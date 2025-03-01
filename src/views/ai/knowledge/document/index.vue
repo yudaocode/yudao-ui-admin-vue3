@@ -68,7 +68,7 @@
           <el-button
             link
             type="primary"
-            @click="openForm('update', scope.row.id)"
+            @click="handleUpdate(scope.row.id)"
             v-hasPermi="['ai:knowledge:update']"
           >
             编辑
@@ -148,15 +148,20 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
 /** 跳转到创建文档页面 */
 const handleCreate = () => {
-  router.push({ name: 'AiKnowledgeDocumentCreate' })
+  router.push({
+    name: 'AiKnowledgeDocumentCreate',
+    query: { knowledgeId: queryParams.knowledgeId }
+  })
+}
+
+/** 跳转到更新文档页面 */
+const handleUpdate = (id: number) => {
+  router.push({
+    name: 'AiKnowledgeDocumentUpdate',
+    query: { id, knowledgeId: queryParams.knowledgeId }
+  })
 }
 
 /** 删除按钮操作 */
@@ -174,10 +179,16 @@ const handleDelete = async (id: number) => {
 
 /** 初始化 **/
 onMounted(() => {
-  // 从路由参数中获取知识库 ID
-  if (route.query.knowledgeId) {
-    queryParams.knowledgeId = route.query.knowledgeId as any
+  // 如果知识库 ID 不存在，显示错误提示并关闭页面
+  if (!route.query.knowledgeId) {
+    message.error('知识库 ID 不存在，无法查看文档列表')
+    // 关闭当前路由，返回到知识库列表页面
+    router.push({ name: 'AiKnowledge' })
+    return
   }
+
+  // 从路由参数中获取知识库 ID
+  queryParams.knowledgeId = route.query.knowledgeId as any
   getList()
 })
 </script>

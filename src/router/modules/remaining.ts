@@ -633,11 +633,23 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: 'console/knowledge/document/create',
-        component: () => import('@/views/ai/knowledge/document/create/index.vue'),
+        component: () => import('@/views/ai/knowledge/document/form/index.vue'),
         name: 'AiKnowledgeDocumentCreate',
         meta: {
           title: '创建文档',
           icon: 'ep:plus',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai/console/knowledge/document'
+        }
+      },
+      {
+        path: 'console/knowledge/document/update',
+        component: () => import('@/views/ai/knowledge/document/form/index.vue'),
+        name: 'AiKnowledgeDocumentUpdate',
+        meta: {
+          title: '修改文档',
+          icon: 'ep:edit',
           noCache: true,
           hidden: true,
           activeMenu: '/ai/console/knowledge/document'

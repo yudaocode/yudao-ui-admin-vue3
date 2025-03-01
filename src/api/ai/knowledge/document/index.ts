@@ -24,9 +24,14 @@ export const KnowledgeDocumentApi = {
     return await request.get({ url: `/ai/knowledge/document/get?id=` + id })
   },
 
-  // 新增知识库文档
+  // 新增知识库文档（单个）
   createKnowledgeDocument: async (data: KnowledgeDocumentVO) => {
     return await request.post({ url: `/ai/knowledge/document/create`, data })
+  },
+
+  // 新增知识库文档（批量）
+  createKnowledgeDocumentList: async (data: any) => {
+    return await request.post({ url: `/ai/knowledge/document/create-list`, data })
   },
 
   // // 修改AI 知识库文档

@@ -78,17 +78,24 @@
 
     <!-- 添加底部按钮 -->
     <div class="mt-20px flex justify-between">
-      <el-button @click="handlePrevStep">上一步</el-button>
-      <el-button type="primary" @click="handleNextStep">保存并处理</el-button>
+      <div>
+        <el-button v-if="!modelData.id" @click="handlePrevStep">上一步</el-button>
+      </div>
+      <div>
+        <el-button type="primary" :loading="submitLoading" @click="handleSave">
+          保存并处理
+        </el-button>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { PropType, ref, computed, inject, onMounted, getCurrentInstance } from 'vue'
+import { computed, getCurrentInstance, inject, onMounted, PropType, ref } from 'vue'
 import { Icon } from '@/components/Icon'
 import { KnowledgeSegmentApi } from '@/api/ai/knowledge/segment'
 import { useMessage } from '@/hooks/web/useMessage'
+import { KnowledgeDocumentApi } from '@/api/ai/knowledge/document'
 
 const props = defineProps({
   modelValue: {
@@ -108,6 +115,7 @@ const modelData = computed({
 
 const splitLoading = ref(false) // 分段加载状态
 const currentFile = ref<any>(null) // 当前选中的文件
+const submitLoading = ref(false) // 提交按钮加载状态
 
 /** 选择文件 */
 const selectFile = async (index: number) => {
@@ -124,8 +132,11 @@ const splitContent = async (file: any) => {
 
   splitLoading.value = true
   try {
-    const data = await KnowledgeSegmentApi.splitContent(file.url, modelData.value.segmentMaxTokens) // 调用后端分段接口，获取文档的分段内容、字符数和 Token 数
-    file.segments = data
+    // 调用后端分段接口，获取文档的分段内容、字符数和 Token 数
+    file.segments = await KnowledgeSegmentApi.splitContent(
+      file.url,
+      modelData.value.segmentMaxTokens
+    )
   } catch (error) {
     console.error('获取分段内容失败:', file, error)
     message.error('获取分段内容失败')
@@ -158,22 +169,46 @@ const handlePrevStep = () => {
   }
 }
 
-/** 下一步按钮处理 */
-const handleNextStep = () => {
-  const parentEl = parent || getCurrentInstance()?.parent
-  if (parentEl && typeof parentEl.exposed?.goToNextStep === 'function') {
-    parentEl.exposed.goToNextStep()
-  }
-}
-
-/** 组件激活时自动调用分段接口 TODO 芋艿：需要看下 */
-const activated = async () => {
-  if (!currentFile.value && modelData.value.list && modelData.value.list.length > 0) {
-    currentFile.value = modelData.value.list[0] // 如果没有选中文件，默认选中第一个
+/** 保存操作 */
+const handleSave = async () => {
+  // 保存前验证
+  if (!currentFile?.value?.segments || currentFile.value.segments.length === 0) {
+    message.warning('请先预览分段内容')
+    return
   }
 
-  if (currentFile.value) {
-    await splitContent(currentFile.value) // 如果有选中的文件，获取分段内容
+  // 设置按钮加载状态
+  submitLoading.value = true
+  try {
+    if (modelData.value.id) {
+      // 修改场景
+      modelData.value.ids = await KnowledgeDocumentApi.createKnowledgeDocumentList({
+        id: modelData.value.id,
+        segmentMaxTokens: modelData.value.segmentMaxTokens
+      })
+    } else {
+      // 新增场景
+      modelData.value.ids = await KnowledgeDocumentApi.createKnowledgeDocumentList({
+        knowledgeId: modelData.value.knowledgeId,
+        segmentMaxTokens: modelData.value.segmentMaxTokens,
+        list: modelData.value.list.map((item: any) => ({
+          name: item.name,
+          url: item.url
+        }))
+      })
+    }
+
+    // 进入下一步
+    const parentEl = parent || getCurrentInstance()?.parent
+    if (parentEl && typeof parentEl.exposed?.goToNextStep === 'function') {
+      parentEl.exposed.goToNextStep()
+    }
+  } catch (error: any) {
+    console.error('保存失败:', modelData.value, error)
+    message.error(error.message)
+  } finally {
+    // 关闭按钮加载状态
+    submitLoading.value = false
   }
 }
 

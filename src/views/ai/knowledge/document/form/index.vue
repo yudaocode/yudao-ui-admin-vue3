@@ -8,8 +8,8 @@
         <!-- 左侧标题 -->
         <div class="w-200px flex items-center overflow-hidden">
           <Icon icon="ep:arrow-left" class="cursor-pointer flex-shrink-0" @click="handleBack" />
-          <span class="ml-10px text-16px truncate" :title="formData.name || '创建知识库文档'">
-            {{ formData.name || '创建知识库文档' }}
+          <span class="ml-10px text-16px truncate">
+            {{ formData.id ? '编辑知识库文档' : '创建知识库文档' }}
           </span>
         </div>
 
@@ -68,29 +68,25 @@
 
 <script lang="ts" setup>
 import { useRoute, useRouter } from 'vue-router'
-import { useMessage } from '@/hooks/web/useMessage'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import UploadStep from './UploadStep.vue'
 import SplitStep from './SplitStep.vue'
 import ProcessStep from './ProcessStep.vue'
+import { KnowledgeDocumentApi } from '@/api/ai/knowledge/document'
 
-const router = useRouter()
 const { delView } = useTagsViewStore() // 视图操作
-const route = useRoute()
-const message = useMessage()
+const route = useRoute() // 路由
+const router = useRouter() // 路由
 
 // 组件引用
 const uploadDocumentRef = ref()
 const documentSegmentRef = ref()
 const processCompleteRef = ref()
-
 const currentStep = ref(0) // 步骤控制
 const steps = [{ title: '上传文档' }, { title: '文档分段' }, { title: '处理并完成' }]
-
-// 表单数据
 const formData = ref({
-  knowlegeId: undefined, // 知识库编号
-  id: undefined, // 文档编号(documentId)
+  knowledgeId: undefined, // 知识库编号
+  id: undefined, // 编辑的文档编号(documentId)
   segmentMaxTokens: 500, // 分段最大 token 数
   list: [] as Array<{
     name: string
@@ -101,17 +97,35 @@ const formData = ref({
       tokens?: number
     }>
   }>, // 用于存储上传的文件列表
+  documentIds: [], // 最终提交的创建/修改的文档编号，用于 ProcessStep 组件的轮询
   status: 0 // 0: 草稿, 1: 处理中, 2: 已完成
-})
+}) // 表单数据
+
+provide('parent', getCurrentInstance()) // 提供 parent 给子组件使用
 
 /** 初始化数据 */
 const initData = async () => {
-  // TODO @芋艿：knowlegeId 解析
-  const documentId = route.params.id as string
+  // 【新增场景】从路由参数中获取知识库 ID
+  if (route.query.knowledgeId) {
+    formData.value.knowledgeId = route.query.knowledgeId as any
+  }
+
+  // 【修改场景】从路由参数中获取文档 ID
+  const documentId = route.query.id
   if (documentId) {
-    // 修改场景
-    // 这里需要调用API获取文档数据
-    // formData.value = await DocumentApi.getDocument(documentId)
+    // 获取文档信息
+    formData.value.id = documentId as any
+    const document = await KnowledgeDocumentApi.getKnowledgeDocument(documentId as any)
+    formData.value.segmentMaxTokens = document.segmentMaxTokens
+    formData.value.list = [
+      {
+        name: document.name,
+        url: document.url,
+        segments: []
+      }
+    ]
+    // 进入下一步
+    goToNextStep()
   }
 
   // TODO @芋艿：为了开发方便，强制设置
@@ -141,52 +155,12 @@ const goToPrevStep = () => {
   }
 }
 
-/** 保存操作 */
-const handleSave = async () => {
-  try {
-    // 更新表单数据
-    const documentData = {
-      ...formData.value
-    }
-
-    if (formData.value.id) {
-      // 修改场景
-      // await DocumentApi.updateDocument(documentData)
-      message.success('修改成功')
-    } else {
-      // 新增场景
-      // formData.value.id = await DocumentApi.createDocument(documentData)
-      message.success('新增成功')
-      try {
-        await message.confirm('创建文档成功，是否继续编辑？')
-        // 用户点击继续编辑，跳转到编辑页面
-        await nextTick()
-        // 先删除当前页签
-        delView(unref(router.currentRoute))
-        // 跳转到编辑页面
-        await router.push({
-          name: 'AiKnowledgeDocumentUpdate',
-          params: { id: formData.value.id }
-        })
-      } catch {
-        // 先删除当前页签
-        delView(unref(router.currentRoute))
-        // 用户点击返回列表
-        await router.push({ name: 'AiKnowledgeDocument' })
-      }
-    }
-  } catch (error: any) {
-    console.error('保存失败:', error)
-    message.warning(error.message || '请完善所有步骤的必填信息')
-  }
-}
-
 /** 返回列表页 */
 const handleBack = () => {
   // 先删除当前页签
   delView(unref(router.currentRoute))
   // 跳转到列表页
-  router.push({ name: 'AiKnowledgeDocument' })
+  router.push({ name: 'AiKnowledgeDocument', query: { knowledgeId: formData.value.knowledgeId } })
 }
 
 /** 初始化 */
@@ -194,10 +168,7 @@ onMounted(async () => {
   await initData()
 })
 
-// 提供parent给子组件使用
-provide('parent', getCurrentInstance())
-
-// 添加组件卸载前的清理代码
+/** 添加组件卸载前的清理代码 */
 onBeforeUnmount(() => {
   // 清理所有的引用
   uploadDocumentRef.value = null
@@ -205,11 +176,10 @@ onBeforeUnmount(() => {
   processCompleteRef.value = null
 })
 
-// 暴露方法给子组件使用
+/** 暴露方法给子组件使用 */
 defineExpose({
   goToNextStep,
-  goToPrevStep,
-  handleSave
+  goToPrevStep
 })
 </script>
 
