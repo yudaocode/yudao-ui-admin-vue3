@@ -75,7 +75,7 @@
               <Icon icon="ep:plus" class="mr-5px" />高级筛选
             </el-button>
           </template>
-          <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
+          <!-- <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
             <el-select
               v-model="queryParams.category"
               placeholder="请选择流程发起人"
@@ -89,7 +89,7 @@
                 :value="category.code"
               />
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item
             label="所属流程"
             class="bold-label"
