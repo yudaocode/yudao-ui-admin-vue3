@@ -40,7 +40,6 @@
           />
         </el-select>
       </el-form-item>
-
       <el-form-item label="" prop="status" class="absolute right-[130px]">
         <el-select
           v-model="queryParams.status"
@@ -78,13 +77,20 @@
             label-position="top"
             prop="processDefinitionKey"
           >
-            <el-input
+            <el-select
               v-model="queryParams.processDefinitionKey"
-              placeholder="请输入流程定义的标识"
+              placeholder="请选择流程定义"
               clearable
-              @keyup.enter="handleQuery"
               class="!w-390px"
-            />
+              @change="handleQuery"
+            >
+              <el-option
+                v-for="item in processDefinitionList"
+                :key="item.key"
+                :label="item.name"
+                :value="item.key"
+              />
+            </el-select>
           </el-form-item>
           <el-form-item label="发起时间" class="font-bold" label-position="top" prop="createTime">
             <el-date-picker
@@ -113,7 +119,7 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="流程名称" align="center" prop="name" min-width="200px" fixed="left" />
-      <el-table-column label="摘要" prop="summary" min-width="180" fixed="left">
+      <el-table-column label="摘要" prop="summary" width="180" fixed="left">
         <template #default="scope">
           <div class="flex flex-col" v-if="scope.row.summary && scope.row.summary.length > 0">
             <div v-for="(item, index) in scope.row.summary" :key="index">
@@ -229,6 +235,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
+const processDefinitionList = ref<any[]>([]) // 流程定义列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -320,5 +327,7 @@ onActivated(() => {
 onMounted(async () => {
   await getList()
   categoryList.value = await CategoryApi.getCategorySimpleList()
+  // 获取流程定义列表
+  processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
 })
 </script>
