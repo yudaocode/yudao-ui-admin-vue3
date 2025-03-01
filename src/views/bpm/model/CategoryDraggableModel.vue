@@ -113,6 +113,11 @@
             </el-text>
           </template>
         </el-table-column>
+        <el-table-column label="流程类型" prop="modelType" min-width="120">
+          <template #default="{ row }">
+            <dict-tag :value="row.type" :type="DICT_TYPE.BPM_MODEL_TYPE" />
+          </template>
+        </el-table-column>
         <el-table-column label="表单信息" prop="formType" min-width="150">
           <template #default="scope">
             <el-button
@@ -260,6 +265,7 @@
 </template>
 
 <script lang="ts" setup>
+import { DICT_TYPE } from '@/utils/dict'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import Sortable from 'sortablejs'
 import { formatDate } from '@/utils/formatTime'
