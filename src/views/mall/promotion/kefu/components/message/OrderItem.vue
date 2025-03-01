@@ -112,7 +112,7 @@ function formatOrderStatus(order: any) {
   border-radius: 10px;
   padding: 10px;
   border: 1px var(--el-border-color) solid;
-  background-color: #fff; // 透明色，暗黑模式下也能体现
+  background-color: rgba(128, 128, 128, 0.3); // 透明色，暗黑模式下也能体现
 
   .order-card-header {
     height: 28px;
