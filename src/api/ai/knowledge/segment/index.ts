@@ -30,20 +30,28 @@ export const KnowledgeSegmentApi = {
   deleteKnowledgeSegment: async (id: number) => {
     return await request.delete({ url: `/ai/knowledge/segment/delete?id=` + id })
   },
-  
+
   // 切片内容
   splitContent: async (url: string, segmentMaxTokens: number) => {
-    return await request.get({ 
-      url: `/ai/knowledge/segment/split`, 
-      params: { url, segmentMaxTokens } 
+    return await request.get({
+      url: `/ai/knowledge/segment/split`,
+      params: { url, segmentMaxTokens }
     })
   },
-  
+
   // 获取文档处理列表
   getKnowledgeSegmentProcessList: async (documentIds: number[]) => {
-    return await request.get({ 
-      url: `/ai/knowledge/segment/get-process-list`, 
-      params: { documentIds: documentIds.join(',') } 
+    return await request.get({
+      url: `/ai/knowledge/segment/get-process-list`,
+      params: { documentIds: documentIds.join(',') }
+    })
+  },
+
+  // 搜索知识库分片
+  searchKnowledgeSegment: async (params: any) => {
+    return await request.get({
+      url: `/ai/knowledge/segment/search`,
+      params
     })
   }
 }

@@ -145,7 +145,6 @@ const splitContent = async (file: any) => {
     )
   } catch (error) {
     console.error('获取分段内容失败:', file, error)
-    message.error('获取分段内容失败')
   } finally {
     splitLoading.value = false
   }
@@ -214,7 +213,6 @@ const handleSave = async () => {
     }
   } catch (error: any) {
     console.error('保存失败:', modelData.value, error)
-    message.error(error.message)
   } finally {
     // 关闭按钮加载状态
     submitLoading.value = false

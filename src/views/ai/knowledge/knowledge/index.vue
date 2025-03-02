@@ -97,6 +97,14 @@
           </el-button>
           <el-button
             link
+            type="primary"
+            @click="handleRetrieval(scope.row.id)"
+            v-hasPermi="['ai:knowledge:query']"
+          >
+            召回测试
+          </el-button>
+          <el-button
+            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['ai:knowledge:delete']"
@@ -191,8 +199,16 @@ const handleDelete = async (id: number) => {
 const router = useRouter()
 const handleDocument = (id: number) => {
   router.push({
-    path: '/ai/console/knowledge/document',
+    name: 'AiKnowledgeDocument',
     query: { knowledgeId: id }
+  })
+}
+
+/** 跳转到文档召回测试页面 */
+const handleRetrieval = (id: number) => {
+  router.push({
+    name: 'AiKnowledgeRetrieval',
+    query: { id }
   })
 }
 
