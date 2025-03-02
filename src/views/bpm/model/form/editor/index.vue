@@ -39,7 +39,7 @@ import * as FormApi from '@/api/bpm/form'
 
 defineOptions({ name: 'BpmModelEditor' })
 
-const props = defineProps<{
+defineProps<{
   modelId?: string
   modelKey: string
   modelName: string
@@ -75,7 +75,7 @@ const model = ref<ModelApi.ModelVO>() // 流程模型的信息
 
 /** 初始化 modeler */
 const initModeler = async (item: any) => {
-  //先初始化模型数据
+  // 先初始化模型数据
   model.value = modelData.value
   modeler.value = item
 }
