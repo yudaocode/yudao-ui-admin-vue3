@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
-// AI 知识库分片 VO
-export interface AiKnowledgeSegmentRespVO {
+// AI 知识库分段 VO
+export interface KnowledgeSegmentVO {
   id: number // 编号
   documentId: number // 文档编号
   knowledgeId: number // 知识库编号
@@ -14,21 +14,39 @@ export interface AiKnowledgeSegmentRespVO {
   createTime: number // 创建时间
 }
 
-// AI 知识库分片 API
+// AI 知识库分段 API
 export const KnowledgeSegmentApi = {
-  // 查询知识库分片分页
+  // 查询知识库分段分页
   getKnowledgeSegmentPage: async (params: any) => {
     return await request.get({ url: `/ai/knowledge/segment/page`, params })
   },
 
-  // 查询知识库分片详情
+  // 查询知识库分段详情
   getKnowledgeSegment: async (id: number) => {
     return await request.get({ url: `/ai/knowledge/segment/get?id=` + id })
   },
 
-  // 删除知识库分片
+  // 删除知识库分段
   deleteKnowledgeSegment: async (id: number) => {
     return await request.delete({ url: `/ai/knowledge/segment/delete?id=` + id })
+  },
+
+  // 新增知识库分段
+  createKnowledgeSegment: async (data: KnowledgeSegmentVO) => {
+    return await request.post({ url: `/ai/knowledge/segment/create`, data })
+  },
+
+  // 修改知识库分段
+  updateKnowledgeSegment: async (data: KnowledgeSegmentVO) => {
+    return await request.put({ url: `/ai/knowledge/segment/update`, data })
+  },
+
+  // 修改知识库分段状态
+  updateKnowledgeSegmentStatus: async (data: any) => {
+    return await request.put({
+      url: `/ai/knowledge/segment/update-status`,
+      data
+    })
   },
 
   // 切片内容
@@ -47,7 +65,7 @@ export const KnowledgeSegmentApi = {
     })
   },
 
-  // 搜索知识库分片
+  // 搜索知识库分段
   searchKnowledgeSegment: async (params: any) => {
     return await request.get({
       url: `/ai/knowledge/segment/search`,

@@ -667,6 +667,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           activeMenu: '/ai/knowledge'
         }
+      },
+      {
+        path: 'knowledge/segment',
+        component: () => import('@/views/ai/knowledge/segment/index.vue'),
+        name: 'AiKnowledgeSegment',
+        meta: {
+          title: '知识库分段',
+          icon: 'ep:tickets',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai/knowledge'
+        }
       }
     ]
   },
