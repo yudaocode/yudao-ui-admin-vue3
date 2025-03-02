@@ -162,6 +162,10 @@ export enum CandidateStrategy {
    * 指定用户
    */
   USER = 30,
+    /**
+   * 审批人自选
+   */
+  APPROVE_USER_SELECT = 34,
   /**
    * 发起人自选
    */
@@ -542,6 +546,7 @@ export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '连续多级部门负责人', value: CandidateStrategy.MULTI_LEVEL_DEPT_LEADER },
   { label: '指定岗位', value: CandidateStrategy.MULTI_LEVEL_DEPT_LEADER },
   { label: '发起人自选', value: CandidateStrategy.START_USER_SELECT },
+  { label: '审批人自选', value: CandidateStrategy.APPROVE_USER_SELECT },
   { label: '发起人本人', value: CandidateStrategy.START_USER },
   { label: '发起人部门负责人', value: CandidateStrategy.START_USER_DEPT_LEADER },
   { label: '发起人连续部门负责人', value: CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER },

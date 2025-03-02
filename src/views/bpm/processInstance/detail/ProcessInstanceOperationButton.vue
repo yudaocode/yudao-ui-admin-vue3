@@ -718,29 +718,31 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
 const initNextAssigneesFormField = async () => {
   // 获取修改的流程变量, 暂时只支持流程表单
   const variables = getUpdatedProcessInstanceVariables()
-  const data = await ProcessInstanceApi.getApprovalDetail({
+  const data = await ProcessInstanceApi.getNextFlowNodes({
     processInstanceId: props.processInstance.id,
+    taskId: runningTask.value.id,
     processVariablesStr: JSON.stringify(variables)
   })
-
-  const activityId = data.todoTask?.taskDefinitionKey
-  if (data.activityNodes && data.activityNodes.length > 0) {
-    // 找到当前节点的索引
-    const currentNodeIndex = data.activityNodes.findIndex((node: any) => node.id === activityId)
-    const nextNode = data.activityNodes[currentNodeIndex + 1]
-    // 情况一：发起人选择审批人：此时一般是因为条件发生变化，需要当前审批人补充选择
-    if (
-      nextNode.candidateStrategy === CandidateStrategy.START_USER_SELECT &&
-      !nextNode.tasks &&
-      nextNode.candidateUsers?.length === 0
-    ) {
-      // 自选审批人，则弹出选择审批人弹窗
-      // TODO @小北：需要考虑下，这里的 nextNode 可能是多个节点，需要怎么处理；类似你在后端的处理哈
-      // TODO @小北：有点纠结，是不是写个预测下一个节点的接口，更合适？
-      nextAssigneesActivityNode.value = [nextNode]
+  if (data && data.length > 0) {
+    data.forEach((node: any) => {
+      if (
+        node.candidateStrategy === CandidateStrategy.START_USER_SELECT &&
+        node.candidateUsers && node.task
+      ) {
+        nextAssigneesActivityNode.value.push(node)
+      }
+    })
+    if (nextAssigneesActivityNode.value.length > 0) {
       nextAssigneesVisible.value = true
     }
-    // TODO @小北：情况二：审批人选择的情况
+
+    //     // 自选审批人，则弹出选择审批人弹窗
+    //     // TODO @小北：需要考虑下，这里的 nextNode 可能是多个节点，需要怎么处理；类似你在后端的处理哈
+    //     // TODO @小北：有点纠结，是不是写个预测下一个节点的接口，更合适？
+    //     nextAssigneesActivityNode.value = [nextNode]
+    //     nextAssigneesVisible.value = true
+    //   }
+    //   // TODO @小北：情况二：审批人选择的情况
   }
 }
 

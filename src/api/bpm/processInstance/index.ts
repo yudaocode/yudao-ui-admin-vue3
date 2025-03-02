@@ -102,3 +102,8 @@ export const getFormFieldsPermission = async (params: any) => {
 export const getProcessInstanceBpmnModelView = async (id: string) => {
   return await request.get({ url: '/bpm/process-instance/get-bpmn-model-view?id=' + id })
 }
+
+// 获取下一个执行的流程节点
+export const getNextFlowNodes = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/get-next-flow-nodes', params })
+}
