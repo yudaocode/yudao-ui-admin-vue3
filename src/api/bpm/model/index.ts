@@ -31,6 +31,7 @@ export const getModelList = async (name: string | undefined) => {
 }
 
 export const getModel = async (id: string) => {
+  debugger
   return await request.get({ url: '/bpm/model/get?id=' + id })
 }
 
