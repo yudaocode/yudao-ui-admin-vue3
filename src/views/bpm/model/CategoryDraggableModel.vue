@@ -113,7 +113,7 @@
             </el-text>
           </template>
         </el-table-column>
-        <el-table-column label="流程类型" prop="modelType" min-width="120">
+        <el-table-column label="流程类型" prop="type" min-width="120">
           <template #default="{ row }">
             <dict-tag :value="row.type" :type="DICT_TYPE.BPM_MODEL_TYPE" />
           </template>

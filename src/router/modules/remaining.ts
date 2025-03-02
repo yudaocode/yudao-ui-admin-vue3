@@ -280,7 +280,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: 'manager/definition',
-        component: () => import('@/views/bpm/definition/index.vue'),
+        component: () => import('@/views/bpm/model/definition/index.vue'),
         name: 'BpmProcessDefinition',
         meta: {
           noCache: true,
