@@ -50,17 +50,49 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="知识库编号" align="center" prop="knowledgeId" />
-      <el-table-column label="文档编号" align="center" prop="documentId" />
-      <el-table-column label="切片内容" align="center" prop="content" />
+      <el-table-column label="分段编号" align="center" prop="id" />
+      <el-table-column type="expand">
+        <template #default="props">
+          <div
+            class="content-expand"
+            style="
+              padding: 10px 20px;
+              white-space: pre-wrap;
+              line-height: 1.5;
+              background-color: #f9f9f9;
+              border-radius: 4px;
+              border-left: 3px solid #409eff;
+            "
+          >
+            <div
+              class="content-title"
+              style="margin-bottom: 8px; color: #606266; font-size: 14px; font-weight: bold"
+            >
+              完整内容：
+            </div>
+            {{ props.row.content }}
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="切片内容"
+        align="center"
+        prop="content"
+        min-width="250px"
+        :show-overflow-tooltip="true"
+      />
       <el-table-column label="字符数" align="center" prop="contentLength" />
-      <el-table-column label="向量库的id" align="center" prop="vectorId" />
-      <el-table-column label="token数量" align="center" prop="tokens" />
+      <el-table-column label="token 数量" align="center" prop="tokens" />
       <el-table-column label="召回次数" align="center" prop="retrievalCount" />
       <el-table-column label="是否启用" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <el-switch
+            v-model="scope.row.status"
+            :active-value="0"
+            :inactive-value="1"
+            @change="handleStatusChange(scope.row)"
+            :disabled="!checkPermi(['ai:knowledge:update'])"
+          />
         </template>
       </el-table-column>
       <el-table-column
@@ -109,6 +141,8 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { KnowledgeSegmentApi, KnowledgeSegmentVO } from '@/api/ai/knowledge/segment'
 import KnowledgeSegmentForm from './KnowledgeSegmentForm.vue'
+import { CommonStatusEnum } from '@/utils/constants'
+import { checkPermi } from '@/utils/permission'
 
 /** AI 知识库分段 列表 */
 defineOptions({ name: 'KnowledgeSegment' })
@@ -171,6 +205,24 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 修改状态操作 */
+const handleStatusChange = async (row: KnowledgeSegmentVO) => {
+  try {
+    // 修改状态的二次确认
+    const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '禁用'
+    await message.confirm('确认要"' + text + '"该分段吗?')
+    // 发起修改状态
+    await KnowledgeSegmentApi.updateKnowledgeSegmentStatus({ id: row.id, status: row.status })
+    message.success(t('common.updateSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {
+    // 取消后，进行恢复按钮
+    row.status =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+  }
 }
 
 /** 初始化 **/

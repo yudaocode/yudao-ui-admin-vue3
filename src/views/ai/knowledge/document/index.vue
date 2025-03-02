@@ -45,7 +45,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" />
+      <el-table-column label="文档编号" align="center" prop="id" />
       <el-table-column label="文件名称" align="center" prop="name" />
       <el-table-column label="字符数" align="center" prop="contentLength" />
       <el-table-column label="Token 数" align="center" prop="tokens" />
