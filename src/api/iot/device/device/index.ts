@@ -72,6 +72,13 @@ export interface IotDeviceDownstreamReqVO {
   data: any // 请求参数
 }
 
+// MQTT连接参数 VO
+export interface MqttConnectionParamsVO {
+  mqttClientId: string // MQTT 客户端 ID
+  mqttUsername: string // MQTT 用户名
+  mqttPassword: string // MQTT 密码
+}
+
 // 设备 API
 export const DeviceApi = {
   // 查询设备分页
@@ -152,5 +159,10 @@ export const DeviceApi = {
   // 查询设备日志分页
   getDeviceLogPage: async (params: any) => {
     return await request.get({ url: `/iot/device/log/page`, params })
+  },
+
+  // 获取设备MQTT连接参数
+  getMqttConnectionParams: async (deviceId: number) => {
+    return await request.get({ url: `/iot/device/mqtt-connection-params`, params: { deviceId } })
   }
 }

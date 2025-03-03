@@ -63,8 +63,11 @@
         </el-input>
       </el-form-item>
       <el-form-item label="passwd">
-        <el-input v-model="mqttParams.mqttPassword" readonly type="password">
+        <el-input v-model="mqttParams.mqttPassword" readonly :type="passwordVisible ? 'text' : 'password'">
           <template #append>
+            <el-button @click="passwordVisible = !passwordVisible" type="primary">
+              <Icon :icon="passwordVisible ? 'ph:eye-slash' : 'ph:eye'" />
+            </el-button>
             <el-button @click="copyToClipboard(mqttParams.mqttPassword)" type="primary">
               <Icon icon="ph:copy" />
             </el-button>
@@ -85,6 +88,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { ProductVO } from '@/api/iot/product/product'
 import { formatDate } from '@/utils/formatTime'
 import { DeviceVO } from '@/api/iot/device/device'
+import { DeviceApi, MqttConnectionParamsVO } from '@/api/iot/device/device/index'
 
 const message = useMessage() // 消息提示
 
@@ -92,6 +96,7 @@ const { product, device } = defineProps<{ product: ProductVO; device: DeviceVO }
 const emit = defineEmits(['refresh']) // 定义 Emits
 
 const mqttDialogVisible = ref(false) // 定义 MQTT 弹框的可见性
+const passwordVisible = ref(false) // 定义密码可见性状态
 const mqttParams = ref({
   mqttClientId: '',
   mqttUsername: '',
@@ -109,13 +114,21 @@ const copyToClipboard = async (text: string) => {
 }
 
 /** 打开 MQTT 参数弹框的方法 */
-const openMqttParams = () => {
-  mqttParams.value = {
-    mqttClientId: device.mqttClientId || 'N/A',
-    mqttUsername: device.mqttUsername || 'N/A',
-    mqttPassword: device.mqttPassword || 'N/A'
+const openMqttParams = async () => {
+  try {
+    const res = await DeviceApi.getMqttConnectionParams(device.id)
+    
+    // 根据API响应结构正确获取数据
+    mqttParams.value = {
+      mqttClientId: res.mqttClientId || 'N/A',
+      mqttUsername: res.mqttUsername || 'N/A',
+      mqttPassword: res.mqttPassword || 'N/A'
+    }
+    mqttDialogVisible.value = true
+  } catch (error) {
+    console.error('获取MQTT连接参数出错：', error)
+    message.error('获取MQTT连接参数失败，请检查网络连接或联系管理员')
   }
-  mqttDialogVisible.value = true
 }
 
 /** 关闭 MQTT 弹框的方法 */
