@@ -18,10 +18,10 @@
       <el-form-item label="模型" prop="modelId">
         <el-select v-model="formData.modelId" placeholder="请选择模型">
           <el-option
-            v-for="chatModel in chatModelList"
-            :key="chatModel.id"
-            :label="chatModel.name"
-            :value="chatModel.id"
+            v-for="model in models"
+            :key="model.id"
+            :label="model.name"
+            :value="model.id"
           />
         </el-select>
       </el-form-item>
@@ -85,7 +85,7 @@ const formRules = reactive({
   maxContexts: [{ required: true, message: '上下文数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const chatModelList = ref([] as ModelVO[]) // 聊天模型列表
+const models = ref([] as ModelVO[]) // 聊天模型列表
 
 /** 打开弹窗 */
 const open = async (id: number) => {
@@ -107,7 +107,7 @@ const open = async (id: number) => {
     }
   }
   // 获得下拉数据
-  chatModelList.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
+  models.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

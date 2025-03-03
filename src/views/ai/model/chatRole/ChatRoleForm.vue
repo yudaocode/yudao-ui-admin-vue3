@@ -16,10 +16,10 @@
       <el-form-item label="绑定模型" prop="modelId" v-if="!isUser">
         <el-select v-model="formData.modelId" placeholder="请选择模型" clearable>
           <el-option
-            v-for="chatModel in chatModelList"
-            :key="chatModel.id"
-            :label="chatModel.name"
-            :value="chatModel.id"
+            v-for="model in models"
+            :key="model.id"
+            :label="model.name"
+            :value="model.id"
           />
         </el-select>
       </el-form-item>
@@ -95,7 +95,7 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE
 })
 const formRef = ref() // 表单 Ref
-const chatModelList = ref([] as ModelVO[]) // 聊天模型列表
+const models = ref([] as ModelVO[]) // 聊天模型列表
 
 /** 是否【我】自己创建，私有角色 */
 const isUser = computed(() => {
@@ -129,7 +129,7 @@ const open = async (type: string, id?: number, title?: string) => {
     }
   }
   // 获得下拉数据
-  chatModelList.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
+  models.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
