@@ -117,6 +117,7 @@ const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批�
 
 /** 设置表单信息、获取流程图数据 **/
 const initProcessInfo = async (row: any, formVariables?: any) => {
+  
   // 重置指定审批人
   startUserSelectTasks.value = []
   startUserSelectAssignees.value = {}
@@ -138,9 +139,13 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     await nextTick()
     fApi.value?.btn.show(false) // 隐藏提交按钮
 
-    // 获取流程审批信息
-    await getApprovalDetail(row)
-
+    // 获取流程审批信息,当再次发起时，流程审批节点要根据原始表单参数预测出来
+    const param = {
+      id: row.id,
+      processVariablesStr: JSON.stringify(formVariables)
+    }
+    await getApprovalDetail(param)
+    // }
     // 加载流程图
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(row.id)
     if (processDefinitionDetail) {
