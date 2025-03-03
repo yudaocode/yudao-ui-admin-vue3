@@ -81,7 +81,7 @@
             </el-button>
 
           </template>
-          <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
+          <!-- <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
             <el-select
               v-model="queryParams.category"
               placeholder="请选择流程发起人"
@@ -95,7 +95,7 @@
                 :value="category.code"
               />
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="发起时间" class="bold-label" label-position="top" prop="createTime">
             <el-date-picker
               v-model="queryParams.createTime"
@@ -170,7 +170,7 @@
           {{ formatPast2(scope.row.durationInMillis) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="流程编号" prop="id" :show-overflow-tooltip="true" />
+      <el-table-column align="center" label="流程编号" prop="processInstanceId" :show-overflow-tooltip="true" />
       <el-table-column align="center" label="任务编号" prop="id" :show-overflow-tooltip="true" />
       <el-table-column align="center" label="操作" fixed="right" width="80">
         <template #default="scope">
@@ -193,7 +193,7 @@ import { dateFormatter, formatPast2 } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 
-defineOptions({ name: 'BpmTodoTask' })
+defineOptions({ name: 'BpmDoneTask' })
 
 const { push } = useRouter() // 路由
 

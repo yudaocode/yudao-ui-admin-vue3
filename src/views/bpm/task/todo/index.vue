@@ -64,7 +64,7 @@
             </el-button>
 
           </template>
-          <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
+          <!-- <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
             <el-select
               v-model="queryParams.category"
               placeholder="请选择流程发起人"
@@ -78,7 +78,7 @@
                 :value="category.code"
               />
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="发起时间" class="bold-label" label-position="top" prop="createTime">
             <el-date-picker
               v-model="queryParams.createTime"
@@ -135,7 +135,7 @@
         prop="createTime"
         width="180"
       />
-      <el-table-column align="center" label="流程编号" prop="id" :show-overflow-tooltip="true" />
+      <el-table-column align="center" label="流程编号" prop="processInstanceId" :show-overflow-tooltip="true" />
       <el-table-column align="center" label="任务编号" prop="id" :show-overflow-tooltip="true" />
       <el-table-column align="center" label="操作" fixed="right" width="80">
         <template #default="scope">
