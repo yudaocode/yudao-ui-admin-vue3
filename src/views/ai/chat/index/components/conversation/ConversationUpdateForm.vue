@@ -58,9 +58,9 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { CommonStatusEnum } from '@/utils/constants'
-import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import { ModelApi, ModelVO } from '@/api/ai/model/model'
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
+import { AiModelTypeEnum } from '@/views/ai/utils/constants'
 
 /** AI 聊天对话的更新表单 */
 defineOptions({ name: 'ChatConversationUpdateForm' })
@@ -85,7 +85,7 @@ const formRules = reactive({
   maxContexts: [{ required: true, message: '上下文数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const chatModelList = ref([] as ChatModelVO[]) // 聊天模型列表
+const chatModelList = ref([] as ModelVO[]) // 聊天模型列表
 
 /** 打开弹窗 */
 const open = async (id: number) => {
@@ -107,7 +107,7 @@ const open = async (id: number) => {
     }
   }
   // 获得下拉数据
-  chatModelList.value = await ChatModelApi.getChatModelSimpleList(CommonStatusEnum.ENABLE)
+  chatModelList.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

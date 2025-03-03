@@ -17,6 +17,21 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="模型类型" prop="type">
+        <el-select
+          v-model="formData.type"
+          placeholder="请输入模型类型"
+          clearable
+          :disabled="formData.id"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.AI_MODEL_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="API 秘钥" prop="keyId">
         <el-select v-model="formData.keyId" placeholder="请选择 API 秘钥" clearable>
           <el-option
@@ -47,7 +62,11 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="温度参数" prop="temperature">
+      <el-form-item
+        label="温度参数"
+        prop="temperature"
+        v-if="formData.type === AiModelTypeEnum.CHAT"
+      >
         <el-input-number
           v-model="formData.temperature"
           placeholder="请输入温度参数"
@@ -56,7 +75,11 @@
           :precision="2"
         />
       </el-form-item>
-      <el-form-item label="回复数 Token 数" prop="maxTokens">
+      <el-form-item
+        label="回复数 Token 数"
+        prop="maxTokens"
+        v-if="formData.type === AiModelTypeEnum.CHAT"
+      >
         <el-input-number
           v-model="formData.maxTokens"
           placeholder="请输入回复数 Token 数"
@@ -64,7 +87,11 @@
           :max="4096"
         />
       </el-form-item>
-      <el-form-item label="上下文数量" prop="maxContexts">
+      <el-form-item
+        label="上下文数量"
+        prop="maxContexts"
+        v-if="formData.type === AiModelTypeEnum.CHAT"
+      >
         <el-input-number
           v-model="formData.maxContexts"
           placeholder="请输入上下文数量"
@@ -80,13 +107,14 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import { ModelApi, ModelVO } from '@/api/ai/model/model'
 import { ApiKeyApi, ApiKeyVO } from '@/api/ai/model/apiKey'
 import { CommonStatusEnum } from '@/utils/constants'
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { AiModelTypeEnum } from '@/views/ai/utils/constants'
 
-/** API 聊天模型 表单 */
-defineOptions({ name: 'ChatModelForm' })
+/** API 模型的表单 */
+defineOptions({ name: 'ModelForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -101,6 +129,7 @@ const formData = ref({
   name: undefined,
   model: undefined,
   platform: undefined,
+  type: undefined,
   sort: undefined,
   status: CommonStatusEnum.ENABLE,
   temperature: undefined,
@@ -112,6 +141,7 @@ const formRules = reactive({
   name: [{ required: true, message: '模型名字不能为空', trigger: 'blur' }],
   model: [{ required: true, message: '模型标识不能为空', trigger: 'blur' }],
   platform: [{ required: true, message: '所属平台不能为空', trigger: 'blur' }],
+  type: [{ required: true, message: '模型类型不能为空', trigger: 'blur' }],
   sort: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
@@ -128,13 +158,13 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ChatModelApi.getChatModel(id)
+      formData.value = await ModelApi.getModel(id)
     } finally {
       formLoading.value = false
     }
   }
   // 获得下拉数据
-  apiKeyList.value = await ApiKeyApi.getApiKeySimpleList(CommonStatusEnum.ENABLE)
+  apiKeyList.value = await ApiKeyApi.getApiKeySimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -146,12 +176,17 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ChatModelVO
+    const data = formData.value as unknown as ModelVO
+    if (data.type !== AiModelTypeEnum.CHAT) {
+      delete data.temperature
+      delete data.maxTokens
+      delete data.maxContexts
+    }
     if (formType.value === 'create') {
-      await ChatModelApi.createChatModel(data)
+      await ModelApi.createModel(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ChatModelApi.updateChatModel(data)
+      await ModelApi.updateModel(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -170,6 +205,7 @@ const resetForm = () => {
     name: undefined,
     model: undefined,
     platform: undefined,
+    type: undefined,
     sort: undefined,
     status: CommonStatusEnum.ENABLE,
     temperature: undefined,

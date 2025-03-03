@@ -42,7 +42,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['ai:chat-model:create']"
+          v-hasPermi="['ai:model:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -56,6 +56,11 @@
       <el-table-column label="所属平台" align="center" prop="platform">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI_PLATFORM" :value="scope.row.platform" />
+        </template>
+      </el-table-column>
+      <el-table-column label="模型类型" align="center" prop="platform">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.AI_MODEL_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
       <el-table-column label="模型名字" align="center" prop="name" />
@@ -80,7 +85,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['ai:chat-model:update']"
+            v-hasPermi="['ai:model:update']"
           >
             编辑
           </el-button>
@@ -88,7 +93,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['ai:chat-model:delete']"
+            v-hasPermi="['ai:model:delete']"
           >
             删除
           </el-button>
@@ -105,23 +110,23 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ChatModelForm ref="formRef" @success="getList" />
+  <ModelForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
-import ChatModelForm from './ChatModelForm.vue'
+import { ModelApi, ModelVO } from '@/api/ai/model/model'
+import ModelForm from './ModelForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import { ApiKeyApi, ApiKeyVO } from '@/api/ai/model/apiKey'
 
-/** API 聊天模型 列表 */
-defineOptions({ name: 'AiChatModel' })
+/** API 模型列表 */
+defineOptions({ name: 'AiModel' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ChatModelVO[]>([]) // 列表的数据
+const list = ref<ModelVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
@@ -137,7 +142,7 @@ const apiKeyList = ref([] as ApiKeyVO[]) // API 密钥列表
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ChatModelApi.getChatModelPage(queryParams)
+    const data = await ModelApi.getModelPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -169,7 +174,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ChatModelApi.deleteChatModel(id)
+    await ModelApi.deleteModel(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -178,7 +183,7 @@ const handleDelete = async (id: number) => {
 
 /** 初始化 **/
 onMounted(async () => {
-  getList()
+  await getList()
   // 获得下拉数据
   apiKeyList.value = await ApiKeyApi.getApiKeySimpleList()
 })

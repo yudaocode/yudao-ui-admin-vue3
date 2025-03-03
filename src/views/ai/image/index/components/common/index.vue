@@ -2,11 +2,11 @@
 <template>
   <div class="prompt">
     <el-text tag="b">画面描述</el-text>
-    <el-text tag="p">建议使用“形容词+动词+风格”的格式，使用“，”隔开</el-text>
+    <el-text tag="p">建议使用“形容词 + 动词 + 风格”的格式，使用“，”隔开</el-text>
     <el-input
       v-model="prompt"
       maxlength="1024"
-      rows="5"
+      :rows="5"
       class="w-100% mt-15px"
       input-style="border-radius: 7px;"
       placeholder="例如：童话里的小屋应该是什么样子？"
@@ -57,8 +57,13 @@
       <el-text tag="b">模型</el-text>
     </div>
     <el-space wrap class="group-item-body">
-      <el-select v-model="model" placeholder="Select" size="large" class="!w-350px">
-        <el-option v-for="item in models" :key="item.key" :label="item.name" :value="item.key" />
+      <el-select v-model="modelId" placeholder="Select" size="large" class="!w-350px">
+        <el-option
+          v-for="item in platformModels"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id"
+        />
       </el-select>
     </el-space>
   </div>
@@ -72,24 +77,33 @@
     </el-space>
   </div>
   <div class="btns">
-    <el-button type="primary" size="large" round :loading="drawIn" @click="handleGenerateImage">
+    <el-button
+      type="primary"
+      size="large"
+      round
+      :loading="drawIn"
+      :disabled="prompt.length === 0"
+      @click="handleGenerateImage"
+    >
       {{ drawIn ? '生成中' : '生成内容' }}
     </el-button>
   </div>
 </template>
 <script setup lang="ts">
 import { ImageApi, ImageDrawReqVO, ImageVO } from '@/api/ai/image'
-import {
-  AiPlatformEnum,
-  ChatGlmModels,
-  ImageHotWords,
-  ImageModelVO,
-  OtherPlatformEnum,
-  QianFanModels,
-  TongYiWanXiangModels
-} from '@/views/ai/utils/constants'
+import { AiPlatformEnum, ImageHotWords, OtherPlatformEnum } from '@/views/ai/utils/constants'
+import { ModelVO } from '@/api/ai/model/model'
 
 const message = useMessage() // 消息弹窗
+
+// 接收父组件传入的模型列表
+const props = defineProps({
+  models: {
+    type: Array<ModelVO>,
+    default: () => [] as ModelVO[]
+  }
+})
+const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
 
 // 定义属性
 const drawIn = ref<boolean>(false) // 生成中
@@ -99,10 +113,8 @@ const prompt = ref<string>('') // 提示词
 const width = ref<number>(512) // 图片宽度
 const height = ref<number>(512) // 图片高度
 const otherPlatform = ref<string>(AiPlatformEnum.TONG_YI) // 平台
-const models = ref<ImageModelVO[]>(TongYiWanXiangModels) // 模型  TongYiWanXiangModels、QianFanModels
-const model = ref<string>(models.value[0].key) // 模型
-
-const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
+const platformModels = ref<ModelVO[]>([]) // 模型列表
+const modelId = ref<number>() // 选中的模型
 
 /** 选择热词 */
 const handleHotWordClick = async (hotWord: string) => {
@@ -125,11 +137,11 @@ const handleGenerateImage = async () => {
     // 加载中
     drawIn.value = true
     // 回调
-    emits('onDrawStart', AiPlatformEnum.STABLE_DIFFUSION)
+    emits('onDrawStart', otherPlatform.value)
     // 发送请求
     const form = {
       platform: otherPlatform.value,
-      model: model.value, // 模型
+      modelId: modelId.value, // 模型
       prompt: prompt.value, // 提示词
       width: width.value, // 图片宽度
       height: height.value, // 图片高度
@@ -138,7 +150,7 @@ const handleGenerateImage = async () => {
     await ImageApi.drawImage(form)
   } finally {
     // 回调
-    emits('onDrawComplete', AiPlatformEnum.STABLE_DIFFUSION)
+    emits('onDrawComplete', otherPlatform.value)
     // 加载结束
     drawIn.value = false
   }
@@ -153,33 +165,29 @@ const settingValues = async (detail: ImageVO) => {
 
 /** 平台切换 */
 const handlerPlatformChange = async (platform: string) => {
-  // 切换平台，切换模型、风格
-  if (AiPlatformEnum.TONG_YI === platform) {
-    models.value = TongYiWanXiangModels
-  } else if (AiPlatformEnum.YI_YAN === platform) {
-    models.value = QianFanModels
-  } else if (AiPlatformEnum.ZHI_PU === platform) {
-    models.value = ChatGlmModels
+  // 根据选择的平台筛选模型
+  platformModels.value = props.models.filter((item: ModelVO) => item.platform === platform)
+
+  // 切换平台，默认选择一个模型
+  if (platformModels.value.length > 0) {
+    modelId.value = platformModels.value[0].id // 使用 model 属性作为值
   } else {
-    models.value = []
-  }
-  // 切换平台，默认选择一个风格
-  if (models.value.length > 0) {
-    model.value = models.value[0].key
-  } else {
-    model.value = ''
+    modelId.value = undefined
   }
 }
 
+/** 监听 models 变化 */
+watch(
+  () => props.models,
+  () => {
+    handlerPlatformChange(otherPlatform.value)
+  },
+  { immediate: true, deep: true }
+)
 /** 暴露组件方法 */
 defineExpose({ settingValues })
 </script>
 <style scoped lang="scss">
-// 提示词
-.prompt {
-}
-
-// 热词
 .hot-words {
   display: flex;
   flex-direction: column;

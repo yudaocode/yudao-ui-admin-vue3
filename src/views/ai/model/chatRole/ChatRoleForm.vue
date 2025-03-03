@@ -68,8 +68,9 @@
 import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
 import { CommonStatusEnum } from '@/utils/constants'
-import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import { ModelApi, ModelVO } from '@/api/ai/model/model'
 import { FormRules } from 'element-plus'
+import { AiModelTypeEnum } from '@/views/ai/utils/constants'
 
 /** AI 聊天角色 表单 */
 defineOptions({ name: 'ChatRoleForm' })
@@ -94,7 +95,7 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE
 })
 const formRef = ref() // 表单 Ref
-const chatModelList = ref([] as ChatModelVO[]) // 聊天模型列表
+const chatModelList = ref([] as ModelVO[]) // 聊天模型列表
 
 /** 是否【我】自己创建，私有角色 */
 const isUser = computed(() => {
@@ -128,7 +129,7 @@ const open = async (type: string, id?: number, title?: string) => {
     }
   }
   // 获得下拉数据
-  chatModelList.value = await ChatModelApi.getChatModelSimpleList(CommonStatusEnum.ENABLE)
+  chatModelList.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
