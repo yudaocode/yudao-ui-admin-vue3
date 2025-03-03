@@ -43,7 +43,8 @@
           v-if="
             isEmpty(activity.tasks) &&
             isEmpty(activity.candidateUsers) &&
-            CandidateStrategy.START_USER_SELECT === activity.candidateStrategy
+            (CandidateStrategy.START_USER_SELECT === activity.candidateStrategy ||
+              CandidateStrategy.APPROVE_USER_SELECT === activity.candidateStrategy)
           "
         >
           <!--  && activity.nodeType === NodeType.USER_TASK_NODE -->
@@ -252,7 +253,7 @@ const nodeTypeSvgMap = {
   // 并行分支节点
   [NodeType.PARALLEL_BRANCH_NODE]: { color: '#14bb83', svg: parallelSvg },
   // 子流程节点
-  [NodeType.CHILD_PROCESS_NODE]: { color: '#14bb83', svg: childProcessSvg },
+  [NodeType.CHILD_PROCESS_NODE]: { color: '#14bb83', svg: childProcessSvg }
 }
 
 // 只有只有状态是 -1、0、1 才展示头像右小角状态小icon
