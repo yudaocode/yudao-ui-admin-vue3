@@ -288,7 +288,7 @@ const handleSaleOrderChange = (order: SaleOrderVO) => {
   formData.value.fileUrl = order.fileUrl
   // 将订单项设置到退货单项
   order.items.forEach((item) => {
-    item.count = item.outCount - item.returnCount
+    item.count = item.outCount
     item.orderItemId = item.id
     item.id = undefined
   })

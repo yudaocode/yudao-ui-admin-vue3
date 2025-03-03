@@ -182,7 +182,7 @@
         :formatter="erpCountTableColumnFormatter"
       />
       <el-table-column
-        label="出库数量"
+        label="实际出库数量"
         align="center"
         prop="outCount"
         :formatter="erpCountTableColumnFormatter"
