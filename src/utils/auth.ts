@@ -39,7 +39,7 @@ export const formatToken = (token: string): string => {
 
 export type LoginFormType = {
   tenantName: string
-  username: string
+  mobile: string
   password: string
   rememberMe: boolean
 }
@@ -67,6 +67,6 @@ export const getTenantId = () => {
   return wsCache.get(CACHE_KEY.TenantId)
 }
 
-export const setTenantId = (username: string) => {
-  wsCache.set(CACHE_KEY.TenantId, username)
+export const setTenantId = (mobile: string) => {
+  wsCache.set(CACHE_KEY.TenantId, mobile)
 }

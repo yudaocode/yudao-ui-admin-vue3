@@ -8,7 +8,7 @@
       label-width="130px"
     >
       <el-form-item label="短信签名" prop="signature">
-        <el-input v-model="formData.signature" placeholder="请输入短信签名" />
+        <el-input v-model="formData.signature" maxlength="12" placeholder="请输入短信签名" />
       </el-form-item>
       <el-form-item label="渠道编码" prop="code">
         <el-select v-model="formData.code" clearable placeholder="请选择渠道编码">
@@ -75,7 +75,14 @@ const formData = ref({
   callbackUrl: ''
 })
 const formRules = reactive({
-  signature: [{ required: true, message: '短信签名不能为空', trigger: 'blur' }],
+  signature: [
+    { required: true, message: '短信签名不能为空', trigger: 'blur' },
+    {
+      required: true,
+      message: '短信签名由4-12位 字符 组成',
+      trigger: 'blur'
+    }
+  ],
   code: [{ required: true, message: '渠道编码不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '启用状态不能为空', trigger: 'blur' }],
   apiKey: [{ required: true, message: '短信 API 的账号不能为空', trigger: 'blur' }]
