@@ -53,33 +53,33 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="所属平台" align="center" prop="platform">
+      <el-table-column label="所属平台" align="center" prop="platform" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI_PLATFORM" :value="scope.row.platform" />
         </template>
       </el-table-column>
-      <el-table-column label="模型类型" align="center" prop="platform">
+      <el-table-column label="模型类型" align="center" prop="platform" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI_MODEL_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="模型名字" align="center" prop="name" />
-      <el-table-column label="模型标识" align="center" prop="model" />
+      <el-table-column label="模型名字" align="center" prop="name" min-width="180" />
+      <el-table-column label="模型标识" align="center" prop="model" min-width="180" />
       <el-table-column label="API 秘钥" align="center" prop="keyId" min-width="140">
         <template #default="scope">
           <span>{{ apiKeyList.find((item) => item.id === scope.row.keyId)?.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="排序" align="center" prop="sort" />
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="排序" align="center" prop="sort" min-width="80" />
+      <el-table-column label="状态" align="center" prop="status" min-width="80">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="温度参数" align="center" prop="temperature" />
+      <el-table-column label="温度参数" align="center" prop="temperature" min-width="80" />
       <el-table-column label="回复数 Token 数" align="center" prop="maxTokens" min-width="140" />
-      <el-table-column label="上下文数量" align="center" prop="maxContexts" />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="上下文数量" align="center" prop="maxContexts" min-width="100" />
+      <el-table-column label="操作" align="center" width="180" fixed="right">
         <template #default="scope">
           <el-button
             link

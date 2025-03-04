@@ -6,7 +6,7 @@
     <el-input
       v-model="prompt"
       maxlength="1024"
-      rows="5"
+      :rows="5"
       class="w-100% mt-15px"
       input-style="border-radius: 7px;"
       placeholder="例如：童话里的小屋应该是什么样子？"

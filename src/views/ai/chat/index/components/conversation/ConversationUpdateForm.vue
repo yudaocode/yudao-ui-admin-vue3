@@ -11,7 +11,7 @@
         <el-input
           type="textarea"
           v-model="formData.systemMessage"
-          rows="4"
+          :rows="4"
           placeholder="请输入角色设定"
         />
       </el-form-item>
@@ -32,6 +32,7 @@
           :min="0"
           :max="2"
           :precision="2"
+          class="!w-1/1"
         />
       </el-form-item>
       <el-form-item label="回复数 Token 数" prop="maxTokens">
@@ -39,7 +40,8 @@
           v-model="formData.maxTokens"
           placeholder="请输入回复数 Token 数"
           :min="0"
-          :max="4096"
+          :max="8192"
+          class="!w-1/1"
         />
       </el-form-item>
       <el-form-item label="上下文数量" prop="maxContexts">
@@ -48,6 +50,7 @@
           placeholder="请输入上下文数量"
           :min="0"
           :max="20"
+          class="!w-1/1"
         />
       </el-form-item>
     </el-form>

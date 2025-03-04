@@ -73,6 +73,7 @@
           :min="0"
           :max="2"
           :precision="2"
+          class="!w-1/1"
         />
       </el-form-item>
       <el-form-item
@@ -84,7 +85,8 @@
           v-model="formData.maxTokens"
           placeholder="请输入回复数 Token 数"
           :min="0"
-          :max="4096"
+          :max="8192"
+          class="!w-1/1"
         />
       </el-form-item>
       <el-form-item
@@ -97,6 +99,7 @@
           placeholder="请输入上下文数量"
           :min="0"
           :max="20"
+          class="!w-1/1"
         />
       </el-form-item>
     </el-form>
