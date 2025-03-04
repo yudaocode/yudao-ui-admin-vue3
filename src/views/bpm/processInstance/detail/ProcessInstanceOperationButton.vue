@@ -718,7 +718,7 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
 const initNextAssigneesFormField = async () => {
   // 获取修改的流程变量, 暂时只支持流程表单
   const variables = getUpdatedProcessInstanceVariables()
-  const data = await ProcessInstanceApi.getNextFlowNodes({
+  const data = await ProcessInstanceApi.getNextApprovalNodes({
     processInstanceId: props.processInstance.id,
     taskId: runningTask.value.id,
     processVariablesStr: JSON.stringify(variables)

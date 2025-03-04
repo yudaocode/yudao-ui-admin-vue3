@@ -93,6 +93,11 @@ export const getApprovalDetail = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/get-approval-detail', params })
 }
 
+// 获取下一个执行的流程节点
+export const getNextApprovalNodes = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/get-next-approval-nodes', params })
+}
+
 // 获取表单字段权限
 export const getFormFieldsPermission = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/get-form-fields-permission', params })
@@ -101,9 +106,4 @@ export const getFormFieldsPermission = async (params: any) => {
 // 获取流程实例的 BPMN 模型视图
 export const getProcessInstanceBpmnModelView = async (id: string) => {
   return await request.get({ url: '/bpm/process-instance/get-bpmn-model-view?id=' + id })
-}
-
-// 获取下一个执行的流程节点
-export const getNextFlowNodes = async (params: any) => {
-  return await request.get({ url: '/bpm/process-instance/get-next-flow-nodes', params })
 }
