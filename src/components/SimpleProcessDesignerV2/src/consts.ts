@@ -162,7 +162,7 @@ export enum CandidateStrategy {
    * 指定用户
    */
   USER = 30,
-    /**
+  /**
    * 审批人自选
    */
   APPROVE_USER_SELECT = 34,
