@@ -140,11 +140,10 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     fApi.value?.btn.show(false) // 隐藏提交按钮
 
     // 获取流程审批信息,当再次发起时，流程审批节点要根据原始表单参数预测出来
-    const param = {
+    await getApprovalDetail({
       id: row.id,
       processVariablesStr: JSON.stringify(formVariables)
-    }
-    await getApprovalDetail(param)
+    })
     // }
     // 加载流程图
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(row.id)
