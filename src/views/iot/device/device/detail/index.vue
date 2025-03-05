@@ -26,9 +26,9 @@
           :device="device"
         />
       </el-tab-pane>
-      <!-- <el-tab-pane label="设备配置" name="config">
+      <el-tab-pane label="设备配置" name="config">
         <DeviceDetailConfig />
-      </el-tab-pane> -->
+      </el-tab-pane>
     </el-tabs>
   </el-col>
 </template>

@@ -13,7 +13,7 @@
     <Vue3Jsoneditor
       ref="editor"
       v-if="isEditing"
-      v-model="deviceConfig"
+      v-model="deviceConfigState"
       :options="editorOptions"
       height="500px"
       currentMode="code"
@@ -23,13 +23,14 @@
     <Vue3Jsoneditor
       ref="editor"
       v-else
-      v-model="deviceConfig"
+      v-model="deviceConfigState"
       :options="editorOptions"
       height="500px"
       currentMode="view"
+      v-loading.fullscreen.lock="loading"
       @error="onError"
     />
-    <div class="button-group">
+    <div class="flex justify-center mt-24">
       <el-button v-if="isEditing" @click="cancelEdit">取消</el-button>
       <el-button v-if="isEditing" type="primary" @click="saveConfig">保存</el-button>
       <el-button v-else @click="enableEdit">编辑</el-button>
@@ -39,11 +40,43 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-// import Vue3Jsoneditor from 'v3-jsoneditor/src/Vue3Jsoneditor.vue'
+import Vue3Jsoneditor from 'v3-jsoneditor/src/Vue3Jsoneditor.vue'
+import { DeviceApi } from '@/api/iot/device/device/index'
+import { useTagsViewStore } from '@/store/modules/tagsView'
+import { DeviceVO } from '../../../../../api/iot/device/device/index';
 
-const deviceConfig = ref({
-  name: 'dyla1n'
-}) // 定义设备配置 TODO @dylan：从后端读取
+const route = useRoute()
+const message = useMessage()
+const { delView } = useTagsViewStore() // 视图操作
+const { currentRoute } = useRouter() // 路由
+const id = Number(route.params.id) // 将字符串转换为数字
+const loading = ref(true) // 加载中
+const deviceConfigState = ref({})  // 设置配置
+
+
+// 获取设备配置
+const getDeviceConfig = async (id: number) => {
+  try {
+    loading.value = true
+    const res = await DeviceApi.getDevice(id)
+    deviceConfigState.value = res
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  if (!id) {
+    message.warning('参数错误，产品不能为空！')
+    delView(unref(currentRoute))
+    return
+  }
+   await getDeviceConfig(id)
+})
+
+
 const isEditing = ref(false) // 编辑状态
 const editorOptions = computed(() => ({
   mainMenuBar: false,
@@ -64,23 +97,30 @@ const cancelEdit = () => {
 }
 
 /** 保存配置的函数 */
-const saveConfig = () => {
+const saveConfig = async () => {
+  const params = {
+      ...deviceConfigState.value
+    } as DeviceVO
+  await updateDeviceConfig(params)
   isEditing.value = false
-  // 逻辑代码
-  console.log('保存配置')
 }
 
 /** 处理 JSON 编辑器错误的函数 */
 const onError = (e: any) => {
   console.log('onError', e)
 }
-</script>
 
-<!-- TODO dylan：建议使用 unocss 替代哈，AI 模型友好 -->
-<style scoped>
-.button-group {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
+// 更新设备配置
+const updateDeviceConfig = async (params: DeviceVO) => {
+  try {
+    loading.value = true
+    await DeviceApi.updateDevice(params)
+    await getDeviceConfig(id)
+    message.success('更新成功！')
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
 }
-</style>
+</script>
