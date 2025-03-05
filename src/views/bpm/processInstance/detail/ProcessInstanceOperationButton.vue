@@ -44,7 +44,11 @@
               :rows="4"
             />
           </el-form-item>
-          <el-form-item label="下一个节点的审批人" prop="nextAssignees" v-if="nextAssigneesActivityNode.length > 0">
+          <el-form-item
+            label="下一个节点的审批人"
+            prop="nextAssignees"
+            v-if="nextAssigneesActivityNode.length > 0"
+          >
             <div class="ml-10px -mt-15px -mb-35px">
               <ProcessInstanceTimeline
                 :activity-nodes="nextAssigneesActivityNode"
@@ -725,11 +729,12 @@ const initNextAssigneesFormField = async () => {
   })
   if (data && data.length > 0) {
     data.forEach((node: any) => {
+      // 如果是发起人自选，并且没有审批人 或者 是审批人自选
       if (
-        isEmpty(node.tasks) &&
-        isEmpty(node.candidateUsers) &&
-        (CandidateStrategy.START_USER_SELECT === node.candidateStrategy ||
-          CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy)
+        (isEmpty(node.tasks) &&
+          isEmpty(node.candidateUsers) &&
+          CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
+        CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy
       ) {
         nextAssigneesActivityNode.value.push(node)
       }
@@ -740,6 +745,20 @@ const initNextAssigneesFormField = async () => {
 /** 选择下一个节点的审批人 */
 const selectNextAssigneesConfirm = (id: string, userList: any[]) => {
   approveReasonForm.nextAssignees[id] = userList?.map((item: any) => item.id)
+}
+/** 审批通过时，校验每个自选审批人的节点是否都已配置了审批人 */
+const validateNextAssignees = () => {
+  // 如果需要自选审批人，则校验自选审批人
+  if (Object.keys(nextAssigneesActivityNode.value).length > 0) {
+    // 校验每个节点是否都已配置审批人
+    for (const item of nextAssigneesActivityNode.value) {
+      if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
+        message.warning('下一个节点的审批人不能为空!')
+        return false
+      }
+    }
+  }
+  return true
 }
 
 /** 处理审批通过和不通过的操作 */
@@ -757,12 +776,8 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
     }
 
     if (pass) {
-      // 如果需要自选审批人，则校验自选审批人
-      if (Object.keys(nextAssigneesActivityNode.value).length > 0 
-      && Object.keys(approveReasonForm.nextAssignees).length === 0) {
-        message.warning('下一个节点的审批人不能为空!')
-        return
-      }
+      const nextAssigneesValid = validateNextAssignees()
+      if (!nextAssigneesValid) return
       const variables = getUpdatedProcessInstanceVariables()
       // 审批通过数据
       const data = {
