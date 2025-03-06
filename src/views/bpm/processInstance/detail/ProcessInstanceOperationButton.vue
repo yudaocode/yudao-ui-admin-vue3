@@ -44,7 +44,11 @@
               :rows="4"
             />
           </el-form-item>
-          <el-form-item label="下一个节点的审批人" prop="nextAssignees" v-if="nextAssigneesVisible">
+          <el-form-item
+            label="下一个节点的审批人"
+            prop="nextAssignees"
+            v-if="nextAssigneesActivityNode.length > 0"
+          >
             <div class="ml-10px -mt-15px -mb-35px">
               <ProcessInstanceTimeline
                 :activity-nodes="nextAssigneesActivityNode"
@@ -522,6 +526,7 @@ import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/constants'
 import type { FormInstance, FormRules } from 'element-plus'
 import SignDialog from './SignDialog.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
@@ -565,7 +570,6 @@ const reasonRequire = ref()
 const approveFormRef = ref<FormInstance>()
 const signRef = ref()
 const approveSignFormRef = ref()
-const nextAssigneesVisible = ref(false) // 是否显示下一个节点的审批人
 const nextAssigneesActivityNode = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 下一个审批节点信息
 const approveReasonForm = reactive({
   reason: '',
@@ -711,42 +715,50 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
     formRef.resetFields()
   }
   popOverVisible.value[type] = false
-  nextAssigneesVisible.value = false
+  nextAssigneesActivityNode.value = []
 }
 
 /** 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人 */
 const initNextAssigneesFormField = async () => {
   // 获取修改的流程变量, 暂时只支持流程表单
   const variables = getUpdatedProcessInstanceVariables()
-  const data = await ProcessInstanceApi.getApprovalDetail({
+  const data = await ProcessInstanceApi.getNextApprovalNodes({
     processInstanceId: props.processInstance.id,
+    taskId: runningTask.value.id,
     processVariablesStr: JSON.stringify(variables)
   })
-
-  const activityId = data.todoTask?.taskDefinitionKey
-  if (data.activityNodes && data.activityNodes.length > 0) {
-    // 找到当前节点的索引
-    const currentNodeIndex = data.activityNodes.findIndex((node: any) => node.id === activityId)
-    const nextNode = data.activityNodes[currentNodeIndex + 1]
-    // 情况一：发起人选择审批人：此时一般是因为条件发生变化，需要当前审批人补充选择
-    if (
-      nextNode.candidateStrategy === CandidateStrategy.START_USER_SELECT &&
-      !nextNode.tasks &&
-      nextNode.candidateUsers?.length === 0
-    ) {
-      // 自选审批人，则弹出选择审批人弹窗
-      // TODO @小北：需要考虑下，这里的 nextNode 可能是多个节点，需要怎么处理；类似你在后端的处理哈
-      // TODO @小北：有点纠结，是不是写个预测下一个节点的接口，更合适？
-      nextAssigneesActivityNode.value = [nextNode]
-      nextAssigneesVisible.value = true
-    }
-    // TODO @小北：情况二：审批人选择的情况
+  if (data && data.length > 0) {
+    data.forEach((node: any) => {
+      // 如果是发起人自选，并且没有审批人 或者 是审批人自选
+      if (
+        (isEmpty(node.tasks) &&
+          isEmpty(node.candidateUsers) &&
+          CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
+        CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy
+      ) {
+        nextAssigneesActivityNode.value.push(node)
+      }
+    })
   }
 }
 
 /** 选择下一个节点的审批人 */
 const selectNextAssigneesConfirm = (id: string, userList: any[]) => {
   approveReasonForm.nextAssignees[id] = userList?.map((item: any) => item.id)
+}
+/** 审批通过时，校验每个自选审批人的节点是否都已配置了审批人 */
+const validateNextAssignees = () => {
+  // 如果需要自选审批人，则校验自选审批人
+  if (Object.keys(nextAssigneesActivityNode.value).length > 0) {
+    // 校验每个节点是否都已配置审批人
+    for (const item of nextAssigneesActivityNode.value) {
+      if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
+        message.warning('下一个节点的审批人不能为空!')
+        return false
+      }
+    }
+  }
+  return true
 }
 
 /** 处理审批通过和不通过的操作 */
@@ -764,11 +776,8 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
     }
 
     if (pass) {
-      // 如果需要自选审批人，则校验自选审批人
-      if (nextAssigneesVisible.value && Object.keys(approveReasonForm.nextAssignees).length === 0) {
-        message.warning('下一个节点的审批人不能为空!')
-        return
-      }
+      const nextAssigneesValid = validateNextAssignees()
+      if (!nextAssigneesValid) return
       const variables = getUpdatedProcessInstanceVariables()
       // 审批通过数据
       const data = {
@@ -791,7 +800,7 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       }
       await TaskApi.approveTask(data)
       popOverVisible.value.approve = false
-      nextAssigneesVisible.value = false
+      nextAssigneesActivityNode.value = []
       message.success('审批通过成功')
     } else {
       // 审批不通过数据

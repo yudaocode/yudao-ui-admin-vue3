@@ -93,6 +93,11 @@ export const getApprovalDetail = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/get-approval-detail', params })
 }
 
+// 获取下一个执行的流程节点
+export const getNextApprovalNodes = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/get-next-approval-nodes', params })
+}
+
 // 获取表单字段权限
 export const getFormFieldsPermission = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/get-form-fields-permission', params })
