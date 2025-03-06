@@ -117,7 +117,6 @@ const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批�
 
 /** 设置表单信息、获取流程图数据 **/
 const initProcessInfo = async (row: any, formVariables?: any) => {
-  
   // 重置指定审批人
   startUserSelectTasks.value = []
   startUserSelectAssignees.value = {}
@@ -144,7 +143,7 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
       id: row.id,
       processVariablesStr: JSON.stringify(formVariables)
     })
-    // }
+
     // 加载流程图
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(row.id)
     if (processDefinitionDetail) {

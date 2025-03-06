@@ -729,11 +729,12 @@ const initNextAssigneesFormField = async () => {
   })
   if (data && data.length > 0) {
     data.forEach((node: any) => {
-      // 如果是发起人自选，并且没有审批人 或者 是审批人自选
       if (
+        // 情况一：当前节点没有审批人，并且是发起人自选
         (isEmpty(node.tasks) &&
           isEmpty(node.candidateUsers) &&
           CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
+        // 情况二：当前节点是审批人自选
         CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy
       ) {
         nextAssigneesActivityNode.value.push(node)
@@ -748,11 +749,13 @@ const selectNextAssigneesConfirm = (id: string, userList: any[]) => {
 }
 /** 审批通过时，校验每个自选审批人的节点是否都已配置了审批人 */
 const validateNextAssignees = () => {
+  // TODO @小北：可以考虑 Object.keys(nextAssigneesActivityNode.value).length === 0) return true；减少括号层级
   // 如果需要自选审批人，则校验自选审批人
   if (Object.keys(nextAssigneesActivityNode.value).length > 0) {
     // 校验每个节点是否都已配置审批人
     for (const item of nextAssigneesActivityNode.value) {
       if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
+        // TODO @小北：可以打印下节点名，嘿嘿。
         message.warning('下一个节点的审批人不能为空!')
         return false
       }
