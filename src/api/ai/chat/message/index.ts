@@ -14,9 +14,16 @@ export interface ChatMessageVO {
   modelId: number // 模型编号
   content: string // 聊天内容
   tokens: number // 消耗 Token 数量
+  segmentIds?: number[] // 段落编号
+  segments?: {
+    id: number // 段落编号
+    content: string // 段落内容
+    documentId: number // 文档编号
+    documentName: string // 文档名称
+  }[]
   createTime: Date // 创建时间
   roleAvatar: string // 角色头像
-  userAvatar: string // 创建时间
+  userAvatar: string // 用户头像
 }
 
 // AI chat 聊天

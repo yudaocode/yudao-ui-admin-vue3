@@ -12,6 +12,7 @@
           </div>
           <div class="left-text-container" ref="markdownViewRef">
             <MarkdownView class="left-text" :content="item.content" />
+            <MessageKnowledge v-if="item.segments" :segments="item.segments" />
           </div>
           <div class="left-btns">
             <el-button class="btn-cus" link @click="copyContent(item.content)">
@@ -62,6 +63,7 @@
 import { PropType } from 'vue'
 import { formatDate } from '@/utils/formatTime'
 import MarkdownView from '@/components/MarkdownView/index.vue'
+import MessageKnowledge from './MessageKnowledge.vue'
 import { useClipboard } from '@vueuse/core'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
 import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
