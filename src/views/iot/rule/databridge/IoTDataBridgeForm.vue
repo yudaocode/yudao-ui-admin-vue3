@@ -33,7 +33,24 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="桥梁配置" prop="config">
-        <!--        <el-input v-model="formData.config" placeholder="请输入桥梁配置" />-->
+        <HttpConfigForm v-if="showConfig(IoTDataBridgeConfigType.HTTP)" v-model="formData.config" />
+        <MqttConfigForm v-if="showConfig(IoTDataBridgeConfigType.MQTT)" v-model="formData.config" />
+        <RocketMQConfigForm
+          v-if="showConfig(IoTDataBridgeConfigType.ROCKETMQ)"
+          v-model="formData.config"
+        />
+        <KafkaMQConfigForm
+          v-if="showConfig(IoTDataBridgeConfigType.KAFKA)"
+          v-model="formData.config"
+        />
+        <RabbitMQConfigForm
+          v-if="showConfig(IoTDataBridgeConfigType.RABBITMQ)"
+          v-model="formData.config"
+        />
+        <RedisStreamMQConfigForm
+          v-if="showConfig(IoTDataBridgeConfigType.REDIS_STREAM)"
+          v-model="formData.config"
+        />
       </el-form-item>
       <el-form-item label="桥梁描述" prop="description">
         <el-input v-model="formData.description" height="150px" type="textarea" />
@@ -57,8 +74,16 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { DataBridgeApi, DataBridgeVO } from '@/api/iot/rule/databridge'
+import { DICT_TYPE, getDictLabel, getIntDictOptions } from '@/utils/dict'
+import { DataBridgeApi, DataBridgeVO, IoTDataBridgeConfigType } from '@/api/iot/rule/databridge'
+import {
+  HttpConfigForm,
+  KafkaMQConfigForm,
+  MqttConfigForm,
+  RabbitMQConfigForm,
+  RedisStreamMQConfigForm,
+  RocketMQConfigForm
+} from './config'
 
 /** IoT 数据桥梁 表单 */
 defineOptions({ name: 'IoTDataBridgeForm' })
@@ -73,16 +98,22 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<DataBridgeVO>({
   status: 0,
   direction: 1,
-  type: 1
+  type: 1,
+  config: {} as any
 })
 const formRules = reactive({
   name: [{ required: true, message: '桥梁名称不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '桥梁状态不能为空', trigger: 'blur' }],
   direction: [{ required: true, message: '桥梁方向不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '桥梁类型不能为空', trigger: 'change' }]
+  type: [{ required: true, message: '桥梁类型不能为空', trigger: 'change' }],
+  'config.bootstrapServers': [{ required: true, message: '服务地址不能为空', trigger: 'blur' }],
+  'config.topic': [{ required: true, message: '主题不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-
+const showConfig = computed(() => (val: string) => {
+  const label = getDictLabel(DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM, formData.value.type)
+  return label && label === val
+}) // 显示对应的 Config 配置项
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -130,7 +161,8 @@ const resetForm = () => {
   formData.value = {
     status: 0,
     direction: 1,
-    type: 1
+    type: 1,
+    config: {} as any
   }
   formRef.value?.resetFields()
 }

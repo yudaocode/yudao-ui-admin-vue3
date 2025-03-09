@@ -79,6 +79,19 @@ export interface RedisStreamMQConfig extends Config {
   topic: string
 }
 
+/** 数据桥梁类型 */
+export const IoTDataBridgeConfigType = {
+  HTTP: 'HTTP',
+  TCP: 'TCP',
+  WEBSOCKET: 'WEBSOCKET',
+  MQTT: 'MQTT',
+  DATABASE: 'DATABASE',
+  REDIS_STREAM: 'REDIS_STREAM',
+  ROCKETMQ: 'ROCKETMQ',
+  RABBITMQ: 'RABBITMQ',
+  KAFKA: 'KAFKA'
+} as const
+
 // IoT 数据桥梁 API
 export const DataBridgeApi = {
   // 查询IoT 数据桥梁分页
