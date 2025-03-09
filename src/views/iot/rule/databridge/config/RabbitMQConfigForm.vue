@@ -31,7 +31,7 @@ import { useVModel } from '@vueuse/core'
 defineOptions({ name: 'RabbitMQConfigForm' })
 
 const props = defineProps<{
-  modelValue: RabbitMQConfig
+  modelValue: any
 }>()
 const emit = defineEmits(['update:modelValue'])
 const config = useVModel(props, 'modelValue', emit) as Ref<RabbitMQConfig>

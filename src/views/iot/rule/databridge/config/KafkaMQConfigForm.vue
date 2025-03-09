@@ -22,7 +22,7 @@ import { useVModel } from '@vueuse/core'
 defineOptions({ name: 'KafkaMQConfigForm' })
 
 const props = defineProps<{
-  modelValue: KafkaMQConfig
+  modelValue: any
 }>()
 const emit = defineEmits(['update:modelValue'])
 const config = useVModel(props, 'modelValue', emit) as Ref<KafkaMQConfig>

@@ -22,7 +22,7 @@ import { useVModel } from '@vueuse/core'
 defineOptions({ name: 'MqttConfigForm' })
 
 const props = defineProps<{
-  modelValue: MqttConfig
+  modelValue: any
 }>()
 const emit = defineEmits(['update:modelValue'])
 const config = useVModel(props, 'modelValue', emit) as Ref<MqttConfig>

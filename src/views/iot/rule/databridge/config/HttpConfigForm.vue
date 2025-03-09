@@ -37,7 +37,7 @@ import { useVModel } from '@vueuse/core'
 defineOptions({ name: 'HttpConfigForm' })
 
 const props = defineProps<{
-  modelValue: HttpConfig
+  modelValue: any
 }>()
 const emit = defineEmits(['update:modelValue'])
 const config = useVModel(props, 'modelValue', emit) as Ref<HttpConfig>

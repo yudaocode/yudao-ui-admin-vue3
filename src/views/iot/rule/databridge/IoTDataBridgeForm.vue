@@ -32,29 +32,24 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="桥梁配置" prop="config">
-        <HttpConfigForm v-if="showConfig(IoTDataBridgeConfigType.HTTP)" v-model="formData.config" />
-        <MqttConfigForm v-if="showConfig(IoTDataBridgeConfigType.MQTT)" v-model="formData.config" />
-        <RocketMQConfigForm
-          v-if="showConfig(IoTDataBridgeConfigType.ROCKETMQ)"
-          v-model="formData.config"
-        />
-        <KafkaMQConfigForm
-          v-if="showConfig(IoTDataBridgeConfigType.KAFKA)"
-          v-model="formData.config"
-        />
-        <RabbitMQConfigForm
-          v-if="showConfig(IoTDataBridgeConfigType.RABBITMQ)"
-          v-model="formData.config"
-        />
-        <RedisStreamMQConfigForm
-          v-if="showConfig(IoTDataBridgeConfigType.REDIS_STREAM)"
-          v-model="formData.config"
-        />
-      </el-form-item>
-      <el-form-item label="桥梁描述" prop="description">
-        <el-input v-model="formData.description" height="150px" type="textarea" />
-      </el-form-item>
+      <HttpConfigForm v-if="showConfig(IoTDataBridgeConfigType.HTTP)" v-model="formData.config" />
+      <MqttConfigForm v-if="showConfig(IoTDataBridgeConfigType.MQTT)" v-model="formData.config" />
+      <RocketMQConfigForm
+        v-if="showConfig(IoTDataBridgeConfigType.ROCKETMQ)"
+        v-model="formData.config"
+      />
+      <KafkaMQConfigForm
+        v-if="showConfig(IoTDataBridgeConfigType.KAFKA)"
+        v-model="formData.config!"
+      />
+      <RabbitMQConfigForm
+        v-if="showConfig(IoTDataBridgeConfigType.RABBITMQ)"
+        v-model="formData.config!"
+      />
+      <RedisStreamMQConfigForm
+        v-if="showConfig(IoTDataBridgeConfigType.REDIS_STREAM)"
+        v-model="formData.config!"
+      />
       <el-form-item label="桥梁状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
@@ -65,6 +60,9 @@
             {{ dict.label }}
           </el-radio>
         </el-radio-group>
+      </el-form-item>
+      <el-form-item label="桥梁描述" prop="description">
+        <el-input v-model="formData.description" height="150px" type="textarea" />
       </el-form-item>
     </el-form>
     <template #footer>

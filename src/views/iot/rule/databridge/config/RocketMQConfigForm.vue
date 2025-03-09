@@ -1,5 +1,5 @@
 <template>
-  <el-form-item label="命名服务地址" prop="config.nameServer">
+  <el-form-item label="名称服务地址" prop="config.nameServer">
     <el-input v-model="config.nameServer" placeholder="请输入命名服务地址，如：127.0.0.1:9876" />
   </el-form-item>
   <el-form-item label="Access Key" prop="config.accessKey">
@@ -30,7 +30,7 @@ import { useVModel } from '@vueuse/core'
 defineOptions({ name: 'RocketMQConfigForm' })
 
 const props = defineProps<{
-  modelValue: RocketMQConfig
+  modelValue: any
 }>()
 const emit = defineEmits(['update:modelValue'])
 const config = useVModel(props, 'modelValue', emit) as Ref<RocketMQConfig>
