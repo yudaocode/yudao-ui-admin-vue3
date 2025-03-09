@@ -18,6 +18,7 @@
 <script lang="ts" setup>
 import { IoTDataBridgeConfigType, KafkaMQConfig } from '@/api/iot/rule/databridge'
 import { useVModel } from '@vueuse/core'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'KafkaMQConfigForm' })
 
@@ -29,6 +30,9 @@ const config = useVModel(props, 'modelValue', emit) as Ref<KafkaMQConfig>
 
 /** 组件初始化 */
 onMounted(() => {
+  if (!isEmpty(config.value)) {
+    return
+  }
   config.value = {
     type: IoTDataBridgeConfigType.KAFKA,
     bootstrapServers: '',

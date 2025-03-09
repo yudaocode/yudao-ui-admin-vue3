@@ -33,6 +33,7 @@
 <script lang="ts" setup>
 import { HttpConfig, IoTDataBridgeConfigType } from '@/api/iot/rule/databridge'
 import { useVModel } from '@vueuse/core'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'HttpConfigForm' })
 
@@ -47,6 +48,9 @@ const queryStr = ref('{}')
 
 /** 组件初始化 */
 onMounted(() => {
+  if (!isEmpty(config.value)) {
+    return
+  }
   config.value = {
     type: IoTDataBridgeConfigType.HTTP,
     url: '',

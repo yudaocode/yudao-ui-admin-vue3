@@ -27,6 +27,7 @@
 <script lang="ts" setup>
 import { IoTDataBridgeConfigType, RabbitMQConfig } from '@/api/iot/rule/databridge'
 import { useVModel } from '@vueuse/core'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'RabbitMQConfigForm' })
 
@@ -38,6 +39,9 @@ const config = useVModel(props, 'modelValue', emit) as Ref<RabbitMQConfig>
 
 /** 组件初始化 */
 onMounted(() => {
+  if (!isEmpty(config.value)) {
+    return
+  }
   config.value = {
     type: IoTDataBridgeConfigType.RABBITMQ,
     host: '',
