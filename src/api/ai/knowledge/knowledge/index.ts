@@ -35,5 +35,10 @@ export const KnowledgeApi = {
   // 删除知识库
   deleteKnowledge: async (id: number) => {
     return await request.delete({ url: `/ai/knowledge/delete?id=` + id })
+  },
+
+  // 获取知识库简单列表
+  getSimpleKnowledgeList: async () => {
+    return await request.get({ url: `/ai/knowledge/simple-list` })
   }
 }

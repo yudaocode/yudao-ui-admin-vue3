@@ -32,6 +32,16 @@
       <el-form-item label="角色设定" prop="systemMessage">
         <el-input type="textarea" v-model="formData.systemMessage" placeholder="请输入角色设定" />
       </el-form-item>
+      <el-form-item label="引用知识库" prop="knowledgeIds">
+        <el-select v-model="formData.knowledgeIds" placeholder="请选择知识库" clearable multiple>
+          <el-option
+            v-for="item in knowledgeList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="是否公开" prop="publicStatus" v-if="!isUser">
         <el-radio-group v-model="formData.publicStatus">
           <el-radio
@@ -71,6 +81,7 @@ import { CommonStatusEnum } from '@/utils/constants'
 import { ModelApi, ModelVO } from '@/api/ai/model/model'
 import { FormRules } from 'element-plus'
 import { AiModelTypeEnum } from '@/views/ai/utils/constants'
+import { KnowledgeApi, KnowledgeVO } from '@/api/ai/knowledge/knowledge'
 
 /** AI 聊天角色 表单 */
 defineOptions({ name: 'ChatRoleForm' })
@@ -92,10 +103,12 @@ const formData = ref({
   description: undefined,
   systemMessage: undefined,
   publicStatus: true,
-  status: CommonStatusEnum.ENABLE
+  status: CommonStatusEnum.ENABLE,
+  knowledgeIds: [] as number[]
 })
 const formRef = ref() // 表单 Ref
 const models = ref([] as ModelVO[]) // 聊天模型列表
+const knowledgeList = ref([] as KnowledgeVO[]) // 知识库列表
 
 /** 是否【我】自己创建，私有角色 */
 const isUser = computed(() => {
@@ -130,6 +143,8 @@ const open = async (type: string, id?: number, title?: string) => {
   }
   // 获得下拉数据
   models.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
+  // 获取知识库列表
+  knowledgeList.value = await KnowledgeApi.getSimpleKnowledgeList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -177,7 +192,8 @@ const resetForm = () => {
     description: undefined,
     systemMessage: undefined,
     publicStatus: true,
-    status: CommonStatusEnum.ENABLE
+    status: CommonStatusEnum.ENABLE,
+    knowledgeIds: []
   }
   formRef.value?.resetFields()
 }
