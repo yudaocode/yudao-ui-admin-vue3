@@ -1,5 +1,5 @@
 <template>
-  <el-form-item label="MQTT服务地址" prop="config.url">
+  <el-form-item label="服务地址" prop="config.url">
     <el-input v-model="config.url" placeholder="请输入MQTT服务地址，如：mqtt://localhost:1883" />
   </el-form-item>
   <el-form-item label="用户名" prop="config.username">

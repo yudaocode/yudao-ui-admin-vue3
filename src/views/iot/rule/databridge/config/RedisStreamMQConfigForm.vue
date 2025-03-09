@@ -3,13 +3,25 @@
     <el-input v-model="config.host" placeholder="请输入主机地址，如：localhost" />
   </el-form-item>
   <el-form-item label="端口" prop="config.port">
-    <el-input-number v-model="config.port" :max="65535" :min="1" placeholder="请输入端口" />
+    <el-input-number
+      v-model="config.port"
+      :max="65535"
+      :min="1"
+      controls-position="right"
+      placeholder="请输入端口"
+    />
   </el-form-item>
   <el-form-item label="密码" prop="config.password">
     <el-input v-model="config.password" placeholder="请输入密码" show-password type="password" />
   </el-form-item>
   <el-form-item label="数据库" prop="config.database">
-    <el-input-number v-model="config.database" :max="15" :min="0" placeholder="请输入数据库索引" />
+    <el-input-number
+      v-model="config.database"
+      :max="15"
+      :min="0"
+      controls-position="right"
+      placeholder="请输入数据库索引"
+    />
   </el-form-item>
   <el-form-item label="主题" prop="config.topic">
     <el-input v-model="config.topic" placeholder="请输入主题" />

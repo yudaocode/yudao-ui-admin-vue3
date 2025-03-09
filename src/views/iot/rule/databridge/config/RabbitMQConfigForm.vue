@@ -3,7 +3,13 @@
     <el-input v-model="config.host" placeholder="请输入主机地址，如：localhost" />
   </el-form-item>
   <el-form-item label="端口" prop="config.port">
-    <el-input-number v-model="config.port" :max="65535" :min="1" placeholder="请输入端口" />
+    <el-input-number
+      v-model="config.port"
+      :max="65535"
+      :min="1"
+      controls-position="right"
+      placeholder="请输入端口"
+    />
   </el-form-item>
   <el-form-item label="虚拟主机" prop="config.virtualHost">
     <el-input v-model="config.virtualHost" placeholder="请输入虚拟主机" />

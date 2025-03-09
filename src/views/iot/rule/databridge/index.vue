@@ -116,7 +116,6 @@
           <dict-tag :type="DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="桥梁配置" prop="config" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -124,7 +123,7 @@
         prop="createTime"
         width="180px"
       />
-      <el-table-column align="center" label="操作" min-width="120px">
+      <el-table-column align="center" fixed="right" label="操作" width="120px">
         <template #default="scope">
           <el-button
             v-hasPermi="['iot:data-bridge:update']"

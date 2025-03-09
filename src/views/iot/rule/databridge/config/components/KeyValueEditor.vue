@@ -1,5 +1,5 @@
 <template>
-  <div v-for="(item, index) in items" :key="index" class="flex mb-2">
+  <div v-for="(item, index) in items" :key="index" class="flex mb-2 w-full">
     <el-input v-model="item.key" class="mr-2" placeholder="键" />
     <el-input v-model="item.value" placeholder="值" />
     <el-button class="ml-2" text type="danger" @click="removeItem(index)">
@@ -61,11 +61,14 @@ const updateModelValue = () => {
 
 // 监听项目变化
 watch(items, updateModelValue, { deep: true })
-onMounted(() => {
-  if (isEmpty(props.modelValue)) {
-    return
+watch(
+  () => props.modelValue,
+  (val) => {
+    // 列表有值后以列表中的值为准
+    if (isEmpty(val) || !isEmpty(items.value)) {
+      return
+    }
+    items.value = Object.entries(props.modelValue).map(([key, value]) => ({ key, value }))
   }
-
-  items.value = Object.entries(props.modelValue).map(([key, value]) => ({ key, value }))
-})
+)
 </script>
