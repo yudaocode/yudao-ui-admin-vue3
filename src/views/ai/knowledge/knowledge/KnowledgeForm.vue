@@ -18,9 +18,15 @@
           placeholder="请输入知识库描述"
         />
       </el-form-item>
-      <!-- TODO @芋艿：增加一个下拉选择 -->
       <el-form-item label="向量模型" prop="embeddingModelId">
-        <el-input v-model="formData.embeddingModelId" placeholder="请输入向量模型" />
+        <el-select
+          v-model="formData.embeddingModelId"
+          placeholder="请选择向量模型"
+          clearable
+          class="!w-full"
+        >
+          <el-option v-for="item in modelList" :key="item.id" :label="item.name" :value="item.id" />
+        </el-select>
       </el-form-item>
       <el-form-item label="检索 topK" prop="topK">
         <el-input-number
@@ -64,6 +70,8 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { KnowledgeApi, KnowledgeVO } from '@/api/ai/knowledge/knowledge'
 import { CommonStatusEnum } from '@/utils/constants'
+import { ModelApi, ModelVO } from '@/api/ai/model/model'
+import { AiModelTypeEnum } from '../../utils/constants'
 
 /** AI 知识库表单 */
 defineOptions({ name: 'KnowledgeForm' })
@@ -92,6 +100,7 @@ const formRules = reactive({
   status: [{ required: true, message: '请选择是否启用', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const modelList = ref<ModelVO[]>([]) // 向量模型选项
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -99,6 +108,8 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
+  // 获取向量模型列表
+  modelList.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.EMBEDDING)
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
