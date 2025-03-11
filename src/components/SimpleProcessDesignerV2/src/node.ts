@@ -310,6 +310,11 @@ export function useNodeForm(nodeType: NodeType) {
       showText = `表单内部门负责人`
     }
 
+    // 审批人自选
+    if (configForm.value?.candidateStrategy === CandidateStrategy.APPROVE_USER_SELECT) {
+      showText = `审批人自选`
+    }
+
     // 发起人自选
     if (configForm.value?.candidateStrategy === CandidateStrategy.START_USER_SELECT) {
       showText = `发起人自选`
