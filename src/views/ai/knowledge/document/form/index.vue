@@ -129,29 +129,6 @@ const initData = async () => {
     // 进入下一步
     goToNextStep()
   }
-
-  // TODO @芋艿：为了开发方便，强制设置
-  if (false) {
-    formData.value.list = [
-      {
-        name: '项目说明文档.pdf',
-        url: 'https://static.iocoder.cn/README_yudao.md',
-        segments: []
-      }
-    ]
-    goToNextStep()
-  }
-  if (false) {
-    formData.value.list = [
-      {
-        id: 1,
-        name: '项目说明文档.pdf',
-        url: 'https://static.iocoder.cn/README_yudao.md',
-        segments: []
-      }
-    ]
-    goToNextStep()
-  }
 }
 
 /** 切换到下一步 */
