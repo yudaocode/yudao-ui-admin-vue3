@@ -70,7 +70,7 @@
                   trigger: 'change'
                 }"
               >
-                <el-select style="width: 160px" v-model="rule.leftSide">
+                <el-select style="width: 160px" v-model="rule.leftSide" clearable>
                   <el-option
                     v-for="(field, fIdx) in fieldOptions"
                     :key="fIdx"
