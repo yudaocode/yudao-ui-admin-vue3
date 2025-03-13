@@ -749,19 +749,16 @@ const selectNextAssigneesConfirm = (id: string, userList: any[]) => {
 }
 /** 审批通过时，校验每个自选审批人的节点是否都已配置了审批人 */
 const validateNextAssignees = () => {
-  // TODO @小北：可以考虑 Object.keys(nextAssigneesActivityNode.value).length === 0) return true；减少括号层级
+  if (Object.keys(nextAssigneesActivityNode.value).length === 0) return true
   // 如果需要自选审批人，则校验自选审批人
-  if (Object.keys(nextAssigneesActivityNode.value).length > 0) {
-    // 校验每个节点是否都已配置审批人
-    for (const item of nextAssigneesActivityNode.value) {
-      if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
-        // TODO @小北：可以打印下节点名，嘿嘿。
-        message.warning('下一个节点的审批人不能为空!')
-        return false
-      }
+  // 校验每个节点是否都已配置审批人
+  for (const item of nextAssigneesActivityNode.value) {
+    if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
+      console.log('下一个节点【' + item.name + '】的审批人不能为空!')
+      message.warning('下一个节点的审批人不能为空!')
+      return false
     }
   }
-  return true
 }
 
 /** 处理审批通过和不通过的操作 */
