@@ -11,9 +11,8 @@
 
     <!-- JSON 编辑器：读模式 -->
     <Vue3Jsoneditor
-      ref="editor"
       v-if="isEditing"
-      v-model="deviceConfigState"
+      v-model="config"
       :options="editorOptions"
       height="500px"
       currentMode="code"
@@ -21,61 +20,47 @@
     />
     <!-- JSON 编辑器：写模式 -->
     <Vue3Jsoneditor
-      ref="editor"
       v-else
-      v-model="deviceConfigState"
+      v-model="config"
       :options="editorOptions"
       height="500px"
       currentMode="view"
       v-loading.fullscreen.lock="loading"
       @error="onError"
     />
-    <div class="flex justify-center mt-24">
+    <div class="mt-5 text-center">
       <el-button v-if="isEditing" @click="cancelEdit">取消</el-button>
-      <el-button v-if="isEditing" type="primary" @click="saveConfig">保存</el-button>
+      <el-button v-if="isEditing" type="primary" @click="saveConfig" :disabled="hasJsonError"
+        >保存</el-button
+      >
       <el-button v-else @click="enableEdit">编辑</el-button>
+      <!-- TODO @芋艿：缺一个下发按钮 -->
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
 import Vue3Jsoneditor from 'v3-jsoneditor/src/Vue3Jsoneditor.vue'
-import { DeviceApi } from '@/api/iot/device/device/index'
-import { useTagsViewStore } from '@/store/modules/tagsView'
-import { DeviceVO } from '../../../../../api/iot/device/device/index';
+import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
+import { jsonParse } from '@/utils'
 
-const route = useRoute()
+const props = defineProps<{
+  device: DeviceVO
+}>()
+
+const emit = defineEmits<{
+  (e: 'success'): void // 定义 success 事件，不需要参数
+}>()
+
 const message = useMessage()
-const { delView } = useTagsViewStore() // 视图操作
-const { currentRoute } = useRouter() // 路由
-const id = Number(route.params.id) // 将字符串转换为数字
-const loading = ref(true) // 加载中
-const deviceConfigState = ref({})  // 设置配置
+const loading = ref(false) // 加载中
+const config = ref<any>({}) // 只存储 config 字段
+const hasJsonError = ref(false) // 是否有 JSON 格式错误
 
-
-// 获取设备配置
-const getDeviceConfig = async (id: number) => {
-  try {
-    loading.value = true
-    const res = await DeviceApi.getDevice(id)
-    deviceConfigState.value = res
-  } catch (error) {
-    console.error(error)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(async () => {
-  if (!id) {
-    message.warning('参数错误，产品不能为空！')
-    delView(unref(currentRoute))
-    return
-  }
-   await getDeviceConfig(id)
+/** 监听 props.device 的变化，只更新 config 字段 */
+watchEffect(() => {
+  config.value = jsonParse(props.device.config)
 })
-
 
 const isEditing = ref(false) // 编辑状态
 const editorOptions = computed(() => ({
@@ -87,40 +72,48 @@ const editorOptions = computed(() => ({
 /** 启用编辑模式的函数 */
 const enableEdit = () => {
   isEditing.value = true
+  hasJsonError.value = false // 重置错误状态
 }
 
 /** 取消编辑的函数 */
 const cancelEdit = () => {
+  config.value = jsonParse(props.device.config)
   isEditing.value = false
-  // 逻辑代码
-  console.log('取消编辑')
+  hasJsonError.value = false // 重置错误状态
 }
 
 /** 保存配置的函数 */
 const saveConfig = async () => {
-  const params = {
-      ...deviceConfigState.value
-    } as DeviceVO
-  await updateDeviceConfig(params)
+  if (hasJsonError.value) {
+    message.error('JSON格式错误，请修正后再提交！')
+    return
+  }
+  await updateDeviceConfig()
   isEditing.value = false
 }
 
-/** 处理 JSON 编辑器错误的函数 */
-const onError = (e: any) => {
-  console.log('onError', e)
-}
-
-// 更新设备配置
-const updateDeviceConfig = async (params: DeviceVO) => {
+/** 更新设备配置 */
+const updateDeviceConfig = async () => {
   try {
+    // 提交请求
     loading.value = true
-    await DeviceApi.updateDevice(params)
-    await getDeviceConfig(id)
+    await DeviceApi.updateDevice({
+      id: props.device.id,
+      config: JSON.stringify(config.value)
+    } as DeviceVO)
     message.success('更新成功！')
+    // 触发 success 事件
+    emit('success')
   } catch (error) {
     console.error(error)
   } finally {
     loading.value = false
   }
+}
+
+/** 处理 JSON 编辑器错误的函数 */
+const onError = (e: any) => {
+  console.log('onError', e)
+  hasJsonError.value = true
 }
 </script>

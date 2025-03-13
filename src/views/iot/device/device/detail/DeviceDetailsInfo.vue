@@ -63,7 +63,11 @@
         </el-input>
       </el-form-item>
       <el-form-item label="passwd">
-        <el-input v-model="mqttParams.mqttPassword" readonly :type="passwordVisible ? 'text' : 'password'">
+        <el-input
+          v-model="mqttParams.mqttPassword"
+          readonly
+          :type="passwordVisible ? 'text' : 'password'"
+        >
           <template #append>
             <el-button @click="passwordVisible = !passwordVisible" type="primary">
               <Icon :icon="passwordVisible ? 'ph:eye-slash' : 'ph:eye'" />
@@ -117,13 +121,14 @@ const copyToClipboard = async (text: string) => {
 const openMqttParams = async () => {
   try {
     const res = await DeviceApi.getMqttConnectionParams(device.id)
-    
-    // 根据API响应结构正确获取数据
+    // 根据 API 响应结构正确获取数据
     mqttParams.value = {
       mqttClientId: res.mqttClientId || 'N/A',
       mqttUsername: res.mqttUsername || 'N/A',
       mqttPassword: res.mqttPassword || 'N/A'
     }
+
+    // 显示 MQTT 弹框
     mqttDialogVisible.value = true
   } catch (error) {
     console.error('获取MQTT连接参数出错：', error)

@@ -27,7 +27,11 @@
         />
       </el-tab-pane>
       <el-tab-pane label="设备配置" name="config">
-        <DeviceDetailConfig />
+        <DeviceDetailConfig
+          v-if="activeTab === 'config'"
+          :device="device"
+          @success="getDeviceData"
+        />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -41,7 +45,7 @@ import DeviceDetailsInfo from './DeviceDetailsInfo.vue'
 import DeviceDetailsModel from './DeviceDetailsModel.vue'
 import DeviceDetailsLog from './DeviceDetailsLog.vue'
 import DeviceDetailsSimulator from './DeviceDetailsSimulator.vue'
-import DeviceDetailConfig from './DeviceDetailConfig.vue';
+import DeviceDetailConfig from './DeviceDetailConfig.vue'
 
 defineOptions({ name: 'IoTDeviceDetail' })
 
@@ -54,7 +58,7 @@ const device = ref<DeviceVO>({} as DeviceVO) // 设备详情
 const activeTab = ref('info') // 默认激活的标签页
 
 /** 获取设备详情 */
-const getDeviceData = async (id: number) => {
+const getDeviceData = async () => {
   loading.value = true
   try {
     device.value = await DeviceApi.getDevice(id)
@@ -78,7 +82,7 @@ onMounted(async () => {
     delView(unref(currentRoute))
     return
   }
-  await getDeviceData(id)
+  await getDeviceData()
   activeTab.value = (route.query.tab as string) || 'info'
 })
 </script>

@@ -27,6 +27,7 @@ export interface DeviceVO {
   areaId: number // 地区编码
   address: string // 设备详细地址
   serialNumber: string // 设备序列号
+  config: string // 设备配置
   groupIds?: number[] // 添加分组 ID
 }
 
@@ -72,7 +73,7 @@ export interface IotDeviceDownstreamReqVO {
   data: any // 请求参数
 }
 
-// MQTT连接参数 VO
+// MQTT 连接参数 VO
 export interface MqttConnectionParamsVO {
   mqttClientId: string // MQTT 客户端 ID
   mqttUsername: string // MQTT 用户名
