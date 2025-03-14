@@ -42,6 +42,11 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="引用工具" prop="toolIds">
+        <el-select v-model="formData.toolIds" placeholder="请选择工具" clearable multiple>
+          <el-option v-for="item in toolList" :key="item.id" :label="item.name" :value="item.id" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="是否公开" prop="publicStatus" v-if="!isUser">
         <el-radio-group v-model="formData.publicStatus">
           <el-radio
@@ -82,6 +87,7 @@ import { ModelApi, ModelVO } from '@/api/ai/model/model'
 import { FormRules } from 'element-plus'
 import { AiModelTypeEnum } from '@/views/ai/utils/constants'
 import { KnowledgeApi, KnowledgeVO } from '@/api/ai/knowledge/knowledge'
+import { ToolApi, ToolVO } from '@/api/ai/model/tool'
 
 /** AI 聊天角色 表单 */
 defineOptions({ name: 'ChatRoleForm' })
@@ -104,11 +110,13 @@ const formData = ref({
   systemMessage: undefined,
   publicStatus: true,
   status: CommonStatusEnum.ENABLE,
-  knowledgeIds: [] as number[]
+  knowledgeIds: [] as number[],
+  toolIds: [] as number[]
 })
 const formRef = ref() // 表单 Ref
 const models = ref([] as ModelVO[]) // 聊天模型列表
 const knowledgeList = ref([] as KnowledgeVO[]) // 知识库列表
+const toolList = ref([] as ToolVO[]) // 工具列表
 
 /** 是否【我】自己创建，私有角色 */
 const isUser = computed(() => {
@@ -145,6 +153,8 @@ const open = async (type: string, id?: number, title?: string) => {
   models.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
   // 获取知识库列表
   knowledgeList.value = await KnowledgeApi.getSimpleKnowledgeList()
+  // 获取工具列表
+  toolList.value = await ToolApi.getToolSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -193,7 +203,8 @@ const resetForm = () => {
     systemMessage: undefined,
     publicStatus: true,
     status: CommonStatusEnum.ENABLE,
-    knowledgeIds: []
+    knowledgeIds: [],
+    toolIds: []
   }
   formRef.value?.resetFields()
 }

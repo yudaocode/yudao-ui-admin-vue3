@@ -33,5 +33,10 @@ export const ToolApi = {
   // 删除工具
   deleteTool: async (id: number) => {
     return await request.delete({ url: `/ai/tool/delete?id=` + id })
+  },
+
+  // 获取工具简单列表
+  getToolSimpleList: async () => {
+    return await request.get({ url: `/ai/tool/simple-list` })
   }
 }
