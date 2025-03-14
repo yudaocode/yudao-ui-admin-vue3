@@ -22,7 +22,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="桥梁类型" prop="type">
-        <el-radio-group v-model="formData.type">
+        <el-radio-group :model-value="formData.type" @change="handleTypeChange">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM)"
             :key="dict.value"
@@ -183,6 +183,13 @@ const submitForm = async () => {
   } finally {
     formLoading.value = false
   }
+}
+
+/** 处理类型切换事件 */
+const handleTypeChange = (val: number) => {
+  formData.value.type = val
+  // 切换类型时重置配置
+  formData.value.config = {} as any
 }
 
 /** 重置表单 */
