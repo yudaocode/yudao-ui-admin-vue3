@@ -42,14 +42,14 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue'])
 const config = useVModel(props, 'modelValue', emit) as Ref<HttpConfig>
 
-// URL处理
+/** URL处理 */
 const urlPrefix = ref('http://')
 const urlPath = ref('')
 const fullUrl = computed(() => {
   return urlPath.value ? urlPrefix.value + urlPath.value : ''
 })
 
-// 监听URL变化
+/** 监听URL变化 */
 watch([urlPrefix, urlPath], () => {
   config.value.url = fullUrl.value
 })

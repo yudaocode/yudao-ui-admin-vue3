@@ -33,22 +33,22 @@ const props = defineProps<{
   addButtonText: string
 }>()
 const emit = defineEmits(['update:modelValue'])
-// 内部key-value项列表
+/** 内部 key-value 项列表 */
 const items = ref<KeyValueItem[]>([])
 
-// 添加项目
+/** 添加项目 */
 const addItem = () => {
   items.value.push({ key: '', value: '' })
   updateModelValue()
 }
 
-// 移除项目
+/** 移除项目 */
 const removeItem = (index: number) => {
   items.value.splice(index, 1)
   updateModelValue()
 }
 
-// 更新modelValue
+/** 更新 modelValue */
 const updateModelValue = () => {
   const result: Record<string, string> = {}
   items.value.forEach((item) => {
@@ -59,7 +59,7 @@ const updateModelValue = () => {
   emit('update:modelValue', result)
 }
 
-// 监听项目变化
+/** 监听项目变化 */
 watch(items, updateModelValue, { deep: true })
 watch(
   () => props.modelValue,
