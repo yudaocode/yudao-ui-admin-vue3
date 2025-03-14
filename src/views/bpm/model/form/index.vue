@@ -359,6 +359,16 @@ const handleStepClick = async (index: number) => {
 
     // 切换步骤
     currentStep.value = index
+
+    // 如果切换到流程设计步骤，等待组件渲染完成后刷新设计器
+    if (index === 2) {
+      await nextTick()
+      // 等待更长时间确保组件完全初始化
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      if (processDesignRef.value?.refresh) {
+        await processDesignRef.value.refresh()
+      }
+    }
   } catch (error) {
     console.error('步骤切换失败:', error)
     message.warning('请先完善当前步骤必填信息')

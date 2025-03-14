@@ -23,6 +23,15 @@ export const AiPlatformEnum = {
   SUNO: 'Suno' // Suno AI
 }
 
+export const AiModelTypeEnum = {
+  CHAT: 1, // 聊天
+  IMAGE: 2, // 图像
+  VOICE: 3, // 音频
+  VIDEO: 4, // 视频
+  EMBEDDING: 5, // 向量
+  RERANK: 6 // 重排
+}
+
 export const OtherPlatformEnum: ImageModelVO[] = [
   {
     key: AiPlatformEnum.TONG_YI,
@@ -208,31 +217,6 @@ export const StableDiffusionStylePresets: ImageModelVO[] = [
   {
     key: 'tile-texture',
     name: 'tile-texture'
-  }
-]
-
-export const TongYiWanXiangModels: ImageModelVO[] = [
-  {
-    key: 'wanx-v1',
-    name: 'wanx-v1'
-  },
-  {
-    key: 'wanx-sketch-to-image-v1',
-    name: 'wanx-sketch-to-image-v1'
-  }
-]
-
-export const QianFanModels: ImageModelVO[] = [
-  {
-    key: 'sd_xl',
-    name: 'sd_xl'
-  }
-]
-
-export const ChatGlmModels: ImageModelVO[] = [
-  {
-    key: 'cogview-3',
-    name: 'cogview-3'
   }
 ]
 

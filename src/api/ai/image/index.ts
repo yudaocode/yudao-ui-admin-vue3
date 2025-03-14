@@ -20,9 +20,8 @@ export interface ImageVO {
 }
 
 export interface ImageDrawReqVO {
-  platform: string // 平台
   prompt: string // 提示词
-  model: string // 模型
+  modelId: number // 模型
   style: string // 图像生成的风格
   width: string // 图片宽度
   height: string // 图片高度
@@ -31,7 +30,7 @@ export interface ImageDrawReqVO {
 
 export interface ImageMidjourneyImagineReqVO {
   prompt: string // 提示词
-  model: string // 模型 mj nijj
+  modelId: number // 模型
   base64Array: string[] // size不能为空
   width: string // 图片宽度
   height: string // 图片高度

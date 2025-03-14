@@ -41,9 +41,9 @@
 </template>
 
 <script setup lang="ts">
-import {ChatRoleVO} from '@/api/ai/model/chatRole'
-import {PropType, ref} from 'vue'
-import {More} from '@element-plus/icons-vue'
+import { ChatRoleVO } from '@/api/ai/model/chatRole'
+import { PropType, ref } from 'vue'
+import { More } from '@element-plus/icons-vue'
 
 const tabsRef = ref<any>() // tabs ref
 
