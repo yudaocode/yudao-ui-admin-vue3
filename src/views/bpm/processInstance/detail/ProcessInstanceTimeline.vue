@@ -123,6 +123,17 @@
               >
                 审批意见：{{ task.reason }}
               </div>
+              <div
+                v-if="task.signPicUrl && activity.nodeType === NodeType.USER_TASK_NODE"
+                class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
+              >
+                签名：
+                <el-image
+                  class="w-90px h-40px ml-5px"
+                  :src="task.signPicUrl"
+                  :preview-src-list="[task.signPicUrl]"
+                />
+              </div>
             </teleport>
           </div>
           <!-- 情况二：遍历每个审批节点下的【候选的】task 任务。例如说，1）依次审批，2）未来的审批任务等 -->

@@ -85,8 +85,6 @@
     </div>
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改流程 -->
-  <ModelForm ref="formRef" @success="getList" />
   <!-- 表单弹窗：添加分类 -->
   <CategoryForm ref="categoryFormRef" @success="getList" />
   <!-- 弹窗：表单详情 -->
@@ -99,7 +97,6 @@
 import draggable from 'vuedraggable'
 import { CategoryApi } from '@/api/bpm/category'
 import * as ModelApi from '@/api/bpm/model'
-import ModelForm from './ModelForm.vue'
 import CategoryForm from '../category/CategoryForm.vue'
 import { cloneDeep } from 'lodash-es'
 import CategoryDraggableModel from './CategoryDraggableModel.vue'
@@ -123,7 +120,6 @@ const handleQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
 const openForm = (type: string, id?: number) => {
   if (type === 'create') {
     push({ name: 'BpmModelCreate' })
@@ -206,7 +202,7 @@ const getList = async () => {
 }
 
 /** 初始化 **/
-onMounted(() => {
+onActivated(() => {
   getList()
 })
 </script>

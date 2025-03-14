@@ -3,7 +3,7 @@
     :append-to-body="true"
     v-model="settingVisible"
     :show-close="false"
-    :size="550"
+    :size="580"
     :before-close="saveConfig"
     class="justify-start"
   >
@@ -19,7 +19,8 @@
           :placeholder="nodeName"
         />
         <div v-else class="node-name">
-          {{ nodeName }} <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()" />
+          {{ nodeName }}
+          <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()" />
         </div>
         <div class="divide-line"></div>
       </div>
@@ -46,14 +47,13 @@
                 v-model="configForm.candidateStrategy"
                 @change="changeCandidateStrategy"
               >
-                <el-radio
-                  v-for="(dict, index) in CANDIDATE_STRATEGY"
-                  :key="index"
-                  :value="dict.value"
-                  :label="dict.value"
-                >
-                  {{ dict.label }}
-                </el-radio>
+                <el-row>
+                  <el-col v-for="(dict, index) in CANDIDATE_STRATEGY" :key="index" :span="8">
+                    <el-radio :value="dict.value" :label="dict.value">
+                      {{ dict.label }}
+                    </el-radio>
+                  </el-col>
+                </el-row>
               </el-radio-group>
             </el-form-item>
             <el-form-item
@@ -61,7 +61,7 @@
               label="指定角色"
               prop="roleIds"
             >
-              <el-select v-model="configForm.roleIds" clearable multiple style="width: 100%">
+              <el-select filterable v-model="configForm.roleIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in roleOptions"
                   :key="item.id"
@@ -99,7 +99,7 @@
               prop="postIds"
               span="24"
             >
-              <el-select v-model="configForm.postIds" clearable multiple style="width: 100%">
+              <el-select filterable v-model="configForm.postIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in postOptions"
                   :key="item.id"
@@ -114,7 +114,7 @@
               prop="userIds"
               span="24"
             >
-              <el-select v-model="configForm.userIds" clearable multiple style="width: 100%">
+              <el-select filterable v-model="configForm.userIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in userOptions"
                   :key="item.id"
@@ -128,7 +128,7 @@
               label="指定用户组"
               prop="userGroups"
             >
-              <el-select v-model="configForm.userGroups" clearable multiple style="width: 100%">
+              <el-select filterable v-model="configForm.userGroups" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in userGroupOptions"
                   :key="item.id"
@@ -142,13 +142,13 @@
               label="表单内用户字段"
               prop="formUser"
             >
-              <el-select v-model="configForm.formUser" clearable style="width: 100%">
+              <el-select filterable v-model="configForm.formUser" clearable style="width: 100%">
                 <el-option
                   v-for="(item, idx) in userFieldOnFormOptions"
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
-                  :disabled ="!item.required"
+                  :disabled="!item.required"
                 />
               </el-select>
             </el-form-item>
@@ -157,13 +157,13 @@
               label="表单内部门字段"
               prop="formDept"
             >
-              <el-select v-model="configForm.formDept" clearable style="width: 100%">
+              <el-select filterable v-model="configForm.formDept" clearable style="width: 100%">
                 <el-option
                   v-for="(item, idx) in deptFieldOnFormOptions"
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
-                  :disabled ="!item.required"
+                  :disabled="!item.required"
                 />
               </el-select>
             </el-form-item>
@@ -179,7 +179,7 @@
               prop="deptLevel"
               span="24"
             >
-              <el-select v-model="configForm.deptLevel" clearable>
+              <el-select filterable v-model="configForm.deptLevel" clearable>
                 <el-option
                   v-for="(item, index) in MULTI_LEVEL_DEPT"
                   :key="index"
@@ -245,7 +245,7 @@
               label="驳回节点"
               prop="returnNodeId"
             >
-              <el-select v-model="configForm.returnNodeId" clearable style="width: 100%">
+              <el-select filterable v-model="configForm.returnNodeId" clearable style="width: 100%">
                 <el-option
                   v-for="item in returnTaskList"
                   :key="item.id"
@@ -293,6 +293,7 @@
                 />
               </el-form-item>
               <el-select
+                filterable
                 v-model="timeUnit"
                 class="mr-2"
                 :style="{ width: '100px' }"
@@ -332,6 +333,7 @@
               span="24"
             >
               <el-select
+                filterable
                 v-model="configForm.assignEmptyHandlerUserIds"
                 clearable
                 multiple
@@ -355,6 +357,16 @@
                   </div>
                 </div>
               </el-radio-group>
+            </el-form-item>
+
+            <el-divider content-position="left">是否需要签名</el-divider>
+            <el-form-item prop="signEnable">
+              <el-switch v-model="configForm.signEnable" active-text="是" inactive-text="否" />
+            </el-form-item>
+
+            <el-divider content-position="left">审批意见</el-divider>
+            <el-form-item prop="reasonRequire">
+              <el-switch v-model="configForm.reasonRequire" active-text="必填" inactive-text="非必填" />
             </el-form-item>
           </el-form>
         </div>
@@ -435,6 +447,9 @@
           </div>
         </div>
       </el-tab-pane>
+      <el-tab-pane label="监听器" name="listener">
+        <UserTaskListener ref="userTaskListenerRef" v-model="configForm" :form-field-options="formFieldOptions" />
+      </el-tab-pane>
     </el-tabs>
     <template #footer>
       <el-divider />
@@ -484,6 +499,7 @@ import {
 import { defaultProps } from '@/utils/tree'
 import { cloneDeep } from 'lodash-es'
 import { convertTimeUnit, getApproveTypeText } from '../utils'
+import UserTaskListener from './components/UserTaskListener.vue'
 defineOptions({
   name: 'UserTaskNodeConfig'
 })
@@ -609,9 +625,11 @@ const {
   cTimeoutMaxRemindCount
 } = useTimeoutHandler()
 
+const userTaskListenerRef = ref()
+
 // 保存配置
 const saveConfig = async () => {
-  activeTabName.value = 'user'
+  // activeTabName.value = 'user'
   // 设置审批节点名称
   currentNode.value.name = nodeName.value!
   // 设置审批类型
@@ -624,7 +642,8 @@ const saveConfig = async () => {
   }
 
   if (!formRef) return false
-  const valid = await formRef.value.validate()
+  if (!userTaskListenerRef) return false
+  const valid = (await formRef.value.validate()) && (await userTaskListenerRef.value.validate())
   if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
@@ -663,6 +682,31 @@ const saveConfig = async () => {
   currentNode.value.fieldsPermission = fieldsPermissionConfig.value
   // 设置按钮权限
   currentNode.value.buttonsSetting = buttonsSetting.value
+  // 创建任务监听器
+  currentNode.value.taskCreateListener = {
+    enable: configForm.value.taskCreateListenerEnable ?? false,
+    path: configForm.value.taskCreateListenerPath,
+    header: configForm.value.taskCreateListener?.header,
+    body: configForm.value.taskCreateListener?.body
+  }
+  // 指派任务监听器
+  currentNode.value.taskAssignListener = {
+    enable: configForm.value.taskAssignListenerEnable ?? false,
+    path: configForm.value.taskAssignListenerPath,
+    header: configForm.value.taskAssignListener?.header,
+    body: configForm.value.taskAssignListener?.body
+  }
+  // 完成任务监听器
+  currentNode.value.taskCompleteListener = {
+    enable: configForm.value.taskCompleteListenerEnable ?? false,
+    path: configForm.value.taskCompleteListenerPath,
+    header: configForm.value.taskCompleteListener?.header,
+    body: configForm.value.taskCompleteListener?.body
+  }
+  // 签名
+  currentNode.value.signEnable = configForm.value.signEnable
+  // 审批意见
+  currentNode.value.reasonRequire = configForm.value.reasonRequire
 
   currentNode.value.showText = showText
   settingVisible.value = false
@@ -714,6 +758,32 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   buttonsSetting.value = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
   // 4. 表单字段权限配置
   getNodeConfigFormFields(node.fieldsPermission)
+  // 5. 监听器
+  // 5.1 创建任务
+  configForm.value.taskCreateListenerEnable = node.taskCreateListener?.enable
+  configForm.value.taskCreateListenerPath = node.taskCreateListener?.path
+  configForm.value.taskCreateListener = {
+    header: node.taskCreateListener?.header ?? [],
+    body: node.taskCreateListener?.body ?? []
+  }
+  // 5.2 指派任务
+  configForm.value.taskAssignListenerEnable = node.taskAssignListener?.enable
+  configForm.value.taskAssignListenerPath = node.taskAssignListener?.path
+  configForm.value.taskAssignListener = {
+    header: node.taskAssignListener?.header ?? [],
+    body: node.taskAssignListener?.body ?? []
+  }
+ // 5.3 完成任务
+  configForm.value.taskCompleteListenerEnable = node.taskCompleteListener?.enable
+  configForm.value.taskCompleteListenerPath = node.taskCompleteListener?.path
+  configForm.value.taskCompleteListener = {
+    header: node.taskCompleteListener?.header ?? [],
+    body: node.taskCompleteListener?.body ?? []
+  }
+  // 6. 签名
+  configForm.value.signEnable = node?.signEnable ?? false
+  // 7. 审批意见
+  configForm.value.reasonRequire = node?.reasonRequire ?? false
 }
 
 defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件

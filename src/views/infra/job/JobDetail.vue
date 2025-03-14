@@ -7,7 +7,7 @@
       <el-descriptions-item label="任务名称">
         {{ detailData.name }}
       </el-descriptions-item>
-      <el-descriptions-item label="任务名称">
+      <el-descriptions-item label="任务状态">
         <dict-tag :type="DICT_TYPE.INFRA_JOB_STATUS" :value="detailData.status" />
       </el-descriptions-item>
       <el-descriptions-item label="处理器的名字">

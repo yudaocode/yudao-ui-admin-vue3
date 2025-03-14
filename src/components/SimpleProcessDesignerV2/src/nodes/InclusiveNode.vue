@@ -34,7 +34,7 @@
               ]"
             >
               <div class="branch-node-title-container">
-                <div v-if="showInputs[index]">
+                <div v-if="!readonly && showInputs[index]">
                   <input
                     type="text"
                     class="editable-title-input"
@@ -110,7 +110,7 @@
 <script setup lang="ts">
 import NodeHandler from '../NodeHandler.vue'
 import ProcessNodeTree from '../ProcessNodeTree.vue'
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
+import { SimpleFlowNode, NodeType, ConditionType, DEFAULT_CONDITION_GROUP_VALUE, NODE_DEFAULT_TEXT } from '../consts'
 import { useTaskStatusClass } from '../node'
 import { getDefaultInclusiveConditionNodeName } from '../utils'
 import { generateUUID } from '@/utils'
@@ -153,7 +153,7 @@ const blurEvent = (index: number) => {
   showInputs.value[index] = false
   const conditionNode = currentNode.value.conditionNodes?.at(index) as SimpleFlowNode
   conditionNode.name =
-    conditionNode.name || getDefaultInclusiveConditionNodeName(index, conditionNode.defaultFlow)
+    conditionNode.name || getDefaultInclusiveConditionNodeName(index, conditionNode.conditionSetting?.defaultFlow)
 }
 
 // 点击条件名称
@@ -182,8 +182,11 @@ const addCondition = () => {
       type: NodeType.CONDITION_NODE,
       childNode: undefined,
       conditionNodes: [],
-      conditionType: 1,
-      defaultFlow: false
+      conditionSetting: {
+        defaultFlow: false,
+        conditionType: ConditionType.RULE,
+        conditionGroups: DEFAULT_CONDITION_GROUP_VALUE
+      }
     }
     conditionNodes.splice(lastIndex, 0, conditionData)
   }

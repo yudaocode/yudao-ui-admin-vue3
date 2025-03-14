@@ -13,7 +13,7 @@
             ><span class="iconfont icon-start-user"></span
           ></div>
           <input
-            v-if="showInput"
+            v-if="!readonly && showInput"
             type="text"
             class="editable-title-input"
             @blur="blurEvent()"
@@ -117,7 +117,7 @@ const props = defineProps({
   }
 })
 const readonly = inject<Boolean>('readonly') // 是否只读
-const tasks = inject<Ref<any[]>>('tasks')
+const tasks = inject<Ref<any[]>>('tasks', ref([]))
 // 定义事件，更新父组件。
 const emits = defineEmits<{
   'update:modelValue': [node: SimpleFlowNode | undefined]

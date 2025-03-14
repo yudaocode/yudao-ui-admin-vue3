@@ -15,7 +15,7 @@ interface UserVO {
 
 interface UserInfoVO {
   // USER 缓存
-  permissions: string[]
+  permissions: Set<string>
   roles: string[]
   isSetUser: boolean
   user: UserVO
@@ -23,7 +23,7 @@ interface UserInfoVO {
 
 export const useUserStore = defineStore('admin-user', {
   state: (): UserInfoVO => ({
-    permissions: [],
+    permissions: new Set<string>(),
     roles: [],
     isSetUser: false,
     user: {
@@ -34,7 +34,7 @@ export const useUserStore = defineStore('admin-user', {
     }
   }),
   getters: {
-    getPermissions(): string[] {
+    getPermissions(): Set<string> {
       return this.permissions
     },
     getRoles(): string[] {
@@ -57,7 +57,7 @@ export const useUserStore = defineStore('admin-user', {
       if (!userInfo) {
         userInfo = await getInfo()
       }
-      this.permissions = userInfo.permissions
+      this.permissions = new Set(userInfo.permissions)
       this.roles = userInfo.roles
       this.user = userInfo.user
       this.isSetUser = true
@@ -85,7 +85,7 @@ export const useUserStore = defineStore('admin-user', {
       this.resetState()
     },
     resetState() {
-      this.permissions = []
+      this.permissions = new Set<string>()
       this.roles = []
       this.isSetUser = false
       this.user = {

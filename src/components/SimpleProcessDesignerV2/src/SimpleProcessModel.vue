@@ -3,6 +3,22 @@
     <div class="position-absolute top-0px right-0px bg-#fff">
       <el-row type="flex" justify="end">
         <el-button-group key="scale-control" size="default">
+          <el-button v-if="!readonly" size="default" @click="exportJson">
+            <Icon icon="ep:download" /> 导出
+          </el-button>
+          <el-button v-if="!readonly" size="default" @click="importJson">
+            <Icon icon="ep:upload" />导入
+          </el-button>
+          <!-- 用于打开本地文件-->
+          <input
+            v-if="!readonly"
+            type="file"
+            id="files"
+            ref="refFile"
+            style="display: none"
+            accept=".json"
+            @change="importLocalFile"
+          />
           <el-button size="default" :icon="ScaleToOriginal" @click="processReZoom()" />
           <el-button size="default" :plain="true" :icon="ZoomOut" @click="zoomOut()" />
           <el-button size="default" class="w-80px"> {{ scaleValue }}% </el-button>
@@ -34,6 +50,8 @@ import ProcessNodeTree from './ProcessNodeTree.vue'
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from './consts'
 import { useWatchNode } from './node'
 import { ZoomOut, ZoomIn, ScaleToOriginal } from '@element-plus/icons-vue'
+import { isString } from '@/utils/is'
+import download from '@/utils/download'
 
 defineOptions({
   name: 'SimpleProcessModel'
@@ -52,7 +70,7 @@ const props = defineProps({
 })
 
 const emits = defineEmits<{
-  'save': [node: SimpleFlowNode | undefined]
+  save: [node: SimpleFlowNode | undefined]
 }>()
 
 const processNodeTree = useWatchNode(props)
@@ -84,6 +102,16 @@ const processReZoom = () => {
 
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
+
+const saveSimpleFlowModel = async () => {
+  errorNodes = []
+  validateNode(processNodeTree.value, errorNodes)
+  if (errorNodes.length > 0) {
+    errorDialogVisible.value = true
+    return
+  }
+  emits('save', processNodeTree.value)
+}
 
 // 校验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
@@ -143,6 +171,28 @@ const getCurrentFlowData = async () => {
 defineExpose({
   getCurrentFlowData
 })
+
+/** 导出 JSON */
+const exportJson = () => {
+  download.json(new Blob([JSON.stringify(processNodeTree.value)]), 'model.json')
+}
+
+/** 导入 JSON */
+const refFile = ref()
+const importJson = () => {
+  refFile.value.click()
+}
+const importLocalFile = () => {
+  const file = refFile.value.files[0]
+  const reader = new FileReader()
+  reader.readAsText(file)
+  reader.onload = function () {
+    if (isString(this.result)) {
+      processNodeTree.value = JSON.parse(this.result)
+      emits('save', processNodeTree.value)
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped></style>

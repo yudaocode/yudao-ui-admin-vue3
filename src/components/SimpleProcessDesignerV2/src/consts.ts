@@ -29,6 +29,11 @@ export enum NodeType {
   DELAY_TIMER_NODE = 14,
 
   /**
+   * 触发器节点
+   */
+  TRIGGER_NODE = 15,
+
+  /**
    * 条件节点
    */
   CONDITION_NODE = 50,
@@ -44,7 +49,11 @@ export enum NodeType {
   /**
    * 包容分支节点 (对应包容网关)
    */
-  INCLUSIVE_BRANCH_NODE = 53
+  INCLUSIVE_BRANCH_NODE = 53,
+  /**
+   * 路由分支节点
+   */
+  ROUTER_BRANCH_NODE = 54
 }
 
 export enum NodeId {
@@ -93,18 +102,27 @@ export interface SimpleFlowNode {
   assignEmptyHandler?: AssignEmptyHandler
   // 审批节点的审批人与发起人相同时，对应的处理类型
   assignStartUserHandlerType?: number
-  // 条件类型
-  conditionType?: ConditionType
-  // 条件表达式
-  conditionExpression?: string
-  // 条件组
-  conditionGroups?: ConditionGroup
-  // 是否默认的条件
-  defaultFlow?: boolean
+  // 创建任务监听器
+  taskCreateListener?: ListenerHandler
+  // 创建任务监听器
+  taskAssignListener?: ListenerHandler
+  // 创建任务监听器
+  taskCompleteListener?: ListenerHandler
+  // 条件设置
+  conditionSetting?: ConditionSetting
   // 活动的状态，用于前端节点状态展示
   activityStatus?: TaskStatusEnum
   // 延迟设置
   delaySetting?: DelaySetting
+  // 路由分支
+  routerGroups?: RouterSetting[]
+  defaultFlowId?: string
+  // 签名
+  signEnable?: boolean
+  // 审批意见
+  reasonRequire?: boolean
+  // 触发器设置
+  triggerSetting?: TriggerSetting
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -222,6 +240,41 @@ export type AssignEmptyHandler = {
   userIds?: number[]
 }
 
+/**
+ * 监听器的结构定义
+ */
+export type ListenerHandler = {
+  enable: boolean
+  path?: string
+  header?: HttpRequestParam[]
+  body?: HttpRequestParam[]
+}
+export type HttpRequestParam = {
+  key: string
+  type: number
+  value: string
+}
+export enum BpmHttpRequestParamTypeEnum {
+  /**
+   * 固定值
+   */
+  FIXED_VALUE = 1,
+  /**
+   * 表单
+   */
+  FROM_FORM = 2
+}
+export const BPM_HTTP_REQUEST_PARAM_TYPES = [
+  {
+    value: 1,
+    label: '固定值'
+  },
+  {
+    value: 2,
+    label: '表单'
+  }
+]
+
 // 审批拒绝类型枚举
 export enum RejectHandlerType {
   /**
@@ -315,6 +368,20 @@ export enum TimeUnitType {
   DAY = 3
 }
 
+/**
+ * 条件节点设置结构定义，用于条件节点
+ */
+export type ConditionSetting = {
+  // 条件类型
+  conditionType?: ConditionType
+  // 条件表达式
+  conditionExpression?: string
+  // 条件组
+  conditionGroups?: ConditionGroup
+  // 是否默认的条件
+  defaultFlow?: boolean
+}
+
 // 条件配置类型 （ 用于条件节点配置 ）
 export enum ConditionType {
   /**
@@ -389,8 +456,6 @@ export enum OperationButtonType {
  * 条件规则结构定义
  */
 export type ConditionRule = {
-  type: number
-  opName: string
   opCode: string
   leftSide: string
   rightSide: string
@@ -404,6 +469,24 @@ export type ConditionGroup = {
   and: boolean
   // 条件数组
   conditions: Condition[]
+}
+/**
+ * 条件组默认值
+ */
+export const DEFAULT_CONDITION_GROUP_VALUE = {
+  and: true,
+  conditions: [
+    {
+      and: true,
+      rules: [
+        {
+          opCode: '==',
+          leftSide: '',
+          rightSide: ''
+        }
+      ]
+    }
+  ]
 }
 
 /**
@@ -421,6 +504,8 @@ NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
 NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
 NODE_DEFAULT_TEXT.set(NodeType.START_USER_NODE, '请设置发起人')
 NODE_DEFAULT_TEXT.set(NodeType.DELAY_TIMER_NODE, '请设置延迟器')
+NODE_DEFAULT_TEXT.set(NodeType.ROUTER_BRANCH_NODE, '请设置路由节点')
+NODE_DEFAULT_TEXT.set(NodeType.TRIGGER_NODE, '请设置触发器')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
@@ -428,6 +513,8 @@ NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 NODE_DEFAULT_NAME.set(NodeType.START_USER_NODE, '发起人')
 NODE_DEFAULT_NAME.set(NodeType.DELAY_TIMER_NODE, '延迟器')
+NODE_DEFAULT_NAME.set(NodeType.ROUTER_BRANCH_NODE, '路由分支')
+NODE_DEFAULT_NAME.set(NodeType.TRIGGER_NODE, '触发器')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [
@@ -460,8 +547,8 @@ export const APPROVE_METHODS: DictDataVO[] = [
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO[] = [
-  { label: '条件表达式', value: ConditionType.EXPRESSION },
-  { label: '条件规则', value: ConditionType.RULE }
+  { label: '条件规则', value: ConditionType.RULE },
+  { label: '条件表达式', value: ConditionType.EXPRESSION }
 ]
 
 // 时间单位类型
@@ -575,7 +662,15 @@ export enum ProcessVariableEnum {
   /**
    * 发起用户 ID
    */
-  START_USER_ID = 'PROCESS_START_USER_ID'
+  START_USER_ID = 'PROCESS_START_USER_ID',
+  /**
+   * 发起时间
+   */
+  START_TIME = 'PROCESS_START_TIME',
+  /**
+   * 流程定义名称
+   */
+  PROCESS_DEFINITION_NAME = 'PROCESS_DEFINITION_NAME'
 }
 
 /**
@@ -603,4 +698,65 @@ export enum DelayTypeEnum {
 export const DELAY_TYPE = [
   { label: '固定时长', value: DelayTypeEnum.FIXED_TIME_DURATION },
   { label: '固定日期', value: DelayTypeEnum.FIXED_DATE_TIME }
+]
+
+/**
+ * 路由分支结构定义
+ */
+export type RouterSetting = {
+  nodeId: string
+  conditionType: ConditionType
+  conditionExpression: string
+  conditionGroups: ConditionGroup
+}
+
+// ==================== 触发器相关定义 ====================
+/**
+ * 触发器节点结构定义
+ */
+export type TriggerSetting = {
+  type: TriggerTypeEnum
+  httpRequestSetting?: HttpRequestTriggerSetting
+  normalFormSetting?: NormalFormTriggerSetting
+}
+
+/**
+ * 触发器类型枚举
+ */
+export enum TriggerTypeEnum {
+  /**
+   * 发送 HTTP 请求触发器
+   */
+  HTTP_REQUEST = 1,
+  /**
+   * 更新流程表单触发器
+   */
+  UPDATE_NORMAL_FORM = 2 // TODO @jason：FORM_UPDATE？
+}
+
+/**
+ * HTTP 请求触发器结构定义
+ */
+export type HttpRequestTriggerSetting = {
+  // 请求 URL
+  url: string
+  // 请求头参数设置
+  header?: HttpRequestParam[]
+  // 请求体参数设置
+  body?: HttpRequestParam[]
+  // 请求响应设置
+  response?: Record<string, string>[]
+}
+
+/**
+ * 流程表单触发器配置结构定义
+ */
+export type NormalFormTriggerSetting = {
+  // 更新表单字段
+  updateFormFields?: Record<string, any>
+}
+
+export const TRIGGER_TYPES: DictDataVO[] = [
+  { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
+  { label: '修改表单数据', value: TriggerTypeEnum.UPDATE_NORMAL_FORM }
 ]

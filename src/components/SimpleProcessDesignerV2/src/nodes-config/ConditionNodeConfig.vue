@@ -26,121 +26,11 @@
       </div>
     </template>
     <div>
-      <div class="mb-3 font-size-16px" v-if="currentNode.defaultFlow"
+      <div class="mb-3 font-size-16px" v-if="currentNode.conditionSetting?.defaultFlow"
         >未满足其它条件时，将进入此分支（该分支不可编辑和删除）</div
       >
       <div v-else>
-        <el-form ref="formRef" :model="currentNode" :rules="formRules" label-position="top">
-          <el-form-item label="配置方式" prop="conditionType">
-            <el-radio-group v-model="currentNode.conditionType" @change="changeConditionType">
-              <el-radio
-                v-for="(dict, index) in conditionConfigTypes"
-                :key="index"
-                :value="dict.value"
-                :label="dict.value"
-              >
-                {{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <el-form-item
-            v-if="currentNode.conditionType === 1"
-            label="条件表达式"
-            prop="conditionExpression"
-          >
-            <el-input
-              type="textarea"
-              v-model="currentNode.conditionExpression"
-              clearable
-              style="width: 100%"
-            />
-          </el-form-item>
-          <el-form-item v-if="currentNode.conditionType === 2" label="条件规则">
-            <div class="condition-group-tool">
-              <div class="flex items-center">
-                <div class="mr-4">条件组关系</div>
-                <el-switch
-                  v-model="conditionGroups.and"
-                  inline-prompt
-                  active-text="且"
-                  inactive-text="或"
-                />
-              </div>
-            </div>
-            <el-space direction="vertical" :spacer="conditionGroups.and ? '且' : '或'">
-              <el-card
-                class="condition-group"
-                style="width: 530px"
-                v-for="(condition, cIdx) in conditionGroups.conditions"
-                :key="cIdx"
-              >
-                <div class="condition-group-delete" v-if="conditionGroups.conditions.length > 1">
-                  <Icon
-                    color="#0089ff"
-                    icon="ep:circle-close-filled"
-                    :size="18"
-                    @click="deleteConditionGroup(cIdx)"
-                  />
-                </div>
-                <template #header>
-                  <div class="flex items-center justify-between">
-                    <div>条件组</div>
-                    <div class="flex">
-                      <div class="mr-4">规则关系</div>
-                      <el-switch
-                        v-model="condition.and"
-                        inline-prompt
-                        active-text="且"
-                        inactive-text="或"
-                      />
-                    </div>
-                  </div>
-                </template>
-
-                <div class="flex pt-2" v-for="(rule, rIdx) in condition.rules" :key="rIdx">
-                  <div class="mr-2">
-                    <el-select style="width: 160px" v-model="rule.leftSide">
-                      <el-option
-                        v-for="(item, index) in fieldOptions"
-                        :key="index"
-                        :label="item.title"
-                        :value="item.field"
-                        :disabled="!item.required"
-                      />
-                    </el-select>
-                  </div>
-                  <div class="mr-2">
-                    <el-select v-model="rule.opCode" style="width: 100px">
-                      <el-option
-                        v-for="item in COMPARISON_OPERATORS"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                      />
-                    </el-select>
-                  </div>
-                  <div class="mr-2">
-                    <el-input v-model="rule.rightSide" style="width: 160px" />
-                  </div>
-                  <div class="mr-1 flex items-center" v-if="condition.rules.length > 1">
-                    <Icon
-                      icon="ep:delete"
-                      :size="18"
-                      @click="deleteConditionRule(condition, rIdx)"
-                    />
-                  </div>
-                  <div class="flex items-center">
-                    <Icon icon="ep:plus" :size="18" @click="addConditionRule(condition, rIdx)" />
-                  </div>
-                </div>
-              </el-card>
-            </el-space>
-            <div title="添加条件组" class="mt-4 cursor-pointer">
-              <Icon color="#0089ff" icon="ep:plus" :size="24" @click="addConditionGroup" />
-            </div>
-          </el-form-item>
-        </el-form>
+        <Condition ref="conditionRef" v-model="condition" />
       </div>
     </div>
     <template #footer>
@@ -155,33 +45,16 @@
 <script setup lang="ts">
 import {
   SimpleFlowNode,
-  CONDITION_CONFIG_TYPES,
   ConditionType,
   COMPARISON_OPERATORS,
-  ConditionGroup,
-  Condition,
-  ConditionRule,
-  ProcessVariableEnum
 } from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
-import { useFormFields } from '../node'
-import { BpmModelFormType } from '@/utils/constants'
+import { useFormFieldsAndStartUser } from '../node'
+import Condition from './components/Condition.vue'
 const message = useMessage() // 消息弹窗
 defineOptions({
   name: 'ConditionNodeConfig'
 })
-const formType = inject<Ref<number>>('formType') // 表单类型
-const conditionConfigTypes = computed(() => {
-  return CONDITION_CONFIG_TYPES.filter((item) => {
-    // 业务表单暂时去掉条件规则选项
-    if (formType?.value === BpmModelFormType.CUSTOM && item.value === ConditionType.RULE) {
-      return false
-    } else {
-      return true
-    }
-  })
-})
-
 const props = defineProps({
   conditionNode: {
     type: Object as () => SimpleFlowNode,
@@ -193,12 +66,10 @@ const props = defineProps({
   }
 })
 const settingVisible = ref(false)
+const currentNode = ref<SimpleFlowNode>(props.conditionNode)
+const condition = ref<any>()
 const open = () => {
-  if (currentNode.value.conditionType === ConditionType.RULE) {
-    if (currentNode.value.conditionGroups) {
-      conditionGroups.value = currentNode.value.conditionGroups
-    }
-  }
+  condition.value = currentNode.value.conditionSetting
   settingVisible.value = true
 }
 
@@ -219,10 +90,10 @@ const blurEvent = () => {
   showInput.value = false
   currentNode.value.name =
     currentNode.value.name ||
-    getDefaultConditionNodeName(props.nodeIndex, currentNode.value?.defaultFlow)
+    getDefaultConditionNodeName(props.nodeIndex, currentNode.value?.conditionSetting?.defaultFlow)
 }
 
-const currentNode = ref<SimpleFlowNode>(props.conditionNode)
+
 
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -239,31 +110,27 @@ const handleClose = async (done: (cancel?: boolean) => void) => {
     done()
   }
 }
-// 表单校验规则
-const formRules = reactive({
-  conditionType: [{ required: true, message: '配置方式不能为空', trigger: 'blur' }],
-  conditionExpression: [{ required: true, message: '条件表达式不能为空', trigger: 'blur' }]
-})
-const formRef = ref() // 表单 Ref
 
+const conditionRef = ref()
 // 保存配置
 const saveConfig = async () => {
-  if (!currentNode.value.defaultFlow) {
+  if (!currentNode.value.conditionSetting?.defaultFlow) {
     // 校验表单
-    if (!formRef) return false
-    const valid = await formRef.value.validate()
+    const valid = await conditionRef.value.validate()
     if (!valid) return false
     const showText = getShowText()
     if (!showText) {
       return false
     }
     currentNode.value.showText = showText
-    if (currentNode.value.conditionType === ConditionType.EXPRESSION) {
-      currentNode.value.conditionGroups = undefined
+    currentNode.value.conditionSetting!.conditionType = condition.value?.conditionType
+    if (currentNode.value.conditionSetting?.conditionType === ConditionType.EXPRESSION) {
+      currentNode.value.conditionSetting.conditionGroups = undefined
+      currentNode.value.conditionSetting.conditionExpression = condition.value?.conditionExpression
     }
-    if (currentNode.value.conditionType === ConditionType.RULE) {
-      currentNode.value.conditionExpression = undefined
-      currentNode.value.conditionGroups = conditionGroups.value
+    if (currentNode.value.conditionSetting!.conditionType === ConditionType.RULE) {
+      currentNode.value.conditionSetting!.conditionExpression = undefined
+      currentNode.value.conditionSetting!.conditionGroups = condition.value?.conditionGroups
     }
   }
   settingVisible.value = false
@@ -271,16 +138,16 @@ const saveConfig = async () => {
 }
 const getShowText = (): string => {
   let showText = ''
-  if (currentNode.value.conditionType === ConditionType.EXPRESSION) {
-    if (currentNode.value.conditionExpression) {
-      showText = `表达式：${currentNode.value.conditionExpression}`
+  if (condition.value?.conditionType === ConditionType.EXPRESSION) {
+    if (condition.value.conditionExpression) {
+      showText = `表达式：${condition.value.conditionExpression}`
     }
   }
-  if (currentNode.value.conditionType === ConditionType.RULE) {
+  if (condition.value?.conditionType === ConditionType.RULE) {
     // 条件组是否为与关系
-    const groupAnd = conditionGroups.value.and
+    const groupAnd = condition.value.conditionGroups?.and
     let warningMesg: undefined | string = undefined
-    const conditionGroup = conditionGroups.value.conditions.map((item) => {
+    const conditionGroup = condition.value.conditionGroups?.conditions.map((item) => {
       return (
         '(' +
         item.rules
@@ -303,85 +170,17 @@ const getShowText = (): string => {
       message.warning(warningMesg)
       showText = ''
     } else {
-      showText = conditionGroup.join(groupAnd ? ' 且 ' : ' 或 ')
+      showText = conditionGroup!.join(groupAnd ? ' 且 ' : ' 或 ')
     }
   }
   return showText
 }
-
-// 改变条件配置方式
-const changeConditionType = () => {}
-
-const conditionGroups = ref<ConditionGroup>({
-  and: true,
-  conditions: [
-    {
-      and: true,
-      rules: [
-        {
-          type: 1,
-          opName: '等于',
-          opCode: '==',
-          leftSide: '',
-          rightSide: ''
-        }
-      ]
-    }
-  ]
-})
-// 添加条件组
-const addConditionGroup = () => {
-  const condition = {
-    and: true,
-    rules: [
-      {
-        type: 1,
-        opName: '等于',
-        opCode: '==',
-        leftSide: '',
-        rightSide: ''
-      }
-    ]
-  }
-  conditionGroups.value.conditions.push(condition)
-}
-// 删除条件组
-const deleteConditionGroup = (idx: number) => {
-  conditionGroups.value.conditions.splice(idx, 1)
-}
-
-// 添加条件规则
-const addConditionRule = (condition: Condition, idx: number) => {
-  const rule: ConditionRule = {
-    type: 1,
-    opName: '等于',
-    opCode: '==',
-    leftSide: '',
-    rightSide: ''
-  }
-  condition.rules.splice(idx + 1, 0, rule)
-}
-
-const deleteConditionRule = (condition: Condition, idx: number) => {
-  condition.rules.splice(idx, 1)
-}
-const fieldsInfo = useFormFields()
-
-/** 条件规则可选择的表单字段 */
-const fieldOptions = computed(() => {
-  const fieldsCopy = fieldsInfo.slice()
-  // 固定添加发起人 ID 字段
-  fieldsCopy.unshift({
-    field: ProcessVariableEnum.START_USER_ID,
-    title: '发起人',
-    required: true
-  })
-  return fieldsCopy
-})
+// 流程表单字段和发起人字段
+const fieldOptions = useFormFieldsAndStartUser()
 
 /** 获取字段名称 */
 const getFieldTitle = (field: string) => {
-  const item = fieldOptions.value.find((item) => item.field === field)
+  const item = fieldOptions.find((item) => item.field === field)
   return item?.title
 }
 

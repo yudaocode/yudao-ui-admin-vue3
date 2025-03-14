@@ -1,4 +1,3 @@
-import { cloneDeep } from 'lodash-es'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
@@ -14,9 +13,12 @@ import {
   NODE_DEFAULT_NAME,
   AssignStartUserHandlerType,
   AssignEmptyHandlerType,
-  FieldPermissionType
+  FieldPermissionType,
+  HttpRequestParam,
+  ProcessVariableEnum
 } from './consts'
-import { parseFormFields } from '@/components/FormCreate/src/utils/index'
+import { parseFormFields } from '@/components/FormCreate/src/utils'
+
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
   const node = ref<SimpleFlowNode>(props.flowNode)
   watch(
@@ -46,9 +48,9 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
   // 字段权限配置. 需要有 field, title,  permissioin 属性
   const fieldsPermissionConfig = ref<Array<Record<string, any>>>([])
 
-  const formType = inject<Ref<number>>('formType') // 表单类型
+  const formType = inject<Ref<number | undefined>>('formType', ref()) // 表单类型
 
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
 
   const getNodeConfigFormFields = (nodeFormFields?: Array<Record<string, string>>) => {
     nodeFormFields = toRaw(nodeFormFields)
@@ -104,16 +106,32 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
     getNodeConfigFormFields
   }
 }
+
 /**
- * @description 获取表单的字段
+ * @description 获取流程表单的字段
  */
 export function useFormFields() {
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   return parseFormCreateFields(unref(formFields))
 }
 
+// TODO @芋艿：后续需要把各种类似 useFormFieldsPermission 的逻辑，抽成一个通用方法。
+/**
+ * @description 获取流程表单的字段和发起人字段
+ */
+export function useFormFieldsAndStartUser() {
+  const injectFormFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
+  const formFields = parseFormCreateFields(unref(injectFormFields))
+  // 添加发起人
+  formFields.unshift({
+    field: ProcessVariableEnum.START_USER_ID,
+    title: '发起人',
+    required: true
+  })
+  return formFields
+}
+
 export type UserTaskFormType = {
-  //candidateParamArray: any[]
   candidateStrategy: CandidateStrategy
   approveMethod: ApproveMethodType
   roleIds?: number[] // 角色
@@ -136,10 +154,29 @@ export type UserTaskFormType = {
   timeDuration?: number
   maxRemindCount?: number
   buttonsSetting: any[]
+  taskCreateListenerEnable?: boolean
+  taskCreateListenerPath?: string
+  taskCreateListener?: {
+    header: HttpRequestParam[]
+    body: HttpRequestParam[]
+  }
+  taskAssignListenerEnable?: boolean
+  taskAssignListenerPath?: string
+  taskAssignListener?: {
+    header: HttpRequestParam[]
+    body: HttpRequestParam[]
+  }
+  taskCompleteListenerEnable?: boolean
+  taskCompleteListenerPath?: string
+  taskCompleteListener?: {
+    header: HttpRequestParam[]
+    body: HttpRequestParam[]
+  }
+  signEnable: boolean
+  reasonRequire: boolean
 }
 
 export type CopyTaskFormType = {
-  // candidateParamArray: any[]
   candidateStrategy: CandidateStrategy
   roleIds?: number[] // 角色
   deptIds?: number[] // 部门
@@ -156,13 +193,13 @@ export type CopyTaskFormType = {
  * @description 节点表单数据。 用于审批节点、抄送节点
  */
 export function useNodeForm(nodeType: NodeType) {
-  const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
-  const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
-  const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
-  const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList') // 部门列表
-  const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
-  const deptTreeOptions = inject('deptTree') // 部门树
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList', ref([])) // 角色列表
+  const postOptions = inject<Ref<PostApi.PostVO[]>>('postList', ref([])) // 岗位列表
+  const userOptions = inject<Ref<UserApi.UserVO[]>>('userList', ref([])) // 用户列表
+  const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList', ref([])) // 部门列表
+  const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList', ref([])) // 用户组列表
+  const deptTreeOptions = inject('deptTree', ref()) // 部门树
+  const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   const configForm = ref<UserTaskFormType | CopyTaskFormType>()
   if (nodeType === NodeType.USER_TASK_NODE) {
     configForm.value = {

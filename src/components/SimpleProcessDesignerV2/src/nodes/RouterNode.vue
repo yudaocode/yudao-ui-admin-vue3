@@ -9,7 +9,9 @@
         ]"
       >
         <div class="node-title-container">
-          <div class="node-title-icon delay-node"><span class="iconfont icon-delay"></span></div>
+          <div class="node-title-icon router-node">
+            <span class="iconfont icon-router"></span>
+          </div>
           <input
             v-if="!readonly && showInput"
             type="text"
@@ -28,7 +30,7 @@
             {{ currentNode.showText }}
           </div>
           <div class="node-text" v-else>
-            {{ NODE_DEFAULT_TEXT.get(NodeType.DELAY_TIMER_NODE) }}
+            {{ NODE_DEFAULT_TEXT.get(NodeType.ROUTER_BRANCH_NODE) }}
           </div>
           <Icon v-if="!readonly" icon="ep:arrow-right-bold" />
         </div>
@@ -46,28 +48,26 @@
         :current-node="currentNode"
       />
     </div>
-    <DelayTimerNodeConfig
-      v-if="!readonly && currentNode"
-      ref="nodeSetting"
-      :flow-node="currentNode"
-    />
+    <RouterNodeConfig v-if="!readonly && currentNode" ref="nodeSetting" :flow-node="currentNode" />
   </div>
 </template>
 <script setup lang="ts">
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
 import NodeHandler from '../NodeHandler.vue'
 import { useNodeName2, useWatchNode, useTaskStatusClass } from '../node'
-import DelayTimerNodeConfig from '../nodes-config/DelayTimerNodeConfig.vue'
+import RouterNodeConfig from '../nodes-config/RouterNodeConfig.vue'
+
 defineOptions({
-  name: 'DelayTimerNode'
+  name: 'RouterNode'
 })
+
 const props = defineProps({
   flowNode: {
     type: Object as () => SimpleFlowNode,
     required: true
   }
 })
-// 定义事件，更新父组件。
+// 定义事件，更新父组件
 const emits = defineEmits<{
   'update:flowNode': [node: SimpleFlowNode | undefined]
 }>()
@@ -76,7 +76,7 @@ const readonly = inject<Boolean>('readonly')
 // 监控节点的变化
 const currentNode = useWatchNode(props)
 // 节点名称编辑
-const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.DELAY_TIMER_NODE)
+const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.ROUTER_BRANCH_NODE)
 
 const nodeSetting = ref()
 // 打开节点配置
@@ -84,7 +84,7 @@ const openNodeConfig = () => {
   if (readonly) {
     return
   }
-  nodeSetting.value.showDelayTimerNodeConfig(currentNode.value)
+  nodeSetting.value.showRouteNodeConfig(currentNode.value)
   nodeSetting.value.openDrawer()
 }
 

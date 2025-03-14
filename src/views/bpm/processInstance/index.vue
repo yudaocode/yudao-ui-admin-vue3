@@ -75,7 +75,7 @@
               <Icon icon="ep:plus" class="mr-5px" />高级筛选
             </el-button>
           </template>
-          <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
+          <!-- <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
             <el-select
               v-model="queryParams.category"
               placeholder="请选择流程发起人"
@@ -89,7 +89,7 @@
                 :value="category.code"
               />
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item
             label="所属流程"
             class="bold-label"
@@ -130,6 +130,15 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="流程名称" align="center" prop="name" min-width="200px" fixed="left" />
+      <el-table-column label="摘要" prop="summary" min-width="180" fixed="left">
+        <template #default="scope">
+          <div class="flex flex-col" v-if="scope.row.summary && scope.row.summary.length > 0">
+            <div v-for="(item, index) in scope.row.summary" :key="index">
+              <el-text type="info"> {{ item.key }} : {{ item.value }} </el-text>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         label="流程分类"
         align="center"
