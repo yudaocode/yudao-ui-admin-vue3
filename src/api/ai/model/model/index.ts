@@ -1,6 +1,6 @@
 import request from '@/config/axios'
 
-// AI 聊天模型 VO
+// AI 模型 VO
 export interface ModelVO {
   id: number // 编号
   keyId: number // API 秘钥编号
@@ -42,12 +42,12 @@ export const ModelApi = {
     return await request.post({ url: `/ai/model/create`, data })
   },
 
-  // 修改聊天模型
+  // 修改模型
   updateModel: async (data: ModelVO) => {
     return await request.put({ url: `/ai/model/update`, data })
   },
 
-  // 删除聊天模型
+  // 删除模型
   deleteModel: async (id: number) => {
     return await request.delete({ url: `/ai/model/delete?id=` + id })
   }
