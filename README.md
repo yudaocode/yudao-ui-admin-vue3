@@ -81,16 +81,13 @@
 
 系统内置多种多种业务功能，可以用于快速你的业务系统：
 
-* 系统功能
-* 基础设施
-* 工作流程
-* 支付系统
-* 会员中心
-* 数据报表
-* 商城系统
-* 微信公众号
-* ERP 系统
-* CRM 系统
+系统内置多种多种业务功能，可以用于快速你的业务系统：
+
+![功能分层](/.image/common/ruoyi-vue-pro-biz.png)
+
+* 通用模块（必选）：系统功能、基础设施
+* 通用模块（可选）：工作流程、支付系统、数据报表、会员中心
+* 业务系统（按需）：ERP 系统、CRM 系统、商城系统、微信公众号、AI 大模型
 
 ### 系统功能
 
@@ -212,6 +209,14 @@ ps：核心功能已经实现，正在对接微信小程序中...
 演示地址：<https://doc.iocoder.cn/crm-preview/>
 
 ![功能图](/.image/common/crm-feature.png)
+
+### AI 大模型
+
+演示地址：<https://doc.iocoder.cn/ai-preview/>
+
+![功能图](/.image/common/ai-feature.png)
+
+![功能图](/.image/common/ai-preview.gif)
 
 ## 🐷 演示图
 
