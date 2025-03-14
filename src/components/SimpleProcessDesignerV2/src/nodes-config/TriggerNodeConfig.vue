@@ -43,91 +43,11 @@
             ) && configForm.httpRequestSetting
           "
         >
-          <el-form-item>
-            <el-alert
-              title="仅支持 POST 请求，以请求体方式接收参数"
-              type="warning"
-              show-icon
-              :closable="false"
-            />
-          </el-form-item>
-          <!-- 请求地址-->
-          <el-form-item label="请求地址" prop="httpRequestSetting.url">
-            <el-input v-model="configForm.httpRequestSetting.url" />
-          </el-form-item>
-          <!-- 请求头，请求体设置-->
-          <HttpRequestParamSetting
-            :header="configForm.httpRequestSetting.header"
-            :body="configForm.httpRequestSetting.body"
-            :bind="'httpRequestSetting'"
+          <HttpRequestSetting
+            v-model:setting="configForm.httpRequestSetting"
+            :responseEnable="configForm.type === TriggerTypeEnum.HTTP_REQUEST"
+            :formItemPrefix="'httpRequestSetting'"
           />
-          <!-- 返回值设置-->
-          <div v-if="configForm.type === TriggerTypeEnum.HTTP_REQUEST">
-            <el-form-item label="返回值">
-              <el-alert
-                title="通过请求返回值, 可以修改流程表单的值"
-                type="warning"
-                show-icon
-                :closable="false"
-              />
-            </el-form-item>
-            <el-form-item>
-              <div
-                class="flex pt-2"
-                v-for="(item, index) in configForm.httpRequestSetting.response"
-                :key="index"
-              >
-                <div class="mr-2">
-                  <el-form-item
-                    :prop="`httpRequestSetting.response.${index}.key`"
-                    :rules="{
-                      required: true,
-                      message: '表单字段不能为空',
-                      trigger: 'blur'
-                    }"
-                  >
-                    <el-select class="w-160px!" v-model="item.key" placeholder="请选择表单字段">
-                      <el-option
-                        v-for="(field, fIdx) in formFields"
-                        :key="fIdx"
-                        :label="field.title"
-                        :value="field.field"
-                        :disabled="!field.required"
-                      />
-                    </el-select>
-                  </el-form-item>
-                </div>
-                <div class="mr-2">
-                  <el-form-item
-                    :prop="`httpRequestSetting.response.${index}.value`"
-                    :rules="{
-                      required: true,
-                      message: '请求返回字段不能为空',
-                      trigger: 'blur'
-                    }"
-                  >
-                    <el-input class="w-160px" v-model="item.value" placeholder="请求返回字段" />
-                  </el-form-item>
-                </div>
-                <div class="mr-1 pt-1 cursor-pointer">
-                  <Icon
-                    icon="ep:delete"
-                    :size="18"
-                    @click="
-                      deleteHttpResponseSetting(configForm.httpRequestSetting.response!, index)
-                    "
-                  />
-                </div>
-              </div>
-              <el-button
-                type="primary"
-                text
-                @click="addHttpResponseSetting(configForm.httpRequestSetting.response!)"
-              >
-                <Icon icon="ep:plus" class="mr-5px" />添加一行
-              </el-button>
-            </el-form-item>
-          </div>
         </div>
 
         <!-- 表单数据修改触发器 -->
@@ -332,7 +252,7 @@ import {
   DEFAULT_CONDITION_GROUP_VALUE
 } from '../consts'
 import { useWatchNode, useDrawer, useNodeName, useFormFields, getConditionShowText } from '../node'
-import HttpRequestParamSetting from './components/HttpRequestParamSetting.vue'
+import HttpRequestSetting from './components/HttpRequestSetting.vue'
 import ConditionDialog from './components/ConditionDialog.vue'
 const { proxy } = getCurrentInstance() as any
 
@@ -449,19 +369,6 @@ const changeTriggerType = () => {
     configForm.value.httpRequestSetting = undefined
     return
   }
-}
-
-/** 添加 HTTP 请求返回值设置项 */
-const addHttpResponseSetting = (responseSetting: Record<string, string>[]) => {
-  responseSetting.push({
-    key: '',
-    value: ''
-  })
-}
-
-/** 删除 HTTP 请求返回值设置项 */
-const deleteHttpResponseSetting = (responseSetting: Record<string, string>[], index: number) => {
-  responseSetting.splice(index, 1)
 }
 
 /** 添加新的修改表单设置 */
