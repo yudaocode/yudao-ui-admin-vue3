@@ -1,6 +1,6 @@
 import request from '@/config/axios'
 
-// IoT 数据桥梁 VO
+//数据桥梁 VO
 export interface DataBridgeVO {
   id?: number // 桥梁编号
   name?: string // 桥梁名称
@@ -81,45 +81,45 @@ export interface RedisStreamMQConfig extends Config {
 
 /** 数据桥梁类型 */
 export const IoTDataBridgeConfigType = {
-  HTTP: 'HTTP',
-  TCP: 'TCP',
-  WEBSOCKET: 'WEBSOCKET',
-  MQTT: 'MQTT',
-  DATABASE: 'DATABASE',
-  REDIS_STREAM: 'REDIS_STREAM',
-  ROCKETMQ: 'ROCKETMQ',
-  RABBITMQ: 'RABBITMQ',
-  KAFKA: 'KAFKA'
+  HTTP: '1',
+  TCP: '2',
+  WEBSOCKET: '3',
+  MQTT: '10',
+  DATABASE: '20',
+  REDIS_STREAM: '21',
+  ROCKETMQ: '30',
+  RABBITMQ: '31',
+  KAFKA: '32'
 } as const
 
-// IoT 数据桥梁 API
+// 数据桥梁 API
 export const DataBridgeApi = {
-  // 查询IoT 数据桥梁分页
+  // 查询数据桥梁分页
   getDataBridgePage: async (params: any) => {
     return await request.get({ url: `/iot/data-bridge/page`, params })
   },
 
-  // 查询IoT 数据桥梁详情
+  // 查询数据桥梁详情
   getDataBridge: async (id: number) => {
     return await request.get({ url: `/iot/data-bridge/get?id=` + id })
   },
 
-  // 新增IoT 数据桥梁
+  // 新增数据桥梁
   createDataBridge: async (data: DataBridgeVO) => {
     return await request.post({ url: `/iot/data-bridge/create`, data })
   },
 
-  // 修改IoT 数据桥梁
+  // 修改数据桥梁
   updateDataBridge: async (data: DataBridgeVO) => {
     return await request.put({ url: `/iot/data-bridge/update`, data })
   },
 
-  // 删除IoT 数据桥梁
+  // 删除数据桥梁
   deleteDataBridge: async (id: number) => {
     return await request.delete({ url: `/iot/data-bridge/delete?id=` + id })
   },
 
-  // 导出IoT 数据桥梁 Excel
+  // 导出数据桥梁 Excel
   exportDataBridge: async (params) => {
     return await request.download({ url: `/iot/data-bridge/export-excel`, params })
   }

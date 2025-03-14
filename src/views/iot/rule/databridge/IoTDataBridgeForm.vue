@@ -72,7 +72,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import { DICT_TYPE, getDictLabel, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getDictObj, getIntDictOptions } from '@/utils/dict'
 import { DataBridgeApi, DataBridgeVO, IoTDataBridgeConfigType } from '@/api/iot/rule/databridge'
 import {
   HttpConfigForm,
@@ -140,8 +140,8 @@ const formRules = reactive({
 
 const formRef = ref() // 表单 Ref
 const showConfig = computed(() => (val: string) => {
-  const label = getDictLabel(DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM, formData.value.type)
-  return label && label === val
+  const dict = getDictObj(DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM, formData.value.type)
+  return dict && dict.value + '' === val
 }) // 显示对应的 Config 配置项
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
