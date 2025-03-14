@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="AI 工具调用（function calling）" url="https://doc.iocoder.cn/ai/tool/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
