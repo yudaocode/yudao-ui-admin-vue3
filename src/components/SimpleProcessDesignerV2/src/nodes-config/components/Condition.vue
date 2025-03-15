@@ -12,7 +12,10 @@
         </el-radio>
       </el-radio-group>
     </el-form-item>
-    <el-form-item v-if="condition.conditionType === ConditionType.RULE && condition.conditionGroups" label="条件规则">
+    <el-form-item
+      v-if="condition.conditionType === ConditionType.RULE && condition.conditionGroups"
+      label="条件规则"
+    >
       <div class="condition-group-tool">
         <div class="flex items-center">
           <div class="mr-4">条件组关系</div>
@@ -67,14 +70,23 @@
                   trigger: 'change'
                 }"
               >
-                <el-select style="width: 160px" v-model="rule.leftSide">
+                <el-select style="width: 160px" v-model="rule.leftSide" clearable>
                   <el-option
                     v-for="(field, fIdx) in fieldOptions"
                     :key="fIdx"
                     :label="field.title"
                     :value="field.field"
                     :disabled="!field.required"
-                  />
+                  >
+                    <el-tooltip
+                      content="表单字段非必填时不能作为流程分支条件"
+                      effect="dark"
+                      placement="right-start"
+                      v-if="!field.required"
+                    >
+                      <span>{{ field.title }}</span>
+                    </el-tooltip>
+                  </el-option>
                 </el-select>
               </el-form-item>
             </div>
