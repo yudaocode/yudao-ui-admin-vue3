@@ -42,13 +42,13 @@ watch(
       const finishedSequenceFlowActivityIds: string[] = newModelView.finishedSequenceFlowActivityIds
       setSimpleModelNodeTaskStatus(
         newModelView.simpleModel,
-        newModelView.processInstance.status,
+        newModelView.processInstance?.status,
         rejectedTaskActivityIds,
         unfinishedTaskActivityIds,
         finishedActivityIds,
         finishedSequenceFlowActivityIds
       )
-      simpleModel.value = newModelView.simpleModel
+      simpleModel.value = newModelView.simpleModel ? newModelView.simpleModel : {}
     }
   }
 )
@@ -84,7 +84,9 @@ const setSimpleModelNodeTaskStatus = (
   // 审批节点
   if (
     simpleModel.type === NodeType.START_USER_NODE ||
-    simpleModel.type === NodeType.USER_TASK_NODE
+    simpleModel.type === NodeType.USER_TASK_NODE ||
+    simpleModel.type === NodeType.TRANSACTOR_NODE ||
+    simpleModel.type === NodeType.CHILD_PROCESS_NODE
   ) {
     simpleModel.activityStatus = TaskStatusEnum.NOT_START
     if (rejectedTaskActivityIds.includes(simpleModel.id)) {
@@ -169,5 +171,4 @@ const setSimpleModelNodeTaskStatus = (
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -36,7 +36,8 @@
             placement="top"
             :content="getUserNicknames(startUserIds)"
           >
-            {{ getUserNicknames(startUserIds.slice(0,2)) }} 等 {{ startUserIds.length }} 人可发起流程
+            {{ getUserNicknames(startUserIds.slice(0, 2)) }} 等
+            {{ startUserIds.length }} 人可发起流程
           </el-tooltip>
         </el-text>
       </el-tab-pane>
@@ -46,9 +47,15 @@
           <div class="field-permit-title">
             <div class="setting-title-label first-title"> 字段名称 </div>
             <div class="other-titles">
-              <span class="setting-title-label">只读</span>
-              <span class="setting-title-label">可编辑</span>
-              <span class="setting-title-label">隐藏</span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')">
+                只读
+              </span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')">
+                可编辑
+              </span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')">
+                隐藏
+              </span>
             </div>
           </div>
           <div
@@ -157,6 +164,17 @@ const showStartUserNodeConfig = (node: SimpleFlowNode) => {
   getNodeConfigFormFields(node.fieldsPermission)
 }
 
+/** 批量更新权限 */
+const updatePermission = (type: string) => {
+  fieldsPermissionConfig.value.forEach((field) => {
+    field.permission =
+      type === 'READ'
+        ? FieldPermissionType.READ
+        : type === 'WRITE'
+          ? FieldPermissionType.WRITE
+          : FieldPermissionType.NONE
+  })
+}
 defineExpose({ openDrawer, showStartUserNodeConfig }) // 暴露方法给父组件
 </script>
 

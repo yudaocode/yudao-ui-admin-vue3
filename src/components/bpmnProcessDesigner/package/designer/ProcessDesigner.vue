@@ -188,12 +188,8 @@
       :scroll="true"
       max-height="600px"
     >
-      <!-- append-to-body -->
-      <div v-highlight>
-        <code class="hljs">
-          <!-- 高亮代码块 -->
-          {{ previewResult }}
-        </code>
+      <div>
+        <pre><code v-dompurify-html="highlightedCode(previewResult)" class="hljs"></code></pre>
       </div>
     </Dialog>
   </div>
@@ -237,6 +233,8 @@ import { XmlNode, XmlNodeType, parseXmlString } from 'steady-xml'
 // const eventName = reactive({
 //   name: ''
 // })
+import hljs from 'highlight.js' // 导入代码高亮文件
+import 'highlight.js/styles/github.css' // 导入代码高亮样式
 
 defineOptions({ name: 'MyProcessDesigner' })
 
@@ -307,6 +305,18 @@ const props = defineProps({
       ['default', 'primary', 'success', 'warning', 'danger', 'info'].indexOf(value) !== -1
   }
 })
+
+/**
+ * 代码高亮
+ */
+const highlightedCode = (code: string) => {
+  // 高亮
+  if (previewType.value === 'json') {
+    code = JSON.stringify(code, null, 2)
+  }
+  const result = hljs.highlight(code, { language: previewType.value, ignoreIllegals: true })
+  return result.value || '&nbsp;'
+}
 
 provide('configGlobal', props)
 let bpmnModeler: any = null

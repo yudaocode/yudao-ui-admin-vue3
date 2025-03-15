@@ -15,6 +15,12 @@
             </div>
             <div class="handler-item-text">审批人</div>
           </div>
+          <div class="handler-item" @click="addNode(NodeType.TRANSACTOR_NODE)">
+            <div class="transactor handler-item-icon">
+              <span class="iconfont icon-transactor icon-size"></span>
+            </div>
+            <div class="handler-item-text">办理人</div>
+          </div>
           <div class="handler-item" @click="addNode(NodeType.COPY_TASK_NODE)">
             <div class="handler-item-icon copy">
               <span class="iconfont icon-size icon-copy"></span>
@@ -57,7 +63,13 @@
             </div>
             <div class="handler-item-text">触发器</div>
           </div>
-        </div> 
+          <div class="handler-item" @click="addNode(NodeType.CHILD_PROCESS_NODE)">
+            <div class="handler-item-icon child-process">
+              <span class="iconfont icon-size icon-child-process"></span>
+            </div>
+            <div class="handler-item-text">子流程</div>
+          </div>
+        </div>
         <template #reference>
           <div class="add-icon"><Icon icon="ep:plus" /></div>
         </template>
@@ -78,7 +90,7 @@ import {
   SimpleFlowNode,
   DEFAULT_CONDITION_GROUP_VALUE
 } from './consts'
-import {generateUUID} from '@/utils'
+import { generateUUID } from '@/utils'
 
 defineOptions({
   name: 'NodeHandler'
@@ -114,13 +126,13 @@ const addNode = (type: number) => {
   }
 
   popoverShow.value = false
-  if (type === NodeType.USER_TASK_NODE) {
+  if (type === NodeType.USER_TASK_NODE || type === NodeType.TRANSACTOR_NODE) {
     const id = 'Activity_' + generateUUID()
     const data: SimpleFlowNode = {
       id: id,
-      name: NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string,
+      name: NODE_DEFAULT_NAME.get(type) as string,
       showText: '',
-      type: NodeType.USER_TASK_NODE,
+      type: type,
       approveMethod: ApproveMethodType.SEQUENTIAL_APPROVE,
       // 超时处理
       rejectHandler: {
@@ -274,6 +286,31 @@ const addNode = (type: number) => {
       showText: '',
       type: NodeType.TRIGGER_NODE,
       childNode: props.childNode
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.CHILD_PROCESS_NODE) {
+    const data: SimpleFlowNode = {
+      id: 'Activity_' + generateUUID(),
+      name: NODE_DEFAULT_NAME.get(NodeType.CHILD_PROCESS_NODE) as string,
+      showText: '',
+      type: NodeType.CHILD_PROCESS_NODE,
+      childNode: props.childNode,
+      childProcessSetting: {
+        calledProcessDefinitionKey: '',
+        calledProcessDefinitionName: '',
+        async: false,
+        skipStartUserNode: false,
+        startUserSetting: {
+          type: 1
+        },
+        timeoutSetting: {
+          enable: false
+        },
+        multiInstanceSetting: {
+          enable: false
+        }
+      }
     }
     emits('update:childNode', data)
   }

@@ -44,8 +44,13 @@
 
         <!-- 右侧按钮 -->
         <div class="w-200px flex items-center justify-end gap-2">
-          <el-button v-if="route.params.id" type="success" @click="handleDeploy">发 布</el-button>
-          <el-button type="primary" @click="handleSave">保 存</el-button>
+          <el-button v-if="actionType === 'update'" type="success" @click="handleDeploy">
+            发 布
+          </el-button>
+          <el-button type="primary" @click="handleSave">
+            <span v-if="actionType === 'definition'">恢 复</span>
+            <span v-else>保 存</span>
+          </el-button>
         </div>
       </div>
 
@@ -81,20 +86,23 @@
 <script lang="ts" setup>
 import { useRoute, useRouter } from 'vue-router'
 import { useMessage } from '@/hooks/web/useMessage'
+import { useTagsViewStore } from '@/store/modules/tagsView'
+import { useUserStoreWithOut } from '@/store/modules/user'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import * as UserApi from '@/api/system/user'
-import { useUserStoreWithOut } from '@/store/modules/user'
+import * as DefinitionApi from '@/api/bpm/definition'
 import { BpmModelFormType, BpmModelType, BpmAutoApproveType } from '@/utils/constants'
 import BasicInfo from './BasicInfo.vue'
 import FormDesign from './FormDesign.vue'
 import ProcessDesign from './ProcessDesign.vue'
-import { useTagsViewStore } from '@/store/modules/tagsView'
 import ExtraSettings from './ExtraSettings.vue'
+import { useTagsView } from '@/hooks/web/useTagsView'
 
 const router = useRouter()
 const { delView } = useTagsViewStore() // 视图操作
+const tagsView = useTagsView()
 const route = useRoute()
 const message = useMessage()
 const userStore = useUserStoreWithOut()
@@ -165,7 +173,7 @@ const formData: any = ref({
   }
 })
 
-//流程数据
+// 流程数据
 const processData = ref<any>()
 
 provide('processData', processData)
@@ -177,20 +185,36 @@ const categoryList = ref<CategoryVO[]>([])
 const userList = ref<UserApi.UserVO[]>([])
 
 /** 初始化数据 */
+const actionType = route.params.type as string
 const initData = async () => {
-  const modelId = route.params.id as string
-  if (modelId) {
-    // 修改场景
+  if (actionType === 'definition') {
+    // 情况一：流程定义场景（恢复）
+    const definitionId = route.params.id as string
+    const data = await DefinitionApi.getProcessDefinition(definitionId)
+    // 将 definition => model，最终赋值
+    data.type = data.modelType
+    delete data.modelType
+    data.id = data.modelId
+    delete data.modelId
+    if (data.simpleModel) {
+      data.simpleModel = JSON.parse(data.simpleModel)
+    }
+    formData.value = data
+    formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : 0
+  } else if (['update', 'copy'].includes(actionType)) {
+    // 情况二：修改场景/复制场景
+    const modelId = route.params.id as string
     formData.value = await ModelApi.getModel(modelId)
     formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : 0
-    // 复制场景
-    if (route.params.type === 'copy') {
+    // 特殊：复制场景
+    if (actionType === 'copy') {
       delete formData.value.id
       formData.value.name += '副本'
       formData.value.key += '_copy'
+      tagsView.setTitle('复制流程')
     }
   } else {
-    // 新增场景
+    // 情况三：新增场景
     formData.value.startUserType = 0 // 全体
     formData.value.managerUserIds.push(userStore.getUser.id)
   }
@@ -271,37 +295,31 @@ const handleSave = async () => {
       ...formData.value
     }
 
-    if (formData.value.id) {
+    if (actionType === 'definition') {
+      // 情况一：流程定义场景（恢复）
+      await ModelApi.updateModel(modelData)
+      // 提示成功
+      message.success('恢复成功，可点击【发布】按钮，进行发布模型')
+    } else if (actionType === 'update') {
       // 修改场景
       await ModelApi.updateModel(modelData)
-      // 询问是否发布流程
-      try {
-        await message.confirm('修改流程成功，是否发布流程？')
-        // 用户点击确认，执行发布
-        await handleDeploy()
-      } catch {
-        // 用户点击取消，停留在当前页面
-      }
-    } else {
-      // 新增场景
+      // 提示成功
+      message.success('修改成功，可点击【发布】按钮，进行发布模型')
+    } else if (actionType === 'copy') {
+      // 情况三：复制场景
       formData.value.id = await ModelApi.createModel(modelData)
-      try {
-        await message.confirm('流程创建成功，是否继续编辑？')
-        // 用户点击继续编辑，跳转到编辑页面
-        await nextTick()
-        // 先删除当前页签
-        delView(unref(router.currentRoute))
-        // 跳转到编辑页面
-        await router.push({
-          name: 'BpmModelUpdate',
-          params: { id: formData.value.id }
-        })
-      } catch {
-        // 先删除当前页签
-        delView(unref(router.currentRoute))
-        // 用户点击返回列表
-        await router.push({ name: 'BpmModel' })
-      }
+      // 提示成功
+      message.success('复制成功，可点击【发布】按钮，进行发布模型')
+    } else {
+      // 情况四：新增场景
+      formData.value.id = await ModelApi.createModel(modelData)
+      // 提示成功
+      message.success('新建成功，可点击【发布】按钮，进行发布模型')
+    }
+
+    // 返回列表页（排除更新的情况）
+    if (actionType !== 'update') {
+      await router.push({ name: 'BpmModel' })
     }
   } catch (error: any) {
     console.error('保存失败:', error)
@@ -346,7 +364,6 @@ const handleDeploy = async () => {
 /** 步骤切换处理 */
 const handleStepClick = async (index: number) => {
   try {
-    console.log('index', index)
     if (index !== 0) {
       await validateBasic()
     }

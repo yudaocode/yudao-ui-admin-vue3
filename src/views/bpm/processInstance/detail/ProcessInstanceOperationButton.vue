@@ -36,13 +36,26 @@
               :rule="approveForm.rule"
             />
           </el-card>
-          <el-form-item label="审批意见" prop="reason">
+          <el-form-item :label="`${nodeTypeName}意见`" prop="reason">
             <el-input
               v-model="approveReasonForm.reason"
-              placeholder="请输入审批意见"
+              :placeholder="`请输入${nodeTypeName}意见`"
               type="textarea"
               :rows="4"
             />
+          </el-form-item>
+          <el-form-item
+            label="下一个节点的审批人"
+            prop="nextAssignees"
+            v-if="nextAssigneesActivityNode.length > 0"
+          >
+            <div class="ml-10px -mt-15px -mb-35px">
+              <ProcessInstanceTimeline
+                :activity-nodes="nextAssigneesActivityNode"
+                :show-status-icon="false"
+                @select-user-confirm="selectNextAssigneesConfirm"
+              />
+            </div>
           </el-form-item>
           <el-form-item
             v-if="runningTask.signEnable"
@@ -66,7 +79,7 @@
             >
               {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
             </el-button>
-            <el-button @click="closePropover('approve', approveFormRef)"> 取消 </el-button>
+            <el-button @click="closePopover('approve', approveFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -111,7 +124,7 @@
             >
               {{ getButtonDisplayName(OperationButtonType.REJECT) }}
             </el-button>
-            <el-button @click="closePropover('reject', rejectFormRef)"> 取消 </el-button>
+            <el-button @click="closePopover('reject', rejectFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -169,7 +182,7 @@
             <el-button :disabled="formLoading" type="primary" @click="handleCopy">
               {{ getButtonDisplayName(OperationButtonType.COPY) }}
             </el-button>
-            <el-button @click="closePropover('copy', copyFormRef)"> 取消 </el-button>
+            <el-button @click="closePopover('copy', copyFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -221,7 +234,7 @@
             <el-button :disabled="formLoading" type="primary" @click="handleTransfer()">
               {{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
             </el-button>
-            <el-button @click="closePropover('transfer', transferFormRef)"> 取消 </el-button>
+            <el-button @click="closePopover('transfer', transferFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -273,7 +286,7 @@
             <el-button :disabled="formLoading" type="primary" @click="handleDelegate()">
               {{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
             </el-button>
-            <el-button @click="closePropover('delegate', delegateFormRef)"> 取消 </el-button>
+            <el-button @click="closePopover('delegate', delegateFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -328,7 +341,7 @@
             <el-button :disabled="formLoading" type="primary" @click="handlerAddSign('after')">
               向后{{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
             </el-button>
-            <el-button @click="closePropover('addSign', addSignFormRef)"> 取消 </el-button>
+            <el-button @click="closePopover('addSign', addSignFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -379,7 +392,7 @@
             <el-button :disabled="formLoading" type="primary" @click="handlerDeleteSign()">
               减签
             </el-button>
-            <el-button @click="closePropover('deleteSign', deleteSignFormRef)"> 取消 </el-button>
+            <el-button @click="closePopover('deleteSign', deleteSignFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -431,7 +444,7 @@
             <el-button :disabled="formLoading" type="primary" @click="handleReturn()">
               {{ getButtonDisplayName(OperationButtonType.RETURN) }}
             </el-button>
-            <el-button @click="closePropover('return', returnFormRef)"> 取消 </el-button>
+            <el-button @click="closePopover('return', returnFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -475,7 +488,7 @@
             <el-button :disabled="formLoading" type="primary" @click="handleCancel()">
               确认
             </el-button>
-            <el-button @click="closePropover('cancel', cancelFormRef)"> 取消 </el-button>
+            <el-button @click="closePopover('cancel', cancelFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -504,12 +517,16 @@ import * as TaskApi from '@/api/bpm/task'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as UserApi from '@/api/system/user'
 import {
+  NodeType,
   OPERATION_BUTTON_NAME,
-  OperationButtonType
+  OperationButtonType,
+  CandidateStrategy
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/constants'
 import type { FormInstance, FormRules } from 'element-plus'
 import SignDialog from './SignDialog.vue'
+import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
@@ -546,22 +563,29 @@ const returnList = ref([] as any) // 退回节点
 const runningTask = ref<any>() // 运行中的任务
 const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
+const nodeTypeName = ref('审批') // 节点类型名称
 
 // 审批通过意见表单
 const reasonRequire = ref()
 const approveFormRef = ref<FormInstance>()
 const signRef = ref()
 const approveSignFormRef = ref()
+const nextAssigneesActivityNode = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 下一个审批节点信息
 const approveReasonForm = reactive({
   reason: '',
-  signPicUrl: ''
+  signPicUrl: '',
+  nextAssignees: {}
 })
 const approveReasonRule = computed(() => {
   return {
-    reason: [{ required: reasonRequire.value, message: '审批意见不能为空', trigger: 'blur' }],
-    signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }]
+    reason: [
+      { required: reasonRequire.value, message: nodeTypeName + '意见不能为空', trigger: 'blur' }
+    ],
+    signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
+    nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
   }
 })
+
 // 拒绝表单
 const rejectFormRef = ref<FormInstance>()
 const rejectReasonForm = reactive({
@@ -668,6 +692,7 @@ const openPopover = async (type: string) => {
       message.warning('表单校验不通过，请先完善表单!!')
       return
     }
+    initNextAssigneesFormField()
   }
   if (type === 'return') {
     // 获取退回节点
@@ -685,11 +710,58 @@ const openPopover = async (type: string) => {
 }
 
 /** 关闭气泡卡 */
-const closePropover = (type: string, formRef: FormInstance | undefined) => {
+const closePopover = (type: string, formRef: FormInstance | undefined) => {
   if (formRef) {
     formRef.resetFields()
   }
   popOverVisible.value[type] = false
+  nextAssigneesActivityNode.value = []
+}
+
+/** 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人 */
+const initNextAssigneesFormField = async () => {
+  // 获取修改的流程变量, 暂时只支持流程表单
+  const variables = getUpdatedProcessInstanceVariables()
+  const data = await ProcessInstanceApi.getNextApprovalNodes({
+    processInstanceId: props.processInstance.id,
+    taskId: runningTask.value.id,
+    processVariablesStr: JSON.stringify(variables)
+  })
+  if (data && data.length > 0) {
+    data.forEach((node: any) => {
+      if (
+        // 情况一：当前节点没有审批人，并且是发起人自选
+        (isEmpty(node.tasks) &&
+          isEmpty(node.candidateUsers) &&
+          CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
+        // 情况二：当前节点是审批人自选
+        CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy
+      ) {
+        nextAssigneesActivityNode.value.push(node)
+      }
+    })
+  }
+}
+
+/** 选择下一个节点的审批人 */
+const selectNextAssigneesConfirm = (id: string, userList: any[]) => {
+  approveReasonForm.nextAssignees[id] = userList?.map((item: any) => item.id)
+}
+/** 审批通过时，校验每个自选审批人的节点是否都已配置了审批人 */
+const validateNextAssignees = () => {
+  // TODO @小北：可以考虑 Object.keys(nextAssigneesActivityNode.value).length === 0) return true；减少括号层级
+  // 如果需要自选审批人，则校验自选审批人
+  if (Object.keys(nextAssigneesActivityNode.value).length > 0) {
+    // 校验每个节点是否都已配置审批人
+    for (const item of nextAssigneesActivityNode.value) {
+      if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
+        // TODO @小北：可以打印下节点名，嘿嘿。
+        message.warning('下一个节点的审批人不能为空!')
+        return false
+      }
+    }
+  }
+  return true
 }
 
 /** 处理审批通过和不通过的操作 */
@@ -699,15 +771,24 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
     // 校验表单
     if (!formRef) return
     await formRef.validate()
+    // 校验流程表单必填字段
+    const valid = await validateNormalForm()
+    if (!valid) {
+      message.warning('表单校验不通过，请先完善表单!!')
+      return
+    }
+
     if (pass) {
-      // 获取修改的流程变量, 暂时只支持流程表单
+      const nextAssigneesValid = validateNextAssignees()
+      if (!nextAssigneesValid) return
       const variables = getUpdatedProcessInstanceVariables()
       // 审批通过数据
       const data = {
         id: runningTask.value.id,
         reason: approveReasonForm.reason,
-        variables // 审批通过, 把修改的字段值赋于流程实例变量
-      }
+        variables, // 审批通过, 把修改的字段值赋于流程实例变量
+        nextAssignees: approveReasonForm.nextAssignees // 下个自选节点选择的审批人信息
+      } as any
       // 签名
       if (runningTask.value.signEnable) {
         data.signPicUrl = approveReasonForm.signPicUrl
@@ -722,6 +803,7 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       }
       await TaskApi.approveTask(data)
       popOverVisible.value.approve = false
+      nextAssigneesActivityNode.value = []
       message.success('审批通过成功')
     } else {
       // 审批不通过数据
@@ -969,9 +1051,10 @@ const getButtonDisplayName = (btnType: OperationButtonType) => {
 
 const loadTodoTask = (task: any) => {
   approveForm.value = {}
-  approveFormFApi.value = {}
   runningTask.value = task
+  approveFormFApi.value = {}
   reasonRequire.value = task?.reasonRequire ?? false
+  nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
   // 处理 approve 表单.
   if (task && task.formId && task.formConf) {
     const tempApproveForm = {}
@@ -997,6 +1080,11 @@ const validateNormalForm = async () => {
   }
 }
 
+/**
+ * TODO @小北  TO  @芋道
+ * 问题：这里存在一种场景会出现问题，流程发起后，A节点审批完成，B节点没有可编辑的流程字段且B节点为自选审批人节点，会导致流程审批人为空，
+ * 原因：因为没有可编辑的流程字段时props.writableFields为空，参数variables传递时也为空
+ */
 /** 从可以编辑的流程表单字段，获取需要修改的流程实例的变量 */
 const getUpdatedProcessInstanceVariables = () => {
   const variables = {}

@@ -15,7 +15,10 @@ import {
   AssignEmptyHandlerType,
   FieldPermissionType,
   HttpRequestParam,
-  ProcessVariableEnum
+  ProcessVariableEnum,
+  ConditionType,
+  ConditionGroup,
+  COMPARISON_OPERATORS
 } from './consts'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
 
@@ -201,7 +204,7 @@ export function useNodeForm(nodeType: NodeType) {
   const deptTreeOptions = inject('deptTree', ref()) // 部门树
   const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   const configForm = ref<UserTaskFormType | CopyTaskFormType>()
-  if (nodeType === NodeType.USER_TASK_NODE) {
+  if (nodeType === NodeType.USER_TASK_NODE || nodeType === NodeType.TRANSACTOR_NODE) {
     configForm.value = {
       candidateStrategy: CandidateStrategy.USER,
       approveMethod: ApproveMethodType.SEQUENTIAL_APPROVE,
@@ -305,6 +308,11 @@ export function useNodeForm(nodeType: NodeType) {
     // 表单内部门负责人
     if (configForm.value?.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER) {
       showText = `表单内部门负责人`
+    }
+
+    // 审批人自选
+    if (configForm.value?.candidateStrategy === CandidateStrategy.APPROVE_USER_SELECT) {
+      showText = `审批人自选`
     }
 
     // 发起人自选
@@ -543,6 +551,66 @@ export function useTaskStatusClass(taskStatus: TaskStatusEnum | undefined): stri
   if (taskStatus === TaskStatusEnum.CANCEL) {
     return 'status-cancel'
   }
-
   return ''
+}
+
+/** 条件组件文字展示 */
+export function getConditionShowText(
+  conditionType: ConditionType | undefined,
+  conditionExpression: string | undefined,
+  conditionGroups: ConditionGroup | undefined,
+  fieldOptions: Array<Record<string, any>>
+) {
+  let showText = ''
+  if (conditionType === ConditionType.EXPRESSION) {
+    if (conditionExpression) {
+      showText = `表达式：${conditionExpression}`
+    }
+  }
+  if (conditionType === ConditionType.RULE) {
+    // 条件组是否为与关系
+    const groupAnd = conditionGroups?.and
+    let warningMessage: undefined | string = undefined
+    const conditionGroup = conditionGroups?.conditions.map((item) => {
+      return (
+        '(' +
+        item.rules
+          .map((rule) => {
+            if (rule.leftSide && rule.rightSide) {
+              return (
+                getFormFieldTitle(fieldOptions, rule.leftSide) +
+                ' ' +
+                getOpName(rule.opCode) +
+                ' ' +
+                rule.rightSide
+              )
+            } else {
+              // 有一条规则不完善。提示错误
+              warningMessage = '请完善条件规则'
+              return ''
+            }
+          })
+          .join(item.and ? ' 且 ' : ' 或 ') +
+        ' ) '
+      )
+    })
+    if (warningMessage) {
+      showText = ''
+    } else {
+      showText = conditionGroup!.join(groupAnd ? ' 且 ' : ' 或 ')
+    }
+  }
+  return showText
+}
+
+/** 获取表单字段名称*/
+const getFormFieldTitle = (fieldOptions: Array<Record<string, any>>, field: string) => {
+  const item = fieldOptions.find((item) => item.field === field)
+  return item?.title
+}
+
+/** 获取操作符名称 */
+const getOpName = (opCode: string): string => {
+  const opName = COMPARISON_OPERATORS.find((item: any) => item.value === opCode)
+  return opName?.label
 }

@@ -255,32 +255,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: 'manager/model/edit',
-        component: () => import('@/views/bpm/model/editor/index.vue'),
-        name: 'BpmModelEditor',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '设计流程',
-          activeMenu: '/bpm/manager/model'
-        }
-      },
-      {
-        path: 'manager/simple/model',
-        component: () => import('@/views/bpm/simple/SimpleModelDesign.vue'),
-        name: 'SimpleModelDesign',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '仿钉钉设计流程',
-          activeMenu: '/bpm/manager/model'
-        }
-      },
-      {
         path: 'manager/definition',
-        component: () => import('@/views/bpm/definition/index.vue'),
+        component: () => import('@/views/bpm/model/definition/index.vue'),
         name: 'BpmProcessDefinition',
         meta: {
           noCache: true,
@@ -356,7 +332,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        // TODO @zws：1）建议，在加一个路由。然后标题是“复制流程”，这样体验会好点；2）复制出来的数据，在名字前面，加“副本 ”，和钉钉保持一致！
         path: 'manager/model/:type/:id',
         component: () => import('@/views/bpm/model/form/index.vue'),
         name: 'BpmModelUpdate',

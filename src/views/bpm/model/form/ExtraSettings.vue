@@ -140,6 +140,46 @@
         </el-select>
       </div>
     </el-form-item>
+    <el-form-item class="mb-20px">
+      <template #label>
+        <el-text size="large" tag="b">流程前置通知</el-text>
+      </template>
+      <div class="flex flex-col w-100%">
+        <div class="flex">
+          <el-switch
+            v-model="preProcessNotifyEnable"
+            @change="handlePreProcessNotifyEnableChange"
+          />
+          <div class="ml-80px">流程启动后通知</div>
+        </div>
+        <HttpRequestSetting
+          v-if="preProcessNotifyEnable"
+          v-model:setting="modelData.preProcessNotifySetting"
+          :responseEnable="true"
+          :formItemPrefix="'preProcessNotifySetting'"
+        />
+      </div>
+    </el-form-item>
+    <el-form-item class="mb-20px">
+      <template #label>
+        <el-text size="large" tag="b">流程后置通知</el-text>
+      </template>
+      <div class="flex flex-col w-100%">
+        <div class="flex">
+          <el-switch
+            v-model="postProcessNotifyEnable"
+            @change="handlePostProcessNotifyEnableChange"
+          />
+          <div class="ml-80px">流程启动后通知</div>
+        </div>
+        <HttpRequestSetting
+          v-if="postProcessNotifyEnable"
+          v-model:setting="modelData.postProcessNotifySetting"
+          :responseEnable="true"
+          :formItemPrefix="'postProcessNotifySetting'"
+        />
+      </div>
+    </el-form-item>
   </el-form>
 </template>
 
@@ -149,6 +189,7 @@ import { BpmAutoApproveType, BpmModelFormType } from '@/utils/constants'
 import * as FormApi from '@/api/bpm/form'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
 import { ProcessVariableEnum } from '@/components/SimpleProcessDesignerV2/src/consts'
+import HttpRequestSetting from '@/components/SimpleProcessDesignerV2/src/nodes-config/components/HttpRequestSetting.vue'
 
 const modelData = defineModel<any>()
 
@@ -204,6 +245,36 @@ const numberExample = computed(() => {
     return ''
   }
 })
+
+/** 是否开启流程前置通知 */
+const preProcessNotifyEnable = ref(false)
+const handlePreProcessNotifyEnableChange = (val: boolean | string | number) => {
+  if (val) {
+    modelData.value.preProcessNotifySetting = {
+      url: '',
+      header: [],
+      body: [],
+      response: []
+    }
+  } else {
+    modelData.value.preProcessNotifySetting = null
+  }
+}
+
+/** 是否开启流程后置通知 */
+const postProcessNotifyEnable = ref(false)
+const handlePostProcessNotifyEnableChange = (val: boolean | string | number) => {
+  if (val) {
+    modelData.value.postProcessNotifySetting = {
+      url: '',
+      header: [],
+      body: [],
+      response: []
+    }
+  } else {
+    modelData.value.postProcessNotifySetting = null
+  }
+}
 
 /** 表单选项 */
 const formField = ref<Array<{ field: string; title: string }>>([])
@@ -263,6 +334,12 @@ const initData = () => {
       enable: false,
       summary: []
     }
+  }
+  if (modelData.value.preProcessNotifySetting) {
+    preProcessNotifyEnable.value = true
+  }
+  if (modelData.value.postProcessNotifySetting) {
+    postProcessNotifyEnable.value = true
   }
 }
 defineExpose({ initData })
