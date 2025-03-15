@@ -147,16 +147,16 @@
       <div class="flex flex-col w-100%">
         <div class="flex">
           <el-switch
-            v-model="preProcessNotifyEnable"
+            v-model="processBeforeTriggerEnable"
             @change="handlePreProcessNotifyEnableChange"
           />
           <div class="ml-80px">流程启动后通知</div>
         </div>
         <HttpRequestSetting
-          v-if="preProcessNotifyEnable"
-          v-model:setting="modelData.preProcessNotifySetting"
+          v-if="processBeforeTriggerEnable"
+          v-model:setting="modelData.processBeforeTriggerSetting"
           :responseEnable="true"
-          :formItemPrefix="'preProcessNotifySetting'"
+          :formItemPrefix="'processBeforeTriggerSetting'"
         />
       </div>
     </el-form-item>
@@ -167,16 +167,16 @@
       <div class="flex flex-col w-100%">
         <div class="flex">
           <el-switch
-            v-model="postProcessNotifyEnable"
+            v-model="processAfterTriggerEnable"
             @change="handlePostProcessNotifyEnableChange"
           />
           <div class="ml-80px">流程启动后通知</div>
         </div>
         <HttpRequestSetting
-          v-if="postProcessNotifyEnable"
-          v-model:setting="modelData.postProcessNotifySetting"
+          v-if="processAfterTriggerEnable"
+          v-model:setting="modelData.processAfterTriggerSetting"
           :responseEnable="true"
-          :formItemPrefix="'postProcessNotifySetting'"
+          :formItemPrefix="'processAfterTriggerSetting'"
         />
       </div>
     </el-form-item>
@@ -247,32 +247,32 @@ const numberExample = computed(() => {
 })
 
 /** 是否开启流程前置通知 */
-const preProcessNotifyEnable = ref(false)
+const processBeforeTriggerEnable = ref(false)
 const handlePreProcessNotifyEnableChange = (val: boolean | string | number) => {
   if (val) {
-    modelData.value.preProcessNotifySetting = {
+    modelData.value.processBeforeTriggerSetting = {
       url: '',
       header: [],
       body: [],
       response: []
     }
   } else {
-    modelData.value.preProcessNotifySetting = null
+    modelData.value.processBeforeTriggerSetting = null
   }
 }
 
 /** 是否开启流程后置通知 */
-const postProcessNotifyEnable = ref(false)
+const processAfterTriggerEnable = ref(false)
 const handlePostProcessNotifyEnableChange = (val: boolean | string | number) => {
   if (val) {
-    modelData.value.postProcessNotifySetting = {
+    modelData.value.processAfterTriggerSetting = {
       url: '',
       header: [],
       body: [],
       response: []
     }
   } else {
-    modelData.value.postProcessNotifySetting = null
+    modelData.value.processAfterTriggerSetting = null
   }
 }
 
@@ -335,11 +335,11 @@ const initData = () => {
       summary: []
     }
   }
-  if (modelData.value.preProcessNotifySetting) {
-    preProcessNotifyEnable.value = true
+  if (modelData.value.processBeforeTriggerSetting) {
+    processBeforeTriggerEnable.value = true
   }
-  if (modelData.value.postProcessNotifySetting) {
-    postProcessNotifyEnable.value = true
+  if (modelData.value.processAfterTriggerSetting) {
+    processAfterTriggerEnable.value = true
   }
 }
 defineExpose({ initData })
