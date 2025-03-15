@@ -16,10 +16,10 @@
       <el-form-item label="绑定模型" prop="modelId" v-if="!isUser">
         <el-select v-model="formData.modelId" placeholder="请选择模型" clearable>
           <el-option
-            v-for="chatModel in chatModelList"
-            :key="chatModel.id"
-            :label="chatModel.name"
-            :value="chatModel.id"
+            v-for="model in models"
+            :key="model.id"
+            :label="model.name"
+            :value="model.id"
           />
         </el-select>
       </el-form-item>
@@ -31,6 +31,21 @@
       </el-form-item>
       <el-form-item label="角色设定" prop="systemMessage">
         <el-input type="textarea" v-model="formData.systemMessage" placeholder="请输入角色设定" />
+      </el-form-item>
+      <el-form-item label="引用知识库" prop="knowledgeIds">
+        <el-select v-model="formData.knowledgeIds" placeholder="请选择知识库" clearable multiple>
+          <el-option
+            v-for="item in knowledgeList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="引用工具" prop="toolIds">
+        <el-select v-model="formData.toolIds" placeholder="请选择工具" clearable multiple>
+          <el-option v-for="item in toolList" :key="item.id" :label="item.name" :value="item.id" />
+        </el-select>
       </el-form-item>
       <el-form-item label="是否公开" prop="publicStatus" v-if="!isUser">
         <el-radio-group v-model="formData.publicStatus">
@@ -68,8 +83,11 @@
 import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
 import { CommonStatusEnum } from '@/utils/constants'
-import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import { ModelApi, ModelVO } from '@/api/ai/model/model'
 import { FormRules } from 'element-plus'
+import { AiModelTypeEnum } from '@/views/ai/utils/constants'
+import { KnowledgeApi, KnowledgeVO } from '@/api/ai/knowledge/knowledge'
+import { ToolApi, ToolVO } from '@/api/ai/model/tool'
 
 /** AI 聊天角色 表单 */
 defineOptions({ name: 'ChatRoleForm' })
@@ -91,10 +109,14 @@ const formData = ref({
   description: undefined,
   systemMessage: undefined,
   publicStatus: true,
-  status: CommonStatusEnum.ENABLE
+  status: CommonStatusEnum.ENABLE,
+  knowledgeIds: [] as number[],
+  toolIds: [] as number[]
 })
 const formRef = ref() // 表单 Ref
-const chatModelList = ref([] as ChatModelVO[]) // 聊天模型列表
+const models = ref([] as ModelVO[]) // 聊天模型列表
+const knowledgeList = ref([] as KnowledgeVO[]) // 知识库列表
+const toolList = ref([] as ToolVO[]) // 工具列表
 
 /** 是否【我】自己创建，私有角色 */
 const isUser = computed(() => {
@@ -128,7 +150,11 @@ const open = async (type: string, id?: number, title?: string) => {
     }
   }
   // 获得下拉数据
-  chatModelList.value = await ChatModelApi.getChatModelSimpleList(CommonStatusEnum.ENABLE)
+  models.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
+  // 获取知识库列表
+  knowledgeList.value = await KnowledgeApi.getSimpleKnowledgeList()
+  // 获取工具列表
+  toolList.value = await ToolApi.getToolSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -176,7 +202,9 @@ const resetForm = () => {
     description: undefined,
     systemMessage: undefined,
     publicStatus: true,
-    status: CommonStatusEnum.ENABLE
+    status: CommonStatusEnum.ENABLE,
+    knowledgeIds: [],
+    toolIds: []
   }
   formRef.value?.resetFields()
 }

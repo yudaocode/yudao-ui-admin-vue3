@@ -13,6 +13,8 @@ export interface ChatRoleVO {
   welcomeMessage: string // 角色设定
   publicStatus: boolean // 是否公开
   status: number // 状态
+  knowledgeIds?: number[] // 引用的知识库 ID 列表
+  toolIds?: number[] // 引用的工具 ID 列表
 }
 
 // AI 聊天角色 分页请求 vo

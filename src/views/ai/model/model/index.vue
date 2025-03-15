@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="AI 对话聊天" url="https://doc.iocoder.cn/ai/chat/" />
+  <doc-alert title="AI 手册" url="https://doc.iocoder.cn/ai/build/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -10,38 +10,32 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="角色名称" prop="name">
+      <el-form-item label="模型名字" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入角色名称"
+          placeholder="请输入模型名字"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="角色类别" prop="category">
+      <el-form-item label="模型标识" prop="model">
         <el-input
-          v-model="queryParams.category"
-          placeholder="请输入角色类别"
+          v-model="queryParams.model"
+          placeholder="请输入模型标识"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="是否公开" prop="publicStatus">
-        <el-select
-          v-model="queryParams.publicStatus"
-          placeholder="请选择是否公开"
+      <el-form-item label="模型平台" prop="platform">
+        <el-input
+          v-model="queryParams.platform"
+          placeholder="请输入模型平台"
           clearable
+          @keyup.enter="handleQuery"
           class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -50,7 +44,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['ai:chat-role:create']"
+          v-hasPermi="['ai:model:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -61,46 +55,39 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="角色名称" align="center" prop="name" />
-      <el-table-column label="绑定模型" align="center" prop="modelName" />
-      <el-table-column label="角色头像" align="center" prop="avatar">
+      <el-table-column label="所属平台" align="center" prop="platform" min-width="100">
         <template #default="scope">
-          <el-image :src="scope?.row.avatar" class="w-32px h-32px" />
+          <dict-tag :type="DICT_TYPE.AI_PLATFORM" :value="scope.row.platform" />
         </template>
       </el-table-column>
-      <el-table-column label="角色类别" align="center" prop="category" />
-      <el-table-column label="角色描述" align="center" prop="description" />
-      <el-table-column label="角色设定" align="center" prop="systemMessage" />
-      <el-table-column label="知识库" align="center" prop="knowledgeIds">
+      <el-table-column label="模型类型" align="center" prop="platform" min-width="100">
         <template #default="scope">
-          <span v-if="!scope.row.knowledgeIds || scope.row.knowledgeIds.length === 0">-</span>
-          <span v-else>引用 {{ scope.row.knowledgeIds.length }} 个</span>
+          <dict-tag :type="DICT_TYPE.AI_MODEL_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="工具" align="center" prop="toolIds">
+      <el-table-column label="模型名字" align="center" prop="name" min-width="180" />
+      <el-table-column label="模型标识" align="center" prop="model" min-width="180" />
+      <el-table-column label="API 秘钥" align="center" prop="keyId" min-width="140">
         <template #default="scope">
-          <span v-if="!scope.row.toolIds || scope.row.toolIds.length === 0">-</span>
-          <span v-else>引用 {{ scope.row.toolIds.length }} 个</span>
+          <span>{{ apiKeyList.find((item) => item.id === scope.row.keyId)?.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="是否公开" align="center" prop="publicStatus">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.publicStatus" />
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="排序" align="center" prop="sort" min-width="80" />
+      <el-table-column label="状态" align="center" prop="status" min-width="80">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="角色排序" align="center" prop="sort" />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="温度参数" align="center" prop="temperature" min-width="80" />
+      <el-table-column label="回复数 Token 数" align="center" prop="maxTokens" min-width="140" />
+      <el-table-column label="上下文数量" align="center" prop="maxContexts" min-width="100" />
+      <el-table-column label="操作" align="center" width="180" fixed="right">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['ai:chat-role:update']"
+            v-hasPermi="['ai:model:update']"
           >
             编辑
           </el-button>
@@ -108,7 +95,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['ai:chat-role:delete']"
+            v-hasPermi="['ai:model:delete']"
           >
             删除
           </el-button>
@@ -125,37 +112,39 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ChatRoleForm ref="formRef" @success="getList" />
+  <ModelForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
-import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
-import ChatRoleForm from './ChatRoleForm.vue'
+import { ModelApi, ModelVO } from '@/api/ai/model/model'
+import ModelForm from './ModelForm.vue'
+import { DICT_TYPE } from '@/utils/dict'
+import { ApiKeyApi, ApiKeyVO } from '@/api/ai/model/apiKey'
 
-/** AI 聊天角色 列表 */
-defineOptions({ name: 'AiChatRole' })
+/** API 模型列表 */
+defineOptions({ name: 'AiModel' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ChatRoleVO[]>([]) // 列表的数据
+const list = ref<ModelVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: undefined,
-  category: undefined,
-  publicStatus: true
+  model: undefined,
+  platform: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const apiKeyList = ref([] as ApiKeyVO[]) // API 密钥列表
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ChatRoleApi.getChatRolePage(queryParams)
+    const data = await ModelApi.getModelPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -187,7 +176,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ChatRoleApi.deleteChatRole(id)
+    await ModelApi.deleteModel(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -195,7 +184,9 @@ const handleDelete = async (id: number) => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  // 获得下拉数据
+  apiKeyList.value = await ApiKeyApi.getApiKeySimpleList()
 })
 </script>
