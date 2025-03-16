@@ -120,18 +120,19 @@ const copyToClipboard = async (text: string) => {
 /** 打开 MQTT 参数弹框的方法 */
 const openMqttParams = async () => {
   try {
-    const res = await DeviceApi.getMqttConnectionParams(device.id)
+    const data = await DeviceApi.getMqttConnectionParams(device.id)
     // 根据 API 响应结构正确获取数据
+    // TODO @haohao：'N/A' 是不是在 ui 里处理哈
     mqttParams.value = {
-      mqttClientId: res.mqttClientId || 'N/A',
-      mqttUsername: res.mqttUsername || 'N/A',
-      mqttPassword: res.mqttPassword || 'N/A'
+      mqttClientId: data.mqttClientId || 'N/A',
+      mqttUsername: data.mqttUsername || 'N/A',
+      mqttPassword: data.mqttPassword || 'N/A'
     }
 
     // 显示 MQTT 弹框
     mqttDialogVisible.value = true
   } catch (error) {
-    console.error('获取MQTT连接参数出错：', error)
+    console.error('获取 MQTT 连接参数出错：', error)
     message.error('获取MQTT连接参数失败，请检查网络连接或联系管理员')
   }
 }

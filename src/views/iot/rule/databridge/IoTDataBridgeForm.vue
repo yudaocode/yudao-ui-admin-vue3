@@ -83,7 +83,7 @@ import {
   RocketMQConfigForm
 } from './config'
 
-/** IoT 数据桥梁 表单 */
+/** IoT 数据桥梁的表单 */
 defineOptions({ name: 'IoTDataBridgeForm' })
 
 const { t } = useI18n() // 国际化
@@ -95,8 +95,8 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<DataBridgeVO>({
   status: 0,
-  direction: 1,
-  type: 1,
+  direction: 1, // TODO @puhui999:枚举类
+  type: 1, // TODO @puhui999:枚举类
   config: {} as any
 })
 const formRules = reactive({

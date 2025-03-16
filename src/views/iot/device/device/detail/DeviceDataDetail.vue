@@ -59,7 +59,7 @@ import { beginOfDay, dateFormatter, endOfDay, formatDate } from '@/utils/formatT
 
 defineProps<{ product: ProductVO; device: DeviceVO }>()
 
-/** IoT 设备 数据详情 */
+/** IoT 设备数据详情 */
 defineOptions({ name: 'IoTDeviceDataDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -78,9 +78,9 @@ const queryParams = reactive({
     formatDate(endOfDay(new Date()))
   ]
 })
-
 const queryFormRef = ref() // 搜索的表单
 
+/** 获得设备历史数据 */
 const getList = async () => {
   detailLoading.value = true
   try {

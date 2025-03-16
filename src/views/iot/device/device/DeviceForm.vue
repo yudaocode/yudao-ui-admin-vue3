@@ -43,7 +43,11 @@
           :disabled="formType === 'update'"
         />
       </el-form-item>
-      <el-form-item v-if="formData.deviceType === 1" label="网关设备" prop="gatewayId">
+      <el-form-item
+        v-if="formData.deviceType === DeviceTypeEnum.GATEWAY_SUB"
+        label="网关设备"
+        prop="gatewayId"
+      >
         <el-select v-model="formData.gatewayId" placeholder="子设备可选择父设备" clearable>
           <el-option
             v-for="gateway in gatewayDevices"

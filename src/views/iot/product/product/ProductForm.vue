@@ -45,7 +45,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item
-        v-if="formData.deviceType === 0 || formData.deviceType === 2"
+        v-if="[DeviceTypeEnum.DEVICE, DeviceTypeEnum.GATEWAY].includes(formData.deviceType)"
         label="联网方式"
         prop="netType"
       >
@@ -62,7 +62,11 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="formData.deviceType === 1" label="接入网关协议" prop="protocolType">
+      <el-form-item
+        v-if="formData.deviceType === DeviceTypeEnum.GATEWAY_SUB"
+        label="接入网关协议"
+        prop="protocolType"
+      >
         <el-select
           v-model="formData.protocolType"
           placeholder="请选择接入网关协议"
@@ -120,7 +124,13 @@
 </template>
 
 <script setup lang="ts">
-import { ValidateTypeEnum, ProductApi, ProductVO, DataFormatEnum } from '@/api/iot/product/product'
+import {
+  ValidateTypeEnum,
+  ProductApi,
+  ProductVO,
+  DataFormatEnum,
+  DeviceTypeEnum
+} from '@/api/iot/product/product'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ProductCategoryApi, ProductCategoryVO } from '@/api/iot/product/category'
 import { UploadImg } from '@/components/UploadFile'

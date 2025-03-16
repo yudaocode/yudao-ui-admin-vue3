@@ -49,7 +49,7 @@ const fullUrl = computed(() => {
   return urlPath.value ? urlPrefix.value + urlPath.value : ''
 })
 
-/** 监听URL变化 */
+/** 监听 URL 变化 */
 watch([urlPrefix, urlPath], () => {
   config.value.url = fullUrl.value
 })
@@ -57,7 +57,7 @@ watch([urlPrefix, urlPath], () => {
 /** 组件初始化 */
 onMounted(() => {
   if (!isEmpty(config.value)) {
-    // 初始化URL
+    // 初始化 URL
     if (config.value.url) {
       if (config.value.url.startsWith('https://')) {
         urlPrefix.value = 'https://'

@@ -30,9 +30,9 @@
     />
     <div class="mt-5 text-center">
       <el-button v-if="isEditing" @click="cancelEdit">取消</el-button>
-      <el-button v-if="isEditing" type="primary" @click="saveConfig" :disabled="hasJsonError"
-        >保存</el-button
-      >
+      <el-button v-if="isEditing" type="primary" @click="saveConfig" :disabled="hasJsonError">
+        保存
+      </el-button>
       <el-button v-else @click="enableEdit">编辑</el-button>
       <!-- TODO @芋艿：缺一个下发按钮 -->
     </div>
