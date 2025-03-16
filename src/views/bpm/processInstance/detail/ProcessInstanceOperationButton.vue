@@ -759,6 +759,7 @@ const validateNextAssignees = () => {
       return false
     }
   }
+  return true
 }
 
 /** 处理审批通过和不通过的操作 */
