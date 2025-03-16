@@ -67,6 +67,7 @@
     "sortablejs": "^1.15.3",
     "steady-xml": "^0.1.0",
     "url": "^0.11.3",
+    "v3-jsoneditor": "^0.0.6",
     "video.js": "^7.21.5",
     "vue": "3.5.12",
     "vue-dompurify-html": "^4.1.4",

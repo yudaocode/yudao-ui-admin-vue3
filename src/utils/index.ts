@@ -117,8 +117,22 @@ export function toAnyString() {
 }
 
 /**
+ * 生成指定长度的随机字符串
+ *
+ * @param length 字符串长度
+ */
+export function generateRandomStr(length: number): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  let result = ''
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return result
+}
+
+/**
  * 根据支持的文件类型生成 accept 属性值
- * 
+ *
  * @param supportedFileTypes 支持的文件类型数组，如 ['PDF', 'DOC', 'DOCX']
  * @returns 用于文件上传组件 accept 属性的字符串
  */
@@ -503,7 +517,7 @@ export function jsonParse(str: string) {
   try {
     return JSON.parse(str)
   } catch (e) {
-    console.error(`str[${str}] 不是一个 JSON 字符串`)
+    console.log(`str[${str}] 不是一个 JSON 字符串`)
     return ''
   }
 }
