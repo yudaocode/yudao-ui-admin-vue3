@@ -178,8 +178,9 @@ const writableFields: Array<string> = [] // 表单可以编辑的字段
 
 /** 获得详情 */
 const getDetail = () => {
+  // 获得审批详情
   getApprovalDetail()
-
+  // 获得流程模型视图
   getProcessModelView()
 }
 

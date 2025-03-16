@@ -24,9 +24,7 @@
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
       </el-form-item>
 
-      <!-- TODO @ tuituji：style 可以使用 unocss -->
-      <el-form-item label="" prop="category" :style="{ position: 'absolute', right: '300px' }">
-        <!-- TODO @tuituji：应该选择好分类，就触发搜索啦。 RE:done & to check-->
+      <el-form-item label="" prop="category" class="absolute right-[300px]">
         <el-select
           v-model="queryParams.category"
           placeholder="请选择流程分类"
@@ -42,8 +40,7 @@
           />
         </el-select>
       </el-form-item>
-
-      <el-form-item label="" prop="status" :style="{ position: 'absolute', right: '130px' }">
+      <el-form-item label="" prop="status" class="absolute right-[130px]">
         <el-select
           v-model="queryParams.status"
           placeholder="请选择流程状态"
@@ -61,8 +58,7 @@
       </el-form-item>
 
       <!-- 高级筛选 -->
-      <!-- TODO @ tuituji：style 可以使用 unocss -->
-      <el-form-item :style="{ position: 'absolute', right: '0px' }">
+      <el-form-item class="absolute right-0">
         <el-popover
           :visible="showPopover"
           persistent
@@ -75,36 +71,28 @@
               <Icon icon="ep:plus" class="mr-5px" />高级筛选
             </el-button>
           </template>
-          <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
-            <el-select
-              v-model="queryParams.category"
-              placeholder="请选择流程发起人"
-              clearable
-              class="!w-390px"
-            >
-              <el-option
-                v-for="category in categoryList"
-                :key="category.code"
-                :label="category.name"
-                :value="category.code"
-              />
-            </el-select>
-          </el-form-item>
           <el-form-item
             label="所属流程"
-            class="bold-label"
+            class="font-bold"
             label-position="top"
             prop="processDefinitionKey"
           >
-            <el-input
+            <el-select
               v-model="queryParams.processDefinitionKey"
-              placeholder="请输入流程定义的标识"
+              placeholder="请选择流程定义"
               clearable
-              @keyup.enter="handleQuery"
               class="!w-390px"
-            />
+              @change="handleQuery"
+            >
+              <el-option
+                v-for="item in processDefinitionList"
+                :key="item.key"
+                :label="item.name"
+                :value="item.key"
+              />
+            </el-select>
           </el-form-item>
-          <el-form-item label="发起时间" class="bold-label" label-position="top" prop="createTime">
+          <el-form-item label="发起时间" class="font-bold" label-position="top" prop="createTime">
             <el-date-picker
               v-model="queryParams.createTime"
               value-format="YYYY-MM-DD HH:mm:ss"
@@ -115,11 +103,12 @@
               class="!w-240px"
             />
           </el-form-item>
-          <!-- TODO tuituiji：参考钉钉，1）按照清空、取消、确认排序。2）右对齐。3）确认增加 primary -->
-          <el-form-item class="bold-label" label-position="top">
-            <el-button @click="handleQuery"> 确认</el-button>
-            <el-button @click="showPopover = false"> 取消</el-button>
-            <el-button @click="resetQuery"> 清空</el-button>
+          <el-form-item class="font-bold" label-position="top">
+            <div class="flex justify-end w-full">
+              <el-button @click="resetQuery">清空</el-button>
+              <el-button @click="showPopover = false">取消</el-button>
+              <el-button type="primary" @click="handleQuery">确认</el-button>
+            </div>
           </el-form-item>
         </el-popover>
       </el-form-item>
@@ -130,6 +119,15 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="流程名称" align="center" prop="name" min-width="200px" fixed="left" />
+      <el-table-column label="摘要" prop="summary" width="180" fixed="left">
+        <template #default="scope">
+          <div class="flex flex-col" v-if="scope.row.summary && scope.row.summary.length > 0">
+            <div v-for="(item, index) in scope.row.summary" :key="index">
+              <el-text type="info"> {{ item.key }} : {{ item.value }} </el-text>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         label="流程分类"
         align="center"
@@ -137,11 +135,37 @@
         min-width="100"
         fixed="left"
       />
-      <!-- TODO @芋艿：摘要 -->
-      <!-- TODO tuituiji：参考钉钉；1）审批中时，展示审批任务；2）非审批中，展示状态 -->
-      <el-table-column label="流程状态" prop="status" width="120">
+      <el-table-column label="流程状态" prop="status" min-width="200">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
+          <!-- 审批中状态 -->
+          <template
+            v-if="
+              scope.row.status === BpmProcessInstanceStatus.RUNNING && scope.row.tasks?.length > 0
+            "
+          >
+            <!-- 单人审批 -->
+            <template v-if="scope.row.tasks.length === 1">
+              <span>
+                <el-button link type="primary" @click="handleDetail(scope.row)">
+                  {{ scope.row.tasks[0].assigneeUser?.nickname }}
+                </el-button>
+                ({{ scope.row.tasks[0].name }}) 审批中
+              </span>
+            </template>
+            <!-- 多人审批 -->
+            <template v-else>
+              <span>
+                <el-button link type="primary" @click="handleDetail(scope.row)">
+                  {{ scope.row.tasks[0].assigneeUser?.nickname }}
+                </el-button>
+                等 {{ scope.row.tasks.length }} 人 ({{ scope.row.tasks[0].name }})审批中
+              </span>
+            </template>
+          </template>
+          <!-- 非审批中状态 -->
+          <template v-else>
+            <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
+          </template>
         </template>
       </el-table-column>
       <el-table-column
@@ -158,19 +182,6 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <!--<el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
-        <template #default="scope">
-          {{ scope.row.durationInMillis > 0 ? formatPast2(scope.row.durationInMillis) : '-' }}
-        </template>
-      </el-table-column>
-      <el-table-column label="当前审批任务" align="center" prop="tasks" min-width="120px">
-        <template #default="scope">
-          <el-button type="primary" v-for="task in scope.row.tasks" :key="task.id" link>
-            <span>{{ task.name }}</span>
-          </el-button>
-        </template>
-      </el-table-column>
-      -->
       <el-table-column label="操作" align="center" fixed="right" width="180">
         <template #default="scope">
           <el-button
@@ -206,7 +217,6 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-// TODO @tuituji：List 改成 <Icon icon="ep:plus" class="mr-5px" /> 类似这种组件哈。 RE:done & to check
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'
@@ -214,6 +224,7 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import { ProcessInstanceVO } from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
+import { BpmProcessInstanceStatus } from '@/utils/constants'
 
 defineOptions({ name: 'BpmProcessInstanceMy' })
 
@@ -224,6 +235,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
+const processDefinitionList = ref<any[]>([]) // 流程定义列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -235,6 +247,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
+const showPopover = ref(false) // 高级筛选是否展示
 
 /** 查询列表 */
 const getList = async () => {
@@ -247,8 +260,6 @@ const getList = async () => {
     loading.value = false
   }
 }
-
-const showPopover = ref(false)
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -316,10 +327,7 @@ onActivated(() => {
 onMounted(async () => {
   await getList()
   categoryList.value = await CategoryApi.getCategorySimpleList()
+  // 获取流程定义列表
+  processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
 })
 </script>
-<style>
-.bold-label .el-form-item__label {
-  font-weight: bold; /* 将字体加粗 */
-}
-</style>

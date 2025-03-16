@@ -59,7 +59,15 @@
             v-hasPermi="['bpm:form:update']"
             link
             type="primary"
-            @click="openForm(scope.row.id)"
+            @click="openForm('copy', scope.row.id)"
+          >
+            复制
+          </el-button>
+          <el-button
+            v-hasPermi="['bpm:form:update']"
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
           >
             编辑
           </el-button>
@@ -139,16 +147,17 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const openForm = (id?: number) => {
-  const toRouter: { name: string; query?: { id: number } } = {
-    name: 'BpmFormEditor'
+const openForm = (type: string, id?: number) => {
+  const toRouter: { name: string; query: { type: string; id?: number } } = {
+    name: 'BpmFormEditor',
+    query: {
+      type
+    }
   }
   console.log(typeof id)
   // 表单新建的时候id传的是event需要排除
   if (typeof id === 'number' || typeof id === 'string') {
-    toRouter.query = {
-      id
-    }
+    toRouter.query.id = id
   }
   push(toRouter)
 }

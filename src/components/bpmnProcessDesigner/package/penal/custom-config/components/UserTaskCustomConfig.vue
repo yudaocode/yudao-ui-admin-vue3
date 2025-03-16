@@ -5,6 +5,7 @@
      4. 操作按钮
      5. 字段权限
      6. 审批类型
+     7. 是否需要签名
 -->
 <template>
   <div>
@@ -122,13 +123,19 @@
     </div>
 
     <el-divider content-position="left">字段权限</el-divider>
-    <div class="field-setting-pane" v-if="formType === 10">
+    <div class="field-setting-pane" v-if="formType === BpmModelFormType.NORMAL">
       <div class="field-permit-title">
         <div class="setting-title-label first-title"> 字段名称 </div>
         <div class="other-titles">
-          <span class="setting-title-label">只读</span>
-          <span class="setting-title-label">可编辑</span>
-          <span class="setting-title-label">隐藏</span>
+          <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')"
+            >只读</span
+          >
+          <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')"
+            >可编辑</span
+          >
+          <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')"
+            >隐藏</span
+          >
         </div>
       </div>
       <div class="field-setting-item" v-for="(item, index) in fieldsPermissionEl" :key="index">
@@ -139,28 +146,54 @@
               :value="FieldPermissionType.READ"
               size="large"
               :label="FieldPermissionType.READ"
-              ><span></span
-            ></el-radio>
+              @change="updateElementExtensions"
+            >
+              <span></span>
+            </el-radio>
           </div>
           <div class="item-radio-wrap">
             <el-radio
               :value="FieldPermissionType.WRITE"
               size="large"
               :label="FieldPermissionType.WRITE"
-              ><span></span
-            ></el-radio>
+              @change="updateElementExtensions"
+            >
+              <span></span>
+            </el-radio>
           </div>
           <div class="item-radio-wrap">
             <el-radio
               :value="FieldPermissionType.NONE"
               size="large"
               :label="FieldPermissionType.NONE"
-              ><span></span
-            ></el-radio>
+              @change="updateElementExtensions"
+            >
+              <span></span>
+            </el-radio>
           </div>
         </el-radio-group>
       </div>
     </div>
+
+    <el-divider content-position="left">是否需要签名</el-divider>
+    <el-form-item prop="signEnable">
+      <el-switch
+        v-model="signEnable.value"
+        active-text="是"
+        inactive-text="否"
+        @change="updateElementExtensions"
+      />
+    </el-form-item>
+
+    <el-divider content-position="left">审批意见</el-divider>
+    <el-form-item prop="reasonRequire">
+      <el-switch
+        v-model="reasonRequire.value"
+        active-text="必填"
+        inactive-text="非必填"
+        @change="updateElementExtensions"
+      />
+    </el-form-item>
   </div>
 </template>
 
@@ -180,6 +213,7 @@ import {
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
 import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
+import { BpmModelFormType } from '@/utils/constants'
 
 defineOptions({ name: 'ElementCustomConfig4UserTask' })
 const props = defineProps({
@@ -218,6 +252,12 @@ const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFie
 // 审批类型
 const approveType = ref({ value: ApproveType.USER })
 
+// 是否需要签名
+const signEnable = ref({ value: false })
+
+// 审批意见
+const reasonRequire = ref({ value: false })
+
 const elExtensionElements = ref()
 const otherExtensions = ref()
 const bpmnElement = ref()
@@ -231,7 +271,6 @@ const resetCustomConfigList = () => {
     bpmnElement.value.id,
     bpmnInstances().modeler
   )
-
   // 获取元素扩展属性 或者 创建扩展属性
   elExtensionElements.value =
     bpmnElement.value.businessObject?.extensionElements ??
@@ -294,14 +333,13 @@ const resetCustomConfigList = () => {
   }
 
   // 字段权限
-  if (formType.value === 10) {
+  if (formType.value === BpmModelFormType.NORMAL) {
     const fieldsPermissionList = elExtensionElements.value.values?.filter(
       (ex) => ex.$type === `${prefix}:FieldsPermission`
     )
     fieldsPermissionEl.value = []
     getNodeConfigFormFields()
-    // 由于默认添加了发起人元素，这里需要删掉
-    fieldsPermissionConfig.value = fieldsPermissionConfig.value.slice(1)
+    fieldsPermissionConfig.value = fieldsPermissionConfig.value
     fieldsPermissionConfig.value.forEach((element) => {
       element.permission =
         fieldsPermissionList?.find((obj) => obj.field === element.field)?.permission ?? '1'
@@ -310,6 +348,16 @@ const resetCustomConfigList = () => {
       )
     })
   }
+
+  // 是否需要签名
+  signEnable.value =
+    elExtensionElements.value.values?.filter((ex) => ex.$type === `${prefix}:SignEnable`)?.[0] ||
+    bpmnInstances().moddle.create(`${prefix}:SignEnable`, { value: false })
+
+  // 审批意见
+  reasonRequire.value =
+    elExtensionElements.value.values?.filter((ex) => ex.$type === `${prefix}:ReasonRequire`)?.[0] ||
+    bpmnInstances().moddle.create(`${prefix}:ReasonRequire`, { value: false })
 
   // 保留剩余扩展元素，便于后面更新该元素对应属性
   otherExtensions.value =
@@ -322,7 +370,9 @@ const resetCustomConfigList = () => {
         ex.$type !== `${prefix}:AssignEmptyUserIds` &&
         ex.$type !== `${prefix}:ButtonsSetting` &&
         ex.$type !== `${prefix}:FieldsPermission` &&
-        ex.$type !== `${prefix}:ApproveType`
+        ex.$type !== `${prefix}:ApproveType` &&
+        ex.$type !== `${prefix}:SignEnable` &&
+        ex.$type !== `${prefix}:ReasonRequire`
     ) ?? []
 
   // 更新元素扩展属性，避免后续报错
@@ -373,7 +423,9 @@ const updateElementExtensions = () => {
       assignEmptyUserIdsEl.value,
       approveType.value,
       ...buttonsSettingEl.value,
-      ...fieldsPermissionEl.value
+      ...fieldsPermissionEl.value,
+      signEnable.value,
+      reasonRequire.value
     ]
   })
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
@@ -456,6 +508,19 @@ function useButtonsSetting() {
   }
 }
 
+/** 批量更新权限 */
+// TODO @lesan：这个页面，有一些 idea 红色报错，咱要不要 fix 下！
+const updatePermission = (type: string) => {
+  fieldsPermissionEl.value.forEach((field) => {
+    field.permission =
+      type === 'READ'
+        ? FieldPermissionType.READ
+        : type === 'WRITE'
+          ? FieldPermissionType.WRITE
+          : FieldPermissionType.NONE
+  })
+}
+
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 onMounted(async () => {
   // 获得用户列表
@@ -466,9 +531,9 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .button-setting-pane {
   display: flex;
-  flex-direction: column;
-  font-size: 14px;
   margin-top: 8px;
+  font-size: 14px;
+  flex-direction: column;
 
   .button-setting-desc {
     padding-right: 8px;

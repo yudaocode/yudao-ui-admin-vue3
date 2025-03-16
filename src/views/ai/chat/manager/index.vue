@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="AI 对话聊天" url="https://doc.iocoder.cn/ai/chat/" />
+
   <ContentWrap>
     <el-tabs>
       <el-tab-pane label="对话列表">

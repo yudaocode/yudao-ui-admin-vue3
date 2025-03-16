@@ -279,8 +279,9 @@ const handleSendMessage = async (event: any) => {
     return
   }
   // 1. 校验消息是否为空
-  if (isEmpty(unref(message.value))) {
+  if (isEmpty(unref(message.value)?.trim())) {
     messageTool.notifyWarning('请输入消息后再发送哦！')
+    message.value = ''
     return
   }
   // 2. 组织发送消息
@@ -372,7 +373,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
 <style lang="scss" scoped>
 .kefu {
-  background-color: #f5f5f5;
+  background-color: var(--app-content-bg-color);
   position: relative;
   width: calc(100% - 300px - 260px);
 
@@ -388,7 +389,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
   }
 
   .kefu-header {
-    background-color: #f5f5f5;
+    background-color: var(--app-content-bg-color);
     position: relative;
     display: flex;
     align-items: center;
@@ -510,7 +511,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
   ::v-deep(textarea) {
     resize: none;
-    background-color: #f5f5f5;
+    background-color: var(--app-content-bg-color);
   }
 
   :deep(.el-input__wrapper) {

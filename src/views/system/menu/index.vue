@@ -53,6 +53,10 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
+        <el-button plain type="danger" @click="toggleExpandAll">
+          <Icon class="mr-5px" icon="ep:sort" />
+          展开/折叠
+        </el-button>
         <el-button plain @click="refreshMenu">
           <Icon class="mr-5px" icon="ep:refresh" />
           刷新菜单缓存
@@ -63,148 +67,169 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <div style="height: 700px">
-      <!-- AutoResizer 自动调节大小 -->
-      <el-auto-resizer>
-        <template #default="{ height, width }">
-          <!-- Virtualized Table 虚拟化表格：高性能，解决表格在大数据量下的卡顿问题 -->
-          <el-table-v2
-            v-loading="loading"
-            :columns="columns"
-            :data="list"
-            :width="width"
-            :height="height"
-            expand-column-key="name"
-          />
-        </template>
-      </el-auto-resizer>
-    </div>
+    <el-auto-resizer>
+      <template #default="{ width }">
+        <el-table-v2
+          v-model:expanded-row-keys="expandedRowKeys"
+          :columns="columns"
+          :data="list"
+          :expand-column-key="columns[0].key"
+          :height="1000"
+          :width="width"
+          fixed
+          row-key="id"
+        />
+      </template>
+    </el-auto-resizer>
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
   <MenuForm ref="formRef" @success="getList" />
 </template>
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
 import * as MenuApi from '@/api/system/menu'
 import { MenuVO } from '@/api/system/menu'
 import MenuForm from './MenuForm.vue'
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
-import { h } from 'vue'
-import { Column, ElButton } from 'element-plus'
+import DictTag from '@/components/DictTag/src/DictTag.vue'
 import { Icon } from '@/components/Icon'
-import { hasPermission } from '@/directives/permission/hasPermi'
+import { ElButton, TableV2FixedDir } from 'element-plus'
+import { checkPermi } from '@/utils/permission'
 import { CommonStatusEnum } from '@/utils/constants'
+import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 
 defineOptions({ name: 'SystemMenu' })
+
+// 虚拟列表表格
+const columns = [
+  {
+    key: 'name',
+    title: '菜单名称',
+    dataKey: 'name',
+    width: 250,
+    fixed: TableV2FixedDir.LEFT
+  },
+  {
+    key: 'icon',
+    title: '图标',
+    dataKey: 'icon',
+    width: 100,
+    align: 'center',
+    cellRenderer: ({ cellData: icon }) => <Icon icon={icon} />
+  },
+  {
+    key: 'sort',
+    title: '排序',
+    dataKey: 'sort',
+    width: 60
+  },
+  {
+    key: 'permission',
+    title: '权限标识',
+    dataKey: 'permission',
+    width: 300
+  },
+  {
+    key: 'component',
+    title: '组件路径',
+    dataKey: 'component',
+    width: 500
+  },
+  {
+    key: 'componentName',
+    title: '组件名称',
+    dataKey: 'componentName',
+    width: 200
+  },
+  {
+    key: 'status',
+    title: '状态',
+    dataKey: 'status',
+    width: 60,
+    fixed: TableV2FixedDir.RIGHT,
+    cellRenderer: ({ rowData }) => {
+      // 检查权限
+      if (!checkPermi(['system:menu:update'])) {
+        return <DictTag type={DICT_TYPE.COMMON_STATUS} value={rowData.status} />
+      }
+
+      // 如果有权限，渲染 ElSwitch
+      return (
+        <ElSwitch
+          v-model={rowData.status}
+          active-value={CommonStatusEnum.ENABLE}
+          inactive-value={CommonStatusEnum.DISABLE}
+          loading={menuStatusUpdating[rowData.id]}
+          class="ml-4px"
+          onChange={(val) => handleStatusChanged(rowData, val)}
+        />
+      )
+    }
+  },
+  {
+    key: 'operations',
+    title: '操作',
+    align: 'center',
+    width: 160,
+    fixed: TableV2FixedDir.RIGHT,
+    cellRenderer: ({ rowData }) => {
+      // 定义按钮列表
+      const buttons = []
+
+      // 检查权限并添加按钮
+      if (checkPermi(['system:menu:update'])) {
+        buttons.push(
+          <ElButton key="edit" link type="primary" onClick={() => openForm('update', rowData.id)}>
+            修改
+          </ElButton>
+        )
+      }
+      if (checkPermi(['system:menu:create'])) {
+        buttons.push(
+          <ElButton
+            key="create"
+            link
+            type="primary"
+            onClick={() => openForm('create', undefined, rowData.id)}
+          >
+            新增
+          </ElButton>
+        )
+      }
+      if (checkPermi(['system:menu:delete'])) {
+        buttons.push(
+          <ElButton key="delete" link type="danger" onClick={() => handleDelete(rowData.id)}>
+            删除
+          </ElButton>
+        )
+      }
+      // 如果没有权限，返回 null
+      if (buttons.length === 0) {
+        return null
+      }
+      // 渲染按钮列表
+      return <>{buttons}</>
+    }
+  }
+]
 
 const { wsCache } = useCache()
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-// 表格的 column 字段
-const columns: Column[] = [
-  {
-    dataKey: 'name',
-    title: '菜单名称',
-    width: 250
-  },
-  {
-    dataKey: 'icon',
-    title: '图标',
-    width: 150,
-    cellRenderer: ({ rowData }) => {
-      return h(Icon, {
-        icon: rowData.icon
-      })
-    }
-  },
-  {
-    dataKey: 'sort',
-    title: '排序',
-    width: 100
-  },
-  {
-    dataKey: 'permission',
-    title: '权限标识',
-    width: 240
-  },
-  {
-    dataKey: 'component',
-    title: '组件路径',
-    width: 240
-  },
-  {
-    dataKey: 'componentName',
-    title: '组件名称',
-    width: 240
-  },
-  {
-    dataKey: 'status',
-    title: '状态',
-    width: 160,
-    cellRenderer: ({ rowData }) => {
-      return h(ElSwitch, {
-        modelValue: rowData.status,
-        activeValue: CommonStatusEnum.ENABLE,
-        inactiveValue: CommonStatusEnum.DISABLE,
-        loading: menuStatusUpdating.value[rowData.id],
-        disabled: !hasPermission(['system:menu:update']),
-        onChange: (val) => handleStatusChanged(rowData, val as number)
-      })
-    }
-  },
-  {
-    dataKey: 'operation',
-    title: '操作',
-    width: 200,
-    cellRenderer: ({ rowData }) => {
-      return h(
-        'div',
-        [
-          hasPermission(['system:menu:update']) &&
-            h(
-              ElButton,
-              {
-                link: true,
-                type: 'primary',
-                onClick: () => openForm('update', rowData.id)
-              },
-              '修改'
-            ),
-          hasPermission(['system:menu:create']) &&
-            h(
-              ElButton,
-              {
-                link: true,
-                type: 'primary',
-                onClick: () => openForm('create', undefined, rowData.id)
-              },
-              '新增'
-            ),
-          hasPermission(['system:menu:delete']) &&
-            h(
-              ElButton,
-              {
-                link: true,
-                type: 'danger',
-                onClick: () => handleDelete(rowData.id)
-              },
-              '删除'
-            )
-        ].filter(Boolean)
-      )
-    }
-  }
-]
 const loading = ref(true) // 列表的加载中
-const list = ref<any>([]) // 列表的数据
+const list = ref<any[]>([]) // 列表的数据
 const queryParams = reactive({
   name: undefined,
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const isExpandAll = ref(false) // 是否展开，默认全部折叠
+const refreshTable = ref(true) // 重新渲染表格状态
+
+// 添加展开行控制
+const expandedRowKeys = ref<number[]>([])
 
 /** 查询列表 */
 const getList = async () => {
@@ -232,6 +257,18 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number, parentId?: number) => {
   formRef.value.open(type, id, parentId)
+}
+
+/** 展开/折叠操作 */
+const toggleExpandAll = () => {
+  if (!isExpandAll.value) {
+    // 展开所有
+    expandedRowKeys.value = list.value.map((item) => item.id)
+  } else {
+    // 折叠所有
+    expandedRowKeys.value = []
+  }
+  isExpandAll.value = !isExpandAll.value
 }
 
 /** 刷新菜单缓存按钮操作 */

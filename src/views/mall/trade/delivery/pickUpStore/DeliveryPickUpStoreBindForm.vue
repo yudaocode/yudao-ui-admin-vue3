@@ -20,7 +20,7 @@
             <el-button type="primary" @click="storeStaffTableSelect.open()">选择店员</el-button>
           </el-form-item>
           <!-- 店员列表 -->
-          <ContentWrap v-if="formData.verifyUsers.length > 0">
+          <ContentWrap v-if="formData.verifyUsers?.length > 0">
             <el-table :data="formData.verifyUsers">
               <el-table-column label="编号" align="center" prop="id" />
               <el-table-column

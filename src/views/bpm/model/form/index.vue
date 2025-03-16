@@ -44,8 +44,13 @@
 
         <!-- 右侧按钮 -->
         <div class="w-200px flex items-center justify-end gap-2">
-          <el-button v-if="route.params.id" type="success" @click="handleDeploy">发 布</el-button>
-          <el-button type="primary" @click="handleSave">保 存</el-button>
+          <el-button v-if="actionType === 'update'" type="success" @click="handleDeploy">
+            发 布
+          </el-button>
+          <el-button type="primary" @click="handleSave">
+            <span v-if="actionType === 'definition'">恢 复</span>
+            <span v-else>保 存</span>
+          </el-button>
         </div>
       </div>
 
@@ -67,12 +72,12 @@
         </div>
 
         <!-- 第三步：流程设计 -->
-        <ProcessDesign
-          v-if="currentStep === 2"
-          v-model="formData"
-          ref="processDesignRef"
-          @success="handleDesignSuccess"
-        />
+        <ProcessDesign v-if="currentStep === 2" v-model="formData" ref="processDesignRef" />
+
+        <!-- 第四步：更多设置 -->
+        <div v-show="currentStep === 3" class="mx-auto w-700px">
+          <ExtraSettings v-model="formData" ref="extraSettingsRef" />
+        </div>
       </div>
     </div>
   </ContentWrap>
@@ -81,19 +86,23 @@
 <script lang="ts" setup>
 import { useRoute, useRouter } from 'vue-router'
 import { useMessage } from '@/hooks/web/useMessage'
+import { useTagsViewStore } from '@/store/modules/tagsView'
+import { useUserStoreWithOut } from '@/store/modules/user'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
-import { CategoryApi } from '@/api/bpm/category'
+import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import * as UserApi from '@/api/system/user'
-import { useUserStoreWithOut } from '@/store/modules/user'
-import { BpmModelFormType, BpmModelType } from '@/utils/constants'
+import * as DefinitionApi from '@/api/bpm/definition'
+import { BpmModelFormType, BpmModelType, BpmAutoApproveType } from '@/utils/constants'
 import BasicInfo from './BasicInfo.vue'
 import FormDesign from './FormDesign.vue'
 import ProcessDesign from './ProcessDesign.vue'
-import { useTagsViewStore } from '@/store/modules/tagsView'
+import ExtraSettings from './ExtraSettings.vue'
+import { useTagsView } from '@/hooks/web/useTagsView'
 
 const router = useRouter()
 const { delView } = useTagsViewStore() // 视图操作
+const tagsView = useTagsView()
 const route = useRoute()
 const message = useMessage()
 const userStore = useUserStoreWithOut()
@@ -102,6 +111,7 @@ const userStore = useUserStoreWithOut()
 const basicInfoRef = ref()
 const formDesignRef = ref()
 const processDesignRef = ref()
+const extraSettingsRef = ref()
 
 /** 步骤校验函数 */
 const validateBasic = async () => {
@@ -118,11 +128,13 @@ const validateProcess = async () => {
   await processDesignRef.value?.validate()
 }
 
-const currentStep = ref(0) // 步骤控制
+const currentStep = ref(-1) // 步骤控制。-1 用于，一开始全部不展示等当前页面数据初始化完成
+
 const steps = [
   { title: '基本信息', validator: validateBasic },
   { title: '表单设计', validator: validateForm },
-  { title: '流程设计', validator: validateProcess }
+  { title: '流程设计', validator: validateProcess },
+  { title: '更多设置', validator: null }
 ]
 
 // 表单数据
@@ -140,24 +152,70 @@ const formData: any = ref({
   formCustomViewPath: '',
   visible: true,
   startUserType: undefined,
-  managerUserType: undefined,
   startUserIds: [],
-  managerUserIds: []
+  managerUserIds: [],
+  allowCancelRunningProcess: true,
+  processIdRule: {
+    enable: false,
+    prefix: '',
+    infix: '',
+    postfix: '',
+    length: 5
+  },
+  autoApprovalType: BpmAutoApproveType.NONE,
+  titleSetting: {
+    enable: false,
+    title: ''
+  },
+  summarySetting: {
+    enable: false,
+    summary: []
+  }
 })
+
+// 流程数据
+const processData = ref<any>()
+
+provide('processData', processData)
+provide('modelData', formData)
 
 // 数据列表
 const formList = ref([])
-const categoryList = ref([])
+const categoryList = ref<CategoryVO[]>([])
 const userList = ref<UserApi.UserVO[]>([])
 
 /** 初始化数据 */
+const actionType = route.params.type as string
 const initData = async () => {
-  const modelId = route.params.id as string
-  if (modelId) {
-    // 修改场景
+  if (actionType === 'definition') {
+    // 情况一：流程定义场景（恢复）
+    const definitionId = route.params.id as string
+    const data = await DefinitionApi.getProcessDefinition(definitionId)
+    // 将 definition => model，最终赋值
+    data.type = data.modelType
+    delete data.modelType
+    data.id = data.modelId
+    delete data.modelId
+    if (data.simpleModel) {
+      data.simpleModel = JSON.parse(data.simpleModel)
+    }
+    formData.value = data
+    formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : 0
+  } else if (['update', 'copy'].includes(actionType)) {
+    // 情况二：修改场景/复制场景
+    const modelId = route.params.id as string
     formData.value = await ModelApi.getModel(modelId)
+    formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : 0
+    // 特殊：复制场景
+    if (actionType === 'copy') {
+      delete formData.value.id
+      formData.value.name += '副本'
+      formData.value.key += '_copy'
+      tagsView.setTitle('复制流程')
+    }
   } else {
-    // 新增场景
+    // 情况三：新增场景
+    formData.value.startUserType = 0 // 全体
     formData.value.managerUserIds.push(userStore.getUser.id)
   }
 
@@ -167,59 +225,57 @@ const initData = async () => {
   categoryList.value = await CategoryApi.getCategorySimpleList()
   // 获取用户列表
   userList.value = await UserApi.getSimpleUserList()
+
+  // 最终，设置 currentStep 切换到第一步
+  currentStep.value = 0
+
+  // 兼容，以前未配置更多设置的流程
+  extraSettingsRef.value.initData()
 }
+
+/** 根据类型切换流程数据 */
+watch(
+  async () => formData.value.type,
+  () => {
+    if (formData.value.type === BpmModelType.BPMN) {
+      processData.value = formData.value.bpmnXml
+    } else if (formData.value.type === BpmModelType.SIMPLE) {
+      processData.value = formData.value.simpleModel
+    }
+    console.log('加载流程数据', processData.value)
+  },
+  {
+    immediate: true
+  }
+)
 
 /** 校验所有步骤数据是否完整 */
 const validateAllSteps = async () => {
   try {
     // 基本信息校验
-    await basicInfoRef.value?.validate()
-    if (!formData.value.key || !formData.value.name || !formData.value.category) {
+    try {
+      await validateBasic()
+    } catch (error) {
       currentStep.value = 0
       throw new Error('请完善基本信息')
     }
 
     // 表单设计校验
-    await formDesignRef.value?.validate()
-    if (formData.value.formType === 10 && !formData.value.formId) {
-      currentStep.value = 1
-      throw new Error('请选择流程表单')
-    }
-    if (
-      formData.value.formType === 20 &&
-      (!formData.value.formCustomCreatePath || !formData.value.formCustomViewPath)
-    ) {
+    try {
+      await validateForm()
+    } catch (error) {
       currentStep.value = 1
       throw new Error('请完善自定义表单信息')
     }
 
     // 流程设计校验
-    // 如果已经有流程数据，则不需要重新校验
-    if (!formData.value.bpmnXml && !formData.value.simpleModel) {
-      // 如果当前不在第三步，需要先保存当前步骤数据
-      if (currentStep.value !== 2) {
-        await steps[currentStep.value].validator()
-        // 切换到第三步
-        currentStep.value = 2
-        // 等待组件渲染完成
-        await nextTick()
-      }
 
-      // 校验流程设计
-      await processDesignRef.value?.validate()
-      const processData = await processDesignRef.value?.getProcessData()
-      if (!processData) {
-        throw new Error('请设计流程')
-      }
-
-      // 保存流程数据
-      if (formData.value.type === BpmModelType.BPMN) {
-        formData.value.bpmnXml = processData
-        formData.value.simpleModel = null
-      } else {
-        formData.value.bpmnXml = null
-        formData.value.simpleModel = processData
-      }
+    // 表单设计校验
+    try {
+      await validateProcess()
+    } catch (error) {
+      currentStep.value = 2
+      throw new Error('请设计流程')
     }
 
     return true
@@ -239,52 +295,31 @@ const handleSave = async () => {
       ...formData.value
     }
 
-    // 如果当前在第三步，获取最新的流程设计数据
-    if (currentStep.value === 2) {
-      const processData = await processDesignRef.value?.getProcessData()
-      if (processData) {
-        if (formData.value.type === BpmModelType.BPMN) {
-          modelData.bpmnXml = processData
-          modelData.simpleModel = null
-        } else {
-          modelData.bpmnXml = null
-          modelData.simpleModel = processData
-        }
-      }
-    }
-
-    if (formData.value.id) {
+    if (actionType === 'definition') {
+      // 情况一：流程定义场景（恢复）
+      await ModelApi.updateModel(modelData)
+      // 提示成功
+      message.success('恢复成功，可点击【发布】按钮，进行发布模型')
+    } else if (actionType === 'update') {
       // 修改场景
       await ModelApi.updateModel(modelData)
-      // 询问是否发布流程
-      try {
-        await message.confirm('修改流程成功，是否发布流程？')
-        // 用户点击确认，执行发布
-        await handleDeploy()
-      } catch {
-        // 用户点击取消，停留在当前页面
-      }
-    } else {
-      // 新增场景
+      // 提示成功
+      message.success('修改成功，可点击【发布】按钮，进行发布模型')
+    } else if (actionType === 'copy') {
+      // 情况三：复制场景
       formData.value.id = await ModelApi.createModel(modelData)
-      message.success('新增成功')
-      try {
-        await message.confirm('创建流程成功，是否继续编辑？')
-        // 用户点击继续编辑，跳转到编辑页面
-        await nextTick()
-        // 先删除当前页签
-        delView(unref(router.currentRoute))
-        // 跳转到编辑页面
-        await router.push({
-          name: 'BpmModelUpdate',
-          params: { id: formData.value.id }
-        })
-      } catch {
-        // 先删除当前页签
-        delView(unref(router.currentRoute))
-        // 用户点击返回列表
-        await router.push({ name: 'BpmModel' })
-      }
+      // 提示成功
+      message.success('复制成功，可点击【发布】按钮，进行发布模型')
+    } else {
+      // 情况四：新增场景
+      formData.value.id = await ModelApi.createModel(modelData)
+      // 提示成功
+      message.success('新建成功，可点击【发布】按钮，进行发布模型')
+    }
+
+    // 返回列表页（排除更新的情况）
+    if (actionType !== 'update') {
+      await router.push({ name: 'BpmModel' })
     }
   } catch (error: any) {
     console.error('保存失败:', error)
@@ -299,27 +334,12 @@ const handleDeploy = async () => {
     if (!formData.value.id) {
       await message.confirm('是否确认发布该流程？')
     }
-
     // 校验所有步骤
     await validateAllSteps()
 
     // 更新表单数据
     const modelData = {
       ...formData.value
-    }
-
-    // 如果当前在第三步，获取最新的流程设计数据
-    if (currentStep.value === 2) {
-      const processData = await processDesignRef.value?.getProcessData()
-      if (processData) {
-        if (formData.value.type === BpmModelType.BPMN) {
-          modelData.bpmnXml = processData
-          modelData.simpleModel = null
-        } else {
-          modelData.bpmnXml = null
-          modelData.simpleModel = processData
-        }
-      }
     }
 
     // 先保存所有数据
@@ -344,33 +364,14 @@ const handleDeploy = async () => {
 /** 步骤切换处理 */
 const handleStepClick = async (index: number) => {
   try {
-    // 如果是切换到第三步（流程设计），需要校验key和name
-    if (index === 2) {
-      if (!formData.value.key || !formData.value.name) {
-        message.warning('请先填写流程标识和流程名称')
-        return
-      }
+    if (index !== 0) {
+      await validateBasic()
     }
-
-    // 保存当前步骤的数据
-    if (currentStep.value === 2) {
-      const processData = await processDesignRef.value?.getProcessData()
-      if (processData) {
-        if (formData.value.type === BpmModelType.BPMN) {
-          formData.value.bpmnXml = processData
-          formData.value.simpleModel = null
-        } else {
-          formData.value.bpmnXml = null
-          formData.value.simpleModel = processData
-        }
-      }
-    } else {
-      // 只有在向后切换时才进行校验
-      if (index > currentStep.value) {
-        if (typeof steps[currentStep.value].validator === 'function') {
-          await steps[currentStep.value].validator()
-        }
-      }
+    if (index !== 1) {
+      await validateForm()
+    }
+    if (index !== 2) {
+      await validateProcess()
     }
 
     // 切换步骤
@@ -380,7 +381,7 @@ const handleStepClick = async (index: number) => {
     if (index === 2) {
       await nextTick()
       // 等待更长时间确保组件完全初始化
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await new Promise((resolve) => setTimeout(resolve, 200))
       if (processDesignRef.value?.refresh) {
         await processDesignRef.value.refresh()
       }
@@ -388,13 +389,6 @@ const handleStepClick = async (index: number) => {
   } catch (error) {
     console.error('步骤切换失败:', error)
     message.warning('请先完善当前步骤必填信息')
-  }
-}
-
-/** 处理设计器保存成功 */
-const handleDesignSuccess = (bpmnXml?: string) => {
-  if (bpmnXml) {
-    formData.value.bpmnXml = bpmnXml
   }
 }
 

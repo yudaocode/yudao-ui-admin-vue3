@@ -4,7 +4,6 @@
       :flow-node="simpleModel"
       :tasks="tasks"
       :process-instance="processInstance"
-      class="process-viewer"
     />
   </div>
 </template>
@@ -20,7 +19,7 @@ const props = defineProps({
   modelView: propTypes.object,
   simpleJson: propTypes.string // Simple 模型结构数据 (json 格式)
 })
-const simpleModel = ref()
+const simpleModel = ref<any>({})
 // 用户任务
 const tasks = ref([])
 // 流程实例
@@ -43,13 +42,13 @@ watch(
       const finishedSequenceFlowActivityIds: string[] = newModelView.finishedSequenceFlowActivityIds
       setSimpleModelNodeTaskStatus(
         newModelView.simpleModel,
-        newModelView.processInstance.status,
+        newModelView.processInstance?.status,
         rejectedTaskActivityIds,
         unfinishedTaskActivityIds,
         finishedActivityIds,
         finishedSequenceFlowActivityIds
       )
-      simpleModel.value = newModelView.simpleModel
+      simpleModel.value = newModelView.simpleModel ? newModelView.simpleModel : {}
     }
   }
 )
@@ -82,11 +81,12 @@ const setSimpleModelNodeTaskStatus = (
     }
     return
   }
-
   // 审批节点
   if (
     simpleModel.type === NodeType.START_USER_NODE ||
-    simpleModel.type === NodeType.USER_TASK_NODE
+    simpleModel.type === NodeType.USER_TASK_NODE ||
+    simpleModel.type === NodeType.TRANSACTOR_NODE ||
+    simpleModel.type === NodeType.CHILD_PROCESS_NODE
   ) {
     simpleModel.activityStatus = TaskStatusEnum.NOT_START
     if (rejectedTaskActivityIds.includes(simpleModel.id)) {
@@ -98,31 +98,49 @@ const setSimpleModelNodeTaskStatus = (
     }
     // TODO 是不是还缺一个 cancel 的状态
   }
-
   // 抄送节点
   if (simpleModel.type === NodeType.COPY_TASK_NODE) {
-    // 抄送节点 只有通过和未执行状态
+    // 抄送节点,只有通过和未执行状态
     if (finishedActivityIds.includes(simpleModel.id)) {
       simpleModel.activityStatus = TaskStatusEnum.APPROVE
     } else {
       simpleModel.activityStatus = TaskStatusEnum.NOT_START
     }
   }
-  // 条件节点 对应 SequenceFlow
-  if (simpleModel.type === NodeType.CONDITION_NODE) {
-    // 条件节点。只有通过和未执行状态
-    if (finishedSequenceFlowActivityIds.includes(simpleModel.id)) {
+  // 延迟器节点
+  if (simpleModel.type === NodeType.DELAY_TIMER_NODE) {
+    // 延迟器节点,只有通过和未执行状态
+    if (finishedActivityIds.includes(simpleModel.id)) {
+      simpleModel.activityStatus = TaskStatusEnum.APPROVE
+    } else {
+      simpleModel.activityStatus = TaskStatusEnum.NOT_START
+    }
+  }
+  // 触发器节点
+  if (simpleModel.type === NodeType.TRIGGER_NODE) {
+    // 触发器节点,只有通过和未执行状态
+    if (finishedActivityIds.includes(simpleModel.id)) {
       simpleModel.activityStatus = TaskStatusEnum.APPROVE
     } else {
       simpleModel.activityStatus = TaskStatusEnum.NOT_START
     }
   }
 
+  // 条件节点对应 SequenceFlow
+  if (simpleModel.type === NodeType.CONDITION_NODE) {
+    // 条件节点,只有通过和未执行状态
+    if (finishedSequenceFlowActivityIds.includes(simpleModel.id)) {
+      simpleModel.activityStatus = TaskStatusEnum.APPROVE
+    } else {
+      simpleModel.activityStatus = TaskStatusEnum.NOT_START
+    }
+  }
   // 网关节点
   if (
     simpleModel.type === NodeType.CONDITION_BRANCH_NODE ||
     simpleModel.type === NodeType.PARALLEL_BRANCH_NODE ||
-    simpleModel.type === NodeType.INCLUSIVE_BRANCH_NODE
+    simpleModel.type === NodeType.INCLUSIVE_BRANCH_NODE ||
+    simpleModel.type === NodeType.ROUTER_BRANCH_NODE
   ) {
     // 网关节点。只有通过和未执行状态
     if (finishedActivityIds.includes(simpleModel.id)) {
@@ -153,16 +171,4 @@ const setSimpleModelNodeTaskStatus = (
 }
 </script>
 
-<style lang="scss" scoped>
-.process-viewer-container {
-  height: 100%;
-  width: 100%;
-  
-  :deep(.process-viewer) {
-    height: 100% !important;
-    min-height: 100%;
-    width: 100%;
-    overflow: auto;
-  }
-}
-</style>
+<style lang="scss" scoped></style>

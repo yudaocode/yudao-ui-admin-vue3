@@ -45,4 +45,3 @@ watch(
 provide('tasks', approveTasks)
 provide('processInstance', currentProcessInstance)
 </script>
-p

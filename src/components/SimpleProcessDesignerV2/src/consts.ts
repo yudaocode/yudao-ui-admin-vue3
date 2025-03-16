@@ -24,9 +24,24 @@ export enum NodeType {
   COPY_TASK_NODE = 12,
 
   /**
+   * 办理人节点
+   */
+  TRANSACTOR_NODE = 13,
+
+  /**
    * 延迟器节点
    */
   DELAY_TIMER_NODE = 14,
+
+  /**
+   * 触发器节点
+   */
+  TRIGGER_NODE = 15,
+
+  /**
+   * 子流程节点
+   */
+  CHILD_PROCESS_NODE = 20,
 
   /**
    * 条件节点
@@ -44,7 +59,11 @@ export enum NodeType {
   /**
    * 包容分支节点 (对应包容网关)
    */
-  INCLUSIVE_BRANCH_NODE = 53
+  INCLUSIVE_BRANCH_NODE = 53,
+  /**
+   * 路由分支节点
+   */
+  ROUTER_BRANCH_NODE = 54
 }
 
 export enum NodeId {
@@ -93,18 +112,29 @@ export interface SimpleFlowNode {
   assignEmptyHandler?: AssignEmptyHandler
   // 审批节点的审批人与发起人相同时，对应的处理类型
   assignStartUserHandlerType?: number
-  // 条件类型
-  conditionType?: ConditionType
-  // 条件表达式
-  conditionExpression?: string
-  // 条件组
-  conditionGroups?: ConditionGroup
-  // 是否默认的条件
-  defaultFlow?: boolean
+  // 创建任务监听器
+  taskCreateListener?: ListenerHandler
+  // 创建任务监听器
+  taskAssignListener?: ListenerHandler
+  // 创建任务监听器
+  taskCompleteListener?: ListenerHandler
+  // 条件设置
+  conditionSetting?: ConditionSetting
   // 活动的状态，用于前端节点状态展示
   activityStatus?: TaskStatusEnum
   // 延迟设置
   delaySetting?: DelaySetting
+  // 路由分支
+  routerGroups?: RouterSetting[]
+  defaultFlowId?: string
+  // 签名
+  signEnable?: boolean
+  // 审批意见
+  reasonRequire?: boolean
+  // 触发器设置
+  triggerSetting?: TriggerSetting
+  // 子流程
+  childProcessSetting?: ChildProcessSetting
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -132,6 +162,10 @@ export enum CandidateStrategy {
    * 指定用户
    */
   USER = 30,
+  /**
+   * 审批人自选
+   */
+  APPROVE_USER_SELECT = 34,
   /**
    * 发起人自选
    */
@@ -221,6 +255,41 @@ export type AssignEmptyHandler = {
   // 指定用户的编号数组
   userIds?: number[]
 }
+
+/**
+ * 监听器的结构定义
+ */
+export type ListenerHandler = {
+  enable: boolean
+  path?: string
+  header?: HttpRequestParam[]
+  body?: HttpRequestParam[]
+}
+export type HttpRequestParam = {
+  key: string
+  type: number
+  value: string
+}
+export enum BpmHttpRequestParamTypeEnum {
+  /**
+   * 固定值
+   */
+  FIXED_VALUE = 1,
+  /**
+   * 表单
+   */
+  FROM_FORM = 2
+}
+export const BPM_HTTP_REQUEST_PARAM_TYPES = [
+  {
+    value: 1,
+    label: '固定值'
+  },
+  {
+    value: 2,
+    label: '表单'
+  }
+]
 
 // 审批拒绝类型枚举
 export enum RejectHandlerType {
@@ -315,6 +384,20 @@ export enum TimeUnitType {
   DAY = 3
 }
 
+/**
+ * 条件节点设置结构定义，用于条件节点
+ */
+export type ConditionSetting = {
+  // 条件类型
+  conditionType?: ConditionType
+  // 条件表达式
+  conditionExpression?: string
+  // 条件组
+  conditionGroups?: ConditionGroup
+  // 是否默认的条件
+  defaultFlow?: boolean
+}
+
 // 条件配置类型 （ 用于条件节点配置 ）
 export enum ConditionType {
   /**
@@ -389,8 +472,6 @@ export enum OperationButtonType {
  * 条件规则结构定义
  */
 export type ConditionRule = {
-  type: number
-  opName: string
   opCode: string
   leftSide: string
   rightSide: string
@@ -404,6 +485,24 @@ export type ConditionGroup = {
   and: boolean
   // 条件数组
   conditions: Condition[]
+}
+/**
+ * 条件组默认值
+ */
+export const DEFAULT_CONDITION_GROUP_VALUE = {
+  and: true,
+  conditions: [
+    {
+      and: true,
+      rules: [
+        {
+          opCode: '==',
+          leftSide: '',
+          rightSide: ''
+        }
+      ]
+    }
+  ]
 }
 
 /**
@@ -421,6 +520,10 @@ NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
 NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
 NODE_DEFAULT_TEXT.set(NodeType.START_USER_NODE, '请设置发起人')
 NODE_DEFAULT_TEXT.set(NodeType.DELAY_TIMER_NODE, '请设置延迟器')
+NODE_DEFAULT_TEXT.set(NodeType.ROUTER_BRANCH_NODE, '请设置路由节点')
+NODE_DEFAULT_TEXT.set(NodeType.TRIGGER_NODE, '请设置触发器')
+NODE_DEFAULT_TEXT.set(NodeType.TRANSACTOR_NODE, '请设置办理人')
+NODE_DEFAULT_TEXT.set(NodeType.CHILD_PROCESS_NODE, '请设置子流程')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
@@ -428,15 +531,21 @@ NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 NODE_DEFAULT_NAME.set(NodeType.START_USER_NODE, '发起人')
 NODE_DEFAULT_NAME.set(NodeType.DELAY_TIMER_NODE, '延迟器')
+NODE_DEFAULT_NAME.set(NodeType.ROUTER_BRANCH_NODE, '路由分支')
+NODE_DEFAULT_NAME.set(NodeType.TRIGGER_NODE, '触发器')
+NODE_DEFAULT_NAME.set(NodeType.TRANSACTOR_NODE, '办理人')
+NODE_DEFAULT_NAME.set(NodeType.CHILD_PROCESS_NODE, '子流程')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '指定成员', value: CandidateStrategy.USER },
   { label: '指定角色', value: CandidateStrategy.ROLE },
+  { label: '指定岗位', value: CandidateStrategy.POST },
   { label: '部门成员', value: CandidateStrategy.DEPT_MEMBER },
   { label: '部门负责人', value: CandidateStrategy.DEPT_LEADER },
   { label: '连续多级部门负责人', value: CandidateStrategy.MULTI_LEVEL_DEPT_LEADER },
   { label: '发起人自选', value: CandidateStrategy.START_USER_SELECT },
+  { label: '审批人自选', value: CandidateStrategy.APPROVE_USER_SELECT },
   { label: '发起人本人', value: CandidateStrategy.START_USER },
   { label: '发起人部门负责人', value: CandidateStrategy.START_USER_DEPT_LEADER },
   { label: '发起人连续部门负责人', value: CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER },
@@ -460,8 +569,8 @@ export const APPROVE_METHODS: DictDataVO[] = [
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO[] = [
-  { label: '条件表达式', value: ConditionType.EXPRESSION },
-  { label: '条件规则', value: ConditionType.RULE }
+  { label: '条件规则', value: ConditionType.RULE },
+  { label: '条件表达式', value: ConditionType.EXPRESSION }
 ]
 
 // 时间单位类型
@@ -540,6 +649,16 @@ export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
   { id: OperationButtonType.RETURN, displayName: '退回', enable: true }
 ]
 
+// 办理人默认的按钮权限设置
+export const TRANSACTOR_DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
+  { id: OperationButtonType.APPROVE, displayName: '办理', enable: true },
+  { id: OperationButtonType.REJECT, displayName: '拒绝', enable: false },
+  { id: OperationButtonType.TRANSFER, displayName: '转办', enable: false },
+  { id: OperationButtonType.DELEGATE, displayName: '委派', enable: false },
+  { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: false },
+  { id: OperationButtonType.RETURN, displayName: '退回', enable: false }
+]
+
 // 发起人的按钮权限。暂时定死，不可以编辑
 export const START_USER_BUTTON_SETTING: ButtonSetting[] = [
   { id: OperationButtonType.APPROVE, displayName: '提交', enable: true },
@@ -575,7 +694,15 @@ export enum ProcessVariableEnum {
   /**
    * 发起用户 ID
    */
-  START_USER_ID = 'PROCESS_START_USER_ID'
+  START_USER_ID = 'PROCESS_START_USER_ID',
+  /**
+   * 发起时间
+   */
+  START_TIME = 'PROCESS_START_TIME',
+  /**
+   * 流程定义名称
+   */
+  PROCESS_DEFINITION_NAME = 'PROCESS_DEFINITION_NAME'
 }
 
 /**
@@ -603,4 +730,171 @@ export enum DelayTypeEnum {
 export const DELAY_TYPE = [
   { label: '固定时长', value: DelayTypeEnum.FIXED_TIME_DURATION },
   { label: '固定日期', value: DelayTypeEnum.FIXED_DATE_TIME }
+]
+
+/**
+ * 路由分支结构定义
+ */
+export type RouterSetting = {
+  nodeId: string
+  conditionType: ConditionType
+  conditionExpression: string
+  conditionGroups: ConditionGroup
+}
+
+// ==================== 触发器相关定义 ====================
+/**
+ * 触发器节点结构定义
+ */
+export type TriggerSetting = {
+  type: TriggerTypeEnum
+  httpRequestSetting?: HttpRequestTriggerSetting
+  formSettings?: FormTriggerSetting[]
+}
+
+/**
+ * 触发器类型枚举
+ */
+export enum TriggerTypeEnum {
+  /**
+   * 发送 HTTP 请求触发器
+   */
+  HTTP_REQUEST = 1,
+  /**
+   * 接收 HTTP 回调请求触发器
+   */
+  HTTP_CALLBACK = 2,
+  /**
+   * 表单数据更新触发器
+   */
+  FORM_UPDATE = 10,
+  /**
+   * 表单数据删除触发器
+   */
+  FORM_DELETE = 11
+}
+
+/**
+ * HTTP 请求触发器结构定义
+ */
+export type HttpRequestTriggerSetting = {
+  // 请求 URL
+  url: string
+  // 请求头参数设置
+  header?: HttpRequestParam[]
+  // 请求体参数设置
+  body?: HttpRequestParam[]
+  // 请求响应设置
+  response?: Record<string, string>[]
+}
+
+/**
+ * 流程表单触发器配置结构定义
+ */
+export type FormTriggerSetting = {
+  // 条件类型
+  conditionType?: ConditionType
+  // 条件表达式
+  conditionExpression?: string
+  // 条件组
+  conditionGroups?: ConditionGroup
+  // 更新表单字段配置
+  updateFormFields?: Record<string, any>
+  // 删除表单字段配置
+  deleteFields?: string[]
+}
+
+export const TRIGGER_TYPES: DictDataVO[] = [
+  { label: '发送 HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
+  { label: '接收 HTTP 回调', value: TriggerTypeEnum.HTTP_CALLBACK },
+  { label: '修改表单数据', value: TriggerTypeEnum.FORM_UPDATE },
+  { label: '删除表单数据', value: TriggerTypeEnum.FORM_DELETE }
+]
+
+/**
+ * 子流程节点结构定义
+ */
+export type ChildProcessSetting = {
+  calledProcessDefinitionKey: string
+  calledProcessDefinitionName: string
+  async: boolean
+  inVariables?: IOParameter[]
+  outVariables?: IOParameter[]
+  skipStartUserNode: boolean
+  startUserSetting: StartUserSetting
+  timeoutSetting: TimeoutSetting
+  multiInstanceSetting: MultiInstanceSetting
+}
+export type IOParameter = {
+  source: string
+  target: string
+}
+export type StartUserSetting = {
+  type: ChildProcessStartUserTypeEnum
+  formField?: string
+  emptyType?: ChildProcessStartUserEmptyTypeEnum
+}
+export type TimeoutSetting = {
+  enable: boolean
+  type?: DelayTypeEnum
+  timeExpression?: string
+}
+export type MultiInstanceSetting = {
+  enable: boolean
+  sequential?: boolean
+  approveRatio?: number
+  sourceType?: ChildProcessMultiInstanceSourceTypeEnum
+  source?: string
+}
+export enum ChildProcessStartUserTypeEnum {
+  /**
+   * 同主流程发起人
+   */
+  MAIN_PROCESS_START_USER = 1,
+  /**
+   * 表单
+   */
+  FROM_FORM = 2
+}
+export const CHILD_PROCESS_START_USER_TYPE = [
+  { label: '同主流程发起人', value: ChildProcessStartUserTypeEnum.MAIN_PROCESS_START_USER },
+  { label: '表单', value: ChildProcessStartUserTypeEnum.FROM_FORM }
+]
+export enum ChildProcessStartUserEmptyTypeEnum {
+  /**
+   * 同主流程发起人
+   */
+  MAIN_PROCESS_START_USER = 1,
+  /**
+   * 子流程管理员
+   */
+  CHILD_PROCESS_ADMIN = 2,
+  /**
+   * 主流程管理员
+   */
+  MAIN_PROCESS_ADMIN = 3
+}
+export const CHILD_PROCESS_START_USER_EMPTY_TYPE = [
+  { label: '同主流程发起人', value: ChildProcessStartUserEmptyTypeEnum.MAIN_PROCESS_START_USER },
+  { label: '子流程管理员', value: ChildProcessStartUserEmptyTypeEnum.CHILD_PROCESS_ADMIN },
+  { label: '主流程管理员', value: ChildProcessStartUserEmptyTypeEnum.MAIN_PROCESS_ADMIN }
+]
+export enum ChildProcessMultiInstanceSourceTypeEnum {
+  /**
+   * 固定数量
+   */
+  FIXED_QUANTITY = 1,
+  /**
+   * 数字表单
+   */
+  NUMBER_FORM = 2,
+  /**
+   * 多选表单
+   */
+  MULTIPLE_FORM = 3
+}
+export const CHILD_PROCESS_MULTI_INSTANCE_SOURCE_TYPE = [
+  { label: '固定数量', value: ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY },
+  { label: '数字表单', value: ChildProcessMultiInstanceSourceTypeEnum.NUMBER_FORM },
+  { label: '多选表单', value: ChildProcessMultiInstanceSourceTypeEnum.MULTIPLE_FORM }
 ]

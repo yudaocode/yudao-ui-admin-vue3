@@ -51,7 +51,8 @@
 </template>
 
 <script setup lang="ts">
-import { ComponentStyle, usePropertyForm } from '@/components/DiyEditor/util'
+import { ComponentStyle } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 
 /**
  * 组件容器属性：目前右边部分
@@ -61,7 +62,7 @@ defineOptions({ name: 'ComponentContainer' })
 
 const props = defineProps<{ modelValue: ComponentStyle }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 const treeData = [
   {

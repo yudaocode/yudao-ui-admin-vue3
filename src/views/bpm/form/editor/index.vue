@@ -50,11 +50,13 @@ import FcDesigner from '@form-create/designer'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/formCreate'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useFormCreateDesigner } from '@/components/FormCreate'
+import { useRoute } from 'vue-router'
 
 defineOptions({ name: 'BpmFormEditor' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息
+const route = useRoute() // 路由
 const { push, currentRoute } = useRouter() // 路由
 const { query } = useRoute() // 路由信息
 const { delView } = useTagsViewStore() // 视图操作
@@ -150,6 +152,14 @@ onMounted(async () => {
   const data = await FormApi.getForm(id)
   formData.value = data
   setConfAndFields(designer, data.conf, data.fields)
+
+  if (route.query.type !== 'copy') {
+    return
+  }
+  // 场景三： 复制表单
+  const { id: foo, ...copied } = data
+  formData.value = copied
+  formData.value.name += '_copy'
 })
 </script>
 

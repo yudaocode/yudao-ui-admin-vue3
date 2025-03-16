@@ -124,6 +124,7 @@ const saveConfig = async () => {
   if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
+  currentNode.value.name = nodeName.value!
   currentNode.value.showText = showText
   if (configForm.value.delayType === DelayTypeEnum.FIXED_TIME_DURATION) {
     currentNode.value.delaySetting = {

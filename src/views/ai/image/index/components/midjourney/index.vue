@@ -6,7 +6,7 @@
     <el-input
       v-model="prompt"
       maxlength="1024"
-      rows="5"
+      :rows="5"
       class="w-100% mt-15px"
       input-style="border-radius: 7px;"
       placeholder="例如：童话里的小屋应该是什么样子？"
@@ -95,7 +95,13 @@
     </el-space>
   </div>
   <div class="btns">
-    <el-button type="primary" size="large" round @click="handleGenerateImage">
+    <el-button
+      type="primary"
+      size="large"
+      round
+      :disabled="prompt.length === 0"
+      @click="handleGenerateImage"
+    >
       {{ drawIn ? '生成中' : '生成内容' }}
     </el-button>
   </div>
@@ -112,8 +118,18 @@ import {
   MidjourneyVersions,
   NijiVersionList
 } from '@/views/ai/utils/constants'
+import { ModelVO } from '@/api/ai/model/model'
 
 const message = useMessage() // 消息弹窗
+
+// 接收父组件传入的模型列表
+const props = defineProps({
+  models: {
+    type: Array<ModelVO>,
+    default: () => [] as ModelVO[]
+  }
+})
+const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
 
 // 定义属性
 const drawIn = ref<boolean>(false) // 生成中
@@ -125,7 +141,6 @@ const selectModel = ref<string>('midjourney') // 选中的模型
 const selectSize = ref<string>('1:1') // 选中 size
 const selectVersion = ref<any>('6.0') // 选中的 version
 const versionList = ref<any>(MidjourneyVersions) // version 列表
-const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
 
 /** 选择热词 */
 const handleHotWordClick = async (hotWord: string) => {
@@ -158,6 +173,15 @@ const handleModelClick = async (model: ImageModelVO) => {
 
 /** 图片生成 */
 const handleGenerateImage = async () => {
+  // 从 models 中查找匹配的模型
+  const matchedModel = props.models.find(
+    (item) => item.model === selectModel.value && item.platform === AiPlatformEnum.MIDJOURNEY
+  )
+  if (!matchedModel) {
+    message.error('该模型不可用，请选择其它模型')
+    return
+  }
+
   // 二次确认
   await message.confirm(`确认生成内容?`)
   try {
@@ -171,7 +195,7 @@ const handleGenerateImage = async () => {
     ) as ImageSizeVO
     const req = {
       prompt: prompt.value,
-      model: selectModel.value,
+      modelId: matchedModel.id,
       width: imageSize.width,
       height: imageSize.height,
       version: selectVersion.value,

@@ -9,7 +9,14 @@
         ]"
       >
         <div class="node-title-container">
-          <div class="node-title-icon user-task"><span class="iconfont icon-approve"></span></div>
+          <div
+            :class="`node-title-icon ${currentNode.type === NodeType.TRANSACTOR_NODE ? 'transactor-task' : 'user-task'}`"
+          >
+            <span
+              :class="`iconfont ${currentNode.type === NodeType.TRANSACTOR_NODE ? 'icon-transactor' : 'icon-approve'}`"
+            >
+            </span>
+          </div>
           <input
             v-if="!readonly && showInput"
             type="text"
@@ -28,7 +35,7 @@
             {{ currentNode.showText }}
           </div>
           <div class="node-text" v-else>
-            {{ NODE_DEFAULT_TEXT.get(NodeType.USER_TASK_NODE) }}
+            {{ NODE_DEFAULT_TEXT.get(currentNode.type) }}
           </div>
           <Icon icon="ep:arrow-right-bold" v-if="!readonly" />
         </div>
@@ -131,7 +138,7 @@ const emits = defineEmits<{
 
 // 是否只读
 const readonly = inject<Boolean>('readonly')
-const tasks = inject<Ref<any[]>>('tasks')
+const tasks = inject<Ref<any[]>>('tasks', ref([]))
 // 监控节点变化
 const currentNode = useWatchNode(props)
 // 节点名称编辑

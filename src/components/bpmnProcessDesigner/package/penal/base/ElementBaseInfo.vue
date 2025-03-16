@@ -152,6 +152,9 @@ watch(
       handleKeyUpdate(props.model.key)
       handleNameUpdate(props.model.name)
     }
+  },
+  {
+    immediate: true
   }
 )
 

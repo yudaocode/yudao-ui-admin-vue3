@@ -11,7 +11,7 @@ export const encodeConf = (designerRef: object) => {
 // 编码表单 Fields
 export const encodeFields = (designerRef: object) => {
   // @ts-ignore
-  const rule = designerRef.value.getRule()
+  const rule = JSON.parse(designerRef.value.getJson())
   const fields: string[] = []
   rule.forEach((item) => {
     fields.push(JSON.stringify(item))

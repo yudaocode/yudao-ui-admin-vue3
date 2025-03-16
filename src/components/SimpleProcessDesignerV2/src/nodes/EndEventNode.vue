@@ -77,7 +77,7 @@ const props = defineProps({
 const currentNode = useWatchNode(props)
 // 是否只读
 const readonly = inject<Boolean>('readonly')
-const processInstance = inject<Ref<any>>('processInstance')
+const processInstance = inject<Ref<any>>('processInstance', ref({}))
 // 审批信息的弹窗显示，用于只读模式
 const dialogVisible = ref(false) // 弹窗可见性
 const processInstanceInfos = ref<any[]>([]) // 流程的审批信息

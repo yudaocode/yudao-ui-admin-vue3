@@ -11,17 +11,17 @@
         <el-input
           type="textarea"
           v-model="formData.systemMessage"
-          rows="4"
+          :rows="4"
           placeholder="请输入角色设定"
         />
       </el-form-item>
       <el-form-item label="模型" prop="modelId">
         <el-select v-model="formData.modelId" placeholder="请选择模型">
           <el-option
-            v-for="chatModel in chatModelList"
-            :key="chatModel.id"
-            :label="chatModel.name"
-            :value="chatModel.id"
+            v-for="model in models"
+            :key="model.id"
+            :label="model.name"
+            :value="model.id"
           />
         </el-select>
       </el-form-item>
@@ -32,6 +32,7 @@
           :min="0"
           :max="2"
           :precision="2"
+          class="!w-1/1"
         />
       </el-form-item>
       <el-form-item label="回复数 Token 数" prop="maxTokens">
@@ -39,7 +40,8 @@
           v-model="formData.maxTokens"
           placeholder="请输入回复数 Token 数"
           :min="0"
-          :max="4096"
+          :max="8192"
+          class="!w-1/1"
         />
       </el-form-item>
       <el-form-item label="上下文数量" prop="maxContexts">
@@ -48,6 +50,7 @@
           placeholder="请输入上下文数量"
           :min="0"
           :max="20"
+          class="!w-1/1"
         />
       </el-form-item>
     </el-form>
@@ -58,9 +61,9 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { CommonStatusEnum } from '@/utils/constants'
-import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import { ModelApi, ModelVO } from '@/api/ai/model/model'
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
+import { AiModelTypeEnum } from '@/views/ai/utils/constants'
 
 /** AI 聊天对话的更新表单 */
 defineOptions({ name: 'ChatConversationUpdateForm' })
@@ -85,7 +88,7 @@ const formRules = reactive({
   maxContexts: [{ required: true, message: '上下文数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const chatModelList = ref([] as ChatModelVO[]) // 聊天模型列表
+const models = ref([] as ModelVO[]) // 聊天模型列表
 
 /** 打开弹窗 */
 const open = async (id: number) => {
@@ -107,7 +110,7 @@ const open = async (id: number) => {
     }
   }
   // 获得下拉数据
-  chatModelList.value = await ChatModelApi.getChatModelSimpleList(CommonStatusEnum.ENABLE)
+  models.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

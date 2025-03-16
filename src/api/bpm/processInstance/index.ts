@@ -36,6 +36,7 @@ export type ApprovalTaskInfo = {
   assigneeUser: User
   status: number
   reason: string
+  signPicUrl: string
 }
 
 // 审批节点信息
@@ -89,7 +90,12 @@ export const getProcessInstanceCopyPage = async (params: any) => {
 
 // 获取审批详情
 export const getApprovalDetail = async (params: any) => {
-  return await request.get({ url: 'bpm/process-instance/get-approval-detail' , params })
+  return await request.get({ url: '/bpm/process-instance/get-approval-detail', params })
+}
+
+// 获取下一个执行的流程节点
+export const getNextApprovalNodes = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/get-next-approval-nodes', params })
 }
 
 // 获取表单字段权限

@@ -134,7 +134,7 @@
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
-                  :disabled ="!item.required"
+                  :disabled="!item.required"
                 />
               </el-select>
             </el-form-item>
@@ -149,7 +149,7 @@
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
-                  :disabled ="!item.required"
+                  :disabled="!item.required"
                 />
               </el-select>
             </el-form-item>
@@ -195,9 +195,15 @@
           <div class="field-permit-title">
             <div class="setting-title-label first-title"> 字段名称 </div>
             <div class="other-titles">
-              <span class="setting-title-label">只读</span>
-              <span class="setting-title-label">可编辑</span>
-              <span class="setting-title-label">隐藏</span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')">
+                只读
+              </span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')">
+                可编辑
+              </span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')">
+                隐藏
+              </span>
             </div>
           </div>
           <div
@@ -366,6 +372,18 @@ const showCopyTaskNodeConfig = (node: SimpleFlowNode) => {
   parseCandidateParam(node.candidateStrategy!, node?.candidateParam)
   // 表单字段权限
   getNodeConfigFormFields(node.fieldsPermission)
+}
+
+/** 批量更新权限 */
+const updatePermission = (type: string) => {
+  fieldsPermissionConfig.value.forEach((field) => {
+    field.permission =
+      type === 'READ'
+        ? FieldPermissionType.READ
+        : type === 'WRITE'
+          ? FieldPermissionType.WRITE
+          : FieldPermissionType.NONE
+  })
 }
 
 defineExpose({ openDrawer, showCopyTaskNodeConfig }) // 暴露方法给父组件

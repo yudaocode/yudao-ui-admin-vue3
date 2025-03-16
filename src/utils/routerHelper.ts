@@ -100,6 +100,9 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
     //处理顶级非目录路由
     if (!route.children && route.parentId == 0 && route.component) {
       data.component = Layout
+      data.meta = {
+        hidden: meta.hidden,
+      }
       data.name = toCamelCase(route.path, true) + 'Parent'
       data.redirect = ''
       meta.alwaysShow = true

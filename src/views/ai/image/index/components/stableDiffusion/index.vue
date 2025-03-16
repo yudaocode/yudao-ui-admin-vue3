@@ -2,11 +2,11 @@
 <template>
   <div class="prompt">
     <el-text tag="b">画面描述</el-text>
-    <el-text tag="p">建议使用“形容词+动词+风格”的格式，使用“，”隔开</el-text>
+    <el-text tag="p">建议使用“形容词 + 动词 + 风格”的格式，使用“，”隔开</el-text>
     <el-input
       v-model="prompt"
       maxlength="1024"
-      rows="5"
+      :rows="5"
       class="w-100% mt-15px"
       input-style="border-radius: 7px;"
       placeholder="例如：童话里的小屋应该是什么样子？"
@@ -128,7 +128,14 @@
     </el-space>
   </div>
   <div class="btns">
-    <el-button type="primary" size="large" round :loading="drawIn" @click="handleGenerateImage">
+    <el-button
+      type="primary"
+      size="large"
+      round
+      :loading="drawIn"
+      :disabled="prompt.length === 0"
+      @click="handleGenerateImage"
+    >
       {{ drawIn ? '生成中' : '生成内容' }}
     </el-button>
   </div>
@@ -143,8 +150,18 @@ import {
   StableDiffusionSamplers,
   StableDiffusionStylePresets
 } from '@/views/ai/utils/constants'
+import { ModelVO } from '@/api/ai/model/model'
 
 const message = useMessage() // 消息弹窗
+
+// 接收父组件传入的模型列表
+const props = defineProps({
+  models: {
+    type: Array<ModelVO>,
+    default: () => [] as ModelVO[]
+  }
+})
+const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
 
 // 定义属性
 const drawIn = ref<boolean>(false) // 生成中
@@ -159,8 +176,6 @@ const seed = ref<number>(42) // 控制生成图像的随机性
 const scale = ref<number>(7.5) // 引导系数
 const clipGuidancePreset = ref<string>('NONE') // 文本提示相匹配的图像(clip_guidance_preset) 简称 CLIP
 const stylePreset = ref<string>('3d-model') // 风格
-
-const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
 
 /** 选择热词 */
 const handleHotWordClick = async (hotWord: string) => {
@@ -177,6 +192,16 @@ const handleHotWordClick = async (hotWord: string) => {
 
 /** 图片生成 */
 const handleGenerateImage = async () => {
+  // 从 models 中查找匹配的模型
+  const selectModel = 'stable-diffusion-v1-6'
+  const matchedModel = props.models.find(
+    (item) => item.model === selectModel && item.platform === AiPlatformEnum.STABLE_DIFFUSION
+  )
+  if (!matchedModel) {
+    message.error('该模型不可用，请选择其它模型')
+    return
+  }
+
   // 二次确认
   if (hasChinese(prompt.value)) {
     message.alert('暂不支持中文！')
@@ -191,8 +216,7 @@ const handleGenerateImage = async () => {
     emits('onDrawStart', AiPlatformEnum.STABLE_DIFFUSION)
     // 发送请求
     const form = {
-      platform: AiPlatformEnum.STABLE_DIFFUSION,
-      model: 'stable-diffusion-v1-6',
+      modelId: matchedModel.id,
       prompt: prompt.value, // 提示词
       width: width.value, // 图片宽度
       height: height.value, // 图片高度

@@ -1438,6 +1438,45 @@
           "isBody": true
         }
       ]
+    },
+    {
+      "name": "SignEnable",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Boolean",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "SkipExpression",
+      "extends": ["bpmn:UserTask"],
+      "properties": [
+        {
+          "name": "skipExpression",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "ReasonRequire",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Boolean",
+          "isBody": true
+        }
+      ]
     }
   ],
   "emumerations": []

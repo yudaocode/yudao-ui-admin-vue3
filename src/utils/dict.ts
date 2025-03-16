@@ -219,6 +219,7 @@ export enum DICT_TYPE {
 
   // ========== AI - 人工智能模块  ==========
   AI_PLATFORM = 'ai_platform', // AI 平台
+  AI_MODEL_TYPE = 'ai_model_type', // AI 模型类型
   AI_IMAGE_STATUS = 'ai_image_status', // AI 图片状态
   AI_MUSIC_STATUS = 'ai_music_status', // AI 音乐状态
   AI_GENERATE_MODE = 'ai_generate_mode', // AI 生成模式

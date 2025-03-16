@@ -1,4 +1,3 @@
-import { cloneDeep } from 'lodash-es'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
@@ -14,9 +13,15 @@ import {
   NODE_DEFAULT_NAME,
   AssignStartUserHandlerType,
   AssignEmptyHandlerType,
-  FieldPermissionType
+  FieldPermissionType,
+  HttpRequestParam,
+  ProcessVariableEnum,
+  ConditionType,
+  ConditionGroup,
+  COMPARISON_OPERATORS
 } from './consts'
-import { parseFormFields } from '@/components/FormCreate/src/utils/index'
+import { parseFormFields } from '@/components/FormCreate/src/utils'
+
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
   const node = ref<SimpleFlowNode>(props.flowNode)
   watch(
@@ -46,9 +51,9 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
   // 字段权限配置. 需要有 field, title,  permissioin 属性
   const fieldsPermissionConfig = ref<Array<Record<string, any>>>([])
 
-  const formType = inject<Ref<number>>('formType') // 表单类型
+  const formType = inject<Ref<number | undefined>>('formType', ref()) // 表单类型
 
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
 
   const getNodeConfigFormFields = (nodeFormFields?: Array<Record<string, string>>) => {
     nodeFormFields = toRaw(nodeFormFields)
@@ -104,16 +109,32 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
     getNodeConfigFormFields
   }
 }
+
 /**
- * @description 获取表单的字段
+ * @description 获取流程表单的字段
  */
 export function useFormFields() {
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   return parseFormCreateFields(unref(formFields))
 }
 
+// TODO @芋艿：后续需要把各种类似 useFormFieldsPermission 的逻辑，抽成一个通用方法。
+/**
+ * @description 获取流程表单的字段和发起人字段
+ */
+export function useFormFieldsAndStartUser() {
+  const injectFormFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
+  const formFields = parseFormCreateFields(unref(injectFormFields))
+  // 添加发起人
+  formFields.unshift({
+    field: ProcessVariableEnum.START_USER_ID,
+    title: '发起人',
+    required: true
+  })
+  return formFields
+}
+
 export type UserTaskFormType = {
-  //candidateParamArray: any[]
   candidateStrategy: CandidateStrategy
   approveMethod: ApproveMethodType
   roleIds?: number[] // 角色
@@ -136,10 +157,29 @@ export type UserTaskFormType = {
   timeDuration?: number
   maxRemindCount?: number
   buttonsSetting: any[]
+  taskCreateListenerEnable?: boolean
+  taskCreateListenerPath?: string
+  taskCreateListener?: {
+    header: HttpRequestParam[]
+    body: HttpRequestParam[]
+  }
+  taskAssignListenerEnable?: boolean
+  taskAssignListenerPath?: string
+  taskAssignListener?: {
+    header: HttpRequestParam[]
+    body: HttpRequestParam[]
+  }
+  taskCompleteListenerEnable?: boolean
+  taskCompleteListenerPath?: string
+  taskCompleteListener?: {
+    header: HttpRequestParam[]
+    body: HttpRequestParam[]
+  }
+  signEnable: boolean
+  reasonRequire: boolean
 }
 
 export type CopyTaskFormType = {
-  // candidateParamArray: any[]
   candidateStrategy: CandidateStrategy
   roleIds?: number[] // 角色
   deptIds?: number[] // 部门
@@ -156,15 +196,15 @@ export type CopyTaskFormType = {
  * @description 节点表单数据。 用于审批节点、抄送节点
  */
 export function useNodeForm(nodeType: NodeType) {
-  const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
-  const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
-  const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
-  const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList') // 部门列表
-  const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
-  const deptTreeOptions = inject('deptTree') // 部门树
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList', ref([])) // 角色列表
+  const postOptions = inject<Ref<PostApi.PostVO[]>>('postList', ref([])) // 岗位列表
+  const userOptions = inject<Ref<UserApi.UserVO[]>>('userList', ref([])) // 用户列表
+  const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList', ref([])) // 部门列表
+  const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList', ref([])) // 用户组列表
+  const deptTreeOptions = inject('deptTree', ref()) // 部门树
+  const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   const configForm = ref<UserTaskFormType | CopyTaskFormType>()
-  if (nodeType === NodeType.USER_TASK_NODE) {
+  if (nodeType === NodeType.USER_TASK_NODE || nodeType === NodeType.TRANSACTOR_NODE) {
     configForm.value = {
       candidateStrategy: CandidateStrategy.USER,
       approveMethod: ApproveMethodType.SEQUENTIAL_APPROVE,
@@ -268,6 +308,11 @@ export function useNodeForm(nodeType: NodeType) {
     // 表单内部门负责人
     if (configForm.value?.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER) {
       showText = `表单内部门负责人`
+    }
+
+    // 审批人自选
+    if (configForm.value?.candidateStrategy === CandidateStrategy.APPROVE_USER_SELECT) {
+      showText = `审批人自选`
     }
 
     // 发起人自选
@@ -506,6 +551,66 @@ export function useTaskStatusClass(taskStatus: TaskStatusEnum | undefined): stri
   if (taskStatus === TaskStatusEnum.CANCEL) {
     return 'status-cancel'
   }
-
   return ''
+}
+
+/** 条件组件文字展示 */
+export function getConditionShowText(
+  conditionType: ConditionType | undefined,
+  conditionExpression: string | undefined,
+  conditionGroups: ConditionGroup | undefined,
+  fieldOptions: Array<Record<string, any>>
+) {
+  let showText = ''
+  if (conditionType === ConditionType.EXPRESSION) {
+    if (conditionExpression) {
+      showText = `表达式：${conditionExpression}`
+    }
+  }
+  if (conditionType === ConditionType.RULE) {
+    // 条件组是否为与关系
+    const groupAnd = conditionGroups?.and
+    let warningMessage: undefined | string = undefined
+    const conditionGroup = conditionGroups?.conditions.map((item) => {
+      return (
+        '(' +
+        item.rules
+          .map((rule) => {
+            if (rule.leftSide && rule.rightSide) {
+              return (
+                getFormFieldTitle(fieldOptions, rule.leftSide) +
+                ' ' +
+                getOpName(rule.opCode) +
+                ' ' +
+                rule.rightSide
+              )
+            } else {
+              // 有一条规则不完善。提示错误
+              warningMessage = '请完善条件规则'
+              return ''
+            }
+          })
+          .join(item.and ? ' 且 ' : ' 或 ') +
+        ' ) '
+      )
+    })
+    if (warningMessage) {
+      showText = ''
+    } else {
+      showText = conditionGroup!.join(groupAnd ? ' 且 ' : ' 或 ')
+    }
+  }
+  return showText
+}
+
+/** 获取表单字段名称*/
+const getFormFieldTitle = (fieldOptions: Array<Record<string, any>>, field: string) => {
+  const item = fieldOptions.find((item) => item.field === field)
+  return item?.title
+}
+
+/** 获取操作符名称 */
+const getOpName = (opCode: string): string => {
+  const opName = COMPARISON_OPERATORS.find((item: any) => item.value === opCode)
+  return opName?.label
 }
