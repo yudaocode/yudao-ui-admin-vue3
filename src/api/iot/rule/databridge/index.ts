@@ -1,6 +1,6 @@
 import request from '@/config/axios'
 
-//数据桥梁 VO
+// IoT 数据桥梁 VO
 export interface DataBridgeVO {
   id?: number // 桥梁编号
   name?: string // 桥梁名称
@@ -80,6 +80,7 @@ export interface RedisStreamMQConfig extends Config {
 }
 
 /** 数据桥梁类型 */
+// TODO @puhui999：枚举用 number 可以么？
 export const IoTDataBridgeConfigType = {
   HTTP: '1',
   TCP: '2',

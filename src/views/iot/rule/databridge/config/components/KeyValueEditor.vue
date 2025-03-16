@@ -33,8 +33,7 @@ const props = defineProps<{
   addButtonText: string
 }>()
 const emit = defineEmits(['update:modelValue'])
-/** 内部 key-value 项列表 */
-const items = ref<KeyValueItem[]>([])
+const items = ref<KeyValueItem[]>([]) // 内部 key-value 项列表
 
 /** 添加项目 */
 const addItem = () => {
@@ -59,6 +58,7 @@ const updateModelValue = () => {
   emit('update:modelValue', result)
 }
 
+// TODO @puhui999：有告警的地方，尽量用 cursor 处理下
 /** 监听项目变化 */
 watch(items, updateModelValue, { deep: true })
 watch(

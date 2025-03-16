@@ -8,7 +8,7 @@
   <el-form-item label="密码" prop="config.password">
     <el-input v-model="config.password" placeholder="请输入密码" show-password type="password" />
   </el-form-item>
-  <el-form-item label="启用SSL" prop="config.ssl">
+  <el-form-item label="启用 SSL" prop="config.ssl">
     <el-switch v-model="config.ssl" />
   </el-form-item>
   <el-form-item label="主题" prop="config.topic">

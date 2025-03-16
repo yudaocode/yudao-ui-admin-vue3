@@ -100,28 +100,28 @@ const formData = ref<DataBridgeVO>({
   config: {} as any
 })
 const formRules = reactive({
-  /** 通用字段 */
+  // 通用字段
   name: [{ required: true, message: '桥梁名称不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '桥梁状态不能为空', trigger: 'blur' }],
   direction: [{ required: true, message: '桥梁方向不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '桥梁类型不能为空', trigger: 'change' }],
-  /** HTTP 配置 */
+  // HTTP 配置
   'config.url': [{ required: true, message: '请求地址不能为空', trigger: 'blur' }],
   'config.method': [{ required: true, message: '请求方法不能为空', trigger: 'blur' }],
-  /** MQTT 配置 */
+  // MQTT 配置
   'config.username': [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
   'config.password': [{ required: true, message: '密码不能为空', trigger: 'blur' }],
   'config.clientId': [{ required: true, message: '客户端ID不能为空', trigger: 'blur' }],
   'config.topic': [{ required: true, message: '主题不能为空', trigger: 'blur' }],
-  /** RocketMQ 配置 */
+  // RocketMQ 配置
   'config.nameServer': [{ required: true, message: 'NameServer 地址不能为空', trigger: 'blur' }],
   'config.accessKey': [{ required: true, message: 'AccessKey 不能为空', trigger: 'blur' }],
   'config.secretKey': [{ required: true, message: 'SecretKey 不能为空', trigger: 'blur' }],
   'config.group': [{ required: true, message: '消费组不能为空', trigger: 'blur' }],
-  /** Kafka 配置 */
+  // Kafka 配置
   'config.bootstrapServers': [{ required: true, message: '服务地址不能为空', trigger: 'blur' }],
   'config.ssl': [{ required: true, message: 'SSL 配置不能为空', trigger: 'change' }],
-  /** RabbitMQ 配置 */
+  // RabbitMQ 配置
   'config.host': [{ required: true, message: '主机地址不能为空', trigger: 'blur' }],
   'config.port': [
     { required: true, message: '端口不能为空', trigger: 'blur' },
@@ -131,7 +131,7 @@ const formRules = reactive({
   'config.exchange': [{ required: true, message: '交换机不能为空', trigger: 'blur' }],
   'config.routingKey': [{ required: true, message: '路由键不能为空', trigger: 'blur' }],
   'config.queue': [{ required: true, message: '队列不能为空', trigger: 'blur' }],
-  /** Redis Stream 配置 */
+  // Redis Stream 配置
   'config.database': [
     { required: true, message: '数据库索引不能为空', trigger: 'blur' },
     { type: 'number', min: 0, message: '数据库索引必须是非负整数', trigger: 'blur' }
@@ -143,6 +143,7 @@ const showConfig = computed(() => (val: string) => {
   const dict = getDictObj(DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM, formData.value.type)
   return dict && dict.value + '' === val
 }) // 显示对应的 Config 配置项
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -195,6 +196,7 @@ const handleTypeChange = (val: number) => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
+    // TODO @puhui999：换成枚举值哈
     status: 0,
     direction: 1,
     type: 1,
