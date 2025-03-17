@@ -59,6 +59,11 @@ const props = defineProps({
   startUserIds: {
     type: Array,
     required: false
+  },
+  // 可发起流程的部门编号
+  startDeptIds: {
+    type: Array,
+    required: false
   }
 })
 
@@ -82,6 +87,7 @@ provide('deptList', deptOptions)
 provide('userGroupList', userGroupOptions)
 provide('deptTree', deptTreeOptions)
 provide('startUserIds', props.startUserIds)
+provide('startDeptIds', props.startDeptIds)
 provide('tasks', [])
 provide('processInstance', {})
 const message = useMessage() // 国际化
