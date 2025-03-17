@@ -55,6 +55,8 @@ const dialogStyle = computed(() => {
     height: unref(dialogHeight)
   }
 })
+
+const closing = ref(false)
 </script>
 
 <template>
@@ -68,6 +70,8 @@ const dialogStyle = computed(() => {
     draggable
     class="com-dialog"
     :show-close="false"
+    @close="closing=true"
+    @closed="closing=false"
   >
     <template #header="{ close }">
       <div class="relative h-54px flex items-center justify-between pl-15px pr-15px">
@@ -101,7 +105,9 @@ const dialogStyle = computed(() => {
     </ElScrollbar>
     <slot v-else></slot>
     <template v-if="slots.footer" #footer>
-      <slot name="footer"></slot>
+      <div :style="{'pointer-events': closing ? 'none' : 'auto'}">
+        <slot name="footer"></slot>
+      </div>
     </template>
   </ElDialog>
 </template>
