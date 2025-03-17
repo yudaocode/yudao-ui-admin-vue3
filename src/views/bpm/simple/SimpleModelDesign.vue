@@ -6,6 +6,7 @@
       :model-name="modelName"
       @success="handleSuccess"
       :start-user-ids="startUserIds"
+      :start-dept-ids="startDeptIds"
       ref="designerRef"
     />
   </ContentWrap>
@@ -22,6 +23,7 @@ defineProps<{
   modelKey?: string
   modelName?: string
   startUserIds?: number[]
+  startDeptIds?: number[]
 }>()
 
 const emit = defineEmits(['success'])

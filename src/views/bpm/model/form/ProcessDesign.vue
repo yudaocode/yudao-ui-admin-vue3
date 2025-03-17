@@ -18,6 +18,7 @@
       :model-key="modelData.key"
       :model-name="modelData.name"
       :start-user-ids="modelData.startUserIds"
+      :start-dept-ids="modelData.startDeptIds"
       @success="handleDesignSuccess"
     />
   </template>
