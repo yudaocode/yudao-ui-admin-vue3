@@ -148,7 +148,7 @@
         <div class="flex">
           <el-switch
             v-model="processBeforeTriggerEnable"
-            @change="handlePreProcessNotifyEnableChange"
+            @change="handleProcessBeforeTriggerEnableChange"
           />
           <div class="ml-80px">流程启动后通知</div>
         </div>
@@ -168,15 +168,55 @@
         <div class="flex">
           <el-switch
             v-model="processAfterTriggerEnable"
-            @change="handlePostProcessNotifyEnableChange"
+            @change="handleProcessAfterTriggerEnableChange"
           />
-          <div class="ml-80px">流程启动后通知</div>
+          <div class="ml-80px">流程结束后通知</div>
         </div>
         <HttpRequestSetting
           v-if="processAfterTriggerEnable"
           v-model:setting="modelData.processAfterTriggerSetting"
           :responseEnable="true"
           :formItemPrefix="'processAfterTriggerSetting'"
+        />
+      </div>
+    </el-form-item>
+    <el-form-item class="mb-20px">
+      <template #label>
+        <el-text size="large" tag="b">任务前置通知</el-text>
+      </template>
+      <div class="flex flex-col w-100%">
+        <div class="flex">
+          <el-switch
+            v-model="taskBeforeTriggerEnable"
+            @change="handleTaskBeforeTriggerEnableChange"
+          />
+          <div class="ml-80px">任务执行时通知</div>
+        </div>
+        <HttpRequestSetting
+          v-if="taskBeforeTriggerEnable"
+          v-model:setting="modelData.taskBeforeTriggerSetting"
+          :responseEnable="true"
+          :formItemPrefix="'taskBeforeTriggerSetting'"
+        />
+      </div>
+    </el-form-item>
+    <el-form-item class="mb-20px">
+      <template #label>
+        <el-text size="large" tag="b">任务后置通知</el-text>
+      </template>
+      <div class="flex flex-col w-100%">
+        <div class="flex">
+          <el-switch
+            v-model="taskAfterTriggerEnable"
+            @change="handleTaskAfterTriggerEnableChange"
+          />
+          <div class="ml-80px">任务结束后通知</div>
+        </div>
+        <HttpRequestSetting
+          v-if="taskAfterTriggerEnable"
+          v-model:setting="modelData.taskAfterTriggerSetting"
+          :responseEnable="true"
+          :formItemPrefix="'taskAfterTriggerSetting'"
         />
       </div>
     </el-form-item>
@@ -248,7 +288,7 @@ const numberExample = computed(() => {
 
 /** 是否开启流程前置通知 */
 const processBeforeTriggerEnable = ref(false)
-const handlePreProcessNotifyEnableChange = (val: boolean | string | number) => {
+const handleProcessBeforeTriggerEnableChange = (val: boolean | string | number) => {
   if (val) {
     modelData.value.processBeforeTriggerSetting = {
       url: '',
@@ -263,7 +303,7 @@ const handlePreProcessNotifyEnableChange = (val: boolean | string | number) => {
 
 /** 是否开启流程后置通知 */
 const processAfterTriggerEnable = ref(false)
-const handlePostProcessNotifyEnableChange = (val: boolean | string | number) => {
+const handleProcessAfterTriggerEnableChange = (val: boolean | string | number) => {
   if (val) {
     modelData.value.processAfterTriggerSetting = {
       url: '',
@@ -273,6 +313,36 @@ const handlePostProcessNotifyEnableChange = (val: boolean | string | number) => 
     }
   } else {
     modelData.value.processAfterTriggerSetting = null
+  }
+}
+
+/** 是否开启任务前置通知 */
+const taskBeforeTriggerEnable = ref(false)
+const handleTaskBeforeTriggerEnableChange = (val: boolean | string | number) => {
+  if (val) {
+    modelData.value.taskBeforeTriggerSetting = {
+      url: '',
+      header: [],
+      body: [],
+      response: []
+    }
+  } else {
+    modelData.value.taskBeforeTriggerSetting = null
+  }
+}
+
+/** 是否开启任务后置通知 */
+const taskAfterTriggerEnable = ref(false)
+const handleTaskAfterTriggerEnableChange = (val: boolean | string | number) => {
+  if (val) {
+    modelData.value.taskAfterTriggerSetting = {
+      url: '',
+      header: [],
+      body: [],
+      response: []
+    }
+  } else {
+    modelData.value.taskAfterTriggerSetting = null
   }
 }
 
@@ -340,6 +410,12 @@ const initData = () => {
   }
   if (modelData.value.processAfterTriggerSetting) {
     processAfterTriggerEnable.value = true
+  }
+  if (modelData.value.taskBeforeTriggerSetting) {
+    taskBeforeTriggerEnable.value = true
+  }
+  if (modelData.value.taskAfterTriggerSetting) {
+    taskAfterTriggerEnable.value = true
   }
 }
 defineExpose({ initData })
