@@ -245,5 +245,7 @@ export enum DICT_TYPE {
   IOT_PLUGIN_STATUS = 'iot_plugin_status', // IOT 插件状态
   IOT_PLUGIN_TYPE = 'iot_plugin_type', // IOT 插件类型
   IOT_DATA_BRIDGE_DIRECTION_ENUM = 'iot_data_bridge_direction_enum', // 桥梁方向
-  IOT_DATA_BRIDGE_TYPE_ENUM = 'iot_data_bridge_type_enum' // 桥梁类型
+  IOT_DATA_BRIDGE_TYPE_ENUM = 'iot_data_bridge_type_enum', // 桥梁类型
+  IOT_DEVICE_MESSAGE_TYPE_ENUM = 'iot_device_message_type_enum', // IoT 设备消息类型枚举
+  IOT_RULE_SCENE_TRIGGER_TYPE_ENUM = 'iot_rule_scene_trigger_type_enum' // IoT 场景流转的触发类型枚举
 }

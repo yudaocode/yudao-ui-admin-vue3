@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="70%">
     <el-form
       ref="formRef"
       :model="formData"
@@ -7,29 +7,41 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="场景名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入场景名称" />
-      </el-form-item>
-      <el-form-item label="场景描述" prop="description">
-        <el-input v-model="formData.description" type="textarea" placeholder="请输入场景描述" />
-      </el-form-item>
-      <el-form-item label="场景状态" prop="status">
-        <el-radio-group v-model="formData.status">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="触发器数组" prop="triggers">
-        <el-input v-model="formData.triggers" placeholder="请输入触发器数组" />
-      </el-form-item>
-      <el-form-item label="执行器数组" prop="actions">
-        <el-input v-model="formData.actions" placeholder="请输入执行器数组" />
-      </el-form-item>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="场景名称" prop="name">
+            <el-input v-model="formData.name" placeholder="请输入场景名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="场景状态" prop="status">
+            <el-radio-group v-model="formData.status">
+              <el-radio
+                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+                :key="dict.value"
+                :label="dict.value"
+              >
+                {{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="场景描述" prop="description">
+            <el-input v-model="formData.description" type="textarea" placeholder="请输入场景描述" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-divider content-position="left">触发器配置</el-divider>
+          <device-listener v-model="formData.triggers" />
+        </el-col>
+        <el-col :span="24">
+          <el-divider content-position="left">执行动作配置</el-divider>
+          <el-form-item label="执行器数组" prop="actionConfigs">
+            <el-input v-model="formData.actions" placeholder="请输入执行器数组" />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -40,6 +52,7 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { RuleSceneApi, RuleSceneVO } from '@/api/iot/rule/scene'
+import DeviceListener from './components/DeviceListener.vue'
 
 /** IoT 规则场景（场景联动） 表单 */
 defineOptions({ name: 'RuleSceneForm' })
