@@ -210,7 +210,7 @@ const resetQuery = () => {
 /** 导入操作 */
 const importFormRef = ref()
 const openImportForm = (type?: string, id?: number) => {
-  formRef.value.open(type, id)
+  importFormRef.value.open(type, id)
 }
 
 // 更新操作
