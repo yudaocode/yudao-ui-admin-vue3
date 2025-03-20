@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="70%">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="1080px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -33,12 +33,18 @@
         </el-col>
         <el-col :span="24">
           <el-divider content-position="left">触发器配置</el-divider>
-          <device-listener v-model="formData.triggers" />
+          <device-listener
+            v-for="(trigger, index) in formData.triggers"
+            :model-value="trigger"
+            :key="index"
+            class="mb-10px"
+          />
+          <el-text class="ml-10px!" type="primary" @click="addTrigger">添加触发器</el-text>
         </el-col>
         <el-col :span="24">
           <el-divider content-position="left">执行动作配置</el-divider>
           <el-form-item label="执行器数组" prop="actionConfigs">
-            <el-input v-model="formData.actions" placeholder="请输入执行器数组" />
+            <!--            <el-input v-model="formData.actions" placeholder="请输入执行器数组" />-->
           </el-form-item>
         </el-col>
       </el-row>
@@ -64,14 +70,10 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
-  id: undefined,
-  name: undefined,
-  description: undefined,
-  status: undefined,
-  triggers: undefined,
-  actions: undefined
-})
+const formData = ref<RuleSceneVO>({
+  status: 0,
+  triggers: []
+} as RuleSceneVO)
 const formRules = reactive({
   name: [{ required: true, message: '场景名称不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '场景状态不能为空', trigger: 'blur' }],
@@ -79,6 +81,10 @@ const formRules = reactive({
   actions: [{ required: true, message: '执行器数组不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+
+const addTrigger = () => {
+  formData.value.triggers?.push({})
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -125,13 +131,9 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    name: undefined,
-    description: undefined,
-    status: undefined,
-    triggers: undefined,
-    actions: undefined
-  }
+    status: 0,
+    triggers: []
+  } as RuleSceneVO
   formRef.value?.resetFields()
 }
 </script>

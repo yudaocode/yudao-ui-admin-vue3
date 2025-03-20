@@ -20,6 +20,8 @@
         <span class="mr-10px">设备</span>
         <el-button type="primary">选择设备</el-button>
       </div>
+      <!-- 添加规则 -->
+      <el-button class="device-listener-delete" type="danger" circle :icon="Delete" size="small" />
     </div>
     <div class="device-listener-condition flex p-10px">
       <div class="flex flex-col items-center justify-center mr-10px h-a">
@@ -32,38 +34,35 @@
           />
         </el-select>
       </div>
-      <div class="flex items-center flex-wrap">
+      <div class="">
         <DeviceListenerCondition
-          v-for="i in 2"
-          :key="i"
-          v-model="conditionParameter"
+          v-for="(conditionParameter, index) in conditionParameters"
+          :key="index"
+          :model-value="conditionParameter"
+          @update:model-value="(val) => (conditionParameters[index] = val)"
           class="mb-10px last:mb-0"
         />
       </div>
-      <div class="flex flex-col items-center justify-center mr-10px h-a">
+      <div class="flex flex-1 flex-col items-center justify-center mr-10px h-a">
         <!-- 添加规则 -->
-        <el-button type="primary" circle :icon="Plus" size="small" />
+        <el-button type="primary" circle :icon="Plus" size="small" @click="addConditionParameter" />
       </div>
-    </div>
-
-    <!-- 新增条件按钮 -->
-    <div class="mt-4">
-      <el-button type="primary"> 新增监听器 </el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Plus } from '@element-plus/icons-vue'
+import { Delete, Plus } from '@element-plus/icons-vue'
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { ref } from 'vue'
 import DeviceListenerCondition from './DeviceListenerCondition.vue'
+import { IotRuleSceneTriggerConditionParameter } from '@/api/iot/rule/scene/scene.types'
 
 /** 场景联动之监听器组件 */
 defineOptions({ name: 'DeviceListener' })
 
 defineProps<{
-  modelValue: any[]
+  modelValue: any
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -71,13 +70,27 @@ const emit = defineEmits(['update:modelValue'])
 // 添加响应式变量
 const triggerType = ref()
 const messageType = ref('property')
-const conditionParameter = ref({})
+const conditionParameters = ref<IotRuleSceneTriggerConditionParameter[]>([])
+const addConditionParameter = () => {
+  conditionParameters.value?.push({} as IotRuleSceneTriggerConditionParameter)
+}
+onMounted(() => {
+  addConditionParameter()
+})
 </script>
 
 <style lang="scss" scoped>
 .device-listener {
   .device-listener-header {
+    position: relative;
     background-color: #eff3f7;
+
+    .device-listener-delete {
+      position: absolute;
+      top: auto;
+      right: 33px;
+      bottom: auto;
+    }
   }
 
   .device-listener-condition {
