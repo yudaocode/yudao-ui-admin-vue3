@@ -43,7 +43,13 @@
       :key="index"
     >
       <div class="flex flex-col items-center justify-center mr-10px h-a">
-        <el-select v-model="condition.type" class="!w-160px" clearable placeholder="">
+        <el-select
+          v-model="condition.type"
+          @change="condition.parameters = []"
+          class="!w-160px"
+          clearable
+          placeholder=""
+        >
           <!--          <el-option-->
           <!--            v-for="dict in getStrDictOptions(DICT_TYPE.IOT_DEVICE_MESSAGE_TYPE_ENUM)"-->
           <!--            :key="dict.value"-->
@@ -148,6 +154,10 @@ const removeCondition = (index: number) => {
 }
 /** 添加参数 */
 const addConditionParameter = (conditionParameters: IotRuleSceneTriggerConditionParameter[]) => {
+  if (!product.value) {
+    message.warning('请先选择一个产品')
+    return
+  }
   conditionParameters.push({} as IotRuleSceneTriggerConditionParameter)
 }
 /** 移除参数 */
@@ -189,10 +199,11 @@ const thingModels = computed(() => (condition: IotRuleSceneTriggerCondition) => 
   switch (condition.type) {
     case 'property':
       return thingModelTSL.value.properties
+    // TODO puhui999: 服务和事件后续考虑
     case 'service':
-      return thingModelTSL.value.service
+      return thingModelTSL.value.services
     case 'event':
-      return thingModelTSL.value.event
+      return thingModelTSL.value.events
   }
   return []
 })

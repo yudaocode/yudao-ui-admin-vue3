@@ -14,6 +14,7 @@
       />
     </el-select>
     <ConditionSelector v-model="conditionParameter.operator" class="!w-180px mr-10px" />
+    <!-- TODO puhui999: 输入值范围校验？ -->
     <el-input v-model="conditionParameter.value" class="!w-240px mr-10px" placeholder="请输入值">
       <template #append> {{ getUnitName }} </template>
     </el-input>
@@ -37,11 +38,20 @@ const conditionParameter = useVModel(
 ) as Ref<IotRuleSceneTriggerConditionParameter>
 
 /** 获得属性单位 */
-const getUnitName = computed(
-  () =>
-    props.thingModels.find((item: any) => item.identifier === conditionParameter.value.identifier)
-      ?.dataSpecs?.unitName || '单位'
-)
+const getUnitName = computed(() => {
+  const model = props.thingModels?.find(
+    (item: any) => item.identifier === conditionParameter.value.identifier
+  )
+  // 属性
+  if (model?.dataSpecs) {
+    return model.dataSpecs.unitName
+  }
+  // 服务和事件
+  // if (model?.outputParams) {
+  //   return model.dataSpecs.unitName
+  // }
+  return '单位'
+})
 </script>
 
 <style scoped lang="scss"></style>

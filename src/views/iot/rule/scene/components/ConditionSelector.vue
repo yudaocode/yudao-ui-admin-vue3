@@ -5,6 +5,7 @@
     clearable
     :placeholder="placeholder"
   >
+    <!-- TODO puhui999: 考虑根据属性类型不同展示不同的可选条件 -->
     <el-option label="等于" value="=" />
     <el-option label="不等于" value="!=" />
     <el-option label="大于" value=">" />
