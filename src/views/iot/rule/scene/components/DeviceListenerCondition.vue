@@ -15,7 +15,7 @@
     </el-select>
     <el-select
       v-model="conditionParameter.operator"
-      class="!w-240px mr-10px"
+      class="!w-180px mr-10px"
       clearable
       placeholder="请选择条件"
     >

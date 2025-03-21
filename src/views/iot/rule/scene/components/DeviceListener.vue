@@ -27,7 +27,9 @@
       </div>
       <!-- 删除触发器 -->
       <div class="device-listener-delete">
-        <slot></slot>
+        <el-tooltip content="删除触发器" placement="top">
+          <slot></slot>
+        </el-tooltip>
       </div>
     </div>
     <!-- 触发器条件 -->
@@ -54,26 +56,37 @@
           @update:model-value="(val) => (condition.parameters[index2] = val)"
           class="mb-10px last:mb-0"
         >
-          <!-- 删除规则 -->
-          <el-button
-            class="device-listener-delete"
-            type="danger"
-            circle
-            :icon="Delete"
-            size="small"
-            @click="removeConditionParameter(condition.parameters, index2)"
-          />
+          <el-tooltip content="删除参数" placement="top">
+            <el-button
+              class="device-listener-delete"
+              type="danger"
+              circle
+              :icon="Delete"
+              size="small"
+              @click="removeConditionParameter(condition.parameters, index2)"
+            />
+          </el-tooltip>
         </DeviceListenerCondition>
       </div>
-      <div class="flex flex-1 flex-col items-center justify-center w-a h-a">
-        <!-- 添加规则 -->
-        <el-button
-          type="primary"
-          circle
-          :icon="Plus"
-          size="small"
-          @click="addConditionParameter(condition.parameters)"
-        />
+      <!-- 添加参数 -->
+      <div class="flex flex-1 flex-col items-center justify-center w-60px h-a">
+        <el-tooltip content="添加参数" placement="top">
+          <el-button
+            type="primary"
+            circle
+            :icon="Plus"
+            size="small"
+            @click="addConditionParameter(condition.parameters)"
+          />
+        </el-tooltip>
+      </div>
+      <!-- 删除条件 -->
+      <div
+        class="device-listener-condition flex flex-1 flex-col items-center justify-center w-a h-a"
+      >
+        <el-tooltip content="删除条件" placement="top">
+          <el-button type="danger" :icon="Delete" size="small" @click="removeCondition(index)" />
+        </el-tooltip>
       </div>
     </div>
     <el-text class="ml-10px!" type="primary" @click="addCondition">添加触发条件</el-text>
@@ -104,7 +117,10 @@ const addCondition = () => {
     parameters: []
   })
 }
-
+/** 移除触发条件 */
+const removeCondition = (index: number) => {
+  triggerConfig.value.conditions.splice(index, 1)
+}
 /** 添加参数 */
 const addConditionParameter = (conditionParameters: IotRuleSceneTriggerConditionParameter[]) => {
   conditionParameters.push({} as IotRuleSceneTriggerConditionParameter)
