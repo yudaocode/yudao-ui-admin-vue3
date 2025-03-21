@@ -121,7 +121,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 
-defineOptions({ name: 'IoTProductSelectForm' })
+defineOptions({ name: 'IoTProductTableSelect' })
 
 const props = defineProps({
   multiple: {
@@ -177,6 +177,7 @@ const open = async () => {
   // 重置选择状态
   selectedProducts.value = []
   selectedId.value = undefined
+  await getList()
 }
 defineExpose({ open })
 
@@ -213,9 +214,4 @@ const submitForm = async () => {
   emit('success', props.multiple ? selectedProducts.value : selectedProducts.value[0])
   dialogVisible.value = false
 }
-
-/** 初始化 **/
-onMounted(() => {
-  getList()
-})
 </script>
