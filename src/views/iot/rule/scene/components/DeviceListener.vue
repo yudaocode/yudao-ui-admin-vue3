@@ -19,7 +19,9 @@
       </div>
       <div class="flex items-center mr-60px">
         <span class="mr-10px">产品</span>
-        <el-button type="primary">选择产品</el-button>
+        <el-button type="primary" @click="productSelectFormRef?.open()">
+          {{ !product ? '选择产品' : product.name }}
+        </el-button>
       </div>
       <div class="flex items-center mr-60px">
         <span class="mr-10px">设备</span>
@@ -91,16 +93,19 @@
     </div>
     <el-text class="ml-10px!" type="primary" @click="addCondition">添加触发条件</el-text>
   </div>
+  <IoTProductSelectForm ref="productSelectFormRef" @success="handleProductSelect" />
 </template>
 
 <script setup lang="ts">
 import { Delete, Plus } from '@element-plus/icons-vue'
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import DeviceListenerCondition from './DeviceListenerCondition.vue'
+import IoTProductSelectForm from '@/views/iot/product/product/components/ProductListSelect.vue'
 import {
   IotRuleSceneTriggerConditionParameter,
   IotRuleSceneTriggerConfig
 } from '@/api/iot/rule/scene/scene.types'
+import { ProductVO } from '@/api/iot/product/product'
 import { useVModel } from '@vueuse/core'
 
 /** 场景联动之监听器组件 */
@@ -109,6 +114,7 @@ defineOptions({ name: 'DeviceListener' })
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const triggerConfig = useVModel(props, 'modelValue', emits) as Ref<IotRuleSceneTriggerConfig>
+const productSelectFormRef = ref<InstanceType<typeof IoTProductSelectForm>>()
 
 /** 添加触发条件 */
 const addCondition = () => {
@@ -131,6 +137,13 @@ const removeConditionParameter = (
   index: number
 ) => {
   conditionParameters.splice(index, 1)
+}
+
+const product = ref<ProductVO>()
+/** 处理产品选择 */
+const handleProductSelect = (val: ProductVO) => {
+  product.value = val
+  triggerConfig.value.productKey = val.productKey
 }
 </script>
 
