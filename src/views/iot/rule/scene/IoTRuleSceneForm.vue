@@ -35,10 +35,19 @@
           <el-divider content-position="left">触发器配置</el-divider>
           <device-listener
             v-for="(trigger, index) in formData.triggers"
-            :model-value="trigger"
             :key="index"
+            :model-value="trigger"
+            @update:model-value="(val) => (formData.triggers[index] = val)"
             class="mb-10px"
-          />
+          >
+            <el-button
+              type="danger"
+              round
+              :icon="Delete"
+              size="small"
+              @click="removeTrigger(index)"
+            />
+          </device-listener>
           <el-text class="ml-10px!" type="primary" @click="addTrigger">添加触发器</el-text>
         </el-col>
         <el-col :span="24">
@@ -59,6 +68,8 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { RuleSceneApi, RuleSceneVO } from '@/api/iot/rule/scene'
 import DeviceListener from './components/DeviceListener.vue'
+import { Delete } from '@element-plus/icons-vue'
+import { IotRuleSceneTriggerConfig } from '@/api/iot/rule/scene/scene.types'
 
 /** IoT 规则场景（场景联动） 表单 */
 defineOptions({ name: 'RuleSceneForm' })
@@ -72,7 +83,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<RuleSceneVO>({
   status: 0,
-  triggers: []
+  triggers: [] as IotRuleSceneTriggerConfig[]
 } as RuleSceneVO)
 const formRules = reactive({
   name: [{ required: true, message: '场景名称不能为空', trigger: 'blur' }],
@@ -82,10 +93,26 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 
+/** 添加触发器 */
 const addTrigger = () => {
-  formData.value.triggers?.push({})
+  formData.value.triggers.push({
+    type: 1,
+    productKey: '',
+    deviceNames: [],
+    conditions: [
+      {
+        type: 'property',
+        parameters: []
+      }
+    ]
+  })
 }
-
+/** 移除触发器 */
+const removeTrigger = (index: number) => {
+  const newTriggers = [...formData.value.triggers]
+  newTriggers.splice(index, 1)
+  formData.value.triggers = newTriggers
+}
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -132,7 +159,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     status: 0,
-    triggers: []
+    triggers: [] as IotRuleSceneTriggerConfig[]
   } as RuleSceneVO
   formRef.value?.resetFields()
 }

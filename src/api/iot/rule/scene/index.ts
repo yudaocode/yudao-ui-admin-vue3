@@ -1,12 +1,13 @@
 import request from '@/config/axios'
+import { IotRuleSceneTriggerConfig } from '@/api/iot/rule/scene/scene.types'
 
 // IoT 规则场景（场景联动） VO
 export interface RuleSceneVO {
   id?: number // 场景编号
-  name?: string // 场景名称
+  name: string // 场景名称
   description?: string // 场景描述
-  status?: number // 场景状态
-  triggers?: any[] // 触发器数组
+  status: number // 场景状态
+  triggers: IotRuleSceneTriggerConfig[] // 触发器数组
   actions?: any[] // 执行器数组
 }
 

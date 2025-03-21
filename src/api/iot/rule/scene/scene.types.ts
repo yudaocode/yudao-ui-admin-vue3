@@ -9,11 +9,11 @@ export interface IotRuleSceneTriggerConfig {
    */
   type: number
   /** 产品标识 */
-  productKey?: string
+  productKey: string
   /** 设备名称数组 */
-  deviceNames?: string[]
+  deviceNames: string[]
   /** 触发条件数组。条件之间是"或"的关系 */
-  conditions?: IotRuleSceneTriggerCondition[]
+  conditions: IotRuleSceneTriggerCondition[]
   /** CRON 表达式。当 type = 2 时必填 */
   cronExpression?: string
 }
@@ -29,7 +29,7 @@ export interface IotRuleSceneTriggerCondition {
    */
   type: string
   /** 消息标识符 */
-  identifier: string
+  identifier?: string
   /** 参数数组。参数之间是"或"的关系 */
   parameters: IotRuleSceneTriggerConditionParameter[]
 }
