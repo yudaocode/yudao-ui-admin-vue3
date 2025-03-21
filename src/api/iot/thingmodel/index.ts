@@ -58,11 +58,10 @@ export const ThingModelApi = {
     return await request.get({ url: `/iot/thing-model/list`, params })
   },
 
-  // 获得产品物模型
-  getThingModelListByProductId: async (params: any) => {
+  // 获得产品物模型 TSL
+  getThingModelTSLByProductId: async (productId: number) => {
     return await request.get({
-      url: `/iot/thing-model/list-by-product-id`,
-      params
+      url: `/iot/thing-model/tsl-by-product-id?productId=${productId}`
     })
   },
 

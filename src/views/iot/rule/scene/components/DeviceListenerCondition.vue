@@ -7,15 +7,15 @@
       placeholder="请选择物模型"
     >
       <el-option
-        v-for="dict in getStrDictOptions(DICT_TYPE.IOT_DEVICE_MESSAGE_TYPE_ENUM)"
-        :key="dict.value"
-        :label="dict.label"
-        :value="dict.value"
+        v-for="thingModel in thingModels"
+        :key="thingModel.identifier"
+        :label="thingModel.name"
+        :value="thingModel.identifier"
       />
     </el-select>
     <ConditionSelector v-model="conditionParameter.operator" class="!w-180px mr-10px" />
     <el-input v-model="conditionParameter.value" class="!w-240px mr-10px" placeholder="请输入值">
-      <template #append> 单位 </template>
+      <template #append> {{ getUnitName }} </template>
     </el-input>
     <!-- 按钮插槽 -->
     <slot></slot>
@@ -25,17 +25,23 @@
 <script setup lang="ts">
 import ConditionSelector from './ConditionSelector.vue'
 import { IotRuleSceneTriggerConditionParameter } from '@/api/iot/rule/scene/scene.types'
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { useVModel } from '@vueuse/core'
 
 defineOptions({ name: 'DeviceListenerCondition' })
-const props = defineProps<{ modelValue: any }>()
+const props = defineProps<{ modelValue: any; thingModels: any }>()
 const emits = defineEmits(['update:modelValue'])
 const conditionParameter = useVModel(
   props,
   'modelValue',
   emits
 ) as Ref<IotRuleSceneTriggerConditionParameter>
+
+/** 获得属性单位 */
+const getUnitName = computed(
+  () =>
+    props.thingModels.find((item: any) => item.identifier === conditionParameter.value.identifier)
+      ?.dataSpecs?.unitName || '单位'
+)
 </script>
 
 <style scoped lang="scss"></style>

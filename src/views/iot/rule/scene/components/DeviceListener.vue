@@ -44,12 +44,15 @@
     >
       <div class="flex flex-col items-center justify-center mr-10px h-a">
         <el-select v-model="condition.type" class="!w-160px" clearable placeholder="">
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.IOT_DEVICE_MESSAGE_TYPE_ENUM)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+          <!--          <el-option-->
+          <!--            v-for="dict in getStrDictOptions(DICT_TYPE.IOT_DEVICE_MESSAGE_TYPE_ENUM)"-->
+          <!--            :key="dict.value"-->
+          <!--            :label="dict.label"-->
+          <!--            :value="dict.value"-->
+          <!--          />-->
+          <el-option label="属性" value="property" />
+          <el-option label="服务" value="service" />
+          <el-option label="事件" value="event" />
         </el-select>
       </div>
       <div class="">
@@ -57,6 +60,7 @@
           v-for="(parameter, index2) in condition.parameters"
           :key="index2"
           :model-value="parameter"
+          :thingModels="thingModels(condition)"
           @update:model-value="(val) => (condition.parameters[index2] = val)"
           class="mb-10px last:mb-0"
         >
@@ -107,11 +111,12 @@
 
 <script setup lang="ts">
 import { Delete, Plus } from '@element-plus/icons-vue'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import DeviceListenerCondition from './DeviceListenerCondition.vue'
 import IoTProductTableSelect from '@/views/iot/product/product/components/IoTProductTableSelect.vue'
 import IoTDeviceTableSelect from '@/views/iot/device/device/components/IoTDeviceTableSelect.vue'
 import {
+  IotRuleSceneTriggerCondition,
   IotRuleSceneTriggerConditionParameter,
   IotRuleSceneTriggerConfig
 } from '@/api/iot/rule/scene/scene.types'
@@ -119,6 +124,7 @@ import { ProductVO } from '@/api/iot/product/product'
 import { DeviceVO } from '@/api/iot/device/device'
 import { useVModel } from '@vueuse/core'
 import { isEmpty } from '@/utils/is'
+import { ThingModelApi } from '@/api/iot/thingmodel'
 
 /** 场景联动之监听器组件 */
 defineOptions({ name: 'DeviceListener' })
@@ -161,6 +167,7 @@ const handleProductSelect = (val: ProductVO) => {
   product.value = val
   triggerConfig.value.productKey = val.productKey
   deviceList.value = []
+  getThingModelTSL()
 }
 /** 处理设备选择 */
 const handleDeviceSelect = (val: DeviceVO[]) => {
@@ -174,6 +181,26 @@ const openDeviceSelect = () => {
     return
   }
   deviceTableSelectRef.value?.open()
+}
+
+/** 获取产品物模型 */
+const thingModelTSL = ref<any>()
+const thingModels = computed(() => (condition: IotRuleSceneTriggerCondition) => {
+  switch (condition.type) {
+    case 'property':
+      return thingModelTSL.value.properties
+    case 'service':
+      return thingModelTSL.value.service
+    case 'event':
+      return thingModelTSL.value.event
+  }
+  return []
+})
+const getThingModelTSL = async () => {
+  if (!product.value) {
+    return
+  }
+  thingModelTSL.value = await ThingModelApi.getThingModelTSLByProductId(product.value.id)
 }
 </script>
 
