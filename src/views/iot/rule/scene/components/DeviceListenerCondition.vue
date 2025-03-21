@@ -29,6 +29,8 @@
     <el-input v-model="conditionParameter.value" class="!w-240px mr-10px" placeholder="请输入值">
       <template #append> 单位 </template>
     </el-input>
+    <!-- 按钮插槽 -->
+    <slot></slot>
   </div>
 </template>
 

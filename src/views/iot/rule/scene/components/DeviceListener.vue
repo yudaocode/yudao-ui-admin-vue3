@@ -21,7 +21,7 @@
         <el-button type="primary">选择设备</el-button>
       </div>
       <!-- 添加规则 -->
-      <el-button class="device-listener-delete" type="danger" circle :icon="Delete" size="small" />
+      <el-button class="device-listener-delete" type="danger" round :icon="Delete" size="small" />
     </div>
     <div class="device-listener-condition flex p-10px">
       <div class="flex flex-col items-center justify-center mr-10px h-a">
@@ -41,9 +41,19 @@
           :model-value="conditionParameter"
           @update:model-value="(val) => (conditionParameters[index] = val)"
           class="mb-10px last:mb-0"
-        />
+        >
+          <!-- 添加规则 -->
+          <el-button
+            class="device-listener-delete"
+            type="danger"
+            circle
+            :icon="Delete"
+            size="small"
+            @click="removeConditionParameter(index)"
+          />
+        </DeviceListenerCondition>
       </div>
-      <div class="flex flex-1 flex-col items-center justify-center mr-10px h-a">
+      <div class="flex flex-1 flex-col items-center justify-center w-a h-a">
         <!-- 添加规则 -->
         <el-button type="primary" circle :icon="Plus" size="small" @click="addConditionParameter" />
       </div>
@@ -71,8 +81,13 @@ const emit = defineEmits(['update:modelValue'])
 const triggerType = ref()
 const messageType = ref('property')
 const conditionParameters = ref<IotRuleSceneTriggerConditionParameter[]>([])
+/** 添加触发条件 */
 const addConditionParameter = () => {
   conditionParameters.value?.push({} as IotRuleSceneTriggerConditionParameter)
+}
+/** 移除触发条件 */
+const removeConditionParameter = (index: number) => {
+  conditionParameters.value?.splice(index, 1)
 }
 onMounted(() => {
   addConditionParameter()
@@ -88,7 +103,7 @@ onMounted(() => {
     .device-listener-delete {
       position: absolute;
       top: auto;
-      right: 33px;
+      right: 16px;
       bottom: auto;
     }
   }
