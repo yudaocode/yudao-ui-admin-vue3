@@ -138,12 +138,12 @@ const submitForm = async () => {
 
 //  新增    ====== begin ========
 /** 获取审批详情 */
-const getApprovalDetail = async (row: any) => {
+const getApprovalDetail = async () => {
   try {
     const data = await ProcessInstanceApi.getApprovalDetail({
-      processDefinitionId: row.id,
+      processDefinitionId: processDefinitionId.value,
       activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: row.processVariablesStr // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
+      processVariablesStr: JSON.stringify({ day: daysDifference() }) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
     })
 
     if (!data) {
@@ -178,6 +178,13 @@ const getApprovalDetail = async (row: any) => {
 const selectUserConfirm = (id: string, userList: any[]) => {
   startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
+
+// 计算天数差
+const daysDifference = () => {
+  const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
+  const diffTime = Math.abs(Number(formData.value.endTime) - Number(formData.value.startTime))
+  return Math.floor(diffTime / oneDay)
+}
 //  新增    ====== end ========
 
 /** 初始化 */
@@ -194,15 +201,12 @@ onMounted(async () => {
   processDefinitionId.value = processDefinitionDetail.id
   startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
   //  新增    ====== begin ========
-  // 查询流程预测节点
-  getApprovalDetail({
-    id: processDefinitionId.value,
-    processVariablesStr: JSON.stringify(formData.value)
-  })
+  // 加载最新的审批详情,主要用于节点预测
+  getApprovalDetail()
   //  新增    ====== end ========
 })
 //  新增    ====== begin ========
-/** 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次 */
+/** 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次, formData.value可改成实际业务中的特定字段 */
 watch(
   formData.value,
   (newValue, oldValue) => {
@@ -213,11 +217,8 @@ watch(
       // 记录之前的节点审批人
       tempStartUserSelectAssignees.value = startUserSelectAssignees.value
       startUserSelectAssignees.value = {}
-      // 加载最新的审批详情
-      getApprovalDetail({
-        id: processDefinitionId.value,
-        processVariablesStr: JSON.stringify(newValue) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
-      })
+      // 加载最新的审批详情,主要用于节点预测
+      getApprovalDetail()
     }
   },
   {
