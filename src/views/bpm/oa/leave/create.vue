@@ -1,84 +1,75 @@
 <template>
-  <el-form
-    ref="formRef"
-    v-loading="formLoading"
-    :model="formData"
-    :rules="formRules"
-    label-width="80px"
-  >
-    <el-form-item label="请假类型" prop="type">
-      <el-select v-model="formData.type" clearable placeholder="请选择请假类型">
-        <el-option
-          v-for="dict in getIntDictOptions(DICT_TYPE.BPM_OA_LEAVE_TYPE)"
-          :key="dict.value"
-          :label="dict.label"
-          :value="dict.value"
-        />
-      </el-select>
-    </el-form-item>
-    <el-form-item label="开始时间" prop="startTime">
-      <el-date-picker
-        v-model="formData.startTime"
-        clearable
-        placeholder="请选择开始时间"
-        type="datetime"
-        value-format="x"
-      />
-    </el-form-item>
-    <el-form-item label="结束时间" prop="endTime">
-      <el-date-picker
-        v-model="formData.endTime"
-        clearable
-        placeholder="请选择结束时间"
-        type="datetime"
-        value-format="x"
-      />
-    </el-form-item>
-    <el-form-item label="原因" prop="reason">
-      <el-input v-model="formData.reason" placeholder="请输请假原因" type="textarea" />
-    </el-form-item>
-    <el-col v-if="startUserSelectTasks.length > 0">
-      <el-card class="mb-10px">
-        <template #header>指定审批人</template>
-        <el-form
-          :model="startUserSelectAssignees"
-          :rules="startUserSelectAssigneesFormRules"
-          ref="startUserSelectAssigneesFormRef"
+  <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }">
+    <el-row :gutter="20">
+      <el-col :span="16"
+        ><el-form
+          ref="formRef"
+          v-loading="formLoading"
+          :model="formData"
+          :rules="formRules"
+          label-width="80px"
         >
-          <el-form-item
-            v-for="userTask in startUserSelectTasks"
-            :key="userTask.id"
-            :label="`任务【${userTask.name}】`"
-            :prop="userTask.id"
-          >
-            <el-select
-              v-model="startUserSelectAssignees[userTask.id]"
-              multiple
-              placeholder="请选择审批人"
-            >
+          <el-form-item label="请假类型" prop="type">
+            <el-select v-model="formData.type" clearable placeholder="请选择请假类型">
               <el-option
-                v-for="user in userList"
-                :key="user.id"
-                :label="user.nickname"
-                :value="user.id"
+                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_OA_LEAVE_TYPE)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
               />
             </el-select>
           </el-form-item>
-        </el-form>
-      </el-card>
-    </el-col>
-    <el-form-item>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
-    </el-form-item>
-  </el-form>
+          <el-form-item label="开始时间" prop="startTime">
+            <el-date-picker
+              v-model="formData.startTime"
+              clearable
+              placeholder="请选择开始时间"
+              type="datetime"
+              value-format="x"
+            />
+          </el-form-item>
+          <el-form-item label="结束时间" prop="endTime">
+            <el-date-picker
+              v-model="formData.endTime"
+              clearable
+              placeholder="请选择结束时间"
+              type="datetime"
+              value-format="x"
+            />
+          </el-form-item>
+          <el-form-item label="原因" prop="reason">
+            <el-input v-model="formData.reason" placeholder="请输入请假原因" type="textarea" />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
+          </el-form-item>
+        </el-form></el-col
+      >
+      <!-- 新增    ====== begin ======== -->
+      <el-col :span="8"
+        ><!-- 流程时间线 -->
+        <ProcessInstanceTimeline
+          ref="timelineRef"
+          :activity-nodes="activityNodes"
+          :show-status-icon="false"
+          @select-user-confirm="selectUserConfirm"
+        />
+      </el-col>
+      <!-- 新增    ====== end ======== -->
+    </el-row>
+  </ContentWrap>
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as LeaveApi from '@/api/bpm/leave'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
-import * as UserApi from '@/api/system/user'
-
+//  新增    ====== begin ========
+import ProcessInstanceTimeline from '../../processInstance/detail/ProcessInstanceTimeline.vue'
+import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
+//  新增    ====== end ========
 defineOptions({ name: 'BpmOALeaveCreate' })
 
 const message = useMessage() // 消息弹窗
@@ -104,10 +95,11 @@ const formRef = ref() // 表单 Ref
 const processDefineKey = 'oa_leave' // 流程定义 Key
 const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
-const startUserSelectAssigneesFormRef = ref() // 发起人选择审批人的表单 Ref
-const startUserSelectAssigneesFormRules = ref({}) // 发起人选择审批人的表单 Rules
-const userList = ref<any[]>([]) // 用户列表
-
+//  新增    ====== begin ========
+const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
+const processDefinitionId = ref('')
+//  新增    ====== end ========
 /** 提交表单 */
 const submitForm = async () => {
   // 校验表单
@@ -116,7 +108,14 @@ const submitForm = async () => {
   if (!valid) return
   // 校验指定审批人
   if (startUserSelectTasks.value?.length > 0) {
-    await startUserSelectAssigneesFormRef.value.validate()
+    for (const userTask of startUserSelectTasks.value) {
+      if (
+        Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
+        startUserSelectAssignees.value[userTask.id].length === 0
+      ) {
+        return message.warning(`请选择${userTask.name}的审批人`)
+      }
+    }
   }
 
   // 提交请求
@@ -137,28 +136,94 @@ const submitForm = async () => {
   }
 }
 
+//  新增    ====== begin ========
+/** 获取审批详情 */
+const getApprovalDetail = async () => {
+  try {
+    const data = await ProcessInstanceApi.getApprovalDetail({
+      processDefinitionId: processDefinitionId.value,
+      activityId: NodeId.START_USER_NODE_ID,
+      processVariablesStr: JSON.stringify({ day: daysDifference() }) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
+    })
+
+    if (!data) {
+      message.error('查询不到审批详情信息！')
+      return
+    }
+    // 获取审批节点，显示 Timeline 的数据
+    activityNodes.value = data.activityNodes
+
+    // 获取发起人自选的任务
+    startUserSelectTasks.value = data.activityNodes?.filter(
+      (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
+    )
+    // 恢复之前的选择审批人
+    if (startUserSelectTasks.value?.length > 0) {
+      for (const node of startUserSelectTasks.value) {
+        if (
+          tempStartUserSelectAssignees.value[node.id] &&
+          tempStartUserSelectAssignees.value[node.id].length > 0
+        ) {
+          startUserSelectAssignees.value[node.id] = tempStartUserSelectAssignees.value[node.id]
+        } else {
+          startUserSelectAssignees.value[node.id] = []
+        }
+      }
+    }
+  } finally {
+  }
+}
+
+/** 选择发起人 */
+const selectUserConfirm = (id: string, userList: any[]) => {
+  startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
+}
+
+// 计算天数差
+const daysDifference = () => {
+  const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
+  const diffTime = Math.abs(Number(formData.value.endTime) - Number(formData.value.startTime))
+  return Math.floor(diffTime / oneDay)
+}
+//  新增    ====== end ========
+
 /** 初始化 */
 onMounted(async () => {
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
     processDefineKey
   )
+
   if (!processDefinitionDetail) {
     message.error('OA 请假的流程模型未配置，请检查！')
     return
   }
+  processDefinitionId.value = processDefinitionDetail.id
   startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
-  // 设置指定审批人
-  if (startUserSelectTasks.value?.length > 0) {
-    // 设置校验规则
-    for (const userTask of startUserSelectTasks.value) {
-      startUserSelectAssignees.value[userTask.id] = []
-      startUserSelectAssigneesFormRules.value[userTask.id] = [
-        { required: true, message: '请选择审批人', trigger: 'blur' }
-      ]
-    }
-    // 加载用户列表
-    userList.value = await UserApi.getSimpleUserList()
-  }
+  //  新增    ====== begin ========
+  // 加载最新的审批详情,主要用于节点预测
+  getApprovalDetail()
+  //  新增    ====== end ========
 })
+//  新增    ====== begin ========
+/** 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次, formData.value可改成实际业务中的特定字段 */
+watch(
+  formData.value,
+  (newValue, oldValue) => {
+    if (!oldValue) {
+      return
+    }
+    if (newValue && Object.keys(newValue).length > 0) {
+      // 记录之前的节点审批人
+      tempStartUserSelectAssignees.value = startUserSelectAssignees.value
+      startUserSelectAssignees.value = {}
+      // 加载最新的审批详情,主要用于节点预测
+      getApprovalDetail()
+    }
+  },
+  {
+    immediate: true
+  }
+  //  新增    ====== end ========
+)
 </script>
