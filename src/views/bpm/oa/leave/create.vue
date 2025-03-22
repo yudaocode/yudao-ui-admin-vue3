@@ -1,8 +1,8 @@
 <template>
-  <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }">
-    <el-row :gutter="20">
-      <el-col :span="16"
-        ><el-form
+  <el-row :gutter="20">
+    <el-col :span="16">
+      <ContentWrap title="申请信息">
+        <el-form
           ref="formRef"
           v-loading="formLoading"
           :model="formData"
@@ -41,35 +41,39 @@
             <el-input v-model="formData.reason" placeholder="请输入请假原因" type="textarea" />
           </el-form-item>
           <el-form-item>
-            <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
+            <el-button :disabled="formLoading" type="primary" @click="submitForm">
+              确 定
+            </el-button>
           </el-form-item>
-        </el-form></el-col
-      >
-      <!-- 新增    ====== begin ======== -->
-      <el-col :span="8"
-        ><!-- 流程时间线 -->
+        </el-form>
+      </ContentWrap>
+    </el-col>
+
+    <!-- 审批相关：流程信息 -->
+    <el-col :span="8">
+      <ContentWrap title="审批流程" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"
           :show-status-icon="false"
           @select-user-confirm="selectUserConfirm"
         />
-      </el-col>
-      <!-- 新增    ====== end ======== -->
-    </el-row>
-  </ContentWrap>
+      </ContentWrap>
+    </el-col>
+  </el-row>
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as LeaveApi from '@/api/bpm/leave'
 import { useTagsViewStore } from '@/store/modules/tagsView'
+
+// 审批相关：import
 import * as DefinitionApi from '@/api/bpm/definition'
-//  新增    ====== begin ========
-import ProcessInstanceTimeline from '../../processInstance/detail/ProcessInstanceTimeline.vue'
+import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessInstanceTimeline.vue'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
-//  新增    ====== end ========
+
 defineOptions({ name: 'BpmOALeaveCreate' })
 
 const message = useMessage() // 消息弹窗
@@ -91,22 +95,21 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 
-// 指定审批人
+// 审批相关：变量
 const processDefineKey = 'oa_leave' // 流程定义 Key
 const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
-//  新增    ====== begin ========
 const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
 const processDefinitionId = ref('')
-//  新增    ====== end ========
+
 /** 提交表单 */
 const submitForm = async () => {
-  // 校验表单
+  // 1.1 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
-  // 校验指定审批人
+  // 1.2 审批相关：校验指定审批人
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
       if (
@@ -118,11 +121,11 @@ const submitForm = async () => {
     }
   }
 
-  // 提交请求
+  // 2. 提交请求
   formLoading.value = true
   try {
     const data = { ...formData.value } as unknown as LeaveApi.LeaveVO
-    // 设置指定审批人
+    // 审批相关：设置指定审批人
     if (startUserSelectTasks.value?.length > 0) {
       data.startUserSelectAssignees = startUserSelectAssignees.value
     }
@@ -136,12 +139,12 @@ const submitForm = async () => {
   }
 }
 
-//  新增    ====== begin ========
-/** 获取审批详情 */
+/** 审批相关：获取审批详情 */
 const getApprovalDetail = async () => {
   try {
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: processDefinitionId.value,
+      // TODO 小北：可以支持 processDefinitionKey 查询
       activityId: NodeId.START_USER_NODE_ID,
       processVariablesStr: JSON.stringify({ day: daysDifference() }) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
     })
@@ -174,21 +177,22 @@ const getApprovalDetail = async () => {
   }
 }
 
-/** 选择发起人 */
+/** 审批相关：选择发起人 */
 const selectUserConfirm = (id: string, userList: any[]) => {
   startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
 
 // 计算天数差
+// TODO @小北：可以搞到 formatTime 里面去，然后看看 dayjs 里面有没有现成的方法，或者辅助计算的方法。
 const daysDifference = () => {
   const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
   const diffTime = Math.abs(Number(formData.value.endTime) - Number(formData.value.startTime))
   return Math.floor(diffTime / oneDay)
 }
-//  新增    ====== end ========
 
 /** 初始化 */
 onMounted(async () => {
+  // TODO @小北：这里可以简化，统一通过 getApprovalDetail 处理么？
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
     processDefineKey
@@ -200,13 +204,12 @@ onMounted(async () => {
   }
   processDefinitionId.value = processDefinitionDetail.id
   startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
-  //  新增    ====== begin ========
-  // 加载最新的审批详情,主要用于节点预测
-  getApprovalDetail()
-  //  新增    ====== end ========
+
+  // 审批相关：加载最新的审批详情，主要用于节点预测
+  await getApprovalDetail()
 })
-//  新增    ====== begin ========
-/** 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次, formData.value可改成实际业务中的特定字段 */
+
+/** 审批相关：预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次, formData.value可改成实际业务中的特定字段 */
 watch(
   formData.value,
   (newValue, oldValue) => {
@@ -224,6 +227,5 @@ watch(
   {
     immediate: true
   }
-  //  新增    ====== end ========
 )
 </script>
