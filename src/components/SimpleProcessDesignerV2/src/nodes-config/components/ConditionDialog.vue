@@ -1,5 +1,5 @@
 <!-- TODO @jason：有可能，它里面套 Condition 么？  -->
-<!-- TODO 怕影响其它节点功能，后面看看如何如何复用 Condtion --> 
+<!-- TODO 怕影响其它节点功能，后面看看如何如何复用 Condtion -->
 <template>
   <Dialog v-model="dialogVisible" title="条件配置" width="600px" :fullscreen="false">
     <div class="h-410px">
@@ -165,6 +165,7 @@ import {
 } from '../../consts'
 import { BpmModelFormType } from '@/utils/constants'
 import { useFormFieldsAndStartUser } from '../../node'
+import { cloneDeep } from 'lodash-es'
 defineOptions({
   name: 'ConditionDialog'
 })
@@ -175,7 +176,7 @@ const condition = ref<{
   conditionGroups?: ConditionGroup
 }>({
   conditionType: ConditionType.RULE,
-  conditionGroups: DEFAULT_CONDITION_GROUP_VALUE
+  conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE)
 })
 
 const emit = defineEmits<{
@@ -210,7 +211,7 @@ const formRef = ref() // 表单 Ref
 const changeConditionType = () => {
   if (condition.value.conditionType === ConditionType.RULE) {
     if (!condition.value.conditionGroups) {
-      condition.value.conditionGroups = DEFAULT_CONDITION_GROUP_VALUE
+      condition.value.conditionGroups = cloneDeep(DEFAULT_CONDITION_GROUP_VALUE)
     }
   }
 }
