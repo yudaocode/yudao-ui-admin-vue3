@@ -689,15 +689,15 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'product/detail/:id',
+        path: 'product/product/detail/:id',
         name: 'IoTProductDetail',
         meta: {
           title: '产品详情',
           noCache: true,
           hidden: true,
-          activeMenu: '/iot/product'
+          activeMenu: '/iot/device/product'
         },
-        component: () => import('@/views/iot/product/detail/index.vue')
+        component: () => import('@/views/iot/product/product/detail/index.vue')
       },
       {
         path: 'device/detail/:id',
@@ -706,9 +706,20 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '设备详情',
           noCache: true,
           hidden: true,
-          activeMenu: '/iot/device'
+          activeMenu: '/iot/device/device'
         },
-        component: () => import('@/views/iot/device/detail/index.vue')
+        component: () => import('@/views/iot/device/device/detail/index.vue')
+      },
+      {
+        path: 'plugin/detail/:id',
+        name: 'IoTPluginDetail',
+        meta: {
+          title: '插件详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/iot/plugin'
+        },
+        component: () => import('@/views/iot/plugin/detail/index.vue')
       }
     ]
   }

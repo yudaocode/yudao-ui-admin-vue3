@@ -16,6 +16,7 @@ export const AiPlatformEnum = {
   DEEP_SEEK: 'DeepSeek', // DeepSeek
   ZHI_PU: 'ZhiPu', // 智谱 AI
   XING_HUO: 'XingHuo', // 讯飞
+  SiliconFlow: 'SiliconFlow', // 硅基流动
   OPENAI: 'OpenAI',
   Ollama: 'Ollama',
   STABLE_DIFFUSION: 'StableDiffusion', // Stability AI
@@ -44,6 +45,10 @@ export const OtherPlatformEnum: ImageModelVO[] = [
   {
     key: AiPlatformEnum.ZHI_PU,
     name: '智谱 AI'
+  },
+  {
+    key: AiPlatformEnum.SiliconFlow,
+    name: '硅基流动'
   }
 ]
 

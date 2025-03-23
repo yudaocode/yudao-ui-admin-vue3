@@ -68,6 +68,7 @@ const dialogStyle = computed(() => {
     draggable
     class="com-dialog"
     :show-close="false"
+    @close="$emit('update:modelValue', false)"
   >
     <template #header="{ close }">
       <div class="relative h-54px flex items-center justify-between pl-15px pr-15px">

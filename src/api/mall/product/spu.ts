@@ -101,7 +101,7 @@ export const deleteSpu = (id: number) => {
 }
 
 // 导出商品 Spu Excel
-export const exportSpu = async (params) => {
+export const exportSpu = async (params: any) => {
   return await request.download({ url: '/product/spu/export', params })
 }
 
