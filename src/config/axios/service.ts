@@ -201,6 +201,10 @@ const refreshToken = async () => {
 const handleAuthorized = () => {
   const { t } = useI18n()
   if (!isRelogin.show) {
+    // 如果已经到登录页面则不进行弹窗提示
+    if (window.location.href.includes('login')) {
+      return
+    }
     isRelogin.show = true
     ElMessageBox.confirm(t('sys.api.timeoutMessage'), t('common.confirmTitle'), {
       showCancelButton: false,
