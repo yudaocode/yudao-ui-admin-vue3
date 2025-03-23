@@ -94,7 +94,6 @@ import * as FormApi from '@/api/bpm/form'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import * as UserApi from '@/api/system/user'
 import * as DeptApi from '@/api/system/dept'
-import { useUserStoreWithOut } from '@/store/modules/user'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { BpmModelFormType, BpmModelType, BpmAutoApproveType } from '@/utils/constants'
 import BasicInfo from './BasicInfo.vue'
@@ -205,14 +204,16 @@ const initData = async () => {
       data.simpleModel = JSON.parse(data.simpleModel)
     }
     formData.value = data
-    formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : formData.value?.startDeptIds?.length > 0 ? 2 : 0
+    formData.value.startUserType =
+      formData.value.startUserIds?.length > 0 ? 1 : formData.value?.startDeptIds?.length > 0 ? 2 : 0
   } else if (['update', 'copy'].includes(actionType)) {
     // 情况二：修改场景/复制场景
     const modelId = route.params.id as string
     formData.value = await ModelApi.getModel(modelId)
-    formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : formData.value?.startDeptIds?.length > 0 ? 2 : 0
+    formData.value.startUserType =
+      formData.value.startUserIds?.length > 0 ? 1 : formData.value?.startDeptIds?.length > 0 ? 2 : 0
 
-    // 复制场景
+    // 特殊：复制场景
     if (route.params.type === 'copy') {
       delete formData.value.id
       formData.value.name += '副本'
@@ -233,7 +234,7 @@ const initData = async () => {
   userList.value = await UserApi.getSimpleUserList()
   // 获取部门列表
   deptList.value = await DeptApi.getSimpleDeptList()
-  
+
   // 最终，设置 currentStep 切换到第一步
   currentStep.value = 0
 

@@ -25,7 +25,14 @@
     </template>
     <el-tabs type="border-card" v-model="activeTabName">
       <el-tab-pane label="权限" name="user">
-        <el-text v-if="(!startUserIds || startUserIds.length === 0) && (!startDeptIds || startDeptIds.length === 0)"> 全部成员可以发起流程 </el-text>
+        <el-text
+          v-if="
+            (!startUserIds || startUserIds.length === 0) &&
+            (!startDeptIds || startDeptIds.length === 0)
+          "
+        >
+          全部成员可以发起流程
+        </el-text>
         <div v-else-if="startUserIds && startUserIds.length > 0">
           <el-text v-if="startUserIds.length == 1">
             {{ getUserNicknames(startUserIds) }} 可发起流程
@@ -37,7 +44,8 @@
               placement="top"
               :content="getUserNicknames(startUserIds)"
             >
-              {{ getUserNicknames(startUserIds.slice(0,2)) }} 等 {{ startUserIds.length }} 人可发起流程
+              {{ getUserNicknames(startUserIds.slice(0, 2)) }} 等
+              {{ startUserIds.length }} 人可发起流程
             </el-tooltip>
           </el-text>
         </div>
@@ -52,11 +60,11 @@
               placement="top"
               :content="getDeptNames(startDeptIds)"
             >
-              {{ getDeptNames(startDeptIds.slice(0,2)) }} 等 {{ startDeptIds.length }} 个部门的人可发起流程
+              {{ getDeptNames(startDeptIds.slice(0, 2)) }} 等
+              {{ startDeptIds.length }} 个部门可发起流程
             </el-tooltip>
           </el-text>
         </div>
-
       </el-tab-pane>
       <el-tab-pane label="表单字段权限" name="fields" v-if="formType === 10">
         <div class="field-setting-pane">
@@ -170,7 +178,7 @@ const getUserNicknames = (userIds: number[]): string => {
 const getDeptNames = (deptIds: number[]): string => {
   if (!deptIds || deptIds.length === 0) {
     return ''
-  } 
+  }
   const deptNames: string[] = []
   deptIds.forEach((deptId) => {
     const found = deptOptions?.value.find((item) => item.id === deptId)

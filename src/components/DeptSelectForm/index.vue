@@ -59,7 +59,7 @@ const props = defineProps({
 
 const treeRef = ref()
 const deptTree = ref<Tree[]>([]) // 部门树形结构
-const selectedDeptIds = ref<number[]>([]) // 选中的部门ID列表
+const selectedDeptIds = ref<number[]>([]) // 选中的部门 ID 列表
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 
@@ -78,7 +78,9 @@ const open = async (selectedList?: DeptApi.DeptVO[]) => {
   // 设置已选择的部门
   if (selectedList?.length) {
     await nextTick()
-    const selectedIds = selectedList.map(dept => dept.id).filter((id): id is number => id !== undefined)
+    const selectedIds = selectedList
+      .map((dept) => dept.id)
+      .filter((id): id is number => id !== undefined)
     selectedDeptIds.value = selectedIds
     treeRef.value?.setCheckedKeys(selectedIds)
   }
