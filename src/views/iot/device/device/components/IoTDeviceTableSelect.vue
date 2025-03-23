@@ -1,3 +1,5 @@
+<!-- TODO @puhui999：IoT 前缀去掉哈，文件名 -->
+<!-- IoT 设备选择，使用弹窗展示 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" :appendToBody="true" width="60%">
     <ContentWrap>
@@ -99,6 +101,8 @@
         </el-form-item>
       </el-form>
     </ContentWrap>
+
+    <!-- 列表 -->
     <ContentWrap>
       <el-table
         ref="tableRef"

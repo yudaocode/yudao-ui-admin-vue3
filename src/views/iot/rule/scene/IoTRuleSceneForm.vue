@@ -48,6 +48,7 @@
               @click="removeTrigger(index)"
             />
           </device-listener>
+          <!-- TODO @puhui999：可以使用 el-button，然后选个合适的样式哇 -->
           <el-text class="ml-10px!" type="primary" @click="addTrigger">添加触发器</el-text>
         </el-col>
         <el-col :span="24">
@@ -68,6 +69,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { RuleSceneApi, RuleSceneVO } from '@/api/iot/rule/scene'
 import DeviceListener from './components/DeviceListener.vue'
+// TODO @puhui999：尽量用 icon 组件哈，项目里的
 import { Delete } from '@element-plus/icons-vue'
 import { IotRuleSceneTriggerConfig } from '@/api/iot/rule/scene/scene.types'
 
@@ -82,7 +84,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<RuleSceneVO>({
-  status: 0,
+  status: 0, // TODO @puhui999：使用枚举值
   triggers: [] as IotRuleSceneTriggerConfig[]
 } as RuleSceneVO)
 const formRules = reactive({
@@ -96,7 +98,7 @@ const formRef = ref() // 表单 Ref
 /** 添加触发器 */
 const addTrigger = () => {
   formData.value.triggers.push({
-    type: 1,
+    type: 1, // TODO @puhui999：使用枚举值
     productKey: '',
     deviceNames: [],
     conditions: [
@@ -113,6 +115,7 @@ const removeTrigger = (index: number) => {
   newTriggers.splice(index, 1)
   formData.value.triggers = newTriggers
 }
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -158,7 +161,7 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    status: 0,
+    status: 0, // TODO @puhui999：使用枚举值
     triggers: [] as IotRuleSceneTriggerConfig[]
   } as RuleSceneVO
   formRef.value?.resetFields()

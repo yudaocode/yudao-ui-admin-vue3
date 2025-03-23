@@ -69,6 +69,7 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
+      <!-- TODO @puhui999：触发器数组 => 触发器，然后展示 x 个？ ps：执行器数组也类似哈。-->
       <el-table-column label="触发器数组" align="center" prop="triggers" />
       <el-table-column label="执行器数组" align="center" prop="actions" />
       <el-table-column

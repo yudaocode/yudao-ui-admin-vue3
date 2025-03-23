@@ -19,13 +19,14 @@
       </div>
       <div class="flex items-center mr-60px">
         <span class="mr-10px">产品</span>
-        <el-button type="primary" @click="productTableSelectRef?.open()">
+        <el-button type="primary" @click="productTableSelectRef?.open()" size="small" plain>
+          <!-- TODO @puhui999：最终最好是，product ? product.name : '选择产品'，减少取反 -->
           {{ !product ? '选择产品' : product.name }}
         </el-button>
       </div>
       <div class="flex items-center mr-60px">
         <span class="mr-10px">设备</span>
-        <el-button type="primary" @click="openDeviceSelect">
+        <el-button type="primary" @click="openDeviceSelect" size="small" plain>
           {{ isEmpty(deviceList) ? '选择设备' : triggerConfig.deviceNames.join(',') }}
         </el-button>
       </div>
@@ -106,6 +107,7 @@
     <el-text class="ml-10px!" type="primary" @click="addCondition">添加触发条件</el-text>
   </div>
 
+  <!-- 产品、设备的选择 -->
   <IoTProductTableSelect ref="productTableSelectRef" @success="handleProductSelect" />
   <IoTDeviceTableSelect
     ref="deviceTableSelectRef"
@@ -152,6 +154,7 @@ const addCondition = () => {
 const removeCondition = (index: number) => {
   triggerConfig.value.conditions.splice(index, 1)
 }
+
 /** 添加参数 */
 const addConditionParameter = (conditionParameters: IotRuleSceneTriggerConditionParameter[]) => {
   if (!product.value) {
@@ -196,6 +199,7 @@ const openDeviceSelect = () => {
 /** 获取产品物模型 */
 const thingModelTSL = ref<any>()
 const thingModels = computed(() => (condition: IotRuleSceneTriggerCondition) => {
+  // TODO @puhui999：这里最好也用枚举
   switch (condition.type) {
     case 'property':
       return thingModelTSL.value.properties
@@ -215,6 +219,7 @@ const getThingModelTSL = async () => {
 }
 </script>
 
+<!-- TODO @puhui999：建议使用 unocss 哈 -->
 <style lang="scss" scoped>
 .device-listener {
   .device-listener-header {
