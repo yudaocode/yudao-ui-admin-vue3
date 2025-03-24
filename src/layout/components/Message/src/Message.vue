@@ -2,8 +2,13 @@
 import { formatDate } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'
 import { useUserStoreWithOut } from '@/store/modules/user'
+import { propTypes } from '@/utils/propTypes'
 
 defineOptions({ name: 'Message' })
+
+defineProps({
+  color: propTypes.string.def('')
+})
 
 const { push } = useRouter()
 const userStore = useUserStoreWithOut()
@@ -54,7 +59,7 @@ onMounted(() => {
     <ElPopover :width="400" placement="bottom" trigger="click">
       <template #reference>
         <ElBadge :is-dot="unreadCount > 0" class="item">
-          <Icon :size="18" class="cursor-pointer" icon="ep:bell" @click="getList" />
+          <Icon :size="18" class="cursor-pointer" icon="ep:bell" :color="color" @click="getList" />
         </ElBadge>
       </template>
       <ElTabs v-model="activeName">
