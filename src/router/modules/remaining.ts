@@ -667,6 +667,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           activeMenu: '/ai/knowledge'
         }
+      },
+      {
+        path: 'console/workflow/:type/:id',
+        component: () => import('@/views/ai/workflow/manager/WorkflowModelForm.vue'),
+        name: 'AiWorkflowUpdate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '修改AI工作流',
+          activeMenu: '/ai/console/workflow'
+        }
       }
     ]
   },
