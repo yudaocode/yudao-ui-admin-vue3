@@ -38,7 +38,9 @@
           </div>
         </div>
         <div v-if="activity.nodeType === NodeType.CHILD_PROCESS_NODE">
-          <el-button type="primary" plain size="small" @click="handleChildProcess(activity)">点击跳转子流程</el-button>
+          <el-button type="primary" plain size="small" @click="handleChildProcess(activity)">
+            查看子流程
+          </el-button>
         </div>
         <!-- 需要自定义选择审批人 -->
         <div
@@ -317,6 +319,7 @@ const handleUserSelectConfirm = (activityId: string, userList: any[]) => {
 
 /** 跳转子流程 */
 const handleChildProcess = (activity: any) => {
+  // TODO @lesan：貌似跳不过去？！
   push({
     name: 'BpmProcessInstanceDetail',
     query: {
