@@ -668,6 +668,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           activeMenu: '/ai/knowledge'
         }
       },
+      // TODO @lesan：:type =》 design 设计 AI 工作流
       {
         path: 'console/workflow/:type/:id',
         component: () => import('@/views/ai/workflow/manager/WorkflowModelForm.vue'),
@@ -676,7 +677,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           noCache: true,
           hidden: true,
           canTo: true,
-          title: '修改AI工作流',
+          title: '修改 AI 工作流',
           activeMenu: '/ai/console/workflow'
         }
       }

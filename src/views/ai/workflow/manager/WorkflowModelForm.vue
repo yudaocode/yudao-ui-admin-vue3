@@ -1,3 +1,4 @@
+<!-- TODO @lesan：要不叫搞个 design 单独一个路由 -->
 <template>
   <div style="width: 100%; height: calc(100vh - 160px)">
     <Tinyflow
@@ -10,8 +11,12 @@
     />
   </div>
   <div class="absolute top-30px right-30px">
-    <el-button @click="updateWorkflowModel" type="primary" v-hasPermi="['ai:workflow:update']">保存</el-button>
-    <el-button @click="testWorkflowModel" type="primary" v-hasPermi="['ai:workflow:test']">测试</el-button>
+    <el-button @click="updateWorkflowModel" type="primary" v-hasPermi="['ai:workflow:update']">
+      保存
+    </el-button>
+    <el-button @click="testWorkflowModel" type="primary" v-hasPermi="['ai:workflow:test']">
+      测试
+    </el-button>
   </div>
 </template>
 
@@ -25,6 +30,7 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const tinyflowRef = ref()
+// TODO @lesan：待接入
 const provider = ref({ llm: () => [], knowledge: () => [], internal: () => [] })
 const initialData = ref()
 

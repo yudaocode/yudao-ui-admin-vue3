@@ -1,3 +1,4 @@
+<!-- TODO @lesan：要不直接放到 workflow 根目录 -->
 <template>
   <!-- 搜索工作栏 -->
   <ContentWrap>
@@ -40,7 +41,12 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" plain @click="openForm('create')" v-hasPermi="['ai:workflow:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['ai:workflow:create']"
+        >
           <Icon icon="ep:plus" /> 新增
         </el-button>
       </el-form-item>
