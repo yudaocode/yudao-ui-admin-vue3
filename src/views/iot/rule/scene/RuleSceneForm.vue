@@ -44,8 +44,9 @@
               <Icon icon="ep:delete" />
             </el-button>
           </device-listener>
-          <!-- TODO @puhui999：可以使用 el-button，然后选个合适的样式哇 -->
-          <el-text class="ml-10px!" type="primary" @click="addTrigger">添加触发器</el-text>
+          <el-button class="ml-10px!" type="primary" size="small" @click="addTrigger">
+            添加触发器
+          </el-button>
         </el-col>
         <el-col :span="24">
           <el-divider content-position="left">执行动作配置</el-divider>

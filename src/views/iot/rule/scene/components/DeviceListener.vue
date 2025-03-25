@@ -17,13 +17,19 @@
           />
         </el-select>
       </div>
-      <div class="flex items-center mr-60px">
+      <div
+        v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE"
+        class="flex items-center mr-60px"
+      >
         <span class="mr-10px">产品</span>
         <el-button type="primary" @click="productTableSelectRef?.open()" size="small" plain>
           {{ product ? product.name : '选择产品' }}
         </el-button>
       </div>
-      <div class="flex items-center mr-60px">
+      <div
+        v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE"
+        class="flex items-center mr-60px"
+      >
         <span class="mr-10px">设备</span>
         <el-button type="primary" @click="openDeviceSelect" size="small" plain>
           {{ isEmpty(deviceList) ? '选择设备' : triggerConfig.deviceNames.join(',') }}
@@ -36,71 +42,89 @@
         </el-tooltip>
       </div>
     </div>
-    <!-- 触发器条件 -->
-    <div
-      class="bg-[#dbe5f6] flex p-10px"
-      v-for="(condition, index) in triggerConfig.conditions"
-      :key="index"
-    >
-      <div class="flex flex-col items-center justify-center mr-10px h-a">
-        <el-select
-          v-model="condition.type"
-          @change="condition.parameters = []"
-          class="!w-160px"
-          clearable
-          placeholder=""
-        >
-          <el-option label="属性" :value="IotDeviceMessageTypeEnum.PROPERTY" />
-          <el-option label="服务" :value="IotDeviceMessageTypeEnum.SERVICE" />
-          <el-option label="事件" :value="IotDeviceMessageTypeEnum.EVENT" />
-        </el-select>
-      </div>
-      <div class="">
-        <DeviceListenerCondition
-          v-for="(parameter, index2) in condition.parameters"
-          :key="index2"
-          :model-value="parameter"
-          :thingModels="thingModels(condition)"
-          @update:model-value="(val) => (condition.parameters[index2] = val)"
-          class="mb-10px last:mb-0"
-        >
-          <el-tooltip content="删除参数" placement="top">
+    <!-- 设备触发器条件 -->
+    <template v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE">
+      <div
+        class="bg-[#dbe5f6] flex p-10px"
+        v-for="(condition, index) in triggerConfig.conditions"
+        :key="index"
+      >
+        <div class="flex flex-col items-center justify-center mr-10px h-a">
+          <el-select
+            v-model="condition.type"
+            @change="condition.parameters = []"
+            class="!w-160px"
+            clearable
+            placeholder=""
+          >
+            <el-option label="属性" :value="IotDeviceMessageTypeEnum.PROPERTY" />
+            <el-option label="服务" :value="IotDeviceMessageTypeEnum.SERVICE" />
+            <el-option label="事件" :value="IotDeviceMessageTypeEnum.EVENT" />
+          </el-select>
+        </div>
+        <div class="">
+          <DeviceListenerCondition
+            v-for="(parameter, index2) in condition.parameters"
+            :key="index2"
+            :model-value="parameter"
+            :thingModels="thingModels(condition)"
+            @update:model-value="(val) => (condition.parameters[index2] = val)"
+            class="mb-10px last:mb-0"
+          >
+            <el-tooltip content="删除参数" placement="top">
+              <el-button
+                type="danger"
+                circle
+                size="small"
+                @click="removeConditionParameter(condition.parameters, index2)"
+              >
+                <Icon icon="ep:delete" />
+              </el-button>
+            </el-tooltip>
+          </DeviceListenerCondition>
+        </div>
+        <!-- 添加参数 -->
+        <div class="flex flex-1 flex-col items-center justify-center w-60px h-a">
+          <el-tooltip content="添加参数" placement="top">
             <el-button
-              type="danger"
+              type="primary"
               circle
               size="small"
-              @click="removeConditionParameter(condition.parameters, index2)"
+              @click="addConditionParameter(condition.parameters)"
             >
+              <Icon icon="ep:plus" />
+            </el-button>
+          </el-tooltip>
+        </div>
+        <!-- 删除条件 -->
+        <div
+          class="device-listener-condition flex flex-1 flex-col items-center justify-center w-a h-a"
+        >
+          <el-tooltip content="删除条件" placement="top">
+            <el-button type="danger" size="small" @click="removeCondition(index)">
               <Icon icon="ep:delete" />
             </el-button>
           </el-tooltip>
-        </DeviceListenerCondition>
+        </div>
       </div>
-      <!-- 添加参数 -->
-      <div class="flex flex-1 flex-col items-center justify-center w-60px h-a">
-        <el-tooltip content="添加参数" placement="top">
-          <el-button
-            type="primary"
-            circle
-            size="small"
-            @click="addConditionParameter(condition.parameters)"
-          >
-            <Icon icon="ep:plus" />
-          </el-button>
-        </el-tooltip>
-      </div>
-      <!-- 删除条件 -->
-      <div
-        class="device-listener-condition flex flex-1 flex-col items-center justify-center w-a h-a"
-      >
-        <el-tooltip content="删除条件" placement="top">
-          <el-button type="danger" size="small" @click="removeCondition(index)">
-            <Icon icon="ep:delete" />
-          </el-button>
-        </el-tooltip>
-      </div>
+    </template>
+    <!-- 定时触发 -->
+    <div
+      v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.TIMER"
+      class="bg-[#dbe5f6] flex items-center justify-between p-10px"
+    >
+      <span class="w-120px">CRON 表达式</span>
+      <crontab v-model="triggerConfig.cronExpression" />
     </div>
-    <el-text class="ml-10px!" type="primary" @click="addCondition">添加触发条件</el-text>
+    <!-- 设备触发才可以设置多个触发条件 -->
+    <el-text
+      v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE"
+      class="ml-10px!"
+      type="primary"
+      @click="addCondition"
+    >
+      添加触发条件
+    </el-text>
   </div>
 
   <!-- 产品、设备的选择 -->
@@ -126,6 +150,7 @@ import { ThingModelApi } from '@/api/iot/thingmodel'
 import {
   IotDeviceMessageIdentifierEnum,
   IotDeviceMessageTypeEnum,
+  IotRuleSceneTriggerTypeEnum,
   TriggerCondition,
   TriggerConditionParameter,
   TriggerConfig
