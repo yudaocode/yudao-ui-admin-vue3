@@ -1,4 +1,3 @@
-<!-- TODO @puhui999：去掉 MQ 关键字哈 -->
 <template>
   <el-form-item label="主机地址" prop="config.host">
     <el-input v-model="config.host" placeholder="请输入主机地址，如：localhost" />
@@ -47,7 +46,7 @@ onMounted(() => {
     return
   }
   config.value = {
-    type: IoTDataBridgeConfigType.REDIS_STREAM,
+    type: IoTDataBridgeConfigType.REDIS_STREAM + '', // 序列化成对应类型时使用
     host: '',
     port: 6379,
     password: '',

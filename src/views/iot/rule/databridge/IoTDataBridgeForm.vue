@@ -46,7 +46,7 @@
         v-if="showConfig(IoTDataBridgeConfigType.RABBITMQ)"
         v-model="formData.config"
       />
-      <RedisStreamMQConfigForm
+      <RedisStreamConfigForm
         v-if="showConfig(IoTDataBridgeConfigType.REDIS_STREAM)"
         v-model="formData.config"
       />
@@ -73,13 +73,19 @@
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getDictObj, getIntDictOptions } from '@/utils/dict'
-import { DataBridgeApi, DataBridgeVO, IoTDataBridgeConfigType } from '@/api/iot/rule/databridge'
+import { CommonStatusEnum } from '@/utils/constants'
+import {
+  DataBridgeApi,
+  DataBridgeVO,
+  IoTDataBridgeConfigType,
+  IotDataBridgeDirectionEnum
+} from '@/api/iot/rule/databridge'
 import {
   HttpConfigForm,
   KafkaMQConfigForm,
   MqttConfigForm,
   RabbitMQConfigForm,
-  RedisStreamMQConfigForm,
+  RedisStreamConfigForm,
   RocketMQConfigForm
 } from './config'
 
@@ -94,9 +100,9 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<DataBridgeVO>({
-  status: 0,
-  direction: 1, // TODO @puhui999:枚举类
-  type: 1, // TODO @puhui999:枚举类
+  status: CommonStatusEnum.ENABLE,
+  direction: IotDataBridgeDirectionEnum.INPUT,
+  type: IoTDataBridgeConfigType.HTTP,
   config: {} as any
 })
 const formRules = reactive({
@@ -139,9 +145,9 @@ const formRules = reactive({
 })
 
 const formRef = ref() // 表单 Ref
-const showConfig = computed(() => (val: string) => {
+const showConfig = computed(() => (val: number) => {
   const dict = getDictObj(DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM, formData.value.type)
-  return dict && dict.value + '' === val
+  return dict && dict.value + '' === val + ''
 }) // 显示对应的 Config 配置项
 
 /** 打开弹窗 */
@@ -196,10 +202,9 @@ const handleTypeChange = (val: number) => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    // TODO @puhui999：换成枚举值哈
-    status: 0,
-    direction: 1,
-    type: 1,
+    status: CommonStatusEnum.ENABLE,
+    direction: IotDataBridgeDirectionEnum.INPUT,
+    type: IoTDataBridgeConfigType.HTTP,
     config: {} as any
   }
   formRef.value?.resetFields()

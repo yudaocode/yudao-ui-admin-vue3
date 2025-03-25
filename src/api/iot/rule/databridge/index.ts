@@ -80,17 +80,21 @@ export interface RedisStreamMQConfig extends Config {
 }
 
 /** 数据桥梁类型 */
-// TODO @puhui999：枚举用 number 可以么？
 export const IoTDataBridgeConfigType = {
-  HTTP: '1',
-  TCP: '2',
-  WEBSOCKET: '3',
-  MQTT: '10',
-  DATABASE: '20',
-  REDIS_STREAM: '21',
-  ROCKETMQ: '30',
-  RABBITMQ: '31',
-  KAFKA: '32'
+  HTTP: 1,
+  TCP: 2,
+  WEBSOCKET: 3,
+  MQTT: 10,
+  DATABASE: 20,
+  REDIS_STREAM: 21,
+  ROCKETMQ: 30,
+  RABBITMQ: 31,
+  KAFKA: 32
+} as const
+
+export const IotDataBridgeDirectionEnum = {
+  INPUT: 1, // 输入
+  OUTPUT: 2 // 输出
 } as const
 
 // 数据桥梁 API

@@ -34,7 +34,7 @@ onMounted(() => {
     return
   }
   config.value = {
-    type: IoTDataBridgeConfigType.KAFKA,
+    type: IoTDataBridgeConfigType.KAFKA + '', // 序列化成对应类型时使用
     bootstrapServers: '',
     username: '',
     password: '',

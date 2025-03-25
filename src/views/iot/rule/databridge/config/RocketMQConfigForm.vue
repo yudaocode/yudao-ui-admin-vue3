@@ -45,7 +45,7 @@ onMounted(() => {
     return
   }
   config.value = {
-    type: IoTDataBridgeConfigType.ROCKETMQ,
+    type: IoTDataBridgeConfigType.ROCKETMQ + '', // 序列化成对应类型时使用
     nameServer: '',
     accessKey: '',
     secretKey: '',
