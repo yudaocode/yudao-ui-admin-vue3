@@ -37,6 +37,9 @@
             {{ getApprovalNodeTime(activity) }}
           </div>
         </div>
+        <div v-if="activity.nodeType === NodeType.CHILD_PROCESS_NODE">
+          <el-button type="primary" plain size="small" @click="handleChildProcess(activity)">点击跳转子流程</el-button>
+        </div>
         <!-- 需要自定义选择审批人 -->
         <div
           class="flex flex-wrap gap2 items-center"
@@ -194,6 +197,7 @@ withDefaults(
     showStatusIcon: true // 默认值为 true
   }
 )
+const { push } = useRouter() // 路由
 
 // 审批节点
 const statusIconMap2 = {
@@ -309,5 +313,15 @@ const customApproveUsers: any = ref({}) // key：activityId，value：用户列�
 const handleUserSelectConfirm = (activityId: string, userList: any[]) => {
   customApproveUsers.value[activityId] = userList || []
   emit('selectUserConfirm', activityId, userList)
+}
+
+/** 跳转子流程 */
+const handleChildProcess = (activity: any) => {
+  push({
+    name: 'BpmProcessInstanceDetail',
+    query: {
+      id: activity.processInstanceId
+    }
+  })
 }
 </script>
