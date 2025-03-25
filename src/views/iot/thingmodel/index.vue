@@ -42,6 +42,9 @@
           <Icon class="mr-5px" icon="ep:plus" />
           添加功能
         </el-button>
+        <el-button v-hasPermi="[`iot:thing-model:query`]" plain type="primary" @click="openTSL">
+          TSL
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -99,6 +102,7 @@
   </ContentWrap>
   <!-- 表单弹窗：添加/修改 -->
   <ThingModelForm ref="formRef" @success="getList" />
+  <ThingModelTSL ref="thingModelTSLRef" />
 </template>
 <script lang="ts" setup>
 import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
@@ -158,6 +162,12 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 展示物模型 TSL */
+const thingModelTSLRef = ref()
+const openTSL = () => {
+  thingModelTSLRef.value?.open()
 }
 
 /** 删除按钮操作 */
