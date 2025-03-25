@@ -40,13 +40,9 @@
             @update:model-value="(val) => (formData.triggers[index] = val)"
             class="mb-10px"
           >
-            <el-button
-              type="danger"
-              round
-              :icon="Delete"
-              size="small"
-              @click="removeTrigger(index)"
-            />
+            <el-button type="danger" round size="small" @click="removeTrigger(index)">
+              <Icon icon="ep:delete" />
+            </el-button>
           </device-listener>
           <!-- TODO @puhui999：可以使用 el-button，然后选个合适的样式哇 -->
           <el-text class="ml-10px!" type="primary" @click="addTrigger">添加触发器</el-text>
@@ -67,14 +63,19 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { RuleSceneApi, RuleSceneVO } from '@/api/iot/rule/scene'
+import { RuleSceneApi } from '@/api/iot/rule/scene'
 import DeviceListener from './components/DeviceListener.vue'
-// TODO @puhui999：尽量用 icon 组件哈，项目里的
-import { Delete } from '@element-plus/icons-vue'
-import { IotRuleSceneTriggerConfig } from '@/api/iot/rule/scene/scene.types'
+import { CommonStatusEnum } from '@/utils/constants'
+import {
+  IotDeviceMessageIdentifierEnum,
+  IotDeviceMessageTypeEnum,
+  IotRuleScene,
+  IotRuleSceneTriggerTypeEnum,
+  TriggerConfig
+} from '@/api/iot/rule/scene/scene.types'
 
-/** IoT 规则场景（场景联动） 表单 */
-defineOptions({ name: 'RuleSceneForm' })
+/** IoT 场景联动表单 */
+defineOptions({ name: 'IotRuleSceneForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -83,10 +84,10 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref<RuleSceneVO>({
-  status: 0, // TODO @puhui999：使用枚举值
-  triggers: [] as IotRuleSceneTriggerConfig[]
-} as RuleSceneVO)
+const formData = ref<IotRuleScene>({
+  status: CommonStatusEnum.ENABLE,
+  triggers: [] as TriggerConfig[]
+} as IotRuleScene)
 const formRules = reactive({
   name: [{ required: true, message: '场景名称不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '场景状态不能为空', trigger: 'blur' }],
@@ -98,12 +99,13 @@ const formRef = ref() // 表单 Ref
 /** 添加触发器 */
 const addTrigger = () => {
   formData.value.triggers.push({
-    type: 1, // TODO @puhui999：使用枚举值
+    type: IotRuleSceneTriggerTypeEnum.DEVICE,
     productKey: '',
     deviceNames: [],
     conditions: [
       {
-        type: 'property',
+        type: IotDeviceMessageTypeEnum.PROPERTY,
+        identifier: IotDeviceMessageIdentifierEnum.PROPERTY_SET,
         parameters: []
       }
     ]
@@ -142,7 +144,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as RuleSceneVO
+    const data = formData.value as unknown as IotRuleScene
     if (formType.value === 'create') {
       await RuleSceneApi.createRuleScene(data)
       message.success(t('common.createSuccess'))
@@ -161,9 +163,9 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    status: 0, // TODO @puhui999：使用枚举值
-    triggers: [] as IotRuleSceneTriggerConfig[]
-  } as RuleSceneVO
+    status: CommonStatusEnum.ENABLE,
+    triggers: [] as TriggerConfig[]
+  } as IotRuleScene
   formRef.value?.resetFields()
 }
 </script>

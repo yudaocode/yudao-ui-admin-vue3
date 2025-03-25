@@ -1,6 +1,6 @@
 <template>
-  <div class="device-listener m-10px">
-    <div class="device-listener-header h-50px flex items-center px-10px">
+  <div class="m-10px">
+    <div class="relative bg-[#eff3f7] h-50px flex items-center px-10px">
       <div class="flex items-center mr-60px">
         <span class="mr-10px">触发条件</span>
         <el-select
@@ -20,8 +20,7 @@
       <div class="flex items-center mr-60px">
         <span class="mr-10px">产品</span>
         <el-button type="primary" @click="productTableSelectRef?.open()" size="small" plain>
-          <!-- TODO @puhui999：最终最好是，product ? product.name : '选择产品'，减少取反 -->
-          {{ !product ? '选择产品' : product.name }}
+          {{ product ? product.name : '选择产品' }}
         </el-button>
       </div>
       <div class="flex items-center mr-60px">
@@ -31,7 +30,7 @@
         </el-button>
       </div>
       <!-- 删除触发器 -->
-      <div class="device-listener-delete">
+      <div class="absolute top-auto right-16px bottom-auto">
         <el-tooltip content="删除触发器" placement="top">
           <slot></slot>
         </el-tooltip>
@@ -39,7 +38,7 @@
     </div>
     <!-- 触发器条件 -->
     <div
-      class="device-listener-condition flex p-10px"
+      class="bg-[#dbe5f6] flex p-10px"
       v-for="(condition, index) in triggerConfig.conditions"
       :key="index"
     >
@@ -51,15 +50,9 @@
           clearable
           placeholder=""
         >
-          <!--          <el-option-->
-          <!--            v-for="dict in getStrDictOptions(DICT_TYPE.IOT_DEVICE_MESSAGE_TYPE_ENUM)"-->
-          <!--            :key="dict.value"-->
-          <!--            :label="dict.label"-->
-          <!--            :value="dict.value"-->
-          <!--          />-->
-          <el-option label="属性" value="property" />
-          <el-option label="服务" value="service" />
-          <el-option label="事件" value="event" />
+          <el-option label="属性" :value="IotDeviceMessageTypeEnum.PROPERTY" />
+          <el-option label="服务" :value="IotDeviceMessageTypeEnum.SERVICE" />
+          <el-option label="事件" :value="IotDeviceMessageTypeEnum.EVENT" />
         </el-select>
       </div>
       <div class="">
@@ -73,13 +66,13 @@
         >
           <el-tooltip content="删除参数" placement="top">
             <el-button
-              class="device-listener-delete"
               type="danger"
               circle
-              :icon="Delete"
               size="small"
               @click="removeConditionParameter(condition.parameters, index2)"
-            />
+            >
+              <Icon icon="ep:delete" />
+            </el-button>
           </el-tooltip>
         </DeviceListenerCondition>
       </div>
@@ -89,10 +82,11 @@
           <el-button
             type="primary"
             circle
-            :icon="Plus"
             size="small"
             @click="addConditionParameter(condition.parameters)"
-          />
+          >
+            <Icon icon="ep:plus" />
+          </el-button>
         </el-tooltip>
       </div>
       <!-- 删除条件 -->
@@ -100,7 +94,9 @@
         class="device-listener-condition flex flex-1 flex-col items-center justify-center w-a h-a"
       >
         <el-tooltip content="删除条件" placement="top">
-          <el-button type="danger" :icon="Delete" size="small" @click="removeCondition(index)" />
+          <el-button type="danger" size="small" @click="removeCondition(index)">
+            <Icon icon="ep:delete" />
+          </el-button>
         </el-tooltip>
       </div>
     </div>
@@ -108,8 +104,8 @@
   </div>
 
   <!-- 产品、设备的选择 -->
-  <IoTProductTableSelect ref="productTableSelectRef" @success="handleProductSelect" />
-  <IoTDeviceTableSelect
+  <ProductTableSelect ref="productTableSelectRef" @success="handleProductSelect" />
+  <DeviceTableSelect
     ref="deviceTableSelectRef"
     multiple
     :product-id="product?.id"
@@ -118,61 +114,63 @@
 </template>
 
 <script setup lang="ts">
-import { Delete, Plus } from '@element-plus/icons-vue'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import DeviceListenerCondition from './DeviceListenerCondition.vue'
-import IoTProductTableSelect from '@/views/iot/product/product/components/IoTProductTableSelect.vue'
-import IoTDeviceTableSelect from '@/views/iot/device/device/components/IoTDeviceTableSelect.vue'
-import {
-  IotRuleSceneTriggerCondition,
-  IotRuleSceneTriggerConditionParameter,
-  IotRuleSceneTriggerConfig
-} from '@/api/iot/rule/scene/scene.types'
-import { ProductVO } from '@/api/iot/product/product'
-import { DeviceVO } from '@/api/iot/device/device'
 import { useVModel } from '@vueuse/core'
 import { isEmpty } from '@/utils/is'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import DeviceListenerCondition from './DeviceListenerCondition.vue'
+import ProductTableSelect from '@/views/iot/product/product/components/ProductTableSelect.vue'
+import DeviceTableSelect from '@/views/iot/device/device/components/DeviceTableSelect.vue'
+import { ProductVO } from '@/api/iot/product/product'
+import { DeviceVO } from '@/api/iot/device/device'
 import { ThingModelApi } from '@/api/iot/thingmodel'
+import {
+  IotDeviceMessageIdentifierEnum,
+  IotDeviceMessageTypeEnum,
+  TriggerCondition,
+  TriggerConditionParameter,
+  TriggerConfig
+} from '@/api/iot/rule/scene/scene.types'
 
 /** 场景联动之监听器组件 */
 defineOptions({ name: 'DeviceListener' })
 
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
-const triggerConfig = useVModel(props, 'modelValue', emits) as Ref<IotRuleSceneTriggerConfig>
+const triggerConfig = useVModel(props, 'modelValue', emits) as Ref<TriggerConfig>
 
 const message = useMessage()
 
 /** 添加触发条件 */
 const addCondition = () => {
-  triggerConfig.value.conditions.push({
-    type: 'property',
+  triggerConfig.value.conditions?.push({
+    type: IotDeviceMessageTypeEnum.PROPERTY,
+    identifier: IotDeviceMessageIdentifierEnum.PROPERTY_SET,
     parameters: []
   })
 }
 /** 移除触发条件 */
 const removeCondition = (index: number) => {
-  triggerConfig.value.conditions.splice(index, 1)
+  triggerConfig.value.conditions?.splice(index, 1)
 }
 
 /** 添加参数 */
-const addConditionParameter = (conditionParameters: IotRuleSceneTriggerConditionParameter[]) => {
+const addConditionParameter = (conditionParameters: TriggerConditionParameter[]) => {
   if (!product.value) {
     message.warning('请先选择一个产品')
     return
   }
-  conditionParameters.push({} as IotRuleSceneTriggerConditionParameter)
+  conditionParameters.push({} as TriggerConditionParameter)
 }
 /** 移除参数 */
 const removeConditionParameter = (
-  conditionParameters: IotRuleSceneTriggerConditionParameter[],
+  conditionParameters: TriggerConditionParameter[],
   index: number
 ) => {
   conditionParameters.splice(index, 1)
 }
 
-const productTableSelectRef = ref<InstanceType<typeof IoTProductTableSelect>>()
-const deviceTableSelectRef = ref<InstanceType<typeof IoTDeviceTableSelect>>()
+const productTableSelectRef = ref<InstanceType<typeof ProductTableSelect>>()
+const deviceTableSelectRef = ref<InstanceType<typeof DeviceTableSelect>>()
 const product = ref<ProductVO>()
 const deviceList = ref<DeviceVO[]>([])
 /** 处理产品选择 */
@@ -198,15 +196,14 @@ const openDeviceSelect = () => {
 
 /** 获取产品物模型 */
 const thingModelTSL = ref<any>()
-const thingModels = computed(() => (condition: IotRuleSceneTriggerCondition) => {
-  // TODO @puhui999：这里最好也用枚举
+const thingModels = computed(() => (condition: TriggerCondition) => {
   switch (condition.type) {
-    case 'property':
+    case IotDeviceMessageTypeEnum.PROPERTY:
       return thingModelTSL.value.properties
     // TODO puhui999: 服务和事件后续考虑
-    case 'service':
+    case IotDeviceMessageTypeEnum.SERVICE:
       return thingModelTSL.value.services
-    case 'event':
+    case IotDeviceMessageTypeEnum.EVENT:
       return thingModelTSL.value.events
   }
   return []
@@ -218,24 +215,3 @@ const getThingModelTSL = async () => {
   thingModelTSL.value = await ThingModelApi.getThingModelTSLByProductId(product.value.id)
 }
 </script>
-
-<!-- TODO @puhui999：建议使用 unocss 哈 -->
-<style lang="scss" scoped>
-.device-listener {
-  .device-listener-header {
-    position: relative;
-    background-color: #eff3f7;
-
-    .device-listener-delete {
-      position: absolute;
-      top: auto;
-      right: 16px;
-      bottom: auto;
-    }
-  }
-
-  .device-listener-condition {
-    background-color: #dbe5f6;
-  }
-}
-</style>
