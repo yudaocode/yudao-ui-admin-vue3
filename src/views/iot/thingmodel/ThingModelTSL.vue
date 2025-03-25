@@ -19,23 +19,23 @@ defineOptions({ name: 'ThingModelTSL' })
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('物模型 TSL') // 弹窗的标题
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
+
 /** 打开弹窗 */
 const open = () => {
   dialogVisible.value = true
 }
 defineExpose({ open })
 
-const thingModelTSL = ref('')
 /** 获取 TSL */
+const thingModelTSL = ref('')
 const getTsl = async () => {
   const res = await ThingModelApi.getThingModelTSLByProductId(product?.value?.id || 0)
   thingModelTSL.value = JSON.stringify(res, null, 2)
 }
 
-/**
- * 代码高亮
- */
+/** 代码高亮 */
 const highlightedCode = () => {
+  // TODO @puhui999：可以考虑 highlight 的告警解决下；另外，可以考虑配置设置里面，有个 json editor 预览
   const result = hljs.highlight('json', thingModelTSL.value, true)
   return result.value || '&nbsp;'
 }
