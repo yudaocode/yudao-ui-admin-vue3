@@ -49,7 +49,7 @@ onMounted(() => {
     return
   }
   config.value = {
-    type: IoTDataBridgeConfigType.RABBITMQ,
+    type: IoTDataBridgeConfigType.RABBITMQ + '', // 序列化成对应类型时使用
     host: '',
     port: 5672,
     virtualHost: '/',

@@ -110,23 +110,24 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <IoTRuleSceneForm ref="formRef" @success="getList" />
+  <RuleSceneForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { RuleSceneApi, RuleSceneVO } from '@/api/iot/rule/scene'
-import IoTRuleSceneForm from './IoTRuleSceneForm.vue'
+import { RuleSceneApi } from '@/api/iot/rule/scene'
+import RuleSceneForm from './RuleSceneForm.vue'
+import { IotRuleScene } from '@/api/iot/rule/scene/scene.types'
 
-/** IoT 规则场景（场景联动） 列表 */
+/** IoT 场景联动 列表 */
 defineOptions({ name: 'IotRuleScene' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<RuleSceneVO[]>([]) // 列表的数据
+const list = ref<IotRuleScene[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,

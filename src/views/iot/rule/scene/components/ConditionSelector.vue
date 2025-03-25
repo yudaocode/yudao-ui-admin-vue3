@@ -1,29 +1,18 @@
 <template>
-  <el-select
-    v-model="selectedOperator"
-    class="condition-selector"
-    clearable
-    :placeholder="placeholder"
-  >
-    <!-- TODO puhui999: 考虑根据属性类型不同展示不同的可选条件 -->
-    <!-- TODO @puhui999：可以在 scene.types.ts IotRuleSceneTriggerConditionParameterOperatorEnum 枚举下 -->
-    <el-option label="等于" value="=" />
-    <el-option label="不等于" value="!=" />
-    <el-option label="大于" value=">" />
-    <el-option label="大于等于" value=">=" />
-    <el-option label="小于" value="<" />
-    <el-option label="小于等于" value="<=" />
-    <el-option label="在列表中" value="in" />
-    <el-option label="不在列表中" value="not in" />
-    <el-option label="在范围内" value="between" />
-    <el-option label="不在范围内" value="not between" />
-    <el-option label="包含" value="like" />
-    <el-option label="非空" value="not null" />
+  <el-select v-model="selectedOperator" class="w-1/1" clearable :placeholder="placeholder">
+    <!-- 根据属性类型展示不同的可选条件 -->
+    <el-option
+      v-for="(item, key) in filteredOperators"
+      :key="key"
+      :label="item.name"
+      :value="item.value"
+    />
   </el-select>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { IotRuleSceneTriggerConditionParameterOperatorEnum } from '@/api/iot/rule/scene/scene.types'
 
 /** 条件选择器 */
 defineOptions({ name: 'ConditionSelector' })
@@ -35,6 +24,10 @@ const props = defineProps({
   modelValue: {
     type: String,
     default: ''
+  },
+  dataType: {
+    type: String,
+    default: ''
   }
 })
 
@@ -44,11 +37,70 @@ const selectedOperator = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
 })
-</script>
 
-<!-- TODO @puhui999：尽量用 unocss -->
-<style scoped>
-.condition-selector {
-  width: 100%;
-}
-</style>
+// 根据数据类型过滤可用的操作符
+const filteredOperators = computed(() => {
+  // 如果没有指定数据类型，返回所有操作符
+  if (!props.dataType) {
+    return IotRuleSceneTriggerConditionParameterOperatorEnum
+  }
+
+  const operatorMap = new Map()
+  
+  // 添加通用的操作符（所有类型都有非空操作符）
+  operatorMap.set('NOT_NULL', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_NULL)
+  
+  // 根据数据类型添加特定的操作符
+  switch (props.dataType) {
+    case 'int':
+    case 'float':
+    case 'double':
+      // 数值类型支持的所有操作符
+      operatorMap.set('EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS)
+      operatorMap.set('NOT_EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS)
+      operatorMap.set('GREATER_THAN', IotRuleSceneTriggerConditionParameterOperatorEnum.GREATER_THAN)
+      operatorMap.set('GREATER_THAN_OR_EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.GREATER_THAN_OR_EQUALS)
+      operatorMap.set('LESS_THAN', IotRuleSceneTriggerConditionParameterOperatorEnum.LESS_THAN)
+      operatorMap.set('LESS_THAN_OR_EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.LESS_THAN_OR_EQUALS)
+      operatorMap.set('IN', IotRuleSceneTriggerConditionParameterOperatorEnum.IN)
+      operatorMap.set('NOT_IN', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_IN)
+      operatorMap.set('BETWEEN', IotRuleSceneTriggerConditionParameterOperatorEnum.BETWEEN)
+      operatorMap.set('NOT_BETWEEN', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_BETWEEN)
+      break
+    case 'enum':
+      // 枚举类型支持的操作符
+      operatorMap.set('EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS)
+      operatorMap.set('NOT_EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS)
+      operatorMap.set('IN', IotRuleSceneTriggerConditionParameterOperatorEnum.IN)
+      operatorMap.set('NOT_IN', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_IN)
+      break
+    case 'bool':
+      // 布尔类型支持的操作符
+      operatorMap.set('EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS)
+      operatorMap.set('NOT_EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS)
+      break
+    case 'text':
+      // 文本类型支持的操作符
+      operatorMap.set('EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS)
+      operatorMap.set('NOT_EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS)
+      operatorMap.set('LIKE', IotRuleSceneTriggerConditionParameterOperatorEnum.LIKE)
+      break
+    case 'date':
+      // 日期类型支持的操作符
+      operatorMap.set('EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS)
+      operatorMap.set('NOT_EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS)
+      operatorMap.set('GREATER_THAN', IotRuleSceneTriggerConditionParameterOperatorEnum.GREATER_THAN)
+      operatorMap.set('GREATER_THAN_OR_EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.GREATER_THAN_OR_EQUALS)
+      operatorMap.set('LESS_THAN', IotRuleSceneTriggerConditionParameterOperatorEnum.LESS_THAN)
+      operatorMap.set('LESS_THAN_OR_EQUALS', IotRuleSceneTriggerConditionParameterOperatorEnum.LESS_THAN_OR_EQUALS)
+      operatorMap.set('BETWEEN', IotRuleSceneTriggerConditionParameterOperatorEnum.BETWEEN)
+      operatorMap.set('NOT_BETWEEN', IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_BETWEEN)
+      break
+    // struct 和 array 类型只支持非空操作符，已在通用部分添加
+    default:
+      return IotRuleSceneTriggerConditionParameterOperatorEnum
+  }
+  
+  return Object.fromEntries(operatorMap)
+})
+</script>

@@ -1,4 +1,3 @@
-<!-- TODO @puhui999：IoT 前缀去掉哈，文件名 -->
 <!-- IoT 产品选择，使用弹窗展示 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" :appendToBody="true" width="60%">

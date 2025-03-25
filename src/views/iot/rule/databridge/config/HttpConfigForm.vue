@@ -73,7 +73,7 @@ onMounted(() => {
   }
 
   config.value = {
-    type: IoTDataBridgeConfigType.HTTP,
+    type: IoTDataBridgeConfigType.HTTP + '', // 序列化成对应类型时使用
     url: '',
     method: 'POST',
     headers: {},

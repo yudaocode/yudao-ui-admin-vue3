@@ -34,7 +34,7 @@ onMounted(() => {
     return
   }
   config.value = {
-    type: IoTDataBridgeConfigType.MQTT,
+    type: IoTDataBridgeConfigType.MQTT + '', // 序列化成对应类型时使用
     url: '',
     username: '',
     password: '',

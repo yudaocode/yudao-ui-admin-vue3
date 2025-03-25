@@ -61,7 +61,7 @@ export const ThingModelApi = {
   // 获得产品物模型 TSL
   getThingModelTSLByProductId: async (productId: number) => {
     return await request.get({
-      url: `/iot/thing-model/tsl-by-product-id?productId=${productId}`
+      url: `/iot/thing-model/get-tsl?productId=${productId}`
     })
   },
 

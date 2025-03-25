@@ -3,7 +3,7 @@ import MqttConfigForm from './MqttConfigForm.vue'
 import RocketMQConfigForm from './RocketMQConfigForm.vue'
 import KafkaMQConfigForm from './KafkaMQConfigForm.vue'
 import RabbitMQConfigForm from './RabbitMQConfigForm.vue'
-import RedisStreamMQConfigForm from './RedisStreamMQConfigForm.vue'
+import RedisStreamConfigForm from './RedisStreamConfigForm.vue'
 
 export {
   HttpConfigForm,
@@ -11,5 +11,5 @@ export {
   RocketMQConfigForm,
   KafkaMQConfigForm,
   RabbitMQConfigForm,
-  RedisStreamMQConfigForm
+  RedisStreamConfigForm
 }
