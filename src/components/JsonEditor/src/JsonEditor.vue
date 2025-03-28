@@ -41,9 +41,9 @@ const initJsonEditor = () => {
     navigationBar: props.showNavigationBar,
     statusBar: props.showStatusBar,
     mainMenuBar: props.showMainMenuBar,
-    onChangeJSON: (json: any) => {
-      jsonObj.value = json
-      emits('change', json)
+    onChange: () => {
+      jsonObj.value = jsonEditor?.get()
+      emits('change', jsonEditor?.get())
     },
     onValidationError: (errors: any) => {
       emits('error', errors)
