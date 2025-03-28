@@ -108,6 +108,7 @@
 import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ThingModelForm from './ThingModelForm.vue'
+import ThingModelTSL from './ThingModelTSL.vue'
 import { ProductVO } from '@/api/iot/product/product'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { getDataTypeOptionsLabel } from './config'

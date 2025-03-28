@@ -1,8 +1,18 @@
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle">
-    <el-scrollbar height="600px">
-      <pre><code v-dompurify-html="highlightedCode()" class="hljs"></code></pre>
-    </el-scrollbar>
+    <div class="h-600px">
+      <JsonEditor
+        v-model="thingModelTSL"
+        :mode="viewMode === 'editor' ? 'code' : 'view'"
+        height="100%"
+      />
+    </div>
+    <template #footer>
+      <el-radio-group v-model="viewMode" size="small">
+        <el-radio-button label="code">代码视图</el-radio-button>
+        <el-radio-button label="editor">编辑器视图</el-radio-button>
+      </el-radio-group>
+    </template>
   </Dialog>
 </template>
 
@@ -19,6 +29,7 @@ defineOptions({ name: 'ThingModelTSL' })
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('物模型 TSL') // 弹窗的标题
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
+const viewMode = ref('code') // 查看模式：code-代码视图，editor-编辑器视图
 
 /** 打开弹窗 */
 const open = () => {
@@ -27,17 +38,9 @@ const open = () => {
 defineExpose({ open })
 
 /** 获取 TSL */
-const thingModelTSL = ref('')
+const thingModelTSL = ref({})
 const getTsl = async () => {
-  const res = await ThingModelApi.getThingModelTSLByProductId(product?.value?.id || 0)
-  thingModelTSL.value = JSON.stringify(res, null, 2)
-}
-
-/** 代码高亮 */
-const highlightedCode = () => {
-  // TODO @puhui999：可以考虑 highlight 的告警解决下；另外，可以考虑配置设置里面，有个 json editor 预览
-  const result = hljs.highlight('json', thingModelTSL.value, true)
-  return result.value || '&nbsp;'
+  thingModelTSL.value = await ThingModelApi.getThingModelTSLByProductId(product?.value?.id || 0)
 }
 
 /** 初始化 **/
