@@ -1,5 +1,6 @@
 <template>
   <div class="m-10px">
+    <!-- TODO puhui999: 产品设备回显 -->
     <div class="relative bg-[#eff3f7] h-50px flex items-center px-10px">
       <div class="flex items-center mr-60px">
         <span class="mr-10px">执行动作</span>
@@ -32,7 +33,7 @@
       >
         <span class="mr-10px">设备</span>
         <el-button type="primary" @click="handleSelectDevice" size="small" plain>
-          {{ isEmpty(deviceList) ? '选择设备' : deviceList.map(d => d.deviceName).join(',') }}
+          {{ isEmpty(deviceList) ? '选择设备' : deviceList.map((d) => d.deviceName).join(',') }}
         </el-button>
       </div>
       <!-- 删除执行器 -->
@@ -91,9 +92,9 @@ import {
   ActionAlert,
   ActionConfig,
   ActionDeviceControl,
-  IotRuleSceneActionTypeEnum,
+  IotDeviceMessageIdentifierEnum,
   IotDeviceMessageTypeEnum,
-  IotDeviceMessageIdentifierEnum
+  IotRuleSceneActionTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
 
 /** 场景联动之执行器组件 */
@@ -139,15 +140,6 @@ const initActionConfig = () => {
   }
 }
 
-// 监听执行类型变化，初始化对应配置
-watch(
-  () => actionConfig.value.type,
-  () => {
-    initActionConfig()
-  },
-  { immediate: true }
-)
-
 // 产品和设备选择
 const productTableSelectRef = ref<InstanceType<typeof ProductTableSelect>>()
 const deviceTableSelectRef = ref<InstanceType<typeof DeviceTableSelect>>()
@@ -188,4 +180,18 @@ const handleDeviceSelect = (val: DeviceVO[]) => {
     actionConfig.value.deviceControl.deviceNames = val.map((item) => item.deviceName)
   }
 }
+
+// 监听执行类型变化，初始化对应配置
+watch(
+  () => actionConfig.value.type,
+  () => {
+    initActionConfig()
+  },
+  { immediate: true }
+)
+
+/** 初始化 */
+onMounted(() => {
+  initActionConfig()
+})
 </script>

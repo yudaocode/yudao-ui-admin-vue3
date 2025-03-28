@@ -12,6 +12,7 @@
         <el-option label="服务" :value="IotDeviceMessageTypeEnum.SERVICE" />
       </el-select>
     </div>
+    <!-- TODO puhui999: 处理服务参数 -->
     <div class="">
       <div
         class="flex items-center justify-around mb-10px last:mb-0"
@@ -31,6 +32,7 @@
             :value="thingModel.identifier"
           />
         </el-select>
+        <!-- TODO puhui999: 输入框调整，数值型使用数字输入框校验边界，bool 值使用开关，枚举值使用下拉选择，时间值使用时间选择器 -->
         <el-input v-model="parameter.value" class="!w-240px mr-10px" placeholder="请输入值">
           <template v-if="getUnitName(parameter.identifier)" #append>
             {{ getUnitName(parameter.identifier) }}
@@ -62,6 +64,7 @@ import {
   IotDeviceMessageIdentifierEnum,
   IotDeviceMessageTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
+import { isEmpty } from '@/utils/is'
 
 /** 设备控制执行器组件 */
 defineOptions({ name: 'DeviceControlAction' })
@@ -78,6 +81,10 @@ const message = useMessage()
 /** 执行器参数 */
 const parameters = ref<{ identifier: string; value: any }[]>([])
 const addParameter = () => {
+  if (!props.productId) {
+    message.warning('请先选择一个产品')
+    return
+  }
   if (parameters.value.length >= thingModels.value.length) {
     message.warning(`该产品只有${thingModels.value.length}个物模型！！！`)
     return
@@ -87,6 +94,23 @@ const addParameter = () => {
 const removeParameter = (index: number) => {
   parameters.value.splice(index, 1)
 }
+watch(
+  () => parameters.value,
+  (newVal) => {
+    if (isEmpty(newVal)) {
+      return
+    }
+    for (const parameter of newVal) {
+      if (isEmpty(parameter.identifier)) {
+        break
+      }
+      deviceControlConfig.value.data[parameter.identifier] = parameter.value
+    }
+    console.log(deviceControlConfig.value)
+  },
+  { deep: true }
+)
+
 // 初始化设备控制执行器结构
 const initDeviceControlConfig = () => {
   if (!deviceControlConfig.value) {
@@ -97,6 +121,12 @@ const initDeviceControlConfig = () => {
       identifier: IotDeviceMessageIdentifierEnum.PROPERTY_SET,
       data: {}
     } as ActionDeviceControl
+  } else {
+    // 参数回显
+    parameters.value = Object.entries(deviceControlConfig.value.data).map(([key, value]) => ({
+      identifier: key,
+      value: value
+    }))
   }
 
   // 确保data对象存在
@@ -104,51 +134,6 @@ const initDeviceControlConfig = () => {
     deviceControlConfig.value.data = {}
   }
 }
-
-// 初始化
-onMounted(() => {
-  initDeviceControlConfig()
-  if (props.productId) {
-    getThingModelTSL()
-  }
-})
-
-// 监听productId变化
-watch(
-  () => props.productId,
-  (newVal) => {
-    if (newVal) {
-      getThingModelTSL()
-      // 当产品ID变化时，清空原有数据
-      deviceControlConfig.value.data = {}
-    } else {
-      thingModelTSL.value = undefined
-    }
-  }
-)
-
-// 监听消息类型变化
-watch(
-  () => deviceControlConfig.value.type,
-  () => {
-    // 切换消息类型时清空参数
-    deviceControlConfig.value.data = {}
-    if (deviceControlConfig.value.type === IotDeviceMessageTypeEnum.PROPERTY) {
-      deviceControlConfig.value.identifier = IotDeviceMessageIdentifierEnum.PROPERTY_SET
-    } else {
-      deviceControlConfig.value.identifier = ''
-    }
-  }
-)
-
-// 监听identifier变化
-watch(
-  () => deviceControlConfig.value.identifier,
-  () => {
-    // 切换identifier时清空参数
-    deviceControlConfig.value.data = {}
-  }
-)
 
 /** 获取产品物模型 */
 const thingModelTSL = ref<any>()
@@ -163,6 +148,9 @@ const getThingModelTSL = async () => {
   }
 }
 const thingModels = computed((): any[] => {
+  if (isEmpty(thingModelTSL.value)) {
+    return []
+  }
   switch (deviceControlConfig.value.type) {
     case IotDeviceMessageTypeEnum.PROPERTY:
       return thingModelTSL.value.properties
@@ -187,5 +175,41 @@ const getUnitName = computed(() => (identifier: string) => {
   //   return model.dataSpecs.unitName
   // }
   return ''
+})
+
+// 监听 productId 变化
+watch(
+  () => props.productId,
+  (newVal) => {
+    if (!newVal) {
+      thingModelTSL.value = undefined
+      parameters.value = []
+      return
+    }
+    getThingModelTSL()
+    // 当产品ID变化时，清空原有数据
+    deviceControlConfig.value.data = {}
+  },
+  { immediate: true }
+)
+
+// 监听消息类型变化
+watch(
+  () => deviceControlConfig.value.type,
+  () => {
+    // 切换消息类型时清空参数
+    deviceControlConfig.value.data = {}
+    parameters.value = []
+    if (deviceControlConfig.value.type === IotDeviceMessageTypeEnum.PROPERTY) {
+      deviceControlConfig.value.identifier = IotDeviceMessageIdentifierEnum.PROPERTY_SET
+    } else if (deviceControlConfig.value.type === IotDeviceMessageTypeEnum.SERVICE) {
+      deviceControlConfig.value.identifier = IotDeviceMessageIdentifierEnum.SERVICE_INVOKE
+    }
+  }
+)
+
+// 初始化
+onMounted(() => {
+  initDeviceControlConfig()
 })
 </script>
