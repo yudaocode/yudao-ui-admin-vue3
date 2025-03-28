@@ -49,10 +49,21 @@
           </el-button>
         </el-col>
         <el-col :span="24">
-          <el-divider content-position="left">执行动作配置</el-divider>
-          <el-form-item label="执行器数组" prop="actionConfigs">
-            <!--            <el-input v-model="formData.actions" placeholder="请输入执行器数组" />-->
-          </el-form-item>
+          <el-divider content-position="left">执行器配置</el-divider>
+          <action-executor
+            v-for="(action, index) in formData.actions"
+            :key="index"
+            :model-value="action"
+            @update:model-value="(val) => (formData.actions[index] = val)"
+            class="mb-10px"
+          >
+            <el-button type="danger" round size="small" @click="removeAction(index)">
+              <Icon icon="ep:delete" />
+            </el-button>
+          </action-executor>
+          <el-button class="ml-10px!" type="primary" size="small" @click="addAction">
+            添加执行器
+          </el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -65,15 +76,18 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
-import DeviceListener from './components/DeviceListener.vue'
+import DeviceListener from './components/listener/DeviceListener.vue'
 import { CommonStatusEnum } from '@/utils/constants'
 import {
+  ActionConfig,
   IotDeviceMessageIdentifierEnum,
   IotDeviceMessageTypeEnum,
   IotRuleScene,
+  IotRuleSceneActionTypeEnum,
   IotRuleSceneTriggerTypeEnum,
   TriggerConfig
 } from '@/api/iot/rule/scene/scene.types'
+import ActionExecutor from './components/action/ActionExecutor.vue'
 
 /** IoT 场景联动表单 */
 defineOptions({ name: 'IotRuleSceneForm' })
@@ -87,7 +101,8 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<IotRuleScene>({
   status: CommonStatusEnum.ENABLE,
-  triggers: [] as TriggerConfig[]
+  triggers: [] as TriggerConfig[],
+  actions: [] as ActionConfig[]
 } as IotRuleScene)
 const formRules = reactive({
   name: [{ required: true, message: '场景名称不能为空', trigger: 'blur' }],
@@ -117,6 +132,19 @@ const removeTrigger = (index: number) => {
   const newTriggers = [...formData.value.triggers]
   newTriggers.splice(index, 1)
   formData.value.triggers = newTriggers
+}
+
+/** 添加执行器 */
+const addAction = () => {
+  formData.value.actions.push({
+    type: IotRuleSceneActionTypeEnum.DEVICE_CONTROL
+  } as ActionConfig)
+}
+/** 移除执行器 */
+const removeAction = (index: number) => {
+  const newActions = [...formData.value.actions]
+  newActions.splice(index, 1)
+  formData.value.actions = newActions
 }
 
 /** 打开弹窗 */
@@ -165,7 +193,8 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     status: CommonStatusEnum.ENABLE,
-    triggers: [] as TriggerConfig[]
+    triggers: [] as TriggerConfig[],
+    actions: [] as ActionConfig[]
   } as IotRuleScene
   formRef.value?.resetFields()
 }
