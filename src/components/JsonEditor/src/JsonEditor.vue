@@ -79,6 +79,19 @@ watch(
   { deep: true }
 )
 
+// 监听模式变化
+watch(
+  () => props.mode,
+  (newMode) => {
+    if (!jsonEditor) return
+    try {
+      jsonEditor.setMode(newMode)
+    } catch (error) {
+      console.error('切换模式失败:', error)
+    }
+  }
+)
+
 // 生命周期钩子
 onMounted(() => {
   initJsonEditor()
