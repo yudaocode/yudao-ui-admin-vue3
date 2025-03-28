@@ -35,7 +35,7 @@
           <el-divider content-position="left">触发器配置</el-divider>
           <device-listener
             v-for="(trigger, index) in formData.triggers"
-            :key="index"
+            :key="`trigger-${index}-${Date.now()}`"
             :model-value="trigger"
             @update:model-value="(val) => (formData.triggers[index] = val)"
             class="mb-10px"
@@ -52,7 +52,7 @@
           <el-divider content-position="left">执行器配置</el-divider>
           <action-executor
             v-for="(action, index) in formData.actions"
-            :key="index"
+            :key="`action-${index}-${Date.now()}`"
             :model-value="action"
             @update:model-value="(val) => (formData.actions[index] = val)"
             class="mb-10px"
@@ -129,9 +129,7 @@ const addTrigger = () => {
 }
 /** 移除触发器 */
 const removeTrigger = (index: number) => {
-  const newTriggers = [...formData.value.triggers]
-  newTriggers.splice(index, 1)
-  formData.value.triggers = newTriggers
+  formData.value.triggers.splice(index, 1)
 }
 
 /** 添加执行器 */
@@ -142,9 +140,7 @@ const addAction = () => {
 }
 /** 移除执行器 */
 const removeAction = (index: number) => {
-  const newActions = [...formData.value.actions]
-  newActions.splice(index, 1)
-  formData.value.actions = newActions
+  formData.value.actions.splice(index, 1)
 }
 
 /** 打开弹窗 */
