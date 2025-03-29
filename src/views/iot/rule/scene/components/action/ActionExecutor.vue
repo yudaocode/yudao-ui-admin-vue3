@@ -1,6 +1,6 @@
 <template>
   <div class="m-10px">
-    <!-- TODO puhui999: 产品设备回显 -->
+    <!-- 产品设备回显区域 -->
     <div class="relative bg-[#eff3f7] h-50px flex items-center px-10px">
       <div class="flex items-center mr-60px">
         <span class="mr-10px">执行动作</span>
@@ -79,15 +79,14 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import { isEmpty } from '@/utils/is'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ProductTableSelect from '@/views/iot/product/product/components/ProductTableSelect.vue'
 import DeviceTableSelect from '@/views/iot/device/device/components/DeviceTableSelect.vue'
 import DeviceControlAction from './DeviceControlAction.vue'
 import AlertAction from './AlertAction.vue'
 import DataBridgeAction from './DataBridgeAction.vue'
-import { ProductVO } from '@/api/iot/product/product'
-import { DeviceVO } from '@/api/iot/device/device'
+import { ProductApi, ProductVO } from '@/api/iot/product/product'
+import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import {
   ActionAlert,
   ActionConfig,
@@ -190,8 +189,61 @@ watch(
   { immediate: true }
 )
 
+/**
+ * 初始化产品回显信息
+ */
+const initProductInfo = async () => {
+  if (!actionConfig.value.deviceControl?.productKey) {
+    return
+  }
+
+  try {
+    // 使用新的API直接通过productKey获取产品信息
+    const productData = await ProductApi.getProductByKey(
+      actionConfig.value.deviceControl.productKey
+    )
+    if (productData) {
+      product.value = productData
+    }
+  } catch (error) {
+    console.error('获取产品信息失败:', error)
+  }
+}
+
+/**
+ * 初始化设备回显信息
+ */
+const initDeviceInfo = async () => {
+  if (
+    !actionConfig.value.deviceControl?.productKey ||
+    !actionConfig.value.deviceControl?.deviceNames?.length
+  ) {
+    return
+  }
+
+  try {
+    // 使用新的API直接通过productKey和deviceNames获取设备列表
+    const deviceData = await DeviceApi.getDevicesByProductKeyAndNames(
+      actionConfig.value.deviceControl.productKey,
+      actionConfig.value.deviceControl.deviceNames
+    )
+
+    if (deviceData && deviceData.length > 0) {
+      deviceList.value = deviceData
+    }
+  } catch (error) {
+    console.error('获取设备信息失败:', error)
+  }
+}
+
 /** 初始化 */
-onMounted(() => {
+onMounted(async () => {
   initActionConfig()
+
+  // 初始化产品和设备回显
+  if (actionConfig.value.deviceControl) {
+    await initProductInfo()
+    await initDeviceInfo()
+  }
 })
 </script>

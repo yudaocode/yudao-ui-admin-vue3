@@ -144,8 +144,8 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import DeviceListenerCondition from './DeviceListenerCondition.vue'
 import ProductTableSelect from '@/views/iot/product/product/components/ProductTableSelect.vue'
 import DeviceTableSelect from '@/views/iot/device/device/components/DeviceTableSelect.vue'
-import { ProductVO } from '@/api/iot/product/product'
-import { DeviceVO } from '@/api/iot/device/device'
+import { ProductApi, ProductVO } from '@/api/iot/product/product'
+import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { ThingModelApi } from '@/api/iot/thingmodel'
 import {
   IotDeviceMessageIdentifierEnum,
@@ -219,9 +219,56 @@ const openDeviceSelect = () => {
   deviceTableSelectRef.value?.open()
 }
 
+/**
+ * 初始化产品回显信息
+ */
+const initProductInfo = async () => {
+  if (!triggerConfig.value.productKey) {
+    return
+  }
+
+  try {
+    // 使用新的API直接通过productKey获取产品信息
+    const productData = await ProductApi.getProductByKey(triggerConfig.value.productKey)
+    if (productData) {
+      product.value = productData
+      // 加载物模型数据
+      await getThingModelTSL()
+    }
+  } catch (error) {
+    console.error('获取产品信息失败:', error)
+  }
+}
+
+/**
+ * 初始化设备回显信息
+ */
+const initDeviceInfo = async () => {
+  if (!triggerConfig.value.productKey || !triggerConfig.value.deviceNames?.length) {
+    return
+  }
+
+  try {
+    // 使用新的API直接通过productKey和deviceNames获取设备列表
+    const deviceData = await DeviceApi.getDevicesByProductKeyAndNames(
+      triggerConfig.value.productKey,
+      triggerConfig.value.deviceNames
+    )
+
+    if (deviceData && deviceData.length > 0) {
+      deviceList.value = deviceData
+    }
+  } catch (error) {
+    console.error('获取设备信息失败:', error)
+  }
+}
+
 /** 获取产品物模型 */
 const thingModelTSL = ref<any>()
 const thingModels = computed(() => (condition: TriggerCondition) => {
+  if (isEmpty(thingModelTSL.value)) {
+    return []
+  }
   switch (condition.type) {
     case IotDeviceMessageTypeEnum.PROPERTY:
       return thingModelTSL.value.properties
@@ -239,4 +286,18 @@ const getThingModelTSL = async () => {
   }
   thingModelTSL.value = await ThingModelApi.getThingModelTSLByProductId(product.value.id)
 }
+
+/** 初始化 */
+onMounted(async () => {
+  // 初始化产品和设备回显
+  if (triggerConfig.value) {
+    // 初始化conditions数组，如果不存在
+    if (!triggerConfig.value.conditions) {
+      triggerConfig.value.conditions = []
+    }
+
+    await initProductInfo()
+    await initDeviceInfo()
+  }
+})
 </script>
