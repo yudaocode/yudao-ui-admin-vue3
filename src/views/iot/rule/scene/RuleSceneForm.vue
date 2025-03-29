@@ -35,7 +35,7 @@
           <el-divider content-position="left">触发器配置</el-divider>
           <device-listener
             v-for="(trigger, index) in formData.triggers"
-            :key="`trigger-${index}-${Date.now()}`"
+            :key="trigger.key"
             :model-value="trigger"
             @update:model-value="(val) => (formData.triggers[index] = val)"
             class="mb-10px"
@@ -52,7 +52,7 @@
           <el-divider content-position="left">执行器配置</el-divider>
           <action-executor
             v-for="(action, index) in formData.actions"
-            :key="`action-${index}-${Date.now()}`"
+            :key="action.key"
             :model-value="action"
             @update:model-value="(val) => (formData.actions[index] = val)"
             class="mb-10px"
@@ -88,6 +88,7 @@ import {
   TriggerConfig
 } from '@/api/iot/rule/scene/scene.types'
 import ActionExecutor from './components/action/ActionExecutor.vue'
+import { generateUUID } from '@/utils'
 
 /** IoT 场景联动表单 */
 defineOptions({ name: 'IotRuleSceneForm' })
@@ -115,6 +116,7 @@ const formRef = ref() // 表单 Ref
 /** 添加触发器 */
 const addTrigger = () => {
   formData.value.triggers.push({
+    key: generateUUID(), // 解决组件索引重用
     type: IotRuleSceneTriggerTypeEnum.DEVICE,
     productKey: '',
     deviceNames: [],
@@ -135,6 +137,7 @@ const removeTrigger = (index: number) => {
 /** 添加执行器 */
 const addAction = () => {
   formData.value.actions.push({
+    key: generateUUID(), // 解决组件索引重用
     type: IotRuleSceneActionTypeEnum.DEVICE_CONTROL
   } as ActionConfig)
 }
@@ -153,7 +156,11 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await RuleSceneApi.getRuleScene(id)
+      const data = (await RuleSceneApi.getRuleScene(id)) as IotRuleScene
+      // 解决组件索引重用
+      data.triggers?.forEach((item) => (item.key = generateUUID()))
+      data.actions?.forEach((item) => (item.key = generateUUID()))
+      formData.value = data
     } finally {
       formLoading.value = false
     }
