@@ -170,7 +170,7 @@ export const DeviceApi = {
   // 根据ProductKey和DeviceNames获取设备列表
   getDevicesByProductKeyAndNames: async (productKey: string, deviceNames: string[]) => {
     return await request.get({
-      url: `/iot/device/get-by-product-key-and-names`,
+      url: `/iot/device/list-by-product-key-and-names`,
       params: {
         productKey,
         deviceNames: deviceNames.join(',')

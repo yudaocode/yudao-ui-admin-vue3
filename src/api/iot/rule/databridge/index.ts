@@ -124,8 +124,8 @@ export const DataBridgeApi = {
     return await request.delete({ url: `/iot/data-bridge/delete?id=` + id })
   },
 
-  // 导出数据桥梁 Excel
-  exportDataBridge: async (params) => {
-    return await request.download({ url: `/iot/data-bridge/export-excel`, params })
+  // 查询数据桥梁（精简）列表
+  getSimpleDataBridgeList() {
+    return request.get({ url: '/iot/data-bridge/simple-list' })
   }
 }

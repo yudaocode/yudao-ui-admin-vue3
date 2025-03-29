@@ -79,6 +79,7 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
+import { isEmpty } from '@/utils/is'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ProductTableSelect from '@/views/iot/product/product/components/ProductTableSelect.vue'
 import DeviceTableSelect from '@/views/iot/device/device/components/DeviceTableSelect.vue'
