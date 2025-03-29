@@ -111,7 +111,7 @@ watch(
   { deep: true }
 )
 
-// 初始化设备控制执行器结构
+/** 初始化设备控制执行器结构 */
 const initDeviceControlConfig = () => {
   if (!deviceControlConfig.value) {
     deviceControlConfig.value = {
@@ -177,7 +177,7 @@ const getUnitName = computed(() => (identifier: string) => {
   return ''
 })
 
-// 监听 productId 变化
+/** 监听 productId 变化 */
 watch(
   () => props.productId,
   (newVal) => {
@@ -193,7 +193,7 @@ watch(
   { immediate: true }
 )
 
-// 监听消息类型变化
+/** 监听消息类型变化 */
 watch(
   () => deviceControlConfig.value.type,
   () => {

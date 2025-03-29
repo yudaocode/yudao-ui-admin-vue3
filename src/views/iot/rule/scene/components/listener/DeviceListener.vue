@@ -194,6 +194,7 @@ const removeConditionParameter = (
   conditionParameters.splice(index, 1)
 }
 
+/** 产品和设备选择引用 */
 const productTableSelectRef = ref<InstanceType<typeof ProductTableSelect>>()
 const deviceTableSelectRef = ref<InstanceType<typeof DeviceTableSelect>>()
 const product = ref<ProductVO>()

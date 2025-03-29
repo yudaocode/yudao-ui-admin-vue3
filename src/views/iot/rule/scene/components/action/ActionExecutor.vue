@@ -106,7 +106,7 @@ const actionConfig = useVModel(props, 'modelValue', emits) as Ref<ActionConfig>
 
 const message = useMessage()
 
-// 初始化执行器结构
+/** 初始化执行器结构 */
 const initActionConfig = () => {
   if (!actionConfig.value) {
     actionConfig.value = { type: IotRuleSceneActionTypeEnum.DEVICE_CONTROL } as ActionConfig
@@ -140,7 +140,7 @@ const initActionConfig = () => {
   }
 }
 
-// 产品和设备选择
+/** 产品和设备选择 */
 const productTableSelectRef = ref<InstanceType<typeof ProductTableSelect>>()
 const deviceTableSelectRef = ref<InstanceType<typeof DeviceTableSelect>>()
 const product = ref<ProductVO>()
@@ -181,7 +181,7 @@ const handleDeviceSelect = (val: DeviceVO[]) => {
   }
 }
 
-// 监听执行类型变化，初始化对应配置
+/** 监听执行类型变化，初始化对应配置 */
 watch(
   () => actionConfig.value.type,
   () => {

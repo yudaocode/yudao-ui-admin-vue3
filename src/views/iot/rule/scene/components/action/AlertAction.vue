@@ -64,7 +64,7 @@ const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const alertConfig = useVModel(props, 'modelValue', emits) as Ref<ActionAlert>
 
-// 初始化告警执行器结构
+/** 初始化告警执行器结构 */
 const initAlertConfig = () => {
   if (!alertConfig.value) {
     alertConfig.value = {
@@ -76,7 +76,7 @@ const initAlertConfig = () => {
   }
 }
 
-// 初始化
+/** 初始化 */
 onMounted(() => {
   initAlertConfig()
 })
