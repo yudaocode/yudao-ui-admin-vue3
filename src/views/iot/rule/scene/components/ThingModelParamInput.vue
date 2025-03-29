@@ -59,7 +59,17 @@
 
     <!-- array、struct 直接输入 -->
     <template v-else>
-      <el-input class="w-1/1!" v-model="value" placeholder="请输入值" />
+      <el-input class="w-1/1!" :model-value="value" disabled placeholder="请输入值">
+        <template #append>
+          <el-button type="primary" @click="openJsonEditor">编辑</el-button>
+        </template>
+      </el-input>
+      <!-- array、struct 类型数据编辑 -->
+      <ThingModelDualView
+        ref="thingModelDualViewRef"
+        v-model="value"
+        :thing-model="dataSpecsList"
+      />
     </template>
   </div>
 </template>
@@ -68,6 +78,7 @@
 import { computed } from 'vue'
 import { useVModel } from '@vueuse/core'
 import { DataSpecsDataType } from '@/views/iot/thingmodel/config'
+import ThingModelDualView from './ThingModelDualView.vue'
 
 /** 物模型属性参数输入组件 */
 defineOptions({ name: 'ThingModelParamInput' })
@@ -79,6 +90,11 @@ const props = defineProps<{
 
 const emits = defineEmits(['update:modelValue', 'change'])
 const value = useVModel(props, 'modelValue', emits)
+
+const thingModelDualViewRef = ref<InstanceType<typeof ThingModelDualView>>()
+const openJsonEditor = () => {
+  thingModelDualViewRef.value?.open()
+}
 
 /** 计算属性：判断数据类型 */
 const isNumeric = computed(() =>
@@ -93,13 +109,17 @@ const isText = computed(() => props.thingModel?.dataType === DataSpecsDataType.T
 /** 获取数据规格 */
 const dataSpecs = computed(() => {
   if (isNumeric.value || isDate.value || isText.value) {
-    return props.thingModel?.dataSpecs
+    return props.thingModel?.dataSpecs || {}
   }
   return {}
 })
 const dataSpecsList = computed(() => {
-  if (isBool.value || isEnum.value) {
-    return props.thingModel?.dataSpecsList
+  if (
+    isBool.value ||
+    isEnum.value ||
+    [DataSpecsDataType.ARRAY, DataSpecsDataType.STRUCT].includes(props.thingModel?.dataType)
+  ) {
+    return props.thingModel?.dataSpecsList || []
   }
   return []
 })

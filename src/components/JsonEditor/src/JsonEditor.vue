@@ -12,7 +12,7 @@ import { JsonEditorEmits, JsonEditorExpose, JsonEditorProps } from '../types'
 defineOptions({ name: 'JsonEditor' })
 
 const props = withDefaults(defineProps<JsonEditorProps>(), {
-  mode: 'tree' as JSONEditorMode,
+  mode: 'view' as JSONEditorMode,
   height: '400px',
   showModeSelection: false,
   showNavigationBar: false,
@@ -57,6 +57,10 @@ const initJsonEditor = () => {
   // 设置初始值
   if (jsonObj.value) {
     jsonEditor.set(jsonObj.value)
+  }
+
+  if (props.mode === 'view') {
+    jsonEditor?.expandAll() // 默认展开全部
   }
 }
 
