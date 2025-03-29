@@ -49,6 +49,7 @@
       v-if="actionConfig.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL"
       :model-value="actionConfig.deviceControl"
       :product-id="product?.id"
+      :product-key="product?.productKey"
       @update:model-value="(val) => (actionConfig.deviceControl = val)"
     />
 

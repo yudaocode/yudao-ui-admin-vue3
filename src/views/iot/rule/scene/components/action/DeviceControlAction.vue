@@ -80,6 +80,7 @@ defineOptions({ name: 'DeviceControlAction' })
 const props = defineProps<{
   modelValue: any
   productId?: number
+  productKey?: string
 }>()
 const emits = defineEmits(['update:modelValue'])
 const deviceControlConfig = useVModel(props, 'modelValue', emits) as Ref<ActionDeviceControl>
@@ -169,11 +170,7 @@ const getThingModelTSL = async () => {
   if (!props.productId) {
     return
   }
-  try {
-    thingModelTSL.value = await ThingModelApi.getThingModelTSLByProductId(props.productId)
-  } catch (error) {
-    console.error('获取物模型失败', error)
-  }
+  thingModelTSL.value = await ThingModelApi.getThingModelTSLByProductId(props.productId)
 }
 const thingModels = computed(() => (identifier?: string): any[] => {
   if (isEmpty(thingModelTSL.value)) {
@@ -183,8 +180,7 @@ const thingModels = computed(() => (identifier?: string): any[] => {
     case IotDeviceMessageTypeEnum.PROPERTY:
       return thingModelTSL.value?.properties || []
     case IotDeviceMessageTypeEnum.SERVICE:
-      // TODO puhui999: 要限制只过滤出 set 类型的 service 吗？
-      const service = thingModelTSL.value.services.find(
+      const service = thingModelTSL.value.services?.find(
         (item: any) => item.identifier === identifier
       )
       return service?.inputParams || []
@@ -200,23 +196,22 @@ const getUnitName = computed(() => (identifier: string) => {
   if (model?.dataSpecs) {
     return model.dataSpecs.unitName
   }
+  // TODO puhui999: enum、bool、struct 类型数据处理
   return ''
 })
 
 /** 监听 productId 变化 */
 watch(
   () => props.productId,
-  (newVal) => {
-    if (!newVal) {
-      thingModelTSL.value = undefined
-      parameters.value = []
+  () => {
+    getThingModelTSL()
+    if (deviceControlConfig.value && deviceControlConfig.value.productKey === props.productKey) {
       return
     }
-    getThingModelTSL()
     // 当产品ID变化时，清空原有数据
     deviceControlConfig.value.data = {}
-  },
-  { immediate: true }
+    parameters.value = []
+  }
 )
 
 /** 监听消息类型变化 */
