@@ -1,24 +1,32 @@
 <template>
   <div class="bg-[#dbe5f6] flex p-10px">
     <div class="flex flex-col items-center justify-center mr-10px h-a">
-      <el-select
-        v-model="deviceControlConfig.type"
-        @change="deviceControlConfig.data = {}"
-        class="!w-160px"
-        clearable
-        placeholder=""
-      >
+      <el-select v-model="deviceControlConfig.type" class="!w-160px" clearable placeholder="">
         <el-option label="属性" :value="IotDeviceMessageTypeEnum.PROPERTY" />
         <el-option label="服务" :value="IotDeviceMessageTypeEnum.SERVICE" />
       </el-select>
     </div>
-    <!-- TODO puhui999: 处理服务参数 -->
     <div class="">
       <div
         class="flex items-center justify-around mb-10px last:mb-0"
         v-for="(parameter, index) in parameters"
         :key="index"
       >
+        <!-- 选择服务 -->
+        <el-select
+          v-if="IotDeviceMessageTypeEnum.SERVICE === deviceControlConfig.type"
+          v-model="parameter.identifier0"
+          class="!w-240px mr-10px"
+          clearable
+          placeholder="请选择服务"
+        >
+          <el-option
+            v-for="thingModel in getThingModelTSLServices"
+            :key="thingModel.identifier"
+            :label="thingModel.name"
+            :value="thingModel.identifier"
+          />
+        </el-select>
         <el-select
           v-model="parameter.identifier"
           class="!w-240px mr-10px"
@@ -26,7 +34,7 @@
           placeholder="请选择物模型"
         >
           <el-option
-            v-for="thingModel in thingModels"
+            v-for="thingModel in thingModels(parameter?.identifier0)"
             :key="thingModel.identifier"
             :label="thingModel.name"
             :value="thingModel.identifier"
@@ -79,7 +87,7 @@ const deviceControlConfig = useVModel(props, 'modelValue', emits) as Ref<ActionD
 const message = useMessage()
 
 /** 执行器参数 */
-const parameters = ref<{ identifier: string; value: any }[]>([])
+const parameters = ref<{ identifier: string; value: any; identifier0?: string }[]>([])
 const addParameter = () => {
   if (!props.productId) {
     message.warning('请先选择一个产品')
@@ -104,9 +112,19 @@ watch(
       if (isEmpty(parameter.identifier)) {
         break
       }
+      // 单独处理服务的情况
+      if (IotDeviceMessageTypeEnum.SERVICE === deviceControlConfig.value.type) {
+        if (!parameter.identifier0) {
+          continue
+        }
+        deviceControlConfig.value.data[parameter.identifier0] = {
+          identifier: parameter.identifier,
+          value: parameter.value
+        }
+        continue
+      }
       deviceControlConfig.value.data[parameter.identifier] = parameter.value
     }
-    console.log(deviceControlConfig.value)
   },
   { deep: true }
 )
@@ -122,6 +140,16 @@ const initDeviceControlConfig = () => {
       data: {}
     } as ActionDeviceControl
   } else {
+    // 单独处理服务的情况
+    if (IotDeviceMessageTypeEnum.SERVICE === deviceControlConfig.value.type) {
+      // 参数回显
+      parameters.value = Object.entries(deviceControlConfig.value.data).map(([key, value]) => ({
+        identifier0: key,
+        identifier: value.identifier,
+        value: value.value
+      }))
+      return
+    }
     // 参数回显
     parameters.value = Object.entries(deviceControlConfig.value.data).map(([key, value]) => ({
       identifier: key,
@@ -147,33 +175,31 @@ const getThingModelTSL = async () => {
     console.error('获取物模型失败', error)
   }
 }
-const thingModels = computed((): any[] => {
+const thingModels = computed(() => (identifier?: string): any[] => {
   if (isEmpty(thingModelTSL.value)) {
     return []
   }
   switch (deviceControlConfig.value.type) {
     case IotDeviceMessageTypeEnum.PROPERTY:
-      return thingModelTSL.value.properties
-    // TODO puhui999: 服务和事件后续考虑
+      return thingModelTSL.value?.properties || []
     case IotDeviceMessageTypeEnum.SERVICE:
-      return thingModelTSL.value.services
-    case IotDeviceMessageTypeEnum.EVENT:
-      return thingModelTSL.value.events
+      // TODO puhui999: 要限制只过滤出 set 类型的 service 吗？
+      const service = thingModelTSL.value.services.find(
+        (item: any) => item.identifier === identifier
+      )
+      return service?.inputParams || []
   }
   return []
 })
+/** 获取物模型服务 */
+const getThingModelTSLServices = computed(() => thingModelTSL.value?.services || [])
 /** 获得属性单位 */
 const getUnitName = computed(() => (identifier: string) => {
-  const model = thingModels.value?.find((item: any) => item.identifier === identifier)
+  const model = thingModels.value().find((item: any) => item.identifier === identifier)
   // 属性
   if (model?.dataSpecs) {
     return model.dataSpecs.unitName
   }
-  // TODO puhui999: 先不考虑服务和事件的情况
-  // 服务和事件
-  // if (model?.outputParams) {
-  //   return model.dataSpecs.unitName
-  // }
   return ''
 })
 
