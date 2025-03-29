@@ -40,12 +40,15 @@
             :value="thingModel.identifier"
           />
         </el-select>
-        <!-- TODO puhui999: 输入框调整，数值型使用数字输入框校验边界，bool 值使用开关，枚举值使用下拉选择，时间值使用时间选择器 -->
-        <el-input v-model="parameter.value" class="!w-240px mr-10px" placeholder="请输入值">
-          <template v-if="getUnitName(parameter.identifier)" #append>
-            {{ getUnitName(parameter.identifier) }}
-          </template>
-        </el-input>
+        <ThingModelParamInput
+          class="!w-240px mr-10px"
+          v-model="parameter.value"
+          :thing-model="
+            thingModels(parameter?.identifier0)?.find(
+              (item) => item.identifier === parameter.identifier
+            )
+          "
+        />
         <el-tooltip content="删除参数" placement="top">
           <el-button type="danger" circle size="small" @click="removeParameter(index)">
             <Icon icon="ep:delete" />
@@ -66,13 +69,14 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
+import { isEmpty } from '@/utils/is'
 import { ThingModelApi } from '@/api/iot/thingmodel'
 import {
   ActionDeviceControl,
   IotDeviceMessageIdentifierEnum,
   IotDeviceMessageTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
-import { isEmpty } from '@/utils/is'
+import ThingModelParamInput from '../ThingModelParamInput.vue'
 
 /** 设备控制执行器组件 */
 defineOptions({ name: 'DeviceControlAction' })
@@ -94,8 +98,8 @@ const addParameter = () => {
     message.warning('请先选择一个产品')
     return
   }
-  if (parameters.value.length >= thingModels.value.length) {
-    message.warning(`该产品只有${thingModels.value.length}个物模型！！！`)
+  if (parameters.value.length >= thingModels.value().length) {
+    message.warning(`该产品只有${thingModels.value().length}个物模型！！！`)
     return
   }
   parameters.value.push({ identifier: '', value: undefined })
@@ -189,16 +193,6 @@ const thingModels = computed(() => (identifier?: string): any[] => {
 })
 /** 获取物模型服务 */
 const getThingModelTSLServices = computed(() => thingModelTSL.value?.services || [])
-/** 获得属性单位 */
-const getUnitName = computed(() => (identifier: string) => {
-  const model = thingModels.value().find((item: any) => item.identifier === identifier)
-  // 属性
-  if (model?.dataSpecs) {
-    return model.dataSpecs.unitName
-  }
-  // TODO puhui999: enum、bool、struct 类型数据处理
-  return ''
-})
 
 /** 监听 productId 变化 */
 watch(
