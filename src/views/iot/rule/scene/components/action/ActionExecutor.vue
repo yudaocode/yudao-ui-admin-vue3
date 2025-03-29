@@ -1,81 +1,83 @@
 <template>
-  <div class="m-10px">
-    <!-- 产品设备回显区域 -->
-    <div class="relative bg-[#eff3f7] h-50px flex items-center px-10px">
-      <div class="flex items-center mr-60px">
-        <span class="mr-10px">执行动作</span>
-        <el-select
-          v-model="actionConfig.type"
-          class="!w-240px"
-          clearable
-          placeholder="请选择执行类型"
+  <div>
+    <div class="m-10px">
+      <!-- 产品设备回显区域 -->
+      <div class="relative bg-[#eff3f7] h-50px flex items-center px-10px">
+        <div class="flex items-center mr-60px">
+          <span class="mr-10px">执行动作</span>
+          <el-select
+            v-model="actionConfig.type"
+            class="!w-240px"
+            clearable
+            placeholder="请选择执行类型"
+          >
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.IOT_RULE_SCENE_ACTION_TYPE_ENUM)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </div>
+        <div
+          v-if="actionConfig.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL"
+          class="flex items-center mr-60px"
         >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_RULE_SCENE_ACTION_TYPE_ENUM)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+          <span class="mr-10px">产品</span>
+          <el-button type="primary" @click="handleSelectProduct" size="small" plain>
+            {{ product ? product.name : '选择产品' }}
+          </el-button>
+        </div>
+        <div
+          v-if="actionConfig.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL"
+          class="flex items-center mr-60px"
+        >
+          <span class="mr-10px">设备</span>
+          <el-button type="primary" @click="handleSelectDevice" size="small" plain>
+            {{ isEmpty(deviceList) ? '选择设备' : deviceList.map((d) => d.deviceName).join(',') }}
+          </el-button>
+        </div>
+        <!-- 删除执行器 -->
+        <div class="absolute top-auto right-16px bottom-auto">
+          <el-tooltip content="删除执行器" placement="top">
+            <slot></slot>
+          </el-tooltip>
+        </div>
       </div>
-      <div
+
+      <!-- 设备控制执行器 -->
+      <DeviceControlAction
         v-if="actionConfig.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL"
-        class="flex items-center mr-60px"
-      >
-        <span class="mr-10px">产品</span>
-        <el-button type="primary" @click="handleSelectProduct" size="small" plain>
-          {{ product ? product.name : '选择产品' }}
-        </el-button>
-      </div>
-      <div
-        v-if="actionConfig.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL"
-        class="flex items-center mr-60px"
-      >
-        <span class="mr-10px">设备</span>
-        <el-button type="primary" @click="handleSelectDevice" size="small" plain>
-          {{ isEmpty(deviceList) ? '选择设备' : deviceList.map((d) => d.deviceName).join(',') }}
-        </el-button>
-      </div>
-      <!-- 删除执行器 -->
-      <div class="absolute top-auto right-16px bottom-auto">
-        <el-tooltip content="删除执行器" placement="top">
-          <slot></slot>
-        </el-tooltip>
-      </div>
+        :model-value="actionConfig.deviceControl"
+        :product-id="product?.id"
+        :product-key="product?.productKey"
+        @update:model-value="(val) => (actionConfig.deviceControl = val)"
+      />
+
+      <!-- 告警执行器 -->
+      <AlertAction
+        v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.ALERT"
+        :model-value="actionConfig.alert"
+        @update:model-value="(val) => (actionConfig.alert = val)"
+      />
+
+      <!-- 数据桥接执行器 -->
+      <DataBridgeAction
+        v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.DATA_BRIDGE"
+        :model-value="actionConfig.dataBridgeId"
+        @update:model-value="(val) => (actionConfig.dataBridgeId = val)"
+      />
     </div>
 
-    <!-- 设备控制执行器 -->
-    <DeviceControlAction
-      v-if="actionConfig.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL"
-      :model-value="actionConfig.deviceControl"
+    <!-- 产品、设备的选择 -->
+    <ProductTableSelect ref="productTableSelectRef" @success="handleProductSelect" />
+    <DeviceTableSelect
+      ref="deviceTableSelectRef"
+      multiple
       :product-id="product?.id"
-      :product-key="product?.productKey"
-      @update:model-value="(val) => (actionConfig.deviceControl = val)"
-    />
-
-    <!-- 告警执行器 -->
-    <AlertAction
-      v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.ALERT"
-      :model-value="actionConfig.alert"
-      @update:model-value="(val) => (actionConfig.alert = val)"
-    />
-
-    <!-- 数据桥接执行器 -->
-    <DataBridgeAction
-      v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.DATA_BRIDGE"
-      :model-value="actionConfig.dataBridgeId"
-      @update:model-value="(val) => (actionConfig.dataBridgeId = val)"
+      @success="handleDeviceSelect"
     />
   </div>
-
-  <!-- 产品、设备的选择 -->
-  <ProductTableSelect ref="productTableSelectRef" @success="handleProductSelect" />
-  <DeviceTableSelect
-    ref="deviceTableSelectRef"
-    multiple
-    :product-id="product?.id"
-    @success="handleDeviceSelect"
-  />
 </template>
 
 <script setup lang="ts">

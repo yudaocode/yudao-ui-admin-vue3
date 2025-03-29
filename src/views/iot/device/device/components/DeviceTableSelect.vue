@@ -117,7 +117,7 @@
           <template #default="scope">
             <el-radio
               v-model="selectedId"
-              :label="scope.row.id"
+              :value="scope.row.id"
               @change="() => handleRadioChange(scope.row)"
             >
               &nbsp;

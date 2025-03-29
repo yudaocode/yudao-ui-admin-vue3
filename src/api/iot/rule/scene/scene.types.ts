@@ -58,7 +58,8 @@ interface TenantBaseDO {
 
 // 触发条件参数
 interface TriggerConditionParameter {
-  identifier: string // 标识符（属性、事件、服务）
+  identifier0: string // 标识符（事件、服务）
+  identifier: string // 标识符（属性）
   operator: string // 操作符
   value: string // 比较值
 }
