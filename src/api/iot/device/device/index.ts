@@ -162,12 +162,13 @@ export const DeviceApi = {
     return await request.get({ url: `/iot/device/log/page`, params })
   },
 
-  // 获取设备MQTT连接参数
+  // 获取设备 MQTT 连接参数
   getMqttConnectionParams: async (deviceId: number) => {
     return await request.get({ url: `/iot/device/mqtt-connection-params`, params: { deviceId } })
   },
 
-  // 根据ProductKey和DeviceNames获取设备列表
+  // 根据 ProductKey 和 DeviceNames 获取设备列表
+  // TODO @puhui999：getDeviceListByProductKeyAndNames 哈。项目的风格统一~
   getDevicesByProductKeyAndNames: async (productKey: string, deviceNames: string[]) => {
     return await request.get({
       url: `/iot/device/list-by-product-key-and-names`,

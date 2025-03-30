@@ -1,12 +1,12 @@
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle" :appendToBody="true" v-loading="loading">
     <div class="flex h-600px">
-      <!-- 左侧物模型属性（view模式） -->
+      <!-- 左侧物模型属性（view 模式） -->
       <div class="w-1/2 border-r border-gray-200 pr-2 overflow-auto">
         <JsonEditor :model-value="thingModel" mode="view" height="600px" />
       </div>
 
-      <!-- 右侧JSON编辑器（code模式） -->
+      <!-- 右侧 JSON 编辑器（code 模式） -->
       <div class="w-1/2 pl-2 overflow-auto">
         <JsonEditor v-model="editableModelTSL" mode="code" height="600px" @error="handleError" />
       </div>

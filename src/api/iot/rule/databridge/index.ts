@@ -125,6 +125,7 @@ export const DataBridgeApi = {
   },
 
   // 查询数据桥梁（精简）列表
+  // TODO @puhui999：getDataBridgeSimpleList 哈。项目的风格统一~ 之前有几个，我写错了。。。
   getSimpleDataBridgeList() {
     return request.get({ url: '/iot/data-bridge/simple-list' })
   }

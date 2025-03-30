@@ -193,16 +193,13 @@ watch(
   { immediate: true }
 )
 
-/**
- * 初始化产品回显信息
- */
+/** 初始化产品回显信息 */
 const initProductInfo = async () => {
   if (!actionConfig.value.deviceControl?.productKey) {
     return
   }
 
   try {
-    // 使用新的API直接通过productKey获取产品信息
     const productData = await ProductApi.getProductByKey(
       actionConfig.value.deviceControl.productKey
     )
@@ -226,12 +223,10 @@ const initDeviceInfo = async () => {
   }
 
   try {
-    // 使用新的API直接通过productKey和deviceNames获取设备列表
     const deviceData = await DeviceApi.getDevicesByProductKeyAndNames(
       actionConfig.value.deviceControl.productKey,
       actionConfig.value.deviceControl.deviceNames
     )
-
     if (deviceData && deviceData.length > 0) {
       deviceList.value = deviceData
     }

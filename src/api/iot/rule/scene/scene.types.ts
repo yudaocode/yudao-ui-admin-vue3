@@ -100,7 +100,7 @@ interface ActionAlert {
 
 // 执行器配置
 interface ActionConfig {
-  key: any // 解决组件索引重用
+  key: any // 解决组件索引重用 TODO @puhui999：看看有没更好的解决方案呢。
   type: number // 执行类型
   deviceControl?: ActionDeviceControl // 设备控制
   alert?: ActionAlert // 告警执行

@@ -162,7 +162,7 @@ const initDeviceControlConfig = () => {
     }))
   }
 
-  // 确保data对象存在
+  // 确保 data 对象存在
   if (!deviceControlConfig.value.data) {
     deviceControlConfig.value.data = {}
   }

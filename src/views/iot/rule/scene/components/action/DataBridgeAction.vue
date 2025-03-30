@@ -25,7 +25,7 @@ const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const dataBridgeId = useVModel(props, 'modelValue', emits)
 
-const dataBridgeList = ref<any[]>([]) /** 数据桥接列表 */
+const dataBridgeList = ref<any[]>([]) // 数据桥接列表
 
 /** 获取数据桥接列表 */
 const getDataBridgeList = async () => {

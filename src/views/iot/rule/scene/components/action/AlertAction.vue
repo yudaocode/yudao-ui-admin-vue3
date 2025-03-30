@@ -8,7 +8,9 @@
         clearable
         placeholder="选择接收方式"
       >
-        <el-option 
+        <!-- TODO @芋艿：后续搞成字典 -->
+        <!-- TODO @puhui999：这里好像是 1、/2、/3 哈 -->
+        <el-option
           v-for="(value, key) in IotAlertConfigReceiveTypeEnum"
           :key="value"
           :label="key === 'SMS' ? '短信' : key === 'MAIL' ? '邮箱' : '通知'"
@@ -16,7 +18,10 @@
         />
       </el-select>
     </div>
-    <div v-if="alertConfig.receiveType === IotAlertConfigReceiveTypeEnum.SMS" class="flex items-center mb-10px">
+    <div
+      v-if="alertConfig.receiveType === IotAlertConfigReceiveTypeEnum.SMS"
+      class="flex items-center mb-10px"
+    >
       <span class="mr-10px w-80px">手机号码</span>
       <el-select
         v-model="alertConfig.phoneNumbers"
@@ -28,7 +33,10 @@
         placeholder="请输入手机号码"
       />
     </div>
-    <div v-if="alertConfig.receiveType === IotAlertConfigReceiveTypeEnum.MAIL" class="flex items-center mb-10px">
+    <div
+      v-if="alertConfig.receiveType === IotAlertConfigReceiveTypeEnum.MAIL"
+      class="flex items-center mb-10px"
+    >
       <span class="mr-10px w-80px">邮箱地址</span>
       <el-select
         v-model="alertConfig.emails"
@@ -80,4 +88,4 @@ const initAlertConfig = () => {
 onMounted(() => {
   initAlertConfig()
 })
-</script> 
+</script>
