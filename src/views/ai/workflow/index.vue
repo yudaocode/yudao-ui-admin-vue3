@@ -1,4 +1,3 @@
-<!-- TODO @lesan：要不直接放到 workflow 根目录 -->
 <template>
   <!-- 搜索工作栏 -->
   <ContentWrap>
@@ -9,9 +8,9 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="流程标识" prop="definitionKey">
+      <el-form-item label="流程标识" prop="code">
         <el-input
-          v-model="queryParams.definitionKey"
+          v-model="queryParams.code"
           placeholder="请输入流程标识"
           clearable
           @keyup.enter="handleQuery"
@@ -26,6 +25,16 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
@@ -56,22 +65,27 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" :show-overflow-tooltip="true" />
-      <el-table-column
-        label="流程标识"
-        align="center"
-        prop="definitionKey"
-        :show-overflow-tooltip="true"
-      />
-      <el-table-column label="流程名称" align="center" prop="name" :show-overflow-tooltip="true" />
+      <el-table-column label="编号" align="center" prop="id" />
+      <el-table-column label="流程标识" align="center" prop="code" />
+      <el-table-column label="流程名称" align="center" prop="name" />
       <el-table-column
         label="创建时间"
         align="center"
         prop="createTime"
         :formatter="dateFormatter"
-        width="180"
       />
-      <el-table-column label="操作" align="center" width="220" fixed="right">
+      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="状态" align="center" key="status">
+        <template #default="scope">
+          <el-switch
+            v-model="scope.row.status"
+            :active-value="0"
+            :inactive-value="1"
+            disabled
+          />
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" align="center" fixed="right">
         <template #default="scope">
           <el-button
             type="primary"
@@ -80,14 +94,6 @@
             v-hasPermi="['ai:workflow:update']"
           >
             修改
-          </el-button>
-          <el-button
-            type="primary"
-            link
-            @click="openModelForm('update', scope.row.id)"
-            v-hasPermi="['ai:workflow:update']"
-          >
-            流程图
           </el-button>
           <el-button
             link
@@ -110,16 +116,15 @@
   </ContentWrap>
 
   <!-- 添加或修改工作流对话框 -->
-  <WorkflowForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as WorkflowApi from '@/api/ai/workflow'
 import { dateFormatter } from '@/utils/formatTime'
-import WorkflowForm from './WorkflowForm.vue'
+import { checkPermi } from '@/utils/permission'
 
-/** AI 绘画 列表 */
-defineOptions({ name: 'AiWorkflowManager' })
+defineOptions({ name: 'AiWorkflow' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -131,8 +136,9 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  definitionKey: '',
+  code: '',
   name: '',
+  status: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -175,13 +181,7 @@ const handleDelete = async (id: number) => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
-/** 修改流程模型弹窗 */
-const openModelForm = async (type: string, id?: number) => {
+const openForm = async (type: string, id?: number) => {
   if (type === 'create') {
     await push({ name: 'AiWorkflowCreate' })
   } else {
