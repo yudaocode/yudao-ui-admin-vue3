@@ -154,6 +154,7 @@ import {
 } from '../../consts'
 import { BpmModelFormType } from '@/utils/constants'
 import { useFormFieldsAndStartUser } from '../../node'
+import { cloneDeep } from 'lodash-es'
 
 const props = defineProps({
   modelValue: {
@@ -196,7 +197,7 @@ const formRef = ref() // 表单 Ref
 const changeConditionType = () => {
   if (condition.value.conditionType === ConditionType.RULE) {
     if (!condition.value.conditionGroups) {
-      condition.value.conditionGroups = DEFAULT_CONDITION_GROUP_VALUE
+      condition.value.conditionGroups = cloneDeep(DEFAULT_CONDITION_GROUP_VALUE)
     }
   }
 }

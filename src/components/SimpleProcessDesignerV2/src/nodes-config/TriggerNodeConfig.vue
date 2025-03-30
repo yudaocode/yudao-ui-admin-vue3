@@ -254,6 +254,7 @@ import {
 import { useWatchNode, useDrawer, useNodeName, useFormFields, getConditionShowText } from '../node'
 import HttpRequestSetting from './components/HttpRequestSetting.vue'
 import ConditionDialog from './components/ConditionDialog.vue'
+import { cloneDeep } from 'lodash-es'
 const { proxy } = getCurrentInstance() as any
 
 defineOptions({
@@ -290,7 +291,7 @@ const configForm = ref<TriggerSetting>({
   },
   formSettings: [
     {
-      conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
+      conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE),
       updateFormFields: {},
       deleteFields: []
     }
@@ -346,7 +347,7 @@ const changeTriggerType = () => {
         ? originalSetting.formSettings
         : [
             {
-              conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
+              conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE),
               updateFormFields: {},
               deleteFields: []
             }
@@ -361,7 +362,7 @@ const changeTriggerType = () => {
         ? originalSetting.formSettings
         : [
             {
-              conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
+              conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE),
               updateFormFields: undefined,
               deleteFields: []
             }
@@ -374,7 +375,7 @@ const changeTriggerType = () => {
 /** 添加新的修改表单设置 */
 const addFormSetting = () => {
   configForm.value.formSettings!.push({
-    conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
+    conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE),
     updateFormFields: {},
     deleteFields: []
   })
@@ -509,7 +510,7 @@ const showTriggerNodeConfig = (node: SimpleFlowNode) => {
       },
       formSettings: node.triggerSetting.formSettings || [
         {
-          conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
+          conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE),
           updateFormFields: {},
           deleteFields: []
         }

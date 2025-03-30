@@ -25,21 +25,46 @@
     </template>
     <el-tabs type="border-card" v-model="activeTabName">
       <el-tab-pane label="权限" name="user">
-        <el-text v-if="!startUserIds || startUserIds.length === 0"> 全部成员可以发起流程 </el-text>
-        <el-text v-else-if="startUserIds.length == 1">
-          {{ getUserNicknames(startUserIds) }} 可发起流程
+        <el-text
+          v-if="
+            (!startUserIds || startUserIds.length === 0) &&
+            (!startDeptIds || startDeptIds.length === 0)
+          "
+        >
+          全部成员可以发起流程
         </el-text>
-        <el-text v-else>
-          <el-tooltip
-            class="box-item"
-            effect="dark"
-            placement="top"
-            :content="getUserNicknames(startUserIds)"
-          >
-            {{ getUserNicknames(startUserIds.slice(0, 2)) }} 等
-            {{ startUserIds.length }} 人可发起流程
-          </el-tooltip>
-        </el-text>
+        <div v-else-if="startUserIds && startUserIds.length > 0">
+          <el-text v-if="startUserIds.length == 1">
+            {{ getUserNicknames(startUserIds) }} 可发起流程
+          </el-text>
+          <el-text v-else>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              placement="top"
+              :content="getUserNicknames(startUserIds)"
+            >
+              {{ getUserNicknames(startUserIds.slice(0, 2)) }} 等
+              {{ startUserIds.length }} 人可发起流程
+            </el-tooltip>
+          </el-text>
+        </div>
+        <div v-else-if="startDeptIds && startDeptIds.length > 0">
+          <el-text v-if="startDeptIds.length == 1">
+            {{ getDeptNames(startDeptIds) }} 可发起流程
+          </el-text>
+          <el-text v-else>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              placement="top"
+              :content="getDeptNames(startDeptIds)"
+            >
+              {{ getDeptNames(startDeptIds.slice(0, 2)) }} 等
+              {{ startDeptIds.length }} 个部门可发起流程
+            </el-tooltip>
+          </el-text>
+        </div>
       </el-tab-pane>
       <el-tab-pane label="表单字段权限" name="fields" v-if="formType === 10">
         <div class="field-setting-pane">
@@ -107,6 +132,7 @@
 import { SimpleFlowNode, NodeType, FieldPermissionType, START_USER_BUTTON_SETTING } from '../consts'
 import { useWatchNode, useDrawer, useNodeName, useFormFieldsPermission } from '../node'
 import * as UserApi from '@/api/system/user'
+import * as DeptApi from '@/api/system/dept'
 defineOptions({
   name: 'StartUserNodeConfig'
 })
@@ -118,8 +144,12 @@ const props = defineProps({
 })
 // 可发起流程的用户编号
 const startUserIds = inject<Ref<any[]>>('startUserIds')
+// 可发起流程的部门编号
+const startDeptIds = inject<Ref<any[]>>('startDeptIds')
 // 用户列表
 const userOptions = inject<Ref<UserApi.UserVO[]>>('userList')
+// 部门列表
+const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList')
 // 抽屉配置
 const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 // 当前节点
@@ -144,6 +174,19 @@ const getUserNicknames = (userIds: number[]): string => {
     }
   })
   return nicknames.join(',')
+}
+const getDeptNames = (deptIds: number[]): string => {
+  if (!deptIds || deptIds.length === 0) {
+    return ''
+  }
+  const deptNames: string[] = []
+  deptIds.forEach((deptId) => {
+    const found = deptOptions?.value.find((item) => item.id === deptId)
+    if (found && found.name) {
+      deptNames.push(found.name)
+    }
+  })
+  return deptNames.join(',')
 }
 // 保存配置
 const saveConfig = async () => {

@@ -97,9 +97,22 @@
         </el-table-column>
         <el-table-column label="可见范围" prop="startUserIds" min-width="150">
           <template #default="{ row }">
-            <el-text v-if="!row.startUsers?.length"> 全部可见 </el-text>
+            <el-text v-if="!row.startUsers?.length && !row.startDepts?.length"> 全部可见 </el-text>
             <el-text v-else-if="row.startUsers.length === 1">
               {{ row.startUsers[0].nickname }}
+            </el-text>
+            <el-text v-else-if="row.startDepts?.length === 1">
+              {{ row.startDepts[0].name }}
+            </el-text>
+            <el-text v-else-if="row.startDepts?.length > 1">
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                placement="top"
+                :content="row.startDepts.map((dept: any) => dept.name).join('、')"
+              >
+                {{ row.startDepts[0].name }}等 {{ row.startDepts.length }} 个部门可见
+              </el-tooltip>
             </el-text>
             <el-text v-else>
               <el-tooltip
