@@ -58,7 +58,8 @@ interface TenantBaseDO {
 
 // 触发条件参数
 interface TriggerConditionParameter {
-  identifier: string // 标识符（属性、事件、服务）
+  identifier0: string // 标识符（事件、服务）
+  identifier: string // 标识符（属性）
   operator: string // 操作符
   value: string // 比较值
 }
@@ -72,6 +73,7 @@ interface TriggerCondition {
 
 // 触发器配置
 interface TriggerConfig {
+  key: any // 解决组件索引重用
   type: number // 触发类型
   productKey: string // 产品标识
   deviceNames: string[] // 设备名称数组
@@ -98,6 +100,7 @@ interface ActionAlert {
 
 // 执行器配置
 interface ActionConfig {
+  key: any // 解决组件索引重用
   type: number // 执行类型
   deviceControl?: ActionDeviceControl // 设备控制
   alert?: ActionAlert // 告警执行

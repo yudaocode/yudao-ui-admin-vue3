@@ -165,5 +165,16 @@ export const DeviceApi = {
   // 获取设备MQTT连接参数
   getMqttConnectionParams: async (deviceId: number) => {
     return await request.get({ url: `/iot/device/mqtt-connection-params`, params: { deviceId } })
+  },
+
+  // 根据ProductKey和DeviceNames获取设备列表
+  getDevicesByProductKeyAndNames: async (productKey: string, deviceNames: string[]) => {
+    return await request.get({
+      url: `/iot/device/list-by-product-key-and-names`,
+      params: {
+        productKey,
+        deviceNames: deviceNames.join(',')
+      }
+    })
   }
 }

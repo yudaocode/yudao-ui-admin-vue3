@@ -8,24 +8,10 @@
       class="my-4"
       description="如需编辑文件，请点击下方编辑按钮"
     />
-
-    <!-- JSON 编辑器：读模式 -->
-    <Vue3Jsoneditor
-      v-if="isEditing"
+    <JsonEditor
       v-model="config"
-      :options="editorOptions"
-      height="500px"
-      currentMode="code"
-      @error="onError"
-    />
-    <!-- JSON 编辑器：写模式 -->
-    <Vue3Jsoneditor
-      v-else
-      v-model="config"
-      :options="editorOptions"
-      height="500px"
-      currentMode="view"
-      v-loading.fullscreen.lock="loading"
+      :mode="isEditing ? 'code' : 'view'"
+      height="600px"
       @error="onError"
     />
     <div class="mt-5 text-center">
@@ -40,9 +26,11 @@
 </template>
 
 <script lang="ts" setup>
-import Vue3Jsoneditor from 'v3-jsoneditor/src/Vue3Jsoneditor.vue'
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { jsonParse } from '@/utils'
+import { isEmpty } from '@/utils/is'
+
+defineOptions({ name: 'DeviceDetailConfig' })
 
 const props = defineProps<{
   device: DeviceVO
@@ -63,12 +51,6 @@ watchEffect(() => {
 })
 
 const isEditing = ref(false) // 编辑状态
-const editorOptions = computed(() => ({
-  mainMenuBar: false,
-  navigationBar: false,
-  statusBar: false
-})) // JSON 编辑器的选项
-
 /** 启用编辑模式的函数 */
 const enableEdit = () => {
   isEditing.value = true
@@ -112,8 +94,11 @@ const updateDeviceConfig = async () => {
 }
 
 /** 处理 JSON 编辑器错误的函数 */
-const onError = (e: any) => {
-  console.log('onError', e)
+const onError = (errors: any) => {
+  if (isEmpty(errors)) {
+    hasJsonError.value = false
+    return
+  }
   hasJsonError.value = true
 }
 </script>

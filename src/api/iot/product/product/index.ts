@@ -78,5 +78,10 @@ export const ProductApi = {
   // 查询产品（精简）列表
   getSimpleProductList() {
     return request.get({ url: '/iot/product/simple-list' })
+  },
+  
+  // 根据ProductKey获取产品信息
+  getProductByKey: async (productKey: string) => {
+    return await request.get({ url: `/iot/product/get-by-key`, params: { productKey } })
   }
 }
