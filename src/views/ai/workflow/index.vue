@@ -77,12 +77,7 @@
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="状态" align="center" key="status">
         <template #default="scope">
-          <el-switch
-            v-model="scope.row.status"
-            :active-value="0"
-            :inactive-value="1"
-            disabled
-          />
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right">
@@ -122,7 +117,6 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as WorkflowApi from '@/api/ai/workflow'
 import { dateFormatter } from '@/utils/formatTime'
-import { checkPermi } from '@/utils/permission'
 
 defineOptions({ name: 'AiWorkflow' })
 
@@ -193,7 +187,7 @@ const openForm = async (type: string, id?: number) => {
 }
 
 /** 初始化 **/
-onMounted(async () => {
+onMounted(() => {
   getList()
 })
 </script>
