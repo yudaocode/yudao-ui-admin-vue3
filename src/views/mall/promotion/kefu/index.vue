@@ -16,7 +16,6 @@ import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { getRefreshToken } from '@/utils/auth'
 import { useWebSocket } from '@vueuse/core'
 import { useMallKefuStore } from '@/store/modules/mall/kefu'
-import { jsonParse } from '@/utils'
 
 defineOptions({ name: 'KeFu' })
 
@@ -66,7 +65,8 @@ watch(
       // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
       if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
         // 更新会话已读
-        kefuStore.updateConversationStatus(jsonParse(jsonMessage.content))
+        const message = JSON.parse(jsonMessage.content)
+        kefuStore.updateConversationStatus(message.conversationId)
       }
     } catch (error) {
       console.error(error)

@@ -118,7 +118,7 @@ export function toAnyString() {
 
 /**
  * 根据支持的文件类型生成 accept 属性值
- * 
+ *
  * @param supportedFileTypes 支持的文件类型数组，如 ['PDF', 'DOC', 'DOCX']
  * @returns 用于文件上传组件 accept 属性的字符串
  */
@@ -503,8 +503,8 @@ export function jsonParse(str: string) {
   try {
     return JSON.parse(str)
   } catch (e) {
-    console.error(`str[${str}] 不是一个 JSON 字符串`)
-    return ''
+    console.warn(`str[${str}] 不是一个 JSON 字符串`)
+    return str
   }
 }
 
@@ -516,7 +516,7 @@ export function jsonParse(str: string) {
  * @param end
  */
 
-export const sliceName = (name: string,start: number, end : number) => {
+export const sliceName = (name: string, start: number, end: number) => {
   if (name.length > end) {
     return name.slice(start, end)
   }
