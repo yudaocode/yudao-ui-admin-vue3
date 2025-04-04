@@ -41,7 +41,7 @@
           <el-form-item label="状态" prop="status">
             <el-select
               v-model="queryParams.status"
-              placeholder="用户状态"
+              placeholder="请选择用户状态"
               clearable
               class="!w-240px"
             >
@@ -345,7 +345,7 @@ const handleResetPwd = async (row: UserApi.UserVO) => {
     )
     const password = result.value
     // 发起重置
-    await UserApi.resetUserPwd(row.id, password)
+    await UserApi.resetUserPassword(row.id, password)
     message.success('修改成功，新密码是：' + password)
   } catch {}
 }
