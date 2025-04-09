@@ -69,11 +69,24 @@ export const useApiSelect = (option: ApiSelectProps) => {
         if (isEmpty(props.url)) {
           return
         }
+
         switch (props.method) {
           case 'GET':
             let url: string = props.url
             if (props.remote) {
-              url = `${url}?${props.remoteField}=${queryParam.value}`
+              if(queryParam.value!=undefined)
+              {
+                if(checkUrl(url))
+                {
+                  url = `${url}&${props.remoteField}=${queryParam.value}`
+                }else
+                {
+                  url = `${url}?${props.remoteField}=${queryParam.value}`
+                }
+              }else
+              {
+                url = `${url}`
+              }
             }
             parseOptions(await request.get({ url: url }))
             break
@@ -85,6 +98,11 @@ export const useApiSelect = (option: ApiSelectProps) => {
             parseOptions(await request.post({ url: props.url, data: data }))
             break
         }
+      }
+
+      function checkUrl(url)
+      {
+          return url.includes('?')
       }
 
       function parseOptions(data: any) {
