@@ -37,7 +37,6 @@ ${selector}:before {
   position: absolute;
   top: 0;
   left: 0;
-  width: 1px;
   height: 100%;
   background-color: var(--el-border-color);
   z-index: 3;
@@ -55,7 +54,6 @@ ${selector}:after {
   position: absolute;
   top: 0;
   right: 0;
-  width: 1px;
   height: 100%;
   background-color: var(--el-border-color);
   z-index: 3;
@@ -74,7 +72,6 @@ ${selector}:before {
   top: 0;
   left: 0;
   width: 100%;
-  height: 1px;
   background-color: var(--el-border-color);
   z-index: 3;
 }
@@ -92,7 +89,6 @@ ${selector}:after {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 1px;
   background-color: var(--el-border-color);
   z-index: 3;
 }
