@@ -312,8 +312,8 @@ const doSocialLogin = async (type: number) => {
       }
     }
     // 计算 redirectUri
-    // tricky: type、redirect需要先encode一次，否则钉钉回调会丢失。
-    // 配合 Login/SocialLogin.vue#getUrlValue() 使用
+    // 注意: type、redirect 需要先 encode 一次，否则钉钉回调会丢失。
+    // 配合 social-login.vue#getUrlValue() 使用
     const redirectUri =
       location.origin +
       '/social-login?' +

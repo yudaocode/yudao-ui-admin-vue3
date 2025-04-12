@@ -64,7 +64,7 @@ export const useFormCreateDesigner = async (designer: Ref) => {
     label: '接口选择器',
     icon: 'icon-server',
     props: [...apiSelectRule],
-    event:['click','change','visibleChange','clear','blur','focus']
+    event: ['click', 'change', 'visibleChange', 'clear', 'blur', 'focus']
   })
 
   /**

@@ -132,7 +132,6 @@ defineExpose({ open, close: () => (dialogVisible.value = false) })
 /** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
-  debugger
   await formRef.value.validate()
   formLoading.value = true
   try {

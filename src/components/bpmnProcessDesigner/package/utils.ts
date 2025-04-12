@@ -2,7 +2,6 @@ import { toRaw } from 'vue'
 const bpmnInstances = () => (window as any)?.bpmnInstances
 // 创建监听器实例
 export function createListenerObject(options, isTask, prefix) {
-  debugger
   const listenerObj = Object.create(null)
   listenerObj.event = options.event
   isTask && (listenerObj.id = options.id) // 任务监听器特有的 id 字段

@@ -62,8 +62,12 @@
     </el-row>
     <!-- 操作 -->
     <template #footer>
-      <el-button :disabled="tableList.length === 0 || dbTableLoading" type="primary" @click="handleImportTable">
-          导入
+      <el-button
+        :disabled="tableList.length === 0 || dbTableLoading"
+        type="primary"
+        @click="handleImportTable"
+      >
+        导入
       </el-button>
       <el-button @click="close">关闭</el-button>
     </template>

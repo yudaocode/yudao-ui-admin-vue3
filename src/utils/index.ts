@@ -525,21 +525,6 @@ export function jsonParse(str: string) {
 /**
  * 截取字符串
  *
- * @param name
- * @param start
- * @param end
- */
-
-export const sliceName = (name: string, start: number, end: number) => {
-  if (name.length > end) {
-    return name.slice(start, end)
-  }
-  return name
-}
-
-/**
- * 截取字符串
- *
  * @param str 字符串
  * @param start 开始位置
  * @param end 结束位置
