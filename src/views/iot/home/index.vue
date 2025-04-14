@@ -42,43 +42,10 @@
   <!-- 第二行：图表行 -->
   <el-row :gutter="16" class="mb-4">
     <el-col :span="12">
-      <el-card class="chart-card" shadow="never">
-        <template #header>
-          <div class="flex items-center">
-            <span class="text-base font-medium text-gray-600">设备数量统计</span>
-          </div>
-        </template>
-        <div ref="deviceCountChartRef" class="h-[240px]"></div>
-      </el-card>
+      <DeviceCountCard :statsData="statsData" />
     </el-col>
     <el-col :span="12">
-      <el-card class="chart-card" shadow="never">
-        <template #header>
-          <div class="flex items-center">
-            <span class="text-base font-medium text-gray-600">设备状态统计</span>
-          </div>
-        </template>
-        <el-row class="h-[240px]">
-          <el-col :span="8" class="flex flex-col items-center">
-            <div ref="deviceOnlineCountChartRef" class="h-[160px] w-full"></div>
-            <div class="text-center mt-2">
-              <span class="text-sm text-gray-600">在线设备</span>
-            </div>
-          </el-col>
-          <el-col :span="8" class="flex flex-col items-center">
-            <div ref="deviceOfflineChartRef" class="h-[160px] w-full"></div>
-            <div class="text-center mt-2">
-              <span class="text-sm text-gray-600">离线设备</span>
-            </div>
-          </el-col>
-          <el-col :span="8" class="flex flex-col items-center">
-            <div ref="deviceActiveChartRef" class="h-[160px] w-full"></div>
-            <div class="text-center mt-2">
-              <span class="text-sm text-gray-600">待激活设备</span>
-            </div>
-          </el-col>
-        </el-row>
-      </el-card>
+      <DeviceStateCountCard :statsData="statsData" />
     </el-col>
   </el-row>
 
@@ -134,6 +101,8 @@ import {
 } from '@/api/iot/statistics'
 import { formatDate } from '@/utils/formatTime'
 import ComparisonCard from './components/ComparisonCard.vue'
+import DeviceCountCard from './components/DeviceCountCard.vue'
+import DeviceStateCountCard from './components/DeviceStateCountCard.vue'
 
 // TODO @super：参考下 /Users/yunai/Java/yudao-ui-admin-vue3/src/views/mall/home/index.vue，拆一拆组件
 
@@ -252,102 +221,8 @@ const getStats = async () => {
 
 /** 初始化图表 */
 const initCharts = () => {
-  // 设备数量统计
-  echarts.init(deviceCountChartRef.value).setOption({
-    tooltip: {
-      trigger: 'item'
-    },
-    legend: {
-      top: '5%',
-      right: '10%',
-      align: 'left',
-      orient: 'vertical',
-      icon: 'circle'
-    },
-    series: [
-      {
-        name: 'Access From',
-        type: 'pie',
-        radius: ['50%', '80%'],
-        avoidLabelOverlap: false,
-        center: ['30%', '50%'],
-        label: {
-          show: false,
-          position: 'outside'
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: 20,
-            fontWeight: 'bold'
-          }
-        },
-        labelLine: {
-          show: false
-        },
-        data: Object.entries(statsData.value.productCategoryDeviceCounts).map(([name, value]) => ({
-          name,
-          value
-        }))
-      }
-    ]
-  })
-
-  // 在线设备统计
-  initGaugeChart(deviceOnlineCountChartRef.value, statsData.value.deviceOnlineCount, '#0d9')
-  // 离线设备统计
-  initGaugeChart(deviceOfflineChartRef.value, statsData.value.deviceOfflineCount, '#f50')
-  // 待激活设备统计
-  initGaugeChart(deviceActiveChartRef.value, statsData.value.deviceInactiveCount, '#05b')
-
   // 消息量统计
   initMessageChart()
-}
-
-/** 初始化仪表盘图表 */
-const initGaugeChart = (el: any, value: number, color: string) => {
-  echarts.init(el).setOption({
-    series: [
-      {
-        type: 'gauge',
-        startAngle: 360,
-        endAngle: 0,
-        min: 0,
-        max: statsData.value.deviceCount || 100, // 使用设备总数作为最大值
-        progress: {
-          show: true,
-          width: 12,
-          itemStyle: {
-            color: color
-          }
-        },
-        axisLine: {
-          lineStyle: {
-            width: 12,
-            color: [[1, '#E5E7EB']]
-          }
-        },
-        axisTick: { show: false },
-        splitLine: { show: false },
-        axisLabel: { show: false },
-        pointer: { show: false },
-        anchor: { show: false },
-        title: { show: false },
-        detail: {
-          valueAnimation: true,
-          fontSize: 24,
-          fontWeight: 'bold',
-          fontFamily: 'Inter, sans-serif',
-          color: color,
-          offsetCenter: [0, '0'],
-          formatter: (value: number) => {
-            return `${value} 个`
-          }
-        },
-        data: [{ value: value }]
-      }
-    ]
-  })
 }
 
 /** 初始化消息统计图表 */
