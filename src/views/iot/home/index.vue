@@ -2,72 +2,40 @@
   <!-- 第一行：统计卡片行 -->
   <el-row :gutter="16" class="mb-4">
     <el-col :span="6">
-      <el-card class="stat-card" shadow="never">
-        <div class="flex flex-col">
-          <div class="flex justify-between items-center mb-1">
-            <span class="text-gray-500 text-base font-medium">分类数量</span>
-            <Icon icon="ep:menu" class="text-[32px] text-blue-400" />
-          </div>
-          <span class="text-3xl font-bold text-gray-700">
-            {{ statsData.productCategoryCount }}
-          </span>
-          <el-divider class="my-2" />
-          <div class="flex justify-between items-center text-gray-400 text-sm">
-            <span>今日新增</span>
-            <span class="text-green-500">+{{ statsData.productCategoryTodayCount }}</span>
-          </div>
-        </div>
-      </el-card>
+      <ComparisonCard
+        title="分类数量"
+        :value="statsData.productCategoryCount"
+        :todayCount="statsData.productCategoryTodayCount"
+        icon="ep:menu"
+        iconColor="text-blue-400"
+      />
     </el-col>
     <el-col :span="6">
-      <el-card class="stat-card" shadow="never">
-        <div class="flex flex-col">
-          <div class="flex justify-between items-center mb-1">
-            <span class="text-gray-500 text-base font-medium">产品数量</span>
-            <Icon icon="ep:box" class="text-[32px] text-orange-400" />
-          </div>
-          <span class="text-3xl font-bold text-gray-700">{{ statsData.productCount }}</span>
-          <el-divider class="my-2" />
-          <div class="flex justify-between items-center text-gray-400 text-sm">
-            <span>今日新增</span>
-            <span class="text-green-500">+{{ statsData.productTodayCount }}</span>
-          </div>
-        </div>
-      </el-card>
+      <ComparisonCard
+        title="产品数量"
+        :value="statsData.productCount"
+        :todayCount="statsData.productTodayCount"
+        icon="ep:box"
+        iconColor="text-orange-400"
+      />
     </el-col>
     <el-col :span="6">
-      <el-card class="stat-card" shadow="never">
-        <div class="flex flex-col">
-          <div class="flex justify-between items-center mb-1">
-            <span class="text-gray-500 text-base font-medium">设备数量</span>
-            <Icon icon="ep:cpu" class="text-[32px] text-purple-400" />
-          </div>
-          <span class="text-3xl font-bold text-gray-700">{{ statsData.deviceCount }}</span>
-          <el-divider class="my-2" />
-          <div class="flex justify-between items-center text-gray-400 text-sm">
-            <span>今日新增</span>
-            <span class="text-green-500">+{{ statsData.deviceTodayCount }}</span>
-          </div>
-        </div>
-      </el-card>
+      <ComparisonCard
+        title="设备数量"
+        :value="statsData.deviceCount"
+        :todayCount="statsData.deviceTodayCount"
+        icon="ep:cpu"
+        iconColor="text-purple-400"
+      />
     </el-col>
     <el-col :span="6">
-      <el-card class="stat-card" shadow="never">
-        <div class="flex flex-col">
-          <div class="flex justify-between items-center mb-1">
-            <span class="text-gray-500 text-base font-medium">设备消息数</span>
-            <Icon icon="ep:message" class="text-[32px] text-teal-400" />
-          </div>
-          <span class="text-3xl font-bold text-gray-700">
-            {{ statsData.deviceMessageCount }}
-          </span>
-          <el-divider class="my-2" />
-          <div class="flex justify-between items-center text-gray-400 text-sm">
-            <span>今日新增</span>
-            <span class="text-green-500">+{{ statsData.deviceMessageTodayCount }}</span>
-          </div>
-        </div>
-      </el-card>
+      <ComparisonCard
+        title="设备消息数"
+        :value="statsData.deviceMessageCount"
+        :todayCount="statsData.deviceMessageTodayCount"
+        icon="ep:message"
+        iconColor="text-teal-400"
+      />
     </el-col>
   </el-row>
 
@@ -165,6 +133,7 @@ import {
   ProductCategoryApi
 } from '@/api/iot/statistics'
 import { formatDate } from '@/utils/formatTime'
+import ComparisonCard from './components/ComparisonCard.vue'
 
 // TODO @super：参考下 /Users/yunai/Java/yudao-ui-admin-vue3/src/views/mall/home/index.vue，拆一拆组件
 
