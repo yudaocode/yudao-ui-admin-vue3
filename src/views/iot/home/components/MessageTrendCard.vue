@@ -32,8 +32,9 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
 import { UniversalTransition } from 'echarts/features'
 import { IotStatisticsDeviceMessageSummaryRespVO } from '@/api/iot/statistics'
-import { formatDate } from '@/utils/formatTime'
+import { formatDate, getTimeRangeStart } from '@/utils/formatTime'
 import type { PropType } from 'vue'
+import dayjs from 'dayjs'
 
 /** 消息趋势统计卡片 */
 defineOptions({ name: 'MessageTrendCard' })
@@ -48,27 +49,14 @@ const props = defineProps({
 const emit = defineEmits(['timeRangeChange'])
 
 const timeRange = ref('7d')
-const dateRange = ref<[Date, Date] | null>(null)
+const dateRange = ref<any>(null)
 const messageChartRef = ref()
 
+// TODO @super：这个的计算，看看能不能结合 dayjs 简化。因为 1h、24h、7d 感觉是比较标准的。如果没有，抽到 utils/formatTime.ts 作为一个工具方法
 // 处理快捷时间范围选择
 const handleTimeRangeChange = (range: string) => {
-  const now = Date.now()
-  let startTime: number
-
-  switch (range) {
-    case '8h':
-      startTime = now - 8 * 60 * 60 * 1000
-      break
-    case '24h':
-      startTime = now - 24 * 60 * 60 * 1000
-      break
-    case '7d':
-      startTime = now - 7 * 24 * 60 * 60 * 1000
-      break
-    default:
-      return
-  }
+  const now = dayjs().valueOf()
+  const startTime = getTimeRangeStart(range as '8h' | '24h' | '7d')
 
   dateRange.value = null
   emit('timeRangeChange', { startTime, endTime: now })
@@ -96,31 +84,75 @@ const initChart = () => {
     UniversalTransition
   ])
 
-  const timestamps = Array.from(
-    new Set([
-      ...props.messageStats.upstreamCounts.map((item) => Number(Object.keys(item)[0])),
-      ...props.messageStats.downstreamCounts.map((item) => Number(Object.keys(item)[0]))
-    ])
-  ).sort((a, b) => a - b) // 确保时间戳从小到大排序
 
-  // 准备数据
-  const xdata = timestamps.map((ts) => formatDate(ts, 'YYYY-MM-DD HH:mm'))
-  const upData = timestamps.map((ts) => {
-    const item = props.messageStats.upstreamCounts.find(
-      (count) => Number(Object.keys(count)[0]) === ts
-    )
-    return item ? Object.values(item)[0] : 0
-  })
-  const downData = timestamps.map((ts) => {
-    const item = props.messageStats.downstreamCounts.find(
-      (count) => Number(Object.keys(count)[0]) === ts
-    )
-    return item ? Object.values(item)[0] : 0
-  })
+  // 检查数据格式并转换
+  const upstreamCounts = Array.isArray(props.messageStats.upstreamCounts) 
+    ? props.messageStats.upstreamCounts 
+    : Object.entries(props.messageStats.upstreamCounts || {}).map(([key, value]) => ({ [key]: value }))
+  
+  const downstreamCounts = Array.isArray(props.messageStats.downstreamCounts) 
+    ? props.messageStats.downstreamCounts 
+    : Object.entries(props.messageStats.downstreamCounts || {}).map(([key, value]) => ({ [key]: value }))
 
   // 获取所有时间戳并排序
+  let timestamps: number[] = []
+  
+  try {
+    // 尝试从数组中提取时间戳
+    if (Array.isArray(upstreamCounts) && upstreamCounts.length > 0) {
+      timestamps = Array.from(
+        new Set([
+          ...upstreamCounts.map(item => Number(Object.keys(item)[0])),
+          ...downstreamCounts.map(item => Number(Object.keys(item)[0]))
+        ])
+      ).sort((a, b) => a - b)
+    } else {
+      // 如果数组为空或不是数组，尝试从对象中提取时间戳
+      const upKeys = Object.keys(props.messageStats.upstreamCounts || {}).map(Number)
+      const downKeys = Object.keys(props.messageStats.downstreamCounts || {}).map(Number)
+      timestamps = Array.from(new Set([...upKeys, ...downKeys])).sort((a, b) => a - b)
+    }
+  } catch (error) {
+    console.error('提取时间戳出错:', error)
+    timestamps = []
+  }
 
-  console.log(xdata, upData, downData)
+
+  // 准备数据
+  const xdata = timestamps.map((ts) => formatDate(dayjs(ts).toDate(), 'YYYY-MM-DD HH:mm'))
+  
+  let upData: number[] = []
+  let downData: number[] = []
+  
+  try {
+    // 尝试从数组中提取数据
+    if (Array.isArray(upstreamCounts) && upstreamCounts.length > 0) {
+      upData = timestamps.map((ts) => {
+        const item = upstreamCounts.find(count => 
+          Number(Object.keys(count)[0]) === ts
+        )
+        return item ? Number(Object.values(item)[0]) : 0
+      })
+      
+      downData = timestamps.map((ts) => {
+        const item = downstreamCounts.find(count => 
+          Number(Object.keys(count)[0]) === ts
+        )
+        return item ? Number(Object.values(item)[0]) : 0
+      })
+    } else {
+      // 如果数组为空或不是数组，尝试从对象中提取数据
+      const upstreamObj = props.messageStats.upstreamCounts || {}
+      const downstreamObj = props.messageStats.downstreamCounts || {}
+      upData = timestamps.map((ts) => Number(upstreamObj[ts as keyof typeof upstreamObj] || 0))
+      downData = timestamps.map((ts) => Number(downstreamObj[ts as keyof typeof downstreamObj] || 0))
+    }
+  } catch (error) {
+    console.error('提取数据出错:', error)
+    upData = []
+    downData = []
+  }
+
 
   // 配置图表
   const chart = echarts.init(messageChartRef.value)

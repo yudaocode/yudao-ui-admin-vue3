@@ -124,6 +124,8 @@ const getStats = async () => {
   statsData.value = await ProductCategoryApi.getIotStatisticsSummary()
   // 获取消息统计数据
   messageStats.value = await ProductCategoryApi.getIotStatisticsDeviceMessageSummary(queryParams)
+  console.log('statsData', statsData.value)
+  console.log('messageStats', messageStats.value)
 }
 
 /** 初始化 */
