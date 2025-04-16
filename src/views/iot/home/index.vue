@@ -8,6 +8,7 @@
         :todayCount="statsData.productCategoryTodayCount"
         icon="ep:menu"
         iconColor="text-blue-400"
+        :loading="loading"
       />
     </el-col>
     <el-col :span="6">
@@ -17,6 +18,7 @@
         :todayCount="statsData.productTodayCount"
         icon="ep:box"
         iconColor="text-orange-400"
+        :loading="loading"
       />
     </el-col>
     <el-col :span="6">
@@ -26,6 +28,7 @@
         :todayCount="statsData.deviceTodayCount"
         icon="ep:cpu"
         iconColor="text-purple-400"
+        :loading="loading"
       />
     </el-col>
     <el-col :span="6">
@@ -35,6 +38,7 @@
         :todayCount="statsData.deviceMessageTodayCount"
         icon="ep:message"
         iconColor="text-teal-400"
+        :loading="loading"
       />
     </el-col>
   </el-row>
@@ -42,10 +46,10 @@
   <!-- 第二行：图表行 -->
   <el-row :gutter="16" class="mb-4">
     <el-col :span="12">
-      <DeviceCountCard :statsData="statsData" />
+      <DeviceCountCard :statsData="statsData" :loading="loading" />
     </el-col>
     <el-col :span="12">
-      <DeviceStateCountCard :statsData="statsData" />
+      <DeviceStateCountCard :statsData="statsData" :loading="loading" />
     </el-col>
   </el-row>
 
@@ -55,6 +59,7 @@
       <MessageTrendCard 
         :messageStats="messageStats"
         @time-range-change="handleTimeRangeChange"
+        :loading="loading"
       />
     </el-col>
   </el-row>
@@ -68,7 +73,7 @@ import {
   IotStatisticsSummaryRespVO,
   ProductCategoryApi
 } from '@/api/iot/statistics'
-import { formatDate } from '@/utils/formatTime'
+import { getHoursAgo } from '@/utils/formatTime'
 import ComparisonCard from './components/ComparisonCard.vue'
 import DeviceCountCard from './components/DeviceCountCard.vue'
 import DeviceStateCountCard from './components/DeviceStateCountCard.vue'
@@ -79,11 +84,9 @@ defineOptions({ name: 'IoTHome' })
 
 // TODO @super：使用下 Echart 组件，参考 yudao-ui-admin-vue3/src/views/mall/home/components/TradeTrendCard.vue 等
 
-const timeRange = ref('7d') // 修改默认选择为近一周
-const dateRange = ref<[Date, Date] | null>(null)
 
 const queryParams = reactive({
-  startTime: Date.now() - 7 * 24 * 60 * 60 * 1000, // 设置默认开始时间为 7 天前
+  startTime: getHoursAgo( 7 * 24 ), // 设置默认开始时间为 7 天前
   endTime: Date.now() // 设置默认结束时间为当前时间
 })
 
@@ -91,25 +94,29 @@ const queryParams = reactive({
 // 基础统计数据
 // TODO @super：初始为 -1，然后界面展示先是加载中？试试用 cursor 改哈
 const statsData = ref<IotStatisticsSummaryRespVO>({
-  productCategoryCount: 0,
-  productCount: 0,
-  deviceCount: 0,
-  deviceMessageCount: 0,
-  productCategoryTodayCount: 0,
-  productTodayCount: 0,
-  deviceTodayCount: 0,
-  deviceMessageTodayCount: 0,
-  deviceOnlineCount: 0,
-  deviceOfflineCount: 0,
-  deviceInactiveCount: 0,
+  productCategoryCount: -1,
+  productCount: -1,
+  deviceCount: -1,
+  deviceMessageCount: -1,
+  productCategoryTodayCount: -1,
+  productTodayCount: -1,
+  deviceTodayCount: -1,
+  deviceMessageTodayCount: -1,
+  deviceOnlineCount: -1,
+  deviceOfflineCount: -1,
+  deviceInactiveCount: -1,
   productCategoryDeviceCounts: {}
 })
 
 // 消息统计数据
 const messageStats = ref<IotStatisticsDeviceMessageSummaryRespVO>({
-  upstreamCounts: {},
-  downstreamCounts: {}
+  statType: 0,
+  upstreamCounts: [],
+  downstreamCounts: []
 })
+
+// 加载状态
+const loading = ref(true)
 
 /** 处理时间范围变化 */
 const handleTimeRangeChange = (params: { startTime: number; endTime: number }) => {
@@ -120,12 +127,17 @@ const handleTimeRangeChange = (params: { startTime: number; endTime: number }) =
 
 /** 获取统计数据 */
 const getStats = async () => {
-  // 获取基础统计数据
-  statsData.value = await ProductCategoryApi.getIotStatisticsSummary()
-  // 获取消息统计数据
-  messageStats.value = await ProductCategoryApi.getIotStatisticsDeviceMessageSummary(queryParams)
-  console.log('statsData', statsData.value)
-  console.log('messageStats', messageStats.value)
+  loading.value = true
+  try {
+    // 获取基础统计数据
+    statsData.value = await ProductCategoryApi.getIotStatisticsSummary()
+    // 获取消息统计数据
+    messageStats.value = await ProductCategoryApi.getIotStatisticsDeviceMessageSummary(queryParams)
+  } catch (error) {
+    console.error('获取统计数据出错:', error)
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 初始化 */

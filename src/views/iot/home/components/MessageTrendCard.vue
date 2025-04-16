@@ -1,8 +1,13 @@
 <template>
-  <el-card class="chart-card" shadow="never">
+  <el-card class="chart-card" shadow="never" :loading="loading">
     <template #header>
       <div class="flex items-center justify-between">
-        <span class="text-base font-medium text-gray-600">上下行消息量统计</span>
+        <span class="text-base font-medium text-gray-600">
+          上下行消息量统计
+          <span class="text-sm text-gray-400 ml-2">
+            {{ props.messageStats.statType === 1 ? '(按天)' : '(按小时)' }}
+          </span>
+        </span>
         <div class="flex items-center space-x-2">
           <el-radio-group v-model="timeRange" @change="handleTimeRangeChange">
             <el-radio-button label="8h">最近8小时</el-radio-button>
@@ -21,7 +26,13 @@
         </div>
       </div>
     </template>
-    <div ref="messageChartRef" class="h-[300px]"></div>
+    <div v-if="loading && !hasData" class="h-[300px] flex justify-center items-center">
+      <el-empty description="加载中..." />
+    </div>
+    <div v-else-if="!hasData" class="h-[300px] flex justify-center items-center">
+      <el-empty description="暂无数据" />
+    </div>
+    <div v-else ref="messageChartRef" class="h-[300px]"></div>
   </el-card>
 </template>
 
@@ -43,6 +54,10 @@ const props = defineProps({
   messageStats: {
     type: Object as PropType<IotStatisticsDeviceMessageSummaryRespVO>,
     required: true
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -52,6 +67,20 @@ const timeRange = ref('7d')
 const dateRange = ref<any>(null)
 const messageChartRef = ref()
 
+// 是否有数据
+const hasData = computed(() => {
+  if (!props.messageStats) return false
+  
+  const upstreamCounts = Array.isArray(props.messageStats.upstreamCounts) 
+    ? props.messageStats.upstreamCounts 
+    : []
+  
+  const downstreamCounts = Array.isArray(props.messageStats.downstreamCounts) 
+    ? props.messageStats.downstreamCounts 
+    : []
+    
+  return upstreamCounts.length > 0 || downstreamCounts.length > 0
+})
 // TODO @super：这个的计算，看看能不能结合 dayjs 简化。因为 1h、24h、7d 感觉是比较标准的。如果没有，抽到 utils/formatTime.ts 作为一个工具方法
 // 处理快捷时间范围选择
 const handleTimeRangeChange = (range: string) => {
@@ -83,6 +112,15 @@ const initChart = () => {
     TooltipComponent,
     UniversalTransition
   ])
+
+  // 检查是否有数据可以绘制
+  if (!hasData.value) return
+  
+  // 确保 DOM 元素存在且已渲染
+  if (!messageChartRef.value) {
+    console.warn('图表DOM元素不存在')
+    return
+  }
 
 
   // 检查数据格式并转换
@@ -117,9 +155,19 @@ const initChart = () => {
     timestamps = []
   }
 
+  console.log('时间戳:', timestamps)
 
-  // 准备数据
-  const xdata = timestamps.map((ts) => formatDate(dayjs(ts).toDate(), 'YYYY-MM-DD HH:mm'))
+  // 准备数据 - 根据 statType 确定时间格式
+  const xdata = timestamps.map((ts) => {
+    // 根据 statType 选择合适的格式
+    if (props.messageStats.statType === 1) {
+      // 日级别统计 - 使用 YYYY-MM-DD 格式
+      return formatDate(dayjs(ts).toDate(), 'YYYY-MM-DD')
+    } else {
+      // 小时级别统计 - 使用 YYYY-MM-DD HH:mm 格式
+      return formatDate(dayjs(ts).toDate(), 'YYYY-MM-DD HH:mm')
+    }
+  })
   
   let upData: number[] = []
   let downData: number[] = []
@@ -155,110 +203,123 @@ const initChart = () => {
 
 
   // 配置图表
-  const chart = echarts.init(messageChartRef.value)
-  chart.setOption({
-    tooltip: {
-      trigger: 'axis',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      borderColor: '#E5E7EB',
-      textStyle: {
-        color: '#374151'
-      }
-    },
-    legend: {
-      data: ['上行消息量', '下行消息量'],
-      textStyle: {
-        color: '#374151',
-        fontWeight: 500
-      }
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      boundaryGap: false,
-      data: xdata,
-      axisLine: {
-        lineStyle: {
-          color: '#E5E7EB'
+  try {
+    const chart = echarts.init(messageChartRef.value)
+    
+    chart.setOption({
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderColor: '#E5E7EB',
+        textStyle: {
+          color: '#374151'
         }
       },
-      axisLabel: {
-        color: '#6B7280'
-      }
-    },
-    yAxis: {
-      type: 'value',
-      axisLine: {
-        lineStyle: {
-          color: '#E5E7EB'
+      legend: {
+        data: ['上行消息量', '下行消息量'],
+        textStyle: {
+          color: '#374151',
+          fontWeight: 500
         }
       },
-      axisLabel: {
-        color: '#6B7280'
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
       },
-      splitLine: {
-        lineStyle: {
-          color: '#F3F4F6'
-        }
-      }
-    },
-    series: [
-      {
-        name: '上行消息量',
-        type: 'line',
-        smooth: true,
-        data: upData,
-        itemStyle: {
-          color: '#3B82F6'
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: xdata,
+        axisLine: {
+          lineStyle: {
+            color: '#E5E7EB'
+          }
         },
-        lineStyle: {
-          width: 2
-        },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(59, 130, 246, 0.2)' },
-            { offset: 1, color: 'rgba(59, 130, 246, 0)' }
-          ])
+        axisLabel: {
+          color: '#6B7280'
         }
       },
-      {
-        name: '下行消息量',
-        type: 'line',
-        smooth: true,
-        data: downData,
-        itemStyle: {
-          color: '#10B981'
+      yAxis: {
+        type: 'value',
+        axisLine: {
+          lineStyle: {
+            color: '#E5E7EB'
+          }
         },
-        lineStyle: {
-          width: 2
+        axisLabel: {
+          color: '#6B7280'
         },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(16, 185, 129, 0.2)' },
-            { offset: 1, color: 'rgba(16, 185, 129, 0)' }
-          ])
+        splitLine: {
+          lineStyle: {
+            color: '#F3F4F6'
+          }
         }
-      }
-    ]
-  })
+      },
+      series: [
+        {
+          name: '上行消息量',
+          type: 'line',
+          smooth: true,
+          data: upData,
+          itemStyle: {
+            color: '#3B82F6'
+          },
+          lineStyle: {
+            width: 2
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(59, 130, 246, 0.2)' },
+              { offset: 1, color: 'rgba(59, 130, 246, 0)' }
+            ])
+          }
+        },
+        {
+          name: '下行消息量',
+          type: 'line',
+          smooth: true,
+          data: downData,
+          itemStyle: {
+            color: '#10B981'
+          },
+          lineStyle: {
+            width: 2
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(16, 185, 129, 0.2)' },
+              { offset: 1, color: 'rgba(16, 185, 129, 0)' }
+            ])
+          }
+        }
+      ]
+    })
+    return chart
+  } catch (error) {
+    console.error('初始化图表失败:', error)
+    return null
+  }
 }
 
 // 监听数据变化
 watch(
   () => props.messageStats,
   () => {
-    initChart()
+    // 使用 nextTick 确保 DOM 已更新
+    nextTick(() => {
+      initChart()
+    })
   },
   { deep: true }
 )
 
 // 组件挂载时初始化图表
 onMounted(() => {
-  initChart()
+  // 使用 nextTick 确保 DOM 已更新
+  nextTick(() => {
+    initChart()
+  })
 })
 </script>

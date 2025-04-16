@@ -23,6 +23,7 @@ interface TimeValueItem {
 
 /** IoT 消息统计数据类型 */
 export interface IotStatisticsDeviceMessageSummaryRespVO {
+  statType: number
   upstreamCounts: TimeValueItem[]
   downstreamCounts: TimeValueItem[]
 }
