@@ -83,12 +83,16 @@
               :sm="24"
               :xs="24"
             >
-              <el-card shadow="hover" class="mr-5px mt-5px">
+              <el-card 
+                shadow="hover" 
+                class="mr-5px mt-5px cursor-pointer"
+                @click="handleProjectClick(item.message)"
+              >
                 <div class="flex items-center">
-                  <Icon :icon="item.icon" :size="25" class="mr-8px" />
+                  <Icon :icon="item.icon" :size="25" class="mr-8px" :style="{ color: item.color }" />
                   <span class="text-16px">{{ item.name }}</span>
                 </div>
-                <div class="mt-12px text-9px text-gray-400">{{ t(item.message) }}</div>
+                <div class="mt-12px text-12px text-gray-400">{{ t(item.message) }}</div>
                 <div class="mt-12px flex justify-between text-12px text-gray-400">
                   <span>{{ item.personal }}</span>
                   <span>{{ formatTime(item.time, 'yyyy-MM-dd') }}</span>
@@ -131,8 +135,8 @@
           <el-row>
             <el-col v-for="item in shortcut" :key="`team-${item.name}`" :span="8" class="mb-8px">
               <div class="flex items-center">
-                <Icon :icon="item.icon" class="mr-8px" />
-                <el-link type="default" :underline="false" @click="setWatermark(item.name)">
+                <Icon :icon="item.icon" class="mr-8px" :style="{ color: item.color }" />
+                <el-link type="default" :underline="false" @click="handleShortcutClick(item.url)">
                   {{ item.name }}
                 </el-link>
               </div>
@@ -180,10 +184,12 @@ import { useUserStore } from '@/store/modules/user'
 import { useWatermark } from '@/hooks/web/useWatermark'
 import type { WorkplaceTotal, Project, Notice, Shortcut } from './types'
 import { pieOptions, barOptions } from './echarts-data'
+import { useRouter } from 'vue-router'
 
 defineOptions({ name: 'Home' })
 
 const { t } = useI18n()
+const router = useRouter()
 const userStore = useUserStore()
 const { setWatermark } = useWatermark()
 const loading = ref(true)
@@ -212,45 +218,51 @@ const getProject = async () => {
   const data = [
     {
       name: 'ruoyi-vue-pro',
-      icon: 'akar-icons:github-fill',
-      message: 'https://github.com/YunaiV/ruoyi-vue-pro',
+      icon: 'simple-icons:springboot',
+      message: 'github.com/YunaiV/ruoyi-vue-pro',
       personal: 'Spring Boot 单体架构',
-      time: new Date()
+      time: new Date('2025-01-02'),
+      color: '#6DB33F'
     },
     {
       name: 'yudao-ui-admin-vue3',
-      icon: 'logos:vue',
-      message: 'https://github.com/yudaocode/yudao-ui-admin-vue3',
-      personal: 'Vue3 + element-plus',
-      time: new Date()
-    },
-    {
-      name: 'yudao-ui-admin-vben',
-      icon: 'logos:vue',
-      message: 'https://github.com/yudaocode/yudao-ui-admin-vben',
-      personal: 'Vue3 + vben(antd)',
-      time: new Date()
-    },
-    {
-      name: 'yudao-cloud',
-      icon: 'akar-icons:github',
-      message: 'https://github.com/YunaiV/yudao-cloud',
-      personal: 'Spring Cloud 微服务架构',
-      time: new Date()
+      icon: 'ep:element-plus',
+      message: 'github.com/yudaocode/yudao-ui-admin-vue3',
+      personal: 'Vue3 + element-plus 管理后台',
+      time: new Date('2025-02-03'),
+      color: '#409EFF'
     },
     {
       name: 'yudao-ui-mall-uniapp',
-      icon: 'logos:vue',
-      message: 'https://github.com/yudaocode/yudao-ui-admin-uniapp',
-      personal: 'Vue3 + uniapp',
-      time: new Date()
+      icon: 'icon-park-outline:mall-bag',
+      message: 'github.com/yudaocode/yudao-ui-mall-uniapp',
+      personal: 'Vue3 + uniapp 商城手机端',
+      time: new Date('2025-03-04'),
+      color: '#ff4d4f'
     },
     {
-      name: 'yudao-ui-admin-vue2',
-      icon: 'logos:vue',
-      message: 'https://github.com/yudaocode/yudao-ui-admin-vue2',
-      personal: 'Vue2 + element-ui',
-      time: new Date()
+      name: 'yudao-cloud',
+      icon: 'material-symbols:cloud-outline',
+      message: 'github.com/YunaiV/yudao-cloud',
+      personal: 'Spring Cloud 微服务架构',
+      time: new Date('2025-04-05'),
+      color: '#1890ff'
+    },
+    {
+      name: 'yudao-ui-admin-vben',
+      icon: 'devicon:antdesign',
+      message: 'github.com/yudaocode/yudao-ui-admin-vben',
+      personal: 'Vue3 + vben5(antd) 管理后台',
+      time: new Date('2025-05-06'),
+      color: '#e18525'
+    },
+    {
+      name: 'yudao-ui-admin-uniapp',
+      icon: 'ant-design:mobile',
+      message: 'github.com/yudaocode/yudao-ui-admin-uniapp',
+      personal: 'Vue3 + uniapp 管理手机端',
+      time: new Date('2025-06-01'),
+      color: '#2979ff'
     }
   ]
   projects = Object.assign(projects, data)
@@ -262,26 +274,26 @@ const getNotice = async () => {
   const data = [
     {
       title: '系统支持 JDK 8/17/21，Vue 2/3',
-      type: '通知',
-      keys: ['通知', '8', '17', '21', '2', '3'],
+      type: '技术兼容性',
+      keys: ['JDK', 'Vue'],
       date: new Date()
     },
     {
       title: '后端提供 Spring Boot 2.7/3.2 + Cloud 双架构',
-      type: '公告',
-      keys: ['公告', 'Boot', 'Cloud'],
+      type: '架构灵活性',
+      keys: ['Boot', 'Cloud'],
       date: new Date()
     },
     {
       title: '全部开源，个人与企业可 100% 直接使用，无需授权',
-      type: '通知',
-      keys: ['通知', '无需授权'],
+      type: '开源免授权',
+      keys: ['无需授权'],
       date: new Date()
     },
     {
-      title: '国内使用最广泛的快速开发平台，超 300+ 人贡献',
-      type: '公告',
-      keys: ['公告', '最广泛'],
+      title: '国内使用最广泛的快速开发平台，远超 10w+ 企业使用',
+      type: '广泛企业认可',
+      keys: ['最广泛', '10w+'],
       date: new Date()
     }
   ]
@@ -294,34 +306,40 @@ let shortcut = reactive<Shortcut[]>([])
 const getShortcut = async () => {
   const data = [
     {
-      name: 'Github',
-      icon: 'akar-icons:github-fill',
-      url: 'github.io'
+      name: '首页',
+      icon: 'ion:home-outline',
+      url: '/',
+      color: '#1fdaca'
     },
     {
-      name: 'Vue',
-      icon: 'logos:vue',
-      url: 'vuejs.org'
+      name: '商城中心',
+      icon: 'ep:shop',
+      url: '/mall/home',
+      color: '#ff6b6b'
     },
     {
-      name: 'Vite',
-      icon: 'vscode-icons:file-type-vite',
-      url: 'https://vitejs.dev/'
+      name: 'AI 大模型',
+      icon: 'tabler:ai',
+      url: '/ai/chat',
+      color: '#7c3aed'
     },
     {
-      name: 'Angular',
-      icon: 'logos:angular-icon',
-      url: 'github.io'
+      name: 'ERP 系统',
+      icon: 'simple-icons:erpnext',
+      url: '/erp/home',
+      color: '#3fb27f'
     },
     {
-      name: 'React',
-      icon: 'logos:react',
-      url: 'github.io'
+      name: 'CRM 系统',
+      icon: 'simple-icons:civicrm',
+      url: '/crm/backlog',
+      color: '#4daf1bc9'
     },
     {
-      name: 'Webpack',
-      icon: 'logos:webpack',
-      url: 'github.io'
+      name: 'IoT 物联网',
+      icon: 'fa-solid:hdd',
+      url: '/iot/home',
+      color: '#1a73e8'
     }
   ]
   shortcut = Object.assign(shortcut, data)
@@ -385,6 +403,14 @@ const getAllApi = async () => {
     getWeeklyUserActivity()
   ])
   loading.value = false
+}
+
+const handleProjectClick = (message: string) => {
+  window.open(`https://${message}`, '_blank')
+}
+
+const handleShortcutClick = (url: string) => {
+  router.push(url)
 }
 
 getAllApi()
