@@ -27,6 +27,7 @@ const userStore = useUserStore()
 
 const cropperRef = ref()
 const handelUpload = async ({ data }) => {
+  // TODO @芋艿：去掉这个接口，使用 url 直接上传
   const res = await uploadAvatar({ avatarFile: data })
   cropperRef.value.close()
   userStore.setUserAvatarAction(res.data)
