@@ -11,6 +11,7 @@ export interface FileClientConfig {
   bucket?: string
   accessKey?: string
   accessSecret?: string
+  enablePathStyleAccess?: boolean
   domain: string
 }
 
