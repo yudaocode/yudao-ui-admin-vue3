@@ -73,7 +73,7 @@ import { CommonStatusEnum } from '@/utils/constants'
 import * as WorkflowApi from '@/api/ai/workflow'
 import BasicInfo from './BasicInfo.vue'
 import WorkflowDesign from './WorkflowDesign.vue'
-import { ApiKeyApi } from '@/api/ai/model/apiKey'
+import { ModelApi } from '@/api/ai/model/model'
 
 const router = useRouter()
 const { delView } = useTagsViewStore()
@@ -118,7 +118,7 @@ const initData = async () => {
     workflowData.value = JSON.parse(formData.value.graph)
   }
 
-  const apiKeys = await ApiKeyApi.getApiKeySimpleList()
+  const apiKeys = await ModelApi.getModelSimpleList(1)
   provider.value = {
     llm: () =>
       apiKeys.map(({ id, name }) => ({
