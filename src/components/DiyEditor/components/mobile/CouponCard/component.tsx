@@ -13,7 +13,7 @@ export const CouponDiscount = defineComponent({
   setup(props) {
     const coupon = props.coupon as CouponTemplateApi.CouponTemplateVO
     // 折扣
-    let value = coupon.discountPercent + ''
+    let value = coupon.discountPercent / 10 + ''
     let suffix = ' 折'
     // 满减
     if (coupon.discountType === PromotionDiscountTypeEnum.PRICE.type) {
