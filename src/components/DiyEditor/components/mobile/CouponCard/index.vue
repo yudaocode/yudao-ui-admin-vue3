@@ -124,7 +124,7 @@ watch(
   () => {
     // 每列的宽度为：（总宽度 - 间距 * (列数 - 1)）/ 列数
     couponWidth.value =
-      (phoneWidth.value * 0.95 - props.property.space * (props.property.columns - 1)) /
+      (phoneWidth.value - props.property.space * (props.property.columns - 1)) /
       props.property.columns
     // 显示滚动条
     scrollbarWidth.value = `${
