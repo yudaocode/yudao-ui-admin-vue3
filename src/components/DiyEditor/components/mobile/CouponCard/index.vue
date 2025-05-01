@@ -49,7 +49,13 @@
           <div class="flex flex-col justify-evenly gap-4px">
             <!-- 优惠值 -->
             <CouponDiscount :coupon="coupon" />
-            <div>{{ coupon.name }}</div>
+            <!-- 优惠描述 -->
+            <CouponDiscountDesc :coupon="coupon" />
+            <!-- 领取说明 -->
+            <div v-if="coupon.totalCount >= 0">
+              仅剩：{{ coupon.totalCount - coupon.takeCount }}张
+            </div>
+            <div v-else-if="coupon.totalCount === -1">仅剩：不限制</div>
           </div>
           <div class="flex flex-col">
             <div
@@ -67,7 +73,8 @@
         <div v-else class="flex flex-col items-center justify-around gap-4px p-4px">
           <!-- 优惠值 -->
           <CouponDiscount :coupon="coupon" />
-          <div>{{ coupon.name }}</div>
+          <!-- 优惠描述 -->
+          <CouponDiscountDesc :coupon="coupon" />
           <div
             class="rounded-20px p-x-8px p-y-2px"
             :style="{

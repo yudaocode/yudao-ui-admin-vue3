@@ -43,7 +43,7 @@ export const CouponDiscountDesc = defineComponent({
     const discountDesc =
       coupon.discountType === PromotionDiscountTypeEnum.PRICE.type
         ? `减${floatToFixed2(coupon.discountPrice)}元`
-        : `打${coupon.discountPercent}折`
+        : `打${coupon.discountPercent / 10.0}折`
     return () => (
       <div>
         <span>{useCondition}</span>
