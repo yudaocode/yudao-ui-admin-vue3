@@ -17,7 +17,8 @@
           fontSize: `${property.titleSize}px`,
           fontWeight: property.titleWeight,
           color: property.titleColor,
-          textAlign: property.textAlign
+          textAlign: property.textAlign,
+          marginLeft: property.skew + 'px'
         }"
       >
         {{ property.title }}
@@ -29,7 +30,8 @@
           fontSize: `${property.descriptionSize}px`,
           fontWeight: property.descriptionWeight,
           color: property.descriptionColor,
-          textAlign: property.textAlign
+          textAlign: property.textAlign,
+          marginLeft: property.skew + 'px'
         }"
         class="m-t-8px"
       >

@@ -16,6 +16,16 @@
             </el-tooltip>
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="偏移量" prop="skew">
+          <el-slider
+            v-model="formData.skew"
+            :max="100"
+            :min="0"
+            :step="1"
+            input-size="small"
+            show-input
+          />
+        </el-form-item>
       </el-card>
       <el-card class="property-group" header="主标题" shadow="never">
         <el-form-item label="文字" label-width="40px" prop="title">

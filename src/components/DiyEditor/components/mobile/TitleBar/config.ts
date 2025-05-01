@@ -4,6 +4,8 @@ import {ComponentStyle, DiyComponent} from '@/components/DiyEditor/util'
 export interface TitleBarProperty {
   // 偏移
   marginLeft: number
+  // 偏移量
+  skew: number
   // 显示位置
   textAlign: 'left' | 'center'
   // 主标题
@@ -52,6 +54,7 @@ export const component = {
     descriptionWeight: 200,
     titleColor: 'rgba(50, 50, 51, 10)',
     descriptionColor: 'rgba(150, 151, 153, 10)',
+    skew: 0,
     more: {
       //查看更多
       show: false,
