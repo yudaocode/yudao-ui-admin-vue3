@@ -8,6 +8,8 @@ export interface FilePresignedUrlRespVO {
   uploadUrl: string
   // 文件 URL
   url: string
+  // 文件路径
+  path: string
 }
 
 // 查询文件列表
@@ -21,10 +23,10 @@ export const deleteFile = (id: number) => {
 }
 
 // 获取文件预签名地址
-export const getFilePresignedUrl = (path: string) => {
+export const getFilePresignedUrl = (name: string, directory?: string) => {
   return request.get<FilePresignedUrlRespVO>({
     url: '/infra/file/presigned-url',
-    params: { path }
+    params: { name, directory }
   })
 }
 
