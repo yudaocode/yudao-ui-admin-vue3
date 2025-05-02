@@ -91,7 +91,7 @@ const dialogStyle = computed(() => {
             icon="ep:close"
             hover-color="var(--el-color-primary)"
             color="var(--el-color-info)"
-            @click="close"
+            @click.stop="close"
           />
         </div>
       </div>
