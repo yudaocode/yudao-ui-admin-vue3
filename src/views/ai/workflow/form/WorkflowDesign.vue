@@ -36,6 +36,7 @@
             <el-input class="w-200px!" v-model="param.value" placeholder="参数值" />
             <el-button type="danger" plain :icon="Delete" circle @click="removeParam(index)" />
           </div>
+          <!-- TODO @lesan：是不是不用添加和删除参数，直接把必填和选填列出来，然后加上参数校验？ -->
           <el-button type="primary" plain @click="addParam">添加参数</el-button>
         </div>
       </fieldset>
@@ -52,9 +53,9 @@
           <div v-else> <el-text type="info">点击运行查看结果</el-text> </div>
         </div>
       </fieldset>
-      <el-button class="mt-20px w-100%" size="large" type="success" @click="goRun"
-        >运行流程</el-button
-      >
+      <el-button class="mt-20px w-100%" size="large" type="success" @click="goRun">
+        运行流程
+      </el-button>
     </el-drawer>
   </div>
 </template>
@@ -62,6 +63,7 @@
 <script setup lang="ts">
 import Tinyflow from '@/components/Tinyflow/Tinyflow.vue'
 import * as WorkflowApi from '@/api/ai/workflow'
+// TODO @lesan：要不使用 ICon 哪个组件哈
 import { Delete } from '@element-plus/icons-vue'
 
 defineProps<{
