@@ -6,7 +6,11 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
+import { getRefreshToken } from '@/utils/auth'
+
 defineOptions({ name: 'GoView' })
 
-const src = ref(import.meta.env.VITE_GOVIEW_URL)
+const src = ref(
+  `${import.meta.env.VITE_GOVIEW_URL}?accessToken=${getRefreshToken()}&refreshToken=${getRefreshToken()}`
+)
 </script>
