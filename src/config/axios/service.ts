@@ -3,7 +3,14 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestCo
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import qs from 'qs'
 import { config } from '@/config/axios/config'
-import { getAccessToken, getRefreshToken, getTenantId, removeToken, setToken } from '@/utils/auth'
+import {
+  getAccessToken,
+  getRefreshToken,
+  getTenantId,
+  getVisitTenantId,
+  removeToken,
+  setToken
+} from '@/utils/auth'
 import errorCode from './errorCode'
 
 import { resetRouter } from '@/router'
@@ -24,7 +31,7 @@ export const isRelogin = { show: false }
 let requestList: any[] = []
 // 是否正在刷新中
 let isRefreshToken = false
-// 请求白名单，无须token的接口
+// 请求白名单，无须 token 的接口
 const whiteList: string[] = ['/login', '/refresh-token']
 
 // 创建axios实例
@@ -55,6 +62,11 @@ service.interceptors.request.use(
     if (tenantEnable && tenantEnable === 'true') {
       const tenantId = getTenantId()
       if (tenantId) config.headers['tenant-id'] = tenantId
+      // 只有登录时，才设置 visit-tenant-id 访问租户
+      const visitTenantId = getVisitTenantId()
+      if (config.headers.Authorization && visitTenantId) {
+        config.headers['visit-tenant-id'] = visitTenantId
+      }
     }
     const method = config.method?.toUpperCase()
     // 防止 GET 请求缓存

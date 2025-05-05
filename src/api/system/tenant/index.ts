@@ -41,6 +41,11 @@ export const getTenant = (id: number) => {
   return request.get({ url: '/system/tenant/get?id=' + id })
 }
 
+// 获取租户精简信息列表
+export const getTenantList = () => {
+  return request.get({ url: '/system/tenant/simple-list' })
+}
+
 // 新增租户
 export const createTenant = (data: TenantVO) => {
   return request.post({ url: '/system/tenant/create', data })
