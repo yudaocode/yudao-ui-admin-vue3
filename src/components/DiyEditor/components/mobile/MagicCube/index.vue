@@ -1,16 +1,19 @@
 <template>
   <div
     class="relative"
-    :style="{ height: `${rowCount * CUBE_SIZE}px`, width: `${4 * CUBE_SIZE}px` }"
+    :style="{
+      height: `${rowCount * CUBE_SIZE}px`,
+      width: `${4 * CUBE_SIZE}px`,
+      padding: `${property.space}px`
+    }"
   >
     <div
       v-for="(item, index) in property.list"
       :key="index"
       class="absolute"
       :style="{
-        width: `${item.width * CUBE_SIZE - property.space * 2}px`,
-        height: `${item.height * CUBE_SIZE - property.space * 2}px`,
-        margin: `${property.space}px`,
+        width: `${item.width * CUBE_SIZE - property.space}px`,
+        height: `${item.height * CUBE_SIZE - property.space}px`,
         top: `${item.top * CUBE_SIZE}px`,
         left: `${item.left * CUBE_SIZE}px`
       }"
@@ -63,10 +66,10 @@ const rowCount = computed(() => {
   let count = 0
   if (props.property.list.length > 0) {
     // 最大行号
-    count = Math.max(...props.property.list.map((item) => item.bottom))
+    count = Math.max(...props.property.list.map((item) => item.top + item.height))
   }
-  // 行号从 0 开始，所以加 1
-  return count + 1
+  // 保证至少有一行
+  return count == 0 ? 1 : count
 })
 </script>
 

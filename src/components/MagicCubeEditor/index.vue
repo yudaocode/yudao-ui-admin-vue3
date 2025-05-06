@@ -35,13 +35,13 @@
       >
         <!-- 右上角热区删除按钮 -->
         <div
-          v-if="selectedHotAreaIndex === index"
+          v-if="selectedHotAreaIndex === index && hotArea.width && hotArea.height"
           class="btn-delete"
           @click="handleDeleteHotArea(index)"
         >
           <Icon icon="ep:circle-close-filled" />
         </div>
-        {{ `${hotArea.width}×${hotArea.height}` }}
+        <span v-if="hotArea.width">{{ `${hotArea.width}×${hotArea.height}` }}</span>
       </div>
     </table>
   </div>

@@ -59,7 +59,7 @@
         <WorkflowDesign
           v-if="currentStep === 1"
           v-model="formData"
-          :provider="provider"
+          :provider="llmProvider"
           ref="workflowDesignRef"
         />
       </div>
@@ -73,7 +73,8 @@ import { CommonStatusEnum } from '@/utils/constants'
 import * as WorkflowApi from '@/api/ai/workflow'
 import BasicInfo from './BasicInfo.vue'
 import WorkflowDesign from './WorkflowDesign.vue'
-import { ApiKeyApi } from '@/api/ai/model/apiKey'
+import { ModelApi } from '@/api/ai/model/model'
+import { AiModelTypeEnum } from '@/views/ai/utils/constants'
 
 const router = useRouter()
 const { delView } = useTagsViewStore()
@@ -104,31 +105,35 @@ const formData: any = ref({
   graph: '',
   status: CommonStatusEnum.ENABLE
 })
-// TODO @lesan：待接入
-const provider = ref<any>()
+const llmProvider = ref<any>([])
 const workflowData = ref<any>({})
 provide('workflowData', workflowData)
 
 /** 初始化数据 */
 const actionType = route.params.type as string
 const initData = async () => {
+  // 编辑情况下，需要加载工作流配置
   if (actionType === 'update') {
     const workflowId = route.params.id as string
     formData.value = await WorkflowApi.getWorkflow(workflowId)
     workflowData.value = JSON.parse(formData.value.graph)
   }
 
-  const apiKeys = await ApiKeyApi.getApiKeySimpleList()
-  provider.value = {
+  // 加载模型列表
+  const models = await ModelApi.getModelSimpleList(AiModelTypeEnum.CHAT)
+  llmProvider.value = {
     llm: () =>
-      apiKeys.map(({ id, name }) => ({
+      models.map(({ id, name }) => ({
         value: id,
         label: name
       })),
     knowledge: () => [],
     internal: () => []
   }
+  // TODO @lesan：知识库（可以看下 knowledge）
+  // TODO @lesan：搜索引擎（这个之前有个 pr 搞了，，，可能来接下）
 
+  // 设置当前步骤
   currentStep.value = 0
 }
 
@@ -164,17 +169,17 @@ const handleSave = async () => {
 
     // 更新表单数据
     const data = {
-      ...formData.value
+      ...formData.value,
+      graph: JSON.stringify(workflowData.value)
     }
-
-    data.graph = JSON.stringify(workflowData.value)
-
     if (actionType === 'update') {
       await WorkflowApi.updateWorkflow(data)
     } else {
       await WorkflowApi.createWorkflow(data)
     }
 
+    // 保存成功，提示并跳转到列表页
+    message.success('保存成功')
     delView(unref(router.currentRoute))
     await router.push({ name: 'AiWorkflow' })
   } catch (error: any) {

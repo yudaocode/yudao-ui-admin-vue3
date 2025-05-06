@@ -4,7 +4,7 @@
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="120px"
+      label-width="130px"
       v-loading="formLoading"
     >
       <el-form-item label="所属平台" prop="platform">
@@ -146,7 +146,10 @@ const formRules = reactive({
   platform: [{ required: true, message: '所属平台不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '模型类型不能为空', trigger: 'blur' }],
   sort: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
+  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }],
+  temperature: [{ required: true, message: '温度参数不能为空', trigger: 'blur' }],
+  maxTokens: [{ required: true, message: '回复数 Token 数不能为空', trigger: 'blur' }],
+  maxContexts: [{ required: true, message: '上下文数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const apiKeyList = ref([] as ApiKeyVO[]) // API 密钥列表

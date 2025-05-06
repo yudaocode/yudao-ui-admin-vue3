@@ -29,7 +29,10 @@
       <ColorInput v-model="formData.bgColor" />
     </el-form-item>
     <el-form-item label="背景图片" prop="bgImg" v-else>
-      <UploadImg v-model="formData.bgImg" :limit="1" width="56px" height="56px" />
+      <div class="flex items-center">
+        <UploadImg v-model="formData.bgImg" :limit="1" width="56px" height="56px" />
+        <span class="text-xs text-gray-400 ml-2 mb-2">建议宽度：750</span>
+      </div>
     </el-form-item>
     <el-card class="property-group" shadow="never">
       <template #header>
@@ -39,8 +42,9 @@
             <el-checkbox
               v-model="formData._local.previewMp"
               @change="formData._local.previewOther = !formData._local.previewMp"
-              >预览</el-checkbox
             >
+              预览
+            </el-checkbox>
           </el-form-item>
         </div>
       </template>
@@ -54,8 +58,9 @@
             <el-checkbox
               v-model="formData._local.previewOther"
               @change="formData._local.previewMp = !formData._local.previewOther"
-              >预览</el-checkbox
             >
+              预览
+            </el-checkbox>
           </el-form-item>
         </div>
       </template>

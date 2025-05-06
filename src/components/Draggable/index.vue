@@ -28,7 +28,7 @@
             <Icon
               icon="ep:delete"
               class="cursor-pointer text-red-5"
-              v-if="formData.length > 1"
+              v-if="formData.length > min"
               @click="handleDelete(index)"
             />
           </el-tooltip>
@@ -69,7 +69,9 @@ const props = defineProps({
   // 空的元素：点击添加按钮时，创建元素并添加到列表；默认为空对象
   emptyItem: any<unknown>().def({}),
   // 数量限制：默认为0，表示不限制
-  limit: propTypes.number.def(0)
+  limit: propTypes.number.def(0),
+  // 最小数量：默认为1
+  min: propTypes.number.def(1)
 })
 // 定义事件
 const emit = defineEmits(['update:modelValue'])

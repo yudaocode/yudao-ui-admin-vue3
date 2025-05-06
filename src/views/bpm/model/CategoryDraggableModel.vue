@@ -449,7 +449,6 @@ const handleChangeState = async (row: any) => {
   try {
     // 修改状态的二次确认
     const id = row.id
-    debugger
     const statusState = state === 1 ? '停用' : '启用'
     const content = '是否确认' + statusState + '流程名字为"' + row.name + '"的数据项?'
     await message.confirm(content)

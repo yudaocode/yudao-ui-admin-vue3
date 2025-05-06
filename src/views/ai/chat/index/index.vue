@@ -462,6 +462,8 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       (error) => {
         message.alert(`对话异常! ${error}`)
         stopStream()
+        // 需要抛出异常，禁止重试
+        throw error
       },
       () => {
         stopStream()

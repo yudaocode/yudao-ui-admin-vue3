@@ -1,8 +1,14 @@
+import { useAppStore } from '@/store/modules/app'
+import { watch } from 'vue'
+
 const domSymbol = Symbol('watermark-dom')
 
 export function useWatermark(appendEl: HTMLElement | null = document.body) {
   let func: Fn = () => {}
   const id = domSymbol.toString()
+  const appStore = useAppStore()
+  let watermarkStr = ''
+  
   const clear = () => {
     const domId = document.getElementById(id)
     if (domId) {
@@ -22,7 +28,7 @@ export function useWatermark(appendEl: HTMLElement | null = document.body) {
     if (cans) {
       cans.rotate((-20 * Math.PI) / 120)
       cans.font = '15px Vedana'
-      cans.fillStyle = 'rgba(0, 0, 0, 0.15)'
+      cans.fillStyle = appStore.getIsDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)'
       cans.textAlign = 'left'
       cans.textBaseline = 'middle'
       cans.fillText(str, can.width / 20, can.height)
@@ -44,12 +50,23 @@ export function useWatermark(appendEl: HTMLElement | null = document.body) {
   }
 
   function setWatermark(str: string) {
+    watermarkStr = str
     createWatermark(str)
     func = () => {
       createWatermark(str)
     }
     window.addEventListener('resize', func)
   }
+
+  // 监听主题变化
+  watch(
+    () => appStore.getIsDark,
+    () => {
+      if (watermarkStr) {
+        createWatermark(watermarkStr)
+      }
+    }
+  )
 
   return { setWatermark, clear }
 }

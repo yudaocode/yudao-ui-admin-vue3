@@ -8,8 +8,10 @@ import { Breadcrumb } from '@/layout/components/Breadcrumb'
 import { SizeDropdown } from '@/layout/components/SizeDropdown'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
 import RouterSearch from '@/components/RouterSearch/index.vue'
+import TenantVisit from '@/layout/components/TenantVisit/index.vue'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
+import { checkPermi } from '@/utils/permission'
 
 const { getPrefixCls, variables } = useDesign()
 
@@ -41,6 +43,9 @@ const locale = computed(() => appStore.getLocale)
 // 消息图标
 const message = computed(() => appStore.getMessage)
 
+// 租户切换权限
+const hasTenantVisitPermission = computed(() => checkPermi(['system:tenant:visit']))
+
 export default defineComponent({
   name: 'ToolHeader',
   setup() {
@@ -62,6 +67,7 @@ export default defineComponent({
           </div>
         ) : undefined}
         <div class="h-full flex items-center">
+          {hasTenantVisitPermission.value ? <TenantVisit /> : undefined}
           {screenfull.value ? (
             <Screenfull class="custom-hover" color="var(--top-header-text-color)"></Screenfull>
           ) : undefined}

@@ -37,7 +37,6 @@ ${selector}:before {
   position: absolute;
   top: 0;
   left: 0;
-  width: 1px;
   height: 100%;
   background-color: var(--el-border-color);
   z-index: 3;

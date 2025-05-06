@@ -476,9 +476,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         name: 'DiyTemplateDecorate',
         meta: {
           title: '模板装修',
-          noCache: true,
+          noCache: false,
           hidden: true,
-          activeMenu: '/mall/promotion/diy/template'
+          activeMenu: '/mall/promotion/diy-template/diy-template'
         },
         component: () => import('@/views/mall/promotion/diy/template/decorate.vue')
       },
@@ -487,9 +487,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         name: 'DiyPageDecorate',
         meta: {
           title: '页面装修',
-          noCache: true,
+          noCache: false,
           hidden: true,
-          activeMenu: '/mall/promotion/diy/page'
+          activeMenu: '/mall/promotion/diy-template/diy-page'
         },
         component: () => import('@/views/mall/promotion/diy/page/decorate.vue')
       }

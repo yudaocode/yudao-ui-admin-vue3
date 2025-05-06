@@ -20,6 +20,6 @@ export const deleteWorkflow = async (id) => {
   return await request.delete({ url: '/ai/workflow/delete?id=' + id })
 }
 
-export const updateWorkflowModel = async (data) => {
-  return await request.put({ url: '/ai/workflow/updateWorkflowModel', data })
+export const testWorkflow = async (data) => {
+  return await request.post({ url: '/ai/workflow/test', data })
 }
