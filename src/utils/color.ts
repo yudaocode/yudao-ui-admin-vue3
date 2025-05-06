@@ -172,3 +172,46 @@ export const PREDEFINE_COLORS = [
   '#1f73c3',
   '#711f57'
 ]
+
+
+/**
+ * Mixes two colors.
+ *
+ * @param {string} color1 - The first color, should be a 6-digit hexadecimal color code starting with `#`.
+ * @param {string} color2 - The second color, should be a 6-digit hexadecimal color code starting with `#`.
+ * @param {number} [weight=0.5] - The weight of color1 in the mix, should be a number between 0 and 1, where 0 represents 100% of color2, and 1 represents 100% of color1.
+ * @returns {string} The mixed color, a 6-digit hexadecimal color code starting with `#`.
+ */
+export const mix = (color1: string, color2: string, weight: number = 0.5): string => {
+  let color = '#'
+  for (let i = 0; i <= 2; i++) {
+    const c1 = parseInt(color1.substring(1 + i * 2, 3 + i * 2), 16)
+    const c2 = parseInt(color2.substring(1 + i * 2, 3 + i * 2), 16)
+    const c = Math.round(c1 * weight + c2 * (1 - weight))
+    color += c.toString(16).padStart(2, '0')
+  }
+  return color
+}
+
+/**
+ * getCssColorVariable
+ * @description 获取css变量的颜色值
+ * @param colorVariable css变量名
+ * @param opacity 透明度
+ * @returns {string} 颜色值
+ * @example getCssColorVariable('--el-color-primary', 0.5)
+ * @example getCssColorVariable('--el-color-primary')
+ * @example getCssColorVariable()
+ */
+export const getCssColorVariable = (
+  colorVariable: string = '--el-color-primary',
+  opacity?: number
+) => {
+  const colorValue = getComputedStyle(document.documentElement)
+    .getPropertyValue(colorVariable)
+    .trim()
+  if (colorValue) {
+    return opacity ? hexToRGB(colorValue, opacity) : colorValue
+  }
+  return ''
+}
