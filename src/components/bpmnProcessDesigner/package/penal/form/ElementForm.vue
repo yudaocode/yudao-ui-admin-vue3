@@ -237,7 +237,7 @@ const props = defineProps({
 const prefix = inject('prefix')
 const width = inject('width')
 
-const formKey = ref('')
+const formKey = ref(undefined)
 const businessKey = ref('')
 const optionModelTitle = ref('')
 const fieldList = ref<any[]>([])
@@ -462,6 +462,7 @@ const updateElementExtensions = () => {
 const formList = ref([]) // 流程表单的下拉框的数据
 onMounted(async () => {
   formList.value = await FormApi.getFormSimpleList()
+  formKey.value = parseInt(formKey.value)
 })
 
 watch(

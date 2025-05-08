@@ -57,9 +57,11 @@ const submit = (data: WriteVO) => {
     },
     ctrl: abortController.value,
     onClose: stopStream,
-    onError: (...err) => {
-      console.error('写作异常', ...err)
+    onError: (error) => {
+      console.error('写作异常', error)
       stopStream()
+      // 需要抛出异常，禁止重试
+      throw error
     }
   })
 }
