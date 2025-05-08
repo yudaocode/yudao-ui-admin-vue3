@@ -7,36 +7,31 @@
       label-width="120px"
       v-loading="formLoading"
     >
-      <el-form-item label="转账类型" prop="type">
+      <el-form-item label="提现标题" prop="subject">
+        <el-input v-model="formData.subject" placeholder="请输入提现标题" />
+      </el-form-item>
+      <el-form-item label="提现类型" prop="type">
         <el-radio-group v-model="formData.type">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.PAY_TRANSFER_TYPE)"
-            :key="dict.value"
-            :value="dict.value"
-            :disabled="dict.value === 2 || dict.value === 3 || dict.value === 4"
-          >
-            {{ dict.label }}
-          </el-radio>
+          <el-radio :value="1">支付宝</el-radio>
+          <el-radio :value="2">微信支付</el-radio>
+          <el-radio :value="3">钱包</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="转账金额(元)" prop="price">
+      <el-form-item label="提现金额" prop="price">
         <el-input-number
           v-model="formData.price"
           :min="0"
           :precision="2"
           :step="0.01"
-          placeholder="请输入转账金额"
+          placeholder="请输入提现金额"
           style="width: 200px"
         />
       </el-form-item>
       <el-form-item label="收款人姓名" prop="userName">
         <el-input v-model="formData.userName" placeholder="请输入收款人姓名" />
       </el-form-item>
-      <el-form-item v-show="formData.type === 1" label="支付宝登录账号" prop="alipayLogonId">
-        <el-input v-model="formData.alipayLogonId" placeholder="请输入支付宝登录账号" />
-      </el-form-item>
-      <el-form-item v-show="formData.type === 2" label="微信 openid" prop="openid">
-        <el-input v-model="formData.openid" placeholder="请输入微信 openid" />
+      <el-form-item label="收款人账号" prop="userAccount">
+        <el-input v-model="formData.userAccount" placeholder="请输入收款人账号" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -46,7 +41,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as DemoTransferApi from '@/api/pay/demo/transfer'
+import * as DemoWithdrawApi from '@/api/pay/demo/withdraw'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { yuanToFen } from '@/utils'
 const { t } = useI18n() // 国际化
@@ -56,17 +51,19 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
-  id: undefined,
-  price: undefined,
-  type: undefined,
-  userName: undefined,
-  alipayLogonId: undefined,
-  openid: undefined
+const formData = ref<DemoWithdrawApi.PayDemoWithdrawVO>({
+  subject: '',
+  price: 0,
+  type: 1,
+  userName: '',
+  userAccount: ''
 })
 const formRules = reactive({
-  price: [{ required: true, message: '转账金额不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '转账类型不能为空', trigger: 'change' }]
+  subject: [{ required: true, message: '提现标题不能为空', trigger: 'blur' }],
+  price: [{ required: true, message: '提现金额不能为空', trigger: 'blur' }],
+  type: [{ required: true, message: '提现类型不能为空', trigger: 'change' }],
+  userName: [{ required: true, message: '收款人姓名不能为空', trigger: 'blur' }],
+  userAccount: [{ required: true, message: '收款人账号不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -97,7 +94,7 @@ const submitForm = async () => {
     const data = { ...formData.value }
     data.price = yuanToFen(data.price)
     if (formType.value === 'create') {
-      await DemoTransferApi.createDemoTransfer(data)
+      await DemoWithdrawApi.createDemoWithdraw(data)
       message.success(t('common.createSuccess'))
     }
     dialogVisible.value = false
@@ -111,11 +108,11 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    price: undefined,
-    userName: undefined,
-    alipayLogonId: undefined,
-    openid: undefined
+    subject: '',
+    price: 0,
+    type: 1,
+    userName: '',
+    userAccount: ''
   }
   formRef.value?.resetFields()
 }

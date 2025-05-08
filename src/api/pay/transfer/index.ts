@@ -18,7 +18,7 @@ export const createTransfer = async (data: TransferVO) => {
 }
 
 // 查询转账单列表
-export const getTransferPage = async (params) => {
+export const getTransferPage = async (params: PageParam) => {
   return await request.get({ url: `/pay/transfer/page`, params })
 }
 
