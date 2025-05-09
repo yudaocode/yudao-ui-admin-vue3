@@ -13,25 +13,25 @@
       <el-form-item label="提现类型" prop="type">
         <el-radio-group v-model="formData.type">
           <el-radio :value="1">支付宝</el-radio>
-          <el-radio :value="2">微信支付</el-radio>
+          <el-radio :value="2">微信余额</el-radio>
           <el-radio :value="3">钱包</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="提现金额" prop="price">
         <el-input-number
           v-model="formData.price"
-          :min="0"
+          :min="0.01"
           :precision="2"
           :step="0.01"
           placeholder="请输入提现金额"
           style="width: 200px"
         />
       </el-form-item>
+      <el-form-item label="收款人账号" prop="userAccount">
+        <el-input v-model="formData.userAccount" :placeholder="getAccountPlaceholder()" />
+      </el-form-item>
       <el-form-item label="收款人姓名" prop="userName">
         <el-input v-model="formData.userName" placeholder="请输入收款人姓名" />
-      </el-form-item>
-      <el-form-item label="收款人账号" prop="userAccount">
-        <el-input v-model="formData.userAccount" placeholder="请输入收款人账号" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -41,8 +41,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as DemoWithdrawApi from '@/api/pay/demo/withdraw'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import * as DemoWithdrawApi from '@/api/pay/demo/withdraw/index'
 import { yuanToFen } from '@/utils'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -62,8 +61,7 @@ const formRules = reactive({
   subject: [{ required: true, message: '提现标题不能为空', trigger: 'blur' }],
   price: [{ required: true, message: '提现金额不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '提现类型不能为空', trigger: 'change' }],
-  userName: [{ required: true, message: '收款人姓名不能为空', trigger: 'blur' }],
-  userAccount: [{ required: true, message: '收款人账号不能为空', trigger: 'blur' }]
+  userAccount: [{ required: true, message: '收款人账号不能为空', trigger: 'blur' }],
 })
 const formRef = ref() // 表单 Ref
 
@@ -115,5 +113,17 @@ const resetForm = () => {
     userAccount: ''
   }
   formRef.value?.resetFields()
+}
+
+/** 根据提现类型获取账号输入框的占位符文本 */
+const getAccountPlaceholder = () => {
+  if (formData.value.type === 1) {
+    return '请输入支付宝账号'
+  } else if (formData.value.type === 2) {
+    return '请输入微信 openid'
+  } else if (formData.value.type === 3) {
+    return '请输入钱包编号'
+  }
+  return '请输入收款人账号'
 }
 </script>

@@ -1,5 +1,6 @@
 import request from '@/config/axios'
 
+// TODO @芋艿：调整字段
 export interface TransferVO {
   appId: number
   channelCode: string
@@ -10,11 +11,6 @@ export interface TransferVO {
   userName: string
   alipayLogonId: string
   openid: string
-}
-
-// 新增转账单
-export const createTransfer = async (data: TransferVO) => {
-  return await request.post({ url: `/pay/transfer/create`, data })
 }
 
 // 查询转账单列表
