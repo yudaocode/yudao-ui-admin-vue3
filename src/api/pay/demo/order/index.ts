@@ -13,13 +13,6 @@ export function createDemoOrder(data: DemoOrderVO) {
   })
 }
 
-// 获得示例订单
-export function getDemoOrder(id: number) {
-  return request.get({
-    url: '/pay/demo-order/get?id=' + id
-  })
-}
-
 // 获得示例订单分页
 export function getDemoOrderPage(query: PageParam) {
   return request.get({
@@ -29,7 +22,7 @@ export function getDemoOrderPage(query: PageParam) {
 }
 
 // 退款示例订单
-export function refundDemoOrder(id) {
+export function refundDemoOrder(id: number) {
   return request.put({
     url: '/pay/demo-order/refund?id=' + id
   })

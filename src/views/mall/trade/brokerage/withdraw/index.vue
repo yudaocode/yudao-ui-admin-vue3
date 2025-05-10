@@ -34,10 +34,19 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="账号" prop="accountNo">
+      <el-form-item label="账号" prop="userAccount">
         <el-input
-          v-model="queryParams.accountNo"
+          v-model="queryParams.userAccount"
           placeholder="请输入账号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="真实名字" prop="userName">
+        <el-input
+          v-model="queryParams.userName"
+          placeholder="请输入真实名字"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -107,10 +116,10 @@
           <div v-if="scope.row.type === BrokerageWithdrawTypeEnum.WALLET.type"> 余额 </div>
           <div v-else>
             {{ getDictLabel(DICT_TYPE.BROKERAGE_WITHDRAW_TYPE, scope.row.type) }}
-            <span v-if="scope.row.accountNo">账号：{{ scope.row.accountNo }}</span>
+            <div v-if="scope.row.userAccount">账号：{{ scope.row.userAccount }}</div>
+            <div v-if="scope.row.userName">真实姓名：{{ scope.row.userName }}</div>
           </div>
           <template v-if="scope.row.type === BrokerageWithdrawTypeEnum.BANK.type">
-            <div>真实姓名：{{ scope.row.name }}</div>
             <div>
               银行名称：
               <dict-tag :type="DICT_TYPE.BROKERAGE_BANK_NAME" :value="scope.row.bankName" />
@@ -119,13 +128,13 @@
           </template>
         </template>
       </el-table-column>
-      <el-table-column label="收款码" align="left" prop="accountQrCodeUrl" min-width="70px">
+      <el-table-column label="收款码" align="left" prop="qrCodeUrl" min-width="70px">
         <template #default="scope">
           <el-image
-            v-if="scope.row.accountQrCodeUrl"
-            :src="scope.row.accountQrCodeUrl"
+            v-if="scope.row.qrCodeUrl"
+            :src="scope.row.qrCodeUrl"
             class="h-40px w-40px"
-            :preview-src-list="[scope.row.accountQrCodeUrl]"
+            :preview-src-list="[scope.row.qrCodeUrl]"
             preview-teleported
           />
           <span v-else>无</span>
@@ -150,6 +159,7 @@
           </div>
         </template>
       </el-table-column>
+      <el-table-column label="转账失败原因" align="left" prop="transferErrorMsg" />
       <el-table-column label="操作" align="left" width="110px" fixed="right">
         <template #default="scope">
           <template v-if="scope.row.status === BrokerageWithdrawStatusEnum.AUDITING.status">
@@ -192,7 +202,6 @@ import { dateFormatter, formatDate } from '@/utils/formatTime'
 import * as BrokerageWithdrawApi from '@/api/mall/trade/brokerage/withdraw'
 import BrokerageWithdrawRejectForm from './BrokerageWithdrawRejectForm.vue'
 import { BrokerageWithdrawStatusEnum, BrokerageWithdrawTypeEnum } from '@/utils/constants'
-import { fenToYuanFormat } from '@/utils/formatter'
 import { fenToYuan } from '@/utils'
 
 defineOptions({ name: 'BrokerageWithdraw' })
@@ -207,8 +216,8 @@ const queryParams = reactive({
   pageSize: 10,
   userId: null,
   type: null,
-  name: null,
-  accountNo: null,
+  userName: null,
+  userAccount: null,
   bankName: null,
   status: null,
   auditReason: null,

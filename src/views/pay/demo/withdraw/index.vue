@@ -99,7 +99,7 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import * as DemoWithdrawApi from '@/api/pay/demo/withdraw/index'
+import * as DemoWithdrawApi from '@/api/pay/demo/withdraw'
 import DemoWithdrawForm from './DemoWithdrawForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import { useMessage } from '@/hooks/web/useMessage'
