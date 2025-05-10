@@ -111,11 +111,15 @@
           <div>手续费：￥{{ fenToYuan(scope.row.feePrice) }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="提现方式" align="left" prop="type" min-width="120px">
+      <el-table-column label="提现方式" align="left" prop="type" min-width="80px">
         <template #default="scope">
-          <div v-if="scope.row.type === BrokerageWithdrawTypeEnum.WALLET.type"> 余额 </div>
+          <dict-tag :type="DICT_TYPE.BROKERAGE_WITHDRAW_TYPE" :value="scope.row.type" />
+        </template>
+      </el-table-column>
+      <el-table-column label="提现信息" align="left" min-width="120px">
+        <template #default="scope">
+          <div v-if="scope.row.type === BrokerageWithdrawTypeEnum.WALLET.type">-</div>
           <div v-else>
-            {{ getDictLabel(DICT_TYPE.BROKERAGE_WITHDRAW_TYPE, scope.row.type) }}
             <div v-if="scope.row.userAccount">账号：{{ scope.row.userAccount }}</div>
             <div v-if="scope.row.userName">真实姓名：{{ scope.row.userName }}</div>
           </div>
@@ -126,18 +130,15 @@
             </div>
             <div>开户地址：{{ scope.row.bankAddress }}</div>
           </template>
-        </template>
-      </el-table-column>
-      <el-table-column label="收款码" align="left" prop="qrCodeUrl" min-width="70px">
-        <template #default="scope">
-          <el-image
-            v-if="scope.row.qrCodeUrl"
-            :src="scope.row.qrCodeUrl"
-            class="h-40px w-40px"
-            :preview-src-list="[scope.row.qrCodeUrl]"
-            preview-teleported
-          />
-          <span v-else>无</span>
+          <div v-if="scope.row.qrCodeUrl" class="mt-2">
+            <div>收款码：</div>
+            <el-image
+              :src="scope.row.qrCodeUrl"
+              class="h-40px w-40px"
+              :preview-src-list="[scope.row.qrCodeUrl]"
+              preview-teleported
+            />
+          </div>
         </template>
       </el-table-column>
       <el-table-column
@@ -155,11 +156,14 @@
             时间：{{ formatDate(scope.row.auditTime) }}
           </div>
           <div v-if="scope.row.auditReason" class="text-xs">
-            原因：{{ scope.row.auditReason }}
+            审核原因：{{ scope.row.auditReason }}
+          </div>
+          <!-- 提现失败原因 -->
+          <div v-if="scope.row.transferErrorMsg" class="text-xs text-red-500">
+            转账失败原因：{{ scope.row.transferErrorMsg }}
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="转账失败原因" align="left" prop="transferErrorMsg" />
       <el-table-column label="操作" align="left" width="110px" fixed="right">
         <template #default="scope">
           <template v-if="scope.row.status === BrokerageWithdrawStatusEnum.AUDITING.status">
@@ -180,6 +184,16 @@
               驳回
             </el-button>
           </template>
+          <template v-if="scope.row.status === BrokerageWithdrawStatusEnum.WITHDRAW_FAIL.status">
+            <el-button
+              link
+              type="warning"
+              @click="handleRetryTransfer(scope.row.id)"
+              v-hasPermi="['trade:brokerage-withdraw:audit']"
+            >
+              重新转账
+            </el-button>
+          </template>
         </template>
       </el-table-column>
     </el-table>
@@ -197,7 +211,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getDictLabel, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import * as BrokerageWithdrawApi from '@/api/mall/trade/brokerage/withdraw'
 import BrokerageWithdrawRejectForm from './BrokerageWithdrawRejectForm.vue'
@@ -215,11 +229,11 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   userId: null,
-  type: null,
+  type: undefined,
   userName: null,
   userAccount: null,
-  bankName: null,
-  status: null,
+  bankName: undefined,
+  status: undefined,
   auditReason: null,
   auditTime: [],
   remark: null,
@@ -262,6 +276,19 @@ const handleApprove = async (id: number) => {
   try {
     loading.value = true
     await message.confirm('确定要审核通过吗？')
+    await BrokerageWithdrawApi.approveBrokerageWithdraw(id)
+    await message.success(t('common.success'))
+    await getList()
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 重新转账 */
+const handleRetryTransfer = async (id: number) => {
+  try {
+    loading.value = true
+    await message.confirm('确定要重新转账吗？')
     await BrokerageWithdrawApi.approveBrokerageWithdraw(id)
     await message.success(t('common.success'))
     await getList()
