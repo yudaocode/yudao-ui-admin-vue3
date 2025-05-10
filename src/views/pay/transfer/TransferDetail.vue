@@ -25,12 +25,7 @@
     <el-divider />
     <el-descriptions :column="2" label-class-name="desc-label">
       <el-descriptions-item label="收款人姓名">{{ detailData.userName }}</el-descriptions-item>
-      <el-descriptions-item label="支付宝登录账号" v-if="detailData.type === 1">
-        {{ detailData.alipayLogonId }}
-      </el-descriptions-item>
-      <el-descriptions-item label="微信 openid" v-if="detailData.type === 2">
-        {{ detailData.openid }}
-      </el-descriptions-item>
+      <el-descriptions-item label="收款人账号">{{ detailData.userAccount }}</el-descriptions-item>
       <el-descriptions-item label="支付渠道">
         <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="detailData.channelCode" />
       </el-descriptions-item>
@@ -45,7 +40,9 @@
     <el-divider />
     <el-descriptions :column="1" label-class-name="desc-label" direction="vertical" border>
       <el-descriptions-item label="转账渠道通知内容">
-        <el-text>{{ detailData.channelNotifyData }}</el-text>
+        <el-text style="white-space: pre-wrap; word-break: break-word">
+          {{ detailData.channelNotifyData }}
+        </el-text>
       </el-descriptions-item>
     </el-descriptions>
     <el-divider />
@@ -59,10 +56,13 @@
 import { DICT_TYPE } from '@/utils/dict'
 import * as TransferApi from '@/api/pay/transfer'
 import { formatDate } from '@/utils/formatTime'
+
 defineOptions({ name: 'PayTransferDetail' })
+
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
 const detailData = ref({})
+
 /** 打开弹窗 */
 const open = async (id: number) => {
   dialogVisible.value = true
