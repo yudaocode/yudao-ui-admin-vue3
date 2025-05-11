@@ -166,7 +166,12 @@
       </el-table-column>
       <el-table-column label="操作" align="left" width="110px" fixed="right">
         <template #default="scope">
-          <template v-if="scope.row.status === BrokerageWithdrawStatusEnum.AUDITING.status">
+          <template
+            v-if="
+              scope.row.status === BrokerageWithdrawStatusEnum.AUDITING.status &&
+              !scope.row.payTransferId
+            "
+          >
             <el-button
               link
               type="primary"

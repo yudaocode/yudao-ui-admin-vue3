@@ -24,7 +24,7 @@
       <el-table-column label="操作" align="center" width="100">
         <template #default="scope">
           <el-button
-            v-if="scope.row.status === 0"
+            v-if="scope.row.status === 0 && !scope.row.payTransferId"
             type="primary"
             link
             @click="handleTransfer(scope.row.id)"
@@ -32,7 +32,7 @@
             发起转账
           </el-button>
           <el-button
-            v-if="scope.row.status === 20"
+            v-else-if="scope.row.status === 20"
             type="warning"
             link
             @click="handleTransfer(scope.row.id)"
@@ -59,7 +59,12 @@
       <el-table-column label="收款人账号" align="center" prop="userAccount" min-width="250" />
       <el-table-column label="提现状态" align="center" prop="status" width="100">
         <template #default="scope">
-          <el-tag v-if="scope.row.status === 0" type="warning">等待转账</el-tag>
+          <el-tag v-if="scope.row.status === 0 && !scope.row.payTransferId" type="warning">
+            等待转账
+          </el-tag>
+          <el-tag v-else-if="scope.row.status === 0 && scope.row.payTransferId" type="info">
+            转账中
+          </el-tag>
           <el-tag v-else-if="scope.row.status === 10" type="success">转账成功</el-tag>
           <el-tag v-else-if="scope.row.status === 20" type="danger">转账失败</el-tag>
         </template>
