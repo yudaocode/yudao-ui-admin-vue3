@@ -28,6 +28,12 @@ defineOptions({ name: 'BasicInfo' })
 const { t } = useI18n()
 const message = useMessage() // 消息弹窗
 const userStore = useUserStore()
+
+// 定义事件
+const emit = defineEmits<{
+  (e: 'success'): void
+}>()
+
 // 表单校验
 const rules = reactive<FormRules>({
   nickname: [{ required: true, message: t('profile.rules.nickname'), trigger: 'blur' }],
@@ -82,6 +88,8 @@ const submit = () => {
       message.success(t('common.updateSuccess'))
       const profile = await init()
       userStore.setUserNicknameAction(profile.nickname)
+      // 发送成功事件
+      emit('success')
     }
   })
 }

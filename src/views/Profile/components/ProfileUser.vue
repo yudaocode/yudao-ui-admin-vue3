@@ -60,6 +60,12 @@ const getUserInfo = async () => {
   const users = await getUserProfile()
   userInfo.value = users
 }
+
+// 暴露刷新方法
+defineExpose({
+  refresh: getUserInfo
+})
+
 onMounted(async () => {
   await getUserInfo()
 })
