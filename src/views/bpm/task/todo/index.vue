@@ -131,7 +131,7 @@
         :formatter="dateFormatter"
         align="center"
         label="发起时间"
-        prop="createTime"
+        prop="processInstance.createTime"
         width="180"
       />
       <el-table-column align="center" label="当前任务" prop="name" width="180" />
