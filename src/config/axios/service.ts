@@ -1,7 +1,3 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
-import qs from 'qs'
 import { config } from '@/config/axios/config'
 import {
   getAccessToken,
@@ -11,10 +7,14 @@ import {
   removeToken,
   setToken
 } from '@/utils/auth'
+import { globalLoading } from '@/utils/loading'
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import qs from 'qs'
 import errorCode from './errorCode'
 
-import { resetRouter } from '@/router'
 import { deleteUserCache } from '@/hooks/web/useCache'
+import { resetRouter } from '@/router'
 
 const tenantEnable = import.meta.env.VITE_APP_TENANT_ENABLE
 const { result_code, base_url, request_timeout } = config
@@ -48,6 +48,10 @@ const service: AxiosInstance = axios.create({
 // request拦截器
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // 显示全局loading
+    if (config.headers?.showLoading !== false) {
+      globalLoading.show()
+    }
     // 是否需要设置 token
     let isToken = (config!.headers || {}).isToken === false
     whiteList.some((v) => {
@@ -86,6 +90,8 @@ service.interceptors.request.use(
     return config
   },
   (error: AxiosError) => {
+    // 隐藏loading
+    globalLoading.hide()
     // Do something with request error
     console.log(error) // for debug
     return Promise.reject(error)
@@ -95,6 +101,10 @@ service.interceptors.request.use(
 // response 拦截器
 service.interceptors.response.use(
   async (response: AxiosResponse<any>) => {
+    // 隐藏loading
+    if (response.config.headers?.showLoading !== false) {
+      globalLoading.hide()
+    }
     let { data } = response
     const config = response.config
     if (!data) {
@@ -191,6 +201,10 @@ service.interceptors.response.use(
     }
   },
   (error: AxiosError) => {
+    // 隐藏loading
+    if (error.config?.headers?.showLoading !== false) {
+      globalLoading.hide()
+    }
     console.log('err' + error) // for debug
     let { message } = error
     const { t } = useI18n()
