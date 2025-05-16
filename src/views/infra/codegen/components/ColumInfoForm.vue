@@ -95,7 +95,7 @@
     </el-table-column>
     <el-table-column label="字典类型" min-width="12%">
       <template #default="scope">
-        <el-select v-model="scope.row.dictType" clearable filterable placeholder="请选择">
+        <el-select v-model="scope.row.dictType" :value-on-clear="''" clearable filterable placeholder="请选择">
           <template #header>
             <div class="flex justify-end">
               <el-popover
