@@ -85,6 +85,8 @@
 </template>
 
 <script lang="ts" setup>
+const { t } = useI18n() // Initialize i18n translation function
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -133,10 +135,10 @@ const validateProcess = async () => {
 const currentStep = ref(-1) // 步骤控制。-1 用于，一开始全部不展示等当前页面数据初始化完成
 
 const steps = [
-  { title: '基本信息', validator: validateBasic },
-  { title: '表单设计', validator: validateForm },
-  { title: '流程设计', validator: validateProcess },
-  { title: '更多设置', validator: null }
+  { title: t('bpm.model.form.basicInfo'), validator: validateBasic },
+  { title: t('bpm.model.form.formDesign'), validator: validateForm },
+  { title: t('bpm.model.form.processDesign'), validator: validateProcess },
+  { title: t('bpm.model.form.extraSettings'), validator: null }
 ]
 
 // 表单数据

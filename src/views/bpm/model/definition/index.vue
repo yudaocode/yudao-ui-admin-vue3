@@ -3,16 +3,16 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="定义编号" align="center" prop="id" min-width="250" />
-      <el-table-column label="流程名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="流程图标" align="center" min-width="50">
+      <el-table-column :label="t('bpm.definition.id')" align="center" prop="id" min-width="250" />
+      <el-table-column :label="t('bpm.definition.name')" align="center" prop="name" min-width="150" />
+      <el-table-column :label="t('bpm.definition.icon')" align="center" min-width="50">
         <template #default="{ row }">
           <el-image v-if="row.icon" :src="row.icon" class="h-24px w-24pxrounded" />
         </template>
       </el-table-column>
-      <el-table-column label="可见范围" prop="startUserIds" min-width="100">
+      <el-table-column :label="t('bpm.definition.visibleRange')" prop="startUserIds" min-width="100">
         <template #default="{ row }">
-          <el-text v-if="!row.startUsers?.length"> 全部可见 </el-text>
+          <el-text v-if="!row.startUsers?.length"> {{ t('bpm.definition.allVisible') }} </el-text>
           <el-text v-else-if="row.startUsers.length === 1">
             {{ row.startUsers[0].nickname }}
           </el-text>
@@ -23,17 +23,17 @@
               placement="top"
               :content="row.startUsers.map((user: any) => user.nickname).join('、')"
             >
-              {{ row.startUsers[0].nickname }}等 {{ row.startUsers.length }} 人可见
+              {{ row.startUsers[0].nickname }}{{ t('bpm.definition.etc') }} {{ row.startUsers.length }} {{ t('bpm.definition.peopleVisible') }}
             </el-tooltip>
           </el-text>
         </template>
       </el-table-column>
-      <el-table-column label="流程类型" prop="modelType" min-width="120">
+      <el-table-column :label="t('bpm.definition.type')" prop="modelType" min-width="120">
         <template #default="{ row }">
           <dict-tag :value="row.modelType" :type="DICT_TYPE.BPM_MODEL_TYPE" />
         </template>
       </el-table-column>
-      <el-table-column label="表单信息" prop="formType" min-width="150">
+      <el-table-column :label="t('bpm.definition.formInfo')" prop="formType" min-width="150">
         <template #default="scope">
           <el-button
             v-if="scope.row.formType === BpmModelFormType.NORMAL"
@@ -51,22 +51,22 @@
           >
             <span>{{ scope.row.formCustomCreatePath }}</span>
           </el-button>
-          <label v-else>暂无表单</label>
+          <label v-else>{{ t('bpm.definition.noForm') }}</label>
         </template>
       </el-table-column>
-      <el-table-column label="流程版本" align="center" min-width="80">
+      <el-table-column :label="t('bpm.definition.version')" align="center" min-width="80">
         <template #default="scope">
           <el-tag>v{{ scope.row.version }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column
-        label="部署时间"
+        :label="t('bpm.definition.deployTime')"
         align="center"
         prop="deploymentTime"
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column :label="t('common.operation')" align="center">
         <template #default="scope">
           <el-button
             link
@@ -74,7 +74,7 @@
             @click="openModelForm(scope.row.id)"
             v-hasPermi="['bpm:model:update']"
           >
-            恢复
+            {{ t('bpm.definition.restore') }}
           </el-button>
         </template>
       </el-table-column>
@@ -89,7 +89,7 @@
   </ContentWrap>
 
   <!-- 弹窗：表单详情 -->
-  <Dialog title="表单详情" v-model="formDetailVisible" width="800">
+  <Dialog :title="t('bpm.definition.formDetail')" v-model="formDetailVisible" width="800">
     <form-create :rule="formDetailPreview.rule" :option="formDetailPreview.option" />
   </Dialog>
 </template>
@@ -100,9 +100,11 @@ import * as DefinitionApi from '@/api/bpm/definition'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { DICT_TYPE } from '@/utils/dict'
 import { BpmModelFormType } from '@/utils/constants'
+import { useI18n } from 'vue-i18n'
 
 defineOptions({ name: 'BpmProcessDefinition' })
 
+const { t } = useI18n() // i18n
 const { push } = useRouter() // 路由
 const { query } = useRoute() // 查询参数
 

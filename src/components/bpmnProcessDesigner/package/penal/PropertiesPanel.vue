@@ -5,31 +5,34 @@
         <!-- class="panel-tab__title" -->
         <template #title>
           <Icon icon="ep:info-filled" />
-          常规</template
-        >
+          {{ $t('bpm.design.general') }}
+        </template>
         <ElementBaseInfo
-          :id-edit-disabled="idEditDisabled"
-          :business-object="elementBusinessObject"
-          :type="elementType"
-          :model="model"
-        />
+:id-edit-disabled="idEditDisabled" :business-object="elementBusinessObject" :type="elementType"
+          :model="model" />
       </el-collapse-item>
       <el-collapse-item name="condition" v-if="elementType === 'Process'" key="message">
-        <template #title><Icon icon="ep:comment" />消息与信号</template>
+        <template #title>
+          <Icon icon="ep:comment" />{{ $t('bpm.design.messageAndSignal') }}
+        </template>
         <signal-and-massage />
       </el-collapse-item>
       <el-collapse-item name="condition" v-if="conditionFormVisible" key="condition">
-        <template #title><Icon icon="ep:promotion" />流转条件</template>
+        <template #title>
+          <Icon icon="ep:promotion" />{{ $t('bpm.design.flowCondition') }}
+        </template>
         <flow-condition :business-object="elementBusinessObject" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="condition" v-if="formVisible" key="form">
-        <template #title><Icon icon="ep:list" />表单</template>
+        <template #title>
+          <Icon icon="ep:list" />{{ $t('bpm.design.form') }}
+        </template>
         <element-form :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="task" v-if="isTaskCollapseItemShow(elementType)" key="task">
-        <template #title
-          ><Icon icon="ep:checked" />{{ getTaskCollapseItemName(elementType) }}</template
-        >
+        <template #title>
+          <Icon icon="ep:checked" />{{ getTaskCollapseItemName(elementType) }}
+        </template>
         <element-task :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item
@@ -37,7 +40,7 @@
         v-if="elementType.indexOf('Task') !== -1"
         key="multiInstance"
       >
-        <template #title><Icon icon="ep:help-filled" />多人审批方式</template>
+        <template #title><Icon icon="ep:help-filled" />{{ $t('bpm.design.multiInstance') }}</template>
         <element-multi-instance
           :id="elementId"
           :business-object="elementBusinessObject"
@@ -45,28 +48,34 @@
         />
       </el-collapse-item>
       <el-collapse-item name="listeners" key="listeners">
-        <template #title><Icon icon="ep:bell-filled" />执行监听器</template>
+        <template #title>
+          <Icon icon="ep:bell-filled" />{{ $t('bpm.design.executionListener') }}
+        </template>
         <element-listeners :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="taskListeners" v-if="elementType === 'UserTask'" key="taskListeners">
-        <template #title><Icon icon="ep:bell-filled" />任务监听器</template>
+        <template #title>
+          <Icon icon="ep:bell-filled" />{{ $t('bpm.design.taskListener') }}
+        </template>
         <user-task-listeners :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="extensions" key="extensions">
-        <template #title><Icon icon="ep:circle-plus-filled" />扩展属性</template>
+        <template #title>
+          <Icon icon="ep:circle-plus-filled" />{{ $t('bpm.design.extensionProperties') }}
+        </template>
         <element-properties :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="other" key="other">
-        <template #title><Icon icon="ep:promotion" />其他</template>
+        <template #title>
+          <Icon icon="ep:promotion" />{{ $t('bpm.design.other') }}
+        </template>
         <element-other-config :id="elementId" />
       </el-collapse-item>
       <el-collapse-item name="customConfig" key="customConfig">
-        <template #title><Icon icon="ep:tools" />自定义配置</template>
-        <element-custom-config
-          :id="elementId"
-          :type="elementType"
-          :business-object="elementBusinessObject"
-        />
+        <template #title>
+          <Icon icon="ep:tools" />{{ $t('bpm.design.customConfig') }}
+        </template>
+        <element-custom-config :id="elementId" :type="elementType" :business-object="elementBusinessObject" />
       </el-collapse-item>
     </el-collapse>
   </div>
@@ -95,7 +104,7 @@ defineOptions({ name: 'MyPropertiesPanel' })
 const props = defineProps({
   bpmnModeler: {
     type: Object,
-    default: () => {}
+    default: () => { }
   },
   prefix: {
     type: String,

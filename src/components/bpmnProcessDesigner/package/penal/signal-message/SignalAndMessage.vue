@@ -1,25 +1,25 @@
 <template>
   <div class="panel-tab__content">
     <div class="panel-tab__content--title">
-      <span><Icon icon="ep:menu" style="margin-right: 8px; color: #555" />消息列表</span>
-      <XButton type="primary" title="创建新消息" preIcon="ep:plus" @click="openModel('message')" />
+      <span><Icon icon="ep:menu" style="margin-right: 8px; color: #555" />{{ $t('bpm.design.messageList') }}</span>
+      <XButton type="primary" :title="$t('bpm.design.createNewMessage')" preIcon="ep:plus" @click="openModel('message')" />
     </div>
     <el-table :data="messageList" border>
-      <el-table-column type="index" label="序号" width="60px" />
-      <el-table-column label="消息ID" prop="id" max-width="300px" show-overflow-tooltip />
-      <el-table-column label="消息名称" prop="name" max-width="300px" show-overflow-tooltip />
+      <el-table-column type="index" :label="$t('bpm.design.serialNumber')" width="60px" />
+      <el-table-column :label="$t('bpm.design.messageId')" prop="id" max-width="300px" show-overflow-tooltip />
+      <el-table-column :label="$t('bpm.design.messageName')" prop="name" max-width="300px" show-overflow-tooltip />
     </el-table>
     <div
       class="panel-tab__content--title"
       style="padding-top: 8px; margin-top: 8px; border-top: 1px solid #eee"
     >
-      <span><Icon icon="ep:menu" style="margin-right: 8px; color: #555" />信号列表</span>
-      <XButton type="primary" title="创建新信号" preIcon="ep:plus" @click="openModel('signal')" />
+      <span><Icon icon="ep:menu" style="margin-right: 8px; color: #555" />{{ $t('bpm.design.signalList') }}</span>
+      <XButton type="primary" :title="$t('bpm.design.createNewSignal')" preIcon="ep:plus" @click="openModel('signal')" />
     </div>
     <el-table :data="signalList" border>
-      <el-table-column type="index" label="序号" width="60px" />
-      <el-table-column label="信号ID" prop="id" max-width="300px" show-overflow-tooltip />
-      <el-table-column label="信号名称" prop="name" max-width="300px" show-overflow-tooltip />
+      <el-table-column type="index" :label="$t('bpm.design.serialNumber')" width="60px" />
+      <el-table-column :label="$t('bpm.design.signalId')" prop="id" max-width="300px" show-overflow-tooltip />
+      <el-table-column :label="$t('bpm.design.signalName')" prop="name" max-width="300px" show-overflow-tooltip />
     </el-table>
 
     <el-dialog
@@ -39,15 +39,15 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addNewObject">保 存</el-button>
+        <el-button @click="dialogVisible = false">{{ $t('bpm.design.cancel') }}</el-button>
+        <el-button type="primary" @click="addNewObject">{{ $t('bpm.design.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 <script lang="ts" setup>
 defineOptions({ name: 'SignalAndMassage' })
-
+const { t } = useI18n()
 const message = useMessage()
 const signalList = ref<any[]>([])
 const messageList = ref<any[]>([])
@@ -59,9 +59,9 @@ const messageIdMap = ref()
 const signalIdMap = ref()
 const modelConfig = computed(() => {
   if (modelType.value === 'message') {
-    return { title: '创建消息', idLabel: '消息ID', nameLabel: '消息名称' }
+    return { title: t('bpm.design.createMessage'), idLabel: t('bpm.design.messageId'), nameLabel: t('bpm.design.messageName') }
   } else {
-    return { title: '创建信号', idLabel: '信号ID', nameLabel: '信号名称' }
+    return { title: t('bpm.design.createSignal'), idLabel: t('bpm.design.signalId'), nameLabel: t('bpm.design.signalName') }
   }
 })
 const bpmnInstances = () => (window as any)?.bpmnInstances
@@ -92,13 +92,13 @@ const openModel = (type) => {
 const addNewObject = () => {
   if (modelType.value === 'message') {
     if (messageIdMap.value[modelObjectForm.value.id]) {
-      message.error('该消息已存在，请修改id后重新保存')
+      message.error(t('bpm.design.messageExists'))
     }
     const messageRef = bpmnInstances().moddle.create('bpmn:Message', modelObjectForm.value)
     rootElements.value.push(messageRef)
   } else {
     if (signalIdMap.value[modelObjectForm.value.id]) {
-      message.error('该信号已存在，请修改id后重新保存')
+      message.error(t('bpm.design.signalExists'))
     }
     const signalRef = bpmnInstances().moddle.create('bpmn:Signal', modelObjectForm.value)
     rootElements.value.push(signalRef)

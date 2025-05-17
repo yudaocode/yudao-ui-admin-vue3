@@ -8,7 +8,7 @@
       <div class="flex-col">
         <div v-for="(item, index) in APPROVE_METHODS" :key="index">
           <el-radio :value="item.value" :label="item.value">
-            {{ item.label }}
+            {{ $t('bpm.design.' + item.label) }}
           </el-radio>
           <el-form-item prop="approveRatio">
             <el-input-number
@@ -28,20 +28,20 @@
       </div>
     </el-radio-group>
     <div v-else>
-      除了UserTask以外节点的多实例待实现
+      {{ $t('bpm.design.multiInstanceNotImplemented') }}
     </div>
     <!-- 与Simple设计器配置合并，保留以前的代码 -->
-    <el-form label-width="90px" style="display: none">
-      <el-form-item label="快捷配置">
-        <el-button size="small" @click="changeConfig('依次审批')">依次审批</el-button>
-        <el-button size="small" @click="changeConfig('会签')">会签</el-button>
-        <el-button size="small" @click="changeConfig('或签')">或签</el-button>
+    <el-form label-width="90px">
+      <el-form-item :label="$t('bpm.design.quickConfig')">
+        <el-button size="small" @click="changeConfig($t('bpm.design.sequentialApproval'))">{{ $t('bpm.design.sequentialApproval') }}</el-button>
+        <el-button size="small" @click="changeConfig($t('bpm.design.countersign'))">{{ $t('bpm.design.countersign') }}</el-button>
+        <el-button size="small" @click="changeConfig($t('bpm.design.orSign'))">{{ $t('bpm.design.orSign') }}</el-button>
       </el-form-item>
-      <el-form-item label="会签类型">
+      <el-form-item :label="$t('bpm.design.countersignType')">
         <el-select v-model="loopCharacteristics" @change="changeLoopCharacteristicsType">
-          <el-option label="并行多重事件" value="ParallelMultiInstance" />
-          <el-option label="时序多重事件" value="SequentialMultiInstance" />
-          <el-option label="无" value="Null" />
+          <el-option :label="$t('bpm.design.parallelMultiInstance')" value="ParallelMultiInstance" />
+          <el-option :label="$t('bpm.design.sequentialMultiInstance')" value="SequentialMultiInstance" />
+          <el-option :label="$t('bpm.design.none')" value="Null" />
         </el-select>
       </el-form-item>
       <template

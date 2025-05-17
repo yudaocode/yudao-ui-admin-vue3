@@ -1,23 +1,23 @@
 <template>
   <div class="panel-tab__content">
     <el-table :data="elementListenersList" size="small" border>
-      <el-table-column label="序号" width="50px" type="index" />
-      <el-table-column label="事件类型" min-width="100px" prop="event" />
+      <el-table-column :label="$t('bpm.design.serialNumber')" width="50px" type="index" />
+      <el-table-column :label="$t('bpm.design.eventType')" min-width="100px" prop="event" />
       <el-table-column
-        label="监听器类型"
+        :label="$t('bpm.design.listenerType')"
         min-width="100px"
         show-overflow-tooltip
         :formatter="(row) => listenerTypeObject[row.listenerType]"
       />
-      <el-table-column label="操作" width="100px">
+      <el-table-column :label="$t('bpm.design.action')" width="100px">
         <template #default="scope">
-          <el-button size="small" link @click="openListenerForm(scope.row, scope.$index)"
-            >编辑</el-button
-          >
+          <el-button size="small" link @click="openListenerForm(scope.row, scope.$index)">
+            {{ $t('bpm.design.edit') }}
+          </el-button>
           <el-divider direction="vertical" />
-          <el-button size="small" link style="color: #ff4d4f" @click="removeListener(scope.$index)"
-            >移除</el-button
-          >
+          <el-button size="small" link style="color: #ff4d4f" @click="removeListener(scope.$index)">
+            {{ $t('bpm.design.remove') }}
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -25,14 +25,14 @@
       <XButton
         type="primary"
         preIcon="ep:plus"
-        title="添加监听器"
+        :title="$t('bpm.design.addListener')"
         size="small"
         @click="openListenerForm(null)"
       />
       <XButton
         type="success"
         preIcon="ep:select"
-        title="选择监听器"
+        :title="$t('bpm.design.selectListener')"
         size="small"
         @click="openProcessListenerDialog"
       />
@@ -41,14 +41,14 @@
     <!-- 监听器 编辑/创建 部分 -->
     <el-drawer
       v-model="listenerFormModelVisible"
-      title="执行监听器"
+      :title="$t('bpm.design.executionListener')"
       :size="`${width}px`"
       append-to-body
       destroy-on-close
     >
       <el-form :model="listenerForm" label-width="96px" ref="listenerFormRef">
         <el-form-item
-          label="事件类型"
+          :label="$t('bpm.design.eventType')"
           prop="event"
           :rules="{ required: true, trigger: ['blur', 'change'] }"
         >
@@ -58,7 +58,7 @@
           </el-select>
         </el-form-item>
         <el-form-item
-          label="监听器类型"
+          :label="$t('bpm.design.listenerType')"
           prop="listenerType"
           :rules="{ required: true, trigger: ['blur', 'change'] }"
         >
@@ -73,7 +73,7 @@
         </el-form-item>
         <el-form-item
           v-if="listenerForm.listenerType === 'classListener'"
-          label="Java类"
+          :label="$t('bpm.design.javaClass')"
           prop="class"
           key="listener-class"
           :rules="{ required: true, trigger: ['blur', 'change'] }"
@@ -82,7 +82,7 @@
         </el-form-item>
         <el-form-item
           v-if="listenerForm.listenerType === 'expressionListener'"
-          label="表达式"
+          :label="$t('bpm.design.expression')"
           prop="expression"
           key="listener-expression"
           :rules="{ required: true, trigger: ['blur', 'change'] }"

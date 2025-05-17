@@ -3,28 +3,28 @@
     <el-form label-width="90px" :model="needProps" :rules="rules">
       <div v-if="needProps.type == 'bpmn:Process'">
         <!-- 如果是 Process 信息的时候，使用自定义表单 -->
-        <el-form-item label="流程标识" prop="id">
+        <el-form-item :label="$t('bpm.design.processId')" prop="id">
           <el-input
             v-model="needProps.id"
-            placeholder="请输入流标标识"
+            :placeholder="$t('bpm.design.enterProcessId')"
             :disabled="needProps.id !== undefined && needProps.id.length > 0"
             @change="handleKeyUpdate"
           />
         </el-form-item>
-        <el-form-item label="流程名称" prop="name">
+        <el-form-item :label="$t('bpm.design.processName')" prop="name">
           <el-input
             v-model="needProps.name"
-            placeholder="请输入流程名称"
+            :placeholder="$t('bpm.design.enterProcessName')"
             clearable
             @change="handleNameUpdate"
           />
         </el-form-item>
       </div>
       <div v-else>
-        <el-form-item label="ID">
+        <el-form-item :label="$t('bpm.design.id')">
           <el-input v-model="elementBaseInfo.id" clearable @change="updateBaseInfo('id')" />
         </el-form-item>
-        <el-form-item label="名称">
+        <el-form-item :label="$t('bpm.design.name')">
           <el-input v-model="elementBaseInfo.name" clearable @change="updateBaseInfo('name')" />
         </el-form-item>
       </div>
@@ -47,12 +47,13 @@ const props = defineProps({
 const needProps = ref<any>({})
 const bpmnElement = ref()
 const elementBaseInfo = ref<any>({})
+const { t } = useI18n()
 // 流程表单的下拉框的数据
 // const forms = ref([])
 // 流程模型的校验
 const rules = reactive({
-  id: [{ required: true, message: '流程标识不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '流程名称不能为空', trigger: 'blur' }]
+  id: [{ required: true, message: t('bpm.design.processIdRequired'), trigger: 'blur' }],
+  name: [{ required: true, message: useI18n().t('bpm.design.processNameRequired'), trigger: 'blur' }]
 })
 
 const bpmnInstances = () => (window as any)?.bpmnInstances

@@ -2,24 +2,24 @@
   <div class="panel-tab__content">
     <el-form size="small" label-width="90px">
       <!-- add by 芋艿：由于「异步延续」暂时用不到，所以这里 display 为 none -->
-      <el-form-item label="异步延续" style="display: none">
+      <el-form-item :label="t('bpm.design.asyncContinuation')" style="display: none">
         <el-checkbox
           v-model="taskConfigForm.asyncBefore"
-          label="异步前"
-          value="异步前"
+          :label="t('bpm.design.asyncBefore')"
+          :value="t('bpm.design.asyncBefore')"
           @change="changeTaskAsync"
         />
         <el-checkbox
           v-model="taskConfigForm.asyncAfter"
-          label="异步后"
-          value="异步后"
+          :label="t('bpm.design.asyncAfter')"
+          :value="t('bpm.design.asyncAfter')"
           @change="changeTaskAsync"
         />
         <el-checkbox
           v-model="taskConfigForm.exclusive"
           v-if="taskConfigForm.asyncAfter || taskConfigForm.asyncBefore"
-          label="排除"
-          value="排除"
+          :label="t('bpm.design.exclusive')"
+          :value="t('bpm.design.exclusive')"
           @change="changeTaskAsync"
         />
       </el-form-item>
@@ -30,8 +30,11 @@
 
 <script lang="ts" setup>
 import { installedComponent } from './data'
+import { useI18n } from 'vue-i18n'
 
 defineOptions({ name: 'ElementTaskConfig' })
+
+const { t } = useI18n()
 
 const props = defineProps({
   id: String,
