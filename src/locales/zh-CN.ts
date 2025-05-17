@@ -56,8 +56,7 @@ export default {
     copySuccess: '复制成功',
     copyError: '复制失败',
     confirm: '确 定',
-    operation: '操作',
-    
+    operation: '操作'
   },
   lock: {
     lockScreen: '锁定屏幕',
@@ -145,9 +144,9 @@ export default {
     qrcode: '扫描二维码登录',
     btnRegister: '注册',
     SmsSendMsg: '验证码已发送',
-    resetPassword: "重置密码",
-    resetPasswordSuccess: "重置密码成功",
-    invalidTenantName: "无效的租户名称"
+    resetPassword: '重置密码',
+    resetPasswordSuccess: '重置密码成功',
+    invalidTenantName: '无效的租户名称'
   },
   captcha: {
     verification: '请完成安全验证',
@@ -489,7 +488,7 @@ export default {
       formDetail: '表单详情',
       manual: '工作流手册'
     },
-     model: {
+    model: {
       dragToSort: '拖动排序',
       sort: '排序',
       create: '新建',
@@ -528,8 +527,11 @@ export default {
       renameSuccess: '重命名成功',
       categoryNotEmpty: '该分类下仍有流程定义,不允许删除',
       confirmDeleteCategory: '确认删除分类吗?',
-    
+
       form: {
+        publish: '发布',
+        restore: '恢复',
+        save: '保存',
         processIdentifier: '流程标识',
         enterProcessIdentifier: '请输入流程标识，以字母或下划线开头',
         identifierNotModifiable: '流程标识不可修改！',
@@ -594,23 +596,23 @@ export default {
       }
     },
     design: {
-      messageList: "消息列表",
-      createNewMessage: "创建新消息",
-      serialNumber: "序号",
-      messageId: "消息ID",
-      messageName: "消息名称",
-      signalList: "信号列表",
-      createNewSignal: "创建新信号",
-      signalId: "信号ID",
-      signalName: "信号名称",
-      createMessage: "创建消息",
-      createSignal: "创建信号",
-      cancel: "取 消",
-      save: "保 存",
-      asyncContinuation: "异步延续",
-      asyncBefore: "异步前",
-      asyncAfter: "异步后",
-      exclusive: "排除",
+      messageList: '消息列表',
+      createNewMessage: '创建新消息',
+      serialNumber: '序号',
+      messageId: '消息ID',
+      messageName: '消息名称',
+      signalList: '信号列表',
+      createNewSignal: '创建新信号',
+      signalId: '信号ID',
+      signalName: '信号名称',
+      createMessage: '创建消息',
+      createSignal: '创建信号',
+      cancel: '取 消',
+      save: '保 存',
+      asyncContinuation: '异步延续',
+      asyncBefore: '异步前',
+      asyncAfter: '异步后',
+      exclusive: '排除',
       eventType: '事件类型',
       listenerType: '监听器类型',
       addListener: '添加监听器',
@@ -624,50 +626,50 @@ export default {
       index: '序号',
       propertyName: '属性名',
       propertyValue: '属性值',
-      
+
       addProperty: '添加属性',
       propertyConfig: '属性配置',
       propertyNameLabel: '属性名：',
       propertyValueLabel: '属性值：',
-    
+
       confirm: '确 定',
       general: '常规',
       messageAndSignal: '消息与信号',
       flowCondition: '流转条件',
       form: '表单',
       multiApprovalType: '多人审批方式',
-      multiInstance:'多人审批方式',
+      multiInstance: '多人审批方式',
       taskListener: '任务监听器',
       extensionProperties: '扩展属性',
       other: '其他',
       customConfig: '自定义配置',
-      processId: "流程标识",
-      enterProcessId: "请输入流程标识",
-      processName: "流程名称",
-      enterProcessName: "请输入流程名称",
-      id: "ID",
-      name: "名称",
-      processIdRequired: "流程标识不能为空",
-      processNameRequired: "流程名称不能为空",
+      processId: '流程标识',
+      enterProcessId: '请输入流程标识',
+      processName: '流程名称',
+      enterProcessName: '请输入流程名称',
+      id: 'ID',
+      name: '名称',
+      processIdRequired: '流程标识不能为空',
+      processNameRequired: '流程名称不能为空',
       elementDocumentation: '元素文档：',
       executeType: '执行类型',
       delegateExpression: '代理表达式',
       processForm: '流程表单',
       businessKey: '业务标识',
       none: '无',
-      candidateStrategy: "规则类型",
-      role: "指定角色",
-      dept: "指定部门",
-      loading: "加载中，请稍后",
-     
-      post: "指定岗位",
-      user: "指定用户",
-      userGroup: "指定用户组",
-      formUser: "表单内用户字段",
-      formDept: "表单内部门字段",
-      deptLevel: "部门层级",
-     
-      skipExpression: "跳过表达式",
+      candidateStrategy: '规则类型',
+      role: '指定角色',
+      dept: '指定部门',
+      loading: '加载中，请稍后',
+
+      post: '指定岗位',
+      user: '指定用户',
+      userGroup: '指定用户组',
+      formUser: '表单内用户字段',
+      formDept: '表单内部门字段',
+      deptLevel: '部门层级',
+
+      skipExpression: '跳过表达式',
       openFile: '打开文件',
       downloadXml: '下载为XML文件',
       downloadSvg: '下载为SVG文件',
@@ -687,9 +689,12 @@ export default {
       countersignType: '会签类型',
       parallelMultiInstance: '并行多重事件',
       sequentialMultiInstance: '时序多重事件',
-      
+      timeCycle: '时间循环',
+      collection: '集合',
+      elementVariable: '元素变量',
+      completionCondition: '完成条件',
+      asyncState: '异步状态',
+      loopCardinality: '循环基数'
     }
-
-     
-    }
-    }
+  }
+}

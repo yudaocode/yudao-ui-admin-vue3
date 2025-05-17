@@ -33,14 +33,26 @@
     <!-- 与Simple设计器配置合并，保留以前的代码 -->
     <el-form label-width="90px">
       <el-form-item :label="$t('bpm.design.quickConfig')">
-        <el-button size="small" @click="changeConfig($t('bpm.design.sequentialApproval'))">{{ $t('bpm.design.sequentialApproval') }}</el-button>
-        <el-button size="small" @click="changeConfig($t('bpm.design.countersign'))">{{ $t('bpm.design.countersign') }}</el-button>
-        <el-button size="small" @click="changeConfig($t('bpm.design.orSign'))">{{ $t('bpm.design.orSign') }}</el-button>
+        <el-button size="small" @click="changeConfig($t('bpm.design.sequentialApproval'))">{{
+          $t('bpm.design.sequentialApproval')
+        }}</el-button>
+        <el-button size="small" @click="changeConfig($t('bpm.design.countersign'))">{{
+          $t('bpm.design.countersign')
+        }}</el-button>
+        <el-button size="small" @click="changeConfig($t('bpm.design.orSign'))">{{
+          $t('bpm.design.orSign')
+        }}</el-button>
       </el-form-item>
       <el-form-item :label="$t('bpm.design.countersignType')">
         <el-select v-model="loopCharacteristics" @change="changeLoopCharacteristicsType">
-          <el-option :label="$t('bpm.design.parallelMultiInstance')" value="ParallelMultiInstance" />
-          <el-option :label="$t('bpm.design.sequentialMultiInstance')" value="SequentialMultiInstance" />
+          <el-option
+            :label="$t('bpm.design.parallelMultiInstance')"
+            value="ParallelMultiInstance"
+          />
+          <el-option
+            :label="$t('bpm.design.sequentialMultiInstance')"
+            value="SequentialMultiInstance"
+          />
           <el-option :label="$t('bpm.design.none')" value="Null" />
         </el-select>
       </el-form-item>
@@ -50,21 +62,25 @@
           loopCharacteristics === 'SequentialMultiInstance'
         "
       >
-        <el-form-item label="循环数量" key="loopCardinality">
+        <el-form-item :label="$t('bpm.design.loopCardinality')" key="loopCardinality">
           <el-input
             v-model="loopInstanceForm.loopCardinality"
             clearable
             @change="updateLoopCardinality"
           />
         </el-form-item>
-        <el-form-item label="集合" key="collection" v-show="false">
+        <el-form-item :label="$t('bpm.design.collection')" key="collection" v-show="false">
           <el-input v-model="loopInstanceForm.collection" clearable @change="updateLoopBase" />
         </el-form-item>
         <!-- add by 芋艿：由于「元素变量」暂时用不到，所以这里 display 为 none -->
-        <el-form-item label="元素变量" key="elementVariable" style="display: none">
+        <el-form-item
+          :label="$t('bpm.design.elementVariable')"
+          key="elementVariable"
+          style="display: none"
+        >
           <el-input v-model="loopInstanceForm.elementVariable" clearable @change="updateLoopBase" />
         </el-form-item>
-        <el-form-item label="完成条件" key="completionCondition">
+        <el-form-item :label="$t('bpm.design.completionCondition')" key="completionCondition">
           <el-input
             v-model="loopInstanceForm.completionCondition"
             clearable
@@ -72,29 +88,29 @@
           />
         </el-form-item>
         <!-- add by 芋艿：由于「异步状态」暂时用不到，所以这里 display 为 none -->
-        <el-form-item label="异步状态" key="async" style="display: none">
+        <el-form-item :label="$t('bpm.design.asyncState')" key="async" style="display: none">
           <el-checkbox
             v-model="loopInstanceForm.asyncBefore"
-            label="异步前"
-            value="异步前"
+            :label="$t('bpm.design.asyncBefore')"
+            :value="$t('bpm.design.asyncBefore')"
             @change="updateLoopAsync('asyncBefore')"
           />
           <el-checkbox
             v-model="loopInstanceForm.asyncAfter"
-            label="异步后"
-            value="异步后"
+            :label="$t('bpm.design.asyncAfter')"
+            :value="$t('bpm.design.asyncAfter')"
             @change="updateLoopAsync('asyncAfter')"
           />
           <el-checkbox
             v-model="loopInstanceForm.exclusive"
             v-if="loopInstanceForm.asyncAfter || loopInstanceForm.asyncBefore"
-            label="排除"
-            value="排除"
+            :label="$t('bpm.design.exclusive')"
+            :value="$t('bpm.design.exclusive')"
             @change="updateLoopAsync('exclusive')"
           />
         </el-form-item>
         <el-form-item
-          label="重试周期"
+          :label="$t('bpm.design.timeCycle')"
           prop="timeCycle"
           v-if="loopInstanceForm.asyncAfter || loopInstanceForm.asyncBefore"
           key="timeCycle"

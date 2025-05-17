@@ -45,11 +45,11 @@
         <!-- 右侧按钮 -->
         <div class="w-200px flex items-center justify-end gap-2">
           <el-button v-if="actionType === 'update'" type="success" @click="handleDeploy">
-            发 布
+            {{ $t('bpm.model.form.publish') }}
           </el-button>
           <el-button type="primary" @click="handleSave">
-            <span v-if="actionType === 'definition'">恢 复</span>
-            <span v-else>保 存</span>
+            <span v-if="actionType === 'definition'">{{ $t('bpm.model.form.restore') }}</span>
+            <span v-else>{{ $t('bpm.model.form.save') }}</span>
           </el-button>
         </div>
       </div>

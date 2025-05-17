@@ -56,7 +56,7 @@ export default {
     copySuccess: 'Copy Success',
     copyError: 'Copy Error',
     confirm: 'Confirm',
-    operation: 'Operation',
+    operation: 'Operation'
   },
   lock: {
     lockScreen: 'Lock screen',
@@ -143,9 +143,9 @@ export default {
     qrcode: 'Scan the QR code to log in',
     btnRegister: 'Sign up',
     SmsSendMsg: 'code has been sent',
-    resetPassword: "Reset Password",
-    resetPasswordSuccess: "Reset Password Success",
-    invalidTenantName:"Invalid Tenant Name"
+    resetPassword: 'Reset Password',
+    resetPasswordSuccess: 'Reset Password Success',
+    invalidTenantName: 'Invalid Tenant Name'
   },
   captcha: {
     verification: 'Please complete security verification',
@@ -532,10 +532,14 @@ export default {
       categoryNotEmpty: 'This category still has process definitions, deletion is not allowed',
       confirmDeleteCategory: 'Are you sure to delete this category?',
       form: {
+        publish: 'Publish',
+        restore: 'Restore',
+        save: 'Save',
         processIdentifier: 'Process Identifier',
         enterProcessIdentifier: 'Please enter process identifier, start with letter or underscore',
         identifierNotModifiable: 'Process identifier cannot be modified!',
-        identifierNotModifiableAfterCreation: 'After creation, process identifier cannot be modified!',
+        identifierNotModifiableAfterCreation:
+          'After creation, process identifier cannot be modified!',
         processName: 'Process Name',
         enterProcessName: 'Please enter process name',
         processCategory: 'Process Category',
@@ -560,7 +564,8 @@ export default {
         processAdminRequired: 'Process administrator cannot be empty',
         submitterPermissions: 'Submitter Permissions',
         allowCancelRunning: 'Allow cancellation of running applications',
-        cancelRunningTip: 'After the first approval node passes, the submitter can still cancel the application',
+        cancelRunningTip:
+          'After the first approval node passes, the submitter can still cancel the application',
         processCode: 'Process Code',
         prefix: 'Prefix',
         infix: 'Infix',
@@ -576,7 +581,8 @@ export default {
         showProcessName: 'Show Process Name',
         customTitle: 'Custom Title',
         insertFieldTip: 'Enter "{" to insert form field',
-        insertFieldPlaceholder: 'Please insert form fields (enter "{" to select form field) or enter text',
+        insertFieldPlaceholder:
+          'Please insert form fields (enter "{" to select form field) or enter text',
         summarySettings: 'Summary Settings',
         showFirstThreeFields: 'Show first 3 form fields',
         customSummary: 'Custom Summary',
@@ -599,33 +605,34 @@ export default {
         formViewPath: 'Form View Path',
         enterFormSubmitPath: 'Please enter form submit path',
         enterFormViewPath: 'Please enter form view path',
-        customFormSubmitPathTip: 'Custom form submit path using Vue route address, e.g.: bpm/oa/leave/create.vue',
-        customFormViewPathTip: 'Custom form view component path using Vue component address, e.g.: bpm/oa/leave/detail.vue',
+        customFormSubmitPathTip:
+          'Custom form submit path using Vue route address, e.g.: bpm/oa/leave/create.vue',
+        customFormViewPathTip:
+          'Custom form view component path using Vue component address, e.g.: bpm/oa/leave/detail.vue',
         formPreview: 'Form Preview',
         formTypeRequired: 'Form type cannot be empty',
         processFormRequired: 'Process form cannot be empty',
         formSubmitPathRequired: 'Form submit path cannot be empty',
         formViewPathRequired: 'Form view path cannot be empty'
-
-      },
+      }
     },
     design: {
-      messageList: "Message List",
-      createNewMessage: "Create New Message",
-      serialNumber: "No.",
-      messageId: "Message ID",
-      messageName: "Message Name",
-      signalList: "Signal List",
-      createNewSignal: "Create New Signal",
-      signalId: "Signal ID",
-      signalName: "Signal Name",
-      createMessage: "Create Message",
-      createSignal: "Create Signal",
-      cancel: "Cancel",
-      save: "Save",
-      asyncBefore: "Async Before",
-      asyncAfter: "Async After",
-      exclusive: "Exclusive",
+      messageList: 'Message List',
+      createNewMessage: 'Create New Message',
+      serialNumber: 'No.',
+      messageId: 'Message ID',
+      messageName: 'Message Name',
+      signalList: 'Signal List',
+      createNewSignal: 'Create New Signal',
+      signalId: 'Signal ID',
+      signalName: 'Signal Name',
+      createMessage: 'Create Message',
+      createSignal: 'Create Signal',
+      cancel: 'Cancel',
+      save: 'Save',
+      asyncBefore: 'Async Before',
+      asyncAfter: 'Async After',
+      exclusive: 'Exclusive',
       eventType: 'Event Type',
       listenerType: 'Listener Type',
       addListener: 'Add Listener',
@@ -639,12 +646,12 @@ export default {
       index: 'Index',
       propertyName: 'Property Name',
       propertyValue: 'Property Value',
-      
+
       addProperty: 'Add Property',
       propertyConfig: 'Property Config',
       propertyNameLabel: 'Property Name:',
       propertyValueLabel: 'Property Value:',
-    
+
       confirm: 'Confirm',
       general: 'General',
       messageAndSignal: 'Message & Signal',
@@ -652,19 +659,19 @@ export default {
       form: 'Form',
       multiApprovalType: 'Multi-approval Type',
       multiInstance: 'Multi Instance',
-   
+
       taskListener: 'Task Listener',
       extensionProperties: 'Extension Properties',
       other: 'Other',
       customConfig: 'Custom Config',
-      processId: "Process ID",
-      enterProcessId: "Please enter process ID",
-      processName: "Process Name",
-      enterProcessName: "Please enter process name",
-      id: "ID",
-      name: "Name",
-      processIdRequired: "Process ID is required",
-      processNameRequired: "Process name is required",
+      processId: 'Process ID',
+      enterProcessId: 'Please enter process ID',
+      processName: 'Process Name',
+      enterProcessName: 'Please enter process name',
+      id: 'ID',
+      name: 'Name',
+      processIdRequired: 'Process ID is required',
+      processNameRequired: 'Process name is required',
       elementDocumentation: 'Element Documentation:',
       executeType: 'Execute Type',
 
@@ -672,19 +679,19 @@ export default {
       processForm: 'Process Form',
       businessKey: 'Business Key',
       none: 'None',
-      candidateStrategy: "Rule Type",
-      role: "Role",
-      dept: "Department",
-      loading: "Loading, please wait",
+      candidateStrategy: 'Rule Type',
+      role: 'Role',
+      dept: 'Department',
+      loading: 'Loading, please wait',
 
-      post: "Post",
-      user: "User", 
-      userGroup: "User Group", 
-      formUser: "Form Dept Field", 
-      formDept: "Form Dept Field", 
-      deptLevel: "Department Level", 
-     
-      skipExpression: "Skip Expression" ,
+      post: 'Post',
+      user: 'User',
+      userGroup: 'User Group',
+      formUser: 'Form Dept Field',
+      formDept: 'Form Dept Field',
+      deptLevel: 'Department Level',
+
+      skipExpression: 'Skip Expression',
       openFile: 'Open File',
       downloadXml: 'Download as XML',
       downloadSvg: 'Download as SVG',
@@ -697,17 +704,21 @@ export default {
       exitSimulation: 'Exit Simulation',
       startSimulation: 'Start Simulation',
 
-      multiInstanceNotImplemented: 'Multi-instance for nodes other than UserTask is not implemented yet',
-    quickConfig: 'Quick Configuration',
-    sequentialApproval: 'Sequential Approval',
-    countersign: 'Countersign',
-    orSign: 'Or-sign',
-    countersignType: 'Countersign Type',
-    parallelMultiInstance: 'Parallel Multi-instance',
-    sequentialMultiInstance: 'Sequential Multi-instance',
-
+      multiInstanceNotImplemented:
+        'Multi-instance for nodes other than UserTask is not implemented yet',
+      quickConfig: 'Quick Configuration',
+      sequentialApproval: 'Sequential Approval',
+      countersign: 'Countersign',
+      orSign: 'Or-sign',
+      countersignType: 'Countersign Type',
+      parallelMultiInstance: 'Parallel Multi-instance',
+      sequentialMultiInstance: 'Sequential Multi-instance',
+      timeCycle: 'Time Cycle',
+      collection: 'Collection',
+      elementVariable: 'Element Variable',
+      completionCondition: 'Completion Condition',
+      asyncState: 'Async State',
+      loopCardinality: 'Loop Cardinality'
     }
-  
-    
   }
-  }
+}
