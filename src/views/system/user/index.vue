@@ -1,17 +1,13 @@
 <template>
-  <doc-alert title="用户体系" url="https://doc.iocoder.cn/user-center/" />
-  <doc-alert title="三方登陆" url="https://doc.iocoder.cn/social-user/" />
-  <doc-alert title="Excel 导入导出" url="https://doc.iocoder.cn/excel-import-and-export/" />
-
   <el-row :gutter="20">
-    <!-- 左侧部门树 -->
+    <!-- Left department tree -->
     <el-col :span="4" :xs="24">
       <ContentWrap class="h-1/1">
         <DeptTree @node-click="handleDeptNodeClick" />
       </ContentWrap>
     </el-col>
     <el-col :span="20" :xs="24">
-      <!-- 搜索 -->
+      <!-- Search -->
       <ContentWrap>
         <el-form
           class="-mb-15px"
@@ -20,28 +16,28 @@
           :inline="true"
           label-width="68px"
         >
-          <el-form-item label="用户名称" prop="username">
+          <el-form-item :label="$t('sys.user.username')" prop="username">
             <el-input
               v-model="queryParams.username"
-              placeholder="请输入用户名称"
+              :placeholder="$t('sys.user.inputUsername')"
               clearable
               @keyup.enter="handleQuery"
               class="!w-240px"
             />
           </el-form-item>
-          <el-form-item label="手机号码" prop="mobile">
+          <el-form-item :label="$t('sys.user.mobile')" prop="mobile">
             <el-input
               v-model="queryParams.mobile"
-              placeholder="请输入手机号码"
+              :placeholder="$t('sys.user.inputMobile')"
               clearable
               @keyup.enter="handleQuery"
               class="!w-240px"
             />
           </el-form-item>
-          <el-form-item label="状态" prop="status">
+          <el-form-item :label="$t('sys.user.status')" prop="status">
             <el-select
               v-model="queryParams.status"
-              placeholder="请选择用户状态"
+              :placeholder="$t('sys.user.selectStatus')"
               clearable
               class="!w-240px"
             >
@@ -53,26 +49,30 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="创建时间" prop="createTime">
+          <el-form-item :label="$t('sys.user.createTime')" prop="createTime">
             <el-date-picker
               v-model="queryParams.createTime"
               value-format="YYYY-MM-DD HH:mm:ss"
               type="datetimerange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
+              :start-placeholder="$t('sys.user.startDate')"
+              :end-placeholder="$t('sys.user.endDate')"
               class="!w-240px"
             />
           </el-form-item>
           <el-form-item>
-            <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-            <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+            <el-button @click="handleQuery"
+              ><Icon icon="ep:search" />{{ $t('sys.user.search') }}</el-button
+            >
+            <el-button @click="resetQuery"
+              ><Icon icon="ep:refresh" />{{ $t('sys.user.reset') }}</el-button
+            >
             <el-button
               type="primary"
               plain
               @click="openForm('create')"
               v-hasPermi="['system:user:create']"
             >
-              <Icon icon="ep:plus" /> 新增
+              <Icon icon="ep:plus" /> {{ $t('sys.user.add') }}
             </el-button>
             <el-button
               type="warning"
@@ -80,7 +80,7 @@
               @click="handleImport"
               v-hasPermi="['system:user:import']"
             >
-              <Icon icon="ep:upload" /> 导入
+              <Icon icon="ep:upload" /> {{ $t('sys.user.import') }}
             </el-button>
             <el-button
               type="success"
@@ -89,35 +89,40 @@
               :loading="exportLoading"
               v-hasPermi="['system:user:export']"
             >
-              <Icon icon="ep:download" />导出
+              <Icon icon="ep:download" />{{ $t('sys.user.export') }}
             </el-button>
           </el-form-item>
         </el-form>
       </ContentWrap>
       <ContentWrap>
         <el-table v-loading="loading" :data="list">
-          <el-table-column label="用户编号" align="center" key="id" prop="id" />
+          <el-table-column :label="$t('sys.user.id')" align="center" key="id" prop="id" />
           <el-table-column
-            label="用户名称"
+            :label="$t('sys.user.username')"
             align="center"
             prop="username"
             :show-overflow-tooltip="true"
           />
           <el-table-column
-            label="用户昵称"
+            :label="$t('sys.user.nickname')"
             align="center"
             prop="nickname"
             :show-overflow-tooltip="true"
           />
           <el-table-column
-            label="部门"
+            :label="$t('sys.user.deptName')"
             align="center"
             key="deptName"
             prop="deptName"
             :show-overflow-tooltip="true"
           />
-          <el-table-column label="手机号码" align="center" prop="mobile" width="120" />
-          <el-table-column label="状态" key="status">
+          <el-table-column
+            :label="$t('sys.user.mobile')"
+            align="center"
+            prop="mobile"
+            width="120"
+          />
+          <el-table-column :label="$t('sys.user.status')" key="status">
             <template #default="scope">
               <el-switch
                 v-model="scope.row.status"
@@ -129,13 +134,13 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="创建时间"
+            :label="$t('sys.user.createTime')"
             align="center"
             prop="createTime"
             :formatter="dateFormatter"
             width="180"
           />
-          <el-table-column label="操作" align="center" width="160">
+          <el-table-column :label="$t('sys.user.operation')" align="center" width="160">
             <template #default="scope">
               <div class="flex items-center justify-center">
                 <el-button
@@ -144,7 +149,7 @@
                   @click="openForm('update', scope.row.id)"
                   v-hasPermi="['system:user:update']"
                 >
-                  <Icon icon="ep:edit" />修改
+                  <Icon icon="ep:edit" />{{ $t('sys.user.edit') }}
                 </el-button>
                 <el-dropdown
                   @command="(command) => handleCommand(command, scope.row)"
@@ -154,26 +159,28 @@
                     'system:permission:assign-user-role'
                   ]"
                 >
-                  <el-button type="primary" link><Icon icon="ep:d-arrow-right" /> 更多</el-button>
+                  <el-button type="primary" link
+                    ><Icon icon="ep:d-arrow-right" /> {{ $t('sys.user.more') }}</el-button
+                  >
                   <template #dropdown>
                     <el-dropdown-menu>
                       <el-dropdown-item
                         command="handleDelete"
                         v-if="checkPermi(['system:user:delete'])"
                       >
-                        <Icon icon="ep:delete" />删除
+                        <Icon icon="ep:delete" />Delete user
                       </el-dropdown-item>
                       <el-dropdown-item
                         command="handleResetPwd"
                         v-if="checkPermi(['system:user:update-password'])"
                       >
-                        <Icon icon="ep:key" />重置密码
+                        <Icon icon="ep:key" />Change password
                       </el-dropdown-item>
                       <el-dropdown-item
                         command="handleRole"
                         v-if="checkPermi(['system:permission:assign-user-role'])"
                       >
-                        <Icon icon="ep:circle-check" />分配角色
+                        <Icon icon="ep:circle-check" />Change role
                       </el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
@@ -276,8 +283,11 @@ const handleImport = () => {
 const handleStatusChange = async (row: UserApi.UserVO) => {
   try {
     // 修改状态的二次确认
-    const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
-    await message.confirm('确认要"' + text + '""' + row.username + '"用户吗?')
+    const text =
+      row.status === CommonStatusEnum.ENABLE ? t('sys.user.enable') : t('sys.user.disable')
+    await message.confirm(
+      t('sys.user.confirmChangeStatus', { status: text, username: row.username })
+    )
     // 发起修改状态
     await UserApi.updateUserStatus(row.id, row.status)
     // 刷新列表
@@ -298,7 +308,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await UserApi.exportUser(queryParams)
-    download.excel(data, '用户数据.xls')
+    download.excel(data, 'export.xls')
   } catch {
   } finally {
     exportLoading.value = false
