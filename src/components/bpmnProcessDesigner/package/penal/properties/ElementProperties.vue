@@ -1,13 +1,13 @@
 <template>
   <div class="panel-tab__content">
     <el-table :data="elementPropertyList" max-height="240" fit border>
-      <el-table-column label="序号" width="50px" type="index" />
-      <el-table-column label="属性名" prop="name" min-width="100px" show-overflow-tooltip />
-      <el-table-column label="属性值" prop="value" min-width="100px" show-overflow-tooltip />
-      <el-table-column label="操作" width="110px">
+      <el-table-column :label="$t('bpm.design.index')" width="50px" type="index" />
+      <el-table-column :label="$t('bpm.design.propertyName')" prop="name" min-width="100px" show-overflow-tooltip />
+      <el-table-column :label="$t('bpm.design.propertyValue')" prop="value" min-width="100px" show-overflow-tooltip />
+      <el-table-column :label="$t('bpm.design.action')" width="110px">
         <template #default="scope">
           <el-button link @click="openAttributesForm(scope.row, scope.$index)" size="small">
-            编辑
+            {{ $t('bpm.design.edit') }}
           </el-button>
           <el-divider direction="vertical" />
           <el-button
@@ -16,7 +16,7 @@
             style="color: #ff4d4f"
             @click="removeAttributes(scope.row, scope.$index)"
           >
-            移除
+            {{ $t('bpm.design.remove') }}
           </el-button>
         </template>
       </el-table-column>
@@ -25,29 +25,29 @@
       <XButton
         type="primary"
         preIcon="ep:plus"
-        title="添加属性"
+        :title="$t('bpm.design.addProperty')"
         @click="openAttributesForm(null, -1)"
       />
     </div>
 
     <el-dialog
       v-model="propertyFormModelVisible"
-      title="属性配置"
+      :title="$t('bpm.design.propertyConfig')"
       width="600px"
       append-to-body
       destroy-on-close
     >
       <el-form :model="propertyForm" label-width="80px" ref="attributeFormRef">
-        <el-form-item label="属性名：" prop="name">
+        <el-form-item :label="$t('bpm.design.propertyNameLabel')" prop="name">
           <el-input v-model="propertyForm.name" clearable />
         </el-form-item>
-        <el-form-item label="属性值：" prop="value">
+        <el-form-item :label="$t('bpm.design.propertyValueLabel')" prop="value">
           <el-input v-model="propertyForm.value" clearable />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="propertyFormModelVisible = false">取 消</el-button>
-        <el-button type="primary" @click="saveAttribute">确 定</el-button>
+        <el-button @click="propertyFormModelVisible = false">{{ $t('bpm.design.cancel') }}</el-button>
+        <el-button type="primary" @click="saveAttribute">{{ $t('bpm.design.confirm') }}</el-button>
       </template>
     </el-dialog>
   </div>

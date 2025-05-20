@@ -1,7 +1,4 @@
 <template>
-  <doc-alert title="功能权限" url="https://doc.iocoder.cn/resource-permission" />
-  <doc-alert title="菜单路由" url="https://doc.iocoder.cn/vue3/route/" />
-
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form
@@ -11,21 +8,21 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="菜单名称" prop="name">
+      <el-form-item :label="$t('sys.menu.name')" prop="name">
         <el-input
           v-model="queryParams.name"
           class="!w-240px"
           clearable
-          placeholder="请输入菜单名称"
+          :placeholder="$t('sys.menu.inputName')"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
+      <el-form-item :label="$t('sys.menu.status')" prop="status">
         <el-select
           v-model="queryParams.status"
           class="!w-240px"
           clearable
-          placeholder="请选择菜单状态"
+          :placeholder="$t('sys.menu.selectStatus')"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -38,11 +35,11 @@
       <el-form-item>
         <el-button @click="handleQuery">
           <Icon class="mr-5px" icon="ep:search" />
-          搜索
+          {{ $t('sys.menu.search') }}
         </el-button>
         <el-button @click="resetQuery">
           <Icon class="mr-5px" icon="ep:refresh" />
-          重置
+          {{ $t('sys.menu.reset') }}
         </el-button>
         <el-button
           v-hasPermi="['system:menu:create']"
@@ -51,15 +48,7 @@
           @click="openForm('create')"
         >
           <Icon class="mr-5px" icon="ep:plus" />
-          新增
-        </el-button>
-        <el-button plain type="danger" @click="toggleExpandAll">
-          <Icon class="mr-5px" icon="ep:sort" />
-          展开/折叠
-        </el-button>
-        <el-button plain @click="refreshMenu">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          刷新菜单缓存
+          {{ $t('sys.menu.create') }}
         </el-button>
       </el-form-item>
     </el-form>

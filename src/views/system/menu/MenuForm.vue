@@ -7,7 +7,7 @@
       :rules="formRules"
       label-width="100px"
     >
-      <el-form-item label="上级菜单">
+      <el-form-item :label="t('sys.menu.parentId')">
         <el-tree-select
           v-model="formData.parentId"
           :data="menuTree"
@@ -17,10 +17,10 @@
           node-key="id"
         />
       </el-form-item>
-      <el-form-item label="菜单名称" prop="name">
-        <el-input v-model="formData.name" clearable placeholder="请输入菜单名称" />
+      <el-form-item :label="t('sys.menu.name')" prop="name">
+        <el-input v-model="formData.name" clearable :placeholder="t('sys.menu.namePlaceholder')" />
       </el-form-item>
-      <el-form-item label="菜单类型" prop="type">
+      <el-form-item :label="t('sys.menu.type')" prop="type">
         <el-radio-group v-model="formData.type">
           <el-radio-button
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_MENU_TYPE)"
@@ -31,17 +31,17 @@
           </el-radio-button>
         </el-radio-group>
       </el-form-item>
-      <el-form-item v-if="formData.type !== 3" label="菜单图标">
+      <el-form-item v-if="formData.type !== 3" :label="t('sys.menu.icon')">
         <IconSelect v-model="formData.icon" clearable />
       </el-form-item>
-      <el-form-item v-if="formData.type !== 3" label="路由地址" prop="path">
+      <el-form-item v-if="formData.type !== 3" :label="t('sys.menu.path')" prop="path">
         <template #label>
           <Tooltip
-            message="访问的路由地址，如：`user`。如需外网地址时，则以 `http(s)://` 开头"
-            title="路由地址"
+            :message="t('sys.menu.pathTip')"
+            :title="t('sys.menu.path')"
           />
         </template>
-        <el-input v-model="formData.path" clearable placeholder="请输入路由地址" />
+        <el-input v-model="formData.path" clearable :placeholder="t('sys.menu.pathPlaceholder')" />
       </el-form-item>
       <el-form-item v-if="formData.type === 2" label="组件地址" prop="component">
         <el-input v-model="formData.component" clearable placeholder="例如说：system/user/index" />
@@ -146,11 +146,11 @@ const formData = ref({
   alwaysShow: true
 })
 const formRules = reactive({
-  name: [{ required: true, message: '菜单名称不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '菜单类型不能为空', trigger: 'blur' }],
-  sort: [{ required: true, message: '菜单顺序不能为空', trigger: 'blur' }],
-  path: [{ required: true, message: '路由地址不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: t('sys.menu.nameRequired'), trigger: 'blur' }],
+  type: [{ required: true, message: t('sys.menu.typeRequired'), trigger: 'blur' }],
+  sort: [{ required: true, message: t('sys.menu.sortRequired'), trigger: 'blur' }],
+  path: [{ required: true, message: t('sys.menu.pathRequired'), trigger: 'blur' }],
+  status: [{ required: true, message: t('sys.menu.statusRequired'), trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
