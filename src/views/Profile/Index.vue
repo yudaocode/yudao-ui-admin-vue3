@@ -18,9 +18,6 @@
           <el-tab-pane :label="t('profile.info.resetPwd')" name="resetPwd">
             <ResetPwd />
           </el-tab-pane>
-          <el-tab-pane :label="t('profile.info.userSocial')" name="userSocial">
-            <UserSocial v-model:activeName="activeName" />
-          </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
