@@ -201,7 +201,7 @@ export default {
     happyDay: '祝你开心每一天!',
     toady: '今日晴',
     notice: '通知公告',
-    project: '项目数',
+    project: '工具列表',
     access: '项目访问',
     toDo: '待办',
     introduction: '一个正经的简介',
