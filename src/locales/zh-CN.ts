@@ -114,13 +114,13 @@ export default {
     small: '小'
   },
   login: {
-    welcome: '欢迎使用本系统',
-    message: '开箱即用的中后台管理系统',
+    welcome: '欢迎使用云匣',
+    message: '云端一匣，万用皆藏。',
     tenantname: '租户名称',
     username: '用户名',
     password: '密码',
     code: '验证码',
-    login: '登录',
+    login: '登 录',
     relogin: '重新登录',
     otherLogin: '其他登录方式',
     register: '注册',
@@ -366,7 +366,7 @@ export default {
     },
     login: {
       backSignIn: '返回',
-      signInFormTitle: '登录',
+      signInFormTitle: '登 录',
       ssoFormTitle: '三方授权',
       mobileSignInFormTitle: '手机登录',
       qrSignInFormTitle: '二维码登录',
