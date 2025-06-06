@@ -6,7 +6,7 @@
     label-width="100px"
     v-loading="formLoading"
   >
-     <el-form-item label="名字" prop="name">
+    <el-form-item label="名字" prop="name">
       <el-input v-model="formData.name" placeholder="请输入名字" />
     </el-form-item>
     <el-form-item label="班主任" prop="teacher">
@@ -15,13 +15,13 @@
   </el-form>
 </template>
 <script setup lang="ts">
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/inner'
+import { Demo03StudentApi } from '@/api/infra/demo/demo03/inner'
 
 const props = defineProps<{
-  studentId: undefined // 学生编号（主表的关联字段）
+  studentId: number // 学生编号（主表的关联字段）
 }>()
 const formLoading = ref(false) // 表单的加载中
-const formData = ref([])
+const formData = ref<any>({})
 const formRules = reactive({
   studentId: [{ required: true, message: '学生编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
@@ -38,11 +38,11 @@ watch(
       id: undefined,
       studentId: undefined,
       name: undefined,
-      teacher: undefined,
+      teacher: undefined
     }
     // 2. val 非空，则加载数据
     if (!val) {
-      return;
+      return
     }
     try {
       formLoading.value = true

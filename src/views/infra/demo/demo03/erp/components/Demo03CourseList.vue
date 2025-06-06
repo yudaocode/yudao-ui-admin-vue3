@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import { isEmpty } from '@/utils/is'
-import { Demo03StudentApi } from '@/api/infra/demo/demo03/erp'
+import {Demo03Course, Demo03StudentApi} from '@/api/infra/demo/demo03/erp'
 import Demo03CourseForm from './Demo03CourseForm.vue'
 
 const { t } = useI18n() // 国际化
