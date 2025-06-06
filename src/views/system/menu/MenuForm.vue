@@ -25,7 +25,7 @@
           <el-radio-button
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_MENU_TYPE)"
             :key="dict.label"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio-button>
@@ -66,7 +66,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.label"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -77,8 +77,8 @@
           <Tooltip message="选择隐藏时，路由将不会出现在侧边栏，但仍然可以访问" title="显示状态" />
         </template>
         <el-radio-group v-model="formData.visible">
-          <el-radio key="true" :label="true" border>显示</el-radio>
-          <el-radio key="false" :label="false" border>隐藏</el-radio>
+          <el-radio key="true" :value="true" border>显示</el-radio>
+          <el-radio key="false" :value="false" border>隐藏</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.type !== 3" label="总是显示" prop="alwaysShow">
@@ -89,8 +89,8 @@
           />
         </template>
         <el-radio-group v-model="formData.alwaysShow">
-          <el-radio key="true" :label="true" border>总是</el-radio>
-          <el-radio key="false" :label="false" border>不是</el-radio>
+          <el-radio key="true" :value="true" border>总是</el-radio>
+          <el-radio key="false" :value="false" border>不是</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.type === 2" label="缓存状态" prop="keepAlive">
@@ -101,8 +101,8 @@
           />
         </template>
         <el-radio-group v-model="formData.keepAlive">
-          <el-radio key="true" :label="true" border>缓存</el-radio>
-          <el-radio key="false" :label="false" border>不缓存</el-radio>
+          <el-radio key="true" :value="true" border>缓存</el-radio>
+          <el-radio key="false" :value="false" border>不缓存</el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
@@ -130,7 +130,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: 0,
+  id: undefined,
   name: '',
   permission: '',
   type: SystemMenuTypeEnum.DIR,
@@ -147,6 +147,7 @@ const formData = ref({
 })
 const formRules = reactive({
   name: [{ required: true, message: '菜单名称不能为空', trigger: 'blur' }],
+  type: [{ required: true, message: '菜单类型不能为空', trigger: 'blur' }],
   sort: [{ required: true, message: '菜单顺序不能为空', trigger: 'blur' }],
   path: [{ required: true, message: '路由地址不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
@@ -231,7 +232,7 @@ const getTree = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: 0,
+    id: undefined,
     name: '',
     permission: '',
     type: SystemMenuTypeEnum.DIR,

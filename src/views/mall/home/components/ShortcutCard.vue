@@ -10,7 +10,10 @@
         class="h-20 w-20% flex flex-col cursor-pointer items-center justify-center gap-2"
         @click="handleMenuClick(menu.routerName)"
       >
-        <div :class="menu.bgColor" class="rounded p-3 text-white">
+        <div
+          :class="menu.bgColor"
+          class="h-48px w-48px flex items-center justify-center rounded text-white"
+        >
           <Icon :icon="menu.icon" class="text-7.5!" />
         </div>
         <span>{{ menu.name }}</span>

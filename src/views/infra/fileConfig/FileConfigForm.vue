@@ -5,7 +5,7 @@
       v-loading="formLoading"
       :model="formData"
       :rules="formRules"
-      label-width="120px"
+      label-width="130px"
     >
       <el-form-item label="配置名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入配置名" />
@@ -66,8 +66,8 @@
       </el-form-item>
       <el-form-item v-if="formData.storage === 11" label="连接模式" prop="config.mode">
         <el-radio-group v-model="formData.config.mode">
-          <el-radio key="Active" label="Active">主动模式</el-radio>
-          <el-radio key="Passive" label="Passive">被动模式</el-radio>
+          <el-radio key="Active" value="Active">主动模式</el-radio>
+          <el-radio key="Passive" value="Passive">被动模式</el-radio>
         </el-radio-group>
       </el-form-item>
       <!-- S3 -->
@@ -82,6 +82,16 @@
       </el-form-item>
       <el-form-item v-if="formData.storage === 20" label="accessSecret" prop="config.accessSecret">
         <el-input v-model="formData.config.accessSecret" placeholder="请输入 accessSecret" />
+      </el-form-item>
+      <el-form-item
+        v-if="formData.storage === 20"
+        label="是否 Path Style"
+        prop="config.enablePathStyleAccess"
+      >
+        <el-radio-group v-model="formData.config.enablePathStyleAccess">
+          <el-radio key="true" :value="true">启用</el-radio>
+          <el-radio key="false" :value="false">禁用</el-radio>
+        </el-radio-group>
       </el-form-item>
       <!-- 通用 -->
       <el-form-item v-if="formData.storage === 20" label="自定义域名">
@@ -101,6 +111,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as FileConfigApi from '@/api/infra/fileConfig'
+import { FormRules } from 'element-plus'
 
 defineOptions({ name: 'InfraFileConfigForm' })
 
@@ -116,9 +127,9 @@ const formData = ref({
   name: '',
   storage: 0,
   remark: '',
-  config: {}
+  config: {} as FileConfigApi.FileClientConfig
 })
-const formRules = reactive({
+const formRules = reactive<FormRules>({
   name: [{ required: true, message: '配置名不能为空', trigger: 'blur' }],
   storage: [{ required: true, message: '存储器不能为空', trigger: 'change' }],
   config: {
@@ -132,8 +143,11 @@ const formRules = reactive({
     bucket: [{ required: true, message: '存储 bucket 不能为空', trigger: 'blur' }],
     accessKey: [{ required: true, message: 'accessKey 不能为空', trigger: 'blur' }],
     accessSecret: [{ required: true, message: 'accessSecret 不能为空', trigger: 'blur' }],
+    enablePathStyleAccess: [
+      { required: true, message: '是否 PathStyle 访问不能为空', trigger: 'change' }
+    ],
     domain: [{ required: true, message: '自定义域名不能为空', trigger: 'blur' }]
-  }
+  } as FormRules
 })
 const formRef = ref() // 表单 Ref
 
@@ -186,9 +200,9 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: '',
-    storage: 0,
+    storage: undefined!,
     remark: '',
-    config: {}
+    config: {} as FileConfigApi.FileClientConfig
   }
   formRef.value?.resetFields()
 }

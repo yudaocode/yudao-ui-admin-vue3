@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【营销】砍价活动" url="https://doc.iocoder.cn/mall/promotion-bargain/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -204,7 +206,7 @@ const handleClose = async (id: number) => {
     // 关闭的二次确认
     await message.confirm('确认关闭该砍价活动吗？')
     // 发起关闭
-    await BargainActivityApi.closeSeckillActivity(id)
+    await BargainActivityApi.closeBargainActivity(id)
     message.success('关闭成功')
     // 刷新列表
     await getList()

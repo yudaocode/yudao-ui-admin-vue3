@@ -65,7 +65,7 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
-        <el-button type="info" plain @click="handleJobLog" v-hasPermi="['infra:job:query']">
+        <el-button type="info" plain @click="handleJobLog()" v-hasPermi="['infra:job:query']">
           <Icon icon="ep:zoom-in" class="mr-5px" /> 执行日志
         </el-button>
       </el-form-item>
@@ -235,11 +235,7 @@ const handleChangeStatus = async (row: JobApi.JobVO) => {
     message.success(text + '成功')
     // 刷新列表
     await getList()
-  } catch {
-    // 取消后，进行恢复按钮
-    row.status =
-      row.status === InfraJobStatusEnum.NORMAL ? InfraJobStatusEnum.STOP : InfraJobStatusEnum.NORMAL
-  }
+  } catch {}
 }
 
 /** 删除按钮操作 */
@@ -292,8 +288,8 @@ const openDetail = (id: number) => {
 }
 
 /** 跳转执行日志 */
-const handleJobLog = (id: number) => {
-  if (id > 0) {
+const handleJobLog = (id?: number) => {
+  if (id && id > 0) {
     push('/job/job-log?id=' + id)
   } else {
     push('/job/job-log')

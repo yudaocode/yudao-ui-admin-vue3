@@ -26,17 +26,17 @@
         <el-form-item label="列数" prop="type">
           <el-radio-group v-model="formData.columns">
             <el-tooltip class="item" content="一列" placement="bottom">
-              <el-radio-button :label="1">
+              <el-radio-button :value="1">
                 <Icon icon="fluent:text-column-one-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="二列" placement="bottom">
-              <el-radio-button :label="2">
+              <el-radio-button :value="2">
                 <Icon icon="fluent:text-column-two-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="三列" placement="bottom">
-              <el-radio-button :label="3">
+              <el-radio-button :value="3">
                 <Icon icon="fluent:text-column-three-24-filled" />
               </el-radio-button>
             </el-tooltip>
@@ -68,15 +68,20 @@
     </el-form>
   </ComponentContainerProperty>
   <!-- 优惠券选择 -->
-  <CouponSelect ref="couponSelectDialog" v-model:multiple-selection="couponList" />
+  <CouponSelect
+    ref="couponSelectDialog"
+    v-model:multiple-selection="couponList"
+    :take-type="CouponTemplateTakeTypeEnum.USER.type"
+    @change="handleCouponSelect"
+  />
 </template>
 
 <script setup lang="ts">
 import { CouponCardProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 import { floatToFixed2 } from '@/utils'
-import { PromotionDiscountTypeEnum } from '@/utils/constants'
+import { CouponTemplateTakeTypeEnum, PromotionDiscountTypeEnum } from '@/utils/constants'
 import CouponSelect from '@/views/mall/promotion/coupon/components/CouponSelect.vue'
 
 // 优惠券卡片属性面板
@@ -84,7 +89,7 @@ defineOptions({ name: 'CouponCardProperty' })
 
 const props = defineProps<{ modelValue: CouponCardProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 // 优惠券列表
 const couponList = ref<CouponTemplateApi.CouponTemplateVO[]>([])
@@ -93,10 +98,20 @@ const couponSelectDialog = ref()
 const handleAddCoupon = () => {
   couponSelectDialog.value.open()
 }
+const handleCouponSelect = () => {
+  formData.value.couponIds = couponList.value.map((coupon) => coupon.id)
+}
+
 watch(
-  () => couponList.value,
-  () => {
-    formData.value.couponIds = couponList.value.map((coupon) => coupon.id)
+  () => formData.value.couponIds,
+  async () => {
+    if (formData.value.couponIds?.length > 0) {
+      couponList.value = await CouponTemplateApi.getCouponTemplateList(formData.value.couponIds)
+    }
+  },
+  {
+    immediate: true,
+    deep: true
   }
 )
 </script>

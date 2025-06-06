@@ -79,13 +79,13 @@ const resetFlowCondition = () => {
   bpmnElement.value = bpmnInstances().bpmnElement
   bpmnElementSource.value = bpmnElement.value.source
   bpmnElementSourceRef.value = bpmnElement.value.businessObject.sourceRef
+  // 初始化默认type为default
+  flowConditionForm.value = { type: 'default' }
   if (
     bpmnElementSourceRef.value &&
     bpmnElementSourceRef.value.default &&
-    bpmnElementSourceRef.value.default.id === bpmnElement.value.id &&
-    flowConditionForm.value.type == 'default'
+    bpmnElementSourceRef.value.default.id === bpmnElement.value.id
   ) {
-    // 默认
     flowConditionForm.value = { type: 'default' }
   } else if (!bpmnElement.value.businessObject.conditionExpression) {
     // 普通
@@ -129,7 +129,7 @@ const updateFlowType = (flowType) => {
       conditionExpression: null
     })
     bpmnInstances().modeling.updateProperties(toRaw(bpmnElementSource.value), {
-      default: bpmnElement.value
+      default: toRaw(bpmnElement.value)
     })
     return
   }

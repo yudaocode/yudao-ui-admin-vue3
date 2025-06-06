@@ -12,7 +12,7 @@ export default defineConfig({
 ${selector} {
   display: flex;
   height: 100%;
-  padding: 1px 10px 0;
+  padding: 0 10px;
   cursor: pointer;
   align-items: center;
   transition: background var(--transition-time-02);
@@ -37,7 +37,6 @@ ${selector}:before {
   position: absolute;
   top: 0;
   left: 0;
-  width: 1px;
   height: 100%;
   background-color: var(--el-border-color);
   z-index: 3;

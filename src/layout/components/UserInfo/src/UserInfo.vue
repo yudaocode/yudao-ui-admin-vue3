@@ -1,17 +1,17 @@
 <script lang="ts" setup>
 import { ElMessageBox } from 'element-plus'
 
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
-import { useDesign } from '@/hooks/web/useDesign'
 import avatarImg from '@/assets/imgs/avatar.gif'
-import { useUserStore } from '@/store/modules/user'
+import { useDesign } from '@/hooks/web/useDesign'
 import { useTagsViewStore } from '@/store/modules/tagsView'
+import { useUserStore } from '@/store/modules/user'
+import LockDialog from './components/LockDialog.vue'
+import LockPage from './components/LockPage.vue'
+import { useLockStore } from '@/store/modules/lock'
 
 defineOptions({ name: 'UserInfo' })
 
 const { t } = useI18n()
-
-const { wsCache } = useCache()
 
 const { push, replace } = useRouter()
 
@@ -23,24 +23,28 @@ const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('user-info')
 
-const user = wsCache.get(CACHE_KEY.USER)
+const avatar = computed(() => userStore.user.avatar || avatarImg)
+const userName = computed(() => userStore.user.nickname ?? 'Admin')
 
-const avatar = user.user.avatar ? user.user.avatar : avatarImg
+// 锁定屏幕
+const lockStore = useLockStore()
+const getIsLock = computed(() => lockStore.getLockInfo?.isLock ?? false)
+const dialogVisible = ref<boolean>(false)
+const lockScreen = () => {
+  dialogVisible.value = true
+}
 
-const userName = user.user.nickname ? user.user.nickname : 'Admin'
-
-const loginOut = () => {
-  ElMessageBox.confirm(t('common.loginOutMessage'), t('common.reminder'), {
-    confirmButtonText: t('common.ok'),
-    cancelButtonText: t('common.cancel'),
-    type: 'warning'
-  })
-    .then(async () => {
-      await userStore.loginOut()
-      tagsViewStore.delAllViews()
-      replace('/login?redirect=/index')
+const loginOut = async () => {
+  try {
+    await ElMessageBox.confirm(t('common.loginOutMessage'), t('common.reminder'), {
+      confirmButtonText: t('common.ok'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning'
     })
-    .catch(() => {})
+    await userStore.loginOut()
+    tagsViewStore.delAllViews()
+    replace('/login?redirect=/index')
+  } catch {}
 }
 const toProfile = async () => {
   push('/user/profile')
@@ -68,6 +72,10 @@ const toDocument = () => {
           <Icon icon="ep:menu" />
           <div @click="toDocument">{{ t('common.document') }}</div>
         </ElDropdownItem>
+        <ElDropdownItem divided>
+          <Icon icon="ep:lock" />
+          <div @click="lockScreen">{{ t('lock.lockScreen') }}</div>
+        </ElDropdownItem>
         <ElDropdownItem divided @click="loginOut">
           <Icon icon="ep:switch-button" />
           <div>{{ t('common.loginOut') }}</div>
@@ -75,4 +83,31 @@ const toDocument = () => {
       </ElDropdownMenu>
     </template>
   </ElDropdown>
+
+  <LockDialog v-if="dialogVisible" v-model="dialogVisible" />
+
+  <teleport to="body">
+    <transition name="fade-bottom" mode="out-in">
+      <LockPage v-if="getIsLock" />
+    </transition>
+  </teleport>
 </template>
+
+<style scoped lang="scss">
+.fade-bottom-enter-active,
+.fade-bottom-leave-active {
+  transition:
+    opacity 0.25s,
+    transform 0.3s;
+}
+
+.fade-bottom-enter-from {
+  opacity: 0;
+  transform: translateY(-10%);
+}
+
+.fade-bottom-leave-to {
+  opacity: 0;
+  transform: translateY(10%);
+}
+</style>

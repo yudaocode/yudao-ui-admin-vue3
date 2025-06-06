@@ -1,4 +1,7 @@
 <template>
+  <doc-alert title="【交易】交易订单" url="https://doc.iocoder.cn/mall/trade-order/" />
+  <doc-alert title="【交易】购物车" url="https://doc.iocoder.cn/mall/trade-cart/" />
+
   <!-- 搜索 -->
   <ContentWrap>
     <el-form
@@ -348,7 +351,7 @@ const deliveryExpressList = ref<DeliveryExpressApi.DeliveryExpressVO[]>([]) // �
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  pickUpStoreList.value = await PickUpStoreApi.getListAllSimple()
+  pickUpStoreList.value = await PickUpStoreApi.getSimpleDeliveryPickUpStoreList()
   deliveryExpressList.value = await DeliveryExpressApi.getSimpleDeliveryExpressList()
 })
 </script>

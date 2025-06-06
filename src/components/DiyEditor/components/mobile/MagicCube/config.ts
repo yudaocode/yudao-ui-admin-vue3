@@ -13,6 +13,7 @@ export interface MagicCubeProperty {
   // 组件样式
   style: ComponentStyle
 }
+
 /** 广告魔方项目属性 */
 export interface MagicCubeItemProperty {
   // 图标链接

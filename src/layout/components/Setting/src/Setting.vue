@@ -126,8 +126,10 @@ const copyConfig = async () => {
       message: ${appStore.getMessage},
       // 标签页
       tagsView: ${appStore.getTagsView},
+      // 标签页
+      tagsViewImmerse: ${appStore.getTagsViewImmerse},
       // 标签页图标
-      getTagsViewIcon: ${appStore.getTagsViewIcon},
+      tagsViewIcon: ${appStore.getTagsViewIcon},
       // logo
       logo: ${appStore.getLogo},
       // 菜单手风琴
@@ -295,5 +297,6 @@ $prefix-cls: #{$namespace}-setting;
 
 .#{$prefix-cls} {
   border-radius: 6px 0 0 6px;
+  z-index: 1200;/*修正没有z-index会被表格层覆盖,值不要超过4000*/
 }
 </style>

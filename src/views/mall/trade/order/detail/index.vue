@@ -334,13 +334,13 @@ onMounted(async () => {
   // 如果配送方式为快递，则查询物流公司
   if (formData.value.deliveryType === DeliveryTypeEnum.EXPRESS.type) {
     deliveryExpressList.value = await DeliveryExpressApi.getSimpleDeliveryExpressList()
-    if (form.value.logisticsId) {
+    if (formData.value.logisticsId) {
       expressTrackList.value = await TradeOrderApi.getExpressTrackList(formData.value.id!)
     }
   } else if (formData.value.deliveryType === DeliveryTypeEnum.PICK_UP.type) {
-    pickUpStore.value = await DeliveryPickUpStoreApi.getDeliveryPickUpStore(
-      formData.value.pickUpStoreId
-    )
+    if (formData.value.pickUpStoreId) {
+      pickUpStore.value = await DeliveryPickUpStoreApi.getDeliveryPickUpStore(formData.value.pickUpStoreId)
+    }
   }
 })
 </script>
@@ -397,13 +397,14 @@ onMounted(async () => {
     align-items: center;
     min-height: 30px;
     padding: 10px;
-    background-color: #f7f8fa;
+    border-radius: var(--el-card-border-radius);
+    background-color: var(--app-content-bg-color);
 
     &::before {
       position: absolute;
       top: 10px;
       left: 13px; /* 将伪元素水平居中 */
-      border-color: transparent #f7f8fa transparent transparent; /* 尖角颜色，左侧朝向 */
+      border-color: transparent var(--app-content-bg-color) transparent transparent; /* 尖角颜色，左侧朝向 */
       border-style: solid;
       border-width: 8px; /* 调整尖角大小 */
       content: ''; /* 必须设置 content 属性 */

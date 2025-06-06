@@ -104,7 +104,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
       }
     ]
   },
-
   {
     path: '/dict',
     component: Layout,
@@ -244,7 +243,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: '/manager/form/edit',
+        path: 'manager/form/edit',
         component: () => import('@/views/bpm/form/editor/index.vue'),
         name: 'BpmFormEditor',
         meta: {
@@ -256,20 +255,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/manager/model/edit',
-        component: () => import('@/views/bpm/model/editor/index.vue'),
-        name: 'BpmModelEditor',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '设计流程',
-          activeMenu: '/bpm/manager/model'
-        }
-      },
-      {
-        path: '/manager/definition',
-        component: () => import('@/views/bpm/definition/index.vue'),
+        path: 'manager/definition',
+        component: () => import('@/views/bpm/model/definition/index.vue'),
         name: 'BpmProcessDefinition',
         meta: {
           noCache: true,
@@ -280,30 +267,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/manager/task-assign-rule',
-        component: () => import('@/views/bpm/taskAssignRule/index.vue'),
-        name: 'BpmTaskAssignRuleList',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '任务分配规则'
-        }
-      },
-      {
-        path: '/process-instance/create',
-        component: () => import('@/views/bpm/processInstance/create/index.vue'),
-        name: 'BpmProcessInstanceCreate',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '发起流程',
-          activeMenu: 'bpm/processInstance/create'
-        }
-      },
-      {
-        path: '/process-instance/detail',
+        path: 'process-instance/detail',
         component: () => import('@/views/bpm/processInstance/detail/index.vue'),
         name: 'BpmProcessInstanceDetail',
         meta: {
@@ -311,11 +275,28 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           title: '流程详情',
-          activeMenu: 'bpm/processInstance/detail'
+          activeMenu: '/bpm/task/my'
+        },
+        props: (route) => ({
+          id: route.query.id,
+          taskId: route.query.taskId,
+          activityId: route.query.activityId
+        })
+      },
+      {
+        path: 'process-instance/report',
+        component: () => import('@/views/bpm/processInstance/report/index.vue'),
+        name: 'BpmProcessInstanceReport',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '数据报表',
+          activeMenu: '/bpm/manager/model'
         }
       },
       {
-        path: '/bpm/oa/leave/create',
+        path: 'oa/leave/create',
         component: () => import('@/views/bpm/oa/leave/create.vue'),
         name: 'OALeaveCreate',
         meta: {
@@ -327,7 +308,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/bpm/oa/leave/detail',
+        path: 'oa/leave/detail',
         component: () => import('@/views/bpm/oa/leave/detail.vue'),
         name: 'OALeaveDetail',
         meta: {
@@ -336,6 +317,30 @@ const remainingRouter: AppRouteRecordRaw[] = [
           canTo: true,
           title: '查看 OA 请假',
           activeMenu: '/bpm/oa/leave'
+        }
+      },
+      {
+        path: 'manager/model/create',
+        component: () => import('@/views/bpm/model/form/index.vue'),
+        name: 'BpmModelCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '创建流程',
+          activeMenu: '/bpm/manager/model'
+        }
+      },
+      {
+        path: 'manager/model/:type/:id',
+        component: () => import('@/views/bpm/model/form/index.vue'),
+        name: 'BpmModelUpdate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '修改流程',
+          activeMenu: '/bpm/manager/model'
         }
       }
     ]
@@ -353,7 +358,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuAdd',
         meta: {
-          noCache: true,
+          noCache: false, // 需要缓存
           hidden: true,
           canTo: true,
           icon: 'ep:edit',
@@ -471,8 +476,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         name: 'DiyTemplateDecorate',
         meta: {
           title: '模板装修',
-          noCache: true,
-          hidden: true
+          noCache: false,
+          hidden: true,
+          activeMenu: '/mall/promotion/diy-template/diy-template'
         },
         component: () => import('@/views/mall/promotion/diy/template/decorate.vue')
       },
@@ -481,8 +487,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         name: 'DiyPageDecorate',
         meta: {
           title: '页面装修',
-          noCache: true,
-          hidden: true
+          noCache: false,
+          hidden: true,
+          activeMenu: '/mall/promotion/diy-template/diy-page'
         },
         component: () => import('@/views/mall/promotion/diy/page/decorate.vue')
       }
@@ -495,14 +502,70 @@ const remainingRouter: AppRouteRecordRaw[] = [
     meta: { hidden: true },
     children: [
       {
+        path: 'clue/detail/:id',
+        name: 'CrmClueDetail',
+        meta: {
+          title: '线索详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/clue'
+        },
+        component: () => import('@/views/crm/clue/detail/index.vue')
+      },
+      {
         path: 'customer/detail/:id',
         name: 'CrmCustomerDetail',
         meta: {
           title: '客户详情',
           noCache: true,
-          hidden: true
+          hidden: true,
+          activeMenu: '/crm/customer'
         },
         component: () => import('@/views/crm/customer/detail/index.vue')
+      },
+      {
+        path: 'business/detail/:id',
+        name: 'CrmBusinessDetail',
+        meta: {
+          title: '商机详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/business'
+        },
+        component: () => import('@/views/crm/business/detail/index.vue')
+      },
+      {
+        path: 'contract/detail/:id',
+        name: 'CrmContractDetail',
+        meta: {
+          title: '合同详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/contract'
+        },
+        component: () => import('@/views/crm/contract/detail/index.vue')
+      },
+      {
+        path: 'receivable-plan/detail/:id',
+        name: 'CrmReceivablePlanDetail',
+        meta: {
+          title: '回款计划详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/receivable-plan'
+        },
+        component: () => import('@/views/crm/receivable/plan/detail/index.vue')
+      },
+      {
+        path: 'receivable/detail/:id',
+        name: 'CrmReceivableDetail',
+        meta: {
+          title: '回款详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/receivable'
+        },
+        component: () => import('@/views/crm/receivable/detail/index.vue')
       },
       {
         path: 'contact/detail/:id',
@@ -510,9 +573,177 @@ const remainingRouter: AppRouteRecordRaw[] = [
         meta: {
           title: '联系人详情',
           noCache: true,
-          hidden: true
+          hidden: true,
+          activeMenu: '/crm/contact'
         },
         component: () => import('@/views/crm/contact/detail/index.vue')
+      },
+      {
+        path: 'product/detail/:id',
+        name: 'CrmProductDetail',
+        meta: {
+          title: '产品详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/product'
+        },
+        component: () => import('@/views/crm/product/detail/index.vue')
+      }
+    ]
+  },
+  {
+    path: '/ai',
+    component: Layout,
+    name: 'Ai',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'image/square',
+        component: () => import('@/views/ai/image/square/index.vue'),
+        name: 'AiImageSquare',
+        meta: {
+          title: '绘图作品',
+          icon: 'ep:home-filled',
+          noCache: false
+        }
+      },
+      {
+        path: 'knowledge/document',
+        component: () => import('@/views/ai/knowledge/document/index.vue'),
+        name: 'AiKnowledgeDocument',
+        meta: {
+          title: '知识库文档',
+          icon: 'ep:document',
+          noCache: false,
+          activeMenu: '/ai/knowledge'
+        }
+      },
+      {
+        path: 'knowledge/document/create',
+        component: () => import('@/views/ai/knowledge/document/form/index.vue'),
+        name: 'AiKnowledgeDocumentCreate',
+        meta: {
+          title: '创建文档',
+          icon: 'ep:plus',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai/knowledge'
+        }
+      },
+      {
+        path: 'knowledge/document/update',
+        component: () => import('@/views/ai/knowledge/document/form/index.vue'),
+        name: 'AiKnowledgeDocumentUpdate',
+        meta: {
+          title: '修改文档',
+          icon: 'ep:edit',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai/knowledge'
+        }
+      },
+      {
+        path: 'knowledge/retrieval',
+        component: () => import('@/views/ai/knowledge/knowledge/retrieval/index.vue'),
+        name: 'AiKnowledgeRetrieval',
+        meta: {
+          title: '文档召回测试',
+          icon: 'ep:search',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai/knowledge'
+        }
+      },
+      {
+        path: 'knowledge/segment',
+        component: () => import('@/views/ai/knowledge/segment/index.vue'),
+        name: 'AiKnowledgeSegment',
+        meta: {
+          title: '知识库分段',
+          icon: 'ep:tickets',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai/knowledge'
+        }
+      },
+      {
+        path: 'console/workflow/create',
+        component: () => import('@/views/ai/workflow/form/index.vue'),
+        name: 'AiWorkflowCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '设计 AI 工作流',
+          activeMenu: '/ai/console/workflow'
+        }
+      },
+      {
+        path: 'console/workflow/:type/:id',
+        component: () => import('@/views/ai/workflow/form/index.vue'),
+        name: 'AiWorkflowUpdate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '设计 AI 工作流',
+          activeMenu: '/ai/console/workflow'
+        }
+      }
+    ]
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('@/views/Error/404.vue'),
+    name: '',
+    meta: {
+      title: '404',
+      hidden: true,
+      breadcrumb: false
+    }
+  },
+  {
+    path: '/iot',
+    component: Layout,
+    name: 'IOT',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'product/product/detail/:id',
+        name: 'IoTProductDetail',
+        meta: {
+          title: '产品详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/iot/device/product'
+        },
+        component: () => import('@/views/iot/product/product/detail/index.vue')
+      },
+      {
+        path: 'device/detail/:id',
+        name: 'IoTDeviceDetail',
+        meta: {
+          title: '设备详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/iot/device/device'
+        },
+        component: () => import('@/views/iot/device/device/detail/index.vue')
+      },
+      {
+        path: 'plugin/detail/:id',
+        name: 'IoTPluginDetail',
+        meta: {
+          title: '插件详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/iot/plugin'
+        },
+        component: () => import('@/views/iot/plugin/detail/index.vue')
       }
     ]
   }

@@ -1,184 +1,67 @@
 <template>
+  <doc-alert title="【回款】回款管理、回款计划" url="https://doc.iocoder.cn/crm/receivable/" />
+  <doc-alert title="【通用】数据权限" url="https://doc.iocoder.cn/crm/permission/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="回款编号" prop="no">
         <el-input
           v-model="queryParams.no"
+          class="!w-240px"
+          clearable
           placeholder="请输入回款编号"
-          clearable
           @keyup.enter="handleQuery"
-          class="!w-240px"
         />
       </el-form-item>
-      <!--<el-form-item label="回款计划ID" prop="planId">
-        <el-input
-          v-model="queryParams.planId"
-          placeholder="请输入回款计划ID"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>-->
       <el-form-item label="客户名称" prop="customerId">
-        <el-input
+        <el-select
           v-model="queryParams.customerId"
-          placeholder="请输入客户名称"
-          clearable
+          class="!w-240px"
+          placeholder="请选择客户"
           @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="合同名称" prop="contractId">
-        <el-input
-          v-model="queryParams.contractId"
-          placeholder="请输入合同名称"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="审批状态" prop="checkStatus">
-        <el-select
-          v-model="queryParams.checkStatus"
-          placeholder="请选择审批状态"
-          clearable
-          class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.CRM_RECEIVABLE_CHECK_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+            v-for="item in customerList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
           />
         </el-select>
-      </el-form-item>
-      <!--<el-form-item label="工作流编号" prop="processInstanceId">
-        <el-input
-          v-model="queryParams.processInstanceId"
-          placeholder="请输入工作流编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>-->
-      <el-form-item label="回款日期" prop="returnTime">
-        <el-date-picker
-          v-model="queryParams.returnTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="回款方式" prop="returnType">
-        <el-select
-          v-model="queryParams.returnType"
-          placeholder="请选择回款方式"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.CRM_RETURN_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <!--<el-form-item label="回款金额" prop="price">
-        <el-input
-          v-model="queryParams.price"
-          placeholder="请输入回款金额"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>-->
-      <!--<el-form-item label="负责人" prop="ownerUserId">
-        <el-input
-          v-model="queryParams.ownerUserId"
-          placeholder="请输入负责人"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="批次" prop="batchId">
-        <el-input
-          v-model="queryParams.batchId"
-          placeholder="请输入批次"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>-->
-      <!--<el-form-item label="数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限）" prop="dataScope">
-        <el-input
-          v-model="queryParams.dataScope"
-          placeholder="请输入数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限）"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="数据范围(指定部门数组)" prop="dataScopeDeptIds">
-        <el-input
-          v-model="queryParams.dataScopeDeptIds"
-          placeholder="请输入数据范围(指定部门数组)"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>-->
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['crm:receivable:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
         </el-button>
         <el-button
-          type="success"
+          v-hasPermi="['crm:receivable:create']"
           plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['crm:receivable:export']"
+          type="primary"
+          @click="openForm('create')"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
+        </el-button>
+        <el-button
+          v-hasPermi="['crm:receivable:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
+        >
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -186,66 +69,123 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="ID" align="center" prop="id" />
-      <el-table-column label="回款编号" align="center" prop="no" />
-      <!-- <el-table-column label="回款计划ID" align="center" prop="planId" />-->
-      <el-table-column label="客户" align="center" prop="customerId" />
-      <el-table-column label="合同" align="center" prop="contractId" />
-      <el-table-column label="审批状态" align="center" prop="checkStatus" width="130px">
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="我参与的" name="2" />
+      <el-tab-pane label="下属负责的" name="3" />
+    </el-tabs>
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" fixed="left" label="回款编号" prop="no" width="180">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_CHECK_STATUS" :value="scope.row.checkStatus" />
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.no }}
+          </el-link>
         </template>
       </el-table-column>
-      <!-- <el-table-column label="工作流编号" align="center" prop="processInstanceId" />-->
+      <el-table-column align="center" label="客户名称" prop="customerName" width="120">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openCustomerDetail(scope.row.customerId)"
+          >
+            {{ scope.row.customerName }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="合同编号" prop="contractNo" width="180">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openContractDetail(scope.row.contractId)"
+          >
+            {{ scope.row.contract.no }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column
-        label="回款日期"
-        align="center"
-        prop="returnTime"
         :formatter="dateFormatter2"
+        align="center"
+        label="回款日期"
+        prop="returnTime"
         width="150px"
       />
-      <el-table-column label="回款方式" align="center" prop="returnType" width="130px">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_RETURN_TYPE" :value="scope.row.returnType" />
-        </template>
-      </el-table-column>
-      <el-table-column label="回款金额(元)" align="center" prop="price" />
-      <el-table-column label="负责人" align="center" prop="ownerUserId" />
-      <el-table-column label="批次" align="center" prop="batchId" />
-      <!--<el-table-column label="显示顺序" align="center" prop="sort" />-->
-      <el-table-column label="状态" align="center" prop="status">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column
-        label="创建时间"
         align="center"
-        prop="createTime"
+        label="回款金额(元)"
+        prop="price"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column align="center" label="回款方式" prop="returnType" width="130px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE" :value="scope.row.returnType" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="备注" prop="remark" width="200" />
+      <el-table-column
+        align="center"
+        label="合同金额（元）"
+        prop="contract.totalPrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column align="center" label="负责人" prop="ownerUserName" width="120" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100px" />
+      <el-table-column
         :formatter="dateFormatter"
+        align="center"
+        label="更新时间"
+        prop="updateTime"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="180px">
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
+        width="180px"
+      />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="120" />
+      <el-table-column align="center" fixed="right" label="回款状态" prop="auditStatus" width="120">
         <template #default="scope">
-          <!-- todo @liuhongfeng：用路径参数哈，receivableId -->
-          <!--<router-link :to="'/crm/receivable-plan?receivableId=' + scope.row.receivableId">
-            <el-button link type="primary">详情</el-button>
-          </router-link>-->
+          <dict-tag :type="DICT_TYPE.CRM_AUDIT_STATUS" :value="scope.row.auditStatus" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" fixed="right" label="操作" width="180px">
+        <template #default="scope">
           <el-button
+            v-hasPermi="['crm:receivable:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['crm:receivable:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-if="scope.row.auditStatus === 0"
+            v-hasPermi="['crm:receivable:update']"
+            link
+            type="primary"
+            @click="handleSubmit(scope.row)"
+          >
+            提交审核
+          </el-button>
+          <el-button
+            v-else
+            v-hasPermi="['crm:receivable:update']"
+            link
+            type="primary"
+            @click="handleProcessDetail(scope.row)"
+          >
+            查看审批
+          </el-button>
+          <el-button
+            v-hasPermi="['crm:receivable:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['crm:receivable:delete']"
           >
             删除
           </el-button>
@@ -254,9 +194,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -264,45 +204,40 @@
   <!-- 表单弹窗：添加/修改 -->
   <ReceivableForm ref="formRef" @success="getList" />
 </template>
-
-<script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+<script lang="ts" setup>
+import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ReceivableApi from '@/api/crm/receivable'
 import ReceivableForm from './ReceivableForm.vue'
+import * as CustomerApi from '@/api/crm/customer'
+import { TabsPaneContext } from 'element-plus'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'Receivable' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  no: null,
-  planId: null,
-  customerId: null,
-  contractId: null,
-  checkStatus: null,
-  processInstanceId: null,
-  returnTime: [],
-  returnType: null,
-  price: null,
-  ownerUserId: null,
-  batchId: null,
-  sort: null,
-  dataScope: null,
-  dataScopeDeptIds: null,
-  status: null,
-  remark: null,
-  createTime: []
+  sceneType: '1', // 默认和 activeName 相等
+  no: undefined,
+  customerId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
+const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
+
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName
+  handleQuery()
+}
 
 /** 查询列表 */
 const getList = async () => {
@@ -347,6 +282,35 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
+/** 提交审核 **/
+const handleSubmit = async (row: ReceivableApi.ReceivableVO) => {
+  await message.confirm(`您确定提交编号为【${row.no}】的回款审核吗？`)
+  await ReceivableApi.submitReceivable(row.id)
+  message.success('提交审核成功！')
+  await getList()
+}
+
+/** 查看审批 */
+const handleProcessDetail = (row: ReceivableApi.ReceivableVO) => {
+  push({ name: 'BpmProcessInstanceDetail', query: { id: row.processInstanceId } })
+}
+
+/** 打开回款详情 */
+const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmReceivableDetail', params: { id } })
+}
+
+/** 打开客户详情 */
+const openCustomerDetail = (id: number) => {
+  push({ name: 'CrmCustomerDetail', params: { id } })
+}
+
+/** 打开合同详情 */
+const openContractDetail = (id: number) => {
+  push({ name: 'CrmContractDetail', params: { id } })
+}
+
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {
@@ -355,7 +319,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await ReceivableApi.exportReceivable(queryParams)
-    download.excel(data, '回款管理.xls')
+    download.excel(data, '回款.xls')
   } catch {
   } finally {
     exportLoading.value = false
@@ -363,7 +327,9 @@ const handleExport = async () => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  // 获得客户列表
+  customerList.value = await CustomerApi.getCustomerSimpleList()
 })
 </script>

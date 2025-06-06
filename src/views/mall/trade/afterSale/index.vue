@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【交易】售后退款" url="https://doc.iocoder.cn/mall/trade-aftersale/" />
+
   <!-- 搜索 -->
   <ContentWrap>
     <el-form ref="queryFormRef" :inline="true" :model="queryParams" label-width="68px">
@@ -79,7 +81,7 @@
         <el-date-picker
           v-model="queryParams.createTime"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-260px"
+          class="!w-280px"
           end-placeholder="自定义时间"
           start-placeholder="自定义时间"
           type="daterange"
@@ -133,7 +135,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单金额" prop="refundPrice">
+      <el-table-column align="center" label="订单金额" min-width="120" prop="refundPrice">
         <template #default="scope">
           <span>{{ fenToYuan(scope.row.refundPrice) }} 元</span>
         </template>
@@ -204,6 +206,7 @@ const queryParams = reactive({
   way: null,
   type: null
 })
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -214,23 +217,26 @@ const getList = async () => {
       delete data.status
     }
     // 执行查询
-    const res = (await AfterSaleApi.getAfterSalePage(data)) as AfterSaleApi.TradeAfterSaleVO[]
-    list.value = res.list
+    const res = await AfterSaleApi.getAfterSalePage(data)
+    list.value = res.list as AfterSaleApi.TradeAfterSaleVO[]
     total.value = res.total
   } finally {
     loading.value = false
   }
 }
+
 /** 搜索按钮操作 */
 const handleQuery = async () => {
   queryParams.pageNo = 1
   await getList()
 }
+
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
   handleQuery()
 }
+
 /** tab 切换 */
 const tabClick = async (tab: TabsPaneContext) => {
   queryParams.status = tab.paneName
@@ -244,7 +250,7 @@ const openAfterSaleDetail = (id: number) => {
 
 /** 查看订单详情 */
 const openOrderDetail = (id: number) => {
-  push({ name: 'TradeOrderDetail', params: { orderId: id } })
+  push({ name: 'TradeOrderDetail', params: { id } })
 }
 
 /** 商品图预览 */

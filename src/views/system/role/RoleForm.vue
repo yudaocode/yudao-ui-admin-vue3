@@ -59,11 +59,11 @@ const formData = ref({
   remark: ''
 })
 const formRules = reactive({
-  name: [{ required: true, message: '岗位标题不能为空', trigger: 'blur' }],
-  code: [{ required: true, message: '岗位编码不能为空', trigger: 'change' }],
-  sort: [{ required: true, message: '岗位顺序不能为空', trigger: 'change' }],
-  status: [{ required: true, message: '岗位状态不能为空', trigger: 'change' }],
-  remark: [{ required: false, message: '岗位内容不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
+  code: [{ required: true, message: '角色标识不能为空', trigger: 'change' }],
+  sort: [{ required: true, message: '显示顺序不能为空', trigger: 'change' }],
+  status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
+  remark: [{ required: false, message: '备注不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 

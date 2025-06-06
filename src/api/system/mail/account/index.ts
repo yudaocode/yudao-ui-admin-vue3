@@ -8,6 +8,7 @@ export interface MailAccountVO {
   host: string
   port: number
   sslEnable: boolean
+  starttlsEnable: boolean
 }
 
 // 查询邮箱账号列表
@@ -37,5 +38,5 @@ export const deleteMailAccount = async (id: number) => {
 
 // 获得邮箱账号精简列表
 export const getSimpleMailAccountList = async () => {
-  return request.get({ url: '/system/mail-account/list-all-simple' })
+  return request.get({ url: '/system/mail-account/simple-list' })
 }

@@ -110,7 +110,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup name="PayDemoOrder">
-import * as PayDemoApi from '@/api/pay/demo'
+import * as PayDemoApi from '@/api/pay/demo/order'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 
@@ -147,7 +147,7 @@ const handlePay = (row: any) => {
     name: 'PayCashier',
     query: {
       id: row.payOrderId,
-      returnUrl: encodeURIComponent('/pay/demo-order?id=' + row.id)
+      returnUrl: encodeURIComponent('/pay/demo/order?id=' + row.id)
     }
   })
 }

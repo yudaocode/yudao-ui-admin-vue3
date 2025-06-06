@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-form-item label="模板名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入模板名称" />
@@ -13,17 +13,17 @@
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" type="textarea" />
       </el-form-item>
-      <el-form-item label="预览图" prop="previewImageUrls">
-        <UploadImgs v-model="formData.previewImageUrls" />
+      <el-form-item label="预览图" prop="previewPicUrls">
+        <UploadImgs v-model="formData.previewPicUrls" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as DiyTemplateApi from '@/api/mall/promotion/diy/template'
 
 /** 装修模板表单 */
@@ -40,7 +40,7 @@ const formData = ref({
   id: undefined,
   name: undefined,
   remark: undefined,
-  previewImageUrls: []
+  previewPicUrls: []
 })
 const formRules = reactive({
   name: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }]
@@ -57,14 +57,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const diyTemplate = await DiyTemplateApi.getDiyTemplate(id)
-      // 处理预览图
-      if (diyTemplate?.previewImageUrls?.length > 0) {
-        diyTemplate.previewImageUrls = diyTemplate.previewImageUrls.map((url: string) => {
-          return { url }
-        })
-      }
-      formData.value = diyTemplate
+      formData.value = await DiyTemplateApi.getDiyTemplate(id)
     } finally {
       formLoading.value = false
     }
@@ -82,11 +75,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    // 处理预览图
-    const previewImageUrls = formData.value.previewImageUrls.map((item) => {
-      return item['url'] ? item['url'] : item
-    })
-    const data = { ...formData.value, previewImageUrls } as unknown as DiyTemplateApi.DiyTemplateVO
+    const data = formData.value as unknown as DiyTemplateApi.DiyTemplateVO
     if (formType.value === 'create') {
       await DiyTemplateApi.createDiyTemplate(data)
       message.success(t('common.createSuccess'))
@@ -108,7 +97,7 @@ const resetForm = () => {
     id: undefined,
     name: undefined,
     remark: undefined,
-    previewImageUrls: []
+    previewPicUrls: []
   }
   formRef.value?.resetFields()
 }

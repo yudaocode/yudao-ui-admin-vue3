@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【产品】产品管理、产品分类" url="https://doc.iocoder.cn/crm/product/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -17,48 +19,19 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="产品编码" prop="no">
-        <el-input
-          v-model="queryParams.no"
-          placeholder="请输入产品编码"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.CRM_PRODUCT_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PRODUCT_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="产品分类" prop="categoryId">
-        <el-input
-          v-model="queryParams.categoryId"
-          placeholder="请选择产品分类"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" /> 搜索 </el-button>
+        <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" /> 重置 </el-button>
         <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:product:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -69,7 +42,8 @@
           :loading="exportLoading"
           v-hasPermi="['crm:product:export']"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon icon="ep:download" class="mr-5px" />
+          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -78,35 +52,42 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!--<el-table-column label="主键id" align="center" prop="id" />-->
-      <el-table-column label="产品名称" align="center" prop="name" />
-      <el-table-column label="产品编码" align="center" prop="no" />
-      <el-table-column label="单位" align="center" prop="unit">
+      <el-table-column label="产品名称" align="center" prop="name" width="160">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PRODUCT_UNIT" :value="scope.row.unit" />
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="价格" align="center" prop="price">
-        <template #default="{ row }">
-          {{ fenToYuan(row.price) }}
+      <el-table-column label="产品类型" align="center" prop="categoryName" width="160" />
+      <el-table-column label="产品单位" align="center" prop="unit">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_PRODUCT_UNIT" :value="scope.row.unit" />
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="产品编码" align="center" prop="no" />
+      <el-table-column
+        label="价格（元）"
+        align="center"
+        prop="price"
+        :formatter="erpPriceTableColumnFormatter"
+        width="100"
+      />
+      <el-table-column label="产品描述" align="center" prop="description" width="150" />
+      <el-table-column label="上架状态" align="center" prop="status" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_PRODUCT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="产品分类" align="center" prop="categoryId">
-        <template #default="{ row }">
-          <span>{{ productCategoryList?.find((c) => c.id === row.categoryId)?.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="产品描述" align="center" prop="description" />
-      <el-table-column label="负责人" align="center" prop="ownerUserId">
-        <template #default="{ row }">
-          <span>{{ userList?.find((c) => c.id === row.ownerUserId)?.nickname }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="负责人" align="center" prop="ownerUserName" width="120" />
+      <el-table-column
+        label="更新时间"
+        align="center"
+        prop="updateTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column label="创建人" align="center" prop="creatorName" width="120" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -114,16 +95,8 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="160">
+      <el-table-column label="操作" align="center" fixed="right" width="160">
         <template #default="scope">
-          <el-button
-            v-hasPermi="['crm:product:query']"
-            link
-            type="primary"
-            @click="openDetail(scope.row)"
-          >
-            详情
-          </el-button>
           <el-button
             link
             type="primary"
@@ -154,21 +127,15 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <ProductForm ref="formRef" @success="getList" />
-
-  <!-- 表单弹窗：详情 -->
-  <ProductDetail ref="detailRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ProductApi from '@/api/crm/product'
 import ProductForm from './ProductForm.vue'
-import ProductDetail from './ProductDetail.vue'
-import { fenToYuan } from '@/utils'
-import * as ProductCategoryApi from '@/api/crm/productCategory'
-import { getSimpleUserList, UserVO } from '@/api/system/user'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CrmProduct' })
 
@@ -181,15 +148,8 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  no: null,
-  unit: null,
-  price: null,
-  status: null,
-  categoryId: null,
-  description: null,
-  ownerUserId: null,
-  createTime: []
+  name: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -223,10 +183,11 @@ const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
-/** 详情操作 */
-const detailRef = ref()
-const openDetail = (data: ProductApi.ProductVO) => {
-  detailRef.value.open(data)
+
+/** 打开详情 */
+const { currentRoute, push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmProductDetail', params: { id } })
 }
 
 /** 删除按钮操作 */
@@ -257,13 +218,13 @@ const handleExport = async () => {
   }
 }
 
-const productCategoryList = ref([]) // 产品分类树
-const userList = ref<UserVO[]>([]) // 系统用户
+/** 激活时 */
+onActivated(() => {
+  getList()
+})
 
 /** 初始化 **/
-onMounted(async () => {
-  await getList()
-  productCategoryList.value = await ProductCategoryApi.getProductCategoryList({})
-  userList.value = await getSimpleUserList()
+onMounted(() => {
+  getList()
 })
 </script>

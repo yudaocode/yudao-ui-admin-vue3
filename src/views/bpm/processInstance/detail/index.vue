@@ -1,312 +1,355 @@
 <template>
-  <ContentWrap>
-    <!-- 审批信息 -->
-    <el-card
-      v-for="(item, index) in runningTasks"
-      :key="index"
-      v-loading="processInstanceLoading"
-      class="box-card"
-    >
-      <template #header>
-        <span class="el-icon-picture-outline">审批任务【{{ item.name }}】</span>
-      </template>
-      <el-col :offset="6" :span="16">
-        <el-form
-          :ref="'form' + index"
-          :model="auditForms[index]"
-          :rules="auditRule"
-          label-width="100px"
-        >
-          <el-form-item v-if="processInstance && processInstance.name" label="流程名">
-            {{ processInstance.name }}
-          </el-form-item>
-          <el-form-item v-if="processInstance && processInstance.startUser" label="流程发起人">
-            {{ processInstance.startUser.nickname }}
-            <el-tag size="small" type="info">{{ processInstance.startUser.deptName }}</el-tag>
-          </el-form-item>
-          <el-form-item label="审批建议" prop="reason">
-            <el-input
-              v-model="auditForms[index].reason"
-              placeholder="请输入审批建议"
-              type="textarea"
-            />
-          </el-form-item>
-        </el-form>
-        <div style="margin-bottom: 20px; margin-left: 10%; font-size: 14px">
-          <el-button type="success" @click="handleAudit(item, true)">
-            <Icon icon="ep:select" />
-            通过
-          </el-button>
-          <el-button type="danger" @click="handleAudit(item, false)">
-            <Icon icon="ep:close" />
-            不通过
-          </el-button>
-          <el-button type="primary" @click="openTaskUpdateAssigneeForm(item.id)">
-            <Icon icon="ep:edit" />
-            转办
-          </el-button>
-          <el-button type="primary" @click="handleDelegate(item)">
-            <Icon icon="ep:position" />
-            委派
-          </el-button>
-          <el-button type="primary" @click="handleSign(item)">
-            <Icon icon="ep:plus" />
-            加签
-          </el-button>
-          <el-button type="warning" @click="handleBack(item)">
-            <Icon icon="ep:back" />
-            回退
-          </el-button>
-        </div>
-      </el-col>
-    </el-card>
-
-    <!-- 申请信息 -->
-    <el-card v-loading="processInstanceLoading" class="box-card">
-      <template #header>
-        <span class="el-icon-document">申请信息【{{ processInstance.name }}】</span>
-      </template>
-      <!-- 情况一：流程表单 -->
-      <el-col v-if="processInstance?.processDefinition?.formType === 10" :offset="6" :span="16">
-        <form-create
-          ref="fApi"
-          v-model="detailForm.value"
-          :option="detailForm.option"
-          :rule="detailForm.rule"
+  <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }" class="position-relative">
+    <div class="processInstance-wrap-main">
+      <el-scrollbar>
+        <img
+          class="position-absolute right-20px"
+          width="150"
+          :src="auditIconsMap[processInstance.status]"
+          alt=""
         />
-      </el-col>
-      <!-- 情况二：业务表单 -->
-      <div v-if="processInstance?.processDefinition?.formType === 20">
-        <BusinessFormComponent :id="processInstance.businessKey" />
-      </div>
-    </el-card>
+        <div class="text-#878c93 h-15px">编号：{{ id }}</div>
+        <el-divider class="!my-8px" />
+        <div class="flex items-center gap-5 mb-10px h-40px">
+          <div class="text-26px font-bold mb-5px">{{ processInstance.name }}</div>
+          <dict-tag
+            v-if="processInstance.status"
+            :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
+            :value="processInstance.status"
+          />
+        </div>
 
-    <!-- 审批记录 -->
-    <ProcessInstanceTaskList :loading="tasksLoad" :tasks="tasks" />
+        <div class="flex items-center gap-5 mb-10px text-13px h-35px">
+          <div
+            class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
+          >
+            <el-avatar
+              :size="28"
+              v-if="processInstance?.startUser?.avatar"
+              :src="processInstance?.startUser?.avatar"
+            />
+            <el-avatar :size="28" v-else-if="processInstance?.startUser?.nickname">
+              {{ processInstance?.startUser?.nickname.substring(0, 1) }}
+            </el-avatar>
+            {{ processInstance?.startUser?.nickname }}
+          </div>
+          <div class="text-#878c93"> {{ formatDate(processInstance.startTime) }} 提交 </div>
+        </div>
 
-    <!-- 高亮流程图 -->
-    <ProcessInstanceBpmnViewer
-      :id="`${id}`"
-      :bpmn-xml="bpmnXML"
-      :loading="processInstanceLoading"
-      :process-instance="processInstance"
-      :tasks="tasks"
-    />
+        <el-tabs v-model="activeTab">
+          <!-- 表单信息 -->
+          <el-tab-pane label="审批详情" name="form">
+            <div class="form-scroll-area">
+              <el-scrollbar>
+                <el-row>
+                  <el-col :span="17" class="!flex !flex-col formCol">
+                    <!-- 表单信息 -->
+                    <div
+                      v-loading="processInstanceLoading"
+                      class="form-box flex flex-col mb-30px flex-1"
+                    >
+                      <!-- 情况一：流程表单 -->
+                      <el-col v-if="processDefinition?.formType === BpmModelFormType.NORMAL">
+                        <form-create
+                          v-model="detailForm.value"
+                          v-model:api="fApi"
+                          :option="detailForm.option"
+                          :rule="detailForm.rule"
+                        />
+                      </el-col>
+                      <!-- 情况二：业务表单 -->
+                      <div v-if="processDefinition?.formType === BpmModelFormType.CUSTOM">
+                        <BusinessFormComponent :id="processInstance.businessKey" />
+                      </div>
+                    </div>
+                  </el-col>
+                  <el-col :span="7">
+                    <!-- 审批记录时间线 -->
+                    <ProcessInstanceTimeline :activity-nodes="activityNodes" />
+                  </el-col>
+                </el-row>
+              </el-scrollbar>
+            </div>
+          </el-tab-pane>
 
-    <!-- 弹窗：转派审批人 -->
-    <TaskUpdateAssigneeForm ref="taskUpdateAssigneeFormRef" @success="getDetail" />
-    <!-- 弹窗，回退节点 -->
-    <TaskReturnDialog ref="taskReturnDialogRef" @success="getDetail" />
-    <!-- 委派，将任务委派给别人处理，处理完成后，会重新回到原审批人手中-->
-    <TaskDelegateForm ref="taskDelegateForm" @success="getDetail" />
-    <!-- 加签，当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
-    <TaskAddSignDialogForm ref="taskAddSignDialogForm" @success="getDetail" />
+          <!-- 流程图 -->
+          <el-tab-pane label="流程图" name="diagram">
+            <div class="form-scroll-area">
+              <ProcessInstanceSimpleViewer
+                v-show="
+                  processDefinition.modelType && processDefinition.modelType === BpmModelType.SIMPLE
+                "
+                :loading="processInstanceLoading"
+                :model-view="processModelView"
+              />
+              <ProcessInstanceBpmnViewer
+                v-show="
+                  processDefinition.modelType && processDefinition.modelType === BpmModelType.BPMN
+                "
+                :loading="processInstanceLoading"
+                :model-view="processModelView"
+              />
+            </div>
+          </el-tab-pane>
+
+          <!-- 流转记录 -->
+          <el-tab-pane label="流转记录" name="record">
+            <div class="form-scroll-area">
+              <el-scrollbar>
+                <ProcessInstanceTaskList :loading="processInstanceLoading" :id="id" />
+              </el-scrollbar>
+            </div>
+          </el-tab-pane>
+
+          <!-- 流转评论 TODO 待开发 -->
+          <el-tab-pane label="流转评论" name="comment" v-if="false">
+            <div class="form-scroll-area">
+              <el-scrollbar> 流转评论 </el-scrollbar>
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+
+        <div class="b-t-solid border-t-1px border-[var(--el-border-color)]">
+          <!-- 操作栏按钮 -->
+          <ProcessInstanceOperationButton
+            ref="operationButtonRef"
+            :process-instance="processInstance"
+            :process-definition="processDefinition"
+            :userOptions="userOptions"
+            :normal-form="detailForm"
+            :normal-form-api="fApi"
+            :writable-fields="writableFields"
+            @success="refresh"
+          />
+        </div>
+      </el-scrollbar>
+    </div>
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-import { useUserStore } from '@/store/modules/user'
+import { formatDate } from '@/utils/formatTime'
+import { DICT_TYPE } from '@/utils/dict'
+import { BpmModelType, BpmModelFormType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
-import type { ApiAttrs } from '@form-create/element-ui/types/config'
-import * as DefinitionApi from '@/api/bpm/definition'
-import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import * as TaskApi from '@/api/bpm/task'
-import TaskUpdateAssigneeForm from './TaskUpdateAssigneeForm.vue'
-import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
-import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
-import TaskReturnDialog from './TaskReturnDialogForm.vue'
-import TaskDelegateForm from './TaskDelegateForm.vue'
-import TaskAddSignDialogForm from './TaskAddSignDialogForm.vue'
 import { registerComponent } from '@/utils/routerHelper'
-import { isEmpty } from '@/utils/is'
+import type { ApiAttrs } from '@form-create/element-ui/types/config'
+import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+import * as UserApi from '@/api/system/user'
+import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
+import ProcessInstanceSimpleViewer from './ProcessInstanceSimpleViewer.vue'
+import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
+import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue'
+import ProcessInstanceTimeline from './ProcessInstanceTimeline.vue'
+import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { TaskStatusEnum } from '@/api/bpm/task'
+import runningSvg from '@/assets/svgs/bpm/running.svg'
+import approveSvg from '@/assets/svgs/bpm/approve.svg'
+import rejectSvg from '@/assets/svgs/bpm/reject.svg'
+import cancelSvg from '@/assets/svgs/bpm/cancel.svg'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
-
-const { query } = useRoute() // 查询参数
+const props = defineProps<{
+  id: string // 流程实例的编号
+  taskId?: string // 任务编号
+  activityId?: string //流程活动编号，用于抄送查看
+}>()
 const message = useMessage() // 消息弹窗
-const { proxy } = getCurrentInstance() as any
-
-const userId = useUserStore().getUser.id // 当前登录的编号
-const id = query.id as unknown as number // 流程实例的编号
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
-const bpmnXML = ref('') // BPMN XML
-const tasksLoad = ref(true) // 任务的加载中
-const tasks = ref<any[]>([]) // 任务列表
-// ========== 审批信息 ==========
-const runningTasks = ref<any[]>([]) // 运行中的任务
-const auditForms = ref<any[]>([]) // 审批任务的表单
-const auditRule = reactive({
-  reason: [{ required: true, message: '审批建议不能为空', trigger: 'blur' }]
-})
+const processDefinition = ref<any>({}) // 流程定义
+const processModelView = ref<any>({}) // 流程模型视图
+const operationButtonRef = ref() // 操作按钮组件 ref
+const auditIconsMap = {
+  [TaskStatusEnum.RUNNING]: runningSvg,
+  [TaskStatusEnum.APPROVE]: approveSvg,
+  [TaskStatusEnum.REJECT]: rejectSvg,
+  [TaskStatusEnum.CANCEL]: cancelSvg
+}
+
 // ========== 申请信息 ==========
 const fApi = ref<ApiAttrs>() //
 const detailForm = ref({
-  // 流程表单详情
   rule: [],
   option: {},
   value: {}
-})
+}) // 流程实例的表单详情
 
-/** 处理审批通过和不通过的操作 */
-const handleAudit = async (task, pass) => {
-  // 1.1 获得对应表单
-  const index = runningTasks.value.indexOf(task)
-  const auditFormRef = proxy.$refs['form' + index][0]
-  // 1.2 校验表单
-  const elForm = unref(auditFormRef)
-  if (!elForm) return
-  const valid = await elForm.validate()
-  if (!valid) return
-
-  // 2.1 提交审批
-  const data = {
-    id: task.id,
-    reason: auditForms.value[index].reason
-  }
-  if (pass) {
-    await TaskApi.approveTask(data)
-    message.success('审批通过成功')
-  } else {
-    await TaskApi.rejectTask(data)
-    message.success('审批不通过成功')
-  }
-  // 2.2 加载最新数据
-  getDetail()
-}
-
-/** 转派审批人 */
-const taskUpdateAssigneeFormRef = ref()
-const openTaskUpdateAssigneeForm = (id: string) => {
-  taskUpdateAssigneeFormRef.value.open(id)
-}
-
-const taskDelegateForm = ref()
-/** 处理审批退回的操作 */
-const handleDelegate = async (task) => {
-  taskDelegateForm.value.open(task.id)
-}
-
-//回退弹框组件
-const taskReturnDialogRef = ref()
-/** 处理审批退回的操作 */
-const handleBack = async (task) => {
-  taskReturnDialogRef.value.open(task.id)
-}
-
-const taskAddSignDialogForm = ref()
-/** 处理审批加签的操作 */
-const handleSign = async (task) => {
-  taskAddSignDialogForm.value.open(task.id)
-}
+const writableFields: Array<string> = [] // 表单可以编辑的字段
 
 /** 获得详情 */
 const getDetail = () => {
-  // 1. 获得流程实例相关
-  getProcessInstance()
-  // 2. 获得流程任务列表（审批记录）
-  getTaskList()
+  // 获得审批详情
+  getApprovalDetail()
+  // 获得流程模型视图
+  getProcessModelView()
 }
 
 /** 加载流程实例 */
-const BusinessFormComponent = ref(null) // 异步组件
-const getProcessInstance = async () => {
+const BusinessFormComponent = ref<any>(null) // 异步组件
+/** 获取审批详情 */
+const getApprovalDetail = async () => {
+  processInstanceLoading.value = true
   try {
-    processInstanceLoading.value = true
-    const data = await ProcessInstanceApi.getProcessInstance(id)
+    const param = {
+      processInstanceId: props.id,
+      activityId: props.activityId,
+      taskId: props.taskId
+    }
+    const data = await ProcessInstanceApi.getApprovalDetail(param)
     if (!data) {
+      message.error('查询不到审批详情信息！')
+      return
+    }
+    if (!data.processDefinition || !data.processInstance) {
       message.error('查询不到流程信息！')
       return
     }
-    processInstance.value = data
+    processInstance.value = data.processInstance
+    processDefinition.value = data.processDefinition
 
     // 设置表单信息
-    const processDefinition = data.processDefinition
-    if (processDefinition.formType === 10) {
-      setConfAndFields2(
-        detailForm,
-        processDefinition.formConf,
-        processDefinition.formFields,
-        data.formVariables
-      )
+    if (processDefinition.value.formType === BpmModelFormType.NORMAL) {
+      // 获取表单字段权限
+      const formFieldsPermission = data.formFieldsPermission
+      // 清空可编辑字段为空
+      writableFields.splice(0)
+      if (detailForm.value.rule?.length > 0) {
+        // 避免刷新 form-create 显示不了
+        detailForm.value.value = processInstance.value.formVariables
+      } else {
+        setConfAndFields2(
+          detailForm,
+          processDefinition.value.formConf,
+          processDefinition.value.formFields,
+          processInstance.value.formVariables
+        )
+      }
       nextTick().then(() => {
-        fApi.value?.fapi?.btn.show(false)
-        fApi.value?.fapi?.resetBtn.show(false)
-        fApi.value?.fapi?.disabled(true)
+        fApi.value?.btn.show(false)
+        fApi.value?.resetBtn.show(false)
+        //@ts-ignore
+        fApi.value?.disabled(true)
+        // 设置表单字段权限
+        if (formFieldsPermission) {
+          Object.keys(data.formFieldsPermission).forEach((item) => {
+            setFieldPermission(item, formFieldsPermission[item])
+          })
+        }
       })
     } else {
+      // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
       BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     }
 
-    // 加载流程图
-    bpmnXML.value = await DefinitionApi.getProcessDefinitionBpmnXML(processDefinition.id as number)
+    // 获取审批节点，显示 Timeline 的数据
+    activityNodes.value = data.activityNodes
+
+    // 获取待办任务显示操作按钮
+    operationButtonRef.value?.loadTodoTask(data.todoTask)
   } finally {
     processInstanceLoading.value = false
   }
 }
 
-/** 加载任务列表 */
-const getTaskList = async () => {
-  try {
-    // 获得未取消的任务
-    tasksLoad.value = true
-    const data = await TaskApi.getTaskListByProcessInstanceId(id)
-    tasks.value = []
-    // 1.1 移除已取消的审批
-    data.forEach((task) => {
-      if (task.result !== 4) {
-        tasks.value.push(task)
-      }
-    })
-    // 1.2 排序，将未完成的排在前面，已完成的排在后面；
-    tasks.value.sort((a, b) => {
-      // 有已完成的情况，按照完成时间倒序
-      if (a.endTime && b.endTime) {
-        return b.endTime - a.endTime
-      } else if (a.endTime) {
-        return 1
-      } else if (b.endTime) {
-        return -1
-        // 都是未完成，按照创建时间倒序
-      } else {
-        return b.createTime - a.createTime
-      }
-    })
+/** 获取流程模型视图*/
+const getProcessModelView = async () => {
+  if (BpmModelType.BPMN === processDefinition.value?.modelType) {
+    // 重置，解决 BPMN 流程图刷新不会重新渲染问题
+    processModelView.value = {
+      bpmnXml: ''
+    }
+  }
+  const data = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
+  if (data) {
+    processModelView.value = data
+  }
+}
 
-    // 获得需要自己审批的任务
-    runningTasks.value = []
-    auditForms.value = []
-    loadRunningTask(tasks.value)
-  } finally {
-    tasksLoad.value = false
+// 审批节点信息
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
+/**
+ * 设置表单权限
+ */
+const setFieldPermission = (field: string, permission: string) => {
+  if (permission === FieldPermissionType.READ) {
+    //@ts-ignore
+    fApi.value?.disabled(true, field)
+  }
+  if (permission === FieldPermissionType.WRITE) {
+    //@ts-ignore
+    fApi.value?.disabled(false, field)
+    // 加入可以编辑的字段
+    writableFields.push(field)
+  }
+  if (permission === FieldPermissionType.NONE) {
+    //@ts-ignore
+    fApi.value?.hidden(true, field)
   }
 }
 
 /**
- * 设置 runningTasks 中的任务
+ * 操作成功后刷新
  */
-const loadRunningTask = (tasks) => {
-  tasks.forEach((task) => {
-    if (!isEmpty(task.children)) {
-      loadRunningTask(task.children)
-    }
-    // 2.1 只有待处理才需要
-    if (task.result !== 1 && task.result !== 6) {
-      return
-    }
-    // 2.2 自己不是处理人
-    if (!task.assigneeUser || task.assigneeUser.id !== userId) {
-      return
-    }
-    // 2.3 添加到处理任务
-    runningTasks.value.push({ ...task })
-    auditForms.value.push({
-      reason: ''
-    })
-  })
+const refresh = () => {
+  // 重新获取详情
+  getDetail()
 }
 
+/** 当前的Tab */
+const activeTab = ref('form')
+
 /** 初始化 */
-onMounted(() => {
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
+onMounted(async () => {
   getDetail()
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
 })
 </script>
+
+<style lang="scss" scoped>
+$wrap-padding-height: 20px;
+$wrap-margin-height: 15px;
+$button-height: 51px;
+$process-header-height: 194px;
+
+.processInstance-wrap-main {
+  height: calc(
+    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px
+  );
+  max-height: calc(
+    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px
+  );
+  overflow: auto;
+
+  .form-scroll-area {
+    display: flex;
+    height: calc(
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px -
+        $process-header-height - 40px
+    );
+    max-height: calc(
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px -
+        $process-header-height - 40px
+    );
+    overflow: auto;
+    flex-direction: column;
+
+    :deep(.box-card) {
+      height: 100%;
+      flex: 1;
+
+      .el-card__body {
+        height: 100%;
+        padding: 0;
+      }
+    }
+  }
+}
+
+.form-box {
+  :deep(.el-card) {
+    border: none;
+  }
+}
+</style>

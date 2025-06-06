@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【营销】商城装修" url="https://doc.iocoder.cn/mall/diy/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -47,33 +49,26 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="预览图" align="center" prop="previewImageUrls">
+      <el-table-column label="预览图" align="center" prop="previewPicUrls">
         <template #default="scope">
           <el-image
             class="h-40px max-w-40px"
-            v-for="(url, index) in scope.row.previewImageUrls"
+            v-for="(url, index) in scope.row.previewPicUrls"
             :key="index"
             :src="url"
-            :preview-src-list="scope.row.previewImageUrls"
+            :preview-src-list="scope.row.previewPicUrls"
             :initial-index="index"
             preview-teleported
           />
         </template>
       </el-table-column>
-      <el-table-column label="模板名称" align="center" prop="name" />
+      <el-table-column label="模板名称" align="center" prop="name" min-width="180" />
       <el-table-column label="是否使用" align="center" prop="used">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.used" />
         </template>
       </el-table-column>
-      <el-table-column
-        label="使用时间"
-        align="center"
-        prop="usedTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="备注" align="center" prop="remark" min-width="180" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -205,7 +200,7 @@ const handleUse = async (row: DiyTemplateApi.DiyTemplateVO) => {
     // 使用模板的二次确认
     await message.confirm(`是否使用模板“${row.name}”?`)
     // 发起删除
-    await DiyTemplateApi.useDiyTemplate(row.id)
+    await DiyTemplateApi.useDiyTemplate(row.id!)
     message.success('使用成功')
     // 刷新列表
     await getList()

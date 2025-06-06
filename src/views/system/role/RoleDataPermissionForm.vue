@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="菜单权限" width="800">
+  <Dialog v-model="dialogVisible" title="数据权限" width="800">
     <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
       <el-form-item label="角色名称">
         <el-tag>{{ formData.name }}</el-tag>
@@ -20,10 +20,10 @@
     </el-form>
     <el-form-item
       v-if="formData.dataScope === SystemDataScopeEnum.DEPT_CUSTOM"
-      label="权限范围"
-      style="display: flex"
+      label="部门范围"
+      label-width="80px"
     >
-      <el-card class="card" shadow="never">
+      <el-card class="w-full h-400px !overflow-y-scroll" shadow="never">
         <template #header>
           全选/全不选:
           <el-switch
@@ -78,7 +78,7 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = reactive({
-  id: 0,
+  id: undefined,
   name: '',
   code: '',
   dataScope: undefined,
@@ -86,7 +86,7 @@ const formData = reactive({
 })
 const formRef = ref() // 表单 Ref
 const deptOptions = ref<any[]>([]) // 部门树形结构
-const deptExpand = ref(false) // 展开/折叠
+const deptExpand = ref(true) // 展开/折叠
 const treeRef = ref() // 菜单树组件 Ref
 const treeNodeAll = ref(false) // 全选/全不选
 const checkStrictly = ref(true) // 是否严格模式，即父子不关联
@@ -102,7 +102,9 @@ const open = async (row: RoleApi.RoleVO) => {
   formData.name = row.name
   formData.code = row.code
   formData.dataScope = row.dataScope
-  row.dataScopeDeptIds?.forEach((deptId: number) => {
+  await nextTick()
+  // 需要在 DOM 渲染完成后，再设置选中状态
+  row.dataScopeDeptIds?.forEach((deptId: number): void => {
     treeRef.value.setChecked(deptId, true, false)
   })
 }
@@ -135,11 +137,11 @@ const submitForm = async () => {
 const resetForm = () => {
   // 重置选项
   treeNodeAll.value = false
-  deptExpand.value = false
+  deptExpand.value = true
   checkStrictly.value = true
   // 重置表单
   formData.value = {
-    id: 0,
+    id: undefined,
     name: '',
     code: '',
     dataScope: undefined,

@@ -8,6 +8,7 @@ export interface MenuListProperty {
   // 组件样式
   style: ComponentStyle
 }
+
 /** 列表导航项目属性 */
 export interface MenuListItemProperty {
   // 图标链接

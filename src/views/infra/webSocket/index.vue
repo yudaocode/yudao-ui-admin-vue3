@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="WebSocket 实时通信" url="https://doc.iocoder.cn/websocket/" />
+
   <div class="flex">
     <!-- 左侧：建立连接、发送消息 -->
     <el-card :gutter="12" class="w-1/2" shadow="always">
@@ -27,8 +29,8 @@
         :autosize="{ minRows: 2, maxRows: 4 }"
         :disabled="!getIsOpen"
         clearable
-        type="textarea"
         placeholder="请输入你要发送的消息"
+        type="textarea"
       />
       <el-select v-model="sendUserId" class="mt-4" placeholder="请选择发送人">
         <el-option key="" label="所有人" value="" />
@@ -52,7 +54,7 @@
       </template>
       <div class="max-h-80 overflow-auto">
         <ul>
-          <li v-for="msg in messageList.reverse()" :key="msg.time" class="mt-2">
+          <li v-for="msg in messageReverseList" :key="msg.time" class="mt-2">
             <div class="flex items-center">
               <span class="text-primary mr-2 font-medium">收到消息:</span>
               <span>{{ formatDate(msg.time) }}</span>
@@ -69,7 +71,7 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import { useWebSocket } from '@vueuse/core'
-import { getAccessToken } from '@/utils/auth'
+import { getRefreshToken } from '@/utils/auth'
 import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'InfraWebSocket' })
@@ -77,19 +79,22 @@ defineOptions({ name: 'InfraWebSocket' })
 const message = useMessage() // 消息弹窗
 
 const server = ref(
-  (import.meta.env.VITE_BASE_URL + '/infra/ws').replace('http', 'ws') + '?token=' + getAccessToken()
+  (import.meta.env.VITE_BASE_URL + '/infra/ws').replace('http', 'ws') +
+    '?token=' +
+    getRefreshToken() // 使用 getRefreshToken() 方法，而不使用 getAccessToken() 方法的原因：WebSocket 无法方便的刷新访问令牌
 ) // WebSocket 服务地址
 const getIsOpen = computed(() => status.value === 'OPEN') // WebSocket 连接是否打开
 const getTagColor = computed(() => (getIsOpen.value ? 'success' : 'red')) // WebSocket 连接的展示颜色
 
 /** 发起 WebSocket 连接 */
 const { status, data, send, close, open } = useWebSocket(server.value, {
-  autoReconnect: false,
+  autoReconnect: true,
   heartbeat: true
 })
 
 /** 监听接收到的数据 */
 const messageList = ref([] as { time: number; text: string }[]) // 消息列表
+const messageReverseList = computed(() => messageList.value.slice().reverse())
 watchEffect(() => {
   if (!data.value) {
     return

@@ -39,6 +39,13 @@
         title="添加监听器"
         @click="openListenerForm(null)"
       />
+      <XButton
+        type="success"
+        preIcon="ep:select"
+        title="选择监听器"
+        size="small"
+        @click="openProcessListenerDialog"
+      />
     </div>
 
     <!-- 监听器 编辑/创建 部分 -->
@@ -286,11 +293,22 @@
       </template>
     </el-dialog>
   </div>
+
+  <!-- 选择弹窗 -->
+  <ProcessListenerDialog ref="processListenerDialogRef" @select="selectProcessListener" />
 </template>
 <script lang="ts" setup>
 import { ElMessageBox } from 'element-plus'
 import { createListenerObject, updateElementExtensions } from '../../utils'
-import { initListenerForm, initListenerType, eventType, listenerType, fieldType } from './utilSelf'
+import {
+  initListenerForm,
+  initListenerType,
+  eventType,
+  listenerType,
+  fieldType,
+  initListenerForm2
+} from './utilSelf'
+import ProcessListenerDialog from '@/components/bpmnProcessDesigner/package/penal/listeners/ProcessListenerDialog.vue'
 
 defineOptions({ name: 'UserTaskListeners' })
 
@@ -435,6 +453,28 @@ const removeListenerField = (field, index) => {
       listenerForm.value.fields.splice(index, 1)
     })
     .catch(() => console.info('操作取消'))
+}
+
+// 打开监听器弹窗
+const processListenerDialogRef = ref()
+const openProcessListenerDialog = async () => {
+  processListenerDialogRef.value.open('task')
+}
+const selectProcessListener = (listener) => {
+  const listenerForm = initListenerForm2(listener)
+  const listenerObject = createListenerObject(listenerForm, true, prefix)
+  bpmnElementListeners.value.push(listenerObject)
+  elementListenersList.value.push(listenerForm)
+
+  // 保存其他配置
+  otherExtensionList.value =
+    bpmnElement.value.businessObject?.extensionElements?.values?.filter(
+      (ex) => ex.$type !== `${prefix}:TaskListener`
+    ) ?? []
+  updateElementExtensions(
+    bpmnElement.value,
+    otherExtensionList.value.concat(bpmnElementListeners.value)
+  )
 }
 
 watch(

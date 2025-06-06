@@ -8,26 +8,40 @@
       :schema="allSchemas.formSchema"
     >
       <!-- 先选择 -->
-      <!-- TODO @zhangshuai：商品允许选择多个 -->
-      <!-- TODO @zhangshuai：选择后的 SKU，需要后面加个【删除】按钮 -->
-      <!-- TODO @zhangshuai：展示的金额，貌似不对，大了 100 倍，需要看下 -->
-      <!-- TODO @zhangshuai：“优惠类型”，是每个 SKU 可以自定义已设置哈。因为每个商品 SKU 的折扣和减少价格，可能不同。具体交互，可以注册一个 youzan.com 看看；它的交互方式是，如果设置了“优惠金额”，则算“减价”；如果再次设置了“折扣百分比”，就算“打折”；这样形成一个互斥的优惠类型 -->
       <template #spuId>
         <el-button @click="spuSelectRef.open()">选择商品</el-button>
         <SpuAndSkuList
           ref="spuAndSkuListRef"
+          :deletable="true"
           :rule-config="ruleConfig"
           :spu-list="spuList"
           :spu-property-list-p="spuPropertyList"
+          @delete="deleteSpu"
         >
           <el-table-column align="center" label="优惠金额" min-width="168">
-            <template #default="{ row: sku }">
-              <el-input-number v-model="sku.productConfig.discountPrice" :min="0" class="w-100%" />
+            <template #default="{ row }">
+              <el-input-number
+                v-model="row.productConfig.discountPrice"
+                :max="parseFloat(fenToYuan(row.price))"
+                :min="0"
+                :precision="2"
+                :step="0.1"
+                class="w-100%"
+                @change="handleSkuDiscountPriceChange(row)"
+              />
             </template>
           </el-table-column>
           <el-table-column align="center" label="折扣百分比(%)" min-width="168">
-            <template #default="{ row: sku }">
-              <el-input-number v-model="sku.productConfig.discountPercent" class="w-100%" />
+            <template #default="{ row }">
+              <el-input-number
+                v-model="row.productConfig.discountPercent"
+                :max="100"
+                :min="0"
+                :precision="2"
+                :step="0.1"
+                class="w-100%"
+                @change="handleSkuDiscountPercentChange(row)"
+              />
             </template>
           </el-table-column>
         </SpuAndSkuList>
@@ -43,10 +57,12 @@
 <script lang="ts" setup>
 import { SpuAndSkuList, SpuProperty, SpuSelect } from '../components'
 import { allSchemas, rules } from './discountActivity.data'
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep, debounce } from 'lodash-es'
 import * as DiscountActivityApi from '@/api/mall/promotion/discount/discountActivity'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
+import { convertToInteger, erpCalculatePercentage, fenToYuan, yuanToFen } from '@/utils'
+import { PromotionDiscountTypeEnum } from '@/utils/constants'
 
 defineOptions({ name: 'PromotionDiscountActivityForm' })
 
@@ -62,11 +78,17 @@ const formRef = ref() // 表单 Ref
 
 const spuSelectRef = ref() // 商品和属性选择 Ref
 const spuAndSkuListRef = ref() // sku 限时折扣  配置组件Ref
-const ruleConfig: RuleConfig[] = []
+const ruleConfig: RuleConfig[] = [
+  {
+    name: 'productConfig.discountPrice',
+    rule: (arg) => arg > 0,
+    message: '商品优惠金额不能为 0 ！！！'
+  }
+]
 const spuList = ref<DiscountActivityApi.SpuExtension[]>([]) // 选择的 spu
 const spuPropertyList = ref<SpuProperty<DiscountActivityApi.SpuExtension>[]>([])
+const spuIds = ref<number[]>([])
 const selectSpu = (spuId: number, skuIds: number[]) => {
-  formRef.value.setValues({ spuId })
   getSpuDetails(spuId, skuIds)
 }
 /**
@@ -75,14 +97,22 @@ const selectSpu = (spuId: number, skuIds: number[]) => {
 const getSpuDetails = async (
   spuId: number,
   skuIds: number[] | undefined,
-  products?: DiscountActivityApi.DiscountProductVO[]
+  products?: DiscountActivityApi.DiscountProductVO[],
+  type?: string
 ) => {
-  const spuProperties: SpuProperty<DiscountActivityApi.SpuExtension>[] = []
+  // 如果已经包含 SPU 则跳过
+  if (spuIds.value.includes(spuId)) {
+    if (type !== 'load') {
+      message.error('数据重复选择！')
+    }
+    return
+  }
+  spuIds.value.push(spuId)
   const res = (await ProductSpuApi.getSpuDetailList([spuId])) as DiscountActivityApi.SpuExtension[]
   if (res.length == 0) {
     return
   }
-  spuList.value = []
+  //spuList.value = []
   // 因为只能选择一个
   const spu = res[0]
   const selectSkus =
@@ -90,25 +120,28 @@ const getSpuDetails = async (
   selectSkus?.forEach((sku) => {
     let config: DiscountActivityApi.DiscountProductVO = {
       skuId: sku.id!,
-      spuId: spu.id,
+      spuId: spu.id!,
       discountType: 1,
       discountPercent: 0,
       discountPrice: 0
     }
     if (typeof products !== 'undefined') {
       const product = products.find((item) => item.skuId === sku.id)
+      if (product) {
+        product.discountPercent = fenToYuan(product.discountPercent) as any
+        product.discountPrice = fenToYuan(product.discountPrice) as any
+      }
       config = product || config
     }
     sku.productConfig = config
   })
   spu.skus = selectSkus as DiscountActivityApi.SkuExtension[]
-  spuProperties.push({
+  spuPropertyList.value.push({
     spuId: spu.id!,
     spuDetail: spu,
     propertyList: getPropertyList(spu)
   })
   spuList.value.push(spu)
-  spuPropertyList.value = spuProperties
 }
 
 // ================= end =================
@@ -126,8 +159,15 @@ const open = async (type: string, id?: number) => {
       const data = (await DiscountActivityApi.getDiscountActivity(
         id
       )) as DiscountActivityApi.DiscountActivityVO
-      const supId = data.products[0].spuId
-      await getSpuDetails(supId!, data.products?.map((sku) => sku.skuId), data.products)
+      for (let productsKey in data.products) {
+        const supId = data.products[productsKey].spuId
+        await getSpuDetails(
+          supId!,
+          data.products?.map((sku) => sku.skuId),
+          data.products,
+          'load'
+        )
+      }
       formRef.value.setValues(data)
     } finally {
       formLoading.value = false
@@ -146,12 +186,13 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formRef.value.formModel as DiscountActivityApi.DiscountActivityVO
-    // 获取 折扣商品配置
+    // 获取折扣商品配置
     const products = cloneDeep(spuAndSkuListRef.value.getSkuConfigs('productConfig'))
     products.forEach((item: DiscountActivityApi.DiscountProductVO) => {
-      item.discountType = data['discountType']
+      item.discountPercent = convertToInteger(item.discountPercent)
+      item.discountPrice = convertToInteger(item.discountPrice)
     })
+    const data = cloneDeep(formRef.value.formModel) as DiscountActivityApi.DiscountActivityVO
     data.products = products
     // 真正提交
     if (formType.value === 'create') {
@@ -169,11 +210,56 @@ const submitForm = async () => {
   }
 }
 
+/** 处理 sku 优惠金额变动 */
+const handleSkuDiscountPriceChange = debounce((row: any) => {
+  // 校验边界
+  if (row.productConfig.discountPrice <= 0) {
+    return
+  }
+
+  // 设置优惠类型：满减
+  row.productConfig.discountType = PromotionDiscountTypeEnum.PRICE.type
+  // 设置折扣
+  row.productConfig.discountPercent = erpCalculatePercentage(
+    row.price - yuanToFen(row.productConfig.discountPrice),
+    row.price
+  )
+}, 200)
+/** 处理 sku 优惠折扣变动 */
+const handleSkuDiscountPercentChange = debounce((row: any) => {
+  // 校验边界
+  if (row.productConfig.discountPercent <= 0 || row.productConfig.discountPercent >= 100) {
+    return
+  }
+
+  // 设置优惠类型：折扣
+  row.productConfig.discountType = PromotionDiscountTypeEnum.PERCENT.type
+  // 设置满减金额
+  row.productConfig.discountPrice = fenToYuan(
+    row.price - row.price * (row.productConfig.discountPercent / 100.0 || 0)
+  )
+}, 200)
+
 /** 重置表单 */
 const resetForm = async () => {
   spuList.value = []
   spuPropertyList.value = []
+  spuIds.value = []
   await nextTick()
   formRef.value.getElFormRef().resetFields()
+}
+
+/**
+ * 删除 SPU
+ */
+const deleteSpu = (spuId: number) => {
+  spuIds.value.splice(
+    spuIds.value.findIndex((item) => item == spuId),
+    1
+  )
+  spuPropertyList.value.splice(
+    spuPropertyList.value.findIndex((item) => item.spuId == spuId),
+    1
+  )
 }
 </script>

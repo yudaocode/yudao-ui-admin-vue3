@@ -8,14 +8,29 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="用户昵称" prop="nickname">
+      <el-form-item label="用户编号" prop="userId">
         <el-input
-          v-model="queryParams.nickname"
-          placeholder="请输入用户昵称"
+          v-model="queryParams.userId"
+          placeholder="请输入用户编号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
+      </el-form-item>
+      <el-form-item label="用户类型" prop="userType">
+        <el-select
+          v-model="queryParams.userType"
+          placeholder="请选择用户类型"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
@@ -39,12 +54,7 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="用户昵称" align="center" prop="nickname" />
-      <el-table-column label="头像" align="center" prop="avatar" width="80px">
-        <template #default="scope">
-          <img :src="scope.row.avatar" style="width: 40px" />
-        </template>
-      </el-table-column>
+      <el-table-column label="用户编号" align="center" prop="userId" />
       <el-table-column label="用户类型" align="center" prop="userType">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.USER_TYPE" :value="scope.row.userType" />
@@ -97,20 +107,17 @@ import WalletForm from './WalletForm.vue'
 
 defineOptions({ name: 'WalletBalance' })
 
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
-
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  nickname: null,
+  userId: null,
+  userType: null,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click.stop>
     <Dialog
       v-model="dialogVisible"
       :canFullscreen="false"
@@ -181,6 +181,7 @@ function openModal() {
 }
 
 function closeModal() {
+  debugger
   dialogVisible.value = false
 }
 

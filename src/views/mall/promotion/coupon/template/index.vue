@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="功能开启" url="https://doc.iocoder.cn/mall/build/" />
+  <doc-alert title="【营销】优惠劵" url="https://doc.iocoder.cn/mall/promotion-coupon/" />
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
@@ -109,7 +109,12 @@
         prop="validityType"
         width="185"
       />
-      <el-table-column align="center" label="发放数量" prop="totalCount" />
+      <el-table-column
+        :formatter="totalCountFormat"
+        align="center"
+        label="发放数量"
+        prop="totalCount"
+      />
       <el-table-column
         :formatter="remainedCountFormat"
         align="center"
@@ -189,6 +194,7 @@ import {
   discountFormat,
   remainedCountFormat,
   takeLimitCountFormat,
+  totalCountFormat,
   validityTypeFormat
 } from '@/views/mall/promotion/coupon/formatter'
 

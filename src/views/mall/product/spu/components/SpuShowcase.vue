@@ -85,6 +85,7 @@ const openSpuTableSelect = () => {
 
 /**
  * 选择商品后触发
+ *
  * @param spus 选中的商品列表
  */
 const handleSpuSelected = (spus: ProductSpuApi.Spu | ProductSpuApi.Spu[]) => {
@@ -94,6 +95,7 @@ const handleSpuSelected = (spus: ProductSpuApi.Spu | ProductSpuApi.Spu[]) => {
 
 /**
  * 删除商品
+ *
  * @param index 商品索引
  */
 const handleRemoveSpu = (index: number) => {

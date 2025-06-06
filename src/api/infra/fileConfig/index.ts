@@ -11,13 +11,14 @@ export interface FileClientConfig {
   bucket?: string
   accessKey?: string
   accessSecret?: string
+  enablePathStyleAccess?: boolean
   domain: string
 }
 
 export interface FileConfigVO {
   id: number
   name: string
-  storage: any
+  storage?: number
   master: boolean
   visible: boolean
   config: FileClientConfig

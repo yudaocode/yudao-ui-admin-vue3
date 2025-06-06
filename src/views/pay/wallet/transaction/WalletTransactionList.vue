@@ -1,28 +1,28 @@
 <template>
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="钱包编号" align="center" prop="walletId" />
-      <el-table-column label="关联业务标题" align="center" prop="title" />
-      <el-table-column label="交易金额" align="center" prop="price">
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" label="编号" prop="id" />
+      <el-table-column align="center" label="钱包编号" prop="walletId" />
+      <el-table-column align="center" label="关联业务标题" prop="title" />
+      <el-table-column align="center" label="交易金额" prop="price">
         <template #default="{ row }"> {{ fenToYuan(row.price) }} 元</template>
       </el-table-column>
-      <el-table-column label="钱包余额" align="center" prop="balance">
+      <el-table-column align="center" label="钱包余额" prop="balance">
         <template #default="{ row }"> {{ fenToYuan(row.balance) }} 元</template>
       </el-table-column>
       <el-table-column
-        label="交易时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="交易时间"
+        prop="createTime"
         width="180px"
       />
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -31,10 +31,16 @@
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import * as WalletTransactionApi from '@/api/pay/wallet/transaction'
+import * as WalletApi from '@/api/pay/wallet/balance'
 import { fenToYuan } from '@/utils'
+
 defineOptions({ name: 'WalletTransactionList' })
-const { walletId }: { walletId: number } = defineProps({
+const props = defineProps({
   walletId: {
+    type: Number,
+    required: false
+  },
+  userId: {
     type: Number,
     required: false
   }
@@ -52,7 +58,12 @@ const list = ref([]) // 列表的数据
 const getList = async () => {
   loading.value = true
   try {
-    queryParams.walletId = walletId
+    if (props.userId) {
+      const wallet = await WalletApi.getWallet({ userId: props.userId })
+      queryParams.walletId = wallet.id as any
+    } else {
+      queryParams.walletId = props.walletId as any
+    }
     const data = await WalletTransactionApi.getWalletTransactionPage(queryParams)
     list.value = data.list
     total.value = data.total
@@ -65,4 +76,4 @@ onMounted(() => {
   getList()
 })
 </script>
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

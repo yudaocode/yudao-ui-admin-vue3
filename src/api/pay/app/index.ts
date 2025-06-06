@@ -2,11 +2,13 @@ import request from '@/config/axios'
 
 export interface AppVO {
   id: number
+  appKey: string
   name: string
   status: number
   remark: string
   payNotifyUrl: string
   refundNotifyUrl: string
+  transferNotifyUrl: string
   merchantId: number
   merchantName: string
   createTime: Date
@@ -18,6 +20,7 @@ export interface AppPageReqVO extends PageParam {
   remark?: string
   payNotifyUrl?: string
   refundNotifyUrl?: string
+  transferNotifyUrl?: string
   merchantName?: string
   createTime?: Date[]
 }

@@ -7,7 +7,7 @@
       <el-descriptions-item label="任务名称">
         {{ detailData.name }}
       </el-descriptions-item>
-      <el-descriptions-item label="任务名称">
+      <el-descriptions-item label="任务状态">
         <dict-tag :type="DICT_TYPE.INFRA_JOB_STATUS" :value="detailData.status" />
       </el-descriptions-item>
       <el-descriptions-item label="处理器的名字">
@@ -51,7 +51,7 @@ defineOptions({ name: 'InfraJobDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
-const detailData = ref({}) // 详情数据
+const detailData = ref({} as JobApi.JobVO) // 详情数据
 const nextTimes = ref([]) // 下一轮执行时间的数组
 
 /** 打开弹窗 */

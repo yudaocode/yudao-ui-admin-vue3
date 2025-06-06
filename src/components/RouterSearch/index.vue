@@ -20,16 +20,22 @@
   <div v-else class="custom-hover" @click.stop="showTopSearch = !showTopSearch">
     <Icon icon="ep:search" />
     <el-select
+      @click.stop
       filterable
       :reserve-keyword="false"
       remote
       placeholder="请输入菜单内容"
       :remote-method="remoteMethod"
       class="overflow-hidden transition-all-600"
-      :class="showTopSearch ? 'w-220px ml2' : 'w-0'"
+      :class="showTopSearch ? '!w-220px ml2' : '!w-0'"
       @change="handleChange"
     >
-      <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+      <el-option
+        v-for="item in options"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value"
+      />
     </el-select>
   </div>
 </template>
@@ -73,7 +79,12 @@ function remoteMethod(data) {
 
 function handleChange(path) {
   router.push({ path })
-  hiddenTopSearch();
+  hiddenSearch()
+  hiddenTopSearch()
+}
+
+function hiddenSearch() {
+  showSearch.value = false
 }
 
 function hiddenTopSearch() {
@@ -93,6 +104,8 @@ onUnmounted(() => {
 // 监听 ctrl + k
 function listenKey(event) {
   if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+    // 阻止触发浏览器默认事件
+    event.preventDefault()
     showSearch.value = !showSearch.value
     // 这里可以执行相应的操作（例如打开搜索框等）
   }

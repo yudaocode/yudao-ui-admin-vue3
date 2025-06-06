@@ -2,19 +2,18 @@ import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 import { CouponTemplateValidityTypeEnum, PromotionDiscountTypeEnum } from '@/utils/constants'
 import { floatToFixed2 } from '@/utils'
 import { formatDate } from '@/utils/formatTime'
+import { object } from 'vue-types'
 
 // 优惠值
 export const CouponDiscount = defineComponent({
   name: 'CouponDiscount',
   props: {
-    coupon: {
-      type: CouponTemplateApi.CouponTemplateVO
-    }
+    coupon: object<CouponTemplateApi.CouponTemplateVO>()
   },
   setup(props) {
     const coupon = props.coupon as CouponTemplateApi.CouponTemplateVO
     // 折扣
-    let value = coupon.discountPercent + ''
+    let value = coupon.discountPercent / 10 + ''
     let suffix = ' 折'
     // 满减
     if (coupon.discountType === PromotionDiscountTypeEnum.PRICE.type) {
@@ -34,9 +33,7 @@ export const CouponDiscount = defineComponent({
 export const CouponDiscountDesc = defineComponent({
   name: 'CouponDiscountDesc',
   props: {
-    coupon: {
-      type: CouponTemplateApi.CouponTemplateVO
-    }
+    coupon: object<CouponTemplateApi.CouponTemplateVO>()
   },
   setup(props) {
     const coupon = props.coupon as CouponTemplateApi.CouponTemplateVO
@@ -46,7 +43,7 @@ export const CouponDiscountDesc = defineComponent({
     const discountDesc =
       coupon.discountType === PromotionDiscountTypeEnum.PRICE.type
         ? `减${floatToFixed2(coupon.discountPrice)}元`
-        : `打${coupon.discountPercent}折`
+        : `打${coupon.discountPercent / 10.0}折`
     return () => (
       <div>
         <span>{useCondition}</span>
@@ -60,9 +57,7 @@ export const CouponDiscountDesc = defineComponent({
 export const CouponValidTerm = defineComponent({
   name: 'CouponValidTerm',
   props: {
-    coupon: {
-      type: CouponTemplateApi.CouponTemplateVO
-    }
+    coupon: object<CouponTemplateApi.CouponTemplateVO>()
   },
   setup(props) {
     const coupon = props.coupon as CouponTemplateApi.CouponTemplateVO

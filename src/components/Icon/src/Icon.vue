@@ -22,7 +22,7 @@ const props = defineProps({
 
 const elRef = ref<ElRef>(null)
 
-const isLocal = computed(() => props.icon.startsWith('svg-icon:'))
+const isLocal = computed(() => props.icon?.startsWith('svg-icon:'))
 
 const symbolId = computed(() => {
   return unref(isLocal) ? `#icon-${props.icon.split('svg-icon:')[1]}` : props.icon
@@ -75,7 +75,7 @@ watch(
 
 <template>
   <ElIcon :class="prefixCls" :color="color" :size="size">
-    <svg v-if="isLocal" :class="getSvgClass" aria-hidden="true">
+    <svg v-if="isLocal" :class="getSvgClass">
       <use :xlink:href="symbolId" />
     </svg>
 

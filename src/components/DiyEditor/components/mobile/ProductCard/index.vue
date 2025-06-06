@@ -14,7 +14,10 @@
       :key="index"
     >
       <!-- 角标 -->
-      <div v-if="property.badge.show" class="absolute left-0 top-0 z-1 items-center justify-center">
+      <div
+        v-if="property.badge.show && property.badge.imgUrl"
+        class="absolute left-0 top-0 z-1 items-center justify-center"
+      >
         <el-image fit="cover" :src="property.badge.imgUrl" class="h-26px w-38px" />
       </div>
       <!-- 商品封面图 -->
@@ -67,15 +70,15 @@
             class="text-16px"
             :style="{ color: property.fields.price.color }"
           >
-            ￥{{ spu.price }}
+            ￥{{ fenToYuan(spu.price as any) }}
           </span>
           <!-- 市场价 -->
           <span
             v-if="property.fields.marketPrice.show && spu.marketPrice"
             class="ml-4px text-10px line-through"
             :style="{ color: property.fields.marketPrice.color }"
-            >￥{{ spu.marketPrice }}</span
-          >
+            >￥{{ fenToYuan(spu.marketPrice) }}
+          </span>
         </div>
         <div class="text-12px">
           <!-- 销量 -->
@@ -117,6 +120,7 @@
 <script setup lang="ts">
 import { ProductCardProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
+import { fenToYuan } from '../../../../../utils'
 
 /** 商品卡片 */
 defineOptions({ name: 'ProductCard' })
@@ -134,6 +138,7 @@ watch(
     deep: true
   }
 )
+
 /**
  * 计算商品的间距
  * @param index 商品索引

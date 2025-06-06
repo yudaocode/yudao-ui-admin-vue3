@@ -66,9 +66,9 @@ export const getTradeStatisticsSummary = () => {
 }
 
 // 获得交易状况统计
-export const getTradeTrendSummary = (params: TradeTrendReqVO) => {
+export const getTradeStatisticsAnalyse = (params: TradeTrendReqVO) => {
   return request.get<DataComparisonRespVO<TradeTrendSummaryRespVO>>({
-    url: '/statistics/trade/trend/summary',
+    url: '/statistics/trade/analyse',
     params: formatDateParam(params)
   })
 }

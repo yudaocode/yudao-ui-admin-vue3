@@ -41,7 +41,7 @@
           <el-form-item label="状态" prop="status">
             <el-select
               v-model="queryParams.status"
-              placeholder="用户状态"
+              placeholder="请选择用户状态"
               clearable
               class="!w-240px"
             >
@@ -113,7 +113,7 @@
             label="部门"
             align="center"
             key="deptName"
-            prop="dept.name"
+            prop="deptName"
             :show-overflow-tooltip="true"
           />
           <el-table-column label="手机号码" align="center" prop="mobile" width="120" />
@@ -124,6 +124,7 @@
                 :active-value="0"
                 :inactive-value="1"
                 @change="handleStatusChange(scope.row)"
+                :disabled="!checkPermi(['system:user:update'])"
               />
             </template>
           </el-table-column>
@@ -344,7 +345,7 @@ const handleResetPwd = async (row: UserApi.UserVO) => {
     )
     const password = result.value
     // 发起重置
-    await UserApi.resetUserPwd(row.id, password)
+    await UserApi.resetUserPassword(row.id, password)
     message.success('修改成功，新密码是：' + password)
   } catch {}
 }

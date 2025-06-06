@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="商城手册（功能开启）" url="https://doc.iocoder.cn/mall/build/" />
+
   <div class="flex flex-col">
     <!-- 数据对照 -->
     <el-row :gutter="16" class="row">
@@ -7,7 +9,7 @@
           tag="今日"
           title="销售额"
           prefix="￥"
-          ::decimals="2"
+          :decimals="2"
           :value="fenToYuan(orderComparison?.value?.orderPayPrice || 0)"
           :reference="fenToYuan(orderComparison?.reference?.orderPayPrice || 0)"
         />
@@ -24,8 +26,8 @@
         <ComparisonCard
           tag="今日"
           title="订单量"
-          :value="fenToYuan(orderComparison?.value?.orderPayCount || 0)"
-          :reference="fenToYuan(orderComparison?.reference?.orderPayCount || 0)"
+          :value="orderComparison?.value?.orderPayCount || 0"
+          :reference="orderComparison?.reference?.orderPayCount || 0"
         />
       </el-col>
       <el-col :md="6" :sm="12" :xs="24" :loading="loading">

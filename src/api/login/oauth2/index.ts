@@ -27,7 +27,7 @@ export const authorize = (
   return request.post({
     url: '/system/oauth2/authorize',
     headers: {
-      'Content-type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded'
     },
     params: {
       response_type: responseType,

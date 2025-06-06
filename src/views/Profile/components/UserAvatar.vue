@@ -12,19 +12,33 @@
 </template>
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
-import { uploadAvatar } from '@/api/system/user/profile'
+import { updateUserProfile } from '@/api/system/user/profile'
 import { CropperAvatar } from '@/components/Cropper'
+import { useUserStore } from '@/store/modules/user'
+import { useUpload } from '@/components/UploadFile/src/useUpload'
+import { UploadRequestOptions } from 'element-plus/es/components/upload/src/upload'
 
+// TODO @芋艿：合并到 ProfileUser 组件中，更简洁一点
 defineOptions({ name: 'UserAvatar' })
 
 defineProps({
   img: propTypes.string.def('')
 })
 
+const userStore = useUserStore()
+
 const cropperRef = ref()
 const handelUpload = async ({ data }) => {
-  await uploadAvatar({ avatarFile: data })
+  const { httpRequest } = useUpload()
+  const avatar = ((await httpRequest({
+    file: data,
+    filename: 'avatar.png',
+  } as UploadRequestOptions)) as unknown as { data: string }).data
+  await updateUserProfile({ avatar })
+
+  // 关闭弹窗，并更新 userStore
   cropperRef.value.close()
+  await userStore.setUserAvatarAction(avatar)
 }
 </script>
 

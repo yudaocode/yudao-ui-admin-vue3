@@ -59,7 +59,13 @@
               </el-checkbox>
             </el-col>
             <el-col :offset="6" :span="12">
-              <el-link style="float: right" type="primary">{{ t('login.forgetPassword') }}</el-link>
+              <el-link
+                style="float: right"
+                type="primary"
+                @click="setLoginState(LoginStateEnum.RESET_PASSWORD)"
+              >
+                {{ t('login.forgetPassword') }}
+              </el-link>
             </el-col>
           </el-row>
         </el-form-item>
@@ -76,6 +82,7 @@
         </el-form-item>
       </el-col>
       <Verify
+        v-if="loginData.captchaEnable === 'true'"
         ref="verify"
         :captchaType="captchaType"
         :imgSize="{ width: '400px', height: '200px' }"
@@ -184,11 +191,11 @@ const loginData = reactive({
   captchaEnable: import.meta.env.VITE_APP_CAPTCHA_ENABLE,
   tenantEnable: import.meta.env.VITE_APP_TENANT_ENABLE,
   loginForm: {
-    tenantName: '芋道源码',
-    username: 'admin',
-    password: 'admin123',
+    tenantName: import.meta.env.VITE_APP_DEFAULT_LOGIN_TENANT || '',
+    username: import.meta.env.VITE_APP_DEFAULT_LOGIN_USERNAME || '',
+    password: import.meta.env.VITE_APP_DEFAULT_LOGIN_PASSWORD || '',
     captchaVerification: '',
-    rememberMe: false
+    rememberMe: true // 默认记录我。如果不需要，可手动修改
   }
 })
 
@@ -218,14 +225,14 @@ const getTenantId = async () => {
   }
 }
 // 记住我
-const getCookie = () => {
+const getLoginFormCache = () => {
   const loginForm = authUtil.getLoginForm()
   if (loginForm) {
     loginData.loginForm = {
       ...loginData.loginForm,
       username: loginForm.username ? loginForm.username : loginData.loginForm.username,
       password: loginForm.password ? loginForm.password : loginData.loginForm.password,
-      rememberMe: loginForm.rememberMe ? true : false,
+      rememberMe: loginForm.rememberMe,
       tenantName: loginForm.tenantName ? loginForm.tenantName : loginData.loginForm.tenantName
     }
   }
@@ -241,7 +248,7 @@ const getTenantByWebsite = async () => {
 }
 const loading = ref() // ElLoading.service 返回的实例
 // 登录
-const handleLogin = async (params) => {
+const handleLogin = async (params: any) => {
   loginLoading.value = true
   try {
     await getTenantId()
@@ -249,8 +256,9 @@ const handleLogin = async (params) => {
     if (!data) {
       return
     }
-    loginData.loginForm.captchaVerification = params.captchaVerification
-    const res = await LoginApi.login(loginData.loginForm)
+    const loginDataLoginForm = { ...loginData.loginForm }
+    loginDataLoginForm.captchaVerification = params.captchaVerification
+    const res = await LoginApi.login(loginDataLoginForm)
     if (!res) {
       return
     }
@@ -259,8 +267,8 @@ const handleLogin = async (params) => {
       text: '正在加载系统中...',
       background: 'rgba(0, 0, 0, 0.7)'
     })
-    if (loginData.loginForm.rememberMe) {
-      authUtil.setLoginForm(loginData.loginForm)
+    if (loginDataLoginForm.rememberMe) {
+      authUtil.setLoginForm(loginDataLoginForm)
     } else {
       authUtil.removeLoginForm()
     }
@@ -272,7 +280,7 @@ const handleLogin = async (params) => {
     if (redirect.value.indexOf('sso') !== -1) {
       window.location.href = window.location.href.replace('/login?redirect=', '')
     } else {
-      push({ path: redirect.value || permissionStore.addRouters[0].path })
+      await push({ path: redirect.value || permissionStore.addRouters[0].path })
     }
   } finally {
     loginLoading.value = false
@@ -291,23 +299,28 @@ const doSocialLogin = async (type: number) => {
       await getTenantId()
       // 如果获取不到，则需要弹出提示，进行处理
       if (!authUtil.getTenantId()) {
-        await message.prompt('请输入租户名称', t('common.reminder')).then(async ({ value }) => {
-          const res = await LoginApi.getTenantIdByName(value)
+        try {
+          const data = await message.prompt('请输入租户名称', t('common.reminder'))
+          if (data?.action !== 'confirm') throw 'cancel'
+          const res = await LoginApi.getTenantIdByName(data.value)
           authUtil.setTenantId(res)
-        })
+        } catch (error) {
+          if (error === 'cancel') return
+        } finally {
+          loginLoading.value = false
+        }
       }
     }
     // 计算 redirectUri
-    // tricky: type、redirect需要先encode一次，否则钉钉回调会丢失。
-    // 配合 Login/SocialLogin.vue#getUrlValue() 使用
+    // 注意: type、redirect 需要先 encode 一次，否则钉钉回调会丢失。
+    // 配合 social-login.vue#getUrlValue() 使用
     const redirectUri =
       location.origin +
       '/social-login?' +
       encodeURIComponent(`type=${type}&redirect=${redirect.value || '/'}`)
 
     // 进行跳转
-    const res = await LoginApi.socialAuthRedirect(type, encodeURIComponent(redirectUri))
-    window.location.href = res
+    window.location.href = await LoginApi.socialAuthRedirect(type, encodeURIComponent(redirectUri))
   }
 }
 watch(
@@ -320,7 +333,7 @@ watch(
   }
 )
 onMounted(() => {
-  getCookie()
+  getLoginFormCache()
   getTenantByWebsite()
 })
 </script>

@@ -11,9 +11,9 @@
         @click="handleClick(item.routerName)"
       >
         <CountTo
-          :prefix="item.prefix"
-          :end-val="item.value"
           :decimals="item.decimals"
+          :end-val="item.value"
+          :prefix="item.prefix"
           class="text-3xl"
         />
         <span class="text-center">{{ item.name }}</span>
@@ -53,10 +53,18 @@ const data = reactive({
 /** 查询订单数据 */
 const getOrderData = async () => {
   const orderCount = await TradeStatisticsApi.getOrderCount()
-  data.orderUndelivered.value = orderCount.undelivered
-  data.orderAfterSaleApply.value = orderCount.afterSaleApply
-  data.orderWaitePickUp.value = orderCount.pickUp
-  data.withdrawAuditing.value = orderCount.auditingWithdraw
+  if (orderCount.undelivered != null) {
+    data.orderUndelivered.value = orderCount.undelivered
+  }
+  if (orderCount.afterSaleApply != null) {
+    data.orderAfterSaleApply.value = orderCount.afterSaleApply
+  }
+  if (orderCount.pickUp != null) {
+    data.orderWaitePickUp.value = orderCount.pickUp
+  }
+  if (orderCount.auditingWithdraw != null) {
+    data.withdrawAuditing.value = orderCount.auditingWithdraw
+  }
 }
 
 /** 查询商品数据 */
@@ -82,6 +90,13 @@ const getWalletRechargeData = async () => {
 const handleClick = (routerName: string) => {
   router.push({ name: routerName })
 }
+
+/** 激活时 */
+onActivated(() => {
+  getOrderData()
+  getProductData()
+  getWalletRechargeData()
+})
 
 /** 初始化 **/
 onMounted(() => {

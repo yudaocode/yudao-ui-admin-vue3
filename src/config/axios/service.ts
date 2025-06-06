@@ -1,19 +1,20 @@
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestHeaders,
-  AxiosResponse,
-  InternalAxiosRequestConfig
-} from 'axios'
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import qs from 'qs'
 import { config } from '@/config/axios/config'
-import { getAccessToken, getRefreshToken, getTenantId, removeToken, setToken } from '@/utils/auth'
+import {
+  getAccessToken,
+  getRefreshToken,
+  getTenantId,
+  getVisitTenantId,
+  removeToken,
+  setToken
+} from '@/utils/auth'
 import errorCode from './errorCode'
 
 import { resetRouter } from '@/router'
-import { useCache } from '@/hooks/web/useCache'
+import { deleteUserCache } from '@/hooks/web/useCache'
 
 const tenantEnable = import.meta.env.VITE_APP_TENANT_ENABLE
 const { result_code, base_url, request_timeout } = config
@@ -30,14 +31,18 @@ export const isRelogin = { show: false }
 let requestList: any[] = []
 // 是否正在刷新中
 let isRefreshToken = false
-// 请求白名单，无须token的接口
+// 请求白名单，无须 token 的接口
 const whiteList: string[] = ['/login', '/refresh-token']
 
 // 创建axios实例
 const service: AxiosInstance = axios.create({
   baseURL: base_url, // api 的 base_url
   timeout: request_timeout, // 请求超时时间
-  withCredentials: false // 禁用 Cookie 等信息
+  withCredentials: false, // 禁用 Cookie 等信息
+  // 自定义参数序列化函数
+  paramsSerializer: (params) => {
+    return qs.stringify(params, { allowDots: true })
+  }
 })
 
 // request拦截器
@@ -46,65 +51,51 @@ service.interceptors.request.use(
     // 是否需要设置 token
     let isToken = (config!.headers || {}).isToken === false
     whiteList.some((v) => {
-      if (config.url) {
-        config.url.indexOf(v) > -1
+      if (config.url && config.url.indexOf(v) > -1) {
         return (isToken = false)
       }
     })
     if (getAccessToken() && !isToken) {
-      ;(config as Recordable).headers.Authorization = 'Bearer ' + getAccessToken() // 让每个请求携带自定义token
+      config.headers.Authorization = 'Bearer ' + getAccessToken() // 让每个请求携带自定义token
     }
     // 设置租户
     if (tenantEnable && tenantEnable === 'true') {
       const tenantId = getTenantId()
-      if (tenantId) (config as Recordable).headers['tenant-id'] = tenantId
+      if (tenantId) config.headers['tenant-id'] = tenantId
+      // 只有登录时，才设置 visit-tenant-id 访问租户
+      const visitTenantId = getVisitTenantId()
+      if (config.headers.Authorization && visitTenantId) {
+        config.headers['visit-tenant-id'] = visitTenantId
+      }
     }
-    const params = config.params || {}
-    const data = config.data || false
-    if (
-      config.method?.toUpperCase() === 'POST' &&
-      (config.headers as AxiosRequestHeaders)['Content-Type'] ===
-        'application/x-www-form-urlencoded'
-    ) {
-      config.data = qs.stringify(data)
+    const method = config.method?.toUpperCase()
+    // 防止 GET 请求缓存
+    if (method === 'GET') {
+      config.headers['Cache-Control'] = 'no-cache'
+      config.headers['Pragma'] = 'no-cache'
     }
-    // get参数编码
-    if (config.method?.toUpperCase() === 'GET' && params) {
-      let url = config.url + '?'
-      for (const propName of Object.keys(params)) {
-        const value = params[propName]
-        if (value !== void 0 && value !== null && typeof value !== 'undefined') {
-          if (typeof value === 'object') {
-            for (const val of Object.keys(value)) {
-              const params = propName + '[' + val + ']'
-              const subPart = encodeURIComponent(params) + '='
-              url += subPart + encodeURIComponent(value[val]) + '&'
-            }
-          } else {
-            url += `${propName}=${encodeURIComponent(value)}&`
-          }
+    // 自定义参数序列化函数
+    else if (method === 'POST') {
+      const contentType = config.headers['Content-Type'] || config.headers['content-type']
+      if (contentType === 'application/x-www-form-urlencoded') {
+        if (config.data && typeof config.data !== 'string') {
+          config.data = qs.stringify(config.data)
         }
       }
-      // 给 get 请求加上时间戳参数，避免从缓存中拿数据
-      // const now = new Date().getTime()
-      // params = params.substring(0, url.length - 1) + `?_t=${now}`
-      url = url.slice(0, -1)
-      config.params = {}
-      config.url = url
     }
     return config
   },
   (error: AxiosError) => {
     // Do something with request error
     console.log(error) // for debug
-    Promise.reject(error)
+    return Promise.reject(error)
   }
 )
 
 // response 拦截器
 service.interceptors.response.use(
   async (response: AxiosResponse<any>) => {
-    const { data } = response
+    let { data } = response
     const config = response.config
     if (!data) {
       // 返回“[HTTP]请求没有返回值”;
@@ -112,14 +103,18 @@ service.interceptors.response.use(
     }
     const { t } = useI18n()
     // 未设置状态码则默认成功状态
-    const code = data.code || result_code
-    // 二进制数据则直接返回
+    // 二进制数据则直接返回，例如说 Excel 导出
     if (
       response.request.responseType === 'blob' ||
       response.request.responseType === 'arraybuffer'
     ) {
-      return response.data
+      // 注意：如果导出的响应为 json，说明可能失败了，不直接返回进行下载
+      if (response.data.type !== 'application/json') {
+        return response.data
+      }
+      data = await new Response(response.data).json()
     }
+    const code = data.code || result_code
     // 获取错误信息
     const msg = data.msg || errorCode[code] || errorCode['default']
     if (ignoreMsgs.indexOf(msg) !== -1) {
@@ -186,6 +181,7 @@ service.interceptors.response.use(
       if (msg === '无效的刷新令牌') {
         // hard coding：忽略这个提示，直接登出
         console.log(msg)
+        return handleAuthorized()
       } else {
         ElNotification.error({ title: msg })
       }
@@ -217,8 +213,8 @@ const refreshToken = async () => {
 const handleAuthorized = () => {
   const { t } = useI18n()
   if (!isRelogin.show) {
-    // 如果已经到重新登录页面则不进行弹窗提示
-    if (window.location.href.includes('login?redirect=')) {
+    // 如果已经到登录页面则不进行弹窗提示
+    if (window.location.href.includes('login')) {
       return
     }
     isRelogin.show = true
@@ -226,12 +222,12 @@ const handleAuthorized = () => {
       showCancelButton: false,
       closeOnClickModal: false,
       showClose: false,
+      closeOnPressEscape: false,
       confirmButtonText: t('login.relogin'),
       type: 'warning'
     }).then(() => {
-      const { wsCache } = useCache()
       resetRouter() // 重置静态路由表
-      wsCache.clear()
+      deleteUserCache() // 删除用户缓存
       removeToken()
       isRelogin.show = false
       // 干掉token后再走一次路由让它过router.beforeEach的校验

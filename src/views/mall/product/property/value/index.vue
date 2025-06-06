@@ -9,7 +9,7 @@
       label-width="68px"
     >
       <el-form-item label="属性项" prop="propertyId">
-        <el-select v-model="queryParams.propertyId" class="!w-240px">
+        <el-select v-model="queryParams.propertyId" class="!w-240px" disabled>
           <el-option
             v-for="item in propertyOptions"
             :key="item.id"
@@ -105,7 +105,7 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  propertyId: Number(params.propertyId),
+  propertyId: params.propertyId,
   name: undefined
 })
 const queryFormRef = ref() // 搜索的表单
@@ -158,6 +158,6 @@ const handleDelete = async (id: number) => {
 onMounted(async () => {
   await getList()
   // 属性项下拉框数据
-  propertyOptions.value = await PropertyApi.getPropertyList({})
+  propertyOptions.value.push(await PropertyApi.getProperty(queryParams.propertyId))
 })
 </script>

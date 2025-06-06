@@ -1,4 +1,7 @@
 <template>
+  <doc-alert title="【客户】客户管理、公海客户" url="https://doc.iocoder.cn/crm/customer/" />
+  <doc-alert title="【通用】数据权限" url="https://doc.iocoder.cn/crm/permission/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -41,12 +44,12 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="客户等级" prop="level">
+      <el-form-item label="客户级别" prop="level">
         <el-select
           v-model="queryParams.level"
           class="!w-240px"
           clearable
-          placeholder="请选择客户等级"
+          placeholder="请选择客户级别"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_LEVEL)"
@@ -84,6 +87,10 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
+        <el-button v-hasPermi="['crm:customer:import']" plain type="warning" @click="handleImport">
+          <Icon icon="ep:upload" />
+          导入
+        </el-button>
         <el-button
           v-hasPermi="['crm:customer:export']"
           :loading="exportLoading"
@@ -100,12 +107,17 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="我参与的" name="2" />
+      <el-tab-pane label="下属负责的" name="3" />
+    </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="客户名称" prop="name" width="160" />
-      <el-table-column align="center" label="所属行业" prop="industryId" width="120">
+      <el-table-column align="center" fixed="left" label="客户名称" prop="name" width="160">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
         </template>
       </el-table-column>
       <el-table-column align="center" label="客户来源" prop="source" width="100">
@@ -113,26 +125,17 @@
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="客户等级" prop="level" width="120">
+      <el-table-column align="center" label="手机" prop="mobile" width="120" />
+      <el-table-column align="center" label="电话" prop="telephone" width="130" />
+      <el-table-column align="center" label="邮箱" prop="email" width="180" />
+      <el-table-column align="center" label="客户级别" prop="level" width="135">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="手机" prop="mobile" width="120" />
-      <el-table-column align="center" label="详细地址" prop="detailAddress" width="200" />
-      <el-table-column align="center" label="负责人" prop="ownerUserName" />
-      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" />
-      <el-table-column align="center" label="创建人" prop="creatorName" />
-      <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="创建时间"
-        prop="createTime"
-        width="180px"
-      />
-      <el-table-column align="center" label="成交状态" prop="dealStatus">
+      <el-table-column align="center" label="客户行业" prop="industryId" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
         </template>
       </el-table-column>
       <el-table-column
@@ -142,6 +145,17 @@
         prop="contactNextTime"
         width="180px"
       />
+      <el-table-column align="center" label="备注" prop="remark" width="200" />
+      <el-table-column align="center" label="锁定状态" prop="lockStatus">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="成交状态" prop="dealStatus">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
+        </template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -149,15 +163,30 @@
         prop="contactLastTime"
         width="180px"
       />
-      <el-table-column align="center" label="锁定状态" prop="lockStatus">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
-        </template>
+      <el-table-column align="center" label="最后跟进记录" prop="contactLastContent" width="200" />
+      <el-table-column align="center" label="地址" prop="detailAddress" width="180" />
+      <el-table-column align="center" label="距离进入公海天数" prop="poolDay" width="140">
+        <template #default="scope"> {{ scope.row.poolDay }} 天</template>
       </el-table-column>
-      <!--  TODO @wanwan 距进入公海天数    -->
+      <el-table-column align="center" label="负责人" prop="ownerUserName" width="100px" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100px" />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="更新时间"
+        prop="updateTime"
+        width="180px"
+      />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
+        width="180px"
+      />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="100px" />
       <el-table-column align="center" fixed="right" label="操作" min-width="150">
         <template #default="scope">
-          <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
           <el-button
             v-hasPermi="['crm:customer:update']"
             link
@@ -188,6 +217,7 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getList" />
+  <CustomerImportForm ref="importFormRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
@@ -196,6 +226,8 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
 import CustomerForm from './CustomerForm.vue'
+import CustomerImportForm from './CustomerImportForm.vue'
+import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CrmCustomer' })
 
@@ -208,15 +240,23 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  pool: false,
+  sceneType: '1', // 默认和 activeName 相等
   name: '',
   mobile: '',
   industryId: undefined,
   level: undefined,
-  source: undefined
+  source: undefined,
+  pool: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
+
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName as string
+  handleQuery()
+}
 
 /** 查询列表 */
 const getList = async () => {
@@ -239,12 +279,11 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
-  queryParams.pool = false
   handleQuery()
 }
 
 /** 打开客户详情 */
-const { push } = useRouter()
+const { currentRoute, push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmCustomerDetail', params: { id } })
 }
@@ -268,6 +307,12 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
+/** 导入按钮操作 */
+const importFormRef = ref<InstanceType<typeof CustomerImportForm>>()
+const handleImport = () => {
+  importFormRef.value?.open()
+}
+
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {
@@ -282,6 +327,14 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
+
+/** 监听路由变化更新列表 */
+watch(
+  () => currentRoute.value,
+  () => {
+    getList()
+  }
+)
 
 /** 初始化 **/
 onMounted(() => {

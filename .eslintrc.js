@@ -68,6 +68,8 @@ module.exports = defineConfig({
     ],
     'vue/multi-word-component-names': 'off',
     'vue/no-v-html': 'off',
-    'prettier/prettier': 'off' // 芋艿：默认关闭 prettier 的 ESLint 校验，因为我们使用的是 IDE 的 Prettier 插件
+    'prettier/prettier': 'off', // 芋艿：默认关闭 prettier 的 ESLint 校验，因为我们使用的是 IDE 的 Prettier 插件
+    '@unocss/order': 'off', // 芋艿：禁用 unocss 【css】顺序的提示，因为暂时不需要这么严格，警告也有点繁琐
+    '@unocss/order-attributify': 'off' // 芋艿：禁用 unocss 【属性】顺序的提示，因为暂时不需要这么严格，警告也有点繁琐
   }
 })

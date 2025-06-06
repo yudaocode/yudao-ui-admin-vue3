@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="工作流手册" url="https://doc.iocoder.cn/bpm/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -61,7 +63,7 @@
       <el-table-column label="描述" align="center" prop="description" />
       <el-table-column label="成员" align="center">
         <template #default="scope">
-          <span v-for="userId in scope.row.memberUserIds" :key="userId" class="pr-5px">
+          <span v-for="userId in scope.row.userIds" :key="userId" class="pr-5px">
             {{ userList.find((user) => user.id === userId)?.nickname }}
           </span>
         </template>

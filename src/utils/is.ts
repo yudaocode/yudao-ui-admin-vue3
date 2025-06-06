@@ -18,8 +18,8 @@ export const isObject = (val: any): val is Record<any, any> => {
   return val !== null && is(val, 'Object')
 }
 
-export const isEmpty = <T = unknown>(val: T): val is T => {
-  if (val === null) {
+export const isEmpty = (val: any): boolean => {
+  if (val === null || val === undefined || typeof val === 'undefined') {
     return true
   }
   if (isArray(val) || isString(val)) {
@@ -98,8 +98,9 @@ export const isServer = typeof window === 'undefined'
 export const isClient = !isServer
 
 export const isUrl = (path: string): boolean => {
+  // fix:修复hash路由无法跳转的问题
   const reg =
-    /(((^https?:(?:\/\/)?)(?:[-:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&%@.\w_]*)#?(?:[\w]*))?)$/
+  /(((^https?:(?:\/\/)?)(?:[-:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%#\/.\w-_]*)?\??(?:[-\+=&%@.\w_]*)#?(?:[\w]*))?)$/
   return reg.test(path)
 }
 

@@ -35,13 +35,13 @@
       >
         <!-- 右上角热区删除按钮 -->
         <div
-          v-if="selectedHotAreaIndex === index"
+          v-if="selectedHotAreaIndex === index && hotArea.width && hotArea.height"
           class="btn-delete"
           @click="handleDeleteHotArea(index)"
         >
           <Icon icon="ep:circle-close-filled" />
         </div>
-        {{ `${hotArea.width}×${hotArea.height}` }}
+        <span v-if="hotArea.width">{{ `${hotArea.width}×${hotArea.height}` }}</span>
       </div>
     </table>
   </div>
@@ -189,7 +189,7 @@ const emit = defineEmits(['update:modelValue', 'hotAreaSelected'])
 const emitUpdateModelValue = () => emit('update:modelValue', hotAreas)
 
 // 热区选中
-const selectedHotAreaIndex = ref(-1)
+const selectedHotAreaIndex = ref(0)
 const handleHotAreaSelected = (hotArea: Rect, index: number) => {
   selectedHotAreaIndex.value = index
   emit('hotAreaSelected', hotArea, index)

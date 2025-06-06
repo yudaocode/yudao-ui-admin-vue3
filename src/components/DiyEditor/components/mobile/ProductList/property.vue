@@ -8,17 +8,17 @@
         <el-form-item label="布局" prop="type">
           <el-radio-group v-model="formData.layoutType">
             <el-tooltip class="item" content="双列" placement="bottom">
-              <el-radio-button label="twoCol">
+              <el-radio-button value="twoCol">
                 <Icon icon="fluent:text-column-two-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="三列" placement="bottom">
-              <el-radio-button label="threeCol">
+              <el-radio-button value="threeCol">
                 <Icon icon="fluent:text-column-three-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="水平滑动" placement="bottom">
-              <el-radio-button label="horizSwiper">
+              <el-radio-button value="horizSwiper">
                 <Icon icon="system-uicons:carousel" />
               </el-radio-button>
             </el-tooltip>
@@ -85,15 +85,15 @@
 
 <script setup lang="ts">
 import { ProductListProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
 
-// 商品卡片属性面板
+// 商品栏属性面板
 defineOptions({ name: 'ProductListProperty' })
 
 const props = defineProps<{ modelValue: ProductListProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 </script>
 
 <style scoped lang="scss"></style>

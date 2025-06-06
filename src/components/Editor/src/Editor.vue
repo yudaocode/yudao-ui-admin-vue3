@@ -6,7 +6,8 @@ import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 import { ElMessage } from 'element-plus'
 import { useLocaleStore } from '@/store/modules/locale'
-import { getAccessToken, getTenantId } from '@/utils/auth'
+import { getRefreshToken, getTenantId } from '@/utils/auth'
+import { getUploadUrl } from '@/components/UploadFile/src/useUpload'
 
 defineOptions({ name: 'Editor' })
 
@@ -88,7 +89,7 @@ const editorConfig = computed((): IEditorConfig => {
       scroll: true,
       MENU_CONF: {
         ['uploadImage']: {
-          server: import.meta.env.VITE_UPLOAD_URL,
+          server: getUploadUrl(),
           // 单个文件的最大体积限制，默认为 2M
           maxFileSize: 5 * 1024 * 1024,
           // 最多可上传几个文件，默认为 100
@@ -96,30 +97,22 @@ const editorConfig = computed((): IEditorConfig => {
           // 选择文件时的类型限制，默认为 ['image/*'] 。如不想限制，则设置为 []
           allowedFileTypes: ['image/*'],
 
-          // 自定义上传参数，例如传递验证的 token 等。参数会被添加到 formData 中，一起上传到服务端。
-          meta: { updateSupport: 0 },
-          // 将 meta 拼接到 url 参数中，默认 false
-          metaWithUrl: true,
-
           // 自定义增加 http  header
           headers: {
             Accept: '*',
-            Authorization: 'Bearer ' + getAccessToken(),
+            Authorization: 'Bearer ' + getRefreshToken(), // 使用 getRefreshToken() 方法，而不使用 getAccessToken() 方法的原因：Editor 无法方便的刷新访问令牌
             'tenant-id': getTenantId()
           },
 
-          // 跨域是否传递 cookie ，默认为 false
-          withCredentials: true,
-
           // 超时时间，默认为 10 秒
-          timeout: 5 * 1000, // 5 秒
+          timeout: 15 * 1000, // 15 秒
 
           // form-data fieldName，后端接口参数名称，默认值wangeditor-uploaded-image
           fieldName: 'file',
 
           // 上传之前触发
           onBeforeUpload(file: File) {
-            console.log(file)
+            // console.log(file)
             return file
           },
           // 上传进度的回调函数
@@ -141,6 +134,54 @@ const editorConfig = computed((): IEditorConfig => {
           // 自定义插入图片
           customInsert(res: any, insertFn: InsertFnType) {
             insertFn(res.data, 'image', res.data)
+          }
+        },
+        ['uploadVideo']: {
+          server: getUploadUrl(),
+          // 单个文件的最大体积限制，默认为 10M
+          maxFileSize: 10 * 1024 * 1024,
+          // 最多可上传几个文件，默认为 100
+          maxNumberOfFiles: 10,
+          // 选择文件时的类型限制，默认为 ['video/*'] 。如不想限制，则设置为 []
+          allowedFileTypes: ['video/*'],
+
+          // 自定义增加 http  header
+          headers: {
+            Accept: '*',
+            Authorization: 'Bearer ' + getRefreshToken(), // 使用 getRefreshToken() 方法，而不使用 getAccessToken() 方法的原因：Editor 无法方便的刷新访问令牌
+            'tenant-id': getTenantId()
+          },
+
+          // 超时时间，默认为 30 秒
+          timeout: 15 * 1000, // 15 秒
+
+          // form-data fieldName，后端接口参数名称，默认值wangeditor-uploaded-image
+          fieldName: 'file',
+
+          // 上传之前触发
+          onBeforeUpload(file: File) {
+            // console.log(file)
+            return file
+          },
+          // 上传进度的回调函数
+          onProgress(progress: number) {
+            // progress 是 0-100 的数字
+            console.log('progress', progress)
+          },
+          onSuccess(file: File, res: any) {
+            console.log('onSuccess', file, res)
+          },
+          onFailed(file: File, res: any) {
+            alert(res.message)
+            console.log('onFailed', file, res)
+          },
+          onError(file: File, err: any, res: any) {
+            alert(err.message)
+            console.error('onError', file, err, res)
+          },
+          // 自定义插入图片
+          customInsert(res: any, insertFn: InsertFnType) {
+            insertFn(res.data, 'mp4', res.data)
           }
         }
       },
@@ -180,12 +221,12 @@ defineExpose({
 </script>
 
 <template>
-  <div class="z-99 border-1 border-[var(--el-border-color)] border-solid">
+  <div class="border-1 border-solid border-[var(--tags-view-border-color)] z-10">
     <!-- 工具栏 -->
     <Toolbar
       :editor="editorRef"
       :editorId="editorId"
-      class="border-0 b-b-1 border-[var(--el-border-color)] border-solid"
+      class="border-0 b-b-1 border-solid border-[var(--tags-view-border-color)]"
     />
     <!-- 编辑器 -->
     <Editor

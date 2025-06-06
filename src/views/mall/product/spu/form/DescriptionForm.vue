@@ -1,30 +1,11 @@
+<!-- 商品发布 - 商品详情 -->
 <template>
-  <!-- 情况一：添加/修改 -->
-  <el-form
-    v-if="!isDetail"
-    ref="descriptionFormRef"
-    :model="formData"
-    :rules="rules"
-    label-width="120px"
-  >
+  <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px" :disabled="isDetail">
     <!--富文本编辑器组件-->
     <el-form-item label="商品详情" prop="description">
       <Editor v-model:modelValue="formData.description" />
     </el-form-item>
   </el-form>
-
-  <!-- 情况二：详情 -->
-  <Descriptions
-    v-if="isDetail"
-    :data="formData"
-    :schema="allSchemas.detailSchema"
-    class="descriptionFormDescriptions"
-  >
-    <!-- 展示 HTML 内容 -->
-    <template #description="{ row }">
-      <div v-dompurify-html="row.description" style="width: 600px"></div>
-    </template>
-  </Descriptions>
 </template>
 <script lang="ts" setup>
 import type { Spu } from '@/api/mall/product/spu'
@@ -32,13 +13,11 @@ import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
-import { descriptionSchema } from './spu.data'
 
-defineOptions({ name: 'DescriptionForm' })
+defineOptions({ name: 'ProductDescriptionForm' })
 
 const message = useMessage() // 消息弹窗
 
-const { allSchemas } = useCrudSchemas(descriptionSchema)
 const props = defineProps({
   propFormData: {
     type: Object as PropType<Spu>,
@@ -47,7 +26,7 @@ const props = defineProps({
   activeName: propTypes.string.def(''),
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
-const descriptionFormRef = ref() // 表单Ref
+const formRef = ref() // 表单Ref
 const formData = ref<Spu>({
   description: '' // 商品详情
 })
@@ -55,9 +34,8 @@ const formData = ref<Spu>({
 const rules = reactive({
   description: [required]
 })
-/**
- * 富文本编辑器如果输入过再清空会有残留，需再重置一次
- */
+
+/** 富文本编辑器如果输入过再清空会有残留，需再重置一次 */
 watch(
   () => formData.value.description,
   (newValue) => {
@@ -70,9 +48,8 @@ watch(
     immediate: true
   }
 )
-/**
- * 将传进来的值赋值给formData
- */
+
+/** 将传进来的值赋值给 formData */
 watch(
   () => props.propFormData,
   (data) => {
@@ -86,24 +63,19 @@ watch(
   }
 )
 
-/**
- * 表单校验
- */
+/** 表单校验 */
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
-  // 校验表单
-  if (!descriptionFormRef) return
-  return await unref(descriptionFormRef).validate((valid) => {
-    if (!valid) {
-      message.warning('商品详情为完善!!')
-      emit('update:activeName', 'description')
-      // 目的截断之后的校验
-      throw new Error('商品详情为完善!!')
-    } else {
-      // 校验通过更新数据
-      Object.assign(props.propFormData, formData.value)
-    }
-  })
+  if (!formRef) return
+  try {
+    await unref(formRef)?.validate()
+    // 校验通过更新数据
+    Object.assign(props.propFormData, formData.value)
+  } catch (e) {
+    message.error('【商品详情】不完善，请填写相关信息')
+    emit('update:activeName', 'description')
+    throw e // 目的截断之后的校验
+  }
 }
 defineExpose({ validate })
 </script>

@@ -1,19 +1,16 @@
 <template>
-  <div
-    class="title-bar"
-    :style="{
-      background: property.backgroundColor,
-      borderBottom: property.showBottomBorder ? '1px solid #F9F9F9' : '1px solid #fff'
-    }"
-  >
-    <div>
+  <div class="title-bar" :style="{ height: `${property.height}px` }">
+    <el-image v-if="property.bgImgUrl" :src="property.bgImgUrl" fit="cover" class="w-full" />
+    <div class="absolute left-0 top-0 w-full h-full flex flex-col justify-center">
       <!-- 标题 -->
       <div
         :style="{
           fontSize: `${property.titleSize}px`,
           fontWeight: property.titleWeight,
           color: property.titleColor,
-          textAlign: property.position
+          textAlign: property.textAlign,
+          marginLeft: `${property.marginLeft}px`,
+          marginBottom: '4px'
         }"
         v-if="property.title"
       >
@@ -25,9 +22,9 @@
           fontSize: `${property.descriptionSize}px`,
           fontWeight: property.descriptionWeight,
           color: property.descriptionColor,
-          textAlign: property.position
+          textAlign: property.textAlign,
+          marginLeft: `${property.marginLeft}px`
         }"
-        class="m-t-8px"
         v-if="property.description"
       >
         {{ property.description }}
@@ -38,10 +35,10 @@
       class="more"
       v-show="property.more.show"
       :style="{
-        color: property.more.type === 'text' ? '#38f' : ''
+        color: property.descriptionColor
       }"
     >
-      {{ property.more.type === 'icon' ? '' : property.more.text }}
+      <span v-if="property.more.type !== 'icon'"> {{ property.more.text }} </span>
       <Icon icon="ep:arrow-right" v-if="property.more.type !== 'text'" />
     </div>
   </div>
@@ -59,8 +56,6 @@ defineProps<{ property: TitleBarProperty }>()
   position: relative;
   width: 100%;
   min-height: 20px;
-  padding: 8px 16px;
-  border: 2px solid #fff;
   box-sizing: border-box;
 
   /* 更多 */

@@ -3,8 +3,8 @@
     <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
       <el-form-item label="发货方式">
         <el-radio-group v-model="expressType">
-          <el-radio border label="express">快递物流</el-radio>
-          <el-radio border label="none">无需发货</el-radio>
+          <el-radio border value="express">快递物流</el-radio>
+          <el-radio border value="none">无需发货</el-radio>
         </el-radio-group>
       </el-form-item>
       <template v-if="expressType === 'express'">
@@ -43,7 +43,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const expressType = ref('express') // 如果值是 express，则是快递；none 则是无；未来做同城配送；
 const formData = ref<TradeOrderApi.DeliveryVO>({
-  id: 0, // 订单编号
+  id: undefined, // 订单编号
   logisticsId: null, // 物流公司编号
   logisticsNo: '' // 物流编号
 })
@@ -86,7 +86,7 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: 0, // 订单编号
+    id: undefined, // 订单编号
     logisticsId: null, // 物流公司编号
     logisticsNo: '' // 物流编号
   }

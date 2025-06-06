@@ -1,7 +1,7 @@
 <template>
-  <el-input v-model="valueRef" v-bind="$attrs">
+  <el-input v-model="modelValue" v-bind="$attrs">
     <template #append>
-      <el-color-picker v-model="colorRef" :predefine="PREDEFINE_COLORS" />
+      <el-color-picker v-model="color" :predefine="PREDEFINE_COLORS" />
     </template>
   </el-input>
 </template>
@@ -9,6 +9,7 @@
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { PREDEFINE_COLORS } from '@/utils/color'
+import { useVModels } from '@vueuse/core'
 
 /**
  * 带颜色选择器输入框
@@ -19,33 +20,8 @@ const props = defineProps({
   modelValue: propTypes.string.def('').isRequired,
   color: propTypes.string.def('').isRequired
 })
-
-watch(
-  () => props.modelValue,
-  (val: string) => {
-    if (val === unref(valueRef)) return
-    valueRef.value = val
-  }
-)
-
 const emit = defineEmits(['update:modelValue', 'update:color'])
-
-// 输入框的值
-const valueRef = ref(props.modelValue)
-watch(
-  () => valueRef.value,
-  (val: string) => {
-    emit('update:modelValue', val)
-  }
-)
-// 颜色
-const colorRef = ref(props.color)
-watch(
-  () => colorRef.value,
-  (val: string) => {
-    emit('update:color', val)
-  }
-)
+const { modelValue, color } = useVModels(props, emit)
 </script>
 <style scoped lang="scss">
 :deep(.el-input-group__append) {

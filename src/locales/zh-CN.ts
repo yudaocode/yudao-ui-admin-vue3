@@ -56,6 +56,16 @@ export default {
     copySuccess: '复制成功',
     copyError: '复制失败'
   },
+  lock: {
+    lockScreen: '锁定屏幕',
+    lock: '锁定',
+    lockPassword: '锁屏密码',
+    unlock: '点击解锁',
+    backToLogin: '返回登录',
+    entrySystem: '进入系统',
+    placeholder: '请输入锁屏密码',
+    message: '锁屏密码错误'
+  },
   error: {
     noPermission: `抱歉，您无权访问此页面。`,
     pageError: '抱歉，您访问的页面不存在。',
@@ -82,6 +92,7 @@ export default {
     localeIcon: '多语言图标',
     messageIcon: '消息图标',
     tagsView: '标签页',
+    tagsViewImmerse: '标签页沉浸',
     logo: '标志',
     greyMode: '灰色模式',
     fixedHeader: '固定头部',
@@ -130,7 +141,10 @@ export default {
     btnQRCode: '二维码登录',
     qrcode: '扫描二维码登录',
     btnRegister: '注册',
-    SmsSendMsg: '验证码已发送'
+    SmsSendMsg: '验证码已发送',
+    resetPassword: '重置密码',
+    resetPasswordSuccess: '重置密码成功',
+    invalidTenantName: '无效的租户名称'
   },
   captcha: {
     verification: '请完成安全验证',
@@ -402,9 +416,9 @@ export default {
     },
     info: {
       title: '基本信息',
-      basicInfo: '基本资料',
-      resetPwd: '修改密码',
-      userSocial: '社交信息'
+      basicInfo: '基本设置',
+      resetPwd: '密码设置',
+      userSocial: '社交绑定'
     },
     rules: {
       nickname: '请输入用户昵称',

@@ -17,7 +17,7 @@ export interface ArticleVO {
 }
 
 // 查询文章管理列表
-export const getArticlePage = async (params) => {
+export const getArticlePage = async (params: any) => {
   return await request.get({ url: `/promotion/article/page`, params })
 }
 

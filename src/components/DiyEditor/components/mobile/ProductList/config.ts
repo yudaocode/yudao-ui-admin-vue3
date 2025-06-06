@@ -1,6 +1,6 @@
 import { ComponentStyle, DiyComponent } from '@/components/DiyEditor/util'
 
-/** 商品卡片属性 */
+/** 商品栏属性 */
 export interface ProductListProperty {
   // 布局类型：双列 | 三列 | 水平滑动
   layoutType: 'twoCol' | 'threeCol' | 'horizSwiper'

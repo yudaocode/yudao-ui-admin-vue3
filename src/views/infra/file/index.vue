@@ -15,6 +15,7 @@
           placeholder="请输入文件路径"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="文件类型" prop="type" width="80">
@@ -23,6 +24,7 @@
           placeholder="请输入文件类型"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
@@ -33,6 +35,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
@@ -59,6 +62,30 @@
         :formatter="fileSizeFormatter"
       />
       <el-table-column label="文件类型" align="center" prop="type" width="180px" />
+      <el-table-column label="文件内容" align="center" prop="url" width="110px">
+        <template #default="{ row }">
+          <el-image
+            v-if="row.type.includes('image')"
+            class="h-80px w-80px"
+            lazy
+            :src="row.url"
+            :preview-src-list="[row.url]"
+            preview-teleported
+            fit="cover"
+          />
+          <el-link
+            v-else-if="row.type.includes('pdf')"
+            type="primary"
+            :href="row.url"
+            :underline="false"
+            target="_blank"
+            >预览</el-link
+          >
+          <el-link v-else type="primary" download :href="row.url" :underline="false" target="_blank"
+            >下载</el-link
+          >
+        </template>
+      </el-table-column>
       <el-table-column
         label="上传时间"
         align="center"
@@ -68,11 +95,14 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
+          <el-button link type="primary" @click="copyToClipboard(scope.row.url)">
+            复制链接
+          </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['infra:config:delete']"
+            v-hasPermi="['infra:file:delete']"
           >
             删除
           </el-button>
@@ -110,6 +140,7 @@ const queryParams = reactive({
   pageSize: 10,
   name: undefined,
   type: undefined,
+  path: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -142,6 +173,13 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = () => {
   formRef.value.open()
+}
+
+/** 复制到剪贴板方法 */
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+    message.success('复制成功')
+  })
 }
 
 /** 删除按钮操作 */

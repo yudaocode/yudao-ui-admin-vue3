@@ -18,13 +18,8 @@ export interface CombinationRecordVO {
 }
 
 // 查询拼团记录列表
-export const getCombinationRecordPage = async (params) => {
+export const getCombinationRecordPage = async (params: any) => {
   return await request.get({ url: '/promotion/combination-record/page', params })
-}
-
-// 查询一个拼团的完整拼团记录
-export const getCombinationRecordPageByHeadId = async (params) => {
-  return await request.get({ url: '/promotion/combination-record/page-by-headId', params })
 }
 
 // 获得拼团记录的概要信息

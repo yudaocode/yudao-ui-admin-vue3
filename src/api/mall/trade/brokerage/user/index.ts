@@ -13,6 +13,11 @@ export interface BrokerageUserVO {
   avatar: string
 }
 
+// 创建分销用户
+export const createBrokerageUser = (data: any) => {
+  return request.post({ url: '/trade/brokerage-user/create', data })
+}
+
 // 查询分销用户列表
 export const getBrokerageUserPage = async (params: any) => {
   return await request.get({ url: `/trade/brokerage-user/page`, params })

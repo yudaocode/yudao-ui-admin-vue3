@@ -3,11 +3,12 @@
     <el-upload
       v-model:file-list="fileList"
       :accept="fileType.join(',')"
-      :action="updateUrl"
+      :action="uploadUrl"
       :before-upload="beforeUpload"
       :class="['upload', drag ? 'no-border' : '']"
+      :disabled="disabled"
       :drag="drag"
-      :headers="uploadHeaders"
+      :http-request="httpRequest"
       :limit="limit"
       :multiple="true"
       :on-error="uploadError"
@@ -24,11 +25,11 @@
       <template #file="{ file }">
         <img :src="file.url" class="upload-image" />
         <div class="upload-handle" @click.stop>
-          <div class="handle-icon" @click="handlePictureCardPreview(file)">
+          <div class="handle-icon" @click="imagePreview(file.url!)">
             <Icon icon="ep:zoom-in" />
             <span>查看</span>
           </div>
-          <div class="handle-icon" @click="handleRemove(file)">
+          <div v-if="!disabled" class="handle-icon" @click="handleRemove(file)">
             <Icon icon="ep:delete" />
             <span>删除</span>
           </div>
@@ -38,24 +39,26 @@
     <div class="el-upload__tip">
       <slot name="tip"></slot>
     </div>
-    <el-image-viewer
-      v-if="imgViewVisible"
-      :url-list="[viewImageUrl]"
-      @close="imgViewVisible = false"
-    />
   </div>
 </template>
 <script lang="ts" setup>
-import { PropType } from 'vue'
 import type { UploadFile, UploadProps, UploadUserFile } from 'element-plus'
 import { ElNotification } from 'element-plus'
+import { createImageViewer } from '@/components/ImageViewer'
 
 import { propTypes } from '@/utils/propTypes'
-import { getAccessToken, getTenantId } from '@/utils/auth'
+import { useUpload } from '@/components/UploadFile/src/useUpload'
 
 defineOptions({ name: 'UploadImgs' })
 
 const message = useMessage() // 消息弹窗
+// 查看图片
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    zIndex: 9999999,
+    urlList: [imgUrl]
+  })
+}
 
 type FileTypes =
   | 'image/apng'
@@ -70,11 +73,7 @@ type FileTypes =
   | 'image/x-icon'
 
 const props = defineProps({
-  modelValue: {
-    type: Array as PropType<UploadUserFile[]>,
-    required: true
-  },
-  updateUrl: propTypes.string.def(import.meta.env.VITE_UPLOAD_URL),
+  modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
   drag: propTypes.bool.def(true), // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled: propTypes.bool.def(false), // 是否禁用上传组件 ==> 非必传（默认为 false）
   limit: propTypes.number.def(5), // 最大图片上传数 ==> 非必传（默认为 5张）
@@ -82,27 +81,15 @@ const props = defineProps({
   fileType: propTypes.array.def(['image/jpeg', 'image/png', 'image/gif']), // 图片类型限制 ==> 非必传（默认为 ["image/jpeg", "image/png", "image/gif"]）
   height: propTypes.string.def('150px'), // 组件高度 ==> 非必传（默认为 150px）
   width: propTypes.string.def('150px'), // 组件宽度 ==> 非必传（默认为 150px）
-  borderradius: propTypes.string.def('8px') // 组件边框圆角 ==> 非必传（默认为 8px）
+  borderradius: propTypes.string.def('8px'), // 组件边框圆角 ==> 非必传（默认为 8px）
+  directory: propTypes.string.def(undefined) // 上传目录 ==> 非必传（默认为 undefined）
 })
 
-const uploadHeaders = ref({
-  Authorization: 'Bearer ' + getAccessToken(),
-  'tenant-id': getTenantId()
-})
+const { uploadUrl, httpRequest } = useUpload(props.directory)
 
 const fileList = ref<UploadUserFile[]>([])
-// fix: 改为动态监听赋值解决图片回显问题
-watch(
-  () => props.modelValue,
-  (data) => {
-    if (!data) return
-    fileList.value = data
-  },
-  {
-    deep: true,
-    immediate: true
-  }
-)
+const uploadNumber = ref<number>(0)
+const uploadList = ref<UploadUserFile[]>([])
 /**
  * @description 文件上传之前判断
  * @param rawFile 上传的文件
@@ -122,29 +109,60 @@ const beforeUpload: UploadProps['beforeUpload'] = (rawFile) => {
       message: `上传图片大小不能超过 ${props.fileSize}M！`,
       type: 'warning'
     })
+  uploadNumber.value++
   return imgType.includes(rawFile.type as FileTypes) && imgSize
 }
 
 // 图片上传成功
 interface UploadEmits {
-  (e: 'update:modelValue', value: UploadUserFile[]): void
+  (e: 'update:modelValue', value: string[]): void
 }
 
 const emit = defineEmits<UploadEmits>()
-const uploadSuccess = (response, uploadFile: UploadFile) => {
-  if (!response) return
-  // TODO 多图上传组件成功后只是把保存成功后的url替换掉组件选图时的文件路径，所以返回的fileList包含的是一个包含文件信息的对象列表
-  uploadFile.url = response.data
-  emit('update:modelValue', fileList.value)
+const uploadSuccess: UploadProps['onSuccess'] = (res: any): void => {
   message.success('上传成功')
+  // 删除自身
+  const index = fileList.value.findIndex((item) => item.response?.data === res.data)
+  fileList.value.splice(index, 1)
+  uploadList.value.push({ name: res.data, url: res.data })
+  if (uploadList.value.length == uploadNumber.value) {
+    fileList.value.push(...uploadList.value)
+    uploadList.value = []
+    uploadNumber.value = 0
+    emitUpdateModelValue()
+  }
 }
 
+// 监听模型绑定值变动
+watch(
+  () => props.modelValue,
+  (val: string | string[]) => {
+    if (!val) {
+      fileList.value = [] // fix：处理掉缓存，表单重置后上传组件的内容并没有重置
+      return
+    }
+
+    fileList.value = [] // 保障数据为空
+    fileList.value.push(
+      ...(val as string[]).map((url) => ({ name: url.substring(url.lastIndexOf('/') + 1), url }))
+    )
+  },
+  { immediate: true, deep: true }
+)
+// 发送图片链接列表更新
+const emitUpdateModelValue = () => {
+  let result: string[] = fileList.value.map((file) => file.url!)
+  emit('update:modelValue', result)
+}
 // 删除图片
 const handleRemove = (uploadFile: UploadFile) => {
   fileList.value = fileList.value.filter(
     (item) => item.url !== uploadFile.url || item.name !== uploadFile.name
   )
-  emit('update:modelValue', fileList.value)
+  emit(
+    'update:modelValue',
+    fileList.value.map((file) => file.url!)
+  )
 }
 
 // 图片上传错误提示
@@ -163,14 +181,6 @@ const handleExceed = () => {
     message: `当前最多只能上传 ${props.limit} 张图片，请移除后上传！`,
     type: 'warning'
   })
-}
-
-// 图片预览
-const viewImageUrl = ref('')
-const imgViewVisible = ref(false)
-const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
-  viewImageUrl.value = uploadFile.url!
-  imgViewVisible.value = true
 }
 </script>
 

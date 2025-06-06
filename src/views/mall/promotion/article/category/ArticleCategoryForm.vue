@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【营销】内容管理" url="https://doc.iocoder.cn/mall/promotion-content/" />
+
   <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
@@ -18,7 +20,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>

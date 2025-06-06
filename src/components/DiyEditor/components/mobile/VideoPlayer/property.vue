@@ -1,9 +1,9 @@
 <template>
   <ComponentContainerProperty v-model="formData.style">
-    <template #style="{ formData }">
+    <template #style>
       <el-form-item label="高度" prop="height">
         <el-slider
-          v-model="formData.height"
+          v-model="formData.style.height"
           :max="500"
           :min="100"
           show-input
@@ -42,14 +42,14 @@
 
 <script setup lang="ts">
 import { VideoPlayerProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 
 // 视频播放属性面板
 defineOptions({ name: 'VideoPlayerProperty' })
 
 const props = defineProps<{ modelValue: VideoPlayerProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 </script>
 
 <style scoped lang="scss"></style>

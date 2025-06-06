@@ -32,6 +32,6 @@ export const component = {
       bgColor: '#fff',
       marginBottom: 8,
       height: 300
-    } as ComponentStyle
+    } as VideoPlayerStyle
   }
 } as DiyComponent<VideoPlayerProperty>

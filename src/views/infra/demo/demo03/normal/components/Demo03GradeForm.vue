@@ -38,11 +38,11 @@ watch(
       id: undefined,
       studentId: undefined,
       name: undefined,
-      teacher: undefined,
+      teacher: undefined
     }
     // 2. val 非空，则加载数据
     if (!val) {
-      return;
+      return
     }
     try {
       formLoading.value = true

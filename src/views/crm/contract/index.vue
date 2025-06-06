@@ -1,74 +1,74 @@
 <template>
+  <doc-alert title="【合同】合同管理、合同提醒" url="https://doc.iocoder.cn/crm/contract/" />
+  <doc-alert title="【通用】数据权限" url="https://doc.iocoder.cn/crm/permission/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="合同名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入合同名称"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="客户编号" prop="customerId">
-        <el-input
-          v-model="queryParams.customerId"
-          placeholder="请输入客户编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="商机编号" prop="businessId">
-        <el-input
-          v-model="queryParams.businessId"
-          placeholder="请输入商机编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="下单日期" prop="orderDate">
-        <el-date-picker
-          v-model="queryParams.orderDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="合同编号" prop="no">
         <el-input
           v-model="queryParams.no"
-          placeholder="请输入合同编号"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入合同编号"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="合同名称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          class="!w-240px"
+          clearable
+          placeholder="请输入合同名称"
+          @keyup.enter="handleQuery"
+        />
+        <el-form-item label="客户" prop="customerId">
+          <el-select
+            v-model="queryParams.customerId"
+            class="!w-240px"
+            clearable
+            lable-key="name"
+            placeholder="请选择客户"
+            value-key="id"
+            @keyup.enter="handleQuery"
+          >
+            <el-option
+              v-for="item in customerList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id!"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:contract:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button v-hasPermi="['crm:contract:create']" type="primary" @click="openForm('create')">
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
         </el-button>
         <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
           v-hasPermi="['crm:contract:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -76,71 +76,172 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="合同编号" align="center" prop="id" />
-      <el-table-column label="合同名称" align="center" prop="name" />
-      <el-table-column label="客户名称" align="center" prop="customerId" />
-      <el-table-column label="商机名称" align="center" prop="businessId" />
-      <el-table-column label="工作流名称" align="center" prop="processInstanceId" />
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="我参与的" name="2" />
+      <el-tab-pane label="下属负责的" name="3" />
+    </el-tabs>
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" fixed="left" label="合同编号" prop="no" width="180" />
+      <el-table-column align="center" fixed="left" label="合同名称" prop="name" width="160">
+        <template #default="scope">
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="客户名称" prop="customerName" width="120">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openCustomerDetail(scope.row.customerId)"
+          >
+            {{ scope.row.customerName }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="商机名称" prop="businessName" width="130">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openBusinessDetail(scope.row.businessId)"
+          >
+            {{ scope.row.businessName }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column
+        align="center"
+        label="合同金额（元）"
+        prop="totalPrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        align="center"
         label="下单时间"
-        align="center"
         prop="orderDate"
-        :formatter="dateFormatter"
-        width="180px"
+        width="120"
+        :formatter="dateFormatter2"
       />
-      <el-table-column label="负责人" align="center" prop="ownerUserId" />
-      <el-table-column label="合同编号" align="center" prop="no" />
       <el-table-column
-        label="开始时间"
         align="center"
+        label="合同开始时间"
         prop="startTime"
-        :formatter="dateFormatter"
-        width="180px"
+        width="120"
+        :formatter="dateFormatter2"
       />
       <el-table-column
-        label="结束时间"
         align="center"
+        label="合同结束时间"
         prop="endTime"
-        :formatter="dateFormatter"
-        width="180px"
+        width="120"
+        :formatter="dateFormatter2"
       />
-      <el-table-column label="合同金额" align="center" prop="price" />
-      <el-table-column label="整单折扣" align="center" prop="discountPercent" />
-      <el-table-column label="产品总金额" align="center" prop="productPrice" />
-      <el-table-column label="联系人" align="center" prop="contactId" />
-      <el-table-column label="公司签约人" align="center" prop="signUserId" />
+      <el-table-column align="center" label="客户签约人" prop="contactName" width="130">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openContactDetail(scope.row.signContactId)"
+          >
+            {{ scope.row.signContactName }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="公司签约人" prop="signUserName" width="130" />
+      <el-table-column align="center" label="备注" prop="remark" width="200" />
       <el-table-column
+        align="center"
+        label="已回款金额（元）"
+        prop="totalReceivablePrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        align="center"
+        label="未回款金额（元）"
+        prop="totalReceivablePrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      >
+        <template #default="scope">
+          {{ erpPriceInputFormatter(scope.row.totalPrice - scope.row.totalReceivablePrice) }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="最后跟进时间"
-        align="center"
         prop="contactLastTime"
+        width="180px"
+      />
+      <el-table-column align="center" label="负责人" prop="ownerUserName" width="120" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100px" />
+      <el-table-column
         :formatter="dateFormatter"
+        align="center"
+        label="更新时间"
+        prop="updateTime"
         width="180px"
       />
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
         width="180px"
       />
-      <el-table-column label="备注" align="center" prop="remark" />
-
-      <el-table-column label="操作" width="120px">
+      <el-table-column align="center" label="创建人" prop="creatorName" width="120" />
+      <el-table-column align="center" fixed="right" label="合同状态" prop="auditStatus" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_AUDIT_STATUS" :value="scope.row.auditStatus" />
+        </template>
+      </el-table-column>
+      <el-table-column fixed="right" label="操作" width="250">
         <template #default="scope">
           <el-button
+            v-if="scope.row.auditStatus === 0"
+            v-hasPermi="['crm:contract:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['crm:contract:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-if="scope.row.auditStatus === 0"
+            v-hasPermi="['crm:contract:update']"
+            link
+            type="primary"
+            @click="handleSubmit(scope.row)"
+          >
+            提交审核
+          </el-button>
+          <el-button
+            v-else
+            link
+            v-hasPermi="['crm:contract:update']"
+            type="primary"
+            @click="handleProcessDetail(scope.row)"
+          >
+            查看审批
+          </el-button>
+          <el-button
+            v-hasPermi="['crm:contract:query']"
+            link
+            type="primary"
+            @click="openDetail(scope.row.id)"
+          >
+            详情
+          </el-button>
+          <el-button
+            v-hasPermi="['crm:contract:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['crm:contract:delete']"
           >
             删除
           </el-button>
@@ -149,9 +250,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -159,12 +260,15 @@
   <!-- 表单弹窗：添加/修改 -->
   <ContractForm ref="formRef" @success="getList" />
 </template>
-
-<script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
+<script lang="ts" setup>
+import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ContractApi from '@/api/crm/contract'
 import ContractForm from './ContractForm.vue'
+import { DICT_TYPE } from '@/utils/dict'
+import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
+import * as CustomerApi from '@/api/crm/customer'
+import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CrmContract' })
 
@@ -177,16 +281,22 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  sceneType: '1', // 默认和 activeName 相等
   name: null,
   customerId: null,
-  businessId: null,
   orderDate: [],
-  no: null,
-  discountPercent: null,
-  productPrice: null
+  no: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
+const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
+
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName
+  handleQuery()
+}
 
 /** 查询列表 */
 const getList = async () => {
@@ -246,8 +356,43 @@ const handleExport = async () => {
   }
 }
 
+/** 提交审核 **/
+const handleSubmit = async (row: ContractApi.ContractVO) => {
+  await message.confirm(`您确定提交【${row.name}】审核吗？`)
+  await ContractApi.submitContract(row.id)
+  message.success('提交审核成功！')
+  await getList()
+}
+
+/** 查看审批 */
+const handleProcessDetail = (row: ContractApi.ContractVO) => {
+  push({ name: 'BpmProcessInstanceDetail', query: { id: row.processInstanceId } })
+}
+
+/** 打开合同详情 */
+const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmContractDetail', params: { id } })
+}
+
+/** 打开客户详情 */
+const openCustomerDetail = (id: number) => {
+  push({ name: 'CrmCustomerDetail', params: { id } })
+}
+
+/** 打开联系人详情 */
+const openContactDetail = (id: number) => {
+  push({ name: 'CrmContactDetail', params: { id } })
+}
+
+/** 打开商机详情 */
+const openBusinessDetail = (id: number) => {
+  push({ name: 'CrmBusinessDetail', params: { id } })
+}
+
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  customerList.value = await CustomerApi.getCustomerSimpleList()
 })
 </script>

@@ -22,7 +22,7 @@ const goToUrl = () => {
 
 /** 是否开启 */
 const getEnable = () => {
-  return import.meta.env.VITE_APP_TENANT_ENABLE === 'true'
+  return import.meta.env.VITE_APP_DOCALERT_ENABLE !== 'false'
 }
 </script>
 <style scoped>

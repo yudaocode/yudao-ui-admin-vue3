@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【营销】内容管理" url="https://doc.iocoder.cn/mall/promotion-content/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -78,6 +80,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" label="ID" min-width="180" prop="id" />
       <el-table-column align="center" label="封面" min-width="80" prop="picUrl">
         <template #default="{ row }">
           <el-image :src="row.picUrl" class="h-30px w-30px" @click="imagePreview(row.picUrl)" />

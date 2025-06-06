@@ -4,10 +4,11 @@ export interface ProductVO {
   id: number
   name: string
   no: string
-  unit: string
+  unit: number
   price: number
   status: number
   categoryId: number
+  categoryName?: string
   description: string
   ownerUserId: number
 }
@@ -15,6 +16,11 @@ export interface ProductVO {
 // 查询产品列表
 export const getProductPage = async (params) => {
   return await request.get({ url: `/crm/product/page`, params })
+}
+
+// 获得产品精简列表
+export const getProductSimpleList = async () => {
+  return await request.get({ url: `/crm/product/simple-list` })
 }
 
 // 查询产品详情

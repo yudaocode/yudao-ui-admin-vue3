@@ -75,17 +75,16 @@ const attributeFormRef = ref()
 const bpmnInstances = () => (window as any)?.bpmnInstances
 
 const resetAttributesList = () => {
-  console.log(window, 'windowwindowwindowwindowwindowwindowwindow')
   bpmnElement.value = bpmnInstances().bpmnElement
   otherExtensionList.value = [] // 其他扩展配置
   bpmnElementProperties.value =
     // bpmnElement.value.businessObject?.extensionElements?.filter((ex) => {
-    bpmnElement.value.businessObject?.extensionElements?.values.filter((ex) => {
+    bpmnElement.value.businessObject?.extensionElements?.values?.filter((ex) => {
       if (ex.$type !== `${prefix}:Properties`) {
         otherExtensionList.value.push(ex)
       }
       return ex.$type === `${prefix}:Properties`
-    }) ?? []
+    }) ?? [];
 
   // 保存所有的 扩展属性字段
   bpmnElementPropertyList.value = bpmnElementProperties.value.reduce(

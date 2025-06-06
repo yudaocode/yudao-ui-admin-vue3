@@ -41,7 +41,7 @@
           <template #header>
             <div
               class="mr-[20px] h-[35px] flex items-center pl-[10px] pr-[10px]"
-              style="background-color: #f7f7f7"
+              style="background-color: var(--app-content-bg-color)"
             >
               <span class="mr-20px">订单号：{{ scope.row.no }} </span>
               <span class="mr-20px">下单时间：{{ formatDate(scope.row.createTime) }}</span>
@@ -120,7 +120,7 @@
               v-if="scope.row.deliveryType === DeliveryTypeEnum.EXPRESS.type"
               class="flex flex-col"
             >
-              <span>买家：{{ scope.row.user.nickname }}</span>
+              <span>买家：{{ scope.row.user?.nickname }}</span>
               <span>
                 收货人：{{ scope.row.receiverName }} {{ scope.row.receiverMobile }}
                 {{ scope.row.receiverAreaName }} {{ scope.row.receiverDetailAddress }}

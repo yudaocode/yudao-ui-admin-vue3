@@ -2,8 +2,8 @@
   <Form ref="formRef" :labelWidth="200" :rules="rules" :schema="schema">
     <template #sex="form">
       <el-radio-group v-model="form['sex']">
-        <el-radio :label="1">{{ t('profile.user.man') }}</el-radio>
-        <el-radio :label="2">{{ t('profile.user.woman') }}</el-radio>
+        <el-radio :value="1">{{ t('profile.user.man') }}</el-radio>
+        <el-radio :value="2">{{ t('profile.user.woman') }}</el-radio>
       </el-radio-group>
     </template>
   </Form>
@@ -21,11 +21,19 @@ import {
   updateUserProfile,
   UserProfileUpdateReqVO
 } from '@/api/system/user/profile'
+import { useUserStore } from '@/store/modules/user'
 
 defineOptions({ name: 'BasicInfo' })
 
 const { t } = useI18n()
 const message = useMessage() // 消息弹窗
+const userStore = useUserStore()
+
+// 定义事件
+const emit = defineEmits<{
+  (e: 'success'): void
+}>()
+
 // 表单校验
 const rules = reactive<FormRules>({
   nickname: [{ required: true, message: t('profile.rules.nickname'), trigger: 'blur' }],
@@ -78,13 +86,17 @@ const submit = () => {
       const data = unref(formRef)?.formModel as UserProfileUpdateReqVO
       await updateUserProfile(data)
       message.success(t('common.updateSuccess'))
-      await init()
+      const profile = await init()
+      userStore.setUserNicknameAction(profile.nickname)
+      // 发送成功事件
+      emit('success')
     }
   })
 }
 const init = async () => {
   const res = await getUserProfile()
   unref(formRef)?.setValues(res)
+  return res
 }
 onMounted(async () => {
   await init()

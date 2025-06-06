@@ -1,10 +1,8 @@
 import type { CrudSchema } from '@/hooks/web/useCrudSchemas'
 import { dateFormatter2 } from '@/utils/formatTime'
 
-// TODO @zhangshai：
 // 表单校验
 export const rules = reactive({
-  spuId: [required],
   name: [required],
   startTime: [required],
   endTime: [required],
@@ -70,17 +68,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     },
     table: {
       width: 120
-    }
-  },
-  {
-    label: '优惠类型',
-    field: 'discountType',
-    dictType: DICT_TYPE.PROMOTION_DISCOUNT_TYPE,
-    dictClass: 'number',
-    isSearch: true,
-    form: {
-      component: 'Radio',
-      value: 1
     }
   },
   {

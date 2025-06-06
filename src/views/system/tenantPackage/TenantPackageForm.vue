@@ -11,7 +11,7 @@
         <el-input v-model="formData.name" placeholder="请输入套餐名" />
       </el-form-item>
       <el-form-item label="菜单权限">
-        <el-card class="cardHeight">
+        <el-card class="w-full h-400px !overflow-y-scroll" shadow="never">
           <template #header>
             全选/全不选:
             <el-switch
@@ -45,7 +45,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="parseInt(dict.value)"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -113,7 +113,7 @@ const open = async (type: string, id?: number) => {
       formData.value = res
       // 设置选中
       res.menuIds.forEach((menuId: number) => {
-        treeRef.value.setChecked(menuId, true, false)
+        treeRef.value!.setChecked(menuId, true, false)
       })
     } finally {
       formLoading.value = false
@@ -134,8 +134,8 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as TenantPackageApi.TenantPackageVO
     data.menuIds = [
-      ...(treeRef.value.getCheckedKeys(false) as unknown as Array<number>), // 获得当前选中节点
-      ...(treeRef.value.getHalfCheckedKeys() as unknown as Array<number>) // 获得半选中的父节点
+      ...(treeRef.value!.getCheckedKeys(false) as unknown as Array<number>), // 获得当前选中节点
+      ...(treeRef.value!.getHalfCheckedKeys() as unknown as Array<number>) // 获得半选中的父节点
     ]
     if (formType.value === 'create') {
       await TenantPackageApi.createTenantPackage(data)
@@ -171,7 +171,7 @@ const resetForm = () => {
 
 /** 全选/全不选 */
 const handleCheckedTreeNodeAll = () => {
-  treeRef.value.setCheckedNodes(treeNodeAll.value ? menuOptions.value : [])
+  treeRef.value!.setCheckedNodes(treeNodeAll.value ? menuOptions.value : [])
 }
 
 /** 展开/折叠全部 */
@@ -185,10 +185,3 @@ const handleCheckedTreeExpand = () => {
   }
 }
 </script>
-<style lang="scss" scoped>
-.cardHeight {
-  width: 100%;
-  max-height: 400px;
-  overflow-y: scroll;
-}
-</style>

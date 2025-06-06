@@ -267,13 +267,13 @@ const getList = async () => {
 
 /** 查看订单详情 */
 const openDetail = (id: number) => {
-  push({ name: 'TradeOrderDetail', params: { orderId: id } })
+  push({ name: 'TradeOrderDetail', params: { id } })
 }
 
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  pickUpStoreList.value = await PickUpStoreApi.getListAllSimple()
+  pickUpStoreList.value = await PickUpStoreApi.getSimpleDeliveryPickUpStoreList()
   deliveryExpressList.value = await DeliveryExpressApi.getSimpleDeliveryExpressList()
 })
 </script>

@@ -1,19 +1,21 @@
 <template>
+  <doc-alert title="审批接入（业务表单）" url="https://doc.iocoder.cn/bpm/use-business-form/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="请假类型" prop="type">
         <el-select
           v-model="queryParams.type"
-          placeholder="请选择请假类型"
-          clearable
           class="!w-240px"
+          clearable
+          placeholder="请选择请假类型"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.BPM_OA_LEAVE_TYPE)"
@@ -26,18 +28,23 @@
       <el-form-item label="申请时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
-      <el-form-item label="结果" prop="result">
-        <el-select v-model="queryParams.result" placeholder="请选择结果" clearable class="!w-240px">
+      <el-form-item label="审批结果" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          class="!w-240px"
+          clearable
+          placeholder="请选择审批结果"
+        >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -47,17 +54,24 @@
       <el-form-item label="原因" prop="reason">
         <el-input
           v-model="queryParams.reason"
-          placeholder="请输入原因"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入原因"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" plain @click="handleCreate()">
-          <Icon icon="ep:plus" class="mr-5px" /> 发起请假
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button plain type="primary" @click="handleCreate()">
+          <Icon class="mr-5px" icon="ep:plus" />
+          发起请假
         </el-button>
       </el-form-item>
     </el-form>
@@ -66,63 +80,63 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="申请编号" align="center" prop="id" />
-      <el-table-column label="状态" align="center" prop="result">
+      <el-table-column align="center" label="申请编号" prop="id" />
+      <el-table-column align="center" label="状态" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.result" />
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
-        label="开始时间"
+        :formatter="dateFormatter"
         align="center"
+        label="开始时间"
         prop="startTime"
         width="180"
-        :formatter="dateFormatter"
       />
       <el-table-column
-        label="结束时间"
+        :formatter="dateFormatter"
         align="center"
+        label="结束时间"
         prop="endTime"
         width="180"
-        :formatter="dateFormatter"
       />
-      <el-table-column label="请假类型" align="center" prop="type">
+      <el-table-column align="center" label="请假类型" prop="type">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_OA_LEAVE_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="原因" align="center" prop="reason" />
+      <el-table-column align="center" label="原因" prop="reason" />
       <el-table-column
-        label="申请时间"
+        :formatter="dateFormatter"
         align="center"
+        label="申请时间"
         prop="createTime"
         width="180"
-        :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center" width="200">
+      <el-table-column align="center" label="操作" width="200">
         <template #default="scope">
           <el-button
+            v-hasPermi="['bpm:oa-leave:query']"
             link
             type="primary"
             @click="handleDetail(scope.row)"
-            v-hasPermi="['bpm:oa-leave:query']"
           >
             详情
           </el-button>
           <el-button
+            v-hasPermi="['bpm:oa-leave:query']"
             link
             type="primary"
             @click="handleProcessDetail(scope.row)"
-            v-hasPermi="['bpm:oa-leave:query']"
           >
             进度
           </el-button>
           <el-button
+            v-if="scope.row.result === 1"
+            v-hasPermi="['bpm:oa-leave:create']"
             link
             type="danger"
             @click="cancelLeave(scope.row)"
-            v-hasPermi="['bpm:oa-leave:create']"
-            v-if="scope.row.result === 1"
           >
             取消
           </el-button>
@@ -131,9 +145,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -157,7 +171,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   type: undefined,
-  result: undefined,
+  status: undefined,
   reason: undefined,
   createTime: []
 })
@@ -212,7 +226,7 @@ const cancelLeave = async (row) => {
     inputErrorMessage: '取消原因不能为空'
   })
   // 发起取消
-  await ProcessInstanceApi.cancelProcessInstance(row.id, value)
+  await ProcessInstanceApi.cancelProcessInstanceByStartUser(row.id, value)
   message.success('取消成功')
   // 刷新列表
   await getList()
@@ -227,6 +241,14 @@ const handleProcessDetail = (row) => {
     }
   })
 }
+
+// fix: 列表不刷新的问题。
+watch(
+  () => router.currentRoute.value,
+  () => {
+    getList()
+  }
+)
 
 /** 初始化 **/
 onMounted(() => {

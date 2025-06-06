@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【交易】快递发货" url="https://doc.iocoder.cn/mall/trade-delivery-express/" />
+
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form ref="queryFormRef" :inline="true" :model="queryParams" class="-mb-15px">
@@ -91,7 +93,7 @@
         prop="createTime"
         width="180"
       />
-      <el-table-column align="center" label="操作">
+      <el-table-column align="center" label="操作" min-width="110">
         <template #default="scope">
           <el-button
             v-hasPermi="['trade:delivery:pick-up-store:update']"
@@ -100,6 +102,14 @@
             @click="openForm('update', scope.row.id)"
           >
             编辑
+          </el-button>
+          <el-button
+            v-hasPermi="['trade:delivery:pick-up-store:update']"
+            link
+            type="primary"
+            @click="openFormBind(scope.row.id)"
+          >
+            绑定店员
           </el-button>
           <el-button
             v-hasPermi="['trade:delivery:pick-up-store:delete']"
@@ -113,12 +123,16 @@
       </el-table-column>
     </el-table>
   </ContentWrap>
+
   <!-- 表单弹窗：添加/修改 -->
   <DeliveryPickUpStoreForm ref="formRef" @success="getList" />
+  <!-- 表单弹窗：绑定店员 -->
+  <DeliveryPickUpStoreBindForm ref="formBindRef" />
 </template>
 <script lang="ts" name="DeliveryPickUpStore" setup>
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import DeliveryPickUpStoreForm from './PickUpStoreForm.vue'
+import DeliveryPickUpStoreBindForm from './DeliveryPickUpStoreBindForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 
@@ -142,6 +156,11 @@ const queryFormRef = ref() // 搜索的表单
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+const formBindRef = ref()
+const openFormBind = (id?: number) => {
+  formBindRef.value.open(id)
 }
 
 /** 删除按钮操作 */

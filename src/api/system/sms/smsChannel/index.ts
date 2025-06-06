@@ -19,7 +19,7 @@ export const getSmsChannelPage = (params: PageParam) => {
 
 // 获得短信渠道精简列表
 export function getSimpleSmsChannelList() {
-  return request.get({ url: '/system/sms-channel/list-all-simple' })
+  return request.get({ url: '/system/sms-channel/simple-list' })
 }
 
 // 查询短信渠道详情

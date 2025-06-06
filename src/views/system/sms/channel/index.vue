@@ -14,11 +14,17 @@
           v-model="queryParams.signature"
           placeholder="请输入短信签名"
           clearable
+          class="!w-240px"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="启用状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择启用状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择启用状态"
+          class="!w-240px"
+          clearable
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
@@ -35,6 +41,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>

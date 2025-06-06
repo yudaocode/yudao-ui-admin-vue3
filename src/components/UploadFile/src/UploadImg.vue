@@ -3,11 +3,12 @@
     <el-upload
       :id="uuid"
       :accept="fileType.join(',')"
-      :action="updateUrl"
+      :action="uploadUrl"
       :before-upload="beforeUpload"
       :class="['upload', drag ? 'no-border' : '']"
+      :disabled="disabled"
       :drag="drag"
-      :headers="uploadHeaders"
+      :http-request="httpRequest"
       :multiple="false"
       :on-error="uploadError"
       :on-success="uploadSuccess"
@@ -16,7 +17,7 @@
       <template v-if="modelValue">
         <img :src="modelValue" class="upload-image" />
         <div class="upload-handle" @click.stop>
-          <div class="handle-icon" @click="editImg">
+          <div v-if="!disabled" class="handle-icon" @click="editImg">
             <Icon icon="ep:edit" />
             <span v-if="showBtnText">{{ t('action.edit') }}</span>
           </div>
@@ -24,7 +25,7 @@
             <Icon icon="ep:zoom-in" />
             <span v-if="showBtnText">{{ t('action.detail') }}</span>
           </div>
-          <div v-if="showDelete" class="handle-icon" @click="deleteImg">
+          <div v-if="showDelete && !disabled" class="handle-icon" @click="deleteImg">
             <Icon icon="ep:delete" />
             <span v-if="showBtnText">{{ t('action.del') }}</span>
           </div>
@@ -50,8 +51,8 @@ import type { UploadProps } from 'element-plus'
 
 import { generateUUID } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
-import { getAccessToken, getTenantId } from '@/utils/auth'
 import { createImageViewer } from '@/components/ImageViewer'
+import { useUpload } from '@/components/UploadFile/src/useUpload'
 
 defineOptions({ name: 'UploadImg' })
 
@@ -70,7 +71,6 @@ type FileTypes =
 // 接受父组件参数
 const props = defineProps({
   modelValue: propTypes.string.def(''),
-  updateUrl: propTypes.string.def(import.meta.env.VITE_UPLOAD_URL),
   drag: propTypes.bool.def(true), // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled: propTypes.bool.def(false), // 是否禁用上传组件 ==> 非必传（默认为 false）
   fileSize: propTypes.number.def(5), // 图片大小限制 ==> 非必传（默认为 5M）
@@ -78,10 +78,9 @@ const props = defineProps({
   height: propTypes.string.def('150px'), // 组件高度 ==> 非必传（默认为 150px）
   width: propTypes.string.def('150px'), // 组件宽度 ==> 非必传（默认为 150px）
   borderradius: propTypes.string.def('8px'), // 组件边框圆角 ==> 非必传（默认为 8px）
-  // 是否显示删除按钮
-  showDelete: propTypes.bool.def(true),
-  // 是否显示按钮文字
-  showBtnText: propTypes.bool.def(true)
+  showDelete: propTypes.bool.def(true), // 是否显示删除按钮
+  showBtnText: propTypes.bool.def(true), // 是否显示按钮文字
+  directory: propTypes.string.def(undefined) // 上传目录 ==> 非必传（默认为 undefined）
 })
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -101,10 +100,7 @@ const deleteImg = () => {
   emit('update:modelValue', '')
 }
 
-const uploadHeaders = ref({
-  Authorization: 'Bearer ' + getAccessToken(),
-  'tenant-id': getTenantId()
-})
+const { uploadUrl, httpRequest } = useUpload(props.directory)
 
 const editImg = () => {
   const dom = document.querySelector(`#${uuid.value} .el-upload__input`)

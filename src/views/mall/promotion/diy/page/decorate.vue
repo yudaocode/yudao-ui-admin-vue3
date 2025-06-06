@@ -4,9 +4,6 @@
     v-model="formData.property"
     :title="formData.name"
     :libs="PAGE_LIBS"
-    :show-page-config="true"
-    :show-navigation-bar="true"
-    :show-tab-bar="false"
     @save="submitForm"
   />
 </template>
@@ -33,6 +30,7 @@ const getPageDetail = async (id: any) => {
     formLoading.value = false
   }
 }
+
 // 提交表单
 const submitForm = async () => {
   // 校验表单
@@ -54,7 +52,7 @@ const resetForm = () => {
     templateId: undefined,
     name: '',
     remark: '',
-    previewImageUrls: [],
+    previewPicUrls: [],
     property: ''
   } as DiyPageApi.DiyPageVO
   formRef.value?.resetFields()
