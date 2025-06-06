@@ -9,7 +9,24 @@
     >
       <Icon icon="ep:plus" class="mr-5px" /> 新增
     </el-button>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <el-button
+          type="danger"
+          plain
+          :disabled="isEmpty(checkedIds)"
+          @click="handleDeleteBatch"
+          v-hasPermi="['infra:demo03-student:delete']"
+      >
+        <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+      </el-button>
+    <el-table
+        row-key="id"
+        v-loading="loading"
+        :data="list"
+        :stripe="true"
+        :show-overflow-tooltip="true"
+        @selection-change="handleRowCheckboxChange"
+    >
+          <el-table-column type="selection" width="55" />
       <el-table-column label="编号" align="center" prop="id" />
        <el-table-column label="名字" align="center" prop="name" />
       <el-table-column label="分数" align="center" prop="score" />
@@ -52,17 +69,17 @@
     <!-- 表单弹窗：添加/修改 -->
     <Demo03CourseForm ref="formRef" @success="getList" />
 </template>
-
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/erp'
+import { isEmpty } from '@/utils/is'
+import { Demo03StudentApi } from '@/api/infra/demo/demo03/erp'
 import Demo03CourseForm from './Demo03CourseForm.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const props = defineProps<{
-  studentId: undefined // 学生编号（主表的关联字段）
+  studentId?: number // 学生编号（主表的关联字段）
 }>()
 const loading = ref(false) // 列表的加载中
 const list = ref([]) // 列表的数据
@@ -70,17 +87,20 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  studentId: undefined
+  studentId: undefined as unknown
 })
 
 /** 监听主表的关联字段的变化，加载对应的子表数据 */
 watch(
   () => props.studentId,
-  (val) => {
+  (val: number) => {
+    if (!val) {
+      return
+    }
     queryParams.studentId = val
     handleQuery()
   },
-  { immediate: false }
+    { immediate: true, deep: true }
 )
 
 /** 查询列表 */
@@ -122,5 +142,21 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 批量删除学生课程 */
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    await Demo03StudentApi.deleteDemo03CourseList(checkedIds.value);
+    message.success(t('common.delSuccess'))
+    await getList();
+  } catch {}
+}
+
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (records: Demo03Course[]) => {
+  checkedIds.value = records.map((item) => item.id);
 }
 </script>
