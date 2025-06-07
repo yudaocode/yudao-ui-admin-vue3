@@ -5,12 +5,12 @@
     <el-button v-if="showBtn" :class="`${prefixCls}-upload-btn`" @click="open()">
       {{ btnText ? btnText : t('cropper.selectImage') }}
     </el-button>
-    <CopperModal
-      ref="cropperModelRef"
-      :srcValue="sourceValue"
-      @upload-success="handleUploadSuccess"
-    />
   </div>
+  <CopperModal
+    ref="cropperModelRef"
+    :srcValue="sourceValue"
+    @upload-success="handleUploadSuccess"
+  />
 </template>
 <script lang="ts" setup>
 import { useDesign } from '@/hooks/web/useDesign'
