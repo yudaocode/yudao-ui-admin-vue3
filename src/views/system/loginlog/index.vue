@@ -47,7 +47,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['infra:login-log:export']"
+          v-hasPermi="['system:login-log:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -85,7 +85,7 @@
             link
             type="primary"
             @click="openDetail(scope.row)"
-            v-hasPermi="['infra:login-log:query']"
+            v-hasPermi="['system:login-log:query']"
           >
             详情
           </el-button>

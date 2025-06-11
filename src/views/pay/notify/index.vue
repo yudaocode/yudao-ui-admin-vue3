@@ -69,6 +69,24 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="商户退款编号" prop="merchantRefundId">
+        <el-input
+          v-model="queryParams.merchantRefundId"
+          placeholder="请输入商户退款编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="商户转账编号" prop="merchantTransferId">
+        <el-input
+          v-model="queryParams.merchantTransferId"
+          placeholder="请输入商户转账编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
@@ -94,7 +112,19 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="任务编号" align="center" prop="id" />
       <el-table-column label="应用编号" align="center" prop="appName" />
-      <el-table-column label="商户订单编号" align="center" prop="merchantOrderId" />
+      <el-table-column label="商户单信息" align="center" prop="merchant">
+        <template #default="scope">
+          <div v-if="scope.row.merchantOrderId">
+            <div>商户订单编号：{{ scope.row.merchantOrderId }}</div>
+          </div>
+          <div v-if="scope.row.merchantRefundId">
+            <div>商户退款编号：{{ scope.row.merchantRefundId }}</div>
+          </div>
+          <div v-if="scope.row.merchantTransferId">
+            <div>商户转账编号：{{ scope.row.merchantTransferId }}</div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="通知类型" align="center" prop="type">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.PAY_NOTIFY_TYPE" :value="scope.row.type" />
@@ -173,16 +203,12 @@ const queryParams = ref({
   dataId: null,
   status: null,
   merchantOrderId: null,
+  merchantRefundId: null,
+  merchantTransferId: null,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
 const appList = ref([]) // 支付应用列表集合
-// 是否显示弹出层
-const open = ref(false)
-// 通知详情
-const notifyDetail = ref<any>({
-  logs: []
-})
 
 /** 搜索按钮操作 */
 const handleQuery = () => {

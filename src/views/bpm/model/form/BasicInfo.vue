@@ -77,6 +77,7 @@
       >
         <el-option label="全员" :value="0" />
         <el-option label="指定人员" :value="1" />
+        <el-option label="指定部门" :value="2" />
       </el-select>
       <div v-if="modelData.startUserType === 1" class="mt-2 flex flex-wrap gap-2">
         <div
@@ -97,6 +98,24 @@
         </div>
         <el-button type="primary" link @click="openStartUserSelect">
           <Icon icon="ep:plus" /> 选择人员
+        </el-button>
+      </div>
+      <div v-if="modelData.startUserType === 2" class="mt-2 flex flex-wrap gap-2">
+        <div
+          v-for="dept in selectedStartDepts" 
+          :key="dept.id"
+          class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
+        >
+          <Icon icon="ep:office-building" class="!m-5px text-20px" />
+          {{ dept.name }}
+          <Icon
+            icon="ep:close"
+            class="ml-2 cursor-pointer hover:text-red-500"
+            @click="handleRemoveStartDept(dept)"
+          />
+        </div>
+        <el-button type="primary" link @click="openStartDeptSelect">
+          <Icon icon="ep:plus" /> 选择部门
         </el-button>
       </div>
     </el-form-item>
@@ -127,11 +146,19 @@
 
   <!-- 用户选择弹窗 -->
   <UserSelectForm ref="userSelectFormRef" @confirm="handleUserSelectConfirm" />
+  <!-- 部门选择弹窗 -->
+  <DeptSelectForm
+    ref="deptSelectFormRef"
+    :multiple="true"
+    :check-strictly="true"
+    @confirm="handleDeptSelectConfirm"
+  />
 </template>
 
 <script lang="ts" setup>
 import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import { UserVO } from '@/api/system/user'
+import { DeptVO } from '@/api/system/dept'
 import { CategoryVO } from '@/api/bpm/category'
 
 const props = defineProps({
@@ -142,13 +169,19 @@ const props = defineProps({
   userList: {
     type: Array,
     required: true
+  },
+  deptList: {
+    type: Array,
+    required: true
   }
 })
 
 const formRef = ref()
 const selectedStartUsers = ref<UserVO[]>([])
+const selectedStartDepts = ref<DeptVO[]>([])
 const selectedManagerUsers = ref<UserVO[]>([])
 const userSelectFormRef = ref()
+const deptSelectFormRef = ref()
 const currentSelectType = ref<'start' | 'manager'>('start')
 
 const rules = {
@@ -174,6 +207,13 @@ watch(
     } else {
       selectedStartUsers.value = []
     }
+    if (newVal.startDeptIds?.length) {
+      selectedStartDepts.value = props.deptList.filter((dept: DeptVO) =>
+        newVal.startDeptIds.includes(dept.id)
+      ) as DeptVO[]
+    } else {
+      selectedStartDepts.value = []
+    }
     if (newVal.managerUserIds?.length) {
       selectedManagerUsers.value = props.userList.filter((user: UserVO) =>
         newVal.managerUserIds.includes(user.id)
@@ -191,6 +231,11 @@ watch(
 const openStartUserSelect = () => {
   currentSelectType.value = 'start'
   userSelectFormRef.value.open(0, selectedStartUsers.value)
+}
+
+/** 打开部门选择 */
+const openStartDeptSelect = () => {
+  deptSelectFormRef.value.open(selectedStartDepts.value)
 }
 
 /** 打开管理员选择 */
@@ -214,9 +259,28 @@ const handleUserSelectConfirm = (_, users: UserVO[]) => {
   }
 }
 
+/** 处理部门选择确认 */
+const handleDeptSelectConfirm = (depts: DeptVO[]) => {
+  modelData.value = {
+    ...modelData.value,
+    startDeptIds: depts.map((d) => d.id)
+  }
+}
+
 /** 处理发起人类型变化 */
 const handleStartUserTypeChange = (value: number) => {
-  if (value !== 1) {
+  if (value === 0) {
+    modelData.value = {
+      ...modelData.value,
+      startUserIds: [],
+      startDeptIds: []
+    }
+  } else if (value === 1) {
+    modelData.value = {
+      ...modelData.value,
+      startDeptIds: []
+    }
+  } else if (value === 2) {
     modelData.value = {
       ...modelData.value,
       startUserIds: []
@@ -229,6 +293,14 @@ const handleRemoveStartUser = (user: UserVO) => {
   modelData.value = {
     ...modelData.value,
     startUserIds: modelData.value.startUserIds.filter((id: number) => id !== user.id)
+  }
+}
+
+/** 移除部门 */
+const handleRemoveStartDept = (dept: DeptVO) => {
+  modelData.value = {
+    ...modelData.value,
+    startDeptIds: modelData.value.startDeptIds.filter((id: number) => id !== dept.id)
   }
 }
 

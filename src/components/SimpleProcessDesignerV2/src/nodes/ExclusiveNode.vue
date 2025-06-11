@@ -108,11 +108,18 @@
 <script setup lang="ts">
 import NodeHandler from '../NodeHandler.vue'
 import ProcessNodeTree from '../ProcessNodeTree.vue'
-import { SimpleFlowNode, NodeType, ConditionType, DEFAULT_CONDITION_GROUP_VALUE, NODE_DEFAULT_TEXT } from '../consts'
+import {
+  SimpleFlowNode,
+  NodeType,
+  ConditionType,
+  DEFAULT_CONDITION_GROUP_VALUE,
+  NODE_DEFAULT_TEXT
+} from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
 import { useTaskStatusClass } from '../node'
 import { generateUUID } from '@/utils'
 import ConditionNodeConfig from '../nodes-config/ConditionNodeConfig.vue'
+import { cloneDeep } from 'lodash-es'
 const { proxy } = getCurrentInstance() as any
 defineOptions({
   name: 'ExclusiveNode'
@@ -149,7 +156,8 @@ const blurEvent = (index: number) => {
   showInputs.value[index] = false
   const conditionNode = currentNode.value.conditionNodes?.at(index) as SimpleFlowNode
   conditionNode.name =
-    conditionNode.name || getDefaultConditionNodeName(index, conditionNode.conditionSetting?.defaultFlow)
+    conditionNode.name ||
+    getDefaultConditionNodeName(index, conditionNode.conditionSetting?.defaultFlow)
 }
 
 // 点击条件名称
@@ -181,7 +189,7 @@ const addCondition = () => {
       conditionSetting: {
         defaultFlow: false,
         conditionType: ConditionType.RULE,
-        conditionGroups: DEFAULT_CONDITION_GROUP_VALUE
+        conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE)
       }
     }
     conditionNodes.splice(lastIndex, 0, conditionData)

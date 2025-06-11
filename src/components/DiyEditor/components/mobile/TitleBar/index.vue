@@ -1,55 +1,49 @@
 <template>
-  <div
-    :style="{
-      background:
-        property.style.bgType === 'color' ? property.style.bgColor : `url(${property.style.bgImg})`,
-      backgroundSize: '100% 100%',
-      backgroundRepeat: 'no-repeat'
-    }"
-    class="title-bar"
-  >
-    <!-- 内容 -->
-    <div>
+  <div class="title-bar" :style="{ height: `${property.height}px` }">
+    <el-image v-if="property.bgImgUrl" :src="property.bgImgUrl" fit="cover" class="w-full" />
+    <div class="absolute left-0 top-0 w-full h-full flex flex-col justify-center">
       <!-- 标题 -->
       <div
-        v-if="property.title"
         :style="{
           fontSize: `${property.titleSize}px`,
           fontWeight: property.titleWeight,
           color: property.titleColor,
-          textAlign: property.textAlign
+          textAlign: property.textAlign,
+          marginLeft: `${property.marginLeft}px`,
+          marginBottom: '4px'
         }"
+        v-if="property.title"
       >
         {{ property.title }}
       </div>
       <!-- 副标题 -->
       <div
-        v-if="property.description"
         :style="{
           fontSize: `${property.descriptionSize}px`,
           fontWeight: property.descriptionWeight,
           color: property.descriptionColor,
-          textAlign: property.textAlign
+          textAlign: property.textAlign,
+          marginLeft: `${property.marginLeft}px`
         }"
-        class="m-t-8px"
+        v-if="property.description"
       >
         {{ property.description }}
       </div>
     </div>
     <!-- 更多 -->
     <div
+      class="more"
       v-show="property.more.show"
       :style="{
         color: property.descriptionColor
       }"
-      class="more"
     >
       <span v-if="property.more.type !== 'icon'"> {{ property.more.text }} </span>
-      <Icon v-if="property.more.type !== 'text'" icon="ep:arrow-right" />
+      <Icon icon="ep:arrow-right" v-if="property.more.type !== 'text'" />
     </div>
   </div>
 </template>
-<script lang="ts" setup>
+<script setup lang="ts">
 import { TitleBarProperty } from './config'
 
 /** 标题栏 */
@@ -57,7 +51,7 @@ defineOptions({ name: 'TitleBar' })
 
 defineProps<{ property: TitleBarProperty }>()
 </script>
-<style lang="scss" scoped>
+<style scoped lang="scss">
 .title-bar {
   position: relative;
   width: 100%;

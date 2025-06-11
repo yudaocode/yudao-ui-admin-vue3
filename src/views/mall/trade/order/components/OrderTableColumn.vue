@@ -120,7 +120,7 @@
               v-if="scope.row.deliveryType === DeliveryTypeEnum.EXPRESS.type"
               class="flex flex-col"
             >
-              <span>买家：{{ scope.row.user.nickname }}</span>
+              <span>买家：{{ scope.row.user?.nickname }}</span>
               <span>
                 收货人：{{ scope.row.receiverName }} {{ scope.row.receiverMobile }}
                 {{ scope.row.receiverAreaName }} {{ scope.row.receiverDetailAddress }}

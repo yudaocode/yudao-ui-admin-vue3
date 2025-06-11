@@ -476,9 +476,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         name: 'DiyTemplateDecorate',
         meta: {
           title: '模板装修',
-          noCache: true,
+          noCache: false,
           hidden: true,
-          activeMenu: '/mall/promotion/diy/template'
+          activeMenu: '/mall/promotion/diy-template/diy-template'
         },
         component: () => import('@/views/mall/promotion/diy/template/decorate.vue')
       },
@@ -487,9 +487,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         name: 'DiyPageDecorate',
         meta: {
           title: '页面装修',
-          noCache: true,
+          noCache: false,
           hidden: true,
-          activeMenu: '/mall/promotion/diy/page'
+          activeMenu: '/mall/promotion/diy-template/diy-page'
         },
         component: () => import('@/views/mall/promotion/diy/page/decorate.vue')
       }
@@ -666,6 +666,30 @@ const remainingRouter: AppRouteRecordRaw[] = [
           noCache: true,
           hidden: true,
           activeMenu: '/ai/knowledge'
+        }
+      },
+      {
+        path: 'console/workflow/create',
+        component: () => import('@/views/ai/workflow/form/index.vue'),
+        name: 'AiWorkflowCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '设计 AI 工作流',
+          activeMenu: '/ai/console/workflow'
+        }
+      },
+      {
+        path: 'console/workflow/:type/:id',
+        component: () => import('@/views/ai/workflow/form/index.vue'),
+        name: 'AiWorkflowUpdate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '设计 AI 工作流',
+          activeMenu: '/ai/console/workflow'
         }
       }
     ]

@@ -46,11 +46,6 @@ export type DatabaseTableVO = {
   comment: string
 }
 
-export type CodegenDetailVO = {
-  table: CodegenTableVO
-  columns: CodegenColumnVO[]
-}
-
 export type CodegenPreviewVO = {
   filePath: string
   code: string
@@ -59,11 +54,6 @@ export type CodegenPreviewVO = {
 export type CodegenUpdateReqVO = {
   table: CodegenTableVO | any
   columns: CodegenColumnVO[]
-}
-
-export type CodegenCreateListReqVO = {
-  dataSourceConfigId: number
-  tableNames: string[]
 }
 
 // 查询列表代码生成表定义
@@ -79,11 +69,6 @@ export const getCodegenTablePage = (params: PageParam) => {
 // 查询详情代码生成表定义
 export const getCodegenTable = (id: number) => {
   return request.get({ url: '/infra/codegen/detail?tableId=' + id })
-}
-
-// 新增代码生成表定义
-export const createCodegenTable = (data: CodegenCreateListReqVO) => {
-  return request.post({ url: '/infra/codegen/create', data })
 }
 
 // 修改代码生成表定义

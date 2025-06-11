@@ -62,7 +62,11 @@
     </el-row>
     <!-- 操作 -->
     <template #footer>
-      <el-button :disabled="tableList.length === 0" type="primary" @click="handleImportTable">
+      <el-button
+        :disabled="tableList.length === 0 || dbTableLoading"
+        type="primary"
+        @click="handleImportTable"
+      >
         导入
       </el-button>
       <el-button @click="close">关闭</el-button>
@@ -139,13 +143,18 @@ const handleSelectionChange = (selection) => {
 
 /** 导入按钮操作 */
 const handleImportTable = async () => {
-  await CodegenApi.createCodegenList({
-    dataSourceConfigId: queryParams.dataSourceConfigId,
-    tableNames: tableList.value
-  })
-  message.success('导入成功')
-  emit('success')
-  close()
+  dbTableLoading.value = true
+  try {
+    await CodegenApi.createCodegenList({
+      dataSourceConfigId: queryParams.dataSourceConfigId,
+      tableNames: tableList.value
+    })
+    message.success('导入成功')
+    emit('success')
+    close()
+  } finally {
+    dbTableLoading.value = false
+  }
 }
 const emit = defineEmits(['success'])
 </script>

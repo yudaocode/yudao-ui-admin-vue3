@@ -86,7 +86,8 @@ const props = defineProps({
   autoUpload: propTypes.bool.def(true), // 自动上传
   drag: propTypes.bool.def(false), // 拖拽上传
   isShowTip: propTypes.bool.def(true), // 是否显示提示
-  disabled: propTypes.bool.def(false) // 是否禁用上传组件 ==> 非必传（默认为 false）
+  disabled: propTypes.bool.def(false), // 是否禁用上传组件 ==> 非必传（默认为 false）
+  directory: propTypes.string.def(undefined) // 上传目录 ==> 非必传（默认为 undefined）
 })
 
 // ========== 上传相关 ==========
@@ -95,7 +96,7 @@ const uploadList = ref<UploadUserFile[]>([])
 const fileList = ref<UploadUserFile[]>([])
 const uploadNumber = ref<number>(0)
 
-const { uploadUrl, httpRequest } = useUpload()
+const { uploadUrl, httpRequest } = useUpload(props.directory)
 
 // 文件上传之前判断
 const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {

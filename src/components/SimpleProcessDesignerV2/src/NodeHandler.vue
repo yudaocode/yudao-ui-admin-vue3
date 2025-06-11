@@ -91,6 +91,7 @@ import {
   DEFAULT_CONDITION_GROUP_VALUE
 } from './consts'
 import { generateUUID } from '@/utils'
+import { cloneDeep } from 'lodash-es'
 
 defineOptions({
   name: 'NodeHandler'
@@ -184,7 +185,7 @@ const addNode = (type: number) => {
           conditionSetting: {
             defaultFlow: false,
             conditionType: ConditionType.RULE,
-            conditionGroups: DEFAULT_CONDITION_GROUP_VALUE
+            conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE)
           }
         },
         {
@@ -242,7 +243,7 @@ const addNode = (type: number) => {
           conditionSetting: {
             defaultFlow: false,
             conditionType: ConditionType.RULE,
-            conditionGroups: DEFAULT_CONDITION_GROUP_VALUE
+            conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE)
           }
         },
         {

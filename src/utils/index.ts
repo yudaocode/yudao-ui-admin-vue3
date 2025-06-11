@@ -517,8 +517,8 @@ export function jsonParse(str: string) {
   try {
     return JSON.parse(str)
   } catch (e) {
-    console.log(`str[${str}] 不是一个 JSON 字符串`)
-    return ''
+    console.warn(`str[${str}] 不是一个 JSON 字符串`)
+    return str
   }
 }
 

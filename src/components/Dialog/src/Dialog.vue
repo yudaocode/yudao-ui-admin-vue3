@@ -68,6 +68,7 @@ const dialogStyle = computed(() => {
     draggable
     class="com-dialog"
     :show-close="false"
+    @close="$emit('update:modelValue', false)"
   >
     <template #header="{ close }">
       <div class="relative h-54px flex items-center justify-between pl-15px pr-15px">
@@ -90,7 +91,7 @@ const dialogStyle = computed(() => {
             icon="ep:close"
             hover-color="var(--el-color-primary)"
             color="var(--el-color-info)"
-            @click="close"
+            @click.stop="close"
           />
         </div>
       </div>

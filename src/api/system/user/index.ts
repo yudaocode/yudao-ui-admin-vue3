@@ -22,11 +22,6 @@ export const getUserPage = (params: PageParam) => {
   return request.get({ url: '/system/user/page', params })
 }
 
-// 查询所有用户列表
-export const getAllUser = () => {
-  return request.get({ url: '/system/user/all' })
-}
-
 // 查询用户详情
 export const getUser = (id: number) => {
   return request.get({ url: '/system/user/get?id=' + id })
@@ -48,7 +43,7 @@ export const deleteUser = (id: number) => {
 }
 
 // 导出用户
-export const exportUser = (params) => {
+export const exportUser = (params: any) => {
   return request.download({ url: '/system/user/export', params })
 }
 
@@ -58,7 +53,7 @@ export const importUserTemplate = () => {
 }
 
 // 用户密码重置
-export const resetUserPwd = (id: number, password: string) => {
+export const resetUserPassword = (id: number, password: string) => {
   const data = {
     id,
     password

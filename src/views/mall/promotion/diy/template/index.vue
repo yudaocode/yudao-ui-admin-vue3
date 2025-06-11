@@ -62,20 +62,13 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="模板名称" align="center" prop="name" />
+      <el-table-column label="模板名称" align="center" prop="name" min-width="180" />
       <el-table-column label="是否使用" align="center" prop="used">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.used" />
         </template>
       </el-table-column>
-      <el-table-column
-        label="使用时间"
-        align="center"
-        prop="usedTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="备注" align="center" prop="remark" min-width="180" />
       <el-table-column
         label="创建时间"
         align="center"
