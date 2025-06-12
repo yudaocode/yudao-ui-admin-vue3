@@ -62,39 +62,10 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item
-        v-if="formData.deviceType === DeviceTypeEnum.GATEWAY_SUB"
-        label="接入网关协议"
-        prop="protocolType"
-      >
-        <el-select
-          v-model="formData.protocolType"
-          placeholder="请选择接入网关协议"
-          :disabled="formType === 'update'"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PROTOCOL_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="数据格式" prop="dataFormat">
-        <el-radio-group v-model="formData.dataFormat" :disabled="formType === 'update'">
+      <el-form-item label="数据格式" prop="codecType">
+        <el-radio-group v-model="formData.codecType" :disabled="formType === 'update'">
           <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DATA_FORMAT)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="数据校验级别" prop="validateType">
-        <el-radio-group v-model="formData.validateType" :disabled="formType === 'update'">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_VALIDATE_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.IOT_CODEC_TYPE)"
             :key="dict.value"
             :label="dict.value"
           >
@@ -124,14 +95,8 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ValidateTypeEnum,
-  ProductApi,
-  ProductVO,
-  DataFormatEnum,
-  DeviceTypeEnum
-} from '@/api/iot/product/product'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { ProductApi, ProductVO, CodecTypeEnum, DeviceTypeEnum } from '@/api/iot/product/product'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { ProductCategoryApi, ProductCategoryVO } from '@/api/iot/product/category'
 import { UploadImg } from '@/components/UploadFile'
 import { generateRandomStr } from '@/utils'
@@ -155,10 +120,7 @@ const formData = ref({
   description: undefined,
   deviceType: undefined,
   netType: undefined,
-  protocolType: undefined,
-  protocolId: undefined,
-  dataFormat: DataFormatEnum.JSON,
-  validateType: ValidateTypeEnum.WEAK
+  codecType: CodecTypeEnum.ALINK
 })
 const formRules = reactive({
   productKey: [{ required: true, message: 'ProductKey 不能为空', trigger: 'blur' }],
@@ -172,15 +134,7 @@ const formRules = reactive({
       trigger: 'change'
     }
   ],
-  protocolType: [
-    {
-      required: true,
-      message: '接入网关协议不能为空',
-      trigger: 'change'
-    }
-  ],
-  dataFormat: [{ required: true, message: '数据格式不能为空', trigger: 'change' }],
-  validateType: [{ required: true, message: '数据校验级别不能为空', trigger: 'change' }]
+  codecType: [{ required: true, message: '数据格式不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 const categoryList = ref<ProductCategoryVO[]>([]) // 产品分类列表
@@ -240,10 +194,7 @@ const resetForm = () => {
     description: undefined,
     deviceType: undefined,
     netType: undefined,
-    protocolType: undefined,
-    protocolId: undefined,
-    dataFormat: DataFormatEnum.JSON,
-    validateType: ValidateTypeEnum.WEAK
+    codecType: CodecTypeEnum.ALINK
   }
   formRef.value?.resetFields()
 }

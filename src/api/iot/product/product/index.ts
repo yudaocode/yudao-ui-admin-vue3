@@ -11,31 +11,23 @@ export interface ProductVO {
   icon: string // 产品图标
   picUrl: string // 产品图片
   description: string // 产品描述
-  validateType: number // 数据校验级别
   status: number // 产品状态
   deviceType: number // 设备类型
   netType: number // 联网方式
-  protocolType: number // 接入网关协议
-  dataFormat: number // 数据格式
+  codecType: string // 数据格式（编解码器类型）
   deviceCount: number // 设备数量
   createTime: Date // 创建时间
 }
 
-// IOT 数据校验级别枚举类
-export enum ValidateTypeEnum {
-  WEAK = 0, // 弱校验
-  NONE = 1 // 免校验
-}
 // IOT 产品设备类型枚举类 0: 直连设备, 1: 网关子设备, 2: 网关设备
 export enum DeviceTypeEnum {
   DEVICE = 0, // 直连设备
   GATEWAY_SUB = 1, // 网关子设备
   GATEWAY = 2 // 网关设备
 }
-// IOT 数据格式枚举类
-export enum DataFormatEnum {
-  JSON = 0, // 标准数据格式（JSON）
-  CUSTOMIZE = 1 // 透传/自定义
+// IOT 数据格式（编解码器类型）枚举类
+export enum CodecTypeEnum {
+  ALINK = 'Alink' // 阿里云 Alink 协议
 }
 
 // IoT 产品 API
