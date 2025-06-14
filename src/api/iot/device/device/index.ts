@@ -49,6 +49,7 @@ export interface DeviceHistoryDataVO {
   data: string // 数据
 }
 
+// TODO @芋艿：调整到 constants
 // IoT 设备状态枚举
 export enum DeviceStateEnum {
   INACTIVE = 0, // 未激活
@@ -56,27 +57,18 @@ export enum DeviceStateEnum {
   OFFLINE = 2 // 离线
 }
 
-// IoT 设备上行 Request VO
-export interface IotDeviceUpstreamReqVO {
-  id: number // 设备编号
-  type: string // 消息类型
-  identifier: string // 标识符
-  data: any // 请求参数
-}
-
-// IoT 设备下行 Request VO
-export interface IotDeviceDownstreamReqVO {
-  id: number // 设备编号
-  type: string // 消息类型
-  identifier: string // 标识符
-  data: any // 请求参数
-}
-
 // 设备认证参数 VO
 export interface IotDeviceAuthInfoVO {
   clientId: string // 客户端 ID
   username: string // 用户名
   password: string // 密码
+}
+
+// IoT 设备发送消息 Request VO
+export interface IotDeviceMessageSendReqVO {
+  deviceId: number // 设备编号
+  method: string // 请求方法
+  params?: any // 请求参数
 }
 
 // 设备 API
@@ -136,16 +128,6 @@ export const DeviceApi = {
     return await request.download({ url: `/iot/device/get-import-template` })
   },
 
-  // 设备上行
-  upstreamDevice: async (data: IotDeviceUpstreamReqVO) => {
-    return await request.post({ url: `/iot/device/upstream`, data })
-  },
-
-  // 设备下行
-  downstreamDevice: async (data: IotDeviceDownstreamReqVO) => {
-    return await request.post({ url: `/iot/device/downstream`, data })
-  },
-
   // 获取设备属性最新数据
   getLatestDeviceProperties: async (params: any) => {
     return await request.get({ url: `/iot/device/property/latest`, params })
@@ -156,18 +138,13 @@ export const DeviceApi = {
     return await request.get({ url: `/iot/device/property/history-page`, params })
   },
 
-  // 查询设备日志分页
-  getDeviceMessagePage: async (params: any) => {
-    return await request.get({ url: `/iot/device/message/page`, params })
-  },
-
-  // 获取设备 MQTT 连接参数
+  // 获取设备认证信息
   getDeviceAuthInfo: async (id: number) => {
     return await request.get({ url: `/iot/device/get-auth-info`, params: { id } })
   },
 
   // 根据 ProductKey 和 DeviceNames 获取设备列表
-  // TODO @puhui999：getDeviceListByProductKeyAndNames 哈。项目的风格统一~
+  // TODO @puhui999：有没可能搞成基于 id 的查询哈？
   getDevicesByProductKeyAndNames: async (productKey: string, deviceNames: string[]) => {
     return await request.get({
       url: `/iot/device/list-by-product-key-and-names`,
@@ -176,5 +153,15 @@ export const DeviceApi = {
         deviceNames: deviceNames.join(',')
       }
     })
+  },
+
+  // 查询设备消息分页
+  getDeviceMessagePage: async (params: any) => {
+    return await request.get({ url: `/iot/device/message/page`, params })
+  },
+
+  // 发送设备消息
+  sendDeviceMessage: async (params: IotDeviceMessageSendReqVO) => {
+    return await request.post({ url: `/iot/device/message/send`, data: params })
   }
 }

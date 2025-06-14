@@ -41,7 +41,7 @@
                   </el-table>
                   <!-- TODO @super：发送按钮，可以放在右侧哈。因为我们的 simulateValue 就在最右侧 -->
                   <div class="mt-10px">
-                    <el-button type="primary" @click="handlePropertyReport"> 发送</el-button>
+                    <el-button type="primary" @click="handlePropertyPost"> 发送</el-button>
                   </div>
                 </ContentWrap>
               </el-tab-pane>
@@ -50,7 +50,7 @@
               <!-- TODO @super：待实现 -->
               <el-tab-pane label="事件上报" name="event">
                 <ContentWrap>
-                  <!-- TODO @super：因为事件是每个 event 去模拟，而不是类似属性的批量上传。所以，可以每一列后面有个“模拟”按钮。另外，“值”使用 textarea，高度 3 -->
+                  <!-- TODO @super：因为事件是每个 event 去模拟，而不是类似属性的批量上传。所以，可以每一列后面有个"模拟"按钮。另外，"值"使用 textarea，高度 3 -->
                   <!-- <el-table v-loading="loading" :data="eventList" :stripe="true">
                     <el-table-column label="功能名称" align="center" prop="name" />
                     <el-table-column label="标识符" align="center" prop="identifier" />
@@ -132,11 +132,9 @@
 
       <!-- 右侧设备日志区域 -->
       <el-col :span="12">
-        <el-tabs type="border-card">
-          <el-tab-pane label="设备日志">
-            <DeviceDetailsMessage :device-id="device.id" />
-          </el-tab-pane>
-        </el-tabs>
+        <ContentWrap title="设备消息">
+          <DeviceDetailsMessage ref="deviceMessageRef" :device-id="device.id" />
+        </ContentWrap>
       </el-col>
     </el-row>
   </ContentWrap>
@@ -149,6 +147,7 @@ import { DeviceApi, DeviceStateEnum, DeviceVO } from '@/api/iot/device/device'
 import DeviceDetailsMessage from './DeviceDetailsMessage.vue'
 import { getDataTypeOptionsLabel } from '@/views/iot/thingmodel/config'
 import { DataDefinition } from '@/views/iot/thingmodel/components'
+import { IotDeviceMessageMethodEnum } from '@/views/iot/utils/constants'
 
 const props = defineProps<{
   product: ProductVO
@@ -158,10 +157,12 @@ const props = defineProps<{
 const message = useMessage() // 消息弹窗
 const activeTab = ref('up') // TODO @super：upstream 上行、downstream 下行
 const subTab = ref('property') // TODO @super：upstreamTab
+const deviceMessageRef = ref() // 设备消息组件引用
+const deviceMessageRefresnhDelay = 2000 // 延迟 N 秒，保证模拟上行的消息被处理
 
 const loading = ref(false)
 const queryParams = reactive({
-  type: undefined, // TODO @super：type 默认给个第一个 tab 对应的，避免下面 watch 爆红
+  type: undefined as number | undefined, // TODO @super：type 默认给个第一个 tab 对应的，避免下面 watch 爆红
   productId: -1
 })
 const list = ref<SimulatorData[]>([]) // 物模型列表的数据 TODO @super：thingModelList
@@ -228,9 +229,6 @@ watch(
         case 'event':
           queryParams.type = 3
           break
-        // case 'status':
-        //   queryParams.type = 'status'
-        //   break
       }
     } else if (newActiveTab === 'down') {
       switch (newSubTab) {
@@ -248,26 +246,26 @@ watch(
 )
 
 /** 处理属性上报 */
-const handlePropertyReport = async () => {
+const handlePropertyPost = async () => {
   // TODO @super:数据类型效验
-  const data: Record<string, object> = {}
+  const data: Record<string, any> = {}
   list.value.forEach((item) => {
     // 只有当 simulateValue 有值时才添加到 content 中
     // TODO @super：直接 if (item.simulateValue) 就可以哈，js 这块还是比较灵活的
-    if (item.simulateValue !== undefined && item.simulateValue !== '') {
+    if (item.simulateValue !== undefined && item.simulateValue !== '' && item.identifier) {
       // TODO @super：这里有个红色的 idea 告警，觉得去除下
       data[item.identifier] = item.simulateValue
     }
   })
 
   try {
-    await DeviceApi.upstreamDevice({
-      id: props.device.id,
-      type: 'property',
-      identifier: 'report',
-      data: data
+    await DeviceApi.sendDeviceMessage({
+      deviceId: props.device.id,
+      method: IotDeviceMessageMethodEnum.PROPERTY_POST.method,
+      params: data
     })
     message.success('属性上报成功')
+    deviceMessageRef.value.refresh(deviceMessageRefresnhDelay)
   } catch (error) {
     message.error('属性上报失败')
   }
@@ -305,13 +303,15 @@ const handlePropertyReport = async () => {
 /** 处理设备状态 */
 const handleDeviceState = async (state: number) => {
   try {
-    await DeviceApi.upstreamDevice({
-      id: props.device.id,
-      type: 'state',
-      identifier: 'report',
-      data: state
+    await DeviceApi.sendDeviceMessage({
+      deviceId: props.device.id,
+      method:
+        state === DeviceStateEnum.ONLINE
+          ? IotDeviceMessageMethodEnum.STATE_ONLINE.method
+          : IotDeviceMessageMethodEnum.STATE_OFFLINE.method
     })
     message.success(`设备${state === DeviceStateEnum.ONLINE ? '上线' : '下线'}成功`)
+    deviceMessageRef.value.refresh(deviceMessageRefresnhDelay)
   } catch (error) {
     message.error(`设备${state === DeviceStateEnum.ONLINE ? '上线' : '下线'}失败`)
   }

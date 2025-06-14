@@ -5,11 +5,21 @@
     <el-form :model="queryParams" inline>
       <el-form-item>
         <el-select v-model="queryParams.method" placeholder="所有方法" class="!w-160px" clearable>
-          <el-option v-for="item in methodOptions" :key="item.value" :label="item.label" :value="item.value" />
+          <el-option
+            v-for="item in methodOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="queryParams.upstream" placeholder="上行/下行" class="!w-160px" clearable>
+        <el-select
+          v-model="queryParams.upstream"
+          placeholder="上行/下行"
+          class="!w-160px"
+          clearable
+        >
           <el-option label="上行" value="true" />
           <el-option label="下行" value="false" />
         </el-select>
@@ -33,7 +43,6 @@
 
     <!-- 消息列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" class="whitespace-nowrap">
-      <el-table-column label="请求编号" align="center" prop="requestId" width="300" />
       <el-table-column label="时间" align="center" prop="ts" width="180">
         <template #default="scope">
           {{ formatDate(scope.row.ts) }}
@@ -51,19 +60,25 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.reply" />
         </template>
       </el-table-column>
+      <el-table-column label="请求编号" align="center" prop="requestId" width="300" />
       <el-table-column label="请求方法" align="center" prop="method" width="140">
         <template #default="scope">
-          {{ methodOptions.find(item => item.value === scope.row.method)?.label }}
+          {{ methodOptions.find((item) => item.value === scope.row.method)?.label }}
         </template>
       </el-table-column>
-             <el-table-column label="请求/响应数据" align="center" prop="params" :show-overflow-tooltip="true">
-         <template #default="scope">
-           <span v-if="scope.row.reply">
+      <el-table-column
+        label="请求/响应数据"
+        align="center"
+        prop="params"
+        :show-overflow-tooltip="true"
+      >
+        <template #default="scope">
+          <span v-if="scope.row.reply">
             {{ `{"code":${scope.row.code},"msg":"${scope.row.msg}","data":${scope.row.data}\}` }}
           </span>
-           <span v-else>{{ scope.row.params }}</span>
-         </template>
-       </el-table-column>
+          <span v-else>{{ scope.row.params }}</span>
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 分页 -->
@@ -106,7 +121,7 @@ let autoRefreshTimer: any = null // TODO @super：autoRefreshEnable，autoRefres
 
 // 消息方法选项
 const methodOptions = computed(() => {
-  return Object.values(IotDeviceMessageMethodEnum).map(item => ({
+  return Object.values(IotDeviceMessageMethodEnum).map((item) => ({
     label: item.name,
     value: item.method
   }))
@@ -165,5 +180,21 @@ onMounted(() => {
   if (props.deviceId) {
     getMessageList()
   }
+})
+
+/** 刷新消息列表 */
+const refresh = (delay = 0) => {
+  if (delay > 0) {
+    setTimeout(() => {
+      handleQuery()
+    }, delay)
+  } else {
+    handleQuery()
+  }
+}
+
+/** 暴露方法给父组件 */
+defineExpose({
+  refresh
 })
 </script>
