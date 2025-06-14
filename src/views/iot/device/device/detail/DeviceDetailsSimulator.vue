@@ -134,7 +134,7 @@
       <el-col :span="12">
         <el-tabs type="border-card">
           <el-tab-pane label="设备日志">
-            <DeviceDetailsLog :device-key="device.deviceKey" />
+            <DeviceDetailsMessage :device-id="device.id" />
           </el-tab-pane>
         </el-tabs>
       </el-col>
@@ -146,7 +146,7 @@
 import { ProductVO } from '@/api/iot/product/product'
 import { SimulatorData, ThingModelApi } from '@/api/iot/thingmodel'
 import { DeviceApi, DeviceStateEnum, DeviceVO } from '@/api/iot/device/device'
-import DeviceDetailsLog from './DeviceDetailsLog.vue'
+import DeviceDetailsMessage from './DeviceDetailsMessage.vue'
 import { getDataTypeOptionsLabel } from '@/views/iot/thingmodel/config'
 import { DataDefinition } from '@/views/iot/thingmodel/components'
 

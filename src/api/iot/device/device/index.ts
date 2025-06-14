@@ -157,8 +157,8 @@ export const DeviceApi = {
   },
 
   // 查询设备日志分页
-  getDeviceLogPage: async (params: any) => {
-    return await request.get({ url: `/iot/device/log/page`, params })
+  getDeviceMessagePage: async (params: any) => {
+    return await request.get({ url: `/iot/device/message/page`, params })
   },
 
   // 获取设备 MQTT 连接参数

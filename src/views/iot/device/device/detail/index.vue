@@ -10,14 +10,12 @@
       <el-tab-pane label="设备信息" name="info">
         <DeviceDetailsInfo v-if="activeTab === 'info'" :product="product" :device="device" />
       </el-tab-pane>
-      <el-tab-pane label="Topic 列表" />
       <el-tab-pane label="物模型数据" name="model">
         <DeviceDetailsModel v-if="activeTab === 'model'" :product="product" :device="device" />
       </el-tab-pane>
       <el-tab-pane label="子设备管理" v-if="product.deviceType === DeviceTypeEnum.GATEWAY" />
-      <el-tab-pane label="设备影子" />
-      <el-tab-pane label="设备日志" name="log">
-        <DeviceDetailsLog v-if="activeTab === 'log'" :device-key="device.deviceKey" />
+      <el-tab-pane label="设备消息" name="log">
+        <DeviceDetailsMessage v-if="activeTab === 'log'" :device-id="device.id" />
       </el-tab-pane>
       <el-tab-pane label="模拟设备" name="simulator">
         <DeviceDetailsSimulator
@@ -43,7 +41,7 @@ import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product
 import DeviceDetailsHeader from './DeviceDetailsHeader.vue'
 import DeviceDetailsInfo from './DeviceDetailsInfo.vue'
 import DeviceDetailsModel from './DeviceDetailsModel.vue'
-import DeviceDetailsLog from './DeviceDetailsLog.vue'
+import DeviceDetailsMessage from './DeviceDetailsMessage.vue'
 import DeviceDetailsSimulator from './DeviceDetailsSimulator.vue'
 import DeviceDetailConfig from './DeviceDetailConfig.vue'
 
@@ -75,7 +73,8 @@ const getProductData = async (id: number) => {
 
 /** 初始化 */
 const { delView } = useTagsViewStore() // 视图操作
-const { currentRoute } = useRouter() // 路由
+const router = useRouter() // 路由
+const { currentRoute } = router
 onMounted(async () => {
   if (!id) {
     message.warning('参数错误，产品不能为空！')
