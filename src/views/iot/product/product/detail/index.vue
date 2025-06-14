@@ -8,8 +8,6 @@
       <el-tab-pane label="功能定义" lazy name="thingModel">
         <IoTProductThingModel ref="thingModelRef" />
       </el-tab-pane>
-      <el-tab-pane label="消息解析" name="message" />
-      <el-tab-pane label="服务端订阅" name="subscription" />
     </el-tabs>
   </el-col>
 </template>
