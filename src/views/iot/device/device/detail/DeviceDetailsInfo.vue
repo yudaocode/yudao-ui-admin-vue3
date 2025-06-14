@@ -27,52 +27,52 @@
       <el-descriptions-item label="最后上线时间">
         {{ formatDate(device.onlineTime) }}
       </el-descriptions-item>
-      <el-descriptions-item label="最后离线时间" :span="3">
+      <el-descriptions-item label="最后离线时间">
         {{ formatDate(device.offlineTime) }}
       </el-descriptions-item>
-      <el-descriptions-item label="MQTT 连接参数">
-        <el-button type="primary" @click="openMqttParams">查看</el-button>
+      <el-descriptions-item label="认证信息">
+        <el-button type="primary" @click="handleAuthInfoDialogOpen" plain> 查看 </el-button>
       </el-descriptions-item>
     </el-descriptions>
   </ContentWrap>
 
-  <!-- MQTT 连接参数弹框 -->
+  <!-- 认证信息弹框 -->
   <Dialog
-    title="MQTT 连接参数"
-    v-model="mqttDialogVisible"
-    width="50%"
-    :before-close="handleCloseMqttDialog"
+    title="设备认证信息"
+    v-model="authDialogVisible"
+    width="640px"
+    :before-close="handleAuthInfoDialogClose"
   >
-    <el-form :model="mqttParams" label-width="120px">
+    <el-form :model="authInfo" label-width="120px">
       <el-form-item label="clientId">
-        <el-input v-model="mqttParams.mqttClientId" readonly>
+        <el-input v-model="authInfo.clientId" readonly>
           <template #append>
-            <el-button @click="copyToClipboard(mqttParams.mqttClientId)" type="primary">
+            <el-button @click="copyToClipboard(authInfo.clientId)" type="primary">
               <Icon icon="ph:copy" />
             </el-button>
           </template>
         </el-input>
       </el-form-item>
       <el-form-item label="username">
-        <el-input v-model="mqttParams.mqttUsername" readonly>
+        <el-input v-model="authInfo.username" readonly>
           <template #append>
-            <el-button @click="copyToClipboard(mqttParams.mqttUsername)" type="primary">
+            <el-button @click="copyToClipboard(authInfo.username)" type="primary">
               <Icon icon="ph:copy" />
             </el-button>
           </template>
         </el-input>
       </el-form-item>
-      <el-form-item label="passwd">
+      <el-form-item label="password">
         <el-input
-          v-model="mqttParams.mqttPassword"
+          v-model="authInfo.password"
           readonly
-          :type="passwordVisible ? 'text' : 'password'"
+          :type="authPasswordVisible ? 'text' : 'password'"
         >
           <template #append>
-            <el-button @click="passwordVisible = !passwordVisible" type="primary">
-              <Icon :icon="passwordVisible ? 'ph:eye-slash' : 'ph:eye'" />
+            <el-button @click="authPasswordVisible = !authPasswordVisible" type="primary">
+              <Icon :icon="authPasswordVisible ? 'ph:eye-slash' : 'ph:eye'" />
             </el-button>
-            <el-button @click="copyToClipboard(mqttParams.mqttPassword)" type="primary">
+            <el-button @click="copyToClipboard(authInfo.password)" type="primary">
               <Icon icon="ph:copy" />
             </el-button>
           </template>
@@ -80,7 +80,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="mqttDialogVisible = false">关闭</el-button>
+      <el-button @click="handleAuthInfoDialogClose">关闭</el-button>
     </template>
   </Dialog>
 
@@ -92,20 +92,16 @@ import { DICT_TYPE } from '@/utils/dict'
 import { ProductVO } from '@/api/iot/product/product'
 import { formatDate } from '@/utils/formatTime'
 import { DeviceVO } from '@/api/iot/device/device'
-import { DeviceApi, MqttConnectionParamsVO } from '@/api/iot/device/device/index'
+import { DeviceApi, IotDeviceAuthInfoVO } from '@/api/iot/device/device'
 
 const message = useMessage() // 消息提示
 
 const { product, device } = defineProps<{ product: ProductVO; device: DeviceVO }>() // 定义 Props
 const emit = defineEmits(['refresh']) // 定义 Emits
 
-const mqttDialogVisible = ref(false) // 定义 MQTT 弹框的可见性
-const passwordVisible = ref(false) // 定义密码可见性状态
-const mqttParams = ref({
-  mqttClientId: '',
-  mqttUsername: '',
-  mqttPassword: ''
-}) // 定义 MQTT 参数对象
+const authDialogVisible = ref(false) // 定义设备认证信息弹框的可见性
+const authPasswordVisible = ref(false) // 定义密码可见性状态
+const authInfo = ref<IotDeviceAuthInfoVO>({} as IotDeviceAuthInfoVO) // 定义设备认证信息对象
 
 /** 复制到剪贴板方法 */
 const copyToClipboard = async (text: string) => {
@@ -117,28 +113,21 @@ const copyToClipboard = async (text: string) => {
   }
 }
 
-/** 打开 MQTT 参数弹框的方法 */
-const openMqttParams = async () => {
+/** 打开设备认证信息弹框的方法 */
+const handleAuthInfoDialogOpen = async () => {
   try {
-    const data = await DeviceApi.getMqttConnectionParams(device.id)
-    // 根据 API 响应结构正确获取数据
-    // TODO @haohao：'N/A' 是不是在 ui 里处理哈
-    mqttParams.value = {
-      mqttClientId: data.mqttClientId || 'N/A',
-      mqttUsername: data.mqttUsername || 'N/A',
-      mqttPassword: data.mqttPassword || 'N/A'
-    }
+    authInfo.value = await DeviceApi.getDeviceAuthInfo(device.id)
 
-    // 显示 MQTT 弹框
-    mqttDialogVisible.value = true
+    // 显示设备认证信息弹框
+    authDialogVisible.value = true
   } catch (error) {
-    console.error('获取 MQTT 连接参数出错：', error)
-    message.error('获取MQTT连接参数失败，请检查网络连接或联系管理员')
+    console.error('获取设备认证信息出错：', error)
+    message.error('获取设备认证信息失败，请检查网络连接或联系管理员')
   }
 }
 
-/** 关闭 MQTT 弹框的方法 */
-const handleCloseMqttDialog = () => {
-  mqttDialogVisible.value = false
+/** 关闭设备认证信息弹框的方法 */
+const handleAuthInfoDialogClose = () => {
+  authDialogVisible.value = false
 }
 </script>
