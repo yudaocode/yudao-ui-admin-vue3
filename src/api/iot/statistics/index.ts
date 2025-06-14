@@ -16,10 +16,16 @@ export interface IotStatisticsSummaryRespVO {
   productCategoryDeviceCounts: Record<string, number>
 }
 
+/** 时间戳-数值的键值对类型 */
+interface TimeValueItem {
+  [key: string]: number
+}
+
 /** IoT 消息统计数据类型 */
 export interface IotStatisticsDeviceMessageSummaryRespVO {
-  upstreamCounts: Record<number, number>
-  downstreamCounts: Record<number, number>
+  statType: number
+  upstreamCounts: TimeValueItem[]
+  downstreamCounts: TimeValueItem[]
 }
 
 // IoT 数据统计 API
