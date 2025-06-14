@@ -3,7 +3,6 @@ import request from '@/config/axios'
 // IoT 设备 VO
 export interface DeviceVO {
   id: number // 设备 ID，主键，自增
-  deviceKey: string // 设备唯一标识符
   deviceName: string // 设备名称
   productId: number // 产品编号
   productKey: string // 产品标识

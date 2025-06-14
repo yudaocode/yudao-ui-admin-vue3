@@ -23,19 +23,6 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="DeviceKey" prop="deviceKey">
-        <el-input
-          v-model="formData.deviceKey"
-          placeholder="请输入 DeviceKey"
-          :disabled="formType === 'update'"
-        >
-          <template #append>
-            <el-button @click="generateDeviceKey" :disabled="formType === 'update'">
-              重新生成
-            </el-button>
-          </template>
-        </el-input>
-      </el-form-item>
       <el-form-item label="DeviceName" prop="deviceName">
         <el-input
           v-model="formData.deviceName"
@@ -108,7 +95,6 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   productId: undefined,
-  deviceKey: undefined as string | undefined,
   deviceName: undefined,
   nickname: undefined,
   picUrl: undefined,
@@ -119,14 +105,6 @@ const formData = ref({
 })
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
-  deviceKey: [
-    { required: true, message: 'DeviceKey 不能为空', trigger: 'blur' },
-    {
-      pattern: /^[a-zA-Z0-9]+$/,
-      message: 'DeviceKey 只能包含字母和数字',
-      trigger: 'blur'
-    }
-  ],
   deviceName: [
     { required: true, message: 'DeviceName 不能为空', trigger: 'blur' },
     {
@@ -183,8 +161,6 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
-  } else {
-    generateDeviceKey()
   }
 
   // 加载网关设备列表
@@ -234,7 +210,6 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     productId: undefined,
-    deviceKey: undefined,
     deviceName: undefined,
     nickname: undefined,
     picUrl: undefined,
@@ -254,10 +229,5 @@ const handleProductChange = (productId: number) => {
   }
   const product = products.value?.find((item) => item.id === productId)
   formData.value.deviceType = product?.deviceType
-}
-
-/** 生成 DeviceKey */
-const generateDeviceKey = () => {
-  formData.value.deviceKey = generateRandomStr(16)
 }
 </script>
