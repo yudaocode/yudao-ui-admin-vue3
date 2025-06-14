@@ -80,7 +80,6 @@ import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { DeviceGroupApi } from '@/api/iot/device/group'
 import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
 import { UploadImg } from '@/components/UploadFile'
-import { generateRandomStr } from '@/utils'
 
 /** IoT 设备表单 */
 defineOptions({ name: 'IoTDeviceForm' })

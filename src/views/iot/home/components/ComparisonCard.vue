@@ -22,8 +22,8 @@
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 
-/** 统计卡片组件 */
-defineOptions({ name: 'ComparisonCard' })
+/** 【总数 + 新增数】统计卡片组件 */
+defineOptions({ name: 'IoTComparisonCard' })
 
 const props = defineProps({
   title: propTypes.string.def('').isRequired,

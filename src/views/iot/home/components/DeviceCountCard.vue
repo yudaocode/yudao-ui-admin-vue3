@@ -24,7 +24,7 @@ import { LabelLayout } from 'echarts/features'
 import { IotStatisticsSummaryRespVO } from '@/api/iot/statistics'
 import type { PropType } from 'vue'
 
-/** 设备数量统计卡片 */
+/** 【设备数量】统计卡片 */
 defineOptions({ name: 'DeviceCountCard' })
 
 const props = defineProps({
@@ -40,27 +40,25 @@ const props = defineProps({
 
 const deviceCountChartRef = ref()
 
-// 是否有数据
+/** 是否有数据 */
 const hasData = computed(() => {
   if (!props.statsData) return false
-  
+
   const categories = Object.entries(props.statsData.productCategoryDeviceCounts || {})
   return categories.length > 0 && props.statsData.deviceCount !== -1
 })
 
-// 初始化图表
+/** 初始化图表 */
 const initChart = () => {
   // 如果没有数据，则不初始化图表
   if (!hasData.value) return
-  
   // 确保 DOM 元素存在且已渲染
   if (!deviceCountChartRef.value) {
     console.warn('图表DOM元素不存在')
     return
   }
-  
+
   echarts.use([TooltipComponent, LegendComponent, PieChart, CanvasRenderer, LabelLayout])
-  
   try {
     const chart = echarts.init(deviceCountChartRef.value)
     chart.setOption({
@@ -95,10 +93,12 @@ const initChart = () => {
           labelLine: {
             show: false
           },
-          data: Object.entries(props.statsData.productCategoryDeviceCounts).map(([name, value]) => ({
-            name,
-            value
-          }))
+          data: Object.entries(props.statsData.productCategoryDeviceCounts).map(
+            ([name, value]) => ({
+              name,
+              value
+            })
+          )
         }
       ]
     })
@@ -109,18 +109,22 @@ const initChart = () => {
   }
 }
 
-// 监听数据变化
-watch(() => props.statsData, () => {
-  // 使用 nextTick 确保 DOM 已更新
-  nextTick(() => {
-    initChart()
-  })
-}, { deep: true })
+/** 监听数据变化 */
+watch(
+  () => props.statsData,
+  () => {
+    // 使用 nextTick 确保 DOM 已更新
+    nextTick(() => {
+      initChart()
+    })
+  },
+  { deep: true }
+)
 
-// 组件挂载时初始化图表
-onMounted(() => {
+/** 组件挂载时初始化图表 */
+onMounted(async () => {
   // 使用 nextTick 确保 DOM 已更新
-  nextTick(() => {
+  await nextTick(() => {
     initChart()
   })
 })

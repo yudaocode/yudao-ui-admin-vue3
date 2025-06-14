@@ -330,30 +330,3 @@ export function getDateRange(
     dayjs(endDate).endOf('d').format('YYYY-MM-DD HH:mm:ss')
   ]
 }
-
-/**
- * 获取指定小时前的时间戳
- * @param hours 小时数
- * @returns 返回指定小时前的时间戳（毫秒）
- */
-export function getHoursAgo(hours: number): number {
-  return dayjs().subtract(hours, 'hour').valueOf()
-}
-
-/**
- * 获取标准时间范围的时间戳
- * @param range 时间范围，支持 '8h' | '24h' | '7d'
- * @returns 返回开始时间戳（毫秒）
- */
-export function getTimeRangeStart(range: '8h' | '24h' | '7d'): number {
-  switch (range) {
-    case '8h':
-      return getHoursAgo(8)
-    case '24h':
-      return getHoursAgo(24)
-    case '7d':
-      return dayjs().subtract(7, 'day').valueOf()
-    default:
-      return dayjs().valueOf()
-  }
-}

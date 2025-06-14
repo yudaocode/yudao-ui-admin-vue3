@@ -56,11 +56,7 @@
   <!-- 第三行：消息统计行 -->
   <el-row>
     <el-col :span="24">
-      <MessageTrendCard 
-        :messageStats="messageStats"
-        @time-range-change="handleTimeRangeChange"
-        :loading="loading"
-      />
+      <MessageTrendCard />
     </el-col>
   </el-row>
 
@@ -68,12 +64,7 @@
 </template>
 
 <script setup lang="ts" name="Index">
-import {
-  IotStatisticsDeviceMessageSummaryRespVO,
-  IotStatisticsSummaryRespVO,
-  ProductCategoryApi
-} from '@/api/iot/statistics'
-import { getHoursAgo } from '@/utils/formatTime'
+import { IotStatisticsSummaryRespVO, StatisticsApi } from '@/api/iot/statistics'
 import ComparisonCard from './components/ComparisonCard.vue'
 import DeviceCountCard from './components/DeviceCountCard.vue'
 import DeviceStateCountCard from './components/DeviceStateCountCard.vue'
@@ -82,17 +73,6 @@ import MessageTrendCard from './components/MessageTrendCard.vue'
 /** IoT 首页 */
 defineOptions({ name: 'IoTHome' })
 
-// TODO @super：使用下 Echart 组件，参考 yudao-ui-admin-vue3/src/views/mall/home/components/TradeTrendCard.vue 等
-
-
-const queryParams = reactive({
-  startTime: getHoursAgo( 7 * 24 ), // 设置默认开始时间为 7 天前
-  endTime: Date.now() // 设置默认结束时间为当前时间
-})
-
-
-// 基础统计数据
-// TODO @super：初始为 -1，然后界面展示先是加载中？试试用 cursor 改哈
 const statsData = ref<IotStatisticsSummaryRespVO>({
   productCategoryCount: -1,
   productCount: -1,
@@ -106,33 +86,16 @@ const statsData = ref<IotStatisticsSummaryRespVO>({
   deviceOfflineCount: -1,
   deviceInactiveCount: -1,
   productCategoryDeviceCounts: {}
-})
+}) // 基础统计数据
 
-// 消息统计数据
-const messageStats = ref<IotStatisticsDeviceMessageSummaryRespVO>({
-  statType: 0,
-  upstreamCounts: [],
-  downstreamCounts: []
-})
-
-// 加载状态
-const loading = ref(true)
-
-/** 处理时间范围变化 */
-const handleTimeRangeChange = (params: { startTime: number; endTime: number }) => {
-  queryParams.startTime = params.startTime
-  queryParams.endTime = params.endTime
-  getStats()
-}
+const loading = ref(true) // 加载状态
 
 /** 获取统计数据 */
 const getStats = async () => {
   loading.value = true
   try {
     // 获取基础统计数据
-    statsData.value = await ProductCategoryApi.getIotStatisticsSummary()
-    // 获取消息统计数据
-    messageStats.value = await ProductCategoryApi.getIotStatisticsDeviceMessageSummary(queryParams)
+    statsData.value = await StatisticsApi.getStatisticsSummary()
   } catch (error) {
     console.error('获取统计数据出错:', error)
   } finally {
@@ -145,5 +108,3 @@ onMounted(() => {
   getStats()
 })
 </script>
-
-<style lang="scss" scoped></style>

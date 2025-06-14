@@ -41,7 +41,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { IotStatisticsSummaryRespVO } from '@/api/iot/statistics'
 import type { PropType } from 'vue'
 
-/** 设备状态统计卡片 */
+/** 【设备状态】统计卡片 */
 defineOptions({ name: 'DeviceStateCountCard' })
 
 const props = defineProps({
@@ -59,22 +59,21 @@ const deviceOnlineCountChartRef = ref()
 const deviceOfflineChartRef = ref()
 const deviceActiveChartRef = ref()
 
-// 是否有数据
+/** 是否有数据 */
 const hasData = computed(() => {
   if (!props.statsData) return false
   return props.statsData.deviceCount !== -1
 })
 
-// 初始化仪表盘图表
+/** 初始化仪表盘图表 */
 const initGaugeChart = (el: any, value: number, color: string) => {
   // 确保 DOM 元素存在且已渲染
   if (!el) {
     console.warn('图表DOM元素不存在')
     return
   }
-  
+
   echarts.use([GaugeChart, CanvasRenderer])
-  
   try {
     const chart = echarts.init(el)
     chart.setOption({
@@ -126,23 +125,21 @@ const initGaugeChart = (el: any, value: number, color: string) => {
   }
 }
 
-// 初始化所有图表
+/** 初始化所有图表 */
 const initCharts = () => {
   // 如果没有数据，则不初始化图表
   if (!hasData.value) return
-  
+
   // 使用 nextTick 确保 DOM 已更新
   nextTick(() => {
     // 在线设备统计
     if (deviceOnlineCountChartRef.value) {
       initGaugeChart(deviceOnlineCountChartRef.value, props.statsData.deviceOnlineCount, '#0d9')
     }
-    
     // 离线设备统计
     if (deviceOfflineChartRef.value) {
       initGaugeChart(deviceOfflineChartRef.value, props.statsData.deviceOfflineCount, '#f50')
     }
-    
     // 待激活设备统计
     if (deviceActiveChartRef.value) {
       initGaugeChart(deviceActiveChartRef.value, props.statsData.deviceInactiveCount, '#05b')
@@ -150,12 +147,16 @@ const initCharts = () => {
   })
 }
 
-// 监听数据变化
-watch(() => props.statsData, () => {
-  initCharts()
-}, { deep: true })
+/** 监听数据变化 */
+watch(
+  () => props.statsData,
+  () => {
+    initCharts()
+  },
+  { deep: true }
+)
 
-// 组件挂载时初始化图表
+/** 组件挂载时初始化图表 */
 onMounted(() => {
   initCharts()
 })
