@@ -265,9 +265,14 @@ const resetQuery = () => {
 }
 
 /** 处理部门被点击 */
-const handleDeptNodeClick = async (row) => {
-  queryParams.deptId = row.id
-  await getList()
+const handleDeptNodeClick = async (row: any) => {
+  if (row === undefined) {
+    queryParams.deptId = undefined
+    await getList()
+  } else {
+    queryParams.deptId = row.id
+    await getList()
+  }
 }
 
 /** 添加/修改操作 */
