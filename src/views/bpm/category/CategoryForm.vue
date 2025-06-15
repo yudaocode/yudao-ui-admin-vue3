@@ -7,16 +7,16 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="分类名" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入分类名" />
+      <el-form-item :label="t('bpm.category.name')" prop="name">
+        <el-input v-model="formData.name" :placeholder="t('bpm.category.namePlaceholder')" />
       </el-form-item>
-      <el-form-item label="分类标志" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入分类标志" />
+      <el-form-item :label="t('bpm.category.code')" prop="code">
+        <el-input v-model="formData.code" :placeholder="t('bpm.category.codePlaceholder')" />
       </el-form-item>
-      <el-form-item label="分类描述" prop="description">
-        <el-input v-model="formData.description" type="textarea" placeholder="请输入分类描述" />
+      <el-form-item :label="t('bpm.category.description')" prop="description">
+        <el-input v-model="formData.description" type="textarea" :placeholder="t('bpm.category.descriptionPlaceholder')" />
       </el-form-item>
-      <el-form-item label="分类状态" prop="status">
+      <el-form-item :label="t('bpm.category.status')" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -27,18 +27,18 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="分类排序" prop="sort">
+      <el-form-item :label="t('bpm.category.sort')" prop="sort">
         <el-input-number
           v-model="formData.sort"
-          placeholder="请输入分类排序"
+          :placeholder="t('bpm.category.sortPlaceholder')"
           class="!w-1/1"
           :precision="0"
         />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">{{ t('common.confirm') }}</el-button>
+      <el-button @click="dialogVisible = false">{{ t('common.cancel') }}</el-button>
     </template>
   </Dialog>
 </template>
@@ -66,10 +66,10 @@ const formData = ref({
   sort: undefined
 })
 const formRules = reactive({
-  name: [{ required: true, message: '分类名不能为空', trigger: 'blur' }],
-  code: [{ required: true, message: '分类标志不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '分类状态不能为空', trigger: 'blur' }],
-  sort: [{ required: true, message: '分类排序不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: t('bpm.category.nameRequired'), trigger: 'blur' }],
+  code: [{ required: true, message: t('bpm.category.codeRequired'), trigger: 'blur' }],
+  status: [{ required: true, message: t('bpm.category.statusRequired'), trigger: 'blur' }],
+  sort: [{ required: true, message: t('bpm.category.sortRequired'), trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 

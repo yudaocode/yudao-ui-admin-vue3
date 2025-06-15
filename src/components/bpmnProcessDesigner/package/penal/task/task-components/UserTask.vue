@@ -1,6 +1,6 @@
 <template>
   <el-form label-width="120px">
-    <el-form-item label="规则类型" prop="candidateStrategy">
+    <el-form-item :label="$t('bpm.design.candidateStrategy')" prop="candidateStrategy">
       <el-select
         v-model="userTaskForm.candidateStrategy"
         clearable
@@ -17,7 +17,7 @@
     </el-form-item>
     <el-form-item
       v-if="userTaskForm.candidateStrategy == CandidateStrategy.ROLE"
-      label="指定角色"
+      :label="$t('bpm.design.role')"
       prop="candidateParam"
     >
       <el-select
@@ -36,7 +36,7 @@
         userTaskForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
         userTaskForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
       "
-      label="指定部门"
+      :label="$t('bpm.design.dept')"
       prop="candidateParam"
       span="24"
     >
@@ -45,7 +45,7 @@
         v-model="userTaskForm.candidateParam"
         :data="deptTreeOptions"
         :props="defaultProps"
-        empty-text="加载中，请稍后"
+        :empty-text="$t('bpm.design.loading')"
         multiple
         node-key="id"
         show-checkbox
@@ -54,7 +54,7 @@
     </el-form-item>
     <el-form-item
       v-if="userTaskForm.candidateStrategy == CandidateStrategy.POST"
-      label="指定岗位"
+      :label="$t('bpm.design.post')"
       prop="candidateParam"
       span="24"
     >
@@ -70,7 +70,7 @@
     </el-form-item>
     <el-form-item
       v-if="userTaskForm.candidateStrategy == CandidateStrategy.USER"
-      label="指定用户"
+      :label="$t('bpm.design.user')"
       prop="candidateParam"
       span="24"
     >
@@ -91,7 +91,7 @@
     </el-form-item>
     <el-form-item
       v-if="userTaskForm.candidateStrategy === CandidateStrategy.USER_GROUP"
-      label="指定用户组"
+      :label="$t('bpm.design.userGroup')"
       prop="candidateParam"
     >
       <el-select
@@ -111,7 +111,7 @@
     </el-form-item>
     <el-form-item
       v-if="userTaskForm.candidateStrategy === CandidateStrategy.FORM_USER"
-      label="表单内用户字段"
+      :label="$t('bpm.design.formUser')"
       prop="formUser"
     >
       <el-select
@@ -131,7 +131,7 @@
     </el-form-item>
     <el-form-item
       v-if="userTaskForm.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER"
-      label="表单内部门字段"
+      :label="$t('bpm.design.formDept')"
       prop="formDept"
     >
       <el-select
@@ -156,7 +156,7 @@
         userTaskForm.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
         userTaskForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
       "
-      :label="deptLevelLabel!"
+      :label="$t('bpm.design.deptLevel')"
       prop="deptLevel"
       span="24"
     >
@@ -171,7 +171,7 @@
     </el-form-item>
     <el-form-item
       v-if="userTaskForm.candidateStrategy === CandidateStrategy.EXPRESSION"
-      label="流程表达式"
+      :label="$t('bpm.design.expression')"
       prop="candidateParam"
     >
       <el-input
@@ -193,7 +193,7 @@
       <ProcessExpressionDialog ref="processExpressionDialogRef" @select="selectProcessExpression" />
     </el-form-item>
 
-    <el-form-item label="跳过表达式" prop="skipExpression">
+    <el-form-item :label="$t('bpm.design.skipExpression')" prop="skipExpression">
       <el-input
         type="textarea"
         v-model="userTaskForm.skipExpression"

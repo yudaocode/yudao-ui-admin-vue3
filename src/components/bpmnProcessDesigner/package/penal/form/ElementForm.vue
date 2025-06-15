@@ -1,16 +1,16 @@
 <template>
   <div class="panel-tab__content">
     <el-form label-width="80px">
-      <el-form-item label="流程表单">
+      <el-form-item :label="$t('bpm.design.processForm')">
         <!--        <el-input v-model="formKey" clearable @change="updateElementFormKey" />-->
         <el-select v-model="formKey" clearable @change="updateElementFormKey">
           <el-option v-for="form in formList" :key="form.id" :label="form.name" :value="form.id" />
         </el-select>
       </el-form-item>
-      <!--      <el-form-item label="业务标识">-->
+      <!--      <el-form-item :label="$t('bpm.design.businessKey')">-->
       <!--        <el-select v-model="businessKey" @change="updateElementBusinessKey">-->
       <!--          <el-option v-for="i in fieldList" :key="i.id" :value="i.id" :label="i.label" />-->
-      <!--          <el-option label="无" value="" />-->
+      <!--          <el-option :label="$t('bpm.design.none')" value="" />-->
       <!--        </el-select>-->
       <!--      </el-form-item>-->
     </el-form>
@@ -237,7 +237,7 @@ const props = defineProps({
 const prefix = inject('prefix')
 const width = inject('width')
 
-const formKey = ref(undefined)
+const formKey = ref('')
 const businessKey = ref('')
 const optionModelTitle = ref('')
 const fieldList = ref<any[]>([])

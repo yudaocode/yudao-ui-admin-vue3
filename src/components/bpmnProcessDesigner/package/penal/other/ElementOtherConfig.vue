@@ -1,7 +1,7 @@
 <template>
   <div class="panel-tab__content">
     <div class="element-property input-property">
-      <div class="element-property__label">元素文档：</div>
+      <div class="element-property__label">{{ $t('bpm.design.elementDocumentation') }}</div>
       <div class="element-property__value">
         <el-input
           type="textarea"
