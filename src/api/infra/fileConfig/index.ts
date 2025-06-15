@@ -56,6 +56,11 @@ export const deleteFileConfig = (id: number) => {
   return request.delete({ url: '/infra/file-config/delete?id=' + id })
 }
 
+// 批量删除文件配置
+export const deleteFileConfigList = (ids: number[]) => {
+  return request.delete({ url: '/infra/file-config/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 测试文件配置
 export const testFileConfig = (id: number) => {
   return request.get({ url: '/infra/file-config/test?id=' + id })
