@@ -41,7 +41,10 @@
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/erp'
+import { Demo03StudentApi, Demo03Student } from '@/api/infra/demo/demo03/erp'
+
+/** 学生 表单 */
+defineOptions({ name: 'Demo03StudentForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -55,13 +58,13 @@ const formData = ref({
   name: undefined,
   sex: undefined,
   birthday: undefined,
-  description: undefined
+  description: undefined,
 })
 const formRules = reactive({
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
   sex: [{ required: true, message: '性别不能为空', trigger: 'blur' }],
   birthday: [{ required: true, message: '出生日期不能为空', trigger: 'blur' }],
-  description: [{ required: true, message: '简介不能为空', trigger: 'blur' }]
+  description: [{ required: true, message: '简介不能为空', trigger: 'blur' }],
 })
 const formRef = ref() // 表单 Ref
 
@@ -91,7 +94,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as Demo03StudentApi.Demo03StudentVO
+    const data = formData.value as unknown as Demo03Student
     if (formType.value === 'create') {
       await Demo03StudentApi.createDemo03Student(data)
       message.success(t('common.createSuccess'))
@@ -114,7 +117,7 @@ const resetForm = () => {
     name: undefined,
     sex: undefined,
     birthday: undefined,
-    description: undefined
+    description: undefined,
   }
   formRef.value?.resetFields()
 }

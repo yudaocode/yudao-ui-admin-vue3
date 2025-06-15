@@ -1,26 +1,29 @@
 <template>
-  <doc-alert title="代码生成（主子表）" url="https://doc.iocoder.cn/new-feature/master-sub/" />
-
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
+      class="-mb-15px"
+      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      :model="queryParams"
-      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="名字" prop="name">
         <el-input
           v-model="queryParams.name"
-          class="!w-240px"
-          clearable
           placeholder="请输入名字"
+          clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="性别" prop="sex">
-        <el-select v-model="queryParams.sex" class="!w-240px" clearable placeholder="请选择性别">
+        <el-select
+          v-model="queryParams.sex"
+          placeholder="请选择性别"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
             :key="dict.value"
@@ -32,41 +35,42 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-          end-placeholder="结束日期"
-          start-placeholder="开始日期"
-          type="daterange"
           value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-220px"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon class="mr-5px" icon="ep:search" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          重置
-        </el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
-          v-hasPermi="['infra:demo03-student:create']"
-          plain
           type="primary"
+          plain
           @click="openForm('create')"
+          v-hasPermi="['infra:demo03-student:create']"
         >
-          <Icon class="mr-5px" icon="ep:plus" />
-          新增
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
-          v-hasPermi="['infra:demo03-student:export']"
-          :loading="exportLoading"
-          plain
           type="success"
+          plain
           @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['infra:demo03-student:export']"
         >
-          <Icon class="mr-5px" icon="ep:download" />
-          导出
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
+        <el-button
+            type="danger"
+            plain
+            :disabled="isEmpty(checkedIds)"
+            @click="handleDeleteBatch"
+            v-hasPermi="['infra:demo03-student:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
       </el-form-item>
     </el-form>
@@ -75,50 +79,53 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
+      row-key="id"
       v-loading="loading"
       :data="list"
-      :show-overflow-tooltip="true"
       :stripe="true"
+      :show-overflow-tooltip="true"
       highlight-current-row
       @current-change="handleCurrentChange"
+      @selection-change="handleRowCheckboxChange"
     >
-      <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="名字" prop="name" />
-      <el-table-column align="center" label="性别" prop="sex">
+    <el-table-column type="selection" width="55" />
+      <el-table-column label="编号" align="center" prop="id" />
+      <el-table-column label="名字" align="center" prop="name" />
+      <el-table-column label="性别" align="center" prop="sex">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="scope.row.sex" />
         </template>
       </el-table-column>
       <el-table-column
-        :formatter="dateFormatter"
-        align="center"
         label="出生日期"
-        prop="birthday"
-        width="180px"
-      />
-      <el-table-column align="center" label="简介" prop="description" />
-      <el-table-column
-        :formatter="dateFormatter"
         align="center"
-        label="创建时间"
-        prop="createTime"
+        prop="birthday"
+        :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column align="center" label="操作">
+      <el-table-column label="简介" align="center" prop="description" />
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
-            v-hasPermi="['infra:demo03-student:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
+            v-hasPermi="['infra:demo03-student:update']"
           >
             编辑
           </el-button>
           <el-button
-            v-hasPermi="['infra:demo03-student:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
+            v-hasPermi="['infra:demo03-student:delete']"
           >
             删除
           </el-button>
@@ -127,9 +134,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      v-model:limit="queryParams.pageSize"
-      v-model:page="queryParams.pageNo"
       :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
   </ContentWrap>
@@ -140,39 +147,41 @@
   <ContentWrap>
     <el-tabs model-value="demo03Course">
       <el-tab-pane label="学生课程" name="demo03Course">
-        <Demo03CourseList :student-id="currentRow?.id" />
+        <Demo03CourseList :student-id="currentRow.id" />
       </el-tab-pane>
       <el-tab-pane label="学生班级" name="demo03Grade">
-        <Demo03GradeList :student-id="currentRow?.id" />
+        <Demo03GradeList :student-id="currentRow.id" />
       </el-tab-pane>
     </el-tabs>
   </ContentWrap>
 </template>
 
-<script lang="ts" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+<script setup lang="ts">
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/erp'
+import { Demo03StudentApi, Demo03Student } from '@/api/infra/demo/demo03/erp'
 import Demo03StudentForm from './Demo03StudentForm.vue'
 import Demo03CourseList from './components/Demo03CourseList.vue'
 import Demo03GradeList from './components/Demo03GradeList.vue'
 
+/** 学生 列表 */
 defineOptions({ name: 'Demo03Student' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref([]) // 列表的数据
+const list = ref<Demo03Student[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  sex: null,
-  description: null,
-  createTime: []
+  name: undefined,
+  sex: undefined,
+  description: undefined,
+  createTime: [],
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -218,6 +227,22 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 批量删除学生 */
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    await Demo03StudentApi.deleteDemo03StudentList(checkedIds.value);
+    message.success(t('common.delSuccess'))
+    await getList();
+  } catch {}
+}
+
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (records: Demo03Student[]) => {
+  checkedIds.value = records.map((item) => item.id);
 }
 
 /** 导出按钮操作 */
