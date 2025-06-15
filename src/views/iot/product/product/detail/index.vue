@@ -5,7 +5,7 @@
       <el-tab-pane label="产品信息" name="info">
         <ProductDetailsInfo v-if="activeTab === 'info'" :product="product" />
       </el-tab-pane>
-      <el-tab-pane label="功能定义" lazy name="thingModel">
+      <el-tab-pane label="物模型（功能定义）" lazy name="thingModel">
         <IoTProductThingModel ref="thingModelRef" />
       </el-tab-pane>
     </el-tabs>

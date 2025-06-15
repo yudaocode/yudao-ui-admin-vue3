@@ -15,6 +15,7 @@
           class="!w-240px"
           clearable
           placeholder="请选择功能类型"
+          @change="handleQuery"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.IOT_THING_MODEL_TYPE)"
@@ -25,14 +26,6 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon class="mr-5px" icon="ep:search" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          重置
-        </el-button>
         <el-button
           v-hasPermi="[`iot:thing-model:create`]"
           plain
@@ -42,7 +35,7 @@
           <Icon class="mr-5px" icon="ep:plus" />
           添加功能
         </el-button>
-        <el-button v-hasPermi="[`iot:thing-model:query`]" plain type="primary" @click="openTSL">
+        <el-button v-hasPermi="[`iot:thing-model:query`]" plain type="success" @click="openTSL">
           TSL
         </el-button>
       </el-form-item>
@@ -100,6 +93,7 @@
       />
     </el-tabs>
   </ContentWrap>
+
   <!-- 表单弹窗：添加/修改 -->
   <ThingModelForm ref="formRef" @success="getList" />
   <ThingModelTSL ref="thingModelTSLRef" />
@@ -150,13 +144,6 @@ const getList = async () => {
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  queryParams.type = undefined
-  handleQuery()
 }
 
 /** 添加/修改操作 */

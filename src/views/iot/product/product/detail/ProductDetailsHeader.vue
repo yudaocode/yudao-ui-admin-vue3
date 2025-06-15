@@ -13,7 +13,7 @@
         <el-button
           @click="openForm('update', product.id)"
           v-hasPermi="['iot:product:update']"
-          v-if="product.status === 0"
+          :disabled="product.status === 1"
         >
           编辑
         </el-button>
@@ -37,15 +37,13 @@
     </div>
   </div>
   <ContentWrap class="mt-10px">
-    <el-descriptions :column="5" direction="horizontal">
+    <el-descriptions :column="1" direction="horizontal">
       <el-descriptions-item label="ProductKey">
         {{ product.productKey }}
         <el-button @click="copyToClipboard(product.productKey)">复制</el-button>
       </el-descriptions-item>
-    </el-descriptions>
-    <el-descriptions :column="5" direction="horizontal">
-      <el-descriptions-item label="设备数">
-        {{ product.deviceCount ?? '加载中...' }}
+      <el-descriptions-item label="设备总数">
+        <span class="ml-20px mr-10px">{{ product.deviceCount ?? '加载中...' }}</span>
         <el-button @click="goToDeviceList(product.id)">前往管理</el-button>
       </el-descriptions-item>
     </el-descriptions>
