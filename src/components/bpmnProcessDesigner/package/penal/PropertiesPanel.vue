@@ -68,6 +68,11 @@
           :business-object="elementBusinessObject"
         />
       </el-collapse-item>
+      <!-- 新增的时间事件配置项 -->
+      <el-collapse-item v-if="elementType === 'IntermediateCatchEvent'" name="timeEvent">
+        <template #title><Icon icon="ep:timer" />时间事件</template>
+        <TimeEventConfig :businessObject="bpmnElement.value?.businessObject" :key="elementId" />
+      </el-collapse-item>
     </el-collapse>
   </div>
 </template>
@@ -83,6 +88,8 @@ import ElementProperties from './properties/ElementProperties.vue'
 // import ElementForm from './form/ElementForm.vue'
 import UserTaskListeners from './listeners/UserTaskListeners.vue'
 import { getTaskCollapseItemName, isTaskCollapseItemShow } from './task/data'
+import TimeEventConfig from './time-event-config/TimeEventConfig.vue'
+import { ref, watch, onMounted } from 'vue'
 
 defineOptions({ name: 'MyPropertiesPanel' })
 
@@ -121,6 +128,8 @@ const formVisible = ref(false) // 表单配置
 const bpmnElement = ref()
 const isReady = ref(false)
 
+const type = ref('time')
+const condition = ref('')
 provide('prefix', props.prefix)
 provide('width', props.width)
 
@@ -141,7 +150,7 @@ const initBpmnInstances = () => {
     }
 
     // 检查所有实例是否都存在
-    const allInstancesExist = Object.values(instances).every(instance => instance)
+    const allInstancesExist = Object.values(instances).every((instance) => instance)
     if (allInstancesExist) {
       const w = window as any
       w.bpmnInstances = instances
@@ -255,4 +264,48 @@ watch(
     activeTab.value = 'base'
   }
 )
+
+function updateNode() {
+  const moddle = window.bpmnInstances?.moddle
+  const modeling = window.bpmnInstances?.modeling
+  const elementRegistry = window.bpmnInstances?.elementRegistry
+  if (!moddle || !modeling || !elementRegistry) return
+
+  const element = elementRegistry.get(props.businessObject.id)
+  if (!element) return
+
+  let timerDef = moddle.create('bpmn:TimerEventDefinition', {})
+  if (type.value === 'time') {
+    timerDef.timeDate = moddle.create('bpmn:FormalExpression', { body: condition.value })
+  } else if (type.value === 'duration') {
+    timerDef.timeDuration = moddle.create('bpmn:FormalExpression', { body: condition.value })
+  } else if (type.value === 'cycle') {
+    timerDef.timeCycle = moddle.create('bpmn:FormalExpression', { body: condition.value })
+  }
+
+  modeling.updateModdleProperties(element, element.businessObject, {
+    eventDefinitions: [timerDef]
+  })
+}
+
+// 初始化和监听
+function syncFromBusinessObject() {
+  if (props.businessObject) {
+    const timerDef = (props.businessObject.eventDefinitions || [])[0]
+    if (timerDef) {
+      if (timerDef.timeDate) {
+        type.value = 'time'
+        condition.value = timerDef.timeDate.body
+      } else if (timerDef.timeDuration) {
+        type.value = 'duration'
+        condition.value = timerDef.timeDuration.body
+      } else if (timerDef.timeCycle) {
+        type.value = 'cycle'
+        condition.value = timerDef.timeCycle.body
+      }
+    }
+  }
+}
+onMounted(syncFromBusinessObject)
+watch(() => props.businessObject, syncFromBusinessObject, { deep: true })
 </script>

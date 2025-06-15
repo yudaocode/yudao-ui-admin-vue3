@@ -1,6 +1,4 @@
 <template>
-  <doc-alert title="代码生成（主子表）" url="https://doc.iocoder.cn/new-feature/master-sub/" />
-
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -37,7 +35,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
+          class="!w-220px"
         />
       </el-form-item>
       <el-form-item>
@@ -60,13 +58,30 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
+        <el-button
+          type="danger"
+          plain
+          :disabled="isEmpty(checkedIds)"
+          @click="handleDeleteBatch"
+          v-hasPermi="['infra:demo03-student:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleRowCheckboxChange"
+    >
+      <el-table-column type="selection" width="55" />
       <!-- 子表的列表 -->
       <el-table-column type="expand">
         <template #default="scope">
@@ -102,7 +117,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
             link
@@ -137,28 +152,30 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/inner'
+import { Demo03Student, Demo03StudentApi } from '@/api/infra/demo/demo03/inner'
 import Demo03StudentForm from './Demo03StudentForm.vue'
 import Demo03CourseList from './components/Demo03CourseList.vue'
 import Demo03GradeList from './components/Demo03GradeList.vue'
 
+/** 学生 列表 */
 defineOptions({ name: 'Demo03Student' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref([]) // 列表的数据
+const list = ref<Demo03Student[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  sex: null,
-  description: null,
+  name: undefined,
+  sex: undefined,
+  description: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -205,6 +222,22 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 批量删除学生 */
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    await Demo03StudentApi.deleteDemo03StudentList(checkedIds.value)
+    message.success(t('common.delSuccess'))
+    await getList()
+  } catch {}
+}
+
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (records: Demo03Student[]) => {
+  checkedIds.value = records.map((item) => item.id)
 }
 
 /** 导出按钮操作 */
