@@ -1,20 +1,29 @@
 <template>
   <div class="panel-tab__content">
-    <div style="margin-top: 10px;">
+    <div style="margin-top: 10px">
       <span>类型：</span>
       <el-button-group>
-        <el-button size="mini" :type="type==='time'?'primary':''" @click="setType('time')">时间</el-button>
-        <el-button size="mini" :type="type==='duration'?'primary':''" @click="setType('duration')">持续</el-button>
-        <el-button size="mini" :type="type==='cycle'?'primary':''" @click="setType('cycle')">循环</el-button>
+        <el-button size="mini" :type="type === 'time' ? 'primary' : ''" @click="setType('time')"
+          >时间</el-button
+        >
+        <el-button
+          size="mini"
+          :type="type === 'duration' ? 'primary' : ''"
+          @click="setType('duration')"
+          >持续</el-button
+        >
+        <el-button size="mini" :type="type === 'cycle' ? 'primary' : ''" @click="setType('cycle')"
+          >循环</el-button
+        >
       </el-button-group>
-      <el-icon v-if="valid" color="green" style="margin-left:8px"><CircleCheckFilled /></el-icon>
+      <el-icon v-if="valid" color="green" style="margin-left: 8px"><CircleCheckFilled /></el-icon>
     </div>
-    <div style="margin-top: 10px; display: flex; align-items: center;">
+    <div style="margin-top: 10px; display: flex; align-items: center">
       <span>条件：</span>
       <el-input
         v-model="condition"
         :placeholder="placeholder"
-        style="width: calc(100% - 100px);"
+        style="width: calc(100% - 100px)"
         :readonly="type !== 'duration' && type !== 'cycle'"
         @focus="handleInputFocus"
         @blur="updateNode"
@@ -24,7 +33,9 @@
             <el-icon color="orange"><WarningFilled /></el-icon>
           </el-tooltip>
           <el-tooltip :content="helpText" placement="top">
-            <el-icon color="#409EFF" style="cursor: pointer" @click="showHelp = true"><QuestionFilled /></el-icon>
+            <el-icon color="#409EFF" style="cursor: pointer" @click="showHelp = true"
+              ><QuestionFilled
+            /></el-icon>
           </el-tooltip>
           <el-button
             v-if="type === 'time'"
@@ -57,40 +68,55 @@
       </el-input>
     </div>
     <!-- 时间选择器 -->
-    <el-dialog v-model="showDatePicker" title="选择时间" width="400px" @close="showDatePicker=false">
+    <el-dialog
+      v-model="showDatePicker"
+      title="选择时间"
+      width="400px"
+      @close="showDatePicker = false"
+    >
       <el-date-picker
         v-model="dateValue"
         type="datetime"
         placeholder="选择日期时间"
-        style="width: 100%;"
+        style="width: 100%"
         @change="onDateChange"
       />
       <template #footer>
-        <el-button @click="showDatePicker=false">取消</el-button>
+        <el-button @click="showDatePicker = false">取消</el-button>
         <el-button type="primary" @click="onDateConfirm">确定</el-button>
       </template>
     </el-dialog>
     <!-- 持续时长选择器 -->
-    <el-dialog v-model="showDurationDialog" title="时间配置" width="600px" @close="showDurationDialog=false">
+    <el-dialog
+      v-model="showDurationDialog"
+      title="时间配置"
+      width="600px"
+      @close="showDurationDialog = false"
+    >
       <DurationConfig :value="condition" @change="onDurationChange" />
       <template #footer>
-        <el-button @click="showDurationDialog=false">取消</el-button>
+        <el-button @click="showDurationDialog = false">取消</el-button>
         <el-button type="primary" @click="onDurationConfirm">确定</el-button>
       </template>
     </el-dialog>
     <!-- 循环配置器 -->
-    <el-dialog v-model="showCycleDialog" title="时间配置" width="800px" @close="showCycleDialog=false">
+    <el-dialog
+      v-model="showCycleDialog"
+      title="时间配置"
+      width="800px"
+      @close="showCycleDialog = false"
+    >
       <CycleConfig :value="condition" @change="onCycleChange" />
       <template #footer>
-        <el-button @click="showCycleDialog=false">取消</el-button>
+        <el-button @click="showCycleDialog = false">取消</el-button>
         <el-button type="primary" @click="onCycleConfirm">确定</el-button>
       </template>
     </el-dialog>
     <!-- 帮助说明 -->
-    <el-dialog v-model="showHelp" title="格式说明" width="600px" @close="showHelp=false">
+    <el-dialog v-model="showHelp" title="格式说明" width="600px" @close="showHelp = false">
       <div v-html="helpHtml"></div>
       <template #footer>
-        <el-button @click="showHelp=false">关闭</el-button>
+        <el-button @click="showHelp = false">关闭</el-button>
       </template>
     </el-dialog>
   </div>
@@ -157,7 +183,6 @@ function syncFromBusinessObject() {
   }
 }
 onMounted(syncFromBusinessObject)
-
 
 // 切换类型
 function setType(t) {
@@ -235,9 +260,10 @@ function updateNode() {
   if (!element) return
 
   // 1. 复用原有 timerDef，或新建
-  let timerDef = (element.businessObject.eventDefinitions && element.businessObject.eventDefinitions[0])
+  let timerDef =
+    element.businessObject.eventDefinitions && element.businessObject.eventDefinitions[0]
   if (!timerDef) {
-    timerDef =bpmnInstances().bpmnFactory.create('bpmn:TimerEventDefinition', {})
+    timerDef = bpmnInstances().bpmnFactory.create('bpmn:TimerEventDefinition', {})
     modeling.updateProperties(element, {
       eventDefinitions: [timerDef]
     })
@@ -250,11 +276,17 @@ function updateNode() {
 
   // 3. 设置新的
   if (type.value === 'time' && condition.value) {
-    timerDef.timeDate =bpmnInstances().bpmnFactory.create('bpmn:FormalExpression', { body: condition.value })
+    timerDef.timeDate = bpmnInstances().bpmnFactory.create('bpmn:FormalExpression', {
+      body: condition.value
+    })
   } else if (type.value === 'duration' && condition.value) {
-    timerDef.timeDuration =bpmnInstances().bpmnFactory.create('bpmn:FormalExpression', { body: condition.value })
+    timerDef.timeDuration = bpmnInstances().bpmnFactory.create('bpmn:FormalExpression', {
+      body: condition.value
+    })
   } else if (type.value === 'cycle' && condition.value) {
-    timerDef.timeCycle = bpmnInstances().bpmnFactory.create('bpmn:FormalExpression', { body: condition.value })
+    timerDef.timeCycle = bpmnInstances().bpmnFactory.create('bpmn:FormalExpression', {
+      body: condition.value
+    })
   }
 
   bpmnInstances().modeling.updateProperties(toRaw(element), {
@@ -262,13 +294,11 @@ function updateNode() {
   })
 }
 
-
 watch(
   () => props.businessObject,
   (val) => {
     if (val) {
       nextTick(() => {
-
         syncFromBusinessObject()
       })
     }

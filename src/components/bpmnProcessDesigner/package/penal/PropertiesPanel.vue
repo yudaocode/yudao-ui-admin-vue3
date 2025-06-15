@@ -88,8 +88,8 @@ import ElementProperties from './properties/ElementProperties.vue'
 // import ElementForm from './form/ElementForm.vue'
 import UserTaskListeners from './listeners/UserTaskListeners.vue'
 import { getTaskCollapseItemName, isTaskCollapseItemShow } from './task/data'
-import TimeEventConfig from "./time-event-config/TimeEventConfig.vue"
-import { ref, computed, watch, onMounted } from 'vue'
+import TimeEventConfig from './time-event-config/TimeEventConfig.vue'
+import { ref, watch, onMounted } from 'vue'
 
 defineOptions({ name: 'MyPropertiesPanel' })
 
@@ -150,7 +150,7 @@ const initBpmnInstances = () => {
     }
 
     // 检查所有实例是否都存在
-    const allInstancesExist = Object.values(instances).every(instance => instance)
+    const allInstancesExist = Object.values(instances).every((instance) => instance)
     if (allInstancesExist) {
       const w = window as any
       w.bpmnInstances = instances
@@ -283,15 +283,9 @@ function updateNode() {
     timerDef.timeCycle = moddle.create('bpmn:FormalExpression', { body: condition.value })
   }
 
-  modeling.updateModdleProperties(
-    element,
-    element.businessObject,
-    {
-      eventDefinitions: [timerDef]
-    }
-  )
-
-  console.log('当前eventDefinitions:', element.businessObject.eventDefinitions)
+  modeling.updateModdleProperties(element, element.businessObject, {
+    eventDefinitions: [timerDef]
+  })
 }
 
 // 初始化和监听

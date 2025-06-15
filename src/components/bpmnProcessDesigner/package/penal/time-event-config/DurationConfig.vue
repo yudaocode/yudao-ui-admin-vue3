@@ -1,11 +1,25 @@
 <template>
   <div>
-    <div style="margin-bottom: 10px;">当前选择：<el-input v-model="isoString" readonly style="width: 300px;" /></div>
-    <div v-for="unit in units" :key="unit.key" style="margin-bottom: 8px;">
+    <div style="margin-bottom: 10px"
+      >当前选择：<el-input v-model="isoString" readonly style="width: 300px"
+    /></div>
+    <div v-for="unit in units" :key="unit.key" style="margin-bottom: 8px">
       <span>{{ unit.label }}：</span>
       <el-button-group>
-        <el-button v-for="val in unit.presets" :key="val" size="mini" @click="setUnit(unit.key, val)">{{ val }}</el-button>
-        <el-input v-model.number="custom[unit.key]" size="mini" style="width: 60px; margin-left: 8px;" placeholder="自定义" @change="setUnit(unit.key, custom[unit.key])" />
+        <el-button
+          v-for="val in unit.presets"
+          :key="val"
+          size="mini"
+          @click="setUnit(unit.key, val)"
+          >{{ val }}</el-button
+        >
+        <el-input
+          v-model.number="custom[unit.key]"
+          size="mini"
+          style="width: 60px; margin-left: 8px"
+          placeholder="自定义"
+          @change="setUnit(unit.key, custom[unit.key])"
+        />
       </el-button-group>
     </div>
   </div>
@@ -49,18 +63,24 @@ function updateIsoString() {
   emit('change', isoString.value)
 }
 
-watch(() => props.value, (val) => {
-  if (!val) return
-  // 解析ISO 8601字符串到custom
-  const match = val.match(/^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/)
-  if (match) {
-    custom.value.Y = match[1] || ''
-    custom.value.M = match[2] || ''
-    custom.value.D = match[3] || ''
-    custom.value.H = match[4] || ''
-    custom.value.m = match[5] || ''
-    custom.value.S = match[6] || ''
-    updateIsoString()
-  }
-}, { immediate: true })
-</script> 
+watch(
+  () => props.value,
+  (val) => {
+    if (!val) return
+    // 解析ISO 8601字符串到custom
+    const match = val.match(
+      /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/
+    )
+    if (match) {
+      custom.value.Y = match[1] || ''
+      custom.value.M = match[2] || ''
+      custom.value.D = match[3] || ''
+      custom.value.H = match[4] || ''
+      custom.value.m = match[5] || ''
+      custom.value.S = match[6] || ''
+      updateIsoString()
+    }
+  },
+  { immediate: true }
+)
+</script>
