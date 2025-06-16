@@ -49,5 +49,5 @@ export const deleteConfigList = (ids: number[]) => {
 
 // 导出参数
 export const exportConfig = (params) => {
-  return request.download({ url: '/infra/config/export', params })
+  return request.download({ url: '/infra/config/export-excel', params })
 }
