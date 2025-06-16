@@ -14,6 +14,15 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
+        <el-button
+          type="danger"
+          plain
+          @click="handleDeleteBatch"
+          :disabled="!isSelected"
+          v-hasPermi="['system:mail-template:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+        </el-button>
       </template>
     </Search>
   </ContentWrap>
@@ -29,6 +38,7 @@
       }"
       v-model:pageSize="tableObject.pageSize"
       v-model:currentPage="tableObject.currentPage"
+      :selection="true"
     >
       <template #action="{ row }">
         <el-button
@@ -92,6 +102,19 @@ const openForm = (type: string, id?: number) => {
 /** 删除按钮操作 */
 const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
+}
+
+/** 是否有选中行 */
+const isSelected = computed(() => {
+  return tableObject.selections && tableObject.selections.length > 0
+})
+
+/** 批量删除按钮操作 */
+const handleDeleteBatch = async () => {
+  const ids = tableObject.selections.map(item => item.id)
+  if (ids.length === 0) return
+  await MailTemplateApi.deleteMailTemplateList(ids)
+  tableMethods.getList()
 }
 
 /** 发送测试操作 */
