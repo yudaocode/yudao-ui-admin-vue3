@@ -11,7 +11,7 @@
         <DeviceDetailsInfo v-if="activeTab === 'info'" :product="product" :device="device" />
       </el-tab-pane>
       <el-tab-pane label="物模型数据" name="model">
-        <DeviceDetailsModel v-if="activeTab === 'model'" :product="product" :device="device" />
+        <DeviceDetailsThingModel v-if="activeTab === 'model'" :product="product" :device="device" />
       </el-tab-pane>
       <el-tab-pane label="子设备管理" v-if="product.deviceType === DeviceTypeEnum.GATEWAY" />
       <el-tab-pane label="设备消息" name="log">
@@ -40,7 +40,7 @@ import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
 import DeviceDetailsHeader from './DeviceDetailsHeader.vue'
 import DeviceDetailsInfo from './DeviceDetailsInfo.vue'
-import DeviceDetailsModel from './DeviceDetailsModel.vue'
+import DeviceDetailsThingModel from './DeviceDetailsThingModel.vue'
 import DeviceDetailsMessage from './DeviceDetailsMessage.vue'
 import DeviceDetailsSimulator from './DeviceDetailsSimulator.vue'
 import DeviceDetailConfig from './DeviceDetailConfig.vue'
