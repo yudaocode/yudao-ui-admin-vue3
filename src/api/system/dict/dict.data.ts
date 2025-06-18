@@ -54,6 +54,6 @@ export const deleteDictDataList = (ids: number[]) => {
 }
 
 // 导出字典数据
-export const exportDictData = (params) => {
+export const exportDictData = (params: any) => {
   return request.download({ url: '/system/dict-data/export-excel', params })
 }

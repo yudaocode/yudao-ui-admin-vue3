@@ -112,7 +112,7 @@ const handleDelete = async (id: number) => {
 /** 批量删除按钮操作 */
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (rows: DataSourceConfigApi.DataSourceConfigVO[]) => {
-  // 过滤掉id为0的主数据源
+  // 过滤掉id为 0 的主数据源
   checkedIds.value = rows.map((row) => row.id!).filter((id) => id !== 0 && Boolean(id))
 }
 

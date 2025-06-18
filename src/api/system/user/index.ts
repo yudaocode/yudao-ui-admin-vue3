@@ -49,7 +49,7 @@ export const deleteUserList = (ids: number[]) => {
 
 // 导出用户
 export const exportUser = (params: any) => {
-  return request.download({ url: '/system/user/export', params })
+  return request.download({ url: '/system/user/export-excel', params })
 }
 
 // 下载用户导入模板
