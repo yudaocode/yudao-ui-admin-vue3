@@ -130,12 +130,12 @@ export const DeviceApi = {
 
   // 获取设备属性最新数据
   getLatestDeviceProperties: async (params: any) => {
-    return await request.get({ url: `/iot/device/property/latest`, params })
+    return await request.get({ url: `/iot/device/property/get-latest`, params })
   },
 
   // 获取设备属性历史数据
-  getHistoryDevicePropertyPage: async (params: any) => {
-    return await request.get({ url: `/iot/device/property/history-page`, params })
+  getHistoryDevicePropertyList: async (params: any) => {
+    return await request.get({ url: `/iot/device/property/history-list`, params })
   },
 
   // 获取设备认证信息

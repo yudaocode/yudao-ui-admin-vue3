@@ -213,7 +213,7 @@ watch(autoRefresh, (newValue) => {
   if (newValue) {
     autoRefreshTimer = setInterval(() => {
       getList()
-    }, 5000) // 每5秒刷新一次
+    }, 5000) // 每 5 秒刷新一次
   } else {
     clearInterval(autoRefreshTimer)
     autoRefreshTimer = null
