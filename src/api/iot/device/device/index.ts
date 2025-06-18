@@ -41,10 +41,11 @@ export interface IotDevicePropertyDetailRespVO {
   dataSpecsList: any[] // 数据定义列表
 }
 
-// IoT 设备数据 VO
-export interface DeviceHistoryDataVO {
-  time: number // 时间
-  data: string // 数据
+// IoT 设备属性 VO
+export interface IotDevicePropertyRespVO {
+  identifier: string // 属性标识符
+  value: string // 最新值
+  updateTime: Date // 更新时间
 }
 
 // TODO @芋艿：调整到 constants

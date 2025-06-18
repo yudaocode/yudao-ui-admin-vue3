@@ -88,7 +88,7 @@
                 <!-- 数据图标 - 可点击 -->
                 <div
                   class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 transition-colors"
-                  @click="openDetail(props.device.id, item.identifier)"
+                  @click="openHistory(props.device.id, item.identifier)"
                 >
                   <Icon icon="ep:data-line" class="text-[18px] text-[#0070ff]" />
                 </div>
@@ -99,7 +99,7 @@
                 <div class="mb-2.5 last:mb-0">
                   <span class="text-[#717c8e] mr-2.5">属性值</span>
                   <span class="text-[#0b1d30] font-600">
-                    {{ item.value || '-' }}
+                    {{ formatValueWithUnit(item) }}
                   </span>
                 </div>
                 <div class="mb-2.5 last:mb-0">
@@ -120,7 +120,11 @@
       <el-table-column label="属性标识符" align="center" prop="identifier" />
       <el-table-column label="属性名称" align="center" prop="name" />
       <el-table-column label="数据类型" align="center" prop="dataType" />
-      <el-table-column label="属性值" align="center" prop="value" />
+      <el-table-column label="属性值" align="center" prop="value">
+        <template #default="scope">
+          {{ formatValueWithUnit(scope.row) }}
+        </template>
+      </el-table-column>
       <el-table-column
         label="更新时间"
         align="center"
@@ -130,7 +134,11 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-          <el-button link type="primary" @click="openDetail(props.device.id, scope.row.identifier)">
+          <el-button
+            link
+            type="primary"
+            @click="openHistory(props.device.id, scope.row.identifier)"
+          >
             查看数据
           </el-button>
         </template>
@@ -138,14 +146,14 @@
     </el-table>
 
     <!-- 表单弹窗：添加/修改 -->
-    <DeviceDataDetail ref="detailRef" :device="device" :product="product" />
+    <DeviceDetailsThingModelPropertyHistory ref="historyRef" :device="device" :product="product" />
   </ContentWrap>
 </template>
 <script setup lang="ts">
 import { ProductVO } from '@/api/iot/product/product'
 import { DeviceApi, IotDevicePropertyDetailRespVO, DeviceVO } from '@/api/iot/device/device'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
-import DeviceDataDetail from './DeviceDataDetail.vue'
+import DeviceDetailsThingModelPropertyHistory from './DeviceDetailsThingModelPropertyHistory.vue'
 
 const props = defineProps<{ product: ProductVO; device: DeviceVO }>()
 
@@ -196,10 +204,19 @@ const handleQuery = () => {
   handleFilter()
 }
 
-/** 添加/修改操作 */
-const detailRef = ref()
-const openDetail = (deviceId: number, identifier: string) => {
-  detailRef.value.open(deviceId, identifier)
+/** 历史操作 */
+const historyRef = ref()
+const openHistory = (deviceId: number, identifier: string) => {
+  historyRef.value.open(deviceId, identifier)
+}
+
+/** 格式化属性值和单位 */
+const formatValueWithUnit = (item: IotDevicePropertyDetailRespVO) => {
+  if (item.value === null || item.value === undefined || item.value === '') {
+    return '-'
+  }
+  const unitName = item.dataSpecs?.unitName
+  return unitName ? `${item.value} ${unitName}` : item.value
 }
 
 /** 监听自动刷新 */
