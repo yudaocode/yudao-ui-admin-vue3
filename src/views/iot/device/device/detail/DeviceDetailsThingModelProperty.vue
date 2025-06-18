@@ -20,6 +20,16 @@
           @clear="handleQuery"
         />
       </el-form-item>
+      <el-form-item class="float-right !mr-0 !mb-0">
+        <el-button-group>
+          <el-button :type="viewMode === 'card' ? 'primary' : 'default'" @click="viewMode = 'card'">
+            <Icon icon="ep:grid" />
+          </el-button>
+          <el-button :type="viewMode === 'list' ? 'primary' : 'default'" @click="viewMode = 'list'">
+            <Icon icon="ep:list" />
+          </el-button>
+        </el-button-group>
+      </el-form-item>
       <el-form-item>
         <el-switch
           size="large"
@@ -35,7 +45,80 @@
     </el-form>
   </ContentWrap>
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <!-- 卡片视图 -->
+    <template v-if="viewMode === 'card'">
+      <el-row :gutter="16" v-loading="loading">
+        <el-col
+          v-for="item in list"
+          :key="item.property.identifier"
+          :xs="24"
+          :sm="12"
+          :md="12"
+          :lg="6"
+          class="mb-4"
+        >
+          <el-card
+            class="h-full transition-colors relative overflow-hidden"
+            :body-style="{ padding: '0' }"
+          >
+            <!-- 添加渐变背景层 -->
+            <div
+              class="absolute top-0 left-0 right-0 h-[50px] pointer-events-none bg-gradient-to-b from-[#eefaff] to-transparent"
+            >
+            </div>
+            <div class="p-4 relative">
+              <!-- 标题区域 -->
+              <div class="flex items-center mb-3">
+                <div class="mr-2.5 flex items-center">
+                  <Icon icon="ep:cpu" class="text-[18px] text-[#0070ff]" />
+                </div>
+                <div class="text-[16px] font-600 flex-1">{{
+                  item.property?.name || item.name
+                }}</div>
+                <!-- 标识符 -->
+                <div class="inline-flex items-center mr-2">
+                  <el-tag size="small" type="primary">
+                    {{ item.property?.identifier || item.identifier }}
+                  </el-tag>
+                </div>
+                <!-- 数据类型标签 -->
+                <div class="inline-flex items-center mr-2">
+                  <el-tag size="small" type="info">
+                    {{ item.property?.dataType || item.dataType }}
+                  </el-tag>
+                </div>
+                <!-- 数据图标 - 可点击 -->
+                <div
+                  class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 transition-colors"
+                  @click="openDetail(props.device.id, item.property?.identifier || item.identifier)"
+                >
+                  <Icon icon="ep:data-line" class="text-[18px] text-[#0070ff]" />
+                </div>
+              </div>
+
+              <!-- 信息区域 -->
+              <div class="text-[14px]">
+                <div class="mb-2.5 last:mb-0">
+                  <span class="text-[#717c8e] mr-2.5">属性值</span>
+                  <span class="text-[#0b1d30] font-600">
+                    {{ item.value || '-' }}
+                  </span>
+                </div>
+                <div class="mb-2.5 last:mb-0">
+                  <span class="text-[#717c8e] mr-2.5">更新时间</span>
+                  <span class="text-[#0b1d30] text-[12px]">
+                    {{ dateFormatter(null, null, item.updateTime) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </template>
+
+    <!-- 列表视图 -->
+    <el-table v-else v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="属性标识符" align="center" prop="property.identifier" />
       <el-table-column label="属性名称" align="center" prop="property.name" />
       <el-table-column label="数据类型" align="center" prop="property.dataType" />
@@ -80,6 +163,7 @@ const queryParams = reactive({
 })
 const autoRefresh = ref(false) // 自动刷新开关
 let autoRefreshTimer: any = null // 定时器
+const viewMode = ref<'card' | 'list'>('card') // 视图模式状态
 
 const queryFormRef = ref() // 搜索的表单
 
