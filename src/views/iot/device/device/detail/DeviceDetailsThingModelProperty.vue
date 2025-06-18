@@ -50,7 +50,7 @@
       <el-row :gutter="16" v-loading="loading">
         <el-col
           v-for="item in list"
-          :key="item.property.identifier"
+          :key="item.identifier"
           :xs="24"
           :sm="12"
           :md="12"
@@ -72,25 +72,23 @@
                 <div class="mr-2.5 flex items-center">
                   <Icon icon="ep:cpu" class="text-[18px] text-[#0070ff]" />
                 </div>
-                <div class="text-[16px] font-600 flex-1">{{
-                  item.property?.name || item.name
-                }}</div>
+                <div class="text-[16px] font-600 flex-1">{{ item.name }}</div>
                 <!-- 标识符 -->
                 <div class="inline-flex items-center mr-2">
                   <el-tag size="small" type="primary">
-                    {{ item.property?.identifier || item.identifier }}
+                    {{ item.identifier }}
                   </el-tag>
                 </div>
                 <!-- 数据类型标签 -->
                 <div class="inline-flex items-center mr-2">
                   <el-tag size="small" type="info">
-                    {{ item.property?.dataType || item.dataType }}
+                    {{ item.dataType }}
                   </el-tag>
                 </div>
                 <!-- 数据图标 - 可点击 -->
                 <div
                   class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 transition-colors"
-                  @click="openDetail(props.device.id, item.property?.identifier || item.identifier)"
+                  @click="openDetail(props.device.id, item.identifier)"
                 >
                   <Icon icon="ep:data-line" class="text-[18px] text-[#0070ff]" />
                 </div>
@@ -107,7 +105,7 @@
                 <div class="mb-2.5 last:mb-0">
                   <span class="text-[#717c8e] mr-2.5">更新时间</span>
                   <span class="text-[#0b1d30] text-[12px]">
-                    {{ dateFormatter(null, null, item.updateTime) }}
+                    {{ item.updateTime ? formatDate(item.updateTime) : '-' }}
                   </span>
                 </div>
               </div>
@@ -119,9 +117,9 @@
 
     <!-- 列表视图 -->
     <el-table v-else v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="属性标识符" align="center" prop="property.identifier" />
-      <el-table-column label="属性名称" align="center" prop="property.name" />
-      <el-table-column label="数据类型" align="center" prop="property.dataType" />
+      <el-table-column label="属性标识符" align="center" prop="identifier" />
+      <el-table-column label="属性名称" align="center" prop="name" />
+      <el-table-column label="数据类型" align="center" prop="dataType" />
       <el-table-column label="属性值" align="center" prop="value" />
       <el-table-column
         label="更新时间"
@@ -132,11 +130,7 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openDetail(props.device.id, scope.row.property.identifier)"
-          >
+          <el-button link type="primary" @click="openDetail(props.device.id, scope.row.identifier)">
             查看数据
           </el-button>
         </template>
@@ -149,15 +143,15 @@
 </template>
 <script setup lang="ts">
 import { ProductVO } from '@/api/iot/product/product'
-import { DeviceApi, DeviceDataVO, DeviceVO } from '@/api/iot/device/device'
-import { dateFormatter } from '@/utils/formatTime'
+import { DeviceApi, IotDevicePropertyDetailRespVO, DeviceVO } from '@/api/iot/device/device'
+import { dateFormatter, formatDate } from '@/utils/formatTime'
 import DeviceDataDetail from './DeviceDataDetail.vue'
 
 const props = defineProps<{ product: ProductVO; device: DeviceVO }>()
 
 const loading = ref(true) // 列表的加载中
-const list = ref<DeviceDataVO[]>([]) // 显示的列表数据
-const allList = ref<DeviceDataVO[]>([]) // 完整的数据列表
+const list = ref<IotDevicePropertyDetailRespVO[]>([]) // 显示的列表数据
+const filterList = ref<IotDevicePropertyDetailRespVO[]>([]) // 完整的数据列表
 const queryParams = reactive({
   keyword: '' as string
 })
@@ -176,30 +170,30 @@ const getList = async () => {
       identifier: undefined as string | undefined,
       name: undefined as string | undefined
     }
-    allList.value = await DeviceApi.getLatestDeviceProperties(params)
-    filterData()
+    filterList.value = await DeviceApi.getLatestDeviceProperties(params)
+    handleFilter()
   } finally {
     loading.value = false
   }
 }
 
 /** 前端筛选数据 */
-const filterData = () => {
+const handleFilter = () => {
   if (!queryParams.keyword.trim()) {
-    list.value = allList.value
+    list.value = filterList.value
   } else {
     const keyword = queryParams.keyword.toLowerCase()
-    list.value = allList.value.filter(
+    list.value = filterList.value.filter(
       (item) =>
-        item.property?.identifier?.toLowerCase().includes(keyword) ||
-        item.property?.name?.toLowerCase().includes(keyword)
+        item.identifier?.toLowerCase().includes(keyword) ||
+        item.name?.toLowerCase().includes(keyword)
     )
   }
 }
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  filterData()
+  handleFilter()
 }
 
 /** 添加/修改操作 */

@@ -30,17 +30,15 @@ export interface DeviceVO {
   groupIds?: number[] // 添加分组 ID
 }
 
-// IoT 设备数据 VO
-export interface DeviceDataVO {
-  deviceId: number // 设备编号
-  thinkModelFunctionId: number // 物模型编号
-  productKey: string // 产品标识
-  deviceName: string // 设备名称
+// IoT 设备属性详细 VO
+export interface IotDevicePropertyDetailRespVO {
   identifier: string // 属性标识符
+  value: string // 最新值
+  updateTime: Date // 更新时间
   name: string // 属性名称
   dataType: string // 数据类型
-  updateTime: Date // 更新时间
-  value: string // 最新值
+  dataSpecs: any // 数据定义
+  dataSpecsList: any[] // 数据定义列表
 }
 
 // IoT 设备数据 VO
