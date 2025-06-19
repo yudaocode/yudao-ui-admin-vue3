@@ -88,7 +88,7 @@
                 <!-- 数据图标 - 可点击 -->
                 <div
                   class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 transition-colors"
-                  @click="openHistory(props.device.id, item.identifier)"
+                  @click="openHistory(props.deviceId, item.identifier)"
                 >
                   <Icon icon="ep:data-line" class="text-[18px] text-[#0070ff]" />
                 </div>
@@ -134,11 +134,7 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openHistory(props.device.id, scope.row.identifier)"
-          >
+          <el-button link type="primary" @click="openHistory(props.deviceId, scope.row.identifier)">
             查看数据
           </el-button>
         </template>
@@ -146,16 +142,15 @@
     </el-table>
 
     <!-- 表单弹窗：添加/修改 -->
-    <DeviceDetailsThingModelPropertyHistory ref="historyRef" :device="device" :product="product" />
+    <DeviceDetailsThingModelPropertyHistory ref="historyRef" :deviceId="props.deviceId" />
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import { ProductVO } from '@/api/iot/product/product'
-import { DeviceApi, IotDevicePropertyDetailRespVO, DeviceVO } from '@/api/iot/device/device'
+import { DeviceApi, IotDevicePropertyDetailRespVO } from '@/api/iot/device/device'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import DeviceDetailsThingModelPropertyHistory from './DeviceDetailsThingModelPropertyHistory.vue'
 
-const props = defineProps<{ product: ProductVO; device: DeviceVO }>()
+const props = defineProps<{ deviceId: number }>()
 
 const loading = ref(true) // 列表的加载中
 const list = ref<IotDevicePropertyDetailRespVO[]>([]) // 显示的列表数据
@@ -174,7 +169,7 @@ const getList = async () => {
   loading.value = true
   try {
     const params = {
-      deviceId: props.device.id,
+      deviceId: props.deviceId,
       identifier: undefined as string | undefined,
       name: undefined as string | undefined
     }

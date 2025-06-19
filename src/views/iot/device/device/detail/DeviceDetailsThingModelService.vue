@@ -7,10 +7,7 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import { ProductVO } from '@/api/iot/product/product'
-import { DeviceVO } from '@/api/iot/device/device'
-
-const props = defineProps<{ product: ProductVO; device: DeviceVO }>()
+const props = defineProps<{ deviceId: number }>()
 
 // TODO: 实现设备服务调用功能
 </script>

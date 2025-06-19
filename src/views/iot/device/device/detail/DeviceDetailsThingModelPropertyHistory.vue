@@ -64,12 +64,11 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DeviceApi, IotDevicePropertyRespVO, DeviceVO } from '@/api/iot/device/device'
-import { ProductVO } from '@/api/iot/product/product'
+import { DeviceApi, IotDevicePropertyRespVO } from '@/api/iot/device/device'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { Echart } from '@/components/Echart'
 
-defineProps<{ product: ProductVO; device: DeviceVO }>()
+defineProps<{ deviceId: number }>()
 
 /** IoT 设备属性历史数据详情 */
 defineOptions({ name: 'DeviceDetailsThingModelPropertyHistory' })

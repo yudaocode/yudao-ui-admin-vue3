@@ -171,6 +171,7 @@ const dataTypeOptionsLabel = computed(() => (value: string) => getDataTypeOption
 
 /** 查询物模型列表 */
 // TODO @super：getThingModelList 更精准
+// TODO @haohao：目前 index.vue 已经有了 thingModels，可以考虑服用下；
 const getList = async () => {
   loading.value = true
   try {
