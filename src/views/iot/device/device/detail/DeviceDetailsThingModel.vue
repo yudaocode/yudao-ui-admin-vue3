@@ -12,7 +12,10 @@
         />
       </el-tab-pane>
       <el-tab-pane label="设备服务调用" name="service">
-        <DeviceDetailsThingModelService :device-id="deviceId" />
+        <DeviceDetailsThingModelService
+          :device-id="deviceId"
+          :thing-model-list="props.thingModelList"
+        />
       </el-tab-pane>
     </el-tabs>
   </ContentWrap>

@@ -54,21 +54,19 @@
   <ContentWrap>
     <!-- 事件列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="时间" align="center" prop="reportTime" width="180px">
+      <el-table-column label="上报时间" align="center" prop="reportTime" width="180px">
         <template #default="scope">
-          {{
-            scope.row.request?.reportTime ? formatDate(new Date(scope.row.request.reportTime)) : '-'
-          }}
+          {{ scope.row.request?.reportTime ? formatDate(scope.row.request.reportTime) : '-' }}
         </template>
       </el-table-column>
-      <el-table-column label="标识符" align="center" prop="identifier" width="120px">
+      <el-table-column label="标识符" align="center" prop="identifier" width="160px">
         <template #default="scope">
           <el-tag type="primary" size="small">
             {{ scope.row.request?.identifier }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="事件名称" align="center" prop="eventName" width="150px">
+      <el-table-column label="事件名称" align="center" prop="eventName" width="160px">
         <template #default="scope">
           {{ getEventName(scope.row.request?.identifier) }}
         </template>

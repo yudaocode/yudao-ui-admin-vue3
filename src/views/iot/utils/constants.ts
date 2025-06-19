@@ -36,5 +36,12 @@ export const IotDeviceMessageMethodEnum = {
     method: 'thing.event.post',
     name: '事件上报',
     upstream: true
+  },
+
+  // ========== 服务调用 ==========
+  SERVICE_INVOKE: {
+    method: 'thing.service.invoke',
+    name: '服务调用',
+    upstream: false
   }
 }
