@@ -43,5 +43,12 @@ export const IotDeviceMessageMethodEnum = {
     method: 'thing.service.invoke',
     name: '服务调用',
     upstream: false
+  },
+
+  // ========== 设备配置 ==========
+  CONFIG_PUSH: {
+    method: 'thing.config.push',
+    name: '配置推送',
+    upstream: false
   }
 }

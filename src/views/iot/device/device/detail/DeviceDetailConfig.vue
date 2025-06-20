@@ -20,13 +20,16 @@
         保存
       </el-button>
       <el-button v-else @click="enableEdit">编辑</el-button>
-      <!-- TODO @芋艿：缺一个下发按钮 -->
+      <el-button v-if="!isEditing" type="success" @click="handleConfigPush" :loading="pushLoading">
+        配置推送
+      </el-button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
+import { IotDeviceMessageMethodEnum } from '@/views/iot/utils/constants'
 import { jsonParse } from '@/utils'
 import { isEmpty } from '@/utils/is'
 
@@ -42,6 +45,7 @@ const emit = defineEmits<{
 
 const message = useMessage()
 const loading = ref(false) // 加载中
+const pushLoading = ref(false) // 推送加载中
 const config = ref<any>({}) // 只存储 config 字段
 const hasJsonError = ref(false) // 是否有 JSON 格式错误
 
@@ -72,6 +76,32 @@ const saveConfig = async () => {
   }
   await updateDeviceConfig()
   isEditing.value = false
+}
+
+/** 配置推送处理函数 */
+const handleConfigPush = async () => {
+  try {
+    // 二次确认
+    await message.confirm('确定要推送配置到设备吗？此操作将远程更新设备配置。', '配置推送确认')
+
+    pushLoading.value = true
+
+    // 调用配置推送接口
+    await DeviceApi.sendDeviceMessage({
+      deviceId: props.device.id,
+      method: IotDeviceMessageMethodEnum.CONFIG_PUSH.method,
+      params: config.value
+    })
+
+    message.success('配置推送成功！')
+  } catch (error) {
+    if (error !== 'cancel') {
+      message.error('配置推送失败！')
+      console.error('配置推送错误:', error)
+    }
+  } finally {
+    pushLoading.value = false
+  }
 }
 
 /** 更新设备配置 */
