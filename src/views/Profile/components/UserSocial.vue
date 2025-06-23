@@ -21,87 +21,92 @@
     </el-table-column>
   </el-table>
 </template>
+
 <script lang="ts" setup>
 import { SystemUserSocialTypeEnum } from '@/utils/constants'
 import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
-import { socialAuthRedirect, socialBind, socialUnbind } from '@/api/system/user/socialUser'
+import { getBindList, socialAuthRedirect, socialBind, socialUnbind } from '@/api/system/user/socialUser'
+import { useRoute } from 'vue-router'
 
 defineOptions({ name: 'UserSocial' })
-defineProps<{
-  activeName: string
-}>()
+
+defineProps<{ activeName: string }>()
+const emit = defineEmits<{ (e: 'update:activeName', v: string): void }>()
 const message = useMessage()
+const route = useRoute()
+
 const socialUsers = ref<any[]>([])
 const userInfo = ref<ProfileVO>()
 
+/** 获取并初始化社交账号列表 */
 const initSocial = async () => {
-  socialUsers.value = [] // 重置避免无限增长
-  const res = await getUserProfile()
-  userInfo.value = res
-  for (const i in SystemUserSocialTypeEnum) {
-    const socialUser = { ...SystemUserSocialTypeEnum[i] }
-    socialUsers.value.push(socialUser)
-    if (userInfo.value?.socialUsers) {
-      for (const j in userInfo.value.socialUsers) {
-        if (socialUser.type === userInfo.value.socialUsers[j].type) {
-          socialUser.openid = userInfo.value.socialUsers[j].openid
-          break
-        }
+  try {
+    userInfo.value = await getUserProfile()
+    const bindedList = await getBindList()
+
+    const existingSocialUsers = bindedList ?? []
+    socialUsers.value = Object.values(SystemUserSocialTypeEnum).map((socialType) => {
+      const match = existingSocialUsers.find((item) => item.type === socialType.type)
+      return {
+        ...socialType,
+        openid: match?.openid,
       }
-    }
+    })
+  } catch (e) {
+    message.error('获取社交账号列表失败，请稍后重试')
+    console.error('[initSocial error]', e)
   }
-}
-const route = useRoute()
-const emit = defineEmits<{
-  (e: 'update:activeName', v: string): void
-}>()
-const bindSocial = () => {
-  // 社交绑定
-  const type = getUrlValue('type')
-  const code = route.query.code
-  const state = route.query.state
-  if (!code) {
-    return
-  }
-  socialBind(type, code, state).then(() => {
-    message.success('绑定成功')
-    emit('update:activeName', 'userSocial')
-  })
 }
 
-// 双层 encode 需要在回调后进行 decode
+/** 检查是否是登录回调，并进行绑定 */
+const handleBindCallback = async () => {
+  const { code, state } = route.query
+  const type = getUrlValue('type')
+  if (!code || !type) return
+  try {
+    await socialBind(type, code as string, state as string)
+    message.success('绑定成功')
+    emit('update:activeName', 'userSocial')
+    await initSocial()
+  } catch (error) {
+    message.error('绑定失败，请稍后重试')
+  }
+}
+
+/** 获取 URL 中参数值 */
 function getUrlValue(key: string): string {
   const url = new URL(decodeURIComponent(location.href))
   return url.searchParams.get(key) ?? ''
 }
 
-const bind = (row) => {
-  // 双层 encode 解决钉钉回调 type 参数丢失的问题
+/** 跳转到第三方授权页面 */
+const bind = async (row: any) => {
   const redirectUri = location.origin + '/user/profile?' + encodeURIComponent(`type=${row.type}`)
-  // 进行跳转
-  socialAuthRedirect(row.type, encodeURIComponent(redirectUri)).then((res) => {
-    window.location.href = res
-  })
-}
-const unbind = async (row) => {
-  const res = await socialUnbind(row.type, row.openid)
-  if (res) {
-    row.openid = undefined
+  try {
+    const authUrl = await socialAuthRedirect(row.type, encodeURIComponent(redirectUri))
+    window.location.href = authUrl
+  } catch (error) {
+    message.error('获取授权链接失败，请稍后重试')
   }
-  message.success('解绑成功')
 }
 
-onMounted(async () => {
-  await initSocial()
-})
+/** 执行解绑 */
+const unbind = async (row: any) => {
+  try {
+    const res = await socialUnbind(row.type, row.openid)
+    if (res) {
+      row.openid = undefined
+      message.success('解绑成功')
+    }
+  } catch (error) {
+    message.error('解绑失败，请稍后重试')
+  }
+}
 
+onMounted(initSocial)
 watch(
-  () => route,
-  () => {
-    bindSocial()
-  },
-  {
-    immediate: true
-  }
+  () => route.query,
+  handleBindCallback,
+  { immediate: true }
 )
 </script>
