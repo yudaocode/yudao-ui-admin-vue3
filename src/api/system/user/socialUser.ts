@@ -23,9 +23,19 @@ export const socialUnbind = (type, openid) => {
   })
 }
 
+
+
+// 获取绑定的social
+export const getBindList = () => {
+  return request.get({
+    url: '/system/social-user/get-bind-list'
+  })
+}
+
 // 社交授权的跳转
 export const socialAuthRedirect = (type, redirectUri) => {
   return request.get({
     url: '/system/auth/social-auth-redirect?type=' + type + '&redirectUri=' + redirectUri
   })
 }
+
