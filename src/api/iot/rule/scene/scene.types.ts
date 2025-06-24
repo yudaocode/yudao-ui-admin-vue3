@@ -104,7 +104,7 @@ interface ActionConfig {
   type: number // 执行类型
   deviceControl?: ActionDeviceControl // 设备控制
   alert?: ActionAlert // 告警执行
-  dataBridgeId?: number // 数据桥接编号
+  dataBridgeId?: number // 数据流转目的编号
 }
 
 // 主接口

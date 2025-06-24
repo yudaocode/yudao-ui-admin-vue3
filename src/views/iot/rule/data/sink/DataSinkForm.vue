@@ -7,50 +7,38 @@
       :rules="formRules"
       label-width="120px"
     >
-      <el-form-item label="桥梁名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入桥梁名称" />
+      <el-form-item label="目的名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入目的名称" />
       </el-form-item>
-      <el-form-item label="桥梁方向" prop="direction">
-        <el-radio-group v-model="formData.direction">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DATA_BRIDGE_DIRECTION_ENUM)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
+      <el-form-item label="目的类型" prop="type">
+        <el-select v-model="formData.type">
+          <el-option
+            v-for="item in getIntDictOptions(DICT_TYPE.IOT_DATA_SINK_TYPE_ENUM)"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="桥梁类型" prop="type">
-        <el-radio-group :model-value="formData.type" @change="handleTypeChange">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <HttpConfigForm v-if="showConfig(IoTDataBridgeConfigType.HTTP)" v-model="formData.config" />
-      <MqttConfigForm v-if="showConfig(IoTDataBridgeConfigType.MQTT)" v-model="formData.config" />
+      <HttpConfigForm v-if="IotDataSinkTypeEnum.HTTP === formData.type" v-model="formData.config" />
+      <MqttConfigForm v-if="IotDataSinkTypeEnum.MQTT === formData.type" v-model="formData.config" />
       <RocketMQConfigForm
-        v-if="showConfig(IoTDataBridgeConfigType.ROCKETMQ)"
+        v-if="IotDataSinkTypeEnum.ROCKETMQ === formData.type"
         v-model="formData.config"
       />
       <KafkaMQConfigForm
-        v-if="showConfig(IoTDataBridgeConfigType.KAFKA)"
+        v-if="IotDataSinkTypeEnum.KAFKA === formData.type"
         v-model="formData.config"
       />
       <RabbitMQConfigForm
-        v-if="showConfig(IoTDataBridgeConfigType.RABBITMQ)"
+        v-if="IotDataSinkTypeEnum.RABBITMQ === formData.type"
         v-model="formData.config"
       />
       <RedisStreamConfigForm
-        v-if="showConfig(IoTDataBridgeConfigType.REDIS_STREAM)"
+        v-if="IotDataSinkTypeEnum.REDIS_STREAM === formData.type"
         v-model="formData.config"
       />
-      <el-form-item label="桥梁状态" prop="status">
+      <el-form-item label="目的状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -61,7 +49,7 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="桥梁描述" prop="description">
+      <el-form-item label="目的描述" prop="description">
         <el-input v-model="formData.description" height="150px" type="textarea" />
       </el-form-item>
     </el-form>
@@ -74,12 +62,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getDictObj, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import {
-  DataBridgeApi,
-  DataBridgeVO,
-  IoTDataBridgeConfigType,
-  IotDataBridgeDirectionEnum
-} from '@/api/iot/rule/databridge'
+import { DataSinkApi, DataSinkVO, IotDataSinkTypeEnum } from '@/api/iot/rule/data/sink'
 import {
   HttpConfigForm,
   KafkaMQConfigForm,
@@ -89,8 +72,8 @@ import {
   RocketMQConfigForm
 } from './config'
 
-/** IoT 数据桥梁的表单 */
-defineOptions({ name: 'IoTDataBridgeForm' })
+/** IoT 数据流转目的的表单 */
+defineOptions({ name: 'IoTDataSinkForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -99,25 +82,23 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref<DataBridgeVO>({
+const formData = ref<DataSinkVO>({
   status: CommonStatusEnum.ENABLE,
-  direction: IotDataBridgeDirectionEnum.INPUT,
-  type: IoTDataBridgeConfigType.HTTP,
+  type: IotDataSinkTypeEnum.HTTP,
   config: {} as any
 })
 const formRules = reactive({
   // 通用字段
-  name: [{ required: true, message: '桥梁名称不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '桥梁状态不能为空', trigger: 'blur' }],
-  direction: [{ required: true, message: '桥梁方向不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '桥梁类型不能为空', trigger: 'change' }],
+  name: [{ required: true, message: '目的名称不能为空', trigger: 'blur' }],
+  status: [{ required: true, message: '目的状态不能为空', trigger: 'blur' }],
+  type: [{ required: true, message: '目的类型不能为空', trigger: 'change' }],
   // HTTP 配置
   'config.url': [{ required: true, message: '请求地址不能为空', trigger: 'blur' }],
   'config.method': [{ required: true, message: '请求方法不能为空', trigger: 'blur' }],
   // MQTT 配置
   'config.username': [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
   'config.password': [{ required: true, message: '密码不能为空', trigger: 'blur' }],
-  'config.clientId': [{ required: true, message: '客户端ID不能为空', trigger: 'blur' }],
+  'config.clientId': [{ required: true, message: '客户端 ID 不能为空', trigger: 'blur' }],
   'config.topic': [{ required: true, message: '主题不能为空', trigger: 'blur' }],
   // RocketMQ 配置
   'config.nameServer': [{ required: true, message: 'NameServer 地址不能为空', trigger: 'blur' }],
@@ -146,7 +127,7 @@ const formRules = reactive({
 
 const formRef = ref() // 表单 Ref
 const showConfig = computed(() => (val: number) => {
-  const dict = getDictObj(DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM, formData.value.type)
+  const dict = getDictObj(DICT_TYPE.IOT_DATA_SINK_TYPE_ENUM, formData.value.type)
   return dict && dict.value + '' === val + ''
 }) // 显示对应的 Config 配置项
 
@@ -160,7 +141,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await DataBridgeApi.getDataBridge(id)
+      formData.value = await DataSinkApi.getDataSink(id)
     } finally {
       formLoading.value = false
     }
@@ -176,12 +157,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as DataBridgeVO
+    const data = formData.value as unknown as DataSinkVO
     if (formType.value === 'create') {
-      await DataBridgeApi.createDataBridge(data)
+      await DataSinkApi.createDataSink(data)
       message.success(t('common.createSuccess'))
     } else {
-      await DataBridgeApi.updateDataBridge(data)
+      await DataSinkApi.updateDataSink(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -203,8 +184,7 @@ const handleTypeChange = (val: number) => {
 const resetForm = () => {
   formData.value = {
     status: CommonStatusEnum.ENABLE,
-    direction: IotDataBridgeDirectionEnum.INPUT,
-    type: IoTDataBridgeConfigType.HTTP,
+    type: IotDataSinkTypeEnum.HTTP,
     config: {} as any
   }
   formRef.value?.resetFields()

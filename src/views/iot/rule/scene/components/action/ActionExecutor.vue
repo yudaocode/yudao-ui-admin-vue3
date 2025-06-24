@@ -61,7 +61,7 @@
         @update:model-value="(val) => (actionConfig.alert = val)"
       />
 
-      <!-- 数据桥接执行器 -->
+      <!-- 数据流转目的执行器 -->
       <DataBridgeAction
         v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.DATA_BRIDGE"
         :model-value="actionConfig.dataBridgeId"
@@ -134,7 +134,7 @@ const initActionConfig = () => {
     actionConfig.value.alert = {} as ActionAlert
   }
 
-  // 数据桥接执行器初始化
+  // 数据流转目的执行器初始化
   if (
     actionConfig.value.type === IotRuleSceneActionTypeEnum.DATA_BRIDGE &&
     !actionConfig.value.dataBridgeId

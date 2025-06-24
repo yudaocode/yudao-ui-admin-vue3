@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { HttpConfig, IoTDataBridgeConfigType } from '@/api/iot/rule/databridge'
+import { HttpConfig, IotDataSinkTypeEnum } from '@/api/iot/rule/data/sink'
 import { useVModel } from '@vueuse/core'
 import { isEmpty } from '@/utils/is'
 import KeyValueEditor from './components/KeyValueEditor.vue'
@@ -73,7 +73,7 @@ onMounted(() => {
   }
 
   config.value = {
-    type: IoTDataBridgeConfigType.HTTP + '', // 序列化成对应类型时使用
+    type: IotDataSinkTypeEnum.HTTP + '', // 序列化成对应类型时使用
     url: '',
     method: 'POST',
     headers: {},

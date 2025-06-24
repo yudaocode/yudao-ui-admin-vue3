@@ -237,8 +237,7 @@ export enum DICT_TYPE {
   IOT_THING_MODEL_TYPE = 'iot_thing_model_type', // IOT 产品功能类型
   IOT_THING_MODEL_UNIT = 'iot_thing_model_unit', // IOT 物模型单位
   IOT_RW_TYPE = 'iot_rw_type', // IOT 读写类型
-  IOT_DATA_BRIDGE_DIRECTION_ENUM = 'iot_data_bridge_direction_enum', // 桥梁方向
-  IOT_DATA_BRIDGE_TYPE_ENUM = 'iot_data_bridge_type_enum', // 桥梁类型
+  IOT_DATA_SINK_TYPE_ENUM = 'iot_data_sink_type_enum', // IoT 数据流转目的类型
   IOT_RULE_SCENE_TRIGGER_TYPE_ENUM = 'iot_rule_scene_trigger_type_enum', // IoT 场景流转的触发类型枚举
   IOT_RULE_SCENE_ACTION_TYPE_ENUM = 'iot_rule_scene_action_type_enum' // IoT 规则场景的触发类型枚举
 }

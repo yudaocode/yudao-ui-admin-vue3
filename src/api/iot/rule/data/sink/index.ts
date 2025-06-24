@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
-// IoT 数据桥梁 VO
-export interface DataBridgeVO {
+// IoT 数据流转目的 VO
+export interface DataSinkVO {
   id?: number // 桥梁编号
   name?: string // 桥梁名称
   description?: string // 桥梁描述
@@ -79,8 +79,8 @@ export interface RedisStreamMQConfig extends Config {
   topic: string
 }
 
-/** 数据桥梁类型 */
-export const IoTDataBridgeConfigType = {
+/** 数据流转目的类型 */
+export const IotDataSinkTypeEnum = {
   HTTP: 1,
   TCP: 2,
   WEBSOCKET: 3,
@@ -92,41 +92,35 @@ export const IoTDataBridgeConfigType = {
   KAFKA: 32
 } as const
 
-export const IotDataBridgeDirectionEnum = {
-  INPUT: 1, // 输入
-  OUTPUT: 2 // 输出
-} as const
-
-// 数据桥梁 API
-export const DataBridgeApi = {
-  // 查询数据桥梁分页
-  getDataBridgePage: async (params: any) => {
-    return await request.get({ url: `/iot/data-bridge/page`, params })
+// 数据流转目的 API
+export const DataSinkApi = {
+  // 查询数据流转目的分页
+  getDataSinkPage: async (params: any) => {
+    return await request.get({ url: `/iot/data-sink/page`, params })
   },
 
-  // 查询数据桥梁详情
-  getDataBridge: async (id: number) => {
-    return await request.get({ url: `/iot/data-bridge/get?id=` + id })
+  // 查询数据流转目的详情
+  getDataSink: async (id: number) => {
+    return await request.get({ url: `/iot/data-sink/get?id=` + id })
   },
 
-  // 新增数据桥梁
-  createDataBridge: async (data: DataBridgeVO) => {
-    return await request.post({ url: `/iot/data-bridge/create`, data })
+  // 新增数据流转目的
+  createDataSink: async (data: DataSinkVO) => {
+    return await request.post({ url: `/iot/data-sink/create`, data })
   },
 
-  // 修改数据桥梁
-  updateDataBridge: async (data: DataBridgeVO) => {
-    return await request.put({ url: `/iot/data-bridge/update`, data })
+  // 修改数据流转目的
+  updateDataSink: async (data: DataSinkVO) => {
+    return await request.put({ url: `/iot/data-sink/update`, data })
   },
 
-  // 删除数据桥梁
-  deleteDataBridge: async (id: number) => {
-    return await request.delete({ url: `/iot/data-bridge/delete?id=` + id })
+  // 删除数据流转目的
+  deleteDataSink: async (id: number) => {
+    return await request.delete({ url: `/iot/data-sink/delete?id=` + id })
   },
 
-  // 查询数据桥梁（精简）列表
-  // TODO @puhui999：getDataBridgeSimpleList 哈。项目的风格统一~ 之前有几个，我写错了。。。
-  getSimpleDataBridgeList() {
-    return request.get({ url: '/iot/data-bridge/simple-list' })
+  // 查询数据流转目的（精简）列表
+  getDataSinkSimpleList() {
+    return request.get({ url: '/iot/data-sink/simple-list' })
   }
 }

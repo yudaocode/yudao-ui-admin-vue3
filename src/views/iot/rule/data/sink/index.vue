@@ -8,21 +8,21 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="桥梁名称" prop="name">
+      <el-form-item label="目的名称" prop="name">
         <el-input
           v-model="queryParams.name"
           class="!w-240px"
           clearable
-          placeholder="请输入桥梁名称"
+          placeholder="请输入目的名称"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="桥梁状态" prop="status">
+      <el-form-item label="目的状态" prop="status">
         <el-select
           v-model="queryParams.status"
           class="!w-240px"
           clearable
-          placeholder="请选择桥梁状态"
+          placeholder="请选择目的状态"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -32,30 +32,15 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="桥梁方向" prop="direction">
-        <el-select
-          v-model="queryParams.direction"
-          class="!w-240px"
-          clearable
-          placeholder="请选择桥梁方向"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DATA_BRIDGE_DIRECTION_ENUM)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="桥梁类型" prop="type">
+      <el-form-item label="目的类型" prop="type">
         <el-select
           v-model="queryParams.type"
           class="!w-240px"
           clearable
-          placeholder="请选择桥梁类型"
+          placeholder="请选择目的类型"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DATA_SINK_TYPE_ENUM)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -83,7 +68,7 @@
           重置
         </el-button>
         <el-button
-          v-hasPermi="['iot:data-bridge:create']"
+          v-hasPermi="['iot:data-sink:create']"
           plain
           type="primary"
           @click="openForm('create')"
@@ -98,22 +83,17 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="桥梁编号" prop="id" />
-      <el-table-column align="center" label="桥梁名称" prop="name" />
-      <el-table-column align="center" label="桥梁描述" prop="description" />
-      <el-table-column align="center" label="桥梁状态" prop="status">
+      <el-table-column align="center" label="目的编号" prop="id" />
+      <el-table-column align="center" label="目的名称" prop="name" />
+      <el-table-column align="center" label="目的描述" prop="description" />
+      <el-table-column align="center" label="目的状态" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="桥梁方向" prop="direction">
+      <el-table-column align="center" label="目的类型" prop="type">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_DATA_BRIDGE_DIRECTION_ENUM" :value="scope.row.direction" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="桥梁类型" prop="type">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_DATA_BRIDGE_TYPE_ENUM" :value="scope.row.type" />
+          <dict-tag :type="DICT_TYPE.IOT_DATA_SINK_TYPE_ENUM" :value="scope.row.type" />
         </template>
       </el-table-column>
       <el-table-column
@@ -126,7 +106,7 @@
       <el-table-column align="center" fixed="right" label="操作" width="120px">
         <template #default="scope">
           <el-button
-            v-hasPermi="['iot:data-bridge:update']"
+            v-hasPermi="['iot:data-sink:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
@@ -134,7 +114,7 @@
             编辑
           </el-button>
           <el-button
-            v-hasPermi="['iot:data-bridge:delete']"
+            v-hasPermi="['iot:data-sink:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
@@ -154,31 +134,29 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <DataBridgeForm ref="formRef" @success="getList" />
+  <DataSinkForm ref="formRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { DataBridgeApi, DataBridgeVO } from '@/api/iot/rule/databridge'
-import DataBridgeForm from './IoTDataBridgeForm.vue'
+import { DataSinkApi, DataSinkVO } from '@/api/iot/rule/data/sink'
+import DataSinkForm from './DataSinkForm.vue'
 
-/** IoT 数据桥梁 列表 */
-defineOptions({ name: 'IotDataBridge' })
+/** IoT 数据流转目的 列表 */
+defineOptions({ name: 'IotDataSink' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<DataBridgeVO[]>([]) // 列表的数据
+const list = ref<DataSinkVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: undefined,
-  description: undefined,
   status: undefined,
-  direction: undefined,
   type: undefined,
   createTime: []
 })
@@ -188,7 +166,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await DataBridgeApi.getDataBridgePage(queryParams)
+    const data = await DataSinkApi.getDataSinkPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -220,7 +198,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await DataBridgeApi.deleteDataBridge(id)
+    await DataSinkApi.deleteDataBridge(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

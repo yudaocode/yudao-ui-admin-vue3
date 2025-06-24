@@ -27,7 +27,7 @@
   </el-form-item>
 </template>
 <script lang="ts" setup>
-import { IoTDataBridgeConfigType, RocketMQConfig } from '@/api/iot/rule/databridge'
+import { IotDataSinkTypeEnum, RocketMQConfig } from '@/api/iot/rule/data/sink'
 import { useVModel } from '@vueuse/core'
 import { isEmpty } from '@/utils/is'
 
@@ -45,7 +45,7 @@ onMounted(() => {
     return
   }
   config.value = {
-    type: IoTDataBridgeConfigType.ROCKETMQ + '', // 序列化成对应类型时使用
+    type: IotDataSinkTypeEnum.ROCKETMQ + '', // 序列化成对应类型时使用
     nameServer: '',
     accessKey: '',
     secretKey: '',

@@ -28,7 +28,7 @@
   </el-form-item>
 </template>
 <script lang="ts" setup>
-import { IoTDataBridgeConfigType, RedisStreamMQConfig } from '@/api/iot/rule/databridge'
+import { IotDataSinkTypeEnum, RedisStreamMQConfig } from '@/api/iot/rule/data/sink'
 import { useVModel } from '@vueuse/core'
 import { isEmpty } from '@/utils/is'
 
@@ -46,7 +46,7 @@ onMounted(() => {
     return
   }
   config.value = {
-    type: IoTDataBridgeConfigType.REDIS_STREAM + '', // 序列化成对应类型时使用
+    type: IotDataSinkTypeEnum.REDIS_STREAM + '', // 序列化成对应类型时使用
     host: '',
     port: 6379,
     password: '',

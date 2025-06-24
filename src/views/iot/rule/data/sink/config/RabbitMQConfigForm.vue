@@ -31,7 +31,7 @@
   </el-form-item>
 </template>
 <script lang="ts" setup>
-import { IoTDataBridgeConfigType, RabbitMQConfig } from '@/api/iot/rule/databridge'
+import { IotDataSinkTypeEnum, RabbitMQConfig } from '@/api/iot/rule/data/sink'
 import { useVModel } from '@vueuse/core'
 import { isEmpty } from '@/utils/is'
 
@@ -49,7 +49,7 @@ onMounted(() => {
     return
   }
   config.value = {
-    type: IoTDataBridgeConfigType.RABBITMQ + '', // 序列化成对应类型时使用
+    type: IotDataSinkTypeEnum.RABBITMQ + '', // 序列化成对应类型时使用
     host: '',
     port: 5672,
     virtualHost: '/',
