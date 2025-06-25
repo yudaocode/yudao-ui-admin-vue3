@@ -10,8 +10,11 @@
       <el-form-item label="目的名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入目的名称" />
       </el-form-item>
+      <el-form-item label="目的描述" prop="description">
+        <el-input v-model="formData.description" height="150px" type="textarea" />
+      </el-form-item>
       <el-form-item label="目的类型" prop="type">
-        <el-select v-model="formData.type">
+        <el-select v-model="formData.type" @change="handleTypeChange">
           <el-option
             v-for="item in getIntDictOptions(DICT_TYPE.IOT_DATA_SINK_TYPE_ENUM)"
             :key="item.value"
@@ -49,9 +52,6 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="目的描述" prop="description">
-        <el-input v-model="formData.description" height="150px" type="textarea" />
-      </el-form-item>
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -60,7 +60,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import { DICT_TYPE, getDictObj, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { DataSinkApi, DataSinkVO, IotDataSinkTypeEnum } from '@/api/iot/rule/data/sink'
 import {
@@ -126,10 +126,6 @@ const formRules = reactive({
 })
 
 const formRef = ref() // 表单 Ref
-const showConfig = computed(() => (val: number) => {
-  const dict = getDictObj(DICT_TYPE.IOT_DATA_SINK_TYPE_ENUM, formData.value.type)
-  return dict && dict.value + '' === val + ''
-}) // 显示对应的 Config 配置项
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -174,8 +170,8 @@ const submitForm = async () => {
 }
 
 /** 处理类型切换事件 */
-const handleTypeChange = (val: number) => {
-  formData.value.type = val
+const handleTypeChange = (type: number) => {
+  formData.value.type = type
   // 切换类型时重置配置
   formData.value.config = {} as any
 }

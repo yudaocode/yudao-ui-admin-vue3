@@ -8,19 +8,19 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="场景名称" prop="name">
+      <el-form-item label="规则名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入场景名称"
+          placeholder="请输入规则名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="场景状态" prop="status">
+      <el-form-item label="规则状态" prop="status">
         <el-select
           v-model="queryParams.status"
-          placeholder="请选择场景状态"
+          placeholder="请选择规则状态"
           clearable
           class="!w-240px"
         >
@@ -68,10 +68,10 @@
       :show-overflow-tooltip="true"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column label="场景编号" align="center" prop="id" />
-      <el-table-column label="场景名称" align="center" prop="name" />
-      <el-table-column label="场景描述" align="center" prop="description" />
-      <el-table-column label="场景状态" align="center" prop="status">
+      <el-table-column label="规则编号" align="center" prop="id" />
+      <el-table-column label="规则名称" align="center" prop="name" />
+      <el-table-column label="规则描述" align="center" prop="description" />
+      <el-table-column label="规则状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>

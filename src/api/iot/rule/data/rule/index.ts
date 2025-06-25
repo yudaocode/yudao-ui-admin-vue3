@@ -6,8 +6,8 @@ export interface DataRule {
   name?: string // 场景名称
   description: string // 场景描述
   status?: number // 场景状态
-  sourceConfigs?: string // 数据源配置数组
-  sinkIds?: string // 数据目的编号数组
+  sourceConfigs?: any[] // 数据源配置数组
+  sinkIds?: number[] // 数据目的编号数组
 }
 
 // IoT 数据流转规则 API
