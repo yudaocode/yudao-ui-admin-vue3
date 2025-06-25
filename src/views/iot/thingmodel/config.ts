@@ -55,6 +55,7 @@ export const getDataTypeOptionsLabel = (value: string) => {
   return dataType && `${dataType.value}(${dataType.label})`
 }
 
+// TODO @puhui999：使用 ThingModelTypeEnum 替换
 // IOT 产品物模型类型枚举类
 export const ThingModelType = {
   PROPERTY: 1, // 属性

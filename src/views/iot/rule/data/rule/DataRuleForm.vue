@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="860">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="870">
     <el-form
       ref="formRef"
       :model="formData"
@@ -78,7 +78,7 @@ const formData = ref({
 const formRules = reactive({
   name: [{ required: true, message: '规则名称不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '规则状态不能为空', trigger: 'blur' }],
-  // sourceConfigs: [{ required: true, message: '数据源配置数组不能为空', trigger: 'blur' }],
+  sourceConfigs: [{ required: true, message: '数据源配置数组不能为空', trigger: 'blur' }],
   sinkIds: [{ required: true, message: '数据目的编号数组不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
@@ -115,16 +115,16 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  // 校验表单
-  await formRef.value.validate()
   // 校验数据源配置
   await sourceConfigRef.value?.validate()
+  formData.value.sourceConfigs = sourceConfigRef.value?.getData() || []
+  // 校验表单
+  await formRef.value.validate()
 
   // 提交请求
   formLoading.value = true
   try {
     const data = { ...formData.value } as unknown as DataRule
-    data.sourceConfigs = sourceConfigRef.value?.getData() || []
     if (formType.value === 'create') {
       await DataRuleApi.createDataRule(data)
       message.success(t('common.createSuccess'))
@@ -141,7 +141,7 @@ const submitForm = async () => {
 }
 
 /** 重置表单 */
-const resetForm = () => {
+const resetForm = async () => {
   formData.value = {
     id: undefined,
     name: undefined,
@@ -152,8 +152,7 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
   // 重置数据源配置
-  nextTick(() => {
-    sourceConfigRef.value?.setData([])
-  })
+  await nextTick()
+  sourceConfigRef.value?.setData([])
 }
 </script>

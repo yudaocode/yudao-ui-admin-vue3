@@ -198,7 +198,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await DataSinkApi.deleteDataBridge(id)
+    await DataSinkApi.deleteDataSink(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

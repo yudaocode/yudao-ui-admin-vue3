@@ -76,8 +76,12 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="数据源配置数组" align="center" prop="sourceConfigs" />
-      <el-table-column label="数据目的编号数组" align="center" prop="sinkIds" />
+      <el-table-column label="数据源" align="center" prop="sourceConfigs">
+        <template #default="scope"> {{ scope.row.sourceConfigs?.length || 0 }} 个 </template>
+      </el-table-column>
+      <el-table-column label="数据目的" align="center" prop="sinkIds">
+        <template #default="scope"> {{ scope.row.sinkIds?.length || 0 }} 个 </template>
+      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
@@ -142,7 +146,6 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {

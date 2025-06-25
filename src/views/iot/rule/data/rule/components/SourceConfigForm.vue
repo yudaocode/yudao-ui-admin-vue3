@@ -15,6 +15,7 @@
               placeholder="请选择产品"
               @change="handleProductChange(row, $index)"
               clearable
+              filterable
               style="width: 100%"
             >
               <el-option
@@ -33,10 +34,11 @@
             <el-select
               v-model="row.deviceId"
               placeholder="请选择设备"
-              @change="handleDeviceChange(row, $index)"
               clearable
+              filterable
               style="width: 100%"
             >
+              <el-option label="全部设备" :value="0" />
               <el-option
                 v-for="device in getFilteredDevices(row.productId)"
                 :key="device.id"
@@ -47,14 +49,15 @@
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="消息方法" min-width="180">
+      <el-table-column label="消息" min-width="150">
         <template #default="{ row, $index }">
           <el-form-item :prop="`${$index}.method`" :rules="formRules.method" class="mb-0px!">
             <el-select
               v-model="row.method"
-              placeholder="请选择消息方法"
+              placeholder="请选择消息"
               @change="handleMethodChange(row, $index)"
               clearable
+              filterable
               style="width: 100%"
             >
               <el-option
@@ -67,7 +70,7 @@
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="标识符" min-width="150">
+      <el-table-column label="标识符" min-width="200">
         <template #default="{ row, $index }">
           <el-form-item :prop="`${$index}.identifier`" class="mb-0px!">
             <el-select
@@ -75,6 +78,7 @@
               v-model="row.identifier"
               placeholder="请选择标识符"
               clearable
+              filterable
               style="width: 100%"
               v-loading="row.identifierLoading"
             >
@@ -85,7 +89,6 @@
                 :value="item.value"
               />
             </el-select>
-            <span v-else>-</span>
           </el-form-item>
         </template>
       </el-table-column>
@@ -105,12 +108,12 @@
 import { ProductApi } from '@/api/iot/product/product'
 import { DeviceApi } from '@/api/iot/device/device'
 import { ThingModelApi } from '@/api/iot/thingmodel'
-import { IotDeviceMessageMethodEnum } from '@/views/iot/utils/constants'
+import { IotDeviceMessageMethodEnum, IotThingModelTypeEnum } from '@/views/iot/utils/constants'
 
 const formData = ref<any[]>([])
 const productList = ref<any[]>([]) // 产品列表
 const deviceList = ref<any[]>([]) // 设备列表
-const thingModelMap = ref<Map<number, any[]>>(new Map()) // 缓存物模型数据，key 为 productId
+const thingModelCache = ref<Map<number, any[]>>(new Map()) // 缓存物模型数据，key 为 productId
 
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'change' }],
@@ -124,7 +127,7 @@ const upstreamMethods = computed(() => {
   return Object.values(IotDeviceMessageMethodEnum).filter((item) => item.upstream)
 })
 
-/** 根据产品ID过滤设备 */
+/** 根据产品 ID 过滤设备 */
 const getFilteredDevices = (productId: number) => {
   if (!productId) return []
   return deviceList.value.filter((device: any) => device.productId === productId)
@@ -132,27 +135,24 @@ const getFilteredDevices = (productId: number) => {
 
 /** 判断是否需要显示标识符选择器 */
 const shouldShowIdentifierSelect = (row: any) => {
-  return (
-    row.method === IotDeviceMessageMethodEnum.EVENT_POST.method ||
-    row.method === IotDeviceMessageMethodEnum.PROPERTY_POST.method
-  )
+  return [
+    IotDeviceMessageMethodEnum.EVENT_POST.method,
+    IotDeviceMessageMethodEnum.PROPERTY_POST.method
+  ].includes(row.method)
 }
 
 /** 获取物模型选项 */
 const getThingModelOptions = (row: any) => {
-  if (!row.productId || !shouldShowIdentifierSelect(row)) return []
-
-  const thingModels: any[] = thingModelMap.value.get(row.productId) || []
-  let filteredModels: any[] = []
-
-  if (row.method === IotDeviceMessageMethodEnum.EVENT_POST.method) {
-    // 事件类型，type = 3
-    filteredModels = thingModels.filter((item: any) => item.type === 3)
-  } else if (row.method === IotDeviceMessageMethodEnum.PROPERTY_POST.method) {
-    // 属性类型，type = 1
-    filteredModels = thingModels.filter((item: any) => item.type === 1)
+  if (!row.productId || !shouldShowIdentifierSelect(row)) {
+    return []
   }
-
+  const thingModels: any[] = thingModelCache.value.get(row.productId) || []
+  let filteredModels: any[] = []
+  if (row.method === IotDeviceMessageMethodEnum.EVENT_POST.method) {
+    filteredModels = thingModels.filter((item: any) => item.type === IotThingModelTypeEnum.EVENT)
+  } else if (row.method === IotDeviceMessageMethodEnum.PROPERTY_POST.method) {
+    filteredModels = thingModels.filter((item: any) => item.type === IotThingModelTypeEnum.PROPERTY)
+  }
   return filteredModels.map((item: any) => ({
     label: `${item.name} (${item.identifier})`,
     value: item.identifier
@@ -179,39 +179,30 @@ const loadDeviceList = async () => {
 
 /** 加载物模型数据 */
 const loadThingModel = async (productId: number) => {
-  if (thingModelMap.value.has(productId)) {
-    return // 已缓存，无需重复加载
+  // 已缓存，无需重复加载
+  if (thingModelCache.value.has(productId)) {
+    return
   }
-
   try {
     const thingModels = await ThingModelApi.getThingModelList({ productId })
-    thingModelMap.value.set(productId, thingModels)
+    thingModelCache.value.set(productId, thingModels)
   } catch (error) {
     console.error('加载物模型失败:', error)
-    thingModelMap.value.set(productId, [])
   }
 }
 
 /** 产品变化时处理 */
 const handleProductChange = async (row: any, _index: number) => {
-  // 清空其他字段
-  row.deviceId = undefined
+  row.deviceId = 0
   row.method = undefined
   row.identifier = undefined
-
-  // 根据产品ID过滤设备列表不需要额外处理，计算属性会自动过滤
-}
-
-/** 设备变化时处理 */
-const handleDeviceChange = (row: any, _index: number) => {
-  // 设备变化时可以做一些额外处理
+  row.identifierLoading = false
 }
 
 /** 消息方法变化时处理 */
 const handleMethodChange = async (row: any, _index: number) => {
   // 清空标识符
   row.identifier = undefined
-
   // 如果需要加载物模型数据
   if (shouldShowIdentifierSelect(row) && row.productId) {
     row.identifierLoading = true
@@ -254,7 +245,6 @@ const setData = (data: any[]) => {
     ...item,
     identifierLoading: false
   }))
-
   // 为已有数据预加载物模型
   data?.forEach(async (item) => {
     if (item.productId && shouldShowIdentifierSelect(item)) {

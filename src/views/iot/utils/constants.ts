@@ -52,3 +52,10 @@ export const IotDeviceMessageMethodEnum = {
     upstream: false
   }
 }
+
+// IOT 产品物模型类型枚举类
+export const IotThingModelTypeEnum = {
+  PROPERTY: 1, // 属性
+  SERVICE: 2, // 服务
+  EVENT: 3 // 事件
+}
