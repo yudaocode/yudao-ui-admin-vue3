@@ -60,13 +60,6 @@
         :model-value="actionConfig.alert"
         @update:model-value="(val) => (actionConfig.alert = val)"
       />
-
-      <!-- 数据流转目的执行器 -->
-      <DataBridgeAction
-        v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.DATA_BRIDGE"
-        :model-value="actionConfig.dataBridgeId"
-        @update:model-value="(val) => (actionConfig.dataBridgeId = val)"
-      />
     </div>
 
     <!-- 产品、设备的选择 -->
@@ -88,7 +81,6 @@ import ProductTableSelect from '@/views/iot/product/product/components/ProductTa
 import DeviceTableSelect from '@/views/iot/device/device/components/DeviceTableSelect.vue'
 import DeviceControlAction from './DeviceControlAction.vue'
 import AlertAction from './AlertAction.vue'
-import DataBridgeAction from './DataBridgeAction.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import {
@@ -132,14 +124,6 @@ const initActionConfig = () => {
   // 告警执行器初始化
   if (actionConfig.value.type === IotRuleSceneActionTypeEnum.ALERT && !actionConfig.value.alert) {
     actionConfig.value.alert = {} as ActionAlert
-  }
-
-  // 数据流转目的执行器初始化
-  if (
-    actionConfig.value.type === IotRuleSceneActionTypeEnum.DATA_BRIDGE &&
-    !actionConfig.value.dataBridgeId
-  ) {
-    actionConfig.value.dataBridgeId = undefined
   }
 }
 

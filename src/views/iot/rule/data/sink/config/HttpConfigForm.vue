@@ -3,6 +3,7 @@
     <el-input v-model="urlPath" placeholder="请输入请求地址">
       <template #prepend>
         <el-select v-model="urlPrefix" placeholder="Select" style="width: 115px">
+          <!--suppress HttpUrlsUsage -->
           <el-option label="http://" value="http://" />
           <el-option label="https://" value="https://" />
         </el-select>
@@ -42,6 +43,7 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue'])
 const config = useVModel(props, 'modelValue', emit) as Ref<HttpConfig>
 
+// noinspection HttpUrlsUsage
 /** URL处理 */
 const urlPrefix = ref('http://')
 const urlPath = ref('')

@@ -10,8 +10,7 @@ const IotRuleSceneTriggerTypeEnum = {
 
 const IotRuleSceneActionTypeEnum = {
   DEVICE_CONTROL: 1, // 设备执行
-  ALERT: 2, // 告警执行
-  DATA_BRIDGE: 3 // 桥接执行
+  ALERT: 2 // 告警执行
 } as const
 
 const IotDeviceMessageTypeEnum = {
@@ -104,7 +103,6 @@ interface ActionConfig {
   type: number // 执行类型
   deviceControl?: ActionDeviceControl // 设备控制
   alert?: ActionAlert // 告警执行
-  dataBridgeId?: number // 数据流转目的编号
 }
 
 // 主接口
