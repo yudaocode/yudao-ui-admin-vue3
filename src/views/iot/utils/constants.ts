@@ -8,14 +8,9 @@ export const IOT_PROVIDE_KEY = {
  */
 export const IotDeviceMessageMethodEnum = {
   // ========== 设备状态 ==========
-  STATE_ONLINE: {
-    method: 'thing.state.online',
-    name: '设备上线',
-    upstream: true
-  },
-  STATE_OFFLINE: {
-    method: 'thing.state.offline',
-    name: '设备下线',
+  STATE_UPDATE: {
+    method: 'thing.state.update',
+    name: '设备状态变更',
     upstream: true
   },
 

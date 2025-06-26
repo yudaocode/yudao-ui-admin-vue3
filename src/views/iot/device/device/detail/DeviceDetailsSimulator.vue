@@ -306,10 +306,10 @@ const handleDeviceState = async (state: number) => {
   try {
     await DeviceApi.sendDeviceMessage({
       deviceId: props.device.id,
-      method:
-        state === DeviceStateEnum.ONLINE
-          ? IotDeviceMessageMethodEnum.STATE_ONLINE.method
-          : IotDeviceMessageMethodEnum.STATE_OFFLINE.method
+      method: IotDeviceMessageMethodEnum.STATE_UPDATE.method,
+      params: {
+        state: state
+      }
     })
     message.success(`设备${state === DeviceStateEnum.ONLINE ? '上线' : '下线'}成功`)
     deviceMessageRef.value.refresh(deviceMessageRefresnhDelay)
