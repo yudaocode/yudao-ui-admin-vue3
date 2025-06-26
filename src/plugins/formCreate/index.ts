@@ -54,7 +54,7 @@ import {
   ElMessage,
   ElCollapse,
   ElCollapseItem,
-  ElCard,
+  ElCard, ElTreeSelect
   // ElFormItem,
   // ElOption
 } from 'element-plus'
@@ -97,6 +97,7 @@ const components = [
   ElTableColumn,
   ElTabPane,
   ElTabs,
+  ElTreeSelect,
   ElDropdown,
   ElDropdownMenu,
   ElDropdownItem,
