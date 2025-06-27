@@ -7,15 +7,19 @@ export interface BrokerageWithdrawVO {
   feePrice: number
   totalPrice: number
   type: number
-  name: string
-  accountNo: string
+  userName: string
+  userAccount: string
   bankName: string
   bankAddress: string
-  accountQrCodeUrl: string
+  qrCodeUrl: string
   status: number
   auditReason: string
   auditTime: Date
   remark: string
+  payTransferId?: number
+  transferChannelCode?: string
+  transferTime?: Date
+  transferErrorMsg?: string
 }
 
 // 查询佣金提现列表

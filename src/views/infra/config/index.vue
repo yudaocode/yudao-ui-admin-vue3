@@ -66,6 +66,15 @@
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
+          type="danger"
+          plain
+          :disabled="checkedIds.length === 0"
+          @click="handleDeleteBatch"
+          v-hasPermi="['infra:config:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+        </el-button>
+        <el-button
           type="success"
           plain
           @click="handleExport"
@@ -80,7 +89,8 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column label="参数主键" align="center" prop="id" />
       <el-table-column label="参数分类" align="center" prop="category" />
       <el-table-column label="参数名称" align="center" prop="name" :show-overflow-tooltip="true" />
@@ -200,6 +210,24 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     // 发起删除
     await ConfigApi.deleteConfig(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 批量删除按钮操作 */
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (rows: ConfigApi.ConfigVO[]) => {
+  checkedIds.value = rows.map((row) => row.id!).filter(Boolean)
+}
+
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起批量删除
+    await ConfigApi.deleteConfigList(checkedIds.value)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

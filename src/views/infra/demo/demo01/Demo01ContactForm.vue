@@ -15,7 +15,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
             :key="dict.value"
-            :value="dict.value"
+            :label="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -44,7 +44,10 @@
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import * as Demo01ContactApi from '@/api/infra/demo/demo01'
+import { Demo01ContactApi, Demo01Contact } from '@/api/infra/demo/demo01'
+
+/** 示例联系人 表单 */
+defineOptions({ name: 'Demo01ContactForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -59,13 +62,13 @@ const formData = ref({
   sex: undefined,
   birthday: undefined,
   description: undefined,
-  avatar: undefined
+  avatar: undefined,
 })
 const formRules = reactive({
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
   sex: [{ required: true, message: '性别不能为空', trigger: 'blur' }],
   birthday: [{ required: true, message: '出生年不能为空', trigger: 'blur' }],
-  description: [{ required: true, message: '简介不能为空', trigger: 'blur' }]
+  description: [{ required: true, message: '简介不能为空', trigger: 'blur' }],
 })
 const formRef = ref() // 表单 Ref
 
@@ -95,7 +98,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as Demo01ContactApi.Demo01ContactVO
+    const data = formData.value as unknown as Demo01Contact
     if (formType.value === 'create') {
       await Demo01ContactApi.createDemo01Contact(data)
       message.success(t('common.createSuccess'))
@@ -119,7 +122,7 @@ const resetForm = () => {
     sex: undefined,
     birthday: undefined,
     description: undefined,
-    avatar: undefined
+    avatar: undefined,
   }
   formRef.value?.resetFields()
 }

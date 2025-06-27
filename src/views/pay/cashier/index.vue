@@ -132,6 +132,7 @@ import svg_wx_lite from '@/assets/svgs/pay/icon/wx_lite.svg'
 import svg_wx_app from '@/assets/svgs/pay/icon/wx_app.svg'
 import svg_wx_native from '@/assets/svgs/pay/icon/wx_native.svg'
 import svg_wx_bar from '@/assets/svgs/pay/icon/wx_bar.svg'
+import svg_wallet from '@/assets/svgs/pay/icon/wallet.svg'
 import svg_mock from '@/assets/svgs/pay/icon/mock.svg'
 
 defineOptions({ name: 'PayCashier' })
@@ -200,6 +201,11 @@ const channelsWechat = [
   }
 ]
 const channelsMock = [
+  {
+    name: '钱包支付',
+    icon: svg_wallet,
+    code: 'wallet'
+  },
   {
     name: '模拟支付',
     icon: svg_mock,

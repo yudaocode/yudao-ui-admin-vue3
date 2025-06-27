@@ -91,12 +91,24 @@
             >
               <Icon icon="ep:download" />{{ $t('sys.user.export') }}
             </el-button>
+            <el-button
+              type="danger"
+              plain
+              :disabled="checkedIds.length === 0"
+              @click="handleDeleteBatch"
+              v-hasPermi="['system:user:delete']"
+            >
+              <Icon icon="ep:delete" />批量删除
+            </el-button>
           </el-form-item>
         </el-form>
       </ContentWrap>
       <ContentWrap>
-        <el-table v-loading="loading" :data="list">
+
+        <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+          <el-table-column type="selection" width="55" />
           <el-table-column :label="$t('sys.user.id')" align="center" key="id" prop="id" />
+
           <el-table-column
             :label="$t('sys.user.username')"
             align="center"
@@ -262,9 +274,14 @@ const resetQuery = () => {
 }
 
 /** 处理部门被点击 */
-const handleDeptNodeClick = async (row) => {
-  queryParams.deptId = row.id
-  await getList()
+const handleDeptNodeClick = async (row: any) => {
+  if (row === undefined) {
+    queryParams.deptId = undefined
+    await getList()
+  } else {
+    queryParams.deptId = row.id
+    await getList()
+  }
 }
 
 /** 添加/修改操作 */
@@ -339,6 +356,24 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     // 发起删除
     await UserApi.deleteUser(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 批量删除按钮操作 */
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (rows: UserApi.UserVO[]) => {
+  checkedIds.value = rows.map((row) => row.id)
+}
+
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起批量删除
+    await UserApi.deleteUserList(checkedIds.value)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

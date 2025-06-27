@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
-export type DictTypeVO = {
-  id: number | undefined
+export interface DictTypeVO {
+  id: number
   name: string
   type: string
   status: number
@@ -10,8 +10,8 @@ export type DictTypeVO = {
 }
 
 // 查询字典（精简)列表
-export const getSimpleDictTypeList = () => {
-  return request.get({ url: '/system/dict-type/list-all-simple' })
+export const getSimpleDictTypeList = (): Promise<DictTypeVO[]> => {
+  return request.get({ url: '/system/dict-type/simple-list' })
 }
 
 // 查询字典列表
@@ -38,7 +38,16 @@ export const updateDictType = (data: DictTypeVO) => {
 export const deleteDictType = (id: number) => {
   return request.delete({ url: '/system/dict-type/delete?id=' + id })
 }
-// 导出字典类型
+
+// 批量删除字典类型
+export const deleteDictTypeList = (ids: number[]) => {
+  return request.delete({ url: '/system/dict-type/delete-list', params: { ids: ids.join(',') } })
+}
+
+// 导出字典
 export const exportDictType = (params) => {
-  return request.download({ url: '/system/dict-type/export', params })
+  return request.download({
+    url: '/system/dict-type/export-excel',
+    params
+  })
 }

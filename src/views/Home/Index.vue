@@ -83,13 +83,18 @@
               :sm="24"
               :xs="24"
             >
-              <el-card 
-                shadow="hover" 
+              <el-card
+                shadow="hover"
                 class="mr-5px mt-5px cursor-pointer"
                 @click="handleProjectClick(item.message)"
               >
                 <div class="flex items-center">
-                  <Icon :icon="item.icon" :size="25" class="mr-8px" :style="{ color: item.color }" />
+                  <Icon
+                    :icon="item.icon"
+                    :size="25"
+                    class="mr-8px"
+                    :style="{ color: item.color }"
+                  />
                   <span class="text-16px">{{ item.name }}</span>
                 </div>
                 <div class="mt-12px text-12px text-gray-400">{{ t(item.message) }}</div>
@@ -181,17 +186,17 @@ import { EChartsOption } from 'echarts'
 import { formatTime } from '@/utils'
 
 import { useUserStore } from '@/store/modules/user'
-import { useWatermark } from '@/hooks/web/useWatermark'
+// import { useWatermark } from '@/hooks/web/useWatermark'
 import type { WorkplaceTotal, Project, Notice, Shortcut } from './types'
 import { pieOptions, barOptions } from './echarts-data'
 import { useRouter } from 'vue-router'
 
-defineOptions({ name: 'Home' })
+defineOptions({ name: 'Index' })
 
 const { t } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
-const { setWatermark } = useWatermark()
+// const { setWatermark } = useWatermark()
 const loading = ref(true)
 const avatar = userStore.getUser.avatar
 const username = userStore.getUser.nickname

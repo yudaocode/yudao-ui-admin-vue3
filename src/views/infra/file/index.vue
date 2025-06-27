@@ -44,13 +44,23 @@
         <el-button type="primary" plain @click="openForm">
           <Icon icon="ep:upload" class="mr-5px" /> 上传文件
         </el-button>
+        <el-button
+          type="danger"
+          plain
+          :disabled="checkedIds.length === 0"
+          @click="handleDeleteBatch"
+          v-hasPermi="['infra:file:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column label="文件名" align="center" prop="name" :show-overflow-tooltip="true" />
       <el-table-column label="文件路径" align="center" prop="path" :show-overflow-tooltip="true" />
       <el-table-column label="URL" align="center" prop="url" :show-overflow-tooltip="true" />
@@ -189,6 +199,24 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     // 发起删除
     await FileApi.deleteFile(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 批量删除按钮操作 */
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (rows) => {
+  checkedIds.value = rows.map((row) => row.id)
+}
+
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起批量删除
+    await FileApi.deleteFileList(checkedIds.value)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

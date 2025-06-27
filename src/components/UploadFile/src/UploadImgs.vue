@@ -81,10 +81,11 @@ const props = defineProps({
   fileType: propTypes.array.def(['image/jpeg', 'image/png', 'image/gif']), // 图片类型限制 ==> 非必传（默认为 ["image/jpeg", "image/png", "image/gif"]）
   height: propTypes.string.def('150px'), // 组件高度 ==> 非必传（默认为 150px）
   width: propTypes.string.def('150px'), // 组件宽度 ==> 非必传（默认为 150px）
-  borderradius: propTypes.string.def('8px') // 组件边框圆角 ==> 非必传（默认为 8px）
+  borderradius: propTypes.string.def('8px'), // 组件边框圆角 ==> 非必传（默认为 8px）
+  directory: propTypes.string.def(undefined) // 上传目录 ==> 非必传（默认为 undefined）
 })
 
-const { uploadUrl, httpRequest } = useUpload()
+const { uploadUrl, httpRequest } = useUpload(props.directory)
 
 const fileList = ref<UploadUserFile[]>([])
 const uploadNumber = ref<number>(0)
