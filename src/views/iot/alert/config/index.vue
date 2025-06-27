@@ -8,19 +8,19 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="规则名称" prop="name">
+      <el-form-item label="配置名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入规则名称"
+          placeholder="请输入配置名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="规则状态" prop="status">
+      <el-form-item label="配置状态" prop="status">
         <el-select
           v-model="queryParams.status"
-          placeholder="请选择规则状态"
+          placeholder="请选择配置状态"
           clearable
           class="!w-240px"
         >
@@ -50,7 +50,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['iot:data-rule:create']"
+          v-hasPermi="['iot:alert-config:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -67,20 +67,18 @@
       :stripe="true"
       :show-overflow-tooltip="true"
     >
-      <el-table-column label="规则编号" align="center" prop="id" />
-      <el-table-column label="规则名称" align="center" prop="name" />
-      <el-table-column label="规则描述" align="center" prop="description" />
-      <el-table-column label="规则状态" align="center" prop="status">
+      <el-table-column label="配置编号" align="center" prop="id" />
+      <el-table-column label="配置名称" align="center" prop="name" />
+      <el-table-column label="配置描述" align="center" prop="description" />
+      <el-table-column label="告警级别" align="center" prop="level">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.IOT_ALERT_LEVEL" :value="scope.row.level" />
         </template>
       </el-table-column>
-      <el-table-column label="数据源" align="center" prop="sourceConfigs">
-        <template #default="scope"> {{ scope.row.sourceConfigs?.length || 0 }} 个 </template>
-      </el-table-column>
-      <el-table-column label="数据目的" align="center" prop="sinkIds">
-        <template #default="scope"> {{ scope.row.sinkIds?.length || 0 }} 个 </template>
-      </el-table-column>
+      <el-table-column label="配置状态" align="center" prop="status" />
+      <el-table-column label="场景联动规则" align="center" prop="sceneRuleIds" />
+      <el-table-column label="接收的用户" align="center" prop="receiveUserIds" />
+      <el-table-column label="接收的类型" align="center" prop="receiveTypes" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -94,7 +92,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['iot:data-rule:update']"
+            v-hasPermi="['iot:alert-config:update']"
           >
             编辑
           </el-button>
@@ -102,7 +100,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['iot:data-rule:delete']"
+            v-hasPermi="['iot:alert-config:delete']"
           >
             删除
           </el-button>
@@ -119,23 +117,23 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <DataRuleForm ref="formRef" @success="getList" />
+  <AlertConfigForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { DataRuleApi, DataRule } from '@/api/iot/rule/data/rule'
-import DataRuleForm from './DataRuleForm.vue'
+import { AlertConfigApi, AlertConfig } from '@/api/iot/alert/config'
+import AlertConfigForm from './AlertConfigForm.vue'
 
-/** IoT 数据流转规则列表 */
-defineOptions({ name: 'IotDataRule' })
+/** IoT 告警配置 列表 */
+defineOptions({ name: 'IotAlertConfig' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<DataRule[]>([]) // 列表的数据
+const list = ref<AlertConfig[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
@@ -150,7 +148,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await DataRuleApi.getDataRulePage(queryParams)
+    const data = await AlertConfigApi.getAlertConfigPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -182,7 +180,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await DataRuleApi.deleteDataRule(id)
+    await AlertConfigApi.deleteAlertConfig(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
