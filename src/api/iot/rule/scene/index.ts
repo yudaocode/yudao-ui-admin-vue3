@@ -26,5 +26,10 @@ export const RuleSceneApi = {
   // 删除场景联动
   deleteRuleScene: async (id: number) => {
     return await request.delete({ url: `/iot/rule-scene/delete?id=` + id })
+  },
+
+  // 获取场景联动简单列表
+  getSimpleRuleSceneList: async () => {
+    return await request.get({ url: `/iot/rule-scene/simple-list` })
   }
 }

@@ -75,10 +75,26 @@
           <dict-tag :type="DICT_TYPE.IOT_ALERT_LEVEL" :value="scope.row.level" />
         </template>
       </el-table-column>
-      <el-table-column label="配置状态" align="center" prop="status" />
-      <el-table-column label="场景联动规则" align="center" prop="sceneRuleIds" />
-      <el-table-column label="接收的用户" align="center" prop="receiveUserIds" />
-      <el-table-column label="接收的类型" align="center" prop="receiveTypes" />
+      <el-table-column label="配置状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="关联场景联动规则" align="center" prop="sceneRuleIds" min-width="100">
+        <template #default="scope"> {{ scope.row.sceneRuleIds?.length || 0 }} 条 </template>
+      </el-table-column>
+      <el-table-column label="接收人" align="center" prop="receiveUserNames" />
+      <el-table-column label="接收类型" align="center" prop="receiveTypes">
+        <template #default="scope">
+          <dict-tag
+            v-for="(receiveType, index) in scope.row.receiveTypes"
+            :key="index"
+            :type="DICT_TYPE.IOT_ALERT_RECEIVE_TYPE"
+            :value="receiveType"
+            class="mr-1"
+          />
+        </template>
+      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
