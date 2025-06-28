@@ -37,5 +37,10 @@ export const AlertConfigApi = {
   // 删除告警配置
   deleteAlertConfig: async (id: number) => {
     return await request.delete({ url: `/iot/alert-config/delete?id=` + id })
+  },
+
+  // 获取告警配置简单列表
+  getSimpleAlertConfigList: async () => {
+    return await request.get({ url: `/iot/alert-config/simple-list` })
   }
 }
