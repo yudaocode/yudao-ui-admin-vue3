@@ -131,7 +131,25 @@
           {{ getDeviceName(scope.row.deviceId) }}
         </template>
       </el-table-column>
-      <el-table-column label="触发的设备消息" align="center" prop="deviceMessage" />
+      <el-table-column label="触发的设备消息" align="center" prop="deviceMessage">
+        <template #default="scope">
+          <el-popover
+            placement="top-start"
+            :width="600"
+            trigger="hover"
+            v-if="scope.row.deviceMessage"
+          >
+            <template #reference>
+              <el-button link type="primary">
+                <Icon icon="ep:view" class="mr-5px" />
+                查看消息
+              </el-button>
+            </template>
+            <pre>{{ scope.row.deviceMessage }}</pre>
+          </el-popover>
+          <span v-else class="text-gray-400">-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="是否处理" align="center" prop="processStatus">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.processStatus" />
@@ -210,14 +228,19 @@ const filteredDeviceList = computed(() => {
 
 /** 根据产品 ID 获取产品名称 */
 const getProductName = (productId: number) => {
+  if (!productId) {
+    return `-`
+  }
   const product = productList.value.find((p) => p.id === productId)
   return product ? product.name : `加载中...`
 }
 
 /** 根据设备 ID 获取设备名称 */
 const getDeviceName = (deviceId: number) => {
+  if (!deviceId) {
+    return `-`
+  }
   const device = deviceList.value.find((d) => d.id === deviceId)
-  debugger
   return device ? device.deviceName : `加载中...`
 }
 
