@@ -41,9 +41,25 @@
           placeholder="请输入客户端密钥,对应各平台的appSecret"
         />
       </el-form-item>
+      <el-form-item label="回调地址" prop="redirectUri">
+        <el-input v-model="formData.redirectUri" placeholder="请输入登录成功后的回调地址" />
+      </el-form-item>
       <el-form-item label="agentId" prop="agentId" v-if="formData!.socialType === 30">
         <el-input v-model="formData.agentId" placeholder="授权方的网页应用 ID，有则填" />
       </el-form-item>
+      <el-form-item label="忽略校验uri" prop="ignoreCheckRedirectUri">
+        <el-radio-group v-model="formData.ignoreCheckRedirectUri">
+          <el-radio :label="true">是</el-radio>
+          <el-radio :label="false">否</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="忽略校验state" prop="ignoreCheckState">
+        <el-radio-group v-model="formData.ignoreCheckState">
+          <el-radio :label="true">是</el-radio>
+          <el-radio :label="false">否</el-radio>
+        </el-radio-group>
+      </el-form-item>
+
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
@@ -81,6 +97,9 @@ const formData = ref({
   clientId: undefined,
   clientSecret: undefined,
   agentId: undefined,
+  redirectUri: undefined,
+  ignoreCheckRedirectUri: undefined,
+  ignoreCheckState: undefined,
   status: 0
 })
 const formRules = reactive({
@@ -89,6 +108,8 @@ const formRules = reactive({
   userType: [{ required: true, message: '用户类型不能为空', trigger: 'blur' }],
   clientId: [{ required: true, message: '客户端编号不能为空', trigger: 'blur' }],
   clientSecret: [{ required: true, message: '客户端密钥不能为空', trigger: 'blur' }],
+  ignoreCheckRedirectUri: [{ required: true, message: '忽略校验uri不能为空', trigger: 'blur' }],
+  ignoreCheckState: [{ required: true, message: '忽略校验state不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref

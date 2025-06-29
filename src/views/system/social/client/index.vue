@@ -111,6 +111,16 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
+      <el-table-column align="center" label="忽略校验uri" prop="ignoreCheckRedirectUri">
+        <template #default="scope">
+          {{ scope.row.ignoreCheckRedirectUri ? '是' : '否' }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="忽略校验state" prop="ignoreCheckState">
+        <template #default="scope">
+          {{ scope.row.ignoreCheckState ? '是' : '否' }}
+        </template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
