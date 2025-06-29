@@ -89,7 +89,7 @@
                 <!-- 数据图标 - 可点击 -->
                 <div
                   class="cursor-pointer flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 transition-colors"
-                  @click="openHistory(props.deviceId, item.identifier)"
+                  @click="openHistory(props.deviceId, item.identifier, item.dataType)"
                 >
                   <Icon icon="ep:data-line" class="text-[18px] text-[#0070ff]" />
                 </div>
@@ -135,7 +135,11 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-          <el-button link type="primary" @click="openHistory(props.deviceId, scope.row.identifier)">
+          <el-button
+            link
+            type="primary"
+            @click="openHistory(props.deviceId, scope.row.identifier, scope.row.dataType)"
+          >
             查看数据
           </el-button>
         </template>
@@ -202,8 +206,8 @@ const handleQuery = () => {
 
 /** 历史操作 */
 const historyRef = ref()
-const openHistory = (deviceId: number, identifier: string) => {
-  historyRef.value.open(deviceId, identifier)
+const openHistory = (deviceId: number, identifier: string, dataType: string) => {
+  historyRef.value.open(deviceId, identifier, dataType)
 }
 
 /** 格式化属性值和单位 */

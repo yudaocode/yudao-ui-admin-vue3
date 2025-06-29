@@ -27,6 +27,7 @@
             <el-button
               :type="viewMode === 'chart' ? 'primary' : 'default'"
               @click="viewMode = 'chart'"
+              :disabled="isComplexDataType"
             >
               <Icon icon="ep:histogram" />
             </el-button>
@@ -57,7 +58,11 @@
               {{ formatDate(new Date(scope.row.updateTime)) }}
             </template>
           </el-table-column>
-          <el-table-column label="属性值" align="center" prop="value" />
+          <el-table-column label="属性值" align="center" prop="value">
+            <template #default="scope">
+              {{ scope.row.value }}
+            </template>
+          </el-table-column>
         </el-table>
       </div>
     </ContentWrap>
@@ -67,6 +72,7 @@
 import { DeviceApi, IotDevicePropertyRespVO } from '@/api/iot/device/device'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { Echart } from '@/components/Echart'
+import { IoTDataSpecsDataTypeEnum } from '@/views/iot/utils/constants'
 
 defineProps<{ deviceId: number }>()
 
@@ -78,6 +84,7 @@ const loading = ref(false)
 const viewMode = ref<'chart' | 'list'>('chart') // 视图模式状态
 const list = ref<IotDevicePropertyRespVO[]>([]) // 列表的数据
 const chartKey = ref(0) // 图表重新渲染的key
+const thingModelDataType = ref<string>('') // 物模型数据类型
 const queryParams = reactive({
   deviceId: -1,
   identifier: '',
@@ -88,6 +95,14 @@ const queryParams = reactive({
   ]
 })
 const queryFormRef = ref() // 搜索的表单
+
+// 判断是否为复杂数据类型（struct 或 array）
+const isComplexDataType = computed(() => {
+  if (!thingModelDataType.value) return false
+  return [IoTDataSpecsDataTypeEnum.STRUCT, IoTDataSpecsDataTypeEnum.ARRAY].includes(
+    thingModelDataType.value as any
+  )
+})
 
 // Echarts 数据
 const echartsData = computed(() => {
@@ -165,15 +180,24 @@ const getList = async () => {
 }
 
 /** 打开弹窗 */
-const open = async (deviceId: number, identifier: string) => {
+const open = async (deviceId: number, identifier: string, dataType: string) => {
   dialogVisible.value = true
   queryParams.deviceId = deviceId
   queryParams.identifier = identifier
-  // 重置图表key，确保每次打开都能正常渲染
+  thingModelDataType.value = dataType
+
+  // 如果物模型是 struct、array，需要默认使用 list 模式
+  if (isComplexDataType.value) {
+    viewMode.value = 'list'
+  } else {
+    viewMode.value = 'chart'
+  }
+  // 重置图表 key，确保每次打开都能正常渲染
   chartKey.value = 0
+
   // 等待弹窗完全渲染后再获取数据
   await nextTick()
-  getList()
+  await getList()
 }
 
 /** 时间变化处理 */

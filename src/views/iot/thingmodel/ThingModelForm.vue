@@ -153,9 +153,10 @@ const submitForm = async () => {
       await ThingModelApi.updateThingModel(data)
       message.success(t('common.updateSuccess'))
     }
-  } finally {
-    dialogVisible.value = false // 确保关闭弹框
+    // 关闭弹窗
+    dialogVisible.value = false
     emit('success')
+  } finally {
     formLoading.value = false
   }
 }
