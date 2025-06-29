@@ -26,6 +26,7 @@
           v-if="activeTab === 'simulator'"
           :product="product"
           :device="device"
+          :thing-model-list="thingModelList"
         />
       </el-tab-pane>
       <el-tab-pane label="设备配置" name="config">
