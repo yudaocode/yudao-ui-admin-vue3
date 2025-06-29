@@ -24,7 +24,7 @@
                     <el-table-column align="center" label="数据类型" prop="identifier">
                       <!-- TODO @super：不用翻译，可以减少宽度的占用 -->
                       <template #default="{ row }">
-                        {{ dataTypeOptionsLabel(row.property?.dataType) ?? '-' }}
+                        {{ getDataTypeOptionsLabel(row.property?.dataType) ?? '-' }}
                       </template>
                     </el-table-column>
                     <el-table-column align="left" label="数据定义" prop="identifier">
@@ -145,9 +145,8 @@ import { ProductVO } from '@/api/iot/product/product'
 import { SimulatorData, ThingModelApi } from '@/api/iot/thingmodel'
 import { DeviceApi, DeviceStateEnum, DeviceVO } from '@/api/iot/device/device'
 import DeviceDetailsMessage from './DeviceDetailsMessage.vue'
-import { getDataTypeOptionsLabel } from '@/views/iot/thingmodel/config'
 import { DataDefinition } from '@/views/iot/thingmodel/components'
-import { IotDeviceMessageMethodEnum } from '@/views/iot/utils/constants'
+import { getDataTypeOptionsLabel, IotDeviceMessageMethodEnum } from '@/views/iot/utils/constants'
 
 const props = defineProps<{
   product: ProductVO
@@ -166,8 +165,6 @@ const queryParams = reactive({
   productId: -1
 })
 const list = ref<SimulatorData[]>([]) // 物模型列表的数据 TODO @super：thingModelList
-// TODO @super：dataTypeOptionsLabel 是不是不用定义，直接用 getDataTypeOptionsLabel 在 template 中使用即可？
-const dataTypeOptionsLabel = computed(() => (value: string) => getDataTypeOptionsLabel(value)) // 解析数据类型
 
 /** 查询物模型列表 */
 // TODO @super：getThingModelList 更精准

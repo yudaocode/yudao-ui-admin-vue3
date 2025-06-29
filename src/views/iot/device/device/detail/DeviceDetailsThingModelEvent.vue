@@ -95,8 +95,11 @@
 import { DeviceApi } from '@/api/iot/device/device'
 import { ThingModelData } from '@/api/iot/thingmodel'
 import { formatDate, defaultShortcuts } from '@/utils/formatTime'
-import { IotDeviceMessageMethodEnum } from '@/views/iot/utils/constants'
-import { ThingModelType, getEventTypeByValue } from '@/views/iot/thingmodel/config'
+import {
+  getEventTypeLabel,
+  IotDeviceMessageMethodEnum,
+  IoTThingModelTypeEnum
+} from '@/views/iot/utils/constants'
 
 const props = defineProps<{
   deviceId: number
@@ -118,7 +121,9 @@ const queryFormRef = ref() // 搜索的表单
 
 /** 事件类型的物模型数据 */
 const eventThingModels = computed(() => {
-  return props.thingModelList.filter((item: ThingModelData) => item.type === ThingModelType.EVENT)
+  return props.thingModelList.filter(
+    (item: ThingModelData) => item.type === IoTThingModelTypeEnum.EVENT
+  )
 })
 
 /** 查询列表 */
@@ -164,7 +169,7 @@ const getEventType = (identifier: string | undefined) => {
     (item: ThingModelData) => item.identifier === identifier
   )
   if (!event?.event?.type) return '-'
-  return getEventTypeByValue(event.event.type) || '-'
+  return getEventTypeLabel(event.event.type) || '-'
 }
 
 /** 解析参数 */

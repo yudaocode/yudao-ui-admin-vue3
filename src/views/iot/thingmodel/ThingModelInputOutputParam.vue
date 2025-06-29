@@ -43,8 +43,9 @@
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
 import ThingModelProperty from './ThingModelProperty.vue'
-import { DataSpecsDataType, ThingModelFormRules } from './config'
 import { isEmpty } from '@/utils/is'
+import { IoTDataSpecsDataTypeEnum } from '@/views/iot/utils/constants'
+import { ThingModelFormRules } from '@/api/iot/thingmodel'
 
 /** 输入输出参数配置组件 */
 defineOptions({ name: 'ThingModelInputOutputParam' })
@@ -57,11 +58,11 @@ const dialogTitle = ref('新增参数') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const paramFormRef = ref() // 表单 ref
 const formData = ref<any>({
-  dataType: DataSpecsDataType.INT,
+  dataType: IoTDataSpecsDataTypeEnum.INT,
   property: {
-    dataType: DataSpecsDataType.INT,
+    dataType: IoTDataSpecsDataTypeEnum.INT,
     dataSpecs: {
-      dataType: DataSpecsDataType.INT
+      dataType: IoTDataSpecsDataTypeEnum.INT
     }
   }
 })
@@ -136,11 +137,11 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    dataType: DataSpecsDataType.INT,
+    dataType: IoTDataSpecsDataTypeEnum.INT,
     property: {
-      dataType: DataSpecsDataType.INT,
+      dataType: IoTDataSpecsDataTypeEnum.INT,
       dataSpecs: {
-        dataType: DataSpecsDataType.INT
+        dataType: IoTDataSpecsDataTypeEnum.INT
       }
     }
   }

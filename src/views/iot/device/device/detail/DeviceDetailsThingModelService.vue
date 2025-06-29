@@ -110,8 +110,11 @@
 import { DeviceApi } from '@/api/iot/device/device'
 import { ThingModelData } from '@/api/iot/thingmodel'
 import { formatDate, defaultShortcuts } from '@/utils/formatTime'
-import { IotDeviceMessageMethodEnum } from '@/views/iot/utils/constants'
-import { ThingModelType, getCallTypeByValue } from '@/views/iot/thingmodel/config'
+import {
+  getThingModelServiceCallTypeLabel,
+  IotDeviceMessageMethodEnum,
+  IoTThingModelTypeEnum
+} from '@/views/iot/utils/constants'
 
 const props = defineProps<{
   deviceId: number
@@ -133,7 +136,9 @@ const queryFormRef = ref() // 搜索的表单
 
 /** 服务类型的物模型数据 */
 const serviceThingModels = computed(() => {
-  return props.thingModelList.filter((item: ThingModelData) => item.type === ThingModelType.SERVICE)
+  return props.thingModelList.filter(
+    (item: ThingModelData) => item.type === IoTThingModelTypeEnum.SERVICE
+  )
 })
 
 /** 查询列表 */
@@ -179,7 +184,7 @@ const getCallType = (identifier: string | undefined) => {
     (item: ThingModelData) => item.identifier === identifier
   )
   if (!service?.service?.callType) return '-'
-  return getCallTypeByValue(service.service.callType) || '-'
+  return getThingModelServiceCallTypeLabel(service.service.callType) || '-'
 }
 
 /** 解析参数 */

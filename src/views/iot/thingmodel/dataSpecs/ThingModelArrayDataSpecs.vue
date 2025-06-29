@@ -2,11 +2,15 @@
 <template>
   <el-form-item label="元素类型" prop="property.dataSpecs.childDataType">
     <el-radio-group v-model="dataSpecs.childDataType" @change="handleChange">
-      <template v-for="item in dataTypeOptions" :key="item.value">
+      <template v-for="item in getDataTypeOptions()" :key="item.value">
         <el-radio
           v-if="
             !(
-              [DataSpecsDataType.ENUM, DataSpecsDataType.ARRAY, DataSpecsDataType.DATE] as any[]
+              [
+                IoTDataSpecsDataTypeEnum.ENUM,
+                IoTDataSpecsDataTypeEnum.ARRAY,
+                IoTDataSpecsDataTypeEnum.DATE
+              ] as any[]
             ).includes(item.value)
           "
           :value="item.value"
@@ -22,15 +26,15 @@
   </el-form-item>
   <!-- Struct 型配置-->
   <ThingModelStructDataSpecs
-    v-if="dataSpecs.childDataType === DataSpecsDataType.STRUCT"
+    v-if="dataSpecs.childDataType === IoTDataSpecsDataTypeEnum.STRUCT"
     v-model="dataSpecs.dataSpecsList"
   />
 </template>
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import { DataSpecsDataType, dataTypeOptions } from '../config'
 import ThingModelStructDataSpecs from './ThingModelStructDataSpecs.vue'
+import { getDataTypeOptions, IoTDataSpecsDataTypeEnum } from '@/views/iot/utils/constants'
 
 /** 数组型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelArrayDataSpecs' })
@@ -41,7 +45,7 @@ const dataSpecs = useVModel(props, 'modelValue', emits) as Ref<any>
 
 /** 元素类型改变时间。当值为 struct 时，对 dataSpecs 中的 dataSpecsList 进行初始化 */
 const handleChange = (val: string) => {
-  if (val !== DataSpecsDataType.STRUCT) {
+  if (val !== IoTDataSpecsDataTypeEnum.STRUCT) {
     return
   }
 

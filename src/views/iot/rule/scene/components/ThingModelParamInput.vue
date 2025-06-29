@@ -77,8 +77,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useVModel } from '@vueuse/core'
-import { DataSpecsDataType } from '@/views/iot/thingmodel/config'
 import ThingModelDualView from './ThingModelDualView.vue'
+import { IoTDataSpecsDataTypeEnum } from '@/views/iot/utils/constants'
 
 /** 物模型属性参数输入组件 */
 defineOptions({ name: 'ThingModelParamInput' })
@@ -98,14 +98,16 @@ const openJsonEditor = () => {
 
 /** 计算属性：判断数据类型 */
 const isNumeric = computed(() =>
-  [DataSpecsDataType.INT, DataSpecsDataType.FLOAT, DataSpecsDataType.DOUBLE].includes(
-    props.thingModel?.dataType as any
-  )
+  [
+    IoTDataSpecsDataTypeEnum.INT,
+    IoTDataSpecsDataTypeEnum.FLOAT,
+    IoTDataSpecsDataTypeEnum.DOUBLE
+  ].includes(props.thingModel?.dataType as any)
 )
-const isBool = computed(() => props.thingModel?.dataType === DataSpecsDataType.BOOL)
-const isEnum = computed(() => props.thingModel?.dataType === DataSpecsDataType.ENUM)
-const isDate = computed(() => props.thingModel?.dataType === DataSpecsDataType.DATE)
-const isText = computed(() => props.thingModel?.dataType === DataSpecsDataType.TEXT)
+const isBool = computed(() => props.thingModel?.dataType === IoTDataSpecsDataTypeEnum.BOOL)
+const isEnum = computed(() => props.thingModel?.dataType === IoTDataSpecsDataTypeEnum.ENUM)
+const isDate = computed(() => props.thingModel?.dataType === IoTDataSpecsDataTypeEnum.DATE)
+const isText = computed(() => props.thingModel?.dataType === IoTDataSpecsDataTypeEnum.TEXT)
 /** 获取数据规格 */
 const dataSpecs = computed(() => {
   if (isNumeric.value || isDate.value || isText.value) {
@@ -117,7 +119,9 @@ const dataSpecsList = computed(() => {
   if (
     isBool.value ||
     isEnum.value ||
-    [DataSpecsDataType.ARRAY, DataSpecsDataType.STRUCT].includes(props.thingModel?.dataType)
+    [IoTDataSpecsDataTypeEnum.ARRAY, IoTDataSpecsDataTypeEnum.STRUCT].includes(
+      props.thingModel?.dataType
+    )
   ) {
     return props.thingModel?.dataSpecsList || []
   }

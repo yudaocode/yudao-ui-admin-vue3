@@ -59,8 +59,8 @@
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import { DataSpecsNumberDataVO } from '../config'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { DataSpecsNumberDataVO } from '@/api/iot/thingmodel'
 
 /** 数值型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelNumberDataSpecs' })
