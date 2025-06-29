@@ -6,12 +6,12 @@
     prop="service.callType"
   >
     <el-radio-group v-model="service.callType">
-      <!-- TODO @AI：使用 IoTThingModelServiceCallTypeEnum 处理下 -->
-      <el-radio :value="IoTThingModelServiceCallTypeEnum.ASYNC.value">
-        {{ IoTThingModelServiceCallTypeEnum.ASYNC.label }}
-      </el-radio>
-      <el-radio :value="IoTThingModelServiceCallTypeEnum.SYNC.value">
-        {{ IoTThingModelServiceCallTypeEnum.SYNC.label }}
+      <el-radio
+        v-for="callType in Object.values(IoTThingModelServiceCallTypeEnum)"
+        :key="callType.value"
+        :value="callType.value"
+      >
+        {{ callType.label }}
       </el-radio>
     </el-radio-group>
   </el-form-item>
@@ -46,7 +46,7 @@ const props = defineProps<{ modelValue: any; isStructDataSpecs?: boolean }>()
 const emits = defineEmits(['update:modelValue'])
 const service = useVModel(props, 'modelValue', emits) as Ref<ThingModelService>
 
-// 默认选中，ASYNC 异步
+/** 默认选中，ASYNC 异步 */
 watch(
   () => service.value.callType,
   (val: string) =>

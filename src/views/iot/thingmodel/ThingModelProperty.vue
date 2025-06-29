@@ -83,13 +83,13 @@
     v-model="property.dataSpecsList"
   />
   <el-form-item v-if="!isStructDataSpecs && !isParams" label="读写类型" prop="property.accessMode">
-    <!-- TODO @AI：枚举 -->
     <el-radio-group v-model="property.accessMode">
-      <el-radio :label="IoTThingModelAccessModeEnum.READ_WRITE.value">
-        {{ IoTThingModelAccessModeEnum.READ_WRITE.label }}
-      </el-radio>
-      <el-radio :label="IoTThingModelAccessModeEnum.READ_ONLY.value">
-        {{ IoTThingModelAccessModeEnum.READ_ONLY.label }}
+      <el-radio
+        v-for="accessMode in Object.values(IoTThingModelAccessModeEnum)"
+        :key="accessMode.value"
+        :label="accessMode.value"
+      >
+        {{ accessMode.label }}
       </el-radio>
     </el-radio-group>
   </el-form-item>
@@ -118,14 +118,11 @@ const props = defineProps<{ modelValue: any; isStructDataSpecs?: boolean; isPara
 const emits = defineEmits(['update:modelValue'])
 const property = useVModel(props, 'modelValue', emits) as Ref<ThingModelProperty>
 const getDataTypeOptions2 = computed(() => {
-  return !props.isStructDataSpecs
-    ? getDataTypeOptions()
-    : getDataTypeOptions().filter(
-        (item: any) =>
-          !([IoTDataSpecsDataTypeEnum.STRUCT, IoTDataSpecsDataTypeEnum.ARRAY] as any[]).includes(
-            item.value
-          )
-      )
+  if (!props.isStructDataSpecs) {
+    return getDataTypeOptions()
+  }
+  const excludedTypes = [IoTDataSpecsDataTypeEnum.STRUCT, IoTDataSpecsDataTypeEnum.ARRAY]
+  return getDataTypeOptions().filter((item: any) => !excludedTypes.includes(item.value))
 }) // 获得数据类型列表
 
 /** 属性值的数据类型切换时初始化相关数据 */
@@ -158,7 +155,7 @@ const handleChange = (dataType: any) => {
   }
 }
 
-// 默认选中读写
+/** 默认选中读写 */
 watch(
   () => property.value.accessMode,
   (val: string) => {

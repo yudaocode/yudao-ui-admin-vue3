@@ -160,9 +160,8 @@ const submitForm = async () => {
   }
 }
 
-/** 填写额外的属性 */
+/** 填写额外的属性（处理不同类型的情况） */
 const fillExtraAttributes = (data: any) => {
-  // 处理不同类型的情况
   // 属性
   if (data.type === IoTThingModelTypeEnum.PROPERTY) {
     removeDataSpecs(data.property)
@@ -191,6 +190,7 @@ const fillExtraAttributes = (data: any) => {
     delete data.service
   }
 }
+
 /** 处理 dataSpecs 为空的情况 */
 const removeDataSpecs = (val: any) => {
   if (isEmpty(val.dataSpecs)) {

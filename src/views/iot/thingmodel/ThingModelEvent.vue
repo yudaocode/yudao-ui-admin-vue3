@@ -6,15 +6,12 @@
     prop="event.type"
   >
     <el-radio-group v-model="thingModelEvent.type">
-      <!-- TODO @AI：使用枚举 -->
-      <el-radio :value="IoTThingModelEventTypeEnum.INFO.value">
-        {{ IoTThingModelEventTypeEnum.INFO.label }}
-      </el-radio>
-      <el-radio :value="IoTThingModelEventTypeEnum.ALERT.value">
-        {{ IoTThingModelEventTypeEnum.ALERT.label }}
-      </el-radio>
-      <el-radio :value="IoTThingModelEventTypeEnum.ERROR.value">
-        {{ IoTThingModelEventTypeEnum.ERROR.label }}
+      <el-radio
+        v-for="eventType in Object.values(IoTThingModelEventTypeEnum)"
+        :key="eventType.value"
+        :value="eventType.value"
+      >
+        {{ eventType.label }}
       </el-radio>
     </el-radio-group>
   </el-form-item>

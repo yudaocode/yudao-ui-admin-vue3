@@ -1,20 +1,18 @@
 import { isEmpty } from '@/utils/is'
 
-/** iot 依赖注入 KEY */
+/** IoT 依赖注入 KEY */
 export const IOT_PROVIDE_KEY = {
   PRODUCT: 'IOT_PRODUCT'
 }
 
-// IOT 产品物模型类型枚举类
+/** IoT 产品物模型类型枚举类 */
 export const IoTThingModelTypeEnum = {
   PROPERTY: 1, // 属性
   SERVICE: 2, // 服务
   EVENT: 3 // 事件
 } as const
 
-/**
- * IoT 设备消息的方法枚举
- */
+/** IoT 设备消息的方法枚举 */
 export const IotDeviceMessageMethodEnum = {
   // ========== 设备状态 ==========
   STATE_UPDATE: {
@@ -57,28 +55,28 @@ export const IotDeviceMessageMethodEnum = {
   }
 }
 
-// IOT 产品物模型类型枚举类
+// IoT 产品物模型类型枚举类
 export const IotThingModelTypeEnum = {
   PROPERTY: 1, // 属性
   SERVICE: 2, // 服务
   EVENT: 3 // 事件
 }
 
-// IOT 产品物模型服务调用方式枚举
+// IoT 产品物模型服务调用方式枚举
 export const IoTThingModelServiceCallTypeEnum = {
   ASYNC: {
-    label: '异步调用',
+    label: '异步',
     value: 'async'
   },
   SYNC: {
-    label: '同步调用',
+    label: '同步',
     value: 'sync'
   }
 } as const
 export const getThingModelServiceCallTypeLabel = (value: string): string | undefined =>
   Object.values(IoTThingModelServiceCallTypeEnum).find((type) => type.value === value)?.label
 
-// IOT 产品物模型事件类型枚举
+// IoT 产品物模型事件类型枚举
 export const IoTThingModelEventTypeEnum = {
   INFO: {
     label: '信息',
@@ -96,13 +94,13 @@ export const IoTThingModelEventTypeEnum = {
 export const getEventTypeLabel = (value: string): string | undefined =>
   Object.values(IoTThingModelEventTypeEnum).find((type) => type.value === value)?.label
 
-// IOT 产品物模型参数是输入参数还是输出参数
+// IoT 产品物模型参数是输入参数还是输出参数
 export const IoTThingModelParamDirectionEnum = {
   INPUT: 'input', // 输入参数
   OUTPUT: 'output' // 输出参数
 } as const
 
-// IOT 产品物模型访问模式枚举类
+// IoT 产品物模型访问模式枚举类
 export const IoTThingModelAccessModeEnum = {
   READ_WRITE: {
     label: '读写',

@@ -38,7 +38,6 @@
       <!-- 属性配置 -->
       <ThingModelProperty v-model="formData.property" is-struct-data-specs />
     </el-form>
-
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -117,19 +116,16 @@ const submitForm = async () => {
       dataSpecsList: isEmpty(data.property.dataSpecsList) ? undefined : data.property.dataSpecsList
     }
 
-    // 查找是否已有相同 identifier 的项
+    // 新增或修改同 identifier 的参数
     const existingIndex = dataSpecsList.value.findIndex(
       (spec) => spec.identifier === data.identifier
     )
     if (existingIndex > -1) {
-      // 更新已有项
       dataSpecsList.value[existingIndex] = item
     } else {
-      // 添加新项
       dataSpecsList.value.push(item)
     }
   } finally {
-    // 隐藏对话框
     dialogVisible.value = false
   }
 }
