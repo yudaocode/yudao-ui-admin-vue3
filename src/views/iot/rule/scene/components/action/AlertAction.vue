@@ -1,5 +1,15 @@
 <template>
   <div class="bg-[#dbe5f6] p-10px">
+    <!-- 告警类型说明 -->
+    <div class="flex items-center mb-10px" v-if="actionType">
+      <el-icon class="mr-5px text-orange-500"><Icon icon="ep:warning-filled" /></el-icon>
+      <span class="text-gray-600">
+        {{
+          actionType === IotRuleSceneActionTypeEnum.ALERT_TRIGGER ? '触发告警通知' : '告警恢复通知'
+        }}
+      </span>
+    </div>
+
     <div class="flex items-center mb-10px">
       <span class="mr-10px w-80px">接收方式</span>
       <el-select
@@ -63,12 +73,19 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import { ActionAlert, IotAlertConfigReceiveTypeEnum } from '@/api/iot/rule/scene/scene.types'
+import {
+  ActionAlert,
+  IotAlertConfigReceiveTypeEnum,
+  IotRuleSceneActionTypeEnum
+} from '@/api/iot/rule/scene/scene.types'
 
 /** 告警执行器组件 */
 defineOptions({ name: 'AlertAction' })
 
-const props = defineProps<{ modelValue: any }>()
+const props = defineProps<{
+  modelValue: any
+  actionType?: number
+}>()
 const emits = defineEmits(['update:modelValue'])
 const alertConfig = useVModel(props, 'modelValue', emits) as Ref<ActionAlert>
 
