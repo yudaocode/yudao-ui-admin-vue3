@@ -33,17 +33,36 @@
         </el-col>
         <el-col :span="24">
           <el-divider content-position="left">触发器配置</el-divider>
-          <device-listener
-            v-for="(trigger, index) in formData.triggers"
-            :key="trigger.key"
-            :model-value="trigger"
-            @update:model-value="(val) => (formData.triggers[index] = val)"
-            class="mb-10px"
-          >
-            <el-button type="danger" round size="small" @click="removeTrigger(index)">
-              <Icon icon="ep:delete" />
-            </el-button>
-          </device-listener>
+          <!-- 根据触发类型选择不同的监听器组件 -->
+          <template v-for="(trigger, index) in formData.triggers" :key="trigger.key">
+            <!-- 设备状态变更和定时触发使用简化的监听器 -->
+            <device-state-listener
+              v-if="
+                trigger.type === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE ||
+                trigger.type === IotRuleSceneTriggerTypeEnum.TIMER
+              "
+              :model-value="trigger"
+              @update:model-value="(val) => (formData.triggers[index] = val)"
+              class="mb-10px"
+            >
+              <el-button type="danger" round size="small" @click="removeTrigger(index)">
+                <Icon icon="ep:delete" />
+              </el-button>
+            </device-state-listener>
+
+            <!-- 其他设备触发类型使用完整的监听器 -->
+            <device-listener
+              v-else
+              :model-value="trigger"
+              @update:model-value="(val) => (formData.triggers[index] = val)"
+              class="mb-10px"
+            >
+              <el-button type="danger" round size="small" @click="removeTrigger(index)">
+                <Icon icon="ep:delete" />
+              </el-button>
+            </device-listener>
+          </template>
+
           <el-button class="ml-10px!" type="primary" size="small" @click="addTrigger">
             添加触发器
           </el-button>
@@ -77,6 +96,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
 import DeviceListener from './components/listener/DeviceListener.vue'
+import DeviceStateListener from './components/listener/DeviceStateListener.vue'
 import { CommonStatusEnum } from '@/utils/constants'
 import {
   ActionConfig,
@@ -117,7 +137,7 @@ const formRef = ref() // 表单 Ref
 const addTrigger = () => {
   formData.value.triggers.push({
     key: generateUUID(), // 解决组件索引重用
-    type: IotRuleSceneTriggerTypeEnum.DEVICE,
+    type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST, // 默认为物模型属性上报
     productKey: '',
     deviceNames: [],
     conditions: [
@@ -138,7 +158,7 @@ const removeTrigger = (index: number) => {
 const addAction = () => {
   formData.value.actions.push({
     key: generateUUID(), // 解决组件索引重用
-    type: IotRuleSceneActionTypeEnum.DEVICE_CONTROL
+    type: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
   } as ActionConfig)
 }
 /** 移除执行器 */

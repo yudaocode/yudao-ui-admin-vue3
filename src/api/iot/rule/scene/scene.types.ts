@@ -4,13 +4,18 @@
 
 // 枚举定义
 const IotRuleSceneTriggerTypeEnum = {
-  DEVICE: 1, // 设备触发
-  TIMER: 2 // 定时触发
+  DEVICE_STATE_UPDATE: 1, // 设备上下线变更
+  DEVICE_PROPERTY_POST: 2, // 物模型属性上报
+  DEVICE_EVENT_POST: 3, // 设备事件上报
+  DEVICE_SERVICE_INVOKE: 4, // 设备服务调用
+  TIMER: 100 // 定时触发
 } as const
 
 const IotRuleSceneActionTypeEnum = {
-  DEVICE_CONTROL: 1, // 设备执行
-  ALERT: 2 // 告警执行
+  DEVICE_PROPERTY_SET: 1, // 设备属性设置,
+  DEVICE_SERVICE_INVOKE: 2, // 设备服务调用
+  ALERT_TRIGGER: 100, // 告警触发
+  ALERT_RECOVER: 101 // 告警恢复
 } as const
 
 const IotDeviceMessageTypeEnum = {
