@@ -98,8 +98,15 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" min-width="120px">
+      <el-table-column label="操作" align="center" min-width="180px">
         <template #default="scope">
+          <el-button
+            link
+            @click="openFirmwareDetail(scope.row.id)"
+            v-hasPermi="['iot:ota-firmware:query']"
+          >
+            详情
+          </el-button>
           <el-button
             link
             type="primary"
@@ -179,6 +186,11 @@ const getProductName = (productId: number) => {
 /** 打开产品详情 */
 const openProductDetail = (productId: number) => {
   push({ name: 'IoTProductDetail', params: { id: productId } })
+}
+
+/** 打开固件详情 */
+const openFirmwareDetail = (firmwareId: number) => {
+  push({ name: 'IoTOtaFirmwareDetail', params: { id: firmwareId } })
 }
 
 /** 搜索按钮操作 */
