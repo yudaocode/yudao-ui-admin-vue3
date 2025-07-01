@@ -1,17 +1,5 @@
 <template>
   <div class="bg-[#dbe5f6] flex p-10px">
-    <div class="flex flex-col items-center justify-center mr-10px h-a">
-      <el-select
-        v-model="deviceControlConfig.type"
-        disabled
-        class="!w-160px"
-        clearable
-        placeholder=""
-      >
-        <el-option label="属性" :value="IotDeviceMessageTypeEnum.PROPERTY" />
-        <el-option label="服务" :value="IotDeviceMessageTypeEnum.SERVICE" />
-      </el-select>
-    </div>
     <div class="">
       <div
         class="flex items-center justify-around mb-10px last:mb-0"

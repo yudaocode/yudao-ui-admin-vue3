@@ -54,32 +54,6 @@
           v-for="(condition, index) in triggerConfig.conditions"
           :key="index"
         >
-          <div class="flex flex-col items-center justify-center mr-10px h-a">
-            <el-select
-              v-model="condition.type"
-              @change="condition.parameters = []"
-              class="!w-160px"
-              clearable
-              placeholder=""
-              :disabled="isConditionTypeFixed"
-            >
-              <el-option
-                v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST"
-                label="属性"
-                :value="IotDeviceMessageTypeEnum.PROPERTY"
-              />
-              <el-option
-                v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST"
-                label="事件"
-                :value="IotDeviceMessageTypeEnum.EVENT"
-              />
-              <el-option
-                v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE"
-                label="服务"
-                :value="IotDeviceMessageTypeEnum.SERVICE"
-              />
-            </el-select>
-          </div>
           <div class="w-70%">
             <DeviceListenerCondition
               v-for="(parameter, index2) in condition.parameters"
@@ -198,11 +172,6 @@ const isDeviceTrigger = computed(() => {
   ].includes(triggerConfig.value.type as any)
 })
 
-/** 计算属性：判断条件类型是否固定（根据触发类型自动确定） */
-const isConditionTypeFixed = computed(() => {
-  return triggerConfig.value.type !== IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
-})
-
 /** 添加触发条件 */
 const addCondition = () => {
   // 根据触发类型设置默认的条件类型
@@ -235,6 +204,10 @@ const removeCondition = (index: number) => {
 const addConditionParameter = (conditionParameters: TriggerConditionParameter[]) => {
   if (!product.value) {
     message.warning('请先选择一个产品')
+    return
+  }
+  if (conditionParameters.length >= 1) {
+    message.warning('只允许添加一个参数')
     return
   }
   conditionParameters.push({} as TriggerConditionParameter)
