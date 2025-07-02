@@ -21,8 +21,8 @@
       </el-descriptions>
     </ContentWrap>
 
-    <!-- 固件升级设备统计 -->
-    <ContentWrap title="固件升级设备统计" class="mb-20px">
+    <!-- 升级设备统计 -->
+    <ContentWrap title="升级设备统计" class="mb-20px">
       <el-row :gutter="20" class="py-20px" v-loading="firmwareStatisticsLoading">
         <el-col :span="6">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
@@ -86,7 +86,11 @@
     </ContentWrap>
 
     <!-- 任务管理 -->
-    <OtaTaskList :firmware-id="firmwareId" />
+    <OtaTaskList
+      :firmware-id="firmwareId"
+      :product-id="firmware?.productId"
+      @success="getStatistics"
+    />
   </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <ContentWrap title="固件任务管理" class="mb-20px">
+  <ContentWrap title="升级任务管理" class="mb-20px">
     <!-- 搜索栏 -->
     <el-form
       class="-mb-15px"
@@ -14,6 +14,7 @@
         </el-button>
       </el-form-item>
       <el-form-item style="float: right">
+        <!--TODO @AI:有个 bug：回车后，会刷新，修复下 -->
         <el-input
           v-model="queryParams.name"
           placeholder="请输入任务名称"
@@ -56,8 +57,10 @@
           <dict-tag :type="DICT_TYPE.IOT_OTA_TASK_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="80">
+      <el-table-column label="操作" align="center" width="120">
+        <!-- TODO @AI：可能要参考别的模块，处理下？-->
         <template #default="scope">
+          <el-button link type="primary" @click="handleViewDetail(scope.row.id)"> 详情 </el-button>
           <el-button
             v-if="scope.row.status === IoTOtaTaskStatusEnum.IN_PROGRESS.value"
             link
@@ -80,7 +83,15 @@
     />
 
     <!-- 新增任务弹窗 -->
-    <OtaTaskForm ref="taskFormRef" :firmware-id="firmwareId" @success="getTaskList" />
+    <OtaTaskForm
+      ref="taskFormRef"
+      :firmware-id="firmwareId"
+      :product-id="productId"
+      @success="handleTaskSuccess"
+    />
+
+    <!-- 任务详情弹窗 -->
+    <OtaTaskDetail ref="taskDetailRef" />
   </ContentWrap>
 </template>
 
@@ -90,12 +101,18 @@ import { IoTOtaTaskApi, OtaTask } from '@/api/iot/ota/task'
 import { DICT_TYPE } from '@/utils/dict'
 import { IoTOtaTaskStatusEnum } from '@/views/iot/utils/constants'
 import OtaTaskForm from './OtaTaskForm.vue'
+import OtaTaskDetail from './OtaTaskDetail.vue'
 
 /** IoT OTA 任务列表 */
 defineOptions({ name: 'OtaTaskList' })
 
 const props = defineProps<{
   firmwareId: number
+  productId?: number
+}>()
+
+const emit = defineEmits<{
+  success: []
 }>()
 
 const message = useMessage() // 消息弹窗
@@ -110,10 +127,9 @@ const queryParams = reactive({
   name: '',
   firmwareId: props.firmwareId
 })
-const queryFormRef = ref()
-
-// 任务表单引用
-const taskFormRef = ref()
+const queryFormRef = ref() // 查询表单引用
+const taskFormRef = ref() // 任务表单引用
+const taskDetailRef = ref() // 任务详情引用
 
 /** 获取任务列表 */
 const getTaskList = async () => {
@@ -136,6 +152,19 @@ const handleQuery = () => {
 /** 打开任务表单 */
 const openTaskForm = () => {
   taskFormRef.value?.open()
+}
+
+/** 处理任务创建成功 */
+const handleTaskSuccess = () => {
+  getTaskList()
+  emit('success')
+}
+
+/** 查看任务详情 */
+const handleViewDetail = (id: number | undefined) => {
+  if (id) {
+    taskDetailRef.value?.open(id)
+  }
 }
 
 /** 取消任务 */

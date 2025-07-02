@@ -243,5 +243,6 @@ export enum DICT_TYPE {
   IOT_ALERT_LEVEL = 'iot_alert_level', // IoT 告警级别
   IOT_ALERT_RECEIVE_TYPE = 'iot_alert_receive_type', // IoT 告警接收类型
   IOT_OTA_TASK_DEVICE_SCOPE = 'iot_ota_task_device_scope', // IoT OTA任务设备范围
-  IOT_OTA_TASK_STATUS = 'iot_ota_task_status' // IoT OTA任务状态
+  IOT_OTA_TASK_STATUS = 'iot_ota_task_status', // IoT OTA 任务状态
+  IOT_OTA_RECORD_STATUS = 'iot_ota_record_status' // IoT OTA 记录状态
 }

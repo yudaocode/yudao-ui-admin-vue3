@@ -118,8 +118,13 @@ export const DeviceApi = {
   },
 
   // 获取设备的精简信息列表
-  getSimpleDeviceList: async (deviceType?: number) => {
-    return await request.get({ url: `/iot/device/simple-list?`, params: { deviceType } })
+  getSimpleDeviceList: async (deviceType?: number, productId?: number) => {
+    return await request.get({ url: `/iot/device/simple-list?`, params: { deviceType, productId } })
+  },
+
+  // 根据产品编号，获取设备的精简信息列表
+  getDeviceListByProductId: async (productId: number) => {
+    return await request.get({ url: `/iot/device/simple-list?`, params: { productId } })
   },
 
   // 获取导入模板

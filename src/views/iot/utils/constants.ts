@@ -154,7 +154,7 @@ export const IoTOtaTaskDeviceScopeEnum = {
     label: '全部设备',
     value: 1
   },
-  SPECIFIC: {
+  SELECT: {
     label: '指定设备',
     value: 2
   }
