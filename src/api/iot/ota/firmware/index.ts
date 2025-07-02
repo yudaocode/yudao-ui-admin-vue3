@@ -7,6 +7,7 @@ export interface IoTOtaFirmware {
   description?: string // 固件描述
   version?: string // 版本号
   productId?: number // 产品编号
+  productName?: string // 产品名称
   fileUrl?: string // 固件文件 URL
   fileSize?: number // 固件文件大小
   fileDigestAlgorithm?: string // 固件文件签名算法

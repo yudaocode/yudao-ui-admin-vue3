@@ -147,3 +147,67 @@ export const getDataTypeOptionsLabel = (value: string) => {
   const dataType = getDataTypeOptions().find((option) => option.value === value)
   return dataType && `${dataType.value}(${dataType.label})`
 }
+
+// IoT OTA 任务设备范围枚举
+export const IoTOtaTaskDeviceScopeEnum = {
+  ALL: {
+    label: '全部设备',
+    value: 1
+  },
+  SPECIFIC: {
+    label: '指定设备',
+    value: 2
+  }
+} as const
+
+// IoT OTA 任务状态枚举
+export const IoTOtaTaskStatusEnum = {
+  PENDING: {
+    label: '待执行',
+    value: 1
+  },
+  IN_PROGRESS: {
+    label: '执行中',
+    value: 2
+  },
+  COMPLETED: {
+    label: '已完成',
+    value: 3
+  },
+  CANCELLED: {
+    label: '已取消',
+    value: 4
+  },
+  FAILED: {
+    label: '执行失败',
+    value: 5
+  }
+} as const
+
+// IoT OTA 升级记录状态枚举
+export const IoTOtaTaskRecordStatusEnum = {
+  PENDING: {
+    label: '待推送',
+    value: 1
+  },
+  PUSHED: {
+    label: '已推送',
+    value: 2
+  },
+  IN_PROGRESS: {
+    label: '正在升级',
+    value: 3
+  },
+  SUCCESS: {
+    label: '升级成功',
+    value: 4
+  },
+  FAILED: {
+    label: '升级失败',
+    value: 5
+  },
+  CANCELLED: {
+    label: '升级取消',
+    value: 6
+  }
+} as const
