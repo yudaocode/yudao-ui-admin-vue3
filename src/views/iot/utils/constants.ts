@@ -162,25 +162,17 @@ export const IoTOtaTaskDeviceScopeEnum = {
 
 // IoT OTA 任务状态枚举
 export const IoTOtaTaskStatusEnum = {
-  PENDING: {
-    label: '待执行',
-    value: 1
-  },
   IN_PROGRESS: {
-    label: '执行中',
-    value: 2
+    label: '进行中',
+    value: 10
   },
   COMPLETED: {
     label: '已完成',
-    value: 3
+    value: 20
   },
-  CANCELLED: {
+  CANCELED: {
     label: '已取消',
-    value: 4
-  },
-  FAILED: {
-    label: '执行失败',
-    value: 5
+    value: 30
   }
 } as const
 
@@ -188,26 +180,26 @@ export const IoTOtaTaskStatusEnum = {
 export const IoTOtaTaskRecordStatusEnum = {
   PENDING: {
     label: '待推送',
-    value: 1
+    value: 0
   },
   PUSHED: {
     label: '已推送',
-    value: 2
+    value: 10
   },
-  IN_PROGRESS: {
-    label: '正在升级',
-    value: 3
+  UPGRADING: {
+    label: '升级中',
+    value: 20
   },
   SUCCESS: {
     label: '升级成功',
-    value: 4
+    value: 30
   },
-  FAILED: {
+  FAILURE: {
     label: '升级失败',
-    value: 5
+    value: 40
   },
-  CANCELLED: {
+  CANCELED: {
     label: '升级取消',
-    value: 6
+    value: 50
   }
 } as const

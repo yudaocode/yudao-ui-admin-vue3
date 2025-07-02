@@ -1,5 +1,5 @@
 <template>
-  <ContentWrap title="任务管理" class="mb-20px">
+  <ContentWrap title="固件任务管理" class="mb-20px">
     <!-- 搜索栏 -->
     <el-form
       class="-mb-15px"
@@ -59,7 +59,7 @@
       <el-table-column label="操作" align="center" width="80">
         <template #default="scope">
           <el-button
-            v-if="scope.row.status === IoTOtaTaskStatusEnum.PENDING.value"
+            v-if="scope.row.status === IoTOtaTaskStatusEnum.IN_PROGRESS.value"
             link
             type="primary"
             @click="handleCancelTask(scope.row.id)"

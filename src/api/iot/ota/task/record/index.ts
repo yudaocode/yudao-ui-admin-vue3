@@ -16,12 +16,11 @@ export interface OtaTaskRecord {
 
 // IoT OTA 任务记录 API
 export const IoTOtaTaskRecordApi = {
-  // 获取 OTA 升级记录状态统计
-  getOtaTaskRecordStatusCount: async (firmwareId?: number, taskId?: number) => {
+  getOtaTaskRecordStatusStatistics: async (firmwareId?: number, taskId?: number) => {
     const params: any = {}
     if (firmwareId) params.firmwareId = firmwareId
     if (taskId) params.taskId = taskId
-    return await request.get({ url: `/iot/ota/task/record/get-status-count`, params })
+    return await request.get({ url: `/iot/ota/task/record/get-status-statistics`, params })
   },
 
   // 查询 OTA 任务记录分页

@@ -23,31 +23,37 @@
 
     <!-- 固件升级设备统计 -->
     <ContentWrap title="固件升级设备统计" class="mb-20px">
-      <el-row :gutter="20" class="py-20px" v-loading="statisticsLoading">
+      <el-row :gutter="20" class="py-20px" v-loading="firmwareStatisticsLoading">
         <el-col :span="6">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
-            <div class="text-32px font-bold mb-8px text-blue-500">{{ statistics.total || 0 }}</div>
+            <div class="text-32px font-bold mb-8px text-blue-500">
+              {{
+                Object.values(firmwareStatistics).reduce((sum, count) => sum + (count || 0), 0) || 0
+              }}
+            </div>
             <div class="text-14px text-gray-600">升级设备总数</div>
           </div>
         </el-col>
         <el-col :span="3">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
             <div class="text-32px font-bold mb-8px text-gray-400">
-              {{ statistics.pending || 0 }}
+              {{ firmwareStatistics[IoTOtaTaskRecordStatusEnum.PENDING.value] || 0 }}
             </div>
             <div class="text-14px text-gray-600">待推送</div>
           </div>
         </el-col>
         <el-col :span="3">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
-            <div class="text-32px font-bold mb-8px text-blue-400">{{ statistics.pushed || 0 }}</div>
+            <div class="text-32px font-bold mb-8px text-blue-400">{{
+              firmwareStatistics[IoTOtaTaskRecordStatusEnum.PUSHED.value] || 0
+            }}</div>
             <div class="text-14px text-gray-600">已推送</div>
           </div>
         </el-col>
         <el-col :span="3">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
             <div class="text-32px font-bold mb-8px text-yellow-500">
-              {{ statistics.inProgress || 0 }}
+              {{ firmwareStatistics[IoTOtaTaskRecordStatusEnum.UPGRADING.value] || 0 }}
             </div>
             <div class="text-14px text-gray-600">正在升级</div>
           </div>
@@ -55,21 +61,23 @@
         <el-col :span="3">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
             <div class="text-32px font-bold mb-8px text-green-500">
-              {{ statistics.success || 0 }}
+              {{ firmwareStatistics[IoTOtaTaskRecordStatusEnum.SUCCESS.value] || 0 }}
             </div>
             <div class="text-14px text-gray-600">升级成功</div>
           </div>
         </el-col>
         <el-col :span="3">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
-            <div class="text-32px font-bold mb-8px text-red-500">{{ statistics.failed || 0 }}</div>
+            <div class="text-32px font-bold mb-8px text-red-500">{{
+              firmwareStatistics[IoTOtaTaskRecordStatusEnum.FAILURE.value] || 0
+            }}</div>
             <div class="text-14px text-gray-600">升级失败</div>
           </div>
         </el-col>
         <el-col :span="3">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
             <div class="text-32px font-bold mb-8px text-gray-400">
-              {{ statistics.cancelled || 0 }}
+              {{ firmwareStatistics[IoTOtaTaskRecordStatusEnum.CANCELED.value] || 0 }}
             </div>
             <div class="text-14px text-gray-600">升级取消</div>
           </div>
@@ -78,7 +86,7 @@
     </ContentWrap>
 
     <!-- 任务管理 -->
-    <OtaTaskList ref="otaTaskListRef" :firmware-id="firmwareId" />
+    <OtaTaskList :firmware-id="firmwareId" />
   </div>
 </template>
 
@@ -100,19 +108,8 @@ const firmwareLoading = ref(false)
 const firmware = ref<IoTOtaFirmware>({} as IoTOtaFirmware)
 
 // 统计信息
-const statisticsLoading = ref(false)
-const statistics = ref({
-  total: 0,
-  pending: 0,
-  pushed: 0,
-  inProgress: 0,
-  success: 0,
-  failed: 0,
-  cancelled: 0
-})
-
-// 任务列表组件引用
-const otaTaskListRef = ref()
+const firmwareStatisticsLoading = ref(false)
+const firmwareStatistics = ref<Record<string, number>>({})
 
 /** 获取固件信息 */
 const getFirmwareInfo = async () => {
@@ -126,28 +123,13 @@ const getFirmwareInfo = async () => {
 
 /** 获取升级统计 */
 const getStatistics = async () => {
-  statisticsLoading.value = true
+  firmwareStatisticsLoading.value = true
   try {
-    const data = await IoTOtaTaskRecordApi.getOtaTaskRecordStatusCount(firmwareId.value)
-    statistics.value = {
-      pending: data[IoTOtaTaskRecordStatusEnum.PENDING.value] || 0,
-      pushed: data[IoTOtaTaskRecordStatusEnum.PUSHED.value] || 0,
-      inProgress: data[IoTOtaTaskRecordStatusEnum.IN_PROGRESS.value] || 0,
-      success: data[IoTOtaTaskRecordStatusEnum.SUCCESS.value] || 0,
-      failed: data[IoTOtaTaskRecordStatusEnum.FAILED.value] || 0,
-      cancelled: data[IoTOtaTaskRecordStatusEnum.CANCELLED.value] || 0,
-      total: 0
-    }
-    // 计算总数
-    statistics.value.total =
-      statistics.value.pending +
-      statistics.value.pushed +
-      statistics.value.inProgress +
-      statistics.value.success +
-      statistics.value.failed +
-      statistics.value.cancelled
+    firmwareStatistics.value = await IoTOtaTaskRecordApi.getOtaTaskRecordStatusStatistics(
+      firmwareId.value
+    )
   } finally {
-    statisticsLoading.value = false
+    firmwareStatisticsLoading.value = false
   }
 }
 
