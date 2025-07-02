@@ -9,10 +9,11 @@
       label-width="68px"
     >
       <el-form-item>
-        <el-button type="primary" @click="openTaskForm">
+        <el-button type="primary" @click="openTaskForm" v-hasPermi="['iot:ota-task:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
+      <!-- TODO @AI：unocss -->
       <el-form-item style="float: right">
         <!--TODO @AI:有个 bug：回车后，会刷新，修复下 -->
         <el-input
@@ -58,13 +59,12 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="120">
-        <!-- TODO @AI：可能要参考别的模块，处理下？-->
         <template #default="scope">
-          <el-button link type="primary" @click="handleViewDetail(scope.row.id)"> 详情 </el-button>
+          <el-button link type="primary" @click="handleTaskDetail(scope.row.id)"> 详情 </el-button>
           <el-button
             v-if="scope.row.status === IoTOtaTaskStatusEnum.IN_PROGRESS.value"
             link
-            type="primary"
+            type="danger"
             @click="handleCancelTask(scope.row.id)"
             v-hasPermi="['iot:ota-task:cancel']"
           >
@@ -87,7 +87,7 @@
       ref="taskFormRef"
       :firmware-id="firmwareId"
       :product-id="productId"
-      @success="handleTaskSuccess"
+      @success="handleTaskCreateSuccess"
     />
 
     <!-- 任务详情弹窗 -->
@@ -108,11 +108,7 @@ defineOptions({ name: 'OtaTaskList' })
 
 const props = defineProps<{
   firmwareId: number
-  productId?: number
-}>()
-
-const emit = defineEmits<{
-  success: []
+  productId: number
 }>()
 
 const message = useMessage() // 消息弹窗
@@ -155,16 +151,15 @@ const openTaskForm = () => {
 }
 
 /** 处理任务创建成功 */
-const handleTaskSuccess = () => {
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+const handleTaskCreateSuccess = () => {
   getTaskList()
   emit('success')
 }
 
 /** 查看任务详情 */
-const handleViewDetail = (id: number | undefined) => {
-  if (id) {
-    taskDetailRef.value?.open(id)
-  }
+const handleTaskDetail = (id: number) => {
+  taskDetailRef.value?.open(id)
 }
 
 /** 取消任务 */
@@ -173,7 +168,9 @@ const handleCancelTask = async (id: number) => {
     await message.confirm('确认要取消该升级任务吗？')
     await IoTOtaTaskApi.cancelOtaTask(id)
     message.success('取消成功')
-    getTaskList()
+    // 刷新数据
+    await getTaskList()
+    emit('success')
   } catch (error) {
     console.error('取消任务失败', error)
   }
@@ -185,7 +182,5 @@ onMounted(() => {
 })
 
 /** 暴露方法供父组件调用 */
-defineExpose({
-  getTaskList
-})
+defineExpose({ getTaskList })
 </script>

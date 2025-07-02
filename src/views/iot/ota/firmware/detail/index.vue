@@ -44,9 +44,9 @@
         </el-col>
         <el-col :span="3">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
-            <div class="text-32px font-bold mb-8px text-blue-400">{{
-              firmwareStatistics[IoTOtaTaskRecordStatusEnum.PUSHED.value] || 0
-            }}</div>
+            <div class="text-32px font-bold mb-8px text-blue-400">
+              {{ firmwareStatistics[IoTOtaTaskRecordStatusEnum.PUSHED.value] || 0 }}
+            </div>
             <div class="text-14px text-gray-600">已推送</div>
           </div>
         </el-col>
@@ -68,9 +68,9 @@
         </el-col>
         <el-col :span="3">
           <div class="text-center p-20px border border-solid border-gray-200 rounded bg-gray-50">
-            <div class="text-32px font-bold mb-8px text-red-500">{{
-              firmwareStatistics[IoTOtaTaskRecordStatusEnum.FAILURE.value] || 0
-            }}</div>
+            <div class="text-32px font-bold mb-8px text-red-500">
+              {{ firmwareStatistics[IoTOtaTaskRecordStatusEnum.FAILURE.value] || 0 }}
+            </div>
             <div class="text-14px text-gray-600">升级失败</div>
           </div>
         </el-col>

@@ -166,8 +166,8 @@ export const IoTOtaTaskStatusEnum = {
     label: '进行中',
     value: 10
   },
-  COMPLETED: {
-    label: '已完成',
+  END: {
+    label: '已结束',
     value: 20
   },
   CANCELED: {
