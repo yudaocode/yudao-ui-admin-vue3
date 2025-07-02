@@ -7,11 +7,14 @@ export interface OtaTaskRecord {
   firmwareVersion?: string // 固件版本
   taskId?: number // 任务编号
   deviceId?: string // 设备编号
+  deviceName?: string // 设备名称
+  currentVersion?: string // 当前版本
   fromFirmwareId?: number // 来源的固件编号
   fromFirmwareVersion?: string // 来源的固件版本
   status?: number // 升级状态
   progress?: number // 升级进度，百分比
   description?: string // 升级进度描述
+  updateTime?: Date // 更新时间
 }
 
 // IoT OTA 任务记录 API
@@ -31,5 +34,10 @@ export const IoTOtaTaskRecordApi = {
   // 查询 OTA 任务记录详情
   getOtaTaskRecord: async (id: number) => {
     return await request.get({ url: `/iot/ota/task/record/get?id=` + id })
+  },
+
+  // 取消 OTA 任务记录
+  cancelOtaTaskRecord: async (id: number) => {
+    return await request.post({ url: `/iot/ota/task/record/cancel?id=` + id })
   }
 }

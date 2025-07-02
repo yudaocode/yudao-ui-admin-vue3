@@ -104,16 +104,14 @@ import OtaTaskList from '../../task/OtaTaskList.vue'
 /** IoT OTA 固件详情 */
 defineOptions({ name: 'IoTOtaFirmwareDetail' })
 
-const route = useRoute()
-const firmwareId = ref(Number(route.params.id))
+const route = useRoute() // 路由
 
-// 固件信息
-const firmwareLoading = ref(false)
-const firmware = ref<IoTOtaFirmware>({} as IoTOtaFirmware)
+const firmwareId = ref(Number(route.params.id)) // 固件编号
+const firmwareLoading = ref(false) // 固件加载状态
+const firmware = ref<IoTOtaFirmware>({} as IoTOtaFirmware) // 固件信息
 
-// 统计信息
-const firmwareStatisticsLoading = ref(false)
-const firmwareStatistics = ref<Record<string, number>>({})
+const firmwareStatisticsLoading = ref(false) // 统计信息加载状态
+const firmwareStatistics = ref<Record<string, number>>({}) // 统计信息
 
 /** 获取固件信息 */
 const getFirmwareInfo = async () => {
