@@ -31,13 +31,8 @@ export const IoTOtaTaskRecordApi = {
     return await request.get({ url: `/iot/ota/task/record/page`, params })
   },
 
-  // 查询 OTA 任务记录详情
-  getOtaTaskRecord: async (id: number) => {
-    return await request.get({ url: `/iot/ota/task/record/get?id=` + id })
-  },
-
   // 取消 OTA 任务记录
   cancelOtaTaskRecord: async (id: number) => {
-    return await request.post({ url: `/iot/ota/task/record/cancel?id=` + id })
+    return await request.put({ url: `/iot/ota/task/record/cancel?id=` + id })
   }
 }

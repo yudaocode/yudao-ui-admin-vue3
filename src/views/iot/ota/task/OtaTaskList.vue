@@ -91,7 +91,7 @@
     />
 
     <!-- 任务详情弹窗 -->
-    <OtaTaskDetail ref="taskDetailRef" />
+    <OtaTaskDetail ref="taskDetailRef" @success="refresh" />
   </ContentWrap>
 </template>
 
@@ -169,18 +169,20 @@ const handleCancelTask = async (id: number) => {
     await IoTOtaTaskApi.cancelOtaTask(id)
     message.success('取消成功')
     // 刷新数据
-    await getTaskList()
-    emit('success')
+    await refresh()
   } catch (error) {
     console.error('取消任务失败', error)
   }
+}
+
+/** 刷新数据 */
+const refresh = async () => {
+  await getTaskList()
+  emit('success')
 }
 
 /** 初始化 */
 onMounted(() => {
   getTaskList()
 })
-
-/** 暴露方法供父组件调用 */
-defineExpose({ getTaskList })
 </script>

@@ -116,10 +116,17 @@
           <el-table-column label="操作" align="center" width="80">
             <template #default="scope">
               <el-button
-                v-if="scope.row.status === IoTOtaTaskRecordStatusEnum.UPGRADING.value"
+                v-if="
+                  [
+                    IoTOtaTaskRecordStatusEnum.PENDING.value,
+                    IoTOtaTaskRecordStatusEnum.PUSHED.value,
+                    IoTOtaTaskRecordStatusEnum.UPGRADING.value
+                  ].includes(scope.row.status)
+                "
                 link
                 type="danger"
                 @click="handleCancelUpgrade(scope.row)"
+                v-hasPermi="['iot:ota-task-record:cancel']"
               >
                 取消
               </el-button>
@@ -154,7 +161,6 @@ import { formatDate } from '@/utils/formatTime'
 defineOptions({ name: 'OtaTaskDetail' })
 
 const message = useMessage() // 消息弹窗
-
 const dialogVisible = ref(false) // 弹窗的是否展示
 
 const taskId = ref<number>() // 任务编号
@@ -242,6 +248,7 @@ const handleTabClick = (tab: TabsPaneContext) => {
 }
 
 /** 取消升级 */
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const handleCancelUpgrade = async (record: OtaTaskRecord) => {
   try {
     await message.confirm('确认要取消该设备的升级任务吗？')
@@ -250,7 +257,9 @@ const handleCancelUpgrade = async (record: OtaTaskRecord) => {
     // 刷新数据
     await getRecordList()
     await getStatistics()
-    // TODO @AI：需要 succes 不断刷新出去
+    await getTaskInfo()
+    // 通知父组件刷新数据
+    emit('success')
   } catch (error) {
     console.error('取消升级失败', error)
   }
