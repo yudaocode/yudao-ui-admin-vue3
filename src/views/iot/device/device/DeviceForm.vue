@@ -66,6 +66,44 @@
           <el-form-item label="设备序列号" prop="serialNumber">
             <el-input v-model="formData.serialNumber" placeholder="请输入设备序列号" />
           </el-form-item>
+          <el-form-item label="定位类型" prop="locationType">
+            <el-radio-group v-model="formData.locationType">
+              <el-radio
+                v-for="dict in getIntDictOptions(DICT_TYPE.IOT_LOCATION_TYPE)"
+                :key="dict.value"
+                :label="dict.value"
+              >
+                {{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <!-- 只在定位类型为GPS时显示坐标和地图 -->
+          <template v-if="showCoordinates">
+            <el-form-item label="设备经度" prop="longitude" type="number">
+              <el-input
+                v-model="formData.longitude"
+                placeholder="请输入设备经度"
+                @blur="updateLocationFromCoordinates"
+              />
+            </el-form-item>
+            <el-form-item label="设备维度" prop="latitude" type="number">
+              <el-input
+                v-model="formData.latitude"
+                placeholder="请输入设备维度"
+                @blur="updateLocationFromCoordinates"
+              />
+            </el-form-item>
+            <div class="pl-0 w-full ml-[-18px]" v-if="showMap">
+              <Map
+                :isWrite="true"
+                :clickMap="true"
+                :center="formData.location"
+                @locateChange="handleLocationChange"
+                ref="mapRef"
+                class="h-[400px] w-full"
+              />
+            </div>
+          </template>
         </el-collapse-item>
       </el-collapse>
     </el-form>
@@ -78,8 +116,11 @@
 <script setup lang="ts">
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { DeviceGroupApi } from '@/api/iot/device/group'
-import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
+import { DeviceTypeEnum, LocationTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
 import { UploadImg } from '@/components/UploadFile'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import Map from '@/components/Map/index.vue'
+import { ref } from 'vue'
 
 /** IoT 设备表单 */
 defineOptions({ name: 'IoTDeviceForm' })
@@ -91,6 +132,17 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const showMap = ref(false) // 是否显示地图组件
+const mapRef = ref(null)
+
+// 是否显示坐标信息（经度、纬度、地图）
+const showCoordinates = computed(() => {
+  return (
+    formData.value.locationType !== LocationTypeEnum.IP &&
+    formData.value.locationType !== LocationTypeEnum.MODULE
+  )
+})
+
 const formData = ref({
   id: undefined,
   productId: undefined,
@@ -100,8 +152,22 @@ const formData = ref({
   gatewayId: undefined,
   deviceType: undefined as number | undefined,
   serialNumber: undefined,
+  locationType: undefined as number | undefined,
+  longitude: undefined,
+  latitude: undefined,
+  location: '', // 格式: "经度,纬度"
   groupIds: [] as number[]
 })
+
+// 监听经纬度变化，更新location
+watch([() => formData.value.longitude, () => formData.value.latitude], ([newLong, newLat]) => {
+  if (newLong && newLat) {
+    formData.value.location = `${newLong},${newLat}`
+    // 有了经纬度数据后显示地图
+    showMap.value = true
+  }
+})
+
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   deviceName: [
@@ -152,15 +218,25 @@ const open = async (type: string, id?: number) => {
   formType.value = type
   resetForm()
 
+  // 默认不显示地图，等待数据加载
+  showMap.value = false
+
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
       formData.value = await DeviceApi.getDevice(id)
+
+      // 如果有经纬度，设置location字段用于地图显示
+      if (formData.value.longitude && formData.value.latitude) {
+        formData.value.location = `${formData.value.longitude},${formData.value.latitude}`
+      }
     } finally {
       formLoading.value = false
     }
   }
+  // 如果有经纬信息，则数据加载完成后，显示地图
+  showMap.value = true
 
   // 加载网关设备列表
   try {
@@ -189,6 +265,16 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as DeviceVO
+
+    // 如果定位类型是IP或MODULE，清空经纬度信息
+    if (
+      data.locationType === LocationTypeEnum.IP ||
+      data.locationType === LocationTypeEnum.MODULE
+    ) {
+      data.longitude = undefined
+      data.latitude = undefined
+    }
+
     if (formType.value === 'create') {
       await DeviceApi.createDevice(data)
       message.success(t('common.createSuccess'))
@@ -215,9 +301,15 @@ const resetForm = () => {
     gatewayId: undefined,
     deviceType: undefined,
     serialNumber: undefined,
+    locationType: undefined,
+    longitude: undefined,
+    latitude: undefined,
+    location: '',
     groupIds: []
   }
   formRef.value?.resetFields()
+  // 重置表单时，隐藏地图
+  showMap.value = false
 }
 
 /** 产品选择变化 */
@@ -228,5 +320,23 @@ const handleProductChange = (productId: number) => {
   }
   const product = products.value?.find((item) => item.id === productId)
   formData.value.deviceType = product?.deviceType
+  formData.value.locationType = product?.locationType
+}
+
+/** 处理位置变化 */
+const handleLocationChange = (lnglat) => {
+  formData.value.longitude = lnglat[0]
+  formData.value.latitude = lnglat[1]
+}
+
+/** 根据经纬度更新地图位置 */
+const updateLocationFromCoordinates = () => {
+  // 验证经纬度是否有效
+  if (formData.value.longitude && formData.value.latitude) {
+    // 更新location字段，地图组件会根据此字段更新
+    formData.value.location = `${formData.value.longitude},${formData.value.latitude}`
+    console.log('更新location字段:', formData.value.location)
+    mapRef.value.regeoCode(formData.value.location)
+  }
 }
 </script>

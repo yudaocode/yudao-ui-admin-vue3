@@ -13,6 +13,7 @@ export interface ProductVO {
   description: string // 产品描述
   status: number // 产品状态
   deviceType: number // 设备类型
+  locationType: number // 设备类型
   netType: number // 联网方式
   codecType: string // 数据格式（编解码器类型）
   deviceCount: number // 设备数量
@@ -24,6 +25,12 @@ export enum DeviceTypeEnum {
   DEVICE = 0, // 直连设备
   GATEWAY_SUB = 1, // 网关子设备
   GATEWAY = 2 // 网关设备
+}
+// IOT 产品定位类型枚举类 0: 手动定位, 1: IP 定位, 2: 定位模块定位
+export enum LocationTypeEnum {
+  MANUAL = 0, // 手动定位
+  IP = 1, // IP 定位
+  MODULE = 2 // 定位模块定位
 }
 // IOT 数据格式（编解码器类型）枚举类
 export enum CodecTypeEnum {
