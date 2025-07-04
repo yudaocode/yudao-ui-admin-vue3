@@ -136,7 +136,7 @@ const formData = ref({
   gatewayId: undefined,
   deviceType: undefined as number | undefined,
   serialNumber: undefined,
-  locationType: undefined,
+  locationType: undefined as number | undefined,
   longitude: undefined,
   latitude: undefined,
   groupIds: [] as number[]
@@ -270,5 +270,6 @@ const handleProductChange = (productId: number) => {
   }
   const product = products.value?.find((item) => item.id === productId)
   formData.value.deviceType = product?.deviceType
+  formData.value.locationType = product?.locationType
 }
 </script>

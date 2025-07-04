@@ -139,7 +139,7 @@ const formRules = reactive({
   name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
   categoryId: [{ required: true, message: '产品分类不能为空', trigger: 'change' }],
   deviceType: [{ required: true, message: '设备类型不能为空', trigger: 'change' }],
-  locationType: [{ required: true, message: '定位类型不能为空', trigger: 'change' }],
+  locationType: [{ required: false, message: '定位类型不能为空', trigger: 'change' }],
   netType: [
     {
       required: true,

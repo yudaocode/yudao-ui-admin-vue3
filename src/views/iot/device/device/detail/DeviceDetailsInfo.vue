@@ -4,84 +4,56 @@
     <ContentWrap>
       <el-row :gutter="16">
         <!-- 左侧设备信息 -->
-        <el-col :span="8">
-          <el-card>
+        <el-col :span="12">
+          <el-card class="h-full">
             <template #header>
               <div class="flex items-center">
                 <Icon icon="ep:info-filled" class="mr-2 text-primary" />
                 <span>设备信息</span>
               </div>
             </template>
-            <div class="info-list">
-              <div class="info-item">
-                <span class="label">产品名称：</span>
-                <span class="value">{{ product.name }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">ProductKey：</span>
-                <span class="value">
-                  {{ product.productKey }}
-                  <el-button @click="copyToClipboard(product.productKey)" link>复制</el-button>
-                </span>
-              </div>
-              <div class="info-item">
-                <span class="label">设备类型：</span>
-                <span class="value">
-                  <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
-                </span>
-              </div>
-              <div class="info-item">
-                <span class="label">定位类型：</span>
-                <span class="value">
-                  <dict-tag :type="DICT_TYPE.IOT_LOCATION_TYPE" :value="device.locationType" />
-                </span>
-              </div>
-              <div class="info-item">
-                <span class="label">DeviceName：</span>
-                <span class="value">
-                  {{ device.deviceName }}
-                  <el-button @click="copyToClipboard(device.deviceName)" link>复制</el-button>
-                </span>
-              </div>
-              <div class="info-item">
-                <span class="label">备注名称：</span>
-                <span class="value">{{ device.nickname }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">创建时间：</span>
-                <span class="value">{{ formatDate(device.createTime) }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">当前状态：</span>
-                <span class="value">
-                  <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="device.state" />
-                </span>
-              </div>
-              <div class="info-item">
-                <span class="label">激活时间：</span>
-                <span class="value">{{ formatDate(device.activeTime) }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">最后上线时间：</span>
-                <span class="value">{{ formatDate(device.onlineTime) }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">最后离线时间：</span>
-                <span class="value">{{ formatDate(device.offlineTime) }}</span>
-              </div>
-              <div class="info-item">
-                <span class="label">认证信息：</span>
-                <span class="value">
-                  <el-button type="primary" @click="handleAuthInfoDialogOpen" plain>查看</el-button>
-                </span>
-              </div>
-            </div>
+            <el-descriptions :column="2" border class="device-descriptions">
+              <el-descriptions-item label="产品名称">{{ product.name }}</el-descriptions-item>
+              <el-descriptions-item label="ProductKey">
+                {{ product.productKey }}
+                <el-button @click="copyToClipboard(product.productKey)" link>复制</el-button>
+              </el-descriptions-item>
+              <el-descriptions-item label="设备类型">
+                <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
+              </el-descriptions-item>
+              <el-descriptions-item label="定位类型">
+                <dict-tag :type="DICT_TYPE.IOT_LOCATION_TYPE" :value="device.locationType" />
+              </el-descriptions-item>
+              <el-descriptions-item label="DeviceName">
+                {{ device.deviceName }}
+                <el-button @click="copyToClipboard(device.deviceName)" link>复制</el-button>
+              </el-descriptions-item>
+              <el-descriptions-item label="备注名称">{{ device.nickname }}</el-descriptions-item>
+              <el-descriptions-item label="创建时间">
+                {{ formatDate(device.createTime) }}
+              </el-descriptions-item>
+              <el-descriptions-item label="当前状态">
+                <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="device.state" />
+              </el-descriptions-item>
+              <el-descriptions-item label="激活时间">
+                {{ formatDate(device.activeTime) }}
+              </el-descriptions-item>
+              <el-descriptions-item label="最后上线时间">
+                {{ formatDate(device.onlineTime) }}
+              </el-descriptions-item>
+              <el-descriptions-item label="最后离线时间">
+                {{ formatDate(device.offlineTime) }}
+              </el-descriptions-item>
+              <el-descriptions-item label="认证信息">
+                <el-button type="primary" @click="handleAuthInfoDialogOpen" plain>查看</el-button>
+              </el-descriptions-item>
+            </el-descriptions>
           </el-card>
         </el-col>
 
         <!-- 右侧地图 -->
-        <el-col :span="16">
-          <el-card class="map-card">
+        <el-col :span="12">
+          <el-card class="h-full">
             <template #header>
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -89,11 +61,22 @@
                   <span>设备位置</span>
                 </div>
                 <div class="text-[14px] text-[var(--el-text-color-secondary)]">
-                  最后上线时间：{{ device.onlineTime ? formatDate(device.onlineTime, 'MM-DD HH:mm:ss') : '--' }}
+                  最后上线时间：{{
+                    device.onlineTime ? formatDate(device.onlineTime, 'MM-DD HH:mm:ss') : '--'
+                  }}
                 </div>
               </div>
             </template>
-            <Map v-if="showMap" :center="getLocationString()" />
+            <div class="h-[400px] w-full">
+              <Map v-if="showMap" :center="getLocationString()" class="h-full w-full" />
+              <div
+                v-else
+                class="flex items-center justify-center h-full w-full bg-[var(--el-fill-color-light)] text-[var(--el-text-color-secondary)]"
+              >
+                <Icon icon="ep:warning" class="mr-2 text-warning" />
+                <span>暂无位置信息</span>
+              </div>
+            </div>
           </el-card>
         </el-col>
       </el-row>
@@ -210,29 +193,16 @@ const handleAuthInfoDialogClose = () => {
   authDialogVisible.value = false
 }
 </script>
-
 <style scoped>
-.info-list .info-item {
-  display: flex;
-  margin-bottom: 16px;
+/* 使用少量CSS覆盖el-descriptions组件的样式，使其更符合Tailwind的间距设计 */
+.device-descriptions :deep(.el-descriptions__label),
+.device-descriptions :deep(.el-descriptions__content) {
+  @apply px-4 py-3 flex items-center;
+  min-height: 50px;
 }
 
-.info-list .info-item .label {
-  width: 100px;
-  color: var(--el-text-color-secondary);
-}
-
-.info-list .info-item .value {
-  flex: 1;
-  color: var(--el-text-color-primary);
-}
-
-.map-card {
-  height: 100%;
-}
-
-.map-card :deep(.el-card__body) {
-  height: calc(100% - 55px);
-  padding: 0;
+.device-descriptions :deep(.el-descriptions__body) {
+  @apply p-0;
 }
 </style>
+
