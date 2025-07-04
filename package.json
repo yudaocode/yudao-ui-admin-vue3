@@ -25,6 +25,7 @@
     "lint:lint-staged": "lint-staged -c "
   },
   "dependencies": {
+    "@amap/amap-jsapi-loader": "^1.0.1",
     "@element-plus/icons-vue": "^2.1.0",
     "@form-create/designer": "^3.2.6",
     "@form-create/element-ui": "^3.2.11",

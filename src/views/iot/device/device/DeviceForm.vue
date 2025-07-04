@@ -66,6 +66,41 @@
           <el-form-item label="设备序列号" prop="serialNumber">
             <el-input v-model="formData.serialNumber" placeholder="请输入设备序列号" />
           </el-form-item>
+          <el-form-item label="定位类型" prop="locationType">
+            <el-radio-group v-model="formData.locationType">
+              <el-radio
+                v-for="dict in getIntDictOptions(DICT_TYPE.IOT_LOCATION_TYPE)"
+                :key="dict.value"
+                :label="dict.value"
+              >
+                {{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="设备经度" prop="longitude" type="number">
+            <el-input v-model="formData.longitude" placeholder="请输入设备经度">
+              <template #append>
+                <el-link
+                  :underline="false"
+                  href="https://api.map.baidu.com/lbsapi/getpoint/index.html"
+                  target="_blank"
+                  >坐标拾取</el-link
+                >
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="设备维度" prop="latitude" type="number">
+            <el-input v-model="formData.latitude" placeholder="请输入设备维度">
+              <template #append>
+                <el-link
+                  :underline="false"
+                  href="https://api.map.baidu.com/lbsapi/getpoint/index.html"
+                  target="_blank"
+                  >坐标拾取</el-link
+                >
+              </template>
+            </el-input>
+          </el-form-item>
         </el-collapse-item>
       </el-collapse>
     </el-form>
@@ -80,6 +115,7 @@ import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { DeviceGroupApi } from '@/api/iot/device/group'
 import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
 import { UploadImg } from '@/components/UploadFile'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 /** IoT 设备表单 */
 defineOptions({ name: 'IoTDeviceForm' })
@@ -100,6 +136,9 @@ const formData = ref({
   gatewayId: undefined,
   deviceType: undefined as number | undefined,
   serialNumber: undefined,
+  locationType: undefined,
+  longitude: undefined,
+  latitude: undefined,
   groupIds: [] as number[]
 })
 const formRules = reactive({
@@ -215,6 +254,9 @@ const resetForm = () => {
     gatewayId: undefined,
     deviceType: undefined,
     serialNumber: undefined,
+    locationType: undefined,
+    longitude: undefined,
+    latitude: undefined,
     groupIds: []
   }
   formRef.value?.resetFields()
