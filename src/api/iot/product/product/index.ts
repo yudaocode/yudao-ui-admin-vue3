@@ -26,6 +26,12 @@ export enum DeviceTypeEnum {
   GATEWAY_SUB = 1, // 网关子设备
   GATEWAY = 2 // 网关设备
 }
+// IOT 产品定位类型枚举类 0: 手动定位, 1: IP 定位, 2: 定位模块定位
+export enum LocationTypeEnum {
+  MANUAL = 0, // 手动定位
+  IP = 1, // IP 定位
+  MODULE = 2 // 定位模块定位
+}
 // IOT 数据格式（编解码器类型）枚举类
 export enum CodecTypeEnum {
   ALINK = 'Alink' // 阿里云 Alink 协议

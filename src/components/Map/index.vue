@@ -1,7 +1,7 @@
 <template>
   <div v-if="props.isWrite">
     <el-form ref="form" label-width="120px">
-      <el-form-item label="设备位置:">
+      <el-form-item label="定位位置:">
         <el-select
           style="width: 100%"
           v-model="state.address"
@@ -9,7 +9,7 @@
           filterable
           remote
           reserve-keyword
-          placeholder="请输入地址"
+          placeholder="可输入地址查询经纬度"
           :remote-method="autoSearch"
           @change="regeoCode"
           :loading="state.loading"
@@ -176,6 +176,10 @@ const getAddress = (lnglat) => {
     }
   })
 }
+// 显式暴露方法，使其可以被父组件访问
+defineExpose({
+  regeoCode
+})
 
 onMounted(() => {
   loadMap()
