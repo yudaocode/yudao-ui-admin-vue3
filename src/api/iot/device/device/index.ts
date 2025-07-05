@@ -22,8 +22,8 @@ export interface DeviceVO {
   mqttPassword: string // MQTT 密码
   authType: string // 认证类型
   locationType: number // 定位类型
-  latitude: number // 设备位置的纬度
-  longitude: number // 设备位置的经度
+  latitude?: number // 设备位置的纬度
+  longitude?: number // 设备位置的经度
   areaId: number // 地区编码
   address: string // 设备详细地址
   serialNumber: string // 设备序列号

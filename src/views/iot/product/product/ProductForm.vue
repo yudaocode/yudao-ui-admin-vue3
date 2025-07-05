@@ -34,7 +34,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="设备类型" prop="deviceType">
-        <el-radioTO-group v-model="formData.deviceType" :disabled="formType === 'update'">
+        <el-radio-group v-model="formData.deviceType" :disabled="formType === 'update'">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE)"
             :key="dict.value"
@@ -42,10 +42,10 @@
           >
             {{ dict.label }}
           </el-radio>
-        </el-radioTO-group>
+        </el-radio-group>
       </el-form-item>
       <el-form-item
-        v-if="[DeviceTypeEnum.DEVICE, DeviceTypeEnum.GATEWAY].includes(formData.deviceType)"
+        v-if="[DeviceTypeEnum.DEVICE, DeviceTypeEnum.GATEWAY].includes(formData.deviceType!)"
         label="联网方式"
         prop="netType"
       >

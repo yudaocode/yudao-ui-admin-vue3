@@ -77,8 +77,8 @@
               </el-radio>
             </el-radio-group>
           </el-form-item>
-          <!-- 只在定位类型为GPS时显示坐标和地图 -->
-          <template v-if="showCoordinates">
+          <!-- LocationTypeEnum.MANUAL：手动定位 -->
+          <template v-if="LocationTypeEnum.MANUAL === formData.locationType">
             <el-form-item label="设备经度" prop="longitude" type="number">
               <el-input
                 v-model="formData.longitude"
@@ -135,14 +135,6 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const showMap = ref(false) // 是否显示地图组件
 const mapRef = ref(null)
 
-// 是否显示坐标信息（经度、纬度、地图）
-const showCoordinates = computed(() => {
-  return (
-    formData.value.locationType !== LocationTypeEnum.IP &&
-    formData.value.locationType !== LocationTypeEnum.MODULE
-  )
-})
-
 const formData = ref({
   id: undefined,
   productId: undefined,
@@ -181,7 +173,7 @@ const formRules = reactive({
   ],
   nickname: [
     {
-      validator: (rule, value, callback) => {
+      validator: (_rule, value: any, callback) => {
         if (value === undefined || value === null) {
           callback()
           return
@@ -227,7 +219,7 @@ const open = async (type: string, id?: number) => {
     try {
       formData.value = await DeviceApi.getDevice(id)
 
-      // 如果有经纬度，设置location字段用于地图显示
+      // 如果有经纬度，设置 location 字段用于地图显示
       if (formData.value.longitude && formData.value.latitude) {
         formData.value.location = `${formData.value.longitude},${formData.value.latitude}`
       }
@@ -239,20 +231,11 @@ const open = async (type: string, id?: number) => {
   showMap.value = true
 
   // 加载网关设备列表
-  try {
-    gatewayDevices.value = await DeviceApi.getSimpleDeviceList(DeviceTypeEnum.GATEWAY)
-  } catch (error) {
-    console.error('加载网关设备列表失败:', error)
-  }
+  gatewayDevices.value = await DeviceApi.getSimpleDeviceList(DeviceTypeEnum.GATEWAY)
   // 加载产品列表
   products.value = await ProductApi.getSimpleProductList()
-
   // 加载设备分组列表
-  try {
-    deviceGroups.value = await DeviceGroupApi.getSimpleDeviceGroupList()
-  } catch (error) {
-    console.error('加载设备分组列表失败:', error)
-  }
+  deviceGroups.value = await DeviceGroupApi.getSimpleDeviceGroupList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -265,15 +248,15 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as DeviceVO
-
-    // 如果定位类型是IP或MODULE，清空经纬度信息
-    if (
-      data.locationType === LocationTypeEnum.IP ||
-      data.locationType === LocationTypeEnum.MODULE
-    ) {
+    // 如果非手动定位，不进行提交该字段
+    if (data.locationType !== LocationTypeEnum.MANUAL) {
       data.longitude = undefined
       data.latitude = undefined
     }
+    // TODO @宗超：【设备定位】address 和 areaId 也要处理；
+    // 1. 手动定位时：longitude + latitude + areaId + address：要稍微注意，address 可能要去掉省市区部分？！
+    // 2. IP 定位时：IotDeviceMessage 的 buildStateUpdateOnline 时，增加 ip 字段。这样，解析到 areaId；另外看看能不能通过 https://lbsyun.baidu.com/faq/api?title=webapi/ip-api-base（只获取 location 就 ok 啦）
+    // 3. 设备定位时：问问 haohao，一般怎么做。
 
     if (formType.value === 'create') {
       await DeviceApi.createDevice(data)
@@ -304,6 +287,7 @@ const resetForm = () => {
     locationType: undefined,
     longitude: undefined,
     latitude: undefined,
+    // TODO @宗超：【设备定位】location 是不是拿出来，不放在 formData 里
     location: '',
     groupIds: []
   }
@@ -333,9 +317,8 @@ const handleLocationChange = (lnglat) => {
 const updateLocationFromCoordinates = () => {
   // 验证经纬度是否有效
   if (formData.value.longitude && formData.value.latitude) {
-    // 更新location字段，地图组件会根据此字段更新
+    // 更新 location 字段，地图组件会根据此字段更新
     formData.value.location = `${formData.value.longitude},${formData.value.latitude}`
-    console.log('更新location字段:', formData.value.location)
     mapRef.value.regeoCode(formData.value.location)
   }
 }
