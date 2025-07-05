@@ -49,13 +49,13 @@
         @update:model-value="(val) => (actionConfig.deviceControl = val)"
       />
 
-      <!-- 告警执行器 -->
-      <AlertAction
-        v-else-if="isAlertAction"
-        :action-type="actionConfig.type"
-        :model-value="actionConfig.alert"
-        @update:model-value="(val) => (actionConfig.alert = val)"
-      />
+      <!-- 告警执行器 - 无需额外配置 -->
+      <div v-else-if="isAlertAction" class="bg-[#dbe5f6] flex items-center justify-center p-10px">
+        <el-icon class="mr-5px text-blue-500"><Icon icon="ep:info-filled" /></el-icon>
+        <span class="text-gray-600">
+          {{ getAlertActionDescription(actionConfig.type) }}
+        </span>
+      </div>
     </div>
 
     <!-- 产品、设备的选择 -->
@@ -76,11 +76,9 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ProductTableSelect from '@/views/iot/product/product/components/ProductTableSelect.vue'
 import DeviceTableSelect from '@/views/iot/device/device/components/DeviceTableSelect.vue'
 import DeviceControlAction from './DeviceControlAction.vue'
-import AlertAction from './AlertAction.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import {
-  ActionAlert,
   ActionConfig,
   ActionDeviceControl,
   IotDeviceMessageIdentifierEnum,
@@ -113,6 +111,18 @@ const isAlertAction = computed(() => {
   ].includes(actionConfig.value.type as any)
 })
 
+/** 获取告警执行器描述文本 */
+const getAlertActionDescription = (actionType: number) => {
+  switch (actionType) {
+    case IotRuleSceneActionTypeEnum.ALERT_TRIGGER:
+      return '触发告警通知，系统将自动发送告警信息'
+    case IotRuleSceneActionTypeEnum.ALERT_RECOVER:
+      return '恢复告警状态，系统将自动发送恢复通知'
+    default:
+      return '告警相关操作，无需额外配置'
+  }
+}
+
 /** 初始化执行器结构 */
 const initActionConfig = () => {
   if (!actionConfig.value) {
@@ -136,9 +146,9 @@ const initActionConfig = () => {
     } as ActionDeviceControl
   }
 
-  // 告警执行器初始化
-  if (isAlertAction.value && !actionConfig.value.alert) {
-    actionConfig.value.alert = {} as ActionAlert
+  // 告警执行器初始化 - 无需额外配置，清空 alert 配置
+  if (isAlertAction.value) {
+    actionConfig.value.alert = undefined
   }
 }
 
