@@ -1,6 +1,6 @@
 <template>
   <ContentWrap>
-    <el-descriptions :column="3" title="产品信息">
+    <el-descriptions :column="3" title="产品信息" border>
       <el-descriptions-item label="产品名称">{{ product.name }}</el-descriptions-item>
       <el-descriptions-item label="所属分类">{{ product.categoryName }}</el-descriptions-item>
       <el-descriptions-item label="设备类型">

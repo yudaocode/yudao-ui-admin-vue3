@@ -28,9 +28,9 @@ export enum DeviceTypeEnum {
 }
 // IOT 产品定位类型枚举类 0: 手动定位, 1: IP 定位, 2: 定位模块定位
 export enum LocationTypeEnum {
-  MANUAL = 0, // 手动定位
   IP = 1, // IP 定位
-  MODULE = 2 // 定位模块定位
+  MODULE = 2, // 设备定位
+  MANUAL = 3 // 手动定位
 }
 // IOT 数据格式（编解码器类型）枚举类
 export enum CodecTypeEnum {

@@ -12,11 +12,10 @@
                 <span>设备信息</span>
               </div>
             </template>
-            <el-descriptions :column="2" border class="device-descriptions">
+            <el-descriptions :column="2" border>
               <el-descriptions-item label="产品名称">{{ product.name }}</el-descriptions-item>
               <el-descriptions-item label="ProductKey">
                 {{ product.productKey }}
-                <el-button @click="copyToClipboard(product.productKey)" link>复制</el-button>
               </el-descriptions-item>
               <el-descriptions-item label="设备类型">
                 <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
@@ -26,7 +25,6 @@
               </el-descriptions-item>
               <el-descriptions-item label="DeviceName">
                 {{ device.deviceName }}
-                <el-button @click="copyToClipboard(device.deviceName)" link>复制</el-button>
               </el-descriptions-item>
               <el-descriptions-item label="备注名称">{{ device.nickname }}</el-descriptions-item>
               <el-descriptions-item label="创建时间">
@@ -45,7 +43,9 @@
                 {{ formatDate(device.offlineTime) }}
               </el-descriptions-item>
               <el-descriptions-item label="认证信息">
-                <el-button type="primary" @click="handleAuthInfoDialogOpen" plain>查看</el-button>
+                <el-button type="primary" @click="handleAuthInfoDialogOpen" plain size="small"
+                  >查看</el-button
+                >
               </el-descriptions-item>
             </el-descriptions>
           </el-card>
@@ -61,9 +61,8 @@
                   <span>设备位置</span>
                 </div>
                 <div class="text-[14px] text-[var(--el-text-color-secondary)]">
-                  最后上线时间：{{
-                    device.onlineTime ? formatDate(device.onlineTime, 'MM-DD HH:mm:ss') : '--'
-                  }}
+                  最后上线时间：
+                  {{ device.onlineTime ? formatDate(device.onlineTime) : '--' }}
                 </div>
               </div>
             </template>
@@ -132,7 +131,6 @@
   </div>
 
   <!-- TODO 待开发：设备标签 -->
-  <!-- TODO 待开发：设备地图 -->
 </template>
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
@@ -152,6 +150,7 @@ const authDialogVisible = ref(false) // 定义设备认证信息弹框的可见�
 const authPasswordVisible = ref(false) // 定义密码可见性状态
 const authInfo = ref<IotDeviceAuthInfoVO>({} as IotDeviceAuthInfoVO) // 定义设备认证信息对象
 
+// TODO @AI：注释使用 /** */ 风格，方法注释；
 // 控制地图显示的标志
 const showMap = computed(() => {
   return !!(device.longitude && device.latitude)
@@ -179,7 +178,6 @@ const copyToClipboard = async (text: string) => {
 const handleAuthInfoDialogOpen = async () => {
   try {
     authInfo.value = await DeviceApi.getDeviceAuthInfo(device.id)
-
     // 显示设备认证信息弹框
     authDialogVisible.value = true
   } catch (error) {
@@ -193,16 +191,3 @@ const handleAuthInfoDialogClose = () => {
   authDialogVisible.value = false
 }
 </script>
-<style scoped>
-/* 使用少量CSS覆盖el-descriptions组件的样式，使其更符合Tailwind的间距设计 */
-.device-descriptions :deep(.el-descriptions__label),
-.device-descriptions :deep(.el-descriptions__content) {
-  @apply px-4 py-3 flex items-center;
-  min-height: 50px;
-}
-
-.device-descriptions :deep(.el-descriptions__body) {
-  @apply p-0;
-}
-</style>
-

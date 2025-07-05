@@ -2,7 +2,7 @@
   <div class="app-container">
     <!-- 固件信息 -->
     <ContentWrap title="固件信息" class="mb-20px">
-      <el-descriptions :column="3" v-loading="firmwareLoading">
+      <el-descriptions :column="3" v-loading="firmwareLoading" border>
         <el-descriptions-item label="固件名称">
           {{ firmware?.name }}
         </el-descriptions-item>

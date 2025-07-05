@@ -2,7 +2,7 @@
   <Dialog v-model="dialogVisible" title="升级任务详情" width="1200px" append-to-body>
     <!-- 任务信息 -->
     <ContentWrap title="任务信息" class="mb-20px">
-      <el-descriptions :column="3" v-loading="taskLoading">
+      <el-descriptions :column="3" v-loading="taskLoading" border>
         <el-descriptions-item label="任务编号">{{ task.id }}</el-descriptions-item>
         <el-descriptions-item label="任务名称">{{ task.name }}</el-descriptions-item>
         <el-descriptions-item label="升级范围">

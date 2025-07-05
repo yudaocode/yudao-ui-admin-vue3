@@ -34,7 +34,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="设备类型" prop="deviceType">
-        <el-radio-group v-model="formData.deviceType" :disabled="formType === 'update'">
+        <el-radioTO-group v-model="formData.deviceType" :disabled="formType === 'update'">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE)"
             :key="dict.value"
@@ -42,18 +42,7 @@
           >
             {{ dict.label }}
           </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="定位类型" prop="locationType">
-        <el-radio-group v-model="formData.locationType" :disabled="formType === 'update'">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_LOCATION_TYPE)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
+        </el-radioTO-group>
       </el-form-item>
       <el-form-item
         v-if="[DeviceTypeEnum.DEVICE, DeviceTypeEnum.GATEWAY].includes(formData.deviceType)"
@@ -72,6 +61,17 @@
             :value="dict.value"
           />
         </el-select>
+      </el-form-item>
+      <el-form-item label="定位类型" prop="locationType">
+        <el-radio-group v-model="formData.locationType" :disabled="formType === 'update'">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_LOCATION_TYPE)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
       </el-form-item>
       <el-form-item label="数据格式" prop="codecType">
         <el-radio-group v-model="formData.codecType" :disabled="formType === 'update'">
@@ -139,7 +139,7 @@ const formRules = reactive({
   name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
   categoryId: [{ required: true, message: '产品分类不能为空', trigger: 'change' }],
   deviceType: [{ required: true, message: '设备类型不能为空', trigger: 'change' }],
-  locationType: [{ required: false, message: '定位类型不能为空', trigger: 'change' }],
+  locationType: [{ required: true, message: '定位类型不能为空', trigger: 'change' }],
   netType: [
     {
       required: true,
