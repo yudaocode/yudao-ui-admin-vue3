@@ -94,20 +94,12 @@ interface ActionDeviceControl {
   data: Record<string, any> // 具体数据
 }
 
-// 告警执行配置
-interface ActionAlert {
-  receiveType: number // 接收方式
-  phoneNumbers?: string[] // 手机号列表
-  emails?: string[] // 邮箱列表
-  content: string // 通知内容
-}
-
 // 执行器配置
 interface ActionConfig {
   key: any // 解决组件索引重用 TODO @puhui999：看看有没更好的解决方案呢。
   type: number // 执行类型
   deviceControl?: ActionDeviceControl // 设备控制
-  alert?: ActionAlert // 告警执行
+  alertConfigId?: number // 告警配置ID（告警恢复时需要）
 }
 
 // 主接口
@@ -127,7 +119,6 @@ export {
   TriggerConditionParameter,
   ActionConfig,
   ActionDeviceControl,
-  ActionAlert,
   IotRuleSceneTriggerTypeEnum,
   IotRuleSceneActionTypeEnum,
   IotDeviceMessageTypeEnum,

@@ -49,12 +49,42 @@
         @update:model-value="(val) => (actionConfig.deviceControl = val)"
       />
 
-      <!-- 告警执行器 - 无需额外配置 -->
-      <div v-else-if="isAlertAction" class="bg-[#dbe5f6] flex items-center justify-center p-10px">
-        <el-icon class="mr-5px text-blue-500"><Icon icon="ep:info-filled" /></el-icon>
-        <span class="text-gray-600">
-          {{ getAlertActionDescription(actionConfig.type) }}
-        </span>
+      <!-- 告警执行器 -->
+      <div v-else-if="isAlertAction">
+        <!-- 告警触发 - 无需额外配置 -->
+        <div
+          v-if="actionConfig.type === IotRuleSceneActionTypeEnum.ALERT_TRIGGER"
+          class="bg-[#dbe5f6] flex items-center justify-center p-10px"
+        >
+          <el-icon class="mr-5px text-blue-500"><Icon icon="ep:info-filled" /></el-icon>
+          <span class="text-gray-600">触发告警通知，系统将自动发送告警信息</span>
+        </div>
+
+        <!-- 告警恢复 - 需要选择告警配置 -->
+        <div v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER">
+          <div class="bg-[#dbe5f6] flex items-center justify-center p-10px mb-10px">
+            <el-icon class="mr-5px text-blue-500"><Icon icon="ep:info-filled" /></el-icon>
+            <span class="text-gray-600">恢复指定的告警配置状态</span>
+          </div>
+          <div class="p-10px">
+            <el-form-item label="选择告警配置" required>
+              <el-select
+                v-model="actionConfig.alertConfigId"
+                class="!w-240px"
+                clearable
+                placeholder="请选择要恢复的告警配置"
+                :loading="alertConfigLoading"
+              >
+                <el-option
+                  v-for="config in alertConfigList"
+                  :key="config.id"
+                  :label="config.name"
+                  :value="config.id"
+                />
+              </el-select>
+            </el-form-item>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -78,6 +108,7 @@ import DeviceTableSelect from '@/views/iot/device/device/components/DeviceTableS
 import DeviceControlAction from './DeviceControlAction.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
+import { AlertConfigApi, AlertConfig } from '@/api/iot/alert/config'
 import {
   ActionConfig,
   ActionDeviceControl,
@@ -111,18 +142,6 @@ const isAlertAction = computed(() => {
   ].includes(actionConfig.value.type as any)
 })
 
-/** 获取告警执行器描述文本 */
-const getAlertActionDescription = (actionType: number) => {
-  switch (actionType) {
-    case IotRuleSceneActionTypeEnum.ALERT_TRIGGER:
-      return '触发告警通知，系统将自动发送告警信息'
-    case IotRuleSceneActionTypeEnum.ALERT_RECOVER:
-      return '恢复告警状态，系统将自动发送恢复通知'
-    default:
-      return '告警相关操作，无需额外配置'
-  }
-}
-
 /** 初始化执行器结构 */
 const initActionConfig = () => {
   if (!actionConfig.value) {
@@ -146,9 +165,17 @@ const initActionConfig = () => {
     } as ActionDeviceControl
   }
 
-  // 告警执行器初始化 - 无需额外配置，清空 alert 配置
+  // 告警执行器初始化
   if (isAlertAction.value) {
-    actionConfig.value.alert = undefined
+    if (actionConfig.value.type === IotRuleSceneActionTypeEnum.ALERT_TRIGGER) {
+      // 告警触发 - 无需额外配置
+      actionConfig.value.alertConfigId = undefined
+    } else if (actionConfig.value.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER) {
+      // 告警恢复 - 需要选择告警配置
+      if (!actionConfig.value.alertConfigId) {
+        actionConfig.value.alertConfigId = undefined
+      }
+    }
   }
 }
 
@@ -157,6 +184,10 @@ const productTableSelectRef = ref<InstanceType<typeof ProductTableSelect>>()
 const deviceTableSelectRef = ref<InstanceType<typeof DeviceTableSelect>>()
 const product = ref<ProductVO>()
 const deviceList = ref<DeviceVO[]>([])
+
+/** 告警配置相关 */
+const alertConfigList = ref<AlertConfig[]>([])
+const alertConfigLoading = ref(false)
 
 /** 处理选择产品 */
 const handleSelectProduct = () => {
@@ -193,11 +224,27 @@ const handleDeviceSelect = (val: DeviceVO[]) => {
   }
 }
 
+/** 获取告警配置列表 */
+const getAlertConfigList = async () => {
+  try {
+    alertConfigLoading.value = true
+    alertConfigList.value = await AlertConfigApi.getSimpleAlertConfigList()
+  } catch (error) {
+    console.error('获取告警配置列表失败:', error)
+  } finally {
+    alertConfigLoading.value = false
+  }
+}
+
 /** 监听执行类型变化，初始化对应配置 */
 watch(
   () => actionConfig.value.type,
-  () => {
+  (newType) => {
     initActionConfig()
+    // 如果是告警恢复类型，需要加载告警配置列表
+    if (newType === IotRuleSceneActionTypeEnum.ALERT_RECOVER) {
+      getAlertConfigList()
+    }
   },
   { immediate: true }
 )
