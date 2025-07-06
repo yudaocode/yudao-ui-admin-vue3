@@ -116,7 +116,8 @@ export const setConfAndFields2 = (
     switch (key) {
       case 'beforeFetch':
         return (config: any) => {
-          // 添加认证头
+          // 添加 Token 认证头。例如说：
+          // https://t.zsxq.com/hK3FO
           const token = localStorage.getItem('token')
           if (token) {
             config.headers = {
