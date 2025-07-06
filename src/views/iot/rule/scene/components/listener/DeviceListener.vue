@@ -24,6 +24,7 @@
             {{ product ? product.name : '选择产品' }}
           </el-button>
         </div>
+        <!-- TODO @puhui999：只允许选择一个，或者全部设备 -->
         <div v-if="isDeviceTrigger" class="flex items-center mr-60px">
           <span class="mr-10px">设备</span>
           <el-button type="primary" @click="openDeviceSelect" size="small" plain>
@@ -110,6 +111,7 @@
         <crontab v-model="triggerConfig.cronExpression" />
       </div>
       <!-- 除了设备上下线变更，其他设备触发类型都可以设置多个触发条件 -->
+      <!-- TODO @puhui999：触发有点不太对，可以在用下阿里云的呢~ -->
       <el-text
         v-if="
           isDeviceTrigger && triggerConfig.type !== IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE
@@ -176,7 +178,6 @@ const isDeviceTrigger = computed(() => {
 const addCondition = () => {
   // 根据触发类型设置默认的条件类型
   let defaultConditionType: string = IotDeviceMessageTypeEnum.PROPERTY
-
   switch (triggerConfig.value.type) {
     case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:
       defaultConditionType = IotDeviceMessageTypeEnum.PROPERTY
@@ -189,6 +190,7 @@ const addCondition = () => {
       break
   }
 
+  // 添加触发条件
   triggerConfig.value.conditions?.push({
     type: defaultConditionType,
     identifier: IotDeviceMessageIdentifierEnum.PROPERTY_SET,

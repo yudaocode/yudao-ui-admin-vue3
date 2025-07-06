@@ -25,6 +25,7 @@
             {{ product ? product.name : '选择产品' }}
           </el-button>
         </div>
+        <!-- TODO @puhui999：单选设备 -->
         <div v-if="isDeviceAction" class="flex items-center mr-60px">
           <span class="mr-10px">设备</span>
           <el-button type="primary" @click="handleSelectDevice" size="small" plain>
@@ -40,6 +41,7 @@
       </div>
 
       <!-- 设备控制执行器 -->
+      <!-- TODO @puhui999：服务调用时，选择好某个物模型，剩余直接填写一个 JSON 哈；不用逐个添加~可以试试【设备详情-设备调试】那，有服务调用的模拟 -->
       <DeviceControlAction
         v-if="isDeviceAction"
         :action-type="actionConfig.type"
@@ -64,10 +66,11 @@
         <div v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER">
           <div class="bg-[#dbe5f6] flex items-center justify-center p-10px mb-10px">
             <el-icon class="mr-5px text-blue-500"><Icon icon="ep:info-filled" /></el-icon>
+            <!-- TODO @puhui999：这种类型的提示，感觉放在 SELECT 那，后面有个所有的提示，会不会更好呀；因为可以少占用行呢； -->
             <span class="text-gray-600">恢复指定的告警配置状态</span>
           </div>
           <div class="p-10px">
-            <el-form-item label="选择告警配置" required>
+            <el-form-item label="选择告警配置" required label-width="110">
               <el-select
                 v-model="actionConfig.alertConfigId"
                 class="!w-240px"
