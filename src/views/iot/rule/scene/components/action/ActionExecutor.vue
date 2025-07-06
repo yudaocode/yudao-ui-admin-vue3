@@ -19,19 +19,13 @@
             />
           </el-select>
         </div>
-        <div
-          v-if="actionConfig.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL"
-          class="flex items-center mr-60px"
-        >
+        <div v-if="isDeviceAction" class="flex items-center mr-60px">
           <span class="mr-10px">产品</span>
           <el-button type="primary" @click="handleSelectProduct" size="small" plain>
             {{ product ? product.name : '选择产品' }}
           </el-button>
         </div>
-        <div
-          v-if="actionConfig.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL"
-          class="flex items-center mr-60px"
-        >
+        <div v-if="isDeviceAction" class="flex items-center mr-60px">
           <span class="mr-10px">设备</span>
           <el-button type="primary" @click="handleSelectDevice" size="small" plain>
             {{ isEmpty(deviceList) ? '选择设备' : deviceList.map((d) => d.deviceName).join(',') }}
@@ -47,7 +41,8 @@
 
       <!-- 设备控制执行器 -->
       <DeviceControlAction
-        v-if="actionConfig.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL"
+        v-if="isDeviceAction"
+        :action-type="actionConfig.type"
         :model-value="actionConfig.deviceControl"
         :product-id="product?.id"
         :product-key="product?.productKey"
@@ -55,11 +50,42 @@
       />
 
       <!-- 告警执行器 -->
-      <AlertAction
-        v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.ALERT"
-        :model-value="actionConfig.alert"
-        @update:model-value="(val) => (actionConfig.alert = val)"
-      />
+      <div v-else-if="isAlertAction">
+        <!-- 告警触发 - 无需额外配置 -->
+        <div
+          v-if="actionConfig.type === IotRuleSceneActionTypeEnum.ALERT_TRIGGER"
+          class="bg-[#dbe5f6] flex items-center justify-center p-10px"
+        >
+          <el-icon class="mr-5px text-blue-500"><Icon icon="ep:info-filled" /></el-icon>
+          <span class="text-gray-600">触发告警通知，系统将自动发送告警信息</span>
+        </div>
+
+        <!-- 告警恢复 - 需要选择告警配置 -->
+        <div v-else-if="actionConfig.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER">
+          <div class="bg-[#dbe5f6] flex items-center justify-center p-10px mb-10px">
+            <el-icon class="mr-5px text-blue-500"><Icon icon="ep:info-filled" /></el-icon>
+            <span class="text-gray-600">恢复指定的告警配置状态</span>
+          </div>
+          <div class="p-10px">
+            <el-form-item label="选择告警配置" required>
+              <el-select
+                v-model="actionConfig.alertConfigId"
+                class="!w-240px"
+                clearable
+                placeholder="请选择要恢复的告警配置"
+                :loading="alertConfigLoading"
+              >
+                <el-option
+                  v-for="config in alertConfigList"
+                  :key="config.id"
+                  :label="config.name"
+                  :value="config.id"
+                />
+              </el-select>
+            </el-form-item>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 产品、设备的选择 -->
@@ -80,11 +106,10 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ProductTableSelect from '@/views/iot/product/product/components/ProductTableSelect.vue'
 import DeviceTableSelect from '@/views/iot/device/device/components/DeviceTableSelect.vue'
 import DeviceControlAction from './DeviceControlAction.vue'
-import AlertAction from './AlertAction.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
+import { AlertConfigApi, AlertConfig } from '@/api/iot/alert/config'
 import {
-  ActionAlert,
   ActionConfig,
   ActionDeviceControl,
   IotDeviceMessageIdentifierEnum,
@@ -101,29 +126,56 @@ const actionConfig = useVModel(props, 'modelValue', emits) as Ref<ActionConfig>
 
 const message = useMessage()
 
+/** 计算属性：判断是否为设备相关执行类型 */
+const isDeviceAction = computed(() => {
+  return [
+    IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,
+    IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
+  ].includes(actionConfig.value.type as any)
+})
+
+/** 计算属性：判断是否为告警相关执行类型 */
+const isAlertAction = computed(() => {
+  return [
+    IotRuleSceneActionTypeEnum.ALERT_TRIGGER,
+    IotRuleSceneActionTypeEnum.ALERT_RECOVER
+  ].includes(actionConfig.value.type as any)
+})
+
 /** 初始化执行器结构 */
 const initActionConfig = () => {
   if (!actionConfig.value) {
-    actionConfig.value = { type: IotRuleSceneActionTypeEnum.DEVICE_CONTROL } as ActionConfig
+    actionConfig.value = { type: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET } as ActionConfig
   }
 
   // 设备控制执行器初始化
-  if (
-    actionConfig.value.type === IotRuleSceneActionTypeEnum.DEVICE_CONTROL &&
-    !actionConfig.value.deviceControl
-  ) {
+  if (isDeviceAction.value && !actionConfig.value.deviceControl) {
     actionConfig.value.deviceControl = {
       productKey: '',
       deviceNames: [],
-      type: IotDeviceMessageTypeEnum.PROPERTY,
-      identifier: IotDeviceMessageIdentifierEnum.PROPERTY_SET,
+      type:
+        actionConfig.value.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
+          ? IotDeviceMessageTypeEnum.PROPERTY
+          : IotDeviceMessageTypeEnum.SERVICE,
+      identifier:
+        actionConfig.value.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
+          ? IotDeviceMessageIdentifierEnum.PROPERTY_SET
+          : IotDeviceMessageIdentifierEnum.SERVICE_INVOKE,
       data: {}
     } as ActionDeviceControl
   }
 
   // 告警执行器初始化
-  if (actionConfig.value.type === IotRuleSceneActionTypeEnum.ALERT && !actionConfig.value.alert) {
-    actionConfig.value.alert = {} as ActionAlert
+  if (isAlertAction.value) {
+    if (actionConfig.value.type === IotRuleSceneActionTypeEnum.ALERT_TRIGGER) {
+      // 告警触发 - 无需额外配置
+      actionConfig.value.alertConfigId = undefined
+    } else if (actionConfig.value.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER) {
+      // 告警恢复 - 需要选择告警配置
+      if (!actionConfig.value.alertConfigId) {
+        actionConfig.value.alertConfigId = undefined
+      }
+    }
   }
 }
 
@@ -132,6 +184,10 @@ const productTableSelectRef = ref<InstanceType<typeof ProductTableSelect>>()
 const deviceTableSelectRef = ref<InstanceType<typeof DeviceTableSelect>>()
 const product = ref<ProductVO>()
 const deviceList = ref<DeviceVO[]>([])
+
+/** 告警配置相关 */
+const alertConfigList = ref<AlertConfig[]>([])
+const alertConfigLoading = ref(false)
 
 /** 处理选择产品 */
 const handleSelectProduct = () => {
@@ -168,11 +224,27 @@ const handleDeviceSelect = (val: DeviceVO[]) => {
   }
 }
 
+/** 获取告警配置列表 */
+const getAlertConfigList = async () => {
+  try {
+    alertConfigLoading.value = true
+    alertConfigList.value = await AlertConfigApi.getSimpleAlertConfigList()
+  } catch (error) {
+    console.error('获取告警配置列表失败:', error)
+  } finally {
+    alertConfigLoading.value = false
+  }
+}
+
 /** 监听执行类型变化，初始化对应配置 */
 watch(
   () => actionConfig.value.type,
-  () => {
+  (newType) => {
     initActionConfig()
+    // 如果是告警恢复类型，需要加载告警配置列表
+    if (newType === IotRuleSceneActionTypeEnum.ALERT_RECOVER) {
+      getAlertConfigList()
+    }
   },
   { immediate: true }
 )

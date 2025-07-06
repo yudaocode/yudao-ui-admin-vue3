@@ -1,11 +1,5 @@
 <template>
   <div class="bg-[#dbe5f6] flex p-10px">
-    <div class="flex flex-col items-center justify-center mr-10px h-a">
-      <el-select v-model="deviceControlConfig.type" class="!w-160px" clearable placeholder="">
-        <el-option label="属性" :value="IotDeviceMessageTypeEnum.PROPERTY" />
-        <el-option label="服务" :value="IotDeviceMessageTypeEnum.SERVICE" />
-      </el-select>
-    </div>
     <div class="">
       <div
         class="flex items-center justify-around mb-10px last:mb-0"
@@ -74,7 +68,8 @@ import { ThingModelApi } from '@/api/iot/thingmodel'
 import {
   ActionDeviceControl,
   IotDeviceMessageIdentifierEnum,
-  IotDeviceMessageTypeEnum
+  IotDeviceMessageTypeEnum,
+  IotRuleSceneActionTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
 import ThingModelParamInput from '../ThingModelParamInput.vue'
 
@@ -83,6 +78,7 @@ defineOptions({ name: 'DeviceControlAction' })
 
 const props = defineProps<{
   modelValue: any
+  actionType: number
   productId?: number
   productKey?: string
 }>()
@@ -96,10 +92,6 @@ const parameters = ref<{ identifier: string; value: any; identifier0?: string }[
 const addParameter = () => {
   if (!props.productId) {
     message.warning('请先选择一个产品')
-    return
-  }
-  if (parameters.value.length >= thingModels.value().length) {
-    message.warning(`该产品只有${thingModels.value().length}个物模型！！！`)
     return
   }
   parameters.value.push({ identifier: '', value: undefined })
@@ -140,8 +132,14 @@ const initDeviceControlConfig = () => {
     deviceControlConfig.value = {
       productKey: '',
       deviceNames: [],
-      type: IotDeviceMessageTypeEnum.PROPERTY,
-      identifier: IotDeviceMessageIdentifierEnum.PROPERTY_SET,
+      type:
+        props.actionType === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
+          ? IotDeviceMessageTypeEnum.PROPERTY
+          : IotDeviceMessageTypeEnum.SERVICE,
+      identifier:
+        props.actionType === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
+          ? IotDeviceMessageIdentifierEnum.PROPERTY_SET
+          : IotDeviceMessageIdentifierEnum.SERVICE_INVOKE,
       data: {}
     } as ActionDeviceControl
   } else {
@@ -205,6 +203,26 @@ watch(
     // 当产品ID变化时，清空原有数据
     deviceControlConfig.value.data = {}
     parameters.value = []
+  }
+)
+
+/** 监听执行类型变化 */
+watch(
+  () => props.actionType,
+  (val: any) => {
+    if (!val) {
+      return
+    }
+    // 切换执行类型时清空参数
+    deviceControlConfig.value.data = {}
+    parameters.value = []
+    if (val === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET) {
+      deviceControlConfig.value.type = IotDeviceMessageTypeEnum.PROPERTY
+      deviceControlConfig.value.identifier = IotDeviceMessageIdentifierEnum.PROPERTY_SET
+    } else if (val === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE) {
+      deviceControlConfig.value.type = IotDeviceMessageTypeEnum.SERVICE
+      deviceControlConfig.value.identifier = IotDeviceMessageIdentifierEnum.SERVICE_INVOKE
+    }
   }
 )
 

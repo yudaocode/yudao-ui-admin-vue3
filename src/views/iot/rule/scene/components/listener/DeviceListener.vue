@@ -18,19 +18,13 @@
             />
           </el-select>
         </div>
-        <div
-          v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE"
-          class="flex items-center mr-60px"
-        >
+        <div v-if="isDeviceTrigger" class="flex items-center mr-60px">
           <span class="mr-10px">产品</span>
           <el-button type="primary" @click="productTableSelectRef?.open()" size="small" plain>
             {{ product ? product.name : '选择产品' }}
           </el-button>
         </div>
-        <div
-          v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE"
-          class="flex items-center mr-60px"
-        >
+        <div v-if="isDeviceTrigger" class="flex items-center mr-60px">
           <span class="mr-10px">设备</span>
           <el-button type="primary" @click="openDeviceSelect" size="small" plain>
             {{ isEmpty(deviceList) ? '选择设备' : triggerConfig.deviceNames.join(',') }}
@@ -44,25 +38,22 @@
         </div>
       </div>
       <!-- 设备触发器条件 -->
-      <template v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE">
+      <template v-if="isDeviceTrigger">
+        <!-- 设备上下线变更 - 无需额外配置 -->
         <div
+          v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE"
+          class="bg-[#dbe5f6] flex items-center justify-center p-10px"
+        >
+          <span class="text-gray-600">设备上下线状态变更时触发，无需额外配置</span>
+        </div>
+
+        <!-- 物模型属性上报、设备事件上报、设备服务调用 - 需要配置条件 -->
+        <div
+          v-else
           class="bg-[#dbe5f6] flex p-10px"
           v-for="(condition, index) in triggerConfig.conditions"
           :key="index"
         >
-          <div class="flex flex-col items-center justify-center mr-10px h-a">
-            <el-select
-              v-model="condition.type"
-              @change="condition.parameters = []"
-              class="!w-160px"
-              clearable
-              placeholder=""
-            >
-              <el-option label="属性" :value="IotDeviceMessageTypeEnum.PROPERTY" />
-              <el-option label="服务" :value="IotDeviceMessageTypeEnum.SERVICE" />
-              <el-option label="事件" :value="IotDeviceMessageTypeEnum.EVENT" />
-            </el-select>
-          </div>
           <div class="w-70%">
             <DeviceListenerCondition
               v-for="(parameter, index2) in condition.parameters"
@@ -118,9 +109,11 @@
         <span class="w-120px">CRON 表达式</span>
         <crontab v-model="triggerConfig.cronExpression" />
       </div>
-      <!-- 设备触发才可以设置多个触发条件 -->
+      <!-- 除了设备上下线变更，其他设备触发类型都可以设置多个触发条件 -->
       <el-text
-        v-if="triggerConfig.type === IotRuleSceneTriggerTypeEnum.DEVICE"
+        v-if="
+          isDeviceTrigger && triggerConfig.type !== IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE
+        "
         class="ml-10px!"
         type="primary"
         @click="addCondition"
@@ -158,6 +151,7 @@ import {
   TriggerConditionParameter,
   TriggerConfig
 } from '@/api/iot/rule/scene/scene.types'
+import { Crontab } from '@/components/Crontab'
 
 /** 场景联动之监听器组件 */
 defineOptions({ name: 'DeviceListener' })
@@ -168,10 +162,35 @@ const triggerConfig = useVModel(props, 'modelValue', emits) as Ref<TriggerConfig
 
 const message = useMessage()
 
+/** 计算属性：判断是否为设备触发类型 */
+const isDeviceTrigger = computed(() => {
+  return [
+    IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE,
+    IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
+    IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST,
+    IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
+  ].includes(triggerConfig.value.type as any)
+})
+
 /** 添加触发条件 */
 const addCondition = () => {
+  // 根据触发类型设置默认的条件类型
+  let defaultConditionType: string = IotDeviceMessageTypeEnum.PROPERTY
+
+  switch (triggerConfig.value.type) {
+    case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:
+      defaultConditionType = IotDeviceMessageTypeEnum.PROPERTY
+      break
+    case IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST:
+      defaultConditionType = IotDeviceMessageTypeEnum.EVENT
+      break
+    case IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE:
+      defaultConditionType = IotDeviceMessageTypeEnum.SERVICE
+      break
+  }
+
   triggerConfig.value.conditions?.push({
-    type: IotDeviceMessageTypeEnum.PROPERTY,
+    type: defaultConditionType,
     identifier: IotDeviceMessageIdentifierEnum.PROPERTY_SET,
     parameters: []
   })
@@ -185,6 +204,10 @@ const removeCondition = (index: number) => {
 const addConditionParameter = (conditionParameters: TriggerConditionParameter[]) => {
   if (!product.value) {
     message.warning('请先选择一个产品')
+    return
+  }
+  if (conditionParameters.length >= 1) {
+    message.warning('只允许添加一个参数')
     return
   }
   conditionParameters.push({} as TriggerConditionParameter)
@@ -290,12 +313,48 @@ const getThingModelTSL = async () => {
   thingModelTSL.value = await ThingModelApi.getThingModelTSLByProductId(product.value.id)
 }
 
+/** 监听触发类型变化，自动设置条件类型 */
+watch(
+  () => triggerConfig.value.type,
+  (newType) => {
+    if (!newType || newType === IotRuleSceneTriggerTypeEnum.TIMER) {
+      return
+    }
+
+    // 设备上下线变更不需要条件配置
+    if (newType === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE) {
+      triggerConfig.value.conditions = []
+      return
+    }
+
+    // 为其他设备触发类型设置默认条件
+    if (triggerConfig.value.conditions && triggerConfig.value.conditions.length > 0) {
+      triggerConfig.value.conditions.forEach((condition) => {
+        switch (newType) {
+          case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:
+            condition.type = IotDeviceMessageTypeEnum.PROPERTY
+            break
+          case IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST:
+            condition.type = IotDeviceMessageTypeEnum.EVENT
+            break
+          case IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE:
+            condition.type = IotDeviceMessageTypeEnum.SERVICE
+            break
+        }
+      })
+    }
+  }
+)
+
 /** 初始化 */
 onMounted(async () => {
   // 初始化产品和设备回显
   if (triggerConfig.value) {
-    // 初始化conditions数组，如果不存在
-    if (!triggerConfig.value.conditions) {
+    // 初始化conditions数组，如果不存在且不是设备上下线变更类型
+    if (
+      !triggerConfig.value.conditions &&
+      triggerConfig.value.type !== IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE
+    ) {
       triggerConfig.value.conditions = []
     }
 

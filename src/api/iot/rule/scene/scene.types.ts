@@ -4,13 +4,18 @@
 
 // 枚举定义
 const IotRuleSceneTriggerTypeEnum = {
-  DEVICE: 1, // 设备触发
-  TIMER: 2 // 定时触发
+  DEVICE_STATE_UPDATE: 1, // 设备上下线变更
+  DEVICE_PROPERTY_POST: 2, // 物模型属性上报
+  DEVICE_EVENT_POST: 3, // 设备事件上报
+  DEVICE_SERVICE_INVOKE: 4, // 设备服务调用
+  TIMER: 100 // 定时触发
 } as const
 
 const IotRuleSceneActionTypeEnum = {
-  DEVICE_CONTROL: 1, // 设备执行
-  ALERT: 2 // 告警执行
+  DEVICE_PROPERTY_SET: 1, // 设备属性设置,
+  DEVICE_SERVICE_INVOKE: 2, // 设备服务调用
+  ALERT_TRIGGER: 100, // 告警触发
+  ALERT_RECOVER: 101 // 告警恢复
 } as const
 
 const IotDeviceMessageTypeEnum = {
@@ -89,20 +94,12 @@ interface ActionDeviceControl {
   data: Record<string, any> // 具体数据
 }
 
-// 告警执行配置
-interface ActionAlert {
-  receiveType: number // 接收方式
-  phoneNumbers?: string[] // 手机号列表
-  emails?: string[] // 邮箱列表
-  content: string // 通知内容
-}
-
 // 执行器配置
 interface ActionConfig {
   key: any // 解决组件索引重用 TODO @puhui999：看看有没更好的解决方案呢。
   type: number // 执行类型
   deviceControl?: ActionDeviceControl // 设备控制
-  alert?: ActionAlert // 告警执行
+  alertConfigId?: number // 告警配置ID（告警恢复时需要）
 }
 
 // 主接口
@@ -122,7 +119,6 @@ export {
   TriggerConditionParameter,
   ActionConfig,
   ActionDeviceControl,
-  ActionAlert,
   IotRuleSceneTriggerTypeEnum,
   IotRuleSceneActionTypeEnum,
   IotDeviceMessageTypeEnum,
