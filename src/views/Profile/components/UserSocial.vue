@@ -23,7 +23,7 @@
 </template>
 <script lang="ts" setup>
 import { SystemUserSocialTypeEnum } from '@/utils/constants'
-import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
+import { getBindSocialUserList } from '@/api/system/social/user'
 import { socialAuthRedirect, socialBind, socialUnbind } from '@/api/system/user/socialUser'
 
 defineOptions({ name: 'UserSocial' })
@@ -32,19 +32,19 @@ defineProps<{
 }>()
 const message = useMessage()
 const socialUsers = ref<any[]>([])
-const userInfo = ref<ProfileVO>()
 
 const initSocial = async () => {
   socialUsers.value = [] // 重置避免无限增长
-  const res = await getUserProfile()
-  userInfo.value = res
+  // 获取已绑定的社交用户列表
+  const bindSocialUserList = await getBindSocialUserList()
+  // 检查该社交平台是否已绑定
   for (const i in SystemUserSocialTypeEnum) {
     const socialUser = { ...SystemUserSocialTypeEnum[i] }
     socialUsers.value.push(socialUser)
-    if (userInfo.value?.socialUsers) {
-      for (const j in userInfo.value.socialUsers) {
-        if (socialUser.type === userInfo.value.socialUsers[j].type) {
-          socialUser.openid = userInfo.value.socialUsers[j].openid
+    if (bindSocialUserList && bindSocialUserList.length > 0) {
+      for (const bindUser of bindSocialUserList) {
+        if (socialUser.type === bindUser.type) {
+          socialUser.openid = bindUser.openid
           break
         }
       }
