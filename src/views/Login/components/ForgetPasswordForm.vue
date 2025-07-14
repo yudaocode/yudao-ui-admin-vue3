@@ -9,14 +9,14 @@
     label-width="120px"
     size="large"
   >
-    <el-row style="margin-right: -10px; margin-left: -10px">
+    <el-row class="mx-[-10px]">
       <!-- 租户名 -->
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item>
-          <LoginFormTitle style="width: 100%" />
+          <LoginFormTitle class="w-full" />
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item v-if="resetPasswordData.tenantEnable === 'true'" prop="tenantName">
           <el-input
             v-model="resetPasswordData.tenantName"
@@ -28,7 +28,7 @@
         </el-form-item>
       </el-col>
       <!-- 手机号 -->
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item prop="mobile">
           <el-input
             v-model="resetPasswordData.mobile"
@@ -45,7 +45,7 @@
         @success="getSmsCode"
       />
       <!-- 验证码 -->
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item prop="code">
           <el-row :gutter="5" justify="space-between" style="width: 100%">
             <el-col :span="24">
@@ -73,44 +73,44 @@
           </el-row>
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item prop="password">
           <InputPassword
             v-model="resetPasswordData.password"
             :placeholder="t('login.passwordPlaceholder')"
-            style="width: 100%"
-            strength="true"
+            class="w-full"
+            :strength="true"
           />
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item prop="check_password">
           <InputPassword
             v-model="resetPasswordData.check_password"
             :placeholder="t('login.checkPassword')"
-            style="width: 100%"
-            strength="true"
+            class="w-full"
+            :strength="true"
           />
         </el-form-item>
       </el-col>
       <!-- 登录按钮 / 返回按钮 -->
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item>
           <XButton
             :loading="loginLoading"
             :title="t('login.resetPassword')"
-            class="w-[100%]"
+            class="w-full"
             type="primary"
             @click="resetPassword()"
           />
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item>
           <XButton
             :loading="loginLoading"
             :title="t('login.backLogin')"
-            class="w-[100%]"
+            class="w-full"
             @click="handleBackLogin()"
           />
         </el-form-item>
@@ -134,7 +134,7 @@ const verify = ref()
 
 const { t } = useI18n()
 const message = useMessage()
-const { currentRoute, push } = useRouter()
+const { currentRoute } = useRouter()
 const formSmsResetPassword = ref()
 const loginLoading = ref(false)
 const iconHouse = useIcon({ icon: 'ep:house' })
@@ -145,7 +145,7 @@ const { handleBackLogin, getLoginState, setLoginState } = useLoginState()
 const getShow = computed(() => unref(getLoginState) === LoginStateEnum.RESET_PASSWORD)
 const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字
 
-const validatePass2 = (rule, value, callback) => {
+const validatePass2 = (_rule, value, callback) => {
   if (value === '') {
     callback(new Error('请再次输入密码'))
   } else if (value !== resetPasswordData.password) {
