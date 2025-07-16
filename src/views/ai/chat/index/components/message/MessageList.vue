@@ -215,13 +215,13 @@ onMounted(async () => {
       display: flex;
       flex-direction: column;
       overflow-wrap: break-word;
-      background-color: rgba(228, 228, 228, 0.8);
-      box-shadow: 0 0 0 1px rgba(228, 228, 228, 0.8);
+      background-color: var(--el-fill-color-light);
+      box-shadow: 0 0 0 1px var(--el-border-color-light);
       border-radius: 10px;
       padding: 10px 10px 5px 10px;
 
       .left-text {
-        color: #393939;
+        color: var(--el-text-color-primary);
         font-size: 0.95rem;
       }
     }
@@ -232,10 +232,10 @@ onMounted(async () => {
 
       .right-text {
         font-size: 0.95rem;
-        color: #fff;
+        color: var(--el-color-white);
         display: inline;
-        background-color: #267fff;
-        box-shadow: 0 0 0 1px #267fff;
+        background-color: var(--el-color-primary);
+        box-shadow: 0 0 0 1px var(--el-color-primary);
         border-radius: 10px;
         padding: 10px;
         width: auto;
@@ -270,7 +270,7 @@ onMounted(async () => {
 
   .btn-cus:hover {
     cursor: pointer;
-    background-color: #f6f6f6;
+    background-color: var(--el-fill-color-lighter);
   }
 }
 

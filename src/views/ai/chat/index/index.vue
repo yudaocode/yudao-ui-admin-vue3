@@ -22,13 +22,16 @@
             <Icon icon="ep:setting" class="ml-10px" />
           </el-button>
           <el-button size="small" class="btn" @click="handlerMessageClear">
-            <Icon icon="heroicons-outline:archive-box-x-mark" color="#787878" />
+            <Icon
+              icon="heroicons-outline:archive-box-x-mark"
+              color="var(--el-text-color-placeholder)"
+            />
           </el-button>
           <el-button size="small" class="btn">
-            <Icon icon="ep:download" color="#787878" />
+            <Icon icon="ep:download" color="var(--el-text-color-placeholder)" />
           </el-button>
           <el-button size="small" class="btn" @click="handleGoTopMessage">
-            <Icon icon="ep:top" color="#787878" />
+            <Icon icon="ep:top" color="var(--el-text-color-placeholder)" />
           </el-button>
         </div>
       </el-header>
@@ -613,7 +616,8 @@ onMounted(async () => {
       line-height: 30px;
 
       &.active {
-        background-color: #e6e6e6;
+        background-color: var(--el-color-primary-light-9);
+        border: 1px solid var(--el-color-primary-light-7);
 
         .button {
           display: inline-block;
@@ -649,7 +653,7 @@ onMounted(async () => {
         display: flex;
         flex-direction: row;
         justify-items: center;
-        color: #606266;
+        color: var(--el-text-color-regular);
 
         .el-icon {
           margin-right: 5px;
@@ -669,7 +673,7 @@ onMounted(async () => {
     > div {
       display: flex;
       align-items: center;
-      color: #606266;
+      color: var(--el-text-color-regular);
       padding: 0;
       margin: 0;
       cursor: pointer;
@@ -683,15 +687,15 @@ onMounted(async () => {
 
 // 头部
 .detail-container {
-  background: #ffffff;
+  background: var(--el-bg-color);
 
   .header {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    background: #fbfbfb;
-    box-shadow: 0 0 0 0 #dcdfe6;
+    background: var(--el-bg-color-page);
+    box-shadow: 0 0 0 0 var(--el-border-color-light);
 
     .title {
       font-size: 18px;
@@ -744,7 +748,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     height: auto;
-    border: 1px solid #e3e3e3;
+    border: 1px solid var(--el-border-color);
     border-radius: 10px;
     margin: 10px 20px 20px 20px;
     padding: 9px 10px;

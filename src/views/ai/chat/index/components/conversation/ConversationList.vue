@@ -391,7 +391,8 @@ onMounted(async () => {
       line-height: 30px;
 
       &.active {
-        background-color: #e6e6e6;
+        background-color: var(--el-color-primary-light-9);
+        border: 1px solid var(--el-color-primary-light-7);
 
         .button {
           display: inline-block;
@@ -409,7 +410,7 @@ onMounted(async () => {
         max-width: 220px;
         font-size: 14px;
         font-weight: 400;
-        color: rgba(0, 0, 0, 0.77);
+        color: var(--el-text-color-regular);
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -430,7 +431,7 @@ onMounted(async () => {
         display: flex;
         flex-direction: row;
         justify-items: center;
-        color: #606266;
+        color: var(--el-text-color-regular);
 
         .btn {
           margin: 0;
@@ -447,8 +448,8 @@ onMounted(async () => {
     right: 0;
     //width: 100%;
     padding: 0 20px;
-    background-color: #f4f4f4;
-    box-shadow: 0 0 1px 1px rgba(228, 228, 228, 0.8);
+    background-color: var(--el-fill-color-extra-light);
+    box-shadow: 0 0 1px 1px var(--el-border-color-lighter);
     line-height: 35px;
     display: flex;
     justify-content: space-between;
@@ -458,7 +459,7 @@ onMounted(async () => {
     > div {
       display: flex;
       align-items: center;
-      color: #606266;
+      color: var(--el-text-color-regular);
       padding: 0;
       margin: 0;
       cursor: pointer;

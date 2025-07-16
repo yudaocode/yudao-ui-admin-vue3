@@ -29,14 +29,14 @@ defineProps({
   padding: 0 10px;
   white-space: nowrap;
   text-overflow: ellipsis;
-  background-color: #ececec;
+  background-color: var(--el-bg-color-page);
   width: 100%;
 
   .title {
     font-size: 20px;
     font-weight: bold;
     overflow: hidden;
-    color: #3e3e3e;
+    color: var(--el-text-color-primary);
     max-width: 220px;
   }
 
