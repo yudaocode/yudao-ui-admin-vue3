@@ -19,22 +19,13 @@
         class="form-container"
       >
         <!-- 基础信息配置 -->
-        <BasicInfoSection
-          v-model="formData"
-          :rules="formRules"
-        />
+        <BasicInfoSection v-model="formData" :rules="formRules" />
 
         <!-- 触发器配置 -->
-        <TriggerSection
-          v-model:triggers="formData.triggers"
-          @validate="handleTriggerValidate"
-        />
+        <TriggerSection v-model:triggers="formData.triggers" @validate="handleTriggerValidate" />
 
         <!-- 执行器配置 -->
-        <ActionSection
-          v-model:actions="formData.actions"
-          @validate="handleActionValidate"
-        />
+        <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
 
         <!-- 预览区域 -->
         <PreviewSection
@@ -71,17 +62,8 @@ import ActionSection from './sections/ActionSection.vue'
 import PreviewSection from './sections/PreviewSection.vue'
 import { RuleSceneFormData, IotRuleScene } from '@/api/iot/rule/scene/scene.types'
 import { getBaseValidationRules } from '../utils/validation'
-import { 
-  transformFormToApi, 
-  transformApiToForm, 
-  createDefaultFormData 
-} from '../utils/transform'
-import { 
-  handleValidationError, 
-  handleNetworkError, 
-  showSuccess, 
-  withErrorHandling 
-} from '../utils/errorHandler'
+import { transformFormToApi, transformApiToForm, createDefaultFormData } from '../utils/transform'
+import { handleValidationError, showSuccess, withErrorHandling } from '../utils/errorHandler'
 
 /** IoT场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
@@ -114,14 +96,16 @@ const actionValidation = ref({ valid: true, message: '' })
 
 // 计算属性
 const isEdit = computed(() => !!props.ruleScene?.id)
-const drawerTitle = computed(() => isEdit.value ? '编辑场景联动规则' : '新增场景联动规则')
+const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
 
 const canSubmit = computed(() => {
-  return formData.value.name && 
-         formData.value.triggers.length > 0 && 
-         formData.value.actions.length > 0 &&
-         triggerValidation.value.valid &&
-         actionValidation.value.valid
+  return (
+    formData.value.name &&
+    formData.value.triggers.length > 0 &&
+    formData.value.actions.length > 0 &&
+    triggerValidation.value.valid &&
+    actionValidation.value.valid
+  )
 })
 
 // 事件处理
@@ -136,15 +120,15 @@ const handleActionValidate = (result: { valid: boolean; message: string }) => {
 const handleValidate = async () => {
   try {
     await formRef.value?.validate()
-    
+
     if (!triggerValidation.value.valid) {
       throw new Error(triggerValidation.value.message)
     }
-    
+
     if (!actionValidation.value.valid) {
       throw new Error(actionValidation.value.message)
     }
-    
+
     validationResult.value = { valid: true, message: '验证通过' }
     showSuccess('规则验证通过')
     return true
@@ -164,16 +148,16 @@ const handleSubmit = async () => {
       if (!isValid) {
         throw new Error('表单验证失败')
       }
-      
+
       // 转换数据格式
       const apiData = transformFormToApi(formData.value)
-      
+
       // 这里应该调用API保存数据
       console.log('提交数据:', apiData)
-      
+
       // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
       return apiData
     },
     {
@@ -184,7 +168,7 @@ const handleSubmit = async () => {
       successMessage: isEdit.value ? '更新成功' : '创建成功'
     }
   )
-  
+
   if (result) {
     emit('success')
     handleClose()
@@ -216,11 +200,14 @@ watch(drawerVisible, (visible) => {
 })
 
 // 监听props变化
-watch(() => props.ruleScene, () => {
-  if (drawerVisible.value) {
-    initFormData()
+watch(
+  () => props.ruleScene,
+  () => {
+    if (drawerVisible.value) {
+      initFormData()
+    }
   }
-})
+)
 </script>
 
 <style scoped>
