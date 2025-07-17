@@ -116,8 +116,8 @@ const queryParams = reactive({
 const loading = ref(false)
 const total = ref(0)
 const list = ref([])
-const autoRefresh = ref(false)
-let autoRefreshTimer: any = null // TODO @super：autoRefreshEnable，autoRefreshTimer；对应上
+const autoRefresh = ref(false) // 自动刷新开关
+let autoRefreshTimer: any = null // 自动刷新定时器
 
 // 消息方法选项
 const methodOptions = computed(() => {
@@ -172,6 +172,7 @@ watch(
 onBeforeUnmount(() => {
   if (autoRefreshTimer) {
     clearInterval(autoRefreshTimer)
+    autoRefreshTimer = null
   }
 })
 

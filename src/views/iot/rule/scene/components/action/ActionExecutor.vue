@@ -25,7 +25,7 @@
             {{ product ? product.name : '选择产品' }}
           </el-button>
         </div>
-        <!-- TODO @puhui999：单选设备 -->
+        <!-- TODO @puhui999：单选设备，默认不选就是全部设备 -->
         <div v-if="isDeviceAction" class="flex items-center mr-60px">
           <span class="mr-10px">设备</span>
           <el-button type="primary" @click="handleSelectDevice" size="small" plain>
