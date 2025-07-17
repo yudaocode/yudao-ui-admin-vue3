@@ -25,14 +25,7 @@
         </div>
       </el-radio>
     </el-radio-group>
-    
-    <!-- 状态说明 -->
-    <div class="status-note">
-      <Icon icon="ep:info-filled" class="note-icon" />
-      <span class="note-text">
-        {{ localValue === 0 ? '启用状态下，规则将实时监控并执行相应动作' : '禁用状态下，规则不会执行任何操作' }}
-      </span>
-    </div>
+
   </div>
 </template>
 
@@ -76,20 +69,23 @@ const handleChange = (value: number) => {
 
 :deep(.el-radio-group) {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  gap: 16px;
   width: 100%;
+  align-items: flex-start;
 }
 
 :deep(.el-radio) {
   margin-right: 0;
-  width: 100%;
+  width: auto;
+  flex: 1;
   height: auto;
   align-items: flex-start;
 }
 
 .status-option {
-  width: 100%;
+  width: auto;
+  flex: 1;
 }
 
 :deep(.el-radio__input) {
@@ -110,7 +106,7 @@ const handleChange = (value: number) => {
   border: 1px solid var(--el-border-color-light);
   border-radius: 6px;
   transition: all 0.2s;
-  width: calc(100% - 28px);
+  width: 100%;
   margin-left: 0;
 }
 
@@ -158,28 +154,5 @@ const handleChange = (value: number) => {
   line-height: 1.4;
 }
 
-.status-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  margin-top: 16px;
-  padding: 12px;
-  background: var(--el-fill-color-light);
-  border-radius: 4px;
-  border: 1px solid var(--el-border-color-lighter);
-}
 
-.note-icon {
-  color: var(--el-color-primary);
-  font-size: 14px;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.note-text {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.5;
-  flex: 1;
-}
 </style>
