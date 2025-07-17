@@ -27,8 +27,8 @@
               <div class="option-identifier">{{ property.identifier }}</div>
             </div>
             <div class="option-meta">
-              <el-tag :type="getPropertyTypeTag(property.type)" size="small">
-                {{ getPropertyTypeName(property.type) }}
+              <el-tag :type="getPropertyTypeTag(property.dataType)" size="small">
+                {{ getPropertyTypeName(property.dataType) }}
               </el-tag>
             </div>
           </div>
@@ -41,8 +41,8 @@
       <div class="details-header">
         <Icon icon="ep:info-filled" class="details-icon" />
         <span class="details-title">{{ selectedProperty.name }}</span>
-        <el-tag :type="getPropertyTypeTag(selectedProperty.type)" size="small">
-          {{ getPropertyTypeName(selectedProperty.type) }}
+        <el-tag :type="getPropertyTypeTag(selectedProperty.dataType)" size="small">
+          {{ getPropertyTypeName(selectedProperty.dataType) }}
         </el-tag>
       </div>
       <div class="details-content">
@@ -70,6 +70,9 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { IotRuleSceneTriggerTypeEnum } from '@/api/iot/rule/scene/scene.types'
+import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
+import { IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
+import type { IotThingModelTSLRespVO, PropertySelectorItem } from './types'
 
 /** 属性选择器组件 */
 defineOptions({ name: 'PropertySelector' })
@@ -93,33 +96,34 @@ const localValue = useVModel(props, 'modelValue', emit)
 
 // 状态
 const loading = ref(false)
-const propertyList = ref<any[]>([])
+const propertyList = ref<PropertySelectorItem[]>([])
+const thingModelTSL = ref<IotThingModelTSLRespVO | null>(null)
 
 // 计算属性
 const propertyGroups = computed(() => {
   const groups: { label: string; options: any[] }[] = []
-  
+
   if (props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST) {
     groups.push({
       label: '设备属性',
-      options: propertyList.value.filter(p => p.category === 'property')
+      options: propertyList.value.filter(p => p.type === IoTThingModelTypeEnum.PROPERTY)
     })
   }
-  
+
   if (props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST) {
     groups.push({
       label: '设备事件',
-      options: propertyList.value.filter(p => p.category === 'event')
+      options: propertyList.value.filter(p => p.type === IoTThingModelTypeEnum.EVENT)
     })
   }
-  
+
   if (props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE) {
     groups.push({
       label: '设备服务',
-      options: propertyList.value.filter(p => p.category === 'service')
+      options: propertyList.value.filter(p => p.type === IoTThingModelTypeEnum.SERVICE)
     })
   }
-  
+
   return groups.filter(group => group.options.length > 0)
 })
 
@@ -128,34 +132,34 @@ const selectedProperty = computed(() => {
 })
 
 // 工具函数
-const getPropertyTypeName = (type: string) => {
+const getPropertyTypeName = (dataType: string) => {
   const typeMap = {
     'int': '整数',
     'float': '浮点数',
     'double': '双精度',
-    'string': '字符串',
+    'text': '字符串',
     'bool': '布尔值',
     'enum': '枚举',
     'date': '日期',
     'struct': '结构体',
     'array': '数组'
   }
-  return typeMap[type] || type
+  return typeMap[dataType] || dataType
 }
 
-const getPropertyTypeTag = (type: string) => {
+const getPropertyTypeTag = (dataType: string) => {
   const tagMap = {
     'int': 'primary',
     'float': 'success',
     'double': 'success',
-    'string': 'info',
+    'text': 'info',
     'bool': 'warning',
     'enum': 'danger',
     'date': 'primary',
     'struct': 'info',
     'array': 'warning'
   }
-  return tagMap[type] || 'info'
+  return tagMap[dataType] || 'info'
 }
 
 // 事件处理
@@ -163,84 +167,162 @@ const handleChange = (value: string) => {
   const property = propertyList.value.find(p => p.identifier === value)
   if (property) {
     emit('change', {
-      type: property.type,
+      type: property.dataType,
       config: property
     })
   }
 }
 
-// API 调用
-const getPropertyList = async () => {
+// 获取物模型TSL数据
+const getThingModelTSL = async () => {
   if (!props.productId) {
+    thingModelTSL.value = null
     propertyList.value = []
     return
   }
-  
+
   loading.value = true
   try {
-    // 这里应该调用真实的API获取物模型数据
-    // 暂时使用模拟数据
-    propertyList.value = [
-      // 属性
-      {
-        identifier: 'temperature',
-        name: '温度',
-        type: 'float',
-        category: 'property',
-        description: '环境温度',
-        unit: '°C',
-        range: '-40~80'
-      },
-      {
-        identifier: 'humidity',
-        name: '湿度',
-        type: 'float',
-        category: 'property',
-        description: '环境湿度',
-        unit: '%',
-        range: '0~100'
-      },
-      {
-        identifier: 'power',
-        name: '电源状态',
-        type: 'bool',
-        category: 'property',
-        description: '设备电源开关状态'
-      },
-      // 事件
-      {
-        identifier: 'alarm',
-        name: '告警事件',
-        type: 'struct',
-        category: 'event',
-        description: '设备告警事件'
-      },
-      {
-        identifier: 'fault',
-        name: '故障事件',
-        type: 'struct',
-        category: 'event',
-        description: '设备故障事件'
-      },
-      // 服务
-      {
-        identifier: 'restart',
-        name: '重启服务',
-        type: 'struct',
-        category: 'service',
-        description: '设备重启服务'
-      }
-    ]
+    thingModelTSL.value = await ThingModelApi.getThingModelTSLByProductId(props.productId)
+    parseThingModelData()
   } catch (error) {
-    console.error('获取物模型失败:', error)
+    console.error('获取物模型TSL失败:', error)
+    // 如果TSL获取失败，尝试获取物模型列表
+    await getThingModelList()
   } finally {
     loading.value = false
   }
 }
 
+// 获取物模型列表（备用方案）
+const getThingModelList = async () => {
+  if (!props.productId) {
+    propertyList.value = []
+    return
+  }
+
+  try {
+    const data = await ThingModelApi.getThingModelList({ productId: props.productId })
+    propertyList.value = data || []
+  } catch (error) {
+    console.error('获取物模型列表失败:', error)
+    propertyList.value = []
+  }
+}
+
+// 解析物模型TSL数据
+const parseThingModelData = () => {
+  const tsl = thingModelTSL.value
+  const properties: PropertySelectorItem[] = []
+
+  if (tsl) {
+    // 解析属性
+    if (tsl.properties && Array.isArray(tsl.properties)) {
+      tsl.properties.forEach((prop) => {
+        properties.push({
+          identifier: prop.identifier,
+          name: prop.name,
+          description: prop.description,
+          dataType: prop.dataType,
+          type: IoTThingModelTypeEnum.PROPERTY,
+          accessMode: prop.accessMode,
+          required: prop.required,
+          unit: getPropertyUnit(prop),
+          range: getPropertyRange(prop),
+          property: prop
+        })
+      })
+    }
+
+    // 解析事件
+    if (tsl.events && Array.isArray(tsl.events)) {
+      tsl.events.forEach((event) => {
+        properties.push({
+          identifier: event.identifier,
+          name: event.name,
+          description: event.description,
+          dataType: 'struct',
+          type: IoTThingModelTypeEnum.EVENT,
+          eventType: event.type,
+          required: event.required,
+          outputParams: event.outputParams,
+          event: event
+        })
+      })
+    }
+
+    // 解析服务
+    if (tsl.services && Array.isArray(tsl.services)) {
+      tsl.services.forEach((service) => {
+        properties.push({
+          identifier: service.identifier,
+          name: service.name,
+          description: service.description,
+          dataType: 'struct',
+          type: IoTThingModelTypeEnum.SERVICE,
+          callType: service.callType,
+          required: service.required,
+          inputParams: service.inputParams,
+          outputParams: service.outputParams,
+          service: service
+        })
+      })
+    }
+  }
+
+  propertyList.value = properties
+}
+
+// 获取属性单位
+const getPropertyUnit = (property: any) => {
+  if (!property) return undefined
+
+  // 数值型数据的单位
+  if (property.dataSpecs && property.dataSpecs.unit) {
+    return property.dataSpecs.unit
+  }
+
+  return undefined
+}
+
+// 获取属性范围描述
+const getPropertyRange = (property: any) => {
+  if (!property) return undefined
+
+  // 数值型数据的范围
+  if (property.dataSpecs) {
+    const specs = property.dataSpecs
+    if (specs.min !== undefined && specs.max !== undefined) {
+      return `${specs.min}~${specs.max}`
+    }
+  }
+
+  // 枚举型和布尔型数据的选项
+  if (property.dataSpecsList && Array.isArray(property.dataSpecsList)) {
+    return property.dataSpecsList.map((item: any) => `${item.name}(${item.value})`).join(', ')
+  }
+
+  return undefined
+}
+
+// 获取数据范围描述（保留兼容性）
+const getDataRange = (dataSpecs: any) => {
+  if (!dataSpecs) return undefined
+
+  if (dataSpecs.min !== undefined && dataSpecs.max !== undefined) {
+    return `${dataSpecs.min}~${dataSpecs.max}`
+  }
+
+  if (dataSpecs.dataSpecsList && Array.isArray(dataSpecs.dataSpecsList)) {
+    return dataSpecs.dataSpecsList.map((item: any) => `${item.name}(${item.value})`).join(', ')
+  }
+
+  return undefined
+}
+
 // 监听产品变化
 watch(() => props.productId, () => {
-  getPropertyList()
+  getThingModelTSL()
 }, { immediate: true })
 
 // 监听触发类型变化

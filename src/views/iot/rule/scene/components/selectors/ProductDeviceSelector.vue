@@ -34,8 +34,20 @@
         </el-form-item>
       </el-col>
 
-      <!-- 设备选择 -->
+      <!-- 设备选择模式 -->
       <el-col :span="12">
+        <el-form-item label="设备选择模式" required>
+          <el-radio-group v-model="deviceSelectionMode" @change="handleDeviceSelectionModeChange">
+            <el-radio value="specific">选择设备</el-radio>
+            <el-radio value="all">全部设备</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <!-- 具体设备选择 -->
+    <el-row v-if="deviceSelectionMode === 'specific'" :gutter="16">
+      <el-col :span="24">
         <el-form-item label="选择设备" required>
           <el-select
             v-model="localDeviceId"
@@ -58,8 +70,8 @@
                   <div class="option-name">{{ device.deviceName }}</div>
                   <div class="option-nickname">{{ device.nickname || '无备注' }}</div>
                 </div>
-                <el-tag 
-                  size="small" 
+                <el-tag
+                  size="small"
                   :type="getDeviceStatusTag(device.state)"
                 >
                   {{ getDeviceStatusText(device.state) }}
@@ -72,7 +84,7 @@
     </el-row>
 
     <!-- 选择结果展示 -->
-    <div v-if="localProductId && localDeviceId" class="selection-result">
+    <div v-if="localProductId && (localDeviceId !== undefined)" class="selection-result">
       <div class="result-header">
         <Icon icon="ep:check" class="result-icon" />
         <span class="result-title">已选择设备</span>
@@ -85,9 +97,18 @@
         </div>
         <div class="result-item">
           <span class="result-label">设备：</span>
-          <span class="result-value">{{ selectedDevice?.deviceName }}</span>
-          <el-tag 
-            size="small" 
+          <span v-if="deviceSelectionMode === 'all'" class="result-value">全部设备</span>
+          <span v-else class="result-value">{{ selectedDevice?.deviceName }}</span>
+          <el-tag
+            v-if="deviceSelectionMode === 'all'"
+            size="small"
+            type="warning"
+          >
+            全部
+          </el-tag>
+          <el-tag
+            v-else
+            size="small"
             :type="getDeviceStatusTag(selectedDevice?.state)"
           >
             {{ getDeviceStatusText(selectedDevice?.state) }}
@@ -122,6 +143,9 @@ const emit = defineEmits<Emits>()
 
 const localProductId = useVModel(props, 'productId', emit)
 const localDeviceId = useVModel(props, 'deviceId', emit)
+
+// 设备选择模式
+const deviceSelectionMode = ref<'specific' | 'all'>('specific')
 
 // 数据状态
 const productLoading = ref(false)
@@ -162,16 +186,30 @@ const handleProductChange = async (productId?: number) => {
   localProductId.value = productId
   localDeviceId.value = undefined
   deviceList.value = []
-  
+
   if (productId) {
     await getDeviceList(productId)
   }
-  
+
   emitChange()
 }
 
 const handleDeviceChange = (deviceId?: number) => {
   localDeviceId.value = deviceId
+  emitChange()
+}
+
+const handleDeviceSelectionModeChange = (mode: 'specific' | 'all') => {
+  deviceSelectionMode.value = mode
+
+  if (mode === 'all') {
+    // 全部设备时，设备ID设为0
+    localDeviceId.value = 0
+  } else {
+    // 选择设备时，清空设备ID
+    localDeviceId.value = undefined
+  }
+
   emitChange()
 }
 
@@ -222,7 +260,14 @@ const getDeviceList = async (productId: number) => {
 // 初始化
 onMounted(async () => {
   await getProductList()
-  
+
+  // 根据初始设备ID设置选择模式
+  if (localDeviceId.value === 0) {
+    deviceSelectionMode.value = 'all'
+  } else if (localDeviceId.value) {
+    deviceSelectionMode.value = 'specific'
+  }
+
   if (localProductId.value) {
     await getDeviceList(localProductId.value)
   }
