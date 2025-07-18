@@ -7,15 +7,14 @@
       ref="queryFormRef"
       :inline="true"
       label-width="68px"
+      @submit.prevent
     >
       <el-form-item>
         <el-button type="primary" @click="openTaskForm" v-hasPermi="['iot:ota-task:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
-      <!-- TODO @AI：unocss -->
-      <el-form-item style="float: right">
-        <!--TODO @AI:有个 bug：回车后，会刷新，修复下 -->
+      <el-form-item class="float-right">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入任务名称"

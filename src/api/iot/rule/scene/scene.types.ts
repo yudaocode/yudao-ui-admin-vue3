@@ -50,6 +50,19 @@ const IotAlertConfigReceiveTypeEnum = {
   NOTIFY: 3 // 通知
 } as const
 
+// 设备状态枚举
+const DeviceStateEnum = {
+  INACTIVE: 0, // 未激活
+  ONLINE: 1, // 在线
+  OFFLINE: 2 // 离线
+} as const
+
+// 通用状态枚举
+const CommonStatusEnum = {
+  ENABLE: 0, // 开启
+  DISABLE: 1 // 关闭
+} as const
+
 // 基础接口
 interface TenantBaseDO {
   createTime?: Date // 创建时间
@@ -62,10 +75,10 @@ interface TenantBaseDO {
 
 // 触发条件参数
 interface TriggerConditionParameter {
-  identifier0: string // 标识符（事件、服务）
-  identifier: string // 标识符（属性）
-  operator: string // 操作符
-  value: string // 比较值
+  identifier0?: string // 标识符（事件、服务）
+  identifier?: string // 标识符（属性）
+  operator: string // 操作符（必填）
+  value: string // 比较值（必填，多值用逗号分隔）
 }
 
 // 触发条件
@@ -77,39 +90,104 @@ interface TriggerCondition {
 
 // 触发器配置
 interface TriggerConfig {
-  key: any // 解决组件索引重用
-  type: number // 触发类型
-  productKey: string // 产品标识
-  deviceNames: string[] // 设备名称数组
-  conditions?: TriggerCondition[] // 触发条件数组
-  cronExpression?: string // CRON 表达式
+  key?: string // 组件唯一标识符，用于解决索引重用问题
+  type: number // 触发类型（必填）
+  productKey?: string // 产品标识（设备触发时必填）
+  deviceNames?: string[] // 设备名称数组（设备触发时必填）
+  conditions?: TriggerCondition[] // 触发条件数组（设备触发时必填）
+  cronExpression?: string // CRON表达式（定时触发时必填）
 }
 
 // 执行设备控制
 interface ActionDeviceControl {
-  productKey: string // 产品标识
-  deviceNames: string[] // 设备名称数组
-  type: string // 消息类型
-  identifier: string // 消息标识符
-  data: Record<string, any> // 具体数据
+  productKey: string // 产品标识（必填）
+  deviceNames: string[] // 设备名称数组（必填）
+  type: string // 消息类型（必填）
+  identifier: string // 消息标识符（必填）
+  params: Record<string, any> // 参数对象（必填）- 统一使用 params 字段
 }
 
 // 执行器配置
 interface ActionConfig {
-  key: any // 解决组件索引重用 TODO @puhui999：看看有没更好的解决方案呢。
-  type: number // 执行类型
-  deviceControl?: ActionDeviceControl // 设备控制
-  alertConfigId?: number // 告警配置ID（告警恢复时需要）
+  key?: string // 组件唯一标识符，用于解决索引重用问题
+  type: number // 执行类型（必填）
+  deviceControl?: ActionDeviceControl // 设备控制（设备控制时必填）
+  alertConfigId?: number // 告警配置ID（告警恢复时必填）
+}
+
+// 表单数据接口
+interface RuleSceneFormData {
+  id?: number
+  name: string
+  description?: string
+  status: number
+  triggers: TriggerFormData[]
+  actions: ActionFormData[]
+}
+
+interface TriggerFormData {
+  type: number
+  productId?: number
+  deviceId?: number
+  identifier?: string
+  operator?: string
+  value?: string
+  cronExpression?: string
+  conditionGroups?: ConditionGroupFormData[]
+}
+
+interface ActionFormData {
+  type: number
+  productId?: number
+  deviceId?: number
+  params?: Record<string, any>
+  alertConfigId?: number
+}
+
+interface ConditionGroupFormData {
+  conditions: ConditionFormData[]
+  logicOperator: 'AND' | 'OR'
+}
+
+interface ConditionFormData {
+  type: number
+  productId: number
+  deviceId: number
+  identifier: string
+  operator: string
+  param: string
 }
 
 // 主接口
 interface IotRuleScene extends TenantBaseDO {
-  id: number // 场景编号
-  name: string // 场景名称
-  description: string // 场景描述
-  status: number // 场景状态
-  triggers: TriggerConfig[] // 触发器数组
-  actions: ActionConfig[] // 执行器数组
+  id?: number // 场景编号（新增时为空）
+  name: string // 场景名称（必填）
+  description?: string // 场景描述（可选）
+  status: number // 场景状态：0-开启，1-关闭
+  triggers: TriggerConfig[] // 触发器数组（必填，至少一个）
+  actions: ActionConfig[] // 执行器数组（必填，至少一个）
+}
+
+// 工具类型
+type TriggerType = (typeof IotRuleSceneTriggerTypeEnum)[keyof typeof IotRuleSceneTriggerTypeEnum]
+type ActionType = (typeof IotRuleSceneActionTypeEnum)[keyof typeof IotRuleSceneActionTypeEnum]
+type MessageType = (typeof IotDeviceMessageTypeEnum)[keyof typeof IotDeviceMessageTypeEnum]
+type OperatorType =
+  (typeof IotRuleSceneTriggerConditionParameterOperatorEnum)[keyof typeof IotRuleSceneTriggerConditionParameterOperatorEnum]['value']
+
+// 表单验证规则类型
+interface ValidationRule {
+  required?: boolean
+  message?: string
+  trigger?: string | string[]
+  type?: string
+  min?: number
+  max?: number
+  enum?: any[]
+}
+
+interface FormValidationRules {
+  [key: string]: ValidationRule[]
 }
 
 export {
@@ -119,10 +197,23 @@ export {
   TriggerConditionParameter,
   ActionConfig,
   ActionDeviceControl,
+  RuleSceneFormData,
+  TriggerFormData,
+  ActionFormData,
+  ConditionGroupFormData,
+  ConditionFormData,
   IotRuleSceneTriggerTypeEnum,
   IotRuleSceneActionTypeEnum,
   IotDeviceMessageTypeEnum,
   IotDeviceMessageIdentifierEnum,
   IotRuleSceneTriggerConditionParameterOperatorEnum,
-  IotAlertConfigReceiveTypeEnum
+  IotAlertConfigReceiveTypeEnum,
+  DeviceStateEnum,
+  CommonStatusEnum,
+  TriggerType,
+  ActionType,
+  MessageType,
+  OperatorType,
+  ValidationRule,
+  FormValidationRules
 }
