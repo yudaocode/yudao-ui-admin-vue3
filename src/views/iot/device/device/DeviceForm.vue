@@ -151,7 +151,7 @@ const formData = ref({
   groupIds: [] as number[]
 })
 
-// 监听经纬度变化，更新location
+/** 监听经纬度变化，更新location */
 watch([() => formData.value.longitude, () => formData.value.latitude], ([newLong, newLat]) => {
   if (newLong && newLat) {
     formData.value.location = `${newLong},${newLat}`
