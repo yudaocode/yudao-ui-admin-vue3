@@ -1,10 +1,11 @@
 <!-- CRON 可视化构建器组件 -->
+<!-- TODO @puhui999：看看能不能复用全局的 cron 组件 -->
 <template>
   <div class="cron-builder">
     <div class="builder-header">
       <span class="header-title">可视化 CRON 编辑器</span>
     </div>
-    
+
     <div class="builder-content">
       <!-- 快捷选项 -->
       <div class="quick-options">
@@ -36,9 +37,9 @@
                 <el-option label="每分钟" value="*" />
                 <el-option
                   v-for="i in 60"
-                  :key="i-1"
-                  :label="`${i-1}分`"
-                  :value="String(i-1)"
+                  :key="i - 1"
+                  :label="`${i - 1}分`"
+                  :value="String(i - 1)"
                 />
               </el-select>
             </el-form-item>
@@ -49,9 +50,9 @@
                 <el-option label="每小时" value="*" />
                 <el-option
                   v-for="i in 24"
-                  :key="i-1"
-                  :label="`${i-1}时`"
-                  :value="String(i-1)"
+                  :key="i - 1"
+                  :label="`${i - 1}时`"
+                  :value="String(i - 1)"
                 />
               </el-select>
             </el-form-item>
@@ -60,12 +61,7 @@
             <el-form-item label="日">
               <el-select v-model="cronParts.day" @change="updateCronExpression">
                 <el-option label="每日" value="*" />
-                <el-option
-                  v-for="i in 31"
-                  :key="i"
-                  :label="`${i}日`"
-                  :value="String(i)"
-                />
+                <el-option v-for="i in 31" :key="i" :label="`${i}日`" :value="String(i)" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -132,7 +128,20 @@ const cronParts = reactive({
 })
 
 // 常量数据
-const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+const months = [
+  '1月',
+  '2月',
+  '3月',
+  '4月',
+  '5月',
+  '6月',
+  '7月',
+  '8月',
+  '9月',
+  '10月',
+  '11月',
+  '12月'
+]
 const weeks = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
 // 快捷选项
@@ -159,7 +168,7 @@ const applyQuickOption = (option: any) => {
 
 const parseCronExpression = () => {
   if (!localValue.value) return
-  
+
   const parts = localValue.value.split(' ')
   if (parts.length >= 6) {
     cronParts.second = parts[0] || '0'

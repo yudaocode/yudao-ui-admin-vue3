@@ -17,11 +17,13 @@
 
     <div class="section-content">
       <el-row :gutter="24">
+        <!-- TODO @puhui999：NameInput、StatusRadio、DescriptionInput 是不是直接写在当前界面哈。有点散； -->
         <el-col :span="12">
           <el-form-item label="场景名称" prop="name" required>
             <NameInput v-model="formData.name" />
           </el-form-item>
         </el-col>
+        <!-- TODO @puhui999：每个一行会好点？ -->
         <el-col :span="12">
           <el-form-item label="场景状态" prop="status" required>
             <StatusRadio v-model="formData.status" />
@@ -59,6 +61,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const formData = useVModel(props, 'modelValue', emit)
+// TODO @puhui999：看看能不能 unocss
 </script>
 
 <style scoped>

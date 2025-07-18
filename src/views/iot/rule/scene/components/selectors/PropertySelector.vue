@@ -1,4 +1,5 @@
 <!-- 属性选择器组件 -->
+<!-- TODO @yunai：可能要在 review 下 -->
 <template>
   <div class="property-selector">
     <el-select
@@ -10,11 +11,7 @@
       class="w-full"
       :loading="loading"
     >
-      <el-option-group
-        v-for="group in propertyGroups"
-        :key="group.label"
-        :label="group.label"
-      >
+      <el-option-group v-for="group in propertyGroups" :key="group.label" :label="group.label">
         <el-option
           v-for="property in group.options"
           :key="property.identifier"
@@ -70,7 +67,7 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { IotRuleSceneTriggerTypeEnum } from '@/api/iot/rule/scene/scene.types'
-import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
+import { ThingModelApi } from '@/api/iot/thingmodel'
 import { IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
 import type { IotThingModelTSLRespVO, PropertySelectorItem } from './types'
 
@@ -106,65 +103,65 @@ const propertyGroups = computed(() => {
   if (props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST) {
     groups.push({
       label: '设备属性',
-      options: propertyList.value.filter(p => p.type === IoTThingModelTypeEnum.PROPERTY)
+      options: propertyList.value.filter((p) => p.type === IoTThingModelTypeEnum.PROPERTY)
     })
   }
 
   if (props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST) {
     groups.push({
       label: '设备事件',
-      options: propertyList.value.filter(p => p.type === IoTThingModelTypeEnum.EVENT)
+      options: propertyList.value.filter((p) => p.type === IoTThingModelTypeEnum.EVENT)
     })
   }
 
   if (props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE) {
     groups.push({
       label: '设备服务',
-      options: propertyList.value.filter(p => p.type === IoTThingModelTypeEnum.SERVICE)
+      options: propertyList.value.filter((p) => p.type === IoTThingModelTypeEnum.SERVICE)
     })
   }
 
-  return groups.filter(group => group.options.length > 0)
+  return groups.filter((group) => group.options.length > 0)
 })
 
 const selectedProperty = computed(() => {
-  return propertyList.value.find(p => p.identifier === localValue.value)
+  return propertyList.value.find((p) => p.identifier === localValue.value)
 })
 
 // 工具函数
 const getPropertyTypeName = (dataType: string) => {
   const typeMap = {
-    'int': '整数',
-    'float': '浮点数',
-    'double': '双精度',
-    'text': '字符串',
-    'bool': '布尔值',
-    'enum': '枚举',
-    'date': '日期',
-    'struct': '结构体',
-    'array': '数组'
+    int: '整数',
+    float: '浮点数',
+    double: '双精度',
+    text: '字符串',
+    bool: '布尔值',
+    enum: '枚举',
+    date: '日期',
+    struct: '结构体',
+    array: '数组'
   }
   return typeMap[dataType] || dataType
 }
 
 const getPropertyTypeTag = (dataType: string) => {
   const tagMap = {
-    'int': 'primary',
-    'float': 'success',
-    'double': 'success',
-    'text': 'info',
-    'bool': 'warning',
-    'enum': 'danger',
-    'date': 'primary',
-    'struct': 'info',
-    'array': 'warning'
+    int: 'primary',
+    float: 'success',
+    double: 'success',
+    text: 'info',
+    bool: 'warning',
+    enum: 'danger',
+    date: 'primary',
+    struct: 'info',
+    array: 'warning'
   }
   return tagMap[dataType] || 'info'
 }
 
 // 事件处理
 const handleChange = (value: string) => {
-  const property = propertyList.value.find(p => p.identifier === value)
+  const property = propertyList.value.find((p) => p.identifier === value)
   if (property) {
     emit('change', {
       type: property.dataType,
@@ -321,14 +318,21 @@ const getDataRange = (dataSpecs: any) => {
 }
 
 // 监听产品变化
-watch(() => props.productId, () => {
-  getThingModelTSL()
-}, { immediate: true })
+watch(
+  () => props.productId,
+  () => {
+    getThingModelTSL()
+  },
+  { immediate: true }
+)
 
 // 监听触发类型变化
-watch(() => props.triggerType, () => {
-  localValue.value = ''
-})
+watch(
+  () => props.triggerType,
+  () => {
+    localValue.value = ''
+  }
+)
 </script>
 
 <style scoped>

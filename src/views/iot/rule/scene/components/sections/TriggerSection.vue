@@ -6,6 +6,7 @@
         <div class="header-left">
           <Icon icon="ep:lightning" class="section-icon" />
           <span class="section-title">触发器配置</span>
+          <!-- TODO @puhui999：是不是去掉 maxTriggers；计数 -->
           <el-tag size="small" type="info">{{ triggers.length }}/{{ maxTriggers }}</el-tag>
         </div>
         <div class="header-right">
@@ -26,6 +27,7 @@
       <!-- 空状态 -->
       <div v-if="triggers.length === 0" class="empty-state">
         <el-empty description="暂无触发器配置">
+          <!-- TODO @puhui999：这个要不要去掉哈；入口统一点 -->
           <el-button type="primary" @click="addTrigger">
             <Icon icon="ep:plus" />
             添加第一个触发器
@@ -35,19 +37,12 @@
 
       <!-- 触发器列表 -->
       <div v-else class="triggers-list">
-        <div
-          v-for="(trigger, index) in triggers"
-          :key="`trigger-${index}`"
-          class="trigger-item"
-        >
+        <div v-for="(trigger, index) in triggers" :key="`trigger-${index}`" class="trigger-item">
           <div class="trigger-header">
             <div class="trigger-title">
               <Icon icon="ep:lightning" class="trigger-icon" />
               <span>触发器 {{ index + 1 }}</span>
-              <el-tag
-                :type="getTriggerTypeTag(trigger.type)"
-                size="small"
-              >
+              <el-tag :type="getTriggerTypeTag(trigger.type)" size="small">
                 {{ getTriggerTypeName(trigger.type) }}
               </el-tag>
             </div>
@@ -93,19 +88,13 @@
       </div>
 
       <!-- 添加提示 -->
+      <!-- TODO @puhui999：这个要不要去掉哈；入口统一点 -->
       <div v-if="triggers.length > 0 && triggers.length < maxTriggers" class="add-more">
-        <el-button
-          type="primary"
-          plain
-          @click="addTrigger"
-          class="add-more-btn"
-        >
+        <el-button type="primary" plain @click="addTrigger" class="add-more-btn">
           <Icon icon="ep:plus" />
           继续添加触发器
         </el-button>
-        <span class="add-more-text">
-          最多可添加 {{ maxTriggers }} 个触发器
-        </span>
+        <span class="add-more-text"> 最多可添加 {{ maxTriggers }} 个触发器 </span>
       </div>
 
       <!-- 验证结果 -->
@@ -126,9 +115,9 @@ import { useVModel } from '@vueuse/core'
 import TriggerTypeSelector from '../selectors/TriggerTypeSelector.vue'
 import DeviceTriggerConfig from '../configs/DeviceTriggerConfig.vue'
 import TimerTriggerConfig from '../configs/TimerTriggerConfig.vue'
-import { 
-  TriggerFormData, 
-  IotRuleSceneTriggerTypeEnum as TriggerTypeEnum 
+import {
+  TriggerFormData,
+  IotRuleSceneTriggerTypeEnum as TriggerTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
 import { createDefaultTriggerData } from '../../utils/transform'
 
@@ -197,7 +186,7 @@ const addTrigger = () => {
   if (triggers.value.length >= maxTriggers) {
     return
   }
-  
+
   const newTrigger = createDefaultTriggerData()
   triggers.value.push(newTrigger)
 }
@@ -205,10 +194,10 @@ const addTrigger = () => {
 const removeTrigger = (index: number) => {
   triggers.value.splice(index, 1)
   delete triggerValidations.value[index]
-  
+
   // 重新索引验证结果
   const newValidations: { [key: number]: { valid: boolean; message: string } } = {}
-  Object.keys(triggerValidations.value).forEach(key => {
+  Object.keys(triggerValidations.value).forEach((key) => {
     const numKey = parseInt(key)
     if (numKey > index) {
       newValidations[numKey - 1] = triggerValidations.value[numKey]
@@ -217,7 +206,7 @@ const removeTrigger = (index: number) => {
     }
   })
   triggerValidations.value = newValidations
-  
+
   updateValidationResult()
 }
 
@@ -263,9 +252,9 @@ const handleTriggerValidate = (index: number, result: { valid: boolean; message:
 
 const updateValidationResult = () => {
   const validations = Object.values(triggerValidations.value)
-  const allValid = validations.every(v => v.valid)
+  const allValid = validations.every((v) => v.valid)
   const hasValidations = validations.length > 0
-  
+
   if (!hasValidations) {
     isValid.value = true
     validationMessage.value = ''
@@ -274,19 +263,20 @@ const updateValidationResult = () => {
     validationMessage.value = '所有触发器配置验证通过'
   } else {
     isValid.value = false
-    const errorMessages = validations
-      .filter(v => !v.valid)
-      .map(v => v.message)
+    const errorMessages = validations.filter((v) => !v.valid).map((v) => v.message)
     validationMessage.value = `触发器配置错误: ${errorMessages.join('; ')}`
   }
-  
+
   emit('validate', { valid: isValid.value, message: validationMessage.value })
 }
 
 // 监听触发器数量变化
-watch(() => triggers.value.length, () => {
-  updateValidationResult()
-})
+watch(
+  () => triggers.value.length,
+  () => {
+    updateValidationResult()
+  }
+)
 </script>
 
 <style scoped>

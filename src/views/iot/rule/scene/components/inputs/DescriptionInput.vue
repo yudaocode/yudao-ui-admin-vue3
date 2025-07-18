@@ -15,19 +15,10 @@
 
     <!-- 描述模板 -->
     <teleport to="body">
-      <div
-        v-if="showTemplates"
-        ref="templateDropdownRef"
-        class="templates"
-        :style="dropdownStyle"
-      >
+      <div v-if="showTemplates" ref="templateDropdownRef" class="templates" :style="dropdownStyle">
         <div class="templates-header">
           <span class="templates-title">描述模板</span>
-          <el-button
-            type="text"
-            size="small"
-            @click="showTemplates = false"
-          >
+          <el-button type="text" size="small" @click="showTemplates = false">
             <Icon icon="ep:close" />
           </el-button>
         </div>
@@ -45,13 +36,10 @@
       </div>
     </teleport>
 
+    <!-- TODO @puhui999：不用模版哈，简单点。。。 -->
     <!-- 模板按钮 -->
     <div v-if="!localValue && !showTemplates" class="template-trigger">
-      <el-button
-        type="text"
-        size="small"
-        @click="toggleTemplates"
-      >
+      <el-button type="text" size="small" @click="toggleTemplates">
         <Icon icon="ep:document" class="mr-1" />
         使用模板
       </el-button>
@@ -163,8 +151,12 @@ const toggleTemplates = () => {
 
 // 点击外部关闭下拉框
 const handleClickOutside = (event: Event) => {
-  if (templateDropdownRef.value && !templateDropdownRef.value.contains(event.target as Node) &&
-      inputRef.value && !inputRef.value.$el.contains(event.target as Node)) {
+  if (
+    templateDropdownRef.value &&
+    !templateDropdownRef.value.contains(event.target as Node) &&
+    inputRef.value &&
+    !inputRef.value.$el.contains(event.target as Node)
+  ) {
     showTemplates.value = false
   }
 }

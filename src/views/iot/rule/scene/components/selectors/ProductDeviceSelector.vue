@@ -25,6 +25,7 @@
                   <div class="option-name">{{ product.name }}</div>
                   <div class="option-key">{{ product.productKey }}</div>
                 </div>
+                <!-- TODO @puhui999：是不是用字典 -->
                 <el-tag size="small" :type="product.status === 0 ? 'success' : 'danger'">
                   {{ product.status === 0 ? '正常' : '禁用' }}
                 </el-tag>
@@ -38,8 +39,8 @@
       <el-col :span="12">
         <el-form-item label="设备选择模式" required>
           <el-radio-group v-model="deviceSelectionMode" @change="handleDeviceSelectionModeChange">
-            <el-radio value="specific">选择设备</el-radio>
             <el-radio value="all">全部设备</el-radio>
+            <el-radio value="specific">选择设备</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-col>
@@ -48,7 +49,9 @@
     <!-- 具体设备选择 -->
     <el-row v-if="deviceSelectionMode === 'specific'" :gutter="16">
       <el-col :span="24">
+        <!-- TODO @puhui999：貌似产品选择不上； -->
         <el-form-item label="选择设备" required>
+          <!-- TODO @puhui999：请先选择产品，是不是改成请选择设备？然后上面，localProductId 为空（未选择）的时候，禁用 deviceSelectionMode -->
           <el-select
             v-model="localDeviceId"
             placeholder="请先选择产品"
@@ -70,10 +73,7 @@
                   <div class="option-name">{{ device.deviceName }}</div>
                   <div class="option-nickname">{{ device.nickname || '无备注' }}</div>
                 </div>
-                <el-tag
-                  size="small"
-                  :type="getDeviceStatusTag(device.state)"
-                >
+                <el-tag size="small" :type="getDeviceStatusTag(device.state)">
                   {{ getDeviceStatusText(device.state) }}
                 </el-tag>
               </div>
@@ -84,7 +84,7 @@
     </el-row>
 
     <!-- 选择结果展示 -->
-    <div v-if="localProductId && (localDeviceId !== undefined)" class="selection-result">
+    <div v-if="localProductId && localDeviceId !== undefined" class="selection-result">
       <div class="result-header">
         <Icon icon="ep:check" class="result-icon" />
         <span class="result-title">已选择设备</span>
@@ -99,18 +99,8 @@
           <span class="result-label">设备：</span>
           <span v-if="deviceSelectionMode === 'all'" class="result-value">全部设备</span>
           <span v-else class="result-value">{{ selectedDevice?.deviceName }}</span>
-          <el-tag
-            v-if="deviceSelectionMode === 'all'"
-            size="small"
-            type="warning"
-          >
-            全部
-          </el-tag>
-          <el-tag
-            v-else
-            size="small"
-            :type="getDeviceStatusTag(selectedDevice?.state)"
-          >
+          <el-tag v-if="deviceSelectionMode === 'all'" size="small" type="warning"> 全部 </el-tag>
+          <el-tag v-else size="small" :type="getDeviceStatusTag(selectedDevice?.state)">
             {{ getDeviceStatusText(selectedDevice?.state) }}
           </el-tag>
         </div>
@@ -145,7 +135,8 @@ const localProductId = useVModel(props, 'productId', emit)
 const localDeviceId = useVModel(props, 'deviceId', emit)
 
 // 设备选择模式
-const deviceSelectionMode = ref<'specific' | 'all'>('specific')
+// TODO @puhui999：默认选中 all
+const deviceSelectionMode = ref<'specific' | 'all'>('all')
 
 // 数据状态
 const productLoading = ref(false)
@@ -155,29 +146,38 @@ const deviceList = ref<any[]>([])
 
 // 计算属性
 const selectedProduct = computed(() => {
-  return productList.value.find(p => p.id === localProductId.value)
+  return productList.value.find((p) => p.id === localProductId.value)
 })
 
 const selectedDevice = computed(() => {
-  return deviceList.value.find(d => d.id === localDeviceId.value)
+  return deviceList.value.find((d) => d.id === localDeviceId.value)
 })
 
+// TODO @puhui999：字典下；
 // 设备状态映射
 const getDeviceStatusText = (state?: number) => {
   switch (state) {
-    case 0: return '未激活'
-    case 1: return '在线'
-    case 2: return '离线'
-    default: return '未知'
+    case 0:
+      return '未激活'
+    case 1:
+      return '在线'
+    case 2:
+      return '离线'
+    default:
+      return '未知'
   }
 }
 
 const getDeviceStatusTag = (state?: number) => {
   switch (state) {
-    case 0: return 'info'
-    case 1: return 'success'
-    case 2: return 'danger'
-    default: return 'info'
+    case 0:
+      return 'info'
+    case 1:
+      return 'success'
+    case 2:
+      return 'danger'
+    default:
+      return 'info'
   }
 }
 
@@ -203,10 +203,10 @@ const handleDeviceSelectionModeChange = (mode: 'specific' | 'all') => {
   deviceSelectionMode.value = mode
 
   if (mode === 'all') {
-    // 全部设备时，设备ID设为0
+    // 全部设备时，设备 ID 设为 0
     localDeviceId.value = 0
   } else {
-    // 选择设备时，清空设备ID
+    // 选择设备时，清空设备 ID
     localDeviceId.value = undefined
   }
 
@@ -229,6 +229,7 @@ const getProductList = async () => {
   } catch (error) {
     console.error('获取产品列表失败:', error)
     // 模拟数据
+    // TODO @puhui999：移除下，不太合理
     productList.value = [
       { id: 1, name: '智能温度传感器', productKey: 'temp_sensor_001', status: 0 },
       { id: 2, name: '智能空调控制器', productKey: 'ac_controller_001', status: 0 },
@@ -247,6 +248,7 @@ const getDeviceList = async (productId: number) => {
   } catch (error) {
     console.error('获取设备列表失败:', error)
     // 模拟数据
+    // TODO @puhui999：移除下，不太合理
     deviceList.value = [
       { id: 1, deviceName: 'sensor_001', nickname: '客厅温度传感器', state: 1, productId },
       { id: 2, deviceName: 'sensor_002', nickname: '卧室温度传感器', state: 2, productId },
@@ -261,7 +263,7 @@ const getDeviceList = async (productId: number) => {
 onMounted(async () => {
   await getProductList()
 
-  // 根据初始设备ID设置选择模式
+  // 根据初始设备 ID 设置选择模式
   if (localDeviceId.value === 0) {
     deviceSelectionMode.value = 'all'
   } else if (localDeviceId.value) {
@@ -274,11 +276,15 @@ onMounted(async () => {
 })
 
 // 监听产品变化
-watch(() => localProductId.value, async (newProductId) => {
-  if (newProductId && deviceList.value.length === 0) {
-    await getDeviceList(newProductId)
+watch(
+  () => localProductId.value,
+  async (newProductId) => {
+    if (newProductId && deviceList.value.length === 0) {
+      await getDeviceList(newProductId)
+    }
   }
-})
+)
+// TODO @puhui999：是不是 unocss
 </script>
 
 <style scoped>

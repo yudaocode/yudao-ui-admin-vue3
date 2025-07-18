@@ -1,4 +1,5 @@
 <!-- 值输入组件 -->
+<!-- TODO @yunai：这个需要在看看。。。 -->
 <template>
   <div class="value-input">
     <!-- 布尔值选择 -->
@@ -64,12 +65,7 @@
       </el-input>
       <div v-if="listPreview.length > 0" class="list-preview">
         <span class="preview-label">解析结果：</span>
-        <el-tag
-          v-for="(item, index) in listPreview"
-          :key="index"
-          size="small"
-          class="preview-tag"
-        >
+        <el-tag v-for="(item, index) in listPreview" :key="index" size="small" class="preview-tag">
           {{ item }}
         </el-tag>
       </div>
@@ -110,7 +106,11 @@
       class="w-full"
     >
       <template #suffix>
-        <el-tooltip v-if="propertyConfig?.unit" :content="`单位：${propertyConfig.unit}`" placement="top">
+        <el-tooltip
+          v-if="propertyConfig?.unit"
+          :content="`单位：${propertyConfig.unit}`"
+          placement="top"
+        >
           <span class="input-unit">{{ propertyConfig.unit }}</span>
         </el-tooltip>
       </template>
@@ -172,7 +172,10 @@ const enumOptions = computed(() => {
 
 const listPreview = computed(() => {
   if (props.operator === 'in' && localValue.value) {
-    return localValue.value.split(',').map(item => item.trim()).filter(item => item)
+    return localValue.value
+      .split(',')
+      .map((item) => item.trim())
+      .filter((item) => item)
   }
   return []
 })
@@ -195,12 +198,12 @@ const getInputType = () => {
 
 const getPlaceholder = () => {
   const typeMap = {
-    'string': '请输入字符串',
-    'int': '请输入整数',
-    'float': '请输入浮点数',
-    'double': '请输入双精度数',
-    'struct': '请输入JSON格式数据',
-    'array': '请输入数组格式数据'
+    string: '请输入字符串',
+    int: '请输入整数',
+    float: '请输入浮点数',
+    double: '请输入双精度数',
+    struct: '请输入JSON格式数据',
+    array: '请输入数组格式数据'
   }
   return typeMap[props.propertyType || ''] || '请输入值'
 }
@@ -325,18 +328,24 @@ const validateValue = () => {
 }
 
 // 监听值变化
-watch(() => localValue.value, () => {
-  validateValue()
-})
+watch(
+  () => localValue.value,
+  () => {
+    validateValue()
+  }
+)
 
 // 监听操作符变化
-watch(() => props.operator, () => {
-  localValue.value = ''
-  rangeStart.value = ''
-  rangeEnd.value = ''
-  dateValue.value = ''
-  numberValue.value = undefined
-})
+watch(
+  () => props.operator,
+  () => {
+    localValue.value = ''
+    rangeStart.value = ''
+    rangeEnd.value = ''
+    dateValue.value = ''
+    numberValue.value = undefined
+  }
+)
 
 // 初始化
 onMounted(() => {

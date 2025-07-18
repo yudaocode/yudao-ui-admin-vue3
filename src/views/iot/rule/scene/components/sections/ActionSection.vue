@@ -1,4 +1,5 @@
 <!-- 执行器配置组件 -->
+<!-- todo @puhui999：参考“触发器配置”，简化下。 -->
 <template>
   <el-card class="action-section" shadow="never">
     <template #header>
@@ -35,19 +36,12 @@
 
       <!-- 执行器列表 -->
       <div v-else class="actions-list">
-        <div
-          v-for="(action, index) in actions"
-          :key="`action-${index}`"
-          class="action-item"
-        >
+        <div v-for="(action, index) in actions" :key="`action-${index}`" class="action-item">
           <div class="action-header">
             <div class="action-title">
               <Icon icon="ep:setting" class="action-icon" />
               <span>执行器 {{ index + 1 }}</span>
-              <el-tag
-                :type="getActionTypeTag(action.type)"
-                size="small"
-              >
+              <el-tag :type="getActionTypeTag(action.type)" size="small">
                 {{ getActionTypeName(action.type) }}
               </el-tag>
             </div>
@@ -94,18 +88,11 @@
 
       <!-- 添加提示 -->
       <div v-if="actions.length > 0 && actions.length < maxActions" class="add-more">
-        <el-button
-          type="primary"
-          plain
-          @click="addAction"
-          class="add-more-btn"
-        >
+        <el-button type="primary" plain @click="addAction" class="add-more-btn">
           <Icon icon="ep:plus" />
           继续添加执行器
         </el-button>
-        <span class="add-more-text">
-          最多可添加 {{ maxActions }} 个执行器
-        </span>
+        <span class="add-more-text"> 最多可添加 {{ maxActions }} 个执行器 </span>
       </div>
 
       <!-- 验证结果 -->
@@ -126,9 +113,9 @@ import { useVModel } from '@vueuse/core'
 import ActionTypeSelector from '../selectors/ActionTypeSelector.vue'
 import DeviceControlConfig from '../configs/DeviceControlConfig.vue'
 import AlertConfig from '../configs/AlertConfig.vue'
-import { 
-  ActionFormData, 
-  IotRuleSceneActionTypeEnum as ActionTypeEnum 
+import {
+  ActionFormData,
+  IotRuleSceneActionTypeEnum as ActionTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
 import { createDefaultActionData } from '../../utils/transform'
 
@@ -174,17 +161,11 @@ const actionTypeTags = {
 
 // 工具函数
 const isDeviceAction = (type: number) => {
-  return [
-    ActionTypeEnum.DEVICE_PROPERTY_SET,
-    ActionTypeEnum.DEVICE_SERVICE_INVOKE
-  ].includes(type)
+  return [ActionTypeEnum.DEVICE_PROPERTY_SET, ActionTypeEnum.DEVICE_SERVICE_INVOKE].includes(type)
 }
 
 const isAlertAction = (type: number) => {
-  return [
-    ActionTypeEnum.ALERT_TRIGGER,
-    ActionTypeEnum.ALERT_RECOVER
-  ].includes(type)
+  return [ActionTypeEnum.ALERT_TRIGGER, ActionTypeEnum.ALERT_RECOVER].includes(type)
 }
 
 const getActionTypeName = (type: number) => {
@@ -200,7 +181,7 @@ const addAction = () => {
   if (actions.value.length >= maxActions) {
     return
   }
-  
+
   const newAction = createDefaultActionData()
   actions.value.push(newAction)
 }
@@ -208,10 +189,10 @@ const addAction = () => {
 const removeAction = (index: number) => {
   actions.value.splice(index, 1)
   delete actionValidations.value[index]
-  
+
   // 重新索引验证结果
   const newValidations: { [key: number]: { valid: boolean; message: string } } = {}
-  Object.keys(actionValidations.value).forEach(key => {
+  Object.keys(actionValidations.value).forEach((key) => {
     const numKey = parseInt(key)
     if (numKey > index) {
       newValidations[numKey - 1] = actionValidations.value[numKey]
@@ -220,7 +201,7 @@ const removeAction = (index: number) => {
     }
   })
   actionValidations.value = newValidations
-  
+
   updateValidationResult()
 }
 
@@ -258,9 +239,9 @@ const handleActionValidate = (index: number, result: { valid: boolean; message: 
 
 const updateValidationResult = () => {
   const validations = Object.values(actionValidations.value)
-  const allValid = validations.every(v => v.valid)
+  const allValid = validations.every((v) => v.valid)
   const hasValidations = validations.length > 0
-  
+
   if (!hasValidations) {
     isValid.value = true
     validationMessage.value = ''
@@ -269,19 +250,20 @@ const updateValidationResult = () => {
     validationMessage.value = '所有执行器配置验证通过'
   } else {
     isValid.value = false
-    const errorMessages = validations
-      .filter(v => !v.valid)
-      .map(v => v.message)
+    const errorMessages = validations.filter((v) => !v.valid).map((v) => v.message)
     validationMessage.value = `执行器配置错误: ${errorMessages.join('; ')}`
   }
-  
+
   emit('validate', { valid: isValid.value, message: validationMessage.value })
 }
 
 // 监听执行器数量变化
-watch(() => actions.value.length, () => {
-  updateValidationResult()
-})
+watch(
+  () => actions.value.length,
+  () => {
+    updateValidationResult()
+  }
+)
 </script>
 
 <style scoped>

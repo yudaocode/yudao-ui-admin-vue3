@@ -8,17 +8,10 @@
       @change="handleDeviceChange"
     />
 
+    <!-- TODO @puhui999：这里有点冗余，建议去掉 -->
     <!-- 设备状态变更提示 -->
-    <div
-      v-if="trigger.type === TriggerTypeEnum.DEVICE_STATE_UPDATE"
-      class="state-update-notice"
-    >
-      <el-alert
-        title="设备状态变更触发"
-        type="info"
-        :closable="false"
-        show-icon
-      >
+    <div v-if="trigger.type === TriggerTypeEnum.DEVICE_STATE_UPDATE" class="state-update-notice">
+      <el-alert title="设备状态变更触发" type="info" :closable="false" show-icon>
         <template #default>
           <p>当选中的设备上线或离线时将自动触发场景规则</p>
           <p class="notice-tip">无需配置额外的触发条件</p>
@@ -27,13 +20,11 @@
     </div>
 
     <!-- 条件组配置 -->
-    <div
-      v-else-if="needsConditions"
-      class="condition-groups"
-    >
+    <div v-else-if="needsConditions" class="condition-groups">
       <div class="condition-groups-header">
         <div class="header-left">
           <span class="header-title">触发条件</span>
+          <!-- TODO @puhui999：去掉数量限制 -->
           <el-tag size="small" type="info">
             {{ trigger.conditionGroups?.length || 0 }}/{{ maxConditionGroups }}
           </el-tag>
@@ -52,7 +43,10 @@
       </div>
 
       <!-- 条件组列表 -->
-      <div v-if="trigger.conditionGroups && trigger.conditionGroups.length > 0" class="condition-groups-list">
+      <div
+        v-if="trigger.conditionGroups && trigger.conditionGroups.length > 0"
+        class="condition-groups-list"
+      >
         <div
           v-for="(group, groupIndex) in trigger.conditionGroups"
           :key="`group-${groupIndex}`"
@@ -61,10 +55,11 @@
           <div class="group-header">
             <div class="group-title">
               <span>条件组 {{ groupIndex + 1 }}</span>
+              <!-- TODO @puhui999：不用“且、或”哈。条件组之间，就是或；条件之间就是且 -->
               <el-select
                 v-model="group.logicOperator"
                 size="small"
-                style="width: 80px; margin-left: 12px;"
+                style="width: 80px; margin-left: 12px"
               >
                 <el-option label="且" value="AND" />
                 <el-option label="或" value="OR" />
@@ -120,10 +115,10 @@
 import { useVModel } from '@vueuse/core'
 import ProductDeviceSelector from '../selectors/ProductDeviceSelector.vue'
 import ConditionGroupConfig from './ConditionGroupConfig.vue'
-import { 
-  TriggerFormData, 
+import {
+  TriggerFormData,
   ConditionGroupFormData,
-  IotRuleSceneTriggerTypeEnum as TriggerTypeEnum 
+  IotRuleSceneTriggerTypeEnum as TriggerTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
 
 /** 设备触发配置组件 */
@@ -173,16 +168,16 @@ const addConditionGroup = () => {
   if (!trigger.value.conditionGroups) {
     trigger.value.conditionGroups = []
   }
-  
+
   if (trigger.value.conditionGroups.length >= maxConditionGroups) {
     return
   }
-  
+
   const newGroup: ConditionGroupFormData = {
     conditions: [],
     logicOperator: 'AND'
   }
-  
+
   trigger.value.conditionGroups.push(newGroup)
 }
 
@@ -190,10 +185,10 @@ const removeConditionGroup = (index: number) => {
   if (trigger.value.conditionGroups) {
     trigger.value.conditionGroups.splice(index, 1)
     delete groupValidations.value[index]
-    
+
     // 重新索引验证结果
     const newValidations: { [key: number]: { valid: boolean; message: string } } = {}
-    Object.keys(groupValidations.value).forEach(key => {
+    Object.keys(groupValidations.value).forEach((key) => {
       const numKey = parseInt(key)
       if (numKey > index) {
         newValidations[numKey - 1] = groupValidations.value[numKey]
@@ -202,7 +197,7 @@ const removeConditionGroup = (index: number) => {
       }
     })
     groupValidations.value = newValidations
-    
+
     updateValidationResult()
   }
 }
@@ -220,7 +215,7 @@ const updateValidationResult = () => {
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   // 设备状态变更不需要条件验证
   if (trigger.value.type === TriggerTypeEnum.DEVICE_STATE_UPDATE) {
     isValid.value = true
@@ -228,7 +223,7 @@ const updateValidationResult = () => {
     emit('validate', { valid: true, message: validationMessage.value })
     return
   }
-  
+
   // 条件组验证
   if (!trigger.value.conditionGroups || trigger.value.conditionGroups.length === 0) {
     isValid.value = false
@@ -236,33 +231,38 @@ const updateValidationResult = () => {
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   const validations = Object.values(groupValidations.value)
-  const allValid = validations.every(v => v.valid)
-  
+  const allValid = validations.every((v) => v.valid)
+
   if (allValid) {
     isValid.value = true
     validationMessage.value = '设备触发配置验证通过'
   } else {
     isValid.value = false
-    const errorMessages = validations
-      .filter(v => !v.valid)
-      .map(v => v.message)
+    const errorMessages = validations.filter((v) => !v.valid).map((v) => v.message)
     validationMessage.value = `条件组配置错误: ${errorMessages.join('; ')}`
   }
-  
+
   emit('validate', { valid: isValid.value, message: validationMessage.value })
 }
 
 // 监听触发器类型变化
-watch(() => trigger.value.type, () => {
-  updateValidationResult()
-})
+watch(
+  () => trigger.value.type,
+  () => {
+    updateValidationResult()
+  }
+)
 
 // 监听产品设备变化
-watch(() => [trigger.value.productId, trigger.value.deviceId], () => {
-  updateValidationResult()
-})
+watch(
+  () => [trigger.value.productId, trigger.value.deviceId],
+  () => {
+    updateValidationResult()
+  }
+)
+// TODO @puhui999：unocss
 </script>
 
 <style scoped>

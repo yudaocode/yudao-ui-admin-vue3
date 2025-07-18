@@ -1,4 +1,3 @@
-<!-- 改进的场景联动规则管理页面 -->
 <template>
   <ContentWrap>
     <!-- 页面头部 -->
@@ -186,6 +185,7 @@
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
+            <!-- TODO @puhui999：间隙大了点 -->
             <div class="action-buttons">
               <el-button type="primary" link @click="handleEdit(row)">
                 <Icon icon="ep:edit" />
@@ -197,6 +197,7 @@
                 @click="handleToggleStatus(row)"
               >
                 <Icon :icon="row.status === 0 ? 'ep:video-pause' : 'ep:video-play'" />
+                <!-- TODO @puhui999：翻译，字典 -->
                 {{ row.status === 0 ? '禁用' : '启用' }}
               </el-button>
               <el-button type="danger" link @click="handleDelete(row)">
@@ -241,7 +242,7 @@
     </div>
 
     <!-- 表单对话框 -->
-    <RuleSceneForm v-model="formVisible" :rule-scene="currentRule" @success="handleFormSuccess" />
+    <RuleSceneForm v-model="formVisible" :rule-scene="currentRule" @success="getList" />
   </ContentWrap>
 </template>
 
@@ -252,11 +253,11 @@ import { IotRuleScene } from '@/api/iot/rule/scene/scene.types'
 import { getRuleSceneSummary } from './utils/transform'
 import { formatDate } from '@/utils/formatTime'
 
-/** 改进的场景联动规则管理页面 */
-defineOptions({ name: 'ImprovedRuleSceneIndex' })
+/** 场景联动规则管理页面 */
+defineOptions({ name: 'IoTSceneRule' })
 
 const message = useMessage()
-// const { t } = useI18n()
+// const { t } = useI18n() // TODO @puhui999：可以删除
 
 // 查询参数
 const queryParams = reactive({
@@ -267,6 +268,7 @@ const queryParams = reactive({
 })
 
 // 数据状态
+// TODO @puhui999：变量名，和别的页面保持一致哈
 const loading = ref(true)
 const list = ref<IotRuleScene[]>([])
 const total = ref(0)
@@ -285,6 +287,7 @@ const statistics = ref({
 })
 
 // 获取列表数据
+// TODO @puhui999：接入
 const getList = async () => {
   loading.value = true
   try {
@@ -352,6 +355,8 @@ const getList = async () => {
   }
 }
 
+// TODO @puhui999：方法注释，使用 /** */ 风格
+
 // 更新统计数据
 const updateStatistics = () => {
   statistics.value = {
@@ -384,6 +389,7 @@ const resetQuery = () => {
   handleQuery()
 }
 
+// TODO @puhui999：这个要不还是使用 open 方式，只是弹出的右侧；
 const handleAdd = () => {
   currentRule.value = undefined
   formVisible.value = true
@@ -394,6 +400,7 @@ const handleEdit = (row: IotRuleScene) => {
   formVisible.value = true
 }
 
+// TODO @puhui999：handleDelete、handleToggleStatus 保持和别的模块一致哇？
 const handleDelete = async (row: IotRuleScene) => {
   try {
     await ElMessageBox.confirm('确定要删除这个规则吗？', '提示', {
@@ -481,10 +488,6 @@ const handleBatchDelete = async () => {
   }
 }
 
-const handleFormSuccess = () => {
-  getList()
-}
-
 // 初始化
 onMounted(() => {
   getList()
@@ -492,6 +495,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/** TODO @puhui999：看看下面的，是不是可以用 unocss 替代 */
 .page-header {
   display: flex;
   justify-content: space-between;

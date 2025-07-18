@@ -1,4 +1,5 @@
 <!-- CRON 表达式输入组件 -->
+<!-- TODO @puhui999：看看能不能复用全局的 cron 组件 -->
 <template>
   <div class="cron-input">
     <el-input
@@ -13,15 +14,10 @@
         </el-tooltip>
       </template>
     </el-input>
-    
+
     <!-- 帮助信息 -->
     <div v-if="showHelp" class="cron-help">
-      <el-alert
-        title="CRON 表达式格式：秒 分 时 日 月 周"
-        type="info"
-        :closable="false"
-        show-icon
-      >
+      <el-alert title="CRON 表达式格式：秒 分 时 日 月 周" type="info" :closable="false" show-icon>
         <template #default>
           <div class="help-content">
             <p><strong>示例：</strong></p>
@@ -83,7 +79,7 @@ const validateExpression = () => {
     emit('validate', { valid: false, message: '请输入CRON表达式' })
     return
   }
-  
+
   const isValid = validateCronExpression(localValue.value)
   if (isValid) {
     emit('validate', { valid: true, message: 'CRON表达式验证通过' })
@@ -93,9 +89,12 @@ const validateExpression = () => {
 }
 
 // 监听值变化
-watch(() => localValue.value, () => {
-  validateExpression()
-})
+watch(
+  () => localValue.value,
+  () => {
+    validateExpression()
+  }
+)
 
 // 初始化
 onMounted(() => {

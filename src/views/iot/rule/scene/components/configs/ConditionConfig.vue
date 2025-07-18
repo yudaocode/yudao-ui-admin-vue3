@@ -1,4 +1,5 @@
 <!-- 单个条件配置组件 -->
+<!-- TODO @puhui999：这里需要在对下阿里云 IoT，不太对；它是条件类型；然后选择产品、设备；接着选条件类型对应的比较； -->
 <template>
   <div class="condition-config">
     <el-row :gutter="16">
@@ -105,11 +106,11 @@ const conditionPreview = computed(() => {
   if (!condition.value.identifier || !condition.value.operator || !condition.value.param) {
     return ''
   }
-  
+
   const propertyName = propertyConfig.value?.name || condition.value.identifier
   const operatorText = getOperatorText(condition.value.operator)
   const value = condition.value.param
-  
+
   return `当 ${propertyName} ${operatorText} ${value} 时触发`
 })
 
@@ -122,8 +123,8 @@ const getOperatorText = (operator: string) => {
     '>=': '大于等于',
     '<': '小于',
     '<=': '小于等于',
-    'in': '包含于',
-    'between': '介于'
+    in: '包含于',
+    between: '介于'
   }
   return operatorMap[operator] || operator
 }
@@ -137,11 +138,11 @@ const updateConditionField = (field: keyof ConditionFormData, value: any) => {
 const handlePropertyChange = (propertyInfo: { type: string; config: any }) => {
   propertyType.value = propertyInfo.type
   propertyConfig.value = propertyInfo.config
-  
+
   // 重置操作符和值
   condition.value.operator = '='
   condition.value.param = ''
-  
+
   updateValidationResult()
 }
 
@@ -164,21 +165,21 @@ const updateValidationResult = () => {
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   if (!condition.value.operator) {
     isValid.value = false
     validationMessage.value = '请选择操作符'
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   if (!condition.value.param) {
     isValid.value = false
     validationMessage.value = '请输入比较值'
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   // 值验证
   if (!valueValidation.value.valid) {
     isValid.value = false
@@ -186,7 +187,7 @@ const updateValidationResult = () => {
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   // 验证通过
   isValid.value = true
   validationMessage.value = '条件配置验证通过'
@@ -194,9 +195,13 @@ const updateValidationResult = () => {
 }
 
 // 监听条件变化
-watch(() => [condition.value.identifier, condition.value.operator, condition.value.param], () => {
-  updateValidationResult()
-}, { deep: true })
+watch(
+  () => [condition.value.identifier, condition.value.operator, condition.value.param],
+  () => {
+    updateValidationResult()
+  },
+  { deep: true }
+)
 
 // 初始化
 onMounted(() => {

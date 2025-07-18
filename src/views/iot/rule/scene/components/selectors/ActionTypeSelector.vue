@@ -1,6 +1,7 @@
 <!-- 执行器类型选择组件 -->
 <template>
   <div class="action-type-selector">
+    <!-- TODO @puhui999：1）设备属性设置时，貌似没选属性；2）服务调用时，貌似也没的设置哈； -->
     <el-form-item label="执行类型" required>
       <el-select
         v-model="localValue"

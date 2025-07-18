@@ -40,15 +40,9 @@
           </div>
 
           <!-- 逻辑连接符 -->
-          <div
-            v-if="index < group.conditions!.length - 1"
-            class="logic-connector"
-          >
-            <el-select
-              v-model="group.logicOperator"
-              size="small"
-              style="width: 80px;"
-            >
+          <!-- TODO @puhui999：不用这个哈； -->
+          <div v-if="index < group.conditions!.length - 1" class="logic-connector">
+            <el-select v-model="group.logicOperator" size="small" style="width: 80px">
               <el-option label="且" value="AND" />
               <el-option label="或" value="OR" />
             </el-select>
@@ -67,23 +61,22 @@
       </div>
 
       <!-- 添加条件按钮 -->
-      <div v-if="group.conditions && group.conditions.length > 0 && group.conditions.length < maxConditions" class="add-condition">
-        <el-button
-          type="primary"
-          plain
-          @click="addCondition"
-          class="add-condition-btn"
-        >
+      <div
+        v-if="
+          group.conditions && group.conditions.length > 0 && group.conditions.length < maxConditions
+        "
+        class="add-condition"
+      >
+        <el-button type="primary" plain @click="addCondition" class="add-condition-btn">
           <Icon icon="ep:plus" />
           继续添加条件
         </el-button>
-        <span class="add-condition-text">
-          最多可添加 {{ maxConditions }} 个条件
-        </span>
+        <span class="add-condition-text"> 最多可添加 {{ maxConditions }} 个条件 </span>
       </div>
     </div>
 
     <!-- 验证结果 -->
+    <!-- TODO @puhui999：是不是不用这种提示；只要 validator rules 能展示出来就好了呀。。。 -->
     <div v-if="validationMessage" class="validation-result">
       <el-alert
         :title="validationMessage"
@@ -98,10 +91,10 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import ConditionConfig from './ConditionConfig.vue'
-import { 
-  ConditionGroupFormData, 
+import {
+  ConditionGroupFormData,
   ConditionFormData,
-  IotRuleSceneTriggerTypeEnum 
+  IotRuleSceneTriggerTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
 
 /** 条件组配置组件 */
@@ -155,11 +148,11 @@ const addCondition = () => {
   if (!group.value.conditions) {
     group.value.conditions = []
   }
-  
+
   if (group.value.conditions.length >= maxConditions) {
     return
   }
-  
+
   const newCondition: ConditionFormData = {
     type: props.triggerType,
     productId: props.productId || 0,
@@ -168,7 +161,7 @@ const addCondition = () => {
     operator: '=',
     param: ''
   }
-  
+
   group.value.conditions.push(newCondition)
 }
 
@@ -176,10 +169,10 @@ const removeCondition = (index: number) => {
   if (group.value.conditions) {
     group.value.conditions.splice(index, 1)
     delete conditionValidations.value[index]
-    
+
     // 重新索引验证结果
     const newValidations: { [key: number]: { valid: boolean; message: string } } = {}
-    Object.keys(conditionValidations.value).forEach(key => {
+    Object.keys(conditionValidations.value).forEach((key) => {
       const numKey = parseInt(key)
       if (numKey > index) {
         newValidations[numKey - 1] = conditionValidations.value[numKey]
@@ -188,7 +181,7 @@ const removeCondition = (index: number) => {
       }
     })
     conditionValidations.value = newValidations
-    
+
     updateValidationResult()
   }
 }
@@ -205,28 +198,29 @@ const updateValidationResult = () => {
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   const validations = Object.values(conditionValidations.value)
-  const allValid = validations.every(v => v.valid)
-  
+  const allValid = validations.every((v) => v.valid)
+
   if (allValid) {
     isValid.value = true
     validationMessage.value = '条件组配置验证通过'
   } else {
     isValid.value = false
-    const errorMessages = validations
-      .filter(v => !v.valid)
-      .map(v => v.message)
+    const errorMessages = validations.filter((v) => !v.valid).map((v) => v.message)
     validationMessage.value = `条件配置错误: ${errorMessages.join('; ')}`
   }
-  
+
   emit('validate', { valid: isValid.value, message: validationMessage.value })
 }
 
 // 监听条件数量变化
-watch(() => group.value.conditions?.length, () => {
-  updateValidationResult()
-})
+watch(
+  () => group.value.conditions?.length,
+  () => {
+    updateValidationResult()
+  }
+)
 
 // 初始化
 onMounted(() => {

@@ -1,4 +1,5 @@
 <!-- 配置预览组件 -->
+<!-- TODO @puhui999：应该暂时不用预览哈 -->
 <template>
   <div class="config-preview">
     <div class="preview-items">

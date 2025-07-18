@@ -1,4 +1,5 @@
 <!-- 设备控制配置组件 -->
+<!-- TODO @puhui999：貌似没生效~~~ -->
 <template>
   <div class="device-control-config">
     <!-- 产品和设备选择 -->
@@ -19,15 +20,10 @@
           @input="handleParamsChange"
         />
       </el-form-item>
-      
+
       <!-- 参数示例 -->
       <div class="params-example">
-        <el-alert
-          title="参数格式示例"
-          type="info"
-          :closable="false"
-          show-icon
-        >
+        <el-alert title="参数格式示例" type="info" :closable="false" show-icon>
           <template #default>
             <div class="example-content">
               <p>属性设置示例：</p>
@@ -109,14 +105,14 @@ const updateValidationResult = () => {
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   if (!action.value.params || Object.keys(action.value.params).length === 0) {
     isValid.value = false
     validationMessage.value = '请配置控制参数'
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   // 验证通过
   isValid.value = true
   validationMessage.value = '设备控制配置验证通过'
@@ -132,11 +128,15 @@ onMounted(() => {
 })
 
 // 监听参数变化
-watch(() => action.value.params, (newParams) => {
-  if (newParams && typeof newParams === 'object') {
-    paramsJson.value = JSON.stringify(newParams, null, 2)
-  }
-}, { deep: true })
+watch(
+  () => action.value.params,
+  (newParams) => {
+    if (newParams && typeof newParams === 'object') {
+      paramsJson.value = JSON.stringify(newParams, null, 2)
+    }
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped>

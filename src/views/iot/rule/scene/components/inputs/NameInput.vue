@@ -14,8 +14,9 @@
         <Icon icon="ep:edit" class="input-icon" />
       </template>
     </el-input>
-    
+
     <!-- 智能提示 -->
+    <!-- TODO @puhui999：暂时不用考虑智能推荐哈。用途不大 -->
     <div v-if="showSuggestions && suggestions.length > 0" class="suggestions">
       <div class="suggestions-header">
         <span class="suggestions-title">推荐名称</span>
@@ -72,9 +73,12 @@ const nameTemplates = [
 const handleInput = (value: string) => {
   if (value.length > 0 && value.length < 10) {
     // 根据输入内容过滤建议
-    suggestions.value = nameTemplates.filter(template => 
-      template.includes(value) || value.includes('温度') && template.includes('温度')
-    ).slice(0, 5)
+    suggestions.value = nameTemplates
+      .filter(
+        (template) =>
+          template.includes(value) || (value.includes('温度') && template.includes('温度'))
+      )
+      .slice(0, 5)
     showSuggestions.value = suggestions.value.length > 0
   } else {
     showSuggestions.value = false

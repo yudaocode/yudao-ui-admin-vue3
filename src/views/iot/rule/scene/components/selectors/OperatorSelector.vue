@@ -24,6 +24,7 @@
     </el-select>
 
     <!-- 操作符说明 -->
+    <!-- TODO @puhui999：这个去掉 -->
     <div v-if="selectedOperator" class="operator-description">
       <div class="desc-content">
         <Icon icon="ep:info-filled" class="desc-icon" />
@@ -155,14 +156,12 @@ const availableOperators = computed(() => {
   if (!props.propertyType) {
     return allOperators
   }
-  
-  return allOperators.filter(op => 
-    op.supportedTypes.includes(props.propertyType!)
-  )
+
+  return allOperators.filter((op) => op.supportedTypes.includes(props.propertyType!))
 })
 
 const selectedOperator = computed(() => {
-  return allOperators.find(op => op.value === localValue.value)
+  return allOperators.find((op) => op.value === localValue.value)
 })
 
 // 事件处理
@@ -171,14 +170,17 @@ const handleChange = (value: string) => {
 }
 
 // 监听属性类型变化
-watch(() => props.propertyType, () => {
-  // 如果当前选择的操作符不支持新的属性类型，则清空选择
-  if (localValue.value && selectedOperator.value) {
-    if (!selectedOperator.value.supportedTypes.includes(props.propertyType || '')) {
-      localValue.value = ''
+watch(
+  () => props.propertyType,
+  () => {
+    // 如果当前选择的操作符不支持新的属性类型，则清空选择
+    if (localValue.value && selectedOperator.value) {
+      if (!selectedOperator.value.supportedTypes.includes(props.propertyType || '')) {
+        localValue.value = ''
+      }
     }
   }
-})
+)
 </script>
 
 <style scoped>

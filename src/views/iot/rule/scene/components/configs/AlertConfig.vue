@@ -1,6 +1,7 @@
 <!-- 告警配置组件 -->
 <template>
   <div class="alert-config">
+    <!-- TODO @puhui999：触发告警时，不用选择配置哈； -->
     <el-form-item label="告警配置" required>
       <el-select
         v-model="localValue"
@@ -95,7 +96,7 @@ const isValid = ref(true)
 
 // 计算属性
 const selectedConfig = computed(() => {
-  return alertConfigs.value.find(config => config.id === localValue.value)
+  return alertConfigs.value.find((config) => config.id === localValue.value)
 })
 
 // 工具函数
@@ -121,7 +122,7 @@ const updateValidationResult = () => {
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   const config = selectedConfig.value
   if (!config) {
     isValid.value = false
@@ -129,14 +130,14 @@ const updateValidationResult = () => {
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   if (!config.enabled) {
     isValid.value = false
     validationMessage.value = '选择的告警配置已禁用'
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }
-  
+
   // 验证通过
   isValid.value = true
   validationMessage.value = '告警配置验证通过'
@@ -149,6 +150,7 @@ const getAlertConfigs = async () => {
   try {
     // 这里应该调用真实的API获取告警配置
     // 暂时使用模拟数据
+    // TODO @puhui999：这里是模拟数据
     alertConfigs.value = [
       {
         id: 1,
@@ -183,9 +185,12 @@ const getAlertConfigs = async () => {
 }
 
 // 监听值变化
-watch(() => localValue.value, () => {
-  updateValidationResult()
-})
+watch(
+  () => localValue.value,
+  () => {
+    updateValidationResult()
+  }
+)
 
 // 初始化
 onMounted(() => {

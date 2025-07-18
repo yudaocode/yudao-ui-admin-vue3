@@ -1,4 +1,5 @@
 <!-- 预览区域组件 -->
+<!-- TODO @puhui999：是不是不用这个哈？ -->
 <template>
   <el-card class="preview-section" shadow="never">
     <template #header>
@@ -8,12 +9,7 @@
           <span class="section-title">配置预览</span>
         </div>
         <div class="header-right">
-          <el-button
-            type="primary"
-            size="small"
-            @click="handleValidate"
-            :loading="validating"
-          >
+          <el-button type="primary" size="small" @click="handleValidate" :loading="validating">
             <Icon icon="ep:check" />
             验证配置
           </el-button>
@@ -101,7 +97,7 @@ const handleValidate = async () => {
   validating.value = true
   try {
     // 延迟一下模拟验证过程
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500))
     emit('validate')
   } finally {
     validating.value = false

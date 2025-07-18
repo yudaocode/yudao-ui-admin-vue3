@@ -7,11 +7,7 @@
         <span class="header-title">定时触发配置</span>
       </div>
       <div class="header-right">
-        <el-button
-          type="text"
-          size="small"
-          @click="showBuilder = !showBuilder"
-        >
+        <el-button type="text" size="small" @click="showBuilder = !showBuilder">
           <Icon :icon="showBuilder ? 'ep:edit' : 'ep:setting'" />
           {{ showBuilder ? '手动编辑' : '可视化编辑' }}
         </el-button>
@@ -19,6 +15,7 @@
     </div>
 
     <!-- 可视化编辑器 -->
+    <!-- TODO @puhui999：是不是复用现有的 cron 组件；不然有点重复哈；维护比较复杂 -->
     <div v-if="showBuilder" class="visual-builder">
       <CronBuilder v-model="localValue" @validate="handleValidate" />
     </div>

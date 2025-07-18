@@ -1,4 +1,5 @@
 <!-- IoT场景联动规则表单 - 主表单组件 -->
+<!-- TODO @puhui999：要不搞个 form 目录，不用 components；保持和别的模块风格一致哈； -->
 <template>
   <el-drawer
     v-model="drawerVisible"
@@ -37,6 +38,7 @@
     </div>
 
     <!-- 抽屉底部操作栏 -->
+    <!-- TODO @puhui999：这个按钮逻辑，和别的模块一致 -->
     <template #footer>
       <div class="drawer-footer">
         <el-button @click="handleClose" size="large">取消</el-button>
@@ -65,7 +67,7 @@ import { getBaseValidationRules } from '../utils/validation'
 import { transformFormToApi, transformApiToForm, createDefaultFormData } from '../utils/transform'
 import { handleValidationError, showSuccess, withErrorHandling } from '../utils/errorHandler'
 
-/** IoT场景联动规则表单 - 主表单组件 */
+/** IoT 场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
 
 interface Props {
@@ -96,7 +98,7 @@ const actionValidation = ref({ valid: true, message: '' })
 
 // 计算属性
 const isEdit = computed(() => !!props.ruleScene?.id)
-const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
+const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则')) // TODO @puhui999：这个风格，和别的模块一致；
 
 const canSubmit = computed(() => {
   return (
@@ -140,6 +142,7 @@ const handleValidate = async () => {
   }
 }
 
+// TODO @puhui999：参考下别的模块，不用这么复杂哈；
 const handleSubmit = async () => {
   const result = await withErrorHandling(
     async () => {
