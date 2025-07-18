@@ -2,6 +2,7 @@
  * IoT 场景联动接口定义
  */
 
+// TODO @puhui999：枚举挪到 views/iot/utils/constants.ts 里
 // 枚举定义
 const IotRuleSceneTriggerTypeEnum = {
   DEVICE_STATE_UPDATE: 1, // 设备上下线变更
@@ -24,6 +25,7 @@ const IotDeviceMessageTypeEnum = {
   EVENT: 'event' // 事件
 } as const
 
+// TODO @puhui999：这个貌似可以不要？
 const IotDeviceMessageIdentifierEnum = {
   PROPERTY_SET: 'set', // 属性设置
   SERVICE_INVOKE: '${identifier}' // 服务调用
@@ -44,6 +46,7 @@ const IotRuleSceneTriggerConditionParameterOperatorEnum = {
   NOT_NULL: { name: '非空', value: 'not null' } // 非空
 } as const
 
+// TODO @puhui999：下面 IotAlertConfigReceiveTypeEnum、DeviceStateEnum 没用到，貌似可以删除下？
 const IotAlertConfigReceiveTypeEnum = {
   SMS: 1, // 短信
   MAIL: 2, // 邮箱
@@ -57,6 +60,7 @@ const DeviceStateEnum = {
   OFFLINE: 2 // 离线
 } as const
 
+// TODO @puhui999：这个全局已经有啦
 // 通用状态枚举
 const CommonStatusEnum = {
   ENABLE: 0, // 开启
@@ -64,6 +68,7 @@ const CommonStatusEnum = {
 } as const
 
 // 基础接口
+// TODO @puhui999：这个貌似可以不要？
 interface TenantBaseDO {
   createTime?: Date // 创建时间
   updateTime?: Date // 更新时间
@@ -169,6 +174,7 @@ interface IotRuleScene extends TenantBaseDO {
 }
 
 // 工具类型
+// TODO @puhui999：这些在瞅瞅~
 type TriggerType = (typeof IotRuleSceneTriggerTypeEnum)[keyof typeof IotRuleSceneTriggerTypeEnum]
 type ActionType = (typeof IotRuleSceneActionTypeEnum)[keyof typeof IotRuleSceneActionTypeEnum]
 type MessageType = (typeof IotDeviceMessageTypeEnum)[keyof typeof IotDeviceMessageTypeEnum]

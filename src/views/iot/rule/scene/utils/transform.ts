@@ -1,7 +1,6 @@
 /**
  * IoT 场景联动数据转换工具函数
  */
-
 import {
   IotRuleScene,
   TriggerConfig,
@@ -12,6 +11,8 @@ import {
 } from '@/api/iot/rule/scene/scene.types'
 import { generateUUID } from '@/utils'
 
+// TODO @puhui999：这些是不是放到对应的界面，会好一丢丢哈？
+
 /**
  * 创建默认的表单数据
  */
@@ -19,7 +20,7 @@ export function createDefaultFormData(): RuleSceneFormData {
   return {
     name: '',
     description: '',
-    status: 0,
+    status: 0, // TODO @puhui999：枚举值
     triggers: [],
     actions: []
   }
@@ -30,7 +31,7 @@ export function createDefaultFormData(): RuleSceneFormData {
  */
 export function createDefaultTriggerData(): TriggerFormData {
   return {
-    type: 2, // 默认为属性上报
+    type: 2, // 默认为属性上报 TODO @puhui999：枚举值
     productId: undefined,
     deviceId: undefined,
     identifier: undefined,
@@ -46,7 +47,7 @@ export function createDefaultTriggerData(): TriggerFormData {
  */
 export function createDefaultActionData(): ActionFormData {
   return {
-    type: 1, // 默认为属性设置
+    type: 1, // 默认为属性设置 TODO @puhui999：枚举值
     productId: undefined,
     deviceId: undefined,
     params: {},
@@ -58,7 +59,8 @@ export function createDefaultActionData(): ActionFormData {
  * 将表单数据转换为API请求格式
  */
 export function transformFormToApi(formData: RuleSceneFormData): IotRuleScene {
-  // 这里需要根据实际API结构进行转换
+  // TODO @puhui999：这个关注下
+  // 这里需要根据实际 API 结构进行转换
   // 暂时返回基本结构
   return {
     id: formData.id,
@@ -71,7 +73,7 @@ export function transformFormToApi(formData: RuleSceneFormData): IotRuleScene {
 }
 
 /**
- * 将API响应数据转换为表单格式
+ * 将 API 响应数据转换为表单格式
  */
 export function transformApiToForm(apiData: IotRuleScene): RuleSceneFormData {
   return {
@@ -94,6 +96,7 @@ export function transformApiToForm(apiData: IotRuleScene): RuleSceneFormData {
   }
 }
 
+// TODO @puhui999：貌似没用到；
 /**
  * 创建默认的触发器配置
  */
@@ -144,6 +147,7 @@ export function createDefaultTriggerConfig(type?: number): TriggerConfig {
   }
 }
 
+// TODO @puhui999：貌似没用到；
 /**
  * 创建默认的执行器配置
  */
@@ -174,6 +178,7 @@ export function createDefaultActionConfig(type?: number): ActionConfig {
   }
 }
 
+// TODO @puhui999：全局已经有类似的
 /**
  * 深度克隆对象（用于避免引用问题）
  */
@@ -203,6 +208,7 @@ export function deepClone<T>(obj: T): T {
   return obj
 }
 
+// TODO @puhui999：貌似没用到；
 /**
  * 清理空值和无效数据
  */
@@ -297,6 +303,7 @@ export function formatCronExpression(cron: string): string {
   return description || cron
 }
 
+// TODO @puhui999：貌似没用到；
 /**
  * 验证并修复数据结构
  */
@@ -351,6 +358,7 @@ export function validateAndFixData(data: IotRuleScene): IotRuleScene {
   return fixed
 }
 
+// TODO @puhui999：貌似没用到；
 /**
  * 比较两个场景联动规则是否相等（忽略key字段）
  */
@@ -401,6 +409,5 @@ export function getRuleSceneSummary(ruleScene: IotRuleScene): {
           return '未知执行类型'
       }
     }) || []
-
   return { triggerSummary, actionSummary }
 }

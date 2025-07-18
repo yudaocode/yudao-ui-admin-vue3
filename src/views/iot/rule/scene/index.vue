@@ -36,6 +36,7 @@
             class="!w-240px"
           />
         </el-form-item>
+        <!-- TODO @puhui999：字典 -->
         <el-form-item label="规则状态">
           <el-select
             v-model="queryParams.status"
@@ -61,6 +62,7 @@
     </el-card>
 
     <!-- 统计卡片 -->
+    <!-- TODO @puhui999：这种需要服用的 stats-content、stats-info 的属性，到底 unocss 好，还是现有的 style css 好~ -->
     <el-row :gutter="16" class="stats-row">
       <el-col :span="6">
         <el-card class="stats-card" shadow="hover">
@@ -124,6 +126,7 @@
           <template #default="{ row }">
             <div class="rule-name-cell">
               <span class="rule-name">{{ row.name }}</span>
+              <!-- TODO @puhui999：字典 -->
               <el-tag
                 :type="row.status === 0 ? 'success' : 'danger'"
                 size="small"
@@ -137,7 +140,6 @@
             </div>
           </template>
         </el-table-column>
-
         <el-table-column label="触发条件" min-width="250">
           <template #default="{ row }">
             <div class="trigger-summary">
@@ -153,7 +155,6 @@
             </div>
           </template>
         </el-table-column>
-
         <el-table-column label="执行动作" min-width="250">
           <template #default="{ row }">
             <div class="action-summary">
@@ -169,7 +170,7 @@
             </div>
           </template>
         </el-table-column>
-
+        <!-- TODO @puhui999：貌似要新增一个字段？ -->
         <el-table-column label="最近触发" prop="lastTriggeredTime" width="180">
           <template #default="{ row }">
             <span v-if="row.lastTriggeredTime">
@@ -178,13 +179,11 @@
             <span v-else class="text-gray-400">未触发</span>
           </template>
         </el-table-column>
-
         <el-table-column label="创建时间" prop="createTime" width="180">
           <template #default="{ row }">
             {{ formatDate(row.createTime) }}
           </template>
         </el-table-column>
-
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <div class="action-buttons">
@@ -242,11 +241,7 @@
     </div>
 
     <!-- 表单对话框 -->
-    <RuleSceneForm
-      v-model="formVisible"
-      :rule-scene="currentRule"
-      @success="handleFormSuccess"
-    />
+    <RuleSceneForm v-model="formVisible" :rule-scene="currentRule" @success="handleFormSuccess" />
   </ContentWrap>
 </template>
 
@@ -435,6 +430,7 @@ const handleSelectionChange = (selection: IotRuleScene[]) => {
   selectedRows.value = selection
 }
 
+// TODO @puhui999：batch 操作的逻辑，要不和其它 UI 界面保持一致，或者相对一致哈；
 const handleBatchEnable = async () => {
   try {
     await ElMessageBox.confirm(`确定要启用选中的 ${selectedRows.value.length} 个规则吗？`, '提示', {

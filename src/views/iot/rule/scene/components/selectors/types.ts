@@ -1,5 +1,7 @@
 // IoT物模型TSL数据类型定义
 
+// TODO @puhui999：看看这些里面，是不是一些已经有了哈？可以复用下~
+
 /** 物模型TSL响应数据结构 */
 export interface IotThingModelTSLRespVO {
   productId: number

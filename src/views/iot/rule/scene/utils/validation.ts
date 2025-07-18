@@ -1,13 +1,18 @@
 /**
  * IoT 场景联动表单验证工具函数
  */
+import {
+  FormValidationRules,
+  IotRuleScene,
+  TriggerConfig,
+  ActionConfig
+} from '@/api/iot/rule/scene/scene.types'
+import {
+  IotRuleSceneTriggerTypeEnum,
+  IotRuleSceneActionTypeEnum
+} from '@/api/iot/rule/scene/scene.types'
 
-import { FormValidationRules, IotRuleScene, TriggerConfig, ActionConfig } from '@/api/iot/rule/scene/scene.types'
-import { IotRuleSceneTriggerTypeEnum, IotRuleSceneActionTypeEnum } from '@/api/iot/rule/scene/scene.types'
-
-/**
- * 基础表单验证规则
- */
+/** 基础表单验证规则 */
 export const getBaseValidationRules = (): FormValidationRules => ({
   name: [
     { required: true, message: '场景名称不能为空', trigger: 'blur' },
@@ -30,55 +35,47 @@ export const getBaseValidationRules = (): FormValidationRules => ({
   ]
 })
 
-/**
- * 验证CRON表达式格式
- */
+/** 验证CRON表达式格式 */
 export function validateCronExpression(cron: string): boolean {
   if (!cron || cron.trim().length === 0) return false
-  
-  // 基础的CRON表达式正则验证（支持6位和7位格式）
-  const cronRegex = /^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))( (\*|([1-9][0-9]{3})|\*\/([1-9][0-9]{3})))?$/
-  
+  // 基础的 CRON 表达式正则验证（支持6位和7位格式）
+  const cronRegex =
+    /^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))( (\*|([1-9][0-9]{3})|\*\/([1-9][0-9]{3})))?$/
   return cronRegex.test(cron.trim())
 }
 
-/**
- * 验证设备名称数组
- */
+/** 验证设备名称数组 */
 export function validateDeviceNames(deviceNames: string[]): boolean {
-  return Array.isArray(deviceNames) && 
-         deviceNames.length > 0 && 
-         deviceNames.every(name => name && name.trim().length > 0)
+  return (
+    Array.isArray(deviceNames) &&
+    deviceNames.length > 0 &&
+    deviceNames.every((name) => name && name.trim().length > 0)
+  )
 }
 
-/**
- * 验证比较值格式
- */
+/** 验证比较值格式 */
 export function validateCompareValue(operator: string, value: string): boolean {
   if (!value || value.trim().length === 0) return false
-
   const trimmedValue = value.trim()
-
   switch (operator) {
     case 'between':
     case 'not between':
       const betweenValues = trimmedValue.split(',')
-      return betweenValues.length === 2 && 
-             betweenValues.every(v => v.trim().length > 0) &&
-             !isNaN(Number(betweenValues[0].trim())) &&
-             !isNaN(Number(betweenValues[1].trim()))
-
+      return (
+        betweenValues.length === 2 &&
+        betweenValues.every((v) => v.trim().length > 0) &&
+        !isNaN(Number(betweenValues[0].trim())) &&
+        !isNaN(Number(betweenValues[1].trim()))
+      )
     case 'in':
     case 'not in':
       const inValues = trimmedValue.split(',')
-      return inValues.length > 0 && inValues.every(v => v.trim().length > 0)
-
+      return inValues.length > 0 && inValues.every((v) => v.trim().length > 0)
     case '>':
     case '>=':
     case '<':
     case '<=':
       return !isNaN(Number(trimmedValue))
-
     case '=':
     case '!=':
     case 'like':
@@ -88,14 +85,14 @@ export function validateCompareValue(operator: string, value: string): boolean {
   }
 }
 
-/**
- * 验证触发器配置
- */
-export function validateTriggerConfig(trigger: TriggerConfig): { valid: boolean; message?: string } {
+/** 验证触发器配置 */
+export function validateTriggerConfig(trigger: TriggerConfig): {
+  valid: boolean
+  message?: string
+} {
   if (!trigger.type) {
     return { valid: false, message: '触发类型不能为空' }
   }
-
   // 定时触发验证
   if (trigger.type === IotRuleSceneTriggerTypeEnum.TIMER) {
     if (!trigger.cronExpression) {
@@ -106,32 +103,26 @@ export function validateTriggerConfig(trigger: TriggerConfig): { valid: boolean;
     }
     return { valid: true }
   }
-
   // 设备触发验证
   if (!trigger.productKey) {
     return { valid: false, message: '产品标识不能为空' }
   }
-
   if (!trigger.deviceNames || !validateDeviceNames(trigger.deviceNames)) {
     return { valid: false, message: '设备名称不能为空' }
   }
-
   // 设备状态变更无需额外条件验证
   if (trigger.type === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE) {
     return { valid: true }
   }
-
   // 其他设备触发类型需要验证条件
   if (!trigger.conditions || trigger.conditions.length === 0) {
     return { valid: false, message: '触发条件不能为空' }
   }
-
   // 验证每个条件的参数
   for (const condition of trigger.conditions) {
     if (!condition.parameters || condition.parameters.length === 0) {
       return { valid: false, message: '触发条件参数不能为空' }
     }
-
     for (const param of condition.parameters) {
       if (!param.operator) {
         return { valid: false, message: '操作符不能为空' }
@@ -141,34 +132,32 @@ export function validateTriggerConfig(trigger: TriggerConfig): { valid: boolean;
       }
     }
   }
-
   return { valid: true }
 }
 
-/**
- * 验证执行器配置
- */
+/** 验证执行器配置 */
 export function validateActionConfig(action: ActionConfig): { valid: boolean; message?: string } {
   if (!action.type) {
     return { valid: false, message: '执行类型不能为空' }
   }
-
   // 告警触发/恢复验证
-  if (action.type === IotRuleSceneActionTypeEnum.ALERT_TRIGGER || 
-      action.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER) {
+  if (
+    action.type === IotRuleSceneActionTypeEnum.ALERT_TRIGGER ||
+    action.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER
+  ) {
     if (!action.alertConfigId) {
       return { valid: false, message: '告警配置ID不能为空' }
     }
     return { valid: true }
   }
-
   // 设备控制验证
-  if (action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET || 
-      action.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE) {
+  if (
+    action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET ||
+    action.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
+  ) {
     if (!action.deviceControl) {
       return { valid: false, message: '设备控制配置不能为空' }
     }
-
     const { deviceControl } = action
     if (!deviceControl.productKey) {
       return { valid: false, message: '产品标识不能为空' }
@@ -185,34 +174,28 @@ export function validateActionConfig(action: ActionConfig): { valid: boolean; me
     if (!deviceControl.params || Object.keys(deviceControl.params).length === 0) {
       return { valid: false, message: '参数不能为空' }
     }
-
     return { valid: true }
   }
 
   return { valid: false, message: '未知的执行类型' }
 }
 
-/**
- * 验证完整的场景联动规则
- */
+// TODO @puhui999：貌似没用到？
+/** 验证完整的场景联动规则 */
 export function validateRuleScene(ruleScene: IotRuleScene): { valid: boolean; message?: string } {
   // 基础字段验证
   if (!ruleScene.name || ruleScene.name.trim().length === 0) {
     return { valid: false, message: '场景名称不能为空' }
   }
-
   if (ruleScene.status !== 0 && ruleScene.status !== 1) {
     return { valid: false, message: '场景状态必须为0或1' }
   }
-
   if (!ruleScene.triggers || ruleScene.triggers.length === 0) {
     return { valid: false, message: '至少需要一个触发器' }
   }
-
   if (!ruleScene.actions || ruleScene.actions.length === 0) {
     return { valid: false, message: '至少需要一个执行器' }
   }
-
   // 验证每个触发器
   for (let i = 0; i < ruleScene.triggers.length; i++) {
     const triggerResult = validateTriggerConfig(ruleScene.triggers[i])
@@ -220,7 +203,6 @@ export function validateRuleScene(ruleScene: IotRuleScene): { valid: boolean; me
       return { valid: false, message: `触发器${i + 1}: ${triggerResult.message}` }
     }
   }
-
   // 验证每个执行器
   for (let i = 0; i < ruleScene.actions.length; i++) {
     const actionResult = validateActionConfig(ruleScene.actions[i])
@@ -228,14 +210,16 @@ export function validateRuleScene(ruleScene: IotRuleScene): { valid: boolean; me
       return { valid: false, message: `执行器${i + 1}: ${actionResult.message}` }
     }
   }
-
   return { valid: true }
 }
+
+// TODO @puhui999：下面 getOperatorOptions、getTriggerTypeOptions、getActionTypeOptions 三个貌似没用到？如果用到的话，要不放到 yudao-ui-admin-vue3/src/views/iot/utils/constants.ts 里
 
 /**
  * 获取操作符选项
  */
 export function getOperatorOptions() {
+  // TODO @puhui999：这个能不能从枚举计算出来，减少后续添加枚举的维护
   return [
     { value: '=', label: '等于' },
     { value: '!=', label: '不等于' },
@@ -256,6 +240,7 @@ export function getOperatorOptions() {
  * 获取触发类型选项
  */
 export function getTriggerTypeOptions() {
+  // TODO @puhui999：这个能不能从枚举计算出来，减少后续添加枚举的维护
   return [
     { value: IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE, label: '设备上下线变更' },
     { value: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST, label: '物模型属性上报' },
@@ -269,6 +254,7 @@ export function getTriggerTypeOptions() {
  * 获取执行类型选项
  */
 export function getActionTypeOptions() {
+  // TODO @puhui999：这个能不能从枚举计算出来，减少后续添加枚举的维护
   return [
     { value: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET, label: '设备属性设置' },
     { value: IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE, label: '设备服务调用' },
