@@ -227,7 +227,11 @@ const regeoCode = (lonLat: string) => {
   emits('locateChange', lnglat)
   emits('update:center', lonLat)
 
-  // 设置标记并获取地址
+  // 先将地图中心点设置到目标位置
+  const point = new window.BMapGL.Point(lnglat[0], lnglat[1])
+  state.map.centerAndZoom(point, 16)
+
+  // 再设置标记并获取地址
   setMarker(lnglat)
   getAddress(lnglat)
 }
@@ -246,7 +250,7 @@ const getAddress = (lnglat: any) => {
   })
 }
 
-// 显式暴露方法，使其可以被父组件访问
+/** 显式暴露方法，使其可以被父组件访问 */
 defineExpose({ regeoCode })
 
 onMounted(() => {
