@@ -1,4 +1,4 @@
-<!-- 地图组件：基于百度地图实现 -->
+<!-- 地图组件：基于百度地图GL实现 -->
 <template>
   <div v-if="props.isWrite">
     <el-form ref="form" label-width="120px">
@@ -40,6 +40,14 @@
 import { reactive, ref, onMounted } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 
+// 扩展Window接口以包含百度地图GL API
+declare global {
+  interface Window {
+    BMapGL: any
+    initBaiduMap: () => void
+  }
+}
+
 const emits = defineEmits(['locateChange', 'update:center'])
 const state = reactive({
   lonLat: '', // 经度,纬度
@@ -68,26 +76,31 @@ const loadMap = () => {
   state.address = ''
   state.latitude = ''
   state.longitude = ''
-  
+
   // 创建百度地图API脚本
   const script = document.createElement('script')
-  script.src = `https://api.map.baidu.com/api?v=3.0&ak=${import.meta.env.VITE_BAIDU_MAP_KEY}&callback=initBaiduMap`
+  script.src = `https://api.map.baidu.com/api?v=1.0&type=webgl&ak=${
+    import.meta.env.VITE_BAIDU_MAP_KEY
+  }&callback=initBaiduMap`
   document.body.appendChild(script)
-  
+
   // 定义全局回调函数
   window.initBaiduMap = () => {
     initMap()
     initGeocoder()
     initAutoComplete()
-    
+
     if (props.clickMap) {
       state.map.addEventListener('click', (e: any) => {
-        const point = e.point
+        console.log(e)
+        const point = e.latlng
+        console.log(point)
         state.lonLat = point.lng + ',' + point.lat
+        console.log(state.lonLat)
         regeoCode(state.lonLat)
       })
     }
-    
+
     if (props.center) {
       regeoCode(props.center)
     }
@@ -99,29 +112,30 @@ const loadMap = () => {
  */
 const initMap = () => {
   const mapId = 'bdMap'
-  state.map = new window.BMap.Map(mapId)
-  state.map.centerAndZoom(new window.BMap.Point(116.404, 39.915), 11)
+  state.map = new window.BMapGL.Map(mapId)
+  state.map.centerAndZoom(new window.BMapGL.Point(116.404, 39.915), 11)
   state.map.enableScrollWheelZoom()
   state.map.disableDoubleClickZoom()
-  
+
   // 添加地图控件
-  state.map.addControl(new window.BMap.NavigationControl())
-  state.map.addControl(new window.BMap.ScaleControl())
+  state.map.addControl(new window.BMapGL.NavigationControl())
+  state.map.addControl(new window.BMapGL.ScaleControl())
+  state.map.addControl(new window.BMapGL.ZoomControl())
 }
 
 /**
  * 初始化地理编码器
  */
 const initGeocoder = () => {
-  state.geocoder = new window.BMap.Geocoder()
+  state.geocoder = new window.BMapGL.Geocoder()
 }
 
 /**
  * 初始化自动完成
  */
 const initAutoComplete = () => {
-  state.autoComplete = new window.BMap.Autocomplete({
-    input: "searchInput",
+  state.autoComplete = new window.BMapGL.Autocomplete({
+    input: 'searchInput',
     location: state.map
   })
 }
@@ -135,15 +149,15 @@ const autoSearch = (queryValue: string) => {
     state.mapAddrOptions = []
     return
   }
-  
+
   state.loading = true
-  
+
   // 使用百度地图地点检索服务
-  const localSearch = new window.BMap.LocalSearch(state.map, {
+  const localSearch = new window.BMapGL.LocalSearch(state.map, {
     onSearchComplete: (results: any) => {
       state.loading = false
       const temp: any[] = []
-      
+
       if (results && results.getPoi) {
         const pois = results.getPoi()
         pois.forEach((p: any) => {
@@ -156,11 +170,11 @@ const autoSearch = (queryValue: string) => {
           }
         })
       }
-      
+
       state.mapAddrOptions = temp
     }
   })
-  
+
   localSearch.search(queryValue)
 }
 
@@ -180,17 +194,17 @@ const handleAddressSelect = (value: string) => {
  */
 const setMarker = (lnglat: any) => {
   if (!lnglat) return
-  
+
   // 如果点标记已存在则先移除原点
   if (state.mapMarker !== null) {
     state.map.removeOverlay(state.mapMarker)
     state.lonLat = ''
   }
-  
+
   // 创建新的标记点
-  const point = new window.BMap.Point(lnglat[0], lnglat[1])
-  state.mapMarker = new window.BMap.Marker(point)
-  
+  const point = new window.BMapGL.Point(lnglat[0], lnglat[1])
+  state.mapMarker = new window.BMapGL.Marker(point)
+
   // 添加点标记到地图
   state.map.addOverlay(state.mapMarker)
   state.map.centerAndZoom(point, 16)
@@ -202,17 +216,17 @@ const setMarker = (lnglat: any) => {
  */
 const regeoCode = (lonLat: string) => {
   if (!lonLat) return
-  
+
   const lnglat = lonLat.split(',')
   if (lnglat.length !== 2) return
-  
+
   state.longitude = lnglat[0]
   state.latitude = lnglat[1]
-  
+
   // 通知父组件位置变更
   emits('locateChange', lnglat)
   emits('update:center', lonLat)
-  
+
   // 设置标记并获取地址
   setMarker(lnglat)
   getAddress(lnglat)
@@ -223,8 +237,8 @@ const regeoCode = (lonLat: string) => {
  * @param lnglat 经纬度数组
  */
 const getAddress = (lnglat: any) => {
-  const point = new window.BMap.Point(lnglat[0], lnglat[1])
-  
+  const point = new window.BMapGL.Point(lnglat[0], lnglat[1])
+
   state.geocoder.getLocation(point, (result: any) => {
     if (result && result.address) {
       state.address = result.address
