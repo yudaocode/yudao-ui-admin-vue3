@@ -93,14 +93,14 @@
                 @blur="updateLocationFromCoordinates"
               />
             </el-form-item>
-            <div class="pl-0 w-full ml-[-18px]" v-if="showMap">
+            <div class="pl-0 h-[400px] w-full ml-[-18px]" v-if="showMap">
               <Map
                 :isWrite="true"
                 :clickMap="true"
                 :center="formData.location"
                 @locateChange="handleLocationChange"
                 ref="mapRef"
-                class="h-[400px] w-full"
+                class="h-full w-full"
               />
             </div>
           </template>
@@ -151,7 +151,7 @@ const formData = ref({
   groupIds: [] as number[]
 })
 
-// 监听经纬度变化，更新location
+/** 监听经纬度变化，更新location */
 watch([() => formData.value.longitude, () => formData.value.latitude], ([newLong, newLat]) => {
   if (newLong && newLat) {
     formData.value.location = `${newLong},${newLat}`
