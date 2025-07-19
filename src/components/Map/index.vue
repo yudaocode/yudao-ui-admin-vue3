@@ -1,12 +1,10 @@
-<!-- 地图组件：基于高德地图实现 -->
-<!-- TODO @宗超：【设备定位】使用百度地图，和 ercharts 更好集成； -->
+<!-- 地图组件：基于百度地图实现 -->
 <template>
   <div v-if="props.isWrite">
     <el-form ref="form" label-width="120px">
       <el-form-item label="定位位置:">
-        <!-- TODO @TODO @AI：style 改成 unocss -->
         <el-select
-          style="width: 100%"
+          class="w-full"
           v-model="state.address"
           clearable
           filterable
@@ -14,7 +12,7 @@
           reserve-keyword
           placeholder="可输入地址查询经纬度"
           :remote-method="autoSearch"
-          @change="regeoCode"
+          @change="handleAddressSelect"
           :loading="state.loading"
         >
           <el-option
@@ -26,7 +24,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="设备地图:">
-        <div id="rwMap" class="mapContainer"></div>
+        <div id="bdMap" class="mapContainer"></div>
       </el-form-item>
     </el-form>
   </div>
@@ -34,12 +32,12 @@
     <el-descriptions :column="2" border :labelStyle="{ 'font-weight': 'bold' }">
       <el-descriptions-item label="设备位置:">{{ state.address }}</el-descriptions-item>
     </el-descriptions>
-    <div id="rMap" class="mapContainer"></div>
+    <div id="bdMap" class="mapContainer"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import AMapLoader from '@amap/amap-jsapi-loader'
+import { reactive, ref, onMounted } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 
 const emits = defineEmits(['locateChange', 'update:center'])
@@ -56,128 +54,180 @@ const state = reactive({
   autoComplete: null as any,
   tips: [] // 搜索提示
 })
+
 const props = defineProps({
   clickMap: propTypes.bool.def(false),
   isWrite: propTypes.bool.def(false),
   center: propTypes.string.def('')
 })
+
+/**
+ * 加载百度地图
+ */
 const loadMap = () => {
-  ;(window as any)._AMapSecurityConfig = {
-    securityJsCode: import.meta.env.VITE_AMAP_SECURITY_CODE
-  }
   state.address = ''
   state.latitude = ''
   state.longitude = ''
-  // TODO @AI：可以使用 await 方式么？
-  AMapLoader.load({
-    key: import.meta.env.VITE_AMAP_KEY, // 申请好的 Web 端开发者Key，首次调用 load 时必填
-    version: '2.0', // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-    plugins: [
-      // 逆解析插件
-      'AMap.Geocoder',
-      'AMap.AutoComplete'
-    ]
-  }).then(() => {
+  
+  // 创建百度地图API脚本
+  const script = document.createElement('script')
+  script.src = `https://api.map.baidu.com/api?v=3.0&ak=${import.meta.env.VITE_BAIDU_MAP_KEY}&callback=initBaiduMap`
+  document.body.appendChild(script)
+  
+  // 定义全局回调函数
+  window.initBaiduMap = () => {
     initMap()
+    initGeocoder()
+    initAutoComplete()
+    
     if (props.clickMap) {
-      state.map.on('click', (e) => {
-        state.lonLat = e.lnglat.lng + ',' + e.lnglat.lat
+      state.map.addEventListener('click', (e: any) => {
+        const point = e.point
+        state.lonLat = point.lng + ',' + point.lat
         regeoCode(state.lonLat)
       })
     }
-    initGeocoder()
-    initAutoComplete()
+    
     if (props.center) {
       regeoCode(props.center)
     }
-  })
-}
-
-const initMap = () => {
-  let mapId = props.isWrite ? 'rwMap' : 'rMap'
-  state.map = new (window as any).AMap.Map(mapId, {
-    resizeEnable: true,
-    zoom: 11, // 地图显示的缩放级别
-    keyboardEnable: false
-  })
-}
-
-const initGeocoder = () => {
-  state.geocoder = new (window as any).AMap.Geocoder({
-    city: '010', // 城市设为北京，默认：“全国”
-    radius: 500, // 范围，默认：500
-    extensions: 'all'
-  })
-}
-
-const initAutoComplete = () => {
-  const autoOptions = {
-    city: '全国'
   }
-  state.autoComplete = new (window as any).AMap.AutoComplete(autoOptions)
 }
 
+/**
+ * 初始化地图
+ */
+const initMap = () => {
+  const mapId = 'bdMap'
+  state.map = new window.BMap.Map(mapId)
+  state.map.centerAndZoom(new window.BMap.Point(116.404, 39.915), 11)
+  state.map.enableScrollWheelZoom()
+  state.map.disableDoubleClickZoom()
+  
+  // 添加地图控件
+  state.map.addControl(new window.BMap.NavigationControl())
+  state.map.addControl(new window.BMap.ScaleControl())
+}
+
+/**
+ * 初始化地理编码器
+ */
+const initGeocoder = () => {
+  state.geocoder = new window.BMap.Geocoder()
+}
+
+/**
+ * 初始化自动完成
+ */
+const initAutoComplete = () => {
+  state.autoComplete = new window.BMap.Autocomplete({
+    input: "searchInput",
+    location: state.map
+  })
+}
+
+/**
+ * 搜索地址
+ * @param queryValue 搜索关键词
+ */
 const autoSearch = (queryValue: string) => {
-  state.autoComplete.search(queryValue, (_status, result) => {
-    // TODO @AI：下面的写法可以优化下么？
-    var res = result.tips || [] // 搜索成功时，result即是对应的匹配数据
-    const temp = ref<any[]>([])
-    res.forEach((p) => {
-      if ((p.name, p.location.lng && p.location.lat)) {
-        temp.value.push({
-          name: p.district + p.name,
-          value: p.location.lng + ',' + p.location.lat
+  if (!queryValue) {
+    state.mapAddrOptions = []
+    return
+  }
+  
+  state.loading = true
+  
+  // 使用百度地图地点检索服务
+  const localSearch = new window.BMap.LocalSearch(state.map, {
+    onSearchComplete: (results: any) => {
+      state.loading = false
+      const temp: any[] = []
+      
+      if (results && results.getPoi) {
+        const pois = results.getPoi()
+        pois.forEach((p: any) => {
+          const point = p.point
+          if (point && point.lng && point.lat) {
+            temp.push({
+              name: p.title,
+              value: point.lng + ',' + point.lat
+            })
+          }
         })
       }
-    })
-    state.mapAddrOptions = temp.value
-  })
-}
-
-// TODO @AI：方法注释，使用 /** */
-// 添加标记点
-const setMarker = (lnglat) => {
-  // TODO @AI: if return 简化下；
-  if (lnglat) {
-    // 如果点标记已存在则先移除原点
-    if (state.mapMarker !== null) {
-      state.map.remove(state.mapMarker)
-      state.lonLat = ''
+      
+      state.mapAddrOptions = temp
     }
-    // 定义点标记对象
-    state.mapMarker = new (window as any).AMap.Marker({
-      position: new (window as any).AMap.LngLat(lnglat[0], lnglat[1])
-    })
-    state.map.add(state.mapMarker) // 添加点标记在地图上
-    state.map.setCenter(lnglat)
-    state.map.setZoom(16)
-    state.mapMarker.setPosition(lnglat)
+  })
+  
+  localSearch.search(queryValue)
+}
+
+/**
+ * 处理地址选择
+ * @param value 选中的地址值
+ */
+const handleAddressSelect = (value: string) => {
+  if (value) {
+    regeoCode(value)
   }
 }
 
-// TODO @AI：下面的写法可以优化下；例如说：
-// 经纬度转化为地址、添加标记点
-const regeoCode = (lonLat) => {
-  if (lonLat) {
-    // TODO @AI：变量名的拼写；
-    let lnglat = lonLat.split(',')
-    state.latitude = lnglat[0]
-    state.longitude = lnglat[1]
-    emits('locateChange', lnglat)
-    emits('update:center', lonLat)
-    setMarker(lnglat)
-    getAddress(lnglat)
+/**
+ * 添加标记点
+ * @param lnglat 经纬度数组
+ */
+const setMarker = (lnglat: any) => {
+  if (!lnglat) return
+  
+  // 如果点标记已存在则先移除原点
+  if (state.mapMarker !== null) {
+    state.map.removeOverlay(state.mapMarker)
+    state.lonLat = ''
   }
+  
+  // 创建新的标记点
+  const point = new window.BMap.Point(lnglat[0], lnglat[1])
+  state.mapMarker = new window.BMap.Marker(point)
+  
+  // 添加点标记到地图
+  state.map.addOverlay(state.mapMarker)
+  state.map.centerAndZoom(point, 16)
 }
 
-// TODO @AI：代码优化下；
-// 把拿到的经纬度转化为地址信息
-const getAddress = (lnglat) => {
-  state.geocoder.getAddress(lnglat, (status, result) => {
-    if (status === 'complete' && result.info === 'OK') {
-      if (result && result.regeocode) {
-        state.address = result.regeocode.formattedAddress
-      }
+/**
+ * 经纬度转化为地址、添加标记点
+ * @param lonLat 经度,纬度字符串
+ */
+const regeoCode = (lonLat: string) => {
+  if (!lonLat) return
+  
+  const lnglat = lonLat.split(',')
+  if (lnglat.length !== 2) return
+  
+  state.longitude = lnglat[0]
+  state.latitude = lnglat[1]
+  
+  // 通知父组件位置变更
+  emits('locateChange', lnglat)
+  emits('update:center', lonLat)
+  
+  // 设置标记并获取地址
+  setMarker(lnglat)
+  getAddress(lnglat)
+}
+
+/**
+ * 根据经纬度获取地址信息
+ * @param lnglat 经纬度数组
+ */
+const getAddress = (lnglat: any) => {
+  const point = new window.BMap.Point(lnglat[0], lnglat[1])
+  
+  state.geocoder.getLocation(point, (result: any) => {
+    if (result && result.address) {
+      state.address = result.address
     }
   })
 }
@@ -188,7 +238,6 @@ defineExpose({ regeoCode })
 onMounted(() => {
   loadMap()
 })
-// TODO @AI：style 可以改成 unocss 么？
 </script>
 
 <style scoped>
