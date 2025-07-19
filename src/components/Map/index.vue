@@ -1,4 +1,5 @@
 <!-- 地图组件：基于百度地图GL实现 -->
+<!-- TODO @super：还存在两个没解决的小bug,一个是修改手动定位时一次加载 不知道为何定位点在地图左上角 调了半天没解决 第二个是检索地址确定定位的功能参照百度的文档没也搞好 回头再解决一下 -->
 <template>
   <div v-if="props.isWrite">
     <el-form ref="form" label-width="120px">
@@ -24,6 +25,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="设备地图:">
+        <!-- TODO @super：这里看看 unocss 哈 -->
         <div id="bdMap" class="mapContainer"></div>
       </el-form-item>
     </el-form>
@@ -37,10 +39,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, onMounted } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 
-// 扩展Window接口以包含百度地图GL API
+// 扩展 Window 接口以包含百度地图 GL API
 declare global {
   interface Window {
     BMapGL: any
@@ -69,15 +71,13 @@ const props = defineProps({
   center: propTypes.string.def('')
 })
 
-/**
- * 加载百度地图
- */
+/** 加载百度地图 */
 const loadMap = () => {
   state.address = ''
   state.latitude = ''
   state.longitude = ''
 
-  // 创建百度地图API脚本
+  // 创建百度地图 API 脚本，动态加载
   const script = document.createElement('script')
   script.src = `https://api.map.baidu.com/api?v=1.0&type=webgl&ak=${
     import.meta.env.VITE_BAIDU_MAP_KEY
@@ -90,6 +90,7 @@ const loadMap = () => {
     initGeocoder()
     initAutoComplete()
 
+    // TODO @super：这里加一行注释
     if (props.clickMap) {
       state.map.addEventListener('click', (e: any) => {
         console.log(e)
@@ -101,18 +102,18 @@ const loadMap = () => {
       })
     }
 
+    // TODO @super：这里加一行注释
     if (props.center) {
       regeoCode(props.center)
     }
   }
 }
 
-/**
- * 初始化地图
- */
+/** 初始化地图 */
 const initMap = () => {
   const mapId = 'bdMap'
   state.map = new window.BMapGL.Map(mapId)
+  // TODO @super：这个是默认的哇？
   state.map.centerAndZoom(new window.BMapGL.Point(116.404, 39.915), 11)
   state.map.enableScrollWheelZoom()
   state.map.disableDoubleClickZoom()
@@ -123,16 +124,12 @@ const initMap = () => {
   state.map.addControl(new window.BMapGL.ZoomControl())
 }
 
-/**
- * 初始化地理编码器
- */
+/** 初始化地理编码器 */
 const initGeocoder = () => {
   state.geocoder = new window.BMapGL.Geocoder()
 }
 
-/**
- * 初始化自动完成
- */
+/** 初始化自动完成 */
 const initAutoComplete = () => {
   state.autoComplete = new window.BMapGL.Autocomplete({
     input: 'searchInput',
@@ -192,6 +189,7 @@ const handleAddressSelect = (value: string) => {
  * 添加标记点
  * @param lnglat 经纬度数组
  */
+// TODO @super：拼写；尽量不要有 idea 绿色提醒哈
 const setMarker = (lnglat: any) => {
   if (!lnglat) return
 
@@ -214,9 +212,11 @@ const setMarker = (lnglat: any) => {
  * 经纬度转化为地址、添加标记点
  * @param lonLat 经度,纬度字符串
  */
+// TODO @super：拼写；尽量不要有 idea 绿色提醒哈
 const regeoCode = (lonLat: string) => {
   if (!lonLat) return
 
+  // TODO @super：拼写；尽量不要有 idea 绿色提醒哈
   const lnglat = lonLat.split(',')
   if (lnglat.length !== 2) return
 
@@ -236,8 +236,10 @@ const regeoCode = (lonLat: string) => {
   getAddress(lnglat)
 }
 
+// TODO @super：lnglat 拼写
 /**
  * 根据经纬度获取地址信息
+ *
  * @param lnglat 经纬度数组
  */
 const getAddress = (lnglat: any) => {
