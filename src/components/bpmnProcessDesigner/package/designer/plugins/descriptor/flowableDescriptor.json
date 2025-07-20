@@ -1014,6 +1014,16 @@
           "name": "fields",
           "type": "Field",
           "isMany": true
+        },
+        {
+          "name": "id",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "eventDefinitions",
+          "type": "bpmn:TimerEventDefinition",
+          "isMany": true
         }
       ]
     },
