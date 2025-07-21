@@ -102,7 +102,7 @@
       </div>
       <div v-if="modelData.startUserType === 2" class="mt-2 flex flex-wrap gap-2">
         <div
-          v-for="dept in selectedStartDepts" 
+          v-for="dept in selectedStartDepts"
           :key="dept.id"
           class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
         >
@@ -186,7 +186,23 @@ const currentSelectType = ref<'start' | 'manager'>('start')
 
 const rules = {
   name: [{ required: true, message: '流程名称不能为空', trigger: 'blur' }],
-  key: [{ required: true, message: '流程标识不能为空', trigger: 'blur' }],
+  key: [
+    { required: true, message: '流程标识不能为空', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string, callback: any) => {
+        if (!value) {
+          callback()
+          return
+        }
+        if (!/^[a-zA-Z_][\-_.0-9_a-zA-Z$]*$/.test(value)) {
+          callback(new Error('只能包含字母、数字、下划线、连字符和点号，且必须以字母或下划线开头'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur'
+    }
+  ],
   category: [{ required: true, message: '流程分类不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
