@@ -1,14 +1,17 @@
 import request from '@/config/axios'
 
 export interface SocialClientVO {
-  id: number
-  name: string
-  socialType: number
-  userType: number
-  clientId: string
-  clientSecret: string
-  agentId: string
-  status: number
+    id: number
+    name: string
+    socialType: number
+    userType: number
+    clientId: string
+    clientSecret: string
+    agentId: string
+    status: number
+    redirectUri: string
+    ignoreCheckRedirectUri: boolean
+    ignoreCheckState: boolean
 }
 
 // 查询社交客户端列表
