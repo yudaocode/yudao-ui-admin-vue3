@@ -510,10 +510,15 @@ const isManagerUser = (row: any) => {
 
 /** 处理模型的排序 **/
 const handleModelSort = () => {
-  // 保存初始数据
-  originalData.value = cloneDeep(props.categoryInfo.modelList)
-  isModelSorting.value = true
-  initSort()
+  if (isModelSorting.value) {
+    // 如果已经在排序状态，则取消排序
+    handleModelSortCancel()
+  } else {
+    // 保存初始数据
+    originalData.value = cloneDeep(props.categoryInfo.modelList)
+    isModelSorting.value = true
+    initSort()
+  }
 }
 
 /** 处理模型的排序提交 */
