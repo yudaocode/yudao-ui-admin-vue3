@@ -1,15 +1,15 @@
 <template>
   <div>
-    <el-form-item label="执行类型" key="executeType">
+    <el-form-item :label="$t('bpm.design.executeType')" key="executeType">
       <el-select v-model="serviceTaskForm.executeType">
-        <el-option label="Java类" value="class" />
-        <el-option label="表达式" value="expression" />
-        <el-option label="代理表达式" value="delegateExpression" />
+        <el-option :label="$t('bpm.design.javaClass')" value="class" />
+        <el-option :label="$t('bpm.design.expression')" value="expression" />
+        <el-option :label="$t('bpm.design.delegateExpression')" value="delegateExpression" />
       </el-select>
     </el-form-item>
     <el-form-item
       v-if="serviceTaskForm.executeType === 'class'"
-      label="Java类"
+      :label="$t('bpm.design.javaClass')"
       prop="class"
       key="execute-class"
     >
@@ -17,7 +17,7 @@
     </el-form-item>
     <el-form-item
       v-if="serviceTaskForm.executeType === 'expression'"
-      label="表达式"
+      :label="$t('bpm.design.expression')"
       prop="expression"
       key="execute-expression"
     >
@@ -25,7 +25,7 @@
     </el-form-item>
     <el-form-item
       v-if="serviceTaskForm.executeType === 'delegateExpression'"
-      label="代理表达式"
+      :label="$t('bpm.design.delegateExpression')"
       prop="delegateExpression"
       key="execute-delegate"
     >

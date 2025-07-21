@@ -2,25 +2,25 @@
   <el-form ref="formRef" :model="modelData" label-width="120px" class="mt-20px">
     <el-form-item class="mb-20px">
       <template #label>
-        <el-text size="large" tag="b">提交人权限</el-text>
+        <el-text size="large" tag="b">{{ t('bpm.model.form.submitterPermissions') }}</el-text>
       </template>
       <div class="flex flex-col">
-        <el-checkbox v-model="modelData.allowCancelRunningProcess" label="允许撤销审批中的申请" />
+        <el-checkbox v-model="modelData.allowCancelRunningProcess" label="'bpm.model.form.allowCancelRunning'" />
         <div class="ml-22px">
-          <el-text type="info"> 第一个审批节点通过后，提交人仍可撤销申请 </el-text>
+          <el-text type="info">{{ t('bpm.model.form.cancelRunningTip') }}</el-text>
         </div>
       </div>
     </el-form-item>
     <el-form-item v-if="modelData.processIdRule" class="mb-20px">
       <template #label>
-        <el-text size="large" tag="b">流程编码</el-text>
+        <el-text size="large" tag="b">{{ t('bpm.model.form.processCode') }}</el-text>
       </template>
       <div class="flex flex-col">
         <div>
           <el-input
             v-model="modelData.processIdRule.prefix"
             class="w-130px!"
-            placeholder="前缀"
+            :placeholder="t('bpm.model.form.prefix')"
             :disabled="!modelData.processIdRule.enable"
           >
             <template #prepend>
@@ -30,7 +30,7 @@
           <el-select
             v-model="modelData.processIdRule.infix"
             class="w-130px! ml-5px"
-            placeholder="中缀"
+            :placeholder="t('bpm.model.form.infix')"
             :disabled="!modelData.processIdRule.enable"
           >
             <el-option
@@ -43,7 +43,7 @@
           <el-input
             v-model="modelData.processIdRule.postfix"
             class="w-80px! ml-5px"
-            placeholder="后缀"
+            :placeholder="t('bpm.model.form.postfix')"
             :disabled="!modelData.processIdRule.enable"
           />
           <el-input-number
@@ -54,41 +54,42 @@
           />
         </div>
         <div class="ml-22px" v-if="modelData.processIdRule.enable">
-          <el-text type="info"> 编码示例：{{ numberExample }} </el-text>
+          <el-text type="info">{{ t('bpm.model.form.codeExample', { example: numberExample }) }}</el-text>
         </div>
       </div>
     </el-form-item>
     <el-form-item class="mb-20px">
       <template #label>
-        <el-text size="large" tag="b">自动去重</el-text>
+        <el-text size="large" tag="b">{{ t('bpm.model.form.autoDeduplicate') }}</el-text>
       </template>
       <div class="flex flex-col">
         <div>
-          <el-text> 同一审批人在流程中重复出现时： </el-text>
+          <el-text>{{ t('bpm.model.form.duplicateApproverTip') }}</el-text>
         </div>
         <el-radio-group v-model="modelData.autoApprovalType">
           <div class="flex flex-col">
-            <el-radio :value="0">不自动通过</el-radio>
-            <el-radio :value="1">仅审批一次，后续重复的审批节点均自动通过</el-radio>
-            <el-radio :value="2">仅针对连续审批的节点自动通过</el-radio>
+            <el-radio :value="0">{{ t('bpm.model.form.noAutoApproval') }}</el-radio>
+            <el-radio :value="1">{{ t('bpm.model.form.approveOnce') }}</el-radio>
+            <el-radio :value="2">{{ t('bpm.model.form.approveConsecutive') }}</el-radio>
           </div>
         </el-radio-group>
       </div>
     </el-form-item>
     <el-form-item v-if="modelData.titleSetting" class="mb-20px">
       <template #label>
-        <el-text size="large" tag="b">标题设置</el-text>
+        <el-text size="large" tag="b">{{ t('bpm.model.form.titleSettings') }}</el-text>
       </template>
       <div class="flex flex-col">
         <el-radio-group v-model="modelData.titleSetting.enable">
           <div class="flex flex-col">
-            <el-radio :value="false"
-              >系统默认 <el-text type="info"> 展示流程名称 </el-text></el-radio
-            >
+            <el-radio :value="false">
+              {{ t('bpm.model.form.systemDefault') }}
+              <el-text type="info">{{ t('bpm.model.form.showProcessName') }}</el-text>
+            </el-radio>
             <el-radio :value="true">
-              自定义标题
+              {{ t('bpm.model.form.customTitle') }}
               <el-text>
-                <el-tooltip content="输入字符 '{' 即可插入表单字段" effect="light" placement="top">
+                <el-tooltip content="t('bpm.model.form.insertFieldTip')" effect="light" placement="top">
                   <Icon icon="ep:question-filled" class="ml-5px" />
                 </el-tooltip>
               </el-text>
@@ -103,7 +104,7 @@
           split="}"
           whole
           :options="formFieldOptions4Title"
-          placeholder="请插入表单字段（输入 '{' 可以选择表单字段）或输入文本"
+          :placeholder="t('bpm.model.form.insertFieldPlaceholder')"
           class="w-600px!"
         />
       </div>
@@ -113,15 +114,16 @@
       class="mb-20px"
     >
       <template #label>
-        <el-text size="large" tag="b">摘要设置</el-text>
+        <el-text size="large" tag="b">{{ t('bpm.model.form.summarySettings') }}</el-text>
       </template>
       <div class="flex flex-col">
         <el-radio-group v-model="modelData.summarySetting.enable">
           <div class="flex flex-col">
             <el-radio :value="false">
-              系统默认 <el-text type="info"> 展示表单前 3 个字段 </el-text>
+              {{ t('bpm.model.form.systemDefault') }}
+              <el-text type="info">{{ t('bpm.model.form.showFirstThreeFields') }}</el-text>
             </el-radio>
-            <el-radio :value="true"> 自定义摘要 </el-radio>
+            <el-radio :value="true">{{ t('bpm.model.form.customSummary') }}</el-radio>
           </div>
         </el-radio-group>
         <el-select
@@ -129,7 +131,7 @@
           v-if="modelData.summarySetting.enable"
           v-model="modelData.summarySetting.summary"
           multiple
-          placeholder="请选择要展示的表单字段"
+          :placeholder="t('bpm.model.form.selectDisplayFields')"
         >
           <el-option
             v-for="item in formFieldOptions4Summary"
@@ -142,7 +144,7 @@
     </el-form-item>
     <el-form-item class="mb-20px">
       <template #label>
-        <el-text size="large" tag="b">流程前置通知</el-text>
+        <el-text size="large" tag="b">{{ t('bpm.model.form.processPreNotification') }}</el-text>
       </template>
       <div class="flex flex-col w-100%">
         <div class="flex">
@@ -150,7 +152,7 @@
             v-model="processBeforeTriggerEnable"
             @change="handleProcessBeforeTriggerEnableChange"
           />
-          <div class="ml-80px">流程启动后通知</div>
+          <div class="ml-80px">{{ t('bpm.model.form.notifyAfterStart') }}</div>
         </div>
         <HttpRequestSetting
           v-if="processBeforeTriggerEnable"
@@ -162,7 +164,7 @@
     </el-form-item>
     <el-form-item class="mb-20px">
       <template #label>
-        <el-text size="large" tag="b">流程后置通知</el-text>
+        <el-text size="large" tag="b">{{ t('bpm.model.form.processPostNotification') }}</el-text>
       </template>
       <div class="flex flex-col w-100%">
         <div class="flex">
@@ -170,7 +172,7 @@
             v-model="processAfterTriggerEnable"
             @change="handleProcessAfterTriggerEnableChange"
           />
-          <div class="ml-80px">流程结束后通知</div>
+          <div class="ml-80px">{{ t('bpm.model.form.notifyAfterEnd') }}</div>
         </div>
         <HttpRequestSetting
           v-if="processAfterTriggerEnable"
@@ -182,7 +184,7 @@
     </el-form-item>
     <el-form-item class="mb-20px">
       <template #label>
-        <el-text size="large" tag="b">任务前置通知</el-text>
+        <el-text size="large" tag="b">{{ t('bpm.model.form.taskPreNotification') }}</el-text>
       </template>
       <div class="flex flex-col w-100%">
         <div class="flex">
@@ -190,7 +192,7 @@
             v-model="taskBeforeTriggerEnable"
             @change="handleTaskBeforeTriggerEnableChange"
           />
-          <div class="ml-80px">任务执行时通知</div>
+          <div class="ml-80px">{{ t('bpm.model.form.notifyDuringTask') }}</div>
         </div>
         <HttpRequestSetting
           v-if="taskBeforeTriggerEnable"
@@ -202,7 +204,7 @@
     </el-form-item>
     <el-form-item class="mb-20px">
       <template #label>
-        <el-text size="large" tag="b">任务后置通知</el-text>
+        <el-text size="large" tag="b">{{ t('bpm.model.form.taskPostNotification') }}</el-text>
       </template>
       <div class="flex flex-col w-100%">
         <div class="flex">
@@ -210,7 +212,7 @@
             v-model="taskAfterTriggerEnable"
             @change="handleTaskAfterTriggerEnableChange"
           />
-          <div class="ml-80px">任务结束后通知</div>
+          <div class="ml-80px">{{ t('bpm.model.form.notifyAfterTask') }}</div>
         </div>
         <HttpRequestSetting
           v-if="taskAfterTriggerEnable"
@@ -224,6 +226,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useI18n() // Initialize i18n translation function
+import { useI18n } from 'vue-i18n'
 import dayjs from 'dayjs'
 import { BpmAutoApproveType, BpmModelFormType } from '@/utils/constants'
 import * as FormApi from '@/api/bpm/form'
@@ -233,29 +237,31 @@ import HttpRequestSetting from '@/components/SimpleProcessDesignerV2/src/nodes-c
 
 const modelData = defineModel<any>()
 
-/** 自定义 ID 流程编码 */
+/** Time options for process ID code */
 const timeOptions = ref([
   {
     value: '',
-    label: '无'
+    label: 'None'
   },
   {
     value: 'DAY',
-    label: '精确到日'
+    label: 'Accurate to day'
   },
   {
     value: 'HOUR',
-    label: '精确到时'
+    label: 'Accurate to hour'
   },
   {
     value: 'MINUTE',
-    label: '精确到分'
+    label: 'Accurate to minute'
   },
   {
     value: 'SECOND',
-    label: '精确到秒'
+    label: 'Accurate to second'
   }
 ])
+
+/** Calculate example number based on process ID rule */
 const numberExample = computed(() => {
   if (modelData.value.processIdRule.enable) {
     let infix = ''
@@ -286,7 +292,7 @@ const numberExample = computed(() => {
   }
 })
 
-/** 是否开启流程前置通知 */
+/** Process pre-notification trigger enable flag */
 const processBeforeTriggerEnable = ref(false)
 const handleProcessBeforeTriggerEnableChange = (val: boolean | string | number) => {
   if (val) {
@@ -301,7 +307,7 @@ const handleProcessBeforeTriggerEnableChange = (val: boolean | string | number) 
   }
 }
 
-/** 是否开启流程后置通知 */
+/** Process post-notification trigger enable flag */
 const processAfterTriggerEnable = ref(false)
 const handleProcessAfterTriggerEnableChange = (val: boolean | string | number) => {
   if (val) {
@@ -316,7 +322,7 @@ const handleProcessAfterTriggerEnableChange = (val: boolean | string | number) =
   }
 }
 
-/** 是否开启任务前置通知 */
+/** Task pre-notification trigger enable flag */
 const taskBeforeTriggerEnable = ref(false)
 const handleTaskBeforeTriggerEnableChange = (val: boolean | string | number) => {
   if (val) {
@@ -331,7 +337,7 @@ const handleTaskBeforeTriggerEnableChange = (val: boolean | string | number) => 
   }
 }
 
-/** 是否开启任务后置通知 */
+/** Task post-notification trigger enable flag */
 const taskAfterTriggerEnable = ref(false)
 const handleTaskAfterTriggerEnableChange = (val: boolean | string | number) => {
   if (val) {
@@ -346,7 +352,7 @@ const handleTaskAfterTriggerEnableChange = (val: boolean | string | number) => {
   }
 }
 
-/** 表单选项 */
+/** Form field options */
 const formField = ref<Array<{ field: string; title: string }>>([])
 const formFieldOptions4Title = computed(() => {
   let cloneFormField = formField.value.map((item) => {
@@ -355,21 +361,22 @@ const formFieldOptions4Title = computed(() => {
       value: item.field
     }
   })
-  // 固定添加发起人 ID 字段
+  // Add fixed process initiator ID field
   cloneFormField.unshift({
-    label: '流程名称',
+    label: 'Process Name',
     value: ProcessVariableEnum.PROCESS_DEFINITION_NAME
   })
   cloneFormField.unshift({
-    label: '发起时间',
+    label: 'Start Time',
     value: ProcessVariableEnum.START_TIME
   })
   cloneFormField.unshift({
-    label: '发起人',
+    label: 'Initiator',
     value: ProcessVariableEnum.START_USER_ID
   })
   return cloneFormField
 })
+
 const formFieldOptions4Summary = computed(() => {
   return formField.value.map((item) => {
     return {
@@ -379,7 +386,7 @@ const formFieldOptions4Summary = computed(() => {
   })
 })
 
-/** 兼容以前未配置更多设置的流程 */
+/** Initialize data for compatibility with older processes without extra settings */
 const initData = () => {
   if (!modelData.value.processIdRule) {
     modelData.value.processIdRule = {
@@ -420,7 +427,7 @@ const initData = () => {
 }
 defineExpose({ initData })
 
-/** 监听表单 ID 变化，加载表单数据 */
+/** Watch form ID changes to load form data */
 watch(
   () => modelData.value.formId,
   async (newFormId) => {

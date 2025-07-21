@@ -2,7 +2,7 @@
   <div class="flex items-center h-50px" v-memo="[categoryInfo.name, isCategorySorting]">
     <!-- 头部：分类名 -->
     <div class="flex items-center">
-      <el-tooltip content="拖动排序" v-if="isCategorySorting">
+      <el-tooltip :content="t('bpm.model.dragToSort')" v-if="isCategorySorting">
         <Icon
           :size="22"
           icon="ic:round-drag-indicator"
@@ -35,11 +35,11 @@
             @click.stop="handleModelSort"
           >
             <Icon icon="fa:sort-amount-desc" class="mr-5px" />
-            排序
+            {{ t('bpm.model.sort') }}
           </el-button>
           <el-button v-else link type="info" class="mr-20px" @click.stop="openModelForm('create')">
             <Icon icon="fa:plus" class="mr-5px" />
-            新建
+            {{ t('bpm.model.create') }}
           </el-button>
           <el-dropdown
             @command="(command) => handleCategoryCommand(command, categoryInfo)"
@@ -47,19 +47,19 @@
           >
             <el-button link type="info">
               <Icon icon="ep:setting" class="mr-5px" />
-              分类
+              {{ t('bpm.model.category') }}
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="handleRename"> 重命名 </el-dropdown-item>
-                <el-dropdown-item command="handleDeleteCategory"> 删除该类 </el-dropdown-item>
+                <el-dropdown-item command="handleRename"> {{ t('bpm.model.rename') }} </el-dropdown-item>
+                <el-dropdown-item command="handleDeleteCategory"> {{ t('bpm.model.deleteCategory') }} </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </template>
         <template v-else>
-          <el-button @click.stop="handleModelSortCancel"> 取 消 </el-button>
-          <el-button type="primary" @click.stop="handleModelSortSubmit"> 保存排序 </el-button>
+          <el-button @click.stop="handleModelSortCancel"> {{ t('common.cancel') }} </el-button>
+          <el-button type="primary" @click.stop="handleModelSortSubmit"> {{ t('bpm.model.saveSort') }} </el-button>
         </template>
       </div>
     </div>
@@ -78,10 +78,10 @@
         :cell-style="tableCellStyle"
         :row-style="{ height: '68px' }"
       >
-        <el-table-column label="流程名" prop="name" min-width="150">
+        <el-table-column :label="t('bpm.model.processName')" prop="name" min-width="150">
           <template #default="{ row }">
             <div class="flex items-center">
-              <el-tooltip content="拖动排序" v-if="isModelSorting">
+              <el-tooltip :content="t('bpm.model.dragToSort')" v-if="isModelSorting">
                 <Icon
                   icon="ic:round-drag-indicator"
                   class="drag-icon cursor-move text-#8a909c mr-10px"
@@ -95,9 +95,9 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="可见范围" prop="startUserIds" min-width="150">
+        <el-table-column :label="t('bpm.model.visibleRange')" prop="startUserIds" min-width="150">
           <template #default="{ row }">
-            <el-text v-if="!row.startUsers?.length && !row.startDepts?.length"> 全部可见 </el-text>
+            <el-text v-if="!row.startUsers?.length && !row.startDepts?.length"> {{ t('bpm.model.allVisible') }} </el-text>
             <el-text v-else-if="row.startUsers.length === 1">
               {{ row.startUsers[0].nickname }}
             </el-text>
@@ -111,7 +111,7 @@
                 placement="top"
                 :content="row.startDepts.map((dept: any) => dept.name).join('、')"
               >
-                {{ row.startDepts[0].name }}等 {{ row.startDepts.length }} 个部门可见
+                {{ row.startDepts[0].name }}{{ t('bpm.model.etc') }} {{ row.startDepts.length }} {{ t('bpm.model.deptVisible') }}
               </el-tooltip>
             </el-text>
             <el-text v-else>
@@ -121,17 +121,17 @@
                 placement="top"
                 :content="row.startUsers.map((user: any) => user.nickname).join('、')"
               >
-                {{ row.startUsers[0].nickname }}等 {{ row.startUsers.length }} 人可见
+                {{ row.startUsers[0].nickname }}{{ t('bpm.model.etc') }} {{ row.startUsers.length }} {{ t('bpm.model.peopleVisible') }}
               </el-tooltip>
             </el-text>
           </template>
         </el-table-column>
-        <el-table-column label="流程类型" prop="type" min-width="120">
+        <el-table-column :label="t('bpm.model.processType')" prop="type" min-width="120">
           <template #default="{ row }">
             <dict-tag :value="row.type" :type="DICT_TYPE.BPM_MODEL_TYPE" />
           </template>
         </el-table-column>
-        <el-table-column label="表单信息" prop="formType" min-width="150">
+        <el-table-column :label="t('bpm.model.formInfo')" prop="formType" min-width="150">
           <template #default="scope">
             <el-button
               v-if="scope.row.formType === BpmModelFormType.NORMAL"
@@ -149,10 +149,10 @@
             >
               <span>{{ scope.row.formCustomCreatePath }}</span>
             </el-button>
-            <label v-else>暂无表单</label>
+            <label v-else>{{ t('bpm.model.noForm') }}</label>
           </template>
         </el-table-column>
-        <el-table-column label="最后发布" prop="deploymentTime" min-width="250">
+        <el-table-column :label="t('bpm.model.lastDeploy')" prop="deploymentTime" min-width="250">
           <template #default="scope">
             <div class="flex items-center">
               <span v-if="scope.row.processDefinition" class="w-150px">
@@ -161,18 +161,18 @@
               <el-tag v-if="scope.row.processDefinition">
                 v{{ scope.row.processDefinition.version }}
               </el-tag>
-              <el-tag v-else type="warning">未部署</el-tag>
+              <el-tag v-else type="warning">{{ t('bpm.model.notDeployed') }}</el-tag>
               <el-tag
                 v-if="scope.row.processDefinition?.suspensionState === 2"
                 type="warning"
                 class="ml-10px"
               >
-                已停用
+                {{ t('bpm.model.disabled') }}
               </el-tag>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column :label="t('common.operation')" width="200" fixed="right">
           <template #default="scope">
             <el-button
               link
@@ -181,7 +181,7 @@
               v-if="hasPermiUpdate"
               :disabled="!isManagerUser(scope.row)"
             >
-              修改
+              {{ t('action.edit') }}
             </el-button>
             <el-button
               link
@@ -190,7 +190,7 @@
               v-if="hasPermiUpdate"
               :disabled="!isManagerUser(scope.row)"
             >
-              复制
+              {{ t('bpm.model.copy') }}
             </el-button>
             <el-button
               link
@@ -200,18 +200,18 @@
               v-if="hasPermiDeploy"
               :disabled="!isManagerUser(scope.row)"
             >
-              发布
+              {{ t('bpm.model.deploy') }}
             </el-button>
             <el-dropdown
               class="!align-middle ml-5px"
               @command="(command) => handleModelCommand(command, scope.row)"
               v-if="hasPermiMore"
             >
-              <el-button type="primary" link>更多</el-button>
+              <el-button type="primary" link>{{ t('action.more') }}</el-button>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="handleDefinitionList" v-if="hasPermiPdQuery">
-                    历史
+                    {{ t('bpm.model.history') }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     command="handleReport"
@@ -221,14 +221,14 @@
                     "
                     :disabled="!isManagerUser(scope.row)"
                   >
-                    报表
+                    {{ t('bpm.model.report') }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     command="handleChangeState"
                     v-if="hasPermiUpdate && scope.row.processDefinition"
                     :disabled="!isManagerUser(scope.row)"
                   >
-                    {{ scope.row.processDefinition.suspensionState === 1 ? '停用' : '启用' }}
+                    {{ scope.row.processDefinition.suspensionState === 1 ? t('bpm.model.disable') : t('bpm.model.enable') }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     type="danger"
@@ -236,7 +236,7 @@
                     v-if="checkPermi(['bpm:model:clean'])"
                     :disabled="!isManagerUser(scope.row)"
                   >
-                    清理
+                    {{ t('bpm.model.clean') }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     type="danger"
@@ -244,7 +244,7 @@
                     v-if="hasPermiDelete"
                     :disabled="!isManagerUser(scope.row)"
                   >
-                    删除
+                    {{ t('action.delete') }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -258,21 +258,21 @@
   <!-- 弹窗：重命名分类 -->
   <Dialog :fullscreen="false" class="rename-dialog" v-model="renameCategoryVisible" width="400">
     <template #title>
-      <div class="pl-10px font-bold text-18px"> 重命名分类 </div>
+      <div class="pl-10px font-bold text-18px"> {{ t('bpm.model.renameCategory') }} </div>
     </template>
     <div class="px-30px">
       <el-input v-model="renameCategoryForm.name" />
     </div>
     <template #footer>
       <div class="pr-25px pb-25px">
-        <el-button @click="renameCategoryVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleRenameConfirm">确 定</el-button>
+        <el-button @click="renameCategoryVisible = false">{{ t('common.cancel') }}</el-button>
+        <el-button type="primary" @click="handleRenameConfirm">{{ t('common.confirm') }}</el-button>
       </div>
     </template>
   </Dialog>
 
   <!-- 弹窗：表单详情 -->
-  <Dialog title="表单详情" :fullscreen="true" v-model="formDetailVisible">
+  <Dialog :title="t('bpm.model.formDetail')" :fullscreen="true" v-model="formDetailVisible">
     <form-create :rule="formDetailPreview.rule" :option="formDetailPreview.option" />
   </Dialog>
 </template>
@@ -292,6 +292,7 @@ import { useAppStore } from '@/store/modules/app'
 import { cloneDeep, isEqual } from 'lodash-es'
 import { useDebounceFn } from '@vueuse/core'
 import { subString } from '@/utils/index'
+import { useI18n } from 'vue-i18n'
 
 defineOptions({ name: 'BpmModel' })
 
@@ -433,10 +434,10 @@ const handleDelete = async (row: any) => {
 const handleClean = async (row: any) => {
   try {
     // 清理的二次确认
-    await message.confirm('是否确认清理流程名字为"' + row.name + '"的数据项?')
+    await message.confirm(t('bpm.model.confirmClean', { name: row.name }))
     // 发起清理
     await ModelApi.cleanModel(row.id)
-    message.success('清理成功')
+    message.success(t('bpm.model.cleanSuccess'))
     // 刷新列表
     emit('success')
   } catch {}
@@ -449,12 +450,12 @@ const handleChangeState = async (row: any) => {
   try {
     // 修改状态的二次确认
     const id = row.id
-    const statusState = state === 1 ? '停用' : '启用'
-    const content = '是否确认' + statusState + '流程名字为"' + row.name + '"的数据项?'
+    const statusState = state === 1 ? t('bpm.model.disable') : t('bpm.model.enable')
+    const content = t('bpm.model.confirmChangeState', { state: statusState, name: row.name })
     await message.confirm(content)
     // 发起修改状态
     await ModelApi.updateModelState(id, newState)
-    message.success(statusState + '成功')
+    message.success(statusState + t('common.success'))
     // 刷新列表
     emit('success')
   } catch {}
@@ -463,10 +464,10 @@ const handleChangeState = async (row: any) => {
 /** 发布流程 */
 const handleDeploy = async (row: any) => {
   try {
-    await message.confirm('是否确认发布该流程？')
+    await message.confirm(t('bpm.model.confirmDeploy'))
     // 发起部署
     await ModelApi.deployModel(row.id)
-    message.success(t('发布成功'))
+    message.success(t('bpm.model.deploySuccess'))
     // 刷新列表
     emit('success')
   } catch {}
@@ -523,7 +524,7 @@ const handleModelSortSubmit = async () => {
   await ModelApi.updateModelSortBatch(ids)
   // 刷新列表
   isModelSorting.value = false
-  message.success('排序模型成功')
+  message.success(t('bpm.model.sortSuccess'))
   emit('success')
 }
 
@@ -575,11 +576,11 @@ const renameCategoryForm = ref({
 })
 const handleRenameConfirm = async () => {
   if (renameCategoryForm.value?.name.length === 0) {
-    return message.warning('请输入名称')
+    return message.warning(t('bpm.model.pleaseEnterName'))
   }
   // 发起修改
   await CategoryApi.updateCategory(renameCategoryForm.value as CategoryVO)
-  message.success('重命名成功')
+  message.success(t('bpm.model.renameSuccess'))
   // 刷新列表
   renameCategoryVisible.value = false
   emit('success')
@@ -589,9 +590,9 @@ const handleRenameConfirm = async () => {
 const handleDeleteCategory = async () => {
   try {
     if (props.categoryInfo.modelList.length > 0) {
-      return message.warning('该分类下仍有流程定义,不允许删除')
+      return message.warning(t('bpm.model.categoryNotEmpty'))
     }
-    await message.confirm('确认删除分类吗?')
+    await message.confirm(t('bpm.model.confirmDeleteCategory'))
     // 发起删除
     await CategoryApi.deleteCategory(props.categoryInfo.id)
     message.success(t('common.delSuccess'))
