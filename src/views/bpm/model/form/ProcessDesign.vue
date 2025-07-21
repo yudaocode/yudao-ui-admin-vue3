@@ -14,9 +14,9 @@
   <template v-else>
     <SimpleModelDesign
       v-if="showDesigner"
-      :model-id="modelData.id"
-      :model-key="modelData.key"
       :model-name="modelData.name"
+      :model-form-id="modelData.formId"
+      :model-form-type="modelData.formType"
       :start-user-ids="modelData.startUserIds"
       :start-dept-ids="modelData.startDeptIds"
       @success="handleDesignSuccess"
