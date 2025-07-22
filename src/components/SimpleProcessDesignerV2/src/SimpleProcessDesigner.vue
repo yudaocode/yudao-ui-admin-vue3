@@ -26,8 +26,7 @@
 <script setup lang="ts">
 import SimpleProcessModel from './SimpleProcessModel.vue'
 import { SimpleFlowNode, NodeType, NodeId, NODE_DEFAULT_TEXT } from './consts'
-import { getModel } from '@/api/bpm/model'
-import { getForm, FormVO } from '@/api/bpm/form'
+import { getForm } from '@/api/bpm/form'
 import { handleTree } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
@@ -43,17 +42,21 @@ defineOptions({
 const emits = defineEmits(['success']) // 保存成功事件
 
 const props = defineProps({
-  modelId: {
-    type: String,
-    required: false
-  },
-  modelKey: {
-    type: String,
-    required: false
-  },
   modelName: {
     type: String,
     required: false
+  },
+  // 流程表单 ID
+  modelFormId: {
+    type: Number,
+    required: false,
+    default: undefined,
+  },
+   // 表单类型
+  modelFormType: {
+    type: Number,
+    required: false,
+    default: BpmModelFormType.NORMAL,
   },
   // 可发起流程的人员编号
   startUserIds: {
@@ -70,7 +73,31 @@ const props = defineProps({
 const processData = inject('processData') as Ref
 const loading = ref(false)
 const formFields = ref<string[]>([])
-const formType = ref(20)
+const formType = ref(props.modelFormType);
+
+// 监听 modelFormType 变化
+watch(
+  () => props.modelFormType,
+  (newVal) => {
+    formType.value = newVal;
+  },
+);
+
+// 监听 modelFormId 变化
+watch(
+  () => props.modelFormId,
+  async (newVal) => {
+    if (newVal) {
+      const form = await getForm(newVal);
+      formFields.value = form?.fields;
+    } else {
+      // 如果 modelFormId 为空，清空表单字段
+      formFields.value = [];
+    }
+  },
+  { immediate: true },
+);
+
 const roleOptions = ref<RoleApi.RoleVO[]>([]) // 角色列表
 const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
@@ -90,6 +117,8 @@ provide('startUserIds', props.startUserIds)
 provide('startDeptIds', props.startDeptIds)
 provide('tasks', [])
 provide('processInstance', {})
+
+
 const message = useMessage() // 国际化
 const processNodeTree = ref<SimpleFlowNode | undefined>()
 provide('processNodeTree', processNodeTree)
@@ -169,17 +198,17 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
 onMounted(async () => {
   try {
     loading.value = true
-    // 获取表单字段
-    if (props.modelId) {
-      const bpmnModel = await getModel(props.modelId)
-      if (bpmnModel) {
-        formType.value = bpmnModel.formType
-        if (formType.value === BpmModelFormType.NORMAL && bpmnModel.formId) {
-          const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
-          formFields.value = bpmnForm?.fields
-        }
-      }
-    }
+    // // 获取表单字段
+    // if (props.modelId) {
+    //   const bpmnModel = await getModel(props.modelId)
+    //   if (bpmnModel) {
+    //     formType.value = bpmnModel.formType
+    //     if (formType.value === BpmModelFormType.NORMAL && bpmnModel.formId) {
+    //       const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
+    //       formFields.value = bpmnForm?.fields
+    //     }
+    //   }
+    // }
     // 获得角色列表
     roleOptions.value = await RoleApi.getSimpleRoleList()
     // 获得岗位列表
