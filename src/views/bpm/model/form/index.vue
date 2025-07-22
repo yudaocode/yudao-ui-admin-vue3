@@ -77,7 +77,10 @@
 
         <!-- 第四步：更多设置 -->
         <div v-show="currentStep === 3" class="mx-auto w-700px">
-          <ExtraSettings v-model="formData" ref="extraSettingsRef" />
+          <ExtraSettings
+            ref="extraSettingsRef"   
+            v-model="formData" 
+            :model-form-id="formData.formId"/>
         </div>
       </div>
     </div>
