@@ -36,14 +36,15 @@
  * Verify 验证码组件
  * @description 分发验证码使用
  * */
-import { VerifyPoints, VerifySlide } from './Verify'
+import {VerifyPictureWord, VerifyPoints, VerifySlide} from './Verify'
 import { computed, ref, toRefs, watchEffect } from 'vue'
 
 export default {
   name: 'Vue3Verify',
   components: {
     VerifySlide,
-    VerifyPoints
+    VerifyPoints,
+    VerifyPictureWord
   },
   props: {
     captchaType: {
