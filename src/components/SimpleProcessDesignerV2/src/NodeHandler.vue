@@ -97,8 +97,6 @@ defineOptions({
   name: 'NodeHandler'
 })
 
-const message = useMessage() // 消息弹窗
-
 const popoverShow = ref(false)
 const props = defineProps({
   childNode: {
@@ -115,17 +113,6 @@ const emits = defineEmits(['update:childNode'])
 const readonly = inject<Boolean>('readonly') // 是否只读
 
 const addNode = (type: number) => {
-  // 校验：条件分支、包容分支后面，不允许直接添加并行分支
-  if (
-    type === NodeType.PARALLEL_BRANCH_NODE &&
-    [NodeType.CONDITION_BRANCH_NODE, NodeType.INCLUSIVE_BRANCH_NODE].includes(
-      props.currentNode?.type
-    )
-  ) {
-    message.error('条件分支、包容分支后面，不允许直接添加并行分支')
-    return
-  }
-
   popoverShow.value = false
   if (type === NodeType.USER_TASK_NODE || type === NodeType.TRANSACTOR_NODE) {
     const id = 'Activity_' + generateUUID()
