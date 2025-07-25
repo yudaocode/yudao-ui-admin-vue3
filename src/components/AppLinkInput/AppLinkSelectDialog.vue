@@ -174,7 +174,7 @@ const groupBtnRefs = ref<ButtonInstance[]>([])
 const scrollToGroupBtn = (group: string) => {
   const groupBtn = groupBtnRefs.value
     .map((btn: ButtonInstance) => btn['ref'])
-    .find((ref: Node) => ref.textContent === group)
+    .find((ref: HTMLButtonElement) => ref.textContent === group)
   if (groupBtn) {
     groupScrollbar.value?.setScrollTop(groupBtn.offsetTop)
   }
