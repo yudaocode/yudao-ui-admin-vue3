@@ -13,10 +13,10 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item :command="['edit', role]">
-                  <Icon icon="ep:edit" color="#787878" />编辑
+                  <Icon icon="ep:edit" color="var(--el-text-color-placeholder)" />编辑
                 </el-dropdown-item>
-                <el-dropdown-item :command="['delete', role]" style="color: red">
-                  <Icon icon="ep:delete" color="red" />删除
+                <el-dropdown-item :command="['delete', role]" style="color: var(--el-color-danger)">
+                  <Icon icon="ep:delete" color="var(--el-color-danger)" />删除
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -153,13 +153,13 @@ const handleTabsScroll = async () => {
         .title {
           font-size: 18px;
           font-weight: bold;
-          color: #3e3e3e;
+          color: var(--el-text-color-primary);
         }
 
         .description {
           margin-top: 10px;
           font-size: 14px;
-          color: #6a6a6a;
+          color: var(--el-text-color-regular);
         }
       }
 

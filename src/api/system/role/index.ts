@@ -52,6 +52,11 @@ export const deleteRole = async (id: number) => {
   return await request.delete({ url: '/system/role/delete?id=' + id })
 }
 
+// 批量删除角色
+export const deleteRoleList = async (ids: number[]) => {
+  return await request.delete({ url: '/system/role/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 导出角色
 export const exportRole = (params) => {
   return request.download({

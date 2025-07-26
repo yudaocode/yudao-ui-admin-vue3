@@ -41,3 +41,8 @@ export const updateSmsChannel = (data: SmsChannelVO) => {
 export const deleteSmsChannel = (id: number) => {
   return request.delete({ url: '/system/sms-channel/delete?id=' + id })
 }
+
+// 批量删除短信渠道
+export const deleteSmsChannelList = (ids: number[]) => {
+  return request.delete({ url: '/system/sms-channel/delete-list', params: { ids: ids.join(',') } })
+}

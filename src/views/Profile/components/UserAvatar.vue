@@ -18,7 +18,6 @@ import { useUserStore } from '@/store/modules/user'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
 import { UploadRequestOptions } from 'element-plus/es/components/upload/src/upload'
 
-// TODO @芋艿：合并到 ProfileUser 组件中，更简洁一点
 defineOptions({ name: 'UserAvatar' })
 
 defineProps({
@@ -30,10 +29,12 @@ const userStore = useUserStore()
 const cropperRef = ref()
 const handelUpload = async ({ data }) => {
   const { httpRequest } = useUpload()
-  const avatar = ((await httpRequest({
-    file: data,
-    filename: 'avatar.png',
-  } as UploadRequestOptions)) as unknown as { data: string }).data
+  const avatar = (
+    (await httpRequest({
+      file: data,
+      filename: 'avatar.png'
+    } as UploadRequestOptions)) as unknown as { data: string }
+  ).data
   await updateUserProfile({ avatar })
 
   // 关闭弹窗，并更新 userStore

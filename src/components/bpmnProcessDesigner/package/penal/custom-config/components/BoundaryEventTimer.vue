@@ -28,7 +28,12 @@
           v-model="timeDuration"
           :min="1"
           controls-position="right"
-          @change="() => updateTimeModdle()"
+          @change="
+            () => {
+              updateTimeModdle()
+              updateElementExtensions()
+            }
+          "
         />
       </el-form-item>
       <el-select
@@ -55,7 +60,12 @@
         v-model="maxRemindCount"
         :min="1"
         :max="10"
-        @change="() => updateTimeModdle()"
+        @change="
+          () => {
+            updateTimeModdle()
+            updateElementExtensions()
+          }
+        "
       />
     </el-form-item>
   </div>
@@ -65,7 +75,7 @@
 import {
   TimeUnitType,
   TIME_UNIT_TYPES,
-  TIMEOUT_HANDLER_TYPES,
+  TIMEOUT_HANDLER_TYPES
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { convertTimeUnit } from '@/components/SimpleProcessDesignerV2/src/utils'
 
@@ -195,6 +205,7 @@ const onTimeUnitChange = () => {
     timeDuration.value = 1
   }
   updateTimeModdle()
+  updateElementExtensions()
 }
 
 const updateTimeModdle = () => {

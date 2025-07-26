@@ -1,7 +1,7 @@
 <template>
   <div v-show="ssoVisible" class="form-cont">
     <!-- 应用名 -->
-    <LoginFormTitle style="width: 100%" />
+    <LoginFormTitle class="w-full" />
     <el-tabs class="form" style="float: none" value="uname">
       <el-tab-pane :label="client.name" name="uname" />
     </el-tabs>
@@ -15,17 +15,17 @@
               v-for="scope in queryParams.scopes"
               :key="scope"
               :value="scope"
-              style="display: block; margin-bottom: -10px"
+              class="block mb-[-10px]"
             >
               {{ formatScope(scope) }}
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
         <!-- 下方的登录按钮 -->
-        <el-form-item class="w-1/1">
+        <el-form-item class="w-full">
           <el-button
             :loading="formLoading"
-            class="w-6/10"
+            class="w-3/5"
             type="primary"
             @click.prevent="handleAuthorize(true)"
           >

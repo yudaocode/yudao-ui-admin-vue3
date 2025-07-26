@@ -16,10 +16,6 @@ export interface ProfileVO {
     id: number
     name: string
   }[]
-  socialUsers: {
-    type: number
-    openid: string
-  }[]
   email: string
   mobile: string
   sex: number

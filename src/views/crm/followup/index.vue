@@ -24,6 +24,38 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="跟进内容" prop="content" />
+      <el-table-column label="图片" align="center">
+        <template #default="scope">
+          <div v-if="scope.row.picUrls && scope.row.picUrls.length > 0" class="flex">
+            <el-image
+              v-for="(url, index) in scope.row.picUrls"
+              :key="index"
+              :src="url"
+              :preview-src-list="scope.row.picUrls"
+              class="w-10 h-10 mr-1"
+              :initial-index="index"
+              fit="cover"
+              preview-teleported
+            />
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="附件" align="center">
+        <template #default="scope">
+          <div v-if="scope.row.fileUrls && scope.row.fileUrls.length > 0" class="flex flex-col">
+            <el-link
+              v-for="(url, index) in scope.row.fileUrls"
+              :key="index"
+              :href="url"
+              type="primary"
+              target="_blank"
+              download
+            >
+              {{ getFileName(url) }}
+            </el-link>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -97,6 +129,14 @@ import { BizTypeEnum } from '@/api/crm/permission'
 
 /** 跟进记录列表 */
 defineOptions({ name: 'FollowUpRecord' })
+
+const getFileName = (url: string) => {
+  if (!url) {
+    return ''
+  }
+  return url.substring(url.lastIndexOf('/') + 1)
+}
+
 const props = defineProps<{
   bizType: number
   bizId: number
