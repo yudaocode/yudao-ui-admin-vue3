@@ -28,3 +28,8 @@ export const getMailLogPage = async (params: PageParam) => {
 export const getMailLog = async (id: number) => {
   return await request.get({ url: '/system/mail-log/get?id=' + id })
 }
+
+// 导出邮件日志
+export const exportMailLog = (params) => {
+  return request.download({ url: '/system/mail-log/export-excel', params })
+}
