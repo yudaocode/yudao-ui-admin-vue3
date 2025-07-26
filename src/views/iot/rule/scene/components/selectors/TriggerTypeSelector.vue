@@ -1,6 +1,6 @@
 <!-- 触发器类型选择组件 -->
 <template>
-  <div class="trigger-type-selector">
+  <div class="w-full">
     <el-form-item label="触发类型" required>
       <el-select
         v-model="localValue"
@@ -14,13 +14,13 @@
           :label="option.label"
           :value="option.value"
         >
-          <div class="trigger-option">
-            <div class="option-content">
+          <div class="flex items-center justify-between w-full py-4px">
+            <div class="flex items-center gap-12px flex-1">
               <!-- TODO @puhui999：貌似没对齐？ -->
-              <Icon :icon="option.icon" class="option-icon" />
-              <div class="option-info">
-                <div class="option-label">{{ option.label }}</div>
-                <div class="option-desc">{{ option.description }}</div>
+              <Icon :icon="option.icon" class="text-18px text-[var(--el-color-primary)] flex-shrink-0" />
+              <div class="flex-1">
+                <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ option.label }}</div>
+                <div class="text-12px text-[var(--el-text-color-secondary)] leading-relaxed">{{ option.description }}</div>
               </div>
             </div>
             <!-- TODO @puhui999：这个要不去掉？ -->
@@ -34,17 +34,17 @@
 
     <!-- 类型说明 -->
     <!-- TODO @puhui999：这个去掉。感觉没啥内容哈； -->
-    <div v-if="selectedOption" class="type-description">
-      <div class="desc-header">
-        <Icon :icon="selectedOption.icon" class="desc-icon" />
-        <span class="desc-title">{{ selectedOption.label }}</span>
+    <div v-if="selectedOption" class="mt-16px p-16px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+      <div class="flex items-center gap-8px mb-12px">
+        <Icon :icon="selectedOption.icon" class="text-20px text-[var(--el-color-primary)]" />
+        <span class="text-16px font-600 text-[var(--el-text-color-primary)]">{{ selectedOption.label }}</span>
       </div>
-      <div class="desc-content">
-        <p class="desc-text">{{ selectedOption.description }}</p>
-        <div class="desc-features">
-          <div v-for="feature in selectedOption.features" :key="feature" class="feature-item">
-            <Icon icon="ep:check" class="feature-icon" />
-            <span class="feature-text">{{ feature }}</span>
+      <div class="ml-28px">
+        <p class="text-14px text-[var(--el-text-color-regular)] m-0 mb-12px leading-relaxed">{{ selectedOption.description }}</p>
+        <div class="flex flex-col gap-6px">
+          <div v-for="feature in selectedOption.features" :key="feature" class="flex items-center gap-6px">
+            <Icon icon="ep:check" class="text-12px text-[var(--el-color-success)] flex-shrink-0" />
+            <span class="text-12px text-[var(--el-text-color-secondary)]">{{ feature }}</span>
           </div>
         </div>
       </div>
@@ -134,109 +134,7 @@ const handleChange = (value: number) => {
 </script>
 
 <style scoped>
-/** TODO @puhui999：unocss 哈 */
-.trigger-type-selector {
-  width: 100%;
-}
-
-.trigger-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 4px 0;
-}
-
-.option-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.option-icon {
-  font-size: 18px;
-  color: var(--el-color-primary);
-  flex-shrink: 0;
-}
-
-.option-info {
-  flex: 1;
-}
-
-.option-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  margin-bottom: 2px;
-}
-
-.option-desc {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.4;
-}
-
-.type-description {
-  margin-top: 16px;
-  padding: 16px;
-  background: var(--el-fill-color-light);
-  border-radius: 6px;
-  border: 1px solid var(--el-border-color-lighter);
-}
-
-.desc-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.desc-icon {
-  font-size: 20px;
-  color: var(--el-color-primary);
-}
-
-.desc-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
-.desc-content {
-  margin-left: 28px;
-}
-
-.desc-text {
-  font-size: 14px;
-  color: var(--el-text-color-regular);
-  margin: 0 0 12px 0;
-  line-height: 1.5;
-}
-
-.desc-features {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.feature-icon {
-  font-size: 12px;
-  color: var(--el-color-success);
-  flex-shrink: 0;
-}
-
-.feature-text {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
+/** TODO @puhui999：unocss 哈 - 已完成转换 */
 :deep(.el-select-dropdown__item) {
   height: auto;
   padding: 8px 20px;

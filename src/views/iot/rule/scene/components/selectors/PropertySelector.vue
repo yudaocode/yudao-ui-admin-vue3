@@ -1,7 +1,7 @@
 <!-- 属性选择器组件 -->
 <!-- TODO @yunai：可能要在 review 下 -->
 <template>
-  <div class="property-selector">
+  <div class="w-full">
     <el-select
       v-model="localValue"
       placeholder="请选择监控项"
@@ -18,12 +18,12 @@
           :label="property.name"
           :value="property.identifier"
         >
-          <div class="property-option">
-            <div class="option-content">
-              <div class="option-name">{{ property.name }}</div>
-              <div class="option-identifier">{{ property.identifier }}</div>
+          <div class="flex items-center justify-between w-full py-4px">
+            <div class="flex-1">
+              <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ property.name }}</div>
+              <div class="text-12px text-[var(--el-text-color-secondary)]">{{ property.identifier }}</div>
             </div>
-            <div class="option-meta">
+            <div class="flex-shrink-0">
               <el-tag :type="getPropertyTypeTag(property.dataType)" size="small">
                 {{ getPropertyTypeName(property.dataType) }}
               </el-tag>
@@ -34,30 +34,30 @@
     </el-select>
 
     <!-- 属性详情 -->
-    <div v-if="selectedProperty" class="property-details">
-      <div class="details-header">
-        <Icon icon="ep:info-filled" class="details-icon" />
-        <span class="details-title">{{ selectedProperty.name }}</span>
+    <div v-if="selectedProperty" class="mt-16px p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+      <div class="flex items-center gap-8px mb-12px">
+        <Icon icon="ep:info-filled" class="text-[var(--el-color-info)] text-16px" />
+        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">{{ selectedProperty.name }}</span>
         <el-tag :type="getPropertyTypeTag(selectedProperty.dataType)" size="small">
           {{ getPropertyTypeName(selectedProperty.dataType) }}
         </el-tag>
       </div>
-      <div class="details-content">
-        <div class="detail-item">
-          <span class="detail-label">标识符：</span>
-          <span class="detail-value">{{ selectedProperty.identifier }}</span>
+      <div class="space-y-8px ml-24px">
+        <div class="flex items-start gap-8px">
+          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0">标识符：</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedProperty.identifier }}</span>
         </div>
-        <div v-if="selectedProperty.description" class="detail-item">
-          <span class="detail-label">描述：</span>
-          <span class="detail-value">{{ selectedProperty.description }}</span>
+        <div v-if="selectedProperty.description" class="flex items-start gap-8px">
+          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0">描述：</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedProperty.description }}</span>
         </div>
-        <div v-if="selectedProperty.unit" class="detail-item">
-          <span class="detail-label">单位：</span>
-          <span class="detail-value">{{ selectedProperty.unit }}</span>
+        <div v-if="selectedProperty.unit" class="flex items-start gap-8px">
+          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0">单位：</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedProperty.unit }}</span>
         </div>
-        <div v-if="selectedProperty.range" class="detail-item">
-          <span class="detail-label">取值范围：</span>
-          <span class="detail-value">{{ selectedProperty.range }}</span>
+        <div v-if="selectedProperty.range" class="flex items-start gap-8px">
+          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0">取值范围：</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedProperty.range }}</span>
         </div>
       </div>
     </div>
@@ -336,90 +336,6 @@ watch(
 </script>
 
 <style scoped>
-.property-selector {
-  width: 100%;
-}
-
-.property-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 4px 0;
-}
-
-.option-content {
-  flex: 1;
-}
-
-.option-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  margin-bottom: 2px;
-}
-
-.option-identifier {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  font-family: 'Courier New', monospace;
-}
-
-.option-meta {
-  flex-shrink: 0;
-}
-
-.property-details {
-  margin-top: 12px;
-  padding: 12px;
-  background: var(--el-fill-color-light);
-  border-radius: 6px;
-  border: 1px solid var(--el-border-color-lighter);
-}
-
-.details-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.details-icon {
-  color: var(--el-color-primary);
-  font-size: 14px;
-}
-
-.details-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.details-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-left: 22px;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.detail-label {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  min-width: 60px;
-}
-
-.detail-value {
-  font-size: 12px;
-  color: var(--el-text-color-primary);
-  font-family: 'Courier New', monospace;
-}
-
 :deep(.el-select-dropdown__item) {
   height: auto;
   padding: 8px 20px;

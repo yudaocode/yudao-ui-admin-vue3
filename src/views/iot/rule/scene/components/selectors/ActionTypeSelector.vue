@@ -1,6 +1,6 @@
 <!-- 执行器类型选择组件 -->
 <template>
-  <div class="action-type-selector">
+  <div class="w-full">
     <!-- TODO @puhui999：1）设备属性设置时，貌似没选属性；2）服务调用时，貌似也没的设置哈； -->
     <el-form-item label="执行类型" required>
       <el-select
@@ -15,12 +15,12 @@
           :label="option.label"
           :value="option.value"
         >
-          <div class="action-option">
-            <div class="option-content">
-              <Icon :icon="option.icon" class="option-icon" />
-              <div class="option-info">
-                <div class="option-label">{{ option.label }}</div>
-                <div class="option-desc">{{ option.description }}</div>
+          <div class="flex items-center justify-between w-full py-4px">
+            <div class="flex items-center gap-12px flex-1">
+              <Icon :icon="option.icon" class="text-18px text-[var(--el-color-primary)] flex-shrink-0" />
+              <div class="flex-1">
+                <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ option.label }}</div>
+                <div class="text-12px text-[var(--el-text-color-secondary)] leading-relaxed">{{ option.description }}</div>
               </div>
             </div>
             <el-tag :type="option.tag" size="small">
@@ -97,48 +97,6 @@ const handleChange = (value: number) => {
 </script>
 
 <style scoped>
-.action-type-selector {
-  width: 100%;
-}
-
-.action-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 4px 0;
-}
-
-.option-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.option-icon {
-  font-size: 18px;
-  color: var(--el-color-primary);
-  flex-shrink: 0;
-}
-
-.option-info {
-  flex: 1;
-}
-
-.option-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  margin-bottom: 2px;
-}
-
-.option-desc {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.4;
-}
-
 :deep(.el-select-dropdown__item) {
   height: auto;
   padding: 8px 20px;

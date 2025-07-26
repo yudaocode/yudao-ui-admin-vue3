@@ -1,6 +1,6 @@
 <!-- 操作符选择器组件 -->
 <template>
-  <div class="operator-selector">
+  <div class="w-full">
     <el-select
       v-model="localValue"
       placeholder="请选择操作符"
@@ -13,26 +13,26 @@
         :label="operator.label"
         :value="operator.value"
       >
-        <div class="operator-option">
-          <div class="option-content">
-            <div class="option-label">{{ operator.label }}</div>
-            <div class="option-symbol">{{ operator.symbol }}</div>
+        <div class="flex items-center justify-between w-full py-4px">
+          <div class="flex items-center gap-8px">
+            <div class="text-14px font-500 text-[var(--el-text-color-primary)]">{{ operator.label }}</div>
+            <div class="text-12px text-[var(--el-color-primary)] bg-[var(--el-color-primary-light-9)] px-6px py-2px rounded-4px font-mono">{{ operator.symbol }}</div>
           </div>
-          <div class="option-desc">{{ operator.description }}</div>
+          <div class="text-12px text-[var(--el-text-color-secondary)]">{{ operator.description }}</div>
         </div>
       </el-option>
     </el-select>
 
     <!-- 操作符说明 -->
     <!-- TODO @puhui999：这个去掉 -->
-    <div v-if="selectedOperator" class="operator-description">
-      <div class="desc-content">
-        <Icon icon="ep:info-filled" class="desc-icon" />
-        <span class="desc-text">{{ selectedOperator.description }}</span>
+    <div v-if="selectedOperator" class="mt-8px p-8px bg-[var(--el-fill-color-light)] rounded-4px border border-[var(--el-border-color-lighter)]">
+      <div class="flex items-center gap-6px">
+        <Icon icon="ep:info-filled" class="text-12px text-[var(--el-color-info)]" />
+        <span class="text-12px text-[var(--el-text-color-secondary)]">{{ selectedOperator.description }}</span>
       </div>
-      <div v-if="selectedOperator.example" class="desc-example">
-        <span class="example-label">示例：</span>
-        <code class="example-code">{{ selectedOperator.example }}</code>
+      <div v-if="selectedOperator.example" class="flex items-center gap-6px mt-4px">
+        <span class="text-12px text-[var(--el-text-color-secondary)]">示例：</span>
+        <code class="text-12px text-[var(--el-color-primary)] bg-[var(--el-fill-color-blank)] px-4px py-2px rounded-2px font-mono">{{ selectedOperator.example }}</code>
       </div>
     </div>
   </div>
@@ -184,92 +184,6 @@ watch(
 </script>
 
 <style scoped>
-.operator-selector {
-  width: 100%;
-}
-
-.operator-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 4px 0;
-}
-
-.option-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.option-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.option-symbol {
-  font-size: 16px;
-  color: var(--el-color-primary);
-  font-weight: bold;
-  min-width: 20px;
-  text-align: center;
-}
-
-.option-desc {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  max-width: 120px;
-  text-align: right;
-}
-
-.operator-description {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: var(--el-fill-color-light);
-  border-radius: 4px;
-  border: 1px solid var(--el-border-color-lighter);
-}
-
-.desc-content {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-.desc-icon {
-  color: var(--el-color-primary);
-  font-size: 12px;
-  flex-shrink: 0;
-}
-
-.desc-text {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.desc-example {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: 18px;
-}
-
-.example-label {
-  font-size: 11px;
-  color: var(--el-text-color-placeholder);
-}
-
-.example-code {
-  font-size: 11px;
-  color: var(--el-color-primary);
-  background: var(--el-fill-color-blank);
-  padding: 2px 4px;
-  border-radius: 2px;
-  font-family: 'Courier New', monospace;
-}
-
 :deep(.el-select-dropdown__item) {
   height: auto;
   padding: 8px 20px;
