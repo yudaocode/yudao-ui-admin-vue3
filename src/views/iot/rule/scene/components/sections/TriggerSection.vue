@@ -1,15 +1,15 @@
 <!-- 触发器配置组件 -->
 <template>
-  <el-card class="trigger-section" shadow="never">
+  <el-card class="border border-[var(--el-border-color-light)] rounded-8px" shadow="never">
     <template #header>
-      <div class="section-header">
-        <div class="header-left">
-          <Icon icon="ep:lightning" class="section-icon" />
-          <span class="section-title">触发器配置</span>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-8px">
+          <Icon icon="ep:lightning" class="text-[var(--el-color-primary)] text-18px" />
+          <span class="text-16px font-600 text-[var(--el-text-color-primary)]">触发器配置</span>
           <!-- TODO @puhui999：是不是去掉 maxTriggers；计数 -->
           <el-tag size="small" type="info">{{ triggers.length }}/{{ maxTriggers }}</el-tag>
         </div>
-        <div class="header-right">
+        <div class="flex items-center gap-8px">
           <el-button
             type="primary"
             size="small"
@@ -23,9 +23,9 @@
       </div>
     </template>
 
-    <div class="section-content">
+    <div class="p-0">
       <!-- 空状态 -->
-      <div v-if="triggers.length === 0" class="empty-state">
+      <div v-if="triggers.length === 0">
         <el-empty description="暂无触发器配置">
           <!-- TODO @puhui999：这个要不要去掉哈；入口统一点 -->
           <el-button type="primary" @click="addTrigger">
@@ -36,17 +36,17 @@
       </div>
 
       <!-- 触发器列表 -->
-      <div v-else class="triggers-list">
-        <div v-for="(trigger, index) in triggers" :key="`trigger-${index}`" class="trigger-item">
-          <div class="trigger-header">
-            <div class="trigger-title">
-              <Icon icon="ep:lightning" class="trigger-icon" />
+      <div v-else class="space-y-16px">
+        <div v-for="(trigger, index) in triggers" :key="`trigger-${index}`" class="p-16px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]">
+          <div class="flex items-center justify-between mb-16px">
+            <div class="flex items-center gap-8px">
+              <Icon icon="ep:lightning" class="text-[var(--el-color-warning)] text-16px" />
               <span>触发器 {{ index + 1 }}</span>
               <el-tag :type="getTriggerTypeTag(trigger.type)" size="small">
                 {{ getTriggerTypeName(trigger.type) }}
               </el-tag>
             </div>
-            <div class="trigger-actions">
+            <div>
               <el-button
                 type="danger"
                 size="small"
@@ -60,7 +60,7 @@
             </div>
           </div>
 
-          <div class="trigger-content">
+          <div class="space-y-16px">
             <!-- 触发类型选择 -->
             <TriggerTypeSelector
               :model-value="trigger.type"
@@ -89,12 +89,12 @@
 
       <!-- 添加提示 -->
       <!-- TODO @puhui999：这个要不要去掉哈；入口统一点 -->
-      <div v-if="triggers.length > 0 && triggers.length < maxTriggers" class="add-more">
-        <el-button type="primary" plain @click="addTrigger" class="add-more-btn">
+      <div v-if="triggers.length > 0 && triggers.length < maxTriggers" class="text-center py-16px">
+        <el-button type="primary" plain @click="addTrigger">
           <Icon icon="ep:plus" />
           继续添加触发器
         </el-button>
-        <span class="add-more-text"> 最多可添加 {{ maxTriggers }} 个触发器 </span>
+        <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]"> 最多可添加 {{ maxTriggers }} 个触发器 </span>
       </div>
 
       <!-- 验证结果 -->
@@ -279,107 +279,4 @@ watch(
 )
 </script>
 
-<style scoped>
-.trigger-section {
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 8px;
-}
 
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-icon {
-  color: var(--el-color-primary);
-  font-size: 18px;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-content {
-  padding: 0;
-}
-
-.empty-state {
-  padding: 40px 0;
-  text-align: center;
-}
-
-.triggers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.trigger-item {
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
-  background: var(--el-fill-color-blank);
-}
-
-.trigger-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--el-fill-color-light);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.trigger-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.trigger-icon {
-  color: var(--el-color-warning);
-  font-size: 16px;
-}
-
-.trigger-content {
-  padding: 16px;
-}
-
-.add-more {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 16px;
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  background: var(--el-fill-color-lighter);
-}
-
-.add-more-btn {
-  flex-shrink: 0;
-}
-
-.add-more-text {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.validation-result {
-  margin-top: 16px;
-}
-</style>

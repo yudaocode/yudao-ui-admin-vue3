@@ -20,10 +20,10 @@
               :label="product.name"
               :value="product.id"
             >
-              <div class="product-option">
-                <div class="option-content">
-                  <div class="option-name">{{ product.name }}</div>
-                  <div class="option-key">{{ product.productKey }}</div>
+              <div class="flex items-center justify-between w-full py-4px">
+                <div class="flex-1">
+                  <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ product.name }}</div>
+                  <div class="text-12px text-[var(--el-text-color-secondary)]">{{ product.productKey }}</div>
                 </div>
                 <!-- TODO @puhui999：是不是用字典 -->
                 <el-tag size="small" :type="product.status === 0 ? 'success' : 'danger'">
@@ -68,10 +68,10 @@
               :label="device.deviceName"
               :value="device.id"
             >
-              <div class="device-option">
-                <div class="option-content">
-                  <div class="option-name">{{ device.deviceName }}</div>
-                  <div class="option-nickname">{{ device.nickname || '无备注' }}</div>
+              <div class="flex items-center justify-between w-full py-4px">
+                <div class="flex-1">
+                  <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ device.deviceName }}</div>
+                  <div class="text-12px text-[var(--el-text-color-secondary)]">{{ device.nickname || '无备注' }}</div>
                 </div>
                 <el-tag size="small" :type="getDeviceStatusTag(device.state)">
                   {{ getDeviceStatusText(device.state) }}
@@ -84,21 +84,21 @@
     </el-row>
 
     <!-- 选择结果展示 -->
-    <div v-if="localProductId && localDeviceId !== undefined" class="selection-result">
-      <div class="result-header">
-        <Icon icon="ep:check" class="result-icon" />
-        <span class="result-title">已选择设备</span>
+    <div v-if="localProductId && localDeviceId !== undefined" class="mt-16px p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+      <div class="flex items-center gap-6px mb-8px">
+        <Icon icon="ep:check" class="text-[var(--el-color-success)] text-16px" />
+        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">已选择设备</span>
       </div>
-      <div class="result-content">
-        <div class="result-item">
-          <span class="result-label">产品：</span>
-          <span class="result-value">{{ selectedProduct?.name }}</span>
+      <div class="flex flex-col gap-6px ml-22px">
+        <div class="flex items-center gap-8px">
+          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-40px">产品：</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] font-500">{{ selectedProduct?.name }}</span>
           <el-tag size="small" type="primary">{{ selectedProduct?.productKey }}</el-tag>
         </div>
-        <div class="result-item">
-          <span class="result-label">设备：</span>
-          <span v-if="deviceSelectionMode === 'all'" class="result-value">全部设备</span>
-          <span v-else class="result-value">{{ selectedDevice?.deviceName }}</span>
+        <div class="flex items-center gap-8px">
+          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-40px">设备：</span>
+          <span v-if="deviceSelectionMode === 'all'" class="text-12px text-[var(--el-text-color-primary)] font-500">全部设备</span>
+          <span v-else class="text-12px text-[var(--el-text-color-primary)] font-500">{{ selectedDevice?.deviceName }}</span>
           <el-tag v-if="deviceSelectionMode === 'all'" size="small" type="warning"> 全部 </el-tag>
           <el-tag v-else size="small" :type="getDeviceStatusTag(selectedDevice?.state)">
             {{ getDeviceStatusText(selectedDevice?.state) }}
@@ -288,87 +288,6 @@ watch(
 </script>
 
 <style scoped>
-.product-device-selector {
-  width: 100%;
-}
-
-.product-option,
-.device-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 4px 0;
-}
-
-.option-content {
-  flex: 1;
-}
-
-.option-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  margin-bottom: 2px;
-}
-
-.option-key,
-.option-nickname {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.selection-result {
-  margin-top: 16px;
-  padding: 12px;
-  background: var(--el-fill-color-light);
-  border-radius: 6px;
-  border: 1px solid var(--el-border-color-lighter);
-}
-
-.result-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.result-icon {
-  color: var(--el-color-success);
-  font-size: 16px;
-}
-
-.result-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.result-content {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-left: 22px;
-}
-
-.result-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.result-label {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  min-width: 40px;
-}
-
-.result-value {
-  font-size: 12px;
-  color: var(--el-text-color-primary);
-  font-weight: 500;
-}
-
 :deep(.el-select-dropdown__item) {
   height: auto;
   padding: 8px 20px;

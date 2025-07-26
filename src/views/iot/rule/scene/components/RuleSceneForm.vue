@@ -9,15 +9,15 @@
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     @close="handleClose"
-    class="rule-scene-drawer"
+    class="[--el-drawer-padding-primary:20px]"
   >
-    <div class="rule-scene-form">
+    <div class="h-[calc(100vh-120px)] overflow-y-auto p-20px pb-80px">
       <el-form
         ref="formRef"
         :model="formData"
         :rules="formRules"
         label-width="120px"
-        class="form-container"
+        class="flex flex-col gap-24px"
       >
         <!-- 基础信息配置 -->
         <BasicInfoSection v-model="formData" :rules="formRules" />
@@ -40,7 +40,7 @@
     <!-- 抽屉底部操作栏 -->
     <!-- TODO @puhui999：这个按钮逻辑，和别的模块一致 -->
     <template #footer>
-      <div class="drawer-footer">
+      <div class="absolute bottom-0 left-0 right-0 flex justify-end gap-16px p-16px px-20px bg-[var(--el-bg-color)] border-t border-[var(--el-border-color-light)] shadow-[0_-2px_8px_rgba(0,0,0,0.1)]">
         <el-button @click="handleClose" size="large">取消</el-button>
         <el-button
           type="primary"
@@ -214,53 +214,22 @@ watch(
 </script>
 
 <style scoped>
-.rule-scene-drawer {
-  --el-drawer-padding-primary: 20px;
-}
-
-.rule-scene-form {
-  height: calc(100vh - 120px);
-  overflow-y: auto;
-  padding: 20px;
-  padding-bottom: 80px; /* 为底部操作栏留出空间 */
-}
-
-.form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.drawer-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-  padding: 16px 20px;
-  background: var(--el-bg-color);
-  border-top: 1px solid var(--el-border-color-light);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-}
-
 /* 滚动条样式 */
-.rule-scene-form::-webkit-scrollbar {
+.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar {
   width: 6px;
 }
 
-.rule-scene-form::-webkit-scrollbar-track {
+.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar-track {
   background: var(--el-fill-color-light);
   border-radius: 3px;
 }
 
-.rule-scene-form::-webkit-scrollbar-thumb {
+.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar-thumb {
   background: var(--el-border-color);
   border-radius: 3px;
 }
 
-.rule-scene-form::-webkit-scrollbar-thumb:hover {
+.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar-thumb:hover {
   background: var(--el-border-color-dark);
 }
 
@@ -284,20 +253,20 @@ watch(
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .rule-scene-drawer {
+  .el-drawer {
     --el-drawer-size: 100% !important;
   }
 
-  .rule-scene-form {
+  .h-\[calc\(100vh-120px\)\] {
     padding: 16px;
     padding-bottom: 80px;
   }
 
-  .form-container {
+  .flex.flex-col.gap-24px {
     gap: 20px;
   }
 
-  .drawer-footer {
+  .absolute.bottom-0 {
     padding: 12px 16px;
     gap: 12px;
   }

@@ -1,13 +1,13 @@
 <!-- 基础信息配置组件 -->
 <template>
-  <el-card class="basic-info-section" shadow="never">
+  <el-card class="border border-[var(--el-border-color-light)] rounded-8px" shadow="never">
     <template #header>
-      <div class="section-header">
-        <div class="header-left">
-          <Icon icon="ep:info-filled" class="section-icon" />
-          <span class="section-title">基础信息</span>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-8px">
+          <Icon icon="ep:info-filled" class="text-[var(--el-color-primary)] text-18px" />
+          <span class="text-16px font-600 text-[var(--el-text-color-primary)]">基础信息</span>
         </div>
-        <div class="header-right">
+        <div class="flex items-center gap-8px">
           <el-tag :type="formData.status === 0 ? 'success' : 'danger'" size="small">
             {{ formData.status === 0 ? '启用' : '禁用' }}
           </el-tag>
@@ -15,7 +15,7 @@
       </div>
     </template>
 
-    <div class="section-content">
+    <div class="p-0">
       <el-row :gutter="24">
         <!-- TODO @puhui999：NameInput、StatusRadio、DescriptionInput 是不是直接写在当前界面哈。有点散； -->
         <el-col :span="12">
@@ -65,44 +65,6 @@ const formData = useVModel(props, 'modelValue', emit)
 </script>
 
 <style scoped>
-.basic-info-section {
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 8px;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-icon {
-  color: var(--el-color-primary);
-  font-size: 18px;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-content {
-  padding: 0;
-}
-
 :deep(.el-form-item) {
   margin-bottom: 20px;
 }

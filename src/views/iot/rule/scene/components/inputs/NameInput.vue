@@ -1,6 +1,6 @@
 <!-- 场景名称输入组件 -->
 <template>
-  <div class="name-input">
+  <div class="relative w-full">
     <el-input
       v-model="localValue"
       placeholder="请输入场景名称"
@@ -11,21 +11,21 @@
       @input="handleInput"
     >
       <template #prefix>
-        <Icon icon="ep:edit" class="input-icon" />
+        <Icon icon="ep:edit" class="text-[var(--el-text-color-placeholder)]" />
       </template>
     </el-input>
 
     <!-- 智能提示 -->
     <!-- TODO @puhui999：暂时不用考虑智能推荐哈。用途不大 -->
-    <div v-if="showSuggestions && suggestions.length > 0" class="suggestions">
-      <div class="suggestions-header">
-        <span class="suggestions-title">推荐名称</span>
+    <div v-if="showSuggestions && suggestions.length > 0" class="absolute top-full left-0 right-0 z-1000 bg-white border border-[var(--el-border-color-light)] rounded-4px shadow-[var(--el-box-shadow-light)] mt-4px">
+      <div class="p-8px px-12px border-b border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]">
+        <span class="text-12px text-[var(--el-text-color-secondary)] font-500">推荐名称</span>
       </div>
-      <div class="suggestions-list">
+      <div class="max-h-200px overflow-y-auto">
         <div
           v-for="suggestion in suggestions"
           :key="suggestion"
-          class="suggestion-item"
+          class="p-8px px-12px cursor-pointer transition-colors duration-200 text-14px text-[var(--el-text-color-primary)] hover:bg-[var(--el-fill-color-light)] last:border-b-0"
           @click="applySuggestion(suggestion)"
         >
           {{ suggestion }}
@@ -108,59 +108,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.name-input {
-  position: relative;
-  width: 100%;
-}
 
-.input-icon {
-  color: var(--el-text-color-placeholder);
-}
-
-.suggestions {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background: white;
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 4px;
-  box-shadow: var(--el-box-shadow-light);
-  margin-top: 4px;
-}
-
-.suggestions-header {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  background: var(--el-fill-color-light);
-}
-
-.suggestions-title {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  font-weight: 500;
-}
-
-.suggestions-list {
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.suggestion-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-size: 14px;
-  color: var(--el-text-color-primary);
-}
-
-.suggestion-item:hover {
-  background: var(--el-fill-color-light);
-}
-
-.suggestion-item:last-child {
-  border-bottom: none;
-}
-</style>

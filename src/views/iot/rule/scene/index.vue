@@ -1,15 +1,15 @@
 <template>
   <ContentWrap>
     <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-left">
-        <h2 class="page-title">
-          <Icon icon="ep:connection" class="title-icon" />
+    <div class="flex justify-between items-start mb-20px">
+      <div class="flex-1">
+        <h2 class="flex items-center m-0 mb-8px text-24px font-600 text-[#303133]">
+          <Icon icon="ep:connection" class="mr-12px text-[#409eff]" />
           场景联动规则
         </h2>
-        <p class="page-description"> 通过配置触发条件和执行动作，实现设备间的智能联动控制 </p>
+        <p class="m-0 text-[#606266] text-14px"> 通过配置触发条件和执行动作，实现设备间的智能联动控制 </p>
       </div>
-      <div class="header-right">
+      <div>
         <el-button type="primary" @click="handleAdd">
           <Icon icon="ep:plus" />
           新增规则
@@ -18,7 +18,7 @@
     </div>
 
     <!-- 搜索和筛选 -->
-    <el-card class="search-card" shadow="never">
+    <el-card class="mb-16px" shadow="never">
       <el-form
         ref="queryFormRef"
         :model="queryParams"
@@ -62,55 +62,55 @@
 
     <!-- 统计卡片 -->
     <!-- TODO @puhui999：这种需要服用的 stats-content、stats-info 的属性，到底 unocss 好，还是现有的 style css 好~ -->
-    <el-row :gutter="16" class="stats-row">
+    <el-row :gutter="16" class="mb-16px">
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon total">
+        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+          <div class="flex items-center">
+            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#667eea] to-[#764ba2]">
               <Icon icon="ep:document" />
             </div>
-            <div class="stats-info">
-              <div class="stats-number">{{ statistics.total }}</div>
-              <div class="stats-label">总规则数</div>
+            <div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.total }}</div>
+              <div class="text-14px text-[#909399] mt-4px">总规则数</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon enabled">
+        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+          <div class="flex items-center">
+            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#f093fb] to-[#f5576c]">
               <Icon icon="ep:check" />
             </div>
-            <div class="stats-info">
-              <div class="stats-number">{{ statistics.enabled }}</div>
-              <div class="stats-label">启用规则</div>
+            <div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.enabled }}</div>
+              <div class="text-14px text-[#909399] mt-4px">启用规则</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon disabled">
+        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+          <div class="flex items-center">
+            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#4facfe] to-[#00f2fe]">
               <Icon icon="ep:close" />
             </div>
-            <div class="stats-info">
-              <div class="stats-number">{{ statistics.disabled }}</div>
-              <div class="stats-label">禁用规则</div>
+            <div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.disabled }}</div>
+              <div class="text-14px text-[#909399] mt-4px">禁用规则</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon active">
+        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+          <div class="flex items-center">
+            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#43e97b] to-[#38f9d7]">
               <Icon icon="ep:lightning" />
             </div>
-            <div class="stats-info">
-              <div class="stats-number">{{ statistics.triggered }}</div>
-              <div class="stats-label">今日触发</div>
+            <div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.triggered }}</div>
+              <div class="text-14px text-[#909399] mt-4px">今日触发</div>
             </div>
           </div>
         </el-card>
@@ -118,36 +118,36 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-card class="table-card" shadow="never">
+    <el-card class="mb-20px" shadow="never">
       <el-table v-loading="loading" :data="list" stripe @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
         <el-table-column label="规则名称" prop="name" min-width="200">
           <template #default="{ row }">
-            <div class="rule-name-cell">
-              <span class="rule-name">{{ row.name }}</span>
+            <div class="flex items-center gap-8px">
+              <span class="font-500 text-[#303133]">{{ row.name }}</span>
               <!-- TODO @puhui999：字典 -->
               <el-tag
                 :type="row.status === 0 ? 'success' : 'danger'"
                 size="small"
-                class="status-tag"
+                class="flex-shrink-0"
               >
                 {{ row.status === 0 ? '启用' : '禁用' }}
               </el-tag>
             </div>
-            <div v-if="row.description" class="rule-description">
+            <div v-if="row.description" class="text-12px text-[#909399] mt-4px">
               {{ row.description }}
             </div>
           </template>
         </el-table-column>
         <el-table-column label="触发条件" min-width="250">
           <template #default="{ row }">
-            <div class="trigger-summary">
+            <div class="flex flex-wrap gap-4px">
               <el-tag
                 v-for="(trigger, index) in getTriggerSummary(row)"
                 :key="index"
                 type="primary"
                 size="small"
-                class="trigger-tag"
+                class="m-0"
               >
                 {{ trigger }}
               </el-tag>
@@ -156,13 +156,13 @@
         </el-table-column>
         <el-table-column label="执行动作" min-width="250">
           <template #default="{ row }">
-            <div class="action-summary">
+            <div class="flex flex-wrap gap-4px">
               <el-tag
                 v-for="(action, index) in getActionSummary(row)"
                 :key="index"
                 type="success"
                 size="small"
-                class="action-tag"
+                class="m-0"
               >
                 {{ action }}
               </el-tag>
@@ -186,7 +186,7 @@
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <!-- TODO @puhui999：间隙大了点 -->
-            <div class="action-buttons">
+            <div class="flex gap-8px">
               <el-button type="primary" link @click="handleEdit(row)">
                 <Icon icon="ep:edit" />
                 编辑
@@ -219,11 +219,11 @@
     </el-card>
 
     <!-- 批量操作 -->
-    <div v-if="selectedRows.length > 0" class="batch-actions">
+    <div v-if="selectedRows.length > 0" class="fixed bottom-20px left-1/2 transform -translate-x-1/2 z-1000">
       <el-card shadow="always">
-        <div class="batch-content">
-          <span class="batch-info"> 已选择 {{ selectedRows.length }} 项 </span>
-          <div class="batch-buttons">
+        <div class="flex items-center gap-16px">
+          <span class="font-500 text-[#303133]"> 已选择 {{ selectedRows.length }} 项 </span>
+          <div class="flex gap-8px">
             <el-button @click="handleBatchEnable">
               <Icon icon="ep:video-play" />
               批量启用
@@ -494,165 +494,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-/** TODO @puhui999：看看下面的，是不是可以用 unocss 替代 */
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
 
-.header-left {
-  flex: 1;
-}
-
-.page-title {
-  display: flex;
-  align-items: center;
-  margin: 0 0 8px 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.title-icon {
-  margin-right: 12px;
-  color: #409eff;
-}
-
-.page-description {
-  margin: 0;
-  color: #606266;
-  font-size: 14px;
-}
-
-.search-card {
-  margin-bottom: 16px;
-}
-
-.stats-row {
-  margin-bottom: 16px;
-}
-
-.stats-card {
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.stats-card:hover {
-  transform: translateY(-2px);
-}
-
-.stats-content {
-  display: flex;
-  align-items: center;
-}
-
-.stats-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: white;
-  margin-right: 16px;
-}
-
-.stats-icon.total {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.stats-icon.enabled {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.stats-icon.disabled {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.stats-icon.active {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.stats-number {
-  font-size: 24px;
-  font-weight: 600;
-  color: #303133;
-  line-height: 1;
-}
-
-.stats-label {
-  font-size: 14px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.table-card {
-  margin-bottom: 20px;
-}
-
-.rule-name-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.rule-name {
-  font-weight: 500;
-  color: #303133;
-}
-
-.status-tag {
-  flex-shrink: 0;
-}
-
-.rule-description {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.trigger-summary,
-.action-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.trigger-tag,
-.action-tag {
-  margin: 0;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.batch-actions {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-}
-
-.batch-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.batch-info {
-  font-weight: 500;
-  color: #303133;
-}
-
-.batch-buttons {
-  display: flex;
-  gap: 8px;
-}
-</style>
