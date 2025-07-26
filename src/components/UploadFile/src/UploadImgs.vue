@@ -97,20 +97,28 @@ const uploadList = ref<UploadUserFile[]>([])
 const beforeUpload: UploadProps['beforeUpload'] = (rawFile) => {
   const imgSize = rawFile.size / 1024 / 1024 < props.fileSize
   const imgType = props.fileType
-  if (!imgType.includes(rawFile.type as FileTypes))
+  const isValidType = imgType.includes(rawFile.type as FileTypes)
+  const isValidSize = imgSize
+
+  if (!isValidType)
     ElNotification({
       title: '温馨提示',
       message: '上传图片不符合所需的格式！',
       type: 'warning'
     })
-  if (!imgSize)
+  if (!isValidSize)
     ElNotification({
       title: '温馨提示',
       message: `上传图片大小不能超过 ${props.fileSize}M！`,
       type: 'warning'
     })
-  uploadNumber.value++
-  return imgType.includes(rawFile.type as FileTypes) && imgSize
+
+  // 只有在验证通过后才增加计数器
+  if (isValidType && isValidSize) {
+    uploadNumber.value++
+  }
+
+  return isValidType && isValidSize
 }
 
 // 图片上传成功
@@ -172,6 +180,8 @@ const uploadError = () => {
     message: '图片上传失败，请您重新上传！',
     type: 'error'
   })
+  // 上传失败时减少计数器，避免后续上传被阻塞
+  uploadNumber.value = Math.max(0, uploadNumber.value - 1)
 }
 
 // 文件数超出提示
