@@ -1,7 +1,7 @@
 <!-- 单个条件配置组件 -->
 <!-- TODO @puhui999：这里需要在对下阿里云 IoT，不太对；它是条件类型；然后选择产品、设备；接着选条件类型对应的比较； -->
 <template>
-  <div class="condition-config">
+  <div class="flex flex-col gap-16px">
     <el-row :gutter="16">
       <!-- 属性/事件/服务选择 -->
       <el-col :span="8">
@@ -45,18 +45,18 @@
     </el-row>
 
     <!-- 条件预览 -->
-    <div v-if="conditionPreview" class="condition-preview">
-      <div class="preview-header">
-        <Icon icon="ep:view" class="preview-icon" />
-        <span class="preview-title">条件预览</span>
+    <div v-if="conditionPreview" class="p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+      <div class="flex items-center gap-8px mb-8px">
+        <Icon icon="ep:view" class="text-[var(--el-color-info)] text-16px" />
+        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">条件预览</span>
       </div>
-      <div class="preview-content">
-        <code class="preview-text">{{ conditionPreview }}</code>
+      <div class="pl-24px">
+        <code class="text-12px text-[var(--el-color-primary)] bg-[var(--el-fill-color-blank)] p-8px rounded-4px font-mono">{{ conditionPreview }}</code>
       </div>
     </div>
 
     <!-- 验证结果 -->
-    <div v-if="validationMessage" class="validation-result">
+    <div v-if="validationMessage" class="mt-8px">
       <el-alert
         :title="validationMessage"
         :type="isValid ? 'success' : 'error'"
@@ -210,55 +210,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.condition-config {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.condition-preview {
-  padding: 12px;
-  background: var(--el-fill-color-light);
-  border-radius: 6px;
-  border: 1px solid var(--el-border-color-lighter);
-}
-
-.preview-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.preview-icon {
-  color: var(--el-color-primary);
-  font-size: 14px;
-}
-
-.preview-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--el-text-color-secondary);
-}
-
-.preview-content {
-  margin-left: 20px;
-}
-
-.preview-text {
-  font-size: 14px;
-  color: var(--el-text-color-primary);
-  background: var(--el-fill-color-blank);
-  padding: 8px 12px;
-  border-radius: 4px;
-  display: block;
-  font-family: inherit;
-}
-
-.validation-result {
-  margin-top: 8px;
-}
-
 :deep(.el-form-item) {
   margin-bottom: 0;
 }

@@ -1,6 +1,6 @@
 <!-- 告警配置组件 -->
 <template>
-  <div class="alert-config">
+  <div class="w-full">
     <!-- TODO @puhui999：触发告警时，不用选择配置哈； -->
     <el-form-item label="告警配置" required>
       <el-select
@@ -18,10 +18,10 @@
           :label="config.name"
           :value="config.id"
         >
-          <div class="alert-option">
-            <div class="option-content">
-              <div class="option-name">{{ config.name }}</div>
-              <div class="option-desc">{{ config.description }}</div>
+          <div class="flex items-center justify-between w-full py-4px">
+            <div class="flex-1">
+              <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ config.name }}</div>
+              <div class="text-12px text-[var(--el-text-color-secondary)]">{{ config.description }}</div>
             </div>
             <el-tag :type="config.enabled ? 'success' : 'danger'" size="small">
               {{ config.enabled ? '启用' : '禁用' }}
@@ -32,32 +32,32 @@
     </el-form-item>
 
     <!-- 告警配置详情 -->
-    <div v-if="selectedConfig" class="alert-details">
-      <div class="details-header">
-        <Icon icon="ep:bell" class="details-icon" />
-        <span class="details-title">{{ selectedConfig.name }}</span>
+    <div v-if="selectedConfig" class="mt-16px p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+      <div class="flex items-center gap-8px mb-12px">
+        <Icon icon="ep:bell" class="text-[var(--el-color-warning)] text-16px" />
+        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">{{ selectedConfig.name }}</span>
         <el-tag :type="selectedConfig.enabled ? 'success' : 'danger'" size="small">
           {{ selectedConfig.enabled ? '启用' : '禁用' }}
         </el-tag>
       </div>
-      <div class="details-content">
-        <div class="detail-item">
-          <span class="detail-label">描述：</span>
-          <span class="detail-value">{{ selectedConfig.description }}</span>
+      <div class="space-y-8px">
+        <div class="flex items-start gap-8px">
+          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">描述：</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedConfig.description }}</span>
         </div>
-        <div class="detail-item">
-          <span class="detail-label">通知方式：</span>
-          <span class="detail-value">{{ getNotifyTypeName(selectedConfig.notifyType) }}</span>
+        <div class="flex items-start gap-8px">
+          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">通知方式：</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ getNotifyTypeName(selectedConfig.notifyType) }}</span>
         </div>
-        <div v-if="selectedConfig.receivers" class="detail-item">
-          <span class="detail-label">接收人：</span>
-          <span class="detail-value">{{ selectedConfig.receivers.join(', ') }}</span>
+        <div v-if="selectedConfig.receivers" class="flex items-start gap-8px">
+          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">接收人：</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedConfig.receivers.join(', ') }}</span>
         </div>
       </div>
     </div>
 
     <!-- 验证结果 -->
-    <div v-if="validationMessage" class="validation-result">
+    <div v-if="validationMessage" class="mt-16px">
       <el-alert
         :title="validationMessage"
         :type="isValid ? 'success' : 'error'"
@@ -202,90 +202,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.alert-config {
-  width: 100%;
-}
-
-.alert-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 4px 0;
-}
-
-.option-content {
-  flex: 1;
-}
-
-.option-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  margin-bottom: 2px;
-}
-
-.option-desc {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.alert-details {
-  margin-top: 12px;
-  padding: 12px;
-  background: var(--el-fill-color-light);
-  border-radius: 6px;
-  border: 1px solid var(--el-border-color-lighter);
-}
-
-.details-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.details-icon {
-  color: var(--el-color-warning);
-  font-size: 14px;
-}
-
-.details-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.details-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-left: 22px;
-}
-
-.detail-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.detail-label {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  min-width: 60px;
-  flex-shrink: 0;
-}
-
-.detail-value {
-  font-size: 12px;
-  color: var(--el-text-color-primary);
-  flex: 1;
-}
-
-.validation-result {
-  margin-top: 8px;
-}
-
 :deep(.el-select-dropdown__item) {
   height: auto;
   padding: 8px 20px;

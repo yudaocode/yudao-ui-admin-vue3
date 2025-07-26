@@ -1,6 +1,6 @@
 <!-- 设备触发配置组件 -->
 <template>
-  <div class="device-trigger-config">
+  <div class="flex flex-col gap-16px">
     <!-- 产品和设备选择 -->
     <ProductDeviceSelector
       v-model:product-id="trigger.productId"
@@ -10,26 +10,26 @@
 
     <!-- TODO @puhui999：这里有点冗余，建议去掉 -->
     <!-- 设备状态变更提示 -->
-    <div v-if="trigger.type === TriggerTypeEnum.DEVICE_STATE_UPDATE" class="state-update-notice">
+    <div v-if="trigger.type === TriggerTypeEnum.DEVICE_STATE_UPDATE" class="mt-8px">
       <el-alert title="设备状态变更触发" type="info" :closable="false" show-icon>
         <template #default>
-          <p>当选中的设备上线或离线时将自动触发场景规则</p>
-          <p class="notice-tip">无需配置额外的触发条件</p>
+          <p class="m-0">当选中的设备上线或离线时将自动触发场景规则</p>
+          <p class="m-0 mt-4px text-12px text-[var(--el-text-color-secondary)]">无需配置额外的触发条件</p>
         </template>
       </el-alert>
     </div>
 
     <!-- 条件组配置 -->
-    <div v-else-if="needsConditions" class="condition-groups">
-      <div class="condition-groups-header">
-        <div class="header-left">
-          <span class="header-title">触发条件</span>
+    <div v-else-if="needsConditions" class="space-y-12px">
+      <div class="flex items-center justify-between mb-12px">
+        <div class="flex items-center gap-8px">
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">触发条件</span>
           <!-- TODO @puhui999：去掉数量限制 -->
           <el-tag size="small" type="info">
             {{ trigger.conditionGroups?.length || 0 }}/{{ maxConditionGroups }}
           </el-tag>
         </div>
-        <div class="header-right">
+        <div class="flex items-center gap-8px">
           <el-button
             type="primary"
             size="small"
@@ -45,21 +45,21 @@
       <!-- 条件组列表 -->
       <div
         v-if="trigger.conditionGroups && trigger.conditionGroups.length > 0"
-        class="condition-groups-list"
+        class="flex flex-col gap-12px"
       >
         <div
           v-for="(group, groupIndex) in trigger.conditionGroups"
           :key="`group-${groupIndex}`"
-          class="condition-group"
+          class="border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]"
         >
-          <div class="group-header">
-            <div class="group-title">
+          <div class="flex items-center justify-between p-12px px-16px bg-[var(--el-fill-color-light)] border-b border-[var(--el-border-color-lighter)]">
+            <div class="flex items-center text-14px font-500 text-[var(--el-text-color-primary)]">
               <span>条件组 {{ groupIndex + 1 }}</span>
               <!-- TODO @puhui999：不用“且、或”哈。条件组之间，就是或；条件之间就是且 -->
               <el-select
                 v-model="group.logicOperator"
                 size="small"
-                style="width: 80px; margin-left: 12px"
+                class="w-80px ml-12px"
               >
                 <el-option label="且" value="AND" />
                 <el-option label="或" value="OR" />
@@ -89,7 +89,7 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="empty-conditions">
+      <div v-else class="py-40px text-center">
         <el-empty description="暂无触发条件">
           <el-button type="primary" @click="addConditionGroup">
             <Icon icon="ep:plus" />
@@ -100,7 +100,7 @@
     </div>
 
     <!-- 验证结果 -->
-    <div v-if="validationMessage" class="validation-result">
+    <div v-if="validationMessage" class="mt-8px">
       <el-alert
         :title="validationMessage"
         :type="isValid ? 'success' : 'error'"
@@ -262,86 +262,5 @@ watch(
     updateValidationResult()
   }
 )
-// TODO @puhui999：unocss
+// TODO @puhui999：unocss - 已完成转换
 </script>
-
-<style scoped>
-.device-trigger-config {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.state-update-notice {
-  margin-top: 8px;
-}
-
-.notice-tip {
-  margin: 4px 0 0 0;
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.condition-groups-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.header-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.condition-groups-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.condition-group {
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
-  background: var(--el-fill-color-blank);
-}
-
-.group-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--el-fill-color-light);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.group-title {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.empty-conditions {
-  padding: 40px 0;
-  text-align: center;
-}
-
-.validation-result {
-  margin-top: 8px;
-}
-</style>

@@ -1,17 +1,17 @@
 <!-- 条件组配置组件 -->
 <template>
-  <div class="condition-group-config">
-    <div class="group-content">
+  <div class="p-16px">
+    <div class="space-y-12px">
       <!-- 条件列表 -->
-      <div v-if="group.conditions && group.conditions.length > 0" class="conditions-list">
+      <div v-if="group.conditions && group.conditions.length > 0" class="space-y-12px">
         <div
           v-for="(condition, index) in group.conditions"
           :key="`condition-${index}`"
-          class="condition-item"
+          class="p-12px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-light)]"
         >
-          <div class="condition-header">
-            <div class="condition-title">
-              <span>条件 {{ index + 1 }}</span>
+          <div class="flex items-center justify-between mb-12px">
+            <div class="flex items-center gap-8px">
+              <span class="text-14px font-500 text-[var(--el-text-color-primary)]">条件 {{ index + 1 }}</span>
               <el-tag size="small" type="primary">
                 {{ getConditionTypeName(condition.type) }}
               </el-tag>
@@ -28,7 +28,7 @@
             </el-button>
           </div>
 
-          <div class="condition-content">
+          <div class="p-12px bg-[var(--el-fill-color-blank)] rounded-4px">
             <ConditionConfig
               :model-value="condition"
               @update:model-value="(value) => updateCondition(index, value)"
@@ -41,8 +41,8 @@
 
           <!-- 逻辑连接符 -->
           <!-- TODO @puhui999：不用这个哈； -->
-          <div v-if="index < group.conditions!.length - 1" class="logic-connector">
-            <el-select v-model="group.logicOperator" size="small" style="width: 80px">
+          <div v-if="index < group.conditions!.length - 1" class="flex justify-center mt-8px">
+            <el-select v-model="group.logicOperator" size="small" class="w-80px">
               <el-option label="且" value="AND" />
               <el-option label="或" value="OR" />
             </el-select>
@@ -51,7 +51,7 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="empty-conditions">
+      <div v-else class="py-40px text-center">
         <el-empty description="暂无条件配置" :image-size="80">
           <el-button type="primary" @click="addCondition">
             <Icon icon="ep:plus" />
@@ -65,19 +65,19 @@
         v-if="
           group.conditions && group.conditions.length > 0 && group.conditions.length < maxConditions
         "
-        class="add-condition"
+        class="text-center py-16px"
       >
-        <el-button type="primary" plain @click="addCondition" class="add-condition-btn">
+        <el-button type="primary" plain @click="addCondition">
           <Icon icon="ep:plus" />
           继续添加条件
         </el-button>
-        <span class="add-condition-text"> 最多可添加 {{ maxConditions }} 个条件 </span>
+        <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]"> 最多可添加 {{ maxConditions }} 个条件 </span>
       </div>
     </div>
 
     <!-- 验证结果 -->
     <!-- TODO @puhui999：是不是不用这种提示；只要 validator rules 能展示出来就好了呀。。。 -->
-    <div v-if="validationMessage" class="validation-result">
+    <div v-if="validationMessage" class="mt-8px">
       <el-alert
         :title="validationMessage"
         :type="isValid ? 'success' : 'error'"
@@ -230,96 +230,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.condition-group-config {
-  padding: 16px;
-}
 
-.group-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.conditions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.condition-item {
-  position: relative;
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
-  background: var(--el-fill-color-blank);
-}
-
-.condition-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--el-fill-color-light);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.condition-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.condition-content {
-  padding: 16px;
-}
-
-.logic-connector {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px 0;
-  position: relative;
-}
-
-.logic-connector::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1px;
-  height: 100%;
-  background: var(--el-border-color);
-}
-
-.empty-conditions {
-  padding: 40px 0;
-  text-align: center;
-}
-
-.add-condition {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  background: var(--el-fill-color-lighter);
-}
-
-.add-condition-btn {
-  flex-shrink: 0;
-}
-
-.add-condition-text {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.validation-result {
-  margin-top: 16px;
-}
-</style>

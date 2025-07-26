@@ -1,24 +1,24 @@
 <!-- 触发器预览组件 -->
 <template>
-  <div class="trigger-preview">
-    <div v-if="triggers.length === 0" class="empty-preview">
+  <div class="w-full">
+    <div v-if="triggers.length === 0" class="text-center py-20px">
       <el-text type="info" size="small">暂无触发器配置</el-text>
     </div>
-    <div v-else class="trigger-list">
+    <div v-else class="space-y-12px">
       <div
         v-for="(trigger, index) in triggers"
         :key="index"
-        class="trigger-item"
+        class="p-12px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]"
       >
-        <div class="trigger-header">
-          <Icon icon="ep:lightning" class="trigger-icon" />
-          <span class="trigger-title">触发器 {{ index + 1 }}</span>
+        <div class="flex items-center gap-8px mb-8px">
+          <Icon icon="ep:lightning" class="text-[var(--el-color-warning)] text-16px" />
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">触发器 {{ index + 1 }}</span>
           <el-tag :type="getTriggerTypeTag(trigger.type)" size="small">
             {{ getTriggerTypeName(trigger.type) }}
           </el-tag>
         </div>
-        <div class="trigger-content">
-          <div class="trigger-summary">
+        <div class="pl-24px">
+          <div class="text-12px text-[var(--el-text-color-secondary)] leading-relaxed">
             {{ getTriggerSummary(trigger) }}
           </div>
         </div>
@@ -77,55 +77,4 @@ const getTriggerSummary = (trigger: TriggerFormData) => {
 }
 </script>
 
-<style scoped>
-.trigger-preview {
-  width: 100%;
-}
 
-.empty-preview {
-  text-align: center;
-  padding: 20px 0;
-}
-
-.trigger-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.trigger-item {
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 4px;
-  background: var(--el-fill-color-blank);
-}
-
-.trigger-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--el-fill-color-light);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.trigger-icon {
-  color: var(--el-color-warning);
-  font-size: 14px;
-}
-
-.trigger-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.trigger-content {
-  padding: 8px 12px;
-}
-
-.trigger-summary {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.4;
-}
-</style>

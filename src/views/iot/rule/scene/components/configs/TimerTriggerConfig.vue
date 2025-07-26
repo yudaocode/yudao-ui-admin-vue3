@@ -1,12 +1,12 @@
 <!-- 定时触发配置组件 -->
 <template>
-  <div class="timer-trigger-config">
-    <div class="config-header">
-      <div class="header-left">
-        <Icon icon="ep:timer" class="header-icon" />
-        <span class="header-title">定时触发配置</span>
+  <div class="flex flex-col gap-16px">
+    <div class="flex items-center justify-between p-12px px-16px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+      <div class="flex items-center gap-8px">
+        <Icon icon="ep:timer" class="text-[var(--el-color-danger)] text-18px" />
+        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">定时触发配置</span>
       </div>
-      <div class="header-right">
+      <div class="flex items-center gap-8px">
         <el-button type="text" size="small" @click="showBuilder = !showBuilder">
           <Icon :icon="showBuilder ? 'ep:edit' : 'ep:setting'" />
           {{ showBuilder ? '手动编辑' : '可视化编辑' }}
@@ -16,12 +16,12 @@
 
     <!-- 可视化编辑器 -->
     <!-- TODO @puhui999：是不是复用现有的 cron 组件；不然有点重复哈；维护比较复杂 -->
-    <div v-if="showBuilder" class="visual-builder">
+    <div v-if="showBuilder" class="p-16px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]">
       <CronBuilder v-model="localValue" @validate="handleValidate" />
     </div>
 
     <!-- 手动编辑 -->
-    <div v-else class="manual-editor">
+    <div v-else class="p-16px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]">
       <el-form-item label="CRON表达式" required>
         <CronInput v-model="localValue" @validate="handleValidate" />
       </el-form-item>
@@ -31,7 +31,7 @@
     <NextExecutionPreview :cron-expression="localValue" />
 
     <!-- 验证结果 -->
-    <div v-if="validationMessage" class="validation-result">
+    <div v-if="validationMessage" class="mt-8px">
       <el-alert
         :title="validationMessage"
         :type="isValid ? 'success' : 'error'"
@@ -85,55 +85,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.timer-trigger-config {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
 
-.config-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--el-fill-color-light);
-  border-radius: 6px;
-  border: 1px solid var(--el-border-color-lighter);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.header-icon {
-  color: var(--el-color-danger);
-  font-size: 18px;
-}
-
-.header-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.visual-builder,
-.manual-editor {
-  padding: 16px;
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
-  background: var(--el-fill-color-blank);
-}
-
-.validation-result {
-  margin-top: 8px;
-}
-</style>
