@@ -89,15 +89,6 @@
         >
           <Icon icon="ep:delete" class="mr-5px" />批量删除
         </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['system:mail-template:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -206,7 +197,6 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as MailTemplateApi from '@/api/system/mail/template'
 import * as MailAccountApi from '@/api/system/mail/account'
-import download from '@/utils/download'
 import MailTemplateForm from './MailTemplateForm.vue'
 import MailTemplateSendForm from './MailTemplateSendForm.vue'
 
@@ -228,7 +218,6 @@ const queryParams = reactive({
   status: undefined,
   createTime: []
 })
-const exportLoading = ref(false) // 导出的加载中
 const accountList = ref<MailAccountApi.MailAccountVO[]>([]) // 邮箱账号列表
 
 /** 查询列表 */
@@ -296,21 +285,6 @@ const handleDeleteBatch = async () => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await MailTemplateApi.exportMailTemplate(queryParams)
-    download.excel(data, '邮件模板.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 获取邮箱账号名称 */
