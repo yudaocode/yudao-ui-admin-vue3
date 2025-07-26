@@ -1,6 +1,6 @@
 <!-- 场景描述输入组件 -->
 <template>
-  <div class="description-input">
+  <div class="relative w-full">
     <el-input
       ref="inputRef"
       v-model="localValue"
@@ -15,22 +15,22 @@
 
     <!-- 描述模板 -->
     <teleport to="body">
-      <div v-if="showTemplates" ref="templateDropdownRef" class="templates" :style="dropdownStyle">
-        <div class="templates-header">
-          <span class="templates-title">描述模板</span>
+      <div v-if="showTemplates" ref="templateDropdownRef" class="fixed z-1000 bg-white border border-[var(--el-border-color-light)] rounded-6px shadow-[var(--el-box-shadow)] min-w-300px max-w-400px" :style="dropdownStyle">
+        <div class="flex items-center justify-between p-12px border-b border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]">
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">描述模板</span>
           <el-button type="text" size="small" @click="showTemplates = false">
             <Icon icon="ep:close" />
           </el-button>
         </div>
-        <div class="templates-list">
+        <div class="max-h-300px overflow-y-auto">
           <div
             v-for="template in descriptionTemplates"
             :key="template.title"
-            class="template-item"
+            class="p-12px border-b border-[var(--el-border-color-lighter)] cursor-pointer transition-colors duration-200 hover:bg-[var(--el-fill-color-light)] last:border-b-0"
             @click="applyTemplate(template)"
           >
-            <div class="template-title">{{ template.title }}</div>
-            <div class="template-content">{{ template.content }}</div>
+            <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-4px">{{ template.title }}</div>
+            <div class="text-12px text-[var(--el-text-color-secondary)] leading-relaxed">{{ template.content }}</div>
           </div>
         </div>
       </div>
@@ -38,7 +38,7 @@
 
     <!-- TODO @puhui999：不用模版哈，简单点。。。 -->
     <!-- 模板按钮 -->
-    <div v-if="!localValue && !showTemplates" class="template-trigger">
+    <div v-if="!localValue && !showTemplates" class="absolute top-2px right-2px">
       <el-button type="text" size="small" @click="toggleTemplates">
         <Icon icon="ep:document" class="mr-1" />
         使用模板
@@ -175,75 +175,4 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
-.description-input {
-  position: relative;
-  width: 100%;
-}
 
-.templates {
-  position: fixed;
-  z-index: 9999;
-  background: white;
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 300px;
-  max-width: 400px;
-  max-height: 400px;
-  overflow: hidden;
-}
-
-.templates-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  background: var(--el-fill-color-light);
-}
-
-.templates-title {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  font-weight: 500;
-}
-
-.templates-list {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.template-item {
-  padding: 12px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.template-item:hover {
-  background: var(--el-fill-color-light);
-}
-
-.template-item:last-child {
-  border-bottom: none;
-}
-
-.template-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  margin-bottom: 4px;
-}
-
-.template-content {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.4;
-}
-
-.template-trigger {
-  margin-top: 8px;
-  text-align: right;
-}
-</style>

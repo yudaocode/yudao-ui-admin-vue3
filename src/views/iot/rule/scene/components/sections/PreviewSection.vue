@@ -1,14 +1,14 @@
 <!-- 预览区域组件 -->
 <!-- TODO @puhui999：是不是不用这个哈？ -->
 <template>
-  <el-card class="preview-section" shadow="never">
+  <el-card class="border border-[var(--el-border-color-light)] rounded-8px" shadow="never">
     <template #header>
-      <div class="section-header">
-        <div class="header-left">
-          <Icon icon="ep:view" class="section-icon" />
-          <span class="section-title">配置预览</span>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-8px">
+          <Icon icon="ep:view" class="text-[var(--el-color-primary)] text-18px" />
+          <span class="text-16px font-600 text-[var(--el-text-color-primary)]">配置预览</span>
         </div>
-        <div class="header-right">
+        <div class="flex items-center gap-8px">
           <el-button type="primary" size="small" @click="handleValidate" :loading="validating">
             <Icon icon="ep:check" />
             验证配置
@@ -17,49 +17,49 @@
       </div>
     </template>
 
-    <div class="section-content">
+    <div class="p-0">
       <!-- 基础信息预览 -->
-      <div class="preview-group">
-        <div class="group-header">
-          <Icon icon="ep:info-filled" class="group-icon" />
-          <span class="group-title">基础信息</span>
+      <div class="mb-20px">
+        <div class="flex items-center gap-8px mb-12px">
+          <Icon icon="ep:info-filled" class="text-[var(--el-color-info)] text-16px" />
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">基础信息</span>
         </div>
-        <div class="group-content">
+        <div class="p-12px bg-[var(--el-fill-color-light)] rounded-6px">
           <ConfigPreview :form-data="formData" />
         </div>
       </div>
 
       <!-- 触发器预览 -->
-      <div class="preview-group">
-        <div class="group-header">
-          <Icon icon="ep:lightning" class="group-icon" />
-          <span class="group-title">触发器配置</span>
+      <div class="mb-20px">
+        <div class="flex items-center gap-8px mb-12px">
+          <Icon icon="ep:lightning" class="text-[var(--el-color-warning)] text-16px" />
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">触发器配置</span>
           <el-tag size="small" type="primary">{{ formData.triggers.length }}</el-tag>
         </div>
-        <div class="group-content">
+        <div class="p-12px bg-[var(--el-fill-color-light)] rounded-6px">
           <TriggerPreview :triggers="formData.triggers" />
         </div>
       </div>
 
       <!-- 执行器预览 -->
-      <div class="preview-group">
-        <div class="group-header">
-          <Icon icon="ep:setting" class="group-icon" />
-          <span class="group-title">执行器配置</span>
+      <div class="mb-20px">
+        <div class="flex items-center gap-8px mb-12px">
+          <Icon icon="ep:setting" class="text-[var(--el-color-success)] text-16px" />
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">执行器配置</span>
           <el-tag size="small" type="success">{{ formData.actions.length }}</el-tag>
         </div>
-        <div class="group-content">
+        <div class="p-12px bg-[var(--el-fill-color-light)] rounded-6px">
           <ActionPreview :actions="formData.actions" />
         </div>
       </div>
 
       <!-- 验证结果 -->
-      <div class="preview-group">
-        <div class="group-header">
-          <Icon icon="ep:circle-check" class="group-icon" />
-          <span class="group-title">验证结果</span>
+      <div class="mb-20px">
+        <div class="flex items-center gap-8px mb-12px">
+          <Icon icon="ep:circle-check" class="text-[var(--el-color-primary)] text-16px" />
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">验证结果</span>
         </div>
-        <div class="group-content">
+        <div class="p-12px bg-[var(--el-fill-color-light)] rounded-6px">
           <ValidationResult :validation-result="validationResult" />
         </div>
       </div>
@@ -105,75 +105,4 @@ const handleValidate = async () => {
 }
 </script>
 
-<style scoped>
-.preview-section {
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 8px;
-}
 
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-icon {
-  color: var(--el-color-primary);
-  font-size: 18px;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-content {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.preview-group {
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
-  background: var(--el-fill-color-blank);
-}
-
-.group-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: var(--el-fill-color-light);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.group-icon {
-  color: var(--el-color-primary);
-  font-size: 16px;
-}
-
-.group-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.group-content {
-  padding: 16px;
-}
-</style>

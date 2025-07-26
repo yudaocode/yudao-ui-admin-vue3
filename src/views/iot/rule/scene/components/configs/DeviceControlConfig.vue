@@ -1,7 +1,7 @@
 <!-- 设备控制配置组件 -->
 <!-- TODO @puhui999：貌似没生效~~~ -->
 <template>
-  <div class="device-control-config">
+  <div class="flex flex-col gap-16px">
     <!-- 产品和设备选择 -->
     <ProductDeviceSelector
       v-model:product-id="action.productId"
@@ -10,7 +10,7 @@
     />
 
     <!-- 控制参数配置 -->
-    <div v-if="action.productId && action.deviceId" class="control-params">
+    <div v-if="action.productId && action.deviceId" class="space-y-16px">
       <el-form-item label="控制参数" required>
         <el-input
           v-model="paramsJson"
@@ -22,14 +22,14 @@
       </el-form-item>
 
       <!-- 参数示例 -->
-      <div class="params-example">
+      <div class="mt-12px">
         <el-alert title="参数格式示例" type="info" :closable="false" show-icon>
           <template #default>
-            <div class="example-content">
-              <p>属性设置示例：</p>
-              <pre><code>{ "temperature": 25, "power": true }</code></pre>
-              <p>服务调用示例：</p>
-              <pre><code>{ "method": "restart", "params": { "delay": 5 } }</code></pre>
+            <div class="space-y-8px">
+              <p class="m-0 text-14px text-[var(--el-text-color-primary)]">属性设置示例：</p>
+              <pre class="m-0 p-8px bg-[var(--el-fill-color-light)] rounded-4px text-12px text-[var(--el-text-color-regular)] overflow-x-auto"><code>{ "temperature": 25, "power": true }</code></pre>
+              <p class="m-0 text-14px text-[var(--el-text-color-primary)]">服务调用示例：</p>
+              <pre class="m-0 p-8px bg-[var(--el-fill-color-light)] rounded-4px text-12px text-[var(--el-text-color-regular)] overflow-x-auto"><code>{ "method": "restart", "params": { "delay": 5 } }</code></pre>
             </div>
           </template>
         </el-alert>
@@ -37,7 +37,7 @@
     </div>
 
     <!-- 验证结果 -->
-    <div v-if="validationMessage" class="validation-result">
+    <div v-if="validationMessage" class="mt-16px">
       <el-alert
         :title="validationMessage"
         :type="isValid ? 'success' : 'error'"
@@ -140,34 +140,8 @@ watch(
 </script>
 
 <style scoped>
-.device-control-config {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.control-params {
-  margin-top: 16px;
-}
-
-.params-example {
-  margin-top: 8px;
-}
-
-.example-content pre {
-  margin: 4px 0;
-  padding: 8px;
-  background: var(--el-fill-color-light);
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.example-content code {
+:deep(.example-content code) {
   font-family: 'Courier New', monospace;
   color: var(--el-color-primary);
-}
-
-.validation-result {
-  margin-top: 8px;
 }
 </style>

@@ -1,15 +1,15 @@
 <!-- 执行器配置组件 -->
 <!-- todo @puhui999：参考“触发器配置”，简化下。 -->
 <template>
-  <el-card class="action-section" shadow="never">
+  <el-card class="border border-[var(--el-border-color-light)] rounded-8px" shadow="never">
     <template #header>
-      <div class="section-header">
-        <div class="header-left">
-          <Icon icon="ep:setting" class="section-icon" />
-          <span class="section-title">执行器配置</span>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-8px">
+          <Icon icon="ep:setting" class="text-[var(--el-color-primary)] text-18px" />
+          <span class="text-16px font-600 text-[var(--el-text-color-primary)]">执行器配置</span>
           <el-tag size="small" type="info">{{ actions.length }}/{{ maxActions }}</el-tag>
         </div>
-        <div class="header-right">
+        <div class="flex items-center gap-8px">
           <el-button
             type="primary"
             size="small"
@@ -23,9 +23,9 @@
       </div>
     </template>
 
-    <div class="section-content">
+    <div class="p-0">
       <!-- 空状态 -->
-      <div v-if="actions.length === 0" class="empty-state">
+      <div v-if="actions.length === 0">
         <el-empty description="暂无执行器配置">
           <el-button type="primary" @click="addAction">
             <Icon icon="ep:plus" />
@@ -35,17 +35,17 @@
       </div>
 
       <!-- 执行器列表 -->
-      <div v-else class="actions-list">
-        <div v-for="(action, index) in actions" :key="`action-${index}`" class="action-item">
-          <div class="action-header">
-            <div class="action-title">
-              <Icon icon="ep:setting" class="action-icon" />
+      <div v-else class="space-y-16px">
+        <div v-for="(action, index) in actions" :key="`action-${index}`" class="p-16px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]">
+          <div class="flex items-center justify-between mb-16px">
+            <div class="flex items-center gap-8px">
+              <Icon icon="ep:setting" class="text-[var(--el-color-success)] text-16px" />
               <span>执行器 {{ index + 1 }}</span>
               <el-tag :type="getActionTypeTag(action.type)" size="small">
                 {{ getActionTypeName(action.type) }}
               </el-tag>
             </div>
-            <div class="action-actions">
+            <div>
               <el-button
                 type="danger"
                 size="small"
@@ -59,7 +59,7 @@
             </div>
           </div>
 
-          <div class="action-content">
+          <div class="space-y-16px">
             <!-- 执行类型选择 -->
             <ActionTypeSelector
               :model-value="action.type"
@@ -87,12 +87,12 @@
       </div>
 
       <!-- 添加提示 -->
-      <div v-if="actions.length > 0 && actions.length < maxActions" class="add-more">
-        <el-button type="primary" plain @click="addAction" class="add-more-btn">
+      <div v-if="actions.length > 0 && actions.length < maxActions" class="text-center py-16px">
+        <el-button type="primary" plain @click="addAction">
           <Icon icon="ep:plus" />
           继续添加执行器
         </el-button>
-        <span class="add-more-text"> 最多可添加 {{ maxActions }} 个执行器 </span>
+        <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]"> 最多可添加 {{ maxActions }} 个执行器 </span>
       </div>
 
       <!-- 验证结果 -->
@@ -266,107 +266,4 @@ watch(
 )
 </script>
 
-<style scoped>
-.action-section {
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 8px;
-}
 
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-icon {
-  color: var(--el-color-primary);
-  font-size: 18px;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-content {
-  padding: 0;
-}
-
-.empty-state {
-  padding: 40px 0;
-  text-align: center;
-}
-
-.actions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.action-item {
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 6px;
-  background: var(--el-fill-color-blank);
-}
-
-.action-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: var(--el-fill-color-light);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.action-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.action-icon {
-  color: var(--el-color-success);
-  font-size: 16px;
-}
-
-.action-content {
-  padding: 16px;
-}
-
-.add-more {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 16px;
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  background: var(--el-fill-color-lighter);
-}
-
-.add-more-btn {
-  flex-shrink: 0;
-}
-
-.add-more-text {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.validation-result {
-  margin-top: 16px;
-}
-</style>

@@ -1,24 +1,24 @@
 <!-- 执行器预览组件 -->
 <template>
-  <div class="action-preview">
-    <div v-if="actions.length === 0" class="empty-preview">
+  <div class="w-full">
+    <div v-if="actions.length === 0" class="text-center py-20px">
       <el-text type="info" size="small">暂无执行器配置</el-text>
     </div>
-    <div v-else class="action-list">
+    <div v-else class="space-y-12px">
       <div
         v-for="(action, index) in actions"
         :key="index"
-        class="action-item"
+        class="p-12px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]"
       >
-        <div class="action-header">
-          <Icon icon="ep:setting" class="action-icon" />
-          <span class="action-title">执行器 {{ index + 1 }}</span>
+        <div class="flex items-center gap-8px mb-8px">
+          <Icon icon="ep:setting" class="text-[var(--el-color-success)] text-16px" />
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">执行器 {{ index + 1 }}</span>
           <el-tag :type="getActionTypeTag(action.type)" size="small">
             {{ getActionTypeName(action.type) }}
           </el-tag>
         </div>
-        <div class="action-content">
-          <div class="action-summary">
+        <div class="pl-24px">
+          <div class="text-12px text-[var(--el-text-color-secondary)] leading-relaxed">
             {{ getActionSummary(action) }}
           </div>
         </div>
@@ -73,55 +73,4 @@ const getActionSummary = (action: ActionFormData) => {
 }
 </script>
 
-<style scoped>
-.action-preview {
-  width: 100%;
-}
 
-.empty-preview {
-  text-align: center;
-  padding: 20px 0;
-}
-
-.action-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.action-item {
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 4px;
-  background: var(--el-fill-color-blank);
-}
-
-.action-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--el-fill-color-light);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.action-icon {
-  color: var(--el-color-success);
-  font-size: 14px;
-}
-
-.action-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.action-content {
-  padding: 8px 12px;
-}
-
-.action-summary {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.4;
-}
-</style>
