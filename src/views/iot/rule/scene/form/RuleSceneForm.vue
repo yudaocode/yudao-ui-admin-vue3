@@ -1,5 +1,4 @@
 <!-- IoT场景联动规则表单 - 主表单组件 -->
-<!-- TODO @puhui999：要不搞个 form 目录，不用 components；保持和别的模块风格一致哈； -->
 <template>
   <el-drawer
     v-model="drawerVisible"
@@ -37,21 +36,9 @@
       </el-form>
     </div>
 
-    <!-- 抽屉底部操作栏 -->
-    <!-- TODO @puhui999：这个按钮逻辑，和别的模块一致 -->
     <template #footer>
-      <div class="absolute bottom-0 left-0 right-0 flex justify-end gap-16px p-16px px-20px bg-[var(--el-bg-color)] border-t border-[var(--el-border-color-light)] shadow-[0_-2px_8px_rgba(0,0,0,0.1)]">
-        <el-button @click="handleClose" size="large">取消</el-button>
-        <el-button
-          type="primary"
-          @click="handleSubmit"
-          :loading="submitLoading"
-          :disabled="!canSubmit"
-          size="large"
-        >
-          {{ isEdit ? '更新' : '创建' }}
-        </el-button>
-      </div>
+      <el-button :disabled="submitLoading" type="primary" @click="handleSubmit">确 定</el-button>
+      <el-button @click="handleClose">取 消</el-button>
     </template>
   </el-drawer>
 </template>
@@ -65,7 +52,7 @@ import PreviewSection from './sections/PreviewSection.vue'
 import { RuleSceneFormData, IotRuleScene } from '@/api/iot/rule/scene/scene.types'
 import { getBaseValidationRules } from '../utils/validation'
 import { transformFormToApi, transformApiToForm, createDefaultFormData } from '../utils/transform'
-import { handleValidationError, showSuccess, withErrorHandling } from '../utils/errorHandler'
+import { ElMessage } from 'element-plus'
 
 /** IoT 场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
@@ -98,7 +85,7 @@ const actionValidation = ref({ valid: true, message: '' })
 
 // 计算属性
 const isEdit = computed(() => !!props.ruleScene?.id)
-const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则')) // TODO @puhui999：这个风格，和别的模块一致；
+const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
 
 const canSubmit = computed(() => {
   return (
@@ -132,49 +119,49 @@ const handleValidate = async () => {
     }
 
     validationResult.value = { valid: true, message: '验证通过' }
-    showSuccess('规则验证通过')
+    ElMessage.success('规则验证通过')
     return true
   } catch (error: any) {
     const message = error.message || '表单验证失败'
     validationResult.value = { valid: false, message }
-    await handleValidationError(message, 'rule-scene-form')
+    ElMessage.error(message)
     return false
   }
 }
 
-// TODO @puhui999：参考下别的模块，不用这么复杂哈；
 const handleSubmit = async () => {
-  const result = await withErrorHandling(
-    async () => {
-      // 验证表单
-      const isValid = await handleValidate()
-      if (!isValid) {
-        throw new Error('表单验证失败')
-      }
+  // 校验表单
+  if (!formRef.value) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
 
-      // 转换数据格式
-      const apiData = transformFormToApi(formData.value)
+  // 验证触发器和执行器
+  if (!triggerValidation.value.valid) {
+    ElMessage.error(triggerValidation.value.message)
+    return
+  }
+  if (!actionValidation.value.valid) {
+    ElMessage.error(actionValidation.value.message)
+    return
+  }
 
-      // 这里应该调用API保存数据
-      console.log('提交数据:', apiData)
+  // 提交请求
+  submitLoading.value = true
+  try {
+    // 转换数据格式
+    const apiData = transformFormToApi(formData.value)
 
-      // 模拟API调用
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+    // 这里应该调用API保存数据
+    console.log('提交数据:', apiData)
 
-      return apiData
-    },
-    {
-      loadingKey: 'rule-scene-submit',
-      loadingText: isEdit.value ? '更新中...' : '创建中...',
-      context: 'rule-scene-form',
-      showSuccess: true,
-      successMessage: isEdit.value ? '更新成功' : '创建成功'
-    }
-  )
+    // 模拟API调用
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-  if (result) {
+    ElMessage.success(isEdit.value ? '更新成功' : '创建成功')
+    drawerVisible.value = false
     emit('success')
-    handleClose()
+  } finally {
+    submitLoading.value = false
   }
 }
 

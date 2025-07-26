@@ -248,7 +248,7 @@
 
 <script setup lang="ts">
 import { ContentWrap } from '@/components/ContentWrap'
-import RuleSceneForm from './components/RuleSceneForm.vue'
+import RuleSceneForm from './form/RuleSceneForm.vue'
 import { IotRuleScene } from '@/api/iot/rule/scene/scene.types'
 import { getRuleSceneSummary } from './utils/transform'
 import { formatDate } from '@/utils/formatTime'
