@@ -5,139 +5,111 @@
     @close="handleDrawerClose"
     custom-class="drawer-class"
   >
-    <!-- 图片 -->
-    <div class="item">
-      <div class="body">
-        <el-image
-          class="image"
-          :src="detail?.picUrl"
-          :preview-src-list="[detail.picUrl]"
-          preview-teleported
-        />
-      </div>
+    <!-- 图片预览 -->
+    <div class="mb-5">
+      <el-image
+        :src="detail?.picUrl"
+        :preview-src-list="[detail.picUrl]"
+        preview-teleported
+        class="w-full rounded-2"
+        fit="contain"
+      />
     </div>
-    <!-- 时间 -->
-    <div class="item">
-      <div class="tip">时间</div>
-      <div class="body">
-        <div>提交时间：{{ formatTime(detail.createTime, 'yyyy-MM-dd HH:mm:ss') }}</div>
-        <div>生成时间：{{ formatTime(detail.finishTime, 'yyyy-MM-dd HH:mm:ss') }}</div>
-      </div>
-    </div>
-    <!-- 模型 -->
-    <div class="item">
-      <div class="tip">模型</div>
-      <div class="body"> {{ detail.model }}({{ detail.height }}x{{ detail.width }}) </div>
-    </div>
-    <!-- 提示词 -->
-    <div class="item">
-      <div class="tip">提示词</div>
-      <div class="body">
-        {{ detail.prompt }}
-      </div>
-    </div>
-    <!-- 地址 -->
-    <div class="item">
-      <div class="tip">图片地址</div>
-      <div class="body">
-        {{ detail.picUrl }}
-      </div>
-    </div>
+
+    <!-- 基础信息 -->
+    <el-descriptions title="基础信息" :column="1" :label-width="100" border>
+      <el-descriptions-item label="提交时间">
+        {{ formatTime(detail.createTime, 'yyyy-MM-dd HH:mm:ss') }}
+      </el-descriptions-item>
+      <el-descriptions-item label="生成时间">
+        {{ formatTime(detail.finishTime, 'yyyy-MM-dd HH:mm:ss') }}
+      </el-descriptions-item>
+      <el-descriptions-item label="模型">
+        {{ detail.model }}({{ detail.height }}x{{ detail.width }})
+      </el-descriptions-item>
+      <el-descriptions-item label="提示词">
+        <div class="break-words">{{ detail.prompt }}</div>
+      </el-descriptions-item>
+      <el-descriptions-item label="图片地址">
+        <div class="break-all text-xs">{{ detail.picUrl }}</div>
+      </el-descriptions-item>
+    </el-descriptions>
+
     <!-- StableDiffusion 专属区域 -->
-    <div
-      class="item"
-      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.sampler"
+    <el-descriptions
+      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && hasStableDiffusionOptions"
+      title="StableDiffusion 参数"
+      :column="1"
+      :label-width="100"
+      border
+      class="mt-5"
     >
-      <div class="tip">采样方法</div>
-      <div class="body">
+      <el-descriptions-item v-if="detail?.options?.sampler" label="采样方法">
         {{
           StableDiffusionSamplers.find(
             (item: ImageModelVO) => item.key === detail?.options?.sampler
           )?.name
         }}
-      </div>
-    </div>
-    <div
-      class="item"
-      v-if="
-        detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.clipGuidancePreset
-      "
-    >
-      <div class="tip">CLIP</div>
-      <div class="body">
+      </el-descriptions-item>
+      <el-descriptions-item v-if="detail?.options?.clipGuidancePreset" label="CLIP">
         {{
           StableDiffusionClipGuidancePresets.find(
             (item: ImageModelVO) => item.key === detail?.options?.clipGuidancePreset
           )?.name
         }}
-      </div>
-    </div>
-    <div
-      class="item"
-      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.stylePreset"
-    >
-      <div class="tip">风格</div>
-      <div class="body">
+      </el-descriptions-item>
+      <el-descriptions-item v-if="detail?.options?.stylePreset" label="风格">
         {{
           StableDiffusionStylePresets.find(
             (item: ImageModelVO) => item.key === detail?.options?.stylePreset
           )?.name
         }}
-      </div>
-    </div>
-    <div
-      class="item"
-      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.steps"
-    >
-      <div class="tip">迭代步数</div>
-      <div class="body">
+      </el-descriptions-item>
+      <el-descriptions-item v-if="detail?.options?.steps" label="迭代步数">
         {{ detail?.options?.steps }}
-      </div>
-    </div>
-    <div
-      class="item"
-      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.scale"
-    >
-      <div class="tip">引导系数</div>
-      <div class="body">
+      </el-descriptions-item>
+      <el-descriptions-item v-if="detail?.options?.scale" label="引导系数">
         {{ detail?.options?.scale }}
-      </div>
-    </div>
-    <div
-      class="item"
-      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.seed"
-    >
-      <div class="tip">随机因子</div>
-      <div class="body">
+      </el-descriptions-item>
+      <el-descriptions-item v-if="detail?.options?.seed" label="随机因子">
         {{ detail?.options?.seed }}
-      </div>
-    </div>
+      </el-descriptions-item>
+    </el-descriptions>
+
     <!-- Dall3 专属区域 -->
-    <div class="item" v-if="detail.platform === AiPlatformEnum.OPENAI && detail?.options?.style">
-      <div class="tip">风格选择</div>
-      <div class="body">
+    <el-descriptions
+      v-if="detail.platform === AiPlatformEnum.OPENAI && detail?.options?.style"
+      title="DALL-E 3 参数"
+      :column="1"
+      :label-width="100"
+      border
+      class="mt-5"
+    >
+      <el-descriptions-item label="风格选择">
         {{ Dall3StyleList.find((item: ImageModelVO) => item.key === detail?.options?.style)?.name }}
-      </div>
-    </div>
+      </el-descriptions-item>
+    </el-descriptions>
+
     <!-- Midjourney 专属区域 -->
-    <div
-      class="item"
-      v-if="detail.platform === AiPlatformEnum.MIDJOURNEY && detail?.options?.version"
+    <el-descriptions
+      v-if="detail.platform === AiPlatformEnum.MIDJOURNEY && hasMidjourneyOptions"
+      title="Midjourney 参数"
+      :column="1"
+      :label-width="100"
+      border
+      class="mt-5"
     >
-      <div class="tip">模型版本</div>
-      <div class="body">
+      <el-descriptions-item v-if="detail?.options?.version" label="模型版本">
         {{ detail?.options?.version }}
-      </div>
-    </div>
-    <div
-      class="item"
-      v-if="detail.platform === AiPlatformEnum.MIDJOURNEY && detail?.options?.referImageUrl"
-    >
-      <div class="tip">参考图</div>
-      <div class="body">
-        <el-image :src="detail.options.referImageUrl" />
-      </div>
-    </div>
+      </el-descriptions-item>
+      <el-descriptions-item v-if="detail?.options?.referImageUrl" label="参考图">
+        <el-image
+          :src="detail.options.referImageUrl"
+          class="max-w-[200px] rounded-2"
+          fit="contain"
+        />
+      </el-descriptions-item>
+    </el-descriptions>
   </el-drawer>
 </template>
 
@@ -155,6 +127,25 @@ import { formatTime } from '@/utils'
 
 const showDrawer = ref<boolean>(false) // 是否显示
 const detail = ref<ImageVO>({} as ImageVO) // 图片详细信息
+
+// 计算属性：判断是否有 StableDiffusion 选项
+const hasStableDiffusionOptions = computed(() => {
+  const options = detail.value?.options
+  return (
+    options?.sampler ||
+    options?.clipGuidancePreset ||
+    options?.stylePreset ||
+    options?.steps ||
+    options?.scale ||
+    options?.seed
+  )
+})
+
+// 计算属性：判断是否有 Midjourney 选项
+const hasMidjourneyOptions = computed(() => {
+  const options = detail.value?.options
+  return options?.version || options?.referImageUrl
+})
 
 const props = defineProps({
   show: {
@@ -175,7 +166,7 @@ const handleDrawerClose = async () => {
 
 /** 监听 drawer 是否打开 */
 const { show } = toRefs(props)
-watch(show, async (newValue, oldValue) => {
+watch(show, async (newValue, _oldValue) => {
   showDrawer.value = newValue as boolean
 })
 
@@ -186,7 +177,7 @@ const getImageDetail = async (id: number) => {
 
 /** 监听 id 变化，加载最新图片详情 */
 const { id } = toRefs(props)
-watch(id, async (newVal, oldVal) => {
+watch(id, async (newVal, _oldVal) => {
   if (newVal) {
     await getImageDetail(newVal)
   }
@@ -194,31 +185,3 @@ watch(id, async (newVal, oldVal) => {
 
 const emits = defineEmits(['handleDrawerClose'])
 </script>
-<style scoped lang="scss">
-.item {
-  margin-bottom: 20px;
-  width: 100%;
-  overflow: hidden;
-  word-wrap: break-word;
-
-  .header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
-  .tip {
-    font-weight: bold;
-    font-size: 16px;
-  }
-
-  .body {
-    margin-top: 10px;
-    color: #616161;
-
-    .taskImage {
-      border-radius: 10px;
-    }
-  }
-}
-</style>
