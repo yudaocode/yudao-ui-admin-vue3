@@ -117,7 +117,6 @@ import {
   ActionFormData,
   IotRuleSceneActionTypeEnum as ActionTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
-import { createDefaultActionData } from '../../utils/transform'
 
 /** 执行器配置组件 */
 defineOptions({ name: 'ActionSection' })
@@ -135,6 +134,19 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const actions = useVModel(props, 'actions', emit)
+
+/**
+ * 创建默认的执行器数据
+ */
+const createDefaultActionData = (): ActionFormData => {
+  return {
+    type: ActionTypeEnum.DEVICE_PROPERTY_SET, // 默认为设备属性设置
+    productId: undefined,
+    deviceId: undefined,
+    params: {},
+    alertConfigId: undefined
+  }
+}
 
 // 配置常量
 const maxActions = 5

@@ -26,13 +26,6 @@
 
         <!-- 执行器配置 -->
         <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
-
-        <!-- 预览区域 -->
-        <PreviewSection
-          :form-data="formData"
-          :validation-result="validationResult"
-          @validate="handleValidate"
-        />
       </el-form>
     </div>
 
@@ -48,11 +41,16 @@ import { useVModel } from '@vueuse/core'
 import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
-import PreviewSection from './sections/PreviewSection.vue'
-import { RuleSceneFormData, IotRuleScene } from '@/api/iot/rule/scene/scene.types'
+import {
+  RuleSceneFormData,
+  IotRuleScene,
+  IotRuleSceneTriggerTypeEnum,
+  IotRuleSceneActionTypeEnum,
+  CommonStatusEnum
+} from '@/api/iot/rule/scene/scene.types'
 import { getBaseValidationRules } from '../utils/validation'
-import { transformFormToApi, transformApiToForm, createDefaultFormData } from '../utils/transform'
 import { ElMessage } from 'element-plus'
+import { generateUUID } from '@/utils'
 
 /** IoT 场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
@@ -72,12 +70,93 @@ const emit = defineEmits<Emits>()
 
 const drawerVisible = useVModel(props, 'modelValue', emit)
 
+/**
+ * 创建默认的表单数据
+ */
+const createDefaultFormData = (): RuleSceneFormData => {
+  return {
+    name: '',
+    description: '',
+    status: CommonStatusEnum.ENABLE, // 默认启用状态
+    triggers: [],
+    actions: []
+  }
+}
+
+/**
+ * 将表单数据转换为API请求格式
+ */
+const transformFormToApi = (formData: RuleSceneFormData): IotRuleScene => {
+  return {
+    id: formData.id,
+    name: formData.name,
+    description: formData.description,
+    status: Number(formData.status),
+    triggers:
+      formData.triggers?.map((trigger) => ({
+        type: trigger.type,
+        productKey: trigger.productId ? `product_${trigger.productId}` : undefined,
+        deviceNames: trigger.deviceId ? [`device_${trigger.deviceId}`] : undefined,
+        cronExpression: trigger.cronExpression,
+        conditions:
+          trigger.conditionGroups?.map((group) => ({
+            type: 'property',
+            identifier: trigger.identifier || '',
+            parameters: group.conditions.map((condition) => ({
+              identifier: condition.identifier,
+              operator: condition.operator,
+              value: condition.param
+            }))
+          })) || []
+      })) || [],
+    actions:
+      formData.actions?.map((action) => ({
+        type: action.type,
+        alertConfigId: action.alertConfigId,
+        deviceControl:
+          action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET ||
+          action.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
+            ? {
+                productKey: action.productId ? `product_${action.productId}` : '',
+                deviceNames: action.deviceId ? [`device_${action.deviceId}`] : [],
+                type: 'property',
+                identifier: 'set',
+                params: action.params || {}
+              }
+            : undefined
+      })) || []
+  } as IotRuleScene
+}
+
+/**
+ * 将 API 响应数据转换为表单格式
+ */
+const transformApiToForm = (apiData: IotRuleScene): RuleSceneFormData => {
+  return {
+    ...apiData,
+    status: Number(apiData.status), // 确保状态为数字类型
+    triggers:
+      apiData.triggers?.map((trigger) => ({
+        ...trigger,
+        type: Number(trigger.type),
+        // 为每个触发器添加唯一标识符，解决组件索引重用问题
+        key: generateUUID()
+      })) || [],
+    actions:
+      apiData.actions?.map((action) => ({
+        ...action,
+        type: Number(action.type),
+        // 为每个执行器添加唯一标识符，解决组件索引重用问题
+        key: generateUUID()
+      })) || []
+  }
+}
+
 // 表单数据和状态
 const formRef = ref()
 const formData = ref<RuleSceneFormData>(createDefaultFormData())
 const formRules = getBaseValidationRules()
 const submitLoading = ref(false)
-const validationResult = ref<{ valid: boolean; message?: string } | null>(null)
 
 // 验证状态
 const triggerValidation = ref({ valid: true, message: '' })
@@ -87,16 +166,6 @@ const actionValidation = ref({ valid: true, message: '' })
 const isEdit = computed(() => !!props.ruleScene?.id)
 const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
 
-const canSubmit = computed(() => {
-  return (
-    formData.value.name &&
-    formData.value.triggers.length > 0 &&
-    formData.value.actions.length > 0 &&
-    triggerValidation.value.valid &&
-    actionValidation.value.valid
-  )
-})
-
 // 事件处理
 const handleTriggerValidate = (result: { valid: boolean; message: string }) => {
   triggerValidation.value = result
@@ -104,29 +173,6 @@ const handleTriggerValidate = (result: { valid: boolean; message: string }) => {
 
 const handleActionValidate = (result: { valid: boolean; message: string }) => {
   actionValidation.value = result
-}
-
-const handleValidate = async () => {
-  try {
-    await formRef.value?.validate()
-
-    if (!triggerValidation.value.valid) {
-      throw new Error(triggerValidation.value.message)
-    }
-
-    if (!actionValidation.value.valid) {
-      throw new Error(actionValidation.value.message)
-    }
-
-    validationResult.value = { valid: true, message: '验证通过' }
-    ElMessage.success('规则验证通过')
-    return true
-  } catch (error: any) {
-    const message = error.message || '表单验证失败'
-    validationResult.value = { valid: false, message }
-    ElMessage.error(message)
-    return false
-  }
 }
 
 const handleSubmit = async () => {
@@ -167,7 +213,6 @@ const handleSubmit = async () => {
 
 const handleClose = () => {
   drawerVisible.value = false
-  validationResult.value = null
 }
 
 // 初始化表单数据

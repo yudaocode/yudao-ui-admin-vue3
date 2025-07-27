@@ -35,7 +35,6 @@
             class="!w-240px"
           />
         </el-form-item>
-        <!-- TODO @puhui999：字典 -->
         <el-form-item label="规则状态">
           <el-select
             v-model="queryParams.status"
@@ -43,8 +42,12 @@
             clearable
             class="!w-240px"
           >
-            <el-option label="启用" :value="0" />
-            <el-option label="禁用" :value="1" />
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -61,7 +64,6 @@
     </el-card>
 
     <!-- 统计卡片 -->
-    <!-- TODO @puhui999：这种需要服用的 stats-content、stats-info 的属性，到底 unocss 好，还是现有的 style css 好~ -->
     <el-row :gutter="16" class="mb-16px">
       <el-col :span="6">
         <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
@@ -125,14 +127,7 @@
           <template #default="{ row }">
             <div class="flex items-center gap-8px">
               <span class="font-500 text-[#303133]">{{ row.name }}</span>
-              <!-- TODO @puhui999：字典 -->
-              <el-tag
-                :type="row.status === 0 ? 'success' : 'danger'"
-                size="small"
-                class="flex-shrink-0"
-              >
-                {{ row.status === 0 ? '启用' : '禁用' }}
-              </el-tag>
+              <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="row.status" />
             </div>
             <div v-if="row.description" class="text-12px text-[#909399] mt-4px">
               {{ row.description }}
@@ -169,7 +164,6 @@
             </div>
           </template>
         </el-table-column>
-        <!-- TODO @puhui999：貌似要新增一个字段？ -->
         <el-table-column label="最近触发" prop="lastTriggeredTime" width="180">
           <template #default="{ row }">
             <span v-if="row.lastTriggeredTime">
@@ -185,7 +179,6 @@
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <!-- TODO @puhui999：间隙大了点 -->
             <div class="flex gap-8px">
               <el-button type="primary" link @click="handleEdit(row)">
                 <Icon icon="ep:edit" />
@@ -197,10 +190,9 @@
                 @click="handleToggleStatus(row)"
               >
                 <Icon :icon="row.status === 0 ? 'ep:video-pause' : 'ep:video-play'" />
-                <!-- TODO @puhui999：翻译，字典 -->
                 {{ row.status === 0 ? '禁用' : '启用' }}
               </el-button>
-              <el-button type="danger" link @click="handleDelete(row)">
+              <el-button type="danger" link @click="handleDelete(row.id)">
                 <Icon icon="ep:delete" />
                 删除
               </el-button>
@@ -247,17 +239,17 @@
 </template>
 
 <script setup lang="ts">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
 import RuleSceneForm from './form/RuleSceneForm.vue'
 import { IotRuleScene } from '@/api/iot/rule/scene/scene.types'
-import { getRuleSceneSummary } from './utils/transform'
 import { formatDate } from '@/utils/formatTime'
 
 /** 场景联动规则管理页面 */
 defineOptions({ name: 'IoTSceneRule' })
 
-const message = useMessage()
-// const { t } = useI18n() // TODO @puhui999：可以删除
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 // 查询参数
 const queryParams = reactive({
@@ -267,12 +259,11 @@ const queryParams = reactive({
   status: undefined as number | undefined
 })
 
-// 数据状态
-// TODO @puhui999：变量名，和别的页面保持一致哈
-const loading = ref(true)
-const list = ref<IotRuleScene[]>([])
-const total = ref(0)
-const selectedRows = ref<IotRuleScene[]>([])
+const loading = ref(true) // 列表的加载中
+const list = ref<IotRuleScene[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const selectedRows = ref<IotRuleScene[]>([]) // 选中的行数据
+const queryFormRef = ref() // 搜索的表单
 
 // 表单状态
 const formVisible = ref(false)
@@ -286,8 +277,96 @@ const statistics = ref({
   triggered: 0
 })
 
-// 获取列表数据
-// TODO @puhui999：接入
+/**
+ * 格式化CRON表达式显示
+ */
+const formatCronExpression = (cron: string): string => {
+  if (!cron) return ''
+
+  // 简单的CRON表达式解析和格式化
+  const parts = cron.trim().split(' ')
+  if (parts.length < 5) return cron
+
+  const [second, minute, hour] = parts
+
+  // 构建可读的描述
+  let description = ''
+
+  if (second === '0' && minute === '0') {
+    if (hour === '*') {
+      description = '每小时'
+    } else if (hour.includes('/')) {
+      const interval = hour.split('/')[1]
+      description = `每${interval}小时`
+    } else {
+      description = `每天${hour}点`
+    }
+  } else if (second === '0') {
+    if (minute === '*') {
+      description = '每分钟'
+    } else if (minute.includes('/')) {
+      const interval = minute.split('/')[1]
+      description = `每${interval}分钟`
+    } else {
+      description = `每小时第${minute}分钟`
+    }
+  } else {
+    if (second === '*') {
+      description = '每秒'
+    } else if (second.includes('/')) {
+      const interval = second.split('/')[1]
+      description = `每${interval}秒`
+    }
+  }
+
+  return description || cron
+}
+
+/**
+ * 获取规则摘要信息
+ */
+const getRuleSceneSummary = (rule: IotRuleScene) => {
+  const triggerSummary =
+    rule.triggers?.map((trigger) => {
+      switch (trigger.type) {
+        case 1:
+          return `设备状态变更 (${trigger.deviceNames?.length || 0}个设备)`
+        case 2:
+          return `属性上报 (${trigger.deviceNames?.length || 0}个设备)`
+        case 3:
+          return `事件上报 (${trigger.deviceNames?.length || 0}个设备)`
+        case 4:
+          return `服务调用 (${trigger.deviceNames?.length || 0}个设备)`
+        case 100:
+          return `定时触发 (${formatCronExpression(trigger.cronExpression || '')})`
+        default:
+          return '未知触发类型'
+      }
+    }) || []
+
+  const actionSummary =
+    rule.actions?.map((action) => {
+      switch (action.type) {
+        case 1:
+          return `设备属性设置 (${action.deviceControl?.deviceNames?.length || 0}个设备)`
+        case 2:
+          return `设备服务调用 (${action.deviceControl?.deviceNames?.length || 0}个设备)`
+        case 100:
+          return '发送告警通知'
+        case 101:
+          return '发送邮件通知'
+        default:
+          return '未知执行类型'
+      }
+    }) || []
+
+  return {
+    triggerSummary: triggerSummary.join(', ') || '无触发器',
+    actionSummary: actionSummary.join(', ') || '无执行器'
+  }
+}
+
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
@@ -355,9 +434,7 @@ const getList = async () => {
   }
 }
 
-// TODO @puhui999：方法注释，使用 /** */ 风格
-
-// 更新统计数据
+/** 更新统计数据 */
 const updateStatistics = () => {
   statistics.value = {
     total: list.value.length,
@@ -377,19 +454,20 @@ const getActionSummary = (rule: IotRuleScene) => {
   return getRuleSceneSummary(rule).actionSummary
 }
 
-// 事件处理
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryParams.name = ''
   queryParams.status = undefined
   handleQuery()
 }
 
-// TODO @puhui999：这个要不还是使用 open 方式，只是弹出的右侧；
+/** 添加/修改操作 */
 const handleAdd = () => {
   currentRule.value = undefined
   formVisible.value = true
@@ -400,78 +478,76 @@ const handleEdit = (row: IotRuleScene) => {
   formVisible.value = true
 }
 
-// TODO @puhui999：handleDelete、handleToggleStatus 保持和别的模块一致哇？
-const handleDelete = async (row: IotRuleScene) => {
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
   try {
-    await ElMessageBox.confirm('确定要删除这个规则吗？', '提示', {
-      type: 'warning'
-    })
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    // await RuleSceneApi.deleteRuleScene(id)
 
-    // 这里应该调用删除API
-    message.success('删除成功')
-    getList()
-  } catch (error) {
-    // 用户取消删除
-  }
+    // 模拟删除操作
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
+/** 修改状态 */
 const handleToggleStatus = async (row: IotRuleScene) => {
   try {
-    const newStatus = row.status === 0 ? 1 : 0
-    const action = newStatus === 0 ? '启用' : '禁用'
+    // 修改状态的二次确认
+    const text = row.status === 0 ? '禁用' : '启用'
+    await message.confirm('确认要' + text + '"' + row.name + '"吗?')
+    // 发起修改状态
+    // await RuleSceneApi.updateRuleSceneStatus(row.id, row.status === 0 ? 1 : 0)
 
-    await ElMessageBox.confirm(`确定要${action}这个规则吗？`, '提示', {
-      type: 'warning'
-    })
-
-    // 这里应该调用状态切换API
-    row.status = newStatus
-    message.success(`${action}成功`)
+    // 模拟状态切换
+    row.status = row.status === 0 ? 1 : 0
+    message.success(text + '成功')
+    // 刷新统计
     updateStatistics()
-  } catch (error) {
-    // 用户取消操作
+  } catch {
+    // 取消后，进行恢复按钮
+    row.status = row.status === 0 ? 1 : 0
   }
 }
 
+/** 多选框选中数据 */
 const handleSelectionChange = (selection: IotRuleScene[]) => {
   selectedRows.value = selection
 }
 
-// TODO @puhui999：batch 操作的逻辑，要不和其它 UI 界面保持一致，或者相对一致哈；
+/** 批量启用操作 */
 const handleBatchEnable = async () => {
   try {
-    await ElMessageBox.confirm(`确定要启用选中的 ${selectedRows.value.length} 个规则吗？`, '提示', {
-      type: 'warning'
-    })
-
+    await message.confirm(`确定要启用选中的 ${selectedRows.value.length} 个规则吗？`)
     // 这里应该调用批量启用API
+    // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 0)
+
+    // 模拟批量启用
     selectedRows.value.forEach((row) => {
       row.status = 0
     })
-
     message.success('批量启用成功')
     updateStatistics()
-  } catch (error) {
-    // 用户取消操作
-  }
+  } catch {}
 }
 
+/** 批量禁用操作 */
 const handleBatchDisable = async () => {
   try {
-    await ElMessageBox.confirm(`确定要禁用选中的 ${selectedRows.value.length} 个规则吗？`, '提示', {
-      type: 'warning'
-    })
-
+    await message.confirm(`确定要禁用选中的 ${selectedRows.value.length} 个规则吗？`)
     // 这里应该调用批量禁用API
+    // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 1)
+
+    // 模拟批量禁用
     selectedRows.value.forEach((row) => {
       row.status = 1
     })
-
     message.success('批量禁用成功')
     updateStatistics()
-  } catch (error) {
-    // 用户取消操作
-  }
+  } catch {}
 }
 
 const handleBatchDelete = async () => {

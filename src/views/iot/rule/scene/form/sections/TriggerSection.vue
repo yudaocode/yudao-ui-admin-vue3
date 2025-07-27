@@ -119,7 +119,6 @@ import {
   TriggerFormData,
   IotRuleSceneTriggerTypeEnum as TriggerTypeEnum
 } from '@/api/iot/rule/scene/scene.types'
-import { createDefaultTriggerData } from '../../utils/transform'
 
 /** 触发器配置组件 */
 defineOptions({ name: 'TriggerSection' })
@@ -137,6 +136,22 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const triggers = useVModel(props, 'triggers', emit)
+
+/**
+ * 创建默认的触发器数据
+ */
+const createDefaultTriggerData = (): TriggerFormData => {
+  return {
+    type: TriggerTypeEnum.DEVICE_PROPERTY_POST, // 默认为设备属性上报
+    productId: undefined,
+    deviceId: undefined,
+    identifier: undefined,
+    operator: undefined,
+    value: undefined,
+    cronExpression: undefined,
+    conditionGroups: []
+  }
+}
 
 // 配置常量
 const maxTriggers = 5
