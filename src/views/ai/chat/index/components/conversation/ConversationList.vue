@@ -31,7 +31,9 @@
             class="conversation-item classify-title"
             v-if="conversationMap[conversationKey].length"
           >
-            <el-text class="mx-1" size="small" tag="b">{{ conversationKey }}</el-text>
+            <el-text class="mx-1" size="small" tag="b">
+              {{ conversationKey }}
+            </el-text>
           </div>
           <div
             class="conversation-item"
@@ -193,12 +195,12 @@ const getConversationGroupByCreateTime = async (list: ChatConversationVO[]) => {
   // 排序、指定、时间分组(今天、一天前、三天前、七天前、30天前)
   // noinspection NonAsciiCharacters
   const groupMap = {
-    置顶: [],
-    今天: [],
-    一天前: [],
-    三天前: [],
-    七天前: [],
-    三十天前: []
+    置顶: [] as ChatConversationVO[],
+    今天: [] as ChatConversationVO[],
+    一天前: [] as ChatConversationVO[],
+    三天前: [] as ChatConversationVO[],
+    七天前: [] as ChatConversationVO[],
+    三十天前: [] as ChatConversationVO[]
   }
   // 当前时间的时间戳
   const now = Date.now()
