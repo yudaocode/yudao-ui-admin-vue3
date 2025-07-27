@@ -1,19 +1,19 @@
 <template>
-  <div class="square-container">
+  <div class="bg-white p-20px">
     <!-- TODO @fan：style 建议换成 unocss -->
     <!-- TODO @fan：Search 可以换成 Icon 组件么？ -->
     <el-input
       v-model="queryParams.prompt"
-      style="width: 100%; margin-bottom: 20px"
+      class="!w-full !mb-20px"
       size="large"
       placeholder="请输入要搜索的内容"
       :suffix-icon="Search"
       @keyup.enter="handleQuery"
     />
-    <div class="gallery">
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-10px bg-white shadow-[0_0_10px_rgba(0,0,0,0.1)]">
       <!-- TODO @fan：这个图片的风格，要不和 ImageCard.vue 界面一致？（只有卡片，没有操作）；因为看着更有相框的感觉~~~ -->
-      <div v-for="item in list" :key="item.id" class="gallery-item">
-        <img :src="item.picUrl" class="img" />
+      <div v-for="item in list" :key="item.id" class="relative overflow-hidden bg-gray-100 cursor-pointer transition-transform duration-300 hover:scale-105">
+        <img :src="item.picUrl" class="w-full h-auto block transition-transform duration-300 hover:scale-110" />
       </div>
     </div>
     <!-- TODO @fan：缺少翻页 -->
@@ -64,41 +64,4 @@ onMounted(async () => {
   await getList()
 })
 </script>
-<style scoped lang="scss">
-.square-container {
-  background-color: #fff;
-  padding: 20px;
 
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
-    //max-width: 1000px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .gallery-item {
-    position: relative;
-    overflow: hidden;
-    background: #f0f0f0;
-    cursor: pointer;
-    transition: transform 0.3s;
-  }
-
-  .gallery-item img {
-    width: 100%;
-    height: auto;
-    display: block;
-    transition: transform 0.3s;
-  }
-
-  .gallery-item:hover img {
-    transform: scale(1.1);
-  }
-
-  .gallery-item:hover {
-    transform: scale(1.05);
-  }
-}
-</style>
