@@ -6,15 +6,13 @@
         <div class="flex items-center gap-8px">
           <Icon icon="ep:lightning" class="text-[var(--el-color-primary)] text-18px" />
           <span class="text-16px font-600 text-[var(--el-text-color-primary)]">触发器配置</span>
-          <!-- TODO @puhui999：是不是去掉 maxTriggers；计数 -->
-          <el-tag size="small" type="info">{{ triggers.length }}/{{ maxTriggers }}</el-tag>
+          <el-tag size="small" type="info">{{ triggers.length }}个触发器</el-tag>
         </div>
         <div class="flex items-center gap-8px">
           <el-button
             type="primary"
             size="small"
             @click="addTrigger"
-            :disabled="triggers.length >= maxTriggers"
           >
             <Icon icon="ep:plus" />
             添加触发器
@@ -26,13 +24,7 @@
     <div class="p-0">
       <!-- 空状态 -->
       <div v-if="triggers.length === 0">
-        <el-empty description="暂无触发器配置">
-          <!-- TODO @puhui999：这个要不要去掉哈；入口统一点 -->
-          <el-button type="primary" @click="addTrigger">
-            <Icon icon="ep:plus" />
-            添加第一个触发器
-          </el-button>
-        </el-empty>
+        <el-empty description="暂无触发器配置，请点击右上角添加触发器按钮开始配置" />
       </div>
 
       <!-- 触发器列表 -->
@@ -62,18 +54,28 @@
 
           <div class="space-y-16px">
             <!-- 触发类型选择 -->
-            <TriggerTypeSelector
-              :model-value="trigger.type"
-              @update:model-value="(value) => updateTriggerType(index, value)"
-              @change="onTriggerTypeChange(trigger, $event)"
-            />
+            <el-form-item label="触发类型" required>
+              <el-select
+                :model-value="trigger.type"
+                @update:model-value="(value) => updateTriggerType(index, value)"
+                @change="onTriggerTypeChange(trigger, $event)"
+                placeholder="请选择触发类型"
+                class="w-full"
+              >
+                <el-option
+                  v-for="option in triggerTypeOptions"
+                  :key="option.value"
+                  :label="option.label"
+                  :value="option.value"
+                />
+              </el-select>
+            </el-form-item>
 
             <!-- 设备触发配置 -->
             <DeviceTriggerConfig
               v-if="isDeviceTrigger(trigger.type)"
               :model-value="trigger"
               @update:model-value="(value) => updateTrigger(index, value)"
-              @validate="(result) => handleTriggerValidate(index, result)"
             />
 
             <!-- 定时触发配置 -->
@@ -81,30 +83,9 @@
               v-if="trigger.type === TriggerTypeEnum.TIMER"
               :model-value="trigger.cronExpression"
               @update:model-value="(value) => updateTriggerCronExpression(index, value)"
-              @validate="(result) => handleTriggerValidate(index, result)"
             />
           </div>
         </div>
-      </div>
-
-      <!-- 添加提示 -->
-      <!-- TODO @puhui999：这个要不要去掉哈；入口统一点 -->
-      <div v-if="triggers.length > 0 && triggers.length < maxTriggers" class="text-center py-16px">
-        <el-button type="primary" plain @click="addTrigger">
-          <Icon icon="ep:plus" />
-          继续添加触发器
-        </el-button>
-        <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]"> 最多可添加 {{ maxTriggers }} 个触发器 </span>
-      </div>
-
-      <!-- 验证结果 -->
-      <div v-if="validationMessage" class="validation-result">
-        <el-alert
-          :title="validationMessage"
-          :type="isValid ? 'success' : 'error'"
-          :closable="false"
-          show-icon
-        />
       </div>
     </div>
   </el-card>
@@ -112,7 +93,6 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import TriggerTypeSelector from '../selectors/TriggerTypeSelector.vue'
 import DeviceTriggerConfig from '../configs/DeviceTriggerConfig.vue'
 import TimerTriggerConfig from '../configs/TimerTriggerConfig.vue'
 import {
@@ -129,7 +109,6 @@ interface Props {
 
 interface Emits {
   (e: 'update:triggers', value: TriggerFormData[]): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
 const props = defineProps<Props>()
@@ -153,13 +132,33 @@ const createDefaultTriggerData = (): TriggerFormData => {
   }
 }
 
-// 配置常量
-const maxTriggers = 5
 
-// 验证状态
-const triggerValidations = ref<{ [key: number]: { valid: boolean; message: string } }>({})
-const validationMessage = ref('')
-const isValid = ref(true)
+
+
+
+// 触发器类型选项
+const triggerTypeOptions = [
+  {
+    value: TriggerTypeEnum.DEVICE_STATE_UPDATE,
+    label: '设备状态变更'
+  },
+  {
+    value: TriggerTypeEnum.DEVICE_PROPERTY_POST,
+    label: '设备属性上报'
+  },
+  {
+    value: TriggerTypeEnum.DEVICE_EVENT_POST,
+    label: '设备事件上报'
+  },
+  {
+    value: TriggerTypeEnum.DEVICE_SERVICE_INVOKE,
+    label: '设备服务调用'
+  },
+  {
+    value: TriggerTypeEnum.TIMER,
+    label: '定时触发'
+  }
+]
 
 // 触发器类型映射
 const triggerTypeNames = {
@@ -180,12 +179,13 @@ const triggerTypeTags = {
 
 // 工具函数
 const isDeviceTrigger = (type: number) => {
-  return [
+  const deviceTriggerTypes = [
     TriggerTypeEnum.DEVICE_STATE_UPDATE,
     TriggerTypeEnum.DEVICE_PROPERTY_POST,
     TriggerTypeEnum.DEVICE_EVENT_POST,
     TriggerTypeEnum.DEVICE_SERVICE_INVOKE
-  ].includes(type)
+  ] as number[]
+  return deviceTriggerTypes.includes(type)
 }
 
 const getTriggerTypeName = (type: number) => {
@@ -198,31 +198,12 @@ const getTriggerTypeTag = (type: number) => {
 
 // 事件处理
 const addTrigger = () => {
-  if (triggers.value.length >= maxTriggers) {
-    return
-  }
-
   const newTrigger = createDefaultTriggerData()
   triggers.value.push(newTrigger)
 }
 
 const removeTrigger = (index: number) => {
   triggers.value.splice(index, 1)
-  delete triggerValidations.value[index]
-
-  // 重新索引验证结果
-  const newValidations: { [key: number]: { valid: boolean; message: string } } = {}
-  Object.keys(triggerValidations.value).forEach((key) => {
-    const numKey = parseInt(key)
-    if (numKey > index) {
-      newValidations[numKey - 1] = triggerValidations.value[numKey]
-    } else if (numKey < index) {
-      newValidations[numKey] = triggerValidations.value[numKey]
-    }
-  })
-  triggerValidations.value = newValidations
-
-  updateValidationResult()
 }
 
 const updateTriggerType = (index: number, type: number) => {
@@ -259,39 +240,6 @@ const onTriggerTypeChange = (trigger: TriggerFormData, type: number) => {
     }
   }
 }
-
-const handleTriggerValidate = (index: number, result: { valid: boolean; message: string }) => {
-  triggerValidations.value[index] = result
-  updateValidationResult()
-}
-
-const updateValidationResult = () => {
-  const validations = Object.values(triggerValidations.value)
-  const allValid = validations.every((v) => v.valid)
-  const hasValidations = validations.length > 0
-
-  if (!hasValidations) {
-    isValid.value = true
-    validationMessage.value = ''
-  } else if (allValid) {
-    isValid.value = true
-    validationMessage.value = '所有触发器配置验证通过'
-  } else {
-    isValid.value = false
-    const errorMessages = validations.filter((v) => !v.valid).map((v) => v.message)
-    validationMessage.value = `触发器配置错误: ${errorMessages.join('; ')}`
-  }
-
-  emit('validate', { valid: isValid.value, message: validationMessage.value })
-}
-
-// 监听触发器数量变化
-watch(
-  () => triggers.value.length,
-  () => {
-    updateValidationResult()
-  }
-)
 </script>
 
 

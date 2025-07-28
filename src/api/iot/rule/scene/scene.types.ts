@@ -173,12 +173,13 @@ interface IotRuleScene extends TenantBaseDO {
   actions: ActionConfig[] // 执行器数组（必填，至少一个）
 }
 
-// 工具类型
-// TODO @puhui999：这些在瞅瞅~
-type TriggerType = (typeof IotRuleSceneTriggerTypeEnum)[keyof typeof IotRuleSceneTriggerTypeEnum]
-type ActionType = (typeof IotRuleSceneActionTypeEnum)[keyof typeof IotRuleSceneActionTypeEnum]
-type MessageType = (typeof IotDeviceMessageTypeEnum)[keyof typeof IotDeviceMessageTypeEnum]
-type OperatorType =
+// 工具类型 - 从枚举中提取类型
+export type TriggerType =
+  (typeof IotRuleSceneTriggerTypeEnum)[keyof typeof IotRuleSceneTriggerTypeEnum]
+export type ActionType =
+  (typeof IotRuleSceneActionTypeEnum)[keyof typeof IotRuleSceneActionTypeEnum]
+export type MessageType = (typeof IotDeviceMessageTypeEnum)[keyof typeof IotDeviceMessageTypeEnum]
+export type OperatorType =
   (typeof IotRuleSceneTriggerConditionParameterOperatorEnum)[keyof typeof IotRuleSceneTriggerConditionParameterOperatorEnum]['value']
 
 // 表单验证规则类型

@@ -8,25 +8,13 @@
       @change="handleDeviceChange"
     />
 
-    <!-- TODO @puhui999：这里有点冗余，建议去掉 -->
-    <!-- 设备状态变更提示 -->
-    <div v-if="trigger.type === TriggerTypeEnum.DEVICE_STATE_UPDATE" class="mt-8px">
-      <el-alert title="设备状态变更触发" type="info" :closable="false" show-icon>
-        <template #default>
-          <p class="m-0">当选中的设备上线或离线时将自动触发场景规则</p>
-          <p class="m-0 mt-4px text-12px text-[var(--el-text-color-secondary)]">无需配置额外的触发条件</p>
-        </template>
-      </el-alert>
-    </div>
-
     <!-- 条件组配置 -->
-    <div v-else-if="needsConditions" class="space-y-12px">
+    <div v-if="needsConditions" class="space-y-12px">
       <div class="flex items-center justify-between mb-12px">
         <div class="flex items-center gap-8px">
           <span class="text-14px font-500 text-[var(--el-text-color-primary)]">触发条件</span>
-          <!-- TODO @puhui999：去掉数量限制 -->
           <el-tag size="small" type="info">
-            {{ trigger.conditionGroups?.length || 0 }}/{{ maxConditionGroups }}
+            {{ trigger.conditionGroups?.length || 0 }}个条件组
           </el-tag>
         </div>
         <div class="flex items-center gap-8px">
@@ -52,18 +40,13 @@
           :key="`group-${groupIndex}`"
           class="border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]"
         >
-          <div class="flex items-center justify-between p-12px px-16px bg-[var(--el-fill-color-light)] border-b border-[var(--el-border-color-lighter)]">
+          <div
+            class="flex items-center justify-between p-12px px-16px bg-[var(--el-fill-color-light)] border-b border-[var(--el-border-color-lighter)]"
+          >
             <div class="flex items-center text-14px font-500 text-[var(--el-text-color-primary)]">
               <span>条件组 {{ groupIndex + 1 }}</span>
               <!-- TODO @puhui999：不用“且、或”哈。条件组之间，就是或；条件之间就是且 -->
-              <el-select
-                v-model="group.logicOperator"
-                size="small"
-                class="w-80px ml-12px"
-              >
-                <el-option label="且" value="AND" />
-                <el-option label="或" value="OR" />
-              </el-select>
+              <el-tag size="small" type="info" class="ml-8px">条件间为"且"关系</el-tag>
             </div>
             <el-button
               type="danger"
@@ -262,5 +245,4 @@ watch(
     updateValidationResult()
   }
 )
-// TODO @puhui999：unocss - 已完成转换
 </script>
