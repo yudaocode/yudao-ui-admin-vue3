@@ -3,7 +3,7 @@
   <el-aside width="260px" class="conversation-container h-100%">
     <!-- 左顶部：对话 -->
     <div class="h-100%">
-      <el-button class="w-1/1 btn-new-conversation" type="primary" @click="createConversation">
+      <el-button class="w-1/1 py-4.5" type="primary" @click="createConversation">
         <Icon icon="ep:plus" class="mr-5px" />
         新建对话
       </el-button>
@@ -12,7 +12,7 @@
       <el-input
         v-model="searchName"
         size="large"
-        class="mt-10px search-input"
+        class="mt-5"
         placeholder="搜索历史记录"
         @keyup="searchConversation"
       >
@@ -27,16 +27,13 @@
         <el-empty v-if="loading" description="." :v-loading="loading" />
         <!-- 情况二：按照 group 分组，展示聊天会话 list 列表 -->
         <div v-for="conversationKey in Object.keys(conversationMap)" :key="conversationKey">
-          <div
-            class="conversation-item classify-title"
-            v-if="conversationMap[conversationKey].length"
-          >
+          <div class="mt-1.25 pt-2.5" v-if="conversationMap[conversationKey].length">
             <el-text class="mx-1" size="small" tag="b">
               {{ conversationKey }}
             </el-text>
           </div>
           <div
-            class="conversation-item"
+            class="mt-1.25"
             v-for="conversation in conversationMap[conversationKey]"
             :key="conversation.id"
             @click="handleConversationClick(conversation.id)"
@@ -48,21 +45,28 @@
                 conversation.id === activeConversationId ? 'conversation active' : 'conversation'
               "
             >
-              <div class="title-wrapper">
-                <img class="avatar" :src="conversation.roleAvatar || roleAvatarDefaultImg" />
+              <div class="flex flex-row items-center">
+                <img
+                  class="w-6.25 h-6.25 rounded-1.25 flex flex-row justify-center"
+                  :src="conversation.roleAvatar || roleAvatarDefaultImg"
+                />
                 <span class="title">{{ conversation.title }}</span>
               </div>
-              <div class="button-wrapper" v-show="hoverConversationId === conversation.id">
-                <el-button class="btn" link @click.stop="handleTop(conversation)">
+              <div
+                class="right-0.5 flex flex-row justify-center"
+                style="color: var(--el-text-color-regular)"
+                v-show="hoverConversationId === conversation.id"
+              >
+                <el-button class="m-0" link @click.stop="handleTop(conversation)">
                   <el-icon title="置顶" v-if="!conversation.pinned"><Top /></el-icon>
                   <el-icon title="置顶" v-if="conversation.pinned"><Bottom /></el-icon>
                 </el-button>
-                <el-button class="btn" link @click.stop="updateConversationTitle(conversation)">
+                <el-button class="m-0" link @click.stop="updateConversationTitle(conversation)">
                   <el-icon title="编辑">
                     <Icon icon="ep:edit" />
                   </el-icon>
                 </el-button>
-                <el-button class="btn" link @click.stop="deleteChatConversation(conversation)">
+                <el-button class="m-0" link @click.stop="deleteChatConversation(conversation)">
                   <el-icon title="删除对话">
                     <Icon icon="ep:delete" />
                   </el-icon>
@@ -77,14 +81,29 @@
     </div>
 
     <!-- 左底部：工具栏 -->
-    <div class="tool-box">
-      <div @click="handleRoleRepository">
+    <div
+      class="absolute bottom-0 left-0 right-0 px-5 leading-8.75 flex justify-between items-center"
+      style="
+        background-color: var(--el-fill-color-extra-light);
+        box-shadow: 0 0 1px 1px var(--el-border-color-lighter);
+        color: var(--el-text-color);
+      "
+    >
+      <div
+        class="flex items-center p-0 m-0 cursor-pointer"
+        style="color: var(--el-text-color-regular)"
+        @click="handleRoleRepository"
+      >
         <Icon icon="ep:user" />
-        <el-text size="small">角色仓库</el-text>
+        <el-text class="ml-1.25" size="small">角色仓库</el-text>
       </div>
-      <div @click="handleClearConversation">
+      <div
+        class="flex items-center p-0 m-0 cursor-pointer"
+        style="color: var(--el-text-color-regular)"
+        @click="handleClearConversation"
+      >
         <Icon icon="ep:delete" />
-        <el-text size="small">清空未置顶对话</el-text>
+        <el-text class="ml-1.25" size="small">清空未置顶对话</el-text>
       </div>
     </div>
 
@@ -361,25 +380,9 @@ onMounted(async () => {
   padding: 10px 10px 0;
   overflow: hidden;
 
-  .btn-new-conversation {
-    padding: 18px 0;
-  }
-
-  .search-input {
-    margin-top: 20px;
-  }
-
   .conversation-list {
     overflow: auto;
     height: 100%;
-
-    .classify-title {
-      padding-top: 10px;
-    }
-
-    .conversation-item {
-      margin-top: 5px;
-    }
 
     .conversation {
       display: flex;
@@ -401,12 +404,6 @@ onMounted(async () => {
         }
       }
 
-      .title-wrapper {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-
       .title {
         padding: 2px 10px;
         max-width: 220px;
@@ -416,58 +413,6 @@ onMounted(async () => {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-      }
-
-      .avatar {
-        width: 25px;
-        height: 25px;
-        border-radius: 5px;
-        display: flex;
-        flex-direction: row;
-        justify-items: center;
-      }
-
-      // 对话编辑、删除
-      .button-wrapper {
-        right: 2px;
-        display: flex;
-        flex-direction: row;
-        justify-items: center;
-        color: var(--el-text-color-regular);
-
-        .btn {
-          margin: 0;
-        }
-      }
-    }
-  }
-
-  // 角色仓库、清空未设置对话
-  .tool-box {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    //width: 100%;
-    padding: 0 20px;
-    background-color: var(--el-fill-color-extra-light);
-    box-shadow: 0 0 1px 1px var(--el-border-color-lighter);
-    line-height: 35px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--el-text-color);
-
-    > div {
-      display: flex;
-      align-items: center;
-      color: var(--el-text-color-regular);
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-
-      > span {
-        margin-left: 5px;
       }
     }
   }

@@ -10,36 +10,38 @@
       @on-conversation-delete="handlerConversationDelete"
     />
     <!-- 右侧：对话详情 -->
-    <el-container class="detail-container">
-      <el-header class="header">
-        <div class="title">
+    <el-container class="bg-[var(--el-bg-color)]">
+      <el-header
+        class="flex flex-row items-center justify-between bg-[var(--el-bg-color-page)] shadow-[0_0_0_0_var(--el-border-color-light)]"
+      >
+        <div class="text-18px font-bold">
           {{ activeConversation?.title ? activeConversation?.title : '对话' }}
           <span v-if="activeMessageList.length">({{ activeMessageList.length }})</span>
         </div>
-        <div class="btns" v-if="activeConversation">
+        <div class="flex w-300px flex-row justify-end" v-if="activeConversation">
           <el-button type="primary" bg plain size="small" @click="openChatConversationUpdateForm">
             <span v-html="activeConversation?.modelName"></span>
             <Icon icon="ep:setting" class="ml-10px" />
           </el-button>
-          <el-button size="small" class="btn" @click="handlerMessageClear">
+          <el-button size="small" class="p-10px" @click="handlerMessageClear">
             <Icon
               icon="heroicons-outline:archive-box-x-mark"
               color="var(--el-text-color-placeholder)"
             />
           </el-button>
-          <el-button size="small" class="btn">
+          <el-button size="small" class="p-10px">
             <Icon icon="ep:download" color="var(--el-text-color-placeholder)" />
           </el-button>
-          <el-button size="small" class="btn" @click="handleGoTopMessage">
+          <el-button size="small" class="p-10px" @click="handleGoTopMessage">
             <Icon icon="ep:top" color="var(--el-text-color-placeholder)" />
           </el-button>
         </div>
       </el-header>
 
       <!-- main：消息列表 -->
-      <el-main class="main-container">
+      <el-main class="m-0 p-0 relative h-full w-full">
         <div>
-          <div class="message-container">
+          <div class="absolute top-0 bottom-0 left-0 right-0 overflow-y-hidden p-0 m-0">
             <!-- 情况一：消息加载中 -->
             <MessageLoading v-if="activeMessageListLoading" />
             <!-- 情况二：无聊天对话时 -->
@@ -68,6 +70,7 @@
 
       <!-- 底部 -->
       <el-footer class="flex flex-col !h-auto !p-0">
+        <!-- TODO @芋艿：这块要想办法迁移下！ -->
         <form
           class="mt-10px mx-20px mb-20px py-9px px-10px flex flex-col h-auto rounded-10px"
           style="border: 1px solid var(--el-border-color)"
@@ -577,156 +580,3 @@ onMounted(async () => {
   await getMessageList()
 })
 </script>
-
-<style lang="scss" scoped>
-.conversation-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 10px 10px 0;
-
-  .btn-new-conversation {
-    padding: 18px 0;
-  }
-
-  .search-input {
-    margin-top: 20px;
-  }
-
-  .conversation-list {
-    margin-top: 20px;
-
-    .conversation {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      flex: 1;
-      padding: 0 5px;
-      margin-top: 10px;
-      cursor: pointer;
-      border-radius: 5px;
-      align-items: center;
-      line-height: 30px;
-
-      &.active {
-        background-color: var(--el-color-primary-light-9);
-        border: 1px solid var(--el-color-primary-light-7);
-
-        .button {
-          display: inline-block;
-        }
-      }
-
-      .title-wrapper {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .title {
-        padding: 5px 10px;
-        max-width: 220px;
-        font-size: 14px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-
-      .avatar {
-        width: 28px;
-        height: 28px;
-        display: flex;
-        flex-direction: row;
-        justify-items: center;
-      }
-
-      // 对话编辑、删除
-      .button-wrapper {
-        right: 2px;
-        display: flex;
-        flex-direction: row;
-        justify-items: center;
-        color: var(--el-text-color-regular);
-
-        .el-icon {
-          margin-right: 5px;
-        }
-      }
-    }
-  }
-
-  // 角色仓库、清空未设置对话
-  .tool-box {
-    line-height: 35px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--el-text-color);
-
-    > div {
-      display: flex;
-      align-items: center;
-      color: var(--el-text-color-regular);
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-
-      > span {
-        margin-left: 5px;
-      }
-    }
-  }
-}
-
-// 头部
-.detail-container {
-  background: var(--el-bg-color);
-
-  .header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--el-bg-color-page);
-    box-shadow: 0 0 0 0 var(--el-border-color-light);
-
-    .title {
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .btns {
-      display: flex;
-      width: 300px;
-      flex-direction: row;
-      justify-content: flex-end;
-      //justify-content: space-between;
-
-      .btn {
-        padding: 10px;
-      }
-    }
-  }
-}
-
-// main 容器
-.main-container {
-  margin: 0;
-  padding: 0;
-  position: relative;
-  height: 100%;
-  width: 100%;
-
-  .message-container {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    overflow-y: hidden;
-    padding: 0;
-    margin: 0;
-  }
-}
-</style>
