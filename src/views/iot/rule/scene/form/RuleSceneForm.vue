@@ -1,5 +1,5 @@
-<!-- IoT场景联动规则表单 - 主表单组件 -->
 <template>
+  <!-- TODO @puhui999：这个抽屉的高度太高了？！ -->
   <el-drawer
     v-model="drawerVisible"
     :title="drawerTitle"
@@ -28,7 +28,6 @@
         <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
       </el-form>
     </div>
-
     <template #footer>
       <el-button :disabled="submitLoading" type="primary" @click="handleSubmit">确 定</el-button>
       <el-button @click="handleClose">取 消</el-button>
@@ -55,11 +54,13 @@ import { generateUUID } from '@/utils'
 /** IoT 场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
 
+// TODO @puhui999：是不是融合到 props
 interface Props {
   modelValue: boolean
   ruleScene?: IotRuleScene
 }
 
+// TODO @puhui999：Emits 是不是融合到 emit
 interface Emits {
   (e: 'update:modelValue', value: boolean): void
   (e: 'success'): void
@@ -68,11 +69,11 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-const drawerVisible = useVModel(props, 'modelValue', emit)
+const drawerVisible = useVModel(props, 'modelValue', emit) // 是否可见
 
-/**
- * 创建默认的表单数据
- */
+// TODO @puhui999：使用 /** 注释风格哈 */
+
+/** 创建默认的表单数据 */
 const createDefaultFormData = (): RuleSceneFormData => {
   return {
     name: '',
@@ -93,8 +94,9 @@ const createDefaultFormData = (): RuleSceneFormData => {
   }
 }
 
+// TODO @puhui999：使用 convertFormToVO；下面也是类似哈；
 /**
- * 将表单数据转换为API请求格式
+ * 将表单数据转换为 API 请求格式
  */
 const transformFormToApi = (formData: RuleSceneFormData): IotRuleScene => {
   return {
@@ -196,7 +198,6 @@ const handleSubmit = async () => {
   if (!formRef.value) return
   const valid = await formRef.value.validate()
   if (!valid) return
-
   // 验证触发器和执行器
   if (!triggerValidation.value.valid) {
     ElMessage.error(triggerValidation.value.message)
@@ -214,6 +215,7 @@ const handleSubmit = async () => {
     const apiData = transformFormToApi(formData.value)
 
     // 这里应该调用API保存数据
+    // TODO @puhui999：貌似还没接入
     console.log('提交数据:', apiData)
 
     // 模拟API调用
@@ -250,7 +252,7 @@ watch(drawerVisible, (visible) => {
   }
 })
 
-// 监听props变化
+// 监听 props 变化
 watch(
   () => props.ruleScene,
   () => {
@@ -261,6 +263,7 @@ watch(
 )
 </script>
 
+<!-- TODO @puhui999：看看下面样式，哪些是必要添加的 -->
 <style scoped>
 /* 滚动条样式 */
 .h-\[calc\(100vh-120px\)\]::-webkit-scrollbar {

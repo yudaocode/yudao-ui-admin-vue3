@@ -20,6 +20,7 @@
     </div>
 
     <!-- 主条件配置 -->
+    <!-- TODO @puhui999：这里可以简化下，主条件是不能删除的。。。 -->
     <div v-else class="space-y-16px">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-8px">

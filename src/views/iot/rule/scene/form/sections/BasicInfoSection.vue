@@ -8,6 +8,7 @@
           <span class="text-16px font-600 text-[var(--el-text-color-primary)]">基础信息</span>
         </div>
         <div class="flex items-center gap-8px">
+          <!-- TODO @puhui999：dict-tag 可以哇？ -->
           <el-tag :type="formData.status === 0 ? 'success' : 'danger'" size="small">
             {{ formData.status === 0 ? '启用' : '禁用' }}
           </el-tag>
@@ -64,6 +65,8 @@ import { RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
 
 /** 基础信息配置组件 */
 defineOptions({ name: 'BasicInfoSection' })
+
+// TODO @puhui999：下面的 Props、Emits 可以合并到变量那；
 
 interface Props {
   modelValue: RuleSceneFormData

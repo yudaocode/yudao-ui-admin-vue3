@@ -1,7 +1,9 @@
 <!-- 当前时间条件配置组件 -->
 <template>
   <div class="flex flex-col gap-16px">
-    <div class="flex items-center gap-8px p-12px px-16px bg-orange-50 rounded-6px border border-orange-200">
+    <div
+      class="flex items-center gap-8px p-12px px-16px bg-orange-50 rounded-6px border border-orange-200"
+    >
       <Icon icon="ep:timer" class="text-orange-500 text-18px" />
       <span class="text-14px font-500 text-orange-700">当前时间条件配置</span>
     </div>
@@ -89,13 +91,20 @@
     </el-row>
 
     <!-- 条件预览 -->
-    <div v-if="conditionPreview" class="p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+    <!-- puhui999：可以去掉。。。因为表单选择了，可以看懂的呀。 -->
+    <div
+      v-if="conditionPreview"
+      class="p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]"
+    >
       <div class="flex items-center gap-8px mb-8px">
         <Icon icon="ep:view" class="text-[var(--el-color-info)] text-16px" />
         <span class="text-14px font-500 text-[var(--el-text-color-primary)]">条件预览</span>
       </div>
       <div class="pl-24px">
-        <code class="text-12px text-[var(--el-color-primary)] bg-[var(--el-fill-color-blank)] p-8px rounded-4px font-mono">{{ conditionPreview }}</code>
+        <code
+          class="text-12px text-[var(--el-color-primary)] bg-[var(--el-fill-color-blank)] p-8px rounded-4px font-mono"
+          >{{ conditionPreview }}</code
+        >
       </div>
     </div>
 
@@ -113,7 +122,10 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import { ConditionFormData, IotRuleSceneTriggerTimeOperatorEnum } from '@/api/iot/rule/scene/scene.types'
+import {
+  ConditionFormData,
+  IotRuleSceneTriggerTimeOperatorEnum
+} from '@/api/iot/rule/scene/scene.types'
 
 /** 当前时间条件配置组件 */
 defineOptions({ name: 'CurrentTimeConditionConfig' })
@@ -203,22 +215,22 @@ const conditionPreview = computed(() => {
   if (!condition.value.operator) {
     return ''
   }
-  
-  const operatorOption = timeOperatorOptions.find(opt => opt.value === condition.value.operator)
+
+  const operatorOption = timeOperatorOptions.find((opt) => opt.value === condition.value.operator)
   const operatorLabel = operatorOption?.label || condition.value.operator
-  
+
   if (condition.value.operator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
     return `当前时间 ${operatorLabel}`
   }
-  
+
   if (!condition.value.timeValue) {
     return `当前时间 ${operatorLabel} [未设置时间]`
   }
-  
+
   if (needsSecondTimeInput.value && condition.value.timeValue2) {
     return `当前时间 ${operatorLabel} ${condition.value.timeValue} 和 ${condition.value.timeValue2}`
   }
-  
+
   return `当前时间 ${operatorLabel} ${condition.value.timeValue}`
 })
 

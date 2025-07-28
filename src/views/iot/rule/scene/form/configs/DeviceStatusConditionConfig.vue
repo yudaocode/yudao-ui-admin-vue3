@@ -79,6 +79,7 @@
     </el-row>
 
     <!-- 条件预览 -->
+    <!-- TODO puhui999：可以去掉。。。因为表单选择了，可以看懂的呀。 -->
     <div
       v-if="conditionPreview"
       class="p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]"

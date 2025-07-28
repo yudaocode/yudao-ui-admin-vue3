@@ -1,6 +1,6 @@
-<!-- 场景触发器配置组件 -->
 <template>
   <el-card class="border border-[var(--el-border-color-light)] rounded-8px" shadow="never">
+    <!-- TODO @puhui999：触发器还是多个。。。每个触发器里面有事件类型 + 附加条件组（最好文案上，和阿里 iot 保持相对一致） -->
     <template #header>
       <div class="flex items-center gap-8px">
         <Icon icon="ep:lightning" class="text-[var(--el-color-primary)] text-18px" />
@@ -36,6 +36,7 @@
       />
 
       <!-- 定时触发配置 -->
+      <!-- TODO @puhui999：这里要不 v-else 好了？ -->
       <TimerTriggerConfig
         v-if="trigger.type === TriggerTypeEnum.TIMER"
         :model-value="trigger.cronExpression"
@@ -57,6 +58,7 @@ import {
 /** 触发器配置组件 */
 defineOptions({ name: 'TriggerSection' })
 
+// TODO @puhui999：下面的 Props、Emits 可以合并到变量那；
 interface Props {
   trigger: TriggerFormData
 }
@@ -71,6 +73,7 @@ const emit = defineEmits<Emits>()
 const trigger = useVModel(props, 'trigger', emit)
 
 // 触发器类型选项
+// TODO @puhui999：/Users/yunai/Java/yudao-ui-admin-vue3/src/views/iot/utils/constants.ts
 const triggerTypeOptions = [
   {
     value: TriggerTypeEnum.DEVICE_STATE_UPDATE,
@@ -95,6 +98,7 @@ const triggerTypeOptions = [
 ]
 
 // 工具函数
+// TODO @puhui999：/Users/yunai/Java/yudao-ui-admin-vue3/src/views/iot/utils/constants.ts
 const isDeviceTrigger = (type: number) => {
   const deviceTriggerTypes = [
     TriggerTypeEnum.DEVICE_STATE_UPDATE,
@@ -111,10 +115,12 @@ const updateTriggerType = (type: number) => {
   onTriggerTypeChange(type)
 }
 
+// TODO @puhui999：updateTriggerDeviceConfig
 const updateTrigger = (newTrigger: TriggerFormData) => {
   trigger.value = newTrigger
 }
 
+// TODO @puhui999：updateTriggerCronConfig
 const updateTriggerCronExpression = (cronExpression?: string) => {
   trigger.value.cronExpression = cronExpression
 }

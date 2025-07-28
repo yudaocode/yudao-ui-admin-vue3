@@ -1,4 +1,3 @@
-<!-- 主条件内部配置组件 - 不显示条件类型选择 -->
 <template>
   <div class="space-y-16px">
     <!-- 触发事件类型显示 -->
@@ -76,6 +75,7 @@
       </el-row>
 
       <!-- 条件预览 -->
+      <!-- TODO puhui999：可以去掉。。。因为表单选择了，可以看懂的呀。 -->
       <div v-if="conditionPreview" class="mt-12px">
         <div class="text-12px text-[var(--el-text-color-secondary)]">
           预览：{{ conditionPreview }}
@@ -133,6 +133,7 @@ const emit = defineEmits<Emits>()
 
 // 响应式数据
 const condition = useVModel(props, 'modelValue', emit)
+// TODO @puhui999：是不是 validationMessage 非空，就是不通过哈；
 const isValid = ref(true)
 const validationMessage = ref('')
 const propertyType = ref('')
@@ -159,6 +160,7 @@ const conditionPreview = computed(() => {
 })
 
 // 获取触发类型文本
+// TODO @puhui999：是不是有枚举可以服用哈；
 const getTriggerTypeText = (type: number) => {
   switch (type) {
     case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:

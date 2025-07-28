@@ -144,7 +144,7 @@ interface RuleSceneFormData {
   name: string
   description?: string
   status: number
-  trigger: TriggerFormData // 改为单个触发器
+  trigger: TriggerFormData
   actions: ActionFormData[]
 }
 

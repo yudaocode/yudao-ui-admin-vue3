@@ -1,3 +1,4 @@
+// TODO @puhui999：貌似很多地方，都用不到啦？这个文件
 /**
  * IoT 场景联动表单验证工具函数
  */
@@ -37,9 +38,10 @@ export const getBaseValidationRules = (): FormValidationRules => ({
 })
 
 /** 验证CRON表达式格式 */
+// TODO @puhui999：这个可以拿到 cron 组件里哇？
 export function validateCronExpression(cron: string): boolean {
   if (!cron || cron.trim().length === 0) return false
-  // 基础的 CRON 表达式正则验证（支持6位和7位格式）
+  // 基础的 CRON 表达式正则验证（支持 6 位和 7 位格式）
   const cronRegex =
     /^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))( (\*|([1-9][0-9]{3})|\*\/([1-9][0-9]{3})))?$/
   return cronRegex.test(cron.trim())
@@ -58,6 +60,7 @@ export function validateDeviceNames(deviceNames: string[]): boolean {
 export function validateCompareValue(operator: string, value: string): boolean {
   if (!value || value.trim().length === 0) return false
   const trimmedValue = value.trim()
+  // TODO @puhui999：这里要用下枚举哇？
   switch (operator) {
     case 'between':
     case 'not between':
@@ -81,11 +84,13 @@ export function validateCompareValue(operator: string, value: string): boolean {
     case '!=':
     case 'like':
     case 'not null':
+    // TODO @puhui999：这里要不加个 default 抛出异常？
     default:
       return true
   }
 }
 
+// TODO @puhui999：貌似没用到？
 /** 验证触发器配置 */
 export function validateTriggerConfig(trigger: TriggerConfig): {
   valid: boolean
@@ -136,6 +141,7 @@ export function validateTriggerConfig(trigger: TriggerConfig): {
   return { valid: true }
 }
 
+// TODO @puhui999：貌似没用到？
 /** 验证执行器配置 */
 export function validateActionConfig(action: ActionConfig): { valid: boolean; message?: string } {
   if (!action.type) {

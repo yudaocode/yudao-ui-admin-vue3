@@ -17,7 +17,7 @@
           <span class="text-14px font-500 text-[var(--el-text-color-primary)]">附加条件组</span>
           <el-tag size="small" type="success">与主条件为且关系</el-tag>
           <el-tag size="small" type="info">
-            {{ trigger.conditionGroup?.subGroups?.length || 0 }}个子条件组
+            {{ trigger.conditionGroup?.subGroups?.length || 0 }} 个子条件组
           </el-tag>
         </div>
         <el-button
@@ -70,6 +70,7 @@ import {
 /** 设备触发配置组件 */
 defineOptions({ name: 'DeviceTriggerConfig' })
 
+// TODO @puhui999：下面的 Props、Emits 可以合并到变量那；
 interface Props {
   modelValue: TriggerFormData
 }
@@ -91,8 +92,6 @@ const mainConditionValidation = ref<{ valid: boolean; message: string }>({
 })
 const validationMessage = ref('')
 const isValid = ref(true)
-
-// 计算属性
 
 // 初始化主条件
 const initMainCondition = () => {

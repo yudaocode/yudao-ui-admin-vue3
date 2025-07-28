@@ -1,4 +1,3 @@
-<!-- 子条件组配置组件 -->
 <template>
   <div class="p-16px">
     <!-- 空状态 -->
@@ -66,6 +65,7 @@
         </div>
 
         <!-- 条件间的"且"连接符 -->
+        <!-- TODO @puhu999：建议去掉，有点元素太丰富了。 -->
         <div
           v-if="conditionIndex < subGroup.conditions!.length - 1"
           class="flex items-center justify-center py-8px"

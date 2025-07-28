@@ -4,10 +4,12 @@
     <div class="flex justify-between items-start mb-20px">
       <div class="flex-1">
         <h2 class="flex items-center m-0 mb-8px text-24px font-600 text-[#303133]">
-          <Icon icon="ep:connection" class="mr-12px text-[#409eff]" />
+          <Icon icon="ep:connection" class="ml-5px mr-12px text-[#409eff]" />
           场景联动规则
         </h2>
-        <p class="m-0 text-[#606266] text-14px"> 通过配置触发条件和执行动作，实现设备间的智能联动控制 </p>
+        <p class="m-0 text-[#606266] text-14px">
+          通过配置触发条件和执行动作，实现设备间的智能联动控制
+        </p>
       </div>
       <div>
         <el-button type="primary" @click="handleAdd">
@@ -66,52 +68,80 @@
     <!-- 统计卡片 -->
     <el-row :gutter="16" class="mb-16px">
       <el-col :span="6">
-        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+        <el-card
+          class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px"
+          shadow="hover"
+        >
           <div class="flex items-center">
-            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#667eea] to-[#764ba2]">
+            <div
+              class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#667eea] to-[#764ba2]"
+            >
               <Icon icon="ep:document" />
             </div>
             <div>
-              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.total }}</div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{
+                statistics.total
+              }}</div>
               <div class="text-14px text-[#909399] mt-4px">总规则数</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+        <el-card
+          class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px"
+          shadow="hover"
+        >
           <div class="flex items-center">
-            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#f093fb] to-[#f5576c]">
+            <div
+              class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#f093fb] to-[#f5576c]"
+            >
               <Icon icon="ep:check" />
             </div>
             <div>
-              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.enabled }}</div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{
+                statistics.enabled
+              }}</div>
               <div class="text-14px text-[#909399] mt-4px">启用规则</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+        <el-card
+          class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px"
+          shadow="hover"
+        >
           <div class="flex items-center">
-            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#4facfe] to-[#00f2fe]">
+            <div
+              class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#4facfe] to-[#00f2fe]"
+            >
               <Icon icon="ep:close" />
             </div>
             <div>
-              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.disabled }}</div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{
+                statistics.disabled
+              }}</div>
               <div class="text-14px text-[#909399] mt-4px">禁用规则</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+        <el-card
+          class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px"
+          shadow="hover"
+        >
           <div class="flex items-center">
-            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#43e97b] to-[#38f9d7]">
+            <div
+              class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#43e97b] to-[#38f9d7]"
+            >
               <Icon icon="ep:lightning" />
             </div>
             <div>
-              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.triggered }}</div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{
+                statistics.triggered
+              }}</div>
               <div class="text-14px text-[#909399] mt-4px">今日触发</div>
             </div>
           </div>
@@ -134,6 +164,7 @@
             </div>
           </template>
         </el-table-column>
+        <!-- TODO puhui999：貌似展示不太对劲。。。一个字，一个 tab 哈了。 -->
         <el-table-column label="触发条件" min-width="250">
           <template #default="{ row }">
             <div class="flex flex-wrap gap-4px">
@@ -149,6 +180,7 @@
             </div>
           </template>
         </el-table-column>
+        <!-- TODO puhui999：貌似展示不太对劲。。。一个字，一个 tab 哈了。 -->
         <el-table-column label="执行动作" min-width="250">
           <template #default="{ row }">
             <div class="flex flex-wrap gap-4px">
@@ -177,7 +209,7 @@
             {{ formatDate(row.createTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="210" fixed="right">
           <template #default="{ row }">
             <div class="flex gap-8px">
               <el-button type="primary" link @click="handleEdit(row)">
@@ -190,9 +222,10 @@
                 @click="handleToggleStatus(row)"
               >
                 <Icon :icon="row.status === 0 ? 'ep:video-pause' : 'ep:video-play'" />
+                <!-- TODO @puhui999：字典翻译 -->
                 {{ row.status === 0 ? '禁用' : '启用' }}
               </el-button>
-              <el-button type="danger" link @click="handleDelete(row.id)">
+              <el-button type="danger" class="!mr-10px" link @click="handleDelete(row.id)">
                 <Icon icon="ep:delete" />
                 删除
               </el-button>
@@ -211,7 +244,10 @@
     </el-card>
 
     <!-- 批量操作 -->
-    <div v-if="selectedRows.length > 0" class="fixed bottom-20px left-1/2 transform -translate-x-1/2 z-1000">
+    <div
+      v-if="selectedRows.length > 0"
+      class="fixed bottom-20px left-1/2 transform -translate-x-1/2 z-1000"
+    >
       <el-card shadow="always">
         <div class="flex items-center gap-16px">
           <span class="font-500 text-[#303133]"> 已选择 {{ selectedRows.length }} 项 </span>
@@ -266,8 +302,8 @@ const selectedRows = ref<IotRuleScene[]>([]) // 选中的行数据
 const queryFormRef = ref() // 搜索的表单
 
 // 表单状态
-const formVisible = ref(false)
-const currentRule = ref<IotRuleScene>()
+const formVisible = ref(false) // 是否可见
+const currentRule = ref<IotRuleScene>() // 表单数据
 
 // 统计数据
 const statistics = ref({
@@ -277,13 +313,12 @@ const statistics = ref({
   triggered: 0
 })
 
-/**
- * 格式化CRON表达式显示
- */
+/** 格式化 CRON 表达式显示 */
+// TODO @puhui999：这个能不能 cron 组件里翻译哈；
 const formatCronExpression = (cron: string): string => {
   if (!cron) return ''
 
-  // 简单的CRON表达式解析和格式化
+  // 简单的 CRON 表达式解析和格式化
   const parts = cron.trim().split(' ')
   if (parts.length < 5) return cron
 
@@ -322,10 +357,9 @@ const formatCronExpression = (cron: string): string => {
   return description || cron
 }
 
-/**
- * 获取规则摘要信息
- */
+/** 获取规则摘要信息 */
 const getRuleSceneSummary = (rule: IotRuleScene) => {
+  // TODO @puhui999：是不是可以使用字段，或者枚举？
   const triggerSummary =
     rule.triggers?.map((trigger) => {
       switch (trigger.type) {
@@ -344,6 +378,7 @@ const getRuleSceneSummary = (rule: IotRuleScene) => {
       }
     }) || []
 
+  // TODO @puhui999：是不是可以使用字段，或者枚举？
   const actionSummary =
     rule.actions?.map((action) => {
       switch (action.type) {
@@ -367,6 +402,7 @@ const getRuleSceneSummary = (rule: IotRuleScene) => {
 }
 
 /** 查询列表 */
+// TODO @puhui999：这里使用真实数据；
 const getList = async () => {
   loading.value = true
   try {
@@ -440,6 +476,7 @@ const updateStatistics = () => {
     total: list.value.length,
     enabled: list.value.filter((item) => item.status === 0).length,
     disabled: list.value.filter((item) => item.status === 1).length,
+    // TODO @puhui999：这里缺了 lastTriggeredTime 定义
     triggered: list.value.filter((item) => item.lastTriggeredTime).length
   }
 }
@@ -467,18 +504,20 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
+/** 添加操作 */
 const handleAdd = () => {
   currentRule.value = undefined
   formVisible.value = true
 }
 
+/** 修改操作 */
 const handleEdit = (row: IotRuleScene) => {
   currentRule.value = row
   formVisible.value = true
 }
 
 /** 删除按钮操作 */
+// TODO @puhui999：貌似 id 没用上
 const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
@@ -500,6 +539,7 @@ const handleToggleStatus = async (row: IotRuleScene) => {
     const text = row.status === 0 ? '禁用' : '启用'
     await message.confirm('确认要' + text + '"' + row.name + '"吗?')
     // 发起修改状态
+    // TODO @puhui999：这里缺了
     // await RuleSceneApi.updateRuleSceneStatus(row.id, row.status === 0 ? 1 : 0)
 
     // 模拟状态切换
@@ -523,6 +563,7 @@ const handleBatchEnable = async () => {
   try {
     await message.confirm(`确定要启用选中的 ${selectedRows.value.length} 个规则吗？`)
     // 这里应该调用批量启用API
+    // TODO @puhui999：这里缺了
     // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 0)
 
     // 模拟批量启用
@@ -539,6 +580,7 @@ const handleBatchDisable = async () => {
   try {
     await message.confirm(`确定要禁用选中的 ${selectedRows.value.length} 个规则吗？`)
     // 这里应该调用批量禁用API
+    // TODO @puhui999：这里缺了
     // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 1)
 
     // 模拟批量禁用
@@ -550,18 +592,18 @@ const handleBatchDisable = async () => {
   } catch {}
 }
 
+/** 批量删除操作 */
 const handleBatchDelete = async () => {
   try {
     await ElMessageBox.confirm(`确定要删除选中的 ${selectedRows.value.length} 个规则吗？`, '提示', {
       type: 'warning'
     })
 
+    // TODO @puhui999：这里缺了
     // 这里应该调用批量删除API
     message.success('批量删除成功')
-    getList()
-  } catch (error) {
-    // 用户取消操作
-  }
+    await getList()
+  } catch (error) {}
 }
 
 // 初始化
@@ -569,5 +611,3 @@ onMounted(() => {
   getList()
 })
 </script>
-
-
