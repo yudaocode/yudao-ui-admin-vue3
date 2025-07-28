@@ -1,5 +1,5 @@
 <template>
-  <el-container class="ai-layout">
+  <el-container class="absolute flex-1 top-0 left-0 h-full w-full">
     <!-- 左侧：对话列表 -->
     <ConversationList
       :active-id="activeConversationId"
@@ -67,10 +67,13 @@
       </el-main>
 
       <!-- 底部 -->
-      <el-footer class="footer-container">
-        <form class="prompt-from">
+      <el-footer class="flex flex-col !h-auto !p-0">
+        <form
+          class="mt-10px mx-20px mb-20px py-9px px-10px flex flex-col h-auto rounded-10px"
+          style="border: 1px solid var(--el-border-color)"
+        >
           <textarea
-            class="prompt-input"
+            class="h-80px border-none box-border resize-none py-0 px-2px overflow-auto focus:outline-none"
             v-model="prompt"
             @keydown="handleSendByKeydown"
             @input="handlePromptInput"
@@ -78,7 +81,7 @@
             @compositionend="onCompositionend"
             placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
           ></textarea>
-          <div class="prompt-btns">
+          <div class="flex justify-between pb-0 pt-5px">
             <div>
               <el-switch v-model="enableContext" />
               <span class="ml-5px text-14px text-#8f8f8f">上下文</span>
@@ -576,15 +579,6 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-.ai-layout {
-  position: absolute;
-  flex: 1;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-}
-
 .conversation-container {
   position: relative;
   display: flex;
@@ -733,46 +727,6 @@ onMounted(async () => {
     overflow-y: hidden;
     padding: 0;
     margin: 0;
-  }
-}
-
-// 底部
-.footer-container {
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  margin: 0;
-  padding: 0;
-
-  .prompt-from {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    border: 1px solid var(--el-border-color);
-    border-radius: 10px;
-    margin: 10px 20px 20px 20px;
-    padding: 9px 10px;
-  }
-
-  .prompt-input {
-    height: 80px;
-    //box-shadow: none;
-    border: none;
-    box-sizing: border-box;
-    resize: none;
-    padding: 0 2px;
-    overflow: auto;
-  }
-
-  .prompt-input:focus {
-    outline: none;
-  }
-
-  .prompt-btns {
-    display: flex;
-    justify-content: space-between;
-    padding-bottom: 0;
-    padding-top: 5px;
   }
 }
 </style>

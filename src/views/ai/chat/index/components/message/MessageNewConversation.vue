@@ -17,4 +17,3 @@ const handlerNewChat = () => {
   emits('onNewConversation')
 }
 </script>
-

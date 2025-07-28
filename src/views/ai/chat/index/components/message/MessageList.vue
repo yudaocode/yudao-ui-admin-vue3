@@ -10,15 +10,30 @@
           <div>
             <el-text class="text-left leading-30px">{{ formatDate(item.createTime) }}</el-text>
           </div>
-          <div class="relative flex flex-col break-words bg-[var(--el-fill-color-light)] shadow-[0_0_0_1px_var(--el-border-color-light)] rounded-10px pt-10px px-10px pb-5px" ref="markdownViewRef">
-            <MarkdownView class="text-[var(--el-text-color-primary)] text-[0.95rem]" :content="item.content" />
+          <div
+            class="relative flex flex-col break-words bg-[var(--el-fill-color-light)] shadow-[0_0_0_1px_var(--el-border-color-light)] rounded-10px pt-10px px-10px pb-5px"
+            ref="markdownViewRef"
+          >
+            <MarkdownView
+              class="text-[var(--el-text-color-primary)] text-[0.95rem]"
+              :content="item.content"
+            />
             <MessageKnowledge v-if="item.segments" :segments="item.segments" />
           </div>
           <div class="flex flex-row mt-8px">
-            <el-button class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]" link @click="copyContent(item.content)">
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="copyContent(item.content)"
+            >
               <img class="h-20px" src="@/assets/ai/copy.svg" />
             </el-button>
-            <el-button v-if="item.id > 0" class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]" link @click="onDelete(item.id)">
+            <el-button
+              v-if="item.id > 0"
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="onDelete(item.id)"
+            >
               <img class="h-17px" src="@/assets/ai/delete.svg" />
             </el-button>
           </div>
@@ -34,19 +49,38 @@
             <el-text class="text-left leading-30px">{{ formatDate(item.createTime) }}</el-text>
           </div>
           <div class="flex flex-row-reverse">
-            <div class="text-[0.95rem] text-[var(--el-color-white)] inline bg-[var(--el-color-primary)] shadow-[0_0_0_1px_var(--el-color-primary)] rounded-10px p-10px w-auto break-words whitespace-pre-wrap">{{ item.content }}</div>
+            <div
+              class="text-[0.95rem] text-[var(--el-color-white)] inline bg-[var(--el-color-primary)] shadow-[0_0_0_1px_var(--el-color-primary)] rounded-10px p-10px w-auto break-words whitespace-pre-wrap"
+              >{{ item.content }}</div
+            >
           </div>
           <div class="flex flex-row-reverse mt-8px">
-            <el-button class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]" link @click="copyContent(item.content)">
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="copyContent(item.content)"
+            >
               <img class="h-20px" src="@/assets/ai/copy.svg" />
             </el-button>
-            <el-button class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]" link @click="onDelete(item.id)">
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="onDelete(item.id)"
+            >
               <img class="h-17px mr-12px" src="@/assets/ai/delete.svg" />
             </el-button>
-            <el-button class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]" link @click="onRefresh(item)">
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="onRefresh(item)"
+            >
               <el-icon size="17"><RefreshRight /></el-icon>
             </el-button>
-            <el-button class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]" link @click="onEdit(item)">
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="onEdit(item)"
+            >
               <el-icon size="17"><Edit /></el-icon>
             </el-button>
           </div>
@@ -171,5 +205,3 @@ onMounted(async () => {
   messageContainer.value.addEventListener('scroll', handleScroll)
 })
 </script>
-
-
