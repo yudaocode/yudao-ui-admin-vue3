@@ -1,17 +1,37 @@
 <!-- 条件组配置组件 -->
 <template>
   <div class="p-16px">
+    <!-- 条件组说明 -->
+    <div
+      v-if="group.conditions && group.conditions.length > 1"
+      class="mb-12px flex items-center justify-center"
+    >
+      <div
+        class="flex items-center gap-6px px-10px py-4px bg-green-50 border border-green-200 rounded-full text-11px text-green-600"
+      >
+        <Icon icon="ep:info-filled" />
+        <span>组内所有条件必须同时满足（且关系）</span>
+      </div>
+    </div>
+
     <div class="space-y-12px">
       <!-- 条件列表 -->
       <div v-if="group.conditions && group.conditions.length > 0" class="space-y-12px">
         <div
           v-for="(condition, index) in group.conditions"
           :key="`condition-${index}`"
-          class="p-12px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-light)]"
+          class="p-12px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-light)] shadow-sm hover:shadow-md transition-shadow"
         >
           <div class="flex items-center justify-between mb-12px">
             <div class="flex items-center gap-8px">
-              <span class="text-14px font-500 text-[var(--el-text-color-primary)]">条件 {{ index + 1 }}</span>
+              <div class="flex items-center gap-6px">
+                <div
+                  class="w-18px h-18px bg-green-500 text-white rounded-full flex items-center justify-center text-10px font-bold"
+                >
+                  {{ index + 1 }}
+                </div>
+                <span class="text-14px font-500 text-[var(--el-text-color-primary)]">条件</span>
+              </div>
               <el-tag size="small" type="primary">
                 {{ getConditionTypeName(condition.type) }}
               </el-tag>
@@ -39,13 +59,21 @@
             />
           </div>
 
-          <!-- 逻辑连接符 -->
-          <!-- TODO @puhui999：不用这个哈； -->
-          <div v-if="index < group.conditions!.length - 1" class="flex justify-center mt-8px">
-            <el-select v-model="group.logicOperator" size="small" class="w-80px">
-              <el-option label="且" value="AND" />
-              <el-option label="或" value="OR" />
-            </el-select>
+          <!-- 条件间的"且"连接符 -->
+          <div
+            v-if="index < group.conditions!.length - 1"
+            class="flex items-center justify-center py-8px"
+          >
+            <div class="flex items-center gap-6px">
+              <!-- 连接线 -->
+              <div class="w-24px h-1px bg-green-300"></div>
+              <!-- 且标签 -->
+              <div class="px-12px py-4px bg-green-100 border-2 border-green-300 rounded-full">
+                <span class="text-12px font-600 text-green-600">且</span>
+              </div>
+              <!-- 连接线 -->
+              <div class="w-24px h-1px bg-green-300"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -53,10 +81,14 @@
       <!-- 空状态 -->
       <div v-else class="py-40px text-center">
         <el-empty description="暂无条件配置" :image-size="80">
-          <el-button type="primary" @click="addCondition">
-            <Icon icon="ep:plus" />
-            添加第一个条件
-          </el-button>
+          <template #description>
+            <div class="space-y-8px">
+              <p class="text-[var(--el-text-color-secondary)]">暂无条件配置</p>
+              <p class="text-12px text-[var(--el-text-color-placeholder)]">
+                条件组需要至少包含一个条件才能生效
+              </p>
+            </div>
+          </template>
         </el-empty>
       </div>
 
@@ -71,19 +103,10 @@
           <Icon icon="ep:plus" />
           继续添加条件
         </el-button>
-        <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]"> 最多可添加 {{ maxConditions }} 个条件 </span>
+        <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]">
+          最多可添加 {{ maxConditions }} 个条件
+        </span>
       </div>
-    </div>
-
-    <!-- 验证结果 -->
-    <!-- TODO @puhui999：是不是不用这种提示；只要 validator rules 能展示出来就好了呀。。。 -->
-    <div v-if="validationMessage" class="mt-8px">
-      <el-alert
-        :title="validationMessage"
-        :type="isValid ? 'success' : 'error'"
-        :closable="false"
-        show-icon
-      />
     </div>
   </div>
 </template>
@@ -229,5 +252,3 @@ onMounted(() => {
   }
 })
 </script>
-
-

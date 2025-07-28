@@ -44,7 +44,6 @@ import ActionSection from './sections/ActionSection.vue'
 import {
   RuleSceneFormData,
   IotRuleScene,
-  IotRuleSceneTriggerTypeEnum,
   IotRuleSceneActionTypeEnum,
   CommonStatusEnum
 } from '@/api/iot/rule/scene/scene.types'

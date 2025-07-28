@@ -1,4 +1,4 @@
-<!-- 设备触发配置组件 -->
+<!-- 设备触发配置组件 - 优化版本 -->
 <template>
   <div class="flex flex-col gap-16px">
     <!-- 产品和设备选择 -->
@@ -16,6 +16,12 @@
           <el-tag size="small" type="info">
             {{ trigger.conditionGroups?.length || 0 }}个条件组
           </el-tag>
+          <el-tooltip
+            content="条件组之间为'或'关系，满足任意一组即可触发；每个条件组内的条件为'且'关系，需要全部满足"
+            placement="top"
+          >
+            <Icon icon="ep:question-filled" class="text-[var(--el-color-info)] cursor-help" />
+          </el-tooltip>
         </div>
         <div class="flex items-center gap-8px">
           <el-button
@@ -33,63 +39,100 @@
       <!-- 条件组列表 -->
       <div
         v-if="trigger.conditionGroups && trigger.conditionGroups.length > 0"
-        class="flex flex-col gap-12px"
+        class="space-y-16px"
       >
-        <div
-          v-for="(group, groupIndex) in trigger.conditionGroups"
-          :key="`group-${groupIndex}`"
-          class="border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]"
-        >
+        <!-- 逻辑关系说明 -->
+        <div v-if="trigger.conditionGroups.length > 1" class="flex items-center justify-center">
           <div
-            class="flex items-center justify-between p-12px px-16px bg-[var(--el-fill-color-light)] border-b border-[var(--el-border-color-lighter)]"
+            class="flex items-center gap-8px px-12px py-6px bg-blue-50 border border-blue-200 rounded-full text-12px text-blue-600"
           >
-            <div class="flex items-center text-14px font-500 text-[var(--el-text-color-primary)]">
-              <span>条件组 {{ groupIndex + 1 }}</span>
-              <!-- TODO @puhui999：不用“且、或”哈。条件组之间，就是或；条件之间就是且 -->
-              <el-tag size="small" type="info" class="ml-8px">条件间为"且"关系</el-tag>
-            </div>
-            <el-button
-              type="danger"
-              size="small"
-              text
-              @click="removeConditionGroup(groupIndex)"
-              v-if="trigger.conditionGroups!.length > 1"
-            >
-              <Icon icon="ep:delete" />
-              删除组
-            </el-button>
+            <Icon icon="ep:info-filled" />
+            <span>条件组之间为"或"关系，满足任意一组即可触发</span>
           </div>
+        </div>
 
-          <ConditionGroupConfig
-            :model-value="group"
-            @update:model-value="(value) => updateConditionGroup(groupIndex, value)"
-            :trigger-type="trigger.type"
-            :product-id="trigger.productId"
-            :device-id="trigger.deviceId"
-            @validate="(result) => handleGroupValidate(groupIndex, result)"
-          />
+        <div class="relative">
+          <div
+            v-for="(group, groupIndex) in trigger.conditionGroups"
+            :key="`group-${groupIndex}`"
+            class="relative"
+          >
+            <!-- 条件组容器 -->
+            <div
+              class="border-2 border-[var(--el-border-color-lighter)] rounded-8px bg-[var(--el-fill-color-blank)] shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div
+                class="flex items-center justify-between p-16px bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-[var(--el-border-color-lighter)] rounded-t-6px"
+              >
+                <div class="flex items-center gap-12px">
+                  <div
+                    class="flex items-center gap-8px text-16px font-600 text-[var(--el-text-color-primary)]"
+                  >
+                    <div
+                      class="w-24px h-24px bg-blue-500 text-white rounded-full flex items-center justify-center text-12px font-bold"
+                    >
+                      {{ groupIndex + 1 }}
+                    </div>
+                    <span>条件组</span>
+                  </div>
+                  <el-tag size="small" type="success" class="font-500"> 组内条件为"且"关系 </el-tag>
+                </div>
+                <el-button
+                  type="danger"
+                  size="small"
+                  text
+                  @click="removeConditionGroup(groupIndex)"
+                  v-if="trigger.conditionGroups!.length > 1"
+                  class="hover:bg-red-50"
+                >
+                  <Icon icon="ep:delete" />
+                  删除组
+                </el-button>
+              </div>
+
+              <ConditionGroupConfig
+                :model-value="group"
+                @update:model-value="(value) => updateConditionGroup(groupIndex, value)"
+                :trigger-type="trigger.type"
+                :product-id="trigger.productId"
+                :device-id="trigger.deviceId"
+                @validate="(result) => handleGroupValidate(groupIndex, result)"
+              />
+            </div>
+
+            <!-- 条件组间的"或"连接符 -->
+            <div
+              v-if="groupIndex < trigger.conditionGroups!.length - 1"
+              class="flex items-center justify-center py-12px"
+            >
+              <div class="flex items-center gap-8px">
+                <!-- 连接线 -->
+                <div class="w-32px h-1px bg-orange-300"></div>
+                <!-- 或标签 -->
+                <div class="px-16px py-6px bg-orange-100 border-2 border-orange-300 rounded-full">
+                  <span class="text-14px font-600 text-orange-600">或</span>
+                </div>
+                <!-- 连接线 -->
+                <div class="w-32px h-1px bg-orange-300"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- 空状态 -->
       <div v-else class="py-40px text-center">
         <el-empty description="暂无触发条件">
-          <el-button type="primary" @click="addConditionGroup">
-            <Icon icon="ep:plus" />
-            添加第一个条件组
-          </el-button>
+          <template #description>
+            <div class="space-y-8px">
+              <p class="text-[var(--el-text-color-secondary)]">暂无触发条件</p>
+              <p class="text-12px text-[var(--el-text-color-placeholder)]">
+                请使用上方的"添加条件组"按钮来设置触发规则
+              </p>
+            </div>
+          </template>
         </el-empty>
       </div>
-    </div>
-
-    <!-- 验证结果 -->
-    <div v-if="validationMessage" class="mt-8px">
-      <el-alert
-        :title="validationMessage"
-        :type="isValid ? 'success' : 'error'"
-        :closable="false"
-        show-icon
-      />
     </div>
   </div>
 </template>
@@ -158,7 +201,7 @@ const addConditionGroup = () => {
 
   const newGroup: ConditionGroupFormData = {
     conditions: [],
-    logicOperator: 'AND'
+    logicOperator: 'AND' // 固定为AND，因为条件组内部条件间为"且"关系
   }
 
   trigger.value.conditionGroups.push(newGroup)

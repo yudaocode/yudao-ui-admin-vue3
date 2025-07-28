@@ -151,6 +151,8 @@ interface ActionFormData {
 
 interface ConditionGroupFormData {
   conditions: ConditionFormData[]
+  // 注意：条件组内部的条件固定为"且"关系，条件组之间固定为"或"关系
+  // logicOperator 字段保留用于兼容性，但在UI中固定为 'AND'
   logicOperator: 'AND' | 'OR'
 }
 
