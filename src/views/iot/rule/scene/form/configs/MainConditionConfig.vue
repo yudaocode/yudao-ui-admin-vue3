@@ -20,52 +20,30 @@
     </div>
 
     <!-- 主条件配置 -->
-    <div
-      v-else
-      class="border border-[var(--el-border-color-lighter)] rounded-8px bg-[var(--el-fill-color-blank)] shadow-sm"
-    >
-      <div
-        class="flex items-center justify-between p-16px bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-[var(--el-border-color-lighter)] rounded-t-6px"
-      >
-        <div class="flex items-center gap-12px">
-          <div
-            class="flex items-center gap-8px text-16px font-600 text-[var(--el-text-color-primary)]"
-          >
-            <div
-              class="w-24px h-24px bg-blue-500 text-white rounded-full flex items-center justify-center text-12px font-bold"
-            >
-              主
-            </div>
-            <span>主条件</span>
-          </div>
-          <el-tag size="small" type="primary" class="font-500">必须满足</el-tag>
+    <div v-else class="space-y-16px">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-8px">
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">主条件</span>
+          <el-tag size="small" type="primary">必须满足</el-tag>
         </div>
-        <el-button
-          type="danger"
-          size="small"
-          text
-          @click="removeMainCondition"
-          class="hover:bg-red-50"
-        >
+        <el-button type="danger" size="small" text @click="removeMainCondition">
           <Icon icon="ep:delete" />
           删除
         </el-button>
       </div>
 
-      <div class="p-16px">
-        <ConditionConfig
-          :model-value="modelValue"
-          @update:model-value="updateCondition"
-          :trigger-type="triggerType"
-          @validate="handleValidate"
-        />
-      </div>
+      <MainConditionInnerConfig
+        :model-value="modelValue"
+        @update:model-value="updateCondition"
+        :trigger-type="triggerType"
+        @validate="handleValidate"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import ConditionConfig from './ConditionConfig.vue'
+import MainConditionInnerConfig from './MainConditionInnerConfig.vue'
 import {
   ConditionFormData,
   IotRuleSceneTriggerConditionTypeEnum
@@ -84,7 +62,7 @@ interface Emits {
   (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 // 事件处理

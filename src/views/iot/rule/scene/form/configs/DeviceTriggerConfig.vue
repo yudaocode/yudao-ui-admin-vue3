@@ -1,23 +1,8 @@
 <!-- 设备触发配置组件 - 优化版本 -->
 <template>
   <div class="flex flex-col gap-16px">
-    <!-- 产品和设备选择 -->
-    <ProductDeviceSelector
-      v-model:product-id="trigger.productId"
-      v-model:device-id="trigger.deviceId"
-      @change="handleDeviceChange"
-    />
-
-    <!-- 主条件配置 -->
-    <div v-if="needsConditions" class="space-y-16px">
-      <div
-        class="flex items-center gap-8px p-12px px-16px bg-blue-50 rounded-6px border border-blue-200"
-      >
-        <Icon icon="ep:star-filled" class="text-blue-500 text-18px" />
-        <span class="text-14px font-600 text-blue-700">主条件配置</span>
-        <el-tag size="small" type="primary">必须满足</el-tag>
-      </div>
-
+    <!-- 主条件配置 - 默认直接展示 -->
+    <div class="space-y-16px">
       <MainConditionConfig
         v-model="trigger.mainCondition"
         :trigger-type="trigger.type"
@@ -26,13 +11,10 @@
     </div>
 
     <!-- 条件组配置 -->
-    <div v-if="needsConditions && trigger.mainCondition" class="space-y-16px">
+    <div v-if="trigger.mainCondition" class="space-y-16px">
       <div class="flex items-center justify-between">
-        <div
-          class="flex items-center gap-8px p-12px px-16px bg-green-50 rounded-6px border border-green-200"
-        >
-          <Icon icon="ep:connection" class="text-green-500 text-18px" />
-          <span class="text-14px font-600 text-green-700">附加条件组</span>
+        <div class="flex items-center gap-8px">
+          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">附加条件组</span>
           <el-tag size="small" type="success">与主条件为且关系</el-tag>
           <el-tag size="small" type="info">
             {{ trigger.conditionGroup?.subGroups?.length || 0 }}个子条件组
@@ -77,7 +59,7 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import ProductDeviceSelector from '../selectors/ProductDeviceSelector.vue'
+
 import MainConditionConfig from './MainConditionConfig.vue'
 import ConditionGroupContainerConfig from './ConditionGroupContainerConfig.vue'
 import {
@@ -111,9 +93,29 @@ const validationMessage = ref('')
 const isValid = ref(true)
 
 // 计算属性
-const needsConditions = computed(() => {
-  return trigger.value.type !== TriggerTypeEnum.DEVICE_STATE_UPDATE
-})
+
+// 初始化主条件
+const initMainCondition = () => {
+  if (!trigger.value.mainCondition) {
+    trigger.value.mainCondition = {
+      type: trigger.value.type, // 使用触发事件类型作为条件类型
+      productId: undefined,
+      deviceId: undefined,
+      identifier: '',
+      operator: '=',
+      param: ''
+    }
+  }
+}
+
+// 监听触发器类型变化，自动初始化主条件
+watch(
+  () => trigger.value.type,
+  () => {
+    initMainCondition()
+  },
+  { immediate: true }
+)
 
 // 新的事件处理函数
 const handleMainConditionValidate = (result: { valid: boolean; message: string }) => {
@@ -130,13 +132,8 @@ const addConditionGroup = () => {
 }
 
 // 事件处理
-const handleDeviceChange = ({ productId, deviceId }: { productId?: number; deviceId?: number }) => {
-  trigger.value.productId = productId
-  trigger.value.deviceId = deviceId
-  updateValidationResult()
-}
 
-const handleConditionGroupValidate = (result: { valid: boolean; message: string }) => {
+const handleConditionGroupValidate = () => {
   updateValidationResult()
 }
 
@@ -145,10 +142,10 @@ const removeConditionGroup = () => {
 }
 
 const updateValidationResult = () => {
-  // 基础验证
-  if (!trigger.value.productId || !trigger.value.deviceId) {
+  // 主条件验证
+  if (!mainConditionValidation.value.valid) {
     isValid.value = false
-    validationMessage.value = '请选择产品和设备'
+    validationMessage.value = mainConditionValidation.value.message
     emit('validate', { valid: false, message: validationMessage.value })
     return
   }

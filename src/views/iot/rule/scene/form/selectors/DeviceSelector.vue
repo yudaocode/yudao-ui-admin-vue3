@@ -80,6 +80,7 @@ const getDeviceList = async () => {
     console.error('获取设备列表失败:', error)
     deviceList.value = []
   } finally {
+    deviceList.value.push({ id: 0, deviceName: '全部设备' })
     deviceLoading.value = false
   }
 }

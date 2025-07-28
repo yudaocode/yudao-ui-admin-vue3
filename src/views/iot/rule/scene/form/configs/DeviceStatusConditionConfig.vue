@@ -1,13 +1,6 @@
 <!-- 设备状态条件配置组件 -->
 <template>
   <div class="flex flex-col gap-16px">
-    <div
-      class="flex items-center gap-8px p-12px px-16px bg-blue-50 rounded-6px border border-blue-200"
-    >
-      <Icon icon="ep:connection" class="text-blue-500 text-18px" />
-      <span class="text-14px font-500 text-blue-700">设备状态条件配置</span>
-    </div>
-
     <!-- 产品设备选择 -->
     <el-row :gutter="16">
       <el-col :span="12">
