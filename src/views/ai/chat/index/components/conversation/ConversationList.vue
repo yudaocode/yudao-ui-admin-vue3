@@ -1,6 +1,9 @@
 <!--  AI 对话  -->
 <template>
-  <el-aside width="260px" class="conversation-container h-100%">
+  <el-aside
+    width="260px"
+    class="h-100% relative flex flex-col justify-between px-2.5 pt-2.5 pb-0 overflow-hidden"
+  >
     <!-- 左顶部：对话 -->
     <div class="h-100%">
       <el-button class="w-1/1 py-4.5" type="primary" @click="createConversation">
@@ -22,7 +25,7 @@
       </el-input>
 
       <!-- 左中间：对话列表 -->
-      <div class="conversation-list">
+      <div class="overflow-auto h-full">
         <!-- 情况一：加载中 -->
         <el-empty v-if="loading" description="." :v-loading="loading" />
         <!-- 情况二：按照 group 分组，展示聊天会话 list 列表 -->
@@ -41,8 +44,11 @@
             @mouseout="hoverConversationId = ''"
           >
             <div
-              :class="
-                conversation.id === activeConversationId ? 'conversation active' : 'conversation'
+              class="flex flex-row justify-between flex-1 px-1.25 cursor-pointer rounded-1.25 items-center leading-7.5"
+              :style="
+                conversation.id === activeConversationId
+                  ? 'background-color: var(--el-color-primary-light-9); border: 1px solid var(--el-color-primary-light-7);'
+                  : ''
               "
             >
               <div class="flex flex-row items-center">
@@ -50,7 +56,20 @@
                   class="w-6.25 h-6.25 rounded-1.25 flex flex-row justify-center"
                   :src="conversation.roleAvatar || roleAvatarDefaultImg"
                 />
-                <span class="title">{{ conversation.title }}</span>
+                <span
+                  class="py-0.5 px-2.5"
+                  style="
+                    max-width: 220px;
+                    font-size: 14px;
+                    font-weight: 400;
+                    color: var(--el-text-color-regular);
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                  "
+                >
+                  {{ conversation.title }}
+                </span>
               </div>
               <div
                 class="right-0.5 flex flex-row justify-center"
@@ -370,51 +389,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-<style scoped lang="scss">
-.conversation-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 10px 10px 0;
-  overflow: hidden;
-
-  .conversation-list {
-    overflow: auto;
-    height: 100%;
-
-    .conversation {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      flex: 1;
-      padding: 0 5px;
-      cursor: pointer;
-      border-radius: 5px;
-      align-items: center;
-      line-height: 30px;
-
-      &.active {
-        background-color: var(--el-color-primary-light-9);
-        border: 1px solid var(--el-color-primary-light-7);
-
-        .button {
-          display: inline-block;
-        }
-      }
-
-      .title {
-        padding: 2px 10px;
-        max-width: 220px;
-        font-size: 14px;
-        font-weight: 400;
-        color: var(--el-text-color-regular);
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-    }
-  }
-}
-</style>
