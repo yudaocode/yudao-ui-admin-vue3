@@ -22,7 +22,7 @@
         <BasicInfoSection v-model="formData" :rules="formRules" />
 
         <!-- 触发器配置 -->
-        <TriggerSection v-model:triggers="formData.triggers" @validate="handleTriggerValidate" />
+        <TriggerSection v-model:trigger="formData.trigger" @validate="handleTriggerValidate" />
 
         <!-- 执行器配置 -->
         <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
@@ -45,6 +45,7 @@ import {
   RuleSceneFormData,
   IotRuleScene,
   IotRuleSceneActionTypeEnum,
+  IotRuleSceneTriggerTypeEnum,
   CommonStatusEnum
 } from '@/api/iot/rule/scene/scene.types'
 import { getBaseValidationRules } from '../utils/validation'
@@ -77,7 +78,17 @@ const createDefaultFormData = (): RuleSceneFormData => {
     name: '',
     description: '',
     status: CommonStatusEnum.ENABLE, // 默认启用状态
-    triggers: [],
+    trigger: {
+      type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
+      productId: undefined,
+      deviceId: undefined,
+      identifier: undefined,
+      operator: undefined,
+      value: undefined,
+      cronExpression: undefined,
+      mainCondition: undefined,
+      conditionGroup: undefined
+    },
     actions: []
   }
 }
@@ -91,23 +102,19 @@ const transformFormToApi = (formData: RuleSceneFormData): IotRuleScene => {
     name: formData.name,
     description: formData.description,
     status: Number(formData.status),
-    triggers:
-      formData.triggers?.map((trigger) => ({
-        type: trigger.type,
-        productKey: trigger.productId ? `product_${trigger.productId}` : undefined,
-        deviceNames: trigger.deviceId ? [`device_${trigger.deviceId}`] : undefined,
-        cronExpression: trigger.cronExpression,
-        conditions:
-          trigger.conditionGroups?.map((group) => ({
-            type: 'property',
-            identifier: trigger.identifier || '',
-            parameters: group.conditions.map((condition) => ({
-              identifier: condition.identifier,
-              operator: condition.operator,
-              value: condition.param
-            }))
-          })) || []
-      })) || [],
+    triggers: [
+      {
+        type: formData.trigger.type,
+        productKey: formData.trigger.productId
+          ? `product_${formData.trigger.productId}`
+          : undefined,
+        deviceNames: formData.trigger.deviceId
+          ? [`device_${formData.trigger.deviceId}`]
+          : undefined,
+        cronExpression: formData.trigger.cronExpression,
+        conditions: [] // TODO: 实现新的条件转换逻辑
+      }
+    ],
     actions:
       formData.actions?.map((action) => ({
         type: action.type,
@@ -131,16 +138,26 @@ const transformFormToApi = (formData: RuleSceneFormData): IotRuleScene => {
  * 将 API 响应数据转换为表单格式
  */
 const transformApiToForm = (apiData: IotRuleScene): RuleSceneFormData => {
+  const firstTrigger = apiData.triggers?.[0]
   return {
     ...apiData,
     status: Number(apiData.status), // 确保状态为数字类型
-    triggers:
-      apiData.triggers?.map((trigger) => ({
-        ...trigger,
-        type: Number(trigger.type),
-        // 为每个触发器添加唯一标识符，解决组件索引重用问题
-        key: generateUUID()
-      })) || [],
+    trigger: firstTrigger
+      ? {
+          ...firstTrigger,
+          type: Number(firstTrigger.type)
+        }
+      : {
+          type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
+          productId: undefined,
+          deviceId: undefined,
+          identifier: undefined,
+          operator: undefined,
+          value: undefined,
+          cronExpression: undefined,
+          mainCondition: undefined,
+          conditionGroup: undefined
+        },
     actions:
       apiData.actions?.map((action) => ({
         ...action,

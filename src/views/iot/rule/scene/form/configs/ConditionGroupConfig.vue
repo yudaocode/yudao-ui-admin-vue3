@@ -128,6 +128,7 @@ interface Props {
   triggerType: number
   productId?: number
   deviceId?: number
+  maxConditions?: number
 }
 
 interface Emits {
@@ -141,7 +142,7 @@ const emit = defineEmits<Emits>()
 const group = useVModel(props, 'modelValue', emit)
 
 // 配置常量
-const maxConditions = 5
+const maxConditions = computed(() => props.maxConditions || 3)
 
 // 验证状态
 const conditionValidations = ref<{ [key: number]: { valid: boolean; message: string } }>({})
@@ -172,12 +173,12 @@ const addCondition = () => {
     group.value.conditions = []
   }
 
-  if (group.value.conditions.length >= maxConditions) {
+  if (group.value.conditions.length >= maxConditions.value) {
     return
   }
 
   const newCondition: ConditionFormData = {
-    type: props.triggerType,
+    type: 2, // 默认为设备属性条件
     productId: props.productId || 0,
     deviceId: props.deviceId || 0,
     identifier: '',

@@ -1,0 +1,287 @@
+<!-- 当前时间条件配置组件 -->
+<template>
+  <div class="flex flex-col gap-16px">
+    <div class="flex items-center gap-8px p-12px px-16px bg-orange-50 rounded-6px border border-orange-200">
+      <Icon icon="ep:timer" class="text-orange-500 text-18px" />
+      <span class="text-14px font-500 text-orange-700">当前时间条件配置</span>
+    </div>
+
+    <el-row :gutter="16">
+      <!-- 时间操作符选择 -->
+      <el-col :span="8">
+        <el-form-item label="时间条件" required>
+          <el-select
+            :model-value="condition.operator"
+            @update:model-value="(value) => updateConditionField('operator', value)"
+            placeholder="请选择时间条件"
+            class="w-full"
+          >
+            <el-option
+              v-for="option in timeOperatorOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            >
+              <div class="flex items-center justify-between w-full">
+                <div class="flex items-center gap-8px">
+                  <Icon :icon="option.icon" :class="option.iconClass" />
+                  <span>{{ option.label }}</span>
+                </div>
+                <el-tag :type="option.tag" size="small">{{ option.category }}</el-tag>
+              </div>
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+
+      <!-- 时间值输入 -->
+      <el-col :span="8">
+        <el-form-item label="时间值" required>
+          <el-time-picker
+            v-if="needsTimeInput"
+            :model-value="condition.timeValue"
+            @update:model-value="(value) => updateConditionField('timeValue', value)"
+            placeholder="请选择时间"
+            format="HH:mm:ss"
+            value-format="HH:mm:ss"
+            class="w-full"
+          />
+          <el-date-picker
+            v-else-if="needsDateInput"
+            :model-value="condition.timeValue"
+            @update:model-value="(value) => updateConditionField('timeValue', value)"
+            type="datetime"
+            placeholder="请选择日期时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            class="w-full"
+          />
+          <div v-else class="text-[var(--el-text-color-placeholder)] text-14px">
+            无需设置时间值
+          </div>
+        </el-form-item>
+      </el-col>
+
+      <!-- 第二个时间值（范围条件） -->
+      <el-col :span="8" v-if="needsSecondTimeInput">
+        <el-form-item label="结束时间" required>
+          <el-time-picker
+            v-if="needsTimeInput"
+            :model-value="condition.timeValue2"
+            @update:model-value="(value) => updateConditionField('timeValue2', value)"
+            placeholder="请选择结束时间"
+            format="HH:mm:ss"
+            value-format="HH:mm:ss"
+            class="w-full"
+          />
+          <el-date-picker
+            v-else
+            :model-value="condition.timeValue2"
+            @update:model-value="(value) => updateConditionField('timeValue2', value)"
+            type="datetime"
+            placeholder="请选择结束日期时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            class="w-full"
+          />
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <!-- 条件预览 -->
+    <div v-if="conditionPreview" class="p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+      <div class="flex items-center gap-8px mb-8px">
+        <Icon icon="ep:view" class="text-[var(--el-color-info)] text-16px" />
+        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">条件预览</span>
+      </div>
+      <div class="pl-24px">
+        <code class="text-12px text-[var(--el-color-primary)] bg-[var(--el-fill-color-blank)] p-8px rounded-4px font-mono">{{ conditionPreview }}</code>
+      </div>
+    </div>
+
+    <!-- 验证结果 -->
+    <div v-if="validationMessage" class="mt-8px">
+      <el-alert
+        :title="validationMessage"
+        :type="isValid ? 'success' : 'error'"
+        :closable="false"
+        show-icon
+      />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useVModel } from '@vueuse/core'
+import { ConditionFormData, IotRuleSceneTriggerTimeOperatorEnum } from '@/api/iot/rule/scene/scene.types'
+
+/** 当前时间条件配置组件 */
+defineOptions({ name: 'CurrentTimeConditionConfig' })
+
+interface Props {
+  modelValue: ConditionFormData
+}
+
+interface Emits {
+  (e: 'update:modelValue', value: ConditionFormData): void
+  (e: 'validate', result: { valid: boolean; message: string }): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
+const condition = useVModel(props, 'modelValue', emit)
+
+// 时间操作符选项
+const timeOperatorOptions = [
+  {
+    value: IotRuleSceneTriggerTimeOperatorEnum.BEFORE_TIME.value,
+    label: IotRuleSceneTriggerTimeOperatorEnum.BEFORE_TIME.name,
+    icon: 'ep:arrow-left',
+    iconClass: 'text-blue-500',
+    tag: 'primary',
+    category: '时间点'
+  },
+  {
+    value: IotRuleSceneTriggerTimeOperatorEnum.AFTER_TIME.value,
+    label: IotRuleSceneTriggerTimeOperatorEnum.AFTER_TIME.name,
+    icon: 'ep:arrow-right',
+    iconClass: 'text-green-500',
+    tag: 'success',
+    category: '时间点'
+  },
+  {
+    value: IotRuleSceneTriggerTimeOperatorEnum.BETWEEN_TIME.value,
+    label: IotRuleSceneTriggerTimeOperatorEnum.BETWEEN_TIME.name,
+    icon: 'ep:sort',
+    iconClass: 'text-orange-500',
+    tag: 'warning',
+    category: '时间段'
+  },
+  {
+    value: IotRuleSceneTriggerTimeOperatorEnum.AT_TIME.value,
+    label: IotRuleSceneTriggerTimeOperatorEnum.AT_TIME.name,
+    icon: 'ep:position',
+    iconClass: 'text-purple-500',
+    tag: 'info',
+    category: '时间点'
+  },
+  {
+    value: IotRuleSceneTriggerTimeOperatorEnum.TODAY.value,
+    label: IotRuleSceneTriggerTimeOperatorEnum.TODAY.name,
+    icon: 'ep:calendar',
+    iconClass: 'text-red-500',
+    tag: 'danger',
+    category: '日期'
+  }
+]
+
+// 状态
+const validationMessage = ref('')
+const isValid = ref(true)
+
+// 计算属性
+const needsTimeInput = computed(() => {
+  const timeOnlyOperators = [
+    IotRuleSceneTriggerTimeOperatorEnum.BEFORE_TIME.value,
+    IotRuleSceneTriggerTimeOperatorEnum.AFTER_TIME.value,
+    IotRuleSceneTriggerTimeOperatorEnum.BETWEEN_TIME.value,
+    IotRuleSceneTriggerTimeOperatorEnum.AT_TIME.value
+  ]
+  return timeOnlyOperators.includes(condition.value.operator)
+})
+
+const needsDateInput = computed(() => {
+  return false // 暂时不支持日期输入，只支持时间
+})
+
+const needsSecondTimeInput = computed(() => {
+  return condition.value.operator === IotRuleSceneTriggerTimeOperatorEnum.BETWEEN_TIME.value
+})
+
+const conditionPreview = computed(() => {
+  if (!condition.value.operator) {
+    return ''
+  }
+  
+  const operatorOption = timeOperatorOptions.find(opt => opt.value === condition.value.operator)
+  const operatorLabel = operatorOption?.label || condition.value.operator
+  
+  if (condition.value.operator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
+    return `当前时间 ${operatorLabel}`
+  }
+  
+  if (!condition.value.timeValue) {
+    return `当前时间 ${operatorLabel} [未设置时间]`
+  }
+  
+  if (needsSecondTimeInput.value && condition.value.timeValue2) {
+    return `当前时间 ${operatorLabel} ${condition.value.timeValue} 和 ${condition.value.timeValue2}`
+  }
+  
+  return `当前时间 ${operatorLabel} ${condition.value.timeValue}`
+})
+
+// 事件处理
+const updateConditionField = (field: keyof ConditionFormData, value: any) => {
+  condition.value[field] = value
+  updateValidationResult()
+}
+
+const updateValidationResult = () => {
+  if (!condition.value.operator) {
+    isValid.value = false
+    validationMessage.value = '请选择时间条件'
+    emit('validate', { valid: false, message: validationMessage.value })
+    return
+  }
+
+  // 今日条件不需要时间值
+  if (condition.value.operator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
+    isValid.value = true
+    validationMessage.value = '当前时间条件配置验证通过'
+    emit('validate', { valid: true, message: validationMessage.value })
+    return
+  }
+
+  if (needsTimeInput.value && !condition.value.timeValue) {
+    isValid.value = false
+    validationMessage.value = '请设置时间值'
+    emit('validate', { valid: false, message: validationMessage.value })
+    return
+  }
+
+  if (needsSecondTimeInput.value && !condition.value.timeValue2) {
+    isValid.value = false
+    validationMessage.value = '请设置结束时间'
+    emit('validate', { valid: false, message: validationMessage.value })
+    return
+  }
+
+  isValid.value = true
+  validationMessage.value = '当前时间条件配置验证通过'
+  emit('validate', { valid: true, message: validationMessage.value })
+}
+
+// 监听变化
+watch(
+  () => [condition.value.operator, condition.value.timeValue, condition.value.timeValue2],
+  () => {
+    updateValidationResult()
+  },
+  { immediate: true }
+)
+
+// 监听操作符变化，清理不相关的时间值
+watch(
+  () => condition.value.operator,
+  (newOperator) => {
+    if (newOperator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
+      condition.value.timeValue = undefined
+      condition.value.timeValue2 = undefined
+    } else if (!needsSecondTimeInput.value) {
+      condition.value.timeValue2 = undefined
+    }
+  }
+)
+</script>
