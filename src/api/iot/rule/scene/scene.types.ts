@@ -46,6 +46,24 @@ const IotRuleSceneTriggerConditionParameterOperatorEnum = {
   NOT_NULL: { name: '非空', value: 'not null' } // 非空
 } as const
 
+// 条件类型枚举
+const IotRuleSceneTriggerConditionTypeEnum = {
+  DEVICE_STATUS: 1, // 设备状态
+  DEVICE_PROPERTY: 2, // 设备属性
+  CURRENT_TIME: 3 // 当前时间
+} as const
+
+// 时间运算符枚举
+const IotRuleSceneTriggerTimeOperatorEnum = {
+  BEFORE_TIME: { name: '在时间之前', value: 'before_time' }, // 在时间之前
+  AFTER_TIME: { name: '在时间之后', value: 'after_time' }, // 在时间之后
+  BETWEEN_TIME: { name: '在时间之间', value: 'between_time' }, // 在时间之间
+  AT_TIME: { name: '在指定时间', value: 'at_time' }, // 在指定时间
+  BEFORE_TODAY: { name: '在今日之前', value: 'before_today' }, // 在今日之前
+  AFTER_TODAY: { name: '在今日之后', value: 'after_today' }, // 在今日之后
+  TODAY: { name: '在今日之间', value: 'today' } // 在今日之间
+} as const
+
 // TODO @puhui999：下面 IotAlertConfigReceiveTypeEnum、DeviceStateEnum 没用到，貌似可以删除下？
 const IotAlertConfigReceiveTypeEnum = {
   SMS: 1, // 短信
@@ -126,7 +144,7 @@ interface RuleSceneFormData {
   name: string
   description?: string
   status: number
-  triggers: TriggerFormData[]
+  trigger: TriggerFormData // 改为单个触发器
   actions: ActionFormData[]
 }
 
@@ -138,7 +156,9 @@ interface TriggerFormData {
   operator?: string
   value?: string
   cronExpression?: string
-  conditionGroups?: ConditionGroupFormData[]
+  // 新的条件结构
+  mainCondition?: ConditionFormData // 主条件（必须满足）
+  conditionGroup?: ConditionGroupContainerFormData // 条件组容器（可选，与主条件为且关系）
 }
 
 interface ActionFormData {
@@ -149,18 +169,33 @@ interface ActionFormData {
   alertConfigId?: number
 }
 
+// 条件组容器（包含多个子条件组，子条件组间为或关系）
+interface ConditionGroupContainerFormData {
+  subGroups: SubConditionGroupFormData[] // 子条件组数组，子条件组间为或关系
+}
+
+// 子条件组（内部条件为且关系）
+interface SubConditionGroupFormData {
+  conditions: ConditionFormData[] // 条件数组，条件间为且关系
+}
+
+// 保留原有接口用于兼容性
 interface ConditionGroupFormData {
   conditions: ConditionFormData[]
+  // 注意：条件组内部的条件固定为"且"关系，条件组之间固定为"或"关系
+  // logicOperator 字段保留用于兼容性，但在UI中固定为 'AND'
   logicOperator: 'AND' | 'OR'
 }
 
 interface ConditionFormData {
-  type: number
-  productId: number
-  deviceId: number
-  identifier: string
-  operator: string
-  param: string
+  type: number // 条件类型：1-设备状态，2-设备属性，3-当前时间
+  productId?: number // 产品ID（设备状态和设备属性时必填）
+  deviceId?: number // 设备ID（设备状态和设备属性时必填）
+  identifier?: string // 标识符（设备属性时必填）
+  operator: string // 操作符
+  param: string // 参数值
+  timeValue?: string // 时间值（当前时间条件时使用）
+  timeValue2?: string // 第二个时间值（时间范围条件时使用）
 }
 
 // 主接口
@@ -173,12 +208,13 @@ interface IotRuleScene extends TenantBaseDO {
   actions: ActionConfig[] // 执行器数组（必填，至少一个）
 }
 
-// 工具类型
-// TODO @puhui999：这些在瞅瞅~
-type TriggerType = (typeof IotRuleSceneTriggerTypeEnum)[keyof typeof IotRuleSceneTriggerTypeEnum]
-type ActionType = (typeof IotRuleSceneActionTypeEnum)[keyof typeof IotRuleSceneActionTypeEnum]
-type MessageType = (typeof IotDeviceMessageTypeEnum)[keyof typeof IotDeviceMessageTypeEnum]
-type OperatorType =
+// 工具类型 - 从枚举中提取类型
+export type TriggerType =
+  (typeof IotRuleSceneTriggerTypeEnum)[keyof typeof IotRuleSceneTriggerTypeEnum]
+export type ActionType =
+  (typeof IotRuleSceneActionTypeEnum)[keyof typeof IotRuleSceneActionTypeEnum]
+export type MessageType = (typeof IotDeviceMessageTypeEnum)[keyof typeof IotDeviceMessageTypeEnum]
+export type OperatorType =
   (typeof IotRuleSceneTriggerConditionParameterOperatorEnum)[keyof typeof IotRuleSceneTriggerConditionParameterOperatorEnum]['value']
 
 // 表单验证规则类型
@@ -207,12 +243,16 @@ export {
   TriggerFormData,
   ActionFormData,
   ConditionGroupFormData,
+  ConditionGroupContainerFormData,
+  SubConditionGroupFormData,
   ConditionFormData,
   IotRuleSceneTriggerTypeEnum,
   IotRuleSceneActionTypeEnum,
   IotDeviceMessageTypeEnum,
   IotDeviceMessageIdentifierEnum,
   IotRuleSceneTriggerConditionParameterOperatorEnum,
+  IotRuleSceneTriggerConditionTypeEnum,
+  IotRuleSceneTriggerTimeOperatorEnum,
   IotAlertConfigReceiveTypeEnum,
   DeviceStateEnum,
   CommonStatusEnum,

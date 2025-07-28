@@ -1,15 +1,15 @@
 <template>
   <ContentWrap>
     <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-left">
-        <h2 class="page-title">
-          <Icon icon="ep:connection" class="title-icon" />
+    <div class="flex justify-between items-start mb-20px">
+      <div class="flex-1">
+        <h2 class="flex items-center m-0 mb-8px text-24px font-600 text-[#303133]">
+          <Icon icon="ep:connection" class="mr-12px text-[#409eff]" />
           场景联动规则
         </h2>
-        <p class="page-description"> 通过配置触发条件和执行动作，实现设备间的智能联动控制 </p>
+        <p class="m-0 text-[#606266] text-14px"> 通过配置触发条件和执行动作，实现设备间的智能联动控制 </p>
       </div>
-      <div class="header-right">
+      <div>
         <el-button type="primary" @click="handleAdd">
           <Icon icon="ep:plus" />
           新增规则
@@ -18,7 +18,7 @@
     </div>
 
     <!-- 搜索和筛选 -->
-    <el-card class="search-card" shadow="never">
+    <el-card class="mb-16px" shadow="never">
       <el-form
         ref="queryFormRef"
         :model="queryParams"
@@ -35,7 +35,6 @@
             class="!w-240px"
           />
         </el-form-item>
-        <!-- TODO @puhui999：字典 -->
         <el-form-item label="规则状态">
           <el-select
             v-model="queryParams.status"
@@ -43,8 +42,12 @@
             clearable
             class="!w-240px"
           >
-            <el-option label="启用" :value="0" />
-            <el-option label="禁用" :value="1" />
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -61,56 +64,55 @@
     </el-card>
 
     <!-- 统计卡片 -->
-    <!-- TODO @puhui999：这种需要服用的 stats-content、stats-info 的属性，到底 unocss 好，还是现有的 style css 好~ -->
-    <el-row :gutter="16" class="stats-row">
+    <el-row :gutter="16" class="mb-16px">
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon total">
+        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+          <div class="flex items-center">
+            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#667eea] to-[#764ba2]">
               <Icon icon="ep:document" />
             </div>
-            <div class="stats-info">
-              <div class="stats-number">{{ statistics.total }}</div>
-              <div class="stats-label">总规则数</div>
+            <div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.total }}</div>
+              <div class="text-14px text-[#909399] mt-4px">总规则数</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon enabled">
+        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+          <div class="flex items-center">
+            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#f093fb] to-[#f5576c]">
               <Icon icon="ep:check" />
             </div>
-            <div class="stats-info">
-              <div class="stats-number">{{ statistics.enabled }}</div>
-              <div class="stats-label">启用规则</div>
+            <div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.enabled }}</div>
+              <div class="text-14px text-[#909399] mt-4px">启用规则</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon disabled">
+        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+          <div class="flex items-center">
+            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#4facfe] to-[#00f2fe]">
               <Icon icon="ep:close" />
             </div>
-            <div class="stats-info">
-              <div class="stats-number">{{ statistics.disabled }}</div>
-              <div class="stats-label">禁用规则</div>
+            <div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.disabled }}</div>
+              <div class="text-14px text-[#909399] mt-4px">禁用规则</div>
             </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
-          <div class="stats-content">
-            <div class="stats-icon active">
+        <el-card class="cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-2px" shadow="hover">
+          <div class="flex items-center">
+            <div class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#43e97b] to-[#38f9d7]">
               <Icon icon="ep:lightning" />
             </div>
-            <div class="stats-info">
-              <div class="stats-number">{{ statistics.triggered }}</div>
-              <div class="stats-label">今日触发</div>
+            <div>
+              <div class="text-24px font-600 text-[#303133] leading-none">{{ statistics.triggered }}</div>
+              <div class="text-14px text-[#909399] mt-4px">今日触发</div>
             </div>
           </div>
         </el-card>
@@ -118,36 +120,29 @@
     </el-row>
 
     <!-- 数据表格 -->
-    <el-card class="table-card" shadow="never">
+    <el-card class="mb-20px" shadow="never">
       <el-table v-loading="loading" :data="list" stripe @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
         <el-table-column label="规则名称" prop="name" min-width="200">
           <template #default="{ row }">
-            <div class="rule-name-cell">
-              <span class="rule-name">{{ row.name }}</span>
-              <!-- TODO @puhui999：字典 -->
-              <el-tag
-                :type="row.status === 0 ? 'success' : 'danger'"
-                size="small"
-                class="status-tag"
-              >
-                {{ row.status === 0 ? '启用' : '禁用' }}
-              </el-tag>
+            <div class="flex items-center gap-8px">
+              <span class="font-500 text-[#303133]">{{ row.name }}</span>
+              <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="row.status" />
             </div>
-            <div v-if="row.description" class="rule-description">
+            <div v-if="row.description" class="text-12px text-[#909399] mt-4px">
               {{ row.description }}
             </div>
           </template>
         </el-table-column>
         <el-table-column label="触发条件" min-width="250">
           <template #default="{ row }">
-            <div class="trigger-summary">
+            <div class="flex flex-wrap gap-4px">
               <el-tag
                 v-for="(trigger, index) in getTriggerSummary(row)"
                 :key="index"
                 type="primary"
                 size="small"
-                class="trigger-tag"
+                class="m-0"
               >
                 {{ trigger }}
               </el-tag>
@@ -156,20 +151,19 @@
         </el-table-column>
         <el-table-column label="执行动作" min-width="250">
           <template #default="{ row }">
-            <div class="action-summary">
+            <div class="flex flex-wrap gap-4px">
               <el-tag
                 v-for="(action, index) in getActionSummary(row)"
                 :key="index"
                 type="success"
                 size="small"
-                class="action-tag"
+                class="m-0"
               >
                 {{ action }}
               </el-tag>
             </div>
           </template>
         </el-table-column>
-        <!-- TODO @puhui999：貌似要新增一个字段？ -->
         <el-table-column label="最近触发" prop="lastTriggeredTime" width="180">
           <template #default="{ row }">
             <span v-if="row.lastTriggeredTime">
@@ -185,8 +179,7 @@
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <!-- TODO @puhui999：间隙大了点 -->
-            <div class="action-buttons">
+            <div class="flex gap-8px">
               <el-button type="primary" link @click="handleEdit(row)">
                 <Icon icon="ep:edit" />
                 编辑
@@ -197,10 +190,9 @@
                 @click="handleToggleStatus(row)"
               >
                 <Icon :icon="row.status === 0 ? 'ep:video-pause' : 'ep:video-play'" />
-                <!-- TODO @puhui999：翻译，字典 -->
                 {{ row.status === 0 ? '禁用' : '启用' }}
               </el-button>
-              <el-button type="danger" link @click="handleDelete(row)">
+              <el-button type="danger" link @click="handleDelete(row.id)">
                 <Icon icon="ep:delete" />
                 删除
               </el-button>
@@ -219,11 +211,11 @@
     </el-card>
 
     <!-- 批量操作 -->
-    <div v-if="selectedRows.length > 0" class="batch-actions">
+    <div v-if="selectedRows.length > 0" class="fixed bottom-20px left-1/2 transform -translate-x-1/2 z-1000">
       <el-card shadow="always">
-        <div class="batch-content">
-          <span class="batch-info"> 已选择 {{ selectedRows.length }} 项 </span>
-          <div class="batch-buttons">
+        <div class="flex items-center gap-16px">
+          <span class="font-500 text-[#303133]"> 已选择 {{ selectedRows.length }} 项 </span>
+          <div class="flex gap-8px">
             <el-button @click="handleBatchEnable">
               <Icon icon="ep:video-play" />
               批量启用
@@ -247,17 +239,17 @@
 </template>
 
 <script setup lang="ts">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
-import RuleSceneForm from './components/RuleSceneForm.vue'
+import RuleSceneForm from './form/RuleSceneForm.vue'
 import { IotRuleScene } from '@/api/iot/rule/scene/scene.types'
-import { getRuleSceneSummary } from './utils/transform'
 import { formatDate } from '@/utils/formatTime'
 
 /** 场景联动规则管理页面 */
 defineOptions({ name: 'IoTSceneRule' })
 
-const message = useMessage()
-// const { t } = useI18n() // TODO @puhui999：可以删除
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 // 查询参数
 const queryParams = reactive({
@@ -267,12 +259,11 @@ const queryParams = reactive({
   status: undefined as number | undefined
 })
 
-// 数据状态
-// TODO @puhui999：变量名，和别的页面保持一致哈
-const loading = ref(true)
-const list = ref<IotRuleScene[]>([])
-const total = ref(0)
-const selectedRows = ref<IotRuleScene[]>([])
+const loading = ref(true) // 列表的加载中
+const list = ref<IotRuleScene[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const selectedRows = ref<IotRuleScene[]>([]) // 选中的行数据
+const queryFormRef = ref() // 搜索的表单
 
 // 表单状态
 const formVisible = ref(false)
@@ -286,8 +277,96 @@ const statistics = ref({
   triggered: 0
 })
 
-// 获取列表数据
-// TODO @puhui999：接入
+/**
+ * 格式化CRON表达式显示
+ */
+const formatCronExpression = (cron: string): string => {
+  if (!cron) return ''
+
+  // 简单的CRON表达式解析和格式化
+  const parts = cron.trim().split(' ')
+  if (parts.length < 5) return cron
+
+  const [second, minute, hour] = parts
+
+  // 构建可读的描述
+  let description = ''
+
+  if (second === '0' && minute === '0') {
+    if (hour === '*') {
+      description = '每小时'
+    } else if (hour.includes('/')) {
+      const interval = hour.split('/')[1]
+      description = `每${interval}小时`
+    } else {
+      description = `每天${hour}点`
+    }
+  } else if (second === '0') {
+    if (minute === '*') {
+      description = '每分钟'
+    } else if (minute.includes('/')) {
+      const interval = minute.split('/')[1]
+      description = `每${interval}分钟`
+    } else {
+      description = `每小时第${minute}分钟`
+    }
+  } else {
+    if (second === '*') {
+      description = '每秒'
+    } else if (second.includes('/')) {
+      const interval = second.split('/')[1]
+      description = `每${interval}秒`
+    }
+  }
+
+  return description || cron
+}
+
+/**
+ * 获取规则摘要信息
+ */
+const getRuleSceneSummary = (rule: IotRuleScene) => {
+  const triggerSummary =
+    rule.triggers?.map((trigger) => {
+      switch (trigger.type) {
+        case 1:
+          return `设备状态变更 (${trigger.deviceNames?.length || 0}个设备)`
+        case 2:
+          return `属性上报 (${trigger.deviceNames?.length || 0}个设备)`
+        case 3:
+          return `事件上报 (${trigger.deviceNames?.length || 0}个设备)`
+        case 4:
+          return `服务调用 (${trigger.deviceNames?.length || 0}个设备)`
+        case 100:
+          return `定时触发 (${formatCronExpression(trigger.cronExpression || '')})`
+        default:
+          return '未知触发类型'
+      }
+    }) || []
+
+  const actionSummary =
+    rule.actions?.map((action) => {
+      switch (action.type) {
+        case 1:
+          return `设备属性设置 (${action.deviceControl?.deviceNames?.length || 0}个设备)`
+        case 2:
+          return `设备服务调用 (${action.deviceControl?.deviceNames?.length || 0}个设备)`
+        case 100:
+          return '发送告警通知'
+        case 101:
+          return '发送邮件通知'
+        default:
+          return '未知执行类型'
+      }
+    }) || []
+
+  return {
+    triggerSummary: triggerSummary.join(', ') || '无触发器',
+    actionSummary: actionSummary.join(', ') || '无执行器'
+  }
+}
+
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
@@ -355,9 +434,7 @@ const getList = async () => {
   }
 }
 
-// TODO @puhui999：方法注释，使用 /** */ 风格
-
-// 更新统计数据
+/** 更新统计数据 */
 const updateStatistics = () => {
   statistics.value = {
     total: list.value.length,
@@ -377,19 +454,20 @@ const getActionSummary = (rule: IotRuleScene) => {
   return getRuleSceneSummary(rule).actionSummary
 }
 
-// 事件处理
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryParams.name = ''
   queryParams.status = undefined
   handleQuery()
 }
 
-// TODO @puhui999：这个要不还是使用 open 方式，只是弹出的右侧；
+/** 添加/修改操作 */
 const handleAdd = () => {
   currentRule.value = undefined
   formVisible.value = true
@@ -400,78 +478,76 @@ const handleEdit = (row: IotRuleScene) => {
   formVisible.value = true
 }
 
-// TODO @puhui999：handleDelete、handleToggleStatus 保持和别的模块一致哇？
-const handleDelete = async (row: IotRuleScene) => {
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
   try {
-    await ElMessageBox.confirm('确定要删除这个规则吗？', '提示', {
-      type: 'warning'
-    })
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    // await RuleSceneApi.deleteRuleScene(id)
 
-    // 这里应该调用删除API
-    message.success('删除成功')
-    getList()
-  } catch (error) {
-    // 用户取消删除
-  }
+    // 模拟删除操作
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
+/** 修改状态 */
 const handleToggleStatus = async (row: IotRuleScene) => {
   try {
-    const newStatus = row.status === 0 ? 1 : 0
-    const action = newStatus === 0 ? '启用' : '禁用'
+    // 修改状态的二次确认
+    const text = row.status === 0 ? '禁用' : '启用'
+    await message.confirm('确认要' + text + '"' + row.name + '"吗?')
+    // 发起修改状态
+    // await RuleSceneApi.updateRuleSceneStatus(row.id, row.status === 0 ? 1 : 0)
 
-    await ElMessageBox.confirm(`确定要${action}这个规则吗？`, '提示', {
-      type: 'warning'
-    })
-
-    // 这里应该调用状态切换API
-    row.status = newStatus
-    message.success(`${action}成功`)
+    // 模拟状态切换
+    row.status = row.status === 0 ? 1 : 0
+    message.success(text + '成功')
+    // 刷新统计
     updateStatistics()
-  } catch (error) {
-    // 用户取消操作
+  } catch {
+    // 取消后，进行恢复按钮
+    row.status = row.status === 0 ? 1 : 0
   }
 }
 
+/** 多选框选中数据 */
 const handleSelectionChange = (selection: IotRuleScene[]) => {
   selectedRows.value = selection
 }
 
-// TODO @puhui999：batch 操作的逻辑，要不和其它 UI 界面保持一致，或者相对一致哈；
+/** 批量启用操作 */
 const handleBatchEnable = async () => {
   try {
-    await ElMessageBox.confirm(`确定要启用选中的 ${selectedRows.value.length} 个规则吗？`, '提示', {
-      type: 'warning'
-    })
-
+    await message.confirm(`确定要启用选中的 ${selectedRows.value.length} 个规则吗？`)
     // 这里应该调用批量启用API
+    // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 0)
+
+    // 模拟批量启用
     selectedRows.value.forEach((row) => {
       row.status = 0
     })
-
     message.success('批量启用成功')
     updateStatistics()
-  } catch (error) {
-    // 用户取消操作
-  }
+  } catch {}
 }
 
+/** 批量禁用操作 */
 const handleBatchDisable = async () => {
   try {
-    await ElMessageBox.confirm(`确定要禁用选中的 ${selectedRows.value.length} 个规则吗？`, '提示', {
-      type: 'warning'
-    })
-
+    await message.confirm(`确定要禁用选中的 ${selectedRows.value.length} 个规则吗？`)
     // 这里应该调用批量禁用API
+    // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 1)
+
+    // 模拟批量禁用
     selectedRows.value.forEach((row) => {
       row.status = 1
     })
-
     message.success('批量禁用成功')
     updateStatistics()
-  } catch (error) {
-    // 用户取消操作
-  }
+  } catch {}
 }
 
 const handleBatchDelete = async () => {
@@ -494,165 +570,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-/** TODO @puhui999：看看下面的，是不是可以用 unocss 替代 */
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-}
 
-.header-left {
-  flex: 1;
-}
-
-.page-title {
-  display: flex;
-  align-items: center;
-  margin: 0 0 8px 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.title-icon {
-  margin-right: 12px;
-  color: #409eff;
-}
-
-.page-description {
-  margin: 0;
-  color: #606266;
-  font-size: 14px;
-}
-
-.search-card {
-  margin-bottom: 16px;
-}
-
-.stats-row {
-  margin-bottom: 16px;
-}
-
-.stats-card {
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.stats-card:hover {
-  transform: translateY(-2px);
-}
-
-.stats-content {
-  display: flex;
-  align-items: center;
-}
-
-.stats-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: white;
-  margin-right: 16px;
-}
-
-.stats-icon.total {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.stats-icon.enabled {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.stats-icon.disabled {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.stats-icon.active {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.stats-number {
-  font-size: 24px;
-  font-weight: 600;
-  color: #303133;
-  line-height: 1;
-}
-
-.stats-label {
-  font-size: 14px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.table-card {
-  margin-bottom: 20px;
-}
-
-.rule-name-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.rule-name {
-  font-weight: 500;
-  color: #303133;
-}
-
-.status-tag {
-  flex-shrink: 0;
-}
-
-.rule-description {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.trigger-summary,
-.action-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.trigger-tag,
-.action-tag {
-  margin: 0;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.batch-actions {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-}
-
-.batch-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.batch-info {
-  font-weight: 500;
-  color: #303133;
-}
-
-.batch-buttons {
-  display: flex;
-  gap: 8px;
-}
-</style>

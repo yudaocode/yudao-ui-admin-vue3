@@ -1,15 +1,11 @@
 /**
  * IoT 场景联动表单验证工具函数
  */
-import {
-  FormValidationRules,
-  IotRuleScene,
-  TriggerConfig,
-  ActionConfig
-} from '@/api/iot/rule/scene/scene.types'
+import { FormValidationRules, TriggerConfig, ActionConfig } from '@/api/iot/rule/scene/scene.types'
 import {
   IotRuleSceneTriggerTypeEnum,
-  IotRuleSceneActionTypeEnum
+  IotRuleSceneActionTypeEnum,
+  CommonStatusEnum
 } from '@/api/iot/rule/scene/scene.types'
 
 /** 基础表单验证规则 */
@@ -20,7 +16,12 @@ export const getBaseValidationRules = (): FormValidationRules => ({
   ],
   status: [
     { required: true, message: '场景状态不能为空', trigger: 'change' },
-    { type: 'enum', enum: [0, 1], message: '状态值必须为0或1', trigger: 'change' }
+    {
+      type: 'enum',
+      enum: [CommonStatusEnum.ENABLE, CommonStatusEnum.DISABLE],
+      message: '状态值必须为启用或禁用',
+      trigger: 'change'
+    }
   ],
   description: [
     { type: 'string', max: 200, message: '场景描述不能超过200个字符', trigger: 'blur' }
@@ -178,87 +179,4 @@ export function validateActionConfig(action: ActionConfig): { valid: boolean; me
   }
 
   return { valid: false, message: '未知的执行类型' }
-}
-
-// TODO @puhui999：貌似没用到？
-/** 验证完整的场景联动规则 */
-export function validateRuleScene(ruleScene: IotRuleScene): { valid: boolean; message?: string } {
-  // 基础字段验证
-  if (!ruleScene.name || ruleScene.name.trim().length === 0) {
-    return { valid: false, message: '场景名称不能为空' }
-  }
-  if (ruleScene.status !== 0 && ruleScene.status !== 1) {
-    return { valid: false, message: '场景状态必须为0或1' }
-  }
-  if (!ruleScene.triggers || ruleScene.triggers.length === 0) {
-    return { valid: false, message: '至少需要一个触发器' }
-  }
-  if (!ruleScene.actions || ruleScene.actions.length === 0) {
-    return { valid: false, message: '至少需要一个执行器' }
-  }
-  // 验证每个触发器
-  for (let i = 0; i < ruleScene.triggers.length; i++) {
-    const triggerResult = validateTriggerConfig(ruleScene.triggers[i])
-    if (!triggerResult.valid) {
-      return { valid: false, message: `触发器${i + 1}: ${triggerResult.message}` }
-    }
-  }
-  // 验证每个执行器
-  for (let i = 0; i < ruleScene.actions.length; i++) {
-    const actionResult = validateActionConfig(ruleScene.actions[i])
-    if (!actionResult.valid) {
-      return { valid: false, message: `执行器${i + 1}: ${actionResult.message}` }
-    }
-  }
-  return { valid: true }
-}
-
-// TODO @puhui999：下面 getOperatorOptions、getTriggerTypeOptions、getActionTypeOptions 三个貌似没用到？如果用到的话，要不放到 yudao-ui-admin-vue3/src/views/iot/utils/constants.ts 里
-
-/**
- * 获取操作符选项
- */
-export function getOperatorOptions() {
-  // TODO @puhui999：这个能不能从枚举计算出来，减少后续添加枚举的维护
-  return [
-    { value: '=', label: '等于' },
-    { value: '!=', label: '不等于' },
-    { value: '>', label: '大于' },
-    { value: '>=', label: '大于等于' },
-    { value: '<', label: '小于' },
-    { value: '<=', label: '小于等于' },
-    { value: 'in', label: '包含' },
-    { value: 'not in', label: '不包含' },
-    { value: 'between', label: '介于之间' },
-    { value: 'not between', label: '不在之间' },
-    { value: 'like', label: '字符串匹配' },
-    { value: 'not null', label: '非空' }
-  ]
-}
-
-/**
- * 获取触发类型选项
- */
-export function getTriggerTypeOptions() {
-  // TODO @puhui999：这个能不能从枚举计算出来，减少后续添加枚举的维护
-  return [
-    { value: IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE, label: '设备上下线变更' },
-    { value: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST, label: '物模型属性上报' },
-    { value: IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST, label: '设备事件上报' },
-    { value: IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE, label: '设备服务调用' },
-    { value: IotRuleSceneTriggerTypeEnum.TIMER, label: '定时触发' }
-  ]
-}
-
-/**
- * 获取执行类型选项
- */
-export function getActionTypeOptions() {
-  // TODO @puhui999：这个能不能从枚举计算出来，减少后续添加枚举的维护
-  return [
-    { value: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET, label: '设备属性设置' },
-    { value: IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE, label: '设备服务调用' },
-    { value: IotRuleSceneActionTypeEnum.ALERT_TRIGGER, label: '告警触发' },
-    { value: IotRuleSceneActionTypeEnum.ALERT_RECOVER, label: '告警恢复' }
-  ]
 }
