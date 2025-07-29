@@ -55,6 +55,7 @@ import {
   ElCollapse,
   ElCollapseItem,
   ElCard,
+  ElTreeSelect
   // ElFormItem,
   // ElOption
 } from 'element-plus'
@@ -97,6 +98,7 @@ const components = [
   ElTableColumn,
   ElTabPane,
   ElTabs,
+  ElTreeSelect,
   ElDropdown,
   ElDropdownMenu,
   ElDropdownItem,
@@ -119,7 +121,7 @@ const components = [
   Editor,
   ElCollapse,
   ElCollapseItem,
-  ElCard,
+  ElCard
 ]
 
 // 参考 http://www.form-create.com/v3/element-ui/auto-import.html 文档

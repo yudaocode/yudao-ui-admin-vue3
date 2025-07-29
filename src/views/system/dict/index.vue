@@ -80,13 +80,24 @@
           <Icon class="mr-5px" icon="ep:download" />
           导出
         </el-button>
+        <el-button
+          v-hasPermi="['system:dict:delete']"
+          :disabled="checkedIds.length === 0"
+          plain
+          type="danger"
+          @click="handleDeleteBatch"
+        >
+          <Icon class="mr-5px" icon="ep:delete" />
+          批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column align="center" label="字典编号" prop="id" />
       <el-table-column align="center" label="字典名称" prop="name" show-overflow-tooltip />
       <el-table-column align="center" label="字典类型" prop="type" width="300" />
@@ -203,6 +214,24 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     // 发起删除
     await DictTypeApi.deleteDictType(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 批量删除按钮操作 */
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (rows: DictTypeApi.DictTypeVO[]) => {
+  checkedIds.value = rows.map((row) => row.id)
+}
+
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起批量删除
+    await DictTypeApi.deleteDictTypeList(checkedIds.value)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

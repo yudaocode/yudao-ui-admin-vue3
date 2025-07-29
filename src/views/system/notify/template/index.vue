@@ -65,13 +65,23 @@
         >
           <Icon icon="ep:plus" class="mr-5px" />新增
         </el-button>
+        <el-button
+          type="danger"
+          plain
+          :disabled="checkedIds.length === 0"
+          @click="handleDeleteBatch"
+          v-hasPermi="['system:notify-template:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" />批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column
         label="模板编码"
         align="center"
@@ -165,6 +175,7 @@ import NotifyTemplateSendForm from './NotifyTemplateSendForm.vue'
 defineOptions({ name: 'NotifySmsTemplate' })
 
 const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 const loading = ref(false) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -216,7 +227,25 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     // 发起删除
     await NotifyTemplateApi.deleteNotifyTemplate(id)
-    message.success('删除成功')
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 批量删除按钮操作 */
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (rows: NotifyTemplateApi.NotifyTemplateVO[]) => {
+  checkedIds.value = rows.map((row) => row.id!)
+}
+
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起批量删除
+    await NotifyTemplateApi.deleteNotifyTemplateList(checkedIds.value)
+    message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
   } catch {}

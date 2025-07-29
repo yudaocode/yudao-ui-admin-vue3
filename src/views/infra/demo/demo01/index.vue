@@ -1,6 +1,4 @@
 <template>
-  <doc-alert title="代码生成（单表）" url="https://doc.iocoder.cn/new-feature/" />
-
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -20,7 +18,12 @@
         />
       </el-form-item>
       <el-form-item label="性别" prop="sex">
-        <el-select v-model="queryParams.sex" placeholder="请选择性别" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.sex"
+          placeholder="请选择性别"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
             :key="dict.value"
@@ -37,7 +40,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
+          class="!w-220px"
         />
       </el-form-item>
       <el-form-item>
@@ -60,13 +63,30 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
+        <el-button
+          type="danger"
+          plain
+          :disabled="isEmpty(checkedIds)"
+          @click="handleDeleteBatch"
+          v-hasPermi="['infra:demo01-contact:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleRowCheckboxChange"
+    >
+      <el-table-column type="selection" width="55" />
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="名字" align="center" prop="name" />
       <el-table-column label="性别" align="center" prop="sex">
@@ -90,7 +110,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
             link
@@ -126,25 +146,27 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as Demo01ContactApi from '@/api/infra/demo/demo01'
+import { Demo01ContactApi, Demo01Contact } from '@/api/infra/demo/demo01'
 import Demo01ContactForm from './Demo01ContactForm.vue'
 
+/** 示例联系人 列表 */
 defineOptions({ name: 'Demo01Contact' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref([]) // 列表的数据
+const list = ref<Demo01Contact[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  sex: null,
-  createTime: []
+  name: undefined,
+  sex: undefined,
+  createTime: [],
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -190,6 +212,22 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 批量删除示例联系人 */
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    await Demo01ContactApi.deleteDemo01ContactList(checkedIds.value);
+    message.success(t('common.delSuccess'))
+    await getList();
+  } catch {}
+}
+
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (records: Demo01Contact[]) => {
+  checkedIds.value = records.map((item) => item.id);
 }
 
 /** 导出按钮操作 */

@@ -43,6 +43,11 @@ export const deleteNotifyTemplate = async (id: number) => {
   return await request.delete({ url: '/system/notify-template/delete?id=' + id })
 }
 
+// 批量删除站内信模板
+export const deleteNotifyTemplateList = async (ids: number[]) => {
+  return await request.delete({ url: '/system/notify-template/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 发送站内信
 export const sendNotify = (data: NotifySendReqVO) => {
   return request.post({ url: '/system/notify-template/send-notify', data })

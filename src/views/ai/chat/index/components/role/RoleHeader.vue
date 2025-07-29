@@ -1,10 +1,10 @@
 <!-- header -->
 <template>
-  <el-header class="chat-header">
-    <div class="title">
+  <el-header class="flex flex-row justify-between items-center px-10px whitespace-nowrap text-ellipsis w-full" :style="{ backgroundColor: 'var(--el-bg-color-page)' }">
+    <div class="text-20px font-bold overflow-hidden max-w-220px" :style="{ color: 'var(--el-text-color-primary)' }">
       {{ title }}
     </div>
-    <div class="title-right">
+    <div class="flex flex-row">
       <slot></slot>
     </div>
   </el-header>
@@ -19,30 +19,3 @@ defineProps({
   }
 })
 </script>
-
-<style scoped lang="scss">
-.chat-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 10px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  background-color: #ececec;
-  width: 100%;
-
-  .title {
-    font-size: 20px;
-    font-weight: bold;
-    overflow: hidden;
-    color: #3e3e3e;
-    max-width: 220px;
-  }
-
-  .title-right {
-    display: flex;
-    flex-direction: row;
-  }
-}
-</style>

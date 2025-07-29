@@ -105,3 +105,8 @@ export const createCodegenList = (data) => {
 export const deleteCodegenTable = (id: number) => {
   return request.delete({ url: '/infra/codegen/delete?tableId=' + id })
 }
+
+// 批量删除代码生成表定义
+export const deleteCodegenTableList = (ids: number[]) => {
+  return request.delete({ url: '/infra/codegen/delete-list', params: { tableIds: ids.join(',') } })
+}

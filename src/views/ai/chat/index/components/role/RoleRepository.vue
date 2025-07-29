@@ -1,17 +1,19 @@
 <!-- chat 角色仓库 -->
 <template>
-  <el-container class="role-container">
+  <el-container
+    class="role-container absolute w-full h-full m-0 p-0 left-0 right-0 top-0 bottom-0 bg-[var(--el-bg-color)] overflow-hidden flex !flex-col"
+  >
     <ChatRoleForm ref="formRef" @success="handlerAddRoleSuccess" />
-    <!-- header  -->
+    <!-- header -->
     <RoleHeader title="角色仓库" class="relative" />
-    <!--  main  -->
-    <el-main class="role-main">
-      <div class="search-container">
+    <!-- main -->
+    <el-main class="flex-1 overflow-hidden m-0 !p-0 relative">
+      <div class="mx-5 mt-5 mb-0 absolute right-0 -top-1.25 z-100">
         <!-- 搜索按钮 -->
         <el-input
           :loading="loading"
           v-model="search"
-          class="search-input"
+          class="!w-60"
           size="default"
           placeholder="请输入搜索的内容"
           :suffix-icon="Search"
@@ -23,13 +25,21 @@
           @click="handlerAddRole"
           class="ml-20px"
         >
-          <Icon icon="ep:user" style="margin-right: 5px;" />
+          <Icon icon="ep:user" class="mr-1.25" />
           添加角色
         </el-button>
       </div>
       <!-- tabs -->
-      <el-tabs v-model="activeTab" class="tabs" @tab-click="handleTabsClick">
-        <el-tab-pane class="role-pane" label="我的角色" name="my-role">
+      <el-tabs
+        v-model="activeTab"
+        @tab-click="handleTabsClick"
+        class="relative h-full [&_.el-tabs__nav-scroll]:my-2.5 [&_.el-tabs__nav-scroll]:mx-5"
+      >
+        <el-tab-pane
+          label="我的角色"
+          name="my-role"
+          class="flex flex-col h-full overflow-y-auto relative"
+        >
           <RoleList
             :loading="loading"
             :role-list="myRoleList"
@@ -43,7 +53,7 @@
         </el-tab-pane>
         <el-tab-pane label="公共角色" name="public-role">
           <RoleCategoryList
-            class="role-category-list"
+            class="mx-6.75"
             :category-list="categoryList"
             :active="activeCategory"
             @on-category-click="handlerCategoryClick"
@@ -64,15 +74,15 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue'
+import { ref } from 'vue'
 import RoleHeader from './RoleHeader.vue'
 import RoleList from './RoleList.vue'
 import ChatRoleForm from '@/views/ai/model/chatRole/ChatRoleForm.vue'
 import RoleCategoryList from './RoleCategoryList.vue'
-import {ChatRoleApi, ChatRolePageReqVO, ChatRoleVO} from '@/api/ai/model/chatRole'
-import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
-import {Search} from '@element-plus/icons-vue'
-import {TabsPaneContext} from 'element-plus'
+import { ChatRoleApi, ChatRolePageReqVO, ChatRoleVO } from '@/api/ai/model/chatRole'
+import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
+import { Search } from '@element-plus/icons-vue'
+import { TabsPaneContext } from 'element-plus'
 
 const router = useRouter() // 路由对象
 
@@ -220,70 +230,9 @@ onMounted(async () => {
   await getActiveTabsRole()
 })
 </script>
-<!-- 覆盖 element ui css -->
+<!-- 覆盖 element plus css -->
 <style lang="scss">
-.el-tabs__content {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-}
 .el-tabs__nav-scroll {
   margin: 10px 20px;
-}
-</style>
-<!-- 样式 -->
-<style scoped lang="scss">
-// 跟容器
-.role-container {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-color: #ffffff;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-
-  .role-main {
-    flex: 1;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
-    position: relative;
-
-    .search-container {
-      margin: 20px 20px 0px 20px;
-      position: absolute;
-      right: 0;
-      top: -5px;
-      z-index: 100;
-    }
-
-    .search-input {
-      width: 240px;
-    }
-
-    .tabs {
-      position: relative;
-      height: 100%;
-
-      .role-category-list {
-        margin: 0 27px;
-      }
-    }
-
-    .role-pane {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      overflow-y: auto;
-      position: relative;
-    }
-  }
 }
 </style>

@@ -39,7 +39,13 @@
           </div>
         </div>
         <div v-if="activity.nodeType === NodeType.CHILD_PROCESS_NODE">
-          <el-button type="primary" plain size="small" @click="handleChildProcess(activity)">
+          <el-button
+            type="primary"
+            plain
+            size="small"
+            @click="handleChildProcess(activity)"
+            :disabled="!activity.processInstanceId"
+          >
             查看子流程
           </el-button>
         </div>
@@ -324,7 +330,9 @@ const handleUserSelectConfirm = (activityId: string, userList: any[]) => {
 
 /** 跳转子流程 */
 const handleChildProcess = (activity: any) => {
-  // TODO @lesan：貌似跳不过去？！
+  if (!activity.processInstanceId) {
+    return
+  }
   push({
     name: 'BpmProcessInstanceDetail',
     query: {

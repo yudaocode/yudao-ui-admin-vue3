@@ -72,6 +72,7 @@ watch(
   (options) => {
     if (echartRef) {
       echartRef?.setOption(options)
+      echartRef?.resize()
     }
   },
   {

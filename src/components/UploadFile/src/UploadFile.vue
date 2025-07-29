@@ -122,7 +122,9 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
     return false
   }
   message.success('正在上传文件，请稍候...')
+  // 只有在验证通过后才增加计数器
   uploadNumber.value++
+  return true
 }
 // 处理上传的文件发生变化
 // const handleFileChange = (uploadFile: UploadFile): void => {
@@ -149,6 +151,8 @@ const handleExceed: UploadProps['onExceed'] = (): void => {
 // 上传错误提示
 const excelUploadError: UploadProps['onError'] = (): void => {
   message.error('导入数据失败，请您重新上传！')
+  // 上传失败时减少计数器，避免后续上传被阻塞
+  uploadNumber.value = Math.max(0, uploadNumber.value - 1)
 }
 // 删除上传文件
 const handleRemove = (file: UploadFile) => {

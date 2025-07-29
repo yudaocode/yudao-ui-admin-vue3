@@ -61,6 +61,11 @@ export const deleteTenant = (id: number) => {
   return request.delete({ url: '/system/tenant/delete?id=' + id })
 }
 
+// 批量删除租户
+export const deleteTenantList = (ids: number[]) => {
+  return request.delete({ url: '/system/tenant/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 导出租户
 export const exportTenant = (params: TenantExportReqVO) => {
   return request.download({ url: '/system/tenant/export-excel', params })

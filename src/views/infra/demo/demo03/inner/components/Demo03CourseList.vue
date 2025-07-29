@@ -1,7 +1,13 @@
 <template>
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+    >
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="名字" align="center" prop="name" />
       <el-table-column label="分数" align="center" prop="score" />
@@ -17,13 +23,10 @@
 </template>
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/inner'
-
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
+import { Demo03StudentApi } from '@/api/infra/demo/demo03/inner'
 
 const props = defineProps<{
-  studentId: undefined // 学生编号（主表的关联字段）
+  studentId?: number // 学生编号（主表的关联字段）
 }>()
 const loading = ref(false) // 列表的加载中
 const list = ref([]) // 列表的数据
@@ -36,12 +39,6 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
 }
 
 /** 初始化 **/

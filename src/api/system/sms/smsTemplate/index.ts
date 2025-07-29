@@ -46,6 +46,11 @@ export const deleteSmsTemplate = (id: number) => {
   return request.delete({ url: '/system/sms-template/delete?id=' + id })
 }
 
+// 批量删除短信模板
+export const deleteSmsTemplateList = (ids: number[]) => {
+  return request.delete({ url: '/system/sms-template/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 导出短信模板
 export const exportSmsTemplate = (params) => {
   return request.download({

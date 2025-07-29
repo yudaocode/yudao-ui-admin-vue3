@@ -354,12 +354,13 @@ const resetTaskForm = () => {
 const changeCandidateStrategy = () => {
   userTaskForm.value.candidateParam = []
   deptLevel.value = 1
-  if (userTaskForm.value.candidateStrategy === CandidateStrategy.FORM_USER) {
-    // 特殊处理表单内用户字段，当只有发起人选项时应选中发起人
-    if (!userFieldOnFormOptions.value || userFieldOnFormOptions.value.length <= 1) {
-      userTaskForm.value.candidateStrategy = CandidateStrategy.START_USER
-    }
-  }
+  // 注释 by 芋艿：这个交互很多用户反馈费解，https://t.zsxq.com/xNmas 所以暂时屏蔽
+  // if (userTaskForm.value.candidateStrategy === CandidateStrategy.FORM_USER) {
+  //   // 特殊处理表单内用户字段，当只有发起人选项时应选中发起人
+  //   if (!userFieldOnFormOptions.value || userFieldOnFormOptions.value.length <= 1) {
+  //     userTaskForm.value.candidateStrategy = CandidateStrategy.START_USER
+  //   }
+  // }
   updateElementTask()
 }
 

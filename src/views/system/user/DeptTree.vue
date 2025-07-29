@@ -46,8 +46,24 @@ const filterNode = (name: string, data: Tree) => {
 }
 
 /** 处理部门被点击 */
-const handleNodeClick = async (row: { [key: string]: any }) => {
-  emits('node-click', row)
+let currentNode: any = {}
+const handleNodeClick = async (row: { [key: string]: any }, treeNode: any) => {
+  // 判断选中状态
+  if (currentNode && currentNode.name === row.name) {
+    treeNode.checked = !treeNode.checked
+  } else {
+    treeNode.checked = true
+  }
+  if (treeNode.checked) {
+    // 选中
+    currentNode = row
+    emits('node-click', row)
+  } else {
+    // 取消选中
+    treeRef.value!.setCurrentKey(undefined)
+    emits('node-click', undefined)
+    currentNode = null
+  }
 }
 const emits = defineEmits(['node-click'])
 
