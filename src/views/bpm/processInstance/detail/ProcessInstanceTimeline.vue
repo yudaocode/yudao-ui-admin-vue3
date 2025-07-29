@@ -28,7 +28,8 @@
       <div class="flex flex-col items-start gap2" :id="`activity-task-${activity.id}-${index}`">
         <!-- 第一行：节点名称、时间 -->
         <div class="flex w-full">
-          <div class="font-bold"> {{ activity.name }} <span v-if="activity.status === TaskStatusEnum.SKIP">【跳过】</span>
+          <div class="font-bold">
+            {{ activity.name }} <span v-if="activity.status === TaskStatusEnum.SKIP">【跳过】</span>
           </div>
           <!-- 信息：时间 -->
           <div
@@ -234,7 +235,7 @@ const statusIconMap2 = {
 
 const statusIconMap = {
   // 跳过
-  '-2': { color: '#909398', icon: ArrowDown},
+  '-2': { color: '#909398', icon: ArrowDown },
   // 审批未开始
   '-1': { color: '#909398', icon: Clock },
   '0': { color: '#00b32a', icon: Clock },
