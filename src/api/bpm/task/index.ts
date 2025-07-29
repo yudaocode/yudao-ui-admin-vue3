@@ -5,6 +5,10 @@ import request from '@/config/axios'
  */
 export enum TaskStatusEnum {
   /**
+   * 跳过
+   */
+  SKIP = -2,
+  /**
    * 未开始
    */
   NOT_START = -1,

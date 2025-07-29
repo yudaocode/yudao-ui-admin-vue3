@@ -131,6 +131,8 @@ export interface SimpleFlowNode {
   signEnable?: boolean
   // 审批意见
   reasonRequire?: boolean
+  // 跳过表达式
+  skipExpression?: string
   // 触发器设置
   triggerSetting?: TriggerSetting
   // 子流程
