@@ -107,7 +107,7 @@ interface ActionConfig {
   alertConfigId?: number // 告警配置ID（告警恢复时必填）
 }
 
-// 表单数据接口
+// 表单数据接口 - 直接对应后端 DO 结构
 interface RuleSceneFormData {
   id?: number
   name: string
@@ -117,57 +117,38 @@ interface RuleSceneFormData {
   actions: ActionFormData[]
 }
 
+// 触发器表单数据 - 直接对应 TriggerDO
 interface TriggerFormData {
-  type: number
-  productId?: number
-  deviceId?: number
-  identifier?: string
-  operator?: string
-  value?: string
-  cronExpression?: string
-  // 新的条件结构
-  mainCondition?: ConditionFormData // 主条件（必须满足）
-  conditionGroup?: ConditionGroupContainerFormData // 条件组容器（可选，与主条件为且关系）
+  type: number // 触发类型
+  productId?: number // 产品编号
+  deviceId?: number // 设备编号
+  identifier?: string // 物模型标识符
+  operator?: string // 操作符
+  value?: string // 参数值
+  cronExpression?: string // CRON 表达式
+  conditionGroups?: TriggerConditionFormData[][] // 条件组（二维数组）
 }
 
-interface ActionFormData {
-  type: number
-  productId?: number
-  deviceId?: number
-  params?: Record<string, any>
-  alertConfigId?: number
-}
-
-// 条件组容器（包含多个子条件组，子条件组间为或关系）
-interface ConditionGroupContainerFormData {
-  subGroups: SubConditionGroupFormData[] // 子条件组数组，子条件组间为或关系
-}
-
-// 子条件组（内部条件为且关系）
-interface SubConditionGroupFormData {
-  conditions: ConditionFormData[] // 条件数组，条件间为且关系
-}
-
-// 保留原有接口用于兼容性
-interface ConditionGroupFormData {
-  conditions: ConditionFormData[]
-  // 注意：条件组内部的条件固定为"且"关系，条件组之间固定为"或"关系
-  // logicOperator 字段保留用于兼容性，但在UI中固定为 'AND'
-  logicOperator: 'AND' | 'OR'
-}
-
-interface ConditionFormData {
+// 触发条件表单数据 - 直接对应 TriggerConditionDO
+interface TriggerConditionFormData {
   type: number // 条件类型：1-设备状态，2-设备属性，3-当前时间
-  productId?: number // 产品ID（设备状态和设备属性时必填）
-  deviceId?: number // 设备ID（设备状态和设备属性时必填）
-  identifier?: string // 标识符（设备属性时必填）
+  productId?: number // 产品编号
+  deviceId?: number // 设备编号
+  identifier?: string // 标识符
   operator: string // 操作符
   param: string // 参数值
-  timeValue?: string // 时间值（当前时间条件时使用）
-  timeValue2?: string // 第二个时间值（时间范围条件时使用）
 }
 
-// 主接口
+// 执行器表单数据 - 直接对应 ActionDO
+interface ActionFormData {
+  type: number // 执行类型
+  productId?: number // 产品编号
+  deviceId?: number // 设备编号
+  params?: Record<string, any> // 请求参数
+  alertConfigId?: number // 告警配置编号
+}
+
+// 主接口 - 原有的 API 接口格式（保持兼容性）
 interface IotRuleScene extends TenantBaseDO {
   id?: number // 场景编号（新增时为空）
   name: string // 场景名称（必填）
@@ -175,6 +156,47 @@ interface IotRuleScene extends TenantBaseDO {
   status: number // 场景状态：0-开启，1-关闭
   triggers: TriggerConfig[] // 触发器数组（必填，至少一个）
   actions: ActionConfig[] // 执行器数组（必填，至少一个）
+}
+
+// 后端 DO 接口 - 匹配后端数据结构
+interface IotRuleSceneDO {
+  id?: number // 场景编号
+  name: string // 场景名称
+  description?: string // 场景描述
+  status: number // 场景状态：0-开启，1-关闭
+  triggers: TriggerDO[] // 触发器数组
+  actions: ActionDO[] // 执行器数组
+}
+
+// 触发器 DO 结构
+interface TriggerDO {
+  type: number // 触发类型
+  productId?: number // 产品编号
+  deviceId?: number // 设备编号
+  identifier?: string // 物模型标识符
+  operator?: string // 操作符
+  value?: string // 参数值
+  cronExpression?: string // CRON 表达式
+  conditionGroups?: TriggerConditionDO[][] // 条件组（二维数组）
+}
+
+// 触发条件 DO 结构
+interface TriggerConditionDO {
+  type: number // 条件类型
+  productId?: number // 产品编号
+  deviceId?: number // 设备编号
+  identifier?: string // 标识符
+  operator: string // 操作符
+  param: string // 参数
+}
+
+// 执行器 DO 结构
+interface ActionDO {
+  type: number // 执行类型
+  productId?: number // 产品编号
+  deviceId?: number // 设备编号
+  params?: Record<string, any> // 请求参数
+  alertConfigId?: number // 告警配置编号
 }
 
 // 工具类型 - 从枚举中提取类型
@@ -202,6 +224,10 @@ interface FormValidationRules {
 
 export {
   IotRuleScene,
+  IotRuleSceneDO,
+  TriggerDO,
+  TriggerConditionDO,
+  ActionDO,
   TriggerConfig,
   TriggerCondition,
   TriggerConditionParameter,
@@ -209,11 +235,8 @@ export {
   ActionDeviceControl,
   RuleSceneFormData,
   TriggerFormData,
+  TriggerConditionFormData,
   ActionFormData,
-  ConditionGroupFormData,
-  ConditionGroupContainerFormData,
-  SubConditionGroupFormData,
-  ConditionFormData,
   IotRuleSceneActionTypeEnum,
   IotDeviceMessageTypeEnum,
   IotRuleSceneTriggerConditionParameterOperatorEnum,

@@ -40,37 +40,37 @@
 <script setup lang="ts">
 import MainConditionInnerConfig from './MainConditionInnerConfig.vue'
 import {
-  ConditionFormData,
-  IotRuleSceneTriggerConditionTypeEnum
+  IotRuleSceneTriggerConditionTypeEnum,
+  TriggerFormData
 } from '@/api/iot/rule/scene/scene.types'
 
 /** 主条件配置组件 */
 defineOptions({ name: 'MainConditionConfig' })
 
 defineProps<{
-  modelValue?: ConditionFormData
+  modelValue?: TriggerFormData
   triggerType: number
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value?: ConditionFormData): void
+  (e: 'update:modelValue', value?: TriggerFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 
 // 事件处理
 const addMainCondition = () => {
-  const newCondition: ConditionFormData = {
+  const newCondition: TriggerFormData = {
     type: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY, // 默认为设备属性
     productId: undefined,
     deviceId: undefined,
     identifier: '',
     operator: '=',
-    param: ''
+    value: ''
   }
   emit('update:modelValue', newCondition)
 }
 
-const updateCondition = (condition: ConditionFormData) => {
+const updateCondition = (condition: TriggerFormData) => {
   emit('update:modelValue', condition)
 }
 

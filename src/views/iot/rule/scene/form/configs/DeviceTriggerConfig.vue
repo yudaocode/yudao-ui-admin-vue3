@@ -1,10 +1,10 @@
-<!-- 设备触发配置组件 - 优化版本 -->
+<!-- 设备触发配置组件 -->
 <template>
   <div class="flex flex-col gap-16px">
     <!-- 主条件配置 - 默认直接展示 -->
     <div class="space-y-16px">
       <MainConditionConfig
-        v-model="trigger.mainCondition"
+        v-model="trigger"
         :trigger-type="trigger.type"
         @validate="handleMainConditionValidate"
       />

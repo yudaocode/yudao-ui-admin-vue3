@@ -148,8 +148,7 @@ const addTrigger = () => {
     operator: undefined,
     value: undefined,
     cronExpression: undefined,
-    mainCondition: undefined,
-    conditionGroup: undefined
+    conditionGroups: [] // 空的条件组数组
   }
   triggers.value.push(newTrigger)
 }

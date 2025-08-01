@@ -41,9 +41,11 @@ import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
 import {
   IotRuleScene,
+  IotRuleSceneDO,
   IotRuleSceneActionTypeEnum,
   RuleSceneFormData,
-  TriggerFormData
+  TriggerFormData,
+  TriggerConditionFormData
 } from '@/api/iot/rule/scene/scene.types'
 import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
 import { ElMessage } from 'element-plus'
@@ -91,8 +93,7 @@ const createDefaultFormData = (): RuleSceneFormData => {
         operator: undefined,
         value: undefined,
         cronExpression: undefined,
-        mainCondition: undefined,
-        conditionGroup: undefined
+        conditionGroups: [] // 空的条件组数组
       }
     ],
     actions: []
@@ -100,49 +101,10 @@ const createDefaultFormData = (): RuleSceneFormData => {
 }
 
 /**
- * 将表单数据转换为 API 请求格式
+ * 将表单数据转换为后端 DO 格式
+ * 由于数据结构已对齐，转换变得非常简单
  */
-const convertFormToVO = (formData: RuleSceneFormData): IotRuleScene => {
-  // 构建单个触发器的条件
-  const buildTriggerConditions = (trigger: TriggerFormData) => {
-    const conditions: any[] = []
-
-    // 处理主条件
-    if (trigger.mainCondition) {
-      const mainCondition = trigger.mainCondition
-      conditions.push({
-        type: mainCondition.type === 2 ? 'property' : 'event',
-        identifier: mainCondition.identifier || '',
-        parameters: [
-          {
-            operator: mainCondition.operator,
-            value: mainCondition.param
-          }
-        ]
-      })
-    }
-
-    // 处理条件组
-    if (trigger.conditionGroup?.subGroups) {
-      trigger.conditionGroup.subGroups.forEach((subGroup) => {
-        subGroup.conditions.forEach((condition) => {
-          conditions.push({
-            type: condition.type === 2 ? 'property' : 'event',
-            identifier: condition.identifier || '',
-            parameters: [
-              {
-                operator: condition.operator,
-                value: condition.param
-              }
-            ]
-          })
-        })
-      })
-    }
-
-    return conditions
-  }
-
+const convertFormToVO = (formData: RuleSceneFormData): IotRuleSceneDO => {
   return {
     id: formData.id,
     name: formData.name,
@@ -150,79 +112,41 @@ const convertFormToVO = (formData: RuleSceneFormData): IotRuleScene => {
     status: Number(formData.status),
     triggers: formData.triggers.map((trigger) => ({
       type: trigger.type,
-      productKey: trigger.productId ? `product_${trigger.productId}` : undefined,
-      deviceNames: trigger.deviceId ? [`device_${trigger.deviceId}`] : undefined,
+      productId: trigger.productId,
+      deviceId: trigger.deviceId,
+      identifier: trigger.identifier,
+      operator: trigger.operator,
+      value: trigger.value,
       cronExpression: trigger.cronExpression,
-      conditions: buildTriggerConditions(trigger)
+      conditionGroups: trigger.conditionGroups || []
     })),
-    actions:
-      formData.actions?.map((action) => ({
-        type: action.type,
-        alertConfigId: action.alertConfigId,
-        deviceControl:
-          action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET ||
-          action.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
-            ? {
-                productKey: action.productId ? `product_${action.productId}` : '',
-                deviceNames: action.deviceId ? [`device_${action.deviceId}`] : [],
-                type:
-                  action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
-                    ? 'property'
-                    : 'service',
-                identifier:
-                  action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET ? 'set' : 'invoke',
-                params: action.params || {}
-              }
-            : undefined
-      })) || []
-  } as IotRuleScene
+    actions: formData.actions?.map((action) => ({
+      type: action.type,
+      productId: action.productId,
+      deviceId: action.deviceId,
+      params: action.params,
+      alertConfigId: action.alertConfigId
+    })) || []
+  }
 }
 
 /**
- * 将 API 响应数据转换为表单格式
+ * 将后端 DO 数据转换为表单格式
+ * 由于数据结构已对齐，转换变得非常简单
  */
-const convertVOToForm = (apiData: IotRuleScene): RuleSceneFormData => {
-  // 解析单个触发器的条件
-  const parseConditions = (trigger: any) => {
-    if (!trigger?.conditions?.length) {
-      return {
-        mainCondition: undefined,
-        conditionGroup: undefined
-      }
-    }
-
-    // 简化处理：将第一个条件作为主条件
-    const firstCondition = trigger.conditions[0]
-    const mainCondition = {
-      type: firstCondition.type === 'property' ? 2 : 3,
-      productId: undefined, // 需要从 productKey 解析
-      deviceId: undefined, // 需要从 deviceNames 解析
-      identifier: firstCondition.identifier,
-      operator: firstCondition.parameters?.[0]?.operator || '=',
-      param: firstCondition.parameters?.[0]?.value || ''
-    }
-
-    return {
-      mainCondition,
-      conditionGroup: undefined // 暂时简化处理
-    }
-  }
-
+const convertVOToForm = (apiData: IotRuleSceneDO): RuleSceneFormData => {
   // 转换所有触发器
   const triggers = apiData.triggers?.length
-    ? apiData.triggers.map((trigger) => {
-        const conditionData = parseConditions(trigger)
-        return {
-          type: Number(trigger.type),
-          productId: undefined, // 需要从 productKey 解析
-          deviceId: undefined, // 需要从 deviceNames 解析
-          identifier: undefined,
-          operator: undefined,
-          value: undefined,
-          cronExpression: trigger.cronExpression,
-          ...conditionData
-        }
-      })
+    ? apiData.triggers.map((trigger: any) => ({
+        type: Number(trigger.type),
+        productId: trigger.productId,
+        deviceId: trigger.deviceId,
+        identifier: trigger.identifier,
+        operator: trigger.operator,
+        value: trigger.value,
+        cronExpression: trigger.cronExpression,
+        conditionGroups: trigger.conditionGroups || []
+      }))
     : [
         {
           type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
@@ -232,22 +156,23 @@ const convertVOToForm = (apiData: IotRuleScene): RuleSceneFormData => {
           operator: undefined,
           value: undefined,
           cronExpression: undefined,
-          mainCondition: undefined,
-          conditionGroup: undefined
+          conditionGroups: []
         }
       ]
 
   return {
-    ...apiData,
+    id: apiData.id,
+    name: apiData.name,
+    description: apiData.description,
     status: Number(apiData.status),
     triggers,
     actions:
-      apiData.actions?.map((action) => ({
-        ...action,
+      apiData.actions?.map((action: any) => ({
         type: Number(action.type),
-        productId: undefined, // 需要从 deviceControl.productKey 解析
-        deviceId: undefined, // 需要从 deviceControl.deviceNames 解析
-        params: action.deviceControl?.params || {},
+        productId: action.productId,
+        deviceId: action.deviceId,
+        params: action.params || {},
+        alertConfigId: action.alertConfigId,
         // 为每个执行器添加唯一标识符，解决组件索引重用问题
         key: generateUUID()
       })) || []
@@ -321,9 +246,13 @@ const handleSubmit = async () => {
   // 提交请求
   submitLoading.value = true
   try {
+    console.log(formData.value)
     // 转换数据格式
     const apiData = convertFormToVO(formData.value)
-
+    if (true) {
+      console.log('转换后', apiData)
+      return
+    }
     // 调用API保存数据
     if (isEdit.value) {
       // 更新场景联动规则
