@@ -1,5 +1,5 @@
 <template>
-  <!-- TODO @puhui999：这个抽屉的高度太高了？！ -->
+  <!-- 场景联动规则表单抽屉 - 优化高度和布局 -->
   <el-drawer
     v-model="drawerVisible"
     :title="drawerTitle"
@@ -8,29 +8,28 @@
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     @close="handleClose"
-    class="[--el-drawer-padding-primary:20px]"
   >
-    <div class="h-[calc(100vh-120px)] overflow-y-auto p-20px pb-80px">
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="formRules"
-        label-width="120px"
-        class="flex flex-col gap-24px"
-      >
-        <!-- 基础信息配置 -->
-        <BasicInfoSection v-model="formData" :rules="formRules" />
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
+      <!-- 基础信息配置 -->
+      <BasicInfoSection v-model="formData" :rules="formRules" />
 
-        <!-- 触发器配置 -->
-        <TriggerSection v-model:trigger="formData.trigger" @validate="handleTriggerValidate" />
+      <!-- 触发器配置 -->
+      <TriggerSection v-model:trigger="formData.trigger" @validate="handleTriggerValidate" />
 
-        <!-- 执行器配置 -->
-        <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
-      </el-form>
-    </div>
+      <!-- 执行器配置 -->
+      <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
+    </el-form>
     <template #footer>
-      <el-button :disabled="submitLoading" type="primary" @click="handleSubmit">确 定</el-button>
-      <el-button @click="handleClose">取 消</el-button>
+      <div class="drawer-footer">
+        <el-button :disabled="submitLoading" type="primary" @click="handleSubmit">
+          <Icon icon="ep:check" />
+          确 定
+        </el-button>
+        <el-button @click="handleClose">
+          <Icon icon="ep:close" />
+          取 消
+        </el-button>
+      </div>
     </template>
   </el-drawer>
 </template>
@@ -41,37 +40,35 @@ import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
 import {
-  RuleSceneFormData,
+  CommonStatusEnum,
   IotRuleScene,
   IotRuleSceneActionTypeEnum,
   IotRuleSceneTriggerTypeEnum,
-  CommonStatusEnum
+  RuleSceneFormData
 } from '@/api/iot/rule/scene/scene.types'
-import { getBaseValidationRules } from '../utils/validation'
 import { ElMessage } from 'element-plus'
 import { generateUUID } from '@/utils'
 
 /** IoT 场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
 
-// TODO @puhui999：是不是融合到 props
-interface Props {
+/** 组件属性定义 */
+const props = defineProps<{
+  /** 抽屉显示状态 */
   modelValue: boolean
+  /** 编辑的规则数据（新增时为空） */
   ruleScene?: IotRuleScene
-}
+}>()
 
-// TODO @puhui999：Emits 是不是融合到 emit
-interface Emits {
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'success'): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+/** 组件事件定义 */
+const emit = defineEmits<{
+  /** 更新抽屉显示状态 */
+  'update:modelValue': [value: boolean]
+  /** 操作成功事件 */
+  success: []
+}>()
 
 const drawerVisible = useVModel(props, 'modelValue', emit) // 是否可见
-
-// TODO @puhui999：使用 /** 注释风格哈 */
 
 /** 创建默认的表单数据 */
 const createDefaultFormData = (): RuleSceneFormData => {
@@ -94,11 +91,50 @@ const createDefaultFormData = (): RuleSceneFormData => {
   }
 }
 
-// TODO @puhui999：使用 convertFormToVO；下面也是类似哈；
 /**
  * 将表单数据转换为 API 请求格式
  */
-const transformFormToApi = (formData: RuleSceneFormData): IotRuleScene => {
+const convertFormToVO = (formData: RuleSceneFormData): IotRuleScene => {
+  // 构建触发器条件
+  const buildTriggerConditions = () => {
+    const conditions: any[] = []
+
+    // 处理主条件
+    if (formData.trigger.mainCondition) {
+      const mainCondition = formData.trigger.mainCondition
+      conditions.push({
+        type: mainCondition.type === 2 ? 'property' : 'event',
+        identifier: mainCondition.identifier || '',
+        parameters: [
+          {
+            operator: mainCondition.operator,
+            value: mainCondition.param
+          }
+        ]
+      })
+    }
+
+    // 处理条件组
+    if (formData.trigger.conditionGroup?.subGroups) {
+      formData.trigger.conditionGroup.subGroups.forEach((subGroup) => {
+        subGroup.conditions.forEach((condition) => {
+          conditions.push({
+            type: condition.type === 2 ? 'property' : 'event',
+            identifier: condition.identifier || '',
+            parameters: [
+              {
+                operator: condition.operator,
+                value: condition.param
+              }
+            ]
+          })
+        })
+      })
+    }
+
+    return conditions
+  }
+
   return {
     id: formData.id,
     name: formData.name,
@@ -114,7 +150,7 @@ const transformFormToApi = (formData: RuleSceneFormData): IotRuleScene => {
           ? [`device_${formData.trigger.deviceId}`]
           : undefined,
         cronExpression: formData.trigger.cronExpression,
-        conditions: [] // TODO: 实现新的条件转换逻辑
+        conditions: buildTriggerConditions()
       }
     ],
     actions:
@@ -127,8 +163,12 @@ const transformFormToApi = (formData: RuleSceneFormData): IotRuleScene => {
             ? {
                 productKey: action.productId ? `product_${action.productId}` : '',
                 deviceNames: action.deviceId ? [`device_${action.deviceId}`] : [],
-                type: 'property',
-                identifier: 'set',
+                type:
+                  action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
+                    ? 'property'
+                    : 'service',
+                identifier:
+                  action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET ? 'set' : 'invoke',
                 params: action.params || {}
               }
             : undefined
@@ -139,15 +179,55 @@ const transformFormToApi = (formData: RuleSceneFormData): IotRuleScene => {
 /**
  * 将 API 响应数据转换为表单格式
  */
-const transformApiToForm = (apiData: IotRuleScene): RuleSceneFormData => {
+const convertVOToForm = (apiData: IotRuleScene): RuleSceneFormData => {
   const firstTrigger = apiData.triggers?.[0]
+
+  // 解析触发器条件
+  const parseConditions = (trigger: any) => {
+    if (!trigger?.conditions?.length) {
+      return {
+        mainCondition: undefined,
+        conditionGroup: undefined
+      }
+    }
+
+    // 简化处理：将第一个条件作为主条件
+    const firstCondition = trigger.conditions[0]
+    const mainCondition = {
+      type: firstCondition.type === 'property' ? 2 : 3,
+      productId: undefined, // 需要从 productKey 解析
+      deviceId: undefined, // 需要从 deviceNames 解析
+      identifier: firstCondition.identifier,
+      operator: firstCondition.parameters?.[0]?.operator || '=',
+      param: firstCondition.parameters?.[0]?.value || ''
+    }
+
+    return {
+      mainCondition,
+      conditionGroup: undefined // 暂时简化处理
+    }
+  }
+
+  const conditionData = firstTrigger
+    ? parseConditions(firstTrigger)
+    : {
+        mainCondition: undefined,
+        conditionGroup: undefined
+      }
+
   return {
     ...apiData,
-    status: Number(apiData.status), // 确保状态为数字类型
+    status: Number(apiData.status),
     trigger: firstTrigger
       ? {
-          ...firstTrigger,
-          type: Number(firstTrigger.type)
+          type: Number(firstTrigger.type),
+          productId: undefined, // 需要从 productKey 解析
+          deviceId: undefined, // 需要从 deviceNames 解析
+          identifier: undefined,
+          operator: undefined,
+          value: undefined,
+          cronExpression: firstTrigger.cronExpression,
+          ...conditionData
         }
       : {
           type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
@@ -164,6 +244,9 @@ const transformApiToForm = (apiData: IotRuleScene): RuleSceneFormData => {
       apiData.actions?.map((action) => ({
         ...action,
         type: Number(action.type),
+        productId: undefined, // 需要从 deviceControl.productKey 解析
+        deviceId: undefined, // 需要从 deviceControl.deviceNames 解析
+        params: action.deviceControl?.params || {},
         // 为每个执行器添加唯一标识符，解决组件索引重用问题
         key: generateUUID()
       })) || []
@@ -173,7 +256,33 @@ const transformApiToForm = (apiData: IotRuleScene): RuleSceneFormData => {
 // 表单数据和状态
 const formRef = ref()
 const formData = ref<RuleSceneFormData>(createDefaultFormData())
-const formRules = getBaseValidationRules()
+const formRules = reactive({
+  name: [
+    { required: true, message: '场景名称不能为空', trigger: 'blur' },
+    { type: 'string', min: 1, max: 50, message: '场景名称长度应在1-50个字符之间', trigger: 'blur' }
+  ],
+  status: [
+    { required: true, message: '场景状态不能为空', trigger: 'change' },
+    {
+      type: 'enum',
+      enum: [CommonStatusEnum.ENABLE, CommonStatusEnum.DISABLE],
+      message: '状态值必须为启用或禁用',
+      trigger: 'change'
+    }
+  ],
+  description: [
+    { type: 'string', max: 200, message: '场景描述不能超过200个字符', trigger: 'blur' }
+  ],
+  triggers: [
+    { required: true, message: '触发器数组不能为空', trigger: 'change' },
+    { type: 'array', min: 1, message: '至少需要一个触发器', trigger: 'change' }
+  ],
+  actions: [
+    { required: true, message: '执行器数组不能为空', trigger: 'change' },
+    { type: 'array', min: 1, message: '至少需要一个执行器', trigger: 'change' }
+  ]
+})
+
 const submitLoading = ref(false)
 
 // 验证状态
@@ -212,11 +321,18 @@ const handleSubmit = async () => {
   submitLoading.value = true
   try {
     // 转换数据格式
-    const apiData = transformFormToApi(formData.value)
+    const apiData = convertFormToVO(formData.value)
 
-    // 这里应该调用API保存数据
-    // TODO @puhui999：貌似还没接入
-    console.log('提交数据:', apiData)
+    // 调用API保存数据
+    if (isEdit.value) {
+      // 更新场景联动规则
+      // await RuleSceneApi.updateRuleScene(apiData)
+      console.log('更新数据:', apiData)
+    } else {
+      // 创建场景联动规则
+      // await RuleSceneApi.createRuleScene(apiData)
+      console.log('创建数据:', apiData)
+    }
 
     // 模拟API调用
     await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -224,6 +340,9 @@ const handleSubmit = async () => {
     ElMessage.success(isEdit.value ? '更新成功' : '创建成功')
     drawerVisible.value = false
     emit('success')
+  } catch (error) {
+    console.error('保存失败:', error)
+    ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
   } finally {
     submitLoading.value = false
   }
@@ -233,10 +352,10 @@ const handleClose = () => {
   drawerVisible.value = false
 }
 
-// 初始化表单数据
+/** 初始化表单数据 */
 const initFormData = () => {
   if (props.ruleScene) {
-    formData.value = transformApiToForm(props.ruleScene)
+    formData.value = convertVOToForm(props.ruleScene)
   } else {
     formData.value = createDefaultFormData()
   }
@@ -262,64 +381,3 @@ watch(
   }
 )
 </script>
-
-<!-- TODO @puhui999：看看下面样式，哪些是必要添加的 -->
-<style scoped>
-/* 滚动条样式 */
-.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar {
-  width: 6px;
-}
-
-.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar-track {
-  background: var(--el-fill-color-light);
-  border-radius: 3px;
-}
-
-.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar-thumb {
-  background: var(--el-border-color);
-  border-radius: 3px;
-}
-
-.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar-thumb:hover {
-  background: var(--el-border-color-dark);
-}
-
-/* 抽屉内容区域优化 */
-:deep(.el-drawer__body) {
-  padding: 0;
-  position: relative;
-}
-
-:deep(.el-drawer__header) {
-  padding: 20px 20px 16px 20px;
-  border-bottom: 1px solid var(--el-border-color-light);
-  margin-bottom: 0;
-}
-
-:deep(.el-drawer__title) {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .el-drawer {
-    --el-drawer-size: 100% !important;
-  }
-
-  .h-\[calc\(100vh-120px\)\] {
-    padding: 16px;
-    padding-bottom: 80px;
-  }
-
-  .flex.flex-col.gap-24px {
-    gap: 20px;
-  }
-
-  .absolute.bottom-0 {
-    padding: 12px 16px;
-    gap: 12px;
-  }
-}
-</style>

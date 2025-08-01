@@ -256,10 +256,6 @@ export {
   IotAlertConfigReceiveTypeEnum,
   DeviceStateEnum,
   CommonStatusEnum,
-  TriggerType,
-  ActionType,
-  MessageType,
-  OperatorType,
   ValidationRule,
   FormValidationRules
 }
