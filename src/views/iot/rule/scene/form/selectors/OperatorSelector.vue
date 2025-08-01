@@ -39,19 +39,15 @@ import { useVModel } from '@vueuse/core'
 /** 操作符选择器组件 */
 defineOptions({ name: 'OperatorSelector' })
 
-interface Props {
+const props = defineProps<{
   modelValue?: string
   propertyType?: string
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
-
   (e: 'change', value: string): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const localValue = useVModel(props, 'modelValue', emit)
 

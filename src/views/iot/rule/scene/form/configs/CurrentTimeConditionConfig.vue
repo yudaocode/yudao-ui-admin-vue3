@@ -102,18 +102,14 @@ import {
 /** 当前时间条件配置组件 */
 defineOptions({ name: 'CurrentTimeConditionConfig' })
 
-interface Props {
+const props = defineProps<{
   modelValue: ConditionFormData
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: ConditionFormData): void
-
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const condition = useVModel(props, 'modelValue', emit)
 

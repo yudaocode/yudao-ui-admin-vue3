@@ -98,20 +98,16 @@ import {
 /** 子条件组配置组件 */
 defineOptions({ name: 'SubConditionGroupConfig' })
 
-interface Props {
+const props = defineProps<{
   modelValue: SubConditionGroupFormData
   triggerType: number
   maxConditions?: number
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: SubConditionGroupFormData): void
-
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const subGroup = useVModel(props, 'modelValue', emit)
 

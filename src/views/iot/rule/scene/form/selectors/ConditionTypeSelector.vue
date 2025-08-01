@@ -29,17 +29,14 @@ import { IotRuleSceneTriggerConditionTypeEnum } from '@/api/iot/rule/scene/scene
 /** 条件类型选择器组件 */
 defineOptions({ name: 'ConditionTypeSelector' })
 
-interface Props {
+defineProps<{
   modelValue?: number
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void
   (e: 'change', value: number): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 // 条件类型选项
 const conditionTypeOptions = [

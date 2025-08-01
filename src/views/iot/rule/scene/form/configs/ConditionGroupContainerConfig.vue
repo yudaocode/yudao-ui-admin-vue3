@@ -137,6 +137,7 @@ const props = defineProps<{
   modelValue: ConditionGroupContainerFormData
   triggerType: number
 }>()
+
 const emit = defineEmits<{
   (e: 'update:modelValue', value: ConditionGroupContainerFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void

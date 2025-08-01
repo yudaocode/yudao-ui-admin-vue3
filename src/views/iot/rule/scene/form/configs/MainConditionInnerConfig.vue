@@ -104,19 +104,15 @@ import { useVModel } from '@vueuse/core'
 /** 主条件内部配置组件 */
 defineOptions({ name: 'MainConditionInnerConfig' })
 
-interface Props {
+const props = defineProps<{
   modelValue: ConditionFormData
   triggerType: number
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: ConditionFormData): void
-
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 // 响应式数据
 const condition = useVModel(props, 'modelValue', emit)

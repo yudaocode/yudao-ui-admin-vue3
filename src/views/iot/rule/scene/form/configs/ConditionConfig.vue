@@ -190,22 +190,20 @@ const handleValidate = (result: { valid: boolean; message: string }) => {
   emit('validate', result)
 }
 
-const handleProductChange = (productId: number) => {
+const handleProductChange = (_: number) => {
   // 产品变化时清空设备和属性
-  condition.value.productId = productId
+  condition.value.deviceId = undefined
   condition.value.identifier = ''
   updateValidationResult()
 }
 
-const handleDeviceChange = (deviceId: number) => {
+const handleDeviceChange = (_: number) => {
   // 设备变化时清空属性
-  condition.value.deviceId = deviceId
+  condition.value.identifier = ''
   updateValidationResult()
 }
 
 const handlePropertyChange = (propertyInfo: { type: string; config: any }) => {
-  debugger
-  console.log(propertyInfo)
   propertyType.value = propertyInfo.type
   propertyConfig.value = propertyInfo.config
 

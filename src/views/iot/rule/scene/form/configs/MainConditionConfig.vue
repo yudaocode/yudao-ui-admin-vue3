@@ -51,6 +51,7 @@ defineProps<{
   modelValue?: ConditionFormData
   triggerType: number
 }>()
+
 const emit = defineEmits<{
   (e: 'update:modelValue', value?: ConditionFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void

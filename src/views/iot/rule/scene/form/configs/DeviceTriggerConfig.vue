@@ -68,14 +68,13 @@ import { IotRuleSceneTriggerTypeEnum as TriggerTypeEnum } from '@/views/iot/util
 /** 设备触发配置组件 */
 defineOptions({ name: 'DeviceTriggerConfig' })
 
-// Props 和 Emits 定义
 const props = defineProps<{
   modelValue: TriggerFormData
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [value: TriggerFormData]
-  validate: [result: { valid: boolean; message: string }]
+  (e: 'update:modelValue', value: TriggerFormData): void
+  (e: 'validate', value: { valid: boolean; message: string }): void
 }>()
 
 const trigger = useVModel(props, 'modelValue', emit)
@@ -126,7 +125,6 @@ const addConditionGroup = () => {
 }
 
 // 事件处理
-
 const handleConditionGroupValidate = () => {
   updateValidationResult()
 }
