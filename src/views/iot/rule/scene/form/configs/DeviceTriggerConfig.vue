@@ -12,7 +12,7 @@
 
     <!-- 条件组配置 -->
     <div v-if="trigger.mainCondition" class="space-y-16px">
-      <div class="flex items-center justify-between">
+      <div v-if="!trigger.conditionGroup" class="flex items-center justify-between">
         <div class="flex items-center gap-8px">
           <span class="text-14px font-500 text-[var(--el-text-color-primary)]">附加条件组</span>
           <el-tag size="small" type="success">与主条件为且关系</el-tag>

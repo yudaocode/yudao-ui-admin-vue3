@@ -1,7 +1,6 @@
 <template>
   <div class="flex flex-col gap-16px">
     <!-- 条件组容器头部 -->
-    <!-- TODO @puhui999：这个是不是删除，不然有两个“附件条件组”的 header -->
     <div
       class="flex items-center justify-between p-16px bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-8px"
     >
@@ -39,16 +38,6 @@
     <!-- 子条件组列表 -->
     <div v-if="modelValue.subGroups && modelValue.subGroups.length > 0" class="space-y-16px">
       <!-- 逻辑关系说明 -->
-      <!-- TODO @puhui999：这个可以去掉。。。提示有点太多了。 -->
-      <div v-if="modelValue.subGroups.length > 1" class="flex items-center justify-center">
-        <div
-          class="flex items-center gap-8px px-12px py-6px bg-orange-50 border border-orange-200 rounded-full text-12px text-orange-600"
-        >
-          <Icon icon="ep:info-filled" />
-          <span>子条件组之间为"或"关系，满足任意一组即可触发</span>
-        </div>
-      </div>
-
       <div class="relative">
         <div
           v-for="(subGroup, subGroupIndex) in modelValue.subGroups"
@@ -144,19 +133,15 @@ import {
 /** 条件组容器配置组件 */
 defineOptions({ name: 'ConditionGroupContainerConfig' })
 
-interface Props {
+const props = defineProps<{
   modelValue: ConditionGroupContainerFormData
   triggerType: number
-}
-
-interface Emits {
+}>()
+const emit = defineEmits<{
   (e: 'update:modelValue', value: ConditionGroupContainerFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void
   (e: 'remove'): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const container = useVModel(props, 'modelValue', emit)
 

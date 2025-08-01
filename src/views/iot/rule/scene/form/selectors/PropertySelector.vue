@@ -134,21 +134,17 @@ import type { IotThingModelTSLRespVO, PropertySelectorItem } from './types'
 /** 属性选择器组件 */
 defineOptions({ name: 'PropertySelector' })
 
-interface Props {
+const props = defineProps<{
   modelValue?: string
   triggerType: number
   productId?: number
   deviceId?: number
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
-
   (e: 'change', value: { type: string; config: any }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const localValue = useVModel(props, 'modelValue', emit)
 

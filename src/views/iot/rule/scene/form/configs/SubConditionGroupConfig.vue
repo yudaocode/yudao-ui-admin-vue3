@@ -63,24 +63,6 @@
             />
           </div>
         </div>
-
-        <!-- 条件间的"且"连接符 -->
-        <!-- TODO @puhu999：建议去掉，有点元素太丰富了。 -->
-        <div
-          v-if="conditionIndex < subGroup.conditions!.length - 1"
-          class="flex items-center justify-center py-8px"
-        >
-          <div class="flex items-center gap-8px">
-            <!-- 连接线 -->
-            <div class="w-24px h-1px bg-green-300"></div>
-            <!-- 且标签 -->
-            <div class="px-12px py-4px bg-green-100 border border-green-300 rounded-full">
-              <span class="text-12px font-600 text-green-600">且</span>
-            </div>
-            <!-- 连接线 -->
-            <div class="w-24px h-1px bg-green-300"></div>
-          </div>
-        </div>
       </div>
 
       <!-- 添加条件按钮 -->
@@ -108,9 +90,9 @@
 import { useVModel } from '@vueuse/core'
 import ConditionConfig from './ConditionConfig.vue'
 import {
-  SubConditionGroupFormData,
   ConditionFormData,
-  IotRuleSceneTriggerConditionTypeEnum
+  IotRuleSceneTriggerConditionTypeEnum,
+  SubConditionGroupFormData
 } from '@/api/iot/rule/scene/scene.types'
 
 /** 子条件组配置组件 */
@@ -124,6 +106,7 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: SubConditionGroupFormData): void
+
   (e: 'validate', result: { valid: boolean; message: string }): void
 }
 

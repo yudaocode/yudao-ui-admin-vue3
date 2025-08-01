@@ -89,24 +89,6 @@
           </el-form-item>
         </el-col>
       </el-row>
-
-      <!-- 条件预览 -->
-      <!-- TODO puhui999：可以去掉。。。因为表单选择了，可以看懂的呀。 -->
-      <div
-        v-if="conditionPreview"
-        class="p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]"
-      >
-        <div class="flex items-center gap-8px mb-8px">
-          <Icon icon="ep:view" class="text-[var(--el-color-info)] text-16px" />
-          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">条件预览</span>
-        </div>
-        <div class="pl-24px">
-          <code
-            class="text-12px text-[var(--el-color-primary)] bg-[var(--el-fill-color-blank)] p-8px rounded-4px font-mono"
-            >{{ conditionPreview }}</code
-          >
-        </div>
-      </div>
     </div>
 
     <!-- 当前时间条件配置 -->
@@ -147,18 +129,15 @@ import {
 /** 单个条件配置组件 */
 defineOptions({ name: 'ConditionConfig' })
 
-interface Props {
+const props = defineProps<{
   modelValue: ConditionFormData
   triggerType: number
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: ConditionFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const condition = useVModel(props, 'modelValue', emit)
 
@@ -171,34 +150,6 @@ const propertyConfig = ref<any>(null)
 const validationMessage = ref('')
 const isValid = ref(true)
 const valueValidation = ref({ valid: true, message: '' })
-
-// 计算属性
-const conditionPreview = computed(() => {
-  if (!condition.value.identifier || !condition.value.operator || !condition.value.param) {
-    return ''
-  }
-
-  const propertyName = propertyConfig.value?.name || condition.value.identifier
-  const operatorText = getOperatorText(condition.value.operator)
-  const value = condition.value.param
-
-  return `当 ${propertyName} ${operatorText} ${value} 时触发`
-})
-
-// 工具函数
-const getOperatorText = (operator: string) => {
-  const operatorMap = {
-    '=': '等于',
-    '!=': '不等于',
-    '>': '大于',
-    '>=': '大于等于',
-    '<': '小于',
-    '<=': '小于等于',
-    in: '包含于',
-    between: '介于'
-  }
-  return operatorMap[operator] || operator
-}
 
 // 事件处理
 const updateConditionField = (field: keyof ConditionFormData, value: any) => {
@@ -241,18 +192,20 @@ const handleValidate = (result: { valid: boolean; message: string }) => {
 
 const handleProductChange = (productId: number) => {
   // 产品变化时清空设备和属性
-  condition.value.deviceId = undefined
+  condition.value.productId = productId
   condition.value.identifier = ''
   updateValidationResult()
 }
 
 const handleDeviceChange = (deviceId: number) => {
   // 设备变化时清空属性
-  condition.value.identifier = ''
+  condition.value.deviceId = deviceId
   updateValidationResult()
 }
 
 const handlePropertyChange = (propertyInfo: { type: string; config: any }) => {
+  debugger
+  console.log(propertyInfo)
   propertyType.value = propertyInfo.type
   propertyConfig.value = propertyInfo.config
 

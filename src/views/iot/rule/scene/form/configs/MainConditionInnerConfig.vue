@@ -67,14 +67,6 @@
           </el-form-item>
         </el-col>
       </el-row>
-
-      <!-- 条件预览 -->
-      <!-- TODO puhui999：可以去掉。。。因为表单选择了，可以看懂的呀。 -->
-      <div v-if="conditionPreview" class="mt-12px">
-        <div class="text-12px text-[var(--el-text-color-secondary)]">
-          预览：{{ conditionPreview }}
-        </div>
-      </div>
     </div>
 
     <!-- 设备状态条件配置 -->
@@ -145,13 +137,6 @@ const isDevicePropertyTrigger = computed(() => {
 
 const isDeviceStatusTrigger = computed(() => {
   return props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE
-})
-
-const conditionPreview = computed(() => {
-  if (!condition.value.productId || !condition.value.deviceId || !condition.value.identifier) {
-    return ''
-  }
-  return `设备[${condition.value.deviceId}]的${condition.value.identifier} ${condition.value.operator} ${condition.value.param}`
 })
 
 // 获取触发类型文本
