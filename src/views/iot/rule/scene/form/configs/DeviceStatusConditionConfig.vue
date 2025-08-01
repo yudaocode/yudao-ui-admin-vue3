@@ -84,17 +84,17 @@
 import { useVModel } from '@vueuse/core'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
-import { ConditionFormData } from '@/api/iot/rule/scene/scene.types'
+import { TriggerConditionFormData } from '@/api/iot/rule/scene/scene.types'
 
 /** 设备状态条件配置组件 */
 defineOptions({ name: 'DeviceStatusConditionConfig' })
 
 const props = defineProps<{
-  modelValue: ConditionFormData
+  modelValue: TriggerConditionFormData
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: ConditionFormData): void
+  (e: 'update:modelValue', value: TriggerConditionFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 
@@ -139,18 +139,18 @@ const validationMessage = ref('')
 const isValid = ref(true)
 
 // 事件处理
-const updateConditionField = (field: keyof ConditionFormData, value: any) => {
+const updateConditionField = (field: any, value: any) => {
   condition.value[field] = value
   updateValidationResult()
 }
 
-const handleProductChange = (productId: number) => {
+const handleProductChange = (_: number) => {
   // 产品变化时清空设备
   condition.value.deviceId = undefined
   updateValidationResult()
 }
 
-const handleDeviceChange = (deviceId: number) => {
+const handleDeviceChange = (_: number) => {
   // 设备变化时可以进行其他处理
   updateValidationResult()
 }

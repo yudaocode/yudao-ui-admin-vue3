@@ -270,7 +270,7 @@
     </div>
 
     <!-- 表单对话框 -->
-    <RuleSceneForm v-model="formVisible" :rule-scene="currentRule" @success="getList" />
+    <RuleSceneForm v-model="formVisible" @success="getList" />
   </ContentWrap>
 </template>
 

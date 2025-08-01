@@ -14,16 +14,14 @@
           <span>附加条件组</span>
         </div>
         <el-tag size="small" type="success">与主条件为且关系</el-tag>
-        <el-tag size="small" type="info">
-          {{ modelValue.subGroups?.length || 0 }}个子条件组
-        </el-tag>
+        <el-tag size="small" type="info"> {{ modelValue?.length || 0 }}个子条件组 </el-tag>
       </div>
       <div class="flex items-center gap-8px">
         <el-button
           type="primary"
           size="small"
           @click="addSubGroup"
-          :disabled="(modelValue.subGroups?.length || 0) >= maxSubGroups"
+          :disabled="(modelValue?.length || 0) >= maxSubGroups"
         >
           <Icon icon="ep:plus" />
           添加子条件组
@@ -36,11 +34,11 @@
     </div>
 
     <!-- 子条件组列表 -->
-    <div v-if="modelValue.subGroups && modelValue.subGroups.length > 0" class="space-y-16px">
+    <div v-if="modelValue && modelValue.length > 0" class="space-y-16px">
       <!-- 逻辑关系说明 -->
       <div class="relative">
         <div
-          v-for="(subGroup, subGroupIndex) in modelValue.subGroups"
+          v-for="(subGroup, subGroupIndex) in modelValue"
           :key="`sub-group-${subGroupIndex}`"
           class="relative"
         >
@@ -88,7 +86,7 @@
 
           <!-- 子条件组间的"或"连接符 -->
           <div
-            v-if="subGroupIndex < modelValue.subGroups!.length - 1"
+            v-if="subGroupIndex < modelValue!.length - 1"
             class="flex items-center justify-center py-12px"
           >
             <div class="flex items-center gap-8px">
@@ -125,21 +123,17 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import SubConditionGroupConfig from './SubConditionGroupConfig.vue'
-import {
-  ConditionGroupContainerFormData,
-  SubConditionGroupFormData
-} from '@/api/iot/rule/scene/scene.types'
 
 /** 条件组容器配置组件 */
 defineOptions({ name: 'ConditionGroupContainerConfig' })
 
 const props = defineProps<{
-  modelValue: ConditionGroupContainerFormData
+  modelValue: any
   triggerType: number
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: ConditionGroupContainerFormData): void
+  (e: 'update:modelValue', value: any): void
   (e: 'validate', result: { valid: boolean; message: string }): void
   (e: 'remove'): void
 }>()
@@ -155,24 +149,20 @@ const subGroupValidations = ref<{ [key: number]: { valid: boolean; message: stri
 
 // 事件处理
 const addSubGroup = () => {
-  if (!container.value.subGroups) {
-    container.value.subGroups = []
+  if (!container.value) {
+    container.value = []
   }
 
-  if (container.value.subGroups.length >= maxSubGroups) {
+  if (container.value.length >= maxSubGroups) {
     return
   }
 
-  const newSubGroup: SubConditionGroupFormData = {
-    conditions: []
-  }
-
-  container.value.subGroups.push(newSubGroup)
+  container.value.push([])
 }
 
 const removeSubGroup = (index: number) => {
-  if (container.value.subGroups) {
-    container.value.subGroups.splice(index, 1)
+  if (container.value) {
+    container.value.splice(index, 1)
     delete subGroupValidations.value[index]
 
     // 重新索引验证结果
@@ -191,9 +181,9 @@ const removeSubGroup = (index: number) => {
   }
 }
 
-const updateSubGroup = (index: number, subGroup: SubConditionGroupFormData) => {
-  if (container.value.subGroups) {
-    container.value.subGroups[index] = subGroup
+const updateSubGroup = (index: number, subGroup: any) => {
+  if (container.value) {
+    container.value[index] = subGroup
   }
 }
 
@@ -207,7 +197,7 @@ const handleSubGroupValidate = (index: number, result: { valid: boolean; message
 }
 
 const updateValidationResult = () => {
-  if (!container.value.subGroups || container.value.subGroups.length === 0) {
+  if (!container.value || container.value.length === 0) {
     emit('validate', { valid: true, message: '条件组容器为空，验证通过' })
     return
   }
@@ -225,7 +215,7 @@ const updateValidationResult = () => {
 
 // 监听变化
 watch(
-  () => container.value.subGroups,
+  () => container.value,
   () => {
     updateValidationResult()
   },

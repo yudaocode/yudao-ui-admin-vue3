@@ -39,14 +39,7 @@ import { useVModel } from '@vueuse/core'
 import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
-import {
-  IotRuleScene,
-  IotRuleSceneDO,
-  IotRuleSceneActionTypeEnum,
-  RuleSceneFormData,
-  TriggerFormData,
-  TriggerConditionFormData
-} from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneDO, RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
 import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
 import { ElMessage } from 'element-plus'
 import { generateUUID } from '@/utils'
@@ -64,16 +57,12 @@ defineOptions({ name: 'RuleSceneForm' })
 const props = defineProps<{
   /** 抽屉显示状态 */
   modelValue: boolean
-  /** 编辑的规则数据（新增时为空） */
-  ruleScene?: IotRuleScene
 }>()
 
 /** 组件事件定义 */
 const emit = defineEmits<{
-  /** 更新抽屉显示状态 */
-  'update:modelValue': [value: boolean]
-  /** 操作成功事件 */
-  success: []
+  (e: 'update:modelValue', value: boolean): void
+  (e: 'success'): void
 }>()
 
 const drawerVisible = useVModel(props, 'modelValue', emit) // 是否可见
@@ -120,13 +109,14 @@ const convertFormToVO = (formData: RuleSceneFormData): IotRuleSceneDO => {
       cronExpression: trigger.cronExpression,
       conditionGroups: trigger.conditionGroups || []
     })),
-    actions: formData.actions?.map((action) => ({
-      type: action.type,
-      productId: action.productId,
-      deviceId: action.deviceId,
-      params: action.params,
-      alertConfigId: action.alertConfigId
-    })) || []
+    actions:
+      formData.actions?.map((action) => ({
+        type: action.type,
+        productId: action.productId,
+        deviceId: action.deviceId,
+        params: action.params,
+        alertConfigId: action.alertConfigId
+      })) || []
   }
 }
 
@@ -216,7 +206,7 @@ const triggerValidation = ref({ valid: true, message: '' })
 const actionValidation = ref({ valid: true, message: '' })
 
 // 计算属性
-const isEdit = computed(() => !!props.ruleScene?.id)
+const isEdit = ref(false)
 const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
 
 // 事件处理
@@ -284,30 +274,28 @@ const handleClose = () => {
 
 /** 初始化表单数据 */
 const initFormData = () => {
-  if (props.ruleScene) {
-    formData.value = convertVOToForm(props.ruleScene)
-  } else {
-    formData.value = createDefaultFormData()
-  }
+  // TODO @puhui999: 编辑的情况后面实现
+  formData.value = createDefaultFormData()
 }
 
 // 监听抽屉显示
 watch(drawerVisible, (visible) => {
   if (visible) {
     initFormData()
-    nextTick(() => {
-      formRef.value?.clearValidate()
-    })
+    // TODO @puhui999: 重置表单的情况
+    // nextTick(() => {
+    //   formRef.value?.clearValidate()
+    // })
   }
 })
 
 // 监听 props 变化
-watch(
-  () => props.ruleScene,
-  () => {
-    if (drawerVisible.value) {
-      initFormData()
-    }
-  }
-)
+// watch(
+//   () => props.ruleScene,
+//   () => {
+//     if (drawerVisible.value) {
+//       initFormData()
+//     }
+//   }
+// )
 </script>

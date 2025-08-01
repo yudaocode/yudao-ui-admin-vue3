@@ -67,6 +67,7 @@
           <DeviceTriggerConfig
             v-if="isDeviceTrigger(triggerItem.type)"
             :model-value="triggerItem"
+            :index="index"
             @update:model-value="(value) => updateTriggerDeviceConfig(index, value)"
           />
 
@@ -111,13 +112,12 @@ import {
 /** 触发器配置组件 */
 defineOptions({ name: 'TriggerSection' })
 
-// Props 和 Emits 定义
 const props = defineProps<{
   triggers: TriggerFormData[]
 }>()
 
 const emit = defineEmits<{
-  'update:triggers': [value: TriggerFormData[]]
+  (e: 'update:triggers', value: TriggerFormData[]): void
 }>()
 
 const triggers = useVModel(props, 'triggers', emit)
@@ -172,36 +172,15 @@ const updateTriggerCronConfig = (index: number, cronExpression?: string) => {
   triggers.value[index].cronExpression = cronExpression
 }
 
-const onTriggerTypeChange = (index: number, type: number) => {
+const onTriggerTypeChange = (index: number, _: number) => {
   const triggerItem = triggers.value[index]
-
-  // 清理不相关的配置
-  if (type === TriggerTypeEnum.TIMER) {
-    triggerItem.productId = undefined
-    triggerItem.deviceId = undefined
-    triggerItem.identifier = undefined
-    triggerItem.operator = undefined
-    triggerItem.value = undefined
-    triggerItem.mainCondition = undefined
-    triggerItem.conditionGroup = undefined
-    if (!triggerItem.cronExpression) {
-      triggerItem.cronExpression = '0 0 12 * * ?'
-    }
-  } else {
-    triggerItem.cronExpression = undefined
-    if (type === TriggerTypeEnum.DEVICE_STATE_UPDATE) {
-      triggerItem.mainCondition = undefined
-      triggerItem.conditionGroup = undefined
-    } else {
-      // 设备属性、事件、服务触发需要条件配置
-      if (!triggerItem.mainCondition) {
-        triggerItem.mainCondition = undefined // 等待用户配置
-      }
-      if (!triggerItem.conditionGroup) {
-        triggerItem.conditionGroup = undefined // 可选的条件组
-      }
-    }
-  }
+  triggerItem.productId = undefined
+  triggerItem.deviceId = undefined
+  triggerItem.identifier = undefined
+  triggerItem.operator = undefined
+  triggerItem.value = undefined
+  triggerItem.cronExpression = undefined
+  triggerItem.conditionGroups = []
 }
 
 // 初始化：确保至少有一个触发器
