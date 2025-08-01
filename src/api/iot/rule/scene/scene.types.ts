@@ -2,15 +2,7 @@
  * IoT 场景联动接口定义
  */
 
-// TODO @puhui999：枚举挪到 views/iot/utils/constants.ts 里
-// 枚举定义
-const IotRuleSceneTriggerTypeEnum = {
-  DEVICE_STATE_UPDATE: 1, // 设备上下线变更
-  DEVICE_PROPERTY_POST: 2, // 物模型属性上报
-  DEVICE_EVENT_POST: 3, // 设备事件上报
-  DEVICE_SERVICE_INVOKE: 4, // 设备服务调用
-  TIMER: 100 // 定时触发
-} as const
+// 枚举定义已迁移到 constants.ts，这里不再重复导出
 
 const IotRuleSceneActionTypeEnum = {
   DEVICE_PROPERTY_SET: 1, // 设备属性设置,
@@ -25,11 +17,7 @@ const IotDeviceMessageTypeEnum = {
   EVENT: 'event' // 事件
 } as const
 
-// TODO @puhui999：这个貌似可以不要？
-const IotDeviceMessageIdentifierEnum = {
-  PROPERTY_SET: 'set', // 属性设置
-  SERVICE_INVOKE: '${identifier}' // 服务调用
-} as const
+// 已删除不需要的 IotDeviceMessageIdentifierEnum
 
 const IotRuleSceneTriggerConditionParameterOperatorEnum = {
   EQUALS: { name: '等于', value: '=' }, // 等于
@@ -64,29 +52,10 @@ const IotRuleSceneTriggerTimeOperatorEnum = {
   TODAY: { name: '在今日之间', value: 'today' } // 在今日之间
 } as const
 
-// TODO @puhui999：下面 IotAlertConfigReceiveTypeEnum、DeviceStateEnum 没用到，貌似可以删除下？
-const IotAlertConfigReceiveTypeEnum = {
-  SMS: 1, // 短信
-  MAIL: 2, // 邮箱
-  NOTIFY: 3 // 通知
-} as const
+// 已删除未使用的枚举：IotAlertConfigReceiveTypeEnum、DeviceStateEnum
+// CommonStatusEnum 已在全局定义，这里不再重复定义
 
-// 设备状态枚举
-const DeviceStateEnum = {
-  INACTIVE: 0, // 未激活
-  ONLINE: 1, // 在线
-  OFFLINE: 2 // 离线
-} as const
-
-// TODO @puhui999：这个全局已经有啦
-// 通用状态枚举
-const CommonStatusEnum = {
-  ENABLE: 0, // 开启
-  DISABLE: 1 // 关闭
-} as const
-
-// 基础接口
-// TODO @puhui999：这个貌似可以不要？
+// 基础接口（如果项目中有全局的 BaseDO，可以使用全局的）
 interface TenantBaseDO {
   createTime?: Date // 创建时间
   updateTime?: Date // 更新时间
@@ -144,7 +113,7 @@ interface RuleSceneFormData {
   name: string
   description?: string
   status: number
-  trigger: TriggerFormData
+  triggers: TriggerFormData[] // 支持多个触发器
   actions: ActionFormData[]
 }
 
@@ -209,8 +178,7 @@ interface IotRuleScene extends TenantBaseDO {
 }
 
 // 工具类型 - 从枚举中提取类型
-export type TriggerType =
-  (typeof IotRuleSceneTriggerTypeEnum)[keyof typeof IotRuleSceneTriggerTypeEnum]
+// TriggerType 现在从 constants.ts 中的枚举提取
 export type ActionType =
   (typeof IotRuleSceneActionTypeEnum)[keyof typeof IotRuleSceneActionTypeEnum]
 export type MessageType = (typeof IotDeviceMessageTypeEnum)[keyof typeof IotDeviceMessageTypeEnum]
@@ -246,16 +214,11 @@ export {
   ConditionGroupContainerFormData,
   SubConditionGroupFormData,
   ConditionFormData,
-  IotRuleSceneTriggerTypeEnum,
   IotRuleSceneActionTypeEnum,
   IotDeviceMessageTypeEnum,
-  IotDeviceMessageIdentifierEnum,
   IotRuleSceneTriggerConditionParameterOperatorEnum,
   IotRuleSceneTriggerConditionTypeEnum,
   IotRuleSceneTriggerTimeOperatorEnum,
-  IotAlertConfigReceiveTypeEnum,
-  DeviceStateEnum,
-  CommonStatusEnum,
   ValidationRule,
   FormValidationRules
 }

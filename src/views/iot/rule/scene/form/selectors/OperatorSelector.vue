@@ -15,26 +15,21 @@
       >
         <div class="flex items-center justify-between w-full py-4px">
           <div class="flex items-center gap-8px">
-            <div class="text-14px font-500 text-[var(--el-text-color-primary)]">{{ operator.label }}</div>
-            <div class="text-12px text-[var(--el-color-primary)] bg-[var(--el-color-primary-light-9)] px-6px py-2px rounded-4px font-mono">{{ operator.symbol }}</div>
+            <div class="text-14px font-500 text-[var(--el-text-color-primary)]">
+              {{ operator.label }}
+            </div>
+            <div
+              class="text-12px text-[var(--el-color-primary)] bg-[var(--el-color-primary-light-9)] px-6px py-2px rounded-4px font-mono"
+            >
+              {{ operator.symbol }}
+            </div>
           </div>
-          <div class="text-12px text-[var(--el-text-color-secondary)]">{{ operator.description }}</div>
+          <div class="text-12px text-[var(--el-text-color-secondary)]">
+            {{ operator.description }}
+          </div>
         </div>
       </el-option>
     </el-select>
-
-    <!-- 操作符说明 -->
-    <!-- TODO @puhui999：这个去掉 -->
-    <div v-if="selectedOperator" class="mt-8px p-8px bg-[var(--el-fill-color-light)] rounded-4px border border-[var(--el-border-color-lighter)]">
-      <div class="flex items-center gap-6px">
-        <Icon icon="ep:info-filled" class="text-12px text-[var(--el-color-info)]" />
-        <span class="text-12px text-[var(--el-text-color-secondary)]">{{ selectedOperator.description }}</span>
-      </div>
-      <div v-if="selectedOperator.example" class="flex items-center gap-6px mt-4px">
-        <span class="text-12px text-[var(--el-text-color-secondary)]">示例：</span>
-        <code class="text-12px text-[var(--el-color-primary)] bg-[var(--el-fill-color-blank)] px-4px py-2px rounded-2px font-mono">{{ selectedOperator.example }}</code>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -51,6 +46,7 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: string): void
+
   (e: 'change', value: string): void
 }
 

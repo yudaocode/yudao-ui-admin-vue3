@@ -62,26 +62,21 @@ import { useVModel } from '@vueuse/core'
 
 import MainConditionConfig from './MainConditionConfig.vue'
 import ConditionGroupContainerConfig from './ConditionGroupContainerConfig.vue'
-import {
-  TriggerFormData,
-  IotRuleSceneTriggerTypeEnum as TriggerTypeEnum
-} from '@/api/iot/rule/scene/scene.types'
+import { TriggerFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneTriggerTypeEnum as TriggerTypeEnum } from '@/views/iot/utils/constants'
 
 /** 设备触发配置组件 */
 defineOptions({ name: 'DeviceTriggerConfig' })
 
-// TODO @puhui999：下面的 Props、Emits 可以合并到变量那；
-interface Props {
+// Props 和 Emits 定义
+const props = defineProps<{
   modelValue: TriggerFormData
-}
+}>()
 
-interface Emits {
-  (e: 'update:modelValue', value: TriggerFormData): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const emit = defineEmits<{
+  'update:modelValue': [value: TriggerFormData]
+  validate: [result: { valid: boolean; message: string }]
+}>()
 
 const trigger = useVModel(props, 'modelValue', emit)
 

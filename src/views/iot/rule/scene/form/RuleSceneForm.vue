@@ -9,12 +9,12 @@
     :close-on-press-escape="false"
     @close="handleClose"
   >
-    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="110px">
       <!-- 基础信息配置 -->
       <BasicInfoSection v-model="formData" :rules="formRules" />
 
       <!-- 触发器配置 -->
-      <TriggerSection v-model:trigger="formData.trigger" @validate="handleTriggerValidate" />
+      <TriggerSection v-model:triggers="formData.triggers" @validate="handleTriggerValidate" />
 
       <!-- 执行器配置 -->
       <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
@@ -40,14 +40,20 @@ import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
 import {
-  CommonStatusEnum,
   IotRuleScene,
   IotRuleSceneActionTypeEnum,
-  IotRuleSceneTriggerTypeEnum,
-  RuleSceneFormData
+  RuleSceneFormData,
+  TriggerFormData
 } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
 import { ElMessage } from 'element-plus'
 import { generateUUID } from '@/utils'
+
+// 导入全局的 CommonStatusEnum
+const CommonStatusEnum = {
+  ENABLE: 0, // 开启
+  DISABLE: 1 // 关闭
+} as const
 
 /** IoT 场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
@@ -76,17 +82,19 @@ const createDefaultFormData = (): RuleSceneFormData => {
     name: '',
     description: '',
     status: CommonStatusEnum.ENABLE, // 默认启用状态
-    trigger: {
-      type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
-      productId: undefined,
-      deviceId: undefined,
-      identifier: undefined,
-      operator: undefined,
-      value: undefined,
-      cronExpression: undefined,
-      mainCondition: undefined,
-      conditionGroup: undefined
-    },
+    triggers: [
+      {
+        type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
+        productId: undefined,
+        deviceId: undefined,
+        identifier: undefined,
+        operator: undefined,
+        value: undefined,
+        cronExpression: undefined,
+        mainCondition: undefined,
+        conditionGroup: undefined
+      }
+    ],
     actions: []
   }
 }
@@ -95,13 +103,13 @@ const createDefaultFormData = (): RuleSceneFormData => {
  * 将表单数据转换为 API 请求格式
  */
 const convertFormToVO = (formData: RuleSceneFormData): IotRuleScene => {
-  // 构建触发器条件
-  const buildTriggerConditions = () => {
+  // 构建单个触发器的条件
+  const buildTriggerConditions = (trigger: TriggerFormData) => {
     const conditions: any[] = []
 
     // 处理主条件
-    if (formData.trigger.mainCondition) {
-      const mainCondition = formData.trigger.mainCondition
+    if (trigger.mainCondition) {
+      const mainCondition = trigger.mainCondition
       conditions.push({
         type: mainCondition.type === 2 ? 'property' : 'event',
         identifier: mainCondition.identifier || '',
@@ -115,8 +123,8 @@ const convertFormToVO = (formData: RuleSceneFormData): IotRuleScene => {
     }
 
     // 处理条件组
-    if (formData.trigger.conditionGroup?.subGroups) {
-      formData.trigger.conditionGroup.subGroups.forEach((subGroup) => {
+    if (trigger.conditionGroup?.subGroups) {
+      trigger.conditionGroup.subGroups.forEach((subGroup) => {
         subGroup.conditions.forEach((condition) => {
           conditions.push({
             type: condition.type === 2 ? 'property' : 'event',
@@ -140,19 +148,13 @@ const convertFormToVO = (formData: RuleSceneFormData): IotRuleScene => {
     name: formData.name,
     description: formData.description,
     status: Number(formData.status),
-    triggers: [
-      {
-        type: formData.trigger.type,
-        productKey: formData.trigger.productId
-          ? `product_${formData.trigger.productId}`
-          : undefined,
-        deviceNames: formData.trigger.deviceId
-          ? [`device_${formData.trigger.deviceId}`]
-          : undefined,
-        cronExpression: formData.trigger.cronExpression,
-        conditions: buildTriggerConditions()
-      }
-    ],
+    triggers: formData.triggers.map((trigger) => ({
+      type: trigger.type,
+      productKey: trigger.productId ? `product_${trigger.productId}` : undefined,
+      deviceNames: trigger.deviceId ? [`device_${trigger.deviceId}`] : undefined,
+      cronExpression: trigger.cronExpression,
+      conditions: buildTriggerConditions(trigger)
+    })),
     actions:
       formData.actions?.map((action) => ({
         type: action.type,
@@ -180,9 +182,7 @@ const convertFormToVO = (formData: RuleSceneFormData): IotRuleScene => {
  * 将 API 响应数据转换为表单格式
  */
 const convertVOToForm = (apiData: IotRuleScene): RuleSceneFormData => {
-  const firstTrigger = apiData.triggers?.[0]
-
-  // 解析触发器条件
+  // 解析单个触发器的条件
   const parseConditions = (trigger: any) => {
     if (!trigger?.conditions?.length) {
       return {
@@ -208,28 +208,23 @@ const convertVOToForm = (apiData: IotRuleScene): RuleSceneFormData => {
     }
   }
 
-  const conditionData = firstTrigger
-    ? parseConditions(firstTrigger)
-    : {
-        mainCondition: undefined,
-        conditionGroup: undefined
-      }
-
-  return {
-    ...apiData,
-    status: Number(apiData.status),
-    trigger: firstTrigger
-      ? {
-          type: Number(firstTrigger.type),
+  // 转换所有触发器
+  const triggers = apiData.triggers?.length
+    ? apiData.triggers.map((trigger) => {
+        const conditionData = parseConditions(trigger)
+        return {
+          type: Number(trigger.type),
           productId: undefined, // 需要从 productKey 解析
           deviceId: undefined, // 需要从 deviceNames 解析
           identifier: undefined,
           operator: undefined,
           value: undefined,
-          cronExpression: firstTrigger.cronExpression,
+          cronExpression: trigger.cronExpression,
           ...conditionData
         }
-      : {
+      })
+    : [
+        {
           type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
           productId: undefined,
           deviceId: undefined,
@@ -239,7 +234,13 @@ const convertVOToForm = (apiData: IotRuleScene): RuleSceneFormData => {
           cronExpression: undefined,
           mainCondition: undefined,
           conditionGroup: undefined
-        },
+        }
+      ]
+
+  return {
+    ...apiData,
+    status: Number(apiData.status),
+    triggers,
     actions:
       apiData.actions?.map((action) => ({
         ...action,

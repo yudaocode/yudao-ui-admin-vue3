@@ -1,14 +1,14 @@
 <!-- 属性选择器组件 -->
 <!-- TODO @yunai：可能要在 review 下 -->
 <template>
-  <div class="w-full">
+  <div class="flex items-center gap-8px">
     <el-select
       v-model="localValue"
       placeholder="请选择监控项"
       filterable
       clearable
       @change="handleChange"
-      class="w-full"
+      class="!w-150px"
       :loading="loading"
     >
       <el-option-group v-for="group in propertyGroups" :key="group.label" :label="group.label">
@@ -20,8 +20,12 @@
         >
           <div class="flex items-center justify-between w-full py-4px">
             <div class="flex-1">
-              <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ property.name }}</div>
-              <div class="text-12px text-[var(--el-text-color-secondary)]">{{ property.identifier }}</div>
+              <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">
+                {{ property.name }}
+              </div>
+              <div class="text-12px text-[var(--el-text-color-secondary)]">
+                {{ property.identifier }}
+              </div>
             </div>
             <div class="flex-shrink-0">
               <el-tag :type="getPropertyTypeTag(property.dataType)" size="small">
@@ -33,42 +37,98 @@
       </el-option-group>
     </el-select>
 
-    <!-- 属性详情 -->
-    <div v-if="selectedProperty" class="mt-16px p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
-      <div class="flex items-center gap-8px mb-12px">
-        <Icon icon="ep:info-filled" class="text-[var(--el-color-info)] text-16px" />
-        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">{{ selectedProperty.name }}</span>
-        <el-tag :type="getPropertyTypeTag(selectedProperty.dataType)" size="small">
-          {{ getPropertyTypeName(selectedProperty.dataType) }}
-        </el-tag>
-      </div>
-      <div class="space-y-8px ml-24px">
-        <div class="flex items-start gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0">标识符：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedProperty.identifier }}</span>
+    <!-- 属性详情触发按钮 -->
+    <div class="relative">
+      <el-button
+        v-if="selectedProperty"
+        ref="detailTriggerRef"
+        type="info"
+        :icon="InfoFilled"
+        circle
+        size="small"
+        @click="togglePropertyDetail"
+        class="flex-shrink-0"
+        title="查看属性详情"
+      />
+
+      <!-- 属性详情弹出层 -->
+      <Teleport to="body">
+        <div
+          v-if="showPropertyDetail && selectedProperty"
+          ref="propertyDetailRef"
+          class="property-detail-popover"
+          :style="popoverStyle"
+        >
+          <div
+            class="p-16px bg-white rounded-8px shadow-lg border border-[var(--el-border-color)] min-w-300px max-w-400px"
+          >
+            <div class="flex items-center gap-8px mb-12px">
+              <Icon icon="ep:info-filled" class="text-[var(--el-color-info)] text-4px" />
+              <span class="text-14px font-500 text-[var(--el-text-color-primary)]">
+                {{ selectedProperty.name }}
+              </span>
+              <el-tag :type="getPropertyTypeTag(selectedProperty.dataType)" size="small">
+                {{ getPropertyTypeName(selectedProperty.dataType) }}
+              </el-tag>
+            </div>
+            <div class="space-y-8px ml-24px">
+              <div class="flex items-start gap-8px">
+                <span
+                  class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0"
+                >
+                  标识符：
+                </span>
+                <span class="text-12px text-[var(--el-text-color-primary)] flex-1">
+                  {{ selectedProperty.identifier }}
+                </span>
+              </div>
+              <div v-if="selectedProperty.description" class="flex items-start gap-8px">
+                <span
+                  class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0"
+                >
+                  描述：
+                </span>
+                <span class="text-12px text-[var(--el-text-color-primary)] flex-1">
+                  {{ selectedProperty.description }}
+                </span>
+              </div>
+              <div v-if="selectedProperty.unit" class="flex items-start gap-8px">
+                <span
+                  class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0"
+                >
+                  单位：
+                </span>
+                <span class="text-12px text-[var(--el-text-color-primary)] flex-1">
+                  {{ selectedProperty.unit }}
+                </span>
+              </div>
+              <div v-if="selectedProperty.range" class="flex items-start gap-8px">
+                <span
+                  class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0"
+                >
+                  取值范围：
+                </span>
+                <span class="text-12px text-[var(--el-text-color-primary)] flex-1">
+                  {{ selectedProperty.range }}
+                </span>
+              </div>
+            </div>
+            <!-- 关闭按钮 -->
+            <div class="flex justify-end mt-12px">
+              <el-button size="small" @click="hidePropertyDetail">关闭</el-button>
+            </div>
+          </div>
         </div>
-        <div v-if="selectedProperty.description" class="flex items-start gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0">描述：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedProperty.description }}</span>
-        </div>
-        <div v-if="selectedProperty.unit" class="flex items-start gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0">单位：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedProperty.unit }}</span>
-        </div>
-        <div v-if="selectedProperty.range" class="flex items-start gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px flex-shrink-0">取值范围：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedProperty.range }}</span>
-        </div>
-      </div>
+      </Teleport>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import { IotRuleSceneTriggerTypeEnum } from '@/api/iot/rule/scene/scene.types'
+import { InfoFilled } from '@element-plus/icons-vue'
+import { IotRuleSceneTriggerTypeEnum, IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
 import { ThingModelApi } from '@/api/iot/thingmodel'
-import { IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
 import type { IotThingModelTSLRespVO, PropertySelectorItem } from './types'
 
 /** 属性选择器组件 */
@@ -83,6 +143,7 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: string): void
+
   (e: 'change', value: { type: string; config: any }): void
 }
 
@@ -95,6 +156,25 @@ const localValue = useVModel(props, 'modelValue', emit)
 const loading = ref(false)
 const propertyList = ref<PropertySelectorItem[]>([])
 const thingModelTSL = ref<IotThingModelTSLRespVO | null>(null)
+
+// 属性详情弹出层相关状态
+const showPropertyDetail = ref(false)
+const detailTriggerRef = ref()
+const propertyDetailRef = ref()
+const popoverStyle = ref({})
+
+// 点击外部关闭弹出层
+const handleClickOutside = (event: MouseEvent) => {
+  if (
+    showPropertyDetail.value &&
+    propertyDetailRef.value &&
+    detailTriggerRef.value &&
+    !propertyDetailRef.value.contains(event.target as Node) &&
+    !detailTriggerRef.value.$el.contains(event.target as Node)
+  ) {
+    hidePropertyDetail()
+  }
+}
 
 // 计算属性
 const propertyGroups = computed(() => {
@@ -159,6 +239,67 @@ const getPropertyTypeTag = (dataType: string) => {
   return tagMap[dataType] || 'info'
 }
 
+// 弹出层控制方法
+const togglePropertyDetail = () => {
+  if (showPropertyDetail.value) {
+    hidePropertyDetail()
+  } else {
+    showPropertyDetailPopover()
+  }
+}
+
+const showPropertyDetailPopover = () => {
+  if (!selectedProperty.value || !detailTriggerRef.value) return
+
+  showPropertyDetail.value = true
+
+  nextTick(() => {
+    updatePopoverPosition()
+  })
+}
+
+const hidePropertyDetail = () => {
+  showPropertyDetail.value = false
+}
+
+const updatePopoverPosition = () => {
+  if (!detailTriggerRef.value || !propertyDetailRef.value) return
+
+  const triggerEl = detailTriggerRef.value.$el
+  const triggerRect = triggerEl.getBoundingClientRect()
+  const popoverEl = propertyDetailRef.value
+
+  // 计算弹出层位置
+  const left = triggerRect.left + triggerRect.width + 8
+  const top = triggerRect.top
+
+  // 检查是否超出视窗右边界
+  const popoverWidth = 400 // 最大宽度
+  const viewportWidth = window.innerWidth
+
+  let finalLeft = left
+  if (left + popoverWidth > viewportWidth - 16) {
+    // 如果超出右边界，显示在左侧
+    finalLeft = triggerRect.left - popoverWidth - 8
+  }
+
+  // 检查是否超出视窗下边界
+  let finalTop = top
+  const popoverHeight = popoverEl.offsetHeight || 200
+  const viewportHeight = window.innerHeight
+
+  if (top + popoverHeight > viewportHeight - 16) {
+    finalTop = Math.max(16, viewportHeight - popoverHeight - 16)
+  }
+
+  popoverStyle.value = {
+    position: 'fixed',
+    left: `${finalLeft}px`,
+    top: `${finalTop}px`,
+    zIndex: 9999
+  }
+}
+
 // 事件处理
 const handleChange = (value: string) => {
   const property = propertyList.value.find((p) => p.identifier === value)
@@ -168,6 +309,8 @@ const handleChange = (value: string) => {
       config: property
     })
   }
+  // 选择变化时隐藏详情弹出层
+  hidePropertyDetail()
 }
 
 // 获取物模型TSL数据
@@ -331,13 +474,74 @@ watch(
   () => props.triggerType,
   () => {
     localValue.value = ''
+    hidePropertyDetail()
   }
 )
+
+// 监听窗口大小变化，重新计算弹出层位置
+const handleResize = () => {
+  if (showPropertyDetail.value) {
+    updatePopoverPosition()
+  }
+}
+
+// 生命周期
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('resize', handleResize)
+})
 </script>
 
 <style scoped>
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 :deep(.el-select-dropdown__item) {
   height: auto;
   padding: 8px 20px;
+}
+
+.property-detail-popover {
+  animation: fadeInScale 0.2s ease-out;
+  transform-origin: top left;
+}
+
+/* 弹出层箭头效果（可选） */
+.property-detail-popover::before {
+  position: absolute;
+  top: 20px;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-right: 8px solid var(--el-border-color);
+  border-bottom: 8px solid transparent;
+  content: '';
+}
+
+.property-detail-popover::after {
+  position: absolute;
+  top: 20px;
+  left: -7px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-right: 8px solid white;
+  border-bottom: 8px solid transparent;
+  content: '';
 }
 </style>

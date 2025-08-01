@@ -203,3 +203,49 @@ export const IoTOtaTaskRecordStatusEnum = {
     value: 50
   }
 } as const
+
+// ========== 场景联动规则相关常量 ==========
+
+/** IoT 场景联动触发器类型枚举 */
+export const IotRuleSceneTriggerTypeEnum = {
+  DEVICE_STATE_UPDATE: 1, // 设备上下线变更
+  DEVICE_PROPERTY_POST: 2, // 物模型属性上报
+  DEVICE_EVENT_POST: 3, // 设备事件上报
+  DEVICE_SERVICE_INVOKE: 4, // 设备服务调用
+  TIMER: 100 // 定时触发
+} as const
+
+/** 触发器类型选项配置 */
+export const getTriggerTypeOptions = () => [
+  {
+    value: IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE,
+    label: '设备状态变更'
+  },
+  {
+    value: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
+    label: '设备属性上报'
+  },
+  {
+    value: IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST,
+    label: '设备事件上报'
+  },
+  {
+    value: IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE,
+    label: '设备服务调用'
+  },
+  {
+    value: IotRuleSceneTriggerTypeEnum.TIMER,
+    label: '定时触发'
+  }
+]
+
+/** 判断是否为设备触发器类型 */
+export const isDeviceTrigger = (type: number): boolean => {
+  const deviceTriggerTypes = [
+    IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE,
+    IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
+    IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST,
+    IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
+  ] as number[]
+  return deviceTriggerTypes.includes(type)
+}

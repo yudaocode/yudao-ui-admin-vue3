@@ -114,11 +114,8 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import ConditionConfig from './ConditionConfig.vue'
-import {
-  ConditionGroupFormData,
-  ConditionFormData,
-  IotRuleSceneTriggerTypeEnum
-} from '@/api/iot/rule/scene/scene.types'
+import { ConditionFormData, ConditionGroupFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
 
 /** 条件组配置组件 */
 defineOptions({ name: 'ConditionGroupConfig' })
@@ -133,6 +130,7 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: ConditionGroupFormData): void
+
   (e: 'validate', result: { valid: boolean; message: string }): void
 }
 

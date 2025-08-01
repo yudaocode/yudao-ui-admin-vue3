@@ -1,11 +1,5 @@
 <template>
   <div class="space-y-16px">
-    <!-- 触发事件类型显示 -->
-    <div class="flex items-center gap-8px mb-16px">
-      <span class="text-14px text-[var(--el-text-color-regular)]">触发事件类型：</span>
-      <el-tag size="small" type="primary">{{ getTriggerTypeText(triggerType) }}</el-tag>
-    </div>
-
     <!-- 设备属性条件配置 -->
     <div v-if="isDevicePropertyTrigger" class="space-y-16px">
       <!-- 产品设备选择 -->
@@ -112,7 +106,7 @@ import OperatorSelector from '../selectors/OperatorSelector.vue'
 import ValueInput from '../inputs/ValueInput.vue'
 import DeviceStatusConditionConfig from './DeviceStatusConditionConfig.vue'
 import { ConditionFormData } from '@/api/iot/rule/scene/scene.types'
-import { IotRuleSceneTriggerTypeEnum } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
 import { useVModel } from '@vueuse/core'
 
 /** 主条件内部配置组件 */
@@ -125,6 +119,7 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: ConditionFormData): void
+
   (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
