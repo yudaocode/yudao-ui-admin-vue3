@@ -82,10 +82,8 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import ConditionConfig from './ConditionConfig.vue'
-import {
-  IotRuleSceneTriggerConditionTypeEnum,
-  TriggerConditionFormData
-} from '@/api/iot/rule/scene/scene.types'
+import { TriggerConditionFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneTriggerConditionTypeEnum } from '@/views/iot/utils/constants'
 
 /** 子条件组配置组件 */
 defineOptions({ name: 'SubConditionGroupConfig' })

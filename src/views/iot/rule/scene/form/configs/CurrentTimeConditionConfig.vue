@@ -94,10 +94,7 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import {
-  ConditionFormData,
-  IotRuleSceneTriggerTimeOperatorEnum
-} from '@/api/iot/rule/scene/scene.types'
+import { ConditionFormData, IotRuleSceneTriggerTimeOperatorEnum } from '@/views/iot/utils/constants'
 
 /** 当前时间条件配置组件 */
 defineOptions({ name: 'CurrentTimeConditionConfig' })

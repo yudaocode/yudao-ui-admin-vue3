@@ -39,11 +39,8 @@
 
 <script setup lang="ts">
 import MainConditionInnerConfig from './MainConditionInnerConfig.vue'
-import {
-  IotRuleSceneTriggerConditionTypeEnum,
-  TriggerFormData
-} from '@/api/iot/rule/scene/scene.types'
-
+import { TriggerFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneTriggerConditionTypeEnum } from '@/views/iot/utils/constants'
 /** 主条件配置组件 */
 defineOptions({ name: 'MainConditionConfig' })
 
