@@ -129,7 +129,7 @@ import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
 import { IotRuleSceneTriggerTypeEnum, IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
 import { ThingModelApi } from '@/api/iot/thingmodel'
-import type { IotThingModelTSLRespVO, PropertySelectorItem } from './types'
+import type { IotThingModelTSLRespVO, PropertySelectorItem } from '@/api/iot/rule/scene/scene.types'
 
 /** 属性选择器组件 */
 defineOptions({ name: 'PropertySelector' })

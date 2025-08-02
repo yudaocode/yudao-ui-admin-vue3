@@ -2,58 +2,138 @@
  * IoT 场景联动接口定义
  */
 
-// 枚举定义已迁移到 constants.ts，这里不再重复导出
+// ========== IoT物模型TSL数据类型定义 ==========
 
-const IotRuleSceneActionTypeEnum = {
-  DEVICE_PROPERTY_SET: 1, // 设备属性设置,
-  DEVICE_SERVICE_INVOKE: 2, // 设备服务调用
-  ALERT_TRIGGER: 100, // 告警触发
-  ALERT_RECOVER: 101 // 告警恢复
-} as const
+/** 物模型TSL响应数据结构 */
+export interface IotThingModelTSLRespVO {
+  productId: number
+  productKey: string
+  properties: ThingModelProperty[]
+  events: ThingModelEvent[]
+  services: ThingModelService[]
+}
 
-const IotDeviceMessageTypeEnum = {
-  PROPERTY: 'property', // 属性
-  SERVICE: 'service', // 服务
-  EVENT: 'event' // 事件
-} as const
+/** 物模型属性 */
+export interface ThingModelProperty {
+  identifier: string
+  name: string
+  accessMode: string
+  required?: boolean
+  dataType: string
+  description?: string
+  dataSpecs?: ThingModelDataSpecs
+  dataSpecsList?: ThingModelDataSpecs[]
+}
 
-// 已删除不需要的 IotDeviceMessageIdentifierEnum
+/** 物模型事件 */
+export interface ThingModelEvent {
+  identifier: string
+  name: string
+  required?: boolean
+  type: string
+  description?: string
+  outputParams?: ThingModelParam[]
+  method?: string
+}
 
-const IotRuleSceneTriggerConditionParameterOperatorEnum = {
-  EQUALS: { name: '等于', value: '=' }, // 等于
-  NOT_EQUALS: { name: '不等于', value: '!=' }, // 不等于
-  GREATER_THAN: { name: '大于', value: '>' }, // 大于
-  GREATER_THAN_OR_EQUALS: { name: '大于等于', value: '>=' }, // 大于等于
-  LESS_THAN: { name: '小于', value: '<' }, // 小于
-  LESS_THAN_OR_EQUALS: { name: '小于等于', value: '<=' }, // 小于等于
-  IN: { name: '在...之中', value: 'in' }, // 在...之中
-  NOT_IN: { name: '不在...之中', value: 'not in' }, // 不在...之中
-  BETWEEN: { name: '在...之间', value: 'between' }, // 在...之间
-  NOT_BETWEEN: { name: '不在...之间', value: 'not between' }, // 不在...之间
-  LIKE: { name: '字符串匹配', value: 'like' }, // 字符串匹配
-  NOT_NULL: { name: '非空', value: 'not null' } // 非空
-} as const
+/** 物模型服务 */
+export interface ThingModelService {
+  identifier: string
+  name: string
+  required?: boolean
+  callType: string
+  description?: string
+  inputParams?: ThingModelParam[]
+  outputParams?: ThingModelParam[]
+  method?: string
+}
 
-// 条件类型枚举
-const IotRuleSceneTriggerConditionTypeEnum = {
-  DEVICE_STATUS: 1, // 设备状态
-  DEVICE_PROPERTY: 2, // 设备属性
-  CURRENT_TIME: 3 // 当前时间
-} as const
+/** 物模型参数 */
+export interface ThingModelParam {
+  identifier: string
+  name: string
+  direction: string
+  paraOrder?: number
+  dataType: string
+  dataSpecs?: ThingModelDataSpecs
+  dataSpecsList?: ThingModelDataSpecs[]
+}
 
-// 时间运算符枚举
-const IotRuleSceneTriggerTimeOperatorEnum = {
-  BEFORE_TIME: { name: '在时间之前', value: 'before_time' }, // 在时间之前
-  AFTER_TIME: { name: '在时间之后', value: 'after_time' }, // 在时间之后
-  BETWEEN_TIME: { name: '在时间之间', value: 'between_time' }, // 在时间之间
-  AT_TIME: { name: '在指定时间', value: 'at_time' }, // 在指定时间
-  BEFORE_TODAY: { name: '在今日之前', value: 'before_today' }, // 在今日之前
-  AFTER_TODAY: { name: '在今日之后', value: 'after_today' }, // 在今日之后
-  TODAY: { name: '在今日之间', value: 'today' } // 在今日之间
-} as const
+/** 数值型数据规范 */
+export interface ThingModelNumericDataSpec {
+  dataType: 'int' | 'float' | 'double'
+  max: string
+  min: string
+  step: string
+  precise?: string
+  defaultValue?: string
+  unit?: string
+  unitName?: string
+}
 
-// 已删除未使用的枚举：IotAlertConfigReceiveTypeEnum、DeviceStateEnum
-// CommonStatusEnum 已在全局定义，这里不再重复定义
+/** 布尔/枚举型数据规范 */
+export interface ThingModelBoolOrEnumDataSpecs {
+  dataType: 'bool' | 'enum'
+  name: string
+  value: number
+}
+
+/** 文本/时间型数据规范 */
+export interface ThingModelDateOrTextDataSpecs {
+  dataType: 'text' | 'date'
+  length?: number
+  defaultValue?: string
+}
+
+/** 数组型数据规范 */
+export interface ThingModelArrayDataSpecs {
+  dataType: 'array'
+  size: number
+  childDataType: string
+  dataSpecsList?: ThingModelDataSpecs[]
+}
+
+/** 结构体型数据规范 */
+export interface ThingModelStructDataSpecs {
+  dataType: 'struct'
+  identifier: string
+  name: string
+  accessMode: string
+  required?: boolean
+  childDataType: string
+  dataSpecs?: ThingModelDataSpecs
+  dataSpecsList?: ThingModelDataSpecs[]
+}
+
+/** 数据规范联合类型 */
+export type ThingModelDataSpecs =
+  | ThingModelNumericDataSpec
+  | ThingModelBoolOrEnumDataSpecs
+  | ThingModelDateOrTextDataSpecs
+  | ThingModelArrayDataSpecs
+  | ThingModelStructDataSpecs
+
+/** 属性选择器内部使用的统一数据结构 */
+export interface PropertySelectorItem {
+  identifier: string
+  name: string
+  description?: string
+  dataType: string
+  type: number // IoTThingModelTypeEnum
+  accessMode?: string
+  required?: boolean
+  unit?: string
+  range?: string
+  eventType?: string
+  callType?: string
+  inputParams?: ThingModelParam[]
+  outputParams?: ThingModelParam[]
+  property?: ThingModelProperty
+  event?: ThingModelEvent
+  service?: ThingModelService
+}
+
+// ========== 场景联动规则相关接口定义 ==========
 
 // 基础接口（如果项目中有全局的 BaseDO，可以使用全局的）
 interface TenantBaseDO {
@@ -199,14 +279,6 @@ interface ActionDO {
   alertConfigId?: number // 告警配置编号
 }
 
-// 工具类型 - 从枚举中提取类型
-// TriggerType 现在从 constants.ts 中的枚举提取
-export type ActionType =
-  (typeof IotRuleSceneActionTypeEnum)[keyof typeof IotRuleSceneActionTypeEnum]
-export type MessageType = (typeof IotDeviceMessageTypeEnum)[keyof typeof IotDeviceMessageTypeEnum]
-export type OperatorType =
-  (typeof IotRuleSceneTriggerConditionParameterOperatorEnum)[keyof typeof IotRuleSceneTriggerConditionParameterOperatorEnum]['value']
-
 // 表单验证规则类型
 interface ValidationRule {
   required?: boolean
@@ -237,11 +309,6 @@ export {
   TriggerFormData,
   TriggerConditionFormData,
   ActionFormData,
-  IotRuleSceneActionTypeEnum,
-  IotDeviceMessageTypeEnum,
-  IotRuleSceneTriggerConditionParameterOperatorEnum,
-  IotRuleSceneTriggerConditionTypeEnum,
-  IotRuleSceneTriggerTimeOperatorEnum,
   ValidationRule,
   FormValidationRules
 }

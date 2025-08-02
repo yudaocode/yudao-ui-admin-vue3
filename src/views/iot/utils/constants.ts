@@ -249,3 +249,54 @@ export const isDeviceTrigger = (type: number): boolean => {
   ] as number[]
   return deviceTriggerTypes.includes(type)
 }
+
+// ========== 场景联动规则执行器相关常量 ==========
+
+/** IoT 场景联动执行器类型枚举 */
+export const IotRuleSceneActionTypeEnum = {
+  DEVICE_PROPERTY_SET: 1, // 设备属性设置
+  DEVICE_SERVICE_INVOKE: 2, // 设备服务调用
+  ALERT_TRIGGER: 100, // 告警触发
+  ALERT_RECOVER: 101 // 告警恢复
+} as const
+
+/** IoT 设备消息类型枚举 */
+export const IotDeviceMessageTypeEnum = {
+  PROPERTY: 'property', // 属性
+  SERVICE: 'service', // 服务
+  EVENT: 'event' // 事件
+} as const
+
+/** IoT 场景联动触发条件参数操作符枚举 */
+export const IotRuleSceneTriggerConditionParameterOperatorEnum = {
+  EQUALS: { name: '等于', value: '=' }, // 等于
+  NOT_EQUALS: { name: '不等于', value: '!=' }, // 不等于
+  GREATER_THAN: { name: '大于', value: '>' }, // 大于
+  GREATER_THAN_OR_EQUALS: { name: '大于等于', value: '>=' }, // 大于等于
+  LESS_THAN: { name: '小于', value: '<' }, // 小于
+  LESS_THAN_OR_EQUALS: { name: '小于等于', value: '<=' }, // 小于等于
+  IN: { name: '在...之中', value: 'in' }, // 在...之中
+  NOT_IN: { name: '不在...之中', value: 'not in' }, // 不在...之中
+  BETWEEN: { name: '在...之间', value: 'between' }, // 在...之间
+  NOT_BETWEEN: { name: '不在...之间', value: 'not between' }, // 不在...之间
+  LIKE: { name: '字符串匹配', value: 'like' }, // 字符串匹配
+  NOT_NULL: { name: '非空', value: 'not null' } // 非空
+} as const
+
+/** IoT 场景联动触发条件类型枚举 */
+export const IotRuleSceneTriggerConditionTypeEnum = {
+  DEVICE_STATUS: 1, // 设备状态
+  DEVICE_PROPERTY: 2, // 设备属性
+  CURRENT_TIME: 3 // 当前时间
+} as const
+
+/** IoT 场景联动触发时间操作符枚举 */
+export const IotRuleSceneTriggerTimeOperatorEnum = {
+  BEFORE_TIME: { name: '在时间之前', value: 'before_time' }, // 在时间之前
+  AFTER_TIME: { name: '在时间之后', value: 'after_time' }, // 在时间之后
+  BETWEEN_TIME: { name: '在时间之间', value: 'between_time' }, // 在时间之间
+  AT_TIME: { name: '在指定时间', value: 'at_time' }, // 在指定时间
+  BEFORE_TODAY: { name: '在今日之前', value: 'before_today' }, // 在今日之前
+  AFTER_TODAY: { name: '在今日之后', value: 'after_today' }, // 在今日之后
+  TODAY: { name: '在今日之间', value: 'today' } // 在今日之间
+} as const

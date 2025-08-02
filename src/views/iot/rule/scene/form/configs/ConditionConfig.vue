@@ -121,10 +121,11 @@ import DeviceSelector from '../selectors/DeviceSelector.vue'
 import PropertySelector from '../selectors/PropertySelector.vue'
 import OperatorSelector from '../selectors/OperatorSelector.vue'
 import ValueInput from '../inputs/ValueInput.vue'
+import { TriggerConditionFormData } from '@/api/iot/rule/scene/scene.types'
 import {
-  TriggerConditionFormData,
-  IotRuleSceneTriggerConditionTypeEnum
-} from '@/api/iot/rule/scene/scene.types'
+  IotRuleSceneTriggerConditionTypeEnum,
+  IotRuleSceneTriggerConditionParameterOperatorEnum
+} from '@/views/iot/utils/constants'
 
 /** 单个条件配置组件 */
 defineOptions({ name: 'ConditionConfig' })
@@ -166,19 +167,29 @@ const handleConditionTypeChange = (type: number) => {
   // 清理不相关的字段
   if (type === ConditionTypeEnum.DEVICE_STATUS) {
     condition.value.identifier = undefined
-    condition.value.timeValue = undefined
-    condition.value.timeValue2 = undefined
+    // 清理时间相关字段（如果存在）
+    if ('timeValue' in condition.value) {
+      delete (condition.value as any).timeValue
+    }
+    if ('timeValue2' in condition.value) {
+      delete (condition.value as any).timeValue2
+    }
   } else if (type === ConditionTypeEnum.CURRENT_TIME) {
     condition.value.identifier = undefined
     condition.value.productId = undefined
     condition.value.deviceId = undefined
   } else if (type === ConditionTypeEnum.DEVICE_PROPERTY) {
-    condition.value.timeValue = undefined
-    condition.value.timeValue2 = undefined
+    // 清理时间相关字段（如果存在）
+    if ('timeValue' in condition.value) {
+      delete (condition.value as any).timeValue
+    }
+    if ('timeValue2' in condition.value) {
+      delete (condition.value as any).timeValue2
+    }
   }
 
-  // 重置操作符和参数
-  condition.value.operator = '='
+  // 重置操作符和参数，使用枚举中的默认值
+  condition.value.operator = IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
   condition.value.param = ''
 
   updateValidationResult()

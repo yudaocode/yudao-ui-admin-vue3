@@ -36,7 +36,11 @@
 
       <!-- 执行器列表 -->
       <div v-else class="space-y-16px">
-        <div v-for="(action, index) in actions" :key="`action-${index}`" class="p-16px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]">
+        <div
+          v-for="(action, index) in actions"
+          :key="`action-${index}`"
+          class="p-16px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]"
+        >
           <div class="flex items-center justify-between mb-16px">
             <div class="flex items-center gap-8px">
               <Icon icon="ep:setting" class="text-[var(--el-color-success)] text-16px" />
@@ -92,7 +96,9 @@
           <Icon icon="ep:plus" />
           继续添加执行器
         </el-button>
-        <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]"> 最多可添加 {{ maxActions }} 个执行器 </span>
+        <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]">
+          最多可添加 {{ maxActions }} 个执行器
+        </span>
       </div>
 
       <!-- 验证结果 -->
@@ -113,10 +119,8 @@ import { useVModel } from '@vueuse/core'
 import ActionTypeSelector from '../selectors/ActionTypeSelector.vue'
 import DeviceControlConfig from '../configs/DeviceControlConfig.vue'
 import AlertConfig from '../configs/AlertConfig.vue'
-import {
-  ActionFormData,
-  IotRuleSceneActionTypeEnum as ActionTypeEnum
-} from '@/api/iot/rule/scene/scene.types'
+import { ActionFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneActionTypeEnum as ActionTypeEnum } from '@/views/iot/utils/constants'
 
 /** 执行器配置组件 */
 defineOptions({ name: 'ActionSection' })
@@ -173,11 +177,13 @@ const actionTypeTags = {
 
 // 工具函数
 const isDeviceAction = (type: number) => {
-  return [ActionTypeEnum.DEVICE_PROPERTY_SET, ActionTypeEnum.DEVICE_SERVICE_INVOKE].includes(type)
+  return [ActionTypeEnum.DEVICE_PROPERTY_SET, ActionTypeEnum.DEVICE_SERVICE_INVOKE].includes(
+    type as any
+  )
 }
 
 const isAlertAction = (type: number) => {
-  return [ActionTypeEnum.ALERT_TRIGGER, ActionTypeEnum.ALERT_RECOVER].includes(type)
+  return [ActionTypeEnum.ALERT_TRIGGER, ActionTypeEnum.ALERT_RECOVER].includes(type as any)
 }
 
 const getActionTypeName = (type: number) => {
@@ -277,5 +283,3 @@ watch(
   }
 )
 </script>
-
-

@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { IotRuleSceneTriggerConditionTypeEnum } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneTriggerConditionTypeEnum } from '@/views/iot/utils/constants'
 
 /** 条件类型选择器组件 */
 defineOptions({ name: 'ConditionTypeSelector' })
