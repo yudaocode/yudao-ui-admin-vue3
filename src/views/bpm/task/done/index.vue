@@ -184,8 +184,9 @@
         :show-overflow-tooltip="true"
       />
       <el-table-column align="center" label="任务编号" prop="id" :show-overflow-tooltip="true" />
-      <el-table-column align="center" label="操作" fixed="right" width="80">
+      <el-table-column align="center" label="操作" fixed="right" width="130">
         <template #default="scope">
+          <el-button link type="warning" @click="handleWithdraw(scope.row)">撤回</el-button>
           <el-button link type="primary" @click="handleAudit(scope.row)">历史</el-button>
         </template>
       </el-table-column>
@@ -209,6 +210,7 @@ import * as DefinitionApi from '@/api/bpm/definition'
 defineOptions({ name: 'BpmDoneTask' })
 
 const { push } = useRouter() // 路由
+const message = useMessage()
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -259,6 +261,14 @@ const handleAudit = (row: any) => {
       id: row.processInstance.id,
       taskId: row.id
     }
+  })
+}
+
+/** 测回按钮 */
+const handleWithdraw = (row: any) => {
+  TaskApi.withdrawTask(row.id).then(() => {
+    message.success('撤回成功')
+    getList()
   })
 }
 
