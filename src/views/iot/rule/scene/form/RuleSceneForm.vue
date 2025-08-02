@@ -1,5 +1,4 @@
 <template>
-  <!-- 场景联动规则表单抽屉 - 优化高度和布局 -->
   <el-drawer
     v-model="drawerVisible"
     :title="drawerTitle"
@@ -12,10 +11,8 @@
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="110px">
       <!-- 基础信息配置 -->
       <BasicInfoSection v-model="formData" :rules="formRules" />
-
       <!-- 触发器配置 -->
       <TriggerSection v-model:triggers="formData.triggers" @validate="handleTriggerValidate" />
-
       <!-- 执行器配置 -->
       <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
     </el-form>
@@ -45,6 +42,7 @@ import { ElMessage } from 'element-plus'
 import { generateUUID } from '@/utils'
 
 // 导入全局的 CommonStatusEnum
+// TODO @puhui999：这里直接复用全局的哈；
 const CommonStatusEnum = {
   ENABLE: 0, // 开启
   DISABLE: 1 // 关闭
@@ -120,6 +118,7 @@ const convertFormToVO = (formData: RuleSceneFormData): IotRuleSceneDO => {
   }
 }
 
+// TODO @puhui999：下面好像没用到？
 /**
  * 将后端 DO 数据转换为表单格式
  * 由于数据结构已对齐，转换变得非常简单
@@ -209,6 +208,7 @@ const actionValidation = ref({ valid: true, message: '' })
 const isEdit = ref(false)
 const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
 
+// TODO @puhui999：方法的注释风格统一；
 // 事件处理
 const handleTriggerValidate = (result: { valid: boolean; message: string }) => {
   triggerValidation.value = result
@@ -218,6 +218,7 @@ const handleActionValidate = (result: { valid: boolean; message: string }) => {
   actionValidation.value = result
 }
 
+// TODO @puhui999：API 调用
 const handleSubmit = async () => {
   // 校验表单
   if (!formRef.value) return

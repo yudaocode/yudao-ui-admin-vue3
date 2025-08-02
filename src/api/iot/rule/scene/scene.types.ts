@@ -4,6 +4,8 @@
 
 // ========== IoT物模型TSL数据类型定义 ==========
 
+// TODO @puhui999：看看有些是不是在别的模块已经定义了。物模型的
+
 /** 物模型TSL响应数据结构 */
 export interface IotThingModelTSLRespVO {
   productId: number
@@ -293,6 +295,8 @@ interface ValidationRule {
 interface FormValidationRules {
   [key: string]: ValidationRule[]
 }
+
+// TODO @puhui999：这个文件，目标最终没有哈，和别的模块一致；
 
 export {
   IotRuleScene,

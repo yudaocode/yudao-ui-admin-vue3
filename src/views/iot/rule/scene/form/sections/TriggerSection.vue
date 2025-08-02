@@ -16,6 +16,7 @@
 
     <div class="p-16px space-y-24px">
       <!-- 触发器列表 -->
+      <!-- TODO 每个触发器，有个外框，会不会好点？ -->
       <div v-if="triggers.length > 0" class="space-y-24px">
         <div
           v-for="(triggerItem, index) in triggers"

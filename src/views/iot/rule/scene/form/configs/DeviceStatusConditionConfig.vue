@@ -43,9 +43,9 @@
             >
               <div class="flex items-center justify-between w-full">
                 <span>{{ option.label }}</span>
-                <span class="text-12px text-[var(--el-text-color-secondary)]">{{
-                  option.description
-                }}</span>
+                <span class="text-12px text-[var(--el-text-color-secondary)]">
+                  {{ option.description }}
+                </span>
               </div>
             </el-option>
           </el-select>
@@ -101,6 +101,7 @@ const emit = defineEmits<{
 const condition = useVModel(props, 'modelValue', emit)
 
 // 设备状态选项
+// TODO @puhui999：这个要不直接字段，简洁一点；
 const deviceStatusOptions = [
   {
     value: 'online',
@@ -121,6 +122,7 @@ const deviceStatusOptions = [
 ]
 
 // 状态操作符选项
+// TODO @puhui999：value、label 看看能不能复用枚举值；
 const statusOperatorOptions = [
   {
     value: '=',

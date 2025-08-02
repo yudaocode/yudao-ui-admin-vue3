@@ -20,6 +20,7 @@
     </div>
 
     <!-- 主条件配置 -->
+    <!-- TODO @puhui999：和“主条件”，是不是和“附加条件组”弄成一个风格，都是占一行；有个绿条； -->
     <div v-else class="space-y-16px">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-8px">
