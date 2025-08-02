@@ -62,7 +62,7 @@ export const useUserStore = defineStore('admin-user', {
           userInfo = await getInfo()
         } catch (error) {}
       }
-      this.permissions = new Set(userInfo.permissions)
+      this.permissions = new Set(userInfo.permissions || []) // 兜底为 [] https://t.zsxq.com/xCJew
       this.roles = userInfo.roles
       this.user = userInfo.user
       this.isSetUser = true

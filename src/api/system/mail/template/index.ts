@@ -44,6 +44,11 @@ export const deleteMailTemplate = async (id: number) => {
   return await request.delete({ url: '/system/mail-template/delete?id=' + id })
 }
 
+// 批量删除邮件模版
+export const deleteMailTemplateList = async (ids: number[]) => {
+  return await request.delete({ url: '/system/mail-template/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 发送邮件
 export const sendMail = (data: MailSendReqVO) => {
   return request.post({ url: '/system/mail-template/send-mail', data })

@@ -80,7 +80,8 @@ const activeAppLink = ref({} as AppLink)
 /** 打开弹窗 */
 const dialogVisible = ref(false)
 const open = (link: string) => {
-  activeAppLink.value.path = link
+  // 进入页面时先重置 activeAppLink
+  activeAppLink.value = { name: '', path: '' }
   dialogVisible.value = true
 
   // 滚动到当前的链接
@@ -102,8 +103,11 @@ defineExpose({ open })
 
 // 处理 APP 链接选中
 const handleAppLinkSelected = (appLink: AppLink) => {
+  // 只有不同链接时才更新（避免重复触发）
   if (!isSameLink(appLink.path, activeAppLink.value.path)) {
-    activeAppLink.value = appLink
+    // 如果新链接的 path 为空，则沿用当前 activeAppLink 的 path
+    const path = appLink.path || activeAppLink.value.path
+    activeAppLink.value = { ...appLink, path: path }
   }
   switch (appLink.type) {
     case APP_LINK_TYPE_ENUM.PRODUCT_CATEGORY_LIST:
@@ -170,7 +174,7 @@ const groupBtnRefs = ref<ButtonInstance[]>([])
 const scrollToGroupBtn = (group: string) => {
   const groupBtn = groupBtnRefs.value
     .map((btn: ButtonInstance) => btn['ref'])
-    .find((ref: Node) => ref.textContent === group)
+    .find((ref: HTMLButtonElement) => ref.textContent === group)
   if (groupBtn) {
     groupScrollbar.value?.setScrollTop(groupBtn.offsetTop)
   }

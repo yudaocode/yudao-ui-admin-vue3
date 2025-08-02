@@ -33,7 +33,7 @@
       />
     </el-form-item>
     <el-form-item>
-      <div class="flex pt-2" v-for="(item, index) in setting.response" :key="index">
+      <div class="flex pt-4" v-for="(item, index) in setting.response" :key="index">
         <div class="mr-2">
           <el-form-item
             :prop="`${formItemPrefix}.response.${index}.key`"
@@ -74,10 +74,12 @@
           />
         </div>
       </div>
+    </el-form-item>
+    <div class="pt-1">
       <el-button type="primary" text @click="addHttpResponseSetting(setting.response!)">
         <Icon icon="ep:plus" class="mr-5px" />添加一行
       </el-button>
-    </el-form-item>
+    </div>
   </div>
 </template>
 <script setup lang="ts">

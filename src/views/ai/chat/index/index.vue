@@ -1,5 +1,5 @@
 <template>
-  <el-container class="ai-layout">
+  <el-container class="absolute flex-1 top-0 left-0 h-full w-full">
     <!-- 左侧：对话列表 -->
     <ConversationList
       :active-id="activeConversationId"
@@ -10,33 +10,38 @@
       @on-conversation-delete="handlerConversationDelete"
     />
     <!-- 右侧：对话详情 -->
-    <el-container class="detail-container">
-      <el-header class="header">
-        <div class="title">
+    <el-container class="bg-[var(--el-bg-color)]">
+      <el-header
+        class="flex flex-row items-center justify-between bg-[var(--el-bg-color-page)] shadow-[0_0_0_0_var(--el-border-color-light)]"
+      >
+        <div class="text-18px font-bold">
           {{ activeConversation?.title ? activeConversation?.title : '对话' }}
           <span v-if="activeMessageList.length">({{ activeMessageList.length }})</span>
         </div>
-        <div class="btns" v-if="activeConversation">
+        <div class="flex w-300px flex-row justify-end" v-if="activeConversation">
           <el-button type="primary" bg plain size="small" @click="openChatConversationUpdateForm">
             <span v-html="activeConversation?.modelName"></span>
             <Icon icon="ep:setting" class="ml-10px" />
           </el-button>
-          <el-button size="small" class="btn" @click="handlerMessageClear">
-            <Icon icon="heroicons-outline:archive-box-x-mark" color="#787878" />
+          <el-button size="small" class="p-10px" @click="handlerMessageClear">
+            <Icon
+              icon="heroicons-outline:archive-box-x-mark"
+              color="var(--el-text-color-placeholder)"
+            />
           </el-button>
-          <el-button size="small" class="btn">
-            <Icon icon="ep:download" color="#787878" />
+          <el-button size="small" class="p-10px">
+            <Icon icon="ep:download" color="var(--el-text-color-placeholder)" />
           </el-button>
-          <el-button size="small" class="btn" @click="handleGoTopMessage">
-            <Icon icon="ep:top" color="#787878" />
+          <el-button size="small" class="p-10px" @click="handleGoTopMessage">
+            <Icon icon="ep:top" color="var(--el-text-color-placeholder)" />
           </el-button>
         </div>
       </el-header>
 
       <!-- main：消息列表 -->
-      <el-main class="main-container">
+      <el-main class="m-0 p-0 relative h-full w-full">
         <div>
-          <div class="message-container">
+          <div class="absolute top-0 bottom-0 left-0 right-0 overflow-y-hidden p-0 m-0">
             <!-- 情况一：消息加载中 -->
             <MessageLoading v-if="activeMessageListLoading" />
             <!-- 情况二：无聊天对话时 -->
@@ -64,10 +69,14 @@
       </el-main>
 
       <!-- 底部 -->
-      <el-footer class="footer-container">
-        <form class="prompt-from">
+      <el-footer class="flex flex-col !h-auto !p-0">
+        <!-- TODO @芋艿：这块要想办法迁移下！ -->
+        <form
+          class="mt-10px mx-20px mb-20px py-9px px-10px flex flex-col h-auto rounded-10px"
+          style="border: 1px solid var(--el-border-color)"
+        >
           <textarea
-            class="prompt-input"
+            class="h-80px border-none box-border resize-none py-0 px-2px overflow-auto focus:outline-none"
             v-model="prompt"
             @keydown="handleSendByKeydown"
             @input="handlePromptInput"
@@ -75,7 +84,7 @@
             @compositionend="onCompositionend"
             placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
           ></textarea>
-          <div class="prompt-btns">
+          <div class="flex justify-between pb-0 pt-5px">
             <div>
               <el-switch v-model="enableContext" />
               <span class="ml-5px text-14px text-#8f8f8f">上下文</span>
@@ -571,204 +580,3 @@ onMounted(async () => {
   await getMessageList()
 })
 </script>
-
-<style lang="scss" scoped>
-.ai-layout {
-  position: absolute;
-  flex: 1;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-}
-
-.conversation-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 10px 10px 0;
-
-  .btn-new-conversation {
-    padding: 18px 0;
-  }
-
-  .search-input {
-    margin-top: 20px;
-  }
-
-  .conversation-list {
-    margin-top: 20px;
-
-    .conversation {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      flex: 1;
-      padding: 0 5px;
-      margin-top: 10px;
-      cursor: pointer;
-      border-radius: 5px;
-      align-items: center;
-      line-height: 30px;
-
-      &.active {
-        background-color: #e6e6e6;
-
-        .button {
-          display: inline-block;
-        }
-      }
-
-      .title-wrapper {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .title {
-        padding: 5px 10px;
-        max-width: 220px;
-        font-size: 14px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-
-      .avatar {
-        width: 28px;
-        height: 28px;
-        display: flex;
-        flex-direction: row;
-        justify-items: center;
-      }
-
-      // 对话编辑、删除
-      .button-wrapper {
-        right: 2px;
-        display: flex;
-        flex-direction: row;
-        justify-items: center;
-        color: #606266;
-
-        .el-icon {
-          margin-right: 5px;
-        }
-      }
-    }
-  }
-
-  // 角色仓库、清空未设置对话
-  .tool-box {
-    line-height: 35px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--el-text-color);
-
-    > div {
-      display: flex;
-      align-items: center;
-      color: #606266;
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-
-      > span {
-        margin-left: 5px;
-      }
-    }
-  }
-}
-
-// 头部
-.detail-container {
-  background: #ffffff;
-
-  .header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    background: #fbfbfb;
-    box-shadow: 0 0 0 0 #dcdfe6;
-
-    .title {
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .btns {
-      display: flex;
-      width: 300px;
-      flex-direction: row;
-      justify-content: flex-end;
-      //justify-content: space-between;
-
-      .btn {
-        padding: 10px;
-      }
-    }
-  }
-}
-
-// main 容器
-.main-container {
-  margin: 0;
-  padding: 0;
-  position: relative;
-  height: 100%;
-  width: 100%;
-
-  .message-container {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    overflow-y: hidden;
-    padding: 0;
-    margin: 0;
-  }
-}
-
-// 底部
-.footer-container {
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  margin: 0;
-  padding: 0;
-
-  .prompt-from {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    border: 1px solid #e3e3e3;
-    border-radius: 10px;
-    margin: 10px 20px 20px 20px;
-    padding: 9px 10px;
-  }
-
-  .prompt-input {
-    height: 80px;
-    //box-shadow: none;
-    border: none;
-    box-sizing: border-box;
-    resize: none;
-    padding: 0 2px;
-    overflow: auto;
-  }
-
-  .prompt-input:focus {
-    outline: none;
-  }
-
-  .prompt-btns {
-    display: flex;
-    justify-content: space-between;
-    padding-bottom: 0;
-    padding-top: 5px;
-  }
-}
-</style>

@@ -107,16 +107,15 @@ const initGiveCouponList = async () => {
 
 /** 设置赠送的优惠券 */
 const setGiveCouponList = () => {
-  if (isEmpty(rewardRule.value) || isEmpty(list.value)) {
+  if (isEmpty(rewardRule.value)) {
     return
   }
+  // 核心：清空 rewardRule.value.giveCouponTemplateCounts，解决删除不生效的问题
+  rewardRule.value.giveCouponTemplateCounts = {}
 
   // 设置优惠券和其数量的对应
   list.value.forEach((rule) => {
-    if (!rewardRule.value.giveCouponTemplateCounts) {
-      rewardRule.value.giveCouponTemplateCounts = {}
-    }
-    rewardRule.value.giveCouponTemplateCounts[rule.id] = rule.giveCount!
+    rewardRule.value.giveCouponTemplateCounts![rule.id] = rule.giveCount!
   })
 }
 defineExpose({ setGiveCouponList })

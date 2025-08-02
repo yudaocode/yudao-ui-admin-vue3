@@ -1,52 +1,86 @@
 <template>
   <div ref="messageContainer" class="h-100% overflow-y-auto relative">
-    <div class="chat-list" v-for="(item, index) in list" :key="index">
+    <div class="flex flex-col overflow-y-hidden px-20px" v-for="(item, index) in list" :key="index">
       <!-- 靠左 message：system、assistant 类型 -->
-      <div class="left-message message-item" v-if="item.type !== 'user'">
+      <div class="flex flex-row mt-50px" v-if="item.type !== 'user'">
         <div class="avatar">
           <el-avatar :src="roleAvatar" />
         </div>
-        <div class="message">
+        <div class="flex flex-col text-left mx-15px">
           <div>
-            <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
+            <el-text class="text-left leading-30px">{{ formatDate(item.createTime) }}</el-text>
           </div>
-          <div class="left-text-container" ref="markdownViewRef">
-            <MarkdownView class="left-text" :content="item.content" />
+          <div
+            class="relative flex flex-col break-words bg-[var(--el-fill-color-light)] shadow-[0_0_0_1px_var(--el-border-color-light)] rounded-10px pt-10px px-10px pb-5px"
+            ref="markdownViewRef"
+          >
+            <MarkdownView
+              class="text-[var(--el-text-color-primary)] text-[0.95rem]"
+              :content="item.content"
+            />
             <MessageKnowledge v-if="item.segments" :segments="item.segments" />
           </div>
-          <div class="left-btns">
-            <el-button class="btn-cus" link @click="copyContent(item.content)">
-              <img class="btn-image" src="@/assets/ai/copy.svg" />
+          <div class="flex flex-row mt-8px">
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="copyContent(item.content)"
+            >
+              <img class="h-20px" src="@/assets/ai/copy.svg" />
             </el-button>
-            <el-button v-if="item.id > 0" class="btn-cus" link @click="onDelete(item.id)">
-              <img class="btn-image h-17px" src="@/assets/ai/delete.svg" />
+            <el-button
+              v-if="item.id > 0"
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="onDelete(item.id)"
+            >
+              <img class="h-17px" src="@/assets/ai/delete.svg" />
             </el-button>
           </div>
         </div>
       </div>
       <!-- 靠右 message：user 类型 -->
-      <div class="right-message message-item" v-if="item.type === 'user'">
+      <div class="flex flex-row-reverse justify-start mt-50px" v-if="item.type === 'user'">
         <div class="avatar">
           <el-avatar :src="userAvatar" />
         </div>
-        <div class="message">
+        <div class="flex flex-col text-left mx-15px">
           <div>
-            <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
+            <el-text class="text-left leading-30px">{{ formatDate(item.createTime) }}</el-text>
           </div>
-          <div class="right-text-container">
-            <div class="right-text">{{ item.content }}</div>
+          <div class="flex flex-row-reverse">
+            <div
+              class="text-[0.95rem] text-[var(--el-color-white)] inline bg-[var(--el-color-primary)] shadow-[0_0_0_1px_var(--el-color-primary)] rounded-10px p-10px w-auto break-words whitespace-pre-wrap"
+              >{{ item.content }}</div
+            >
           </div>
-          <div class="right-btns">
-            <el-button class="btn-cus" link @click="copyContent(item.content)">
-              <img class="btn-image" src="@/assets/ai/copy.svg" />
+          <div class="flex flex-row-reverse mt-8px">
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="copyContent(item.content)"
+            >
+              <img class="h-20px" src="@/assets/ai/copy.svg" />
             </el-button>
-            <el-button class="btn-cus" link @click="onDelete(item.id)">
-              <img class="btn-image h-17px mr-12px" src="@/assets/ai/delete.svg" />
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="onDelete(item.id)"
+            >
+              <img class="h-17px mr-12px" src="@/assets/ai/delete.svg" />
             </el-button>
-            <el-button class="btn-cus" link @click="onRefresh(item)">
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="onRefresh(item)"
+            >
               <el-icon size="17"><RefreshRight /></el-icon>
             </el-button>
-            <el-button class="btn-cus" link @click="onEdit(item)">
+            <el-button
+              class="flex bg-transparent items-center hover:cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
+              link
+              @click="onEdit(item)"
+            >
               <el-icon size="17"><Edit /></el-icon>
             </el-button>
           </div>
@@ -55,7 +89,7 @@
     </div>
   </div>
   <!-- 回到底部 -->
-  <div v-if="isScrolling" class="to-bottom" @click="handleGoBottom">
+  <div v-if="isScrolling" class="absolute z-1000 bottom-0 right-50%" @click="handleGoBottom">
     <el-button :icon="ArrowDownBold" circle />
   </div>
 </template>
@@ -142,7 +176,7 @@ defineExpose({ scrollToBottom, handlerGoTop }) // 提供方法给 parent 调用
 // ============ 处理消息操作 ==============
 
 /** 复制 */
-const copyContent = async (content) => {
+const copyContent = async (content: string) => {
   await copy(content)
   message.success('复制成功！')
 }
@@ -171,114 +205,3 @@ onMounted(async () => {
   messageContainer.value.addEventListener('scroll', handleScroll)
 })
 </script>
-
-<style scoped lang="scss">
-.message-container {
-  position: relative;
-  overflow-y: scroll;
-}
-
-// 中间
-.chat-list {
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
-  padding: 0 20px;
-  .message-item {
-    margin-top: 50px;
-  }
-
-  .left-message {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .right-message {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-start;
-  }
-
-  .message {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    margin: 0 15px;
-
-    .time {
-      text-align: left;
-      line-height: 30px;
-    }
-
-    .left-text-container {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      overflow-wrap: break-word;
-      background-color: rgba(228, 228, 228, 0.8);
-      box-shadow: 0 0 0 1px rgba(228, 228, 228, 0.8);
-      border-radius: 10px;
-      padding: 10px 10px 5px 10px;
-
-      .left-text {
-        color: #393939;
-        font-size: 0.95rem;
-      }
-    }
-
-    .right-text-container {
-      display: flex;
-      flex-direction: row-reverse;
-
-      .right-text {
-        font-size: 0.95rem;
-        color: #fff;
-        display: inline;
-        background-color: #267fff;
-        box-shadow: 0 0 0 1px #267fff;
-        border-radius: 10px;
-        padding: 10px;
-        width: auto;
-        overflow-wrap: break-word;
-        white-space: pre-wrap;
-      }
-    }
-
-    .left-btns {
-      display: flex;
-      flex-direction: row;
-      margin-top: 8px;
-    }
-
-    .right-btns {
-      display: flex;
-      flex-direction: row-reverse;
-      margin-top: 8px;
-    }
-  }
-
-  // 复制、删除按钮
-  .btn-cus {
-    display: flex;
-    background-color: transparent;
-    align-items: center;
-
-    .btn-image {
-      height: 20px;
-    }
-  }
-
-  .btn-cus:hover {
-    cursor: pointer;
-    background-color: #f6f6f6;
-  }
-}
-
-// 回到底部
-.to-bottom {
-  position: absolute;
-  z-index: 1000;
-  bottom: 0;
-  right: 50%;
-}
-</style>

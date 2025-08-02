@@ -1,6 +1,9 @@
 <template>
-  <el-card body-class="" class="image-card">
-    <div class="image-operation">
+  <el-card
+    body-class=""
+    class="!w-80 !h-auto !rounded-10px !relative !flex !flex-col"
+  >
+    <div class="!flex !flex-row !justify-between">
       <div>
         <el-button type="primary" text bg v-if="detail?.status === AiImageStatusEnum.IN_PROGRESS">
           生成中
@@ -15,24 +18,34 @@
       <!-- 操作区 -->
       <div>
         <el-button
-          class="btn"
+          class="!p-10px !m-0"
           text
           :icon="Download"
           @click="handleButtonClick('download', detail)"
         />
         <el-button
-          class="btn"
+          class="!p-10px !m-0"
           text
           :icon="RefreshRight"
           @click="handleButtonClick('regeneration', detail)"
         />
-        <el-button class="btn" text :icon="Delete" @click="handleButtonClick('delete', detail)" />
-        <el-button class="btn" text :icon="More" @click="handleButtonClick('more', detail)" />
+        <el-button
+          class="!p-10px !m-0"
+          text
+          :icon="Delete"
+          @click="handleButtonClick('delete', detail)"
+        />
+        <el-button
+          class="!p-10px !m-0"
+          text
+          :icon="More"
+          @click="handleButtonClick('more', detail)"
+        />
       </div>
     </div>
-    <div class="image-wrapper" ref="cardImageRef">
+    <div class="!overflow-hidden !mt-20px !h-280px !flex-1" ref="cardImageRef">
       <el-image
-        class="image"
+        class="!w-full !rounded-10px"
         :src="detail?.picUrl"
         :preview-src-list="[detail.picUrl]"
         preview-teleported
@@ -42,7 +55,7 @@
       </div>
     </div>
     <!-- Midjourney 专属操作 -->
-    <div class="image-mj-btns">
+    <div class="!mt-5px !w-full !flex !flex-row !flex-wrap !justify-start">
       <el-button
         size="small"
         v-for="button in detail?.buttons"
@@ -116,47 +129,3 @@ onMounted(async () => {
   await handleLoading(props.detail.status as string)
 })
 </script>
-
-<style scoped lang="scss">
-.image-card {
-  width: 320px;
-  height: auto;
-  border-radius: 10px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-
-  .image-operation {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-
-    .btn {
-      //border: 1px solid red;
-      padding: 10px;
-      margin: 0;
-    }
-  }
-
-  .image-wrapper {
-    overflow: hidden;
-    margin-top: 20px;
-    height: 280px;
-    flex: 1;
-
-    .image {
-      width: 100%;
-      border-radius: 10px;
-    }
-  }
-
-  .image-mj-btns {
-    margin-top: 5px;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-}
-</style>

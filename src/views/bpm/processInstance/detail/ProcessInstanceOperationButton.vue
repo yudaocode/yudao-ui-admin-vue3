@@ -685,6 +685,7 @@ watch(
 
 /** 弹出气泡卡 */
 const openPopover = async (type: string) => {
+  if (popOverVisible.value[type] === true) return
   if (type === 'approve') {
     // 校验流程表单
     const valid = await validateNormalForm()

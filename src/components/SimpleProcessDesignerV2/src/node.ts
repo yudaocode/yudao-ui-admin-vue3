@@ -177,6 +177,7 @@ export type UserTaskFormType = {
   }
   signEnable: boolean
   reasonRequire: boolean
+  skipExpression?: string
 }
 
 export type CopyTaskFormType = {

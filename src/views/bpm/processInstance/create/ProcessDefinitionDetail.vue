@@ -231,8 +231,25 @@ const getApprovalDetail = async (row: any) => {
  */
 const setFieldPermission = (field: string, permission: string) => {
   if (permission === FieldPermissionType.READ) {
+    // 1. 设置字段为只读
     //@ts-ignore
     fApi.value?.disabled(true, field)
+    // 2. 只读字段， 去掉验证规则
+    //  fApi.value?.updateValidate(field, []); 这个方法貌似不起作用，
+    try {
+      //@ts-ignore
+      const rule = fApi.value?.getRule(field)
+      if (rule) {
+        // 必填验证设置为false
+        rule.$required = false
+        // 清空所有验证规则
+        if (rule.validate) {
+          rule.validate = []
+        }
+      }
+    } catch (error) {
+      console.warn('修改字段验证规则失败:', error)
+    }
   }
   if (permission === FieldPermissionType.WRITE) {
     //@ts-ignore
@@ -249,8 +266,15 @@ const submitForm = async () => {
   if (!fApi.value || !props.selectProcessDefinition) {
     return
   }
-  // 流程表单校验
-  await fApi.value.validate()
+  
+  try {
+    // 流程表单校验
+    await fApi.value.validate()
+  } catch (error) {
+    // 如果验证失败，检查是否是只读字段的验证错误
+    console.warn('表单验证失败:', error)
+    return
+  }
   // 如果有指定审批人，需要校验
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {

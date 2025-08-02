@@ -92,13 +92,24 @@
           <Icon icon="ep:download" class="mr-5px" />
           导出
         </el-button>
+        <el-button
+          type="danger"
+          plain
+          :disabled="checkedIds.length === 0"
+          @click="handleDeleteBatch"
+          v-hasPermi="['system:tenant:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" />
+          批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column label="租户编号" align="center" prop="id" />
       <el-table-column label="租户名" align="center" prop="name" />
       <el-table-column label="租户套餐" align="center" prop="packageId">
@@ -243,6 +254,24 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
+/** 批量删除按钮操作 */
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (rows: TenantApi.TenantVO[]) => {
+  checkedIds.value = rows.map((row) => row.id)
+}
+
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起批量删除
+    await TenantApi.deleteTenantList(checkedIds.value)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {
@@ -261,6 +290,7 @@ const handleExport = async () => {
 /** 初始化 **/
 onMounted(async () => {
   await getList()
+  // 获取租户套餐列表
   packageList.value = await TenantPackageApi.getTenantPackageList()
 })
 </script>

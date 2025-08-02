@@ -51,13 +51,24 @@
           <Icon icon="ep:plus" class="mr-5px" />
           新增
         </el-button>
+        <el-button
+          type="danger"
+          plain
+          :disabled="checkedIds.length === 0"
+          @click="handleDeleteBatch"
+          v-hasPermi="['system:tenant-package:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" />
+          批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column label="套餐编号" align="center" prop="id" width="120" />
       <el-table-column label="套餐名" align="center" prop="name" />
       <el-table-column label="状态" align="center" prop="status" width="100">
@@ -167,6 +178,24 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     // 发起删除
     await TenantPackageApi.deleteTenantPackage(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 批量删除按钮操作 */
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (rows: TenantPackageApi.TenantPackageVO[]) => {
+  checkedIds.value = rows.map((row) => row.id)
+}
+
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起批量删除
+    await TenantPackageApi.deleteTenantPackageList(checkedIds.value)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

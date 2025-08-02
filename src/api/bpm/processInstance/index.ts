@@ -48,6 +48,7 @@ export type ApprovalNodeInfo = {
   status: number
   startTime?: Date
   endTime?: Date
+  processInstanceId?: string
   candidateUsers?: User[]
   tasks: ApprovalTaskInfo[]
 }

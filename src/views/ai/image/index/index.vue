@@ -1,11 +1,15 @@
 <!-- image -->
 <template>
-  <div class="ai-image">
-    <div class="left">
-      <div class="segmented">
-        <el-segmented v-model="selectPlatform" :options="platformOptions" />
+  <div class="absolute inset-0 flex flex-row wh-full">
+    <div class="flex flex-col p-5 w-[390px]">
+      <div class="mb-[30px]">
+        <el-segmented
+          v-model="selectPlatform"
+          :options="platformOptions"
+          class="w-[350px] !bg-[#ececec] [--el-border-radius-base:16px] [--el-segmented-item-selected-color:#fff]"
+        />
       </div>
-      <div class="modal-switch-container">
+      <div class="h-full overflow-y-auto">
         <Common
           v-if="selectPlatform === 'common'"
           ref="commonRef"
@@ -32,7 +36,7 @@
         />
       </div>
     </div>
-    <div class="main">
+    <div class="flex-1 bg-white">
       <ImageList ref="imageListRef" @on-regeneration="handleRegeneration" />
     </div>
   </div>
@@ -79,10 +83,10 @@ const platformOptions = [
 const models = ref<ModelVO[]>([]) // 模型列表
 
 /** 绘画 start  */
-const handleDrawStart = async (platform: string) => {}
+const handleDrawStart = async (_platform: string) => {}
 
 /** 绘画 complete */
-const handleDrawComplete = async (platform: string) => {
+const handleDrawComplete = async (_platform: string) => {
   await imageListRef.value.getImageList()
 }
 
@@ -108,48 +112,3 @@ onMounted(async () => {
   models.value = await ModelApi.getModelSimpleList(AiModelTypeEnum.IMAGE)
 })
 </script>
-
-<style scoped lang="scss">
-.ai-image {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-
-  display: flex;
-  flex-direction: row;
-  height: 100%;
-  width: 100%;
-
-  .left {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    width: 390px;
-
-    .segmented .el-segmented {
-      --el-border-radius-base: 16px;
-      --el-segmented-item-selected-color: #fff;
-      background-color: #ececec;
-      width: 350px;
-    }
-
-    .modal-switch-container {
-      height: 100%;
-      overflow-y: auto;
-      margin-top: 30px;
-    }
-  }
-
-  .main {
-    flex: 1;
-    background-color: #fff;
-  }
-
-  .right {
-    width: 350px;
-    background-color: #f7f8fa;
-  }
-}
-</style>

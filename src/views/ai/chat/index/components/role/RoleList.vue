@@ -1,9 +1,16 @@
 <template>
-  <div class="card-list" ref="tabsRef" @scroll="handleTabsScroll">
-    <div class="card-item" v-for="role in roleList" :key="role.id">
-      <el-card class="card" body-class="card-body">
+  <div
+    class="flex flex-row flex-wrap relative h-full overflow-auto px-25px pb-140px items-start content-start justify-start"
+    ref="tabsRef"
+    @scroll="handleTabsScroll"
+  >
+    <div v-for="role in roleList" :key="role.id">
+      <el-card
+        class="inline-block mr-20px rounded-10px mb-20px relative"
+        body-class="max-w-240px w-240px pt-15px px-15px pb-10px flex flex-row justify-start relative"
+      >
         <!-- 更多操作 -->
-        <div class="more-container" v-if="showMore">
+        <div class="absolute top-0 right-12px" v-if="showMore">
           <el-dropdown @command="handleMoreClick">
             <span class="el-dropdown-link">
               <el-button type="text">
@@ -13,10 +20,10 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item :command="['edit', role]">
-                  <Icon icon="ep:edit" color="#787878" />编辑
+                  <Icon icon="ep:edit" color="var(--el-text-color-placeholder)" />编辑
                 </el-dropdown-item>
-                <el-dropdown-item :command="['delete', role]" style="color: red">
-                  <Icon icon="ep:delete" color="red" />删除
+                <el-dropdown-item :command="['delete', role]" style="color: var(--el-color-danger)">
+                  <Icon icon="ep:delete" color="var(--el-color-danger)" />删除
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -24,14 +31,18 @@
         </div>
         <!-- 角色信息 -->
         <div>
-          <img class="avatar" :src="role.avatar" />
+          <img class="w-40px h-40px rounded-10px overflow-hidden" :src="role.avatar" />
         </div>
-        <div class="right-container">
-          <div class="content-container">
-            <div class="title">{{ role.name }}</div>
-            <div class="description">{{ role.description }}</div>
+        <div class="ml-10px w-full">
+          <div class="h-85px">
+            <div class="text-18px font-bold" style="color: var(--el-text-color-primary)">
+              {{ role.name }}
+            </div>
+            <div class="mt-10px text-14px" style="color: var(--el-text-color-regular)">
+              {{ role.description }}
+            </div>
           </div>
-          <div class="btn-container">
+          <div class="flex flex-row-reverse mt-2px">
             <el-button type="primary" size="small" @click="handleUseClick(role)">使用</el-button>
           </div>
         </div>
@@ -79,7 +90,7 @@ const handleMoreClick = async (data) => {
 }
 
 /** 选中 */
-const handleUseClick = (role) => {
+const handleUseClick = (role: any) => {
   emits('onUse', role)
 }
 
@@ -88,87 +99,8 @@ const handleTabsScroll = async () => {
   if (tabsRef.value) {
     const { scrollTop, scrollHeight, clientHeight } = tabsRef.value
     if (scrollTop + clientHeight >= scrollHeight - 20 && !props.loading) {
-      await emits('onPage')
+      emits('onPage')
     }
   }
 }
 </script>
-
-<style lang="scss">
-// 重写 card 组件 body 样式
-.card-body {
-  max-width: 240px;
-  width: 240px;
-  padding: 15px 15px 10px 15px;
-
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  position: relative;
-}
-</style>
-<style scoped lang="scss">
-// 卡片列表
-.card-list {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  position: relative;
-  height: 100%;
-  overflow: auto;
-  padding: 0px 25px;
-  padding-bottom: 140px;
-  align-items: start;
-  align-content: flex-start;
-  justify-content: start;
-
-  .card {
-    display: inline-block;
-    margin-right: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    position: relative;
-
-    .more-container {
-      position: absolute;
-      top: 0;
-      right: 12px;
-    }
-
-    .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .right-container {
-      margin-left: 10px;
-      width: 100%;
-      //height: 100px;
-
-      .content-container {
-        height: 85px;
-
-        .title {
-          font-size: 18px;
-          font-weight: bold;
-          color: #3e3e3e;
-        }
-
-        .description {
-          margin-top: 10px;
-          font-size: 14px;
-          color: #6a6a6a;
-        }
-      }
-
-      .btn-container {
-        display: flex;
-        flex-direction: row-reverse;
-        margin-top: 2px;
-      }
-    }
-  }
-}
-</style>

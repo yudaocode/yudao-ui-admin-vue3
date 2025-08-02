@@ -181,7 +181,6 @@ function openModal() {
 }
 
 function closeModal() {
-  debugger
   dialogVisible.value = false
 }
 
