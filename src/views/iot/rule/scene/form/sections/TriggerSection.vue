@@ -16,20 +16,26 @@
 
     <div class="p-16px space-y-24px">
       <!-- 触发器列表 -->
-      <!-- TODO 每个触发器，有个外框，会不会好点？ -->
       <div v-if="triggers.length > 0" class="space-y-24px">
         <div
           v-for="(triggerItem, index) in triggers"
           :key="`trigger-${index}`"
-          class="border border-[var(--el-border-color-light)] rounded-8px p-16px relative"
+          class="border-2 border-green-200 rounded-8px bg-green-50 shadow-sm hover:shadow-md transition-shadow"
         >
-          <!-- 触发器头部 -->
-          <div class="flex items-center justify-between mb-16px">
-            <div class="flex items-center gap-8px">
-              <span class="text-14px font-500 text-[var(--el-text-color-primary)]">
-                触发器 {{ index + 1 }}
-              </span>
-              <el-tag size="small" :type="getTriggerTagType(triggerItem.type)">
+          <!-- 触发器头部 - 绿色主题 -->
+          <div
+            class="flex items-center justify-between p-16px bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200 rounded-t-6px"
+          >
+            <div class="flex items-center gap-12px">
+              <div class="flex items-center gap-8px text-16px font-600 text-green-700">
+                <div
+                  class="w-24px h-24px bg-green-500 text-white rounded-full flex items-center justify-center text-12px font-bold"
+                >
+                  {{ index + 1 }}
+                </div>
+                <span>触发器 {{ index + 1 }}</span>
+              </div>
+              <el-tag size="small" :type="getTriggerTagType(triggerItem.type)" class="font-500">
                 {{ getTriggerTypeLabel(triggerItem.type) }}
               </el-tag>
             </div>
@@ -40,6 +46,7 @@
                 size="small"
                 text
                 @click="removeTrigger(index)"
+                class="hover:bg-red-50"
               >
                 <Icon icon="ep:delete" />
                 删除
@@ -47,37 +54,24 @@
             </div>
           </div>
 
-          <!-- 触发事件类型选择 -->
-          <el-form-item label="触发事件类型" required>
-            <el-select
-              :model-value="triggerItem.type"
-              @update:model-value="(value) => updateTriggerType(index, value)"
-              placeholder="请选择触发事件类型"
-              class="w-full"
-            >
-              <el-option
-                v-for="option in triggerTypeOptions"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
-              />
-            </el-select>
-          </el-form-item>
+          <!-- 触发器内容区域 -->
+          <div class="p-16px space-y-16px">
+            <!-- 设备触发配置 -->
+            <DeviceTriggerConfig
+              v-if="isDeviceTrigger(triggerItem.type)"
+              :model-value="triggerItem"
+              :index="index"
+              @update:model-value="(value) => updateTriggerDeviceConfig(index, value)"
+              @trigger-type-change="(type) => updateTriggerType(index, type)"
+            />
 
-          <!-- 设备触发配置 -->
-          <DeviceTriggerConfig
-            v-if="isDeviceTrigger(triggerItem.type)"
-            :model-value="triggerItem"
-            :index="index"
-            @update:model-value="(value) => updateTriggerDeviceConfig(index, value)"
-          />
-
-          <!-- 定时触发配置 -->
-          <TimerTriggerConfig
-            v-else-if="triggerItem.type === TriggerTypeEnum.TIMER"
-            :model-value="triggerItem.cronExpression"
-            @update:model-value="(value) => updateTriggerCronConfig(index, value)"
-          />
+            <!-- 定时触发配置 -->
+            <TimerTriggerConfig
+              v-else-if="triggerItem.type === TriggerTypeEnum.TIMER"
+              :model-value="triggerItem.cronExpression"
+              @update:model-value="(value) => updateTriggerCronConfig(index, value)"
+            />
+          </div>
         </div>
       </div>
 

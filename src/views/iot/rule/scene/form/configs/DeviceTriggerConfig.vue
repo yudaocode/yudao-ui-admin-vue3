@@ -7,6 +7,7 @@
         v-model="trigger"
         :trigger-type="trigger.type"
         @validate="handleMainConditionValidate"
+        @trigger-type-change="handleTriggerTypeChange"
       />
     </div>
 
@@ -42,6 +43,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: TriggerFormData): void
   (e: 'validate', value: { valid: boolean; message: string }): void
+  (e: 'trigger-type-change', type: number): void
 }>()
 
 const trigger = useVModel(props, 'modelValue', emit)
@@ -81,6 +83,11 @@ watch(
 const handleMainConditionValidate = (result: { valid: boolean; message: string }) => {
   mainConditionValidation.value = result
   updateValidationResult()
+}
+
+const handleTriggerTypeChange = (type: number) => {
+  trigger.value.type = type
+  emit('trigger-type-change', type)
 }
 
 // 事件处理
