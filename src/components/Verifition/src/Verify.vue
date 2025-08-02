@@ -119,6 +119,10 @@ export default {
     }
     watchEffect(() => {
       switch (captchaType.value) {
+        case 'pictureWord':
+          verifyType.value = '3'
+          componentType.value = 'VerifyPictureWord'
+          break
         case 'blockPuzzle':
           verifyType.value = '2'
           componentType.value = 'VerifySlide'

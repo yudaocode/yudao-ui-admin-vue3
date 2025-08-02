@@ -37,7 +37,7 @@
       }">
         <input class="verify-input" type="text" v-model="userCode" />
       </div>
-      <button class="verify-btn" @click="submit" @disabled="checking">{{ t('captcha.verify') }}</button>
+      <button type="button" class="verify-btn" @click="submit" :disabled="checking">{{ t('captcha.verify') }}</button>
     </div>
   </div>
 </template>
@@ -48,7 +48,7 @@
  * */
 import { resetSize } from '../utils/util';
 import { aesEncrypt } from '../utils/ase';
-import { getCode, reqCheck } from 'src/api/login';
+import { getCode, reqCheck } from '@/api/login';
 import { getCurrentInstance, nextTick, onMounted, reactive, ref, toRefs } from 'vue';
 
 const props = defineProps({
