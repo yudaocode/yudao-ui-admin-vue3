@@ -51,8 +51,10 @@
           >
             <div class="ml-10px -mt-15px -mb-35px">
               <ProcessInstanceTimeline
+                ref="nextAssigneesTimelineRef"
                 :activity-nodes="nextAssigneesActivityNode"
                 :show-status-icon="false"
+                :enable-approve-user-select="true"
                 @select-user-confirm="selectNextAssigneesConfirm"
               />
             </div>
@@ -571,6 +573,7 @@ const approveFormRef = ref<FormInstance>()
 const signRef = ref()
 const approveSignFormRef = ref()
 const nextAssigneesActivityNode = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 下一个审批节点信息
+const nextAssigneesTimelineRef = ref() // 下一个节点审批人时间线组件的引用
 const approveReasonForm = reactive({
   reason: '',
   signPicUrl: '',
@@ -717,6 +720,10 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
   }
   popOverVisible.value[type] = false
   nextAssigneesActivityNode.value = []
+  // 清理 Timeline 组件中的自定义审批人数据
+  if (nextAssigneesTimelineRef.value) {
+    nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
+  }
 }
 
 /** 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人 */
@@ -729,6 +736,7 @@ const initNextAssigneesFormField = async () => {
     processVariablesStr: JSON.stringify(variables)
   })
   if (data && data.length > 0) {
+    const customApproveUsersData: Record<string, any[]> = {} // 用于收集需要设置到 Timeline 组件的自定义审批人数据
     data.forEach((node: any) => {
       if (
         // 情况一：当前节点没有审批人，并且是发起人自选
@@ -740,7 +748,18 @@ const initNextAssigneesFormField = async () => {
       ) {
         nextAssigneesActivityNode.value.push(node)
       }
+
+      // 如果节点有 candidateUsers，设置到 customApproveUsers 中
+      if (node.candidateUsers && node.candidateUsers.length > 0) {
+        customApproveUsersData[node.id] = node.candidateUsers
+      }
     })
+
+    // 将 candidateUsers 设置到 Timeline 组件中
+    await nextTick() // 等待下一个 tick，确保 Timeline 组件已经渲染
+    if (nextAssigneesTimelineRef.value && Object.keys(customApproveUsersData).length > 0) {
+      nextAssigneesTimelineRef.value.batchSetCustomApproveUsers(customApproveUsersData)
+    }
   }
 }
 
@@ -803,6 +822,10 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       await TaskApi.approveTask(data)
       popOverVisible.value.approve = false
       nextAssigneesActivityNode.value = []
+      // 清理 Timeline 组件中的自定义审批人数据
+      if (nextAssigneesTimelineRef.value) {
+        nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
+      }
       message.success('审批通过成功')
     } else {
       // 审批不通过数据
