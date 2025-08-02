@@ -52,6 +52,7 @@
         <!-- 属性/事件/服务选择 -->
         <el-col :span="6">
           <el-form-item label="监控项" required>
+            <!-- TODO @puhui999：是不是不展示“整数”、“小数”这个类型，一行，只展示属性名 + 标识，更简洁一点；然后标识是 tag；因为已经有个 ？ tip 了 -->
             <PropertySelector
               :model-value="condition.identifier"
               @update:model-value="(value) => updateConditionField('identifier', value)"
@@ -76,6 +77,7 @@
         </el-col>
 
         <!-- 值输入 -->
+        <!-- TODO @puhui999：框子大小占满哈。 -->
         <el-col :span="12">
           <el-form-item label="比较值" required>
             <ValueInput

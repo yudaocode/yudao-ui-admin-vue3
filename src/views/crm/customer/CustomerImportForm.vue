@@ -56,7 +56,7 @@ import type { UploadUserFile } from 'element-plus'
 import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
 
-defineOptions({ name: 'SystemUserImportForm' })
+defineOptions({ name: 'CrmCustomerImportForm' })
 
 const message = useMessage() // 消息弹窗
 

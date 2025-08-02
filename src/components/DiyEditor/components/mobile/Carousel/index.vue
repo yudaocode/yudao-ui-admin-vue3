@@ -8,7 +8,7 @@
   </div>
   <div v-else class="relative">
     <el-carousel
-      height="174px"
+      :height="property.height + 'px'"
       :type="property.type === 'card' ? 'card' : ''"
       :autoplay="property.autoplay"
       :interval="property.interval * 1000"

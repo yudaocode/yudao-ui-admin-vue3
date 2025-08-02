@@ -42,7 +42,12 @@ export const deleteConfig = (id: number) => {
   return request.delete({ url: '/infra/config/delete?id=' + id })
 }
 
+// 批量删除参数
+export const deleteConfigList = (ids: number[]) => {
+  return request.delete({ url: '/infra/config/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 导出参数
 export const exportConfig = (params) => {
-  return request.download({ url: '/infra/config/export', params })
+  return request.download({ url: '/infra/config/export-excel', params })
 }

@@ -411,6 +411,12 @@
                 />
               </el-form-item>
             </div>
+            <div>
+              <el-divider content-position="left">跳过表达式</el-divider>
+              <el-form-item prop="skipExpression">
+                <el-input v-model="configForm.skipExpression" type="textarea"  />
+              </el-form-item>
+            </div>
           </el-form>
         </div>
       </el-tab-pane>
@@ -770,6 +776,8 @@ const saveConfig = async () => {
   currentNode.value.signEnable = configForm.value.signEnable
   // 审批意见
   currentNode.value.reasonRequire = configForm.value.reasonRequire
+  // 跳过表达式
+  currentNode.value.skipExpression = configForm.value.skipExpression
 
   currentNode.value.showText = showText
   settingVisible.value = false
@@ -851,6 +859,8 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   configForm.value.signEnable = node?.signEnable ?? false
   // 7. 审批意见
   configForm.value.reasonRequire = node?.reasonRequire ?? false
+  // 8. 跳过表达式
+  configForm.value.skipExpression = node?.skipExpression ?? ''
 }
 
 defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件

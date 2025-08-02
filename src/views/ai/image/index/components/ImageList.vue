@@ -1,12 +1,19 @@
 <template>
-  <el-card class="dr-task" body-class="task-card" shadow="never">
+  <el-card
+    class="wh-full"
+    :body-style="{ margin: 0, padding: 0, height: '100%', position: 'relative' }"
+    shadow="never"
+  >
     <template #header>
       绘画任务
       <!-- TODO @fan：看看，怎么优化下这个样子哈。 -->
       <el-button @click="handleViewPublic">绘画作品</el-button>
     </template>
     <!-- 图片列表 -->
-    <div class="task-image-list" ref="imageListRef">
+    <div
+      class="relative flex flex-row flex-wrap content-start h-full overflow-auto p-5 pb-[140px] box-border [&>div]:mr-5 [&>div]:mb-5"
+      ref="imageListRef"
+    >
       <ImageCard
         v-for="image in imageList"
         :key="image.id"
@@ -15,7 +22,9 @@
         @on-mj-btn-click="handleImageMidjourneyButtonClick"
       />
     </div>
-    <div class="task-image-pagination">
+    <div
+      class="absolute bottom-[60px] h-[50px] leading-[90px] w-full z-[999] bg-white flex flex-row justify-center items-center"
+    >
       <Pagination
         :total="pageTotal"
         v-model:page="queryParams.pageNo"
@@ -150,12 +159,12 @@ const handleImageButtonClick = async (type: string, imageDetail: ImageVO) => {
   }
   // 下载
   if (type === 'download') {
-    await download.image({ url: imageDetail.picUrl })
+    download.image({ url: imageDetail.picUrl })
     return
   }
   // 重新生成
   if (type === 'regeneration') {
-    await emits('onRegeneration', imageDetail)
+    emits('onRegeneration', imageDetail)
     return
   }
 }
@@ -197,49 +206,3 @@ onUnmounted(async () => {
   }
 })
 </script>
-<style lang="scss">
-.dr-task {
-  width: 100%;
-  height: 100%;
-}
-.task-card {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  position: relative;
-}
-
-.task-image-list {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  height: 100%;
-  overflow: auto;
-  padding: 20px 20px 140px;
-  box-sizing: border-box; /* 确保内边距不会增加高度 */
-
-  > div {
-    margin-right: 20px;
-    margin-bottom: 20px;
-  }
-  > div:last-of-type {
-    //margin-bottom: 100px;
-  }
-}
-
-.task-image-pagination {
-  position: absolute;
-  bottom: 60px;
-  height: 50px;
-  line-height: 90px;
-  width: 100%;
-  z-index: 999;
-  background-color: #ffffff;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-</style>

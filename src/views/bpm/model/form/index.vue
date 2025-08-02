@@ -77,7 +77,10 @@
 
         <!-- 第四步：更多设置 -->
         <div v-show="currentStep === 3" class="mx-auto w-700px">
-          <ExtraSettings v-model="formData" ref="extraSettingsRef" />
+          <ExtraSettings
+            ref="extraSettingsRef"   
+            v-model="formData" 
+            :model-form-id="formData.formId"/>
         </div>
       </div>
     </div>
@@ -216,6 +219,16 @@ const initData = async () => {
     // 特殊：复制场景
     if (route.params.type === 'copy') {
       delete formData.value.id
+      if (formData.value.bpmnXml) {
+        formData.value.bpmnXml = formData.value.bpmnXml.replaceAll(
+          formData.value.name,
+          formData.value.name + '副本'
+        )
+        formData.value.bpmnXml = formData.value.bpmnXml.replaceAll(
+          formData.value.key,
+          formData.value.key + '_copy'
+        )
+      }
       formData.value.name += '副本'
       formData.value.key += '_copy'
       tagsView.setTitle('复制流程')

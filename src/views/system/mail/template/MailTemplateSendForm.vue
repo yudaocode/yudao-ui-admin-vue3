@@ -5,7 +5,7 @@
       v-loading="formLoading"
       :model="formData"
       :rules="formRules"
-      label-width="120px"
+      label-width="140px"
     >
       <el-form-item label="模板内容" prop="content">
         <Editor :model-value="formData.content" height="150px" readonly />

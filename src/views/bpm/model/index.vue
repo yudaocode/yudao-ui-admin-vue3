@@ -209,15 +209,18 @@ onActivated(() => {
 
 <style lang="scss" scoped>
 :deep() {
-  .el-table--fit .el-table__inner-wrapper:before {
+  .el-table--fit .el-table__inner-wrapper::before {
     height: 0;
   }
+
   .el-card {
     border-radius: 8px;
   }
+
   .el-form--inline .el-form-item {
     margin-right: 10px;
   }
+  
   .el-divider--horizontal {
     margin-top: 6px;
   }

@@ -13,8 +13,8 @@
           </div>
           <span>附加条件组</span>
         </div>
-        <el-tag size="small" type="success">与主条件为且关系</el-tag>
-        <el-tag size="small" type="info"> {{ modelValue?.length || 0 }}个子条件组 </el-tag>
+        <el-tag size="small" type="success">与“主条件”为且关系</el-tag>
+        <el-tag size="small" type="info"> {{ modelValue?.length || 0 }} 个子条件组 </el-tag>
       </div>
       <div class="flex items-center gap-8px">
         <el-button
@@ -140,9 +140,10 @@ const emit = defineEmits<{
 
 const container = useVModel(props, 'modelValue', emit)
 
+// TODO @puhui999：这个限制去掉好了；
 // 配置常量
-const maxSubGroups = 3 // 最多3个子条件组
-const maxConditionsPerGroup = 3 // 每组最多3个条件
+const maxSubGroups = 3 // 最多 3 个子条件组
+const maxConditionsPerGroup = 3 // 每组最多 3 个条件
 
 // 验证状态
 const subGroupValidations = ref<{ [key: number]: { valid: boolean; message: string } }>({})

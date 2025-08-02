@@ -94,7 +94,7 @@ import { MenuVO } from '@/api/system/menu'
 import MenuForm from './MenuForm.vue'
 import DictTag from '@/components/DictTag/src/DictTag.vue'
 import { Icon } from '@/components/Icon'
-import { ElButton, TableV2FixedDir } from 'element-plus'
+import { ElButton, TableV2FixedDir, ElSwitch } from 'element-plus'
 import { checkPermi } from '@/utils/permission'
 import { CommonStatusEnum } from '@/utils/constants'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
@@ -175,7 +175,7 @@ const columns = [
     fixed: TableV2FixedDir.RIGHT,
     cellRenderer: ({ rowData }) => {
       // 定义按钮列表
-      const buttons = []
+      const buttons: InstanceType<typeof ElButton>[] = []
 
       // 检查权限并添加按钮
       if (checkPermi(['system:menu:update'])) {

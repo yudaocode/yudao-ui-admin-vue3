@@ -54,9 +54,12 @@ const getCellStyle = (cell: NavigationBarCellProperty) => {
 const getSearchProp = computed(() => (cell: NavigationBarCellProperty) => {
   return {
     height: 30,
-    showScan: false,
+    backgroundColor: cell.backgroundColor,
+    showScan: cell.showScan,
     placeholder: cell.placeholder,
-    borderRadius: cell.borderRadius
+    borderRadius: cell.borderRadius,
+    textColor: cell.textColor,
+    placeholderPosition: cell.placeholderPosition
   } as SearchProperty
 })
 </script>

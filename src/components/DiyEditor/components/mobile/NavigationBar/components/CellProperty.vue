@@ -13,7 +13,7 @@
   <template v-for="(cell, cellIndex) in cellList" :key="cellIndex">
     <template v-if="selectedHotAreaIndex === cellIndex">
       <el-form-item :prop="`cell[${cellIndex}].type`" label="类型">
-        <el-radio-group v-model="cell.type">
+        <el-radio-group v-model="cell.type" @change="handleHotAreaSelected(cell, cellIndex)">
           <el-radio value="text">文字</el-radio>
           <el-radio value="image">图片</el-radio>
           <el-radio value="search">搜索框</el-radio>
@@ -44,8 +44,31 @@
       </template>
       <!-- 3. 搜索框 -->
       <template v-else>
+        <el-form-item label="框体颜色" prop="backgroundColor">
+          <ColorInput v-model="cell.backgroundColor" />
+        </el-form-item>
+        <el-form-item class="lef" label="文本颜色" prop="textColor">
+          <ColorInput v-model="cell.textColor" />
+        </el-form-item>
         <el-form-item :prop="`cell[${cellIndex}].placeholder`" label="提示文字">
           <el-input v-model="cell.placeholder" maxlength="10" show-word-limit />
+        </el-form-item>
+        <el-form-item label="文本位置" prop="placeholderPosition">
+          <el-radio-group v-model="cell!.placeholderPosition">
+            <el-tooltip content="居左" placement="top">
+              <el-radio-button value="left">
+                <Icon icon="ant-design:align-left-outlined" />
+              </el-radio-button>
+            </el-tooltip>
+            <el-tooltip content="居中" placement="top">
+              <el-radio-button value="center">
+                <Icon icon="ant-design:align-center-outlined" />
+              </el-radio-button>
+            </el-tooltip>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="扫一扫" prop="showScan">
+          <el-switch v-model="cell!.showScan" />
         </el-form-item>
         <el-form-item :prop="`cell[${cellIndex}].borderRadius`" label="圆角">
           <el-slider
@@ -88,9 +111,16 @@ const cellCount = computed(() => (props.isMp ? 6 : 8))
 const selectedHotAreaIndex = ref(0)
 const handleHotAreaSelected = (cellValue: NavigationBarCellProperty, index: number) => {
   selectedHotAreaIndex.value = index
+  // 默认设置为选中文字，并设置属性
   if (!cellValue.type) {
     cellValue.type = 'text'
     cellValue.textColor = '#111111'
+  }
+  // 如果点击的是搜索框，则初始化搜索框的属性
+  if (cellValue.type === 'search') {
+    cellValue.placeholderPosition = 'left'
+    cellValue.backgroundColor = '#EEEEEE'
+    cellValue.textColor = '#969799'
   }
 }
 </script>

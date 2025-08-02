@@ -199,6 +199,7 @@ const handleValidate = (result: { valid: boolean; message: string }) => {
 }
 
 // 验证逻辑
+// TODO @puhui999：这个校验，是不是用更原生的 validator 哈。项目风格更统一点。
 const updateValidationResult = () => {
   if (isDevicePropertyTrigger.value) {
     // 设备属性触发验证

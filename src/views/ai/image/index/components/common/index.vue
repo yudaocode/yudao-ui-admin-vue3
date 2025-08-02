@@ -14,14 +14,14 @@
       type="textarea"
     />
   </div>
-  <div class="hot-words">
+  <div class="flex flex-col mt-30px">
     <div>
       <el-text tag="b">随机热词</el-text>
     </div>
-    <el-space wrap class="word-list">
+    <el-space wrap class="flex flex-row flex-wrap justify-start mt-15px">
       <el-button
         round
-        class="btn"
+        class="m-0"
         :type="selectHotWord === hotWord ? 'primary' : 'default'"
         v-for="hotWord in ImageHotWords"
         :key="hotWord"
@@ -31,11 +31,11 @@
       </el-button>
     </el-space>
   </div>
-  <div class="group-item">
+  <div class="mt-30px">
     <div>
       <el-text tag="b">平台</el-text>
     </div>
-    <el-space wrap class="group-item-body">
+    <el-space wrap class="mt-15px w-full">
       <el-select
         v-model="otherPlatform"
         placeholder="Select"
@@ -52,11 +52,11 @@
       </el-select>
     </el-space>
   </div>
-  <div class="group-item">
+  <div class="mt-30px">
     <div>
       <el-text tag="b">模型</el-text>
     </div>
-    <el-space wrap class="group-item-body">
+    <el-space wrap class="mt-15px w-full">
       <el-select v-model="modelId" placeholder="Select" size="large" class="!w-350px">
         <el-option
           v-for="item in platformModels"
@@ -67,16 +67,16 @@
       </el-select>
     </el-space>
   </div>
-  <div class="group-item">
+  <div class="mt-30px">
     <div>
       <el-text tag="b">图片尺寸</el-text>
     </div>
-    <el-space wrap class="group-item-body">
+    <el-space wrap class="mt-15px w-full">
       <el-input v-model="width" type="number" class="w-170px" placeholder="图片宽度" />
       <el-input v-model="height" type="number" class="w-170px" placeholder="图片高度" />
     </el-space>
   </div>
-  <div class="btns">
+  <div class="flex justify-center mt-50px">
     <el-button
       type="primary"
       size="large"
@@ -187,38 +187,3 @@ watch(
 /** 暴露组件方法 */
 defineExpose({ settingValues })
 </script>
-<style scoped lang="scss">
-.hot-words {
-  display: flex;
-  flex-direction: column;
-  margin-top: 30px;
-
-  .word-list {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: start;
-    margin-top: 15px;
-
-    .btn {
-      margin: 0;
-    }
-  }
-}
-
-// 模型
-.group-item {
-  margin-top: 30px;
-
-  .group-item-body {
-    margin-top: 15px;
-    width: 100%;
-  }
-}
-
-.btns {
-  display: flex;
-  justify-content: center;
-  margin-top: 50px;
-}
-</style>

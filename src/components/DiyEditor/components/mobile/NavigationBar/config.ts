@@ -45,8 +45,14 @@ export interface NavigationBarCellProperty {
   imgUrl: string
   // 图片链接
   url: string
+  // 搜索框：框体颜色
+  backgroundColor: string
   // 搜索框：提示文字
   placeholder: string
+  // 搜索框：提示文字位置
+  placeholderPosition: string
+  // 搜索框：是否显示扫一扫
+  showScan: boolean
   // 搜索框：边框圆角半径
   borderRadius: number
 }
