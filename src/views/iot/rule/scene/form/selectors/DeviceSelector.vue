@@ -18,9 +18,9 @@
     >
       <div class="flex items-center justify-between w-full py-4px">
         <div class="flex-1">
-          <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{
-            device.deviceName
-          }}</div>
+          <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px"
+            >{{ device.deviceName }}
+          </div>
           <div class="text-12px text-[var(--el-text-color-secondary)]">{{ device.deviceKey }}</div>
         </div>
         <div class="flex items-center gap-4px">
@@ -42,18 +42,15 @@ import { DeviceApi } from '@/api/iot/device/device'
 /** 设备选择器组件 */
 defineOptions({ name: 'DeviceSelector' })
 
-interface Props {
+const props = defineProps<{
   modelValue?: number
   productId?: number
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value?: number): void
   (e: 'change', value?: number): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 // 状态
 const deviceLoading = ref(false)

@@ -1,5 +1,5 @@
 <template>
-  <!-- TODO @puhui999：这个抽屉的高度太高了？！ -->
+  <!-- 场景联动规则表单抽屉 - 优化高度和布局 -->
   <el-drawer
     v-model="drawerVisible"
     :title="drawerTitle"
@@ -8,29 +8,28 @@
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     @close="handleClose"
-    class="[--el-drawer-padding-primary:20px]"
   >
-    <div class="h-[calc(100vh-120px)] overflow-y-auto p-20px pb-80px">
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="formRules"
-        label-width="120px"
-        class="flex flex-col gap-24px"
-      >
-        <!-- 基础信息配置 -->
-        <BasicInfoSection v-model="formData" :rules="formRules" />
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="110px">
+      <!-- 基础信息配置 -->
+      <BasicInfoSection v-model="formData" :rules="formRules" />
 
-        <!-- 触发器配置 -->
-        <TriggerSection v-model:trigger="formData.trigger" @validate="handleTriggerValidate" />
+      <!-- 触发器配置 -->
+      <TriggerSection v-model:triggers="formData.triggers" @validate="handleTriggerValidate" />
 
-        <!-- 执行器配置 -->
-        <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
-      </el-form>
-    </div>
+      <!-- 执行器配置 -->
+      <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
+    </el-form>
     <template #footer>
-      <el-button :disabled="submitLoading" type="primary" @click="handleSubmit">确 定</el-button>
-      <el-button @click="handleClose">取 消</el-button>
+      <div class="drawer-footer">
+        <el-button :disabled="submitLoading" type="primary" @click="handleSubmit">
+          <Icon icon="ep:check" />
+          确 定
+        </el-button>
+        <el-button @click="handleClose">
+          <Icon icon="ep:close" />
+          取 消
+        </el-button>
+      </div>
     </template>
   </el-drawer>
 </template>
@@ -40,38 +39,33 @@ import { useVModel } from '@vueuse/core'
 import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
-import {
-  RuleSceneFormData,
-  IotRuleScene,
-  IotRuleSceneActionTypeEnum,
-  IotRuleSceneTriggerTypeEnum,
-  CommonStatusEnum
-} from '@/api/iot/rule/scene/scene.types'
-import { getBaseValidationRules } from '../utils/validation'
+import { IotRuleSceneDO, RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
 import { ElMessage } from 'element-plus'
 import { generateUUID } from '@/utils'
+
+// 导入全局的 CommonStatusEnum
+const CommonStatusEnum = {
+  ENABLE: 0, // 开启
+  DISABLE: 1 // 关闭
+} as const
 
 /** IoT 场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
 
-// TODO @puhui999：是不是融合到 props
-interface Props {
+/** 组件属性定义 */
+const props = defineProps<{
+  /** 抽屉显示状态 */
   modelValue: boolean
-  ruleScene?: IotRuleScene
-}
+}>()
 
-// TODO @puhui999：Emits 是不是融合到 emit
-interface Emits {
+/** 组件事件定义 */
+const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
   (e: 'success'): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const drawerVisible = useVModel(props, 'modelValue', emit) // 是否可见
-
-// TODO @puhui999：使用 /** 注释风格哈 */
 
 /** 创建默认的表单数据 */
 const createDefaultFormData = (): RuleSceneFormData => {
@@ -79,77 +73,72 @@ const createDefaultFormData = (): RuleSceneFormData => {
     name: '',
     description: '',
     status: CommonStatusEnum.ENABLE, // 默认启用状态
-    trigger: {
-      type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
-      productId: undefined,
-      deviceId: undefined,
-      identifier: undefined,
-      operator: undefined,
-      value: undefined,
-      cronExpression: undefined,
-      mainCondition: undefined,
-      conditionGroup: undefined
-    },
+    triggers: [
+      {
+        type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
+        productId: undefined,
+        deviceId: undefined,
+        identifier: undefined,
+        operator: undefined,
+        value: undefined,
+        cronExpression: undefined,
+        conditionGroups: [] // 空的条件组数组
+      }
+    ],
     actions: []
   }
 }
 
-// TODO @puhui999：使用 convertFormToVO；下面也是类似哈；
 /**
- * 将表单数据转换为 API 请求格式
+ * 将表单数据转换为后端 DO 格式
+ * 由于数据结构已对齐，转换变得非常简单
  */
-const transformFormToApi = (formData: RuleSceneFormData): IotRuleScene => {
+const convertFormToVO = (formData: RuleSceneFormData): IotRuleSceneDO => {
   return {
     id: formData.id,
     name: formData.name,
     description: formData.description,
     status: Number(formData.status),
-    triggers: [
-      {
-        type: formData.trigger.type,
-        productKey: formData.trigger.productId
-          ? `product_${formData.trigger.productId}`
-          : undefined,
-        deviceNames: formData.trigger.deviceId
-          ? [`device_${formData.trigger.deviceId}`]
-          : undefined,
-        cronExpression: formData.trigger.cronExpression,
-        conditions: [] // TODO: 实现新的条件转换逻辑
-      }
-    ],
+    triggers: formData.triggers.map((trigger) => ({
+      type: trigger.type,
+      productId: trigger.productId,
+      deviceId: trigger.deviceId,
+      identifier: trigger.identifier,
+      operator: trigger.operator,
+      value: trigger.value,
+      cronExpression: trigger.cronExpression,
+      conditionGroups: trigger.conditionGroups || []
+    })),
     actions:
       formData.actions?.map((action) => ({
         type: action.type,
-        alertConfigId: action.alertConfigId,
-        deviceControl:
-          action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET ||
-          action.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
-            ? {
-                productKey: action.productId ? `product_${action.productId}` : '',
-                deviceNames: action.deviceId ? [`device_${action.deviceId}`] : [],
-                type: 'property',
-                identifier: 'set',
-                params: action.params || {}
-              }
-            : undefined
+        productId: action.productId,
+        deviceId: action.deviceId,
+        params: action.params,
+        alertConfigId: action.alertConfigId
       })) || []
-  } as IotRuleScene
+  }
 }
 
 /**
- * 将 API 响应数据转换为表单格式
+ * 将后端 DO 数据转换为表单格式
+ * 由于数据结构已对齐，转换变得非常简单
  */
-const transformApiToForm = (apiData: IotRuleScene): RuleSceneFormData => {
-  const firstTrigger = apiData.triggers?.[0]
-  return {
-    ...apiData,
-    status: Number(apiData.status), // 确保状态为数字类型
-    trigger: firstTrigger
-      ? {
-          ...firstTrigger,
-          type: Number(firstTrigger.type)
-        }
-      : {
+const convertVOToForm = (apiData: IotRuleSceneDO): RuleSceneFormData => {
+  // 转换所有触发器
+  const triggers = apiData.triggers?.length
+    ? apiData.triggers.map((trigger: any) => ({
+        type: Number(trigger.type),
+        productId: trigger.productId,
+        deviceId: trigger.deviceId,
+        identifier: trigger.identifier,
+        operator: trigger.operator,
+        value: trigger.value,
+        cronExpression: trigger.cronExpression,
+        conditionGroups: trigger.conditionGroups || []
+      }))
+    : [
+        {
           type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
           productId: undefined,
           deviceId: undefined,
@@ -157,13 +146,23 @@ const transformApiToForm = (apiData: IotRuleScene): RuleSceneFormData => {
           operator: undefined,
           value: undefined,
           cronExpression: undefined,
-          mainCondition: undefined,
-          conditionGroup: undefined
-        },
+          conditionGroups: []
+        }
+      ]
+
+  return {
+    id: apiData.id,
+    name: apiData.name,
+    description: apiData.description,
+    status: Number(apiData.status),
+    triggers,
     actions:
-      apiData.actions?.map((action) => ({
-        ...action,
+      apiData.actions?.map((action: any) => ({
         type: Number(action.type),
+        productId: action.productId,
+        deviceId: action.deviceId,
+        params: action.params || {},
+        alertConfigId: action.alertConfigId,
         // 为每个执行器添加唯一标识符，解决组件索引重用问题
         key: generateUUID()
       })) || []
@@ -173,7 +172,33 @@ const transformApiToForm = (apiData: IotRuleScene): RuleSceneFormData => {
 // 表单数据和状态
 const formRef = ref()
 const formData = ref<RuleSceneFormData>(createDefaultFormData())
-const formRules = getBaseValidationRules()
+const formRules = reactive({
+  name: [
+    { required: true, message: '场景名称不能为空', trigger: 'blur' },
+    { type: 'string', min: 1, max: 50, message: '场景名称长度应在1-50个字符之间', trigger: 'blur' }
+  ],
+  status: [
+    { required: true, message: '场景状态不能为空', trigger: 'change' },
+    {
+      type: 'enum',
+      enum: [CommonStatusEnum.ENABLE, CommonStatusEnum.DISABLE],
+      message: '状态值必须为启用或禁用',
+      trigger: 'change'
+    }
+  ],
+  description: [
+    { type: 'string', max: 200, message: '场景描述不能超过200个字符', trigger: 'blur' }
+  ],
+  triggers: [
+    { required: true, message: '触发器数组不能为空', trigger: 'change' },
+    { type: 'array', min: 1, message: '至少需要一个触发器', trigger: 'change' }
+  ],
+  actions: [
+    { required: true, message: '执行器数组不能为空', trigger: 'change' },
+    { type: 'array', min: 1, message: '至少需要一个执行器', trigger: 'change' }
+  ]
+})
+
 const submitLoading = ref(false)
 
 // 验证状态
@@ -181,7 +206,7 @@ const triggerValidation = ref({ valid: true, message: '' })
 const actionValidation = ref({ valid: true, message: '' })
 
 // 计算属性
-const isEdit = computed(() => !!props.ruleScene?.id)
+const isEdit = ref(false)
 const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
 
 // 事件处理
@@ -211,12 +236,23 @@ const handleSubmit = async () => {
   // 提交请求
   submitLoading.value = true
   try {
+    console.log(formData.value)
     // 转换数据格式
-    const apiData = transformFormToApi(formData.value)
-
-    // 这里应该调用API保存数据
-    // TODO @puhui999：貌似还没接入
-    console.log('提交数据:', apiData)
+    const apiData = convertFormToVO(formData.value)
+    if (true) {
+      console.log('转换后', apiData)
+      return
+    }
+    // 调用API保存数据
+    if (isEdit.value) {
+      // 更新场景联动规则
+      // await RuleSceneApi.updateRuleScene(apiData)
+      console.log('更新数据:', apiData)
+    } else {
+      // 创建场景联动规则
+      // await RuleSceneApi.createRuleScene(apiData)
+      console.log('创建数据:', apiData)
+    }
 
     // 模拟API调用
     await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -224,6 +260,9 @@ const handleSubmit = async () => {
     ElMessage.success(isEdit.value ? '更新成功' : '创建成功')
     drawerVisible.value = false
     emit('success')
+  } catch (error) {
+    console.error('保存失败:', error)
+    ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
   } finally {
     submitLoading.value = false
   }
@@ -233,93 +272,30 @@ const handleClose = () => {
   drawerVisible.value = false
 }
 
-// 初始化表单数据
+/** 初始化表单数据 */
 const initFormData = () => {
-  if (props.ruleScene) {
-    formData.value = transformApiToForm(props.ruleScene)
-  } else {
-    formData.value = createDefaultFormData()
-  }
+  // TODO @puhui999: 编辑的情况后面实现
+  formData.value = createDefaultFormData()
 }
 
 // 监听抽屉显示
 watch(drawerVisible, (visible) => {
   if (visible) {
     initFormData()
-    nextTick(() => {
-      formRef.value?.clearValidate()
-    })
+    // TODO @puhui999: 重置表单的情况
+    // nextTick(() => {
+    //   formRef.value?.clearValidate()
+    // })
   }
 })
 
 // 监听 props 变化
-watch(
-  () => props.ruleScene,
-  () => {
-    if (drawerVisible.value) {
-      initFormData()
-    }
-  }
-)
+// watch(
+//   () => props.ruleScene,
+//   () => {
+//     if (drawerVisible.value) {
+//       initFormData()
+//     }
+//   }
+// )
 </script>
-
-<!-- TODO @puhui999：看看下面样式，哪些是必要添加的 -->
-<style scoped>
-/* 滚动条样式 */
-.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar {
-  width: 6px;
-}
-
-.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar-track {
-  background: var(--el-fill-color-light);
-  border-radius: 3px;
-}
-
-.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar-thumb {
-  background: var(--el-border-color);
-  border-radius: 3px;
-}
-
-.h-\[calc\(100vh-120px\)\]::-webkit-scrollbar-thumb:hover {
-  background: var(--el-border-color-dark);
-}
-
-/* 抽屉内容区域优化 */
-:deep(.el-drawer__body) {
-  padding: 0;
-  position: relative;
-}
-
-:deep(.el-drawer__header) {
-  padding: 20px 20px 16px 20px;
-  border-bottom: 1px solid var(--el-border-color-light);
-  margin-bottom: 0;
-}
-
-:deep(.el-drawer__title) {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .el-drawer {
-    --el-drawer-size: 100% !important;
-  }
-
-  .h-\[calc\(100vh-120px\)\] {
-    padding: 16px;
-    padding-bottom: 80px;
-  }
-
-  .flex.flex-col.gap-24px {
-    gap: 20px;
-  }
-
-  .absolute.bottom-0 {
-    padding: 12px 16px;
-    gap: 12px;
-  }
-}
-</style>

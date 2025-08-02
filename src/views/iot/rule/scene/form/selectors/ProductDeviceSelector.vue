@@ -22,13 +22,14 @@
             >
               <div class="flex items-center justify-between w-full py-4px">
                 <div class="flex-1">
-                  <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ product.name }}</div>
-                  <div class="text-12px text-[var(--el-text-color-secondary)]">{{ product.productKey }}</div>
+                  <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px"
+                    >{{ product.name }}
+                  </div>
+                  <div class="text-12px text-[var(--el-text-color-secondary)]"
+                    >{{ product.productKey }}
+                  </div>
                 </div>
-                <!-- TODO @puhui999：是不是用字典 -->
-                <el-tag size="small" :type="product.status === 0 ? 'success' : 'danger'">
-                  {{ product.status === 0 ? '正常' : '禁用' }}
-                </el-tag>
+                <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="product.status" />
               </div>
             </el-option>
           </el-select>
@@ -70,8 +71,12 @@
             >
               <div class="flex items-center justify-between w-full py-4px">
                 <div class="flex-1">
-                  <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ device.deviceName }}</div>
-                  <div class="text-12px text-[var(--el-text-color-secondary)]">{{ device.nickname || '无备注' }}</div>
+                  <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px"
+                    >{{ device.deviceName }}
+                  </div>
+                  <div class="text-12px text-[var(--el-text-color-secondary)]"
+                    >{{ device.nickname || '无备注' }}
+                  </div>
                 </div>
                 <el-tag size="small" :type="getDeviceStatusTag(device.state)">
                   {{ getDeviceStatusText(device.state) }}
@@ -84,7 +89,10 @@
     </el-row>
 
     <!-- 选择结果展示 -->
-    <div v-if="localProductId && localDeviceId !== undefined" class="mt-16px p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+    <div
+      v-if="localProductId && localDeviceId !== undefined"
+      class="mt-16px p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]"
+    >
       <div class="flex items-center gap-6px mb-8px">
         <Icon icon="ep:check" class="text-[var(--el-color-success)] text-16px" />
         <span class="text-14px font-500 text-[var(--el-text-color-primary)]">已选择设备</span>
@@ -92,14 +100,22 @@
       <div class="flex flex-col gap-6px ml-22px">
         <div class="flex items-center gap-8px">
           <span class="text-12px text-[var(--el-text-color-secondary)] min-w-40px">产品：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] font-500">{{ selectedProduct?.name }}</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] font-500">{{
+            selectedProduct?.name
+          }}</span>
           <el-tag size="small" type="primary">{{ selectedProduct?.productKey }}</el-tag>
         </div>
         <div class="flex items-center gap-8px">
           <span class="text-12px text-[var(--el-text-color-secondary)] min-w-40px">设备：</span>
-          <span v-if="deviceSelectionMode === 'all'" class="text-12px text-[var(--el-text-color-primary)] font-500">全部设备</span>
-          <span v-else class="text-12px text-[var(--el-text-color-primary)] font-500">{{ selectedDevice?.deviceName }}</span>
-          <el-tag v-if="deviceSelectionMode === 'all'" size="small" type="warning"> 全部 </el-tag>
+          <span
+            v-if="deviceSelectionMode === 'all'"
+            class="text-12px text-[var(--el-text-color-primary)] font-500"
+            >全部设备</span
+          >
+          <span v-else class="text-12px text-[var(--el-text-color-primary)] font-500">{{
+            selectedDevice?.deviceName
+          }}</span>
+          <el-tag v-if="deviceSelectionMode === 'all'" size="small" type="warning"> 全部</el-tag>
           <el-tag v-else size="small" :type="getDeviceStatusTag(selectedDevice?.state)">
             {{ getDeviceStatusText(selectedDevice?.state) }}
           </el-tag>
@@ -113,6 +129,7 @@
 import { useVModel } from '@vueuse/core'
 import { ProductApi } from '@/api/iot/product/product'
 import { DeviceApi } from '@/api/iot/device/device'
+import { DICT_TYPE } from '@/utils/dict'
 
 /** 产品设备选择器组件 */
 defineOptions({ name: 'ProductDeviceSelector' })
@@ -124,7 +141,9 @@ interface Props {
 
 interface Emits {
   (e: 'update:productId', value?: number): void
+
   (e: 'update:deviceId', value?: number): void
+
   (e: 'change', value: { productId?: number; deviceId?: number }): void
 }
 

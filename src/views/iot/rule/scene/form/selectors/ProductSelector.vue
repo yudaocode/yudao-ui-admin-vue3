@@ -17,16 +17,14 @@
     >
       <div class="flex items-center justify-between w-full py-4px">
         <div class="flex-1">
-          <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{
-            product.name
-          }}</div>
-          <div class="text-12px text-[var(--el-text-color-secondary)]">{{
-            product.productKey
-          }}</div>
+          <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px"
+            >{{ product.name }}
+          </div>
+          <div class="text-12px text-[var(--el-text-color-secondary)]"
+            >{{ product.productKey }}
+          </div>
         </div>
-        <el-tag size="small" :type="product.status === 0 ? 'success' : 'danger'">
-          {{ product.status === 0 ? '正常' : '禁用' }}
-        </el-tag>
+        <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="product.status" />
       </div>
     </el-option>
   </el-select>
@@ -34,21 +32,19 @@
 
 <script setup lang="ts">
 import { ProductApi } from '@/api/iot/product/product'
+import { DICT_TYPE } from '@/utils/dict'
 
 /** 产品选择器组件 */
 defineOptions({ name: 'ProductSelector' })
 
-interface Props {
+defineProps<{
   modelValue?: number
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value?: number): void
   (e: 'change', value?: number): void
-}
-
-defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 // 状态
 const productLoading = ref(false)

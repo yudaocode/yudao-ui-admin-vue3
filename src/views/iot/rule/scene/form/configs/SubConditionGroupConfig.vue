@@ -1,10 +1,7 @@
 <template>
   <div class="p-16px">
     <!-- 空状态 -->
-    <div
-      v-if="!subGroup.conditions || subGroup.conditions.length === 0"
-      class="text-center py-24px"
-    >
+    <div v-if="!subGroup || subGroup.length === 0" class="text-center py-24px">
       <div class="flex flex-col items-center gap-12px">
         <Icon icon="ep:plus" class="text-32px text-[var(--el-text-color-placeholder)]" />
         <div class="text-[var(--el-text-color-secondary)]">
@@ -21,7 +18,7 @@
     <!-- 条件列表 -->
     <div v-else class="space-y-16px">
       <div
-        v-for="(condition, conditionIndex) in subGroup.conditions"
+        v-for="(condition, conditionIndex) in subGroup"
         :key="`condition-${conditionIndex}`"
         class="relative"
       >
@@ -47,7 +44,7 @@
               size="small"
               text
               @click="removeCondition(conditionIndex)"
-              v-if="subGroup.conditions!.length > 1"
+              v-if="subGroup!.length > 1"
               class="hover:bg-red-50"
             >
               <Icon icon="ep:delete" />
@@ -63,33 +60,11 @@
             />
           </div>
         </div>
-
-        <!-- 条件间的"且"连接符 -->
-        <!-- TODO @puhu999：建议去掉，有点元素太丰富了。 -->
-        <div
-          v-if="conditionIndex < subGroup.conditions!.length - 1"
-          class="flex items-center justify-center py-8px"
-        >
-          <div class="flex items-center gap-8px">
-            <!-- 连接线 -->
-            <div class="w-24px h-1px bg-green-300"></div>
-            <!-- 且标签 -->
-            <div class="px-12px py-4px bg-green-100 border border-green-300 rounded-full">
-              <span class="text-12px font-600 text-green-600">且</span>
-            </div>
-            <!-- 连接线 -->
-            <div class="w-24px h-1px bg-green-300"></div>
-          </div>
-        </div>
       </div>
 
       <!-- 添加条件按钮 -->
       <div
-        v-if="
-          subGroup.conditions &&
-          subGroup.conditions.length > 0 &&
-          subGroup.conditions.length < maxConditions
-        "
+        v-if="subGroup && subGroup.length > 0 && subGroup.length < maxConditions"
         class="text-center py-16px"
       >
         <el-button type="primary" plain @click="addCondition">
@@ -108,27 +83,23 @@
 import { useVModel } from '@vueuse/core'
 import ConditionConfig from './ConditionConfig.vue'
 import {
-  SubConditionGroupFormData,
-  ConditionFormData,
-  IotRuleSceneTriggerConditionTypeEnum
+  IotRuleSceneTriggerConditionTypeEnum,
+  TriggerConditionFormData
 } from '@/api/iot/rule/scene/scene.types'
 
 /** 子条件组配置组件 */
 defineOptions({ name: 'SubConditionGroupConfig' })
 
-interface Props {
-  modelValue: SubConditionGroupFormData
+const props = defineProps<{
+  modelValue: TriggerConditionFormData[]
   triggerType: number
   maxConditions?: number
-}
+}>()
 
-interface Emits {
-  (e: 'update:modelValue', value: SubConditionGroupFormData): void
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: TriggerConditionFormData[]): void
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const subGroup = useVModel(props, 'modelValue', emit)
 
@@ -140,15 +111,13 @@ const conditionValidations = ref<{ [key: number]: { valid: boolean; message: str
 
 // 事件处理
 const addCondition = () => {
-  if (!subGroup.value.conditions) {
-    subGroup.value.conditions = []
+  if (!subGroup.value) {
+    subGroup.value = []
   }
-
-  if (subGroup.value.conditions.length >= maxConditions.value) {
+  if (subGroup.value.length >= maxConditions.value) {
     return
   }
-
-  const newCondition: ConditionFormData = {
+  const newCondition: TriggerConditionFormData = {
     type: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY, // 默认为设备属性
     productId: undefined,
     deviceId: undefined,
@@ -156,13 +125,12 @@ const addCondition = () => {
     operator: '=',
     param: ''
   }
-
-  subGroup.value.conditions.push(newCondition)
+  subGroup.value.push(newCondition)
 }
 
 const removeCondition = (index: number) => {
-  if (subGroup.value.conditions) {
-    subGroup.value.conditions.splice(index, 1)
+  if (subGroup.value) {
+    subGroup.value.splice(index, 1)
     delete conditionValidations.value[index]
 
     // 重新索引验证结果
@@ -181,9 +149,9 @@ const removeCondition = (index: number) => {
   }
 }
 
-const updateCondition = (index: number, condition: ConditionFormData) => {
-  if (subGroup.value.conditions) {
-    subGroup.value.conditions[index] = condition
+const updateCondition = (index: number, condition: TriggerConditionFormData) => {
+  if (subGroup.value) {
+    subGroup.value[index] = condition
   }
 }
 
@@ -193,7 +161,7 @@ const handleConditionValidate = (index: number, result: { valid: boolean; messag
 }
 
 const updateValidationResult = () => {
-  if (!subGroup.value.conditions || subGroup.value.conditions.length === 0) {
+  if (!subGroup.value || subGroup.value.length === 0) {
     emit('validate', { valid: false, message: '子条件组至少需要一个条件' })
     return
   }
@@ -211,7 +179,7 @@ const updateValidationResult = () => {
 
 // 监听变化
 watch(
-  () => subGroup.value.conditions,
+  () => subGroup.value,
   () => {
     updateValidationResult()
   },

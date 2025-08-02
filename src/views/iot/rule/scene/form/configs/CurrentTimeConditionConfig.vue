@@ -89,34 +89,6 @@
         </el-form-item>
       </el-col>
     </el-row>
-
-    <!-- 条件预览 -->
-    <!-- puhui999：可以去掉。。。因为表单选择了，可以看懂的呀。 -->
-    <div
-      v-if="conditionPreview"
-      class="p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]"
-    >
-      <div class="flex items-center gap-8px mb-8px">
-        <Icon icon="ep:view" class="text-[var(--el-color-info)] text-16px" />
-        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">条件预览</span>
-      </div>
-      <div class="pl-24px">
-        <code
-          class="text-12px text-[var(--el-color-primary)] bg-[var(--el-fill-color-blank)] p-8px rounded-4px font-mono"
-          >{{ conditionPreview }}</code
-        >
-      </div>
-    </div>
-
-    <!-- 验证结果 -->
-    <div v-if="validationMessage" class="mt-8px">
-      <el-alert
-        :title="validationMessage"
-        :type="isValid ? 'success' : 'error'"
-        :closable="false"
-        show-icon
-      />
-    </div>
   </div>
 </template>
 
@@ -130,17 +102,14 @@ import {
 /** 当前时间条件配置组件 */
 defineOptions({ name: 'CurrentTimeConditionConfig' })
 
-interface Props {
+const props = defineProps<{
   modelValue: ConditionFormData
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: ConditionFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const condition = useVModel(props, 'modelValue', emit)
 
@@ -209,29 +178,6 @@ const needsDateInput = computed(() => {
 
 const needsSecondTimeInput = computed(() => {
   return condition.value.operator === IotRuleSceneTriggerTimeOperatorEnum.BETWEEN_TIME.value
-})
-
-const conditionPreview = computed(() => {
-  if (!condition.value.operator) {
-    return ''
-  }
-
-  const operatorOption = timeOperatorOptions.find((opt) => opt.value === condition.value.operator)
-  const operatorLabel = operatorOption?.label || condition.value.operator
-
-  if (condition.value.operator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
-    return `当前时间 ${operatorLabel}`
-  }
-
-  if (!condition.value.timeValue) {
-    return `当前时间 ${operatorLabel} [未设置时间]`
-  }
-
-  if (needsSecondTimeInput.value && condition.value.timeValue2) {
-    return `当前时间 ${operatorLabel} ${condition.value.timeValue} 和 ${condition.value.timeValue2}`
-  }
-
-  return `当前时间 ${operatorLabel} ${condition.value.timeValue}`
 })
 
 // 事件处理

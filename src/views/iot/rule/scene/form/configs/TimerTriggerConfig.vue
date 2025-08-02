@@ -25,18 +25,13 @@ import { Crontab } from '@/components/Crontab'
 /** 定时触发配置组件 */
 defineOptions({ name: 'TimerTriggerConfig' })
 
-// TODO @puhui999：下面的 Props、Emits 可以合并到变量那；
-interface Props {
+const props = defineProps<{
   modelValue?: string
-}
-
-interface Emits {
+}>()
+const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const localValue = useVModel(props, 'modelValue', emit, {
   defaultValue: '0 0 12 * * ?'

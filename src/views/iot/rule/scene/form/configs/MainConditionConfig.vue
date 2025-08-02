@@ -20,19 +20,13 @@
     </div>
 
     <!-- 主条件配置 -->
-    <!-- TODO @puhui999：这里可以简化下，主条件是不能删除的。。。 -->
     <div v-else class="space-y-16px">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-8px">
           <span class="text-14px font-500 text-[var(--el-text-color-primary)]">主条件</span>
           <el-tag size="small" type="primary">必须满足</el-tag>
         </div>
-        <el-button type="danger" size="small" text @click="removeMainCondition">
-          <Icon icon="ep:delete" />
-          删除
-        </el-button>
       </div>
-
       <MainConditionInnerConfig
         :model-value="modelValue"
         @update:model-value="updateCondition"
@@ -46,48 +40,45 @@
 <script setup lang="ts">
 import MainConditionInnerConfig from './MainConditionInnerConfig.vue'
 import {
-  ConditionFormData,
-  IotRuleSceneTriggerConditionTypeEnum
+  IotRuleSceneTriggerConditionTypeEnum,
+  TriggerFormData
 } from '@/api/iot/rule/scene/scene.types'
 
 /** 主条件配置组件 */
 defineOptions({ name: 'MainConditionConfig' })
 
-interface Props {
-  modelValue?: ConditionFormData
+defineProps<{
+  modelValue?: TriggerFormData
   triggerType: number
-}
+}>()
 
-interface Emits {
-  (e: 'update:modelValue', value?: ConditionFormData): void
+const emit = defineEmits<{
+  (e: 'update:modelValue', value?: TriggerFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 // 事件处理
 const addMainCondition = () => {
-  const newCondition: ConditionFormData = {
+  const newCondition: TriggerFormData = {
     type: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY, // 默认为设备属性
     productId: undefined,
     deviceId: undefined,
     identifier: '',
     operator: '=',
-    param: ''
+    value: ''
   }
   emit('update:modelValue', newCondition)
 }
 
-const removeMainCondition = () => {
-  emit('update:modelValue', undefined)
-}
-
-const updateCondition = (condition: ConditionFormData) => {
+const updateCondition = (condition: TriggerFormData) => {
   emit('update:modelValue', condition)
 }
 
 const handleValidate = (result: { valid: boolean; message: string }) => {
   emit('validate', result)
 }
+
+onMounted(() => {
+  addMainCondition()
+})
 </script>

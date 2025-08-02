@@ -27,9 +27,13 @@
           <template #default>
             <div class="space-y-8px">
               <p class="m-0 text-14px text-[var(--el-text-color-primary)]">属性设置示例：</p>
-              <pre class="m-0 p-8px bg-[var(--el-fill-color-light)] rounded-4px text-12px text-[var(--el-text-color-regular)] overflow-x-auto"><code>{ "temperature": 25, "power": true }</code></pre>
+              <pre
+                class="m-0 p-8px bg-[var(--el-fill-color-light)] rounded-4px text-12px text-[var(--el-text-color-regular)] overflow-x-auto"
+              ><code>{ "temperature": 25, "power": true }</code></pre>
               <p class="m-0 text-14px text-[var(--el-text-color-primary)]">服务调用示例：</p>
-              <pre class="m-0 p-8px bg-[var(--el-fill-color-light)] rounded-4px text-12px text-[var(--el-text-color-regular)] overflow-x-auto"><code>{ "method": "restart", "params": { "delay": 5 } }</code></pre>
+              <pre
+                class="m-0 p-8px bg-[var(--el-fill-color-light)] rounded-4px text-12px text-[var(--el-text-color-regular)] overflow-x-auto"
+              ><code>{ "method": "restart", "params": { "delay": 5 } }</code></pre>
             </div>
           </template>
         </el-alert>
@@ -56,17 +60,14 @@ import { ActionFormData } from '@/api/iot/rule/scene/scene.types'
 /** 设备控制配置组件 */
 defineOptions({ name: 'DeviceControlConfig' })
 
-interface Props {
+const props = defineProps<{
   modelValue: ActionFormData
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: ActionFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 const action = useVModel(props, 'modelValue', emit)
 

@@ -17,10 +17,17 @@
         >
           <div class="flex items-center justify-between w-full py-4px">
             <div class="flex items-center gap-12px flex-1">
-              <Icon :icon="option.icon" class="text-18px text-[var(--el-color-primary)] flex-shrink-0" />
+              <Icon
+                :icon="option.icon"
+                class="text-18px text-[var(--el-color-primary)] flex-shrink-0"
+              />
               <div class="flex-1">
-                <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ option.label }}</div>
-                <div class="text-12px text-[var(--el-text-color-secondary)] leading-relaxed">{{ option.description }}</div>
+                <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{
+                  option.label
+                }}</div>
+                <div class="text-12px text-[var(--el-text-color-secondary)] leading-relaxed">{{
+                  option.description
+                }}</div>
               </div>
             </div>
             <el-tag :type="option.tag" size="small">
@@ -35,7 +42,7 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import { IotRuleSceneActionTypeEnum } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneActionTypeEnum } from '@/views/iot/utils/constants'
 
 /** 执行器类型选择组件 */
 defineOptions({ name: 'ActionTypeSelector' })

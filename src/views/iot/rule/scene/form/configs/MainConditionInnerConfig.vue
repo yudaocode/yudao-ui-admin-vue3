@@ -1,11 +1,5 @@
 <template>
   <div class="space-y-16px">
-    <!-- 触发事件类型显示 -->
-    <div class="flex items-center gap-8px mb-16px">
-      <span class="text-14px text-[var(--el-text-color-regular)]">触发事件类型：</span>
-      <el-tag size="small" type="primary">{{ getTriggerTypeText(triggerType) }}</el-tag>
-    </div>
-
     <!-- 设备属性条件配置 -->
     <div v-if="isDevicePropertyTrigger" class="space-y-16px">
       <!-- 产品设备选择 -->
@@ -73,14 +67,6 @@
           </el-form-item>
         </el-col>
       </el-row>
-
-      <!-- 条件预览 -->
-      <!-- TODO puhui999：可以去掉。。。因为表单选择了，可以看懂的呀。 -->
-      <div v-if="conditionPreview" class="mt-12px">
-        <div class="text-12px text-[var(--el-text-color-secondary)]">
-          预览：{{ conditionPreview }}
-        </div>
-      </div>
     </div>
 
     <!-- 设备状态条件配置 -->
@@ -112,24 +98,21 @@ import OperatorSelector from '../selectors/OperatorSelector.vue'
 import ValueInput from '../inputs/ValueInput.vue'
 import DeviceStatusConditionConfig from './DeviceStatusConditionConfig.vue'
 import { ConditionFormData } from '@/api/iot/rule/scene/scene.types'
-import { IotRuleSceneTriggerTypeEnum } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
 import { useVModel } from '@vueuse/core'
 
 /** 主条件内部配置组件 */
 defineOptions({ name: 'MainConditionInnerConfig' })
 
-interface Props {
+const props = defineProps<{
   modelValue: ConditionFormData
   triggerType: number
-}
+}>()
 
-interface Emits {
+const emit = defineEmits<{
   (e: 'update:modelValue', value: ConditionFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+}>()
 
 // 响应式数据
 const condition = useVModel(props, 'modelValue', emit)
@@ -150,13 +133,6 @@ const isDevicePropertyTrigger = computed(() => {
 
 const isDeviceStatusTrigger = computed(() => {
   return props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE
-})
-
-const conditionPreview = computed(() => {
-  if (!condition.value.productId || !condition.value.deviceId || !condition.value.identifier) {
-    return ''
-  }
-  return `设备[${condition.value.deviceId}]的${condition.value.identifier} ${condition.value.operator} ${condition.value.param}`
 })
 
 // 获取触发类型文本
