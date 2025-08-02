@@ -80,10 +80,14 @@
 </template>
 
 <script setup lang="ts">
+import { nextTick } from 'vue'
 import { useVModel } from '@vueuse/core'
 import ConditionConfig from './ConditionConfig.vue'
 import { TriggerConditionFormData } from '@/api/iot/rule/scene/scene.types'
-import { IotRuleSceneTriggerConditionTypeEnum } from '@/views/iot/utils/constants'
+import {
+  IotRuleSceneTriggerConditionTypeEnum,
+  IotRuleSceneTriggerConditionParameterOperatorEnum
+} from '@/views/iot/utils/constants'
 
 /** 子条件组配置组件 */
 defineOptions({ name: 'SubConditionGroupConfig' })
@@ -109,21 +113,31 @@ const conditionValidations = ref<{ [key: number]: { valid: boolean; message: str
 
 // 事件处理
 const addCondition = () => {
+  // 确保 subGroup.value 是一个数组
   if (!subGroup.value) {
     subGroup.value = []
   }
-  if (subGroup.value.length >= maxConditions.value) {
+
+  // 检查是否达到最大条件数量限制
+  if (subGroup.value?.length >= maxConditions.value) {
     return
   }
+
   const newCondition: TriggerConditionFormData = {
     type: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY, // 默认为设备属性
     productId: undefined,
     deviceId: undefined,
     identifier: '',
-    operator: '=',
+    operator: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value, // 使用枚举默认值
     param: ''
   }
-  subGroup.value.push(newCondition)
+
+  // 使用 nextTick 确保响应式更新完成后再添加新条件
+  nextTick(() => {
+    if (subGroup.value) {
+      subGroup.value.push(newCondition)
+    }
+  })
 }
 
 const removeCondition = (index: number) => {

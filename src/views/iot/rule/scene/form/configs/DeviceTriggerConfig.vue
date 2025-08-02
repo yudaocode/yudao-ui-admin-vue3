@@ -83,13 +83,6 @@ const handleMainConditionValidate = (result: { valid: boolean; message: string }
   updateValidationResult()
 }
 
-const addConditionGroup = () => {
-  if (!trigger.value.conditionGroups) {
-    trigger.value.conditionGroups = []
-  }
-  trigger.value.conditionGroups.push([])
-}
-
 // 事件处理
 const handleConditionGroupValidate = () => {
   updateValidationResult()

@@ -153,11 +153,17 @@ const addSubGroup = () => {
     container.value = []
   }
 
-  if (container.value.length >= maxSubGroups) {
+  // 检查是否达到最大子组数量限制
+  if (container.value?.length >= maxSubGroups) {
     return
   }
 
-  container.value.push([])
+  // 使用 nextTick 确保响应式更新完成后再添加新的子组
+  nextTick(() => {
+    if (container.value) {
+      container.value.push([])
+    }
+  })
 }
 
 const removeSubGroup = (index: number) => {
