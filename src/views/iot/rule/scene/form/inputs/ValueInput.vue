@@ -1,14 +1,15 @@
 <!-- 值输入组件 -->
 <!-- TODO @yunai：这个需要在看看。。。 -->
 <template>
-  <div class="value-input">
+  <div class="w-full min-w-0">
     <!-- 布尔值选择 -->
     <el-select
       v-if="propertyType === 'bool'"
       v-model="localValue"
       placeholder="请选择布尔值"
       @change="handleChange"
-      class="w-full"
+      class="w-full!"
+      style="width: 100% !important"
     >
       <el-option label="真 (true)" value="true" />
       <el-option label="假 (false)" value="false" />
@@ -20,7 +21,8 @@
       v-model="localValue"
       placeholder="请选择枚举值"
       @change="handleChange"
-      class="w-full"
+      class="w-full!"
+      style="width: 100% !important"
     >
       <el-option
         v-for="option in enumOptions"
@@ -31,41 +33,51 @@
     </el-select>
 
     <!-- 范围输入 (between 操作符) -->
-    <div v-else-if="operator === 'between'" class="range-input">
+    <div
+      v-else-if="operator === 'between'"
+      class="w-full! flex items-center gap-8px"
+      style="width: 100% !important"
+    >
       <el-input
         v-model="rangeStart"
         :type="getInputType()"
         placeholder="最小值"
         @input="handleRangeChange"
-        class="range-start"
+        class="flex-1 min-w-0"
+        style="width: auto !important"
       />
-      <span class="range-separator">至</span>
+      <span class="text-12px text-[var(--el-text-color-secondary)] whitespace-nowrap">至</span>
       <el-input
         v-model="rangeEnd"
         :type="getInputType()"
         placeholder="最大值"
         @input="handleRangeChange"
-        class="range-end"
+        class="flex-1 min-w-0"
+        style="width: auto !important"
       />
     </div>
 
     <!-- 列表输入 (in 操作符) -->
-    <div v-else-if="operator === 'in'" class="list-input">
+    <div v-else-if="operator === 'in'" class="w-full!" style="width: 100% !important">
       <el-input
         v-model="localValue"
         placeholder="请输入值列表，用逗号分隔"
         @input="handleChange"
-        class="w-full"
+        class="w-full!"
+        style="width: 100% !important"
       >
         <template #suffix>
           <el-tooltip content="多个值用逗号分隔，如：1,2,3" placement="top">
-            <Icon icon="ep:question-filled" class="input-tip" />
+            <Icon
+              icon="ep:question-filled"
+              class="text-[var(--el-text-color-placeholder)] cursor-help"
+            />
           </el-tooltip>
         </template>
       </el-input>
-      <div v-if="listPreview.length > 0" class="list-preview">
-        <span class="preview-label">解析结果：</span>
-        <el-tag v-for="(item, index) in listPreview" :key="index" size="small" class="preview-tag">
+      <div v-if="listPreview.length > 0" class="mt-8px flex items-center gap-6px flex-wrap">
+        <span class="text-12px text-[var(--el-text-color-secondary)]">解析结果：</span>
+        <el-tag v-for="(item, index) in listPreview" :key="index" size="small" class="m-0">
           {{ item }}
         </el-tag>
       </div>
@@ -80,7 +92,8 @@
       format="YYYY-MM-DD HH:mm:ss"
       value-format="YYYY-MM-DD HH:mm:ss"
       @change="handleDateChange"
-      class="w-full"
+      class="w-full!"
+      style="width: 100% !important"
     />
 
     <!-- 数字输入 -->
@@ -93,7 +106,8 @@
       :max="getMax()"
       placeholder="请输入数值"
       @change="handleNumberChange"
-      class="w-full"
+      class="w-full!"
+      style="width: 100% !important"
     />
 
     <!-- 文本输入 -->
@@ -103,7 +117,8 @@
       :type="getInputType()"
       :placeholder="getPlaceholder()"
       @input="handleChange"
-      class="w-full"
+      class="w-full!"
+      style="width: 100% !important"
     >
       <template #suffix>
         <el-tooltip
@@ -111,13 +126,15 @@
           :content="`单位：${propertyConfig.unit}`"
           placement="top"
         >
-          <span class="input-unit">{{ propertyConfig.unit }}</span>
+          <span class="text-12px text-[var(--el-text-color-secondary)] px-4px">{{
+            propertyConfig.unit
+          }}</span>
         </el-tooltip>
       </template>
     </el-input>
 
     <!-- 验证提示 -->
-    <div v-if="validationMessage" class="validation-message">
+    <div v-if="validationMessage" class="mt-4px">
       <el-text :type="isValid ? 'success' : 'danger'" size="small">
         <Icon :icon="isValid ? 'ep:check' : 'ep:warning-filled'" />
         {{ validationMessage }}
@@ -354,62 +371,3 @@ onMounted(() => {
   }
 })
 </script>
-
-<style scoped>
-.value-input {
-  width: 100%;
-}
-
-.range-input {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.range-start,
-.range-end {
-  flex: 1;
-}
-
-.range-separator {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  white-space: nowrap;
-}
-
-.list-input {
-  width: 100%;
-}
-
-.input-tip {
-  color: var(--el-text-color-placeholder);
-  cursor: help;
-}
-
-.input-unit {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  padding: 0 4px;
-}
-
-.list-preview {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.preview-label {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-
-.preview-tag {
-  margin: 0;
-}
-
-.validation-message {
-  margin-top: 4px;
-}
-</style>
