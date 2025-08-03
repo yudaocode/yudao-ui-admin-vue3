@@ -300,3 +300,24 @@ export const IotRuleSceneTriggerTimeOperatorEnum = {
   AFTER_TODAY: { name: '在今日之后', value: 'after_today' }, // 在今日之后
   TODAY: { name: '在今日之间', value: 'today' } // 在今日之间
 } as const
+
+// ========== 辅助函数 ==========
+
+/** 获取触发器类型标签 */
+export const getTriggerTypeLabel = (type: number): string => {
+  const options = getTriggerTypeOptions()
+  const option = options.find((item) => item.value === type)
+  return option?.label || '未知类型'
+}
+
+/** 获取执行器类型标签 */
+export const getActionTypeLabel = (type: number): string => {
+  const actionTypeOptions = [
+    { label: '设备属性设置', value: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET },
+    { label: '设备服务调用', value: IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE },
+    { label: '告警触发', value: IotRuleSceneActionTypeEnum.ALERT_TRIGGER },
+    { label: '告警恢复', value: IotRuleSceneActionTypeEnum.ALERT_RECOVER }
+  ]
+  const option = actionTypeOptions.find((item) => item.value === type)
+  return option?.label || '未知类型'
+}

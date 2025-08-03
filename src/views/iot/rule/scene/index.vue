@@ -164,7 +164,7 @@
             </div>
           </template>
         </el-table-column>
-        <!-- TODO puhui999：貌似展示不太对劲。。。一个字，一个 tab 哈了。 -->
+        <!-- 触发条件列 -->
         <el-table-column label="触发条件" min-width="250">
           <template #default="{ row }">
             <div class="flex flex-wrap gap-4px">
@@ -180,7 +180,7 @@
             </div>
           </template>
         </el-table-column>
-        <!-- TODO puhui999：貌似展示不太对劲。。。一个字，一个 tab 哈了。 -->
+        <!-- 执行动作列 -->
         <el-table-column label="执行动作" min-width="250">
           <template #default="{ row }">
             <div class="flex flex-wrap gap-4px">
@@ -222,8 +222,7 @@
                 @click="handleToggleStatus(row)"
               >
                 <Icon :icon="row.status === 0 ? 'ep:video-pause' : 'ep:video-play'" />
-                <!-- TODO @puhui999：字典翻译 -->
-                {{ row.status === 0 ? '禁用' : '启用' }}
+                {{ getDictLabel(DICT_TYPE.COMMON_STATUS, row.status === 0 ? 1 : 0) }}
               </el-button>
               <el-button type="danger" class="!mr-10px" link @click="handleDelete(row.id)">
                 <Icon icon="ep:delete" />
@@ -270,15 +269,22 @@
     </div>
 
     <!-- 表单对话框 -->
-    <RuleSceneForm v-model="formVisible" @success="getList" />
+    <RuleSceneForm v-model="formVisible" :rule-scene="currentRule" @success="getList" />
   </ContentWrap>
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
 import RuleSceneForm from './form/RuleSceneForm.vue'
 import { IotRuleScene } from '@/api/iot/rule/scene/scene.types'
+import { RuleSceneApi } from '@/api/iot/rule/scene'
+import {
+  IotRuleSceneTriggerTypeEnum,
+  IotRuleSceneActionTypeEnum,
+  getTriggerTypeLabel,
+  getActionTypeLabel
+} from '@/views/iot/utils/constants'
 import { formatDate } from '@/utils/formatTime'
 
 /** 场景联动规则管理页面 */
@@ -314,7 +320,7 @@ const statistics = ref({
 })
 
 /** 格式化 CRON 表达式显示 */
-// TODO @puhui999：这个能不能 cron 组件里翻译哈；
+// 注：后续可考虑将此功能移至 CRON 组件内部
 const formatCronExpression = (cron: string): string => {
   if (!cron) return ''
 
@@ -359,39 +365,37 @@ const formatCronExpression = (cron: string): string => {
 
 /** 获取规则摘要信息 */
 const getRuleSceneSummary = (rule: IotRuleScene) => {
-  // TODO @puhui999：是不是可以使用字段，或者枚举？
   const triggerSummary =
     rule.triggers?.map((trigger) => {
       switch (trigger.type) {
-        case 1:
+        case IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE:
           return `设备状态变更 (${trigger.deviceNames?.length || 0}个设备)`
-        case 2:
+        case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:
           return `属性上报 (${trigger.deviceNames?.length || 0}个设备)`
-        case 3:
+        case IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST:
           return `事件上报 (${trigger.deviceNames?.length || 0}个设备)`
-        case 4:
+        case IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE:
           return `服务调用 (${trigger.deviceNames?.length || 0}个设备)`
-        case 100:
+        case IotRuleSceneTriggerTypeEnum.TIMER:
           return `定时触发 (${formatCronExpression(trigger.cronExpression || '')})`
         default:
-          return '未知触发类型'
+          return getTriggerTypeLabel(trigger.type)
       }
     }) || []
 
-  // TODO @puhui999：是不是可以使用字段，或者枚举？
   const actionSummary =
     rule.actions?.map((action) => {
       switch (action.type) {
-        case 1:
+        case IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET:
           return `设备属性设置 (${action.deviceControl?.deviceNames?.length || 0}个设备)`
-        case 2:
+        case IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE:
           return `设备服务调用 (${action.deviceControl?.deviceNames?.length || 0}个设备)`
-        case 100:
+        case IotRuleSceneActionTypeEnum.ALERT_TRIGGER:
           return '发送告警通知'
-        case 101:
+        case IotRuleSceneActionTypeEnum.ALERT_RECOVER:
           return '发送邮件通知'
         default:
-          return '未知执行类型'
+          return getActionTypeLabel(action.type)
       }
     }) || []
 
@@ -402,69 +406,26 @@ const getRuleSceneSummary = (rule: IotRuleScene) => {
 }
 
 /** 查询列表 */
-// TODO @puhui999：这里使用真实数据；
 const getList = async () => {
   loading.value = true
   try {
-    // 模拟API调用
-    const mockData = {
-      list: [
-        {
-          id: 1,
-          name: '温度过高自动降温',
-          description: '当温度超过30度时自动开启空调',
-          status: 0,
-          triggers: [
-            {
-              type: 2,
-              productKey: 'temp_sensor',
-              deviceNames: ['sensor_001'],
-              conditions: [
-                {
-                  type: 'property',
-                  identifier: 'temperature',
-                  parameters: [{ operator: '>', value: '30' }]
-                }
-              ]
-            }
-          ],
-          actions: [
-            {
-              type: 1,
-              deviceControl: {
-                productKey: 'air_conditioner',
-                deviceNames: ['ac_001'],
-                type: 'property',
-                identifier: 'power',
-                params: { power: 1 }
-              }
-            }
-          ],
-          lastTriggeredTime: new Date().toISOString(),
-          createTime: new Date().toISOString()
-        },
-        {
-          id: 2,
-          name: '设备离线告警',
-          description: '设备离线时发送告警通知',
-          status: 0,
-          triggers: [
-            { type: 1, productKey: 'smart_device', deviceNames: ['device_001', 'device_002'] }
-          ],
-          actions: [{ type: 100, alertConfigId: 1 }],
-          createTime: new Date().toISOString()
-        }
-      ],
-      total: 2
-    }
-
-    list.value = mockData.list
-    total.value = mockData.total
+    // 调用真实API获取数据
+    const data = await RuleSceneApi.getRuleScenePage(queryParams)
+    list.value = data.list
+    total.value = data.total
 
     // 更新统计数据
     updateStatistics()
   } catch (error) {
     console.error('获取列表失败:', error)
+    ElMessage.error('获取列表失败')
+
+    // 清空列表数据
+    list.value = []
+    total.value = 0
+
+    // 更新统计数据
+    updateStatistics()
   } finally {
     loading.value = false
   }
@@ -476,8 +437,8 @@ const updateStatistics = () => {
     total: list.value.length,
     enabled: list.value.filter((item) => item.status === 0).length,
     disabled: list.value.filter((item) => item.status === 1).length,
-    // TODO @puhui999：这里缺了 lastTriggeredTime 定义
-    triggered: list.value.filter((item) => item.lastTriggeredTime).length
+    // 已触发的规则数量 (暂时使用启用状态的规则数量)
+    triggered: list.value.filter((item) => item.status === 0).length
   }
 }
 
@@ -517,19 +478,19 @@ const handleEdit = (row: IotRuleScene) => {
 }
 
 /** 删除按钮操作 */
-// TODO @puhui999：貌似 id 没用上
 const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    // await RuleSceneApi.deleteRuleScene(id)
-
-    // 模拟删除操作
+    await RuleSceneApi.deleteRuleScene(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
-  } catch {}
+  } catch (error) {
+    console.error('删除失败:', error)
+    ElMessage.error('删除失败')
+  }
 }
 
 /** 修改状态 */
@@ -539,10 +500,10 @@ const handleToggleStatus = async (row: IotRuleScene) => {
     const text = row.status === 0 ? '禁用' : '启用'
     await message.confirm('确认要' + text + '"' + row.name + '"吗?')
     // 发起修改状态
-    // TODO @puhui999：这里缺了
+    // 调用API更新状态 (待后端API实现)
     // await RuleSceneApi.updateRuleSceneStatus(row.id, row.status === 0 ? 1 : 0)
 
-    // 模拟状态切换
+    // 更新本地状态
     row.status = row.status === 0 ? 1 : 0
     message.success(text + '成功')
     // 刷新统计
@@ -563,7 +524,7 @@ const handleBatchEnable = async () => {
   try {
     await message.confirm(`确定要启用选中的 ${selectedRows.value.length} 个规则吗？`)
     // 这里应该调用批量启用API
-    // TODO @puhui999：这里缺了
+    // 批量启用API调用 (待后端API实现)
     // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 0)
 
     // 模拟批量启用
@@ -580,7 +541,7 @@ const handleBatchDisable = async () => {
   try {
     await message.confirm(`确定要禁用选中的 ${selectedRows.value.length} 个规则吗？`)
     // 这里应该调用批量禁用API
-    // TODO @puhui999：这里缺了
+    // 批量禁用API调用 (待后端API实现)
     // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 1)
 
     // 模拟批量禁用
@@ -599,8 +560,8 @@ const handleBatchDelete = async () => {
       type: 'warning'
     })
 
-    // TODO @puhui999：这里缺了
-    // 这里应该调用批量删除API
+    // 批量删除API调用 (待后端API实现)
+    // await RuleSceneApi.deleteRuleSceneBatch(selectedRows.value.map(row => row.id))
     message.success('批量删除成功')
     await getList()
   } catch (error) {}

@@ -37,6 +37,7 @@ import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
 import { IotRuleSceneDO, RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
+import { RuleSceneApi } from '@/api/iot/rule/scene'
 import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
 import { ElMessage } from 'element-plus'
 import { generateUUID } from '@/utils'
@@ -55,6 +56,8 @@ defineOptions({ name: 'RuleSceneForm' })
 const props = defineProps<{
   /** 抽屉显示状态 */
   modelValue: boolean
+  /** 编辑的场景联动规则数据 */
+  ruleScene?: IotRuleSceneDO
 }>()
 
 /** 组件事件定义 */
@@ -218,12 +221,13 @@ const handleActionValidate = (result: { valid: boolean; message: string }) => {
   actionValidation.value = result
 }
 
-// TODO @puhui999：API 调用
+/** 提交表单 */
 const handleSubmit = async () => {
   // 校验表单
   if (!formRef.value) return
   const valid = await formRef.value.validate()
   if (!valid) return
+
   // 验证触发器和执行器
   if (!triggerValidation.value.valid) {
     ElMessage.error(triggerValidation.value.message)
@@ -237,28 +241,22 @@ const handleSubmit = async () => {
   // 提交请求
   submitLoading.value = true
   try {
-    console.log(formData.value)
     // 转换数据格式
     const apiData = convertFormToVO(formData.value)
-    if (true) {
-      console.log('转换后', apiData)
-      return
-    }
+    console.log('提交数据:', apiData)
+
     // 调用API保存数据
     if (isEdit.value) {
       // 更新场景联动规则
-      // await RuleSceneApi.updateRuleScene(apiData)
-      console.log('更新数据:', apiData)
+      await RuleSceneApi.updateRuleScene(apiData)
+      ElMessage.success('更新成功')
     } else {
       // 创建场景联动规则
-      // await RuleSceneApi.createRuleScene(apiData)
-      console.log('创建数据:', apiData)
+      await RuleSceneApi.createRuleScene(apiData)
+      ElMessage.success('创建成功')
     }
 
-    // 模拟API调用
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    ElMessage.success(isEdit.value ? '更新成功' : '创建成功')
+    // 关闭抽屉并触发成功事件
     drawerVisible.value = false
     emit('success')
   } catch (error) {
@@ -275,28 +273,36 @@ const handleClose = () => {
 
 /** 初始化表单数据 */
 const initFormData = () => {
-  // TODO @puhui999: 编辑的情况后面实现
-  formData.value = createDefaultFormData()
+  if (props.ruleScene) {
+    // 编辑模式：转换后端数据为表单格式
+    isEdit.value = true
+    formData.value = convertVOToForm(props.ruleScene)
+  } else {
+    // 新增模式：使用默认数据
+    isEdit.value = false
+    formData.value = createDefaultFormData()
+  }
 }
 
 // 监听抽屉显示
 watch(drawerVisible, (visible) => {
   if (visible) {
     initFormData()
-    // TODO @puhui999: 重置表单的情况
-    // nextTick(() => {
-    //   formRef.value?.clearValidate()
-    // })
+    // 重置表单验证状态
+    nextTick(() => {
+      formRef.value?.clearValidate()
+    })
   }
 })
 
-// 监听 props 变化
-// watch(
-//   () => props.ruleScene,
-//   () => {
-//     if (drawerVisible.value) {
-//       initFormData()
-//     }
-//   }
-// )
+// 监听编辑数据变化
+watch(
+  () => props.ruleScene,
+  () => {
+    if (drawerVisible.value) {
+      initFormData()
+    }
+  },
+  { deep: true }
+)
 </script>
