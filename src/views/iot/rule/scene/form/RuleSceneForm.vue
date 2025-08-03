@@ -36,11 +36,12 @@ import { useVModel } from '@vueuse/core'
 import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
-import { IotRuleSceneDO, RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleScene, IotRuleSceneDO, RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerTypeEnum,
   IotRuleSceneActionTypeEnum,
+  IotDeviceMessageTypeEnum,
   isDeviceTrigger
 } from '@/views/iot/utils/constants'
 import { ElMessage } from 'element-plus'
@@ -52,6 +53,57 @@ const CommonStatusEnum = {
   ENABLE: 0, // 开启
   DISABLE: 1 // 关闭
 } as const
+
+// 工具函数：根据触发器类型获取消息类型
+const getMessageTypeByTriggerType = (triggerType: number): string => {
+  switch (triggerType) {
+    case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:
+      return IotDeviceMessageTypeEnum.PROPERTY
+    case IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST:
+      return IotDeviceMessageTypeEnum.EVENT
+    case IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE:
+      return IotDeviceMessageTypeEnum.SERVICE
+    default:
+      return IotDeviceMessageTypeEnum.PROPERTY
+  }
+}
+
+// 工具函数：根据执行器类型获取消息类型
+const getMessageTypeByActionType = (actionType: number): string => {
+  switch (actionType) {
+    case IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET:
+      return IotDeviceMessageTypeEnum.PROPERTY
+    case IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE:
+      return IotDeviceMessageTypeEnum.SERVICE
+    default:
+      return IotDeviceMessageTypeEnum.PROPERTY
+  }
+}
+
+// 工具函数：根据执行器类型和参数获取标识符
+const getIdentifierByActionType = (actionType: number, params?: Record<string, any>): string => {
+  if (!params) return ''
+
+  switch (actionType) {
+    case IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET:
+      // 属性设置：取第一个属性名作为标识符
+      return Object.keys(params)[0] || ''
+    case IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE:
+      // 服务调用：取 method 字段作为标识符
+      return params.method || ''
+    default:
+      return ''
+  }
+}
+
+// 工具函数：判断是否为设备执行器
+const isDeviceAction = (type: number): boolean => {
+  const deviceActionTypes = [
+    IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,
+    IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
+  ] as number[]
+  return deviceActionTypes.includes(type)
+}
 
 /** IoT 场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
@@ -95,31 +147,50 @@ const createDefaultFormData = (): RuleSceneFormData => {
 }
 
 /**
- * 将表单数据转换为后端 DO 格式
- * 由于数据结构已对齐，转换变得非常简单
+ * 将表单数据转换为后端 API 格式
+ * 转换为 IotRuleScene 格式，与后端 API 接口对齐
  */
-const convertFormToVO = (formData: RuleSceneFormData): IotRuleSceneDO => {
+const convertFormToVO = (formData: RuleSceneFormData): IotRuleScene => {
   return {
     id: formData.id,
     name: formData.name,
     description: formData.description,
     status: Number(formData.status),
     triggers: formData.triggers.map((trigger) => ({
+      key: generateUUID(), // 为每个触发器生成唯一标识
       type: trigger.type,
-      productId: trigger.productId,
-      deviceId: trigger.deviceId,
-      identifier: trigger.identifier,
-      operator: trigger.operator,
-      value: trigger.value,
-      cronExpression: trigger.cronExpression,
-      conditionGroups: trigger.conditionGroups || []
+      productKey: trigger.productId ? `product_${trigger.productId}` : undefined, // 转换为产品标识
+      deviceNames: trigger.deviceId ? [`device_${trigger.deviceId}`] : undefined, // 转换为设备名称数组
+      conditions: trigger.identifier
+        ? [
+            {
+              type: getMessageTypeByTriggerType(trigger.type),
+              identifier: trigger.identifier,
+              parameters: [
+                {
+                  identifier: trigger.identifier,
+                  operator: trigger.operator || '=',
+                  value: trigger.value || ''
+                }
+              ]
+            }
+          ]
+        : undefined,
+      cronExpression: trigger.cronExpression
     })),
     actions:
       formData.actions?.map((action) => ({
+        key: generateUUID(), // 为每个执行器生成唯一标识
         type: action.type,
-        productId: action.productId,
-        deviceId: action.deviceId,
-        params: action.params,
+        deviceControl: isDeviceAction(action.type)
+          ? {
+              productKey: action.productId ? `product_${action.productId}` : '',
+              deviceNames: action.deviceId ? [`device_${action.deviceId}`] : [],
+              type: getMessageTypeByActionType(action.type),
+              identifier: getIdentifierByActionType(action.type, action.params),
+              params: action.params || {}
+            }
+          : undefined,
         alertConfigId: action.alertConfigId
       })) || []
   }

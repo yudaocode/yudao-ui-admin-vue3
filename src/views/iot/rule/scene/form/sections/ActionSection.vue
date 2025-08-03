@@ -108,7 +108,12 @@ import ActionTypeSelector from '../selectors/ActionTypeSelector.vue'
 import DeviceControlConfig from '../configs/DeviceControlConfig.vue'
 import AlertConfig from '../configs/AlertConfig.vue'
 import { ActionFormData } from '@/api/iot/rule/scene/scene.types'
-import { IotRuleSceneActionTypeEnum as ActionTypeEnum } from '@/views/iot/utils/constants'
+import {
+  IotRuleSceneActionTypeEnum as ActionTypeEnum,
+  isDeviceAction,
+  isAlertAction,
+  getActionTypeLabel
+} from '@/views/iot/utils/constants'
 
 /** 执行器配置组件 */
 defineOptions({ name: 'ActionSection' })
@@ -142,37 +147,18 @@ const createDefaultActionData = (): ActionFormData => {
 // 配置常量
 const maxActions = 5
 
-// 执行器类型映射
-const actionTypeNames = {
-  [ActionTypeEnum.DEVICE_PROPERTY_SET]: '属性设置',
-  [ActionTypeEnum.DEVICE_SERVICE_INVOKE]: '服务调用',
-  [ActionTypeEnum.ALERT_TRIGGER]: '触发告警',
-  [ActionTypeEnum.ALERT_RECOVER]: '恢复告警'
-}
-
-const actionTypeTags = {
-  [ActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
-  [ActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
-  [ActionTypeEnum.ALERT_TRIGGER]: 'danger',
-  [ActionTypeEnum.ALERT_RECOVER]: 'warning'
-}
-
 // 工具函数
-const isDeviceAction = (type: number) => {
-  return [ActionTypeEnum.DEVICE_PROPERTY_SET, ActionTypeEnum.DEVICE_SERVICE_INVOKE].includes(
-    type as any
-  )
-}
-
-const isAlertAction = (type: number) => {
-  return [ActionTypeEnum.ALERT_TRIGGER, ActionTypeEnum.ALERT_RECOVER].includes(type as any)
-}
-
 const getActionTypeName = (type: number) => {
-  return actionTypeNames[type] || '未知类型'
+  return getActionTypeLabel(type)
 }
 
 const getActionTypeTag = (type: number) => {
+  const actionTypeTags = {
+    [ActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
+    [ActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
+    [ActionTypeEnum.ALERT_TRIGGER]: 'danger',
+    [ActionTypeEnum.ALERT_RECOVER]: 'warning'
+  }
   return actionTypeTags[type] || 'info'
 }
 
@@ -204,16 +190,23 @@ const updateActionAlertConfig = (index: number, alertConfigId?: number) => {
 }
 
 const onActionTypeChange = (action: ActionFormData, type: number) => {
-  // 清理不相关的配置
+  // 清理不相关的配置，确保数据结构干净
   if (isDeviceAction(type)) {
+    // 设备控制类型：清理告警配置，确保设备参数存在
     action.alertConfigId = undefined
     if (!action.params) {
       action.params = {}
     }
   } else if (isAlertAction(type)) {
+    // 告警类型：清理设备配置
     action.productId = undefined
     action.deviceId = undefined
     action.params = undefined
   }
+
+  // 触发重新校验
+  nextTick(() => {
+    // 这里可以添加校验逻辑
+  })
 }
 </script>

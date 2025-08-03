@@ -39,10 +39,20 @@
       <!-- 设备选择模式 -->
       <el-col :span="12">
         <el-form-item label="设备选择模式" required>
-          <el-radio-group v-model="deviceSelectionMode" @change="handleDeviceSelectionModeChange">
+          <el-radio-group
+            v-model="deviceSelectionMode"
+            @change="handleDeviceSelectionModeChange"
+            :disabled="!localProductId"
+          >
             <el-radio value="all">全部设备</el-radio>
             <el-radio value="specific">选择设备</el-radio>
           </el-radio-group>
+          <div
+            v-if="!localProductId"
+            class="text-12px text-[var(--el-text-color-placeholder)] mt-4px"
+          >
+            请先选择产品
+          </div>
         </el-form-item>
       </el-col>
     </el-row>
@@ -50,12 +60,10 @@
     <!-- 具体设备选择 -->
     <el-row v-if="deviceSelectionMode === 'specific'" :gutter="16">
       <el-col :span="24">
-        <!-- TODO @puhui999：貌似产品选择不上； -->
         <el-form-item label="选择设备" required>
-          <!-- TODO @puhui999：请先选择产品，是不是改成请选择设备？然后上面，localProductId 为空（未选择）的时候，禁用 deviceSelectionMode -->
           <el-select
             v-model="localDeviceId"
-            placeholder="请先选择产品"
+            :placeholder="localProductId ? '请选择设备' : '请先选择产品'"
             filterable
             clearable
             @change="handleDeviceChange"
@@ -152,8 +160,8 @@ const localProductId = useVModel(props, 'productId', emit)
 const localDeviceId = useVModel(props, 'deviceId', emit)
 
 // 设备选择模式
-// TODO @puhui999：默认选中 all
-const deviceSelectionMode = ref<'specific' | 'all'>('all')
+// 默认选择具体设备，这样用户可以看到设备选择器
+const deviceSelectionMode = ref<'specific' | 'all'>('specific')
 
 // 数据状态
 const productLoading = ref(false)

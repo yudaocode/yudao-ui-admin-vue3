@@ -1,72 +1,152 @@
 <!-- 告警配置组件 -->
 <template>
   <div class="w-full">
-    <!-- TODO @puhui999：触发告警时，不用选择配置哈； -->
-    <el-form-item label="告警配置" required>
-      <el-select
-        v-model="localValue"
-        placeholder="请选择告警配置"
-        filterable
-        clearable
-        @change="handleChange"
-        class="w-full"
-        :loading="loading"
-      >
-        <el-option
-          v-for="config in alertConfigs"
-          :key="config.id"
-          :label="config.name"
-          :value="config.id"
+    <!-- 告警配置选择区域 -->
+    <div
+      class="border border-[var(--el-border-color-light)] rounded-6px p-16px bg-[var(--el-fill-color-blank)]"
+    >
+      <div class="flex items-center gap-8px mb-12px">
+        <Icon icon="ep:bell" class="text-[var(--el-color-warning)] text-16px" />
+        <span class="text-14px font-600 text-[var(--el-text-color-primary)]">告警配置选择</span>
+        <el-tag size="small" type="warning">必选</el-tag>
+      </div>
+
+      <el-form-item label="告警配置" required>
+        <el-select
+          v-model="localValue"
+          placeholder="请选择告警配置"
+          filterable
+          clearable
+          @change="handleChange"
+          class="w-full"
+          :loading="loading"
         >
-          <div class="flex items-center justify-between w-full py-4px">
-            <div class="flex-1">
-              <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{
-                config.name
-              }}</div>
-              <div class="text-12px text-[var(--el-text-color-secondary)]">{{
-                config.description
-              }}</div>
+          <template #empty>
+            <div class="text-center py-20px">
+              <Icon
+                icon="ep:warning"
+                class="text-24px text-[var(--el-text-color-placeholder)] mb-8px"
+              />
+              <p class="text-12px text-[var(--el-text-color-secondary)]">暂无可用的告警配置</p>
             </div>
-            <el-tag :type="config.enabled ? 'success' : 'danger'" size="small">
-              {{ config.enabled ? '启用' : '禁用' }}
-            </el-tag>
-          </div>
-        </el-option>
-      </el-select>
-    </el-form-item>
+          </template>
+          <el-option
+            v-for="config in alertConfigs"
+            :key="config.id"
+            :label="config.name"
+            :value="config.id"
+            :disabled="!config.enabled"
+          >
+            <div class="flex items-center justify-between w-full py-6px">
+              <div class="flex items-center gap-12px flex-1">
+                <Icon
+                  :icon="config.enabled ? 'ep:circle-check' : 'ep:circle-close'"
+                  :class="
+                    config.enabled
+                      ? 'text-[var(--el-color-success)]'
+                      : 'text-[var(--el-color-danger)]'
+                  "
+                  class="text-16px flex-shrink-0"
+                />
+                <div class="flex-1">
+                  <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{
+                    config.name
+                  }}</div>
+                  <div class="text-12px text-[var(--el-text-color-secondary)] line-clamp-1">{{
+                    config.description
+                  }}</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-8px">
+                <el-tag :type="getNotifyTypeTag(config.notifyType)" size="small">
+                  {{ getNotifyTypeName(config.notifyType) }}
+                </el-tag>
+                <el-tag :type="config.enabled ? 'success' : 'danger'" size="small">
+                  {{ config.enabled ? '启用' : '禁用' }}
+                </el-tag>
+              </div>
+            </div>
+          </el-option>
+        </el-select>
+      </el-form-item>
+    </div>
 
     <!-- 告警配置详情 -->
     <div
       v-if="selectedConfig"
-      class="mt-16px p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]"
+      class="mt-16px border border-[var(--el-border-color-light)] rounded-6px p-16px bg-gradient-to-r from-orange-50 to-yellow-50"
     >
-      <div class="flex items-center gap-8px mb-12px">
-        <Icon icon="ep:bell" class="text-[var(--el-color-warning)] text-16px" />
-        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">{{
-          selectedConfig.name
-        }}</span>
-        <el-tag :type="selectedConfig.enabled ? 'success' : 'danger'" size="small">
-          {{ selectedConfig.enabled ? '启用' : '禁用' }}
-        </el-tag>
+      <div class="flex items-center gap-8px mb-16px">
+        <Icon icon="ep:info-filled" class="text-[var(--el-color-warning)] text-18px" />
+        <span class="text-16px font-600 text-[var(--el-text-color-primary)]">配置详情</span>
       </div>
-      <div class="space-y-8px">
-        <div class="flex items-start gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">描述：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{
-            selectedConfig.description
-          }}</span>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-16px">
+        <!-- 基本信息 -->
+        <div class="space-y-12px">
+          <div class="flex items-center gap-8px">
+            <Icon icon="ep:document" class="text-[var(--el-color-primary)] text-14px" />
+            <span class="text-14px font-500 text-[var(--el-text-color-primary)]">基本信息</span>
+          </div>
+          <div class="pl-22px space-y-8px">
+            <div class="flex items-start gap-8px">
+              <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">名称：</span>
+              <span class="text-12px text-[var(--el-text-color-primary)] flex-1 font-500">{{
+                selectedConfig.name
+              }}</span>
+            </div>
+            <div class="flex items-start gap-8px">
+              <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">描述：</span>
+              <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{
+                selectedConfig.description
+              }}</span>
+            </div>
+            <div class="flex items-start gap-8px">
+              <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">状态：</span>
+              <el-tag :type="selectedConfig.enabled ? 'success' : 'danger'" size="small">
+                {{ selectedConfig.enabled ? '启用' : '禁用' }}
+              </el-tag>
+            </div>
+          </div>
         </div>
-        <div class="flex items-start gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">通知方式：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{
-            getNotifyTypeName(selectedConfig.notifyType)
-          }}</span>
-        </div>
-        <div v-if="selectedConfig.receivers" class="flex items-start gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">接收人：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{
-            selectedConfig.receivers.join(', ')
-          }}</span>
+
+        <!-- 通知配置 -->
+        <div class="space-y-12px">
+          <div class="flex items-center gap-8px">
+            <Icon icon="ep:message" class="text-[var(--el-color-success)] text-14px" />
+            <span class="text-14px font-500 text-[var(--el-text-color-primary)]">通知配置</span>
+          </div>
+          <div class="pl-22px space-y-8px">
+            <div class="flex items-start gap-8px">
+              <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">方式：</span>
+              <el-tag :type="getNotifyTypeTag(selectedConfig.notifyType)" size="small">
+                {{ getNotifyTypeName(selectedConfig.notifyType) }}
+              </el-tag>
+            </div>
+            <div
+              v-if="selectedConfig.receivers && selectedConfig.receivers.length > 0"
+              class="flex items-start gap-8px"
+            >
+              <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px"
+                >接收人：</span
+              >
+              <div class="flex-1">
+                <div class="flex flex-wrap gap-4px">
+                  <el-tag
+                    v-for="receiver in selectedConfig.receivers.slice(0, 3)"
+                    :key="receiver"
+                    size="small"
+                    type="info"
+                  >
+                    {{ receiver }}
+                  </el-tag>
+                  <el-tag v-if="selectedConfig.receivers.length > 3" size="small" type="info">
+                    +{{ selectedConfig.receivers.length - 3 }}
+                  </el-tag>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -110,6 +190,22 @@ const getNotifyTypeName = (type: number) => {
     4: '钉钉通知'
   }
   return typeMap[type] || '未知'
+}
+
+const getNotifyTypeTag = (type: number) => {
+  const tagMap = {
+    1: 'primary', // 邮件
+    2: 'success', // 短信
+    3: 'warning', // 微信
+    4: 'info' // 钉钉
+  }
+  return tagMap[type] || 'info'
+}
+
+// 事件处理
+const handleChange = (value?: number) => {
+  // 可以在这里添加额外的处理逻辑
+  console.log('告警配置选择变化:', value)
 }
 
 // API 调用

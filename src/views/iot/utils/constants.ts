@@ -260,6 +260,66 @@ export const IotRuleSceneActionTypeEnum = {
   ALERT_RECOVER: 101 // 告警恢复
 } as const
 
+/** 执行器类型选项配置 */
+export const getActionTypeOptions = () => [
+  {
+    value: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,
+    label: '设备属性设置',
+    description: '设置目标设备的属性值',
+    icon: 'ep:edit',
+    tag: 'primary',
+    category: '设备控制'
+  },
+  {
+    value: IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE,
+    label: '设备服务调用',
+    description: '调用目标设备的服务',
+    icon: 'ep:service',
+    tag: 'success',
+    category: '设备控制'
+  },
+  {
+    value: IotRuleSceneActionTypeEnum.ALERT_TRIGGER,
+    label: '触发告警',
+    description: '触发系统告警通知',
+    icon: 'ep:warning',
+    tag: 'danger',
+    category: '告警通知'
+  },
+  {
+    value: IotRuleSceneActionTypeEnum.ALERT_RECOVER,
+    label: '恢复告警',
+    description: '恢复已触发的告警',
+    icon: 'ep:circle-check',
+    tag: 'warning',
+    category: '告警通知'
+  }
+]
+
+/** 判断是否为设备执行器类型 */
+export const isDeviceAction = (type: number): boolean => {
+  const deviceActionTypes = [
+    IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,
+    IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
+  ] as number[]
+  return deviceActionTypes.includes(type)
+}
+
+/** 判断是否为告警执行器类型 */
+export const isAlertAction = (type: number): boolean => {
+  const alertActionTypes = [
+    IotRuleSceneActionTypeEnum.ALERT_TRIGGER,
+    IotRuleSceneActionTypeEnum.ALERT_RECOVER
+  ] as number[]
+  return alertActionTypes.includes(type)
+}
+
+/** 获取执行器类型标签 */
+export const getActionTypeLabel = (type: number): string => {
+  const option = getActionTypeOptions().find((opt) => opt.value === type)
+  return option?.label || '未知类型'
+}
+
 /** IoT 设备消息类型枚举 */
 export const IotDeviceMessageTypeEnum = {
   PROPERTY: 'property', // 属性
@@ -307,17 +367,5 @@ export const IotRuleSceneTriggerTimeOperatorEnum = {
 export const getTriggerTypeLabel = (type: number): string => {
   const options = getTriggerTypeOptions()
   const option = options.find((item) => item.value === type)
-  return option?.label || '未知类型'
-}
-
-/** 获取执行器类型标签 */
-export const getActionTypeLabel = (type: number): string => {
-  const actionTypeOptions = [
-    { label: '设备属性设置', value: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET },
-    { label: '设备服务调用', value: IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE },
-    { label: '告警触发', value: IotRuleSceneActionTypeEnum.ALERT_TRIGGER },
-    { label: '告警恢复', value: IotRuleSceneActionTypeEnum.ALERT_RECOVER }
-  ]
-  const option = actionTypeOptions.find((item) => item.value === type)
   return option?.label || '未知类型'
 }
