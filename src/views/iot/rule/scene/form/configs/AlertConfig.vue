@@ -20,8 +20,12 @@
         >
           <div class="flex items-center justify-between w-full py-4px">
             <div class="flex-1">
-              <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{ config.name }}</div>
-              <div class="text-12px text-[var(--el-text-color-secondary)]">{{ config.description }}</div>
+              <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">{{
+                config.name
+              }}</div>
+              <div class="text-12px text-[var(--el-text-color-secondary)]">{{
+                config.description
+              }}</div>
             </div>
             <el-tag :type="config.enabled ? 'success' : 'danger'" size="small">
               {{ config.enabled ? '启用' : '禁用' }}
@@ -32,10 +36,15 @@
     </el-form-item>
 
     <!-- 告警配置详情 -->
-    <div v-if="selectedConfig" class="mt-16px p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]">
+    <div
+      v-if="selectedConfig"
+      class="mt-16px p-12px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]"
+    >
       <div class="flex items-center gap-8px mb-12px">
         <Icon icon="ep:bell" class="text-[var(--el-color-warning)] text-16px" />
-        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">{{ selectedConfig.name }}</span>
+        <span class="text-14px font-500 text-[var(--el-text-color-primary)]">{{
+          selectedConfig.name
+        }}</span>
         <el-tag :type="selectedConfig.enabled ? 'success' : 'danger'" size="small">
           {{ selectedConfig.enabled ? '启用' : '禁用' }}
         </el-tag>
@@ -43,27 +52,23 @@
       <div class="space-y-8px">
         <div class="flex items-start gap-8px">
           <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">描述：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedConfig.description }}</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{
+            selectedConfig.description
+          }}</span>
         </div>
         <div class="flex items-start gap-8px">
           <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">通知方式：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ getNotifyTypeName(selectedConfig.notifyType) }}</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{
+            getNotifyTypeName(selectedConfig.notifyType)
+          }}</span>
         </div>
         <div v-if="selectedConfig.receivers" class="flex items-start gap-8px">
           <span class="text-12px text-[var(--el-text-color-secondary)] min-w-60px">接收人：</span>
-          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{ selectedConfig.receivers.join(', ') }}</span>
+          <span class="text-12px text-[var(--el-text-color-primary)] flex-1">{{
+            selectedConfig.receivers.join(', ')
+          }}</span>
         </div>
       </div>
-    </div>
-
-    <!-- 验证结果 -->
-    <div v-if="validationMessage" class="mt-16px">
-      <el-alert
-        :title="validationMessage"
-        :type="isValid ? 'success' : 'error'"
-        :closable="false"
-        show-icon
-      />
     </div>
   </div>
 </template>
@@ -80,7 +85,6 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value?: number): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
 const props = defineProps<Props>()
@@ -91,8 +95,6 @@ const localValue = useVModel(props, 'modelValue', emit)
 // 状态
 const loading = ref(false)
 const alertConfigs = ref<any[]>([])
-const validationMessage = ref('')
-const isValid = ref(true)
 
 // 计算属性
 const selectedConfig = computed(() => {
@@ -108,40 +110,6 @@ const getNotifyTypeName = (type: number) => {
     4: '钉钉通知'
   }
   return typeMap[type] || '未知'
-}
-
-// 事件处理
-const handleChange = () => {
-  updateValidationResult()
-}
-
-const updateValidationResult = () => {
-  if (!localValue.value) {
-    isValid.value = false
-    validationMessage.value = '请选择告警配置'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  const config = selectedConfig.value
-  if (!config) {
-    isValid.value = false
-    validationMessage.value = '告警配置不存在'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  if (!config.enabled) {
-    isValid.value = false
-    validationMessage.value = '选择的告警配置已禁用'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  // 验证通过
-  isValid.value = true
-  validationMessage.value = '告警配置验证通过'
-  emit('validate', { valid: true, message: validationMessage.value })
 }
 
 // API 调用
@@ -184,20 +152,9 @@ const getAlertConfigs = async () => {
   }
 }
 
-// 监听值变化
-watch(
-  () => localValue.value,
-  () => {
-    updateValidationResult()
-  }
-)
-
 // 初始化
 onMounted(() => {
   getAlertConfigs()
-  if (localValue.value) {
-    updateValidationResult()
-  }
 })
 </script>
 

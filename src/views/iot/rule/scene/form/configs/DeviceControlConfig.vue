@@ -39,16 +39,6 @@
         </el-alert>
       </div>
     </div>
-
-    <!-- 验证结果 -->
-    <div v-if="validationMessage" class="mt-16px">
-      <el-alert
-        :title="validationMessage"
-        :type="isValid ? 'success' : 'error'"
-        :closable="false"
-        show-icon
-      />
-    </div>
   </div>
 </template>
 
@@ -66,21 +56,17 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: ActionFormData): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 
 const action = useVModel(props, 'modelValue', emit)
 
 // 状态
 const paramsJson = ref('')
-const validationMessage = ref('')
-const isValid = ref(true)
 
 // 事件处理
 const handleDeviceChange = ({ productId, deviceId }: { productId?: number; deviceId?: number }) => {
   action.value.productId = productId
   action.value.deviceId = deviceId
-  updateValidationResult()
 }
 
 const handleParamsChange = () => {
@@ -90,34 +76,9 @@ const handleParamsChange = () => {
     } else {
       action.value.params = {}
     }
-    updateValidationResult()
   } catch (error) {
-    isValid.value = false
-    validationMessage.value = 'JSON格式错误'
-    emit('validate', { valid: false, message: validationMessage.value })
+    console.error('JSON格式错误:', error)
   }
-}
-
-const updateValidationResult = () => {
-  // 基础验证
-  if (!action.value.productId || !action.value.deviceId) {
-    isValid.value = false
-    validationMessage.value = '请选择产品和设备'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  if (!action.value.params || Object.keys(action.value.params).length === 0) {
-    isValid.value = false
-    validationMessage.value = '请配置控制参数'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  // 验证通过
-  isValid.value = true
-  validationMessage.value = '设备控制配置验证通过'
-  emit('validate', { valid: true, message: validationMessage.value })
 }
 
 // 初始化
@@ -125,7 +86,6 @@ onMounted(() => {
   if (action.value.params) {
     paramsJson.value = JSON.stringify(action.value.params, null, 2)
   }
-  updateValidationResult()
 })
 
 // 监听参数变化

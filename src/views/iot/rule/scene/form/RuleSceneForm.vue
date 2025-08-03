@@ -12,9 +12,9 @@
       <!-- 基础信息配置 -->
       <BasicInfoSection v-model="formData" :rules="formRules" />
       <!-- 触发器配置 -->
-      <TriggerSection v-model:triggers="formData.triggers" @validate="handleTriggerValidate" />
+      <TriggerSection v-model:triggers="formData.triggers" />
       <!-- 执行器配置 -->
-      <ActionSection v-model:actions="formData.actions" @validate="handleActionValidate" />
+      <ActionSection v-model:actions="formData.actions" />
     </el-form>
     <template #footer>
       <div class="drawer-footer">
@@ -38,7 +38,11 @@ import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
 import { IotRuleSceneDO, RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
-import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
+import {
+  IotRuleSceneTriggerTypeEnum,
+  IotRuleSceneActionTypeEnum,
+  isDeviceTrigger
+} from '@/views/iot/utils/constants'
 import { ElMessage } from 'element-plus'
 import { generateUUID } from '@/utils'
 
@@ -174,6 +178,107 @@ const convertVOToForm = (apiData: IotRuleSceneDO): RuleSceneFormData => {
 // 表单数据和状态
 const formRef = ref()
 const formData = ref<RuleSceneFormData>(createDefaultFormData())
+// 自定义校验器
+const validateTriggers = (rule: any, value: any, callback: any) => {
+  if (!value || !Array.isArray(value) || value.length === 0) {
+    callback(new Error('至少需要一个触发器'))
+    return
+  }
+
+  for (let i = 0; i < value.length; i++) {
+    const trigger = value[i]
+
+    // 校验触发器类型
+    if (!trigger.type) {
+      callback(new Error(`触发器 ${i + 1}: 触发器类型不能为空`))
+      return
+    }
+
+    // 校验设备触发器
+    if (isDeviceTrigger(trigger.type)) {
+      if (!trigger.productId) {
+        callback(new Error(`触发器 ${i + 1}: 产品不能为空`))
+        return
+      }
+      if (!trigger.deviceId) {
+        callback(new Error(`触发器 ${i + 1}: 设备不能为空`))
+        return
+      }
+      if (!trigger.identifier) {
+        callback(new Error(`触发器 ${i + 1}: 物模型标识符不能为空`))
+        return
+      }
+      if (!trigger.operator) {
+        callback(new Error(`触发器 ${i + 1}: 操作符不能为空`))
+        return
+      }
+      if (trigger.value === undefined || trigger.value === null || trigger.value === '') {
+        callback(new Error(`触发器 ${i + 1}: 参数值不能为空`))
+        return
+      }
+    }
+
+    // 校验定时触发器
+    if (trigger.type === IotRuleSceneTriggerTypeEnum.TIMER) {
+      if (!trigger.cronExpression) {
+        callback(new Error(`触发器 ${i + 1}: CRON表达式不能为空`))
+        return
+      }
+    }
+  }
+
+  callback()
+}
+
+const validateActions = (rule: any, value: any, callback: any) => {
+  if (!value || !Array.isArray(value) || value.length === 0) {
+    callback(new Error('至少需要一个执行器'))
+    return
+  }
+
+  for (let i = 0; i < value.length; i++) {
+    const action = value[i]
+
+    // 校验执行器类型
+    if (!action.type) {
+      callback(new Error(`执行器 ${i + 1}: 执行器类型不能为空`))
+      return
+    }
+
+    // 校验设备控制执行器
+    if (
+      action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET ||
+      action.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
+    ) {
+      if (!action.productId) {
+        callback(new Error(`执行器 ${i + 1}: 产品不能为空`))
+        return
+      }
+      if (!action.deviceId) {
+        callback(new Error(`执行器 ${i + 1}: 设备不能为空`))
+        return
+      }
+      if (!action.params || Object.keys(action.params).length === 0) {
+        callback(new Error(`执行器 ${i + 1}: 参数配置不能为空`))
+        return
+      }
+    }
+
+    // 校验告警执行器
+    if (
+      action.type === IotRuleSceneActionTypeEnum.ALERT_TRIGGER ||
+      action.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER
+    ) {
+      if (!action.alertConfigId) {
+        callback(new Error(`执行器 ${i + 1}: 告警配置不能为空`))
+        return
+      }
+    }
+  }
+
+  callback()
+}
+
 const formRules = reactive({
   name: [
     { required: true, message: '场景名称不能为空', trigger: 'blur' },
@@ -191,35 +296,15 @@ const formRules = reactive({
   description: [
     { type: 'string', max: 200, message: '场景描述不能超过200个字符', trigger: 'blur' }
   ],
-  triggers: [
-    { required: true, message: '触发器数组不能为空', trigger: 'change' },
-    { type: 'array', min: 1, message: '至少需要一个触发器', trigger: 'change' }
-  ],
-  actions: [
-    { required: true, message: '执行器数组不能为空', trigger: 'change' },
-    { type: 'array', min: 1, message: '至少需要一个执行器', trigger: 'change' }
-  ]
+  triggers: [{ required: true, validator: validateTriggers, trigger: 'change' }],
+  actions: [{ required: true, validator: validateActions, trigger: 'change' }]
 })
 
 const submitLoading = ref(false)
 
-// 验证状态
-const triggerValidation = ref({ valid: true, message: '' })
-const actionValidation = ref({ valid: true, message: '' })
-
 // 计算属性
 const isEdit = ref(false)
 const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
-
-// TODO @puhui999：方法的注释风格统一；
-// 事件处理
-const handleTriggerValidate = (result: { valid: boolean; message: string }) => {
-  triggerValidation.value = result
-}
-
-const handleActionValidate = (result: { valid: boolean; message: string }) => {
-  actionValidation.value = result
-}
 
 /** 提交表单 */
 const handleSubmit = async () => {
@@ -227,16 +312,6 @@ const handleSubmit = async () => {
   if (!formRef.value) return
   const valid = await formRef.value.validate()
   if (!valid) return
-
-  // 验证触发器和执行器
-  if (!triggerValidation.value.valid) {
-    ElMessage.error(triggerValidation.value.message)
-    return
-  }
-  if (!actionValidation.value.valid) {
-    ElMessage.error(actionValidation.value.message)
-    return
-  }
 
   // 提交请求
   submitLoading.value = true

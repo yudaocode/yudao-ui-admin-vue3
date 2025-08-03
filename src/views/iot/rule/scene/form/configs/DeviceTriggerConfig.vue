@@ -6,7 +6,6 @@
       <MainConditionConfig
         v-model="trigger"
         :trigger-type="trigger.type"
-        @validate="handleMainConditionValidate"
         @trigger-type-change="handleTriggerTypeChange"
       />
     </div>
@@ -17,7 +16,6 @@
       <ConditionGroupContainerConfig
         v-model="trigger.conditionGroups"
         :trigger-type="trigger.type"
-        @validate="handleConditionGroupValidate"
         @remove="removeConditionGroup"
       />
     </div>
@@ -48,14 +46,6 @@ const emit = defineEmits<{
 
 const trigger = useVModel(props, 'modelValue', emit)
 
-// 验证状态
-const mainConditionValidation = ref<{ valid: boolean; message: string }>({
-  valid: true,
-  message: ''
-})
-const validationMessage = ref('')
-const isValid = ref(true)
-
 // 初始化主条件
 const initMainCondition = () => {
   // TODO @puhui999: 等到编辑回显时联调
@@ -80,76 +70,12 @@ watch(
   { immediate: true }
 )
 
-const handleMainConditionValidate = (result: { valid: boolean; message: string }) => {
-  mainConditionValidation.value = result
-  updateValidationResult()
-}
-
 const handleTriggerTypeChange = (type: number) => {
   trigger.value.type = type
   emit('trigger-type-change', type)
 }
 
-// 事件处理
-const handleConditionGroupValidate = () => {
-  updateValidationResult()
-}
-
 const removeConditionGroup = () => {
   trigger.value.conditionGroups = undefined
 }
-
-const updateValidationResult = () => {
-  // 主条件验证
-  if (!mainConditionValidation.value.valid) {
-    isValid.value = false
-    validationMessage.value = mainConditionValidation.value.message
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  // 设备状态变更不需要条件验证
-  if (trigger.value.type === TriggerTypeEnum.DEVICE_STATE_UPDATE) {
-    isValid.value = true
-    validationMessage.value = '设备触发配置验证通过'
-    emit('validate', { valid: true, message: validationMessage.value })
-    return
-  }
-
-  // 主条件验证
-  if (!trigger.value.value) {
-    isValid.value = false
-    validationMessage.value = '请配置主条件'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  // 主条件详细验证
-  if (!mainConditionValidation.value.valid) {
-    isValid.value = false
-    validationMessage.value = `主条件配置错误: ${mainConditionValidation.value.message}`
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  isValid.value = true
-  validationMessage.value = '设备触发配置验证通过'
-  emit('validate', { valid: isValid.value, message: validationMessage.value })
-}
-
-// 监听触发器类型变化
-watch(
-  () => trigger.value.type,
-  () => {
-    updateValidationResult()
-  }
-)
-
-// 监听产品设备变化
-watch(
-  () => [trigger.value.productId, trigger.value.deviceId],
-  () => {
-    updateValidationResult()
-  }
-)
 </script>

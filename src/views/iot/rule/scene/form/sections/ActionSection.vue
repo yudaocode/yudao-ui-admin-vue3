@@ -76,7 +76,6 @@
               v-if="isDeviceAction(action.type)"
               :model-value="action"
               @update:model-value="(value) => updateAction(index, value)"
-              @validate="(result) => handleActionValidate(index, result)"
             />
 
             <!-- 告警配置 -->
@@ -84,7 +83,6 @@
               v-if="isAlertAction(action.type)"
               :model-value="action.alertConfigId"
               @update:model-value="(value) => updateActionAlertConfig(index, value)"
-              @validate="(result) => handleActionValidate(index, result)"
             />
           </div>
         </div>
@@ -99,16 +97,6 @@
         <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]">
           最多可添加 {{ maxActions }} 个执行器
         </span>
-      </div>
-
-      <!-- 验证结果 -->
-      <div v-if="validationMessage" class="validation-result">
-        <el-alert
-          :title="validationMessage"
-          :type="isValid ? 'success' : 'error'"
-          :closable="false"
-          show-icon
-        />
       </div>
     </div>
   </el-card>
@@ -131,7 +119,6 @@ interface Props {
 
 interface Emits {
   (e: 'update:actions', value: ActionFormData[]): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
 const props = defineProps<Props>()
@@ -154,11 +141,6 @@ const createDefaultActionData = (): ActionFormData => {
 
 // 配置常量
 const maxActions = 5
-
-// 验证状态
-const actionValidations = ref<{ [key: number]: { valid: boolean; message: string } }>({})
-const validationMessage = ref('')
-const isValid = ref(true)
 
 // 执行器类型映射
 const actionTypeNames = {
@@ -206,21 +188,6 @@ const addAction = () => {
 
 const removeAction = (index: number) => {
   actions.value.splice(index, 1)
-  delete actionValidations.value[index]
-
-  // 重新索引验证结果
-  const newValidations: { [key: number]: { valid: boolean; message: string } } = {}
-  Object.keys(actionValidations.value).forEach((key) => {
-    const numKey = parseInt(key)
-    if (numKey > index) {
-      newValidations[numKey - 1] = actionValidations.value[numKey]
-    } else if (numKey < index) {
-      newValidations[numKey] = actionValidations.value[numKey]
-    }
-  })
-  actionValidations.value = newValidations
-
-  updateValidationResult()
 }
 
 const updateActionType = (index: number, type: number) => {
@@ -249,37 +216,4 @@ const onActionTypeChange = (action: ActionFormData, type: number) => {
     action.params = undefined
   }
 }
-
-const handleActionValidate = (index: number, result: { valid: boolean; message: string }) => {
-  actionValidations.value[index] = result
-  updateValidationResult()
-}
-
-const updateValidationResult = () => {
-  const validations = Object.values(actionValidations.value)
-  const allValid = validations.every((v) => v.valid)
-  const hasValidations = validations.length > 0
-
-  if (!hasValidations) {
-    isValid.value = true
-    validationMessage.value = ''
-  } else if (allValid) {
-    isValid.value = true
-    validationMessage.value = '所有执行器配置验证通过'
-  } else {
-    isValid.value = false
-    const errorMessages = validations.filter((v) => !v.valid).map((v) => v.message)
-    validationMessage.value = `执行器配置错误: ${errorMessages.join('; ')}`
-  }
-
-  emit('validate', { valid: isValid.value, message: validationMessage.value })
-}
-
-// 监听执行器数量变化
-watch(
-  () => actions.value.length,
-  () => {
-    updateValidationResult()
-  }
-)
 </script>
