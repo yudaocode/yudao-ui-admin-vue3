@@ -23,6 +23,14 @@ export const RuleSceneApi = {
     return await request.put({ url: `/iot/rule-scene/update`, data })
   },
 
+  // 修改场景联动
+  updateRuleSceneStatus: async (id: number, status: number) => {
+    return await request.put({ url: `/iot/rule-scene/update-status`, data: {
+      id,
+      status
+    }})
+  },
+
   // 删除场景联动
   deleteRuleScene: async (id: number) => {
     return await request.delete({ url: `/iot/rule-scene/delete?id=` + id })

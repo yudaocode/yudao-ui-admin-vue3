@@ -168,14 +168,8 @@
         <el-table-column label="触发条件" min-width="250">
           <template #default="{ row }">
             <div class="flex flex-wrap gap-4px">
-              <el-tag
-                v-for="(trigger, index) in getTriggerSummary(row)"
-                :key="index"
-                type="primary"
-                size="small"
-                class="m-0"
-              >
-                {{ trigger }}
+              <el-tag type="primary" size="small" class="m-0">
+                {{ getTriggerSummary(row) }}
               </el-tag>
             </div>
           </template>
@@ -184,14 +178,8 @@
         <el-table-column label="执行动作" min-width="250">
           <template #default="{ row }">
             <div class="flex flex-wrap gap-4px">
-              <el-tag
-                v-for="(action, index) in getActionSummary(row)"
-                :key="index"
-                type="success"
-                size="small"
-                class="m-0"
-              >
-                {{ action }}
+              <el-tag type="success" size="small" class="m-0">
+                {{ getActionSummary(row) }}
               </el-tag>
             </div>
           </template>
@@ -242,32 +230,6 @@
       />
     </el-card>
 
-    <!-- 批量操作 -->
-    <div
-      v-if="selectedRows.length > 0"
-      class="fixed bottom-20px left-1/2 transform -translate-x-1/2 z-1000"
-    >
-      <el-card shadow="always">
-        <div class="flex items-center gap-16px">
-          <span class="font-500 text-[#303133]"> 已选择 {{ selectedRows.length }} 项 </span>
-          <div class="flex gap-8px">
-            <el-button @click="handleBatchEnable">
-              <Icon icon="ep:video-play" />
-              批量启用
-            </el-button>
-            <el-button @click="handleBatchDisable">
-              <Icon icon="ep:video-pause" />
-              批量禁用
-            </el-button>
-            <el-button type="danger" @click="handleBatchDelete">
-              <Icon icon="ep:delete" />
-              批量删除
-            </el-button>
-          </div>
-        </div>
-      </el-card>
-    </div>
-
     <!-- 表单对话框 -->
     <RuleSceneForm v-model="formVisible" :rule-scene="currentRule" @success="getList" />
   </ContentWrap>
@@ -277,7 +239,7 @@
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
 import RuleSceneForm from './form/RuleSceneForm.vue'
-import { IotRuleScene } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneDO } from '@/api/iot/rule/scene/scene.types'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerTypeEnum,
@@ -293,7 +255,7 @@ defineOptions({ name: 'IoTSceneRule' })
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
-// 查询参数
+/** 查询参数 */
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -302,16 +264,16 @@ const queryParams = reactive({
 })
 
 const loading = ref(true) // 列表的加载中
-const list = ref<IotRuleScene[]>([]) // 列表的数据
+const list = ref<IotRuleSceneDO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
-const selectedRows = ref<IotRuleScene[]>([]) // 选中的行数据
+const selectedRows = ref<IotRuleSceneDO[]>([]) // 选中的行数据
 const queryFormRef = ref() // 搜索的表单
 
-// 表单状态
+/** 表单状态 */
 const formVisible = ref(false) // 是否可见
-const currentRule = ref<IotRuleScene>() // 表单数据
+const currentRule = ref<IotRuleSceneDO>() // 表单数据
 
-// 统计数据
+/** 统计数据 */
 const statistics = ref({
   total: 0,
   enabled: 0,
@@ -320,7 +282,7 @@ const statistics = ref({
 })
 
 /** 格式化 CRON 表达式显示 */
-// 注：后续可考虑将此功能移至 CRON 组件内部
+/** 注：后续可考虑将此功能移至 CRON 组件内部 */
 const formatCronExpression = (cron: string): string => {
   if (!cron) return ''
 
@@ -364,39 +326,86 @@ const formatCronExpression = (cron: string): string => {
 }
 
 /** 获取规则摘要信息 */
-const getRuleSceneSummary = (rule: IotRuleScene) => {
+const getRuleSceneSummary = (rule: IotRuleSceneDO) => {
   const triggerSummary =
-    rule.triggers?.map((trigger) => {
+    rule.triggers?.map((trigger: any) => {
+      // 构建基础描述
+      let description = ''
+
       switch (trigger.type) {
         case IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE:
-          return `设备状态变更 (${trigger.deviceNames?.length || 0}个设备)`
+          description = '设备状态变更'
+          break
         case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:
-          return `属性上报 (${trigger.deviceNames?.length || 0}个设备)`
+          description = '属性上报'
+          if (trigger.identifier) {
+            description += ` (${trigger.identifier})`
+          }
+          break
         case IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST:
-          return `事件上报 (${trigger.deviceNames?.length || 0}个设备)`
+          description = '事件上报'
+          if (trigger.identifier) {
+            description += ` (${trigger.identifier})`
+          }
+          break
         case IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE:
-          return `服务调用 (${trigger.deviceNames?.length || 0}个设备)`
+          description = '服务调用'
+          if (trigger.identifier) {
+            description += ` (${trigger.identifier})`
+          }
+          break
         case IotRuleSceneTriggerTypeEnum.TIMER:
-          return `定时触发 (${formatCronExpression(trigger.cronExpression || '')})`
+          description = `定时触发 (${formatCronExpression(trigger.cronExpression || '')})`
+          break
         default:
-          return getTriggerTypeLabel(trigger.type)
+          description = getTriggerTypeLabel(trigger.type)
       }
+
+      // 添加设备信息（如果有）
+      if (trigger.deviceId) {
+        description += ` [设备ID: ${trigger.deviceId}]`
+      } else if (trigger.productId) {
+        description += ` [产品ID: ${trigger.productId}]`
+      }
+
+      return description
     }) || []
 
   const actionSummary =
-    rule.actions?.map((action) => {
+    rule.actions?.map((action: any) => {
+      // 构建基础描述
+      let description = ''
+
       switch (action.type) {
         case IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET:
-          return `设备属性设置 (${action.deviceControl?.deviceNames?.length || 0}个设备)`
+          description = '设备属性设置'
+          break
         case IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE:
-          return `设备服务调用 (${action.deviceControl?.deviceNames?.length || 0}个设备)`
+          description = '设备服务调用'
+          break
         case IotRuleSceneActionTypeEnum.ALERT_TRIGGER:
-          return '发送告警通知'
+          description = '发送告警通知'
+          break
         case IotRuleSceneActionTypeEnum.ALERT_RECOVER:
-          return '发送邮件通知'
+          description = '发送恢复通知'
+          break
         default:
-          return getActionTypeLabel(action.type)
+          description = getActionTypeLabel(action.type)
       }
+
+      // 添加设备信息（如果有）
+      if (action.deviceId) {
+        description += ` [设备ID: ${action.deviceId}]`
+      } else if (action.productId) {
+        description += ` [产品ID: ${action.productId}]`
+      }
+
+      // 添加告警配置信息（如果有）
+      if (action.alertConfigId) {
+        description += ` [告警配置ID: ${action.alertConfigId}]`
+      }
+
+      return description
     }) || []
 
   return {
@@ -442,13 +451,13 @@ const updateStatistics = () => {
   }
 }
 
-// 获取触发器摘要
-const getTriggerSummary = (rule: IotRuleScene) => {
+/** 获取触发器摘要 */
+const getTriggerSummary = (rule: IotRuleSceneDO) => {
   return getRuleSceneSummary(rule).triggerSummary
 }
 
-// 获取执行器摘要
-const getActionSummary = (rule: IotRuleScene) => {
+/** 获取执行器摘要 */
+const getActionSummary = (rule: IotRuleSceneDO) => {
   return getRuleSceneSummary(rule).actionSummary
 }
 
@@ -472,7 +481,7 @@ const handleAdd = () => {
 }
 
 /** 修改操作 */
-const handleEdit = (row: IotRuleScene) => {
+const handleEdit = (row: IotRuleSceneDO) => {
   currentRule.value = row
   formVisible.value = true
 }
@@ -494,19 +503,16 @@ const handleDelete = async (id: number) => {
 }
 
 /** 修改状态 */
-const handleToggleStatus = async (row: IotRuleScene) => {
+const handleToggleStatus = async (row: IotRuleSceneDO) => {
   try {
     // 修改状态的二次确认
     const text = row.status === 0 ? '禁用' : '启用'
     await message.confirm('确认要' + text + '"' + row.name + '"吗?')
     // 发起修改状态
-    // 调用API更新状态 (待后端API实现)
-    // await RuleSceneApi.updateRuleSceneStatus(row.id, row.status === 0 ? 1 : 0)
-
-    // 更新本地状态
-    row.status = row.status === 0 ? 1 : 0
+    await RuleSceneApi.updateRuleSceneStatus(row.id!, row.status === 0 ? 1 : 0)
     message.success(text + '成功')
-    // 刷新统计
+    // 刷新
+    await getList()
     updateStatistics()
   } catch {
     // 取消后，进行恢复按钮
@@ -515,59 +521,11 @@ const handleToggleStatus = async (row: IotRuleScene) => {
 }
 
 /** 多选框选中数据 */
-const handleSelectionChange = (selection: IotRuleScene[]) => {
+const handleSelectionChange = (selection: IotRuleSceneDO[]) => {
   selectedRows.value = selection
 }
 
-/** 批量启用操作 */
-const handleBatchEnable = async () => {
-  try {
-    await message.confirm(`确定要启用选中的 ${selectedRows.value.length} 个规则吗？`)
-    // 这里应该调用批量启用API
-    // 批量启用API调用 (待后端API实现)
-    // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 0)
-
-    // 模拟批量启用
-    selectedRows.value.forEach((row) => {
-      row.status = 0
-    })
-    message.success('批量启用成功')
-    updateStatistics()
-  } catch {}
-}
-
-/** 批量禁用操作 */
-const handleBatchDisable = async () => {
-  try {
-    await message.confirm(`确定要禁用选中的 ${selectedRows.value.length} 个规则吗？`)
-    // 这里应该调用批量禁用API
-    // 批量禁用API调用 (待后端API实现)
-    // await RuleSceneApi.updateRuleSceneStatusBatch(selectedRows.value.map(row => row.id), 1)
-
-    // 模拟批量禁用
-    selectedRows.value.forEach((row) => {
-      row.status = 1
-    })
-    message.success('批量禁用成功')
-    updateStatistics()
-  } catch {}
-}
-
-/** 批量删除操作 */
-const handleBatchDelete = async () => {
-  try {
-    await ElMessageBox.confirm(`确定要删除选中的 ${selectedRows.value.length} 个规则吗？`, '提示', {
-      type: 'warning'
-    })
-
-    // 批量删除API调用 (待后端API实现)
-    // await RuleSceneApi.deleteRuleSceneBatch(selectedRows.value.map(row => row.id))
-    message.success('批量删除成功')
-    await getList()
-  } catch (error) {}
-}
-
-// 初始化
+/** 初始化 */
 onMounted(() => {
   getList()
 })
