@@ -20,7 +20,82 @@
       </el-col>
     </el-row>
 
-    <!-- 控制参数配置 - 只要选择了产品就显示，支持全部设备和单独设备 -->
+    <!-- 服务选择 - 服务调用类型时显示 -->
+    <div v-if="action.productId && isServiceInvokeAction" class="space-y-16px">
+      <el-form-item label="服务" required>
+        <ServiceSelector
+          v-model="action.identifier"
+          :product-id="action.productId"
+          @change="handleServiceChange"
+        />
+      </el-form-item>
+
+      <!-- 服务参数配置 -->
+      <div v-if="action.identifier" class="space-y-16px">
+        <el-form-item label="服务参数" required>
+          <div class="w-full space-y-8px">
+            <!-- JSON 输入框 -->
+            <div class="relative">
+              <el-input
+                v-model="paramsJson"
+                type="textarea"
+                :rows="6"
+                placeholder="请输入JSON格式的服务参数"
+                @input="handleParamsChange"
+                :class="{ 'is-error': jsonError }"
+              />
+              <!-- 查看详细示例按钮 -->
+              <div class="absolute top-8px right-8px">
+                <el-button
+                  ref="exampleTriggerRef"
+                  type="info"
+                  :icon="InfoFilled"
+                  circle
+                  size="small"
+                  @click="toggleExampleDetail"
+                  title="查看详细示例"
+                />
+              </div>
+            </div>
+
+            <!-- 验证状态和错误提示 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-8px">
+                <Icon
+                  :icon="jsonError ? 'ep:warning' : 'ep:circle-check'"
+                  :class="
+                    jsonError ? 'text-[var(--el-color-danger)]' : 'text-[var(--el-color-success)]'
+                  "
+                  class="text-14px"
+                />
+                <span
+                  :class="
+                    jsonError ? 'text-[var(--el-color-danger)]' : 'text-[var(--el-color-success)]'
+                  "
+                  class="text-12px"
+                >
+                  {{ jsonError || 'JSON格式正确' }}
+                </span>
+              </div>
+
+              <!-- 快速填充按钮 -->
+              <div
+                v-if="selectedService?.inputParams?.length > 0"
+                class="flex items-center gap-8px"
+              >
+                <span class="text-12px text-[var(--el-text-color-secondary)]">快速填充：</span>
+                <el-button size="small" type="primary" plain @click="fillServiceExampleJson">
+                  示例数据
+                </el-button>
+                <el-button size="small" type="default" plain @click="clearParams"> 清空 </el-button>
+              </div>
+            </div>
+          </div>
+        </el-form-item>
+      </div>
+    </div>
+
+    <!-- 控制参数配置 - 属性设置类型时显示 -->
     <div v-if="action.productId && isPropertySetAction" class="space-y-16px">
       <!-- 参数配置 -->
       <el-form-item label="参数" required>
@@ -100,8 +175,51 @@
             </div>
 
             <div class="space-y-16px">
-              <!-- 物模型属性示例 -->
-              <div v-if="thingModelProperties.length > 0">
+              <!-- 服务参数示例 - 服务调用时显示 -->
+              <div v-if="isServiceInvokeAction && selectedService?.inputParams?.length > 0">
+                <div class="flex items-center gap-8px mb-8px">
+                  <Icon icon="ep:service" class="text-[var(--el-color-success)] text-14px" />
+                  <span class="text-14px font-500 text-[var(--el-text-color-primary)]">
+                    当前服务输入参数
+                  </span>
+                </div>
+                <div class="ml-22px space-y-8px">
+                  <div
+                    v-for="param in selectedService.inputParams.slice(0, 4)"
+                    :key="param.identifier"
+                    class="flex items-center justify-between p-8px bg-[var(--el-fill-color-lighter)] rounded-4px"
+                  >
+                    <div class="flex-1">
+                      <div class="text-12px font-500 text-[var(--el-text-color-primary)]">
+                        {{ param.name }}
+                      </div>
+                      <div class="text-11px text-[var(--el-text-color-secondary)]">
+                        {{ param.identifier }}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-8px">
+                      <el-tag :type="getPropertyTypeTag(param.dataType)" size="small">
+                        {{ getPropertyTypeName(param.dataType) }}
+                      </el-tag>
+                      <span class="text-11px text-[var(--el-text-color-secondary)]">
+                        {{ getExampleValueForParam(param) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-12px ml-22px">
+                  <div class="text-12px text-[var(--el-text-color-secondary)] mb-6px">
+                    完整JSON格式：
+                  </div>
+                  <pre
+                    class="p-12px bg-[var(--el-fill-color-light)] rounded-4px text-11px text-[var(--el-text-color-primary)] overflow-x-auto border-l-3px border-[var(--el-color-success)]"
+                  ><code>{{ generateServiceExampleJson() }}</code></pre>
+                </div>
+              </div>
+
+              <!-- 物模型属性示例 - 属性设置时显示 -->
+              <div v-if="isPropertySetAction && thingModelProperties.length > 0">
                 <div class="flex items-center gap-8px mb-8px">
                   <Icon icon="ep:edit" class="text-[var(--el-color-primary)] text-14px" />
                   <span class="text-14px font-500 text-[var(--el-text-color-primary)]">
@@ -184,7 +302,8 @@ import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
-import { ActionFormData } from '@/api/iot/rule/scene/scene.types'
+import ServiceSelector from '../selectors/ServiceSelector.vue'
+import { ActionFormData, ThingModelService } from '@/api/iot/rule/scene/scene.types'
 import { IotRuleSceneActionTypeEnum } from '@/views/iot/utils/constants'
 
 /** 设备控制配置组件 */
@@ -207,6 +326,9 @@ const thingModelProperties = ref<any[]>([])
 const loadingThingModel = ref(false)
 const propertyValues = ref<Record<string, any>>({})
 
+// 服务调用相关状态
+const selectedService = ref<ThingModelService | null>(null)
+
 // 示例弹出层相关状态
 const showExampleDetail = ref(false)
 const exampleTriggerRef = ref()
@@ -218,15 +340,28 @@ const isPropertySetAction = computed(() => {
   return action.value.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
 })
 
+const isServiceInvokeAction = computed(() => {
+  return action.value.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
+})
+
 // 事件处理
 const handleProductChange = (productId?: number) => {
+  console.log('🔄 handleProductChange called:', {
+    productId,
+    currentProductId: action.value.productId
+  })
+
   // 当产品变化时，清空设备选择和参数配置
   if (action.value.productId !== productId) {
     action.value.deviceId = undefined
+    action.value.identifier = undefined // 清空服务标识符
     action.value.params = {}
     paramsJson.value = ''
     jsonError.value = ''
     propertyValues.value = {}
+    selectedService.value = null // 清空选中的服务
+
+    console.log('🧹 Cleared action data due to product change')
   }
 
   // 加载新产品的物模型属性
@@ -244,11 +379,44 @@ const handleDeviceChange = (deviceId?: number) => {
   }
 }
 
+const handleServiceChange = (serviceIdentifier?: string, service?: ThingModelService) => {
+  console.log('🔄 handleServiceChange called:', { serviceIdentifier, service: service?.name })
+
+  // 更新服务对象
+  selectedService.value = service || null
+
+  // 当服务变化时，清空参数配置并根据服务输入参数生成默认参数结构
+  action.value.params = {}
+  paramsJson.value = ''
+  jsonError.value = ''
+
+  // 如果选择了服务且有输入参数，生成默认参数结构
+  if (service && service.inputParams && service.inputParams.length > 0) {
+    const defaultParams = {}
+    service.inputParams.forEach((param) => {
+      defaultParams[param.identifier] = getDefaultValueForParam(param)
+    })
+    action.value.params = defaultParams
+    paramsJson.value = JSON.stringify(defaultParams, null, 2)
+
+    console.log('✅ Generated default params:', defaultParams)
+  }
+}
+
 // 快速填充示例数据
 const fillExampleJson = () => {
   const exampleData = generateExampleJson()
   paramsJson.value = exampleData
   handleParamsChange()
+}
+
+// 快速填充服务示例数据
+const fillServiceExampleJson = () => {
+  if (selectedService.value && selectedService.value.inputParams) {
+    const exampleData = generateServiceExampleJson()
+    paramsJson.value = exampleData
+    handleParamsChange()
+  }
 }
 
 // 清空参数
@@ -260,14 +428,14 @@ const clearParams = () => {
 }
 
 // 更新属性值（保留但不在模板中使用）
-const updatePropertyValue = (identifier: string, value: any) => {
-  propertyValues.value[identifier] = value
-  // 同步更新到 action.params
-  action.value.params = { ...propertyValues.value }
-  // 同步更新 JSON 显示
-  paramsJson.value = JSON.stringify(action.value.params, null, 2)
-  jsonError.value = ''
-}
+// const updatePropertyValue = (identifier: string, value: any) => {
+//   propertyValues.value[identifier] = value
+//   // 同步更新到 action.params
+//   action.value.params = { ...propertyValues.value }
+//   // 同步更新 JSON 显示
+//   paramsJson.value = JSON.stringify(action.value.params, null, 2)
+//   jsonError.value = ''
+// }
 
 // 加载物模型属性
 const loadThingModelProperties = async (productId: number) => {
@@ -322,6 +490,40 @@ const loadThingModelProperties = async (productId: number) => {
   }
 }
 
+// 从TSL加载服务信息
+const loadServiceFromTSL = async (productId: number, serviceIdentifier: string) => {
+  console.log('🔍 loadServiceFromTSL called:', { productId, serviceIdentifier })
+  try {
+    const { ThingModelApi } = await import('@/api/iot/thingmodel')
+    const tslData = await ThingModelApi.getThingModelTSLByProductId(productId)
+    console.log('📡 TSL data loaded:', tslData)
+
+    if (tslData?.services) {
+      const service = tslData.services.find((s: any) => s.identifier === serviceIdentifier)
+      console.log('🎯 Found service:', service)
+
+      if (service) {
+        // 设置服务对象
+        selectedService.value = service
+
+        console.log('✅ Service set:', {
+          serviceIdentifier,
+          selectedService: selectedService.value?.name
+        })
+
+        // 确保在下一个tick中更新，让ServiceSelector有时间处理
+        await nextTick()
+      } else {
+        console.warn('⚠️ Service not found in TSL')
+      }
+    } else {
+      console.warn('⚠️ No services in TSL data')
+    }
+  } catch (error) {
+    console.error('❌ 加载服务信息失败:', error)
+  }
+}
+
 const handleParamsChange = () => {
   try {
     jsonError.value = '' // 清除之前的错误
@@ -364,6 +566,29 @@ const getPropertyTypeName = (dataType: string) => {
   return typeMap[dataType] || dataType
 }
 
+// 根据参数类型获取默认值
+const getDefaultValueForParam = (param: any) => {
+  switch (param.dataType) {
+    case 'int':
+      return 0
+    case 'float':
+    case 'double':
+      return 0.0
+    case 'bool':
+      return false
+    case 'text':
+      return ''
+    case 'enum':
+      // 如果有枚举值，使用第一个
+      if (param.dataSpecs?.dataSpecsList && param.dataSpecs.dataSpecsList.length > 0) {
+        return param.dataSpecs.dataSpecsList[0].value
+      }
+      return ''
+    default:
+      return ''
+  }
+}
+
 const getPropertyTypeTag = (dataType: string) => {
   const tagMap = {
     int: 'primary',
@@ -391,6 +616,28 @@ const getExampleValue = (property: any) => {
     case 'text':
       return '"auto"'
     case 'enum':
+      return '"option1"'
+    default:
+      return '""'
+  }
+}
+
+// 获取参数示例值
+const getExampleValueForParam = (param: any) => {
+  switch (param.dataType) {
+    case 'int':
+      return '0'
+    case 'float':
+    case 'double':
+      return '0.0'
+    case 'bool':
+      return 'false'
+    case 'text':
+      return '"text"'
+    case 'enum':
+      if (param.dataSpecs?.dataSpecsList && param.dataSpecs.dataSpecsList.length > 0) {
+        return `"${param.dataSpecs.dataSpecsList[0].name}"`
+      }
       return '"option1"'
     default:
       return '""'
@@ -428,6 +675,20 @@ const generateExampleJson = () => {
       default:
         example[property.identifier] = ''
     }
+  })
+
+  return JSON.stringify(example, null, 2)
+}
+
+// 生成服务示例JSON
+const generateServiceExampleJson = () => {
+  if (!selectedService.value || !selectedService.value.inputParams) {
+    return JSON.stringify({}, null, 2)
+  }
+
+  const example = {}
+  selectedService.value.inputParams.forEach((param) => {
+    example[param.identifier] = getDefaultValueForParam(param)
   })
 
   return JSON.stringify(example, null, 2)
@@ -531,6 +792,12 @@ onMounted(() => {
     loadThingModelProperties(action.value.productId)
   }
 
+  // 如果是服务调用类型且已有标识符，初始化服务选择
+  if (action.value.productId && isServiceInvokeAction.value && action.value.identifier) {
+    // 加载物模型TSL以获取服务信息
+    loadServiceFromTSL(action.value.productId, action.value.identifier)
+  }
+
   // 添加事件监听器
   document.addEventListener('click', handleClickOutside)
   window.addEventListener('resize', handleResize)
@@ -558,9 +825,63 @@ watch(
         console.error('参数格式化失败:', error)
         jsonError.value = '参数格式化失败'
       }
+    } else {
+      // 参数为空时清空JSON显示
+      if (paramsJson.value !== '') {
+        paramsJson.value = ''
+        jsonError.value = ''
+      }
     }
   },
   { deep: true }
+)
+
+// 监听action.value变化，处理编辑模式的数据回显
+watch(
+  () => action.value,
+  async (newAction) => {
+    console.log('🔄 action.value changed:', {
+      type: newAction?.type,
+      productId: newAction?.productId,
+      identifier: newAction?.identifier,
+      isServiceInvokeAction: isServiceInvokeAction.value
+    })
+
+    if (newAction) {
+      // 处理服务调用的数据回显
+      if (isServiceInvokeAction.value && newAction.productId && newAction.identifier) {
+        // 异步加载服务信息以设置selectedService
+        await loadServiceFromTSL(newAction.productId, newAction.identifier)
+      } else if (isServiceInvokeAction.value) {
+        // 清空服务选择
+        selectedService.value = null
+      }
+
+      // 处理参数回显
+      if (newAction.params && Object.keys(newAction.params).length > 0) {
+        try {
+          const newJsonString = JSON.stringify(newAction.params, null, 2)
+          if (paramsJson.value !== newJsonString) {
+            paramsJson.value = newJsonString
+            propertyValues.value = { ...newAction.params }
+            jsonError.value = ''
+            console.log('✅ Params restored:', newAction.params)
+          }
+        } catch (error) {
+          console.error('❌ 参数格式化失败:', error)
+          jsonError.value = '参数格式化失败'
+        }
+      } else {
+        if (paramsJson.value !== '') {
+          paramsJson.value = ''
+          propertyValues.value = {}
+          jsonError.value = ''
+          console.log('🧹 Params cleared')
+        }
+      }
+    }
+  },
+  { deep: true, immediate: true }
 )
 </script>
 

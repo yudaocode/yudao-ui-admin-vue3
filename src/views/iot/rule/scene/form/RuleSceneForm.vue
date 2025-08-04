@@ -170,6 +170,15 @@ const validateActions = (_rule: any, value: any, callback: any) => {
         callback(new Error(`执行器 ${i + 1}: 设备不能为空`))
         return
       }
+
+      // 服务调用需要验证服务标识符
+      if (action.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE) {
+        if (!action.identifier) {
+          callback(new Error(`执行器 ${i + 1}: 服务不能为空`))
+          return
+        }
+      }
+
       if (!action.params || Object.keys(action.params).length === 0) {
         callback(new Error(`执行器 ${i + 1}: 参数配置不能为空`))
         return

@@ -139,6 +139,7 @@ const createDefaultActionData = (): ActionFormData => {
     type: ActionTypeEnum.DEVICE_PROPERTY_SET, // 默认为设备属性设置
     productId: undefined,
     deviceId: undefined,
+    identifier: undefined, // 物模型标识符（服务调用时使用）
     params: {},
     alertConfigId: undefined
   }
@@ -197,10 +198,15 @@ const onActionTypeChange = (action: ActionFormData, type: number) => {
     if (!action.params) {
       action.params = {}
     }
+    // 如果从其他类型切换到设备控制类型，清空identifier（让用户重新选择）
+    if (action.identifier && type !== action.type) {
+      action.identifier = undefined
+    }
   } else if (isAlertAction(type)) {
     // 告警类型：清理设备配置
     action.productId = undefined
     action.deviceId = undefined
+    action.identifier = undefined // 清理服务标识符
     action.params = undefined
   }
 
