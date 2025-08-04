@@ -226,6 +226,7 @@ interface ActionFormData {
   type: number // 执行类型
   productId?: number // 产品编号
   deviceId?: number // 设备编号
+  identifier?: string // 物模型标识符（服务调用时使用）
   params?: Record<string, any> // 请求参数
   alertConfigId?: number // 告警配置编号
 }
@@ -277,6 +278,7 @@ interface ActionDO {
   type: number // 执行类型
   productId?: number // 产品编号
   deviceId?: number // 设备编号
+  identifier?: string // 物模型标识符（服务调用时使用）
   params?: Record<string, any> // 请求参数
   alertConfigId?: number // 告警配置编号
 }

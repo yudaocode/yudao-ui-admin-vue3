@@ -1,38 +1,33 @@
 <!-- 主条件配置组件 -->
 <template>
   <div class="flex flex-col gap-16px">
-    <!-- 条件配置提示 -->
-    <div
-      v-if="!modelValue"
-      class="p-16px border-2 border-dashed border-[var(--el-border-color)] rounded-8px text-center"
-    >
-      <div class="flex flex-col items-center gap-12px">
-        <Icon icon="ep:plus" class="text-32px text-[var(--el-text-color-placeholder)]" />
-        <div class="text-[var(--el-text-color-secondary)]">
-          <p class="text-14px font-500 mb-4px">请配置主条件</p>
-          <p class="text-12px">主条件是触发器的核心条件，必须满足才能触发场景</p>
-        </div>
-        <el-button type="primary" @click="addMainCondition">
-          <Icon icon="ep:plus" />
-          添加主条件
-        </el-button>
-      </div>
-    </div>
-
     <!-- 主条件配置 -->
     <!-- TODO @puhui999：和“主条件”，是不是和“附加条件组”弄成一个风格，都是占一行；有个绿条； -->
-    <div v-else class="space-y-16px">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-8px">
-          <span class="text-14px font-500 text-[var(--el-text-color-primary)]">主条件</span>
-          <el-tag size="small" type="primary">必须满足</el-tag>
+    <div class="space-y-16px">
+      <!-- 主条件头部 - 与附加条件组保持一致的绿色风格 -->
+      <div
+        class="flex items-center justify-between p-16px bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-8px"
+      >
+        <div class="flex items-center gap-12px">
+          <div class="flex items-center gap-8px text-16px font-600 text-green-700">
+            <div
+              class="w-24px h-24px bg-green-500 text-white rounded-full flex items-center justify-center text-12px font-bold"
+            >
+              主
+            </div>
+            <span>主条件</span>
+          </div>
+          <el-tag size="small" type="success">必须满足</el-tag>
         </div>
       </div>
+
+      <!-- 主条件内容配置 -->
       <MainConditionInnerConfig
         :model-value="modelValue"
         @update:model-value="updateCondition"
         :trigger-type="triggerType"
         @validate="handleValidate"
+        @trigger-type-change="handleTriggerTypeChange"
       />
     </div>
   </div>
@@ -45,29 +40,18 @@ import { IotRuleSceneTriggerConditionTypeEnum } from '@/views/iot/utils/constant
 /** 主条件配置组件 */
 defineOptions({ name: 'MainConditionConfig' })
 
-defineProps<{
-  modelValue?: TriggerFormData
+const props = defineProps<{
+  modelValue: TriggerFormData
   triggerType: number
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value?: TriggerFormData): void
+  (e: 'update:modelValue', value: TriggerFormData): void
   (e: 'validate', result: { valid: boolean; message: string }): void
+  (e: 'trigger-type-change', type: number): void
 }>()
 
 // 事件处理
-const addMainCondition = () => {
-  const newCondition: TriggerFormData = {
-    type: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY, // 默认为设备属性
-    productId: undefined,
-    deviceId: undefined,
-    identifier: '',
-    operator: '=',
-    value: ''
-  }
-  emit('update:modelValue', newCondition)
-}
-
 const updateCondition = (condition: TriggerFormData) => {
   emit('update:modelValue', condition)
 }
@@ -76,7 +60,7 @@ const handleValidate = (result: { valid: boolean; message: string }) => {
   emit('validate', result)
 }
 
-onMounted(() => {
-  addMainCondition()
-})
+const handleTriggerTypeChange = (type: number) => {
+  emit('trigger-type-change', type)
+}
 </script>

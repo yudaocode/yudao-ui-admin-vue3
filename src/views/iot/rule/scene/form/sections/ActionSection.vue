@@ -76,7 +76,6 @@
               v-if="isDeviceAction(action.type)"
               :model-value="action"
               @update:model-value="(value) => updateAction(index, value)"
-              @validate="(result) => handleActionValidate(index, result)"
             />
 
             <!-- 告警配置 -->
@@ -84,7 +83,6 @@
               v-if="isAlertAction(action.type)"
               :model-value="action.alertConfigId"
               @update:model-value="(value) => updateActionAlertConfig(index, value)"
-              @validate="(result) => handleActionValidate(index, result)"
             />
           </div>
         </div>
@@ -100,16 +98,6 @@
           最多可添加 {{ maxActions }} 个执行器
         </span>
       </div>
-
-      <!-- 验证结果 -->
-      <div v-if="validationMessage" class="validation-result">
-        <el-alert
-          :title="validationMessage"
-          :type="isValid ? 'success' : 'error'"
-          :closable="false"
-          show-icon
-        />
-      </div>
     </div>
   </el-card>
 </template>
@@ -120,7 +108,12 @@ import ActionTypeSelector from '../selectors/ActionTypeSelector.vue'
 import DeviceControlConfig from '../configs/DeviceControlConfig.vue'
 import AlertConfig from '../configs/AlertConfig.vue'
 import { ActionFormData } from '@/api/iot/rule/scene/scene.types'
-import { IotRuleSceneActionTypeEnum as ActionTypeEnum } from '@/views/iot/utils/constants'
+import {
+  IotRuleSceneActionTypeEnum as ActionTypeEnum,
+  isDeviceAction,
+  isAlertAction,
+  getActionTypeLabel
+} from '@/views/iot/utils/constants'
 
 /** 执行器配置组件 */
 defineOptions({ name: 'ActionSection' })
@@ -131,7 +124,6 @@ interface Props {
 
 interface Emits {
   (e: 'update:actions', value: ActionFormData[]): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
 const props = defineProps<Props>()
@@ -147,6 +139,7 @@ const createDefaultActionData = (): ActionFormData => {
     type: ActionTypeEnum.DEVICE_PROPERTY_SET, // 默认为设备属性设置
     productId: undefined,
     deviceId: undefined,
+    identifier: undefined, // 物模型标识符（服务调用时使用）
     params: {},
     alertConfigId: undefined
   }
@@ -155,42 +148,18 @@ const createDefaultActionData = (): ActionFormData => {
 // 配置常量
 const maxActions = 5
 
-// 验证状态
-const actionValidations = ref<{ [key: number]: { valid: boolean; message: string } }>({})
-const validationMessage = ref('')
-const isValid = ref(true)
-
-// 执行器类型映射
-const actionTypeNames = {
-  [ActionTypeEnum.DEVICE_PROPERTY_SET]: '属性设置',
-  [ActionTypeEnum.DEVICE_SERVICE_INVOKE]: '服务调用',
-  [ActionTypeEnum.ALERT_TRIGGER]: '触发告警',
-  [ActionTypeEnum.ALERT_RECOVER]: '恢复告警'
-}
-
-const actionTypeTags = {
-  [ActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
-  [ActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
-  [ActionTypeEnum.ALERT_TRIGGER]: 'danger',
-  [ActionTypeEnum.ALERT_RECOVER]: 'warning'
-}
-
 // 工具函数
-const isDeviceAction = (type: number) => {
-  return [ActionTypeEnum.DEVICE_PROPERTY_SET, ActionTypeEnum.DEVICE_SERVICE_INVOKE].includes(
-    type as any
-  )
-}
-
-const isAlertAction = (type: number) => {
-  return [ActionTypeEnum.ALERT_TRIGGER, ActionTypeEnum.ALERT_RECOVER].includes(type as any)
-}
-
 const getActionTypeName = (type: number) => {
-  return actionTypeNames[type] || '未知类型'
+  return getActionTypeLabel(type)
 }
 
 const getActionTypeTag = (type: number) => {
+  const actionTypeTags = {
+    [ActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
+    [ActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
+    [ActionTypeEnum.ALERT_TRIGGER]: 'danger',
+    [ActionTypeEnum.ALERT_RECOVER]: 'warning'
+  }
   return actionTypeTags[type] || 'info'
 }
 
@@ -206,21 +175,6 @@ const addAction = () => {
 
 const removeAction = (index: number) => {
   actions.value.splice(index, 1)
-  delete actionValidations.value[index]
-
-  // 重新索引验证结果
-  const newValidations: { [key: number]: { valid: boolean; message: string } } = {}
-  Object.keys(actionValidations.value).forEach((key) => {
-    const numKey = parseInt(key)
-    if (numKey > index) {
-      newValidations[numKey - 1] = actionValidations.value[numKey]
-    } else if (numKey < index) {
-      newValidations[numKey] = actionValidations.value[numKey]
-    }
-  })
-  actionValidations.value = newValidations
-
-  updateValidationResult()
 }
 
 const updateActionType = (index: number, type: number) => {
@@ -237,49 +191,28 @@ const updateActionAlertConfig = (index: number, alertConfigId?: number) => {
 }
 
 const onActionTypeChange = (action: ActionFormData, type: number) => {
-  // 清理不相关的配置
+  // 清理不相关的配置，确保数据结构干净
   if (isDeviceAction(type)) {
+    // 设备控制类型：清理告警配置，确保设备参数存在
     action.alertConfigId = undefined
     if (!action.params) {
       action.params = {}
     }
+    // 如果从其他类型切换到设备控制类型，清空identifier（让用户重新选择）
+    if (action.identifier && type !== action.type) {
+      action.identifier = undefined
+    }
   } else if (isAlertAction(type)) {
+    // 告警类型：清理设备配置
     action.productId = undefined
     action.deviceId = undefined
+    action.identifier = undefined // 清理服务标识符
     action.params = undefined
   }
+
+  // 触发重新校验
+  nextTick(() => {
+    // 这里可以添加校验逻辑
+  })
 }
-
-const handleActionValidate = (index: number, result: { valid: boolean; message: string }) => {
-  actionValidations.value[index] = result
-  updateValidationResult()
-}
-
-const updateValidationResult = () => {
-  const validations = Object.values(actionValidations.value)
-  const allValid = validations.every((v) => v.valid)
-  const hasValidations = validations.length > 0
-
-  if (!hasValidations) {
-    isValid.value = true
-    validationMessage.value = ''
-  } else if (allValid) {
-    isValid.value = true
-    validationMessage.value = '所有执行器配置验证通过'
-  } else {
-    isValid.value = false
-    const errorMessages = validations.filter((v) => !v.valid).map((v) => v.message)
-    validationMessage.value = `执行器配置错误: ${errorMessages.join('; ')}`
-  }
-
-  emit('validate', { valid: isValid.value, message: validationMessage.value })
-}
-
-// 监听执行器数量变化
-watch(
-  () => actions.value.length,
-  () => {
-    updateValidationResult()
-  }
-)
 </script>
