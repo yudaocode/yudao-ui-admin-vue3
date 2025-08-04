@@ -39,7 +39,7 @@
             :class="jsonError ? 'text-[var(--el-color-danger)]' : 'text-[var(--el-color-success)]'"
             class="text-12px"
           >
-            {{ jsonError || 'JSON格式正确' }}
+            {{ jsonError || 'JSON 格式正确' }}
           </span>
         </div>
 
@@ -49,6 +49,7 @@
           <el-button size="small" type="primary" plain @click="fillExampleJson">
             示例数据
           </el-button>
+          <!-- TODO @puhui999：这里的 type 有告警 -->
           <el-button size="small" type="default" plain @click="clearParams"> 清空 </el-button>
         </div>
       </div>
@@ -89,9 +90,9 @@
                     <div class="flex-1">
                       <div class="text-12px font-500 text-[var(--el-text-color-primary)]">
                         {{ param.name }}
-                        <el-tag v-if="param.required" size="small" type="danger" class="ml-4px"
-                          >必填</el-tag
-                        >
+                        <el-tag v-if="param.required" size="small" type="danger" class="ml-4px">
+                          必填
+                        </el-tag>
                       </div>
                       <div class="text-11px text-[var(--el-text-color-secondary)]">
                         {{ param.identifier }}
@@ -110,11 +111,13 @@
 
                 <div class="mt-12px ml-22px">
                   <div class="text-12px text-[var(--el-text-color-secondary)] mb-6px">
-                    完整JSON格式：
+                    完整 JSON 格式：
                   </div>
                   <pre
                     class="p-12px bg-[var(--el-fill-color-light)] rounded-4px text-11px text-[var(--el-text-color-primary)] overflow-x-auto border-l-3px border-[var(--el-color-primary)]"
-                  ><code>{{ generateExampleJson() }}</code></pre>
+                  >
+                    <code>{{ generateExampleJson() }}</code>
+                  </pre>
                 </div>
               </div>
 
@@ -166,6 +169,8 @@ const localValue = useVModel(props, 'modelValue', emit, {
   defaultValue: ''
 })
 
+// TODO @puhui999：一些注释风格；
+
 // 状态
 const paramsJson = ref('')
 const jsonError = ref('')
@@ -192,7 +197,7 @@ const handleParamsChange = () => {
 
       // 额外的参数验证
       if (typeof parsed !== 'object' || parsed === null) {
-        jsonError.value = '参数必须是一个有效的JSON对象'
+        jsonError.value = '参数必须是一个有效的 JSON 对象'
         emit('validate', { valid: false, message: jsonError.value })
         return
       }
@@ -219,8 +224,7 @@ const handleParamsChange = () => {
 
 // 快速填充示例数据
 const fillExampleJson = () => {
-  const exampleData = generateExampleJson()
-  paramsJson.value = exampleData
+  paramsJson.value = generateExampleJson()
   handleParamsChange()
 }
 
@@ -233,6 +237,7 @@ const clearParams = () => {
 }
 
 // 工具函数
+// TODO @puhui999：这里的复用
 const getParamTypeName = (dataType: string) => {
   const typeMap = {
     int: '整数',

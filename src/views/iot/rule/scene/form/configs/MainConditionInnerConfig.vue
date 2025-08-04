@@ -1,13 +1,13 @@
 <template>
   <div class="space-y-16px">
     <!-- 触发事件类型选择 -->
+    <!-- TODO @puhui999：事件上报时，应该也是 json？ -->
     <el-form-item label="触发事件类型" required>
       <el-select
         :model-value="triggerType"
         @update:model-value="handleTriggerTypeChange"
         placeholder="请选择触发事件类型"
         class="w-full"
-        style="width: 100%"
       >
         <el-option
           v-for="option in triggerTypeOptions"

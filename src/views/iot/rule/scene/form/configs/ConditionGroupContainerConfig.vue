@@ -155,11 +155,13 @@ const addSubGroup = () => {
   }
 
   // 检查是否达到最大子组数量限制
+  // TODO @puhui999：最大的数量限制
   if (container.value?.length >= maxSubGroups) {
     return
   }
 
   // 使用 nextTick 确保响应式更新完成后再添加新的子组
+  // TODO @puhui999：这里 nextTick 要不要 await
   nextTick(() => {
     if (container.value) {
       container.value.push([])

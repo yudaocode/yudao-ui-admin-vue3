@@ -283,6 +283,7 @@ const statistics = ref({
 
 /** 格式化 CRON 表达式显示 */
 /** 注：后续可考虑将此功能移至 CRON 组件内部 */
+// TODO @puhui999：优化这个format
 const formatCronExpression = (cron: string): string => {
   if (!cron) return ''
 
@@ -418,6 +419,7 @@ const getRuleSceneSummary = (rule: IotRuleSceneDO) => {
 const getList = async () => {
   loading.value = true
   try {
+    // TODO @puhui999：这里的注释优化下；
     // 调用真实API获取数据
     const data = await RuleSceneApi.getRuleScenePage(queryParams)
     list.value = data.list
@@ -427,6 +429,7 @@ const getList = async () => {
     updateStatistics()
   } catch (error) {
     console.error('获取列表失败:', error)
+    // TODO @puhui999：这里的处理，是不是和其他模块一致哈；
     ElMessage.error('获取列表失败')
 
     // 清空列表数据
@@ -506,6 +509,7 @@ const handleDelete = async (id: number) => {
 const handleToggleStatus = async (row: IotRuleSceneDO) => {
   try {
     // 修改状态的二次确认
+    // TODO @puhui999：status 枚举；
     const text = row.status === 0 ? '禁用' : '启用'
     await message.confirm('确认要' + text + '"' + row.name + '"吗?')
     // 发起修改状态

@@ -2,6 +2,7 @@
 <template>
   <div class="w-full">
     <!-- TODO @puhui999：1）设备属性设置时，貌似没选属性；2）服务调用时，貌似也没的设置哈； -->
+    <!-- TODO @puhui999：执行器的样式风格，需要统一； -->
     <el-form-item label="执行类型" required>
       <el-select
         v-model="localValue"
@@ -62,6 +63,7 @@ const emit = defineEmits<Emits>()
 const localValue = useVModel(props, 'modelValue', emit)
 
 // 执行器类型选项
+// TODO @puhui999：我们是不是弱化 icon 和 tag；所有组件，让整体交互更简洁和一致；
 const actionTypeOptions = [
   {
     value: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,

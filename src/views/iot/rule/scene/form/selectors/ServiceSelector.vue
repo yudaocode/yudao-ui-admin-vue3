@@ -195,6 +195,7 @@ const emit = defineEmits<{
   (e: 'change', value?: string, service?: ThingModelService): void
 }>()
 
+// TODO @puhui999：这里不用的
 const localValue = useVModel(props, 'modelValue', emit)
 
 // 状态
@@ -240,6 +241,7 @@ const getCallTypeTag = (callType: string) => {
   return callType === 'sync' ? 'primary' : 'success'
 }
 
+// TODO @puhui999：一些注释风格；
 const getParamTypeName = (dataType: string) => {
   const typeMap = {
     int: '整数',

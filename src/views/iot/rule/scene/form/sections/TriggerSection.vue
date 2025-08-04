@@ -121,6 +121,7 @@ const triggers = useVModel(props, 'triggers', emit)
 const triggerTypeOptions = getTriggerTypeOptions()
 
 // 工具函数
+// TODO @puhui999：这里是不是重复了哈；
 const getTriggerTypeLabel = (type: number): string => {
   const option = triggerTypeOptions.find((opt) => opt.value === type)
   return option?.label || '未知类型'
