@@ -47,10 +47,7 @@
           />
         </el-form-item>
       </el-col>
-      <el-col
-        :span="24"
-        class="px-10px mt-[-20px] mb-[-20px]"
-      >
+      <el-col :span="24" class="px-10px mt-[-20px] mb-[-20px]">
         <el-form-item>
           <el-row justify="space-between" style="width: 100%">
             <el-col :span="6">
@@ -177,8 +174,7 @@ const permissionStore = usePermissionStore()
 const redirect = ref<string>('')
 const loginLoading = ref(false)
 const verify = ref()
-const captchaType = ref('pictureWord') // blockPuzzle 滑块 clickWord 点击文字 pictureWord 文字验证码
-// const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字 pictureWord 文字验证码
+const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字 pictureWord 文字验证码
 
 const getShow = computed(() => unref(getLoginState) === LoginStateEnum.LOGIN)
 
