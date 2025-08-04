@@ -36,74 +36,15 @@ import { useVModel } from '@vueuse/core'
 import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
-import { IotRuleScene, IotRuleSceneDO, RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotRuleSceneDO, RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerTypeEnum,
   IotRuleSceneActionTypeEnum,
-  IotDeviceMessageTypeEnum,
   isDeviceTrigger
 } from '@/views/iot/utils/constants'
 import { ElMessage } from 'element-plus'
-import { generateUUID } from '@/utils'
-
-// 导入全局的 CommonStatusEnum
-// TODO @puhui999：这里直接复用全局的哈；
-const CommonStatusEnum = {
-  ENABLE: 0, // 开启
-  DISABLE: 1 // 关闭
-} as const
-
-// 工具函数：根据触发器类型获取消息类型
-const getMessageTypeByTriggerType = (triggerType: number): string => {
-  switch (triggerType) {
-    case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:
-      return IotDeviceMessageTypeEnum.PROPERTY
-    case IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST:
-      return IotDeviceMessageTypeEnum.EVENT
-    case IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE:
-      return IotDeviceMessageTypeEnum.SERVICE
-    default:
-      return IotDeviceMessageTypeEnum.PROPERTY
-  }
-}
-
-// 工具函数：根据执行器类型获取消息类型
-const getMessageTypeByActionType = (actionType: number): string => {
-  switch (actionType) {
-    case IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET:
-      return IotDeviceMessageTypeEnum.PROPERTY
-    case IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE:
-      return IotDeviceMessageTypeEnum.SERVICE
-    default:
-      return IotDeviceMessageTypeEnum.PROPERTY
-  }
-}
-
-// 工具函数：根据执行器类型和参数获取标识符
-const getIdentifierByActionType = (actionType: number, params?: Record<string, any>): string => {
-  if (!params) return ''
-
-  switch (actionType) {
-    case IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET:
-      // 属性设置：取第一个属性名作为标识符
-      return Object.keys(params)[0] || ''
-    case IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE:
-      // 服务调用：取 method 字段作为标识符
-      return params.method || ''
-    default:
-      return ''
-  }
-}
-
-// 工具函数：判断是否为设备执行器
-const isDeviceAction = (type: number): boolean => {
-  const deviceActionTypes = [
-    IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,
-    IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
-  ] as number[]
-  return deviceActionTypes.includes(type)
-}
+import { CommonStatusEnum } from '@/utils/constants'
 
 /** IoT 场景联动规则表单 - 主表单组件 */
 defineOptions({ name: 'RuleSceneForm' })
@@ -146,111 +87,11 @@ const createDefaultFormData = (): RuleSceneFormData => {
   }
 }
 
-/**
- * 将表单数据转换为后端 API 格式
- * 转换为 IotRuleScene 格式，与后端 API 接口对齐
- */
-const convertFormToVO = (formData: RuleSceneFormData): IotRuleScene => {
-  return {
-    id: formData.id,
-    name: formData.name,
-    description: formData.description,
-    status: Number(formData.status),
-    triggers: formData.triggers.map((trigger) => ({
-      key: generateUUID(), // 为每个触发器生成唯一标识
-      type: trigger.type,
-      productKey: trigger.productId ? `product_${trigger.productId}` : undefined, // 转换为产品标识
-      deviceNames: trigger.deviceId ? [`device_${trigger.deviceId}`] : undefined, // 转换为设备名称数组
-      conditions: trigger.identifier
-        ? [
-            {
-              type: getMessageTypeByTriggerType(trigger.type),
-              identifier: trigger.identifier,
-              parameters: [
-                {
-                  identifier: trigger.identifier,
-                  operator: trigger.operator || '=',
-                  value: trigger.value || ''
-                }
-              ]
-            }
-          ]
-        : undefined,
-      cronExpression: trigger.cronExpression
-    })),
-    actions:
-      formData.actions?.map((action) => ({
-        key: generateUUID(), // 为每个执行器生成唯一标识
-        type: action.type,
-        deviceControl: isDeviceAction(action.type)
-          ? {
-              productKey: action.productId ? `product_${action.productId}` : '',
-              deviceNames: action.deviceId ? [`device_${action.deviceId}`] : [],
-              type: getMessageTypeByActionType(action.type),
-              identifier: getIdentifierByActionType(action.type, action.params),
-              params: action.params || {}
-            }
-          : undefined,
-        alertConfigId: action.alertConfigId
-      })) || []
-  }
-}
-
-// TODO @puhui999：下面好像没用到？
-/**
- * 将后端 DO 数据转换为表单格式
- * 由于数据结构已对齐，转换变得非常简单
- */
-const convertVOToForm = (apiData: IotRuleSceneDO): RuleSceneFormData => {
-  // 转换所有触发器
-  const triggers = apiData.triggers?.length
-    ? apiData.triggers.map((trigger: any) => ({
-        type: Number(trigger.type),
-        productId: trigger.productId,
-        deviceId: trigger.deviceId,
-        identifier: trigger.identifier,
-        operator: trigger.operator,
-        value: trigger.value,
-        cronExpression: trigger.cronExpression,
-        conditionGroups: trigger.conditionGroups || []
-      }))
-    : [
-        {
-          type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
-          productId: undefined,
-          deviceId: undefined,
-          identifier: undefined,
-          operator: undefined,
-          value: undefined,
-          cronExpression: undefined,
-          conditionGroups: []
-        }
-      ]
-
-  return {
-    id: apiData.id,
-    name: apiData.name,
-    description: apiData.description,
-    status: Number(apiData.status),
-    triggers,
-    actions:
-      apiData.actions?.map((action: any) => ({
-        type: Number(action.type),
-        productId: action.productId,
-        deviceId: action.deviceId,
-        params: action.params || {},
-        alertConfigId: action.alertConfigId,
-        // 为每个执行器添加唯一标识符，解决组件索引重用问题
-        key: generateUUID()
-      })) || []
-  }
-}
-
 // 表单数据和状态
 const formRef = ref()
 const formData = ref<RuleSceneFormData>(createDefaultFormData())
 // 自定义校验器
-const validateTriggers = (rule: any, value: any, callback: any) => {
+const validateTriggers = (_rule: any, value: any, callback: any) => {
   if (!value || !Array.isArray(value) || value.length === 0) {
     callback(new Error('至少需要一个触发器'))
     return
@@ -301,7 +142,7 @@ const validateTriggers = (rule: any, value: any, callback: any) => {
   callback()
 }
 
-const validateActions = (rule: any, value: any, callback: any) => {
+const validateActions = (_rule: any, value: any, callback: any) => {
   if (!value || !Array.isArray(value) || value.length === 0) {
     callback(new Error('至少需要一个执行器'))
     return
@@ -387,18 +228,17 @@ const handleSubmit = async () => {
   // 提交请求
   submitLoading.value = true
   try {
-    // 转换数据格式
-    const apiData = convertFormToVO(formData.value)
-    console.log('提交数据:', apiData)
+    // 数据结构已对齐，直接使用表单数据
+    console.log('提交数据:', formData.value)
 
     // 调用API保存数据
     if (isEdit.value) {
       // 更新场景联动规则
-      await RuleSceneApi.updateRuleScene(apiData)
+      await RuleSceneApi.updateRuleScene(formData.value)
       ElMessage.success('更新成功')
     } else {
       // 创建场景联动规则
-      await RuleSceneApi.createRuleScene(apiData)
+      await RuleSceneApi.createRuleScene(formData.value)
       ElMessage.success('创建成功')
     }
 
@@ -420,9 +260,28 @@ const handleClose = () => {
 /** 初始化表单数据 */
 const initFormData = () => {
   if (props.ruleScene) {
-    // 编辑模式：转换后端数据为表单格式
+    // 编辑模式：数据结构已对齐，直接使用后端数据
     isEdit.value = true
-    formData.value = convertVOToForm(props.ruleScene)
+    formData.value = {
+      ...props.ruleScene,
+      // 确保触发器数组不为空
+      triggers: props.ruleScene.triggers?.length
+        ? props.ruleScene.triggers
+        : [
+            {
+              type: IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST,
+              productId: undefined,
+              deviceId: undefined,
+              identifier: undefined,
+              operator: undefined,
+              value: undefined,
+              cronExpression: undefined,
+              conditionGroups: []
+            }
+          ],
+      // 确保执行器数组不为空
+      actions: props.ruleScene.actions || []
+    }
   } else {
     // 新增模式：使用默认数据
     isEdit.value = false

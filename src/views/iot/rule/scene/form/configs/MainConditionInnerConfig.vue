@@ -59,8 +59,8 @@
           </el-form-item>
         </el-col>
 
-        <!-- 操作符选择 -->
-        <el-col :span="6">
+        <!-- 操作符选择 - 服务调用不需要操作符 -->
+        <el-col v-if="triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE" :span="6">
           <el-form-item label="操作符" required>
             <OperatorSelector
               :model-value="condition.operator"
@@ -72,9 +72,26 @@
         </el-col>
 
         <!-- 值输入 -->
-        <el-col :span="12">
-          <el-form-item label="比较值" required>
+        <el-col :span="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE ? 18 : 12">
+          <el-form-item
+            :label="
+              triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
+                ? '服务参数'
+                : '比较值'
+            "
+            required
+          >
+            <!-- 服务调用参数配置 -->
+            <ServiceParamsInput
+              v-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE"
+              :model-value="condition.value"
+              @update:model-value="(value) => updateConditionField('value', value)"
+              :service-config="propertyConfig"
+              @validate="handleValueValidate"
+            />
+            <!-- 普通值输入 -->
             <ValueInput
+              v-else
               :model-value="condition.value"
               @update:model-value="(value) => updateConditionField('value', value)"
               :property-type="propertyType"
@@ -114,6 +131,7 @@ import DeviceSelector from '../selectors/DeviceSelector.vue'
 import PropertySelector from '../selectors/PropertySelector.vue'
 import OperatorSelector from '../selectors/OperatorSelector.vue'
 import ValueInput from '../inputs/ValueInput.vue'
+import ServiceParamsInput from '../inputs/ServiceParamsInput.vue'
 import DeviceStatusConditionConfig from './DeviceStatusConditionConfig.vue'
 import { TriggerFormData } from '@/api/iot/rule/scene/scene.types'
 import { IotRuleSceneTriggerTypeEnum, getTriggerTypeOptions } from '@/views/iot/utils/constants'
@@ -176,7 +194,7 @@ const triggerTypeOptions = getTriggerTypeOptions()
 
 // 事件处理
 const updateConditionField = (field: keyof TriggerFormData, value: any) => {
-  condition.value[field] = value
+  ;(condition.value as any)[field] = value
   updateValidationResult()
 }
 
@@ -214,7 +232,7 @@ const handleOperatorChange = () => {
   updateValidationResult()
 }
 
-const handleValueValidate = (result: { valid: boolean; message: string }) => {
+const handleValueValidate = (_result: { valid: boolean; message: string }) => {
   updateValidationResult()
 }
 
@@ -250,7 +268,11 @@ const updateValidationResult = () => {
       return
     }
 
-    if (!condition.value.operator) {
+    // 服务调用不需要操作符
+    if (
+      props.triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE &&
+      !condition.value.operator
+    ) {
       isValid.value = false
       validationMessage.value = '请选择操作符'
       emit('validate', { valid: false, message: validationMessage.value })
@@ -276,7 +298,10 @@ watch(
     condition.value.productId,
     condition.value.deviceId,
     condition.value.identifier,
-    condition.value.operator,
+    // 服务调用不需要监听操作符
+    props.triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
+      ? condition.value.operator
+      : null,
     condition.value.value
   ],
   () => {
