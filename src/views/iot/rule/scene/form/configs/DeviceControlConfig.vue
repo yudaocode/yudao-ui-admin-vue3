@@ -23,11 +23,29 @@
     <!-- 服务选择 - 服务调用类型时显示 -->
     <div v-if="action.productId && isServiceInvokeAction" class="space-y-16px">
       <el-form-item label="服务" required>
-        <ServiceSelector
+        <el-select
           v-model="action.identifier"
-          :product-id="action.productId"
+          placeholder="请选择服务"
+          filterable
+          clearable
+          class="w-full"
+          :loading="loadingServices"
           @change="handleServiceChange"
-        />
+        >
+          <el-option
+            v-for="service in serviceList"
+            :key="service.identifier"
+            :label="service.name"
+            :value="service.identifier"
+          >
+            <div class="flex items-center justify-between">
+              <span>{{ service.name }}</span>
+              <el-tag :type="service.callType === 'sync' ? 'primary' : 'success'" size="small">
+                {{ service.callType === 'sync' ? '同步' : '异步' }}
+              </el-tag>
+            </div>
+          </el-option>
+        </el-select>
       </el-form-item>
 
       <!-- 服务参数配置 -->
@@ -302,7 +320,6 @@ import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
-import ServiceSelector from '../selectors/ServiceSelector.vue'
 import { ActionFormData, ThingModelService } from '@/api/iot/rule/scene/scene.types'
 import { IotRuleSceneActionTypeEnum } from '@/views/iot/utils/constants'
 
@@ -319,38 +336,36 @@ const emit = defineEmits<{
 
 const action = useVModel(props, 'modelValue', emit)
 
-// 状态
-const paramsJson = ref('')
-const jsonError = ref('')
-const thingModelProperties = ref<any[]>([])
-const loadingThingModel = ref(false)
-const propertyValues = ref<Record<string, any>>({})
+const paramsJson = ref('') // 参数JSON字符串
+const jsonError = ref('') // JSON格式错误信息
+const thingModelProperties = ref<any[]>([]) // 物模型属性列表
+const loadingThingModel = ref(false) // 物模型加载状态
+const propertyValues = ref<Record<string, any>>({}) // 属性值映射
 
-// 服务调用相关状态
-const selectedService = ref<ThingModelService | null>(null)
+const selectedService = ref<ThingModelService | null>(null) // 选中的服务对象
+const serviceList = ref<ThingModelService[]>([]) // 服务列表
+const loadingServices = ref(false) // 服务加载状态
 
-// 示例弹出层相关状态
-const showExampleDetail = ref(false)
-const exampleTriggerRef = ref()
-const exampleDetailRef = ref()
-const examplePopoverStyle = ref({})
+const showExampleDetail = ref(false) // 示例详情弹出层显示状态
+const exampleTriggerRef = ref() // 示例触发按钮引用
+const exampleDetailRef = ref() // 示例详情弹出层引用
+const examplePopoverStyle = ref({}) // 示例弹出层样式
 
-// 计算属性
 const isPropertySetAction = computed(() => {
+  // 是否为属性设置类型
   return action.value.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
 })
 
 const isServiceInvokeAction = computed(() => {
+  // 是否为服务调用类型
   return action.value.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
 })
 
-// 事件处理
+/**
+ * 处理产品变化事件
+ * @param productId 产品ID
+ */
 const handleProductChange = (productId?: number) => {
-  console.log('🔄 handleProductChange called:', {
-    productId,
-    currentProductId: action.value.productId
-  })
-
   // 当产品变化时，清空设备选择和参数配置
   if (action.value.productId !== productId) {
     action.value.deviceId = undefined
@@ -360,16 +375,23 @@ const handleProductChange = (productId?: number) => {
     jsonError.value = ''
     propertyValues.value = {}
     selectedService.value = null // 清空选中的服务
-
-    console.log('🧹 Cleared action data due to product change')
+    serviceList.value = [] // 清空服务列表
   }
 
-  // 加载新产品的物模型属性
-  if (productId && isPropertySetAction.value) {
-    loadThingModelProperties(productId)
+  // 加载新产品的物模型属性或服务列表
+  if (productId) {
+    if (isPropertySetAction.value) {
+      loadThingModelProperties(productId)
+    } else if (isServiceInvokeAction.value) {
+      loadServiceList(productId)
+    }
   }
 }
 
+/**
+ * 处理设备变化事件
+ * @param deviceId 设备ID
+ */
 const handleDeviceChange = (deviceId?: number) => {
   // 当设备变化时，清空参数配置
   if (action.value.deviceId !== deviceId) {
@@ -379,11 +401,14 @@ const handleDeviceChange = (deviceId?: number) => {
   }
 }
 
-const handleServiceChange = (serviceIdentifier?: string, service?: ThingModelService) => {
-  console.log('🔄 handleServiceChange called:', { serviceIdentifier, service: service?.name })
-
-  // 更新服务对象
-  selectedService.value = service || null
+/**
+ * 处理服务变化事件
+ * @param serviceIdentifier 服务标识符
+ */
+const handleServiceChange = (serviceIdentifier?: string) => {
+  // 根据服务标识符找到对应的服务对象
+  const service = serviceList.value.find((s) => s.identifier === serviceIdentifier) || null
+  selectedService.value = service
 
   // 当服务变化时，清空参数配置并根据服务输入参数生成默认参数结构
   action.value.params = {}
@@ -398,19 +423,21 @@ const handleServiceChange = (serviceIdentifier?: string, service?: ThingModelSer
     })
     action.value.params = defaultParams
     paramsJson.value = JSON.stringify(defaultParams, null, 2)
-
-    console.log('✅ Generated default params:', defaultParams)
   }
 }
 
-// 快速填充示例数据
+/**
+ * 快速填充示例数据
+ */
 const fillExampleJson = () => {
   const exampleData = generateExampleJson()
   paramsJson.value = exampleData
   handleParamsChange()
 }
 
-// 快速填充服务示例数据
+/**
+ * 快速填充服务示例数据
+ */
 const fillServiceExampleJson = () => {
   if (selectedService.value && selectedService.value.inputParams) {
     const exampleData = generateServiceExampleJson()
@@ -419,7 +446,9 @@ const fillServiceExampleJson = () => {
   }
 }
 
-// 清空参数
+/**
+ * 清空参数
+ */
 const clearParams = () => {
   paramsJson.value = ''
   action.value.params = {}
@@ -437,7 +466,10 @@ const clearParams = () => {
 //   jsonError.value = ''
 // }
 
-// 加载物模型属性
+/**
+ * 加载物模型属性
+ * @param productId 产品ID
+ */
 const loadThingModelProperties = async (productId: number) => {
   if (!productId) {
     thingModelProperties.value = []
@@ -490,40 +522,48 @@ const loadThingModelProperties = async (productId: number) => {
   }
 }
 
-// 从TSL加载服务信息
-const loadServiceFromTSL = async (productId: number, serviceIdentifier: string) => {
-  console.log('🔍 loadServiceFromTSL called:', { productId, serviceIdentifier })
+/**
+ * 加载服务列表
+ * @param productId 产品ID
+ */
+const loadServiceList = async (productId: number) => {
+  if (!productId) {
+    serviceList.value = []
+    return
+  }
+
+  loadingServices.value = true
   try {
     const { ThingModelApi } = await import('@/api/iot/thingmodel')
     const tslData = await ThingModelApi.getThingModelTSLByProductId(productId)
-    console.log('📡 TSL data loaded:', tslData)
-
-    if (tslData?.services) {
-      const service = tslData.services.find((s: any) => s.identifier === serviceIdentifier)
-      console.log('🎯 Found service:', service)
-
-      if (service) {
-        // 设置服务对象
-        selectedService.value = service
-
-        console.log('✅ Service set:', {
-          serviceIdentifier,
-          selectedService: selectedService.value?.name
-        })
-
-        // 确保在下一个tick中更新，让ServiceSelector有时间处理
-        await nextTick()
-      } else {
-        console.warn('⚠️ Service not found in TSL')
-      }
-    } else {
-      console.warn('⚠️ No services in TSL data')
-    }
+    serviceList.value = tslData?.services || []
   } catch (error) {
-    console.error('❌ 加载服务信息失败:', error)
+    console.error('加载服务列表失败:', error)
+    serviceList.value = []
+  } finally {
+    loadingServices.value = false
   }
 }
 
+/**
+ * 从TSL加载服务信息（用于编辑模式回显）
+ * @param productId 产品ID
+ * @param serviceIdentifier 服务标识符
+ */
+const loadServiceFromTSL = async (productId: number, serviceIdentifier: string) => {
+  // 先加载服务列表
+  await loadServiceList(productId)
+
+  // 然后设置选中的服务
+  const service = serviceList.value.find((s: any) => s.identifier === serviceIdentifier)
+  if (service) {
+    selectedService.value = service
+  }
+}
+
+/**
+ * 处理参数变化事件
+ */
 const handleParamsChange = () => {
   try {
     jsonError.value = '' // 清除之前的错误
@@ -550,7 +590,11 @@ const handleParamsChange = () => {
   }
 }
 
-// 工具函数 - 参考 PropertySelector 的设计
+/**
+ * 获取属性类型名称
+ * @param dataType 数据类型
+ * @returns 类型名称
+ */
 const getPropertyTypeName = (dataType: string) => {
   const typeMap = {
     int: '整数',
@@ -566,7 +610,11 @@ const getPropertyTypeName = (dataType: string) => {
   return typeMap[dataType] || dataType
 }
 
-// 根据参数类型获取默认值
+/**
+ * 根据参数类型获取默认值
+ * @param param 参数对象
+ * @returns 默认值
+ */
 const getDefaultValueForParam = (param: any) => {
   switch (param.dataType) {
     case 'int':
@@ -589,6 +637,11 @@ const getDefaultValueForParam = (param: any) => {
   }
 }
 
+/**
+ * 获取属性类型标签样式
+ * @param dataType 数据类型
+ * @returns 标签类型
+ */
 const getPropertyTypeTag = (dataType: string) => {
   const tagMap = {
     int: 'primary',
@@ -604,6 +657,11 @@ const getPropertyTypeTag = (dataType: string) => {
   return tagMap[dataType] || 'info'
 }
 
+/**
+ * 获取属性示例值
+ * @param property 属性对象
+ * @returns 示例值
+ */
 const getExampleValue = (property: any) => {
   switch (property.dataType) {
     case 'int':
@@ -622,7 +680,11 @@ const getExampleValue = (property: any) => {
   }
 }
 
-// 获取参数示例值
+/**
+ * 获取参数示例值
+ * @param param 参数对象
+ * @returns 示例值
+ */
 const getExampleValueForParam = (param: any) => {
   switch (param.dataType) {
     case 'int':
@@ -644,6 +706,10 @@ const getExampleValueForParam = (param: any) => {
   }
 }
 
+/**
+ * 生成示例JSON
+ * @returns JSON字符串
+ */
 const generateExampleJson = () => {
   if (thingModelProperties.value.length === 0) {
     return JSON.stringify(
@@ -680,7 +746,10 @@ const generateExampleJson = () => {
   return JSON.stringify(example, null, 2)
 }
 
-// 生成服务示例JSON
+/**
+ * 生成服务示例JSON
+ * @returns JSON字符串
+ */
 const generateServiceExampleJson = () => {
   if (!selectedService.value || !selectedService.value.inputParams) {
     return JSON.stringify({}, null, 2)
@@ -694,7 +763,9 @@ const generateServiceExampleJson = () => {
   return JSON.stringify(example, null, 2)
 }
 
-// 示例弹出层控制方法 - 参考 PropertySelector 的设计
+/**
+ * 切换示例详情弹出层显示状态
+ */
 const toggleExampleDetail = () => {
   if (showExampleDetail.value) {
     hideExampleDetail()
@@ -703,6 +774,9 @@ const toggleExampleDetail = () => {
   }
 }
 
+/**
+ * 显示示例详情弹出层
+ */
 const showExampleDetailPopover = () => {
   if (!exampleTriggerRef.value) return
 
@@ -713,10 +787,16 @@ const showExampleDetailPopover = () => {
   })
 }
 
+/**
+ * 隐藏示例详情弹出层
+ */
 const hideExampleDetail = () => {
   showExampleDetail.value = false
 }
 
+/**
+ * 更新示例弹出层位置
+ */
 const updateExamplePopoverPosition = () => {
   if (!exampleTriggerRef.value || !exampleDetailRef.value) return
 
@@ -754,7 +834,10 @@ const updateExamplePopoverPosition = () => {
   }
 }
 
-// 点击外部关闭弹出层
+/**
+ * 点击外部关闭弹出层
+ * @param event 鼠标事件
+ */
 const handleClickOutside = (event: MouseEvent) => {
   if (
     showExampleDetail.value &&
@@ -767,14 +850,18 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 }
 
-// 监听窗口大小变化，重新计算弹出层位置
+/**
+ * 监听窗口大小变化，重新计算弹出层位置
+ */
 const handleResize = () => {
   if (showExampleDetail.value) {
     updateExamplePopoverPosition()
   }
 }
 
-// 初始化
+/**
+ * 组件初始化
+ */
 onMounted(() => {
   if (action.value.params && Object.keys(action.value.params).length > 0) {
     try {
@@ -803,7 +890,9 @@ onMounted(() => {
   window.addEventListener('resize', handleResize)
 })
 
-// 组件卸载时清理事件监听器
+/**
+ * 组件卸载时清理事件监听器
+ */
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   window.removeEventListener('resize', handleResize)
@@ -840,21 +929,20 @@ watch(
 watch(
   () => action.value,
   async (newAction) => {
-    console.log('🔄 action.value changed:', {
-      type: newAction?.type,
-      productId: newAction?.productId,
-      identifier: newAction?.identifier,
-      isServiceInvokeAction: isServiceInvokeAction.value
-    })
-
     if (newAction) {
       // 处理服务调用的数据回显
-      if (isServiceInvokeAction.value && newAction.productId && newAction.identifier) {
-        // 异步加载服务信息以设置selectedService
-        await loadServiceFromTSL(newAction.productId, newAction.identifier)
+      if (isServiceInvokeAction.value && newAction.productId) {
+        if (newAction.identifier) {
+          // 编辑模式：加载服务信息并设置选中的服务
+          await loadServiceFromTSL(newAction.productId, newAction.identifier)
+        } else {
+          // 新建模式：只加载服务列表
+          await loadServiceList(newAction.productId)
+        }
       } else if (isServiceInvokeAction.value) {
         // 清空服务选择
         selectedService.value = null
+        serviceList.value = []
       }
 
       // 处理参数回显
@@ -865,10 +953,9 @@ watch(
             paramsJson.value = newJsonString
             propertyValues.value = { ...newAction.params }
             jsonError.value = ''
-            console.log('✅ Params restored:', newAction.params)
           }
         } catch (error) {
-          console.error('❌ 参数格式化失败:', error)
+          console.error('参数格式化失败:', error)
           jsonError.value = '参数格式化失败'
         }
       } else {
@@ -876,7 +963,6 @@ watch(
           paramsJson.value = ''
           propertyValues.value = {}
           jsonError.value = ''
-          console.log('🧹 Params cleared')
         }
       }
     }

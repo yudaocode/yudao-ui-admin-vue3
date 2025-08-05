@@ -209,6 +209,10 @@ const servicePopoverStyle = ref({})
 
 // 事件处理
 const handleChange = (value?: string) => {
+  // 更新 modelValue（这是 v-model 绑定的关键）
+  emit('update:modelValue', value)
+
+  // 触发 change 事件，传递服务对象
   const service = serviceList.value.find((s) => s.identifier === value)
   emit('change', value, service)
 }
@@ -336,22 +340,11 @@ watch(
 watch(
   () => props.modelValue,
   (newValue) => {
-    console.log('🔄 ServiceSelector modelValue changed:', {
-      newValue,
-      serviceListLength: serviceList.value.length,
-      serviceList: serviceList.value.map((s) => s.identifier)
-    })
-
     if (newValue && serviceList.value.length > 0) {
       // 确保服务列表已加载，然后设置选中的服务
       const service = serviceList.value.find((s) => s.identifier === newValue)
-      console.log('🎯 ServiceSelector found service:', service)
-
       if (service) {
         selectedService.value = service
-        console.log('✅ ServiceSelector service set:', service.name)
-      } else {
-        console.warn('⚠️ ServiceSelector service not found for identifier:', newValue)
       }
     }
   },
@@ -362,20 +355,11 @@ watch(
 watch(
   () => serviceList.value,
   (newServiceList) => {
-    console.log('📋 ServiceSelector serviceList changed:', {
-      length: newServiceList.length,
-      services: newServiceList.map((s) => s.identifier),
-      modelValue: props.modelValue
-    })
-
     if (newServiceList.length > 0 && props.modelValue) {
       // 服务列表加载完成后，如果有modelValue，设置选中的服务
       const service = newServiceList.find((s) => s.identifier === props.modelValue)
-      console.log('🎯 ServiceSelector found service in list:', service)
-
       if (service) {
         selectedService.value = service
-        console.log('✅ ServiceSelector service set from list:', service.name)
       }
     }
   },
