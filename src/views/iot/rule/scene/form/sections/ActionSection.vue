@@ -78,12 +78,27 @@
               @update:model-value="(value) => updateAction(index, value)"
             />
 
-            <!-- 告警配置 -->
+            <!-- 告警配置 - 只有恢复告警时才显示 -->
             <AlertConfig
-              v-if="isAlertAction(action.type)"
+              v-if="action.type === ActionTypeEnum.ALERT_RECOVER"
               :model-value="action.alertConfigId"
               @update:model-value="(value) => updateActionAlertConfig(index, value)"
             />
+
+            <!-- 触发告警提示 - 触发告警时显示 -->
+            <div
+              v-if="action.type === ActionTypeEnum.ALERT_TRIGGER"
+              class="border border-[var(--el-border-color-light)] rounded-6px p-16px bg-[var(--el-fill-color-blank)]"
+            >
+              <div class="flex items-center gap-8px mb-8px">
+                <Icon icon="ep:warning" class="text-[var(--el-color-warning)] text-16px" />
+                <span class="text-14px font-600 text-[var(--el-text-color-primary)]">触发告警</span>
+                <el-tag size="small" type="warning">自动执行</el-tag>
+              </div>
+              <div class="text-12px text-[var(--el-text-color-secondary)] leading-relaxed">
+                当触发条件满足时，系统将自动发送告警通知，无需额外配置。
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -107,7 +122,7 @@ import { useVModel } from '@vueuse/core'
 import ActionTypeSelector from '../selectors/ActionTypeSelector.vue'
 import DeviceControlConfig from '../configs/DeviceControlConfig.vue'
 import AlertConfig from '../configs/AlertConfig.vue'
-import { ActionFormData } from '@/api/iot/rule/scene/scene.types'
+import { Action } from '@/api/iot/rule/scene/scene.types'
 import {
   IotRuleSceneActionTypeEnum as ActionTypeEnum,
   isDeviceAction,
@@ -118,23 +133,20 @@ import {
 /** 执行器配置组件 */
 defineOptions({ name: 'ActionSection' })
 
-interface Props {
-  actions: ActionFormData[]
-}
+const props = defineProps<{
+  actions: Action[]
+}>()
 
-interface Emits {
-  (e: 'update:actions', value: ActionFormData[]): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const emit = defineEmits<{
+  (e: 'update:actions', value: Action[]): void
+}>()
 
 const actions = useVModel(props, 'actions', emit)
 
 /**
  * 创建默认的执行器数据
  */
-const createDefaultActionData = (): ActionFormData => {
+const createDefaultActionData = (): Action => {
   return {
     type: ActionTypeEnum.DEVICE_PROPERTY_SET, // 默认为设备属性设置
     productId: undefined,
@@ -145,9 +157,7 @@ const createDefaultActionData = (): ActionFormData => {
   }
 }
 
-// 配置常量
-// TODO @puhui999：去掉最大；注释风格改下；
-const maxActions = 5
+const maxActions = 5 // 最大执行器数量
 
 // 工具函数
 const getActionTypeName = (type: number) => {
@@ -164,7 +174,7 @@ const getActionTypeTag = (type: number) => {
   return actionTypeTags[type] || 'info'
 }
 
-// 事件处理
+/** 添加执行器 */
 const addAction = () => {
   if (actions.value.length >= maxActions) {
     return
@@ -174,24 +184,29 @@ const addAction = () => {
   actions.value.push(newAction)
 }
 
+/** 删除执行器 */
 const removeAction = (index: number) => {
   actions.value.splice(index, 1)
 }
 
+/** 更新执行器类型 */
 const updateActionType = (index: number, type: number) => {
   actions.value[index].type = type
   onActionTypeChange(actions.value[index], type)
 }
 
-const updateAction = (index: number, action: ActionFormData) => {
+/** 更新执行器 */
+const updateAction = (index: number, action: Action) => {
   actions.value[index] = action
 }
 
+/** 更新告警配置 */
 const updateActionAlertConfig = (index: number, alertConfigId?: number) => {
   actions.value[index].alertConfigId = alertConfigId
 }
 
-const onActionTypeChange = (action: ActionFormData, type: number) => {
+/** 监听执行器类型变化 */
+const onActionTypeChange = (action: Action, type: number) => {
   // 清理不相关的配置，确保数据结构干净
   if (isDeviceAction(type)) {
     // 设备控制类型：清理告警配置，确保设备参数存在
@@ -204,16 +219,11 @@ const onActionTypeChange = (action: ActionFormData, type: number) => {
       action.identifier = undefined
     }
   } else if (isAlertAction(type)) {
-    // 告警类型：清理设备配置
     action.productId = undefined
     action.deviceId = undefined
     action.identifier = undefined // 清理服务标识符
     action.params = undefined
+    action.alertConfigId = undefined
   }
-
-  // 触发重新校验
-  nextTick(() => {
-    // 这里可以添加校验逻辑
-  })
 }
 </script>

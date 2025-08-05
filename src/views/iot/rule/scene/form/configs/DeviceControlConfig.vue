@@ -320,18 +320,18 @@ import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
-import { ActionFormData, ThingModelService } from '@/api/iot/rule/scene/scene.types'
+import { Action, ThingModelService } from '@/api/iot/rule/scene/scene.types'
 import { IotRuleSceneActionTypeEnum } from '@/views/iot/utils/constants'
 
 /** 设备控制配置组件 */
 defineOptions({ name: 'DeviceControlConfig' })
 
 const props = defineProps<{
-  modelValue: ActionFormData
+  modelValue: Action
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: ActionFormData): void
+  (e: 'update:modelValue', value: Action): void
 }>()
 
 const action = useVModel(props, 'modelValue', emit)

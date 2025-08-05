@@ -36,7 +36,7 @@ import { useVModel } from '@vueuse/core'
 import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
-import { IotRuleSceneDO, RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotSceneRule } from '@/api/iot/rule/scene/scene.types'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerTypeEnum,
@@ -54,7 +54,7 @@ const props = defineProps<{
   /** 抽屉显示状态 */
   modelValue: boolean
   /** 编辑的场景联动规则数据 */
-  ruleScene?: IotRuleSceneDO
+  ruleScene?: IotSceneRule
 }>()
 
 /** 组件事件定义 */
@@ -66,7 +66,7 @@ const emit = defineEmits<{
 const drawerVisible = useVModel(props, 'modelValue', emit) // 是否可见
 
 /** 创建默认的表单数据 */
-const createDefaultFormData = (): RuleSceneFormData => {
+const createDefaultFormData = (): IotSceneRule => {
   return {
     name: '',
     description: '',
@@ -89,7 +89,7 @@ const createDefaultFormData = (): RuleSceneFormData => {
 
 // 表单数据和状态
 const formRef = ref()
-const formData = ref<RuleSceneFormData>(createDefaultFormData())
+const formData = ref<IotSceneRule>(createDefaultFormData())
 // 自定义校验器
 const validateTriggers = (_rule: any, value: any, callback: any) => {
   if (!value || !Array.isArray(value) || value.length === 0) {
