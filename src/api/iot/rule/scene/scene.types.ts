@@ -194,6 +194,9 @@ interface FormValidationRules {
   [key: string]: ValidationRule[]
 }
 
+// 表单数据类型别名
+export type TriggerFormData = Trigger
+
 // TODO @puhui999：这个文件，目标最终没有哈，和别的模块一致；
 
 export { IotSceneRule, Trigger, TriggerCondition, Action, ValidationRule, FormValidationRules }

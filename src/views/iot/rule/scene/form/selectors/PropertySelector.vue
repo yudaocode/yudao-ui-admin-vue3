@@ -286,7 +286,6 @@ const handleChange = (value: string) => {
       config: property
     })
   }
-  // 选择变化时，el-popover 会自动关闭
 }
 
 // 获取物模型TSL数据

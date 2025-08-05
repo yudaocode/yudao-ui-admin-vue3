@@ -82,11 +82,23 @@
             required
           >
             <!-- 服务调用参数配置 -->
-            <ServiceParamsInput
+            <JsonParamsInput
               v-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE"
               :model-value="condition.value"
               @update:model-value="(value) => updateConditionField('value', value)"
-              :service-config="propertyConfig"
+              type="service"
+              :config="{ service: propertyConfig }"
+              placeholder="请输入JSON格式的服务参数"
+              @validate="handleValueValidate"
+            />
+            <!-- 事件上报参数配置 -->
+            <JsonParamsInput
+              v-else-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST"
+              :model-value="condition.value"
+              @update:model-value="(value) => updateConditionField('value', value)"
+              type="event"
+              :config="{ event: propertyConfig }"
+              placeholder="请输入JSON格式的事件参数"
               @validate="handleValueValidate"
             />
             <!-- 普通值输入 -->
@@ -106,11 +118,44 @@
 
     <!-- 设备状态条件配置 -->
     <div v-else-if="isDeviceStatusTrigger" class="space-y-16px">
-      <DeviceStatusConditionConfig
-        :model-value="condition"
-        @update:model-value="updateCondition"
-        @validate="handleValidate"
-      />
+      <!-- 设备状态触发器使用简化的配置 -->
+      <el-row :gutter="16">
+        <el-col :span="12">
+          <el-form-item label="产品" required>
+            <ProductSelector
+              :model-value="condition.productId"
+              @update:model-value="(value) => updateConditionField('productId', value)"
+              @change="handleProductChange"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="设备" required>
+            <DeviceSelector
+              :model-value="condition.deviceId"
+              @update:model-value="(value) => updateConditionField('deviceId', value)"
+              :product-id="condition.productId"
+              @change="handleDeviceChange"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="16">
+        <el-col :span="12">
+          <el-form-item label="操作符" required>
+            <el-select
+              :model-value="condition.operator"
+              @update:model-value="(value) => updateConditionField('operator', value)"
+              placeholder="请选择操作符"
+              class="w-full"
+            >
+              <el-option label="变为在线" value="online" />
+              <el-option label="变为离线" value="offline" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </div>
 
     <!-- 其他触发类型的提示 -->
@@ -131,8 +176,8 @@ import DeviceSelector from '../selectors/DeviceSelector.vue'
 import PropertySelector from '../selectors/PropertySelector.vue'
 import OperatorSelector from '../selectors/OperatorSelector.vue'
 import ValueInput from '../inputs/ValueInput.vue'
-import ServiceParamsInput from '../inputs/ServiceParamsInput.vue'
-import DeviceStatusConditionConfig from './DeviceStatusConditionConfig.vue'
+import JsonParamsInput from '../inputs/JsonParamsInput.vue'
+
 import { TriggerFormData } from '@/api/iot/rule/scene/scene.types'
 import { IotRuleSceneTriggerTypeEnum, getTriggerTypeOptions } from '@/views/iot/utils/constants'
 import { useVModel } from '@vueuse/core'
@@ -198,11 +243,6 @@ const updateConditionField = (field: keyof TriggerFormData, value: any) => {
   updateValidationResult()
 }
 
-const updateCondition = (value: TriggerFormData) => {
-  emit('update:modelValue', value)
-  updateValidationResult()
-}
-
 const handleTriggerTypeChange = (type: number) => {
   emit('trigger-type-change', type)
 }
@@ -232,14 +272,12 @@ const handleOperatorChange = () => {
   updateValidationResult()
 }
 
-const handleValueValidate = (_result: { valid: boolean; message: string }) => {
-  updateValidationResult()
-}
-
-const handleValidate = (result: { valid: boolean; message: string }) => {
+// 处理参数验证结果
+const handleValueValidate = (result: { valid: boolean; message: string }) => {
   isValid.value = result.valid
   validationMessage.value = result.message
   emit('validate', result)
+  updateValidationResult()
 }
 
 // 验证逻辑
