@@ -97,7 +97,7 @@
             <!-- 服务调用参数配置 -->
             <JsonParamsInput
               v-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE"
-              v-model="conditionValueAsString"
+              v-model="condition.value"
               type="service"
               :config="serviceConfig"
               placeholder="请输入JSON格式的服务参数"
@@ -106,7 +106,7 @@
             <!-- 事件上报参数配置 -->
             <JsonParamsInput
               v-else-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST"
-              v-model="conditionValueAsString"
+              v-model="condition.value"
               type="event"
               :config="eventConfig"
               placeholder="请输入JSON格式的事件参数"
@@ -255,23 +255,6 @@ const eventConfig = computed(() => {
     }
   }
   return undefined
-})
-
-// 确保传递给 JsonParamsInput 的值始终是字符串类型
-const conditionValueAsString = computed({
-  get: () => {
-    const value = condition.value.value
-    if (value === null || value === undefined) {
-      return ''
-    }
-    if (typeof value === 'object') {
-      return JSON.stringify(value, null, 2)
-    }
-    return String(value)
-  },
-  set: (newValue: string) => {
-    condition.value.value = newValue
-  }
 })
 
 // 获取触发类型文本

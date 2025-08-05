@@ -189,12 +189,15 @@ const jsonError = ref('')
 
 // 计算属性
 const hasConfig = computed(() => {
-  return !!(
-    props.config?.service ||
-    props.config?.event ||
-    props.config?.properties ||
-    props.config?.custom
-  )
+  // TODO @puhui999: 后续统一处理
+  console.log(props.config)
+  // return !!(
+  //   props.config?.service ||
+  //   props.config?.event ||
+  //   props.config?.properties ||
+  //   props.config?.custom
+  // )
+  return true
 })
 
 const paramsList = computed(() => {
@@ -440,43 +443,25 @@ const generateExampleJson = () => {
   return JSON.stringify(example, null, 2)
 }
 
-// 初始化标志，防止重复初始化
-const isInitialized = ref(false)
-
-// 初始化数据
-const initializeData = () => {
-  if (isInitialized.value) return
-
-  if (localValue.value) {
-    try {
-      // modelValue 已经是字符串类型，直接使用
-      if (localValue.value.trim()) {
-        try {
-          // 尝试解析JSON，如果成功则格式化
-          const parsed = JSON.parse(localValue.value)
-          paramsJson.value = JSON.stringify(parsed, null, 2)
-        } catch {
-          // 如果不是有效的JSON，直接使用原字符串
-          paramsJson.value = localValue.value
-        }
-      } else {
-        paramsJson.value = ''
-      }
-
-      jsonError.value = ''
-    } catch (error) {
-      console.error('初始化参数失败:', error)
-      jsonError.value = '初始参数格式错误'
-    }
+// 处理数据回显的函数
+const handleDataDisplay = (value: string) => {
+  if (!value || !value.trim()) {
+    paramsJson.value = ''
+    jsonError.value = ''
+    return
   }
 
-  isInitialized.value = true
+  try {
+    // 尝试解析JSON，如果成功则格式化
+    const parsed = JSON.parse(value)
+    paramsJson.value = JSON.stringify(parsed, null, 2)
+    jsonError.value = ''
+  } catch {
+    // 如果不是有效的JSON，直接使用原字符串
+    paramsJson.value = value
+    jsonError.value = ''
+  }
 }
-
-// 组件挂载时初始化
-onMounted(() => {
-  initializeData()
-})
 
 // 监听外部值变化（编辑模式数据回显）
 watch(
@@ -485,32 +470,22 @@ watch(
     // 避免循环更新
     if (newValue === oldValue) return
 
-    try {
-      let newJsonString = ''
-
-      if (newValue && newValue.trim()) {
-        try {
-          // 尝试解析JSON，如果成功则格式化
-          const parsed = JSON.parse(newValue)
-          newJsonString = JSON.stringify(parsed, null, 2)
-        } catch {
-          // 如果不是有效的JSON，直接使用原字符串
-          newJsonString = newValue
-        }
-      }
-
-      // 只有当JSON字符串真正改变时才更新
-      if (newJsonString !== paramsJson.value) {
-        paramsJson.value = newJsonString
-        jsonError.value = ''
-      }
-    } catch (error) {
-      console.error('数据回显失败:', error)
-      jsonError.value = '数据格式错误'
-    }
+    // 使用 nextTick 确保在下一个 tick 中处理数据
+    nextTick(() => {
+      handleDataDisplay(newValue || '')
+    })
   },
   { immediate: true }
 )
+
+// 组件挂载后也尝试处理一次数据回显
+onMounted(() => {
+  nextTick(() => {
+    if (localValue.value) {
+      handleDataDisplay(localValue.value)
+    }
+  })
+})
 
 // 监听配置变化
 watch(
