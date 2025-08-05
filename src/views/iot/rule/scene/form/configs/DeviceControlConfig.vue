@@ -82,8 +82,12 @@ import { useVModel } from '@vueuse/core'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
 import JsonParamsInput from '../inputs/JsonParamsInput.vue'
-import { Action, ThingModelService } from '@/api/iot/rule/scene/scene.types'
-import { IotRuleSceneActionTypeEnum } from '@/views/iot/utils/constants'
+import { Action, ThingModelProperty, ThingModelService } from '@/api/iot/rule/scene/scene.types'
+import {
+  IotRuleSceneActionTypeEnum,
+  IoTThingModelAccessModeEnum
+} from '@/views/iot/utils/constants'
+import { ThingModelApi } from '@/api/iot/thingmodel'
 
 /** 设备控制配置组件 */
 defineOptions({ name: 'DeviceControlConfig' })
@@ -99,7 +103,7 @@ const emit = defineEmits<{
 const action = useVModel(props, 'modelValue', emit)
 
 // 简化后的状态变量
-const thingModelProperties = ref<any[]>([]) // 物模型属性列表
+const thingModelProperties = ref<ThingModelProperty[]>([]) // 物模型属性列表
 const loadingThingModel = ref(false) // 物模型加载状态
 const selectedService = ref<ThingModelService | null>(null) // 选中的服务对象
 const serviceList = ref<ThingModelService[]>([]) // 服务列表
@@ -108,21 +112,16 @@ const loadingServices = ref(false) // 服务加载状态
 // 参数值的计算属性，用于双向绑定
 const paramsValue = computed({
   get: () => {
+    // 如果 params 是对象，转换为 JSON 字符串（兼容旧数据）
     if (action.value.params && typeof action.value.params === 'object') {
       return JSON.stringify(action.value.params, null, 2)
     }
-    return ''
+    // 如果 params 已经是字符串，直接返回
+    return action.value.params || ''
   },
   set: (value: string) => {
-    try {
-      if (value.trim()) {
-        action.value.params = JSON.parse(value)
-      } else {
-        action.value.params = {}
-      }
-    } catch (error) {
-      console.error('JSON解析错误:', error)
-    }
+    // 直接保存为 JSON 字符串，不进行解析转换
+    action.value.params = value.trim() || ''
   }
 })
 
@@ -151,7 +150,7 @@ const handleProductChange = (productId?: number) => {
   if (action.value.productId !== productId) {
     action.value.deviceId = undefined
     action.value.identifier = undefined // 清空服务标识符
-    action.value.params = {}
+    action.value.params = '' // 清空参数，保存为空字符串
     selectedService.value = null // 清空选中的服务
     serviceList.value = [] // 清空服务列表
   }
@@ -173,7 +172,7 @@ const handleProductChange = (productId?: number) => {
 const handleDeviceChange = (deviceId?: number) => {
   // 当设备变化时，清空参数配置
   if (action.value.deviceId !== deviceId) {
-    action.value.params = {}
+    action.value.params = '' // 清空参数，保存为空字符串
   }
 }
 
@@ -187,7 +186,7 @@ const handleServiceChange = (serviceIdentifier?: string) => {
   selectedService.value = service
 
   // 当服务变化时，清空参数配置
-  action.value.params = {}
+  action.value.params = ''
 
   // 如果选择了服务且有输入参数，生成默认参数结构
   if (service && service.inputParams && service.inputParams.length > 0) {
@@ -195,12 +194,29 @@ const handleServiceChange = (serviceIdentifier?: string) => {
     service.inputParams.forEach((param) => {
       defaultParams[param.identifier] = getDefaultValueForParam(param)
     })
-    action.value.params = defaultParams
+    // 将默认参数转换为 JSON 字符串保存
+    action.value.params = JSON.stringify(defaultParams, null, 2)
   }
 }
 
 /**
- * 加载物模型属性
+ * 获取物模型TSL数据
+ * @param productId 产品ID
+ * @returns 物模型TSL数据
+ */
+const getThingModelTSL = async (productId: number) => {
+  if (!productId) return null
+
+  try {
+    return await ThingModelApi.getThingModelTSLByProductId(productId)
+  } catch (error) {
+    console.error('获取物模型TSL数据失败:', error)
+    return null
+  }
+}
+
+/**
+ * 加载物模型属性（可写属性）
  * @param productId 产品ID
  */
 const loadThingModelProperties = async (productId: number) => {
@@ -211,39 +227,22 @@ const loadThingModelProperties = async (productId: number) => {
 
   try {
     loadingThingModel.value = true
-    // TODO: 这里需要调用实际的物模型API
-    // const response = await ProductApi.getThingModel(productId)
-    // 暂时使用模拟数据
-    thingModelProperties.value = [
-      {
-        identifier: 'BatteryLevel',
-        name: '电池电量',
-        dataType: 'int',
-        description: '设备电池电量百分比'
-      },
-      {
-        identifier: 'WaterLeachState',
-        name: '漏水状态',
-        dataType: 'bool',
-        description: '设备漏水检测状态'
-      },
-      {
-        identifier: 'Temperature',
-        name: '温度',
-        dataType: 'float',
-        description: '环境温度值'
-      },
-      {
-        identifier: 'Humidity',
-        name: '湿度',
-        dataType: 'float',
-        description: '环境湿度值'
-      }
-    ]
+    const tslData = await getThingModelTSL(productId)
 
-    // 属性加载完成，无需额外初始化
+    if (!tslData?.properties) {
+      thingModelProperties.value = []
+      return
+    }
+
+    // 过滤出可写的属性（accessMode 包含 'w'）
+    thingModelProperties.value = tslData.properties.filter(
+      (property: ThingModelProperty) =>
+        property.accessMode &&
+        (property.accessMode === IoTThingModelAccessModeEnum.READ_WRITE.value ||
+          property.accessMode === IoTThingModelAccessModeEnum.WRITE_ONLY.value)
+    )
   } catch (error) {
-    console.error('加载物模型失败:', error)
+    console.error('加载物模型属性失败:', error)
     thingModelProperties.value = []
   } finally {
     loadingThingModel.value = false
@@ -260,11 +259,16 @@ const loadServiceList = async (productId: number) => {
     return
   }
 
-  loadingServices.value = true
   try {
-    const { ThingModelApi } = await import('@/api/iot/thingmodel')
-    const tslData = await ThingModelApi.getThingModelTSLByProductId(productId)
-    serviceList.value = tslData?.services || []
+    loadingServices.value = true
+    const tslData = await getThingModelTSL(productId)
+
+    if (!tslData?.services) {
+      serviceList.value = []
+      return
+    }
+
+    serviceList.value = tslData.services
   } catch (error) {
     console.error('加载服务列表失败:', error)
     serviceList.value = []
@@ -316,43 +320,67 @@ const getDefaultValueForParam = (param: any) => {
   }
 }
 
+// 防止重复初始化的标志
+const isInitialized = ref(false)
+
+/**
+ * 初始化组件数据
+ */
+const initializeComponent = async () => {
+  if (isInitialized.value) return
+
+  const currentAction = action.value
+  if (!currentAction) return
+
+  // 如果已经选择了产品且是属性设置类型，加载物模型
+  if (currentAction.productId && isPropertySetAction.value) {
+    await loadThingModelProperties(currentAction.productId)
+  }
+
+  // 如果是服务调用类型且已有标识符，初始化服务选择
+  if (currentAction.productId && isServiceInvokeAction.value && currentAction.identifier) {
+    // 加载物模型TSL以获取服务信息
+    await loadServiceFromTSL(currentAction.productId, currentAction.identifier)
+  }
+
+  isInitialized.value = true
+}
+
 /**
  * 组件初始化
  */
 onMounted(() => {
-  // 如果已经选择了产品且是属性设置类型，加载物模型
-  if (action.value.productId && isPropertySetAction.value) {
-    loadThingModelProperties(action.value.productId)
-  }
-
-  // 如果是服务调用类型且已有标识符，初始化服务选择
-  if (action.value.productId && isServiceInvokeAction.value && action.value.identifier) {
-    // 加载物模型TSL以获取服务信息
-    loadServiceFromTSL(action.value.productId, action.value.identifier)
-  }
+  initializeComponent()
 })
 
-// 监听action.value变化，处理编辑模式的数据回显
+// 只监听关键字段的变化，避免深度监听导致的性能问题
 watch(
-  () => action.value,
-  async (newAction) => {
-    if (newAction) {
-      // 处理服务调用的数据回显
-      if (isServiceInvokeAction.value && newAction.productId) {
-        if (newAction.identifier) {
-          // 编辑模式：加载服务信息并设置选中的服务
-          await loadServiceFromTSL(newAction.productId, newAction.identifier)
-        } else {
-          // 新建模式：只加载服务列表
-          await loadServiceList(newAction.productId)
-        }
-      } else if (isServiceInvokeAction.value) {
-        // 清空服务选择
-        selectedService.value = null
-        serviceList.value = []
+  () => [action.value.productId, action.value.type, action.value.identifier],
+  async ([newProductId, , newIdentifier], [oldProductId, , oldIdentifier]) => {
+    // 避免初始化时的重复调用
+    if (!isInitialized.value) return
+
+    // 产品变化时重新加载数据
+    if (newProductId !== oldProductId) {
+      if (newProductId && isPropertySetAction.value) {
+        await loadThingModelProperties(newProductId as number)
+      } else if (newProductId && isServiceInvokeAction.value) {
+        await loadServiceList(newProductId as number)
       }
     }
-  },
-  { deep: true, immediate: true }
+
+    // 服务标识符变化时更新选中的服务
+    if (
+      newIdentifier !== oldIdentifier &&
+      newProductId &&
+      isServiceInvokeAction.value &&
+      newIdentifier
+    ) {
+      const service = serviceList.value.find((s: any) => s.identifier === newIdentifier)
+      if (service) {
+        selectedService.value = service
+      }
+    }
+  }
 )
 </script>

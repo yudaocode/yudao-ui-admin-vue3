@@ -169,7 +169,6 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: string): void
-
   (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
@@ -441,37 +440,90 @@ const generateExampleJson = () => {
   return JSON.stringify(example, null, 2)
 }
 
-// 初始化
-onMounted(() => {
+// 初始化标志，防止重复初始化
+const isInitialized = ref(false)
+
+// 初始化数据
+const initializeData = () => {
+  if (isInitialized.value) return
+
   if (localValue.value) {
     try {
-      paramsJson.value = localValue.value
+      // modelValue 已经是字符串类型，直接使用
+      if (localValue.value.trim()) {
+        try {
+          // 尝试解析JSON，如果成功则格式化
+          const parsed = JSON.parse(localValue.value)
+          paramsJson.value = JSON.stringify(parsed, null, 2)
+        } catch {
+          // 如果不是有效的JSON，直接使用原字符串
+          paramsJson.value = localValue.value
+        }
+      } else {
+        paramsJson.value = ''
+      }
+
       jsonError.value = ''
     } catch (error) {
       console.error('初始化参数失败:', error)
       jsonError.value = '初始参数格式错误'
     }
   }
+
+  isInitialized.value = true
+}
+
+// 组件挂载时初始化
+onMounted(() => {
+  initializeData()
 })
 
-// 监听输入值变化
+// 监听外部值变化（编辑模式数据回显）
 watch(
   () => localValue.value,
-  (newValue) => {
-    if (newValue !== paramsJson.value) {
-      paramsJson.value = newValue || ''
+  (newValue, oldValue) => {
+    // 避免循环更新
+    if (newValue === oldValue) return
+
+    try {
+      let newJsonString = ''
+
+      if (newValue && newValue.trim()) {
+        try {
+          // 尝试解析JSON，如果成功则格式化
+          const parsed = JSON.parse(newValue)
+          newJsonString = JSON.stringify(parsed, null, 2)
+        } catch {
+          // 如果不是有效的JSON，直接使用原字符串
+          newJsonString = newValue
+        }
+      }
+
+      // 只有当JSON字符串真正改变时才更新
+      if (newJsonString !== paramsJson.value) {
+        paramsJson.value = newJsonString
+        jsonError.value = ''
+      }
+    } catch (error) {
+      console.error('数据回显失败:', error)
+      jsonError.value = '数据格式错误'
     }
-  }
+  },
+  { immediate: true }
 )
 
 // 监听配置变化
 watch(
   () => props.config,
-  () => {
-    // 配置变化时清空参数
-    paramsJson.value = ''
-    localValue.value = ''
-    jsonError.value = ''
+  (newConfig, oldConfig) => {
+    // 只有在配置真正变化时才清空数据
+    if (JSON.stringify(newConfig) !== JSON.stringify(oldConfig)) {
+      // 如果没有外部传入的值，才清空数据
+      if (!localValue.value) {
+        paramsJson.value = ''
+        jsonError.value = ''
+      }
+    }
   }
 )
 </script>

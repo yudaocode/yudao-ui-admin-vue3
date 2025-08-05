@@ -288,7 +288,9 @@ const handleChange = (value: string) => {
   }
 }
 
-// 获取物模型TSL数据
+/**
+ * 获取物模型TSL数据
+ */
 const getThingModelTSL = async () => {
   if (!props.productId) {
     thingModelTSL.value = null
@@ -298,8 +300,15 @@ const getThingModelTSL = async () => {
 
   loading.value = true
   try {
-    thingModelTSL.value = await ThingModelApi.getThingModelTSLByProductId(props.productId)
-    parseThingModelData()
+    const tslData = await ThingModelApi.getThingModelTSLByProductId(props.productId)
+
+    if (tslData) {
+      thingModelTSL.value = tslData
+      parseThingModelData()
+    } else {
+      // 如果TSL获取失败，尝试获取物模型列表
+      await getThingModelList()
+    }
   } catch (error) {
     console.error('获取物模型TSL失败:', error)
     // 如果TSL获取失败，尝试获取物模型列表
@@ -309,7 +318,9 @@ const getThingModelTSL = async () => {
   }
 }
 
-// 获取物模型列表（备用方案）
+/**
+ * 获取物模型列表（备用方案）
+ */
 const getThingModelList = async () => {
   if (!props.productId) {
     propertyList.value = []
