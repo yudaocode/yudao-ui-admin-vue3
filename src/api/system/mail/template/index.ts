@@ -14,7 +14,9 @@ export interface MailTemplateVO {
 }
 
 export interface MailSendReqVO {
-  mail: string
+  toMails: string[]
+  ccMails?: string[]
+  bccMails?: string[]
   templateCode: string
   templateParams: Map<String, Object>
 }
@@ -46,7 +48,10 @@ export const deleteMailTemplate = async (id: number) => {
 
 // 批量删除邮件模版
 export const deleteMailTemplateList = async (ids: number[]) => {
-  return await request.delete({ url: '/system/mail-template/delete-list', params: { ids: ids.join(',') } })
+  return await request.delete({
+    url: '/system/mail-template/delete-list',
+    params: { ids: ids.join(',') }
+  })
 }
 
 // 发送邮件
