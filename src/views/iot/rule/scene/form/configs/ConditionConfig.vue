@@ -123,7 +123,7 @@ import DeviceSelector from '../selectors/DeviceSelector.vue'
 import PropertySelector from '../selectors/PropertySelector.vue'
 import OperatorSelector from '../selectors/OperatorSelector.vue'
 import ValueInput from '../inputs/ValueInput.vue'
-import { TriggerConditionFormData } from '@/api/iot/rule/scene/scene.types'
+import { TriggerCondition } from '@/api/iot/rule/scene/scene.types'
 import {
   IotRuleSceneTriggerConditionTypeEnum,
   IotRuleSceneTriggerConditionParameterOperatorEnum
@@ -133,12 +133,12 @@ import {
 defineOptions({ name: 'ConditionConfig' })
 
 const props = defineProps<{
-  modelValue: TriggerConditionFormData
+  modelValue: TriggerCondition
   triggerType: number
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: TriggerConditionFormData): void
+  (e: 'update:modelValue', value: TriggerCondition): void
   (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 
@@ -155,12 +155,12 @@ const isValid = ref(true)
 const valueValidation = ref({ valid: true, message: '' })
 
 // 事件处理
-const updateConditionField = (field: keyof TriggerConditionFormData, value: any) => {
+const updateConditionField = (field: keyof TriggerCondition, value: any) => {
   ;(condition.value as any)[field] = value
   emit('update:modelValue', condition.value)
 }
 
-const updateCondition = (newCondition: TriggerConditionFormData) => {
+const updateCondition = (newCondition: TriggerCondition) => {
   condition.value = newCondition
   emit('update:modelValue', condition.value)
 }

@@ -239,7 +239,7 @@
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
 import RuleSceneForm from './form/RuleSceneForm.vue'
-import { IotRuleSceneDO } from '@/api/iot/rule/scene/scene.types'
+import { IotSceneRule } from '@/api/iot/rule/scene/scene.types'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerTypeEnum,
@@ -264,14 +264,14 @@ const queryParams = reactive({
 })
 
 const loading = ref(true) // 列表的加载中
-const list = ref<IotRuleSceneDO[]>([]) // 列表的数据
+const list = ref<IotSceneRule[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
-const selectedRows = ref<IotRuleSceneDO[]>([]) // 选中的行数据
+const selectedRows = ref<IotSceneRule[]>([]) // 选中的行数据
 const queryFormRef = ref() // 搜索的表单
 
 /** 表单状态 */
 const formVisible = ref(false) // 是否可见
-const currentRule = ref<IotRuleSceneDO>() // 表单数据
+const currentRule = ref<IotSceneRule>() // 表单数据
 
 /** 统计数据 */
 const statistics = ref({
@@ -327,7 +327,7 @@ const formatCronExpression = (cron: string): string => {
 }
 
 /** 获取规则摘要信息 */
-const getRuleSceneSummary = (rule: IotRuleSceneDO) => {
+const getRuleSceneSummary = (rule: IotSceneRule) => {
   const triggerSummary =
     rule.triggers?.map((trigger: any) => {
       // 构建基础描述
@@ -455,12 +455,12 @@ const updateStatistics = () => {
 }
 
 /** 获取触发器摘要 */
-const getTriggerSummary = (rule: IotRuleSceneDO) => {
+const getTriggerSummary = (rule: IotSceneRule) => {
   return getRuleSceneSummary(rule).triggerSummary
 }
 
 /** 获取执行器摘要 */
-const getActionSummary = (rule: IotRuleSceneDO) => {
+const getActionSummary = (rule: IotSceneRule) => {
   return getRuleSceneSummary(rule).actionSummary
 }
 
@@ -484,7 +484,7 @@ const handleAdd = () => {
 }
 
 /** 修改操作 */
-const handleEdit = (row: IotRuleSceneDO) => {
+const handleEdit = (row: IotSceneRule) => {
   currentRule.value = row
   formVisible.value = true
 }
@@ -506,7 +506,7 @@ const handleDelete = async (id: number) => {
 }
 
 /** 修改状态 */
-const handleToggleStatus = async (row: IotRuleSceneDO) => {
+const handleToggleStatus = async (row: IotSceneRule) => {
   try {
     // 修改状态的二次确认
     // TODO @puhui999：status 枚举；
@@ -525,7 +525,7 @@ const handleToggleStatus = async (row: IotRuleSceneDO) => {
 }
 
 /** 多选框选中数据 */
-const handleSelectionChange = (selection: IotRuleSceneDO[]) => {
+const handleSelectionChange = (selection: IotSceneRule[]) => {
   selectedRows.value = selection
 }
 

@@ -1,5 +1,5 @@
 import request from '@/config/axios'
-import { IotRuleScene } from './scene.types'
+import { IotSceneRule } from './scene.types'
 
 // IoT 场景联动 API
 export const RuleSceneApi = {
@@ -14,21 +14,24 @@ export const RuleSceneApi = {
   },
 
   // 新增场景联动
-  createRuleScene: async (data: IotRuleScene) => {
+  createRuleScene: async (data: IotSceneRule) => {
     return await request.post({ url: `/iot/rule-scene/create`, data })
   },
 
   // 修改场景联动
-  updateRuleScene: async (data: IotRuleScene) => {
+  updateRuleScene: async (data: IotSceneRule) => {
     return await request.put({ url: `/iot/rule-scene/update`, data })
   },
 
   // 修改场景联动
   updateRuleSceneStatus: async (id: number, status: number) => {
-    return await request.put({ url: `/iot/rule-scene/update-status`, data: {
-      id,
-      status
-    }})
+    return await request.put({
+      url: `/iot/rule-scene/update-status`,
+      data: {
+        id,
+        status
+      }
+    })
   },
 
   // 删除场景联动

@@ -84,17 +84,17 @@
 import { useVModel } from '@vueuse/core'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
-import { TriggerConditionFormData } from '@/api/iot/rule/scene/scene.types'
+import { TriggerCondition } from '@/api/iot/rule/scene/scene.types'
 
 /** 设备状态条件配置组件 */
 defineOptions({ name: 'DeviceStatusConditionConfig' })
 
 const props = defineProps<{
-  modelValue: TriggerConditionFormData
+  modelValue: TriggerCondition
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: TriggerConditionFormData): void
+  (e: 'update:modelValue', value: TriggerCondition): void
   (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 

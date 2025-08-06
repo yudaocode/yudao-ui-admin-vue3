@@ -83,7 +83,7 @@
 import { nextTick } from 'vue'
 import { useVModel } from '@vueuse/core'
 import ConditionConfig from './ConditionConfig.vue'
-import { TriggerConditionFormData } from '@/api/iot/rule/scene/scene.types'
+import { TriggerCondition } from '@/api/iot/rule/scene/scene.types'
 import {
   IotRuleSceneTriggerConditionTypeEnum,
   IotRuleSceneTriggerConditionParameterOperatorEnum
@@ -93,13 +93,13 @@ import {
 defineOptions({ name: 'SubConditionGroupConfig' })
 
 const props = defineProps<{
-  modelValue: TriggerConditionFormData[]
+  modelValue: TriggerCondition[]
   triggerType: number
   maxConditions?: number
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: TriggerConditionFormData[]): void
+  (e: 'update:modelValue', value: TriggerCondition[]): void
   (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 
@@ -123,7 +123,7 @@ const addCondition = () => {
     return
   }
 
-  const newCondition: TriggerConditionFormData = {
+  const newCondition: TriggerCondition = {
     type: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY, // 默认为设备属性
     productId: undefined,
     deviceId: undefined,
@@ -161,7 +161,7 @@ const removeCondition = (index: number) => {
   }
 }
 
-const updateCondition = (index: number, condition: TriggerConditionFormData) => {
+const updateCondition = (index: number, condition: TriggerCondition) => {
   if (subGroup.value) {
     subGroup.value[index] = condition
   }

@@ -58,17 +58,17 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { RuleSceneFormData } from '@/api/iot/rule/scene/scene.types'
+import { IotSceneRule } from '@/api/iot/rule/scene/scene.types'
 
 /** 基础信息配置组件 */
 defineOptions({ name: 'BasicInfoSection' })
 
 const props = defineProps<{
-  modelValue: RuleSceneFormData
+  modelValue: IotSceneRule
   rules?: any
 }>()
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: RuleSceneFormData): void
+  (e: 'update:modelValue', value: IotSceneRule): void
 }>()
 
 const formData = useVModel(props, 'modelValue', emit)

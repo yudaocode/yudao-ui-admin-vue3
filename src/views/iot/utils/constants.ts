@@ -109,8 +109,18 @@ export const IoTThingModelAccessModeEnum = {
   READ_ONLY: {
     label: '只读',
     value: 'r'
+  },
+  WRITE_ONLY: {
+    label: '只写',
+    value: 'w'
   }
 } as const
+
+/** 获取访问模式标签 */
+export const getAccessModeLabel = (value: string): string => {
+  const mode = Object.values(IoTThingModelAccessModeEnum).find((mode) => mode.value === value)
+  return mode?.label || value
+}
 
 /** 属性值的数据类型 */
 export const IoTDataSpecsDataTypeEnum = {
