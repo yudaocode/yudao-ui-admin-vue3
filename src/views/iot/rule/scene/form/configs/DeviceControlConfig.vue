@@ -50,6 +50,7 @@
       <!-- 服务参数配置 -->
       <div v-if="action.identifier" class="space-y-16px">
         <el-form-item label="服务参数" required>
+          <!-- TODO@puhui999：这里有个 idea 告警 -->
           <JsonParamsInput
             v-model="paramsValue"
             type="service"
@@ -102,7 +103,7 @@ const emit = defineEmits<{
 
 const action = useVModel(props, 'modelValue', emit)
 
-// 简化后的状态变量
+// 状态变量
 const thingModelProperties = ref<ThingModelProperty[]>([]) // 物模型属性列表
 const loadingThingModel = ref(false) // 物模型加载状态
 const selectedService = ref<ThingModelService | null>(null) // 选中的服务对象
@@ -126,6 +127,7 @@ const paramsValue = computed({
 })
 
 // 参数验证处理
+// TODO @puhui999：这个还需要哇？
 const handleParamsValidate = (result: { valid: boolean; message: string }) => {
   // 可以在这里处理验证结果，比如显示错误信息
   console.log('参数验证结果:', result)
@@ -165,10 +167,7 @@ const handleProductChange = (productId?: number) => {
   }
 }
 
-/**
- * 处理设备变化事件
- * @param deviceId 设备ID
- */
+/** 处理设备变化事件 */
 const handleDeviceChange = (deviceId?: number) => {
   // 当设备变化时，清空参数配置
   if (action.value.deviceId !== deviceId) {
@@ -176,10 +175,7 @@ const handleDeviceChange = (deviceId?: number) => {
   }
 }
 
-/**
- * 处理服务变化事件
- * @param serviceIdentifier 服务标识符
- */
+/** 处理服务变化事件 */
 const handleServiceChange = (serviceIdentifier?: string) => {
   // 根据服务标识符找到对应的服务对象
   const service = serviceList.value.find((s) => s.identifier === serviceIdentifier) || null
@@ -200,13 +196,10 @@ const handleServiceChange = (serviceIdentifier?: string) => {
 }
 
 /**
- * 获取物模型TSL数据
- * @param productId 产品ID
- * @returns 物模型TSL数据
+ * 获取物模型 TSL 数据
  */
 const getThingModelTSL = async (productId: number) => {
   if (!productId) return null
-
   try {
     return await ThingModelApi.getThingModelTSLByProductId(productId)
   } catch (error) {
@@ -215,10 +208,7 @@ const getThingModelTSL = async (productId: number) => {
   }
 }
 
-/**
- * 加载物模型属性（可写属性）
- * @param productId 产品ID
- */
+/** 加载物模型属性（可写属性）*/
 const loadThingModelProperties = async (productId: number) => {
   if (!productId) {
     thingModelProperties.value = []
@@ -249,16 +239,12 @@ const loadThingModelProperties = async (productId: number) => {
   }
 }
 
-/**
- * 加载服务列表
- * @param productId 产品ID
- */
+/** 加载服务列表 */
 const loadServiceList = async (productId: number) => {
   if (!productId) {
     serviceList.value = []
     return
   }
-
   try {
     loadingServices.value = true
     const tslData = await getThingModelTSL(productId)
@@ -277,11 +263,7 @@ const loadServiceList = async (productId: number) => {
   }
 }
 
-/**
- * 从TSL加载服务信息（用于编辑模式回显）
- * @param productId 产品ID
- * @param serviceIdentifier 服务标识符
- */
+/** 从 TSL 加载服务信息（用于编辑模式回显）*/
 const loadServiceFromTSL = async (productId: number, serviceIdentifier: string) => {
   // 先加载服务列表
   await loadServiceList(productId)
@@ -293,11 +275,7 @@ const loadServiceFromTSL = async (productId: number, serviceIdentifier: string) 
   }
 }
 
-/**
- * 根据参数类型获取默认值
- * @param param 参数对象
- * @returns 默认值
- */
+/** 根据参数类型获取默认值 */
 const getDefaultValueForParam = (param: any) => {
   switch (param.dataType) {
     case 'int':
@@ -323,9 +301,7 @@ const getDefaultValueForParam = (param: any) => {
 // 防止重复初始化的标志
 const isInitialized = ref(false)
 
-/**
- * 初始化组件数据
- */
+/** 初始化组件数据 */
 const initializeComponent = async () => {
   if (isInitialized.value) return
 
@@ -346,9 +322,7 @@ const initializeComponent = async () => {
   isInitialized.value = true
 }
 
-/**
- * 组件初始化
- */
+/** 组件初始化 */
 onMounted(() => {
   initializeComponent()
 })

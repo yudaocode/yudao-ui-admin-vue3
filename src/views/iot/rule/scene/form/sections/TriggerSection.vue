@@ -66,6 +66,7 @@
             />
 
             <!-- 定时触发配置 -->
+            <!-- TODO @puhui999：改成定时触发配置后，就改不回来了。 -->
             <TimerTriggerConfig
               v-else-if="triggerItem.type === TriggerTypeEnum.TIMER"
               :model-value="triggerItem.cronExpression"
