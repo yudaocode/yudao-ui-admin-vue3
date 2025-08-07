@@ -100,7 +100,6 @@
               type="service"
               :config="serviceConfig"
               placeholder="请输入JSON格式的服务参数"
-              @validate="handleValueValidate"
             />
             <!-- 事件上报参数配置 -->
             <JsonParamsInput
@@ -109,7 +108,6 @@
               type="event"
               :config="eventConfig"
               placeholder="请输入JSON格式的事件参数"
-              @validate="handleValueValidate"
             />
             <!-- 普通值输入 -->
             <ValueInput
@@ -119,7 +117,6 @@
               :property-type="propertyType"
               :operator="condition.operator"
               :property-config="propertyConfig"
-              @validate="handleValueValidate"
             />
           </el-form-item>
         </el-col>
@@ -202,15 +199,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Trigger): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
   (e: 'trigger-type-change', value: number): void
 }>()
 
 // 响应式数据
 const condition = useVModel(props, 'modelValue', emit)
-// TODO @puhui999：是不是 validationMessage 非空，就是不通过哈；
-const isValid = ref(true)
-const validationMessage = ref('')
 const propertyType = ref('')
 const propertyConfig = ref<any>(null)
 
@@ -279,7 +272,6 @@ const triggerTypeOptions = getTriggerTypeOptions()
 // 事件处理
 const updateConditionField = (field: keyof Trigger, value: any) => {
   ;(condition.value as any)[field] = value
-  updateValidationResult()
 }
 
 const handleTriggerTypeChange = (type: number) => {
@@ -290,13 +282,11 @@ const handleProductChange = () => {
   // 产品变化时清空设备和属性
   condition.value.deviceId = undefined
   condition.value.identifier = ''
-  updateValidationResult()
 }
 
 const handleDeviceChange = () => {
   // 设备变化时清空属性
   condition.value.identifier = ''
-  updateValidationResult()
 }
 
 const handlePropertyChange = (propertyInfo: any) => {
@@ -312,88 +302,9 @@ const handlePropertyChange = (propertyInfo: any) => {
       condition.value.operator = '='
     }
   }
-  updateValidationResult()
 }
 
 const handleOperatorChange = () => {
-  updateValidationResult()
+  // 操作符变化处理
 }
-
-// 处理参数验证结果
-const handleValueValidate = (result: { valid: boolean; message: string }) => {
-  isValid.value = result.valid
-  validationMessage.value = result.message
-  emit('validate', result)
-  updateValidationResult()
-}
-
-// 验证逻辑
-// TODO @puhui999：这个校验，是不是用更原生的 validator 哈。项目风格更统一点。
-const updateValidationResult = () => {
-  if (isDevicePropertyTrigger.value) {
-    // 设备属性触发验证
-    if (!condition.value.productId) {
-      isValid.value = false
-      validationMessage.value = '请选择产品'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-
-    if (!condition.value.deviceId) {
-      isValid.value = false
-      validationMessage.value = '请选择设备'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-
-    if (!condition.value.identifier) {
-      isValid.value = false
-      validationMessage.value = '请选择监控项'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-
-    // 服务调用和事件上报不需要操作符
-    if (
-      props.triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE &&
-      props.triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST &&
-      !condition.value.operator
-    ) {
-      isValid.value = false
-      validationMessage.value = '请选择操作符'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-
-    if (!condition.value.value) {
-      isValid.value = false
-      validationMessage.value = '请输入比较值'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-  }
-
-  isValid.value = true
-  validationMessage.value = '主条件配置验证通过'
-  emit('validate', { valid: true, message: validationMessage.value })
-}
-
-// 监听变化
-watch(
-  () => [
-    condition.value.productId,
-    condition.value.deviceId,
-    condition.value.identifier,
-    // 服务调用和事件上报不需要监听操作符
-    props.triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE &&
-    props.triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST
-      ? condition.value.operator
-      : null,
-    condition.value.value
-  ],
-  () => {
-    updateValidationResult()
-  },
-  { immediate: true }
-)
 </script>

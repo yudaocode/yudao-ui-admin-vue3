@@ -159,7 +159,11 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
-import { IotRuleSceneTriggerTypeEnum, IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
+import {
+  IotRuleSceneTriggerTypeEnum,
+  IoTThingModelTypeEnum,
+  IoTDataSpecsDataTypeEnum
+} from '@/views/iot/utils/constants'
 import type {
   IotThingModelTSLResp,
   ThingModelEvent,
@@ -246,30 +250,30 @@ const selectedProperty = computed(() => {
 // 工具函数
 const getPropertyTypeName = (dataType: string) => {
   const typeMap = {
-    int: '整数',
-    float: '浮点数',
-    double: '双精度',
-    text: '字符串',
-    bool: '布尔值',
-    enum: '枚举',
-    date: '日期',
-    struct: '结构体',
-    array: '数组'
+    [IoTDataSpecsDataTypeEnum.INT]: '整数',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: '浮点数',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: '双精度',
+    [IoTDataSpecsDataTypeEnum.TEXT]: '字符串',
+    [IoTDataSpecsDataTypeEnum.BOOL]: '布尔值',
+    [IoTDataSpecsDataTypeEnum.ENUM]: '枚举',
+    [IoTDataSpecsDataTypeEnum.DATE]: '日期',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: '结构体',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: '数组'
   }
   return typeMap[dataType] || dataType
 }
 
 const getPropertyTypeTag = (dataType: string) => {
   const tagMap = {
-    int: 'primary',
-    float: 'success',
-    double: 'success',
-    text: 'info',
-    bool: 'warning',
-    enum: 'danger',
-    date: 'primary',
-    struct: 'info',
-    array: 'warning'
+    [IoTDataSpecsDataTypeEnum.INT]: 'primary',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: 'success',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: 'success',
+    [IoTDataSpecsDataTypeEnum.TEXT]: 'info',
+    [IoTDataSpecsDataTypeEnum.BOOL]: 'warning',
+    [IoTDataSpecsDataTypeEnum.ENUM]: 'danger',
+    [IoTDataSpecsDataTypeEnum.DATE]: 'primary',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: 'info',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: 'warning'
   }
   return tagMap[dataType] || 'info'
 }

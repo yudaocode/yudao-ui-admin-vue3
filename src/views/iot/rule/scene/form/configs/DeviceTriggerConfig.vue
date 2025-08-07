@@ -29,7 +29,6 @@
             :model-value="trigger"
             @update:model-value="updateCondition"
             :trigger-type="trigger.type"
-            @validate="handleValidate"
             @trigger-type-change="handleTriggerTypeChange"
           />
         </div>
@@ -123,7 +122,6 @@
                   @update:model-value="(value) => updateSubGroup(subGroupIndex, value)"
                   :trigger-type="trigger.type"
                   :max-conditions="maxConditionsPerGroup"
-                  @validate="(result) => handleSubGroupValidate(subGroupIndex, result)"
                 />
               </div>
 
@@ -182,7 +180,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Trigger): void
-  (e: 'validate', value: { valid: boolean; message: string }): void
   (e: 'trigger-type-change', type: number): void
 }>()
 
@@ -192,16 +189,9 @@ const trigger = useVModel(props, 'modelValue', emit)
 const maxSubGroups = 3 // 最多 3 个子条件组
 const maxConditionsPerGroup = 3 // 每组最多 3 个条件
 
-// 验证状态
-const subGroupValidations = ref<{ [key: number]: { valid: boolean; message: string } }>({})
-
 // 事件处理
 const updateCondition = (condition: Trigger) => {
   trigger.value = condition
-}
-
-const handleValidate = (result: { valid: boolean; message: string }) => {
-  emit('validate', result)
 }
 
 const handleTriggerTypeChange = (type: number) => {
@@ -231,21 +221,6 @@ const addSubGroup = () => {
 const removeSubGroup = (index: number) => {
   if (trigger.value.conditionGroups) {
     trigger.value.conditionGroups.splice(index, 1)
-    delete subGroupValidations.value[index]
-
-    // 重新索引验证结果
-    const newValidations: { [key: number]: { valid: boolean; message: string } } = {}
-    Object.keys(subGroupValidations.value).forEach((key) => {
-      const numKey = parseInt(key)
-      if (numKey > index) {
-        newValidations[numKey - 1] = subGroupValidations.value[numKey]
-      } else if (numKey < index) {
-        newValidations[numKey] = subGroupValidations.value[numKey]
-      }
-    })
-    subGroupValidations.value = newValidations
-
-    updateValidationResult()
   }
 }
 
@@ -258,35 +233,4 @@ const updateSubGroup = (index: number, subGroup: any) => {
 const removeConditionGroup = () => {
   trigger.value.conditionGroups = undefined
 }
-
-const handleSubGroupValidate = (index: number, result: { valid: boolean; message: string }) => {
-  subGroupValidations.value[index] = result
-  updateValidationResult()
-}
-
-const updateValidationResult = () => {
-  if (!trigger.value.conditionGroups || trigger.value.conditionGroups.length === 0) {
-    emit('validate', { valid: true, message: '条件组容器为空，验证通过' })
-    return
-  }
-
-  const validations = Object.values(subGroupValidations.value)
-  const allValid = validations.every((v: any) => v.valid)
-
-  if (allValid) {
-    emit('validate', { valid: true, message: '条件组容器配置验证通过' })
-  } else {
-    const errorMessages = validations.filter((v: any) => !v.valid).map((v: any) => v.message)
-    emit('validate', { valid: false, message: `子条件组配置错误: ${errorMessages.join('; ')}` })
-  }
-}
-
-// 监听变化
-watch(
-  () => trigger.value.conditionGroups,
-  () => {
-    updateValidationResult()
-  },
-  { deep: true, immediate: true }
-)
 </script>

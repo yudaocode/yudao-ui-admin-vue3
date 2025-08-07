@@ -35,7 +35,10 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import { IotRuleSceneTriggerConditionParameterOperatorEnum } from '@/views/iot/utils/constants'
+import {
+  IotRuleSceneTriggerConditionParameterOperatorEnum,
+  IoTDataSpecsDataTypeEnum
+} from '@/views/iot/utils/constants'
 
 /** 操作符选择器组件 */
 defineOptions({ name: 'OperatorSelector' })
@@ -60,7 +63,14 @@ const allOperators = [
     symbol: '=',
     description: '值完全相等时触发',
     example: 'temperature = 25',
-    supportedTypes: ['int', 'float', 'double', 'string', 'bool', 'enum']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.DOUBLE,
+      IoTDataSpecsDataTypeEnum.TEXT,
+      IoTDataSpecsDataTypeEnum.BOOL,
+      IoTDataSpecsDataTypeEnum.ENUM
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.value,
@@ -68,7 +78,14 @@ const allOperators = [
     symbol: '≠',
     description: '值不相等时触发',
     example: 'power != false',
-    supportedTypes: ['int', 'float', 'double', 'string', 'bool', 'enum']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.DOUBLE,
+      IoTDataSpecsDataTypeEnum.TEXT,
+      IoTDataSpecsDataTypeEnum.BOOL,
+      IoTDataSpecsDataTypeEnum.ENUM
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.GREATER_THAN.value,
@@ -76,7 +93,12 @@ const allOperators = [
     symbol: '>',
     description: '值大于指定值时触发',
     example: 'temperature > 30',
-    supportedTypes: ['int', 'float', 'double', 'date']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.DOUBLE,
+      IoTDataSpecsDataTypeEnum.DATE
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.GREATER_THAN_OR_EQUALS.value,
@@ -84,7 +106,12 @@ const allOperators = [
     symbol: '≥',
     description: '值大于或等于指定值时触发',
     example: 'humidity >= 80',
-    supportedTypes: ['int', 'float', 'double', 'date']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.DOUBLE,
+      IoTDataSpecsDataTypeEnum.DATE
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.LESS_THAN.value,
@@ -92,7 +119,12 @@ const allOperators = [
     symbol: '<',
     description: '值小于指定值时触发',
     example: 'temperature < 10',
-    supportedTypes: ['int', 'float', 'double', 'date']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.DOUBLE,
+      IoTDataSpecsDataTypeEnum.DATE
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.LESS_THAN_OR_EQUALS.value,
@@ -100,7 +132,12 @@ const allOperators = [
     symbol: '≤',
     description: '值小于或等于指定值时触发',
     example: 'battery <= 20',
-    supportedTypes: ['int', 'float', 'double', 'date']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.DOUBLE,
+      IoTDataSpecsDataTypeEnum.DATE
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.IN.value,
@@ -108,7 +145,12 @@ const allOperators = [
     symbol: '∈',
     description: '值在指定列表中时触发',
     example: 'status in [1,2,3]',
-    supportedTypes: ['int', 'float', 'string', 'enum']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.TEXT,
+      IoTDataSpecsDataTypeEnum.ENUM
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_IN.value,
@@ -116,7 +158,12 @@ const allOperators = [
     symbol: '∉',
     description: '值不在指定列表中时触发',
     example: 'status not in [1,2,3]',
-    supportedTypes: ['int', 'float', 'string', 'enum']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.TEXT,
+      IoTDataSpecsDataTypeEnum.ENUM
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.BETWEEN.value,
@@ -124,7 +171,12 @@ const allOperators = [
     symbol: '⊆',
     description: '值在指定范围内时触发',
     example: 'temperature between 20,30',
-    supportedTypes: ['int', 'float', 'double', 'date']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.DOUBLE,
+      IoTDataSpecsDataTypeEnum.DATE
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_BETWEEN.value,
@@ -132,7 +184,12 @@ const allOperators = [
     symbol: '⊄',
     description: '值不在指定范围内时触发',
     example: 'temperature not between 20,30',
-    supportedTypes: ['int', 'float', 'double', 'date']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.DOUBLE,
+      IoTDataSpecsDataTypeEnum.DATE
+    ]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.LIKE.value,
@@ -140,7 +197,7 @@ const allOperators = [
     symbol: '≈',
     description: '字符串匹配指定模式时触发',
     example: 'message like "%error%"',
-    supportedTypes: ['string']
+    supportedTypes: [IoTDataSpecsDataTypeEnum.TEXT]
   },
   {
     value: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_NULL.value,
@@ -148,7 +205,15 @@ const allOperators = [
     symbol: '≠∅',
     description: '值非空时触发',
     example: 'data not null',
-    supportedTypes: ['int', 'float', 'double', 'string', 'bool', 'enum', 'date']
+    supportedTypes: [
+      IoTDataSpecsDataTypeEnum.INT,
+      IoTDataSpecsDataTypeEnum.FLOAT,
+      IoTDataSpecsDataTypeEnum.DOUBLE,
+      IoTDataSpecsDataTypeEnum.TEXT,
+      IoTDataSpecsDataTypeEnum.BOOL,
+      IoTDataSpecsDataTypeEnum.ENUM,
+      IoTDataSpecsDataTypeEnum.DATE
+    ]
   }
 ]
 

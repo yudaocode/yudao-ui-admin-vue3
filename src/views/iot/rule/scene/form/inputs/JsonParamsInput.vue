@@ -136,6 +136,7 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
+import { IoTDataSpecsDataTypeEnum } from '@/views/iot/utils/constants'
 
 /** JSON参数输入组件 - 通用版本 */
 defineOptions({ name: 'JsonParamsInput' })
@@ -169,7 +170,6 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: string): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -317,7 +317,6 @@ const handleParamsChange = () => {
       // 额外的参数验证
       if (typeof parsed !== 'object' || parsed === null) {
         jsonError.value = '参数必须是一个有效的 JSON 对象'
-        emit('validate', { valid: false, message: jsonError.value })
         return
       }
 
@@ -325,7 +324,6 @@ const handleParamsChange = () => {
       for (const param of paramsList.value) {
         if (param.required && (!parsed[param.identifier] || parsed[param.identifier] === '')) {
           jsonError.value = `参数 ${param.name} 为必填项`
-          emit('validate', { valid: false, message: jsonError.value })
           return
         }
       }
@@ -334,10 +332,9 @@ const handleParamsChange = () => {
     }
 
     // 验证通过
-    emit('validate', { valid: true, message: 'JSON格式正确' })
+    jsonError.value = ''
   } catch (error) {
     jsonError.value = `JSON格式错误: ${error instanceof Error ? error.message : '未知错误'}`
-    emit('validate', { valid: false, message: jsonError.value })
   }
 }
 
@@ -352,7 +349,6 @@ const clearParams = () => {
   paramsJson.value = ''
   localValue.value = ''
   jsonError.value = ''
-  emit('validate', { valid: true, message: '' })
 }
 
 // 工具函数
@@ -373,35 +369,35 @@ const getParamTypeName = (dataType: string) => {
 
 const getParamTypeTag = (dataType: string) => {
   const tagMap = {
-    int: 'primary',
-    float: 'success',
-    double: 'success',
-    text: 'info',
-    bool: 'warning',
-    enum: 'danger',
-    date: 'primary',
-    struct: 'info',
-    array: 'warning'
+    [IoTDataSpecsDataTypeEnum.INT]: 'primary',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: 'success',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: 'success',
+    [IoTDataSpecsDataTypeEnum.TEXT]: 'info',
+    [IoTDataSpecsDataTypeEnum.BOOL]: 'warning',
+    [IoTDataSpecsDataTypeEnum.ENUM]: 'danger',
+    [IoTDataSpecsDataTypeEnum.DATE]: 'primary',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: 'info',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: 'warning'
   }
   return tagMap[dataType] || 'info'
 }
 
 const getExampleValue = (param: any) => {
   switch (param.dataType) {
-    case 'int':
+    case IoTDataSpecsDataTypeEnum.INT:
       return '25'
-    case 'float':
-    case 'double':
+    case IoTDataSpecsDataTypeEnum.FLOAT:
+    case IoTDataSpecsDataTypeEnum.DOUBLE:
       return '25.5'
-    case 'bool':
+    case IoTDataSpecsDataTypeEnum.BOOL:
       return 'false'
-    case 'text':
+    case IoTDataSpecsDataTypeEnum.TEXT:
       return '"auto"'
-    case 'enum':
+    case IoTDataSpecsDataTypeEnum.ENUM:
       return '"option1"'
-    case 'struct':
+    case IoTDataSpecsDataTypeEnum.STRUCT:
       return '{}'
-    case 'array':
+    case IoTDataSpecsDataTypeEnum.ARRAY:
       return '[]'
     default:
       return '""'

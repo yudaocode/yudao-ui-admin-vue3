@@ -106,7 +106,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: TriggerCondition): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 
 const condition = useVModel(props, 'modelValue', emit)
@@ -155,10 +154,6 @@ const timeOperatorOptions = [
   }
 ]
 
-// 状态
-const validationMessage = ref('')
-const isValid = ref(true)
-
 // 计算属性
 const needsTimeInput = computed(() => {
   const timeOnlyOperators = [
@@ -181,62 +176,16 @@ const needsSecondTimeInput = computed(() => {
 // 事件处理
 const updateConditionField = (field: keyof TriggerCondition, value: any) => {
   condition.value[field] = value
-  updateValidationResult()
 }
-
-const updateValidationResult = () => {
-  if (!condition.value.operator) {
-    isValid.value = false
-    validationMessage.value = '请选择时间条件'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  // 今日条件不需要时间值
-  if (condition.value.operator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
-    isValid.value = true
-    validationMessage.value = '当前时间条件配置验证通过'
-    emit('validate', { valid: true, message: validationMessage.value })
-    return
-  }
-
-  if (needsTimeInput.value && !condition.value.timeValue) {
-    isValid.value = false
-    validationMessage.value = '请设置时间值'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  if (needsSecondTimeInput.value && !condition.value.timeValue2) {
-    isValid.value = false
-    validationMessage.value = '请设置结束时间'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  isValid.value = true
-  validationMessage.value = '当前时间条件配置验证通过'
-  emit('validate', { valid: true, message: validationMessage.value })
-}
-
-// 监听变化
-watch(
-  () => [condition.value.operator, condition.value.timeValue, condition.value.timeValue2],
-  () => {
-    updateValidationResult()
-  },
-  { immediate: true }
-)
 
 // 监听操作符变化，清理不相关的时间值
 watch(
   () => condition.value.operator,
   (newOperator) => {
     if (newOperator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
-      condition.value.timeValue = undefined
-      condition.value.timeValue2 = undefined
+      ;(condition.value as any).timeValue = undefined(condition.value as any).timeValue2 = undefined
     } else if (!needsSecondTimeInput.value) {
-      condition.value.timeValue2 = undefined
+      ;(condition.value as any).timeValue2 = undefined
     }
   }
 )

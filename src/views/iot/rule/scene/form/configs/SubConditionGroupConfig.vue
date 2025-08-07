@@ -56,7 +56,6 @@
               :model-value="condition"
               @update:model-value="(value) => updateCondition(conditionIndex, value)"
               :trigger-type="triggerType"
-              @validate="(result) => handleConditionValidate(conditionIndex, result)"
             />
           </div>
         </div>
@@ -100,16 +99,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: TriggerCondition[]): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 
 const subGroup = useVModel(props, 'modelValue', emit)
 
 // 配置常量
 const maxConditions = computed(() => props.maxConditions || 3)
-
-// 验证状态
-const conditionValidations = ref<{ [key: number]: { valid: boolean; message: string } }>({})
 
 // 事件处理
 const addCondition = () => {
@@ -143,21 +138,6 @@ const addCondition = () => {
 const removeCondition = (index: number) => {
   if (subGroup.value) {
     subGroup.value.splice(index, 1)
-    delete conditionValidations.value[index]
-
-    // 重新索引验证结果
-    const newValidations: { [key: number]: { valid: boolean; message: string } } = {}
-    Object.keys(conditionValidations.value).forEach((key) => {
-      const numKey = parseInt(key)
-      if (numKey > index) {
-        newValidations[numKey - 1] = conditionValidations.value[numKey]
-      } else if (numKey < index) {
-        newValidations[numKey] = conditionValidations.value[numKey]
-      }
-    })
-    conditionValidations.value = newValidations
-
-    updateValidationResult()
   }
 }
 
@@ -166,35 +146,4 @@ const updateCondition = (index: number, condition: TriggerCondition) => {
     subGroup.value[index] = condition
   }
 }
-
-const handleConditionValidate = (index: number, result: { valid: boolean; message: string }) => {
-  conditionValidations.value[index] = result
-  updateValidationResult()
-}
-
-const updateValidationResult = () => {
-  if (!subGroup.value || subGroup.value.length === 0) {
-    emit('validate', { valid: false, message: '子条件组至少需要一个条件' })
-    return
-  }
-
-  const validations = Object.values(conditionValidations.value)
-  const allValid = validations.every((v: any) => v.valid)
-
-  if (allValid) {
-    emit('validate', { valid: true, message: '子条件组配置验证通过' })
-  } else {
-    const errorMessages = validations.filter((v: any) => !v.valid).map((v: any) => v.message)
-    emit('validate', { valid: false, message: `条件配置错误: ${errorMessages.join('; ')}` })
-  }
-}
-
-// 监听变化
-watch(
-  () => subGroup.value,
-  () => {
-    updateValidationResult()
-  },
-  { deep: true, immediate: true }
-)
 </script>

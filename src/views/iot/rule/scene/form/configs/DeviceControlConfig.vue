@@ -55,7 +55,6 @@
             type="service"
             :config="{ service: selectedService }"
             placeholder="请输入JSON格式的服务参数"
-            @validate="handleParamsValidate"
           />
         </el-form-item>
       </div>
@@ -70,7 +69,6 @@
           type="property"
           :config="{ properties: thingModelProperties }"
           placeholder="请输入JSON格式的控制参数"
-          @validate="handleParamsValidate"
         />
       </el-form-item>
     </div>
@@ -86,7 +84,8 @@ import type { Action } from '@/api/iot/rule/scene'
 import type { ThingModelProperty, ThingModelService } from '@/api/iot/thingmodel'
 import {
   IotRuleSceneActionTypeEnum,
-  IoTThingModelAccessModeEnum
+  IoTThingModelAccessModeEnum,
+  IoTDataSpecsDataTypeEnum
 } from '@/views/iot/utils/constants'
 import { ThingModelApi } from '@/api/iot/thingmodel'
 
@@ -125,12 +124,6 @@ const paramsValue = computed({
     action.value.params = value.trim() || ''
   }
 })
-
-// 参数验证处理
-const handleParamsValidate = (result: { valid: boolean; message: string }) => {
-  // 可以在这里处理验证结果，比如显示错误信息
-  console.log('参数验证结果:', result)
-}
 
 const isPropertySetAction = computed(() => {
   // 是否为属性设置类型
@@ -301,16 +294,16 @@ const loadServiceFromTSL = async (productId: number, serviceIdentifier: string) 
  */
 const getDefaultValueForParam = (param: any) => {
   switch (param.dataType) {
-    case 'int':
+    case IoTDataSpecsDataTypeEnum.INT:
       return 0
-    case 'float':
-    case 'double':
+    case IoTDataSpecsDataTypeEnum.FLOAT:
+    case IoTDataSpecsDataTypeEnum.DOUBLE:
       return 0.0
-    case 'bool':
+    case IoTDataSpecsDataTypeEnum.BOOL:
       return false
-    case 'text':
+    case IoTDataSpecsDataTypeEnum.TEXT:
       return ''
-    case 'enum':
+    case IoTDataSpecsDataTypeEnum.ENUM:
       // 如果有枚举值，使用第一个
       if (param.dataSpecs?.dataSpecsList && param.dataSpecs.dataSpecsList.length > 0) {
         return param.dataSpecs.dataSpecsList[0].value
