@@ -197,7 +197,7 @@ const isDeviceCondition = computed(() => {
  * @param field 字段名
  * @param value 字段值
  */
-const updateConditionField = (field: keyof TriggerCondition, value: any) => {
+const updateConditionField = (field: any, value: any) => {
   ;(condition.value as any)[field] = value
   emit('update:modelValue', condition.value)
 }
@@ -216,32 +216,27 @@ const updateCondition = (newCondition: TriggerCondition) => {
  * @param type 条件类型
  */
 const handleConditionTypeChange = (type: number) => {
-  // 清理不相关的字段
-  if (type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS) {
+  // 根据条件类型清理字段
+  const isCurrentTime = type === IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME
+  const isDeviceStatus = type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS
+
+  // 清理标识符字段（时间条件和设备状态条件都不需要）
+  if (isCurrentTime || isDeviceStatus) {
     condition.value.identifier = undefined
-    // 清理时间相关字段（如果存在）
-    if ('timeValue' in condition.value) {
-      delete (condition.value as any).timeValue
-    }
-    if ('timeValue2' in condition.value) {
-      delete (condition.value as any).timeValue2
-    }
-  } else if (type === IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME) {
-    condition.value.identifier = undefined
-    condition.value.productId = undefined
-    condition.value.deviceId = undefined
-  } else if (type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY) {
-    // 清理时间相关字段（如果存在）
-    if ('timeValue' in condition.value) {
-      delete (condition.value as any).timeValue
-    }
-    if ('timeValue2' in condition.value) {
-      delete (condition.value as any).timeValue2
-    }
   }
 
-  // 重置操作符和参数，使用枚举中的默认值
-  condition.value.operator = IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
+  // 清理设备相关字段（仅时间条件需要）
+  if (isCurrentTime) {
+    condition.value.productId = undefined
+    condition.value.deviceId = undefined
+  }
+
+  // 设置默认操作符
+  condition.value.operator = isCurrentTime
+    ? 'at_time'
+    : IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
+
+  // 清空参数值
   condition.value.param = ''
 }
 

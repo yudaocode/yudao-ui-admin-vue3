@@ -266,8 +266,8 @@ const deviceStatusChangeOptions = getDeviceStatusChangeOptions() // 设备状态
  * @param field 字段名
  * @param value 字段值
  */
-const updateConditionField = (field: keyof Trigger, value: any) => {
-  ;(condition.value as any)[field] = value
+const updateConditionField = (field: any, value: any) => {
+  condition.value[field] = value
 }
 
 /**
