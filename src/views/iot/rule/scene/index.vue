@@ -136,13 +136,13 @@
             <div
               class="w-48px h-48px rounded-8px flex items-center justify-center text-24px text-white mr-16px bg-gradient-to-br from-[#43e97b] to-[#38f9d7]"
             >
-              <Icon icon="ep:lightning" />
+              <Icon icon="ep:timer" />
             </div>
             <div>
               <div class="text-24px font-600 text-[#303133] leading-none">{{
-                statistics.triggered
+                statistics.timerRules
               }}</div>
-              <div class="text-14px text-[#909399] mt-4px">今日触发</div>
+              <div class="text-14px text-[#909399] mt-4px">定时规则</div>
             </div>
           </div>
         </el-card>
@@ -165,12 +165,27 @@
           </template>
         </el-table-column>
         <!-- 触发条件列 -->
-        <el-table-column label="触发条件" min-width="250">
+        <el-table-column label="触发条件" min-width="280">
           <template #default="{ row }">
-            <div class="flex flex-wrap gap-4px">
-              <el-tag type="primary" size="small" class="m-0">
-                {{ getTriggerSummary(row) }}
-              </el-tag>
+            <div class="space-y-4px">
+              <div class="flex flex-wrap gap-4px">
+                <el-tag type="primary" size="small" class="m-0">
+                  {{ getTriggerSummary(row) }}
+                </el-tag>
+              </div>
+              <!-- 显示定时触发器的额外信息 -->
+              <div v-if="hasTimerTrigger(row)" class="mt-4px">
+                <el-tooltip :content="getCronExpression(row)" placement="top">
+                  <el-tag size="small" type="info" class="mr-4px">
+                    <Icon icon="ep:timer" class="mr-2px" />
+                    {{ getCronFrequency(row) }}
+                  </el-tag>
+                </el-tooltip>
+                <div v-if="getNextExecutionTime(row)" class="text-12px text-[#909399] mt-2px">
+                  <Icon icon="ep:clock" class="mr-2px" />
+                  下次执行: {{ formatDate(getNextExecutionTime(row)!) }}
+                </div>
+              </div>
             </div>
           </template>
         </el-table-column>
@@ -210,7 +225,14 @@
                 @click="handleToggleStatus(row)"
               >
                 <Icon :icon="row.status === 0 ? 'ep:video-pause' : 'ep:video-play'" />
-                {{ getDictLabel(DICT_TYPE.COMMON_STATUS, row.status === 0 ? 1 : 0) }}
+                {{
+                  getDictLabel(
+                    DICT_TYPE.COMMON_STATUS,
+                    row.status === CommonStatusEnum.ENABLE
+                      ? CommonStatusEnum.DISABLE
+                      : CommonStatusEnum.ENABLE
+                  )
+                }}
               </el-button>
               <el-button type="danger" class="!mr-10px" link @click="handleDelete(row.id)">
                 <Icon icon="ep:delete" />
@@ -236,18 +258,18 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
+import { DICT_TYPE, getDictLabel, getIntDictOptions } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
 import RuleSceneForm from './form/RuleSceneForm.vue'
-import { IotSceneRule } from '@/api/iot/rule/scene'
-import { RuleSceneApi } from '@/api/iot/rule/scene'
+import { IotSceneRule, RuleSceneApi } from '@/api/iot/rule/scene'
 import {
-  IotRuleSceneTriggerTypeEnum,
-  IotRuleSceneActionTypeEnum,
+  getActionTypeLabel,
   getTriggerTypeLabel,
-  getActionTypeLabel
+  IotRuleSceneTriggerTypeEnum
 } from '@/views/iot/utils/constants'
 import { formatDate } from '@/utils/formatTime'
+import { CommonStatusEnum } from '@/utils/constants'
+import { CronUtils } from '@/utils/cron'
 
 /** 场景联动规则管理页面 */
 defineOptions({ name: 'IoTSceneRule' })
@@ -260,7 +282,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: '',
-  status: undefined as number | undefined
+  status: undefined
 })
 
 const loading = ref(true) // 列表的加载中
@@ -278,85 +300,28 @@ const statistics = ref({
   total: 0,
   enabled: 0,
   disabled: 0,
-  triggered: 0
+  triggered: 0,
+  timerRules: 0 // 定时规则数量
 })
-
-/** 格式化 CRON 表达式显示 */
-/** 注：后续可考虑将此功能移至 CRON 组件内部 */
-// TODO @puhui999：优化这个format
-const formatCronExpression = (cron: string): string => {
-  if (!cron) return ''
-
-  // 简单的 CRON 表达式解析和格式化
-  const parts = cron.trim().split(' ')
-  if (parts.length < 5) return cron
-
-  const [second, minute, hour] = parts
-
-  // 构建可读的描述
-  let description = ''
-
-  if (second === '0' && minute === '0') {
-    if (hour === '*') {
-      description = '每小时'
-    } else if (hour.includes('/')) {
-      const interval = hour.split('/')[1]
-      description = `每${interval}小时`
-    } else {
-      description = `每天${hour}点`
-    }
-  } else if (second === '0') {
-    if (minute === '*') {
-      description = '每分钟'
-    } else if (minute.includes('/')) {
-      const interval = minute.split('/')[1]
-      description = `每${interval}分钟`
-    } else {
-      description = `每小时第${minute}分钟`
-    }
-  } else {
-    if (second === '*') {
-      description = '每秒'
-    } else if (second.includes('/')) {
-      const interval = second.split('/')[1]
-      description = `每${interval}秒`
-    }
-  }
-
-  return description || cron
-}
 
 /** 获取规则摘要信息 */
 const getRuleSceneSummary = (rule: IotSceneRule) => {
   const triggerSummary =
     rule.triggers?.map((trigger: any) => {
       // 构建基础描述
-      let description = ''
-
+      let description = getTriggerTypeLabel(trigger.type)
       switch (trigger.type) {
         case IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE:
-          description = '设备状态变更'
           break
         case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:
-          description = '属性上报'
-          if (trigger.identifier) {
-            description += ` (${trigger.identifier})`
-          }
-          break
         case IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST:
-          description = '事件上报'
-          if (trigger.identifier) {
-            description += ` (${trigger.identifier})`
-          }
-          break
         case IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE:
-          description = '服务调用'
           if (trigger.identifier) {
             description += ` (${trigger.identifier})`
           }
           break
         case IotRuleSceneTriggerTypeEnum.TIMER:
-          description = `定时触发 (${formatCronExpression(trigger.cronExpression || '')})`
+          description = `${getTriggerTypeLabel(trigger.type)} (${CronUtils.format(trigger.cronExpression || '')})`
           break
         default:
           description = getTriggerTypeLabel(trigger.type)
@@ -375,24 +340,7 @@ const getRuleSceneSummary = (rule: IotSceneRule) => {
   const actionSummary =
     rule.actions?.map((action: any) => {
       // 构建基础描述
-      let description = ''
-
-      switch (action.type) {
-        case IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET:
-          description = '设备属性设置'
-          break
-        case IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE:
-          description = '设备服务调用'
-          break
-        case IotRuleSceneActionTypeEnum.ALERT_TRIGGER:
-          description = '发送告警通知'
-          break
-        case IotRuleSceneActionTypeEnum.ALERT_RECOVER:
-          description = '发送恢复通知'
-          break
-        default:
-          description = getActionTypeLabel(action.type)
-      }
+      let description = getActionTypeLabel(action.type)
 
       // 添加设备信息（如果有）
       if (action.deviceId) {
@@ -419,26 +367,12 @@ const getRuleSceneSummary = (rule: IotSceneRule) => {
 const getList = async () => {
   loading.value = true
   try {
-    // TODO @puhui999：这里的注释优化下；
-    // 调用真实API获取数据
     const data = await RuleSceneApi.getRuleScenePage(queryParams)
     list.value = data.list
     total.value = data.total
-
-    // 更新统计数据
-    updateStatistics()
-  } catch (error) {
-    console.error('获取列表失败:', error)
-    // TODO @puhui999：这里的处理，是不是和其他模块一致哈；
-    ElMessage.error('获取列表失败')
-
-    // 清空列表数据
-    list.value = []
-    total.value = 0
-
-    // 更新统计数据
-    updateStatistics()
   } finally {
+    // 更新统计数据
+    updateStatistics()
     loading.value = false
   }
 }
@@ -447,10 +381,12 @@ const getList = async () => {
 const updateStatistics = () => {
   statistics.value = {
     total: list.value.length,
-    enabled: list.value.filter((item) => item.status === 0).length,
-    disabled: list.value.filter((item) => item.status === 1).length,
+    enabled: list.value.filter((item) => item.status === CommonStatusEnum.ENABLE).length,
+    disabled: list.value.filter((item) => item.status === CommonStatusEnum.DISABLE).length,
     // 已触发的规则数量 (暂时使用启用状态的规则数量)
-    triggered: list.value.filter((item) => item.status === 0).length
+    triggered: list.value.filter((item) => item.status === CommonStatusEnum.ENABLE).length,
+    // 定时规则数量
+    timerRules: list.value.filter((item) => hasTimerTrigger(item)).length
   }
 }
 
@@ -462,6 +398,43 @@ const getTriggerSummary = (rule: IotSceneRule) => {
 /** 获取执行器摘要 */
 const getActionSummary = (rule: IotSceneRule) => {
   return getRuleSceneSummary(rule).actionSummary
+}
+
+/** 检查规则是否包含定时触发器 */
+const hasTimerTrigger = (rule: IotSceneRule): boolean => {
+  return (
+    rule.triggers?.some((trigger) => trigger.type === IotRuleSceneTriggerTypeEnum.TIMER) || false
+  )
+}
+
+/** 获取 CRON 表达式的执行频率描述 */
+const getCronFrequency = (rule: IotSceneRule): string => {
+  const timerTrigger = rule.triggers?.find(
+    (trigger) => trigger.type === IotRuleSceneTriggerTypeEnum.TIMER
+  )
+  if (timerTrigger?.cronExpression) {
+    return CronUtils.getFrequencyDescription(timerTrigger.cronExpression)
+  }
+  return ''
+}
+
+/** 获取下次执行时间 */
+const getNextExecutionTime = (rule: IotSceneRule): Date | null => {
+  const timerTrigger = rule.triggers?.find(
+    (trigger) => trigger.type === IotRuleSceneTriggerTypeEnum.TIMER
+  )
+  if (timerTrigger?.cronExpression) {
+    return CronUtils.getNextExecutionTime(timerTrigger.cronExpression)
+  }
+  return null
+}
+
+/** 获取 CRON 表达式原始值 */
+const getCronExpression = (rule: IotSceneRule): string => {
+  const timerTrigger = rule.triggers?.find(
+    (trigger) => trigger.type === IotRuleSceneTriggerTypeEnum.TIMER
+  )
+  return timerTrigger?.cronExpression || ''
 }
 
 /** 搜索按钮操作 */
@@ -499,28 +472,27 @@ const handleDelete = async (id: number) => {
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
-  } catch (error) {
-    console.error('删除失败:', error)
-    ElMessage.error('删除失败')
-  }
+  } catch (error) {}
 }
 
 /** 修改状态 */
 const handleToggleStatus = async (row: IotSceneRule) => {
   try {
     // 修改状态的二次确认
-    // TODO @puhui999：status 枚举；
-    const text = row.status === 0 ? '禁用' : '启用'
+    const text = row.status === CommonStatusEnum.ENABLE ? '禁用' : '启用'
     await message.confirm('确认要' + text + '"' + row.name + '"吗?')
     // 发起修改状态
-    await RuleSceneApi.updateRuleSceneStatus(row.id!, row.status === 0 ? 1 : 0)
+    await RuleSceneApi.updateRuleSceneStatus(
+      row.id!,
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+    )
     message.success(text + '成功')
     // 刷新
     await getList()
-    updateStatistics()
   } catch {
     // 取消后，进行恢复按钮
-    row.status = row.status === 0 ? 1 : 0
+    row.status =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
   }
 }
 
