@@ -185,21 +185,29 @@ const emit = defineEmits<{
 
 const trigger = useVModel(props, 'modelValue', emit)
 
-// 配置常量
 const maxSubGroups = 3 // 最多 3 个子条件组
 const maxConditionsPerGroup = 3 // 每组最多 3 个条件
 
-// 事件处理
+/**
+ * 更新条件
+ * @param condition 条件对象
+ */
 const updateCondition = (condition: Trigger) => {
   trigger.value = condition
 }
 
+/**
+ * 处理触发器类型变化事件
+ * @param type 触发器类型
+ */
 const handleTriggerTypeChange = (type: number) => {
   trigger.value.type = type
   emit('trigger-type-change', type)
 }
 
-// 条件组相关方法
+/**
+ * 添加子条件组
+ */
 const addSubGroup = async () => {
   if (!trigger.value.conditionGroups) {
     trigger.value.conditionGroups = []
@@ -217,18 +225,30 @@ const addSubGroup = async () => {
   }
 }
 
+/**
+ * 移除子条件组
+ * @param index 子条件组索引
+ */
 const removeSubGroup = (index: number) => {
   if (trigger.value.conditionGroups) {
     trigger.value.conditionGroups.splice(index, 1)
   }
 }
 
+/**
+ * 更新子条件组
+ * @param index 子条件组索引
+ * @param subGroup 子条件组数据
+ */
 const updateSubGroup = (index: number, subGroup: any) => {
   if (trigger.value.conditionGroups) {
     trigger.value.conditionGroups[index] = subGroup
   }
 }
 
+/**
+ * 移除整个条件组
+ */
 const removeConditionGroup = () => {
   trigger.value.conditionGroups = undefined
 }

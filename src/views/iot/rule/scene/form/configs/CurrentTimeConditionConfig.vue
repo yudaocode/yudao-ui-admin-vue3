@@ -154,7 +154,7 @@ const timeOperatorOptions = [
   }
 ]
 
-// 计算属性
+// 计算属性：是否需要时间输入
 const needsTimeInput = computed(() => {
   const timeOnlyOperators = [
     IotRuleSceneTriggerTimeOperatorEnum.BEFORE_TIME.value,
@@ -165,15 +165,21 @@ const needsTimeInput = computed(() => {
   return timeOnlyOperators.includes(condition.value.operator)
 })
 
+// 计算属性：是否需要日期输入
 const needsDateInput = computed(() => {
   return false // 暂时不支持日期输入，只支持时间
 })
 
+// 计算属性：是否需要第二个时间输入
 const needsSecondTimeInput = computed(() => {
   return condition.value.operator === IotRuleSceneTriggerTimeOperatorEnum.BETWEEN_TIME.value
 })
 
-// 事件处理
+/**
+ * 更新条件字段
+ * @param field 字段名
+ * @param value 字段值
+ */
 const updateConditionField = (field: keyof TriggerCondition, value: any) => {
   condition.value[field] = value
 }
@@ -183,7 +189,8 @@ watch(
   () => condition.value.operator,
   (newOperator) => {
     if (newOperator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
-      ;(condition.value as any).timeValue = undefined(condition.value as any).timeValue2 = undefined
+      ;(condition.value as any).timeValue = undefined
+      ;(condition.value as any).timeValue2 = undefined
     } else if (!needsSecondTimeInput.value) {
       ;(condition.value as any).timeValue2 = undefined
     }

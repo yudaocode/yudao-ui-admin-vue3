@@ -160,13 +160,12 @@ const localValue = useVModel(props, 'modelValue', emit, {
   defaultValue: ''
 })
 
-// 状态
-const rangeStart = ref('')
-const rangeEnd = ref('')
-const dateValue = ref('')
-const numberValue = ref<number>()
+const rangeStart = ref('') // 范围开始值
+const rangeEnd = ref('') // 范围结束值
+const dateValue = ref('') // 日期值
+const numberValue = ref<number>() // 数字值
 
-// 计算属性
+// 计算属性：枚举选项
 const enumOptions = computed(() => {
   if (props.propertyConfig?.enum) {
     return props.propertyConfig.enum.map((item: any) => ({
@@ -177,6 +176,7 @@ const enumOptions = computed(() => {
   return []
 })
 
+// 计算属性：列表预览
 const listPreview = computed(() => {
   if (props.operator === 'in' && localValue.value) {
     return localValue.value
@@ -187,7 +187,10 @@ const listPreview = computed(() => {
   return []
 })
 
-// 工具函数
+/**
+ * 判断是否为数字类型
+ * @returns 是否为数字类型
+ */
 const isNumericType = () => {
   return [
     IoTDataSpecsDataTypeEnum.INT,
@@ -196,6 +199,10 @@ const isNumericType = () => {
   ].includes(props.propertyType || '')
 }
 
+/**
+ * 获取输入框类型
+ * @returns 输入框类型
+ */
 const getInputType = () => {
   switch (props.propertyType) {
     case IoTDataSpecsDataTypeEnum.INT:
@@ -207,6 +214,10 @@ const getInputType = () => {
   }
 }
 
+/**
+ * 获取占位符文本
+ * @returns 占位符文本
+ */
 const getPlaceholder = () => {
   const typeMap = {
     [IoTDataSpecsDataTypeEnum.TEXT]: '请输入字符串',
@@ -219,27 +230,48 @@ const getPlaceholder = () => {
   return typeMap[props.propertyType || ''] || '请输入值'
 }
 
+/**
+ * 获取数字精度
+ * @returns 数字精度
+ */
 const getPrecision = () => {
   return props.propertyType === IoTDataSpecsDataTypeEnum.INT ? 0 : 2
 }
 
+/**
+ * 获取数字步长
+ * @returns 数字步长
+ */
 const getStep = () => {
   return props.propertyType === IoTDataSpecsDataTypeEnum.INT ? 1 : 0.1
 }
 
+/**
+ * 获取最小值
+ * @returns 最小值
+ */
 const getMin = () => {
   return props.propertyConfig?.min || undefined
 }
 
+/**
+ * 获取最大值
+ * @returns 最大值
+ */
 const getMax = () => {
   return props.propertyConfig?.max || undefined
 }
 
-// 事件处理
+/**
+ * 处理值变化事件
+ */
 const handleChange = () => {
   // 值变化处理
 }
 
+/**
+ * 处理范围变化事件
+ */
 const handleRangeChange = () => {
   if (rangeStart.value && rangeEnd.value) {
     localValue.value = `${rangeStart.value},${rangeEnd.value}`
@@ -248,10 +280,18 @@ const handleRangeChange = () => {
   }
 }
 
+/**
+ * 处理日期变化事件
+ * @param value 日期值
+ */
 const handleDateChange = (value: string) => {
   localValue.value = value || ''
 }
 
+/**
+ * 处理数字变化事件
+ * @param value 数字值
+ */
 const handleNumberChange = (value: number | undefined) => {
   localValue.value = value?.toString() || ''
 }

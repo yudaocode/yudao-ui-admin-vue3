@@ -157,8 +157,11 @@ const emit = defineEmits<{
 
 const actions = useVModel(props, 'actions', emit)
 
+const maxActions = SCENE_RULE_CONFIG.MAX_ACTIONS // 最大执行器数量
+
 /**
  * 创建默认的执行器数据
+ * @returns 默认执行器对象
  */
 const createDefaultActionData = (): Action => {
   return {
@@ -171,10 +174,9 @@ const createDefaultActionData = (): Action => {
   }
 }
 
-// 使用标准化的常量和函数
-const maxActions = SCENE_RULE_CONFIG.MAX_ACTIONS
-
-/** 添加执行器 */
+/**
+ * 添加执行器
+ */
 const addAction = () => {
   if (actions.value.length >= maxActions) {
     return
@@ -184,28 +186,47 @@ const addAction = () => {
   actions.value.push(newAction)
 }
 
-/** 删除执行器 */
+/**
+ * 删除执行器
+ * @param index 执行器索引
+ */
 const removeAction = (index: number) => {
   actions.value.splice(index, 1)
 }
 
-/** 更新执行器类型 */
+/**
+ * 更新执行器类型
+ * @param index 执行器索引
+ * @param type 执行器类型
+ */
 const updateActionType = (index: number, type: number) => {
   actions.value[index].type = type
   onActionTypeChange(actions.value[index], type)
 }
 
-/** 更新执行器 */
+/**
+ * 更新执行器
+ * @param index 执行器索引
+ * @param action 执行器对象
+ */
 const updateAction = (index: number, action: Action) => {
   actions.value[index] = action
 }
 
-/** 更新告警配置 */
+/**
+ * 更新告警配置
+ * @param index 执行器索引
+ * @param alertConfigId 告警配置ID
+ */
 const updateActionAlertConfig = (index: number, alertConfigId?: number) => {
   actions.value[index].alertConfigId = alertConfigId
 }
 
-/** 监听执行器类型变化 */
+/**
+ * 监听执行器类型变化
+ * @param action 执行器对象
+ * @param type 执行器类型
+ */
 const onActionTypeChange = (action: Action, type: number) => {
   // 清理不相关的配置，确保数据结构干净
   if (isDeviceAction(type)) {

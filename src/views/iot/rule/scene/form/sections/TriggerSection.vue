@@ -137,7 +137,9 @@ const emit = defineEmits<{
 
 const triggers = useVModel(props, 'triggers', emit)
 
-// 事件处理函数
+/**
+ * 添加触发器
+ */
 const addTrigger = () => {
   const newTrigger: Trigger = {
     type: TriggerTypeEnum.DEVICE_STATE_UPDATE,
@@ -152,25 +154,49 @@ const addTrigger = () => {
   triggers.value.push(newTrigger)
 }
 
+/**
+ * 删除触发器
+ * @param index 触发器索引
+ */
 const removeTrigger = (index: number) => {
   if (triggers.value.length > 1) {
     triggers.value.splice(index, 1)
   }
 }
 
+/**
+ * 更新触发器类型
+ * @param index 触发器索引
+ * @param type 触发器类型
+ */
 const updateTriggerType = (index: number, type: number) => {
   triggers.value[index].type = type
   onTriggerTypeChange(index, type)
 }
 
+/**
+ * 更新触发器设备配置
+ * @param index 触发器索引
+ * @param newTrigger 新的触发器对象
+ */
 const updateTriggerDeviceConfig = (index: number, newTrigger: Trigger) => {
   triggers.value[index] = newTrigger
 }
 
+/**
+ * 更新触发器CRON配置
+ * @param index 触发器索引
+ * @param cronExpression CRON表达式
+ */
 const updateTriggerCronConfig = (index: number, cronExpression?: string) => {
   triggers.value[index].cronExpression = cronExpression
 }
 
+/**
+ * 处理触发器类型变化事件
+ * @param index 触发器索引
+ * @param _ 触发器类型（未使用）
+ */
 const onTriggerTypeChange = (index: number, _: number) => {
   const triggerItem = triggers.value[index]
   triggerItem.productId = undefined

@@ -204,11 +204,10 @@ const localValue = useVModel(props, 'modelValue', emit, {
   defaultValue: ''
 })
 
-// 状态
-const paramsJson = ref('')
-const jsonError = ref('')
+const paramsJson = ref('') // JSON参数字符串
+const jsonError = ref('') // JSON验证错误信息
 
-// 计算属性
+// 计算属性：是否有配置
 const hasConfig = computed(() => {
   // TODO @puhui999: 后续统一处理
   console.log(props.config)
@@ -221,6 +220,7 @@ const hasConfig = computed(() => {
   return true
 })
 
+// 计算属性：参数列表
 const paramsList = computed(() => {
   switch (props.type) {
     case JsonParamsInputTypeEnum.SERVICE:
@@ -236,6 +236,7 @@ const paramsList = computed(() => {
   }
 })
 
+// 计算属性：标题
 const title = computed(() => {
   switch (props.type) {
     case JsonParamsInputTypeEnum.SERVICE:
@@ -251,6 +252,7 @@ const title = computed(() => {
   }
 })
 
+// 计算属性：标题图标
 const titleIcon = computed(() => {
   switch (props.type) {
     case JsonParamsInputTypeEnum.SERVICE:
@@ -266,6 +268,7 @@ const titleIcon = computed(() => {
   }
 })
 
+// 计算属性：参数图标
 const paramsIcon = computed(() => {
   switch (props.type) {
     case JsonParamsInputTypeEnum.SERVICE:
@@ -281,6 +284,7 @@ const paramsIcon = computed(() => {
   }
 })
 
+// 计算属性：参数标签
 const paramsLabel = computed(() => {
   switch (props.type) {
     case JsonParamsInputTypeEnum.SERVICE:
@@ -296,6 +300,7 @@ const paramsLabel = computed(() => {
   }
 })
 
+// 计算属性：空状态消息
 const emptyMessage = computed(() => {
   switch (props.type) {
     case JsonParamsInputTypeEnum.SERVICE:
@@ -311,6 +316,7 @@ const emptyMessage = computed(() => {
   }
 })
 
+// 计算属性：无配置消息
 const noConfigMessage = computed(() => {
   switch (props.type) {
     case JsonParamsInputTypeEnum.SERVICE:
@@ -326,7 +332,9 @@ const noConfigMessage = computed(() => {
   }
 })
 
-// 事件处理
+/**
+ * 处理参数变化事件
+ */
 const handleParamsChange = () => {
   try {
     jsonError.value = '' // 清除之前的错误
@@ -361,20 +369,28 @@ const handleParamsChange = () => {
   }
 }
 
-// 快速填充示例数据
+/**
+ * 快速填充示例数据
+ */
 const fillExampleJson = () => {
   paramsJson.value = generateExampleJson()
   handleParamsChange()
 }
 
-// 清空参数
+/**
+ * 清空参数
+ */
 const clearParams = () => {
   paramsJson.value = ''
   localValue.value = ''
   jsonError.value = ''
 }
 
-// 工具函数
+/**
+ * 获取参数类型名称
+ * @param dataType 数据类型
+ * @returns 类型名称
+ */
 const getParamTypeName = (dataType: string) => {
   // 使用 constants.ts 中已有的 getDataTypeName 函数逻辑
   const typeMap = {
@@ -391,6 +407,11 @@ const getParamTypeName = (dataType: string) => {
   return typeMap[dataType] || dataType
 }
 
+/**
+ * 获取参数类型标签样式
+ * @param dataType 数据类型
+ * @returns 标签样式
+ */
 const getParamTypeTag = (dataType: string) => {
   const tagMap = {
     [IoTDataSpecsDataTypeEnum.INT]: 'primary',
@@ -406,12 +427,21 @@ const getParamTypeTag = (dataType: string) => {
   return tagMap[dataType] || 'info'
 }
 
+/**
+ * 获取示例值
+ * @param param 参数对象
+ * @returns 示例值
+ */
 const getExampleValue = (param: any) => {
   const exampleConfig =
     JSON_PARAMS_EXAMPLE_VALUES[param.dataType] || JSON_PARAMS_EXAMPLE_VALUES.DEFAULT
   return exampleConfig.display
 }
 
+/**
+ * 生成示例JSON
+ * @returns JSON字符串
+ */
 const generateExampleJson = () => {
   if (paramsList.value.length === 0) {
     return '{}'
@@ -427,7 +457,10 @@ const generateExampleJson = () => {
   return JSON.stringify(example, null, 2)
 }
 
-// 处理数据回显的函数
+/**
+ * 处理数据回显
+ * @param value 值字符串
+ */
 const handleDataDisplay = (value: string) => {
   if (!value || !value.trim()) {
     paramsJson.value = ''

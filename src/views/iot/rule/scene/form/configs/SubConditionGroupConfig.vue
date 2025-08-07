@@ -103,10 +103,11 @@ const emit = defineEmits<{
 
 const subGroup = useVModel(props, 'modelValue', emit)
 
-// 配置常量
-const maxConditions = computed(() => props.maxConditions || 3)
+const maxConditions = computed(() => props.maxConditions || 3) // 最大条件数量
 
-// 事件处理
+/**
+ * 添加条件
+ */
 const addCondition = async () => {
   // 确保 subGroup.value 是一个数组
   if (!subGroup.value) {
@@ -134,12 +135,21 @@ const addCondition = async () => {
   }
 }
 
+/**
+ * 移除条件
+ * @param index 条件索引
+ */
 const removeCondition = (index: number) => {
   if (subGroup.value) {
     subGroup.value.splice(index, 1)
   }
 }
 
+/**
+ * 更新条件
+ * @param index 条件索引
+ * @param condition 条件对象
+ */
 const updateCondition = (index: number, condition: TriggerCondition) => {
   if (subGroup.value) {
     subGroup.value[index] = condition

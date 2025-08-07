@@ -212,12 +212,11 @@ const emit = defineEmits<{
 
 const localValue = useVModel(props, 'modelValue', emit)
 
-// 状态
-const loading = ref(false)
-const propertyList = ref<PropertySelectorItem[]>([])
-const thingModelTSL = ref<IotThingModelTSLResp | null>(null)
+const loading = ref(false) // 加载状态
+const propertyList = ref<PropertySelectorItem[]>([]) // 属性列表
+const thingModelTSL = ref<IotThingModelTSLResp | null>(null) // 物模型TSL数据
 
-// 计算属性
+// 计算属性：属性分组
 const propertyGroups = computed(() => {
   const groups: { label: string; options: any[] }[] = []
 
@@ -245,11 +244,15 @@ const propertyGroups = computed(() => {
   return groups.filter((group) => group.options.length > 0)
 })
 
+// 计算属性：当前选中的属性
 const selectedProperty = computed(() => {
   return propertyList.value.find((p) => p.identifier === localValue.value)
 })
 
-// 事件处理
+/**
+ * 处理选择变化事件
+ * @param value 选中的属性标识符
+ */
 const handleChange = (value: string) => {
   const property = propertyList.value.find((p) => p.identifier === value)
   if (property) {
@@ -289,7 +292,9 @@ const getThingModelTSL = async () => {
   }
 }
 
-// 解析物模型TSL数据
+/**
+ * 解析物模型TSL数据
+ */
 const parseThingModelData = () => {
   const tsl = thingModelTSL.value
   const properties: PropertySelectorItem[] = []
@@ -352,7 +357,11 @@ const parseThingModelData = () => {
   propertyList.value = properties
 }
 
-// 获取属性单位
+/**
+ * 获取属性单位
+ * @param property 属性对象
+ * @returns 属性单位
+ */
 const getPropertyUnit = (property: any) => {
   if (!property) return undefined
 
@@ -364,7 +373,11 @@ const getPropertyUnit = (property: any) => {
   return undefined
 }
 
-// 获取属性范围描述
+/**
+ * 获取属性范围描述
+ * @param property 属性对象
+ * @returns 属性范围描述
+ */
 const getPropertyRange = (property: any) => {
   if (!property) return undefined
 

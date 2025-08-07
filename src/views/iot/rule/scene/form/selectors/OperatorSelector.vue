@@ -217,7 +217,7 @@ const allOperators = [
   }
 ]
 
-// 计算属性
+// 计算属性：可用的操作符
 const availableOperators = computed(() => {
   if (!props.propertyType) {
     return allOperators
@@ -226,11 +226,15 @@ const availableOperators = computed(() => {
   return allOperators.filter((op) => op.supportedTypes.includes(props.propertyType!))
 })
 
+// 计算属性：当前选中的操作符
 const selectedOperator = computed(() => {
   return allOperators.find((op) => op.value === localValue.value)
 })
 
-// 事件处理
+/**
+ * 处理选择变化事件
+ * @param value 选中的操作符值
+ */
 const handleChange = (value: string) => {
   emit('change', value)
 }

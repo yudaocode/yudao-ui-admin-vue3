@@ -102,7 +102,6 @@ const emit = defineEmits<{
 
 const action = useVModel(props, 'modelValue', emit)
 
-// 简化后的状态变量
 const thingModelProperties = ref<ThingModelProperty[]>([]) // 物模型属性列表
 const loadingThingModel = ref(false) // 物模型加载状态
 const selectedService = ref<ThingModelService | null>(null) // 选中的服务对象
@@ -125,13 +124,13 @@ const paramsValue = computed({
   }
 })
 
+// 计算属性：是否为属性设置类型
 const isPropertySetAction = computed(() => {
-  // 是否为属性设置类型
   return action.value.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
 })
 
+// 计算属性：是否为服务调用类型
 const isServiceInvokeAction = computed(() => {
-  // 是否为服务调用类型
   return action.value.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
 })
 
@@ -314,8 +313,7 @@ const getDefaultValueForParam = (param: any) => {
   }
 }
 
-// 防止重复初始化的标志
-const isInitialized = ref(false)
+const isInitialized = ref(false) // 防止重复初始化的标志
 
 /**
  * 初始化组件数据
@@ -347,7 +345,7 @@ onMounted(() => {
   initializeComponent()
 })
 
-// 只监听关键字段的变化，避免深度监听导致的性能问题
+// 监听关键字段的变化，避免深度监听导致的性能问题
 watch(
   () => [action.value.productId, action.value.type, action.value.identifier],
   async ([newProductId, , newIdentifier], [oldProductId, , oldIdentifier]) => {

@@ -211,12 +211,11 @@ const emit = defineEmits<{
   (e: 'trigger-type-change', value: number): void
 }>()
 
-// 响应式数据
 const condition = useVModel(props, 'modelValue', emit)
-const propertyType = ref('')
-const propertyConfig = ref<any>(null)
+const propertyType = ref('') // 属性类型
+const propertyConfig = ref<any>(null) // 属性配置
 
-// 计算属性
+// 计算属性：是否为设备属性触发器
 const isDevicePropertyTrigger = computed(() => {
   return (
     props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST ||
@@ -225,11 +224,12 @@ const isDevicePropertyTrigger = computed(() => {
   )
 })
 
+// 计算属性：是否为设备状态触发器
 const isDeviceStatusTrigger = computed(() => {
   return props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE
 })
 
-// 服务配置 - 用于 JsonParamsInput
+// 计算属性：服务配置 - 用于 JsonParamsInput
 const serviceConfig = computed(() => {
   if (
     propertyConfig.value &&
@@ -245,7 +245,7 @@ const serviceConfig = computed(() => {
   return undefined
 })
 
-// 事件配置 - 用于 JsonParamsInput
+// 计算属性：事件配置 - 用于 JsonParamsInput
 const eventConfig = computed(() => {
   if (propertyConfig.value && props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST) {
     return {
@@ -258,30 +258,47 @@ const eventConfig = computed(() => {
   return undefined
 })
 
-// 使用标准化的选项获取函数
-const triggerTypeOptions = getTriggerTypeOptions()
-const deviceStatusChangeOptions = getDeviceStatusChangeOptions()
+const triggerTypeOptions = getTriggerTypeOptions() // 触发器类型选项
+const deviceStatusChangeOptions = getDeviceStatusChangeOptions() // 设备状态变化选项
 
-// 事件处理
+/**
+ * 更新条件字段
+ * @param field 字段名
+ * @param value 字段值
+ */
 const updateConditionField = (field: keyof Trigger, value: any) => {
   ;(condition.value as any)[field] = value
 }
 
+/**
+ * 处理触发器类型变化事件
+ * @param type 触发器类型
+ */
 const handleTriggerTypeChange = (type: number) => {
   emit('trigger-type-change', type)
 }
 
+/**
+ * 处理产品变化事件
+ */
 const handleProductChange = () => {
   // 产品变化时清空设备和属性
   condition.value.deviceId = undefined
   condition.value.identifier = ''
 }
 
+/**
+ * 处理设备变化事件
+ */
 const handleDeviceChange = () => {
   // 设备变化时清空属性
   condition.value.identifier = ''
 }
 
+/**
+ * 处理属性变化事件
+ * @param propertyInfo 属性信息对象
+ */
 const handlePropertyChange = (propertyInfo: any) => {
   if (propertyInfo) {
     propertyType.value = propertyInfo.type
@@ -297,6 +314,9 @@ const handlePropertyChange = (propertyInfo: any) => {
   }
 }
 
+/**
+ * 处理操作符变化事件
+ */
 const handleOperatorChange = () => {
   // 操作符变化处理
 }

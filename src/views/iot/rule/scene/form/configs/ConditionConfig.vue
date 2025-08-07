@@ -181,9 +181,8 @@ const emit = defineEmits<{
 
 const condition = useVModel(props, 'modelValue', emit)
 
-// 状态
-const propertyType = ref<string>('string')
-const propertyConfig = ref<any>(null)
+const propertyType = ref<string>('string') // 属性类型
+const propertyConfig = ref<any>(null) // 属性配置
 
 // 计算属性：判断是否为设备相关条件
 const isDeviceCondition = computed(() => {
@@ -193,17 +192,29 @@ const isDeviceCondition = computed(() => {
   )
 })
 
-// 事件处理
+/**
+ * 更新条件字段
+ * @param field 字段名
+ * @param value 字段值
+ */
 const updateConditionField = (field: keyof TriggerCondition, value: any) => {
   ;(condition.value as any)[field] = value
   emit('update:modelValue', condition.value)
 }
 
+/**
+ * 更新整个条件对象
+ * @param newCondition 新的条件对象
+ */
 const updateCondition = (newCondition: TriggerCondition) => {
   condition.value = newCondition
   emit('update:modelValue', condition.value)
 }
 
+/**
+ * 处理条件类型变化事件
+ * @param type 条件类型
+ */
 const handleConditionTypeChange = (type: number) => {
   // 清理不相关的字段
   if (type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS) {
@@ -234,17 +245,29 @@ const handleConditionTypeChange = (type: number) => {
   condition.value.param = ''
 }
 
+/**
+ * 处理产品变化事件
+ * @param _ 产品ID（未使用）
+ */
 const handleProductChange = (_: number) => {
   // 产品变化时清空设备和属性
   condition.value.deviceId = undefined
   condition.value.identifier = ''
 }
 
+/**
+ * 处理设备变化事件
+ * @param _ 设备ID（未使用）
+ */
 const handleDeviceChange = (_: number) => {
   // 设备变化时清空属性
   condition.value.identifier = ''
 }
 
+/**
+ * 处理属性变化事件
+ * @param propertyInfo 属性信息对象
+ */
 const handlePropertyChange = (propertyInfo: { type: string; config: any }) => {
   propertyType.value = propertyInfo.type
   propertyConfig.value = propertyInfo.config
@@ -254,6 +277,9 @@ const handlePropertyChange = (propertyInfo: { type: string; config: any }) => {
   condition.value.param = ''
 }
 
+/**
+ * 处理操作符变化事件
+ */
 const handleOperatorChange = () => {
   // 重置值
   condition.value.param = ''

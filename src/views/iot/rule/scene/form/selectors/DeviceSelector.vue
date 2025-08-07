@@ -58,17 +58,21 @@ const emit = defineEmits<{
   (e: 'change', value?: number): void
 }>()
 
-// 状态
-const deviceLoading = ref(false)
-const deviceList = ref<any[]>([])
+const deviceLoading = ref(false) // 设备加载状态
+const deviceList = ref<any[]>([]) // 设备列表
 
-// 事件处理
+/**
+ * 处理选择变化事件
+ * @param value 选中的设备ID
+ */
 const handleChange = (value?: number) => {
   emit('update:modelValue', value)
   emit('change', value)
 }
 
-// 获取设备列表
+/**
+ * 获取设备列表
+ */
 const getDeviceList = async () => {
   if (!props.productId) {
     deviceList.value = []
@@ -87,8 +91,6 @@ const getDeviceList = async () => {
     deviceLoading.value = false
   }
 }
-
-// 设备状态处理函数已从 constants.ts 中导入
 
 // 监听产品变化
 watch(

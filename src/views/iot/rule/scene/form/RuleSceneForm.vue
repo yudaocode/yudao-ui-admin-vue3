@@ -63,9 +63,12 @@ const emit = defineEmits<{
   (e: 'success'): void
 }>()
 
-const drawerVisible = useVModel(props, 'modelValue', emit) // 是否可见
+const drawerVisible = useVModel(props, 'modelValue', emit) // 抽屉显示状态
 
-/** 创建默认的表单数据 */
+/**
+ * 创建默认的表单数据
+ * @returns 默认表单数据对象
+ */
 const createDefaultFormData = (): IotSceneRule => {
   return {
     name: '',
@@ -87,10 +90,15 @@ const createDefaultFormData = (): IotSceneRule => {
   }
 }
 
-// 表单数据和状态
-const formRef = ref()
-const formData = ref<IotSceneRule>(createDefaultFormData())
-// 自定义校验器
+const formRef = ref() // 表单引用
+const formData = ref<IotSceneRule>(createDefaultFormData()) // 表单数据
+
+/**
+ * 触发器校验器
+ * @param _rule 校验规则（未使用）
+ * @param value 校验值
+ * @param callback 回调函数
+ */
 const validateTriggers = (_rule: any, value: any, callback: any) => {
   if (!value || !Array.isArray(value) || value.length === 0) {
     callback(new Error('至少需要一个触发器'))
@@ -142,6 +150,12 @@ const validateTriggers = (_rule: any, value: any, callback: any) => {
   callback()
 }
 
+/**
+ * 执行器校验器
+ * @param _rule 校验规则（未使用）
+ * @param value 校验值
+ * @param callback 回调函数
+ */
 const validateActions = (_rule: any, value: any, callback: any) => {
   if (!value || !Array.isArray(value) || value.length === 0) {
     callback(new Error('至少需要一个执行器'))
@@ -201,6 +215,7 @@ const validateActions = (_rule: any, value: any, callback: any) => {
 }
 
 const formRules = reactive({
+  // 表单校验规则
   name: [
     { required: true, message: '场景名称不能为空', trigger: 'blur' },
     { type: 'string', min: 1, max: 50, message: '场景名称长度应在1-50个字符之间', trigger: 'blur' }
@@ -221,13 +236,15 @@ const formRules = reactive({
   actions: [{ required: true, validator: validateActions, trigger: 'change' }]
 })
 
-const submitLoading = ref(false)
+const submitLoading = ref(false) // 提交加载状态
+const isEdit = ref(false) // 是否为编辑模式
 
-// 计算属性
-const isEdit = ref(false)
+// 计算属性：抽屉标题
 const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
 
-/** 提交表单 */
+/**
+ * 提交表单
+ */
 const handleSubmit = async () => {
   // 校验表单
   if (!formRef.value) return
@@ -258,11 +275,16 @@ const handleSubmit = async () => {
   }
 }
 
+/**
+ * 处理抽屉关闭事件
+ */
 const handleClose = () => {
   drawerVisible.value = false
 }
 
-/** 初始化表单数据 */
+/**
+ * 初始化表单数据
+ */
 const initFormData = () => {
   if (props.ruleScene) {
     // 编辑模式：数据结构已对齐，直接使用后端数据

@@ -67,11 +67,12 @@ const props = defineProps<{
   modelValue: IotSceneRule
   rules?: any
 }>()
+
 const emit = defineEmits<{
   (e: 'update:modelValue', value: IotSceneRule): void
 }>()
 
-const formData = useVModel(props, 'modelValue', emit)
+const formData = useVModel(props, 'modelValue', emit) // 表单数据
 </script>
 
 <style scoped>
