@@ -77,7 +77,6 @@
         </el-col>
 
         <!-- 值输入 -->
-        <!-- TODO @puhui999：框子大小占满哈。 -->
         <el-col :span="12">
           <el-form-item label="比较值" required>
             <ValueInput
