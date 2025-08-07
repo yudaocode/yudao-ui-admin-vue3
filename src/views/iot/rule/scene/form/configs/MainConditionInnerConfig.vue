@@ -157,8 +157,12 @@
               placeholder="请选择操作符"
               class="w-full"
             >
-              <el-option label="变为在线" value="online" />
-              <el-option label="变为离线" value="offline" />
+              <el-option
+                v-for="option in deviceStatusChangeOptions"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+              />
             </el-select>
           </el-form-item>
         </el-col>
@@ -168,7 +172,7 @@
     <!-- 其他触发类型的提示 -->
     <div v-else class="text-center py-20px">
       <p class="text-14px text-[var(--el-text-color-secondary)] mb-4px">
-        当前触发事件类型：{{ getTriggerTypeText(triggerType) }}
+        当前触发事件类型：{{ getTriggerTypeLabel(triggerType) }}
       </p>
       <p class="text-12px text-[var(--el-text-color-placeholder)]">
         此触发类型暂不需要配置额外条件
@@ -186,7 +190,12 @@ import ValueInput from '../inputs/ValueInput.vue'
 import JsonParamsInput from '../inputs/JsonParamsInput.vue'
 
 import type { Trigger } from '@/api/iot/rule/scene'
-import { IotRuleSceneTriggerTypeEnum, getTriggerTypeOptions } from '@/views/iot/utils/constants'
+import {
+  IotRuleSceneTriggerTypeEnum,
+  getTriggerTypeOptions,
+  getTriggerTypeLabel,
+  getDeviceStatusChangeOptions
+} from '@/views/iot/utils/constants'
 import { useVModel } from '@vueuse/core'
 
 /** 主条件内部配置组件 */
@@ -249,25 +258,9 @@ const eventConfig = computed(() => {
   return undefined
 })
 
-// 获取触发类型文本
-// TODO @puhui999：是不是有枚举可以服用哈；
-const getTriggerTypeText = (type: number) => {
-  switch (type) {
-    case IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST:
-      return '设备属性上报'
-    case IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST:
-      return '设备事件上报'
-    case IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE:
-      return '设备服务调用'
-    case IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE:
-      return '设备状态变化'
-    default:
-      return '未知类型'
-  }
-}
-
-// 触发器类型选项
+// 使用标准化的选项获取函数
 const triggerTypeOptions = getTriggerTypeOptions()
+const deviceStatusChangeOptions = getDeviceStatusChangeOptions()
 
 // 事件处理
 const updateConditionField = (field: keyof Trigger, value: any) => {

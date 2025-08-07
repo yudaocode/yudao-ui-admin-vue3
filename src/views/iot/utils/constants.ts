@@ -158,6 +158,47 @@ export const getDataTypeOptionsLabel = (value: string) => {
   return dataType && `${dataType.value}(${dataType.label})`
 }
 
+/** 获取数据类型显示名称（用于属性选择器） */
+export const getDataTypeName = (dataType: string): string => {
+  const typeMap = {
+    [IoTDataSpecsDataTypeEnum.INT]: '整数',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: '浮点数',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: '双精度',
+    [IoTDataSpecsDataTypeEnum.TEXT]: '字符串',
+    [IoTDataSpecsDataTypeEnum.BOOL]: '布尔值',
+    [IoTDataSpecsDataTypeEnum.ENUM]: '枚举',
+    [IoTDataSpecsDataTypeEnum.DATE]: '日期',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: '结构体',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: '数组'
+  }
+  return typeMap[dataType] || dataType
+}
+
+/** 获取数据类型标签类型（用于 el-tag 的 type 属性） */
+export const getDataTypeTagType = (
+  dataType: string
+): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  const tagMap = {
+    [IoTDataSpecsDataTypeEnum.INT]: 'primary',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: 'success',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: 'success',
+    [IoTDataSpecsDataTypeEnum.TEXT]: 'info',
+    [IoTDataSpecsDataTypeEnum.BOOL]: 'warning',
+    [IoTDataSpecsDataTypeEnum.ENUM]: 'danger',
+    [IoTDataSpecsDataTypeEnum.DATE]: 'primary',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: 'info',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: 'warning'
+  } as const
+  return tagMap[dataType] || 'info'
+}
+
+/** 物模型组标签常量 */
+export const THING_MODEL_GROUP_LABELS = {
+  PROPERTY: '设备属性',
+  EVENT: '设备事件',
+  SERVICE: '设备服务'
+} as const
+
 // IoT OTA 任务设备范围枚举
 export const IoTOtaTaskDeviceScopeEnum = {
   ALL: {
@@ -314,6 +355,26 @@ export const getActionTypeLabel = (type: number): string => {
   return option?.label || '未知类型'
 }
 
+/** 获取执行器标签类型（用于 el-tag 的 type 属性） */
+export const getActionTypeTag = (
+  type: number
+): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  const actionTypeTags = {
+    [IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
+    [IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
+    [IotRuleSceneActionTypeEnum.ALERT_TRIGGER]: 'danger',
+    [IotRuleSceneActionTypeEnum.ALERT_RECOVER]: 'warning'
+  } as const
+  return actionTypeTags[type] || 'info'
+}
+
+/** 场景联动规则配置常量 */
+export const SCENE_RULE_CONFIG = {
+  MAX_ACTIONS: 5, // 最大执行器数量
+  MAX_TRIGGERS: 10, // 最大触发器数量
+  MAX_CONDITIONS: 20 // 最大条件数量
+} as const
+
 /** IoT 设备消息类型枚举 */
 export const IotDeviceMessageTypeEnum = {
   PROPERTY: 'property', // 属性
@@ -344,6 +405,131 @@ export const IotRuleSceneTriggerConditionTypeEnum = {
   CURRENT_TIME: 3 // 当前时间
 } as const
 
+/** 获取条件类型选项 */
+export const getConditionTypeOptions = () => [
+  {
+    value: IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS,
+    label: '设备状态'
+  },
+  {
+    value: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY,
+    label: '设备属性'
+  },
+  {
+    value: IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME,
+    label: '当前时间'
+  }
+]
+
+/** 设备状态枚举 */
+export const IoTDeviceStatusEnum = {
+  ONLINE: {
+    label: '在线',
+    value: 'online'
+  },
+  OFFLINE: {
+    label: '离线',
+    value: 'offline'
+  }
+} as const
+
+/** 设备启用状态枚举 */
+export const IoTDeviceEnableStatusEnum = {
+  ENABLED: {
+    label: '正常',
+    value: 0,
+    tagType: 'success'
+  },
+  DISABLED: {
+    label: '禁用',
+    value: 1,
+    tagType: 'danger'
+  }
+} as const
+
+/** 设备激活状态枚举 */
+export const IoTDeviceActiveStatusEnum = {
+  ACTIVATED: {
+    label: '已激活',
+    tagType: 'success'
+  },
+  NOT_ACTIVATED: {
+    label: '未激活',
+    tagType: 'info'
+  }
+} as const
+
+/** 设备选择器特殊选项 */
+export const DEVICE_SELECTOR_OPTIONS = {
+  ALL_DEVICES: {
+    id: 0,
+    deviceName: '全部设备'
+  }
+} as const
+
+/** 获取设备状态选项 */
+export const getDeviceStatusOptions = () => [
+  {
+    value: IoTDeviceStatusEnum.ONLINE.value,
+    label: IoTDeviceStatusEnum.ONLINE.label
+  },
+  {
+    value: IoTDeviceStatusEnum.OFFLINE.value,
+    label: IoTDeviceStatusEnum.OFFLINE.label
+  }
+]
+
+/** 获取状态操作符选项 */
+export const getStatusOperatorOptions = () => [
+  {
+    value: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value,
+    label: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.name
+  },
+  {
+    value: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.value,
+    label: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.name
+  }
+]
+
+/** 获取设备状态变更选项（用于触发器配置） */
+export const getDeviceStatusChangeOptions = () => [
+  {
+    label: '变为在线',
+    value: IoTDeviceStatusEnum.ONLINE.value
+  },
+  {
+    label: '变为离线',
+    value: IoTDeviceStatusEnum.OFFLINE.value
+  }
+]
+
+/** 获取设备启用状态文本 */
+export const getDeviceEnableStatusText = (status: number): string => {
+  const statusItem = Object.values(IoTDeviceEnableStatusEnum).find((item) => item.value === status)
+  return statusItem?.label || '未知'
+}
+
+/** 获取设备启用状态标签类型 */
+export const getDeviceEnableStatusTagType = (
+  status: number
+): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  const statusItem = Object.values(IoTDeviceEnableStatusEnum).find((item) => item.value === status)
+  return statusItem?.tagType || 'info'
+}
+
+/** 获取设备激活状态文本和标签类型 */
+export const getDeviceActiveStatus = (activeTime?: string | null) => {
+  const isActivated = !!activeTime
+  return {
+    text: isActivated
+      ? IoTDeviceActiveStatusEnum.ACTIVATED.label
+      : IoTDeviceActiveStatusEnum.NOT_ACTIVATED.label,
+    tagType: isActivated
+      ? IoTDeviceActiveStatusEnum.ACTIVATED.tagType
+      : IoTDeviceActiveStatusEnum.NOT_ACTIVATED.tagType
+  }
+}
+
 /** IoT 场景联动触发时间操作符枚举 */
 export const IotRuleSceneTriggerTimeOperatorEnum = {
   BEFORE_TIME: { name: '在时间之前', value: 'before_time' }, // 在时间之前
@@ -362,4 +548,14 @@ export const getTriggerTypeLabel = (type: number): string => {
   const options = getTriggerTypeOptions()
   const option = options.find((item) => item.value === type)
   return option?.label || '未知类型'
+}
+
+/** 获取触发器标签类型（用于 el-tag 的 type 属性） */
+export const getTriggerTagType = (
+  type: number
+): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  if (type === IotRuleSceneTriggerTypeEnum.TIMER) {
+    return 'warning'
+  }
+  return isDeviceTrigger(type) ? 'success' : 'info'
 }

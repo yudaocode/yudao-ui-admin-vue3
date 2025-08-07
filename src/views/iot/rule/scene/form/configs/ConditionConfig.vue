@@ -13,7 +13,7 @@
             class="w-full"
           >
             <el-option
-              v-for="option in conditionTypeOptions"
+              v-for="option in getConditionTypeOptions()"
               :key="option.value"
               :label="option.label"
               :value="option.value"
@@ -47,7 +47,10 @@
     </el-row>
 
     <!-- 设备状态条件配置 -->
-    <div v-if="condition.type === ConditionTypeEnum.DEVICE_STATUS" class="flex flex-col gap-16px">
+    <div
+      v-if="condition.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS"
+      class="flex flex-col gap-16px"
+    >
       <!-- 状态和操作符选择 -->
       <el-row :gutter="16">
         <!-- 操作符选择 -->
@@ -60,7 +63,7 @@
               class="w-full"
             >
               <el-option
-                v-for="option in statusOperatorOptions"
+                v-for="option in getStatusOperatorOptions()"
                 :key="option.value"
                 :label="option.label"
                 :value="option.value"
@@ -79,7 +82,7 @@
               class="w-full"
             >
               <el-option
-                v-for="option in deviceStatusOptions"
+                v-for="option in getDeviceStatusOptions()"
                 :key="option.value"
                 :label="option.label"
                 :value="option.value"
@@ -91,13 +94,15 @@
     </div>
 
     <!-- 设备属性条件配置 -->
-    <div v-else-if="condition.type === ConditionTypeEnum.DEVICE_PROPERTY" class="space-y-16px">
+    <div
+      v-else-if="condition.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY"
+      class="space-y-16px"
+    >
       <!-- 属性配置 -->
       <el-row :gutter="16">
         <!-- 属性/事件/服务选择 -->
         <el-col :span="6">
           <el-form-item label="监控项" required>
-            <!-- TODO @puhui999：是不是不展示“整数”、“小数”这个类型，一行，只展示属性名 + 标识，更简洁一点；然后标识是 tag；因为已经有个 ？ tip 了 -->
             <PropertySelector
               :model-value="condition.identifier"
               @update:model-value="(value) => updateConditionField('identifier', value)"
@@ -138,7 +143,7 @@
 
     <!-- 当前时间条件配置 -->
     <CurrentTimeConditionConfig
-      v-else-if="condition.type === ConditionTypeEnum.CURRENT_TIME"
+      v-else-if="condition.type === IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME"
       :model-value="condition"
       @update:model-value="updateCondition"
     />
@@ -156,7 +161,10 @@ import ValueInput from '../inputs/ValueInput.vue'
 import type { TriggerCondition } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerConditionTypeEnum,
-  IotRuleSceneTriggerConditionParameterOperatorEnum
+  IotRuleSceneTriggerConditionParameterOperatorEnum,
+  getConditionTypeOptions,
+  getDeviceStatusOptions,
+  getStatusOperatorOptions
 } from '@/views/iot/utils/constants'
 
 /** 单个条件配置组件 */
@@ -173,48 +181,6 @@ const emit = defineEmits<{
 
 const condition = useVModel(props, 'modelValue', emit)
 
-// 常量定义
-const ConditionTypeEnum = IotRuleSceneTriggerConditionTypeEnum
-
-// 条件类型选项
-const conditionTypeOptions = [
-  {
-    value: IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS,
-    label: '设备状态'
-  },
-  {
-    value: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY,
-    label: '设备属性'
-  },
-  {
-    value: IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME,
-    label: '当前时间'
-  }
-]
-
-// 设备状态选项
-const deviceStatusOptions = [
-  {
-    value: 'online',
-    label: '在线'
-  },
-  {
-    value: 'offline',
-    label: '离线'
-  }
-]
-// 状态操作符选项
-const statusOperatorOptions = [
-  {
-    value: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value,
-    label: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.name
-  },
-  {
-    value: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.value,
-    label: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.name
-  }
-]
-
 // 状态
 const propertyType = ref<string>('string')
 const propertyConfig = ref<any>(null)
@@ -222,8 +188,8 @@ const propertyConfig = ref<any>(null)
 // 计算属性：判断是否为设备相关条件
 const isDeviceCondition = computed(() => {
   return (
-    condition.value.type === ConditionTypeEnum.DEVICE_STATUS ||
-    condition.value.type === ConditionTypeEnum.DEVICE_PROPERTY
+    condition.value.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS ||
+    condition.value.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY
   )
 })
 
@@ -240,7 +206,7 @@ const updateCondition = (newCondition: TriggerCondition) => {
 
 const handleConditionTypeChange = (type: number) => {
   // 清理不相关的字段
-  if (type === ConditionTypeEnum.DEVICE_STATUS) {
+  if (type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS) {
     condition.value.identifier = undefined
     // 清理时间相关字段（如果存在）
     if ('timeValue' in condition.value) {
@@ -249,11 +215,11 @@ const handleConditionTypeChange = (type: number) => {
     if ('timeValue2' in condition.value) {
       delete (condition.value as any).timeValue2
     }
-  } else if (type === ConditionTypeEnum.CURRENT_TIME) {
+  } else if (type === IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME) {
     condition.value.identifier = undefined
     condition.value.productId = undefined
     condition.value.deviceId = undefined
-  } else if (type === ConditionTypeEnum.DEVICE_PROPERTY) {
+  } else if (type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY) {
     // 清理时间相关字段（如果存在）
     if ('timeValue' in condition.value) {
       delete (condition.value as any).timeValue

@@ -118,9 +118,9 @@ import DeviceTriggerConfig from '../configs/DeviceTriggerConfig.vue'
 import { Crontab } from '@/components/Crontab'
 import type { Trigger } from '@/api/iot/rule/scene'
 import {
-  getTriggerTypeOptions,
+  getTriggerTypeLabel,
+  getTriggerTagType,
   IotRuleSceneTriggerTypeEnum as TriggerTypeEnum,
-  IotRuleSceneTriggerTypeEnum,
   isDeviceTrigger
 } from '@/views/iot/utils/constants'
 
@@ -136,23 +136,6 @@ const emit = defineEmits<{
 }>()
 
 const triggers = useVModel(props, 'triggers', emit)
-
-// 触发器类型选项（从 constants 中获取）
-const triggerTypeOptions = getTriggerTypeOptions()
-
-// 工具函数
-// TODO @puhui999：这里是不是重复了哈；
-const getTriggerTypeLabel = (type: number): string => {
-  const option = triggerTypeOptions.find((opt) => opt.value === type)
-  return option?.label || '未知类型'
-}
-
-const getTriggerTagType = (type: number): string => {
-  if (type === IotRuleSceneTriggerTypeEnum.TIMER) {
-    return 'warning'
-  }
-  return isDeviceTrigger(type) ? 'success' : 'info'
-}
 
 // 事件处理函数
 const addTrigger = () => {

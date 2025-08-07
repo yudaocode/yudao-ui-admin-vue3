@@ -24,11 +24,11 @@
           <div class="text-12px text-[var(--el-text-color-secondary)]">{{ device.deviceKey }}</div>
         </div>
         <div class="flex items-center gap-4px">
-          <el-tag size="small" :type="getStatusType(device.status)">
-            {{ getStatusText(device.status) }}
+          <el-tag size="small" :type="getDeviceEnableStatusTagType(device.status)">
+            {{ getDeviceEnableStatusText(device.status) }}
           </el-tag>
-          <el-tag size="small" :type="device.activeTime ? 'success' : 'info'">
-            {{ device.activeTime ? '已激活' : '未激活' }}
+          <el-tag size="small" :type="getDeviceActiveStatus(device.activeTime).tagType">
+            {{ getDeviceActiveStatus(device.activeTime).text }}
           </el-tag>
         </div>
       </div>
@@ -38,6 +38,12 @@
 
 <script setup lang="ts">
 import { DeviceApi } from '@/api/iot/device/device'
+import {
+  getDeviceEnableStatusText,
+  getDeviceEnableStatusTagType,
+  getDeviceActiveStatus,
+  DEVICE_SELECTOR_OPTIONS
+} from '@/views/iot/utils/constants'
 
 /** 设备选择器组件 */
 defineOptions({ name: 'DeviceSelector' })
@@ -77,33 +83,12 @@ const getDeviceList = async () => {
     console.error('获取设备列表失败:', error)
     deviceList.value = []
   } finally {
-    deviceList.value.push({ id: 0, deviceName: '全部设备' })
+    deviceList.value.push(DEVICE_SELECTOR_OPTIONS.ALL_DEVICES)
     deviceLoading.value = false
   }
 }
 
-// 设备状态映射
-const getStatusType = (status: number) => {
-  switch (status) {
-    case 0:
-      return 'success' // 正常
-    case 1:
-      return 'danger' // 禁用
-    default:
-      return 'info'
-  }
-}
-
-const getStatusText = (status: number) => {
-  switch (status) {
-    case 0:
-      return '正常'
-    case 1:
-      return '禁用'
-    default:
-      return '未知'
-  }
-}
+// 设备状态处理函数已从 constants.ts 中导入
 
 // 监听产品变化
 watch(

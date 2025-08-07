@@ -45,7 +45,7 @@
               <Icon icon="ep:setting" class="text-[var(--el-color-success)] text-16px" />
               <span>执行器 {{ index + 1 }}</span>
               <el-tag :type="getActionTypeTag(action.type)" size="small">
-                {{ getActionTypeName(action.type) }}
+                {{ getActionTypeLabel(action.type) }}
               </el-tag>
             </div>
             <div>
@@ -139,7 +139,9 @@ import {
   isDeviceAction,
   isAlertAction,
   getActionTypeLabel,
-  getActionTypeOptions
+  getActionTypeOptions,
+  getActionTypeTag,
+  SCENE_RULE_CONFIG
 } from '@/views/iot/utils/constants'
 
 /** 执行器配置组件 */
@@ -169,22 +171,8 @@ const createDefaultActionData = (): Action => {
   }
 }
 
-const maxActions = 5 // 最大执行器数量
-
-// 工具函数
-const getActionTypeName = (type: number) => {
-  return getActionTypeLabel(type)
-}
-
-const getActionTypeTag = (type: number) => {
-  const actionTypeTags = {
-    [ActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
-    [ActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
-    [ActionTypeEnum.ALERT_TRIGGER]: 'danger',
-    [ActionTypeEnum.ALERT_RECOVER]: 'warning'
-  }
-  return actionTypeTags[type] || 'info'
-}
+// 使用标准化的常量和函数
+const maxActions = SCENE_RULE_CONFIG.MAX_ACTIONS
 
 /** 添加执行器 */
 const addAction = () => {
