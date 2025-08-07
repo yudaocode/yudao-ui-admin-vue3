@@ -274,35 +274,19 @@ export const IotRuleSceneActionTypeEnum = {
 export const getActionTypeOptions = () => [
   {
     value: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,
-    label: '设备属性设置',
-    description: '设置目标设备的属性值',
-    icon: 'ep:edit',
-    tag: 'primary',
-    category: '设备控制'
+    label: '设备属性设置'
   },
   {
     value: IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE,
-    label: '设备服务调用',
-    description: '调用目标设备的服务',
-    icon: 'ep:service',
-    tag: 'success',
-    category: '设备控制'
+    label: '设备服务调用'
   },
   {
     value: IotRuleSceneActionTypeEnum.ALERT_TRIGGER,
-    label: '触发告警',
-    description: '触发系统告警通知',
-    icon: 'ep:warning',
-    tag: 'danger',
-    category: '告警通知'
+    label: '触发告警'
   },
   {
     value: IotRuleSceneActionTypeEnum.ALERT_RECOVER,
-    label: '恢复告警',
-    description: '恢复已触发的告警',
-    icon: 'ep:circle-check',
-    tag: 'warning',
-    category: '告警通知'
+    label: '恢复告警'
   }
 ]
 

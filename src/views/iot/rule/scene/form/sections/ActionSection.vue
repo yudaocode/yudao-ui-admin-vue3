@@ -1,5 +1,4 @@
 <!-- 执行器配置组件 -->
-<!-- todo @puhui999：参考“触发器配置”，简化下。 -->
 <template>
   <el-card class="border border-[var(--el-border-color-light)] rounded-8px" shadow="never">
     <template #header>
@@ -65,11 +64,24 @@
 
           <div class="space-y-16px">
             <!-- 执行类型选择 -->
-            <ActionTypeSelector
-              :model-value="action.type"
-              @update:model-value="(value) => updateActionType(index, value)"
-              @change="onActionTypeChange(action, $event)"
-            />
+            <div class="w-full">
+              <el-form-item label="执行类型" required>
+                <el-select
+                  :model-value="action.type"
+                  @update:model-value="(value) => updateActionType(index, value)"
+                  @change="(value) => onActionTypeChange(action, value)"
+                  placeholder="请选择执行类型"
+                  class="w-full"
+                >
+                  <el-option
+                    v-for="option in getActionTypeOptions()"
+                    :key="option.value"
+                    :label="option.label"
+                    :value="option.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </div>
 
             <!-- 设备控制配置 -->
             <DeviceControlConfig
@@ -119,7 +131,6 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import ActionTypeSelector from '../selectors/ActionTypeSelector.vue'
 import DeviceControlConfig from '../configs/DeviceControlConfig.vue'
 import AlertConfig from '../configs/AlertConfig.vue'
 import type { Action } from '@/api/iot/rule/scene'
@@ -127,7 +138,8 @@ import {
   IotRuleSceneActionTypeEnum as ActionTypeEnum,
   isDeviceAction,
   isAlertAction,
-  getActionTypeLabel
+  getActionTypeLabel,
+  getActionTypeOptions
 } from '@/views/iot/utils/constants'
 
 /** 执行器配置组件 */
@@ -152,7 +164,7 @@ const createDefaultActionData = (): Action => {
     productId: undefined,
     deviceId: undefined,
     identifier: undefined, // 物模型标识符（服务调用时使用）
-    params: {},
+    params: undefined,
     alertConfigId: undefined
   }
 }
@@ -212,7 +224,7 @@ const onActionTypeChange = (action: Action, type: number) => {
     // 设备控制类型：清理告警配置，确保设备参数存在
     action.alertConfigId = undefined
     if (!action.params) {
-      action.params = {}
+      action.params = ''
     }
     // 如果从其他类型切换到设备控制类型，清空identifier（让用户重新选择）
     if (action.identifier && type !== action.type) {
