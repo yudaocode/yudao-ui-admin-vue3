@@ -29,7 +29,7 @@
                   <Icon :icon="option.icon" :class="option.iconClass" />
                   <span>{{ option.label }}</span>
                 </div>
-                <el-tag :type="option.tag" size="small">{{ option.category }}</el-tag>
+                <el-tag :type="option.tag as any" size="small">{{ option.category }}</el-tag>
               </div>
             </el-option>
           </el-select>
@@ -41,8 +41,8 @@
         <el-form-item label="时间值" required>
           <el-time-picker
             v-if="needsTimeInput"
-            :model-value="condition.timeValue"
-            @update:model-value="(value) => updateConditionField('timeValue', value)"
+            :model-value="timeValue"
+            @update:model-value="handleTimeValueChange"
             placeholder="请选择时间"
             format="HH:mm:ss"
             value-format="HH:mm:ss"
@@ -50,8 +50,8 @@
           />
           <el-date-picker
             v-else-if="needsDateInput"
-            :model-value="condition.timeValue"
-            @update:model-value="(value) => updateConditionField('timeValue', value)"
+            :model-value="timeValue"
+            @update:model-value="handleTimeValueChange"
             type="datetime"
             placeholder="请选择日期时间"
             format="YYYY-MM-DD HH:mm:ss"
@@ -69,8 +69,8 @@
         <el-form-item label="结束时间" required>
           <el-time-picker
             v-if="needsTimeInput"
-            :model-value="condition.timeValue2"
-            @update:model-value="(value) => updateConditionField('timeValue2', value)"
+            :model-value="timeValue2"
+            @update:model-value="handleTimeValue2Change"
             placeholder="请选择结束时间"
             format="HH:mm:ss"
             value-format="HH:mm:ss"
@@ -78,8 +78,8 @@
           />
           <el-date-picker
             v-else
-            :model-value="condition.timeValue2"
-            @update:model-value="(value) => updateConditionField('timeValue2', value)"
+            :model-value="timeValue2"
+            @update:model-value="handleTimeValue2Change"
             type="datetime"
             placeholder="请选择结束日期时间"
             format="YYYY-MM-DD HH:mm:ss"
@@ -162,7 +162,7 @@ const needsTimeInput = computed(() => {
     IotRuleSceneTriggerTimeOperatorEnum.BETWEEN_TIME.value,
     IotRuleSceneTriggerTimeOperatorEnum.AT_TIME.value
   ]
-  return timeOnlyOperators.includes(condition.value.operator)
+  return timeOnlyOperators.includes(condition.value.operator as any)
 })
 
 // 计算属性：是否需要日期输入
@@ -175,13 +175,53 @@ const needsSecondTimeInput = computed(() => {
   return condition.value.operator === IotRuleSceneTriggerTimeOperatorEnum.BETWEEN_TIME.value
 })
 
+// 计算属性：从 param 中解析时间值
+const timeValue = computed(() => {
+  if (!condition.value.param) return ''
+  const params = condition.value.param.split(',')
+  return params[0] || ''
+})
+
+// 计算属性：从 param 中解析第二个时间值
+const timeValue2 = computed(() => {
+  if (!condition.value.param) return ''
+  const params = condition.value.param.split(',')
+  return params[1] || ''
+})
+
 /**
  * 更新条件字段
  * @param field 字段名
  * @param value 字段值
  */
-const updateConditionField = (field: keyof TriggerCondition, value: any) => {
+const updateConditionField = (field: any, value: any) => {
   condition.value[field] = value
+}
+
+/**
+ * 处理第一个时间值变化
+ * @param value 时间值
+ */
+const handleTimeValueChange = (value: string) => {
+  const currentParams = condition.value.param ? condition.value.param.split(',') : []
+  currentParams[0] = value || ''
+
+  // 如果是范围条件，保留第二个值；否则只保留第一个值
+  if (needsSecondTimeInput.value) {
+    condition.value.param = currentParams.slice(0, 2).join(',')
+  } else {
+    condition.value.param = currentParams[0]
+  }
+}
+
+/**
+ * 处理第二个时间值变化
+ * @param value 时间值
+ */
+const handleTimeValue2Change = (value: string) => {
+  const currentParams = condition.value.param ? condition.value.param.split(',') : ['']
+  currentParams[1] = value || ''
+  condition.value.param = currentParams.slice(0, 2).join(',')
 }
 
 // 监听操作符变化，清理不相关的时间值
@@ -189,10 +229,12 @@ watch(
   () => condition.value.operator,
   (newOperator) => {
     if (newOperator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
-      ;(condition.value as any).timeValue = undefined
-      ;(condition.value as any).timeValue2 = undefined
+      // 今日条件不需要时间参数
+      condition.value.param = ''
     } else if (!needsSecondTimeInput.value) {
-      ;(condition.value as any).timeValue2 = undefined
+      // 非范围条件只保留第一个时间值
+      const currentParams = condition.value.param ? condition.value.param.split(',') : []
+      condition.value.param = currentParams[0] || ''
     }
   }
 )
