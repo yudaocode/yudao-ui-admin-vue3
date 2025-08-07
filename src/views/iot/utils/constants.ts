@@ -559,3 +559,112 @@ export const getTriggerTagType = (
   }
   return isDeviceTrigger(type) ? 'success' : 'info'
 }
+
+// ========== JSON参数输入组件相关常量 ==========
+
+/** JSON参数输入组件类型枚举 */
+export const JsonParamsInputTypeEnum = {
+  SERVICE: 'service',
+  EVENT: 'event',
+  PROPERTY: 'property',
+  CUSTOM: 'custom'
+} as const
+
+/** JSON参数输入组件类型 */
+export type JsonParamsInputType =
+  (typeof JsonParamsInputTypeEnum)[keyof typeof JsonParamsInputTypeEnum]
+
+/** JSON参数输入组件文本常量 */
+export const JSON_PARAMS_INPUT_CONSTANTS = {
+  // 基础文本
+  PLACEHOLDER: '请输入JSON格式的参数',
+  JSON_FORMAT_CORRECT: 'JSON 格式正确',
+  QUICK_FILL_LABEL: '快速填充：',
+  EXAMPLE_DATA_BUTTON: '示例数据',
+  CLEAR_BUTTON: '清空',
+  VIEW_EXAMPLE_TITLE: '查看参数示例',
+  COMPLETE_JSON_FORMAT: '完整 JSON 格式：',
+  REQUIRED_TAG: '必填',
+
+  // 错误信息
+  PARAMS_MUST_BE_OBJECT: '参数必须是一个有效的 JSON 对象',
+  PARAM_REQUIRED_ERROR: (paramName: string) => `参数 ${paramName} 为必填项`,
+  JSON_FORMAT_ERROR: (error: string) => `JSON格式错误: ${error}`,
+  UNKNOWN_ERROR: '未知错误',
+
+  // 类型相关标题
+  TITLES: {
+    SERVICE: (name?: string) => `${name || '服务'} - 输入参数示例`,
+    EVENT: (name?: string) => `${name || '事件'} - 输出参数示例`,
+    PROPERTY: '属性设置 - 参数示例',
+    CUSTOM: (name?: string) => `${name || '自定义'} - 参数示例`,
+    DEFAULT: '参数示例'
+  },
+
+  // 参数标签
+  PARAMS_LABELS: {
+    SERVICE: '输入参数',
+    EVENT: '输出参数',
+    PROPERTY: '属性参数',
+    CUSTOM: '参数列表',
+    DEFAULT: '参数'
+  },
+
+  // 空状态消息
+  EMPTY_MESSAGES: {
+    SERVICE: '此服务无需输入参数',
+    EVENT: '此事件无输出参数',
+    PROPERTY: '无可设置的属性',
+    CUSTOM: '无参数配置',
+    DEFAULT: '无参数'
+  },
+
+  // 无配置消息
+  NO_CONFIG_MESSAGES: {
+    SERVICE: '请先选择服务',
+    EVENT: '请先选择事件',
+    PROPERTY: '请先选择产品',
+    CUSTOM: '请先进行配置',
+    DEFAULT: '请先进行配置'
+  }
+} as const
+
+/** JSON参数输入组件图标常量 */
+export const JSON_PARAMS_INPUT_ICONS = {
+  // 标题图标
+  TITLE_ICONS: {
+    SERVICE: 'ep:service',
+    EVENT: 'ep:bell',
+    PROPERTY: 'ep:edit',
+    CUSTOM: 'ep:document',
+    DEFAULT: 'ep:document'
+  },
+
+  // 参数图标
+  PARAMS_ICONS: {
+    SERVICE: 'ep:edit',
+    EVENT: 'ep:upload',
+    PROPERTY: 'ep:setting',
+    CUSTOM: 'ep:list',
+    DEFAULT: 'ep:edit'
+  },
+
+  // 状态图标
+  STATUS_ICONS: {
+    ERROR: 'ep:warning',
+    SUCCESS: 'ep:circle-check'
+  }
+} as const
+
+/** JSON参数输入组件示例值常量 */
+export const JSON_PARAMS_EXAMPLE_VALUES = {
+  [IoTDataSpecsDataTypeEnum.INT]: { display: '25', value: 25 },
+  [IoTDataSpecsDataTypeEnum.FLOAT]: { display: '25.5', value: 25.5 },
+  [IoTDataSpecsDataTypeEnum.DOUBLE]: { display: '25.5', value: 25.5 },
+  [IoTDataSpecsDataTypeEnum.BOOL]: { display: 'false', value: false },
+  [IoTDataSpecsDataTypeEnum.TEXT]: { display: '"auto"', value: 'auto' },
+  [IoTDataSpecsDataTypeEnum.ENUM]: { display: '"option1"', value: 'option1' },
+  [IoTDataSpecsDataTypeEnum.STRUCT]: { display: '{}', value: {} },
+  [IoTDataSpecsDataTypeEnum.ARRAY]: { display: '[]', value: [] },
+  DEFAULT: { display: '""', value: '' }
+} as const
