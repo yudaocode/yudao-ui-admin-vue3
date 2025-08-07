@@ -107,7 +107,7 @@ const subGroup = useVModel(props, 'modelValue', emit)
 const maxConditions = computed(() => props.maxConditions || 3)
 
 // 事件处理
-const addCondition = () => {
+const addCondition = async () => {
   // 确保 subGroup.value 是一个数组
   if (!subGroup.value) {
     subGroup.value = []
@@ -128,11 +128,10 @@ const addCondition = () => {
   }
 
   // 使用 nextTick 确保响应式更新完成后再添加新条件
-  nextTick(() => {
-    if (subGroup.value) {
-      subGroup.value.push(newCondition)
-    }
-  })
+  await nextTick()
+  if (subGroup.value) {
+    subGroup.value.push(newCondition)
+  }
 }
 
 const removeCondition = (index: number) => {

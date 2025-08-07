@@ -237,10 +237,6 @@ const handleSubmit = async () => {
   // 提交请求
   submitLoading.value = true
   try {
-    // 数据结构已对齐，直接使用表单数据
-    console.log('提交数据:', formData.value)
-
-    // 调用API保存数据
     if (isEdit.value) {
       // 更新场景联动规则
       await RuleSceneApi.updateRuleScene(formData.value)
@@ -299,13 +295,12 @@ const initFormData = () => {
 }
 
 // 监听抽屉显示
-watch(drawerVisible, (visible) => {
+watch(drawerVisible, async (visible) => {
   if (visible) {
     initFormData()
     // 重置表单验证状态
-    nextTick(() => {
-      formRef.value?.clearValidate()
-    })
+    await nextTick()
+    formRef.value?.clearValidate()
   }
 })
 

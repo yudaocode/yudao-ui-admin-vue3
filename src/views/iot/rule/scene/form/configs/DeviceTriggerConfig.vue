@@ -200,7 +200,7 @@ const handleTriggerTypeChange = (type: number) => {
 }
 
 // 条件组相关方法
-const addSubGroup = () => {
+const addSubGroup = async () => {
   if (!trigger.value.conditionGroups) {
     trigger.value.conditionGroups = []
   }
@@ -211,11 +211,10 @@ const addSubGroup = () => {
   }
 
   // 使用 nextTick 确保响应式更新完成后再添加新的子组
-  nextTick(() => {
-    if (trigger.value.conditionGroups) {
-      trigger.value.conditionGroups.push([])
-    }
-  })
+  await nextTick()
+  if (trigger.value.conditionGroups) {
+    trigger.value.conditionGroups.push([])
+  }
 }
 
 const removeSubGroup = (index: number) => {

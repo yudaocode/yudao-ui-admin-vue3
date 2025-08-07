@@ -462,25 +462,23 @@ const handleDataDisplay = (value: string) => {
 // 监听外部值变化（编辑模式数据回显）
 watch(
   () => localValue.value,
-  (newValue, oldValue) => {
+  async (newValue, oldValue) => {
     // 避免循环更新
     if (newValue === oldValue) return
 
     // 使用 nextTick 确保在下一个 tick 中处理数据
-    nextTick(() => {
-      handleDataDisplay(newValue || '')
-    })
+    await nextTick()
+    handleDataDisplay(newValue || '')
   },
   { immediate: true }
 )
 
 // 组件挂载后也尝试处理一次数据回显
-onMounted(() => {
-  nextTick(() => {
-    if (localValue.value) {
-      handleDataDisplay(localValue.value)
-    }
-  })
+onMounted(async () => {
+  await nextTick()
+  if (localValue.value) {
+    handleDataDisplay(localValue.value)
+  }
 })
 
 // 监听配置变化
