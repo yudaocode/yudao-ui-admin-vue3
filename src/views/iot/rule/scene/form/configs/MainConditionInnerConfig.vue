@@ -77,6 +77,7 @@
         </el-col>
 
         <!-- 值输入 -->
+        <!-- TODO @puhui999：这种用 include 更简洁 -->
         <el-col
           :span="
             triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE ||
@@ -94,6 +95,7 @@
             required
           >
             <!-- 服务调用参数配置 -->
+            <!-- TODO @puhui999：中英文之间，有个空格哈？ -->
             <JsonParamsInput
               v-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE"
               v-model="condition.value"
@@ -148,6 +150,7 @@
         </el-col>
       </el-row>
 
+      <!-- TODO @puhui999：这个是不是跟阿里云，还是一致一点哈？ -->
       <el-row :gutter="16">
         <el-col :span="12">
           <el-form-item label="操作符" required>
