@@ -239,7 +239,7 @@
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
 import RuleSceneForm from './form/RuleSceneForm.vue'
-import { IotSceneRule } from '@/api/iot/rule/scene/scene.types'
+import { IotSceneRule } from '@/api/iot/rule/scene'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerTypeEnum,

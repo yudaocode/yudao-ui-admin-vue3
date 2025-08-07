@@ -96,7 +96,7 @@
 import { useVModel } from '@vueuse/core'
 import DeviceTriggerConfig from '../configs/DeviceTriggerConfig.vue'
 import TimerTriggerConfig from '../configs/TimerTriggerConfig.vue'
-import { TriggerFormData } from '@/api/iot/rule/scene/scene.types'
+import type { Trigger } from '@/api/iot/rule/scene'
 import {
   getTriggerTypeOptions,
   IotRuleSceneTriggerTypeEnum as TriggerTypeEnum,
@@ -108,11 +108,11 @@ import {
 defineOptions({ name: 'TriggerSection' })
 
 const props = defineProps<{
-  triggers: TriggerFormData[]
+  triggers: Trigger[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:triggers', value: TriggerFormData[]): void
+  (e: 'update:triggers', value: Trigger[]): void
 }>()
 
 const triggers = useVModel(props, 'triggers', emit)
@@ -136,7 +136,7 @@ const getTriggerTagType = (type: number): string => {
 
 // 事件处理函数
 const addTrigger = () => {
-  const newTrigger: TriggerFormData = {
+  const newTrigger: Trigger = {
     type: TriggerTypeEnum.DEVICE_STATE_UPDATE,
     productId: undefined,
     deviceId: undefined,
@@ -160,7 +160,7 @@ const updateTriggerType = (index: number, type: number) => {
   onTriggerTypeChange(index, type)
 }
 
-const updateTriggerDeviceConfig = (index: number, newTrigger: TriggerFormData) => {
+const updateTriggerDeviceConfig = (index: number, newTrigger: Trigger) => {
   triggers.value[index] = newTrigger
 }
 

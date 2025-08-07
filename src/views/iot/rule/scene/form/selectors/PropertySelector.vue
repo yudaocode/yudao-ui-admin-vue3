@@ -160,11 +160,37 @@
 import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
 import { IotRuleSceneTriggerTypeEnum, IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
+import type {
+  IotThingModelTSLResp,
+  ThingModelEvent,
+  ThingModelParam,
+  ThingModelProperty,
+  ThingModelService
+} from '@/api/iot/thingmodel'
 import { ThingModelApi } from '@/api/iot/thingmodel'
-import type { IotThingModelTSLRespVO, PropertySelectorItem } from '@/api/iot/rule/scene/scene.types'
 
 /** 属性选择器组件 */
 defineOptions({ name: 'PropertySelector' })
+
+/** 属性选择器内部使用的统一数据结构 */
+export interface PropertySelectorItem {
+  identifier: string
+  name: string
+  description?: string
+  dataType: string
+  type: number // IoTThingModelTypeEnum
+  accessMode?: string
+  required?: boolean
+  unit?: string
+  range?: string
+  eventType?: string
+  callType?: string
+  inputParams?: ThingModelParam[]
+  outputParams?: ThingModelParam[]
+  property?: ThingModelProperty
+  event?: ThingModelEvent
+  service?: ThingModelService
+}
 
 const props = defineProps<{
   modelValue?: string
@@ -183,7 +209,7 @@ const localValue = useVModel(props, 'modelValue', emit)
 // 状态
 const loading = ref(false)
 const propertyList = ref<PropertySelectorItem[]>([])
-const thingModelTSL = ref<IotThingModelTSLRespVO | null>(null)
+const thingModelTSL = ref<IotThingModelTSLResp | null>(null)
 
 // 计算属性
 const propertyGroups = computed(() => {

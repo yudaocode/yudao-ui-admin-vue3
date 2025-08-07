@@ -36,7 +36,7 @@ import { useVModel } from '@vueuse/core'
 import BasicInfoSection from './sections/BasicInfoSection.vue'
 import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
-import { IotSceneRule } from '@/api/iot/rule/scene/scene.types'
+import { IotSceneRule } from '@/api/iot/rule/scene'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerTypeEnum,

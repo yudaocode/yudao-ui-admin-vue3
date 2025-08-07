@@ -94,17 +94,18 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import { ConditionFormData, IotRuleSceneTriggerTimeOperatorEnum } from '@/views/iot/utils/constants'
+import { IotRuleSceneTriggerTimeOperatorEnum } from '@/views/iot/utils/constants'
+import type { TriggerCondition } from '@/api/iot/rule/scene'
 
 /** 当前时间条件配置组件 */
 defineOptions({ name: 'CurrentTimeConditionConfig' })
 
 const props = defineProps<{
-  modelValue: ConditionFormData
+  modelValue: TriggerCondition
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: ConditionFormData): void
+  (e: 'update:modelValue', value: TriggerCondition): void
   (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 
@@ -178,7 +179,7 @@ const needsSecondTimeInput = computed(() => {
 })
 
 // 事件处理
-const updateConditionField = (field: keyof ConditionFormData, value: any) => {
+const updateConditionField = (field: keyof TriggerCondition, value: any) => {
   condition.value[field] = value
   updateValidationResult()
 }

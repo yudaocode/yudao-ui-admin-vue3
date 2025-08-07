@@ -84,7 +84,7 @@
 import { useVModel } from '@vueuse/core'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
-import { TriggerCondition } from '@/api/iot/rule/scene/scene.types'
+import type { TriggerCondition } from '@/api/iot/rule/scene'
 
 /** 设备状态条件配置组件 */
 defineOptions({ name: 'DeviceStatusConditionConfig' })

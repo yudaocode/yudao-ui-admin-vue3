@@ -122,7 +122,7 @@ import { useVModel } from '@vueuse/core'
 import ActionTypeSelector from '../selectors/ActionTypeSelector.vue'
 import DeviceControlConfig from '../configs/DeviceControlConfig.vue'
 import AlertConfig from '../configs/AlertConfig.vue'
-import { Action } from '@/api/iot/rule/scene/scene.types'
+import type { Action } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneActionTypeEnum as ActionTypeEnum,
   isDeviceAction,

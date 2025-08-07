@@ -82,7 +82,8 @@ import { useVModel } from '@vueuse/core'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
 import JsonParamsInput from '../inputs/JsonParamsInput.vue'
-import { Action, ThingModelProperty, ThingModelService } from '@/api/iot/rule/scene/scene.types'
+import type { Action } from '@/api/iot/rule/scene'
+import type { ThingModelProperty, ThingModelService } from '@/api/iot/thingmodel'
 import {
   IotRuleSceneActionTypeEnum,
   IoTThingModelAccessModeEnum

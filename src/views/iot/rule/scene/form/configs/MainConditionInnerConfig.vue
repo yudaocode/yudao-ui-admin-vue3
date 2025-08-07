@@ -1,7 +1,6 @@
 <template>
   <div class="space-y-16px">
     <!-- 触发事件类型选择 -->
-    <!-- TODO @puhui999：事件上报时，应该也是 json？ -->
     <el-form-item label="触发事件类型" required>
       <el-select
         :model-value="triggerType"
@@ -189,7 +188,7 @@ import OperatorSelector from '../selectors/OperatorSelector.vue'
 import ValueInput from '../inputs/ValueInput.vue'
 import JsonParamsInput from '../inputs/JsonParamsInput.vue'
 
-import { TriggerFormData } from '@/api/iot/rule/scene/scene.types'
+import type { Trigger } from '@/api/iot/rule/scene'
 import { IotRuleSceneTriggerTypeEnum, getTriggerTypeOptions } from '@/views/iot/utils/constants'
 import { useVModel } from '@vueuse/core'
 
@@ -197,12 +196,12 @@ import { useVModel } from '@vueuse/core'
 defineOptions({ name: 'MainConditionInnerConfig' })
 
 const props = defineProps<{
-  modelValue: TriggerFormData
+  modelValue: Trigger
   triggerType: number
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: TriggerFormData): void
+  (e: 'update:modelValue', value: Trigger): void
   (e: 'validate', result: { valid: boolean; message: string }): void
   (e: 'trigger-type-change', value: number): void
 }>()
@@ -278,7 +277,7 @@ const getTriggerTypeText = (type: number) => {
 const triggerTypeOptions = getTriggerTypeOptions()
 
 // 事件处理
-const updateConditionField = (field: keyof TriggerFormData, value: any) => {
+const updateConditionField = (field: keyof Trigger, value: any) => {
   ;(condition.value as any)[field] = value
   updateValidationResult()
 }

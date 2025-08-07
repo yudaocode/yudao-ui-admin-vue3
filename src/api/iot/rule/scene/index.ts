@@ -1,5 +1,46 @@
 import request from '@/config/axios'
-import { IotSceneRule } from './scene.types'
+
+// 场景联动
+export interface IotSceneRule {
+  id?: number // 场景编号
+  name: string // 场景名称
+  description?: string // 场景描述
+  status: number // 场景状态：0-开启，1-关闭
+  triggers: Trigger[] // 触发器数组
+  actions: Action[] // 执行器数组
+}
+
+// 触发器结构
+export interface Trigger {
+  type: number // 触发类型
+  productId?: number // 产品编号
+  deviceId?: number // 设备编号
+  identifier?: string // 物模型标识符
+  operator?: string // 操作符
+  value?: string // 参数值
+  cronExpression?: string // CRON 表达式
+  conditionGroups?: TriggerCondition[][] // 条件组（二维数组）
+}
+
+// 触发条件结构
+export interface TriggerCondition {
+  type: number // 条件类型：1-设备状态，2-设备属性，3-当前时间
+  productId?: number // 产品编号
+  deviceId?: number // 设备编号
+  identifier?: string // 标识符
+  operator: string // 操作符
+  param: string // 参数
+}
+
+// 执行器结构
+export interface Action {
+  type: number // 执行类型
+  productId?: number // 产品编号
+  deviceId?: number // 设备编号
+  identifier?: string // 物模型标识符（服务调用时使用）
+  params?: string // 请求参数
+  alertConfigId?: number // 告警配置编号
+}
 
 // IoT 场景联动 API
 export const RuleSceneApi = {

@@ -123,7 +123,7 @@ import DeviceSelector from '../selectors/DeviceSelector.vue'
 import PropertySelector from '../selectors/PropertySelector.vue'
 import OperatorSelector from '../selectors/OperatorSelector.vue'
 import ValueInput from '../inputs/ValueInput.vue'
-import { TriggerCondition } from '@/api/iot/rule/scene/scene.types'
+import type { TriggerCondition } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerConditionTypeEnum,
   IotRuleSceneTriggerConditionParameterOperatorEnum

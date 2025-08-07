@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { IotSceneRule } from '@/api/iot/rule/scene/scene.types'
+import type { IotSceneRule } from '@/api/iot/rule/scene'
 
 /** 基础信息配置组件 */
 defineOptions({ name: 'BasicInfoSection' })

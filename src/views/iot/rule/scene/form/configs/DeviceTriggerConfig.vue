@@ -27,48 +27,23 @@ import { useVModel } from '@vueuse/core'
 
 import MainConditionConfig from './MainConditionConfig.vue'
 import ConditionGroupContainerConfig from './ConditionGroupContainerConfig.vue'
-import { TriggerFormData } from '@/api/iot/rule/scene/scene.types'
-import { IotRuleSceneTriggerTypeEnum as TriggerTypeEnum } from '@/views/iot/utils/constants'
+import type { Trigger } from '@/api/iot/rule/scene'
 
 /** 设备触发配置组件 */
 defineOptions({ name: 'DeviceTriggerConfig' })
 
 const props = defineProps<{
-  modelValue: TriggerFormData
+  modelValue: Trigger
   index: number
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: TriggerFormData): void
+  (e: 'update:modelValue', value: Trigger): void
   (e: 'validate', value: { valid: boolean; message: string }): void
   (e: 'trigger-type-change', type: number): void
 }>()
 
 const trigger = useVModel(props, 'modelValue', emit)
-
-// 初始化主条件
-const initMainCondition = () => {
-  // TODO @puhui999: 等到编辑回显时联调
-  // if (!trigger.value.mainCondition) {
-  //   trigger.value = {
-  //     type: trigger.value.type, // 使用触发事件类型作为条件类型
-  //     productId: undefined,
-  //     deviceId: undefined,
-  //     identifier: '',
-  //     operator: '=',
-  //     param: ''
-  //   }
-  // }
-}
-
-// 监听触发器类型变化，自动初始化主条件
-watch(
-  () => trigger.value.type,
-  () => {
-    initMainCondition()
-  },
-  { immediate: true }
-)
 
 const handleTriggerTypeChange = (type: number) => {
   trigger.value.type = type

@@ -83,7 +83,7 @@
 import { nextTick } from 'vue'
 import { useVModel } from '@vueuse/core'
 import ConditionConfig from './ConditionConfig.vue'
-import { TriggerCondition } from '@/api/iot/rule/scene/scene.types'
+import type { TriggerCondition } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerConditionTypeEnum,
   IotRuleSceneTriggerConditionParameterOperatorEnum
