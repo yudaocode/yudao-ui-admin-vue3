@@ -5,11 +5,20 @@
     <el-row :gutter="16">
       <el-col :span="8">
         <el-form-item label="条件类型" required>
-          <ConditionTypeSelector
+          <el-select
             :model-value="condition.type"
             @update:model-value="(value) => updateConditionField('type', value)"
             @change="handleConditionTypeChange"
-          />
+            placeholder="请选择条件类型"
+            class="w-full"
+          >
+            <el-option
+              v-for="option in conditionTypeOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
         </el-form-item>
       </el-col>
     </el-row>
@@ -114,7 +123,6 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import ConditionTypeSelector from '../selectors/ConditionTypeSelector.vue'
 import DeviceStatusConditionConfig from './DeviceStatusConditionConfig.vue'
 import CurrentTimeConditionConfig from './CurrentTimeConditionConfig.vue'
 import ProductSelector from '../selectors/ProductSelector.vue'
@@ -145,6 +153,22 @@ const condition = useVModel(props, 'modelValue', emit)
 
 // 常量定义
 const ConditionTypeEnum = IotRuleSceneTriggerConditionTypeEnum
+
+// 条件类型选项
+const conditionTypeOptions = [
+  {
+    value: IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS,
+    label: '设备状态'
+  },
+  {
+    value: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY,
+    label: '设备属性'
+  },
+  {
+    value: IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME,
+    label: '当前时间'
+  }
+]
 
 // 状态
 const propertyType = ref<string>('string')
