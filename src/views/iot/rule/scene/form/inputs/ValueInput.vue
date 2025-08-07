@@ -196,7 +196,7 @@ const isNumericType = () => {
     IoTDataSpecsDataTypeEnum.INT,
     IoTDataSpecsDataTypeEnum.FLOAT,
     IoTDataSpecsDataTypeEnum.DOUBLE
-  ].includes(props.propertyType || '')
+  ].includes((props.propertyType || '') as any)
 }
 
 /**
@@ -224,7 +224,7 @@ const getPlaceholder = () => {
     [IoTDataSpecsDataTypeEnum.INT]: '请输入整数',
     [IoTDataSpecsDataTypeEnum.FLOAT]: '请输入浮点数',
     [IoTDataSpecsDataTypeEnum.DOUBLE]: '请输入双精度数',
-    [IoTDataSpecsDataTypeEnum.STRUCT]: '请输入JSON格式数据',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: '请输入 JSON 格式数据',
     [IoTDataSpecsDataTypeEnum.ARRAY]: '请输入数组格式数据'
   }
   return typeMap[props.propertyType || ''] || '请输入值'

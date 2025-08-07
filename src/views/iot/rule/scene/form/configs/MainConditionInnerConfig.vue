@@ -59,13 +59,7 @@
         </el-col>
 
         <!-- 操作符选择 - 服务调用和事件上报不需要操作符 -->
-        <el-col
-          v-if="
-            triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE &&
-            triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST
-          "
-          :span="6"
-        >
+        <el-col v-if="needsOperatorSelector" :span="6">
           <el-form-item label="操作符" required>
             <OperatorSelector
               :model-value="condition.operator"
@@ -77,31 +71,15 @@
         </el-col>
 
         <!-- 值输入 -->
-        <!-- TODO @puhui999：这种用 include 更简洁 -->
-        <el-col
-          :span="
-            triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE ||
-            triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST
-              ? 18
-              : 12
-          "
-        >
-          <el-form-item
-            :label="
-              triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
-                ? '服务参数'
-                : '比较值'
-            "
-            required
-          >
+        <el-col :span="isWideValueColumn ? 18 : 12">
+          <el-form-item :label="valueInputLabel" required>
             <!-- 服务调用参数配置 -->
-            <!-- TODO @puhui999：中英文之间，有个空格哈？ -->
             <JsonParamsInput
               v-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE"
               v-model="condition.value"
               type="service"
               :config="serviceConfig"
-              placeholder="请输入JSON格式的服务参数"
+              placeholder="请输入 JSON 格式的服务参数"
             />
             <!-- 事件上报参数配置 -->
             <JsonParamsInput
@@ -109,7 +87,7 @@
               v-model="condition.value"
               type="event"
               :config="eventConfig"
-              placeholder="请输入JSON格式的事件参数"
+              placeholder="请输入 JSON 格式的事件参数"
             />
             <!-- 普通值输入 -->
             <ValueInput
@@ -149,14 +127,27 @@
           </el-form-item>
         </el-col>
       </el-row>
-
-      <!-- TODO @puhui999：这个是不是跟阿里云，还是一致一点哈？ -->
       <el-row :gutter="16">
-        <el-col :span="12">
+        <el-col :span="6">
           <el-form-item label="操作符" required>
             <el-select
               :model-value="condition.operator"
               @update:model-value="(value) => updateConditionField('operator', value)"
+              placeholder="请选择操作符"
+              class="w-full"
+            >
+              <el-option
+                :label="IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.name"
+                :value="IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="参数" required>
+            <el-select
+              :model-value="condition.value"
+              @update:model-value="(value) => updateConditionField('value', value)"
               placeholder="请选择操作符"
               class="w-full"
             >
@@ -195,9 +186,10 @@ import JsonParamsInput from '../inputs/JsonParamsInput.vue'
 import type { Trigger } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerTypeEnum,
-  getTriggerTypeOptions,
+  triggerTypeOptions,
   getTriggerTypeLabel,
-  getDeviceStatusChangeOptions
+  deviceStatusChangeOptions,
+  IotRuleSceneTriggerConditionParameterOperatorEnum
 } from '@/views/iot/utils/constants'
 import { useVModel } from '@vueuse/core'
 
@@ -232,6 +224,31 @@ const isDeviceStatusTrigger = computed(() => {
   return props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE
 })
 
+// 计算属性：是否需要操作符选择（服务调用和事件上报不需要操作符）
+const needsOperatorSelector = computed(() => {
+  const noOperatorTriggerTypes = [
+    IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE,
+    IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST
+  ] as number[]
+  return !noOperatorTriggerTypes.includes(props.triggerType)
+})
+
+// 计算属性：是否需要宽列布局（服务调用和事件上报不需要操作符列，所以值输入列更宽）
+const isWideValueColumn = computed(() => {
+  const wideColumnTriggerTypes = [
+    IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE,
+    IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST
+  ] as number[]
+  return wideColumnTriggerTypes.includes(props.triggerType)
+})
+
+// 计算属性：值输入字段的标签文本
+const valueInputLabel = computed(() => {
+  return props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
+    ? '服务参数'
+    : '比较值'
+})
+
 // 计算属性：服务配置 - 用于 JsonParamsInput
 const serviceConfig = computed(() => {
   if (
@@ -260,9 +277,6 @@ const eventConfig = computed(() => {
   }
   return undefined
 })
-
-const triggerTypeOptions = getTriggerTypeOptions() // 触发器类型选项
-const deviceStatusChangeOptions = getDeviceStatusChangeOptions() // 设备状态变化选项
 
 /**
  * 更新条件字段
@@ -312,7 +326,7 @@ const handlePropertyChange = (propertyInfo: any) => {
       props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST ||
       props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
     ) {
-      condition.value.operator = '='
+      condition.value.operator = IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
     }
   }
 }

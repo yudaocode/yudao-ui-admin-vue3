@@ -53,8 +53,8 @@
           <JsonParamsInput
             v-model="paramsValue"
             type="service"
-            :config="{ service: selectedService }"
-            placeholder="请输入JSON格式的服务参数"
+            :config="{ service: selectedService } as any"
+            placeholder="请输入 JSON 格式的服务参数"
           />
         </el-form-item>
       </div>
@@ -68,7 +68,7 @@
           v-model="paramsValue"
           type="property"
           :config="{ properties: thingModelProperties }"
-          placeholder="请输入JSON格式的控制参数"
+          placeholder="请输入 JSON 格式的控制参数"
         />
       </el-form-item>
     </div>

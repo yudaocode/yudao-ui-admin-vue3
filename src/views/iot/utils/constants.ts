@@ -267,7 +267,7 @@ export const IotRuleSceneTriggerTypeEnum = {
 } as const
 
 /** 触发器类型选项配置 */
-export const getTriggerTypeOptions = () => [
+export const triggerTypeOptions = [
   {
     value: IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE,
     label: '设备状态变更'
@@ -492,13 +492,13 @@ export const getStatusOperatorOptions = () => [
 ]
 
 /** 获取设备状态变更选项（用于触发器配置） */
-export const getDeviceStatusChangeOptions = () => [
+export const deviceStatusChangeOptions = [
   {
-    label: '变为在线',
+    label: IoTDeviceStatusEnum.ONLINE.label,
     value: IoTDeviceStatusEnum.ONLINE.value
   },
   {
-    label: '变为离线',
+    label: IoTDeviceStatusEnum.OFFLINE.label,
     value: IoTDeviceStatusEnum.OFFLINE.value
   }
 ]
@@ -545,8 +545,7 @@ export const IotRuleSceneTriggerTimeOperatorEnum = {
 
 /** 获取触发器类型标签 */
 export const getTriggerTypeLabel = (type: number): string => {
-  const options = getTriggerTypeOptions()
-  const option = options.find((item) => item.value === type)
+  const option = triggerTypeOptions.find((item) => item.value === type)
   return option?.label || '未知类型'
 }
 
