@@ -82,7 +82,7 @@ const msgDivRef = ref<HTMLDivElement | null>(null) // 消息显示窗口ref，�
 onMounted(async () => {
   const data = await getUser(props.userId)
   user.nickname = data.nickname?.length > 0 ? data.nickname : user.nickname
-  user.avatar = user.avatar?.length > 0 ? data.avatar : user.avatar
+  user.avatar = data.headImageUrl?.length > 0 ? data.headImageUrl : user.avatar
   accountId.value = data.accountId
   reply.value.accountId = data.accountId
 
