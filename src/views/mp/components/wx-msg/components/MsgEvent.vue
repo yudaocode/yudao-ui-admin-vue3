@@ -34,6 +34,9 @@
     <div v-else-if="item.event === 'location_select'">
       <el-tag>选择地理位置</el-tag>
     </div>
+    <div v-else-if="item.event === 'SCAN'">
+      <el-tag>扫码</el-tag>
+    </div>
     <div v-else>
       <el-tag type="danger">未知事件类型</el-tag>
     </div>
