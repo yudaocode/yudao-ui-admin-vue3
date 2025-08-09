@@ -1,4 +1,5 @@
 <!-- 执行器配置组件 -->
+<!-- TODO @puhui999：每个执行器的 UI 风格，应该和【触发器配置】那，有点像 -->
 <template>
   <el-card class="border border-[var(--el-border-color-light)] rounded-8px" shadow="never">
     <template #header>

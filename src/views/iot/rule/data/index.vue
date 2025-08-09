@@ -14,7 +14,7 @@ import RuleIndex from './rule/index.vue'
 import SinkIndex from './sink/index.vue'
 
 /** IoT 数据流转 */
-defineOptions({ name: 'IotData' })
+defineOptions({ name: 'IoTDataRule' })
 
 const activeTab = ref('rule')
 </script>

@@ -137,9 +137,7 @@ const emit = defineEmits<{
 
 const triggers = useVModel(props, 'triggers', emit)
 
-/**
- * 添加触发器
- */
+/** 添加触发器 */
 const addTrigger = () => {
   const newTrigger: Trigger = {
     type: TriggerTypeEnum.DEVICE_STATE_UPDATE,
@@ -184,9 +182,9 @@ const updateTriggerDeviceConfig = (index: number, newTrigger: Trigger) => {
 }
 
 /**
- * 更新触发器CRON配置
+ * 更新触发器 CRON 配置
  * @param index 触发器索引
- * @param cronExpression CRON表达式
+ * @param cronExpression CRON 表达式
  */
 const updateTriggerCronConfig = (index: number, cronExpression?: string) => {
   triggers.value[index].cronExpression = cronExpression
@@ -208,7 +206,7 @@ const onTriggerTypeChange = (index: number, _: number) => {
   triggerItem.conditionGroups = []
 }
 
-// 初始化：确保至少有一个触发器
+/** 初始化：确保至少有一个触发器 */
 onMounted(() => {
   if (triggers.value.length === 0) {
     addTrigger()

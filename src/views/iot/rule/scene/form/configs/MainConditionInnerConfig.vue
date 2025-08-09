@@ -295,18 +295,14 @@ const handleTriggerTypeChange = (type: number) => {
   emit('trigger-type-change', type)
 }
 
-/**
- * 处理产品变化事件
- */
+/** 处理产品变化事件 */
 const handleProductChange = () => {
   // 产品变化时清空设备和属性
   condition.value.deviceId = undefined
   condition.value.identifier = ''
 }
 
-/**
- * 处理设备变化事件
- */
+/** 处理设备变化事件 */
 const handleDeviceChange = () => {
   // 设备变化时清空属性
   condition.value.identifier = ''
@@ -331,6 +327,7 @@ const handlePropertyChange = (propertyInfo: any) => {
   }
 }
 
+// TODO @puhui999：这个貌似没用上
 /**
  * 处理操作符变化事件
  */

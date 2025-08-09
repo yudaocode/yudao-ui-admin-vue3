@@ -105,9 +105,7 @@ export const CRON_PRESETS = {
 
 /** CRON 表达式工具类 */
 export class CronUtils {
-  /**
-   * 验证 CRON 表达式格式
-   */
+  /** 验证 CRON 表达式格式 */
   static validate(cronExpression: string): boolean {
     if (!cronExpression || typeof cronExpression !== 'string') {
       return false
@@ -125,9 +123,7 @@ export class CronUtils {
     return parts.every((part) => cronRegex.test(part))
   }
 
-  /**
-   * 解析单个 CRON 字段
-   */
+  /** 解析单个 CRON 字段 */
   static parseField(
     fieldValue: string,
     fieldType: CronFieldType,
@@ -206,9 +202,7 @@ export class CronUtils {
     return field
   }
 
-  /**
-   * 解析完整的 CRON 表达式
-   */
+  /** 解析完整的 CRON 表达式 */
   static parse(cronExpression: string): ParsedCronExpression {
     const result: ParsedCronExpression = {
       second: { type: 'any', values: [], original: '*', description: '每秒' },
@@ -259,9 +253,7 @@ export class CronUtils {
     return result
   }
 
-  /**
-   * 生成 CRON 表达式的可读描述
-   */
+  /** 生成 CRON 表达式的可读描述 */
   static generateDescription(parsed: ParsedCronExpression): string {
     const parts: string[] = []
 
@@ -305,9 +297,7 @@ export class CronUtils {
     return parts.length > 0 ? parts.join(' ') : '自定义时间规则'
   }
 
-  /**
-   * 格式化 CRON 表达式为可读文本
-   */
+  /** 格式化 CRON 表达式为可读文本 */
   static format(cronExpression: string): string {
     if (!cronExpression) return ''
 
@@ -315,9 +305,7 @@ export class CronUtils {
     return parsed.isValid ? parsed.description : cronExpression
   }
 
-  /**
-   * 获取预设的 CRON 表达式列表
-   */
+  /** 获取预设的 CRON 表达式列表 */
   static getPresets() {
     return Object.entries(CRON_PRESETS).map(([key, value]) => ({
       label: this.format(value),
@@ -326,9 +314,7 @@ export class CronUtils {
     }))
   }
 
-  /**
-   * 计算 CRON 表达式的下次执行时间
-   */
+  /** 计算 CRON 表达式的下次执行时间 */
   static getNextExecutionTime(cronExpression: string, fromDate?: Date): Date | null {
     const parsed = this.parse(cronExpression)
     if (!parsed.isValid) {
@@ -402,9 +388,7 @@ export class CronUtils {
     return new Date(now.getTime() + 60000) // 1分钟后
   }
 
-  /**
-   * 获取 CRON 表达式的执行频率描述
-   */
+  /** 获取 CRON 表达式的执行频率描述 */
   static getFrequencyDescription(cronExpression: string): string {
     const parsed = this.parse(cronExpression)
     if (!parsed.isValid) {
@@ -435,9 +419,7 @@ export class CronUtils {
     return '按计划执行'
   }
 
-  /**
-   * 检查 CRON 表达式是否会在指定时间执行
-   */
+  /** 检查 CRON 表达式是否会在指定时间执行 */
   static willExecuteAt(cronExpression: string, targetDate: Date): boolean {
     const parsed = this.parse(cronExpression)
     if (!parsed.isValid) {
@@ -462,9 +444,7 @@ export class CronUtils {
     )
   }
 
-  /**
-   * 检查字段值是否匹配
-   */
+  /** 检查字段值是否匹配 */
   private static fieldMatches(field: ParsedCronField, value: number): boolean {
     if (field.type === 'any') {
       return true

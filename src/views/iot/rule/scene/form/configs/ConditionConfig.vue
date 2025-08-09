@@ -183,14 +183,12 @@ const condition = useVModel(props, 'modelValue', emit)
 
 const propertyType = ref<string>('string') // 属性类型
 const propertyConfig = ref<any>(null) // 属性配置
-
-// 计算属性：判断是否为设备相关条件
 const isDeviceCondition = computed(() => {
   return (
     condition.value.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS ||
     condition.value.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY
   )
-})
+}) // 计算属性：判断是否为设备相关条件
 
 /**
  * 更新条件字段
@@ -240,20 +238,14 @@ const handleConditionTypeChange = (type: number) => {
   condition.value.param = ''
 }
 
-/**
- * 处理产品变化事件
- * @param _ 产品ID（未使用）
- */
+/** 处理产品变化事件 */
 const handleProductChange = (_: number) => {
   // 产品变化时清空设备和属性
   condition.value.deviceId = undefined
   condition.value.identifier = ''
 }
 
-/**
- * 处理设备变化事件
- * @param _ 设备ID（未使用）
- */
+/** 处理设备变化事件 */
 const handleDeviceChange = (_: number) => {
   // 设备变化时清空属性
   condition.value.identifier = ''
@@ -268,13 +260,11 @@ const handlePropertyChange = (propertyInfo: { type: string; config: any }) => {
   propertyConfig.value = propertyInfo.config
 
   // 重置操作符和值
-  condition.value.operator = '='
+  condition.value.operator = IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
   condition.value.param = ''
 }
 
-/**
- * 处理操作符变化事件
- */
+/** 处理操作符变化事件 */
 const handleOperatorChange = () => {
   // 重置值
   condition.value.param = ''

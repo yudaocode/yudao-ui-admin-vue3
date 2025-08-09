@@ -222,7 +222,6 @@ const availableOperators = computed(() => {
   if (!props.propertyType) {
     return allOperators
   }
-
   return allOperators.filter((op) => op.supportedTypes.includes(props.propertyType!))
 })
 
@@ -239,7 +238,7 @@ const handleChange = (value: string) => {
   emit('change', value)
 }
 
-// 监听属性类型变化
+/** 监听属性类型变化 */
 watch(
   () => props.propertyType,
   () => {

@@ -17,11 +17,11 @@
     >
       <div class="flex items-center justify-between w-full py-4px">
         <div class="flex-1">
-          <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px"
-            >{{ product.name }}
+          <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">
+            {{ product.name }}
           </div>
-          <div class="text-12px text-[var(--el-text-color-secondary)]"
-            >{{ product.productKey }}
+          <div class="text-12px text-[var(--el-text-color-secondary)]">
+            {{ product.productKey }}
           </div>
         </div>
         <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="product.status" />
@@ -51,16 +51,14 @@ const productList = ref<any[]>([]) // 产品列表
 
 /**
  * 处理选择变化事件
- * @param value 选中的产品ID
+ * @param value 选中的产品 ID
  */
 const handleChange = (value?: number) => {
   emit('update:modelValue', value)
   emit('change', value)
 }
 
-/**
- * 获取产品列表
- */
+/** 获取产品列表 */
 const getProductList = async () => {
   try {
     productLoading.value = true

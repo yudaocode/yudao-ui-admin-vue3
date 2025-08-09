@@ -18,12 +18,12 @@
     >
       <div class="flex items-center justify-between w-full py-4px">
         <div class="flex-1">
-          <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px"
-            >{{ device.deviceName }}
+          <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">
+            {{ device.deviceName }}
           </div>
           <div class="text-12px text-[var(--el-text-color-secondary)]">{{ device.deviceKey }}</div>
         </div>
-        <div class="flex items-center gap-4px">
+        <div class="flex items-center gap-4px" v-if="device.id > 0">
           <el-tag size="small" :type="getDeviceEnableStatusTagType(device.status)">
             {{ getDeviceEnableStatusText(device.status) }}
           </el-tag>
@@ -87,7 +87,7 @@ const getDeviceList = async () => {
     console.error('获取设备列表失败:', error)
     deviceList.value = []
   } finally {
-    deviceList.value.push(DEVICE_SELECTOR_OPTIONS.ALL_DEVICES)
+    deviceList.value.unshift(DEVICE_SELECTOR_OPTIONS.ALL_DEVICES)
     deviceLoading.value = false
   }
 }

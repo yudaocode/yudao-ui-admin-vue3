@@ -205,9 +205,7 @@ const handleTriggerTypeChange = (type: number) => {
   emit('trigger-type-change', type)
 }
 
-/**
- * 添加子条件组
- */
+/** 添加子条件组 */
 const addSubGroup = async () => {
   if (!trigger.value.conditionGroups) {
     trigger.value.conditionGroups = []
@@ -246,9 +244,7 @@ const updateSubGroup = (index: number, subGroup: any) => {
   }
 }
 
-/**
- * 移除整个条件组
- */
+/** 移除整个条件组 */
 const removeConditionGroup = () => {
   trigger.value.conditionGroups = undefined
 }

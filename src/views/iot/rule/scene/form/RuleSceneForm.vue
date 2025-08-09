@@ -215,7 +215,6 @@ const validateActions = (_rule: any, value: any, callback: any) => {
 }
 
 const formRules = reactive({
-  // 表单校验规则
   name: [
     { required: true, message: '场景名称不能为空', trigger: 'blur' },
     { type: 'string', min: 1, max: 50, message: '场景名称长度应在1-50个字符之间', trigger: 'blur' }
@@ -234,17 +233,13 @@ const formRules = reactive({
   ],
   triggers: [{ required: true, validator: validateTriggers, trigger: 'change' }],
   actions: [{ required: true, validator: validateActions, trigger: 'change' }]
-})
+}) // 表单校验规则
 
 const submitLoading = ref(false) // 提交加载状态
 const isEdit = ref(false) // 是否为编辑模式
+const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则')) // 抽屉标题
 
-// 计算属性：抽屉标题
-const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : '新增场景联动规则'))
-
-/**
- * 提交表单
- */
+/** 提交表单 */
 const handleSubmit = async () => {
   // 校验表单
   if (!formRef.value) return
@@ -275,16 +270,12 @@ const handleSubmit = async () => {
   }
 }
 
-/**
- * 处理抽屉关闭事件
- */
+/** 处理抽屉关闭事件 */
 const handleClose = () => {
   drawerVisible.value = false
 }
 
-/**
- * 初始化表单数据
- */
+/** 初始化表单数据 */
 const initFormData = () => {
   if (props.ruleScene) {
     // 编辑模式：数据结构已对齐，直接使用后端数据
@@ -316,7 +307,7 @@ const initFormData = () => {
   }
 }
 
-// 监听抽屉显示
+/** 监听抽屉显示 */
 watch(drawerVisible, async (visible) => {
   if (visible) {
     initFormData()
@@ -326,7 +317,7 @@ watch(drawerVisible, async (visible) => {
   }
 })
 
-// 监听编辑数据变化
+/** 监听编辑数据变化 */
 watch(
   () => props.ruleScene,
   () => {

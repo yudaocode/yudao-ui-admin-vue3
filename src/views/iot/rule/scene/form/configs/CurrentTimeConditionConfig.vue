@@ -1,13 +1,6 @@
 <!-- 当前时间条件配置组件 -->
 <template>
   <div class="flex flex-col gap-16px">
-    <div
-      class="flex items-center gap-8px p-12px px-16px bg-orange-50 rounded-6px border border-orange-200"
-    >
-      <Icon icon="ep:timer" class="text-orange-500 text-18px" />
-      <span class="text-14px font-500 text-orange-700">当前时间条件配置</span>
-    </div>
-
     <el-row :gutter="16">
       <!-- 时间操作符选择 -->
       <el-col :span="8">
@@ -224,7 +217,7 @@ const handleTimeValue2Change = (value: string) => {
   condition.value.param = currentParams.slice(0, 2).join(',')
 }
 
-// 监听操作符变化，清理不相关的时间值
+/** 监听操作符变化，清理不相关的时间值 */
 watch(
   () => condition.value.operator,
   (newOperator) => {

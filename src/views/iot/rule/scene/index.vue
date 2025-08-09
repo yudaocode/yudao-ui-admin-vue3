@@ -225,14 +225,7 @@
                 @click="handleToggleStatus(row)"
               >
                 <Icon :icon="row.status === 0 ? 'ep:video-pause' : 'ep:video-play'" />
-                {{
-                  getDictLabel(
-                    DICT_TYPE.COMMON_STATUS,
-                    row.status === CommonStatusEnum.ENABLE
-                      ? CommonStatusEnum.DISABLE
-                      : CommonStatusEnum.ENABLE
-                  )
-                }}
+                {{ getDictLabel(DICT_TYPE.COMMON_STATUS, row.status) }}
               </el-button>
               <el-button type="danger" class="!mr-10px" link @click="handleDelete(row.id)">
                 <Icon icon="ep:delete" />
@@ -300,7 +293,7 @@ const statistics = ref({
   total: 0,
   enabled: 0,
   disabled: 0,
-  triggered: 0,
+  triggered: 0, // 已触发的规则数量 (暂时使用启用状态的规则数量)
   timerRules: 0 // 定时规则数量
 })
 
@@ -326,14 +319,12 @@ const getRuleSceneSummary = (rule: IotSceneRule) => {
         default:
           description = getTriggerTypeLabel(trigger.type)
       }
-
       // 添加设备信息（如果有）
       if (trigger.deviceId) {
         description += ` [设备ID: ${trigger.deviceId}]`
       } else if (trigger.productId) {
         description += ` [产品ID: ${trigger.productId}]`
       }
-
       return description
     }) || []
 
@@ -341,19 +332,16 @@ const getRuleSceneSummary = (rule: IotSceneRule) => {
     rule.actions?.map((action: any) => {
       // 构建基础描述
       let description = getActionTypeLabel(action.type)
-
       // 添加设备信息（如果有）
       if (action.deviceId) {
         description += ` [设备ID: ${action.deviceId}]`
       } else if (action.productId) {
         description += ` [产品ID: ${action.productId}]`
       }
-
       // 添加告警配置信息（如果有）
       if (action.alertConfigId) {
         description += ` [告警配置ID: ${action.alertConfigId}]`
       }
-
       return description
     }) || []
 
@@ -383,9 +371,7 @@ const updateStatistics = () => {
     total: list.value.length,
     enabled: list.value.filter((item) => item.status === CommonStatusEnum.ENABLE).length,
     disabled: list.value.filter((item) => item.status === CommonStatusEnum.DISABLE).length,
-    // 已触发的规则数量 (暂时使用启用状态的规则数量)
     triggered: list.value.filter((item) => item.status === CommonStatusEnum.ENABLE).length,
-    // 定时规则数量
     timerRules: list.value.filter((item) => hasTimerTrigger(item)).length
   }
 }

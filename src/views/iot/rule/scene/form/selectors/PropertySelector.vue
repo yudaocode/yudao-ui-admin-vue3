@@ -1,5 +1,4 @@
 <!-- 属性选择器组件 -->
-<!-- TODO @yunai：可能要在 review 下 -->
 <template>
   <div class="flex items-center gap-8px">
     <el-select
@@ -263,6 +262,7 @@ const handleChange = (value: string) => {
   }
 }
 
+// TODO @puhui999：这里没用到哈；
 /**
  * 获取物模型TSL数据
  */
@@ -292,13 +292,12 @@ const getThingModelTSL = async () => {
   }
 }
 
-/**
- * 解析物模型TSL数据
- */
+/** 解析物模型 TSL 数据 */
 const parseThingModelData = () => {
   const tsl = thingModelTSL.value
   const properties: PropertySelectorItem[] = []
 
+  // TODO @puhui999：if return，减少下括号层级；
   if (tsl) {
     // 解析属性
     if (tsl.properties && Array.isArray(tsl.properties)) {
@@ -397,7 +396,7 @@ const getPropertyRange = (property: any) => {
   return undefined
 }
 
-// 监听产品变化
+/** 监听产品变化 *、
 watch(
   () => props.productId,
   () => {
@@ -406,7 +405,7 @@ watch(
   { immediate: true }
 )
 
-// 监听触发类型变化
+/** 监听触发类型变化 */
 watch(
   () => props.triggerType,
   () => {

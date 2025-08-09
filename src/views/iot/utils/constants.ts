@@ -356,6 +356,7 @@ export const getActionTypeLabel = (type: number): string => {
 }
 
 /** 获取执行器标签类型（用于 el-tag 的 type 属性） */
+// TODO @puhui999：这种跟界面相关的，可以拿到对应组件里；
 export const getActionTypeTag = (
   type: number
 ): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
@@ -368,6 +369,7 @@ export const getActionTypeTag = (
   return actionTypeTags[type] || 'info'
 }
 
+// TODO @puhui999：建议不设置最大值哈。
 /** 场景联动规则配置常量 */
 export const SCENE_RULE_CONFIG = {
   MAX_ACTIONS: 5, // 最大执行器数量
@@ -375,6 +377,7 @@ export const SCENE_RULE_CONFIG = {
   MAX_CONDITIONS: 20 // 最大条件数量
 } as const
 
+// TODO @puhui999：下面这个要去掉么？
 /** IoT 设备消息类型枚举 */
 export const IotDeviceMessageTypeEnum = {
   PROPERTY: 'property', // 属性
@@ -434,6 +437,7 @@ export const IoTDeviceStatusEnum = {
 } as const
 
 /** 设备启用状态枚举 */
+// TODO @puhui999：这个是不是和 IoTDeviceStatusEnum 合并下；额外增加一个 value2
 export const IoTDeviceEnableStatusEnum = {
   ENABLED: {
     label: '正常',
@@ -448,6 +452,7 @@ export const IoTDeviceEnableStatusEnum = {
 } as const
 
 /** 设备激活状态枚举 */
+// TODO @puhui999：这个是不是搞到界面里。label 就是 IoTDeviceStatusEnum，然后 tag 界面里处理；；或者也可以在想想，= = 主要设备状态有 3 个枚举，嘿嘿~
 export const IoTDeviceActiveStatusEnum = {
   ACTIVATED: {
     label: '已激活',
@@ -505,11 +510,13 @@ export const deviceStatusChangeOptions = [
 
 /** 获取设备启用状态文本 */
 export const getDeviceEnableStatusText = (status: number): string => {
+  // TODO @puhui999：设备有 3 个状态，上线、离线，未激活；
   const statusItem = Object.values(IoTDeviceEnableStatusEnum).find((item) => item.value === status)
   return statusItem?.label || '未知'
 }
 
 /** 获取设备启用状态标签类型 */
+// TODO @puhui999：这个是不是可以直接在界面里处理；或者也可以在想想，= = 主要设备状态有 3 个枚举，嘿嘿~
 export const getDeviceEnableStatusTagType = (
   status: number
 ): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
@@ -518,6 +525,7 @@ export const getDeviceEnableStatusTagType = (
 }
 
 /** 获取设备激活状态文本和标签类型 */
+// TODO @puhui999：这个是不是可以直接在界面里处理；或者也可以在想想，= = 主要设备状态有 3 个枚举，嘿嘿~
 export const getDeviceActiveStatus = (activeTime?: string | null) => {
   const isActivated = !!activeTime
   return {
@@ -541,14 +549,13 @@ export const IotRuleSceneTriggerTimeOperatorEnum = {
   TODAY: { name: '在今日之间', value: 'today' } // 在今日之间
 } as const
 
-// ========== 辅助函数 ==========
-
 /** 获取触发器类型标签 */
 export const getTriggerTypeLabel = (type: number): string => {
   const option = triggerTypeOptions.find((item) => item.value === type)
   return option?.label || '未知类型'
 }
 
+// TODO @puhui999：这种跟界面相关的，可以拿到对应组件里；
 /** 获取触发器标签类型（用于 el-tag 的 type 属性） */
 export const getTriggerTagType = (
   type: number
@@ -559,9 +566,9 @@ export const getTriggerTagType = (
   return isDeviceTrigger(type) ? 'success' : 'info'
 }
 
-// ========== JSON参数输入组件相关常量 ==========
+// ========== JSON 参数输入组件相关常量 ==========
 
-/** JSON参数输入组件类型枚举 */
+/** JSON 参数输入组件类型枚举 */
 export const JsonParamsInputTypeEnum = {
   SERVICE: 'service',
   EVENT: 'event',
@@ -569,11 +576,11 @@ export const JsonParamsInputTypeEnum = {
   CUSTOM: 'custom'
 } as const
 
-/** JSON参数输入组件类型 */
+/** JSON 参数输入组件类型 */
 export type JsonParamsInputType =
   (typeof JsonParamsInputTypeEnum)[keyof typeof JsonParamsInputTypeEnum]
 
-/** JSON参数输入组件文本常量 */
+/** JSON 参数输入组件文本常量 */
 export const JSON_PARAMS_INPUT_CONSTANTS = {
   // 基础文本
   PLACEHOLDER: '请输入JSON格式的参数',
@@ -628,7 +635,7 @@ export const JSON_PARAMS_INPUT_CONSTANTS = {
   }
 } as const
 
-/** JSON参数输入组件图标常量 */
+/** JSON 参数输入组件图标常量 */
 export const JSON_PARAMS_INPUT_ICONS = {
   // 标题图标
   TITLE_ICONS: {
@@ -655,7 +662,7 @@ export const JSON_PARAMS_INPUT_ICONS = {
   }
 } as const
 
-/** JSON参数输入组件示例值常量 */
+/** JSON 参数输入组件示例值常量 */
 export const JSON_PARAMS_EXAMPLE_VALUES = {
   [IoTDataSpecsDataTypeEnum.INT]: { display: '25', value: 25 },
   [IoTDataSpecsDataTypeEnum.FLOAT]: { display: '25.5', value: 25.5 },

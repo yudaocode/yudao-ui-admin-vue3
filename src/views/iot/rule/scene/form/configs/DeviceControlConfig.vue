@@ -136,7 +136,7 @@ const isServiceInvokeAction = computed(() => {
 
 /**
  * 处理产品变化事件
- * @param productId 产品ID
+ * @param productId 产品 ID
  */
 const handleProductChange = (productId?: number) => {
   // 当产品变化时，清空设备选择和参数配置
@@ -160,7 +160,7 @@ const handleProductChange = (productId?: number) => {
 
 /**
  * 处理设备变化事件
- * @param deviceId 设备ID
+ * @param deviceId 设备 ID
  */
 const handleDeviceChange = (deviceId?: number) => {
   // 当设备变化时，清空参数配置
@@ -338,14 +338,12 @@ const initializeComponent = async () => {
   isInitialized.value = true
 }
 
-/**
- * 组件初始化
- */
+/** 组件初始化 */
 onMounted(() => {
   initializeComponent()
 })
 
-// 监听关键字段的变化，避免深度监听导致的性能问题
+/** 监听关键字段的变化，避免深度监听导致的性能问题 */
 watch(
   () => [action.value.productId, action.value.type, action.value.identifier],
   async ([newProductId, , newIdentifier], [oldProductId, , oldIdentifier]) => {
