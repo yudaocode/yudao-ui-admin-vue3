@@ -270,6 +270,7 @@ const handleDeleteBatch = async () => {
     await message.delConfirm()
     // 发起批量删除
     await RoleApi.deleteRoleList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

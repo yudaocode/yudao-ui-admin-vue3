@@ -230,6 +230,7 @@ const handleDeleteBatch = async () => {
     // 删除的二次确认
     await message.delConfirm()
     await Demo03StudentApi.deleteDemo03StudentList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
