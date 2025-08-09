@@ -52,6 +52,11 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="用户标识" align="center" prop="openid" width="260" />
+      <el-table-column label="用户头像" min-width="80px" prop="headImageUrl">
+        <template #default="scope">
+          <el-avatar :src="scope.row.headImageUrl"/>
+        </template>
+      </el-table-column>
       <el-table-column label="昵称" align="center" prop="nickname" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="标签" align="center" prop="tagIds" width="200">
