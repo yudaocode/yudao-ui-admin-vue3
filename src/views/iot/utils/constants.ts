@@ -158,6 +158,47 @@ export const getDataTypeOptionsLabel = (value: string) => {
   return dataType && `${dataType.value}(${dataType.label})`
 }
 
+/** 获取数据类型显示名称（用于属性选择器） */
+export const getDataTypeName = (dataType: string): string => {
+  const typeMap = {
+    [IoTDataSpecsDataTypeEnum.INT]: '整数',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: '浮点数',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: '双精度',
+    [IoTDataSpecsDataTypeEnum.TEXT]: '字符串',
+    [IoTDataSpecsDataTypeEnum.BOOL]: '布尔值',
+    [IoTDataSpecsDataTypeEnum.ENUM]: '枚举',
+    [IoTDataSpecsDataTypeEnum.DATE]: '日期',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: '结构体',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: '数组'
+  }
+  return typeMap[dataType] || dataType
+}
+
+/** 获取数据类型标签类型（用于 el-tag 的 type 属性） */
+export const getDataTypeTagType = (
+  dataType: string
+): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  const tagMap = {
+    [IoTDataSpecsDataTypeEnum.INT]: 'primary',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: 'success',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: 'success',
+    [IoTDataSpecsDataTypeEnum.TEXT]: 'info',
+    [IoTDataSpecsDataTypeEnum.BOOL]: 'warning',
+    [IoTDataSpecsDataTypeEnum.ENUM]: 'danger',
+    [IoTDataSpecsDataTypeEnum.DATE]: 'primary',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: 'info',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: 'warning'
+  } as const
+  return tagMap[dataType] || 'info'
+}
+
+/** 物模型组标签常量 */
+export const THING_MODEL_GROUP_LABELS = {
+  PROPERTY: '设备属性',
+  EVENT: '设备事件',
+  SERVICE: '设备服务'
+} as const
+
 // IoT OTA 任务设备范围枚举
 export const IoTOtaTaskDeviceScopeEnum = {
   ALL: {
@@ -226,7 +267,7 @@ export const IotRuleSceneTriggerTypeEnum = {
 } as const
 
 /** 触发器类型选项配置 */
-export const getTriggerTypeOptions = () => [
+export const triggerTypeOptions = [
   {
     value: IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE,
     label: '设备状态变更'
@@ -274,35 +315,19 @@ export const IotRuleSceneActionTypeEnum = {
 export const getActionTypeOptions = () => [
   {
     value: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,
-    label: '设备属性设置',
-    description: '设置目标设备的属性值',
-    icon: 'ep:edit',
-    tag: 'primary',
-    category: '设备控制'
+    label: '设备属性设置'
   },
   {
     value: IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE,
-    label: '设备服务调用',
-    description: '调用目标设备的服务',
-    icon: 'ep:service',
-    tag: 'success',
-    category: '设备控制'
+    label: '设备服务调用'
   },
   {
     value: IotRuleSceneActionTypeEnum.ALERT_TRIGGER,
-    label: '触发告警',
-    description: '触发系统告警通知',
-    icon: 'ep:warning',
-    tag: 'danger',
-    category: '告警通知'
+    label: '触发告警'
   },
   {
     value: IotRuleSceneActionTypeEnum.ALERT_RECOVER,
-    label: '恢复告警',
-    description: '恢复已触发的告警',
-    icon: 'ep:circle-check',
-    tag: 'warning',
-    category: '告警通知'
+    label: '恢复告警'
   }
 ]
 
@@ -329,6 +354,26 @@ export const getActionTypeLabel = (type: number): string => {
   const option = getActionTypeOptions().find((opt) => opt.value === type)
   return option?.label || '未知类型'
 }
+
+/** 获取执行器标签类型（用于 el-tag 的 type 属性） */
+export const getActionTypeTag = (
+  type: number
+): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  const actionTypeTags = {
+    [IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
+    [IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
+    [IotRuleSceneActionTypeEnum.ALERT_TRIGGER]: 'danger',
+    [IotRuleSceneActionTypeEnum.ALERT_RECOVER]: 'warning'
+  } as const
+  return actionTypeTags[type] || 'info'
+}
+
+/** 场景联动规则配置常量 */
+export const SCENE_RULE_CONFIG = {
+  MAX_ACTIONS: 5, // 最大执行器数量
+  MAX_TRIGGERS: 10, // 最大触发器数量
+  MAX_CONDITIONS: 20 // 最大条件数量
+} as const
 
 /** IoT 设备消息类型枚举 */
 export const IotDeviceMessageTypeEnum = {
@@ -360,6 +405,131 @@ export const IotRuleSceneTriggerConditionTypeEnum = {
   CURRENT_TIME: 3 // 当前时间
 } as const
 
+/** 获取条件类型选项 */
+export const getConditionTypeOptions = () => [
+  {
+    value: IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS,
+    label: '设备状态'
+  },
+  {
+    value: IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY,
+    label: '设备属性'
+  },
+  {
+    value: IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME,
+    label: '当前时间'
+  }
+]
+
+/** 设备状态枚举 */
+export const IoTDeviceStatusEnum = {
+  ONLINE: {
+    label: '在线',
+    value: 'online'
+  },
+  OFFLINE: {
+    label: '离线',
+    value: 'offline'
+  }
+} as const
+
+/** 设备启用状态枚举 */
+export const IoTDeviceEnableStatusEnum = {
+  ENABLED: {
+    label: '正常',
+    value: 0,
+    tagType: 'success'
+  },
+  DISABLED: {
+    label: '禁用',
+    value: 1,
+    tagType: 'danger'
+  }
+} as const
+
+/** 设备激活状态枚举 */
+export const IoTDeviceActiveStatusEnum = {
+  ACTIVATED: {
+    label: '已激活',
+    tagType: 'success'
+  },
+  NOT_ACTIVATED: {
+    label: '未激活',
+    tagType: 'info'
+  }
+} as const
+
+/** 设备选择器特殊选项 */
+export const DEVICE_SELECTOR_OPTIONS = {
+  ALL_DEVICES: {
+    id: 0,
+    deviceName: '全部设备'
+  }
+} as const
+
+/** 获取设备状态选项 */
+export const getDeviceStatusOptions = () => [
+  {
+    value: IoTDeviceStatusEnum.ONLINE.value,
+    label: IoTDeviceStatusEnum.ONLINE.label
+  },
+  {
+    value: IoTDeviceStatusEnum.OFFLINE.value,
+    label: IoTDeviceStatusEnum.OFFLINE.label
+  }
+]
+
+/** 获取状态操作符选项 */
+export const getStatusOperatorOptions = () => [
+  {
+    value: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value,
+    label: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.name
+  },
+  {
+    value: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.value,
+    label: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.name
+  }
+]
+
+/** 获取设备状态变更选项（用于触发器配置） */
+export const deviceStatusChangeOptions = [
+  {
+    label: IoTDeviceStatusEnum.ONLINE.label,
+    value: IoTDeviceStatusEnum.ONLINE.value
+  },
+  {
+    label: IoTDeviceStatusEnum.OFFLINE.label,
+    value: IoTDeviceStatusEnum.OFFLINE.value
+  }
+]
+
+/** 获取设备启用状态文本 */
+export const getDeviceEnableStatusText = (status: number): string => {
+  const statusItem = Object.values(IoTDeviceEnableStatusEnum).find((item) => item.value === status)
+  return statusItem?.label || '未知'
+}
+
+/** 获取设备启用状态标签类型 */
+export const getDeviceEnableStatusTagType = (
+  status: number
+): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  const statusItem = Object.values(IoTDeviceEnableStatusEnum).find((item) => item.value === status)
+  return statusItem?.tagType || 'info'
+}
+
+/** 获取设备激活状态文本和标签类型 */
+export const getDeviceActiveStatus = (activeTime?: string | null) => {
+  const isActivated = !!activeTime
+  return {
+    text: isActivated
+      ? IoTDeviceActiveStatusEnum.ACTIVATED.label
+      : IoTDeviceActiveStatusEnum.NOT_ACTIVATED.label,
+    tagType: isActivated
+      ? IoTDeviceActiveStatusEnum.ACTIVATED.tagType
+      : IoTDeviceActiveStatusEnum.NOT_ACTIVATED.tagType
+  }
+}
+
 /** IoT 场景联动触发时间操作符枚举 */
 export const IotRuleSceneTriggerTimeOperatorEnum = {
   BEFORE_TIME: { name: '在时间之前', value: 'before_time' }, // 在时间之前
@@ -375,7 +545,125 @@ export const IotRuleSceneTriggerTimeOperatorEnum = {
 
 /** 获取触发器类型标签 */
 export const getTriggerTypeLabel = (type: number): string => {
-  const options = getTriggerTypeOptions()
-  const option = options.find((item) => item.value === type)
+  const option = triggerTypeOptions.find((item) => item.value === type)
   return option?.label || '未知类型'
 }
+
+/** 获取触发器标签类型（用于 el-tag 的 type 属性） */
+export const getTriggerTagType = (
+  type: number
+): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  if (type === IotRuleSceneTriggerTypeEnum.TIMER) {
+    return 'warning'
+  }
+  return isDeviceTrigger(type) ? 'success' : 'info'
+}
+
+// ========== JSON参数输入组件相关常量 ==========
+
+/** JSON参数输入组件类型枚举 */
+export const JsonParamsInputTypeEnum = {
+  SERVICE: 'service',
+  EVENT: 'event',
+  PROPERTY: 'property',
+  CUSTOM: 'custom'
+} as const
+
+/** JSON参数输入组件类型 */
+export type JsonParamsInputType =
+  (typeof JsonParamsInputTypeEnum)[keyof typeof JsonParamsInputTypeEnum]
+
+/** JSON参数输入组件文本常量 */
+export const JSON_PARAMS_INPUT_CONSTANTS = {
+  // 基础文本
+  PLACEHOLDER: '请输入JSON格式的参数',
+  JSON_FORMAT_CORRECT: 'JSON 格式正确',
+  QUICK_FILL_LABEL: '快速填充：',
+  EXAMPLE_DATA_BUTTON: '示例数据',
+  CLEAR_BUTTON: '清空',
+  VIEW_EXAMPLE_TITLE: '查看参数示例',
+  COMPLETE_JSON_FORMAT: '完整 JSON 格式：',
+  REQUIRED_TAG: '必填',
+
+  // 错误信息
+  PARAMS_MUST_BE_OBJECT: '参数必须是一个有效的 JSON 对象',
+  PARAM_REQUIRED_ERROR: (paramName: string) => `参数 ${paramName} 为必填项`,
+  JSON_FORMAT_ERROR: (error: string) => `JSON格式错误: ${error}`,
+  UNKNOWN_ERROR: '未知错误',
+
+  // 类型相关标题
+  TITLES: {
+    SERVICE: (name?: string) => `${name || '服务'} - 输入参数示例`,
+    EVENT: (name?: string) => `${name || '事件'} - 输出参数示例`,
+    PROPERTY: '属性设置 - 参数示例',
+    CUSTOM: (name?: string) => `${name || '自定义'} - 参数示例`,
+    DEFAULT: '参数示例'
+  },
+
+  // 参数标签
+  PARAMS_LABELS: {
+    SERVICE: '输入参数',
+    EVENT: '输出参数',
+    PROPERTY: '属性参数',
+    CUSTOM: '参数列表',
+    DEFAULT: '参数'
+  },
+
+  // 空状态消息
+  EMPTY_MESSAGES: {
+    SERVICE: '此服务无需输入参数',
+    EVENT: '此事件无输出参数',
+    PROPERTY: '无可设置的属性',
+    CUSTOM: '无参数配置',
+    DEFAULT: '无参数'
+  },
+
+  // 无配置消息
+  NO_CONFIG_MESSAGES: {
+    SERVICE: '请先选择服务',
+    EVENT: '请先选择事件',
+    PROPERTY: '请先选择产品',
+    CUSTOM: '请先进行配置',
+    DEFAULT: '请先进行配置'
+  }
+} as const
+
+/** JSON参数输入组件图标常量 */
+export const JSON_PARAMS_INPUT_ICONS = {
+  // 标题图标
+  TITLE_ICONS: {
+    SERVICE: 'ep:service',
+    EVENT: 'ep:bell',
+    PROPERTY: 'ep:edit',
+    CUSTOM: 'ep:document',
+    DEFAULT: 'ep:document'
+  },
+
+  // 参数图标
+  PARAMS_ICONS: {
+    SERVICE: 'ep:edit',
+    EVENT: 'ep:upload',
+    PROPERTY: 'ep:setting',
+    CUSTOM: 'ep:list',
+    DEFAULT: 'ep:edit'
+  },
+
+  // 状态图标
+  STATUS_ICONS: {
+    ERROR: 'ep:warning',
+    SUCCESS: 'ep:circle-check'
+  }
+} as const
+
+/** JSON参数输入组件示例值常量 */
+export const JSON_PARAMS_EXAMPLE_VALUES = {
+  [IoTDataSpecsDataTypeEnum.INT]: { display: '25', value: 25 },
+  [IoTDataSpecsDataTypeEnum.FLOAT]: { display: '25.5', value: 25.5 },
+  [IoTDataSpecsDataTypeEnum.DOUBLE]: { display: '25.5', value: 25.5 },
+  [IoTDataSpecsDataTypeEnum.BOOL]: { display: 'false', value: false },
+  [IoTDataSpecsDataTypeEnum.TEXT]: { display: '"auto"', value: 'auto' },
+  [IoTDataSpecsDataTypeEnum.ENUM]: { display: '"option1"', value: 'option1' },
+  [IoTDataSpecsDataTypeEnum.STRUCT]: { display: '{}', value: {} },
+  [IoTDataSpecsDataTypeEnum.ARRAY]: { display: '[]', value: [] },
+  DEFAULT: { display: '""', value: '' }
+} as const

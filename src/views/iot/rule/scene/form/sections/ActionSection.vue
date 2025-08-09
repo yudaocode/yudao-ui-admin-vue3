@@ -1,5 +1,4 @@
 <!-- 执行器配置组件 -->
-<!-- todo @puhui999：参考“触发器配置”，简化下。 -->
 <template>
   <el-card class="border border-[var(--el-border-color-light)] rounded-8px" shadow="never">
     <template #header>
@@ -46,7 +45,7 @@
               <Icon icon="ep:setting" class="text-[var(--el-color-success)] text-16px" />
               <span>执行器 {{ index + 1 }}</span>
               <el-tag :type="getActionTypeTag(action.type)" size="small">
-                {{ getActionTypeName(action.type) }}
+                {{ getActionTypeLabel(action.type) }}
               </el-tag>
             </div>
             <div>
@@ -65,11 +64,24 @@
 
           <div class="space-y-16px">
             <!-- 执行类型选择 -->
-            <ActionTypeSelector
-              :model-value="action.type"
-              @update:model-value="(value) => updateActionType(index, value)"
-              @change="onActionTypeChange(action, $event)"
-            />
+            <div class="w-full">
+              <el-form-item label="执行类型" required>
+                <el-select
+                  :model-value="action.type"
+                  @update:model-value="(value) => updateActionType(index, value)"
+                  @change="(value) => onActionTypeChange(action, value)"
+                  placeholder="请选择执行类型"
+                  class="w-full"
+                >
+                  <el-option
+                    v-for="option in getActionTypeOptions()"
+                    :key="option.value"
+                    :label="option.label"
+                    :value="option.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </div>
 
             <!-- 设备控制配置 -->
             <DeviceControlConfig
@@ -119,15 +131,17 @@
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import ActionTypeSelector from '../selectors/ActionTypeSelector.vue'
 import DeviceControlConfig from '../configs/DeviceControlConfig.vue'
 import AlertConfig from '../configs/AlertConfig.vue'
-import { Action } from '@/api/iot/rule/scene/scene.types'
+import type { Action } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneActionTypeEnum as ActionTypeEnum,
   isDeviceAction,
   isAlertAction,
-  getActionTypeLabel
+  getActionTypeLabel,
+  getActionTypeOptions,
+  getActionTypeTag,
+  SCENE_RULE_CONFIG
 } from '@/views/iot/utils/constants'
 
 /** 执行器配置组件 */
@@ -143,8 +157,11 @@ const emit = defineEmits<{
 
 const actions = useVModel(props, 'actions', emit)
 
+const maxActions = SCENE_RULE_CONFIG.MAX_ACTIONS // 最大执行器数量
+
 /**
  * 创建默认的执行器数据
+ * @returns 默认执行器对象
  */
 const createDefaultActionData = (): Action => {
   return {
@@ -152,29 +169,14 @@ const createDefaultActionData = (): Action => {
     productId: undefined,
     deviceId: undefined,
     identifier: undefined, // 物模型标识符（服务调用时使用）
-    params: {},
+    params: undefined,
     alertConfigId: undefined
   }
 }
 
-const maxActions = 5 // 最大执行器数量
-
-// 工具函数
-const getActionTypeName = (type: number) => {
-  return getActionTypeLabel(type)
-}
-
-const getActionTypeTag = (type: number) => {
-  const actionTypeTags = {
-    [ActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
-    [ActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
-    [ActionTypeEnum.ALERT_TRIGGER]: 'danger',
-    [ActionTypeEnum.ALERT_RECOVER]: 'warning'
-  }
-  return actionTypeTags[type] || 'info'
-}
-
-/** 添加执行器 */
+/**
+ * 添加执行器
+ */
 const addAction = () => {
   if (actions.value.length >= maxActions) {
     return
@@ -184,35 +186,54 @@ const addAction = () => {
   actions.value.push(newAction)
 }
 
-/** 删除执行器 */
+/**
+ * 删除执行器
+ * @param index 执行器索引
+ */
 const removeAction = (index: number) => {
   actions.value.splice(index, 1)
 }
 
-/** 更新执行器类型 */
+/**
+ * 更新执行器类型
+ * @param index 执行器索引
+ * @param type 执行器类型
+ */
 const updateActionType = (index: number, type: number) => {
   actions.value[index].type = type
   onActionTypeChange(actions.value[index], type)
 }
 
-/** 更新执行器 */
+/**
+ * 更新执行器
+ * @param index 执行器索引
+ * @param action 执行器对象
+ */
 const updateAction = (index: number, action: Action) => {
   actions.value[index] = action
 }
 
-/** 更新告警配置 */
+/**
+ * 更新告警配置
+ * @param index 执行器索引
+ * @param alertConfigId 告警配置ID
+ */
 const updateActionAlertConfig = (index: number, alertConfigId?: number) => {
   actions.value[index].alertConfigId = alertConfigId
 }
 
-/** 监听执行器类型变化 */
+/**
+ * 监听执行器类型变化
+ * @param action 执行器对象
+ * @param type 执行器类型
+ */
 const onActionTypeChange = (action: Action, type: number) => {
   // 清理不相关的配置，确保数据结构干净
   if (isDeviceAction(type)) {
     // 设备控制类型：清理告警配置，确保设备参数存在
     action.alertConfigId = undefined
     if (!action.params) {
-      action.params = {}
+      action.params = ''
     }
     // 如果从其他类型切换到设备控制类型，清空identifier（让用户重新选择）
     if (action.identifier && type !== action.type) {

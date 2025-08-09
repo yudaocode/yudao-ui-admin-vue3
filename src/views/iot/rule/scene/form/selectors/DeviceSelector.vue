@@ -24,11 +24,11 @@
           <div class="text-12px text-[var(--el-text-color-secondary)]">{{ device.deviceKey }}</div>
         </div>
         <div class="flex items-center gap-4px">
-          <el-tag size="small" :type="getStatusType(device.status)">
-            {{ getStatusText(device.status) }}
+          <el-tag size="small" :type="getDeviceEnableStatusTagType(device.status)">
+            {{ getDeviceEnableStatusText(device.status) }}
           </el-tag>
-          <el-tag size="small" :type="device.activeTime ? 'success' : 'info'">
-            {{ device.activeTime ? '已激活' : '未激活' }}
+          <el-tag size="small" :type="getDeviceActiveStatus(device.activeTime).tagType">
+            {{ getDeviceActiveStatus(device.activeTime).text }}
           </el-tag>
         </div>
       </div>
@@ -38,6 +38,12 @@
 
 <script setup lang="ts">
 import { DeviceApi } from '@/api/iot/device/device'
+import {
+  getDeviceEnableStatusText,
+  getDeviceEnableStatusTagType,
+  getDeviceActiveStatus,
+  DEVICE_SELECTOR_OPTIONS
+} from '@/views/iot/utils/constants'
 
 /** 设备选择器组件 */
 defineOptions({ name: 'DeviceSelector' })
@@ -52,17 +58,21 @@ const emit = defineEmits<{
   (e: 'change', value?: number): void
 }>()
 
-// 状态
-const deviceLoading = ref(false)
-const deviceList = ref<any[]>([])
+const deviceLoading = ref(false) // 设备加载状态
+const deviceList = ref<any[]>([]) // 设备列表
 
-// 事件处理
+/**
+ * 处理选择变化事件
+ * @param value 选中的设备ID
+ */
 const handleChange = (value?: number) => {
   emit('update:modelValue', value)
   emit('change', value)
 }
 
-// 获取设备列表
+/**
+ * 获取设备列表
+ */
 const getDeviceList = async () => {
   if (!props.productId) {
     deviceList.value = []
@@ -77,31 +87,8 @@ const getDeviceList = async () => {
     console.error('获取设备列表失败:', error)
     deviceList.value = []
   } finally {
-    deviceList.value.push({ id: 0, deviceName: '全部设备' })
+    deviceList.value.push(DEVICE_SELECTOR_OPTIONS.ALL_DEVICES)
     deviceLoading.value = false
-  }
-}
-
-// 设备状态映射
-const getStatusType = (status: number) => {
-  switch (status) {
-    case 0:
-      return 'success' // 正常
-    case 1:
-      return 'danger' // 禁用
-    default:
-      return 'info'
-  }
-}
-
-const getStatusText = (status: number) => {
-  switch (status) {
-    case 0:
-      return '正常'
-    case 1:
-      return '禁用'
-    default:
-      return '未知'
   }
 }
 

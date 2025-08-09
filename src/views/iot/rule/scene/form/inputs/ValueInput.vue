@@ -132,19 +132,12 @@
         </el-tooltip>
       </template>
     </el-input>
-
-    <!-- 验证提示 -->
-    <div v-if="validationMessage" class="mt-4px">
-      <el-text :type="isValid ? 'success' : 'danger'" size="small">
-        <Icon :icon="isValid ? 'ep:check' : 'ep:warning-filled'" />
-        {{ validationMessage }}
-      </el-text>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
+import { IoTDataSpecsDataTypeEnum } from '@/views/iot/utils/constants'
 
 /** 值输入组件 */
 defineOptions({ name: 'ValueInput' })
@@ -158,7 +151,6 @@ interface Props {
 
 interface Emits {
   (e: 'update:modelValue', value: string): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
 const props = defineProps<Props>()
@@ -168,15 +160,12 @@ const localValue = useVModel(props, 'modelValue', emit, {
   defaultValue: ''
 })
 
-// 状态
-const rangeStart = ref('')
-const rangeEnd = ref('')
-const dateValue = ref('')
-const numberValue = ref<number>()
-const validationMessage = ref('')
-const isValid = ref(true)
+const rangeStart = ref('') // 范围开始值
+const rangeEnd = ref('') // 范围结束值
+const dateValue = ref('') // 日期值
+const numberValue = ref<number>() // 数字值
 
-// 计算属性
+// 计算属性：枚举选项
 const enumOptions = computed(() => {
   if (props.propertyConfig?.enum) {
     return props.propertyConfig.enum.map((item: any) => ({
@@ -187,6 +176,7 @@ const enumOptions = computed(() => {
   return []
 })
 
+// 计算属性：列表预览
 const listPreview = computed(() => {
   if (props.operator === 'in' && localValue.value) {
     return localValue.value
@@ -197,160 +187,114 @@ const listPreview = computed(() => {
   return []
 })
 
-// 工具函数
+/**
+ * 判断是否为数字类型
+ * @returns 是否为数字类型
+ */
 const isNumericType = () => {
-  return ['int', 'float', 'double'].includes(props.propertyType || '')
+  return [
+    IoTDataSpecsDataTypeEnum.INT,
+    IoTDataSpecsDataTypeEnum.FLOAT,
+    IoTDataSpecsDataTypeEnum.DOUBLE
+  ].includes((props.propertyType || '') as any)
 }
 
+/**
+ * 获取输入框类型
+ * @returns 输入框类型
+ */
 const getInputType = () => {
   switch (props.propertyType) {
-    case 'int':
-    case 'float':
-    case 'double':
+    case IoTDataSpecsDataTypeEnum.INT:
+    case IoTDataSpecsDataTypeEnum.FLOAT:
+    case IoTDataSpecsDataTypeEnum.DOUBLE:
       return 'number'
     default:
       return 'text'
   }
 }
 
+/**
+ * 获取占位符文本
+ * @returns 占位符文本
+ */
 const getPlaceholder = () => {
   const typeMap = {
-    string: '请输入字符串',
-    int: '请输入整数',
-    float: '请输入浮点数',
-    double: '请输入双精度数',
-    struct: '请输入JSON格式数据',
-    array: '请输入数组格式数据'
+    [IoTDataSpecsDataTypeEnum.TEXT]: '请输入字符串',
+    [IoTDataSpecsDataTypeEnum.INT]: '请输入整数',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: '请输入浮点数',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: '请输入双精度数',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: '请输入 JSON 格式数据',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: '请输入数组格式数据'
   }
   return typeMap[props.propertyType || ''] || '请输入值'
 }
 
+/**
+ * 获取数字精度
+ * @returns 数字精度
+ */
 const getPrecision = () => {
-  return props.propertyType === 'int' ? 0 : 2
+  return props.propertyType === IoTDataSpecsDataTypeEnum.INT ? 0 : 2
 }
 
+/**
+ * 获取数字步长
+ * @returns 数字步长
+ */
 const getStep = () => {
-  return props.propertyType === 'int' ? 1 : 0.1
+  return props.propertyType === IoTDataSpecsDataTypeEnum.INT ? 1 : 0.1
 }
 
+/**
+ * 获取最小值
+ * @returns 最小值
+ */
 const getMin = () => {
   return props.propertyConfig?.min || undefined
 }
 
+/**
+ * 获取最大值
+ * @returns 最大值
+ */
 const getMax = () => {
   return props.propertyConfig?.max || undefined
 }
 
-// 事件处理
+/**
+ * 处理值变化事件
+ */
 const handleChange = () => {
-  validateValue()
+  // 值变化处理
 }
 
+/**
+ * 处理范围变化事件
+ */
 const handleRangeChange = () => {
   if (rangeStart.value && rangeEnd.value) {
     localValue.value = `${rangeStart.value},${rangeEnd.value}`
   } else {
     localValue.value = ''
   }
-  validateValue()
 }
 
+/**
+ * 处理日期变化事件
+ * @param value 日期值
+ */
 const handleDateChange = (value: string) => {
   localValue.value = value || ''
-  validateValue()
 }
 
+/**
+ * 处理数字变化事件
+ * @param value 数字值
+ */
 const handleNumberChange = (value: number | undefined) => {
   localValue.value = value?.toString() || ''
-  validateValue()
 }
-
-// 验证函数
-const validateValue = () => {
-  if (!localValue.value) {
-    isValid.value = false
-    validationMessage.value = '请输入值'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  // 数字类型验证
-  if (isNumericType()) {
-    const num = parseFloat(localValue.value)
-    if (isNaN(num)) {
-      isValid.value = false
-      validationMessage.value = '请输入有效的数字'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-
-    // 范围验证
-    const min = getMin()
-    const max = getMax()
-    if (min !== undefined && num < min) {
-      isValid.value = false
-      validationMessage.value = `值不能小于 ${min}`
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-    if (max !== undefined && num > max) {
-      isValid.value = false
-      validationMessage.value = `值不能大于 ${max}`
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-  }
-
-  // 范围输入验证
-  if (props.operator === 'between') {
-    const parts = localValue.value.split(',')
-    if (parts.length !== 2) {
-      isValid.value = false
-      validationMessage.value = '范围格式错误'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-
-    const start = parseFloat(parts[0])
-    const end = parseFloat(parts[1])
-    if (isNaN(start) || isNaN(end)) {
-      isValid.value = false
-      validationMessage.value = '范围值必须是数字'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-
-    if (start >= end) {
-      isValid.value = false
-      validationMessage.value = '起始值必须小于结束值'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-  }
-
-  // 列表输入验证
-  if (props.operator === 'in') {
-    if (listPreview.value.length === 0) {
-      isValid.value = false
-      validationMessage.value = '请输入至少一个值'
-      emit('validate', { valid: false, message: validationMessage.value })
-      return
-    }
-  }
-
-  // 验证通过
-  isValid.value = true
-  validationMessage.value = '输入值验证通过'
-  emit('validate', { valid: true, message: validationMessage.value })
-}
-
-// 监听值变化
-watch(
-  () => localValue.value,
-  () => {
-    validateValue()
-  }
-)
 
 // 监听操作符变化
 watch(
@@ -363,11 +307,4 @@ watch(
     numberValue.value = undefined
   }
 )
-
-// 初始化
-onMounted(() => {
-  if (localValue.value) {
-    validateValue()
-  }
-})
 </script>

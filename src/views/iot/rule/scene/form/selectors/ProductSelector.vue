@@ -46,17 +46,21 @@ const emit = defineEmits<{
   (e: 'change', value?: number): void
 }>()
 
-// 状态
-const productLoading = ref(false)
-const productList = ref<any[]>([])
+const productLoading = ref(false) // 产品加载状态
+const productList = ref<any[]>([]) // 产品列表
 
-// 事件处理
+/**
+ * 处理选择变化事件
+ * @param value 选中的产品ID
+ */
 const handleChange = (value?: number) => {
   emit('update:modelValue', value)
   emit('change', value)
 }
 
-// 获取产品列表
+/**
+ * 获取产品列表
+ */
 const getProductList = async () => {
   try {
     productLoading.value = true

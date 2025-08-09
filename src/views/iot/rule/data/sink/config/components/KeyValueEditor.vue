@@ -58,7 +58,6 @@ const updateModelValue = () => {
   emit('update:modelValue', result)
 }
 
-// TODO @puhui999：有告警的地方，尽量用 cursor 处理下
 /** 监听项目变化 */
 watch(items, updateModelValue, { deep: true })
 watch(

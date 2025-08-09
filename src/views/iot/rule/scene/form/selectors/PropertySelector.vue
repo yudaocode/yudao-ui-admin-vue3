@@ -18,20 +18,17 @@
           :label="property.name"
           :value="property.identifier"
         >
-          <div class="flex items-center justify-between w-full py-4px">
-            <div class="flex-1">
-              <div class="text-14px font-500 text-[var(--el-text-color-primary)] mb-2px">
-                {{ property.name }}
-              </div>
-              <div class="text-12px text-[var(--el-text-color-secondary)]">
-                {{ property.identifier }}
-              </div>
-            </div>
-            <div class="flex-shrink-0">
-              <el-tag :type="getPropertyTypeTag(property.dataType)" size="small">
-                {{ getPropertyTypeName(property.dataType) }}
-              </el-tag>
-            </div>
+          <div class="flex items-center justify-between w-full py-2px">
+            <span class="text-14px font-500 text-[var(--el-text-color-primary)] flex-1 truncate">
+              {{ property.name }}
+            </span>
+            <el-tag
+              :type="getDataTypeTagType(property.dataType)"
+              size="small"
+              class="ml-8px flex-shrink-0"
+            >
+              {{ property.identifier }}
+            </el-tag>
           </div>
         </el-option>
       </el-option-group>
@@ -65,8 +62,8 @@
           <span class="text-14px font-500 text-[var(--el-text-color-primary)]">
             {{ selectedProperty.name }}
           </span>
-          <el-tag :type="getPropertyTypeTag(selectedProperty.dataType)" size="small">
-            {{ getPropertyTypeName(selectedProperty.dataType) }}
+          <el-tag :type="getDataTypeTagType(selectedProperty.dataType)" size="small">
+            {{ getDataTypeName(selectedProperty.dataType) }}
           </el-tag>
         </div>
 
@@ -119,7 +116,7 @@
               访问模式：
             </span>
             <span class="text-12px text-[var(--el-text-color-primary)] flex-1">
-              {{ getAccessModeText(selectedProperty.accessMode) }}
+              {{ getAccessModeLabel(selectedProperty.accessMode) }}
             </span>
           </div>
 
@@ -133,7 +130,7 @@
               事件类型：
             </span>
             <span class="text-12px text-[var(--el-text-color-primary)] flex-1">
-              {{ getEventTypeText(selectedProperty.eventType) }}
+              {{ getEventTypeLabel(selectedProperty.eventType) }}
             </span>
           </div>
 
@@ -147,7 +144,7 @@
               调用类型：
             </span>
             <span class="text-12px text-[var(--el-text-color-primary)] flex-1">
-              {{ getCallTypeText(selectedProperty.callType) }}
+              {{ getThingModelServiceCallTypeLabel(selectedProperty.callType) }}
             </span>
           </div>
         </div>
@@ -159,12 +156,47 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
-import { IotRuleSceneTriggerTypeEnum, IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
+import {
+  IotRuleSceneTriggerTypeEnum,
+  IoTThingModelTypeEnum,
+  getAccessModeLabel,
+  getEventTypeLabel,
+  getThingModelServiceCallTypeLabel,
+  getDataTypeName,
+  getDataTypeTagType,
+  THING_MODEL_GROUP_LABELS
+} from '@/views/iot/utils/constants'
+import type {
+  IotThingModelTSLResp,
+  ThingModelEvent,
+  ThingModelParam,
+  ThingModelProperty,
+  ThingModelService
+} from '@/api/iot/thingmodel'
 import { ThingModelApi } from '@/api/iot/thingmodel'
-import type { IotThingModelTSLRespVO, PropertySelectorItem } from '@/api/iot/rule/scene/scene.types'
 
 /** 属性选择器组件 */
 defineOptions({ name: 'PropertySelector' })
+
+/** 属性选择器内部使用的统一数据结构 */
+interface PropertySelectorItem {
+  identifier: string
+  name: string
+  description?: string
+  dataType: string
+  type: number // IoTThingModelTypeEnum
+  accessMode?: string
+  required?: boolean
+  unit?: string
+  range?: string
+  eventType?: string
+  callType?: string
+  inputParams?: ThingModelParam[]
+  outputParams?: ThingModelParam[]
+  property?: ThingModelProperty
+  event?: ThingModelEvent
+  service?: ThingModelService
+}
 
 const props = defineProps<{
   modelValue?: string
@@ -180,32 +212,31 @@ const emit = defineEmits<{
 
 const localValue = useVModel(props, 'modelValue', emit)
 
-// 状态
-const loading = ref(false)
-const propertyList = ref<PropertySelectorItem[]>([])
-const thingModelTSL = ref<IotThingModelTSLRespVO | null>(null)
+const loading = ref(false) // 加载状态
+const propertyList = ref<PropertySelectorItem[]>([]) // 属性列表
+const thingModelTSL = ref<IotThingModelTSLResp | null>(null) // 物模型TSL数据
 
-// 计算属性
+// 计算属性：属性分组
 const propertyGroups = computed(() => {
   const groups: { label: string; options: any[] }[] = []
 
   if (props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST) {
     groups.push({
-      label: '设备属性',
+      label: THING_MODEL_GROUP_LABELS.PROPERTY,
       options: propertyList.value.filter((p) => p.type === IoTThingModelTypeEnum.PROPERTY)
     })
   }
 
   if (props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST) {
     groups.push({
-      label: '设备事件',
+      label: THING_MODEL_GROUP_LABELS.EVENT,
       options: propertyList.value.filter((p) => p.type === IoTThingModelTypeEnum.EVENT)
     })
   }
 
   if (props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE) {
     groups.push({
-      label: '设备服务',
+      label: THING_MODEL_GROUP_LABELS.SERVICE,
       options: propertyList.value.filter((p) => p.type === IoTThingModelTypeEnum.SERVICE)
     })
   }
@@ -213,71 +244,15 @@ const propertyGroups = computed(() => {
   return groups.filter((group) => group.options.length > 0)
 })
 
+// 计算属性：当前选中的属性
 const selectedProperty = computed(() => {
   return propertyList.value.find((p) => p.identifier === localValue.value)
 })
 
-// 工具函数
-const getPropertyTypeName = (dataType: string) => {
-  const typeMap = {
-    int: '整数',
-    float: '浮点数',
-    double: '双精度',
-    text: '字符串',
-    bool: '布尔值',
-    enum: '枚举',
-    date: '日期',
-    struct: '结构体',
-    array: '数组'
-  }
-  return typeMap[dataType] || dataType
-}
-
-const getPropertyTypeTag = (dataType: string) => {
-  const tagMap = {
-    int: 'primary',
-    float: 'success',
-    double: 'success',
-    text: 'info',
-    bool: 'warning',
-    enum: 'danger',
-    date: 'primary',
-    struct: 'info',
-    array: 'warning'
-  }
-  return tagMap[dataType] || 'info'
-}
-
-// 工具函数 - 获取访问模式文本
-const getAccessModeText = (accessMode: string) => {
-  const modeMap = {
-    r: '只读',
-    w: '只写',
-    rw: '读写'
-  }
-  return modeMap[accessMode] || accessMode
-}
-
-// 工具函数 - 获取事件类型文本
-const getEventTypeText = (eventType: string) => {
-  const typeMap = {
-    info: '信息',
-    alert: '告警',
-    error: '故障'
-  }
-  return typeMap[eventType] || eventType
-}
-
-// 工具函数 - 获取调用类型文本
-const getCallTypeText = (callType: string) => {
-  const typeMap = {
-    sync: '同步',
-    async: '异步'
-  }
-  return typeMap[callType] || callType
-}
-
-// 事件处理
+/**
+ * 处理选择变化事件
+ * @param value 选中的属性标识符
+ */
 const handleChange = (value: string) => {
   const property = propertyList.value.find((p) => p.identifier === value)
   if (property) {
@@ -306,37 +281,20 @@ const getThingModelTSL = async () => {
       thingModelTSL.value = tslData
       parseThingModelData()
     } else {
-      // 如果TSL获取失败，尝试获取物模型列表
-      await getThingModelList()
+      console.error('获取物模型TSL失败: 返回数据为空')
+      propertyList.value = []
     }
   } catch (error) {
     console.error('获取物模型TSL失败:', error)
-    // 如果TSL获取失败，尝试获取物模型列表
-    await getThingModelList()
+    propertyList.value = []
   } finally {
     loading.value = false
   }
 }
 
 /**
- * 获取物模型列表（备用方案）
+ * 解析物模型TSL数据
  */
-const getThingModelList = async () => {
-  if (!props.productId) {
-    propertyList.value = []
-    return
-  }
-
-  try {
-    const data = await ThingModelApi.getThingModelList({ productId: props.productId })
-    propertyList.value = data || []
-  } catch (error) {
-    console.error('获取物模型列表失败:', error)
-    propertyList.value = []
-  }
-}
-
-// 解析物模型TSL数据
 const parseThingModelData = () => {
   const tsl = thingModelTSL.value
   const properties: PropertySelectorItem[] = []
@@ -399,7 +357,11 @@ const parseThingModelData = () => {
   propertyList.value = properties
 }
 
-// 获取属性单位
+/**
+ * 获取属性单位
+ * @param property 属性对象
+ * @returns 属性单位
+ */
 const getPropertyUnit = (property: any) => {
   if (!property) return undefined
 
@@ -411,7 +373,11 @@ const getPropertyUnit = (property: any) => {
   return undefined
 }
 
-// 获取属性范围描述
+/**
+ * 获取属性范围描述
+ * @param property 属性对象
+ * @returns 属性范围描述
+ */
 const getPropertyRange = (property: any) => {
   if (!property) return undefined
 
@@ -454,7 +420,7 @@ watch(
 /* 下拉选项样式 */
 :deep(.el-select-dropdown__item) {
   height: auto;
-  padding: 8px 20px;
+  padding: 6px 20px;
 }
 
 /* 弹出层内容样式 */

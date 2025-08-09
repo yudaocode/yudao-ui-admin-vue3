@@ -50,13 +50,11 @@
       <!-- 服务参数配置 -->
       <div v-if="action.identifier" class="space-y-16px">
         <el-form-item label="服务参数" required>
-          <!-- TODO@puhui999：这里有个 idea 告警 -->
           <JsonParamsInput
             v-model="paramsValue"
             type="service"
-            :config="{ service: selectedService }"
-            placeholder="请输入JSON格式的服务参数"
-            @validate="handleParamsValidate"
+            :config="{ service: selectedService } as any"
+            placeholder="请输入 JSON 格式的服务参数"
           />
         </el-form-item>
       </div>
@@ -70,8 +68,7 @@
           v-model="paramsValue"
           type="property"
           :config="{ properties: thingModelProperties }"
-          placeholder="请输入JSON格式的控制参数"
-          @validate="handleParamsValidate"
+          placeholder="请输入 JSON 格式的控制参数"
         />
       </el-form-item>
     </div>
@@ -83,10 +80,12 @@ import { useVModel } from '@vueuse/core'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
 import JsonParamsInput from '../inputs/JsonParamsInput.vue'
-import { Action, ThingModelProperty, ThingModelService } from '@/api/iot/rule/scene/scene.types'
+import type { Action } from '@/api/iot/rule/scene'
+import type { ThingModelProperty, ThingModelService } from '@/api/iot/thingmodel'
 import {
   IotRuleSceneActionTypeEnum,
-  IoTThingModelAccessModeEnum
+  IoTThingModelAccessModeEnum,
+  IoTDataSpecsDataTypeEnum
 } from '@/views/iot/utils/constants'
 import { ThingModelApi } from '@/api/iot/thingmodel'
 
@@ -103,7 +102,6 @@ const emit = defineEmits<{
 
 const action = useVModel(props, 'modelValue', emit)
 
-// 状态变量
 const thingModelProperties = ref<ThingModelProperty[]>([]) // 物模型属性列表
 const loadingThingModel = ref(false) // 物模型加载状态
 const selectedService = ref<ThingModelService | null>(null) // 选中的服务对象
@@ -126,20 +124,13 @@ const paramsValue = computed({
   }
 })
 
-// 参数验证处理
-// TODO @puhui999：这个还需要哇？
-const handleParamsValidate = (result: { valid: boolean; message: string }) => {
-  // 可以在这里处理验证结果，比如显示错误信息
-  console.log('参数验证结果:', result)
-}
-
+// 计算属性：是否为属性设置类型
 const isPropertySetAction = computed(() => {
-  // 是否为属性设置类型
   return action.value.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET
 })
 
+// 计算属性：是否为服务调用类型
 const isServiceInvokeAction = computed(() => {
-  // 是否为服务调用类型
   return action.value.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
 })
 
@@ -167,7 +158,10 @@ const handleProductChange = (productId?: number) => {
   }
 }
 
-/** 处理设备变化事件 */
+/**
+ * 处理设备变化事件
+ * @param deviceId 设备ID
+ */
 const handleDeviceChange = (deviceId?: number) => {
   // 当设备变化时，清空参数配置
   if (action.value.deviceId !== deviceId) {
@@ -175,7 +169,10 @@ const handleDeviceChange = (deviceId?: number) => {
   }
 }
 
-/** 处理服务变化事件 */
+/**
+ * 处理服务变化事件
+ * @param serviceIdentifier 服务标识符
+ */
 const handleServiceChange = (serviceIdentifier?: string) => {
   // 根据服务标识符找到对应的服务对象
   const service = serviceList.value.find((s) => s.identifier === serviceIdentifier) || null
@@ -196,10 +193,13 @@ const handleServiceChange = (serviceIdentifier?: string) => {
 }
 
 /**
- * 获取物模型 TSL 数据
+ * 获取物模型TSL数据
+ * @param productId 产品ID
+ * @returns 物模型TSL数据
  */
 const getThingModelTSL = async (productId: number) => {
   if (!productId) return null
+
   try {
     return await ThingModelApi.getThingModelTSLByProductId(productId)
   } catch (error) {
@@ -208,7 +208,10 @@ const getThingModelTSL = async (productId: number) => {
   }
 }
 
-/** 加载物模型属性（可写属性）*/
+/**
+ * 加载物模型属性（可写属性）
+ * @param productId 产品ID
+ */
 const loadThingModelProperties = async (productId: number) => {
   if (!productId) {
     thingModelProperties.value = []
@@ -239,12 +242,16 @@ const loadThingModelProperties = async (productId: number) => {
   }
 }
 
-/** 加载服务列表 */
+/**
+ * 加载服务列表
+ * @param productId 产品ID
+ */
 const loadServiceList = async (productId: number) => {
   if (!productId) {
     serviceList.value = []
     return
   }
+
   try {
     loadingServices.value = true
     const tslData = await getThingModelTSL(productId)
@@ -263,7 +270,11 @@ const loadServiceList = async (productId: number) => {
   }
 }
 
-/** 从 TSL 加载服务信息（用于编辑模式回显）*/
+/**
+ * 从TSL加载服务信息（用于编辑模式回显）
+ * @param productId 产品ID
+ * @param serviceIdentifier 服务标识符
+ */
 const loadServiceFromTSL = async (productId: number, serviceIdentifier: string) => {
   // 先加载服务列表
   await loadServiceList(productId)
@@ -275,19 +286,23 @@ const loadServiceFromTSL = async (productId: number, serviceIdentifier: string) 
   }
 }
 
-/** 根据参数类型获取默认值 */
+/**
+ * 根据参数类型获取默认值
+ * @param param 参数对象
+ * @returns 默认值
+ */
 const getDefaultValueForParam = (param: any) => {
   switch (param.dataType) {
-    case 'int':
+    case IoTDataSpecsDataTypeEnum.INT:
       return 0
-    case 'float':
-    case 'double':
+    case IoTDataSpecsDataTypeEnum.FLOAT:
+    case IoTDataSpecsDataTypeEnum.DOUBLE:
       return 0.0
-    case 'bool':
+    case IoTDataSpecsDataTypeEnum.BOOL:
       return false
-    case 'text':
+    case IoTDataSpecsDataTypeEnum.TEXT:
       return ''
-    case 'enum':
+    case IoTDataSpecsDataTypeEnum.ENUM:
       // 如果有枚举值，使用第一个
       if (param.dataSpecs?.dataSpecsList && param.dataSpecs.dataSpecsList.length > 0) {
         return param.dataSpecs.dataSpecsList[0].value
@@ -298,10 +313,11 @@ const getDefaultValueForParam = (param: any) => {
   }
 }
 
-// 防止重复初始化的标志
-const isInitialized = ref(false)
+const isInitialized = ref(false) // 防止重复初始化的标志
 
-/** 初始化组件数据 */
+/**
+ * 初始化组件数据
+ */
 const initializeComponent = async () => {
   if (isInitialized.value) return
 
@@ -322,12 +338,14 @@ const initializeComponent = async () => {
   isInitialized.value = true
 }
 
-/** 组件初始化 */
+/**
+ * 组件初始化
+ */
 onMounted(() => {
   initializeComponent()
 })
 
-// 只监听关键字段的变化，避免深度监听导致的性能问题
+// 监听关键字段的变化，避免深度监听导致的性能问题
 watch(
   () => [action.value.productId, action.value.type, action.value.identifier],
   async ([newProductId, , newIdentifier], [oldProductId, , oldIdentifier]) => {

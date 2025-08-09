@@ -24,7 +24,13 @@
             popper-class="json-params-detail-popover"
           >
             <template #reference>
-              <el-button type="info" :icon="InfoFilled" circle size="small" title="查看参数示例" />
+              <el-button
+                type="info"
+                :icon="InfoFilled"
+                circle
+                size="small"
+                :title="JSON_PARAMS_INPUT_CONSTANTS.VIEW_EXAMPLE_TITLE"
+              />
             </template>
 
             <!-- 弹出层内容 -->
@@ -55,7 +61,7 @@
                         <div class="text-12px font-500 text-[var(--el-text-color-primary)]">
                           {{ param.name }}
                           <el-tag v-if="param.required" size="small" type="danger" class="ml-4px">
-                            必填
+                            {{ JSON_PARAMS_INPUT_CONSTANTS.REQUIRED_TAG }}
                           </el-tag>
                         </div>
                         <div class="text-11px text-[var(--el-text-color-secondary)]">
@@ -75,7 +81,7 @@
 
                   <div class="mt-12px ml-22px">
                     <div class="text-12px text-[var(--el-text-color-secondary)] mb-6px">
-                      完整 JSON 格式：
+                      {{ JSON_PARAMS_INPUT_CONSTANTS.COMPLETE_JSON_FORMAT }}
                     </div>
                     <pre
                       class="p-12px bg-[var(--el-fill-color-light)] rounded-4px text-11px text-[var(--el-text-color-primary)] overflow-x-auto border-l-3px border-[var(--el-color-primary)]"
@@ -103,7 +109,11 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-8px">
           <Icon
-            :icon="jsonError ? 'ep:warning' : 'ep:circle-check'"
+            :icon="
+              jsonError
+                ? JSON_PARAMS_INPUT_ICONS.STATUS_ICONS.ERROR
+                : JSON_PARAMS_INPUT_ICONS.STATUS_ICONS.SUCCESS
+            "
             :class="jsonError ? 'text-[var(--el-color-danger)]' : 'text-[var(--el-color-success)]'"
             class="text-14px"
           />
@@ -111,17 +121,21 @@
             :class="jsonError ? 'text-[var(--el-color-danger)]' : 'text-[var(--el-color-success)]'"
             class="text-12px"
           >
-            {{ jsonError || 'JSON 格式正确' }}
+            {{ jsonError || JSON_PARAMS_INPUT_CONSTANTS.JSON_FORMAT_CORRECT }}
           </span>
         </div>
 
         <!-- 快速填充按钮 -->
         <div v-if="paramsList.length > 0" class="flex items-center gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)]">快速填充：</span>
+          <span class="text-12px text-[var(--el-text-color-secondary)]">{{
+            JSON_PARAMS_INPUT_CONSTANTS.QUICK_FILL_LABEL
+          }}</span>
           <el-button size="small" type="primary" plain @click="fillExampleJson">
-            示例数据
+            {{ JSON_PARAMS_INPUT_CONSTANTS.EXAMPLE_DATA_BUTTON }}
           </el-button>
-          <el-button size="small" type="danger" plain @click="clearParams"> 清空</el-button>
+          <el-button size="small" type="danger" plain @click="clearParams">{{
+            JSON_PARAMS_INPUT_CONSTANTS.CLEAR_BUTTON
+          }}</el-button>
         </div>
       </div>
     </div>
@@ -136,6 +150,14 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
+import {
+  IoTDataSpecsDataTypeEnum,
+  JSON_PARAMS_INPUT_CONSTANTS,
+  JSON_PARAMS_INPUT_ICONS,
+  JSON_PARAMS_EXAMPLE_VALUES,
+  JsonParamsInputTypeEnum,
+  type JsonParamsInputType
+} from '@/views/iot/utils/constants'
 
 /** JSON参数输入组件 - 通用版本 */
 defineOptions({ name: 'JsonParamsInput' })
@@ -163,18 +185,17 @@ export interface JsonParamsConfig {
 interface Props {
   modelValue?: string
   config?: JsonParamsConfig
-  type?: 'service' | 'event' | 'property' | 'custom'
+  type?: JsonParamsInputType
   placeholder?: string
 }
 
 interface Emits {
   (e: 'update:modelValue', value: string): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  type: 'service',
-  placeholder: '请输入JSON格式的参数'
+  type: JsonParamsInputTypeEnum.SERVICE,
+  placeholder: JSON_PARAMS_INPUT_CONSTANTS.PLACEHOLDER
 })
 
 const emit = defineEmits<Emits>()
@@ -183,11 +204,10 @@ const localValue = useVModel(props, 'modelValue', emit, {
   defaultValue: ''
 })
 
-// 状态
-const paramsJson = ref('')
-const jsonError = ref('')
+const paramsJson = ref('') // JSON参数字符串
+const jsonError = ref('') // JSON验证错误信息
 
-// 计算属性
+// 计算属性：是否有配置
 const hasConfig = computed(() => {
   // TODO @puhui999: 后续统一处理
   console.log(props.config)
@@ -200,112 +220,121 @@ const hasConfig = computed(() => {
   return true
 })
 
+// 计算属性：参数列表
 const paramsList = computed(() => {
   switch (props.type) {
-    case 'service':
+    case JsonParamsInputTypeEnum.SERVICE:
       return props.config?.service?.inputParams || []
-    case 'event':
+    case JsonParamsInputTypeEnum.EVENT:
       return props.config?.event?.outputParams || []
-    case 'property':
+    case JsonParamsInputTypeEnum.PROPERTY:
       return props.config?.properties || []
-    case 'custom':
+    case JsonParamsInputTypeEnum.CUSTOM:
       return props.config?.custom?.params || []
     default:
       return []
   }
 })
 
+// 计算属性：标题
 const title = computed(() => {
   switch (props.type) {
-    case 'service':
-      return `${props.config?.service?.name || '服务'} - 输入参数示例`
-    case 'event':
-      return `${props.config?.event?.name || '事件'} - 输出参数示例`
-    case 'property':
-      return '属性设置 - 参数示例'
-    case 'custom':
-      return `${props.config?.custom?.name || '自定义'} - 参数示例`
+    case JsonParamsInputTypeEnum.SERVICE:
+      return JSON_PARAMS_INPUT_CONSTANTS.TITLES.SERVICE(props.config?.service?.name)
+    case JsonParamsInputTypeEnum.EVENT:
+      return JSON_PARAMS_INPUT_CONSTANTS.TITLES.EVENT(props.config?.event?.name)
+    case JsonParamsInputTypeEnum.PROPERTY:
+      return JSON_PARAMS_INPUT_CONSTANTS.TITLES.PROPERTY
+    case JsonParamsInputTypeEnum.CUSTOM:
+      return JSON_PARAMS_INPUT_CONSTANTS.TITLES.CUSTOM(props.config?.custom?.name)
     default:
-      return '参数示例'
+      return JSON_PARAMS_INPUT_CONSTANTS.TITLES.DEFAULT
   }
 })
 
+// 计算属性：标题图标
 const titleIcon = computed(() => {
   switch (props.type) {
-    case 'service':
-      return 'ep:service'
-    case 'event':
-      return 'ep:bell'
-    case 'property':
-      return 'ep:edit'
-    case 'custom':
-      return 'ep:document'
+    case JsonParamsInputTypeEnum.SERVICE:
+      return JSON_PARAMS_INPUT_ICONS.TITLE_ICONS.SERVICE
+    case JsonParamsInputTypeEnum.EVENT:
+      return JSON_PARAMS_INPUT_ICONS.TITLE_ICONS.EVENT
+    case JsonParamsInputTypeEnum.PROPERTY:
+      return JSON_PARAMS_INPUT_ICONS.TITLE_ICONS.PROPERTY
+    case JsonParamsInputTypeEnum.CUSTOM:
+      return JSON_PARAMS_INPUT_ICONS.TITLE_ICONS.CUSTOM
     default:
-      return 'ep:document'
+      return JSON_PARAMS_INPUT_ICONS.TITLE_ICONS.DEFAULT
   }
 })
 
+// 计算属性：参数图标
 const paramsIcon = computed(() => {
   switch (props.type) {
-    case 'service':
-      return 'ep:edit'
-    case 'event':
-      return 'ep:upload'
-    case 'property':
-      return 'ep:setting'
-    case 'custom':
-      return 'ep:list'
+    case JsonParamsInputTypeEnum.SERVICE:
+      return JSON_PARAMS_INPUT_ICONS.PARAMS_ICONS.SERVICE
+    case JsonParamsInputTypeEnum.EVENT:
+      return JSON_PARAMS_INPUT_ICONS.PARAMS_ICONS.EVENT
+    case JsonParamsInputTypeEnum.PROPERTY:
+      return JSON_PARAMS_INPUT_ICONS.PARAMS_ICONS.PROPERTY
+    case JsonParamsInputTypeEnum.CUSTOM:
+      return JSON_PARAMS_INPUT_ICONS.PARAMS_ICONS.CUSTOM
     default:
-      return 'ep:edit'
+      return JSON_PARAMS_INPUT_ICONS.PARAMS_ICONS.DEFAULT
   }
 })
 
+// 计算属性：参数标签
 const paramsLabel = computed(() => {
   switch (props.type) {
-    case 'service':
-      return '输入参数'
-    case 'event':
-      return '输出参数'
-    case 'property':
-      return '属性参数'
-    case 'custom':
-      return '参数列表'
+    case JsonParamsInputTypeEnum.SERVICE:
+      return JSON_PARAMS_INPUT_CONSTANTS.PARAMS_LABELS.SERVICE
+    case JsonParamsInputTypeEnum.EVENT:
+      return JSON_PARAMS_INPUT_CONSTANTS.PARAMS_LABELS.EVENT
+    case JsonParamsInputTypeEnum.PROPERTY:
+      return JSON_PARAMS_INPUT_CONSTANTS.PARAMS_LABELS.PROPERTY
+    case JsonParamsInputTypeEnum.CUSTOM:
+      return JSON_PARAMS_INPUT_CONSTANTS.PARAMS_LABELS.CUSTOM
     default:
-      return '参数'
+      return JSON_PARAMS_INPUT_CONSTANTS.PARAMS_LABELS.DEFAULT
   }
 })
 
+// 计算属性：空状态消息
 const emptyMessage = computed(() => {
   switch (props.type) {
-    case 'service':
-      return '此服务无需输入参数'
-    case 'event':
-      return '此事件无输出参数'
-    case 'property':
-      return '无可设置的属性'
-    case 'custom':
-      return '无参数配置'
+    case JsonParamsInputTypeEnum.SERVICE:
+      return JSON_PARAMS_INPUT_CONSTANTS.EMPTY_MESSAGES.SERVICE
+    case JsonParamsInputTypeEnum.EVENT:
+      return JSON_PARAMS_INPUT_CONSTANTS.EMPTY_MESSAGES.EVENT
+    case JsonParamsInputTypeEnum.PROPERTY:
+      return JSON_PARAMS_INPUT_CONSTANTS.EMPTY_MESSAGES.PROPERTY
+    case JsonParamsInputTypeEnum.CUSTOM:
+      return JSON_PARAMS_INPUT_CONSTANTS.EMPTY_MESSAGES.CUSTOM
     default:
-      return '无参数'
+      return JSON_PARAMS_INPUT_CONSTANTS.EMPTY_MESSAGES.DEFAULT
   }
 })
 
+// 计算属性：无配置消息
 const noConfigMessage = computed(() => {
   switch (props.type) {
-    case 'service':
-      return '请先选择服务'
-    case 'event':
-      return '请先选择事件'
-    case 'property':
-      return '请先选择产品'
-    case 'custom':
-      return '请先进行配置'
+    case JsonParamsInputTypeEnum.SERVICE:
+      return JSON_PARAMS_INPUT_CONSTANTS.NO_CONFIG_MESSAGES.SERVICE
+    case JsonParamsInputTypeEnum.EVENT:
+      return JSON_PARAMS_INPUT_CONSTANTS.NO_CONFIG_MESSAGES.EVENT
+    case JsonParamsInputTypeEnum.PROPERTY:
+      return JSON_PARAMS_INPUT_CONSTANTS.NO_CONFIG_MESSAGES.PROPERTY
+    case JsonParamsInputTypeEnum.CUSTOM:
+      return JSON_PARAMS_INPUT_CONSTANTS.NO_CONFIG_MESSAGES.CUSTOM
     default:
-      return '请先进行配置'
+      return JSON_PARAMS_INPUT_CONSTANTS.NO_CONFIG_MESSAGES.DEFAULT
   }
 })
 
-// 事件处理
+/**
+ * 处理参数变化事件
+ */
 const handleParamsChange = () => {
   try {
     jsonError.value = '' // 清除之前的错误
@@ -316,16 +345,14 @@ const handleParamsChange = () => {
 
       // 额外的参数验证
       if (typeof parsed !== 'object' || parsed === null) {
-        jsonError.value = '参数必须是一个有效的 JSON 对象'
-        emit('validate', { valid: false, message: jsonError.value })
+        jsonError.value = JSON_PARAMS_INPUT_CONSTANTS.PARAMS_MUST_BE_OBJECT
         return
       }
 
       // 验证必填参数
       for (const param of paramsList.value) {
         if (param.required && (!parsed[param.identifier] || parsed[param.identifier] === '')) {
-          jsonError.value = `参数 ${param.name} 为必填项`
-          emit('validate', { valid: false, message: jsonError.value })
+          jsonError.value = JSON_PARAMS_INPUT_CONSTANTS.PARAM_REQUIRED_ERROR(param.name)
           return
         }
       }
@@ -334,80 +361,87 @@ const handleParamsChange = () => {
     }
 
     // 验证通过
-    emit('validate', { valid: true, message: 'JSON格式正确' })
+    jsonError.value = ''
   } catch (error) {
-    jsonError.value = `JSON格式错误: ${error instanceof Error ? error.message : '未知错误'}`
-    emit('validate', { valid: false, message: jsonError.value })
+    jsonError.value = JSON_PARAMS_INPUT_CONSTANTS.JSON_FORMAT_ERROR(
+      error instanceof Error ? error.message : JSON_PARAMS_INPUT_CONSTANTS.UNKNOWN_ERROR
+    )
   }
 }
 
-// 快速填充示例数据
+/**
+ * 快速填充示例数据
+ */
 const fillExampleJson = () => {
   paramsJson.value = generateExampleJson()
   handleParamsChange()
 }
 
-// 清空参数
+/**
+ * 清空参数
+ */
 const clearParams = () => {
   paramsJson.value = ''
   localValue.value = ''
   jsonError.value = ''
-  emit('validate', { valid: true, message: '' })
 }
 
-// 工具函数
+/**
+ * 获取参数类型名称
+ * @param dataType 数据类型
+ * @returns 类型名称
+ */
 const getParamTypeName = (dataType: string) => {
+  // 使用 constants.ts 中已有的 getDataTypeName 函数逻辑
   const typeMap = {
-    int: '整数',
-    float: '浮点数',
-    double: '双精度',
-    text: '字符串',
-    bool: '布尔值',
-    enum: '枚举',
-    date: '日期',
-    struct: '结构体',
-    array: '数组'
+    [IoTDataSpecsDataTypeEnum.INT]: '整数',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: '浮点数',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: '双精度',
+    [IoTDataSpecsDataTypeEnum.TEXT]: '字符串',
+    [IoTDataSpecsDataTypeEnum.BOOL]: '布尔值',
+    [IoTDataSpecsDataTypeEnum.ENUM]: '枚举',
+    [IoTDataSpecsDataTypeEnum.DATE]: '日期',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: '结构体',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: '数组'
   }
   return typeMap[dataType] || dataType
 }
 
+/**
+ * 获取参数类型标签样式
+ * @param dataType 数据类型
+ * @returns 标签样式
+ */
 const getParamTypeTag = (dataType: string) => {
   const tagMap = {
-    int: 'primary',
-    float: 'success',
-    double: 'success',
-    text: 'info',
-    bool: 'warning',
-    enum: 'danger',
-    date: 'primary',
-    struct: 'info',
-    array: 'warning'
+    [IoTDataSpecsDataTypeEnum.INT]: 'primary',
+    [IoTDataSpecsDataTypeEnum.FLOAT]: 'success',
+    [IoTDataSpecsDataTypeEnum.DOUBLE]: 'success',
+    [IoTDataSpecsDataTypeEnum.TEXT]: 'info',
+    [IoTDataSpecsDataTypeEnum.BOOL]: 'warning',
+    [IoTDataSpecsDataTypeEnum.ENUM]: 'danger',
+    [IoTDataSpecsDataTypeEnum.DATE]: 'primary',
+    [IoTDataSpecsDataTypeEnum.STRUCT]: 'info',
+    [IoTDataSpecsDataTypeEnum.ARRAY]: 'warning'
   }
   return tagMap[dataType] || 'info'
 }
 
+/**
+ * 获取示例值
+ * @param param 参数对象
+ * @returns 示例值
+ */
 const getExampleValue = (param: any) => {
-  switch (param.dataType) {
-    case 'int':
-      return '25'
-    case 'float':
-    case 'double':
-      return '25.5'
-    case 'bool':
-      return 'false'
-    case 'text':
-      return '"auto"'
-    case 'enum':
-      return '"option1"'
-    case 'struct':
-      return '{}'
-    case 'array':
-      return '[]'
-    default:
-      return '""'
-  }
+  const exampleConfig =
+    JSON_PARAMS_EXAMPLE_VALUES[param.dataType] || JSON_PARAMS_EXAMPLE_VALUES.DEFAULT
+  return exampleConfig.display
 }
 
+/**
+ * 生成示例JSON
+ * @returns JSON字符串
+ */
 const generateExampleJson = () => {
   if (paramsList.value.length === 0) {
     return '{}'
@@ -415,36 +449,18 @@ const generateExampleJson = () => {
 
   const example = {}
   paramsList.value.forEach((param) => {
-    switch (param.dataType) {
-      case 'int':
-        example[param.identifier] = 25
-        break
-      case 'float':
-      case 'double':
-        example[param.identifier] = 25.5
-        break
-      case 'bool':
-        example[param.identifier] = false
-        break
-      case 'text':
-        example[param.identifier] = 'auto'
-        break
-      case 'struct':
-        example[param.identifier] = {}
-        break
-      case 'array':
-        example[param.identifier] = []
-        break
-      default:
-        example[param.identifier] = ''
-    }
+    const exampleConfig =
+      JSON_PARAMS_EXAMPLE_VALUES[param.dataType] || JSON_PARAMS_EXAMPLE_VALUES.DEFAULT
+    example[param.identifier] = exampleConfig.value
   })
 
   return JSON.stringify(example, null, 2)
 }
 
-// 处理数据回显的函数
-// TODO @puhui999：注释风格；
+/**
+ * 处理数据回显
+ * @param value 值字符串
+ */
 const handleDataDisplay = (value: string) => {
   if (!value || !value.trim()) {
     paramsJson.value = ''
@@ -467,25 +483,23 @@ const handleDataDisplay = (value: string) => {
 // 监听外部值变化（编辑模式数据回显）
 watch(
   () => localValue.value,
-  (newValue, oldValue) => {
+  async (newValue, oldValue) => {
     // 避免循环更新
     if (newValue === oldValue) return
 
     // 使用 nextTick 确保在下一个 tick 中处理数据
-    nextTick(() => {
-      handleDataDisplay(newValue || '')
-    })
+    await nextTick()
+    handleDataDisplay(newValue || '')
   },
   { immediate: true }
 )
 
 // 组件挂载后也尝试处理一次数据回显
-onMounted(() => {
-  nextTick(() => {
-    if (localValue.value) {
-      handleDataDisplay(localValue.value)
-    }
-  })
+onMounted(async () => {
+  await nextTick()
+  if (localValue.value) {
+    handleDataDisplay(localValue.value)
+  }
 })
 
 // 监听配置变化
@@ -505,7 +519,6 @@ watch(
 </script>
 
 <style scoped>
-/** TODO @puhui999：unocss，看看哪些可以搞掉哈。 */
 /* 弹出层内容样式 */
 .json-params-detail-content {
   padding: 4px 0;

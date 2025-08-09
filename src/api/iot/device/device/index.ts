@@ -148,18 +148,6 @@ export const DeviceApi = {
     return await request.get({ url: `/iot/device/get-auth-info`, params: { id } })
   },
 
-  // 根据 ProductKey 和 DeviceNames 获取设备列表
-  // TODO @puhui999：有没可能搞成基于 id 的查询哈？
-  getDevicesByProductKeyAndNames: async (productKey: string, deviceNames: string[]) => {
-    return await request.get({
-      url: `/iot/device/list-by-product-key-and-names`,
-      params: {
-        productKey,
-        deviceNames: deviceNames.join(',')
-      }
-    })
-  },
-
   // 查询设备消息分页
   getDeviceMessagePage: async (params: any) => {
     return await request.get({ url: `/iot/device/message/page`, params })

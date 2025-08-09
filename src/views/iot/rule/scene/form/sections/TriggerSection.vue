@@ -66,12 +66,31 @@
             />
 
             <!-- 定时触发配置 -->
-            <!-- TODO @puhui999：改成定时触发配置后，就改不回来了。 -->
-            <TimerTriggerConfig
+            <div
               v-else-if="triggerItem.type === TriggerTypeEnum.TIMER"
-              :model-value="triggerItem.cronExpression"
-              @update:model-value="(value) => updateTriggerCronConfig(index, value)"
-            />
+              class="flex flex-col gap-16px"
+            >
+              <div
+                class="flex items-center gap-8px p-12px px-16px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]"
+              >
+                <Icon icon="ep:timer" class="text-[var(--el-color-danger)] text-18px" />
+                <span class="text-14px font-500 text-[var(--el-text-color-primary)]"
+                  >定时触发配置</span
+                >
+              </div>
+
+              <!-- CRON 表达式配置 -->
+              <div
+                class="p-16px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]"
+              >
+                <el-form-item label="CRON表达式" required>
+                  <Crontab
+                    :model-value="triggerItem.cronExpression || '0 0 12 * * ?'"
+                    @update:model-value="(value) => updateTriggerCronConfig(index, value)"
+                  />
+                </el-form-item>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -96,12 +115,12 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import DeviceTriggerConfig from '../configs/DeviceTriggerConfig.vue'
-import TimerTriggerConfig from '../configs/TimerTriggerConfig.vue'
-import { TriggerFormData } from '@/api/iot/rule/scene/scene.types'
+import { Crontab } from '@/components/Crontab'
+import type { Trigger } from '@/api/iot/rule/scene'
 import {
-  getTriggerTypeOptions,
+  getTriggerTypeLabel,
+  getTriggerTagType,
   IotRuleSceneTriggerTypeEnum as TriggerTypeEnum,
-  IotRuleSceneTriggerTypeEnum,
   isDeviceTrigger
 } from '@/views/iot/utils/constants'
 
@@ -109,35 +128,20 @@ import {
 defineOptions({ name: 'TriggerSection' })
 
 const props = defineProps<{
-  triggers: TriggerFormData[]
+  triggers: Trigger[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:triggers', value: TriggerFormData[]): void
+  (e: 'update:triggers', value: Trigger[]): void
 }>()
 
 const triggers = useVModel(props, 'triggers', emit)
 
-// 触发器类型选项（从 constants 中获取）
-const triggerTypeOptions = getTriggerTypeOptions()
-
-// 工具函数
-// TODO @puhui999：这里是不是重复了哈；
-const getTriggerTypeLabel = (type: number): string => {
-  const option = triggerTypeOptions.find((opt) => opt.value === type)
-  return option?.label || '未知类型'
-}
-
-const getTriggerTagType = (type: number): string => {
-  if (type === IotRuleSceneTriggerTypeEnum.TIMER) {
-    return 'warning'
-  }
-  return isDeviceTrigger(type) ? 'success' : 'info'
-}
-
-// 事件处理函数
+/**
+ * 添加触发器
+ */
 const addTrigger = () => {
-  const newTrigger: TriggerFormData = {
+  const newTrigger: Trigger = {
     type: TriggerTypeEnum.DEVICE_STATE_UPDATE,
     productId: undefined,
     deviceId: undefined,
@@ -150,25 +154,49 @@ const addTrigger = () => {
   triggers.value.push(newTrigger)
 }
 
+/**
+ * 删除触发器
+ * @param index 触发器索引
+ */
 const removeTrigger = (index: number) => {
   if (triggers.value.length > 1) {
     triggers.value.splice(index, 1)
   }
 }
 
+/**
+ * 更新触发器类型
+ * @param index 触发器索引
+ * @param type 触发器类型
+ */
 const updateTriggerType = (index: number, type: number) => {
   triggers.value[index].type = type
   onTriggerTypeChange(index, type)
 }
 
-const updateTriggerDeviceConfig = (index: number, newTrigger: TriggerFormData) => {
+/**
+ * 更新触发器设备配置
+ * @param index 触发器索引
+ * @param newTrigger 新的触发器对象
+ */
+const updateTriggerDeviceConfig = (index: number, newTrigger: Trigger) => {
   triggers.value[index] = newTrigger
 }
 
+/**
+ * 更新触发器CRON配置
+ * @param index 触发器索引
+ * @param cronExpression CRON表达式
+ */
 const updateTriggerCronConfig = (index: number, cronExpression?: string) => {
   triggers.value[index].cronExpression = cronExpression
 }
 
+/**
+ * 处理触发器类型变化事件
+ * @param index 触发器索引
+ * @param _ 触发器类型（未使用）
+ */
 const onTriggerTypeChange = (index: number, _: number) => {
   const triggerItem = triggers.value[index]
   triggerItem.productId = undefined

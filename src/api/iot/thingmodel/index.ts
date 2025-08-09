@@ -40,7 +40,7 @@ export interface ThingModelService {
 }
 
 /** dataSpecs 数值型数据结构 */
-export interface DataSpecsNumberDataVO {
+export interface DataSpecsNumberData {
   dataType: 'int' | 'float' | 'double' // 数据类型，取值为 INT、FLOAT 或 DOUBLE
   max: string // 最大值，必须与 dataType 设置一致，且为 STRING 类型
   min: string // 最小值，必须与 dataType 设置一致，且为 STRING 类型
@@ -52,11 +52,112 @@ export interface DataSpecsNumberDataVO {
 }
 
 /** dataSpecs 枚举型数据结构 */
-export interface DataSpecsEnumOrBoolDataVO {
+export interface DataSpecsEnumOrBoolData {
   dataType: 'enum' | 'bool'
   defaultValue?: string // 默认值，可选
   name: string // 枚举项的名称
   value: number | undefined // 枚举值
+}
+
+/** 物模型TSL响应数据结构 */
+export interface IotThingModelTSLResp {
+  productId: number
+  productKey: string
+  properties: ThingModelProperty[]
+  events: ThingModelEvent[]
+  services: ThingModelService[]
+}
+
+/** 物模型属性 */
+export interface ThingModelProperty {
+  identifier: string
+  name: string
+  accessMode: string
+  required?: boolean
+  dataType: string
+  description?: string
+  dataSpecs?: ThingModelProperty
+  dataSpecsList?: ThingModelProperty[]
+}
+
+/** 物模型事件 */
+export interface ThingModelEvent {
+  identifier: string
+  name: string
+  required?: boolean
+  type: string
+  description?: string
+  outputParams?: ThingModelParam[]
+  method?: string
+}
+
+/** 物模型服务 */
+export interface ThingModelService {
+  identifier: string
+  name: string
+  required?: boolean
+  callType: string
+  description?: string
+  inputParams?: ThingModelParam[]
+  outputParams?: ThingModelParam[]
+  method?: string
+}
+
+/** 物模型参数 */
+export interface ThingModelParam {
+  identifier: string
+  name: string
+  direction: string
+  paraOrder?: number
+  dataType: string
+  dataSpecs?: ThingModelProperty
+  dataSpecsList?: ThingModelProperty[]
+}
+
+/** 数值型数据规范 */
+export interface ThingModelNumericDataSpec {
+  dataType: 'int' | 'float' | 'double'
+  max: string
+  min: string
+  step: string
+  precise?: string
+  defaultValue?: string
+  unit?: string
+  unitName?: string
+}
+
+/** 布尔/枚举型数据规范 */
+export interface ThingModelBoolOrEnumDataSpecs {
+  dataType: 'bool' | 'enum'
+  name: string
+  value: number
+}
+
+/** 文本/时间型数据规范 */
+export interface ThingModelDateOrTextDataSpecs {
+  dataType: 'text' | 'date'
+  length?: number
+  defaultValue?: string
+}
+
+/** 数组型数据规范 */
+export interface ThingModelArrayDataSpecs {
+  dataType: 'array'
+  size: number
+  childDataType: string
+  dataSpecsList?: ThingModelProperty[]
+}
+
+/** 结构体型数据规范 */
+export interface ThingModelStructDataSpecs {
+  dataType: 'struct'
+  identifier: string
+  name: string
+  accessMode: string
+  required?: boolean
+  childDataType: string
+  dataSpecs?: ThingModelProperty
+  dataSpecsList?: ThingModelProperty[]
 }
 
 // IoT 产品物模型 API

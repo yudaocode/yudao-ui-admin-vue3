@@ -5,54 +5,104 @@
     <el-row :gutter="16">
       <el-col :span="8">
         <el-form-item label="条件类型" required>
-          <ConditionTypeSelector
+          <el-select
             :model-value="condition.type"
             @update:model-value="(value) => updateConditionField('type', value)"
             @change="handleConditionTypeChange"
+            placeholder="请选择条件类型"
+            class="w-full"
+          >
+            <el-option
+              v-for="option in getConditionTypeOptions()"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-row>
+
+    <!-- 产品设备选择 - 设备相关条件的公共部分 -->
+    <el-row v-if="isDeviceCondition" :gutter="16">
+      <el-col :span="12">
+        <el-form-item label="产品" required>
+          <ProductSelector
+            :model-value="condition.productId"
+            @update:model-value="(value) => updateConditionField('productId', value)"
+            @change="handleProductChange"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="设备" required>
+          <DeviceSelector
+            :model-value="condition.deviceId"
+            @update:model-value="(value) => updateConditionField('deviceId', value)"
+            :product-id="condition.productId"
+            @change="handleDeviceChange"
           />
         </el-form-item>
       </el-col>
     </el-row>
 
     <!-- 设备状态条件配置 -->
-    <DeviceStatusConditionConfig
-      v-if="condition.type === ConditionTypeEnum.DEVICE_STATUS"
-      :model-value="condition"
-      @update:model-value="updateCondition"
-      @validate="handleValidate"
-    />
-
-    <!-- 设备属性条件配置 -->
-    <div v-else-if="condition.type === ConditionTypeEnum.DEVICE_PROPERTY" class="space-y-16px">
-      <!-- 产品设备选择 -->
+    <div
+      v-if="condition.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS"
+      class="flex flex-col gap-16px"
+    >
+      <!-- 状态和操作符选择 -->
       <el-row :gutter="16">
+        <!-- 操作符选择 -->
         <el-col :span="12">
-          <el-form-item label="产品" required>
-            <ProductSelector
-              :model-value="condition.productId"
-              @update:model-value="(value) => updateConditionField('productId', value)"
-              @change="handleProductChange"
-            />
+          <el-form-item label="操作符" required>
+            <el-select
+              :model-value="condition.operator"
+              @update:model-value="(value) => updateConditionField('operator', value)"
+              placeholder="请选择操作符"
+              class="w-full"
+            >
+              <el-option
+                v-for="option in getStatusOperatorOptions()"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
+
+        <!-- 状态选择 -->
         <el-col :span="12">
-          <el-form-item label="设备" required>
-            <DeviceSelector
-              :model-value="condition.deviceId"
-              @update:model-value="(value) => updateConditionField('deviceId', value)"
-              :product-id="condition.productId"
-              @change="handleDeviceChange"
-            />
+          <el-form-item label="设备状态" required>
+            <el-select
+              :model-value="condition.param"
+              @update:model-value="(value) => updateConditionField('param', value)"
+              placeholder="请选择设备状态"
+              class="w-full"
+            >
+              <el-option
+                v-for="option in getDeviceStatusOptions()"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
       </el-row>
+    </div>
 
+    <!-- 设备属性条件配置 -->
+    <div
+      v-else-if="condition.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY"
+      class="space-y-16px"
+    >
       <!-- 属性配置 -->
       <el-row :gutter="16">
         <!-- 属性/事件/服务选择 -->
         <el-col :span="6">
           <el-form-item label="监控项" required>
-            <!-- TODO @puhui999：是不是不展示“整数”、“小数”这个类型，一行，只展示属性名 + 标识，更简洁一点；然后标识是 tag；因为已经有个 ？ tip 了 -->
             <PropertySelector
               :model-value="condition.identifier"
               @update:model-value="(value) => updateConditionField('identifier', value)"
@@ -77,7 +127,6 @@
         </el-col>
 
         <!-- 值输入 -->
-        <!-- TODO @puhui999：框子大小占满哈。 -->
         <el-col :span="12">
           <el-form-item label="比较值" required>
             <ValueInput
@@ -86,7 +135,6 @@
               :property-type="propertyType"
               :operator="condition.operator"
               :property-config="propertyConfig"
-              @validate="handleValueValidate"
             />
           </el-form-item>
         </el-col>
@@ -95,38 +143,28 @@
 
     <!-- 当前时间条件配置 -->
     <CurrentTimeConditionConfig
-      v-else-if="condition.type === ConditionTypeEnum.CURRENT_TIME"
+      v-else-if="condition.type === IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME"
       :model-value="condition"
       @update:model-value="updateCondition"
-      @validate="handleValidate"
     />
-
-    <!-- 验证结果 -->
-    <div v-if="validationMessage" class="mt-8px">
-      <el-alert
-        :title="validationMessage"
-        :type="isValid ? 'success' : 'error'"
-        :closable="false"
-        show-icon
-      />
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import ConditionTypeSelector from '../selectors/ConditionTypeSelector.vue'
-import DeviceStatusConditionConfig from './DeviceStatusConditionConfig.vue'
 import CurrentTimeConditionConfig from './CurrentTimeConditionConfig.vue'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
 import PropertySelector from '../selectors/PropertySelector.vue'
 import OperatorSelector from '../selectors/OperatorSelector.vue'
 import ValueInput from '../inputs/ValueInput.vue'
-import { TriggerCondition } from '@/api/iot/rule/scene/scene.types'
+import type { TriggerCondition } from '@/api/iot/rule/scene'
 import {
   IotRuleSceneTriggerConditionTypeEnum,
-  IotRuleSceneTriggerConditionParameterOperatorEnum
+  IotRuleSceneTriggerConditionParameterOperatorEnum,
+  getConditionTypeOptions,
+  getDeviceStatusOptions,
+  getStatusOperatorOptions
 } from '@/views/iot/utils/constants'
 
 /** 单个条件配置组件 */
@@ -139,83 +177,92 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: TriggerCondition): void
-  (e: 'validate', result: { valid: boolean; message: string }): void
 }>()
 
 const condition = useVModel(props, 'modelValue', emit)
 
-// 常量定义
-const ConditionTypeEnum = IotRuleSceneTriggerConditionTypeEnum
+const propertyType = ref<string>('string') // 属性类型
+const propertyConfig = ref<any>(null) // 属性配置
 
-// 状态
-const propertyType = ref<string>('string')
-const propertyConfig = ref<any>(null)
-const validationMessage = ref('')
-const isValid = ref(true)
-const valueValidation = ref({ valid: true, message: '' })
+// 计算属性：判断是否为设备相关条件
+const isDeviceCondition = computed(() => {
+  return (
+    condition.value.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS ||
+    condition.value.type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_PROPERTY
+  )
+})
 
-// 事件处理
-const updateConditionField = (field: keyof TriggerCondition, value: any) => {
+/**
+ * 更新条件字段
+ * @param field 字段名
+ * @param value 字段值
+ */
+const updateConditionField = (field: any, value: any) => {
   ;(condition.value as any)[field] = value
   emit('update:modelValue', condition.value)
 }
 
+/**
+ * 更新整个条件对象
+ * @param newCondition 新的条件对象
+ */
 const updateCondition = (newCondition: TriggerCondition) => {
   condition.value = newCondition
   emit('update:modelValue', condition.value)
 }
 
+/**
+ * 处理条件类型变化事件
+ * @param type 条件类型
+ */
 const handleConditionTypeChange = (type: number) => {
-  // 清理不相关的字段
-  if (type === ConditionTypeEnum.DEVICE_STATUS) {
+  // 根据条件类型清理字段
+  const isCurrentTime = type === IotRuleSceneTriggerConditionTypeEnum.CURRENT_TIME
+  const isDeviceStatus = type === IotRuleSceneTriggerConditionTypeEnum.DEVICE_STATUS
+
+  // 清理标识符字段（时间条件和设备状态条件都不需要）
+  if (isCurrentTime || isDeviceStatus) {
     condition.value.identifier = undefined
-    // 清理时间相关字段（如果存在）
-    if ('timeValue' in condition.value) {
-      delete (condition.value as any).timeValue
-    }
-    if ('timeValue2' in condition.value) {
-      delete (condition.value as any).timeValue2
-    }
-  } else if (type === ConditionTypeEnum.CURRENT_TIME) {
-    condition.value.identifier = undefined
-    condition.value.productId = undefined
-    condition.value.deviceId = undefined
-  } else if (type === ConditionTypeEnum.DEVICE_PROPERTY) {
-    // 清理时间相关字段（如果存在）
-    if ('timeValue' in condition.value) {
-      delete (condition.value as any).timeValue
-    }
-    if ('timeValue2' in condition.value) {
-      delete (condition.value as any).timeValue2
-    }
   }
 
-  // 重置操作符和参数，使用枚举中的默认值
-  condition.value.operator = IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
+  // 清理设备相关字段（仅时间条件需要）
+  if (isCurrentTime) {
+    condition.value.productId = undefined
+    condition.value.deviceId = undefined
+  }
+
+  // 设置默认操作符
+  condition.value.operator = isCurrentTime
+    ? 'at_time'
+    : IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
+
+  // 清空参数值
   condition.value.param = ''
-
-  updateValidationResult()
 }
 
-const handleValidate = (result: { valid: boolean; message: string }) => {
-  isValid.value = result.valid
-  validationMessage.value = result.message
-  emit('validate', result)
-}
-
+/**
+ * 处理产品变化事件
+ * @param _ 产品ID（未使用）
+ */
 const handleProductChange = (_: number) => {
   // 产品变化时清空设备和属性
   condition.value.deviceId = undefined
   condition.value.identifier = ''
-  updateValidationResult()
 }
 
+/**
+ * 处理设备变化事件
+ * @param _ 设备ID（未使用）
+ */
 const handleDeviceChange = (_: number) => {
   // 设备变化时清空属性
   condition.value.identifier = ''
-  updateValidationResult()
 }
 
+/**
+ * 处理属性变化事件
+ * @param propertyInfo 属性信息对象
+ */
 const handlePropertyChange = (propertyInfo: { type: string; config: any }) => {
   propertyType.value = propertyInfo.type
   propertyConfig.value = propertyInfo.config
@@ -223,71 +270,15 @@ const handlePropertyChange = (propertyInfo: { type: string; config: any }) => {
   // 重置操作符和值
   condition.value.operator = '='
   condition.value.param = ''
-
-  updateValidationResult()
 }
 
+/**
+ * 处理操作符变化事件
+ */
 const handleOperatorChange = () => {
   // 重置值
   condition.value.param = ''
-  updateValidationResult()
 }
-
-const handleValueValidate = (result: { valid: boolean; message: string }) => {
-  valueValidation.value = result
-  updateValidationResult()
-}
-
-const updateValidationResult = () => {
-  // 基础验证
-  if (!condition.value.identifier) {
-    isValid.value = false
-    validationMessage.value = '请选择监控项'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  if (!condition.value.operator) {
-    isValid.value = false
-    validationMessage.value = '请选择操作符'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  if (!condition.value.param) {
-    isValid.value = false
-    validationMessage.value = '请输入比较值'
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  // 值验证
-  if (!valueValidation.value.valid) {
-    isValid.value = false
-    validationMessage.value = valueValidation.value.message
-    emit('validate', { valid: false, message: validationMessage.value })
-    return
-  }
-
-  // 验证通过
-  isValid.value = true
-  validationMessage.value = '条件配置验证通过'
-  emit('validate', { valid: true, message: validationMessage.value })
-}
-
-// 监听条件变化
-watch(
-  () => [condition.value.identifier, condition.value.operator, condition.value.param],
-  () => {
-    updateValidationResult()
-  },
-  { deep: true }
-)
-
-// 初始化
-onMounted(() => {
-  updateValidationResult()
-})
 </script>
 
 <style scoped>
