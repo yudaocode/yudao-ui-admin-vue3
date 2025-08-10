@@ -144,7 +144,7 @@
         show-overflow-tooltip
         min-width="300"
       >
-        <template #defaul="{ row }">
+        <template #default="{ row }">
           <el-image
             :src="row.picUrl"
             class="mr-5px h-30px w-30px align-middle"

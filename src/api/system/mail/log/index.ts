@@ -4,7 +4,9 @@ export interface MailLogVO {
   id: number
   userId: number
   userType: number
-  toMail: string
+  toMails: string[]
+  ccMails?: string[]
+  bccMails?: string[]
   accountId: number
   fromMail: string
   templateId: number

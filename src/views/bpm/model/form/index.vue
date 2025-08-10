@@ -173,7 +173,8 @@ const formData: any = ref({
   summarySetting: {
     enable: false,
     summary: []
-  }
+  },
+  allowWithdrawTask: false
 })
 
 // 流程数据

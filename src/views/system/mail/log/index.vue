@@ -119,12 +119,36 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="接收邮箱" align="center" prop="toMail" width="200">
+      <el-table-column label="接收用户" align="center" width="150">
         <template #default="scope">
-          <div>{{ scope.row.toMail }}</div>
           <div v-if="scope.row.userType && scope.row.userId">
             <dict-tag :type="DICT_TYPE.USER_TYPE" :value="scope.row.userType" />
-            {{ '(' + scope.row.userId + ')' }}
+            <div>{{ '(' + scope.row.userId + ')' }}</div>
+          </div>
+          <div v-else>-</div>
+        </template>
+      </el-table-column>
+      <el-table-column label="接收信息" align="center" width="300">
+        <template #default="scope">
+          <div class="text-left">
+            <div v-if="scope.row.toMails && scope.row.toMails.length > 0">
+              收件：
+              <span v-for="(mail, index) in scope.row.toMails" :key="mail">
+                {{ mail }}<span v-if="index < scope.row.toMails.length - 1">、</span>
+              </span>
+            </div>
+            <div v-if="scope.row.ccMails && scope.row.ccMails.length > 0">
+              抄送：
+              <span v-for="(mail, index) in scope.row.ccMails" :key="mail">
+                {{ mail }}<span v-if="index < scope.row.ccMails.length - 1">、</span>
+              </span>
+            </div>
+            <div v-if="scope.row.bccMails && scope.row.bccMails.length > 0">
+              密送：
+              <span v-for="(mail, index) in scope.row.bccMails" :key="mail">
+                {{ mail }}<span v-if="index < scope.row.bccMails.length - 1">、</span>
+              </span>
+            </div>
           </div>
         </template>
       </el-table-column>
@@ -185,15 +209,15 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   toMail: '',
-  accountId: null,
-  templateId: null,
-  sendStatus: null,
-  userId: null,
-  userType: null,
+  accountId: undefined,
+  templateId: undefined,
+  sendStatus: undefined,
+  userId: undefined,
+  userType: undefined,
   sendTime: []
 })
 const exportLoading = ref(false) // 导出的加载中
-const accountList = ref([]) // 邮箱账号列表
+const accountList = ref<MailAccountApi.MailAccountVO[]>([]) // 邮箱账号列表
 
 /** 查询列表 */
 const getList = async () => {

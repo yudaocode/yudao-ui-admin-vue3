@@ -119,7 +119,7 @@ const permissionStore = usePermissionStore()
 const redirect = ref<string>('')
 const loginLoading = ref(false)
 const verify = ref()
-const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字
+const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字 pictureWord 文字验证码
 
 const getShow = computed(() => unref(getLoginState) === LoginStateEnum.REGISTER)
 

@@ -143,7 +143,7 @@ const iconCircleCheck = useIcon({ icon: 'ep:circle-check' })
 const { validForm } = useFormValid(formSmsResetPassword)
 const { handleBackLogin, getLoginState, setLoginState } = useLoginState()
 const getShow = computed(() => unref(getLoginState) === LoginStateEnum.RESET_PASSWORD)
-const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字
+const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字 pictureWord 文字验证码
 
 const validatePass2 = (_rule, value, callback) => {
   if (value === '') {

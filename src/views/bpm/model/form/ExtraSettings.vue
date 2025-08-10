@@ -11,6 +11,17 @@
         </div>
       </div>
     </el-form-item>
+    <el-form-item class="mb-20px">
+      <template #label>
+        <el-text size="large" tag="b">审批人权限</el-text>
+      </template>
+      <div class="flex flex-col">
+        <el-checkbox v-model="modelData.allowWithdrawTask" label="允许审批人撤回任务" />
+        <div class="ml-22px">
+          <el-text type="info"> 审批人可撤回正在审批节点的前一节点 </el-text>
+        </div>
+      </div>
+    </el-form-item>
     <el-form-item v-if="modelData.processIdRule" class="mb-20px">
       <template #label>
         <el-text size="large" tag="b">流程编码</el-text>
@@ -421,6 +432,9 @@ const initData = () => {
   }
   if (modelData.value.taskAfterTriggerSetting) {
     taskAfterTriggerEnable.value = true
+  }
+  if (modelData.value.allowWithdrawTask) {
+    modelData.value.allowWithdrawTask = false
   }
 }
 defineExpose({ initData })
