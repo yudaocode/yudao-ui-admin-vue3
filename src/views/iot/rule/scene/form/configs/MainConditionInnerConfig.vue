@@ -65,7 +65,6 @@
               :model-value="condition.operator"
               @update:model-value="(value) => updateConditionField('operator', value)"
               :property-type="propertyType"
-              @change="handleOperatorChange"
             />
           </el-form-item>
         </el-col>
@@ -325,13 +324,5 @@ const handlePropertyChange = (propertyInfo: any) => {
       condition.value.operator = IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
     }
   }
-}
-
-// TODO @puhui999：这个貌似没用上
-/**
- * 处理操作符变化事件
- */
-const handleOperatorChange = () => {
-  // 操作符变化处理
 }
 </script>
