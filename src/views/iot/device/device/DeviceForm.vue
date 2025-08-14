@@ -98,7 +98,7 @@
                 :isWrite="true"
                 :clickMap="true"
                 :center="formData.location"
-                @locateChange="handleLocationChange"
+                @locate-change="handleLocationChange"
                 ref="mapRef"
                 class="h-full w-full"
               />

@@ -1,5 +1,4 @@
 <!-- 执行器配置组件 -->
-<!-- TODO @puhui999：每个执行器的 UI 风格，应该和【触发器配置】那，有点像 -->
 <template>
   <el-card class="border border-[var(--el-border-color-light)] rounded-8px" shadow="never">
     <template #header>
@@ -35,27 +34,37 @@
       </div>
 
       <!-- 执行器列表 -->
-      <div v-else class="space-y-16px">
+      <div v-else class="space-y-24px">
         <div
           v-for="(action, index) in actions"
           :key="`action-${index}`"
-          class="p-16px border border-[var(--el-border-color-lighter)] rounded-6px bg-[var(--el-fill-color-blank)]"
+          class="border-2 border-blue-200 rounded-8px bg-blue-50 shadow-sm hover:shadow-md transition-shadow"
         >
-          <div class="flex items-center justify-between mb-16px">
-            <div class="flex items-center gap-8px">
-              <Icon icon="ep:setting" class="text-[var(--el-color-success)] text-16px" />
-              <span>执行器 {{ index + 1 }}</span>
-              <el-tag :type="getActionTypeTag(action.type)" size="small">
+          <!-- 执行器头部 - 蓝色主题 -->
+          <div
+            class="flex items-center justify-between p-16px bg-gradient-to-r from-blue-50 to-sky-50 border-b border-blue-200 rounded-t-6px"
+          >
+            <div class="flex items-center gap-12px">
+              <div class="flex items-center gap-8px text-16px font-600 text-blue-700">
+                <div
+                  class="w-24px h-24px bg-blue-500 text-white rounded-full flex items-center justify-center text-12px font-bold"
+                >
+                  {{ index + 1 }}
+                </div>
+                <span>执行器 {{ index + 1 }}</span>
+              </div>
+              <el-tag :type="getActionTypeTag(action.type)" size="small" class="font-500">
                 {{ getActionTypeLabel(action.type) }}
               </el-tag>
             </div>
-            <div>
+            <div class="flex items-center gap-8px">
               <el-button
+                v-if="actions.length > 1"
                 type="danger"
                 size="small"
                 text
                 @click="removeAction(index)"
-                v-if="actions.length > 1"
+                class="hover:bg-red-50"
               >
                 <Icon icon="ep:delete" />
                 删除
@@ -63,7 +72,8 @@
             </div>
           </div>
 
-          <div class="space-y-16px">
+          <!-- 执行器内容区域 -->
+          <div class="p-16px space-y-16px">
             <!-- 执行类型选择 -->
             <div class="w-full">
               <el-form-item label="执行类型" required>
