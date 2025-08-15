@@ -1,148 +1,139 @@
 <!-- JSON参数输入组件 - 通用版本 -->
 <template>
-  <div class="w-full min-w-0">
-    <!-- 参数配置 -->
-    <div v-if="hasConfig" class="space-y-12px">
-      <!-- JSON 输入框 -->
-      <div class="relative">
-        <el-input
-          v-model="paramsJson"
-          type="textarea"
-          :rows="4"
-          :placeholder="placeholder"
-          @input="handleParamsChange"
-          :class="{ 'is-error': jsonError }"
-        />
-        <!-- 查看详细示例弹出层 -->
-        <div class="absolute top-8px right-8px">
-          <el-popover
-            placement="left-start"
-            :width="450"
-            trigger="click"
-            :show-arrow="true"
-            :offset="8"
-            popper-class="json-params-detail-popover"
-          >
-            <template #reference>
-              <el-button
-                type="info"
-                :icon="InfoFilled"
-                circle
-                size="small"
-                :title="JSON_PARAMS_INPUT_CONSTANTS.VIEW_EXAMPLE_TITLE"
-              />
-            </template>
+  <!-- 参数配置 -->
+  <div class="w-full space-y-12px">
+    <!-- JSON 输入框 -->
+    <div class="relative">
+      <el-input
+        v-model="paramsJson"
+        type="textarea"
+        :rows="4"
+        :placeholder="placeholder"
+        @input="handleParamsChange"
+        :class="{ 'is-error': jsonError }"
+      />
+      <!-- 查看详细示例弹出层 -->
+      <div class="absolute top-8px right-8px">
+        <el-popover
+          placement="left-start"
+          :width="450"
+          trigger="click"
+          :show-arrow="true"
+          :offset="8"
+          popper-class="json-params-detail-popover"
+        >
+          <template #reference>
+            <el-button
+              type="info"
+              :icon="InfoFilled"
+              circle
+              size="small"
+              :title="JSON_PARAMS_INPUT_CONSTANTS.VIEW_EXAMPLE_TITLE"
+            />
+          </template>
 
-            <!-- 弹出层内容 -->
-            <div class="json-params-detail-content">
-              <div class="flex items-center gap-8px mb-16px">
-                <Icon :icon="titleIcon" class="text-[var(--el-color-primary)] text-18px" />
-                <span class="text-16px font-600 text-[var(--el-text-color-primary)]">
-                  {{ title }}
-                </span>
-              </div>
+          <!-- 弹出层内容 -->
+          <div class="json-params-detail-content">
+            <div class="flex items-center gap-8px mb-16px">
+              <Icon :icon="titleIcon" class="text-[var(--el-color-primary)] text-18px" />
+              <span class="text-16px font-600 text-[var(--el-text-color-primary)]">
+                {{ title }}
+              </span>
+            </div>
 
-              <div class="space-y-16px">
-                <!-- 参数列表 -->
-                <div v-if="paramsList.length > 0">
-                  <div class="flex items-center gap-8px mb-8px">
-                    <Icon :icon="paramsIcon" class="text-[var(--el-color-primary)] text-14px" />
-                    <span class="text-14px font-500 text-[var(--el-text-color-primary)]">
-                      {{ paramsLabel }}
-                    </span>
-                  </div>
-                  <div class="ml-22px space-y-8px">
-                    <div
-                      v-for="param in paramsList"
-                      :key="param.identifier"
-                      class="flex items-center justify-between p-8px bg-[var(--el-fill-color-lighter)] rounded-4px"
-                    >
-                      <div class="flex-1">
-                        <div class="text-12px font-500 text-[var(--el-text-color-primary)]">
-                          {{ param.name }}
-                          <el-tag v-if="param.required" size="small" type="danger" class="ml-4px">
-                            {{ JSON_PARAMS_INPUT_CONSTANTS.REQUIRED_TAG }}
-                          </el-tag>
-                        </div>
-                        <div class="text-11px text-[var(--el-text-color-secondary)]">
-                          {{ param.identifier }}
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-8px">
-                        <el-tag :type="getParamTypeTag(param.dataType)" size="small">
-                          {{ getParamTypeName(param.dataType) }}
+            <div class="space-y-16px">
+              <!-- 参数列表 -->
+              <div v-if="paramsList.length > 0">
+                <div class="flex items-center gap-8px mb-8px">
+                  <Icon :icon="paramsIcon" class="text-[var(--el-color-primary)] text-14px" />
+                  <span class="text-14px font-500 text-[var(--el-text-color-primary)]">
+                    {{ paramsLabel }}
+                  </span>
+                </div>
+                <div class="ml-22px space-y-8px">
+                  <div
+                    v-for="param in paramsList"
+                    :key="param.identifier"
+                    class="flex items-center justify-between p-8px bg-[var(--el-fill-color-lighter)] rounded-4px"
+                  >
+                    <div class="flex-1">
+                      <div class="text-12px font-500 text-[var(--el-text-color-primary)]">
+                        {{ param.name }}
+                        <el-tag v-if="param.required" size="small" type="danger" class="ml-4px">
+                          {{ JSON_PARAMS_INPUT_CONSTANTS.REQUIRED_TAG }}
                         </el-tag>
-                        <span class="text-11px text-[var(--el-text-color-secondary)]">
-                          {{ getExampleValue(param) }}
-                        </span>
+                      </div>
+                      <div class="text-11px text-[var(--el-text-color-secondary)]">
+                        {{ param.identifier }}
                       </div>
                     </div>
-                  </div>
-
-                  <div class="mt-12px ml-22px">
-                    <div class="text-12px text-[var(--el-text-color-secondary)] mb-6px">
-                      {{ JSON_PARAMS_INPUT_CONSTANTS.COMPLETE_JSON_FORMAT }}
+                    <div class="flex items-center gap-8px">
+                      <el-tag :type="getParamTypeTag(param.dataType)" size="small">
+                        {{ getParamTypeName(param.dataType) }}
+                      </el-tag>
+                      <span class="text-11px text-[var(--el-text-color-secondary)]">
+                        {{ getExampleValue(param) }}
+                      </span>
                     </div>
-                    <pre
-                      class="p-12px bg-[var(--el-fill-color-light)] rounded-4px text-11px text-[var(--el-text-color-primary)] overflow-x-auto border-l-3px border-[var(--el-color-primary)]"
-                    >
-                      <code>{{ generateExampleJson() }}</code>
-                    </pre>
                   </div>
                 </div>
 
-                <!-- 无参数提示 -->
-                <div v-else>
-                  <div class="text-center py-16px">
-                    <p class="text-14px text-[var(--el-text-color-secondary)]">{{
-                      emptyMessage
-                    }}</p>
+                <div class="mt-12px ml-22px">
+                  <div class="text-12px text-[var(--el-text-color-secondary)] mb-6px">
+                    {{ JSON_PARAMS_INPUT_CONSTANTS.COMPLETE_JSON_FORMAT }}
                   </div>
+                  <pre
+                    class="p-12px bg-[var(--el-fill-color-light)] rounded-4px text-11px text-[var(--el-text-color-primary)] overflow-x-auto border-l-3px border-[var(--el-color-primary)]"
+                  >
+                      <code>{{ generateExampleJson() }}</code>
+                    </pre>
+                </div>
+              </div>
+
+              <!-- 无参数提示 -->
+              <div v-else>
+                <div class="text-center py-16px">
+                  <p class="text-14px text-[var(--el-text-color-secondary)]">{{ emptyMessage }}</p>
                 </div>
               </div>
             </div>
-          </el-popover>
-        </div>
-      </div>
-
-      <!-- 验证状态和错误提示 -->
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-8px">
-          <Icon
-            :icon="
-              jsonError
-                ? JSON_PARAMS_INPUT_ICONS.STATUS_ICONS.ERROR
-                : JSON_PARAMS_INPUT_ICONS.STATUS_ICONS.SUCCESS
-            "
-            :class="jsonError ? 'text-[var(--el-color-danger)]' : 'text-[var(--el-color-success)]'"
-            class="text-14px"
-          />
-          <span
-            :class="jsonError ? 'text-[var(--el-color-danger)]' : 'text-[var(--el-color-success)]'"
-            class="text-12px"
-          >
-            {{ jsonError || JSON_PARAMS_INPUT_CONSTANTS.JSON_FORMAT_CORRECT }}
-          </span>
-        </div>
-
-        <!-- 快速填充按钮 -->
-        <div v-if="paramsList.length > 0" class="flex items-center gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)]">{{
-            JSON_PARAMS_INPUT_CONSTANTS.QUICK_FILL_LABEL
-          }}</span>
-          <el-button size="small" type="primary" plain @click="fillExampleJson">
-            {{ JSON_PARAMS_INPUT_CONSTANTS.EXAMPLE_DATA_BUTTON }}
-          </el-button>
-          <el-button size="small" type="danger" plain @click="clearParams">{{
-            JSON_PARAMS_INPUT_CONSTANTS.CLEAR_BUTTON
-          }}</el-button>
-        </div>
+          </div>
+        </el-popover>
       </div>
     </div>
 
-    <!-- 无配置提示 -->
-    <div v-else class="text-center py-20px">
-      <p class="text-14px text-[var(--el-text-color-secondary)]">{{ noConfigMessage }}</p>
+    <!-- 验证状态和错误提示 -->
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-8px">
+        <Icon
+          :icon="
+            jsonError
+              ? JSON_PARAMS_INPUT_ICONS.STATUS_ICONS.ERROR
+              : JSON_PARAMS_INPUT_ICONS.STATUS_ICONS.SUCCESS
+          "
+          :class="jsonError ? 'text-[var(--el-color-danger)]' : 'text-[var(--el-color-success)]'"
+          class="text-14px"
+        />
+        <span
+          :class="jsonError ? 'text-[var(--el-color-danger)]' : 'text-[var(--el-color-success)]'"
+          class="text-12px"
+        >
+          {{ jsonError || JSON_PARAMS_INPUT_CONSTANTS.JSON_FORMAT_CORRECT }}
+        </span>
+      </div>
+
+      <!-- 快速填充按钮 -->
+      <div v-if="paramsList.length > 0" class="flex items-center gap-8px">
+        <span class="text-12px text-[var(--el-text-color-secondary)]">{{
+          JSON_PARAMS_INPUT_CONSTANTS.QUICK_FILL_LABEL
+        }}</span>
+        <el-button size="small" type="primary" plain @click="fillExampleJson">
+          {{ JSON_PARAMS_INPUT_CONSTANTS.EXAMPLE_DATA_BUTTON }}
+        </el-button>
+        <el-button size="small" type="danger" plain @click="clearParams">{{
+          JSON_PARAMS_INPUT_CONSTANTS.CLEAR_BUTTON
+        }}</el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -162,7 +153,7 @@ import {
 /** JSON参数输入组件 - 通用版本 */
 defineOptions({ name: 'JsonParamsInput' })
 
-export interface JsonParamsConfig {
+interface JsonParamsConfig {
   // 服务配置
   service?: {
     name: string
@@ -206,19 +197,6 @@ const localValue = useVModel(props, 'modelValue', emit, {
 
 const paramsJson = ref('') // JSON参数字符串
 const jsonError = ref('') // JSON验证错误信息
-
-// 计算属性：是否有配置
-const hasConfig = computed(() => {
-  // TODO @puhui999: 后续统一处理
-  console.log(props.config)
-  // return !!(
-  //   props.config?.service ||
-  //   props.config?.event ||
-  //   props.config?.properties ||
-  //   props.config?.custom
-  // )
-  return true
-})
 
 // 计算属性：参数列表
 const paramsList = computed(() => {

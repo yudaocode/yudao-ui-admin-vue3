@@ -6,15 +6,10 @@
         <div class="flex items-center gap-8px">
           <Icon icon="ep:setting" class="text-[var(--el-color-primary)] text-18px" />
           <span class="text-16px font-600 text-[var(--el-text-color-primary)]">执行器配置</span>
-          <el-tag size="small" type="info">{{ actions.length }}/{{ maxActions }}</el-tag>
+          <el-tag size="small" type="info">{{ actions.length }} 个执行器</el-tag>
         </div>
         <div class="flex items-center gap-8px">
-          <el-button
-            type="primary"
-            size="small"
-            @click="addAction"
-            :disabled="actions.length >= maxActions"
-          >
+          <el-button type="primary" size="small" @click="addAction">
             <Icon icon="ep:plus" />
             添加执行器
           </el-button>
@@ -103,14 +98,14 @@
 
             <!-- 告警配置 - 只有恢复告警时才显示 -->
             <AlertConfig
-              v-if="action.type === ActionTypeEnum.ALERT_RECOVER"
+              v-if="action.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER"
               :model-value="action.alertConfigId"
               @update:model-value="(value) => updateActionAlertConfig(index, value)"
             />
 
             <!-- 触发告警提示 - 触发告警时显示 -->
             <div
-              v-if="action.type === ActionTypeEnum.ALERT_TRIGGER"
+              v-if="action.type === IotRuleSceneActionTypeEnum.ALERT_TRIGGER"
               class="border border-[var(--el-border-color-light)] rounded-6px p-16px bg-[var(--el-fill-color-blank)]"
             >
               <div class="flex items-center gap-8px mb-8px">
@@ -127,14 +122,11 @@
       </div>
 
       <!-- 添加提示 -->
-      <div v-if="actions.length > 0 && actions.length < maxActions" class="text-center py-16px">
+      <div v-if="actions.length > 0" class="text-center py-16px">
         <el-button type="primary" plain @click="addAction">
           <Icon icon="ep:plus" />
           继续添加执行器
         </el-button>
-        <span class="block mt-8px text-12px text-[var(--el-text-color-secondary)]">
-          最多可添加 {{ maxActions }} 个执行器
-        </span>
       </div>
     </div>
   </el-card>
@@ -146,13 +138,9 @@ import DeviceControlConfig from '../configs/DeviceControlConfig.vue'
 import AlertConfig from '../configs/AlertConfig.vue'
 import type { Action } from '@/api/iot/rule/scene'
 import {
-  IotRuleSceneActionTypeEnum as ActionTypeEnum,
-  isDeviceAction,
-  isAlertAction,
   getActionTypeLabel,
   getActionTypeOptions,
-  getActionTypeTag,
-  SCENE_RULE_CONFIG
+  IotRuleSceneActionTypeEnum
 } from '@/views/iot/utils/constants'
 
 /** 执行器配置组件 */
@@ -168,7 +156,34 @@ const emit = defineEmits<{
 
 const actions = useVModel(props, 'actions', emit)
 
-const maxActions = SCENE_RULE_CONFIG.MAX_ACTIONS // 最大执行器数量
+/** 获取执行器标签类型（用于 el-tag 的 type 属性） */
+const getActionTypeTag = (type: number): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  const actionTypeTags = {
+    [IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
+    [IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
+    [IotRuleSceneActionTypeEnum.ALERT_TRIGGER]: 'danger',
+    [IotRuleSceneActionTypeEnum.ALERT_RECOVER]: 'warning'
+  } as const
+  return actionTypeTags[type] || 'info'
+}
+
+/** 判断是否为设备执行器类型 */
+const isDeviceAction = (type: number): boolean => {
+  const deviceActionTypes = [
+    IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,
+    IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
+  ] as number[]
+  return deviceActionTypes.includes(type)
+}
+
+/** 判断是否为告警执行器类型 */
+const isAlertAction = (type: number): boolean => {
+  const alertActionTypes = [
+    IotRuleSceneActionTypeEnum.ALERT_TRIGGER,
+    IotRuleSceneActionTypeEnum.ALERT_RECOVER
+  ] as number[]
+  return alertActionTypes.includes(type)
+}
 
 /**
  * 创建默认的执行器数据
@@ -176,7 +191,7 @@ const maxActions = SCENE_RULE_CONFIG.MAX_ACTIONS // 最大执行器数量
  */
 const createDefaultActionData = (): Action => {
   return {
-    type: ActionTypeEnum.DEVICE_PROPERTY_SET, // 默认为设备属性设置
+    type: IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET, // 默认为设备属性设置
     productId: undefined,
     deviceId: undefined,
     identifier: undefined, // 物模型标识符（服务调用时使用）
@@ -189,10 +204,6 @@ const createDefaultActionData = (): Action => {
  * 添加执行器
  */
 const addAction = () => {
-  if (actions.value.length >= maxActions) {
-    return
-  }
-
   const newAction = createDefaultActionData()
   actions.value.push(newAction)
 }

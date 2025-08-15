@@ -187,8 +187,8 @@ import {
   IotRuleSceneTriggerTypeEnum,
   triggerTypeOptions,
   getTriggerTypeLabel,
-  deviceStatusChangeOptions,
-  IotRuleSceneTriggerConditionParameterOperatorEnum
+  IotRuleSceneTriggerConditionParameterOperatorEnum,
+  IoTDeviceStatusEnum
 } from '@/views/iot/utils/constants'
 import { useVModel } from '@vueuse/core'
 
@@ -204,6 +204,18 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: Trigger): void
   (e: 'trigger-type-change', value: number): void
 }>()
+
+/** 获取设备状态变更选项（用于触发器配置） */
+const deviceStatusChangeOptions = [
+  {
+    label: IoTDeviceStatusEnum.ONLINE.label,
+    value: IoTDeviceStatusEnum.ONLINE.value
+  },
+  {
+    label: IoTDeviceStatusEnum.OFFLINE.label,
+    value: IoTDeviceStatusEnum.OFFLINE.value
+  }
+]
 
 const condition = useVModel(props, 'modelValue', emit)
 const propertyType = ref('') // 属性类型
