@@ -77,10 +77,7 @@
 
         <!-- 第四步：更多设置 -->
         <div v-show="currentStep === 3" class="mx-auto w-700px">
-          <ExtraSettings
-            ref="extraSettingsRef"   
-            v-model="formData" 
-            :model-form-id="formData.formId"/>
+          <ExtraSettings ref="extraSettingsRef" v-model="formData" />
         </div>
       </div>
     </div>
@@ -176,7 +173,8 @@ const formData: any = ref({
   summarySetting: {
     enable: false,
     summary: []
-  }
+  },
+  allowWithdrawTask: false
 })
 
 // 流程数据

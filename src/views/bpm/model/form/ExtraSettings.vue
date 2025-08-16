@@ -11,6 +11,17 @@
         </div>
       </div>
     </el-form-item>
+    <el-form-item class="mb-20px">
+      <template #label>
+        <el-text size="large" tag="b">审批人权限</el-text>
+      </template>
+      <div class="flex flex-col">
+        <el-checkbox v-model="modelData.allowWithdrawTask" label="允许审批人撤回任务" />
+        <div class="ml-22px">
+          <el-text type="info"> 审批人可撤回正在审批节点的前一节点 </el-text>
+        </div>
+      </div>
+    </el-form-item>
     <el-form-item v-if="modelData.processIdRule" class="mb-20px">
       <template #label>
         <el-text size="large" tag="b">流程编码</el-text>
@@ -232,34 +243,6 @@ import { ProcessVariableEnum } from '@/components/SimpleProcessDesignerV2/src/co
 import HttpRequestSetting from '@/components/SimpleProcessDesignerV2/src/nodes-config/components/HttpRequestSetting.vue'
 
 const modelData = defineModel<any>()
-const formFields = ref<string[]>([])
-   
-const props = defineProps({
-  // 流程表单 ID
-  modelFormId: {
-    type: Number,
-    required: false,
-    default: undefined,
-  }
-})
-
-
-// 监听 modelFormId 变化
-watch(
-  () => props.modelFormId,
-  async (newVal) => {
-    if (newVal) {
-      const form = await FormApi.getForm(newVal);
-      formFields.value = form?.fields;
-    } else {
-      // 如果 modelFormId 为空，清空表单字段
-      formFields.value = [];
-    }
-  },
-  { immediate: true },
-);
-// 暴露给子组件使用
-provide('formFields', formFields)
 
 /** 自定义 ID 流程编码 */
 const timeOptions = ref([
@@ -374,10 +357,10 @@ const handleTaskAfterTriggerEnableChange = (val: boolean | string | number) => {
   }
 }
 
-/** 表单选项 */
-const formField = ref<Array<{ field: string; title: string }>>([])
+/** 已解析表单字段 */
+const formFields = ref<Array<{ field: string; title: string }>>([])
 const formFieldOptions4Title = computed(() => {
-  let cloneFormField = formField.value.map((item) => {
+  let cloneFormField = formFields.value.map((item) => {
     return {
       label: item.title,
       value: item.field
@@ -399,13 +382,18 @@ const formFieldOptions4Title = computed(() => {
   return cloneFormField
 })
 const formFieldOptions4Summary = computed(() => {
-  return formField.value.map((item) => {
+  return formFields.value.map((item) => {
     return {
       label: item.title,
       value: item.field
     }
   })
 })
+
+/** 未解析的表单字段 */
+const unParsedFormFields = ref<string[]>([])
+/** 暴露给子组件 HttpRequestSetting 使用 */
+provide('formFields', unParsedFormFields)
 
 /** 兼容以前未配置更多设置的流程 */
 const initData = () => {
@@ -445,6 +433,9 @@ const initData = () => {
   if (modelData.value.taskAfterTriggerSetting) {
     taskAfterTriggerEnable.value = true
   }
+  if (modelData.value.allowWithdrawTask) {
+    modelData.value.allowWithdrawTask = false
+  }
 }
 defineExpose({ initData })
 
@@ -456,13 +447,15 @@ watch(
       const data = await FormApi.getForm(newFormId)
       const result: Array<{ field: string; title: string }> = []
       if (data.fields) {
+        unParsedFormFields.value = data.fields
         data.fields.forEach((fieldStr: string) => {
           parseFormFields(JSON.parse(fieldStr), result)
         })
       }
-      formField.value = result
+      formFields.value = result
     } else {
-      formField.value = []
+      formFields.value = []
+      unParsedFormFields.value = []
     }
   },
   { immediate: true }

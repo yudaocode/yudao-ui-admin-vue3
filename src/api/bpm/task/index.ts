@@ -106,6 +106,11 @@ export const copyTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/copy', data })
 }
 
+// 撤回
+export const withdrawTask = async (taskId: string) => {
+  return await request.put({ url: '/bpm/task/withdraw', params: { taskId } })
+}
+
 // 获取我的待办任务
 export const myTodoTask = async (processInstanceId: string) => {
   return await request.get({ url: '/bpm/task/my-todo?processInstanceId=' + processInstanceId })

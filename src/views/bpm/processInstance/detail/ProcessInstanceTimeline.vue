@@ -15,7 +15,7 @@
         >
           <img class="w-full h-full" :src="getApprovalNodeImg(activity.nodeType)" alt="" />
           <div
-            v-if="showStatusIcon"
+            v-if="props.showStatusIcon"
             class="position-absolute top-17px left-17px rounded-full flex items-center p-1px border-2 border-white border-solid"
             :style="{ backgroundColor: getApprovalNodeColor(activity.status) }"
           >
@@ -55,13 +55,13 @@
           class="flex flex-wrap gap2 items-center"
           v-if="
             isEmpty(activity.tasks) &&
-            isEmpty(activity.candidateUsers) &&
-            (CandidateStrategy.START_USER_SELECT === activity.candidateStrategy ||
-              CandidateStrategy.APPROVE_USER_SELECT === activity.candidateStrategy)
+            ((CandidateStrategy.START_USER_SELECT === activity.candidateStrategy &&
+              isEmpty(activity.candidateUsers)) ||
+              (props.enableApproveUserSelect &&
+                CandidateStrategy.APPROVE_USER_SELECT === activity.candidateStrategy))
           "
         >
           <!--  && activity.nodeType === NodeType.USER_TASK_NODE -->
-
           <el-tooltip content="添加用户" placement="left">
             <el-button
               class="!px-6px"
@@ -119,7 +119,7 @@
                 </template>
                 <!-- 信息：任务 ICON -->
                 <div
-                  v-if="showStatusIcon && onlyStatusIconShow.includes(task.status)"
+                  v-if="props.showStatusIcon && onlyStatusIconShow.includes(task.status)"
                   class="position-absolute top-19px left-23px rounded-full flex items-center p-1px border-2 border-white border-solid"
                   :style="{ backgroundColor: statusIconMap2[task.status]?.color }"
                 >
@@ -165,7 +165,7 @@
 
             <!-- 信息：任务 ICON -->
             <div
-              v-if="showStatusIcon"
+              v-if="props.showStatusIcon"
               class="position-absolute top-20px left-24px rounded-full flex items-center p-1px border-2 border-white border-solid"
               :style="{ backgroundColor: statusIconMap2['-1']?.color }"
             >
@@ -198,13 +198,15 @@ import transactorSvg from '@/assets/svgs/bpm/transactor.svg'
 import childProcessSvg from '@/assets/svgs/bpm/child-process.svg'
 
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
-withDefaults(
+const props = withDefaults(
   defineProps<{
     activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
     showStatusIcon?: boolean // 是否显示头像右下角状态图标
+    enableApproveUserSelect?: boolean // 是否开启审批人自选功能
   }>(),
   {
-    showStatusIcon: true // 默认值为 true
+    showStatusIcon: true, // 默认值为 true
+    enableApproveUserSelect: false // 默认值为 false
   }
 )
 const { push } = useRouter() // 路由
@@ -341,4 +343,19 @@ const handleChildProcess = (activity: any) => {
     }
   })
 }
+
+/** 设置自定义审批人 */
+const setCustomApproveUsers = (activityId: string, users: any[]) => {
+  customApproveUsers.value[activityId] = users || []
+}
+
+/** 批量设置多个节点的自定义审批人 */
+const batchSetCustomApproveUsers = (data: Record<string, any[]>) => {
+  Object.keys(data).forEach((activityId) => {
+    customApproveUsers.value[activityId] = data[activityId] || []
+  })
+}
+
+// 暴露方法给父组件
+defineExpose({ setCustomApproveUsers, batchSetCustomApproveUsers })
 </script>

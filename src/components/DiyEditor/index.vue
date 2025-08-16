@@ -73,7 +73,7 @@
           <draggable
             v-model="pageComponents"
             :animation="200"
-            :force-fallback="true"
+            :force-fallback="false"
             class="page-prop-area drag-area"
             filter=".component-toolbar"
             ghost-class="draggable-ghost"
