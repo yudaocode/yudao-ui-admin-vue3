@@ -26,6 +26,12 @@ interface ImportMetaEnv {
   readonly VITE_SOURCEMAP: string
   readonly VITE_OUT_DIR: string
   readonly VITE_GOVIEW_URL: string
+  // API 加解密相关配置
+  readonly VITE_APP_API_ENCRYPT_ENABLE: string
+  readonly VITE_APP_API_ENCRYPT_HEADER: string
+  readonly VITE_APP_API_ENCRYPT_ALGORITHM: string
+  readonly VITE_APP_API_ENCRYPT_REQUEST_KEY: string
+  readonly VITE_APP_API_ENCRYPT_RESPONSE_KEY: string
 }
 
 declare global {
