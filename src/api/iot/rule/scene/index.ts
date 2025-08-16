@@ -46,28 +46,28 @@ export interface Action {
 export const RuleSceneApi = {
   // 查询场景联动分页
   getRuleScenePage: async (params: any) => {
-    return await request.get({ url: `/iot/rule-scene/page`, params })
+    return await request.get({ url: `/iot/scene-rule/page`, params })
   },
 
   // 查询场景联动详情
   getRuleScene: async (id: number) => {
-    return await request.get({ url: `/iot/rule-scene/get?id=` + id })
+    return await request.get({ url: `/iot/scene-rule/get?id=` + id })
   },
 
   // 新增场景联动
   createRuleScene: async (data: IotSceneRule) => {
-    return await request.post({ url: `/iot/rule-scene/create`, data })
+    return await request.post({ url: `/iot/scene-rule/create`, data })
   },
 
   // 修改场景联动
   updateRuleScene: async (data: IotSceneRule) => {
-    return await request.put({ url: `/iot/rule-scene/update`, data })
+    return await request.put({ url: `/iot/scene-rule/update`, data })
   },
 
   // 修改场景联动
   updateRuleSceneStatus: async (id: number, status: number) => {
     return await request.put({
-      url: `/iot/rule-scene/update-status`,
+      url: `/iot/scene-rule/update-status`,
       data: {
         id,
         status
@@ -77,11 +77,11 @@ export const RuleSceneApi = {
 
   // 删除场景联动
   deleteRuleScene: async (id: number) => {
-    return await request.delete({ url: `/iot/rule-scene/delete?id=` + id })
+    return await request.delete({ url: `/iot/scene-rule/delete?id=` + id })
   },
 
   // 获取场景联动简单列表
   getSimpleRuleSceneList: async () => {
-    return await request.get({ url: `/iot/rule-scene/simple-list` })
+    return await request.get({ url: `/iot/scene-rule/simple-list` })
   }
 }

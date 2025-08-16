@@ -65,7 +65,6 @@
               :model-value="condition.operator"
               @update:model-value="(value) => updateConditionField('operator', value)"
               :property-type="propertyType"
-              @change="handleOperatorChange"
             />
           </el-form-item>
         </el-col>
@@ -188,8 +187,8 @@ import {
   IotRuleSceneTriggerTypeEnum,
   triggerTypeOptions,
   getTriggerTypeLabel,
-  deviceStatusChangeOptions,
-  IotRuleSceneTriggerConditionParameterOperatorEnum
+  IotRuleSceneTriggerConditionParameterOperatorEnum,
+  IoTDeviceStatusEnum
 } from '@/views/iot/utils/constants'
 import { useVModel } from '@vueuse/core'
 
@@ -205,6 +204,18 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: Trigger): void
   (e: 'trigger-type-change', value: number): void
 }>()
+
+/** 获取设备状态变更选项（用于触发器配置） */
+const deviceStatusChangeOptions = [
+  {
+    label: IoTDeviceStatusEnum.ONLINE.label,
+    value: IoTDeviceStatusEnum.ONLINE.value
+  },
+  {
+    label: IoTDeviceStatusEnum.OFFLINE.label,
+    value: IoTDeviceStatusEnum.OFFLINE.value
+  }
+]
 
 const condition = useVModel(props, 'modelValue', emit)
 const propertyType = ref('') // 属性类型
@@ -325,13 +336,5 @@ const handlePropertyChange = (propertyInfo: any) => {
       condition.value.operator = IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
     }
   }
-}
-
-// TODO @puhui999：这个貌似没用上
-/**
- * 处理操作符变化事件
- */
-const handleOperatorChange = () => {
-  // 操作符变化处理
 }
 </script>

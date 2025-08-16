@@ -67,7 +67,7 @@
 
             <!-- 定时触发配置 -->
             <div
-              v-else-if="triggerItem.type === TriggerTypeEnum.TIMER"
+              v-else-if="triggerItem.type === IotRuleSceneTriggerTypeEnum.TIMER"
               class="flex flex-col gap-16px"
             >
               <div
@@ -119,8 +119,7 @@ import { Crontab } from '@/components/Crontab'
 import type { Trigger } from '@/api/iot/rule/scene'
 import {
   getTriggerTypeLabel,
-  getTriggerTagType,
-  IotRuleSceneTriggerTypeEnum as TriggerTypeEnum,
+  IotRuleSceneTriggerTypeEnum,
   isDeviceTrigger
 } from '@/views/iot/utils/constants'
 
@@ -137,10 +136,18 @@ const emit = defineEmits<{
 
 const triggers = useVModel(props, 'triggers', emit)
 
+/** 获取触发器标签类型（用于 el-tag 的 type 属性） */
+const getTriggerTagType = (type: number): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  if (type === IotRuleSceneTriggerTypeEnum.TIMER) {
+    return 'warning'
+  }
+  return isDeviceTrigger(type) ? 'success' : 'info'
+}
+
 /** 添加触发器 */
 const addTrigger = () => {
   const newTrigger: Trigger = {
-    type: TriggerTypeEnum.DEVICE_STATE_UPDATE,
+    type: IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE,
     productId: undefined,
     deviceId: undefined,
     identifier: undefined,

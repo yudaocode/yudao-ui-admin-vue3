@@ -24,12 +24,7 @@
           <div class="text-12px text-[var(--el-text-color-secondary)]">{{ device.deviceKey }}</div>
         </div>
         <div class="flex items-center gap-4px" v-if="device.id > 0">
-          <el-tag size="small" :type="getDeviceEnableStatusTagType(device.status)">
-            {{ getDeviceEnableStatusText(device.status) }}
-          </el-tag>
-          <el-tag size="small" :type="getDeviceActiveStatus(device.activeTime).tagType">
-            {{ getDeviceActiveStatus(device.activeTime).text }}
-          </el-tag>
+          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="device.state" />
         </div>
       </div>
     </el-option>
@@ -38,12 +33,8 @@
 
 <script setup lang="ts">
 import { DeviceApi } from '@/api/iot/device/device'
-import {
-  getDeviceEnableStatusText,
-  getDeviceEnableStatusTagType,
-  getDeviceActiveStatus,
-  DEVICE_SELECTOR_OPTIONS
-} from '@/views/iot/utils/constants'
+import { DEVICE_SELECTOR_OPTIONS } from '@/views/iot/utils/constants'
+import { DICT_TYPE } from '@/utils/dict'
 
 /** 设备选择器组件 */
 defineOptions({ name: 'DeviceSelector' })

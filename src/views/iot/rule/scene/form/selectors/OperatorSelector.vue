@@ -222,7 +222,9 @@ const availableOperators = computed(() => {
   if (!props.propertyType) {
     return allOperators
   }
-  return allOperators.filter((op) => op.supportedTypes.includes(props.propertyType!))
+  return allOperators.filter((op) =>
+    (op.supportedTypes as any[]).includes(props.propertyType || '')
+  )
 })
 
 // 计算属性：当前选中的操作符
@@ -243,10 +245,12 @@ watch(
   () => props.propertyType,
   () => {
     // 如果当前选择的操作符不支持新的属性类型，则清空选择
-    if (localValue.value && selectedOperator.value) {
-      if (!selectedOperator.value.supportedTypes.includes(props.propertyType || '')) {
-        localValue.value = ''
-      }
+    if (
+      localValue.value &&
+      selectedOperator.value &&
+      !(selectedOperator.value.supportedTypes as any[]).includes(props.propertyType || '')
+    ) {
+      localValue.value = ''
     }
   }
 )

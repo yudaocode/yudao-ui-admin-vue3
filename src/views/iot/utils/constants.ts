@@ -55,13 +55,6 @@ export const IotDeviceMessageMethodEnum = {
   }
 }
 
-// IoT 产品物模型类型枚举类
-export const IotThingModelTypeEnum = {
-  PROPERTY: 1, // 属性
-  SERVICE: 2, // 服务
-  EVENT: 3 // 事件
-}
-
 // IoT 产品物模型服务调用方式枚举
 export const IoTThingModelServiceCallTypeEnum = {
   ASYNC: {
@@ -331,59 +324,11 @@ export const getActionTypeOptions = () => [
   }
 ]
 
-/** 判断是否为设备执行器类型 */
-export const isDeviceAction = (type: number): boolean => {
-  const deviceActionTypes = [
-    IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET,
-    IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
-  ] as number[]
-  return deviceActionTypes.includes(type)
-}
-
-/** 判断是否为告警执行器类型 */
-export const isAlertAction = (type: number): boolean => {
-  const alertActionTypes = [
-    IotRuleSceneActionTypeEnum.ALERT_TRIGGER,
-    IotRuleSceneActionTypeEnum.ALERT_RECOVER
-  ] as number[]
-  return alertActionTypes.includes(type)
-}
-
 /** 获取执行器类型标签 */
 export const getActionTypeLabel = (type: number): string => {
   const option = getActionTypeOptions().find((opt) => opt.value === type)
   return option?.label || '未知类型'
 }
-
-/** 获取执行器标签类型（用于 el-tag 的 type 属性） */
-// TODO @puhui999：这种跟界面相关的，可以拿到对应组件里；
-export const getActionTypeTag = (
-  type: number
-): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
-  const actionTypeTags = {
-    [IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET]: 'primary',
-    [IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE]: 'success',
-    [IotRuleSceneActionTypeEnum.ALERT_TRIGGER]: 'danger',
-    [IotRuleSceneActionTypeEnum.ALERT_RECOVER]: 'warning'
-  } as const
-  return actionTypeTags[type] || 'info'
-}
-
-// TODO @puhui999：建议不设置最大值哈。
-/** 场景联动规则配置常量 */
-export const SCENE_RULE_CONFIG = {
-  MAX_ACTIONS: 5, // 最大执行器数量
-  MAX_TRIGGERS: 10, // 最大触发器数量
-  MAX_CONDITIONS: 20 // 最大条件数量
-} as const
-
-// TODO @puhui999：下面这个要去掉么？
-/** IoT 设备消息类型枚举 */
-export const IotDeviceMessageTypeEnum = {
-  PROPERTY: 'property', // 属性
-  SERVICE: 'service', // 服务
-  EVENT: 'event' // 事件
-} as const
 
 /** IoT 场景联动触发条件参数操作符枚举 */
 export const IotRuleSceneTriggerConditionParameterOperatorEnum = {
@@ -424,42 +369,41 @@ export const getConditionTypeOptions = () => [
   }
 ]
 
-/** 设备状态枚举 */
+/** 设备状态枚举 - 统一的设备状态管理 */
 export const IoTDeviceStatusEnum = {
+  // 在线状态
   ONLINE: {
     label: '在线',
-    value: 'online'
+    value: 'online',
+    tagType: 'success'
   },
   OFFLINE: {
     label: '离线',
-    value: 'offline'
-  }
-} as const
-
-/** 设备启用状态枚举 */
-// TODO @puhui999：这个是不是和 IoTDeviceStatusEnum 合并下；额外增加一个 value2
-export const IoTDeviceEnableStatusEnum = {
+    value: 'offline',
+    tagType: 'danger'
+  },
+  // 启用状态
   ENABLED: {
     label: '正常',
     value: 0,
+    value2: 'enabled',
     tagType: 'success'
   },
   DISABLED: {
     label: '禁用',
     value: 1,
+    value2: 'disabled',
     tagType: 'danger'
-  }
-} as const
-
-/** 设备激活状态枚举 */
-// TODO @puhui999：这个是不是搞到界面里。label 就是 IoTDeviceStatusEnum，然后 tag 界面里处理；；或者也可以在想想，= = 主要设备状态有 3 个枚举，嘿嘿~
-export const IoTDeviceActiveStatusEnum = {
+  },
+  // 激活状态
   ACTIVATED: {
     label: '已激活',
+    value2: 'activated',
     tagType: 'success'
   },
   NOT_ACTIVATED: {
     label: '未激活',
+    value2: 'not_activated',
     tagType: 'info'
   }
 } as const
@@ -471,72 +415,6 @@ export const DEVICE_SELECTOR_OPTIONS = {
     deviceName: '全部设备'
   }
 } as const
-
-/** 获取设备状态选项 */
-export const getDeviceStatusOptions = () => [
-  {
-    value: IoTDeviceStatusEnum.ONLINE.value,
-    label: IoTDeviceStatusEnum.ONLINE.label
-  },
-  {
-    value: IoTDeviceStatusEnum.OFFLINE.value,
-    label: IoTDeviceStatusEnum.OFFLINE.label
-  }
-]
-
-/** 获取状态操作符选项 */
-export const getStatusOperatorOptions = () => [
-  {
-    value: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value,
-    label: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.name
-  },
-  {
-    value: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.value,
-    label: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.name
-  }
-]
-
-/** 获取设备状态变更选项（用于触发器配置） */
-export const deviceStatusChangeOptions = [
-  {
-    label: IoTDeviceStatusEnum.ONLINE.label,
-    value: IoTDeviceStatusEnum.ONLINE.value
-  },
-  {
-    label: IoTDeviceStatusEnum.OFFLINE.label,
-    value: IoTDeviceStatusEnum.OFFLINE.value
-  }
-]
-
-/** 获取设备启用状态文本 */
-export const getDeviceEnableStatusText = (status: number): string => {
-  // TODO @puhui999：设备有 3 个状态，上线、离线，未激活；
-  const statusItem = Object.values(IoTDeviceEnableStatusEnum).find((item) => item.value === status)
-  return statusItem?.label || '未知'
-}
-
-/** 获取设备启用状态标签类型 */
-// TODO @puhui999：这个是不是可以直接在界面里处理；或者也可以在想想，= = 主要设备状态有 3 个枚举，嘿嘿~
-export const getDeviceEnableStatusTagType = (
-  status: number
-): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
-  const statusItem = Object.values(IoTDeviceEnableStatusEnum).find((item) => item.value === status)
-  return statusItem?.tagType || 'info'
-}
-
-/** 获取设备激活状态文本和标签类型 */
-// TODO @puhui999：这个是不是可以直接在界面里处理；或者也可以在想想，= = 主要设备状态有 3 个枚举，嘿嘿~
-export const getDeviceActiveStatus = (activeTime?: string | null) => {
-  const isActivated = !!activeTime
-  return {
-    text: isActivated
-      ? IoTDeviceActiveStatusEnum.ACTIVATED.label
-      : IoTDeviceActiveStatusEnum.NOT_ACTIVATED.label,
-    tagType: isActivated
-      ? IoTDeviceActiveStatusEnum.ACTIVATED.tagType
-      : IoTDeviceActiveStatusEnum.NOT_ACTIVATED.tagType
-  }
-}
 
 /** IoT 场景联动触发时间操作符枚举 */
 export const IotRuleSceneTriggerTimeOperatorEnum = {
@@ -553,17 +431,6 @@ export const IotRuleSceneTriggerTimeOperatorEnum = {
 export const getTriggerTypeLabel = (type: number): string => {
   const option = triggerTypeOptions.find((item) => item.value === type)
   return option?.label || '未知类型'
-}
-
-// TODO @puhui999：这种跟界面相关的，可以拿到对应组件里；
-/** 获取触发器标签类型（用于 el-tag 的 type 属性） */
-export const getTriggerTagType = (
-  type: number
-): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
-  if (type === IotRuleSceneTriggerTypeEnum.TIMER) {
-    return 'warning'
-  }
-  return isDeviceTrigger(type) ? 'success' : 'info'
 }
 
 // ========== JSON 参数输入组件相关常量 ==========

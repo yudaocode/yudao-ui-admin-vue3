@@ -262,7 +262,6 @@ const handleChange = (value: string) => {
   }
 }
 
-// TODO @puhui999：这里没用到哈；
 /**
  * 获取物模型TSL数据
  */
@@ -297,62 +296,62 @@ const parseThingModelData = () => {
   const tsl = thingModelTSL.value
   const properties: PropertySelectorItem[] = []
 
-  // TODO @puhui999：if return，减少下括号层级；
-  if (tsl) {
-    // 解析属性
-    if (tsl.properties && Array.isArray(tsl.properties)) {
-      tsl.properties.forEach((prop) => {
-        properties.push({
-          identifier: prop.identifier,
-          name: prop.name,
-          description: prop.description,
-          dataType: prop.dataType,
-          type: IoTThingModelTypeEnum.PROPERTY,
-          accessMode: prop.accessMode,
-          required: prop.required,
-          unit: getPropertyUnit(prop),
-          range: getPropertyRange(prop),
-          property: prop
-        })
+  if (!tsl) {
+    propertyList.value = properties
+    return
+  }
+  // 解析属性
+  if (tsl.properties && Array.isArray(tsl.properties)) {
+    tsl.properties.forEach((prop) => {
+      properties.push({
+        identifier: prop.identifier,
+        name: prop.name,
+        description: prop.description,
+        dataType: prop.dataType,
+        type: IoTThingModelTypeEnum.PROPERTY,
+        accessMode: prop.accessMode,
+        required: prop.required,
+        unit: getPropertyUnit(prop),
+        range: getPropertyRange(prop),
+        property: prop
       })
-    }
-
-    // 解析事件
-    if (tsl.events && Array.isArray(tsl.events)) {
-      tsl.events.forEach((event) => {
-        properties.push({
-          identifier: event.identifier,
-          name: event.name,
-          description: event.description,
-          dataType: 'struct',
-          type: IoTThingModelTypeEnum.EVENT,
-          eventType: event.type,
-          required: event.required,
-          outputParams: event.outputParams,
-          event: event
-        })
-      })
-    }
-
-    // 解析服务
-    if (tsl.services && Array.isArray(tsl.services)) {
-      tsl.services.forEach((service) => {
-        properties.push({
-          identifier: service.identifier,
-          name: service.name,
-          description: service.description,
-          dataType: 'struct',
-          type: IoTThingModelTypeEnum.SERVICE,
-          callType: service.callType,
-          required: service.required,
-          inputParams: service.inputParams,
-          outputParams: service.outputParams,
-          service: service
-        })
-      })
-    }
+    })
   }
 
+  // 解析事件
+  if (tsl.events && Array.isArray(tsl.events)) {
+    tsl.events.forEach((event) => {
+      properties.push({
+        identifier: event.identifier,
+        name: event.name,
+        description: event.description,
+        dataType: 'struct',
+        type: IoTThingModelTypeEnum.EVENT,
+        eventType: event.type,
+        required: event.required,
+        outputParams: event.outputParams,
+        event: event
+      })
+    })
+  }
+
+  // 解析服务
+  if (tsl.services && Array.isArray(tsl.services)) {
+    tsl.services.forEach((service) => {
+      properties.push({
+        identifier: service.identifier,
+        name: service.name,
+        description: service.description,
+        dataType: 'struct',
+        type: IoTThingModelTypeEnum.SERVICE,
+        callType: service.callType,
+        required: service.required,
+        inputParams: service.inputParams,
+        outputParams: service.outputParams,
+        service: service
+      })
+    })
+  }
   propertyList.value = properties
 }
 
@@ -396,7 +395,7 @@ const getPropertyRange = (property: any) => {
   return undefined
 }
 
-/** 监听产品变化 *、
+/** 监听产品变化 */
 watch(
   () => props.productId,
   () => {
@@ -410,7 +409,6 @@ watch(
   () => props.triggerType,
   () => {
     localValue.value = ''
-    // el-popover 会自动关闭，无需手动处理
   }
 )
 </script>

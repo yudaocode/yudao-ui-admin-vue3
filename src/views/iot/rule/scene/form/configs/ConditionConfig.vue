@@ -63,7 +63,7 @@
               class="w-full"
             >
               <el-option
-                v-for="option in getStatusOperatorOptions()"
+                v-for="option in statusOperatorOptions"
                 :key="option.value"
                 :label="option.label"
                 :value="option.value"
@@ -82,7 +82,7 @@
               class="w-full"
             >
               <el-option
-                v-for="option in getDeviceStatusOptions()"
+                v-for="option in deviceStatusOptions"
                 :key="option.value"
                 :label="option.label"
                 :value="option.value"
@@ -163,8 +163,7 @@ import {
   IotRuleSceneTriggerConditionTypeEnum,
   IotRuleSceneTriggerConditionParameterOperatorEnum,
   getConditionTypeOptions,
-  getDeviceStatusOptions,
-  getStatusOperatorOptions
+  IoTDeviceStatusEnum
 } from '@/views/iot/utils/constants'
 
 /** 单个条件配置组件 */
@@ -178,6 +177,30 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: TriggerCondition): void
 }>()
+
+/** 获取设备状态选项 */
+const deviceStatusOptions = [
+  {
+    value: IoTDeviceStatusEnum.ONLINE.value,
+    label: IoTDeviceStatusEnum.ONLINE.label
+  },
+  {
+    value: IoTDeviceStatusEnum.OFFLINE.value,
+    label: IoTDeviceStatusEnum.OFFLINE.label
+  }
+]
+
+/** 获取状态操作符选项 */
+const statusOperatorOptions = [
+  {
+    value: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value,
+    label: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.name
+  },
+  {
+    value: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.value,
+    label: IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_EQUALS.name
+  }
+]
 
 const condition = useVModel(props, 'modelValue', emit)
 
