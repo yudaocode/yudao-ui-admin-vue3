@@ -17,7 +17,7 @@ export const login = (data: UserLoginVO) => {
     url: '/system/auth/login',
     data,
     headers: {
-      isEncrypt: true
+      isEncrypt: false
     }
   })
 }
