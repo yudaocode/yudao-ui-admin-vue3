@@ -93,6 +93,16 @@
           <el-radio key="false" :value="false">禁用</el-radio>
         </el-radio-group>
       </el-form-item>
+      <el-form-item
+        v-if="formData.storage === 20"
+        label="公开访问"
+        prop="config.enablePublicAccess"
+      >
+        <el-radio-group v-model="formData.config.enablePublicAccess">
+          <el-radio key="true" :value="true">公开</el-radio>
+          <el-radio key="false" :value="false">私有</el-radio>
+        </el-radio-group>
+      </el-form-item>
       <!-- 通用 -->
       <el-form-item v-if="formData.storage === 20" label="自定义域名">
         <!-- 无需参数校验，所以去掉 prop -->
@@ -146,6 +156,7 @@ const formRules = reactive<FormRules>({
     enablePathStyleAccess: [
       { required: true, message: '是否 PathStyle 访问不能为空', trigger: 'change' }
     ],
+    enablePublicAccess: [{ required: true, message: '公开访问设置不能为空', trigger: 'change' }],
     domain: [{ required: true, message: '自定义域名不能为空', trigger: 'blur' }]
   } as FormRules
 })
