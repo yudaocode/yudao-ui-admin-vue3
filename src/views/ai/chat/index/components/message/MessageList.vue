@@ -14,6 +14,10 @@
             class="relative flex flex-col break-words bg-[var(--el-fill-color-light)] shadow-[0_0_0_1px_var(--el-border-color-light)] rounded-10px pt-10px px-10px pb-5px"
             ref="markdownViewRef"
           >
+            <MessageReasoning
+              :reasoning-content="item.reasoningContent || ''"
+              :content="item.content || ''"
+            />
             <MarkdownView
               class="text-[var(--el-text-color-primary)] text-[0.95rem]"
               :content="item.content"
@@ -51,8 +55,9 @@
           <div class="flex flex-row-reverse">
             <div
               class="text-[0.95rem] text-[var(--el-color-white)] inline bg-[var(--el-color-primary)] shadow-[0_0_0_1px_var(--el-color-primary)] rounded-10px p-10px w-auto break-words whitespace-pre-wrap"
-              >{{ item.content }}</div
             >
+              {{ item.content }}
+            </div>
           </div>
           <div class="flex flex-row-reverse mt-8px">
             <el-button
@@ -98,6 +103,7 @@ import { PropType } from 'vue'
 import { formatDate } from '@/utils/formatTime'
 import MarkdownView from '@/components/MarkdownView/index.vue'
 import MessageKnowledge from './MessageKnowledge.vue'
+import MessageReasoning from './MessageReasoning.vue'
 import { useClipboard } from '@vueuse/core'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
 import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'

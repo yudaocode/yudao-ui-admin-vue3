@@ -2,7 +2,7 @@
   <el-container class="absolute flex-1 top-0 left-0 h-full w-full">
     <!-- 左侧：对话列表 -->
     <ConversationList
-      :active-id="activeConversationId"
+      :active-id="activeConversationId?.toString() || ''"
       ref="conversationListRef"
       @on-conversation-create="handleConversationCreateSuccess"
       @on-conversation-click="handleConversationClick"
@@ -56,7 +56,7 @@
             />
             <!-- 情况四：消息列表不为空 -->
             <MessageList
-              v-if="!activeMessageListLoading && messageList.length > 0"
+              v-if="!activeMessageListLoading && messageList.length > 0 && activeConversation"
               ref="messageRef"
               :conversation="activeConversation"
               :list="messageList"
@@ -285,9 +285,18 @@ const messageList = computed(() => {
     return [
       {
         id: 0,
+        conversationId: activeConversation.value.id || 0,
         type: 'system',
-        content: activeConversation.value.systemMessage
-      }
+        userId: '',
+        roleId: '',
+        model: 0,
+        modelId: 0,
+        content: activeConversation.value.systemMessage,
+        tokens: 0,
+        createTime: new Date(),
+        roleAvatar: '',
+        userAvatar: ''
+      } as ChatMessageVO
     ]
   }
   return []
@@ -427,6 +436,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'assistant',
       content: '思考中...',
+      reasoningContent: '',
       createTime: new Date()
     } as ChatMessageVO)
     // 1.2 滚动到最下面
@@ -450,9 +460,10 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
         }
 
         // 如果内容为空，就不处理。
-        if (data.receive.content === '') {
+        if (data.receive.content === '' && !data.receive.reasoningContent) {
           return
         }
+
         // 首次返回需要添加一个 message 到页面，后面的都是更新
         if (isFirstChunk) {
           isFirstChunk = false
@@ -463,12 +474,22 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
           activeMessageList.value.push(data.send)
           activeMessageList.value.push(data.receive)
         }
-        // debugger
-        receiveMessageFullText.value = receiveMessageFullText.value + data.receive.content
+
+        // 处理 reasoningContent
+        if (data.receive.reasoningContent) {
+          const lastMessage = activeMessageList.value[activeMessageList.value.length - 1]
+          lastMessage.reasoningContent =
+            lastMessage.reasoningContent + data.receive.reasoningContent
+        }
+
+        // 处理正常内容
+        if (data.receive.content !== '') {
+          receiveMessageFullText.value = receiveMessageFullText.value + data.receive.content
+        }
         // 滚动到最下面
         await scrollToBottom()
       },
-      (error) => {
+      (error: any) => {
         message.alert(`对话异常! ${error}`)
         stopStream()
         // 需要抛出异常，禁止重试

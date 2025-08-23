@@ -13,6 +13,7 @@ export interface ChatMessageVO {
   model: number // 模型标志
   modelId: number // 模型编号
   content: string // 聊天内容
+  reasoningContent?: string // 推理内容
   tokens: number // 消耗 Token 数量
   segmentIds?: number[] // 段落编号
   segments?: {
