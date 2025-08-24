@@ -108,7 +108,7 @@
 import { ProductApi } from '@/api/iot/product/product'
 import { DeviceApi } from '@/api/iot/device/device'
 import { ThingModelApi } from '@/api/iot/thingmodel'
-import { IotDeviceMessageMethodEnum, IotThingModelTypeEnum } from '@/views/iot/utils/constants'
+import { IotDeviceMessageMethodEnum, IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
 
 const formData = ref<any[]>([])
 const productList = ref<any[]>([]) // 产品列表
@@ -149,9 +149,9 @@ const getThingModelOptions = (row: any) => {
   const thingModels: any[] = thingModelCache.value.get(row.productId) || []
   let filteredModels: any[] = []
   if (row.method === IotDeviceMessageMethodEnum.EVENT_POST.method) {
-    filteredModels = thingModels.filter((item: any) => item.type === IotThingModelTypeEnum.EVENT)
+    filteredModels = thingModels.filter((item: any) => item.type === IoTThingModelTypeEnum.EVENT)
   } else if (row.method === IotDeviceMessageMethodEnum.PROPERTY_POST.method) {
-    filteredModels = thingModels.filter((item: any) => item.type === IotThingModelTypeEnum.PROPERTY)
+    filteredModels = thingModels.filter((item: any) => item.type === IoTThingModelTypeEnum.PROPERTY)
   }
   return filteredModels.map((item: any) => ({
     label: `${item.name} (${item.identifier})`,
