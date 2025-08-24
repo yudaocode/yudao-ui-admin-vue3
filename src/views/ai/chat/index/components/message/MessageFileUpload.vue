@@ -1,22 +1,27 @@
 <template>
   <div
-    class="message-file-upload"
-    @mouseenter="showTooltip = true"
-    @mouseleave="showTooltip = false"
+    class="relative inline-block"
+    @mouseenter="showTooltipHandler"
+    @mouseleave="hideTooltipHandler"
   >
     <!-- 文件上传按钮 -->
     <el-button
       v-if="!disabled"
       circle
       size="small"
-      class="upload-btn"
+      class="upload-btn relative transition-all-200ms"
       :class="{ 'has-files': fileList.length > 0 }"
       @click="triggerFileInput"
       :disabled="fileList.length >= limit"
     >
       <Icon icon="ep:paperclip" :size="16" />
       <!-- 文件数量徽章 -->
-      <span v-if="fileList.length > 0" class="file-badge">{{ fileList.length }}</span>
+      <span
+        v-if="fileList.length > 0"
+        class="absolute -top-1 -right-1 bg-red-500 text-white text-10px px-1 rounded-8px min-w-4 h-4 flex items-center justify-center leading-none font-medium"
+      >
+        {{ fileList.length }}
+      </span>
     </el-button>
 
     <!-- 隐藏的文件输入框 -->
@@ -33,29 +38,34 @@
     <div
       v-if="fileList.length > 0 && showTooltip"
       class="file-tooltip"
-      @mouseenter="showTooltip = true"
-      @mouseleave="showTooltip = false"
+      @mouseenter="showTooltipHandler"
+      @mouseleave="hideTooltipHandler"
     >
       <div class="tooltip-arrow"></div>
-      <div class="file-list">
+      <div class="max-h-200px overflow-y-auto file-list">
         <div
           v-for="(file, index) in fileList"
           :key="index"
-          class="file-item"
-          :class="{ uploading: file.uploading }"
+          class="flex items-center justify-between p-2 mb-1 bg-gray-50 rounded-6px text-12px transition-all-200ms last:mb-0 hover:bg-gray-100"
+          :class="{ 'opacity-70': file.uploading }"
         >
-          <div class="file-info">
-            <Icon :icon="getFileIcon(file.name)" class="file-icon" />
-            <span class="file-name">{{ file.name }}</span>
-            <span class="file-size">({{ formatFileSize(file.size) }})</span>
+          <div class="flex items-center flex-1 min-w-0">
+            <Icon :icon="getFileIcon(file.name)" class="text-blue-500 mr-2 flex-shrink-0" />
+            <span
+              class="font-medium text-gray-900 mr-1 overflow-hidden text-ellipsis whitespace-nowrap flex-1"
+              >{{ file.name }}</span
+            >
+            <span class="text-gray-500 flex-shrink-0 text-11px"
+              >({{ formatFileSize(file.size) }})</span
+            >
           </div>
-          <div class="file-actions">
+          <div class="flex items-center gap-1 flex-shrink-0 ml-2">
             <el-progress
               v-if="file.uploading"
               :percentage="file.progress || 0"
               :show-text="false"
               size="small"
-              class="progress-bar"
+              class="w-60px"
             />
             <el-button
               v-else-if="!disabled"
@@ -117,6 +127,7 @@ const fileInputRef = ref<HTMLInputElement>()
 const fileList = ref<FileItem[]>([]) // 内部管理文件列表
 const uploadedUrls = ref<string[]>([]) // 已上传的 URL 列表
 const showTooltip = ref(false) // 控制 tooltip 显示
+const hideTimer = ref<NodeJS.Timeout | null>(null) // 隐藏延迟定时器
 const message = useMessage()
 const { httpRequest } = useUpload()
 
@@ -136,6 +147,23 @@ watch(
 /** 触发文件选择 */
 const triggerFileInput = () => {
   fileInputRef.value?.click()
+}
+
+/** 显示 tooltip */
+const showTooltipHandler = () => {
+  if (hideTimer.value) {
+    clearTimeout(hideTimer.value)
+    hideTimer.value = null
+  }
+  showTooltip.value = true
+}
+
+/** 隐藏 tooltip */
+const hideTooltipHandler = () => {
+  hideTimer.value = setTimeout(() => {
+    showTooltip.value = false
+    hideTimer.value = null
+  }, 300) // 300ms 延迟隐藏
 }
 
 /** 处理文件选择 */
@@ -242,45 +270,28 @@ defineExpose({
     updateModelValue()
   }
 })
+
+// 组件销毁时清理定时器
+onUnmounted(() => {
+  if (hideTimer.value) {
+    clearTimeout(hideTimer.value)
+  }
+})
 </script>
 
 <style scoped>
-.message-file-upload {
-  position: relative;
-  display: inline-block;
-}
-
+/* 上传按钮样式 */
 .upload-btn {
   --el-button-bg-color: transparent;
   --el-button-border-color: transparent;
   --el-button-hover-bg-color: var(--el-fill-color-light);
   --el-button-hover-border-color: transparent;
   color: var(--el-text-color-regular);
-  position: relative;
-  transition: all 0.2s ease;
 }
 
 .upload-btn.has-files {
   color: var(--el-color-primary);
   --el-button-hover-bg-color: var(--el-color-primary-light-9);
-}
-
-.file-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: var(--el-color-danger);
-  color: white;
-  font-size: 10px;
-  padding: 1px 4px;
-  border-radius: 8px;
-  min-width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  font-weight: 500;
 }
 
 .file-tooltip {
@@ -311,6 +322,7 @@ defineExpose({
   border-top: 5px solid var(--el-border-color-light);
 }
 
+/* Tooltip 箭头伪元素 */
 .tooltip-arrow::after {
   content: '';
   position: absolute;
@@ -334,76 +346,34 @@ defineExpose({
   }
 }
 
-.file-list {
-  max-height: 200px;
-  overflow-y: auto;
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
-.file-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px;
-  margin-bottom: 4px;
-  background: var(--el-fill-color-extra-light);
-  border-radius: 6px;
-  font-size: 12px;
-  transition: all 0.2s;
+/* 滚动条样式 */
+.file-list::-webkit-scrollbar {
+  width: 4px;
 }
 
-.file-item:last-child {
-  margin-bottom: 0;
+.file-list::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.file-item:hover {
-  background: var(--el-fill-color-light);
+.file-list::-webkit-scrollbar-thumb {
+  background: var(--el-border-color-light);
+  border-radius: 2px;
 }
 
-.file-item.uploading {
-  opacity: 0.7;
+.file-list::-webkit-scrollbar-thumb:hover {
+  background: var(--el-border-color);
 }
-
-.file-info {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-}
-
-.file-icon {
-  color: var(--el-color-primary);
-  margin-right: 8px;
-  flex-shrink: 0;
-}
-
-.file-name {
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  margin-right: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-}
-
-.file-size {
-  color: var(--el-text-color-secondary);
-  flex-shrink: 0;
-  font-size: 11px;
-}
-
-.file-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-  margin-left: 8px;
-}
-
-.progress-bar {
-  width: 60px;
-}
-
 /* 滚动条样式 */
 .file-list::-webkit-scrollbar {
   width: 4px;
