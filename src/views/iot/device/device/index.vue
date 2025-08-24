@@ -212,7 +212,7 @@
                     <span
                       class="text-[#0b1d30] inline-block align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[130px]"
                     >
-                      {{ item.deviceName || '-' }}
+                      {{ item.nickname || item.deviceName }}
                     </span>
                   </div>
                 </div>
