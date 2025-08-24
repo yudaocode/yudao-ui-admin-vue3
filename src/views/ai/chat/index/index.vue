@@ -83,9 +83,11 @@
             @compositionstart="onCompositionstart"
             @compositionend="onCompositionend"
             placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
-          ></textarea>
+          >
+          </textarea>
           <div class="flex justify-between pb-0 pt-5px">
-            <div>
+            <div class="flex items-center">
+              <MessageFileUpload v-model="uploadFiles" :limit="5" :max-size="10" class="mr-10px" />
               <el-switch v-model="enableContext" />
               <span class="ml-5px text-14px text-#8f8f8f">上下文</span>
             </div>
@@ -128,6 +130,7 @@ import MessageList from './components/message/MessageList.vue'
 import MessageListEmpty from './components/message/MessageListEmpty.vue'
 import MessageLoading from './components/message/MessageLoading.vue'
 import MessageNewConversation from './components/message/MessageNewConversation.vue'
+import MessageFileUpload from './components/message/MessageFileUpload.vue'
 
 /** AI 聊天对话 列表 */
 defineOptions({ name: 'AiChat' })
@@ -156,6 +159,7 @@ const conversationInAbortController = ref<any>() // 对话进行中 abort 控制
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
 const enableContext = ref<boolean>(true) // 是否开启上下文
+const uploadFiles = ref<string[]>([]) // 上传的文件 URL 列表
 // 接收 Stream 消息
 const receiveMessageFullText = ref('')
 const receiveMessageDisplayedText = ref('')
@@ -197,6 +201,8 @@ const handleConversationClick = async (conversation: ChatConversationVO) => {
   scrollToBottom(true)
   // 清空输入框
   prompt.value = ''
+  // 清空文件列表
+  uploadFiles.value = []
   return true
 }
 
@@ -238,6 +244,8 @@ const handleConversationCreate = async () => {
 const handleConversationCreateSuccess = async () => {
   // 创建新的对话，清空输入框
   prompt.value = ''
+  // 清空文件列表
+  uploadFiles.value = []
 }
 
 // =========== 【消息列表】相关 ===========
@@ -404,12 +412,19 @@ const doSendMessage = async (content: string) => {
     message.error('还没创建对话，不能发送!')
     return
   }
-  // 清空输入框
+
+  // 准备附件 URL 数组
+  const attachmentUrls = [...uploadFiles.value]
+
+  // 清空输入框和文件列表
   prompt.value = ''
+  uploadFiles.value = []
+
   // 执行发送
   await doSendMessageStream({
     conversationId: activeConversationId.value,
-    content: content
+    content: content,
+    attachmentUrls: attachmentUrls
   } as ChatMessageVO)
 }
 
@@ -429,6 +444,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'user',
       content: userMessage.content,
+      attachmentUrls: userMessage.attachmentUrls || [],
       createTime: new Date()
     } as ChatMessageVO)
     activeMessageList.value.push({
@@ -497,7 +513,8 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       },
       () => {
         stopStream()
-      }
+      },
+      userMessage.attachmentUrls
     )
   } catch {}
 }

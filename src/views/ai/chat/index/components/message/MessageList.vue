@@ -54,7 +54,10 @@
             <el-text class="text-left leading-30px">{{ formatDate(item.createTime) }}</el-text>
           </div>
           <!-- 附件显示行 -->
-          <div v-if="item.attachmentUrls && item.attachmentUrls.length > 0" class="flex flex-row-reverse mb-8px">
+          <div
+            v-if="item.attachmentUrls && item.attachmentUrls.length > 0"
+            class="flex flex-row-reverse mb-8px"
+          >
             <MessageFiles :attachment-urls="item.attachmentUrls" />
           </div>
           <!-- 文本内容行 -->

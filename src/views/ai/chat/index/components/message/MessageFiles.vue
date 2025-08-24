@@ -23,22 +23,13 @@
 </template>
 
 <script setup lang="ts">
-import { getFileNameFromUrl, isImage } from '@/utils/file'
+import { getFileIcon, getFileNameFromUrl, isImage } from '@/utils/file'
 
 defineOptions({ name: 'MessageFiles' })
 
 defineProps<{
   attachmentUrls?: string[]
 }>()
-
-/** 获取文件图标 */
-const getFileIcon = (filename: string): string => {
-  const ext = filename.split('.').pop()?.toLowerCase() || ''
-  if (isImage(ext)) {
-    return 'ep:picture'
-  }
-  return 'ep:document'
-}
 
 /** 获取文件类型样式类 */
 const getFileTypeClass = (filename: string): string => {
