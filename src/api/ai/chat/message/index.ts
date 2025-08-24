@@ -14,6 +14,7 @@ export interface ChatMessageVO {
   modelId: number // 模型编号
   content: string // 聊天内容
   reasoningContent?: string // 推理内容
+  attachmentUrls?: string[] // 附件 URL 数组
   tokens: number // 消耗 Token 数量
   segmentIds?: number[] // 段落编号
   segments?: {
@@ -45,7 +46,8 @@ export const ChatMessageApi = {
     enableContext: boolean,
     onMessage,
     onError,
-    onClose
+    onClose,
+    attachmentUrls?: string[]
   ) => {
     const token = getAccessToken()
     return fetchEventSource(`${config.base_url}/ai/chat/message/send-stream`, {
@@ -58,7 +60,8 @@ export const ChatMessageApi = {
       body: JSON.stringify({
         conversationId,
         content,
-        useContext: enableContext
+        useContext: enableContext,
+        attachmentUrls: attachmentUrls || []
       }),
       onmessage: onMessage,
       onerror: onError,

@@ -22,6 +22,7 @@
               class="text-[var(--el-text-color-primary)] text-[0.95rem]"
               :content="item.content"
             />
+            <MessageFiles :attachment-urls="item.attachmentUrls" />
             <MessageKnowledge v-if="item.segments" :segments="item.segments" />
           </div>
           <div class="flex flex-row mt-8px">
@@ -52,8 +53,14 @@
           <div>
             <el-text class="text-left leading-30px">{{ formatDate(item.createTime) }}</el-text>
           </div>
+          <!-- 附件显示行 -->
+          <div v-if="item.attachmentUrls && item.attachmentUrls.length > 0" class="flex flex-row-reverse mb-8px">
+            <MessageFiles :attachment-urls="item.attachmentUrls" />
+          </div>
+          <!-- 文本内容行 -->
           <div class="flex flex-row-reverse">
             <div
+              v-if="item.content && item.content.trim()"
               class="text-[0.95rem] text-[var(--el-color-white)] inline bg-[var(--el-color-primary)] shadow-[0_0_0_1px_var(--el-color-primary)] rounded-10px p-10px w-auto break-words whitespace-pre-wrap"
             >
               {{ item.content }}
@@ -104,6 +111,7 @@ import { formatDate } from '@/utils/formatTime'
 import MarkdownView from '@/components/MarkdownView/index.vue'
 import MessageKnowledge from './MessageKnowledge.vue'
 import MessageReasoning from './MessageReasoning.vue'
+import MessageFiles from './MessageFiles.vue'
 import { useClipboard } from '@vueuse/core'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
 import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
