@@ -488,6 +488,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
           activeMessageList.value.pop()
           // 更新返回的数据
           activeMessageList.value.push(data.send)
+          data.send.attachmentUrls = userMessage.attachmentUrls
           activeMessageList.value.push(data.receive)
         }
 
