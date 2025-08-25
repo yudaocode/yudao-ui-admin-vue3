@@ -89,7 +89,9 @@
             <div class="flex items-center">
               <MessageFileUpload v-model="uploadFiles" :limit="5" :max-size="10" class="mr-10px" />
               <el-switch v-model="enableContext" />
-              <span class="ml-5px text-14px text-#8f8f8f">上下文</span>
+              <span class="ml-5px mr-15px text-14px text-#8f8f8f">上下文</span>
+              <el-switch v-model="enableWebSearch" />
+              <span class="ml-5px text-14px text-#8f8f8f">联网搜索</span>
             </div>
             <el-button
               type="primary"
@@ -159,6 +161,7 @@ const conversationInAbortController = ref<any>() // 对话进行中 abort 控制
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
 const enableContext = ref<boolean>(true) // 是否开启上下文
+const enableWebSearch = ref<boolean>(false) // 是否开启联网搜索
 const uploadFiles = ref<string[]>([]) // 上传的文件 URL 列表
 // 接收 Stream 消息
 const receiveMessageFullText = ref('')
@@ -468,6 +471,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       userMessage.content,
       conversationInAbortController.value,
       enableContext.value,
+      enableWebSearch.value,
       async (res) => {
         const { code, data, msg } = JSON.parse(res.data)
         if (code !== 0) {

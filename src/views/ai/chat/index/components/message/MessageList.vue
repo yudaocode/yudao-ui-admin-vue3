@@ -24,6 +24,7 @@
             />
             <MessageFiles :attachment-urls="item.attachmentUrls" />
             <MessageKnowledge v-if="item.segments" :segments="item.segments" />
+            <MessageWebSearch v-if="item.webSearchPages" :web-search-pages="item.webSearchPages" />
           </div>
           <div class="flex flex-row mt-8px">
             <el-button
@@ -115,6 +116,7 @@ import MarkdownView from '@/components/MarkdownView/index.vue'
 import MessageKnowledge from './MessageKnowledge.vue'
 import MessageReasoning from './MessageReasoning.vue'
 import MessageFiles from './MessageFiles.vue'
+import MessageWebSearch from './MessageWebSearch.vue'
 import { useClipboard } from '@vueuse/core'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
 import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'

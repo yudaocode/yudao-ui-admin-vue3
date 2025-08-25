@@ -23,6 +23,14 @@ export interface ChatMessageVO {
     documentId: number // 文档编号
     documentName: string // 文档名称
   }[]
+  webSearchPages?: {
+    name: string // 名称
+    icon: string // 图标
+    title: string // 标题
+    url: string // URL
+    snippet: string // 内容的简短描述
+    summary: string // 内容的文本摘要
+  }[]
   createTime: Date // 创建时间
   roleAvatar: string // 角色头像
   userAvatar: string // 用户头像
@@ -44,6 +52,7 @@ export const ChatMessageApi = {
     content: string,
     ctrl,
     enableContext: boolean,
+    enableWebSearch: boolean,
     onMessage,
     onError,
     onClose,
@@ -61,6 +70,7 @@ export const ChatMessageApi = {
         conversationId,
         content,
         useContext: enableContext,
+        webSearch: enableWebSearch,
         attachmentUrls: attachmentUrls || []
       }),
       onmessage: onMessage,
