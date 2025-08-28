@@ -476,6 +476,10 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
         const { code, data, msg } = JSON.parse(res.data)
         if (code !== 0) {
           message.alert(`对话异常! ${msg}`)
+          // 如果未接收到消息，则进行删除
+          if (receiveMessageFullText.value === '') {
+            activeMessageList.value.pop()
+          }
           return
         }
 
@@ -511,6 +515,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
         await scrollToBottom()
       },
       (error: any) => {
+        // 异常提示，并停止流
         message.alert(`对话异常! ${error}`)
         stopStream()
         // 需要抛出异常，禁止重试
