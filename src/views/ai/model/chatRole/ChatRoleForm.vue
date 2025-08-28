@@ -47,6 +47,16 @@
           <el-option v-for="item in toolList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
+      <el-form-item label="引用 MCP" prop="toolIds">
+        <el-select v-model="formData.mcpClientNames" placeholder="请选择 MCP" clearable multiple>
+          <el-option
+            v-for="dict in getStrDictOptions(DICT_TYPE.AI_MCP_CLIENT_NAME)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="是否公开" prop="publicStatus" v-if="!isUser">
         <el-radio-group v-model="formData.publicStatus">
           <el-radio
@@ -80,7 +90,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, getBoolDictOptions, DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
 import { CommonStatusEnum } from '@/utils/constants'
 import { ModelApi, ModelVO } from '@/api/ai/model/model'
@@ -111,7 +121,8 @@ const formData = ref({
   publicStatus: true,
   status: CommonStatusEnum.ENABLE,
   knowledgeIds: [] as number[],
-  toolIds: [] as number[]
+  toolIds: [] as number[],
+  mcpClientNames: [] as string[]
 })
 const formRef = ref() // 表单 Ref
 const models = ref([] as ModelVO[]) // 聊天模型列表
@@ -204,7 +215,8 @@ const resetForm = () => {
     publicStatus: true,
     status: CommonStatusEnum.ENABLE,
     knowledgeIds: [],
-    toolIds: []
+    toolIds: [],
+    mcpClientNames: []
   }
   formRef.value?.resetFields()
 }
