@@ -76,8 +76,11 @@ onBeforeUnmount(() => {
 <template>
   <el-dialog v-model="dialogVisible" title="自定义模板" fullscreen>
     <div style="margin: 0 10px;">
-      <el-alert title="输入 @ 可选择插入流程表单选项和默认选项" type="info" show-icon
-                :closable="false"/>
+      <el-alert
+        title="输入 @ 可选择插入流程表单选项和默认选项"
+        type="info"
+        show-icon
+        :closable="false"/>
     </div>
     <div style="border: 1px solid #ccc;margin: 10px;">
       <Toolbar
@@ -91,11 +94,12 @@ onBeforeUnmount(() => {
         v-model="valueHtml"
         :defaultConfig="editorConfig"
         :editorId="editorId"
-        @onCreated="handleCreated"
+        @on-created="handleCreated"
       />
-      <MentionModal v-if="isShowModal"
-                    @hideMentionModal="hideModal"
-                    @insertMention="insertMention"/>
+      <MentionModal
+        v-if="isShowModal"
+        @hide-mention-modal="hideModal"
+        @insert-mention="insertMention"/>
     </div>
     <div style="margin-right: 10px;float: right;">
       <el-button @click="dialogVisible = false">取 消</el-button>

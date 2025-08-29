@@ -14,7 +14,7 @@ const list = ref([
   {id: 'endTime', name: '发起时间'},
   {id: 'processStatus', name: '流程状态'},
   {id: 'processResult', name: '流程结果'},
-  {id: 'printUsername', name: '打印人'},
+  {id: 'printUser', name: '打印人'},
   {id: 'printTime', name: '打印时间'},
 ])
 const searchedList = computed(() => {
@@ -41,7 +41,17 @@ const insertMentionHandler = (id, name) => {
   emit('hideMentionModal')
 }
 
+const formFields = inject('formFieldsObj')
 onMounted(()=> {
+  if (formFields.value && formFields.value.length > 0) {
+    const cloneFormField = formFields.value.map((item) => {
+      return {
+        name: '[表单]'+item.title,
+        id: item.field
+      }
+    })
+    list.value.push(...cloneFormField)
+  }
   const domSelection = document.getSelection()
   const domRange = domSelection?.getRangeAt(0)
   if (domRange == null) return
