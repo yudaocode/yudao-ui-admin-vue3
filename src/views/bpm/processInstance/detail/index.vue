@@ -8,7 +8,10 @@
           :src="auditIconsMap[processInstance.status]"
           alt=""
         />
-        <div class="text-#878c93 h-15px">编号：{{ id }}</div>
+        <div class="flex">
+          <div class="text-#878c93 h-15px">编号：{{ id }}</div>
+          <Icon icon="ep:printer" class="ml-15px cursor-pointer" @click="handlePrint"/>
+        </div>
         <el-divider class="!my-8px" />
         <div class="flex items-center gap-5 mb-10px h-40px">
           <div class="text-26px font-bold mb-5px">{{ processInstance.name }}</div>
@@ -293,6 +296,10 @@ const setFieldPermission = (field: string, permission: string) => {
 const refresh = () => {
   // 重新获取详情
   getDetail()
+}
+
+const handlePrint = () => {
+  // TODO 打印
 }
 
 /** 当前的Tab */
