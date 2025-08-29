@@ -34,6 +34,7 @@ const dialogVisible = ref(false)
 const open = async (template) => {
   dialogVisible.value = true
   valueHtml.value = template
+  console.log(template)
 }
 defineExpose({open})
 const handleConfirm = () => {
@@ -108,4 +109,4 @@ onBeforeUnmount(() => {
   </el-dialog>
 </template>
 
-<style src="../../../../../../node_modules/@wangeditor/editor/dist/css/style.css"></style>
+<style src="@wangeditor/editor/dist/css/style.css"></style>
