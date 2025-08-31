@@ -40,6 +40,9 @@ const valueHtml = ref('')
 watch(
   () => props.modelValue,
   (val: string) => {
+    if (!val) {
+      val = ''
+    }
     if (val === unref(valueHtml)) return
     valueHtml.value = val
   },
