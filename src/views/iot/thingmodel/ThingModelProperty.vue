@@ -8,7 +8,7 @@
     <el-select v-model="property.dataType" placeholder="请选择数据类型" @change="handleChange">
       <!-- ARRAY 和 STRUCT 类型数据相互嵌套时，最多支持递归嵌套 2 层（父和子） -->
       <el-option
-        v-for="option in getDataTypeOptions"
+        v-for="option in getDataTypeOptions2"
         :key="option.value"
         :label="`${option.value}(${option.label})`"
         :value="option.value"
@@ -18,19 +18,21 @@
   <!-- 数值型配置 -->
   <ThingModelNumberDataSpecs
     v-if="
-      [DataSpecsDataType.INT, DataSpecsDataType.DOUBLE, DataSpecsDataType.FLOAT].includes(
-        property.dataType || ''
-      )
+      [
+        IoTDataSpecsDataTypeEnum.INT,
+        IoTDataSpecsDataTypeEnum.DOUBLE,
+        IoTDataSpecsDataTypeEnum.FLOAT
+      ].includes(property.dataType || '')
     "
     v-model="property.dataSpecs"
   />
   <!-- 枚举型配置 -->
   <ThingModelEnumDataSpecs
-    v-if="property.dataType === DataSpecsDataType.ENUM"
+    v-if="property.dataType === IoTDataSpecsDataTypeEnum.ENUM"
     v-model="property.dataSpecsList"
   />
   <!-- 布尔型配置 -->
-  <el-form-item v-if="property.dataType === DataSpecsDataType.BOOL" label="布尔值">
+  <el-form-item v-if="property.dataType === IoTDataSpecsDataTypeEnum.BOOL" label="布尔值">
     <template v-for="(item, index) in property.dataSpecsList" :key="item.value">
       <div class="flex items-center justify-start w-1/1 mb-5px">
         <span>{{ item.value }}</span>
@@ -54,7 +56,7 @@
   </el-form-item>
   <!-- 文本型配置 -->
   <el-form-item
-    v-if="property.dataType === DataSpecsDataType.TEXT"
+    v-if="property.dataType === IoTDataSpecsDataTypeEnum.TEXT"
     label="数据长度"
     prop="property.dataSpecs.length"
   >
@@ -63,26 +65,31 @@
     </el-input>
   </el-form-item>
   <!-- 时间型配置 -->
-  <el-form-item v-if="property.dataType === DataSpecsDataType.DATE" label="时间格式" prop="date">
+  <el-form-item
+    v-if="property.dataType === IoTDataSpecsDataTypeEnum.DATE"
+    label="时间格式"
+    prop="date"
+  >
     <el-input class="w-255px!" disabled placeholder="String 类型的 UTC 时间戳（毫秒）" />
   </el-form-item>
   <!-- 数组型配置-->
   <ThingModelArrayDataSpecs
-    v-if="property.dataType === DataSpecsDataType.ARRAY"
+    v-if="property.dataType === IoTDataSpecsDataTypeEnum.ARRAY"
     v-model="property.dataSpecs"
   />
   <!-- Struct 型配置-->
   <ThingModelStructDataSpecs
-    v-if="property.dataType === DataSpecsDataType.STRUCT"
+    v-if="property.dataType === IoTDataSpecsDataTypeEnum.STRUCT"
     v-model="property.dataSpecsList"
   />
   <el-form-item v-if="!isStructDataSpecs && !isParams" label="读写类型" prop="property.accessMode">
     <el-radio-group v-model="property.accessMode">
-      <el-radio :label="ThingModelAccessMode.READ_WRITE.value">
-        {{ ThingModelAccessMode.READ_WRITE.label }}
-      </el-radio>
-      <el-radio :label="ThingModelAccessMode.READ_ONLY.value">
-        {{ ThingModelAccessMode.READ_ONLY.label }}
+      <el-radio
+        v-for="accessMode in Object.values(IoTThingModelAccessModeEnum)"
+        :key="accessMode.value"
+        :label="accessMode.value"
+      >
+        {{ accessMode.label }}
       </el-radio>
     </el-radio-group>
   </el-form-item>
@@ -91,19 +98,18 @@
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
 import {
-  DataSpecsDataType,
-  dataTypeOptions,
-  ThingModelAccessMode,
-  validateBoolName
-} from './config'
-import {
   ThingModelArrayDataSpecs,
   ThingModelEnumDataSpecs,
   ThingModelNumberDataSpecs,
   ThingModelStructDataSpecs
 } from './dataSpecs'
-import { ThingModelProperty } from '@/api/iot/thingmodel'
+import { ThingModelProperty, validateBoolName } from '@/api/iot/thingmodel'
 import { isEmpty } from '@/utils/is'
+import {
+  getDataTypeOptions,
+  IoTDataSpecsDataTypeEnum,
+  IoTThingModelAccessModeEnum
+} from '@/views/iot/utils/constants'
 
 /** IoT 物模型属性 */
 defineOptions({ name: 'ThingModelProperty' })
@@ -111,13 +117,12 @@ defineOptions({ name: 'ThingModelProperty' })
 const props = defineProps<{ modelValue: any; isStructDataSpecs?: boolean; isParams?: boolean }>()
 const emits = defineEmits(['update:modelValue'])
 const property = useVModel(props, 'modelValue', emits) as Ref<ThingModelProperty>
-const getDataTypeOptions = computed(() => {
-  return !props.isStructDataSpecs
-    ? dataTypeOptions
-    : dataTypeOptions.filter(
-        (item) =>
-          !([DataSpecsDataType.STRUCT, DataSpecsDataType.ARRAY] as any[]).includes(item.value)
-      )
+const getDataTypeOptions2 = computed(() => {
+  if (!props.isStructDataSpecs) {
+    return getDataTypeOptions()
+  }
+  const excludedTypes = [IoTDataSpecsDataTypeEnum.STRUCT, IoTDataSpecsDataTypeEnum.ARRAY]
+  return getDataTypeOptions().filter((item: any) => !excludedTypes.includes(item.value))
 }) // 获得数据类型列表
 
 /** 属性值的数据类型切换时初始化相关数据 */
@@ -125,20 +130,23 @@ const handleChange = (dataType: any) => {
   property.value.dataSpecs = {}
   property.value.dataSpecsList = []
   // 不是列表型数据才设置 dataSpecs.dataType
-  ![DataSpecsDataType.ENUM, DataSpecsDataType.BOOL, DataSpecsDataType.STRUCT].includes(dataType) &&
-    (property.value.dataSpecs.dataType = dataType)
+  ![
+    IoTDataSpecsDataTypeEnum.ENUM,
+    IoTDataSpecsDataTypeEnum.BOOL,
+    IoTDataSpecsDataTypeEnum.STRUCT
+  ].includes(dataType) && (property.value.dataSpecs.dataType = dataType)
   switch (dataType) {
-    case DataSpecsDataType.ENUM:
+    case IoTDataSpecsDataTypeEnum.ENUM:
       property.value.dataSpecsList.push({
-        dataType: DataSpecsDataType.ENUM,
+        dataType: IoTDataSpecsDataTypeEnum.ENUM,
         name: '', // 枚举项的名称
         value: undefined // 枚举值
       })
       break
-    case DataSpecsDataType.BOOL:
+    case IoTDataSpecsDataTypeEnum.BOOL:
       for (let i = 0; i < 2; i++) {
         property.value.dataSpecsList.push({
-          dataType: DataSpecsDataType.BOOL,
+          dataType: IoTDataSpecsDataTypeEnum.BOOL,
           name: '', // 布尔值的名称
           value: i // 布尔值
         })
@@ -147,14 +155,14 @@ const handleChange = (dataType: any) => {
   }
 }
 
-// 默认选中读写
+/** 默认选中读写 */
 watch(
   () => property.value.accessMode,
   (val: string) => {
     if (props.isStructDataSpecs || props.isParams) {
       return
     }
-    isEmpty(val) && (property.value.accessMode = ThingModelAccessMode.READ_WRITE.value)
+    isEmpty(val) && (property.value.accessMode = IoTThingModelAccessModeEnum.READ_WRITE.value)
   },
   { immediate: true }
 )

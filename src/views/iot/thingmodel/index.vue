@@ -15,6 +15,7 @@
           class="!w-240px"
           clearable
           placeholder="请选择功能类型"
+          @change="handleQuery"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.IOT_THING_MODEL_TYPE)"
@@ -25,14 +26,6 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon class="mr-5px" icon="ep:search" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          重置
-        </el-button>
         <el-button
           v-hasPermi="[`iot:thing-model:create`]"
           plain
@@ -41,6 +34,9 @@
         >
           <Icon class="mr-5px" icon="ep:plus" />
           添加功能
+        </el-button>
+        <el-button v-hasPermi="[`iot:thing-model:query`]" plain type="success" @click="openTSL">
+          TSL
         </el-button>
       </el-form-item>
     </el-form>
@@ -59,7 +55,7 @@
         <el-table-column align="center" label="标识符" prop="identifier" />
         <el-table-column align="center" label="数据类型" prop="identifier">
           <template #default="{ row }">
-            {{ dataTypeOptionsLabel(row.property?.dataType) ?? '-' }}
+            {{ getDataTypeOptionsLabel(row.property?.dataType) ?? '-' }}
           </template>
         </el-table-column>
         <el-table-column align="left" label="数据定义" prop="identifier">
@@ -97,16 +93,18 @@
       />
     </el-tabs>
   </ContentWrap>
+
   <!-- 表单弹窗：添加/修改 -->
   <ThingModelForm ref="formRef" @success="getList" />
+  <ThingModelTSL ref="tslRef" />
 </template>
 <script lang="ts" setup>
 import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ThingModelForm from './ThingModelForm.vue'
+import ThingModelTSL from './ThingModelTSL.vue'
 import { ProductVO } from '@/api/iot/product/product'
-import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
-import { getDataTypeOptionsLabel } from './config'
+import { getDataTypeOptionsLabel, IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { DataDefinition } from './components'
 
 defineOptions({ name: 'IoTThingModel' })
@@ -126,7 +124,6 @@ const queryParams = reactive({
 
 const queryFormRef = ref() // 搜索的表单
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
-const dataTypeOptionsLabel = computed(() => (value: string) => getDataTypeOptionsLabel(value)) // 解析数据类型
 
 /** 查询列表 */
 const getList = async () => {
@@ -147,17 +144,16 @@ const handleQuery = () => {
   getList()
 }
 
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  queryParams.type = undefined
-  handleQuery()
-}
-
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 展示物模型 TSL */
+const tslRef = ref()
+const openTSL = () => {
+  tslRef.value?.open()
 }
 
 /** 删除按钮操作 */

@@ -15,7 +15,7 @@
   <el-button link type="primary" @click="openParamForm(null)">+新增参数</el-button>
 
   <!-- param 表单 -->
-  <Dialog v-model="dialogVisible" :title="dialogTitle" append-to-body>
+  <Dialog v-model="dialogVisible" title="新增参数" append-to-body>
     <el-form
       ref="paramFormRef"
       v-loading="formLoading"
@@ -32,7 +32,6 @@
       <!-- 属性配置 -->
       <ThingModelProperty v-model="formData.property" is-params />
     </el-form>
-
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -43,8 +42,9 @@
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
 import ThingModelProperty from './ThingModelProperty.vue'
-import { DataSpecsDataType, ThingModelFormRules } from './config'
 import { isEmpty } from '@/utils/is'
+import { IoTDataSpecsDataTypeEnum } from '@/views/iot/utils/constants'
+import { ThingModelFormRules } from '@/api/iot/thingmodel'
 
 /** 输入输出参数配置组件 */
 defineOptions({ name: 'ThingModelInputOutputParam' })
@@ -53,15 +53,14 @@ const props = defineProps<{ modelValue: any; direction: string }>()
 const emits = defineEmits(['update:modelValue'])
 const thingModelParams = useVModel(props, 'modelValue', emits) as Ref<any[]>
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('新增参数') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const paramFormRef = ref() // 表单 ref
 const formData = ref<any>({
-  dataType: DataSpecsDataType.INT,
+  dataType: IoTDataSpecsDataTypeEnum.INT,
   property: {
-    dataType: DataSpecsDataType.INT,
+    dataType: IoTDataSpecsDataTypeEnum.INT,
     dataSpecs: {
-      dataType: DataSpecsDataType.INT
+      dataType: IoTDataSpecsDataTypeEnum.INT
     }
   }
 })
@@ -100,8 +99,8 @@ const submitForm = async () => {
   // 校验参数
   await paramFormRef.value.validate()
   try {
-    const data = unref(formData)
     // 构建数据对象
+    const data = unref(formData)
     const item = {
       identifier: data.identifier,
       name: data.name,
@@ -116,19 +115,16 @@ const submitForm = async () => {
       dataSpecsList: isEmpty(data.property.dataSpecsList) ? undefined : data.property.dataSpecsList
     }
 
-    // 查找是否已有相同 identifier 的项
+    // 新增或修改同 identifier 的参数
     const existingIndex = thingModelParams.value.findIndex(
       (spec) => spec.identifier === data.identifier
     )
     if (existingIndex > -1) {
-      // 更新已有项
       thingModelParams.value[existingIndex] = item
     } else {
-      // 添加新项
       thingModelParams.value.push(item)
     }
   } finally {
-    // 隐藏对话框
     dialogVisible.value = false
   }
 }
@@ -136,11 +132,11 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    dataType: DataSpecsDataType.INT,
+    dataType: IoTDataSpecsDataTypeEnum.INT,
     property: {
-      dataType: DataSpecsDataType.INT,
+      dataType: IoTDataSpecsDataTypeEnum.INT,
       dataSpecs: {
-        dataType: DataSpecsDataType.INT
+        dataType: IoTDataSpecsDataTypeEnum.INT
       }
     }
   }

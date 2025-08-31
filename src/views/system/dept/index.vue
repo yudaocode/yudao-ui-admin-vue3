@@ -145,7 +145,7 @@ const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 const getList = async () => {
   loading.value = true
   try {
-    const data = await DeptApi.getDeptPage(queryParams)
+    const data = await DeptApi.getDeptList(queryParams)
     list.value = handleTree(data)
   } finally {
     loading.value = false

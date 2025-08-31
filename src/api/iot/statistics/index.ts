@@ -16,25 +16,44 @@ export interface IotStatisticsSummaryRespVO {
   productCategoryDeviceCounts: Record<string, number>
 }
 
+/** 时间戳-数值的键值对类型 */
+interface TimeValueItem {
+  [key: string]: number
+}
+
 /** IoT 消息统计数据类型 */
 export interface IotStatisticsDeviceMessageSummaryRespVO {
-  upstreamCounts: Record<number, number>
-  downstreamCounts: Record<number, number>
+  statType: number
+  upstreamCounts: TimeValueItem[]
+  downstreamCounts: TimeValueItem[]
+}
+
+/** 新的消息统计数据项 */
+export interface IotStatisticsDeviceMessageSummaryByDateRespVO {
+  time: string
+  upstreamCount: number
+  downstreamCount: number
+}
+
+/** 新的消息统计接口参数 */
+export interface IotStatisticsDeviceMessageReqVO {
+  interval: number
+  times?: string[]
 }
 
 // IoT 数据统计 API
-export const ProductCategoryApi = {
-  // 查询基础的数据统计
-  getIotStatisticsSummary: async () => {
+export const StatisticsApi = {
+  // 查询全局的数据统计
+  getStatisticsSummary: async () => {
     return await request.get<IotStatisticsSummaryRespVO>({
       url: `/iot/statistics/get-summary`
     })
   },
 
-  // 查询设备上下行消息的数据统计
-  getIotStatisticsDeviceMessageSummary: async (params: { startTime: number; endTime: number }) => {
-    return await request.get<IotStatisticsDeviceMessageSummaryRespVO>({
-      url: `/iot/statistics/get-log-summary`,
+  // 获取设备消息的数据统计
+  getDeviceMessageSummaryByDate: async (params: IotStatisticsDeviceMessageReqVO) => {
+    return await request.get<IotStatisticsDeviceMessageSummaryByDateRespVO[]>({
+      url: `/iot/statistics/get-device-message-summary-by-date`,
       params
     })
   }

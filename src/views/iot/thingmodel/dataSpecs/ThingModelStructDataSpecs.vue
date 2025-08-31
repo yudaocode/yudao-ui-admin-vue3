@@ -38,7 +38,6 @@
       <!-- 属性配置 -->
       <ThingModelProperty v-model="formData.property" is-struct-data-specs />
     </el-form>
-
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -49,8 +48,9 @@
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
 import ThingModelProperty from '../ThingModelProperty.vue'
-import { DataSpecsDataType, ThingModelFormRules } from '../config'
 import { isEmpty } from '@/utils/is'
+import { IoTDataSpecsDataTypeEnum } from '@/views/iot/utils/constants'
+import { ThingModelFormRules } from '@/api/iot/thingmodel'
 
 /** Struct 型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelStructDataSpecs' })
@@ -64,9 +64,9 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const structFormRef = ref() // 表单 ref
 const formData = ref<any>({
   property: {
-    dataType: DataSpecsDataType.INT,
+    dataType: IoTDataSpecsDataTypeEnum.INT,
     dataSpecs: {
-      dataType: DataSpecsDataType.INT
+      dataType: IoTDataSpecsDataTypeEnum.INT
     }
   }
 })
@@ -107,7 +107,7 @@ const submitForm = async () => {
       identifier: data.identifier,
       name: data.name,
       description: data.description,
-      dataType: DataSpecsDataType.STRUCT,
+      dataType: IoTDataSpecsDataTypeEnum.STRUCT,
       childDataType: data.property.dataType,
       dataSpecs:
         !!data.property.dataSpecs && Object.keys(data.property.dataSpecs).length > 1
@@ -116,19 +116,16 @@ const submitForm = async () => {
       dataSpecsList: isEmpty(data.property.dataSpecsList) ? undefined : data.property.dataSpecsList
     }
 
-    // 查找是否已有相同 identifier 的项
+    // 新增或修改同 identifier 的参数
     const existingIndex = dataSpecsList.value.findIndex(
       (spec) => spec.identifier === data.identifier
     )
     if (existingIndex > -1) {
-      // 更新已有项
       dataSpecsList.value[existingIndex] = item
     } else {
-      // 添加新项
       dataSpecsList.value.push(item)
     }
   } finally {
-    // 隐藏对话框
     dialogVisible.value = false
   }
 }
@@ -137,9 +134,9 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     property: {
-      dataType: DataSpecsDataType.INT,
+      dataType: IoTDataSpecsDataTypeEnum.INT,
       dataSpecs: {
-        dataType: DataSpecsDataType.INT
+        dataType: IoTDataSpecsDataTypeEnum.INT
       }
     }
   }

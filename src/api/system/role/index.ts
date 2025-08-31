@@ -12,11 +12,6 @@ export interface RoleVO {
   createTime: Date
 }
 
-export interface UpdateStatusReqVO {
-  id: number
-  status: number
-}
-
 // 查询角色列表
 export const getRolePage = async (params: PageParam) => {
   return await request.get({ url: '/system/role/page', params })
@@ -42,11 +37,6 @@ export const updateRole = async (data: RoleVO) => {
   return await request.put({ url: '/system/role/update', data })
 }
 
-// 修改角色状态
-export const updateRoleStatus = async (data: UpdateStatusReqVO) => {
-  return await request.put({ url: '/system/role/update-status', data })
-}
-
 // 删除角色
 export const deleteRole = async (id: number) => {
   return await request.delete({ url: '/system/role/delete?id=' + id })
@@ -58,7 +48,7 @@ export const deleteRoleList = async (ids: number[]) => {
 }
 
 // 导出角色
-export const exportRole = (params) => {
+export const exportRole = (params: any) => {
   return request.download({
     url: '/system/role/export-excel',
     params

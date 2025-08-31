@@ -44,21 +44,22 @@
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import { DataSpecsDataType, DataSpecsEnumOrBoolDataVO } from '../config'
 import { isEmpty } from '@/utils/is'
+import { IoTDataSpecsDataTypeEnum } from '@/views/iot/utils/constants'
+import { DataSpecsEnumOrBoolData } from '@/api/iot/thingmodel'
 
 /** 枚举型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelEnumDataSpecs' })
 
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
-const dataSpecsList = useVModel(props, 'modelValue', emits) as Ref<DataSpecsEnumOrBoolDataVO[]>
+const dataSpecsList = useVModel(props, 'modelValue', emits) as Ref<DataSpecsEnumOrBoolData[]>
 const message = useMessage()
 
 /** 添加枚举项 */
 const addEnum = () => {
   dataSpecsList.value.push({
-    dataType: DataSpecsDataType.ENUM,
+    dataType: IoTDataSpecsDataTypeEnum.ENUM,
     name: '', // 枚举项的名称
     value: undefined // 枚举值
   })

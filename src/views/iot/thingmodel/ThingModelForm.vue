@@ -27,16 +27,19 @@
       </el-form-item>
       <!-- 属性配置 -->
       <ThingModelProperty
-        v-if="formData.type === ThingModelType.PROPERTY"
+        v-if="formData.type === IoTThingModelTypeEnum.PROPERTY"
         v-model="formData.property"
       />
       <!-- 服务配置 -->
       <ThingModelService
-        v-if="formData.type === ThingModelType.SERVICE"
+        v-if="formData.type === IoTThingModelTypeEnum.SERVICE"
         v-model="formData.service"
       />
       <!-- 事件配置 -->
-      <ThingModelEvent v-if="formData.type === ThingModelType.EVENT" v-model="formData.event" />
+      <ThingModelEvent
+        v-if="formData.type === IoTThingModelTypeEnum.EVENT"
+        v-model="formData.event"
+      />
       <el-form-item label="描述" prop="description">
         <el-input
           v-model="formData.description"
@@ -60,9 +63,12 @@ import { ProductVO } from '@/api/iot/product/product'
 import ThingModelProperty from './ThingModelProperty.vue'
 import ThingModelService from './ThingModelService.vue'
 import ThingModelEvent from './ThingModelEvent.vue'
-import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
-import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
-import { DataSpecsDataType, ThingModelFormRules, ThingModelType } from './config'
+import { ThingModelApi, ThingModelData, ThingModelFormRules } from '@/api/iot/thingmodel'
+import {
+  IOT_PROVIDE_KEY,
+  IoTDataSpecsDataTypeEnum,
+  IoTThingModelTypeEnum
+} from '@/views/iot/utils/constants'
 import { cloneDeep } from 'lodash-es'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
@@ -80,12 +86,12 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<ThingModelData>({
-  type: ThingModelType.PROPERTY,
-  dataType: DataSpecsDataType.INT,
+  type: IoTThingModelTypeEnum.PROPERTY,
+  dataType: IoTDataSpecsDataTypeEnum.INT,
   property: {
-    dataType: DataSpecsDataType.INT,
+    dataType: IoTDataSpecsDataTypeEnum.INT,
     dataSpecs: {
-      dataType: DataSpecsDataType.INT
+      dataType: IoTDataSpecsDataTypeEnum.INT
     }
   },
   service: {},
@@ -106,11 +112,11 @@ const open = async (type: string, id?: number) => {
       formData.value = await ThingModelApi.getThingModel(id)
       // 情况一：属性初始化
       if (isEmpty(formData.value.property)) {
-        formData.value.dataType = DataSpecsDataType.INT
+        formData.value.dataType = IoTDataSpecsDataTypeEnum.INT
         formData.value.property = {
-          dataType: DataSpecsDataType.INT,
+          dataType: IoTDataSpecsDataTypeEnum.INT,
           dataSpecs: {
-            dataType: DataSpecsDataType.INT
+            dataType: IoTDataSpecsDataTypeEnum.INT
           }
         }
       }
@@ -147,18 +153,18 @@ const submitForm = async () => {
       await ThingModelApi.updateThingModel(data)
       message.success(t('common.updateSuccess'))
     }
-  } finally {
-    dialogVisible.value = false // 确保关闭弹框
+    // 关闭弹窗
+    dialogVisible.value = false
     emit('success')
+  } finally {
     formLoading.value = false
   }
 }
 
-/** 填写额外的属性 */
+/** 填写额外的属性（处理不同类型的情况） */
 const fillExtraAttributes = (data: any) => {
-  // 处理不同类型的情况
   // 属性
-  if (data.type === ThingModelType.PROPERTY) {
+  if (data.type === IoTThingModelTypeEnum.PROPERTY) {
     removeDataSpecs(data.property)
     data.dataType = data.property.dataType
     data.property.identifier = data.identifier
@@ -167,7 +173,7 @@ const fillExtraAttributes = (data: any) => {
     delete data.event
   }
   // 服务
-  if (data.type === ThingModelType.SERVICE) {
+  if (data.type === IoTThingModelTypeEnum.SERVICE) {
     removeDataSpecs(data.service)
     data.dataType = data.service.dataType
     data.service.identifier = data.identifier
@@ -176,7 +182,7 @@ const fillExtraAttributes = (data: any) => {
     delete data.event
   }
   // 事件
-  if (data.type === ThingModelType.EVENT) {
+  if (data.type === IoTThingModelTypeEnum.EVENT) {
     removeDataSpecs(data.event)
     data.dataType = data.event.dataType
     data.event.identifier = data.identifier
@@ -185,6 +191,7 @@ const fillExtraAttributes = (data: any) => {
     delete data.service
   }
 }
+
 /** 处理 dataSpecs 为空的情况 */
 const removeDataSpecs = (val: any) => {
   if (isEmpty(val.dataSpecs)) {
@@ -198,12 +205,12 @@ const removeDataSpecs = (val: any) => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    type: ThingModelType.PROPERTY,
-    dataType: DataSpecsDataType.INT,
+    type: IoTThingModelTypeEnum.PROPERTY,
+    dataType: IoTDataSpecsDataTypeEnum.INT,
     property: {
-      dataType: DataSpecsDataType.INT,
+      dataType: IoTDataSpecsDataTypeEnum.INT,
       dataSpecs: {
-        dataType: DataSpecsDataType.INT
+        dataType: IoTDataSpecsDataTypeEnum.INT
       }
     },
     service: {},

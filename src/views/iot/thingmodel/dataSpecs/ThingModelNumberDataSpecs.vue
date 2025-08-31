@@ -59,15 +59,15 @@
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import { DataSpecsNumberDataVO } from '../config'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { DataSpecsNumberData } from '@/api/iot/thingmodel'
 
 /** 数值型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelNumberDataSpecs' })
 
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
-const dataSpecs = useVModel(props, 'modelValue', emits) as Ref<DataSpecsNumberDataVO>
+const dataSpecs = useVModel(props, 'modelValue', emits) as Ref<DataSpecsNumberData>
 
 /** 单位发生变化时触发 */
 const unitChange = (UnitSpecs: string) => {

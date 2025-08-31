@@ -199,20 +199,20 @@
                 <div class="flex-1">
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">所属产品</span>
-                    <span class="text-[#0070ff]">
+                    <el-link class="text-[#0070ff]" @click="openProductDetail(item.productId)">
                       {{ products.find((p) => p.id === item.productId)?.name }}
-                    </span>
+                    </el-link>
                   </div>
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">设备类型</span>
                     <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="item.deviceType" />
                   </div>
                   <div class="mb-2.5 last:mb-0">
-                    <span class="text-[#717c8e] mr-2.5">DeviceKey</span>
+                    <span class="text-[#717c8e] mr-2.5">备注名称</span>
                     <span
                       class="text-[#0b1d30] inline-block align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[130px]"
                     >
-                      {{ item.deviceKey }}
+                      {{ item.nickname || item.deviceName }}
                     </span>
                   </div>
                 </div>
@@ -289,7 +289,9 @@
       <el-table-column label="备注名称" align="center" prop="nickname" />
       <el-table-column label="所属产品" align="center" prop="productId">
         <template #default="scope">
-          {{ products.find((p) => p.id === scope.row.productId)?.name || '-' }}
+          <el-link @click="openProductDetail(scope.row.productId)">
+            {{ products.find((p) => p.id === scope.row.productId)?.name || '-' }}
+          </el-link>
         </template>
       </el-table-column>
       <el-table-column label="设备类型" align="center" prop="deviceType">
@@ -440,6 +442,11 @@ const openForm = (type: string, id?: number) => {
 const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'IoTDeviceDetail', params: { id } })
+}
+
+/** 跳转到产品详情页面 */
+const openProductDetail = (productId: number) => {
+  push({ name: 'IoTProductDetail', params: { id: productId } })
 }
 
 /** 删除按钮操作 */

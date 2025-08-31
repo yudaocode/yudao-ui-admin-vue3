@@ -5,14 +5,9 @@
       <el-tab-pane label="产品信息" name="info">
         <ProductDetailsInfo v-if="activeTab === 'info'" :product="product" />
       </el-tab-pane>
-      <el-tab-pane label="Topic 类列表" name="topic">
-        <ProductTopic v-if="activeTab === 'topic'" :product="product" />
-      </el-tab-pane>
-      <el-tab-pane label="功能定义" lazy name="thingModel">
+      <el-tab-pane label="物模型（功能定义）" lazy name="thingModel">
         <IoTProductThingModel ref="thingModelRef" />
       </el-tab-pane>
-      <el-tab-pane label="消息解析" name="message" />
-      <el-tab-pane label="服务端订阅" name="subscription" />
     </el-tabs>
   </el-col>
 </template>
@@ -21,7 +16,6 @@ import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceApi } from '@/api/iot/device/device'
 import ProductDetailsHeader from './ProductDetailsHeader.vue'
 import ProductDetailsInfo from './ProductDetailsInfo.vue'
-import ProductTopic from './ProductTopic.vue'
 import IoTProductThingModel from '@/views/iot/thingmodel/index.vue'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useRouter } from 'vue-router'

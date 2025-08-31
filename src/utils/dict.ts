@@ -231,19 +231,21 @@ export enum DICT_TYPE {
 
   // ========== IOT - 物联网模块  ==========
   IOT_NET_TYPE = 'iot_net_type', // IOT 联网方式
-  IOT_VALIDATE_TYPE = 'iot_validate_type', // IOT 数据校验级别
   IOT_PRODUCT_STATUS = 'iot_product_status', // IOT 产品状态
   IOT_PRODUCT_DEVICE_TYPE = 'iot_product_device_type', // IOT 产品设备类型
-  IOT_DATA_FORMAT = 'iot_data_format', // IOT 数据格式
-  IOT_PROTOCOL_TYPE = 'iot_protocol_type', // IOT 接入网关协议
+  IOT_CODEC_TYPE = 'iot_codec_type', // IOT 数据格式（编解码器类型）
+  IOT_LOCATION_TYPE = 'iot_location_type', // IOT 定位类型
   IOT_DEVICE_STATE = 'iot_device_state', // IOT 设备状态
   IOT_THING_MODEL_TYPE = 'iot_thing_model_type', // IOT 产品功能类型
-  IOT_DATA_TYPE = 'iot_data_type', // IOT 数据类型
   IOT_THING_MODEL_UNIT = 'iot_thing_model_unit', // IOT 物模型单位
   IOT_RW_TYPE = 'iot_rw_type', // IOT 读写类型
-  IOT_PLUGIN_DEPLOY_TYPE = 'iot_plugin_deploy_type', // IOT 插件部署类型
-  IOT_PLUGIN_STATUS = 'iot_plugin_status', // IOT 插件状态
-  IOT_PLUGIN_TYPE = 'iot_plugin_type', // IOT 插件类型
-  IOT_DATA_BRIDGE_DIRECTION_ENUM = 'iot_data_bridge_direction_enum', // 桥梁方向
-  IOT_DATA_BRIDGE_TYPE_ENUM = 'iot_data_bridge_type_enum' // 桥梁类型
+  // TODO @芋艿：貌似这几个多了 _enum 后缀
+  IOT_DATA_SINK_TYPE_ENUM = 'iot_data_sink_type_enum', // IoT 数据流转目的类型
+  IOT_RULE_SCENE_TRIGGER_TYPE_ENUM = 'iot_rule_scene_trigger_type_enum', // IoT 场景流转的触发类型枚举
+  IOT_RULE_SCENE_ACTION_TYPE_ENUM = 'iot_rule_scene_action_type_enum', // IoT 规则场景的触发类型枚举
+  IOT_ALERT_LEVEL = 'iot_alert_level', // IoT 告警级别
+  IOT_ALERT_RECEIVE_TYPE = 'iot_alert_receive_type', // IoT 告警接收类型
+  IOT_OTA_TASK_DEVICE_SCOPE = 'iot_ota_task_device_scope', // IoT OTA任务设备范围
+  IOT_OTA_TASK_STATUS = 'iot_ota_task_status', // IoT OTA 任务状态
+  IOT_OTA_TASK_RECORD_STATUS = 'iot_ota_task_record_status' // IoT OTA 记录状态
 }

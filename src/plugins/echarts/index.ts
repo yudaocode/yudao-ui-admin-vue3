@@ -13,6 +13,7 @@ import {
 
 import {
   AriaComponent,
+  DataZoomComponent,
   GridComponent,
   LegendComponent,
   ParallelComponent,
@@ -30,6 +31,7 @@ echarts.use([
   TitleComponent,
   TooltipComponent,
   ToolboxComponent,
+  DataZoomComponent,
   GridComponent,
   PolarComponent,
   AriaComponent,

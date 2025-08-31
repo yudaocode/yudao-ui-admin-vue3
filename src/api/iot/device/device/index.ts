@@ -3,7 +3,6 @@ import request from '@/config/axios'
 // IoT 设备 VO
 export interface DeviceVO {
   id: number // 设备 ID，主键，自增
-  deviceKey: string // 设备唯一标识符
   deviceName: string // 设备名称
   productId: number // 产品编号
   productKey: string // 产品标识
@@ -22,8 +21,9 @@ export interface DeviceVO {
   mqttUsername: string // MQTT 用户名
   mqttPassword: string // MQTT 密码
   authType: string // 认证类型
-  latitude: number // 设备位置的纬度
-  longitude: number // 设备位置的经度
+  locationType: number // 定位类型
+  latitude?: number // 设备位置的纬度
+  longitude?: number // 设备位置的经度
   areaId: number // 地区编码
   address: string // 设备详细地址
   serialNumber: string // 设备序列号
@@ -31,25 +31,25 @@ export interface DeviceVO {
   groupIds?: number[] // 添加分组 ID
 }
 
-// IoT 设备数据 VO
-export interface DeviceDataVO {
-  deviceId: number // 设备编号
-  thinkModelFunctionId: number // 物模型编号
-  productKey: string // 产品标识
-  deviceName: string // 设备名称
+// IoT 设备属性详细 VO
+export interface IotDevicePropertyDetailRespVO {
   identifier: string // 属性标识符
+  value: string // 最新值
+  updateTime: Date // 更新时间
   name: string // 属性名称
   dataType: string // 数据类型
-  updateTime: Date // 更新时间
+  dataSpecs: any // 数据定义
+  dataSpecsList: any[] // 数据定义列表
+}
+
+// IoT 设备属性 VO
+export interface IotDevicePropertyRespVO {
+  identifier: string // 属性标识符
   value: string // 最新值
+  updateTime: Date // 更新时间
 }
 
-// IoT 设备数据 VO
-export interface DeviceHistoryDataVO {
-  time: number // 时间
-  data: string // 数据
-}
-
+// TODO @芋艿：调整到 constants
 // IoT 设备状态枚举
 export enum DeviceStateEnum {
   INACTIVE = 0, // 未激活
@@ -57,27 +57,18 @@ export enum DeviceStateEnum {
   OFFLINE = 2 // 离线
 }
 
-// IoT 设备上行 Request VO
-export interface IotDeviceUpstreamReqVO {
-  id: number // 设备编号
-  type: string // 消息类型
-  identifier: string // 标识符
-  data: any // 请求参数
+// 设备认证参数 VO
+export interface IotDeviceAuthInfoVO {
+  clientId: string // 客户端 ID
+  username: string // 用户名
+  password: string // 密码
 }
 
-// IoT 设备下行 Request VO
-export interface IotDeviceDownstreamReqVO {
-  id: number // 设备编号
-  type: string // 消息类型
-  identifier: string // 标识符
-  data: any // 请求参数
-}
-
-// MQTT 连接参数 VO
-export interface MqttConnectionParamsVO {
-  mqttClientId: string // MQTT 客户端 ID
-  mqttUsername: string // MQTT 用户名
-  mqttPassword: string // MQTT 密码
+// IoT 设备发送消息 Request VO
+export interface IotDeviceMessageSendReqVO {
+  deviceId: number // 设备编号
+  method: string // 请求方法
+  params?: any // 请求参数
 }
 
 // 设备 API
@@ -128,8 +119,13 @@ export const DeviceApi = {
   },
 
   // 获取设备的精简信息列表
-  getSimpleDeviceList: async (deviceType?: number) => {
-    return await request.get({ url: `/iot/device/simple-list?`, params: { deviceType } })
+  getSimpleDeviceList: async (deviceType?: number, productId?: number) => {
+    return await request.get({ url: `/iot/device/simple-list?`, params: { deviceType, productId } })
+  },
+
+  // 根据产品编号，获取设备的精简信息列表
+  getDeviceListByProductId: async (productId: number) => {
+    return await request.get({ url: `/iot/device/simple-list?`, params: { productId } })
   },
 
   // 获取导入模板
@@ -137,33 +133,33 @@ export const DeviceApi = {
     return await request.download({ url: `/iot/device/get-import-template` })
   },
 
-  // 设备上行
-  upstreamDevice: async (data: IotDeviceUpstreamReqVO) => {
-    return await request.post({ url: `/iot/device/upstream`, data })
-  },
-
-  // 设备下行
-  downstreamDevice: async (data: IotDeviceDownstreamReqVO) => {
-    return await request.post({ url: `/iot/device/downstream`, data })
-  },
-
   // 获取设备属性最新数据
   getLatestDeviceProperties: async (params: any) => {
-    return await request.get({ url: `/iot/device/property/latest`, params })
+    return await request.get({ url: `/iot/device/property/get-latest`, params })
   },
 
   // 获取设备属性历史数据
-  getHistoryDevicePropertyPage: async (params: any) => {
-    return await request.get({ url: `/iot/device/property/history-page`, params })
+  getHistoryDevicePropertyList: async (params: any) => {
+    return await request.get({ url: `/iot/device/property/history-list`, params })
   },
 
-  // 查询设备日志分页
-  getDeviceLogPage: async (params: any) => {
-    return await request.get({ url: `/iot/device/log/page`, params })
+  // 获取设备认证信息
+  getDeviceAuthInfo: async (id: number) => {
+    return await request.get({ url: `/iot/device/get-auth-info`, params: { id } })
   },
 
-  // 获取设备MQTT连接参数
-  getMqttConnectionParams: async (deviceId: number) => {
-    return await request.get({ url: `/iot/device/mqtt-connection-params`, params: { deviceId } })
+  // 查询设备消息分页
+  getDeviceMessagePage: async (params: any) => {
+    return await request.get({ url: `/iot/device/message/page`, params })
+  },
+
+  // 查询设备消息配对分页
+  getDeviceMessagePairPage: async (params: any) => {
+    return await request.get({ url: `/iot/device/message/pair-page`, params })
+  },
+
+  // 发送设备消息
+  sendDeviceMessage: async (params: IotDeviceMessageSendReqVO) => {
+    return await request.post({ url: `/iot/device/message/send`, data: params })
   }
 }

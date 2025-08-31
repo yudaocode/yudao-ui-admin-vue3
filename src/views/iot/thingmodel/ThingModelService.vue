@@ -6,24 +6,25 @@
     prop="service.callType"
   >
     <el-radio-group v-model="service.callType">
-      <el-radio :value="ThingModelServiceCallType.ASYNC.value">
-        {{ ThingModelServiceCallType.ASYNC.label }}
-      </el-radio>
-      <el-radio :value="ThingModelServiceCallType.SYNC.value">
-        {{ ThingModelServiceCallType.SYNC.label }}
+      <el-radio
+        v-for="callType in Object.values(IoTThingModelServiceCallTypeEnum)"
+        :key="callType.value"
+        :value="callType.value"
+      >
+        {{ callType.label }}
       </el-radio>
     </el-radio-group>
   </el-form-item>
   <el-form-item label="输入参数">
     <ThingModelInputOutputParam
       v-model="service.inputParams"
-      :direction="ThingModelParamDirection.INPUT"
+      :direction="IoTThingModelParamDirectionEnum.INPUT"
     />
   </el-form-item>
   <el-form-item label="输出参数">
     <ThingModelInputOutputParam
       v-model="service.outputParams"
-      :direction="ThingModelParamDirection.OUTPUT"
+      :direction="IoTThingModelParamDirectionEnum.OUTPUT"
     />
   </el-form-item>
 </template>
@@ -32,8 +33,11 @@
 import ThingModelInputOutputParam from './ThingModelInputOutputParam.vue'
 import { useVModel } from '@vueuse/core'
 import { ThingModelService } from '@/api/iot/thingmodel'
-import { ThingModelParamDirection, ThingModelServiceCallType } from './config'
 import { isEmpty } from '@/utils/is'
+import {
+  IoTThingModelParamDirectionEnum,
+  IoTThingModelServiceCallTypeEnum
+} from '@/views/iot/utils/constants'
 
 /** IoT 物模型服务 */
 defineOptions({ name: 'ThingModelService' })
@@ -42,10 +46,11 @@ const props = defineProps<{ modelValue: any; isStructDataSpecs?: boolean }>()
 const emits = defineEmits(['update:modelValue'])
 const service = useVModel(props, 'modelValue', emits) as Ref<ThingModelService>
 
-// 默认选中，ASYNC 异步
+/** 默认选中，ASYNC 异步 */
 watch(
   () => service.value.callType,
-  (val: string) => isEmpty(val) && (service.value.callType = ThingModelServiceCallType.ASYNC.value),
+  (val: string) =>
+    isEmpty(val) && (service.value.callType = IoTThingModelServiceCallTypeEnum.ASYNC.value),
   { immediate: true }
 )
 </script>
