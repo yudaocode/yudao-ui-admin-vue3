@@ -45,6 +45,8 @@ import VueDOMPurifyHTML from 'vue-dompurify-html' // 解决v-html 的安全隐�
 // wangeditor插件注册
 import {setupWangeditorPlugin} from "@/views/bpm/model/form/PrintTemplate";
 
+import print from 'vue3-print-nb' // 打印插件
+
 // 创建实例
 const setupAll = async () => {
   const app = createApp(App)
@@ -70,6 +72,8 @@ const setupAll = async () => {
   await router.isReady()
 
   app.use(VueDOMPurifyHTML)
+
+  app.use(print)
 
   app.mount('#app')
 }

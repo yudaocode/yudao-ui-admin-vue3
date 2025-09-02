@@ -128,6 +128,7 @@
       </el-scrollbar>
     </div>
   </ContentWrap>
+  <PrintDialog ref="printRef" />
 </template>
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
@@ -149,6 +150,7 @@ import runningSvg from '@/assets/svgs/bpm/running.svg'
 import approveSvg from '@/assets/svgs/bpm/approve.svg'
 import rejectSvg from '@/assets/svgs/bpm/reject.svg'
 import cancelSvg from '@/assets/svgs/bpm/cancel.svg'
+import PrintDialog from './PrintDialog.vue'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 const props = defineProps<{
@@ -298,8 +300,9 @@ const refresh = () => {
   getDetail()
 }
 
-const handlePrint = () => {
-  // TODO 打印
+const printRef = ref()
+const handlePrint = async () => {
+  printRef.value.open(props.id)
 }
 
 /** 当前的Tab */
