@@ -79,9 +79,9 @@
               <Icon icon="ep:document" />
             </div>
             <div>
-              <div class="text-24px font-600 text-[#303133] leading-none">{{
-                statistics.total
-              }}</div>
+              <div class="text-24px font-600 text-[#303133] leading-none">
+                {{ statistics.total }}
+              </div>
               <div class="text-14px text-[#909399] mt-4px">总规则数</div>
             </div>
           </div>
@@ -99,9 +99,9 @@
               <Icon icon="ep:check" />
             </div>
             <div>
-              <div class="text-24px font-600 text-[#303133] leading-none">{{
-                statistics.enabled
-              }}</div>
+              <div class="text-24px font-600 text-[#303133] leading-none">
+                {{ statistics.enabled }}
+              </div>
               <div class="text-14px text-[#909399] mt-4px">启用规则</div>
             </div>
           </div>
@@ -119,9 +119,9 @@
               <Icon icon="ep:close" />
             </div>
             <div>
-              <div class="text-24px font-600 text-[#303133] leading-none">{{
-                statistics.disabled
-              }}</div>
+              <div class="text-24px font-600 text-[#303133] leading-none">
+                {{ statistics.disabled }}
+              </div>
               <div class="text-14px text-[#909399] mt-4px">禁用规则</div>
             </div>
           </div>
@@ -139,9 +139,9 @@
               <Icon icon="ep:timer" />
             </div>
             <div>
-              <div class="text-24px font-600 text-[#303133] leading-none">{{
-                statistics.timerRules
-              }}</div>
+              <div class="text-24px font-600 text-[#303133] leading-none">
+                {{ statistics.timerRules }}
+              </div>
               <div class="text-14px text-[#909399] mt-4px">定时规则</div>
             </div>
           </div>
@@ -214,7 +214,7 @@
         </el-table-column>
         <el-table-column label="操作" width="210" fixed="right">
           <template #default="{ row }">
-            <div class="flex gap-8px">
+            <div>
               <el-button type="primary" link @click="handleEdit(row)">
                 <Icon icon="ep:edit" />
                 编辑
@@ -293,7 +293,6 @@ const statistics = ref({
   total: 0,
   enabled: 0,
   disabled: 0,
-  triggered: 0, // 已触发的规则数量 (暂时使用启用状态的规则数量)
   timerRules: 0 // 定时规则数量
 })
 
@@ -321,9 +320,9 @@ const getRuleSceneSummary = (rule: IotSceneRule) => {
       }
       // 添加设备信息（如果有）
       if (trigger.deviceId) {
-        description += ` [设备ID: ${trigger.deviceId}]`
+        description += ` [设备 ID: ${trigger.deviceId}]`
       } else if (trigger.productId) {
-        description += ` [产品ID: ${trigger.productId}]`
+        description += ` [产品 ID: ${trigger.productId}]`
       }
       return description
     }) || []
@@ -334,13 +333,13 @@ const getRuleSceneSummary = (rule: IotSceneRule) => {
       let description = getActionTypeLabel(action.type)
       // 添加设备信息（如果有）
       if (action.deviceId) {
-        description += ` [设备ID: ${action.deviceId}]`
+        description += ` [设备 ID: ${action.deviceId}]`
       } else if (action.productId) {
-        description += ` [产品ID: ${action.productId}]`
+        description += ` [产品 ID: ${action.productId}]`
       }
       // 添加告警配置信息（如果有）
       if (action.alertConfigId) {
-        description += ` [告警配置ID: ${action.alertConfigId}]`
+        description += ` [告警配置 ID: ${action.alertConfigId}]`
       }
       return description
     }) || []
@@ -371,7 +370,6 @@ const updateStatistics = () => {
     total: list.value.length,
     enabled: list.value.filter((item) => item.status === CommonStatusEnum.ENABLE).length,
     disabled: list.value.filter((item) => item.status === CommonStatusEnum.DISABLE).length,
-    triggered: list.value.filter((item) => item.status === CommonStatusEnum.ENABLE).length,
     timerRules: list.value.filter((item) => hasTimerTrigger(item)).length
   }
 }
