@@ -4,7 +4,7 @@ function withProcessRecord<T extends IDomEditor>(editor: T) {
   const { isInline, isVoid } = editor
   const newEditor = editor
 
-  newEditor.isInline = elem => {
+  newEditor.isInline = (elem) => {
     const type = DomEditor.getNodeType(elem)
     if (type === 'process-record') {
       return true
@@ -13,7 +13,7 @@ function withProcessRecord<T extends IDomEditor>(editor: T) {
     return isInline(elem)
   }
 
-  newEditor.isVoid = elem => {
+  newEditor.isVoid = (elem) => {
     const type = DomEditor.getNodeType(elem)
     if (type === 'process-record') {
       return true

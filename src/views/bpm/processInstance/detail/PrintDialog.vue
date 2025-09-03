@@ -12,7 +12,7 @@ const printData = ref()
 const userName = computed(() => userStore.user.nickname ?? '')
 const printTime = ref(formatDate(new Date(), 'YYYY-MM-DD HH:mm'))
 
-const open = async (id) => {
+const open = async (id: string) => {
   loading.value = true
   try {
     printData.value = await ProcessInstanceApi.getProcessInstancePrintData(id)
@@ -98,6 +98,7 @@ const printObj = ref({
       </div>
     </template>
   </el-dialog>
+  <!-- TODO @lesan：最下面的 table 央视，可以去掉么？ -->
 </template>
 
 <style lang="scss">

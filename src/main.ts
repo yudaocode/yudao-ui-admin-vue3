@@ -42,8 +42,8 @@ import Logger from '@/utils/Logger'
 
 import VueDOMPurifyHTML from 'vue-dompurify-html' // 解决v-html 的安全隐患
 
-// wangeditor插件注册
-import {setupWangeditorPlugin} from "@/views/bpm/model/form/PrintTemplate";
+// wangeditor 插件注册
+import { setupWangeditorPlugin } from '@/views/bpm/model/form/PrintTemplate'
 
 import print from 'vue3-print-nb' // 打印插件
 
@@ -67,12 +67,14 @@ const setupAll = async () => {
   setupAuth(app)
   setupMountedFocus(app)
 
+  // wangeditor 插件注册
   setupWangeditorPlugin()
 
   await router.isReady()
 
   app.use(VueDOMPurifyHTML)
 
+  // 打印
   app.use(print)
 
   app.mount('#app')

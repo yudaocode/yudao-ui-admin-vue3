@@ -254,7 +254,7 @@
       </div>
     </el-form-item>
   </el-form>
-  <print-template ref="printTemplateRef" @confirm="confirmPrintTemplate"/>
+  <print-template ref="printTemplateRef" @confirm="confirmPrintTemplate" />
 </template>
 
 <script setup lang="ts">
@@ -491,8 +491,9 @@ watch(
   { immediate: true }
 )
 
-// TODO defaultTemplate 是否需要放到 infra_config
-const defaultTemplate = '<p style="text-align: center;"><span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="流程名称" data-info="%7B%22id%22%3A%22processName%22%7D">@流程名称</span></p><p style="text-align: right;">打印人：<span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="打印人" data-info="%7B%22id%22%3A%22printUser%22%7D">@打印人</span></p><p style="text-align: right;">流程编号：<span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="流程编号" data-info="%7B%22id%22%3A%22processNum%22%7D">@流程编号</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;打印时间：<span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="打印时间" data-info="%7B%22id%22%3A%22printTime%22%7D">@打印时间</span></p><table style="width: 100%;"><tbody><tr><td colSpan="1" rowSpan="1" width="auto">发起人</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="发起人" data-info="%7B%22id%22%3A%22startUser%22%7D">@发起人</span></td><td colSpan="1" rowSpan="1" width="auto">发起时间</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="发起时间" data-info="%7B%22id%22%3A%22startTime%22%7D">@发起时间</span></td></tr><tr><td colSpan="1" rowSpan="1" width="auto">所属部门</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="发起人部门" data-info="%7B%22id%22%3A%22startUserDept%22%7D">@发起人部门</span></td><td colSpan="1" rowSpan="1" width="auto">流程状态</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="流程状态" data-info="%7B%22id%22%3A%22processStatus%22%7D">@流程状态</span></td></tr></tbody></table><p><span data-w-e-type="process-record" data-w-e-is-void data-w-e-is-inline>流程记录</span></p>'
+// TODO defaultTemplate 是否需要放到 infra_config TODO @lesan：就先 default 这里好了。
+const defaultTemplate =
+  '<p style="text-align: center;"><span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="流程名称" data-info="%7B%22id%22%3A%22processName%22%7D">@流程名称</span></p><p style="text-align: right;">打印人：<span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="打印人" data-info="%7B%22id%22%3A%22printUser%22%7D">@打印人</span></p><p style="text-align: right;">流程编号：<span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="流程编号" data-info="%7B%22id%22%3A%22processNum%22%7D">@流程编号</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;打印时间：<span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="打印时间" data-info="%7B%22id%22%3A%22printTime%22%7D">@打印时间</span></p><table style="width: 100%;"><tbody><tr><td colSpan="1" rowSpan="1" width="auto">发起人</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="发起人" data-info="%7B%22id%22%3A%22startUser%22%7D">@发起人</span></td><td colSpan="1" rowSpan="1" width="auto">发起时间</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="发起时间" data-info="%7B%22id%22%3A%22startTime%22%7D">@发起时间</span></td></tr><tr><td colSpan="1" rowSpan="1" width="auto">所属部门</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="发起人部门" data-info="%7B%22id%22%3A%22startUserDept%22%7D">@发起人部门</span></td><td colSpan="1" rowSpan="1" width="auto">流程状态</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="流程状态" data-info="%7B%22id%22%3A%22processStatus%22%7D">@流程状态</span></td></tr></tbody></table><p><span data-w-e-type="process-record" data-w-e-is-void data-w-e-is-inline>流程记录</span></p>'
 const handlePrintTemplateEnableChange = (val: boolean) => {
   if (val) {
     if (!modelData.value.printTemplateSetting.template) {
@@ -504,7 +505,7 @@ const printTemplateRef = ref()
 const handleEditPrintTemplate = () => {
   printTemplateRef.value.open(modelData.value.printTemplateSetting.template)
 }
-const confirmPrintTemplate = (template) => {
+const confirmPrintTemplate = (template: any) => {
   modelData.value.printTemplateSetting.template = template
 }
 </script>

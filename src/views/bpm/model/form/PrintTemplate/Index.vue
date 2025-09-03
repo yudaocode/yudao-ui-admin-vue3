@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
-import {IDomEditor} from '@wangeditor/editor'
-import MentionModal from "./MentionModal.vue";
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { IDomEditor } from '@wangeditor/editor'
+import MentionModal from './MentionModal.vue'
 
 const emit = defineEmits(['confirm'])
 
-// mention
+// @mention 相关
 const isShowModal = ref(false)
 const showModal = () => {
   isShowModal.value = true
@@ -13,12 +13,12 @@ const showModal = () => {
 const hideModal = () => {
   isShowModal.value = false
 }
-const insertMention = (id, name) => {
+const insertMention = (id: any, name: any) => {
   const mentionNode = {
     type: 'mention',
     value: name,
-    info: {id},
-    children: [{text: ''}],
+    info: { id },
+    children: [{ text: '' }]
   }
   const editor = editorRef.value
   if (editor) {
@@ -29,20 +29,19 @@ const insertMention = (id, name) => {
   }
 }
 
-// Dialog
+// Dialog 相关
 const dialogVisible = ref(false)
-const open = async (template) => {
+const open = async (template: string) => {
   dialogVisible.value = true
   valueHtml.value = template
-  console.log(template)
 }
-defineExpose({open})
+defineExpose({ open })
 const handleConfirm = () => {
   emit('confirm', valueHtml.value)
   dialogVisible.value = false
 }
 
-// Editor
+// Editor 相关
 const editorRef = shallowRef<IDomEditor>()
 const editorId = ref('wangeEditor-1')
 const toolbarConfig = {
@@ -57,41 +56,45 @@ const editorConfig = {
   EXTEND_CONF: {
     mentionConfig: {
       showModal,
-      hideModal,
-    },
-  },
+      hideModal
+    }
+  }
 }
 const valueHtml = ref()
 const handleCreated = (editor: IDomEditor) => {
   editorRef.value = editor
 }
 
-// onBeforeUnmount
+/** 初始化 */
 onBeforeUnmount(() => {
   const editor = editorRef.value
-  if (editor == null) return
+  if (editor == null) {
+    return
+  }
   editor.destroy()
 })
 </script>
 
 <template>
   <el-dialog v-model="dialogVisible" title="自定义模板" fullscreen>
-    <div style="margin: 0 10px;">
+    <div style="margin: 0 10px">
       <el-alert
         title="输入 @ 可选择插入流程表单选项和默认选项"
         type="info"
         show-icon
-        :closable="false"/>
+        :closable="false"
+      />
     </div>
-    <div style="border: 1px solid #ccc;margin: 10px;">
+    <!-- TODO @unocss 简化 style -->
+    <div style="border: 1px solid #ccc; margin: 10px">
       <Toolbar
-        style="border-bottom: 1px solid #ccc;"
+        style="border-bottom: 1px solid #ccc"
         :editor="editorRef"
         :editorId="editorId"
         :defaultConfig="toolbarConfig"
       />
       <Editor
-        style="height: 500px; overflow-y: hidden;"
+        style="height: 500px; overflow-y: hidden"
         v-model="valueHtml"
         :defaultConfig="editorConfig"
         :editorId="editorId"
@@ -100,9 +103,10 @@ onBeforeUnmount(() => {
       <MentionModal
         v-if="isShowModal"
         @hide-mention-modal="hideModal"
-        @insert-mention="insertMention"/>
+        @insert-mention="insertMention"
+      />
     </div>
-    <div style="margin-right: 10px;float: right;">
+    <div style="margin-right: 10px; float: right">
       <el-button @click="dialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="handleConfirm">确 定</el-button>
     </div>
