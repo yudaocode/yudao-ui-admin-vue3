@@ -11,10 +11,9 @@ const list = ref([
   { id: 'processName', name: '流程名称' },
   { id: 'processNum', name: '流程编号' },
   { id: 'startTime', name: '发起时间' },
-  { id: 'endTime', name: '发起时间' },
+  { id: 'endTime', name: '结束时间' },
   { id: 'processStatus', name: '流程状态' },
-  { id: 'processResult', name: '流程结果' },
-  { id: 'printUser', name: '打印人' },
+  { id: 'printUsername', name: '打印人' },
   { id: 'printTime', name: '打印时间' }
 ])
 const searchedList = computed(() => {
@@ -41,9 +40,8 @@ const insertMentionHandler = (id: any, name: any) => {
   emit('hideMentionModal')
 }
 
-const formFields = inject('formFieldsObj')
+const formFields = inject<any>('formFieldsObj')
 onMounted(() => {
-  // TODO @lesan：这里 idea 会爆红，看看能不能处理下；
   if (formFields.value && formFields.value.length > 0) {
     const cloneFormField = formFields.value.map((item) => {
       return {

@@ -5,7 +5,7 @@ import elemToHtmlConf from './elem-to-html'
 import parseHtmlConf from './parse-elem-html'
 import processRecordMenu from './menu/ProcessRecordMenu'
 
-// TODO @lesan：PrintTemplate 是参考了哪些文档哇？要不要在 index.ts 稍微写点注释，方便大家理解；
+// 可参考 wangEditor 官方文档进行自定义扩展插件：https://www.wangeditor.com/v5/development.html#%E5%AE%9A%E4%B9%89%E6%96%B0%E5%85%83%E7%B4%A0
 const module: Partial<IModuleConf> = {
   editorPlugin: withProcessRecord,
   renderElems: [renderElemConf],
