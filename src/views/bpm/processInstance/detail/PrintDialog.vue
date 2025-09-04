@@ -22,7 +22,6 @@ const open = async (id: string) => {
     printData.value = await ProcessInstanceApi.getProcessInstancePrintData(id)
     initPrintDataMap()
     parseFormFields()
-    console.log(printData.value)
   } finally {
     loading.value = false
   }
@@ -31,6 +30,7 @@ const open = async (id: string) => {
 defineExpose({ open })
 
 const parseFormFields = () => {
+  // TODO @lesan：form field 有可能基于 form-create 什么 api 生成么？好像也挺难的 = =
   const formFieldsObj = decodeFields(printData.value.formFields)
   const processVariables = printData.value.processVariables
   let res: any = []
@@ -39,10 +39,10 @@ const parseFormFields = () => {
     const name = item['title']
     let html = '暂不支持此类型的表单展示'
     // TODO 完善各类型表单的展示
+    // TODO @lesan：要不 UploadImg、UploadFile 特殊处理下，其它就 else processVariables[item['field']]？
     if (item['type'] === 'input') {
       html = processVariables[item['field']]
-    }
-    if (item['type'] === 'UploadImg') {
+    } else if (item['type'] === 'UploadImg') {
       html = `<img src="${processVariables[item['field']]}" style="max-width: 600px" />`
     }
     printDataMap.value[item['field']] = html
@@ -75,7 +75,7 @@ const getPrintTemplateHTML = () => {
     item.setAttribute('border', '1')
     item.setAttribute('style', (item.getAttribute('style') || '') + 'border-collapse:collapse;')
   })
-  // 替换mentions
+  // 替换 mentions
   let mentions = doc.querySelectorAll('[data-w-e-type="mention"]')
   mentions.forEach((item) => {
     const mentionId = JSON.parse(decodeURIComponent(item.getAttribute('data-info') ?? ''))['id']
@@ -83,7 +83,7 @@ const getPrintTemplateHTML = () => {
   })
   // 替换流程记录
   let processRecords = doc.querySelectorAll('[data-w-e-type="process-record"]')
-  let processRecordTable : Element = document.createElement('table')
+  let processRecordTable: Element = document.createElement('table')
   if (processRecords.length > 0) {
     // 构建流程记录html
     processRecordTable.setAttribute('border', '1')
@@ -96,7 +96,7 @@ const getPrintTemplateHTML = () => {
     headTd.innerHTML = '流程节点'
     headTr.appendChild(headTd)
     processRecordTable.appendChild(headTr)
-    printData.value.approveNodes.forEach(item => {
+    printData.value.approveNodes.forEach((item) => {
       const tr = document.createElement('tr')
       const td1 = document.createElement('td')
       td1.innerHTML = item.nodeName
@@ -107,10 +107,10 @@ const getPrintTemplateHTML = () => {
       processRecordTable.appendChild(tr)
     })
   }
-  processRecords.forEach(item => {
+  processRecords.forEach((item) => {
     item.innerHTML = processRecordTable.outerHTML
   })
-  // 返回html
+  // 返回 html
   return doc.body.innerHTML
 }
 
