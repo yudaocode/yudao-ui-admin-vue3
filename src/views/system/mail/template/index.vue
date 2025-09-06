@@ -61,7 +61,6 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          style="width: 240px"
           type="daterange"
           value-format="YYYY-MM-DD HH:mm:ss"
           start-placeholder="开始日期"
@@ -122,7 +121,7 @@
         label="模板内容"
         align="center"
         prop="content"
-        width="200"
+        min-width="200"
         :show-overflow-tooltip="true"
       />
       <el-table-column label="邮箱账号" align="center" prop="accountId" width="200">
