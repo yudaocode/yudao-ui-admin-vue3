@@ -3,9 +3,7 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { useUserStore } from '@/store/modules/user'
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
-import { decodeFields, setConfAndFields2 } from '@/utils/formCreate'
-import type { ApiAttrs } from '@form-create/element-ui/types/config'
-import formCreate from "@form-create/element-ui";
+import { decodeFields } from '@/utils/formCreate'
 
 const userStore = useUserStore()
 
@@ -17,21 +15,6 @@ const userName = computed(() => userStore.user.nickname ?? '')
 const printTime = ref(formatDate(new Date(), 'YYYY-MM-DD HH:mm'))
 const formFields = ref()
 const printDataMap = ref({})
-
-const fApi = ref<ApiAttrs>()
-const detailForm = ref({
-  rule: [],
-  option: {},
-  value: {}
-})
-
-const fApiH = ref<ApiAttrs>()
-const detailFormH = ref({
-  rule: [],
-  option: {},
-  value: {}
-})
-const fcRef = ref()
 
 const open = async (id: string) => {
   loading.value = true
@@ -47,37 +30,9 @@ const open = async (id: string) => {
 defineExpose({ open })
 
 const parseFormFields = () => {
-  const processInstance = printData.value.processInstance
-  const processDefinition = processInstance.processDefinition
-  setConfAndFields2(
-    detailForm,
-    processDefinition.formConf,
-    processDefinition.formFields,
-    processInstance.formVariables
-  )
-  detailForm.value.option = {
-    submitBtn: false,
-    resetBtn: false,
-    form: {
-      disabled: true
-    }
-  }
-  setConfAndFields2(
-    detailFormH,
-    processDefinition.formConf,
-    processDefinition.formFields,
-    processInstance.formVariables
-  )
-  detailFormH.value.option = {
-    submitBtn: false,
-    resetBtn: false,
-    form: {
-      disabled: true
-    }
-  }
-  return
   // TODO @lesan：form field 有可能基于 form-create 什么 api 生成么？好像也挺难的 = =
-  const formFieldsObj = decodeFields(printData.value.formFields)
+  // TODO @芋艿：默认打印可以直接用form-create的预览表单模式，但是自定义模板打印就没法这么做
+  const formFieldsObj = decodeFields(printData.value.processInstance.processDefinition.formFields)
   const processVariables = printData.value.processInstance.formVariables
   let res: any = []
   for (const item of formFieldsObj) {
@@ -109,7 +64,7 @@ const initPrintDataMap = () => {
     DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS,
     printData.value.processInstance.status
   )
-  printDataMap.value['printUsername'] = userName.value
+  printDataMap.value['printUser'] = userName.value
   printDataMap.value['printTime'] = printTime.value
 }
 
@@ -161,25 +116,6 @@ const getPrintTemplateHTML = () => {
   return doc.body.innerHTML
 }
 
-const html = ref('')
-const handleDialogOpened = async () => {
-  const processInstance = printData.value.processInstance
-  const processDefinition = processInstance.processDefinition
-  let fcData = {
-    rule: [],
-    option: {},
-    value: {}
-  }
-  setConfAndFields2(
-    fcData,
-    processDefinition.formConf,
-    processDefinition.formFields,
-    processInstance.formVariables
-  )
-  const api = formCreate.create(fcData.rule,fcData.option)
-  console.log(api)
-}
-
 const printObj = ref({
   id: 'printDivTag',
   popTitle: '&nbsp',
@@ -226,14 +162,22 @@ const printObj = ref({
                 <h4>表单内容</h4>
               </td>
             </tr>
-            <tr>
-              <td class="p-5px w-100% text-center" colspan="4">
-                <form-create
-                  v-model="detailForm.value"
-                  v-model:api="fApi"
-                  :option="detailForm.option"
-                  :rule="detailForm.rule"
-                />
+            <!--            <tr>-->
+            <!--              <td class="p-5px w-100% text-center" colspan="4">-->
+            <!--                <form-create-->
+            <!--                  v-model="detailForm.value"-->
+            <!--                  v-model:api="fApi"-->
+            <!--                  :option="detailForm.option"-->
+            <!--                  :rule="detailForm.rule"-->
+            <!--                />-->
+            <!--              </td>-->
+            <!--            </tr>-->
+            <tr v-for="item in formFields" :key="item.id">
+              <td class="p-5px w-20%">
+                {{ item.name }}
+              </td>
+              <td class="p-5px w-80%" colspan="3">
+                <div v-html="item.html"></div>
               </td>
             </tr>
             <tr>
@@ -258,7 +202,7 @@ const printObj = ref({
     </div>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleDialogOpened">取 消</el-button>
+        <el-button @click="visible = false">取 消</el-button>
         <el-button type="primary" v-print="printObj"> 打 印</el-button>
       </div>
     </template>
