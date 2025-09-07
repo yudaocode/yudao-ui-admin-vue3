@@ -13,7 +13,7 @@ const list = ref([
   { id: 'startTime', name: '发起时间' },
   { id: 'endTime', name: '结束时间' },
   { id: 'processStatus', name: '流程状态' },
-  { id: 'printUsername', name: '打印人' },
+  { id: 'printUser', name: '打印人' },
   { id: 'printTime', name: '打印时间' }
 ])
 const searchedList = computed(() => {

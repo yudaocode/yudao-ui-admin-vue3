@@ -31,8 +31,9 @@ defineExpose({ open })
 
 const parseFormFields = () => {
   // TODO @lesan：form field 有可能基于 form-create 什么 api 生成么？好像也挺难的 = =
-  const formFieldsObj = decodeFields(printData.value.formFields)
-  const processVariables = printData.value.processVariables
+  // TODO @芋艿：默认打印可以直接用form-create的预览表单模式，但是自定义模板打印就没法这么做
+  const formFieldsObj = decodeFields(printData.value.processInstance.processDefinition.formFields)
+  const processVariables = printData.value.processInstance.formVariables
   let res: any = []
   for (const item of formFieldsObj) {
     const id = item['field']
@@ -40,6 +41,7 @@ const parseFormFields = () => {
     let html = '暂不支持此类型的表单展示'
     // TODO 完善各类型表单的展示
     // TODO @lesan：要不 UploadImg、UploadFile 特殊处理下，其它就 else processVariables[item['field']]？
+    // TODO @芋艿：感觉很多都要处理一下，select那些都要转为可读的label，还有子表单那些，都需要处理一下...
     if (item['type'] === 'input') {
       html = processVariables[item['field']]
     } else if (item['type'] === 'UploadImg') {
@@ -52,17 +54,17 @@ const parseFormFields = () => {
 }
 
 const initPrintDataMap = () => {
-  printDataMap.value['startUser'] = printData.value.startUser.nickname
-  printDataMap.value['startUserDept'] = printData.value.startUser.deptName
-  printDataMap.value['processName'] = printData.value.processName
-  printDataMap.value['processNum'] = printData.value.processInstanceId
-  printDataMap.value['startTime'] = printData.value.startTime
-  printDataMap.value['endTime'] = printData.value.endTime
+  printDataMap.value['startUser'] = printData.value.processInstance.startUser.nickname
+  printDataMap.value['startUserDept'] = printData.value.processInstance.startUser.deptName
+  printDataMap.value['processName'] = printData.value.processInstance.name
+  printDataMap.value['processNum'] = printData.value.processInstance.id
+  printDataMap.value['startTime'] = formatDate(printData.value.processInstance.startTime)
+  printDataMap.value['endTime'] = formatDate(printData.value.processInstance.endTime)
   printDataMap.value['processStatus'] = getDictLabel(
     DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS,
-    printData.value.processStatus
+    printData.value.processInstance.status
   )
-  printDataMap.value['printUsername'] = userName.value
+  printDataMap.value['printUser'] = userName.value
   printDataMap.value['printTime'] = printTime.value
 }
 
@@ -96,12 +98,12 @@ const getPrintTemplateHTML = () => {
     headTd.innerHTML = '流程节点'
     headTr.appendChild(headTd)
     processRecordTable.appendChild(headTr)
-    printData.value.approveNodes.forEach((item) => {
+    printData.value.tasks.forEach((item) => {
       const tr = document.createElement('tr')
       const td1 = document.createElement('td')
-      td1.innerHTML = item.nodeName
+      td1.innerHTML = item.name
       const td2 = document.createElement('td')
-      td2.innerHTML = item.nodeDesc
+      td2.innerHTML = item.description
       tr.appendChild(td1)
       tr.appendChild(td2)
       processRecordTable.appendChild(tr)
@@ -128,26 +130,31 @@ const printObj = ref({
     <div id="printDivTag">
       <div v-if="printData.printTemplateEnable" v-html="getPrintTemplateHTML()"></div>
       <div v-else>
-        <h2 class="text-center">{{ printData.processName }}</h2>
+        <h2 class="text-center">{{ printData.processInstance.name }}</h2>
         <div class="text-right text-15px">{{ '打印人员: ' + userName }}</div>
         <div class="flex justify-between">
-          <div class="text-15px">{{ '流程编号: ' + printData.processInstanceId }}</div>
+          <div class="text-15px">{{ '流程编号: ' + printData.processInstance.id }}</div>
           <div class="text-15px">{{ '打印时间: ' + printTime }}</div>
         </div>
         <table class="mt-20px w-100%" border="1" style="border-collapse: collapse">
           <tbody>
             <tr>
               <td class="p-5px w-25%">发起人</td>
-              <td class="p-5px w-25%">{{ printData.startUser.nickname }}</td>
+              <td class="p-5px w-25%">{{ printData.processInstance.startUser.nickname }}</td>
               <td class="p-5px w-25%">发起时间</td>
-              <td class="p-5px w-25%">{{ printData.startTime }}</td>
+              <td class="p-5px w-25%">{{ formatDate(printData.processInstance.startTime) }}</td>
             </tr>
             <tr>
               <td class="p-5px w-25%">所属部门</td>
-              <td class="p-5px w-25%">{{ printData.startUser.deptName }}</td>
+              <td class="p-5px w-25%">{{ printData.processInstance.startUser.deptName }}</td>
               <td class="p-5px w-25%">流程状态</td>
               <td class="p-5px w-25%">
-                {{ getDictLabel(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS, printData.processStatus) }}
+                {{
+                  getDictLabel(
+                    DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS,
+                    printData.processInstance.status
+                  )
+                }}
               </td>
             </tr>
             <tr>
@@ -155,6 +162,16 @@ const printObj = ref({
                 <h4>表单内容</h4>
               </td>
             </tr>
+            <!--            <tr>-->
+            <!--              <td class="p-5px w-100% text-center" colspan="4">-->
+            <!--                <form-create-->
+            <!--                  v-model="detailForm.value"-->
+            <!--                  v-model:api="fApi"-->
+            <!--                  :option="detailForm.option"-->
+            <!--                  :rule="detailForm.rule"-->
+            <!--                />-->
+            <!--              </td>-->
+            <!--            </tr>-->
             <tr v-for="item in formFields" :key="item.id">
               <td class="p-5px w-20%">
                 {{ item.name }}
@@ -168,12 +185,12 @@ const printObj = ref({
                 <h4>流程节点</h4>
               </td>
             </tr>
-            <tr v-for="item in printData.approveNodes" :key="item.nodeId">
+            <tr v-for="item in printData.tasks" :key="item.id">
               <td class="p-5px w-20%">
-                {{ item.nodeName }}
+                {{ item.name }}
               </td>
               <td class="p-5px w-80%" colspan="3">
-                {{ item.nodeDesc }}
+                {{ item.description }}
                 <div v-if="item.signUrl !== ''">
                   <img class="w-90px h-40px" :src="item.signUrl" alt="" />
                 </div>
