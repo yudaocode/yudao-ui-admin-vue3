@@ -42,6 +42,7 @@ const parseFormFields = () => {
     // TODO 完善各类型表单的展示
     // TODO @lesan：要不 UploadImg、UploadFile 特殊处理下，其它就 else processVariables[item['field']]？
     // TODO @芋艿：感觉很多都要处理一下，select那些都要转为可读的label，还有子表单那些，都需要处理一下...
+    // TODO @lesan：有办法基于 form-create api 来读取值么？如果不行，就兜底让大模型生成一些常用的。子表单可以往后放；
     if (item['type'] === 'input') {
       html = processVariables[item['field']]
     } else if (item['type'] === 'UploadImg') {
@@ -191,8 +192,8 @@ const printObj = ref({
               </td>
               <td class="p-5px w-80%" colspan="3">
                 {{ item.description }}
-                <div v-if="item.signUrl !== ''">
-                  <img class="w-90px h-40px" :src="item.signUrl" alt="" />
+                <div v-if="item.signPicUrl && item.signPicUrl.length > 0">
+                  <img class="w-90px h-40px" :src="item.signPicUrl" alt="" />
                 </div>
               </td>
             </tr>
