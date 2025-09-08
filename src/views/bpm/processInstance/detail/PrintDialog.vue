@@ -128,7 +128,7 @@ const printObj = ref({
 
 <template>
   <el-dialog v-loading="loading" v-model="visible" :show-close="false">
-    <div id="printDivTag">
+    <div id="printDivTag" style="word-break: break-all;">
       <div v-if="printData.printTemplateEnable" v-html="getPrintTemplateHTML()"></div>
       <div v-else>
         <h2 class="text-center">{{ printData.processInstance.name }}</h2>
@@ -209,3 +209,14 @@ const printObj = ref({
     </template>
   </el-dialog>
 </template>
+
+<style>
+@media print {
+  @page {
+    size: auto;
+  }
+  body, html, div{
+    height: auto!important;
+  }
+}
+</style>
