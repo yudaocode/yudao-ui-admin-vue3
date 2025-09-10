@@ -30,23 +30,37 @@ const open = async (id: string) => {
 defineExpose({ open })
 
 const parseFormFields = () => {
-  // TODO @lesan：form field 有可能基于 form-create 什么 api 生成么？好像也挺难的 = =
-  // TODO @芋艿：默认打印可以直接用form-create的预览表单模式，但是自定义模板打印就没法这么做
   const formFieldsObj = decodeFields(printData.value.processInstance.processDefinition.formFields)
   const processVariables = printData.value.processInstance.formVariables
   let res: any = []
   for (const item of formFieldsObj) {
     const id = item['field']
     const name = item['title']
-    let html = '暂不支持此类型的表单展示'
-    // TODO 完善各类型表单的展示
-    // TODO @lesan：要不 UploadImg、UploadFile 特殊处理下，其它就 else processVariables[item['field']]？
-    // TODO @芋艿：感觉很多都要处理一下，select那些都要转为可读的label，还有子表单那些，都需要处理一下...
-    // TODO @lesan：有办法基于 form-create api 来读取值么？如果不行，就兜底让大模型生成一些常用的。子表单可以往后放；
-    if (item['type'] === 'input') {
-      html = processVariables[item['field']]
-    } else if (item['type'] === 'UploadImg') {
-      html = `<img src="${processVariables[item['field']]}" style="max-width: 600px" />`
+    const variable = processVariables[item['field']]
+    let html = variable
+    switch (item['type']) {
+      case 'UploadImg': {
+        let imgEl = document.createElement('img')
+        imgEl.setAttribute('src', variable)
+        imgEl.setAttribute('style', 'max-width: 600px;')
+        html = imgEl.outerHTML
+        break
+      }
+      case 'radio':
+      case 'checkbox':
+      case 'select': {
+        const options = item['options'] || []
+        const temp: any = []
+        if (Array.isArray(variable)) {
+          const labels = options.filter((o) => variable.includes(o.value)).map((o) => o.label)
+          temp.push(...labels)
+        } else {
+          const opt = options.find((o) => o.value === variable)
+          temp.push(opt.label)
+        }
+        html = temp.join(',')
+      }
+      // TODO 更多表单打印展示
     }
     printDataMap.value[item['field']] = html
     res.push({ id, name, html })
@@ -128,7 +142,7 @@ const printObj = ref({
 
 <template>
   <el-dialog v-loading="loading" v-model="visible" :show-close="false">
-    <div id="printDivTag">
+    <div id="printDivTag" style="word-break: break-all">
       <div v-if="printData.printTemplateEnable" v-html="getPrintTemplateHTML()"></div>
       <div v-else>
         <h2 class="text-center">{{ printData.processInstance.name }}</h2>
@@ -163,16 +177,6 @@ const printObj = ref({
                 <h4>表单内容</h4>
               </td>
             </tr>
-            <!--            <tr>-->
-            <!--              <td class="p-5px w-100% text-center" colspan="4">-->
-            <!--                <form-create-->
-            <!--                  v-model="detailForm.value"-->
-            <!--                  v-model:api="fApi"-->
-            <!--                  :option="detailForm.option"-->
-            <!--                  :rule="detailForm.rule"-->
-            <!--                />-->
-            <!--              </td>-->
-            <!--            </tr>-->
             <tr v-for="item in formFields" :key="item.id">
               <td class="p-5px w-20%">
                 {{ item.name }}
@@ -209,3 +213,18 @@ const printObj = ref({
     </template>
   </el-dialog>
 </template>
+
+<style>
+/* 修复打印只显示一页 */
+@media print {
+  @page {
+    size: auto;
+  }
+
+  body,
+  html,
+  div {
+    height: auto !important;
+  }
+}
+</style>
