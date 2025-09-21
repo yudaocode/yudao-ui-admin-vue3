@@ -102,17 +102,19 @@ const submit = () => {
       await updateUserProfile(data)
       message.success(t('common.updateSuccess'))
       const profile = await init()
-      userStore.setUserNicknameAction(profile.nickname)
+      await userStore.setUserNicknameAction(profile.nickname)
       // 发送成功事件
       emit('success')
     }
   })
 }
+
 const init = async () => {
   const res = await getUserProfile()
   unref(formRef)?.setValues(res)
   return res
 }
+
 onMounted(async () => {
   await init()
 })
