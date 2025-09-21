@@ -70,7 +70,7 @@ export const ChatMessageApi = {
         conversationId,
         content,
         useContext: enableContext,
-        webSearch: enableWebSearch,
+        useSearch: enableWebSearch,
         attachmentUrls: attachmentUrls || []
       }),
       onmessage: onMessage,
