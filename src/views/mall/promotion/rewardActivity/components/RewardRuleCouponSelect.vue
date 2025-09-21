@@ -89,9 +89,7 @@ const initGiveCouponList = async () => {
   if (isEmpty(rewardRule.value) || isEmpty(rewardRule.value.giveCouponTemplateCounts)) {
     return
   }
-  const tempLateIds = Object.keys(rewardRule.value.giveCouponTemplateCounts!).map((item) =>
-    parseInt(item)
-  )
+  const tempLateIds = Object.keys(rewardRule.value.giveCouponTemplateCounts!)
   const data = await CouponTemplateApi.getCouponTemplateList(tempLateIds)
   if (!data) {
     return
