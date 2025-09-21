@@ -70,8 +70,11 @@ import { ChatRoleApi, ChatRolePageReqVO, ChatRoleVO } from '@/api/ai/model/chatR
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 import { Search } from '@element-plus/icons-vue'
 import { TabsPaneContext } from 'element-plus'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 
 const router = useRouter() // 路由对象
+const { currentRoute } = useRouter() // 路由
+const { delView } = useTagsViewStore() // 视图操作
 
 // 属性定义
 const loading = ref<boolean>(false) // 加载中
@@ -121,7 +124,7 @@ const getPublicRole = async (append?: boolean) => {
     name: search.value,
     publicStatus: true
   }
-  const { total, list } = await ChatRoleApi.getMyPage(params)
+  const { list } = await ChatRoleApi.getMyPage(params)
   if (append) {
     publicRoleList.value.push.apply(publicRoleList.value, list)
   } else {
@@ -201,7 +204,8 @@ const handlerCardUse = async (role) => {
   const conversationId = await ChatConversationApi.createChatConversationMy(data)
 
   // 2. 跳转页面
-  await router.push({
+  delView(unref(currentRoute))
+  await router.replace({
     name: 'AiChat',
     query: {
       conversationId: conversationId
