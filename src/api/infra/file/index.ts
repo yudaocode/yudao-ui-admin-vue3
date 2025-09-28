@@ -40,7 +40,32 @@ export const createFile = (data: any) => {
   return request.post({ url: '/infra/file/create', data })
 }
 
-// 上传文件
+/**
+ * 上传文件
+ * @deprecated use uploadFile instead
+ * @param data
+ */
 export const updateFile = (data: any) => {
+  return uploadFile(data)
+}
+
+// 上传文件
+export const uploadFile = (data: any) => {
   return request.upload({ url: '/infra/file/upload', data })
+}
+
+/**
+ * 上传剪贴板中的第一个文件
+ * @param event
+ */
+export const uploadFirstFileItem = (event: ClipboardEvent) => {
+  const items = event.clipboardData?.items
+  if (!items) return null
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
+    if (item.kind === 'file') {
+      return uploadFile(item.getAsFile())
+    }
+  }
+  return null
 }
