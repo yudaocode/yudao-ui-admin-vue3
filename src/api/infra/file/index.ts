@@ -60,12 +60,19 @@ export const uploadFile = (data: any) => {
  */
 export const uploadFirstFileItem = (event: ClipboardEvent) => {
   const items = event.clipboardData?.items
-  if (!items) return null
+  if (!items)
+    return new Promise((_, reject) => {
+      reject(new Error('剪贴板中没有内容'))
+    })
+
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
     if (item.kind === 'file') {
       return uploadFile({ file: item.getAsFile() })
     }
   }
-  return null
+
+  return new Promise((_, reject) => {
+    reject(new Error('剪贴板中没有文件'))
+  })
 }
