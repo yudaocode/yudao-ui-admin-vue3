@@ -108,3 +108,8 @@ export const getFormFieldsPermission = async (params: any) => {
 export const getProcessInstanceBpmnModelView = async (id: string) => {
   return await request.get({ url: '/bpm/process-instance/get-bpmn-model-view?id=' + id })
 }
+
+// 获取流程实例打印数据
+export const getProcessInstancePrintData = async (id: string) => {
+  return await request.get({ url: '/bpm/process-instance/get-print-data?processInstanceId=' + id })
+}

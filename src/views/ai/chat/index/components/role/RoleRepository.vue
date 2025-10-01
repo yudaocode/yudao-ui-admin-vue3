@@ -1,14 +1,10 @@
 <!-- chat 角色仓库 -->
 <template>
-  <el-container
-    class="role-container absolute w-full h-full m-0 p-0 left-0 right-0 top-0 bottom-0 bg-[var(--el-bg-color)] overflow-hidden flex !flex-col"
-  >
+  <el-container class="bg-[var(--el-bg-color)] -mt-25px">
     <ChatRoleForm ref="formRef" @success="handlerAddRoleSuccess" />
-    <!-- header -->
-    <RoleHeader title="角色仓库" class="relative" />
     <!-- main -->
     <el-main class="flex-1 overflow-hidden m-0 !p-0 relative">
-      <div class="mx-5 mt-5 mb-0 absolute right-0 -top-1.25 z-100">
+      <div class="mx-3 mt-3 mb-0 absolute right-0 -top-1.25 z-100">
         <!-- 搜索按钮 -->
         <el-input
           :loading="loading"
@@ -30,16 +26,8 @@
         </el-button>
       </div>
       <!-- tabs -->
-      <el-tabs
-        v-model="activeTab"
-        @tab-click="handleTabsClick"
-        class="relative h-full [&_.el-tabs__nav-scroll]:my-2.5 [&_.el-tabs__nav-scroll]:mx-5"
-      >
-        <el-tab-pane
-          label="我的角色"
-          name="my-role"
-          class="flex flex-col h-full overflow-y-auto relative"
-        >
+      <el-tabs v-model="activeTab" @tab-click="handleTabsClick" class="relative h-full">
+        <el-tab-pane label="我的角色" name="my-role" class="flex flex-col h-full overflow-y-auto">
           <RoleList
             :loading="loading"
             :role-list="myRoleList"
@@ -48,12 +36,12 @@
             @on-edit="handlerCardEdit"
             @on-use="handlerCardUse"
             @on-page="handlerCardPage('my')"
-            class="mt-20px"
+            class="mt-3"
           />
         </el-tab-pane>
-        <el-tab-pane label="公共角色" name="public-role">
+        <el-tab-pane label="公共角色" name="public-role" class="!pt-2">
           <RoleCategoryList
-            class="mx-6.75"
+            class="mx-3"
             :category-list="categoryList"
             :active="activeCategory"
             @on-category-click="handlerCategoryClick"
@@ -64,7 +52,7 @@
             @on-edit="handlerCardEdit"
             @on-use="handlerCardUse"
             @on-page="handlerCardPage('public')"
-            class="mt-20px"
+            class="mt-3"
             loading
           />
         </el-tab-pane>
@@ -75,7 +63,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import RoleHeader from './RoleHeader.vue'
 import RoleList from './RoleList.vue'
 import ChatRoleForm from '@/views/ai/model/chatRole/ChatRoleForm.vue'
 import RoleCategoryList from './RoleCategoryList.vue'
@@ -83,8 +70,11 @@ import { ChatRoleApi, ChatRolePageReqVO, ChatRoleVO } from '@/api/ai/model/chatR
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 import { Search } from '@element-plus/icons-vue'
 import { TabsPaneContext } from 'element-plus'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 
 const router = useRouter() // 路由对象
+const { currentRoute } = useRouter() // 路由
+const { delView } = useTagsViewStore() // 视图操作
 
 // 属性定义
 const loading = ref<boolean>(false) // 加载中
@@ -134,7 +124,7 @@ const getPublicRole = async (append?: boolean) => {
     name: search.value,
     publicStatus: true
   }
-  const { total, list } = await ChatRoleApi.getMyPage(params)
+  const { list } = await ChatRoleApi.getMyPage(params)
   if (append) {
     publicRoleList.value.push.apply(publicRoleList.value, list)
   } else {
@@ -214,7 +204,8 @@ const handlerCardUse = async (role) => {
   const conversationId = await ChatConversationApi.createChatConversationMy(data)
 
   // 2. 跳转页面
-  await router.push({
+  delView(unref(currentRoute))
+  await router.replace({
     name: 'AiChat',
     query: {
       conversationId: conversationId
@@ -233,6 +224,23 @@ onMounted(async () => {
 <!-- 覆盖 element plus css -->
 <style lang="scss">
 .el-tabs__nav-scroll {
-  margin: 10px 20px;
+  margin: 2px 8px !important;
+}
+
+.el-tabs__header {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.el-tabs__nav-wrap {
+  margin-bottom: 0 !important;
+}
+
+.el-tabs__content {
+  padding: 0 !important;
+}
+
+.el-tab-pane {
+  padding: 8px 0 0 0 !important;
 }
 </style>

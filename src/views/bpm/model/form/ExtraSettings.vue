@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="formRef" :model="modelData" label-width="120px" class="mt-20px">
+  <el-form ref="formRef" :model="modelData" label-width="130px" class="mt-20px">
     <el-form-item class="mb-20px">
       <template #label>
         <el-text size="large" tag="b">提交人权限</el-text>
@@ -231,7 +231,30 @@
         />
       </div>
     </el-form-item>
+    <el-form-item class="mb-20px">
+      <template #label>
+        <el-text size="large" tag="b">自定义打印模板</el-text>
+      </template>
+      <div class="flex flex-col w-100%">
+        <div class="flex">
+          <el-switch
+            v-model="modelData.printTemplateSetting.enable"
+            @change="handlePrintTemplateEnableChange"
+          />
+          <el-button
+            v-if="modelData.printTemplateSetting.enable"
+            class="ml-80px"
+            type="primary"
+            link
+            @click="handleEditPrintTemplate"
+          >
+            编辑模板
+          </el-button>
+        </div>
+      </div>
+    </el-form-item>
   </el-form>
+  <print-template ref="printTemplateRef" @confirm="confirmPrintTemplate" />
 </template>
 
 <script setup lang="ts">
@@ -241,6 +264,7 @@ import * as FormApi from '@/api/bpm/form'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
 import { ProcessVariableEnum } from '@/components/SimpleProcessDesignerV2/src/consts'
 import HttpRequestSetting from '@/components/SimpleProcessDesignerV2/src/nodes-config/components/HttpRequestSetting.vue'
+import PrintTemplate from './PrintTemplate/Index.vue'
 
 const modelData = defineModel<any>()
 
@@ -394,6 +418,7 @@ const formFieldOptions4Summary = computed(() => {
 const unParsedFormFields = ref<string[]>([])
 /** 暴露给子组件 HttpRequestSetting 使用 */
 provide('formFields', unParsedFormFields)
+provide('formFieldsObj', formFields)
 
 /** 兼容以前未配置更多设置的流程 */
 const initData = () => {
@@ -436,6 +461,11 @@ const initData = () => {
   if (modelData.value.allowWithdrawTask) {
     modelData.value.allowWithdrawTask = false
   }
+  if (!modelData.value.printTemplateSetting) {
+    modelData.value.printTemplateSetting = {
+      enable: false
+    }
+  }
 }
 defineExpose({ initData })
 
@@ -460,4 +490,21 @@ watch(
   },
   { immediate: true }
 )
+
+const defaultTemplate =
+  '<p style="text-align: center;"><span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="流程名称" data-info="%7B%22id%22%3A%22processName%22%7D">@流程名称</span></p><p style="text-align: right;">打印人：<span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="打印人" data-info="%7B%22id%22%3A%22printUser%22%7D">@打印人</span></p><p style="text-align: right;">流程编号：<span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="流程编号" data-info="%7B%22id%22%3A%22processNum%22%7D">@流程编号</span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;打印时间：<span data-w-e-type="mention" data-w-e-is-void="" data-w-e-is-inline="" data-value="打印时间" data-info="%7B%22id%22%3A%22printTime%22%7D">@打印时间</span></p><table style="width: 100%;"><tbody><tr><td colSpan="1" rowSpan="1" width="auto">发起人</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="发起人" data-info="%7B%22id%22%3A%22startUser%22%7D">@发起人</span></td><td colSpan="1" rowSpan="1" width="auto">发起时间</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="发起时间" data-info="%7B%22id%22%3A%22startTime%22%7D">@发起时间</span></td></tr><tr><td colSpan="1" rowSpan="1" width="auto">所属部门</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="发起人部门" data-info="%7B%22id%22%3A%22startUserDept%22%7D">@发起人部门</span></td><td colSpan="1" rowSpan="1" width="auto">流程状态</td><td colSpan="1" rowSpan="1" width="auto"><span data-w-e-type="mention" data-w-e-is-void data-w-e-is-inline data-value="流程状态" data-info="%7B%22id%22%3A%22processStatus%22%7D">@流程状态</span></td></tr></tbody></table><p><span data-w-e-type="process-record" data-w-e-is-void data-w-e-is-inline>流程记录</span></p>'
+const handlePrintTemplateEnableChange = (val: boolean) => {
+  if (val) {
+    if (!modelData.value.printTemplateSetting.template) {
+      modelData.value.printTemplateSetting.template = defaultTemplate
+    }
+  }
+}
+const printTemplateRef = ref()
+const handleEditPrintTemplate = () => {
+  printTemplateRef.value.open(modelData.value.printTemplateSetting.template)
+}
+const confirmPrintTemplate = (template: any) => {
+  modelData.value.printTemplateSetting.template = template
+}
 </script>

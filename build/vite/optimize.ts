@@ -115,7 +115,8 @@ const include = [
   '@element-plus/icons-vue',
   'element-plus/es/components/footer/style/css',
   'element-plus/es/components/empty/style/css',
-  'element-plus/es/components/mention/style/css'
+  'element-plus/es/components/mention/style/css',
+  'element-plus/es/components/progress/style/css'
 ]
 
 const exclude = ['@iconify/json']

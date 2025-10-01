@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-row flex-wrap relative h-full overflow-auto px-25px pb-140px items-start content-start justify-start"
+    class="flex flex-row flex-wrap relative h-full overflow-auto pb-140px items-start content-start justify-start"
     ref="tabsRef"
     @scroll="handleTabsScroll"
   >

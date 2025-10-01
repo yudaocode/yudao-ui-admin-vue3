@@ -1,5 +1,4 @@
 import * as FileApi from '@/api/infra/file'
-// import CryptoJS from 'crypto-js'
 import { UploadRawFile, UploadRequestOptions } from 'element-plus/es/components/upload/src/upload'
 import axios from 'axios'
 
@@ -20,7 +19,7 @@ export const useUpload = (directory?: string) => {
     // 模式一：前端上传
     if (isClientUpload) {
       // 1.1 生成文件名称
-      const fileName = await generateFileName(options.file)
+      const fileName = options.file.name || options.filename
       // 1.2 获取文件预签名地址
       const presignedInfo = await FileApi.getFilePresignedUrl(fileName, directory)
       // 1.3 上传文件（不能使用 ElUpload 的 ajaxUpload 方法的原因：其使用的是 FormData 上传，Minio 不支持）
@@ -32,7 +31,7 @@ export const useUpload = (directory?: string) => {
         })
         .then(() => {
           // 1.4. 记录文件信息到后端（异步）
-          createFile(presignedInfo, options.file)
+          createFile(presignedInfo, options.file, fileName)
           // 通知成功，数据格式保持与后端上传的返回结果一致
           return { data: presignedInfo.url }
         })
@@ -64,36 +63,20 @@ export const useUpload = (directory?: string) => {
 /**
  * 创建文件信息
  * @param vo 文件预签名信息
- * @param name 文件名称
  * @param file 文件
+ * @param fileName
  */
-function createFile(vo: FileApi.FilePresignedUrlRespVO, file: UploadRawFile) {
+function createFile(vo: FileApi.FilePresignedUrlRespVO, file: UploadRawFile, fileName: string) {
   const fileVo = {
     configId: vo.configId,
     url: vo.url,
     path: vo.path,
-    name: file.name,
+    name: fileName,
     type: file.type,
     size: file.size
   }
   FileApi.createFile(fileVo)
   return fileVo
-}
-
-/**
- * 生成文件名称（使用算法SHA256）
- * @param file 要上传的文件
- */
-async function generateFileName(file: UploadRawFile) {
-  // // 读取文件内容
-  // const data = await file.arrayBuffer()
-  // const wordArray = CryptoJS.lib.WordArray.create(data)
-  // // 计算SHA256
-  // const sha256 = CryptoJS.SHA256(wordArray).toString()
-  // // 拼接后缀
-  // const ext = file.name.substring(file.name.lastIndexOf('.'))
-  // return `${sha256}${ext}`
-  return file.name
 }
 
 /**

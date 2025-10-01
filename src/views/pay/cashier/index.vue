@@ -459,6 +459,11 @@ onMounted(() => {
   }
   getDetail()
 })
+
+/** 销毁 */
+onBeforeUnmount(() => {
+  clearQueryInterval()
+})
 </script>
 
 <style lang="scss" scoped>

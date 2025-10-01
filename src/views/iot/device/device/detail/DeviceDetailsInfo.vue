@@ -150,7 +150,6 @@ const authDialogVisible = ref(false) // 定义设备认证信息弹框的可见�
 const authPasswordVisible = ref(false) // 定义密码可见性状态
 const authInfo = ref<IotDeviceAuthInfoVO>({} as IotDeviceAuthInfoVO) // 定义设备认证信息对象
 
-// TODO @AI：注释使用 /** */ 风格，方法注释；
 /** 控制地图显示的标志 */
 const showMap = computed(() => {
   return !!(device.longitude && device.latitude)

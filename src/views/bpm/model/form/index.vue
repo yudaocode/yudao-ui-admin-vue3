@@ -174,7 +174,10 @@ const formData: any = ref({
     enable: false,
     summary: []
   },
-  allowWithdrawTask: false
+  allowWithdrawTask: false,
+  printTemplateSetting: {
+    enable: false
+  }
 })
 
 // 流程数据
