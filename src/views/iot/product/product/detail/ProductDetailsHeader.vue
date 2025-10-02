@@ -72,7 +72,7 @@ const copyToClipboard = async (text: string) => {
 /** 路由跳转到设备管理 */
 const { push } = useRouter()
 const goToDeviceList = (productId: number) => {
-  push({ name: 'IoTDevice', params: { productId } })
+  push({ name: 'IoTDevice', query: { productId } })
 }
 
 /** 修改操作 */

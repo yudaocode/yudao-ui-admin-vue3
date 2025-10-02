@@ -384,6 +384,7 @@ defineOptions({ name: 'IoTDevice' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const route = useRoute()
 
 const loading = ref(true) // 列表加载中
 const list = ref<DeviceVO[]>([]) // 列表的数据
@@ -392,7 +393,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   deviceName: undefined,
-  productId: undefined,
+  productId: undefined as number | undefined,
   deviceType: undefined,
   nickname: undefined,
   status: undefined,
@@ -513,7 +514,12 @@ const handleImport = () => {
 
 /** 初始化 **/
 onMounted(async () => {
-  getList()
+  // 处理 productId 参数
+  const { productId } = route.query
+  if (productId) {
+    queryParams.productId = Number(productId)
+  }
+  await getList()
 
   // 获取产品列表
   products.value = await ProductApi.getSimpleProductList()
