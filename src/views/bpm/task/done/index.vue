@@ -52,13 +52,13 @@
       <el-form-item label="" prop="status" :style="{ position: 'absolute', right: '130px' }">
         <el-select
           v-model="queryParams.status"
-          placeholder="请选择流程状态"
+          placeholder="请选择审批状态"
           clearable
           class="!w-155px"
           @change="handleQuery"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
