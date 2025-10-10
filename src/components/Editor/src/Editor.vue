@@ -90,6 +90,12 @@ const editorConfig = computed((): IEditorConfig => {
       },
       autoFocus: false,
       scroll: true,
+      EXTEND_CONF: {
+        mentionConfig: {
+          showModal: () => {},
+          hideModal: () => {}
+        }
+      },
       MENU_CONF: {
         ['uploadImage']: {
           server: getUploadUrl(),
