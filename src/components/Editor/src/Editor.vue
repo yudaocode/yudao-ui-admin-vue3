@@ -58,6 +58,16 @@ watch(
     emit('update:modelValue', val)
   }
 )
+watch(
+  () => props.readonly,
+  (val) => {
+    if (val) {
+      editorRef.value?.disable()
+    } else {
+      editorRef.value?.enable()
+    }
+  }
+)
 
 const handleCreated = (editor: IDomEditor) => {
   editorRef.value = editor
