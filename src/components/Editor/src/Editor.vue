@@ -58,6 +58,16 @@ watch(
     emit('update:modelValue', val)
   }
 )
+watch(
+  () => props.readonly,
+  (val) => {
+    if (val) {
+      editorRef.value?.disable()
+    } else {
+      editorRef.value?.enable()
+    }
+  }
+)
 
 const handleCreated = (editor: IDomEditor) => {
   editorRef.value = editor
@@ -90,6 +100,12 @@ const editorConfig = computed((): IEditorConfig => {
       },
       autoFocus: false,
       scroll: true,
+      EXTEND_CONF: {
+        mentionConfig: {
+          showModal: () => {},
+          hideModal: () => {}
+        }
+      },
       MENU_CONF: {
         ['uploadImage']: {
           server: getUploadUrl(),
