@@ -43,7 +43,7 @@ const handleConfirm = () => {
 
 // Editor 相关
 const editorRef = shallowRef<IDomEditor>()
-const editorId = ref('wangeEditor-1')
+const editorId = ref('wangEditor-1')
 const toolbarConfig = {
   excludeKeys: ['group-video'],
   insertKeys: {

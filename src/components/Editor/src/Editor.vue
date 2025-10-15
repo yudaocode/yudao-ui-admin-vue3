@@ -20,7 +20,7 @@ const currentLocale = computed(() => localeStore.getCurrentLocale)
 i18nChangeLanguage(unref(currentLocale).lang)
 
 const props = defineProps({
-  editorId: propTypes.string.def('wangeEditor-1'),
+  editorId: propTypes.string.def('wangEditor-1'),
   height: propTypes.oneOfType([Number, String]).def('500px'),
   editorConfig: {
     type: Object as PropType<Partial<IEditorConfig>>,
