@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-import { i18nChangeLanguage, IDomEditor, IEditorConfig } from '@wangeditor/editor'
+import { Editor, Toolbar } from '@wangeditor-next/editor-for-vue'
+import { i18nChangeLanguage, IDomEditor, IEditorConfig } from '@wangeditor-next/editor'
 import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 import { ElMessage } from 'element-plus'
@@ -259,4 +259,4 @@ defineExpose({
   </div>
 </template>
 
-<style src="@wangeditor/editor/dist/css/style.css"></style>
+<style src="@wangeditor-next/editor/dist/css/style.css"></style>

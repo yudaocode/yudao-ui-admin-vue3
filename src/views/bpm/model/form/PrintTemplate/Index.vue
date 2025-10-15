@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-import { IDomEditor } from '@wangeditor/editor'
+import { Editor, Toolbar } from '@wangeditor-next/editor-for-vue'
+import { IDomEditor } from '@wangeditor-next/editor'
 import MentionModal from './MentionModal.vue'
 
 const emit = defineEmits(['confirm'])
@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
       />
     </div>
     <!-- TODO @unocss 简化 style -->
-    <div style="border: 1px solid #ccc; margin: 10px">
+    <div style=" margin: 10px;border: 1px solid #ccc">
       <Toolbar
         style="border-bottom: 1px solid #ccc"
         :editor="editorRef"
@@ -106,11 +106,11 @@ onBeforeUnmount(() => {
         @insert-mention="insertMention"
       />
     </div>
-    <div style="margin-right: 10px; float: right">
+    <div style=" float: right;margin-right: 10px">
       <el-button @click="dialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="handleConfirm">确 定</el-button>
     </div>
   </el-dialog>
 </template>
 
-<style src="@wangeditor/editor/dist/css/style.css"></style>
+<style src="@wangeditor-next/editor/dist/css/style.css"></style>
