@@ -66,7 +66,7 @@
                       </div>
                     </div>
                   </el-col>
-                  <el-col :span="7">
+                  <el-col :span="7" class="timeline-col">
                     <!-- 审批记录时间线 -->
                     <ProcessInstanceTimeline :activity-nodes="activityNodes" />
                   </el-col>
@@ -359,5 +359,11 @@ $process-header-height: 194px;
   :deep(.el-card) {
     border: none;
   }
+}
+
+.timeline-col {
+  padding-left: 30px;
+  padding-right: 30px;
+  box-sizing: border-box;
 }
 </style>
