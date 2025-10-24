@@ -87,7 +87,7 @@ const emits = defineEmits(['success'])
 const submitFormSuccess = (response: any) => {
   if (response.code !== 0) {
     message.error(response.msg)
-    formLoading.value = false
+    resetForm()
     return
   }
   // 拼接提示语
