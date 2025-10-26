@@ -20,7 +20,7 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '积分商城活动商品',
+    label: '活动商品',
     field: 'spuId',
     isTable: true,
     isSearch: false,

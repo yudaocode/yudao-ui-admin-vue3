@@ -29,7 +29,6 @@ const terminalChartOptions = reactive<EChartsOption>({
     orient: 'vertical',
     left: 'right'
   },
-  roseType: 'area',
   series: [
     {
       name: '会员终端',

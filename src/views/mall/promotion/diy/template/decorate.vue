@@ -166,11 +166,15 @@ const handleEditorReset = () => storePageIndex()
 //#region 无感刷新
 // 记录标识
 const DIY_PAGE_INDEX_KEY = 'diy_page_index'
+
 // 1. 记录
-const storePageIndex = () =>
-  sessionStorage.setItem(DIY_PAGE_INDEX_KEY, `${selectedTemplateItem.value}`)
+function storePageIndex() {
+  debugger
+  return sessionStorage.setItem(DIY_PAGE_INDEX_KEY, `${selectedTemplateItem.value}`)
+}
 // 2. 恢复
 const recoverPageIndex = () => {
+  debugger
   // 恢复重置前的页面，默认是第一个页面
   const pageIndex = toNumber(sessionStorage.getItem(DIY_PAGE_INDEX_KEY)) || 0
   // 移除标记

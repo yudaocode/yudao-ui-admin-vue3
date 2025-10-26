@@ -68,7 +68,6 @@
         min-width="100"
         prop="marketPrice"
       />
-      <el-table-column label="原价" min-width="100" prop="marketPrice" />
       <el-table-column align="center" label="活动状态" min-width="100" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
