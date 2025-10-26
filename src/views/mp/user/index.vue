@@ -54,7 +54,7 @@
       <el-table-column label="用户标识" align="center" prop="openid" width="260" />
       <el-table-column label="用户头像" min-width="80px" prop="headImageUrl">
         <template #default="scope">
-          <el-avatar :src="scope.row.headImageUrl"/>
+          <el-avatar :src="scope.row.headImageUrl" />
         </template>
       </el-table-column>
       <el-table-column label="昵称" align="center" prop="nickname" />
@@ -176,7 +176,9 @@ const handleSync = async () => {
     await MpUserApi.syncUser(queryParams.accountId)
     message.success('开始从微信公众号同步粉丝信息，同步需要一段时间，建议稍后再查询')
     await getList()
-  } catch {}
+  } catch {
+    //
+  }
 }
 
 /** 初始化 */
