@@ -96,6 +96,26 @@ PaletteProvider.prototype.getPaletteEntries = function () {
     create.start(event, elementFactory.createParticipantShape())
   }
 
+  function createHttpServiceTask(event) {
+    const httpTask = elementFactory.createShape({
+      type: 'bpmn:ServiceTask'
+    })
+
+    const businessObject = httpTask.businessObject
+
+    if (typeof businessObject.set === 'function') {
+      businessObject.set('flowable:type', 'http')
+    } else {
+      businessObject['flowable:type'] = 'http'
+    }
+
+    if (!businessObject.name) {
+      businessObject.name = translate('HTTP Task')
+    }
+
+    create.start(event, httpTask)
+  }
+
   assign(actions, {
     'hand-tool': {
       group: 'tools',
@@ -177,6 +197,15 @@ PaletteProvider.prototype.getPaletteEntries = function () {
       'bpmn-icon-service',
       translate('Create Service Task')
     ),
+    'create.http-service-task': {
+      group: 'activity',
+      className: 'bpmn-icon-service',
+      title: translate('Create HTTP Task'),
+      action: {
+        dragstart: createHttpServiceTask,
+        click: createHttpServiceTask
+      }
+    },
     'create.data-object': createAction(
       'bpmn:DataObjectReference',
       'data-object',
