@@ -4,7 +4,8 @@ import {
   useSelectRule,
   useUploadFileRule,
   useUploadImgRule,
-  useUploadImgsRule
+  useUploadImgsRule,
+  useDownloadRule
 } from './config'
 import { Ref } from 'vue'
 import { Menu } from '@/components/FormCreate/src/type'
@@ -25,6 +26,7 @@ export const useFormCreateDesigner = async (designer: Ref) => {
   const editorRule = useEditorRule()
   const uploadFileRule = useUploadFileRule()
   const uploadImgRule = useUploadImgRule()
+  const downloadRule = useDownloadRule()
   const uploadImgsRule = useUploadImgsRule()
 
   /**
@@ -35,7 +37,7 @@ export const useFormCreateDesigner = async (designer: Ref) => {
     designer.value?.removeMenuItem('upload')
     // 移除自带的富文本组件规则，使用 editorRule 替代
     designer.value?.removeMenuItem('fcEditor')
-    const components = [editorRule, uploadFileRule, uploadImgRule, uploadImgsRule]
+    const components = [editorRule, uploadFileRule, uploadImgRule, uploadImgsRule, downloadRule]
     components.forEach((component) => {
       // 插入组件规则
       designer.value?.addComponent(component)

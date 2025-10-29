@@ -68,6 +68,7 @@ import { UploadFile, UploadImg, UploadImgs } from '@/components/UploadFile'
 import { useApiSelect } from '@/components/FormCreate'
 import { Editor } from '@/components/Editor'
 import DictSelect from '@/components/FormCreate/src/components/DictSelect.vue'
+import FcDownload from '@/components/FormCreate/src/components/Download.vue'
 
 const UserSelect = useApiSelect({
   name: 'UserSelect',
@@ -118,6 +119,7 @@ const components = [
   UserSelect,
   DeptSelect,
   ApiSelect,
+  FcDownload,
   Editor,
   ElCollapse,
   ElCollapseItem,
