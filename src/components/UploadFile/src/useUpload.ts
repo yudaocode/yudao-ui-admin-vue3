@@ -1,6 +1,6 @@
 import * as FileApi from '@/api/infra/file'
-import { UploadRawFile, UploadRequestOptions } from 'element-plus/es/components/upload/src/upload'
-import axios from 'axios'
+import { UploadRawFile, UploadRequestOptions, UploadProgressEvent } from 'element-plus/es/components/upload/src/upload'
+import axios, { AxiosProgressEvent } from 'axios'
 
 /**
  * 获得上传 URL
@@ -16,6 +16,13 @@ export const useUpload = (directory?: string) => {
   const isClientUpload = UPLOAD_TYPE.CLIENT === import.meta.env.VITE_UPLOAD_TYPE
   // 重写ElUpload上传方法
   const httpRequest = async (options: UploadRequestOptions) => {
+    // 文件上传进度监听
+    const uploadProgressHandler = (evt: AxiosProgressEvent) => {
+      const upEvt: UploadProgressEvent = Object.assign(evt.event)
+      upEvt.percent = evt.progress ? (evt.progress * 100) : 0
+      options.onProgress(upEvt) // 触发 el-upload 的 on-progress
+    }
+
     // 模式一：前端上传
     if (isClientUpload) {
       // 1.1 生成文件名称
@@ -27,7 +34,8 @@ export const useUpload = (directory?: string) => {
         .put(presignedInfo.uploadUrl, options.file, {
           headers: {
             'Content-Type': options.file.type
-          }
+          },
+          onUploadProgress: uploadProgressHandler
         })
         .then(() => {
           // 1.4. 记录文件信息到后端（异步）
@@ -39,7 +47,7 @@ export const useUpload = (directory?: string) => {
       // 模式二：后端上传
       // 重写 el-upload httpRequest 文件上传成功会走成功的钩子，失败走失败的钩子
       return new Promise((resolve, reject) => {
-        FileApi.updateFile({ file: options.file, directory })
+        FileApi.updateFile({ file: options.file, directory }, uploadProgressHandler)
           .then((res) => {
             if (res.code === 0) {
               resolve(res)
