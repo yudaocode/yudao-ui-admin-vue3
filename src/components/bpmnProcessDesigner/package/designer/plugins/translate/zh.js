@@ -109,7 +109,7 @@ export default {
   'Parallel Gateway': '并行网关',
   'Inclusive Gateway': '相容网关',
   'Complex Gateway': '复杂网关',
-  'Event based Gateway': '事件网关',
+  'Event-based Gateway': '事件网关',
   Transaction: '转运',
   'Sub Process': '子流程',
   'Event Sub Process': '事件子流程',
