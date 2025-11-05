@@ -66,50 +66,6 @@ export const MsgTemplateApi = {
     },
 }
 
-// 模板消息配置 VO
-export interface MsgTemplateConfigVO {
-    id: number // 主键
-    appId: string // appId
-    templateId: string // 公众号模板ID
-    templateType: string // 模板类型
-    title: string // 标题
-    status: number // 是否有效 0有效,1无效
-    remark: string // 备注
-}
-
-// 模板消息配置 API
-export const MsgTemplateConfigApi = {
-    // 查询模板消息配置分页
-    getMsgTemplateConfigPage: async (params: any) => {
-        return await request.get({ url: `/mp/template/config/page`, params })
-    },
-
-    // 查询模板消息配置详情
-    getMsgTemplateConfig: async (id: number) => {
-        return await request.get({ url: `/mp/template/config/get?id=` + id })
-    },
-
-    // 新增模板消息配置
-    createMsgTemplateConfig: async (data: MsgTemplateConfigVO) => {
-        return await request.post({ url: `/mp/template/config/create`, data })
-    },
-
-    // 修改模板消息配置
-    updateMsgTemplateConfig: async (data: MsgTemplateConfigVO) => {
-        return await request.put({ url: `/mp/template/config/update`, data })
-    },
-
-    // 删除模板消息配置
-    deleteMsgTemplateConfig: async (id: number) => {
-        return await request.delete({ url: `/mp/template/config/delete?id=` + id })
-    },
-
-    // 导出模板消息配置 Excel
-    exportMsgTemplateConfig: async (params) => {
-        return await request.download({ url: `/mp/template/config/export-excel`, params })
-    },
-}
-
 // 微信模版消息发送记录 VO
 export interface MsgTemplateLogVO {
     id: number // 主键
