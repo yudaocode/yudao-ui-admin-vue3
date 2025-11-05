@@ -216,7 +216,7 @@ const resetHttpForm = () => {
 
 const resetServiceTaskForm = () => {
   const businessObject = bpmnElement.value?.businessObject
-  const nextForm: Record<string, any> = { ...DEFAULT_TASK_FORM }
+  const nextForm = { ...DEFAULT_TASK_FORM }
 
   if (businessObject) {
     if (businessObject.class) {
@@ -233,6 +233,12 @@ const resetServiceTaskForm = () => {
     }
     if (businessObject.$attrs?.[flowableTypeKey] === 'http') {
       nextForm.executeType = 'http'
+    } else {
+      // 兜底：如缺少 flowable:type=http，但扩展里已有 HTTP 的字段，也认为是 HTTP
+      const { httpFields } = collectHttpExtensionInfo()
+      if (httpFields.size > 0) {
+        nextForm.executeType = 'http'
+      }
     }
   }
 
