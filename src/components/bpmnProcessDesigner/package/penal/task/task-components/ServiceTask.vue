@@ -60,18 +60,24 @@
           clearable
         />
       </el-form-item>
-      <!--      <el-form-item label="禁止重定向" key="http-disallow-redirects">-->
-      <!--        <el-switch v-model="httpTaskForm.disallowRedirects" />-->
-      <!--      </el-form-item>-->
-      <!--      <el-form-item label="忽略异常" key="http-ignore-exception">-->
-      <!--        <el-switch v-model="httpTaskForm.ignoreException" />-->
-      <!--      </el-form-item>-->
-      <!--      <el-form-item label="瞬态保存响应参数" key="http-save-transient">-->
-      <!--        <el-switch v-model="httpTaskForm.saveResponseParametersTransient" />-->
-      <!--      </el-form-item>-->
-      <!--      <el-form-item label="JSON 保存响应变量" key="http-save-json">-->
-      <!--        <el-switch v-model="httpTaskForm.saveResponseVariableAsJson" />-->
-      <!--      </el-form-item>-->
+      <el-form-item label="禁止重定向" key="http-disallow-redirects">
+        <el-switch v-model="httpTaskForm.disallowRedirects" />
+      </el-form-item>
+      <el-form-item label="忽略异常" key="http-ignore-exception">
+        <el-switch v-model="httpTaskForm.ignoreException" />
+      </el-form-item>
+      <el-form-item label="保存响应参数" key="http-save-response">
+        <el-switch v-model="httpTaskForm.saveResponseParameters" />
+      </el-form-item>
+      <el-form-item label="瞬态保存响应参数" key="http-save-transient">
+        <el-switch v-model="httpTaskForm.saveResponseParametersTransient" />
+      </el-form-item>
+      <el-form-item label="保存响应参数" key="http-result-variable-prefix">
+        <el-input v-model="httpTaskForm.resultVariablePrefix" />
+      </el-form-item>
+      <el-form-item label="JSON 保存响应变量" key="http-save-json">
+        <el-switch v-model="httpTaskForm.saveResponseVariableAsJson" />
+      </el-form-item>
     </template>
   </div>
 </template>
@@ -94,12 +100,15 @@ const HTTP_FIELD_NAMES = [
   'requestHeaders',
   'disallowRedirects',
   'ignoreException',
+  'saveResponseParameters',
+  'resultVariablePrefix',
   'saveResponseParametersTransient',
   'saveResponseVariableAsJson'
 ]
 const HTTP_BOOLEAN_FIELDS = new Set([
   'disallowRedirects',
   'ignoreException',
+  'saveResponseParameters',
   'saveResponseParametersTransient',
   'saveResponseVariableAsJson'
 ])
@@ -115,8 +124,10 @@ const DEFAULT_HTTP_FORM = {
   requestMethod: 'GET',
   requestUrl: '',
   requestHeaders: 'Content-Type: application/json',
+  resultVariablePrefix: '',
   disallowRedirects: false,
   ignoreException: false,
+  saveResponseParameters: false,
   saveResponseParametersTransient: false,
   saveResponseVariableAsJson: false
 }
