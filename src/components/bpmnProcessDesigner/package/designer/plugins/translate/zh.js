@@ -111,8 +111,8 @@ export default {
   'Complex Gateway': '复杂网关',
   'Event-based Gateway': '事件网关',
   Transaction: '转运',
-  'Sub Process': '子流程',
-  'Event Sub Process': '事件子流程',
+  'sub-process': '子流程',
+  'Event sub-process': '事件子流程',
   'Collapsed Pool': '折叠池',
   'Expanded Pool': '展开池',
 
