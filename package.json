@@ -4,6 +4,7 @@
   "description": "基于vue3、vite4、element-plus、typesScript",
   "author": "xingyu",
   "private": false,
+  "type": "module",
   "scripts": {
     "i": "pnpm install",
     "dev": "vite --mode env.local",
