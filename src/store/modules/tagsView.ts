@@ -93,11 +93,6 @@ export const useTagsViewStore = defineStore('tagsView', {
     delCachedView() {
       const route = router.currentRoute.value
       const index = findIndex<string>(this.getCachedViews, (v) => v === route.name)
-      for (const v of this.visitedViews) {
-        if (v.name === route.name) {
-          return
-        }
-      }
       if (index > -1) {
         this.cachedViews.delete(this.getCachedViews[index])
       }
