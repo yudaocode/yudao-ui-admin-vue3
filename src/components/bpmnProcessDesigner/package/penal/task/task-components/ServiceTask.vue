@@ -139,22 +139,32 @@ const httpInitializing = ref(false)
 
 const bpmnInstances = () => (window as any)?.bpmnInstances
 
+// 判断字符串是否包含表达式
+const isExpression = (value: string): boolean => {
+  if (!value) return false
+  // 检测 ${...} 或 #{...} 格式的表达式
+  return /\${[^}]+}/.test(value) || /#{[^}]+}/.test(value)
+}
+
 const collectHttpExtensionInfo = () => {
   const businessObject = bpmnElement.value?.businessObject
   const extensionElements = businessObject?.extensionElements
   const httpFields = new Map<string, string>()
+  const httpFieldTypes = new Map<string, 'string' | 'expression'>()
   const otherExtensions: any[] = []
 
   extensionElements?.values?.forEach((item: any) => {
     if (item?.$type === flowableFieldType && HTTP_FIELD_NAMES.includes(item.name)) {
       const value = item.string ?? item.stringValue ?? item.expression ?? ''
+      const fieldType = item.expression ? 'expression' : 'string'
       httpFields.set(item.name, value)
+      httpFieldTypes.set(item.name, fieldType)
     } else {
       otherExtensions.push(item)
     }
   })
 
-  return { httpFields, otherExtensions }
+  return { httpFields, httpFieldTypes, otherExtensions }
 }
 
 const resetHttpDefaults = () => {
@@ -168,7 +178,7 @@ const resetHttpDefaults = () => {
 const resetHttpForm = () => {
   httpInitializing.value = true
   const { httpFields } = collectHttpExtensionInfo()
-  const nextForm: Record<string, any> = { ...DEFAULT_HTTP_FORM }
+  const nextForm = { ...DEFAULT_HTTP_FORM }
 
   HTTP_FIELD_NAMES.forEach((name) => {
     const stored = httpFields.get(name)
@@ -228,7 +238,11 @@ const updateHttpExtensions = (force = false) => {
     return
   }
 
-  const { httpFields: existingFields, otherExtensions } = collectHttpExtensionInfo()
+  const {
+    httpFields: existingFields,
+    httpFieldTypes: existingTypes,
+    otherExtensions
+  } = collectHttpExtensionInfo()
 
   const desiredEntries: [string, string][] = []
   HTTP_FIELD_NAMES.forEach((name) => {
@@ -246,21 +260,32 @@ const updateHttpExtensions = (force = false) => {
     desiredEntries.push([name, persisted])
   })
 
-  if (
-    !force &&
-    desiredEntries.length === existingFields.size &&
-    desiredEntries.every(([name, value]) => existingFields.get(name) === value)
-  ) {
-    return
+  // 检查是否有变化：不仅比较值，还要比较字段类型（string vs expression）
+  if (!force && desiredEntries.length === existingFields.size) {
+    let noChange = true
+    for (const [name, value] of desiredEntries) {
+      const existingValue = existingFields.get(name)
+      const existingType = existingTypes.get(name)
+      const currentType = isExpression(value) ? 'expression' : 'string'
+      if (existingValue !== value || existingType !== currentType) {
+        noChange = false
+        break
+      }
+    }
+    if (noChange) {
+      return
+    }
   }
 
   const moddle = bpmnInstances().moddle
-  const httpFieldElements = desiredEntries.map(([name, value]) =>
-    moddle.create(flowableFieldType, {
+  const httpFieldElements = desiredEntries.map(([name, value]) => {
+    // 根据值是否包含表达式来决定使用 string 还是 expression 属性
+    const isExpr = isExpression(value)
+    return moddle.create(flowableFieldType, {
       name,
-      string: value
+      ...(isExpr ? { expression: value } : { string: value })
     })
-  )
+  })
 
   updateElementExtensions(bpmnElement.value, [...otherExtensions, ...httpFieldElements])
 }
