@@ -43,22 +43,34 @@
           <el-option label="POST" value="POST" />
           <el-option label="PUT" value="PUT" />
           <el-option label="DELETE" value="DELETE" />
-          <el-option label="PATCH" value="PATCH" />
-          <el-option label="HEAD" value="HEAD" />
-          <el-option label="OPTIONS" value="OPTIONS" />
+          <!--          <el-option label="PATCH" value="PATCH" />-->
+          <!--          <el-option label="HEAD" value="HEAD" />-->
+          <!--          <el-option label="OPTIONS" value="OPTIONS" />-->
         </el-select>
       </el-form-item>
       <el-form-item label="请求地址" key="http-url" prop="requestUrl">
         <el-input v-model="httpTaskForm.requestUrl" clearable />
       </el-form-item>
       <el-form-item label="请求头" key="http-headers">
-        <el-input
-          v-model="httpTaskForm.requestHeaders"
-          type="textarea"
-          resize="vertical"
-          :autosize="{ minRows: 2, maxRows: 4 }"
-          clearable
-        />
+        <div style="display: flex; gap: 8px; align-items: flex-start; width: 100%">
+          <el-input
+            v-model="httpTaskForm.requestHeaders"
+            type="textarea"
+            resize="vertical"
+            :autosize="{ minRows: 4, maxRows: 8 }"
+            readonly
+            placeholder="点击右侧编辑按钮添加请求头"
+            style="flex: 1; min-width: 0"
+          />
+          <el-button
+            type="primary"
+            :icon="Edit"
+            @click="showHeaderEditor = true"
+            style="flex-shrink: 0"
+          >
+            编辑
+          </el-button>
+        </div>
       </el-form-item>
       <el-form-item label="禁止重定向" key="http-disallow-redirects">
         <el-switch v-model="httpTaskForm.disallowRedirects" />
@@ -66,24 +78,34 @@
       <el-form-item label="忽略异常" key="http-ignore-exception">
         <el-switch v-model="httpTaskForm.ignoreException" />
       </el-form-item>
-      <el-form-item label="保存响应参数" key="http-save-response">
+      <el-form-item label="保存返回变量" key="http-save-response">
         <el-switch v-model="httpTaskForm.saveResponseParameters" />
       </el-form-item>
-      <el-form-item label="瞬态保存响应参数" key="http-save-transient">
+      <el-form-item label="是否瞬间变量" key="http-save-transient">
         <el-switch v-model="httpTaskForm.saveResponseParametersTransient" />
       </el-form-item>
-      <el-form-item label="保存响应参数" key="http-result-variable-prefix">
+      <el-form-item label="返回变量前缀" key="http-result-variable-prefix">
         <el-input v-model="httpTaskForm.resultVariablePrefix" />
       </el-form-item>
-      <el-form-item label="JSON 保存响应变量" key="http-save-json">
+      <el-form-item label="格式化返回为JSON" key="http-save-json">
         <el-switch v-model="httpTaskForm.saveResponseVariableAsJson" />
       </el-form-item>
     </template>
+
+    <!-- 请求头编辑器 -->
+    <HttpHeaderEditor
+      v-model="showHeaderEditor"
+      :headers="httpTaskForm.requestHeaders"
+      @save="handleHeadersSave"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
+import { Edit } from '@element-plus/icons-vue'
 import { updateElementExtensions } from '@/components/bpmnProcessDesigner/package/utils'
+import HttpHeaderEditor from './HttpHeaderEditor.vue'
+
 defineOptions({ name: 'ServiceTask' })
 const props = defineProps({
   id: String,
@@ -136,6 +158,7 @@ const serviceTaskForm = ref({ ...DEFAULT_TASK_FORM })
 const httpTaskForm = ref({ ...DEFAULT_HTTP_FORM })
 const bpmnElement = ref()
 const httpInitializing = ref(false)
+const showHeaderEditor = ref(false)
 
 const bpmnInstances = () => (window as any)?.bpmnInstances
 
@@ -339,6 +362,10 @@ const handleExecuteTypeChange = (value: string) => {
     resetHttpForm()
   }
   updateElementTask()
+}
+
+const handleHeadersSave = (headersStr: string) => {
+  httpTaskForm.value.requestHeaders = headersStr
 }
 
 onBeforeUnmount(() => {
