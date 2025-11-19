@@ -255,6 +255,15 @@ const canShowIcon = (item: RouteLocationNormalizedLoaded) => {
   return false
 }
 
+const closeTabOnMouseMidClick = (e: MouseEvent, item) => {
+  // 中键：button === 1
+  if (e.button === 1) {
+    e.preventDefault()
+    e.stopPropagation()
+    closeSelectedTag(item)
+  }
+}
+
 onBeforeMount(() => {
   initTags()
   addTags()
@@ -293,6 +302,7 @@ watch(
             v-for="item in visitedViews"
             :key="item.fullPath"
             :ref="itemRefs.set"
+            @auxclick="closeTabOnMouseMidClick($event, item)"
             :class="[
               `${prefixCls}__item`,
               tagsViewImmerse ? `${prefixCls}__item--immerse` : '',
