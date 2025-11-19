@@ -38,15 +38,12 @@
     </el-form-item>
     <template v-if="serviceTaskForm.executeType === 'http'">
       <el-form-item label="请求方法" key="http-method">
-        <el-select v-model="httpTaskForm.requestMethod">
-          <el-option label="GET" value="GET" />
-          <el-option label="POST" value="POST" />
-          <el-option label="PUT" value="PUT" />
-          <el-option label="DELETE" value="DELETE" />
-          <!--          <el-option label="PATCH" value="PATCH" />-->
-          <!--          <el-option label="HEAD" value="HEAD" />-->
-          <!--          <el-option label="OPTIONS" value="OPTIONS" />-->
-        </el-select>
+        <el-radio-group v-model="httpTaskForm.requestMethod">
+          <el-radio-button label="GET" value="GET" />
+          <el-radio-button label="POST" value="POST" />
+          <el-radio-button label="PUT" value="PUT" />
+          <el-radio-button label="DELETE" value="DELETE" />
+        </el-radio-group>
       </el-form-item>
       <el-form-item label="请求地址" key="http-url" prop="requestUrl">
         <el-input v-model="httpTaskForm.requestUrl" clearable />
