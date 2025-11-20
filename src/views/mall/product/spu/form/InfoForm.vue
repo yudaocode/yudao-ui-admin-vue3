@@ -13,6 +13,19 @@
         type="textarea"
       />
     </el-form-item>
+    <el-form-item label="商品状态" prop="status">
+      <el-radio-group v-model="formData.status" class="w-80" placeholder="请选择商品状态" disabled>
+        <el-radio
+          v-for="item in getIntDictOptions(DICT_TYPE.PRODUCT_SPU_STATUS)"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-radio-group>
+    </el-form-item>
+    <el-form-item v-if="formData.status === 0">
+      商品创建时默认为【未上架】状态，需在【商品列表】中修改为【已上架】后，商品才会展示出来。
+    </el-form-item>
     <el-form-item label="商品分类" prop="categoryId">
       <el-cascader
         v-model="formData.categoryId"
@@ -67,6 +80,7 @@ import * as ProductCategoryApi from '@/api/mall/product/category'
 import { CategoryVO } from '@/api/mall/product/category'
 import * as ProductBrandApi from '@/api/mall/product/brand'
 import { BrandVO } from '@/api/mall/product/brand'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'ProductSpuInfoForm' })
 const props = defineProps({
@@ -82,6 +96,7 @@ const message = useMessage() // 消息弹窗
 const formRef = ref() // 表单 Ref
 const formData = reactive<Spu>({
   name: '', // 商品名称
+  status: 0, // 商品状态
   categoryId: undefined, // 商品分类
   keyword: '', // 关键字
   picUrl: '', // 商品封面图
