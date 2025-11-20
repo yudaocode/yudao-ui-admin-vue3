@@ -7,7 +7,7 @@ import formCreate from '@form-create/element-ui'
 // 编码表单 Conf
 export const encodeConf = (designerRef: object) => {
   // @ts-ignore
-  return JSON.stringify(designerRef.value.getOption())
+  return formCreate.toJson(designerRef.value.getOption())
 }
 
 // 编码表单 Fields
