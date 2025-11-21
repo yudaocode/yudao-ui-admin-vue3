@@ -574,3 +574,10 @@ const getSkuTableRef = () => {
 // 暴露出生成 sku 方法，给添加属性成功时调用
 defineExpose({ generateTableData, validateSku, getSkuTableRef })
 </script>
+<style>
+// 避免滚动条遮挡最后一行数据
+/*noinspection CssUnusedSymbol*/
+.el-table.tabNumWidth .el-scrollbar {
+  padding-bottom: 10px;
+}
+</style>
