@@ -8,7 +8,7 @@
       label-width="68px"
     >
       <el-form-item label="字典名称" prop="dictType">
-        <el-select v-model="queryParams.dictType" class="!w-240px">
+        <el-select v-model="queryParams.dictType" class="!w-240px" @change="dictChange">
           <el-option
             v-for="item in dictTypeList"
             :key="item.type"
@@ -169,6 +169,12 @@ const getList = async () => {
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
+}
+
+/** 字典类型更改同时更新列表数据 */
+const dictChange = (v) => {
+  queryParams.dictType = v
+  handleQuery()
 }
 
 /** 重置按钮操作 */
