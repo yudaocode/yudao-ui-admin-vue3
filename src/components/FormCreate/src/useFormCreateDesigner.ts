@@ -9,6 +9,7 @@ import {
 import { Ref } from 'vue'
 import { Menu } from '@/components/FormCreate/src/type'
 import { apiSelectRule } from '@/components/FormCreate/src/config/selectRule'
+import { generateUUID } from '@/utils'
 
 /**
  * 表单设计器增强 hook
@@ -93,9 +94,60 @@ export const useFormCreateDesigner = async (designer: Ref) => {
     designer.value?.addMenu(menu)
   }
 
+  /**
+   * 修复重复的字段 ID 问题
+   * 当复制组件时，自动为新组件生成新的字段 ID
+   *
+   * 对应 issue：https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues/ICM22X
+   */
+  const fixDuplicateFields = () => {
+    // 获取当前所有规则
+    const rules = designer.value?.getRule() || []
+    const fieldIds = new Set<string>()
+    let hasChanges = false
+
+    // 遍历所有规则，检测并修复重复的字段 ID
+    rules.forEach((rule: any) => {
+      if (rule.field) {
+        if (fieldIds.has(rule.field)) {
+          // 发现重复，生成新的ID
+          const oldField = rule.field
+          const newField = generateUUID()
+          console.log(`[FormCreate] 检测到重复字段ID: ${oldField}, 已自动更新为: ${newField}`)
+          rule.field = newField
+          hasChanges = true
+        } else {
+          fieldIds.add(rule.field)
+        }
+      }
+    })
+
+    // 如果有重复字段被修复，更新设计器
+    if (hasChanges) {
+      designer.value?.setRule(rules)
+    }
+
+    return hasChanges
+  }
+
   onMounted(async () => {
     await nextTick()
     buildFormComponents()
     buildSystemMenu()
+
+    // 监听设计器内容变化，自动修复重复字段ID
+    let isFixing = false // 防止无限循环
+    watch(
+      () => designer.value?.getRule(),
+      async () => {
+        if (!isFixing) {
+          isFixing = true
+          await nextTick()
+          fixDuplicateFields()
+          isFixing = false
+        }
+      },
+      { deep: true }
+    )
   })
 }
