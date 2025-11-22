@@ -115,7 +115,7 @@ const submitFormSuccess = (response: any) => {
 /** 上传错误提示 */
 const submitFormError = (): void => {
   message.error('上传失败，请您重新上传！')
-  formLoading.value = false
+  resetForm()
 }
 
 /** 重置表单 */
