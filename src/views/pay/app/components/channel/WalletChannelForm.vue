@@ -50,7 +50,7 @@ const formData = ref<any>({
   feeRate: 0,
   remark: '',
   config: {
-    name: 'mock-conf'
+    name: 'wallet-conf'
   }
 })
 const formRules = {
@@ -114,7 +114,7 @@ const resetForm = (appId, code) => {
     remark: '',
     feeRate: 0,
     config: {
-      name: 'mock-conf'
+      name: 'wallet-conf'
     }
   }
   formRef.value?.resetFields()
