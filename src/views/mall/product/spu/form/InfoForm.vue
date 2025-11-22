@@ -18,14 +18,14 @@
         v-model="formData.categoryId"
         :options="categoryList"
         :props="defaultProps"
-        class="w-80"
+        class="w-80!"
         clearable
         filterable
         placeholder="请选择商品分类"
       />
     </el-form-item>
     <el-form-item label="商品品牌" prop="brandId">
-      <el-select v-model="formData.brandId" class="w-80" placeholder="请选择商品品牌">
+      <el-select v-model="formData.brandId" class="w-80!" placeholder="请选择商品品牌">
         <el-option
           v-for="item in brandList"
           :key="item.id"
