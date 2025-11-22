@@ -48,7 +48,7 @@ const rules = reactive<FormRules>({
   mobile: [
     { required: true, message: t('profile.rules.phone'), trigger: 'blur' },
     {
-      pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
+      pattern: /^1[3-9]\d{9}$/,
       message: t('profile.rules.truephone'),
       trigger: 'blur'
     }
