@@ -73,6 +73,15 @@
         <template #title><Icon icon="ep:timer" />时间事件</template>
         <TimeEventConfig :businessObject="bpmnElement.value?.businessObject" :key="elementId" />
       </el-collapse-item>
+      <!-- 信号/消息事件配置项 -->
+      <el-collapse-item v-if="signalMessageEventVisible" name="signalMessageEvent" key="signalMessageEvent">
+        <template #title><Icon icon="ep:message" />信号/消息</template>
+        <EventSignalMessage
+          :businessObject="bpmnElement.value?.businessObject"
+          :elementId="elementId"
+          :key="elementId"
+        />
+      </el-collapse-item>
     </el-collapse>
   </div>
 </template>
@@ -89,6 +98,7 @@ import ElementProperties from './properties/ElementProperties.vue'
 import UserTaskListeners from './listeners/UserTaskListeners.vue'
 import { getTaskCollapseItemName, isTaskCollapseItemShow } from './task/data'
 import TimeEventConfig from './time-event-config/TimeEventConfig.vue'
+import EventSignalMessage from './signal-message/EventSignalMessage.vue'
 import { ref, watch, onMounted } from 'vue'
 
 defineOptions({ name: 'MyPropertiesPanel' })
@@ -125,6 +135,7 @@ const elementType = ref('')
 const elementBusinessObject = ref<any>({}) // 元素 businessObject 镜像，提供给需要做判断的组件使用
 const conditionFormVisible = ref(false) // 流转条件设置
 const formVisible = ref(false) // 表单配置
+const signalMessageEventVisible = ref(false) // 信号/消息事件配置
 const bpmnElement = ref()
 const isReady = ref(false)
 
@@ -247,6 +258,13 @@ const initFormOnChanged = (element) => {
       activatedElement.source.type.indexOf('StartEvent') === -1
     )
     formVisible.value = elementType.value === 'UserTask' || elementType.value === 'StartEvent'
+
+    // 检查是否有信号或消息事件定义
+    const eventDefinitions = activatedElement.businessObject?.eventDefinitions || []
+    signalMessageEventVisible.value = eventDefinitions.some(
+      (def) =>
+        def.$type === 'bpmn:SignalEventDefinition' || def.$type === 'bpmn:MessageEventDefinition'
+    )
   } catch (error) {
     console.error('初始化表单数据失败:', error)
   }
