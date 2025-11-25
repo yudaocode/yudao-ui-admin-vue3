@@ -57,7 +57,7 @@ export const useApiSelect = (option: ApiSelectProps) => {
         type: String,
         default: 'label'
       },
-      // 返回值类型（用于部门选择器等）：id 返回ID，name 返回名称
+      // 返回值类型（用于部门选择器等）：id 返回 ID，name 返回名称
       returnType: {
         type: String,
         default: 'id'

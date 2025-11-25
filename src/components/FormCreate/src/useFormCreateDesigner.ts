@@ -65,7 +65,7 @@ export const useFormCreateDesigner = async (designer: Ref) => {
         title: '返回值类型',
         value: 'id',
         options: [
-          { label: '部门ID', value: 'id' },
+          { label: '部门编号', value: 'id' },
           { label: '部门名称', value: 'name' }
         ]
       }
