@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-form-item label="执行方式" key="executeType">
+    <el-form-item label="执行类型" key="executeType">
       <el-select v-model="serviceTaskForm.executeType" @change="handleExecuteTypeChange">
         <el-option label="Java类" value="class" />
         <el-option label="表达式" value="expression" />
@@ -30,7 +30,11 @@
       prop="delegateExpression"
       key="execute-delegate"
     >
-      <el-input v-model="serviceTaskForm.delegateExpression" clearable @change="updateElementTask" />
+      <el-input
+        v-model="serviceTaskForm.delegateExpression"
+        clearable
+        @change="updateElementTask"
+      />
     </el-form-item>
     <template v-if="serviceTaskForm.executeType === 'http'">
       <el-form-item label="请求方法" key="http-method">
