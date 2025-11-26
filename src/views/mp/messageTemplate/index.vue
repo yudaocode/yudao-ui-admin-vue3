@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="模版消息" url="https://doc.iocoder.cn/mp/message-template/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
