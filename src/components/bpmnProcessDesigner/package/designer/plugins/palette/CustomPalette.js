@@ -89,6 +89,7 @@ F.prototype.getPaletteEntries = function () {
     create.start(event, elementFactory.createParticipantShape())
   }
 
+
   assign(actions, {
     'hand-tool': {
       group: 'tools',
