@@ -45,7 +45,7 @@
         <el-input v-model="formData.agentId" placeholder="授权方的网页应用 ID，有则填" />
       </el-form-item>
       <el-form-item label="publicKey" prop="publicKey" v-if="formData!.socialType === 40">
-        <el-input v-model="formData.publicKey" placeholder="publicKey公钥" />
+        <el-input v-model="formData.publicKey" placeholder="publicKey 公钥" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
