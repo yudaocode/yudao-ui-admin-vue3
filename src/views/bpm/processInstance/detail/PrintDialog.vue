@@ -30,7 +30,11 @@ const open = async (id: string) => {
 defineExpose({ open })
 
 const parseFormFields = () => {
-  const formFieldsObj = decodeFields(printData.value.processInstance.processDefinition.formFields)
+  if (!printData.value) return
+
+  const formFieldsObj = decodeFields(
+    printData.value.processInstance.processDefinition?.formFields || []
+  )
   const processVariables = printData.value.processInstance.formVariables
   let res: any = []
   for (const item of formFieldsObj) {
