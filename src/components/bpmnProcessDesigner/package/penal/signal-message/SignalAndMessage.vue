@@ -19,7 +19,7 @@
             link
             size="small"
             style="color: #ff4d4f"
-            @click="removeObject('message', scope.row, scope.$index)"
+            @click="removeObject('message', scope.row)"
           >
             移除
           </el-button>
@@ -47,7 +47,7 @@
             link
             size="small"
             style="color: #ff4d4f"
-            @click="removeObject('signal', scope.row, scope.$index)"
+            @click="removeObject('signal', scope.row)"
           >
             移除
           </el-button>
@@ -110,6 +110,14 @@ const modelConfig = computed(() => {
 })
 const bpmnInstances = () => (window as any)?.bpmnInstances
 
+// 生成规范化的ID
+const generateStandardId = (type: string): string => {
+  const prefix = type === 'message' ? 'Message_' : 'Signal_'
+  const timestamp = Date.now()
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase()
+  return `${prefix}${timestamp}_${random}`
+}
+
 const initDataList = () => {
   console.log(window, 'window')
   rootElements.value = bpmnInstances().modeler.getDefinitions().rootElements
@@ -131,7 +139,10 @@ const initDataList = () => {
 const openModel = (type) => {
   modelType.value = type
   editingIndex.value = -1
-  modelObjectForm.value = {}
+  modelObjectForm.value = {
+    id: generateStandardId(type),
+    name: ''
+  }
   dialogVisible.value = true
 }
 
@@ -189,7 +200,7 @@ const addNewObject = () => {
   initDataList()
 }
 
-const removeObject = (type, row, index) => {
+const removeObject = (type, row) => {
   ElMessageBox.confirm(`确认移除该${type === 'message' ? '消息' : '信号'}吗？`, '提示', {
     confirmButtonText: '确 认',
     cancelButtonText: '取 消'
