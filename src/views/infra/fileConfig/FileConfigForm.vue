@@ -103,6 +103,10 @@
           <el-radio key="false" :value="false">私有</el-radio>
         </el-radio-group>
       </el-form-item>
+      <el-form-item v-if="formData.storage === 20" label="区域">
+        <!-- 选填，无需参数校验 -->
+        <el-input v-model="formData.config.region" placeholder="请填写区域，一般仅 AWS 需要填写" />
+      </el-form-item>
       <!-- 通用 -->
       <el-form-item v-if="formData.storage === 20" label="自定义域名">
         <!-- 无需参数校验，所以去掉 prop -->

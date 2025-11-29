@@ -13,6 +13,7 @@ export interface FileClientConfig {
   accessSecret?: string
   enablePathStyleAccess?: boolean
   enablePublicAccess?: boolean
+  region?: string
   domain: string
 }
 
