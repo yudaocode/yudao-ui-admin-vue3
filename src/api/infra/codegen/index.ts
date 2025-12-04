@@ -82,13 +82,30 @@ export const syncCodegenFromDB = (id: number) => {
 }
 
 // 预览生成代码
-export const previewCodegen = (id: number) => {
-  return request.get({ url: '/infra/codegen/preview?tableId=' + id })
+export const previewCodegen = (id: number, ignoreDuplicatedClassName: boolean) => {
+  return request.get({
+    url:
+      '/infra/codegen/preview?tableId=' +
+      id +
+      '&ignoreDuplicatedClassName=' +
+      ignoreDuplicatedClassName
+  })
+}
+
+// 预览生成代码
+export const isClassNameDuplicated = (className: string) => {
+  return request.get({ url: '/infra/codegen/is-class-name-duplicated?className=' + className })
 }
 
 // 下载生成代码
-export const downloadCodegen = (id: number) => {
-  return request.download({ url: '/infra/codegen/download?tableId=' + id })
+export const downloadCodegen = (id: number, ignoreDuplicatedClassName: boolean) => {
+  return request.download({
+    url:
+      '/infra/codegen/download?tableId=' +
+      id +
+      '&ignoreDuplicatedClassName=' +
+      ignoreDuplicatedClassName
+  })
 }
 
 // 获得表定义

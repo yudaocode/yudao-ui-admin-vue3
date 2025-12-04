@@ -225,8 +225,13 @@ const handleUpdate = (id: number) => {
 
 /** 预览操作 */
 const previewRef = ref()
-const handlePreview = (row: CodegenApi.CodegenTableVO) => {
-  previewRef.value.open(row.id)
+const handlePreview = async (row: CodegenApi.CodegenTableVO) => {
+  if (await CodegenApi.isClassNameDuplicated(row.className)) {
+    if (!(await message.confirm('当前表的类名称已重复，确定要预览么？'))) {
+      return
+    }
+  }
+  previewRef.value.open(row.id, true)
 }
 
 /** 删除按钮操作 */
@@ -274,7 +279,12 @@ const handleSyncDB = async (row: CodegenApi.CodegenTableVO) => {
 
 /** 生成代码操作 */
 const handleGenTable = async (row: CodegenApi.CodegenTableVO) => {
-  const res = await CodegenApi.downloadCodegen(row.id)
+  if (await CodegenApi.isClassNameDuplicated(row.className)) {
+    if (!(await message.confirm('当前表的类名称已重复，确定要继续生成代码么？'))) {
+      return
+    }
+  }
+  const res = await CodegenApi.downloadCodegen(row.id, true)
   download.zip(res, 'codegen-' + row.className + '.zip')
 }
 
