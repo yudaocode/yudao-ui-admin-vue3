@@ -75,6 +75,9 @@ const tabActivation = computed(() => (tab: string) => activeTab.value === tab)
 const productBrowsingHistoryRef = ref<InstanceType<typeof ProductBrowsingHistory>>()
 const orderBrowsingHistoryRef = ref<InstanceType<typeof OrderBrowsingHistory>>()
 const handleClick = async (tab: string) => {
+  if (isEmpty(conversation)) {
+    return
+  }
   activeTab.value = tab
   await nextTick()
   await getHistoryList()
