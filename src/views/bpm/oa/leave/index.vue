@@ -141,6 +141,7 @@
             取消
           </el-button>
           <el-button
+            v-if="scope.row.status !== 1"
             v-hasPermi="['bpm:oa-leave:create']"
             link
             type="primary"
