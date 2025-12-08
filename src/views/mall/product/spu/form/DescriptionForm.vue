@@ -4,7 +4,7 @@
     <!--富文本编辑器组件-->
     <el-form-item label="商品详情" prop="description">
       <Editor v-if="!isDetail" v-model:modelValue="formData.description" />
-      <Editor :modelValue="formData.description" readonly />
+      <Editor v-else :modelValue="formData.description" readonly />
     </el-form-item>
   </el-form>
 </template>
