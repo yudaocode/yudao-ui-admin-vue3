@@ -220,7 +220,7 @@ const handleReCreate = (row: LeaveApi.LeaveVO) => {
   router.push({
     name: 'OALeaveCreate',
     query: {
-      id: row.id
+      oldId: row.id
     }
   })
 }
