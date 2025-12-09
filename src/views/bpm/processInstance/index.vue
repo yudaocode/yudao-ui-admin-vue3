@@ -290,7 +290,7 @@ const handleCreate = async (row?: ProcessInstanceVO) => {
     } else if (processDefinitionDetail.formType === 10) {
       //如果是【流程表单】，跳转到流程发起界面
       await router.push({
-        name: 'BpmProcessInstanceDynamicFormCreate',
+        name: 'BpmProcessInstanceCreate',
         query: { processInstanceId: row.id }
       })
     }
