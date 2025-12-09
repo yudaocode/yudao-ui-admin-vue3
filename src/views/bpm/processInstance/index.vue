@@ -275,21 +275,26 @@ const resetQuery = () => {
 
 /** 发起流程操作 **/
 const handleCreate = async (row?: ProcessInstanceVO) => {
-  // 如果是【业务表单】，不支持重新发起
   if (row?.id) {
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
       row.processDefinitionId
     )
+    //如果是【业务表单】，跳转到对应的发起界面
     if (processDefinitionDetail.formType === 20) {
-      message.error('重新发起流程失败，原因：该流程使用业务表单，不支持重新发起')
-      return
+      await router.push({
+        path: processDefinitionDetail.formCustomCreatePath,
+        query: {
+          id: row.businessKey
+        }
+      })
+    } else if (processDefinitionDetail.formType === 10) {
+      //如果是【流程表单】，跳转到流程发起界面
+      await router.push({
+        name: 'BpmProcessInstanceCreate',
+        query: { processInstanceId: row.id }
+      })
     }
   }
-  // 跳转发起流程界面
-  await router.push({
-    name: 'BpmProcessInstanceCreate',
-    query: { processInstanceId: row?.id }
-  })
 }
 
 /** 查看详情 */
