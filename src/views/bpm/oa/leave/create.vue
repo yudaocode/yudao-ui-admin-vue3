@@ -195,17 +195,15 @@ const daysDifference = () => {
 const getLeaveData = async (id: number) => {
   formLoading.value = true
   const data = await LeaveApi.getLeave(id)
-  if(!data){
+  if (!data) {
     message.error('重新发起请假失败，原因：请假数据不存在')
     return
   }
-  if (data) {
-    formData.value = {
-      type: data.type,
-      reason: data.reason,
-      startTime: data.startTime,
-      endTime: data.endTime
-    }
+  formData.value = {
+    type: data.type,
+    reason: data.reason,
+    startTime: data.startTime,
+    endTime: data.endTime
   }
   formLoading.value = false
 }
