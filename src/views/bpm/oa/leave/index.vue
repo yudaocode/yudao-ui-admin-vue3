@@ -145,7 +145,7 @@
             v-hasPermi="['bpm:oa-leave:create']"
             link
             type="primary"
-            @click="handleReInitiate(scope.row)"
+            @click="handleReCreate(scope.row)"
           >
             重新发起
           </el-button>
@@ -216,12 +216,11 @@ const handleCreate = () => {
 }
 
 /** 重新发起操作 */
-const handleReInitiate = (row: LeaveApi.LeaveVO) => {
+const handleReCreate = (row: LeaveApi.LeaveVO) => {
   router.push({
     name: 'OALeaveCreate',
     query: {
-      id: row.id,
-      processInstanceId: row.processInstanceId
+      id: row.id
     }
   })
 }
