@@ -187,9 +187,29 @@ const openForm = () => {
 
 /** 复制到剪贴板方法 */
 const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text).then(() => {
-    message.success('复制成功')
-  })
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        message.success('复制成功')
+      })
+      .catch(() => {
+        message.error('复制失败')
+      })
+  } else {
+    // 兼容不支持 clipboard 的情况
+    try {
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      message.success('复制成功')
+    } catch (error) {
+      message.error('复制失败')
+    }
+  }
 }
 
 /** 删除按钮操作 */
