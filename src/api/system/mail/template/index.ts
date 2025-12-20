@@ -1,16 +1,14 @@
 import request from '@/config/axios'
 
 export interface MailTemplateVO {
-  id: number
+  id?: number
   name: string
   code: string
   accountId: number
   nickname: string
   title: string
   content: string
-  params: string
   status: number
-  remark: string
 }
 
 export interface MailSendReqVO {

@@ -43,9 +43,6 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" placeholder="请输入备注" type="textarea" />
-      </el-form-item>
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -76,8 +73,7 @@ const formData = ref({
   nickname: '',
   title: '',
   content: '',
-  status: CommonStatusEnum.ENABLE,
-  remark: ''
+  status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({
   accountId: [{ required: true, message: '邮箱账号不能为空', trigger: 'change' }],
@@ -118,7 +114,7 @@ const submitForm = async () => {
   if (!valid) return
   formLoading.value = true
   try {
-    const data = formData.value as MailTemplateApi.MailTemplateVO
+    const data = formData.value as unknown as MailTemplateApi.MailTemplateVO
     if (formType.value === 'create') {
       await MailTemplateApi.createMailTemplate(data)
       message.success(t('common.createSuccess'))
@@ -144,8 +140,7 @@ const resetForm = () => {
     nickname: '',
     title: '',
     content: '',
-    status: CommonStatusEnum.ENABLE,
-    remark: ''
+    status: CommonStatusEnum.ENABLE
   }
   formRef.value?.resetFields()
 }
