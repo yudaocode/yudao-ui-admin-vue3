@@ -21,7 +21,7 @@
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="手续费比例">
-        {{ (detailData.channelFeeRate / 100.0).toFixed(2) }}%
+        {{ detailData.channelFeeRate.toFixed(2) }}%
       </el-descriptions-item>
       <el-descriptions-item label="支付时间">
         {{ formatDate(detailData.successTime) }}
