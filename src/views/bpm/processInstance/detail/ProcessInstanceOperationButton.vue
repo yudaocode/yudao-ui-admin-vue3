@@ -582,7 +582,7 @@ const approveReasonForm = reactive({
 const approveReasonRule = computed(() => {
   return {
     reason: [
-      { required: reasonRequire.value, message: nodeTypeName + '意见不能为空', trigger: 'blur' }
+      { required: reasonRequire.value, message: nodeTypeName.value + '意见不能为空', trigger: 'blur' }
     ],
     signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
     nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
