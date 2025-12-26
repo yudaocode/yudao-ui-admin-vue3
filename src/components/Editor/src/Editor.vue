@@ -8,6 +8,7 @@ import { ElMessage } from 'element-plus'
 import { useLocaleStore } from '@/store/modules/locale'
 import { getRefreshToken, getTenantId } from '@/utils/auth'
 import { getUploadUrl } from '@/components/UploadFile/src/useUpload'
+import merge from 'lodash-es/merge'
 
 defineOptions({ name: 'Editor' })
 
@@ -60,7 +61,11 @@ watch(
 )
 watch(
   () => props.readonly,
-  (val) => {
+  async (val) => {
+    // 特殊：等待 editorRef 渲染完成
+    if (!editorRef.value) {
+      await nextTick()
+    }
     if (val) {
       editorRef.value?.disable()
     } else {
@@ -75,7 +80,7 @@ const handleCreated = (editor: IDomEditor) => {
 
 // 编辑器配置
 const editorConfig = computed((): IEditorConfig => {
-  return Object.assign(
+  return merge(
     {
       placeholder: '请输入内容...',
       readOnly: props.readonly,
