@@ -192,7 +192,7 @@ const daysDifference = () => {
 }
 
 /** 获取请假数据，用于重新发起时自动填充 */
-const getLeaveData = async (id: number) => {
+const getDetail = async (id: number) => {
   try {
     formLoading.value = true
     const data = await LeaveApi.getLeave(id)
@@ -228,7 +228,7 @@ onMounted(async () => {
 
   // 如果有业务编号，说明是重新发起，需要加载原有数据
   if (query.id) {
-    await getLeaveData(Number(query.id))
+    await getDetail(Number(query.id))
   }
 
   // 审批相关：加载最新的审批详情，主要用于节点预测
