@@ -79,6 +79,7 @@ defineOptions({ name: 'BpmOALeaveCreate' })
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
 const { push, currentRoute } = useRouter() // 路由
+const { query } = useRoute() // 查询参数
 
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
@@ -190,6 +191,26 @@ const daysDifference = () => {
   return Math.floor(diffTime / oneDay)
 }
 
+/** 获取请假数据，用于重新发起时自动填充 */
+const getLeaveData = async (id: number) => {
+  try {
+    formLoading.value = true
+    const data = await LeaveApi.getLeave(id)
+    if (!data) {
+      message.error('重新发起请假失败，原因：请假数据不存在')
+      return
+    }
+    formData.value = {
+      type: data.type,
+      reason: data.reason,
+      startTime: data.startTime,
+      endTime: data.endTime
+    }
+  } finally {
+    formLoading.value = false
+  }
+}
+
 /** 初始化 */
 onMounted(async () => {
   // TODO @小北：这里可以简化，统一通过 getApprovalDetail 处理么？
@@ -204,6 +225,11 @@ onMounted(async () => {
   }
   processDefinitionId.value = processDefinitionDetail.id
   startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
+
+  // 如果有业务编号，说明是重新发起，需要加载原有数据
+  if (query.id) {
+    await getLeaveData(Number(query.id))
+  }
 
   // 审批相关：加载最新的审批详情，主要用于节点预测
   await getApprovalDetail()
