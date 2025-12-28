@@ -17,7 +17,7 @@ const props = defineProps({
 })
 
 const message = useMessage() // 消息弹窗
-const { copy } = useClipboard() // 初始化 copy 到粘贴板
+const { copy } = useClipboard({ legacy: true }) // 初始化 copy 到粘贴板
 const contentRef = ref()
 
 const md = new MarkdownIt({

@@ -54,18 +54,23 @@
 <script setup lang="ts">
 import ProductForm from '@/views/iot/product/product/ProductForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
+import { useClipboard } from '@vueuse/core'
 
 const message = useMessage()
+const { t } = useI18n() // 国际化
 
 const { product } = defineProps<{ product: ProductVO }>() // 定义 Props
 
 /** 复制到剪贴板方法 */
 const copyToClipboard = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text)
-    message.success('复制成功')
-  } catch (error) {
-    message.error('复制失败')
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: text })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+    return
+  }
+  await copy()
+  if (unref(copied)) {
+    message.success(t('common.copySuccess'))
   }
 }
 
