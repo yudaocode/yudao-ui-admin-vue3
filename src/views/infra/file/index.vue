@@ -136,6 +136,7 @@ import { fileSizeFormatter } from '@/utils'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FileApi from '@/api/infra/file'
 import FileForm from './FileForm.vue'
+import { useClipboard } from '@vueuse/core'
 
 defineOptions({ name: 'InfraFile' })
 
@@ -186,29 +187,15 @@ const openForm = () => {
 }
 
 /** 复制到剪贴板方法 */
-const copyToClipboard = (text: string) => {
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        message.success('复制成功')
-      })
-      .catch(() => {
-        message.error('复制失败')
-      })
-  } else {
-    // 兼容不支持 clipboard 的情况
-    try {
-      const textarea = document.createElement('textarea')
-      textarea.value = text
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
-      message.success('复制成功')
-    } catch (error) {
-      message.error('复制失败')
-    }
+const copyToClipboard = async (text: string) => {
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: text })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+    return
+  }
+  await copy()
+  if (unref(copied)) {
+    message.success(t('common.copySuccess'))
   }
 }
 

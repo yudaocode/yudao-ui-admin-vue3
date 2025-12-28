@@ -126,7 +126,7 @@ import userAvatarDefaultImg from '@/assets/imgs/avatar.gif'
 import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 
 const message = useMessage() // 消息弹窗
-const { copy } = useClipboard() // 初始化 copy 到粘贴板
+const { copy } = useClipboard({ legacy: true }) // 初始化 copy 到粘贴板
 const userStore = useUserStore()
 
 // 判断“消息列表”滚动的位置(用于判断是否需要滚动到消息最下方)
