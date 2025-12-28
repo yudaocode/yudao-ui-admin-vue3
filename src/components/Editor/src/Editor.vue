@@ -28,7 +28,8 @@ const props = defineProps({
     default: () => undefined
   },
   readonly: propTypes.bool.def(false),
-  modelValue: propTypes.string.def('')
+  modelValue: propTypes.string.def(''),
+  directory: propTypes.string.def('editor-default')
 })
 
 const emit = defineEmits(['change', 'update:modelValue'])
@@ -115,9 +116,9 @@ const editorConfig = computed((): IEditorConfig => {
         ['uploadImage']: {
           server: getUploadUrl(),
           // 单个文件的最大体积限制，默认为 2M
-          maxFileSize: 5 * 1024 * 1024,
+          maxFileSize: 10 * 1024 * 1024,
           // 最多可上传几个文件，默认为 100
-          maxNumberOfFiles: 10,
+          maxNumberOfFiles: 100,
           // 选择文件时的类型限制，默认为 ['image/*'] 。如不想限制，则设置为 []
           allowedFileTypes: ['image/*'],
 
@@ -133,6 +134,19 @@ const editorConfig = computed((): IEditorConfig => {
 
           // form-data fieldName，后端接口参数名称，默认值wangeditor-uploaded-image
           fieldName: 'file',
+          // 附加参数
+          meta: {
+            directory: `${props.directory}-image`
+          },
+          metaWithUrl: false,
+
+          // uppy 配置项
+          uppyConfig: {
+            onBeforeFileAdded: (newFile: any) => {
+              newFile.id = `${newFile.id}-${Date.now()}`
+              return newFile
+            }
+          },
 
           // 上传之前触发
           onBeforeUpload(file: File) {
@@ -163,7 +177,7 @@ const editorConfig = computed((): IEditorConfig => {
         ['uploadVideo']: {
           server: getUploadUrl(),
           // 单个文件的最大体积限制，默认为 10M
-          maxFileSize: 10 * 1024 * 1024,
+          maxFileSize: 1024 * 1024 * 1024,
           // 最多可上传几个文件，默认为 100
           maxNumberOfFiles: 10,
           // 选择文件时的类型限制，默认为 ['video/*'] 。如不想限制，则设置为 []
@@ -181,6 +195,19 @@ const editorConfig = computed((): IEditorConfig => {
 
           // form-data fieldName，后端接口参数名称，默认值wangeditor-uploaded-image
           fieldName: 'file',
+          // 附加参数
+          meta: {
+            directory: `${props.directory}-video`
+          },
+          metaWithUrl: false,
+
+          // uppy 配置项
+          uppyConfig: {
+            onBeforeFileAdded: (newFile: any) => {
+              newFile.id = `${newFile.id}-${Date.now()}`
+              return newFile
+            }
+          },
 
           // 上传之前触发
           onBeforeUpload(file: File) {
