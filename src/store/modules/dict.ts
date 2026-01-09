@@ -46,6 +46,9 @@ export const useDictStore = defineStore('dict', {
         this.isSetDict = true
       } else {
         const res = await getSimpleDictDataList()
+        if (!res || res.length === 0) {
+          return
+        }
         // 设置数据
         const dictDataMap = new Map<string, any>()
         res.forEach((dictData: DictDataVO) => {
@@ -76,6 +79,9 @@ export const useDictStore = defineStore('dict', {
     async resetDict() {
       wsCache.delete(CACHE_KEY.DICT_CACHE)
       const res = await getSimpleDictDataList()
+      if (!res || res.length === 0) {
+        return
+      }
       // 设置数据
       const dictDataMap = new Map<string, any>()
       res.forEach((dictData: DictDataVO) => {
