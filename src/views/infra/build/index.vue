@@ -136,7 +136,7 @@ const makeTemplate = () => {
 /** 复制 **/
 const copy = async (text: string) => {
   const textToCopy = JSON.stringify(text, null, 2)
-  const { copy, copied, isSupported } = useClipboard({ source: textToCopy })
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: textToCopy })
   if (!isSupported) {
     message.error(t('common.copyError'))
   } else {

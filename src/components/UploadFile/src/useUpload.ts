@@ -1,5 +1,9 @@
 import * as FileApi from '@/api/infra/file'
-import { UploadRawFile, UploadRequestOptions, UploadProgressEvent } from 'element-plus/es/components/upload/src/upload'
+import {
+  UploadRawFile,
+  UploadRequestOptions,
+  UploadProgressEvent
+} from 'element-plus/es/components/upload/src/upload'
 import axios, { AxiosProgressEvent } from 'axios'
 
 /**
@@ -19,7 +23,7 @@ export const useUpload = (directory?: string) => {
     // 文件上传进度监听
     const uploadProgressHandler = (evt: AxiosProgressEvent) => {
       const upEvt: UploadProgressEvent = Object.assign(evt.event)
-      upEvt.percent = evt.progress ? (evt.progress * 100) : 0
+      upEvt.percent = evt.progress ? evt.progress * 100 : 0
       options.onProgress(upEvt) // 触发 el-upload 的 on-progress
     }
 
@@ -33,7 +37,7 @@ export const useUpload = (directory?: string) => {
       return axios
         .put(presignedInfo.uploadUrl, options.file, {
           headers: {
-            'Content-Type': options.file.type
+            'Content-Type': options.file.type || 'application/octet-stream'
           },
           onUploadProgress: uploadProgressHandler
         })
@@ -80,7 +84,7 @@ function createFile(vo: FileApi.FilePresignedUrlRespVO, file: UploadRawFile, fil
     url: vo.url,
     path: vo.path,
     name: fileName,
-    type: file.type,
+    type: file.type || 'application/octet-stream',
     size: file.size
   }
   FileApi.createFile(fileVo)

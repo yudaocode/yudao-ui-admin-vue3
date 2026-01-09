@@ -140,8 +140,10 @@ import { DeviceVO } from '@/api/iot/device/device'
 import { DeviceApi, IotDeviceAuthInfoVO } from '@/api/iot/device/device'
 import Map from '@/components/Map/index.vue'
 import { ref, computed } from 'vue'
+import { useClipboard } from '@vueuse/core'
 
 const message = useMessage() // 消息提示
+const { t } = useI18n() // 国际化
 
 const { product, device } = defineProps<{ product: ProductVO; device: DeviceVO }>() // 定义 Props
 const emit = defineEmits(['refresh']) // 定义 Emits
@@ -165,11 +167,14 @@ const getLocationString = () => {
 
 /** 复制到剪贴板方法 */
 const copyToClipboard = async (text: string) => {
-  try {
-    await navigator.clipboard.writeText(text)
-    message.success('复制成功')
-  } catch (error) {
-    message.error('复制失败')
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: text })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+    return
+  }
+  await copy()
+  if (unref(copied)) {
+    message.success(t('common.copySuccess'))
   }
 }
 
