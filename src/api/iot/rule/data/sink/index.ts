@@ -10,6 +10,8 @@ export interface DataSinkVO {
   type?: number // 桥梁类型
   config?:
     | HttpConfig
+    | TcpConfig
+    | WebSocketConfig
     | MqttConfig
     | RocketMQConfig
     | KafkaMQConfig
@@ -28,6 +30,38 @@ export interface HttpConfig extends Config {
   headers: Record<string, string>
   query: Record<string, string>
   body: string
+}
+
+/** TCP 配置 */
+export interface TcpConfig extends Config {
+  host: string
+  port: number
+  connectTimeoutMs: number
+  readTimeoutMs: number
+  ssl: boolean
+  sslCertPath: string
+  dataFormat: string
+  heartbeatIntervalMs: number
+  reconnectIntervalMs: number
+  maxReconnectAttempts: number
+}
+
+/** WebSocket 配置 */
+export interface WebSocketConfig extends Config {
+  serverUrl: string
+  connectTimeoutMs: number
+  sendTimeoutMs: number
+  heartbeatIntervalMs: number
+  heartbeatMessage: string
+  subprotocols: string
+  customHeaders: string
+  verifySslCert: boolean
+  dataFormat: string
+  reconnectIntervalMs: number
+  maxReconnectAttempts: number
+  enableCompression: boolean
+  sendRetryCount: number
+  sendRetryIntervalMs: number
 }
 
 /** MQTT 配置 */
