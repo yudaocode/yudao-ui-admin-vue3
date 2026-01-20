@@ -1,5 +1,5 @@
-<!-- 地图组件：基于百度地图GL实现 -->
-<!-- TODO @super：还存在两个没解决的小bug,一个是修改手动定位时一次加载 不知道为何定位点在地图左上角 调了半天没解决 第二个是检索地址确定定位的功能参照百度的文档没也搞好 回头再解决一下 -->
+<!-- 地图组件：基于百度地图 GL 实现 -->
+<!-- TODO @AI：还存在两个没解决的小bug,一个是修改手动定位时一次加载 不知道为何定位点在地图左上角 调了半天没解决 第二个是检索地址确定定位的功能参照百度的文档没也搞好 回头再解决一下 -->
 <template>
   <div v-if="props.isWrite">
     <el-form ref="form" label-width="120px">
@@ -73,6 +73,7 @@ const props = defineProps({
 
 watch(
   () => props.center,
+  // TODO @AI：这里有个 linter 报错
   (newVal, oldVal) => {
     if (newVal) {
       // 当 center 变化时 重新加载mark点
@@ -100,7 +101,7 @@ const loadMap = () => {
     initGeocoder()
     initAutoComplete()
 
-    // TODO @super：这里加一行注释
+    // TODO @AI：这里加一行注释
     if (props.clickMap) {
       state.map.addEventListener('click', (e: any) => {
         console.log(e)
@@ -194,9 +195,10 @@ const handleAddressSelect = (value: string) => {
  * 添加标记点
  * @param lnglat 经纬度数组
  */
-// TODO @super：拼写；尽量不要有 idea 绿色提醒哈
 const setMarker = (lnglat: any) => {
-  if (!lnglat) return
+  if (!lnglat) {
+    return
+  }
 
   // 如果点标记已存在则先移除原点
   if (state.mapMarker !== null) {
@@ -217,14 +219,14 @@ const setMarker = (lnglat: any) => {
  * 经纬度转化为地址、添加标记点
  * @param lonLat 经度,纬度字符串
  */
-// TODO @super：拼写；尽量不要有 idea 绿色提醒哈
 const regeoCode = (lonLat: string) => {
-  if (!lonLat) return
-
-  // TODO @super：拼写；尽量不要有 idea 绿色提醒哈
+  if (!lonLat) {
+    return
+  }
   const lnglat = lonLat.split(',')
-  if (lnglat.length !== 2) return
-
+  if (lnglat.length !== 2) {
+    return
+  }
   state.longitude = lnglat[0]
   state.latitude = lnglat[1]
 
@@ -241,7 +243,6 @@ const regeoCode = (lonLat: string) => {
   getAddress(lnglat)
 }
 
-// TODO @super：lnglat 拼写
 /**
  * 根据经纬度获取地址信息
  *
@@ -266,6 +267,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+// @AI：尽量 unocss 简化掉；
 .mapContainer {
   width: 100%;
   height: 400px;

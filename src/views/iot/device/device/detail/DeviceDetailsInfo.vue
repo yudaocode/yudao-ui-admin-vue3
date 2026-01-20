@@ -20,9 +20,6 @@
               <el-descriptions-item label="设备类型">
                 <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
               </el-descriptions-item>
-              <el-descriptions-item label="定位类型">
-                <dict-tag :type="DICT_TYPE.IOT_LOCATION_TYPE" :value="device.locationType" />
-              </el-descriptions-item>
               <el-descriptions-item label="DeviceName">
                 {{ device.deviceName }}
               </el-descriptions-item>
@@ -67,6 +64,7 @@
               </div>
             </template>
             <div class="h-[400px] w-full">
+              <!-- TODO @AI：是不是可以通过 getLocationString() 简化判断； -->
               <Map v-if="showMap" :center="getLocationString()" class="h-full w-full" />
               <div
                 v-else

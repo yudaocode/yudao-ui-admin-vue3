@@ -66,44 +66,31 @@
           <el-form-item label="设备序列号" prop="serialNumber">
             <el-input v-model="formData.serialNumber" placeholder="请输入设备序列号" />
           </el-form-item>
-          <el-form-item label="定位类型" prop="locationType">
-            <el-radio-group v-model="formData.locationType">
-              <el-radio
-                v-for="dict in getIntDictOptions(DICT_TYPE.IOT_LOCATION_TYPE)"
-                :key="dict.value"
-                :label="dict.value"
-              >
-                {{ dict.label }}
-              </el-radio>
-            </el-radio-group>
+          <el-form-item label="设备经度" prop="longitude" type="number">
+            <el-input
+              v-model="formData.longitude"
+              placeholder="请输入设备经度"
+              @blur="updateLocationFromCoordinates"
+            />
           </el-form-item>
-          <!-- LocationTypeEnum.MANUAL：手动定位 -->
-          <template v-if="LocationTypeEnum.MANUAL === formData.locationType">
-            <el-form-item label="设备经度" prop="longitude" type="number">
-              <el-input
-                v-model="formData.longitude"
-                placeholder="请输入设备经度"
-                @blur="updateLocationFromCoordinates"
-              />
-            </el-form-item>
-            <el-form-item label="设备维度" prop="latitude" type="number">
-              <el-input
-                v-model="formData.latitude"
-                placeholder="请输入设备维度"
-                @blur="updateLocationFromCoordinates"
-              />
-            </el-form-item>
-            <div class="pl-0 h-[400px] w-full ml-[-18px]" v-if="showMap">
-              <Map
-                :isWrite="true"
-                :clickMap="true"
-                :center="formData.location"
-                @locate-change="handleLocationChange"
-                ref="mapRef"
-                class="h-full w-full"
-              />
-            </div>
-          </template>
+          <el-form-item label="设备维度" prop="latitude" type="number">
+            <el-input
+              v-model="formData.latitude"
+              placeholder="请输入设备维度"
+              @blur="updateLocationFromCoordinates"
+            />
+          </el-form-item>
+          <!-- TODO @AI：然后后面有个按钮【标注地图】可以手动按需调整； -->
+          <div class="pl-0 h-[400px] w-full ml-[-18px]" v-if="showMap">
+            <Map
+              :isWrite="true"
+              :clickMap="true"
+              :center="formData.location"
+              @locate-change="handleLocationChange"
+              ref="mapRef"
+              class="h-full w-full"
+            />
+          </div>
         </el-collapse-item>
       </el-collapse>
     </el-form>
@@ -116,9 +103,8 @@
 <script setup lang="ts">
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { DeviceGroupApi } from '@/api/iot/device/group'
-import { DeviceTypeEnum, LocationTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
+import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
 import { UploadImg } from '@/components/UploadFile'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import Map from '@/components/Map/index.vue'
 import { ref } from 'vue'
 
@@ -144,14 +130,14 @@ const formData = ref({
   gatewayId: undefined,
   deviceType: undefined as number | undefined,
   serialNumber: undefined,
-  locationType: undefined as number | undefined,
   longitude: undefined,
   latitude: undefined,
-  location: '', // 格式: "经度,纬度"
+  location: '', // 格式: "经度,纬度" // TODO @AI：单独搞个字段出来，不放在 formData 里！
   groupIds: [] as number[]
 })
 
-/** 监听经纬度变化，更新location */
+/** 监听经纬度变化，更新 location */
+// TODO @AI：交互上，想改成上面展示 longitude、latitude 两个地址；然后后面有个按钮【标注地图】可以手动按需调整；
 watch([() => formData.value.longitude, () => formData.value.latitude], ([newLong, newLat]) => {
   if (newLong && newLat) {
     formData.value.location = `${newLong},${newLat}`
@@ -197,6 +183,7 @@ const formRules = reactive({
       trigger: 'blur'
     }
   ]
+  // TODO @AI：加个校验。如果 longitude、latitude 有一个非空，必须两个都非空；
 })
 const formRef = ref() // 表单 Ref
 const products = ref<ProductVO[]>([]) // 产品列表
@@ -248,16 +235,6 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as DeviceVO
-    // 如果非手动定位，不进行提交该字段
-    if (data.locationType !== LocationTypeEnum.MANUAL) {
-      data.longitude = undefined
-      data.latitude = undefined
-    }
-    // TODO @宗超：【设备定位】address 和 areaId 也要处理；
-    // 1. 手动定位时：longitude + latitude + areaId + address：要稍微注意，address 可能要去掉省市区部分？！
-    // 2. IP 定位时：IotDeviceMessage 的 buildStateUpdateOnline 时，增加 ip 字段。这样，解析到 areaId；另外看看能不能通过 https://lbsyun.baidu.com/faq/api?title=webapi/ip-api-base（只获取 location 就 ok 啦）
-    // 3. 设备定位时：问问 haohao，一般怎么做。
-
     if (formType.value === 'create') {
       await DeviceApi.createDevice(data)
       message.success(t('common.createSuccess'))
@@ -284,10 +261,8 @@ const resetForm = () => {
     gatewayId: undefined,
     deviceType: undefined,
     serialNumber: undefined,
-    locationType: undefined,
     longitude: undefined,
     latitude: undefined,
-    // TODO @宗超：【设备定位】location 是不是拿出来，不放在 formData 里
     location: '',
     groupIds: []
   }
@@ -304,10 +279,10 @@ const handleProductChange = (productId: number) => {
   }
   const product = products.value?.find((item) => item.id === productId)
   formData.value.deviceType = product?.deviceType
-  formData.value.locationType = product?.locationType
 }
 
 /** 处理位置变化 */
+// todo @AI：这了有 linter 报错：TS7044: Parameter lnglat implicitly has an any type, but a better type may be inferred from usage.
 const handleLocationChange = (lnglat) => {
   formData.value.longitude = lnglat[0]
   formData.value.latitude = lnglat[1]
@@ -319,6 +294,7 @@ const updateLocationFromCoordinates = () => {
   if (formData.value.longitude && formData.value.latitude) {
     // 更新 location 字段，地图组件会根据此字段更新
     formData.value.location = `${formData.value.longitude},${formData.value.latitude}`
+    // TODO @AI：这里有告警；
     mapRef.value.regeoCode(formData.value.location)
   }
 }

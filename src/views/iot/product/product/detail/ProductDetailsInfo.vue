@@ -6,9 +6,6 @@
       <el-descriptions-item label="设备类型">
         <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
       </el-descriptions-item>
-      <el-descriptions-item label="定位类型">
-        <dict-tag :type="DICT_TYPE.IOT_LOCATION_TYPE" :value="product.locationType" />
-      </el-descriptions-item>
       <el-descriptions-item label="创建时间">
         {{ formatDate(product.createTime) }}
       </el-descriptions-item>

@@ -21,7 +21,6 @@ export interface DeviceVO {
   mqttUsername: string // MQTT 用户名
   mqttPassword: string // MQTT 密码
   authType: string // 认证类型
-  locationType: number // 定位类型
   latitude?: number // 设备位置的纬度
   longitude?: number // 设备位置的经度
   areaId: number // 地区编码
@@ -49,7 +48,7 @@ export interface IotDevicePropertyRespVO {
   updateTime: Date // 更新时间
 }
 
-// TODO @芋艿：调整到 constants
+// TODO @AI：调整到 constants
 // IoT 设备状态枚举
 export enum DeviceStateEnum {
   INACTIVE = 0, // 未激活
