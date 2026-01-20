@@ -5,6 +5,13 @@ export const IOT_PROVIDE_KEY = {
   PRODUCT: 'IOT_PRODUCT'
 }
 
+/** IoT 设备状态枚举 */
+export enum DeviceStateEnum {
+  INACTIVE = 0, // 未激活
+  ONLINE = 1, // 在线
+  OFFLINE = 2 // 离线
+}
+
 /** IoT 产品物模型类型枚举类 */
 export const IoTThingModelTypeEnum = {
   PROPERTY: 1, // 属性

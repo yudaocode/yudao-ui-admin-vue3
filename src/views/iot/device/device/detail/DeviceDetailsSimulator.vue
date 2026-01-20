@@ -244,10 +244,14 @@
 <script lang="ts" setup>
 import { ProductVO } from '@/api/iot/product/product'
 import { ThingModelData } from '@/api/iot/thingmodel'
-import { DeviceApi, DeviceStateEnum, DeviceVO } from '@/api/iot/device/device'
+import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import DeviceDetailsMessage from './DeviceDetailsMessage.vue'
 import { DataDefinition } from '@/views/iot/thingmodel/components'
-import { IotDeviceMessageMethodEnum, IoTThingModelTypeEnum } from '@/views/iot/utils/constants'
+import {
+  DeviceStateEnum,
+  IotDeviceMessageMethodEnum,
+  IoTThingModelTypeEnum
+} from '@/views/iot/utils/constants'
 
 const props = defineProps<{
   product: ProductVO

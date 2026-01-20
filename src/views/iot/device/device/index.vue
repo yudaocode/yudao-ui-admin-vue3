@@ -371,7 +371,8 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { DeviceApi, DeviceVO, DeviceStateEnum } from '@/api/iot/device/device'
+import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
+import { DeviceStateEnum } from '@/views/iot/utils/constants'
 import DeviceForm from './DeviceForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceGroupApi, DeviceGroupVO } from '@/api/iot/device/group'

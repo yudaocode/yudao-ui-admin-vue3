@@ -48,14 +48,6 @@ export interface IotDevicePropertyRespVO {
   updateTime: Date // 更新时间
 }
 
-// TODO @AI：调整到 constants
-// IoT 设备状态枚举
-export enum DeviceStateEnum {
-  INACTIVE = 0, // 未激活
-  ONLINE = 1, // 在线
-  OFFLINE = 2 // 离线
-}
-
 // 设备认证参数 VO
 export interface IotDeviceAuthInfoVO {
   clientId: string // 客户端 ID
