@@ -13,7 +13,13 @@ export interface SmsLoginVO {
 
 // 登录
 export const login = (data: UserLoginVO) => {
-  return request.post({ url: '/system/auth/login', data })
+  return request.post({
+    url: '/system/auth/login',
+    data,
+    headers: {
+      isEncrypt: false
+    }
+  })
 }
 
 // 注册

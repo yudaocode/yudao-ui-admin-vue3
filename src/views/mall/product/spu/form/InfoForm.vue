@@ -18,14 +18,15 @@
         v-model="formData.categoryId"
         :options="categoryList"
         :props="defaultProps"
-        class="w-80"
+        class="w-80!"
         clearable
         filterable
         placeholder="请选择商品分类"
       />
+      <el-button :icon="RefreshRight" @click="refreshCategoryList" class="ml-1" size="small" />
     </el-form-item>
     <el-form-item label="商品品牌" prop="brandId">
-      <el-select v-model="formData.brandId" class="w-80" placeholder="请选择商品品牌">
+      <el-select v-model="formData.brandId" class="w-80!" placeholder="请选择商品品牌">
         <el-option
           v-for="item in brandList"
           :key="item.id"
@@ -33,6 +34,7 @@
           :value="item.id as number"
         />
       </el-select>
+      <el-button :icon="RefreshRight" @click="refreshBrandList" class="ml-1" size="small" />
     </el-form-item>
     <el-form-item label="商品关键字" prop="keyword">
       <el-input v-model="formData.keyword" class="w-80!" placeholder="请输入商品关键字" />
@@ -67,6 +69,7 @@ import * as ProductCategoryApi from '@/api/mall/product/category'
 import { CategoryVO } from '@/api/mall/product/category'
 import * as ProductBrandApi from '@/api/mall/product/brand'
 import { BrandVO } from '@/api/mall/product/brand'
+import { RefreshRight } from '@element-plus/icons-vue'
 
 defineOptions({ name: 'ProductSpuInfoForm' })
 const props = defineProps({
@@ -132,11 +135,19 @@ defineExpose({ validate })
 /** 初始化 */
 const brandList = ref<BrandVO[]>([]) // 商品品牌列表
 const categoryList = ref<CategoryVO[]>([]) // 商品分类树
-onMounted(async () => {
+async function refreshCategoryList() {
   // 获得分类树
   const data = await ProductCategoryApi.getCategoryList({})
   categoryList.value = handleTree(data, 'id')
-  // 获取商品品牌列表
+}
+
+async function refreshBrandList() {
   brandList.value = await ProductBrandApi.getSimpleBrandList()
+}
+
+onMounted(async () => {
+  await refreshCategoryList()
+  // 获取商品品牌列表
+  await refreshBrandList()
 })
 </script>

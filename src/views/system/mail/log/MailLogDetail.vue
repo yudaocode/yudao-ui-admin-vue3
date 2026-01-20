@@ -13,12 +13,34 @@
       <el-descriptions-item label="模版发送人名称">
         {{ detailData.templateNickname }}
       </el-descriptions-item>
-      <el-descriptions-item label="用户信息">
-        {{ detailData.toMail }}
+      <el-descriptions-item label="接收用户">
         <span v-if="detailData.userType && detailData.userId">
           <dict-tag :type="DICT_TYPE.USER_TYPE" :value="detailData.userType" />
           ({{ detailData.userId }})
         </span>
+        <span v-else>无</span>
+      </el-descriptions-item>
+      <el-descriptions-item label="接收信息">
+        <div>
+          <div v-if="detailData.toMails && detailData.toMails.length > 0">
+            收件：
+            <span v-for="(mail, index) in detailData.toMails" :key="mail">
+              {{ mail }}<span v-if="index < detailData.toMails.length - 1">、</span>
+            </span>
+          </div>
+          <div v-if="detailData.ccMails && detailData.ccMails.length > 0">
+            抄送：
+            <span v-for="(mail, index) in detailData.ccMails" :key="mail">
+              {{ mail }}<span v-if="index < detailData.ccMails.length - 1">、</span>
+            </span>
+          </div>
+          <div v-if="detailData.bccMails && detailData.bccMails.length > 0">
+            密送：
+            <span v-for="(mail, index) in detailData.bccMails" :key="mail">
+              {{ mail }}<span v-if="index < detailData.bccMails.length - 1">、</span>
+            </span>
+          </div>
+        </div>
       </el-descriptions-item>
       <el-descriptions-item label="邮件标题">
         {{ detailData.templateTitle }}
@@ -58,7 +80,7 @@ defineOptions({ name: 'SystemMailLogDetail' })
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
 const detailData = ref() // 详情数据
-const accountList = ref([]) // 邮箱账号列表
+const accountList = ref<MailAccountApi.MailAccountVO[]>([]) // 邮箱账号列表
 
 /** 打开弹窗 */
 const open = async (data: MailLogApi.MailLogVO) => {

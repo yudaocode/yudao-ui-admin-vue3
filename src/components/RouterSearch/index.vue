@@ -18,7 +18,7 @@
     </el-select>
   </ElDialog>
   <div v-else class="custom-hover" @click.stop="showTopSearch = !showTopSearch">
-    <Icon icon="ep:search" />
+    <Icon icon="ep:search" :color="color"/>
     <el-select
       @click.stop
       filterable
@@ -41,11 +41,13 @@
 </template>
 
 <script lang="ts" setup>
+import { propTypes } from '@/utils/propTypes'
 defineProps({
   isModal: {
     type: Boolean,
     default: true
-  }
+  },
+  color: propTypes.string.def('')
 })
 
 const router = useRouter() // 路由对象

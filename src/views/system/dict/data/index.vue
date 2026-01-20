@@ -8,7 +8,7 @@
       label-width="68px"
     >
       <el-form-item label="字典名称" prop="dictType">
-        <el-select v-model="queryParams.dictType" class="!w-240px">
+        <el-select v-model="queryParams.dictType" class="!w-240px" @change="dictChange">
           <el-option
             v-for="item in dictTypeList"
             :key="item.type"
@@ -171,6 +171,12 @@ const handleQuery = () => {
   getList()
 }
 
+/** 字典类型更改同时更新列表数据 */
+const dictChange = (v) => {
+  queryParams.dictType = v
+  handleQuery()
+}
+
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
@@ -208,6 +214,7 @@ const handleDeleteBatch = async () => {
     await message.delConfirm()
     // 发起批量删除
     await DictDataApi.deleteDictDataList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

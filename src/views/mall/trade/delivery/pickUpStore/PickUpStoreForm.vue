@@ -145,7 +145,7 @@ const formRules = reactive({
   logo: [{ required: true, message: '门店 logo 不能为空', trigger: 'blur' }],
   phone: [
     { required: true, message: '门店手机不能为空', trigger: 'blur' },
-    { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' }
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
   ],
   areaId: [{ required: true, message: '门店所在区域不能为空', trigger: 'blur' }],
   detailAddress: [{ required: true, message: '门店详细地址不能为空', trigger: 'blur' }],

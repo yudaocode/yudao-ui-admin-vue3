@@ -88,6 +88,7 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
+import formCreate from '@form-create/element-ui'
 
 defineOptions({ name: 'ProcessDefinitionDetail' })
 const props = defineProps<{
@@ -127,7 +128,8 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     // 注意：需要从 formVariables 中，移除不在 row.formFields 的值。
     // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
     //        这样，就可能导致一个流程被审批不通过后，重新发起时，会直接后端报错！！！
-    const allowedFields = decodeFields(row.formFields).map((fieldObj: any) => fieldObj.field)
+    const formApi = formCreate.create(decodeFields(row.formFields))
+    const allowedFields = formApi.fields()
     for (const key in formVariables) {
       if (!allowedFields.includes(key)) {
         delete formVariables[key]

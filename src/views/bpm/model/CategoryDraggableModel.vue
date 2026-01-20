@@ -178,8 +178,7 @@
               link
               type="primary"
               @click="openModelForm('update', scope.row.id)"
-              v-if="hasPermiUpdate"
-              :disabled="!isManagerUser(scope.row)"
+              :disabled="!isManagerUser(scope.row) && !hasPermiUpdate"
             >
               修改
             </el-button>
@@ -187,8 +186,7 @@
               link
               type="primary"
               @click="openModelForm('copy', scope.row.id)"
-              v-if="hasPermiUpdate"
-              :disabled="!isManagerUser(scope.row)"
+              :disabled="!isManagerUser(scope.row) && !hasPermiUpdate"
             >
               复制
             </el-button>
@@ -197,8 +195,7 @@
               class="!ml-5px"
               type="primary"
               @click="handleDeploy(scope.row)"
-              v-if="hasPermiDeploy"
-              :disabled="!isManagerUser(scope.row)"
+              :disabled="!isManagerUser(scope.row) && !hasPermiDeploy"
             >
               发布
             </el-button>

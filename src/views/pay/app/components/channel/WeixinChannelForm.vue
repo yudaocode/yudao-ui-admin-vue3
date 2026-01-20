@@ -147,7 +147,11 @@
               前往微信商户平台查看证书序列号
             </a>
           </el-form-item>
-          <el-form-item label="public_key.pem 证书" label-width="180px" prop="config.publicKeyContent">
+          <el-form-item
+            label="public_key.pem 证书"
+            label-width="180px"
+            prop="config.publicKeyContent"
+          >
             <el-input
               v-model="formData.config.publicKeyContent"
               :autosize="{ minRows: 2, maxRows: 4 }"
@@ -174,17 +178,10 @@
             </el-upload>
           </el-form-item>
           <el-form-item label="公钥 ID" label-width="180px" prop="config.publicKeyId">
-            <el-input
-              v-model="formData.config.publicKeyId"
-              clearable
-              placeholder="请输入公钥 ID"
-            />
+            <el-input v-model="formData.config.publicKeyId" clearable placeholder="请输入公钥 ID" />
           </el-form-item>
           <el-form-item label-width="180px">
-            <a
-              href="https://pay.weixin.qq.com/doc/v3/merchant/4012153196"
-              target="_blank"
-            >
+            <a href="https://pay.weixin.qq.com/doc/v3/merchant/4012153196" target="_blank">
               微信支付公钥产品简介及使用说明
             </a>
           </el-form-item>
@@ -246,7 +243,6 @@ const formRules = {
     { required: true, message: '请上传 apiclient_key.pem 证书', trigger: 'blur' }
   ],
   'config.certSerialNo': [{ required: true, message: '请输入证书序列号', trigger: 'blur' }],
-  'config.publicKeyContent': [{ required: true, message: '请上传 public_key.pem 证书', trigger: 'blur' }],
   'config.publicKeyId': [{ required: true, message: '请输入公钥 ID', trigger: 'blur' }],
   'config.apiV3Key': [{ required: true, message: '请上传 api V3 密钥值', trigger: 'blur' }]
 }

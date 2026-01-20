@@ -1,4 +1,3 @@
-import { toRaw } from 'vue'
 const bpmnInstances = () => (window as any)?.bpmnInstances
 // 创建监听器实例
 export function createListenerObject(options, isTask, prefix) {
@@ -61,7 +60,8 @@ export function updateElementExtensions(element, extensionList) {
   const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
     values: extensionList
   })
-  bpmnInstances().modeling.updateProperties(toRaw(element), {
+  // 直接使用原始元素对象，不需要toRaw包装
+  bpmnInstances().modeling.updateProperties(element, {
     extensionElements: extensions
   })
 }

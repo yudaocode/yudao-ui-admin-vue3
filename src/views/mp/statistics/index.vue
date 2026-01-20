@@ -99,7 +99,7 @@ const userSummaryOption = reactive({
   series: [
     {
       name: '新增用户',
-      type: 'bar',
+      type: 'bar' as const,
       label: {
         show: true
       },
@@ -108,7 +108,7 @@ const userSummaryOption = reactive({
     },
     {
       name: '取消关注的用户',
-      type: 'bar',
+      type: 'bar' as const,
       label: {
         show: true
       },
@@ -122,7 +122,7 @@ const userCumulateOption = reactive({
     data: ['累计用户量']
   },
   xAxis: {
-    type: 'category',
+    type: 'category' as const,
     data: [] as any[]
   },
   yAxis: {
@@ -132,7 +132,7 @@ const userCumulateOption = reactive({
     {
       name: '累计用户量',
       data: [] as any[], // 累计用户量的数据
-      type: 'line',
+      type: 'line' as const,
       smooth: true,
       label: {
         show: true
@@ -156,7 +156,7 @@ const upstreamMessageOption = reactive({
   series: [
     {
       name: '用户发送人数',
-      type: 'line',
+      type: 'line' as const,
       smooth: true,
       label: {
         show: true
@@ -165,7 +165,7 @@ const upstreamMessageOption = reactive({
     },
     {
       name: '用户发送条数',
-      type: 'line',
+      type: 'line' as const,
       smooth: true,
       label: {
         show: true
@@ -188,7 +188,7 @@ const interfaceSummaryOption = reactive({
   series: [
     {
       name: '被动回复用户消息的次数',
-      type: 'bar',
+      type: 'bar' as const,
       label: {
         show: true
       },
@@ -197,7 +197,7 @@ const interfaceSummaryOption = reactive({
     },
     {
       name: '失败次数',
-      type: 'bar',
+      type: 'bar' as const,
       label: {
         show: true
       },
@@ -205,7 +205,7 @@ const interfaceSummaryOption = reactive({
     },
     {
       name: '最大耗时',
-      type: 'bar',
+      type: 'bar' as const,
       label: {
         show: true
       },
@@ -213,7 +213,7 @@ const interfaceSummaryOption = reactive({
     },
     {
       name: '总耗时',
-      type: 'bar',
+      type: 'bar' as const,
       label: {
         show: true
       },
@@ -282,7 +282,9 @@ const initUserSummaryChart = async () => {
         userSummaryOption.series[1].data[index] = item.cancelUser
       })
     })
-  } catch {}
+  } catch {
+    //
+  }
 }
 
 /** 累计用户数据 */
@@ -300,7 +302,9 @@ const initUserCumulateChart = async () => {
     data.forEach((item, index) => {
       userCumulateOption.series[0].data[index] = item.cumulateUser
     })
-  } catch {}
+  } catch {
+    //
+  }
 }
 
 /** 消息概况数据 */
@@ -320,7 +324,9 @@ const initUpstreamMessageChart = async () => {
       upstreamMessageOption.series[0].data[index] = item.messageUser
       upstreamMessageOption.series[1].data[index] = item.messageCount
     })
-  } catch {}
+  } catch {
+    //
+  }
 }
 
 /** 接口分析数据 */
@@ -344,6 +350,8 @@ const interfaceSummaryChart = async () => {
       interfaceSummaryOption.series[2].data[index] = item.maxTimeCost
       interfaceSummaryOption.series[3].data[index] = item.totalTimeCost
     })
-  } catch {}
+  } catch {
+    //
+  }
 }
 </script>

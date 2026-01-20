@@ -136,6 +136,7 @@ import { fileSizeFormatter } from '@/utils'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FileApi from '@/api/infra/file'
 import FileForm from './FileForm.vue'
+import { useClipboard } from '@vueuse/core'
 
 defineOptions({ name: 'InfraFile' })
 
@@ -186,10 +187,16 @@ const openForm = () => {
 }
 
 /** 复制到剪贴板方法 */
-const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text).then(() => {
-    message.success('复制成功')
-  })
+const copyToClipboard = async (text: string) => {
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: text })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+    return
+  }
+  await copy()
+  if (unref(copied)) {
+    message.success(t('common.copySuccess'))
+  }
 }
 
 /** 删除按钮操作 */
@@ -217,6 +224,7 @@ const handleDeleteBatch = async () => {
     await message.delConfirm()
     // 发起批量删除
     await FileApi.deleteFileList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

@@ -238,7 +238,6 @@ const getDetail = async () => {
     return
   }
   const data = await PayOrderApi.getOrder(id.value, true)
-  payOrder.value = data
   // 1.2 无法查询到支付信息
   if (!data) {
     message.error('支付订单不存在，请检查！')
@@ -255,6 +254,8 @@ const getDetail = async () => {
     goReturnUrl('close')
     return
   }
+  // 2. 正常展示支付信息
+  payOrder.value = data
 }
 
 /** 提交支付 */
@@ -458,6 +459,11 @@ onMounted(() => {
     returnUrl.value = decodeURIComponent(route.query.returnUrl)
   }
   getDetail()
+})
+
+/** 销毁 */
+onBeforeUnmount(() => {
+  clearQueryInterval()
 })
 </script>
 

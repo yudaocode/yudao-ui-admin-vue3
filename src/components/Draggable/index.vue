@@ -2,7 +2,7 @@
   <el-text type="info" size="small"> 拖动左上角的小圆点可对其排序 </el-text>
   <VueDraggable
     :list="formData"
-    :force-fallback="true"
+    :force-fallback="false"
     :animation="200"
     handle=".drag-icon"
     class="m-t-8px"

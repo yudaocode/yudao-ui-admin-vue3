@@ -236,7 +236,7 @@
       <el-divider />
       <div>
         <el-button type="primary" @click="saveConfig">确 定</el-button>
-        <el-button @click="closeDrawer">取 消</el-button>
+        <el-button @click="cancelConfig">取 消</el-button>
       </div>
     </template>
   </el-drawer>
@@ -467,6 +467,13 @@ const saveConfig = async () => {
   return true
 }
 
+/** 取消配置 */
+const cancelConfig = () => {
+  // 恢复原来的配置
+  currentNode.value.triggerSetting = originalSetting
+  closeDrawer()
+}
+
 /** 获取节点展示内容 */
 const getShowText = (): string => {
   let showText = ''
@@ -498,7 +505,7 @@ const getShowText = (): string => {
 /** 显示触发器节点配置， 由父组件传过来 */
 const showTriggerNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
-  originalSetting = node.triggerSetting ? JSON.parse(JSON.stringify(node.triggerSetting)) : {}
+  originalSetting = cloneDeep(node.triggerSetting)
   if (node.triggerSetting) {
     configForm.value = {
       type: node.triggerSetting.type,

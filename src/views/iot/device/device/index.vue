@@ -514,13 +514,12 @@ const handleImport = () => {
 
 /** 初始化 **/
 onMounted(async () => {
-  // 处理路由参数中的 productId
-  const productId = route.query.productId
+  // 处理 productId 参数
+  const { productId } = route.query
   if (productId) {
     queryParams.productId = Number(productId)
   }
-  
-  getList()
+  await getList()
 
   // 获取产品列表
   products.value = await ProductApi.getSimpleProductList()

@@ -88,7 +88,8 @@ const formData = ref({
 })
 const formRef = ref() // 表单 Ref
 const formRules = reactive({
-  userId: [{ required: true, message: '分销员不能为空', trigger: 'blur' }]
+  userId: [{ required: true, message: '分销员不能为空', trigger: 'blur' }],
+  bindUserId: [{ required: true, message: '推广人不能为空', trigger: 'blur' }]
 })
 
 /** 打开弹窗 */

@@ -136,7 +136,14 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="绑定域名" align="center" prop="website" width="180" />
+      <el-table-column label="绑定域名" align="center" prop="websites" width="180">
+        <template #default="scope">
+          <el-tag v-for="website in scope.row.websites || []" :key="website" class="mr-1 mb-1">
+            {{ website }}
+          </el-tag>
+          <span v-if="!scope.row.websites || scope.row.websites.length === 0">-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="租户状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -266,6 +273,7 @@ const handleDeleteBatch = async () => {
     await message.delConfirm()
     // 发起批量删除
     await TenantApi.deleteTenantList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

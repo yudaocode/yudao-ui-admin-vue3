@@ -71,6 +71,16 @@ const props = defineProps({
   center: propTypes.string.def('')
 })
 
+watch(
+  () => props.center,
+  (newVal, oldVal) => {
+    if (newVal) {
+      // 当 center 变化时 重新加载mark点
+      regeoCode(newVal)
+    }
+  }
+)
+
 /** 加载百度地图 */
 const loadMap = () => {
   state.address = ''
@@ -100,11 +110,6 @@ const loadMap = () => {
         console.log(state.lonLat)
         regeoCode(state.lonLat)
       })
-    }
-
-    // TODO @super：这里加一行注释
-    if (props.center) {
-      regeoCode(props.center)
     }
   }
 }
@@ -155,8 +160,8 @@ const autoSearch = (queryValue: string) => {
       state.loading = false
       const temp: any[] = []
 
-      if (results && results.getPoi) {
-        const pois = results.getPoi()
+      if (results && results._pois) {
+        const pois = results._pois
         pois.forEach((p: any) => {
           const point = p.point
           if (point && point.lng && point.lat) {

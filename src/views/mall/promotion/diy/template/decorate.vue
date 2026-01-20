@@ -34,6 +34,7 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DiyComponentLibrary, PAGE_LIBS } from '@/components/DiyEditor/util' // 商城的 DIY 组件，在 DiyEditor 目录下
 import { toNumber } from 'lodash-es'
 import { isEmpty } from '@/utils/is'
+import { getTenantId } from '@/utils/auth'
 
 /** 装修模板表单 */
 defineOptions({ name: 'DiyTemplateDecorate' })
@@ -69,7 +70,7 @@ const getPageDetail = async (id: any) => {
     formData.value = await DiyTemplateApi.getDiyTemplateProperty(id)
     // 拼接手机预览链接
     const domain = import.meta.env.VITE_MALL_H5_DOMAIN
-    previewUrl.value = `${domain}/#/pages/index/index?templateId=${formData.value.id}`
+    previewUrl.value = `${domain}?templateId=${formData.value.id}&tenantId=${getTenantId()}`
   } finally {
     formLoading.value = false
   }
@@ -165,11 +166,15 @@ const handleEditorReset = () => storePageIndex()
 //#region 无感刷新
 // 记录标识
 const DIY_PAGE_INDEX_KEY = 'diy_page_index'
+
 // 1. 记录
-const storePageIndex = () =>
-  sessionStorage.setItem(DIY_PAGE_INDEX_KEY, `${selectedTemplateItem.value}`)
+function storePageIndex() {
+  debugger
+  return sessionStorage.setItem(DIY_PAGE_INDEX_KEY, `${selectedTemplateItem.value}`)
+}
 // 2. 恢复
 const recoverPageIndex = () => {
+  debugger
   // 恢复重置前的页面，默认是第一个页面
   const pageIndex = toNumber(sessionStorage.getItem(DIY_PAGE_INDEX_KEY)) || 0
   // 移除标记

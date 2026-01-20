@@ -49,17 +49,30 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import UserAvatar from './UserAvatar.vue'
+import { useUserStore } from '@/store/modules/user'
 
 import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
 
 defineOptions({ name: 'ProfileUser' })
 
 const { t } = useI18n()
+const userStore = useUserStore()
 const userInfo = ref({} as ProfileVO)
+
 const getUserInfo = async () => {
   const users = await getUserProfile()
   userInfo.value = users
 }
+
+// 监听 userStore 中头像的变化，同步更新本地 userInfo
+watch(
+  () => userStore.getUser.avatar,
+  (newAvatar) => {
+    if (newAvatar && userInfo.value) {
+      userInfo.value.avatar = newAvatar
+    }
+  }
+)
 
 // 暴露刷新方法
 defineExpose({

@@ -15,6 +15,7 @@ export interface ChatRoleVO {
   status: number // 状态
   knowledgeIds?: number[] // 引用的知识库 ID 列表
   toolIds?: number[] // 引用的工具 ID 列表
+  mcpClientNames?: string[] // 引用的 MCP Client 名字列表
 }
 
 // AI 聊天角色 分页请求 vo
@@ -57,26 +58,26 @@ export const ChatRoleApi = {
 
   // 获取 my role
   getMyPage: async (params: ChatRolePageReqVO) => {
-    return await request.get({ url: `/ai/chat-role/my-page`, params})
+    return await request.get({ url: `/ai/chat-role/my-page`, params })
   },
 
   // 获取角色分类
   getCategoryList: async () => {
-    return await request.get({ url: `/ai/chat-role/category-list`})
+    return await request.get({ url: `/ai/chat-role/category-list` })
   },
 
   // 创建角色
   createMy: async (data: ChatRoleVO) => {
-    return await request.post({ url: `/ai/chat-role/create-my`, data})
+    return await request.post({ url: `/ai/chat-role/create-my`, data })
   },
 
   // 更新角色
   updateMy: async (data: ChatRoleVO) => {
-    return await request.put({ url: `/ai/chat-role/update-my`, data})
+    return await request.put({ url: `/ai/chat-role/update-my`, data })
   },
 
   // 删除角色 my
   deleteMy: async (id: number) => {
     return await request.delete({ url: `/ai/chat-role/delete-my?id=` + id })
-  },
+  }
 }

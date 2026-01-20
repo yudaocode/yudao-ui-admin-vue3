@@ -14,11 +14,17 @@
             class="relative flex flex-col break-words bg-[var(--el-fill-color-light)] shadow-[0_0_0_1px_var(--el-border-color-light)] rounded-10px pt-10px px-10px pb-5px"
             ref="markdownViewRef"
           >
+            <MessageReasoning
+              :reasoning-content="item.reasoningContent || ''"
+              :content="item.content || ''"
+            />
             <MarkdownView
               class="text-[var(--el-text-color-primary)] text-[0.95rem]"
               :content="item.content"
             />
+            <MessageFiles :attachment-urls="item.attachmentUrls" />
             <MessageKnowledge v-if="item.segments" :segments="item.segments" />
+            <MessageWebSearch v-if="item.webSearchPages" :web-search-pages="item.webSearchPages" />
           </div>
           <div class="flex flex-row mt-8px">
             <el-button
@@ -48,11 +54,21 @@
           <div>
             <el-text class="text-left leading-30px">{{ formatDate(item.createTime) }}</el-text>
           </div>
+          <!-- 附件显示行 -->
+          <div
+            v-if="item.attachmentUrls && item.attachmentUrls.length > 0"
+            class="flex flex-row-reverse mb-8px"
+          >
+            <MessageFiles :attachment-urls="item.attachmentUrls" />
+          </div>
+          <!-- 文本内容行 -->
           <div class="flex flex-row-reverse">
             <div
+              v-if="item.content && item.content.trim()"
               class="text-[0.95rem] text-[var(--el-color-white)] inline bg-[var(--el-color-primary)] shadow-[0_0_0_1px_var(--el-color-primary)] rounded-10px p-10px w-auto break-words whitespace-pre-wrap"
-              >{{ item.content }}</div
             >
+              {{ item.content }}
+            </div>
           </div>
           <div class="flex flex-row-reverse mt-8px">
             <el-button
@@ -98,6 +114,9 @@ import { PropType } from 'vue'
 import { formatDate } from '@/utils/formatTime'
 import MarkdownView from '@/components/MarkdownView/index.vue'
 import MessageKnowledge from './MessageKnowledge.vue'
+import MessageReasoning from './MessageReasoning.vue'
+import MessageFiles from './MessageFiles.vue'
+import MessageWebSearch from './MessageWebSearch.vue'
 import { useClipboard } from '@vueuse/core'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
 import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
@@ -107,7 +126,7 @@ import userAvatarDefaultImg from '@/assets/imgs/avatar.gif'
 import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 
 const message = useMessage() // 消息弹窗
-const { copy } = useClipboard() // 初始化 copy 到粘贴板
+const { copy } = useClipboard({ legacy: true }) // 初始化 copy 到粘贴板
 const userStore = useUserStore()
 
 // 判断“消息列表”滚动的位置(用于判断是否需要滚动到消息最下方)

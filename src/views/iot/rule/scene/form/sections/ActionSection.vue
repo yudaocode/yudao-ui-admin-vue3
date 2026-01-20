@@ -114,7 +114,7 @@
                 <el-tag size="small" type="warning">自动执行</el-tag>
               </div>
               <div class="text-12px text-[var(--el-text-color-secondary)] leading-relaxed">
-                当触发条件满足时，系统将自动发送告警通知，无需额外配置。
+                当触发条件满足时，系统将自动发送告警通知，可在菜单 [告警中心 -> 告警配置] 管理。
               </div>
             </div>
           </div>

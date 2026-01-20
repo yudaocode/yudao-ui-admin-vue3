@@ -40,7 +40,7 @@
         <el-table-column min-width="300" prop="spuName">
           <template #header>
             <div
-              class="mr-[20px] h-[35px] flex items-center pl-[10px] pr-[10px]"
+              class="h-[35px] flex items-center -mx-[10px] px-[20px]"
               style="background-color: var(--app-content-bg-color)"
             >
               <span class="mr-20px">订单号：{{ scope.row.no }} </span>
@@ -166,6 +166,7 @@
   </el-table-column>
 </template>
 <script lang="ts" setup>
+import { nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { DICT_TYPE } from '@/utils/dict'
 import { DeliveryTypeEnum } from '@/utils/constants'
 import { formatDate } from '@/utils/formatTime'
@@ -226,19 +227,26 @@ const spanMethod = ({ row, rowIndex, columnIndex }: SpanMethodProps): spanMethod
   }
 }
 
+const orderTableHeadWidthList = ref([300, 150, 120, 120, 160, 120, 120, 160]) // 头部 col 宽度初始化
+let isFirstTable = false // 标记是否已处理第一个表格
+let firstTableInstance: TableInstance | null = null
+
 /** 解决 ref 在 v-for 中的获取问题*/
-const setOrderTableRef = (el: TableInstance) => {
+const setOrderTableRef = async (el: TableInstance) => {
   if (!el) return
-  // 只要第一个表也就是开始的第一行
-  if (el.tableId !== 'el-table_2') {
-    return
+  // 只处理第一个表格实例
+  if (!isFirstTable) {
+    isFirstTable = true
+    firstTableInstance = el
+    // 使用 nextTick 确保 DOM 已完全渲染
+    await nextTick()
+    tableHeadWidthAuto(el)
   }
-  tableHeadWidthAuto(el)
 }
-// 头部 col 宽度初始化
-const orderTableHeadWidthList = ref([300, 150, 120, 120, 160, 120, 120, 160])
-// 头部宽度自适应
+
+/** 头部宽度自适应 */
 const tableHeadWidthAuto = (el: TableInstance) => {
+  if (!el) return
   const columns = el.store.states.columns.value
   if (columns.length === 0) {
     return
@@ -249,6 +257,38 @@ const tableHeadWidthAuto = (el: TableInstance) => {
     }
   })
 }
+
+/** 监听窗口大小变化，重新计算表头宽度 */
+const handleResize = async () => {
+  if (firstTableInstance) {
+    await nextTick()
+    tableHeadWidthAuto(firstTableInstance!)
+  }
+}
+
+/** 监听列表数据变化，重新计算表头宽度 */
+watch(
+  () => props.list,
+  async () => {
+    // 数据变化后，等待 DOM 更新完成再重新计算宽度
+    await nextTick()
+    if (firstTableInstance) {
+      // 延迟一小段时间，确保表格已完全渲染
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      tableHeadWidthAuto(firstTableInstance!)
+    }
+  },
+  { deep: true }
+)
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
+
 /** 商品图预览 */
 const imagePreview = (imgUrl: string) => {
   createImageViewer({

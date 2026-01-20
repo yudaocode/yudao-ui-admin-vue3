@@ -22,9 +22,9 @@
           value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
-      <el-form-item label="自提门店" prop="pickUpStoreId">
+      <el-form-item label="自提门店" prop="pickUpStoreIds">
         <el-select
-          v-model="queryParams.pickUpStoreId"
+          v-model="queryParams.pickUpStoreIds"
           class="!w-280px"
           placeholder="全部"
           @change="handleQuery"
@@ -251,7 +251,7 @@ const INIT_QUERY_PARAMS = {
   // 配送方式
   deliveryType: DeliveryTypeEnum.PICK_UP.type,
   // 自提门店
-  pickUpStoreId: -1
+  pickUpStoreIds: -1
 } // 初始表单参数
 
 const queryParams = ref({ ...INIT_QUERY_PARAMS }) // 表单搜索
@@ -264,7 +264,7 @@ const isUse = ref(true) // 是否可核销
 // 订单聚合搜索 select 类型配置（动态搜索）
 const dynamicSearchList = ref([
   { value: 'no', label: '订单号' },
-  { value: 'userId', label: '用户UID' },
+  { value: 'userId', label: '用户 UID' },
   { value: 'userNickname', label: '用户昵称' },
   { value: 'userMobile', label: '用户电话' }
 ])
@@ -309,7 +309,7 @@ const resetQuery = () => {
   queryFormRef.value?.resetFields()
   queryParams.value = { ...INIT_QUERY_PARAMS }
   if (pickUpStoreList.value.length > 0) {
-    queryParams.value.pickUpStoreId = pickUpStoreList.value[0].id
+    queryParams.value.pickUpStoreIds = pickUpStoreList.value[0].id
   }
   handleQuery()
 }
@@ -418,7 +418,7 @@ onMounted(async () => {
   }
 
   // 查询
-  queryParams.value.pickUpStoreId = pickUpStoreList.value[0].id
+  queryParams.value.pickUpStoreIds = pickUpStoreList.value[0].id
   isUse.value = false
   await getList()
 })

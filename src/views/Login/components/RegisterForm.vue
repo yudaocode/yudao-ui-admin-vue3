@@ -38,7 +38,7 @@
         </el-form-item>
       </el-col>
       <el-col :span="24" class="px-10px">
-        <el-form-item prop="username">
+        <el-form-item prop="nickname">
           <el-input
             v-model="registerData.registerForm.nickname"
             placeholder="昵称"
@@ -104,7 +104,7 @@ import { useIcon } from '@/hooks/web/useIcon'
 import * as authUtil from '@/utils/auth'
 import { usePermissionStore } from '@/store/modules/permission'
 import * as LoginApi from '@/api/login'
-import { LoginStateEnum, useLoginState } from './useLogin'
+import { LoginStateEnum, useLoginState, useFormValid } from './useLogin'
 
 defineOptions({ name: 'RegisterForm' })
 
@@ -113,13 +113,14 @@ const iconHouse = useIcon({ icon: 'ep:house' })
 const iconAvatar = useIcon({ icon: 'ep:avatar' })
 const iconLock = useIcon({ icon: 'ep:lock' })
 const formLogin = ref()
+const {validForm} = useFormValid(formLogin)
 const { handleBackLogin, getLoginState } = useLoginState()
 const { currentRoute, push } = useRouter()
 const permissionStore = usePermissionStore()
 const redirect = ref<string>('')
 const loginLoading = ref(false)
 const verify = ref()
-const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字
+const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字 pictureWord 文字验证码
 
 const getShow = computed(() => unref(getLoginState) === LoginStateEnum.REGISTER)
 
@@ -170,6 +171,7 @@ const registerData = reactive({
   }
 })
 
+const loading = ref() // ElLoading.service 返回的实例
 // 提交注册
 const handleRegister = async (params: any) => {
   loading.value = true
@@ -181,6 +183,11 @@ const handleRegister = async (params: any) => {
 
     if (registerData.captchaEnable) {
       registerData.registerForm.captchaVerification = params.captchaVerification
+    }
+
+    const data = await validForm()
+    if (!data) {
+      return
     }
 
     const res = await LoginApi.register(registerData.registerForm)
@@ -242,7 +249,6 @@ const getTenantByWebsite = async () => {
     }
   }
 }
-const loading = ref() // ElLoading.service 返回的实例
 
 watch(
   () => currentRoute.value,

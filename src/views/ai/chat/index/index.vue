@@ -2,7 +2,7 @@
   <el-container class="absolute flex-1 top-0 left-0 h-full w-full">
     <!-- 左侧：对话列表 -->
     <ConversationList
-      :active-id="activeConversationId"
+      :active-id="activeConversationId?.toString() || ''"
       ref="conversationListRef"
       @on-conversation-create="handleConversationCreateSuccess"
       @on-conversation-click="handleConversationClick"
@@ -56,7 +56,7 @@
             />
             <!-- 情况四：消息列表不为空 -->
             <MessageList
-              v-if="!activeMessageListLoading && messageList.length > 0"
+              v-if="!activeMessageListLoading && messageList.length > 0 && activeConversation"
               ref="messageRef"
               :conversation="activeConversation"
               :list="messageList"
@@ -83,11 +83,15 @@
             @compositionstart="onCompositionstart"
             @compositionend="onCompositionend"
             placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
-          ></textarea>
+          >
+          </textarea>
           <div class="flex justify-between pb-0 pt-5px">
-            <div>
+            <div class="flex items-center">
+              <MessageFileUpload v-model="uploadFiles" :limit="5" :max-size="10" class="mr-10px" />
               <el-switch v-model="enableContext" />
-              <span class="ml-5px text-14px text-#8f8f8f">上下文</span>
+              <span class="ml-5px mr-15px text-14px text-#8f8f8f">上下文</span>
+              <el-switch v-model="enableWebSearch" />
+              <span class="ml-5px text-14px text-#8f8f8f">联网搜索</span>
             </div>
             <el-button
               type="primary"
@@ -128,6 +132,7 @@ import MessageList from './components/message/MessageList.vue'
 import MessageListEmpty from './components/message/MessageListEmpty.vue'
 import MessageLoading from './components/message/MessageLoading.vue'
 import MessageNewConversation from './components/message/MessageNewConversation.vue'
+import MessageFileUpload from './components/message/MessageFileUpload.vue'
 
 /** AI 聊天对话 列表 */
 defineOptions({ name: 'AiChat' })
@@ -156,6 +161,8 @@ const conversationInAbortController = ref<any>() // 对话进行中 abort 控制
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
 const enableContext = ref<boolean>(true) // 是否开启上下文
+const enableWebSearch = ref<boolean>(false) // 是否开启联网搜索
+const uploadFiles = ref<string[]>([]) // 上传的文件 URL 列表
 // 接收 Stream 消息
 const receiveMessageFullText = ref('')
 const receiveMessageDisplayedText = ref('')
@@ -197,6 +204,8 @@ const handleConversationClick = async (conversation: ChatConversationVO) => {
   scrollToBottom(true)
   // 清空输入框
   prompt.value = ''
+  // 清空文件列表
+  uploadFiles.value = []
   return true
 }
 
@@ -238,6 +247,8 @@ const handleConversationCreate = async () => {
 const handleConversationCreateSuccess = async () => {
   // 创建新的对话，清空输入框
   prompt.value = ''
+  // 清空文件列表
+  uploadFiles.value = []
 }
 
 // =========== 【消息列表】相关 ===========
@@ -285,9 +296,18 @@ const messageList = computed(() => {
     return [
       {
         id: 0,
+        conversationId: activeConversation.value.id || 0,
         type: 'system',
-        content: activeConversation.value.systemMessage
-      }
+        userId: '',
+        roleId: '',
+        model: 0,
+        modelId: 0,
+        content: activeConversation.value.systemMessage,
+        tokens: 0,
+        createTime: new Date(),
+        roleAvatar: '',
+        userAvatar: ''
+      } as ChatMessageVO
     ]
   }
   return []
@@ -395,12 +415,19 @@ const doSendMessage = async (content: string) => {
     message.error('还没创建对话，不能发送!')
     return
   }
-  // 清空输入框
+
+  // 准备附件 URL 数组
+  const attachmentUrls = [...uploadFiles.value]
+
+  // 清空输入框和文件列表
   prompt.value = ''
+  uploadFiles.value = []
+
   // 执行发送
   await doSendMessageStream({
     conversationId: activeConversationId.value,
-    content: content
+    content: content,
+    attachmentUrls: attachmentUrls
   } as ChatMessageVO)
 }
 
@@ -420,6 +447,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'user',
       content: userMessage.content,
+      attachmentUrls: userMessage.attachmentUrls || [],
       createTime: new Date()
     } as ChatMessageVO)
     activeMessageList.value.push({
@@ -427,6 +455,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'assistant',
       content: '思考中...',
+      reasoningContent: '',
       createTime: new Date()
     } as ChatMessageVO)
     // 1.2 滚动到最下面
@@ -442,17 +471,23 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       userMessage.content,
       conversationInAbortController.value,
       enableContext.value,
+      enableWebSearch.value,
       async (res) => {
         const { code, data, msg } = JSON.parse(res.data)
         if (code !== 0) {
           message.alert(`对话异常! ${msg}`)
+          // 如果未接收到消息，则进行删除
+          if (receiveMessageFullText.value === '') {
+            activeMessageList.value.pop()
+          }
           return
         }
 
         // 如果内容为空，就不处理。
-        if (data.receive.content === '') {
+        if (data.receive.content === '' && !data.receive.reasoningContent) {
           return
         }
+
         // 首次返回需要添加一个 message 到页面，后面的都是更新
         if (isFirstChunk) {
           isFirstChunk = false
@@ -461,22 +496,35 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
           activeMessageList.value.pop()
           // 更新返回的数据
           activeMessageList.value.push(data.send)
+          data.send.attachmentUrls = userMessage.attachmentUrls
           activeMessageList.value.push(data.receive)
         }
-        // debugger
-        receiveMessageFullText.value = receiveMessageFullText.value + data.receive.content
+
+        // 处理 reasoningContent
+        if (data.receive.reasoningContent) {
+          const lastMessage = activeMessageList.value[activeMessageList.value.length - 1]
+          lastMessage.reasoningContent =
+            lastMessage.reasoningContent + data.receive.reasoningContent
+        }
+
+        // 处理正常内容
+        if (data.receive.content !== '') {
+          receiveMessageFullText.value = receiveMessageFullText.value + data.receive.content
+        }
         // 滚动到最下面
         await scrollToBottom()
       },
-      (error) => {
-        message.alert(`对话异常! ${error}`)
+      (error: any) => {
+        // 异常提示，并停止流
+        message.alert(`对话异常！`)
         stopStream()
         // 需要抛出异常，禁止重试
         throw error
       },
       () => {
         stopStream()
-      }
+      },
+      userMessage.attachmentUrls
     )
   } catch {}
 }
