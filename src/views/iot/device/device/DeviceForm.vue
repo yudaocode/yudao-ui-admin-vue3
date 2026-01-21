@@ -66,44 +66,17 @@
           <el-form-item label="设备序列号" prop="serialNumber">
             <el-input v-model="formData.serialNumber" placeholder="请输入设备序列号" />
           </el-form-item>
-          <el-form-item label="定位类型" prop="locationType">
-            <el-radio-group v-model="formData.locationType">
-              <el-radio
-                v-for="dict in getIntDictOptions(DICT_TYPE.IOT_LOCATION_TYPE)"
-                :key="dict.value"
-                :label="dict.value"
-              >
-                {{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <!-- LocationTypeEnum.MANUAL：手动定位 -->
-          <template v-if="LocationTypeEnum.MANUAL === formData.locationType">
-            <el-form-item label="设备经度" prop="longitude" type="number">
-              <el-input
-                v-model="formData.longitude"
-                placeholder="请输入设备经度"
-                @blur="updateLocationFromCoordinates"
-              />
-            </el-form-item>
-            <el-form-item label="设备维度" prop="latitude" type="number">
-              <el-input
-                v-model="formData.latitude"
-                placeholder="请输入设备维度"
-                @blur="updateLocationFromCoordinates"
-              />
-            </el-form-item>
-            <div class="pl-0 h-[400px] w-full ml-[-18px]" v-if="showMap">
-              <Map
-                :isWrite="true"
-                :clickMap="true"
-                :center="formData.location"
-                @locate-change="handleLocationChange"
-                ref="mapRef"
-                class="h-full w-full"
-              />
+          <el-form-item label="设备位置" prop="longitude">
+            <div class="flex items-center gap-2 w-full">
+              <el-input v-model="formData.longitude" placeholder="经度" class="flex-1">
+                <template #prepend>经度</template>
+              </el-input>
+              <el-input v-model="formData.latitude" placeholder="纬度" class="flex-1">
+                <template #prepend>纬度</template>
+              </el-input>
+              <el-button type="primary" @click="openMapDialog">坐标拾取</el-button>
             </div>
-          </template>
+          </el-form-item>
         </el-collapse-item>
       </el-collapse>
     </el-form>
@@ -112,14 +85,15 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <!-- 地图选择弹窗 -->
+  <MapDialog ref="mapDialogRef" @confirm="handleMapConfirm" />
 </template>
 <script setup lang="ts">
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { DeviceGroupApi } from '@/api/iot/device/group'
-import { DeviceTypeEnum, LocationTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
+import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
 import { UploadImg } from '@/components/UploadFile'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import Map from '@/components/Map/index.vue'
+import { MapDialog } from '@/components/Map'
 import { ref } from 'vue'
 
 /** IoT 设备表单 */
@@ -132,8 +106,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const showMap = ref(false) // 是否显示地图组件
-const mapRef = ref(null)
+const mapDialogRef = ref() // 地图弹窗 Ref
 
 const formData = ref({
   id: undefined,
@@ -144,21 +117,24 @@ const formData = ref({
   gatewayId: undefined,
   deviceType: undefined as number | undefined,
   serialNumber: undefined,
-  locationType: undefined as number | undefined,
-  longitude: undefined,
-  latitude: undefined,
-  location: '', // 格式: "经度,纬度"
+  longitude: undefined as number | string | undefined,
+  latitude: undefined as number | string | undefined,
   groupIds: [] as number[]
 })
 
-/** 监听经纬度变化，更新location */
-watch([() => formData.value.longitude, () => formData.value.latitude], ([newLong, newLat]) => {
-  if (newLong && newLat) {
-    formData.value.location = `${newLong},${newLat}`
-    // 有了经纬度数据后显示地图
-    showMap.value = true
-  }
-})
+/** 打开地图选择弹窗 */
+const openMapDialog = () => {
+  mapDialogRef.value?.open(
+    formData.value.longitude ? Number(formData.value.longitude) : undefined,
+    formData.value.latitude ? Number(formData.value.latitude) : undefined
+  )
+}
+
+/** 处理地图选择确认 */
+const handleMapConfirm = (data: { longitude: string; latitude: string; address: string }) => {
+  formData.value.longitude = data.longitude
+  formData.value.latitude = data.latitude
+}
 
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
@@ -196,6 +172,52 @@ const formRules = reactive({
       message: '序列号只能包含字母、数字、中划线和下划线',
       trigger: 'blur'
     }
+  ],
+  longitude: [
+    {
+      validator: (_rule: any, value: any, callback: any) => {
+        if (value !== undefined && value !== null && value !== '') {
+          const num = Number(value)
+          if (isNaN(num)) {
+            callback(new Error('经度必须是有效数字'))
+            return
+          }
+          if (num < -180 || num > 180) {
+            callback(new Error('经度范围为 -180 到 180'))
+            return
+          }
+          if (!formData.value.latitude && formData.value.latitude !== 0) {
+            callback(new Error('请同时填写纬度'))
+            return
+          }
+        }
+        callback()
+      },
+      trigger: 'blur'
+    }
+  ],
+  latitude: [
+    {
+      validator: (_rule: any, value: any, callback: any) => {
+        if (value !== undefined && value !== null && value !== '') {
+          const num = Number(value)
+          if (isNaN(num)) {
+            callback(new Error('纬度必须是有效数字'))
+            return
+          }
+          if (num < -90 || num > 90) {
+            callback(new Error('纬度范围为 -90 到 90'))
+            return
+          }
+          if (!formData.value.longitude && formData.value.longitude !== 0) {
+            callback(new Error('请同时填写经度'))
+            return
+          }
+        }
+        callback()
+      },
+      trigger: 'blur'
+    }
   ]
 })
 const formRef = ref() // 表单 Ref
@@ -210,25 +232,15 @@ const open = async (type: string, id?: number) => {
   formType.value = type
   resetForm()
 
-  // 默认不显示地图，等待数据加载
-  showMap.value = false
-
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
       formData.value = await DeviceApi.getDevice(id)
-
-      // 如果有经纬度，设置 location 字段用于地图显示
-      if (formData.value.longitude && formData.value.latitude) {
-        formData.value.location = `${formData.value.longitude},${formData.value.latitude}`
-      }
     } finally {
       formLoading.value = false
     }
   }
-  // 如果有经纬信息，则数据加载完成后，显示地图
-  showMap.value = true
 
   // 加载网关设备列表
   gatewayDevices.value = await DeviceApi.getSimpleDeviceList(DeviceTypeEnum.GATEWAY)
@@ -248,16 +260,6 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as DeviceVO
-    // 如果非手动定位，不进行提交该字段
-    if (data.locationType !== LocationTypeEnum.MANUAL) {
-      data.longitude = undefined
-      data.latitude = undefined
-    }
-    // TODO @宗超：【设备定位】address 和 areaId 也要处理；
-    // 1. 手动定位时：longitude + latitude + areaId + address：要稍微注意，address 可能要去掉省市区部分？！
-    // 2. IP 定位时：IotDeviceMessage 的 buildStateUpdateOnline 时，增加 ip 字段。这样，解析到 areaId；另外看看能不能通过 https://lbsyun.baidu.com/faq/api?title=webapi/ip-api-base（只获取 location 就 ok 啦）
-    // 3. 设备定位时：问问 haohao，一般怎么做。
-
     if (formType.value === 'create') {
       await DeviceApi.createDevice(data)
       message.success(t('common.createSuccess'))
@@ -284,16 +286,11 @@ const resetForm = () => {
     gatewayId: undefined,
     deviceType: undefined,
     serialNumber: undefined,
-    locationType: undefined,
     longitude: undefined,
     latitude: undefined,
-    // TODO @宗超：【设备定位】location 是不是拿出来，不放在 formData 里
-    location: '',
     groupIds: []
   }
   formRef.value?.resetFields()
-  // 重置表单时，隐藏地图
-  showMap.value = false
 }
 
 /** 产品选择变化 */
@@ -304,22 +301,5 @@ const handleProductChange = (productId: number) => {
   }
   const product = products.value?.find((item) => item.id === productId)
   formData.value.deviceType = product?.deviceType
-  formData.value.locationType = product?.locationType
-}
-
-/** 处理位置变化 */
-const handleLocationChange = (lnglat) => {
-  formData.value.longitude = lnglat[0]
-  formData.value.latitude = lnglat[1]
-}
-
-/** 根据经纬度更新地图位置 */
-const updateLocationFromCoordinates = () => {
-  // 验证经纬度是否有效
-  if (formData.value.longitude && formData.value.latitude) {
-    // 更新 location 字段，地图组件会根据此字段更新
-    formData.value.location = `${formData.value.longitude},${formData.value.latitude}`
-    mapRef.value.regeoCode(formData.value.location)
-  }
 }
 </script>

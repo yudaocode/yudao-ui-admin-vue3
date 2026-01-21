@@ -2,83 +2,45 @@
 <template>
   <div>
     <ContentWrap>
-      <el-row :gutter="16">
-        <!-- 左侧设备信息 -->
-        <el-col :span="12">
-          <el-card class="h-full">
-            <template #header>
-              <div class="flex items-center">
-                <Icon icon="ep:info-filled" class="mr-2 text-primary" />
-                <span>设备信息</span>
-              </div>
+      <el-descriptions :column="3" border>
+          <el-descriptions-item label="产品名称">{{ product.name }}</el-descriptions-item>
+          <el-descriptions-item label="ProductKey">{{ product.productKey }}</el-descriptions-item>
+          <el-descriptions-item label="设备类型">
+            <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
+          </el-descriptions-item>
+          <el-descriptions-item label="DeviceName">{{ device.deviceName }}</el-descriptions-item>
+          <el-descriptions-item label="备注名称">{{ device.nickname }}</el-descriptions-item>
+          <el-descriptions-item label="当前状态">
+            <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="device.state" />
+          </el-descriptions-item>
+          <el-descriptions-item label="创建时间">
+            {{ formatDate(device.createTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="激活时间">
+            {{ formatDate(device.activeTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="最后上线时间">
+            {{ formatDate(device.onlineTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="最后离线时间">
+            {{ formatDate(device.offlineTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="设备位置">
+            <template v-if="hasLocation">
+              <span class="mr-2">{{ device.longitude }}, {{ device.latitude }}</span>
+              <el-button type="primary" link @click="openMapDialog">
+                <Icon icon="ep:location" class="mr-1" />
+                查看地图
+              </el-button>
             </template>
-            <el-descriptions :column="2" border>
-              <el-descriptions-item label="产品名称">{{ product.name }}</el-descriptions-item>
-              <el-descriptions-item label="ProductKey">
-                {{ product.productKey }}
-              </el-descriptions-item>
-              <el-descriptions-item label="设备类型">
-                <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
-              </el-descriptions-item>
-              <el-descriptions-item label="定位类型">
-                <dict-tag :type="DICT_TYPE.IOT_LOCATION_TYPE" :value="device.locationType" />
-              </el-descriptions-item>
-              <el-descriptions-item label="DeviceName">
-                {{ device.deviceName }}
-              </el-descriptions-item>
-              <el-descriptions-item label="备注名称">{{ device.nickname }}</el-descriptions-item>
-              <el-descriptions-item label="创建时间">
-                {{ formatDate(device.createTime) }}
-              </el-descriptions-item>
-              <el-descriptions-item label="当前状态">
-                <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="device.state" />
-              </el-descriptions-item>
-              <el-descriptions-item label="激活时间">
-                {{ formatDate(device.activeTime) }}
-              </el-descriptions-item>
-              <el-descriptions-item label="最后上线时间">
-                {{ formatDate(device.onlineTime) }}
-              </el-descriptions-item>
-              <el-descriptions-item label="最后离线时间">
-                {{ formatDate(device.offlineTime) }}
-              </el-descriptions-item>
-              <el-descriptions-item label="认证信息">
-                <el-button type="primary" @click="handleAuthInfoDialogOpen" plain size="small"
-                  >查看</el-button
-                >
-              </el-descriptions-item>
-            </el-descriptions>
-          </el-card>
-        </el-col>
-
-        <!-- 右侧地图 -->
-        <el-col :span="12">
-          <el-card class="h-full">
-            <template #header>
-              <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                  <Icon icon="ep:location" class="mr-2 text-primary" />
-                  <span>设备位置</span>
-                </div>
-                <div class="text-[14px] text-[var(--el-text-color-secondary)]">
-                  最后上线时间：
-                  {{ device.onlineTime ? formatDate(device.onlineTime) : '--' }}
-                </div>
-              </div>
-            </template>
-            <div class="h-[400px] w-full">
-              <Map v-if="showMap" :center="getLocationString()" class="h-full w-full" />
-              <div
-                v-else
-                class="flex items-center justify-center h-full w-full bg-[var(--el-fill-color-light)] text-[var(--el-text-color-secondary)]"
-              >
-                <Icon icon="ep:warning" class="mr-2 text-warning" />
-                <span>暂无位置信息</span>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
+            <span v-else class="text-[var(--el-text-color-secondary)]">暂无位置信息</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="认证信息">
+            <el-button type="primary" @click="handleAuthInfoDialogOpen" plain size="small">
+              查看
+            </el-button>
+          </el-descriptions-item>
+        </el-descriptions>
     </ContentWrap>
 
     <!-- 认证信息弹框 -->
@@ -128,6 +90,9 @@
         <el-button @click="handleAuthInfoDialogClose">关闭</el-button>
       </template>
     </Dialog>
+
+    <!-- 地图弹窗 -->
+    <MapDialog ref="mapDialogRef" />
   </div>
 
   <!-- TODO 待开发：设备标签 -->
@@ -138,7 +103,7 @@ import { ProductVO } from '@/api/iot/product/product'
 import { formatDate } from '@/utils/formatTime'
 import { DeviceVO } from '@/api/iot/device/device'
 import { DeviceApi, IotDeviceAuthInfoVO } from '@/api/iot/device/device'
-import Map from '@/components/Map/index.vue'
+import { MapDialog } from '@/components/Map'
 import { ref, computed } from 'vue'
 import { useClipboard } from '@vueuse/core'
 
@@ -151,18 +116,16 @@ const emit = defineEmits(['refresh']) // 定义 Emits
 const authDialogVisible = ref(false) // 定义设备认证信息弹框的可见性
 const authPasswordVisible = ref(false) // 定义密码可见性状态
 const authInfo = ref<IotDeviceAuthInfoVO>({} as IotDeviceAuthInfoVO) // 定义设备认证信息对象
+const mapDialogRef = ref() // 地图弹窗 Ref
 
-/** 控制地图显示的标志 */
-const showMap = computed(() => {
+/** 是否有位置信息 */
+const hasLocation = computed(() => {
   return !!(device.longitude && device.latitude)
 })
 
-/** 获取位置字符串，用于地图组件 */
-const getLocationString = () => {
-  if (device.longitude && device.latitude) {
-    return `${device.longitude},${device.latitude}`
-  }
-  return ''
+/** 打开地图弹窗 */
+const openMapDialog = () => {
+  mapDialogRef.value?.open(device.longitude, device.latitude)
 }
 
 /** 复制到剪贴板方法 */

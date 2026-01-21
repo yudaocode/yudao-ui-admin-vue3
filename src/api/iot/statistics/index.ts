@@ -16,18 +16,6 @@ export interface IotStatisticsSummaryRespVO {
   productCategoryDeviceCounts: Record<string, number>
 }
 
-/** 时间戳-数值的键值对类型 */
-interface TimeValueItem {
-  [key: string]: number
-}
-
-/** IoT 消息统计数据类型 */
-export interface IotStatisticsDeviceMessageSummaryRespVO {
-  statType: number
-  upstreamCounts: TimeValueItem[]
-  downstreamCounts: TimeValueItem[]
-}
-
 /** 新的消息统计数据项 */
 export interface IotStatisticsDeviceMessageSummaryByDateRespVO {
   time: string
@@ -39,6 +27,17 @@ export interface IotStatisticsDeviceMessageSummaryByDateRespVO {
 export interface IotStatisticsDeviceMessageReqVO {
   interval: number
   times?: string[]
+}
+
+/** 设备位置数据 VO */
+export interface DeviceLocationRespVO {
+  id: number
+  deviceName: string
+  nickname?: string
+  productName?: string
+  state: number
+  longitude: number
+  latitude: number
 }
 
 // IoT 数据统计 API

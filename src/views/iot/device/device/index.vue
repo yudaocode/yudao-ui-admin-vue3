@@ -210,7 +210,7 @@
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">备注名称</span>
                     <span
-                      class="text-[#0b1d30] inline-block align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[130px]"
+                      class="text-[var(--el-text-color-primary)] inline-block align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[130px]"
                     >
                       {{ item.nickname || item.deviceName }}
                     </span>
@@ -371,7 +371,8 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { DeviceApi, DeviceVO, DeviceStateEnum } from '@/api/iot/device/device'
+import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
+import { DeviceStateEnum } from '@/views/iot/utils/constants'
 import DeviceForm from './DeviceForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceGroupApi, DeviceGroupVO } from '@/api/iot/device/group'
@@ -384,7 +385,7 @@ defineOptions({ name: 'IoTDevice' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const route = useRoute()
+const route = useRoute() // 路由对象
 
 const loading = ref(true) // 列表加载中
 const list = ref<DeviceVO[]>([]) // 列表的数据

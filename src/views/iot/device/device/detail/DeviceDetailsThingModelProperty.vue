@@ -99,13 +99,13 @@
               <div class="text-[14px]">
                 <div class="mb-2.5 last:mb-0">
                   <span class="text-[#717c8e] mr-2.5">属性值</span>
-                  <span class="text-[#0b1d30] font-600">
+                  <span class="text-[var(--el-text-color-primary)] font-600">
                     {{ formatValueWithUnit(item) }}
                   </span>
                 </div>
                 <div class="mb-2.5 last:mb-0">
                   <span class="text-[#717c8e] mr-2.5">更新时间</span>
-                  <span class="text-[#0b1d30] text-[12px]">
+                  <span class="text-[var(--el-text-color-primary)] text-[12px]">
                     {{ item.updateTime ? formatDate(item.updateTime) : '-' }}
                   </span>
                 </div>
