@@ -5,6 +5,7 @@ export interface DeviceVO {
   id: number // 设备 ID，主键，自增
   deviceName: string // 设备名称
   productId: number // 产品编号
+  productName?: string // 产品名称（只有部分接口返回，例如 getDeviceLocationList）
   productKey: string // 产品标识
   deviceType: number // 设备类型
   nickname: string // 设备备注名称
@@ -112,6 +113,11 @@ export const DeviceApi = {
   // 获取设备的精简信息列表
   getSimpleDeviceList: async (deviceType?: number, productId?: number) => {
     return await request.get({ url: `/iot/device/simple-list?`, params: { deviceType, productId } })
+  },
+
+  // 获取设备位置列表（用于地图展示）
+  getDeviceLocationList: async () => {
+    return await request.get<DeviceVO[]>({ url: `/iot/device/location-list` })
   },
 
   // 根据产品编号，获取设备的精简信息列表

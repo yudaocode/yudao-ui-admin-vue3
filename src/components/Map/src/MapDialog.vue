@@ -57,14 +57,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, nextTick } from 'vue'
-
-// 扩展 Window 接口以包含百度地图 GL API
-declare global {
-  interface Window {
-    BMapGL: any
-    initBaiduMapDialog: () => void
-  }
-}
+import { loadBaiduMapSdk } from './utils'
 
 const emits = defineEmits(['confirm'])
 
@@ -80,8 +73,7 @@ const state = reactive({
   mapAddressOptions: [] as any[], // 地址搜索选项
   mapMarker: null as any, // 地图标记点
   geocoder: null as any, // 地理编码器实例
-  mapContainerReady: false, // 地图容器是否准备好
-  sdkLoaded: false // 百度地图 SDK 是否已加载
+  mapContainerReady: false // 地图容器是否准备好
 })
 
 // 初始经纬度（打开弹窗时传入）
@@ -108,11 +100,9 @@ const handleDialogOpened = async () => {
 
   // 等待下一个 DOM 更新周期，确保地图容器已渲染
   await nextTick()
-  if (!state.sdkLoaded) {
-    loadMapSdk()
-  } else {
-    initMapInstance()
-  }
+  // 加载百度地图 SDK
+  await loadBaiduMapSdk()
+  initMapInstance()
 }
 
 /** 弹窗关闭后清理地图 */
@@ -125,28 +115,6 @@ const handleDialogClosed = () => {
   state.mapMarker = null
   state.geocoder = null
   state.mapContainerReady = false
-}
-
-/** 加载百度地图 SDK */
-const loadMapSdk = () => {
-  // 检查是否已加载百度地图 SDK
-  if (window.BMapGL) {
-    state.sdkLoaded = true
-    initMapInstance()
-    return
-  }
-
-  // 动态创建脚本标签加载百度地图 SDK
-  const script = document.createElement('script')
-  script.src = `https://api.map.baidu.com/api?v=1.0&type=webgl&ak=${
-    import.meta.env.VITE_BAIDU_MAP_KEY
-  }&callback=initBaiduMapDialog`
-  document.body.appendChild(script)
-  // 定义回调函数，SDK 加载完成后调用
-  window.initBaiduMapDialog = () => {
-    state.sdkLoaded = true
-    initMapInstance()
-  }
 }
 
 /** 初始化地图实例 */

@@ -54,13 +54,18 @@
   </el-row>
 
   <!-- 第三行：消息统计行 -->
-  <el-row>
+  <el-row class="mb-4">
     <el-col :span="24">
       <MessageTrendCard />
     </el-col>
   </el-row>
 
-  <!-- TODO 第四行：地图 -->
+  <!-- 第四行：设备分布地图 -->
+  <el-row>
+    <el-col :span="24">
+      <DeviceMapCard />
+    </el-col>
+  </el-row>
 </template>
 
 <script setup lang="ts" name="Index">
@@ -69,6 +74,7 @@ import ComparisonCard from './components/ComparisonCard.vue'
 import DeviceCountCard from './components/DeviceCountCard.vue'
 import DeviceStateCountCard from './components/DeviceStateCountCard.vue'
 import MessageTrendCard from './components/MessageTrendCard.vue'
+import DeviceMapCard from './components/DeviceMapCard.vue'
 
 /** IoT 首页 */
 defineOptions({ name: 'IoTHome' })
@@ -96,8 +102,6 @@ const getStats = async () => {
   try {
     // 获取基础统计数据
     statsData.value = await StatisticsApi.getStatisticsSummary()
-  } catch (error) {
-    console.error('获取统计数据出错:', error)
   } finally {
     loading.value = false
   }
