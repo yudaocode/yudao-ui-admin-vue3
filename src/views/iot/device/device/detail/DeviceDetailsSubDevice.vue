@@ -62,40 +62,82 @@
   </ContentWrap>
 
   <!-- 添加子设备弹窗 -->
-  <!-- TODO @AI：需要增加检索：产品、设备等检索，可以一起讨论下； -->
-  <Dialog title="添加子设备" v-model="bindDialogVisible" width="800px">
-    <el-table
-      ref="bindTableRef"
-      v-loading="bindFormLoading"
-      :data="bindableDevices"
-      :stripe="true"
-      :show-overflow-tooltip="true"
-      @selection-change="handleBindSelectionChange"
-      max-height="400px"
-    >
-      <el-table-column type="selection" width="55" />
-      <el-table-column label="DeviceName" align="center" prop="deviceName" />
-      <el-table-column label="备注名称" align="center" prop="nickname" />
-      <el-table-column label="产品名称" align="center" prop="productName" />
-      <el-table-column label="设备状态" align="center" prop="state">
-        <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="row.state" />
-        </template>
-      </el-table-column>
-    </el-table>
+  <Dialog title="添加子设备" v-model="bindDialogVisible" width="900px">
+    <ContentWrap>
+      <!-- 搜索区域 -->
+      <el-form :model="bindQueryParams" ref="bindQueryFormRef" :inline="true" class="-mb-15px">
+        <el-form-item label="产品" prop="productId">
+          <ProductSelect
+            v-model="bindQueryParams.productId"
+            :device-type="DeviceTypeEnum.GATEWAY_SUB"
+            class="!w-200px"
+          />
+        </el-form-item>
+        <el-form-item label="设备名称" prop="deviceName">
+          <el-input
+            v-model="bindQueryParams.deviceName"
+            placeholder="请输入设备名称"
+            clearable
+            class="!w-200px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="getBindableDevicePage">
+            <Icon icon="ep:search" class="mr-5px" /> 搜索
+          </el-button>
+          <el-button @click="resetBindQuery">
+            <Icon icon="ep:refresh" class="mr-5px" /> 重置
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </ContentWrap>
+
+    <ContentWrap>
+      <!-- 分页表格 -->
+      <el-table
+        ref="bindTableRef"
+        v-loading="bindFormLoading"
+        :data="bindableDevices"
+        :stripe="true"
+        :show-overflow-tooltip="true"
+        @selection-change="handleBindSelectionChange"
+        max-height="400px"
+      >
+        <el-table-column type="selection" width="55" />
+        <el-table-column label="DeviceName" align="center" prop="deviceName" />
+        <el-table-column label="备注名称" align="center" prop="nickname" />
+        <el-table-column label="产品名称" align="center" prop="productName" />
+        <el-table-column label="设备状态" align="center" prop="state">
+          <template #default="{ row }">
+            <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="row.state" />
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页组件 -->
+      <Pagination
+        v-model:page="bindQueryParams.pageNo"
+        v-model:limit="bindQueryParams.pageSize"
+        :total="bindTotal"
+        @pagination="getBindableDevicePage"
+      />
+    </ContentWrap>
+
     <template #footer>
-      <el-button @click="bindDialogVisible = false">取消</el-button>
       <el-button type="primary" @click="handleBindSubmit" :loading="bindFormLoading">
         确定（已选 {{ bindSelectedIds.length }} 个）
       </el-button>
+      <el-button @click="bindDialogVisible = false">取消</el-button>
     </template>
   </Dialog>
 </template>
 
 <script setup lang="ts">
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
+import { DeviceTypeEnum } from '@/api/iot/product/product'
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
+import ProductSelect from '@/views/iot/product/product/components/ProductSelect.vue'
 
 const props = defineProps<{
   gatewayId: number
@@ -104,18 +146,23 @@ const props = defineProps<{
 const message = useMessage()
 const { push } = useRouter()
 
-// TODO @AI：注释使用尾注释；
-// 列表数据
-const loading = ref(false)
-const subDeviceList = ref<DeviceVO[]>([])
-const selectedIds = ref<number[]>([])
+const loading = ref(false) // 列表加载状态
+const subDeviceList = ref<DeviceVO[]>([]) // 子设备列表
+const selectedIds = ref<number[]>([]) // 选中的设备ID
 
-// 绑定弹窗数据
-const bindDialogVisible = ref(false)
-const bindFormLoading = ref(false)
+const bindDialogVisible = ref(false) // 绑定弹窗可见性
+const bindFormLoading = ref(false) // 绑定弹窗加载状态
 const bindTableRef = ref()
-const bindableDevices = ref<DeviceVO[]>([])
-const bindSelectedIds = ref<number[]>([])
+const bindQueryFormRef = ref()
+const bindableDevices = ref<DeviceVO[]>([]) // 可绑定设备列表
+const bindSelectedIds = ref<number[]>([]) // 绑定选中的设备ID
+const bindTotal = ref(0) // 可绑定设备总数
+const bindQueryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  productId: undefined as number | undefined,
+  deviceName: ''
+})
 
 /** 获取子设备列表 */
 const getSubDeviceList = async () => {
@@ -141,16 +188,27 @@ const handleSelectionChange = (selection: DeviceVO[]) => {
 const openBindDialog = async () => {
   bindSelectedIds.value = []
   bindDialogVisible.value = true
+  await getBindableDevicePage()
+}
+
+/** 获取可绑定设备分页 */
+const getBindableDevicePage = async () => {
   bindFormLoading.value = true
   try {
-    // 获取可绑定的子设备列表
-    const list = await DeviceApi.getBindableSubDeviceList(props.gatewayId)
-    // 排除已绑定到当前网关的设备
-    // TODO @AI：不用排除，后端已经排除；
-    bindableDevices.value = list.filter((device: DeviceVO) => device.gatewayId !== props.gatewayId)
+    const result = await DeviceApi.getUnboundSubDevicePage(bindQueryParams)
+    bindableDevices.value = result.list
+    bindTotal.value = result.total
   } finally {
     bindFormLoading.value = false
   }
+}
+
+/** 重置绑定弹窗搜索条件 */
+const resetBindQuery = () => {
+  bindQueryParams.pageNo = 1
+  bindQueryParams.productId = undefined
+  bindQueryParams.deviceName = ''
+  getBindableDevicePage()
 }
 
 /** 绑定弹窗多选框选中数据 */
@@ -203,8 +261,4 @@ const handleUnbindBatch = async () => {
 onMounted(async () => {
   await getSubDeviceList()
 })
-
-// 暴露刷新方法
-// TODO @AI：refresh 需要提供么？
-defineExpose({ refresh: getSubDeviceList })
 </script>

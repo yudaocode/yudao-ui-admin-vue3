@@ -178,11 +178,8 @@ export const DeviceApi = {
     })
   },
 
-  // 获取可绑定到网关的子设备列表
-  getBindableSubDeviceList: async (gatewayId?: number) => {
-    return await request.get<DeviceVO[]>({
-      url: `/iot/device/bindable-sub-device-list`,
-      params: { gatewayId }
-    })
+  // 获取未绑定网关的子设备分页
+  getUnboundSubDevicePage: async (params: any) => {
+    return await request.get({ url: `/iot/device/unbound-sub-device-page`, params })
   }
 }

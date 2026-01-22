@@ -68,8 +68,8 @@ export const ProductApi = {
   },
 
   // 查询产品（精简）列表
-  getSimpleProductList() {
-    return request.get({ url: '/iot/product/simple-list' })
+  getSimpleProductList(deviceType?: number) {
+    return request.get({ url: '/iot/product/simple-list', params: { deviceType } })
   },
 
   // 根据 ProductKey 获取产品信息
