@@ -21,7 +21,6 @@ export interface DeviceVO {
   mqttClientId: string // MQTT 客户端 ID
   mqttUsername: string // MQTT 用户名
   mqttPassword: string // MQTT 密码
-  authType: string // 认证类型
   latitude?: number // 设备位置的纬度
   longitude?: number // 设备位置的经度
   areaId: number // 地区编码
@@ -158,5 +157,28 @@ export const DeviceApi = {
   // 发送设备消息
   sendDeviceMessage: async (params: IotDeviceMessageSendReqVO) => {
     return await request.post({ url: `/iot/device/message/send`, data: params })
+  },
+
+  // 绑定子设备到网关
+  bindDeviceGateway: async (data: { subIds: number[]; gatewayId: number }) => {
+    return await request.put({ url: `/iot/device/bind-gateway`, data })
+  },
+
+  // 解绑子设备与网关
+  unbindDeviceGateway: async (data: { subIds: number[]; gatewayId: number }) => {
+    return await request.put({ url: `/iot/device/unbind-gateway`, data })
+  },
+
+  // 获取网关的子设备列表
+  getSubDeviceList: async (gatewayId: number) => {
+    return await request.get<DeviceVO[]>({
+      url: `/iot/device/sub-device-list`,
+      params: { gatewayId }
+    })
+  },
+
+  // 获取未绑定网关的子设备分页
+  getUnboundSubDevicePage: async (params: any) => {
+    return await request.get({ url: `/iot/device/unbound-sub-device-page`, params })
   }
 }

@@ -5,6 +5,8 @@ export interface ProductVO {
   id: number // 产品编号
   name: string // 产品名称
   productKey: string // 产品标识
+  productSecret?: string // 产品密钥
+  registerEnabled?: boolean // 动态注册
   protocolId: number // 协议编号
   categoryId: number // 产品所属品类标识符
   categoryName?: string // 产品所属品类名称
@@ -68,8 +70,8 @@ export const ProductApi = {
   },
 
   // 查询产品（精简）列表
-  getSimpleProductList() {
-    return request.get({ url: '/iot/product/simple-list' })
+  getSimpleProductList(deviceType?: number) {
+    return request.get({ url: '/iot/product/simple-list', params: { deviceType } })
   },
 
   // 根据 ProductKey 获取产品信息

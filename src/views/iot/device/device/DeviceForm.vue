@@ -30,20 +30,6 @@
           :disabled="formType === 'update'"
         />
       </el-form-item>
-      <el-form-item
-        v-if="formData.deviceType === DeviceTypeEnum.GATEWAY_SUB"
-        label="网关设备"
-        prop="gatewayId"
-      >
-        <el-select v-model="formData.gatewayId" placeholder="子设备可选择父设备" clearable>
-          <el-option
-            v-for="gateway in gatewayDevices"
-            :key="gateway.id"
-            :label="gateway.nickname || gateway.deviceName"
-            :value="gateway.id"
-          />
-        </el-select>
-      </el-form-item>
 
       <el-collapse>
         <el-collapse-item title="更多配置">
@@ -114,7 +100,6 @@ const formData = ref({
   deviceName: undefined,
   nickname: undefined,
   picUrl: undefined,
-  gatewayId: undefined,
   deviceType: undefined as number | undefined,
   serialNumber: undefined,
   longitude: undefined as number | string | undefined,
@@ -222,7 +207,6 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const products = ref<ProductVO[]>([]) // 产品列表
-const gatewayDevices = ref<DeviceVO[]>([]) // 网关设备列表
 const deviceGroups = ref<any[]>([])
 
 /** 打开弹窗 */
@@ -242,8 +226,6 @@ const open = async (type: string, id?: number) => {
     }
   }
 
-  // 加载网关设备列表
-  gatewayDevices.value = await DeviceApi.getSimpleDeviceList(DeviceTypeEnum.GATEWAY)
   // 加载产品列表
   products.value = await ProductApi.getSimpleProductList()
   // 加载设备分组列表
@@ -283,7 +265,6 @@ const resetForm = () => {
     deviceName: undefined,
     nickname: undefined,
     picUrl: undefined,
-    gatewayId: undefined,
     deviceType: undefined,
     serialNumber: undefined,
     longitude: undefined,
