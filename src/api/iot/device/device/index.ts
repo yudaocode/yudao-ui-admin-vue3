@@ -21,7 +21,6 @@ export interface DeviceVO {
   mqttClientId: string // MQTT 客户端 ID
   mqttUsername: string // MQTT 用户名
   mqttPassword: string // MQTT 密码
-  authType: string // 认证类型
   latitude?: number // 设备位置的纬度
   longitude?: number // 设备位置的经度
   areaId: number // 地区编码
@@ -161,12 +160,12 @@ export const DeviceApi = {
   },
 
   // 绑定子设备到网关
-  bindDeviceGateway: async (data: { ids: number[]; gatewayId: number }) => {
+  bindDeviceGateway: async (data: { subIds: number[]; gatewayId: number }) => {
     return await request.put({ url: `/iot/device/bind-gateway`, data })
   },
 
   // 解绑子设备与网关
-  unbindDeviceGateway: async (data: { ids: number[] }) => {
+  unbindDeviceGateway: async (data: { subIds: number[]; gatewayId: number }) => {
     return await request.put({ url: `/iot/device/unbind-gateway`, data })
   },
 

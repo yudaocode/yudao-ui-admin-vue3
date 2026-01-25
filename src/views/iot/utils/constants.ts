@@ -24,7 +24,41 @@ export const IotDeviceMessageMethodEnum = {
   // ========== 设备状态 ==========
   STATE_UPDATE: {
     method: 'thing.state.update',
-    name: '设备状态变更',
+    name: '设备状态更新',
+    upstream: true
+  },
+
+  // ========== 拓扑管理 ==========
+  TOPO_ADD: {
+    method: 'thing.topo.add',
+    name: '添加拓扑关系',
+    upstream: true
+  },
+  TOPO_DELETE: {
+    method: 'thing.topo.delete',
+    name: '删除拓扑关系',
+    upstream: true
+  },
+  TOPO_GET: {
+    method: 'thing.topo.get',
+    name: '获取拓扑关系',
+    upstream: true
+  },
+  TOPO_CHANGE: {
+    method: 'thing.topo.change',
+    name: '拓扑关系变更通知',
+    upstream: false
+  },
+
+  // ========== 设备注册 ==========
+  DEVICE_REGISTER: {
+    method: 'thing.auth.register',
+    name: '设备动态注册',
+    upstream: true
+  },
+  SUB_DEVICE_REGISTER: {
+    method: 'thing.auth.register.sub',
+    name: '子设备动态注册',
     upstream: true
   },
 
@@ -38,6 +72,11 @@ export const IotDeviceMessageMethodEnum = {
     method: 'thing.property.set',
     name: '属性设置',
     upstream: false
+  },
+  PROPERTY_PACK_POST: {
+    method: 'thing.event.property.pack.post',
+    name: '批量上报（属性 + 事件 + 子设备）',
+    upstream: true
   },
 
   // ========== 设备事件 ==========
@@ -59,6 +98,18 @@ export const IotDeviceMessageMethodEnum = {
     method: 'thing.config.push',
     name: '配置推送',
     upstream: false
+  },
+
+  // ========== OTA 固件 ==========
+  OTA_UPGRADE: {
+    method: 'thing.ota.upgrade',
+    name: 'OTA 固件信息推送',
+    upstream: false
+  },
+  OTA_PROGRESS: {
+    method: 'thing.ota.progress',
+    name: 'OTA 升级进度上报',
+    upstream: true
   }
 }
 

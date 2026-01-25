@@ -225,7 +225,7 @@ const handleBindSubmit = async () => {
   bindFormLoading.value = true
   try {
     await DeviceApi.bindDeviceGateway({
-      ids: bindSelectedIds.value,
+      subIds: bindSelectedIds.value,
       gatewayId: props.gatewayId
     })
     message.success('绑定成功')
@@ -240,7 +240,7 @@ const handleBindSubmit = async () => {
 const handleUnbind = async (id: number) => {
   try {
     await message.confirm('确定要解绑该子设备吗？')
-    await DeviceApi.unbindDeviceGateway({ ids: [id] })
+    await DeviceApi.unbindDeviceGateway({ subIds: [id], gatewayId: props.gatewayId })
     message.success('解绑成功')
     await getSubDeviceList()
   } catch {}
@@ -250,7 +250,7 @@ const handleUnbind = async (id: number) => {
 const handleUnbindBatch = async () => {
   try {
     await message.confirm(`确定要解绑选中的 ${selectedIds.value.length} 个子设备吗？`)
-    await DeviceApi.unbindDeviceGateway({ ids: selectedIds.value })
+    await DeviceApi.unbindDeviceGateway({ subIds: selectedIds.value, gatewayId: props.gatewayId })
     message.success('批量解绑成功')
     selectedIds.value = []
     await getSubDeviceList()

@@ -5,6 +5,8 @@ export interface ProductVO {
   id: number // 产品编号
   name: string // 产品名称
   productKey: string // 产品标识
+  productSecret?: string // 产品密钥
+  registerEnabled?: boolean // 动态注册
   protocolId: number // 协议编号
   categoryId: number // 产品所属品类标识符
   categoryName?: string // 产品所属品类名称
