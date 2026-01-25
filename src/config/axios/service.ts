@@ -85,7 +85,7 @@ service.interceptors.request.use(
       }
     }
     // 是否 API 加密
-    if ((config!.headers || {}).isEncrypt) {
+    if ((config!.headers || {}).isEncrypt && !(config!.headers || {}).isEncrypted) {
       try {
         // 加密请求数据
         if (config.data) {
@@ -169,6 +169,9 @@ service.interceptors.response.use(
             cb()
           })
           requestList = []
+          if ((config!.headers || {}).isEncrypt){
+            (config!.headers || {}).isEncrypted = true
+          }
           return service(config)
         } catch (e) {
           // 为什么需要 catch 异常呢？刷新失败时，请求因为 Promise.reject 触发异常。
