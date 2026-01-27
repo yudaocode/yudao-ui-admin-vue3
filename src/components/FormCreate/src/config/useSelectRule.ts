@@ -19,13 +19,24 @@ export const useSelectRule = (option: SelectRuleOption) => {
     name,
     event: option.event,
     rule() {
-      return {
+      // 构建基础规则
+      const baseRule: any = {
         type: name,
         field: generateUUID(),
         title: label,
         info: '',
         $required: false
       }
+      // 将自定义 props 的默认值添加到 rule 的 props 中
+      if (option.props && option.props.length > 0) {
+        baseRule.props = {}
+        option.props.forEach((prop: any) => {
+          if (prop.field && prop.value !== undefined) {
+            baseRule.props[prop.field] = prop.value
+          }
+        })
+      }
+      return baseRule
     },
     props(_, { t }) {
       if (!option.props) {

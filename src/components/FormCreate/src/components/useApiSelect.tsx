@@ -2,6 +2,7 @@ import request from '@/config/axios'
 import { isEmpty } from '@/utils/is'
 import { ApiSelectProps } from '@/components/FormCreate/src/type'
 import { jsonParse } from '@/utils'
+import { useUserStoreWithOut } from '@/store/modules/user'
 
 export const useApiSelect = (option: ApiSelectProps) => {
   return defineComponent({
@@ -61,13 +62,62 @@ export const useApiSelect = (option: ApiSelectProps) => {
       returnType: {
         type: String,
         default: 'id'
+      },
+      // 是否默认选中当前用户（仅 UserSelect 使用）
+      defaultCurrentUser: {
+        type: Boolean,
+        default: false
       }
     },
-    setup(props) {
+    setup(props, { emit }) {
       const attrs = useAttrs()
       const options = ref<any[]>([]) // 下拉数据
       const loading = ref(false) // 是否正在从远程获取数据
       const queryParam = ref<any>() // 当前输入的值
+
+      // 检查是否有有效的预设值
+      const hasValidPresetValue = (): boolean => {
+        const value = attrs.modelValue
+        if (value === undefined || value === null || value === '') {
+          return false
+        }
+        if (Array.isArray(value)) {
+          return value.length > 0
+        }
+        return true
+      }
+
+      // 设置默认当前用户（仅当 defaultCurrentUser 为 true 且无预设值时）
+      const setDefaultCurrentUser = () => {
+        console.log('[UserSelect] setDefaultCurrentUser called, defaultCurrentUser:', props.defaultCurrentUser)
+        
+        // 仅当组件名为 UserSelect 且 defaultCurrentUser 为 true 时处理
+        if (option.name !== 'UserSelect' || !props.defaultCurrentUser) {
+          console.log('[UserSelect] skip - not UserSelect or defaultCurrentUser is false')
+          return
+        }
+        
+        // 检查是否已有预设值（预设值优先级高于默认当前用户）
+        if (hasValidPresetValue()) {
+          console.log('[UserSelect] has preset value, skip:', attrs.modelValue)
+          return
+        }
+        
+        // 获取当前用户 ID
+        const userStore = useUserStoreWithOut()
+        const user = userStore.getUser
+        const currentUserId = user?.id
+        
+        console.log('[UserSelect] current user:', user, 'userId:', currentUserId)
+        
+        if (currentUserId) {
+          // 根据多选/单选模式设置默认值
+          const defaultValue = props.multiple ? [currentUserId] : currentUserId
+          console.log('[UserSelect] setting default value:', defaultValue)
+          emit('update:modelValue', defaultValue)
+        }
+      }
+
       const getOptions = async () => {
         options.value = []
         // 接口选择器
@@ -188,6 +238,8 @@ export const useApiSelect = (option: ApiSelectProps) => {
 
       onMounted(async () => {
         await getOptions()
+        // 设置默认当前用户（在数据加载完成后）
+        setDefaultCurrentUser()
       })
 
       const buildSelect = () => {
