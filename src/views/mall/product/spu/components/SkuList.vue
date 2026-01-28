@@ -318,6 +318,7 @@ const props = defineProps({
 const formData: Ref<Spu | undefined> = ref<Spu>() // 表单数据
 const skuList = ref<Sku[]>([
   {
+    name: '', // SKU 名称
     price: 0, // 商品价格
     marketPrice: 0, // 市场价
     costPrice: 0, // 成本价
@@ -449,6 +450,7 @@ const generateTableData = (propertyList: any[]) => {
   }
   for (const item of buildSkuList) {
     const row = {
+      name: '', // SKU 名称，提交时会自动使用 SPU 名称
       properties: Array.isArray(item) ? item : [item], // 如果只有一个属性的话返回的是一个 property 对象
       price: 0,
       marketPrice: 0,
@@ -525,6 +527,7 @@ watch(
     if (props.isBatch) {
       skuList.value = [
         {
+          name: '', // SKU 名称
           price: 0,
           marketPrice: 0,
           costPrice: 0,

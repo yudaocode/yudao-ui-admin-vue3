@@ -173,6 +173,7 @@ const onChangeSpec = () => {
   // 重置sku列表
   formData.skus = [
     {
+      name: '', // SKU 名称，提交时会自动使用 SPU 名称
       price: 0,
       marketPrice: 0,
       costPrice: 0,
