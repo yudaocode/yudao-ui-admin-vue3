@@ -58,7 +58,7 @@ export const useFormCreateDesigner = async (designer: Ref) => {
         type: 'switch',
         field: 'defaultCurrentUser',
         title: '默认选中当前用户',
-        value: true
+        value: false
       }
     ]
   })
@@ -81,7 +81,7 @@ export const useFormCreateDesigner = async (designer: Ref) => {
         type: 'switch',
         field: 'defaultCurrentDept',
         title: '默认选中当前部门',
-        value: true
+        value: false
       }
     ]
   })
