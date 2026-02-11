@@ -18,8 +18,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue'
 import { getAreaTree } from '@/api/system/area'
-// TODO @puhui999：这里 handleTree 貌似没用到
-import { handleTree } from '@/utils/tree'
+import { AreaLevelEnum } from '@/utils/constants'
 
 defineOptions({ name: 'AreaSelect' })
 
@@ -35,7 +34,7 @@ interface AreaVO {
 
 interface Props {
   modelValue?: number[] | string[]
-  level?: 1 | 2 | 3 // 1-省 2-市 3-区 TODO @puhui999：这里是不是放到枚举类里？
+  level?: typeof AreaLevelEnum[keyof typeof AreaLevelEnum]
   disabled?: boolean
   placeholder?: string
   clearable?: boolean
@@ -46,7 +45,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: undefined,
-  level: 3, // TODO @puhui999：枚举类；
+  level: AreaLevelEnum.DISTRICT,
   disabled: false,
   placeholder: '请选择省市区',
   clearable: true,
