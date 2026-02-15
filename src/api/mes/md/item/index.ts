@@ -6,7 +6,8 @@ export interface MdItemVO {
   code: string // 物料编码
   name: string // 物料名称
   specification: string // 规格型号
-  unitOfMeasure: string // 单位编码
+  unitMeasureId: number // 计量单位编号
+  unitMeasureName?: string // 计量单位名称
   itemTypeId: number // 物料分类编号
   itemTypeName?: string // 物料分类名称
   itemOrProduct?: string // 物料/产品标识
@@ -54,5 +55,10 @@ export const MdItemApi = {
   // 导出物料产品 Excel
   exportItem: async (params: any) => {
     return await request.download({ url: `/mes/md/item/export-excel`, params })
+  },
+
+  // 下载物料导入模板
+  importTemplate: async () => {
+    return await request.download({ url: `/mes/md/item/get-import-template` })
   }
 }

@@ -66,6 +66,14 @@
               <Icon icon="ep:plus" class="mr-5px" /> 新增
             </el-button>
             <el-button
+              type="warning"
+              plain
+              @click="handleImport"
+              v-hasPermi="['mes:md-item:import']"
+            >
+              <Icon icon="ep:upload" class="mr-5px" /> 导入
+            </el-button>
+            <el-button
               type="success"
               plain
               @click="handleExport"
@@ -84,7 +92,7 @@
           <el-table-column label="物料编码" align="center" prop="code" />
           <el-table-column label="物料名称" align="center" prop="name" />
           <el-table-column label="规格型号" align="center" prop="specification" />
-          <el-table-column label="单位" align="center" prop="unitOfMeasure" />
+          <el-table-column label="单位" align="center" prop="unitMeasureName" />
           <el-table-column label="物料分类" align="center" prop="itemTypeName" />
           <el-table-column label="物料/产品" align="center" prop="itemOrProduct">
             <template #default="scope">
@@ -142,6 +150,8 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <MdItemForm ref="formRef" @success="getList" />
+  <!-- 物料导入对话框 -->
+  <MdItemImportForm ref="importFormRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -150,6 +160,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import MdItemForm from './MdItemForm.vue'
+import MdItemImportForm from './MdItemImportForm.vue'
 import ItemTypeTree from './ItemTypeTree.vue'
 import { getItemOrProductLabel } from '@/views/mes/utils/constants'
 
@@ -220,6 +231,12 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 物料导入 */
+const importFormRef = ref()
+const handleImport = () => {
+  importFormRef.value.open()
 }
 
 /** 导出按钮操作 */

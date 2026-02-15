@@ -31,8 +31,15 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="单位" prop="unitOfMeasure">
-            <el-input v-model="formData.unitOfMeasure" placeholder="请输入单位编码" />
+          <el-form-item label="单位" prop="unitMeasureId">
+            <el-select v-model="formData.unitMeasureId" placeholder="请选择计量单位" class="w-1/1">
+              <el-option
+                v-for="item in unitMeasureList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -138,6 +145,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { generateRandomStr } from '@/utils'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
+import { MdUnitMeasureApi, MdUnitMeasureVO } from '@/api/mes/md/unitmeasure'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
 
@@ -157,7 +165,7 @@ const formData = ref({
   code: undefined,
   name: undefined,
   specification: undefined,
-  unitOfMeasure: undefined,
+  unitMeasureId: undefined,
   itemTypeId: undefined,
   status: CommonStatusEnum.ENABLE,
   safeStockFlag: false,
@@ -170,12 +178,13 @@ const formData = ref({
 const formRules = reactive({
   code: [{ required: true, message: '物料编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '物料名称不能为空', trigger: 'blur' }],
-  unitOfMeasure: [{ required: true, message: '单位编码不能为空', trigger: 'blur' }],
+  unitMeasureId: [{ required: true, message: '计量单位不能为空', trigger: 'change' }],
   itemTypeId: [{ required: true, message: '物料分类不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const itemTypeList = ref<MdItemTypeVO[]>([]) // 物料分类列表
+const unitMeasureList = ref<MdUnitMeasureVO[]>([]) // 计量单位列表
 
 /** 生成物料编码 */
 const generateCode = () => {
@@ -202,6 +211,8 @@ const open = async (type: string, id?: number) => {
   // 物料分类
   const categoryData = await MdItemTypeApi.getItemTypeSimpleList()
   itemTypeList.value = handleTree(categoryData, 'id', 'parentId')
+  // 计量单位
+  unitMeasureList.value = await MdUnitMeasureApi.getUnitMeasureSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -236,7 +247,7 @@ const resetForm = () => {
     code: undefined,
     name: undefined,
     specification: undefined,
-    unitOfMeasure: undefined,
+    unitMeasureId: undefined,
     itemTypeId: undefined,
     status: CommonStatusEnum.ENABLE,
     safeStockFlag: false,
