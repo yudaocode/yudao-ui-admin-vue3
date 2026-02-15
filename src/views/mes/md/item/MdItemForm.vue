@@ -46,7 +46,7 @@
           <el-form-item label="物料分类" prop="itemTypeId">
             <el-tree-select
               v-model="formData.itemTypeId"
-              :data="itemTypeList"
+              :data="itemTypeTree"
               :props="defaultProps"
               check-strictly
               default-expand-all
@@ -118,9 +118,8 @@
       <el-tab-pane label="BOM 组成" name="bom" lazy>
         <el-empty description="BOM 组成（待实现）" />
       </el-tab-pane>
-      <!-- TODO @芋艿：批次属性，等批次模块实现后对接 -->
-      <el-tab-pane label="批次属性" name="batch" lazy>
-        <el-empty description="批次属性（待实现）" />
+      <el-tab-pane label="批次属性" name="batch" lazy v-if="formData.batchFlag">
+        <MdItemBatchConfigForm :itemId="formData.id!" :itemOrProduct="currentItemOrProduct" />
       </el-tab-pane>
       <!-- TODO @芋艿：替代品，等替代品模块实现后对接 -->
       <el-tab-pane label="替代品" name="substitute" lazy>
@@ -145,6 +144,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { generateRandomStr } from '@/utils'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
+import MdItemBatchConfigForm from './MdItemBatchConfigForm.vue'
 import { MdUnitMeasureApi, MdUnitMeasureVO } from '@/api/mes/md/unitmeasure'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
@@ -183,8 +183,18 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const itemTypeList = ref<MdItemTypeVO[]>([]) // 物料分类列表
+const itemTypeTree = ref<MdItemTypeVO[]>([]) // 物料分类树
+const itemTypeList = ref<MdItemTypeVO[]>([]) // 物料分类列表（扁平）
 const unitMeasureList = ref<MdUnitMeasureVO[]>([]) // 计量单位列表
+
+/** 当前物料的「物料/产品」标识 */
+const currentItemOrProduct = computed(() => {
+  if (!formData.value.itemTypeId) {
+    return ''
+  }
+  const itemType = itemTypeList.value.find((t) => t.id === formData.value.itemTypeId)
+  return itemType?.itemOrProduct || ''
+})
 
 /** 生成物料编码 */
 const generateCode = () => {
@@ -209,8 +219,8 @@ const open = async (type: string, id?: number) => {
     }
   }
   // 物料分类
-  const categoryData = await MdItemTypeApi.getItemTypeSimpleList()
-  itemTypeList.value = handleTree(categoryData, 'id', 'parentId')
+  itemTypeList.value = await MdItemTypeApi.getItemTypeSimpleList()
+  itemTypeTree.value = handleTree(itemTypeList.value)
   // 计量单位
   unitMeasureList.value = await MdUnitMeasureApi.getUnitMeasureSimpleList()
 }
