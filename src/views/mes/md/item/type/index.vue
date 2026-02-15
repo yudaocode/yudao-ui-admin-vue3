@@ -39,16 +39,6 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-        <!-- TODO @AI：不需要导出 -->
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['mes:md-item-type:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
         <el-button type="danger" plain @click="toggleExpandAll">
           <Icon icon="ep:sort" class="mr-5px" /> 展开/折叠
         </el-button>
@@ -69,8 +59,11 @@
     >
       <el-table-column label="分类名称" align="left" prop="name" />
       <el-table-column label="分类编码" align="center" prop="code" />
-      <!-- TODO @AI：搞个 mes/constants，类似 ts；然后这个字段要翻译掉；另外，MdItemTypeForm 里的相关，也要通过这个方式复用； -->
-      <el-table-column label="物料/产品" align="center" prop="itemOrProduct" />
+      <el-table-column label="物料/产品" align="center" prop="itemOrProduct">
+        <template #default="scope">
+          {{ getItemOrProductLabel(scope.row.itemOrProduct) }}
+        </template>
+      </el-table-column>
       <el-table-column label="排序" align="center" prop="sort" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
@@ -123,8 +116,8 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { handleTree } from '@/utils/tree'
-import download from '@/utils/download'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
+import { getItemOrProductLabel } from '@/views/mes/utils/constants'
 import MdItemTypeForm from './MdItemTypeForm.vue'
 
 defineOptions({ name: 'MesMdItemType' })
@@ -139,7 +132,6 @@ const queryParams = reactive({
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -180,21 +172,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await MdItemTypeApi.exportItemType(queryParams)
-    download.excel(data, '物料产品分类.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 展开/折叠操作 */

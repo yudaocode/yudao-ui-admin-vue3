@@ -42,10 +42,5 @@ export const MdItemTypeApi = {
   // 删除物料产品分类
   deleteItemType: async (id: number) => {
     return await request.delete({ url: `/mes/md/item-type/delete?id=` + id })
-  },
-
-  // 导出物料产品分类 Excel
-  exportItemType: async (params: any) => {
-    return await request.download({ url: `/mes/md/item-type/export-excel`, params })
   }
 }

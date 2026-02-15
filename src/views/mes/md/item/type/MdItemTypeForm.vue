@@ -26,10 +26,9 @@
         <el-input v-model="formData.name" placeholder="请输入分类名称" />
       </el-form-item>
       <el-form-item label="物料/产品标识" prop="itemOrProduct">
-        <!-- TODO @AI：搞个 mes/constants，类似 ts；然后这个字段要翻译掉；另外，MdItemTypeForm 里的相关，也要通过这个方式复用； -->
         <el-radio-group v-model="formData.itemOrProduct">
-          <el-radio value="ITEM">物料</el-radio>
-          <el-radio value="PRODUCT">产品</el-radio>
+          <el-radio :value="MesItemOrProductEnum.ITEM.value">物料</el-radio>
+          <el-radio :value="MesItemOrProductEnum.PRODUCT.value">产品</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="显示排序" prop="sort">
@@ -61,6 +60,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { CommonStatusEnum } from '@/utils/constants'
+import { MesItemOrProductEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MdItemTypeForm' })
 
@@ -72,14 +72,14 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  parentId: undefined,
-  code: undefined,
-  name: undefined,
-  itemOrProduct: 'ITEM',
+  id: undefined as unknown as number,
+  parentId: undefined as unknown as number,
+  code: undefined as unknown as string,
+  name: undefined as unknown as string,
+  itemOrProduct: MesItemOrProductEnum.ITEM.value as string,
   sort: 0,
   status: CommonStatusEnum.ENABLE,
-  remark: undefined
+  remark: undefined as unknown as string
 })
 const formRules = reactive({
   parentId: [{ required: true, message: '上级分类不能为空', trigger: 'blur' }],
@@ -109,7 +109,6 @@ const open = async (type: string, id?: number, parentId?: number) => {
   }
   // 新增子分类时，设置父分类
   if (parentId) {
-    // TODO @AI：TS2322: Type number is not assignable to type undefined 报错；
     formData.value.parentId = parentId
   }
   await getItemTypeTree()
@@ -147,8 +146,7 @@ const resetForm = () => {
     parentId: undefined,
     code: undefined,
     name: undefined,
-    // TODO @AI：使用 constants 里的枚举。
-    itemOrProduct: 'ITEM',
+    itemOrProduct: MesItemOrProductEnum.ITEM.value,
     sort: 0,
     status: CommonStatusEnum.ENABLE,
     remark: undefined

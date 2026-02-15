@@ -1,6 +1,6 @@
 <!-- MES 物料产品的新增/修改 -->
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="1000px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -8,31 +8,34 @@
       label-width="120px"
       v-loading="formLoading"
     >
-      <!-- TODO @AI：一行 3 个？ -->
       <el-row :gutter="20">
-        <el-col :span="12">
-          <!-- TODO @AI：有个生成按钮，类似 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/iot/product/product/ProductForm.vue -->
-          <!-- TODO @芋艿：先做个假的，ai；把交互做通；后续会有个后端接口 -->
+        <el-col :span="8">
           <el-form-item label="物料编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入物料编码" />
+            <el-input v-model="formData.code" placeholder="请输入物料编码">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="物料名称" prop="name">
             <el-input v-model="formData.name" placeholder="请输入物料名称" />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="规格型号" prop="specification">
             <el-input v-model="formData.specification" placeholder="请输入规格型号" />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="单位" prop="unitOfMeasure">
             <el-input v-model="formData.unitOfMeasure" placeholder="请输入单位编码" />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="物料分类" prop="itemTypeId">
             <el-tree-select
               v-model="formData.itemTypeId"
@@ -45,7 +48,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="formData.status">
               <el-radio
@@ -58,22 +61,22 @@
             </el-radio-group>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="高值物料" prop="highValue">
             <el-switch v-model="formData.highValue" />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="批次管理" prop="batchFlag">
             <el-switch v-model="formData.batchFlag" />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="安全库存" prop="safeStockFlag">
             <el-switch v-model="formData.safeStockFlag" />
           </el-form-item>
         </el-col>
-        <el-col :span="12" v-if="formData.safeStockFlag">
+        <el-col :span="8" v-if="formData.safeStockFlag">
           <el-form-item label="最低库存量" prop="minStock">
             <el-input-number
               v-model="formData.minStock"
@@ -84,7 +87,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="12" v-if="formData.safeStockFlag">
+        <el-col :span="8" v-if="formData.safeStockFlag">
           <el-form-item label="最高库存量" prop="maxStock">
             <el-input-number
               v-model="formData.maxStock"
@@ -102,8 +105,28 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- TODO @AI：底部的 tab 有 BOM组成、批次属性、替代品、SIP、SOP；做法类似：/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/member/user/detail 有很多 tab；只有修改时，才展示 -->
-    <!-- TODO @AI：是不是要有个组件，BarcodeImg 二维码查看； -->
+    <!-- 底部 Tab：仅修改时展示 -->
+    <el-tabs v-model="activeTab" v-if="formType === 'update' && formData.id">
+      <!-- TODO @芋艿：BOM 组成，等 BOM 模块实现后对接 -->
+      <el-tab-pane label="BOM 组成" name="bom" lazy>
+        <el-empty description="BOM 组成（待实现）" />
+      </el-tab-pane>
+      <!-- TODO @芋艿：批次属性，等批次模块实现后对接 -->
+      <el-tab-pane label="批次属性" name="batch" lazy>
+        <el-empty description="批次属性（待实现）" />
+      </el-tab-pane>
+      <!-- TODO @芋艿：替代品，等替代品模块实现后对接 -->
+      <el-tab-pane label="替代品" name="substitute" lazy>
+        <el-empty description="替代品（待实现）" />
+      </el-tab-pane>
+      <!-- TODO @芋艿：SIP/SOP，等工艺模块实现后对接 -->
+      <el-tab-pane label="SIP" name="sip" lazy>
+        <el-empty description="SIP（待实现）" />
+      </el-tab-pane>
+      <el-tab-pane label="SOP" name="sop" lazy>
+        <el-empty description="SOP（待实现）" />
+      </el-tab-pane>
+    </el-tabs>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -112,6 +135,7 @@
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { generateRandomStr } from '@/utils'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -127,12 +151,13 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const activeTab = ref('bom') // 当前激活的 Tab
 const formData = ref({
   id: undefined,
   code: undefined,
   name: undefined,
   specification: undefined,
-  unitOfMeasure: undefined, // TODO @芋艿：等等关联的组件搞完，我们补充下！另外，这个字段貌似改成 unitMeasureId 更好？
+  unitOfMeasure: undefined,
   itemTypeId: undefined,
   status: CommonStatusEnum.ENABLE,
   safeStockFlag: false,
@@ -152,11 +177,18 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const itemTypeList = ref<MdItemTypeVO[]>([]) // 物料分类列表
 
+/** 生成物料编码 */
+const generateCode = () => {
+  // TODO @芋艿：后续对接后端编码生成接口
+  formData.value.code = 'IF' + generateRandomStr(12)
+}
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
+  activeTab.value = 'bom'
   resetForm()
   // 修改时，设置数据
   if (id) {
