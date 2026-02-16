@@ -47,16 +47,6 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-        <!-- TODO @AI：不用导出 -->
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['mes:md-workshop:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -73,14 +63,7 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <!-- TODO @AI：不用时间，展示备注 -->
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
+      <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" width="150">
         <template #default="scope">
           <el-button
@@ -116,8 +99,6 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
 import WorkshopForm from './WorkshopForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -138,7 +119,6 @@ const queryParams = reactive({
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -181,21 +161,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await MdWorkshopApi.exportWorkshop(queryParams)
-    download.excel(data, '车间.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 初始化 **/

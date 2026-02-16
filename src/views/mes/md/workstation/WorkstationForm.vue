@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO @AI：工序字段 -->
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
@@ -8,22 +7,24 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <!-- TODO @AI：一行 3 个，和别的模块一样； -->
       <el-row>
-        <el-col :span="12">
-          <!-- TODO @AI：编号生成 -->
+        <el-col :span="8">
           <el-form-item label="工位编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入工位编码" />
+            <el-input v-model="formData.code" placeholder="请输入工位编码">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="工位名称" prop="name">
             <el-input v-model="formData.name" placeholder="请输入工位名称" />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="所在车间" prop="workshopId">
             <el-select v-model="formData.workshopId" placeholder="请选择车间" class="!w-1/1">
               <el-option
@@ -35,14 +36,14 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+      </el-row>
+      <el-row>
+        <el-col :span="8">
           <el-form-item label="工位地点" prop="address">
             <el-input v-model="formData.address" placeholder="请输入工位地点" />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="formData.status">
               <el-radio
@@ -89,6 +90,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdWorkstationApi, MdWorkstationVO } from '@/api/mes/md/workstation'
 import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
 import { CommonStatusEnum } from '@/utils/constants'
+import { generateRandomStr } from '@/utils'
 import WorkstationMachinePanel from './components/WorkstationMachinePanel.vue'
 import WorkstationToolPanel from './components/WorkstationToolPanel.vue'
 import WorkstationWorkerPanel from './components/WorkstationWorkerPanel.vue'
@@ -124,6 +126,11 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
+
+/** 生成工位编码 */
+const generateCode = () => {
+  formData.value.code = 'WS' + generateRandomStr(12)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {

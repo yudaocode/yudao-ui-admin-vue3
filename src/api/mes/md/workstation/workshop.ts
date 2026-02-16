@@ -1,7 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：是不是独立文件夹
-
 // MES 车间 VO
 export interface MdWorkshopVO {
   id: number // 车间编号

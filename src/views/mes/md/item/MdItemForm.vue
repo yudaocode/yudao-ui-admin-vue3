@@ -114,9 +114,8 @@
     </el-form>
     <!-- 底部 Tab：仅修改时展示 -->
     <el-tabs v-model="activeTab" v-if="formType === 'update' && formData.id">
-      <!-- TODO @芋艿：BOM 组成，等 BOM 模块实现后对接 -->
       <el-tab-pane label="BOM 组成" name="bom" lazy>
-        <el-empty description="BOM 组成（待实现）" />
+        <MdProductBomForm :itemId="formData.id!" />
       </el-tab-pane>
       <el-tab-pane label="批次属性" name="batch" lazy v-if="formData.batchFlag">
         <MdItemBatchConfigForm :itemId="formData.id!" :itemOrProduct="currentItemOrProduct" />
@@ -125,12 +124,11 @@
       <el-tab-pane label="替代品" name="substitute" lazy>
         <el-empty description="替代品（待实现）" />
       </el-tab-pane>
-      <!-- TODO @芋艿：SIP/SOP，等工艺模块实现后对接 -->
-      <el-tab-pane label="SIP" name="sip" lazy>
-        <el-empty description="SIP（待实现）" />
-      </el-tab-pane>
       <el-tab-pane label="SOP" name="sop" lazy>
-        <el-empty description="SOP（待实现）" />
+        <MdProductSopForm :itemId="formData.id!" />
+      </el-tab-pane>
+      <el-tab-pane label="SIP" name="sip" lazy>
+        <MdProductSipForm :itemId="formData.id!" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -145,6 +143,9 @@ import { generateRandomStr } from '@/utils'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
 import MdItemBatchConfigForm from './MdItemBatchConfigForm.vue'
+import MdProductBomForm from './MdProductBomForm.vue'
+import MdProductSopForm from './MdProductSopForm.vue'
+import MdProductSipForm from './MdProductSipForm.vue'
 import { MdUnitMeasureApi, MdUnitMeasureVO } from '@/api/mes/md/unitmeasure'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
