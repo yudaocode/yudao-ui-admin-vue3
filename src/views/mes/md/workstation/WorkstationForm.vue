@@ -90,9 +90,9 @@ import { MdWorkstationApi, MdWorkstationVO } from '@/api/mes/md/workstation'
 import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
 import { CommonStatusEnum } from '@/utils/constants'
 import { generateRandomStr } from '@/utils'
-import WorkstationMachinePanel from './components/WorkstationMachinePanel.vue'
-import WorkstationToolPanel from './components/WorkstationToolPanel.vue'
-import WorkstationWorkerPanel from './components/WorkstationWorkerPanel.vue'
+import WorkstationMachinePanel from './WorkstationMachinePanel.vue'
+import WorkstationToolPanel from './WorkstationToolPanel.vue'
+import WorkstationWorkerPanel from './WorkstationWorkerPanel.vue'
 
 defineOptions({ name: 'WorkstationForm' })
 

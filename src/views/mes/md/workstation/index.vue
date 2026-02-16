@@ -77,15 +77,13 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <!-- @AI：宽度的设置有问题，参考下别的模块；已对齐列宽 -->
-    <!-- @AI：我指的是，你这么写，宽度占不满屏幕 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="工作站编码" align="center" prop="code" width="120" />
-      <el-table-column label="工作站名称" align="center" prop="name" width="150" />
-      <el-table-column label="工作站地点" align="center" prop="address" width="150" />
-      <el-table-column label="所在车间" align="center" prop="workshopName" width="120" />
+      <el-table-column label="工作站编码" align="center" prop="code" min-width="120" />
+      <el-table-column label="工作站名称" align="center" prop="name" min-width="150" />
+      <el-table-column label="工作站地点" align="center" prop="address" min-width="150" />
+      <el-table-column label="所在车间" align="center" prop="workshopName" min-width="120" />
       <!-- TODO @芋艿：所属工序，等工序模块完成后对接 -->
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column label="状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>

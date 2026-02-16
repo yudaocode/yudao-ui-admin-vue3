@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-button type="primary" plain size="small" @click="openAddForm" class="mb-10px">
+    <el-button type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加人员
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
@@ -10,7 +10,7 @@
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" width="120">
         <template #default="scope">
-          <el-button link type="primary" @click="openEditForm(scope.row)">编辑</el-button>
+          <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
@@ -18,13 +18,12 @@
 
     <!-- 添加/编辑弹窗 -->
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
+      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px" v-loading="formLoading">
         <el-form-item label="岗位" prop="postId">
           <el-select
             v-model="formData.postId"
             placeholder="请选择岗位"
             class="!w-1/1"
-            :disabled="formType === 'update'"
           >
             <el-option
               v-for="post in postList"
@@ -47,7 +46,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="submitForm" type="primary">确 定</el-button>
+        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
         <el-button @click="dialogVisible = false">取 消</el-button>
       </template>
     </Dialog>
@@ -62,7 +61,9 @@ const props = defineProps<{
   workstationId: number // 工作站编号
 }>()
 
+const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
 const loading = ref(false) // 列表加载中
 const list = ref<MdWorkstationWorkerVO[]>([]) // 人力资源列表
 const postList = ref<PostApi.PostVO[]>([]) // 岗位下拉列表
@@ -81,6 +82,7 @@ const getList = async () => {
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formLoading = ref(false) // 表单的提交加载中
 const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,
@@ -94,15 +96,47 @@ const formRules = reactive({
   quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
 }) // 表单校验规则
 
-// TODO @AI：是不是 openForm、resetForm 更好？因为编辑和添加其实是同一个表单，区别只是 formType 不同；这样和别的模块，更统一；
-
-/** 打开添加弹窗 */
-const openAddForm = async () => {
+/** 打开表单弹窗 */
+const openForm = async (type: string, row?: MdWorkstationWorkerVO) => {
   dialogVisible.value = true
-  dialogTitle.value = '添加人员'
-  formType.value = 'create'
+  dialogTitle.value = t('action.' + type)
+  formType.value = type
+  resetForm()
   // 加载岗位列表
   postList.value = await PostApi.getSimplePostList()
+  // 修改时，设置数据
+  if (type === 'update' && row) {
+    formData.value = { ...row }
+  }
+}
+
+/** 提交表单 */
+const submitForm = async () => {
+  // 校验表单
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as MdWorkstationWorkerVO
+    if (formType.value === 'create') {
+      await MdWorkstationWorkerApi.createWorkstationWorker(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await MdWorkstationWorkerApi.updateWorkstationWorker(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    // 刷新列表
+    await getList()
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 重置表单 */
+const resetForm = () => {
   formData.value = {
     id: undefined,
     workstationId: props.workstationId,
@@ -111,35 +145,6 @@ const openAddForm = async () => {
     remark: undefined
   }
   formRef.value?.resetFields()
-}
-
-/** 打开编辑弹窗 */
-const openEditForm = async (row: MdWorkstationWorkerVO) => {
-  dialogVisible.value = true
-  dialogTitle.value = '编辑人员'
-  formType.value = 'update'
-  // 加载岗位列表
-  postList.value = await PostApi.getSimplePostList()
-  formData.value = { ...row }
-}
-
-/** 提交表单 */
-const submitForm = async () => {
-  // TODO @AI：和别的模块保持一致；类似 loading 啥的
-  await formRef.value.validate()
-  if (formType.value === 'update') {
-    await MdWorkstationWorkerApi.updateWorkstationWorker(
-      formData.value as unknown as MdWorkstationWorkerVO
-    )
-    message.success('编辑成功')
-  } else {
-    await MdWorkstationWorkerApi.createWorkstationWorker(
-      formData.value as unknown as MdWorkstationWorkerVO
-    )
-    message.success('添加成功')
-  }
-  dialogVisible.value = false
-  await getList()
 }
 
 /** 删除 */

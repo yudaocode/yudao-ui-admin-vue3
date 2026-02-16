@@ -1,7 +1,5 @@
 import request from '@/config/axios'
 
-// DONE @AI：【遵守我说的！】是不是每个 VO 独立文件；例如说 tool/ 、worker/、machine/ 等等
-
 // MES 工作站 VO
 export interface MdWorkstationVO {
   id: number // 工作站编号
