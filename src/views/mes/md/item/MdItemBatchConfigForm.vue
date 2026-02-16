@@ -4,7 +4,7 @@
     <div class="flex justify-end mb-10px">
       <el-button type="primary" size="small" @click="handleSave" :loading="loading">保存批次属性</el-button>
     </div>
-    <div class="batch-config-grid">
+    <div class="grid grid-cols-5 gap-x-20px">
       <!-- 通用属性（ITEM 和 PRODUCT 都可见） -->
       <el-checkbox v-model="formData.produceDateFlag">生产日期</el-checkbox>
       <el-checkbox v-model="formData.qualityStatusFlag">质量状态</el-checkbox>
@@ -39,13 +39,14 @@ import { MesItemOrProductEnum } from '@/views/mes/utils/constants'
 defineOptions({ name: 'MdItemBatchConfigForm' })
 
 const props = defineProps<{
-  itemId: number
-  itemOrProduct: string // 'ITEM' | 'PRODUCT'
+  itemId: number // 物料编号
+  itemOrProduct: string // 区分原材料/产品：'ITEM' | 'PRODUCT'
 }>()
 
-const message = useMessage()
-const loading = ref(false)
-const formRef = ref()
+const message = useMessage() // 消息弹窗
+const loading = ref(false) // 加载中
+const formRef = ref() // 表单 Ref
+/** 表单数据 */
 const formData = ref<MdItemBatchConfigVO>({
   itemId: props.itemId,
   produceDateFlag: false,
@@ -112,11 +113,3 @@ const handleSave = async () => {
 
 onMounted(() => loadData())
 </script>
-
-<style lang="scss" scoped>
-.batch-config-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0 20px;
-}
-</style>

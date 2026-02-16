@@ -43,7 +43,7 @@
             <el-input v-model="formData.address" placeholder="请输入工作站地点" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：所属工序 -->
+        <!-- TODO @芋艿：所属工序，等工序模块完成后对接 -->
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="formData.status">
@@ -94,20 +94,17 @@ import WorkstationMachinePanel from './components/WorkstationMachinePanel.vue'
 import WorkstationToolPanel from './components/WorkstationToolPanel.vue'
 import WorkstationWorkerPanel from './components/WorkstationWorkerPanel.vue'
 
-// TODO @AI：方法注释；
-// TODO @AI：字段注释；
-
 defineOptions({ name: 'WorkstationForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const activeTab = ref('machine')
-const workshopList = ref<MdWorkshopVO[]>([]) // 车间列表
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const activeTab = ref('machine') // 当前激活的资源 Tab
+const workshopList = ref<MdWorkshopVO[]>([]) // 车间下拉列表
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -120,13 +117,13 @@ const formData = ref({
   areaId: undefined,
   status: CommonStatusEnum.ENABLE,
   remark: undefined
-})
+}) // 表单数据
 const formRules = reactive({
   code: [{ required: true, message: '工作站编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '工作站名称不能为空', trigger: 'blur' }],
   workshopId: [{ required: true, message: '所在车间不能为空', trigger: 'change' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
-})
+}) // 表单校验规则
 const formRef = ref()
 
 /** 生成工作站编码 */

@@ -84,7 +84,7 @@
       <el-table-column label="工作站名称" align="center" prop="name" width="150" />
       <el-table-column label="工作站地点" align="center" prop="address" width="150" />
       <el-table-column label="所在车间" align="center" prop="workshopName" width="120" />
-      <!-- TODO @AI：所属工序 -->
+      <!-- TODO @芋艿：所属工序，等工序模块完成后对接 -->
       <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />

@@ -25,7 +25,7 @@
             v-model="formData.toolTypeId"
             placeholder="请输入工具类型编号"
             class="!w-1/1"
-            :disabled="isEdit"
+            :disabled="formType === 'update'"
           />
         </el-form-item>
         <el-form-item label="数量" prop="quantity">
@@ -51,16 +51,13 @@
 <script setup lang="ts">
 import { MdWorkstationToolApi, MdWorkstationToolVO } from '@/api/mes/md/workstation/tool'
 
-// TODO @AI：字段注释；
-// TODO @AI：方法注释；
-
 const props = defineProps<{
-  workstationId: number
+  workstationId: number // 工作站编号
 }>()
 
-const message = useMessage()
-const loading = ref(false)
-const list = ref<MdWorkstationToolVO[]>([])
+const message = useMessage() // 消息弹窗
+const loading = ref(false) // 列表加载中
+const list = ref<MdWorkstationToolVO[]>([]) // 工装夹具资源列表
 
 /** 加载列表 */
 const getList = async () => {
@@ -72,27 +69,29 @@ const getList = async () => {
   }
 }
 
-/** 弹窗 */
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const isEdit = ref(false) // TODO @AI：参考别的模块，formType？
-const formRef = ref()
+// ==================== 添加/编辑工具 ====================
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,
   workstationId: undefined as number | undefined,
   toolTypeId: undefined as number | undefined,
   quantity: 1,
   remark: undefined as string | undefined
-})
+}) // 表单数据
 const formRules = reactive({
   toolTypeId: [{ required: true, message: '工具类型不能为空', trigger: 'blur' }],
   quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
-})
+}) // 表单校验规则
 
+/** 打开添加弹窗 */
+// TODO @AI：是不是 openForm、resetForm 更好？因为编辑和添加其实是同一个表单，区别只是 formType 不同；这样和别的模块，更统一；
 const openAddForm = () => {
   dialogVisible.value = true
   dialogTitle.value = '添加工具'
-  isEdit.value = false
+  formType.value = 'create'
   formData.value = {
     id: undefined,
     workstationId: props.workstationId,
@@ -103,16 +102,19 @@ const openAddForm = () => {
   formRef.value?.resetFields()
 }
 
+/** 打开编辑弹窗 */
 const openEditForm = (row: MdWorkstationToolVO) => {
   dialogVisible.value = true
   dialogTitle.value = '编辑工具'
-  isEdit.value = true
+  formType.value = 'update'
   formData.value = { ...row }
 }
 
+/** 提交表单 */
 const submitForm = async () => {
+  // TODO @AI：和别的模块保持一致；类似 loading 啥的
   await formRef.value.validate()
-  if (isEdit.value) {
+  if (formType.value === 'update') {
     await MdWorkstationToolApi.updateWorkstationTool(
       formData.value as unknown as MdWorkstationToolVO
     )

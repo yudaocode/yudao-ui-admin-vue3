@@ -9,16 +9,19 @@
       <el-col :span="6" v-for="item in list" :key="item.id" class="mb-12px">
         <el-card shadow="hover" :body-style="{ padding: '0px' }">
           <!-- 图片区域 -->
-          <div class="sop-image-wrapper" @click="handlePreview(item.url)">
-            <el-image v-if="item.url" :src="item.url" fit="cover" class="sop-image" />
-            <div v-else class="sop-image sop-image-empty">
+          <div class="cursor-pointer" @click="handlePreview(item.url)">
+            <el-image v-if="item.url" :src="item.url" fit="cover" class="w-full h-160px block" />
+            <div
+              v-else
+              class="w-full h-160px flex items-center justify-center bg-#f5f7fa color-#c0c4cc"
+            >
               <Icon icon="ep:picture" :size="32" />
             </div>
           </div>
           <!-- 信息区域 -->
           <div class="p-10px">
             <div class="font-bold text-14px mb-4px truncate">{{ item.title }}</div>
-            <div class="text-12px color-gray mb-4px">序号：{{ item.orderNum }}</div>
+            <div class="text-12px color-gray mb-4px">序号：{{ item.orderNumber }}</div>
             <div v-if="item.processName" class="text-12px color-gray mb-4px">
               工序：{{ item.processName }}
             </div>
@@ -41,22 +44,15 @@
       </el-col>
     </el-row>
 
-    <!-- 图片预览 -->
-    <el-image-viewer
-      v-if="previewVisible"
-      :url-list="[previewUrl]"
-      @close="previewVisible = false"
-    />
-
     <!-- 新增/编辑弹窗 -->
     <Dialog :title="formDialogTitle" v-model="formDialogVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
         <el-form-item label="标题" prop="title">
           <el-input v-model="formData.title" placeholder="请输入标题" />
         </el-form-item>
-        <el-form-item label="排列顺序" prop="orderNum">
+        <el-form-item label="排列顺序" prop="orderNumber">
           <el-input-number
-            v-model="formData.orderNum"
+            v-model="formData.orderNumber"
             :min="0"
             controls-position="right"
             class="!w-1/1"
@@ -87,21 +83,22 @@
 </template>
 
 <script setup lang="ts">
-// TODO @AI：方法注释，字段注释，记得写下
+// DONE @AI：方法注释，字段注释，记得写下
 import { MdProductSopApi, MdProductSopVO } from '@/api/mes/md/item/productSop'
 import { UploadImg } from '@/components/UploadFile'
+import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'MdProductSopForm' })
 
 const props = defineProps<{
-  itemId: number
+  itemId: number // 物料产品编号
 }>()
 
 const message = useMessage()
-const loading = ref(false)
-const list = ref<MdProductSopVO[]>([])
+const loading = ref(false) // 列表的加载中
+const list = ref<MdProductSopVO[]>([]) // SOP 列表
 
-/** 加载列表 */
+/** 加载 SOP 列表 */
 const getList = async () => {
   loading.value = true
   try {
@@ -112,35 +109,35 @@ const getList = async () => {
 }
 
 // ==================== 图片预览 ====================
-// TODO @AI：图片预览，项目里有更简单的写法！
-const previewVisible = ref(false)
-const previewUrl = ref('')
 
+/** 预览图片 */
 const handlePreview = (url?: string) => {
   if (!url) return
-  previewUrl.value = url
-  previewVisible.value = true
+  createImageViewer({ urlList: [url] })
 }
 
 // ==================== 新增/编辑 ====================
-const formDialogVisible = ref(false)
-const formDialogTitle = ref('')
-const formRef = ref()
+const formDialogVisible = ref(false) // 弹窗是否可见
+const formDialogTitle = ref('') // 弹窗标题
+const formRef = ref() // 表单 Ref
+/** 表单数据 */
 const formData = ref({
   id: undefined as number | undefined,
   itemId: undefined as number | undefined,
-  orderNum: 0,
+  orderNumber: 0,
   processId: undefined as number | undefined,
   title: undefined as string | undefined,
   description: undefined as string | undefined,
   url: undefined as string | undefined,
   remark: undefined as string | undefined
 })
+/** 表单校验规则 */
 const formRules = reactive({
   title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
-  orderNum: [{ required: true, message: '排列顺序不能为空', trigger: 'blur' }]
+  orderNumber: [{ required: true, message: '排列顺序不能为空', trigger: 'blur' }]
 })
 
+/** 打开新增/编辑表单 */
 const openForm = (row?: MdProductSopVO) => {
   formDialogVisible.value = true
   if (row) {
@@ -148,7 +145,7 @@ const openForm = (row?: MdProductSopVO) => {
     formData.value = {
       id: row.id,
       itemId: row.itemId,
-      orderNum: row.orderNum,
+      orderNumber: row.orderNumber,
       processId: row.processId,
       title: row.title,
       description: row.description,
@@ -160,7 +157,7 @@ const openForm = (row?: MdProductSopVO) => {
     formData.value = {
       id: undefined,
       itemId: props.itemId,
-      orderNum: 0,
+      orderNumber: 0,
       processId: undefined,
       title: undefined,
       description: undefined,
@@ -171,6 +168,7 @@ const openForm = (row?: MdProductSopVO) => {
   formRef.value?.resetFields()
 }
 
+/** 提交表单 */
 const submitForm = async () => {
   await formRef.value.validate()
   if (formData.value.id) {
@@ -185,6 +183,8 @@ const submitForm = async () => {
 }
 
 // ==================== 删除 ====================
+
+/** 删除 SOP */
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
@@ -204,25 +204,5 @@ watch(
   },
   { immediate: true }
 )
-// TODO @AI：通过 unocss 简化掉 style
+// DONE @AI：通过 unocss 简化掉 style
 </script>
-
-<style lang="scss" scoped>
-.sop-image-wrapper {
-  cursor: pointer;
-}
-
-.sop-image {
-  width: 100%;
-  height: 160px;
-  display: block;
-}
-
-.sop-image-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f5f7fa;
-  color: #c0c4cc;
-}
-</style>
