@@ -102,7 +102,7 @@
       <el-table-column label="品牌" align="center" prop="brand" />
       <el-table-column label="型号规格" align="center" prop="spec" />
       <el-table-column label="工具类型" align="center" prop="toolTypeName" />
-      <el-table-column label="数量" align="center" prop="quantity" />
+      <el-table-column label="库存数量" align="center" prop="quantity" />
       <el-table-column label="可用数量" align="center" prop="quantityAvailable" />
       <el-table-column label="保养维护类型" align="center" prop="maintenType">
         <template #default="scope">
@@ -111,10 +111,10 @@
       </el-table-column>
       <el-table-column label="下次保养" align="center" width="150">
         <template #default="scope">
-          <span v-if="scope.row.maintenType === 1">
+          <span v-if="scope.row.maintenType === MesMaintenTypeEnum.REGULAR">
             {{ scope.row.nextMaintenDate ? formatDate(scope.row.nextMaintenDate) : '-' }}
           </span>
-          <span v-else-if="scope.row.maintenType === 2">
+          <span v-else-if="scope.row.maintenType === MesMaintenTypeEnum.USAGE">
             {{ scope.row.nextMaintenPeriod != null ? scope.row.nextMaintenPeriod + ' 次' : '-' }}
           </span>
           <span v-else>-</span>
@@ -170,9 +170,10 @@
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { TmToolApi, TmToolVO } from '@/api/mes/tm/tool'
-import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tooltype'
+import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
 import ToolForm from './ToolForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { MesMaintenTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesTmTool' })
 

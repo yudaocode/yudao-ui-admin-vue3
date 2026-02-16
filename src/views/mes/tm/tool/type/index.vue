@@ -127,7 +127,7 @@
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tooltype'
+import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
 import ToolTypeForm from './ToolTypeForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 

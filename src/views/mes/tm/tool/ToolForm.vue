@@ -64,7 +64,7 @@
       <el-form-item
         label="下次保养日期"
         prop="nextMaintenDate"
-        v-if="formData.maintenType === 1"
+        v-if="formData.maintenType === MesMaintenTypeEnum.REGULAR"
       >
         <el-date-picker
           v-model="formData.nextMaintenDate"
@@ -77,7 +77,7 @@
       <el-form-item
         label="下次保养周期"
         prop="nextMaintenPeriod"
-        v-if="formData.maintenType === 2"
+        v-if="formData.maintenType === MesMaintenTypeEnum.USAGE"
       >
         <el-input-number
           v-model="formData.nextMaintenPeriod"
@@ -109,7 +109,8 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { TmToolApi, TmToolVO } from '@/api/mes/tm/tool'
-import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tooltype'
+import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
+import { MesToolStatusEnum, MesMaintenTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ToolForm' })
 
@@ -121,19 +122,19 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined as unknown as number,
-  code: undefined as unknown as string,
-  name: undefined as unknown as string,
-  brand: undefined as unknown as string,
-  spec: undefined as unknown as string,
-  toolTypeId: undefined as unknown as number,
-  quantity: 1 as number,
-  quantityAvailable: 1 as number,
-  maintenType: undefined as unknown as number,
-  nextMaintenPeriod: undefined as unknown as number,
-  nextMaintenDate: undefined as unknown as string,
-  status: 1 as number,
-  remark: undefined as unknown as string
+  id: undefined,
+  code: undefined,
+  name: undefined,
+  brand: undefined,
+  spec: undefined,
+  toolTypeId: undefined,
+  quantity: 1,
+  quantityAvailable: 1,
+  maintenType: undefined,
+  nextMaintenPeriod: undefined,
+  nextMaintenDate: undefined,
+  status: MesToolStatusEnum.STORE,
+  remark: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '工具名称不能为空', trigger: 'blur' }],
@@ -184,20 +185,10 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
-  // 根据保养类型清空互斥字段
-  // TODO @AI：可以忽略，后端处理了。
-  if (formData.value.maintenType === 1) {
-    formData.value.nextMaintenPeriod = undefined as unknown as number
-  } else if (formData.value.maintenType === 2) {
-    formData.value.nextMaintenDate = undefined as unknown as string
-  } else {
-    formData.value.nextMaintenPeriod = undefined as unknown as number
-    formData.value.nextMaintenDate = undefined as unknown as string
-  }
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as TmToolVO
+    const data = formData.value as unknown as TmToolVO // 提交到后端
     if (formType.value === 'create') {
       await TmToolApi.createTool(data)
       message.success(t('common.createSuccess'))
@@ -215,7 +206,6 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  // TODO @AI：linter 报错；
   formData.value = {
     id: undefined,
     code: undefined,
@@ -228,7 +218,7 @@ const resetForm = () => {
     maintenType: undefined,
     nextMaintenPeriod: undefined,
     nextMaintenDate: undefined,
-    status: 1, // TODO @AI：枚举；
+    status: MesToolStatusEnum.STORE,
     remark: undefined
   }
   selectedToolType.value = undefined

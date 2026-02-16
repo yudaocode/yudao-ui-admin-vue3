@@ -15,11 +15,10 @@
         <el-input v-model="formData.name" placeholder="请输入类型名称" />
       </el-form-item>
       <el-form-item label="是否编码管理" prop="codeFlag">
-        <!-- TODO @AI: linter -->
         <el-radio-group v-model="formData.codeFlag">
           <el-radio
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
+            :key="dict.value + ''"
             :value="dict.value"
           >
             {{ dict.label }}
@@ -44,7 +43,7 @@
       <el-form-item
         label="保养周期"
         prop="maintenPeriod"
-        v-if="formData.maintenType === 1"
+        v-if="formData.maintenType === MesMaintenTypeEnum.REGULAR"
       >
         <el-input-number
           v-model="formData.maintenPeriod"
@@ -65,7 +64,8 @@
 </template>
 <script setup lang="ts">
 import { getBoolDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tooltype'
+import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
+import { MesMaintenTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ToolTypeForm' })
 
@@ -77,13 +77,13 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined as unknown as number,
-  code: undefined as unknown as string,
-  name: undefined as unknown as string,
-  codeFlag: true as boolean,
-  maintenType: undefined as unknown as number,
-  maintenPeriod: undefined as unknown as number,
-  remark: undefined as unknown as string
+  id: undefined,
+  code: undefined,
+  name: undefined,
+  codeFlag: true,
+  maintenType: undefined,
+  maintenPeriod: undefined,
+  remark: undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '类型编码不能为空', trigger: 'blur' }],
@@ -115,11 +115,6 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
-  // 如果不是定期维护，清空保养周期
-  // TODO @AI：字典判断；另外，后端已经处理，貌似可以不处理，前端；
-  if (formData.value.maintenType !== 1) {
-    formData.value.maintenPeriod = undefined as unknown as number
-  }
   // 提交请求
   formLoading.value = true
   try {
@@ -140,7 +135,6 @@ const submitForm = async () => {
 }
 
 /** 重置表单 */
-// TODO @AI：linter 报错；参考下别的模块处理策略；
 const resetForm = () => {
   formData.value = {
     id: undefined,

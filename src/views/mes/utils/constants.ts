@@ -1,3 +1,17 @@
+/** MES 工具状态枚举 */
+export const MesToolStatusEnum = {
+  STORE: 1, // 在库
+  ISSUE: 2, // 领用中
+  REPAIR: 3, // 维修中
+  SCRAP: 4 // 报废
+}
+
+/** MES 保养维护类型枚举 */
+export const MesMaintenTypeEnum = {
+  REGULAR: 1, // 定期维护
+  USAGE: 2 // 按使用次数维护
+}
+
 /** MES 物料/产品标识枚举 */
 export const MesItemOrProductEnum = {
   ITEM: {
