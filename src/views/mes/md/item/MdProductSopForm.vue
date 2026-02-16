@@ -1,4 +1,5 @@
 <!-- MES 产品SOP 列表 -->
+<!-- TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/md/item/MdProductSipForm.vue 类似改动； -->
 <template>
   <div>
     <el-button type="primary" plain size="small" @click="openForm(undefined)" class="mb-10px">
@@ -31,9 +32,9 @@
             <!-- 操作按钮 -->
             <div class="flex justify-end mt-8px">
               <el-button link type="primary" size="small" @click="openForm(item)">编辑</el-button>
-              <el-button link type="danger" size="small" @click="handleDelete(item.id!)"
-                >删除</el-button
-              >
+              <el-button link type="danger" size="small" @click="handleDelete(item.id!)">
+                删除
+              </el-button>
             </div>
           </div>
         </el-card>
@@ -83,7 +84,6 @@
 </template>
 
 <script setup lang="ts">
-// DONE @AI：方法注释，字段注释，记得写下
 import { MdProductSopApi, MdProductSopVO } from '@/api/mes/md/item/productSop'
 import { UploadImg } from '@/components/UploadFile'
 import { createImageViewer } from '@/components/ImageViewer'
@@ -120,7 +120,6 @@ const handlePreview = (url?: string) => {
 const formDialogVisible = ref(false) // 弹窗是否可见
 const formDialogTitle = ref('') // 弹窗标题
 const formRef = ref() // 表单 Ref
-/** 表单数据 */
 const formData = ref({
   id: undefined as number | undefined,
   itemId: undefined as number | undefined,
@@ -130,12 +129,11 @@ const formData = ref({
   description: undefined as string | undefined,
   url: undefined as string | undefined,
   remark: undefined as string | undefined
-})
-/** 表单校验规则 */
+}) // 表单数据
 const formRules = reactive({
   title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
   orderNumber: [{ required: true, message: '排列顺序不能为空', trigger: 'blur' }]
-})
+}) // 表单校验规则
 
 /** 打开新增/编辑表单 */
 const openForm = (row?: MdProductSopVO) => {
@@ -204,5 +202,4 @@ watch(
   },
   { immediate: true }
 )
-// DONE @AI：通过 unocss 简化掉 style
 </script>

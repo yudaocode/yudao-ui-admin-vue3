@@ -25,6 +25,7 @@
     </el-table>
 
     <!-- 添加 BOM 物料弹窗 -->
+    <!-- TODO @AI：这里实现不太对，调整成“物料产品选择”；这个组件，我们需要在 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/md/components 里搞一个，然后这里使用； -->
     <Dialog title="添加 BOM 物料" v-model="addDialogVisible" width="500px">
       <el-form ref="addFormRef" :model="addFormData" :rules="addFormRules" label-width="100px">
         <el-form-item label="BOM 物料" prop="bomItemId">

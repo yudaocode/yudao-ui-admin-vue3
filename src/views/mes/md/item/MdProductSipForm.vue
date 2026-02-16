@@ -21,6 +21,8 @@
           <!-- 信息区域 -->
           <div class="p-10px">
             <div class="font-bold text-14px mb-4px truncate">{{ item.title }}</div>
+            <!-- TODO @AI：是不是改成 sort 字段；保持全局统一；如果别的地方也有 orderNumber，也调整下 -->
+            <!-- TODO @AI：下面的序号、工序都不展示； -->
             <div class="text-12px color-gray mb-4px">序号：{{ item.orderNumber }}</div>
             <div v-if="item.processName" class="text-12px color-gray mb-4px">
               工序：{{ item.processName }}
@@ -31,9 +33,9 @@
             <!-- 操作按钮 -->
             <div class="flex justify-end mt-8px">
               <el-button link type="primary" size="small" @click="openForm(item)">编辑</el-button>
-              <el-button link type="danger" size="small" @click="handleDelete(item.id!)"
-                >删除</el-button
-              >
+              <el-button link type="danger" size="small" @click="handleDelete(item.id!)">
+                删除
+              </el-button>
             </div>
           </div>
         </el-card>
@@ -50,6 +52,7 @@
         <el-form-item label="标题" prop="title">
           <el-input v-model="formData.title" placeholder="请输入标题" />
         </el-form-item>
+        <!-- TODO @AI：展示顺序 -->
         <el-form-item label="排列顺序" prop="orderNumber">
           <el-input-number
             v-model="formData.orderNumber"
@@ -58,7 +61,7 @@
             class="!w-1/1"
           />
         </el-form-item>
-        <!-- TODO @芋艿：工序选择，等工序（pro_process）模块实现后对接下拉选择 -->
+        <!-- TODO @AI：内容说明 -->
         <el-form-item label="详细描述" prop="description">
           <el-input
             v-model="formData.description"
@@ -67,6 +70,8 @@
             placeholder="请输入详细描述"
           />
         </el-form-item>
+        <!-- TODO @芋艿：工序选择，等工序（pro_process）模块实现后对接下拉选择 -->
+        <!-- TODO @AI：先至少有个 input 手动填写；“所属工序” -->
         <el-form-item label="图片" prop="url">
           <UploadImg v-model="formData.url" :limit="1" :is-show-tip="false" />
         </el-form-item>

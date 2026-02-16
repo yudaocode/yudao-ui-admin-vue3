@@ -124,11 +124,11 @@
       <el-tab-pane label="替代品" name="substitute" lazy>
         <el-empty description="替代品（待实现）" />
       </el-tab-pane>
-      <el-tab-pane label="SOP" name="sop" lazy>
-        <MdProductSopForm :itemId="formData.id!" />
-      </el-tab-pane>
       <el-tab-pane label="SIP" name="sip" lazy>
         <MdProductSipForm :itemId="formData.id!" />
+      </el-tab-pane>
+      <el-tab-pane label="SOP" name="sop" lazy>
+        <MdProductSopForm :itemId="formData.id!" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
