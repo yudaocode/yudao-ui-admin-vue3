@@ -4,7 +4,7 @@ import request from '@/config/axios'
 export interface MdProductSipVO {
   id?: number // SIP 编号
   itemId: number // 物料产品 ID
-  orderNumber: number // 排列顺序
+  sort: number // 排列顺序
   processId?: number // 工序 ID
   title: string // 标题
   description?: string // 详细描述

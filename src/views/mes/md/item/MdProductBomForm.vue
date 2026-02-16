@@ -1,7 +1,7 @@
 <!-- MES 产品BOM 列表 -->
 <template>
   <div>
-    <el-button type="primary" plain size="small" @click="openAddForm" class="mb-10px">
+    <el-button type="primary" plain size="small" @click="handleAdd" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加 BOM 物料
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
@@ -18,81 +18,63 @@
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" width="120">
         <template #default="scope">
-          <el-button link type="primary" @click="openEditForm(scope.row)">编辑</el-button>
+          <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <!-- 添加 BOM 物料弹窗 -->
-    <!-- TODO @AI：这里实现不太对，调整成“物料产品选择”；这个组件，我们需要在 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/md/components 里搞一个，然后这里使用； -->
-    <Dialog title="添加 BOM 物料" v-model="addDialogVisible" width="500px">
-      <el-form ref="addFormRef" :model="addFormData" :rules="addFormRules" label-width="100px">
-        <el-form-item label="BOM 物料" prop="bomItemId">
-          <el-select
-            v-model="addFormData.bomItemId"
-            filterable
-            remote
-            :remote-method="searchItems"
-            :loading="itemSearchLoading"
-            placeholder="请搜索物料编码/名称"
-            class="w-1/1"
-          >
-            <el-option
-              v-for="item in itemOptions"
-              :key="item.id"
-              :label="item.code + ' - ' + item.name"
-              :value="item.id"
-            />
-          </el-select>
+    <!-- 添加/编辑 BOM 弹窗 -->
+    <Dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="formRules"
+        label-width="120px"
+        v-loading="formLoading"
+      >
+        <el-form-item label="BOM 物料编码" prop="bomItemCode">
+          <el-input v-model="formData.bomItemCode" readonly />
+        </el-form-item>
+        <el-form-item label="BOM 物料名称" prop="bomItemName">
+          <el-input v-model="formData.bomItemName" readonly />
+        </el-form-item>
+        <el-form-item label="规格型号" prop="bomItemSpecification">
+          <el-input v-model="formData.bomItemSpecification" readonly />
+        </el-form-item>
+        <el-form-item label="单位" prop="unitMeasureName">
+          <el-input v-model="formData.unitMeasureName" readonly />
         </el-form-item>
         <el-form-item label="用量比例" prop="quantity">
           <el-input-number
-            v-model="addFormData.quantity"
+            v-model="formData.quantity"
             :min="0"
             :precision="4"
+            :step="0.1"
             controls-position="right"
             class="!w-1/1"
           />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
-          <el-input v-model="addFormData.remark" type="textarea" placeholder="请输入备注" />
+          <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="submitAddForm" type="primary">确 定</el-button>
-        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+        <el-button @click="dialogVisible = false">取 消</el-button>
       </template>
     </Dialog>
 
-    <!-- 编辑 BOM 弹窗 -->
-    <Dialog title="编辑 BOM 物料" v-model="editDialogVisible" width="500px">
-      <el-form ref="editFormRef" :model="editFormData" :rules="editFormRules" label-width="100px">
-        <el-form-item label="用量比例" prop="quantity">
-          <el-input-number
-            v-model="editFormData.quantity"
-            :min="0"
-            :precision="4"
-            controls-position="right"
-            class="!w-1/1"
-          />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="editFormData.remark" type="textarea" placeholder="请输入备注" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="submitEditForm" type="primary">确 定</el-button>
-        <el-button @click="editDialogVisible = false">取 消</el-button>
-      </template>
-    </Dialog>
+    <!-- 物料选择弹窗 -->
+    <ItemProductSelect ref="itemSelectRef" @selected="handleItemSelected" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { MdProductBomApi, MdProductBomVO } from '@/api/mes/md/item/productBom'
-import { MdItemApi } from '@/api/mes/md/item'
+import { MdItemVO } from '@/api/mes/md/item'
 import { getItemOrProductLabel } from '@/views/mes/utils/constants'
+import ItemProductSelect from '@/views/mes/md/components/ItemProductSelect.vue'
 
 defineOptions({ name: 'MdProductBomForm' })
 
@@ -100,7 +82,8 @@ const props = defineProps<{
   itemId: number // 物料产品编号
 }>()
 
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 const loading = ref(false) // 列表的加载中
 const list = ref<MdProductBomVO[]>([]) // BOM 列表
 
@@ -114,97 +97,112 @@ const getList = async () => {
   }
 }
 
-// ==================== 物料搜索 ====================
-const itemSearchLoading = ref(false) // 物料搜索加载中
-const itemOptions = ref<any[]>([]) // 物料搜索选项
+// ==================== 物料选择 ====================
+const itemSelectRef = ref() // 物料选择弹窗 Ref
 
-/** 远程搜索物料 */
-const searchItems = async (query: string) => {
-  if (!query) {
-    itemOptions.value = []
+/** 点击添加按钮 → 打开物料选择弹窗 */
+const handleAdd = () => {
+  itemSelectRef.value.open()
+}
+
+/** 物料选中回调：直接批量创建 BOM（默认用量比例为 1） */
+const handleItemSelected = async (rows: MdItemVO[]) => {
+  if (!rows || rows.length === 0) {
     return
   }
-  itemSearchLoading.value = true
-  try {
-    const data = await MdItemApi.getItemPage({ pageNo: 1, pageSize: 20, code: query })
-    itemOptions.value = data.list || []
-  } finally {
-    itemSearchLoading.value = false
+  for (const item of rows) {
+    await MdProductBomApi.createProductBom({
+      itemId: props.itemId,
+      bomItemId: item.id,
+      quantity: 1
+    } as unknown as MdProductBomVO)
   }
-}
-
-// ==================== 添加 BOM ====================
-const addDialogVisible = ref(false) // 添加弹窗是否可见
-const addFormRef = ref() // 添加表单 Ref
-/** 添加表单数据 */
-const addFormData = ref({
-  itemId: undefined as number | undefined,
-  bomItemId: undefined as number | undefined,
-  quantity: 1,
-  remark: undefined as string | undefined
-})
-const addFormRules = reactive({
-  bomItemId: [{ required: true, message: 'BOM 物料不能为空', trigger: 'change' }],
-  quantity: [{ required: true, message: '用量比例不能为空', trigger: 'blur' }]
-})
-
-/** 打开添加弹窗 */
-const openAddForm = () => {
-  addDialogVisible.value = true
-  addFormData.value = {
-    itemId: props.itemId,
-    bomItemId: undefined,
-    quantity: 1,
-    remark: undefined
-  }
-  itemOptions.value = []
-  addFormRef.value?.resetFields()
-}
-
-/** 提交添加表单 */
-const submitAddForm = async () => {
-  await addFormRef.value.validate()
-  await MdProductBomApi.createProductBom(addFormData.value as unknown as MdProductBomVO)
-  message.success('添加成功')
-  addDialogVisible.value = false
+  message.success(t('common.createSuccess'))
   await getList()
 }
 
-// ==================== 编辑 BOM ====================
-const editDialogVisible = ref(false) // 编辑弹窗是否可见
-const editFormRef = ref() // 编辑表单 Ref
-/** 编辑表单数据 */
-const editFormData = ref({
+// ==================== 添加/编辑 BOM ====================
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formRef = ref() // 表单 Ref
+const formData = ref({
   id: undefined as number | undefined,
   itemId: undefined as number | undefined,
   bomItemId: undefined as number | undefined,
+  bomItemCode: undefined as string | undefined, // 只读展示
+  bomItemName: undefined as string | undefined, // 只读展示
+  bomItemSpecification: undefined as string | undefined, // 只读展示
+  unitMeasureName: undefined as string | undefined, // 只读展示
   quantity: 1,
   remark: undefined as string | undefined
-})
-const editFormRules = reactive({
+}) // 表单数据
+const formRules = reactive({
   quantity: [{ required: true, message: '用量比例不能为空', trigger: 'blur' }]
-})
+}) // 表单校验规则
 
-/** 打开编辑弹窗 */
-const openEditForm = (row: MdProductBomVO) => {
-  editDialogVisible.value = true
-  editFormData.value = {
-    id: row.id,
-    itemId: row.itemId,
-    bomItemId: row.bomItemId,
-    quantity: row.quantity,
-    remark: row.remark
+/** 打开表单弹窗 */
+const openForm = (type: string, row?: MdProductBomVO) => {
+  dialogVisible.value = true
+  dialogTitle.value = t('action.' + type)
+  formType.value = type
+  resetForm()
+  // 修改时，设置数据
+  if (type === 'update' && row) {
+    formData.value = {
+      id: row.id,
+      itemId: row.itemId,
+      bomItemId: row.bomItemId,
+      bomItemCode: row.bomItemCode,
+      bomItemName: row.bomItemName,
+      bomItemSpecification: row.bomItemSpecification,
+      unitMeasureName: row.unitMeasureName,
+      quantity: row.quantity,
+      remark: row.remark
+    }
   }
-  editFormRef.value?.resetFields()
 }
 
-/** 提交编辑表单 */
-const submitEditForm = async () => {
-  await editFormRef.value.validate()
-  await MdProductBomApi.updateProductBom(editFormData.value as unknown as MdProductBomVO)
-  message.success('编辑成功')
-  editDialogVisible.value = false
-  await getList()
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    itemId: props.itemId,
+    bomItemId: undefined,
+    bomItemCode: undefined,
+    bomItemName: undefined,
+    bomItemSpecification: undefined,
+    unitMeasureName: undefined,
+    quantity: 1,
+    remark: undefined
+  }
+  formRef.value?.resetFields()
+}
+
+/** 提交表单 */
+const submitForm = async () => {
+  // 校验表单
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as MdProductBomVO
+    if (formType.value === 'create') {
+      await MdProductBomApi.createProductBom(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await MdProductBomApi.updateProductBom(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    // 刷新列表
+    await getList()
+  } finally {
+    formLoading.value = false
+  }
 }
 
 // ==================== 删除 ====================
