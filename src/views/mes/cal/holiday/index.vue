@@ -1,7 +1,6 @@
 <!-- MES 假期设置 - 日历视图 -->
 <template>
   <ContentWrap>
-    <!-- TODO @AI：从周一到周日，这样的视图； -->
     <el-calendar v-model="currentDate">
       <template #date-cell="{ data }">
         <div class="calendar-cell" @contextmenu.prevent="onRightClick(data)">
@@ -9,24 +8,15 @@
             <span class="solar-day" :class="{ weekend: isWeekend(data.day) }">
               {{ data.day.split('-')[2] }}
             </span>
-            <el-tag
-              v-if="holidaySet.has(data.day)"
-              size="small"
-              effect="dark"
-              type="success"
-            >
+            <el-tag v-if="holidaySet.has(data.day)" size="small" effect="dark" type="success">
               休
             </el-tag>
-            <el-tag
-              v-else-if="workdaySet.has(data.day)"
-              size="small"
-              effect="dark"
-              type="primary"
-            >
-              班
-            </el-tag>
+            <el-tag v-else size="small" effect="dark"> 班 </el-tag>
           </div>
-          <div class="lunar-day" :class="{ festival: hasFestival(data.day) }">
+          <div
+            class="text-12px text-#909399 mt-4px"
+            :class="{ 'text-#67c23a': hasFestival(data.day) }"
+          >
             {{ getLunarDisplay(data.day) }}
           </div>
         </div>
@@ -39,46 +29,46 @@
 </template>
 <script setup lang="ts">
 import { CalHolidayApi, CalHolidayVO } from '@/api/mes/cal/holiday'
+import { formatDate } from '@/utils/formatTime'
 import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
 import PluginLunar from 'dayjs-plugin-lunar'
 import { SolarDay } from 'tyme4ts'
 import HolidayForm from './HolidayForm.vue'
 import { checkPermi } from '@/utils/permission'
+import { HolidayType } from '@/views/mes/utils/constants'
 
+dayjs.locale('zh-cn')
 dayjs.extend(PluginLunar)
 
 defineOptions({ name: 'MesCalHoliday' })
 
 const message = useMessage()
 const currentDate = ref(new Date())
-const holidaySet = ref(new Set<string>()) // HOLIDAY 日期集合
-const workdaySet = ref(new Set<string>()) // WORKDAY 日期集合
+const holidaySet = ref(new Set<string>()) // 节假日日期集合
 const formRef = ref()
 
 /** 获取假期列表 */
 const getList = async () => {
   holidaySet.value.clear()
-  workdaySet.value.clear()
   const list = await CalHolidayApi.getHolidayList()
   if (list) {
     list.forEach((item: CalHolidayVO) => {
-      // 后端返回的 theDay 为 datetime 格式，取前 10 位（yyyy-MM-dd）
-      const day = item.theDay ? item.theDay.substring(0, 10) : ''
-      if (!day) {
-        return
-      }
-      if (item.type === 'HOLIDAY') {
+      // 后端返回的 day 为时间戳（long），格式化为 yyyy-MM-dd
+      const day = item.day ? formatDate(item.day as any, 'YYYY-MM-DD') : ''
+      if (day && item.type === HolidayType.HOLIDAY) {
         holidaySet.value.add(day)
-      } else if (item.type === 'WORKDAY') {
-        workdaySet.value.add(day)
       }
     })
   }
 }
 
-/** 右键点击日期 */
-const onRightClick = (data: { day: string }) => {
-  // 权限校验
+/** 点击日期 */
+const onClickDay = (data: { type: string; day: string }) => {
+  // 非当前月日期，不处理（避免切换月份）
+  if (data.type !== 'current-month') {
+    return
+  }
   if (!checkPermi(['mes:cal-holiday:create'])) {
     message.warning('没有假期设置权限')
     return
@@ -96,14 +86,14 @@ const isWeekend = (day: string): boolean => {
 /** 获取农历显示信息 */
 const getLunarInfo = (day: string) => {
   const parts = day.split('-')
-  const y = parseInt(parts[0]), m = parseInt(parts[1]), d = parseInt(parts[2])
+  const year = parseInt(parts[0])
+  const month = parseInt(parts[1])
+  const date = parseInt(parts[2])
   try {
-    const solarDay = SolarDay.fromYmd(y, m, d)
+    const solarDay = SolarDay.fromYmd(year, month, date)
     const lunarDay = solarDay.getLunarDay()
-    // 公历节日
-    const solarFestival = solarDay.getFestival()
-    // 农历节日
-    const lunarFestival = lunarDay.getFestival()
+    const solarFestival = solarDay.getFestival() // 公历节日
+    const lunarFestival = lunarDay.getFestival() // 农历节日
     // 节气：dayIndex === 0 表示当天恰好是节气日
     const termDay = solarDay.getTermDay()
     const termName = termDay.getDayIndex() === 0 ? termDay.getSolarTerm().getName() : null
@@ -138,36 +128,4 @@ const hasFestival = (day: string): boolean => {
 onMounted(() => {
   getList()
 })
-// TODO @AI：使用 unocss 简化 style；
 </script>
-<style scoped>
-.calendar-cell {
-  height: 100%;
-  padding: 4px;
-}
-
-.calendar-cell-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.solar-day {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.solar-day.weekend {
-  color: #f56c6c;
-}
-
-.lunar-day {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.lunar-day.festival {
-  color: #67c23a;
-}
-</style>

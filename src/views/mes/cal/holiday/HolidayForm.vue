@@ -8,19 +8,22 @@
       label-width="80px"
       v-loading="formLoading"
     >
-      <el-form-item label="日期" prop="theDay">
-        <el-input v-model="formData.theDayDisplay" readonly />
+      <el-form-item label="日期" prop="day">
+        <el-input :model-value="dayDisplay" readonly />
       </el-form-item>
       <el-form-item label="类型" prop="type">
         <el-radio-group v-model="formData.type">
           <el-radio
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_CAL_HOLIDAY_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_CAL_HOLIDAY_TYPE)"
             :key="dict.value"
             :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
         </el-radio-group>
+      </el-form-item>
+      <el-form-item label="备注" prop="remark">
+        <el-input v-model="formData.remark" type="textarea" :rows="3" placeholder="请输入备注" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -30,8 +33,10 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CalHolidayApi } from '@/api/mes/cal/holiday'
+import { formatDate } from '@/utils/formatTime'
+import { HolidayType } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'HolidayForm' })
 
@@ -39,10 +44,11 @@ const message = useMessage()
 
 const dialogVisible = ref(false)
 const formLoading = ref(false)
+const dayDisplay = ref('') // 日期展示文本（yyyy-MM-dd）
 const formData = ref({
-  theDay: '' as string, // 实际提交的日期值，格式 yyyy-MM-dd 00:00:00
-  theDayDisplay: '' as string, // 展示用
-  type: 'HOLIDAY' as string
+  day: undefined as number | undefined, // 提交给后端的时间戳
+  type: HolidayType.WORKDAY as number, // 默认工作日
+  remark: '' as string
 })
 const formRules = reactive({
   type: [{ required: true, message: '请选择类型', trigger: 'change' }]
@@ -50,13 +56,22 @@ const formRules = reactive({
 const formRef = ref()
 
 /** 打开弹窗 */
-const open = (day: string) => {
+const open = async (day: string) => {
   dialogVisible.value = true
   resetForm()
-  formData.value.theDayDisplay = day
-  // 后端 theDay 为 datetime，传入 yyyy-MM-dd 00:00:00 格式
-  // TODO @芋艿：可能还要考虑下，到底怎么处理好；
-  formData.value.theDay = day + ' 00:00:00'
+  dayDisplay.value = day
+  formData.value.day = new Date(day + ' 00:00:00').getTime()
+  formLoading.value = true
+  // 修改时，设置数据
+  try {
+    const data = await CalHolidayApi.getHolidayByDay(formatDate(formData.value.day as any))
+    if (data) {
+      formData.value.type = data.type ?? HolidayType.WORKDAY
+      formData.value.remark = data.remark ?? ''
+    }
+  } finally {
+    formLoading.value = false
+  }
 }
 defineExpose({ open })
 
@@ -66,7 +81,7 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    await CalHolidayApi.createHoliday(formData.value as any)
+    await CalHolidayApi.saveHoliday(formData.value as any)
     message.success('设置成功')
     dialogVisible.value = false
     emit('success')
@@ -78,10 +93,11 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    theDay: '',
-    theDayDisplay: '',
-    type: 'HOLIDAY'
+    day: undefined,
+    type: HolidayType.WORKDAY,
+    remark: ''
   }
+  dayDisplay.value = ''
   formRef.value?.resetFields()
 }
 </script>
