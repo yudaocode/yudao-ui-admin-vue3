@@ -1,6 +1,7 @@
 <!-- MES 工具台账表单 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible">
+    <!-- TODO @AI：参考别的模块，分成 1 行 3 个。 -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -8,6 +9,10 @@
       label-width="120px"
       v-loading="formLoading"
     >
+      <!-- TODO @AI：这里缺了生成；编码； -->
+      <el-form-item label="工具编码" prop="code">
+        <el-input v-model="formData.code" placeholder="请输入工具编码" />
+      </el-form-item>
       <el-form-item label="工具名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入工具名称" />
       </el-form-item>
@@ -26,16 +31,13 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="工具编码" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入工具编码" />
-      </el-form-item>
       <el-form-item label="品牌" prop="brand">
         <el-input v-model="formData.brand" placeholder="请输入品牌" />
       </el-form-item>
       <el-form-item label="型号规格" prop="spec">
         <el-input v-model="formData.spec" placeholder="请输入型号规格" />
       </el-form-item>
-      <el-form-item label="数量" prop="quantity">
+      <el-form-item label="库存数量" prop="quantity">
         <el-input-number
           v-model="formData.quantity"
           :min="1"
@@ -100,6 +102,7 @@
         <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
       </el-form-item>
     </el-form>
+    <!-- TODO @芋艿：这里要有个 barcodeimg，后续在搞 -->
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>

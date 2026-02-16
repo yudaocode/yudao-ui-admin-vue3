@@ -8,6 +8,7 @@
       label-width="120px"
       v-loading="formLoading"
     >
+      <!-- TODO @AI：这里缺了生成 -->
       <el-form-item label="类型编码" prop="code">
         <el-input v-model="formData.code" placeholder="请输入类型编码" />
       </el-form-item>
@@ -25,6 +26,7 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
+      <!-- TODO @AI：分成天、次 -->
       <el-form-item label="保养维护类型" prop="maintenType">
         <el-select
           v-model="formData.maintenType"

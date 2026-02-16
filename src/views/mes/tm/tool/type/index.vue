@@ -81,6 +81,7 @@
           <dict-tag :type="DICT_TYPE.MES_TM_MAINTEN_TYPE" :value="scope.row.maintenType" />
         </template>
       </el-table-column>
+      <!-- TODO @AI：天、次，应该有； -->
       <el-table-column label="保养周期" align="center" prop="maintenPeriod" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column
