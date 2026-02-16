@@ -1,7 +1,6 @@
 <!-- MES 工具台账表单 -->
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
-    <!-- TODO @AI：参考别的模块，分成 1 行 3 个。 -->
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -9,98 +8,129 @@
       label-width="120px"
       v-loading="formLoading"
     >
-      <!-- TODO @AI：这里缺了生成；编码； -->
-      <el-form-item label="工具编码" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入工具编码" />
-      </el-form-item>
-      <el-form-item label="工具名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入工具名称" />
-      </el-form-item>
-      <el-form-item label="工具类型" prop="toolTypeId">
-        <el-select
-          v-model="formData.toolTypeId"
-          placeholder="请选择工具类型"
-          class="!w-1/1"
-          @change="handleToolTypeChange"
-        >
-          <el-option
-            v-for="item in toolTypeList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="品牌" prop="brand">
-        <el-input v-model="formData.brand" placeholder="请输入品牌" />
-      </el-form-item>
-      <el-form-item label="型号规格" prop="spec">
-        <el-input v-model="formData.spec" placeholder="请输入型号规格" />
-      </el-form-item>
-      <el-form-item label="库存数量" prop="quantity">
-        <el-input-number
-          v-model="formData.quantity"
-          :min="1"
-          :disabled="selectedToolType?.codeFlag === true"
-          class="!w-1/1"
-        />
-      </el-form-item>
-      <el-form-item label="可用数量" prop="quantityAvailable">
-        <el-input-number v-model="formData.quantityAvailable" :min="0" class="!w-1/1" />
-      </el-form-item>
-      <el-form-item label="保养维护类型" prop="maintenType">
-        <el-select
-          v-model="formData.maintenType"
-          placeholder="请选择保养维护类型"
-          clearable
-          class="!w-1/1"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_TM_MAINTEN_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item
-        label="下次保养日期"
-        prop="nextMaintenDate"
-        v-if="formData.maintenType === MesMaintenTypeEnum.REGULAR"
-      >
-        <el-date-picker
-          v-model="formData.nextMaintenDate"
-          type="datetime"
-          placeholder="请选择下次保养日期"
-          value-format="x"
-          class="!w-1/1"
-        />
-      </el-form-item>
-      <el-form-item
-        label="下次保养周期"
-        prop="nextMaintenPeriod"
-        v-if="formData.maintenType === MesMaintenTypeEnum.USAGE"
-      >
-        <el-input-number
-          v-model="formData.nextMaintenPeriod"
-          :min="1"
-          placeholder="请输入下次保养周期（次数）"
-          class="!w-1/1"
-        />
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="formData.status" placeholder="请选择状态" class="!w-1/1">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_TM_TOOL_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
-      </el-form-item>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="工具编码" prop="code">
+            <el-input v-model="formData.code" placeholder="请输入工具编码">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="工具名称" prop="name">
+            <el-input v-model="formData.name" placeholder="请输入工具名称" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="工具类型" prop="toolTypeId">
+            <el-select
+              v-model="formData.toolTypeId"
+              placeholder="请选择工具类型"
+              class="!w-1/1"
+              @change="handleToolTypeChange"
+            >
+              <el-option
+                v-for="item in toolTypeList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="品牌" prop="brand">
+            <el-input v-model="formData.brand" placeholder="请输入品牌" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="型号规格" prop="spec">
+            <el-input v-model="formData.spec" placeholder="请输入型号规格" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="库存数量" prop="quantity">
+            <el-input-number
+              v-model="formData.quantity"
+              :min="1"
+              :disabled="selectedToolType?.codeFlag === true"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="可用数量" prop="quantityAvailable">
+            <el-input-number v-model="formData.quantityAvailable" :min="0" class="!w-1/1" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="状态" prop="status">
+            <el-select v-model="formData.status" placeholder="请选择状态" class="!w-1/1">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_TM_TOOL_STATUS)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="保养维护类型" prop="maintenType">
+            <el-select
+              v-model="formData.maintenType"
+              placeholder="请选择保养维护类型"
+              clearable
+              class="!w-1/1"
+            >
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_TM_MAINTEN_TYPE)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" v-if="formData.maintenType === MesMaintenTypeEnum.REGULAR">
+          <el-form-item label="下次保养日期" prop="nextMaintenDate">
+            <el-date-picker
+              v-model="formData.nextMaintenDate"
+              type="datetime"
+              placeholder="请选择下次保养日期"
+              value-format="x"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" v-if="formData.maintenType === MesMaintenTypeEnum.USAGE">
+          <el-form-item label="下次保养周期" prop="nextMaintenPeriod">
+            <el-input-number
+              v-model="formData.nextMaintenPeriod"
+              :min="1"
+              placeholder="次数"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
+            <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <!-- TODO @芋艿：这里要有个 barcodeimg，后续在搞 -->
     <template #footer>
@@ -114,6 +144,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { TmToolApi, TmToolVO } from '@/api/mes/tm/tool'
 import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
 import { MesToolStatusEnum, MesMaintenTypeEnum } from '@/views/mes/utils/constants'
+import { generateRandomStr } from '@/utils'
 
 defineOptions({ name: 'ToolForm' })
 
@@ -172,6 +203,12 @@ const open = async (type: string, id?: number) => {
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 生成工具编码 */
+const generateCode = () => {
+  // TODO @芋艿：后续对接后端编码生成接口
+  formData.value.code = 'TL' + generateRandomStr(12)
+}
 
 /** 工具类型变更 */
 const handleToolTypeChange = (toolTypeId: number) => {

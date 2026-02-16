@@ -69,21 +69,39 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="类型编码" align="center" prop="code" />
-      <el-table-column label="类型名称" align="center" prop="name" />
-      <el-table-column label="是否编码管理" align="center" prop="codeFlag">
+      <el-table-column label="类型编码" align="center" prop="code" width="120" />
+      <el-table-column label="类型名称" align="center" prop="name" min-width="150" />
+      <el-table-column label="是否编码管理" align="center" prop="codeFlag" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.codeFlag" />
         </template>
       </el-table-column>
-      <el-table-column label="保养维护类型" align="center" prop="maintenType">
+      <el-table-column label="保养维护类型" align="center" prop="maintenType" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_TM_MAINTEN_TYPE" :value="scope.row.maintenType" />
         </template>
       </el-table-column>
-      <!-- TODO @AI：天、次，应该有； -->
-      <el-table-column label="保养周期" align="center" prop="maintenPeriod" />
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="保养周期" align="center" prop="maintenPeriod" width="100">
+        <template #default="scope">
+          <span
+            v-if="
+              scope.row.maintenPeriod != null &&
+              scope.row.maintenType === MesMaintenTypeEnum.REGULAR
+            "
+          >
+            {{ scope.row.maintenPeriod }} 天
+          </span>
+          <span
+            v-else-if="
+              scope.row.maintenPeriod != null && scope.row.maintenType === MesMaintenTypeEnum.USAGE
+            "
+          >
+            {{ scope.row.maintenPeriod }} 次
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" min-width="150" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -131,6 +149,7 @@ import download from '@/utils/download'
 import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
 import ToolTypeForm from './ToolTypeForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { MesMaintenTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesTmToolType' })
 

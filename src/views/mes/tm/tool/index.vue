@@ -97,14 +97,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="工具编码" align="center" prop="code" />
-      <el-table-column label="工具名称" align="center" prop="name" />
-      <el-table-column label="品牌" align="center" prop="brand" />
-      <el-table-column label="型号规格" align="center" prop="spec" />
-      <el-table-column label="工具类型" align="center" prop="toolTypeName" />
-      <el-table-column label="库存数量" align="center" prop="quantity" />
-      <el-table-column label="可用数量" align="center" prop="quantityAvailable" />
-      <el-table-column label="保养维护类型" align="center" prop="maintenType">
+      <el-table-column label="工具编码" align="center" prop="code" width="120" />
+      <el-table-column label="工具名称" align="center" prop="name" min-width="150" />
+      <el-table-column label="品牌" align="center" prop="brand" width="100" />
+      <el-table-column label="型号规格" align="center" prop="spec" width="120" />
+      <el-table-column label="工具类型" align="center" prop="toolTypeName" width="120" />
+      <el-table-column label="库存数量" align="center" prop="quantity" width="100" />
+      <el-table-column label="可用数量" align="center" prop="quantityAvailable" width="100" />
+      <el-table-column label="保养维护类型" align="center" prop="maintenType" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_TM_MAINTEN_TYPE" :value="scope.row.maintenType" />
         </template>
@@ -120,7 +120,7 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="状态" align="center" prop="status" width="80">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_TM_TOOL_STATUS" :value="scope.row.status" />
         </template>

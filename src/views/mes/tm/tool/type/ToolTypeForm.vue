@@ -8,9 +8,14 @@
       label-width="120px"
       v-loading="formLoading"
     >
-      <!-- TODO @AI：这里缺了生成 -->
       <el-form-item label="类型编码" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入类型编码" />
+        <el-input v-model="formData.code" placeholder="请输入类型编码">
+          <template #append>
+            <el-button @click="generateCode" :disabled="formType === 'update'">
+              生成
+            </el-button>
+          </template>
+        </el-input>
       </el-form-item>
       <el-form-item label="类型名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入类型名称" />
@@ -26,7 +31,6 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <!-- TODO @AI：分成天、次 -->
       <el-form-item label="保养维护类型" prop="maintenType">
         <el-select
           v-model="formData.maintenType"
@@ -43,14 +47,26 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        label="保养周期"
+        label="保养周期（天）"
         prop="maintenPeriod"
         v-if="formData.maintenType === MesMaintenTypeEnum.REGULAR"
       >
         <el-input-number
           v-model="formData.maintenPeriod"
           :min="1"
-          placeholder="请输入保养周期（天）"
+          placeholder="请输入保养周期"
+          class="!w-1/1"
+        />
+      </el-form-item>
+      <el-form-item
+        label="保养周期（次）"
+        prop="maintenPeriod"
+        v-if="formData.maintenType === MesMaintenTypeEnum.USAGE"
+      >
+        <el-input-number
+          v-model="formData.maintenPeriod"
+          :min="1"
+          placeholder="请输入保养周期"
           class="!w-1/1"
         />
       </el-form-item>
@@ -68,6 +84,7 @@
 import { getBoolDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
 import { MesMaintenTypeEnum } from '@/views/mes/utils/constants'
+import { generateRandomStr } from '@/utils'
 
 defineOptions({ name: 'ToolTypeForm' })
 
@@ -93,6 +110,12 @@ const formRules = reactive({
   codeFlag: [{ required: true, message: '是否编码管理不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+
+/** 生成类型编码 */
+const generateCode = () => {
+  // TODO @芋艿：后续对接后端编码生成接口
+  formData.value.code = 'TT' + generateRandomStr(12)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
