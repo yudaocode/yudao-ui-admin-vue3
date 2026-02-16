@@ -9,8 +9,8 @@
     >
       <el-row>
         <el-col :span="8">
-          <el-form-item label="工位编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入工位编码">
+          <el-form-item label="工作站编码" prop="code">
+            <el-input v-model="formData.code" placeholder="请输入工作站编码">
               <template #append>
                 <el-button @click="generateCode" :disabled="formType === 'update'">
                   生成
@@ -20,8 +20,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="工位名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入工位名称" />
+          <el-form-item label="工作站名称" prop="name">
+            <el-input v-model="formData.name" placeholder="请输入工作站名称" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -39,10 +39,11 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="工位地点" prop="address">
-            <el-input v-model="formData.address" placeholder="请输入工位地点" />
+          <el-form-item label="工作站地点" prop="address">
+            <el-input v-model="formData.address" placeholder="请输入工作站地点" />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：所属工序 -->
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="formData.status">
@@ -70,12 +71,10 @@
       <el-tab-pane label="设备资源" name="machine">
         <WorkstationMachinePanel :workstation-id="formData.id!" />
       </el-tab-pane>
-      <!-- TODO @AI：工装夹具 -->
-      <el-tab-pane label="工具资源" name="tool">
+      <el-tab-pane label="工装夹具" name="tool">
         <WorkstationToolPanel :workstation-id="formData.id!" />
       </el-tab-pane>
-      <!-- TODO @AI：人力资源 -->
-      <el-tab-pane label="人员资源" name="worker">
+      <el-tab-pane label="人力资源" name="worker">
         <WorkstationWorkerPanel :workstation-id="formData.id!" />
       </el-tab-pane>
     </el-tabs>
@@ -94,6 +93,9 @@ import { generateRandomStr } from '@/utils'
 import WorkstationMachinePanel from './components/WorkstationMachinePanel.vue'
 import WorkstationToolPanel from './components/WorkstationToolPanel.vue'
 import WorkstationWorkerPanel from './components/WorkstationWorkerPanel.vue'
+
+// TODO @AI：方法注释；
+// TODO @AI：字段注释；
 
 defineOptions({ name: 'WorkstationForm' })
 
@@ -120,14 +122,14 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
-  code: [{ required: true, message: '工位编码不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '工位名称不能为空', trigger: 'blur' }],
+  code: [{ required: true, message: '工作站编码不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '工作站名称不能为空', trigger: 'blur' }],
   workshopId: [{ required: true, message: '所在车间不能为空', trigger: 'change' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 
-/** 生成工位编码 */
+/** 生成工作站编码 */
 const generateCode = () => {
   formData.value.code = 'WS' + generateRandomStr(12)
 }

@@ -20,7 +20,12 @@
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
         <el-form-item label="岗位" prop="postId">
-          <el-select v-model="formData.postId" placeholder="请选择岗位" class="!w-1/1" :disabled="isEdit">
+          <el-select
+            v-model="formData.postId"
+            placeholder="请选择岗位"
+            class="!w-1/1"
+            :disabled="isEdit"
+          >
             <el-option
               v-for="post in postList"
               :key="post.id"
@@ -30,7 +35,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="数量" prop="quantity">
-          <el-input-number v-model="formData.quantity" :min="1" controls-position="right" class="!w-1/1" />
+          <el-input-number
+            v-model="formData.quantity"
+            :min="1"
+            controls-position="right"
+            class="!w-1/1"
+          />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
@@ -45,8 +55,11 @@
 </template>
 
 <script setup lang="ts">
-import { MdWorkstationWorkerApi, MdWorkstationWorkerVO } from '@/api/mes/md/workstation'
+import { MdWorkstationWorkerApi, MdWorkstationWorkerVO } from '@/api/mes/md/workstation/worker'
 import * as PostApi from '@/api/system/post'
+
+// TODO @AI：字段注释；
+// TODO @AI：方法注释；
 
 const props = defineProps<{
   workstationId: number
@@ -70,7 +83,7 @@ const getList = async () => {
 /** 弹窗 */
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
-const isEdit = ref(false)
+const isEdit = ref(false) // TODO @AI：参考别的模块，formType？
 const formRef = ref()
 const formData = ref({
   id: undefined as number | undefined,
@@ -112,10 +125,14 @@ const openEditForm = async (row: MdWorkstationWorkerVO) => {
 const submitForm = async () => {
   await formRef.value.validate()
   if (isEdit.value) {
-    await MdWorkstationWorkerApi.updateWorkstationWorker(formData.value as unknown as MdWorkstationWorkerVO)
+    await MdWorkstationWorkerApi.updateWorkstationWorker(
+      formData.value as unknown as MdWorkstationWorkerVO
+    )
     message.success('编辑成功')
   } else {
-    await MdWorkstationWorkerApi.createWorkstationWorker(formData.value as unknown as MdWorkstationWorkerVO)
+    await MdWorkstationWorkerApi.createWorkstationWorker(
+      formData.value as unknown as MdWorkstationWorkerVO
+    )
     message.success('添加成功')
   }
   dialogVisible.value = false

@@ -24,7 +24,7 @@
         <el-checkbox v-model="formData.salesOrderCodeFlag">销售订单编号</el-checkbox>
         <el-checkbox v-model="formData.workorderFlag">生产工单</el-checkbox>
         <el-checkbox v-model="formData.taskFlag">生产任务</el-checkbox>
-        <el-checkbox v-model="formData.workstationFlag">工位</el-checkbox>
+        <el-checkbox v-model="formData.workstationFlag">工作站</el-checkbox>
         <el-checkbox v-model="formData.toolFlag">工具</el-checkbox>
         <el-checkbox v-model="formData.moldFlag">模具</el-checkbox>
       </template>

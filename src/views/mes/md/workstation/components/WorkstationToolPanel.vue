@@ -21,10 +21,20 @@
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
         <el-form-item label="工具类型" prop="toolTypeId">
           <!-- TODO @芋艿：对接工具类型下拉列表，等 TM 工具模块完成后对接 -->
-          <el-input-number v-model="formData.toolTypeId" placeholder="请输入工具类型编号" class="!w-1/1" :disabled="isEdit" />
+          <el-input-number
+            v-model="formData.toolTypeId"
+            placeholder="请输入工具类型编号"
+            class="!w-1/1"
+            :disabled="isEdit"
+          />
         </el-form-item>
         <el-form-item label="数量" prop="quantity">
-          <el-input-number v-model="formData.quantity" :min="1" controls-position="right" class="!w-1/1" />
+          <el-input-number
+            v-model="formData.quantity"
+            :min="1"
+            controls-position="right"
+            class="!w-1/1"
+          />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
@@ -39,7 +49,10 @@
 </template>
 
 <script setup lang="ts">
-import { MdWorkstationToolApi, MdWorkstationToolVO } from '@/api/mes/md/workstation'
+import { MdWorkstationToolApi, MdWorkstationToolVO } from '@/api/mes/md/workstation/tool'
+
+// TODO @AI：字段注释；
+// TODO @AI：方法注释；
 
 const props = defineProps<{
   workstationId: number
@@ -62,7 +75,7 @@ const getList = async () => {
 /** 弹窗 */
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
-const isEdit = ref(false)
+const isEdit = ref(false) // TODO @AI：参考别的模块，formType？
 const formRef = ref()
 const formData = ref({
   id: undefined as number | undefined,
@@ -100,10 +113,14 @@ const openEditForm = (row: MdWorkstationToolVO) => {
 const submitForm = async () => {
   await formRef.value.validate()
   if (isEdit.value) {
-    await MdWorkstationToolApi.updateWorkstationTool(formData.value as unknown as MdWorkstationToolVO)
+    await MdWorkstationToolApi.updateWorkstationTool(
+      formData.value as unknown as MdWorkstationToolVO
+    )
     message.success('编辑成功')
   } else {
-    await MdWorkstationToolApi.createWorkstationTool(formData.value as unknown as MdWorkstationToolVO)
+    await MdWorkstationToolApi.createWorkstationTool(
+      formData.value as unknown as MdWorkstationToolVO
+    )
     message.success('添加成功')
   }
   dialogVisible.value = false

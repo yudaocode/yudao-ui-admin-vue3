@@ -13,7 +13,7 @@ export interface MdItemBatchConfigVO {
   purchaseOrderCodeFlag: boolean // 批次属性-采购订单编号
   workorderFlag: boolean // 批次属性-生产工单
   taskFlag: boolean // 批次属性-生产任务
-  workstationFlag: boolean // 批次属性-工位
+  workstationFlag: boolean // 批次属性-工作站
   toolFlag: boolean // 批次属性-工具
   moldFlag: boolean // 批次属性-模具
   lotNumberFlag: boolean // 批次属性-生产批号

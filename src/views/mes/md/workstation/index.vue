@@ -6,28 +6,33 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="68px"
+      label-width="85px"
     >
-      <el-form-item label="工位编码" prop="code">
+      <el-form-item label="工作站编码" prop="code">
         <el-input
           v-model="queryParams.code"
-          placeholder="请输入工位编码"
+          placeholder="请输入工作站编码"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="工位名称" prop="name">
+      <el-form-item label="工作站名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入工位名称"
+          placeholder="请输入工作站名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="所在车间" prop="workshopId">
-        <el-select v-model="queryParams.workshopId" placeholder="请选择车间" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.workshopId"
+          placeholder="请选择车间"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="workshop in workshopList"
             :key="workshop.id"
@@ -72,13 +77,15 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <!-- @AI：宽度的设置有问题，参考下别的模块；已对齐列宽 -->
+    <!-- @AI：我指的是，你这么写，宽度占不满屏幕 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：应该是“应该是工作站”；然后字段在对齐下； -->
-      <el-table-column label="工位编码" align="center" prop="code" />
-      <el-table-column label="工位名称" align="center" prop="name" width="150" />
-      <el-table-column label="工位地点" align="center" prop="address" />
-      <el-table-column label="所在车间" align="center" prop="workshopName" />
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="工作站编码" align="center" prop="code" width="120" />
+      <el-table-column label="工作站名称" align="center" prop="name" width="150" />
+      <el-table-column label="工作站地点" align="center" prop="address" width="150" />
+      <el-table-column label="所在车间" align="center" prop="workshopName" width="120" />
+      <!-- TODO @AI：所属工序 -->
+      <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
@@ -92,6 +99,7 @@
       />
       <el-table-column label="操作" align="center" width="150">
         <template #default="scope">
+          <!-- TODO @芋艿：【标签打印】 -->
           <el-button
             link
             type="primary"
@@ -198,7 +206,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     exportLoading.value = true
     const data = await MdWorkstationApi.exportWorkstation(queryParams)
-    download.excel(data, '工位.xls')
+    download.excel(data, '工作站.xls')
   } catch {
   } finally {
     exportLoading.value = false

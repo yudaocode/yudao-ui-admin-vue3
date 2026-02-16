@@ -38,7 +38,10 @@
 </template>
 
 <script setup lang="ts">
-import { MdWorkstationMachineApi, MdWorkstationMachineVO } from '@/api/mes/md/workstation'
+import { MdWorkstationMachineApi, MdWorkstationMachineVO } from '@/api/mes/md/workstation/machine'
+
+// TODO @AI：字段注释；
+// TODO @AI：方法注释；
 
 const props = defineProps<{
   workstationId: number
@@ -59,6 +62,7 @@ const getList = async () => {
 }
 
 /** 添加弹窗 */
+// TODO @AI：使用 form，不要 add 前缀；
 const addDialogVisible = ref(false)
 const addFormRef = ref()
 const addFormData = ref({

@@ -89,7 +89,6 @@
 </template>
 
 <script setup lang="ts">
-// TODO @AI：方法注释，字段注释，记得写下
 import { MdProductBomApi, MdProductBomVO } from '@/api/mes/md/item/productBom'
 import { MdItemApi } from '@/api/mes/md/item'
 import { getItemOrProductLabel } from '@/views/mes/utils/constants'
@@ -97,14 +96,14 @@ import { getItemOrProductLabel } from '@/views/mes/utils/constants'
 defineOptions({ name: 'MdProductBomForm' })
 
 const props = defineProps<{
-  itemId: number
+  itemId: number // 物料产品编号
 }>()
 
 const message = useMessage()
-const loading = ref(false)
-const list = ref<MdProductBomVO[]>([])
+const loading = ref(false) // 列表的加载中
+const list = ref<MdProductBomVO[]>([]) // BOM 列表
 
-/** 加载列表 */
+/** 加载 BOM 列表 */
 const getList = async () => {
   loading.value = true
   try {
@@ -115,9 +114,10 @@ const getList = async () => {
 }
 
 // ==================== 物料搜索 ====================
-const itemSearchLoading = ref(false)
-const itemOptions = ref<any[]>([])
+const itemSearchLoading = ref(false) // 物料搜索加载中
+const itemOptions = ref<any[]>([]) // 物料搜索选项
 
+/** 远程搜索物料 */
 const searchItems = async (query: string) => {
   if (!query) {
     itemOptions.value = []
@@ -133,8 +133,9 @@ const searchItems = async (query: string) => {
 }
 
 // ==================== 添加 BOM ====================
-const addDialogVisible = ref(false)
-const addFormRef = ref()
+const addDialogVisible = ref(false) // 添加弹窗是否可见
+const addFormRef = ref() // 添加表单 Ref
+/** 添加表单数据 */
 const addFormData = ref({
   itemId: undefined as number | undefined,
   bomItemId: undefined as number | undefined,
@@ -146,6 +147,7 @@ const addFormRules = reactive({
   quantity: [{ required: true, message: '用量比例不能为空', trigger: 'blur' }]
 })
 
+/** 打开添加弹窗 */
 const openAddForm = () => {
   addDialogVisible.value = true
   addFormData.value = {
@@ -158,6 +160,7 @@ const openAddForm = () => {
   addFormRef.value?.resetFields()
 }
 
+/** 提交添加表单 */
 const submitAddForm = async () => {
   await addFormRef.value.validate()
   await MdProductBomApi.createProductBom(addFormData.value as unknown as MdProductBomVO)
@@ -167,8 +170,9 @@ const submitAddForm = async () => {
 }
 
 // ==================== 编辑 BOM ====================
-const editDialogVisible = ref(false)
-const editFormRef = ref()
+const editDialogVisible = ref(false) // 编辑弹窗是否可见
+const editFormRef = ref() // 编辑表单 Ref
+/** 编辑表单数据 */
 const editFormData = ref({
   id: undefined as number | undefined,
   itemId: undefined as number | undefined,
@@ -180,6 +184,7 @@ const editFormRules = reactive({
   quantity: [{ required: true, message: '用量比例不能为空', trigger: 'blur' }]
 })
 
+/** 打开编辑弹窗 */
 const openEditForm = (row: MdProductBomVO) => {
   editDialogVisible.value = true
   editFormData.value = {
@@ -192,6 +197,7 @@ const openEditForm = (row: MdProductBomVO) => {
   editFormRef.value?.resetFields()
 }
 
+/** 提交编辑表单 */
 const submitEditForm = async () => {
   await editFormRef.value.validate()
   await MdProductBomApi.updateProductBom(editFormData.value as unknown as MdProductBomVO)
@@ -201,6 +207,8 @@ const submitEditForm = async () => {
 }
 
 // ==================== 删除 ====================
+
+/** 删除 BOM */
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
