@@ -3,9 +3,9 @@
   <ContentWrap>
     <el-calendar v-model="currentDate">
       <template #date-cell="{ data }">
-        <div class="calendar-cell" @contextmenu.prevent="onRightClick(data)">
-          <div class="calendar-cell-header">
-            <span class="solar-day" :class="{ weekend: isWeekend(data.day) }">
+        <div class="h-full p-4px" @click.stop="onClickDay(data)">
+          <div class="flex justify-between items-center">
+            <span class="text-16px font-500" :class="{ 'text-#f56c6c': isWeekend(data.day) }">
               {{ data.day.split('-')[2] }}
             </span>
             <el-tag v-if="holidaySet.has(data.day)" size="small" effect="dark" type="success">

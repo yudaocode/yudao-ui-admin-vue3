@@ -78,12 +78,17 @@ defineExpose({ open })
 /** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
-  await formRef.value.validate()
+  // 校验表单
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  // 提交请求
   formLoading.value = true
   try {
     await CalHolidayApi.saveHoliday(formData.value as any)
     message.success('设置成功')
     dialogVisible.value = false
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false

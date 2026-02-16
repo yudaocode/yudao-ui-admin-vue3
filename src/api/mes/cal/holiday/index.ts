@@ -20,28 +20,13 @@ export const CalHolidayApi = {
     return await request.get({ url: `/mes/cal/holiday/list` })
   },
 
-  // 查询假期设置详情
-  getHoliday: async (id: number) => {
-    return await request.get({ url: `/mes/cal/holiday/get?id=` + id })
+  // 根据日期查询假期设置
+  getHolidayByDay: async (day: string) => {
+    return await request.get({ url: `/mes/cal/holiday/get-by-day`, params: { day } })
   },
 
-  // 新增假期设置（含 upsert 逻辑）
-  createHoliday: async (data: CalHolidayVO) => {
-    return await request.post({ url: `/mes/cal/holiday/create`, data })
-  },
-
-  // 修改假期设置
-  updateHoliday: async (data: CalHolidayVO) => {
-    return await request.put({ url: `/mes/cal/holiday/update`, data })
-  },
-
-  // 删除假期设置
-  deleteHoliday: async (id: number) => {
-    return await request.delete({ url: `/mes/cal/holiday/delete?id=` + id })
-  },
-
-  // 导出假期设置 Excel
-  exportHoliday: async (params: any) => {
-    return await request.download({ url: `/mes/cal/holiday/export-excel`, params })
+  // 保存假期设置（含 upsert 逻辑）
+  saveHoliday: async (data: CalHolidayVO) => {
+    return await request.post({ url: `/mes/cal/holiday/save`, data })
   }
 }
