@@ -1,5 +1,7 @@
 import request from '@/config/axios'
 
+// TODO @AI：挪到 plan/shift 目录下
+
 // MES 计划班次 VO
 export interface CalPlanShiftVO {
   id: number
