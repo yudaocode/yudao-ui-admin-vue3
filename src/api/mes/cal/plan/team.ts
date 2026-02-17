@@ -1,7 +1,6 @@
 import request from '@/config/axios'
 
 // MES 计划班组关联 VO
-// TODO @AI：挪到 plan/team 目录下
 export interface CalPlanTeamVO {
   id: number
   planId: number // 排班计划编号
