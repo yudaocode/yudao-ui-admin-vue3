@@ -1,0 +1,291 @@
+<template>
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="980px">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="120px"
+      v-loading="formLoading"
+    >
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="所属仓库">
+            <el-select
+              v-model="selectedWarehouseId"
+              placeholder="请选择仓库"
+              class="!w-1/1"
+              @change="handleWarehouseChange"
+            >
+              <el-option
+                v-for="warehouse in warehouseList"
+                :key="warehouse.id"
+                :label="warehouse.name"
+                :value="warehouse.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="所属库区" prop="locationId">
+            <el-select
+              v-model="formData.locationId"
+              placeholder="请选择库区"
+              class="!w-1/1"
+              :disabled="!selectedWarehouseId"
+            >
+              <el-option
+                v-for="location in locationList"
+                :key="location.id"
+                :label="location.name"
+                :value="location.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="库位编码" prop="code">
+            <el-input v-model="formData.code" placeholder="请输入库位编码" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="库位名称" prop="name">
+            <el-input v-model="formData.name" placeholder="请输入库位名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="面积" prop="area">
+            <el-input-number
+              v-model="formData.area"
+              :precision="2"
+              :min="0"
+              controls-position="right"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="最大载重" prop="maxLoad">
+            <el-input-number
+              v-model="formData.maxLoad"
+              :precision="2"
+              :min="0"
+              controls-position="right"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="坐标 X" prop="positionX">
+            <el-input-number v-model="formData.positionX" :min="0" controls-position="right" class="!w-1/1" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="坐标 Y" prop="positionY">
+            <el-input-number v-model="formData.positionY" :min="0" controls-position="right" class="!w-1/1" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="坐标 Z" prop="positionZ">
+            <el-input-number v-model="formData.positionZ" :min="0" controls-position="right" class="!w-1/1" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="是否启用" prop="enabled">
+            <el-switch v-model="formData.enabled" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="是否冻结" prop="frozen">
+            <el-switch v-model="formData.frozen" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="状态" prop="status">
+            <el-radio-group v-model="formData.status">
+              <el-radio
+                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+                :key="dict.value"
+                :value="dict.value"
+              >
+                {{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="允许物料混放" prop="allowItemMixing">
+            <el-switch v-model="formData.allowItemMixing" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="允许批次混放" prop="allowBatchMixing">
+            <el-switch v-model="formData.allowBatchMixing" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+    <template #footer>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
+</template>
+
+<script setup lang="ts">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
+import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
+import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
+import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/area'
+
+defineOptions({ name: 'AreaForm' })
+
+const { t } = useI18n()
+const message = useMessage()
+
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const formLoading = ref(false)
+const formType = ref('')
+const selectedWarehouseId = ref<number | undefined>(undefined)
+const warehouseList = ref<WmWarehouseVO[]>([])
+const locationList = ref<WmWarehouseLocationVO[]>([])
+const formData = ref({
+  id: undefined,
+  code: undefined,
+  name: undefined,
+  locationId: undefined,
+  area: undefined,
+  maxLoad: undefined,
+  positionX: undefined,
+  positionY: undefined,
+  positionZ: undefined,
+  enabled: true,
+  status: CommonStatusEnum.ENABLE,
+  frozen: false,
+  allowItemMixing: true,
+  allowBatchMixing: true,
+  remark: undefined
+})
+const formRules = reactive({
+  code: [{ required: true, message: '库位编码不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '库位名称不能为空', trigger: 'blur' }],
+  locationId: [{ required: true, message: '所属库区不能为空', trigger: 'change' }],
+  enabled: [{ required: true, message: '是否启用不能为空', trigger: 'change' }],
+  status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
+  frozen: [{ required: true, message: '是否冻结不能为空', trigger: 'change' }],
+  allowItemMixing: [{ required: true, message: '物料混放开关不能为空', trigger: 'change' }],
+  allowBatchMixing: [{ required: true, message: '批次混放开关不能为空', trigger: 'change' }]
+})
+const formRef = ref()
+
+const loadLocationList = async (warehouseId?: number) => {
+  if (!warehouseId) {
+    locationList.value = []
+    return
+  }
+  locationList.value = await WmWarehouseLocationApi.getWarehouseLocationSimpleList(warehouseId)
+}
+
+const handleWarehouseChange = async (warehouseId?: number) => {
+  formData.value.locationId = undefined
+  await loadLocationList(warehouseId)
+}
+
+/** 打开弹窗 */
+const open = async (type: string, id?: number) => {
+  dialogVisible.value = true
+  dialogTitle.value = t('action.' + type)
+  formType.value = type
+  resetForm()
+  warehouseList.value = await WmWarehouseApi.getWarehouseSimpleList()
+  if (id) {
+    formLoading.value = true
+    try {
+      const data = await WmWarehouseAreaApi.getWarehouseArea(id)
+      selectedWarehouseId.value = data.warehouseId
+      await loadLocationList(selectedWarehouseId.value)
+      formData.value = {
+        id: data.id,
+        code: data.code,
+        name: data.name,
+        locationId: data.locationId,
+        area: data.area,
+        maxLoad: data.maxLoad,
+        positionX: data.positionX,
+        positionY: data.positionY,
+        positionZ: data.positionZ,
+        enabled: data.enabled,
+        status: data.status,
+        frozen: data.frozen,
+        allowItemMixing: data.allowItemMixing,
+        allowBatchMixing: data.allowBatchMixing,
+        remark: data.remark
+      }
+    } finally {
+      formLoading.value = false
+    }
+  }
+}
+defineExpose({ open })
+
+/** 提交表单 */
+const emit = defineEmits(['success'])
+const submitForm = async () => {
+  await formRef.value.validate()
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as WmWarehouseAreaVO
+    if (formType.value === 'create') {
+      await WmWarehouseAreaApi.createWarehouseArea(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await WmWarehouseAreaApi.updateWarehouseArea(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  selectedWarehouseId.value = undefined
+  locationList.value = []
+  formData.value = {
+    id: undefined,
+    code: undefined,
+    name: undefined,
+    locationId: undefined,
+    area: undefined,
+    maxLoad: undefined,
+    positionX: undefined,
+    positionY: undefined,
+    positionZ: undefined,
+    enabled: true,
+    status: CommonStatusEnum.ENABLE,
+    frozen: false,
+    allowItemMixing: true,
+    allowBatchMixing: true,
+    remark: undefined
+  }
+  formRef.value?.resetFields()
+}
+</script>
