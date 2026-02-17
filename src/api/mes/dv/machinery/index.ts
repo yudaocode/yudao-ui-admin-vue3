@@ -47,5 +47,10 @@ export const DvMachineryApi = {
   // 导出设备台账 Excel
   exportMachinery: async (params: any) => {
     return await request.download({ url: `/mes/dv/machinery/export-excel`, params })
+  },
+
+  // 下载设备导入模板
+  importTemplate: async () => {
+    return await request.download({ url: `/mes/dv/machinery/get-import-template` })
   }
 }

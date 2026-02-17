@@ -72,6 +72,14 @@
               <Icon icon="ep:plus" class="mr-5px" /> 新增
             </el-button>
             <el-button
+              type="warning"
+              plain
+              @click="handleImport"
+              v-hasPermi="['mes:dv-machinery:import']"
+            >
+              <Icon icon="ep:upload" class="mr-5px" /> 导入
+            </el-button>
+            <el-button
               type="success"
               plain
               @click="handleExport"
@@ -139,6 +147,8 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <MachineryForm ref="formRef" @success="getList" />
+  <!-- 设备导入对话框 -->
+  <MachineryImportForm ref="importFormRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -148,6 +158,7 @@ import { DvMachineryApi, DvMachineryVO } from '@/api/mes/dv/machinery'
 import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
 import MachineryForm from './MachineryForm.vue'
 import MachineryTypeTree from './MachineryTypeTree.vue'
+import MachineryImportForm from './MachineryImportForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'MesDvMachinery' })
@@ -236,7 +247,11 @@ const handleExport = async () => {
   }
 }
 
-// TODO @AI：导入逻辑；
+/** 设备导入 */
+const importFormRef = ref()
+const handleImport = () => {
+  importFormRef.value.open()
+}
 
 /** 初始化 **/
 onMounted(async () => {
