@@ -65,13 +65,13 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined as unknown as number,
-  parentId: undefined as unknown as number,
-  code: undefined as unknown as string,
-  name: undefined as unknown as string,
+  id: undefined,
+  parentId: undefined,
+  code: undefined,
+  name: undefined,
   sort: 0,
   status: CommonStatusEnum.ENABLE,
-  remark: undefined as unknown as string
+  remark: undefined
 })
 const formRules = reactive({
   parentId: [{ required: true, message: '上级类型不能为空', trigger: 'blur' }],
@@ -132,7 +132,6 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  // TODO @AI：linter
   formData.value = {
     id: undefined,
     parentId: undefined,
