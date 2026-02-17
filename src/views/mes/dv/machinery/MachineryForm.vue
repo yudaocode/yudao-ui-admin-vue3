@@ -1,7 +1,6 @@
 <!-- MES 设备台账表单 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
-    <!-- TODO @AI：所属车间 -->
     <!-- TODO @AI：最近点检时间 -->
     <!-- TODO @AI：最近保养时间 -->
     <el-form
@@ -88,7 +87,21 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- TODO @AI：缺 3 个 tab； -->
+    <!-- 编辑时显示子资源 Tab -->
+    <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
+      <el-tab-pane label="点检记录" name="check">
+        <!-- TODO 等点检模块实现后对接 -->
+        <el-empty description="暂无点检记录" />
+      </el-tab-pane>
+      <el-tab-pane label="保养记录" name="mainten">
+        <!-- TODO 等保养模块实现后对接 -->
+        <el-empty description="暂无保养记录" />
+      </el-tab-pane>
+      <el-tab-pane label="维修工单" name="repair">
+        <!-- TODO 等维修模块实现后对接 -->
+        <el-empty description="暂无维修工单" />
+      </el-tab-pane>
+    </el-tabs>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -113,6 +126,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const activeTab = ref('check') // 当前激活的资源 Tab
 const formData = ref({
   id: undefined,
   code: undefined,
