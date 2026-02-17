@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { CalShiftApi, CalShiftVO } from '@/api/mes/cal/shift'
+import { CalPlanShiftApi, CalPlanShiftVO } from '@/api/mes/cal/shift'
 
 const props = defineProps<{
   planId: number // 排班计划编号
@@ -66,13 +66,13 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表加载中
-const list = ref<CalShiftVO[]>([]) // 班次列表
+const list = ref<CalPlanShiftVO[]>([]) // 班次列表
 
 /** 加载列表 */
 const getList = async () => {
   loading.value = true
   try {
-    list.value = await CalShiftApi.getShiftListByPlan(props.planId)
+    list.value = await CalPlanShiftApi.getPlanShiftListByPlan(props.planId)
   } finally {
     loading.value = false
   }
@@ -101,12 +101,13 @@ const formRules = reactive({
 })
 
 /** 打开表单弹窗 */
-// TODO @AI：参考别的模块，方法里，应该有注释
-const openForm = (type: string, row?: CalShiftVO) => {
+const openForm = (type: string, row?: CalPlanShiftVO) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
+  // 重置表单
   resetForm()
+  // 修改时，设置数据
   if (type === 'update' && row) {
     formData.value = {
       id: row.id,
@@ -121,22 +122,24 @@ const openForm = (type: string, row?: CalShiftVO) => {
 }
 
 /** 提交表单 */
-// TODO @AI：参考别的模块，方法里，应该有注释
 const submitForm = async () => {
+  // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as CalShiftVO
+    const data = formData.value as unknown as CalPlanShiftVO
     if (formType.value === 'create') {
-      await CalShiftApi.createShift(data)
+      await CalPlanShiftApi.createPlanShift(data)
       message.success(t('common.createSuccess'))
     } else {
-      await CalShiftApi.updateShift(data)
+      await CalPlanShiftApi.updatePlanShift(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
+    // 刷新列表
     await getList()
   } finally {
     formLoading.value = false
@@ -161,7 +164,7 @@ const resetForm = () => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await CalShiftApi.deleteShift(id)
+    await CalPlanShiftApi.deletePlanShift(id)
     message.success('删除成功')
     await getList()
   } catch {}

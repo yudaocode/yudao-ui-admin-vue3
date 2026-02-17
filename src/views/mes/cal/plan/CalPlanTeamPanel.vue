@@ -86,15 +86,18 @@ const openForm = (type: string) => {
 
 /** 提交表单 */
 const submitForm = async () => {
+  // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as unknown as CalPlanTeamVO
     await CalPlanTeamApi.createPlanTeam(data)
     message.success(t('common.createSuccess'))
     dialogVisible.value = false
+    // 刷新列表
     await getList()
   } finally {
     formLoading.value = false

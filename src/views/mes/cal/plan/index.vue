@@ -85,8 +85,20 @@
           <dict-tag :type="DICT_TYPE.MES_CAL_CALENDAR_TYPE" :value="scope.row.calendarType" />
         </template>
       </el-table-column>
-      <el-table-column label="开始日期" align="center" prop="startDate" :formatter="dateFormatter" width="180px" />
-      <el-table-column label="结束日期" align="center" prop="endDate" :formatter="dateFormatter" width="180px" />
+      <el-table-column
+        label="开始日期"
+        align="center"
+        prop="startDate"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column
+        label="结束日期"
+        align="center"
+        prop="endDate"
+        :formatter="dateFormatter"
+        width="180px"
+      />
       <el-table-column label="轮班方式" align="center" prop="shiftType" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_CAL_SHIFT_TYPE" :value="scope.row.shiftType" />
@@ -112,6 +124,7 @@
       <el-table-column label="操作" align="center" width="150">
         <template #default="scope">
           <el-button
+            v-if="scope.row.status === MesCalPlanStatusEnum.PREPARE"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"

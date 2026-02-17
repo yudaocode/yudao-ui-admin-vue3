@@ -74,8 +74,7 @@
         </el-col>
       </el-row>
       <el-row>
-        <!-- TODO @AI：枚举类 -->
-        <el-col :span="8" v-if="formData.shiftType && formData.shiftType !== 1">
+        <el-col :span="8" v-if="formData.shiftType && formData.shiftType !== MesCalShiftTypeEnum.SINGLE">
           <el-form-item label="倒班方式" prop="shiftMethod">
             <el-select v-model="formData.shiftMethod" placeholder="请选择倒班方式" class="!w-1/1">
               <el-option
@@ -87,8 +86,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：枚举类 -->
-        <el-col :span="8" v-if="formData.shiftMethod === 4">
+        <el-col :span="8" v-if="formData.shiftMethod === MesCalShiftMethodEnum.DAY">
           <el-form-item label="倒班天数" prop="shiftCount">
             <el-input-number
               v-model="formData.shiftCount"
@@ -123,9 +121,8 @@
     </el-tabs>
     <template #footer>
       <!-- 确认按钮：仅草稿状态显示 -->
-      <!-- TODO @AI：status 枚举 -->
       <el-button
-        v-if="formType === 'update' && formData.status === 0"
+        v-if="formType === 'update' && formData.status === MesCalPlanStatusEnum.PREPARE"
         type="warning"
         @click="handleConfirm"
         :disabled="formLoading"
@@ -142,6 +139,7 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CalPlanApi, CalPlanVO } from '@/api/mes/cal/plan'
 import { generateRandomStr } from '@/utils'
+import { MesCalPlanStatusEnum, MesCalShiftTypeEnum, MesCalShiftMethodEnum } from '@/views/mes/utils/constants'
 import CalShiftPanel from './CalShiftPanel.vue'
 import CalPlanTeamPanel from './CalPlanTeamPanel.vue'
 
@@ -165,7 +163,7 @@ const formData = ref({
   shiftType: undefined,
   shiftMethod: undefined,
   shiftCount: undefined,
-  status: 0,
+  status: MesCalPlanStatusEnum.PREPARE,
   remark: undefined
 })
 const formRules = reactive({
@@ -223,10 +221,10 @@ const submitForm = async () => {
 /** 确认计划 */
 const handleConfirm = async () => {
   try {
+    // TODO @AI：单独一个接口，更合适；
     await message.confirm('确认该排班计划？确认后将不可删除。')
     formLoading.value = true
-    // TODO @AI：枚举类；
-    const data = { ...formData.value, status: 1 } as unknown as CalPlanVO
+    const data = { ...formData.value, status: MesCalPlanStatusEnum.CONFIRMED } as unknown as CalPlanVO
     await CalPlanApi.updatePlan(data)
     message.success('确认成功')
     dialogVisible.value = false
@@ -249,7 +247,7 @@ const resetForm = () => {
     shiftType: undefined,
     shiftMethod: undefined,
     shiftCount: undefined,
-    status: 0, // TODO @AI：枚举类；
+    status: MesCalPlanStatusEnum.PREPARE,
     remark: undefined
   }
   formRef.value?.resetFields()

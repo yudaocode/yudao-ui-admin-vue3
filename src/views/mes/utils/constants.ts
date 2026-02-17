@@ -58,6 +58,14 @@ export const MesCalShiftMethodEnum = {
   DAY: 4 // 按天
 }
 
+/** MES 生产工单状态枚举 */
+export const MesProWorkorderStatusEnum = {
+  PREPARE: 0, // 草稿
+  CONFIRMED: 1, // 已确认
+  FINISHED: 2, // 已完成
+  CANCELED: 3 // 已取消
+}
+
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {
   for (const item of Object.values(MesItemOrProductEnum)) {
