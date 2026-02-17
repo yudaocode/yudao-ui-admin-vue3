@@ -1,6 +1,12 @@
 <template>
   <ContentWrap>
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="仓库编码" prop="code">
         <el-input
           v-model="queryParams.code"
@@ -19,6 +25,7 @@
           class="!w-240px"
         />
       </el-form-item>
+      <!-- TODO @AI：可以起到这个筛选；前端 + 后端 -->
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
@@ -29,6 +36,7 @@
           />
         </el-select>
       </el-form-item>
+      <!-- TODO @AI：可以起到这个筛选；前端 + 后端 -->
       <el-form-item label="是否冻结" prop="frozen">
         <el-select v-model="queryParams.frozen" placeholder="请选择" clearable class="!w-240px">
           <el-option :value="true" label="是" />
@@ -38,7 +46,12 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" plain @click="openForm('create')" v-hasPermi="['mes:wm-warehouse:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['mes:wm-warehouse:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
@@ -59,17 +72,17 @@
       <el-table-column label="仓库编码" align="center" prop="code" min-width="120" />
       <el-table-column label="仓库名称" align="center" prop="name" min-width="140" />
       <el-table-column label="仓库地址" align="center" prop="address" min-width="150" />
-      <el-table-column label="面积" align="center" prop="area" min-width="100" />
-      <el-table-column label="状态" align="center" prop="status" min-width="90">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
+      <el-table-column label="面积（㎡）" align="center" prop="area" min-width="100" />
+      <!-- TODO @AI：负责人 -->
+      <!-- TODO @AI：可以使用字典翻译，是否 -->
       <el-table-column label="冻结" align="center" prop="frozen" min-width="80">
         <template #default="scope">
-          <el-tag :type="scope.row.frozen ? 'danger' : 'success'">{{ scope.row.frozen ? '是' : '否' }}</el-tag>
+          <el-tag :type="scope.row.frozen ? 'danger' : 'success'">{{
+            scope.row.frozen ? '是' : '否'
+          }}</el-tag>
         </template>
       </el-table-column>
+      <!-- TODO @AI：备注的展示 -->
       <el-table-column
         label="创建时间"
         align="center"
@@ -77,8 +90,17 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="150">
+      <el-table-column label="操作" align="center" width="220">
         <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openLocation(scope.row.id)"
+            v-hasPermi="['mes:wm-warehouse:query']"
+          >
+            库区
+          </el-button>
+          <!-- TODO @芋艿：标签打印 -->
           <el-button
             link
             type="primary"
@@ -120,6 +142,7 @@ defineOptions({ name: 'MesWmWarehouse' })
 
 const message = useMessage()
 const { t } = useI18n()
+const router = useRouter()
 
 const loading = ref(true)
 const list = ref<WmWarehouseVO[]>([])
@@ -163,6 +186,14 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 打开库区页面 */
+const openLocation = (warehouseId: number) => {
+  router.push({
+    path: '/mes/wm/warehouse/location',
+    query: { warehouseId: String(warehouseId) }
+  })
 }
 
 /** 删除按钮操作 */

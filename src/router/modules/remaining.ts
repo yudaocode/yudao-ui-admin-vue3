@@ -127,6 +127,42 @@ const remainingRouter: AppRouteRecordRaw[] = [
       }
     ]
   },
+  {
+    path: '/mes',
+    component: Layout,
+    name: 'MesWmRouter',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'wm/warehouse/location',
+        component: () => import('@/views/mes/wm/warehouse/location/index.vue'),
+        name: 'MesWmLocationRouter',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          icon: '',
+          title: '库区设置',
+          activeMenu: '/mes/wm/warehouse'
+        }
+      },
+      {
+        path: 'wm/warehouse/area',
+        component: () => import('@/views/mes/wm/warehouse/area/index.vue'),
+        name: 'MesWmAreaRouter',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          icon: '',
+          title: '库位设置',
+          activeMenu: '/mes/wm/warehouse'
+        }
+      }
+    ]
+  },
 
   {
     path: '/codegen',

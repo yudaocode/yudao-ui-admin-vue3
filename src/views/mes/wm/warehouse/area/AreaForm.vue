@@ -43,6 +43,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <!-- TODO @AI：生成，参考别的界面 -->
           <el-form-item label="库位编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入库位编码" />
           </el-form-item>
@@ -55,7 +56,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="面积" prop="area">
+          <el-form-item label="面积（㎡）" prop="area">
             <el-input-number
               v-model="formData.area"
               :precision="2"
@@ -80,17 +81,32 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="坐标 X" prop="positionX">
-            <el-input-number v-model="formData.positionX" :min="0" controls-position="right" class="!w-1/1" />
+            <el-input-number
+              v-model="formData.positionX"
+              :min="0"
+              controls-position="right"
+              class="!w-1/1"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="坐标 Y" prop="positionY">
-            <el-input-number v-model="formData.positionY" :min="0" controls-position="right" class="!w-1/1" />
+            <el-input-number
+              v-model="formData.positionY"
+              :min="0"
+              controls-position="right"
+              class="!w-1/1"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="坐标 Z" prop="positionZ">
-            <el-input-number v-model="formData.positionZ" :min="0" controls-position="right" class="!w-1/1" />
+            <el-input-number
+              v-model="formData.positionZ"
+              :min="0"
+              controls-position="right"
+              class="!w-1/1"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -121,6 +137,7 @@
       </el-row>
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：允许产品混放 -->
           <el-form-item label="允许物料混放" prop="allowItemMixing">
             <el-switch v-model="formData.allowItemMixing" />
           </el-form-item>
@@ -140,6 +157,7 @@
       </el-row>
     </el-form>
     <template #footer>
+      <!-- TODO @AI：barcodeimg -->
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -155,9 +173,11 @@ import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/ar
 
 defineOptions({ name: 'AreaForm' })
 
+// TODO @AI：变量注释，模仿下别的模块
 const { t } = useI18n()
 const message = useMessage()
 
+// TODO @AI：变量注释，模仿下别的模块
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
@@ -194,6 +214,7 @@ const formRules = reactive({
 })
 const formRef = ref()
 
+/** 加载库区列表 */
 const loadLocationList = async (warehouseId?: number) => {
   if (!warehouseId) {
     locationList.value = []
@@ -202,13 +223,20 @@ const loadLocationList = async (warehouseId?: number) => {
   locationList.value = await WmWarehouseLocationApi.getWarehouseLocationSimpleList(warehouseId)
 }
 
+/** 仓库改变时，重置库区 */
 const handleWarehouseChange = async (warehouseId?: number) => {
   formData.value.locationId = undefined
   await loadLocationList(warehouseId)
 }
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (
+  type: string,
+  id?: number,
+  defaultLocationId?: number,
+  defaultWarehouseId?: number
+) => {
+  // TODO @AI：注释的风格，参考下别的模块的 form；
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -240,6 +268,20 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+    return
+  }
+  if (defaultWarehouseId) {
+    selectedWarehouseId.value = defaultWarehouseId
+    await loadLocationList(defaultWarehouseId)
+  }
+  if (defaultLocationId) {
+    if (!selectedWarehouseId.value) {
+      const location = await WmWarehouseLocationApi.getWarehouseLocation(defaultLocationId)
+      selectedWarehouseId.value = location.warehouseId
+      await loadLocationList(selectedWarehouseId.value)
+    }
+    // TODO @linter：修复
+    formData.value.locationId = defaultLocationId
   }
 }
 defineExpose({ open })

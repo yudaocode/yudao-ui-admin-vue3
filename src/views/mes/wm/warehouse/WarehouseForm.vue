@@ -9,6 +9,7 @@
     >
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：生成，参考别的界面 -->
           <el-form-item label="仓库编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入仓库编码" />
           </el-form-item>
@@ -26,7 +27,12 @@
               clearable
               class="!w-1/1"
             >
-              <el-option v-for="user in userList" :key="user.id" :label="user.nickname" :value="user.id" />
+              <el-option
+                v-for="user in userList"
+                :key="user.id"
+                :label="user.nickname"
+                :value="user.id"
+              />
             </el-select>
           </el-form-item>
         </el-col>
@@ -38,7 +44,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="面积" prop="area">
+          <el-form-item label="面积（㎡）" prop="area">
             <el-input-number
               v-model="formData.area"
               :precision="2"
@@ -48,6 +54,7 @@
             />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：前后端，这个字段都删除，包括数据库的 -->
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="formData.status">
@@ -78,6 +85,7 @@
       </el-row>
     </el-form>
     <template #footer>
+      <!-- TODO @AI：barcodeimg -->
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -89,6 +97,8 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import * as UserApi from '@/api/system/user'
+
+// TODO @AI：变量注释，模仿下别的模块
 
 defineOptions({ name: 'WarehouseForm' })
 
@@ -121,6 +131,7 @@ const formRef = ref()
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
+  // TODO @AI：注释的风格，参考下别的模块的 form；
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -140,6 +151,7 @@ defineExpose({ open })
 /** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
+  // TODO @AI：注释的风格，参考下别的模块的 form；
   await formRef.value.validate()
   formLoading.value = true
   try {

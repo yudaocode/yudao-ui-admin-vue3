@@ -9,6 +9,7 @@
     >
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：生成，参考别的界面 -->
           <el-form-item label="库区编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入库区编码" />
           </el-form-item>
@@ -78,6 +79,7 @@
       </el-row>
     </el-form>
     <template #footer>
+      <!-- TODO @AI：barcodeimg -->
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -92,6 +94,7 @@ import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/ware
 
 defineOptions({ name: 'LocationForm' })
 
+// TODO @AI：变量注释，模仿下别的模块
 const { t } = useI18n()
 const message = useMessage()
 
@@ -122,7 +125,8 @@ const formRules = reactive({
 const formRef = ref()
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, defaultWarehouseId?: number) => {
+  // TODO @AI：注释的风格，参考下别的模块的 form；
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -135,6 +139,11 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+    return
+  }
+  // TODO @linter：修复
+  if (defaultWarehouseId) {
+    formData.value.warehouseId = defaultWarehouseId
   }
 }
 defineExpose({ open })
@@ -142,6 +151,7 @@ defineExpose({ open })
 /** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
+  // TODO @AI：注释的风格，参考下别的模块的 form；
   await formRef.value.validate()
   formLoading.value = true
   try {
