@@ -11,17 +11,26 @@
       label-width="120px"
       v-loading="formLoading"
     >
-      <!-- TODO @AI：1 行 3 列 -->
       <el-row>
-        <el-col :span="12">
-          <!-- TODO @AI：生成操作； -->
+        <el-col :span="8">
           <el-form-item label="设备编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入设备编码" />
+            <el-input v-model="formData.code" placeholder="请输入设备编码">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="设备名称" prop="name">
             <el-input v-model="formData.name" placeholder="请输入设备名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="品牌" prop="brand">
+            <el-input v-model="formData.brand" placeholder="请输入品牌" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -66,11 +75,6 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="品牌" prop="brand">
-            <el-input v-model="formData.brand" placeholder="请输入品牌" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
           <el-form-item label="规格型号" prop="spec">
             <el-input v-model="formData.spec" placeholder="请输入规格型号" />
           </el-form-item>
@@ -98,6 +102,7 @@ import { DvMachineryTypeApi } from '@/api/mes/dv/machinery/type'
 import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { MesDvMachineryStatusEnum } from '@/views/mes/utils/constants'
+import { generateRandomStr } from '@/utils'
 
 defineOptions({ name: 'MachineryForm' })
 
@@ -129,6 +134,11 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const machineryTypeTree = ref<any[]>([]) // 设备类型树
 const workshopList = ref<MdWorkshopVO[]>([]) // 车间列表
+
+/** 生成设备编码 */
+const generateCode = () => {
+  formData.value.code = 'M' + generateRandomStr(12)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
