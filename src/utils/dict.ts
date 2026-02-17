@@ -266,7 +266,7 @@ export enum DICT_TYPE {
   MES_INDEX_TYPE = 'mes_index_type', // MES 检测项类型
   MES_QC_RESULT_TYPE = 'mes_qc_result_type', // MES 质检结果值类型
   MES_DEFECT_LEVEL = 'mes_defect_level', // MES 缺陷等级
-  MES_PRO_WORKORDER_STATUS = 'mes_pro_workorder_status', // MES 生产工单状态
-  MES_PRO_WORKORDER_SOURCE_TYPE = 'mes_pro_workorder_source_type', // MES 工单来源类型
-  MES_PRO_WORKORDER_TYPE = 'mes_pro_workorder_type' // MES 工单类型
+  MES_PRO_WORK_ORDER_STATUS = 'mes_pro_work_order_status', // MES 生产工单状态
+  MES_PRO_WORK_ORDER_SOURCE_TYPE = 'mes_pro_work_order_source_type', // MES 工单来源类型
+  MES_PRO_WORK_ORDER_TYPE = 'mes_pro_work_order_type' // MES 工单类型
 }

@@ -59,7 +59,7 @@ export const MesCalShiftMethodEnum = {
 }
 
 /** MES 生产工单状态枚举 */
-export const MesProWorkorderStatusEnum = {
+export const MesProWorkOrderStatusEnum = {
   PREPARE: 0, // 草稿
   CONFIRMED: 1, // 已确认
   FINISHED: 2, // 已完成

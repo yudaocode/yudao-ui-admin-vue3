@@ -22,23 +22,6 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="工单类型" prop="type">
-            <el-select
-              v-model="formData.type"
-              placeholder="请选择工单类型"
-              class="!w-1/1"
-              :disabled="isDetail"
-            >
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORKORDER_TYPE)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
           <el-form-item label="来源类型" prop="orderSourceType">
             <el-select
               v-model="formData.orderSourceType"
@@ -47,7 +30,7 @@
               :disabled="isDetail"
             >
               <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORKORDER_SOURCE_TYPE)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -179,7 +162,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="工单状态" prop="status" v-if="formType !== 'create'">
-            <dict-tag :type="DICT_TYPE.MES_PRO_WORKORDER_STATUS" :value="formData.status" />
+            <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="formData.status" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -199,11 +182,7 @@
     <!-- BOM Tab：编辑/详情时显示 -->
     <el-tabs v-if="formType !== 'create'" v-model="activeTab" class="mt-15px">
       <el-tab-pane label="工单 BOM" name="bom">
-        <WorkorderBom
-          v-if="formData.id"
-          :workorder-id="formData.id"
-          :disabled="isDetail"
-        />
+        <WorkOrderBom v-if="formData.id" :work-order-id="formData.id" :disabled="isDetail" />
       </el-tab-pane>
     </el-tabs>
     <template #footer v-if="!isDetail">
@@ -215,14 +194,14 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { ProWorkorderApi, ProWorkorderVO } from '@/api/mes/pro/workorder'
+import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import { MdClientApi } from '@/api/mes/md/client'
 import { MdVendorApi } from '@/api/mes/md/vendor'
 import { MdUnitMeasureApi } from '@/api/mes/md/unitmeasure'
-import WorkorderBom from './WorkorderBom.vue'
+import WorkOrderBom from './WorkOrderBom.vue'
 
-defineOptions({ name: 'WorkorderForm' })
+defineOptions({ name: 'WorkOrderForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -286,7 +265,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ProWorkorderApi.getWorkorder(id)
+      formData.value = await ProWorkOrderApi.getWorkOrder(id)
     } finally {
       formLoading.value = false
     }
@@ -308,12 +287,12 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ProWorkorderVO
+    const data = formData.value as unknown as ProWorkOrderVO
     if (formType.value === 'create') {
-      await ProWorkorderApi.createWorkorder(data)
+      await ProWorkOrderApi.createWorkOrder(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ProWorkorderApi.updateWorkorder(data)
+      await ProWorkOrderApi.updateWorkOrder(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

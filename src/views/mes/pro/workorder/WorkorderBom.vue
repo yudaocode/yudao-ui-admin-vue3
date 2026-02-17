@@ -13,11 +13,7 @@
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="规格型号" align="center" prop="itemSpec" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
-      <el-table-column label="物料/产品" align="center" prop="itemOrProduct" width="100">
-        <template #default="scope">
-          {{ getItemOrProductLabel(scope.row.itemOrProduct) }}
-        </template>
-      </el-table-column>
+      <!-- TODO @AI：物料/名称，增加该类； -->
       <el-table-column label="预计使用量" align="center" prop="quantity" width="120" />
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
       <el-table-column label="操作" align="center" width="130" v-if="!disabled">
@@ -36,6 +32,8 @@
     />
 
     <!-- BOM 表单弹窗 -->
+    <!-- TODO @AI：拆成 List 和 Form 两个 -->
+    <!-- TODO @芋艿：这块暂时还没测试和 review； -->
     <Dialog :title="bomDialogTitle" v-model="bomDialogVisible" width="600px">
       <el-form
         ref="bomFormRef"
@@ -75,12 +73,6 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="物料/产品" prop="itemOrProduct">
-          <el-select v-model="bomFormData.itemOrProduct" placeholder="请选择" class="!w-1/1">
-            <el-option label="物料" value="ITEM" />
-            <el-option label="产品" value="PRODUCT" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="预计使用量" prop="quantity">
           <el-input-number
             v-model="bomFormData.quantity"
@@ -102,15 +94,14 @@
 </template>
 
 <script setup lang="ts">
-import { ProWorkorderBomApi, ProWorkorderBomVO } from '@/api/mes/pro/workorder/bom'
+import { ProWorkOrderBomApi, ProWorkOrderBomVO } from '@/api/mes/pro/workorder/bom'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import { MdUnitMeasureApi } from '@/api/mes/md/unitmeasure'
-import { getItemOrProductLabel } from '@/views/mes/utils/constants'
 
-defineOptions({ name: 'WorkorderBom' })
+defineOptions({ name: 'WorkOrderBom' })
 
 const props = defineProps<{
-  workorderId: number
+  workOrderId: number
   disabled?: boolean
 }>()
 
@@ -119,20 +110,20 @@ const { t } = useI18n()
 
 // ==================== BOM 列表 ====================
 const loading = ref(false)
-const bomList = ref<ProWorkorderBomVO[]>([])
+const bomList = ref<ProWorkOrderBomVO[]>([])
 const bomTotal = ref(0)
 const bomQueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  workorderId: undefined as number | undefined
+  workOrderId: undefined as number | undefined
 })
 
 /** 查询 BOM 列表 */
 const getBomList = async () => {
   loading.value = true
   try {
-    bomQueryParams.workorderId = props.workorderId
-    const data = await ProWorkorderBomApi.getWorkorderBomPage(bomQueryParams)
+    bomQueryParams.workOrderId = props.workOrderId
+    const data = await ProWorkOrderBomApi.getWorkOrderBomPage(bomQueryParams)
     bomList.value = data.list
     bomTotal.value = data.total
   } finally {
@@ -144,7 +135,7 @@ const getBomList = async () => {
 const handleDeleteBom = async (id: number) => {
   try {
     await message.delConfirm()
-    await ProWorkorderBomApi.deleteWorkorderBom(id)
+    await ProWorkOrderBomApi.deleteWorkOrderBom(id)
     message.success(t('common.delSuccess'))
     await getBomList()
   } catch {}
@@ -157,17 +148,15 @@ const bomFormLoading = ref(false)
 const bomFormType = ref('')
 const bomFormData = ref({
   id: undefined,
-  workorderId: undefined as number | undefined,
+  workOrderId: undefined as number | undefined,
   itemId: undefined,
   unitMeasureId: undefined,
-  itemOrProduct: 'ITEM',
   quantity: undefined,
   remark: undefined
 })
 const bomFormRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   unitMeasureId: [{ required: true, message: '单位不能为空', trigger: 'change' }],
-  itemOrProduct: [{ required: true, message: '物料产品标识不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '预计使用量不能为空', trigger: 'blur' }]
 })
 const bomFormRef = ref()
@@ -185,10 +174,9 @@ const openBomForm = async (type: string, row?: any) => {
   // 重置表单
   bomFormData.value = {
     id: undefined,
-    workorderId: props.workorderId,
+    workOrderId: props.workOrderId,
     itemId: undefined,
     unitMeasureId: undefined,
-    itemOrProduct: 'ITEM',
     quantity: undefined,
     remark: undefined
   }
@@ -211,12 +199,12 @@ const submitBomForm = async () => {
   await bomFormRef.value.validate()
   bomFormLoading.value = true
   try {
-    const data = bomFormData.value as unknown as ProWorkorderBomVO
+    const data = bomFormData.value as unknown as ProWorkOrderBomVO
     if (bomFormType.value === 'create') {
-      await ProWorkorderBomApi.createWorkorderBom(data)
+      await ProWorkOrderBomApi.createWorkOrderBom(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ProWorkorderBomApi.updateWorkorderBom(data)
+      await ProWorkOrderBomApi.updateWorkOrderBom(data)
       message.success(t('common.updateSuccess'))
     }
     bomDialogVisible.value = false

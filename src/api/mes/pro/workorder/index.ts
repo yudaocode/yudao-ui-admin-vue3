@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
 // MES 生产工单 VO
-export interface ProWorkorderVO {
+export interface ProWorkOrderVO {
   id: number // 编号
   code: string // 工单编码
   name: string // 工单名称
@@ -25,7 +25,6 @@ export interface ProWorkorderVO {
   batchCode: string // 批次号
   requestDate: Date // 需求日期
   parentId: number // 父工单编号
-  ancestors: string // 所有父节点编号
   finishDate: Date // 完成时间
   cancelDate: Date // 取消时间
   status: number // 工单状态
@@ -33,44 +32,44 @@ export interface ProWorkorderVO {
 }
 
 // MES 生产工单 API
-export const ProWorkorderApi = {
+export const ProWorkOrderApi = {
   // 查询生产工单分页
-  getWorkorderPage: async (params: any) => {
-    return await request.get({ url: `/mes/pro/workorder/page`, params })
+  getWorkOrderPage: async (params: any) => {
+    return await request.get({ url: `/mes/pro/work-order/page`, params })
   },
 
   // 查询生产工单详情
-  getWorkorder: async (id: number) => {
-    return await request.get({ url: `/mes/pro/workorder/get?id=` + id })
+  getWorkOrder: async (id: number) => {
+    return await request.get({ url: `/mes/pro/work-order/get?id=` + id })
   },
 
   // 新增生产工单
-  createWorkorder: async (data: ProWorkorderVO) => {
-    return await request.post({ url: `/mes/pro/workorder/create`, data })
+  createWorkOrder: async (data: ProWorkOrderVO) => {
+    return await request.post({ url: `/mes/pro/work-order/create`, data })
   },
 
   // 修改生产工单
-  updateWorkorder: async (data: ProWorkorderVO) => {
-    return await request.put({ url: `/mes/pro/workorder/update`, data })
+  updateWorkOrder: async (data: ProWorkOrderVO) => {
+    return await request.put({ url: `/mes/pro/work-order/update`, data })
   },
 
   // 删除生产工单
-  deleteWorkorder: async (id: number) => {
-    return await request.delete({ url: `/mes/pro/workorder/delete?id=` + id })
+  deleteWorkOrder: async (id: number) => {
+    return await request.delete({ url: `/mes/pro/work-order/delete?id=` + id })
   },
 
   // 导出生产工单 Excel
-  exportWorkorder: async (params: any) => {
-    return await request.download({ url: `/mes/pro/workorder/export-excel`, params })
+  exportWorkOrder: async (params: any) => {
+    return await request.download({ url: `/mes/pro/work-order/export-excel`, params })
   },
 
   // 完成工单
-  finishWorkorder: async (id: number) => {
-    return await request.put({ url: `/mes/pro/workorder/finish?id=` + id })
+  finishWorkOrder: async (id: number) => {
+    return await request.put({ url: `/mes/pro/work-order/finish?id=` + id })
   },
 
   // 取消工单
-  cancelWorkorder: async (id: number) => {
-    return await request.put({ url: `/mes/pro/workorder/cancel?id=` + id })
+  cancelWorkOrder: async (id: number) => {
+    return await request.put({ url: `/mes/pro/work-order/cancel?id=` + id })
   }
 }

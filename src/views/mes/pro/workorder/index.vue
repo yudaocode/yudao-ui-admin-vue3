@@ -30,7 +30,7 @@
       <el-form-item label="工单类型" prop="type">
         <el-select v-model="queryParams.type" placeholder="请选择工单类型" clearable class="!w-240px">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORKORDER_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -45,7 +45,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORKORDER_SOURCE_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -60,7 +60,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORKORDER_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -85,7 +85,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['mes:pro-workorder:create']"
+          v-hasPermi="['mes:pro-work-order:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -94,7 +94,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['mes:pro-workorder:export']"
+          v-hasPermi="['mes:pro-work-order:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -109,13 +109,13 @@
       <el-table-column label="工单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="工单类型" align="center" prop="type" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_PRO_WORKORDER_TYPE" :value="scope.row.type" />
+          <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
       <el-table-column label="来源类型" align="center" prop="orderSourceType" width="100">
         <template #default="scope">
           <dict-tag
-            :type="DICT_TYPE.MES_PRO_WORKORDER_SOURCE_TYPE"
+            :type="DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE"
             :value="scope.row.orderSourceType"
           />
         </template>
@@ -130,7 +130,7 @@
       <el-table-column label="需求日期" align="center" prop="requestDate" :formatter="dateFormatter" width="180" />
       <el-table-column label="工单状态" align="center" prop="status" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_PRO_WORKORDER_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
@@ -143,12 +143,12 @@
       <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
           <!-- 草稿状态：编辑、删除 -->
-          <template v-if="scope.row.status === MesProWorkorderStatusEnum.PREPARE">
+          <template v-if="scope.row.status === MesProWorkOrderStatusEnum.PREPARE">
             <el-button
               link
               type="primary"
               @click="openForm('update', scope.row.id)"
-              v-hasPermi="['mes:pro-workorder:update']"
+              v-hasPermi="['mes:pro-work-order:update']"
             >
               编辑
             </el-button>
@@ -156,18 +156,18 @@
               link
               type="danger"
               @click="handleDelete(scope.row.id)"
-              v-hasPermi="['mes:pro-workorder:delete']"
+              v-hasPermi="['mes:pro-work-order:delete']"
             >
               删除
             </el-button>
           </template>
           <!-- 已确认状态：完成、取消 -->
-          <template v-if="scope.row.status === MesProWorkorderStatusEnum.CONFIRMED">
+          <template v-if="scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED">
             <el-button
               link
               type="success"
               @click="handleFinish(scope.row.id)"
-              v-hasPermi="['mes:pro-workorder:update']"
+              v-hasPermi="['mes:pro-work-order:update']"
             >
               完成
             </el-button>
@@ -175,7 +175,7 @@
               link
               type="warning"
               @click="handleCancel(scope.row.id)"
-              v-hasPermi="['mes:pro-workorder:update']"
+              v-hasPermi="['mes:pro-work-order:update']"
             >
               取消
             </el-button>
@@ -185,7 +185,7 @@
             link
             type="primary"
             @click="openForm('detail', scope.row.id)"
-            v-hasPermi="['mes:pro-workorder:query']"
+            v-hasPermi="['mes:pro-work-order:query']"
           >
             详情
           </el-button>
@@ -202,24 +202,24 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <WorkorderForm ref="formRef" @success="getList" />
+  <WorkOrderForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { ProWorkorderApi, ProWorkorderVO } from '@/api/mes/pro/workorder'
-import WorkorderForm from './WorkorderForm.vue'
+import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
+import WorkOrderForm from './WorkOrderForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { MesProWorkorderStatusEnum } from '@/views/mes/utils/constants'
+import { MesProWorkOrderStatusEnum } from '@/views/mes/utils/constants'
 
-defineOptions({ name: 'MesProWorkorder' })
+defineOptions({ name: 'MesProWorkOrder' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ProWorkorderVO[]>([]) // 列表的数据
+const list = ref<ProWorkOrderVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
@@ -238,7 +238,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ProWorkorderApi.getWorkorderPage(queryParams)
+    const data = await ProWorkOrderApi.getWorkOrderPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -268,7 +268,7 @@ const openForm = (type: string, id?: number) => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await ProWorkorderApi.deleteWorkorder(id)
+    await ProWorkOrderApi.deleteWorkOrder(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -278,7 +278,7 @@ const handleDelete = async (id: number) => {
 const handleFinish = async (id: number) => {
   try {
     await message.confirm('确认要完成该工单吗？')
-    await ProWorkorderApi.finishWorkorder(id)
+    await ProWorkOrderApi.finishWorkOrder(id)
     message.success('工单已完成')
     await getList()
   } catch {}
@@ -288,7 +288,7 @@ const handleFinish = async (id: number) => {
 const handleCancel = async (id: number) => {
   try {
     await message.confirm('确认要取消该工单吗？')
-    await ProWorkorderApi.cancelWorkorder(id)
+    await ProWorkOrderApi.cancelWorkOrder(id)
     message.success('工单已取消')
     await getList()
   } catch {}
@@ -299,7 +299,7 @@ const handleExport = async () => {
   try {
     await message.exportConfirm()
     exportLoading.value = true
-    const data = await ProWorkorderApi.exportWorkorder(queryParams)
+    const data = await ProWorkOrderApi.exportWorkOrder(queryParams)
     download.excel(data, '生产工单.xls')
   } catch {
   } finally {
