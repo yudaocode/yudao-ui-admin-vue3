@@ -16,10 +16,11 @@
 
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：去掉「产品物料ID」，替换成产品物料编码、产品物料名称、规格型号； -->
-      <el-table-column label="产品物料ID" align="center" prop="itemId" width="120" />
+      <el-table-column label="物料编码" align="center" prop="itemCode" width="130" />
+      <el-table-column label="物料名称" align="center" prop="itemName" min-width="150" />
+      <el-table-column label="规格型号" align="center" prop="specification" min-width="130" />
+      <el-table-column label="计量单位" align="center" prop="unitMeasureName" width="100" />
       <el-table-column label="最低检测数" align="center" prop="quantityCheck" width="110" />
-      <!-- TODO @AI：单位 -->
       <el-table-column label="最大不合格数" align="center" prop="quantityUnqualified" width="120">
         <template #default="scope">
           {{ scope.row.quantityUnqualified === 0 ? '不启用' : scope.row.quantityUnqualified }}
@@ -28,8 +29,6 @@
       <el-table-column label="最大致命缺陷率(%)" align="center" prop="criticalRate" width="150" />
       <el-table-column label="最大严重缺陷率(%)" align="center" prop="majorRate" width="150" />
       <el-table-column label="最大轻微缺陷率(%)" align="center" prop="minorRate" width="150" />
-      <!-- TODO @AI:备注，去掉 -->
-      <el-table-column label="备注" align="center" prop="remark" min-width="120" />
       <el-table-column label="操作" align="center" width="130" fixed="right">
         <template #default="scope">
           <el-button

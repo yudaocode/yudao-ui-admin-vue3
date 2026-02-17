@@ -1,41 +1,52 @@
 import request from '@/config/axios'
 
-// TODO @AI：拆成多个，参考别的 api ts；
 // MES 质检方案 VO
 export interface QcTemplateVO {
   id: number // 编号
   code: string // 方案编号
   name: string // 方案名称
-  types: string // 检测种类（逗号分隔：IQC,IPQC,OQC,RQC）
-  enableFlag: string // 是否启用（Y/N）
+  types: number[] // 检测种类
+  enableFlag: boolean // 是否启用
   remark: string // 备注
 }
 
 // MES 质检方案-检测指标项 VO
+// TODO @AI：拆成多个，参考别的 api ts；
 export interface QcTemplateIndicatorVO {
   id: number // 编号
   templateId: number // 质检方案ID
   indicatorId: number // 质检指标ID
-  checkMethod: string // 检测方法/检测要求
+  checkMethod: string // 检测方法
   standardValue: number // 标准值
   unit: string // 单位
   thresholdMax: number // 误差上限
   thresholdMin: number // 误差下限
   docUrl: string // 说明图URL
   remark: string // 备注
+  // JOIN mes_qc_indicator
+  indicatorCode: string // 检测项编码
+  indicatorName: string // 检测项名称
+  indicatorType: string // 检测项类型（字典 mes_index_type）
+  indicatorTool: string // 检测工具
 }
 
 // MES 质检方案-产品关联 VO
+// TODO @AI：拆成多个，参考别的 api ts；
 export interface QcTemplateItemVO {
   id: number // 编号
   templateId: number // 质检方案ID
   itemId: number // 产品物料ID
   quantityCheck: number // 最低检测数
-  quantityUnqualified: number // 最大不合格数（0=不启用）
+  quantityUnqualified: number // 最大不合格数
   criticalRate: number // 最大致命缺陷率（%）
   majorRate: number // 最大严重缺陷率（%）
   minorRate: number // 最大轻微缺陷率（%）
   remark: string // 备注
+  // JOIN mes_md_item
+  itemCode: string // 物料编码
+  itemName: string // 物料名称
+  specification: string // 规格型号
+  unitMeasureName: string // 计量单位名称
 }
 
 // MES 质检方案 API

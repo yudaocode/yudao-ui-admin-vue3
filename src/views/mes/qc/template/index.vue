@@ -36,7 +36,7 @@
         >
           <!-- TODO @AI：字典枚举 -->
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_QC_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -50,8 +50,12 @@
           clearable
           class="!w-240px"
         >
-          <el-option label="启用" value="Y" />
-          <el-option label="停用" value="N" />
+          <el-option
+            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
+            :key="dict.value as unknown as string"
+            :label="dict.label"
+            :value="dict.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -90,27 +94,20 @@
     >
       <el-table-column label="方案编号" align="center" prop="code" width="150" />
       <el-table-column label="方案名称" align="center" prop="name" min-width="200" />
-      <!-- TODO @AI：业务类型，改成这个。数据库字典、后端字段的，都改下 -->
       <el-table-column label="检测种类" align="center" prop="types" min-width="200">
         <template #default="scope">
-          <template v-if="scope.row.types">
-            <el-tag
-              v-for="t in scope.row.types.split(',')"
-              :key="t"
-              size="small"
-              class="mr-5px"
-            >
+          <!-- TODO @AI：t 改成 type 变量； -->
+          <!-- TODO @AI：el-tag：里面也支持数组的； -->
+          <template v-if="scope.row.types && scope.row.types.length">
+            <el-tag v-for="t in scope.row.types" :key="t" size="small" class="mr-5px">
               <dict-tag :type="DICT_TYPE.MES_QC_TYPE" :value="t" />
             </el-tag>
           </template>
         </template>
       </el-table-column>
-      <!-- TODO @AI：改成 boolean 类型了 -->
       <el-table-column label="是否启用" align="center" prop="enableFlag" width="100">
         <template #default="scope">
-          <el-tag :type="scope.row.enableFlag === 'Y' ? 'success' : 'danger'">
-            {{ scope.row.enableFlag === 'Y' ? '启用' : '停用' }}
-          </el-tag>
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.enableFlag" />
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="150" />
@@ -153,15 +150,18 @@
 
   <!-- 子表标签页：检测指标项 + 产品关联 -->
   <!-- TODO @AI：是不是不用这个？？？有点奇怪； -->
-  <ContentWrap v-if="currentRow">
-    <el-tabs v-model="activeTab">
-      <el-tab-pane label="检测指标项" name="indicator">
-        <TemplateIndicatorList :template-id="currentRow.id" />
-      </el-tab-pane>
-      <el-tab-pane label="产品关联" name="item">
-        <TemplateItemList :template-id="currentRow.id" />
-      </el-tab-pane>
-    </el-tabs>
+  <ContentWrap>
+    <template v-if="currentRow">
+      <el-tabs v-model="activeTab">
+        <el-tab-pane label="检测指标项" name="indicator">
+          <TemplateIndicatorList :template-id="currentRow.id" />
+        </el-tab-pane>
+        <el-tab-pane label="产品关联" name="item">
+          <TemplateItemList :template-id="currentRow.id" />
+        </el-tab-pane>
+      </el-tabs>
+    </template>
+    <el-empty v-else description="请先在上方列表选择一条质检方案" />
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
@@ -175,7 +175,7 @@ import { QcTemplateApi, QcTemplateVO } from '@/api/mes/qc/template'
 import TemplateForm from './TemplateForm.vue'
 import TemplateIndicatorList from './TemplateIndicatorList.vue'
 import TemplateItemList from './TemplateItemList.vue'
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'MesQcTemplate' })
 

@@ -8,14 +8,17 @@
       label-width="150px"
       v-loading="formLoading"
     >
-      <el-form-item label="产品物料ID" prop="itemId">
-        <!-- TODO @芋艿：后续替换为 md_item 物料选择器 -->
-        <el-input-number
-          v-model="formData.itemId"
-          placeholder="请输入产品物料ID"
-          :min="1"
-          class="!w-1/1"
-        />
+      <el-form-item label="产品物料" prop="itemId">
+        <!-- TODO @AI：item select 选择； -->
+        <el-select v-model="formData.itemId" placeholder="请选择产品物料" filterable class="!w-1/1">
+          <el-option
+            v-for="item in itemList"
+            :key="item.id"
+            :label="item.code + ' - ' + item.name"
+            :value="item.id"
+          />
+        </el-select>
+        <!-- TODO @AI：产品物料编码、产品物料名称、规格型号 -->
       </el-form-item>
       <el-form-item label="最低检测数" prop="quantityCheck">
         <el-input-number
@@ -62,9 +65,6 @@
           class="!w-1/1"
         />
       </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
-      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -75,6 +75,7 @@
 
 <script setup lang="ts">
 import { QcTemplateApi, QcTemplateItemVO } from '@/api/mes/qc/template'
+import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 
 defineOptions({ name: 'TemplateItemForm' })
 
@@ -93,14 +94,16 @@ const formData = ref({
   quantityUnqualified: 0,
   criticalRate: 0,
   majorRate: 0,
-  minorRate: 100,
-  remark: undefined
+  minorRate: 100
 })
 const formRules = reactive({
-  itemId: [{ required: true, message: '产品物料ID不能为空', trigger: 'blur' }],
+  itemId: [{ required: true, message: '产品物料不能为空', trigger: 'change' }],
   quantityCheck: [{ required: true, message: '最低检测数不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
+
+/** 物料精简列表 */
+const itemList = ref<MdItemVO[]>([])
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number, templateId?: number) => {
@@ -109,6 +112,8 @@ const open = async (type: string, id?: number, templateId?: number) => {
   formType.value = type
   resetForm()
   formData.value.templateId = templateId
+  // 加载物料列表
+  itemList.value = await MdItemApi.getItemSimpleList()
   if (id) {
     formLoading.value = true
     try {
@@ -151,8 +156,7 @@ const resetForm = () => {
     quantityUnqualified: 0,
     criticalRate: 0,
     majorRate: 0,
-    minorRate: 100,
-    remark: undefined
+    minorRate: 100
   }
   formRef.value?.resetFields()
 }

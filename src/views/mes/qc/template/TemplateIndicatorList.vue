@@ -16,29 +16,19 @@
 
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：检测项名称、检测项类型、检测工具，替代质检指标ID  -->
-      <el-table-column label="质检指标ID" align="center" prop="indicatorId" width="120" />
-      <!-- TODO @AI：所有检测方法/要求，都改成检测方法 -->
-      <el-table-column label="检测方法/要求" align="center" prop="checkMethod" min-width="180" />
+      <el-table-column label="检测项编码" align="center" prop="indicatorCode" width="140" />
+      <el-table-column label="检测项名称" align="center" prop="indicatorName" min-width="150" />
+      <el-table-column label="检测项类型" align="center" prop="indicatorType" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_INDEX_TYPE" :value="scope.row.indicatorType" />
+        </template>
+      </el-table-column>
+      <el-table-column label="检测工具" align="center" prop="indicatorTool" width="120" />
+      <el-table-column label="检测方法" align="center" prop="checkMethod" min-width="180" />
       <el-table-column label="标准值" align="center" prop="standardValue" width="100" />
       <el-table-column label="单位" align="center" prop="unit" width="80" />
       <el-table-column label="误差上限" align="center" prop="thresholdMax" width="100" />
       <el-table-column label="误差下限" align="center" prop="thresholdMin" width="100" />
-      <!-- TODO @AI：说明图，去掉 -->
-      <el-table-column label="说明图" align="center" prop="docUrl" width="100">
-        <template #default="scope">
-          <el-image
-            v-if="scope.row.docUrl"
-            :src="scope.row.docUrl"
-            :preview-src-list="[scope.row.docUrl]"
-            fit="cover"
-            style="width: 40px; height: 40px"
-          />
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <!-- TODO @AI：备注，去掉 -->
-      <el-table-column label="备注" align="center" prop="remark" min-width="120" />
       <el-table-column label="操作" align="center" width="130" fixed="right">
         <template #default="scope">
           <el-button
@@ -67,6 +57,7 @@
 </template>
 
 <script setup lang="ts">
+import { DICT_TYPE } from '@/utils/dict'
 import { QcTemplateApi, QcTemplateIndicatorVO } from '@/api/mes/qc/template'
 import TemplateIndicatorForm from './TemplateIndicatorForm.vue'
 

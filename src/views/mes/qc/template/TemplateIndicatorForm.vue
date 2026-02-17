@@ -8,21 +8,27 @@
       label-width="130px"
       v-loading="formLoading"
     >
-      <el-form-item label="质检指标ID" prop="indicatorId">
-        <!-- TODO @AI:可以做了！ -->
-        <!-- TODO @芋艿：等 qc_indicator 完成后，替换为选择器组件 -->
-        <el-input-number
+      <el-form-item label="质检指标" prop="indicatorId">
+        <!-- TODO @AI：检测项（item-select 方式）、检测工具； -->
+        <el-select
           v-model="formData.indicatorId"
-          placeholder="请输入质检指标ID"
-          :min="1"
+          placeholder="请选择质检指标"
+          filterable
           class="!w-1/1"
-        />
+        >
+          <el-option
+            v-for="item in indicatorList"
+            :key="item.id"
+            :label="item.code + ' - ' + item.name"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="检测方法/要求" prop="checkMethod">
+      <el-form-item label="检测方法" prop="checkMethod">
         <el-input
           type="textarea"
           v-model="formData.checkMethod"
-          placeholder="请输入检测方法/检测要求"
+          placeholder="请输入检测方法"
           :rows="3"
         />
       </el-form-item>
@@ -35,6 +41,7 @@
         />
       </el-form-item>
       <el-form-item label="单位" prop="unit">
+        <!-- TODO @AI：unit api 查询下； -->
         <el-input v-model="formData.unit" placeholder="请输入单位" />
       </el-form-item>
       <el-form-item label="误差上限" prop="thresholdMax">
@@ -69,6 +76,7 @@
 
 <script setup lang="ts">
 import { QcTemplateApi, QcTemplateIndicatorVO } from '@/api/mes/qc/template'
+import { QcIndicatorApi, QcIndicatorVO } from '@/api/mes/qc/indicator'
 
 defineOptions({ name: 'TemplateIndicatorForm' })
 
@@ -92,9 +100,12 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
-  indicatorId: [{ required: true, message: '质检指标ID不能为空', trigger: 'blur' }]
+  indicatorId: [{ required: true, message: '质检指标不能为空', trigger: 'change' }]
 })
 const formRef = ref()
+
+/** 质检指标精简列表 */
+const indicatorList = ref<QcIndicatorVO[]>([])
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number, templateId?: number) => {
@@ -103,6 +114,8 @@ const open = async (type: string, id?: number, templateId?: number) => {
   formType.value = type
   resetForm()
   formData.value.templateId = templateId
+  // 加载质检指标列表
+  indicatorList.value = await QcIndicatorApi.getIndicatorSimpleList()
   if (id) {
     formLoading.value = true
     try {
