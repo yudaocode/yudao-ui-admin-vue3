@@ -9,8 +9,8 @@
     </el-row>
     <!-- BOM 列表 -->
     <el-table v-loading="loading" :data="bomList" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="物料编码" align="center" prop="itemCode" width="120" />
-      <el-table-column label="物料名称" align="center" prop="itemName" min-width="150" />
+      <el-table-column label="BOM 物料编码" align="center" prop="itemCode" width="120" />
+      <el-table-column label="BOM 物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="规格型号" align="center" prop="itemSpec" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <!-- TODO @AI：物料/名称，增加该类； -->
@@ -20,6 +20,7 @@
         <template #default="scope">
           <el-button link type="primary" @click="openBomForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDeleteBom(scope.row.id)">删除</el-button>
+          <!-- TODO @AI：生成订单 -->
         </template>
       </el-table-column>
     </el-table>

@@ -10,6 +10,7 @@
     >
       <el-row>
         <el-col :span="12">
+          <!-- TODO @AI：生成 -->
           <el-form-item label="工单编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入工单编码" :disabled="isDetail" />
           </el-form-item>
@@ -38,6 +39,7 @@
             </el-select>
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：应该只有【客户订单】时，才展示这个表单项。 -->
         <el-col :span="8">
           <el-form-item label="来源单据编号" prop="orderSourceCode">
             <el-input
@@ -47,9 +49,27 @@
             />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="工单类型" prop="type">
+            <el-select
+              v-model="formData.type"
+              placeholder="请选择工单类型"
+              class="!w-1/1"
+              :disabled="isDetail"
+            >
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_TYPE)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：应该是 ItemSelect -->
           <el-form-item label="产品" prop="productId">
             <el-select
               v-model="formData.productId"
@@ -68,6 +88,8 @@
             </el-select>
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：这里 disabled 展示：产品名称、规格类型、单位； -->
+        <!-- TODO @AI：这个字段“单位”，应该不用存储，通过 item 查询就好了； -->
         <el-col :span="8">
           <el-form-item label="单位" prop="unitMeasureId">
             <el-select
@@ -87,6 +109,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <!-- TODO @ai：工单数量； -->
           <el-form-item label="生产数量" prop="quantity">
             <el-input-number
               v-model="formData.quantity"
@@ -100,6 +123,7 @@
       </el-row>
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：这个需要搞个客户的 select 弹出；类似 itemselect 这种； -->
           <el-form-item label="客户" prop="clientId">
             <el-select
               v-model="formData.clientId"
@@ -117,8 +141,10 @@
               />
             </el-select>
           </el-form-item>
+          <!-- TODO @AI：展示客户编码、客户名称； -->
         </el-col>
         <el-col :span="8">
+          <!-- TODO @AI：只有外协、外购，才有供应商 -->
           <el-form-item label="供应商" prop="vendorId">
             <el-select
               v-model="formData.vendorId"
@@ -136,8 +162,10 @@
               />
             </el-select>
           </el-form-item>
+          <!-- TODO @AI：展示供应商编码、供应商名称； -->
         </el-col>
         <el-col :span="8">
+          <!-- TODO @AI：这个字段，是必须的么？在调研确认下； -->
           <el-form-item label="批次号" prop="batchCode">
             <el-input
               v-model="formData.batchCode"
@@ -184,6 +212,7 @@
       <el-tab-pane label="工单 BOM" name="bom">
         <WorkOrderBom v-if="formData.id" :work-order-id="formData.id" :disabled="isDetail" />
       </el-tab-pane>
+      <!-- TODO @AI：物料需求，是不是缺的？ -->
     </el-tabs>
     <template #footer v-if="!isDetail">
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>

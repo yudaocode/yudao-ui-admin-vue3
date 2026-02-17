@@ -2,6 +2,8 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
+    <!-- TODO @AI：产品编号、产品名称 -->
+    <!-- TODO @AI：客户编号、客户名称 -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -28,7 +30,12 @@
         />
       </el-form-item>
       <el-form-item label="工单类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择工单类型" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.type"
+          placeholder="请选择工单类型"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_TYPE)"
             :key="dict.value"
@@ -37,6 +44,7 @@
           />
         </el-select>
       </el-form-item>
+      <!-- TODO @AI：来源类型 改成 工单来源 -->
       <el-form-item label="来源类型" prop="orderSourceType">
         <el-select
           v-model="queryParams.orderSourceType"
@@ -104,6 +112,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <!-- TODO @AI：生产工单，是父子结构； -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="工单编码" align="center" prop="code" width="140" />
       <el-table-column label="工单名称" align="center" prop="name" min-width="150" />
@@ -120,14 +129,24 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="产品名称" align="center" prop="productName" min-width="120" />
+      <!-- TODO @AI：订单编号 -->
       <el-table-column label="产品编码" align="center" prop="productCode" width="120" />
+      <el-table-column label="产品名称" align="center" prop="productName" min-width="120" />
       <el-table-column label="规格型号" align="center" prop="productSpec" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
-      <el-table-column label="生产数量" align="center" prop="quantity" width="100" />
-      <el-table-column label="已生产" align="center" prop="quantityProduced" width="80" />
+      <el-table-column label="工单数量" align="center" prop="quantity" width="100" />
+      <el-table-column label="已生产数量" align="center" prop="quantityProduced" width="80" />
+      <!-- TODO @AI：客户编码 -->
+      <!-- TODO @AI：客户名称 -->
       <el-table-column label="客户" align="center" prop="clientName" width="120" />
-      <el-table-column label="需求日期" align="center" prop="requestDate" :formatter="dateFormatter" width="180" />
+      <el-table-column
+        label="需求日期"
+        align="center"
+        prop="requestDate"
+        :formatter="dateFormatter"
+        width="180"
+      />
+      <!-- TODO @AI：单据状态 -->
       <el-table-column label="工单状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="scope.row.status" />
@@ -142,6 +161,7 @@
       />
       <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
+          <!-- TODO @AI：新增、完成、取消、预览 -->
           <!-- 草稿状态：编辑、删除 -->
           <template v-if="scope.row.status === MesProWorkOrderStatusEnum.PREPARE">
             <el-button
