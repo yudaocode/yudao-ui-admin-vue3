@@ -26,9 +26,9 @@ export const MesItemOrProductEnum = {
 
 /** MES 设备状态枚举 */
 export const MesDvMachineryStatusEnum = {
-  RUNNING: 1, // 运行中
-  STOP: 2, // 停机
-  FAULT: 3 // 故障
+  STOP: 1, // 停机
+  PRODUCING: 2, // 生产中
+  MAINTENANCE: 3 // 维护中
 }
 
 /** MES 假期类型枚举 */
@@ -36,6 +36,27 @@ export const HolidayType = {
   WORKDAY: 1, // 工作日
   HOLIDAY: 2 // 节假日
 } as const
+
+/** MES 排班计划状态枚举 */
+export const MesCalPlanStatusEnum = {
+  PREPARE: 0, // 草稿
+  CONFIRMED: 1 // 已确认
+}
+
+/** MES 轮班方式枚举 */
+export const MesCalShiftTypeEnum = {
+  SINGLE: 1, // 单白班
+  TWO: 2, // 两班倒
+  THREE: 3 // 三班倒
+}
+
+/** MES 倒班方式枚举 */
+export const MesCalShiftMethodEnum = {
+  QUARTER: 1, // 按季度
+  MONTH: 2, // 按月
+  WEEK: 3, // 按周
+  DAY: 4 // 按天
+}
 
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {

@@ -120,7 +120,7 @@
             编辑
           </el-button>
           <el-button
-            v-if="scope.row.status === 0"
+            v-if="scope.row.status === MesCalPlanStatusEnum.PREPARE"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
@@ -150,6 +150,7 @@ import download from '@/utils/download'
 import { CalPlanApi, CalPlanVO } from '@/api/mes/cal/plan'
 import CalPlanForm from './CalPlanForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { MesCalPlanStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesCalPlan' })
 

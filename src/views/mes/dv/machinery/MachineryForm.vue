@@ -1,8 +1,6 @@
 <!-- MES 设备台账表单 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
-    <!-- TODO @AI：最近点检时间 -->
-    <!-- TODO @AI：最近保养时间 -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -78,6 +76,28 @@
             <el-input v-model="formData.spec" placeholder="请输入规格型号" />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="最近点检时间" prop="lastCheckTime">
+            <el-date-picker
+              v-model="formData.lastCheckTime"
+              type="datetime"
+              placeholder="请选择最近点检时间"
+              value-format="x"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="最近保养时间" prop="lastMaintenTime">
+            <el-date-picker
+              v-model="formData.lastMaintenTime"
+              type="datetime"
+              placeholder="请选择最近保养时间"
+              value-format="x"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row>
         <el-col :span="24">
@@ -87,6 +107,7 @@
         </el-col>
       </el-row>
     </el-form>
+    <!-- TODO @芋艿：barcodeimg -->
     <!-- 编辑时显示子资源 Tab -->
     <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="点检记录" name="check">
@@ -135,7 +156,9 @@ const formData = ref({
   spec: undefined,
   machineryTypeId: undefined,
   workshopId: undefined,
-  status: MesDvMachineryStatusEnum.RUNNING,
+  status: MesDvMachineryStatusEnum.STOP,
+  lastCheckTime: undefined,
+  lastMaintenTime: undefined,
   remark: undefined
 })
 const formRules = reactive({
@@ -211,7 +234,9 @@ const resetForm = () => {
     spec: undefined,
     machineryTypeId: undefined,
     workshopId: undefined,
-    status: MesDvMachineryStatusEnum.RUNNING,
+    status: MesDvMachineryStatusEnum.STOP,
+    lastCheckTime: undefined,
+    lastMaintenTime: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()

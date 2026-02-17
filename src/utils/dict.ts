@@ -262,5 +262,7 @@ export enum DICT_TYPE {
   MES_CAL_PLAN_STATUS = 'mes_cal_plan_status', // MES 排班计划状态
   MES_TM_TOOL_STATUS = 'mes_tm_tool_status', // MES 工具状态
   MES_TM_MAINTEN_TYPE = 'mes_tm_mainten_type', // MES 保养维护类型
-  MES_DV_MACHINERY_STATUS = 'mes_dv_machinery_status' // MES 设备状态
+  MES_DV_MACHINERY_STATUS = 'mes_dv_machinery_status', // MES 设备状态
+  MES_INDEX_TYPE = 'mes_index_type', // MES 检测项类型
+  MES_DEFECT_LEVEL = 'mes_defect_level' // MES 缺陷等级
 }
