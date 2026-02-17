@@ -104,21 +104,6 @@
           <dict-tag :type="DICT_TYPE.MES_DV_MACHINERY_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <!-- TODO @AI lastMaintenTime/lastCheckTime 可以去掉 -->
-      <el-table-column
-        label="最近保养时间"
-        align="center"
-        prop="lastMaintenTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column
-        label="最近点检时间"
-        align="center"
-        prop="lastCheckTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
       <el-table-column
         label="创建时间"
         align="center"
