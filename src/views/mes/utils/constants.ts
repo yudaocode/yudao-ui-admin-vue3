@@ -24,6 +24,13 @@ export const MesItemOrProductEnum = {
   }
 } as const
 
+/** MES 设备状态枚举 */
+export const MesDvMachineryStatusEnum = {
+  RUNNING: 1, // 运行中
+  STOP: 2, // 停机
+  FAULT: 3 // 故障
+}
+
 /** MES 假期类型枚举 */
 export const HolidayType = {
   WORKDAY: 1, // 工作日
