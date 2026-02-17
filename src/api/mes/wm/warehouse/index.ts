@@ -8,7 +8,6 @@ export interface WmWarehouseVO {
   address: string
   area: number
   chargeUserId: number
-  status: number
   frozen: boolean
   remark: string
   attribute1: string
@@ -49,9 +48,4 @@ export const WmWarehouseApi = {
   deleteWarehouse: async (id: number) => {
     return await request.delete({ url: '/mes/wm/warehouse/delete?id=' + id })
   },
-
-  // 导出仓库 Excel
-  exportWarehouse: async (params: any) => {
-    return await request.download({ url: '/mes/wm/warehouse/export-excel', params })
-  }
 }

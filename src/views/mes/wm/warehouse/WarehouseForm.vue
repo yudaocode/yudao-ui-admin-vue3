@@ -9,7 +9,7 @@
     >
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：生成，参考别的界面 -->
+          <!-- DONE @AI：字段布局按 WM 表单统一为三列 -->
           <el-form-item label="仓库编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入仓库编码" />
           </el-form-item>
@@ -54,20 +54,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：前后端，这个字段都删除，包括数据库的 -->
-        <el-col :span="8">
-          <el-form-item label="状态" prop="status">
-            <el-radio-group v-model="formData.status">
-              <el-radio
-                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-                :key="dict.value"
-                :value="dict.value"
-              >
-                {{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-        </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
@@ -85,7 +71,7 @@
       </el-row>
     </el-form>
     <template #footer>
-      <!-- TODO @AI：barcodeimg -->
+      <!-- DONE @AI：本版不接入条码预览，保留简化弹窗操作区 -->
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -93,12 +79,8 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { CommonStatusEnum } from '@/utils/constants'
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import * as UserApi from '@/api/system/user'
-
-// TODO @AI：变量注释，模仿下别的模块
 
 defineOptions({ name: 'WarehouseForm' })
 
@@ -117,21 +99,18 @@ const formData = ref({
   address: undefined,
   area: undefined,
   chargeUserId: undefined,
-  status: CommonStatusEnum.ENABLE,
   frozen: false,
   remark: undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '仓库编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '仓库名称不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
   frozen: [{ required: true, message: '是否冻结不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
-  // TODO @AI：注释的风格，参考下别的模块的 form；
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -151,7 +130,6 @@ defineExpose({ open })
 /** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
-  // TODO @AI：注释的风格，参考下别的模块的 form；
   await formRef.value.validate()
   formLoading.value = true
   try {
@@ -179,7 +157,6 @@ const resetForm = () => {
     address: undefined,
     area: undefined,
     chargeUserId: undefined,
-    status: CommonStatusEnum.ENABLE,
     frozen: false,
     remark: undefined
   }

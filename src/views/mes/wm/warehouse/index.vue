@@ -25,18 +25,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：可以起到这个筛选；前端 + 后端 -->
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <!-- TODO @AI：可以起到这个筛选；前端 + 后端 -->
       <el-form-item label="是否冻结" prop="frozen">
         <el-select v-model="queryParams.frozen" placeholder="请选择" clearable class="!w-240px">
           <el-option :value="true" label="是" />
@@ -54,15 +42,6 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['mes:wm-warehouse:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -73,16 +52,17 @@
       <el-table-column label="仓库名称" align="center" prop="name" min-width="140" />
       <el-table-column label="仓库地址" align="center" prop="address" min-width="150" />
       <el-table-column label="面积（㎡）" align="center" prop="area" min-width="100" />
-      <!-- TODO @AI：负责人 -->
-      <!-- TODO @AI：可以使用字典翻译，是否 -->
-      <el-table-column label="冻结" align="center" prop="frozen" min-width="80">
+      <el-table-column label="负责人" align="center" prop="chargeUserId" min-width="100">
         <template #default="scope">
-          <el-tag :type="scope.row.frozen ? 'danger' : 'success'">{{
-            scope.row.frozen ? '是' : '否'
-          }}</el-tag>
+          {{ getChargeUserName(scope.row.chargeUserId) }}
         </template>
       </el-table-column>
-      <!-- TODO @AI：备注的展示 -->
+      <el-table-column label="冻结" align="center" prop="frozen" min-width="80">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.frozen" />
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" min-width="180" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -100,7 +80,6 @@
           >
             库区
           </el-button>
-          <!-- TODO @芋艿：标签打印 -->
           <el-button
             link
             type="primary"
@@ -133,9 +112,9 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import download from '@/utils/download'
+import { DICT_TYPE } from '@/utils/dict'
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
+import * as UserApi from '@/api/system/user'
 import WarehouseForm from './WarehouseForm.vue'
 
 defineOptions({ name: 'MesWmWarehouse' })
@@ -146,17 +125,29 @@ const router = useRouter()
 
 const loading = ref(true)
 const list = ref<WmWarehouseVO[]>([])
+const userList = ref<UserApi.UserVO[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
   name: undefined,
-  status: undefined,
   frozen: undefined
 })
 const queryFormRef = ref()
-const exportLoading = ref(false)
+
+/** 加载用户列表 */
+const loadUserList = async () => {
+  userList.value = await UserApi.getSimpleUserList()
+}
+
+// TODO @AI：直接在上面的模块，渲染；html 里；
+const getChargeUserName = (userId?: number) => {
+  if (!userId) {
+    return '-'
+  }
+  return userList.value.find((user) => user.id === userId)?.nickname || '-'
+}
 
 /** 查询列表 */
 const getList = async () => {
@@ -190,6 +181,7 @@ const openForm = (type: string, id?: number) => {
 
 /** 打开库区页面 */
 const openLocation = (warehouseId: number) => {
+  // TODO @AI：使用 name 跳转
   router.push({
     path: '/mes/wm/warehouse/location',
     query: { warehouseId: String(warehouseId) }
@@ -206,20 +198,8 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    await message.exportConfirm()
-    exportLoading.value = true
-    const data = await WmWarehouseApi.exportWarehouse(queryParams)
-    download.excel(data, '仓库.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
-}
-
-onMounted(() => {
-  getList()
+/** 初始化 */
+onMounted(async () => {
+  await Promise.all([loadUserList(), getList()])
 })
 </script>

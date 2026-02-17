@@ -15,7 +15,6 @@
       :inline="true"
       label-width="68px"
     >
-      <!-- TODO @AI：只保留：库位编码、名称，其它状态、冻结都删除； -->
       <el-form-item label="库位编码" prop="code">
         <el-input
           v-model="queryParams.code"
@@ -34,29 +33,33 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+      <el-form-item label="位置 X" prop="positionX">
+        <el-input-number
+          v-model="queryParams.positionX"
+          :min="0"
+          controls-position="right"
+          class="!w-240px"
+        />
       </el-form-item>
-      <el-form-item label="冻结" prop="frozen">
-        <el-select v-model="queryParams.frozen" placeholder="请选择" clearable class="!w-240px">
-          <el-option :value="true" label="是" />
-          <el-option :value="false" label="否" />
-        </el-select>
+      <el-form-item label="位置 Y" prop="positionY">
+        <el-input-number
+          v-model="queryParams.positionY"
+          :min="0"
+          controls-position="right"
+          class="!w-240px"
+        />
       </el-form-item>
-      <!-- TODO @AI：额外增加：库位位置 X、库位位置 Y、库位位置 Z -->
+      <el-form-item label="位置 Z" prop="positionZ">
+        <el-input-number
+          v-model="queryParams.positionZ"
+          :min="0"
+          controls-position="right"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button @click="goBackToLocation"
-          ><Icon icon="ep:back" class="mr-5px" /> 返回库区</el-button
-        >
         <el-button
           type="primary"
           plain
@@ -64,15 +67,6 @@
           v-hasPermi="['mes:wm-warehouse:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['mes:wm-warehouse:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -84,29 +78,20 @@
       <el-table-column label="库位名称" align="center" prop="name" min-width="140" />
       <el-table-column label="面积（㎡）" align="center" prop="area" min-width="90" />
       <el-table-column label="最大载重" align="center" prop="maxLoad" min-width="100" />
-      <!-- TODO @AI：库位位置 X、Y、Z -->
-      <!-- TODO @AI：使用字典渲染； -->
+      <el-table-column label="位置 X" align="center" prop="positionX" min-width="80" />
+      <el-table-column label="位置 Y" align="center" prop="positionY" min-width="80" />
+      <el-table-column label="位置 Z" align="center" prop="positionZ" min-width="80" />
       <el-table-column label="启用" align="center" prop="enabled" min-width="70">
         <template #default="scope">
-          <el-tag :type="scope.row.enabled ? 'success' : 'info'">{{
-            scope.row.enabled ? '是' : '否'
-          }}</el-tag>
-        </template>
-      </el-table-column>
-      <!-- TODO @AI：删除状态字段，前端+后端、数据库 -->
-      <el-table-column label="状态" align="center" prop="status" min-width="90">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.enabled" />
         </template>
       </el-table-column>
       <el-table-column label="冻结" align="center" prop="frozen" min-width="80">
         <template #default="scope">
-          <el-tag :type="scope.row.frozen ? 'danger' : 'success'">{{
-            scope.row.frozen ? '是' : '否'
-          }}</el-tag>
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.frozen" />
         </template>
       </el-table-column>
-      <!-- TODO @AI：增加备注； -->
+      <el-table-column label="备注" align="center" prop="remark" min-width="180" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -148,8 +133,7 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import download from '@/utils/download'
+import { DICT_TYPE } from '@/utils/dict'
 import { WmWarehouseLocationApi } from '@/api/mes/wm/warehouse/location'
 import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/area'
 import AreaForm from './AreaForm.vue'
@@ -158,7 +142,6 @@ defineOptions({ name: 'MesWmArea' })
 
 const message = useMessage()
 const { t } = useI18n()
-const router = useRouter()
 const route = useRoute()
 
 const loading = ref(true)
@@ -174,11 +157,11 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   locationId: undefined,
-  status: undefined,
-  frozen: undefined
+  positionX: undefined,
+  positionY: undefined,
+  positionZ: undefined
 })
 const queryFormRef = ref()
-const exportLoading = ref(false)
 
 const parseQueryId = (queryValue: string | string[] | null | undefined): number | undefined => {
   const value = Array.isArray(queryValue) ? queryValue[0] : queryValue
@@ -195,6 +178,7 @@ const loadLocationContext = async () => {
     return
   }
   currentLocationId.value = locationId
+  // TODO @AI：linter 报错
   queryParams.locationId = locationId
   try {
     const location = await WmWarehouseLocationApi.getWarehouseLocation(locationId)
@@ -231,18 +215,6 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 返回库区页面 */
-const goBackToLocation = () => {
-  if (currentWarehouseId.value) {
-    router.push({
-      path: '/mes/wm/warehouse/location',
-      query: { warehouseId: String(currentWarehouseId.value) }
-    })
-    return
-  }
-  router.push('/mes/wm/warehouse/location')
-}
-
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
@@ -259,19 +231,7 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    await message.exportConfirm()
-    exportLoading.value = true
-    const data = await WmWarehouseAreaApi.exportWarehouseArea(queryParams)
-    download.excel(data, '库位.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
-}
-
+/** 初始化 */
 onMounted(async () => {
   await loadLocationContext()
   await getList()

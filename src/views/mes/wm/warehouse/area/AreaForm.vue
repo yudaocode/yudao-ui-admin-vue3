@@ -43,7 +43,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- TODO @AI：生成，参考别的界面 -->
           <el-form-item label="库位编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入库位编码" />
           </el-form-item>
@@ -80,7 +79,7 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="坐标 X" prop="positionX">
+          <el-form-item label="位置 X" prop="positionX">
             <el-input-number
               v-model="formData.positionX"
               :min="0"
@@ -90,7 +89,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="坐标 Y" prop="positionY">
+          <el-form-item label="位置 Y" prop="positionY">
             <el-input-number
               v-model="formData.positionY"
               :min="0"
@@ -100,7 +99,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="坐标 Z" prop="positionZ">
+          <el-form-item label="位置 Z" prop="positionZ">
             <el-input-number
               v-model="formData.positionZ"
               :min="0"
@@ -121,23 +120,9 @@
             <el-switch v-model="formData.frozen" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <el-form-item label="状态" prop="status">
-            <el-radio-group v-model="formData.status">
-              <el-radio
-                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-                :key="dict.value"
-                :value="dict.value"
-              >
-                {{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-        </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：允许产品混放 -->
           <el-form-item label="允许物料混放" prop="allowItemMixing">
             <el-switch v-model="formData.allowItemMixing" />
           </el-form-item>
@@ -157,7 +142,7 @@
       </el-row>
     </el-form>
     <template #footer>
-      <!-- TODO @AI：barcodeimg -->
+      <!-- TODO @芋艿：barcodeimg -->
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -165,19 +150,15 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { CommonStatusEnum } from '@/utils/constants'
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
 import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/area'
 
 defineOptions({ name: 'AreaForm' })
 
-// TODO @AI：变量注释，模仿下别的模块
 const { t } = useI18n()
 const message = useMessage()
 
-// TODO @AI：变量注释，模仿下别的模块
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
@@ -196,7 +177,6 @@ const formData = ref({
   positionY: undefined,
   positionZ: undefined,
   enabled: true,
-  status: CommonStatusEnum.ENABLE,
   frozen: false,
   allowItemMixing: true,
   allowBatchMixing: true,
@@ -207,7 +187,6 @@ const formRules = reactive({
   name: [{ required: true, message: '库位名称不能为空', trigger: 'blur' }],
   locationId: [{ required: true, message: '所属库区不能为空', trigger: 'change' }],
   enabled: [{ required: true, message: '是否启用不能为空', trigger: 'change' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
   frozen: [{ required: true, message: '是否冻结不能为空', trigger: 'change' }],
   allowItemMixing: [{ required: true, message: '物料混放开关不能为空', trigger: 'change' }],
   allowBatchMixing: [{ required: true, message: '批次混放开关不能为空', trigger: 'change' }]
@@ -259,7 +238,6 @@ const open = async (
         positionY: data.positionY,
         positionZ: data.positionZ,
         enabled: data.enabled,
-        status: data.status,
         frozen: data.frozen,
         allowItemMixing: data.allowItemMixing,
         allowBatchMixing: data.allowBatchMixing,
@@ -322,7 +300,6 @@ const resetForm = () => {
     positionY: undefined,
     positionZ: undefined,
     enabled: true,
-    status: CommonStatusEnum.ENABLE,
     frozen: false,
     allowItemMixing: true,
     allowBatchMixing: true,

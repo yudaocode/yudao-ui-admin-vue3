@@ -15,7 +15,6 @@ export interface WmWarehouseAreaVO {
   positionY: number
   positionZ: number
   enabled: boolean
-  status: number
   frozen: boolean
   allowItemMixing: boolean
   allowBatchMixing: boolean
@@ -58,9 +57,4 @@ export const WmWarehouseAreaApi = {
   deleteWarehouseArea: async (id: number) => {
     return await request.delete({ url: '/mes/wm/warehouse-area/delete?id=' + id })
   },
-
-  // 导出库位 Excel
-  exportWarehouseArea: async (params: any) => {
-    return await request.download({ url: '/mes/wm/warehouse-area/export-excel', params })
-  }
 }

@@ -9,7 +9,6 @@
     >
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：生成，参考别的界面 -->
           <el-form-item label="库区编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入库区编码" />
           </el-form-item>
@@ -44,24 +43,6 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <el-form-item label="库位管理" prop="areaEnabled">
-            <el-switch v-model="formData.areaEnabled" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="状态" prop="status">
-            <el-radio-group v-model="formData.status">
-              <el-radio
-                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-                :key="dict.value"
-                :value="dict.value"
-              >
-                {{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-        </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
@@ -79,7 +60,7 @@
       </el-row>
     </el-form>
     <template #footer>
-      <!-- TODO @AI：barcodeimg -->
+      <!-- TODO @芋艿：barcodeimg -->
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -87,8 +68,6 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { CommonStatusEnum } from '@/utils/constants'
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
 
@@ -110,7 +89,6 @@ const formData = ref({
   warehouseId: undefined,
   area: undefined,
   areaEnabled: true,
-  status: CommonStatusEnum.ENABLE,
   frozen: false,
   remark: undefined
 })
@@ -118,8 +96,6 @@ const formRules = reactive({
   code: [{ required: true, message: '库区编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '库区名称不能为空', trigger: 'blur' }],
   warehouseId: [{ required: true, message: '所属仓库不能为空', trigger: 'change' }],
-  areaEnabled: [{ required: true, message: '库位管理开关不能为空', trigger: 'change' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
   frozen: [{ required: true, message: '是否冻结不能为空', trigger: 'change' }]
 })
 const formRef = ref()
@@ -179,7 +155,6 @@ const resetForm = () => {
     warehouseId: undefined,
     area: undefined,
     areaEnabled: true,
-    status: CommonStatusEnum.ENABLE,
     frozen: false,
     remark: undefined
   }

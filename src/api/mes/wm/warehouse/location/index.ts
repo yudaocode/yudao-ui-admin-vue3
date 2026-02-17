@@ -9,7 +9,6 @@ export interface WmWarehouseLocationVO {
   warehouseName: string
   area: number
   areaEnabled: boolean
-  status: number
   frozen: boolean
   remark: string
   attribute1: string
@@ -50,9 +49,4 @@ export const WmWarehouseLocationApi = {
   deleteWarehouseLocation: async (id: number) => {
     return await request.delete({ url: '/mes/wm/warehouse-location/delete?id=' + id })
   },
-
-  // 导出库区 Excel
-  exportWarehouseLocation: async (params: any) => {
-    return await request.download({ url: '/mes/wm/warehouse-location/export-excel', params })
-  }
 }
