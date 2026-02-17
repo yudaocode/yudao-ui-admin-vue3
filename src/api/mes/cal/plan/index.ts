@@ -41,6 +41,11 @@ export const CalPlanApi = {
     return await request.put({ url: `/mes/cal/plan/update`, data })
   },
 
+  // 确认排班计划
+  confirmPlan: async (id: number) => {
+    return await request.put({ url: `/mes/cal/plan/confirm?id=` + id })
+  },
+
   // 删除排班计划
   deletePlan: async (id: number) => {
     return await request.delete({ url: `/mes/cal/plan/delete?id=` + id })

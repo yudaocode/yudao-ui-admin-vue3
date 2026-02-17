@@ -223,8 +223,7 @@ const handleConfirm = async () => {
   try {
     await message.confirm('确认该排班计划？确认后将不可修改或删除。')
     formLoading.value = true
-    const data = { ...formData.value, status: MesCalPlanStatusEnum.CONFIRMED } as unknown as CalPlanVO
-    await CalPlanApi.updatePlan(data)
+    await CalPlanApi.confirmPlan(formData.value.id!)
     message.success('确认成功')
     dialogVisible.value = false
     emit('success')
