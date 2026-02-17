@@ -264,6 +264,7 @@ export enum DICT_TYPE {
   MES_TM_MAINTEN_TYPE = 'mes_tm_mainten_type', // MES 保养维护类型
   MES_DV_MACHINERY_STATUS = 'mes_dv_machinery_status', // MES 设备状态
   MES_INDEX_TYPE = 'mes_index_type', // MES 检测项类型
+  MES_QC_RESULT_TYPE = 'mes_qc_result_type', // MES 质检结果值类型
   MES_DEFECT_LEVEL = 'mes_defect_level', // MES 缺陷等级
   MES_PRO_WORKORDER_STATUS = 'mes_pro_workorder_status', // MES 生产工单状态
   MES_PRO_WORKORDER_SOURCE_TYPE = 'mes_pro_workorder_source_type', // MES 工单来源类型
