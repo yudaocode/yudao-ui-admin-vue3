@@ -1,6 +1,6 @@
 <!-- MES 生产工序表单 -->
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="700px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -9,20 +9,23 @@
       v-loading="formLoading"
     >
       <el-row :gutter="20">
-        <el-col :span="12">
-          <!-- TODO @AI：生成 -->
+        <el-col :span="8">
           <el-form-item label="工序编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入工序编码" />
+            <el-input v-model="formData.code" placeholder="请输入工序编码">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="工序名称" prop="name">
             <el-input v-model="formData.name" placeholder="请输入工序名称" />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="formData.status">
               <el-radio
@@ -36,19 +39,22 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- TODO @AI：工序说明，应该是这个文字； -->
-      <el-form-item label="工艺要求" prop="attention">
+      <el-form-item label="工序说明" prop="attention">
         <el-input
           v-model="formData.attention"
           type="textarea"
           :rows="3"
-          placeholder="请输入工艺要求"
+          placeholder="请输入工序说明"
         />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
       </el-form-item>
-      <!-- 标记时，支持添加“操作步骤”，对齐 ktg，也类似别的模块，有 ContentList + ContentForm -->
+      <!-- 编辑时展示操作步骤 -->
+      <template v-if="formData.id">
+        <el-divider content-position="left">操作步骤</el-divider>
+        <ProProcessContentList :processId="formData.id" />
+      </template>
     </el-form>
     <template #footer>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -59,7 +65,9 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { generateRandomStr } from '@/utils'
 import { ProProcessApi, ProProcessVO } from '@/api/mes/pro/process'
+import ProProcessContentList from './ProProcessContentList.vue'
 
 defineOptions({ name: 'ProProcessForm' })
 
@@ -84,6 +92,11 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+
+/** 生成工序编码 */
+const generateCode = () => {
+  formData.value.code = 'PROC' + generateRandomStr(8)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {

@@ -79,20 +79,8 @@
       :show-overflow-tooltip="true"
       row-key="id"
     >
-      <!-- 展开行：操作步骤 -->
-      <!-- TODO @AI：不需要这个交互，和 ktg 对齐！ -->
-      <el-table-column type="expand">
-        <template #default="scope">
-          <div class="px-40px py-10px">
-            <div class="mb-10px font-bold text-gray-600">操作步骤</div>
-            <ProProcessContentTable :processId="scope.row.id" />
-          </div>
-        </template>
-      </el-table-column>
       <el-table-column label="工序编码" align="center" prop="code" width="150" />
       <el-table-column label="工序名称" align="center" prop="name" width="200" />
-      <!-- TODO @AI：去掉要求； -->
-      <el-table-column label="工艺要求" align="center" prop="attention" show-overflow-tooltip />
       <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -146,7 +134,6 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ProProcessApi, ProProcessVO } from '@/api/mes/pro/process'
 import ProProcessForm from './ProProcessForm.vue'
-import ProProcessContentTable from './ProProcessContentTable.vue'
 
 defineOptions({ name: 'MesProProcess' })
 
