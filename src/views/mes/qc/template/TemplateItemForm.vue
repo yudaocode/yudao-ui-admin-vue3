@@ -14,7 +14,7 @@
           <el-option
             v-for="item in itemList"
             :key="item.id"
-            :label="item.code + ' - ' + item.name"
+            :label="item.code + ' - ' + item.name + (item.specification ? '（' + item.specification + '）' : '')"
             :value="item.id"
           />
         </el-select>

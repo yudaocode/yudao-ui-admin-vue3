@@ -268,5 +268,6 @@ export enum DICT_TYPE {
   MES_DEFECT_LEVEL = 'mes_defect_level', // MES 缺陷等级
   MES_PRO_WORK_ORDER_STATUS = 'mes_pro_work_order_status', // MES 生产工单状态
   MES_PRO_WORK_ORDER_SOURCE_TYPE = 'mes_pro_work_order_source_type', // MES 工单来源类型
-  MES_PRO_WORK_ORDER_TYPE = 'mes_pro_work_order_type' // MES 工单类型
+  MES_PRO_WORK_ORDER_TYPE = 'mes_pro_work_order_type', // MES 工单类型
+  MES_QC_TYPE = 'mes_qc_type', // MES 质检方案类型
 }

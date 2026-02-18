@@ -18,7 +18,7 @@ export interface QcTemplateIndicatorVO {
   indicatorId: number // 质检指标ID
   checkMethod: string // 检测方法
   standardValue: number // 标准值
-  unit: string // 单位
+  unitMeasureId: number // 计量单位ID
   thresholdMax: number // 误差上限
   thresholdMin: number // 误差下限
   docUrl: string // 说明图URL
@@ -28,6 +28,8 @@ export interface QcTemplateIndicatorVO {
   indicatorName: string // 检测项名称
   indicatorType: string // 检测项类型（字典 mes_index_type）
   indicatorTool: string // 检测工具
+  // JOIN mes_md_unit_measure
+  unitMeasureName: string // 计量单位名称
 }
 
 // MES 质检方案-产品关联 VO
