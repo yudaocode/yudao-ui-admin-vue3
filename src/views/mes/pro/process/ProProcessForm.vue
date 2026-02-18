@@ -1,6 +1,6 @@
 <!-- MES 生产工序表单 -->
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="900px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="700px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -10,6 +10,7 @@
     >
       <el-row :gutter="20">
         <el-col :span="12">
+          <!-- TODO @AI：生成 -->
           <el-form-item label="工序编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入工序编码" />
           </el-form-item>
@@ -35,6 +36,7 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <!-- TODO @AI：工序说明，应该是这个文字； -->
       <el-form-item label="工艺要求" prop="attention">
         <el-input
           v-model="formData.attention"
@@ -46,52 +48,7 @@
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
       </el-form-item>
-
-      <!-- 工序内容（操作步骤） -->
-      <el-divider content-position="left">操作步骤</el-divider>
-      <el-table :data="formData.contents" border style="width: 100%">
-        <el-table-column label="序号" align="center" width="80">
-          <template #default="scope">
-            <el-input-number
-              v-model="scope.row.sort"
-              :min="1"
-              :max="999"
-              controls-position="right"
-              size="small"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="步骤说明" align="center" min-width="200">
-          <template #default="scope">
-            <el-input v-model="scope.row.content" type="textarea" :rows="2" placeholder="请输入步骤说明" />
-          </template>
-        </el-table-column>
-        <el-table-column label="辅助设备" align="center" width="150">
-          <template #default="scope">
-            <el-input v-model="scope.row.device" placeholder="请输入辅助设备" />
-          </template>
-        </el-table-column>
-        <el-table-column label="辅助材料" align="center" width="150">
-          <template #default="scope">
-            <el-input v-model="scope.row.material" placeholder="请输入辅助材料" />
-          </template>
-        </el-table-column>
-        <el-table-column label="材料文档" align="center" width="150">
-          <template #default="scope">
-            <el-input v-model="scope.row.docUrl" placeholder="请输入文档 URL" />
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" width="80">
-          <template #default="scope">
-            <el-button link type="danger" @click="handleDeleteContent(scope.$index)">
-              删除
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-button type="primary" plain class="mt-10px" @click="handleAddContent">
-        <Icon icon="ep:plus" class="mr-5px" /> 添加步骤
-      </el-button>
+      <!-- 标记时，支持添加“操作步骤”，对齐 ktg，也类似别的模块，有 ContentList + ContentForm -->
     </el-form>
     <template #footer>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -102,7 +59,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { ProProcessApi, ProProcessVO, ProProcessContentVO } from '@/api/mes/pro/process'
+import { ProProcessApi, ProProcessVO } from '@/api/mes/pro/process'
 
 defineOptions({ name: 'ProProcessForm' })
 
@@ -119,8 +76,7 @@ const formData = ref<ProProcessVO>({
   name: '',
   attention: '',
   status: 0,
-  remark: '',
-  contents: []
+  remark: ''
 })
 const formRules = reactive({
   code: [{ required: true, message: '工序编码不能为空', trigger: 'blur' }],
@@ -140,10 +96,6 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await ProProcessApi.getProcess(id)
-      // 确保 contents 是数组
-      if (!formData.value.contents) {
-        formData.value.contents = []
-      }
     } finally {
       formLoading.value = false
     }
@@ -185,30 +137,8 @@ const resetForm = () => {
     name: '',
     attention: '',
     status: 0,
-    remark: '',
-    contents: []
+    remark: ''
   }
   formRef.value?.resetFields()
-}
-
-/** 添加操作步骤 */
-const handleAddContent = () => {
-  if (!formData.value.contents) {
-    formData.value.contents = []
-  }
-  const maxSort = formData.value.contents.reduce((max, item) => Math.max(max, item.sort || 0), 0)
-  formData.value.contents.push({
-    sort: maxSort + 1,
-    content: '',
-    device: '',
-    material: '',
-    docUrl: '',
-    remark: ''
-  })
-}
-
-/** 删除操作步骤 */
-const handleDeleteContent = (index: number) => {
-  formData.value.contents?.splice(index, 1)
 }
 </script>
