@@ -4,6 +4,7 @@
     <el-button type="primary" plain size="small" @click="openForm()" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加成员
     </el-button>
+    <!-- TODO @AI：这里展示的时候，没去读取相关字段，可能后端接口，需要修复下； -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
       <el-table-column label="用户编号" align="center" prop="userId" width="100" />
       <el-table-column label="用户名称" align="center" prop="userName" min-width="120" />
@@ -18,6 +19,7 @@
     </el-table>
 
     <!-- 添加成员弹窗 -->
+    <!-- TODO @AI：拆分成一个 List，一个 Form； -->
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
       <el-form
         ref="formRef"
@@ -26,6 +28,7 @@
         label-width="80px"
         v-loading="formLoading"
       >
+        <!-- TODO @AI：用户下拉选择； -->
         <el-form-item label="用户" prop="userId">
           <el-input-number v-model="formData.userId" placeholder="请输入用户编号" class="!w-1/1" />
         </el-form-item>
