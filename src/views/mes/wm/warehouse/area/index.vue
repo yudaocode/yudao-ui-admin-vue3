@@ -1,8 +1,8 @@
 <template>
   <ContentWrap>
     <el-alert
-      v-if="currentLocationId"
-      :title="`当前仓库/库区：${currentWarehouseName || `#${currentWarehouseId || '-'}`} / ${currentLocationName || `#${currentLocationId}`}`"
+      v-if="currentLocation.id"
+      :title="`当前仓库/库区：${currentLocation.warehouseName || `#${currentLocation.warehouseId || '-'}`} / ${currentLocation.name || `#${currentLocation.id}`}`"
       type="info"
       show-icon
       :closable="false"
@@ -140,51 +140,44 @@ import AreaForm from './AreaForm.vue'
 
 defineOptions({ name: 'MesWmArea' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 const route = useRoute()
 
-const loading = ref(true)
-const list = ref<WmWarehouseAreaVO[]>([])
-const total = ref(0)
-const currentWarehouseId = ref<number | undefined>(undefined)
-const currentWarehouseName = ref('')
-const currentLocationId = ref<number | undefined>(undefined)
-const currentLocationName = ref('')
+const loading = ref(true) // 列表的加载中
+const list = ref<WmWarehouseAreaVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const currentLocation = ref<{ id: number; name: string; warehouseId: number; warehouseName: string }>({
+  id: 0,
+  name: '',
+  warehouseId: 0,
+  warehouseName: ''
+}) // 当前库区上下文
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
   name: undefined,
-  locationId: undefined,
+  locationId: undefined as number | undefined,
   positionX: undefined,
   positionY: undefined,
   positionZ: undefined
-})
-const queryFormRef = ref()
+}) // 查询参数
+const queryFormRef = ref() // 查询表单 Ref
 
-const parseQueryId = (queryValue: string | string[] | null | undefined): number | undefined => {
-  const value = Array.isArray(queryValue) ? queryValue[0] : queryValue
-  if (!value) {
-    return undefined
-  }
-  const id = Number(value)
-  return Number.isInteger(id) && id > 0 ? id : undefined
-}
-
+/** 加载库区上下文（从 URL query 参数获取 locationId，并加载库区和仓库名称） */
 const loadLocationContext = async () => {
-  const locationId = parseQueryId(route.query.locationId as string | string[] | undefined)
-  if (!locationId) {
+  const locationId = Number(route.query.locationId)
+  if (!Number.isInteger(locationId) || locationId <= 0) {
     return
   }
-  currentLocationId.value = locationId
-  // TODO @AI：linter 报错
+  currentLocation.value.id = locationId
   queryParams.locationId = locationId
   try {
     const location = await WmWarehouseLocationApi.getWarehouseLocation(locationId)
-    currentLocationName.value = location.name
-    currentWarehouseId.value = location.warehouseId
-    currentWarehouseName.value = location.warehouseName
+    currentLocation.value.name = location.name
+    currentLocation.value.warehouseId = location.warehouseId
+    currentLocation.value.warehouseName = location.warehouseName
   } catch {
     // 忽略上级名称加载异常，不影响列表查询
   }
@@ -211,14 +204,14 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
-  queryParams.locationId = currentLocationId.value
+  queryParams.locationId = currentLocation.value.id || undefined
   handleQuery()
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id, currentLocationId.value, currentWarehouseId.value)
+  formRef.value.open(type, id, currentLocation.value.id || undefined, currentLocation.value.warehouseId || undefined)
 }
 
 /** 删除按钮操作 */

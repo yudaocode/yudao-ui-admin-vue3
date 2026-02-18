@@ -115,26 +115,28 @@ import LocationForm from './LocationForm.vue'
 
 defineOptions({ name: 'MesWmLocation' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 const router = useRouter()
 const route = useRoute()
 
-const loading = ref(true)
-const list = ref<WmWarehouseLocationVO[]>([])
-const total = ref(0)
+const loading = ref(true) // 列表的加载中
+const list = ref<WmWarehouseLocationVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const currentWarehouse = ref<{ id: number; name: string }>({
   id: 0,
   name: ''
-})
+}) // 当前仓库上下文
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
   name: undefined,
-  warehouseId: undefined
-})
-const queryFormRef = ref()
+  warehouseId: undefined as number | undefined
+}) // 查询参数
+const queryFormRef = ref() // 查询表单 Ref
+
+/** 加载仓库上下文（从 URL query 参数获取 warehouseId，并加载仓库名称） */
 const loadWarehouseContext = async () => {
   const warehouseId = Number(route.query.warehouseId)
   if (!Number.isInteger(warehouseId) || warehouseId <= 0) {
@@ -178,13 +180,13 @@ const resetQuery = () => {
 /** 打开库位页面 */
 const openArea = (locationId: number) => {
   router.push({
-    path: '/mes/wm/warehouse/area',
+    name: 'MesWmArea',
     query: { locationId: String(locationId) }
   })
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id, currentWarehouse.value.id || undefined)
 }

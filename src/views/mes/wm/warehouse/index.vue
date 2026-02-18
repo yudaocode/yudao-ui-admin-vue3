@@ -54,7 +54,11 @@
       <el-table-column label="面积（㎡）" align="center" prop="area" min-width="100" />
       <el-table-column label="负责人" align="center" prop="chargeUserId" min-width="100">
         <template #default="scope">
-          {{ getChargeUserName(scope.row.chargeUserId) }}
+          {{
+            scope.row.chargeUserId
+              ? userList.find((user) => user.id === scope.row.chargeUserId)?.nickname || '-'
+              : '-'
+          }}
         </template>
       </el-table-column>
       <el-table-column label="冻结" align="center" prop="frozen" min-width="80">
@@ -119,34 +123,26 @@ import WarehouseForm from './WarehouseForm.vue'
 
 defineOptions({ name: 'MesWmWarehouse' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 const router = useRouter()
 
-const loading = ref(true)
-const list = ref<WmWarehouseVO[]>([])
-const userList = ref<UserApi.UserVO[]>([])
-const total = ref(0)
+const loading = ref(true) // 列表的加载中
+const list = ref<WmWarehouseVO[]>([]) // 列表的数据
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
   name: undefined,
   frozen: undefined
-})
-const queryFormRef = ref()
+}) // 查询参数
+const queryFormRef = ref() // 查询表单 Ref
 
 /** 加载用户列表 */
 const loadUserList = async () => {
   userList.value = await UserApi.getSimpleUserList()
-}
-
-// TODO @AI：直接在上面的模块，渲染；html 里；
-const getChargeUserName = (userId?: number) => {
-  if (!userId) {
-    return '-'
-  }
-  return userList.value.find((user) => user.id === userId)?.nickname || '-'
 }
 
 /** 查询列表 */
@@ -174,16 +170,15 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
 /** 打开库区页面 */
 const openLocation = (warehouseId: number) => {
-  // TODO @AI：使用 name 跳转
   router.push({
-    path: '/mes/wm/warehouse/location',
+    name: 'MesWmLocation',
     query: { warehouseId: String(warehouseId) }
   })
 }

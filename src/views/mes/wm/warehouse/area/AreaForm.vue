@@ -156,21 +156,21 @@ import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/ar
 
 defineOptions({ name: 'AreaForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const selectedWarehouseId = ref<number | undefined>(undefined)
-const warehouseList = ref<WmWarehouseVO[]>([])
-const locationList = ref<WmWarehouseLocationVO[]>([])
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const selectedWarehouseId = ref<number | undefined>(undefined) // 当前选中的仓库 ID
+const warehouseList = ref<WmWarehouseVO[]>([]) // 仓库列表
+const locationList = ref<WmWarehouseLocationVO[]>([]) // 库区列表
 const formData = ref({
   id: undefined,
   code: undefined,
   name: undefined,
-  locationId: undefined,
+  locationId: undefined as number | undefined,
   area: undefined,
   maxLoad: undefined,
   positionX: undefined,
@@ -191,7 +191,7 @@ const formRules = reactive({
   allowItemMixing: [{ required: true, message: '物料混放开关不能为空', trigger: 'change' }],
   allowBatchMixing: [{ required: true, message: '批次混放开关不能为空', trigger: 'change' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
 /** 加载库区列表 */
 const loadLocationList = async (warehouseId?: number) => {
@@ -215,39 +215,25 @@ const open = async (
   defaultLocationId?: number,
   defaultWarehouseId?: number
 ) => {
-  // TODO @AI：注释的风格，参考下别的模块的 form；
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
   warehouseList.value = await WmWarehouseApi.getWarehouseSimpleList()
+  // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
       const data = await WmWarehouseAreaApi.getWarehouseArea(id)
       selectedWarehouseId.value = data.warehouseId
       await loadLocationList(selectedWarehouseId.value)
-      formData.value = {
-        id: data.id,
-        code: data.code,
-        name: data.name,
-        locationId: data.locationId,
-        area: data.area,
-        maxLoad: data.maxLoad,
-        positionX: data.positionX,
-        positionY: data.positionY,
-        positionZ: data.positionZ,
-        enabled: data.enabled,
-        frozen: data.frozen,
-        allowItemMixing: data.allowItemMixing,
-        allowBatchMixing: data.allowBatchMixing,
-        remark: data.remark
-      }
+      formData.value = data
     } finally {
       formLoading.value = false
     }
     return
   }
+  // 新增时，设置默认仓库和库区（从列表页跳转过来时传入）
   if (defaultWarehouseId) {
     selectedWarehouseId.value = defaultWarehouseId
     await loadLocationList(defaultWarehouseId)
@@ -258,16 +244,17 @@ const open = async (
       selectedWarehouseId.value = location.warehouseId
       await loadLocationList(selectedWarehouseId.value)
     }
-    // TODO @linter：修复
     formData.value.locationId = defaultLocationId
   }
 }
-defineExpose({ open })
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
+  // 校验表单
   await formRef.value.validate()
+  // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as unknown as WmWarehouseAreaVO
@@ -279,6 +266,7 @@ const submitForm = async () => {
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false
@@ -293,7 +281,7 @@ const resetForm = () => {
     id: undefined,
     code: undefined,
     name: undefined,
-    locationId: undefined,
+    locationId: undefined as number | undefined,
     area: undefined,
     maxLoad: undefined,
     positionX: undefined,
