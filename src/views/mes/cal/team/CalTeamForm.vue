@@ -43,7 +43,7 @@
     <!-- 编辑时显示成员管理 Tab -->
     <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="班组成员" name="member">
-        <CalTeamMemberPanel :team-id="formData.id!" />
+        <CalTeamMemberList :team-id="formData.id!" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CalTeamApi, CalTeamVO } from '@/api/mes/cal/team'
-import CalTeamMemberPanel from './CalTeamMemberPanel.vue'
+import CalTeamMemberList from './CalTeamMemberList.vue'
 
 defineOptions({ name: 'CalTeamForm' })
 
