@@ -138,7 +138,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: 'wm/warehouse/location',
         component: () => import('@/views/mes/wm/warehouse/location/index.vue'),
-        name: 'MesWmLocationRouter',
+        name: 'MesWmLocation',
         meta: {
           noCache: true,
           hidden: true,
@@ -151,7 +151,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: 'wm/warehouse/area',
         component: () => import('@/views/mes/wm/warehouse/area/index.vue'),
-        name: 'MesWmAreaRouter',
+        name: 'MesWmArea',
         meta: {
           noCache: true,
           hidden: true,
