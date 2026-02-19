@@ -28,11 +28,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="是否启用" prop="enableFlag">
-            <el-select v-model="formData.enableFlag" placeholder="请选择" class="!w-1/1">
+          <el-form-item label="状态" prop="status">
+            <el-select v-model="formData.status" placeholder="请选择" class="!w-1/1">
               <el-option
-                v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-                :key="dict.value + ''"
+                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+                :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
               />
@@ -90,7 +90,8 @@
 </template>
 
 <script setup lang="ts">
-import { getBoolDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
 import { generateRandomStr } from '@/utils'
 import { QcTemplateApi, QcTemplateVO } from '@/api/mes/qc/template'
 import TemplateIndicatorList from './TemplateIndicatorList.vue'
@@ -111,7 +112,7 @@ const formData = ref({
   code: undefined,
   name: undefined,
   types: [] as number[],
-  enableFlag: true,
+  status: CommonStatusEnum.ENABLE,
   remark: undefined
 })
 const formRules = reactive({
@@ -120,7 +121,7 @@ const formRules = reactive({
   types: [
     { required: true, message: '检测种类不能为空', trigger: 'change', type: 'array', min: 1 }
   ],
-  enableFlag: [{ required: true, message: '是否启用不能为空', trigger: 'change' }]
+  status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -186,7 +187,7 @@ const resetForm = () => {
     code: undefined,
     name: undefined,
     types: [],
-    enableFlag: true,
+    status: CommonStatusEnum.ENABLE,
     remark: undefined
   }
   formRef.value?.resetFields()

@@ -42,16 +42,16 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="是否启用" prop="enableFlag">
+      <el-form-item label="状态" prop="status">
         <el-select
-          v-model="queryParams.enableFlag"
-          placeholder="请选择是否启用"
+          v-model="queryParams.status"
+          placeholder="请选择状态"
           clearable
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value as unknown as string"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
@@ -91,9 +91,9 @@
           <dict-tag :type="DICT_TYPE.MES_QC_TYPE" :value="scope.row.types" />
         </template>
       </el-table-column>
-      <el-table-column label="是否启用" align="center" prop="enableFlag" width="100">
+      <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.enableFlag" />
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="150" />
@@ -143,7 +143,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { QcTemplateApi, QcTemplateVO } from '@/api/mes/qc/template'
 import TemplateForm from './TemplateForm.vue'
-import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'MesQcTemplate' })
 
@@ -159,7 +159,7 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   type: undefined,
-  enableFlag: undefined
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中

@@ -70,6 +70,7 @@
 <script setup lang="ts">
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
+import { CommonStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'LocationForm' })
 
@@ -87,7 +88,7 @@ const formData = ref({
   name: undefined,
   warehouseId: undefined as number | undefined,
   area: undefined,
-  areaEnabled: true,
+  areaStatus: CommonStatusEnum.ENABLE,
   frozen: false,
   remark: undefined
 })
@@ -155,7 +156,7 @@ const resetForm = () => {
     name: undefined,
     warehouseId: undefined as number | undefined,
     area: undefined,
-    areaEnabled: true,
+    areaStatus: CommonStatusEnum.ENABLE,
     frozen: false,
     remark: undefined
   }

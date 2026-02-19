@@ -8,7 +8,7 @@ export interface WmWarehouseLocationVO {
   warehouseId: number
   warehouseName: string
   area: number
-  areaEnabled: boolean
+  areaStatus: number
   frozen: boolean
   remark: string
   attribute1: string

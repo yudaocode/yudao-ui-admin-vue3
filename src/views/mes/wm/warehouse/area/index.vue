@@ -81,9 +81,9 @@
       <el-table-column label="位置 X" align="center" prop="positionX" min-width="80" />
       <el-table-column label="位置 Y" align="center" prop="positionY" min-width="80" />
       <el-table-column label="位置 Z" align="center" prop="positionZ" min-width="80" />
-      <el-table-column label="启用" align="center" prop="enabled" min-width="70">
+      <el-table-column label="状态" align="center" prop="status" min-width="70">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.enabled" />
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="冻结" align="center" prop="frozen" min-width="80">
