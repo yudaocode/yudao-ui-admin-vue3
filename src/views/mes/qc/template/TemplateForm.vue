@@ -95,18 +95,16 @@ import { QcTemplateApi, QcTemplateVO } from '@/api/mes/qc/template'
 import TemplateIndicatorList from './TemplateIndicatorList.vue'
 import TemplateItemList from './TemplateItemList.vue'
 
-// TODO @AI：整个文件的注释风格，参考 user 的 form.vue 那；
-
 defineOptions({ name: 'TemplateForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const activeTab = ref('indicator')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const activeTab = ref('indicator') // 子表当前激活的 Tab
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
@@ -118,10 +116,12 @@ const formData = ref({
 const formRules = reactive({
   code: [{ required: true, message: '方案编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '方案名称不能为空', trigger: 'blur' }],
-  types: [{ required: true, message: '检测种类不能为空', trigger: 'change', type: 'array', min: 1 }],
+  types: [
+    { required: true, message: '检测种类不能为空', trigger: 'change', type: 'array', min: 1 }
+  ],
   enableFlag: [{ required: true, message: '是否启用不能为空', trigger: 'change' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
 /** 生成方案编号 */
 const generateCode = () => {
@@ -135,6 +135,7 @@ const open = async (type: string, id?: number) => {
   formType.value = type
   activeTab.value = 'indicator'
   resetForm()
+  // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
@@ -148,12 +149,16 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open })
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  await formRef.value.validate()
+  // 校验表单
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as unknown as QcTemplateVO
@@ -165,6 +170,7 @@ const submitForm = async () => {
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false

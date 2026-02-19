@@ -57,8 +57,6 @@
 </template>
 
 <script setup lang="ts">
-// TODO @AI：整个文件的注释风格，参考 user 的 index.vue 那；
-
 import { DICT_TYPE } from '@/utils/dict'
 import { QcTemplateIndicatorApi, QcTemplateIndicatorVO } from '@/api/mes/qc/template/indicator'
 import TemplateIndicatorForm from './TemplateIndicatorForm.vue'
@@ -67,11 +65,11 @@ defineOptions({ name: 'TemplateIndicatorList' })
 
 const props = defineProps<{ templateId: number }>()
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(false)
-const list = ref<QcTemplateIndicatorVO[]>([])
+const loading = ref(false) // 列表的加载中
+const list = ref<QcTemplateIndicatorVO[]>([]) // 列表的数据
 
 /** 查询列表 */
 const getList = async () => {
@@ -89,23 +87,26 @@ const getList = async () => {
   }
 }
 
-/** 打开表单 */
+/** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id, props.templateId)
 }
 
-/** 删除 */
+/** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
+    // 删除的二次确认
     await message.delConfirm()
+    // 发起删除
     await QcTemplateIndicatorApi.deleteTemplateIndicator(id)
     message.success(t('common.delSuccess'))
+    // 刷新列表
     await getList()
   } catch {}
 }
 
-/** 监听 templateId 变化，重新加载 */
+/** 监听 templateId 变化，重新加载列表 */
 watch(
   () => props.templateId,
   () => getList(),
