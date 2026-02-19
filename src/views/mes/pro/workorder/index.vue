@@ -2,8 +2,6 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
-    <!-- TODO @AI：产品编号、产品名称 -->
-    <!-- TODO @AI：客户编号、客户名称 -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -29,6 +27,12 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="产品" prop="productId">
+        <MdItemSelect v-model="queryParams.productId" placeholder="请选择产品" class="!w-240px" />
+      </el-form-item>
+      <el-form-item label="客户" prop="clientId">
+        <MdClientSelect v-model="queryParams.clientId" placeholder="请选择客户" class="!w-240px" />
+      </el-form-item>
       <el-form-item label="工单类型" prop="type">
         <el-select
           v-model="queryParams.type"
@@ -44,11 +48,10 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：来源类型 改成 工单来源 -->
-      <el-form-item label="来源类型" prop="orderSourceType">
+      <el-form-item label="工单来源" prop="orderSourceType">
         <el-select
           v-model="queryParams.orderSourceType"
-          placeholder="请选择来源类型"
+          placeholder="请选择工单来源"
           clearable
           class="!w-240px"
         >
@@ -115,13 +118,21 @@
     <!-- TODO @AI：生产工单，是父子结构； -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="工单编码" align="center" prop="code" width="140" />
+      <el-table-column label="父工单" align="center" prop="parentCode" width="140">
+        <template #default="scope">
+          <span v-if="scope.row.parentId && scope.row.parentId !== 0">
+            {{ scope.row.parentCode }}
+          </span>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="工单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="工单类型" align="center" prop="type" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="来源类型" align="center" prop="orderSourceType" width="100">
+      <el-table-column label="工单来源" align="center" prop="orderSourceType" width="100">
         <template #default="scope">
           <dict-tag
             :type="DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE"
@@ -129,16 +140,16 @@
           />
         </template>
       </el-table-column>
-      <!-- TODO @AI：订单编号 -->
+      <el-table-column label="来源单据编号" align="center" prop="orderSourceCode" width="140" />
       <el-table-column label="产品编码" align="center" prop="productCode" width="120" />
       <el-table-column label="产品名称" align="center" prop="productName" min-width="120" />
       <el-table-column label="规格型号" align="center" prop="productSpec" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="工单数量" align="center" prop="quantity" width="100" />
-      <el-table-column label="已生产数量" align="center" prop="quantityProduced" width="80" />
-      <!-- TODO @AI：客户编码 -->
-      <!-- TODO @AI：客户名称 -->
-      <el-table-column label="客户" align="center" prop="clientName" width="120" />
+      <el-table-column label="已生产数量" align="center" prop="quantityProduced" width="100" />
+      <!-- TODO @AI：客户编码未展示，是不是后端没查询？！ -->
+      <el-table-column label="客户编码" align="center" prop="clientCode" width="120" />
+      <el-table-column label="客户名称" align="center" prop="clientName" width="120" />
       <el-table-column
         label="需求日期"
         align="center"
@@ -146,7 +157,6 @@
         :formatter="dateFormatter"
         width="180"
       />
-      <!-- TODO @AI：单据状态 -->
       <el-table-column label="工单状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="scope.row.status" />
@@ -161,7 +171,7 @@
       />
       <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
-          <!-- TODO @AI：新增、完成、取消、预览 -->
+          <!-- TODO @AI：新增操作；对齐下； -->
           <!-- 草稿状态：编辑、删除 -->
           <template v-if="scope.row.status === MesProWorkOrderStatusEnum.PREPARE">
             <el-button
@@ -232,6 +242,8 @@ import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import WorkOrderForm from './WorkOrderForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProWorkOrderStatusEnum } from '@/views/mes/utils/constants'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 
 defineOptions({ name: 'MesProWorkOrder' })
 
@@ -246,6 +258,8 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
+  productId: undefined,
+  clientId: undefined,
   type: undefined,
   orderSourceType: undefined,
   status: undefined,

@@ -10,9 +10,14 @@
     >
       <el-row>
         <el-col :span="12">
-          <!-- TODO @AI：生成 -->
           <el-form-item label="工单编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入工单编码" :disabled="isDetail" />
+            <el-input v-model="formData.code" placeholder="请输入工单编码" :disabled="isDetail">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update' || isDetail">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -23,10 +28,10 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="来源类型" prop="orderSourceType">
+          <el-form-item label="工单来源" prop="orderSourceType">
             <el-select
               v-model="formData.orderSourceType"
-              placeholder="请选择来源类型"
+              placeholder="请选择工单来源"
               class="!w-1/1"
               :disabled="isDetail"
             >
@@ -39,8 +44,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：应该只有【客户订单】时，才展示这个表单项。 -->
-        <el-col :span="8">
+        <el-col :span="8" v-if="formData.orderSourceType === MesProWorkOrderSourceTypeEnum.ORDER">
           <el-form-item label="来源单据编号" prop="orderSourceCode">
             <el-input
               v-model="formData.orderSourceCode"
@@ -78,8 +82,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- TODO @ai：工单数量； -->
-          <el-form-item label="生产数量" prop="quantity">
+          <el-form-item label="工单数量" prop="quantity">
             <el-input-number
               v-model="formData.quantity"
               :min="0"
@@ -96,14 +99,18 @@
             <MdClientSelect v-model="formData.clientId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <!-- TODO @AI：只有外协、外购，才有供应商 -->
+        <el-col
+          :span="8"
+          v-if="
+            formData.type === MesProWorkOrderTypeEnum.OUTSOURCE ||
+            formData.type === MesProWorkOrderTypeEnum.PURCHASE
+          "
+        >
           <el-form-item label="供应商" prop="vendorId">
             <MdVendorSelect v-model="formData.vendorId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- TODO @AI：这个字段，是必须的么？在调研确认下； -->
           <el-form-item label="批次号" prop="batchCode">
             <el-input
               v-model="formData.batchCode"
@@ -148,9 +155,9 @@
     <!-- BOM Tab：编辑/详情时显示 -->
     <el-tabs v-if="formType !== 'create'" v-model="activeTab" class="mt-15px">
       <el-tab-pane label="工单 BOM" name="bom">
-        <WorkOrderBom v-if="formData.id" :work-order-id="formData.id" :disabled="isDetail" />
+        <WorkOrderBomList v-if="formData.id" :work-order-id="formData.id" :disabled="isDetail" />
       </el-tab-pane>
-      <!-- TODO @AI：物料需求，是不是缺的？ -->
+      <!-- TODO @AI：物料需求缺少； -->
     </el-tabs>
     <template #footer v-if="!isDetail">
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -163,10 +170,15 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import { MdItemVO } from '@/api/mes/md/item'
+import { generateRandomStr } from '@/utils'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
-import WorkOrderBom from './WorkOrderBom.vue'
+import WorkOrderBomList from './WorkOrderBomList.vue'
+import {
+  MesProWorkOrderSourceTypeEnum,
+  MesProWorkOrderTypeEnum
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'WorkOrderForm' })
 
@@ -199,15 +211,20 @@ const formRules = reactive({
   code: [{ required: true, message: '工单编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '工单名称不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '工单类型不能为空', trigger: 'change' }],
-  orderSourceType: [{ required: true, message: '来源类型不能为空', trigger: 'change' }],
+  orderSourceType: [{ required: true, message: '工单来源不能为空', trigger: 'change' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'change' }],
-  quantity: [{ required: true, message: '生产数量不能为空', trigger: 'blur' }],
+  quantity: [{ required: true, message: '工单数量不能为空', trigger: 'blur' }],
   requestDate: [{ required: true, message: '需求日期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
 /** 是否为详情模式 */
 const isDetail = computed(() => formType.value === 'detail')
+
+/** 生成工单编码 */
+const generateCode = () => {
+  formData.value.code = 'MO' + generateRandomStr(10)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -234,6 +251,26 @@ const handleProductChange = (product: MdItemVO) => {
     formData.value.unitMeasureId = product.unitMeasureId
   }
 }
+
+/** 工单来源变更：非客户订单时清空来源单据编号 */
+watch(
+  () => formData.value.orderSourceType,
+  (val) => {
+    if (val !== MesProWorkOrderSourceTypeEnum.ORDER) {
+      formData.value.orderSourceCode = undefined
+    }
+  }
+)
+
+/** 工单类型变更：非代工/采购时清空供应商 */
+watch(
+  () => formData.value.type,
+  (val) => {
+    if (val !== MesProWorkOrderTypeEnum.OUTSOURCE && val !== MesProWorkOrderTypeEnum.PURCHASE) {
+      formData.value.vendorId = undefined
+    }
+  }
+)
 
 /** 提交表单 */
 const emit = defineEmits(['success'])

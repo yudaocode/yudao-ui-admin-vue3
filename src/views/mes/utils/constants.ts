@@ -66,6 +66,19 @@ export const MesProWorkOrderStatusEnum = {
   CANCELED: 3 // 已取消
 }
 
+/** MES 工单类型枚举 */
+export const MesProWorkOrderTypeEnum = {
+  SELF: 1, // 自行生产
+  OUTSOURCE: 2, // 代工
+  PURCHASE: 3 // 采购
+}
+
+/** MES 工单来源类型枚举 */
+export const MesProWorkOrderSourceTypeEnum = {
+  ORDER: 1, // 客户订单
+  STORE: 2 // 库存备货
+}
+
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {
   for (const item of Object.values(MesItemOrProductEnum)) {

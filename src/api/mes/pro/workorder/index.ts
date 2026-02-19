@@ -19,12 +19,14 @@ export interface ProWorkOrderVO {
   quantityChanged: number // 调整数量
   quantityScheduled: number // 已排产数量
   clientId: number // 客户编号
+  clientCode: string // 客户编码
   clientName: string // 客户名称
   vendorId: number // 供应商编号
   vendorName: string // 供应商名称
   batchCode: string // 批次号
   requestDate: Date // 需求日期
   parentId: number // 父工单编号
+  parentCode: string // 父工单编码
   finishDate: Date // 完成时间
   cancelDate: Date // 取消时间
   status: number // 工单状态
