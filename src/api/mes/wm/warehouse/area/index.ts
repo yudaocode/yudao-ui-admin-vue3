@@ -14,7 +14,7 @@ export interface WmWarehouseAreaVO {
   positionX: number
   positionY: number
   positionZ: number
-  enabled: boolean
+  status: number
   frozen: boolean
   allowItemMixing: boolean
   allowBatchMixing: boolean

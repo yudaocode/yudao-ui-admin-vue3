@@ -6,7 +6,7 @@ export interface QcTemplateVO {
   code: string // 方案编号
   name: string // 方案名称
   types: number[] // 检测种类
-  enableFlag: boolean // 是否启用
+  status: number // 状态
   remark: string // 备注
 }
 
