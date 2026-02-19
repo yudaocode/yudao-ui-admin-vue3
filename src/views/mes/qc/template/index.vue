@@ -27,14 +27,13 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="检测种类" prop="types">
+      <el-form-item label="检测种类" prop="type">
         <el-select
-          v-model="queryParams.types"
+          v-model="queryParams.type"
           placeholder="请选择检测种类"
           clearable
           class="!w-240px"
         >
-          <!-- TODO @AI：字典枚举 -->
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_TYPE)"
             :key="dict.value"
@@ -89,20 +88,12 @@
       :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
-      highlight-current-row
-      @current-change="handleCurrentChange"
     >
       <el-table-column label="方案编号" align="center" prop="code" width="150" />
       <el-table-column label="方案名称" align="center" prop="name" min-width="200" />
       <el-table-column label="检测种类" align="center" prop="types" min-width="200">
         <template #default="scope">
-          <!-- TODO @AI：t 改成 type 变量； -->
-          <!-- TODO @AI：el-tag：里面也支持数组的； -->
-          <template v-if="scope.row.types && scope.row.types.length">
-            <el-tag v-for="t in scope.row.types" :key="t" size="small" class="mr-5px">
-              <dict-tag :type="DICT_TYPE.MES_QC_TYPE" :value="t" />
-            </el-tag>
-          </template>
+          <dict-tag :type="DICT_TYPE.MES_QC_TYPE" :value="scope.row.types" />
         </template>
       </el-table-column>
       <el-table-column label="是否启用" align="center" prop="enableFlag" width="100">
@@ -148,23 +139,7 @@
     />
   </ContentWrap>
 
-  <!-- 子表标签页：检测指标项 + 产品关联 -->
-  <!-- TODO @AI：是不是不用这个？？？有点奇怪； -->
-  <ContentWrap>
-    <template v-if="currentRow">
-      <el-tabs v-model="activeTab">
-        <el-tab-pane label="检测指标项" name="indicator">
-          <TemplateIndicatorList :template-id="currentRow.id" />
-        </el-tab-pane>
-        <el-tab-pane label="产品关联" name="item">
-          <TemplateItemList :template-id="currentRow.id" />
-        </el-tab-pane>
-      </el-tabs>
-    </template>
-    <el-empty v-else description="请先在上方列表选择一条质检方案" />
-  </ContentWrap>
-
-  <!-- 表单弹窗：添加/修改 -->
+  <!-- 表单弹窗：添加/修改（编辑时含检测指标项和产品关联子表） -->
   <TemplateForm ref="formRef" @success="getList" />
 </template>
 
@@ -173,8 +148,6 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { QcTemplateApi, QcTemplateVO } from '@/api/mes/qc/template'
 import TemplateForm from './TemplateForm.vue'
-import TemplateIndicatorList from './TemplateIndicatorList.vue'
-import TemplateItemList from './TemplateItemList.vue'
 import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'MesQcTemplate' })
@@ -190,14 +163,11 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
-  types: undefined,
+  type: undefined,
   enableFlag: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-
-const currentRow = ref<QcTemplateVO | null>(null) // 当前选中行
-const activeTab = ref('indicator') // 当前激活标签页
 
 /** 查询列表 */
 const getList = async () => {
@@ -223,11 +193,6 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 行点击切换子表 */
-const handleCurrentChange = (row: QcTemplateVO | null) => {
-  currentRow.value = row
-}
-
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
@@ -240,10 +205,6 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     await QcTemplateApi.deleteTemplate(id)
     message.success(t('common.delSuccess'))
-    // 若删除的是当前选中行，清空子表
-    if (currentRow.value?.id === id) {
-      currentRow.value = null
-    }
     await getList()
   } catch {}
 }

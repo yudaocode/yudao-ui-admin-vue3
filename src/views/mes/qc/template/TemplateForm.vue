@@ -1,6 +1,7 @@
 <!-- MES 质检方案表单 -->
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="900px">
+    <!-- 基本信息表单 -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -66,6 +67,20 @@
         </el-col>
       </el-row>
     </el-form>
+
+    <!-- 子表标签页（编辑模式下显示） -->
+    <template v-if="formType === 'update' && formData.id">
+      <el-divider />
+      <el-tabs v-model="activeTab">
+        <el-tab-pane label="检测指标项" name="indicator">
+          <TemplateIndicatorList :template-id="formData.id" />
+        </el-tab-pane>
+        <el-tab-pane label="产品关联" name="item">
+          <TemplateItemList :template-id="formData.id" />
+        </el-tab-pane>
+      </el-tabs>
+    </template>
+
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -77,6 +92,10 @@
 import { getBoolDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { generateRandomStr } from '@/utils'
 import { QcTemplateApi, QcTemplateVO } from '@/api/mes/qc/template'
+import TemplateIndicatorList from './TemplateIndicatorList.vue'
+import TemplateItemList from './TemplateItemList.vue'
+
+// TODO @AI：整个文件的注释风格，参考 user 的 form.vue 那；
 
 defineOptions({ name: 'TemplateForm' })
 
@@ -87,8 +106,9 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
 const formType = ref('')
+const activeTab = ref('indicator')
 const formData = ref({
-  id: undefined,
+  id: undefined as number | undefined,
   code: undefined,
   name: undefined,
   types: [] as number[],
@@ -113,6 +133,7 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
+  activeTab.value = 'indicator'
   resetForm()
   if (id) {
     formLoading.value = true

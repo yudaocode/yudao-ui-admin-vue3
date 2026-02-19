@@ -65,7 +65,8 @@
 </template>
 
 <script setup lang="ts">
-import { QcTemplateApi, QcTemplateItemVO } from '@/api/mes/qc/template'
+// TODO @AI：整个文件的注释风格，参考 user 的 form.vue 那；
+import { QcTemplateItemApi, QcTemplateItemVO } from '@/api/mes/qc/template/item'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 
 defineOptions({ name: 'TemplateItemForm' })
@@ -93,7 +94,6 @@ const formRules = reactive({
 })
 const formRef = ref()
 
-
 /** 打开弹窗 */
 const open = async (type: string, id?: number, templateId?: number) => {
   dialogVisible.value = true
@@ -104,7 +104,7 @@ const open = async (type: string, id?: number, templateId?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await QcTemplateApi.getTemplateItem(id)
+      formData.value = await QcTemplateItemApi.getTemplateItem(id)
     } finally {
       formLoading.value = false
     }
@@ -120,10 +120,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as QcTemplateItemVO
     if (formType.value === 'create') {
-      await QcTemplateApi.createTemplateItem(data)
+      await QcTemplateItemApi.createTemplateItem(data)
       message.success(t('common.createSuccess'))
     } else {
-      await QcTemplateApi.updateTemplateItem(data)
+      await QcTemplateItemApi.updateTemplateItem(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

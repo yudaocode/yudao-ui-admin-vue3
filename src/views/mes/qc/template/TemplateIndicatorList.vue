@@ -26,7 +26,7 @@
       <el-table-column label="检测工具" align="center" prop="indicatorTool" width="120" />
       <el-table-column label="检测方法" align="center" prop="checkMethod" min-width="180" />
       <el-table-column label="标准值" align="center" prop="standardValue" width="100" />
-      <el-table-column label="单位" align="center" prop="unit" width="80" />
+      <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="误差上限" align="center" prop="thresholdMax" width="100" />
       <el-table-column label="误差下限" align="center" prop="thresholdMin" width="100" />
       <el-table-column label="操作" align="center" width="130" fixed="right">
@@ -57,8 +57,10 @@
 </template>
 
 <script setup lang="ts">
+// TODO @AI：整个文件的注释风格，参考 user 的 index.vue 那；
+
 import { DICT_TYPE } from '@/utils/dict'
-import { QcTemplateApi, QcTemplateIndicatorVO } from '@/api/mes/qc/template'
+import { QcTemplateIndicatorApi, QcTemplateIndicatorVO } from '@/api/mes/qc/template/indicator'
 import TemplateIndicatorForm from './TemplateIndicatorForm.vue'
 
 defineOptions({ name: 'TemplateIndicatorList' })
@@ -76,7 +78,7 @@ const getList = async () => {
   if (!props.templateId) return
   loading.value = true
   try {
-    const data = await QcTemplateApi.getTemplateIndicatorPage({
+    const data = await QcTemplateIndicatorApi.getTemplateIndicatorPage({
       pageNo: 1,
       pageSize: 100,
       templateId: props.templateId
@@ -97,7 +99,7 @@ const openForm = (type: string, id?: number) => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await QcTemplateApi.deleteTemplateIndicator(id)
+    await QcTemplateIndicatorApi.deleteTemplateIndicator(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}

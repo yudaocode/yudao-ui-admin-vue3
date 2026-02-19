@@ -28,7 +28,11 @@
         />
       </el-form-item>
       <el-form-item label="单位" prop="unitMeasureId">
-        <MdUnitMeasureSelect v-model="formData.unitMeasureId" placeholder="请选择计量单位" clearable />
+        <MdUnitMeasureSelect
+          v-model="formData.unitMeasureId"
+          placeholder="请选择计量单位"
+          clearable
+        />
       </el-form-item>
       <el-form-item label="误差上限" prop="thresholdMax">
         <el-input-number
@@ -61,10 +65,11 @@
 </template>
 
 <script setup lang="ts">
-import { QcTemplateApi, QcTemplateIndicatorVO } from '@/api/mes/qc/template'
+import { QcTemplateIndicatorApi, QcTemplateIndicatorVO } from '@/api/mes/qc/template/indicator'
 import QcIndicatorSelect from '@/views/mes/qc/indicator/components/QcIndicatorSelect.vue'
 import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
 
+// TODO @AI：整个文件的注释风格，参考 user 的 form.vue 那；
 defineOptions({ name: 'TemplateIndicatorForm' })
 
 const { t } = useI18n()
@@ -101,7 +106,7 @@ const open = async (type: string, id?: number, templateId?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await QcTemplateApi.getTemplateIndicator(id)
+      formData.value = await QcTemplateIndicatorApi.getTemplateIndicator(id)
     } finally {
       formLoading.value = false
     }
@@ -117,10 +122,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as QcTemplateIndicatorVO
     if (formType.value === 'create') {
-      await QcTemplateApi.createTemplateIndicator(data)
+      await QcTemplateIndicatorApi.createTemplateIndicator(data)
       message.success(t('common.createSuccess'))
     } else {
-      await QcTemplateApi.updateTemplateIndicator(data)
+      await QcTemplateIndicatorApi.updateTemplateIndicator(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

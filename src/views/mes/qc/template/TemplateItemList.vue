@@ -57,7 +57,9 @@
 </template>
 
 <script setup lang="ts">
-import { QcTemplateApi, QcTemplateItemVO } from '@/api/mes/qc/template'
+// TODO @AI：整个文件的注释风格，参考 user 的 index.vue 那；
+
+import { QcTemplateItemApi, QcTemplateItemVO } from '@/api/mes/qc/template/item'
 import TemplateItemForm from './TemplateItemForm.vue'
 
 defineOptions({ name: 'TemplateItemList' })
@@ -75,7 +77,7 @@ const getList = async () => {
   if (!props.templateId) return
   loading.value = true
   try {
-    const data = await QcTemplateApi.getTemplateItemPage({
+    const data = await QcTemplateItemApi.getTemplateItemPage({
       pageNo: 1,
       pageSize: 100,
       templateId: props.templateId
@@ -96,7 +98,7 @@ const openForm = (type: string, id?: number) => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await QcTemplateApi.deleteTemplateItem(id)
+    await QcTemplateItemApi.deleteTemplateItem(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}

@@ -270,4 +270,6 @@ export enum DICT_TYPE {
   MES_PRO_WORK_ORDER_SOURCE_TYPE = 'mes_pro_work_order_source_type', // MES 工单来源类型
   MES_PRO_WORK_ORDER_TYPE = 'mes_pro_work_order_type', // MES 工单类型
   MES_QC_TYPE = 'mes_qc_type', // MES 质检方案类型
+  MES_PRO_LINK_TYPE = 'mes_pro_link_type', // MES 工序关系类型
+  MES_TIME_UNIT_TYPE = 'mes_time_unit_type', // MES 时间单位
 }
