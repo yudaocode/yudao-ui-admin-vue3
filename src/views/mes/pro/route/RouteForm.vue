@@ -72,6 +72,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
 import { generateRandomStr } from '@/utils'
 import { ProRouteApi, ProRouteVO } from '@/api/mes/pro/route'
 import RouteProcessList from './RouteProcessList.vue'
@@ -79,21 +80,20 @@ import RouteProductList from './RouteProductList.vue'
 
 defineOptions({ name: 'RouteForm' })
 
-// TODO @AI：注释参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/template/TemplateForm.vue
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const activeTab = ref('process')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const activeTab = ref('process') // 子表当前激活的 Tab
 const formData = ref<ProRouteVO>({
   id: undefined,
   code: '',
   name: '',
   description: '',
-  status: 0, // TODO @AI：枚举；
+  status: CommonStatusEnum.ENABLE,
   remark: ''
 })
 const formRules = reactive({
@@ -101,7 +101,7 @@ const formRules = reactive({
   name: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
 /** 生成编码 */
 const generateCode = () => {
@@ -156,7 +156,7 @@ const resetForm = () => {
     code: '',
     name: '',
     description: '',
-    status: 0,
+    status: CommonStatusEnum.ENABLE,
     remark: ''
   }
   formRef.value?.resetFields()

@@ -1,5 +1,4 @@
 <!-- MES 工艺路线列表 -->
-<!-- TODO @AI：对齐下字段，前缀需要加“工艺路线”；不限于编码、名称、说明、 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -10,19 +9,19 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="编码" prop="code">
+      <el-form-item label="路线编码" prop="code">
         <el-input
           v-model="queryParams.code"
-          placeholder="请输入编码"
+          placeholder="请输入工艺路线编码"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="名称" prop="name">
+      <el-form-item label="路线名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入名称"
+          placeholder="请输入工艺路线名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -65,12 +64,18 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编码" align="center" prop="code" width="180" />
-      <el-table-column label="名称" align="center" prop="name" width="200" />
-      <el-table-column label="说明" align="center" prop="description" min-width="200" />
+      <el-table-column label="路线编码" align="center" prop="code" width="180" />
+      <el-table-column label="路线名称" align="center" prop="name" width="200" />
+      <el-table-column label="路线说明" align="center" prop="description" min-width="200" />
       <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <el-switch
+            v-model="scope.row.status"
+            :active-value="0"
+            :inactive-value="1"
+            @change="handleStatusChange(scope.row)"
+            :disabled="!checkPermi(['mes:pro-route:update'])"
+          />
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
@@ -83,7 +88,8 @@
       />
       <el-table-column label="操作" align="center" width="150">
         <template #default="scope">
-          <!-- TODO @AI：增加一个启用、禁用操作 -->
+          <!-- TODO @AI：开启和关闭，还是做成按钮，好一点。 -->
+          <!-- TODO @AI：开启后，不允许关闭、删除；前后端都要限制；关联表都要限制 -->
           <el-button
             link
             type="primary"
@@ -119,18 +125,20 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
+import { CommonStatusEnum } from '@/utils/constants'
+import { checkPermi } from '@/utils/permission'
 import download from '@/utils/download'
 import { ProRouteApi, ProRouteVO } from '@/api/mes/pro/route'
 import RouteForm from './RouteForm.vue'
 
 defineOptions({ name: 'MesProRoute' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const list = ref<ProRouteVO[]>([])
-const total = ref(0)
+const loading = ref(true) // 列表的加载中
+const list = ref<ProRouteVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -138,8 +146,8 @@ const queryParams = reactive({
   name: undefined,
   status: undefined
 })
-const queryFormRef = ref()
-const exportLoading = ref(false)
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -169,6 +177,23 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 修改工艺路线状态 */
+const handleStatusChange = async (row: ProRouteVO) => {
+  try {
+    // 修改状态的二次确认
+    const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
+    await message.confirm('确认要"' + text + '""' + row.name + '"工艺路线吗?')
+    // 发起修改状态
+    await ProRouteApi.updateRouteStatus(row.id!, row.status)
+    // 刷新列表
+    await getList()
+  } catch {
+    // 取消后，进行恢复按钮
+    row.status =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+  }
 }
 
 /** 删除按钮操作 */

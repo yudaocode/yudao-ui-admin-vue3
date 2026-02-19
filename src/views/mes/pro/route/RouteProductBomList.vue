@@ -71,30 +71,28 @@ import { MdItemApi } from '@/api/mes/md/item'
 
 defineOptions({ name: 'RouteProductBomList' })
 
-// TODO @AI：注释参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/template/TemplateIndicatorList.vue
-
 const props = defineProps<{
   routeId: number
   productId: number
   productName?: string
 }>()
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(false)
-const bomList = ref<ProRouteProductBomVO[]>([])
-const processList = ref<any[]>([])
-const activeProcessId = ref('')
-const itemList = ref<any[]>([])
+const loading = ref(false) // 列表的加载中
+const bomList = ref<ProRouteProductBomVO[]>([]) // BOM 列表的数据
+const processList = ref<any[]>([]) // 工序列表（用于 Tab）
+const activeProcessId = ref('') // 当前选中的工序 Tab
+const itemList = ref<any[]>([]) // 物料下拉列表
 
 // 表单相关
-const formVisible = ref(false)
-const formTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const formRef = ref()
-const formData = ref<any>({})
+const formVisible = ref(false) // 表单弹窗的是否展示
+const formTitle = ref('') // 表单弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formRef = ref() // 表单 Ref
+const formData = ref<any>({}) // 表单数据
 const formRules = reactive({
   itemId: [{ required: true, message: 'BOM 物料不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '用料比例不能为空', trigger: 'blur' }]
@@ -115,6 +113,7 @@ const getBomList = async () => {
   if (!activeProcessId.value) return
   loading.value = true
   try {
+    // TODO @AI：linter 报错；
     bomList.value = await ProRouteProductBomApi.getRouteProductBomList({
       routeId: props.routeId,
       processId: activeProcessId.value,

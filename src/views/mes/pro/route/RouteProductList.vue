@@ -106,29 +106,27 @@ const props = defineProps<{
   routeId: number
 }>()
 
-// TODO @AI：注释参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/template/TemplateIndicatorList.vue
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const message = useMessage()
-const { t } = useI18n()
-
-const loading = ref(false)
-const list = ref<ProRouteProductVO[]>([])
-const itemList = ref<any[]>([])
+const loading = ref(false) // 列表的加载中
+const list = ref<ProRouteProductVO[]>([]) // 列表的数据
+const itemList = ref<any[]>([]) // 物料下拉列表
 
 // 表单相关
-const formVisible = ref(false)
-const formTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const formRef = ref()
-const formData = ref<any>({})
+const formVisible = ref(false) // 表单弹窗的是否展示
+const formTitle = ref('') // 表单弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formRef = ref() // 表单 Ref
+const formData = ref<any>({}) // 表单数据
 const formRules = reactive({
   itemId: [{ required: true, message: '产品不能为空', trigger: 'change' }]
 })
 
 // BOM 弹窗相关
-const bomDialogVisible = ref(false)
-const currentProduct = ref<any>({})
+const bomDialogVisible = ref(false) // BOM 弹窗的是否展示
+const currentProduct = ref<any>({}) // 当前选中的产品
 
 /** 查询列表 */
 const getList = async () => {

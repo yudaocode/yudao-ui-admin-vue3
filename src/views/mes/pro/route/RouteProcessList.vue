@@ -148,28 +148,26 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProRouteProcessApi, ProRouteProcessVO } from '@/api/mes/pro/route/process'
 import { ProProcessApi } from '@/api/mes/pro/process'
 
-// TODO @AI：注释参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/template/TemplateIndicatorList.vue
-
 defineOptions({ name: 'RouteProcessList' })
 
 const props = defineProps<{
   routeId: number
 }>()
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(false)
-const list = ref<ProRouteProcessVO[]>([])
-const processList = ref<any[]>([])
+const loading = ref(false) // 列表的加载中
+const list = ref<ProRouteProcessVO[]>([]) // 列表的数据
+const processList = ref<any[]>([]) // 工序下拉列表
 
 // 表单相关
-const formVisible = ref(false)
-const formTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const formRef = ref()
-const formData = ref<any>({})
+const formVisible = ref(false) // 表单弹窗的是否展示
+const formTitle = ref('') // 表单弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formRef = ref() // 表单 Ref
+const formData = ref<any>({}) // 表单数据
 const formRules = reactive({
   sort: [{ required: true, message: '序号不能为空', trigger: 'blur' }],
   processId: [{ required: true, message: '工序不能为空', trigger: 'change' }],
