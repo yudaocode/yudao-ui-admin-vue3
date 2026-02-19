@@ -1,9 +1,11 @@
 <!-- 排班日历 - 按个人视图 -->
+<!-- TODO @AI: user > person 文件名 -->
 <template>
   <div>
     <!-- 顶部：用户选择 -->
     <el-form :inline="true" label-width="80px" class="mb-10px">
       <el-form-item label="用户编号">
+        <!-- TODO @AI：下拉选择； -->
         <el-input-number
           v-model="userId"
           placeholder="请输入用户编号"
@@ -19,6 +21,7 @@
       </el-form-item>
     </el-form>
     <!-- 日历 -->
+
     <el-calendar v-model="currentDate" v-loading="loading">
       <template #date-cell="{ data }">
         <div class="h-full p-4px">

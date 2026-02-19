@@ -1,19 +1,20 @@
 <!-- 排班日历 - 按分类视图 -->
+<!-- todo @ai：是不是去掉开头的 calendar，因为大家都是呀 -->
 <template>
   <div class="flex">
     <!-- 左侧：班组类型选择 -->
-    <div class="w-150px mr-10px">
-      <el-radio-group v-model="selectedType" class="flex flex-col" @change="onTypeSelected">
-        <el-radio-button
-          v-for="dict in getIntDictOptions(DICT_TYPE.MES_CAL_CALENDAR_TYPE)"
-          :key="dict.value"
-          :value="dict.value"
-          class="!rounded-0 !border-b-1px !border-b-solid !border-b-gray-200"
-        >
-          {{ dict.label }}
-        </el-radio-button>
-      </el-radio-group>
+    <div class="w-150px shrink-0 mr-12px border border-solid border-#dcdfe6 rounded-4px overflow-hidden">
+      <div
+        v-for="dict in getIntDictOptions(DICT_TYPE.MES_CAL_CALENDAR_TYPE)"
+        :key="dict.value"
+        class="px-16px py-10px cursor-pointer text-14px text-#606266 border-b border-b-solid border-b-#ebeef5 last:border-b-0 hover:bg-#f5f7fa transition-colors"
+        :class="selectedType === dict.value ? 'bg-#ecf5ff text-#409eff font-500' : ''"
+        @click="selectedType = dict.value; onTypeSelected()"
+      >
+        {{ dict.label }}
+      </div>
     </div>
+
     <!-- 右侧：日历 -->
     <div class="flex-1">
       <el-calendar v-model="currentDate" v-loading="loading">
@@ -104,7 +105,9 @@ const getHolidayList = async () => {
 
 /** 查询排班日历 */
 const fetchCalendar = async () => {
-  if (!selectedType.value) return
+  if (!selectedType.value) {
+    return
+  }
   loading.value = true
   try {
     // 计算当前月份的起止日期
@@ -192,7 +195,7 @@ const hasFestival = (day: string): boolean => {
   return !!(info.solarFestival || info.lunarFestival || info.termName)
 }
 
-// 监听月份变化
+/** 监听月份变化 */
 watch(currentDate, () => {
   if (selectedType.value) {
     fetchCalendar()

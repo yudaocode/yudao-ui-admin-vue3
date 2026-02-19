@@ -2,18 +2,18 @@
 <template>
   <div class="flex">
     <!-- 左侧：班组列表选择 -->
-    <div class="w-150px mr-10px">
-      <el-radio-group v-model="selectedTeamId" class="flex flex-col" @change="onTeamSelected">
-        <el-radio-button
-          v-for="team in teamList"
-          :key="team.id"
-          :value="team.id"
-          class="!rounded-0 !border-b-1px !border-b-solid !border-b-gray-200"
-        >
-          {{ team.name }}
-        </el-radio-button>
-      </el-radio-group>
+    <div class="w-150px shrink-0 mr-12px border border-solid border-#dcdfe6 rounded-4px overflow-hidden">
+      <div
+        v-for="team in teamList"
+        :key="team.id"
+        class="px-16px py-10px cursor-pointer text-14px text-#606266 border-b border-b-solid border-b-#ebeef5 last:border-b-0 hover:bg-#f5f7fa transition-colors"
+        :class="selectedTeamId === team.id ? 'bg-#ecf5ff text-#409eff font-500' : ''"
+        @click="selectedTeamId = team.id; onTeamSelected()"
+      >
+        {{ team.name }}
+      </div>
     </div>
+
     <!-- 右侧：日历 -->
     <div class="flex-1">
       <el-calendar v-model="currentDate" v-loading="loading">

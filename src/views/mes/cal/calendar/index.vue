@@ -2,6 +2,7 @@
 <template>
   <ContentWrap>
     <el-tabs v-model="activeTab" type="border-card">
+      <!-- TODO @AI：下面三个组件，都有日历，是不是可以复用下； -->
       <el-tab-pane label="按分类" name="type">
         <CalendarTypeView />
       </el-tab-pane>
