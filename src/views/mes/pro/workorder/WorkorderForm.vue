@@ -69,43 +69,12 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：应该是 ItemSelect -->
           <el-form-item label="产品" prop="productId">
-            <el-select
+            <MdItemSelect
               v-model="formData.productId"
-              placeholder="请选择产品"
-              filterable
-              class="!w-1/1"
               :disabled="isDetail"
               @change="handleProductChange"
-            >
-              <el-option
-                v-for="item in productList"
-                :key="item.id"
-                :label="item.name + (item.code ? ' (' + item.code + ')' : '')"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <!-- TODO @AI：这里 disabled 展示：产品名称、规格类型、单位； -->
-        <!-- TODO @AI：这个字段“单位”，应该不用存储，通过 item 查询就好了； -->
-        <el-col :span="8">
-          <el-form-item label="单位" prop="unitMeasureId">
-            <el-select
-              v-model="formData.unitMeasureId"
-              placeholder="请选择单位"
-              filterable
-              class="!w-1/1"
-              :disabled="isDetail"
-            >
-              <el-option
-                v-for="item in unitMeasureList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -123,46 +92,15 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：这个需要搞个客户的 select 弹出；类似 itemselect 这种； -->
           <el-form-item label="客户" prop="clientId">
-            <el-select
-              v-model="formData.clientId"
-              placeholder="请选择客户"
-              filterable
-              clearable
-              class="!w-1/1"
-              :disabled="isDetail"
-            >
-              <el-option
-                v-for="item in clientList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            <MdClientSelect v-model="formData.clientId" :disabled="isDetail" />
           </el-form-item>
-          <!-- TODO @AI：展示客户编码、客户名称； -->
         </el-col>
         <el-col :span="8">
           <!-- TODO @AI：只有外协、外购，才有供应商 -->
           <el-form-item label="供应商" prop="vendorId">
-            <el-select
-              v-model="formData.vendorId"
-              placeholder="请选择供应商"
-              filterable
-              clearable
-              class="!w-1/1"
-              :disabled="isDetail"
-            >
-              <el-option
-                v-for="item in vendorList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            <MdVendorSelect v-model="formData.vendorId" :disabled="isDetail" />
           </el-form-item>
-          <!-- TODO @AI：展示供应商编码、供应商名称； -->
         </el-col>
         <el-col :span="8">
           <!-- TODO @AI：这个字段，是必须的么？在调研确认下； -->
@@ -224,10 +162,10 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
-import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
-import { MdClientApi } from '@/api/mes/md/client'
-import { MdVendorApi } from '@/api/mes/md/vendor'
-import { MdUnitMeasureApi } from '@/api/mes/md/unitmeasure'
+import { MdItemVO } from '@/api/mes/md/item'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
+import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import WorkOrderBom from './WorkOrderBom.vue'
 
 defineOptions({ name: 'WorkOrderForm' })
@@ -263,17 +201,10 @@ const formRules = reactive({
   type: [{ required: true, message: '工单类型不能为空', trigger: 'change' }],
   orderSourceType: [{ required: true, message: '来源类型不能为空', trigger: 'change' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'change' }],
-  unitMeasureId: [{ required: true, message: '单位不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '生产数量不能为空', trigger: 'blur' }],
   requestDate: [{ required: true, message: '需求日期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-
-// 关联数据列表
-const productList = ref<MdItemVO[]>([]) // 产品列表
-const clientList = ref<any[]>([]) // 客户列表
-const vendorList = ref<any[]>([]) // 供应商列表
-const unitMeasureList = ref<any[]>([]) // 计量单位列表
 
 /** 是否为详情模式 */
 const isDetail = computed(() => formType.value === 'detail')
@@ -285,11 +216,6 @@ const open = async (type: string, id?: number) => {
   formType.value = type
   activeTab.value = 'bom'
   resetForm()
-  // 加载关联数据
-  productList.value = await MdItemApi.getItemSimpleList()
-  clientList.value = await MdClientApi.getClientSimpleList()
-  vendorList.value = await MdVendorApi.getVendorSimpleList()
-  unitMeasureList.value = await MdUnitMeasureApi.getUnitMeasureSimpleList()
   // 修改/详情时，设置数据
   if (id) {
     formLoading.value = true
@@ -303,9 +229,8 @@ const open = async (type: string, id?: number) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 产品变更：自动填充单位 */
-const handleProductChange = (productId: number) => {
-  const product = productList.value.find((item) => item.id === productId)
-  if (product && product.unitMeasureId) {
+const handleProductChange = (product: MdItemVO) => {
+  if (product?.unitMeasureId) {
     formData.value.unitMeasureId = product.unitMeasureId
   }
 }

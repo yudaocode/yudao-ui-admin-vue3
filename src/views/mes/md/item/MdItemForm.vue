@@ -32,14 +32,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="单位" prop="unitMeasureId">
-            <el-select v-model="formData.unitMeasureId" placeholder="请选择计量单位" class="w-1/1">
-              <el-option
-                v-for="item in unitMeasureList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            <MdUnitMeasureSelect v-model="formData.unitMeasureId" placeholder="请选择计量单位" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -146,7 +139,7 @@ import MdItemBatchConfigForm from './MdItemBatchConfigForm.vue'
 import MdProductBomForm from './MdProductBomForm.vue'
 import MdProductSopForm from './MdProductSopForm.vue'
 import MdProductSipForm from './MdProductSipForm.vue'
-import { MdUnitMeasureApi, MdUnitMeasureVO } from '@/api/mes/md/unitmeasure'
+import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
 
@@ -186,7 +179,6 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const itemTypeTree = ref<MdItemTypeVO[]>([]) // 物料分类树
 const itemTypeList = ref<MdItemTypeVO[]>([]) // 物料分类列表（扁平）
-const unitMeasureList = ref<MdUnitMeasureVO[]>([]) // 计量单位列表
 
 /** 当前物料的「物料/产品」标识 */
 const currentItemOrProduct = computed(() => {
@@ -222,8 +214,6 @@ const open = async (type: string, id?: number) => {
   // 物料分类
   itemTypeList.value = await MdItemTypeApi.getItemTypeSimpleList()
   itemTypeTree.value = handleTree(itemTypeList.value)
-  // 计量单位
-  unitMeasureList.value = await MdUnitMeasureApi.getUnitMeasureSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

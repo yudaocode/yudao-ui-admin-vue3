@@ -9,19 +9,7 @@
       v-loading="formLoading"
     >
       <el-form-item label="质检指标" prop="indicatorId">
-        <el-select
-          v-model="formData.indicatorId"
-          placeholder="请选择质检指标"
-          filterable
-          class="!w-1/1"
-        >
-          <el-option
-            v-for="item in indicatorList"
-            :key="item.id"
-            :label="item.code + ' - ' + item.name"
-            :value="item.id"
-          />
-        </el-select>
+        <QcIndicatorSelect v-model="formData.indicatorId" placeholder="请选择质检指标" />
       </el-form-item>
       <el-form-item label="检测方法" prop="checkMethod">
         <el-input
@@ -40,20 +28,7 @@
         />
       </el-form-item>
       <el-form-item label="单位" prop="unitMeasureId">
-        <el-select
-          v-model="formData.unitMeasureId"
-          placeholder="请选择计量单位"
-          filterable
-          clearable
-          class="!w-1/1"
-        >
-          <el-option
-            v-for="unit in unitMeasureList"
-            :key="unit.id"
-            :label="unit.name"
-            :value="unit.id"
-          />
-        </el-select>
+        <MdUnitMeasureSelect v-model="formData.unitMeasureId" placeholder="请选择计量单位" clearable />
       </el-form-item>
       <el-form-item label="误差上限" prop="thresholdMax">
         <el-input-number
@@ -87,8 +62,8 @@
 
 <script setup lang="ts">
 import { QcTemplateApi, QcTemplateIndicatorVO } from '@/api/mes/qc/template'
-import { QcIndicatorApi, QcIndicatorVO } from '@/api/mes/qc/indicator'
-import { MdUnitMeasureApi, MdUnitMeasureVO } from '@/api/mes/md/unitmeasure'
+import QcIndicatorSelect from '@/views/mes/qc/indicator/components/QcIndicatorSelect.vue'
+import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
 
 defineOptions({ name: 'TemplateIndicatorForm' })
 
@@ -116,11 +91,6 @@ const formRules = reactive({
 })
 const formRef = ref()
 
-/** 质检指标精简列表 */
-const indicatorList = ref<QcIndicatorVO[]>([])
-/** 计量单位精简列表 */
-const unitMeasureList = ref<MdUnitMeasureVO[]>([])
-
 /** 打开弹窗 */
 const open = async (type: string, id?: number, templateId?: number) => {
   dialogVisible.value = true
@@ -128,12 +98,6 @@ const open = async (type: string, id?: number, templateId?: number) => {
   formType.value = type
   resetForm()
   formData.value.templateId = templateId
-  // 并行加载下拉数据
-  // TODO @AI：串行加载；
-  ;[indicatorList.value, unitMeasureList.value] = await Promise.all([
-    QcIndicatorApi.getIndicatorSimpleList(),
-    MdUnitMeasureApi.getUnitMeasureSimpleList()
-  ])
   if (id) {
     formLoading.value = true
     try {

@@ -44,35 +44,10 @@
         v-loading="bomFormLoading"
       >
         <el-form-item label="物料" prop="itemId">
-          <el-select
-            v-model="bomFormData.itemId"
-            placeholder="请选择物料"
-            filterable
-            class="!w-1/1"
-            @change="handleBomItemChange"
-          >
-            <el-option
-              v-for="item in itemList"
-              :key="item.id"
-              :label="item.name + (item.code ? ' (' + item.code + ')' : '')"
-              :value="item.id"
-            />
-          </el-select>
+          <MdItemSelect v-model="bomFormData.itemId" @change="handleBomItemChange" />
         </el-form-item>
         <el-form-item label="单位" prop="unitMeasureId">
-          <el-select
-            v-model="bomFormData.unitMeasureId"
-            placeholder="请选择单位"
-            filterable
-            class="!w-1/1"
-          >
-            <el-option
-              v-for="item in unitMeasureList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
-          </el-select>
+          <MdUnitMeasureSelect v-model="bomFormData.unitMeasureId" />
         </el-form-item>
         <el-form-item label="预计使用量" prop="quantity">
           <el-input-number
@@ -96,8 +71,9 @@
 
 <script setup lang="ts">
 import { ProWorkOrderBomApi, ProWorkOrderBomVO } from '@/api/mes/pro/workorder/bom'
-import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
-import { MdUnitMeasureApi } from '@/api/mes/md/unitmeasure'
+import { MdItemVO } from '@/api/mes/md/item'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
 
 defineOptions({ name: 'WorkOrderBom' })
 
@@ -161,17 +137,12 @@ const bomFormRules = reactive({
   quantity: [{ required: true, message: '预计使用量不能为空', trigger: 'blur' }]
 })
 const bomFormRef = ref()
-const itemList = ref<MdItemVO[]>([])
-const unitMeasureList = ref<any[]>([])
 
 /** 打开 BOM 表单弹窗 */
 const openBomForm = async (type: string, row?: any) => {
   bomDialogVisible.value = true
   bomDialogTitle.value = type === 'create' ? '添加物料' : '编辑物料'
   bomFormType.value = type
-  // 加载物料和单位列表
-  itemList.value = await MdItemApi.getItemSimpleList()
-  unitMeasureList.value = await MdUnitMeasureApi.getUnitMeasureSimpleList()
   // 重置表单
   bomFormData.value = {
     id: undefined,
@@ -188,9 +159,8 @@ const openBomForm = async (type: string, row?: any) => {
 }
 
 /** 物料变更：自动填充单位 */
-const handleBomItemChange = (itemId: number) => {
-  const item = itemList.value.find((i) => i.id === itemId)
-  if (item && item.unitMeasureId) {
+const handleBomItemChange = (item: MdItemVO | undefined) => {
+  if (item?.unitMeasureId) {
     bomFormData.value.unitMeasureId = item.unitMeasureId
   }
 }

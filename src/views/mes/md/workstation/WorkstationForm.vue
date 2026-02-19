@@ -26,14 +26,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="所在车间" prop="workshopId">
-            <el-select v-model="formData.workshopId" placeholder="请选择车间" class="!w-1/1">
-              <el-option
-                v-for="workshop in workshopList"
-                :key="workshop.id"
-                :label="workshop.name"
-                :value="workshop.id"
-              />
-            </el-select>
+            <MdWorkshopSelect v-model="formData.workshopId" placeholder="请选择车间" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -45,20 +38,12 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="线边库" prop="warehouseId">
-            <el-select
+            <WmWarehouseSelect
               v-model="formData.warehouseId"
               placeholder="请选择线边库"
               clearable
-              class="!w-1/1"
-              @change="handleWarehouseChange"
-            >
-              <el-option
-                v-for="warehouse in warehouseList"
-                :key="warehouse.id"
-                :label="warehouse.name"
-                :value="warehouse.id"
-              />
-            </el-select>
+              @change="handleWarehouseSelectChange"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -143,8 +128,9 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdWorkstationApi, MdWorkstationVO } from '@/api/mes/md/workstation'
-import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
-import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
+import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
+import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
+import { WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
 import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/area'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -163,8 +149,6 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const activeTab = ref('machine') // 当前激活的资源 Tab
-const workshopList = ref<MdWorkshopVO[]>([]) // 车间下拉列表
-const warehouseList = ref<WmWarehouseVO[]>([]) // 仓库下拉列表
 const locationList = ref<WmWarehouseLocationVO[]>([]) // 库区下拉列表
 const areaList = ref<WmWarehouseAreaVO[]>([]) // 库位下拉列表
 const formData = ref({
@@ -211,12 +195,12 @@ const loadAreaList = async (locationId?: number) => {
   areaList.value = await WmWarehouseAreaApi.getWarehouseAreaSimpleList(locationId)
 }
 
-/** 仓库改变时，重置库区和库位 */
-const handleWarehouseChange = async (warehouseId?: number) => {
+/** 仓库选择变化：重置库区和库位 */
+const handleWarehouseSelectChange = async (item: WmWarehouseVO | undefined) => {
   formData.value.locationId = undefined
   formData.value.areaId = undefined
   areaList.value = []
-  await loadLocationList(warehouseId)
+  await loadLocationList(item?.id)
 }
 
 /** 库区改变时，重置库位 */
@@ -231,10 +215,6 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  // 加载车间列表
-  workshopList.value = await MdWorkshopApi.getWorkshopSimpleList()
-  // 加载仓库列表
-  warehouseList.value = await WmWarehouseApi.getWarehouseSimpleList()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true

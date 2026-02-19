@@ -27,19 +27,7 @@
         />
       </el-form-item>
       <el-form-item label="所在车间" prop="workshopId">
-        <el-select
-          v-model="queryParams.workshopId"
-          placeholder="请选择车间"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="workshop in workshopList"
-            :key="workshop.id"
-            :label="workshop.name"
-            :value="workshop.id"
-          />
-        </el-select>
+        <MdWorkshopSelect v-model="queryParams.workshopId" placeholder="请选择车间" clearable class="!w-240px" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
@@ -134,7 +122,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { MdWorkstationApi, MdWorkstationVO } from '@/api/mes/md/workstation'
-import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
+import MdWorkshopSelect from './components/MdWorkshopSelect.vue'
 import WorkstationForm from './WorkstationForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
@@ -146,7 +134,6 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const list = ref<MdWorkstationVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
-const workshopList = ref<MdWorkshopVO[]>([]) // 车间列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -214,7 +201,5 @@ const handleExport = async () => {
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  // 加载车间列表
-  workshopList.value = await MdWorkshopApi.getWorkshopSimpleList()
 })
 </script>

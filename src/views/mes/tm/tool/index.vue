@@ -28,19 +28,7 @@
         />
       </el-form-item>
       <el-form-item label="工具类型" prop="toolTypeId">
-        <el-select
-          v-model="queryParams.toolTypeId"
-          placeholder="请选择工具类型"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="item in toolTypeList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
+        <TmToolTypeSelect v-model="queryParams.toolTypeId" placeholder="请选择工具类型" clearable class="!w-240px" />
       </el-form-item>
       <el-form-item label="品牌" prop="brand">
         <el-input
@@ -170,7 +158,7 @@
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { TmToolApi, TmToolVO } from '@/api/mes/tm/tool'
-import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
+import TmToolTypeSelect from './components/TmToolTypeSelect.vue'
 import ToolForm from './ToolForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesMaintenTypeEnum } from '@/views/mes/utils/constants'
@@ -195,8 +183,6 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const toolTypeList = ref<TmToolTypeVO[]>([]) // 工具类型列表
-
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -258,7 +244,5 @@ const handleExport = async () => {
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  // 加载工具类型列表
-  toolTypeList.value = await TmToolTypeApi.getToolTypeSimpleList()
 })
 </script>

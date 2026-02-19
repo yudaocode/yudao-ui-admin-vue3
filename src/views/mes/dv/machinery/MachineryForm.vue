@@ -47,14 +47,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="所属车间" prop="workshopId">
-            <el-select v-model="formData.workshopId" placeholder="请选择所属车间" class="!w-1/1">
-              <el-option
-                v-for="item in workshopList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            <MdWorkshopSelect v-model="formData.workshopId" placeholder="请选择所属车间" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -133,7 +126,7 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { DvMachineryApi, DvMachineryVO } from '@/api/mes/dv/machinery'
 import { DvMachineryTypeApi } from '@/api/mes/dv/machinery/type'
-import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
+import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { MesDvMachineryStatusEnum } from '@/views/mes/utils/constants'
 import { generateRandomStr } from '@/utils'
@@ -170,7 +163,6 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const machineryTypeTree = ref<any[]>([]) // 设备类型树
-const workshopList = ref<MdWorkshopVO[]>([]) // 车间列表
 
 /** 生成设备编码 */
 const generateCode = () => {
@@ -186,8 +178,6 @@ const open = async (type: string, id?: number) => {
   // 加载设备类型树
   const typeData = await DvMachineryTypeApi.getMachineryTypeSimpleList()
   machineryTypeTree.value = handleTree(typeData)
-  // 加载车间列表
-  workshopList.value = await MdWorkshopApi.getWorkshopSimpleList()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true

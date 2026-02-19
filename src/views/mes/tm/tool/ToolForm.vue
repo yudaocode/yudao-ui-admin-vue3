@@ -29,19 +29,11 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="工具类型" prop="toolTypeId">
-            <el-select
+            <TmToolTypeSelect
               v-model="formData.toolTypeId"
               placeholder="请选择工具类型"
-              class="!w-1/1"
               @change="handleToolTypeChange"
-            >
-              <el-option
-                v-for="item in toolTypeList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -142,7 +134,8 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { TmToolApi, TmToolVO } from '@/api/mes/tm/tool'
-import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
+import { TmToolTypeVO } from '@/api/mes/tm/tool/type'
+import TmToolTypeSelect from '@/views/mes/tm/tool/components/TmToolTypeSelect.vue'
 import { MesToolStatusEnum, MesMaintenTypeEnum } from '@/views/mes/utils/constants'
 import { generateRandomStr } from '@/utils'
 
@@ -177,7 +170,6 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-const toolTypeList = ref<TmToolTypeVO[]>([]) // 工具类型列表
 const selectedToolType = ref<TmToolTypeVO>() // 当前选中的工具类型
 
 /** 打开弹窗 */
@@ -186,17 +178,11 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  // 加载工具类型列表
-  toolTypeList.value = await TmToolTypeApi.getToolTypeSimpleList()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
       formData.value = await TmToolApi.getTool(id)
-      // 设置选中的工具类型
-      selectedToolType.value = toolTypeList.value.find(
-        (item) => item.id === formData.value.toolTypeId
-      )
     } finally {
       formLoading.value = false
     }
@@ -211,10 +197,10 @@ const generateCode = () => {
 }
 
 /** 工具类型变更 */
-const handleToolTypeChange = (toolTypeId: number) => {
-  selectedToolType.value = toolTypeList.value.find((item) => item.id === toolTypeId)
+const handleToolTypeChange = (item: TmToolTypeVO | undefined) => {
+  selectedToolType.value = item
   // 如果是编码管理，数量锁定为 1
-  if (selectedToolType.value?.codeFlag === true) {
+  if (item?.codeFlag === true) {
     formData.value.quantity = 1
     formData.value.quantityAvailable = 1
   }
