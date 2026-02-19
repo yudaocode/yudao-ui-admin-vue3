@@ -16,13 +16,18 @@
     >
       {{ lunarDisplay }}
     </div>
-    <!-- 班次信息：节假日不显示排班 -->
+    <!-- 班次列表：节假日不显示排班 -->
     <template v-if="!isHoliday">
-      <!-- TODO @AI：最好有个地方，说明下这个逻辑； -->
+      <!--
+        配色规则（sort 对应轮班方式中的班次顺序）：
+          sort=1  白班  → success（绿色）
+          sort=2  中班  → 三班倒用 warning（橙色），两班倒用 info（灰色）
+          sort=3  夜班  → info（灰色）
+      -->
       <div v-for="item in teamShifts" :key="item.sort" class="mt-2px">
         <!-- sort=1 白班：绿色 -->
         <el-button v-if="item.sort === 1" type="success" size="small" class="!w-full !text-12px">
-          {{ item.teamName }}
+          {{ item.shiftName }} · {{ item.teamName }}
         </el-button>
         <!-- sort=2 中班：三班倒时用橙色，两班倒时用灰色 -->
         <el-button
@@ -31,11 +36,11 @@
           size="small"
           class="!w-full !text-12px"
         >
-          {{ item.teamName }}
+          {{ item.shiftName }} · {{ item.teamName }}
         </el-button>
         <!-- sort=3 夜班：灰色 -->
         <el-button v-else-if="item.sort === 3" type="info" size="small" class="!w-full !text-12px">
-          {{ item.teamName }}
+          {{ item.shiftName }} · {{ item.teamName }}
         </el-button>
       </div>
     </template>

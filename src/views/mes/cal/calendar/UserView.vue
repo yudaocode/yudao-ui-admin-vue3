@@ -27,6 +27,7 @@
     </el-form>
 
     <!-- 日历 -->
+    <CalendarLegend />
     <el-calendar v-model="currentDate" v-loading="loading">
       <template #date-cell="{ data }">
         <CalendarDateCell
@@ -46,6 +47,7 @@ import { getSimpleUserList, UserVO } from '@/api/system/user'
 import { formatDate } from '@/utils/formatTime'
 import { HolidayType } from '@/views/mes/utils/constants'
 import CalendarDateCell from './CalendarDateCell.vue'
+import CalendarLegend from './CalendarLegend.vue'
 
 const loading = ref(false)
 const currentDate = ref(new Date()) // 日历当前显示月份

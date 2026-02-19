@@ -2,20 +2,15 @@
 <template>
   <div class="flex">
     <!-- 左侧：班组类型选择 -->
-    <!-- TODO @AI：默认选中首个 -->
     <div
       class="w-150px shrink-0 mr-12px border border-solid border-#dcdfe6 rounded-4px overflow-hidden"
     >
-      <!-- TODO @AI：可以把 @click 在封装下么？更统一一些； -->
       <div
         v-for="dict in getIntDictOptions(DICT_TYPE.MES_CAL_CALENDAR_TYPE)"
         :key="dict.value"
         class="px-16px py-10px cursor-pointer text-14px text-#606266 border-b border-b-solid border-b-#ebeef5 last:border-b-0 hover:bg-#f5f7fa transition-colors"
         :class="selectedType === dict.value ? 'bg-#ecf5ff text-#409eff font-500' : ''"
-        @click="
-          selectedType = dict.value
-          onTypeSelected()
-        "
+        @click="onSelectType(dict.value)"
       >
         {{ dict.label }}
       </div>
@@ -23,6 +18,7 @@
 
     <!-- 右侧：日历 -->
     <div class="flex-1">
+      <CalendarLegend />
       <el-calendar v-model="currentDate" v-loading="loading">
         <template #date-cell="{ data }">
           <CalendarDateCell
@@ -43,6 +39,7 @@ import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { HolidayType } from '@/views/mes/utils/constants'
 import CalendarDateCell from './CalendarDateCell.vue'
+import CalendarLegend from './CalendarLegend.vue'
 
 const loading = ref(false)
 const currentDate = ref(new Date()) // 日历当前显示月份
@@ -95,8 +92,9 @@ const fetchCalendar = async () => {
   }
 }
 
-/** 选择分类后刷新日历 */
-const onTypeSelected = () => {
+/** 点击左侧分类后切换并刷新日历 */
+const onSelectType = (value: number) => {
+  selectedType.value = value
   fetchCalendar()
 }
 
@@ -107,8 +105,12 @@ watch(currentDate, () => {
   }
 })
 
-/** 初始化 */
+/** 初始化：加载节假日，并默认选中第一个分类 */
 onMounted(() => {
   getHolidayList()
+  const opts = getIntDictOptions(DICT_TYPE.MES_CAL_CALENDAR_TYPE)
+  if (opts.length > 0) {
+    onSelectType(opts[0].value as number)
+  }
 })
 </script>
