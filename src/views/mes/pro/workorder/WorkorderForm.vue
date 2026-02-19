@@ -110,6 +110,7 @@
             <MdVendorSelect v-model="formData.vendorId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：批次号，貌似一直不需要；你在确认下！ -->
         <el-col :span="8">
           <el-form-item label="批次号" prop="batchCode">
             <el-input
@@ -122,6 +123,7 @@
       </el-row>
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：只选择日期，后面都是 00:00:00 -->
           <el-form-item label="需求日期" prop="requestDate">
             <el-date-picker
               v-model="formData.requestDate"

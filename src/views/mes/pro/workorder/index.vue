@@ -115,7 +115,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <!-- TODO @AI：生产工单，是父子结构； -->
+    <!-- TODO @AI：生产工单，是父子结构；到底是前端拼接出来，还是后端拼接出来？！ -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="工单编码" align="center" prop="code" width="140" />
       <el-table-column label="父工单" align="center" prop="parentCode" width="140">
@@ -154,7 +154,7 @@
         label="需求日期"
         align="center"
         prop="requestDate"
-        :formatter="dateFormatter"
+        :formatter="dateFormatter2"
         width="180"
       />
       <el-table-column label="工单状态" align="center" prop="status" width="100">
@@ -219,6 +219,7 @@
           >
             详情
           </el-button>
+          <!-- TODO @芋艿：预览（打印） -->
         </template>
       </el-table-column>
     </el-table>
@@ -236,7 +237,7 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import WorkOrderForm from './WorkOrderForm.vue'
@@ -335,7 +336,6 @@ const handleExport = async () => {
     exportLoading.value = true
     const data = await ProWorkOrderApi.exportWorkOrder(queryParams)
     download.excel(data, '生产工单.xls')
-  } catch {
   } finally {
     exportLoading.value = false
   }
