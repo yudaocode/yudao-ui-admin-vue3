@@ -2,6 +2,7 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="900px">
     <!-- 基本信息表单 -->
+    <!-- TODO @AI：rules 有linter报错； -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -142,6 +143,7 @@ const open = async (type: string, id?: number) => {
       const data = await QcTemplateApi.getTemplate(id)
       formData.value = {
         ...data,
+        // TODO @AI：应该不用 types？后端已经处理；
         types: data.types ?? []
       }
     } finally {

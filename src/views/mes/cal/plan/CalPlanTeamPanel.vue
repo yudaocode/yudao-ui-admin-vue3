@@ -19,12 +19,14 @@
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px" v-loading="formLoading">
         <el-form-item label="班组" prop="teamId">
-          <!-- TODO @芋艿：对接班组下拉列表，等 cal_team 迁移后对接 -->
-          <el-input-number
-            v-model="formData.teamId"
-            placeholder="请输入班组编号"
-            class="!w-1/1"
-          />
+          <el-select v-model="formData.teamId" placeholder="请选择班组" class="!w-1/1">
+            <el-option
+              v-for="team in teamList"
+              :key="team.id"
+              :label="team.name"
+              :value="team.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />

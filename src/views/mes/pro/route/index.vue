@@ -1,4 +1,5 @@
-<!-- MES 质检方案列表 -->
+<!-- MES 工艺路线列表 -->
+<!-- TODO @AI：对齐下字段，前缀需要加“工艺路线”；不限于编码、名称、说明、 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -7,64 +8,44 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="100px"
+      label-width="68px"
     >
-      <el-form-item label="方案编号" prop="code">
+      <el-form-item label="编码" prop="code">
         <el-input
           v-model="queryParams.code"
-          placeholder="请输入方案编号"
+          placeholder="请输入编码"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="方案名称" prop="name">
+      <el-form-item label="名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入方案名称"
+          placeholder="请输入名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="检测种类" prop="type">
-        <el-select
-          v-model="queryParams.type"
-          placeholder="请选择检测种类"
-          clearable
-          class="!w-240px"
-        >
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="是否启用" prop="enableFlag">
-        <el-select
-          v-model="queryParams.enableFlag"
-          placeholder="请选择是否启用"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value as unknown as string"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" /> 搜索 </el-button>
+        <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" /> 重置 </el-button>
         <el-button
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['mes:qc-template:create']"
+          v-hasPermi="['mes:pro-route:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -73,7 +54,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['mes:qc-template:export']"
+          v-hasPermi="['mes:pro-route:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -84,19 +65,15 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="方案编号" align="center" prop="code" width="150" />
-      <el-table-column label="方案名称" align="center" prop="name" min-width="200" />
-      <el-table-column label="检测种类" align="center" prop="types" min-width="200">
+      <el-table-column label="编码" align="center" prop="code" width="180" />
+      <el-table-column label="名称" align="center" prop="name" width="200" />
+      <el-table-column label="说明" align="center" prop="description" min-width="200" />
+      <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_QC_TYPE" :value="scope.row.types" />
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="是否启用" align="center" prop="enableFlag" width="100">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.enableFlag" />
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" min-width="150" />
+      <el-table-column label="备注" align="center" prop="remark" min-width="120" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -104,13 +81,14 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="130" fixed="right">
+      <el-table-column label="操作" align="center" width="150">
         <template #default="scope">
+          <!-- TODO @AI：增加一个启用、禁用操作 -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:qc-template:update']"
+            v-hasPermi="['mes:pro-route:update']"
           >
             编辑
           </el-button>
@@ -118,7 +96,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:qc-template:delete']"
+            v-hasPermi="['mes:pro-route:delete']"
           >
             删除
           </el-button>
@@ -134,41 +112,40 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改（编辑时含检测指标项和产品关联子表） -->
-  <TemplateForm ref="formRef" @success="getList" />
+  <!-- 表单弹窗：添加/修改 -->
+  <RouteForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { QcTemplateApi, QcTemplateVO } from '@/api/mes/qc/template'
-import TemplateForm from './TemplateForm.vue'
-import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
+import { ProRouteApi, ProRouteVO } from '@/api/mes/pro/route'
+import RouteForm from './RouteForm.vue'
 
-defineOptions({ name: 'MesQcTemplate' })
+defineOptions({ name: 'MesProRoute' })
 
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
+const message = useMessage()
+const { t } = useI18n()
 
-const loading = ref(true) // 列表的加载中
-const list = ref<QcTemplateVO[]>([]) // 列表的数据
-const total = ref(0) // 列表的总页数
+const loading = ref(true)
+const list = ref<ProRouteVO[]>([])
+const total = ref(0)
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
   name: undefined,
-  type: undefined,
-  enableFlag: undefined
+  status: undefined
 })
-const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const queryFormRef = ref()
+const exportLoading = ref(false)
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await QcTemplateApi.getTemplatePage(queryParams)
+    const data = await ProRouteApi.getRoutePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -198,7 +175,7 @@ const openForm = (type: string, id?: number) => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await QcTemplateApi.deleteTemplate(id)
+    await ProRouteApi.deleteRoute(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -209,8 +186,8 @@ const handleExport = async () => {
   try {
     await message.exportConfirm()
     exportLoading.value = true
-    const data = await QcTemplateApi.exportTemplate(queryParams)
-    download.excel(data, '质检方案.xls')
+    const data = await ProRouteApi.exportRoute(queryParams)
+    download.excel(data, '工艺路线.xls')
   } catch {
   } finally {
     exportLoading.value = false
@@ -218,7 +195,7 @@ const handleExport = async () => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
 })
 </script>
