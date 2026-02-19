@@ -40,6 +40,12 @@ import { formatDate } from '@/utils/formatTime'
 import { HolidayType } from '@/views/mes/utils/constants'
 import CalendarDateCell from './CalendarDateCell.vue'
 import CalendarLegend from './CalendarLegend.vue'
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+import PluginLunar from 'dayjs-plugin-lunar'
+
+dayjs.locale('zh-cn')
+dayjs.extend(PluginLunar)
 
 const loading = ref(false)
 const currentDate = ref(new Date()) // 日历当前显示月份
@@ -94,7 +100,11 @@ const fetchCalendar = async () => {
       return
     }
     list.forEach((item: CalCalendarDayVO) => {
-      calendarDayMap.value.set(item.day, item)
+      // 后端返回的 day 为时间戳（long），格式化为 yyyy-MM-dd 作为 Map key
+      const day = item.day ? formatDate(item.day as any, 'YYYY-MM-DD') : ''
+      if (day) {
+        calendarDayMap.value.set(day, { ...item, day })
+      }
     })
   } finally {
     loading.value = false

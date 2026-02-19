@@ -1,8 +1,8 @@
 <!-- 排班日历 - 日历格子（公共组件） -->
 <template>
-  <div class="h-full p-4px">
+  <div class="h-full p-4px flex flex-col overflow-hidden">
     <!-- 顶部：日期数字 + 上班/休息标签 -->
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center shrink-0">
       <span class="text-16px font-500" :class="{ 'text-#f56c6c': isWeekend }">
         {{ dayNumber }}
       </span>
@@ -11,39 +11,38 @@
     </div>
     <!-- 农历 / 节气 / 节日显示 -->
     <div
-      class="text-12px text-#909399 mt-2px"
+      class="text-11px text-#909399 mt-1px shrink-0 truncate"
       :class="{ 'text-#67c23a': hasFestivalDay }"
     >
       {{ lunarDisplay }}
     </div>
     <!-- 班次列表：节假日不显示排班 -->
-    <template v-if="!isHoliday">
-      <!--
-        配色规则（sort 对应轮班方式中的班次顺序）：
-          sort=1  白班  → success（绿色）
-          sort=2  中班  → 三班倒用 warning（橙色），两班倒用 info（灰色）
-          sort=3  夜班  → info（灰色）
-      -->
-      <div v-for="item in teamShifts" :key="item.sort" class="mt-2px">
+    <!--
+      配色规则（sort 对应轮班方式中的班次顺序）：
+        sort=1  白班  → 绿色（#95d475）
+        sort=2  中班  → 三班倒用橙色（#f0a020），两班倒用灰色（#909399）
+        sort=3  夜班  → 灰色（#909399）
+    -->
+    <div v-if="!isHoliday" class="mt-2px flex flex-col gap-1px overflow-hidden">
+      <div v-for="item in teamShifts" :key="item.sort">
         <!-- sort=1 白班：绿色 -->
-        <el-button v-if="item.sort === 1" type="success" size="small" class="!w-full !text-12px">
+        <div v-if="item.sort === 1" class="shift-tag bg-#95d475">
           {{ item.shiftName }} · {{ item.teamName }}
-        </el-button>
-        <!-- sort=2 中班：三班倒时用橙色，两班倒时用灰色 -->
-        <el-button
+        </div>
+        <!-- sort=2 中班：三班倒时橙色，两班倒时灰色 -->
+        <div
           v-else-if="item.sort === 2"
-          :type="shiftType === MesCalShiftTypeEnum.THREE ? 'warning' : 'info'"
-          size="small"
-          class="!w-full !text-12px"
+          class="shift-tag"
+          :class="shiftType === MesCalShiftTypeEnum.THREE ? 'bg-#f0a020' : 'bg-#909399'"
         >
           {{ item.shiftName }} · {{ item.teamName }}
-        </el-button>
+        </div>
         <!-- sort=3 夜班：灰色 -->
-        <el-button v-else-if="item.sort === 3" type="info" size="small" class="!w-full !text-12px">
+        <div v-else-if="item.sort === 3" class="shift-tag bg-#909399">
           {{ item.shiftName }} · {{ item.teamName }}
-        </el-button>
+        </div>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -108,3 +107,18 @@ const hasFestivalDay = computed(() => {
   return !!(info.solarFestival || info.lunarFestival || info.termName)
 })
 </script>
+
+<style scoped>
+/* 紧凑的班次标签：替代 el-button，减少纵向占用 */
+.shift-tag {
+  padding: 1px 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  border-radius: 3px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+</style>
