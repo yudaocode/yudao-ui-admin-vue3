@@ -69,13 +69,7 @@
       <el-table-column label="路线说明" align="center" prop="description" min-width="200" />
       <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
-          <el-switch
-            v-model="scope.row.status"
-            :active-value="0"
-            :inactive-value="1"
-            @change="handleStatusChange(scope.row)"
-            :disabled="!checkPermi(['mes:pro-route:update'])"
-          />
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
@@ -86,10 +80,8 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="150">
+      <el-table-column label="操作" align="center" width="220">
         <template #default="scope">
-          <!-- TODO @AI：开启和关闭，还是做成按钮，好一点。 -->
-          <!-- TODO @AI：开启后，不允许关闭、删除；前后端都要限制；关联表都要限制 -->
           <el-button
             link
             type="primary"
@@ -100,9 +92,18 @@
           </el-button>
           <el-button
             link
+            :type="scope.row.status === CommonStatusEnum.ENABLE ? 'warning' : 'success'"
+            @click="handleStatusChange(scope.row)"
+            v-hasPermi="['mes:pro-route:update']"
+          >
+            {{ scope.row.status === CommonStatusEnum.ENABLE ? '禁用' : '启用' }}
+          </el-button>
+          <el-button
+            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:pro-route:delete']"
+            :disabled="scope.row.status === CommonStatusEnum.ENABLE"
           >
             删除
           </el-button>
@@ -126,7 +127,6 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { CommonStatusEnum } from '@/utils/constants'
-import { checkPermi } from '@/utils/permission'
 import download from '@/utils/download'
 import { ProRouteApi, ProRouteVO } from '@/api/mes/pro/route'
 import RouteForm from './RouteForm.vue'
@@ -182,25 +182,28 @@ const openForm = (type: string, id?: number) => {
 /** 修改工艺路线状态 */
 const handleStatusChange = async (row: ProRouteVO) => {
   try {
+    // 目标状态：当前禁用 → 启用
+    const newStatus =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+    const text = newStatus === CommonStatusEnum.ENABLE ? '启用' : '停用'
     // 修改状态的二次确认
-    const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
     await message.confirm('确认要"' + text + '""' + row.name + '"工艺路线吗?')
     // 发起修改状态
-    await ProRouteApi.updateRouteStatus(row.id!, row.status)
+    await ProRouteApi.updateRouteStatus(row.id!, newStatus)
+    message.success(text + '成功')
     // 刷新列表
     await getList()
-  } catch {
-    // 取消后，进行恢复按钮
-    row.status =
-      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
-  }
+  } catch {}
 }
 
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
+    // 删除的二次确认
     await message.delConfirm()
+    // 发起删除
     await ProRouteApi.deleteRoute(id)
+    // 删除成功的提示
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -213,7 +216,6 @@ const handleExport = async () => {
     exportLoading.value = true
     const data = await ProRouteApi.exportRoute(queryParams)
     download.excel(data, '工艺路线.xls')
-  } catch {
   } finally {
     exportLoading.value = false
   }

@@ -9,27 +9,23 @@
     </el-row>
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="序号" align="center" prop="sort" width="70" />
-      <el-table-column label="工序编码" align="center" prop="processCode" width="120" />
-      <el-table-column label="工序名称" align="center" prop="processName" width="120" />
+      <el-table-column label="序号" align="center" prop="sort" width="70" fixed="left" />
+      <el-table-column label="工序编码" align="center" prop="processCode" width="120" fixed="left" />
+      <el-table-column label="工序名称" align="center" prop="processName" width="120" fixed="left" />
       <el-table-column label="下一道工序" align="center" prop="nextProcessName" width="120" />
-      <el-table-column label="工序关系" align="center" prop="linkType" width="130">
+      <el-table-column label="与下一道工序关系" align="center" prop="linkType" width="150">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_PRO_LINK_TYPE" :value="scope.row.linkType" />
         </template>
       </el-table-column>
       <el-table-column label="关键工序" align="center" prop="keyFlag" width="80">
         <template #default="scope">
-          <el-tag :type="scope.row.keyFlag ? 'danger' : 'info'" size="small">
-            {{ scope.row.keyFlag ? '是' : '否' }}
-          </el-tag>
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.keyFlag" />
         </template>
       </el-table-column>
       <el-table-column label="质检工序" align="center" prop="checkFlag" width="80">
         <template #default="scope">
-          <el-tag :type="scope.row.checkFlag ? 'warning' : 'info'" size="small">
-            {{ scope.row.checkFlag ? '是' : '否' }}
-          </el-tag>
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.checkFlag" />
         </template>
       </el-table-column>
       <el-table-column label="准备时间" align="center" prop="prepareTime" width="90">
@@ -42,18 +38,19 @@
           {{ scope.row.waitTime ? scope.row.waitTime + '分钟' : '' }}
         </template>
       </el-table-column>
-      <el-table-column label="颜色" align="center" prop="colorCode" width="70">
+      <el-table-column label="颜色" align="center" prop="colorCode" width="100">
         <template #default="scope">
-          <div
-            v-if="scope.row.colorCode"
-            :style="{
-              backgroundColor: scope.row.colorCode,
-              width: '20px',
-              height: '20px',
-              borderRadius: '4px',
-              margin: '0 auto'
-            }"
-          ></div>
+          <div v-if="scope.row.colorCode" style="display: flex; align-items: center; justify-content: center; gap: 4px">
+            <div
+              :style="{
+                backgroundColor: scope.row.colorCode,
+                width: '16px',
+                height: '16px',
+                borderRadius: '4px'
+              }"
+            ></div>
+            <span>{{ scope.row.colorCode }}</span>
+          </div>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="130" fixed="right">
@@ -65,7 +62,7 @@
     </el-table>
 
     <!-- 表单弹窗：添加/修改 -->
-    <Dialog :title="formTitle" v-model="formVisible" width="600px">
+    <Dialog :title="formTitle" v-model="formVisible" width="960px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="12">
@@ -88,7 +85,7 @@
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="工序关系" prop="linkType">
+            <el-form-item label="与下道工序关系" prop="linkType">
               <el-select v-model="formData.linkType" placeholder="请选择">
                 <el-option
                   v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_LINK_TYPE)"
@@ -101,7 +98,10 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="颜色" prop="colorCode">
-              <el-color-picker v-model="formData.colorCode" />
+              <div style="display: flex; align-items: center; gap: 8px">
+                <el-color-picker v-model="formData.colorCode" />
+                <span v-if="formData.colorCode">{{ formData.colorCode }}</span>
+              </div>
             </el-form-item>
           </el-col>
         </el-row>

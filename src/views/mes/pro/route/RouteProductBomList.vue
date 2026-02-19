@@ -17,8 +17,8 @@
     </el-row>
     <!-- 列表 -->
     <el-table v-loading="loading" :data="bomList" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="物料编码" align="center" prop="itemCode" width="150" />
-      <el-table-column label="物料名称" align="center" prop="itemName" width="150" />
+      <el-table-column label="BOM 物料编码" align="center" prop="itemCode" width="150" />
+      <el-table-column label="BOM 物料名称" align="center" prop="itemName" width="150" />
       <el-table-column label="规格型号" align="center" prop="specification" width="150" />
       <el-table-column label="单位" align="center" prop="unitName" width="80" />
       <el-table-column label="用料比例" align="center" prop="quantity" width="100" />
@@ -35,14 +35,7 @@
     <Dialog :title="formTitle" v-model="formVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
         <el-form-item label="BOM 物料" prop="itemId">
-          <el-select v-model="formData.itemId" placeholder="请选择 BOM 物料" filterable>
-            <el-option
-              v-for="item in itemList"
-              :key="item.id"
-              :label="item.name + (item.code ? ' (' + item.code + ')' : '')"
-              :value="item.id"
-            />
-          </el-select>
+          <MdItemSelect v-model="formData.itemId" placeholder="请选择 BOM 物料" />
         </el-form-item>
         <el-form-item label="用料比例" prop="quantity">
           <el-input-number
@@ -67,7 +60,7 @@
 <script setup lang="ts">
 import { ProRouteProductBomApi, ProRouteProductBomVO } from '@/api/mes/pro/route/productbom'
 import { ProRouteProcessApi } from '@/api/mes/pro/route/process'
-import { MdItemApi } from '@/api/mes/md/item'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 
 defineOptions({ name: 'RouteProductBomList' })
 
@@ -84,7 +77,6 @@ const loading = ref(false) // 列表的加载中
 const bomList = ref<ProRouteProductBomVO[]>([]) // BOM 列表的数据
 const processList = ref<any[]>([]) // 工序列表（用于 Tab）
 const activeProcessId = ref('') // 当前选中的工序 Tab
-const itemList = ref<any[]>([]) // 物料下拉列表
 
 // 表单相关
 const formVisible = ref(false) // 表单弹窗的是否展示
@@ -113,10 +105,9 @@ const getBomList = async () => {
   if (!activeProcessId.value) return
   loading.value = true
   try {
-    // TODO @AI：linter 报错；
     bomList.value = await ProRouteProductBomApi.getRouteProductBomList({
       routeId: props.routeId,
-      processId: activeProcessId.value,
+      processId: Number(activeProcessId.value),
       productId: props.productId
     })
   } finally {
@@ -127,11 +118,6 @@ const getBomList = async () => {
 /** 切换工序 Tab */
 const handleTabChange = () => {
   getBomList()
-}
-
-/** 加载物料列表 */
-const loadItemList = async () => {
-  itemList.value = await MdItemApi.getItemSimpleList()
 }
 
 /** 添加/修改操作 */
@@ -185,6 +171,5 @@ const handleDelete = async (id: number) => {
 /** 初始化 */
 onMounted(() => {
   loadProcessList()
-  loadItemList()
 })
 </script>

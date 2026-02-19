@@ -1,7 +1,7 @@
 <!-- MES 质检方案-产品关联 子列表 -->
 <template>
   <div>
-    <!-- 操作按钮 -->
+    <!-- 操作栏 -->
     <el-row class="mb-10px">
       <el-button
         type="primary"

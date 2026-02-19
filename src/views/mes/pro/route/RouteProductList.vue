@@ -9,8 +9,8 @@
     </el-row>
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="产品编码" align="center" prop="itemCode" width="150" />
-      <el-table-column label="产品名称" align="center" prop="itemName" width="150" />
+      <el-table-column label="产品物料编码" align="center" prop="itemCode" width="150" />
+      <el-table-column label="产品物料名称" align="center" prop="itemName" width="150" />
       <el-table-column label="规格型号" align="center" prop="specification" width="150" />
       <el-table-column label="单位" align="center" prop="unitName" width="80" />
       <el-table-column label="生产数量" align="center" prop="quantity" width="100" />
@@ -23,9 +23,8 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
-      <el-table-column label="操作" align="center" width="180" fixed="right">
+      <el-table-column label="操作" align="center" width="130" fixed="right">
         <template #default="scope">
-          <el-button link type="primary" @click="openBomDialog(scope.row)">BOM</el-button>
           <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
@@ -33,17 +32,10 @@
     </el-table>
 
     <!-- 表单弹窗：添加/修改 -->
-    <Dialog :title="formTitle" v-model="formVisible" width="500px">
+    <Dialog :title="formTitle" v-model="formVisible" width="960px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
         <el-form-item label="产品" prop="itemId">
-          <el-select v-model="formData.itemId" placeholder="请选择产品" filterable>
-            <el-option
-              v-for="item in itemList"
-              :key="item.id"
-              :label="item.name + (item.code ? ' (' + item.code + ')' : '')"
-              :value="item.id"
-            />
-          </el-select>
+          <MdItemSelect v-model="formData.itemId" />
         </el-form-item>
         <el-form-item label="生产数量" prop="quantity">
           <el-input-number v-model="formData.quantity" :min="1" controls-position="right" />
@@ -76,20 +68,19 @@
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
+      <!-- 编辑时展示产品 BOM 配置 -->
+      <template v-if="formType === 'update' && formData.id">
+        <el-divider content-position="left">产品 BOM 配置</el-divider>
+        <RouteProductBomList
+          :routeId="routeId"
+          :productId="formData.itemId"
+          :productName="formData.itemName"
+        />
+      </template>
       <template #footer>
         <el-button @click="formVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
       </template>
-    </Dialog>
-
-    <!-- 产品 BOM 弹窗 -->
-    <Dialog title="产品 BOM 配置" v-model="bomDialogVisible" width="800px">
-      <RouteProductBomList
-        v-if="bomDialogVisible"
-        :routeId="routeId"
-        :productId="currentProduct.itemId"
-        :productName="currentProduct.itemName"
-      />
     </Dialog>
   </div>
 </template>
@@ -97,7 +88,7 @@
 <script setup lang="ts">
 import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProRouteProductApi, ProRouteProductVO } from '@/api/mes/pro/route/product'
-import { MdItemApi } from '@/api/mes/md/item'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import RouteProductBomList from './RouteProductBomList.vue'
 
 defineOptions({ name: 'RouteProductList' })
@@ -111,7 +102,6 @@ const { t } = useI18n() // 国际化
 
 const loading = ref(false) // 列表的加载中
 const list = ref<ProRouteProductVO[]>([]) // 列表的数据
-const itemList = ref<any[]>([]) // 物料下拉列表
 
 // 表单相关
 const formVisible = ref(false) // 表单弹窗的是否展示
@@ -124,10 +114,6 @@ const formRules = reactive({
   itemId: [{ required: true, message: '产品不能为空', trigger: 'change' }]
 })
 
-// BOM 弹窗相关
-const bomDialogVisible = ref(false) // BOM 弹窗的是否展示
-const currentProduct = ref<any>({}) // 当前选中的产品
-
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -136,11 +122,6 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-/** 加载物料列表 */
-const loadItemList = async () => {
-  itemList.value = await MdItemApi.getItemSimpleList()
 }
 
 /** 添加/修改操作 */
@@ -191,12 +172,6 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 打开 BOM 弹窗 */
-const openBomDialog = (row: ProRouteProductVO) => {
-  currentProduct.value = row
-  bomDialogVisible.value = true
-}
-
 /** 监听路线编号变化 */
 watch(
   () => props.routeId,
@@ -208,8 +183,4 @@ watch(
   { immediate: true }
 )
 
-/** 初始化 */
-onMounted(() => {
-  loadItemList()
-})
 </script>
