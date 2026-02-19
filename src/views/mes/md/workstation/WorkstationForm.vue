@@ -110,13 +110,13 @@
     <!-- 编辑时显示子资源 Tab -->
     <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="设备资源" name="machine">
-        <WorkstationMachinePanel :workstation-id="formData.id!" />
+        <WorkstationMachineList :workstation-id="formData.id!" />
       </el-tab-pane>
       <el-tab-pane label="工装夹具" name="tool">
-        <WorkstationToolPanel :workstation-id="formData.id!" />
+        <WorkstationToolList :workstation-id="formData.id!" />
       </el-tab-pane>
       <el-tab-pane label="人力资源" name="worker">
-        <WorkstationWorkerPanel :workstation-id="formData.id!" />
+        <WorkstationWorkerList :workstation-id="formData.id!" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -135,9 +135,9 @@ import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/ware
 import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/area'
 import { CommonStatusEnum } from '@/utils/constants'
 import { generateRandomStr } from '@/utils'
-import WorkstationMachinePanel from './WorkstationMachinePanel.vue'
-import WorkstationToolPanel from './WorkstationToolPanel.vue'
-import WorkstationWorkerPanel from './WorkstationWorkerPanel.vue'
+import WorkstationMachineList from './WorkstationMachineList.vue'
+import WorkstationToolList from './WorkstationToolList.vue'
+import WorkstationWorkerList from './WorkstationWorkerList.vue'
 
 defineOptions({ name: 'WorkstationForm' })
 

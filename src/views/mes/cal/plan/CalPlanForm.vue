@@ -113,10 +113,10 @@
     <!-- 编辑时显示子资源 Tab -->
     <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="班次" name="shift">
-        <CalShiftPanel :plan-id="formData.id!" />
+        <CalShiftList :plan-id="formData.id!" />
       </el-tab-pane>
       <el-tab-pane label="班组" name="team">
-        <CalPlanTeamPanel :plan-id="formData.id!" />
+        <CalPlanTeamList :plan-id="formData.id!" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -140,8 +140,8 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CalPlanApi, CalPlanVO } from '@/api/mes/cal/plan'
 import { generateRandomStr } from '@/utils'
 import { MesCalPlanStatusEnum, MesCalShiftTypeEnum, MesCalShiftMethodEnum } from '@/views/mes/utils/constants'
-import CalShiftPanel from './CalShiftPanel.vue'
-import CalPlanTeamPanel from './CalPlanTeamPanel.vue'
+import CalShiftList from './CalShiftList.vue'
+import CalPlanTeamList from './CalPlanTeamList.vue'
 
 defineOptions({ name: 'CalPlanForm' })
 

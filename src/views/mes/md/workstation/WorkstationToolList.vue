@@ -1,11 +1,14 @@
+<!-- MES 工作站-工装夹具 列表 -->
 <template>
   <div>
+    <!-- 操作栏 -->
     <el-button type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
-      <Icon icon="ep:plus" class="mr-5px" /> 添加人员
+      <Icon icon="ep:plus" class="mr-5px" /> 添加工具
     </el-button>
+    <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
-      <el-table-column label="岗位编号" align="center" prop="postId" />
-      <el-table-column label="岗位名称" align="center" prop="postName" />
+      <el-table-column label="工具类型编号" align="center" prop="toolTypeId" />
+      <el-table-column label="工具类型名称" align="center" prop="toolTypeName" />
       <el-table-column label="数量" align="center" prop="quantity" width="100" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" width="120">
@@ -16,22 +19,23 @@
       </el-table-column>
     </el-table>
 
-    <!-- 添加/编辑弹窗 -->
+    <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px" v-loading="formLoading">
-        <el-form-item label="岗位" prop="postId">
-          <el-select
-            v-model="formData.postId"
-            placeholder="请选择岗位"
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="formRules"
+        label-width="80px"
+        v-loading="formLoading"
+      >
+        <el-form-item label="工具类型" prop="toolTypeId">
+          <!-- TODO @芋艿：对接工具类型下拉列表，等 TM 工具模块完成后对接 -->
+          <el-input-number
+            v-model="formData.toolTypeId"
+            placeholder="请输入工具类型编号"
             class="!w-1/1"
-          >
-            <el-option
-              v-for="post in postList"
-              :key="post.id"
-              :label="post.name"
-              :value="post.id!"
-            />
-          </el-select>
+            :disabled="formType === 'update'"
+          />
         </el-form-item>
         <el-form-item label="数量" prop="quantity">
           <el-input-number
@@ -54,8 +58,9 @@
 </template>
 
 <script setup lang="ts">
-import { MdWorkstationWorkerApi, MdWorkstationWorkerVO } from '@/api/mes/md/workstation/worker'
-import * as PostApi from '@/api/system/post'
+import { MdWorkstationToolApi, MdWorkstationToolVO } from '@/api/mes/md/workstation/tool'
+
+defineOptions({ name: 'WorkstationToolList' })
 
 const props = defineProps<{
   workstationId: number // 工作站编号
@@ -64,46 +69,43 @@ const props = defineProps<{
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const loading = ref(false) // 列表加载中
-const list = ref<MdWorkstationWorkerVO[]>([]) // 人力资源列表
-const postList = ref<PostApi.PostVO[]>([]) // 岗位下拉列表
+const loading = ref(false) // 列表的加载中
+const list = ref<MdWorkstationToolVO[]>([]) // 列表的数据
 
-/** 加载列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    list.value = await MdWorkstationWorkerApi.getWorkstationWorkerList(props.workstationId)
+    list.value = await MdWorkstationToolApi.getWorkstationToolList(props.workstationId)
   } finally {
     loading.value = false
   }
 }
 
-// ==================== 添加/编辑人员 ====================
+// ==================== 添加/修改 ====================
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formLoading = ref(false) // 表单的提交加载中
+const formLoading = ref(false) // 表单的加载中
 const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,
   workstationId: undefined as number | undefined,
-  postId: undefined as number | undefined,
+  toolTypeId: undefined as number | undefined,
   quantity: 1,
   remark: undefined as string | undefined
-}) // 表单数据
+})
 const formRules = reactive({
-  postId: [{ required: true, message: '岗位不能为空', trigger: 'change' }],
+  toolTypeId: [{ required: true, message: '工具类型不能为空', trigger: 'blur' }],
   quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
-}) // 表单校验规则
+})
 
 /** 打开表单弹窗 */
-const openForm = async (type: string, row?: MdWorkstationWorkerVO) => {
+const openForm = (type: string, row?: MdWorkstationToolVO) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  // 加载岗位列表
-  postList.value = await PostApi.getSimplePostList()
   // 修改时，设置数据
   if (type === 'update' && row) {
     formData.value = { ...row }
@@ -119,12 +121,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as MdWorkstationWorkerVO
+    const data = formData.value as unknown as MdWorkstationToolVO
     if (formType.value === 'create') {
-      await MdWorkstationWorkerApi.createWorkstationWorker(data)
+      await MdWorkstationToolApi.createWorkstationTool(data)
       message.success(t('common.createSuccess'))
     } else {
-      await MdWorkstationWorkerApi.updateWorkstationWorker(data)
+      await MdWorkstationToolApi.updateWorkstationTool(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -140,7 +142,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     workstationId: props.workstationId,
-    postId: undefined,
+    toolTypeId: undefined,
     quantity: 1,
     remark: undefined
   }
@@ -151,12 +153,13 @@ const resetForm = () => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await MdWorkstationWorkerApi.deleteWorkstationWorker(id)
+    await MdWorkstationToolApi.deleteWorkstationTool(id)
     message.success('删除成功')
     await getList()
   } catch {}
 }
 
+/** 监听 workstationId 变化，加载列表 */
 watch(
   () => props.workstationId,
   (val) => {

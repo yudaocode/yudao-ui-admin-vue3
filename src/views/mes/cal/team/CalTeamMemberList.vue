@@ -21,7 +21,8 @@
 
 <script setup lang="ts">
 import { CalTeamMemberApi, CalTeamMemberVO } from '@/api/mes/cal/team/member'
-import CalTeamMemberForm from './CalTeamMemberForm.vue'
+import { getSimpleUserList } from '@/api/system/user'
+import type { UserVO } from '@/api/system/user'
 
 const props = defineProps<{
   teamId: number // 班组编号
