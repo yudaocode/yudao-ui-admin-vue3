@@ -33,22 +33,7 @@
         v-loading="formLoading"
       >
         <el-form-item label="项目" prop="subjectId">
-          <!-- TODO @AI：使用组件的 machinery select，如果没有，就封装一个！另外，现在 {{ item.machineryCode }} - {{ item.machineryName }} 都展示不出来； -->
-          <el-select
-            v-model="formData.subjectId"
-            placeholder="请选择项目"
-            class="!w-1/1"
-            filterable
-          >
-            <el-option
-              v-for="item in subjectList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            >
-              <span>{{ item.code }} - {{ item.name }}</span>
-            </el-option>
-          </el-select>
+          <DvSubjectSelect v-model="formData.subjectId" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
@@ -65,7 +50,7 @@
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { DvCheckPlanSubjectApi, DvCheckPlanSubjectVO } from '@/api/mes/dv/checkplan/subject'
-import { DvSubjectApi } from '@/api/mes/dv/subject'
+import DvSubjectSelect from '@/views/mes/dv/subject/components/DvSubjectSelect.vue'
 
 defineOptions({ name: 'CheckPlanSubjectList' })
 
@@ -78,7 +63,6 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表的加载中
 const list = ref<DvCheckPlanSubjectVO[]>([]) // 列表的数据
-const subjectList = ref<any[]>([]) // 项目下拉列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -110,8 +94,6 @@ const openForm = async (type: string) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   resetForm()
-  // 加载项目下拉列表
-  subjectList.value = await DvSubjectApi.getSimpleList()
 }
 
 /** 提交表单 */

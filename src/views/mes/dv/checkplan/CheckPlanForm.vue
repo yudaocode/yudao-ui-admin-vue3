@@ -108,24 +108,6 @@
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <!-- 启用方案：仅草稿状态显示 -->
-      <el-button
-        v-if="formType === 'update' && formData.status === MesDvCheckPlanStatusEnum.PREPARE"
-        type="warning"
-        @click="handleEnable"
-        :disabled="formLoading"
-      >
-        启用方案
-      </el-button>
-      <!-- 停用方案：仅已启用状态显示 -->
-      <el-button
-        v-if="formType === 'update' && formData.status === MesDvCheckPlanStatusEnum.ENABLED"
-        type="danger"
-        @click="handleDisable"
-        :disabled="formLoading"
-      >
-        停用方案
-      </el-button>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -210,37 +192,6 @@ const submitForm = async () => {
     }
     dialogVisible.value = false
     emit('success')
-  } finally {
-    formLoading.value = false
-  }
-}
-
-// TODO @AI：启用、停用逻辑，全部迁移到 index.vue 里；聚焦一点；
-/** 启用方案 */
-const handleEnable = async () => {
-  try {
-    await message.confirm('确认启用该点检保养方案？启用后将不可修改或删除。')
-    formLoading.value = true
-    await DvCheckPlanApi.enableCheckPlan(formData.value.id!)
-    message.success('启用成功')
-    dialogVisible.value = false
-    emit('success')
-  } catch {
-  } finally {
-    formLoading.value = false
-  }
-}
-
-/** 停用方案 */
-const handleDisable = async () => {
-  try {
-    await message.confirm('确认停用该点检保养方案？')
-    formLoading.value = true
-    await DvCheckPlanApi.disableCheckPlan(formData.value.id!)
-    message.success('停用成功')
-    dialogVisible.value = false
-    emit('success')
-  } catch {
   } finally {
     formLoading.value = false
   }

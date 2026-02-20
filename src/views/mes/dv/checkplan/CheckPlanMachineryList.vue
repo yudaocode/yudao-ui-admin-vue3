@@ -27,23 +27,8 @@
         label-width="80px"
         v-loading="formLoading"
       >
-        <!-- TODO @AI：使用组件的 machinery select，如果没有，就封装一个！另外，现在 {{ item.machineryCode }} - {{ item.machineryName }} 都展示不出来； -->
         <el-form-item label="设备" prop="machineryId">
-          <el-select
-            v-model="formData.machineryId"
-            placeholder="请选择设备"
-            class="!w-1/1"
-            filterable
-          >
-            <el-option
-              v-for="item in machineryList"
-              :key="item.id"
-              :label="item.machineryName"
-              :value="item.id"
-            >
-              <span>{{ item.machineryCode }} - {{ item.machineryName }}</span>
-            </el-option>
-          </el-select>
+          <DvMachinerySelect v-model="formData.machineryId" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
@@ -59,7 +44,7 @@
 
 <script setup lang="ts">
 import { DvCheckPlanMachineryApi, DvCheckPlanMachineryVO } from '@/api/mes/dv/checkplan/machinery'
-import { DvMachineryApi } from '@/api/mes/dv/machinery'
+import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 
 defineOptions({ name: 'CheckPlanMachineryList' })
 
@@ -72,7 +57,6 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表的加载中
 const list = ref<DvCheckPlanMachineryVO[]>([]) // 列表的数据
-const machineryList = ref<any[]>([]) // 设备下拉列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -104,8 +88,6 @@ const openForm = async (type: string) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   resetForm()
-  // 加载设备下拉列表
-  machineryList.value = await DvMachineryApi.getSimpleList()
 }
 
 /** 提交表单 */

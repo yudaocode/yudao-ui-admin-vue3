@@ -139,6 +139,15 @@
             删除
           </el-button>
           <el-button
+            v-if="scope.row.status === MesDvCheckPlanStatusEnum.PREPARE"
+            link
+            type="success"
+            @click="handleEnable(scope.row.id)"
+            v-hasPermi="['mes:dv-check-plan:update']"
+          >
+            启用
+          </el-button>
+          <el-button
             v-if="scope.row.status === MesDvCheckPlanStatusEnum.ENABLED"
             link
             type="warning"
@@ -226,6 +235,16 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     await DvCheckPlanApi.deleteCheckPlan(id)
     message.success(t('common.delSuccess'))
+    await getList()
+  } catch {}
+}
+
+/** 启用按钮操作 */
+const handleEnable = async (id: number) => {
+  try {
+    await message.confirm('确认启用该点检保养方案？启用后将不可修改或删除。')
+    await DvCheckPlanApi.enableCheckPlan(id)
+    message.success('启用成功')
     await getList()
   } catch {}
 }
