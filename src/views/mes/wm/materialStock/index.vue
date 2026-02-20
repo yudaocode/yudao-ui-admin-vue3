@@ -17,62 +17,34 @@
           :inline="true"
           label-width="68px"
         >
-          <el-form-item label="物料编码" prop="itemCode">
-            <el-input
-              v-model="queryParams.itemCode"
-              placeholder="请输入物料编码"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-200px"
-            />
+          <el-form-item label="物料" prop="itemId">
+            <MdItemSelect v-model="queryParams.itemId" placeholder="请选择物料" class="!w-240px" />
           </el-form-item>
-          <el-form-item label="物料名称" prop="itemName">
+          <el-form-item label="批次号" prop="batchCode">
             <el-input
-              v-model="queryParams.itemName"
-              placeholder="请输入物料名称"
+              v-model="queryParams.batchCode"
+              placeholder="请输入批次号"
               clearable
               @keyup.enter="handleQuery"
               class="!w-200px"
             />
           </el-form-item>
           <el-form-item label="仓库" prop="warehouseId">
-            <el-select
+            <WmWarehouseSelect
               v-model="queryParams.warehouseId"
-              placeholder="请选择仓库"
-              clearable
               class="!w-200px"
               @change="handleWarehouseChange"
-            >
-              <el-option
-                v-for="item in warehouseList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            />
           </el-form-item>
           <el-form-item label="库区" prop="locationId">
-            <el-select
+            <WmWarehouseLocationSelect
               v-model="queryParams.locationId"
-              placeholder="请选择库区"
-              clearable
+              :warehouse-id="queryParams.warehouseId"
               class="!w-200px"
-            >
-              <el-option
-                v-for="item in locationList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            />
           </el-form-item>
           <el-form-item label="是否冻结" prop="frozen">
-            <el-select
-              v-model="queryParams.frozen"
-              placeholder="请选择"
-              clearable
-              class="!w-200px"
-            >
+            <el-select v-model="queryParams.frozen" placeholder="请选择" clearable class="!w-200px">
               <el-option :value="true" label="是" />
               <el-option :value="false" label="否" />
             </el-select>
@@ -105,7 +77,7 @@
           <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
           <el-table-column label="在库数量" align="center" prop="quantityOnhand" min-width="100" />
           <el-table-column label="单位" align="center" prop="unitMeasureName" min-width="80" />
-          <!-- TODO @芋艿：批次号； -->
+          <!-- TODO @芋艿：批次号，待 mes_wm_batch 模块迁移后补充 -->
           <el-table-column label="仓库" align="center" prop="warehouseName" min-width="100" />
           <el-table-column label="库区" align="center" prop="locationName" min-width="100" />
           <el-table-column label="库位" align="center" prop="areaName" min-width="100">
@@ -126,7 +98,7 @@
             label="入库日期"
             align="center"
             prop="recptDate"
-            :formatter="dateFormatter"
+            :formatter="dateFormatter2"
             width="180px"
           />
           <el-table-column label="冻结" align="center" prop="frozen" min-width="80">
@@ -157,13 +129,14 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { WmMaterialStockApi, WmMaterialStockVO } from '@/api/mes/wm/materialstock'
-import { WmWarehouseApi } from '@/api/mes/wm/warehouse'
-import { WmWarehouseLocationApi } from '@/api/mes/wm/warehouse/location'
 import ItemTypeTree from '@/views/mes/md/item/ItemTypeTree.vue'
 import AreaForm from '@/views/mes/wm/warehouse/area/AreaForm.vue'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
+import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 
 defineOptions({ name: 'MesWmMaterialStock' })
 
@@ -176,8 +149,8 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   itemTypeId: undefined,
-  itemCode: undefined,
-  itemName: undefined,
+  itemId: undefined,
+  batchCode: undefined,
   warehouseId: undefined,
   locationId: undefined,
   frozen: undefined
@@ -185,23 +158,9 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 
-// 仓库、库区下拉数据
-const warehouseList = ref<any[]>([])
-const locationList = ref<any[]>([])
-
-/** 加载仓库列表 */
-const loadWarehouseList = async () => {
-  warehouseList.value = await WmWarehouseApi.getWarehouseSimpleList()
-}
-
-/** 仓库切换时联动加载库区 */
-const handleWarehouseChange = async (warehouseId: number | undefined) => {
+/** 仓库切换时清空库区 */
+const handleWarehouseChange = () => {
   queryParams.locationId = undefined
-  if (warehouseId) {
-    locationList.value = await WmWarehouseLocationApi.getWarehouseLocationSimpleList(warehouseId)
-  } else {
-    locationList.value = []
-  }
 }
 
 /** 查询列表 */
@@ -226,7 +185,6 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   queryParams.itemTypeId = undefined
-  locationList.value = []
   handleQuery()
 }
 
@@ -239,10 +197,12 @@ const handleTypeNodeClick = (row: any) => {
 /** 处理冻结状态切换 */
 const handleFrozenChange = async (row: WmMaterialStockVO) => {
   try {
+    const text = row.frozen ? '冻结' : '解冻'
+    await message.confirm('确认要"' + text + '"该库存记录吗?')
     await WmMaterialStockApi.updateMaterialStockFrozen({ id: row.id, frozen: row.frozen })
-    message.success(row.frozen ? '冻结成功' : '解冻成功')
+    message.success(text + '成功')
   } catch {
-    // 失败时回滚
+    // 取消或失败时回滚
     row.frozen = !row.frozen
   }
 }
@@ -268,6 +228,6 @@ const handleExport = async () => {
 
 /** 初始化 */
 onMounted(async () => {
-  await Promise.all([loadWarehouseList(), getList()])
+  await getList()
 })
 </script>
