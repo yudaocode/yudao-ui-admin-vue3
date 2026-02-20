@@ -1,5 +1,4 @@
 <!-- MES 库存台账列表 -->
-<!-- TODO @AI：包名应该小写； -->
 <template>
   <el-row :gutter="20">
     <!-- 左侧分类树 -->
@@ -98,8 +97,6 @@
         </el-form>
       </ContentWrap>
 
-      <!-- TODO @AI：左侧分类，看看能不能复用下 md item 那的组件； -->
-
       <!-- 列表 -->
       <ContentWrap>
         <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
@@ -156,26 +153,25 @@
   </el-row>
 
   <!-- 库位详情弹窗 -->
-  <AreaDetailDialog ref="areaDetailDialogRef" />
+  <AreaForm ref="areaFormRef" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { WmMaterialStockApi, WmMaterialStockVO } from '@/api/mes/wm/materialStock'
+import { WmMaterialStockApi, WmMaterialStockVO } from '@/api/mes/wm/materialstock'
 import { WmWarehouseApi } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi } from '@/api/mes/wm/warehouse/location'
 import ItemTypeTree from '@/views/mes/md/item/ItemTypeTree.vue'
-import AreaDetailDialog from './AreaDetailDialog.vue'
+import AreaForm from '@/views/mes/wm/warehouse/area/AreaForm.vue'
 
 defineOptions({ name: 'MesWmMaterialStock' })
 
-// TODO @AI：注释分隔，参考 system user index.vue
-const message = useMessage()
+const message = useMessage() // 消息弹窗
 
-const loading = ref(true)
-const list = ref<WmMaterialStockVO[]>([])
-const total = ref(0)
+const loading = ref(true) // 列表的加载中
+const list = ref<WmMaterialStockVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -186,8 +182,8 @@ const queryParams = reactive({
   locationId: undefined,
   frozen: undefined
 })
-const queryFormRef = ref()
-const exportLoading = ref(false)
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
 
 // 仓库、库区下拉数据
 const warehouseList = ref<any[]>([])
@@ -252,9 +248,9 @@ const handleFrozenChange = async (row: WmMaterialStockVO) => {
 }
 
 /** 打开库位详情弹窗 */
-const areaDetailDialogRef = ref()
+const areaFormRef = ref()
 const openAreaDetail = (areaId: number) => {
-  areaDetailDialogRef.value.open(areaId)
+  areaFormRef.value.open('detail', areaId)
 }
 
 /** 导出按钮操作 */
