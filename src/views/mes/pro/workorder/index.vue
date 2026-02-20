@@ -115,17 +115,16 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <!-- TODO @AI：生产工单，是父子结构；到底是前端拼接出来，还是后端拼接出来？！ -->
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      row-key="id"
+      default-expand-all
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+    >
       <el-table-column label="工单编码" align="center" prop="code" width="140" />
-      <el-table-column label="父工单" align="center" prop="parentCode" width="140">
-        <template #default="scope">
-          <span v-if="scope.row.parentId && scope.row.parentId !== 0">
-            {{ scope.row.parentCode }}
-          </span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
       <el-table-column label="工单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="工单类型" align="center" prop="type" width="100">
         <template #default="scope">
@@ -147,7 +146,6 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="工单数量" align="center" prop="quantity" width="100" />
       <el-table-column label="已生产数量" align="center" prop="quantityProduced" width="100" />
-      <!-- TODO @AI：客户编码未展示，是不是后端没查询？！ -->
       <el-table-column label="客户编码" align="center" prop="clientCode" width="120" />
       <el-table-column label="客户名称" align="center" prop="clientName" width="120" />
       <el-table-column
@@ -169,10 +167,9 @@
         :formatter="dateFormatter"
         width="180"
       />
-      <el-table-column label="操作" align="center" width="200" fixed="right">
+      <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
-          <!-- TODO @AI：新增操作；对齐下； -->
-          <!-- 草稿状态：编辑、删除 -->
+          <!-- 草稿状态：编辑、确认、删除 -->
           <template v-if="scope.row.status === MesProWorkOrderStatusEnum.PREPARE">
             <el-button
               link
@@ -184,6 +181,14 @@
             </el-button>
             <el-button
               link
+              type="success"
+              @click="handleConfirm(scope.row.id)"
+              v-hasPermi="['mes:pro-work-order:update']"
+            >
+              确认
+            </el-button>
+            <el-button
+              link
               type="danger"
               @click="handleDelete(scope.row.id)"
               v-hasPermi="['mes:pro-work-order:delete']"
@@ -191,6 +196,19 @@
               删除
             </el-button>
           </template>
+          <!-- 已确认 + 自行生产：新增子工单 -->
+          <el-button
+            v-if="
+              scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED &&
+              scope.row.type === MesProWorkOrderTypeEnum.SELF
+            "
+            link
+            type="primary"
+            @click="handleAddChild(scope.row)"
+            v-hasPermi="['mes:pro-work-order:create']"
+          >
+            新增
+          </el-button>
           <!-- 已确认状态：完成、取消 -->
           <template v-if="scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED">
             <el-button
@@ -239,10 +257,11 @@
 <script setup lang="ts">
 import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
+import { handleTree } from '@/utils/tree'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import WorkOrderForm from './WorkOrderForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { MesProWorkOrderStatusEnum } from '@/views/mes/utils/constants'
+import { MesProWorkOrderStatusEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 
@@ -269,12 +288,12 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 
-/** 查询列表 */
+/** 查询列表（分页 + 前端 handleTree 拼接树） */
 const getList = async () => {
   loading.value = true
   try {
     const data = await ProWorkOrderApi.getWorkOrderPage(queryParams)
-    list.value = data.list
+    list.value = handleTree(data.list, 'id', 'parentId')
     total.value = data.total
   } finally {
     loading.value = false
@@ -295,8 +314,8 @@ const resetQuery = () => {
 
 /** 添加/修改操作 */
 const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+const openForm = (type: string, id?: number, parentRow?: any) => {
+  formRef.value.open(type, id, parentRow)
 }
 
 /** 删除按钮操作 */
@@ -307,6 +326,21 @@ const handleDelete = async (id: number) => {
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
+}
+
+/** 确认工单 */
+const handleConfirm = async (id: number) => {
+  try {
+    await message.confirm('确认要完成工单编制吗？确认后将不能更改')
+    await ProWorkOrderApi.confirmWorkOrder(id)
+    message.success('工单已确认')
+    await getList()
+  } catch {}
+}
+
+/** 新增子工单 */
+const handleAddChild = (row: any) => {
+  openForm('create', undefined, row)
 }
 
 /** 完成工单 */

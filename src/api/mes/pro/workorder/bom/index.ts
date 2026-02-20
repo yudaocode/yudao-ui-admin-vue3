@@ -12,6 +12,7 @@ export interface ProWorkOrderBomVO {
   unitMeasureName: string // 单位名称
   quantity: number // 预计使用量
   remark: string // 备注
+  itemOrProduct: string // 物料产品标识
 }
 
 // MES 生产工单 BOM API
@@ -39,5 +40,10 @@ export const ProWorkOrderBomApi = {
   // 删除工单 BOM
   deleteWorkOrderBom: async (id: number) => {
     return await request.delete({ url: `/mes/pro/work-order-bom/delete?id=` + id })
+  },
+
+  // 获取工单物料需求列表
+  getWorkOrderBomItemListByWorkOrderId: async (workOrderId: number) => {
+    return await request.get({ url: `/mes/pro/work-order-bom/item-list-by-work-order-id?workOrderId=` + workOrderId })
   }
 }

@@ -23,7 +23,6 @@ export interface ProWorkOrderVO {
   clientName: string // 客户名称
   vendorId: number // 供应商编号
   vendorName: string // 供应商名称
-  batchCode: string // 批次号
   requestDate: Date // 需求日期
   parentId: number // 父工单编号
   parentCode: string // 父工单编码
@@ -73,5 +72,10 @@ export const ProWorkOrderApi = {
   // 取消工单
   cancelWorkOrder: async (id: number) => {
     return await request.put({ url: `/mes/pro/work-order/cancel?id=` + id })
+  },
+
+  // 确认工单
+  confirmWorkOrder: async (id: number) => {
+    return await request.put({ url: `/mes/pro/work-order/confirm?id=` + id })
   }
 }
