@@ -39,6 +39,11 @@ export const DvSubjectApi = {
     return await request.delete({ url: `/mes/dv/subject/delete?id=` + id })
   },
 
+  // 获得点检保养项目精简列表（下拉选项用）
+  getSimpleList: async () => {
+    return await request.get({ url: `/mes/dv/subject/simple-list` })
+  },
+
   // 导出点检保养项目 Excel
   exportSubject: async (params: any) => {
     return await request.download({ url: `/mes/dv/subject/export-excel`, params })

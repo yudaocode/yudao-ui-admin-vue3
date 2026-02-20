@@ -88,6 +88,12 @@ export const MesProTaskStatusEnum = {
   CANCELED: 4 // 已取消
 }
 
+/** MES 点检保养方案状态枚举 */
+export const MesDvCheckPlanStatusEnum = {
+  PREPARE: 0, // 草稿
+  ENABLED: 1 // 已启用
+}
+
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {
   for (const item of Object.values(MesItemOrProductEnum)) {

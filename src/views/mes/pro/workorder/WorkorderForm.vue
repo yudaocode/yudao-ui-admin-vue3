@@ -111,6 +111,15 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input
+              v-model="formData.batchCode"
+              placeholder="请输入批次号"
+              :disabled="isDetail"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="需求日期" prop="requestDate">
             <el-date-picker
               v-model="formData.requestDate"
@@ -198,6 +207,7 @@ const formData = ref({
   quantity: undefined,
   clientId: undefined,
   vendorId: undefined,
+  batchCode: undefined,
   requestDate: undefined,
   status: undefined,
   remark: undefined
@@ -336,6 +346,7 @@ const resetForm = () => {
     quantity: undefined,
     clientId: undefined,
     vendorId: undefined,
+    batchCode: undefined,
     requestDate: undefined,
     status: undefined,
     remark: undefined

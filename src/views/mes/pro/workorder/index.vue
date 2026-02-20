@@ -63,6 +63,15 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="批次号" prop="batchCode">
+        <el-input
+          v-model="queryParams.batchCode"
+          placeholder="请输入批次号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="工单状态" prop="status">
         <el-select
           v-model="queryParams.status"
@@ -148,6 +157,8 @@
       <el-table-column label="已生产数量" align="center" prop="quantityProduced" width="100" />
       <el-table-column label="客户编码" align="center" prop="clientCode" width="120" />
       <el-table-column label="客户名称" align="center" prop="clientName" width="120" />
+      <el-table-column label="供应商编码" align="center" prop="vendorCode" width="120" />
+      <el-table-column label="批次号" align="center" prop="batchCode" width="120" />
       <el-table-column
         label="需求日期"
         align="center"
@@ -282,6 +293,7 @@ const queryParams = reactive({
   clientId: undefined,
   type: undefined,
   orderSourceType: undefined,
+  batchCode: undefined,
   status: undefined,
   requestDate: undefined
 })

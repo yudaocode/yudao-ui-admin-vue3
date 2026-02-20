@@ -44,6 +44,11 @@ export const DvMachineryApi = {
     return await request.delete({ url: `/mes/dv/machinery/delete?id=` + id })
   },
 
+  // 获得设备精简列表（下拉选项用）
+  getSimpleList: async () => {
+    return await request.get({ url: `/mes/dv/machinery/simple-list` })
+  },
+
   // 导出设备台账 Excel
   exportMachinery: async (params: any) => {
     return await request.download({ url: `/mes/dv/machinery/export-excel`, params })

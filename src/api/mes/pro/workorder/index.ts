@@ -23,6 +23,8 @@ export interface ProWorkOrderVO {
   clientName: string // 客户名称
   vendorId: number // 供应商编号
   vendorName: string // 供应商名称
+  vendorCode: string // 供应商编码
+  batchCode: string // 批次号
   requestDate: Date // 需求日期
   parentId: number // 父工单编号
   parentCode: string // 父工单编码
