@@ -8,21 +8,19 @@
       :inline="true"
       label-width="90px"
     >
-      <!-- TODO @AI：维修单编号 -->
-      <el-form-item label="工单编码" prop="code">
+      <el-form-item label="维修单编号" prop="code">
         <el-input
           v-model="queryParams.code"
-          placeholder="请输入工单编码"
+          placeholder="请输入维修单编号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：维修单名称 -->
-      <el-form-item label="工单名称" prop="name">
+      <el-form-item label="维修单名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入工单名称"
+          placeholder="请输入维修单名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -31,19 +29,25 @@
       <el-form-item label="设备" prop="machineryId">
         <DvMachinerySelect v-model="queryParams.machineryId" class="!w-240px" />
       </el-form-item>
-      <!-- TODO @AI:维修结果 -->
-      <!-- TODO @AI:单据状态 -->
-      <!-- TODO @AI：报修日期，不用这个字段 -->
-      <el-form-item label="报修日期" prop="requireDate">
-        <el-date-picker
-          v-model="queryParams.requireDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
+      <el-form-item label="维修结果" prop="result">
+        <el-select v-model="queryParams.result" placeholder="请选择维修结果" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_REPAIR_RESULT)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="单据状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_REPAIR_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -72,39 +76,77 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：维修单编码 -->
-      <!-- TODO @AI：维修单名称 -->
-      <el-table-column label="工单编码" align="center" prop="code" />
-      <el-table-column label="工单名称" align="center" prop="name" />
+      <el-table-column label="维修单编号" align="center" prop="code" />
+      <el-table-column label="维修单名称" align="center" prop="name" />
       <el-table-column label="设备编码" align="center" prop="machineryCode" />
       <el-table-column label="设备名称" align="center" prop="machineryName" />
-      <!-- TODO @AI:保修日期 -->
-      <!-- TODO @AI:保修完成日期 -->
-      <!-- TODO @AI:验收日期 -->
-      <!-- TODO @AI:维修结果 -->
+      <el-table-column
+        label="报修日期"
+        align="center"
+        prop="requireDate"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column
+        label="维修完成日期"
+        align="center"
+        prop="finishDate"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column
+        label="验收日期"
+        align="center"
+        prop="confirmDate"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column label="维修结果" align="center" prop="result">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_DV_REPAIR_RESULT" :value="scope.row.result" />
+        </template>
+      </el-table-column>
       <el-table-column label="维修人员" align="center" prop="acceptedUserNickname" />
-      <el-table-column label="验收人员" align="center" prop="acceptedUserNickname" />
+      <el-table-column label="验收人员" align="center" prop="confirmUserNickname" />
       <el-table-column label="单据状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_DV_REPAIR_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="220">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
+            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
             v-hasPermi="['mes:dv-repair:update']"
           >
             编辑
           </el-button>
-          <!-- TODO @AI：通过 -->
-          <!-- TODO @AI：不通过 -->
+          <el-button
+            link
+            type="success"
+            @click="handleConfirm(scope.row.id)"
+            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
+            v-hasPermi="['mes:dv-repair:update']"
+          >
+            通过
+          </el-button>
+          <el-button
+            link
+            type="warning"
+            @click="handleReject(scope.row.id)"
+            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
+            v-hasPermi="['mes:dv-repair:update']"
+          >
+            不通过
+          </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
+            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
             v-hasPermi="['mes:dv-repair:delete']"
           >
             删除
@@ -126,11 +168,13 @@
 </template>
 
 <script setup lang="ts">
+import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { DvRepairApi } from '@/api/mes/dv/repair'
 import RepairForm from './RepairForm.vue'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
-import { DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { MesDvRepairStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesDvRepair' })
 
@@ -146,7 +190,8 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   machineryId: undefined,
-  requireDate: []
+  result: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -179,6 +224,26 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 通过按钮操作 */
+const handleConfirm = async (id: number) => {
+  try {
+    await message.confirm('确认通过该维修工单吗？')
+    await DvRepairApi.confirmRepair(id)
+    message.success('操作成功')
+    await getList()
+  } catch {}
+}
+
+/** 不通过按钮操作 */
+const handleReject = async (id: number) => {
+  try {
+    await message.confirm('确认不通过该维修工单吗？')
+    await DvRepairApi.rejectRepair(id)
+    message.success('操作成功')
+    await getList()
+  } catch {}
 }
 
 /** 删除按钮操作 */

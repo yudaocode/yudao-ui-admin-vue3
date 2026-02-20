@@ -55,5 +55,15 @@ export const DvRepairApi = {
   // 导出维修工单 Excel
   exportRepair: async (params: any) => {
     return await request.download({ url: `/mes/dv/repair/export-excel`, params })
+  },
+
+  // 通过维修工单
+  confirmRepair: async (id: number) => {
+    return await request.put({ url: `/mes/dv/repair/confirm?id=` + id })
+  },
+
+  // 不通过维修工单
+  rejectRepair: async (id: number) => {
+    return await request.put({ url: `/mes/dv/repair/reject?id=` + id })
   }
 }
