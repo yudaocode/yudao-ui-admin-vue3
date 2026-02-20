@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：line/index.ts 里；
 // MES 设备保养记录明细 VO
 export interface DvMaintenRecordLineVO {
   id: number // 编号
