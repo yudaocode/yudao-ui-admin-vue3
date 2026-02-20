@@ -273,4 +273,7 @@ export enum DICT_TYPE {
   MES_PRO_LINK_TYPE = 'mes_pro_link_type', // MES 工序关系类型
   MES_PRO_TASK_STATUS = 'mes_pro_task_status', // MES 生产任务状态
   MES_TIME_UNIT_TYPE = 'mes_time_unit_type', // MES 时间单位
+  MES_QC_IQC_STATUS = 'mes_qc_iqc_status', // MES 检验单状态
+  MES_QC_CHECK_RESULT = 'mes_qc_check_result', // MES 检测结果
+  MES_QC_SOURCE_DOC_TYPE = 'mes_qc_source_doc_type', // MES 来源单据类型
 }
