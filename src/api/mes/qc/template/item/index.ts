@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：item/index.ts 迁移过去；
 // MES 质检方案-产品关联 VO
 export interface QcTemplateItemVO {
   id: number // 编号

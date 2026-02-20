@@ -285,4 +285,9 @@ export enum DICT_TYPE {
   MES_DV_REPAIR_RESULT = 'mes_dv_repair_result', // MES 维修结果
   MES_DV_CHECK_RECORD_STATUS = 'mes_dv_check_record_status', // MES 点检记录状态
   MES_DV_CHECK_RESULT = 'mes_dv_check_result', // MES 点检结果
+  MES_PRO_FEEDBACK_STATUS = 'mes_pro_feedback_status', // MES 生产报工状态
+  MES_PRO_FEEDBACK_TYPE = 'mes_pro_feedback_type', // MES 生产报工类型
+  MES_PRO_FEEDBACK_CHANNEL = 'mes_pro_feedback_channel', // MES 生产报工途径
+  MES_PRO_ANDON_STATUS = 'mes_pro_andon_status', // MES 安灯处置状态
+  MES_PRO_ANDON_LEVEL = 'mes_pro_andon_level', // MES 安灯级别
 }

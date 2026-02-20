@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：indicator/index.ts 迁移过去；
 // MES 质检方案-检测指标项 VO
 export interface QcTemplateIndicatorVO {
   id: number // 编号

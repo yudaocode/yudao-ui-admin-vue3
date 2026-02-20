@@ -130,6 +130,40 @@ export const MesDvCheckResultEnum = {
   ABNORMAL: 2 // 异常
 }
 
+/** MES 来料检验单（IQC）状态枚举 */
+export const MesQcIqcStatusEnum = {
+  PREPARE: 0, // 草稿
+  FINISHED: 1 // 已完成
+}
+
+/** MES 生产报工状态枚举 */
+export const MesProFeedbackStatusEnum = {
+  PREPARE: 0,   // 草稿
+  APPROVING: 1, // 审批中
+  UNCHECK: 2,   // 待检验
+  FINISHED: 3,  // 已完成
+  CANCELED: 4   // 已取消
+}
+
+/** MES 安灯处置状态枚举 */
+export const MesProAndonStatusEnum = {
+  ACTIVE: 0,  // 未处置
+  HANDLED: 1  // 已处置
+}
+
+/** MES 安灯级别枚举 */
+export const MesProAndonLevelEnum = {
+  LEVEL1: 1, // 一级
+  LEVEL2: 2, // 二级
+  LEVEL3: 3  // 三级
+}
+
+/** MES 生产报工类型枚举 */
+export const MesProFeedbackTypeEnum = {
+  SELF: 1,    // 自行报工
+  UNIFIED: 2  // 统一报工
+}
+
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {
   for (const item of Object.values(MesItemOrProductEnum)) {

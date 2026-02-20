@@ -2,7 +2,6 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="900px">
     <!-- 基本信息表单 -->
-    <!-- TODO @AI：rules 有linter报错； -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -90,6 +89,7 @@
 </template>
 
 <script setup lang="ts">
+import type { FormRules } from 'element-plus'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { generateRandomStr } from '@/utils'
@@ -115,7 +115,7 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE,
   remark: undefined
 })
-const formRules = reactive({
+const formRules = reactive<FormRules>({
   code: [{ required: true, message: '方案编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '方案名称不能为空', trigger: 'blur' }],
   types: [
@@ -144,8 +144,7 @@ const open = async (type: string, id?: number) => {
       const data = await QcTemplateApi.getTemplate(id)
       formData.value = {
         ...data,
-        // TODO @AI：应该不用 types？后端已经处理；
-        types: data.types ?? []
+        types: data.types
       }
     } finally {
       formLoading.value = false
