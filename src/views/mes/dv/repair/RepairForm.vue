@@ -11,12 +11,12 @@
         <!-- TODO @ai：生成 -->
         <el-col :span="8">
           <el-form-item label="维修单编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入工单编码" />
+            <el-input v-model="formData.code" placeholder="请输入维修单编码" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="维修单名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入工单名称" />
+            <el-input v-model="formData.name" placeholder="请输入维修单名称" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -36,21 +36,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：维修完成日期，往前放 -->
-        <!-- TODO @AI：验收日期，往前放 -->
-        <!-- TODO @AI：保修结果，往前放 -->
-        <el-col :span="8">
-          <el-form-item label="维修人" prop="acceptedUserId">
-            <UserSelect v-model="formData.acceptedUserId" placeholder="请选择维修人" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="验收人" prop="confirmUserId">
-            <UserSelect v-model="formData.confirmUserId" placeholder="请选择验收人" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="8">
           <el-form-item label="维修完成日期" prop="finishDate">
             <el-date-picker
@@ -71,6 +56,8 @@
             />
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="8">
           <el-form-item label="维修结果" prop="result">
             <el-select v-model="formData.result" placeholder="请选择维修结果" clearable>
@@ -81,6 +68,16 @@
                 :value="dict.value"
               />
             </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="维修人" prop="acceptedUserId">
+            <UserSelect v-model="formData.acceptedUserId" placeholder="请选择维修人" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="验收人" prop="confirmUserId">
+            <UserSelect v-model="formData.confirmUserId" placeholder="请选择验收人" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -131,11 +128,10 @@ const formData = ref({
   result: undefined,
   acceptedUserId: undefined,
   confirmUserId: undefined,
-  status: 10, // TODO @AI：不用传递 status，后端会设置；
   remark: ''
 })
 const formRules = reactive({
-  code: [{ required: true, message: '工单编码不能为空', trigger: 'blur' }],
+  code: [{ required: true, message: '维修单编码不能为空', trigger: 'blur' }],
   machineryId: [{ required: true, message: '设备不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
@@ -197,7 +193,6 @@ const resetForm = () => {
     result: undefined,
     acceptedUserId: undefined,
     confirmUserId: undefined,
-    status: 10,
     remark: ''
   }
   formRef.value?.resetFields()

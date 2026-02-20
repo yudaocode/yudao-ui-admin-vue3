@@ -10,11 +10,11 @@
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="项目名称" align="center" prop="subjectName" />
-      <!-- TODO @AI：故障描述、故障描述资源、维修情况；往前放 -->
+      <el-table-column label="故障描述" align="center" prop="malfunction" />
+      <el-table-column label="故障图片" align="center" prop="malfunctionUrl" />
+      <el-table-column label="维修描述" align="center" prop="description" />
       <el-table-column label="项目内容" align="center" prop="subjectContent" />
       <el-table-column label="标准" align="center" prop="subjectStandard" />
-      <el-table-column label="故障描述" align="center" prop="malfunction" />
-      <el-table-column label="维修描述" align="center" prop="description" />
       <el-table-column label="操作" align="center" width="130" v-if="!disabled">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
