@@ -36,6 +36,7 @@
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="formTitle" v-model="formVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
+        <!-- TODO @AI：这里的项目，是不是全称；另外，搞个 subject 的 select 组件，更好的复用呀； -->
         <el-form-item label="项目" prop="subjectId">
           <el-select
             v-model="formData.subjectId"
@@ -64,6 +65,7 @@
             </el-radio>
           </el-radio-group>
         </el-form-item>
+        <!-- TODO @AI：是不是只有异常的时候，才描述噢 -->
         <el-form-item label="异常描述" prop="result">
           <el-input v-model="formData.result" type="textarea" placeholder="请输入异常描述" />
         </el-form-item>
@@ -71,6 +73,7 @@
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
+      <!-- TODO @AI：记录多的时候，下面的按钮位置不对； -->
       <template #footer>
         <el-button @click="formVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
@@ -182,6 +185,7 @@ const handleDelete = async (id: number) => {
 }
 
 /** 获取项目选项 */
+// TODO @AI：不要分页，通过 simple-list 接口！
 const getSubjectOptions = async (query: string) => {
   try {
     const data = await DvSubjectApi.getSubjectPage({ name: query, pageNo: 1, pageSize: 20 })

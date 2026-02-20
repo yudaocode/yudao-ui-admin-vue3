@@ -47,7 +47,6 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- DONE @AI：编辑时展示保养项目明细 -->
     <template v-if="formData.id">
       <el-divider content-position="center">保养项目明细</el-divider>
       <MaintenRecordLineList :record-id="formData.id" />
@@ -142,7 +141,7 @@ const resetForm = () => {
     machineryId: undefined,
     maintenTime: undefined,
     userId: undefined,
-    status: 0,
+    status: 0, // TODO @AI：这里要枚举！
     remark: ''
   }
   formRef.value?.resetFields()
