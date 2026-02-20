@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：line/index.ts
 // MES 来料检验单行 VO
 export interface QcIqcLineVO {
   id: number // 编号

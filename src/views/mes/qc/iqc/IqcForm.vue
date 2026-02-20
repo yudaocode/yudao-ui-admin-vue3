@@ -2,9 +2,6 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="1080px">
     <!-- 基本信息表单 -->
-    <!-- TODO @AI：分割线：物料与供应商 -->
-    <!-- TODO @AI：分割线：检测情况 -->
-    <!-- TODO @AI：分割线：缺陷情况 -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -42,6 +39,8 @@
           </el-form-item>
         </el-col>
       </el-row>
+
+      <el-divider content-position="left">物料与供应商</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="供应商" prop="vendorId">
@@ -49,13 +48,7 @@
               v-model="formData.vendorId"
               placeholder="请选择供应商"
               class="!w-1/1"
-              @change="handleVendorChange"
             />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="供应商简称">
-            <el-input :model-value="vendorNickname" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -86,6 +79,8 @@
           </el-form-item>
         </el-col>
       </el-row>
+
+      <el-divider content-position="left">检测情况</el-divider>
       <el-row :gutter="16">
         <el-col :span="6">
           <el-form-item label="接收数量" prop="receivedQuantity">
@@ -153,15 +148,26 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="检测结果" prop="checkResult">
+          <el-form-item label="检测人员" prop="inspectorUserId">
+            <UserSelect
+              v-model="formData.inspectorUserId"
+              placeholder="请选择检测人员"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="检测结论" prop="checkResult">
             <el-select
               v-model="formData.checkResult"
-              placeholder="请选择检测结果"
+              placeholder="请选择检测结论"
               clearable
               class="!w-1/1"
             >
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.MES_QC_CHECK_RESULT)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_CHECK_RESULT)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -169,71 +175,62 @@
             </el-select>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="24">
+        <el-col :span="16">
           <el-form-item label="备注" prop="remark">
             <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
           </el-form-item>
         </el-col>
       </el-row>
 
-      <!-- 缺陷统计（只读折叠） -->
-      <el-collapse v-if="formType === 'update' && formData.id">
-        <el-collapse-item title="缺陷统计" name="defectStats">
-          <el-row :gutter="16">
-            <el-col :span="8">
-              <el-form-item label="致命缺陷数">
-                <el-input :model-value="formData.criticalQuantity" disabled />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="严重缺陷数">
-                <el-input :model-value="formData.majorQuantity" disabled />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="轻微缺陷数">
-                <el-input :model-value="formData.minorQuantity" disabled />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row :gutter="16">
-            <el-col :span="8">
-              <el-form-item label="致命缺陷率">
-                <el-input :model-value="formData.criticalRate + '%'" disabled />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="严重缺陷率">
-                <el-input :model-value="formData.majorRate + '%'" disabled />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="轻微缺陷率">
-                <el-input :model-value="formData.minorRate + '%'" disabled />
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-collapse-item>
-      </el-collapse>
+      <!-- 缺陷统计（只读） -->
+      <template v-if="formType === 'update' && formData.id">
+        <el-divider content-position="left">缺陷情况</el-divider>
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="致命缺陷数">
+              <el-input :model-value="formData.criticalQuantity" disabled />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="严重缺陷数">
+              <el-input :model-value="formData.majorQuantity" disabled />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="轻微缺陷数">
+              <el-input :model-value="formData.minorQuantity" disabled />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="致命缺陷率">
+              <el-input :model-value="formData.criticalRate + '%'" disabled />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="严重缺陷率">
+              <el-input :model-value="formData.majorRate + '%'" disabled />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="轻微缺陷率">
+              <el-input :model-value="formData.minorRate + '%'" disabled />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </template>
     </el-form>
 
     <!-- 子表标签页（编辑模式下显示） -->
     <template v-if="formType === 'update' && formData.id">
       <el-divider />
-      <!-- TODO @AI：检验项、检测结果 -->
       <el-tabs v-model="activeTab">
         <el-tab-pane label="检验项" name="line">
           <IqcLineList :iqc-id="formData.id" />
         </el-tab-pane>
-        <el-tab-pane label="检测结果" name="defect">
-          <IqcDefectList :iqc-id="formData.id" /> <!-- TODO <--- 这个组件，貌似是缺陷记录； -->
-          <!-- TODO @AI -->
-          <!-- TODO @AI：样品编码：生成操作； -->
-          <!-- TODO @AI：SN -->
-          <!-- TODO @AI：备注 -->
-          <!-- TODO @AI：el 风格符【检测值】：检测项1、检测值 -->
+        <el-tab-pane label="缺陷记录" name="defect">
+          <IqcDefectList :iqc-id="formData.id" />
         </el-tab-pane>
       </el-tabs>
     </template>
@@ -261,15 +258,14 @@
 </template>
 
 <script setup lang="ts">
-import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { QcIqcApi, QcIqcVO } from '@/api/mes/qc/iqc'
 import { QcTemplateApi } from '@/api/mes/qc/template'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import IqcLineList from './IqcLineList.vue'
 import IqcDefectList from './IqcDefectList.vue'
-
-// TODO @AI：/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/indicator/IndicatorForm.vue
 
 defineOptions({ name: 'IqcForm' })
 
@@ -283,8 +279,6 @@ const formType = ref('')
 const activeTab = ref('line')
 
 // 关联数据回显
-// TODO @AI：换成下拉框
-const vendorNickname = ref('')
 const itemName = ref('')
 const itemSpecification = ref('')
 
@@ -312,7 +306,7 @@ const formData = ref({
   checkResult: undefined,
   receiveDate: undefined,
   inspectDate: undefined,
-  inspector: undefined,
+  inspectorUserId: undefined,
   remark: undefined,
   status: 0,
   // 缺陷统计（只读）
@@ -332,11 +326,6 @@ const formRules = reactive({
   receivedQuantity: [{ required: true, message: '接收数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
-
-/** 供应商变更回调 */
-const handleVendorChange = (vendor: any) => {
-  vendorNickname.value = vendor?.nickname || ''
-}
 
 /** 物料变更回调 */
 const handleItemChange = (item: any) => {
@@ -360,7 +349,6 @@ const open = async (type: string, id?: number) => {
       const data = await QcIqcApi.getIqc(id)
       formData.value = data
       // 回显关联数据
-      vendorNickname.value = data.vendorNickname || ''
       itemName.value = data.itemName || ''
       itemSpecification.value = data.itemSpecification || ''
     } finally {
@@ -434,7 +422,7 @@ const resetForm = () => {
     checkResult: undefined,
     receiveDate: undefined,
     inspectDate: undefined,
-    inspector: undefined,
+    inspectorUserId: undefined,
     remark: undefined,
     status: 0,
     criticalRate: 0,
@@ -444,7 +432,7 @@ const resetForm = () => {
     majorQuantity: 0,
     minorQuantity: 0
   }
-  vendorNickname.value = ''
+  // TODO @AI：这些字段是不是不用了？因为 item 是下拉框；
   itemName.value = ''
   itemSpecification.value = ''
   formRef.value?.resetFields()

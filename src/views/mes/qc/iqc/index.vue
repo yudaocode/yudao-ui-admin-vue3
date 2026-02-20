@@ -43,28 +43,15 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：检测结论 -->
-      <!-- TODO @AI：字典，只需要：校验通过、校验不通过 -->
-      <el-form-item label="检测结果" prop="checkResult">
+      <el-form-item label="检测结论" prop="checkResult">
         <el-select
           v-model="queryParams.checkResult"
-          placeholder="请选择检测结果"
+          placeholder="请选择检测结论"
           clearable
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_QC_CHECK_RESULT)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <!-- TODO @AI：单据状态，去掉 -->
-      <el-form-item label="单据状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_IQC_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_CHECK_RESULT)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -93,7 +80,14 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：检测人员，下拉选择 -->
+      <el-form-item label="检测人员" prop="inspectorUserId">
+        <UserSelect
+          v-model="queryParams.inspectorUserId"
+          placeholder="请选择检测人员"
+          clearable
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -121,18 +115,16 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：来料检验单编号、来料检验单名称 -->
-      <el-table-column label="检验单编号" align="center" prop="code" width="160" />
-      <el-table-column label="检验单名称" align="center" prop="name" min-width="180" />
+      <el-table-column label="来料检验单编号" align="center" prop="code" width="160" />
+      <el-table-column label="来料检验单名称" align="center" prop="name" min-width="180" />
       <el-table-column label="供应商简称" align="center" prop="vendorNickname" width="120" />
       <el-table-column label="供应商批次号" align="center" prop="vendorBatch" width="130" />
-      <!-- TODO @AI：产品物料编码、产品物料名称 -->
-      <el-table-column label="物料编码" align="center" prop="itemCode" width="130" />
-      <el-table-column label="物料名称" align="center" prop="itemName" min-width="150" />
+      <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
+      <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="接收数量" align="center" prop="receivedQuantity" width="100" />
       <el-table-column label="检测数量" align="center" prop="checkQuantity" width="100" />
       <el-table-column label="不合格数" align="center" prop="unqualifiedQuantity" width="100" />
-      <el-table-column label="检测结果" align="center" prop="checkResult" width="100">
+      <el-table-column label="检测结论" align="center" prop="checkResult" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_QC_CHECK_RESULT" :value="scope.row.checkResult" />
         </template>
@@ -151,31 +143,38 @@
         :formatter="dateFormatter2"
         width="180px"
       />
-      <el-table-column label="检测人员" align="center" prop="inspector" width="100" />
+      <el-table-column label="检测人员" align="center" prop="inspectorNickname" width="100" />
       <el-table-column label="单据状态" align="center" prop="status" width="80">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_QC_IQC_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="130" fixed="right">
-        <!-- TODO @AI：完成；是否完成来料检验单编制？【完成后将不能更改】 -->
+      <el-table-column label="操作" align="center" width="180" fixed="right">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:qc-iqc:update']"
-            v-if="scope.row.status === 0"
+            v-if="scope.row.status === QC_IQC_STATUS.PREPARE"
           >
             编辑
           </el-button>
-          <!-- TODO @AI：status 枚举值； -->
+          <el-button
+            link
+            type="success"
+            @click="handleComplete(scope.row.id)"
+            v-hasPermi="['mes:qc-iqc:update']"
+            v-if="scope.row.status === QC_IQC_STATUS.PREPARE"
+          >
+            完成
+          </el-button>
           <!-- TODO @芋艿：查看报表，后续要搞下； -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-if="scope.row.status !== 0"
+            v-if="scope.row.status !== QC_IQC_STATUS.PREPARE"
           >
             查看报表
           </el-button>
@@ -184,7 +183,7 @@
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:qc-iqc:delete']"
-            v-if="scope.row.status === 0"
+            v-if="scope.row.status === QC_IQC_STATUS.PREPARE"
           >
             删除
           </el-button>
@@ -209,11 +208,19 @@ import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { QcIqcApi, QcIqcVO } from '@/api/mes/qc/iqc'
 import IqcForm from './IqcForm.vue'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 
 defineOptions({ name: 'MesQcIqc' })
+
+/** IQC 状态枚举 */
+// TODO @AI：放到 constants 里；
+const QC_IQC_STATUS = {
+  PREPARE: 0,
+  FINISHED: 1
+}
 
 const message = useMessage()
 const { t } = useI18n()
@@ -229,9 +236,9 @@ const queryParams = reactive({
   vendorBatch: undefined,
   itemId: undefined,
   checkResult: undefined,
-  status: undefined,
   receiveDate: undefined,
-  inspectDate: undefined
+  inspectDate: undefined,
+  inspectorUserId: undefined
 })
 const queryFormRef = ref()
 const exportLoading = ref(false)
@@ -264,6 +271,16 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 完成操作 */
+const handleComplete = async (id: number) => {
+  try {
+    await message.confirm('是否完成来料检验单编制？【完成后将不能更改】')
+    await QcIqcApi.completeIqc(id)
+    message.success('完成成功')
+    await getList()
+  } catch {}
 }
 
 /** 删除按钮操作 */

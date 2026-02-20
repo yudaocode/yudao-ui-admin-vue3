@@ -3,7 +3,6 @@
   <div>
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：检测项名称、检测项类型、检测工具、检测要求、标准值、单位、误差上限、误差下限、致命缺陷数、严重缺陷数、轻微缺陷数、备注 -->
       <el-table-column label="检测指标编码" align="center" prop="indicatorCode" width="140" />
       <el-table-column label="检测指标名称" align="center" prop="indicatorName" min-width="150" />
       <el-table-column label="检测指标类型" align="center" prop="indicatorType" width="120">
@@ -20,14 +19,24 @@
       <el-table-column label="致命缺陷数" align="center" prop="criticalQuantity" width="100" />
       <el-table-column label="严重缺陷数" align="center" prop="majorQuantity" width="100" />
       <el-table-column label="轻微缺陷数" align="center" prop="minorQuantity" width="100" />
-      <!-- TODO @AI：操作：【缺陷记录】弹窗 -->
+      <el-table-column label="操作" align="center" width="100" fixed="right">
+        <template #default="scope">
+          <el-button link type="primary" @click="openDefectDialog(scope.row)"> 缺陷记录 </el-button>
+        </template>
+      </el-table-column>
     </el-table>
+
+    <!-- 缺陷记录弹窗 -->
+    <Dialog title="缺陷记录" v-model="defectDialogVisible" width="900px">
+      <IqcDefectList :iqc-id="props.iqcId" :line-id="currentLineId!" />
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { QcIqcLineApi, QcIqcLineVO } from '@/api/mes/qc/iqc/line'
+import IqcDefectList from './IqcDefectList.vue'
 
 defineOptions({ name: 'IqcLineList' })
 
@@ -35,6 +44,16 @@ const props = defineProps<{ iqcId: number }>()
 
 const loading = ref(false)
 const list = ref<QcIqcLineVO[]>([])
+
+// 缺陷记录弹窗
+const defectDialogVisible = ref(false)
+const currentLineId = ref<number>()
+
+/** 打开缺陷记录弹窗 */
+const openDefectDialog = (row: QcIqcLineVO) => {
+  currentLineId.value = row.id
+  defectDialogVisible.value = true
+}
 
 /** 查询列表 */
 const getList = async () => {

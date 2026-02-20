@@ -1,13 +1,12 @@
 import request from '@/config/axios'
 
-// TODO @AI：defect/index.ts
 // MES 来料检验缺陷记录 VO
 export interface QcIqcDefectVO {
   id: number // 编号
   iqcId: number // 来料检验单 ID
   lineId: number // 来料检验行 ID
   defectName: string // 缺陷描述
-  defectLevel: string // 缺陷等级
+  defectLevel: number // 缺陷等级
   defectQuantity: number // 缺陷数量
   remark: string // 备注
 }

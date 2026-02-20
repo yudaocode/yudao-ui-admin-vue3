@@ -81,7 +81,7 @@
         <el-form-item label="缺陷等级" prop="defectLevel">
           <el-select v-model="formData.defectLevel" placeholder="请选择缺陷等级" class="!w-1/1">
             <el-option
-              v-for="dict in getStrDictOptions(DICT_TYPE.MES_DEFECT_LEVEL)"
+              v-for="dict in getIntDictOptions(DICT_TYPE.MES_DEFECT_LEVEL)"
               :key="dict.value"
               :label="dict.label"
               :value="dict.value"
@@ -110,13 +110,16 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { QcIqcDefectApi, QcIqcDefectVO } from '@/api/mes/qc/iqc/defect'
 import { QcIqcLineApi, QcIqcLineVO } from '@/api/mes/qc/iqc/line'
 
 defineOptions({ name: 'IqcDefectList' })
 
-const props = defineProps<{ iqcId: number }>()
+const props = defineProps<{
+  iqcId: number
+  lineId?: number // 可选：从行表操作列打开时按行筛选
+}>()
 
 const message = useMessage()
 const { t } = useI18n()
@@ -133,7 +136,8 @@ const getList = async () => {
     const data = await QcIqcDefectApi.getIqcDefectPage({
       pageNo: 1,
       pageSize: 100,
-      iqcId: props.iqcId
+      iqcId: props.iqcId,
+      lineId: props.lineId
     })
     list.value = data.list
   } finally {
@@ -161,7 +165,7 @@ const formRef = ref()
 const formData = ref({
   id: undefined,
   iqcId: undefined as number | undefined,
-  lineId: undefined,
+  lineId: undefined as number | undefined,
   defectName: undefined,
   defectLevel: undefined,
   defectQuantity: 1,
@@ -180,6 +184,10 @@ const openForm = async (type: string, id?: number) => {
   formType.value = type
   resetForm()
   formData.value.iqcId = props.iqcId
+  // 如果有 lineId prop，预设 lineId
+  if (props.lineId) {
+    formData.value.lineId = props.lineId
+  }
   // 加载检验行列表
   await loadLineList()
   // 修改时，查询详情（缺陷记录只有分页接口，从列表中获取）
@@ -247,5 +255,11 @@ watch(
   () => props.iqcId,
   () => getList(),
   { immediate: true }
+)
+
+/** 监听 lineId 变化，重新加载列表 */
+watch(
+  () => props.lineId,
+  () => getList()
 )
 </script>
