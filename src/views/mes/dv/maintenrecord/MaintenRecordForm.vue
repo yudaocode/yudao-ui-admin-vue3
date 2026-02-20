@@ -9,19 +9,16 @@
     >
       <el-row>
         <el-col :span="8">
-          <!-- DONE @AI：这里抽成一个独立的 components 组件；一定要按照我说的 -->
           <el-form-item label="设备" prop="machineryId">
             <DvMachinerySelect v-model="formData.machineryId" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- DONE @AI：这里抽成一个独立的 components 组件；一定要按照我说的 -->
           <el-form-item label="保养计划" prop="planId">
             <DvCheckPlanSelect v-model="formData.planId" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- DONE @AI：user-select 封装一个到 views/system/user/components -->
           <el-form-item label="保养人" prop="userId">
             <UserSelect v-model="formData.userId" placeholder="请选择保养人" />
           </el-form-item>
@@ -64,7 +61,6 @@ import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySe
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import MaintenRecordLineList from './MaintenRecordLineList.vue'
-import { MesDvMaintenRecordStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MaintenRecordForm' })
 
@@ -81,7 +77,6 @@ const formData = ref({
   machineryId: undefined,
   maintenTime: undefined,
   userId: undefined,
-  status: MesDvMaintenRecordStatusEnum.PREPARE,
   remark: ''
 })
 const formRules = reactive({
@@ -142,7 +137,6 @@ const resetForm = () => {
     machineryId: undefined,
     maintenTime: undefined,
     userId: undefined,
-    status: MesDvMaintenRecordStatusEnum.PREPARE,
     remark: ''
   }
   formRef.value?.resetFields()
