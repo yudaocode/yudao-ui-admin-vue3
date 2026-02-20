@@ -1,4 +1,4 @@
-<!-- MES 设备保养记录明细列表 -->
+<!-- MES 设备点检记录明细列表 -->
 <template>
   <div>
     <!-- 操作栏 -->
@@ -9,15 +9,16 @@
     </el-row>
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <el-table-column label="项目编码" align="center" prop="subjectCode" />
       <el-table-column label="项目名称" align="center" prop="subjectName" />
-      <el-table-column label="项目内容" align="center" prop="subjectContent" />
-      <el-table-column label="标准" align="center" prop="subjectStandard" />
-      <el-table-column label="保养结果" align="center" prop="status">
+      <el-table-column label="检查内容" align="center" prop="subjectContent" />
+      <el-table-column label="检查标准" align="center" prop="subjectStandard" />
+      <el-table-column label="点检结果" align="center" prop="checkStatus">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_MAINTEN_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_DV_CHECK_RESULT" :value="scope.row.checkStatus" />
         </template>
       </el-table-column>
-      <el-table-column label="异常描述" align="center" prop="result" />
+      <el-table-column label="异常描述" align="center" prop="checkResult" />
       <el-table-column label="操作" align="center" width="130" v-if="!disabled">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
@@ -36,14 +37,27 @@
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="formTitle" v-model="formVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
-        <!-- DONE @AI：这里的项目，是不是全称；另外，搞个 subject 的 select 组件，更好的复用呀； -->
-        <el-form-item label="项目" prop="subjectId">
-          <DvSubjectSelect v-model="formData.subjectId" />
+        <el-form-item label="点检项目" prop="subjectId">
+          <el-select
+            v-model="formData.subjectId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="请输入项目名称搜索"
+            :remote-method="getSubjectOptions"
+          >
+            <el-option
+              v-for="item in subjectOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="保养结果" prop="status">
-          <el-radio-group v-model="formData.status">
+        <el-form-item label="点检结果" prop="checkStatus">
+          <el-radio-group v-model="formData.checkStatus">
             <el-radio
-              v-for="dict in getIntDictOptions(DICT_TYPE.MES_MAINTEN_STATUS)"
+              v-for="dict in getStrDictOptions(DICT_TYPE.MES_DV_CHECK_RESULT)"
               :key="dict.value"
               :value="dict.value"
             >
@@ -51,8 +65,9 @@
             </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="异常描述" prop="result">
-          <el-input v-model="formData.result" type="textarea" placeholder="请输入异常描述" />
+        <!-- TODO @AI：checkStatus 改成 int 枚举；然后 constants.ts 里； -->
+        <el-form-item label="异常描述" prop="checkResult" v-if="formData.checkStatus === 'N'">
+          <el-input v-model="formData.checkResult" type="textarea" placeholder="请输入异常描述" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
@@ -67,12 +82,11 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { DvMaintenRecordLineApi } from '@/api/mes/dv/maintenrecord/line'
-import { MesDvMaintenStatusEnum } from '@/views/mes/utils/constants'
-import DvSubjectSelect from '@/views/mes/dv/subject/components/DvSubjectSelect.vue'
+import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
+import { DvCheckRecordLineApi } from '@/api/mes/dv/checkrecord/line'
+import { DvSubjectApi } from '@/api/mes/dv/subject'
 
-defineOptions({ name: 'MaintenRecordLineList' })
+defineOptions({ name: 'CheckRecordLineList' })
 
 const props = defineProps<{
   recordId: number
@@ -99,15 +113,16 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formRef = ref() // 表单 Ref
 const formData = ref<any>({}) // 表单数据
 const formRules = reactive({
-  subjectId: [{ required: true, message: '项目不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '保养结果不能为空', trigger: 'blur' }]
+  subjectId: [{ required: true, message: '点检项目不能为空', trigger: 'blur' }],
+  checkStatus: [{ required: true, message: '点检结果不能为空', trigger: 'blur' }]
 })
+const subjectOptions = ref<any[]>([]) // 项目选项列表
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await DvMaintenRecordLineApi.getMaintenRecordLinePage(queryParams)
+    const data = await DvCheckRecordLineApi.getCheckRecordLinePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -124,12 +139,16 @@ const openForm = async (type: string, row?: any) => {
     formData.value = {
       recordId: props.recordId,
       subjectId: undefined,
-      status: MesDvMaintenStatusEnum.NORMAL,
-      result: '',
+      checkStatus: 'Y',
+      checkResult: '',
       remark: ''
     }
   } else {
     formData.value = { ...row }
+    if (row.subjectId) {
+      const subject = await DvSubjectApi.getSubject(row.subjectId)
+      if (subject) subjectOptions.value = [subject]
+    }
   }
   formRef.value?.resetFields()
 }
@@ -141,10 +160,10 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     if (formType.value === 'create') {
-      await DvMaintenRecordLineApi.createMaintenRecordLine(formData.value)
+      await DvCheckRecordLineApi.createCheckRecordLine(formData.value)
       message.success(t('common.createSuccess'))
     } else {
-      await DvMaintenRecordLineApi.updateMaintenRecordLine(formData.value)
+      await DvCheckRecordLineApi.updateCheckRecordLine(formData.value)
       message.success(t('common.updateSuccess'))
     }
     formVisible.value = false
@@ -158,9 +177,17 @@ const submitForm = async () => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await DvMaintenRecordLineApi.deleteMaintenRecordLine(id)
+    await DvCheckRecordLineApi.deleteCheckRecordLine(id)
     message.success(t('common.delSuccess'))
     await getList()
+  } catch {}
+}
+
+/** 获取项目选项 */
+const getSubjectOptions = async (query: string) => {
+  try {
+    const data = await DvSubjectApi.getSubjectPage({ name: query, pageNo: 1, pageSize: 20 })
+    subjectOptions.value = data.list
   } catch {}
 }
 
@@ -175,5 +202,4 @@ watch(
   },
   { immediate: true }
 )
-
 </script>

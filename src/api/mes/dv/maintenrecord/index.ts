@@ -39,6 +39,11 @@ export const DvMaintenRecordApi = {
     return await request.put({ url: `/mes/dv/mainten-record/update`, data })
   },
 
+  // 提交设备保养记录
+  submitMaintenRecord: async (id: number) => {
+    return await request.put({ url: `/mes/dv/mainten-record/submit?id=` + id })
+  },
+
   // 删除设备保养记录
   deleteMaintenRecord: async (id: number) => {
     return await request.delete({ url: `/mes/dv/mainten-record/delete?id=` + id })

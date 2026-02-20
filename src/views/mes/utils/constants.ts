@@ -94,6 +94,18 @@ export const MesDvCheckPlanStatusEnum = {
   ENABLED: 1 // 已启用
 }
 
+/** MES 设备保养记录状态枚举 */
+export const MesDvMaintenRecordStatusEnum = {
+  PREPARE: 0, // 草稿
+  SUBMITTED: 1 // 已提交
+}
+
+/** MES 设备保养明细结果枚举（对应字典 mes_mainten_status） */
+export const MesDvMaintenStatusEnum = {
+  NORMAL: 1, // 正常
+  ABNORMAL: 2 // 异常
+}
+
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {
   for (const item of Object.values(MesItemOrProductEnum)) {

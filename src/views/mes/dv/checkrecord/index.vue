@@ -8,18 +8,28 @@
       :inline="true"
       label-width="90px"
     >
-      <el-form-item label="保养计划" prop="planId">
+      <el-form-item label="点检计划" prop="planId">
         <DvCheckPlanSelect v-model="queryParams.planId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="设备" prop="machineryId">
         <DvMachinerySelect v-model="queryParams.machineryId" class="!w-240px" />
       </el-form-item>
-      <el-form-item label="保养人" prop="userId">
-        <UserSelect v-model="queryParams.userId" placeholder="请选择保养人" class="!w-240px" />
+      <el-form-item label="点检人" prop="userId">
+        <UserSelect v-model="queryParams.userId" placeholder="请选择点检人" class="!w-240px" />
       </el-form-item>
-      <el-form-item label="保养时间" prop="maintenTime">
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_CHECK_RECORD_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="点检时间" prop="checkTime">
         <el-date-picker
-          v-model="queryParams.maintenTime"
+          v-model="queryParams.checkTime"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
@@ -35,7 +45,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['mes:dv-mainten-record:create']"
+          v-hasPermi="['mes:dv-check-record:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -44,7 +54,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['mes:dv-mainten-record:export']"
+          v-hasPermi="['mes:dv-check-record:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -61,43 +71,46 @@
       <el-table-column label="规格型号" align="center" prop="machinerySpec" />
       <el-table-column label="计划名称" align="center" prop="planName" />
       <el-table-column
-        label="保养时间"
+        label="点检时间"
         align="center"
-        prop="maintenTime"
+        prop="checkTime"
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="保养人" align="center" prop="nickname" />
+      <el-table-column label="点检人" align="center" prop="nickname" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_MAINTEN_RECORD_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_DV_CHECK_RECORD_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
+          <!-- TODO @AI：只有草稿，可以编辑； -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:dv-mainten-record:update']"
+            v-hasPermi="['mes:dv-check-record:update']"
           >
             编辑
           </el-button>
+          <!-- TODO @AI：10 这些，都换成枚举 -->
           <el-button
             link
             type="success"
             @click="handleSubmit(scope.row)"
-            v-if="scope.row.status === MesDvMaintenRecordStatusEnum.PREPARE"
-            v-hasPermi="['mes:dv-mainten-record:update']"
+            v-if="scope.row.status === 10"
+            v-hasPermi="['mes:dv-check-record:update']"
           >
             提交
           </el-button>
+          <!-- TODO @AI：只有草稿，可以删除； -->
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-if="scope.row.status === MesDvMaintenRecordStatusEnum.PREPARE"
-            v-hasPermi="['mes:dv-mainten-record:delete']"
+            v-if="scope.row.status === 10"
+            v-hasPermi="['mes:dv-check-record:delete']"
           >
             删除
           </el-button>
@@ -114,21 +127,20 @@
   </ContentWrap>
 
   <!-- 表单弹窗 -->
-  <MaintenRecordForm ref="formRef" @success="getList" />
+  <CheckRecordForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { DvMaintenRecordApi } from '@/api/mes/dv/maintenrecord'
-import MaintenRecordForm from './MaintenRecordForm.vue'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { DvCheckRecordApi } from '@/api/mes/dv/checkrecord'
+import CheckRecordForm from './CheckRecordForm.vue'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import { DICT_TYPE } from '@/utils/dict'
-import { MesDvMaintenRecordStatusEnum } from '@/views/mes/utils/constants'
 
-defineOptions({ name: 'MesDvMaintenRecord' })
+defineOptions({ name: 'MesDvCheckRecord' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -142,7 +154,8 @@ const queryParams = reactive({
   planId: undefined,
   machineryId: undefined,
   userId: undefined,
-  maintenTime: []
+  status: undefined,
+  checkTime: []
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -151,7 +164,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await DvMaintenRecordApi.getMaintenRecordPage(queryParams)
+    const data = await DvCheckRecordApi.getCheckRecordPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -180,8 +193,8 @@ const openForm = (type: string, id?: number) => {
 /** 提交按钮操作 */
 const handleSubmit = async (row: any) => {
   try {
-    await message.confirm('确认提交该保养记录吗？')
-    await DvMaintenRecordApi.submitMaintenRecord(row.id)
+    await message.confirm('确认提交该点检记录吗？')
+    await DvCheckRecordApi.submitCheckRecord(row.id)
     message.success('提交成功')
     await getList()
   } catch {}
@@ -191,7 +204,7 @@ const handleSubmit = async (row: any) => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await DvMaintenRecordApi.deleteMaintenRecord(id)
+    await DvCheckRecordApi.deleteCheckRecord(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -202,8 +215,8 @@ const handleExport = async () => {
   try {
     await message.exportConfirm()
     exportLoading.value = true
-    const data = await DvMaintenRecordApi.exportMaintenRecord(queryParams)
-    download.excel(data, '设备保养记录.xls')
+    const data = await DvCheckRecordApi.exportCheckRecord(queryParams)
+    download.excel(data, '设备点检记录.xls')
   } catch {
   } finally {
     exportLoading.value = false

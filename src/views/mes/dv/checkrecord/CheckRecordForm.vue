@@ -9,32 +9,29 @@
     >
       <el-row>
         <el-col :span="8">
-          <!-- DONE @AI：这里抽成一个独立的 components 组件；一定要按照我说的 -->
           <el-form-item label="设备" prop="machineryId">
             <DvMachinerySelect v-model="formData.machineryId" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- DONE @AI：这里抽成一个独立的 components 组件；一定要按照我说的 -->
-          <el-form-item label="保养计划" prop="planId">
+          <el-form-item label="点检计划" prop="planId">
             <DvCheckPlanSelect v-model="formData.planId" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- DONE @AI：user-select 封装一个到 views/system/user/components -->
-          <el-form-item label="保养人" prop="userId">
-            <UserSelect v-model="formData.userId" placeholder="请选择保养人" />
+          <el-form-item label="点检人" prop="userId">
+            <UserSelect v-model="formData.userId" placeholder="请选择点检人" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="保养时间" prop="maintenTime">
+          <el-form-item label="点检时间" prop="checkTime">
             <el-date-picker
-              v-model="formData.maintenTime"
+              v-model="formData.checkTime"
               type="datetime"
               value-format="x"
-              placeholder="选择保养时间"
+              placeholder="选择点检时间"
             />
           </el-form-item>
         </el-col>
@@ -47,9 +44,10 @@
         </el-col>
       </el-row>
     </el-form>
+    <!-- 编辑时展示点检项目明细 -->
     <template v-if="formData.id">
-      <el-divider content-position="center">保养项目明细</el-divider>
-      <MaintenRecordLineList :record-id="formData.id" />
+      <el-divider content-position="center">点检项目明细</el-divider>
+      <CheckRecordLineList :record-id="formData.id" />
     </template>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -59,14 +57,13 @@
 </template>
 
 <script setup lang="ts">
-import { DvMaintenRecordApi } from '@/api/mes/dv/maintenrecord'
+import { DvCheckRecordApi } from '@/api/mes/dv/checkrecord'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import MaintenRecordLineList from './MaintenRecordLineList.vue'
-import { MesDvMaintenRecordStatusEnum } from '@/views/mes/utils/constants'
+import CheckRecordLineList from './CheckRecordLineList.vue'
 
-defineOptions({ name: 'MaintenRecordForm' })
+defineOptions({ name: 'CheckRecordForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -79,14 +76,14 @@ const formData = ref({
   id: undefined,
   planId: undefined,
   machineryId: undefined,
-  maintenTime: undefined,
+  checkTime: undefined,
   userId: undefined,
-  status: MesDvMaintenRecordStatusEnum.PREPARE,
+  status: undefined,
   remark: ''
 })
 const formRules = reactive({
   machineryId: [{ required: true, message: '设备不能为空', trigger: 'blur' }],
-  maintenTime: [{ required: true, message: '保养时间不能为空', trigger: 'blur' }]
+  checkTime: [{ required: true, message: '点检时间不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -100,7 +97,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await DvMaintenRecordApi.getMaintenRecord(id)
+      formData.value = await DvCheckRecordApi.getCheckRecord(id)
     } finally {
       formLoading.value = false
     }
@@ -120,10 +117,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as any
     if (formType.value === 'create') {
-      await DvMaintenRecordApi.createMaintenRecord(data)
+      await DvCheckRecordApi.createCheckRecord(data)
       message.success(t('common.createSuccess'))
     } else {
-      await DvMaintenRecordApi.updateMaintenRecord(data)
+      await DvCheckRecordApi.updateCheckRecord(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -140,9 +137,9 @@ const resetForm = () => {
     id: undefined,
     planId: undefined,
     machineryId: undefined,
-    maintenTime: undefined,
+    checkTime: undefined,
     userId: undefined,
-    status: MesDvMaintenRecordStatusEnum.PREPARE,
+    status: undefined,
     remark: ''
   }
   formRef.value?.resetFields()
