@@ -79,6 +79,15 @@ export const MesProWorkOrderSourceTypeEnum = {
   STORE: 2 // 库存备货
 }
 
+/** MES 生产任务状态枚举 */
+export const MesProTaskStatusEnum = {
+  NORMAL: 0, // 草稿
+  START: 1, // 进行中
+  PAUSE: 2, // 暂停
+  FINISHED: 3, // 已完成
+  CANCELED: 4 // 已取消
+}
+
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {
   for (const item of Object.values(MesItemOrProductEnum)) {
