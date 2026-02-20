@@ -2,6 +2,9 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="1080px">
     <!-- 基本信息表单 -->
+    <!-- TODO @AI：分割线：物料与供应商 -->
+    <!-- TODO @AI：分割线：检测情况 -->
+    <!-- TODO @AI：分割线：缺陷情况 -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -219,14 +222,19 @@
     <!-- 子表标签页（编辑模式下显示） -->
     <template v-if="formType === 'update' && formData.id">
       <el-divider />
+      <!-- TODO @AI：检验项、检测结果 -->
       <el-tabs v-model="activeTab">
-        <el-tab-pane label="检验行" name="line">
+        <el-tab-pane label="检验项" name="line">
           <IqcLineList :iqc-id="formData.id" />
         </el-tab-pane>
-        <el-tab-pane label="缺陷记录" name="defect">
-          <IqcDefectList :iqc-id="formData.id" />
+        <el-tab-pane label="检测结果" name="defect">
+          <IqcDefectList :iqc-id="formData.id" /> <!-- TODO <--- 这个组件，貌似是缺陷记录； -->
+          <!-- TODO @AI -->
+          <!-- TODO @AI：样品编码：生成操作； -->
+          <!-- TODO @AI：SN -->
+          <!-- TODO @AI：备注 -->
+          <!-- TODO @AI：el 风格符【检测值】：检测项1、检测值 -->
         </el-tab-pane>
-        <!-- TODO @芋艿：检验结果 tab（qc_result 实现后添加） -->
       </el-tabs>
     </template>
 
@@ -261,6 +269,8 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import IqcLineList from './IqcLineList.vue'
 import IqcDefectList from './IqcDefectList.vue'
 
+// TODO @AI：/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/indicator/IndicatorForm.vue
+
 defineOptions({ name: 'IqcForm' })
 
 const { t } = useI18n()
@@ -273,6 +283,7 @@ const formType = ref('')
 const activeTab = ref('line')
 
 // 关联数据回显
+// TODO @AI：换成下拉框
 const vendorNickname = ref('')
 const itemName = ref('')
 const itemSpecification = ref('')

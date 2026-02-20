@@ -63,16 +63,14 @@
         v-loading="formLoading"
       >
         <el-form-item label="检验行" prop="lineId">
-          <el-select
-            v-model="formData.lineId"
-            placeholder="请选择检验行"
-            filterable
-            class="!w-1/1"
-          >
+          <!-- TODO @AI：使用组件 -->
+          <el-select v-model="formData.lineId" placeholder="请选择检验行" filterable class="!w-1/1">
             <el-option
               v-for="line in lineList"
               :key="line.id"
-              :label="line.indicatorName + (line.indicatorCode ? ' (' + line.indicatorCode + ')' : '')"
+              :label="
+                line.indicatorName + (line.indicatorCode ? ' (' + line.indicatorCode + ')' : '')
+              "
               :value="line.id"
             />
           </el-select>
@@ -81,11 +79,7 @@
           <el-input v-model="formData.defectName" placeholder="请输入缺陷描述" />
         </el-form-item>
         <el-form-item label="缺陷等级" prop="defectLevel">
-          <el-select
-            v-model="formData.defectLevel"
-            placeholder="请选择缺陷等级"
-            class="!w-1/1"
-          >
+          <el-select v-model="formData.defectLevel" placeholder="请选择缺陷等级" class="!w-1/1">
             <el-option
               v-for="dict in getStrDictOptions(DICT_TYPE.MES_DEFECT_LEVEL)"
               :key="dict.value"
