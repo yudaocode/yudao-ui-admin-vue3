@@ -85,31 +85,29 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
-          <!-- TODO @AI：只有草稿，可以编辑； -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
+            v-if="scope.row.status === MesDvCheckRecordStatusEnum.DRAFT"
             v-hasPermi="['mes:dv-check-record:update']"
           >
             编辑
           </el-button>
-          <!-- TODO @AI：10 这些，都换成枚举 -->
           <el-button
             link
             type="success"
             @click="handleSubmit(scope.row)"
-            v-if="scope.row.status === 10"
+            v-if="scope.row.status === MesDvCheckRecordStatusEnum.DRAFT"
             v-hasPermi="['mes:dv-check-record:update']"
           >
             提交
           </el-button>
-          <!-- TODO @AI：只有草稿，可以删除； -->
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-if="scope.row.status === 10"
+            v-if="scope.row.status === MesDvCheckRecordStatusEnum.DRAFT"
             v-hasPermi="['mes:dv-check-record:delete']"
           >
             删除
@@ -139,6 +137,7 @@ import CheckRecordForm from './CheckRecordForm.vue'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import { MesDvCheckRecordStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesDvCheckRecord' })
 

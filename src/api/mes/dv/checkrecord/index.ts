@@ -4,7 +4,6 @@ import request from '@/config/axios'
 export interface DvCheckRecordVO {
   id: number // 编号
   planId: number // 点检计划编号
-  planType?: number // 计划类型
   planName?: string // 计划名称
   machineryId: number // 设备编号
   machineryCode?: string // 设备编码

@@ -78,7 +78,6 @@ const formData = ref({
   machineryId: undefined,
   checkTime: undefined,
   userId: undefined,
-  status: undefined,
   remark: ''
 })
 const formRules = reactive({
@@ -139,7 +138,6 @@ const resetForm = () => {
     machineryId: undefined,
     checkTime: undefined,
     userId: undefined,
-    status: undefined,
     remark: ''
   }
   formRef.value?.resetFields()

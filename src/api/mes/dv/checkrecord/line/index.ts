@@ -9,8 +9,7 @@ export interface DvCheckRecordLineVO {
   subjectName?: string // 项目名称
   subjectContent?: string // 检查内容
   subjectStandard?: string // 检查标准
-  // TODO @AI：number
-  checkStatus: string // 点检结果
+  checkStatus: number // 点检结果
   checkResult?: string // 异常描述
   remark: string // 备注
 }

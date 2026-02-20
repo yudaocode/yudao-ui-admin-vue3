@@ -38,26 +38,12 @@
     <Dialog :title="formTitle" v-model="formVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
         <el-form-item label="点检项目" prop="subjectId">
-          <el-select
-            v-model="formData.subjectId"
-            filterable
-            remote
-            reserve-keyword
-            placeholder="请输入项目名称搜索"
-            :remote-method="getSubjectOptions"
-          >
-            <el-option
-              v-for="item in subjectOptions"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
-          </el-select>
+          <DvSubjectSelect v-model="formData.subjectId" />
         </el-form-item>
         <el-form-item label="点检结果" prop="checkStatus">
           <el-radio-group v-model="formData.checkStatus">
             <el-radio
-              v-for="dict in getStrDictOptions(DICT_TYPE.MES_DV_CHECK_RESULT)"
+              v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_CHECK_RESULT)"
               :key="dict.value"
               :value="dict.value"
             >
@@ -65,8 +51,7 @@
             </el-radio>
           </el-radio-group>
         </el-form-item>
-        <!-- TODO @AI：checkStatus 改成 int 枚举；然后 constants.ts 里； -->
-        <el-form-item label="异常描述" prop="checkResult" v-if="formData.checkStatus === 'N'">
+        <el-form-item label="异常描述" prop="checkResult" v-if="formData.checkStatus === MesDvCheckResultEnum.ABNORMAL">
           <el-input v-model="formData.checkResult" type="textarea" placeholder="请输入异常描述" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
@@ -82,9 +67,10 @@
 </template>
 
 <script setup lang="ts">
-import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { DvCheckRecordLineApi } from '@/api/mes/dv/checkrecord/line'
-import { DvSubjectApi } from '@/api/mes/dv/subject'
+import DvSubjectSelect from '@/views/mes/dv/subject/components/DvSubjectSelect.vue'
+import { MesDvCheckResultEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'CheckRecordLineList' })
 
@@ -116,7 +102,6 @@ const formRules = reactive({
   subjectId: [{ required: true, message: '点检项目不能为空', trigger: 'blur' }],
   checkStatus: [{ required: true, message: '点检结果不能为空', trigger: 'blur' }]
 })
-const subjectOptions = ref<any[]>([]) // 项目选项列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -139,16 +124,12 @@ const openForm = async (type: string, row?: any) => {
     formData.value = {
       recordId: props.recordId,
       subjectId: undefined,
-      checkStatus: 'Y',
+      checkStatus: MesDvCheckResultEnum.NORMAL,
       checkResult: '',
       remark: ''
     }
   } else {
     formData.value = { ...row }
-    if (row.subjectId) {
-      const subject = await DvSubjectApi.getSubject(row.subjectId)
-      if (subject) subjectOptions.value = [subject]
-    }
   }
   formRef.value?.resetFields()
 }
@@ -180,14 +161,6 @@ const handleDelete = async (id: number) => {
     await DvCheckRecordLineApi.deleteCheckRecordLine(id)
     message.success(t('common.delSuccess'))
     await getList()
-  } catch {}
-}
-
-/** 获取项目选项 */
-const getSubjectOptions = async (query: string) => {
-  try {
-    const data = await DvSubjectApi.getSubjectPage({ name: query, pageNo: 1, pageSize: 20 })
-    subjectOptions.value = data.list
   } catch {}
 }
 
