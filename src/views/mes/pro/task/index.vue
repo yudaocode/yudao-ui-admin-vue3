@@ -57,7 +57,6 @@
   </ContentWrap>
 
   <!-- 待排产工单列表 -->
-  <!-- TODO @AI：这里是父子，在参考下修复；也可以看看 workorder -->
   <ContentWrap title="待排产工单">
     <el-table
       v-loading="loading"
@@ -75,10 +74,10 @@
       <el-table-column label="规格型号" align="center" prop="productSpec" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="工单数量" align="center" prop="quantity" width="100" />
-      <!-- TODO @AI：调整数量 -->
+      <el-table-column label="调整数量" align="center" prop="quantityChanged" width="100" />
       <el-table-column label="已排产" align="center" prop="quantityScheduled" width="80" />
       <el-table-column label="已生产数量" align="center" prop="quantityProduced" width="80" />
-      <!-- TODO @AI：客户编码 -->
+      <el-table-column label="客户编码" align="center" prop="clientCode" width="120" />
       <el-table-column label="客户名称" align="center" prop="clientName" width="120" />
       <el-table-column
         label="需求日期"
@@ -123,7 +122,6 @@
   </ContentWrap>
 
   <!-- 排产 Drawer -->
-  <!-- TODO @AI：是不是要抽出去一个独立组件？是不是使用弹窗？在对齐下； -->
   <el-drawer v-model="scheduleDrawerVisible" title="排产" size="75%" :destroy-on-close="true">
     <div v-if="currentWorkOrder">
       <!-- 工单概要信息 -->
@@ -190,6 +188,7 @@ import { ProTaskApi } from '@/api/mes/pro/task'
 import { ProRouteProcessApi, ProRouteProcessVO } from '@/api/mes/pro/route/process'
 import { ProRouteProductApi } from '@/api/mes/pro/route/product'
 import { MesProWorkOrderStatusEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import GanttChart from './components/GanttChart.vue'
 import GanttEdit from './GanttEdit.vue'
 import ProTaskList from './ProTaskList.vue'
@@ -205,6 +204,7 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
+  productId: undefined,
   requestDate: undefined,
   // 固定筛选：已确认 + 自行生产
   status: MesProWorkOrderStatusEnum.CONFIRMED,
@@ -274,9 +274,8 @@ const openScheduleDrawer = async (row: any) => {
 
   // 通过产品查找工艺路线，再加载工序列表
   try {
+    // 临时方案：查所有工艺路线产品，前端匹配（后续需后端提供"根据产品查询工艺路线"接口）
     const routeProducts = await ProRouteProductApi.getRouteProductListByRoute(0)
-    // TODO @芋艿：需要后端提供"根据产品查询关联的工艺路线"接口
-    // 临时方案：查所有工艺路线产品，前端匹配
     const matched = routeProducts?.find((rp: any) => rp.itemId === row.productId)
     if (matched) {
       currentRouteId.value = matched.routeId

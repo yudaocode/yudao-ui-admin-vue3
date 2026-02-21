@@ -1,5 +1,4 @@
-<!-- dhtmlx-gantt Vue 3 封装 -->
-<!-- TODO @芋艿：更深度的注释 -->
+<!-- dhtmlx-gantt Vue 3 封装组件：基于 dhtmlx-gantt 实现甘特图展示和拖拽编辑 -->
 <template>
   <div ref="ganttContainer" :style="{ width: '100%', height: height + 'px' }"></div>
 </template>
@@ -8,7 +7,15 @@
 import { gantt } from 'dhtmlx-gantt'
 import 'dhtmlx-gantt/codebase/dhtmlxgantt.css'
 
-// TODO @AI：更全的注释；
+/**
+ * GanttChart - 甘特图组件
+ *
+ * 功能：
+ * 1. 按工单分组展示生产任务，工单为 project 行，任务为子行
+ * 2. 支持只读预览和拖拽编辑两种模式
+ * 3. 拖拽后触发 task-update 事件，通知父组件批量保存
+ * 4. 时间刻度：周 → 日，工作日单位（1 工作日 = 8 小时）
+ */
 
 defineOptions({ name: 'GanttChart' })
 
@@ -71,7 +78,6 @@ const initGantt = () => {
       day_full: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
       day_short: ['日', '一', '二', '三', '四', '五', '六']
     },
-    // TODO @AI：这里有 linter 报错；
     labels: {
       new_task: '新任务',
       icon_save: '保存',
@@ -166,8 +172,7 @@ const initGantt = () => {
         id: task.taskId || id,
         startTime: task.start_date,
         endTime: task.end_date,
-        // TODO @AI：这里有linter报错
-        duration: task.duration / 8 // 转回工作日
+        duration: (task.duration as number) / 8 // 转回工作日
       })
     })
   }

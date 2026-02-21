@@ -14,8 +14,6 @@ export interface CalPlanTeamVO {
   attribute4: number
 }
 
-// TODO @AI：挪到 team/index.ts 中
-
 // MES 计划班组关联 API
 export const CalPlanTeamApi = {
   // 查询指定排班计划的班组列表

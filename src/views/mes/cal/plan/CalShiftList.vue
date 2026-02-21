@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { CalPlanShiftApi, CalPlanShiftVO } from '@/api/mes/cal/shift'
+import { CalPlanShiftApi, CalPlanShiftVO } from '@/api/mes/cal/plan/shift'
 
 defineOptions({ name: 'CalShiftList' })
 

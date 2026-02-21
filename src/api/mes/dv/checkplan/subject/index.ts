@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：放到 subject/index.ts
 // MES 点检保养方案项目 VO
 export interface DvCheckPlanSubjectVO {
   id: number

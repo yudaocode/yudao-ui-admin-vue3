@@ -1,5 +1,4 @@
 <!-- MES 甘特图编辑（全屏 Dialog） -->
-<!-- TODO @AI：独立路由 -->
 <template>
   <Dialog title="甘特图编辑" v-model="dialogVisible" fullscreen>
     <div class="mb-10px flex items-center justify-between">
@@ -59,7 +58,6 @@ const open = async () => {
 
 /** 加载甘特图数据（复用 page 接口，传大 pageSize） */
 const loadGanttData = async () => {
-  // TODO @AI：请求地址不存在:admin-api/mes/pro/task/page；这个在对齐下；
   const data = await ProTaskApi.getTaskPage({ pageNo: 1, pageSize: 999 })
   taskList.value = data.list
 }
