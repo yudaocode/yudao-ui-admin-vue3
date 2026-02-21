@@ -20,9 +20,8 @@
       </el-form-item>
       <el-form-item label="检测项类型" prop="type">
         <el-select v-model="formData.type" placeholder="请选择检测项类型" clearable class="!w-1/1">
-          <!-- TODO @AI：MES_INDEX_TYPE 改成 MES_INDICATOR_TYPE 类型，然后对应的值，相关的 sql、后端都要改变； -->
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDEX_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDICATOR_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -48,19 +47,16 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：枚举类判断 -->
       <!-- 动态显示：FILE 类型 -->
-      <el-form-item v-if="formData.resultType === 5" label="文件类型" prop="resultSpecification">
+      <el-form-item v-if="formData.resultType === MesQcResultValueType.FILE" label="文件类型" prop="resultSpecification">
         <el-radio-group v-model="formData.resultSpecification">
           <el-radio label="IMG">图片/照片</el-radio>
           <el-radio label="FILE">文件</el-radio>
         </el-radio-group>
       </el-form-item>
       <!-- 动态显示：DICT 类型 -->
-      <!-- TODO @AI：枚举类判断 -->
-      <!-- TODO @AI：是不是抽个 dict/components/DictTypeSelect 组件出来；然后这边使用噢 -->
       <el-form-item
-        v-else-if="formData.resultType === 4"
+        v-else-if="formData.resultType === MesQcResultValueType.DICT"
         label="字典类型"
         prop="resultSpecification"
       >
@@ -83,6 +79,7 @@
 import { getStrDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { QcIndicatorApi, QcIndicatorVO } from '@/api/mes/qc/indicator'
 import { generateRandomStr } from '@/utils'
+import { MesQcResultValueType } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IndicatorForm' })
 

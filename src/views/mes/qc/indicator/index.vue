@@ -35,7 +35,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDEX_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDICATOR_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -88,7 +88,7 @@
       <el-table-column label="检测项名称" align="center" prop="name" min-width="150" />
       <el-table-column label="检测项类型" align="center" prop="type" width="120">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_INDEX_TYPE" :value="scope.row.type" />
+          <dict-tag :type="DICT_TYPE.MES_INDICATOR_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
       <el-table-column label="检测工具" align="center" prop="tool" width="120" />

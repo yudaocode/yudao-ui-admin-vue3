@@ -20,7 +20,7 @@
       <el-table-column label="检测项名称" align="center" prop="indicatorName" min-width="150" />
       <el-table-column label="检测项类型" align="center" prop="indicatorType" width="120">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_INDEX_TYPE" :value="scope.row.indicatorType" />
+          <dict-tag :type="DICT_TYPE.MES_INDICATOR_TYPE" :value="scope.row.indicatorType" />
         </template>
       </el-table-column>
       <el-table-column label="检测工具" align="center" prop="indicatorTool" width="120" />

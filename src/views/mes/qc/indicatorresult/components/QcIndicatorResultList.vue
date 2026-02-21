@@ -1,5 +1,4 @@
 <!-- MES 检验结果列表子组件（嵌入 IQC 等质检单详情页） -->
-<!-- TODO @AI：这个文件名，可以更全面一点；另外，放到 components 目录下； -->
 <template>
   <div>
     <!-- 操作按钮 -->
@@ -32,15 +31,17 @@
     />
 
     <!-- 新增/修改弹窗 -->
-    <ResultForm ref="formRef" :qc-id="qcId" :qc-type="qcType" @success="getList" />
+    <QcIndicatorResultForm ref="formRef" :qc-id="qcId" :qc-type="qcType" @success="getList" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { QcResultApi, QcResultVO } from '@/api/mes/qc/indicatorresult'
-import ResultForm from './ResultForm.vue'
+import { QcIndicatorResultApi, QcIndicatorResultVO } from '@/api/mes/qc/indicatorresult'
+import QcIndicatorResultForm from './QcIndicatorResultForm.vue'
 
-defineOptions({ name: 'ResultList' })
+// TODO @AI：补全注释，参考 system user index.vue
+
+defineOptions({ name: 'QcIndicatorResultList' })
 
 const props = defineProps<{
   qcId: number
@@ -51,7 +52,7 @@ const { t } = useI18n()
 const message = useMessage()
 
 const loading = ref(false)
-const list = ref<QcResultVO[]>([])
+const list = ref<QcIndicatorResultVO[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNo: 1,
@@ -70,7 +71,7 @@ const getList = async () => {
   queryParams.qcType = props.qcType
   loading.value = true
   try {
-    const data = await QcResultApi.getResultPage(queryParams)
+    const data = await QcIndicatorResultApi.getResultPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -84,15 +85,15 @@ const handleAdd = () => {
 }
 
 /** 修改 */
-const handleUpdate = (row: QcResultVO) => {
+const handleUpdate = (row: QcIndicatorResultVO) => {
   formRef.value.open('update', row.id)
 }
 
 /** 删除 */
-const handleDelete = async (row: QcResultVO) => {
+const handleDelete = async (row: QcIndicatorResultVO) => {
   try {
     await message.delConfirm()
-    await QcResultApi.deleteResult(row.id)
+    await QcIndicatorResultApi.deleteResult(row.id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}

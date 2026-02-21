@@ -130,6 +130,15 @@ export const MesDvCheckResultEnum = {
   ABNORMAL: 2 // 异常
 }
 
+/** MES 质检结果值类型枚举 */
+export const MesQcResultValueType = {
+  FLOAT: 1,    // 浮点
+  INTEGER: 2,  // 整数
+  TEXT: 3,     // 文本
+  DICT: 4,     // 字典
+  FILE: 5      // 文件
+} as const
+
 /** MES 质检类型枚举 */
 export const MesQcTypeEnum = {
   IQC: 1,  // 来料检验

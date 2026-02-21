@@ -28,7 +28,7 @@
           class="!w-1/1"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDEX_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDICATOR_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
