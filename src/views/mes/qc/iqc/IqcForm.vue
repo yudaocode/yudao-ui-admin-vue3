@@ -209,23 +209,12 @@
     </template>
 
     <template #footer>
-      <!-- TODO @AI：不需要 status 判断 -->
       <el-button
         @click="submitForm"
         type="primary"
         :disabled="formLoading"
-        v-if="formData.status === 0"
       >
         保 存
-      </el-button>
-      <!-- TODO @AI：不需要 【完成】 操作； -->
-      <el-button
-        @click="handleComplete"
-        type="success"
-        :disabled="formLoading"
-        v-if="formType === 'update' && formData.id && formData.status === 0"
-      >
-        完 成
       </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
@@ -272,9 +261,8 @@ const formData = ref({
   maxUnqualifiedQuantity: undefined,
   receivedQuantity: undefined,
   checkQuantity: undefined,
-  // TODO @AI：qualifiedQuantity、unqualifiedQuantity 使用 undefined，不用必填；
-  qualifiedQuantity: 0,
-  unqualifiedQuantity: 0,
+  qualifiedQuantity: undefined,
+  unqualifiedQuantity: undefined,
   checkResult: undefined,
   receiveDate: undefined,
   inspectDate: undefined,
@@ -343,24 +331,6 @@ const submitForm = async () => {
   }
 }
 
-/** 完成操作 */
-const handleComplete = async () => {
-  try {
-    await message.confirm('确认完成该来料检验单？完成后不可修改。')
-    formLoading.value = true
-    // 先保存
-    await QcIqcApi.updateIqc(formData.value as unknown as QcIqcVO)
-    // 再完成
-    await QcIqcApi.completeIqc(formData.value.id!)
-    message.success('完成成功')
-    dialogVisible.value = false
-    emit('success')
-  } catch {
-  } finally {
-    formLoading.value = false
-  }
-}
-
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
@@ -379,8 +349,8 @@ const resetForm = () => {
     maxUnqualifiedQuantity: undefined,
     receivedQuantity: undefined,
     checkQuantity: undefined,
-    qualifiedQuantity: 0,
-    unqualifiedQuantity: 0,
+    qualifiedQuantity: undefined,
+    unqualifiedQuantity: undefined,
     checkResult: undefined,
     receiveDate: undefined,
     inspectDate: undefined,

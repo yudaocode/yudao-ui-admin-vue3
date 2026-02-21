@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：defect/record/index.ts
 // MES 质检缺陷记录 VO
 export interface QcDefectRecordVO {
   id: number // 编号

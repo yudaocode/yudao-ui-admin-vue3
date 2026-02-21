@@ -2,15 +2,14 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <!-- // TODO @AI：使用 mes:qc-record:create 权限标识先；不要搞太复杂；当然，也写个 todo
-    @芋艿：说下这个情况 -->
+    <!-- TODO @芋艿：说下 mes:qc-record 这个权限标识的情况 -->
     <el-row class="mb-10px">
       <el-button
         type="primary"
         plain
         size="small"
         @click="openForm('create')"
-        v-hasPermi="['mes:qc-defect-record:create']"
+        v-hasPermi="['mes:qc-record:create']"
       >
         <Icon icon="ep:plus" class="mr-5px" /> 新增缺陷记录
       </el-button>
@@ -39,7 +38,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:qc-defect-record:update']"
+            v-hasPermi="['mes:qc-record:update']"
           >
             编辑
           </el-button>
@@ -47,7 +46,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:qc-defect-record:update']"
+            v-hasPermi="['mes:qc-record:update']"
           >
             删除
           </el-button>
@@ -112,7 +111,7 @@
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { QcDefectRecordApi, QcDefectRecordVO } from '@/api/mes/qc/defect-record'
+import { QcDefectRecordApi, QcDefectRecordVO } from '@/api/mes/qc/defect/record'
 import { QcIqcLineApi, QcIqcLineVO } from '@/api/mes/qc/iqc/line'
 
 defineOptions({ name: 'IqcDefectList' })
