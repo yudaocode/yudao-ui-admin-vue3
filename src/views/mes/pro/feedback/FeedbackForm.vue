@@ -1,6 +1,5 @@
 <!-- MES 生产报工表单 -->
 <template>
-  <!-- TODO @AI：一行 3 个 -->
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
@@ -9,14 +8,14 @@
       label-width="120px"
       v-loading="formLoading"
     >
-      <el-row>
-        <el-col :span="12">
-          <!-- TODO @AI：生成，前端处理；参考别的模块  -->
+      <!-- 基本信息 -->
+      <el-row :gutter="20">
+        <el-col :span="8">
           <el-form-item label="报工单号" prop="code">
             <el-input v-model="formData.code" disabled placeholder="自动生成" />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="报工类型" prop="type">
             <el-select
               v-model="formData.type"
@@ -33,10 +32,8 @@
             </el-select>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
-        <!-- TODO @芋艿：报告途径，是不是非必须？ -->
-        <el-col :span="12">
+        <el-col :span="8">
+          <!-- TODO @芋艿：报告途径，是不是非必须？ -->
           <el-form-item label="报工途径" prop="channel">
             <el-select
               v-model="formData.channel"
@@ -53,20 +50,11 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
-          <el-form-item label="批次号" prop="batchCode">
-            <el-input
-              v-model="formData.batchCode"
-              placeholder="请输入批次号"
-              :disabled="isDetail"
-            />
-          </el-form-item>
-        </el-col>
       </el-row>
-      <!-- 工单选择 -->
+      <!-- 工单 / 任务 / 工作站 -->
       <!-- TODO @AI：生产工单 select； -->
-      <el-row>
-        <el-col :span="12">
+      <el-row :gutter="20">
+        <el-col :span="8">
           <el-form-item label="生产工单" prop="workOrderId">
             <el-select
               v-model="formData.workOrderId"
@@ -74,7 +62,7 @@
               remote
               reserve-keyword
               :remote-method="searchWorkOrder"
-              placeholder="请搜索工单编码/名称"
+              placeholder="请搜索工单编码"
               :disabled="isDetail"
               class="!w-1/1"
               @change="handleWorkOrderChange"
@@ -88,7 +76,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="生产任务" prop="taskId">
             <el-select
               v-model="formData.taskId"
@@ -110,11 +98,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-      </el-row>
-      <!-- 工作站 / 工序（任务选中后自动填充，也支持手动选择） -->
-      <!-- TODO @AI：工作站 select； -->
-      <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="工作站" prop="workstationId">
             <el-select
               v-model="formData.workstationId"
@@ -135,36 +119,27 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：生产任务 select； -->
-        <el-col :span="12">
+      </el-row>
+      <!-- 工序 / 批次号 -->
+      <el-row :gutter="20">
+        <el-col :span="8">
           <el-form-item label="工序" prop="processId">
             <el-input v-model="processDisplay" disabled placeholder="由任务自动带入" />
           </el-form-item>
         </el-col>
-      </el-row>
-      <!-- 物料 / 单位 / 工艺路线（自动填充，只读） -->
-      <!-- TODO 下面的 itemDisplay、scheduledQuantity 不需要 -->
-      <el-row>
-        <el-col :span="12">
-          <el-form-item label="产品物料" prop="itemId">
-            <el-input v-model="itemDisplay" disabled placeholder="由任务自动带入" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="排产数量" prop="scheduledQuantity">
-            <el-input-number
-              v-model="formData.scheduledQuantity"
-              :min="0"
-              :precision="2"
-              disabled
-              class="!w-1/1"
+        <el-col :span="8">
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input
+              v-model="formData.batchCode"
+              placeholder="请输入批次号"
+              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
       </el-row>
       <!-- 数量区域 -->
       <el-divider content-position="left">报工数量</el-divider>
-      <el-row>
+      <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="报工数量" prop="feedbackQuantity">
             <el-input-number
@@ -215,7 +190,7 @@
       </el-row>
       <!-- 废品分类（不良品>0 时展开） -->
       <!-- TODO @芋艿：在评审下 -->
-      <el-row v-if="formData.unqualifiedQuantity > 0">
+      <el-row :gutter="20" v-if="formData.unqualifiedQuantity > 0">
         <el-col :span="8">
           <el-form-item label="工废数量">
             <el-input-number
@@ -250,8 +225,27 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- TODO @AI：报工人、报工时间、审批人 -->
-      <el-row>
+      <!-- TODO @AI：报工人、报工时间、审批人；select 模式； -->
+      <!-- 报工人 / 报工时间 / 审核人（仅编辑/详情模式展示） -->
+      <el-row :gutter="20" v-if="formData.id">
+        <el-col :span="8">
+          <el-form-item label="报工人">
+            <el-input :model-value="formData.feedbackUserNickname" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="报工时间">
+            <el-input :model-value="formData.feedbackTime" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="审核人">
+            <el-input :model-value="formData.approveUserNickname" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <!-- 备注 -->
+      <el-row :gutter="20">
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input
@@ -277,8 +271,6 @@ import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProFeedbackApi, ProFeedbackVO } from '@/api/mes/pro/feedback'
 import { ProWorkOrderApi } from '@/api/mes/pro/workorder'
 
-// TODO @AI：方法注释、变量注释，参考别的模块；
-
 defineOptions({ name: 'FeedbackForm' })
 
 const { t } = useI18n()
@@ -289,8 +281,9 @@ const dialogTitle = ref('')
 const formLoading = ref(false)
 const formType = ref('') // 'create' | 'update' | 'detail'
 
-const formData = ref({
+const formData = ref<Record<string, any>>({
   id: undefined,
+  code: undefined,
   type: undefined,
   channel: undefined,
   workstationId: undefined,
@@ -302,7 +295,6 @@ const formData = ref({
   unitMeasureId: undefined,
   expireDate: undefined,
   batchCode: undefined,
-  scheduledQuantity: 0,
   feedbackQuantity: 0,
   qualifiedQuantity: 0,
   unqualifiedQuantity: 0,
@@ -311,7 +303,10 @@ const formData = ref({
   materialScrapQuantity: 0,
   otherScrapQuantity: 0,
   remark: undefined,
-  code: undefined
+  // 展示字段（来自 RespVO，不提交）
+  feedbackUserNickname: undefined,
+  feedbackTime: undefined,
+  approveUserNickname: undefined
 })
 
 const formRules = reactive({
@@ -329,9 +324,8 @@ const isDetail = computed(() => formType.value === 'detail')
 /** 是否需要检验（checkFlag） */
 const checkFlag = ref(false)
 
-/** 显示字段（只读） */
+/** 工序显示（只读） */
 const processDisplay = ref('')
-const itemDisplay = ref('')
 
 // ==================== 远程搜索选项 ====================
 
@@ -362,23 +356,19 @@ const searchTask = async (query: string) => {
 /** 搜索工作站 */
 const searchWorkstation = async (query: string) => {
   if (!query) return
-  // 使用工作站 API 搜索（这里用简单查询）
   // TODO @芋艿：如果有工作站搜索 API，可替换
   workstationOptions.value = []
 }
 
-/** 工单变更 */
-const handleWorkOrderChange = (workOrderId: number) => {
-  // 清空任务相关字段
+/** 工单变更：清空任务相关字段 */
+const handleWorkOrderChange = () => {
   formData.value.taskId = undefined
   formData.value.routeId = undefined
   formData.value.processId = undefined
   formData.value.itemId = undefined
   formData.value.unitMeasureId = undefined
   formData.value.workstationId = undefined
-  formData.value.scheduledQuantity = 0
   processDisplay.value = ''
-  itemDisplay.value = ''
   taskOptions.value = []
   checkFlag.value = false
 }
@@ -392,11 +382,30 @@ const handleTaskChange = (taskId: number) => {
   formData.value.itemId = task.itemId
   formData.value.unitMeasureId = task.unitMeasureId
   formData.value.workstationId = task.workstationId
-  formData.value.scheduledQuantity = task.quantity
   processDisplay.value = task.processCode ? task.processCode + ' - ' + task.processName : ''
-  itemDisplay.value = task.itemCode ? task.itemCode + ' - ' + task.itemName : ''
   // TODO @芋艿：加载 checkFlag（查询 routeProcess）
 }
+
+// ==================== 报工单编号生成 ====================
+
+/** 生成报工单编号（前端生成） */
+const generateCode = () => {
+  const now = new Date()
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  const dateStr =
+    now.getFullYear().toString() +
+    pad(now.getMonth() + 1) +
+    pad(now.getDate()) +
+    pad(now.getHours()) +
+    pad(now.getMinutes()) +
+    pad(now.getSeconds())
+  const random = Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, '0')
+  return 'FB' + dateStr + random
+}
+
+// ==================== 弹窗操作 ====================
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -407,12 +416,11 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = (await ProFeedbackApi.getFeedback(id)) as any
-      formData.value = data
+      const data = await ProFeedbackApi.getFeedback(id)
+      formData.value = data as any
       // 填充显示字段
       processDisplay.value = data.processCode ? data.processCode + ' - ' + data.processName : ''
-      itemDisplay.value = data.itemCode ? data.itemCode + ' - ' + data.itemName : ''
-      checkFlag.value = data.checkFlag || false
+      checkFlag.value = (data as any).checkFlag || false
       // 填充选项（让 select 能显示已选值）
       if (data.workOrderId) {
         workOrderOptions.value = [
@@ -430,6 +438,9 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else {
+    // 创建模式：自动生成报工单号
+    formData.value.code = generateCode()
   }
 }
 
@@ -460,6 +471,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
+    code: undefined,
     type: undefined,
     channel: undefined,
     workstationId: undefined,
@@ -471,7 +483,6 @@ const resetForm = () => {
     unitMeasureId: undefined,
     expireDate: undefined,
     batchCode: undefined,
-    scheduledQuantity: 0,
     feedbackQuantity: 0,
     qualifiedQuantity: 0,
     unqualifiedQuantity: 0,
@@ -480,13 +491,14 @@ const resetForm = () => {
     materialScrapQuantity: 0,
     otherScrapQuantity: 0,
     remark: undefined,
-    code: undefined
+    feedbackUserNickname: undefined,
+    feedbackTime: undefined,
+    approveUserNickname: undefined
   }
   workOrderOptions.value = []
   taskOptions.value = []
   workstationOptions.value = []
   processDisplay.value = ''
-  itemDisplay.value = ''
   checkFlag.value = false
   formRef.value?.resetFields()
 }

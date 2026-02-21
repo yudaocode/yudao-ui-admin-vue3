@@ -33,15 +33,25 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：select；  -->
-      <el-form-item label="工单编号" prop="workOrderId">
-        <el-input
+      <!-- TODO @AI：select；增加一个 workOrder 的 select 组件 -->
+      <el-form-item label="生产工单" prop="workOrderId">
+        <el-select
           v-model="queryParams.workOrderId"
-          placeholder="请输入工单编号"
+          filterable
+          remote
+          reserve-keyword
+          :remote-method="searchWorkOrder"
+          placeholder="请搜索工单编码"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="item in workOrderOptions"
+            :key="item.id"
+            :label="item.code"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <!-- TODO @AI：产品物料 select -->
       <!-- TODO @AI：报工人 select -->
@@ -136,21 +146,24 @@
               link
               type="primary"
               @click="openForm('update', scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:update']">
+              v-hasPermi="['mes:pro-feedback:update']"
+            >
               编辑
             </el-button>
             <el-button
               link
               type="success"
               @click="handleSubmit(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:update']">
+              v-hasPermi="['mes:pro-feedback:update']"
+            >
               提交
             </el-button>
             <el-button
               link
               type="danger"
               @click="handleDelete(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:delete']">
+              v-hasPermi="['mes:pro-feedback:delete']"
+            >
               删除
             </el-button>
           </template>
@@ -160,14 +173,16 @@
               link
               type="warning"
               @click="handleReject(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:update']">
+              v-hasPermi="['mes:pro-feedback:update']"
+            >
               驳回
             </el-button>
             <el-button
               link
               type="success"
               @click="handleExecute(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:update']">
+              v-hasPermi="['mes:pro-feedback:update']"
+            >
               执行
             </el-button>
             <el-button
@@ -206,11 +221,10 @@
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ProFeedbackApi, ProFeedbackVO } from '@/api/mes/pro/feedback'
+import { ProWorkOrderApi } from '@/api/mes/pro/workorder'
 import FeedbackForm from './FeedbackForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
-
-// TODO @AI：变量、方法注释，参考别的模块；
 
 defineOptions({ name: 'MesProFeedback' })
 
@@ -231,6 +245,14 @@ const queryParams = reactive({
 })
 const queryFormRef = ref()
 const exportLoading = ref(false)
+
+/** 工单远程搜索选项 */
+const workOrderOptions = ref<any[]>([])
+const searchWorkOrder = async (query: string) => {
+  if (!query) return
+  const data = await ProWorkOrderApi.getWorkOrderPage({ pageNo: 1, pageSize: 20, code: query })
+  workOrderOptions.value = data.list
+}
 
 /** 查询列表 */
 const getList = async () => {
