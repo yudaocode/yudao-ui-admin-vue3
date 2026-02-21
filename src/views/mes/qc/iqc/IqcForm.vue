@@ -64,18 +64,7 @@
               v-model="formData.itemId"
               placeholder="请选择产品物料"
               class="!w-1/1"
-              @change="handleItemChange"
             />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="物料名称">
-            <el-input :model-value="itemName" disabled />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="规格型号">
-            <el-input :model-value="itemSpecification" disabled />
           </el-form-item>
         </el-col>
       </el-row>
@@ -278,10 +267,6 @@ const formLoading = ref(false)
 const formType = ref('')
 const activeTab = ref('line')
 
-// 关联数据回显
-const itemName = ref('')
-const itemSpecification = ref('')
-
 // 模板列表
 const templateList = ref<any[]>([])
 
@@ -327,12 +312,6 @@ const formRules = reactive({
 })
 const formRef = ref()
 
-/** 物料变更回调 */
-const handleItemChange = (item: any) => {
-  itemName.value = item?.name || ''
-  itemSpecification.value = item?.specification || ''
-}
-
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -348,9 +327,6 @@ const open = async (type: string, id?: number) => {
     try {
       const data = await QcIqcApi.getIqc(id)
       formData.value = data
-      // 回显关联数据
-      itemName.value = data.itemName || ''
-      itemSpecification.value = data.itemSpecification || ''
     } finally {
       formLoading.value = false
     }
@@ -432,9 +408,6 @@ const resetForm = () => {
     majorQuantity: 0,
     minorQuantity: 0
   }
-  // TODO @AI：这些字段是不是不用了？因为 item 是下拉框；
-  itemName.value = ''
-  itemSpecification.value = ''
   formRef.value?.resetFields()
 }
 </script>

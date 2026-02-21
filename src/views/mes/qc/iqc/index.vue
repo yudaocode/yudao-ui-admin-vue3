@@ -156,7 +156,7 @@
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:qc-iqc:update']"
-            v-if="scope.row.status === QC_IQC_STATUS.PREPARE"
+            v-if="scope.row.status === MesQcIqcStatusEnum.PREPARE"
           >
             编辑
           </el-button>
@@ -165,7 +165,7 @@
             type="success"
             @click="handleComplete(scope.row.id)"
             v-hasPermi="['mes:qc-iqc:update']"
-            v-if="scope.row.status === QC_IQC_STATUS.PREPARE"
+            v-if="scope.row.status === MesQcIqcStatusEnum.PREPARE"
           >
             完成
           </el-button>
@@ -174,7 +174,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-if="scope.row.status !== QC_IQC_STATUS.PREPARE"
+            v-if="scope.row.status !== MesQcIqcStatusEnum.PREPARE"
           >
             查看报表
           </el-button>
@@ -183,7 +183,7 @@
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:qc-iqc:delete']"
-            v-if="scope.row.status === QC_IQC_STATUS.PREPARE"
+            v-if="scope.row.status === MesQcIqcStatusEnum.PREPARE"
           >
             删除
           </el-button>
@@ -212,15 +212,9 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import { MesQcIqcStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcIqc' })
-
-/** IQC 状态枚举 */
-// TODO @AI：放到 constants 里；
-const QC_IQC_STATUS = {
-  PREPARE: 0,
-  FINISHED: 1
-}
 
 const message = useMessage()
 const { t } = useI18n()
