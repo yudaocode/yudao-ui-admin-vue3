@@ -193,7 +193,7 @@
           <IqcLineList :iqc-id="formData.id" />
         </el-tab-pane>
         <el-tab-pane label="检测结果" name="result">
-          <IqcResultList :iqc-id="formData.id" />
+          <ResultList :qc-id="formData.id!" :qc-type="MesQcTypeEnum.IQC" />
         </el-tab-pane>
       </el-tabs>
     </template>
@@ -214,7 +214,8 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import QcTemplateSelect from '@/views/mes/qc/template/components/QcTemplateSelect.vue'
 import IqcLineList from './IqcLineList.vue'
-import IqcResultList from './IqcResultList.vue'
+import ResultList from '@/views/mes/qc/result/ResultList.vue'
+import { MesQcTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IqcForm' })
 

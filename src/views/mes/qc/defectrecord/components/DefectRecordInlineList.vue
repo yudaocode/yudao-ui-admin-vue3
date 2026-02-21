@@ -105,7 +105,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { QcDefectRecordApi, QcDefectRecordVO } from '@/api/mes/qc/defect/record'
+import { QcDefectRecordApi, QcDefectRecordVO } from '@/api/mes/qc/defectrecord'
 
 /** 缺陷记录内联编辑弹窗（通用组件，供 IQC/IPQC/OQC/RQC 各模块复用） */
 defineOptions({ name: 'DefectRecordInlineList' })

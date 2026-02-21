@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { QcIqcLineApi, QcIqcLineVO } from '@/api/mes/qc/iqc/line'
-import DefectRecordInlineList from '@/views/mes/qc/defect/record/components/DefectRecordInlineList.vue'
+import DefectRecordInlineList from '@/views/mes/qc/defectrecord/components/DefectRecordInlineList.vue'
 import { MesQcTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IqcLineList' })
