@@ -18,8 +18,14 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：生产工单编号 select 组件 -->
-      <!-- TODO @AI：批次号 -->
+      <el-form-item label="生产工单" prop="workOrderId">
+        <ProWorkOrderSelect
+          v-model="queryParams.workOrderId"
+          placeholder="请选择工单"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <!-- TODO @芋艿：批次号 -->
       <el-form-item label="产品" prop="itemId">
         <MdItemSelect v-model="queryParams.itemId" placeholder="请选择产品" class="!w-240px" />
       </el-form-item>
@@ -103,6 +109,7 @@
       />
       <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
+          <!-- TODO @AI：状态怎么流转？是不是不用 status？ -->
           <!-- TODO @芋艿：打印 -->
           <el-button
             link
@@ -152,6 +159,7 @@ import { ProCardApi, ProCardVO } from '@/api/mes/pro/card'
 import CardForm from './CardForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 
 defineOptions({ name: 'MesProCard' })
 
@@ -165,6 +173,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
+  workOrderId: undefined,
   itemId: undefined,
   batchCode: undefined,
   status: undefined,

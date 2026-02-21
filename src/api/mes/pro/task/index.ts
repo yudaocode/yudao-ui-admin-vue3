@@ -67,5 +67,10 @@ export const ProTaskApi = {
   // 导出生产任务 Excel
   exportTask: async (params: any) => {
     return await request.download({ url: `/mes/pro/task/export-excel`, params })
+  },
+
+  // 获得任务精简列表（下拉选项）
+  getTaskSimpleList: async (workOrderId?: number) => {
+    return await request.get({ url: `/mes/pro/task/simple-list`, params: { workOrderId } })
   }
 }

@@ -22,13 +22,7 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="生产工单" prop="workOrderId">
-            <el-input-number
-              v-model="formData.workOrderId"
-              placeholder="请输入工单编号"
-              class="!w-1/1"
-              :disabled="isDetail"
-            />
-            <!-- TODO @芋艿：替换为 WorkOrderSelect 组件（工单选择器） -->
+            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -66,11 +60,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="规格型号" prop="specification">
-            <el-input
-              v-model="formData.specification"
-              placeholder="请输入规格型号"
-              :disabled="isDetail"
-            />
+            <el-input v-model="formData.specification" placeholder="选择产品后自动填充" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8" v-if="formType !== 'create'">
@@ -95,11 +85,7 @@
     <!-- 工序记录子表：编辑/详情时显示 -->
     <el-tabs v-if="formType !== 'create'" v-model="activeTab" class="mt-15px">
       <el-tab-pane label="工序记录" name="process">
-        <CardProcessList
-          v-if="formData.id"
-          :card-id="formData.id"
-          :disabled="isDetail"
-        />
+        <CardProcessList v-if="formData.id" :card-id="formData.id" :disabled="isDetail" />
       </el-tab-pane>
     </el-tabs>
     <template #footer v-if="!isDetail">
@@ -115,6 +101,7 @@ import { ProCardApi, ProCardVO } from '@/api/mes/pro/card'
 import { MdItemVO } from '@/api/mes/md/item'
 import { generateRandomStr } from '@/utils'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import CardProcessList from './CardProcessList.vue'
 
 defineOptions({ name: 'CardForm' })
@@ -133,8 +120,8 @@ const formData = ref({
   workOrderId: undefined,
   batchCode: undefined,
   itemId: undefined,
-  specification: undefined,
-  unitMeasureId: undefined,
+  // TODO @AI：specification 不用展示；
+  specification: undefined, // 仅展示，不存储（从 item 获取）
   barcodeUrl: undefined,
   transferedQuantity: undefined,
   status: undefined,
@@ -176,15 +163,9 @@ const open = async (type: string, id?: number) => {
 
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 产品变更：自动填充单位和规格 */
-// TODO @AI：这 2 个字段，不用存储，通过 item 查询即可。
+/** 产品变更：自动填充规格型号（仅展示） */
 const handleItemChange = (item: MdItemVO) => {
-  if (item?.unitMeasureId) {
-    formData.value.unitMeasureId = item.unitMeasureId
-  }
-  if (item?.specification) {
-    formData.value.specification = item.specification
-  }
+  formData.value.specification = item?.specification
 }
 
 /** 提交表单 */
@@ -217,7 +198,6 @@ const resetForm = () => {
     batchCode: undefined,
     itemId: undefined,
     specification: undefined,
-    unitMeasureId: undefined,
     barcodeUrl: undefined,
     transferedQuantity: undefined,
     status: undefined,
