@@ -169,7 +169,7 @@
           >
             完成
           </el-button>
-          <!-- TODO @芋艿：查看报表，后续要搞下； -->
+          <!-- TODO 【不要删除】 @芋艿：查看报表，后续要搞下； -->
           <el-button
             link
             type="primary"
@@ -204,7 +204,6 @@
 </template>
 
 <script setup lang="ts">
-// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/index.vue 写方法、变量注释；
 import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { QcIqcApi, QcIqcVO } from '@/api/mes/qc/iqc'
@@ -217,12 +216,12 @@ import { MesQcIqcStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcIqc' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const list = ref<QcIqcVO[]>([])
-const total = ref(0)
+const loading = ref(true) // 列表的加载中
+const list = ref<QcIqcVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -235,8 +234,8 @@ const queryParams = reactive({
   inspectDate: undefined,
   inspectorUserId: undefined
 })
-const queryFormRef = ref()
-const exportLoading = ref(false)
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {

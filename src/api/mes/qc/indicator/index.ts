@@ -7,8 +7,8 @@ export interface QcIndicatorVO {
   name: string // 检测项名称
   type: string // 检测项类型
   tool: string // 检测工具
-  resultType: string // 结果值类型
-  resultSpec: string // 结果值属性
+  resultType: number // 结果值类型
+  resultSpecification: string // 结果值属性
   remark: string // 备注
 }
 

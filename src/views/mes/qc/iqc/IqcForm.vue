@@ -214,7 +214,7 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import QcTemplateSelect from '@/views/mes/qc/template/components/QcTemplateSelect.vue'
 import IqcLineList from './IqcLineList.vue'
-import ResultList from '@/views/mes/qc/result/ResultList.vue'
+import ResultList from '@/views/mes/qc/indicatorresult/ResultList.vue'
 import { MesQcTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IqcForm' })

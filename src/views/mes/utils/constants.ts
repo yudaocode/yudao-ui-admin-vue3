@@ -144,6 +144,12 @@ export const MesQcIqcStatusEnum = {
   FINISHED: 1 // 已完成
 }
 
+/** MES 过程检验单（IPQC）状态枚举 */
+export const MesQcIpqcStatusEnum = {
+  PREPARE: 0, // 草稿
+  FINISHED: 1 // 已完成
+}
+
 /** MES 生产报工状态枚举 */
 export const MesProFeedbackStatusEnum = {
   PREPARE: 0,   // 草稿
