@@ -22,19 +22,17 @@
         <dict-tag :type="DICT_TYPE.MES_PRO_ANDON_LEVEL" :value="recordInfo.level" />
       </el-form-item>
       <!-- 可编辑字段 -->
-      <!-- TODO @AI：unocss 简化 style -->
       <el-form-item label="处置时间" prop="handleTime">
         <el-date-picker
           v-model="formData.handleTime"
           type="datetime"
           value-format="YYYY-MM-DD HH:mm:ss"
           placeholder="请选择处置时间"
-          style="width: 100%"
+          class="!w-full"
         />
       </el-form-item>
-      <!-- TODO @AI：可选，user-select；只是默认当前人； -->
       <el-form-item label="处置人" prop="handlerUserId">
-        <el-input :model-value="handlerNickname" disabled placeholder="当前用户" />
+        <UserSelect v-model="formData.handlerUserId" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" type="textarea" placeholder="请输入处置备注" />
@@ -51,41 +49,39 @@
 import { ProAndonRecordApi } from '@/api/mes/pro/andon/record'
 import { DICT_TYPE } from '@/utils/dict'
 import { useUserStoreWithOut } from '@/store/modules/user'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import { formatDate } from '@/utils/formatTime'
 
 defineOptions({ name: 'AndonHandleForm' })
 
 const message = useMessage()
 
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const formData = ref<any>({})
-const recordInfo = ref<any>({})
-const handlerNickname = ref('')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const formData = ref<any>({}) // 表单数据
+const recordInfo = ref<any>({}) // 呼叫记录信息（只读展示）
 const formRules = reactive({
   handleTime: [{ required: true, message: '处置时间不能为空', trigger: 'change' }],
   handlerUserId: [{ required: true, message: '处置人不能为空', trigger: 'change' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const open = async (id: number) => {
   dialogVisible.value = true
+  resetForm()
   formLoading.value = true
-  // TODO @AI：还是老样子，先 reset；参考别的；
   try {
     // 加载记录信息
     recordInfo.value = await ProAndonRecordApi.getAndonRecord(id)
-    // 初始化处置表单
+    // 初始化处置表单，默认当前用户
     const userStore = useUserStoreWithOut()
     formData.value = {
       id: id,
-      // TODO @AI：不需要 format；
       handleTime: formatDate(new Date(), 'YYYY-MM-DD HH:mm:ss'),
       handlerUserId: userStore.getUser?.id,
       remark: undefined
     }
-    handlerNickname.value = userStore.getUser?.nickname || ''
   } finally {
     formLoading.value = false
   }
@@ -105,5 +101,17 @@ const submitForm = async () => {
   } finally {
     formLoading.value = false
   }
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    handleTime: undefined,
+    handlerUserId: undefined,
+    remark: undefined
+  }
+  recordInfo.value = {}
+  formRef.value?.resetFields()
 }
 </script>

@@ -16,11 +16,12 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：发起人 select -->
-      <!-- TODO @AI：生产工单 select -->
-      <!-- TODO @AI：工序 select -->
-      <!-- TODO @AI：工序名称 select -->
-      <!-- TODO @AI：处置人 select -->
+      <el-form-item label="发起人" prop="userId">
+        <UserSelect v-model="queryParams.userId" class="!w-240px" />
+      </el-form-item>
+      <el-form-item label="处置人" prop="handlerUserId">
+        <UserSelect v-model="queryParams.handlerUserId" class="!w-240px" />
+      </el-form-item>
       <el-form-item label="处理状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
@@ -79,8 +80,8 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="工作站编码" align="center" prop="workstationCode" width="120" />
       <el-table-column label="工作站名称" align="center" prop="workstationName" min-width="120" />
-      <!-- TODO @AI：工单编码 -->
-      <!-- TODO @AI：工序 -->
+      <el-table-column label="工单编码" align="center" prop="workOrderCode" width="140" />
+      <el-table-column label="工序名称" align="center" prop="processName" width="120" />
       <el-table-column label="发起人" align="center" prop="userNickname" width="100" />
       <el-table-column
         label="发起时间"
@@ -89,15 +90,6 @@
         :formatter="dateFormatter"
         width="180"
       />
-      <!-- TODO @AI：发起时间 -->
-      <!-- TODO @AI：呼叫原因 -->
-      <!-- TODO @AI：级别 -->
-      <!-- TODO @AI：处理时间 -->
-      <!-- TODO @AI：处理人 -->
-      <!-- TODO @AI：处置状态 -->
-      <!-- TODO @AI：操作 -->
-      <el-table-column label="工单编码" align="center" prop="workOrderCode" width="140" />
-      <el-table-column label="工序名称" align="center" prop="processName" width="120" />
       <el-table-column label="呼叫原因" align="center" prop="reason" min-width="150" />
       <el-table-column label="级别" align="center" prop="level" width="80">
         <template #default="scope">
@@ -105,14 +97,14 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="处置时间"
+        label="处理时间"
         align="center"
         prop="handleTime"
         :formatter="dateFormatter"
         width="180"
       />
-      <el-table-column label="处置人" align="center" prop="handlerUserNickname" width="100" />
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column label="处理人" align="center" prop="handlerUserNickname" width="100" />
+      <el-table-column label="处置状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_PRO_ANDON_STATUS" :value="scope.row.status" />
         </template>
@@ -174,25 +166,27 @@ import AndonConfigDialog from '../config/AndonConfigForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProAndonStatusEnum } from '@/views/mes/utils/constants'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 
 defineOptions({ name: 'MesProAndon' })
 
 const message = useMessage()
 const { t } = useI18n()
 
-const loading = ref(true)
-const list = ref<ProAndonRecordVO[]>([])
-const total = ref(0)
+const loading = ref(true) // 列表的加载中
+const list = ref<ProAndonRecordVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   workstationId: undefined,
-  level: undefined,
+  userId: undefined,
+  handlerUserId: undefined,
   status: undefined,
   createTime: undefined
 })
-const queryFormRef = ref()
-const exportLoading = ref(false)
+const queryFormRef = ref() // 搜索的表单 Ref
+const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {

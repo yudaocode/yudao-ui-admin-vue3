@@ -37,14 +37,12 @@
           <dict-tag v-else :type="DICT_TYPE.MES_PRO_ANDON_LEVEL" :value="scope.row.level" />
         </template>
       </el-table-column>
-      <el-table-column label="处置人" align="center" width="150">
+      <el-table-column label="处置人" align="center" width="200">
         <template #default="scope">
-          <!-- TODO @AI：user-select -->
-          <el-input
+          <UserSelect
             v-if="scope.row.editing"
             v-model="scope.row.handlerUserId"
-            placeholder="请输入用户编号"
-            type="number"
+            placeholder="请选择处置人"
           />
           <span v-else>{{ scope.row.handlerUserNickname || scope.row.handlerUserId || '-' }}</span>
         </template>
@@ -94,17 +92,18 @@
 <script setup lang="ts">
 import { ProAndonConfigApi, ProAndonConfigVO } from '@/api/mes/pro/andon/config'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { MesProAndonLevelEnum } from '@/views/mes/utils/constants'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 
-// TODO @AI：参考别的模块，增加下注释；
-
+/** 安灯呼叫配置弹窗（内联编辑表格） */
 defineOptions({ name: 'AndonConfigDialog' })
 
 const message = useMessage()
 const { t } = useI18n()
 
-const dialogVisible = ref(false)
-const loading = ref(false)
-const list = ref<any[]>([])
+const dialogVisible = ref(false) // 弹窗的是否展示
+const loading = ref(false) // 列表的加载中
+const list = ref<any[]>([]) // 配置列表
 
 /** 打开弹窗 */
 const open = async () => {
@@ -129,7 +128,7 @@ const handleAdd = () => {
   list.value.unshift({
     id: undefined,
     reason: '',
-    level: 3, // TODO @AI：使用枚举；
+    level: MesProAndonLevelEnum.LEVEL3,
     handlerRoleId: undefined,
     handlerUserId: undefined,
     remark: '',
@@ -155,20 +154,11 @@ const handleSave = async (row: any) => {
     return
   }
   try {
-    // TODO @AI：直接使用 row；后端自己会处理的；
-    const data = {
-      id: row.id,
-      reason: row.reason,
-      level: row.level,
-      handlerRoleId: row.handlerRoleId,
-      handlerUserId: row.handlerUserId,
-      remark: row.remark
-    }
     if (row.isNew) {
-      await ProAndonConfigApi.createAndonConfig(data as any)
+      await ProAndonConfigApi.createAndonConfig(row)
       message.success(t('common.createSuccess'))
     } else {
-      await ProAndonConfigApi.updateAndonConfig(data as any)
+      await ProAndonConfigApi.updateAndonConfig(row)
       message.success(t('common.updateSuccess'))
     }
     await getList()

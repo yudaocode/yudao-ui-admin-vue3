@@ -3,6 +3,7 @@ import request from '@/config/axios'
 // MES 安灯记录 VO
 export interface ProAndonRecordVO {
   id: number // 编号
+  configId: number // 安灯配置编号
   workstationId: number // 工作站编号
   workstationCode: string // 工作站编码
   workstationName: string // 工作站名称
