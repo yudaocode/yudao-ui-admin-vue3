@@ -204,6 +204,7 @@
 </template>
 
 <script setup lang="ts">
+// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/index.vue 写方法、变量注释；
 import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { QcIqcApi, QcIqcVO } from '@/api/mes/qc/iqc'

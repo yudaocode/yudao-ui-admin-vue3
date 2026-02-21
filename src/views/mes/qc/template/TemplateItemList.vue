@@ -151,7 +151,7 @@
 </template>
 
 <script setup lang="ts">
-import { QcTemplateItemApi, QcTemplateItemVO } from '@/api/mes/qc/template/item'
+import { QcTemplateItemApi, QcTemplateItemVO } from '@/api/mes/qc/template/item/index'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 
 defineOptions({ name: 'TemplateItemList' })

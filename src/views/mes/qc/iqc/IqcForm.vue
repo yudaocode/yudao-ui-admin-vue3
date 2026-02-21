@@ -12,7 +12,7 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检验单编号" prop="code">
-            <!-- TODO @AI：参考别的模块，搞一下； -->
+            <!-- TODO @AI：参考别的模块，搞一下；有个生成按钮； -->
             <el-input v-model="formData.code" placeholder="请输入检验单编号" />
           </el-form-item>
         </el-col>
@@ -21,12 +21,12 @@
             <el-input v-model="formData.name" placeholder="请输入检验单名称" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：貌似不用填写这个字段哈 -->
         <el-col :span="8">
-          <el-form-item label="检验模板" prop="templateId">
+          <el-form-item label="质检方案" prop="templateId">
+            <!-- TODO @AI：质检方案；有个 select 组件； -->
             <el-select
               v-model="formData.templateId"
-              placeholder="请选择检验模板"
+              placeholder="质检方案"
               filterable
               class="!w-1/1"
             >
@@ -200,22 +200,12 @@
         <el-tab-pane label="检验项" name="line">
           <IqcLineList :iqc-id="formData.id" />
         </el-tab-pane>
-        <!-- TODO @AI：应该是 IqcDefectList；可以重构到 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/defect/record/components/ 提供给每个模块使用，传递 qc-id、qc-type； -->
-        <el-tab-pane label="缺陷记录" name="defect">
-          <IqcDefectList :iqc-id="formData.id" />
-        </el-tab-pane>
-        <!-- TODO @AI：检测结果；缺少一个 List -->
+        <!-- TODO @芋艿：检测结果；缺少一个 tab-pane -->
       </el-tabs>
     </template>
 
     <template #footer>
-      <el-button
-        @click="submitForm"
-        type="primary"
-        :disabled="formLoading"
-      >
-        保 存
-      </el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading"> 保 存 </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -229,8 +219,8 @@ import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import IqcLineList from './IqcLineList.vue'
-import IqcDefectList from './IqcDefectList.vue'
 
+// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/UserForm.vue 写变量、方法注释；
 defineOptions({ name: 'IqcForm' })
 
 const { t } = useI18n()
@@ -243,6 +233,7 @@ const formType = ref('')
 const activeTab = ref('line')
 
 // 模板列表
+// TODO @AI：/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/template 封装一个 components 下的 select 组件；
 const templateList = ref<any[]>([])
 
 const formData = ref({
@@ -268,7 +259,6 @@ const formData = ref({
   inspectDate: undefined,
   inspectorUserId: undefined,
   remark: undefined,
-  status: 0,
   // 缺陷统计（只读）
   criticalRate: 0,
   majorRate: 0,
@@ -356,7 +346,6 @@ const resetForm = () => {
     inspectDate: undefined,
     inspectorUserId: undefined,
     remark: undefined,
-    status: 0, // TODO @AI：默认值，不用填写；
     criticalRate: 0,
     majorRate: 0,
     minorRate: 0,

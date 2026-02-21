@@ -43,7 +43,7 @@
           class="!w-1/1"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_DEFECT_LEVEL)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_DEFECT_LEVEL)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -61,7 +61,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { QcDefectApi, QcDefectVO } from '@/api/mes/qc/defect'
 import { generateRandomStr } from '@/utils'
 

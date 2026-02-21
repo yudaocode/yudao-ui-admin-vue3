@@ -21,51 +21,59 @@
       <el-table-column label="轻微缺陷数" align="center" prop="minorQuantity" width="100" />
       <el-table-column label="操作" align="center" width="100" fixed="right">
         <template #default="scope">
-          <el-button link type="primary" @click="openDefectDialog(scope.row)"> 缺陷记录 </el-button>
+          <el-button link type="primary" @click="openDefectDialog(scope.row)"> 缺陷列表 </el-button>
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
 
-    <!-- 缺陷记录弹窗 -->
-    <Dialog title="缺陷记录" v-model="defectDialogVisible" width="900px">
-      <IqcDefectList :iqc-id="props.iqcId" :line-id="currentLineId!" />
-    </Dialog>
+    <!-- 缺陷记录弹窗（内联编辑） -->
+    <DefectRecordInlineList ref="defectListRef" @refresh="getList" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { QcIqcLineApi, QcIqcLineVO } from '@/api/mes/qc/iqc/line'
-import IqcDefectList from './IqcDefectList.vue'
+import DefectRecordInlineList from '@/views/mes/qc/defect/record/components/DefectRecordInlineList.vue'
+import { MesQcTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IqcLineList' })
 
 const props = defineProps<{ iqcId: number }>()
 
-const loading = ref(false)
-const list = ref<QcIqcLineVO[]>([])
-
-// 缺陷记录弹窗
-const defectDialogVisible = ref(false)
-const currentLineId = ref<number>()
+const loading = ref(false) // 列表的加载中
+const list = ref<QcIqcLineVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  iqcId: undefined as number | undefined
+})
+const defectListRef = ref() // 缺陷记录弹窗 Ref
 
 /** 打开缺陷记录弹窗 */
 const openDefectDialog = (row: QcIqcLineVO) => {
-  currentLineId.value = row.id
-  defectDialogVisible.value = true
+  defectListRef.value.open(MesQcTypeEnum.IQC, props.iqcId, row.id)
 }
 
 /** 查询列表 */
 const getList = async () => {
-  if (!props.iqcId) return
+  if (!props.iqcId) {
+    return
+  }
+  queryParams.iqcId = props.iqcId
   loading.value = true
   try {
-    const data = await QcIqcLineApi.getIqcLinePage({
-      pageNo: 1,
-      pageSize: 100,
-      iqcId: props.iqcId
-    })
+    const data = await QcIqcLineApi.getIqcLinePage(queryParams)
     list.value = data.list
+    total.value = data.total
   } finally {
     loading.value = false
   }
@@ -74,7 +82,10 @@ const getList = async () => {
 /** 监听 iqcId 变化，重新加载列表 */
 watch(
   () => props.iqcId,
-  () => getList(),
+  () => {
+    queryParams.pageNo = 1
+    getList()
+  },
   { immediate: true }
 )
 </script>
