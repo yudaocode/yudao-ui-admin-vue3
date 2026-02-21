@@ -12,8 +12,13 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检验单编号" prop="code">
-            <!-- TODO @AI：参考别的模块，搞一下；有个生成按钮； -->
-            <el-input v-model="formData.code" placeholder="请输入检验单编号" />
+            <el-input v-model="formData.code" placeholder="请输入检验单编号">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -23,20 +28,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="质检方案" prop="templateId">
-            <!-- TODO @AI：质检方案；有个 select 组件； -->
-            <el-select
-              v-model="formData.templateId"
-              placeholder="质检方案"
-              filterable
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="item in templateList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            <QcTemplateSelect v-model="formData.templateId" class="!w-1/1" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -117,7 +109,7 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：应该不用填写 -->
+        <!-- TODO 【暂时不要删除】@芋艿：应该不用填写 -->
         <el-col :span="8">
           <el-form-item label="检测人员" prop="inspectorUserId">
             <UserSelect
@@ -200,7 +192,9 @@
         <el-tab-pane label="检验项" name="line">
           <IqcLineList :iqc-id="formData.id" />
         </el-tab-pane>
-        <!-- TODO @芋艿：检测结果；缺少一个 tab-pane -->
+        <el-tab-pane label="检测结果" name="result">
+          <IqcResultList :iqc-id="formData.id" />
+        </el-tab-pane>
       </el-tabs>
     </template>
 
@@ -213,28 +207,25 @@
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { generateRandomStr } from '@/utils'
 import { QcIqcApi, QcIqcVO } from '@/api/mes/qc/iqc'
-import { QcTemplateApi } from '@/api/mes/qc/template'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import QcTemplateSelect from '@/views/mes/qc/template/components/QcTemplateSelect.vue'
 import IqcLineList from './IqcLineList.vue'
+import IqcResultList from './IqcResultList.vue'
 
-// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/UserForm.vue 写变量、方法注释；
 defineOptions({ name: 'IqcForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const activeTab = ref('line')
-
-// 模板列表
-// TODO @AI：/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/template 封装一个 components 下的 select 组件；
-const templateList = ref<any[]>([])
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const activeTab = ref('line') // 当前激活的标签页
 
 const formData = ref({
   id: undefined as number | undefined,
@@ -275,7 +266,12 @@ const formRules = reactive({
   itemId: [{ required: true, message: '产品物料不能为空', trigger: 'change' }],
   receivedQuantity: [{ required: true, message: '接收数量不能为空', trigger: 'blur' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
+
+/** 生成检验单编号 */
+const generateCode = () => {
+  formData.value.code = 'IQC' + generateRandomStr(10)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -284,8 +280,6 @@ const open = async (type: string, id?: number) => {
   formType.value = type
   activeTab.value = 'line'
   resetForm()
-  // 加载模板列表
-  templateList.value = await QcTemplateApi.getTemplateSimpleList()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -296,14 +290,16 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open })
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
+  // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as unknown as QcIqcVO
@@ -315,6 +311,7 @@ const submitForm = async () => {
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false
