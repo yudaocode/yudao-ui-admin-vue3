@@ -39,6 +39,7 @@
       </el-table-column>
       <el-table-column label="处置人" align="center" width="150">
         <template #default="scope">
+          <!-- TODO @AI：user-select -->
           <el-input
             v-if="scope.row.editing"
             v-model="scope.row.handlerUserId"
@@ -91,8 +92,10 @@
 </template>
 
 <script setup lang="ts">
-import { ProAndonConfigApi, ProAndonConfigVO } from '@/api/mes/pro/andon'
+import { ProAndonConfigApi, ProAndonConfigVO } from '@/api/mes/pro/andon/config'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+
+// TODO @AI：参考别的模块，增加下注释；
 
 defineOptions({ name: 'AndonConfigDialog' })
 
@@ -126,7 +129,7 @@ const handleAdd = () => {
   list.value.unshift({
     id: undefined,
     reason: '',
-    level: 3,
+    level: 3, // TODO @AI：使用枚举；
     handlerRoleId: undefined,
     handlerUserId: undefined,
     remark: '',
@@ -152,6 +155,7 @@ const handleSave = async (row: any) => {
     return
   }
   try {
+    // TODO @AI：直接使用 row；后端自己会处理的；
     const data = {
       id: row.id,
       reason: row.reason,

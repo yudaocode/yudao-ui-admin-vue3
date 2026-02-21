@@ -16,28 +16,13 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="级别" prop="level">
-        <el-select
-          v-model="queryParams.level"
-          placeholder="请选择级别"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_ANDON_LEVEL)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择状态"
-          clearable
-          class="!w-240px"
-        >
+      <!-- TODO @AI：发起人 select -->
+      <!-- TODO @AI：生产工单 select -->
+      <!-- TODO @AI：工序 select -->
+      <!-- TODO @AI：工序名称 select -->
+      <!-- TODO @AI：处置人 select -->
+      <el-form-item label="处理状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_ANDON_STATUS)"
             :key="dict.value"
@@ -94,6 +79,8 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="工作站编码" align="center" prop="workstationCode" width="120" />
       <el-table-column label="工作站名称" align="center" prop="workstationName" min-width="120" />
+      <!-- TODO @AI：工单编码 -->
+      <!-- TODO @AI：工序 -->
       <el-table-column label="发起人" align="center" prop="userNickname" width="100" />
       <el-table-column
         label="发起时间"
@@ -102,6 +89,13 @@
         :formatter="dateFormatter"
         width="180"
       />
+      <!-- TODO @AI：发起时间 -->
+      <!-- TODO @AI：呼叫原因 -->
+      <!-- TODO @AI：级别 -->
+      <!-- TODO @AI：处理时间 -->
+      <!-- TODO @AI：处理人 -->
+      <!-- TODO @AI：处置状态 -->
+      <!-- TODO @AI：操作 -->
       <el-table-column label="工单编码" align="center" prop="workOrderCode" width="140" />
       <el-table-column label="工序名称" align="center" prop="processName" width="120" />
       <el-table-column label="呼叫原因" align="center" prop="reason" min-width="150" />
@@ -173,10 +167,10 @@
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { ProAndonRecordApi, ProAndonRecordVO } from '@/api/mes/pro/andon'
+import { ProAndonRecordApi, ProAndonRecordVO } from '@/api/mes/pro/andon/record'
 import AndonRecordForm from './AndonRecordForm.vue'
 import AndonHandleForm from './AndonHandleForm.vue'
-import AndonConfigDialog from './AndonConfigDialog.vue'
+import AndonConfigDialog from '../config/AndonConfigForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProAndonStatusEnum } from '@/views/mes/utils/constants'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'

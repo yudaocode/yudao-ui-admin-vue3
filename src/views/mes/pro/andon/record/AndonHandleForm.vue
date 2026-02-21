@@ -22,6 +22,7 @@
         <dict-tag :type="DICT_TYPE.MES_PRO_ANDON_LEVEL" :value="recordInfo.level" />
       </el-form-item>
       <!-- 可编辑字段 -->
+      <!-- TODO @AI：unocss 简化 style -->
       <el-form-item label="处置时间" prop="handleTime">
         <el-date-picker
           v-model="formData.handleTime"
@@ -31,6 +32,7 @@
           style="width: 100%"
         />
       </el-form-item>
+      <!-- TODO @AI：可选，user-select；只是默认当前人； -->
       <el-form-item label="处置人" prop="handlerUserId">
         <el-input :model-value="handlerNickname" disabled placeholder="当前用户" />
       </el-form-item>
@@ -46,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ProAndonRecordApi } from '@/api/mes/pro/andon'
+import { ProAndonRecordApi } from '@/api/mes/pro/andon/record'
 import { DICT_TYPE } from '@/utils/dict'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { formatDate } from '@/utils/formatTime'
@@ -70,6 +72,7 @@ const formRef = ref()
 const open = async (id: number) => {
   dialogVisible.value = true
   formLoading.value = true
+  // TODO @AI：还是老样子，先 reset；参考别的；
   try {
     // 加载记录信息
     recordInfo.value = await ProAndonRecordApi.getAndonRecord(id)
@@ -77,6 +80,7 @@ const open = async (id: number) => {
     const userStore = useUserStoreWithOut()
     formData.value = {
       id: id,
+      // TODO @AI：不需要 format；
       handleTime: formatDate(new Date(), 'YYYY-MM-DD HH:mm:ss'),
       handlerUserId: userStore.getUser?.id,
       remark: undefined

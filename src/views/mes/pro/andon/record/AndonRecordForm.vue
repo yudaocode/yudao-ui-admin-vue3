@@ -1,4 +1,5 @@
 <!-- 安灯呼叫记录 新增/详情弹窗 -->
+<!-- TODO @芋艿：需要提供这样的新增么？ -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
     <el-form
@@ -13,6 +14,7 @@
         <MdWorkstationSelect v-model="formData.workstationId" placeholder="请选择工作站" />
       </el-form-item>
       <el-form-item label="发起人" prop="userId">
+        <!-- TODO @AI：可以选择，只是默认当前用户；可以在 user-select 组件里，封装下； -->
         <el-input v-model="formData.userNickname" disabled placeholder="当前用户" />
       </el-form-item>
       <el-form-item label="生产工单" prop="workOrderId">
@@ -22,6 +24,8 @@
         <el-input v-model="formData.processId" placeholder="请输入工序编号（可选）" type="number" />
       </el-form-item>
       <el-form-item label="呼叫原因" prop="reason">
+        <!-- TODO @AI：unocss 简化 style -->
+        <!-- TODO @AI：是不是做成 select 组件；另外，后端的 reason 存储，是不是增加存储 id？ -->
         <el-select
           v-model="selectedConfigId"
           placeholder="请选择呼叫原因"
@@ -38,6 +42,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="级别" prop="level">
+        <!-- TODO @AI：字典展示不出来； -->
         <dict-tag :type="DICT_TYPE.MES_PRO_ANDON_LEVEL" :value="formData.level" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
@@ -64,10 +69,13 @@
 </template>
 
 <script setup lang="ts">
-import { ProAndonRecordApi, ProAndonConfigApi, ProAndonConfigVO } from '@/api/mes/pro/andon'
+import { ProAndonRecordApi } from '@/api/mes/pro/andon/record'
+import { ProAndonConfigApi, ProAndonConfigVO } from '@/api/mes/pro/andon/config'
 import { DICT_TYPE } from '@/utils/dict'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import { useUserStoreWithOut } from '@/store/modules/user'
+
+// TODO @AI：注释缺少，参考别的 Form.vue
 
 defineOptions({ name: 'AndonRecordForm' })
 
@@ -86,7 +94,7 @@ const formRules = reactive({
 })
 const formRef = ref()
 const configList = ref<ProAndonConfigVO[]>([])
-const selectedConfigId = ref<number>()
+const selectedConfigId = ref<number>() // TODO @AI：应该是在 formData 里的；
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -107,6 +115,7 @@ const open = async (type: string, id?: number) => {
     try {
       formData.value = await ProAndonRecordApi.getAndonRecord(id!)
       // 回显选中的配置
+      // TODO @AI：后端拼接；
       const config = configList.value.find((c) => c.reason === formData.value.reason)
       if (config) {
         selectedConfigId.value = config.id
