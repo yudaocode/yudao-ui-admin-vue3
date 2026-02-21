@@ -52,75 +52,40 @@
         </el-col>
       </el-row>
       <!-- 工单 / 任务 / 工作站 -->
-      <!-- TODO @AI：生产工单 select； -->
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="生产工单" prop="workOrderId">
-            <el-select
+            <ProWorkOrderSelect
               v-model="formData.workOrderId"
-              filterable
-              remote
-              reserve-keyword
-              :remote-method="searchWorkOrder"
-              placeholder="请搜索工单编码"
               :disabled="isDetail"
-              class="!w-1/1"
+              placeholder="请选择工单"
               @change="handleWorkOrderChange"
-            >
-              <el-option
-                v-for="item in workOrderOptions"
-                :key="item.id"
-                :label="item.code + ' - ' + item.name"
-                :value="item.id"
-              />
-            </el-select>
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="生产任务" prop="taskId">
-            <el-select
+            <ProTaskSelect
               v-model="formData.taskId"
-              filterable
-              remote
-              reserve-keyword
-              :remote-method="searchTask"
-              placeholder="请搜索任务编码"
+              :workOrderId="formData.workOrderId"
               :disabled="isDetail || !formData.workOrderId"
-              class="!w-1/1"
+              placeholder="请选择任务"
               @change="handleTaskChange"
-            >
-              <el-option
-                v-for="item in taskOptions"
-                :key="item.id"
-                :label="item.code + ' - ' + item.name"
-                :value="item.id"
-              />
-            </el-select>
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="工作站" prop="workstationId">
-            <el-select
+            <MdWorkstationSelect
               v-model="formData.workstationId"
-              filterable
-              remote
-              reserve-keyword
-              :remote-method="searchWorkstation"
-              placeholder="请搜索工作站"
               :disabled="isDetail"
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="item in workstationOptions"
-                :key="item.id"
-                :label="item.code + ' - ' + item.name"
-                :value="item.id"
-              />
-            </el-select>
+              placeholder="请选择工作站"
+            />
           </el-form-item>
         </el-col>
       </el-row>
       <!-- 工序 / 批次号 -->
+      <!-- TODO @芋艿：是不是不用这个字段？【待定】 -->
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="工序" prop="processId">
@@ -225,22 +190,36 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- TODO @AI：报工人、报工时间、审批人；select 模式； -->
-      <!-- 报工人 / 报工时间 / 审核人（仅编辑/详情模式展示） -->
-      <el-row :gutter="20" v-if="formData.id">
+      <!-- 报工人 / 报工时间 / 审核人 -->
+      <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="报工人">
-            <el-input :model-value="formData.feedbackUserNickname" disabled />
+          <el-form-item label="报工人" prop="feedbackUserId">
+            <UserSelect
+              v-model="formData.feedbackUserId"
+              :disabled="isDetail"
+              placeholder="请选择报工人"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="报工时间">
-            <el-input :model-value="formData.feedbackTime" disabled />
+          <el-form-item label="报工时间" prop="feedbackTime">
+            <el-date-picker
+              v-model="formData.feedbackTime"
+              type="datetime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              placeholder="请选择报工时间"
+              :disabled="isDetail"
+              class="!w-1/1"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="审核人">
-            <el-input :model-value="formData.approveUserNickname" disabled />
+          <el-form-item label="审核人" prop="approveUserId">
+            <UserSelect
+              v-model="formData.approveUserId"
+              :disabled="isDetail"
+              placeholder="请选择审核人"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -269,7 +248,10 @@
 <script setup lang="ts">
 import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProFeedbackApi, ProFeedbackVO } from '@/api/mes/pro/feedback'
-import { ProWorkOrderApi } from '@/api/mes/pro/workorder'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
+import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
+import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 
 defineOptions({ name: 'FeedbackForm' })
 
@@ -302,11 +284,10 @@ const formData = ref<Record<string, any>>({
   laborScrapQuantity: 0,
   materialScrapQuantity: 0,
   otherScrapQuantity: 0,
-  remark: undefined,
-  // 展示字段（来自 RespVO，不提交）
-  feedbackUserNickname: undefined,
+  feedbackUserId: undefined,
   feedbackTime: undefined,
-  approveUserNickname: undefined
+  approveUserId: undefined,
+  remark: undefined
 })
 
 const formRules = reactive({
@@ -327,38 +308,7 @@ const checkFlag = ref(false)
 /** 工序显示（只读） */
 const processDisplay = ref('')
 
-// ==================== 远程搜索选项 ====================
-
-const workOrderOptions = ref<any[]>([])
-const taskOptions = ref<any[]>([])
-const workstationOptions = ref<any[]>([])
-
-/** 搜索工单 */
-const searchWorkOrder = async (query: string) => {
-  if (!query) return
-  const data = await ProWorkOrderApi.getWorkOrderPage({
-    pageNo: 1,
-    pageSize: 20,
-    code: query,
-    status: 1
-  })
-  workOrderOptions.value = data.list
-}
-
-/** 搜索任务（按工单过滤） */
-// TODO @芋艿：pro_task API 待迁移，暂用占位
-const searchTask = async (query: string) => {
-  if (!query || !formData.value.workOrderId) return
-  // TODO @芋艿：待 pro_task 前端 API 迁移后，替换为 ProTaskApi.getTaskPage({ workOrderId, code: query })
-  taskOptions.value = []
-}
-
-/** 搜索工作站 */
-const searchWorkstation = async (query: string) => {
-  if (!query) return
-  // TODO @芋艿：如果有工作站搜索 API，可替换
-  workstationOptions.value = []
-}
+// ==================== 级联选择回调 ====================
 
 /** 工单变更：清空任务相关字段 */
 const handleWorkOrderChange = () => {
@@ -369,14 +319,14 @@ const handleWorkOrderChange = () => {
   formData.value.unitMeasureId = undefined
   formData.value.workstationId = undefined
   processDisplay.value = ''
-  taskOptions.value = []
   checkFlag.value = false
 }
 
 /** 任务变更：自动填充关联字段 */
-const handleTaskChange = (taskId: number) => {
-  const task = taskOptions.value.find((t: any) => t.id === taskId)
-  if (!task) return
+const handleTaskChange = (task: any) => {
+  if (!task) {
+    return
+  }
   formData.value.routeId = task.routeId
   formData.value.processId = task.processId
   formData.value.itemId = task.itemId
@@ -421,20 +371,6 @@ const open = async (type: string, id?: number) => {
       // 填充显示字段
       processDisplay.value = data.processCode ? data.processCode + ' - ' + data.processName : ''
       checkFlag.value = (data as any).checkFlag || false
-      // 填充选项（让 select 能显示已选值）
-      if (data.workOrderId) {
-        workOrderOptions.value = [
-          { id: data.workOrderId, code: data.workOrderCode, name: data.workOrderName }
-        ]
-      }
-      if (data.taskId) {
-        taskOptions.value = [{ id: data.taskId, code: data.taskCode, name: '' }]
-      }
-      if (data.workstationId) {
-        workstationOptions.value = [
-          { id: data.workstationId, code: data.workstationCode, name: data.workstationName }
-        ]
-      }
     } finally {
       formLoading.value = false
     }
@@ -490,14 +426,11 @@ const resetForm = () => {
     laborScrapQuantity: 0,
     materialScrapQuantity: 0,
     otherScrapQuantity: 0,
-    remark: undefined,
-    feedbackUserNickname: undefined,
+    feedbackUserId: undefined,
     feedbackTime: undefined,
-    approveUserNickname: undefined
+    approveUserId: undefined,
+    remark: undefined
   }
-  workOrderOptions.value = []
-  taskOptions.value = []
-  workstationOptions.value = []
   processDisplay.value = ''
   checkFlag.value = false
   formRef.value?.resetFields()

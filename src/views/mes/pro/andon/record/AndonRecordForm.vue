@@ -1,5 +1,4 @@
 <!-- 安灯呼叫记录 新增/详情弹窗 -->
-<!-- TODO @芋艿：需要提供这样的新增么？ -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
     <el-form
@@ -16,17 +15,11 @@
       <el-form-item label="发起人" prop="userId">
         <UserSelect v-model="formData.userId" />
       </el-form-item>
-      <!-- TODO @芋艿：这里的 select 组件 -->
       <el-form-item label="生产工单" prop="workOrderId">
-        <el-input
-          v-model="formData.workOrderId"
-          placeholder="请输入工单编号（可选）"
-          type="number"
-        />
+        <ProWorkOrderSelect v-model="formData.workOrderId" placeholder="请选择工单（可选）" />
       </el-form-item>
-      <!-- TODO @芋艿：这里的 select 组件 -->
       <el-form-item label="工序" prop="processId">
-        <el-input v-model="formData.processId" placeholder="请输入工序编号（可选）" type="number" />
+        <ProProcessSelect v-model="formData.processId" placeholder="请选择工序（可选）" />
       </el-form-item>
       <el-form-item label="呼叫原因" prop="configId">
         <AndonConfigSelect v-model="formData.configId" @change="handleConfigChange" />
@@ -67,6 +60,8 @@ import { ProAndonRecordApi } from '@/api/mes/pro/andon/record'
 import { ProAndonConfigVO } from '@/api/mes/pro/andon/config'
 import { DICT_TYPE } from '@/utils/dict'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
+import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import AndonConfigSelect from '../config/components/AndonConfigSelect.vue'
 import { useUserStoreWithOut } from '@/store/modules/user'

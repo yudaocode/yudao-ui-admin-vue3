@@ -33,29 +33,18 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：select；增加一个 workOrder 的 select 组件 -->
       <el-form-item label="生产工单" prop="workOrderId">
-        <el-select
-          v-model="queryParams.workOrderId"
-          filterable
-          remote
-          reserve-keyword
-          :remote-method="searchWorkOrder"
-          placeholder="请搜索工单编码"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="item in workOrderOptions"
-            :key="item.id"
-            :label="item.code"
-            :value="item.id"
-          />
-        </el-select>
+        <ProWorkOrderSelect v-model="queryParams.workOrderId" placeholder="请选择工单" class="!w-240px" />
       </el-form-item>
-      <!-- TODO @AI：产品物料 select -->
-      <!-- TODO @AI：报工人 select -->
-      <!-- TODO @AI：记录人 select -->
+      <el-form-item label="产品物料" prop="itemId">
+        <MdItemSelect v-model="queryParams.itemId" placeholder="请选择产品物料" class="!w-240px" />
+      </el-form-item>
+      <el-form-item label="报工人" prop="feedbackUserId">
+        <UserSelect v-model="queryParams.feedbackUserId" placeholder="请选择报工人" class="!w-240px" />
+      </el-form-item>
+      <el-form-item label="记录人" prop="creator">
+        <UserSelect v-model="queryParams.creator" placeholder="请选择记录人" class="!w-240px" />
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
@@ -221,7 +210,9 @@
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ProFeedbackApi, ProFeedbackVO } from '@/api/mes/pro/feedback'
-import { ProWorkOrderApi } from '@/api/mes/pro/workorder'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import FeedbackForm from './FeedbackForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
@@ -240,19 +231,14 @@ const queryParams = reactive({
   code: undefined,
   type: undefined,
   workOrderId: undefined,
+  itemId: undefined,
+  feedbackUserId: undefined,
+  creator: undefined,
   status: undefined,
   feedbackTime: undefined
 })
 const queryFormRef = ref()
 const exportLoading = ref(false)
-
-/** 工单远程搜索选项 */
-const workOrderOptions = ref<any[]>([])
-const searchWorkOrder = async (query: string) => {
-  if (!query) return
-  const data = await ProWorkOrderApi.getWorkOrderPage({ pageNo: 1, pageSize: 20, code: query })
-  workOrderOptions.value = data.list
-}
 
 /** 查询列表 */
 const getList = async () => {

@@ -9,9 +9,12 @@
     >
       <el-row>
         <el-col :span="12">
-          <!-- TODO @AI：生成逻辑； -->
           <el-form-item label="项目编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入项目编码" />
+            <el-input v-model="formData.code" placeholder="请输入项目编码">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">生成</el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -69,6 +72,7 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { DvSubjectApi, DvSubjectVO } from '@/api/mes/dv/subject'
 import { CommonStatusEnum } from '@/utils/constants'
+import { generateRandomStr } from '@/utils'
 
 defineOptions({ name: 'SubjectForm' })
 
@@ -96,6 +100,11 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+
+/** 生成项目编码 */
+const generateCode = () => {
+  formData.value.code = 'SUBJECT' + generateRandomStr(8)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
