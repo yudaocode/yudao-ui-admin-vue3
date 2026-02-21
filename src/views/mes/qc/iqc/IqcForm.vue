@@ -12,7 +12,7 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检验单编号" prop="code">
-            <!-- TODO @芋艿：自动编码未迁移，暂用手动输入 -->
+            <!-- TODO @AI：参考别的模块，搞一下； -->
             <el-input v-model="formData.code" placeholder="请输入检验单编号" />
           </el-form-item>
         </el-col>
@@ -21,6 +21,7 @@
             <el-input v-model="formData.name" placeholder="请输入检验单名称" />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：貌似不用填写这个字段哈 -->
         <el-col :span="8">
           <el-form-item label="检验模板" prop="templateId">
             <el-select
@@ -43,12 +44,13 @@
       <el-divider content-position="left">物料与供应商</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
+          <el-form-item label="产品物料" prop="itemId">
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择产品物料" class="!w-1/1" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="供应商" prop="vendorId">
-            <MdVendorSelect
-              v-model="formData.vendorId"
-              placeholder="请选择供应商"
-              class="!w-1/1"
-            />
+            <MdVendorSelect v-model="formData.vendorId" placeholder="请选择供应商" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -57,21 +59,10 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row :gutter="16">
-        <el-col :span="8">
-          <el-form-item label="产品物料" prop="itemId">
-            <MdItemSelect
-              v-model="formData.itemId"
-              placeholder="请选择产品物料"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
 
       <el-divider content-position="left">检测情况</el-divider>
       <el-row :gutter="16">
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="接收数量" prop="receivedQuantity">
             <el-input-number
               v-model="formData.receivedQuantity"
@@ -82,17 +73,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
-          <el-form-item label="检测数量" prop="checkQuantity">
-            <el-input-number
-              v-model="formData.checkQuantity"
-              :min="0"
-              placeholder="请输入"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="合格品数量" prop="qualifiedQuantity">
             <el-input-number
               v-model="formData.qualifiedQuantity"
@@ -102,7 +83,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="不合格品数量" prop="unqualifiedQuantity">
             <el-input-number
               v-model="formData.unqualifiedQuantity"
@@ -136,6 +117,7 @@
             />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：应该不用填写 -->
         <el-col :span="8">
           <el-form-item label="检测人员" prop="inspectorUserId">
             <UserSelect
@@ -218,13 +200,16 @@
         <el-tab-pane label="检验项" name="line">
           <IqcLineList :iqc-id="formData.id" />
         </el-tab-pane>
+        <!-- TODO @AI：应该是 IqcDefectList；可以重构到 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/qc/defect/record/components/ 提供给每个模块使用，传递 qc-id、qc-type； -->
         <el-tab-pane label="缺陷记录" name="defect">
           <IqcDefectList :iqc-id="formData.id" />
         </el-tab-pane>
+        <!-- TODO @AI：检测结果；缺少一个 List -->
       </el-tabs>
     </template>
 
     <template #footer>
+      <!-- TODO @AI：不需要 status 判断 -->
       <el-button
         @click="submitForm"
         type="primary"
@@ -233,6 +218,7 @@
       >
         保 存
       </el-button>
+      <!-- TODO @AI：不需要 【完成】 操作； -->
       <el-button
         @click="handleComplete"
         type="success"
@@ -247,7 +233,7 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { QcIqcApi, QcIqcVO } from '@/api/mes/qc/iqc'
 import { QcTemplateApi } from '@/api/mes/qc/template'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
@@ -286,6 +272,7 @@ const formData = ref({
   maxUnqualifiedQuantity: undefined,
   receivedQuantity: undefined,
   checkQuantity: undefined,
+  // TODO @AI：qualifiedQuantity、unqualifiedQuantity 使用 undefined，不用必填；
   qualifiedQuantity: 0,
   unqualifiedQuantity: 0,
   checkResult: undefined,
@@ -325,8 +312,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = await QcIqcApi.getIqc(id)
-      formData.value = data
+      formData.value = await QcIqcApi.getIqc(id)
     } finally {
       formLoading.value = false
     }
@@ -400,7 +386,7 @@ const resetForm = () => {
     inspectDate: undefined,
     inspectorUserId: undefined,
     remark: undefined,
-    status: 0,
+    status: 0, // TODO @AI：默认值，不用填写；
     criticalRate: 0,
     majorRate: 0,
     minorRate: 0,
