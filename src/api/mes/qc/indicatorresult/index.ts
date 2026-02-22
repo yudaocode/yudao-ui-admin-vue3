@@ -10,13 +10,6 @@ export interface QcIndicatorResultVO {
   sn: string // 物资SN
   remark: string // 备注
   createTime: Date // 创建时间
-  // 关联查询字段
-  qcCode: string // 质检单编号
-  qcName: string // 质检单名称
-  itemCode: string // 产品物料编码
-  itemName: string // 产品物料名称
-  itemSpecification: string // 规格型号
-  unitName: string // 单位名称
   // 子表
   items: QcIndicatorResultDetailVO[] // 检验结果明细列表
 }
@@ -28,18 +21,10 @@ export interface QcIndicatorResultDetailVO {
   indicatorId: number // 检测指标ID
   value: string // 检测值（统一存为字符串）
   remark: string // 备注
-  // 关联查询字段
-  indicatorCode: string // 检测指标编码
+  // 关联查询字段（来自 indicator）
   indicatorName: string // 检测指标名称
-  indicatorType: string // 检测指标类型
-  valueType: number // 质检值类型（关联查询）
-  valueSpecification: string // 值属性（关联查询）
-  toolName: string // 检测工具名称
-  checkMethod: string // 检测方法
-  standardValue: number // 标准值
-  unitMeasureName: string // 计量单位名称
-  maxThreshold: number // 误差上限
-  minThreshold: number // 误差下限
+  valueType: number // 质检值类型
+  valueSpecification: string // 值属性
 }
 
 // MES 检验结果 API
@@ -49,9 +34,9 @@ export const QcIndicatorResultApi = {
     return await request.get({ url: `/mes/qc/indicator-result/page`, params })
   },
 
-  // 查询检验结果详情（含明细）
-  getResult: async (id: number) => {
-    return await request.get({ url: `/mes/qc/indicator-result/get?id=` + id })
+  // 查询检验结果明细（含检测项模板）：编辑传 id，新增不传
+  getDetail: async (qcId: number, qcType: number, id?: number) => {
+    return await request.get({ url: `/mes/qc/indicator-result/get-detail`, params: { id, qcId, qcType } })
   },
 
   // 新增检验结果
@@ -67,10 +52,5 @@ export const QcIndicatorResultApi = {
   // 删除检验结果
   deleteResult: async (id: number) => {
     return await request.delete({ url: `/mes/qc/indicator-result/delete?id=` + id })
-  },
-
-  // 获取空值检测项模板（新建结果时用）
-  getDetailTemplate: async (qcId: number, qcType: number) => {
-    return await request.get({ url: `/mes/qc/indicator-result/detail-template`, params: { qcId, qcType } })
   }
 }

@@ -39,23 +39,16 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <!-- 浮点值 -->
-            <el-form-item v-if="item.valueType === MesQcResultValueType.FLOAT" label="检测值">
-              <el-input-number
-                v-model="item.valueFloat"
-                :precision="4"
-                placeholder="请输入"
-                class="!w-1/1"
-              />
-            </el-form-item>
-            <!-- 整数值 -->
+            <!-- 数值（浮点/整数） -->
             <el-form-item
-              v-else-if="item.valueType === MesQcResultValueType.INTEGER"
+              v-if="
+                [MesQcResultValueType.FLOAT, MesQcResultValueType.INTEGER].includes(item.valueType)
+              "
               label="检测值"
             >
               <el-input-number
-                v-model="item.valueInteger"
-                :precision="0"
+                v-model="item.valueNumber"
+                :precision="item.valueType === MesQcResultValueType.FLOAT ? 4 : 0"
                 placeholder="请输入"
                 class="!w-1/1"
               />
@@ -66,10 +59,9 @@
             </el-form-item>
             <!-- 字典值 -->
             <el-form-item v-else-if="item.valueType === MesQcResultValueType.DICT" label="检测值">
-              <!-- TODO @AI：这里是不是要用 StrDict；因为后端存储的字符串，统一的 -->
               <el-select v-model="item.value" placeholder="请选择" class="!w-1/1">
                 <el-option
-                  v-for="dict in getDictOptions(item.valueSpecification)"
+                  v-for="dict in getStrDictOptions(item.valueSpecification)"
                   :key="dict.value"
                   :label="dict.label"
                   :value="dict.value"
@@ -99,7 +91,7 @@
 
 <script setup lang="ts">
 import { QcIndicatorResultApi } from '@/api/mes/qc/indicatorresult'
-import { getDictOptions } from '@/utils/dict'
+import { getStrDictOptions } from '@/utils/dict'
 import { MesQcResultValueType } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'QcIndicatorResultForm' })
@@ -109,16 +101,13 @@ const props = defineProps<{
   qcType: number
 }>()
 
-// TODO @AI：补全注释，参考 system user form.vue
-
 const { t } = useI18n()
 const message = useMessage()
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined as string | undefined,
@@ -127,11 +116,11 @@ const formData = ref({
   sn: undefined as string | undefined,
   remark: undefined as string | undefined,
   items: [] as any[]
-})
+}) // 表单数据
 const formRules = reactive({
   code: [{ required: true, message: '样品编号不能为空', trigger: 'blur' }]
-})
-const formRef = ref()
+}) // 表单校验规则
+const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -139,34 +128,23 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  formData.value.qcId = props.qcId
-  formData.value.qcType = props.qcType
-
-  if (type === 'update' && id) {
-    // 修改时加载已有数据（含明细）
-    formLoading.value = true
-    try {
-      formData.value = await QcIndicatorResultApi.getResult(id)
-      // 回填浮点/整数值用于 el-input-number 绑定
-      // TODO @AI：是不是可以 include 判断，这样转化简单点；
-      formData.value.items?.forEach((item: any) => {
-        if (item.valueType === MesQcResultValueType.FLOAT && item.value != null) {
-          item.valueFloat = Number(item.value)
-        } else if (item.valueType === MesQcResultValueType.INTEGER && item.value != null) {
-          item.valueInteger = Number(item.value)
-        }
-      })
-    } finally {
-      formLoading.value = false
-    }
-  } else {
-    // 新增时加载空值检测项模板
-    formLoading.value = true
-    try {
-      formData.value.items = await QcIndicatorResultApi.getDetailTemplate(props.qcId, props.qcType)
-    } finally {
-      formLoading.value = false
-    }
+  // 加载数据
+  formLoading.value = true
+  try {
+    formData.value = await QcIndicatorResultApi.getDetail(props.qcId, props.qcType, id)
+    formData.value.qcId = props.qcId
+    formData.value.qcType = props.qcType
+    // 回填数值用于 el-input-number 绑定
+    formData.value.items?.forEach((item: any) => {
+      if (
+        [MesQcResultValueType.FLOAT, MesQcResultValueType.INTEGER].includes(item.valueType) &&
+        item.value != null
+      ) {
+        item.valueNumber = Number(item.value)
+      }
+    })
+  } finally {
+    formLoading.value = false
   }
 }
 defineExpose({ open })
@@ -174,13 +152,13 @@ defineExpose({ open })
 /** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
+  // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
   formLoading.value = true
   try {
-    // 提交前将浮点/整数值统一转为 string value
-    // TODO @AI：不用转换，直接存储看看；后端自己来转换！
+    // 构建请求
     const data = { ...formData.value }
     data.items = data.items.map((item: any) => {
       const submitItem: any = {
@@ -188,15 +166,14 @@ const submitForm = async () => {
         indicatorId: item.indicatorId,
         remark: item.remark
       }
-      if (item.valueType === MesQcResultValueType.FLOAT) {
-        submitItem.value = item.valueFloat != null ? String(item.valueFloat) : undefined
-      } else if (item.valueType === MesQcResultValueType.INTEGER) {
-        submitItem.value = item.valueInteger != null ? String(item.valueInteger) : undefined
+      if ([MesQcResultValueType.FLOAT, MesQcResultValueType.INTEGER].includes(item.valueType)) {
+        submitItem.value = item.valueNumber != null ? String(item.valueNumber) : undefined
       } else {
         submitItem.value = item.value
       }
       return submitItem
     })
+    // 提交请求
     if (formType.value === 'create') {
       await QcIndicatorResultApi.createResult(data)
       message.success(t('common.createSuccess'))
