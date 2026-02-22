@@ -35,12 +35,11 @@
 
       <el-divider content-position="left">物料信息</el-divider>
       <el-row :gutter="16">
-        <!-- TODO @AI：应该是 检验类型 把？ -->
         <el-col :span="8">
-          <el-form-item label="退货类型" prop="rqcType">
+          <el-form-item label="检验类型" prop="rqcType">
             <el-select
               v-model="formData.rqcType"
-              placeholder="请选择退货类型"
+              placeholder="请选择检验类型"
               clearable
               class="!w-1/1"
             >
@@ -52,18 +51,18 @@
               />
             </el-select>
           </el-form-item>
-          <!-- TODO @芋艿：来源单据类型 -->
-          <!-- TODO @芋艿：来源单据编号 -->
-          <el-col :span="8">
-            <el-form-item label="产品物料" prop="itemId">
-              <MdItemSelect v-model="formData.itemId" placeholder="请选择产品物料" class="!w-1/1" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="批次号" prop="batchCode">
-              <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
-            </el-form-item>
-          </el-col>
+        </el-col>
+        <!-- TODO @芋艿：来源单据类型 -->
+        <!-- TODO @芋艿：来源单据编号 -->
+        <el-col :span="8">
+          <el-form-item label="产品物料" prop="itemId">
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择产品物料" class="!w-1/1" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
+          </el-form-item>
         </el-col>
       </el-row>
 

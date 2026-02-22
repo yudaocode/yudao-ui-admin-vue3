@@ -26,7 +26,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_IPQC_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_IPQC_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -83,15 +83,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：可以去掉 -->
-      <el-form-item label="检测人员" prop="inspectorUserId">
-        <UserSelect
-          v-model="queryParams.inspectorUserId"
-          placeholder="请选择检测人员"
-          clearable
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -129,8 +120,8 @@
       <el-table-column label="工单编号" align="center" prop="workOrderCode" width="140" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
-      <!-- TODO @AI：规格型号 -->
-      <!-- TODO @AI：单位 -->
+      <el-table-column label="规格型号" align="center" prop="itemSpecification" width="130" />
+      <el-table-column label="单位" align="center" prop="unitName" width="80" />
       <el-table-column label="检测数量" align="center" prop="checkQuantity" width="100" />
       <el-table-column label="检测结论" align="center" prop="checkResult" width="100">
         <template #default="scope">
@@ -209,11 +200,10 @@ import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { QcIpqcApi, QcIpqcVO } from '@/api/mes/qc/ipqc'
 import IpqcForm from './IpqcForm.vue'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import { MesQcIpqcStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcIpqc' })
@@ -233,8 +223,7 @@ const queryParams = reactive({
   workstationId: undefined,
   itemId: undefined,
   checkResult: undefined,
-  inspectDate: undefined,
-  inspectorUserId: undefined
+  inspectDate: undefined
 })
 const queryFormRef = ref()
 const exportLoading = ref(false)

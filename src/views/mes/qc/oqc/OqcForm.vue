@@ -55,8 +55,7 @@
       <el-divider content-position="left">检测情况</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
-          <!-- TODO @AI：发货数量 -->
-          <el-form-item label="出货数量" prop="outQuantity">
+          <el-form-item label="发货数量" prop="outQuantity">
             <el-input-number
               v-model="formData.outQuantity"
               :min="0"
@@ -66,7 +65,18 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：检测数量 -->
+        <el-col :span="8">
+          <el-form-item label="检测数量" prop="checkQuantity">
+            <el-input-number
+              v-model="formData.checkQuantity"
+              :min="0"
+              placeholder="请输入"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="合格品数量" prop="qualifiedQuantity">
             <el-input-number
@@ -90,12 +100,12 @@
       </el-row>
       <el-row :gutter="16">
         <el-col :span="8">
-          <el-form-item label="出货日期" prop="outDate">
+          <el-form-item label="发货日期" prop="outDate">
             <el-date-picker
               v-model="formData.outDate"
               type="datetime"
               value-format="YYYY-MM-DD HH:mm:ss"
-              placeholder="请选择出货日期"
+              placeholder="请选择发货日期"
               class="!w-1/1"
             />
           </el-form-item>
@@ -266,7 +276,7 @@ const formRules = reactive({
   templateId: [{ required: true, message: '检验模板不能为空', trigger: 'change' }],
   clientId: [{ required: true, message: '客户不能为空', trigger: 'change' }],
   itemId: [{ required: true, message: '产品物料不能为空', trigger: 'change' }],
-  outQuantity: [{ required: true, message: '出货数量不能为空', trigger: 'blur' }]
+  outQuantity: [{ required: true, message: '发货数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 

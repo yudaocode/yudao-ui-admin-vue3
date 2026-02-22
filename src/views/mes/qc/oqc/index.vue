@@ -58,7 +58,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="出货日期" prop="outDate">
+      <el-form-item label="发货日期" prop="outDate">
         <el-date-picker
           v-model="queryParams.outDate"
           value-format="YYYY-MM-DD HH:mm:ss"
@@ -121,8 +121,7 @@
       <el-table-column label="批次号" align="center" prop="batchCode" width="130" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
-      <!-- TODO @AI：出货数量，改成发货数量-->
-      <el-table-column label="出货数量" align="center" prop="outQuantity" width="100" />
+      <el-table-column label="发货数量" align="center" prop="outQuantity" width="100" />
       <el-table-column label="检测数量" align="center" prop="checkQuantity" width="100" />
       <el-table-column label="不合格数" align="center" prop="unqualifiedQuantity" width="100" />
       <el-table-column label="检测结论" align="center" prop="checkResult" width="100">
@@ -130,9 +129,8 @@
           <dict-tag :type="DICT_TYPE.MES_QC_CHECK_RESULT" :value="scope.row.checkResult" />
         </template>
       </el-table-column>
-      <!-- TODO @AI：出货日期，改成发货日期-->
       <el-table-column
-        label="出货日期"
+        label="发货日期"
         align="center"
         prop="outDate"
         :formatter="dateFormatter2"

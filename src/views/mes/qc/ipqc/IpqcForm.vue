@@ -29,7 +29,7 @@
               class="!w-1/1"
             >
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.MES_IPQC_TYPE)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_IPQC_TYPE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -256,7 +256,7 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { QcIpqcApi, QcIpqcVO } from '@/api/mes/qc/ipqc'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'

@@ -18,8 +18,24 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：来源单据类型 -->
-      <!-- TODO @AI：来源单据编号 -->
+      <el-form-item label="来源单据类型" prop="sourceDocType">
+        <el-input
+          v-model="queryParams.sourceDocType"
+          placeholder="请输入来源单据类型"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="来源单据编号" prop="sourceDocCode">
+        <el-input
+          v-model="queryParams.sourceDocCode"
+          placeholder="请输入来源单据编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="产品物料" prop="itemId">
         <MdItemSelect
           v-model="queryParams.itemId"
@@ -28,10 +44,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="退货类型" prop="rqcType">
+      <el-form-item label="检验类型" prop="rqcType">
         <el-select
           v-model="queryParams.rqcType"
-          placeholder="请选择退货类型"
+          placeholder="请选择检验类型"
           clearable
           class="!w-240px"
         >
@@ -106,13 +122,14 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="退货检验单编号" align="center" prop="code" width="160" />
       <el-table-column label="退货检验单名称" align="center" prop="name" min-width="180" />
-      <!-- TODO @AI：来源单据类型、来源单据编号 -->
+      <el-table-column label="来源单据类型" align="center" prop="sourceDocType" width="120" />
+      <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" width="140" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
-      <!-- TODO @AI：缺规格型号、单位 -->
+      <el-table-column label="规格型号" align="center" prop="itemSpecification" width="130" />
+      <el-table-column label="单位" align="center" prop="unitName" width="80" />
       <el-table-column label="批次号" align="center" prop="batchCode" width="130" />
-      <!-- TODO @AI：应该是 检验类型 吧？ -->
-      <el-table-column label="退货类型" align="center" prop="rqcType" width="100">
+      <el-table-column label="检验类型" align="center" prop="rqcType" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_RQC_TYPE" :value="scope.row.rqcType" />
         </template>
@@ -211,6 +228,8 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
+  sourceDocType: undefined,
+  sourceDocCode: undefined,
   itemId: undefined,
   rqcType: undefined,
   checkResult: undefined,
