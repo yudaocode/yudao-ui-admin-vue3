@@ -35,14 +35,12 @@
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" min-width="80" />
       <el-table-column label="到货数量" align="center" prop="arrivalQuantity" min-width="100" />
-      <el-table-column label="合格数量" align="center" prop="qualifiedQuantity" min-width="100" />
-      <el-table-column label="来料检验" align="center" prop="iqcCheckFlag" min-width="90">
+      <el-table-column label="是否检验" align="center" prop="iqcCheckFlag" min-width="90">
         <template #default="scope">
-          <el-tag :type="scope.row.iqcCheckFlag ? 'warning' : 'info'" size="small">
-            {{ scope.row.iqcCheckFlag ? '需检验' : '免检' }}
-          </el-tag>
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.iqcCheckFlag" />
         </template>
       </el-table-column>
+      <el-table-column label="合格数量" align="center" prop="qualifiedQuantity" min-width="100" />
       <el-table-column label="检验单号" align="center" prop="iqcCode" min-width="140" />
       <el-table-column label="备注" align="center" prop="remark" min-width="150" />
       <el-table-column
@@ -86,6 +84,7 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
+import { DICT_TYPE } from '@/utils/dict'
 import { WmArrivalNoticeLineApi, WmArrivalNoticeLineVO } from '@/api/mes/wm/arrivalnotice/line'
 import ArrivalNoticeLineForm from './ArrivalNoticeLineForm.vue'
 
