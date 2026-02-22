@@ -1,4 +1,4 @@
-<!-- MES 过程检验单表单 -->
+<!-- MES 出货检验单表单 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="1080px">
     <!-- 基本信息表单 -->
@@ -12,8 +12,13 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检验单编号" prop="code">
-            <!-- TODO @芋艿：自动编码未迁移，暂用手动输入 -->
-            <el-input v-model="formData.code" placeholder="请输入检验单编号" />
+            <el-input v-model="formData.code" placeholder="请输入检验单编号">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -22,60 +27,38 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="检验类型" prop="type">
-            <el-select
-              v-model="formData.type"
-              placeholder="请选择检验类型"
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.MES_IPQC_TYPE)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
+          <el-form-item label="质检方案" prop="templateId">
+            <QcTemplateSelect v-model="formData.templateId" class="!w-1/1" />
           </el-form-item>
         </el-col>
       </el-row>
 
-      <el-divider content-position="left">生产关联</el-divider>
+      <el-divider content-position="left">物料与客户</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
-          <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect
-              v-model="formData.workOrderId"
-              placeholder="请选择生产工单"
-              class="!w-1/1"
-            />
+          <el-form-item label="产品物料" prop="itemId">
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择产品物料" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="工位" prop="workstationId">
-            <MdWorkstationSelect
-              v-model="formData.workstationId"
-              placeholder="请选择工位"
-              class="!w-1/1"
-            />
+          <el-form-item label="客户" prop="clientId">
+            <MdClientSelect v-model="formData.clientId" placeholder="请选择客户" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="生产任务" prop="taskId">
-            <ProTaskSelect
-              v-model="formData.taskId"
-              placeholder="请选择生产任务"
-              class="!w-1/1"
-            />
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
           </el-form-item>
         </el-col>
       </el-row>
 
       <el-divider content-position="left">检测情况</el-divider>
       <el-row :gutter="16">
-        <el-col :span="6">
-          <el-form-item label="检测数量" prop="checkQuantity">
+        <el-col :span="8">
+          <!-- TODO @AI：发货数量 -->
+          <el-form-item label="出货数量" prop="outQuantity">
             <el-input-number
-              v-model="formData.checkQuantity"
+              v-model="formData.outQuantity"
               :min="0"
               :precision="2"
               placeholder="请输入"
@@ -83,23 +66,22 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <!-- TODO @AI：检测数量 -->
+        <el-col :span="8">
           <el-form-item label="合格品数量" prop="qualifiedQuantity">
             <el-input-number
               v-model="formData.qualifiedQuantity"
               :min="0"
-              :precision="2"
               placeholder="请输入"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="不合格品数量" prop="unqualifiedQuantity">
             <el-input-number
               v-model="formData.unqualifiedQuantity"
               :min="0"
-              :precision="2"
               placeholder="请输入"
               class="!w-1/1"
             />
@@ -107,41 +89,17 @@
         </el-col>
       </el-row>
       <el-row :gutter="16">
-        <el-col :span="6">
-          <el-form-item label="工废数量" prop="laborScrapQuantity">
-            <el-input-number
-              v-model="formData.laborScrapQuantity"
-              :min="0"
-              :precision="2"
-              placeholder="请输入"
+        <el-col :span="8">
+          <el-form-item label="出货日期" prop="outDate">
+            <el-date-picker
+              v-model="formData.outDate"
+              type="datetime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              placeholder="请选择出货日期"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
-          <el-form-item label="料废数量" prop="materialScrapQuantity">
-            <el-input-number
-              v-model="formData.materialScrapQuantity"
-              :min="0"
-              :precision="2"
-              placeholder="请输入"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="其他废品数量" prop="otherScrapQuantity">
-            <el-input-number
-              v-model="formData.otherScrapQuantity"
-              :min="0"
-              :precision="2"
-              placeholder="请输入"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检测日期" prop="inspectDate">
             <el-date-picker
@@ -162,6 +120,8 @@
             />
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检测结论" prop="checkResult">
             <el-select
@@ -179,8 +139,6 @@
             </el-select>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row :gutter="16">
         <el-col :span="16">
           <el-form-item label="备注" prop="remark">
             <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
@@ -233,76 +191,67 @@
       <el-divider />
       <el-tabs v-model="activeTab">
         <el-tab-pane label="检验项" name="line">
-          <IpqcLineList :ipqc-id="formData.id" />
+          <OqcLineList :oqc-id="formData.id" />
         </el-tab-pane>
         <el-tab-pane label="检测结果" name="result">
-          <QcIndicatorResultList :qc-id="formData.id!" :qc-type="MesQcTypeEnum.IPQC" />
+          <QcIndicatorResultList :qc-id="formData.id!" :qc-type="MesQcTypeEnum.OQC" />
         </el-tab-pane>
       </el-tabs>
     </template>
 
     <template #footer>
-      <el-button
-        @click="submitForm"
-        type="primary"
-        :disabled="formLoading"
-        v-if="formData.status === 0"
-      >
-        保 存
-      </el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading"> 保 存 </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
-import { QcIpqcApi, QcIpqcVO } from '@/api/mes/qc/ipqc'
-import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
-import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
-import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { generateRandomStr } from '@/utils'
+import { QcOqcApi, QcOqcVO } from '@/api/mes/qc/oqc'
+import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import IpqcLineList from './IpqcLineList.vue'
+import QcTemplateSelect from '@/views/mes/qc/template/components/QcTemplateSelect.vue'
+import OqcLineList from './OqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
 import { MesQcTypeEnum } from '@/views/mes/utils/constants'
 
-defineOptions({ name: 'IpqcForm' })
+defineOptions({ name: 'OqcForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const activeTab = ref('line')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const activeTab = ref('line') // 当前激活的标签页
 
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
-  type: undefined,
   templateId: undefined,
   sourceDocId: undefined,
   sourceDocType: undefined,
   sourceDocCode: undefined,
   sourceLineId: undefined,
-  workOrderId: undefined,
-  taskId: undefined,
-  workstationId: undefined,
-  processId: undefined,
+  clientId: undefined,
+  batchCode: undefined,
   itemId: undefined,
+  minCheckQuantity: undefined,
+  maxUnqualifiedQuantity: undefined,
+  outQuantity: undefined,
   checkQuantity: undefined,
-  qualifiedQuantity: 0,
-  unqualifiedQuantity: 0,
-  laborScrapQuantity: 0,
-  materialScrapQuantity: 0,
-  otherScrapQuantity: 0,
+  qualifiedQuantity: undefined,
+  unqualifiedQuantity: undefined,
   checkResult: undefined,
+  outDate: undefined,
   inspectDate: undefined,
   inspectorUserId: undefined,
   remark: undefined,
-  status: 0,
   // 缺陷统计（只读）
   criticalRate: 0,
   majorRate: 0,
@@ -314,11 +263,17 @@ const formData = ref({
 const formRules = reactive({
   code: [{ required: true, message: '检验单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '检验单名称不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '检验类型不能为空', trigger: 'change' }],
-  workOrderId: [{ required: true, message: '生产工单不能为空', trigger: 'change' }],
-  workstationId: [{ required: true, message: '工位不能为空', trigger: 'change' }]
+  templateId: [{ required: true, message: '检验模板不能为空', trigger: 'change' }],
+  clientId: [{ required: true, message: '客户不能为空', trigger: 'change' }],
+  itemId: [{ required: true, message: '产品物料不能为空', trigger: 'change' }],
+  outQuantity: [{ required: true, message: '出货数量不能为空', trigger: 'blur' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
+
+/** 生成检验单编号 */
+const generateCode = () => {
+  formData.value.code = 'OQC' + generateRandomStr(10)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -331,32 +286,34 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = await QcIpqcApi.getIpqc(id)
-      formData.value = data
+      formData.value = await QcOqcApi.getOqc(id)
     } finally {
       formLoading.value = false
     }
   }
 }
-defineExpose({ open })
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
+  // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as QcIpqcVO
+    const data = formData.value as unknown as QcOqcVO
     if (formType.value === 'create') {
-      await QcIpqcApi.createIpqc(data)
+      await QcOqcApi.createOqc(data)
       message.success(t('common.createSuccess'))
     } else {
-      await QcIpqcApi.updateIpqc(data)
+      await QcOqcApi.updateOqc(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false
@@ -369,28 +326,25 @@ const resetForm = () => {
     id: undefined,
     code: undefined,
     name: undefined,
-    type: undefined,
     templateId: undefined,
     sourceDocId: undefined,
     sourceDocType: undefined,
     sourceDocCode: undefined,
     sourceLineId: undefined,
-    workOrderId: undefined,
-    taskId: undefined,
-    workstationId: undefined,
-    processId: undefined,
+    clientId: undefined,
+    batchCode: undefined,
     itemId: undefined,
+    minCheckQuantity: undefined,
+    maxUnqualifiedQuantity: undefined,
+    outQuantity: undefined,
     checkQuantity: undefined,
-    qualifiedQuantity: 0,
-    unqualifiedQuantity: 0,
-    laborScrapQuantity: 0,
-    materialScrapQuantity: 0,
-    otherScrapQuantity: 0,
+    qualifiedQuantity: undefined,
+    unqualifiedQuantity: undefined,
     checkResult: undefined,
+    outDate: undefined,
     inspectDate: undefined,
     inspectorUserId: undefined,
     remark: undefined,
-    status: 0,
     criticalRate: 0,
     majorRate: 0,
     minorRate: 0,
