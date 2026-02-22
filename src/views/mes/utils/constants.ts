@@ -199,6 +199,22 @@ export const MesProFeedbackTypeEnum = {
   UNIFIED: 2  // 统一报工
 }
 
+/** MES 到货通知单状态枚举 */
+export const MesWmArrivalNoticeStatusEnum = {
+  PREPARE: 0,    // 草稿
+  SUBMITTED: 1,  // 已提交
+  APPROVED: 2,   // 已审批
+  FINISHED: 3    // 已完成
+}
+
+/** MES 采购入库单状态枚举 */
+export const MesWmItemReceiptStatusEnum = {
+  PREPARE: 0,    // 草稿
+  SUBMITTED: 1,  // 已提交
+  APPROVED: 2,   // 已审批
+  FINISHED: 3    // 已完成
+}
+
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {
   for (const item of Object.values(MesItemOrProductEnum)) {

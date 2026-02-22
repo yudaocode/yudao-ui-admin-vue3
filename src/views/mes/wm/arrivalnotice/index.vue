@@ -49,7 +49,17 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：到货时间 -->
+      <el-form-item label="到货日期" prop="arrivalDate">
+        <el-date-picker
+          v-model="queryParams.arrivalDate"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="单据状态" prop="status">
         <el-select
           v-model="queryParams.status"
@@ -57,7 +67,6 @@
           clearable
           class="!w-240px"
         >
-          <!-- TODO @AI：MES_WM_ARRIVAL_NOTICE_STATUS 枚举下 -->
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_ARRIVAL_NOTICE_STATUS)"
             :key="dict.value"
@@ -121,7 +130,6 @@
           <dict-tag :type="DICT_TYPE.MES_WM_ARRIVAL_NOTICE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <!-- TODO @AI：到货时间，看看怎么没了； -->
       <el-table-column
         label="创建时间"
         align="center"
@@ -129,16 +137,14 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <!-- TODO @AI:fixed？ -->
-      <el-table-column label="操作" align="center" width="220">
-        <!-- TODO @AI：需要在 mes constants 里； -->
+      <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:wm-arrival-notice:update']"
-            v-if="scope.row.status === 0"
+            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PREPARE"
           >
             编辑
           </el-button>
@@ -147,7 +153,7 @@
             type="warning"
             @click="handleSubmit(scope.row.id)"
             v-hasPermi="['mes:wm-arrival-notice:update']"
-            v-if="scope.row.status === 0"
+            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PREPARE"
           >
             提交
           </el-button>
@@ -156,7 +162,7 @@
             type="success"
             @click="handleApprove(scope.row.id)"
             v-hasPermi="['mes:wm-arrival-notice:update']"
-            v-if="scope.row.status === 1"
+            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.SUBMITTED"
           >
             审批
           </el-button>
@@ -165,7 +171,7 @@
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-arrival-notice:delete']"
-            v-if="scope.row.status === 0"
+            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PREPARE"
           >
             删除
           </el-button>
@@ -190,20 +196,19 @@ import download from '@/utils/download'
 import { WmArrivalNoticeApi, WmArrivalNoticeVO } from '@/api/mes/wm/arrivalnotice'
 import { MdVendorApi } from '@/api/mes/md/vendor'
 import ArrivalNoticeForm from './ArrivalNoticeForm.vue'
-
-// TODO @AI：/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/index.vue 里的注释风格，参考下；
+import { MesWmArrivalNoticeStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesWmArrivalNotice' })
 
-const message = useMessage()
-const { t } = useI18n()
-const router = useRouter()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
+const router = useRouter() // 路由
 
-const loading = ref(true)
-const list = ref<WmArrivalNoticeVO[]>([])
-const total = ref(0)
-const exportLoading = ref(false)
-const vendorList = ref<any[]>([])
+const loading = ref(true) // 列表的加载中
+const list = ref<WmArrivalNoticeVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
+const vendorList = ref<any[]>([]) // 供应商列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -211,9 +216,10 @@ const queryParams = reactive({
   name: undefined,
   purchaseOrderCode: undefined,
   vendorId: undefined,
+  arrivalDate: undefined,
   status: undefined
 })
-const queryFormRef = ref()
+const queryFormRef = ref() // 搜索的表单
 
 /** 查询列表 */
 const getList = async () => {
@@ -240,7 +246,7 @@ const resetQuery = () => {
 }
 
 /** 新增/修改 */
-const formRef = ref()
+const formRef = ref() // 表单弹窗
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }

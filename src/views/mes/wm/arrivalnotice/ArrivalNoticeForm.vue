@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="860px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -9,9 +9,14 @@
     >
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：生成功能，参考别的模块 -->
           <el-form-item label="通知单编号" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入通知单编号" />
+            <el-input v-model="formData.code" placeholder="请输入通知单编号">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -75,7 +80,11 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- TODO @AI：这里缺少了“物料信息” -->
+    <!-- 编辑时展示物料信息 -->
+    <template v-if="formData.id">
+      <el-divider content-position="center">物料信息</el-divider>
+      <ArrivalNoticeLineList :notice-id="formData.id" />
+    </template>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -84,19 +93,21 @@
 </template>
 
 <script setup lang="ts">
+import { generateRandomStr } from '@/utils'
 import { WmArrivalNoticeApi, WmArrivalNoticeVO } from '@/api/mes/wm/arrivalnotice'
 import { MdVendorApi } from '@/api/mes/md/vendor'
+import ArrivalNoticeLineList from './ArrivalNoticeLineList.vue'
 
 defineOptions({ name: 'ArrivalNoticeForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const vendorList = ref<any[]>([])
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const vendorList = ref<any[]>([]) // 供应商列表
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -113,7 +124,12 @@ const formRules = reactive({
   vendorId: [{ required: true, message: '请选择供应商', trigger: 'change' }],
   arrivalDate: [{ required: true, message: '请选择到货日期', trigger: 'change' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
+
+/** 生成通知单编号 */
+const generateCode = () => {
+  formData.value.code = 'AN' + generateRandomStr(10)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
