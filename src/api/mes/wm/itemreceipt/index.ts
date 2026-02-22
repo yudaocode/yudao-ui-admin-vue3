@@ -56,14 +56,19 @@ export const WmItemReceiptApi = {
     return await request.put({ url: '/mes/wm/item-receipt/submit?id=' + id })
   },
 
-  // 审批采购入库单
-  approveItemReceipt: async (id: number) => {
-    return await request.put({ url: '/mes/wm/item-receipt/approve?id=' + id })
+  // 执行上架
+  shelvingItemReceipt: async (id: number) => {
+    return await request.put({ url: '/mes/wm/item-receipt/shelving?id=' + id })
   },
 
   // 执行入库
   executeItemReceipt: async (id: number) => {
     return await request.put({ url: '/mes/wm/item-receipt/execute?id=' + id })
+  },
+
+  // 取消采购入库单
+  cancelItemReceipt: async (id: number) => {
+    return await request.put({ url: '/mes/wm/item-receipt/cancel?id=' + id })
   },
 
   // 导出采购入库单 Excel

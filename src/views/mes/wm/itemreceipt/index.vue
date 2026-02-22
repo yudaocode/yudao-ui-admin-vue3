@@ -101,13 +101,7 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="入库单编号" align="center" prop="code" min-width="160">
-        <template #default="scope">
-          <el-button link type="primary" @click="openForm('update', scope.row.id)">
-            {{ scope.row.code }}
-          </el-button>
-        </template>
-      </el-table-column>
+      <el-table-column label="入库单编号" align="center" prop="code" min-width="160" />
       <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
       <el-table-column
         label="采购订单编号"
@@ -137,6 +131,7 @@
       />
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
+          <!-- 草稿：编辑、提交、删除 -->
           <el-button
             link
             type="primary"
@@ -155,26 +150,6 @@
           >
             提交
           </el-button>
-          <!-- TODO @AI：审批 => 执行上架； -->
-          <!-- todo @AI：阅读下 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/utils/constants.ts 最新状态；前后端，字典都需要调整下； -->
-          <el-button
-            link
-            type="success"
-            @click="handleApprove(scope.row.id)"
-            v-hasPermi="['mes:wm-item-receipt:update']"
-            v-if="scope.row.status === MesWmItemReceiptStatusEnum.SUBMITTED"
-          >
-            审批
-          </el-button>
-          <el-button
-            link
-            type="primary"
-            @click="handleExecute(scope.row.id)"
-            v-hasPermi="['mes:wm-item-receipt:execute']"
-            v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVED"
-          >
-            执行入库
-          </el-button>
           <el-button
             link
             type="danger"
@@ -183,6 +158,55 @@
             v-if="scope.row.status === MesWmItemReceiptStatusEnum.PREPARE"
           >
             删除
+          </el-button>
+          <!-- 待上架：执行上架、取消 -->
+          <el-button
+            link
+            type="success"
+            @click="openForm('shelving', scope.row.id)"
+            v-hasPermi="['mes:wm-item-receipt:update']"
+            v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVING"
+          >
+            执行上架
+          </el-button>
+          <!-- 待入库：执行入库、取消 -->
+          <!-- TODO @AI：执行入库时，不需要弹窗，只需要 confirm 之后，调用下接口就 ok 了 -->
+          <el-button
+            link
+            type="primary"
+            @click="openForm('execute', scope.row.id)"
+            v-hasPermi="['mes:wm-item-receipt:execute']"
+            v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVED"
+          >
+            执行入库
+          </el-button>
+          <!-- 待上架/待入库：取消 -->
+          <!-- TODO @AI：使用 include 去判断 -->
+          <!-- TODO @AI：需要在确认下，哪些状态可以取消！取消是个危险的动作； -->
+          <el-button
+            link
+            type="danger"
+            @click="handleCancel(scope.row.id)"
+            v-hasPermi="['mes:wm-item-receipt:update']"
+            v-if="
+              scope.row.status === MesWmItemReceiptStatusEnum.APPROVING ||
+              scope.row.status === MesWmItemReceiptStatusEnum.APPROVED
+            "
+          >
+            取消
+          </el-button>
+          <!-- 已完成/已取消：详情 -->
+          <!-- TODO @AI：使用 include 去判断 -->
+          <el-button
+            link
+            type="info"
+            @click="openForm('detail', scope.row.id)"
+            v-if="
+              scope.row.status === MesWmItemReceiptStatusEnum.FINISHED ||
+              scope.row.status === MesWmItemReceiptStatusEnum.CANCELED
+            "
+          >
+            详情
           </el-button>
         </template>
       </el-table-column>
@@ -253,7 +277,7 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 新增/修改 */
+/** 新增/修改/上架/执行/详情 */
 const formRef = ref() // 表单弹窗
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
@@ -269,22 +293,12 @@ const handleSubmit = async (id: number) => {
   } catch {}
 }
 
-/** 审批 */
-const handleApprove = async (id: number) => {
+/** 取消 */
+const handleCancel = async (id: number) => {
   try {
-    await message.confirm('确认审批通过该采购入库单？')
-    await WmItemReceiptApi.approveItemReceipt(id)
-    message.success('审批成功')
-    await getList()
-  } catch {}
-}
-
-/** 执行入库 */
-const handleExecute = async (id: number) => {
-  try {
-    await message.confirm('确认执行入库？执行后将更新库存台账。')
-    await WmItemReceiptApi.executeItemReceipt(id)
-    message.success('入库成功')
+    await message.confirm('确认取消该采购入库单？取消后不可恢复。')
+    await WmItemReceiptApi.cancelItemReceipt(id)
+    message.success('取消成功')
     await getList()
   } catch {}
 }

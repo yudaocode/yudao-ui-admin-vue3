@@ -1,7 +1,7 @@
 <!-- MES 采购入库单行列表子组件 -->
 <template>
   <div>
-    <el-button type="primary" plain @click="openForm('create')" class="mb-10px">
+    <el-button v-if="!isReadonly" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加物料
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
@@ -16,16 +16,7 @@
         prop="productionBatchNumber"
         min-width="120"
       />
-      <!-- TODO @AI：删除是否检验、检验单号、备注 -->
-      <el-table-column label="是否检验" align="center" prop="iqcCheckFlag" width="90">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.iqcCheckFlag" />
-        </template>
-      </el-table-column>
-      <el-table-column label="检验单号" align="center" prop="iqcCode" min-width="140" />
-      <el-table-column label="备注" align="center" prop="remark" min-width="120" />
-      <!-- TODO @AI：操作需要 fixed； -->
-      <el-table-column label="操作" align="center" width="120">
+      <el-table-column v-if="!isReadonly" label="操作" align="center" width="120" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row.id)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
@@ -52,6 +43,7 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="物料" prop="itemId">
+            <!-- TODO 物料的 select 组件 -->
             <el-select
               v-model="formData.itemId"
               placeholder="请选择物料"
@@ -81,21 +73,10 @@
         </el-col>
       </el-row>
       <el-row>
+        <!-- TODO @AI：此时不需要这个字段！ -->
         <el-col :span="8">
           <el-form-item label="仓库" prop="warehouseId">
-            <el-select
-              v-model="formData.warehouseId"
-              placeholder="请选择仓库"
-              clearable
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="warehouse in warehouseList"
-                :key="warehouse.id"
-                :label="warehouse.name"
-                :value="warehouse.id"
-              />
-            </el-select>
+            <WmWarehouseSelect v-model="formData.warehouseId" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -103,6 +84,7 @@
             <el-input v-model="formData.productionBatchNumber" placeholder="请输入生产批号" />
           </el-form-item>
         </el-col>
+        <!-- TODO @芋艿：可能不需要这个字段，界面上没有。【待定】 -->
         <el-col :span="8">
           <el-form-item label="是否检验" prop="iqcCheckFlag">
             <el-switch v-model="formData.iqcCheckFlag" />
@@ -144,7 +126,11 @@
     <!-- 编辑时展示上架明细 -->
     <template v-if="formData.id">
       <el-divider content-position="center">上架明细</el-divider>
-      <ItemReceiptDetailList :receipt-id="props.receiptId" :line-id="formData.id" />
+      <ItemReceiptDetailList
+        :receipt-id="props.receiptId"
+        :line-id="formData.id"
+        :form-type="props.formType"
+      />
     </template>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -154,17 +140,22 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE } from '@/utils/dict'
 import { WmItemReceiptLineApi, WmItemReceiptLineVO } from '@/api/mes/wm/itemreceipt/line'
 import { MdItemApi } from '@/api/mes/md/item'
-import { WmWarehouseApi } from '@/api/mes/wm/warehouse'
+import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import ItemReceiptDetailList from './ItemReceiptDetailList.vue'
 
 defineOptions({ name: 'ItemReceiptLineList' })
 
 const props = defineProps<{
   receiptId: number
+  formType: string
 }>()
+
+/** 行列表在 shelving/execute/detail 模式下只读 */
+const isReadonly = computed(() =>
+  ['shelving', 'execute', 'detail'].includes(props.formType)
+)
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -206,9 +197,8 @@ const handleDelete = async (id: number) => {
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型
+const lineFormType = ref('') // 行表单的类型
 const itemList = ref<any[]>([]) // 物料列表
-const warehouseList = ref<any[]>([]) // 仓库列表
 const formData = ref({
   id: undefined,
   receiptId: undefined as number | undefined,
@@ -234,15 +224,10 @@ const formRef = ref() // 表单 Ref
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
-  formType.value = type
+  lineFormType.value = type
   resetForm()
-  // 加载物料和仓库列表
-  const [items, warehouses] = await Promise.all([
-    MdItemApi.getItemSimpleList(),
-    WmWarehouseApi.getWarehouseSimpleList()
-  ])
-  itemList.value = items
-  warehouseList.value = warehouses
+  // 加载物料列表
+  itemList.value = await MdItemApi.getItemSimpleList()
   if (id) {
     formLoading.value = true
     try {
@@ -259,7 +244,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = { ...formData.value, receiptId: props.receiptId } as unknown as WmItemReceiptLineVO
-    if (formType.value === 'create') {
+    if (lineFormType.value === 'create') {
       await WmItemReceiptLineApi.createItemReceiptLine(data)
       message.success(t('common.createSuccess'))
     } else {

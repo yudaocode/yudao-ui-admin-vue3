@@ -57,5 +57,10 @@ export const WmArrivalNoticeApi = {
   // 导出到货通知单 Excel
   exportArrivalNotice: async (params: any) => {
     return await request.download({ url: '/mes/wm/arrival-notice/export-excel', params })
+  },
+
+  // 获得到货通知单精简列表（可按状态筛选）
+  getArrivalNoticeSimpleList: async (status?: number) => {
+    return await request.get({ url: '/mes/wm/arrival-notice/simple-list', params: { status } })
   }
 }

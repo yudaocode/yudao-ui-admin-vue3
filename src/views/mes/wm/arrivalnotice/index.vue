@@ -157,13 +157,13 @@
           >
             提交
           </el-button>
-          <!-- TODO @AI：是不是没这个操作，而是通过【采购入库】解决的状态变更的； -->
+          <!-- TODO @AI：是不是没这个操作，而是通过【采购入库】解决的状态变更的；（确实是的） -->
           <el-button
             link
             type="success"
             @click="handleApprove(scope.row.id)"
             v-hasPermi="['mes:wm-arrival-notice:update']"
-            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.SUBMITTED"
+            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PENDING_QC"
           >
             审批
           </el-button>
