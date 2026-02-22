@@ -170,7 +170,6 @@
             执行上架
           </el-button>
           <!-- 待入库：执行入库、取消 -->
-          <!-- TODO DONE @AI：执行入库已改为直接 confirm + API 调用，不再弹窗 -->
           <el-button
             link
             type="primary"
@@ -194,7 +193,6 @@
             link
             type="info"
             @click="openForm('detail', scope.row.id)"
-            v-if="[MesWmItemReceiptStatusEnum.FINISHED, MesWmItemReceiptStatusEnum.CANCELED].includes(scope.row.status)"
           >
             详情
           </el-button>

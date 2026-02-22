@@ -24,9 +24,9 @@ export interface WmItemReceiptDetailVO {
 
 // MES 采购入库明细 API
 export const WmItemReceiptDetailApi = {
-  // 查询采购入库明细分页
-  getItemReceiptDetailPage: async (params: any) => {
-    return await request.get({ url: '/mes/wm/item-receipt-detail/page', params })
+  // 查询采购入库明细列表（按行编号）
+  getItemReceiptDetailListByLineId: async (lineId: number) => {
+    return await request.get({ url: '/mes/wm/item-receipt-detail/list-by-line', params: { lineId } })
   },
 
   // 查询采购入库明细详情

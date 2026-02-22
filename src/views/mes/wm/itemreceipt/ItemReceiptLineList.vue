@@ -1,10 +1,29 @@
 <!-- MES 采购入库单行列表子组件 -->
 <template>
   <div>
-    <el-button v-if="!isReadonly" type="primary" plain @click="openForm('create')" class="mb-10px">
+    <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加物料
     </el-button>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      border
+      :row-key="(row: any) => row.id"
+    >
+      <el-table-column type="expand">
+        <template #default="scope">
+          <ItemReceiptDetailList
+            :ref="(el: any) => setDetailListRef(scope.row.id, el)"
+            :receipt-id="props.receiptId"
+            :line-id="scope.row.id"
+            :item-id="scope.row.itemId"
+            :form-type="props.formType"
+            @edit-detail="(detailId: number) => openDetailForm('update', scope.row.id, scope.row.itemId, detailId)"
+          />
+        </template>
+      </el-table-column>
       <el-table-column label="物料编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
@@ -16,10 +35,23 @@
         prop="productionBatchNumber"
         min-width="120"
       />
-      <el-table-column v-if="!isReadonly" label="操作" align="center" width="120" fixed="right">
+      <el-table-column
+        v-if="isUpdate || isShelving"
+        label="操作"
+        align="center"
+        width="160"
+        fixed="right"
+      >
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('update', scope.row.id)">编辑</el-button>
-          <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+          <el-button v-if="isUpdate" link type="primary" @click="openForm('update', scope.row.id)">
+            编辑
+          </el-button>
+          <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
+            删除
+          </el-button>
+          <el-button v-if="isShelving" link type="success" @click="handleShelving(scope.row.id)">
+            上架
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -43,8 +75,6 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="物料" prop="itemId">
-            <!-- TODO DONE：物料选择已使用 el-select 实现，后续可替换为独立的 MdItemSelect 组件 -->
-            <!-- TODO @AI：就是替换成 MdItemSelect -->
             <el-select
               v-model="formData.itemId"
               placeholder="请选择物料"
@@ -112,26 +142,21 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- 编辑时展示上架明细 -->
-    <template v-if="formData.id">
-      <el-divider content-position="center">上架明细</el-divider>
-      <ItemReceiptDetailList
-        :receipt-id="props.receiptId"
-        :line-id="formData.id"
-        :form-type="props.formType"
-      />
-    </template>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+
+  <!-- 上架明细添加/编辑弹窗 -->
+  <ItemReceiptDetailForm ref="detailFormRef" :receipt-id="props.receiptId" @success="onDetailFormSuccess" />
 </template>
 
 <script setup lang="ts">
 import { WmItemReceiptLineApi, WmItemReceiptLineVO } from '@/api/mes/wm/itemreceipt/line'
 import { MdItemApi } from '@/api/mes/md/item'
 import ItemReceiptDetailList from './ItemReceiptDetailList.vue'
+import ItemReceiptDetailForm from './ItemReceiptDetailForm.vue'
 
 defineOptions({ name: 'ItemReceiptLineList' })
 
@@ -140,11 +165,11 @@ const props = defineProps<{
   formType: string
 }>()
 
-/** 行列表在 shelving/detail 模式下只读 */
-const isReadonly = computed(() => ['shelving', 'detail'].includes(props.formType))
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
+const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
+const isShelving = computed(() => props.formType === 'shelving') // 是否为上架模式
 
 // ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
@@ -258,6 +283,35 @@ const resetForm = () => {
     remark: undefined
   }
   formRef.value?.resetFields()
+}
+
+// ==================== 展开行：上架明细 ====================
+const detailListRefs = ref<Record<number, InstanceType<typeof ItemReceiptDetailList>>>({})
+
+/** 缓存子组件 ref */
+const setDetailListRef = (lineId: number, el: any) => {
+  if (el) {
+    detailListRefs.value[lineId] = el
+  }
+}
+
+// ==================== 上架明细表单（LineList 层级持有） ====================
+const detailFormRef = ref()
+
+/** 上架：直接打开明细创建表单 */
+const handleShelving = (lineId: number) => {
+  const row = list.value.find((r) => r.id === lineId)
+  openDetailForm('create', lineId, row?.itemId)
+}
+
+/** 打开上架明细表单 */
+const openDetailForm = (type: string, lineId: number, itemId?: number, detailId?: number) => {
+  detailFormRef.value.open(type, lineId, itemId, detailId)
+}
+
+/** 明细表单提交成功后，刷新已展开行的 DetailList */
+const onDetailFormSuccess = (lineId: number) => {
+  detailListRefs.value[lineId]?.getList()
 }
 
 /** 初始化 */

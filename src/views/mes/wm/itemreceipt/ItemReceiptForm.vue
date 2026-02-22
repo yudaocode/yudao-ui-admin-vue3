@@ -11,7 +11,11 @@
         <el-col :span="8">
           <!-- 入库单编号：新增时可自动生成，其他模式不可生成 -->
           <el-form-item label="入库单编号" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入入库单编号" :disabled="isHeaderReadonly">
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入入库单编号"
+              :disabled="isHeaderReadonly"
+            >
               <template #append>
                 <el-button @click="generateCode" :disabled="formType !== 'create'">
                   生成
@@ -22,12 +26,20 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="入库单名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入入库单名称" :disabled="isHeaderReadonly" />
+            <el-input
+              v-model="formData.name"
+              placeholder="请输入入库单名称"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="采购订单编号" prop="purchaseOrderCode">
-            <el-input v-model="formData.purchaseOrderCode" placeholder="请输入采购订单编号" :disabled="isHeaderReadonly" />
+            <el-input
+              v-model="formData.purchaseOrderCode"
+              placeholder="请输入采购订单编号"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -67,7 +79,12 @@
         </el-col>
         <el-col :span="16">
           <el-form-item label="备注" prop="remark">
-            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" :disabled="isHeaderReadonly" />
+            <el-input
+              v-model="formData.remark"
+              type="textarea"
+              placeholder="请输入备注"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -78,22 +95,13 @@
       <ItemReceiptLineList :receipt-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
-      <!-- create/update 模式 -->
-      <template v-if="formType === 'create' || formType === 'update'">
-        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-        <el-button @click="dialogVisible = false">取 消</el-button>
-      </template>
-      <!-- shelving 模式 -->
-      <template v-else-if="formType === 'shelving'">
-        <el-button @click="handleShelving" type="primary" :disabled="formLoading">执行上架</el-button>
-        <!-- TODO @AI：这里的【取消】操作去掉，避免误点 -->
-        <el-button @click="handleCancelReceipt" type="danger" :disabled="formLoading">取消入库单</el-button>
-        <el-button @click="dialogVisible = false">关 闭</el-button>
-      </template>
-      <!-- detail 模式 -->
-      <template v-else>
-        <el-button @click="dialogVisible = false">关 闭</el-button>
-      </template>
+      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading"
+        >确 定</el-button
+      >
+      <el-button v-if="isShelving" @click="handleShelving" type="primary" :disabled="formLoading"
+        >执行上架</el-button
+      >
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -133,18 +141,15 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 
-/** Header fields are read-only in shelving/detail modes */
-const isHeaderReadonly = computed(() =>
-  ['shelving', 'detail'].includes(formType.value)
-)
-
-/** 弹窗标题映射 */
+const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isShelving = computed(() => formType.value === 'shelving') // 是否为上架模式
+const isHeaderReadonly = computed(() => ['shelving', 'detail'].includes(formType.value)) // 是否只读
 const dialogTitleMap: Record<string, string> = {
   create: '新增采购入库单',
   update: '编辑采购入库单',
   shelving: '执行上架',
   detail: '采购入库单详情'
-}
+} // 弹窗标题映射
 
 /** 生成入库单编号 */
 const generateCode = () => {
@@ -194,6 +199,7 @@ const submitForm = async () => {
       message.success('修改成功')
     }
     dialogVisible.value = false
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false
@@ -207,21 +213,6 @@ const handleShelving = async () => {
     formLoading.value = true
     await WmItemReceiptApi.shelvingItemReceipt(formData.value.id!)
     message.success('上架成功')
-    dialogVisible.value = false
-    emit('success')
-  } catch {
-  } finally {
-    formLoading.value = false
-  }
-}
-
-/** 取消入库单 */
-const handleCancelReceipt = async () => {
-  try {
-    await message.confirm('确认取消该采购入库单？取消后不可恢复。')
-    formLoading.value = true
-    await WmItemReceiptApi.cancelItemReceipt(formData.value.id!)
-    message.success('取消成功')
     dialogVisible.value = false
     emit('success')
   } catch {
