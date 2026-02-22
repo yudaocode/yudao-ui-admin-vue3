@@ -291,4 +291,5 @@ export enum DICT_TYPE {
   MES_PRO_FEEDBACK_CHANNEL = 'mes_pro_feedback_channel', // MES 生产报工途径
   MES_PRO_ANDON_STATUS = 'mes_pro_andon_status', // MES 安灯处置状态
   MES_PRO_ANDON_LEVEL = 'mes_pro_andon_level', // MES 安灯级别
+  MES_RQC_TYPE = 'mes_rqc_type', // MES 退货检验类型
 }

@@ -159,6 +159,18 @@ export const MesQcIpqcStatusEnum = {
   FINISHED: 1 // 已完成
 }
 
+/** MES 出货检验单（OQC）状态枚举 */
+export const MesQcOqcStatusEnum = {
+  PREPARE: 0, // 草稿
+  FINISHED: 1 // 已完成
+}
+
+/** MES 退货检验单（RQC）状态枚举 */
+export const MesQcRqcStatusEnum = {
+  PREPARE: 0, // 草稿
+  FINISHED: 1 // 已完成
+}
+
 /** MES 生产报工状态枚举 */
 export const MesProFeedbackStatusEnum = {
   PREPARE: 0,   // 草稿
