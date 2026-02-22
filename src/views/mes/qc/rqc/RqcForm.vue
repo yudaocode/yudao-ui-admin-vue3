@@ -44,7 +44,7 @@
               class="!w-1/1"
             >
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.MES_RQC_TYPE)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_RQC_TYPE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -172,7 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { generateRandomStr } from '@/utils'
 import { QcRqcApi, QcRqcVO } from '@/api/mes/qc/rqc'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'

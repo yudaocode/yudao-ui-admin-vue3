@@ -52,7 +52,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_RQC_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_RQC_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -211,7 +211,7 @@ import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { QcRqcApi, QcRqcVO } from '@/api/mes/qc/rqc'
 import RqcForm from './RqcForm.vue'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import { MesQcRqcStatusEnum } from '@/views/mes/utils/constants'

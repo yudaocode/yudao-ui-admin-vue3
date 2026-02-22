@@ -10,7 +10,7 @@ export interface QcRqcVO {
   sourceDocType: string // 来源单据类型
   sourceDocCode: string // 来源单据编号
   sourceLineId: number // 来源单据行 ID
-  rqcType: string // 退货检验类型
+  rqcType: number // 检验类型
   itemId: number // 产品物料 ID
   itemCode: string // 产品物料编码（关联查询）
   itemName: string // 产品物料名称（关联查询）
