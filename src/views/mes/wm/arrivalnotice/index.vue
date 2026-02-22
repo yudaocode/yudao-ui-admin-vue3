@@ -157,16 +157,6 @@
           >
             提交
           </el-button>
-          <!-- TODO @AI：是不是没这个操作，而是通过【采购入库】解决的状态变更的；（确实是的） -->
-          <el-button
-            link
-            type="success"
-            @click="handleApprove(scope.row.id)"
-            v-hasPermi="['mes:wm-arrival-notice:update']"
-            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PENDING_QC"
-          >
-            审批
-          </el-button>
           <el-button
             link
             type="danger"
@@ -266,16 +256,6 @@ const handleSubmit = async (id: number) => {
     await message.confirm('确认提交该到货通知单？')
     await WmArrivalNoticeApi.submitArrivalNotice(id)
     message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 审批 */
-const handleApprove = async (id: number) => {
-  try {
-    await message.confirm('确认审批通过该到货通知单？')
-    await WmArrivalNoticeApi.approveArrivalNotice(id)
-    message.success('审批成功')
     await getList()
   } catch {}
 }

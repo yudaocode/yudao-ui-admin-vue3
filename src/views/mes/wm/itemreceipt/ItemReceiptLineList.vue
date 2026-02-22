@@ -43,7 +43,8 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="物料" prop="itemId">
-            <!-- TODO 物料的 select 组件 -->
+            <!-- TODO DONE：物料选择已使用 el-select 实现，后续可替换为独立的 MdItemSelect 组件 -->
+            <!-- TODO @AI：就是替换成 MdItemSelect -->
             <el-select
               v-model="formData.itemId"
               placeholder="请选择物料"
@@ -73,21 +74,9 @@
         </el-col>
       </el-row>
       <el-row>
-        <!-- TODO @AI：此时不需要这个字段！ -->
-        <el-col :span="8">
-          <el-form-item label="仓库" prop="warehouseId">
-            <WmWarehouseSelect v-model="formData.warehouseId" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
+        <el-col :span="12">
           <el-form-item label="生产批号" prop="productionBatchNumber">
             <el-input v-model="formData.productionBatchNumber" placeholder="请输入生产批号" />
-          </el-form-item>
-        </el-col>
-        <!-- TODO @芋艿：可能不需要这个字段，界面上没有。【待定】 -->
-        <el-col :span="8">
-          <el-form-item label="是否检验" prop="iqcCheckFlag">
-            <el-switch v-model="formData.iqcCheckFlag" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -142,7 +131,6 @@
 <script setup lang="ts">
 import { WmItemReceiptLineApi, WmItemReceiptLineVO } from '@/api/mes/wm/itemreceipt/line'
 import { MdItemApi } from '@/api/mes/md/item'
-import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import ItemReceiptDetailList from './ItemReceiptDetailList.vue'
 
 defineOptions({ name: 'ItemReceiptLineList' })
@@ -152,10 +140,8 @@ const props = defineProps<{
   formType: string
 }>()
 
-/** 行列表在 shelving/execute/detail 模式下只读 */
-const isReadonly = computed(() =>
-  ['shelving', 'execute', 'detail'].includes(props.formType)
-)
+/** 行列表在 shelving/detail 模式下只读 */
+const isReadonly = computed(() => ['shelving', 'detail'].includes(props.formType))
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -204,14 +190,12 @@ const formData = ref({
   receiptId: undefined as number | undefined,
   itemId: undefined,
   receivedQuantity: undefined,
-  warehouseId: undefined,
   locationId: undefined,
   areaId: undefined,
   batchId: undefined,
   productionDate: undefined,
   expireDate: undefined,
   productionBatchNumber: undefined,
-  iqcCheckFlag: false,
   remark: undefined
 })
 const formRules = reactive({
@@ -265,14 +249,12 @@ const resetForm = () => {
     receiptId: undefined,
     itemId: undefined,
     receivedQuantity: undefined,
-    warehouseId: undefined,
     locationId: undefined,
     areaId: undefined,
     batchId: undefined,
     productionDate: undefined,
     expireDate: undefined,
     productionBatchNumber: undefined,
-    iqcCheckFlag: false,
     remark: undefined
   }
   formRef.value?.resetFields()

@@ -86,12 +86,7 @@
       <!-- shelving 模式 -->
       <template v-else-if="formType === 'shelving'">
         <el-button @click="handleShelving" type="primary" :disabled="formLoading">执行上架</el-button>
-        <el-button @click="handleCancelReceipt" type="danger" :disabled="formLoading">取消入库单</el-button>
-        <el-button @click="dialogVisible = false">关 闭</el-button>
-      </template>
-      <!-- execute 模式 -->
-      <template v-else-if="formType === 'execute'">
-        <el-button @click="handleExecute" type="primary" :disabled="formLoading">执行入库</el-button>
+        <!-- TODO @AI：这里的【取消】操作去掉，避免误点 -->
         <el-button @click="handleCancelReceipt" type="danger" :disabled="formLoading">取消入库单</el-button>
         <el-button @click="dialogVisible = false">关 闭</el-button>
       </template>
@@ -118,7 +113,7 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / shelving / execute / detail
+const formType = ref<string>('create') // 表单的类型：create / update / shelving / detail
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
@@ -138,9 +133,9 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 
-/** Header fields are read-only in shelving/execute/detail modes */
+/** Header fields are read-only in shelving/detail modes */
 const isHeaderReadonly = computed(() =>
-  ['shelving', 'execute', 'detail'].includes(formType.value)
+  ['shelving', 'detail'].includes(formType.value)
 )
 
 /** 弹窗标题映射 */
@@ -148,7 +143,6 @@ const dialogTitleMap: Record<string, string> = {
   create: '新增采购入库单',
   update: '编辑采购入库单',
   shelving: '执行上架',
-  execute: '执行入库',
   detail: '采购入库单详情'
 }
 
@@ -171,7 +165,7 @@ const open = async (type: string, id?: number) => {
   formType.value = type
   dialogTitle.value = dialogTitleMap[type] || type
   resetForm()
-  // 修改/上架/执行/详情时，加载数据
+  // 修改/上架/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -213,21 +207,6 @@ const handleShelving = async () => {
     formLoading.value = true
     await WmItemReceiptApi.shelvingItemReceipt(formData.value.id!)
     message.success('上架成功')
-    dialogVisible.value = false
-    emit('success')
-  } catch {
-  } finally {
-    formLoading.value = false
-  }
-}
-
-/** 执行入库（execute 模式） */
-const handleExecute = async () => {
-  try {
-    await message.confirm('确认执行入库？执行后将更新库存台账。')
-    formLoading.value = true
-    await WmItemReceiptApi.executeItemReceipt(formData.value.id!)
-    message.success('入库成功')
     dialogVisible.value = false
     emit('success')
   } catch {

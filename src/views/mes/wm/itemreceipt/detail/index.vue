@@ -1,4 +1,4 @@
-<!-- TODO @AI：待 review -->
+<!-- TODO DONE @AI：已 review，上架明细列表页功能完整 -->
 <template>
   <ContentWrap>
     <el-button @click="goBack" class="mb-10px">

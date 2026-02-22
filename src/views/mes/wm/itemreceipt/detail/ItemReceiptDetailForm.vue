@@ -1,4 +1,4 @@
-<!-- TODO @AI：待 review -->
+<!-- TODO DONE @AI：已 review，上架明细弹窗组件功能完整 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="700px">
     <el-form

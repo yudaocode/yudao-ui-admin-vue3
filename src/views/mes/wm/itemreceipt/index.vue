@@ -170,41 +170,31 @@
             执行上架
           </el-button>
           <!-- 待入库：执行入库、取消 -->
-          <!-- TODO @AI：执行入库时，不需要弹窗，只需要 confirm 之后，调用下接口就 ok 了 -->
+          <!-- TODO DONE @AI：执行入库已改为直接 confirm + API 调用，不再弹窗 -->
           <el-button
             link
             type="primary"
-            @click="openForm('execute', scope.row.id)"
+            @click="handleExecute(scope.row.id)"
             v-hasPermi="['mes:wm-item-receipt:execute']"
             v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVED"
           >
             执行入库
           </el-button>
-          <!-- 待上架/待入库：取消 -->
-          <!-- TODO @AI：使用 include 去判断 -->
-          <!-- TODO @AI：需要在确认下，哪些状态可以取消！取消是个危险的动作； -->
+          <!-- TODO DONE @AI：确认只有待上架和待入库状态可以取消 -->
           <el-button
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
             v-hasPermi="['mes:wm-item-receipt:update']"
-            v-if="
-              scope.row.status === MesWmItemReceiptStatusEnum.APPROVING ||
-              scope.row.status === MesWmItemReceiptStatusEnum.APPROVED
-            "
+            v-if="[MesWmItemReceiptStatusEnum.APPROVING, MesWmItemReceiptStatusEnum.APPROVED].includes(scope.row.status)"
           >
             取消
           </el-button>
-          <!-- 已完成/已取消：详情 -->
-          <!-- TODO @AI：使用 include 去判断 -->
           <el-button
             link
             type="info"
             @click="openForm('detail', scope.row.id)"
-            v-if="
-              scope.row.status === MesWmItemReceiptStatusEnum.FINISHED ||
-              scope.row.status === MesWmItemReceiptStatusEnum.CANCELED
-            "
+            v-if="[MesWmItemReceiptStatusEnum.FINISHED, MesWmItemReceiptStatusEnum.CANCELED].includes(scope.row.status)"
           >
             详情
           </el-button>
@@ -277,7 +267,7 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 新增/修改/上架/执行/详情 */
+/** 新增/修改/上架/详情 */
 const formRef = ref() // 表单弹窗
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
@@ -289,6 +279,16 @@ const handleSubmit = async (id: number) => {
     await message.confirm('确认提交该采购入库单？')
     await WmItemReceiptApi.submitItemReceipt(id)
     message.success('提交成功')
+    await getList()
+  } catch {}
+}
+
+/** 执行入库 */
+const handleExecute = async (id: number) => {
+  try {
+    await message.confirm('确认执行入库？执行后将更新库存台账。')
+    await WmItemReceiptApi.executeItemReceipt(id)
+    message.success('入库成功')
     await getList()
   } catch {}
 }

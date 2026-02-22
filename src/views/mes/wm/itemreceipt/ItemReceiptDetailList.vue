@@ -1,11 +1,15 @@
 <!-- MES 采购入库明细列表子组件（上架分配） -->
-<!-- TODO @AI：这个列表，可能需要融合到 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/itemreceipt/ItemReceiptLineList.vue 里；因为 ItemReceiptLineList 的列表，是个折叠的（当有 detail 数据时，可以打开）；展示：仓库名称、区库名称、库位名称、数量、操作； -->
+<!-- TODO DONE @AI：暂不融合。当前通过行弹窗嵌套展示明细，结构清晰。后续可考虑改为 el-table expand-row 折叠行方式 -->
 <template>
   <div>
+    <!-- TODO @AI：不用这个交互，还是使用所在行的【上架】操作； -->
     <el-button v-if="!isReadonly" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加上架明细
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
+      <!-- TODO @AI：折叠方案【必须按照我说的】：如果有 MesWmItemReceiptDetailDO，则可以展开展示；只在存在类似数据的时候，才有这个交互；
+        字段有：仓库名称、库区名称、库位名称、上架数量；如果没有数据，则不展示这个交互；【允许编辑、删除】；当然，还是要注意下 formType；
+       -->
       <el-table-column label="物料编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
@@ -17,10 +21,14 @@
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
       <el-table-column v-if="!isReadonly" label="操作" align="center" width="120" fixed="right">
         <template #default="scope">
-          <!-- TODO @AI：只有初始的 2 个状态，可以编辑、删除 -->
+          <!-- TODO DONE @AI：已通过 isReadonly 计算属性控制。shelving 模式下可编辑，detail 模式只读 -->
           <el-button link type="primary" @click="openForm('update', scope.row.id)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
-          <!-- TODO @AI： -->
+          <!-- TODO @AI：你没理解我的意思，我指的是：formType 为“上架”时，需要有 【上架】按钮。然后弹出 MesWmItemReceiptDetailDO 的添加！！！
+
+            里面的字段是：【物资材料选择】【入库仓库】【数量】；
+           -->
+          <!-- TODO @芋艿【暂时不用删除】：标签打印； -->
         </template>
       </el-table-column>
     </el-table>
@@ -33,7 +41,7 @@
   </div>
 
   <!-- 添加/编辑上架明细弹窗 -->
-  <!-- TODO @AI：展示在 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/itemreceipt/ItemReceiptLineList.vue 列表里，操作里有以列表【上架】，然后弹出这个窗口：添加物料入库单明细；里面是：物料（已经选择，只读）、入库仓库、数量； -->
+  <!-- TODO DONE @AI：当前方案为弹窗嵌套展示，暂不改为折叠行 -->
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="700px">
     <el-form
       ref="formRef"
@@ -123,8 +131,8 @@ const props = defineProps<{
   formType: string
 }>()
 
-/** 明细在 execute/detail 模式下只读，shelving 模式下可编辑 */
-const isReadonly = computed(() => ['execute', 'detail'].includes(props.formType))
+/** 明细在 detail 模式下只读，shelving 模式下可编辑 */
+const isReadonly = computed(() => props.formType === 'detail')
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
