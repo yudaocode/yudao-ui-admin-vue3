@@ -39,7 +39,7 @@
 import { QcIndicatorResultApi, QcIndicatorResultVO } from '@/api/mes/qc/indicatorresult'
 import QcIndicatorResultForm from './QcIndicatorResultForm.vue'
 
-// TODO @AI：补全注释，参考 system user index.vue
+// TODO DONE @AI：补全注释，参考 system user index.vue => 已补全
 
 defineOptions({ name: 'QcIndicatorResultList' })
 
@@ -51,16 +51,16 @@ const props = defineProps<{
 const { t } = useI18n()
 const message = useMessage()
 
-const loading = ref(false)
-const list = ref<QcIndicatorResultVO[]>([])
-const total = ref(0)
+const loading = ref(false) // 列表的加载中
+const list = ref<QcIndicatorResultVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   qcId: undefined as number | undefined,
   qcType: undefined as number | undefined
-})
-const formRef = ref()
+}) // 搜索的表单
+const formRef = ref() // 表单弹窗 Ref
 
 /** 查询列表 */
 const getList = async () => {
@@ -79,17 +79,17 @@ const getList = async () => {
   }
 }
 
-/** 新增 */
+/** 新增操作 */
 const handleAdd = () => {
   formRef.value.open('create')
 }
 
-/** 修改 */
+/** 修改操作 */
 const handleUpdate = (row: QcIndicatorResultVO) => {
   formRef.value.open('update', row.id)
 }
 
-/** 删除 */
+/** 删除操作 */
 const handleDelete = async (row: QcIndicatorResultVO) => {
   try {
     await message.delConfirm()
