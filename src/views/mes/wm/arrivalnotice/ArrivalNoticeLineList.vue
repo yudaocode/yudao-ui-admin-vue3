@@ -34,13 +34,83 @@
     />
   </div>
 
-  <ArrivalNoticeLineForm ref="formRef" @success="getList" :noticeId="noticeId" />
+  <!-- 添加/编辑行弹窗 -->
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="700px">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="110px"
+      v-loading="formLoading"
+    >
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="物料" prop="itemId">
+            <el-select
+              v-model="formData.itemId"
+              placeholder="请选择物料"
+              filterable
+              clearable
+              class="!w-1/1"
+            >
+              <el-option
+                v-for="item in itemList"
+                :key="item.id"
+                :label="`${item.code} - ${item.name}`"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="到货数量" prop="arrivalQuantity">
+            <el-input-number
+              v-model="formData.arrivalQuantity"
+              :precision="2"
+              :min="0"
+              controls-position="right"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="合格数量" prop="qualifiedQuantity">
+            <el-input-number
+              v-model="formData.qualifiedQuantity"
+              :precision="2"
+              :min="0"
+              controls-position="right"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="是否检验" prop="iqcCheckFlag">
+            <el-switch v-model="formData.iqcCheckFlag" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+    <template #footer>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { WmArrivalNoticeLineApi, WmArrivalNoticeLineVO } from '@/api/mes/wm/arrivalnotice/line'
-import ArrivalNoticeLineForm from './line/ArrivalNoticeLineForm.vue'
+import { MdItemApi } from '@/api/mes/md/item'
 
 defineOptions({ name: 'ArrivalNoticeLineList' })
 
@@ -51,6 +121,7 @@ const props = defineProps<{
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
+// ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
 const list = ref<WmArrivalNoticeLineVO[]>([]) // 行列表
 const total = ref(0) // 列表的总页数
@@ -73,12 +144,6 @@ const getList = async () => {
   }
 }
 
-/** 新增/修改 */
-const formRef = ref() // 表单弹窗
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
 /** 删除 */
 const handleDelete = async (id: number) => {
   try {
@@ -87,6 +152,78 @@ const handleDelete = async (id: number) => {
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
+}
+
+// ==================== 添加/编辑表单 ====================
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型
+const itemList = ref<any[]>([]) // 物料列表
+const formData = ref({
+  id: undefined,
+  noticeId: undefined as number | undefined,
+  itemId: undefined,
+  arrivalQuantity: undefined,
+  qualifiedQuantity: undefined,
+  iqcCheckFlag: false,
+  remark: undefined
+})
+const formRules = reactive({
+  itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
+  arrivalQuantity: [{ required: true, message: '到货数量不能为空', trigger: 'blur' }]
+})
+const formRef = ref() // 表单 Ref
+
+/** 打开表单弹窗 */
+const openForm = async (type: string, id?: number) => {
+  dialogVisible.value = true
+  dialogTitle.value = t('action.' + type)
+  formType.value = type
+  resetForm()
+  itemList.value = await MdItemApi.getItemSimpleList()
+  if (id) {
+    formLoading.value = true
+    try {
+      formData.value = await WmArrivalNoticeLineApi.getArrivalNoticeLine(id)
+    } finally {
+      formLoading.value = false
+    }
+  }
+}
+
+/** 提交表单 */
+const submitForm = async () => {
+  await formRef.value.validate()
+  formLoading.value = true
+  try {
+    const data = { ...formData.value, noticeId: props.noticeId } as unknown as WmArrivalNoticeLineVO
+    if (formType.value === 'create') {
+      await WmArrivalNoticeLineApi.createArrivalNoticeLine(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await WmArrivalNoticeLineApi.updateArrivalNoticeLine(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    await getList()
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    noticeId: undefined,
+    itemId: undefined,
+    arrivalQuantity: undefined,
+    qualifiedQuantity: undefined,
+    iqcCheckFlag: false,
+    remark: undefined
+  }
+  formRef.value?.resetFields()
 }
 
 /** 初始化 */
