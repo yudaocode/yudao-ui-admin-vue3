@@ -7,19 +7,19 @@
       :inline="true"
       label-width="100px"
     >
-      <el-form-item label="通知单编号" prop="code">
+      <el-form-item label="入库单编号" prop="code">
         <el-input
           v-model="queryParams.code"
-          placeholder="请输入通知单编号"
+          placeholder="请输入入库单编号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="通知单名称" prop="name">
+      <el-form-item label="入库单名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入通知单名称"
+          placeholder="请输入入库单名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -49,9 +49,9 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="到货日期" prop="arrivalDate">
+      <el-form-item label="入库日期" prop="receiptDate">
         <el-date-picker
-          v-model="queryParams.arrivalDate"
+          v-model="queryParams.receiptDate"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
@@ -68,7 +68,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_ARRIVAL_NOTICE_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_ITEM_RECEIPT_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -82,7 +82,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['mes:wm-arrival-notice:create']"
+          v-hasPermi="['mes:wm-item-receipt:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -91,7 +91,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['mes:wm-arrival-notice:export']"
+          v-hasPermi="['mes:wm-item-receipt:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -101,14 +101,14 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="通知单编号" align="center" prop="code" min-width="160">
+      <el-table-column label="入库单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
-          <el-button link type="primary" @click="openLine(scope.row.id)">
+          <el-button link type="primary" @click="openForm('update', scope.row.id)">
             {{ scope.row.code }}
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="通知单名称" align="center" prop="name" min-width="150" />
+      <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
       <el-table-column
         label="采购订单编号"
         align="center"
@@ -117,17 +117,15 @@
       />
       <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="120" />
       <el-table-column
-        label="到货日期"
+        label="入库日期"
         align="center"
-        prop="arrivalDate"
+        prop="receiptDate"
         :formatter="dateFormatter2"
         width="180px"
       />
-      <el-table-column label="联系人" align="center" prop="contactName" min-width="100" />
-      <el-table-column label="联系方式" align="center" prop="contactTelephone" min-width="120" />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_WM_ARRIVAL_NOTICE_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_WM_ITEM_RECEIPT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
@@ -137,14 +135,14 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="220" fixed="right">
+      <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:wm-arrival-notice:update']"
-            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-item-receipt:update']"
+            v-if="scope.row.status === MesWmItemReceiptStatusEnum.PREPARE"
           >
             编辑
           </el-button>
@@ -152,27 +150,37 @@
             link
             type="warning"
             @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-arrival-notice:update']"
-            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-item-receipt:update']"
+            v-if="scope.row.status === MesWmItemReceiptStatusEnum.PREPARE"
           >
             提交
           </el-button>
-          <!-- TODO @AI：是不是没这个操作，而是通过【采购入库】解决的状态变更的； -->
+          <!-- TODO @AI：审批 => 执行上架； -->
+          <!-- todo @AI：阅读下 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/utils/constants.ts 最新状态；前后端，字典都需要调整下； -->
           <el-button
             link
             type="success"
             @click="handleApprove(scope.row.id)"
-            v-hasPermi="['mes:wm-arrival-notice:update']"
-            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.SUBMITTED"
+            v-hasPermi="['mes:wm-item-receipt:update']"
+            v-if="scope.row.status === MesWmItemReceiptStatusEnum.SUBMITTED"
           >
             审批
           </el-button>
           <el-button
             link
+            type="primary"
+            @click="handleExecute(scope.row.id)"
+            v-hasPermi="['mes:wm-item-receipt:execute']"
+            v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVED"
+          >
+            执行入库
+          </el-button>
+          <el-button
+            link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:wm-arrival-notice:delete']"
-            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-item-receipt:delete']"
+            v-if="scope.row.status === MesWmItemReceiptStatusEnum.PREPARE"
           >
             删除
           </el-button>
@@ -187,26 +195,25 @@
     />
   </ContentWrap>
 
-  <ArrivalNoticeForm ref="formRef" @success="getList" />
+  <ItemReceiptForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
-import { WmArrivalNoticeApi, WmArrivalNoticeVO } from '@/api/mes/wm/arrivalnotice'
+import { WmItemReceiptApi, WmItemReceiptVO } from '@/api/mes/wm/itemreceipt'
 import { MdVendorApi } from '@/api/mes/md/vendor'
-import ArrivalNoticeForm from './ArrivalNoticeForm.vue'
-import { MesWmArrivalNoticeStatusEnum } from '@/views/mes/utils/constants'
+import ItemReceiptForm from './ItemReceiptForm.vue'
+import { MesWmItemReceiptStatusEnum } from '@/views/mes/utils/constants'
 
-defineOptions({ name: 'MesWmArrivalNotice' })
+defineOptions({ name: 'MesWmItemReceipt' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const router = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
-const list = ref<WmArrivalNoticeVO[]>([]) // 列表的数据
+const list = ref<WmItemReceiptVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const exportLoading = ref(false) // 导出的加载中
 const vendorList = ref<any[]>([]) // 供应商列表
@@ -217,7 +224,7 @@ const queryParams = reactive({
   name: undefined,
   purchaseOrderCode: undefined,
   vendorId: undefined,
-  arrivalDate: undefined,
+  receiptDate: undefined,
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
@@ -226,7 +233,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await WmArrivalNoticeApi.getArrivalNoticePage(queryParams)
+    const data = await WmItemReceiptApi.getItemReceiptPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -252,19 +259,11 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 打开明细行 */
-const openLine = (noticeId: number) => {
-  router.push({
-    name: 'MesWmArrivalNoticeLine',
-    query: { noticeId: String(noticeId) }
-  })
-}
-
 /** 提交 */
 const handleSubmit = async (id: number) => {
   try {
-    await message.confirm('确认提交该到货通知单？')
-    await WmArrivalNoticeApi.submitArrivalNotice(id)
+    await message.confirm('确认提交该采购入库单？')
+    await WmItemReceiptApi.submitItemReceipt(id)
     message.success('提交成功')
     await getList()
   } catch {}
@@ -273,9 +272,19 @@ const handleSubmit = async (id: number) => {
 /** 审批 */
 const handleApprove = async (id: number) => {
   try {
-    await message.confirm('确认审批通过该到货通知单？')
-    await WmArrivalNoticeApi.approveArrivalNotice(id)
+    await message.confirm('确认审批通过该采购入库单？')
+    await WmItemReceiptApi.approveItemReceipt(id)
     message.success('审批成功')
+    await getList()
+  } catch {}
+}
+
+/** 执行入库 */
+const handleExecute = async (id: number) => {
+  try {
+    await message.confirm('确认执行入库？执行后将更新库存台账。')
+    await WmItemReceiptApi.executeItemReceipt(id)
+    message.success('入库成功')
     await getList()
   } catch {}
 }
@@ -284,7 +293,7 @@ const handleApprove = async (id: number) => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await WmArrivalNoticeApi.deleteArrivalNotice(id)
+    await WmItemReceiptApi.deleteItemReceipt(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -295,8 +304,8 @@ const handleExport = async () => {
   try {
     await message.exportConfirm()
     exportLoading.value = true
-    const data = await WmArrivalNoticeApi.exportArrivalNotice(queryParams)
-    download.excel(data, '到货通知单.xls')
+    const data = await WmItemReceiptApi.exportItemReceipt(queryParams)
+    download.excel(data, '采购入库单.xls')
   } catch {
   } finally {
     exportLoading.value = false

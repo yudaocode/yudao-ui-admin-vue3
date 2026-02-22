@@ -200,6 +200,10 @@ export const MesProFeedbackTypeEnum = {
 }
 
 /** MES 到货通知单状态枚举 */
+// TODO @AI（4 个状态）：草稿
+// 待质检
+// 已完成
+// 待入库
 export const MesWmArrivalNoticeStatusEnum = {
   PREPARE: 0,    // 草稿
   SUBMITTED: 1,  // 已提交
@@ -208,6 +212,16 @@ export const MesWmArrivalNoticeStatusEnum = {
 }
 
 /** MES 采购入库单状态枚举 */
+// TODO @AI（5 个状态）：草稿
+// 待上架
+// 待执行入库
+// 已完成
+// 已取消
+  // 创建：进入草稿
+  // 提交：待上架
+  // 上架：待执行入库
+  // 执行入库：已完成
+  // 取消：已取消
 export const MesWmItemReceiptStatusEnum = {
   PREPARE: 0,    // 草稿
   SUBMITTED: 1,  // 已提交
