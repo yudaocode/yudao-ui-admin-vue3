@@ -76,7 +76,7 @@
             <el-input-number
               v-model="formData.qualifiedQuantity"
               :min="0"
-              placeholder="请输入"
+              placeholder="请输入合格品数量"
               class="!w-1/1"
             />
           </el-form-item>
@@ -86,7 +86,7 @@
             <el-input-number
               v-model="formData.unqualifiedQuantity"
               :min="0"
-              placeholder="请输入"
+              placeholder="请输入不合格品数量"
               class="!w-1/1"
             />
           </el-form-item>
@@ -116,8 +116,6 @@
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检测结论" prop="checkResult">
             <el-select
@@ -135,7 +133,9 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="16">
+      </el-row>
+      <el-row :gutter="16">
+        <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
           </el-form-item>
