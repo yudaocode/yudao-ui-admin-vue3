@@ -147,28 +147,14 @@ export const MesQcTypeEnum = {
   RQC: 4   // 退货检验
 }
 
-/** MES 来料检验单（IQC）状态枚举 */
-export const MesQcIqcStatusEnum = {
-  PREPARE: 0, // 草稿
-  FINISHED: 1 // 已完成
-}
-
-/** MES 过程检验单（IPQC）状态枚举 */
-export const MesQcIpqcStatusEnum = {
-  PREPARE: 0, // 草稿
-  FINISHED: 1 // 已完成
-}
-
-/** MES 出货检验单（OQC）状态枚举 */
-export const MesQcOqcStatusEnum = {
-  PREPARE: 0, // 草稿
-  FINISHED: 1 // 已完成
-}
-
-/** MES 退货检验单（RQC）状态枚举 */
-export const MesQcRqcStatusEnum = {
-  PREPARE: 0, // 草稿
-  FINISHED: 1 // 已完成
+/** MES 单据状态枚举 */
+export const MesOrderStatusEnum = {
+  DRAFT: 0,      // 草稿
+  CONFIRMED: 1,  // 已确认
+  APPROVING: 2,  // 审批中
+  APPROVED: 3,   // 已审批
+  FINISHED: 4,   // 已完成
+  CANCELLED: 5   // 已取消
 }
 
 /** MES 生产报工状态枚举 */

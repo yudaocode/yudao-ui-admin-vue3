@@ -138,7 +138,7 @@
       <el-table-column label="检测人员" align="center" prop="inspectorNickname" width="100" />
       <el-table-column label="单据状态" align="center" prop="status" width="80">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_QC_IQC_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_ORDER_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="180" fixed="right">

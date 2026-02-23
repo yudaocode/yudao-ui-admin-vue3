@@ -274,7 +274,7 @@ export enum DICT_TYPE {
   MES_PRO_LINK_TYPE = 'mes_pro_link_type', // MES 工序关系类型
   MES_PRO_TASK_STATUS = 'mes_pro_task_status', // MES 生产任务状态
   MES_TIME_UNIT_TYPE = 'mes_time_unit_type', // MES 时间单位
-  MES_QC_IQC_STATUS = 'mes_qc_iqc_status', // MES 检验单状态
+  MES_ORDER_STATUS = 'mes_order_status', // MES 单据状态
   MES_QC_CHECK_RESULT = 'mes_qc_check_result', // MES 检测结果
   MES_QC_SOURCE_DOC_TYPE = 'mes_qc_source_doc_type', // MES 来源单据类型
   MES_IPQC_TYPE = 'mes_ipqc_type', // MES IPQC 检验类型
@@ -293,5 +293,5 @@ export enum DICT_TYPE {
   MES_PRO_ANDON_LEVEL = 'mes_pro_andon_level', // MES 安灯级别
   MES_RQC_TYPE = 'mes_rqc_type', // MES 退货检验类型
   MES_WM_ARRIVAL_NOTICE_STATUS = 'mes_wm_arrival_notice_status', // MES 到货通知单状态
-  MES_WM_ITEM_RECEIPT_STATUS = 'mes_wm_item_receipt_status', // MES 物料接收单状态
+  MES_WM_ITEM_RECEIPT_STATUS = 'mes_wm_item_receipt_status' // MES 物料接收单状态
 }

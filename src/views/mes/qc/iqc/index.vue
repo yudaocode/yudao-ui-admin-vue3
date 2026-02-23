@@ -152,7 +152,7 @@
       <el-table-column label="检测人员" align="center" prop="inspectorNickname" width="100" />
       <el-table-column label="单据状态" align="center" prop="status" width="90">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_QC_IQC_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_ORDER_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="180" fixed="right">
@@ -162,7 +162,7 @@
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:qc-iqc:update']"
-            v-if="scope.row.status === MesQcIqcStatusEnum.PREPARE"
+            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             编辑
           </el-button>
@@ -171,7 +171,7 @@
             type="success"
             @click="handleComplete(scope.row.id)"
             v-hasPermi="['mes:qc-iqc:update']"
-            v-if="scope.row.status === MesQcIqcStatusEnum.PREPARE"
+            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             完成
           </el-button>
@@ -180,7 +180,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-if="scope.row.status !== MesQcIqcStatusEnum.PREPARE"
+            v-if="scope.row.status !== MesOrderStatusEnum.DRAFT"
           >
             查看报表
           </el-button>
@@ -189,7 +189,7 @@
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:qc-iqc:delete']"
-            v-if="scope.row.status === MesQcIqcStatusEnum.PREPARE"
+            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             删除
           </el-button>
@@ -218,7 +218,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import { MesQcIqcStatusEnum } from '@/views/mes/utils/constants'
+import { MesOrderStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcIqc' })
 
