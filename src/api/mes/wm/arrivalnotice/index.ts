@@ -49,11 +49,6 @@ export const WmArrivalNoticeApi = {
     return await request.put({ url: '/mes/wm/arrival-notice/submit?id=' + id })
   },
 
-  // 审批到货通知单
-  approveArrivalNotice: async (id: number) => {
-    return await request.put({ url: '/mes/wm/arrival-notice/approve?id=' + id })
-  },
-
   // 导出到货通知单 Excel
   exportArrivalNotice: async (params: any) => {
     return await request.download({ url: '/mes/wm/arrival-notice/export-excel', params })

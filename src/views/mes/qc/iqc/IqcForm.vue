@@ -235,7 +235,6 @@ const formData = ref({
   templateId: undefined,
   sourceDocId: undefined,
   sourceDocType: undefined,
-  sourceDocCode: undefined,
   sourceLineId: undefined,
   vendorId: undefined,
   vendorBatch: undefined,
