@@ -8,6 +8,7 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row :gutter="16">
         <el-col :span="8">
@@ -143,43 +144,41 @@
       </el-row>
 
       <!-- 缺陷统计（只读） -->
-      <template v-if="formType === 'update' && formData.id">
-        <el-divider content-position="left">缺陷情况</el-divider>
-        <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="致命缺陷数">
-              <el-input :model-value="formData.criticalQuantity" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="严重缺陷数">
-              <el-input :model-value="formData.majorQuantity" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="轻微缺陷数">
-              <el-input :model-value="formData.minorQuantity" disabled />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="致命缺陷率">
-              <el-input :model-value="formData.criticalRate + '%'" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="严重缺陷率">
-              <el-input :model-value="formData.majorRate + '%'" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="轻微缺陷率">
-              <el-input :model-value="formData.minorRate + '%'" disabled />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </template>
+      <el-divider content-position="left">缺陷情况</el-divider>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="致命缺陷数">
+            <el-input :model-value="formData.criticalQuantity" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="严重缺陷数">
+            <el-input :model-value="formData.majorQuantity" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="轻微缺陷数">
+            <el-input :model-value="formData.minorQuantity" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="致命缺陷率">
+            <el-input :model-value="formData.criticalRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="严重缺陷率">
+            <el-input :model-value="formData.majorRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="轻微缺陷率">
+            <el-input :model-value="formData.minorRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
     <!-- 子表标签页（编辑模式下显示） -->
@@ -196,7 +195,9 @@
     </template>
 
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading"> 保 存 </el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
+        保 存
+      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -218,15 +219,21 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const activeTab = ref('line') // 当前激活的标签页
-
-/** 是否来自待检任务（有预填的来源单据信息） */
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增来料检验单',
+    update: '修改来料检验单',
+    detail: '查看来料检验单'
+  }
+  return titles[formType.value] || t('action.' + formType.value)
+}) // 弹窗标题，根据 formType 自动显示
+const isDetail = computed(() => formType.value === 'detail') // 表单是否为详情模式（只读）
 const isFromPendingTask = computed(
   () => formType.value === 'create' && formData.value.sourceDocId != null
-)
+) // 是否来自待检任务（有预填的来源单据信息）
 
 const formData = ref({
   id: undefined as number | undefined,
@@ -274,7 +281,6 @@ const generateCode = () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number, data?: QcIqcVO) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   activeTab.value = 'line'
   resetForm()
@@ -305,13 +311,15 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as QcIqcVO
     if (formType.value === 'create') {
-      await QcIqcApi.createIqc(data)
+      const res = await QcIqcApi.createIqc(data)
       message.success(t('common.createSuccess'))
+      // 新增成功后，切换到修改模式，设置 id
+      formData.value.id = res
+      formType.value = 'update'
     } else {
       await QcIqcApi.updateIqc(data)
       message.success(t('common.updateSuccess'))
     }
-    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {

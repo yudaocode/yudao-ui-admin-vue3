@@ -115,7 +115,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="来料检验单编号" align="center" prop="code" width="160" />
+      <el-table-column label="来料检验单编号" align="center" prop="code" width="160">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="来料检验单名称" align="center" prop="name" min-width="180" />
       <el-table-column label="供应商简称" align="center" prop="vendorNickname" width="120" />
       <el-table-column label="供应商批次号" align="center" prop="vendorBatch" width="130" />
