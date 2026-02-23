@@ -1,0 +1,156 @@
+<!-- MES 待检任务列表 -->
+<template>
+  <ContentWrap>
+    <!-- 搜索工作栏 -->
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="100px"
+    >
+      <el-form-item label="来源单据编号" prop="sourceDocCode">
+        <el-input
+          v-model="queryParams.sourceDocCode"
+          placeholder="请输入来源单据编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="产品物料" prop="itemId">
+        <MdItemSelect
+          v-model="queryParams.itemId"
+          placeholder="请选择产品物料"
+          clearable
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="检验类型" prop="qcType">
+        <el-select
+          v-model="queryParams.qcType"
+          placeholder="请选择检验类型"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+      </el-form-item>
+    </el-form>
+  </ContentWrap>
+
+  <!-- 列表 -->
+  <ContentWrap>
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" width="160" />
+      <el-table-column label="检验类型" align="center" prop="qcType" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_QC_TYPE" :value="scope.row.qcType" />
+        </template>
+      </el-table-column>
+      <el-table-column label="检验类型名称" align="center" prop="qcTypeName" width="120" />
+      <el-table-column label="物料编码" align="center" prop="itemCode" width="130" />
+      <el-table-column label="物料名称" align="center" prop="itemName" min-width="150" />
+      <el-table-column label="规格型号" align="center" prop="specification" width="130" />
+      <el-table-column label="待检数量" align="center" prop="quantityToCheck" width="100" />
+      <el-table-column label="单位" align="center" prop="unitName" width="80" />
+      <el-table-column label="操作" align="center" fixed="right" width="130">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="handleCreateIqc(scope.row)"
+            v-if="scope.row.qcType === MesQcTypeEnum.IQC"
+            v-hasPermi="['mes:qc-iqc:create']"
+          >
+            创建检验单
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </ContentWrap>
+
+  <!-- IQC 表单弹窗 -->
+  <IqcForm ref="iqcFormRef" @success="getList" />
+</template>
+
+<script setup lang="ts">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { QcPendingInspectApi, QcPendingInspectVO } from '@/api/mes/qc/pendinginspect'
+import { MesQcTypeEnum } from '@/views/mes/utils/constants'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import IqcForm from '@/views/mes/qc/iqc/IqcForm.vue'
+
+defineOptions({ name: 'MesQcPendingInspect' })
+
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref<QcPendingInspectVO[]>([]) // 列表的数据
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  sourceDocCode: undefined,
+  qcType: undefined,
+  itemId: undefined
+})
+const queryFormRef = ref() // 搜索的表单
+
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await QcPendingInspectApi.getPendingInspectPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** 创建 IQC 检验单 */
+const iqcFormRef = ref()
+const handleCreateIqc = (row: QcPendingInspectVO) => {
+  iqcFormRef.value.open('create', undefined, {
+    sourceDocId: row.sourceDocId,
+    sourceDocType: row.sourceDocType,
+    sourceLineId: row.sourceLineId,
+    vendorId: row.vendorId,
+    itemId: row.itemId,
+    receivedQuantity: row.quantityToCheck,
+    receiveDate: row.recordTime,
+    name: row.sourceDocCode + ' 来料检验单'
+  })
+}
+
+/** 初始化 **/
+onMounted(() => {
+  getList()
+})
+</script>

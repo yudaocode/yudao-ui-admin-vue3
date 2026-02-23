@@ -37,12 +37,22 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="产品物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择产品物料" class="!w-1/1" />
+            <MdItemSelect
+              v-model="formData.itemId"
+              placeholder="请选择产品物料"
+              class="!w-1/1"
+              :disabled="isFromPendingTask"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="供应商" prop="vendorId">
-            <MdVendorSelect v-model="formData.vendorId" placeholder="请选择供应商" class="!w-1/1" />
+            <MdVendorSelect
+              v-model="formData.vendorId"
+              placeholder="请选择供应商"
+              class="!w-1/1"
+              :disabled="isFromPendingTask"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -62,6 +72,7 @@
               :precision="2"
               placeholder="请输入"
               class="!w-1/1"
+              :disabled="isFromPendingTask"
             />
           </el-form-item>
         </el-col>
@@ -95,6 +106,7 @@
               value-format="YYYY-MM-DD HH:mm:ss"
               placeholder="请选择来料日期"
               class="!w-1/1"
+              :disabled="isFromPendingTask"
             />
           </el-form-item>
         </el-col>
@@ -228,6 +240,11 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const activeTab = ref('line') // 当前激活的标签页
 
+/** 是否来自待检任务（有预填的来源单据信息） */
+const isFromPendingTask = computed(
+  () => formType.value === 'create' && formData.value.sourceDocId != null
+)
+
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
@@ -274,7 +291,8 @@ const generateCode = () => {
 }
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+// TODO @AI：Partial 是不是可以不用？变量是不是可以叫 data；
+const open = async (type: string, id?: number, prefillData?: Partial<QcIqcVO>) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -288,6 +306,9 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else if (prefillData) {
+    // 预填模式：来自待检任务（pending inspect）
+    Object.assign(formData.value, prefillData)
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
