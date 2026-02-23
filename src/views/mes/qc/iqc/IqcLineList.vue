@@ -3,15 +3,14 @@
   <div>
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="检测指标编码" align="center" prop="indicatorCode" width="140" />
-      <el-table-column label="检测指标名称" align="center" prop="indicatorName" min-width="150" />
-      <el-table-column label="检测指标类型" align="center" prop="indicatorType" width="120">
+      <el-table-column label="检测项名称" align="center" prop="indicatorName" width="150" />
+      <el-table-column label="检测项类型" align="center" prop="indicatorType" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_INDICATOR_TYPE" :value="scope.row.indicatorType" />
         </template>
       </el-table-column>
       <el-table-column label="检测工具" align="center" prop="tool" width="120" />
-      <el-table-column label="检测方法" align="center" prop="checkMethod" min-width="180" />
+      <el-table-column label="检测要求" align="center" prop="checkMethod" min-width="180" />
       <el-table-column label="标准值" align="center" prop="standardValue" width="100" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="误差上限" align="center" prop="maxThreshold" width="100" />
@@ -19,6 +18,7 @@
       <el-table-column label="致命缺陷数" align="center" prop="criticalQuantity" width="100" />
       <el-table-column label="严重缺陷数" align="center" prop="majorQuantity" width="100" />
       <el-table-column label="轻微缺陷数" align="center" prop="minorQuantity" width="100" />
+      <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" width="100" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="openDefectDialog(scope.row)"> 缺陷列表 </el-button>
