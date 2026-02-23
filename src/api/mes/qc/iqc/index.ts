@@ -17,8 +17,6 @@ export interface QcIqcVO {
   itemName: string // 产品物料名称（关联查询）
   itemSpecification: string // 规格型号（关联查询）
   unitName: string // 单位名称（关联查询）
-  minCheckQuantity: number // 最低检测数
-  maxUnqualifiedQuantity: number // 最大不合格数
   receivedQuantity: number // 本次接收数量
   checkQuantity: number // 本次检测数量
   qualifiedQuantity: number // 合格品数量

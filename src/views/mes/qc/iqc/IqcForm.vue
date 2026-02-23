@@ -26,11 +26,6 @@
             <el-input v-model="formData.name" placeholder="请输入检验单名称" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <el-form-item label="质检方案" prop="templateId">
-            <QcTemplateSelect v-model="formData.templateId" class="!w-1/1" />
-          </el-form-item>
-        </el-col>
       </el-row>
 
       <el-divider content-position="left">物料与供应商</el-divider>
@@ -65,12 +60,12 @@
       <el-divider content-position="left">检测情况</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
-          <el-form-item label="接收数量" prop="receivedQuantity">
+          <el-form-item label="本次接收数量" prop="receivedQuantity">
             <el-input-number
               v-model="formData.receivedQuantity"
               :min="0"
               :precision="2"
-              placeholder="请输入"
+              placeholder="请输入本次接收数量"
               class="!w-1/1"
               :disabled="isFromPendingTask"
             />
@@ -117,16 +112,6 @@
               type="datetime"
               value-format="YYYY-MM-DD HH:mm:ss"
               placeholder="请选择检测日期"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-        <!-- TODO 【暂时不要删除】@芋艿：应该不用填写 -->
-        <el-col :span="8">
-          <el-form-item label="检测人员" prop="inspectorUserId">
-            <UserSelect
-              v-model="formData.inspectorUserId"
-              placeholder="请选择检测人员"
               class="!w-1/1"
             />
           </el-form-item>
@@ -223,8 +208,6 @@ import { generateRandomStr } from '@/utils'
 import { QcIqcApi, QcIqcVO } from '@/api/mes/qc/iqc'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import QcTemplateSelect from '@/views/mes/qc/template/components/QcTemplateSelect.vue'
 import IqcLineList from './IqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
 import { MesQcTypeEnum } from '@/views/mes/utils/constants'
@@ -249,23 +232,18 @@ const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
-  templateId: undefined,
   sourceDocId: undefined,
   sourceDocType: undefined,
   sourceLineId: undefined,
   vendorId: undefined,
   vendorBatch: undefined,
   itemId: undefined,
-  minCheckQuantity: undefined,
-  maxUnqualifiedQuantity: undefined,
   receivedQuantity: undefined,
-  checkQuantity: undefined,
   qualifiedQuantity: undefined,
   unqualifiedQuantity: undefined,
   checkResult: undefined,
   receiveDate: undefined,
   inspectDate: undefined,
-  inspectorUserId: undefined,
   remark: undefined,
   // 缺陷统计（只读）
   criticalRate: 0,
@@ -278,10 +256,13 @@ const formData = ref({
 const formRules = reactive({
   code: [{ required: true, message: '检验单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '检验单名称不能为空', trigger: 'blur' }],
-  templateId: [{ required: true, message: '检验模板不能为空', trigger: 'change' }],
   vendorId: [{ required: true, message: '供应商不能为空', trigger: 'change' }],
   itemId: [{ required: true, message: '产品物料不能为空', trigger: 'change' }],
-  receivedQuantity: [{ required: true, message: '接收数量不能为空', trigger: 'blur' }]
+  receivedQuantity: [{ required: true, message: '本次接收数量不能为空', trigger: 'blur' }],
+  qualifiedQuantity: [{ required: true, message: '合格品数量不能为空', trigger: 'blur' }],
+  unqualifiedQuantity: [{ required: true, message: '不合格品数量不能为空', trigger: 'blur' }],
+  receiveDate: [{ required: true, message: '来料日期不能为空', trigger: 'change' }],
+  inspectDate: [{ required: true, message: '检测日期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -291,8 +272,7 @@ const generateCode = () => {
 }
 
 /** 打开弹窗 */
-// TODO @AI：Partial 是不是可以不用？变量是不是可以叫 data；
-const open = async (type: string, id?: number, prefillData?: Partial<QcIqcVO>) => {
+const open = async (type: string, id?: number, data?: QcIqcVO) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -306,9 +286,9 @@ const open = async (type: string, id?: number, prefillData?: Partial<QcIqcVO>) =
     } finally {
       formLoading.value = false
     }
-  } else if (prefillData) {
+  } else if (data) {
     // 预填模式：来自待检任务（pending inspect）
-    Object.assign(formData.value, prefillData)
+    Object.assign(formData.value, data)
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -345,24 +325,18 @@ const resetForm = () => {
     id: undefined,
     code: undefined,
     name: undefined,
-    templateId: undefined,
     sourceDocId: undefined,
     sourceDocType: undefined,
-    sourceDocCode: undefined,
     sourceLineId: undefined,
     vendorId: undefined,
     vendorBatch: undefined,
     itemId: undefined,
-    minCheckQuantity: undefined,
-    maxUnqualifiedQuantity: undefined,
     receivedQuantity: undefined,
-    checkQuantity: undefined,
     qualifiedQuantity: undefined,
     unqualifiedQuantity: undefined,
     checkResult: undefined,
     receiveDate: undefined,
     inspectDate: undefined,
-    inspectorUserId: undefined,
     remark: undefined,
     criticalRate: 0,
     majorRate: 0,
