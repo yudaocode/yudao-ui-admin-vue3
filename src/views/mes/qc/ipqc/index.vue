@@ -41,15 +41,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：workstationId 前后端检索，都去掉这个字段； -->
-      <el-form-item label="工位" prop="workstationId">
-        <MdWorkstationSelect
-          v-model="queryParams.workstationId"
-          placeholder="请选择工位"
-          clearable
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="产品物料" prop="itemId">
         <MdItemSelect
           v-model="queryParams.itemId"
@@ -72,18 +63,6 @@
             :value="dict.value"
           />
         </el-select>
-      </el-form-item>
-      <!-- TODO @AI：inspectDate 前后端检索，都去掉这个字段； -->
-      <el-form-item label="检测日期" prop="inspectDate">
-        <el-date-picker
-          v-model="queryParams.inspectDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -112,8 +91,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：需要有超链接； -->
-      <el-table-column label="检验单编号" align="center" prop="code" width="160" />
+      <el-table-column label="检验单编号" align="center" prop="code" width="160">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="检验单名称" align="center" prop="name" min-width="180" />
       <el-table-column label="检验类型" align="center" prop="type" width="120">
         <template #default="scope">
@@ -196,7 +180,6 @@ import { QcIpqcApi, QcIpqcVO } from '@/api/mes/qc/ipqc'
 import IpqcForm from './IpqcForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
-import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import { MesOrderStatusEnum } from '@/views/mes/utils/constants'
 
@@ -214,10 +197,8 @@ const queryParams = reactive({
   code: undefined,
   type: undefined,
   workOrderId: undefined,
-  workstationId: undefined,
   itemId: undefined,
-  checkResult: undefined,
-  inspectDate: undefined
+  checkResult: undefined
 })
 const queryFormRef = ref()
 const exportLoading = ref(false)

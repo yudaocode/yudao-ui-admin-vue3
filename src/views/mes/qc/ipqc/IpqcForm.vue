@@ -8,6 +8,7 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row :gutter="16">
         <el-col :span="8">
@@ -64,76 +65,86 @@
 
       <el-divider content-position="left">检测情况</el-divider>
       <el-row :gutter="16">
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="检测数量" prop="checkQuantity">
             <el-input-number
               v-model="formData.checkQuantity"
               :min="0"
               :precision="2"
-              placeholder="请输入"
+              placeholder="请输入检测数量"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="合格品数量" prop="qualifiedQuantity">
             <el-input-number
               v-model="formData.qualifiedQuantity"
               :min="0"
               :precision="2"
-              placeholder="请输入"
+              placeholder="请输入合格品数量"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="不合格品数量" prop="unqualifiedQuantity">
             <el-input-number
               v-model="formData.unqualifiedQuantity"
               :min="0"
               :precision="2"
-              placeholder="请输入"
+              placeholder="请输入不合格品数量"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row :gutter="16">
-        <el-col :span="6">
+      <!-- 废品数量（当不合格数量大于 0 时显示） -->
+      <el-row :gutter="16" v-if="formData.unqualifiedQuantity && formData.unqualifiedQuantity > 0">
+        <el-col :span="8">
           <el-form-item label="工废数量" prop="laborScrapQuantity">
             <el-input-number
               v-model="formData.laborScrapQuantity"
               :min="0"
               :precision="2"
-              placeholder="请输入"
+              placeholder="请输入工废数量"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="料废数量" prop="materialScrapQuantity">
             <el-input-number
               v-model="formData.materialScrapQuantity"
               :min="0"
               :precision="2"
-              placeholder="请输入"
+              placeholder="请输入料废数量"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <el-form-item label="其他废品数量" prop="otherScrapQuantity">
             <el-input-number
               v-model="formData.otherScrapQuantity"
               :min="0"
               :precision="2"
-              placeholder="请输入"
+              placeholder="请输入其他废品数量"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="检测人员" prop="inspectorUserId">
+            <UserSelect
+              v-model="formData.inspectorUserId"
+              placeholder="请选择检测人员"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
         <el-col :span="8">
           <el-form-item label="检测日期" prop="inspectDate">
             <el-date-picker
@@ -141,15 +152,6 @@
               type="datetime"
               value-format="YYYY-MM-DD HH:mm:ss"
               placeholder="请选择检测日期"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="检测人员" prop="inspectorUserId">
-            <UserSelect
-              v-model="formData.inspectorUserId"
-              placeholder="请选择检测人员"
               class="!w-1/1"
             />
           </el-form-item>
@@ -220,8 +222,8 @@
       </template>
     </el-form>
 
-    <!-- 子表标签页（编辑模式下显示） -->
-    <template v-if="formType === 'update' && formData.id">
+    <!-- 子表标签页（编辑/详情模式下显示） -->
+    <template v-if="(formType === 'update' || formType === 'detail') && formData.id">
       <el-divider />
       <el-tabs v-model="activeTab">
         <el-tab-pane label="检验项" name="line">
@@ -234,12 +236,7 @@
     </template>
 
     <template #footer>
-      <el-button
-        @click="submitForm"
-        type="primary"
-        :disabled="formLoading"
-        v-if="formData.status === 0"
-      >
+      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
         保 存
       </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
@@ -264,10 +261,18 @@ const { t } = useI18n()
 const message = useMessage()
 
 const dialogVisible = ref(false)
-const dialogTitle = ref('')
 const formLoading = ref(false)
 const formType = ref('')
 const activeTab = ref('line')
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增过程检验单',
+    update: '修改过程检验单',
+    detail: '查看过程检验单'
+  }
+  return titles[formType.value] || t('action.' + formType.value)
+})
+const isDetail = computed(() => formType.value === 'detail')
 
 const formData = ref({
   id: undefined as number | undefined,
@@ -277,7 +282,6 @@ const formData = ref({
   templateId: undefined,
   sourceDocId: undefined,
   sourceDocType: undefined,
-  sourceDocCode: undefined,
   sourceLineId: undefined,
   workOrderId: undefined,
   taskId: undefined,
@@ -285,8 +289,8 @@ const formData = ref({
   processId: undefined,
   itemId: undefined,
   checkQuantity: undefined,
-  qualifiedQuantity: 0,
-  unqualifiedQuantity: 0,
+  qualifiedQuantity: undefined,
+  unqualifiedQuantity: undefined,
   laborScrapQuantity: 0,
   materialScrapQuantity: 0,
   otherScrapQuantity: 0,
@@ -294,7 +298,6 @@ const formData = ref({
   inspectDate: undefined,
   inspectorUserId: undefined,
   remark: undefined,
-  status: 0,
   // 缺陷统计（只读）
   criticalRate: 0,
   majorRate: 0,
@@ -303,24 +306,30 @@ const formData = ref({
   majorQuantity: 0,
   minorQuantity: 0
 })
-// TODO @AI：必填；前后端都加上；检验类型、不合格数；合格品数量；检测数量；检测日期；检测人员；
 const formRules = reactive({
   code: [{ required: true, message: '检验单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '检验单名称不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '检验类型不能为空', trigger: 'change' }],
   workOrderId: [{ required: true, message: '生产工单不能为空', trigger: 'change' }],
-  workstationId: [{ required: true, message: '工位不能为空', trigger: 'change' }]
+  workstationId: [{ required: true, message: '工位不能为空', trigger: 'change' }],
+  checkQuantity: [{ required: true, message: '检测数量不能为空', trigger: 'blur' }],
+  qualifiedQuantity: [{ required: true, message: '合格品数量不能为空', trigger: 'blur' }],
+  unqualifiedQuantity: [{ required: true, message: '不合格品数量不能为空', trigger: 'blur' }],
+  laborScrapQuantity: [{ required: true, message: '工废数量不能为空', trigger: 'blur' }],
+  materialScrapQuantity: [{ required: true, message: '料废数量不能为空', trigger: 'blur' }],
+  otherScrapQuantity: [{ required: true, message: '其他废品数量不能为空', trigger: 'blur' }],
+  inspectorUserId: [{ required: true, message: '检测人员不能为空', trigger: 'change' }],
+  inspectDate: [{ required: true, message: '检测日期不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   activeTab.value = 'line'
   resetForm()
-  // 修改时，设置数据
+  // 修改/详情时，设置数据
   if (id) {
     formLoading.value = true
     try {
@@ -365,7 +374,6 @@ const resetForm = () => {
     templateId: undefined,
     sourceDocId: undefined,
     sourceDocType: undefined,
-    sourceDocCode: undefined,
     sourceLineId: undefined,
     workOrderId: undefined,
     taskId: undefined,
@@ -373,8 +381,8 @@ const resetForm = () => {
     processId: undefined,
     itemId: undefined,
     checkQuantity: undefined,
-    qualifiedQuantity: 0,
-    unqualifiedQuantity: 0,
+    qualifiedQuantity: undefined,
+    unqualifiedQuantity: undefined,
     laborScrapQuantity: 0,
     materialScrapQuantity: 0,
     otherScrapQuantity: 0,
@@ -382,7 +390,6 @@ const resetForm = () => {
     inspectDate: undefined,
     inspectorUserId: undefined,
     remark: undefined,
-    status: 0,
     criticalRate: 0,
     majorRate: 0,
     minorRate: 0,

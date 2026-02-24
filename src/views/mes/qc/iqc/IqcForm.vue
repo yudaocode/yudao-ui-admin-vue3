@@ -95,14 +95,11 @@
       </el-row>
       <el-row :gutter="16">
         <el-col :span="8">
-          <el-form-item label="来料日期" prop="receiveDate">
-            <el-date-picker
-              v-model="formData.receiveDate"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              placeholder="请选择来料日期"
+          <el-form-item label="检测人员" prop="inspectorUserId">
+            <UserSelect
+              v-model="formData.inspectorUserId"
+              placeholder="请选择检测人员"
               class="!w-1/1"
-              :disabled="isFromPendingTask"
             />
           </el-form-item>
         </el-col>
@@ -248,9 +245,10 @@ const formData = ref({
   receivedQuantity: undefined,
   qualifiedQuantity: undefined,
   unqualifiedQuantity: undefined,
+  inspectorUserId: undefined,
+  inspectDate: undefined,
   checkResult: undefined,
   receiveDate: undefined,
-  inspectDate: undefined,
   remark: undefined,
   // 缺陷统计（只读）
   criticalRate: 0,
@@ -269,6 +267,7 @@ const formRules = reactive({
   qualifiedQuantity: [{ required: true, message: '合格品数量不能为空', trigger: 'blur' }],
   unqualifiedQuantity: [{ required: true, message: '不合格品数量不能为空', trigger: 'blur' }],
   receiveDate: [{ required: true, message: '来料日期不能为空', trigger: 'change' }],
+  inspectorUserId: [{ required: true, message: '检测人员不能为空', trigger: 'change' }],
   inspectDate: [{ required: true, message: '检测日期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
@@ -342,9 +341,10 @@ const resetForm = () => {
     receivedQuantity: undefined,
     qualifiedQuantity: undefined,
     unqualifiedQuantity: undefined,
+    inspectorUserId: undefined,
+    inspectDate: undefined,
     checkResult: undefined,
     receiveDate: undefined,
-    inspectDate: undefined,
     remark: undefined,
     criticalRate: 0,
     majorRate: 0,

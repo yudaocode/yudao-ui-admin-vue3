@@ -24,10 +24,10 @@ export interface QcIpqcVO {
   itemName: string // 产品物料名称（关联查询）
   itemSpecification: string // 规格型号（关联查询）
   unitName: string // 单位名称（关联查询）
-  checkQuantity: number // 检测数量
-  qualifiedQuantity: number // 合格品数量
-  unqualifiedQuantity: number // 不合格品数量
-  laborScrapQuantity: number // 工废数量
+  checkQuantity?: number // 检测数量
+  qualifiedQuantity?: number // 合格品数量
+  unqualifiedQuantity?: number // 不合格品数量
+  laborScrapQuantity?: number // 工废数量
   materialScrapQuantity: number // 料废数量
   otherScrapQuantity: number // 其他废品数量
   criticalRate: number // 致命缺陷率（%）
@@ -40,7 +40,7 @@ export interface QcIpqcVO {
   inspectDate: Date // 检测日期
   inspectorUserId: number // 检测人员用户 ID
   inspectorNickname: string // 检测人员昵称（关联查询）
-  status: number // 状态
+  status?: number // 状态
   remark: string // 备注
 }
 
