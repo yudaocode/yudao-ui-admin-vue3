@@ -41,6 +41,7 @@
           class="!w-240px"
         />
       </el-form-item>
+      <!-- TODO @AI：workstationId 前后端检索，都去掉这个字段； -->
       <el-form-item label="工位" prop="workstationId">
         <MdWorkstationSelect
           v-model="queryParams.workstationId"
@@ -57,10 +58,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="检测结论" prop="checkResult">
+      <el-form-item label="检测结果" prop="checkResult">
         <el-select
           v-model="queryParams.checkResult"
-          placeholder="请选择检测结论"
+          placeholder="请选择检测结果"
           clearable
           class="!w-240px"
         >
@@ -72,6 +73,7 @@
           />
         </el-select>
       </el-form-item>
+      <!-- TODO @AI：inspectDate 前后端检索，都去掉这个字段； -->
       <el-form-item label="检测日期" prop="inspectDate">
         <el-date-picker
           v-model="queryParams.inspectDate"
@@ -110,6 +112,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <!-- TODO @AI：需要有超链接； -->
       <el-table-column label="检验单编号" align="center" prop="code" width="160" />
       <el-table-column label="检验单名称" align="center" prop="name" min-width="180" />
       <el-table-column label="检验类型" align="center" prop="type" width="120">
@@ -117,13 +120,13 @@
           <dict-tag :type="DICT_TYPE.MES_IPQC_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="工单编号" align="center" prop="workOrderCode" width="140" />
+      <el-table-column label="生产工单编号" align="center" prop="workOrderCode" width="140" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="规格型号" align="center" prop="itemSpecification" width="130" />
       <el-table-column label="单位" align="center" prop="unitName" width="80" />
       <el-table-column label="检测数量" align="center" prop="checkQuantity" width="100" />
-      <el-table-column label="检测结论" align="center" prop="checkResult" width="100">
+      <el-table-column label="检测结果" align="center" prop="checkResult" width="110">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_QC_CHECK_RESULT" :value="scope.row.checkResult" />
         </template>
@@ -148,7 +151,7 @@
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:qc-ipqc:update']"
-            v-if="scope.row.status === MesQcIpqcStatusEnum.PREPARE"
+            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             编辑
           </el-button>
@@ -157,25 +160,16 @@
             type="success"
             @click="handleComplete(scope.row.id)"
             v-hasPermi="['mes:qc-ipqc:update']"
-            v-if="scope.row.status === MesQcIpqcStatusEnum.PREPARE"
+            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             完成
-          </el-button>
-          <!-- TODO @芋艿：查看报表，后续要搞下； -->
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-if="scope.row.status !== MesQcIpqcStatusEnum.PREPARE"
-          >
-            查看报表
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:qc-ipqc:delete']"
-            v-if="scope.row.status === MesQcIpqcStatusEnum.PREPARE"
+            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             删除
           </el-button>
@@ -204,7 +198,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import { MesQcIpqcStatusEnum } from '@/views/mes/utils/constants'
+import { MesOrderStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcIpqc' })
 

@@ -118,10 +118,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="检测结论" prop="checkResult">
+          <el-form-item label="检测结果" prop="checkResult">
             <el-select
               v-model="formData.checkResult"
-              placeholder="请选择检测结论"
+              placeholder="请选择检测结果"
               clearable
               class="!w-1/1"
             >

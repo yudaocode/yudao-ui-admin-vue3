@@ -3,9 +3,8 @@
   <div>
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="检测指标编码" align="center" prop="indicatorCode" width="140" />
-      <el-table-column label="检测指标名称" align="center" prop="indicatorName" min-width="150" />
-      <el-table-column label="检测指标类型" align="center" prop="indicatorType" width="120">
+      <el-table-column label="检测项名称" align="center" prop="indicatorName" min-width="150" />
+      <el-table-column label="检测项类型" align="center" prop="indicatorType" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_INDICATOR_TYPE" :value="scope.row.indicatorType" />
         </template>

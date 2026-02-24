@@ -26,6 +26,7 @@
             <el-input v-model="formData.name" placeholder="请输入检验单名称" />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：不用前端选择，后端自己计算出来！ -->
         <el-col :span="8">
           <el-form-item label="质检方案" prop="templateId">
             <QcTemplateSelect v-model="formData.templateId" class="!w-1/1" />
@@ -78,6 +79,7 @@
       </el-row>
       <el-row :gutter="16">
         <el-col :span="8">
+          <!-- TODO @AI：不需要 qualifiedQuantity 参数 -->
           <el-form-item label="合格品数量" prop="qualifiedQuantity">
             <el-input-number
               v-model="formData.qualifiedQuantity"
@@ -133,10 +135,10 @@
       </el-row>
       <el-row :gutter="16">
         <el-col :span="8">
-          <el-form-item label="检测结论" prop="checkResult">
+          <el-form-item label="检测结果" prop="checkResult">
             <el-select
               v-model="formData.checkResult"
-              placeholder="请选择检测结论"
+              placeholder="请选择检测结果"
               clearable
               class="!w-1/1"
             >
@@ -157,7 +159,7 @@
       </el-row>
 
       <!-- 缺陷统计（只读） -->
-      <template v-if="formType === 'update' && formData.id">
+      <template>
         <el-divider content-position="left">缺陷情况</el-divider>
         <el-row :gutter="16">
           <el-col :span="8">
@@ -270,6 +272,8 @@ const formData = ref({
   majorQuantity: 0,
   minorQuantity: 0
 })
+// TODO @AI：检测数量、发货数量；必填；
+// TODO @AI：发货日期、检测日期、检测人员；必填
 const formRules = reactive({
   code: [{ required: true, message: '检验单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '检验单名称不能为空', trigger: 'blur' }],

@@ -43,10 +43,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="检测结论" prop="checkResult">
+      <el-form-item label="检测结果" prop="checkResult">
         <el-select
           v-model="queryParams.checkResult"
-          placeholder="请选择检测结论"
+          placeholder="请选择检测结果"
           clearable
           class="!w-240px"
         >
@@ -58,6 +58,7 @@
           />
         </el-select>
       </el-form-item>
+      <!-- TODO @AI：前后端，去掉 outDate、inspectDate 的校验逻辑； -->
       <el-form-item label="发货日期" prop="outDate">
         <el-date-picker
           v-model="queryParams.outDate"
@@ -115,22 +116,24 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="出货检验单编号" align="center" prop="code" width="160" />
-      <el-table-column label="出货检验单名称" align="center" prop="name" min-width="180" />
-      <el-table-column label="客户简称" align="center" prop="clientNickname" width="120" />
+      <el-table-column label="检验单编号" align="center" prop="code" width="160" />
+      <el-table-column label="检验单名称" align="center" prop="name" min-width="180" />
+      <el-table-column label="客户名称" align="center" prop="clientNickname" width="120" />
       <el-table-column label="批次号" align="center" prop="batchCode" width="130" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
+      <el-table-column label="规格型号" align="center" prop="itemName" min-width="150" />
+      <el-table-column label="单位" align="center" prop="itemName" min-width="150" />
       <el-table-column label="发货数量" align="center" prop="outQuantity" width="100" />
       <el-table-column label="检测数量" align="center" prop="checkQuantity" width="100" />
       <el-table-column label="不合格数" align="center" prop="unqualifiedQuantity" width="100" />
-      <el-table-column label="检测结论" align="center" prop="checkResult" width="100">
+      <el-table-column label="检测结果" align="center" prop="checkResult" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_QC_CHECK_RESULT" :value="scope.row.checkResult" />
         </template>
       </el-table-column>
       <el-table-column
-        label="发货日期"
+        label="出货日期"
         align="center"
         prop="outDate"
         :formatter="dateFormatter2"
@@ -156,7 +159,7 @@
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:qc-oqc:update']"
-            v-if="scope.row.status === MesQcOqcStatusEnum.PREPARE"
+            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             编辑
           </el-button>
@@ -165,24 +168,16 @@
             type="success"
             @click="handleComplete(scope.row.id)"
             v-hasPermi="['mes:qc-oqc:update']"
-            v-if="scope.row.status === MesQcOqcStatusEnum.PREPARE"
+            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             完成
-          </el-button>
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-if="scope.row.status !== MesQcOqcStatusEnum.PREPARE"
-          >
-            查看报表
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:qc-oqc:delete']"
-            v-if="scope.row.status === MesQcOqcStatusEnum.PREPARE"
+            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             删除
           </el-button>
@@ -211,7 +206,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import { MesQcOqcStatusEnum } from '@/views/mes/utils/constants'
+import { MesOrderStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcOqc' })
 

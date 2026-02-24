@@ -23,11 +23,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="检验类型" prop="type">
-            <el-select
-              v-model="formData.type"
-              placeholder="请选择检验类型"
-              class="!w-1/1"
-            >
+            <el-select v-model="formData.type" placeholder="请选择检验类型" class="!w-1/1">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_IPQC_TYPE)"
                 :key="dict.value"
@@ -61,11 +57,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="生产任务" prop="taskId">
-            <ProTaskSelect
-              v-model="formData.taskId"
-              placeholder="请选择生产任务"
-              class="!w-1/1"
-            />
+            <ProTaskSelect v-model="formData.taskId" placeholder="请选择生产任务" class="!w-1/1" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -163,10 +155,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="检测结论" prop="checkResult">
+          <el-form-item label="检测结果" prop="checkResult">
             <el-select
               v-model="formData.checkResult"
-              placeholder="请选择检测结论"
+              placeholder="请选择检测结果"
               clearable
               class="!w-1/1"
             >
@@ -256,7 +248,7 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { QcIpqcApi, QcIpqcVO } from '@/api/mes/qc/ipqc'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
@@ -311,6 +303,7 @@ const formData = ref({
   majorQuantity: 0,
   minorQuantity: 0
 })
+// TODO @AI：必填；前后端都加上；检验类型、不合格数；合格品数量；检测数量；检测日期；检测人员；
 const formRules = reactive({
   code: [{ required: true, message: '检验单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '检验单名称不能为空', trigger: 'blur' }],
@@ -331,8 +324,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = await QcIpqcApi.getIpqc(id)
-      formData.value = data
+      formData.value = await QcIpqcApi.getIpqc(id)
     } finally {
       formLoading.value = false
     }

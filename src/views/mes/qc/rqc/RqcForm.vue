@@ -26,6 +26,7 @@
             <el-input v-model="formData.name" placeholder="请输入检验单名称" />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：不用前端选择，后端自己计算出来！ -->
         <el-col :span="8">
           <el-form-item label="质检方案" prop="templateId">
             <QcTemplateSelect v-model="formData.templateId" class="!w-1/1" />
@@ -36,6 +37,7 @@
       <el-divider content-position="left">物料信息</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
+          <!-- TODO @AI：应该有 3 个类型（字典要加下）：生产退料检验、委外退料检验、销售退货检验 -->
           <el-form-item label="检验类型" prop="rqcType">
             <el-select
               v-model="formData.rqcType"
@@ -52,8 +54,8 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <!-- TODO @芋艿：来源单据类型 -->
-        <!-- TODO @芋艿：来源单据编号 -->
+        <!-- TODO @芋艿：【暂时不处理】来源单据类型 -->
+        <!-- TODO @芋艿：【暂时不处理】来源单据编号 -->
         <el-col :span="8">
           <el-form-item label="产品物料" prop="itemId">
             <MdItemSelect v-model="formData.itemId" placeholder="请选择产品物料" class="!w-1/1" />
@@ -114,7 +116,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @芋艿：【不要删除】校验人员、和审核人的区别？ -->
         <el-col :span="8">
           <el-form-item label="检测人员" prop="inspectorUserId">
             <UserSelect
@@ -125,10 +126,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="检测结论" prop="checkResult">
+          <el-form-item label="检测结果" prop="checkResult">
             <el-select
               v-model="formData.checkResult"
-              placeholder="请选择检测结论"
+              placeholder="请选择检测结果"
               clearable
               class="!w-1/1"
             >
@@ -213,6 +214,7 @@ const formData = ref({
   inspectorUserId: undefined,
   remark: undefined
 })
+// TODO @AI：必填：检验类型、检测数量、合格品数量、不合格数量、检验人员；前后端，都加上校验；
 const formRules = reactive({
   code: [{ required: true, message: '检验单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '检验单名称不能为空', trigger: 'blur' }],

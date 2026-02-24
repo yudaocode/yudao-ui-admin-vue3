@@ -43,10 +43,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="检测结论" prop="checkResult">
+      <el-form-item label="检测结果" prop="checkResult">
         <el-select
           v-model="queryParams.checkResult"
-          placeholder="请选择检测结论"
+          placeholder="请选择检测结果"
           clearable
           class="!w-240px"
         >
@@ -130,7 +130,7 @@
       <el-table-column label="接收数量" align="center" prop="receivedQuantity" width="100" />
       <el-table-column label="检测数量" align="center" prop="checkQuantity" width="100" />
       <el-table-column label="不合格数" align="center" prop="unqualifiedQuantity" width="100" />
-      <el-table-column label="检测结论" align="center" prop="checkResult" width="100">
+      <el-table-column label="检测结果" align="center" prop="checkResult" width="110">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_QC_CHECK_RESULT" :value="scope.row.checkResult" />
         </template>
@@ -174,15 +174,6 @@
             v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
           >
             完成
-          </el-button>
-          <!-- TODO 【不要删除】 @芋艿：查看报表，后续要搞下； -->
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-if="scope.row.status !== MesOrderStatusEnum.DRAFT"
-          >
-            查看报表
           </el-button>
           <el-button
             link
