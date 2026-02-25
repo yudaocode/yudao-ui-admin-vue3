@@ -58,29 +58,6 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：前后端，去掉 outDate、inspectDate 的校验逻辑； -->
-      <el-form-item label="发货日期" prop="outDate">
-        <el-date-picker
-          v-model="queryParams.outDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="检测日期" prop="inspectDate">
-        <el-date-picker
-          v-model="queryParams.inspectDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="检测人员" prop="inspectorUserId">
         <UserSelect
           v-model="queryParams.inspectorUserId"
@@ -224,8 +201,6 @@ const queryParams = reactive({
   batchCode: undefined,
   itemId: undefined,
   checkResult: undefined,
-  outDate: undefined,
-  inspectDate: undefined,
   inspectorUserId: undefined
 })
 const queryFormRef = ref() // 搜索的表单

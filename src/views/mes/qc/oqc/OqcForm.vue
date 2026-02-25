@@ -26,12 +26,6 @@
             <el-input v-model="formData.name" placeholder="请输入检验单名称" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：不用前端选择，后端自己计算出来！ -->
-        <el-col :span="8">
-          <el-form-item label="质检方案" prop="templateId">
-            <QcTemplateSelect v-model="formData.templateId" class="!w-1/1" />
-          </el-form-item>
-        </el-col>
       </el-row>
 
       <el-divider content-position="left">物料与客户</el-divider>
@@ -61,7 +55,7 @@
               v-model="formData.outQuantity"
               :min="0"
               :precision="2"
-              placeholder="请输入"
+              placeholder="请输入发货数量"
               class="!w-1/1"
             />
           </el-form-item>
@@ -71,54 +65,29 @@
             <el-input-number
               v-model="formData.checkQuantity"
               :min="0"
-              placeholder="请输入"
+              placeholder="请输入检测数量"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="合格品数量" prop="qualifiedQuantity">
+            <el-input-number
+              v-model="formData.qualifiedQuantity"
+              :min="0"
+              placeholder="请输入合格品数量"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row :gutter="16">
-        <el-col :span="8">
-          <!-- TODO @AI：不需要 qualifiedQuantity 参数 -->
-          <el-form-item label="合格品数量" prop="qualifiedQuantity">
-            <el-input-number
-              v-model="formData.qualifiedQuantity"
-              :min="0"
-              placeholder="请输入"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
         <el-col :span="8">
           <el-form-item label="不合格品数量" prop="unqualifiedQuantity">
             <el-input-number
               v-model="formData.unqualifiedQuantity"
               :min="0"
-              placeholder="请输入"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row :gutter="16">
-        <el-col :span="8">
-          <el-form-item label="发货日期" prop="outDate">
-            <el-date-picker
-              v-model="formData.outDate"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              placeholder="请选择发货日期"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="检测日期" prop="inspectDate">
-            <el-date-picker
-              v-model="formData.inspectDate"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              placeholder="请选择检测日期"
+              placeholder="请输入不合格品数量"
               class="!w-1/1"
             />
           </el-form-item>
@@ -132,8 +101,30 @@
             />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="出货日期" prop="outDate">
+            <el-date-picker
+              v-model="formData.outDate"
+              type="datetime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              placeholder="请选择出货日期"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="检测日期" prop="inspectDate">
+            <el-date-picker
+              v-model="formData.inspectDate"
+              type="datetime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              placeholder="请选择检测日期"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
         <el-col :span="8">
           <el-form-item label="检测结果" prop="checkResult">
             <el-select
@@ -151,7 +142,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="16">
+        <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
           </el-form-item>
@@ -159,43 +150,41 @@
       </el-row>
 
       <!-- 缺陷统计（只读） -->
-      <template>
-        <el-divider content-position="left">缺陷情况</el-divider>
-        <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="致命缺陷数">
-              <el-input :model-value="formData.criticalQuantity" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="严重缺陷数">
-              <el-input :model-value="formData.majorQuantity" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="轻微缺陷数">
-              <el-input :model-value="formData.minorQuantity" disabled />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="致命缺陷率">
-              <el-input :model-value="formData.criticalRate + '%'" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="严重缺陷率">
-              <el-input :model-value="formData.majorRate + '%'" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="轻微缺陷率">
-              <el-input :model-value="formData.minorRate + '%'" disabled />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </template>
+      <el-divider content-position="left">缺陷情况</el-divider>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="致命缺陷数">
+            <el-input :model-value="formData.criticalQuantity" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="严重缺陷数">
+            <el-input :model-value="formData.majorQuantity" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="轻微缺陷数">
+            <el-input :model-value="formData.minorQuantity" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="致命缺陷率">
+            <el-input :model-value="formData.criticalRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="严重缺陷率">
+            <el-input :model-value="formData.majorRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="轻微缺陷率">
+            <el-input :model-value="formData.minorRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
     <!-- 子表标签页（编辑模式下显示） -->
@@ -225,7 +214,6 @@ import { QcOqcApi, QcOqcVO } from '@/api/mes/qc/oqc'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import QcTemplateSelect from '@/views/mes/qc/template/components/QcTemplateSelect.vue'
 import OqcLineList from './OqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
 import { MesQcTypeEnum } from '@/views/mes/utils/constants'
@@ -245,7 +233,6 @@ const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
-  templateId: undefined,
   sourceDocId: undefined,
   sourceDocType: undefined,
   sourceDocCode: undefined,
@@ -253,8 +240,6 @@ const formData = ref({
   clientId: undefined,
   batchCode: undefined,
   itemId: undefined,
-  minCheckQuantity: undefined,
-  maxUnqualifiedQuantity: undefined,
   outQuantity: undefined,
   checkQuantity: undefined,
   qualifiedQuantity: undefined,
@@ -272,15 +257,18 @@ const formData = ref({
   majorQuantity: 0,
   minorQuantity: 0
 })
-// TODO @AI：检测数量、发货数量；必填；
-// TODO @AI：发货日期、检测日期、检测人员；必填
 const formRules = reactive({
   code: [{ required: true, message: '检验单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '检验单名称不能为空', trigger: 'blur' }],
-  templateId: [{ required: true, message: '检验模板不能为空', trigger: 'change' }],
   clientId: [{ required: true, message: '客户不能为空', trigger: 'change' }],
   itemId: [{ required: true, message: '产品物料不能为空', trigger: 'change' }],
-  outQuantity: [{ required: true, message: '发货数量不能为空', trigger: 'blur' }]
+  outQuantity: [{ required: true, message: '发货数量不能为空', trigger: 'blur' }],
+  checkQuantity: [{ required: true, message: '检测数量不能为空', trigger: 'blur' }],
+  qualifiedQuantity: [{ required: true, message: '合格品数量不能为空', trigger: 'blur' }],
+  unqualifiedQuantity: [{ required: true, message: '不合格品数量不能为空', trigger: 'blur' }],
+  inspectorUserId: [{ required: true, message: '检测人员不能为空', trigger: 'change' }],
+  outDate: [{ required: true, message: '出货日期不能为空', trigger: 'change' }],
+  inspectDate: [{ required: true, message: '检测日期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -340,7 +328,6 @@ const resetForm = () => {
     id: undefined,
     code: undefined,
     name: undefined,
-    templateId: undefined,
     sourceDocId: undefined,
     sourceDocType: undefined,
     sourceDocCode: undefined,
@@ -348,8 +335,6 @@ const resetForm = () => {
     clientId: undefined,
     batchCode: undefined,
     itemId: undefined,
-    minCheckQuantity: undefined,
-    maxUnqualifiedQuantity: undefined,
     outQuantity: undefined,
     checkQuantity: undefined,
     qualifiedQuantity: undefined,
