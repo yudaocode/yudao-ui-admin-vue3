@@ -1,4 +1,5 @@
 <!-- MES 采购入库单行列表子组件 -->
+<!-- TODO @AI：每一行的摆放，优化下； -->
 <template>
   <div>
     <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
@@ -20,7 +21,10 @@
             :line-id="scope.row.id"
             :item-id="scope.row.itemId"
             :form-type="props.formType"
-            @edit-detail="(detailId: number) => openDetailForm('update', scope.row.id, scope.row.itemId, detailId)"
+            @edit-detail="
+              (detailId: number) =>
+                openDetailForm('update', scope.row.id, scope.row.itemId, detailId)
+            "
           />
         </template>
       </el-table-column>
@@ -29,6 +33,7 @@
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="入库数量" align="center" prop="receivedQuantity" width="100" />
+      <!-- TODO @AI：批次号；batchCode -->
       <el-table-column
         label="生产批号"
         align="center"
@@ -74,7 +79,9 @@
     >
       <el-row>
         <el-col :span="12">
+          <!-- TODO @AI：分成两种情况： 1）默认是物料选择；2）如果选择了“到货通知单”，则前面多一个选择“到货通知单”的 line；（然后物料不可选择 disabled 或者 readonly 都行）【这里也在 arrivalnotice 那，封装一个 select 组件，可维护性更好】-->
           <el-form-item label="物料" prop="itemId">
+            <!-- TODO @AI：换成物料组件的选择器；已经封装 -->
             <el-select
               v-model="formData.itemId"
               placeholder="请选择物料"
@@ -108,6 +115,7 @@
           <el-form-item label="生产批号" prop="productionBatchNumber">
             <el-input v-model="formData.productionBatchNumber" placeholder="请输入生产批号" />
           </el-form-item>
+          <!-- TODO @AI：批次号 -->
         </el-col>
       </el-row>
       <el-row>
@@ -149,7 +157,11 @@
   </Dialog>
 
   <!-- 上架明细添加/编辑弹窗 -->
-  <ItemReceiptDetailForm ref="detailFormRef" :receipt-id="props.receiptId" @success="onDetailFormSuccess" />
+  <ItemReceiptDetailForm
+    ref="detailFormRef"
+    :receipt-id="props.receiptId"
+    @success="onDetailFormSuccess"
+  />
 </template>
 
 <script setup lang="ts">
@@ -224,6 +236,7 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
+  // TODO @AI：如果选择了“到货通知单”，则前面多一个选择“到货通知单”的 line；必填；
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   receivedQuantity: [{ required: true, message: '入库数量不能为空', trigger: 'blur' }]
 })

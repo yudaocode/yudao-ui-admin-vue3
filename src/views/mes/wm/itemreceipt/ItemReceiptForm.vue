@@ -9,7 +9,7 @@
     >
       <el-row>
         <el-col :span="8">
-          <!-- 入库单编号：新增时可自动生成，其他模式不可生成 -->
+          <!-- TODO 芋艿【暂时不删除】：入库单编号：新增时可自动生成，其他模式不可生成 -->
           <el-form-item label="入库单编号" prop="code">
             <el-input
               v-model="formData.code"
@@ -54,6 +54,7 @@
             <WmWarehouseSelect v-model="formData.warehouseId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：放到“采购订单号”前面； -->
         <el-col :span="8">
           <el-form-item label="入库日期" prop="receiptDate">
             <el-date-picker
@@ -69,6 +70,7 @@
       </el-row>
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：放到“采购订单号”前面；-->
           <el-form-item label="到货通知单" prop="noticeId">
             <WmArrivalNoticeSelect
               v-model="formData.noticeId"
@@ -91,16 +93,17 @@
     </el-form>
     <!-- 非新建模式展示行项目信息（入库物料） -->
     <template v-if="formData.id">
-      <el-divider content-position="center">行项目信息</el-divider>
+      <el-divider content-position="center">物料信息</el-divider>
       <ItemReceiptLineList :receipt-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
-      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading"
-        >确 定</el-button
-      >
-      <el-button v-if="isShelving" @click="handleShelving" type="primary" :disabled="formLoading"
-        >执行上架</el-button
-      >
+      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
+      <!-- TODO @AI：上架，还是使用 isStock 类似的单词；其它地方都看着一起调整； -->
+      <el-button v-if="isShelving" @click="handleShelving" type="primary" :disabled="formLoading">
+        执行上架
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -144,6 +147,7 @@ const formRef = ref() // 表单 Ref
 const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isShelving = computed(() => formType.value === 'shelving') // 是否为上架模式
 const isHeaderReadonly = computed(() => ['shelving', 'detail'].includes(formType.value)) // 是否只读
+// TODO @AI：dialogTitleMap 的处理，参考 iqc form 的；通过 compute 计算；
 const dialogTitleMap: Record<string, string> = {
   create: '新增采购入库单',
   update: '编辑采购入库单',
@@ -194,6 +198,7 @@ const submitForm = async () => {
     if (formType.value === 'create') {
       await WmItemReceiptApi.createItemReceipt(data)
       message.success('新增成功')
+      // TODO @AI：参考 iqc form 处理下这里；
     } else {
       await WmItemReceiptApi.updateItemReceipt(data)
       message.success('修改成功')

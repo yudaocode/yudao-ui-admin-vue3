@@ -5,7 +5,7 @@
       <el-table-column label="仓库名称" align="center" prop="warehouseName" min-width="100" />
       <el-table-column label="库区名称" align="center" prop="locationName" min-width="100" />
       <el-table-column label="库位名称" align="center" prop="areaName" min-width="100" />
-      <el-table-column label="上架数量" align="center" prop="quantity" width="100" />
+      <el-table-column label="数量" align="center" prop="quantity" width="100" />
       <el-table-column
         v-if="props.formType === 'shelving'"
         label="操作"
@@ -18,6 +18,7 @@
             编辑
           </el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+          <!-- TODO @芋艿：【保留】标签打印 -->
         </template>
       </el-table-column>
     </el-table>
@@ -41,7 +42,6 @@ const emit = defineEmits(['edit-detail'])
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-// ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
 const list = ref<WmItemReceiptDetailVO[]>([]) // 明细列表
 
