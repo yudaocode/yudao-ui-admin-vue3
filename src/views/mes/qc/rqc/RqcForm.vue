@@ -8,6 +8,7 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row :gutter="16">
         <el-col :span="8">
@@ -26,21 +27,14 @@
             <el-input v-model="formData.name" placeholder="请输入检验单名称" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：不用前端选择，后端自己计算出来！ -->
-        <el-col :span="8">
-          <el-form-item label="质检方案" prop="templateId">
-            <QcTemplateSelect v-model="formData.templateId" class="!w-1/1" />
-          </el-form-item>
-        </el-col>
       </el-row>
 
       <el-divider content-position="left">物料信息</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
-          <!-- TODO @AI：应该有 3 个类型（字典要加下）：生产退料检验、委外退料检验、销售退货检验 -->
-          <el-form-item label="检验类型" prop="rqcType">
+          <el-form-item label="检验类型" prop="type">
             <el-select
-              v-model="formData.rqcType"
+              v-model="formData.type"
               placeholder="请选择检验类型"
               clearable
               class="!w-1/1"
@@ -58,7 +52,12 @@
         <!-- TODO @芋艿：【暂时不处理】来源单据编号 -->
         <el-col :span="8">
           <el-form-item label="产品物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择产品物料" class="!w-1/1" />
+            <MdItemSelect
+              v-model="formData.itemId"
+              placeholder="请选择产品物料"
+              class="!w-1/1"
+              :disabled="isFromPendingTask"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -150,10 +149,47 @@
           </el-form-item>
         </el-col>
       </el-row>
+
+      <!-- 缺陷统计（只读） -->
+      <el-divider content-position="left">缺陷情况</el-divider>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="致命缺陷数">
+            <el-input :model-value="formData.criticalQuantity" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="严重缺陷数">
+            <el-input :model-value="formData.majorQuantity" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="轻微缺陷数">
+            <el-input :model-value="formData.minorQuantity" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="致命缺陷率">
+            <el-input :model-value="formData.criticalRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="严重缺陷率">
+            <el-input :model-value="formData.majorRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="轻微缺陷率">
+            <el-input :model-value="formData.minorRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
-    <!-- 子表标签页（编辑模式下显示） -->
-    <template v-if="formType === 'update' && formData.id">
+    <!-- 子表标签页（编辑/详情模式下显示） -->
+    <template v-if="(formType === 'update' || formType === 'detail') && formData.id">
       <el-divider />
       <el-tabs v-model="activeTab">
         <el-tab-pane label="检验项" name="line">
@@ -166,7 +202,9 @@
     </template>
 
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading"> 保 存 </el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
+        保 存
+      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -178,7 +216,6 @@ import { generateRandomStr } from '@/utils'
 import { QcRqcApi, QcRqcVO } from '@/api/mes/qc/rqc'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import QcTemplateSelect from '@/views/mes/qc/template/components/QcTemplateSelect.vue'
 import RqcLineList from './RqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
 import { MesQcTypeEnum } from '@/views/mes/utils/constants'
@@ -189,10 +226,21 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const activeTab = ref('line') // 当前激活的标签页
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增退货检验单',
+    update: '修改退货检验单',
+    detail: '查看退货检验单'
+  }
+  return titles[formType.value] || t('action.' + formType.value)
+}) // 弹窗标题，根据 formType 自动显示
+const isDetail = computed(() => formType.value === 'detail') // 表单是否为详情模式（只读）
+const isFromPendingTask = computed(
+  () => formType.value === 'create' && formData.value.sourceDocId != null
+) // 是否来自待检任务（有预填的来源单据信息）
 
 const formData = ref({
   id: undefined as number | undefined,
@@ -201,9 +249,8 @@ const formData = ref({
   templateId: undefined,
   sourceDocId: undefined,
   sourceDocType: undefined,
-  sourceDocCode: undefined,
   sourceLineId: undefined,
-  rqcType: undefined,
+  type: undefined,
   itemId: undefined,
   batchCode: undefined,
   checkQuantity: undefined,
@@ -212,14 +259,25 @@ const formData = ref({
   checkResult: undefined,
   inspectDate: undefined,
   inspectorUserId: undefined,
-  remark: undefined
+  remark: undefined,
+  // 缺陷统计（只读）
+  criticalRate: 0,
+  majorRate: 0,
+  minorRate: 0,
+  criticalQuantity: 0,
+  majorQuantity: 0,
+  minorQuantity: 0
 })
-// TODO @AI：必填：检验类型、检测数量、合格品数量、不合格数量、检验人员；前后端，都加上校验；
 const formRules = reactive({
   code: [{ required: true, message: '检验单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '检验单名称不能为空', trigger: 'blur' }],
-  templateId: [{ required: true, message: '检验模板不能为空', trigger: 'change' }],
-  itemId: [{ required: true, message: '产品物料不能为空', trigger: 'change' }]
+  type: [{ required: true, message: '检验类型不能为空', trigger: 'change' }],
+  itemId: [{ required: true, message: '产品物料不能为空', trigger: 'change' }],
+  checkQuantity: [{ required: true, message: '检测数量不能为空', trigger: 'blur' }],
+  qualifiedQuantity: [{ required: true, message: '合格品数量不能为空', trigger: 'blur' }],
+  unqualifiedQuantity: [{ required: true, message: '不合格数量不能为空', trigger: 'blur' }],
+  inspectDate: [{ required: true, message: '检测日期不能为空', trigger: 'change' }],
+  inspectorUserId: [{ required: true, message: '检测人员不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -229,13 +287,12 @@ const generateCode = () => {
 }
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, data?: QcRqcVO) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   activeTab.value = 'line'
   resetForm()
-  // 修改时，设置数据
+  // 修改/详情时，设置数据
   if (id) {
     formLoading.value = true
     try {
@@ -243,6 +300,9 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else if (data) {
+    // 预填模式：来自待检任务（pending inspect）
+    Object.assign(formData.value, data)
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -259,13 +319,15 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as QcRqcVO
     if (formType.value === 'create') {
-      await QcRqcApi.createRqc(data)
+      const res = await QcRqcApi.createRqc(data)
       message.success(t('common.createSuccess'))
+      // 新增成功后，切换到修改模式，设置 id
+      formData.value.id = res
+      formType.value = 'update'
     } else {
       await QcRqcApi.updateRqc(data)
       message.success(t('common.updateSuccess'))
     }
-    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {
@@ -282,9 +344,8 @@ const resetForm = () => {
     templateId: undefined,
     sourceDocId: undefined,
     sourceDocType: undefined,
-    sourceDocCode: undefined,
     sourceLineId: undefined,
-    rqcType: undefined,
+    type: undefined,
     itemId: undefined,
     batchCode: undefined,
     checkQuantity: undefined,
@@ -293,7 +354,13 @@ const resetForm = () => {
     checkResult: undefined,
     inspectDate: undefined,
     inspectorUserId: undefined,
-    remark: undefined
+    remark: undefined,
+    criticalRate: 0,
+    majorRate: 0,
+    minorRate: 0,
+    criticalQuantity: 0,
+    majorQuantity: 0,
+    minorQuantity: 0
   }
   formRef.value?.resetFields()
 }

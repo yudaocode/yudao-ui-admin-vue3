@@ -18,25 +18,24 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：来源类型，应该是个字典（并且要按照 rqc 做下过滤） -->
+      <!--
+      TODO @芋艿：【暂时不用处理】等后面接完 source 业务！
       <el-form-item label="来源单据类型" prop="sourceDocType">
-        <el-input
+        <el-select
           v-model="queryParams.sourceDocType"
-          placeholder="请输入来源单据类型"
+          placeholder="请选择来源单据类型"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_SOURCE_DOC_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="来源单据编号" prop="sourceDocCode">
-        <el-input
-          v-model="queryParams.sourceDocCode"
-          placeholder="请输入来源单据编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
+      -->
       <el-form-item label="产品物料" prop="itemId">
         <MdItemSelect
           v-model="queryParams.itemId"
@@ -45,22 +44,14 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：批次号 batchCode -->
-      <!-- TODO @AI：不需要 rqcType 的检索，去掉去掉，前后端都去掉； -->
-      <el-form-item label="检验类型" prop="rqcType">
-        <el-select
-          v-model="queryParams.rqcType"
-          placeholder="请选择检验类型"
+      <el-form-item label="批次号" prop="batchCode">
+        <el-input
+          v-model="queryParams.batchCode"
+          placeholder="请输入批次号"
           clearable
+          @keyup.enter="handleQuery"
           class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_RQC_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        />
       </el-form-item>
       <el-form-item label="检测结果" prop="checkResult">
         <el-select
@@ -76,18 +67,6 @@
             :value="dict.value"
           />
         </el-select>
-      </el-form-item>
-      <!-- TODO @AI：去掉 inspectDate，前后端都去掉； -->
-      <el-form-item label="检测日期" prop="inspectDate">
-        <el-date-picker
-          v-model="queryParams.inspectDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
       </el-form-item>
       <el-form-item label="检测人员" prop="inspectorUserId">
         <UserSelect
@@ -124,10 +103,15 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="检验单编号" align="center" prop="code" width="160" />
+      <el-table-column label="检验单编号" align="center" prop="code" width="160">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="检验单名称" align="center" prop="name" min-width="180" />
       <el-table-column label="来源单据类型" align="center" prop="sourceDocType" width="120" />
-      <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" width="140" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="规格型号" align="center" prop="itemSpecification" width="130" />
@@ -219,11 +203,9 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   sourceDocType: undefined,
-  sourceDocCode: undefined,
   itemId: undefined,
-  rqcType: undefined,
+  batchCode: undefined,
   checkResult: undefined,
-  inspectDate: undefined,
   inspectorUserId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
