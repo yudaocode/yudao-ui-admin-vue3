@@ -34,28 +34,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="采购订单编号" prop="purchaseOrderCode">
-            <el-input
-              v-model="formData.purchaseOrderCode"
-              placeholder="请输入采购订单编号"
-              :disabled="isHeaderReadonly"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="供应商" prop="vendorId">
-            <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="仓库" prop="warehouseId">
-            <WmWarehouseSelect v-model="formData.warehouseId" :disabled="isHeaderReadonly" />
-          </el-form-item>
-        </el-col>
-        <!-- TODO @AI：放到“采购订单号”前面； -->
-        <el-col :span="8">
           <el-form-item label="入库日期" prop="receiptDate">
             <el-date-picker
               v-model="formData.receiptDate"
@@ -70,16 +48,23 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：放到“采购订单号”前面；-->
           <el-form-item label="到货通知单" prop="noticeId">
             <WmArrivalNoticeSelect
               v-model="formData.noticeId"
+              :status="MesWmArrivalNoticeStatusEnum.PENDING_RECEIPT"
               :disabled="isHeaderReadonly"
               @change="handleNoticeChange"
             />
           </el-form-item>
         </el-col>
-        <el-col :span="16">
+        <el-col :span="8">
+          <el-form-item label="供应商" prop="vendorId">
+            <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input
               v-model="formData.remark"
@@ -94,14 +79,17 @@
     <!-- 非新建模式展示行项目信息（入库物料） -->
     <template v-if="formData.id">
       <el-divider content-position="center">物料信息</el-divider>
-      <ItemReceiptLineList :receipt-id="formData.id" :form-type="formType" />
+      <ItemReceiptLineList
+        :receipt-id="formData.id"
+        :notice-id="formData.noticeId"
+        :form-type="formType"
+      />
     </template>
     <template #footer>
       <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
       </el-button>
-      <!-- TODO @AI：上架，还是使用 isStock 类似的单词；其它地方都看着一起调整； -->
-      <el-button v-if="isShelving" @click="handleShelving" type="primary" :disabled="formLoading">
+      <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
         执行上架
       </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -113,58 +101,56 @@
 import { generateRandomStr } from '@/utils'
 import { WmItemReceiptApi, WmItemReceiptVO } from '@/api/mes/wm/itemreceipt'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
-import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmArrivalNoticeSelect from '@/views/mes/wm/arrivalnotice/components/WmArrivalNoticeSelect.vue'
 import ItemReceiptLineList from './ItemReceiptLineList.vue'
+import { MesWmArrivalNoticeStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ItemReceiptForm' })
 
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
 const formType = ref<string>('create') // 表单的类型：create / update / shelving / detail
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
-  purchaseOrderCode: undefined,
   vendorId: undefined,
-  warehouseId: undefined,
-  locationId: undefined,
-  areaId: undefined,
   noticeId: undefined,
   iqcId: undefined,
   receiptDate: undefined,
   remark: undefined
 })
 const formRules = reactive({
-  code: [{ required: true, message: '入库单编号不能为空', trigger: 'blur' }]
+  code: [{ required: true, message: '入库单编号不能为空', trigger: 'blur' }],
+  receiptDate: [{ required: true, message: '入库日期不能为空', trigger: 'change' }],
+  vendorId: [{ required: true, message: '供应商不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
 const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isShelving = computed(() => formType.value === 'shelving') // 是否为上架模式
+const isStock = computed(() => formType.value === 'shelving') // 是否为上架模式
 const isHeaderReadonly = computed(() => ['shelving', 'detail'].includes(formType.value)) // 是否只读
-// TODO @AI：dialogTitleMap 的处理，参考 iqc form 的；通过 compute 计算；
-const dialogTitleMap: Record<string, string> = {
-  create: '新增采购入库单',
-  update: '编辑采购入库单',
-  shelving: '执行上架',
-  detail: '采购入库单详情'
-} // 弹窗标题映射
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增采购入库单',
+    update: '编辑采购入库单',
+    shelving: '执行上架',
+    detail: '采购入库单详情'
+  }
+  return titles[formType.value] || formType.value
+})
 
 /** 生成入库单编号 */
 const generateCode = () => {
   formData.value.code = 'IR' + generateRandomStr(10)
 }
 
-/** 到货通知单变化时，自动填充供应商和采购订单号 */
+/** 到货通知单变化时，自动填充供应商 */
 const handleNoticeChange = (notice: any) => {
   if (notice) {
     formData.value.vendorId = notice.vendorId
-    formData.value.purchaseOrderCode = notice.purchaseOrderCode
   }
 }
 
@@ -172,7 +158,6 @@ const handleNoticeChange = (notice: any) => {
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
-  dialogTitle.value = dialogTitleMap[type] || type
   resetForm()
   // 修改/上架/详情时，加载数据
   if (id) {
@@ -196,14 +181,14 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as WmItemReceiptVO
     if (formType.value === 'create') {
-      await WmItemReceiptApi.createItemReceipt(data)
+      const res = await WmItemReceiptApi.createItemReceipt(data)
       message.success('新增成功')
-      // TODO @AI：参考 iqc form 处理下这里；
+      formData.value.id = res
+      formType.value = 'update'
     } else {
       await WmItemReceiptApi.updateItemReceipt(data)
       message.success('修改成功')
     }
-    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {
@@ -211,12 +196,12 @@ const submitForm = async () => {
   }
 }
 
-/** 执行上架（shelving 模式） */
-const handleShelving = async () => {
+/** 执行上架 */
+const handleStock = async () => {
   try {
     await message.confirm('确认执行上架？')
     formLoading.value = true
-    await WmItemReceiptApi.shelvingItemReceipt(formData.value.id!)
+    await WmItemReceiptApi.stockItemReceipt(formData.value.id!)
     message.success('上架成功')
     dialogVisible.value = false
     emit('success')
@@ -232,11 +217,7 @@ const resetForm = () => {
     id: undefined,
     code: undefined,
     name: undefined,
-    purchaseOrderCode: undefined,
     vendorId: undefined,
-    warehouseId: undefined,
-    locationId: undefined,
-    areaId: undefined,
     noticeId: undefined,
     iqcId: undefined,
     receiptDate: undefined,

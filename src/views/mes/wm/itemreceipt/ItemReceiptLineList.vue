@@ -1,5 +1,4 @@
 <!-- MES 采购入库单行列表子组件 -->
-<!-- TODO @AI：每一行的摆放，优化下； -->
 <template>
   <div>
     <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
@@ -33,15 +32,9 @@
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="入库数量" align="center" prop="receivedQuantity" width="100" />
-      <!-- TODO @AI：批次号；batchCode -->
+      <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column
-        label="生产批号"
-        align="center"
-        prop="productionBatchNumber"
-        min-width="120"
-      />
-      <el-table-column
-        v-if="isUpdate || isShelving"
+        v-if="isUpdate || isStock"
         label="操作"
         align="center"
         width="160"
@@ -54,7 +47,7 @@
           <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
             删除
           </el-button>
-          <el-button v-if="isShelving" link type="success" @click="handleShelving(scope.row.id)">
+          <el-button v-if="isStock" link type="success" @click="handleShelving(scope.row.id)">
             上架
           </el-button>
         </template>
@@ -78,27 +71,26 @@
       v-loading="formLoading"
     >
       <el-row>
-        <el-col :span="12">
-          <!-- TODO @AI：分成两种情况： 1）默认是物料选择；2）如果选择了“到货通知单”，则前面多一个选择“到货通知单”的 line；（然后物料不可选择 disabled 或者 readonly 都行）【这里也在 arrivalnotice 那，封装一个 select 组件，可维护性更好】-->
-          <el-form-item label="物料" prop="itemId">
-            <!-- TODO @AI：换成物料组件的选择器；已经封装 -->
-            <el-select
-              v-model="formData.itemId"
-              placeholder="请选择物料"
-              filterable
-              clearable
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="item in itemList"
-                :key="item.id"
-                :label="`${item.code} - ${item.name}`"
-                :value="item.id"
-              />
-            </el-select>
+        <el-col :span="8" v-if="hasNoticeId">
+          <el-form-item label="到货通知单行" prop="arrivalNoticeLineId">
+            <WmArrivalNoticeLineSelect
+              v-model="formData.arrivalNoticeLineId"
+              :notice-id="props.noticeId"
+              @change="handleNoticeLineChange"
+            />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
+          <el-form-item label="物料" prop="itemId">
+            <MdItemSelect
+              v-model="formData.itemId"
+              placeholder="请选择物料"
+              class="!w-1/1"
+              :disabled="!!formData.arrivalNoticeLineId"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="入库数量" prop="receivedQuantity">
             <el-input-number
               v-model="formData.receivedQuantity"
@@ -111,21 +103,23 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="生产批号" prop="productionBatchNumber">
             <el-input v-model="formData.productionBatchNumber" placeholder="请输入生产批号" />
           </el-form-item>
-          <!-- TODO @AI：批次号 -->
         </el-col>
-      </el-row>
-      <el-row>
+        <el-col :span="8">
+          <el-form-item label="批次编码" prop="batchCode">
+            <el-input v-model="formData.batchCode" placeholder="请输入批次编码" />
+          </el-form-item>
+        </el-col>
         <el-col :span="8">
           <el-form-item label="生产日期" prop="productionDate">
             <el-date-picker
               v-model="formData.productionDate"
               type="date"
               value-format="x"
-              placeholder="请选择"
+              placeholder="请选择生产日期"
               class="!w-1/1"
             />
           </el-form-item>
@@ -136,7 +130,7 @@
               v-model="formData.expireDate"
               type="date"
               value-format="x"
-              placeholder="请选择"
+              placeholder="请选择有效期"
               class="!w-1/1"
             />
           </el-form-item>
@@ -166,7 +160,8 @@
 
 <script setup lang="ts">
 import { WmItemReceiptLineApi, WmItemReceiptLineVO } from '@/api/mes/wm/itemreceipt/line'
-import { MdItemApi } from '@/api/mes/md/item'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import WmArrivalNoticeLineSelect from '@/views/mes/wm/arrivalnotice/components/WmArrivalNoticeLineSelect.vue'
 import ItemReceiptDetailList from './ItemReceiptDetailList.vue'
 import ItemReceiptDetailForm from './ItemReceiptDetailForm.vue'
 
@@ -174,6 +169,7 @@ defineOptions({ name: 'ItemReceiptLineList' })
 
 const props = defineProps<{
   receiptId: number
+  noticeId?: number
   formType: string
 }>()
 
@@ -181,7 +177,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
-const isShelving = computed(() => props.formType === 'shelving') // 是否为上架模式
+const isStock = computed(() => props.formType === 'shelving') // 是否为上架模式
 
 // ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
@@ -221,26 +217,34 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
 const lineFormType = ref('') // 行表单的类型
-const itemList = ref<any[]>([]) // 物料列表
+const hasNoticeId = computed(() => !!props.noticeId) // 是否有到货通知单
 const formData = ref({
   id: undefined,
   receiptId: undefined as number | undefined,
+  arrivalNoticeLineId: undefined,
   itemId: undefined,
   receivedQuantity: undefined,
-  locationId: undefined,
-  areaId: undefined,
   batchId: undefined,
+  batchCode: undefined,
   productionDate: undefined,
   expireDate: undefined,
   productionBatchNumber: undefined,
   remark: undefined
 })
 const formRules = reactive({
-  // TODO @AI：如果选择了“到货通知单”，则前面多一个选择“到货通知单”的 line；必填；
+  arrivalNoticeLineId: [{ required: true, message: '到货通知单行不能为空', trigger: 'change' }],
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   receivedQuantity: [{ required: true, message: '入库数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+
+/** 到货通知单行变化时，自动填充物料信息 */
+const handleNoticeLineChange = (line: any) => {
+  if (line) {
+    formData.value.itemId = line.itemId
+    formData.value.receivedQuantity = line.arrivalQuantity
+  }
+}
 
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
@@ -248,8 +252,6 @@ const openForm = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   lineFormType.value = type
   resetForm()
-  // 加载物料列表
-  itemList.value = await MdItemApi.getItemSimpleList()
   if (id) {
     formLoading.value = true
     try {
@@ -285,11 +287,11 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     receiptId: undefined,
+    arrivalNoticeLineId: undefined,
     itemId: undefined,
     receivedQuantity: undefined,
-    locationId: undefined,
-    areaId: undefined,
     batchId: undefined,
+    batchCode: undefined,
     productionDate: undefined,
     expireDate: undefined,
     productionBatchNumber: undefined,

@@ -4,7 +4,7 @@ import request from '@/config/axios'
 export interface WmItemReceiptLineVO {
   id: number
   receiptId: number
-  noticeLineId: number
+  arrivalNoticeLineId: number
   itemId: number
   itemCode: string
   itemName: string

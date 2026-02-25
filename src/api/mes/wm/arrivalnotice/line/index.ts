@@ -43,5 +43,12 @@ export const WmArrivalNoticeLineApi = {
   // 删除到货通知单行
   deleteArrivalNoticeLine: async (id: number) => {
     return await request.delete({ url: '/mes/wm/arrival-notice-line/delete?id=' + id })
+  },
+
+  // 查询到货通知单行列表（按通知单编号）
+  getArrivalNoticeLineListByNoticeId: async (noticeId: number) => {
+    return await request.get({
+      url: '/mes/wm/arrival-notice-line/list-by-notice-id?noticeId=' + noticeId
+    })
   }
 }

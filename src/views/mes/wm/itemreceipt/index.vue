@@ -25,15 +25,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="采购订单编号" prop="purchaseOrderCode">
-        <el-input
-          v-model="queryParams.purchaseOrderCode"
-          placeholder="请输入采购订单编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="供应商" prop="vendorId">
         <el-select
           v-model="queryParams.vendorId"
@@ -59,21 +50,6 @@
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
         />
-      </el-form-item>
-      <el-form-item label="单据状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择单据状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_ITEM_RECEIPT_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -103,12 +79,6 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="入库单编号" align="center" prop="code" min-width="160" />
       <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
-      <el-table-column
-        label="采购订单编号"
-        align="center"
-        prop="purchaseOrderCode"
-        min-width="140"
-      />
       <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="120" />
       <el-table-column
         label="入库日期"
@@ -122,13 +92,6 @@
           <dict-tag :type="DICT_TYPE.MES_WM_ITEM_RECEIPT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
           <!-- 草稿：编辑、提交、删除 -->
@@ -179,23 +142,20 @@
           >
             执行入库
           </el-button>
-          <!-- TODO DONE @AI：确认只有待上架和待入库状态可以取消 -->
           <el-button
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
             v-hasPermi="['mes:wm-item-receipt:update']"
-            v-if="[MesWmItemReceiptStatusEnum.APPROVING, MesWmItemReceiptStatusEnum.APPROVED].includes(scope.row.status)"
+            v-if="
+              [MesWmItemReceiptStatusEnum.APPROVING, MesWmItemReceiptStatusEnum.APPROVED].includes(
+                scope.row.status
+              )
+            "
           >
             取消
           </el-button>
-          <el-button
-            link
-            type="info"
-            @click="openForm('detail', scope.row.id)"
-          >
-            详情
-          </el-button>
+          <el-button link type="info" @click="openForm('detail', scope.row.id)"> 详情 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -234,10 +194,8 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
-  purchaseOrderCode: undefined,
   vendorId: undefined,
-  receiptDate: undefined,
-  status: undefined
+  receiptDate: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 

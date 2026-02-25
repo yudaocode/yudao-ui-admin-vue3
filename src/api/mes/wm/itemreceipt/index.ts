@@ -57,8 +57,8 @@ export const WmItemReceiptApi = {
   },
 
   // 执行上架
-  shelvingItemReceipt: async (id: number) => {
-    return await request.put({ url: '/mes/wm/item-receipt/shelving?id=' + id })
+  stockItemReceipt: async (id: number) => {
+    return await request.put({ url: '/mes/wm/item-receipt/stock?id=' + id })
   },
 
   // 执行入库
