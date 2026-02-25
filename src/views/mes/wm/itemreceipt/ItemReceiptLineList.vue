@@ -249,7 +249,7 @@ const handleNoticeLineChange = (line: any) => {
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
+  dialogTitle.value = type === 'create' ? '添加物料入库单行' : '修改物料入库单行'
   lineFormType.value = type
   resetForm()
   if (id) {

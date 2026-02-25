@@ -224,7 +224,14 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '添加出货检验单',
+    update: '修改出货检验单',
+    detail: '查看出货检验单信息'
+  }
+  return titles[formType.value] || formType.value
+}) // 弹窗标题，根据 formType 自动显示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const activeTab = ref('line') // 当前激活的标签页
@@ -280,7 +287,6 @@ const generateCode = () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   activeTab.value = 'line'
   resetForm()

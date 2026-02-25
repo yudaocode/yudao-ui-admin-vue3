@@ -129,6 +129,7 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 
+// TODO @AI：formType 还是使用 stock，而不是 shelving；
 const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isStock = computed(() => formType.value === 'shelving') // 是否为上架模式
 const isHeaderReadonly = computed(() => ['shelving', 'detail'].includes(formType.value)) // 是否只读
