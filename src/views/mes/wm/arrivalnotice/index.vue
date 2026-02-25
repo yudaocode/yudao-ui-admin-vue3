@@ -25,6 +25,7 @@
           class="!w-240px"
         />
       </el-form-item>
+      <!-- TODO @芋艿：【待确认，先忽略】这里的字段映射 -->
       <el-form-item label="采购订单编号" prop="purchaseOrderCode">
         <el-input
           v-model="queryParams.purchaseOrderCode"
@@ -103,9 +104,9 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="通知单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
-          <el-button link type="primary" @click="openLine(scope.row.id)">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
             {{ scope.row.code }}
-          </el-button>
+          </el-link>
         </template>
       </el-table-column>
       <el-table-column label="通知单名称" align="center" prop="name" min-width="150" />
@@ -116,6 +117,8 @@
         min-width="140"
       />
       <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="120" />
+      <el-table-column label="联系人" align="center" prop="contactName" min-width="100" />
+      <el-table-column label="联系方式" align="center" prop="contactTelephone" min-width="120" />
       <el-table-column
         label="到货日期"
         align="center"
@@ -123,20 +126,11 @@
         :formatter="dateFormatter2"
         width="180px"
       />
-      <el-table-column label="联系人" align="center" prop="contactName" min-width="100" />
-      <el-table-column label="联系方式" align="center" prop="contactTelephone" min-width="120" />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_ARRIVAL_NOTICE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
       <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
           <el-button
@@ -181,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
+import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmArrivalNoticeApi, WmArrivalNoticeVO } from '@/api/mes/wm/arrivalnotice'
@@ -193,7 +187,6 @@ defineOptions({ name: 'MesWmArrivalNotice' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const router = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const list = ref<WmArrivalNoticeVO[]>([]) // 列表的数据
@@ -236,18 +229,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 新增/修改 */
+/** 新增/修改/详情 */
 const formRef = ref() // 表单弹窗
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 打开明细行 */
-const openLine = (noticeId: number) => {
-  router.push({
-    name: 'MesWmArrivalNoticeLine',
-    query: { noticeId: String(noticeId) }
-  })
 }
 
 /** 提交 */

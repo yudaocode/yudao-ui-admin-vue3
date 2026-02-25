@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="110px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
@@ -33,19 +34,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="供应商" prop="vendorId">
-            <el-select
-              v-model="formData.vendorId"
-              placeholder="请选择供应商"
-              clearable
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="vendor in vendorList"
-                :key="vendor.id"
-                :label="vendor.name"
-                :value="vendor.id"
-              />
-            </el-select>
+            <MdVendorSelect v-model="formData.vendorId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -81,12 +70,14 @@
       </el-row>
     </el-form>
     <!-- 编辑时展示物料信息 -->
-    <template v-if="formData.id">
+    <template v-if="formType === 'update' && formData.id">
       <el-divider content-position="center">物料信息</el-divider>
       <ArrivalNoticeLineList :notice-id="formData.id" />
     </template>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -95,8 +86,8 @@
 <script setup lang="ts">
 import { generateRandomStr } from '@/utils'
 import { WmArrivalNoticeApi, WmArrivalNoticeVO } from '@/api/mes/wm/arrivalnotice'
-import { MdVendorApi } from '@/api/mes/md/vendor'
 import ArrivalNoticeLineList from './ArrivalNoticeLineList.vue'
+import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 
 defineOptions({ name: 'ArrivalNoticeForm' })
 
@@ -104,10 +95,17 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const vendorList = ref<any[]>([]) // 供应商列表
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增到货通知单',
+    update: '修改到货通知单',
+    detail: '查看到货通知单'
+  }
+  return titles[formType.value] || t('action.' + formType.value)
+})
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -121,6 +119,7 @@ const formData = ref({
 })
 const formRules = reactive({
   code: [{ required: true, message: '通知单编号不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '通知单名称不能为空', trigger: 'blur' }],
   vendorId: [{ required: true, message: '请选择供应商', trigger: 'change' }],
   arrivalDate: [{ required: true, message: '请选择到货日期', trigger: 'change' }]
 })
@@ -134,10 +133,9 @@ const generateCode = () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  vendorList.value = await MdVendorApi.getVendorSimpleList()
+  // DONE @AI：已改用 MdVendorSelect 组件，该组件会自动加载供应商列表
   if (id) {
     formLoading.value = true
     try {
@@ -157,14 +155,17 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as WmArrivalNoticeVO
     if (formType.value === 'create') {
-      await WmArrivalNoticeApi.createArrivalNotice(data)
+      const res = await WmArrivalNoticeApi.createArrivalNotice(data)
       message.success(t('common.createSuccess'))
+      // 新增成功后，切换到修改模式，设置 id
+      formData.value.id = res
+      formType.value = 'update'
     } else {
       await WmArrivalNoticeApi.updateArrivalNotice(data)
       message.success(t('common.updateSuccess'))
+      dialogVisible.value = false
+      emit('success')
     }
-    dialogVisible.value = false
-    emit('success')
   } finally {
     formLoading.value = false
   }

@@ -16,7 +16,6 @@
         </template>
       </el-table-column>
       <el-table-column label="合格数量" align="center" prop="qualifiedQuantity" width="100" />
-      <!-- TODO @芋艿【不要删除】：后续需要怎么弄 -->
       <el-table-column label="检验单号" align="center" prop="iqcCode" min-width="140" />
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
       <el-table-column label="操作" align="center" width="120">
@@ -67,25 +66,15 @@
             <el-input-number
               v-model="formData.arrivalQuantity"
               :precision="2"
-              :min="0"
+              :min="0.01"
               controls-position="right"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
       </el-row>
+      <!-- DONE @AI：已移除合格数量字段，该字段由 IQC 回调自动设置 -->
       <el-row>
-        <el-col :span="12">
-          <el-form-item label="合格数量" prop="qualifiedQuantity">
-            <el-input-number
-              v-model="formData.qualifiedQuantity"
-              :precision="2"
-              :min="0"
-              controls-position="right"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
         <el-col :span="12">
           <el-form-item label="是否检验" prop="iqcCheckFlag">
             <el-switch v-model="formData.iqcCheckFlag" />
@@ -165,13 +154,16 @@ const formData = ref({
   noticeId: undefined as number | undefined,
   itemId: undefined,
   arrivalQuantity: undefined,
-  qualifiedQuantity: undefined,
   iqcCheckFlag: false,
   remark: undefined
 })
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
-  arrivalQuantity: [{ required: true, message: '到货数量不能为空', trigger: 'blur' }]
+  arrivalQuantity: [
+    { required: true, message: '到货数量不能为空', trigger: 'blur' },
+    { type: 'number', min: 0.01, message: '到货数量必须大于0', trigger: 'blur' }
+  ],
+  iqcCheckFlag: [{ required: true, message: '是否检验不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -219,7 +211,6 @@ const resetForm = () => {
     noticeId: undefined,
     itemId: undefined,
     arrivalQuantity: undefined,
-    qualifiedQuantity: undefined,
     iqcCheckFlag: false,
     remark: undefined
   }
