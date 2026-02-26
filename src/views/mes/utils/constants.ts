@@ -147,17 +147,24 @@ export const MesQcTypeEnum = {
   RQC: 4   // 退货检验
 }
 
-/** MES 单据状态枚举 */
-export const MesOrderStatusEnum = {
-  DRAFT: 0,      // 草稿
-  CONFIRMED: 1,  // 已确认
-  APPROVING: 2,  // 审批中
-  APPROVED: 3,   // 已审批
-  FINISHED: 4,   // 已完成
-  CANCELLED: 5   // 已取消
+/** MES 单据状态常量 */
+export const MesOrderStatusConstants = {
+  DRAFT: 0,
+  CONFIRMED: 1,
+  APPROVING: 2,
+  APPROVED: 3,
+  FINISHED: 4,
+  CANCELLED: 5
+} as const
+
+/** MES 质检单状态枚举 */
+export const MesQcStatusEnum = {
+  DRAFT: MesOrderStatusConstants.DRAFT,
+  FINISHED: MesOrderStatusConstants.FINISHED
 }
 
 /** MES 生产报工状态枚举 */
+// TODO @芋艿：【晚点弄】需要对其 MesOrderStatusConstants
 export const MesProFeedbackStatusEnum = {
   PREPARE: 0,   // 草稿
   APPROVING: 1, // 审批中
@@ -187,19 +194,19 @@ export const MesProFeedbackTypeEnum = {
 
 /** MES 到货通知单状态枚举 */
 export const MesWmArrivalNoticeStatusEnum = {
-  PREPARE: 0,        // 草稿
-  PENDING_QC: 1,     // 待质检
-  PENDING_RECEIPT: 2, // 待入库
-  FINISHED: 3         // 已完成
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  PENDING_QC: MesOrderStatusConstants.APPROVING,
+  PENDING_RECEIPT: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED
 }
 
 /** MES 采购入库单状态枚举 */
 export const MesWmItemReceiptStatusEnum = {
-  PREPARE: 0,    // 草稿
-  APPROVING: 1,  // 待上架
-  APPROVED: 2,   // 待入库
-  FINISHED: 3,   // 已完成
-  CANCELED: 4    // 已取消
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  APPROVING: MesOrderStatusConstants.APPROVING,
+  APPROVED: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED,
+  CANCELED: MesOrderStatusConstants.CANCELLED
 }
 
 /** 获取物料/产品标识的标签 */
