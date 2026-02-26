@@ -67,17 +67,7 @@ export const WmProductionIssueApi = {
     return await request.delete({ url: '/mes/wm/production-issue/delete?id=' + id })
   },
 
-  // 审批领料出库单
-  approveIssue: async (id: number) => {
-    return await request.put({ url: '/mes/wm/production-issue/approve?id=' + id })
-  },
-
-  // 反审批领料出库单
-  unapproveIssue: async (id: number) => {
-    return await request.put({ url: '/mes/wm/production-issue/unapprove?id=' + id })
-  },
-
-  // 完成领料出库单
+  // 完成领料出库单（执行出库）
   finishIssue: async (id: number) => {
     return await request.put({ url: '/mes/wm/production-issue/finish?id=' + id })
   },

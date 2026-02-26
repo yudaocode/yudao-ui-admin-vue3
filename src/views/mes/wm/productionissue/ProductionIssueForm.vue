@@ -1,5 +1,5 @@
-<!-- TODO @AI：一行 3 个； -->
-<!-- TODO @AI：领料单编号（必填）、领料单名称（必填）、需求时间（必填）、生产工单（必填）、工作站 -->
+<!-- 表单布局：一行 3 个字段 -->
+<!-- 必填字段：领料单编号（必填）、领料单名称（必填）、需求时间（必填）、生产工单（必填）、工作站 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="1200px">
     <el-form
@@ -10,44 +10,17 @@
       v-loading="formLoading"
     >
       <el-row :gutter="20">
-        <el-col :span="12">
-          <!-- TODO @AI：领料单编号，字段，生成； -->
+        <el-col :span="8">
+          <el-form-item label="领料单编号" prop="code">
+            <el-input v-model="formData.code" placeholder="自动生成" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="领料单名称" prop="name">
             <el-input v-model="formData.name" placeholder="请输入领料单名称" :disabled="isDetail" />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
-          <el-form-item label="工单编号" prop="workorderId">
-            <el-input
-              v-model="formData.workorderCode"
-              placeholder="请选择工单"
-              :disabled="isDetail"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="工作站" prop="workstationId">
-            <el-input
-              v-model="formData.workstationCode"
-              placeholder="请选择工作站"
-              :disabled="isDetail"
-            />
-          </el-form-item>
-        </el-col>
-        <!-- TODO @AI：不用这个字段 -->
-        <el-col :span="12">
-          <el-form-item label="领料日期" prop="issueDate">
-            <el-date-picker
-              v-model="formData.issueDate"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              placeholder="选择领料日期"
-              :disabled="isDetail"
-              class="!w-full"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="需求时间" prop="requiredTime">
             <el-date-picker
               v-model="formData.requiredTime"
@@ -59,7 +32,25 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="24">
+        <el-col :span="8">
+          <el-form-item label="生产工单" prop="workorderId">
+            <el-input
+              v-model="formData.workorderCode"
+              placeholder="请选择工单"
+              :disabled="isDetail"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="工作站" prop="workstationId">
+            <el-input
+              v-model="formData.workstationCode"
+              placeholder="请选择工作站"
+              :disabled="isDetail"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="备注" prop="remark">
             <el-input
               v-model="formData.remark"
@@ -169,14 +160,12 @@ const formData = ref<WmProductionIssueVO>({
   workorderCode: '',
   workstationId: undefined,
   workstationCode: '',
-  issueDate: undefined,
   requiredTime: undefined,
   remark: '',
   lines: []
 })
 const formRules = reactive({
-  name: [{ required: true, message: '领料单名称不能为空', trigger: 'blur' }],
-  issueDate: [{ required: true, message: '领料日期不能为空', trigger: 'change' }]
+  name: [{ required: true, message: '领料单名称不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 
@@ -234,7 +223,6 @@ const resetForm = () => {
     workorderCode: '',
     workstationId: undefined,
     workstationCode: '',
-    issueDate: undefined,
     requiredTime: undefined,
     remark: '',
     lines: []

@@ -36,7 +36,17 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：单据状态 -->
+      <el-form-item label="单据状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择单据状态"
+          clearable
+          class="!w-240px"
+        >
+          <el-option label="草稿" :value="0" />
+          <el-option label="已完成" :value="4" />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -63,18 +73,22 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：点击后，跳转详情 -->
-      <el-table-column label="领料单编号" align="center" prop="code" min-width="160" />
+      <el-table-column label="领料单编号" align="center" prop="code" min-width="160">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="领料单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="生产工单" align="center" prop="workorderCode" min-width="140" />
-      <!-- TODO @AI：工作站、workstationName -->
-      <!-- TODO @AI：客户编号、客户名称 -->
-      <!-- TODO @AI：需求日期 -->
-      <!-- TODO @AI：移除“领料日期” -->
+      <el-table-column label="工作站" align="center" prop="workstationName" min-width="120" />
+      <el-table-column label="客户编号" align="center" prop="clientCode" min-width="120" />
+      <el-table-column label="客户名称" align="center" prop="clientName" min-width="150" />
       <el-table-column
-        label="领料日期"
+        label="需求时间"
         align="center"
-        prop="issueDate"
+        prop="requiredTime"
         :formatter="dateFormatter2"
         width="180px"
       />
@@ -85,55 +99,35 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
-          <!-- TODO @AI：操作和 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/itemreceipt/index.vue 对齐下； -->
-          <!-- TODO @AI：应该是：执行领出、修改、删除； -->
-          <!-- 准备中：编辑、审批、删除 -->
+          <!-- 草稿(0)：编辑、完成、删除 -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:wm-production-issue:update']"
-            v-if="scope.row.status === 10"
+            v-if="scope.row.status === 0"
           >
             编辑
           </el-button>
           <el-button
             link
             type="success"
-            @click="handleApprove(scope.row.id)"
+            @click="handleFinish(scope.row.id)"
             v-hasPermi="['mes:wm-production-issue:update-status']"
-            v-if="scope.row.status === 10"
+            v-if="scope.row.status === 0"
           >
-            审批
+            完成
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-production-issue:delete']"
-            v-if="scope.row.status === 10"
+            v-if="scope.row.status === 0"
           >
             删除
           </el-button>
-          <!-- 已审批：反审批、完成 -->
-          <el-button
-            link
-            type="warning"
-            @click="handleUnapprove(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update-status']"
-            v-if="scope.row.status === 20"
-          >
-            反审批
-          </el-button>
-          <el-button
-            link
-            type="primary"
-            @click="handleFinish(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update-status']"
-            v-if="scope.row.status === 20"
-          >
-            完成
-          </el-button>
+          <!-- 所有状态：详情 -->
           <el-button link type="info" @click="openForm('detail', scope.row.id)"> 详情 </el-button>
         </template>
       </el-table-column>
@@ -170,6 +164,7 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
+  status: undefined,
   issueDate: undefined
 })
 const queryFormRef = ref()
@@ -214,30 +209,10 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 审批按钮操作 */
-const handleApprove = async (id: number) => {
-  try {
-    await message.confirm('确认审批该领料单吗？')
-    await WmProductionIssueApi.approveIssue(id)
-    message.success('审批成功')
-    await getList()
-  } catch {}
-}
-
-/** 反审批按钮操作 */
-const handleUnapprove = async (id: number) => {
-  try {
-    await message.confirm('确认反审批该领料单吗？')
-    await WmProductionIssueApi.unapproveIssue(id)
-    message.success('反审批成功')
-    await getList()
-  } catch {}
-}
-
 /** 完成按钮操作 */
 const handleFinish = async (id: number) => {
   try {
-    await message.confirm('确认完成该领料单吗？')
+    await message.confirm('确认完成该领料单并执行出库吗？')
     await WmProductionIssueApi.finishIssue(id)
     message.success('完成成功')
     await getList()
