@@ -162,7 +162,7 @@
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:qc-iqc:update']"
-            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
+            v-if="scope.row.status === MesQcStatusEnum.DRAFT"
           >
             编辑
           </el-button>
@@ -171,7 +171,7 @@
             type="success"
             @click="handleComplete(scope.row.id)"
             v-hasPermi="['mes:qc-iqc:update']"
-            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
+            v-if="scope.row.status === MesQcStatusEnum.DRAFT"
           >
             完成
           </el-button>
@@ -180,7 +180,7 @@
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:qc-iqc:delete']"
-            v-if="scope.row.status === MesOrderStatusEnum.DRAFT"
+            v-if="scope.row.status === MesQcStatusEnum.DRAFT"
           >
             删除
           </el-button>
@@ -209,7 +209,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import { MesOrderStatusEnum } from '@/views/mes/utils/constants'
+import { MesQcStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcIqc' })
 
