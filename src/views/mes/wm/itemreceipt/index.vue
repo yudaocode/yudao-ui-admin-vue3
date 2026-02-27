@@ -26,19 +26,7 @@
         />
       </el-form-item>
       <el-form-item label="供应商" prop="vendorId">
-        <el-select
-          v-model="queryParams.vendorId"
-          placeholder="请选择供应商"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="vendor in vendorList"
-            :key="vendor.id"
-            :label="vendor.name"
-            :value="vendor.id"
-          />
-        </el-select>
+        <MdVendorSelect v-model="queryParams.vendorId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="入库日期" prop="receiptDate">
         <el-date-picker
@@ -174,7 +162,7 @@ import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmItemReceiptApi, WmItemReceiptVO } from '@/api/mes/wm/itemreceipt'
-import { MdVendorApi } from '@/api/mes/md/vendor'
+import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import ItemReceiptForm from './ItemReceiptForm.vue'
 import { MesWmItemReceiptStatusEnum } from '@/views/mes/utils/constants'
 
@@ -187,7 +175,6 @@ const loading = ref(true) // 列表的加载中
 const list = ref<WmItemReceiptVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const exportLoading = ref(false) // 导出的加载中
-const vendorList = ref<any[]>([]) // 供应商列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -282,8 +269,7 @@ const handleExport = async () => {
 }
 
 /** 初始化 */
-onMounted(async () => {
-  vendorList.value = await MdVendorApi.getVendorSimpleList()
-  await getList()
+onMounted(() => {
+  getList()
 })
 </script>

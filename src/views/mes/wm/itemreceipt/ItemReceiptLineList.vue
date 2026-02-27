@@ -47,7 +47,7 @@
           <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
             删除
           </el-button>
-          <el-button v-if="isStock" link type="success" @click="handleShelving(scope.row.id)">
+          <el-button v-if="isStock" link type="success" @click="handleStock(scope.row.id)">
             上架
           </el-button>
         </template>
@@ -314,7 +314,7 @@ const setDetailListRef = (lineId: number, el: any) => {
 const detailFormRef = ref()
 
 /** 上架：直接打开明细创建表单 */
-const handleShelving = (lineId: number) => {
+const handleStock = (lineId: number) => {
   const row = list.value.find((r) => r.id === lineId)
   openDetailForm('create', lineId, row?.itemId)
 }

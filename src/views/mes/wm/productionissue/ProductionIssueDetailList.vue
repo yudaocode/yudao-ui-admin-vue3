@@ -52,14 +52,8 @@ const list = ref<WmProductionIssueDetailVO[]>([]) // 明细列表
 /** 查询明细列表 */
 const getList = async () => {
   loading.value = true
-  // TODO @AI：走 list 接口，不需要分页；检查下；
   try {
-    const data = await WmProductionIssueDetailApi.getProductionIssueDetailPage({
-      pageNo: 1,
-      pageSize: 100,
-      lineId: props.lineId
-    })
-    list.value = data.list
+    list.value = await WmProductionIssueDetailApi.getProductionIssueDetailListByLineId(props.lineId)
   } finally {
     loading.value = false
   }

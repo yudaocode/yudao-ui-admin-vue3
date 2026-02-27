@@ -107,9 +107,10 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
-  // TODO @AI：你看下 workorderid、需求时间，必填；
   code: [{ required: true, message: '领料单编号不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '领料单名称不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '领料单名称不能为空', trigger: 'blur' }],
+  workOrderId: [{ required: true, message: '生产工单不能为空', trigger: 'change' }],
+  requiredTime: [{ required: true, message: '需求时间不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 

@@ -21,9 +21,9 @@ export interface WmProductionIssueDetailVO {
 
 // MES 领料出库明细 API
 export const WmProductionIssueDetailApi = {
-  // 查询领料出库明细分页
-  getProductionIssueDetailPage: async (params: any) => {
-    return await request.get({ url: '/mes/wm/production-issue-detail/page', params })
+  // 查询领料出库明细列表（按行编号）
+  getProductionIssueDetailListByLineId: async (lineId: number) => {
+    return await request.get({ url: '/mes/wm/production-issue-detail/list-by-line', params: { lineId } })
   },
 
   // 查询领料出库明细详情

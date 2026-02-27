@@ -68,6 +68,11 @@ export const WmProductionIssueApi = {
     return await request.put({ url: '/mes/wm/production-issue/stock?id=' + id })
   },
 
+  // 取消领料出库单
+  cancelProductionIssue: async (id: number) => {
+    return await request.put({ url: '/mes/wm/production-issue/cancel?id=' + id })
+  },
+
   // 完成领料出库单（执行出库）
   finishProductionIssue: async (id: number) => {
     return await request.put({ url: '/mes/wm/production-issue/finish?id=' + id })

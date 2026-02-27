@@ -96,7 +96,7 @@
         :formatter="dateFormatter2"
         width="180px"
       />
-      <el-table-column label="单据状态" align="center" prop="status" min-width="100">
+      <el-table-column label="单据状态" align="center" prop="status" min-width="110">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_PRODUCTION_ISSUE_STATUS" :value="scope.row.status" />
         </template>
@@ -150,6 +150,20 @@
             v-if="scope.row.status === MesWmProductionIssueStatusEnum.APPROVED"
           >
             完成
+          </el-button>
+          <!-- 待拣货、待执行领出：取消 -->
+          <el-button
+            link
+            type="danger"
+            @click="handleCancel(scope.row.id)"
+            v-hasPermi="['mes:wm-production-issue:update']"
+            v-if="
+              [MesWmProductionIssueStatusEnum.APPROVING, MesWmProductionIssueStatusEnum.APPROVED].includes(
+                scope.row.status
+              )
+            "
+          >
+            取消
           </el-button>
         </template>
       </el-table-column>
@@ -238,6 +252,16 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     await WmProductionIssueApi.deleteProductionIssue(id)
     message.success(t('common.delSuccess'))
+    await getList()
+  } catch {}
+}
+
+/** 取消按钮操作 */
+const handleCancel = async (id: number) => {
+  try {
+    await message.confirm('确认取消该领料出库单？取消后不可恢复。')
+    await WmProductionIssueApi.cancelProductionIssue(id)
+    message.success('取消成功')
     await getList()
   } catch {}
 }
