@@ -1,23 +1,35 @@
-<!-- 表单布局：一行 3 个字段 -->
-<!-- 必填字段：领料单编号（必填）、领料单名称（必填）、需求时间（必填）、生产工单（必填）、工作站 -->
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="1200px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="120px"
+      label-width="110px"
       v-loading="formLoading"
     >
-      <el-row :gutter="20">
+      <el-row>
         <el-col :span="8">
           <el-form-item label="领料单编号" prop="code">
-            <el-input v-model="formData.code" placeholder="自动生成" disabled />
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入领料单编号"
+              :disabled="isHeaderReadonly"
+            >
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType !== 'create'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="领料单名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入领料单名称" :disabled="isDetail" />
+            <el-input
+              v-model="formData.name"
+              placeholder="请输入领料单名称"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -27,163 +39,108 @@
               type="datetime"
               value-format="YYYY-MM-DD HH:mm:ss"
               placeholder="选择需求时间"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
               class="!w-full"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="生产工单" prop="workorderId">
-            <el-input
-              v-model="formData.workorderCode"
-              placeholder="请选择工单"
-              :disabled="isDetail"
-            />
+          <el-form-item label="生产工单" prop="workOrderId">
+            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="工作站" prop="workstationId">
-            <el-input
-              v-model="formData.workstationCode"
-              placeholder="请选择工作站"
-              :disabled="isDetail"
-            />
+            <MdWorkstationSelect v-model="formData.workstationId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input
               v-model="formData.remark"
               type="textarea"
               placeholder="请输入备注"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
       </el-row>
-
-      <!-- 领料明细 -->
-      <!-- TODO @AI：参考别的模块，独立文件； -->
-      <el-divider content-position="left">领料明细</el-divider>
-      <el-row>
-        <el-col :span="24">
-          <el-button type="primary" @click="handleAddLine" v-if="!isDetail" class="mb-10px">
-            <Icon icon="ep:plus" class="mr-5px" /> 添加物料
-          </el-button>
-          <el-table :data="formData.lines" border>
-            <el-table-column label="物料编码" prop="itemCode" width="150">
-              <template #default="{ row, $index }">
-                <el-input
-                  v-model="row.itemCode"
-                  placeholder="请输入物料编码"
-                  :disabled="isDetail"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column label="物料名称" prop="itemName" width="150">
-              <template #default="{ row, $index }">
-                <el-input
-                  v-model="row.itemName"
-                  placeholder="请输入物料名称"
-                  :disabled="isDetail"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column label="规格型号" prop="specification" width="150">
-              <template #default="{ row, $index }">
-                <el-input
-                  v-model="row.specification"
-                  placeholder="请输入规格型号"
-                  :disabled="isDetail"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column label="单位" prop="unitOfMeasure" width="100">
-              <template #default="{ row, $index }">
-                <el-input v-model="row.unitOfMeasure" placeholder="单位" :disabled="isDetail" />
-              </template>
-            </el-table-column>
-            <el-table-column label="领料数量" prop="quantityIssued" width="120">
-              <template #default="{ row, $index }">
-                <el-input-number
-                  v-model="row.quantityIssued"
-                  :min="0"
-                  :precision="2"
-                  :disabled="isDetail"
-                  class="!w-full"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column label="批次号" prop="batchCode" width="120">
-              <template #default="{ row, $index }">
-                <el-input v-model="row.batchCode" placeholder="批次号" :disabled="isDetail" />
-              </template>
-            </el-table-column>
-            <el-table-column label="备注" prop="remark" min-width="150">
-              <template #default="{ row, $index }">
-                <el-input v-model="row.remark" placeholder="备注" :disabled="isDetail" />
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" align="center" width="80" v-if="!isDetail">
-              <template #default="{ row, $index }">
-                <el-button link type="danger" @click="handleDeleteLine($index)">删除</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-col>
-      </el-row>
     </el-form>
+    <!-- 非新建模式展示行项目信息（领料物料） -->
+    <template v-if="formData.id">
+      <el-divider content-position="center">物料信息</el-divider>
+      <ProductionIssueLineList :issue-id="formData.id" :form-type="formType" />
+    </template>
     <template #footer>
+      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
+      <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
+        执行拣货
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="submitForm" v-if="!isDetail">确 定</el-button>
     </template>
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { WmProductionIssueApi, WmProductionIssueVO } from '@/api/mes/wm/production-issue'
+import { generateRandomStr } from '@/utils'
+import { WmProductionIssueApi, WmProductionIssueVO } from '@/api/mes/wm/productionissue'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
+import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
+import ProductionIssueLineList from './ProductionIssueLineList.vue'
 
-defineOptions({ name: 'IssueForm' })
+defineOptions({ name: 'ProductionIssueForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const isDetail = ref(false)
-const formData = ref<WmProductionIssueVO>({
-  id: undefined,
-  name: '',
-  workorderId: undefined,
-  workorderCode: '',
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const formType = ref<string>('create') // 表单的类型：create / update / stock / detail
+const formData = ref({
+  id: undefined as number | undefined,
+  code: undefined,
+  name: undefined,
+  workOrderId: undefined,
   workstationId: undefined,
-  workstationCode: '',
   requiredTime: undefined,
-  remark: '',
-  lines: []
+  remark: undefined
 })
 const formRules = reactive({
+  // TODO @AI：你看下 workorderid、需求时间，必填；
+  code: [{ required: true, message: '领料单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '领料单名称不能为空', trigger: 'blur' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
+
+const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isStock = computed(() => formType.value === 'stock') // 是否为拣货模式
+const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value)) // 是否只读
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增领料出库单',
+    update: '编辑领料出库单',
+    stock: '执行拣货',
+    detail: '领料出库单详情'
+  }
+  return titles[formType.value] || formType.value
+})
+
+/** 生成领料单编号 */
+const generateCode = () => {
+  formData.value.code = 'PI' + generateRandomStr(10)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value =
-    type === 'create' ? '新增领料出库单' : type === 'update' ? '修改领料出库单' : '领料出库单详情'
   formType.value = type
-  isDetail.value = type === 'detail'
   resetForm()
+  // 修改/拣货/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await WmProductionIssueApi.getIssue(id)
-      if (!formData.value.lines) {
-        formData.value.lines = []
-      }
+      formData.value = await WmProductionIssueApi.getProductionIssue(id)
     } finally {
       formLoading.value = false
     }
@@ -191,24 +148,41 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open })
 
-/** 提交表单 */
+/** 提交表单（create/update 模式） */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
-  if (!formRef) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
+  // 校验表单
+  await formRef.value.validate()
+  // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value
+    const data = formData.value as unknown as WmProductionIssueVO
     if (formType.value === 'create') {
-      await WmProductionIssueApi.createIssue(data)
-      message.success(t('common.createSuccess'))
+      const res = await WmProductionIssueApi.createProductionIssue(data)
+      message.success('新增成功')
+      formData.value.id = res
+      formType.value = 'update'
     } else {
-      await WmProductionIssueApi.updateIssue(data)
-      message.success(t('common.updateSuccess'))
+      await WmProductionIssueApi.updateProductionIssue(data)
+      message.success('修改成功')
     }
+    // 发送操作成功的事件
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 执行拣货 */
+const handleStock = async () => {
+  try {
+    await message.confirm('确认执行拣货？')
+    formLoading.value = true
+    await WmProductionIssueApi.stockProductionIssue(formData.value.id!)
+    message.success('拣货成功')
     dialogVisible.value = false
     emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -218,37 +192,13 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    name: '',
-    workorderId: undefined,
-    workorderCode: '',
+    code: undefined,
+    name: undefined,
+    workOrderId: undefined,
     workstationId: undefined,
-    workstationCode: '',
     requiredTime: undefined,
-    remark: '',
-    lines: []
+    remark: undefined
   }
   formRef.value?.resetFields()
-}
-
-/** 添加行 */
-const handleAddLine = () => {
-  if (!formData.value.lines) {
-    formData.value.lines = []
-  }
-  formData.value.lines.push({
-    itemId: 0,
-    itemCode: '',
-    itemName: '',
-    specification: '',
-    unitOfMeasure: '',
-    quantityIssued: 1,
-    batchCode: '',
-    remark: ''
-  })
-}
-
-/** 删除行 */
-const handleDeleteLine = (index: number) => {
-  formData.value.lines?.splice(index, 1)
 }
 </script>

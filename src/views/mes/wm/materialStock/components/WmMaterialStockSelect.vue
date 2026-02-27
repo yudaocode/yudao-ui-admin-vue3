@@ -1,25 +1,19 @@
-<!-- TODO @AI：这些组件，已经有了，你找下 -->
 <template>
-  <el-dialog
-    v-model="dialogVisible"
-    title="选择物料"
-    width="1000px"
-    @close="handleClose"
-  >
+  <el-dialog v-model="dialogVisible" title="选择库存" width="1200px" @close="handleClose">
     <el-form :inline="true" :model="queryParams" class="mb-10px">
-      <el-form-item label="物料编号">
+      <el-form-item label="批次号">
         <el-input
-          v-model="queryParams.code"
-          placeholder="请输入物料编号"
+          v-model="queryParams.batchCode"
+          placeholder="请输入批次号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-200px"
         />
       </el-form-item>
-      <el-form-item label="物料名称">
+      <el-form-item label="仓库">
         <el-input
-          v-model="queryParams.name"
-          placeholder="请输入物料名称"
+          v-model="queryParams.warehouseName"
+          placeholder="请输入仓库名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-200px"
@@ -29,9 +23,7 @@
         <el-button type="primary" @click="handleQuery">
           <Icon icon="ep:search" class="mr-5px" /> 搜索
         </el-button>
-        <el-button @click="resetQuery">
-          <Icon icon="ep:refresh" class="mr-5px" /> 重置
-        </el-button>
+        <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" /> 重置 </el-button>
       </el-form-item>
     </el-form>
 
@@ -42,11 +34,12 @@
       highlight-current-row
       max-height="400px"
     >
-      <el-table-column label="物料编号" prop="code" width="150" />
-      <el-table-column label="物料名称" prop="name" width="200" />
-      <el-table-column label="规格型号" prop="specification" width="150" />
-      <el-table-column label="单位" prop="unitName" width="100" />
-      <el-table-column label="物料分类" prop="typeName" width="150" />
+      <el-table-column label="批次号" prop="batchCode" width="150" />
+      <el-table-column label="仓库" prop="warehouseName" width="150" />
+      <el-table-column label="库区" prop="locationName" width="150" />
+      <el-table-column label="库位" prop="areaName" width="150" />
+      <el-table-column label="可用数量" prop="quantityOnhand" width="120" />
+      <el-table-column label="冻结数量" prop="quantityFrozen" width="120" />
     </el-table>
 
     <Pagination
@@ -65,9 +58,9 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { ItemApi } from '@/api/mes/md/item'
+import { WmMaterialStockApi } from '@/api/mes/wm/materialstock'
 
-defineOptions({ name: 'ItemSelect' })
+defineOptions({ name: 'WmMaterialStockSelect' })
 
 const emit = defineEmits(['select'])
 
@@ -76,15 +69,19 @@ const loading = ref(false)
 const list = ref([])
 const total = ref(0)
 const selectedRow = ref(null)
+const currentItemId = ref(null)
 
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  code: undefined,
-  name: undefined
+  itemId: undefined,
+  batchCode: undefined,
+  warehouseName: undefined
 })
 
-const open = () => {
+const open = (itemId?: number) => {
+  currentItemId.value = itemId
+  queryParams.itemId = itemId
   dialogVisible.value = true
   getList()
 }
@@ -92,12 +89,13 @@ const open = () => {
 const handleClose = () => {
   dialogVisible.value = false
   selectedRow.value = null
+  currentItemId.value = null
 }
 
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ItemApi.getItemPage(queryParams)
+    const data = await WmMaterialStockApi.getMaterialStockPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -111,8 +109,9 @@ const handleQuery = () => {
 }
 
 const resetQuery = () => {
-  queryParams.code = undefined
-  queryParams.name = undefined
+  queryParams.batchCode = undefined
+  queryParams.warehouseName = undefined
+  queryParams.itemId = currentItemId.value
   handleQuery()
 }
 
@@ -125,11 +124,16 @@ const handleConfirm = () => {
     return
   }
   emit('select', {
-    itemId: selectedRow.value.id,
-    itemCode: selectedRow.value.code,
-    itemName: selectedRow.value.name,
-    specification: selectedRow.value.specification,
-    unitName: selectedRow.value.unitName
+    materialStockId: selectedRow.value.id,
+    batchId: selectedRow.value.batchId,
+    batchCode: selectedRow.value.batchCode,
+    warehouseId: selectedRow.value.warehouseId,
+    warehouseName: selectedRow.value.warehouseName,
+    locationId: selectedRow.value.locationId,
+    locationName: selectedRow.value.locationName,
+    areaId: selectedRow.value.areaId,
+    areaName: selectedRow.value.areaName,
+    availableQuantity: selectedRow.value.quantityOnhand
   })
   handleClose()
 }

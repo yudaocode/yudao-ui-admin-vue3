@@ -155,7 +155,6 @@
           >
             取消
           </el-button>
-          <el-button link type="info" @click="openForm('detail', scope.row.id)"> 详情 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -171,8 +170,8 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateFormatter2 } from '@/utils/formatTime'
+import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmItemReceiptApi, WmItemReceiptVO } from '@/api/mes/wm/itemreceipt'
 import { MdVendorApi } from '@/api/mes/md/vendor'
@@ -198,6 +197,7 @@ const queryParams = reactive({
   receiptDate: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -211,25 +211,24 @@ const getList = async () => {
   }
 }
 
-/** 搜索 */
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
-/** 重置 */
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
-/** 新增/修改/上架/详情 */
-const formRef = ref() // 表单弹窗
+/** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交 */
+/** 提交按钮操作 */
 const handleSubmit = async (id: number) => {
   try {
     await message.confirm('确认提交该采购入库单？')

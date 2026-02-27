@@ -43,8 +43,12 @@
           clearable
           class="!w-240px"
         >
-          <el-option label="草稿" :value="0" />
-          <el-option label="已完成" :value="4" />
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_PRODUCTION_ISSUE_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -94,41 +98,59 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_WM_ISSUE_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_WM_PRODUCTION_ISSUE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
-          <!-- 草稿(0)：编辑、完成、删除 -->
+          <!-- 草稿：编辑、提交、删除 -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:wm-production-issue:update']"
-            v-if="scope.row.status === 0"
+            v-if="scope.row.status === MesWmProductionIssueStatusEnum.PREPARE"
           >
             编辑
           </el-button>
           <el-button
             link
-            type="success"
-            @click="handleFinish(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update-status']"
-            v-if="scope.row.status === 0"
+            type="warning"
+            @click="handleSubmit(scope.row.id)"
+            v-hasPermi="['mes:wm-production-issue:update']"
+            v-if="scope.row.status === MesWmProductionIssueStatusEnum.PREPARE"
           >
-            完成
+            提交
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-production-issue:delete']"
-            v-if="scope.row.status === 0"
+            v-if="scope.row.status === MesWmProductionIssueStatusEnum.PREPARE"
           >
             删除
           </el-button>
-          <!-- 所有状态：详情 -->
-          <el-button link type="info" @click="openForm('detail', scope.row.id)"> 详情 </el-button>
+          <!-- 待拣货：执行拣货 -->
+          <el-button
+            link
+            type="success"
+            @click="openForm('stock', scope.row.id)"
+            v-hasPermi="['mes:wm-production-issue:update']"
+            v-if="scope.row.status === MesWmProductionIssueStatusEnum.APPROVING"
+          >
+            执行拣货
+          </el-button>
+          <!-- 待执行领出：完成 -->
+          <el-button
+            link
+            type="success"
+            @click="handleFinish(scope.row.id)"
+            v-hasPermi="['mes:wm-production-issue:execute']"
+            v-if="scope.row.status === MesWmProductionIssueStatusEnum.APPROVED"
+          >
+            完成
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -140,25 +162,26 @@
     />
   </ContentWrap>
 
-  <IssueForm ref="formRef" @success="getList" />
+  <ProductionIssueForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
-import { WmProductionIssueApi, WmProductionIssueVO } from '@/api/mes/wm/production-issue'
-import IssueForm from './IssueForm.vue'
+import { WmProductionIssueApi, WmProductionIssueVO } from '@/api/mes/wm/productionissue'
+import ProductionIssueForm from './ProductionIssueForm.vue'
+import { MesWmProductionIssueStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesWmIssue' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const list = ref<WmProductionIssueVO[]>([])
-const total = ref(0)
-const exportLoading = ref(false)
+const loading = ref(true) // 列表的加载中
+const list = ref<WmProductionIssueVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -167,14 +190,14 @@ const queryParams = reactive({
   status: undefined,
   issueDate: undefined
 })
-const queryFormRef = ref()
-const formRef = ref()
+const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await WmProductionIssueApi.getIssuePage(queryParams)
+    const data = await WmProductionIssueApi.getProductionIssuePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -199,11 +222,21 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
+/** 提交按钮操作 */
+const handleSubmit = async (id: number) => {
+  try {
+    await message.confirm('确认提交该领料单进入审批流程吗？')
+    await WmProductionIssueApi.submitProductionIssue(id)
+    message.success('提交成功')
+    await getList()
+  } catch {}
+}
+
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await WmProductionIssueApi.deleteIssue(id)
+    await WmProductionIssueApi.deleteProductionIssue(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -213,7 +246,7 @@ const handleDelete = async (id: number) => {
 const handleFinish = async (id: number) => {
   try {
     await message.confirm('确认完成该领料单并执行出库吗？')
-    await WmProductionIssueApi.finishIssue(id)
+    await WmProductionIssueApi.finishProductionIssue(id)
     message.success('完成成功')
     await getList()
   } catch {}
@@ -224,7 +257,7 @@ const handleExport = async () => {
   try {
     await message.exportConfirm()
     exportLoading.value = true
-    const data = await WmProductionIssueApi.exportIssue(queryParams)
+    const data = await WmProductionIssueApi.exportProductionIssue(queryParams)
     download.excel(data, '领料出库单.xls')
   } catch {
   } finally {
