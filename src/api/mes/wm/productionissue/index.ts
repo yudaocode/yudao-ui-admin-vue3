@@ -78,6 +78,11 @@ export const WmProductionIssueApi = {
     return await request.put({ url: '/mes/wm/production-issue/finish?id=' + id })
   },
 
+  // 校验领料出库单数量（每行明细数量之和是否等于行领料数量）
+  checkProductionIssueQuantity: async (id: number) => {
+    return await request.get({ url: '/mes/wm/production-issue/check-quantity?id=' + id })
+  },
+
   // 导出领料出库单 Excel
   exportProductionIssue: async (params: any) => {
     return await request.download({ url: '/mes/wm/production-issue/export-excel', params })
