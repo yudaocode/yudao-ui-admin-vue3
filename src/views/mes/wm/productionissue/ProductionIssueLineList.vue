@@ -32,20 +32,22 @@
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="领料数量" align="center" prop="quantity" width="100" />
-      <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column
-        v-if="isUpdate"
+        v-if="isUpdate || isStock"
         label="操作"
         align="center"
         width="160"
         fixed="right"
       >
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('update', scope.row.id)">
+          <el-button v-if="isUpdate" link type="primary" @click="openForm('update', scope.row.id)">
             编辑
           </el-button>
-          <el-button link type="danger" @click="handleDelete(scope.row.id)">
+          <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
             删除
+          </el-button>
+          <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
+            拣货
           </el-button>
         </template>
       </el-table-column>
@@ -69,10 +71,10 @@
     >
       <el-row>
         <el-col :span="8">
-          <el-form-item label="物料" prop="itemId">
+          <el-form-item label="产品物料" prop="itemId">
             <MdItemSelect
               v-model="formData.itemId"
-              placeholder="请选择物料"
+              placeholder="请选择产品物料"
               class="!w-1/1"
               @change="handleItemChange"
             />
@@ -89,11 +91,6 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <el-form-item label="批次号" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
-          </el-form-item>
-        </el-col>
       </el-row>
       <el-row>
         <el-col :span="24">
@@ -108,66 +105,53 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+
+  <!-- 拣货明细添加/编辑弹窗 -->
+  <ProductionIssueDetailForm
+    ref="detailFormRef"
+    :issue-id="props.issueId"
+    @success="onDetailFormSuccess"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
-import { WmProductionIssueLineApi, WmProductionIssueLineVO } from '@/api/mes/wm/productionissue/line'
+import {
+  WmProductionIssueLineApi,
+  WmProductionIssueLineVO
+} from '@/api/mes/wm/productionissue/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProductionIssueDetailList from './ProductionIssueDetailList.vue'
+import ProductionIssueDetailForm from './ProductionIssueDetailForm.vue'
 
 defineOptions({ name: 'ProductionIssueLineList' })
 
-const message = useMessage()
+const props = defineProps<{
+  issueId: number
+  formType: string
+}>()
 
-const props = defineProps({
-  issueId: { type: Number, required: true },
-  formType: { type: String, required: true }
-})
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const loading = ref(false)
-const list = ref<WmProductionIssueLineVO[]>([])
-const total = ref(0)
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const lineFormType = ref<string>('create')
-const formRef = ref()
-const detailListRefs = ref<Map<number, any>>(new Map())
+const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
+const isStock = computed(() => props.formType === 'stock') // 是否为拣货模式
 
+// ==================== 列表 ====================
+const loading = ref(false) // 列表的加载中
+const list = ref<WmProductionIssueLineVO[]>([]) // 行列表
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  issueId: props.issueId
+  issueId: undefined as number | undefined
 })
 
-const formData = ref<WmProductionIssueLineVO>({
-  id: undefined,
-  issueId: props.issueId,
-  itemId: 0,
-  quantity: 0,
-  batchCode: undefined,
-  remark: undefined
-})
-
-const formRules = reactive({
-  itemId: [{ required: true, message: '请选择物料', trigger: 'change' }],
-  quantity: [{ required: true, message: '请输入领料数量', trigger: 'blur' }]
-})
-
-const isUpdate = computed(() => ['create', 'update'].includes(props.formType))
-
-const setDetailListRef = (lineId: number, el: any) => {
-  if (el) {
-    detailListRefs.value.set(lineId, el)
-  }
-}
-
-/** 查询列表 */
+/** 查询行列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await WmProductionIssueLineApi.getLinePage(queryParams)
+    queryParams.issueId = props.issueId
+    const data = await WmProductionIssueLineApi.getProductionIssueLinePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -175,17 +159,51 @@ const getList = async () => {
   }
 }
 
+/** 删除 */
+const handleDelete = async (id: number) => {
+  try {
+    await message.delConfirm()
+    await WmProductionIssueLineApi.deleteProductionIssueLine(id)
+    message.success(t('common.delSuccess'))
+    await getList()
+  } catch {}
+}
+
+// ==================== 添加/编辑表单 ====================
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const lineFormType = ref('') // 行表单的类型
+const formData = ref({
+  id: undefined,
+  issueId: undefined as number | undefined,
+  itemId: undefined,
+  quantity: undefined,
+  remark: undefined
+})
+const formRules = reactive({
+  itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
+  quantity: [{ required: true, message: '领料数量不能为空', trigger: 'blur' }]
+})
+const formRef = ref() // 表单 Ref
+
+/** 物料变化时，自动填充信息 */
+const handleItemChange = (item: any) => {
+  if (item) {
+    formData.value.itemId = item.id
+  }
+}
+
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'create' ? '添加物料' : '编辑物料'
+  dialogTitle.value = type === 'create' ? '添加领料出库单行' : '修改领料出库单行'
   lineFormType.value = type
   resetForm()
-  // 修改/上架/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await WmProductionIssueLineApi.getLine(id)
+      formData.value = await WmProductionIssueLineApi.getProductionIssueLine(id)
     } finally {
       formLoading.value = false
     }
@@ -197,13 +215,13 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = formData.value
+    const data = { ...formData.value, issueId: props.issueId } as unknown as WmProductionIssueLineVO
     if (lineFormType.value === 'create') {
-      await WmProductionIssueLineApi.createLine(data)
-      message.success('新增成功')
+      await WmProductionIssueLineApi.createProductionIssueLine(data)
+      message.success(t('common.createSuccess'))
     } else {
-      await WmProductionIssueLineApi.updateLine(data)
-      message.success('修改成功')
+      await WmProductionIssueLineApi.updateProductionIssueLine(data)
+      message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
     await getList()
@@ -212,45 +230,49 @@ const submitForm = async () => {
   }
 }
 
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await WmProductionIssueLineApi.deleteLine(id)
-    message.success('删除成功')
-    await getList()
-  } catch {}
-}
-
-/** 物料变化时，自动填充信息 */
-const handleItemChange = (item: any) => {
-  if (item) {
-    formData.value.itemCode = item.code
-    formData.value.itemName = item.name
-    formData.value.specification = item.specification
-    formData.value.unitMeasureName = item.unitName
-  }
-}
-
-/** 打开明细表单弹窗 */
-const openDetailForm = (type: string, lineId: number, itemId: number, detailId?: number) => {
-  // 由子组件 ProductionIssueDetailList 处理
-}
-
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    issueId: props.issueId,
-    itemId: 0,
-    quantity: 0,
-    batchCode: undefined,
+    issueId: undefined,
+    itemId: undefined,
+    quantity: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()
 }
 
-onMounted(() => {
-  getList()
+// ==================== 展开行：拣货明细 ====================
+const detailListRefs = ref<Record<number, InstanceType<typeof ProductionIssueDetailList>>>({})
+
+/** 缓存子组件 ref */
+const setDetailListRef = (lineId: number, el: any) => {
+  if (el) {
+    detailListRefs.value[lineId] = el
+  }
+}
+
+// ==================== 拣货明细表单（LineList 层级持有） ====================
+const detailFormRef = ref()
+
+/** 拣货：直接打开明细创建表单 */
+const handlePicking = (lineId: number) => {
+  const row = list.value.find((r) => r.id === lineId)
+  openDetailForm('create', lineId, row?.itemId)
+}
+
+/** 打开拣货明细表单 */
+const openDetailForm = (type: string, lineId: number, itemId?: number, detailId?: number) => {
+  detailFormRef.value.open(type, lineId, itemId, detailId)
+}
+
+/** 明细表单提交成功后，刷新已展开行的 DetailList */
+const onDetailFormSuccess = (lineId: number) => {
+  detailListRefs.value[lineId]?.getList()
+}
+
+/** 初始化 */
+onMounted(async () => {
+  await getList()
 })
 </script>

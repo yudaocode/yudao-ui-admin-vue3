@@ -177,7 +177,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
-const isStock = computed(() => props.formType === 'shelving') // 是否为上架模式
+const isStock = computed(() => props.formType === 'stock') // 是否为上架模式
 
 // ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中

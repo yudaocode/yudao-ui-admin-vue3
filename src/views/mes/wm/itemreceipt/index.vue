@@ -126,7 +126,7 @@
           <el-button
             link
             type="success"
-            @click="openForm('shelving', scope.row.id)"
+            @click="openForm('stock', scope.row.id)"
             v-hasPermi="['mes:wm-item-receipt:update']"
             v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVING"
           >

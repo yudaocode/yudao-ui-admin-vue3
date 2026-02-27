@@ -11,7 +11,6 @@ export interface WmProductionIssueLineVO {
   unitMeasureName?: string
   quantity: number
   batchId?: number
-  batchCode?: string
   remark?: string
 }
 

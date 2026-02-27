@@ -111,7 +111,7 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / shelving / detail
+const formType = ref<string>('create') // 表单的类型：create / update / stock / detail
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
@@ -129,15 +129,14 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 
-// TODO @AI：formType 还是使用 stock，而不是 shelving；
 const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isStock = computed(() => formType.value === 'shelving') // 是否为上架模式
-const isHeaderReadonly = computed(() => ['shelving', 'detail'].includes(formType.value)) // 是否只读
+const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
+const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value)) // 是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增采购入库单',
     update: '编辑采购入库单',
-    shelving: '执行上架',
+    stock: '执行上架',
     detail: '采购入库单详情'
   }
   return titles[formType.value] || formType.value
