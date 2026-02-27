@@ -14,10 +14,6 @@ export interface MdWorkstationVO {
   areaId: number // 库位 ID
   status: number // 状态
   remark: string // 备注
-  attribute1: string
-  attribute2: string
-  attribute3: number
-  attribute4: number
 }
 
 // MES 工作站 API

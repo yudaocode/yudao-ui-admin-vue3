@@ -11,10 +11,6 @@ export interface WmWarehouseLocationVO {
   areaStatus: number
   frozen: boolean
   remark: string
-  attribute1: string
-  attribute2: string
-  attribute3: number
-  attribute4: number
   createTime: string
 }
 

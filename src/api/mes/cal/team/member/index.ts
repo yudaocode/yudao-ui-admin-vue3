@@ -9,10 +9,6 @@ export interface CalTeamMemberVO {
   nickname: string // 用户昵称（关联查询）
   telephone: string // 用户手机号（关联查询）
   remark: string // 备注
-  attribute1: string
-  attribute2: string
-  attribute3: number
-  attribute4: number
 }
 
 // MES 班组成员 API

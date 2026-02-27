@@ -11,10 +11,6 @@ export interface CalPlanShiftVO {
   startTime: string // 开始时间
   endTime: string // 结束时间
   remark: string // 备注
-  attribute1: string
-  attribute2: string
-  attribute3: number
-  attribute4: number
 }
 
 // MES 计划班次 API

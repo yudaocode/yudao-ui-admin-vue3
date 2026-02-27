@@ -10,10 +10,6 @@ export interface MdWorkshopVO {
   chargeUserName: string // 负责人名称
   status: number // 状态
   remark: string // 备注
-  attribute1: string // 预留字段1
-  attribute2: string // 预留字段2
-  attribute3: number // 预留字段3
-  attribute4: number // 预留字段4
 }
 
 // MES 车间 API

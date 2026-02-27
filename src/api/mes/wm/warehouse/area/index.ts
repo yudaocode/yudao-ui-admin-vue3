@@ -19,10 +19,6 @@ export interface WmWarehouseAreaVO {
   allowItemMixing: boolean
   allowBatchMixing: boolean
   remark: string
-  attribute1: string
-  attribute2: string
-  attribute3: number
-  attribute4: number
   createTime: string
 }
 

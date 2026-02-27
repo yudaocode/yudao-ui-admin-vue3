@@ -13,10 +13,6 @@ export interface CalPlanVO {
   shiftCount: number // 倒班天数
   status: number // 状态
   remark: string // 备注
-  attribute1: string
-  attribute2: string
-  attribute3: number
-  attribute4: number
 }
 
 // MES 排班计划 API

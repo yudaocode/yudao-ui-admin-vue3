@@ -11,10 +11,6 @@ export interface CalTeamShiftVO {
   teamName: string // 班组名称（关联查询）
   shiftName: string // 班次名称（关联查询）
   remark: string // 备注
-  attribute1: string
-  attribute2: string
-  attribute3: number
-  attribute4: number
 }
 
 // MES 班组排班 API

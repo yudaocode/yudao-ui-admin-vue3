@@ -8,10 +8,6 @@ export interface CalPlanTeamVO {
   teamCode: string // 班组编码
   teamName: string // 班组名称
   remark: string // 备注
-  attribute1: string
-  attribute2: string
-  attribute3: number
-  attribute4: number
 }
 
 // MES 计划班组关联 API

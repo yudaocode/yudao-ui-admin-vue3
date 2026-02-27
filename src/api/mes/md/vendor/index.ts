@@ -22,10 +22,6 @@ export interface MdVendorVO {
   contact2Telephone: string // 联系人2-电话
   contact2Email: string // 联系人2-邮箱
   creditCode: string // 统一社会信用代码
-  attribute1: string // 预留字段1
-  attribute2: string // 预留字段2
-  attribute3: number // 预留字段3
-  attribute4: number // 预留字段4
   status: number // 状态
   remark: string // 备注
 }

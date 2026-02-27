@@ -6,10 +6,6 @@ export interface CalHolidayVO {
   day: number // 日期（时间戳）
   type: number // 日期类型
   remark: string // 备注
-  attribute1: string // 预留字段1
-  attribute2: string // 预留字段2
-  attribute3: number // 预留字段3
-  attribute4: number // 预留字段4
   createTime: string // 创建时间
 }
 

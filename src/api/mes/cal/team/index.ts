@@ -7,10 +7,6 @@ export interface CalTeamVO {
   name: string // 班组名称
   calendarType: number // 班组类型
   remark: string // 备注
-  attribute1: string
-  attribute2: string
-  attribute3: number
-  attribute4: number
 }
 
 // MES 班组 API
