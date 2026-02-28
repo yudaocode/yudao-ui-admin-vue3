@@ -23,7 +23,6 @@
             </el-input>
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：必填；前后端都是；name -->
         <el-col :span="8">
           <el-form-item label="退料单名称" prop="name">
             <el-input
@@ -33,17 +32,16 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：必填；前后端都是；returnType -->
         <el-col :span="8">
-          <el-form-item label="退料类型" prop="returnType">
+          <el-form-item label="退料类型" prop="type">
             <el-select
-              v-model="formData.returnType"
+              v-model="formData.type"
               placeholder="请选择退料类型"
               :disabled="isHeaderReadonly"
               class="!w-full"
             >
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_RETURN_ISSUE_TYPE)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_RETURN_ISSUE_TYPE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -63,7 +61,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：必填；前后端都是；workOrderId -->
         <el-col :span="8">
           <el-form-item label="生产工单" prop="workOrderId">
             <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
@@ -105,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { generateRandomStr } from '@/utils'
 import { WmReturnIssueApi, WmReturnIssueVO } from '@/api/mes/wm/returnissue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
@@ -125,13 +122,15 @@ const formData = ref({
   name: undefined,
   workOrderId: undefined,
   workstationId: undefined,
-  returnType: undefined,
+  type: undefined,
   returnDate: undefined,
   remark: undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '退料单编号不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '退料单名称不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '退料单名称不能为空', trigger: 'blur' }],
+  type: [{ required: true, message: '退料类型不能为空', trigger: 'change' }],
+  workOrderId: [{ required: true, message: '生产工单不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -222,7 +221,7 @@ const resetForm = () => {
     name: undefined,
     workOrderId: undefined,
     workstationId: undefined,
-    returnType: undefined,
+    type: undefined,
     returnDate: undefined,
     remark: undefined
   }

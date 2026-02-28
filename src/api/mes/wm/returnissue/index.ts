@@ -9,7 +9,7 @@ export interface WmReturnIssueVO {
   workstationName?: string
   workOrderId?: number
   workOrderCode?: string
-  returnType?: string
+  type?: number
   returnDate?: string
   status?: number
   remark?: string

@@ -25,17 +25,22 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：增加 生产工单 的 select -->
-      <!-- TODO @AI：需要生成下，字典插入 sql -->
-      <el-form-item label="退料类型" prop="returnType">
+      <el-form-item label="生产工单" prop="workOrderId">
+        <ProWorkOrderSelect
+          v-model="queryParams.workOrderId"
+          clearable
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="退料类型" prop="type">
         <el-select
-          v-model="queryParams.returnType"
+          v-model="queryParams.type"
           placeholder="请选择退料类型"
           clearable
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_RETURN_ISSUE_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_RETURN_ISSUE_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -104,9 +109,9 @@
       <el-table-column label="退料单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="生产工单" align="center" prop="workOrderCode" min-width="140" />
       <el-table-column label="工作站" align="center" prop="workstationName" min-width="120" />
-      <el-table-column label="退料类型" align="center" prop="returnType" min-width="110">
+      <el-table-column label="退料类型" align="center" prop="type" min-width="110">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_WM_RETURN_ISSUE_TYPE" :value="scope.row.returnType" />
+          <dict-tag :type="DICT_TYPE.MES_WM_RETURN_ISSUE_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
       <el-table-column
@@ -152,8 +157,8 @@
             删除
           </el-button>
           <!-- TODO @芋艿：UNEXECUTE、UNSTOCK； -->
-          <!-- 待入库：入库上架 -->
-          <!-- TODO @AI：名字改成：“执行上架” -->
+          <!-- 待入库：执行上架 -->
+          <!-- DONE @AI：名字改成：“执行上架” -->
           <el-button
             link
             type="success"
@@ -161,10 +166,10 @@
             v-hasPermi="['mes:wm-return-issue:update']"
             v-if="scope.row.status === MesWmReturnIssueStatusEnum.APPROVING"
           >
-            入库上架
+            执行上架
           </el-button>
-          <!-- 已入库：完成 -->
-          <!-- TODO @AI：名字换成：“执行退料” -->
+          <!-- 已入库：执行退料 -->
+          <!-- DONE @AI：名字换成：“执行退料” -->
           <el-button
             link
             type="success"
@@ -172,7 +177,7 @@
             v-hasPermi="['mes:wm-return-issue:execute']"
             v-if="scope.row.status === MesWmReturnIssueStatusEnum.APPROVED"
           >
-            完成
+            执行退料
           </el-button>
           <!-- 待入库、已入库：取消 -->
           <el-button
@@ -204,10 +209,11 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmReturnIssueApi, WmReturnIssueVO } from '@/api/mes/wm/returnissue'
 import ReturnIssueForm from './ReturnIssueForm.vue'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import { MesWmReturnIssueStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesWmReturnIssue' })
@@ -224,7 +230,8 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
-  returnType: undefined,
+  workOrderId: undefined,
+  type: undefined,
   status: undefined,
   returnDate: undefined
 })
