@@ -1,19 +1,5 @@
 import request from '@/config/axios'
 
-// MES 领料出库单行 VO
-export interface WmProductionIssueLineVO {
-  id?: number
-  issueId?: number
-  itemId: number
-  itemCode?: string
-  itemName?: string
-  specification?: string
-  unitMeasureName?: string
-  quantity: number
-  batchId?: number
-  remark?: string
-}
-
 // MES 领料出库单 VO
 export interface WmProductionIssueVO {
   id?: number
@@ -28,7 +14,6 @@ export interface WmProductionIssueVO {
   status?: number
   remark?: string
   createTime?: string
-  lines?: WmProductionIssueLineVO[]
 }
 
 // MES 领料出库单 API
