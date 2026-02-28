@@ -60,6 +60,7 @@
           <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
             上架
           </el-button>
+          <!-- TODO @芋艿：【标签打印】后续搞的情况下； -->
         </template>
       </el-table-column>
     </el-table>

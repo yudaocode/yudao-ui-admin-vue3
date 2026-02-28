@@ -198,11 +198,6 @@ const submitForm = async () => {
 const handleStock = async () => {
   try {
     formLoading.value = true
-    // 校验退料数量与明细数量是否一致
-    const quantityMatch = await WmReturnIssueApi.checkReturnIssueQuantity(formData.value.id!)
-    if (!quantityMatch) {
-      await message.confirm('退料数量与明细数量不一致，确认执行入库上架？')
-    }
     await WmReturnIssueApi.stockReturnIssue(formData.value.id!)
     message.success('入库上架成功')
     dialogVisible.value = false

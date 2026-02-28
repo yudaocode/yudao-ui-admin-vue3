@@ -63,11 +63,6 @@ export const WmReturnIssueApi = {
     return await request.put({ url: '/mes/wm/return-issue/finish?id=' + id })
   },
 
-  // 校验生产退料单数量（每行明细数量之和是否等于行退料数量）
-  checkReturnIssueQuantity: async (id: number) => {
-    return await request.get({ url: '/mes/wm/return-issue/check-quantity?id=' + id })
-  },
-
   // 导出生产退料单 Excel
   exportReturnIssue: async (params: any) => {
     return await request.download({ url: '/mes/wm/return-issue/export-excel', params })
