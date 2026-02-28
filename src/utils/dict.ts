@@ -296,5 +296,8 @@ export enum DICT_TYPE {
   MES_WM_ITEM_RECEIPT_STATUS = 'mes_wm_item_receipt_status', // MES 物料接收单状态
   MES_WM_PRODUCTION_ISSUE_STATUS = 'mes_wm_production_issue_status', // MES 领料出库单状态
   MES_PRODUCT_PRODUCE_STATUS = 'mes_product_produce_status', // MES 生产入库单状态
+  MES_RETURN_VENDOR_STATUS = 'mes_return_vendor_status', // MES 供应商退货单状态
   MES_WM_QUALITY_STATUS = 'mes_wm_quality_status', // MES 质量状态
+  MES_WM_RETURN_ISSUE_STATUS = 'mes_wm_return_issue_status', // MES 生产退料单状态
+  MES_WM_RETURN_ISSUE_TYPE = 'mes_wm_return_issue_type', // MES 退料类型
 }

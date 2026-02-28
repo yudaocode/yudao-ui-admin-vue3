@@ -218,6 +218,24 @@ export const MesWmProductionIssueStatusEnum = {
   CANCELED: MesOrderStatusConstants.CANCELLED
 }
 
+/** MES 供应商退货单状态枚举 */
+export const MesWmReturnVendorStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  APPROVING: MesOrderStatusConstants.APPROVING,
+  APPROVED: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED,
+  CANCELED: MesOrderStatusConstants.CANCELLED
+}
+
+/** MES 生产退料单状态枚举 */
+export const MesWmReturnIssueStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  APPROVING: MesOrderStatusConstants.APPROVING,
+  APPROVED: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED,
+  CANCELED: MesOrderStatusConstants.CANCELLED
+}
+
 /** MES 生产入库单状态枚举 */
 export const MesWmProductProduceStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
