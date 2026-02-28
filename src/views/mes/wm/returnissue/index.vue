@@ -26,11 +26,7 @@
         />
       </el-form-item>
       <el-form-item label="生产工单" prop="workOrderId">
-        <ProWorkOrderSelect
-          v-model="queryParams.workOrderId"
-          clearable
-          class="!w-240px"
-        />
+        <ProWorkOrderSelect v-model="queryParams.workOrderId" clearable class="!w-240px" />
       </el-form-item>
       <el-form-item label="退料类型" prop="type">
         <el-select
@@ -41,32 +37,6 @@
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_RETURN_ISSUE_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="退料日期" prop="returnDate">
-        <el-date-picker
-          v-model="queryParams.returnDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="单据状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择单据状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_RETURN_ISSUE_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -107,13 +77,13 @@
         </template>
       </el-table-column>
       <el-table-column label="退料单名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="生产工单" align="center" prop="workOrderCode" min-width="140" />
-      <el-table-column label="工作站" align="center" prop="workstationName" min-width="120" />
       <el-table-column label="退料类型" align="center" prop="type" min-width="110">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_RETURN_ISSUE_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
+      <el-table-column label="生产工单" align="center" prop="workOrderCode" min-width="140" />
+      <el-table-column label="工作站" align="center" prop="workstationName" min-width="120" />
       <el-table-column
         label="退料日期"
         align="center"
@@ -156,9 +126,7 @@
           >
             删除
           </el-button>
-          <!-- TODO @芋艿：UNEXECUTE、UNSTOCK； -->
           <!-- 待入库：执行上架 -->
-          <!-- DONE @AI：名字改成：“执行上架” -->
           <el-button
             link
             type="success"
@@ -169,7 +137,6 @@
             执行上架
           </el-button>
           <!-- 已入库：执行退料 -->
-          <!-- DONE @AI：名字换成：“执行退料” -->
           <el-button
             link
             type="success"
@@ -231,9 +198,7 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   workOrderId: undefined,
-  type: undefined,
-  status: undefined,
-  returnDate: undefined
+  type: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const formRef = ref() // 表单弹窗

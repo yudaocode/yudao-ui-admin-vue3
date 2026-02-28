@@ -32,8 +32,12 @@
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="退料数量" align="center" prop="quantity" width="100" />
-      <!-- TODO @AI：批次号；增加下； -->
-      <!-- TODO @AI：是否检测，增加下； -->
+      <el-table-column label="批次号" align="center" prop="batchNo" min-width="120" />
+      <el-table-column label="是否检测" align="center" prop="qcFlag" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.qcFlag" />
+        </template>
+      </el-table-column>
       <el-table-column label="质量状态" align="center" prop="qualityStatus" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_QUALITY_STATUS" :value="scope.row.qualityStatus" />
@@ -78,6 +82,7 @@
     >
       <el-row>
         <el-col :span="8">
+          <!-- TODO @芋艿：【StockSelect】需要使用库存选择器； -->
           <el-form-item label="产品物料" prop="itemId">
             <MdItemSelect
               v-model="formData.itemId"
@@ -194,7 +199,8 @@ const formData = ref({
 })
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
-  quantity: [{ required: true, message: '退料数量不能为空', trigger: 'blur' }]
+  quantity: [{ required: true, message: '退料数量不能为空', trigger: 'blur' }],
+  qcFlag: [{ required: true, message: '需要质检不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 

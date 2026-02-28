@@ -50,6 +50,17 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <el-form-item label="生产工单" prop="workOrderId">
+            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
+          </el-form-item>
+        </el-col>
+        <!-- TODO @芋艿：貌似前端不用选择；关注下； -->
+        <el-col :span="8">
+          <el-form-item label="工作站" prop="workstationId">
+            <MdWorkstationSelect v-model="formData.workstationId" :disabled="isHeaderReadonly" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="退料日期" prop="returnDate">
             <el-date-picker
               v-model="formData.returnDate"
@@ -59,17 +70,6 @@
               :disabled="isHeaderReadonly"
               class="!w-full"
             />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
-          </el-form-item>
-        </el-col>
-        <!-- TODO @芋艿：貌似前端不用选择；关注下； -->
-        <el-col :span="8">
-          <el-form-item label="工作站" prop="workstationId">
-            <MdWorkstationSelect v-model="formData.workstationId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
         <el-col :span="24">
