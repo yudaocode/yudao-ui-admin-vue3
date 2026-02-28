@@ -16,7 +16,7 @@
         <template #default="scope">
           <ReturnVendorDetailList
             :ref="(el: any) => setDetailListRef(scope.row.id, el)"
-            :return-vendor-id="props.returnVendorId"
+            :return-id="props.returnId"
             :line-id="scope.row.id"
             :item-id="scope.row.itemId"
             :form-type="props.formType"
@@ -32,7 +32,7 @@
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="退货数量" align="center" prop="quantity" width="100" />
-      <!-- TODO @AI：批次号 -->
+      <el-table-column label="批次号" align="center" prop="batchId" width="80" />
       <el-table-column
         v-if="isUpdate || isStock"
         label="操作"
@@ -50,6 +50,7 @@
           <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
             拣货
           </el-button>
+          <!-- TODO @芋艿：【标签打印】后续在加； -->
         </template>
       </el-table-column>
     </el-table>
@@ -92,6 +93,7 @@
             />
           </el-form-item>
         </el-col>
+        <!-- TODO @芋艿：这里差一个批次号的选择器；【暂不处理】 -->
       </el-row>
       <el-row>
         <el-col :span="24">
@@ -110,7 +112,7 @@
   <!-- 拣货明细添加/编辑弹窗 -->
   <ReturnVendorDetailForm
     ref="detailFormRef"
-    :return-vendor-id="props.returnVendorId"
+    :return-id="props.returnId"
     @success="onDetailFormSuccess"
   />
 </template>
@@ -124,7 +126,7 @@ import ReturnVendorDetailForm from './ReturnVendorDetailForm.vue'
 defineOptions({ name: 'ReturnVendorLineList' })
 
 const props = defineProps<{
-  returnVendorId: number
+  returnId: number
   formType: string
 }>()
 
@@ -141,14 +143,14 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  returnVendorId: undefined as number | undefined
+  returnId: undefined as number | undefined
 })
 
 /** 查询行列表 */
 const getList = async () => {
   loading.value = true
   try {
-    queryParams.returnVendorId = props.returnVendorId
+    queryParams.returnId = props.returnId
     const data = await WmReturnVendorLineApi.getReturnVendorLinePage(queryParams)
     list.value = data.list
     total.value = data.total
@@ -174,7 +176,7 @@ const formLoading = ref(false) // 表单的加载中
 const lineFormType = ref('') // 行表单的类型
 const formData = ref({
   id: undefined,
-  returnVendorId: undefined as number | undefined,
+  returnId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
   remark: undefined
@@ -215,7 +217,7 @@ const submitForm = async () => {
   try {
     const data = {
       ...formData.value,
-      returnVendorId: props.returnVendorId
+      returnId: props.returnId
     } as unknown as WmReturnVendorLineVO
     if (lineFormType.value === 'create') {
       await WmReturnVendorLineApi.createReturnVendorLine(data)
@@ -235,7 +237,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    returnVendorId: undefined,
+    returnId: undefined,
     itemId: undefined,
     quantity: undefined,
     remark: undefined

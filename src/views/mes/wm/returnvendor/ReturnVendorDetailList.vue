@@ -34,7 +34,7 @@ import {
 defineOptions({ name: 'ReturnVendorDetailList' })
 
 const props = defineProps<{
-  returnVendorId: number
+  returnId: number
   lineId: number
   itemId: number
   formType: string

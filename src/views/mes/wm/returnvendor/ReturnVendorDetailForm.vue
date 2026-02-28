@@ -56,7 +56,7 @@ import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehou
 defineOptions({ name: 'ReturnVendorDetailForm' })
 
 const props = defineProps<{
-  returnVendorId: number
+  returnId: number
 }>()
 
 const emit = defineEmits(['success'])
@@ -73,7 +73,7 @@ const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,
   lineId: undefined as number | undefined,
-  returnVendorId: undefined as number | undefined,
+  returnId: undefined as number | undefined,
   itemId: undefined as number | undefined,
   quantity: undefined as number | undefined,
   batchCode: undefined as string | undefined,
@@ -119,7 +119,7 @@ const submitForm = async () => {
   try {
     const data = {
       ...formData.value,
-      returnVendorId: props.returnVendorId,
+      returnId: props.returnId,
       lineId: currentLineId.value
     } as unknown as WmReturnVendorDetailVO
     if (formType.value === 'create') {
@@ -142,7 +142,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     lineId: undefined,
-    returnVendorId: undefined,
+    returnId: undefined,
     itemId: undefined,
     quantity: undefined,
     batchCode: undefined,

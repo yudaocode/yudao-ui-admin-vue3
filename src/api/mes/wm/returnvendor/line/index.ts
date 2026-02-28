@@ -3,7 +3,7 @@ import request from '@/config/axios'
 // MES 供应商退货单行 VO
 export interface WmReturnVendorLineVO {
   id?: number
-  returnVendorId: number
+  returnId: number
   itemId: number
   itemCode?: string
   itemName?: string

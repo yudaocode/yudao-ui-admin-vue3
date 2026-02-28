@@ -33,21 +33,19 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="供应商" prop="vendorId">
-            <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
-          </el-form-item>
-        </el-col>
-        <!-- TODO @AI：字段完整拼写 -->
-        <el-col :span="8">
-          <el-form-item label="采购订单号" prop="poCode">
+          <el-form-item label="采购订单号" prop="purchaseOrderCode">
             <el-input
-              v-model="formData.poCode"
+              v-model="formData.purchaseOrderCode"
               placeholder="请输入采购订单号"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：供应商 select（必填） -->
+        <el-col :span="8">
+          <el-form-item label="供应商" prop="vendorId">
+            <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
+          </el-form-item>
+        </el-col>
         <el-col :span="8">
           <el-form-item label="退货日期" prop="returnDate">
             <el-date-picker
@@ -60,36 +58,25 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：不需要批次号 -->
-        <el-col :span="8">
-          <el-form-item label="批次号" prop="batchCode">
-            <el-input
-              v-model="formData.batchCode"
-              placeholder="请输入批次号"
-              :disabled="isHeaderReadonly"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
+        <el-col :span="24">
           <el-form-item label="退货原因" prop="returnReason">
             <el-input
               v-model="formData.returnReason"
+              type="textarea"
               placeholder="请输入退货原因"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：运单号 -->
         <el-col :span="8">
-          <el-form-item label="物流单号" prop="transportCode">
+          <el-form-item label="运单号" prop="transportCode">
             <el-input
               v-model="formData.transportCode"
-              placeholder="请输入物流单号"
+              placeholder="请输入运单号"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：联系人 -->
         <el-col :span="8">
           <el-form-item label="联系电话" prop="transportTelephone">
             <el-input
@@ -114,7 +101,7 @@
     <!-- 非新建模式展示行项目信息（退货物料） -->
     <template v-if="formData.id">
       <el-divider content-position="center">物料信息</el-divider>
-      <ReturnVendorLineList :return-vendor-id="formData.id" :form-type="formType" />
+      <ReturnVendorLineList :return-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
       <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
@@ -145,9 +132,9 @@ const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
-  poCode: undefined,
+  purchaseOrderCode: undefined,
   vendorId: undefined,
-  batchCode: undefined,
+
   returnDate: undefined,
   returnReason: undefined,
   transportCode: undefined,
@@ -157,6 +144,7 @@ const formData = ref({
 const formRules = reactive({
   code: [{ required: true, message: '退货单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '退货单名称不能为空', trigger: 'blur' }],
+  vendorId: [{ required: true, message: '供应商不能为空', trigger: 'change' }],
   returnDate: [{ required: true, message: '退货日期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
@@ -246,9 +234,9 @@ const resetForm = () => {
     id: undefined,
     code: undefined,
     name: undefined,
-    poCode: undefined,
+    purchaseOrderCode: undefined,
     vendorId: undefined,
-    batchCode: undefined,
+
     returnDate: undefined,
     returnReason: undefined,
     transportCode: undefined,

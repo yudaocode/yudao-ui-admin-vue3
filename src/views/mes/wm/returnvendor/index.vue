@@ -25,34 +25,17 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：采购订单编号 -->
-      <!-- TODO @AI：供应商筛选 -->
-      <!-- TODO @AI：去掉 returnDate、status；包括前后端； -->
-      <el-form-item label="退货日期" prop="returnDate">
-        <el-date-picker
-          v-model="queryParams.returnDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+      <el-form-item label="采购订单编号" prop="purchaseOrderCode">
+        <el-input
+          v-model="queryParams.purchaseOrderCode"
+          placeholder="请输入采购订单编号"
+          clearable
+          @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="单据状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择单据状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_RETURN_VENDOR_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+      <el-form-item label="供应商" prop="vendorId">
+        <MdVendorSelect v-model="queryParams.vendorId" clearable class="!w-240px" />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -88,11 +71,9 @@
         </template>
       </el-table-column>
       <el-table-column label="退货单名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="采购订单号" align="center" prop="poCode" min-width="140" />
-      <!-- TODO @AI：拆成供应商编码、供应商名称 -->
-      <el-table-column label="供应商" align="center" prop="vendorName" min-width="150" />
-      <!-- TODO @AI：去掉 batchCode 字段-->
-      <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
+      <el-table-column label="采购订单号" align="center" prop="purchaseOrderCode" min-width="140" />
+      <el-table-column label="供应商编码" align="center" prop="vendorCode" min-width="120" />
+      <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="150" />
       <el-table-column
         label="退货日期"
         align="center"
@@ -100,8 +81,6 @@
         :formatter="dateFormatter2"
         width="180px"
       />
-      <!-- TODO @AI：去掉 returnReason 字段-->
-      <el-table-column label="退货原因" align="center" prop="returnReason" min-width="150" />
       <el-table-column label="单据状态" align="center" prop="status" min-width="110">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_RETURN_VENDOR_STATUS" :value="scope.row.status" />
@@ -188,10 +167,11 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmReturnVendorApi, WmReturnVendorVO } from '@/api/mes/wm/returnvendor'
 import ReturnVendorForm from './ReturnVendorForm.vue'
+import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import { MesWmReturnVendorStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesWmReturnVendor' })
@@ -208,8 +188,8 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
-  status: undefined,
-  returnDate: undefined
+  purchaseOrderCode: undefined,
+  vendorId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const formRef = ref() // 表单弹窗

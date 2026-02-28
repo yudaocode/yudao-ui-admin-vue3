@@ -5,11 +5,11 @@ export interface WmReturnVendorVO {
   id?: number
   code?: string
   name: string
-  poCode?: string
+  purchaseOrderCode?: string
   vendorId?: number
+  vendorCode?: string
   vendorName?: string
   vendorNickname?: string
-  batchCode?: string
   returnDate?: string
   returnReason?: string
   transportCode?: string
