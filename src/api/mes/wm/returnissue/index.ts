@@ -43,7 +43,7 @@ export const WmReturnIssueApi = {
     return await request.delete({ url: '/mes/wm/return-issue/delete?id=' + id })
   },
 
-  // 提交生产退料单
+  // 提交生产退料单（草稿 → 待检验/待上架）
   submitReturnIssue: async (id: number) => {
     return await request.put({ url: '/mes/wm/return-issue/submit?id=' + id })
   },

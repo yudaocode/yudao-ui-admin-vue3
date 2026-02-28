@@ -230,6 +230,7 @@ export const MesWmReturnVendorStatusEnum = {
 /** MES 生产退料单状态枚举 */
 export const MesWmReturnIssueStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
+  CONFIRMED: MesOrderStatusConstants.CONFIRMED,
   APPROVING: MesOrderStatusConstants.APPROVING,
   APPROVED: MesOrderStatusConstants.APPROVED,
   FINISHED: MesOrderStatusConstants.FINISHED,

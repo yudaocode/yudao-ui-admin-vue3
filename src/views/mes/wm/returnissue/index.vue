@@ -126,7 +126,7 @@
           >
             删除
           </el-button>
-          <!-- 待入库：执行上架 -->
+          <!-- 待上架：执行上架 -->
           <el-button
             link
             type="success"
@@ -232,10 +232,10 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交按钮操作 */
+/** 提交按钮操作（草稿 → 待检验/待上架） */
 const handleSubmit = async (id: number) => {
   try {
-    await message.confirm('确认提交该退料单吗？')
+    await message.confirm('确认提交该退料单吗？系统将根据是否需要质检自动流转状态。')
     await WmReturnIssueApi.submitReturnIssue(id)
     message.success('提交成功')
     await getList()
