@@ -90,7 +90,6 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
-          {{ scope.row.status }}
           <el-button
             link
             type="primary"
@@ -118,7 +117,6 @@
           >
             删除
           </el-button>
-          <!-- DONE @AI：执行退货、执行上架；是不是状态判断错了；（状态判断正确：APPROVING=待执行→执行退货，APPROVED=待上架→执行上架） -->
           <!-- 待执行：执行退货 -->
           <el-button
             link
