@@ -48,13 +48,10 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
-          </el-form-item>
-        </el-col>
-        <!-- TODO @AI：MdItemSelect 都是 readonly，通过 ProWorkOrderSelect 选择后，设置下； -->
-        <el-col :span="8">
-          <el-form-item label="产品物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" :disabled="isHeaderReadonly" />
+            <ProWorkOrderSelect
+              v-model="formData.workOrderId"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -91,7 +88,6 @@
 <script setup lang="ts">
 import { generateRandomStr } from '@/utils'
 import { WmProductRecptApi, WmProductRecptVO } from '@/api/mes/wm/productrecpt'
-import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import ProductRecptLineList from './ProductRecptLineList.vue'
 
@@ -107,18 +103,13 @@ const formData = ref({
   code: undefined,
   name: undefined,
   workOrderId: undefined,
-  itemId: undefined,
   receiptDate: undefined,
   remark: undefined
 })
 const formRules = reactive({
-  // TODO @AI：name；必填
   code: [{ required: true, message: '入库单编号不能为空', trigger: 'blur' }],
-  receiptDate: [{ required: true, message: '入库日期不能为空', trigger: 'change' }],
-  // TODO @AI：workOrderId 可选；
-  workOrderId: [{ required: true, message: '生产工单不能为空', trigger: 'change' }],
-  // TODO @AI：去掉 itemId 必填；
-  itemId: [{ required: true, message: '产品物料不能为空', trigger: 'change' }]
+  name: [{ required: true, message: '入库单名称不能为空', trigger: 'blur' }],
+  receiptDate: [{ required: true, message: '入库日期不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
@@ -183,6 +174,12 @@ const handleStock = async () => {
   try {
     await message.confirm('确认执行上架？')
     formLoading.value = true
+    // 校验明细数量与行收货数量是否一致
+    const quantityMatch = await WmProductRecptApi.checkProductRecptQuantity(formData.value.id!)
+    if (!quantityMatch) {
+      await message.confirm('明细数量与行收货数量不一致，确认执行上架？')
+    }
+    // 执行上架
     await WmProductRecptApi.stockProductRecpt(formData.value.id!)
     message.success('上架成功')
     dialogVisible.value = false
@@ -200,7 +197,6 @@ const resetForm = () => {
     code: undefined,
     name: undefined,
     workOrderId: undefined,
-    itemId: undefined,
     receiptDate: undefined,
     remark: undefined
   }

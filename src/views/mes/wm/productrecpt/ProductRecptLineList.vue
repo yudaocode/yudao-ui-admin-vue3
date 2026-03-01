@@ -27,8 +27,8 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="物料编码" align="center" prop="itemCode" min-width="120" />
-      <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
+      <el-table-column label="产品物料编码" align="center" prop="itemCode" min-width="120" />
+      <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="入库数量" align="center" prop="quantity" width="100" />
@@ -50,6 +50,7 @@
           <el-button v-if="isStock" link type="success" @click="handleStock(scope.row.id)">
             上架
           </el-button>
+          <!-- TODO @芋艿：【暂不处理】标签打印 -->
         </template>
       </el-table-column>
     </el-table>
@@ -71,13 +72,10 @@
       v-loading="formLoading"
     >
       <el-row>
+        <!-- TODO @芋艿：【后面处理】库存物资选择 -->
         <el-col :span="8">
-          <el-form-item label="物料" prop="itemId">
-            <MdItemSelect
-              v-model="formData.itemId"
-              placeholder="请选择物料"
-              class="!w-1/1"
-            />
+          <el-form-item label="物料物料" prop="itemId">
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料物料" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -92,8 +90,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="批次编码" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次编码" />
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
           </el-form-item>
         </el-col>
       </el-row>

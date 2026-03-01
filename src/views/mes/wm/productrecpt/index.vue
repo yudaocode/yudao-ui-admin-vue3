@@ -31,27 +31,6 @@
       <el-form-item label="产品物料" prop="itemId">
         <MdItemSelect v-model="queryParams.itemId" class="!w-240px" />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_PRODUCT_RECPT_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="入库日期" prop="receiptDate">
-        <el-date-picker
-          v-model="queryParams.receiptDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -80,9 +59,11 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="入库单编号" align="center" prop="code" min-width="160" />
       <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="生产工单" align="center" prop="workOrderCode" min-width="120" />
-      <!-- TODO @AI：itemName -> itemCode -->
-      <el-table-column label="产品物料" align="center" prop="itemName" min-width="120" />
+      <el-table-column label="生产工单" align="center" prop="workOrderCode" min-width="140" />
+      <el-table-column label="产品物料编码" align="center" prop="itemCode" min-width="120" />
+      <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
+      <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
+      <el-table-column label="计量单位" align="center" prop="unitMeasureName" min-width="100" />
       <el-table-column
         label="入库日期"
         align="center"
@@ -90,7 +71,7 @@
         :formatter="dateFormatter2"
         width="180px"
       />
-      <el-table-column label="单据状态" align="center" prop="status" min-width="100">
+      <el-table-column label="单据状态" align="center" prop="status" min-width="110">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_PRODUCT_RECPT_STATUS" :value="scope.row.status" />
         </template>
@@ -125,7 +106,7 @@
           >
             删除
           </el-button>
-          <!-- 待上架：执行上架、取消 -->
+          <!-- 待拣货：执行上架 -->
           <el-button
             link
             type="success"
@@ -135,7 +116,7 @@
           >
             执行上架
           </el-button>
-          <!-- 待入库：执行入库、取消 -->
+          <!-- 待执行入库：执行入库 -->
           <el-button
             link
             type="primary"
@@ -145,15 +126,17 @@
           >
             执行入库
           </el-button>
+          <!-- 待拣货、待执行入库：取消 -->
           <el-button
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
             v-hasPermi="['mes:wm-product-recpt:update']"
             v-if="
-              [MesWmProductRecptStatusEnum.APPROVING, MesWmProductRecptStatusEnum.APPROVED].includes(
-                scope.row.status
-              )
+              [
+                MesWmProductRecptStatusEnum.APPROVING,
+                MesWmProductRecptStatusEnum.APPROVED
+              ].includes(scope.row.status)
             "
           >
             取消
@@ -174,7 +157,7 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmProductRecptApi, WmProductRecptVO } from '@/api/mes/wm/productrecpt'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
@@ -197,9 +180,7 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   workOrderId: undefined,
-  itemId: undefined,
-  status: undefined,
-  receiptDate: undefined
+  itemId: undefined
 })
 const queryFormRef = ref()
 const formRef = ref()
