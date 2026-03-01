@@ -33,9 +33,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="销售订单号" prop="soCode">
+          <el-form-item label="销售订单号" prop="salesOrderCode">
             <el-input
-              v-model="formData.soCode"
+              v-model="formData.salesOrderCode"
               placeholder="请输入销售订单号"
               :disabled="isHeaderReadonly"
             />
@@ -62,7 +62,6 @@
         </el-col>
       </el-row>
       <el-row>
-        <!-- TODO @AI：必填 -->
         <el-col :span="24">
           <el-form-item label="退货原因" prop="returnReason">
             <el-input
@@ -121,7 +120,7 @@ const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
-  soCode: undefined,
+  salesOrderCode: undefined,
   clientId: undefined,
   returnDate: undefined,
   returnReason: undefined,
@@ -131,7 +130,8 @@ const formRules = reactive({
   code: [{ required: true, message: '退货单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '退货单名称不能为空', trigger: 'blur' }],
   clientId: [{ required: true, message: '客户不能为空', trigger: 'change' }],
-  returnDate: [{ required: true, message: '退货日期不能为空', trigger: 'change' }]
+  returnDate: [{ required: true, message: '退货日期不能为空', trigger: 'change' }],
+  returnReason: [{ required: true, message: '退货原因不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -216,7 +216,7 @@ const resetForm = () => {
     id: undefined,
     code: undefined,
     name: undefined,
-    soCode: undefined,
+    salesOrderCode: undefined,
     clientId: undefined,
     returnDate: undefined,
     returnReason: undefined,

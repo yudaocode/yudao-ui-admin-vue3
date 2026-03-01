@@ -301,4 +301,5 @@ export enum DICT_TYPE {
   MES_WM_RETURN_ISSUE_STATUS = 'mes_wm_return_issue_status', // MES 生产退料单状态
   MES_WM_RETURN_ISSUE_TYPE = 'mes_wm_return_issue_type', // MES 退料类型
   MES_WM_PRODUCT_RECPT_STATUS = 'mes_wm_product_receipt_status', // MES 成品入库单状态
+  MES_WM_RETURN_SALES_STATUS = 'mes_wm_return_sales_status', // MES 销售退货单状态
 }

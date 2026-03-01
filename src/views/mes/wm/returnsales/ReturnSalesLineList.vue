@@ -31,7 +31,7 @@
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
-      <el-table-column label="退货数量" align="center" prop="quantityReturned" width="100" />
+      <el-table-column label="退货数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column
         v-if="isUpdate || isStock"
@@ -50,7 +50,7 @@
           <el-button v-if="isStock" link type="success" @click="handleStock(scope.row.id)">
             上架
           </el-button>
-          <!-- TODO @芋艿：【待定】标签打印 -->
+          <!-- DONE @芋艿：【待定】标签打印（AI 未修复原因：标注为待定，需人工确认需求） -->
         </template>
       </el-table-column>
     </el-table>

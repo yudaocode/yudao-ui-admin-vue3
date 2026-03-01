@@ -5,7 +5,7 @@ export interface WmReturnSalesVO {
   id?: number
   code?: string
   name: string
-  soCode?: string
+  salesOrderCode?: string
   clientId?: number
   clientCode?: string
   clientName?: string

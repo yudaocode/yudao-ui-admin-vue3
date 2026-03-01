@@ -25,32 +25,19 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：soCode 前后端都去掉 -->
-      <el-form-item label="销售订单号" prop="soCode">
-        <el-input
-          v-model="queryParams.soCode"
-          placeholder="请输入销售订单号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="客户" prop="clientId">
         <MdClientSelect v-model="queryParams.clientId" clearable class="!w-240px" />
       </el-form-item>
-      <!-- TODO @AI：soCode returnDate 都去掉 -->
-      <el-form-item label="退货日期" prop="returnDate">
-        <el-date-picker
-          v-model="queryParams.returnDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
+      <el-form-item label="单据状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择单据状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_RETURN_SALES_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
-      <!-- TODO @AI：缺一个单独状态； -->
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -85,10 +72,10 @@
         </template>
       </el-table-column>
       <el-table-column label="退货单名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="销售订单号" align="center" prop="soCode" min-width="140" />
+      <el-table-column label="销售订单号" align="center" prop="salesOrderCode" min-width="140" />
       <el-table-column label="客户编码" align="center" prop="clientCode" min-width="120" />
       <el-table-column label="客户名称" align="center" prop="clientName" min-width="150" />
-      <!-- TODO @AI：退货原因 -->
+      <el-table-column label="退货原因" align="center" prop="returnReason" min-width="150" />
       <el-table-column
         label="退货日期"
         align="center"
@@ -98,7 +85,6 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="110">
         <template #default="scope">
-          <!-- TODO @AI：DICT_TYPE 里没定义！ -->
           <dict-tag :type="DICT_TYPE.MES_WM_RETURN_SALES_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
@@ -132,7 +118,7 @@
           >
             删除
           </el-button>
-          <!-- TODO @AI：执行退货、执行上架；是不是状态判断错了； -->
+          <!-- DONE @AI：执行退货、执行上架；是不是状态判断错了；（状态判断正确：APPROVING=待执行→执行退货，APPROVED=待上架→执行上架） -->
           <!-- 待执行：执行退货 -->
           <el-button
             link
@@ -183,7 +169,7 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmReturnSalesApi, WmReturnSalesVO } from '@/api/mes/wm/returnsales'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
@@ -204,9 +190,8 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
-  soCode: undefined,
   clientId: undefined,
-  returnDate: undefined
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const formRef = ref() // 表单弹窗
