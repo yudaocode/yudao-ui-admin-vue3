@@ -71,7 +71,7 @@
     <!-- 非新建模式展示行项目信息（收货物料） -->
     <template v-if="formData.id">
       <el-divider content-position="center">物料信息</el-divider>
-      <ProductRecptLineList :recpt-id="formData.id" :form-type="formType" />
+      <ProductReceiptLineList :receipt-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
       <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
@@ -87,11 +87,11 @@
 
 <script setup lang="ts">
 import { generateRandomStr } from '@/utils'
-import { WmProductRecptApi, WmProductRecptVO } from '@/api/mes/wm/productrecpt'
+import { WmProductReceiptApi, WmProductReceiptVO } from '@/api/mes/wm/productreceipt'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
-import ProductRecptLineList from './ProductRecptLineList.vue'
+import ProductReceiptLineList from './ProductReceiptLineList.vue'
 
-defineOptions({ name: 'ProductRecptForm' })
+defineOptions({ name: 'ProductReceiptForm' })
 
 const message = useMessage()
 
@@ -139,7 +139,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await WmProductRecptApi.getProductRecpt(id)
+      formData.value = await WmProductReceiptApi.getProductReceipt(id)
     } finally {
       formLoading.value = false
     }
@@ -153,14 +153,14 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = formData.value as unknown as WmProductRecptVO
+    const data = formData.value as unknown as WmProductReceiptVO
     if (formType.value === 'create') {
-      const res = await WmProductRecptApi.createProductRecpt(data)
+      const res = await WmProductReceiptApi.createProductReceipt(data)
       message.success('新增成功')
       formData.value.id = res
       formType.value = 'update'
     } else {
-      await WmProductRecptApi.updateProductRecpt(data)
+      await WmProductReceiptApi.updateProductReceipt(data)
       message.success('修改成功')
     }
     emit('success')
@@ -175,12 +175,12 @@ const handleStock = async () => {
     await message.confirm('确认执行上架？')
     formLoading.value = true
     // 校验明细数量与行收货数量是否一致
-    const quantityMatch = await WmProductRecptApi.checkProductRecptQuantity(formData.value.id!)
+    const quantityMatch = await WmProductReceiptApi.checkProductReceiptQuantity(formData.value.id!)
     if (!quantityMatch) {
       await message.confirm('明细数量与行收货数量不一致，确认执行上架？')
     }
     // 执行上架
-    await WmProductRecptApi.stockProductRecpt(formData.value.id!)
+    await WmProductReceiptApi.stockProductReceipt(formData.value.id!)
     message.success('上架成功')
     dialogVisible.value = false
     emit('success')

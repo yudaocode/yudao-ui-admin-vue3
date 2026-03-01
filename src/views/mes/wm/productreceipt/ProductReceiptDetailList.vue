@@ -25,12 +25,12 @@
 </template>
 
 <script setup lang="ts">
-import { WmProductRecptDetailApi, WmProductRecptDetailVO } from '@/api/mes/wm/productrecpt/detail'
+import { WmProductReceiptDetailApi, WmProductReceiptDetailVO } from '@/api/mes/wm/productreceipt/detail'
 
-defineOptions({ name: 'ProductRecptDetailList' })
+defineOptions({ name: 'ProductReceiptDetailList' })
 
 const props = defineProps<{
-  recptId: number
+  receiptId: number
   lineId: number
   itemId: number
   formType: string
@@ -42,13 +42,13 @@ const { t } = useI18n()
 const message = useMessage()
 
 const loading = ref(false)
-const list = ref<WmProductRecptDetailVO[]>([])
+const list = ref<WmProductReceiptDetailVO[]>([])
 
 /** 查询明细列表 */
 const getList = async () => {
   loading.value = true
   try {
-    list.value = await WmProductRecptDetailApi.getProductRecptDetailListByLineId(props.lineId)
+    list.value = await WmProductReceiptDetailApi.getProductReceiptDetailListByLineId(props.lineId)
   } finally {
     loading.value = false
   }
@@ -59,7 +59,7 @@ defineExpose({ getList })
 const handleDelete = async (detailId: number) => {
   try {
     await message.delConfirm()
-    await WmProductRecptDetailApi.deleteProductRecptDetail(detailId)
+    await WmProductReceiptDetailApi.deleteProductReceiptDetail(detailId)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}

@@ -41,16 +41,16 @@
 </template>
 
 <script setup lang="ts">
-import { WmProductRecptDetailApi, WmProductRecptDetailVO } from '@/api/mes/wm/productrecpt/detail'
+import { WmProductReceiptDetailApi, WmProductReceiptDetailVO } from '@/api/mes/wm/productreceipt/detail'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
 
-defineOptions({ name: 'ProductRecptDetailForm' })
+defineOptions({ name: 'ProductReceiptDetailForm' })
 
 const props = defineProps<{
-  recptId: number
+  receiptId: number
 }>()
 
 const emit = defineEmits(['success'])
@@ -67,7 +67,7 @@ const formRef = ref()
 const formData = ref({
   id: undefined as number | undefined,
   lineId: undefined as number | undefined,
-  recptId: undefined as number | undefined,
+  receiptId: undefined as number | undefined,
   itemId: undefined as number | undefined,
   quantity: undefined as number | undefined,
   warehouseId: undefined as number | undefined,
@@ -92,7 +92,7 @@ const open = async (type: string, lineId: number, itemId?: number, detailId?: nu
   if (detailId) {
     formLoading.value = true
     try {
-      formData.value = await WmProductRecptDetailApi.getProductRecptDetail(detailId)
+      formData.value = await WmProductReceiptDetailApi.getProductReceiptDetail(detailId)
     } finally {
       formLoading.value = false
     }
@@ -109,14 +109,14 @@ const submitForm = async () => {
   try {
     const data = {
       ...formData.value,
-      recptId: props.recptId,
+      receiptId: props.receiptId,
       lineId: currentLineId.value
-    } as unknown as WmProductRecptDetailVO
+    } as unknown as WmProductReceiptDetailVO
     if (formType.value === 'create') {
-      await WmProductRecptDetailApi.createProductRecptDetail(data)
+      await WmProductReceiptDetailApi.createProductReceiptDetail(data)
       message.success(t('common.createSuccess'))
     } else {
-      await WmProductRecptDetailApi.updateProductRecptDetail(data)
+      await WmProductReceiptDetailApi.updateProductReceiptDetail(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -131,7 +131,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     lineId: undefined,
-    recptId: undefined,
+    receiptId: undefined,
     itemId: undefined,
     quantity: undefined,
     warehouseId: undefined,

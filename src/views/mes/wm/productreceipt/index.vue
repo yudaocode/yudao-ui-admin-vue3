@@ -38,7 +38,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['mes:wm-product-recpt:create']"
+          v-hasPermi="['mes:wm-product-receipt:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -47,7 +47,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['mes:wm-product-recpt:export']"
+          v-hasPermi="['mes:wm-product-receipt:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -83,8 +83,8 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:wm-product-recpt:update']"
-            v-if="scope.row.status === MesWmProductRecptStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-product-receipt:update']"
+            v-if="scope.row.status === MesWmProductReceiptStatusEnum.PREPARE"
           >
             编辑
           </el-button>
@@ -92,8 +92,8 @@
             link
             type="warning"
             @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-product-recpt:update']"
-            v-if="scope.row.status === MesWmProductRecptStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-product-receipt:update']"
+            v-if="scope.row.status === MesWmProductReceiptStatusEnum.PREPARE"
           >
             提交
           </el-button>
@@ -101,8 +101,8 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:wm-product-recpt:delete']"
-            v-if="scope.row.status === MesWmProductRecptStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-product-receipt:delete']"
+            v-if="scope.row.status === MesWmProductReceiptStatusEnum.PREPARE"
           >
             删除
           </el-button>
@@ -111,8 +111,8 @@
             link
             type="success"
             @click="openForm('stock', scope.row.id)"
-            v-hasPermi="['mes:wm-product-recpt:update']"
-            v-if="scope.row.status === MesWmProductRecptStatusEnum.APPROVING"
+            v-hasPermi="['mes:wm-product-receipt:update']"
+            v-if="scope.row.status === MesWmProductReceiptStatusEnum.APPROVING"
           >
             执行上架
           </el-button>
@@ -121,8 +121,8 @@
             link
             type="primary"
             @click="handleExecute(scope.row.id)"
-            v-hasPermi="['mes:wm-product-recpt:execute']"
-            v-if="scope.row.status === MesWmProductRecptStatusEnum.APPROVED"
+            v-hasPermi="['mes:wm-product-receipt:execute']"
+            v-if="scope.row.status === MesWmProductReceiptStatusEnum.APPROVED"
           >
             执行入库
           </el-button>
@@ -131,11 +131,11 @@
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
-            v-hasPermi="['mes:wm-product-recpt:update']"
+            v-hasPermi="['mes:wm-product-receipt:update']"
             v-if="
               [
-                MesWmProductRecptStatusEnum.APPROVING,
-                MesWmProductRecptStatusEnum.APPROVED
+                MesWmProductReceiptStatusEnum.APPROVING,
+                MesWmProductReceiptStatusEnum.APPROVED
               ].includes(scope.row.status)
             "
           >
@@ -152,26 +152,26 @@
     />
   </ContentWrap>
 
-  <ProductRecptForm ref="formRef" @success="getList" />
+  <ProductReceiptForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
-import { WmProductRecptApi, WmProductRecptVO } from '@/api/mes/wm/productrecpt'
+import { WmProductReceiptApi, WmProductReceiptVO } from '@/api/mes/wm/productreceipt'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
-import ProductRecptForm from './ProductRecptForm.vue'
-import { MesWmProductRecptStatusEnum } from '@/views/mes/utils/constants'
+import ProductReceiptForm from './ProductReceiptForm.vue'
+import { MesWmProductReceiptStatusEnum } from '@/views/mes/utils/constants'
 
-defineOptions({ name: 'MesWmProductRecpt' })
+defineOptions({ name: 'MesWmProductReceipt' })
 
 const message = useMessage()
 const { t } = useI18n()
 
 const loading = ref(true)
-const list = ref<WmProductRecptVO[]>([])
+const list = ref<WmProductReceiptVO[]>([])
 const total = ref(0)
 const exportLoading = ref(false)
 const queryParams = reactive({
@@ -189,7 +189,7 @@ const formRef = ref()
 const getList = async () => {
   loading.value = true
   try {
-    const data = await WmProductRecptApi.getProductRecptPage(queryParams)
+    const data = await WmProductReceiptApi.getProductReceiptPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -218,7 +218,7 @@ const openForm = (type: string, id?: number) => {
 const handleSubmit = async (id: number) => {
   try {
     await message.confirm('确认提交该产品入库单？')
-    await WmProductRecptApi.submitProductRecpt(id)
+    await WmProductReceiptApi.submitProductReceipt(id)
     message.success('提交成功')
     await getList()
   } catch {}
@@ -228,7 +228,7 @@ const handleSubmit = async (id: number) => {
 const handleExecute = async (id: number) => {
   try {
     await message.confirm('确认执行入库？执行后将更新库存台账。')
-    await WmProductRecptApi.executeProductRecpt(id)
+    await WmProductReceiptApi.executeProductReceipt(id)
     message.success('入库成功')
     await getList()
   } catch {}
@@ -238,7 +238,7 @@ const handleExecute = async (id: number) => {
 const handleCancel = async (id: number) => {
   try {
     await message.confirm('确认取消该产品入库单？取消后不可恢复。')
-    await WmProductRecptApi.cancelProductRecpt(id)
+    await WmProductReceiptApi.cancelProductReceipt(id)
     message.success('取消成功')
     await getList()
   } catch {}
@@ -248,7 +248,7 @@ const handleCancel = async (id: number) => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await WmProductRecptApi.deleteProductRecpt(id)
+    await WmProductReceiptApi.deleteProductReceipt(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -259,7 +259,7 @@ const handleExport = async () => {
   try {
     await message.exportConfirm()
     exportLoading.value = true
-    const data = await WmProductRecptApi.exportProductRecpt(queryParams)
+    const data = await WmProductReceiptApi.exportProductReceipt(queryParams)
     download.excel(data, '产品入库单.xls')
   } catch {
   } finally {

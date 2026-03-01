@@ -245,7 +245,7 @@ export const MesWmProductProduceStatusEnum = {
 }
 
 /** MES 产品入库单状态枚举 */
-export const MesWmProductRecptStatusEnum = {
+export const MesWmProductReceiptStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
   APPROVING: MesOrderStatusConstants.APPROVING,
   APPROVED: MesOrderStatusConstants.APPROVED,

@@ -14,9 +14,9 @@
     >
       <el-table-column type="expand">
         <template #default="scope">
-          <ProductRecptDetailList
+          <ProductReceiptDetailList
             :ref="(el: any) => setDetailListRef(scope.row.id, el)"
-            :recpt-id="props.recptId"
+            :receipt-id="props.receiptId"
             :line-id="scope.row.id"
             :item-id="scope.row.itemId"
             :form-type="props.formType"
@@ -110,23 +110,23 @@
   </Dialog>
 
   <!-- 上架明细添加/编辑弹窗 -->
-  <ProductRecptDetailForm
+  <ProductReceiptDetailForm
     ref="detailFormRef"
-    :recpt-id="props.recptId"
+    :receipt-id="props.receiptId"
     @success="onDetailFormSuccess"
   />
 </template>
 
 <script setup lang="ts">
-import { WmProductRecptLineApi, WmProductRecptLineVO } from '@/api/mes/wm/productrecpt/line'
+import { WmProductReceiptLineApi, WmProductReceiptLineVO } from '@/api/mes/wm/productreceipt/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import ProductRecptDetailList from './ProductRecptDetailList.vue'
-import ProductRecptDetailForm from './ProductRecptDetailForm.vue'
+import ProductReceiptDetailList from './ProductReceiptDetailList.vue'
+import ProductReceiptDetailForm from './ProductReceiptDetailForm.vue'
 
-defineOptions({ name: 'ProductRecptLineList' })
+defineOptions({ name: 'ProductReceiptLineList' })
 
 const props = defineProps<{
-  recptId: number
+  receiptId: number
   formType: string
 }>()
 
@@ -138,20 +138,20 @@ const isStock = computed(() => props.formType === 'stock')
 
 // ==================== 列表 ====================
 const loading = ref(false)
-const list = ref<WmProductRecptLineVO[]>([])
+const list = ref<WmProductReceiptLineVO[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  recptId: undefined as number | undefined
+  receiptId: undefined as number | undefined
 })
 
 /** 查询行列表 */
 const getList = async () => {
   loading.value = true
   try {
-    queryParams.recptId = props.recptId
-    const data = await WmProductRecptLineApi.getProductRecptLinePage(queryParams)
+    queryParams.receiptId = props.receiptId
+    const data = await WmProductReceiptLineApi.getProductReceiptLinePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -163,7 +163,7 @@ const getList = async () => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await WmProductRecptLineApi.deleteProductRecptLine(id)
+    await WmProductReceiptLineApi.deleteProductReceiptLine(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -176,7 +176,7 @@ const formLoading = ref(false)
 const lineFormType = ref('')
 const formData = ref({
   id: undefined,
-  recptId: undefined as number | undefined,
+  receiptId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
   batchId: undefined,
@@ -198,7 +198,7 @@ const openForm = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await WmProductRecptLineApi.getProductRecptLine(id)
+      formData.value = await WmProductReceiptLineApi.getProductReceiptLine(id)
     } finally {
       formLoading.value = false
     }
@@ -210,12 +210,12 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = { ...formData.value, recptId: props.recptId } as unknown as WmProductRecptLineVO
+    const data = { ...formData.value, receiptId: props.receiptId } as unknown as WmProductReceiptLineVO
     if (lineFormType.value === 'create') {
-      await WmProductRecptLineApi.createProductRecptLine(data)
+      await WmProductReceiptLineApi.createProductReceiptLine(data)
       message.success(t('common.createSuccess'))
     } else {
-      await WmProductRecptLineApi.updateProductRecptLine(data)
+      await WmProductReceiptLineApi.updateProductReceiptLine(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -229,7 +229,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    recptId: undefined,
+    receiptId: undefined,
     itemId: undefined,
     quantity: undefined,
     batchId: undefined,
@@ -240,7 +240,7 @@ const resetForm = () => {
 }
 
 // ==================== 展开行：上架明细 ====================
-const detailListRefs = ref<Record<number, InstanceType<typeof ProductRecptDetailList>>>({})
+const detailListRefs = ref<Record<number, InstanceType<typeof ProductReceiptDetailList>>>({})
 
 /** 缓存子组件 ref */
 const setDetailListRef = (lineId: number, el: any) => {
