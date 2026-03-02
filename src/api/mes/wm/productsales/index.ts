@@ -48,9 +48,19 @@ export const WmProductSalesApi = {
     return await request.put({ url: '/mes/wm/product-sales/submit?id=' + id })
   },
 
+  // 校验销售出库单数量
+  checkProductSalesQuantity: async (id: number) => {
+    return await request.get({ url: '/mes/wm/product-sales/check-quantity?id=' + id })
+  },
+
   // 执行拣货
-  pickProductSales: async (id: number) => {
-    return await request.put({ url: '/mes/wm/product-sales/pick?id=' + id })
+  stockProductSales: async (id: number) => {
+    return await request.put({ url: '/mes/wm/product-sales/stock?id=' + id })
+  },
+
+  // 填写运单
+  shippingProductSales: async (data: WmProductSalesVO) => {
+    return await request.put({ url: '/mes/wm/product-sales/shipping', data })
   },
 
   // 执行出库

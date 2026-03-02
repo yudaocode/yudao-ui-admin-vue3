@@ -266,6 +266,7 @@ export const MesWmProductReceiptStatusEnum = {
 export const MesWmProductSalesStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
   APPROVING: MesOrderStatusConstants.APPROVING,
+  SHIPPING: 10, // 待填写运单
   APPROVED: MesOrderStatusConstants.APPROVED,
   FINISHED: MesOrderStatusConstants.FINISHED,
   CANCELED: MesOrderStatusConstants.CANCELLED

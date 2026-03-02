@@ -136,18 +136,26 @@
           >
             删除
           </el-button>
-          <!-- DONE @AI：执行拣货；之后状态是 status = 10（填写运单）（AI 未修复原因：需要后端增加新状态和状态流转逻辑，需人工实现） -->
           <!-- 待拣货：拣货、取消 -->
           <el-button
             link
             type="success"
-            @click="openForm('pick', scope.row.id)"
-            v-hasPermi="['mes:wm-product-sales:pick']"
+            @click="openForm('stock', scope.row.id)"
+            v-hasPermi="['mes:wm-product-sales:stock']"
             v-if="scope.row.status === MesWmProductSalesStatusEnum.APPROVING"
           >
             拣货
           </el-button>
-          <!-- DONE @AI：增加【填写运单】操作：（需要增加一个 status = 10）；注意，填写运单，继续搞在 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/productsales/ProductSalesForm.vue 里；只允许填写（承运商、运货单号）两个字段；（单独搞个 --- --- 分栏）（AI 未修复原因：需要后端增加新状态和填写运单接口，需人工实现） -->
+          <!-- 待填写运单：填写运单、取消 -->
+          <el-button
+            link
+            type="warning"
+            @click="openForm('shipping', scope.row.id)"
+            v-hasPermi="['mes:wm-product-sales:shipping']"
+            v-if="scope.row.status === MesWmProductSalesStatusEnum.SHIPPING"
+          >
+            填写运单
+          </el-button>
           <!-- 待出库：执行出库、取消 -->
           <el-button
             link
@@ -166,6 +174,7 @@
             v-if="
               [
                 MesWmProductSalesStatusEnum.APPROVING,
+                MesWmProductSalesStatusEnum.SHIPPING,
                 MesWmProductSalesStatusEnum.APPROVED
               ].includes(scope.row.status)
             "

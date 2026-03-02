@@ -131,7 +131,7 @@
       <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
       </el-button>
-      <el-button v-if="isPick" @click="handlePick" type="primary" :disabled="formLoading">
+      <el-button v-if="isPick" @click="handleStock" type="primary" :disabled="formLoading">
         执行拣货
       </el-button>
       <el-button v-if="isShipping" @click="handleShipping" type="primary" :disabled="formLoading">
@@ -241,11 +241,15 @@ const submitForm = async () => {
 }
 
 /** 执行拣货 */
-const handlePick = async () => {
+const handleStock = async () => {
   try {
-    await message.confirm('确认执行拣货？')
     formLoading.value = true
-    await WmProductSalesApi.pickProductSales(formData.value.id!)
+    // 校验出库数量与拣货数量是否一致
+    const quantityMatch = await WmProductSalesApi.checkProductSalesQuantity(formData.value.id!)
+    if (!quantityMatch) {
+      await message.confirm('出库数量与拣货数量不一致，确认执行拣货？')
+    }
+    await WmProductSalesApi.stockProductSales(formData.value.id!)
     message.success('拣货成功')
     dialogVisible.value = false
     emit('success')
@@ -256,19 +260,16 @@ const handlePick = async () => {
 }
 
 /** 填写运单 */
-// TODO @AI：方法改成 handleShipping
 const handleShipping = async () => {
   try {
     await message.confirm('确认提交运单信息？')
     formLoading.value = true
-    // 只提交运输信息字段
     const data = {
       id: formData.value.id,
       carrier: formData.value.carrier,
       shippingNumber: formData.value.shippingNumber
     } as unknown as WmProductSalesVO
-    // TODO @AI：不是更新方法，需要增加一个 controller 接口；
-    await WmProductSalesApi.updateProductSales(data)
+    await WmProductSalesApi.shippingProductSales(data)
     message.success('运单信息填写成功')
     dialogVisible.value = false
     emit('success')
