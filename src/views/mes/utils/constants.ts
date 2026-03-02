@@ -274,7 +274,8 @@ export const MesWmProductSalesStatusEnum = {
 /** MES 发货通知单状态枚举 */
 export const MesWmSalesNoticeStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
-  APPROVED: MesOrderStatusConstants.CONFIRMED
+  APPROVED: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED
 }
 
 /** 获取物料/产品标识的标签 */

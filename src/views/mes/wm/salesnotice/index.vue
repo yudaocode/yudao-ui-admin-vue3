@@ -49,33 +49,7 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：前后端的筛选项去掉 salesDate、status -->
-      <el-form-item label="发货日期" prop="salesDate">
-        <el-date-picker
-          v-model="queryParams.salesDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="单据状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择单据状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_SALES_NOTICE_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
+      <!-- DONE @AI：前后端的筛选项去掉 salesDate、status -->
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -121,7 +95,8 @@
       />
       <el-table-column label="收货人" align="center" prop="recipientName" min-width="100" />
       <el-table-column label="联系方式" align="center" prop="recipientTelephone" min-width="120" />
-      <!-- TODO @AI：收货地址 -->
+      <!-- DONE @AI：收货地址 -->
+      <el-table-column label="收货地址" align="center" prop="recipientAddress" min-width="200" />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_SALES_NOTICE_STATUS" :value="scope.row.status" />
@@ -195,9 +170,7 @@ const queryParams = reactive({
   noticeCode: undefined,
   noticeName: undefined,
   salesOrderCode: undefined,
-  clientId: undefined,
-  salesDate: undefined,
-  status: undefined
+  clientId: undefined
 })
 const queryFormRef = ref()
 
