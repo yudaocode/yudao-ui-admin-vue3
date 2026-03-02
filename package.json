@@ -130,7 +130,7 @@
     "stylelint-config-standard": "^36.0.0",
     "stylelint-order": "^6.0.4",
     "terser": "^5.28.1",
-    "typescript": "5.3.3",
+    "typescript": "5.9.3",
     "unocss": "^0.58.5",
     "unplugin-auto-import": "^0.16.7",
     "unplugin-element-plus": "^0.8.0",
