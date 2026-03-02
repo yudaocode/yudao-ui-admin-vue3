@@ -24,7 +24,7 @@
         <WmWarehouseAreaSelect v-model="formData.areaId" :location-id="formData.locationId" />
       </el-form-item>
       <el-form-item label="批次号" prop="batchId">
-        <WmBatchSelect v-model="formData.batchId" :item-id="formData.itemId" />
+        <el-input v-model="formData.batchId" placeholder="请输入批次号" />
       </el-form-item>
       <el-form-item label="数量" prop="quantity">
         <el-input-number

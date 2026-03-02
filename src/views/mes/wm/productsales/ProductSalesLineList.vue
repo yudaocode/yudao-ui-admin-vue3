@@ -65,6 +65,12 @@
         </template>
       </el-table-column>
     </el-table>
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
   </div>
 
   <!-- 添加/编辑行弹窗 -->
@@ -84,8 +90,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="批次号" prop="batchId">
-            <!-- TODO @AI： WmBatchSelect 不存在，相关的都改成 input 先；在 productsales 模块里的； -->
-            <WmBatchSelect v-model="formData.batchId" :item-id="formData.itemId" />
+            <el-input v-model="formData.batchId" placeholder="请输入批次号" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -156,12 +161,21 @@ const isPick = computed(() => props.formType === 'pick') // 是否为拣货模�
 // ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
 const list = ref<WmProductSalesLineVO[]>([]) // 行列表
+const total = ref(0) // 列表的总页数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  salesId: undefined as number | undefined
+})
 
 /** 查询行列表 */
 const getList = async () => {
   loading.value = true
   try {
-    list.value = await WmProductSalesLineApi.getProductSalesLineListBySalesId(props.salesId)
+    queryParams.salesId = props.salesId
+    const data = await WmProductSalesLineApi.getProductSalesLinePage(queryParams)
+    list.value = data.list
+    total.value = data.total
   } finally {
     loading.value = false
   }
@@ -204,7 +218,6 @@ const openForm = async (type: string, id?: number) => {
   lineFormType.value = type
   resetForm()
   if (id) {
-    // TODO @AI：这个是分页接口；
     formLoading.value = true
     try {
       formData.value = await WmProductSalesLineApi.getProductSalesLine(id)

@@ -32,7 +32,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- DONE @AI：【发货通知单】 salesnotice 选择器；-->
         <el-col :span="8">
           <el-form-item label="发货通知单" prop="noticeId">
             <WmSalesNoticeSelect v-model="formData.noticeId" :disabled="isHeaderReadonly" />
@@ -41,7 +40,7 @@
       </el-row>
       <el-row>
         <!-- DONE @芋艿：【暂时先忽略我这个想法】销售订单编号、出库日期，是不是不用记录 -->
-        <!-- TODO @芋艿：【暂时先忽略我这个想法】目前发货通知单选择后，可设置销售订单比那好、出库日期、客户；（和上面这个 DONE 有关联） -->
+        <!-- DONE @芋艿：【暂时先忽略我这个想法】目前发货通知单选择后，可设置销售订单比那好、出库日期、客户；（和上面这个 DONE 有关联）（暂时保持手动填写，未来可考虑自动填充） -->
         <el-col :span="8">
           <el-form-item label="销售订单编号" prop="salesOrderCode">
             <el-input
@@ -89,27 +88,6 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- TODO @AI：“填写运单”的时候，在展示这 2 个字段：单独有个类似“物料信息”的风格；放在它前面； -->
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="承运商" prop="carrier">
-            <el-input
-              v-model="formData.carrier"
-              placeholder="请输入承运商"
-              :disabled="isHeaderReadonly"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="运输单号" prop="shippingNumber">
-            <el-input
-              v-model="formData.shippingNumber"
-              placeholder="请输入运输单号"
-              :disabled="isHeaderReadonly"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
       <el-row>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
@@ -118,6 +96,27 @@
               type="textarea"
               placeholder="请输入备注"
               :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-divider content-position="left">运输信息</el-divider>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="承运商" prop="carrier">
+            <el-input
+              v-model="formData.carrier"
+              placeholder="请输入承运商"
+              :disabled="!isShipping && isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="运输单号" prop="shippingNumber">
+            <el-input
+              v-model="formData.shippingNumber"
+              placeholder="请输入运输单号"
+              :disabled="!isShipping && isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
@@ -134,6 +133,9 @@
       </el-button>
       <el-button v-if="isPick" @click="handlePick" type="primary" :disabled="formLoading">
         执行拣货
+      </el-button>
+      <el-button v-if="isShipping" @click="handleShipping" type="primary" :disabled="formLoading">
+        确认填写
       </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -153,7 +155,7 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / pick / detail
+const formType = ref<string>('create') // 表单的类型：create / update / pick / shipping / detail
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
@@ -178,12 +180,14 @@ const formRef = ref() // 表单 Ref
 
 const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isPick = computed(() => formType.value === 'pick') // 是否为拣货模式
-const isHeaderReadonly = computed(() => ['pick', 'detail'].includes(formType.value)) // 是否只读
+const isShipping = computed(() => formType.value === 'shipping') // 是否为填写运单模式
+const isHeaderReadonly = computed(() => ['pick', 'shipping', 'detail'].includes(formType.value)) // 是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增销售出库单',
     update: '编辑销售出库单',
     pick: '执行拣货',
+    shipping: '填写运单',
     detail: '销售出库单详情'
   }
   return titles[formType.value] || formType.value
@@ -243,6 +247,29 @@ const handlePick = async () => {
     formLoading.value = true
     await WmProductSalesApi.pickProductSales(formData.value.id!)
     message.success('拣货成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 填写运单 */
+// TODO @AI：方法改成 handleShipping
+const handleShipping = async () => {
+  try {
+    await message.confirm('确认提交运单信息？')
+    formLoading.value = true
+    // 只提交运输信息字段
+    const data = {
+      id: formData.value.id,
+      carrier: formData.value.carrier,
+      shippingNumber: formData.value.shippingNumber
+    } as unknown as WmProductSalesVO
+    // TODO @AI：不是更新方法，需要增加一个 controller 接口；
+    await WmProductSalesApi.updateProductSales(data)
+    message.success('运单信息填写成功')
     dialogVisible.value = false
     emit('success')
   } catch {

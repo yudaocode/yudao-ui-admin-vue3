@@ -16,11 +16,9 @@ export interface WmProductSalesLineVO {
 
 // MES 销售出库单行 API
 export const WmProductSalesLineApi = {
-  // 查询销售出库单行列表（按出库单编号）
-  getProductSalesLineListBySalesId: async (salesId: number) => {
-    return await request.get({
-      url: '/mes/wm/product-sales-line/list-by-sales-id?salesId=' + salesId
-    })
+  // 查询销售出库单行分页
+  getProductSalesLinePage: async (params: any) => {
+    return await request.get({ url: '/mes/wm/product-sales-line/page', params })
   },
 
   // 查询销售出库单行详情
