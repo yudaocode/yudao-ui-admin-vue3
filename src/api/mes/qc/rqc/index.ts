@@ -57,8 +57,8 @@ export const QcRqcApi = {
   },
 
   // 完成退货检验单
-  completeRqc: async (id: number) => {
-    return await request.put({ url: `/mes/qc/rqc/complete?id=` + id })
+  finishRqc: async (id: number) => {
+    return await request.put({ url: `/mes/qc/rqc/finish?id=` + id })
   },
 
   // 删除退货检验单

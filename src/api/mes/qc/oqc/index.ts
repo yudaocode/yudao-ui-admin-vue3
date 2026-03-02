@@ -62,8 +62,8 @@ export const QcOqcApi = {
   },
 
   // 完成出货检验单
-  completeOqc: async (id: number) => {
-    return await request.put({ url: `/mes/qc/oqc/complete?id=` + id })
+  finishOqc: async (id: number) => {
+    return await request.put({ url: `/mes/qc/oqc/finish?id=` + id })
   },
 
   // 删除出货检验单

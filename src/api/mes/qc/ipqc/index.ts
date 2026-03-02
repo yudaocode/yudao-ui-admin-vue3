@@ -67,8 +67,8 @@ export const QcIpqcApi = {
   },
 
   // 完成过程检验单
-  completeIpqc: async (id: number) => {
-    return await request.put({ url: `/mes/qc/ipqc/complete?id=` + id })
+  finishIpqc: async (id: number) => {
+    return await request.put({ url: `/mes/qc/ipqc/finish?id=` + id })
   },
 
   // 删除过程检验单

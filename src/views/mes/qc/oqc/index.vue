@@ -143,8 +143,8 @@
           <el-button
             link
             type="success"
-            @click="handleComplete(scope.row.id)"
-            v-hasPermi="['mes:qc-oqc:update']"
+            @click="handleFinish(scope.row.id)"
+            v-hasPermi="['mes:qc-oqc:finish']"
             v-if="scope.row.status === MesQcStatusEnum.DRAFT"
           >
             完成
@@ -237,10 +237,10 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 完成操作 */
-const handleComplete = async (id: number) => {
+const handleFinish = async (id: number) => {
   try {
     await message.confirm('是否完成出货检验单编制？【完成后将不能更改】')
-    await QcOqcApi.completeOqc(id)
+    await QcOqcApi.finishOqc(id)
     message.success('完成成功')
     await getList()
   } catch {}

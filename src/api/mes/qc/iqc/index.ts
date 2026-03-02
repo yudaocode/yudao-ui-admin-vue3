@@ -58,8 +58,8 @@ export const QcIqcApi = {
   },
 
   // 完成来料检验单
-  completeIqc: async (id: number) => {
-    return await request.put({ url: `/mes/qc/iqc/complete?id=` + id })
+  finishIqc: async (id: number) => {
+    return await request.put({ url: `/mes/qc/iqc/finish?id=` + id })
   },
 
   // 删除来料检验单
