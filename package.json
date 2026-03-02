@@ -40,7 +40,7 @@
     "@wangeditor-next/plugin-mention": "^1.0.16",
     "@zxcvbn-ts/core": "^3.0.4",
     "animate.css": "^4.1.1",
-    "axios": "1.9.0",
+    "axios": "1.13.6",
     "benz-amr-recorder": "^1.1.5",
     "bpmn-js-token-simulation": "^0.36.0",
     "camunda-bpmn-moddle": "^7.0.1",
