@@ -63,8 +63,8 @@ importers:
         specifier: ^1.11.19
         version: 1.11.19
       diagram-js:
-        specifier: ^12.8.1
-        version: 12.8.1
+        specifier: ^15.9.1
+        version: 15.9.1
       driver.js:
         specifier: ^1.4.0
         version: 1.4.0
@@ -77,9 +77,6 @@ importers:
       element-plus:
         specifier: 2.13.3
         version: 2.13.3(vue@3.5.29(typescript@5.9.3))
-      fast-xml-parser:
-        specifier: ^4.5.4
-        version: 4.5.4
       highlight.js:
         specifier: ^11.11.1
         version: 11.11.1
@@ -108,8 +105,8 @@ importers:
         specifier: ^0.18.12
         version: 0.18.12(markmap-common@0.18.9)
       min-dash:
-        specifier: ^4.2.3
-        version: 4.2.3
+        specifier: ^5.0.0
+        version: 5.0.0
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
@@ -190,8 +187,8 @@ importers:
         specifier: ^1.58.2
         version: 1.58.2
       '@purge-icons/generated':
-        specifier: ^0.9.0
-        version: 0.9.0
+        specifier: ^0.10.0
+        version: 0.10.0
       '@types/jsoneditor':
         specifier: ^9.9.6
         version: 9.9.6
@@ -236,7 +233,7 @@ importers:
         version: 18.12.0
       bpmn-js-properties-panel:
         specifier: 5.52.1
-        version: 5.52.1(@bpmn-io/properties-panel@3.25.0)(bpmn-js@18.12.0)(camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.12.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0))(diagram-js@12.8.1)
+        version: 5.52.1(@bpmn-io/properties-panel@3.25.0)(bpmn-js@18.12.0)(camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.12.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0))(diagram-js@15.9.1)
       consola:
         specifier: ^3.4.2
         version: 3.4.2
@@ -1738,9 +1735,6 @@ packages:
   '@purge-icons/generated@0.10.0':
     resolution: {integrity: sha512-I+1yN7/yDy/eZzfhAZqKF8Z6FM8D/O1vempbPrHJ0m9HlZwvf8sWXOArPJ2qRQGB6mJUVSpaXkoGBuoz1GQX5A==}
 
-  '@purge-icons/generated@0.9.0':
-    resolution: {integrity: sha512-s2t+1oVtGDV6KtqfCXtUOhxfeYvOdDF90IVm+nMs/6bUP0HeGZLslguuL/AibpwtfL4FA/oCsIu/RhwapgAdJw==}
-
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
 
@@ -3160,18 +3154,12 @@ packages:
     peerDependencies:
       diagram-js: '*'
 
-  diagram-js@12.8.1:
-    resolution: {integrity: sha512-LF9BiwjbOPpZd0ez5VSlYRbdbEA59YQX43bWvNDp1rLMv0xwZ5yIg4oaYDK82nIQ0kH1tjvoQRpNevMTCgQVyw==}
-
   diagram-js@15.9.1:
     resolution: {integrity: sha512-2JsGmyeTo6o39beq2e/UkTfMopQSM27eXBUzbYQ+1m5VhEnQDkcjcrnRCjcObLMzzXSE/LSJyYhji90sqBFodQ==}
 
   didi@11.0.0:
     resolution: {integrity: sha512-PzCfRzQttvFpVcYMbSF7h8EsWjeJpVjWH4qDhB5LkMi1ILvHq4Ob0vhM2wLFziPkbUBi+PAo7ODbe2sacR7nJQ==}
     engines: {node: '>= 20.12'}
-
-  didi@9.0.2:
-    resolution: {integrity: sha512-q2+aj+lnJcUweV7A9pdUrwFr4LHVmRPwTmQLtHPFz4aT7IBoryN6Iy+jmFku+oIzr5ebBkvtBCOb87+dJhb7bg==}
 
   dijkstrajs@1.0.3:
     resolution: {integrity: sha512-qiSlmBq9+BCdCA/L46dw8Uy93mloxsPSbwnm5yrKn2vMPiy8KyAskTF6zuV/j5BMsmOGZDPs7KjU+mjb670kfA==}
@@ -3475,10 +3463,6 @@ packages:
   fast-uri@3.1.0:
     resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
 
-  fast-xml-parser@4.5.4:
-    resolution: {integrity: sha512-jE8ugADnYOBsu1uaoayVl1tVKAMNOXyjwvv2U6udEA2ORBhDooJDWoGxTkhd4Qn4yh59JVVt/pKXtjPwx9OguQ==}
-    hasBin: true
-
   fastest-levenshtein@1.0.16:
     resolution: {integrity: sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==}
     engines: {node: '>= 4.9.1'}
@@ -3681,10 +3665,6 @@ packages:
   gzip-size@6.0.0:
     resolution: {integrity: sha512-ax7ZYomf6jqPTQ4+XCpUGyXKHk5WweS+e05MBO4/y3WJ5RkmPXNKvX+bx1behVILVwr6JSQvZAku021CHPXG3Q==}
     engines: {node: '>=10'}
-
-  hammerjs@2.0.8:
-    resolution: {integrity: sha512-tSQXBXS/MWQOn/RKckawJ61vvsDpCom87JgxiYdGwHdOa0ht0vzUWDlfioofFCRU0L+6NGDt6XzbgoJvZkMeRQ==}
-    engines: {node: '>=0.8.0'}
 
   has-ansi@2.0.0:
     resolution: {integrity: sha512-C8vBJ8DwUCx19vhm7urhTuUsr4/IyP6l4VzNQDv+ryHQObW3TTTp9yB68WpYgRe2bbaGuZ/se74IqFeVnMnLZg==}
@@ -4339,9 +4319,6 @@ packages:
     resolution: {integrity: sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew==}
     engines: {node: '>= 0.4'}
 
-  object-refs@0.3.0:
-    resolution: {integrity: sha512-eP0ywuoWOaDoiake/6kTJlPJhs+k0qNm4nYRzXLNHj6vh+5M3i9R1epJTdxIPGlhWc4fNRQ7a6XJNCX+/L4FOQ==}
-
   object-refs@0.4.0:
     resolution: {integrity: sha512-6kJqKWryKZmtte6QYvouas0/EIJKPI1/MMIuRsiBlNuhIMfqYTggzX2F1AJ2+cDs288xyi9GL7FyasHINR98BQ==}
 
@@ -4414,9 +4391,6 @@ packages:
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
     engines: {node: '>=8'}
-
-  path-intersection@2.2.1:
-    resolution: {integrity: sha512-9u8xvMcSfuOiStv9bPdnRJQhGQXLKurew94n4GPQCdH1nj9QKC9ObbNoIpiRq8skiOBxKkt277PgOoFgAt3/rA==}
 
   path-intersection@4.1.0:
     resolution: {integrity: sha512-urUP6WvhnxbHPdHYl6L7Yrc6+1ny6uOFKPCzPxTSUSYGHG0o94RmI7SvMMaScNAM5RtTf08bg4skc6/kjfne3A==}
@@ -4918,9 +4892,6 @@ packages:
   strip-literal@3.1.0:
     resolution: {integrity: sha512-8r3mkIM/2+PpjHoOtiAW8Rg3jJLHaV7xPwG+YRGrv6FP0wwk/toTpATxWYOW0BKdWwl82VT2tFYi5DlROa0Mxg==}
 
-  strnum@1.1.2:
-    resolution: {integrity: sha512-vrN+B7DBIoTTZjnPNewwhx6cBA/H+IS7rfW68n7XxC1y7uoiGQBxaKzqucGUgavX15dJgiGztLJ8vxuEzwqBdA==}
-
   style-mod@4.1.3:
     resolution: {integrity: sha512-i/n8VsZydrugj3Iuzll8+x/00GH2vnYsk1eomD8QiRrSAeW6ItbCQDtfXCeJHd0iwiNagqjQkvpvREEPtW3IoQ==}
 
@@ -5007,9 +4978,6 @@ packages:
 
   text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
-
-  tiny-svg@3.1.3:
-    resolution: {integrity: sha512-9mwnPqXInRsBmH/DO6NMxBE++9LsqpVXQSSTZGc5bomoKKvL5OX/Hlotw7XVXP6XLRcHWIzZpxfovGqWKgCypQ==}
 
   tiny-svg@4.1.4:
     resolution: {integrity: sha512-cBaEACCbouYrQc9RG+eTXnPYosX1Ijqty/I6DdXovwDd89Pwu4jcmpOR7BuFEF9YCcd7/AWwasE0207WMK7hdw==}
@@ -7076,10 +7044,6 @@ snapshots:
     dependencies:
       '@iconify/iconify': 3.1.1
 
-  '@purge-icons/generated@0.9.0':
-    dependencies:
-      '@iconify/iconify': 3.1.1
-
   '@quansync/fs@1.0.0':
     dependencies:
       quansync: 1.0.0
@@ -8137,14 +8101,14 @@ snapshots:
 
   boolbase@1.0.0: {}
 
-  bpmn-js-properties-panel@5.52.1(@bpmn-io/properties-panel@3.25.0)(bpmn-js@18.12.0)(camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.12.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0))(diagram-js@12.8.1):
+  bpmn-js-properties-panel@5.52.1(@bpmn-io/properties-panel@3.25.0)(bpmn-js@18.12.0)(camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.12.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0))(diagram-js@15.9.1):
     dependencies:
       '@bpmn-io/extract-process-variables': 2.2.1
       '@bpmn-io/properties-panel': 3.25.0
       array-move: 4.0.0
       bpmn-js: 18.12.0
       camunda-bpmn-js-behaviors: 1.7.2(bpmn-js@18.12.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0)
-      diagram-js: 12.8.1
+      diagram-js: 15.9.1
       ids: 3.0.1
       min-dash: 5.0.0
       min-dom: 5.3.0
@@ -8668,19 +8632,6 @@ snapshots:
       min-dash: 5.0.0
       min-dom: 5.3.0
 
-  diagram-js@12.8.1:
-    dependencies:
-      '@bpmn-io/diagram-js-ui': 0.2.3
-      clsx: 2.1.1
-      didi: 9.0.2
-      hammerjs: 2.0.8
-      inherits-browser: 0.1.0
-      min-dash: 4.2.3
-      min-dom: 4.2.1
-      object-refs: 0.3.0
-      path-intersection: 2.2.1
-      tiny-svg: 3.1.3
-
   diagram-js@15.9.1:
     dependencies:
       '@bpmn-io/diagram-js-ui': 0.2.3
@@ -8694,8 +8645,6 @@ snapshots:
       tiny-svg: 4.1.4
 
   didi@11.0.0: {}
-
-  didi@9.0.2: {}
 
   dijkstrajs@1.0.3: {}
 
@@ -9114,10 +9063,6 @@ snapshots:
 
   fast-uri@3.1.0: {}
 
-  fast-xml-parser@4.5.4:
-    dependencies:
-      strnum: 1.1.2
-
   fastest-levenshtein@1.0.16: {}
 
   fastq@1.20.1:
@@ -9365,8 +9310,6 @@ snapshots:
   gzip-size@6.0.0:
     dependencies:
       duplexer: 0.1.2
-
-  hammerjs@2.0.8: {}
 
   has-ansi@2.0.0:
     dependencies:
@@ -9949,8 +9892,6 @@ snapshots:
 
   object-inspect@1.13.4: {}
 
-  object-refs@0.3.0: {}
-
   object-refs@0.4.0: {}
 
   obug@2.1.1: {}
@@ -10029,8 +9970,6 @@ snapshots:
   path-browserify@1.0.1: {}
 
   path-exists@4.0.0: {}
-
-  path-intersection@2.2.1: {}
 
   path-intersection@4.1.0: {}
 
@@ -10507,8 +10446,6 @@ snapshots:
     dependencies:
       js-tokens: 9.0.1
 
-  strnum@1.1.2: {}
-
   style-mod@4.1.3: {}
 
   stylelint-config-html@1.1.0(postcss-html@1.8.1)(stylelint@17.4.0(typescript@5.9.3)):
@@ -10629,8 +10566,6 @@ snapshots:
       source-map-support: 0.5.21
 
   text-table@0.2.0: {}
-
-  tiny-svg@3.1.3: {}
 
   tiny-svg@4.1.4: {}
 
