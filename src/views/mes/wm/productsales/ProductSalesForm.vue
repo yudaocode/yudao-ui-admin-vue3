@@ -41,6 +41,7 @@
       </el-row>
       <el-row>
         <!-- DONE @芋艿：【暂时先忽略我这个想法】销售订单编号、出库日期，是不是不用记录 -->
+        <!-- TODO @芋艿：【暂时先忽略我这个想法】目前发货通知单选择后，可设置销售订单比那好、出库日期、客户；（和上面这个 DONE 有关联） -->
         <el-col :span="8">
           <el-form-item label="销售订单编号" prop="salesOrderCode">
             <el-input
@@ -88,6 +89,7 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <!-- TODO @AI：“填写运单”的时候，在展示这 2 个字段：单独有个类似“物料信息”的风格；放在它前面； -->
       <el-row>
         <el-col :span="8">
           <el-form-item label="承运商" prop="carrier">

@@ -49,7 +49,7 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
-import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
+// import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 
 defineOptions({ name: 'ProductSalesDetailForm' })
 

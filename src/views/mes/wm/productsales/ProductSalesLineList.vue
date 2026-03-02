@@ -38,7 +38,13 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.oqcCheck" />
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" min-width="150" show-overflow-tooltip />
+      <el-table-column
+        label="备注"
+        align="center"
+        prop="remark"
+        min-width="150"
+        show-overflow-tooltip
+      />
       <el-table-column
         v-if="isUpdate || isPick"
         label="操作"
@@ -78,6 +84,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="批次号" prop="batchId">
+            <!-- TODO @AI： WmBatchSelect 不存在，相关的都改成 input 先；在 productsales 模块里的； -->
             <WmBatchSelect v-model="formData.batchId" :item-id="formData.itemId" />
           </el-form-item>
         </el-col>
@@ -128,7 +135,7 @@
 <script setup lang="ts">
 import { WmProductSalesLineApi, WmProductSalesLineVO } from '@/api/mes/wm/productsales/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
+// import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 import ProductSalesDetailList from './ProductSalesDetailList.vue'
 import ProductSalesDetailForm from './ProductSalesDetailForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
@@ -197,6 +204,7 @@ const openForm = async (type: string, id?: number) => {
   lineFormType.value = type
   resetForm()
   if (id) {
+    // TODO @AI：这个是分页接口；
     formLoading.value = true
     try {
       formData.value = await WmProductSalesLineApi.getProductSalesLine(id)
