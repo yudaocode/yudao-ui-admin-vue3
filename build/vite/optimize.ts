@@ -14,7 +14,6 @@ const include = [
   'lodash-es',
   'nprogress',
   'web-storage-cache',
-  '@iconify/iconify',
   '@vueuse/core',
   '@zxcvbn-ts/core',
   'echarts/core',
