@@ -1,0 +1,257 @@
+<template>
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="110px"
+      v-loading="formLoading"
+    >
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="出库单编号" prop="code">
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入出库单编号"
+              :disabled="isHeaderReadonly"
+            >
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType !== 'create'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="出库单名称" prop="name">
+            <el-input
+              v-model="formData.name"
+              placeholder="请输入出库单名称"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+        <!-- TODO @AI：【发货通知单】 salesnotice 选择器；-->
+        <!-- TODO @芋艿：【暂时先忽略我这个想法】销售订单编号、出库日期，是不是不用记录 -->
+        <!-- TODO @AI：【销售订单编号】 -->
+        <!-- TODO @AI：【发货日期】=》出库日期 shipmentDate =》salesDate 字段名也要改下； -->
+        <el-col :span="8">
+          <el-form-item label="发货日期" prop="shipmentDate">
+            <el-date-picker
+              v-model="formData.shipmentDate"
+              type="date"
+              value-format="x"
+              placeholder="请选择发货日期"
+              class="!w-1/1"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="客户" prop="clientId">
+            <MdClientSelect v-model="formData.clientId" :disabled="isHeaderReadonly" />
+          </el-form-item>
+        </el-col>
+        <!-- TODO @AI：【销售订单号】往前挪 -->
+        <el-col :span="8">
+          <el-form-item label="销售订单号" prop="salesOrderCode">
+            <el-input
+              v-model="formData.salesOrderCode"
+              placeholder="请输入销售订单号"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <!-- TODO @AI：收货人；字段改成；（字段 prop 不用改） -->
+          <el-form-item label="联系人" prop="contactName">
+            <el-input
+              v-model="formData.contactName"
+              placeholder="请输入联系人"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+        <!-- TODO @AI：联系方式 -->
+        <el-col :span="8">
+          <el-form-item label="联系电话" prop="contactTelephone">
+            <el-input
+              v-model="formData.contactTelephone"
+              placeholder="请输入联系电话"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <!-- TODO @AI：前后端，都删除掉 contactAddress 字段 -->
+        <el-col :span="24">
+          <el-form-item label="收货地址" prop="contactAddress">
+            <el-input
+              v-model="formData.contactAddress"
+              placeholder="请输入收货地址"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
+            <el-input
+              v-model="formData.remark"
+              type="textarea"
+              placeholder="请输入备注"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+    <!-- 非新建模式展示行项目信息（出库物料） -->
+    <template v-if="formData.id">
+      <el-divider content-position="center">物料信息</el-divider>
+      <ProductSalesLineList :sales-id="formData.id" :form-type="formType" />
+    </template>
+    <template #footer>
+      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
+      <el-button v-if="isPick" @click="handlePick" type="primary" :disabled="formLoading">
+        执行拣货
+      </el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
+</template>
+
+<script setup lang="ts">
+import { generateRandomStr } from '@/utils'
+import { WmProductSalesApi, WmProductSalesVO } from '@/api/mes/wm/productsales'
+import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
+import ProductSalesLineList from './ProductSalesLineList.vue'
+
+defineOptions({ name: 'ProductSalesForm' })
+
+const message = useMessage() // 消息弹窗
+
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const formType = ref<string>('create') // 表单的类型：create / update / pick / detail
+const formData = ref({
+  id: undefined as number | undefined,
+  code: undefined,
+  name: undefined,
+  clientId: undefined,
+  salesOrderCode: undefined,
+  shipmentDate: undefined,
+  contactName: undefined,
+  contactTelephone: undefined,
+  contactAddress: undefined,
+  remark: undefined
+})
+const formRules = reactive({
+  code: [{ required: true, message: '出库单编号不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '出库单名称不能为空', trigger: 'blur' }],
+  shipmentDate: [{ required: true, message: '发货日期不能为空', trigger: 'change' }],
+  clientId: [{ required: true, message: '客户不能为空', trigger: 'change' }]
+})
+const formRef = ref() // 表单 Ref
+
+const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isPick = computed(() => formType.value === 'pick') // 是否为拣货模式
+const isHeaderReadonly = computed(() => ['pick', 'detail'].includes(formType.value)) // 是否只读
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增销售出库单',
+    update: '编辑销售出库单',
+    pick: '执行拣货',
+    detail: '销售出库单详情'
+  }
+  return titles[formType.value] || formType.value
+})
+
+/** 生成出库单编号 */
+const generateCode = () => {
+  formData.value.code = 'PS' + generateRandomStr(10)
+}
+
+/** 打开弹窗 */
+const open = async (type: string, id?: number) => {
+  dialogVisible.value = true
+  formType.value = type
+  resetForm()
+  // 修改/拣货/详情时，加载数据
+  if (id) {
+    formLoading.value = true
+    try {
+      formData.value = await WmProductSalesApi.getProductSales(id)
+    } finally {
+      formLoading.value = false
+    }
+  }
+}
+defineExpose({ open })
+
+/** 提交表单（create/update 模式） */
+const emit = defineEmits(['success'])
+const submitForm = async () => {
+  // 校验表单
+  await formRef.value.validate()
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as WmProductSalesVO
+    if (formType.value === 'create') {
+      const res = await WmProductSalesApi.createProductSales(data)
+      message.success('新增成功')
+      formData.value.id = res
+      formType.value = 'update'
+    } else {
+      await WmProductSalesApi.updateProductSales(data)
+      message.success('修改成功')
+    }
+    // 发送操作成功的事件
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 执行拣货 */
+const handlePick = async () => {
+  try {
+    await message.confirm('确认执行拣货？')
+    formLoading.value = true
+    await WmProductSalesApi.pickProductSales(formData.value.id!)
+    message.success('拣货成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    code: undefined,
+    name: undefined,
+    clientId: undefined,
+    salesOrderCode: undefined,
+    shipmentDate: undefined,
+    contactName: undefined,
+    contactTelephone: undefined,
+    contactAddress: undefined,
+    remark: undefined
+  }
+  formRef.value?.resetFields()
+}
+</script>
