@@ -49,7 +49,6 @@
           />
         </el-select>
       </el-form-item>
-      <!-- DONE @AI：前后端的筛选项去掉 salesDate、status -->
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -95,7 +94,6 @@
       />
       <el-table-column label="收货人" align="center" prop="recipientName" min-width="100" />
       <el-table-column label="联系方式" align="center" prop="recipientTelephone" min-width="120" />
-      <!-- DONE @AI：收货地址 -->
       <el-table-column label="收货地址" align="center" prop="recipientAddress" min-width="200" />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
