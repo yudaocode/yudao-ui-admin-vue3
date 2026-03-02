@@ -124,8 +124,8 @@
           <el-button
             link
             type="primary"
-            @click="handleExecute(scope.row.id)"
-            v-hasPermi="['mes:wm-item-receipt:execute']"
+            @click="handleFinish(scope.row.id)"
+            v-hasPermi="['mes:wm-item-receipt:finish']"
             v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVED"
           >
             执行入库
@@ -226,10 +226,10 @@ const handleSubmit = async (id: number) => {
 }
 
 /** 执行入库 */
-const handleExecute = async (id: number) => {
+const handleFinish = async (id: number) => {
   try {
     await message.confirm('确认执行入库？执行后将更新库存台账。')
-    await WmItemReceiptApi.executeItemReceipt(id)
+    await WmItemReceiptApi.finishItemReceipt(id)
     message.success('入库成功')
     await getList()
   } catch {}

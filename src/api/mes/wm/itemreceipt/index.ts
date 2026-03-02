@@ -62,8 +62,8 @@ export const WmItemReceiptApi = {
   },
 
   // 执行入库
-  executeItemReceipt: async (id: number) => {
-    return await request.put({ url: '/mes/wm/item-receipt/execute?id=' + id })
+  finishItemReceipt: async (id: number) => {
+    return await request.put({ url: '/mes/wm/item-receipt/finish?id=' + id })
   },
 
   // 取消采购入库单

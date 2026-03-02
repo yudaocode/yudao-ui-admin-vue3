@@ -141,7 +141,7 @@
             link
             type="success"
             @click="handleFinish(scope.row.id)"
-            v-hasPermi="['mes:wm-return-issue:execute']"
+            v-hasPermi="['mes:wm-return-issue:finish']"
             v-if="scope.row.status === MesWmReturnIssueStatusEnum.APPROVED"
           >
             执行退料

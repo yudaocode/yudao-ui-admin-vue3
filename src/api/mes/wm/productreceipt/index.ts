@@ -56,8 +56,8 @@ export const WmProductReceiptApi = {
   },
 
   // 执行入库
-  executeProductReceipt: async (id: number) => {
-    return await request.put({ url: '/mes/wm/product-receipt/execute?id=' + id })
+  finishProductReceipt: async (id: number) => {
+    return await request.put({ url: '/mes/wm/product-receipt/finish?id=' + id })
   },
 
   // 取消产品入库单

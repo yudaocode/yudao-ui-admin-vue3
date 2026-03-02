@@ -49,8 +49,8 @@ export const WmReturnSalesApi = {
   },
 
   // 执行退货
-  executeReturnSales: async (id: number) => {
-    return await request.put({ url: '/mes/wm/return-sales/execute?id=' + id })
+  finishReturnSales: async (id: number) => {
+    return await request.put({ url: '/mes/wm/return-sales/finish?id=' + id })
   },
 
   // 执行上架

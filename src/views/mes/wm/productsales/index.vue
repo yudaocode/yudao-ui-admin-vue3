@@ -160,8 +160,8 @@
           <el-button
             link
             type="primary"
-            @click="handleExecute(scope.row.id)"
-            v-hasPermi="['mes:wm-product-sales:execute']"
+            @click="handleFinish(scope.row.id)"
+            v-hasPermi="['mes:wm-product-sales:finish']"
             v-if="scope.row.status === MesWmProductSalesStatusEnum.APPROVED"
           >
             执行出库
@@ -266,10 +266,10 @@ const handleSubmit = async (id: number) => {
 }
 
 /** 执行出库 */
-const handleExecute = async (id: number) => {
+const handleFinish = async (id: number) => {
   try {
     await message.confirm('确认执行出库？执行后将扣减库存。')
-    await WmProductSalesApi.executeProductSales(id)
+    await WmProductSalesApi.finishProductSales(id)
     message.success('出库成功')
     await getList()
   } catch {}

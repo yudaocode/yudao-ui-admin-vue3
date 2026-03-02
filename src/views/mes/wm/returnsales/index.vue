@@ -121,8 +121,8 @@
           <el-button
             link
             type="primary"
-            @click="handleExecute(scope.row.id)"
-            v-hasPermi="['mes:wm-return-sales:execute']"
+            @click="handleFinish(scope.row.id)"
+            v-hasPermi="['mes:wm-return-sales:finish']"
             v-if="scope.row.status === MesWmReturnSalesStatusEnum.APPROVING"
           >
             执行退货
@@ -234,10 +234,10 @@ const handleSubmit = async (id: number) => {
 }
 
 /** 执行退货 */
-const handleExecute = async (id: number) => {
+const handleFinish = async (id: number) => {
   try {
     await message.confirm('确认执行退货？')
-    await WmReturnSalesApi.executeReturnSales(id)
+    await WmReturnSalesApi.finishReturnSales(id)
     message.success('执行成功')
     await getList()
   } catch {}

@@ -169,8 +169,8 @@
             <el-button
               link
               type="success"
-              @click="handleExecute(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:update']"
+              @click="handleFinish(scope.row.id)"
+              v-hasPermi="['mes:pro-feedback:finish']"
             >
               执行
             </el-button>
@@ -293,10 +293,10 @@ const handleReject = async (id: number) => {
   } catch {}
 }
 
-const handleExecute = async (id: number) => {
+const handleFinish = async (id: number) => {
   try {
     await message.confirm('确认要执行该报工单吗？')
-    await ProFeedbackApi.executeFeedback(id)
+    await ProFeedbackApi.finishFeedback(id)
     message.success('报工单已执行')
     await getList()
   } catch {}

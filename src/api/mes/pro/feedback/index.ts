@@ -80,8 +80,8 @@ export const ProFeedbackApi = {
     return await request.put({ url: `/mes/pro/feedback/reject?id=` + id })
   },
   // 执行报工
-  executeFeedback: async (id: number) => {
-    return await request.put({ url: `/mes/pro/feedback/execute?id=` + id })
+  finishFeedback: async (id: number) => {
+    return await request.put({ url: `/mes/pro/feedback/finish?id=` + id })
   },
   // 取消报工
   cancelFeedback: async (id: number) => {

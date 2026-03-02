@@ -64,8 +64,8 @@ export const WmProductSalesApi = {
   },
 
   // 执行出库
-  executeProductSales: async (id: number) => {
-    return await request.put({ url: '/mes/wm/product-sales/execute?id=' + id })
+  finishProductSales: async (id: number) => {
+    return await request.put({ url: '/mes/wm/product-sales/finish?id=' + id })
   },
 
   // 取消销售出库单

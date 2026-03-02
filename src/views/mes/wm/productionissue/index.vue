@@ -146,7 +146,7 @@
             link
             type="success"
             @click="handleFinish(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:execute']"
+            v-hasPermi="['mes:wm-production-issue:finish']"
             v-if="scope.row.status === MesWmProductionIssueStatusEnum.APPROVED"
           >
             完成
