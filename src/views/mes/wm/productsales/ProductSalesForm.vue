@@ -87,16 +87,6 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <!-- TODO @AI：前后端，都删除掉 contactAddress 字段 -->
-          <el-form-item label="收货地址" prop="contactAddress">
-            <el-input
-              v-model="formData.contactAddress"
-              placeholder="请输入收货地址"
-              :disabled="isHeaderReadonly"
-            />
-          </el-form-item>
-        </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
@@ -172,7 +162,6 @@ const formData = ref({
   salesDate: undefined,
   contactName: undefined,
   contactTelephone: undefined,
-  contactAddress: undefined,
   carrier: undefined,
   shippingNumber: undefined,
   remark: undefined
@@ -272,7 +261,6 @@ const resetForm = () => {
     salesDate: undefined,
     contactName: undefined,
     contactTelephone: undefined,
-    contactAddress: undefined,
     carrier: undefined,
     shippingNumber: undefined,
     remark: undefined

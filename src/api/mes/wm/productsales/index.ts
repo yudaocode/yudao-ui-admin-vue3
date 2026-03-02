@@ -11,7 +11,6 @@ export interface WmProductSalesVO {
   shipmentDate: string
   contactName: string
   contactTelephone: string
-  contactAddress: string
   status: number
   remark: string
   createTime: string

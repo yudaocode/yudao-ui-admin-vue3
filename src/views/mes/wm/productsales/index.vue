@@ -92,7 +92,6 @@
       <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
       <el-table-column label="收货人" align="center" prop="contactName" min-width="100" />
       <el-table-column label="联系方式" align="center" prop="contactTelephone" min-width="120" />
-      <el-table-column label="收货地址" align="center" prop="contactAddress" min-width="180" show-overflow-tooltip />
       <el-table-column label="承运商" align="center" prop="carrier" min-width="120" />
       <el-table-column label="运输单号" align="center" prop="shippingNumber" min-width="160" />
       <el-table-column
