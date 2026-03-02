@@ -271,6 +271,12 @@ export const MesWmProductSalesStatusEnum = {
   CANCELED: MesOrderStatusConstants.CANCELLED
 }
 
+/** MES 发货通知单状态枚举 */
+export const MesWmSalesNoticeStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  APPROVED: MesOrderStatusConstants.CONFIRMED
+}
+
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {
   for (const item of Object.values(MesItemOrProductEnum)) {
