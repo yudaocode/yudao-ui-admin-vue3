@@ -22,6 +22,9 @@
     "lint:eslint": "eslint --fix --ext .js,.ts,.vue ./src",
     "lint:format": "prettier --write --loglevel warn \"src/**/*.{js,ts,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:style": "stylelint --fix \"./src/**/*.{vue,less,postcss,css,scss}\" --cache --cache-location node_modules/.cache/stylelint/",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
     "lint:lint-staged": "lint-staged -c "
   },
   "dependencies": {
@@ -87,6 +90,7 @@
     "@commitlint/config-conventional": "^19.0.0",
     "@iconify/json": "^2.2.187",
     "@intlify/unplugin-vue-i18n": "^2.0.0",
+    "@playwright/test": "^1.58.2",
     "@purge-icons/generated": "^0.9.0",
     "@types/jsoneditor": "^9.9.5",
     "@types/lodash-es": "^4.17.12",
