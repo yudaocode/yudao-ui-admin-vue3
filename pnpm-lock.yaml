@@ -17,6 +17,9 @@ importers:
       '@form-create/element-ui':
         specifier: ^3.2.37
         version: 3.2.37(vue@3.5.29(typescript@5.9.3))
+      '@iconify/iconify':
+        specifier: ^3.1.1
+        version: 3.1.1
       '@microsoft/fetch-event-source':
         specifier: ^2.0.1
         version: 2.0.1
@@ -187,8 +190,8 @@ importers:
         specifier: ^1.58.2
         version: 1.58.2
       '@purge-icons/generated':
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: ^0.9.0
+        version: 0.9.0
       '@types/jsoneditor':
         specifier: ^9.9.6
         version: 9.9.6
@@ -1734,6 +1737,9 @@ packages:
 
   '@purge-icons/generated@0.10.0':
     resolution: {integrity: sha512-I+1yN7/yDy/eZzfhAZqKF8Z6FM8D/O1vempbPrHJ0m9HlZwvf8sWXOArPJ2qRQGB6mJUVSpaXkoGBuoz1GQX5A==}
+
+  '@purge-icons/generated@0.9.0':
+    resolution: {integrity: sha512-s2t+1oVtGDV6KtqfCXtUOhxfeYvOdDF90IVm+nMs/6bUP0HeGZLslguuL/AibpwtfL4FA/oCsIu/RhwapgAdJw==}
 
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
@@ -7041,6 +7047,10 @@ snapshots:
       - supports-color
 
   '@purge-icons/generated@0.10.0':
+    dependencies:
+      '@iconify/iconify': 3.1.1
+
+  '@purge-icons/generated@0.9.0':
     dependencies:
       '@iconify/iconify': 3.1.1
 
