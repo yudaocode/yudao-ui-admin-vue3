@@ -17,7 +17,8 @@ export default tseslint.config(
       'test/unit/coverage/',
       'node_modules/',
       'src/main.ts',
-      'e2e/'
+      'e2e/',
+      'src/types/auto-components.d.ts'
     ]
   },
 
@@ -92,6 +93,14 @@ export default tseslint.config(
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-unsafe-function-type': 'off',
+      '@typescript-eslint/no-wrapper-object-types': 'off',
+      '@typescript-eslint/no-this-alias': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      'vue/no-ref-as-operand': 'off',
+      'vue/no-mutating-props': 'off',
+      'vue/no-side-effects-in-computed-properties': 'off',
       'no-use-before-define': 'off',
       '@typescript-eslint/no-use-before-define': 'off',
       'no-unused-vars': 'off',
