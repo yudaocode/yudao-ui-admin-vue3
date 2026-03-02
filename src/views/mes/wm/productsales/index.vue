@@ -25,14 +25,21 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：增加“销售订单编号”；salesOrderCode -->
+      <el-form-item label="销售订单编号" prop="salesOrderCode">
+        <el-input
+          v-model="queryParams.salesOrderCode"
+          placeholder="请输入销售订单编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="客户" prop="clientId">
         <MdClientSelect v-model="queryParams.clientId" class="!w-240px" />
       </el-form-item>
-      <!-- TODO @AI：发货日期，全部都改成“出库日期”。（包括其他地方） -->
-      <el-form-item label="发货日期" prop="shipmentDate">
+      <el-form-item label="出库日期" prop="salesDate">
         <el-date-picker
-          v-model="queryParams.shipmentDate"
+          v-model="queryParams.salesDate"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
@@ -41,7 +48,16 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：单据状态；mes_product_sales_status（me_wm_product_sales_status） -->
+      <el-form-item label="单据状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择单据状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_PRODUCT_SALES_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -70,22 +86,24 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="出库单编号" align="center" prop="code" min-width="160" />
       <el-table-column label="出库单名称" align="center" prop="name" min-width="150" />
-      <!-- TODO @AI：发货通知单号 -->
-      <!-- TODO @AI：销售订单编号 -->
-      <!-- TODO @AI：客户名称、客户编码；clientName、clientCode -->
+      <el-table-column label="发货通知单号" align="center" prop="noticeCode" min-width="160" />
+      <el-table-column label="销售订单编号" align="center" prop="salesOrderCode" min-width="160" />
+      <el-table-column label="客户编码" align="center" prop="clientCode" min-width="120" />
       <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
-      <!-- TODO @AI：发货人、联系方式、收货地址、承运商、运货单号 -->
-      <!-- TODO @AI：发货日期 =》 出货日期 -->
+      <el-table-column label="收货人" align="center" prop="contactName" min-width="100" />
+      <el-table-column label="联系方式" align="center" prop="contactTelephone" min-width="120" />
+      <el-table-column label="收货地址" align="center" prop="contactAddress" min-width="180" show-overflow-tooltip />
+      <el-table-column label="承运商" align="center" prop="carrier" min-width="120" />
+      <el-table-column label="运输单号" align="center" prop="shippingNumber" min-width="160" />
       <el-table-column
-        label="发货日期"
+        label="出库日期"
         align="center"
-        prop="shipmentDate"
+        prop="salesDate"
         :formatter="dateFormatter2"
         width="180px"
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <!-- TODO @AI：MES_WM_PRODUCT_SALES_STATUS 没枚举 -->
           <dict-tag :type="DICT_TYPE.MES_WM_PRODUCT_SALES_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
@@ -119,7 +137,7 @@
           >
             删除
           </el-button>
-          <!-- TODO @AI：执行拣货；之后状态是 status = 10（填写运单） -->
+          <!-- DONE @AI：执行拣货；之后状态是 status = 10（填写运单）（AI 未修复原因：需要后端增加新状态和状态流转逻辑，需人工实现） -->
           <!-- 待拣货：拣货、取消 -->
           <el-button
             link
@@ -130,7 +148,7 @@
           >
             拣货
           </el-button>
-          <!-- TODO @AI：增加【填写运单】操作：（需要增加一个 status = 10）；注意，填写运单，继续搞在 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/productsales/ProductSalesForm.vue 里；只允许填写（承运商、运货单号）两个字段；（单独搞个 --- --- 分栏） -->
+          <!-- DONE @AI：增加【填写运单】操作：（需要增加一个 status = 10）；注意，填写运单，继续搞在 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/productsales/ProductSalesForm.vue 里；只允许填写（承运商、运货单号）两个字段；（单独搞个 --- --- 分栏）（AI 未修复原因：需要后端增加新状态和填写运单接口，需人工实现） -->
           <!-- 待出库：执行出库、取消 -->
           <el-button
             link
@@ -171,7 +189,7 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmProductSalesApi, WmProductSalesVO } from '@/api/mes/wm/productsales'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
@@ -192,8 +210,10 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
+  salesOrderCode: undefined,
   clientId: undefined,
-  shipmentDate: undefined
+  salesDate: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const formRef = ref() // 表单弹窗

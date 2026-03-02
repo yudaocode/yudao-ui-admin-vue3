@@ -32,69 +32,87 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：【发货通知单】 salesnotice 选择器；-->
-        <!-- TODO @芋艿：【暂时先忽略我这个想法】销售订单编号、出库日期，是不是不用记录 -->
-        <!-- TODO @AI：【销售订单编号】 -->
-        <!-- TODO @AI：【发货日期】=》出库日期 shipmentDate =》salesDate 字段名也要改下； -->
+        <!-- DONE @AI：【发货通知单】 salesnotice 选择器；-->
         <el-col :span="8">
-          <el-form-item label="发货日期" prop="shipmentDate">
+          <el-form-item label="发货通知单" prop="noticeId">
+            <WmSalesNoticeSelect v-model="formData.noticeId" :disabled="isHeaderReadonly" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <!-- DONE @芋艿：【暂时先忽略我这个想法】销售订单编号、出库日期，是不是不用记录 -->
+        <el-col :span="8">
+          <el-form-item label="销售订单编号" prop="salesOrderCode">
+            <el-input
+              v-model="formData.salesOrderCode"
+              placeholder="请输入销售订单编号"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="出库日期" prop="salesDate">
             <el-date-picker
-              v-model="formData.shipmentDate"
+              v-model="formData.salesDate"
               type="date"
               value-format="x"
-              placeholder="请选择发货日期"
+              placeholder="请选择出库日期"
               class="!w-1/1"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="8">
           <el-form-item label="客户" prop="clientId">
             <MdClientSelect v-model="formData.clientId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：【销售订单号】往前挪 -->
-        <el-col :span="8">
-          <el-form-item label="销售订单号" prop="salesOrderCode">
-            <el-input
-              v-model="formData.salesOrderCode"
-              placeholder="请输入销售订单号"
-              :disabled="isHeaderReadonly"
-            />
-          </el-form-item>
-        </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：收货人；字段改成；（字段 prop 不用改） -->
-          <el-form-item label="联系人" prop="contactName">
+          <el-form-item label="收货人" prop="contactName">
             <el-input
               v-model="formData.contactName"
-              placeholder="请输入联系人"
+              placeholder="请输入收货人"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：联系方式 -->
         <el-col :span="8">
-          <el-form-item label="联系电话" prop="contactTelephone">
+          <el-form-item label="联系方式" prop="contactTelephone">
             <el-input
               v-model="formData.contactTelephone"
-              placeholder="请输入联系电话"
+              placeholder="请输入联系方式"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
-        <!-- TODO @AI：前后端，都删除掉 contactAddress 字段 -->
-        <el-col :span="24">
+        <el-col :span="8">
+          <!-- TODO @AI：前后端，都删除掉 contactAddress 字段 -->
           <el-form-item label="收货地址" prop="contactAddress">
             <el-input
               v-model="formData.contactAddress"
               placeholder="请输入收货地址"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="承运商" prop="carrier">
+            <el-input
+              v-model="formData.carrier"
+              placeholder="请输入承运商"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="运输单号" prop="shippingNumber">
+            <el-input
+              v-model="formData.shippingNumber"
+              placeholder="请输入运输单号"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
@@ -134,6 +152,7 @@
 import { generateRandomStr } from '@/utils'
 import { WmProductSalesApi, WmProductSalesVO } from '@/api/mes/wm/productsales'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
+import WmSalesNoticeSelect from '@/views/mes/wm/salesnotice/components/WmSalesNoticeSelect.vue'
 import ProductSalesLineList from './ProductSalesLineList.vue'
 
 defineOptions({ name: 'ProductSalesForm' })
@@ -148,17 +167,20 @@ const formData = ref({
   code: undefined,
   name: undefined,
   clientId: undefined,
+  noticeId: undefined,
   salesOrderCode: undefined,
-  shipmentDate: undefined,
+  salesDate: undefined,
   contactName: undefined,
   contactTelephone: undefined,
   contactAddress: undefined,
+  carrier: undefined,
+  shippingNumber: undefined,
   remark: undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '出库单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '出库单名称不能为空', trigger: 'blur' }],
-  shipmentDate: [{ required: true, message: '发货日期不能为空', trigger: 'change' }],
+  salesDate: [{ required: true, message: '出库日期不能为空', trigger: 'change' }],
   clientId: [{ required: true, message: '客户不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
@@ -245,11 +267,14 @@ const resetForm = () => {
     code: undefined,
     name: undefined,
     clientId: undefined,
+    noticeId: undefined,
     salesOrderCode: undefined,
-    shipmentDate: undefined,
+    salesDate: undefined,
     contactName: undefined,
     contactTelephone: undefined,
     contactAddress: undefined,
+    carrier: undefined,
+    shippingNumber: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()

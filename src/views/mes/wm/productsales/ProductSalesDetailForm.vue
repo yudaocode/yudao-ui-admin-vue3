@@ -23,9 +23,10 @@
       <el-form-item label="库位" prop="areaId" v-if="formData.locationId">
         <WmWarehouseAreaSelect v-model="formData.areaId" :location-id="formData.locationId" />
       </el-form-item>
-      <!-- TODO @AI：批次号 -->
-      <!-- TODO @AI：拣货数量 =》 数量 -->
-      <el-form-item label="拣货数量" prop="quantity">
+      <el-form-item label="批次号" prop="batchId">
+        <WmBatchSelect v-model="formData.batchId" :item-id="formData.itemId" />
+      </el-form-item>
+      <el-form-item label="数量" prop="quantity">
         <el-input-number
           v-model="formData.quantity"
           :precision="2"
@@ -48,6 +49,7 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
+import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 
 defineOptions({ name: 'ProductSalesDetailForm' })
 
@@ -74,14 +76,15 @@ const formData = ref({
   quantity: undefined as number | undefined,
   warehouseId: undefined as number | undefined,
   locationId: undefined as number | undefined,
-  areaId: undefined as number | undefined
+  areaId: undefined as number | undefined,
+  batchId: undefined as number | undefined
 })
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   warehouseId: [{ required: true, message: '出库仓库不能为空', trigger: 'change' }],
   locationId: [{ required: true, message: '库区不能为空', trigger: 'change' }],
   areaId: [{ required: true, message: '库位不能为空', trigger: 'change' }],
-  quantity: [{ required: true, message: '拣货数量不能为空', trigger: 'blur' }]
+  quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
 })
 
 /** 打开弹窗 */
@@ -142,7 +145,8 @@ const resetForm = () => {
     quantity: undefined,
     warehouseId: undefined,
     locationId: undefined,
-    areaId: undefined
+    areaId: undefined,
+    batchId: undefined
   }
   formRef.value?.resetFields()
 }

@@ -5,9 +5,8 @@
       <el-table-column label="仓库名称" align="center" prop="warehouseName" min-width="100" />
       <el-table-column label="库区名称" align="center" prop="locationName" min-width="100" />
       <el-table-column label="库位名称" align="center" prop="areaName" min-width="100" />
-      <!-- TODO @AI：批次号 -->
-      <!-- TODO @AI：件货数量，改成【数量】 -->
-      <el-table-column label="拣货数量" align="center" prop="quantity" width="100" />
+      <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
+      <el-table-column label="数量" align="center" prop="quantity" width="100" />
       <el-table-column
         v-if="props.formType === 'pick'"
         label="操作"

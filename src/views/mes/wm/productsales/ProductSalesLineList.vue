@@ -29,14 +29,16 @@
       </el-table-column>
       <el-table-column label="产品编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="产品名称" align="center" prop="itemName" min-width="140" />
-      <!-- TODO @AI：规格型号、单位 -->
+      <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
+      <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="出库数量" align="center" prop="quantity" width="100" />
-      <!-- TODO @AI：不展示 pickedQuantity 字段； -->
-      <!-- TODO @芋艿：后端的 pickedQuantity 需要存储么？ -->
-      <el-table-column label="已拣货数量" align="center" prop="pickedQuantity" width="100" />
-      <!-- TODO @AI：批次号 -->
-      <!-- TODO @AI：是否校验 -->
-      <!-- TODO @AI：备注 -->
+      <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
+      <el-table-column label="是否校验" align="center" prop="oqcCheck" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.oqcCheck" />
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" min-width="150" show-overflow-tooltip />
       <el-table-column
         v-if="isUpdate || isPick"
         label="操作"
@@ -74,7 +76,11 @@
             <MdItemSelect v-model="formData.itemId" placeholder="请选择产品" class="!w-1/1" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：批次号； -->
+        <el-col :span="8">
+          <el-form-item label="批次号" prop="batchId">
+            <WmBatchSelect v-model="formData.batchId" :item-id="formData.itemId" />
+          </el-form-item>
+        </el-col>
         <el-col :span="8">
           <el-form-item label="出库数量" prop="quantity">
             <el-input-number
@@ -85,7 +91,16 @@
               class="!w-1/1"
             />
           </el-form-item>
-          <!-- TODO @AI：是否校验 -->
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="是否校验" prop="oqcCheck">
+            <el-radio-group v-model="formData.oqcCheck">
+              <el-radio :label="true">是</el-radio>
+              <el-radio :label="false">否</el-radio>
+            </el-radio-group>
+          </el-form-item>
         </el-col>
       </el-row>
       <el-row>
@@ -113,8 +128,10 @@
 <script setup lang="ts">
 import { WmProductSalesLineApi, WmProductSalesLineVO } from '@/api/mes/wm/productsales/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 import ProductSalesDetailList from './ProductSalesDetailList.vue'
 import ProductSalesDetailForm from './ProductSalesDetailForm.vue'
+import { DICT_TYPE } from '@/utils/dict'
 
 defineOptions({ name: 'ProductSalesLineList' })
 
@@ -164,6 +181,7 @@ const formData = ref({
   itemId: undefined,
   quantity: undefined,
   batchId: undefined,
+  oqcCheck: false,
   remark: undefined
 })
 const formRules = reactive({
@@ -216,6 +234,7 @@ const resetForm = () => {
     itemId: undefined,
     quantity: undefined,
     batchId: undefined,
+    oqcCheck: false,
     remark: undefined
   }
   formRef.value?.resetFields()
