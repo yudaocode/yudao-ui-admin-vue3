@@ -49,7 +49,7 @@
     "dayjs": "^1.11.10",
     "diagram-js": "^12.8.0",
     "driver.js": "^1.3.1",
-    "echarts": "^5.5.0",
+    "echarts": "^6.0.0",
     "echarts-wordcloud": "^2.1.0",
     "element-plus": "2.13.3",
     "fast-xml-parser": "^4.3.2",

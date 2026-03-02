@@ -72,11 +72,11 @@ importers:
         specifier: ^1.3.1
         version: 1.3.1
       echarts:
-        specifier: ^5.5.0
-        version: 5.5.1
+        specifier: ^6.0.0
+        version: 6.0.0
       echarts-wordcloud:
         specifier: ^2.1.0
-        version: 2.1.0(echarts@5.5.1)
+        version: 2.1.0(echarts@6.0.0)
       element-plus:
         specifier: 2.13.3
         version: 2.13.3(vue@3.5.26(typescript@5.9.3))
@@ -3345,8 +3345,8 @@ packages:
     peerDependencies:
       echarts: ^5.0.1
 
-  echarts@5.5.1:
-    resolution: {integrity: sha512-Fce8upazaAXUVUVsjgV6mBnGuqgO+JNDlcgF79Dksy4+wgGpQB2lmYoO4TSweFg/mZITdpGHomw/cNBJZj1icA==}
+  echarts@6.0.0:
+    resolution: {integrity: sha512-Tte/grDQRiETQP4xz3iZWSvoHrkCQtwqd6hs+mifXcjrCuo2iKWbajFObuLJVBlDIJlOzgQPd1hsaKt/3+OMkQ==}
 
   ejs@3.1.10:
     resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
@@ -5678,8 +5678,8 @@ packages:
   zeebe-bpmn-moddle@1.7.0:
     resolution: {integrity: sha512-eZ6OXSt0c4n9V/oN/46gTlwDIS3GhWQLt9jbM5uS/YryB4yN8wdrrKrtw+TpyNy0SSKWXNDHyC83nCA2blPO3Q==}
 
-  zrender@5.6.0:
-    resolution: {integrity: sha512-uzgraf4njmmHAbEUxMJ8Oxg+P3fT04O+9p7gY+wJRVxo8Ge+KmYv0WJev945EH4wFuc4OY2NLXz46FZrWS9xJg==}
+  zrender@6.0.0:
+    resolution: {integrity: sha512-41dFXEEXuJpNecuUQq6JlbybmnHaqqpGlbH1yxnA5V9MMP4SbohSVZsJIwz+zdjQXSSlR1Vc34EgH1zxyTDvhg==}
 
 snapshots:
 
@@ -9075,14 +9075,14 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  echarts-wordcloud@2.1.0(echarts@5.5.1):
+  echarts-wordcloud@2.1.0(echarts@6.0.0):
     dependencies:
-      echarts: 5.5.1
+      echarts: 6.0.0
 
-  echarts@5.5.1:
+  echarts@6.0.0:
     dependencies:
       tslib: 2.3.0
-      zrender: 5.6.0
+      zrender: 6.0.0
 
   ejs@3.1.10:
     dependencies:
@@ -11539,6 +11539,6 @@ snapshots:
 
   zeebe-bpmn-moddle@1.7.0: {}
 
-  zrender@5.6.0:
+  zrender@6.0.0:
     dependencies:
       tslib: 2.3.0
