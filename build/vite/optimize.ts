@@ -11,7 +11,6 @@ const include = [
   'unocss',
   'vue-router',
   'vue-types',
-  'vue-i18n',
   'crypto-js',
   'cropperjs',
   'lodash-es',
