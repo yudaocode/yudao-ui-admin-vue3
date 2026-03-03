@@ -80,6 +80,9 @@
       <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
       </el-button>
+      <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
+        入库上架
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -117,11 +120,13 @@ const formRules = reactive({
 const formRef = ref()
 
 const isUpdate = computed(() => ['create', 'update'].includes(formType.value))
-const isHeaderReadonly = computed(() => ['detail'].includes(formType.value))
+const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value))
+const isStock = computed(() => formType.value === 'stock')
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增外协入库单',
     update: '编辑外协入库单',
+    stock: '入库上架',
     detail: '外协入库单详情'
   }
   return titles[formType.value] || formType.value
@@ -165,6 +170,20 @@ const submitForm = async () => {
       message.success('修改成功')
     }
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 入库上架 */
+const handleStock = async () => {
+  try {
+    formLoading.value = true
+    await WmOutsourceReceiptApi.stockOutsourceReceipt(formData.value.id!)
+    message.success('入库上架成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }

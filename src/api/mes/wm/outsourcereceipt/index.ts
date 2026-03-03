@@ -71,9 +71,9 @@ export const WmOutsourceReceiptApi = {
     return await request.put({ url: '/mes/wm/outsource-receipt/submit?id=' + id })
   },
 
-  // 审批委外收货单
-  approveOutsourceReceipt: async (id: number) => {
-    return await request.put({ url: '/mes/wm/outsource-receipt/approve?id=' + id })
+  // 入库上架
+  stockOutsourceReceipt: async (id: number) => {
+    return await request.put({ url: '/mes/wm/outsource-receipt/stock?id=' + id })
   },
 
   // 完成委外收货单

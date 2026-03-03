@@ -43,12 +43,23 @@
           <dict-tag :type="DICT_TYPE.MES_WM_QUALITY_STATUS" :value="scope.row.qualityStatus" />
         </template>
       </el-table-column>
-      <el-table-column v-if="isUpdate" label="操作" align="center" width="160" fixed="right">
+      <el-table-column
+        v-if="isUpdate || isStock"
+        label="操作"
+        align="center"
+        width="160"
+        fixed="right"
+      >
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('update', scope.row.id)">
+          <el-button v-if="isUpdate" link type="primary" @click="openForm('update', scope.row.id)">
             编辑
           </el-button>
-          <el-button link type="danger" @click="handleDelete(scope.row.id)"> 删除 </el-button>
+          <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
+            删除
+          </el-button>
+          <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
+            上架
+          </el-button>
           <!-- DONE @芋艿：标签打印；（AI 未修复原因：标注为人工处理，需产品经理确认功能需求） -->
         </template>
       </el-table-column>
@@ -172,6 +183,7 @@ const { t } = useI18n()
 const message = useMessage()
 
 const isUpdate = computed(() => ['create', 'update'].includes(props.formType))
+const isStock = computed(() => props.formType === 'stock')
 
 // ==================== 列表 ====================
 const loading = ref(false)
@@ -297,6 +309,12 @@ const setDetailListRef = (lineId: number, el: any) => {
 
 // ==================== 入库明细表单 ====================
 const detailFormRef = ref()
+
+/** 上架：直接打开明细创建表单 */
+const handlePicking = (lineId: number) => {
+  const row = list.value.find((r) => r.id === lineId)
+  openDetailForm('create', lineId, row?.itemId)
+}
 
 /** 打开入库明细表单 */
 const openDetailForm = (type: string, lineId: number, itemId?: number, detailId?: number) => {

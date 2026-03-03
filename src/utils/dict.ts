@@ -307,4 +307,5 @@ export enum DICT_TYPE {
   MES_SALES_NOTICE_STATUS = 'mes_sales_notice_status', // MES 发货通知单状态
   MES_WM_MISC_ISSUE_TYPE = 'mes_wm_misc_issue_type', // MES 杂项单类型
   MES_WM_MISC_RECEIPT_TYPE = 'mes_wm_misc_receipt_type', // MES 杂项单类型
+  MES_WM_OUTSOURCE_RECEIPT_STATUS = 'mes_wm_outsource_receipt_status', // MES 外协入库单状态
 }

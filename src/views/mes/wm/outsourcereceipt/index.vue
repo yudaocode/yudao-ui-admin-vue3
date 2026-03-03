@@ -67,7 +67,6 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="入库单编号" align="center" prop="code" min-width="160" />
       <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
-      <!-- DONE @AI：生产工单号； -->
       <el-table-column label="外协工单号" align="center" prop="workOrderCode" min-width="140" />
       <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="120" />
       <el-table-column
@@ -79,7 +78,6 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <!-- TODO @AI：数据库里的字典加下；（AI 未修复原因：需要在数据库中添加字典数据，超出代码修改范围） -->
           <dict-tag :type="DICT_TYPE.MES_WM_OUTSOURCE_RECEIPT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
@@ -113,19 +111,17 @@
           >
             删除
           </el-button>
-          <!-- DONE @AI：执行上架；（AI 未修复原因：需要明确业务流程，外协入库单不需要上架操作） -->
-          <!-- 审批中：审批、取消 -->
+          <!-- 待上架：执行上架 -->
           <el-button
             link
             type="success"
-            @click="handleApprove(scope.row.id)"
+            @click="openForm('stock', scope.row.id)"
             v-hasPermi="['mes:wm-outsource-receipt:update']"
             v-if="scope.row.status === MesWmOutsourceReceiptStatusEnum.APPROVING"
           >
-            审批
+            执行上架
           </el-button>
-          <!-- DONE @AI：执行领料（AI 未修复原因：需要明确业务流程，外协入库单审批后应该是执行入库出库，不是领料） -->
-          <!-- 已审批：完成、取消 -->
+          <!-- 已上架：执行退料 -->
           <el-button
             link
             type="primary"
@@ -133,7 +129,7 @@
             v-hasPermi="['mes:wm-outsource-receipt:finish']"
             v-if="scope.row.status === MesWmOutsourceReceiptStatusEnum.APPROVED"
           >
-            完成
+            执行退料
           </el-button>
           <el-button
             link
