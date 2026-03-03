@@ -1,0 +1,192 @@
+<template>
+  <!-- TODO @AI：每行 3 个； -->
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="110px"
+      v-loading="formLoading"
+    >
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="收货单编号" prop="code">
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入收货单编号"
+              :disabled="isHeaderReadonly"
+            >
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType !== 'create'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="收货单名称" prop="name">
+            <el-input
+              v-model="formData.name"
+              placeholder="请输入收货单名称"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+        <!-- TODO @AI:外协工单；使用 workorder select； -->
+        <el-col :span="8">
+          <el-form-item label="收货日期" prop="receiptDate">
+            <el-date-picker
+              v-model="formData.receiptDate"
+              type="date"
+              value-format="x"
+              placeholder="请选择收货日期"
+              class="!w-1/1"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <!-- TODO @AI：放到“日期”前面； -->
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="供应商" prop="vendorId">
+            <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
+          </el-form-item>
+        </el-col>
+        <!-- TODO @AI:去掉仓库 -->
+        <el-col :span="8">
+          <el-form-item label="仓库" prop="warehouseId">
+            <MdWarehouseSelect v-model="formData.warehouseId" :disabled="isHeaderReadonly" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
+            <el-input
+              v-model="formData.remark"
+              type="textarea"
+              placeholder="请输入备注"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+    <!-- 非新建模式展示行项目信息（收货物料） -->
+    <template v-if="formData.id">
+      <el-divider content-position="center">物料信息</el-divider>
+      <OutsourceReceiptLineList :receipt-id="formData.id" :form-type="formType" />
+    </template>
+    <template #footer>
+      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
+</template>
+
+<script setup lang="ts">
+import { generateRandomStr } from '@/utils'
+import { WmOutsourceReceiptApi, WmOutsourceReceiptVO } from '@/api/mes/wm/outsourcereceipt'
+import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
+import MdWarehouseSelect from '@/views/mes/md/warehouse/components/MdWarehouseSelect.vue'
+import OutsourceReceiptLineList from './OutsourceReceiptLineList.vue'
+
+defineOptions({ name: 'OutsourceReceiptForm' })
+
+const message = useMessage()
+
+const dialogVisible = ref(false)
+const formLoading = ref(false)
+const formType = ref<string>('create')
+const formData = ref({
+  id: undefined as number | undefined,
+  code: undefined,
+  name: undefined,
+  vendorId: undefined,
+  warehouseId: undefined,
+  receiptDate: undefined,
+  remark: undefined
+})
+const formRules = reactive({
+  // TODO @AI：name 必填；
+  code: [{ required: true, message: '收货单编号不能为空', trigger: 'blur' }],
+  receiptDate: [{ required: true, message: '收货日期不能为空', trigger: 'change' }],
+  // TODO @AI：供应商非必填；
+  vendorId: [{ required: true, message: '供应商不能为空', trigger: 'change' }],
+  // TODO @AI：warehouseId 没有这个字段！！！
+  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
+})
+const formRef = ref()
+
+const isUpdate = computed(() => ['create', 'update'].includes(formType.value))
+const isHeaderReadonly = computed(() => ['detail'].includes(formType.value))
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增委外收货单',
+    update: '编辑委外收货单',
+    detail: '委外收货单详情'
+  }
+  return titles[formType.value] || formType.value
+})
+
+/** 生成收货单编号 */
+const generateCode = () => {
+  formData.value.code = 'OR' + generateRandomStr(10)
+}
+
+/** 打开弹窗 */
+const open = async (type: string, id?: number) => {
+  dialogVisible.value = true
+  formType.value = type
+  resetForm()
+  if (id) {
+    formLoading.value = true
+    try {
+      formData.value = await WmOutsourceReceiptApi.getOutsourceReceipt(id)
+    } finally {
+      formLoading.value = false
+    }
+  }
+}
+defineExpose({ open })
+
+/** 提交表单 */
+const emit = defineEmits(['success'])
+const submitForm = async () => {
+  await formRef.value.validate()
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as WmOutsourceReceiptVO
+    if (formType.value === 'create') {
+      const res = await WmOutsourceReceiptApi.createOutsourceReceipt(data)
+      message.success('新增成功')
+      formData.value.id = res
+      formType.value = 'update'
+    } else {
+      await WmOutsourceReceiptApi.updateOutsourceReceipt(data)
+      message.success('修改成功')
+    }
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    code: undefined,
+    name: undefined,
+    vendorId: undefined,
+    warehouseId: undefined,
+    receiptDate: undefined,
+    remark: undefined
+  }
+  formRef.value?.resetFields()
+}
+</script>
