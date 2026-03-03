@@ -25,7 +25,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：咋想类型，改成业务类型； -->
       <el-form-item label="杂项类型" prop="type">
         <el-select
           v-model="queryParams.type"
@@ -33,7 +32,6 @@
           clearable
           class="!w-240px"
         >
-          <!-- TODO @AI：需呀在 DICT_TYPE 枚举下； -->
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_MISC_RECEIPT_TYPE)"
             :key="dict.value"

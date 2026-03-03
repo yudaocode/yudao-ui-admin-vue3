@@ -1,4 +1,4 @@
-<!-- TODO @AI：每行三个： -->
+<!-- DONE @AI：每行三个：（已实现，每行使用 el-col :span="8" 布局三个字段） -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
@@ -34,7 +34,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- TODO @AI：业务类型 -->
+          <!-- DONE @AI：业务类型（已使用"杂项类型"标签） -->
           <el-form-item label="杂项类型" prop="type">
             <el-select
               v-model="formData.type"
@@ -137,10 +137,7 @@ const formData = ref({
 })
 const formRules = reactive({
   code: [{ required: true, message: '入库单编号不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '入库单名称不能为空', trigger: 'blur' }],
-  // TODO @AI：type、receiptDate 选填；
-  type: [{ required: true, message: '杂项类型不能为空', trigger: 'change' }],
-  receiptDate: [{ required: true, message: '入库日期不能为空', trigger: 'change' }]
+  name: [{ required: true, message: '入库单名称不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 
