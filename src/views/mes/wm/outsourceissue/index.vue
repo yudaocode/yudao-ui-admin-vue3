@@ -28,16 +28,6 @@
       <el-form-item label="供应商" prop="vendorId">
         <MdVendorSelect v-model="queryParams.vendorId" class="!w-240px" />
       </el-form-item>
-      <!-- TODO @AI：前后端筛选，去掉 workorderCode -->
-      <el-form-item label="工单编号" prop="workorderCode">
-        <el-input
-          v-model="queryParams.workorderCode"
-          placeholder="请输入工单编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="发料日期" prop="issueDate">
         <el-date-picker
           v-model="queryParams.issueDate"
@@ -48,22 +38,6 @@
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
         />
-      </el-form-item>
-      <el-form-item label="单据状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择单据状态"
-          clearable
-          class="!w-240px"
-        >
-          <!-- TODO @AI：MES_WM_OUTSOURCE_ISSUE_STATUS 在 DICT_TYPE 不要声明； -->
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_OUTSOURCE_ISSUE_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -99,9 +73,8 @@
         </template>
       </el-table-column>
       <el-table-column label="发料单名称" align="center" prop="name" min-width="150" />
-      <!-- TODO @AI：增加“生产工单号”，去掉“工单编号”； -->
+      <el-table-column label="生产工单号" align="center" prop="workorderId" min-width="140" />
       <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="120" />
-      <el-table-column label="工单编号" align="center" prop="workorderCode" min-width="140" />
       <el-table-column
         label="发料日期"
         align="center"
@@ -114,8 +87,9 @@
           <dict-tag :type="DICT_TYPE.MES_WM_OUTSOURCE_ISSUE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="220" fixed="right">
+      <el-table-column label="操作" align="center" width="260" fixed="right">
         <template #default="scope">
+          <!-- 草稿状态：编辑、删除、提交 -->
           <el-button
             link
             type="primary"
@@ -125,10 +99,6 @@
           >
             编辑
           </el-button>
-          <!-- TODO @AI：不同状态，不同操作：
-           1）执行拣货；
-           2）执行领出；
-           -->
           <el-button
             link
             type="danger"
@@ -140,12 +110,32 @@
           </el-button>
           <el-button
             link
-            type="warning"
-            @click="handleExecute(scope.row.id)"
-            v-hasPermi="['mes:wm-outsource-issue:execute']"
+            type="success"
+            @click="handleSubmit(scope.row.id)"
+            v-hasPermi="['mes:wm-outsource-issue:update']"
             v-if="scope.row.status === MesWmOutsourceIssueStatusEnum.PREPARE"
           >
-            执行出库
+            提交
+          </el-button>
+          <!-- 待拣货状态：执行拣货 -->
+          <el-button
+            link
+            type="primary"
+            @click="openForm('stock', scope.row.id)"
+            v-hasPermi="['mes:wm-outsource-issue:update']"
+            v-if="scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVING"
+          >
+            执行拣货
+          </el-button>
+          <!-- 待执行出库状态：执行出库 -->
+          <el-button
+            link
+            type="warning"
+            @click="handleFinish(scope.row.id)"
+            v-hasPermi="['mes:wm-outsource-issue:finish']"
+            v-if="scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVED"
+          >
+            执行领出
           </el-button>
         </template>
       </el-table-column>
@@ -185,9 +175,7 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   vendorId: undefined,
-  workorderCode: undefined,
-  issueDate: undefined,
-  status: undefined
+  issueDate: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -221,11 +209,21 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 执行出库 */
-const handleExecute = async (id: number) => {
+/** 提交到待拣货 */
+const handleSubmit = async (id: number) => {
+  try {
+    await message.confirm('确认提交到待拣货状态吗？')
+    await WmOutsourceIssueApi.submitOutsourceIssue(id)
+    message.success('提交成功')
+    await getList()
+  } catch {}
+}
+
+/** 完成出库 */
+const handleFinish = async (id: number) => {
   try {
     await message.confirm('确认执行出库吗？执行后将扣减库存，且无法撤销。')
-    await WmOutsourceIssueApi.executeOutsourceIssue(id)
+    await WmOutsourceIssueApi.finishOutsourceIssue(id)
     message.success('出库成功')
     await getList()
   } catch {}

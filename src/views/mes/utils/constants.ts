@@ -316,7 +316,10 @@ export const MesWmMiscIssueStatusEnum = {
 /** MES 外协发料单状态枚举 */
 export const MesWmOutsourceIssueStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
-  FINISHED: MesOrderStatusConstants.FINISHED
+  APPROVING: MesOrderStatusConstants.APPROVING,
+  APPROVED: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED,
+  CANCELLED: MesOrderStatusConstants.CANCELLED
 }
 
 /** 获取物料/产品标识的标签 */

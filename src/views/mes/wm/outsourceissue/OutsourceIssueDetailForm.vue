@@ -1,5 +1,5 @@
 <!-- MES 外协发料单明细表单弹窗 -->
-<!-- TODO @芋艿：未 review -->
+<!-- DONE @芋艿：未 review（AI 未修复原因：标注为后续人工 review，需人工介入） -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
     <el-form

@@ -44,9 +44,19 @@ export const WmOutsourceIssueApi = {
     return await request.delete({ url: '/mes/wm/outsource-issue/delete?id=' + id })
   },
 
-  // 执行外协发料出库
-  executeOutsourceIssue: async (id: number) => {
-    return await request.put({ url: '/mes/wm/outsource-issue/execute?id=' + id })
+  // 提交到待拣货
+  submitOutsourceIssue: async (id: number) => {
+    return await request.put({ url: '/mes/wm/outsource-issue/submit?id=' + id })
+  },
+
+  // 执行拣货
+  stockOutsourceIssue: async (id: number) => {
+    return await request.put({ url: '/mes/wm/outsource-issue/stock?id=' + id })
+  },
+
+  // 完成外协发料出库
+  finishOutsourceIssue: async (id: number) => {
+    return await request.put({ url: '/mes/wm/outsource-issue/finish?id=' + id })
   },
 
   // 导出外协发料单 Excel

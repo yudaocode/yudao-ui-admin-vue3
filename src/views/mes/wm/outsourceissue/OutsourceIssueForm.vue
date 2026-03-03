@@ -6,7 +6,7 @@
       :rules="formRules"
       label-width="110px"
       v-loading="formLoading"
-      :disabled="isDetail"
+      :disabled="isHeaderReadonly"
     >
       <el-row>
         <el-col :span="8">
@@ -26,7 +26,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="发料日期" prop="issueDate" required>
+          <el-form-item label="发料日期" prop="issueDate">
             <el-date-picker
               v-model="formData.issueDate"
               type="date"
@@ -39,14 +39,14 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="工单编号" prop="workorderCode">
-            <!-- TODO: @AI：如果 MdWorkorderSelect 组件存在，使用该组件；否则使用普通输入框 -->
-            <el-input v-model="formData.workorderCode" placeholder="请输入工单编号" clearable />
+          <el-form-item label="外协工单" prop="workOrderId">
+            <!-- TODO @芋艿：【未来需要增加，过滤条件】 -->
+            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="供应商" prop="vendorId" required>
-            <MdVendorSelect v-model="formData.vendorId" :disabled="isDetail" />
+          <el-form-item label="供应商" prop="vendorId">
+            <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -64,8 +64,11 @@
       <OutsourceIssueLineList :issue-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
+      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
+      </el-button>
+      <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
+        执行拣货
       </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -76,6 +79,7 @@
 import { generateRandomStr } from '@/utils'
 import { WmOutsourceIssueApi, WmOutsourceIssueVO } from '@/api/mes/wm/outsourceissue'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import OutsourceIssueLineList from './OutsourceIssueLineList.vue'
 
 defineOptions({ name: 'OutsourceIssueForm' })
@@ -85,12 +89,15 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
-const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
+const formType = ref<string>('create') // 表单的类型：create - 新增；update - 修改；stock - 拣货；detail - 详情
+const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isStock = computed(() => formType.value === 'stock') // 是否为拣货模式
+const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value)) // 是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增外协发料单',
     update: '修改外协发料单',
+    stock: '执行拣货',
     detail: '查看外协发料单'
   }
   return titles[formType.value] || t('action.' + formType.value)
@@ -100,21 +107,14 @@ const formData = ref({
   code: undefined,
   name: undefined,
   vendorId: undefined,
-  vendorCode: undefined,
-  vendorName: undefined,
-  workorderId: undefined,
-  workorderCode: undefined,
-  workorderName: undefined,
+  workOrderId: undefined,
   issueDate: undefined,
   remark: undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '发料单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '发料单名称不能为空', trigger: 'blur' }],
-  // TODO @AI：workOrderId 必填；
-  vendorId: [{ required: true, message: '请选择供应商', trigger: 'change' }],
-  // TODO @AI：vendorId、issueDate 非必填；
-  issueDate: [{ required: true, message: '请选择发料日期', trigger: 'change' }]
+  workOrderId: [{ required: true, message: '请选择工单', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -139,7 +139,7 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open })
 
-/** 提交表单 */
+/** 提交表单（create/update 模式） */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
   await formRef.value.validate()
@@ -163,6 +163,21 @@ const submitForm = async () => {
   }
 }
 
+/** 执行拣货 */
+const handleStock = async () => {
+  try {
+    await message.confirm('确认执行拣货吗？执行后将进入待执行出库状态。')
+    formLoading.value = true
+    await WmOutsourceIssueApi.stockOutsourceIssue(formData.value.id!)
+    message.success('拣货成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
@@ -170,11 +185,7 @@ const resetForm = () => {
     code: undefined,
     name: undefined,
     vendorId: undefined,
-    vendorCode: undefined,
-    vendorName: undefined,
-    workorderId: undefined,
-    workorderCode: undefined,
-    workorderName: undefined,
+    workOrderId: undefined,
     issueDate: undefined,
     remark: undefined
   }

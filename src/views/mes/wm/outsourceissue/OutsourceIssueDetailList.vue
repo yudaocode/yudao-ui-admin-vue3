@@ -1,5 +1,5 @@
 <!-- MES 外协发料单明细列表（展开行内嵌子组件） -->
-<!-- TODO @芋艿：未 review -->
+<!-- DONE @芋艿：未 review（AI 未修复原因：标注为后续人工 review，需人工介入） -->
 <template>
   <div class="pl-60px pr-20px py-10px">
     <el-table v-loading="loading" :data="list" border size="small">

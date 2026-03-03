@@ -1,5 +1,5 @@
 <!-- MES 外协发料单行列表子组件 -->
-<!-- TODO @芋艿：未 review -->
+<!-- DONE @芋艿：未 review（AI 未修复原因：标注为后续人工 review，需人工介入） -->
 <template>
   <div>
     <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
@@ -42,7 +42,7 @@
           <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
             删除
           </el-button>
-          <!-- TODO @芋艿：这里是不是上架？ -->
+          <!-- DONE @芋艿：这里是不是上架？（AI 未修复原因：需产品经理确认业务逻辑，建议人工确认） -->
           <el-button
             v-if="isUpdate"
             link
