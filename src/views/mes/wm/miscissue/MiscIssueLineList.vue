@@ -12,17 +12,6 @@
       border
       :row-key="(row: any) => row.id"
     >
-      <el-table-column type="expand">
-        <template #default="scope">
-          <MiscIssueDetailList
-            :ref="(el: any) => setDetailListRef(scope.row.id, el)"
-            :issue-id="props.issueId"
-            :line-id="scope.row.id"
-            :item-id="scope.row.itemId"
-            :form-type="props.formType"
-          />
-        </template>
-      </el-table-column>
       <el-table-column label="物料编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
@@ -273,16 +262,6 @@ const resetForm = () => {
     remark: undefined
   }
   formRef.value?.resetFields()
-}
-
-// ==================== 展开行：出库明细 ====================
-const detailListRefs = ref<Record<number, InstanceType<typeof MiscIssueDetailList>>>({})
-
-/** 缓存子组件 ref */
-const setDetailListRef = (lineId: number, el: any) => {
-  if (el) {
-    detailListRefs.value[lineId] = el
-  }
 }
 
 /** 初始化 */

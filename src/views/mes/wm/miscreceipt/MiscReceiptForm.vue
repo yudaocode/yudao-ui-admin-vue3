@@ -43,7 +43,7 @@
               :disabled="isHeaderReadonly"
             >
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_MISC_RECEIPT_TYPE)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_MISC_RECEIPT_TYPE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -113,7 +113,7 @@
 
 <script setup lang="ts">
 import { generateRandomStr } from '@/utils'
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { WmMiscReceiptApi, WmMiscReceiptVO } from '@/api/mes/wm/miscreceipt'
 import MiscReceiptLineList from './MiscReceiptLineList.vue'
 

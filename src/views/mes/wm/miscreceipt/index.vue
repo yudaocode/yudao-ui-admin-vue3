@@ -35,7 +35,7 @@
         >
           <!-- TODO @AI：需呀在 DICT_TYPE 枚举下； -->
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_MISC_RECEIPT_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_MISC_RECEIPT_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
