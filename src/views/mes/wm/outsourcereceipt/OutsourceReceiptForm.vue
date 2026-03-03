@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO @AI：每行 3 个； -->
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
@@ -10,10 +9,10 @@
     >
       <el-row>
         <el-col :span="8">
-          <el-form-item label="收货单编号" prop="code">
+          <el-form-item label="入库单编号" prop="code">
             <el-input
               v-model="formData.code"
-              placeholder="请输入收货单编号"
+              placeholder="请输入入库单编号"
               :disabled="isHeaderReadonly"
             >
               <template #append>
@@ -25,39 +24,38 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="收货单名称" prop="name">
+          <el-form-item label="入库单名称" prop="name">
             <el-input
               v-model="formData.name"
-              placeholder="请输入收货单名称"
+              placeholder="请输入入库单名称"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI:外协工单；使用 workorder select； -->
-        <el-col :span="8">
-          <el-form-item label="收货日期" prop="receiptDate">
-            <el-date-picker
-              v-model="formData.receiptDate"
-              type="date"
-              value-format="x"
-              placeholder="请选择收货日期"
-              class="!w-1/1"
-              :disabled="isHeaderReadonly"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <!-- TODO @AI：放到“日期”前面； -->
-      <el-row>
         <el-col :span="8">
           <el-form-item label="供应商" prop="vendorId">
             <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI:去掉仓库 -->
+      </el-row>
+      <el-row>
         <el-col :span="8">
-          <el-form-item label="仓库" prop="warehouseId">
-            <MdWarehouseSelect v-model="formData.warehouseId" :disabled="isHeaderReadonly" />
+          <el-form-item label="入库日期" prop="receiptDate">
+            <el-date-picker
+              v-model="formData.receiptDate"
+              type="date"
+              value-format="x"
+              placeholder="请选择入库日期"
+              class="!w-1/1"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
+        <!-- TODO @芋艿：外协工单【后续在处理】这里是有个过滤条件的； -->
+        <!-- TODO @AI：“外协工单”拿到，“供应商前面” -->
+        <el-col :span="8">
+          <el-form-item label="外协工单" prop="workOrderId">
+            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -74,7 +72,7 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- 非新建模式展示行项目信息（收货物料） -->
+    <!-- 非新建模式展示行项目信息（入库物料） -->
     <template v-if="formData.id">
       <el-divider content-position="center">物料信息</el-divider>
       <OutsourceReceiptLineList :receipt-id="formData.id" :form-type="formType" />
@@ -92,7 +90,7 @@
 import { generateRandomStr } from '@/utils'
 import { WmOutsourceReceiptApi, WmOutsourceReceiptVO } from '@/api/mes/wm/outsourcereceipt'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
-import MdWarehouseSelect from '@/views/mes/md/warehouse/components/MdWarehouseSelect.vue'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import OutsourceReceiptLineList from './OutsourceReceiptLineList.vue'
 
 defineOptions({ name: 'OutsourceReceiptForm' })
@@ -107,18 +105,14 @@ const formData = ref({
   code: undefined,
   name: undefined,
   vendorId: undefined,
-  warehouseId: undefined,
+  workOrderId: undefined,
   receiptDate: undefined,
   remark: undefined
 })
 const formRules = reactive({
-  // TODO @AI：name 必填；
-  code: [{ required: true, message: '收货单编号不能为空', trigger: 'blur' }],
-  receiptDate: [{ required: true, message: '收货日期不能为空', trigger: 'change' }],
-  // TODO @AI：供应商非必填；
-  vendorId: [{ required: true, message: '供应商不能为空', trigger: 'change' }],
-  // TODO @AI：warehouseId 没有这个字段！！！
-  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
+  code: [{ required: true, message: '入库单编号不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '入库单名称不能为空', trigger: 'blur' }],
+  receiptDate: [{ required: true, message: '入库日期不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
@@ -126,14 +120,14 @@ const isUpdate = computed(() => ['create', 'update'].includes(formType.value))
 const isHeaderReadonly = computed(() => ['detail'].includes(formType.value))
 const dialogTitle = computed(() => {
   const titles = {
-    create: '新增委外收货单',
-    update: '编辑委外收货单',
-    detail: '委外收货单详情'
+    create: '新增外协入库单',
+    update: '编辑外协入库单',
+    detail: '外协入库单详情'
   }
   return titles[formType.value] || formType.value
 })
 
-/** 生成收货单编号 */
+/** 生成入库单编号 */
 const generateCode = () => {
   formData.value.code = 'OR' + generateRandomStr(10)
 }
@@ -183,7 +177,7 @@ const resetForm = () => {
     code: undefined,
     name: undefined,
     vendorId: undefined,
-    warehouseId: undefined,
+    workOrderId: undefined,
     receiptDate: undefined,
     remark: undefined
   }

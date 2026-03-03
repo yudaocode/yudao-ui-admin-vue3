@@ -1,4 +1,5 @@
-<!-- MES 外协入库单行列表子组件 -->
+<!-- MES 外协发料单行列表子组件 -->
+<!-- TODO @芋艿：未 review -->
 <template>
   <div>
     <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
@@ -14,9 +15,9 @@
     >
       <el-table-column type="expand">
         <template #default="scope">
-          <OutsourceReceiptDetailList
+          <OutsourceIssueDetailList
             :ref="(el: any) => setDetailListRef(scope.row.id, el)"
-            :receipt-id="props.receiptId"
+            :issue-id="props.issueId"
             :line-id="scope.row.id"
             :item-id="scope.row.itemId"
             :form-type="props.formType"
@@ -30,36 +31,26 @@
       <el-table-column label="物料编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
-      <el-table-column label="单位" align="center" prop="unitName" width="80" />
-      <el-table-column label="入库数量" align="center" prop="quantity" width="100" />
+      <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
+      <el-table-column label="领料数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
-      <!-- DONE @AI：是否检验 -->
-      <el-table-column label="是否检验" align="center" prop="isInspection" width="100">
+      <el-table-column v-if="isUpdate" label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.isInspection" />
-        </template>
-      </el-table-column>
-      <!-- DONE @AI：质量状态 -->
-      <el-table-column label="质量状态" align="center" prop="qualityStatus" min-width="100">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_WM_QUALITY_STATUS" :value="scope.row.qualityStatus" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        v-if="isUpdate"
-        label="操作"
-        align="center"
-        width="160"
-        fixed="right"
-      >
-        <template #default="scope">
-          <el-button link type="primary" @click="openForm('update', scope.row.id)">
+          <el-button v-if="isUpdate" link type="primary" @click="openForm('update', scope.row.id)">
             编辑
           </el-button>
-          <el-button link type="danger" @click="handleDelete(scope.row.id)">
+          <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
             删除
           </el-button>
-          <!-- DONE @芋艿：标签打印；（AI 未修复原因：标注为人工处理，需产品经理确认功能需求） -->
+          <!-- TODO @芋艿：这里是不是上架？ -->
+          <el-button
+            v-if="isUpdate"
+            link
+            type="success"
+            @click="handleAddDetail(scope.row.id, scope.row.itemId)"
+          >
+            添加明细
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -82,16 +73,12 @@
     >
       <el-row>
         <el-col :span="8">
-          <el-form-item label="物料" prop="itemId">
-            <MdItemSelect
-              v-model="formData.itemId"
-              placeholder="请选择物料"
-              class="!w-1/1"
-            />
+          <el-form-item label="物料" prop="itemId" required>
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="入库数量" prop="quantity">
+          <el-form-item label="发料数量" prop="quantity" required>
             <el-input-number
               v-model="formData.quantity"
               :precision="2"
@@ -99,6 +86,11 @@
               controls-position="right"
               class="!w-1/1"
             />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="批次编码" prop="batchCode">
+            <el-input v-model="formData.batchCode" placeholder="请输入批次编码" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -116,49 +108,48 @@
     </template>
   </Dialog>
 
-  <!-- 入库明细添加/编辑弹窗 -->
-  <OutsourceReceiptDetailForm
+  <!-- 发料明细添加/编辑弹窗 -->
+  <OutsourceIssueDetailForm
     ref="detailFormRef"
-    :receipt-id="props.receiptId"
+    :issue-id="props.issueId"
     @success="onDetailFormSuccess"
   />
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE } from '@/utils/dict'
-import { WmOutsourceReceiptLineApi, WmOutsourceReceiptLineVO } from '@/api/mes/wm/outsourcereceipt/line'
+import { WmOutsourceIssueLineApi, WmOutsourceIssueLineVO } from '@/api/mes/wm/outsourceissue/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import OutsourceReceiptDetailList from './OutsourceReceiptDetailList.vue'
-import OutsourceReceiptDetailForm from './OutsourceReceiptDetailForm.vue'
+import OutsourceIssueDetailList from './OutsourceIssueDetailList.vue'
+import OutsourceIssueDetailForm from './OutsourceIssueDetailForm.vue'
 
-defineOptions({ name: 'OutsourceReceiptLineList' })
+defineOptions({ name: 'OutsourceIssueLineList' })
 
 const props = defineProps<{
-  receiptId: number
+  issueId: number
   formType: string
 }>()
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const isUpdate = computed(() => ['create', 'update'].includes(props.formType))
+const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
 
 // ==================== 列表 ====================
-const loading = ref(false)
-const list = ref<WmOutsourceReceiptLineVO[]>([])
-const total = ref(0)
+const loading = ref(false) // 列表的加载中
+const list = ref<WmOutsourceIssueLineVO[]>([]) // 行列表
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  receiptId: undefined as number | undefined
+  issueId: undefined as number | undefined
 })
 
 /** 查询行列表 */
 const getList = async () => {
   loading.value = true
   try {
-    queryParams.receiptId = props.receiptId
-    const data = await WmOutsourceReceiptLineApi.getOutsourceReceiptLinePage(queryParams)
+    queryParams.issueId = props.issueId
+    const data = await WmOutsourceIssueLineApi.getOutsourceIssueLinePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -170,40 +161,42 @@ const getList = async () => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await WmOutsourceReceiptLineApi.deleteOutsourceReceiptLine(id)
+    await WmOutsourceIssueLineApi.deleteOutsourceIssueLine(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
 }
 
 // ==================== 添加/编辑表单 ====================
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const lineFormType = ref('')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const lineFormType = ref('') // 行表单的类型
 const formData = ref({
   id: undefined,
-  receiptId: undefined as number | undefined,
+  issueId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
+  batchId: undefined,
+  batchCode: undefined,
   remark: undefined
 })
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
-  quantity: [{ required: true, message: '入库数量不能为空', trigger: 'blur' }]
+  quantity: [{ required: true, message: '发料数量不能为空', trigger: 'blur' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'create' ? '添加外协入库单行' : '修改外协入库单行'
+  dialogTitle.value = type === 'create' ? '添加物料发料单行' : '修改物料发料单行'
   lineFormType.value = type
   resetForm()
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await WmOutsourceReceiptLineApi.getOutsourceReceiptLine(id)
+      formData.value = await WmOutsourceIssueLineApi.getOutsourceIssueLine(id)
     } finally {
       formLoading.value = false
     }
@@ -215,12 +208,12 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = { ...formData.value, receiptId: props.receiptId } as unknown as WmOutsourceReceiptLineVO
+    const data = { ...formData.value, issueId: props.issueId } as unknown as WmOutsourceIssueLineVO
     if (lineFormType.value === 'create') {
-      await WmOutsourceReceiptLineApi.createOutsourceReceiptLine(data)
+      await WmOutsourceIssueLineApi.createOutsourceIssueLine(data)
       message.success(t('common.createSuccess'))
     } else {
-      await WmOutsourceReceiptLineApi.updateOutsourceReceiptLine(data)
+      await WmOutsourceIssueLineApi.updateOutsourceIssueLine(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -234,16 +227,18 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    receiptId: undefined,
+    issueId: undefined,
     itemId: undefined,
     quantity: undefined,
+    batchId: undefined,
+    batchCode: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()
 }
 
-// ==================== 展开行：入库明细 ====================
-const detailListRefs = ref<Record<number, InstanceType<typeof OutsourceReceiptDetailList>>>({})
+// ==================== 展开行：发料明细 ====================
+const detailListRefs = ref<Record<number, InstanceType<typeof OutsourceIssueDetailList>>>({})
 
 /** 缓存子组件 ref */
 const setDetailListRef = (lineId: number, el: any) => {
@@ -252,10 +247,15 @@ const setDetailListRef = (lineId: number, el: any) => {
   }
 }
 
-// ==================== 入库明细表单 ====================
+// ==================== 发料明细表单（LineList 层级持有） ====================
 const detailFormRef = ref()
 
-/** 打开入库明细表单 */
+/** 添加明细：直接打开明细创建表单 */
+const handleAddDetail = (lineId: number, itemId?: number) => {
+  openDetailForm('create', lineId, itemId)
+}
+
+/** 打开发料明细表单 */
 const openDetailForm = (type: string, lineId: number, itemId?: number, detailId?: number) => {
   detailFormRef.value.open(type, lineId, itemId, detailId)
 }

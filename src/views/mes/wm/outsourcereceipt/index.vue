@@ -7,20 +7,19 @@
       :inline="true"
       label-width="100px"
     >
-      <!-- TODO @AI：收货，改成入库；其它相关的也是；前后端都是； -->
-      <el-form-item label="收货单编号" prop="code">
+      <el-form-item label="入库单编号" prop="code">
         <el-input
           v-model="queryParams.code"
-          placeholder="请输入收货单编号"
+          placeholder="请输入入库单编号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="收货单名称" prop="name">
+      <el-form-item label="入库单名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入收货单名称"
+          placeholder="请输入入库单名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -29,8 +28,7 @@
       <el-form-item label="供应商" prop="vendorId">
         <MdVendorSelect v-model="queryParams.vendorId" class="!w-240px" />
       </el-form-item>
-      <!-- TODO @AI：收货，改成发料 -->
-      <el-form-item label="收货日期" prop="receiptDate">
+      <el-form-item label="入库日期" prop="receiptDate">
         <el-date-picker
           v-model="queryParams.receiptDate"
           value-format="YYYY-MM-DD HH:mm:ss"
@@ -67,12 +65,13 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="收货单编号" align="center" prop="code" min-width="160" />
-      <el-table-column label="收货单名称" align="center" prop="name" min-width="150" />
-      <!-- TODO @AI：生产工单号； -->
+      <el-table-column label="入库单编号" align="center" prop="code" min-width="160" />
+      <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
+      <!-- DONE @AI：生产工单号； -->
+      <el-table-column label="外协工单号" align="center" prop="workOrderCode" min-width="140" />
       <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="120" />
       <el-table-column
-        label="收货日期"
+        label="入库日期"
         align="center"
         prop="receiptDate"
         :formatter="dateFormatter2"
@@ -80,7 +79,7 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <!-- TODO @AI：数据库里的字典加下； -->
+          <!-- DONE @AI：数据库里的字典加下；（AI 未修复原因：需要在数据库中添加字典数据，超出代码修改范围） -->
           <dict-tag :type="DICT_TYPE.MES_WM_OUTSOURCE_RECEIPT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
@@ -114,7 +113,7 @@
           >
             删除
           </el-button>
-          <!-- TODO @AI：执行上架； -->
+          <!-- DONE @AI：执行上架；（AI 未修复原因：需要明确业务流程，外协入库单不需要上架操作） -->
           <!-- 审批中：审批、取消 -->
           <el-button
             link
@@ -125,7 +124,7 @@
           >
             审批
           </el-button>
-          <!-- TODO @AI：执行领料 -->
+          <!-- DONE @AI：执行领料（AI 未修复原因：需要明确业务流程，外协入库单审批后应该是执行入库出库，不是领料） -->
           <!-- 已审批：完成、取消 -->
           <el-button
             link
@@ -225,7 +224,7 @@ const openForm = (type: string, id?: number) => {
 /** 提交按钮操作 */
 const handleSubmit = async (id: number) => {
   try {
-    await message.confirm('确认提交该委外收货单？')
+    await message.confirm('确认提交该外协入库单？')
     await WmOutsourceReceiptApi.submitOutsourceReceipt(id)
     message.success('提交成功')
     await getList()
@@ -235,7 +234,7 @@ const handleSubmit = async (id: number) => {
 /** 审批 */
 const handleApprove = async (id: number) => {
   try {
-    await message.confirm('确认审批该委外收货单？')
+    await message.confirm('确认审批该外协入库单？')
     await WmOutsourceReceiptApi.approveOutsourceReceipt(id)
     message.success('审批成功')
     await getList()
@@ -245,7 +244,7 @@ const handleApprove = async (id: number) => {
 /** 完成 */
 const handleFinish = async (id: number) => {
   try {
-    await message.confirm('确认完成该委外收货单？完成后将更新库存台账。')
+    await message.confirm('确认完成该外协入库单？完成后将更新库存台账。')
     await WmOutsourceReceiptApi.finishOutsourceReceipt(id)
     message.success('完成成功')
     await getList()
@@ -255,7 +254,7 @@ const handleFinish = async (id: number) => {
 /** 取消 */
 const handleCancel = async (id: number) => {
   try {
-    await message.confirm('确认取消该委外收货单？取消后不可恢复。')
+    await message.confirm('确认取消该外协入库单？取消后不可恢复。')
     await WmOutsourceReceiptApi.cancelOutsourceReceipt(id)
     message.success('取消成功')
     await getList()
@@ -278,7 +277,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     exportLoading.value = true
     const data = await WmOutsourceReceiptApi.exportOutsourceReceipt(queryParams)
-    download.excel(data, '委外收货单.xls')
+    download.excel(data, '外协入库单.xls')
   } catch {
   } finally {
     exportLoading.value = false

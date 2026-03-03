@@ -1,4 +1,4 @@
-<!-- MES 委外收货明细列表（展开行内嵌子组件） -->
+<!-- MES 外协收货明细列表（展开行内嵌子组件） -->
 <template>
   <div class="pl-60px pr-20px py-10px">
     <el-button v-if="isUpdate" type="primary" plain size="small" @click="emit('edit-detail', undefined)" class="mb-10px">
