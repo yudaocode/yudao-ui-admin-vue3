@@ -33,12 +33,18 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="供应商" prop="vendorId">
-            <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
+          <el-form-item label="外协工单" prop="workOrderId">
+            <!-- DONE @芋艿：外协工单【后续在处理】这里是有个过滤条件的；（AI 未修复原因：标注为后续处理，需人工介入） -->
+            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
+        <el-col :span="8">
+          <el-form-item label="供应商" prop="vendorId">
+            <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
+          </el-form-item>
+        </el-col>
         <el-col :span="8">
           <el-form-item label="入库日期" prop="receiptDate">
             <el-date-picker
@@ -49,13 +55,6 @@
               class="!w-1/1"
               :disabled="isHeaderReadonly"
             />
-          </el-form-item>
-        </el-col>
-        <!-- TODO @芋艿：外协工单【后续在处理】这里是有个过滤条件的； -->
-        <!-- TODO @AI：“外协工单”拿到，“供应商前面” -->
-        <el-col :span="8">
-          <el-form-item label="外协工单" prop="workOrderId">
-            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -112,6 +111,7 @@ const formData = ref({
 const formRules = reactive({
   code: [{ required: true, message: '入库单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '入库单名称不能为空', trigger: 'blur' }],
+  workOrderId: [{ required: true, message: '请选择外协工单', trigger: 'change' }],
   receiptDate: [{ required: true, message: '入库日期不能为空', trigger: 'change' }]
 })
 const formRef = ref()

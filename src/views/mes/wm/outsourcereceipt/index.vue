@@ -79,7 +79,7 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <!-- DONE @AI：数据库里的字典加下；（AI 未修复原因：需要在数据库中添加字典数据，超出代码修改范围） -->
+          <!-- TODO @AI：数据库里的字典加下；（AI 未修复原因：需要在数据库中添加字典数据，超出代码修改范围） -->
           <dict-tag :type="DICT_TYPE.MES_WM_OUTSOURCE_RECEIPT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>

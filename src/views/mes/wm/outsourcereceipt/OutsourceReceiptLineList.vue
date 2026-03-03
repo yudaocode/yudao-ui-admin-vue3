@@ -33,32 +33,22 @@
       <el-table-column label="单位" align="center" prop="unitName" width="80" />
       <el-table-column label="入库数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
-      <!-- DONE @AI：是否检验 -->
       <el-table-column label="是否检验" align="center" prop="isInspection" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.isInspection" />
         </template>
       </el-table-column>
-      <!-- DONE @AI：质量状态 -->
       <el-table-column label="质量状态" align="center" prop="qualityStatus" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_QUALITY_STATUS" :value="scope.row.qualityStatus" />
         </template>
       </el-table-column>
-      <el-table-column
-        v-if="isUpdate"
-        label="操作"
-        align="center"
-        width="160"
-        fixed="right"
-      >
+      <el-table-column v-if="isUpdate" label="操作" align="center" width="160" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row.id)">
             编辑
           </el-button>
-          <el-button link type="danger" @click="handleDelete(scope.row.id)">
-            删除
-          </el-button>
+          <el-button link type="danger" @click="handleDelete(scope.row.id)"> 删除 </el-button>
           <!-- DONE @芋艿：标签打印；（AI 未修复原因：标注为人工处理，需产品经理确认功能需求） -->
         </template>
       </el-table-column>
@@ -83,11 +73,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="物料" prop="itemId">
-            <MdItemSelect
-              v-model="formData.itemId"
-              placeholder="请选择物料"
-              class="!w-1/1"
-            />
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -99,6 +85,47 @@
               controls-position="right"
               class="!w-1/1"
             />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="生产日期" prop="productionDate">
+            <el-date-picker
+              v-model="formData.productionDate"
+              type="date"
+              value-format="x"
+              placeholder="请选择生产日期"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="有效期" prop="expireDate">
+            <el-date-picker
+              v-model="formData.expireDate"
+              type="date"
+              value-format="x"
+              placeholder="请选择有效期"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="生产批号" prop="productionBatchNumber">
+            <el-input v-model="formData.productionBatchNumber" placeholder="请输入生产批号" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="是否质检" prop="iqcCheck">
+            <el-switch v-model="formData.iqcCheck" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -126,7 +153,10 @@
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
-import { WmOutsourceReceiptLineApi, WmOutsourceReceiptLineVO } from '@/api/mes/wm/outsourcereceipt/line'
+import {
+  WmOutsourceReceiptLineApi,
+  WmOutsourceReceiptLineVO
+} from '@/api/mes/wm/outsourcereceipt/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import OutsourceReceiptDetailList from './OutsourceReceiptDetailList.vue'
 import OutsourceReceiptDetailForm from './OutsourceReceiptDetailForm.vue'
@@ -186,6 +216,11 @@ const formData = ref({
   receiptId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
+  batchCode: undefined,
+  productionDate: undefined,
+  expireDate: undefined,
+  productionBatchNumber: undefined,
+  iqcCheck: false,
   remark: undefined
 })
 const formRules = reactive({
@@ -215,7 +250,10 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = { ...formData.value, receiptId: props.receiptId } as unknown as WmOutsourceReceiptLineVO
+    const data = {
+      ...formData.value,
+      receiptId: props.receiptId
+    } as unknown as WmOutsourceReceiptLineVO
     if (lineFormType.value === 'create') {
       await WmOutsourceReceiptLineApi.createOutsourceReceiptLine(data)
       message.success(t('common.createSuccess'))
@@ -237,6 +275,11 @@ const resetForm = () => {
     receiptId: undefined,
     itemId: undefined,
     quantity: undefined,
+    batchCode: undefined,
+    productionDate: undefined,
+    expireDate: undefined,
+    productionBatchNumber: undefined,
+    iqcCheck: false,
     remark: undefined
   }
   formRef.value?.resetFields()
