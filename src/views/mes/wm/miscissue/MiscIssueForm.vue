@@ -32,17 +32,16 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：参考 index.vue 界面的要求； -->
         <el-col :span="8">
-          <el-form-item label="杂项类型" prop="type">
+          <el-form-item label="业务类型" prop="type">
             <el-select
               v-model="formData.type"
-              placeholder="请选择杂项类型"
+              placeholder="请选择业务类型"
               class="!w-1/1"
               :disabled="isHeaderReadonly"
             >
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.MES_MISC_ISSUE_TYPE)"
+                v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_MISC_ISSUE_TYPE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -136,10 +135,7 @@ const formData = ref({
 })
 const formRules = reactive({
   code: [{ required: true, message: '出库单编号不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '出库单名称不能为空', trigger: 'blur' }],
-  // TODO @AI：type、issueDate 都是选填；
-  type: [{ required: true, message: '杂项类型不能为空', trigger: 'change' }],
-  issueDate: [{ required: true, message: '出库日期不能为空', trigger: 'change' }]
+  name: [{ required: true, message: '出库单名称不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 

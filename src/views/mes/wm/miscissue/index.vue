@@ -25,17 +25,15 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：杂项类型，改成“业务类型”； -->
-      <el-form-item label="杂项类型" prop="type">
+      <el-form-item label="业务类型" prop="type">
         <el-select
           v-model="queryParams.type"
-          placeholder="请选择杂项类型"
+          placeholder="请选择业务类型"
           clearable
           class="!w-240px"
         >
-          <!-- TODO @AI：字典枚举；MES_WM_MISC_ISSUE_TYPE：库存调整、报销出库 -->
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_MISC_ISSUE_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_MISC_ISSUE_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -61,9 +59,8 @@
           clearable
           class="!w-240px"
         >
-          <!-- TODO @AI：字典枚举；MES_WM_MISC_ISSUE_STATUS：草稿、待执行出库、已完成、已取消； -->
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_MISC_ISSUE_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_MISC_ISSUE_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -106,7 +103,7 @@
       <el-table-column label="出库单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="业务类型" align="center" prop="type" min-width="120">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_MISC_ISSUE_TYPE" :value="scope.row.type" />
+          <dict-tag :type="DICT_TYPE.MES_WM_MISC_ISSUE_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
       <!-- TODO @芋艿：【来源单据编号】【来源单据类型】；不用改 -->
@@ -119,7 +116,7 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_MISC_ISSUE_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_WM_MISC_ISSUE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
