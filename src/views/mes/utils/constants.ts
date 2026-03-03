@@ -209,6 +209,24 @@ export const MesWmItemReceiptStatusEnum = {
   CANCELED: MesOrderStatusConstants.CANCELLED
 }
 
+/** MES 委外收货单状态枚举 */
+export const MesWmOutsourceReceiptStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  APPROVING: MesOrderStatusConstants.APPROVING,
+  APPROVED: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED,
+  CANCELED: MesOrderStatusConstants.CANCELLED
+}
+
+/** MES 外协入库单状态枚举 */
+export const MesWmOutsourceRecptStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  APPROVING: MesOrderStatusConstants.APPROVING,
+  APPROVED: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED,
+  CANCELED: MesOrderStatusConstants.CANCELLED
+}
+
 /** MES 生产领料出库单状态枚举 */
 export const MesWmProductionIssueStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
@@ -276,6 +294,20 @@ export const MesWmProductSalesStatusEnum = {
 export const MesWmSalesNoticeStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
   APPROVED: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED
+}
+
+/** MES 杂项出库单状态枚举 */
+export const MesWmMiscIssueStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  APPROVED: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED,
+  CANCELED: MesOrderStatusConstants.CANCELLED
+}
+
+/** MES 外协发料单状态枚举 */
+export const MesWmOutsourceIssueStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
   FINISHED: MesOrderStatusConstants.FINISHED
 }
 

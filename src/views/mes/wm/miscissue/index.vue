@@ -7,25 +7,43 @@
       :inline="true"
       label-width="100px"
     >
-      <el-form-item label="领料单编号" prop="code">
+      <el-form-item label="出库单编号" prop="code">
         <el-input
           v-model="queryParams.code"
-          placeholder="请输入领料单编号"
+          placeholder="请输入出库单编号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="领料单名称" prop="name">
+      <el-form-item label="出库单名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入领料单名称"
+          placeholder="请输入出库单名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="领料日期" prop="issueDate">
+      <!-- TODO @AI：杂项类型，改成“业务类型”； -->
+      <el-form-item label="杂项类型" prop="type">
+        <el-select
+          v-model="queryParams.type"
+          placeholder="请选择杂项类型"
+          clearable
+          class="!w-240px"
+        >
+          <!-- TODO @AI：字典枚举；MES_WM_MISC_ISSUE_TYPE：库存调整、报销出库 -->
+          <el-option
+            v-for="dict in getStrDictOptions(DICT_TYPE.MES_MISC_ISSUE_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <!-- TODO @芋艿：【来源单据编号】【来源单据类型】；不用改 -->
+      <el-form-item label="出库日期" prop="issueDate">
         <el-date-picker
           v-model="queryParams.issueDate"
           value-format="YYYY-MM-DD HH:mm:ss"
@@ -43,8 +61,9 @@
           clearable
           class="!w-240px"
         >
+          <!-- TODO @AI：字典枚举；MES_WM_MISC_ISSUE_STATUS：草稿、待执行出库、已完成、已取消； -->
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_PRODUCTION_ISSUE_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_MISC_ISSUE_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -58,7 +77,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['mes:wm-production-issue:create']"
+          v-hasPermi="['mes:wm-misc-issue:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -67,7 +86,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['mes:wm-production-issue:export']"
+          v-hasPermi="['mes:wm-misc-issue:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -77,28 +96,30 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="领料单编号" align="center" prop="code" min-width="160">
+      <el-table-column label="出库单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
             {{ scope.row.code }}
-          </el-button>
+          </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="领料单名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="生产工单" align="center" prop="workorderCode" min-width="140" />
-      <el-table-column label="工作站" align="center" prop="workstationName" min-width="120" />
-      <el-table-column label="客户编号" align="center" prop="clientCode" min-width="120" />
-      <el-table-column label="客户名称" align="center" prop="clientName" min-width="150" />
+      <el-table-column label="出库单名称" align="center" prop="name" min-width="150" />
+      <el-table-column label="业务类型" align="center" prop="type" min-width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_MISC_ISSUE_TYPE" :value="scope.row.type" />
+        </template>
+      </el-table-column>
+      <!-- TODO @芋艿：【来源单据编号】【来源单据类型】；不用改 -->
       <el-table-column
-        label="需求时间"
+        label="出库日期"
         align="center"
-        prop="requiredTime"
+        prop="issueDate"
         :formatter="dateFormatter2"
         width="180px"
       />
-      <el-table-column label="单据状态" align="center" prop="status" min-width="110">
+      <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_WM_PRODUCTION_ISSUE_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_MISC_ISSUE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
@@ -108,8 +129,8 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-misc-issue:update']"
+            v-if="scope.row.status === MesWmMiscIssueStatusEnum.PREPARE"
           >
             编辑
           </el-button>
@@ -117,8 +138,8 @@
             link
             type="warning"
             @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-misc-issue:update']"
+            v-if="scope.row.status === MesWmMiscIssueStatusEnum.PREPARE"
           >
             提交
           </el-button>
@@ -126,42 +147,27 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:delete']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-misc-issue:delete']"
+            v-if="scope.row.status === MesWmMiscIssueStatusEnum.PREPARE"
           >
             删除
           </el-button>
-          <!-- 待拣货：执行拣货 -->
-          <el-button
-            link
-            type="success"
-            @click="openForm('stock', scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.APPROVING"
-          >
-            执行拣货
-          </el-button>
-          <!-- 待执行领出：完成 -->
+          <!-- 待执行出库：执行出库、取消 -->
           <el-button
             link
             type="success"
             @click="handleFinish(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:finish']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.APPROVED"
+            v-hasPermi="['mes:wm-misc-issue:finish']"
+            v-if="scope.row.status === MesWmMiscIssueStatusEnum.APPROVED"
           >
-            完成
+            执行出库
           </el-button>
-          <!-- 待拣货、待执行领出：取消 -->
           <el-button
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update']"
-            v-if="
-              [MesWmProductionIssueStatusEnum.APPROVING, MesWmProductionIssueStatusEnum.APPROVED].includes(
-                scope.row.status
-              )
-            "
+            v-hasPermi="['mes:wm-misc-issue:update']"
+            v-if="scope.row.status === MesWmMiscIssueStatusEnum.APPROVED"
           >
             取消
           </el-button>
@@ -176,24 +182,24 @@
     />
   </ContentWrap>
 
-  <ProductionIssueForm ref="formRef" @success="getList" />
+  <MiscIssueForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
-import { WmProductionIssueApi, WmProductionIssueVO } from '@/api/mes/wm/productionissue'
-import ProductionIssueForm from './ProductionIssueForm.vue'
-import { MesWmProductionIssueStatusEnum } from '@/views/mes/utils/constants'
+import { WmMiscIssueApi, WmMiscIssueVO } from '@/api/mes/wm/miscissue'
+import MiscIssueForm from './MiscIssueForm.vue'
+import { MesWmMiscIssueStatusEnum } from '@/views/mes/utils/constants'
 
-defineOptions({ name: 'MesWmProductionIssue' })
+defineOptions({ name: 'MesWmMiscIssue' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<WmProductionIssueVO[]>([]) // 列表的数据
+const list = ref<WmMiscIssueVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
@@ -201,17 +207,17 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
-  status: undefined,
-  issueDate: undefined
+  type: undefined,
+  issueDate: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await WmProductionIssueApi.getProductionIssuePage(queryParams)
+    const data = await WmMiscIssueApi.getMiscIssuePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -219,76 +225,78 @@ const getList = async () => {
   }
 }
 
-/** 搜索按钮操作 */
+/** 搜索 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
-/** 重置按钮操作 */
+/** 重置 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
-/** 添加/修改操作 */
+/** 新增/修改/详情 */
+const formRef = ref() // 表单弹窗
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交按钮操作 */
+/** 提交 */
 const handleSubmit = async (id: number) => {
   try {
-    await message.confirm('确认提交该领料单进入审批流程吗？')
-    await WmProductionIssueApi.submitProductionIssue(id)
+    await message.confirm('确认提交该杂项出库单？')
+    await WmMiscIssueApi.submitMiscIssue(id)
     message.success('提交成功')
     await getList()
   } catch {}
 }
 
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
+/** 执行出库 */
+const handleFinish = async (id: number) => {
   try {
-    await message.delConfirm()
-    await WmProductionIssueApi.deleteProductionIssue(id)
-    message.success(t('common.delSuccess'))
+    await message.confirm('确认执行出库？执行后将更新库存台账。')
+    await WmMiscIssueApi.finishMiscIssue(id)
+    message.success('出库成功')
     await getList()
   } catch {}
 }
 
-/** 取消按钮操作 */
+/** 取消 */
 const handleCancel = async (id: number) => {
   try {
-    await message.confirm('确认取消该领料出库单？取消后不可恢复。')
-    await WmProductionIssueApi.cancelProductionIssue(id)
+    await message.confirm('确认取消该杂项出库单？取消后不可恢复。')
+    await WmMiscIssueApi.cancelMiscIssue(id)
     message.success('取消成功')
     await getList()
   } catch {}
 }
 
-/** 完成按钮操作 */
-const handleFinish = async (id: number) => {
+/** 删除 */
+const handleDelete = async (id: number) => {
   try {
-    await message.confirm('确认完成该领料单并执行出库吗？')
-    await WmProductionIssueApi.finishProductionIssue(id)
-    message.success('完成成功')
+    await message.delConfirm()
+    await WmMiscIssueApi.deleteMiscIssue(id)
+    message.success(t('common.delSuccess'))
     await getList()
   } catch {}
 }
 
-/** 导出按钮操作 */
+/** 导出 */
 const handleExport = async () => {
   try {
     await message.exportConfirm()
     exportLoading.value = true
-    const data = await WmProductionIssueApi.exportProductionIssue(queryParams)
-    download.excel(data, '领料出库单.xls')
+    const data = await WmMiscIssueApi.exportMiscIssue(queryParams)
+    download.excel(data, '杂项出库单.xls')
   } catch {
   } finally {
     exportLoading.value = false
   }
 }
 
+/** 初始化 */
 onMounted(() => {
   getList()
 })

@@ -294,6 +294,7 @@ export enum DICT_TYPE {
   MES_RQC_TYPE = 'mes_rqc_type', // MES 退货检验类型
   MES_WM_ARRIVAL_NOTICE_STATUS = 'mes_wm_arrival_notice_status', // MES 到货通知单状态
   MES_WM_ITEM_RECEIPT_STATUS = 'mes_wm_item_receipt_status', // MES 物料接收单状态
+  MES_WM_OUTSOURCE_RECPT_STATUS = 'mes_wm_outsource_recpt_status', // MES 外协入库单状态
   MES_WM_PRODUCTION_ISSUE_STATUS = 'mes_wm_production_issue_status', // MES 领料出库单状态
   MES_PRODUCT_PRODUCE_STATUS = 'mes_product_produce_status', // MES 生产入库单状态
   MES_RETURN_VENDOR_STATUS = 'mes_return_vendor_status', // MES 供应商退货单状态
