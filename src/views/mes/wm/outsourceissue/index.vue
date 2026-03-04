@@ -137,6 +137,18 @@
           >
             执行领出
           </el-button>
+          <!-- 取消按钮：草稿、待拣货、待执行出库状态可取消 -->
+          <el-button
+            link
+            type="danger"
+            @click="handleCancel(scope.row.id)"
+            v-hasPermi="['mes:wm-outsource-issue:update']"
+            v-if="scope.row.status === MesWmOutsourceIssueStatusEnum.PREPARE ||
+                  scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVING ||
+                  scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVED"
+          >
+            取消
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -225,6 +237,16 @@ const handleFinish = async (id: number) => {
     await message.confirm('确认执行出库吗？执行后将扣减库存，且无法撤销。')
     await WmOutsourceIssueApi.finishOutsourceIssue(id)
     message.success('出库成功')
+    await getList()
+  } catch {}
+}
+
+/** 取消发料单 */
+const handleCancel = async (id: number) => {
+  try {
+    await message.confirm('确认取消该发料单吗？')
+    await WmOutsourceIssueApi.cancelOutsourceIssue(id)
+    message.success('取消成功')
     await getList()
   } catch {}
 }

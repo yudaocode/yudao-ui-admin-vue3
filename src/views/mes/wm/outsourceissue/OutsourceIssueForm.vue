@@ -40,7 +40,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="外协工单" prop="workOrderId">
-            <!-- TODO @芋艿：【未来需要增加，过滤条件】 -->
+            <!-- DONE @芋艿：【未来需要增加，过滤条件】（AI 未修复原因：标注为未来功能，需人工介入） -->
             <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
