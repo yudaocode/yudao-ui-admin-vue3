@@ -18,6 +18,11 @@ export interface AutoCodePartVO {
 
 // MES 编码规则分段 API
 export const AutoCodePartApi = {
+  // 查询编码规则分段详情
+  getAutoCodePart: async (id: number) => {
+    return await request.get({ url: `/mes/md/auto-code-part/get?id=` + id })
+  },
+
   // 查询编码规则分段列表
   getAutoCodePartListByRuleId: async (ruleId: number) => {
     return await request.get({ url: `/mes/md/auto-code-part/list-by-rule-id?ruleId=` + ruleId })

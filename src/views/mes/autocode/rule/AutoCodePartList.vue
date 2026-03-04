@@ -5,13 +5,13 @@
       <Icon icon="ep:plus" class="mr-5px" /> 新增分段
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="排序" align="center" prop="sort" width="80" />
+      <el-table-column label="分段排序" align="center" prop="sort" width="80" />
       <el-table-column label="分段类型" align="center" prop="type" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_MD_AUTO_CODE_PART_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="长度" align="center" prop="length" width="80" />
+      <el-table-column label="分段长度" align="center" prop="length" width="80" />
       <el-table-column label="日期格式" align="center" prop="dateFormat" width="150" />
       <el-table-column label="固定字符" align="center" prop="fixCharacter" width="120" />
       <el-table-column label="流水号起始" align="center" prop="serialStartNo" width="100" />
@@ -79,7 +79,8 @@ const getList = async () => {
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id, props.ruleId)
+  const maxSort = list.value.length > 0 ? Math.max(...list.value.map((item) => item.sort || 0)) : 0
+  formRef.value.open(type, id, props.ruleId, maxSort)
 }
 
 /** 删除按钮操作 */
