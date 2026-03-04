@@ -34,7 +34,13 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="领料数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
-      <el-table-column v-if="isUpdate" label="操作" align="center" width="200" fixed="right">
+      <el-table-column
+        v-if="isUpdate || isStock"
+        label="操作"
+        align="center"
+        width="160"
+        fixed="right"
+      >
         <template #default="scope">
           <el-button v-if="isUpdate" link type="primary" @click="openForm('update', scope.row.id)">
             编辑
@@ -42,14 +48,8 @@
           <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
             删除
           </el-button>
-          <!-- DONE @芋艿：这里是不是上架？（AI 未修复原因：需产品经理确认业务逻辑，建议人工确认） -->
-          <el-button
-            v-if="isUpdate"
-            link
-            type="success"
-            @click="handleAddDetail(scope.row.id, scope.row.itemId)"
-          >
-            添加明细
+          <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
+            拣货
           </el-button>
         </template>
       </el-table-column>
@@ -133,6 +133,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
+const isStock = computed(() => props.formType === 'stock') // 是否为拣货模式
 
 // ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
@@ -250,9 +251,10 @@ const setDetailListRef = (lineId: number, el: any) => {
 // ==================== 发料明细表单（LineList 层级持有） ====================
 const detailFormRef = ref()
 
-/** 添加明细：直接打开明细创建表单 */
-const handleAddDetail = (lineId: number, itemId?: number) => {
-  openDetailForm('create', lineId, itemId)
+/** 拣货：直接打开明细创建表单 */
+const handlePicking = (lineId: number) => {
+  const row = list.value.find((r) => r.id === lineId)
+  openDetailForm('create', lineId, row?.itemId)
 }
 
 /** 打开发料明细表单 */

@@ -166,8 +166,12 @@ const submitForm = async () => {
 /** 执行拣货 */
 const handleStock = async () => {
   try {
-    await message.confirm('确认执行拣货吗？执行后将进入待执行出库状态。')
     formLoading.value = true
+    // 校验发料数量与拣货数量是否一致
+    const quantityMatch = await WmOutsourceIssueApi.checkOutsourceIssueQuantity(formData.value.id!)
+    if (!quantityMatch) {
+      await message.confirm('发料数量与拣货数量不一致，确认执行拣货？')
+    }
     await WmOutsourceIssueApi.stockOutsourceIssue(formData.value.id!)
     message.success('拣货成功')
     dialogVisible.value = false

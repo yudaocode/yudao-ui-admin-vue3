@@ -7,7 +7,13 @@
       <el-table-column label="库区名称" align="center" prop="locationName" min-width="100" />
       <el-table-column label="库位名称" align="center" prop="areaName" min-width="100" />
       <el-table-column label="数量" align="center" prop="quantity" width="100" />
-      <el-table-column v-if="isUpdate" label="操作" align="center" width="120" fixed="right">
+      <el-table-column
+        v-if="props.formType === 'stock'"
+        label="操作"
+        align="center"
+        width="120"
+        fixed="right"
+      >
         <template #default="scope">
           <el-button link type="primary" @click="emit('edit-detail', scope.row.id)">
             编辑
@@ -38,8 +44,6 @@ const emit = defineEmits(['edit-detail'])
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-
-const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
 
 const loading = ref(false) // 列表的加载中
 const list = ref<WmOutsourceIssueDetailVO[]>([]) // 明细列表

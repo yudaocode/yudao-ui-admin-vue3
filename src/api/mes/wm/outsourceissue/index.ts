@@ -64,6 +64,11 @@ export const WmOutsourceIssueApi = {
     return await request.put({ url: '/mes/wm/outsource-issue/cancel?id=' + id })
   },
 
+  // 校验外协发料单数量
+  checkOutsourceIssueQuantity: async (id: number) => {
+    return await request.get({ url: '/mes/wm/outsource-issue/check-quantity?id=' + id })
+  },
+
   // 导出外协发料单 Excel
   exportOutsourceIssue: async (params: any) => {
     return await request.download({ url: '/mes/wm/outsource-issue/export-excel', params })
