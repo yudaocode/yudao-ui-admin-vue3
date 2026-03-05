@@ -105,6 +105,6 @@ const include = [
   'element-plus/es/components/progress/style/css'
 ]
 
-const exclude = ['@iconify/json']
+const exclude: string[] = []
 
 export { include, exclude }
