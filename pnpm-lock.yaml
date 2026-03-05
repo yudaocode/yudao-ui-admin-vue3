@@ -190,8 +190,8 @@ importers:
         specifier: ^1.58.2
         version: 1.58.2
       '@purge-icons/generated':
-        specifier: ^0.9.0
-        version: 0.9.0
+        specifier: ^0.10.0
+        version: 0.10.0
       '@types/jsoneditor':
         specifier: ^9.9.6
         version: 9.9.6
@@ -232,11 +232,11 @@ importers:
         specifier: ^10.4.27
         version: 10.4.27(postcss@8.5.8)
       bpmn-js:
-        specifier: ^18.12.0
-        version: 18.12.0
+        specifier: ^18.13.0
+        version: 18.13.0
       bpmn-js-properties-panel:
-        specifier: 5.52.1
-        version: 5.52.1(@bpmn-io/properties-panel@3.25.0)(bpmn-js@18.12.0)(camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.12.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0))(diagram-js@15.9.1)
+        specifier: 5.53.0
+        version: 5.53.0(@bpmn-io/properties-panel@3.25.0)(bpmn-js@18.13.0)(camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.13.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0))(diagram-js@15.9.1)
       consola:
         specifier: ^3.4.2
         version: 3.4.2
@@ -1871,9 +1871,6 @@ packages:
   '@purge-icons/generated@0.10.0':
     resolution: {integrity: sha512-I+1yN7/yDy/eZzfhAZqKF8Z6FM8D/O1vempbPrHJ0m9HlZwvf8sWXOArPJ2qRQGB6mJUVSpaXkoGBuoz1GQX5A==}
 
-  '@purge-icons/generated@0.9.0':
-    resolution: {integrity: sha512-s2t+1oVtGDV6KtqfCXtUOhxfeYvOdDF90IVm+nMs/6bUP0HeGZLslguuL/AibpwtfL4FA/oCsIu/RhwapgAdJw==}
-
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
 
@@ -2797,8 +2794,8 @@ packages:
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
-  bpmn-js-properties-panel@5.52.1:
-    resolution: {integrity: sha512-4q5UEphIh2lzLbbckepri0TakyL3FPqqTk53DZ0vVkABxTHcuts71kp8bmWCZC2EPdY7B39r7+CZrvhMVVCoLQ==}
+  bpmn-js-properties-panel@5.53.0:
+    resolution: {integrity: sha512-fXn9yU6YLgr5SiaGHegAHZQe1jbezFPyqzZvTrTR1zOEmlNdTK4H9MAHFeBX6iasw31M9Y6KbPPP/tiZ/VhYug==}
     peerDependencies:
       '@bpmn-io/properties-panel': '>= 3.40'
       bpmn-js: '>= 11.5'
@@ -2809,8 +2806,8 @@ packages:
     resolution: {integrity: sha512-PknpW+uxHD15XOtEN0x1iUBx/sBGazA3GMcf1Me85sFYbgYH616Z5ZVW10EzLKuWO2A56I0rB8PHr1V952Ma0w==}
     engines: {node: '>= 16'}
 
-  bpmn-js@18.12.0:
-    resolution: {integrity: sha512-Dg2O+r7jpBwLgWGpManc7P4ZfZQfxTVi2xNtXR3Q2G5Hx1RVYVFoNsQED8+FPCgjy6m7ZQbxKP1sjCJt5rbtBg==}
+  bpmn-js@18.13.0:
+    resolution: {integrity: sha512-2ozu75OtOMwQPY08MFm3WJX915jYUwFNDh0JGI9T45ql+c4/2MjPIDA3W40EEonn7yYs5LlAfheWhnicrV0vgg==}
 
   bpmn-moddle@10.0.0:
     resolution: {integrity: sha512-vXePD5jkatcILmM3zwJG/m6IIHIghTGB7WvgcdEraEw8E8VdJHrTgrvBUhbzqaXJpnsGQz15QS936xeBY6l9aA==}
@@ -3876,6 +3873,10 @@ packages:
 
   ids@3.0.1:
     resolution: {integrity: sha512-mr0zAgpgA/hzCrHB0DnoTG6xZjNC3ABs4eaksXrpVtfaDatA2SVdDb1ZPLjmKjqzp4kexQRuHXwDWQILVK8FZQ==}
+    engines: {node: '>= 20.12'}
+
+  ids@3.0.2:
+    resolution: {integrity: sha512-t6YJP4mdC+GHF96Nbis/4FEANhP/8VWmYMvUuYpXvSdrhg5hpIVbq2XZlOA3UWTbtdwPCi0q7jEXOdHkAnqOnw==}
     engines: {node: '>= 20.12'}
 
   ignore@5.3.2:
@@ -7280,10 +7281,6 @@ snapshots:
     dependencies:
       '@iconify/iconify': 3.1.1
 
-  '@purge-icons/generated@0.9.0':
-    dependencies:
-      '@iconify/iconify': 3.1.1
-
   '@quansync/fs@1.0.0':
     dependencies:
       quansync: 1.0.0
@@ -8328,15 +8325,15 @@ snapshots:
 
   boolbase@1.0.0: {}
 
-  bpmn-js-properties-panel@5.52.1(@bpmn-io/properties-panel@3.25.0)(bpmn-js@18.12.0)(camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.12.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0))(diagram-js@15.9.1):
+  bpmn-js-properties-panel@5.53.0(@bpmn-io/properties-panel@3.25.0)(bpmn-js@18.13.0)(camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.13.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0))(diagram-js@15.9.1):
     dependencies:
       '@bpmn-io/extract-process-variables': 2.2.1
       '@bpmn-io/properties-panel': 3.25.0
       array-move: 4.0.0
-      bpmn-js: 18.12.0
-      camunda-bpmn-js-behaviors: 1.7.2(bpmn-js@18.12.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0)
+      bpmn-js: 18.13.0
+      camunda-bpmn-js-behaviors: 1.7.2(bpmn-js@18.13.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0)
       diagram-js: 15.9.1
-      ids: 3.0.1
+      ids: 3.0.2
       min-dash: 5.0.0
       min-dom: 5.3.0
 
@@ -8348,7 +8345,7 @@ snapshots:
       min-dom: 5.3.0
       randomcolor: 0.6.2
 
-  bpmn-js@18.12.0:
+  bpmn-js@18.13.0:
     dependencies:
       bpmn-moddle: 10.0.0
       diagram-js: 15.9.1
@@ -8436,9 +8433,9 @@ snapshots:
 
   camelcase@5.3.1: {}
 
-  camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.12.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0):
+  camunda-bpmn-js-behaviors@1.7.2(bpmn-js@18.13.0)(camunda-bpmn-moddle@7.0.1)(zeebe-bpmn-moddle@1.7.0):
     dependencies:
-      bpmn-js: 18.12.0
+      bpmn-js: 18.13.0
       camunda-bpmn-moddle: 7.0.1
       ids: 1.0.5
       min-dash: 4.2.3
@@ -9611,6 +9608,8 @@ snapshots:
   ids@1.0.5: {}
 
   ids@3.0.1: {}
+
+  ids@3.0.2: {}
 
   ignore@5.3.2: {}
 
