@@ -361,3 +361,28 @@ export const BARCODE_FORMAT_MAP: Record<BarcodeFormatEnum, string> = {
   [BarcodeFormatEnum.CODE39]: 'CODE39',
   [BarcodeFormatEnum.UPC_A]: 'UPC_A'
 }
+
+/** MES 条码业务类型枚举（对应后端 BarcodeBizTypeEnum） */
+// TODO @AI：后端的 BizTypeEnum 也搬过来！
+export enum BarcodeBizTypeEnum {
+  // WM 仓库模块 [100, 200)
+  WAREHOUSE = 102,
+  AREA = 103,
+  PACKAGE = 104,
+  STOCK = 105,
+  BATCH = 106,
+  // PRO 生产模块 [300, 400)
+  PROCARD = 300,
+  WORKORDER = 301,
+  TRANSORDER = 302,
+  // DV 设备模块 [400, 500)
+  MACHINERY = 400,
+  // TM 工装夹具模块 [500, 600)
+  TOOL = 500,
+  // MD 主数据模块 [600, 700)
+  ITEM = 600,
+  VENDOR = 601,
+  WORKSTATION = 602,
+  WORKSHOP = 603,
+  USER = 604
+}

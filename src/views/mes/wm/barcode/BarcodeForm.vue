@@ -28,16 +28,35 @@
         </el-select>
       </el-form-item>
       <!-- DONE @AI：需要根据 bizType，使用不同业务的 select;（AI 未修复原因：需要确认各业务类型对应的 select 组件和数据源，需产品经理确认） -->
-      <!-- TODO @AI：根据 bizType 逐个 if else；然后在前端的 mes 各个模块的 components 找；如果没找到，加个 todo 给 芋艿； -->
-      <el-form-item label="业务编号" prop="bizId">
-        <el-input-number v-model="formData.bizId" :min="1" class="!w-240px" />
-      </el-form-item>
+      <!-- DONE @AI：根据 bizType 逐个 if else；然后在前端的 mes 各个模块的 components 找；如果没找到，加个 todo 给 芋艿； -->
       <!-- DONE @AI：bizCode、bizName 根据上面的 select 进行设置；必填！（AI 未修复原因：依赖上方 bizType 动态 select 实现，需产品经理确认业务逻辑） -->
+      <el-form-item label="业务对象" prop="bizId">
+        <!-- 已有 Select 组件的业务类型 -->
+        <WmWarehouseSelect v-if="formData.bizType === BarcodeBizTypeEnum.WAREHOUSE"
+          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
+        <WmWarehouseAreaSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.AREA"
+          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
+        <ProWorkOrderSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.WORKORDER"
+          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
+        <DvMachinerySelect v-else-if="formData.bizType === BarcodeBizTypeEnum.MACHINERY"
+          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
+        <MdItemSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.ITEM"
+          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
+        <MdVendorSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.VENDOR"
+          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
+        <MdWorkstationSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.WORKSTATION"
+          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
+        <MdWorkshopSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.WORKSHOP"
+          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
+        <!-- TODO @芋艿：以下业务类型暂无对应的 Select 组件：PACKAGE(装箱单)、STOCK(库存)、BATCH(批次)、PROCARD(流转卡)、TRANSORDER(流转单)、TOOL(工装)、USER(人员) -->
+        <el-input-number v-else v-model="formData.bizId" :min="1" class="!w-240px"
+          placeholder="请输入业务编号" />
+      </el-form-item>
       <el-form-item label="业务编码" prop="bizCode">
-        <el-input v-model="formData.bizCode" placeholder="请输入业务编码" />
+        <el-input v-model="formData.bizCode" placeholder="请输入业务编码" :disabled="hasBizSelect" />
       </el-form-item>
       <el-form-item label="业务名称" prop="bizName">
-        <el-input v-model="formData.bizName" placeholder="请输入业务名称" />
+        <el-input v-model="formData.bizName" placeholder="请输入业务名称" :disabled="hasBizSelect" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -64,7 +83,16 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import { BarcodeApi, BarcodeVO } from '@/api/mes/wm/barcode'
+import { WmBarcodeApi, type WmBarcodeVO } from '@/api/mes/wm/barcode'
+import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
+import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
+import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
+import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
+import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
+import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
 
 defineOptions({ name: 'BarcodeForm' })
 
@@ -94,6 +122,38 @@ const formRules = reactive({
 })
 const formRef = ref()
 
+/** 有 Select 组件的业务类型集合 */
+const BIZ_TYPES_WITH_SELECT = [
+  BarcodeBizTypeEnum.WAREHOUSE, BarcodeBizTypeEnum.AREA,
+  BarcodeBizTypeEnum.WORKORDER, BarcodeBizTypeEnum.MACHINERY,
+  BarcodeBizTypeEnum.ITEM, BarcodeBizTypeEnum.VENDOR,
+  BarcodeBizTypeEnum.WORKSTATION, BarcodeBizTypeEnum.WORKSHOP
+] as number[]
+
+/** 当前 bizType 是否有对应的 Select 组件 */
+// TODO @AI：这里 linter 报错；
+const hasBizSelect = computed(() => BIZ_TYPES_WITH_SELECT.includes(formData.value.bizType as number))
+
+/** 业务 Select 选中回调：自动填充 bizId、bizCode、bizName */
+const handleBizSelect = (item: any) => {
+  if (!item) {
+    formData.value.bizId = undefined
+    formData.value.bizCode = undefined
+    formData.value.bizName = undefined
+    return
+  }
+  formData.value.bizId = item.id
+  formData.value.bizCode = item.code
+  formData.value.bizName = item.name
+}
+
+/** bizType 切换时，清空业务字段 */
+watch(() => formData.value.bizType, () => {
+  formData.value.bizId = undefined
+  formData.value.bizCode = undefined
+  formData.value.bizName = undefined
+})
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -102,9 +162,8 @@ const open = async (type: string, id?: number) => {
   resetForm()
   if (id) {
     formLoading.value = true
-    // TODO @AI：替换掉，WM 开头的；
     try {
-      formData.value = await BarcodeApi.getBarcode(id)
+      formData.value = await WmBarcodeApi.getBarcode(id)
     } finally {
       formLoading.value = false
     }
@@ -118,12 +177,12 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = formData.value as unknown as BarcodeVO
+    const data = formData.value as unknown as WmBarcodeVO
     if (formType.value === 'create') {
-      await BarcodeApi.createBarcode(data)
+      await WmBarcodeApi.createBarcode(data)
       message.success(t('common.createSuccess'))
     } else {
-      await BarcodeApi.updateBarcode(data)
+      await WmBarcodeApi.updateBarcode(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

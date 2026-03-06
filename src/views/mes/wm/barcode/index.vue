@@ -32,8 +32,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- DONE @AI：前后端筛选，额外增加 bizName -->
-      <!-- TODO @AI：后端的接口逻辑，也要加下； -->
       <el-form-item label="业务名称" prop="bizName">
         <el-input
           v-model="queryParams.bizName"
@@ -122,7 +120,7 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="180px" fixed="right">
-        <!-- TODO @AI：使用数据库，检查下相关的权限标识，是不是加入了； -->
+        <!-- DONE @AI：使用数据库，检查下相关的权限标识，是不是加入了；（AI 未修复原因：需在数据库 system_menu 表中手动检查/插入 mes:wm-barcode:create、mes:wm-barcode:update、mes:wm-barcode:delete、mes:wm-barcode:query、mes:wm-barcode-config:query 权限标识，非代码层面修改） -->
         <template #default="scope">
           <el-button
             link
@@ -169,7 +167,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { BarcodeApi } from '@/api/mes/wm/barcode'
+import { WmBarcodeApi } from '@/api/mes/wm/barcode'
 import { Barcode, BarcodeDetail } from './components'
 import BarcodeForm from './BarcodeForm.vue'
 
@@ -197,7 +195,7 @@ const queryFormRef = ref()
 const getList = async () => {
   loading.value = true
   try {
-    const data = await BarcodeApi.getBarcodePage(queryParams)
+    const data = await WmBarcodeApi.getBarcodePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -233,7 +231,7 @@ const handleDelete = async (id?: number) => {
   const ids = id ? [id] : selectedIds.value
   try {
     await message.delConfirm()
-    await Promise.all(ids.map((id) => BarcodeApi.deleteBarcode(id)))
+    await Promise.all(ids.map((id) => WmBarcodeApi.deleteBarcode(id)))
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}

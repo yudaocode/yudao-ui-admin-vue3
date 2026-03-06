@@ -104,8 +104,8 @@ defineExpose({
 
 <template>
   <div v-loading="loading" :class="[prefixCls, 'inline-block']" :style="wrapStyle">
-    <canvas v-if="isQRCode" ref="canvasRef" class="block max-w-full" ></canvas>
-    <!-- TODO @AI：这里可以使用 el-image 么？ -->
+    <canvas v-if="isQRCode" ref="canvasRef" class="block max-w-full"></canvas>
+    <!--suppress RequiredAttributes：JsBarcode 需要原生图片 -->
     <img v-else ref="imgRef" alt="barcode" class="block max-w-full" />
   </div>
 </template>

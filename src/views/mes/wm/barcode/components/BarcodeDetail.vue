@@ -79,6 +79,7 @@ import { ref } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
+import { escapeHtml } from '@/utils/domUtils'
 import download from '@/utils/download'
 import Barcode from './Barcode.vue'
 import { WmBarcodeApi, type WmBarcodeVO } from '@/api/mes/wm/barcode'
@@ -113,11 +114,11 @@ const openByBusiness = async (bizId: number, bizType: number) => {
     if (data) {
       barcodeData.value = { ...data }
     } else {
-      barcodeData.value = { bizType, content: '' }
+      barcodeData.value = { bizType, bizId, content: '' }
       message.warning('未找到对应条码数据')
     }
   } catch {
-    barcodeData.value = { bizType, content: '' }
+    barcodeData.value = { bizType, bizId, content: '' }
     message.error('加载条码数据失败')
   }
 }
@@ -203,20 +204,12 @@ const handleDownload = () => {
     return
   }
 
-  // TODO @AI：可以更多复用 download 里的方法么？甚至部分封装到 download 里？
+  // DONE @AI：已封装 download.base64Image 方法，复用 download 工具类
   try {
-    const file = download.base64ToFile(
+    download.base64Image(
       base64,
       `barcode_${barcodeData.value.bizCode || 'unknown'}_${Date.now()}`
     )
-    const url = URL.createObjectURL(file)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = file.name
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
     message.success('下载成功')
   } catch (error) {
     console.error('下载失败:', error)
@@ -225,22 +218,29 @@ const handleDownload = () => {
 }
 
 /** 生成条码（当无条码数据时） */
-const handleGenerate = () => {
-  // TODO @AI：现在就搞！你看看接口都 ready 的！
-  message.info('条码生成功能开发中')
-}
-
-// DONE @AI：escapeHtml 保留为组件内方法，因为仅此处使用打印 HTML 拼接
-// TODO @AI：你看看，全局的 utils 放在哪里合适；先回复在这里；
-/** HTML 转义函数，防止 XSS */
-const escapeHtml = (text: string): string => {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
+// DONE @AI：现在就搞！你看看接口都 ready 的！
+const handleGenerate = async () => {
+  const { bizType, bizId, bizCode, bizName } = barcodeData.value
+  if (!bizType || !bizId) {
+    message.warning('缺少业务类型或业务编号，无法生成条码')
+    return
   }
-  return text.replace(/[&<>"']/g, (char) => map[char])
+  try {
+    // 调用创建接口（后端会自动根据条码配置生成 content）
+    await WmBarcodeApi.createBarcode({
+      bizType,
+      bizId,
+      bizCode: bizCode || '',
+      bizName: bizName || ''
+    } as WmBarcodeVO)
+    message.success('条码生成成功')
+    // 重新加载条码数据
+    const data = await WmBarcodeApi.getBarcodeByBusiness(bizType, bizId)
+    if (data) {
+      barcodeData.value = { ...data }
+    }
+  } catch (error: any) {
+    message.error(error?.message || '条码生成失败，请重试')
+  }
 }
 </script>

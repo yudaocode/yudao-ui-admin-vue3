@@ -1,8 +1,5 @@
 import request from '@/config/axios'
 
-// DONE @AI：拆分成 index.ts，和 config/index.ts；
-// DONE @AI：WM 前缀，类似别的模块，要添加下；
-
 // MES 条码清单 VO
 export interface WmBarcodeVO {
   id: number
@@ -53,13 +50,3 @@ export const WmBarcodeApi = {
     return await request.delete({ url: '/mes/wm/barcode/delete?id=' + id })
   }
 }
-
-// 兼容旧引用
-// TODO @AI：不用兼容就旧的。检查下，替换掉；然后下面删除掉；
-/** @deprecated 使用 WmBarcodeVO 代替 */
-export type BarcodeVO = WmBarcodeVO
-/** @deprecated 使用 WmBarcodeApi 代替 */
-export const BarcodeApi = WmBarcodeApi
-/** @deprecated 使用 '@/api/mes/wm/barcode/config' 的 WmBarcodeConfigApi 代替 */
-export { WmBarcodeConfigApi as BarcodeConfigApi } from './config'
-export type { WmBarcodeConfigVO as BarcodeConfigVO } from './config'
