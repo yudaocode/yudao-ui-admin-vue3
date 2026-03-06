@@ -10,7 +10,7 @@
       <el-form-item label="条码格式" prop="format">
         <el-select v-model="formData.format" placeholder="请选择条码格式" class="!w-240px">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_BARCODE_FORMAT)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_BARCODE_FORMAT)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -25,7 +25,7 @@
           :disabled="formType === 'update'"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_BARCODE_BIZ_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_BARCODE_BIZ_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { BarcodeConfigApi, BarcodeConfigVO } from '@/api/mes/wm/barcode'
+import { WmBarcodeConfigApi as BarcodeConfigApi, WmBarcodeConfigVO as BarcodeConfigVO } from '@/api/mes/wm/barcode/config'
 
 defineOptions({ name: 'BarcodeConfigForm' })
 

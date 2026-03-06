@@ -312,4 +312,7 @@ export enum DICT_TYPE {
   MES_MD_AUTO_CODE_PART_TYPE = 'mes_md_auto_code_part_type', // MES 编码规则分段类型
   MES_MD_AUTO_CODE_PADDED_METHOD = 'mes_md_auto_code_padded_method', // MES 编码规则补齐方式
   MES_MD_AUTO_CODE_CYCLE_METHOD = 'mes_md_auto_code_cycle_method', // MES 编码规则循环方式
+  // TODO @AI：相关的数据字典，在数据库里，也加入下！！！
+  MES_WM_BARCODE_FORMAT = 'mes_wm_barcode_format', // MES 条码格式
+  MES_WM_BARCODE_BIZ_TYPE = 'mes_wm_barcode_biz_type', // MES 条码业务类型
 }

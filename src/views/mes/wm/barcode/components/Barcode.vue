@@ -4,13 +4,13 @@ import QRCode, { QRCodeRenderersOptions } from 'qrcode'
 import JsBarcode from 'jsbarcode'
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
-import { BarcodeFormatEnum, BARCODE_FORMAT_MAP } from '@/views/mes/wm/barcode/constants/BarcodeConstants'
+import { BarcodeFormatEnum, BARCODE_FORMAT_MAP } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'Barcode' })
 
 const props = defineProps({
   content: propTypes.string.def(''), // 条码内容
-  format: propTypes.number.def(BarcodeFormatEnum.QR_CODE), // 条码格式: 1=QR_CODE, 2=EAN13, 3=CODE39, 4=UPC_A；TODO @AI：这里 @对应枚举就 ok 了；
+  format: propTypes.number.def(BarcodeFormatEnum.QR_CODE), // DONE @AI：条码格式，对应 BarcodeFormatEnum 枚举
   width: propTypes.number.def(200), // 宽度
   height: propTypes.number.def(100), // 高度（仅一维码使用）
   displayValue: propTypes.bool.def(true) // 是否显示文本
@@ -39,6 +39,7 @@ const wrapStyle = computed(() => {
   }
 })
 
+/** 生成条码 */
 const generateBarcode = async () => {
   if (!props.content) {
     loading.value = false
@@ -96,7 +97,6 @@ const getImageBase64 = (): string => {
   }
 }
 
-// TODO @AI：下面的 scss 尽量（最大化）使用 unocss
 defineExpose({
   getImageBase64
 })
@@ -104,19 +104,8 @@ defineExpose({
 
 <template>
   <div v-loading="loading" :class="[prefixCls, 'inline-block']" :style="wrapStyle">
-    <canvas v-if="isQRCode" ref="canvasRef" ></canvas>
-    <img v-else ref="imgRef" alt="barcode" />
+    <canvas v-if="isQRCode" ref="canvasRef" class="block max-w-full" ></canvas>
+    <!-- TODO @AI：这里可以使用 el-image 么？ -->
+    <img v-else ref="imgRef" alt="barcode" class="block max-w-full" />
   </div>
 </template>
-
-<style scoped lang="scss">
-$prefix-cls: #{$namespace}-barcode;
-
-.#{$prefix-cls} {
-  canvas,
-  img {
-    display: block;
-    max-width: 100%;
-  }
-}
-</style>

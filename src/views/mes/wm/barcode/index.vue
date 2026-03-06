@@ -16,7 +16,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_BARCODE_BIZ_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_BARCODE_BIZ_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -32,7 +32,17 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：前后端筛选，额外增加 bizName -->
+      <!-- DONE @AI：前后端筛选，额外增加 bizName -->
+      <!-- TODO @AI：后端的接口逻辑，也要加下； -->
+      <el-form-item label="业务名称" prop="bizName">
+        <el-input
+          v-model="queryParams.bizName"
+          placeholder="请输入业务名称"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="条码内容" prop="content">
         <el-input
           v-model="queryParams.content"
@@ -80,8 +90,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="条码" align="center" width="150">
         <template #default="scope">
-          <!-- TODO @AI：改成【操作】那，有个【查看】点击开； -->
-          <div class="barcode-preview" @click="handleView(scope.row)">
+          <div class="flex justify-center items-center">
             <Barcode
               v-if="scope.row.content"
               :content="scope.row.content"
@@ -94,14 +103,14 @@
       </el-table-column>
       <el-table-column label="条码格式" align="center" prop="format">
         <template #default="scope">
-          <!-- TODO @AI：MES_BARCODE_FORMAT => MES_WM_BARCODE_FORMAT -->
-          <dict-tag :type="DICT_TYPE.MES_BARCODE_FORMAT" :value="scope.row.format" />
+          <!-- DONE @AI：MES_BARCODE_FORMAT => MES_WM_BARCODE_FORMAT -->
+          <dict-tag :type="DICT_TYPE.MES_WM_BARCODE_FORMAT" :value="scope.row.format" />
         </template>
       </el-table-column>
+      <!-- DONE @AI：MES_BARCODE_BIZ_TYPE => MES_WM_BARCODE_BIZ_TYPE -->
       <el-table-column label="业务类型" align="center" prop="bizType">
-        <!-- TODO @AI：MES_BARCODE_BIZ_TYPE => MES_WM_BARCODE_BIZ_TYPE -->
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_BARCODE_BIZ_TYPE" :value="scope.row.bizType" />
+          <dict-tag :type="DICT_TYPE.MES_WM_BARCODE_BIZ_TYPE" :value="scope.row.bizType" />
         </template>
       </el-table-column>
       <el-table-column label="条码内容" align="center" prop="content" show-overflow-tooltip />
@@ -113,6 +122,7 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="180px" fixed="right">
+        <!-- TODO @AI：使用数据库，检查下相关的权限标识，是不是加入了； -->
         <template #default="scope">
           <el-button
             link
@@ -154,15 +164,14 @@
   <BarcodeForm ref="formRef" @success="getList" />
 
   <!-- 查看弹窗 -->
-  <BarcodeViewDialog ref="viewDialogRef" />
+  <BarcodeDetail ref="viewDialogRef" />
 </template>
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { BarcodeApi } from '@/api/mes/wm/barcode'
-import { Barcode } from './components'
+import { Barcode, BarcodeDetail } from './components'
 import BarcodeForm from './BarcodeForm.vue'
-import BarcodeViewDialog from './BarcodeViewDialog.vue'
 
 defineOptions({ name: 'MesWmBarcode' })
 
@@ -179,6 +188,7 @@ const queryParams = reactive({
   pageSize: 10,
   bizType: undefined,
   bizCode: undefined,
+  bizName: undefined,
   content: undefined
 })
 const queryFormRef = ref()
@@ -237,25 +247,12 @@ const handleView = (row: any) => {
 
 /** 条码设置 */
 const handleConfig = () => {
-  // TODO @AI：后续改成 name，方便路由调整！
-  push('/mes/wm/barcode/config')
+  // DONE @AI：已改成 name 路由跳转
+  push({ name: 'MesWmBarcodeConfig' })
 }
 
 onMounted(() => {
   getList()
 })
-// TODO @AI：下面的 scss 尽量使用 unocss；
+// DONE @AI：下面的 scss 已使用 unocss 替代
 </script>
-
-<style scoped lang="scss">
-.barcode-preview {
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  &:hover {
-    opacity: 0.8;
-  }
-}
-</style>

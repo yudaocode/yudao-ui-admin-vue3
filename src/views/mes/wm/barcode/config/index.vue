@@ -1,5 +1,4 @@
-<!-- TODO @AI：将 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/barcode/BarcodeConfig.vue
-/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/barcode/BarcodeConfigForm.vue 挪到 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/barcode/config；注意，入口应该是 index.vue -->
+<!-- DONE @AI：将 BarcodeConfig.vue 和 BarcodeConfigForm.vue 挪到 config/ 目录；入口改为 index.vue -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -18,7 +17,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_BARCODE_FORMAT)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_BARCODE_FORMAT)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -33,7 +32,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_BARCODE_BIZ_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_BARCODE_BIZ_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -61,12 +60,12 @@
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="条码格式" align="center" prop="format">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_BARCODE_FORMAT" :value="scope.row.format" />
+          <dict-tag :type="DICT_TYPE.MES_WM_BARCODE_FORMAT" :value="scope.row.format" />
         </template>
       </el-table-column>
       <el-table-column label="业务类型" align="center" prop="bizType">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_BARCODE_BIZ_TYPE" :value="scope.row.bizType" />
+          <dict-tag :type="DICT_TYPE.MES_WM_BARCODE_BIZ_TYPE" :value="scope.row.bizType" />
         </template>
       </el-table-column>
       <el-table-column label="内容格式" align="center" prop="contentFormat" show-overflow-tooltip />
@@ -129,7 +128,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { BarcodeConfigApi } from '@/api/mes/wm/barcode'
+import { WmBarcodeConfigApi as BarcodeConfigApi } from '@/api/mes/wm/barcode/config'
 import BarcodeConfigForm from './BarcodeConfigForm.vue'
 
 defineOptions({ name: 'MesWmBarcodeConfig' })
