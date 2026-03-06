@@ -1,4 +1,3 @@
-<!-- DONE @AI：将 BarcodeConfig.vue 和 BarcodeConfigForm.vue 挪到 config/ 目录；入口改为 index.vue -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->

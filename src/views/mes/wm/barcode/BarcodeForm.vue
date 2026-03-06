@@ -8,7 +8,7 @@
       v-loading="formLoading"
     >
       <el-form-item label="条码格式" prop="format">
-        <el-select v-model="formData.format" placeholder="请选择条码格式" class="!w-240px">
+        <el-select v-model="formData.format" placeholder="请选择条码格式" class="!w-1/1">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_BARCODE_FORMAT)"
             :key="dict.value"
@@ -18,7 +18,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="业务类型" prop="bizType">
-        <el-select v-model="formData.bizType" placeholder="请选择业务类型" class="!w-240px">
+        <el-select v-model="formData.bizType" placeholder="请选择业务类型" class="!w-1/1">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_BARCODE_BIZ_TYPE)"
             :key="dict.value"
@@ -27,36 +27,110 @@
           />
         </el-select>
       </el-form-item>
-      <!-- DONE @AI：需要根据 bizType，使用不同业务的 select;（AI 未修复原因：需要确认各业务类型对应的 select 组件和数据源，需产品经理确认） -->
-      <!-- DONE @AI：根据 bizType 逐个 if else；然后在前端的 mes 各个模块的 components 找；如果没找到，加个 todo 给 芋艿； -->
-      <!-- DONE @AI：bizCode、bizName 根据上面的 select 进行设置；必填！（AI 未修复原因：依赖上方 bizType 动态 select 实现，需产品经理确认业务逻辑） -->
+      <!-- TODO @AI： 判断 formData.bizType === BarcodeBizTypeEnum.ITEM
+        <el-form-item label="产品物料" prop="bizId">
+      -->
+      <!-- TODO @AI： 判断 formData.bizType === BarcodeBizTypeEnum.AREA，不用 BarcodeBizTypeEnum.WAREHOUSE
+        使用 WmWarehouseSelect、
+        WmWarehouseLocationSelect
+        、WmWarehouseAreaSelect、
+      -->
+      <!-- TODO @AI： 判断 formData.bizType === BarcodeBizTypeEnum.PACKAGE，缺了 package。（暂时没封装 select，跳过先）
+      -->
+      <!-- TODO @AI： 判断 formData.bizType === BarcodeBizTypeEnum.VENDOR，
+          <el-form-item label="供应商" prop="bizId">
+       -->
+      <!-- todo @AI：判断 WORKSTATION
+        使用对应的选择器；“工作站”
+       -->
+      <!-- TODO @AI：判断 STOCK；暂时不用；
+      -->
+      <!-- TODO @AI：判断 BATCH；暂时不用；
+       -->
+      <!-- TODO @AI：判断： WORKSHOP
+        “车间”（是不是叫这个？？？）
+       -->
+      <!-- TODO @AI：判断：设备 “MACHINERY”
+        使用 select；
+      -->
+      <!-- TODO @AI：判断 人员 USER
+      使用 user select；
+        -->
+      <!-- TODO @AI：判断流转卡；PROCARD
+      使用对应的 select
+       -->
       <el-form-item label="业务对象" prop="bizId">
         <!-- 已有 Select 组件的业务类型 -->
-        <WmWarehouseSelect v-if="formData.bizType === BarcodeBizTypeEnum.WAREHOUSE"
-          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
-        <WmWarehouseAreaSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.AREA"
-          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
-        <ProWorkOrderSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.WORKORDER"
-          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
-        <DvMachinerySelect v-else-if="formData.bizType === BarcodeBizTypeEnum.MACHINERY"
-          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
-        <MdItemSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.ITEM"
-          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
-        <MdVendorSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.VENDOR"
-          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
-        <MdWorkstationSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.WORKSTATION"
-          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
-        <MdWorkshopSelect v-else-if="formData.bizType === BarcodeBizTypeEnum.WORKSHOP"
-          v-model="formData.bizId" @change="handleBizSelect" class="!w-240px" />
+        <WmWarehouseSelect
+          v-if="formData.bizType === BarcodeBizTypeEnum.WAREHOUSE"
+          v-model="formData.bizId"
+          @change="handleBizSelect"
+          class="!w-240px"
+        />
+        <WmWarehouseAreaSelect
+          v-else-if="formData.bizType === BarcodeBizTypeEnum.AREA"
+          v-model="formData.bizId"
+          @change="handleBizSelect"
+          class="!w-240px"
+        />
+        <ProWorkOrderSelect
+          v-else-if="formData.bizType === BarcodeBizTypeEnum.WORKORDER"
+          v-model="formData.bizId"
+          @change="handleBizSelect"
+          class="!w-240px"
+        />
+        <DvMachinerySelect
+          v-else-if="formData.bizType === BarcodeBizTypeEnum.MACHINERY"
+          v-model="formData.bizId"
+          @change="handleBizSelect"
+          class="!w-240px"
+        />
+        <MdItemSelect
+          v-else-if="formData.bizType === BarcodeBizTypeEnum.ITEM"
+          v-model="formData.bizId"
+          @change="handleBizSelect"
+          class="!w-240px"
+        />
+        <MdVendorSelect
+          v-else-if="formData.bizType === BarcodeBizTypeEnum.VENDOR"
+          v-model="formData.bizId"
+          @change="handleBizSelect"
+          class="!w-240px"
+        />
+        <MdWorkstationSelect
+          v-else-if="formData.bizType === BarcodeBizTypeEnum.WORKSTATION"
+          v-model="formData.bizId"
+          @change="handleBizSelect"
+          class="!w-240px"
+        />
+        <MdWorkshopSelect
+          v-else-if="formData.bizType === BarcodeBizTypeEnum.WORKSHOP"
+          v-model="formData.bizId"
+          @change="handleBizSelect"
+          class="!w-240px"
+        />
         <!-- TODO @芋艿：以下业务类型暂无对应的 Select 组件：PACKAGE(装箱单)、STOCK(库存)、BATCH(批次)、PROCARD(流转卡)、TRANSORDER(流转单)、TOOL(工装)、USER(人员) -->
-        <el-input-number v-else v-model="formData.bizId" :min="1" class="!w-240px"
-          placeholder="请输入业务编号" />
+        <el-input-number
+          v-else
+          v-model="formData.bizId"
+          :min="1"
+          class="!w-240px"
+          placeholder="请输入业务编号"
+        />
       </el-form-item>
       <el-form-item label="业务编码" prop="bizCode">
-        <el-input v-model="formData.bizCode" placeholder="请输入业务编码" :disabled="hasBizSelect" />
+        <el-input
+          v-model="formData.bizCode"
+          placeholder="请输入业务编码"
+          :disabled="hasBizSelect"
+        />
       </el-form-item>
       <el-form-item label="业务名称" prop="bizName">
-        <el-input v-model="formData.bizName" placeholder="请输入业务名称" :disabled="hasBizSelect" />
+        <el-input
+          v-model="formData.bizName"
+          placeholder="请输入业务名称"
+          :disabled="hasBizSelect"
+        />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -124,15 +198,21 @@ const formRef = ref()
 
 /** 有 Select 组件的业务类型集合 */
 const BIZ_TYPES_WITH_SELECT = [
-  BarcodeBizTypeEnum.WAREHOUSE, BarcodeBizTypeEnum.AREA,
-  BarcodeBizTypeEnum.WORKORDER, BarcodeBizTypeEnum.MACHINERY,
-  BarcodeBizTypeEnum.ITEM, BarcodeBizTypeEnum.VENDOR,
-  BarcodeBizTypeEnum.WORKSTATION, BarcodeBizTypeEnum.WORKSHOP
+  BarcodeBizTypeEnum.WAREHOUSE,
+  BarcodeBizTypeEnum.AREA,
+  BarcodeBizTypeEnum.WORKORDER,
+  BarcodeBizTypeEnum.MACHINERY,
+  BarcodeBizTypeEnum.ITEM,
+  BarcodeBizTypeEnum.VENDOR,
+  BarcodeBizTypeEnum.WORKSTATION,
+  BarcodeBizTypeEnum.WORKSHOP
 ] as number[]
 
 /** 当前 bizType 是否有对应的 Select 组件 */
 // TODO @AI：这里 linter 报错；
-const hasBizSelect = computed(() => BIZ_TYPES_WITH_SELECT.includes(formData.value.bizType as number))
+const hasBizSelect = computed(() =>
+  BIZ_TYPES_WITH_SELECT.includes(formData.value.bizType as number)
+)
 
 /** 业务 Select 选中回调：自动填充 bizId、bizCode、bizName */
 const handleBizSelect = (item: any) => {
@@ -148,11 +228,14 @@ const handleBizSelect = (item: any) => {
 }
 
 /** bizType 切换时，清空业务字段 */
-watch(() => formData.value.bizType, () => {
-  formData.value.bizId = undefined
-  formData.value.bizCode = undefined
-  formData.value.bizName = undefined
-})
+watch(
+  () => formData.value.bizType,
+  () => {
+    formData.value.bizId = undefined
+    formData.value.bizCode = undefined
+    formData.value.bizName = undefined
+  }
+)
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
