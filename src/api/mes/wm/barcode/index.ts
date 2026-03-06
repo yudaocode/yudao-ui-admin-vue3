@@ -2,17 +2,17 @@ import request from '@/config/axios'
 
 // MES 条码清单 VO
 export interface WmBarcodeVO {
-  id: number
-  configId: number
-  format: number
-  bizType: number
-  content: string
-  bizId: number
-  bizCode: string
-  bizName: string
+  id?: number
+  configId?: number
+  format?: number
+  bizType?: number
+  content?: string
+  bizId?: number
+  bizCode?: string
+  bizName?: string
   status: number
   remark: string
-  createTime: string
+  createTime?: string
 }
 
 // MES 条码 API
