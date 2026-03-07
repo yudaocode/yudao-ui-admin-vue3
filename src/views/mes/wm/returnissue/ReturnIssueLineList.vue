@@ -47,7 +47,7 @@
         v-if="isUpdate || isStock"
         label="操作"
         align="center"
-        width="160"
+        width="200"
         fixed="right"
       >
         <template #default="scope">
@@ -60,7 +60,9 @@
           <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
             上架
           </el-button>
-          <!-- TODO @芋艿：【标签打印】后续搞的情况下； -->
+          <el-button link type="primary" @click="handleBarcode(scope.row)">
+            条码
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -130,6 +132,8 @@
     :issue-id="props.issueId"
     @success="onDetailFormSuccess"
   />
+  <!-- 条码详情弹窗 -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -138,6 +142,8 @@ import { WmReturnIssueLineApi, WmReturnIssueLineVO } from '@/api/mes/wm/returnis
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ReturnIssueDetailList from './ReturnIssueDetailList.vue'
 import ReturnIssueDetailForm from './ReturnIssueDetailForm.vue'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
+import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ReturnIssueLineList' })
 
@@ -288,6 +294,18 @@ const openDetailForm = (type: string, lineId: number, itemId?: number, detailId?
 /** 明细表单提交成功后，刷新已展开行的 DetailList */
 const onDetailFormSuccess = (lineId: number) => {
   detailListRefs.value[lineId]?.getList()
+}
+
+/** 查看物料条码 */
+const barcodeDetailRef = ref()
+const handleBarcode = async (row: WmReturnIssueLineVO) => {
+  // 退料使用物料 ID 作为业务 ID
+  await barcodeDetailRef.value.openByBusiness(
+    row.itemId,
+    BarcodeBizTypeEnum.ITEM,
+    row.itemCode,
+    row.itemName
+  )
 }
 
 /** 初始化 */

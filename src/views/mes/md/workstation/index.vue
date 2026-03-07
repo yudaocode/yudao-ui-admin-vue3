@@ -83,9 +83,8 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="150">
+      <el-table-column label="操作" align="center" width="190">
         <template #default="scope">
-          <!-- TODO @芋艿：【标签打印】 -->
           <el-button
             link
             type="primary"
@@ -102,6 +101,14 @@
           >
             删除
           </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleBarcode(scope.row)"
+            v-hasPermi="['mes:md-workstation:query']"
+          >
+            条码
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -116,6 +123,8 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <WorkstationForm ref="formRef" @success="getList" />
+  <!-- 条码详情弹窗 -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -125,6 +134,8 @@ import { MdWorkstationApi, MdWorkstationVO } from '@/api/mes/md/workstation'
 import MdWorkshopSelect from './components/MdWorkshopSelect.vue'
 import WorkstationForm from './WorkstationForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
+import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesMdWorkstation' })
 
@@ -183,6 +194,17 @@ const handleDelete = async (id: number) => {
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
+}
+
+/** 查看工位条码 */
+const barcodeDetailRef = ref()
+const handleBarcode = async (row: MdWorkstationVO) => {
+  await barcodeDetailRef.value.openByBusiness(
+    row.id,
+    BarcodeBizTypeEnum.WORKSTATION,
+    row.code,
+    row.name
+  )
 }
 
 /** 导出按钮操作 */

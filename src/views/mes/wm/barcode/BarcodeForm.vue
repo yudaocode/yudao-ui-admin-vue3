@@ -7,16 +7,6 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="条码格式" prop="format">
-        <el-select v-model="formData.format" placeholder="请选择条码格式" class="!w-1/1">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_BARCODE_FORMAT)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item label="业务类型" prop="bizType">
         <el-select v-model="formData.bizType" placeholder="请选择业务类型" class="!w-1/1">
           <el-option
@@ -218,7 +208,6 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<WmBarcodeVO>({
   id: undefined,
-  format: undefined,
   bizType: undefined,
   bizId: undefined,
   bizCode: undefined,
@@ -228,7 +217,6 @@ const formData = ref<WmBarcodeVO>({
   remark: ''
 })
 const formRules = reactive({
-  format: [{ required: true, message: '条码格式不能为空', trigger: 'change' }],
   bizType: [{ required: true, message: '业务类型不能为空', trigger: 'change' }],
   bizId: [{ required: true, message: '业务编号不能为空', trigger: 'blur' }],
   bizCode: [{ required: true, message: '业务编码不能为空', trigger: 'blur' }],
@@ -327,7 +315,9 @@ watch(
   () => formData.value.bizType,
   () => {
     // 加载数据时不清空字段
-    if (isLoadingData.value) return
+    if (isLoadingData.value) {
+      return
+    }
 
     formData.value.bizId = undefined
     formData.value.bizCode = undefined
@@ -386,7 +376,6 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    format: undefined,
     bizType: undefined,
     bizId: undefined,
     bizCode: undefined,

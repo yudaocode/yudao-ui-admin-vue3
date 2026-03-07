@@ -99,18 +99,23 @@ const open = (row: Partial<WmBarcodeVO>) => {
 }
 
 /** 打开弹窗 - 方式 2：通过 bizId + bizType 加载 */
-const openByBusiness = async (bizId: number, bizType: number) => {
+const openByBusiness = async (
+  bizId: number,
+  bizType: number,
+  bizCode?: string,
+  bizName?: string
+) => {
   dialogVisible.value = true
   try {
     const data = await WmBarcodeApi.getBarcodeByBusiness(bizType, bizId)
     if (data) {
       barcodeData.value = { ...data }
     } else {
-      barcodeData.value = { bizType, bizId, content: '' }
+      barcodeData.value = { bizType, bizId, bizCode, bizName, content: '' }
       message.warning('未找到对应条码数据')
     }
   } catch {
-    barcodeData.value = { bizType, bizId, content: '' }
+    barcodeData.value = { bizType, bizId, bizCode, bizName, content: '' }
     message.error('加载条码数据失败')
   }
 }

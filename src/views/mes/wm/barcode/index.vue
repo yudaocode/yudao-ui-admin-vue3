@@ -126,7 +126,7 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="180px" fixed="right">
+      <el-table-column label="操作" align="center" width="220px" fixed="right">
         <template #default="scope">
           <el-button
             link
@@ -151,6 +151,14 @@
             v-hasPermi="['mes:wm-barcode:delete']"
           >
             删除
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleBarcode(scope.row)"
+            v-hasPermi="['mes:wm-barcode:query']"
+          >
+            条码
           </el-button>
         </template>
       </el-table-column>
@@ -248,6 +256,11 @@ const handleDelete = async (id?: number) => {
 const viewDialogRef = ref()
 const handleView = (row: any) => {
   viewDialogRef.value.open(row)
+}
+
+/** 查看条码 - 打开详情弹窗 */
+const handleBarcode = (row: any) => {
+  handleView(row)
 }
 
 /** 条码设置 */

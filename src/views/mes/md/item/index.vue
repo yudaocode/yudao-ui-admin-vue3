@@ -116,7 +116,7 @@
             :formatter="dateFormatter"
             width="180px"
           />
-          <el-table-column label="操作" align="center" width="110">
+          <el-table-column label="操作" align="center" width="160">
             <template #default="scope">
               <el-button
                 link
@@ -133,6 +133,14 @@
                 v-hasPermi="['mes:md-item:delete']"
               >
                 删除
+              </el-button>
+              <el-button
+                link
+                type="primary"
+                @click="handleBarcode(scope.row)"
+                v-hasPermi="['mes:md-item:query']"
+              >
+                条码
               </el-button>
             </template>
           </el-table-column>
@@ -152,6 +160,8 @@
   <MdItemForm ref="formRef" @success="getList" />
   <!-- 物料导入对话框 -->
   <MdItemImportForm ref="importFormRef" @success="getList" />
+  <!-- 条码详情弹窗 -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -162,7 +172,8 @@ import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import MdItemForm from './MdItemForm.vue'
 import MdItemImportForm from './MdItemImportForm.vue'
 import ItemTypeTree from './ItemTypeTree.vue'
-import { getItemOrProductLabel } from '@/views/mes/utils/constants'
+import { getItemOrProductLabel, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'MesMdItem' })
 
@@ -237,6 +248,17 @@ const handleDelete = async (id: number) => {
 const importFormRef = ref()
 const handleImport = () => {
   importFormRef.value.open()
+}
+
+/** 查看物料条码 */
+const barcodeDetailRef = ref()
+const handleBarcode = async (row: MdItemVO) => {
+  await barcodeDetailRef.value.openByBusiness(
+    row.id,
+    BarcodeBizTypeEnum.ITEM,
+    row.code,
+    row.name
+  )
 }
 
 /** 导出按钮操作 */

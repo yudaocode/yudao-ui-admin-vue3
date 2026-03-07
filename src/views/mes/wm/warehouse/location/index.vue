@@ -66,7 +66,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="220">
+      <el-table-column label="操作" align="center" width="260">
         <template #default="scope">
           <el-button
             link
@@ -92,6 +92,14 @@
           >
             删除
           </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleBarcode(scope.row)"
+            v-hasPermi="['mes:wm-warehouse:query']"
+          >
+            条码
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -104,6 +112,8 @@
   </ContentWrap>
 
   <LocationForm ref="formRef" @success="getList" />
+  <!-- 条码详情弹窗 -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -112,6 +122,8 @@ import { DICT_TYPE } from '@/utils/dict'
 import { WmWarehouseApi } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
 import LocationForm from './LocationForm.vue'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
+import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesWmLocation' })
 
@@ -199,6 +211,17 @@ const handleDelete = async (id: number) => {
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
+}
+
+/** 查看库区条码 */
+const barcodeDetailRef = ref()
+const handleBarcode = async (row: WmWarehouseLocationVO) => {
+  await barcodeDetailRef.value.openByBusiness(
+    row.id,
+    BarcodeBizTypeEnum.LOCATION,
+    row.code,
+    row.name
+  )
 }
 
 /** 初始化 */

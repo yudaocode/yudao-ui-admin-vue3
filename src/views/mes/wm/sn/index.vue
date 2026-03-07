@@ -74,7 +74,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="180" fixed="right">
+      <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
           <el-button
             link
@@ -92,6 +92,14 @@
           >
             删除
           </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleBarcode(scope.row)"
+            v-hasPermi="['mes:wm-sn:query']"
+          >
+            条码
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -106,6 +114,8 @@
 
   <!-- 表单弹窗：生成 SN 码 -->
   <WmSnGenerateForm ref="formRef" @success="getList" />
+  <!-- 条码详情弹窗 -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -114,6 +124,8 @@ import download from '@/utils/download'
 import * as WmSnApi from '@/api/mes/wm/sn'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmSnGenerateForm from './WmSnGenerateForm.vue'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
+import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesWmSn' })
 
@@ -198,6 +210,18 @@ const handleExportDetail = async (uuid: string) => {
     const data = await WmSnApi.exportSnDetailExcel(uuid)
     download.excel(data, 'SN码明细.xls')
   } catch {}
+}
+
+/** 查看 SN 码条码 */
+const barcodeDetailRef = ref()
+const handleBarcode = async (row: WmSnApi.WmSnGroupVO) => {
+  // SN 码使用 uuid 作为业务 ID
+  await barcodeDetailRef.value.openByBusiness(
+    row.uuid,
+    BarcodeBizTypeEnum.SN,
+    row.batchCode,
+    row.itemName
+  )
 }
 
 /** 初始化 **/

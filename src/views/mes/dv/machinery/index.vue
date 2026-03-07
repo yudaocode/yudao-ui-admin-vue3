@@ -113,8 +113,7 @@
             :formatter="dateFormatter"
             width="180px"
           />
-          <el-table-column label="操作" align="center" width="130">
-            <!-- TODO @芋艿：标签打印 -->
+          <el-table-column label="操作" align="center" width="170">
             <template #default="scope">
               <el-button
                 link
@@ -131,6 +130,14 @@
                 v-hasPermi="['mes:dv-machinery:delete']"
               >
                 删除
+              </el-button>
+              <el-button
+                link
+                type="primary"
+                @click="handleBarcode(scope.row)"
+                v-hasPermi="['mes:dv-machinery:query']"
+              >
+                条码
               </el-button>
             </template>
           </el-table-column>
@@ -150,6 +157,8 @@
   <MachineryForm ref="formRef" @success="getList" />
   <!-- 设备导入对话框 -->
   <MachineryImportForm ref="importFormRef" @success="getList" />
+  <!-- 条码详情弹窗 -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -161,6 +170,8 @@ import MachineryForm from './MachineryForm.vue'
 import MachineryTypeTree from './MachineryTypeTree.vue'
 import MachineryImportForm from './MachineryImportForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
+import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesDvMachinery' })
 
@@ -231,6 +242,17 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 查看设备条码 */
+const barcodeDetailRef = ref()
+const handleBarcode = async (row: DvMachineryVO) => {
+  await barcodeDetailRef.value.openByBusiness(
+    row.id,
+    BarcodeBizTypeEnum.MACHINERY,
+    row.code,
+    row.name
+  )
 }
 
 /** 导出按钮操作 */
