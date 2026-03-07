@@ -204,6 +204,8 @@ import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSe
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import TmToolSelect from '@/views/mes/tm/tool/components/TmToolSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import { WmWarehouseLocationApi } from '@/api/mes/wm/warehouse/location'
+import { WmWarehouseAreaApi } from '@/api/mes/wm/warehouse/area'
 
 defineOptions({ name: 'BarcodeForm' })
 
@@ -238,6 +240,7 @@ const formRef = ref()
 const locationWarehouseId = ref<number>() // 库区选择器的临时数据：选择仓库后，传给库区选择器
 const areaWarehouseId = ref<number>() // 库位选择器的临时数据：选择仓库后，传给库位选择器
 const areaLocationId = ref<number>() // 库位选择器的临时数据：选择库区后，传给库位选择器
+const isLoadingData = ref(false) // 标记是否正在加载数据，避免 watch 清空字段
 
 /** 业务 Select 选中回调：自动填充 bizId、bizCode、bizName */
 const handleBizSelect = async (item: any) => {
@@ -291,10 +294,41 @@ const handleAreaLocationChange = () => {
   formData.value.content = undefined
 }
 
+/** 加载级联选择器的数据（编辑时回填上级数据） */
+const loadCascadeData = async () => {
+  if (!formData.value.bizType || !formData.value.bizId) {
+    return
+  }
+  try {
+    // 库区类型：需要查询库区信息，获取所属仓库ID
+    if (formData.value.bizType === BarcodeBizTypeEnum.LOCATION) {
+      const location = await WmWarehouseLocationApi.getWarehouseLocation(formData.value.bizId)
+      if (location?.warehouseId) {
+        locationWarehouseId.value = location.warehouseId
+      }
+    }
+    // 库位类型：需要查询库位信息，获取所属仓库ID和库区ID
+    else if (formData.value.bizType === BarcodeBizTypeEnum.AREA) {
+      const area = await WmWarehouseAreaApi.getWarehouseArea(formData.value.bizId)
+      if (area?.warehouseId) {
+        areaWarehouseId.value = area.warehouseId
+      }
+      if (area?.locationId) {
+        areaLocationId.value = area.locationId
+      }
+    }
+  } catch (error) {
+    console.error('加载级联数据失败:', error)
+  }
+}
+
 /** bizType 切换时，清空业务字段 */
 watch(
   () => formData.value.bizType,
   () => {
+    // 加载数据时不清空字段
+    if (isLoadingData.value) return
+
     formData.value.bizId = undefined
     formData.value.bizCode = undefined
     formData.value.bizName = undefined
@@ -314,10 +348,14 @@ const open = async (type: string, id?: number) => {
   resetForm()
   if (id) {
     formLoading.value = true
+    isLoadingData.value = true
     try {
       formData.value = await WmBarcodeApi.getBarcode(id)
+      // 编辑时，需要回填级联选择器的中间层级数据
+      await loadCascadeData()
     } finally {
       formLoading.value = false
+      isLoadingData.value = false
     }
   }
 }
