@@ -56,20 +56,37 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="条码格式" align="center" prop="format">
+      :show-overflow-tooltip="true"
+      <el-table-column label="编号" align="center" key="id" prop="id" width="100" />
+      <el-table-column label="条码格式" align="center" key="format" prop="format" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_BARCODE_FORMAT" :value="scope.row.format" />
         </template>
       </el-table-column>
-      <el-table-column label="业务类型" align="center" prop="bizType">
+      <el-table-column label="业务类型" align="center" key="bizType" prop="bizType" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_BARCODE_BIZ_TYPE" :value="scope.row.bizType" />
         </template>
       </el-table-column>
-      <el-table-column label="内容格式" align="center" prop="contentFormat" show-overflow-tooltip />
-      <el-table-column label="内容样例" align="center" prop="contentExample" />
-      <el-table-column label="自动生成" align="center" prop="autoGenerateFlag">
+      <el-table-column
+        label="内容格式"
+        align="center"
+        prop="contentFormat"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column
+        label="内容样例"
+        align="center"
+        prop="contentExample"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column
+        label="自动生成"
+        align="center"
+        key="autoGenerateFlag"
+        prop="autoGenerateFlag"
+        width="100"
+      >
         <template #default="scope">
           <el-switch
             v-model="scope.row.autoGenerateFlag"
@@ -77,8 +94,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="默认打印模板" align="center" prop="defaultTemplate" />
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="状态" align="center" key="status" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
@@ -88,9 +104,9 @@
         align="center"
         prop="createTime"
         :formatter="dateFormatter"
-        width="180px"
+        width="180"
       />
-      <el-table-column label="操作" align="center" width="150px" fixed="right">
+      <el-table-column label="操作" align="center" width="150" fixed="right">
         <template #default="scope">
           <el-button
             link
@@ -198,6 +214,7 @@ const handleAutoGenerateChange = async (row: any) => {
   }
 }
 
+/** 初始化 */
 onMounted(() => {
   getList()
 })

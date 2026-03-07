@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="查看条码" v-model="dialogVisible" width="500px" :close-on-click-modal="false">
+  <Dialog title="查看条码" v-model="dialogVisible" width="500px">
     <div>
       <!-- 条码显示区域 -->
       <div class="flex justify-center items-center min-h-200px p-20px bg-[#f5f7fa] rounded mb-20px">
@@ -47,13 +47,13 @@
         </el-descriptions-item>
         <el-descriptions-item label="状态" label-align="left" align="left">
           <dict-tag
-            v-if="barcodeData.status"
+            v-if="barcodeData.status !== undefined"
             :type="DICT_TYPE.COMMON_STATUS"
             :value="barcodeData.status"
           />
         </el-descriptions-item>
         <el-descriptions-item label="创建时间" label-align="left" align="left">
-          {{ formatDate(barcodeData?.createTime) }}
+          {{ formatDate(barcodeData.createTime) }}
         </el-descriptions-item>
       </el-descriptions>
     </div>
@@ -90,15 +90,7 @@ const message = useMessage()
 
 const dialogVisible = ref(false)
 const barcodeRef = ref<InstanceType<typeof Barcode>>()
-const barcodeData = ref<Partial<WmBarcodeVO>>({
-  format: undefined,
-  bizType: undefined,
-  content: '',
-  bizCode: '',
-  bizName: '',
-  status: undefined,
-  createTime: undefined
-})
+const barcodeData = ref<Partial<WmBarcodeVO>>({})
 
 /** 打开弹窗 - 方式 1：直接传入数据 */
 const open = (row: Partial<WmBarcodeVO>) => {
@@ -125,14 +117,13 @@ const openByBusiness = async (bizId: number, bizType: number) => {
 
 defineExpose({ open, openByBusiness })
 
-// DONE @AI：【晚点弄】打印可以在当前界面么？（AI 未修复原因：打印功能标注为后续处理，当前实现使用新窗口打印已可用）
 /** 打印条码 */
+// TODO @芋艿（目前暂时不处理）：后续支持打印的自定义；
 const handlePrint = () => {
   if (!barcodeRef.value) {
     message.warning('条码组件未加载')
     return
   }
-
   const base64 = barcodeRef.value.getImageBase64?.()
   if (!base64) {
     message.warning('条码生成失败，无法打印')
@@ -176,7 +167,6 @@ const handlePrint = () => {
     </div>
   </body>
 </html>`
-
     printWindow.document.write(html)
     printWindow.document.close()
 
@@ -204,12 +194,8 @@ const handleDownload = () => {
     return
   }
 
-  // DONE @AI：已封装 download.base64Image 方法，复用 download 工具类
   try {
-    download.base64Image(
-      base64,
-      `barcode_${barcodeData.value.bizCode || 'unknown'}_${Date.now()}`
-    )
+    download.base64Image(base64, `barcode_${barcodeData.value.bizCode || 'unknown'}_${Date.now()}`)
     message.success('下载成功')
   } catch (error) {
     console.error('下载失败:', error)
@@ -218,7 +204,6 @@ const handleDownload = () => {
 }
 
 /** 生成条码（当无条码数据时） */
-// DONE @AI：现在就搞！你看看接口都 ready 的！
 const handleGenerate = async () => {
   const { bizType, bizId, bizCode, bizName } = barcodeData.value
   if (!bizType || !bizId) {

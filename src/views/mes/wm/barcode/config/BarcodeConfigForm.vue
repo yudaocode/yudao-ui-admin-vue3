@@ -8,7 +8,7 @@
       v-loading="formLoading"
     >
       <el-form-item label="条码格式" prop="format">
-        <el-select v-model="formData.format" placeholder="请选择条码格式" class="!w-240px">
+        <el-select v-model="formData.format" placeholder="请选择条码格式" class="!w-1/1">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_BARCODE_FORMAT)"
             :key="dict.value"
@@ -21,7 +21,7 @@
         <el-select
           v-model="formData.bizType"
           placeholder="请选择业务类型"
-          class="!w-240px"
+          class="!w-1/1"
           :disabled="formType === 'update'"
         >
           <el-option
@@ -36,15 +36,11 @@
         <el-input
           v-model="formData.contentFormat"
           placeholder="支持{BUSINESSCODE}占位符，如：WH-{BUSINESSCODE}"
-          class="!w-400px"
+          class="!w-1/1"
         />
       </el-form-item>
       <el-form-item label="内容样例" prop="contentExample">
-        <el-input
-          v-model="formData.contentExample"
-          placeholder="如：WH-WH001"
-          class="!w-400px"
-        />
+        <el-input v-model="formData.contentExample" placeholder="如：WH-WH001" class="!w-1/1" />
       </el-form-item>
       <el-form-item label="自动生成" prop="autoGenerateFlag">
         <el-switch v-model="formData.autoGenerateFlag" />
@@ -76,17 +72,20 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { WmBarcodeConfigApi as BarcodeConfigApi, WmBarcodeConfigVO as BarcodeConfigVO } from '@/api/mes/wm/barcode/config'
+import {
+  WmBarcodeConfigApi as BarcodeConfigApi,
+  WmBarcodeConfigVO as BarcodeConfigVO
+} from '@/api/mes/wm/barcode/config'
 
 defineOptions({ name: 'BarcodeConfigForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   format: undefined,
@@ -104,7 +103,7 @@ const formRules = reactive({
   contentFormat: [{ required: true, message: '内容格式模板不能为空', trigger: 'blur' }],
   autoGenerateFlag: [{ required: true, message: '是否自动生成不能为空', trigger: 'blur' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -121,12 +120,14 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open })
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
+  // 校验表单
   await formRef.value.validate()
+  // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as unknown as BarcodeConfigVO

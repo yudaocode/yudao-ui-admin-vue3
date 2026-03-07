@@ -101,11 +101,9 @@
       </el-table-column>
       <el-table-column label="条码格式" align="center" prop="format">
         <template #default="scope">
-          <!-- DONE @AI：MES_BARCODE_FORMAT => MES_WM_BARCODE_FORMAT -->
           <dict-tag :type="DICT_TYPE.MES_WM_BARCODE_FORMAT" :value="scope.row.format" />
         </template>
       </el-table-column>
-      <!-- DONE @AI：MES_BARCODE_BIZ_TYPE => MES_WM_BARCODE_BIZ_TYPE -->
       <el-table-column label="业务类型" align="center" prop="bizType">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_BARCODE_BIZ_TYPE" :value="scope.row.bizType" />
@@ -120,7 +118,6 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="180px" fixed="right">
-        <!-- DONE @AI：使用数据库，检查下相关的权限标识，是不是加入了；（AI 未修复原因：需在数据库 system_menu 表中手动检查/插入 mes:wm-barcode:create、mes:wm-barcode:update、mes:wm-barcode:delete、mes:wm-barcode:query、mes:wm-barcode-config:query 权限标识，非代码层面修改） -->
         <template #default="scope">
           <el-button
             link
@@ -245,12 +242,10 @@ const handleView = (row: any) => {
 
 /** 条码设置 */
 const handleConfig = () => {
-  // DONE @AI：已改成 name 路由跳转
   push({ name: 'MesWmBarcodeConfig' })
 }
 
 onMounted(() => {
   getList()
 })
-// DONE @AI：下面的 scss 已使用 unocss 替代
 </script>

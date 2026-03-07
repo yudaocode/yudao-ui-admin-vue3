@@ -1,9 +1,15 @@
+<template>
+  <div v-loading="loading" class="inline-block" :style="wrapStyle">
+    <canvas v-if="isQRCode" ref="canvasRef" class="block max-w-full"></canvas>
+    <!--suppress RequiredAttributes：JsBarcode 需要原生图片 -->
+    <img v-else ref="imgRef" alt="barcode" class="block max-w-full" />
+  </div>
+</template>
 <script lang="ts" setup>
 import { computed, nextTick, ref, unref, watch } from 'vue'
 import QRCode, { QRCodeRenderersOptions } from 'qrcode'
 import JsBarcode from 'jsbarcode'
 import { propTypes } from '@/utils/propTypes'
-import { useDesign } from '@/hooks/web/useDesign'
 import { BarcodeFormatEnum, BARCODE_FORMAT_MAP } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'Barcode' })
@@ -18,15 +24,10 @@ const props = defineProps({
 
 const emit = defineEmits(['done'])
 
-const { getPrefixCls } = useDesign()
-const prefixCls = getPrefixCls('barcode')
-
-const loading = ref(true)
-const canvasRef = ref<Nullable<HTMLCanvasElement>>(null)
-const imgRef = ref<Nullable<HTMLImageElement>>(null)
-
+const loading = ref(true) // 加载状态
+const canvasRef = ref<Nullable<HTMLCanvasElement>>(null) // 二维码的 Canvas 引用
+const imgRef = ref<Nullable<HTMLImageElement>>(null) // 一维码的图片引用
 const isQRCode = computed(() => props.format === BarcodeFormatEnum.QR_CODE) // 判断是否为二维码
-
 const wrapStyle = computed(() => {
   if (isQRCode.value) {
     return {
@@ -101,11 +102,3 @@ defineExpose({
   getImageBase64
 })
 </script>
-
-<template>
-  <div v-loading="loading" :class="[prefixCls, 'inline-block']" :style="wrapStyle">
-    <canvas v-if="isQRCode" ref="canvasRef" class="block max-w-full"></canvas>
-    <!--suppress RequiredAttributes：JsBarcode 需要原生图片 -->
-    <img v-else ref="imgRef" alt="barcode" class="block max-w-full" />
-  </div>
-</template>

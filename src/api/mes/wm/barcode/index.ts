@@ -12,7 +12,7 @@ export interface WmBarcodeVO {
   bizName?: string
   status: number
   remark: string
-  createTime?: string
+  createTime?: Date
 }
 
 // MES 条码 API
