@@ -78,6 +78,15 @@
         >
           <Icon icon="ep:setting" class="mr-5px" /> 条码设置
         </el-button>
+        <el-button
+          type="warning"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['mes:wm-barcode:export']"
+        >
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -167,6 +176,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { WmBarcodeApi } from '@/api/mes/wm/barcode'
 import { Barcode, BarcodeDetail } from './components'
 import BarcodeForm from './BarcodeForm.vue'
+import download from '@/utils/download'
 
 defineOptions({ name: 'MesWmBarcode' })
 
@@ -243,6 +253,22 @@ const handleView = (row: any) => {
 /** 条码设置 */
 const handleConfig = () => {
   push({ name: 'MesWmBarcodeConfig' })
+}
+
+/** 导出按钮操作 */
+const exportLoading = ref(false)
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await WmBarcodeApi.exportBarcode(queryParams)
+    download.excel(data, '条码清单.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 onMounted(() => {

@@ -48,5 +48,10 @@ export const WmBarcodeApi = {
   // 删除条码
   deleteBarcode: async (id: number) => {
     return await request.delete({ url: '/mes/wm/barcode/delete?id=' + id })
+  },
+
+  // 导出条码 Excel
+  exportBarcode: async (params: any) => {
+    return await request.download({ url: '/mes/wm/barcode/export-excel', params })
   }
 }
