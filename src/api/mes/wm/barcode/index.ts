@@ -53,5 +53,13 @@ export const WmBarcodeApi = {
   // 导出条码 Excel
   exportBarcode: async (params: any) => {
     return await request.download({ url: '/mes/wm/barcode/export-excel', params })
+  },
+
+  // 生成条码内容
+  generateBarcodeContent: async (bizType: number, bizCode: string) => {
+    return await request.get({
+      url: '/mes/wm/barcode/generate-content',
+      params: { bizType, bizCode }
+    })
   }
 }

@@ -55,7 +55,11 @@
           />
         </div>
       </el-form-item>
-      <el-form-item v-else-if="formData.bizType === BarcodeBizTypeEnum.AREA" label="库位" prop="bizId">
+      <el-form-item
+        v-else-if="formData.bizType === BarcodeBizTypeEnum.AREA"
+        label="库位"
+        prop="bizId"
+      >
         <div class="space-y-2">
           <WmWarehouseSelect
             v-model="areaWarehouseId"
@@ -153,18 +157,13 @@
         />
       </el-form-item>
       <el-form-item label="业务编码" prop="bizCode">
-        <el-input
-          v-model="formData.bizCode"
-          placeholder="请输入业务编码"
-          disabled
-        />
+        <el-input v-model="formData.bizCode" placeholder="请输入业务编码" disabled />
       </el-form-item>
       <el-form-item label="业务名称" prop="bizName">
-        <el-input
-          v-model="formData.bizName"
-          placeholder="请输入业务名称"
-          disabled
-        />
+        <el-input v-model="formData.bizName" placeholder="请输入业务名称" disabled />
+      </el-form-item>
+      <el-form-item label="条码内容" prop="content">
+        <el-input v-model="formData.content" placeholder="请输入条码内容或自动生成" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -189,7 +188,7 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { WmBarcodeApi, type WmBarcodeVO } from '@/api/mes/wm/barcode'
 import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
@@ -222,6 +221,7 @@ const formData = ref<WmBarcodeVO>({
   bizId: undefined,
   bizCode: undefined,
   bizName: undefined,
+  content: undefined,
   status: CommonStatusEnum.ENABLE,
   remark: ''
 })
@@ -230,7 +230,8 @@ const formRules = reactive({
   bizType: [{ required: true, message: '业务类型不能为空', trigger: 'change' }],
   bizId: [{ required: true, message: '业务编号不能为空', trigger: 'blur' }],
   bizCode: [{ required: true, message: '业务编码不能为空', trigger: 'blur' }],
-  bizName: [{ required: true, message: '业务名称不能为空', trigger: 'blur' }]
+  bizName: [{ required: true, message: '业务名称不能为空', trigger: 'blur' }],
+  content: [{ required: true, message: '条码内容不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 
@@ -239,16 +240,30 @@ const areaWarehouseId = ref<number>() // 库位选择器的临时数据：选择
 const areaLocationId = ref<number>() // 库位选择器的临时数据：选择库区后，传给库位选择器
 
 /** 业务 Select 选中回调：自动填充 bizId、bizCode、bizName */
-const handleBizSelect = (item: any) => {
+const handleBizSelect = async (item: any) => {
   if (!item) {
     formData.value.bizId = undefined
     formData.value.bizCode = undefined
     formData.value.bizName = undefined
+    formData.value.content = undefined
     return
   }
   formData.value.bizId = item.id
   formData.value.bizCode = item.code || item.username
   formData.value.bizName = item.name || item.nickname
+
+  // 自动生成条码内容
+  if (formData.value.bizType && formData.value.bizCode) {
+    try {
+      formData.value.content = await WmBarcodeApi.generateBarcodeContent(
+        formData.value.bizType,
+        formData.value.bizCode
+      )
+    } catch (error) {
+      console.error('生成条码内容失败:', error)
+      formData.value.content = undefined
+    }
+  }
 }
 
 /** 库区仓库选择回调：清空库区 */
@@ -256,6 +271,7 @@ const handleLocationWarehouseChange = () => {
   formData.value.bizId = undefined
   formData.value.bizCode = undefined
   formData.value.bizName = undefined
+  formData.value.content = undefined
 }
 
 /** 库位仓库选择回调：清空库区和库位 */
@@ -264,6 +280,7 @@ const handleAreaWarehouseChange = () => {
   formData.value.bizId = undefined
   formData.value.bizCode = undefined
   formData.value.bizName = undefined
+  formData.value.content = undefined
 }
 
 /** 库位库区选择回调：清空库位 */
@@ -271,6 +288,7 @@ const handleAreaLocationChange = () => {
   formData.value.bizId = undefined
   formData.value.bizCode = undefined
   formData.value.bizName = undefined
+  formData.value.content = undefined
 }
 
 /** bizType 切换时，清空业务字段 */
@@ -280,6 +298,7 @@ watch(
     formData.value.bizId = undefined
     formData.value.bizCode = undefined
     formData.value.bizName = undefined
+    formData.value.content = undefined
     // 清空仓库层级的临时数据
     locationWarehouseId.value = undefined
     areaWarehouseId.value = undefined
@@ -334,6 +353,7 @@ const resetForm = () => {
     bizId: undefined,
     bizCode: undefined,
     bizName: undefined,
+    content: undefined,
     status: CommonStatusEnum.ENABLE,
     remark: ''
   }
