@@ -365,6 +365,8 @@ export const BARCODE_FORMAT_MAP: Record<BarcodeFormatEnum, string> = {
 /** MES 条码业务类型枚举（对应后端 BarcodeBizTypeEnum） */
 export enum BarcodeBizTypeEnum {
   // WM 仓库模块 [100, 200)
+  WAREHOUSE = 102,
+  LOCATION = 103,
   AREA = 104,
   PACKAGE = 105,
   STOCK = 106,
@@ -375,10 +377,13 @@ export enum BarcodeBizTypeEnum {
   TRANSORDER = 302,
   // DV 设备模块 [400, 500)
   MACHINERY = 400,
+  // TM 工具模块 [500, 600)
+  TOOL = 500,
   // MD 主数据模块 [600, 700)
   ITEM = 600,
   VENDOR = 601,
   WORKSTATION = 602,
   WORKSHOP = 603,
-  USER = 604
+  USER = 604,
+  CLIENT = 605
 }

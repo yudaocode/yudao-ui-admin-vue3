@@ -48,5 +48,10 @@ export const TmToolApi = {
   // 导出工具台账 Excel
   exportTool: async (params: any) => {
     return await request.download({ url: `/mes/tm/tool/export-excel`, params })
+  },
+
+  // 查询工具台账精简列表
+  getToolSimpleList: async () => {
+    return await request.get({ url: `/mes/tm/tool/simple-list` })
   }
 }

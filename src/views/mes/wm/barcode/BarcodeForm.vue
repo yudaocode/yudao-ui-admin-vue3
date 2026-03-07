@@ -27,7 +27,35 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="formData.bizType === BarcodeBizTypeEnum.AREA" label="库区" prop="bizId">
+      <el-form-item
+        v-if="formData.bizType === BarcodeBizTypeEnum.WAREHOUSE"
+        label="仓库"
+        prop="bizId"
+      >
+        <WmWarehouseSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
+      </el-form-item>
+      <el-form-item
+        v-else-if="formData.bizType === BarcodeBizTypeEnum.LOCATION"
+        label="库区"
+        prop="bizId"
+      >
+        <div class="space-y-2">
+          <WmWarehouseSelect
+            v-model="locationWarehouseId"
+            @change="handleLocationWarehouseChange"
+            class="!w-1/1"
+            placeholder="请选择仓库"
+          />
+          <WmWarehouseLocationSelect
+            v-model="formData.bizId"
+            :warehouse-id="locationWarehouseId"
+            @change="handleBizSelect"
+            class="!w-1/1"
+            placeholder="请选择库区"
+          />
+        </div>
+      </el-form-item>
+      <el-form-item v-else-if="formData.bizType === BarcodeBizTypeEnum.AREA" label="库位" prop="bizId">
         <div class="space-y-2">
           <WmWarehouseSelect
             v-model="areaWarehouseId"
@@ -101,7 +129,21 @@
       >
         <UserSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
       </el-form-item>
-      <!-- TODO @芋艿：以下业务类型暂无对应的 Select 组件：PACKAGE(装箱单)、STOCK(库存)、BATCH(批次)、PROCARD(流转卡)、TRANSORDER(流转单)、TOOL(工装) -->
+      <el-form-item
+        v-else-if="formData.bizType === BarcodeBizTypeEnum.CLIENT"
+        label="客户"
+        prop="bizId"
+      >
+        <MdClientSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
+      </el-form-item>
+      <el-form-item
+        v-else-if="formData.bizType === BarcodeBizTypeEnum.TOOL"
+        label="工具"
+        prop="bizId"
+      >
+        <TmToolSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
+      </el-form-item>
+      <!-- TODO @芋艿：以下业务类型暂无对应的 Select 组件：PACKAGE(装箱单)、STOCK(库存)、BATCH(批次)、PROCARD(流转卡)、TRANSORDER(流转单) -->
       <el-form-item v-else-if="formData.bizType" label="暂未接入" prop="bizId">
         <el-input-number
           v-model="formData.bizId"
@@ -160,6 +202,8 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
+import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
+import TmToolSelect from '@/views/mes/tm/tool/components/TmToolSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 
 defineOptions({ name: 'BarcodeForm' })
@@ -190,8 +234,9 @@ const formRules = reactive({
 })
 const formRef = ref()
 
-const areaWarehouseId = ref<number>() // 库区选择器的临时数据：选择仓库后，传给库区选择器，加载对应仓库的库区列表
-const areaLocationId = ref<number>() // 库区选择器的临时数据：选择库位后，传给库区选择器，加载对应库位的库区列表
+const locationWarehouseId = ref<number>() // 库区选择器的临时数据：选择仓库后，传给库区选择器
+const areaWarehouseId = ref<number>() // 库位选择器的临时数据：选择仓库后，传给库位选择器
+const areaLocationId = ref<number>() // 库位选择器的临时数据：选择库区后，传给库位选择器
 
 /** 业务 Select 选中回调：自动填充 bizId、bizCode、bizName */
 const handleBizSelect = (item: any) => {
@@ -206,7 +251,14 @@ const handleBizSelect = (item: any) => {
   formData.value.bizName = item.name || item.nickname
 }
 
-/** 库区仓库选择回调：清空库位和库区 */
+/** 库区仓库选择回调：清空库区 */
+const handleLocationWarehouseChange = () => {
+  formData.value.bizId = undefined
+  formData.value.bizCode = undefined
+  formData.value.bizName = undefined
+}
+
+/** 库位仓库选择回调：清空库区和库位 */
 const handleAreaWarehouseChange = () => {
   areaLocationId.value = undefined
   formData.value.bizId = undefined
@@ -214,7 +266,7 @@ const handleAreaWarehouseChange = () => {
   formData.value.bizName = undefined
 }
 
-/** 库区库位选择回调：清空库区 */
+/** 库位库区选择回调：清空库位 */
 const handleAreaLocationChange = () => {
   formData.value.bizId = undefined
   formData.value.bizCode = undefined
@@ -228,7 +280,8 @@ watch(
     formData.value.bizId = undefined
     formData.value.bizCode = undefined
     formData.value.bizName = undefined
-    // 清空库区的临时数据
+    // 清空仓库层级的临时数据
+    locationWarehouseId.value = undefined
     areaWarehouseId.value = undefined
     areaLocationId.value = undefined
   }
