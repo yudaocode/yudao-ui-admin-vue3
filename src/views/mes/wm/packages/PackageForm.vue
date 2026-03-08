@@ -152,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
@@ -202,9 +202,9 @@ const formRules = reactive({
 const formRef = ref()
 
 /** 生成装箱单编号 */
-// DONE @芽艿：后续接入 code 体系；这里先忽略；（AI 未修复原因：标注为 @芽艿，需人工接入编码体系）
-const generateCode = () => {
-  formData.value.code = 'PKG' + generateRandomStr(10)
+const generateCode = async () => {
+  // TODO @AI：看看 是不是在 mes constants 里。搞个枚举；【后面点弄】
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode('PACKAGE_CODE')
 }
 
 /** 打开弹窗 */

@@ -51,7 +51,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- TODO @AI：必填；前后端都校验； -->
           <el-form-item label="产品物料" prop="itemId">
             <MdItemSelect v-model="formData.itemId" />
           </el-form-item>
@@ -165,6 +164,7 @@ const formData = ref({
 })
 const formRules = reactive({
   workOrderId: [{ required: true, message: '请选择生产工单', trigger: 'change' }],
+  itemId: [{ required: true, message: '请选择产品物料', trigger: 'change' }],
   quantity: [
     { required: true, message: '装箱数量不能为空', trigger: 'blur' },
     { type: 'number', min: 0.01, message: '装箱数量必须大于0', trigger: 'blur' }
