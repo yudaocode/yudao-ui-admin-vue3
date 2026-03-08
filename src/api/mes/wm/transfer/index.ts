@@ -56,6 +56,11 @@ export const WmTransferApi = {
     return await request.put({ url: '/mes/wm/transfer/confirm?id=' + id })
   },
 
+  // 执行上架
+  stockTransfer: async (id: number) => {
+    return await request.put({ url: '/mes/wm/transfer/stock?id=' + id })
+  },
+
   // 完成转移
   finishTransfer: async (id: number) => {
     return await request.put({ url: '/mes/wm/transfer/finish?id=' + id })

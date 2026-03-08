@@ -49,8 +49,6 @@ import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSe
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
 
-// TODO @AI：参考别的 detailform 补全下注释；
-
 defineOptions({ name: 'TransferDetailForm' })
 
 const props = defineProps<{
@@ -58,15 +56,16 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['success'])
-const { t } = useI18n()
-const message = useMessage()
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const currentLineId = ref<number>()
-const formRef = ref()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
+
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create / update
+const currentLineId = ref<number>() // 当前操作的行 ID
+const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,
   lineId: undefined as number | undefined,
@@ -88,12 +87,14 @@ const formRules = reactive({
   quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
 })
 
+/** 打开弹窗 */
 const open = async (type: string, lineId: number, itemId?: number, detailId?: number) => {
   dialogVisible.value = true
   dialogTitle.value = type === 'create' ? '添加调拨明细' : '编辑调拨明细'
   formType.value = type
   currentLineId.value = lineId
   resetForm()
+  // 修改时，设置数据
   if (detailId) {
     formLoading.value = true
     try {
@@ -101,14 +102,17 @@ const open = async (type: string, lineId: number, itemId?: number, detailId?: nu
     } finally {
       formLoading.value = false
     }
-  } else {
+  } else if (itemId) {
     formData.value.itemId = itemId
   }
 }
 defineExpose({ open })
 
+/** 提交表单 */
 const submitForm = async () => {
+  // 校验表单
   await formRef.value.validate()
+  // 提交请求
   formLoading.value = true
   try {
     const data = {
@@ -124,12 +128,14 @@ const submitForm = async () => {
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
+    // 发送操作成功的事件
     emit('success', currentLineId.value)
   } finally {
     formLoading.value = false
   }
 }
 
+/** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,

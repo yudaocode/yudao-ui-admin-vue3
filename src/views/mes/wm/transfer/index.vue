@@ -40,33 +40,6 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：前后端，都去掉 转移日期、单据状态的筛选项； -->
-      <el-form-item label="转移日期" prop="transferDate">
-        <el-date-picker
-          v-model="queryParams.transferDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="单据状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择单据状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_TRANSFER_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -182,7 +155,11 @@
             执行转移
           </el-button>
           <el-button
-            v-if="canCancel(scope.row.status)"
+            v-if="[
+              MesWmTransferStatusEnum.UNCONFIRMED,
+              MesWmTransferStatusEnum.UNSTOCK,
+              MesWmTransferStatusEnum.UNEXECUTE
+            ].includes(scope.row.status)"
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
@@ -212,39 +189,26 @@ import { WmTransferApi, WmTransferVO } from '@/api/mes/wm/transfer'
 import { MesWmTransferStatusEnum } from '@/views/mes/utils/constants'
 import TransferForm from './TransferForm.vue'
 
-// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/index.vue 的注释风格；
-
 defineOptions({ name: 'MesWmTransfer' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const list = ref<WmTransferVO[]>([])
-const total = ref(0)
-const exportLoading = ref(false)
+const loading = ref(true) // 列表的加载中
+const list = ref<WmTransferVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
   name: undefined,
-  type: undefined,
-  transferDate: undefined,
-  status: undefined
+  type: undefined
 })
-const queryFormRef = ref()
-const formRef = ref()
+const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
-// DONE @AI：保留为脚本方法，便于复用取消状态判断
-// TODO @AI：还是参考别的模块，保持代码风格的统一；
-const canCancel = (status: number) => {
-  return [
-    MesWmTransferStatusEnum.UNCONFIRMED,
-    MesWmTransferStatusEnum.UNSTOCK,
-    MesWmTransferStatusEnum.UNEXECUTE
-  ].includes(status)
-}
-
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
@@ -256,20 +220,24 @@ const getList = async () => {
   }
 }
 
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
+/** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
+/** 提交按钮操作 */
 const handleSubmit = async (id: number) => {
   try {
     await message.confirm('确认提交该转移单？')
@@ -279,6 +247,7 @@ const handleSubmit = async (id: number) => {
   } catch {}
 }
 
+/** 到货确认按钮操作 */
 const handleConfirm = async (id: number) => {
   try {
     await message.confirm('确认到货后，将进入待上架状态，是否继续？')
@@ -288,6 +257,7 @@ const handleConfirm = async (id: number) => {
   } catch {}
 }
 
+/** 执行转移按钮操作 */
 const handleFinish = async (id: number) => {
   try {
     await message.confirm('确认执行调拨？执行后将更新库存。')
@@ -297,6 +267,7 @@ const handleFinish = async (id: number) => {
   } catch {}
 }
 
+/** 取消按钮操作 */
 const handleCancel = async (id: number) => {
   try {
     await message.confirm('确认取消该转移单？取消后不可恢复。')
@@ -306,6 +277,7 @@ const handleCancel = async (id: number) => {
   } catch {}
 }
 
+/** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
@@ -315,6 +287,7 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
+/** 导出按钮操作 */
 const handleExport = async () => {
   try {
     await message.exportConfirm()

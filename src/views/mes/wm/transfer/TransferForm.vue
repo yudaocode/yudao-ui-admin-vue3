@@ -32,7 +32,6 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="转移单类型" prop="type">
-            <!-- DONE @AI：编辑时允许调整转移单类型；配送相关字段按类型和是否配送联动展示 -->
             <el-select
               v-model="formData.type"
               placeholder="请选择转移单类型"
@@ -48,7 +47,6 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <!-- DONE @AI：前端仅选择日期，后端继续按 LocalDateTime 接收 -->
         <el-col :span="8">
           <el-form-item label="转移日期" prop="transferDate">
             <el-date-picker
@@ -66,7 +64,6 @@
             <el-switch v-model="formData.deliveryFlag" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：目前看，是否确认，前端不传递！；所以 save 接口也处理掉 -->
         <el-col v-if="isOuterType" :span="8">
           <el-form-item label="是否确认" prop="confirmFlag">
             <el-switch :model-value="formData.confirmFlag" disabled />
@@ -130,22 +127,18 @@
       </el-row>
     </el-form>
 
-    <!-- TODO @AI：需要跟进下； -->
+    <!-- 非新建模式展示行项目信息（调拨物料） -->
     <template v-if="formData.id">
-      <el-alert
-        v-if="formType === 'stock'"
-        type="info"
-        :closable="false"
-        class="mb-12px"
-        title="当前阶段仅维护调拨明细；明细维护完成后，请回到列表页执行后续状态操作。"
-      />
-      <el-divider content-position="center">调拨物料</el-divider>
+      <el-divider content-position="center">物料信息</el-divider>
       <TransferLineList :transfer-id="formData.id" :form-type="formType" />
     </template>
 
     <template #footer>
       <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
+      </el-button>
+      <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
+        执行上架
       </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
@@ -158,17 +151,15 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { WmTransferApi, WmTransferVO } from '@/api/mes/wm/transfer'
 import TransferLineList from './TransferLineList.vue'
 
-// DONE @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/UserForm.vue 的注释风格；
-
 defineOptions({ name: 'TransferForm' })
 
 const emit = defineEmits(['success'])
-const message = useMessage()
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const formType = ref<string>('create')
-const formRef = ref()
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const formType = ref<string>('create') // 表单的类型：create / update / stock / detail
+const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
@@ -182,61 +173,37 @@ const formData = ref({
   shippingNumber: undefined,
   confirmFlag: false,
   transferDate: undefined,
-  status: undefined,
   remark: undefined
 })
-
-// DONE @AI：仅在外部转移且选择配送时校验收货信息
-// TODO @AI：这里不用填写！
-const validateRecipientFields = (_rule, _value, callback) => {
-  if (!showDeliveryFields.value) {
-    callback()
-    return
-  }
-  if (!formData.value.recipientName) {
-    callback(new Error('外部调拨时收货人不能为空'))
-    return
-  }
-  if (!formData.value.recipientTelephone) {
-    callback(new Error('外部调拨时联系电话不能为空'))
-    return
-  }
-  if (!formData.value.destinationAddress) {
-    callback(new Error('外部调拨时目的地不能为空'))
-    return
-  }
-  callback()
-}
 
 const formRules = reactive({
   code: [{ required: true, message: '转移单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '转移单名称不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '转移单类型不能为空', trigger: 'change' }],
   transferDate: [{ required: true, message: '转移日期不能为空', trigger: 'change' }],
-  recipientName: [{ validator: validateRecipientFields, trigger: 'blur' }],
-  recipientTelephone: [{ validator: validateRecipientFields, trigger: 'blur' }],
-  destinationAddress: [{ validator: validateRecipientFields, trigger: 'blur' }]
 })
 
-const isUpdate = computed(() => ['create', 'update'].includes(formType.value))
-const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value))
-const isOuterType = computed(() => !!formData.value.type && Number(formData.value.type) === 2)
-const showDeliveryFields = computed(() => isOuterType.value && !!formData.value.deliveryFlag)
+const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
+const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value)) // 是否只读
+const isOuterType = computed(() => !!formData.value.type && Number(formData.value.type) === 2) // 是否外部转移
+const showDeliveryFields = computed(() => isOuterType.value && !!formData.value.deliveryFlag) // 是否显示配送信息
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增转移单',
     update: '编辑转移单',
-    stock: '维护调拨明细',
+    stock: '执行上架',
     detail: '转移单详情'
   }
   return titles[formType.value] || formType.value
 })
 
-// DONE @AI：暂时保留前端随机编码生成
+/** 生成转移单编号 */
 const generateCode = () => {
   formData.value.code = 'TR' + generateRandomStr(10)
 }
 
+/** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,
@@ -251,16 +218,17 @@ const resetForm = () => {
     shippingNumber: undefined,
     confirmFlag: false,
     transferDate: undefined,
-    status: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()
 }
 
+/** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
+  // 修改/上架/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -272,12 +240,12 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open })
 
+/** 提交表单（create/update 模式） */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
     const { confirmFlag: _confirmFlag, status: _status, ...data } = formData.value
-    // TODO @AI：看看这里，能不能计划下；
     if (!isOuterType.value) {
       data.deliveryFlag = false
       data.recipientName = undefined
@@ -302,6 +270,21 @@ const submitForm = async () => {
       message.success('修改成功')
     }
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 执行上架 */
+const handleStock = async () => {
+  try {
+    await message.confirm('确认执行上架？')
+    formLoading.value = true
+    await WmTransferApi.stockTransfer(formData.value.id!)
+    message.success('上架成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }

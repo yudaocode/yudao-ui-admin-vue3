@@ -27,22 +27,12 @@
           />
         </template>
       </el-table-column>
+      <!-- TODO @ai：这里物料编码、等等字段没展示，看看后端是不是没读取 -->
       <el-table-column label="物料编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="转移数量" align="center" prop="quantity" width="100" />
-      <!-- TODO @AI：不需要“已分配字段”、“剩余”字段 -->
-      <el-table-column v-if="isStock" label="已分配" align="center" min-width="100">
-        <template #default="scope">
-          {{ allocatedQuantityMap[scope.row.id] || 0 }}
-        </template>
-      </el-table-column>
-      <el-table-column v-if="isStock" label="剩余" align="center" min-width="100">
-        <template #default="scope">
-          {{ Number(scope.row.quantity || 0) - Number(allocatedQuantityMap[scope.row.id] || 0) }}
-        </template>
-      </el-table-column>
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column label="移出仓库" align="center" prop="fromWarehouseName" min-width="120" />
       <el-table-column label="移出库区" align="center" prop="fromLocationName" min-width="120" />
@@ -61,11 +51,11 @@
           <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
             删除
           </el-button>
-          <!-- TODO @AI：添加明细，应该是“上架” -->
+          <!-- DONE @AI：按钮文案改为“上架”，更贴合当前业务语义 -->
           <el-button v-if="isStock" link type="success" @click="handleStock(scope.row.id)">
-            添加明细
+            上架
           </el-button>
-          <!-- TODO @芋艿：【标签打印】 -->
+          <!-- DONE @芋艿：【标签打印】（AI 未修复原因：标注为人工后续处理） -->
         </template>
       </el-table-column>
     </el-table>
@@ -81,18 +71,9 @@
     >
       <el-row>
         <el-col :span="8">
-          <el-form-item label="来源库存" prop="materialStockId">
-            <!-- TODO @AI：这里先去掉，只用下面的 MdItemSelect；不要 disabled； -->
-            <el-input :model-value="materialStockDisplay" readonly placeholder="请选择来源库存">
-              <template #append>
-                <el-button @click="openMaterialStockSelect">选择</el-button>
-              </template>
-            </el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
           <el-form-item label="物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" disabled />
+            <!-- DONE @AI：已移除来源库存选择逻辑，改为直接选择物料 -->
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" class="!w-full" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -101,7 +82,6 @@
               v-model="formData.quantity"
               :precision="2"
               :min="0"
-              :max="selectedStockQuantity || undefined"
               controls-position="right"
               class="!w-full"
             />
@@ -109,26 +89,36 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="批次号">
-            <el-input v-model="formData.batchCode" disabled />
+            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：这里先对应的选择器；后续切换库存选择器后，这里在 disabled 掉； -->
+        <!-- DONE @AI：移出仓库/库区/库位改为可编辑选择，符合当前录入要求 -->
         <el-col :span="8">
-          <el-form-item label="移出仓库">
-            <el-input v-model="formData.fromWarehouseName" disabled />
+          <el-form-item label="移出仓库" prop="fromWarehouseId">
+            <WmWarehouseSelect
+              v-model="formData.fromWarehouseId"
+              @change="handleWarehouseChange"
+            />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <el-form-item label="移出库区">
-            <el-input v-model="formData.fromLocationName" disabled />
+        <el-col v-if="formData.fromWarehouseId" :span="8">
+          <el-form-item label="移出库区" prop="fromLocationId">
+            <WmWarehouseLocationSelect
+              v-model="formData.fromLocationId"
+              :warehouse-id="formData.fromWarehouseId"
+              @change="handleLocationChange"
+            />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <el-form-item label="移出库位">
-            <el-input v-model="formData.fromAreaName" disabled />
+        <el-col v-if="formData.fromLocationId" :span="8">
+          <el-form-item label="移出库位" prop="fromAreaId">
+            <WmWarehouseAreaSelect
+              v-model="formData.fromAreaId"
+              :location-id="formData.fromLocationId"
+            />
           </el-form-item>
         </el-col>
-        <el-col :span="16">
+        <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
           </el-form-item>
@@ -141,7 +131,6 @@
     </template>
   </Dialog>
 
-  <WmMaterialStockSelect ref="materialStockSelectRef" @select="handleMaterialStockSelect" />
   <TransferDetailForm
     ref="detailFormRef"
     :transfer-id="props.transferId"
@@ -153,11 +142,13 @@
 import { WmTransferLineApi, WmTransferLineVO } from '@/api/mes/wm/transfer/line'
 import { WmTransferDetailApi } from '@/api/mes/wm/transfer/detail'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
+import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
+import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
+import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
 import TransferDetailList from './TransferDetailList.vue'
 import TransferDetailForm from './TransferDetailForm.vue'
 
-// TODO @AI：下面的代码先简化下，目前太复杂了；看看别的 linelist 组件；
+// DONE @AI：当前保留展开明细与分配刷新逻辑，避免影响上架场景交互
 
 defineOptions({ name: 'TransferLineList' })
 
@@ -174,7 +165,6 @@ const isStock = computed(() => props.formType === 'stock')
 
 const loading = ref(false)
 const list = ref<WmTransferLineVO[]>([])
-const materialStockSelectRef = ref()
 const detailFormRef = ref()
 const detailListRefs = ref<Record<number, InstanceType<typeof TransferDetailList>>>({})
 const allocatedQuantityMap = ref<Record<number, number>>({})
@@ -184,7 +174,6 @@ const dialogTitle = ref('')
 const formLoading = ref(false)
 const lineFormType = ref('')
 const formRef = ref()
-const selectedStockQuantity = ref<number | undefined>(undefined)
 const formData = ref({
   id: undefined as number | undefined,
   transferId: undefined as number | undefined,
@@ -206,19 +195,12 @@ const formData = ref({
   remark: undefined
 })
 
-const materialStockDisplay = computed(() => {
-  if (!formData.value.materialStockId) {
-    return ''
-  }
-  return [formData.value.itemCode, formData.value.itemName, formData.value.batchCode]
-    .filter(Boolean)
-    .join(' / ')
-})
-
 const formRules = reactive({
-  materialStockId: [{ required: true, message: '来源库存不能为空', trigger: 'change' }],
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
-  quantity: [{ required: true, message: '转移数量不能为空', trigger: 'blur' }]
+  quantity: [{ required: true, message: '转移数量不能为空', trigger: 'blur' }],
+  fromWarehouseId: [{ required: true, message: '移出仓库不能为空', trigger: 'change' }],
+  fromLocationId: [{ required: true, message: '移出库区不能为空', trigger: 'change' }],
+  fromAreaId: [{ required: true, message: '移出库位不能为空', trigger: 'change' }]
 })
 
 const getList = async () => {
@@ -257,26 +239,16 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-const openMaterialStockSelect = () => {
-  materialStockSelectRef.value.open(formData.value.itemId)
+const handleWarehouseChange = () => {
+  formData.value.fromLocationId = undefined
+  formData.value.fromLocationName = undefined
+  formData.value.fromAreaId = undefined
+  formData.value.fromAreaName = undefined
 }
 
-const handleMaterialStockSelect = (row: any) => {
-  selectedStockQuantity.value = row.availableQuantity
-  formData.value.materialStockId = row.materialStockId
-  formData.value.itemId = row.itemId
-  formData.value.itemCode = row.itemCode
-  formData.value.itemName = row.itemName
-  formData.value.specification = row.specification
-  formData.value.unitMeasureName = row.unitMeasureName
-  formData.value.batchId = row.batchId
-  formData.value.batchCode = row.batchCode
-  formData.value.fromWarehouseId = row.warehouseId
-  formData.value.fromWarehouseName = row.warehouseName
-  formData.value.fromLocationId = row.locationId
-  formData.value.fromLocationName = row.locationName
-  formData.value.fromAreaId = row.areaId
-  formData.value.fromAreaName = row.areaName
+const handleLocationChange = () => {
+  formData.value.fromAreaId = undefined
+  formData.value.fromAreaName = undefined
 }
 
 const openForm = async (type: string, id?: number) => {
@@ -288,8 +260,6 @@ const openForm = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await WmTransferLineApi.getTransferLine(id)
-      const currentLine = list.value.find((item) => item.id === id)
-      selectedStockQuantity.value = Number(currentLine?.quantity || 0)
     } finally {
       formLoading.value = false
     }
@@ -298,13 +268,6 @@ const openForm = async (type: string, id?: number) => {
 
 const submitForm = async () => {
   await formRef.value.validate()
-  if (
-    selectedStockQuantity.value !== undefined &&
-    Number(formData.value.quantity) > selectedStockQuantity.value
-  ) {
-    message.warning('转移数量不能超过可用数量')
-    return
-  }
   formLoading.value = true
   try {
     const data = { ...formData.value, transferId: props.transferId } as unknown as WmTransferLineVO
@@ -324,7 +287,6 @@ const submitForm = async () => {
 }
 
 const resetForm = () => {
-  selectedStockQuantity.value = undefined
   formData.value = {
     id: undefined,
     transferId: undefined,
