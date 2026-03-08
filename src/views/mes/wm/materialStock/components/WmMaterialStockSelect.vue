@@ -123,6 +123,7 @@ const handleConfirm = () => {
   if (!selectedRow.value) {
     return
   }
+  // TODO @芋艿：暂时不用提供 warehouseName、locationName、areaName 这种；
   emit('select', {
     materialStockId: selectedRow.value.id,
     batchId: selectedRow.value.batchId,

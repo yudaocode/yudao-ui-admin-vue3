@@ -209,6 +209,16 @@ export const MesWmItemReceiptStatusEnum = {
   CANCELED: MesOrderStatusConstants.CANCELLED
 }
 
+/** MES 转移单状态枚举 */
+export const MesWmTransferStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  UNCONFIRMED: MesOrderStatusConstants.CONFIRMED,
+  UNSTOCK: MesOrderStatusConstants.APPROVING,
+  UNEXECUTE: MesOrderStatusConstants.APPROVED,
+  FINISHED: MesOrderStatusConstants.FINISHED,
+  CANCELED: MesOrderStatusConstants.CANCELLED
+}
+
 /** MES 委外收货单状态枚举 */
 export const MesWmOutsourceReceiptStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
