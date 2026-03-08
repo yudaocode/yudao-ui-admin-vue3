@@ -7,9 +7,7 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
       <el-table-column label="装箱单编号" align="center" prop="code" min-width="160" fixed="left">
         <template #default="scope">
-          <el-link type="primary" @click="handleView(scope.row.id)">
-            {{ scope.row.code }}
-          </el-link>
+          <span>{{ scope.row.code }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -49,6 +47,12 @@
         </template>
       </el-table-column>
     </el-table>
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
   </div>
 
   <!-- 添加子箱弹窗：选择已有装箱单作为子箱 -->
@@ -97,29 +101,24 @@ const isEditable = computed(() => ['create', 'update'].includes(props.formType))
 // ==================== 子箱列表 ====================
 const loading = ref(false)
 const list = ref<WmPackageVO[]>([])
+const total = ref(0)
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  parentId: undefined as number | undefined
+})
 
 /** 查询子箱列表 */
 const getList = async () => {
   loading.value = true
   try {
-    // 通过分页查询，筛选 parentId 为当前装箱单的记录
-    // TODO @AI：这个列表的展示，就是使用分页的，所以正常搞就行了；
-    const data = await WmPackageApi.getPackagePage({
-      pageNo: 1,
-      pageSize: 100,
-      parentId: props.packageId
-    })
+    queryParams.parentId = props.packageId
+    const data = await WmPackageApi.getPackagePage(queryParams)
     list.value = data.list || []
+    total.value = data.total || 0
   } finally {
     loading.value = false
   }
-}
-
-/** 查看子箱详情（打开新弹窗） */
-const handleView = (id: number) => {
-  // 通过打开详情弹窗查看
-  // TODO @AI：不用支持查看详情；移除掉
-  window.open(`/mes/wm/packages?id=${id}`, '_blank')
 }
 
 /** 移除子箱：将子箱的 parentId 清空 */

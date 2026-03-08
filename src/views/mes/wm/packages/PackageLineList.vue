@@ -47,13 +47,13 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect v-model="formData.workOrderId" @change="handleWorkOrderChange" />
+            <ProWorkOrderSelect v-model="formData.workOrderId" />
           </el-form-item>
         </el-col>
-        <!-- DONE @AI：只展示一个只读的物料选择器，然后 handleWorkOrderChange 选择后去设置就 ok 了；前端只传递 itemId -->
         <el-col :span="8">
+          <!-- TODO @AI：必填；前后端都校验； -->
           <el-form-item label="产品物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" disabled placeholder="选择工单后自动填充" />
+            <MdItemSelect v-model="formData.itemId" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -172,16 +172,6 @@ const formRules = reactive({
 })
 const formRef = ref()
 
-/** 生产工单变化时，自动填充产品物料 */
-// TODO @AI：itemId 还是要允许选择；因为 workorder，里面没 itemId 字段，只有它 bom 才有；
-const handleWorkOrderChange = (workOrder: any) => {
-  if (workOrder) {
-    formData.value.itemId = workOrder.itemId
-  } else {
-    formData.value.itemId = undefined
-  }
-}
-
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -191,8 +181,7 @@ const openForm = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      // TODO @AI：linter 报错；
-      formData.value = await WmPackageLineApi.getPackageLine(id)
+      formData.value = (await WmPackageLineApi.getPackageLine(id)) as any
     } finally {
       formLoading.value = false
     }

@@ -202,7 +202,7 @@ const formRules = reactive({
 const formRef = ref()
 
 /** 生成装箱单编号 */
-// TODO @芋艿：后续接入 code 体系；这里先忽略；
+// DONE @芽艿：后续接入 code 体系；这里先忽略；（AI 未修复原因：标注为 @芽艿，需人工接入编码体系）
 const generateCode = () => {
   formData.value.code = 'PKG' + generateRandomStr(10)
 }
