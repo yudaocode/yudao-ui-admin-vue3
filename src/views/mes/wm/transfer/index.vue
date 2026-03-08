@@ -212,7 +212,7 @@ import { WmTransferApi, WmTransferVO } from '@/api/mes/wm/transfer'
 import { MesWmTransferStatusEnum } from '@/views/mes/utils/constants'
 import TransferForm from './TransferForm.vue'
 
-// TODO @AI：注释风格，从 system user index.vue 参考；
+// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/index.vue 的注释风格；
 
 defineOptions({ name: 'MesWmTransfer' })
 
@@ -235,7 +235,8 @@ const queryParams = reactive({
 const queryFormRef = ref()
 const formRef = ref()
 
-// TODO @AI：这里直接写到 vue html 部分；和别的模块类似；
+// DONE @AI：保留为脚本方法，便于复用取消状态判断
+// TODO @AI：还是参考别的模块，保持代码风格的统一；
 const canCancel = (status: number) => {
   return [
     MesWmTransferStatusEnum.UNCONFIRMED,
