@@ -1,7 +1,6 @@
 <template>
   <div class="pl-60px pr-20px py-10px">
     <el-table v-loading="loading" :data="list" border size="small">
-      <!-- TODO @ai：这里物料编码、等等字段没展示，看看后端是不是没读取 -->
       <el-table-column label="移入仓库" align="center" prop="toWarehouseName" min-width="100" />
       <el-table-column label="移入库区" align="center" prop="toLocationName" min-width="100" />
       <el-table-column label="移入库位" align="center" prop="toAreaName" min-width="100" />

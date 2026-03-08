@@ -213,8 +213,8 @@ export const MesWmItemReceiptStatusEnum = {
 export const MesWmTransferStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
   UNCONFIRMED: MesOrderStatusConstants.CONFIRMED,
-  UNSTOCK: MesOrderStatusConstants.APPROVING,
-  UNEXECUTE: MesOrderStatusConstants.APPROVED,
+  APPROVING: MesOrderStatusConstants.APPROVING,
+  APPROVED: MesOrderStatusConstants.APPROVED,
   FINISHED: MesOrderStatusConstants.FINISHED,
   CANCELED: MesOrderStatusConstants.CANCELLED
 }

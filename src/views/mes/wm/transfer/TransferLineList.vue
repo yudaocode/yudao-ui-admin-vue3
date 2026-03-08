@@ -27,7 +27,6 @@
           />
         </template>
       </el-table-column>
-      <!-- TODO @ai：这里物料编码、等等字段没展示，看看后端是不是没读取 -->
       <el-table-column label="物料编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />

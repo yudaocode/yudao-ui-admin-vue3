@@ -137,7 +137,7 @@
             到货确认
           </el-button>
           <el-button
-            v-if="scope.row.status === MesWmTransferStatusEnum.UNSTOCK"
+            v-if="scope.row.status === MesWmTransferStatusEnum.APPROVING"
             link
             type="success"
             @click="openForm('stock', scope.row.id)"
@@ -146,7 +146,7 @@
             执行上架
           </el-button>
           <el-button
-            v-if="scope.row.status === MesWmTransferStatusEnum.UNEXECUTE"
+            v-if="scope.row.status === MesWmTransferStatusEnum.APPROVED"
             link
             type="primary"
             @click="handleFinish(scope.row.id)"
@@ -157,8 +157,8 @@
           <el-button
             v-if="[
               MesWmTransferStatusEnum.UNCONFIRMED,
-              MesWmTransferStatusEnum.UNSTOCK,
-              MesWmTransferStatusEnum.UNEXECUTE
+              MesWmTransferStatusEnum.APPROVING,
+              MesWmTransferStatusEnum.APPROVED
             ].includes(scope.row.status)"
             link
             type="danger"
