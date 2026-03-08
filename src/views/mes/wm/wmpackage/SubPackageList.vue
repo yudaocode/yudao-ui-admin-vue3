@@ -1,0 +1,171 @@
+<!-- MES 子箱列表子组件 -->
+<template>
+  <div>
+    <el-button
+      v-if="isEditable"
+      type="primary"
+      plain
+      @click="openForm('create')"
+      class="mb-10px"
+    >
+      <Icon icon="ep:plus" class="mr-5px" /> 添加子箱
+    </el-button>
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
+      <el-table-column label="装箱单编号" align="center" prop="code" min-width="160">
+        <template #default="scope">
+          <el-link type="primary" @click="handleView(scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="装箱日期"
+        align="center"
+        prop="packageDate"
+        :formatter="dateFormatter2"
+        width="120"
+      />
+      <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
+      <el-table-column label="单据状态" align="center" prop="status" min-width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_WM_PACKAGE_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column v-if="isEditable" label="操作" align="center" width="120">
+        <template #default="scope">
+          <el-button
+            link
+            type="danger"
+            @click="handleRemoveChild(scope.row.id)"
+            v-if="scope.row.status === MesWmPackageStatusEnum.PREPARE"
+          >
+            移除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+
+  <!-- 添加子箱弹窗：选择已有装箱单作为子箱 -->
+  <Dialog title="添加子箱" v-model="dialogVisible" width="500px">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="110px"
+      v-loading="formLoading"
+    >
+      <el-form-item label="选择装箱单" prop="childId">
+        <WmPackageSelect
+          v-model="formData.childId"
+          :exclude-id="props.packageId"
+          placeholder="请选择要作为子箱的装箱单"
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
+</template>
+
+<script setup lang="ts">
+import { dateFormatter2 } from '@/utils/formatTime'
+import { DICT_TYPE } from '@/utils/dict'
+import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/wmpackage'
+import { MesWmPackageStatusEnum } from '@/views/mes/utils/constants'
+import WmPackageSelect from './components/WmPackageSelect.vue'
+
+defineOptions({ name: 'SubPackageList' })
+
+const props = defineProps<{
+  packageId: number
+  formType: string
+}>()
+
+const { t } = useI18n()
+const message = useMessage()
+
+const isEditable = computed(() => ['create', 'update'].includes(props.formType))
+
+// ==================== 子箱列表 ====================
+const loading = ref(false)
+const list = ref<WmPackageRespVO[]>([])
+
+/** 查询子箱列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    // 获取当前装箱单详情，取其 children
+    const data = await WmPackageApi.getPackage(props.packageId)
+    list.value = data.children || []
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 查看子箱详情（打开新弹窗） */
+const handleView = (id: number) => {
+  // 通过打开详情弹窗查看
+  window.open(`/mes/wm/wmpackage?id=${id}`, '_blank')
+}
+
+/** 移除子箱：将子箱的 parentId 清空 */
+const handleRemoveChild = async (childId: number) => {
+  try {
+    // TODO @AI：增加一个 delete subpackage 的接口，直接传递 childId 就行了；
+    await message.confirm('确认将该装箱单从子箱列表中移除？')
+    // 获取子箱信息，将其 parentId 置为 0
+    const childData = await WmPackageApi.getPackage(childId)
+    await WmPackageApi.updatePackage({
+      ...childData,
+      parentId: 0
+    })
+    message.success('移除成功')
+    await getList()
+  } catch {}
+}
+
+// ==================== 添加子箱表单 ====================
+const dialogVisible = ref(false)
+const formLoading = ref(false)
+const formData = ref({
+  childId: undefined as number | undefined
+})
+const formRules = reactive({
+  childId: [{ required: true, message: '请选择装箱单', trigger: 'change' }]
+})
+const formRef = ref()
+
+/** 打开添加子箱弹窗 */
+const openForm = async (_type: string) => {
+  dialogVisible.value = true
+  formData.value.childId = undefined
+  formRef.value?.resetFields()
+}
+
+/** 提交：将选中的装箱单设为当前装箱单的子箱 */
+const submitForm = async () => {
+  await formRef.value.validate()
+  formLoading.value = true
+  try {
+    const childData = await WmPackageApi.getPackage(formData.value.childId!)
+    // TODO @AI：单独有个 add subpackage 的接口；
+    await WmPackageApi.updatePackage({
+      ...childData,
+      parentId: props.packageId
+    })
+    message.success(t('common.createSuccess'))
+    dialogVisible.value = false
+    await getList()
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 初始化 */
+onMounted(async () => {
+  await getList()
+})
+</script>

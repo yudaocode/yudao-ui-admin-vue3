@@ -305,6 +305,12 @@ export const MesWmSalesNoticeStatusEnum = {
   FINISHED: MesOrderStatusConstants.FINISHED
 }
 
+/** MES 装箱单状态枚举 */
+export const MesWmPackageStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  FINISHED: MesOrderStatusConstants.FINISHED
+}
+
 /** MES 杂项出库单状态枚举 */
 export const MesWmMiscIssueStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
