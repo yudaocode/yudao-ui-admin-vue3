@@ -1,6 +1,5 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="1100px">
-    <!-- TODO @AI：每行 3 个； -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -32,6 +31,7 @@
             />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：不需要父箱；这里要不把“检查员”，挪上来； -->
         <el-col :span="8">
           <el-form-item label="父箱" prop="parentId">
             <WmPackageSelect
@@ -44,8 +44,8 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="销售订单编号" prop="soCode">
-            <el-input v-model="formData.soCode" placeholder="请输入销售订单编号" />
+          <el-form-item label="销售订单编号" prop="salesOrderCode">
+            <el-input v-model="formData.salesOrderCode" placeholder="请输入销售订单编号" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -53,8 +53,6 @@
             <el-input v-model="formData.invoiceCode" placeholder="请输入发票编号" />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="8">
           <el-form-item label="客户" prop="clientId">
             <MdClientSelect v-model="formData.clientId" :disabled="isDetail" />
@@ -62,8 +60,12 @@
         </el-col>
       </el-row>
       <el-row>
-        <!-- TODO @AI：长度、宽度、高度、尺寸单位；在一行；可能这里一行 4 个了 -->
         <el-col :span="8">
+          <el-form-item label="尺寸单位" prop="sizeUnitId">
+            <MdUnitMeasureSelect v-model="formData.sizeUnitId" :disabled="isDetail" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="5">
           <el-form-item label="箱长度" prop="length">
             <el-input-number
               v-model="formData.length"
@@ -74,7 +76,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="5">
           <el-form-item label="箱宽度" prop="width">
             <el-input-number
               v-model="formData.width"
@@ -85,7 +87,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="5">
           <el-form-item label="箱高度" prop="height">
             <el-input-number
               v-model="formData.height"
@@ -99,14 +101,11 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="尺寸单位" prop="sizeUnitId">
-            <MdUnitMeasureSelect v-model="formData.sizeUnitId" :disabled="isDetail" />
+          <el-form-item label="重量单位" prop="weightUnitId">
+            <MdUnitMeasureSelect v-model="formData.weightUnitId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
-        <!-- TODO @AI：净重、毛重、重量单位 一行； -->
-        <el-col :span="8">
+        <el-col :span="5">
           <el-form-item label="净重" prop="netWeight">
             <el-input-number
               v-model="formData.netWeight"
@@ -117,7 +116,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="5">
           <el-form-item label="毛重" prop="grossWeight">
             <el-input-number
               v-model="formData.grossWeight"
@@ -126,11 +125,6 @@
               controls-position="right"
               class="!w-1/1"
             />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="重量单位" prop="weightUnitId">
-            <MdUnitMeasureSelect v-model="formData.weightUnitId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -152,10 +146,10 @@
     <!-- 编辑/详情时展示子表信息 -->
     <template v-if="formType !== 'create' && formData.id">
       <el-tabs v-model="activeTab" class="mt-15px">
-        <el-tab-pane label="子箱列表" name="subPackage">
+        <el-tab-pane label="子箱" name="subPackage">
           <SubPackageList :package-id="formData.id" :form-type="formType" />
         </el-tab-pane>
-        <el-tab-pane label="装箱明细" name="packageLine">
+        <el-tab-pane label="装箱清单" name="packageLine">
           <PackageLineList :package-id="formData.id" :form-type="formType" />
         </el-tab-pane>
       </el-tabs>
@@ -171,13 +165,15 @@
 
 <script setup lang="ts">
 import { generateRandomStr } from '@/utils'
-import { WmPackageApi, WmPackageSaveReqVO } from '@/api/mes/wm/wmpackage'
+import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/packages'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import WmPackageSelect from './components/WmPackageSelect.vue'
 import SubPackageList from './SubPackageList.vue'
 import PackageLineList from './PackageLineList.vue'
+
+// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/UserForm.vue 注释；
 
 defineOptions({ name: 'PackageForm' })
 
@@ -202,7 +198,7 @@ const formData = ref({
   code: undefined as string | undefined,
   parentId: undefined as number | undefined,
   packageDate: undefined as number | undefined,
-  soCode: undefined as string | undefined,
+  salesOrderCode: undefined as string | undefined,
   invoiceCode: undefined as string | undefined,
   clientId: undefined as number | undefined,
   length: undefined as number | undefined,
@@ -249,7 +245,7 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = formData.value as unknown as WmPackageSaveReqVO
+    const data = formData.value as unknown as WmPackageRespVO
     if (formType.value === 'create') {
       const res = await WmPackageApi.createPackage(data)
       message.success(t('common.createSuccess'))
@@ -260,8 +256,8 @@ const submitForm = async () => {
       await WmPackageApi.updatePackage(data)
       message.success(t('common.updateSuccess'))
       dialogVisible.value = false
-      emit('success')
     }
+    emit('success')
   } finally {
     formLoading.value = false
   }
@@ -274,7 +270,7 @@ const resetForm = () => {
     code: undefined,
     parentId: undefined,
     packageDate: undefined,
-    soCode: undefined,
+    salesOrderCode: undefined,
     invoiceCode: undefined,
     clientId: undefined,
     length: undefined,

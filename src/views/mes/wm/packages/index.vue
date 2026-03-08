@@ -16,9 +16,9 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="销售订单编号" prop="soCode">
+      <el-form-item label="销售订单编号" prop="salesOrderCode">
         <el-input
-          v-model="queryParams.soCode"
+          v-model="queryParams.salesOrderCode"
           placeholder="请输入销售订单编号"
           clearable
           @keyup.enter="handleQuery"
@@ -28,33 +28,8 @@
       <el-form-item label="客户" prop="clientId">
         <MdClientSelect v-model="queryParams.clientId" class="!w-240px" />
       </el-form-item>
-      <!-- TODO @AI：增加检测员的 select； -->
-      <!-- TODO @AI：packageDate、status 去掉这样的检测条件，前后端都是 -->
-      <el-form-item label="装箱日期" prop="packageDate">
-        <el-date-picker
-          v-model="queryParams.packageDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="单据状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择单据状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_PACKAGE_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+      <el-form-item label="检查员" prop="inspectorUserId">
+        <UserSelect v-model="queryParams.inspectorUserId" class="!w-240px" />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -66,15 +41,6 @@
           v-hasPermi="['mes:wm-package:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['mes:wm-package:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -90,6 +56,7 @@
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       default-expand-all
     >
+      <!-- TODO @AI：编号需要 fixed，可以一直被看到，这个列表太长了 -->
       <el-table-column label="装箱单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
           <el-link type="primary" @click="openForm('detail', scope.row.id)">
@@ -104,7 +71,7 @@
         :formatter="dateFormatter2"
         width="120"
       />
-      <el-table-column label="销售订单编号" align="center" prop="soCode" min-width="140" />
+      <el-table-column label="销售订单编号" align="center" prop="salesOrderCode" min-width="140" />
       <el-table-column label="发票编号" align="center" prop="invoiceCode" min-width="120" />
       <el-table-column label="客户编码" align="center" prop="clientCode" min-width="100" />
       <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
@@ -166,14 +133,17 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import download from '@/utils/download'
-import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/wmpackage'
+import { DICT_TYPE } from '@/utils/dict'
+import { handleTree } from '@/utils/tree'
+import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/packages'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import PackageForm from './PackageForm.vue'
 import { MesWmPackageStatusEnum } from '@/views/mes/utils/constants'
 
-defineOptions({ name: 'MesWmPackage' })
+// TODO @AI：注释风格，参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/index.vue
+
+defineOptions({ name: 'MesWmPackages' })
 
 const message = useMessage()
 const { t } = useI18n()
@@ -181,15 +151,13 @@ const { t } = useI18n()
 const loading = ref(true)
 const list = ref<WmPackageRespVO[]>([])
 const total = ref(0)
-const exportLoading = ref(false)
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
-  soCode: undefined,
+  salesOrderCode: undefined,
   clientId: undefined,
-  packageDate: undefined,
-  status: undefined
+  inspectorUserId: undefined
 })
 const queryFormRef = ref()
 
@@ -197,9 +165,8 @@ const queryFormRef = ref()
 const getList = async () => {
   loading.value = true
   try {
-    // TODO @AI：获取分页后，根据 list 转换成 handleTree 就好了；
-    const data = await WmPackageApi.getPackageTree(queryParams)
-    list.value = data.list
+    const data = await WmPackageApi.getPackagePage(queryParams)
+    list.value = handleTree(data.list)
     total.value = data.total
   } finally {
     loading.value = false
@@ -242,20 +209,6 @@ const handleDelete = async (id: number) => {
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
-}
-
-/** 导出 */
-// TODO @AI：不需要导出功能，前后端都去掉；
-const handleExport = async () => {
-  try {
-    await message.exportConfirm()
-    exportLoading.value = true
-    const data = await WmPackageApi.exportPackage(queryParams)
-    download.excel(data, '装箱单.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 初始化 */

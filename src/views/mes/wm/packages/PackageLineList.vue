@@ -1,13 +1,7 @@
 <!-- MES 装箱明细列表子组件 -->
 <template>
   <div>
-    <el-button
-      v-if="isEditable"
-      type="primary"
-      plain
-      @click="openForm('create')"
-      class="mb-10px"
-    >
+    <el-button v-if="isEditable" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加明细
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
@@ -17,6 +11,7 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="装箱数量" align="center" prop="quantity" width="100" />
       <el-table-column label="生产工单编号" align="center" prop="workOrderCode" min-width="140" />
+      <!-- TODO @芋艿：批次号？到底怎么设置好？ -->
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column
         label="有效期"
@@ -25,6 +20,7 @@
         :formatter="dateFormatter2"
         width="120"
       />
+      <!-- TODO @AI：去掉 warehouseName、locationName、areaName 字段；前端、后端都是；表单也是，没用； -->
       <el-table-column label="仓库" align="center" prop="warehouseName" min-width="100" />
       <el-table-column label="库区" align="center" prop="locationName" min-width="100" />
       <el-table-column label="库位" align="center" prop="areaName" min-width="100" />
@@ -55,10 +51,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect
-              v-model="formData.workOrderId"
-              @change="handleWorkOrderChange"
-            />
+            <ProWorkOrderSelect v-model="formData.workOrderId" @change="handleWorkOrderChange" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -78,6 +71,7 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <!-- TODO @AI：只展示一个只读的物料选择器，然后 handleWorkOrderChange 选择后去设置就 ok 了；前端只传递 itemId -->
       <el-row>
         <el-col :span="8">
           <el-form-item label="产品物料编码">
@@ -110,10 +104,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="仓库" prop="warehouseId">
-            <WmWarehouseSelect
-              v-model="formData.warehouseId"
-              @change="handleWarehouseChange"
-            />
+            <WmWarehouseSelect v-model="formData.warehouseId" @change="handleWarehouseChange" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -126,13 +117,11 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="库位" prop="areaId">
-            <WmWarehouseAreaSelect
-              v-model="formData.areaId"
-              :warehouse-id="formData.warehouseId"
-            />
+            <WmWarehouseAreaSelect v-model="formData.areaId" :warehouse-id="formData.warehouseId" />
           </el-form-item>
         </el-col>
       </el-row>
+      <!-- TODO @芋艿：批次号？到底怎么设置好？ -->
       <el-row>
         <el-col :span="8">
           <el-form-item label="有效期" prop="expireDate">
@@ -167,7 +156,7 @@ import {
   WmPackageLineApi,
   WmPackageLineRespVO,
   WmPackageLineSaveReqVO
-} from '@/api/mes/wm/wmpackage'
+} from '@/api/mes/wm/packages/line'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'

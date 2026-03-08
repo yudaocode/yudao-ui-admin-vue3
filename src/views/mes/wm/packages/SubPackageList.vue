@@ -1,16 +1,11 @@
 <!-- MES 子箱列表子组件 -->
 <template>
   <div>
-    <el-button
-      v-if="isEditable"
-      type="primary"
-      plain
-      @click="openForm('create')"
-      class="mb-10px"
-    >
+    <el-button v-if="isEditable" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加子箱
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
+      <!-- TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/packages/index.vue 列表，只是没树、筛选； -->
       <el-table-column label="装箱单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
           <el-link type="primary" @click="handleView(scope.row.id)">
@@ -73,7 +68,7 @@
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
-import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/wmpackage'
+import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/packages'
 import { MesWmPackageStatusEnum } from '@/views/mes/utils/constants'
 import WmPackageSelect from './components/WmPackageSelect.vue'
 
@@ -97,9 +92,13 @@ const list = ref<WmPackageRespVO[]>([])
 const getList = async () => {
   loading.value = true
   try {
-    // 获取当前装箱单详情，取其 children
-    const data = await WmPackageApi.getPackage(props.packageId)
-    list.value = data.children || []
+    // 通过分页查询，筛选 parentId 为当前装箱单的记录
+    const data = await WmPackageApi.getPackagePage({
+      pageNo: 1,
+      pageSize: 100,
+      parentId: props.packageId
+    })
+    list.value = data.list || []
   } finally {
     loading.value = false
   }
@@ -108,20 +107,15 @@ const getList = async () => {
 /** 查看子箱详情（打开新弹窗） */
 const handleView = (id: number) => {
   // 通过打开详情弹窗查看
-  window.open(`/mes/wm/wmpackage?id=${id}`, '_blank')
+  window.open(`/mes/wm/packages?id=${id}`, '_blank')
 }
 
 /** 移除子箱：将子箱的 parentId 清空 */
 const handleRemoveChild = async (childId: number) => {
   try {
-    // TODO @AI：增加一个 delete subpackage 的接口，直接传递 childId 就行了；
+    // DONE @AI：增加一个 delete subpackage 的接口，直接传递 childId 就行了；
     await message.confirm('确认将该装箱单从子箱列表中移除？')
-    // 获取子箱信息，将其 parentId 置为 0
-    const childData = await WmPackageApi.getPackage(childId)
-    await WmPackageApi.updatePackage({
-      ...childData,
-      parentId: 0
-    })
+    await WmPackageApi.removeSubPackage(childId)
     message.success('移除成功')
     await getList()
   } catch {}
@@ -150,12 +144,8 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const childData = await WmPackageApi.getPackage(formData.value.childId!)
-    // TODO @AI：单独有个 add subpackage 的接口；
-    await WmPackageApi.updatePackage({
-      ...childData,
-      parentId: props.packageId
-    })
+    // DONE @AI：单独有个 add subpackage 的接口；
+    await WmPackageApi.addSubPackage(props.packageId, formData.value.childId!)
     message.success(t('common.createSuccess'))
     dialogVisible.value = false
     await getList()

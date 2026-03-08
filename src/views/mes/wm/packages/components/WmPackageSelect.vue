@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/wmpackage'
+import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/packages'
 
 defineOptions({ name: 'WmPackageSelect' })
 
@@ -61,7 +61,9 @@ const selectValue = computed({
 
 /** 获取排除后的列表 */
 const getAvailableList = () => {
-  if (!props.excludeId) return allList.value
+  if (!props.excludeId) {
+    return allList.value
+  }
   return allList.value.filter((item) => item.id !== props.excludeId)
 }
 
@@ -86,28 +88,10 @@ const handleChange = (val: number | undefined) => {
   emit('change', item)
 }
 
-/** 加载装箱单列表（扁平化） */
+/** 加载装箱单列表（无父箱 + 已完成状态） */
 const loadList = async () => {
-  // TODO @AI：不用 tree 树形结构；单独一个接口：
-  // 1. 没有父
-  // 2. 状态是完成的；
-  const tree = await WmPackageApi.getPackageTree()
-  // 将树形结构扁平化
-  const flatList: WmPackageRespVO[] = []
-  const flatten = (items: WmPackageRespVO[]) => {
-    for (const item of items) {
-      flatList.push(item)
-      if (item.children?.length) {
-        flatten(item.children)
-      }
-    }
-  }
-  if (Array.isArray(tree)) {
-    flatten(tree)
-  } else if (tree?.list) {
-    flatten(tree.list)
-  }
-  allList.value = flatList
+  const data = await WmPackageApi.getPackageSimpleList()
+  allList.value = Array.isArray(data) ? data : []
   filteredList.value = getAvailableList()
 }
 
