@@ -31,14 +31,9 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：不需要父箱；这里要不把“检查员”，挪上来； -->
         <el-col :span="8">
-          <el-form-item label="父箱" prop="parentId">
-            <WmPackageSelect
-              v-model="formData.parentId"
-              :disabled="isDetail"
-              :exclude-id="formData.id"
-            />
+          <el-form-item label="检查员" prop="inspectorUserId">
+            <UserSelect v-model="formData.inspectorUserId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -129,13 +124,6 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="8">
-          <el-form-item label="检查员" prop="inspectorUserId">
-            <UserSelect v-model="formData.inspectorUserId" :disabled="isDetail" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
@@ -165,24 +153,21 @@
 
 <script setup lang="ts">
 import { generateRandomStr } from '@/utils'
-import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/packages'
+import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import WmPackageSelect from './components/WmPackageSelect.vue'
 import SubPackageList from './SubPackageList.vue'
 import PackageLineList from './PackageLineList.vue'
 
-// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/UserForm.vue 注释；
-
 defineOptions({ name: 'PackageForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const formType = ref('')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const isDetail = computed(() => formType.value === 'detail')
 const dialogTitle = computed(() => {
   const titles: Record<string, string> = {
@@ -196,7 +181,6 @@ const activeTab = ref('subPackage')
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined as string | undefined,
-  parentId: undefined as number | undefined,
   packageDate: undefined as number | undefined,
   salesOrderCode: undefined as string | undefined,
   invoiceCode: undefined as string | undefined,
@@ -218,6 +202,7 @@ const formRules = reactive({
 const formRef = ref()
 
 /** 生成装箱单编号 */
+// TODO @芋艿：后续接入 code 体系；这里先忽略；
 const generateCode = () => {
   formData.value.code = 'PKG' + generateRandomStr(10)
 }
@@ -245,7 +230,7 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = formData.value as unknown as WmPackageRespVO
+    const data = formData.value as unknown as WmPackageVO
     if (formType.value === 'create') {
       const res = await WmPackageApi.createPackage(data)
       message.success(t('common.createSuccess'))
@@ -268,7 +253,6 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     code: undefined,
-    parentId: undefined,
     packageDate: undefined,
     salesOrderCode: undefined,
     invoiceCode: undefined,

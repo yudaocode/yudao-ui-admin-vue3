@@ -1,8 +1,7 @@
 import request from '@/config/axios'
 
-// 装箱单响应 VO
-// TODO @AI：VO 改成 WmPackageVO
-export interface WmPackageRespVO {
+// 装箱单 VO
+export interface WmPackageVO {
     id: number
     code: string
     parentId?: number
@@ -32,12 +31,12 @@ export interface WmPackageRespVO {
 // 装箱单 API
 export const WmPackageApi = {
     // 创建装箱单
-    createPackage: async (data: WmPackageRespVO) => {
+    createPackage: async (data: WmPackageVO) => {
         return await request.post({ url: '/mes/wm/package/create', data })
     },
 
     // 修改装箱单
-    updatePackage: async (data: WmPackageRespVO) => {
+    updatePackage: async (data: WmPackageVO) => {
         return await request.put({ url: '/mes/wm/package/update', data })
     },
 
@@ -48,7 +47,7 @@ export const WmPackageApi = {
 
     // 获取装箱单详情
     getPackage: async (id: number) => {
-        return await request.get<WmPackageRespVO>({ url: '/mes/wm/package/get?id=' + id })
+        return await request.get<WmPackageVO>({ url: '/mes/wm/package/get?id=' + id })
     },
 
     // 分页查询装箱单
@@ -62,20 +61,17 @@ export const WmPackageApi = {
     },
 
     // 添加子箱
-    // TODO @AI：addChildPackage，且接口地址改成 /mes/wm/package/add-child-package
-    addSubPackage: async (parentId: number, childId: number) => {
-        return await request.put({ url: '/mes/wm/package/add-sub-package', params: { parentId, childId } })
+    addChildPackage: async (parentId: number, childId: number) => {
+        return await request.put({ url: '/mes/wm/package/add-child-package', params: { parentId, childId } })
     },
 
     // 移除子箱
-    // TODO @AI：removeChildPackage，且接口地址改成 /mes/wm/package/remove-child-package
-    removeSubPackage: async (childId: number) => {
-        return await request.put({ url: '/mes/wm/package/remove-sub-package?childId=' + childId })
+    removeChildPackage: async (childId: number) => {
+        return await request.put({ url: '/mes/wm/package/remove-child-package?childId=' + childId })
     },
 
-    // 获取装箱单精简列表（无父箱 + 已完成状态，用于选择父箱）
-    // TODO @AI：改成 getChildablePackageSimpleList，且接口地址改成 /mes/wm/package/childable-simple-list；注释改成 可添加为子箱的装箱单精简列表（无父箱 + 已完成状态，用于选择父箱）
-    getPackageSimpleList: async () => {
-        return await request.get<WmPackageRespVO[]>({ url: '/mes/wm/package/simple-list' })
+    // 可添加为子箱的装箱单精简列表（无父箱 + 已完成状态，用于选择父箱）
+    getChildablePackageSimpleList: async () => {
+        return await request.get<WmPackageVO[]>({ url: '/mes/wm/package/childable-simple-list' })
     }
 }

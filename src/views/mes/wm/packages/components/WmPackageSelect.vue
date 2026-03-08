@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/packages'
+import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
 
 defineOptions({ name: 'WmPackageSelect' })
 
@@ -48,11 +48,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:modelValue': [value: number | undefined]
-  change: [item: WmPackageRespVO | undefined]
-}>()
+change: [item: WmPackageVO | undefined]
+}>() 
 
-const allList = ref<WmPackageRespVO[]>([])
-const filteredList = ref<WmPackageRespVO[]>([])
+const allList = ref<WmPackageVO[]>([])
+const filteredList = ref<WmPackageVO[]>([])
 
 const selectValue = computed({
   get: () => props.modelValue,
@@ -90,7 +90,7 @@ const handleChange = (val: number | undefined) => {
 
 /** 加载装箱单列表（无父箱 + 已完成状态） */
 const loadList = async () => {
-  const data = await WmPackageApi.getPackageSimpleList()
+  const data = await WmPackageApi.getChildablePackageSimpleList()
   allList.value = Array.isArray(data) ? data : []
   filteredList.value = getAvailableList()
 }

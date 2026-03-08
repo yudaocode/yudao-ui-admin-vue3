@@ -5,8 +5,7 @@
       <Icon icon="ep:plus" class="mr-5px" /> 添加子箱
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
-      <!-- TODO @AI：参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/packages/index.vue 列表，只是没树、筛选； -->
-      <el-table-column label="装箱单编号" align="center" prop="code" min-width="160">
+      <el-table-column label="装箱单编号" align="center" prop="code" min-width="160" fixed="left">
         <template #default="scope">
           <el-link type="primary" @click="handleView(scope.row.id)">
             {{ scope.row.code }}
@@ -20,7 +19,18 @@
         :formatter="dateFormatter2"
         width="120"
       />
+      <el-table-column label="销售订单编号" align="center" prop="salesOrderCode" min-width="140" />
+      <el-table-column label="发票编号" align="center" prop="invoiceCode" min-width="120" />
+      <el-table-column label="客户编码" align="center" prop="clientCode" min-width="100" />
       <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
+      <el-table-column label="箱长度" align="center" prop="length" width="80" />
+      <el-table-column label="箱宽度" align="center" prop="width" width="80" />
+      <el-table-column label="箱高度" align="center" prop="height" width="80" />
+      <el-table-column label="尺寸单位" align="center" prop="sizeUnitName" width="90" />
+      <el-table-column label="净重" align="center" prop="netWeight" width="80" />
+      <el-table-column label="毛重" align="center" prop="grossWeight" width="80" />
+      <el-table-column label="重量单位" align="center" prop="weightUnitName" width="90" />
+      <el-table-column label="检查员" align="center" prop="inspectorName" min-width="100" />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_PACKAGE_STATUS" :value="scope.row.status" />
@@ -68,7 +78,7 @@
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
-import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/packages'
+import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
 import { MesWmPackageStatusEnum } from '@/views/mes/utils/constants'
 import WmPackageSelect from './components/WmPackageSelect.vue'
 
@@ -86,13 +96,14 @@ const isEditable = computed(() => ['create', 'update'].includes(props.formType))
 
 // ==================== 子箱列表 ====================
 const loading = ref(false)
-const list = ref<WmPackageRespVO[]>([])
+const list = ref<WmPackageVO[]>([])
 
 /** 查询子箱列表 */
 const getList = async () => {
   loading.value = true
   try {
     // 通过分页查询，筛选 parentId 为当前装箱单的记录
+    // TODO @AI：这个列表的展示，就是使用分页的，所以正常搞就行了；
     const data = await WmPackageApi.getPackagePage({
       pageNo: 1,
       pageSize: 100,
@@ -107,15 +118,15 @@ const getList = async () => {
 /** 查看子箱详情（打开新弹窗） */
 const handleView = (id: number) => {
   // 通过打开详情弹窗查看
+  // TODO @AI：不用支持查看详情；移除掉
   window.open(`/mes/wm/packages?id=${id}`, '_blank')
 }
 
 /** 移除子箱：将子箱的 parentId 清空 */
 const handleRemoveChild = async (childId: number) => {
   try {
-    // DONE @AI：增加一个 delete subpackage 的接口，直接传递 childId 就行了；
     await message.confirm('确认将该装箱单从子箱列表中移除？')
-    await WmPackageApi.removeSubPackage(childId)
+    await WmPackageApi.removeChildPackage(childId)
     message.success('移除成功')
     await getList()
   } catch {}
@@ -144,8 +155,7 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    // DONE @AI：单独有个 add subpackage 的接口；
-    await WmPackageApi.addSubPackage(props.packageId, formData.value.childId!)
+    await WmPackageApi.addChildPackage(props.packageId, formData.value.childId!)
     message.success(t('common.createSuccess'))
     dialogVisible.value = false
     await getList()

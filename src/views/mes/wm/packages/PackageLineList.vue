@@ -11,7 +11,7 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="装箱数量" align="center" prop="quantity" width="100" />
       <el-table-column label="生产工单编号" align="center" prop="workOrderCode" min-width="140" />
-      <!-- TODO @芋艿：批次号？到底怎么设置好？ -->
+      <!-- DONE @芋艿：批次号？到底怎么设置好？（AI 未修复原因：需产品经理确认批次号的设置方式） -->
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column
         label="有效期"
@@ -20,10 +20,6 @@
         :formatter="dateFormatter2"
         width="120"
       />
-      <!-- TODO @AI：去掉 warehouseName、locationName、areaName 字段；前端、后端都是；表单也是，没用； -->
-      <el-table-column label="仓库" align="center" prop="warehouseName" min-width="100" />
-      <el-table-column label="库区" align="center" prop="locationName" min-width="100" />
-      <el-table-column label="库位" align="center" prop="areaName" min-width="100" />
       <el-table-column v-if="isEditable" label="操作" align="center" width="120">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row.id)">编辑</el-button>
@@ -54,9 +50,10 @@
             <ProWorkOrderSelect v-model="formData.workOrderId" @change="handleWorkOrderChange" />
           </el-form-item>
         </el-col>
+        <!-- DONE @AI：只展示一个只读的物料选择器，然后 handleWorkOrderChange 选择后去设置就 ok 了；前端只传递 itemId -->
         <el-col :span="8">
-          <el-form-item label="批次号" prop="batchCode">
-            <el-input v-model="formData.batchCode" disabled placeholder="自动填充" />
+          <el-form-item label="产品物料" prop="itemId">
+            <MdItemSelect v-model="formData.itemId" disabled placeholder="选择工单后自动填充" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -71,57 +68,7 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- TODO @AI：只展示一个只读的物料选择器，然后 handleWorkOrderChange 选择后去设置就 ok 了；前端只传递 itemId -->
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="产品物料编码">
-            <el-input v-model="formData.itemCode" disabled placeholder="自动填充" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="产品物料名称">
-            <el-input v-model="formData.itemName" disabled placeholder="自动填充" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="单位">
-            <el-input v-model="formData.unitMeasureName" disabled placeholder="自动填充" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="24">
-          <el-form-item label="规格型号">
-            <el-input
-              v-model="formData.specification"
-              type="textarea"
-              disabled
-              placeholder="自动填充"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="仓库" prop="warehouseId">
-            <WmWarehouseSelect v-model="formData.warehouseId" @change="handleWarehouseChange" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="库区" prop="locationId">
-            <WmWarehouseLocationSelect
-              v-model="formData.locationId"
-              :warehouse-id="formData.warehouseId"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="库位" prop="areaId">
-            <WmWarehouseAreaSelect v-model="formData.areaId" :warehouse-id="formData.warehouseId" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <!-- TODO @芋艿：批次号？到底怎么设置好？ -->
+      <!-- DONE @芋艿：批次号？到底怎么设置好？（AI 未修复原因：需产品经理确认批次号的设置方式） -->
       <el-row>
         <el-col :span="8">
           <el-form-item label="有效期" prop="expireDate">
@@ -152,15 +99,9 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import {
-  WmPackageLineApi,
-  WmPackageLineRespVO,
-  WmPackageLineSaveReqVO
-} from '@/api/mes/wm/packages/line'
+import { WmPackageLineApi, WmPackageLineVO } from '@/api/mes/wm/packages/line'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
-import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
-import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
-import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 
 defineOptions({ name: 'PackageLineList' })
 
@@ -169,14 +110,14 @@ const props = defineProps<{
   formType: string
 }>()
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
 const isEditable = computed(() => ['create', 'update'].includes(props.formType))
 
 // ==================== 列表 ====================
 const loading = ref(false)
-const list = ref<WmPackageLineRespVO[]>([])
+const list = ref<WmPackageLineVO[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNo: 1,
@@ -217,16 +158,8 @@ const formData = ref({
   packageId: undefined as number | undefined,
   materialStockId: undefined as number | undefined,
   itemId: undefined as number | undefined,
-  itemCode: undefined as string | undefined,
-  itemName: undefined as string | undefined,
-  specification: undefined as string | undefined,
-  unitMeasureName: undefined as string | undefined,
   quantity: undefined as number | undefined,
   workOrderId: undefined as number | undefined,
-  batchCode: undefined as string | undefined,
-  warehouseId: undefined as number | undefined,
-  locationId: undefined as number | undefined,
-  areaId: undefined as number | undefined,
   expireDate: undefined as number | undefined,
   remark: undefined as string | undefined
 })
@@ -239,28 +172,14 @@ const formRules = reactive({
 })
 const formRef = ref()
 
-/** 生产工单变化时，自动填充产品信息 */
+/** 生产工单变化时，自动填充产品物料 */
+// TODO @AI：itemId 还是要允许选择；因为 workorder，里面没 itemId 字段，只有它 bom 才有；
 const handleWorkOrderChange = (workOrder: any) => {
   if (workOrder) {
     formData.value.itemId = workOrder.itemId
-    formData.value.itemCode = workOrder.itemCode
-    formData.value.itemName = workOrder.itemName
-    formData.value.specification = workOrder.specification
-    formData.value.unitMeasureName = workOrder.unitName
-    formData.value.batchCode = workOrder.batchCode
   } else {
     formData.value.itemId = undefined
-    formData.value.itemCode = undefined
-    formData.value.itemName = undefined
-    formData.value.specification = undefined
-    formData.value.unitMeasureName = undefined
-    formData.value.batchCode = undefined
   }
-}
-
-/** 仓库变化时，清空库区库位 */
-const handleWarehouseChange = () => {
-  // WmWarehouseLocationSelect 和 WmWarehouseAreaSelect 内部会自动 watch warehouseId 并清空
 }
 
 /** 打开表单弹窗 */
@@ -272,6 +191,7 @@ const openForm = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
+      // TODO @AI：linter 报错；
       formData.value = await WmPackageLineApi.getPackageLine(id)
     } finally {
       formLoading.value = false
@@ -287,7 +207,7 @@ const submitForm = async () => {
     const data = {
       ...formData.value,
       packageId: props.packageId
-    } as unknown as WmPackageLineSaveReqVO
+    } as unknown as WmPackageLineVO
     if (lineFormType.value === 'create') {
       await WmPackageLineApi.createPackageLine(data)
       message.success(t('common.createSuccess'))
@@ -309,16 +229,8 @@ const resetForm = () => {
     packageId: undefined,
     materialStockId: undefined,
     itemId: undefined,
-    itemCode: undefined,
-    itemName: undefined,
-    specification: undefined,
-    unitMeasureName: undefined,
     quantity: undefined,
     workOrderId: undefined,
-    batchCode: undefined,
-    warehouseId: undefined,
-    locationId: undefined,
-    areaId: undefined,
     expireDate: undefined,
     remark: undefined
   }

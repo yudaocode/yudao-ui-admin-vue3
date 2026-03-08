@@ -56,8 +56,7 @@
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       default-expand-all
     >
-      <!-- TODO @AI：编号需要 fixed，可以一直被看到，这个列表太长了 -->
-      <el-table-column label="装箱单编号" align="center" prop="code" min-width="160">
+      <el-table-column label="装箱单编号" align="center" prop="code" min-width="250" fixed="left">
         <template #default="scope">
           <el-link type="primary" @click="openForm('detail', scope.row.id)">
             {{ scope.row.code }}
@@ -135,22 +134,20 @@
 import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
-import { WmPackageApi, WmPackageRespVO } from '@/api/mes/wm/packages'
+import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import PackageForm from './PackageForm.vue'
 import { MesWmPackageStatusEnum } from '@/views/mes/utils/constants'
 
-// TODO @AI：注释风格，参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/index.vue
-
 defineOptions({ name: 'MesWmPackages' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const list = ref<WmPackageRespVO[]>([])
-const total = ref(0)
+const loading = ref(true) // 列表的加载中
+const list = ref<WmPackageVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -159,7 +156,7 @@ const queryParams = reactive({
   clientId: undefined,
   inspectorUserId: undefined
 })
-const queryFormRef = ref()
+const queryFormRef = ref() // 搜索的表单
 
 /** 查询列表 */
 const getList = async () => {
@@ -194,9 +191,12 @@ const openForm = (type: string, id?: number) => {
 /** 完成 */
 const handleFinish = async (id: number) => {
   try {
+    // 完成的二次确认
     await message.confirm('确认完成该装箱单？完成后将不可编辑。')
+    // 发起完成
     await WmPackageApi.finishPackage(id)
     message.success('完成成功')
+    // 刷新列表
     await getList()
   } catch {}
 }
@@ -204,9 +204,12 @@ const handleFinish = async (id: number) => {
 /** 删除 */
 const handleDelete = async (id: number) => {
   try {
+    // 删除的二次确认
     await message.delConfirm()
+    // 发起删除
     await WmPackageApi.deletePackage(id)
     message.success(t('common.delSuccess'))
+    // 刷新列表
     await getList()
   } catch {}
 }
