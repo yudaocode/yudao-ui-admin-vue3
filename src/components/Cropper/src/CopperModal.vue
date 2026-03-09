@@ -162,13 +162,24 @@ function handleReady(cropperInstance: Cropper) {
 }
 
 function handlerToolbar(event: string, arg?: number) {
-  if (event === 'scaleX') {
-    scaleX = arg = scaleX === -1 ? 1 : -1
+  if (!cropper.value) return
+  const cropperImage = cropper.value.getCropperImage()
+  const cropperSelection = cropper.value.getCropperSelection()
+
+  if (event === 'reset') {
+    cropperImage?.$resetTransform()
+    cropperSelection?.$reset()
+  } else if (event === 'rotate') {
+    cropperImage?.$rotate(`${arg}deg`)
+  } else if (event === 'scaleX') {
+    scaleX = scaleX === -1 ? 1 : -1
+    cropperImage?.$scale(scaleX, 1)
+  } else if (event === 'scaleY') {
+    scaleY = scaleY === -1 ? 1 : -1
+    cropperImage?.$scale(1, scaleY)
+  } else if (event === 'zoom') {
+    cropperImage?.$zoom(arg!)
   }
-  if (event === 'scaleY') {
-    scaleY = arg = scaleY === -1 ? 1 : -1
-  }
-  cropper?.value?.[event]?.(arg)
 }
 
 async function handleOk() {

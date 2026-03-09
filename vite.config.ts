@@ -44,18 +44,13 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             preprocessorOptions: {
                 scss: {
                     additionalData: '@use "@/styles/variables.scss" as *;',
-                    javascriptEnabled: true,
-                    silenceDeprecations: ["legacy-js-api"], // 参考自 https://stackoverflow.com/questions/78997907/the-legacy-js-api-is-deprecated-and-will-be-removed-in-dart-sass-2-0-0
+                    api: 'modern-compiler'
                 }
             }
         },
         resolve: {
             extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss', '.css'],
             alias: [
-                {
-                    find: 'vue-i18n',
-                    replacement: 'vue-i18n/dist/vue-i18n.cjs.js'
-                },
                 {
                     find: /\@\//,
                     replacement: `${pathResolve('src')}/`

@@ -7,3 +7,6 @@ pnpm-debug
 auto-*.d.ts
 .idea
 .history
+e2e/.auth/
+test-results/
+playwright-report/
