@@ -237,7 +237,7 @@ export const MesWmStockTakingTypeEnum = {
 /** MES 盘点任务状态枚举 */
 export const MesWmStockTakingTaskStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
-  IN_PROGRESS: MesOrderStatusConstants.CONFIRMED,
+  APPROVING: MesOrderStatusConstants.APPROVING,
   FINISHED: MesOrderStatusConstants.FINISHED,
   CANCELED: MesOrderStatusConstants.CANCELLED
 }
