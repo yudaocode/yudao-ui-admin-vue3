@@ -168,8 +168,8 @@ const submitForm = async () => {
       await WmSalesNoticeApi.updateSalesNotice(data)
       message.success(t('common.updateSuccess'))
       dialogVisible.value = false
-      emit('success')
     }
+    emit('success')
   } finally {
     formLoading.value = false
   }

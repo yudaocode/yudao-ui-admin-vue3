@@ -10,18 +10,12 @@ export interface StockTakingPlanParamVO {
   remark?: string
 }
 
-export interface StockTakingPlanParamPageReqVO {
-  pageNo: number
-  pageSize: number
-  planId: number
-}
-
 export const StockTakingPlanParamApi = {
   getStockTakingPlanParam: async (id: number) => {
     return await request.get({ url: '/mes/wm/stocktaking-plan-param/get?id=' + id })
   },
 
-  getStockTakingPlanParamPage: async (params: StockTakingPlanParamPageReqVO) => {
+  getStockTakingPlanParamPage: async (params: any) => {
     return await request.get({ url: '/mes/wm/stocktaking-plan-param/page', params })
   },
 

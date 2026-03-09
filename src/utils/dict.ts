@@ -297,10 +297,9 @@ export enum DICT_TYPE {
   MES_WM_TRANSFER_STATUS = 'mes_wm_transfer_status', // MES 转移单状态
   MES_WM_TRANSFER_TYPE = 'mes_wm_transfer_type', // MES 转移单类型
   MES_WM_STOCK_TAKING_TYPE = 'mes_wm_stock_taking_type', // MES 盘点类型
-  MES_WM_STOCK_TAKING_PLAN_STATUS = 'mes_wm_stock_taking_plan_status', // MES 盘点方案状态
   MES_WM_STOCK_TAKING_TASK_STATUS = 'mes_wm_stock_taking_task_status', // MES 盘点任务状态
   MES_WM_STOCK_TAKING_LINE_STATUS = 'mes_wm_stock_taking_task_line_status', // MES 盘点任务行状态
-  MES_WM_STOCK_TAKING_PARAM_TYPE = 'mes_wm_stock_taking_param_type', // MES 盘点方案参数类型
+  MES_WM_STOCK_TAKING_PLAN_PARAM_TYPE = 'mes_wm_stock_taking_plan_param_type', // MES 盘点方案参数类型
   MES_WM_OUTSOURCE_RECPT_STATUS = 'mes_wm_outsource_recpt_status', // MES 外协入库单状态
   MES_WM_PRODUCTION_ISSUE_STATUS = 'mes_wm_production_issue_status', // MES 领料出库单状态
   MES_PRODUCT_PRODUCE_STATUS = 'mes_product_produce_status', // MES 生产入库单状态
@@ -321,5 +320,5 @@ export enum DICT_TYPE {
   MES_MD_AUTO_CODE_CYCLE_METHOD = 'mes_md_auto_code_cycle_method', // MES 编码规则循环方式
   MES_WM_BARCODE_FORMAT = 'mes_wm_barcode_format', // MES 条码格式
   MES_WM_BARCODE_BIZ_TYPE = 'mes_wm_barcode_biz_type', // MES 条码业务类型
-  MES_WM_PACKAGE_STATUS = 'mes_wm_package_status', // MES 装箱单状态
+  MES_WM_PACKAGE_STATUS = 'mes_wm_package_status' // MES 装箱单状态
 }
