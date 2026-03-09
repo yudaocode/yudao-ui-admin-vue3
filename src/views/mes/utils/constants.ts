@@ -228,6 +228,44 @@ export const MesWmOutsourceReceiptStatusEnum = {
   CANCELED: MesOrderStatusConstants.CANCELLED
 }
 
+/** MES 盘点类型枚举 */
+export const MesWmStockTakingTypeEnum = {
+  OPEN: 1,
+  CYCLE: 2,
+  DYNAMIC: 3
+}
+
+/** MES 盘点方案状态枚举 */
+export const MesWmStockTakingPlanStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  CONFIRMED: MesOrderStatusConstants.CONFIRMED
+}
+
+/** MES 盘点任务状态枚举 */
+export const MesWmStockTakingTaskStatusEnum = {
+  PREPARE: MesOrderStatusConstants.DRAFT,
+  IN_PROGRESS: MesOrderStatusConstants.CONFIRMED,
+  FINISHED: MesOrderStatusConstants.FINISHED,
+  CANCELED: MesOrderStatusConstants.CANCELLED
+}
+
+/** MES 盘点任务行状态枚举 */
+export const MesWmStockTakingTaskLineStatusEnum = {
+  UNCOUNTED: 0,
+  NORMAL: 1,
+  GAIN: 2,
+  LOSS: 3
+}
+
+/** MES 盘点方案参数类型枚举 */
+export const MesWmStockTakingParamTypeEnum = {
+  WAREHOUSE: 1,
+  LOCATION: 2,
+  AREA: 3,
+  ITEM: 4,
+  BATCH: 5
+}
+
 /** MES 外协入库单状态枚举 */
 export const MesWmOutsourceRecptStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,

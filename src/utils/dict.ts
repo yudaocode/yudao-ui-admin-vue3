@@ -296,6 +296,11 @@ export enum DICT_TYPE {
   MES_WM_ITEM_RECEIPT_STATUS = 'mes_wm_item_receipt_status', // MES 物料接收单状态
   MES_WM_TRANSFER_STATUS = 'mes_wm_transfer_status', // MES 转移单状态
   MES_WM_TRANSFER_TYPE = 'mes_wm_transfer_type', // MES 转移单类型
+  MES_WM_STOCK_TAKING_TYPE = 'mes_wm_stock_taking_type', // MES 盘点类型
+  MES_WM_STOCK_TAKING_PLAN_STATUS = 'mes_wm_stock_taking_plan_status', // MES 盘点方案状态
+  MES_WM_STOCK_TAKING_TASK_STATUS = 'mes_wm_stock_taking_task_status', // MES 盘点任务状态
+  MES_WM_STOCK_TAKING_LINE_STATUS = 'mes_wm_stock_taking_task_line_status', // MES 盘点任务行状态
+  MES_WM_STOCK_TAKING_PARAM_TYPE = 'mes_wm_stock_taking_param_type', // MES 盘点方案参数类型
   MES_WM_OUTSOURCE_RECPT_STATUS = 'mes_wm_outsource_recpt_status', // MES 外协入库单状态
   MES_WM_PRODUCTION_ISSUE_STATUS = 'mes_wm_production_issue_status', // MES 领料出库单状态
   MES_PRODUCT_PRODUCE_STATUS = 'mes_product_produce_status', // MES 生产入库单状态
