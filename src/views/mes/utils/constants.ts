@@ -230,15 +230,8 @@ export const MesWmOutsourceReceiptStatusEnum = {
 
 /** MES 盘点类型枚举 */
 export const MesWmStockTakingTypeEnum = {
-  OPEN: 1,
-  CYCLE: 2,
-  DYNAMIC: 3
-}
-
-/** MES 盘点方案状态枚举 */
-export const MesWmStockTakingPlanStatusEnum = {
-  PREPARE: MesOrderStatusConstants.DRAFT,
-  CONFIRMED: MesOrderStatusConstants.CONFIRMED
+  STATIC: 1,
+  DYNAMIC: 2
 }
 
 /** MES 盘点任务状态枚举 */
@@ -258,6 +251,7 @@ export const MesWmStockTakingTaskLineStatusEnum = {
 }
 
 /** MES 盘点方案参数类型枚举 */
+// TODO @AI：感觉这个枚举不太对，看看 biz type；
 export const MesWmStockTakingParamTypeEnum = {
   WAREHOUSE: 1,
   LOCATION: 2,

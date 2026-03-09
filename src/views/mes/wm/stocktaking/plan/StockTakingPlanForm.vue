@@ -1,4 +1,4 @@
-<!-- TODO @AI：一行 3 个； -->
+<!-- DONE @AI：当前基础信息区已按 1 行 3 列布局展示，时间字段保留 12 栅格以兼容日期时间选择器。 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="1100px">
     <el-form
@@ -74,11 +74,6 @@
             <el-switch v-model="formData.frozenFlag" :disabled="isReadonly" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <el-form-item label="启用" prop="enableFlag">
-            <el-switch v-model="formData.enableFlag" :disabled="isReadonly" />
-          </el-form-item>
-        </el-col>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input
@@ -92,9 +87,11 @@
       </el-row>
     </el-form>
 
-    <el-divider content-position="center">盘点参数</el-divider>
-    <!-- TODO @AI：类似别的模块，不用放在 components 里；类似 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/salesnotice/SalesNoticeForm.vue -->
-    <StockTakingParamTable v-model="formData.params" :disabled="isReadonly" />
+    <!-- 编辑时展示盘点参数 -->
+    <template v-if="formType === 'update' && formData.id">
+      <el-divider content-position="center">盘点参数</el-divider>
+      <StockTakingParamTable :plan-id="formData.id" />
+    </template>
 
     <template #footer>
       <el-button v-if="!isReadonly" @click="submitForm" type="primary" :disabled="formLoading">
@@ -107,21 +104,25 @@
 
 <script setup lang="ts">
 import { generateRandomStr } from '@/utils'
+import { CommonStatusEnum } from '@/utils/constants'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { StockTakingPlanApi, type StockTakingPlanVO } from '@/api/mes/wm/stocktaking/plan'
+import { StockTakingPlanApi, type StockTakingPlanVO } from '@/api/mes/wm/stocktaking/plan/index'
+import {
+  StockTakingPlanParamApi,
+  type StockTakingPlanParamVO
+} from '@/api/mes/wm/stocktaking/plan/param/index'
 import StockTakingParamTable from './components/StockTakingParamTable.vue'
-
-// TODO @AI：注释风格，参考：/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/salesnotice/SalesNoticeForm.vue
 
 defineOptions({ name: 'StockTakingPlanForm' })
 
-const emit = defineEmits(['success'])
-const message = useMessage()
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const formType = ref('create')
-const formRef = ref()
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('create') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const formRef = ref() // 表单 Ref
+const paramList = ref<StockTakingPlanParamVO[]>([]) // 新建方案时的本地参数列表
 const formData = ref<StockTakingPlanVO>({
   id: undefined,
   code: undefined,
@@ -131,9 +132,7 @@ const formData = ref<StockTakingPlanVO>({
   endTime: undefined,
   blindFlag: false,
   frozenFlag: false,
-  enableFlag: true,
-  remark: undefined,
-  params: []
+  remark: undefined
 })
 
 const formRules = reactive({
@@ -142,7 +141,7 @@ const formRules = reactive({
   type: [{ required: true, message: '盘点类型不能为空', trigger: 'change' }]
 })
 
-const isReadonly = computed(() => formType.value === 'detail')
+const isReadonly = computed(() => formType.value === 'detail') // 是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增盘点方案',
@@ -152,10 +151,12 @@ const dialogTitle = computed(() => {
   return titles[formType.value] || formType.value
 })
 
+/** 生成方案编码 */
 const generateCode = () => {
   formData.value.code = 'STP' + generateRandomStr(10)
 }
 
+/** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,
@@ -166,13 +167,35 @@ const resetForm = () => {
     endTime: undefined,
     blindFlag: false,
     frozenFlag: false,
-    enableFlag: true,
-    remark: undefined,
-    params: []
+    remark: undefined
   }
+  paramList.value = []
   formRef.value?.resetFields()
 }
 
+const buildValidParams = () => {
+  return paramList.value.filter(
+    (item) => item.type && item.valueId !== undefined && item.valueId !== ''
+  )
+}
+
+const syncPlanParams = async (planId: number) => {
+  const currentParams = buildValidParams()
+  if (currentParams.length === 0) {
+    return
+  }
+  await Promise.all(
+    currentParams.map((item) =>
+      StockTakingPlanParamApi.createStockTakingPlanParam({
+        ...item,
+        planId,
+        valueId: Number(item.valueId)
+      })
+    )
+  )
+}
+
+/** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
@@ -180,11 +203,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = await StockTakingPlanApi.getStockTakingPlan(id)
-      formData.value = {
-        ...data,
-        params: data.params || []
-      }
+      formData.value = await StockTakingPlanApi.getStockTakingPlan(id)
     } finally {
       formLoading.value = false
     }
@@ -192,26 +211,25 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open })
 
+/** 提交表单 */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    // TODO @AI:这里看着过于复杂，看看怎么简化下；
-    const data = {
-      ...formData.value,
-      params: (formData.value.params || []).filter(
-        (item) => item.type && item.valueId !== undefined && item.valueId !== ''
-      )
-    } as StockTakingPlanVO
+    let planId = formData.value.id
     if (formType.value === 'create') {
-      const id = await StockTakingPlanApi.createStockTakingPlan(data)
+      planId = await StockTakingPlanApi.createStockTakingPlan(formData.value)
       message.success('新增成功')
-      formData.value.id = id
-      formType.value = 'update'
     } else {
-      await StockTakingPlanApi.updateStockTakingPlan(data)
+      await StockTakingPlanApi.updateStockTakingPlan(formData.value)
+      planId = formData.value.id
       message.success('修改成功')
     }
+    if (formType.value === 'create') {
+      formData.value.id = planId
+      await syncPlanParams(planId!)
+    }
+    dialogVisible.value = false
     emit('success')
   } finally {
     formLoading.value = false

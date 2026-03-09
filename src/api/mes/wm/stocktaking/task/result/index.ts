@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：原则是 plan、task 两个目录；然后每个目录里，index.ts 都只能；param/index.ts 这样；
 export interface StockTakingResultVO {
   id?: number
   taskId?: number

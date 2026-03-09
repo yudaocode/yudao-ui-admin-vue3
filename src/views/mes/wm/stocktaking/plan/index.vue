@@ -40,29 +40,6 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：前后端都去掉 status 筛选； -->
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_STOCK_TAKING_PLAN_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <!-- TODO @AI：前后端都去掉 enableFlag 筛选； -->
-      <el-form-item label="启用状态" prop="enableFlag">
-        <el-select
-          v-model="queryParams.enableFlag"
-          placeholder="请选择启用状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option label="启用" :value="true" />
-          <el-option label="停用" :value="false" />
-        </el-select>
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -191,38 +168,28 @@ import { ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
-import {
-  StockTakingPlanApi,
-  type StockTakingPlanGenerateReqVO,
-  type StockTakingPlanVO
-} from '@/api/mes/wm/stocktaking/plan'
-import { MesWmStockTakingPlanStatusEnum } from '@/views/mes/utils/constants'
+import { CommonStatusEnum } from '@/utils/constants'
+import { StockTakingPlanApi, type StockTakingPlanVO } from '@/api/mes/wm/stocktaking/plan/index'
 import StockTakingPlanForm from './StockTakingPlanForm.vue'
-
-// TODO @AI：注释参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/system/user/index.vue
 
 defineOptions({ name: 'MesWmStockTakingPlan' })
 
-const message = useMessage()
-const { t } = useI18n()
-const userStore = useUserStore()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const list = ref<StockTakingPlanVO[]>([])
-const total = ref(0)
-const exportLoading = ref(false)
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref<StockTakingPlanVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
   name: undefined,
-  type: undefined,
-  status: undefined,
-  enableFlag: undefined
+  type: undefined
 })
-const queryFormRef = ref()
-const formRef = ref()
+const queryFormRef = ref() // 搜索的表单
 
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
@@ -234,66 +201,59 @@ const getList = async () => {
   }
 }
 
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
+/** 添加/修改操作 */
+const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-const handleConfirm = async (id: number) => {
+/** 修改盘点方案状态 */
+const handleStatusChange = async (row: StockTakingPlanVO) => {
   try {
-    await message.confirm('确认该盘点方案后将不可再修改关键内容，是否继续？')
-    await StockTakingPlanApi.confirmStockTakingPlan(id)
-    message.success('确认成功')
+    const newStatus =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+    const text = newStatus === CommonStatusEnum.ENABLE ? '启用' : '停用'
+    await message.confirm(`确认要${text}”${row.name}”盘点方案吗？`)
+    await StockTakingPlanApi.updateStockTakingPlanStatus(row.id!, newStatus)
+    message.success(`${text}成功`)
     await getList()
-  } catch {}
+  } catch {
+    await getList()
+  }
 }
 
+/** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
+    // 删除的二次确认
     await message.delConfirm()
+    // 发起删除
     await StockTakingPlanApi.deleteStockTakingPlan(id)
     message.success(t('common.delSuccess'))
+    // 刷新列表
     await getList()
   } catch {}
 }
 
-const handleGenerate = async (row: StockTakingPlanVO) => {
-  try {
-    const plan = await StockTakingPlanApi.getStockTakingPlan(row.id!)
-    const codeResult = await ElMessageBox.prompt('请输入任务编码', '生成盘点任务', {
-      inputValue: `ST${Date.now()}`,
-      inputValidator: (value) => !!value || '任务编码不能为空'
-    })
-    const nameResult = await ElMessageBox.prompt('请输入任务名称', '生成盘点任务', {
-      inputValue: `${row.name || row.code}-任务`,
-      inputValidator: (value) => !!value || '任务名称不能为空'
-    })
-    const reqVO: StockTakingPlanGenerateReqVO = {
-      planId: row.id!,
-      code: codeResult.value,
-      name: nameResult.value,
-      takingDate: row.startTime,
-      userId: userStore.getUser.id,
-      remark: row.remark,
-      params: plan.params
-    }
-    await StockTakingPlanApi.generateStockTakingTask(reqVO)
-    message.success('生成任务成功')
-  } catch {}
-}
-
+/** 导出按钮操作 */
+const exportLoading = ref(false)
 const handleExport = async () => {
   try {
+    // 导出的二次确认
     await message.exportConfirm()
+    // 发起导出
     exportLoading.value = true
     const data = await StockTakingPlanApi.exportStockTakingPlan(queryParams)
     download.excel(data, '盘点方案.xls')
@@ -303,6 +263,7 @@ const handleExport = async () => {
   }
 }
 
+/** 初始化 */
 onMounted(() => {
   getList()
 })
