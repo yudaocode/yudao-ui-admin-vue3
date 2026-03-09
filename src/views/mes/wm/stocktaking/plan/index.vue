@@ -41,24 +41,24 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
         <el-button
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['mes:wm-stocktaking-plan:create']"
+          v-hasPermi="['mes:wm-stock-taking-plan:create']"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+          <Icon icon="ep:plus" /> 新增
         </el-button>
         <el-button
           type="success"
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['mes:wm-stocktaking-plan:export']"
+          v-hasPermi="['mes:wm-stock-taking-plan:export']"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon icon="ep:download" />导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -79,75 +79,60 @@
           <dict-tag :type="DICT_TYPE.MES_WM_STOCK_TAKING_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="开始时间" align="center" prop="startTime" min-width="180" />
-      <el-table-column label="结束时间" align="center" prop="endTime" min-width="180" />
+      <el-table-column
+        label="开始时间"
+        align="center"
+        prop="startTime"
+        :formatter="dateFormatter"
+        width="180"
+      />
+      <el-table-column
+        label="结束时间"
+        align="center"
+        prop="endTime"
+        :formatter="dateFormatter"
+        width="180"
+      />
       <el-table-column label="是否盲盘" align="center" prop="blindFlag" width="100">
-        <!-- TODO @AI: booleanstring 数据字典 -->
         <template #default="scope">
-          <el-tag :type="scope.row.blindFlag ? 'warning' : 'success'">
-            {{ scope.row.blindFlag ? '是' : '否' }}
-          </el-tag>
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.blindFlag" />
         </template>
       </el-table-column>
-      <el-table-column label="是否冻结库存" align="center" prop="frozenFlag" width="100">
+      <el-table-column label="是否冻结库存" align="center" prop="frozenFlag" width="110">
         <template #default="scope">
-          <!-- TODO @AI: booleanstring 数据字典 -->
-          <el-tag :type="scope.row.frozenFlag ? 'warning' : 'info'">
-            {{ scope.row.frozenFlag ? '是' : '否' }}
-          </el-tag>
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.frozenFlag" />
         </template>
       </el-table-column>
-      <!-- TODO @AI：enableFlag 和 status 融合了 -->
-      <el-table-column label="启用" align="center" prop="enableFlag" width="90">
+      <el-table-column label="状态" align="center" prop="status" width="120">
         <template #default="scope">
-          <el-tag :type="scope.row.enableFlag ? 'success' : 'info'">
-            {{ scope.row.enableFlag ? '启用' : '停用' }}
-          </el-tag>
+          <el-switch
+            :model-value="scope.row.status"
+            :active-value="CommonStatusEnum.ENABLE"
+            :inactive-value="CommonStatusEnum.DISABLE"
+            :disabled="loading"
+            @change="handleStatusChange(scope.row)"
+          />
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status" min-width="100">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_WM_STOCK_TAKING_PLAN_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" width="340" fixed="right">
+      <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
           <el-button
-            v-if="scope.row.status === MesWmStockTakingPlanStatusEnum.PREPARE"
+            v-if="scope.row.status === CommonStatusEnum.DISABLE"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:wm-stocktaking-plan:update']"
+            v-hasPermi="['mes:wm-stock-taking-plan:update']"
           >
             编辑
           </el-button>
-          <!-- TODO @AI：去掉“确认”操作了； -->
           <el-button
-            v-if="scope.row.status === MesWmStockTakingPlanStatusEnum.PREPARE"
-            link
-            type="warning"
-            @click="handleConfirm(scope.row.id)"
-            v-hasPermi="['mes:wm-stocktaking-plan:update']"
-          >
-            确认
-          </el-button>
-          <el-button
-            v-if="scope.row.status === MesWmStockTakingPlanStatusEnum.PREPARE"
+            v-if="scope.row.status === CommonStatusEnum.DISABLE"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:wm-stocktaking-plan:delete']"
+            v-hasPermi="['mes:wm-stock-taking-plan:delete']"
           >
             删除
-          </el-button>
-          <!-- TODO @AI：前后端都去嗲哦这个操作；不需要； -->
-          <el-button
-            link
-            type="success"
-            @click="handleGenerate(scope.row)"
-            v-hasPermi="['mes:wm-stocktaking-task:create']"
-          >
-            生成任务
           </el-button>
         </template>
       </el-table-column>
@@ -160,13 +145,13 @@
     />
   </ContentWrap>
 
+  <!-- 添加或修改盘点方案对话框 -->
   <StockTakingPlanForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { ElMessageBox } from 'element-plus'
-import { useUserStore } from '@/store/modules/user'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { CommonStatusEnum } from '@/utils/constants'
 import { StockTakingPlanApi, type StockTakingPlanVO } from '@/api/mes/wm/stocktaking/plan/index'

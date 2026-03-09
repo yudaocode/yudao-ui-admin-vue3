@@ -134,7 +134,6 @@ const formData = ref<StockTakingPlanVO>({
   frozenFlag: false,
   remark: undefined
 })
-
 const formRules = reactive({
   code: [{ required: true, message: '方案编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '方案名称不能为空', trigger: 'blur' }],
