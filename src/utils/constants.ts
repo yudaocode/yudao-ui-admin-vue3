@@ -463,3 +463,13 @@ export const BpmAutoApproveType = {
   APPROVE_ALL: 1, // 仅审批一次，后续重复的审批节点均自动通过
   APPROVE_SEQUENT: 2 // 仅针对连续审批的节点自动通过
 }
+
+// ========== SYSTEM - 地区模块 ==========
+/**
+ * 地区选择器层级枚举
+ */
+export const AreaLevelEnum = {
+  PROVINCE: 1, // 省
+  CITY: 2, // 市
+  DISTRICT: 3 // 区
+}
