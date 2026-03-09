@@ -251,13 +251,13 @@ export const MesWmStockTakingTaskLineStatusEnum = {
 }
 
 /** MES 盘点方案参数类型枚举 */
-// TODO @AI：感觉这个枚举不太对，看看 biz type；
 export const MesWmStockTakingParamTypeEnum = {
-  WAREHOUSE: 1,
-  LOCATION: 2,
-  AREA: 3,
-  ITEM: 4,
-  BATCH: 5
+  WAREHOUSE: 102,
+  LOCATION: 103,
+  AREA: 104,
+  ITEM: 600,
+  BATCH: 107,
+  QUALITY_STATUS: 900
 }
 
 /** MES 外协入库单状态枚举 */

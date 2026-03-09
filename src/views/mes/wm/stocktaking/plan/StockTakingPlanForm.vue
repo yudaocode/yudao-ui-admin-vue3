@@ -1,4 +1,3 @@
-<!-- DONE @AI：当前基础信息区已按 1 行 3 列布局展示，时间字段保留 12 栅格以兼容日期时间选择器。 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="1100px">
     <el-form

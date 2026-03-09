@@ -5,14 +5,14 @@
       type="primary"
       plain
       @click="openForm('create')"
-      :disabled="disabled || (isRemoteMode && !planId)"
+      :disabled="disabled"
       class="mb-10px"
     >
       <Icon icon="ep:plus" class="mr-5px" /> 添加条件
     </el-button>
     <el-table
       v-loading="loading"
-      :data="displayList"
+      :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
       border
@@ -32,7 +32,6 @@
       </el-table-column>
     </el-table>
     <Pagination
-      v-if="isRemoteMode"
       :total="total"
       v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
@@ -67,15 +66,12 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="24">
+        <el-col :span="24" v-if="formData.type">
           <el-form-item label="条件值" prop="valueId">
-            <template v-if="formData.type === BarcodeBizTypeEnum.WAREHOUSE">
-              <WmWarehouseSelect
-                v-model="formData.valueId"
-                @change="(item) => handleSelectorChange(item)"
-              />
+            <template v-if="formData.type === MesWmStockTakingParamTypeEnum.WAREHOUSE">
+              <WmWarehouseSelect v-model="formData.valueId" @change="handleSelectorChange" />
             </template>
-            <template v-else-if="formData.type === BarcodeBizTypeEnum.LOCATION">
+            <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.LOCATION">
               <div class="space-y-2">
                 <WmWarehouseSelect
                   v-model="locationWarehouseId"
@@ -84,15 +80,16 @@
                   placeholder="请选择仓库"
                 />
                 <WmWarehouseLocationSelect
+                  v-if="locationWarehouseId"
                   v-model="formData.valueId"
                   :warehouse-id="locationWarehouseId"
-                  @change="(item) => handleSelectorChange(item)"
+                  @change="handleSelectorChange"
                   class="!w-1/1"
                   placeholder="请选择库区"
                 />
               </div>
             </template>
-            <template v-else-if="formData.type === BarcodeBizTypeEnum.AREA">
+            <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.AREA">
               <div class="space-y-2">
                 <WmWarehouseSelect
                   v-model="areaWarehouseId"
@@ -101,6 +98,7 @@
                   placeholder="请选择仓库"
                 />
                 <WmWarehouseLocationSelect
+                  v-if="areaWarehouseId"
                   v-model="areaLocationId"
                   :warehouse-id="areaWarehouseId"
                   @change="handleAreaLocationChange"
@@ -108,24 +106,27 @@
                   placeholder="请选择库区"
                 />
                 <WmWarehouseAreaSelect
+                  v-if="areaLocationId"
                   v-model="formData.valueId"
                   :warehouse-id="areaWarehouseId"
-                  @change="(item) => handleSelectorChange(item)"
+                  @change="handleSelectorChange"
                   class="!w-1/1"
                   placeholder="请选择库位"
                 />
               </div>
             </template>
-            <template v-else-if="formData.type === BarcodeBizTypeEnum.ITEM">
-              <MdItemSelect
-                v-model="formData.valueId"
-                @change="(item) => handleSelectorChange(item)"
-              />
+            <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.ITEM">
+              <MdItemSelect v-model="formData.valueId" @change="handleSelectorChange" />
             </template>
-            <template v-else>
+            <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.BATCH || formData.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS">
+              <!-- TODO @芋艿：后续来跟进 -->
               <el-row :gutter="8" class="w-full">
                 <el-col :span="8">
-                  <el-input v-model="formData.valueId" placeholder="值ID" @change="handleManualChange" />
+                  <el-input
+                    v-model="formData.valueId"
+                    placeholder="值ID"
+                    @change="handleManualChange"
+                  />
                 </el-col>
                 <el-col :span="8">
                   <el-input
@@ -165,7 +166,7 @@ import {
   StockTakingPlanParamApi,
   type StockTakingPlanParamVO
 } from '@/api/mes/wm/stocktaking/plan/param/index'
-import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+import { MesWmStockTakingParamTypeEnum } from '@/views/mes/utils/constants'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
@@ -175,25 +176,9 @@ import { WmWarehouseAreaApi } from '@/api/mes/wm/warehouse/area'
 
 defineOptions({ name: 'StockTakingPlanParamList' })
 
-interface ParamRow extends StockTakingPlanParamVO {
-  valueId?: number | string
-}
-
-const props = withDefaults(
-  defineProps<{
-    modelValue?: ParamRow[]
-    planId?: number
-    disabled?: boolean
-  }>(),
-  {
-    modelValue: () => [],
-    planId: undefined,
-    disabled: false
-  }
-)
-
-const emit = defineEmits<{
-  'update:modelValue': [value: ParamRow[]]
+const props = defineProps<{
+  planId: number
+  disabled?: boolean
 }>()
 
 const { t } = useI18n()
@@ -201,7 +186,7 @@ const message = useMessage()
 
 // ==================== 列表 ====================
 const loading = ref(false)
-const list = ref<ParamRow[]>([])
+const list = ref<StockTakingPlanParamVO[]>([])
 const total = ref(0)
 const queryParams = reactive({
   pageNo: 1,
@@ -209,21 +194,8 @@ const queryParams = reactive({
   planId: undefined as number | undefined
 })
 
-// TODO @AI：isRemoteMode 字段不需要？
-const isRemoteMode = computed(() => !!props.planId)
-const localRows = computed({
-  get: () => props.modelValue || [],
-  set: (value) => emit('update:modelValue', value)
-})
-const displayList = computed(() => (isRemoteMode.value ? list.value : localRows.value))
-
 /** 查询条件列表 */
 const getList = async () => {
-  if (!isRemoteMode.value || !props.planId) {
-    list.value = []
-    total.value = 0
-    return
-  }
   loading.value = true
   try {
     queryParams.planId = props.planId
@@ -236,23 +208,12 @@ const getList = async () => {
 }
 
 /** 删除 */
-const handleDelete = async (row: ParamRow) => {
+const handleDelete = async (row: StockTakingPlanParamVO) => {
   try {
     await message.delConfirm()
-    if (isRemoteMode.value && row.id) {
-      await StockTakingPlanParamApi.deleteStockTakingPlanParam(row.id)
-      message.success(t('common.delSuccess'))
-      // TODO @AI：不用这个；
-      // 如果是最后一条且不是第一页，页码减1
-      if (list.value.length === 1 && queryParams.pageNo > 1) {
-        queryParams.pageNo -= 1
-      }
-      await getList()
-      return
-    }
-
-    localRows.value = localRows.value.filter((item) => item !== row)
+    await StockTakingPlanParamApi.deleteStockTakingPlanParam(row.id!)
     message.success(t('common.delSuccess'))
+    await getList()
   } catch {}
 }
 
@@ -261,10 +222,10 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
 const formType = ref('')
-const formData = ref<ParamRow>({
+const formData = ref<StockTakingPlanParamVO>({
   id: undefined,
   planId: undefined,
-  type: BarcodeBizTypeEnum.WAREHOUSE,
+  type: undefined,
   valueId: undefined,
   valueCode: '',
   valueName: '',
@@ -275,7 +236,6 @@ const formRules = reactive({
   valueId: [{ required: true, message: '条件值不能为空', trigger: 'change' }]
 })
 const formRef = ref()
-const editingIndex = ref<number>(-1)
 
 const locationWarehouseId = ref<number>() // 库区选择器的临时数据：选择仓库后，传给库区选择器
 const areaWarehouseId = ref<number>() // 库位选择器的临时数据：选择仓库后，传给库位选择器
@@ -292,19 +252,12 @@ const openForm = async (type: string, id?: number) => {
     formLoading.value = true
     isLoadingData.value = true
     try {
-      formData.value = (await StockTakingPlanParamApi.getStockTakingPlanParam(id)) as ParamRow
+      formData.value = await StockTakingPlanParamApi.getStockTakingPlanParam(id)
       // 编辑时，需要回填级联选择器的中间层级数据
       await loadCascadeData()
     } finally {
       formLoading.value = false
       isLoadingData.value = false
-    }
-  } else if (type === 'update') {
-    // 本地模式编辑
-    const row = localRows.value.find((item) => item === id)
-    if (row) {
-      formData.value = { ...row }
-      editingIndex.value = localRows.value.findIndex((item) => item === row)
     }
   }
 }
@@ -319,31 +272,15 @@ const submitForm = async () => {
       planId: props.planId,
       valueId: Number(formData.value.valueId)
     } as StockTakingPlanParamVO
-
-    if (isRemoteMode.value && props.planId) {
-      if (formType.value === 'create') {
-        await StockTakingPlanParamApi.createStockTakingPlanParam(data)
-        message.success(t('common.createSuccess'))
-      } else {
-        await StockTakingPlanParamApi.updateStockTakingPlanParam(data)
-        message.success(t('common.updateSuccess'))
-      }
-      dialogVisible.value = false
-      await getList()
-      return
-    }
-
-    // 本地模式
-    const nextRows = [...localRows.value]
     if (formType.value === 'create') {
-      nextRows.push({ ...data, planId: undefined })
+      await StockTakingPlanParamApi.createStockTakingPlanParam(data)
       message.success(t('common.createSuccess'))
-    } else if (editingIndex.value > -1) {
-      nextRows.splice(editingIndex.value, 1, { ...data, planId: undefined })
+    } else {
+      await StockTakingPlanParamApi.updateStockTakingPlanParam(data)
       message.success(t('common.updateSuccess'))
     }
-    localRows.value = nextRows
     dialogVisible.value = false
+    await getList()
   } finally {
     formLoading.value = false
   }
@@ -354,13 +291,12 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     planId: props.planId,
-    type: BarcodeBizTypeEnum.WAREHOUSE,
+    type: undefined,
     valueId: undefined,
     valueCode: '',
     valueName: '',
     remark: ''
   }
-  editingIndex.value = -1
   formRef.value?.resetFields()
 }
 
@@ -428,14 +364,14 @@ const loadCascadeData = async () => {
   }
   try {
     // 库区类型：需要查询库区信息，获取所属仓库ID
-    if (formData.value.type === BarcodeBizTypeEnum.LOCATION) {
+    if (formData.value.type === MesWmStockTakingParamTypeEnum.LOCATION) {
       const location = await WmWarehouseLocationApi.getWarehouseLocation(formData.value.valueId)
       if (location?.warehouseId) {
         locationWarehouseId.value = location.warehouseId
       }
     }
     // 库位类型：需要查询库位信息，获取所属仓库ID和库区ID
-    else if (formData.value.type === BarcodeBizTypeEnum.AREA) {
+    else if (formData.value.type === MesWmStockTakingParamTypeEnum.AREA) {
       const area = await WmWarehouseAreaApi.getWarehouseArea(formData.value.valueId)
       if (area?.warehouseId) {
         areaWarehouseId.value = area.warehouseId
@@ -452,15 +388,7 @@ const loadCascadeData = async () => {
 /** 监听 planId 变化 */
 watch(
   () => props.planId,
-  async (value) => {
-    resetForm()
-    if (!value) {
-      queryParams.planId = undefined
-      queryParams.pageNo = 1
-      list.value = []
-      total.value = 0
-      return
-    }
+  async () => {
     queryParams.pageNo = 1
     await getList()
   },
