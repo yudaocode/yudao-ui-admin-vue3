@@ -48,6 +48,30 @@
             </el-select>
           </el-form-item>
         </el-col>
+        <el-col :span="8" v-if="formData.type === MesWmStockTakingTypeEnum.DYNAMIC">
+          <el-form-item label="开始时间" prop="startTime">
+            <el-date-picker
+              v-model="formData.startTime"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="请选择开始时间"
+              class="!w-full"
+              :disabled="isDetail"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" v-if="formData.type === MesWmStockTakingTypeEnum.DYNAMIC">
+          <el-form-item label="结束时间" prop="endTime">
+            <el-date-picker
+              v-model="formData.endTime"
+              type="date"
+              value-format="YYYY-MM-DD"
+              placeholder="请选择结束时间"
+              class="!w-full"
+              :disabled="isDetail"
+            />
+          </el-form-item>
+        </el-col>
         <el-col :span="8">
           <el-form-item label="盘点日期" prop="takingDate">
             <el-date-picker
@@ -104,6 +128,7 @@ import { StockTakingApi, type StockTakingTaskVO } from '@/api/mes/wm/stocktaking
 import { type StockTakingPlanVO } from '@/api/mes/wm/stocktaking/plan/index'
 import StockTakingPlanSelect from '@/views/mes/wm/stocktaking/plan/components/StockTakingPlanSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import { MesWmStockTakingTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'StockTakingForm' })
 
@@ -133,6 +158,8 @@ const formData = ref<StockTakingTaskVO>({
   userId: undefined,
   userNickname: undefined,
   planId: undefined,
+  startTime: undefined,
+  endTime: undefined,
   blindFlag: false,
   frozenFlag: false,
   remark: undefined
@@ -140,6 +167,7 @@ const formData = ref<StockTakingTaskVO>({
 const formRules = reactive({
   code: [{ required: true, message: '任务编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '任务名称不能为空', trigger: 'blur' }],
+  planId: [{ required: true, message: '盘点方案不能为空', trigger: 'change' }],
   type: [{ required: true, message: '盘点类型不能为空', trigger: 'change' }],
   takingDate: [{ required: true, message: '盘点日期不能为空', trigger: 'change' }],
   blindFlag: [{ required: true, message: '是否盲盘不能为空', trigger: 'change' }],
@@ -200,6 +228,8 @@ const resetForm = () => {
     userId: undefined,
     userNickname: undefined,
     planId: undefined,
+    startTime: undefined,
+    endTime: undefined,
     blindFlag: false,
     frozenFlag: false,
     remark: undefined
@@ -213,6 +243,8 @@ const handlePlanChange = (plan?: StockTakingPlanVO) => {
     return
   }
   formData.value.type = plan.type
+  formData.value.startTime = plan.startTime
+  formData.value.endTime = plan.endTime
   formData.value.blindFlag = !!plan.blindFlag
   formData.value.frozenFlag = !!plan.frozenFlag
 }

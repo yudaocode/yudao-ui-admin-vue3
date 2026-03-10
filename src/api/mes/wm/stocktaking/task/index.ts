@@ -13,11 +13,9 @@ export interface StockTakingTaskVO {
   planName?: string
   blindFlag?: boolean
   frozenFlag?: boolean
-  snapshotTime?: string
   startTime?: string
   endTime?: string
   status?: number
-  adjustedFlag?: boolean
   remark?: string
   createTime?: string
 }
@@ -47,12 +45,8 @@ export const StockTakingApi = {
     return await request.delete({ url: '/mes/wm/stocktaking-task/delete?id=' + id })
   },
 
-  startStockTaking: async (data: StockTakingTaskActionReqVO) => {
-    return await request.put({ url: '/mes/wm/stocktaking-task/start', data })
-  },
-
-  finishStockTaking: async (data: StockTakingTaskActionReqVO) => {
-    return await request.put({ url: '/mes/wm/stocktaking-task/finish', data })
+  submitStockTaking: async (data: StockTakingTaskActionReqVO) => {
+    return await request.put({ url: '/mes/wm/stocktaking-task/submit', data })
   },
 
   cancelStockTaking: async (data: StockTakingTaskActionReqVO) => {
