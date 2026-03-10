@@ -24,22 +24,20 @@ export interface StockTakingTaskLineVO {
   remark?: string
 }
 
-// TODO @AI：可能不需要这个；
-export interface StockTakingTaskLineBatchUpdateReqVO {
-  taskId: number
-  items: Array<{
-    id: number
-    takingQuantity: number
-    remark?: string
-  }>
-}
-
 export const StockTakingTaskLineApi = {
-  getStockTakingTaskLineList: async (taskId: number) => {
-    return await request.get({ url: '/mes/wm/stocktaking-task/line-list?taskId=' + taskId })
+  getStockTakingTaskLinePage: async (params: any) => {
+    return await request.get({ url: '/mes/wm/stocktaking-task-line/page', params })
   },
 
-  batchUpdateStockTakingTaskLines: async (data: StockTakingTaskLineBatchUpdateReqVO) => {
-    return await request.put({ url: '/mes/wm/stocktaking-task/line-batch-update', data })
+  createStockTakingTaskLine: async (data: StockTakingTaskLineVO) => {
+    return await request.post({ url: '/mes/wm/stocktaking-task-line/create', data })
+  },
+
+  updateStockTakingTaskLine: async (data: StockTakingTaskLineVO) => {
+    return await request.put({ url: '/mes/wm/stocktaking-task-line/update', data })
+  },
+
+  deleteStockTakingTaskLine: async (id: number) => {
+    return await request.delete({ url: '/mes/wm/stocktaking-task-line/delete?id=' + id })
   }
 }

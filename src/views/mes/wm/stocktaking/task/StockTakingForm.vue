@@ -112,6 +112,15 @@
       </el-row>
     </el-form>
 
+    <el-tabs v-if="formData.id" type="border-card" class="mt-16px">
+      <el-tab-pane v-if="!formData.blindFlag" label="盘点清单">
+        <StockTakingTaskLineList :task-id="formData.id" :form-type="formType" />
+      </el-tab-pane>
+      <el-tab-pane v-if="resultVisible" label="盘点结果">
+        <StockTakingTaskResultList :task-id="formData.id" />
+      </el-tab-pane>
+    </el-tabs>
+
     <template #footer>
       <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
@@ -128,7 +137,12 @@ import { StockTakingApi, type StockTakingTaskVO } from '@/api/mes/wm/stocktaking
 import { type StockTakingPlanVO } from '@/api/mes/wm/stocktaking/plan/index'
 import StockTakingPlanSelect from '@/views/mes/wm/stocktaking/plan/components/StockTakingPlanSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import { MesWmStockTakingTypeEnum } from '@/views/mes/utils/constants'
+import StockTakingTaskLineList from './StockTakingTaskLineList.vue'
+import StockTakingTaskResultList from './StockTakingTaskResultList.vue'
+import {
+  MesWmStockTakingTypeEnum,
+  MesWmStockTakingTaskStatusEnum
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'StockTakingForm' })
 
@@ -148,7 +162,9 @@ const dialogTitle = computed(() => {
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('create') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const isDetail = computed(() => formType.value === 'detail') // 是否只读
-const formRef = ref() // 表单 Ref
+const resultVisible = computed(
+  () => formData.value.status && formData.value.status !== MesWmStockTakingTaskStatusEnum.PREPARE
+)
 const formData = ref<StockTakingTaskVO>({
   id: undefined,
   code: undefined,
@@ -174,6 +190,7 @@ const formRules = reactive({
   frozenFlag: [{ required: true, message: '是否冻结库存不能为空', trigger: 'change' }],
   userId: [{ required: true, message: '盘点人不能为空', trigger: 'change' }]
 })
+const formRef = ref() // 表单 Ref
 
 /** 生成任务编码 */
 const generateCode = () => {
