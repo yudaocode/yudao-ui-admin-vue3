@@ -20,10 +20,6 @@ export interface StockTakingTaskVO {
   createTime?: string
 }
 
-export interface StockTakingTaskActionReqVO {
-  id: number
-}
-
 export const StockTakingApi = {
   getStockTakingPage: async (params: any) => {
     return await request.get({ url: '/mes/wm/stocktaking-task/page', params })
@@ -45,12 +41,12 @@ export const StockTakingApi = {
     return await request.delete({ url: '/mes/wm/stocktaking-task/delete?id=' + id })
   },
 
-  submitStockTaking: async (data: StockTakingTaskActionReqVO) => {
-    return await request.put({ url: '/mes/wm/stocktaking-task/submit', data })
+  submitStockTaking: async (id: number) => {
+    return await request.put({ url: '/mes/wm/stocktaking-task/submit', params: { id } })
   },
 
-  cancelStockTaking: async (data: StockTakingTaskActionReqVO) => {
-    return await request.put({ url: '/mes/wm/stocktaking-task/cancel', data })
+  cancelStockTaking: async (id: number) => {
+    return await request.put({ url: '/mes/wm/stocktaking-task/cancel', params: { id } })
   },
 
   exportStockTaking: async (params: any) => {

@@ -29,6 +29,10 @@ export const StockTakingTaskLineApi = {
     return await request.get({ url: '/mes/wm/stocktaking-task-line/page', params })
   },
 
+  getStockTakingTaskLine: async (id: number) => {
+    return await request.get({ url: '/mes/wm/stocktaking-task-line/get', params: { id } })
+  },
+
   createStockTakingTaskLine: async (data: StockTakingTaskLineVO) => {
     return await request.post({ url: '/mes/wm/stocktaking-task-line/create', data })
   },

@@ -142,10 +142,7 @@
             删除
           </el-button>
           <el-button
-            v-if="
-              scope.row.status !== MesWmStockTakingTaskStatusEnum.FINISHED &&
-              scope.row.status !== MesWmStockTakingTaskStatusEnum.CANCELED
-            "
+            v-if="scope.row.status === MesWmStockTakingTaskStatusEnum.APPROVING"
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
@@ -178,7 +175,6 @@ defineOptions({ name: 'MesWmStockTakingTaking' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const router = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const list = ref<StockTakingTaskVO[]>([]) // 列表数据
@@ -229,7 +225,7 @@ const openForm = (type: string, id?: number) => {
 const handleSubmit = async (id: number) => {
   try {
     await message.confirm('确认提交该盘点任务进行审批？')
-    await StockTakingApi.submitStockTaking({ id })
+    await StockTakingApi.submitStockTaking(id)
     message.success('提交成功')
     await getList()
   } catch {}
@@ -239,7 +235,7 @@ const handleSubmit = async (id: number) => {
 const handleCancel = async (id: number) => {
   try {
     await message.confirm('确认取消该盘点任务？')
-    await StockTakingApi.cancelStockTaking({ id })
+    await StockTakingApi.cancelStockTaking(id)
     message.success('取消成功')
     await getList()
   } catch {}
