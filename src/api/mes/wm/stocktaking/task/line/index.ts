@@ -29,6 +29,10 @@ export const StockTakingTaskLineApi = {
     return await request.get({ url: '/mes/wm/stocktaking-task-line/page', params })
   },
 
+  getStockTakingTaskLineSimpleList: async (taskId: number) => {
+    return await request.get({ url: '/mes/wm/stocktaking-task-line/simple-list', params: { taskId } })
+  },
+
   getStockTakingTaskLine: async (id: number) => {
     return await request.get({ url: '/mes/wm/stocktaking-task-line/get', params: { id } })
   },
@@ -44,4 +48,21 @@ export const StockTakingTaskLineApi = {
   deleteStockTakingTaskLine: async (id: number) => {
     return await request.delete({ url: '/mes/wm/stocktaking-task-line/delete?id=' + id })
   }
+}
+
+export interface StockTakingTaskLineSimpleVO {
+  id: number
+  itemId: number
+  itemCode: string
+  itemName: string
+  specification?: string
+  unitMeasureName?: string
+  batchCode?: string
+  warehouseId: number
+  warehouseName: string
+  locationId?: number
+  locationName?: string
+  areaId?: number
+  areaName?: string
+  quantity: number
 }

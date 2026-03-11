@@ -28,11 +28,23 @@ export const StockTakingResultApi = {
     return await request.get({ url: '/mes/wm/stocktaking-task-result/page', params })
   },
 
-  getStockTakingResultList: async (taskId: number) => {
-    return await request.get({ url: '/mes/wm/stocktaking-task-result/list?taskId=' + taskId })
+  getStockTakingResult: async (id: number) => {
+    return await request.get({ url: '/mes/wm/stocktaking-task-result/get', params: { id } })
   },
 
-  exportStockTakingResult: async (params: any) => {
-    return await request.download({ url: '/mes/wm/stocktaking-task-result/export-excel', params })
+  getStockTakingResultList: async (params: any) => {
+    return await request.get({ url: '/mes/wm/stocktaking-task-result/list', params })
+  },
+
+  createStockTakingResult: async (data: StockTakingResultVO) => {
+    return await request.post({ url: '/mes/wm/stocktaking-task-result/create', data })
+  },
+
+  updateStockTakingResult: async (data: StockTakingResultVO) => {
+    return await request.put({ url: '/mes/wm/stocktaking-task-result/update', data })
+  },
+
+  deleteStockTakingResult: async (id: number) => {
+    return await request.delete({ url: '/mes/wm/stocktaking-task-result/delete?id=' + id })
   }
 }

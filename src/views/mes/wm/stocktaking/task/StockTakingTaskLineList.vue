@@ -146,7 +146,7 @@ const props = defineProps<{
 const { t } = useI18n()
 const message = useMessage()
 
-const isReadOnly = computed(() => props.formType === 'detail')
+const isReadOnly = computed(() => props.formType !== 'update')
 
 // ==================== 列表 ====================
 const loading = ref(false)

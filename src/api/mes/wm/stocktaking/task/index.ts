@@ -49,6 +49,10 @@ export const StockTakingApi = {
     return await request.put({ url: '/mes/wm/stocktaking-task/cancel', params: { id } })
   },
 
+  finishStockTaking: async (id: number) => {
+    return await request.put({ url: '/mes/wm/stocktaking-task/finish', data: { id } })
+  },
+
   exportStockTaking: async (params: any) => {
     return await request.download({ url: '/mes/wm/stocktaking-task/export-excel', params })
   }

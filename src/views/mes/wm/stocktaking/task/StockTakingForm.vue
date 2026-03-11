@@ -112,17 +112,24 @@
       </el-row>
     </el-form>
 
-    <el-tabs v-if="formData.id" type="border-card" class="mt-16px">
-      <el-tab-pane v-if="!formData.blindFlag" label="盘点清单">
+    <el-tabs v-if="formData.id" v-model="activeTab" type="border-card" class="mt-16px">
+      <el-tab-pane v-if="!formData.blindFlag" label="盘点清单" name="lines">
         <StockTakingTaskLineList :task-id="formData.id" :form-type="formType" />
       </el-tab-pane>
-      <el-tab-pane v-if="resultVisible" label="盘点结果">
-        <StockTakingTaskResultList :task-id="formData.id" />
+      <el-tab-pane v-if="resultVisible || isExecute" label="盘点结果" name="results">
+        <StockTakingTaskResultList
+          ref="resultListRef"
+          :task-id="formData.id"
+          :form-type="isExecute ? 'execute' : 'detail'"
+        />
       </el-tab-pane>
     </el-tabs>
 
     <template #footer>
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+      <el-button v-if="isExecute" @click="handleExecute" type="primary" :disabled="formLoading">
+        执行盘点
+      </el-button>
+      <el-button v-else-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
       </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -155,13 +162,15 @@ const dialogTitle = computed(() => {
   const titles = {
     create: '新增盘点任务',
     update: '编辑盘点任务',
-    detail: '盘点任务详情'
+    detail: '盘点任务详情',
+    execute: '执行盘点'
   }
   return titles[formType.value] || formType.value
 }) // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('create') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const formType = ref('create') // 表单的类型：create - 新增；update - 修改；detail - 详情；execute - 执行盘点
 const isDetail = computed(() => formType.value === 'detail') // 是否只读
+const isExecute = computed(() => formType.value === 'execute') // 是否执行盘点模式
 const resultVisible = computed(
   () => formData.value.status && formData.value.status !== MesWmStockTakingTaskStatusEnum.PREPARE
 )
@@ -191,6 +200,8 @@ const formRules = reactive({
   userId: [{ required: true, message: '盘点人不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const activeTab = ref('lines') // 当前激活的 tab
+const resultListRef = ref() // 盘点结果列表 Ref
 
 /** 生成任务编码 */
 const generateCode = () => {
@@ -201,6 +212,7 @@ const generateCode = () => {
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
+  activeTab.value = type === 'execute' ? 'results' : 'lines'
   resetForm()
   if (id) {
     formLoading.value = true
@@ -264,5 +276,23 @@ const handlePlanChange = (plan?: StockTakingPlanVO) => {
   formData.value.endTime = plan.endTime
   formData.value.blindFlag = !!plan.blindFlag
   formData.value.frozenFlag = !!plan.frozenFlag
+}
+
+/** 执行盘点 */
+const handleExecute = async () => {
+  try {
+    await message.confirm('确认执行盘点操作？')
+    formLoading.value = true
+
+    // 完成盘点任务
+    await StockTakingApi.finishStockTaking(formData.value.id!)
+
+    message.success('执行盘点成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
 }
 </script>

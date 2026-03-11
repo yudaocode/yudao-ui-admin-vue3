@@ -105,7 +105,7 @@
         </template>
       </el-table-column>
       <el-table-column label="盘点方案" align="center" prop="planName" min-width="180" />
-      <el-table-column label="盘点日期" align="center" prop="takingDate" min-width="180" />
+      <el-table-column label="盘点日期" align="center" prop="takingDate" :formatter="dateFormatter2" min-width="180" />
       <el-table-column label="盘点人" align="center" prop="userNickname" min-width="120" />
       <el-table-column label="单据状态" align="center" prop="status" min-width="110">
         <template #default="scope">
@@ -131,6 +131,15 @@
             v-hasPermi="['mes:wm-stock-taking-task:update']"
           >
             提交
+          </el-button>
+          <el-button
+            v-if="scope.row.status === MesWmStockTakingTaskStatusEnum.APPROVING"
+            link
+            type="primary"
+            @click="handleExecute(scope.row.id)"
+            v-hasPermi="['mes:wm-stock-taking-task:update']"
+          >
+            执行盘点
           </el-button>
           <el-button
             v-if="scope.row.status === MesWmStockTakingTaskStatusEnum.PREPARE"
@@ -165,6 +174,7 @@
 </template>
 
 <script setup lang="ts">
+import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { StockTakingApi, type StockTakingTaskVO } from '@/api/mes/wm/stocktaking/task/index'
@@ -229,6 +239,11 @@ const handleSubmit = async (id: number) => {
     message.success('提交成功')
     await getList()
   } catch {}
+}
+
+/** 执行盘点 */
+const handleExecute = (id: number) => {
+  formRef.value.open('execute', id)
 }
 
 /** 取消任务 */
