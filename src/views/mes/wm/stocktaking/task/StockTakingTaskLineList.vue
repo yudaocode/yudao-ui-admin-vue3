@@ -1,6 +1,7 @@
 <!-- MES 盘点任务行列表子组件 -->
 <template>
   <div>
+    <!-- 添加物料按钮 -->
     <el-button
       v-if="!isReadOnly"
       v-hasPermi="['mes:wm-stock-taking-task:update']"
@@ -143,20 +144,20 @@ const props = defineProps<{
   formType?: string
 }>()
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const isReadOnly = computed(() => props.formType !== 'update')
+const isReadOnly = computed(() => props.formType !== 'update') // 是否只读
 
 // ==================== 列表 ====================
-const loading = ref(false)
-const list = ref<StockTakingTaskLineVO[]>([])
-const total = ref(0)
+const loading = ref(false) // 列表的加载中
+const list = ref<StockTakingTaskLineVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   taskId: undefined as number | undefined
-})
+}) // 查询参数
 
 /** 查询行列表 */
 const getList = async () => {
@@ -183,10 +184,10 @@ const handleDelete = async (id: number) => {
 }
 
 // ==================== 添加/编辑表单 ====================
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const dialogFormType = ref('')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const dialogFormType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   taskId: undefined as number | undefined,
@@ -197,7 +198,7 @@ const formData = ref({
   quantity: undefined,
   status: undefined,
   remark: undefined
-})
+}) // 表单数据
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }],
@@ -205,8 +206,8 @@ const formRules = reactive({
   areaId: [{ required: true, message: '库位不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '在库数量不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
-})
-const formRef = ref()
+}) // 表单校验规则
+const formRef = ref() // 表单 Ref
 
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {

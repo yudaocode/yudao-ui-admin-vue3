@@ -1,6 +1,7 @@
 <!-- MES 盘点任务结果列表子组件 -->
 <template>
   <div>
+    <!-- 新增按钮 -->
     <el-button
       v-if="!isReadOnly"
       v-hasPermi="['mes:wm-stock-taking-task:update']"
@@ -28,6 +29,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
     <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
@@ -45,16 +47,16 @@
       label-width="110px"
       v-loading="formLoading"
     >
-      <!-- 执行盘点模式：选择盘点清单行 -->
-      <el-row v-if="isExecute && dialogFormType === 'create'">
+      <!-- 执行盘点模式：选择盘点清单行（可选，选择后自动带出信息） -->
+      <el-row>
         <el-col :span="24">
           <el-form-item label="盘点清单" prop="lineId">
-            <!-- TODO @AI：无论什么时候，都展示；只是说，create 的时候可以操作，其他时候是 readoly；  -->
             <el-select
               v-model="formData.lineId"
               placeholder="请选择盘点清单（可选）"
               class="!w-full"
               clearable
+              :disabled="dialogFormType !== 'create'"
               @change="handleLineChange"
               @clear="handleLineClear"
             >
@@ -68,7 +70,7 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- 物料、批次编码、差异数量 -->
+      <!-- 物料、批次编码、盘点数量 -->
       <el-row>
         <el-col :span="8">
           <el-form-item label="物料" prop="itemId">
@@ -169,28 +171,31 @@ const props = defineProps<{
   formType?: string
 }>()
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const isReadOnly = computed(() => props.formType === 'detail')
-const isExecute = computed(() => props.formType === 'execute')
+const isReadOnly = computed(() => props.formType === 'detail') // 是否只读
+const isExecute = computed(() => props.formType === 'execute') // 是否执行盘点模式
+// 字段是否禁用：执行盘点模式下，选择了盘点清单后，自动带出的字段禁用
 const isFieldsDisabled = computed(() => {
   return isExecute.value && dialogFormType.value === 'create' && !!formData.value.lineId
 })
 
 // ==================== 列表 ====================
-const loading = ref(false)
-const list = ref<StockTakingResultVO[]>([])
-const total = ref(0)
+const loading = ref(false) // 列表的加载中
+const list = ref<StockTakingResultVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   taskId: undefined as number | undefined
-})
+}) // 查询参数
 
 /** 查询列表 */
 const getList = async () => {
-  if (!props.taskId) return
+  if (!props.taskId) {
+    return
+  }
   loading.value = true
   try {
     queryParams.taskId = props.taskId
@@ -213,11 +218,11 @@ const handleDelete = async (id: number) => {
 }
 
 // ==================== 添加/编辑表单 ====================
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const dialogFormType = ref('')
-const taskLineList = ref<StockTakingTaskLineVO[]>([])
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const dialogFormType = ref('') // 表单的类型：create - 新增；update - 修改
+const taskLineList = ref<StockTakingTaskLineVO[]>([]) // 盘点清单列表
 const formData = ref({
   id: undefined as number | undefined,
   taskId: undefined as number | undefined,
@@ -231,15 +236,15 @@ const formData = ref({
   areaId: undefined as number | undefined,
   takingQuantity: undefined as number | undefined,
   remark: undefined as string | undefined
-})
+}) // 表单数据
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }],
   locationId: [{ required: true, message: '库区不能为空', trigger: 'change' }],
   areaId: [{ required: true, message: '库位不能为空', trigger: 'change' }],
   takingQuantity: [{ required: true, message: '盘点数量不能为空', trigger: 'blur' }]
-})
-const formRef = ref()
+}) // 表单校验规则
+const formRef = ref() // 表单 Ref
 
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
@@ -248,7 +253,7 @@ const openForm = async (type: string, id?: number) => {
   dialogFormType.value = type
   resetForm()
   // 执行盘点模式下，加载盘点清单列表
-  if (isExecute.value && !id) {
+  if (isExecute.value) {
     formLoading.value = true
     try {
       taskLineList.value = await StockTakingTaskLineApi.getStockTakingTaskLineSimpleList(
