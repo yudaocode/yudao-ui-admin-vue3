@@ -16,7 +16,9 @@
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="160" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位名称" align="center" prop="unitMeasureName" width="90" />
-      <!-- TODO @AI：三个仓库字段 -->
+      <el-table-column label="仓库" align="center" prop="warehouseName" min-width="120" />
+      <el-table-column label="库区" align="center" prop="locationName" min-width="120" />
+      <el-table-column label="库位" align="center" prop="areaName" min-width="120" />
       <el-table-column label="数量" align="center" prop="quantity" min-width="120" />
       <el-table-column label="盘点数量" align="center" prop="takingQuantity" min-width="120" />
       <el-table-column v-if="!isReadOnly" label="操作" align="center" width="160" fixed="right">
@@ -44,20 +46,17 @@
       v-loading="formLoading"
     >
       <!-- 执行盘点模式：选择盘点清单行 -->
-      <!--
-       TODO @AI：我想是这样的：
-       lineId 是可选的；
-       1）选择了 lineId 的情况下，其他字段（itemId、warehouseId 等）都不可修改，且根据 lineId 自动带出对应的值；
-        2）不选择 lineId 的情况下，其他字段都可以手动选择/
-       -->
-      <el-row v-if="isExecuteMode && dialogFormType === 'create'">
+      <el-row v-if="isExecute && dialogFormType === 'create'">
         <el-col :span="24">
           <el-form-item label="盘点清单" prop="lineId">
+            <!-- TODO @AI：无论什么时候，都展示；只是说，create 的时候可以操作，其他时候是 readoly；  -->
             <el-select
               v-model="formData.lineId"
-              placeholder="请选择盘点清单"
+              placeholder="请选择盘点清单（可选）"
               class="!w-full"
+              clearable
               @change="handleLineChange"
+              @clear="handleLineClear"
             >
               <el-option
                 v-for="line in taskLineList"
@@ -69,35 +68,56 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- 普通模式：手动选择物料和仓库 -->
-      <el-row v-if="!isExecuteMode || dialogFormType === 'update'">
+      <!-- 物料、批次编码、差异数量 -->
+      <el-row>
         <el-col :span="8">
           <el-form-item label="物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" />
+            <MdItemSelect
+              v-model="formData.itemId"
+              placeholder="请选择物料"
+              :disabled="isFieldsDisabled"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="批次编码" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次编码" />
+            <el-input
+              v-model="formData.batchCode"
+              placeholder="请输入批次编码"
+              :disabled="isFieldsDisabled"
+            />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="盘点数量" prop="takingQuantity">
+            <el-input-number
+              v-model="formData.takingQuantity"
+              :precision="2"
+              controls-position="right"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <!-- 仓库、库区、库位（递归选择） -->
+      <el-row>
         <el-col :span="8">
           <el-form-item label="仓库" prop="warehouseId">
             <WmWarehouseSelect
               v-model="formData.warehouseId"
               placeholder="请选择仓库"
+              :disabled="isFieldsDisabled"
               @change="handleWarehouseChange"
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row v-if="!isExecuteMode || dialogFormType === 'update'">
         <el-col :span="8" v-if="formData.warehouseId">
           <el-form-item label="库区" prop="locationId">
             <WmWarehouseLocationSelect
               v-model="formData.locationId"
               :warehouse-id="formData.warehouseId"
               placeholder="请选择库区"
+              :disabled="isFieldsDisabled"
               @change="handleLocationChange"
             />
           </el-form-item>
@@ -108,20 +128,7 @@
               v-model="formData.areaId"
               :location-id="formData.locationId"
               placeholder="请选择库位"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <!-- 差异数量 -->
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="差异数量" prop="quantity">
-            <el-input-number
-              v-model="formData.quantity"
-              :precision="2"
-              controls-position="right"
-              class="!w-1/1"
+              :disabled="isFieldsDisabled"
             />
           </el-form-item>
         </el-col>
@@ -166,7 +173,10 @@ const { t } = useI18n()
 const message = useMessage()
 
 const isReadOnly = computed(() => props.formType === 'detail')
-const isExecuteMode = computed(() => props.formType === 'execute')
+const isExecute = computed(() => props.formType === 'execute')
+const isFieldsDisabled = computed(() => {
+  return isExecute.value && dialogFormType.value === 'create' && !!formData.value.lineId
+})
 
 // ==================== 列表 ====================
 const loading = ref(false)
@@ -184,7 +194,7 @@ const getList = async () => {
   loading.value = true
   try {
     queryParams.taskId = props.taskId
-    const data = await StockTakingResultApi.getStockTakingResultList(queryParams)
+    const data = await StockTakingResultApi.getStockTakingResultPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -209,22 +219,25 @@ const formLoading = ref(false)
 const dialogFormType = ref('')
 const taskLineList = ref<StockTakingTaskLineVO[]>([])
 const formData = ref({
-  id: undefined,
+  id: undefined as number | undefined,
   taskId: undefined as number | undefined,
-  lineId: undefined,
-  materialStockId: undefined,
-  itemId: undefined,
-  batchId: undefined,
-  batchCode: undefined,
-  warehouseId: undefined,
-  locationId: undefined,
-  areaId: undefined,
-  quantity: undefined,
-  remark: undefined
+  lineId: undefined as number | undefined,
+  materialStockId: undefined as number | undefined,
+  itemId: undefined as number | undefined,
+  batchId: undefined as number | undefined,
+  batchCode: undefined as string | undefined,
+  warehouseId: undefined as number | undefined,
+  locationId: undefined as number | undefined,
+  areaId: undefined as number | undefined,
+  takingQuantity: undefined as number | undefined,
+  remark: undefined as string | undefined
 })
 const formRules = reactive({
-  lineId: [{ required: true, message: '请选择盘点清单', trigger: 'change' }],
-  quantity: [{ required: true, message: '差异数量不能为空', trigger: 'blur' }]
+  itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
+  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }],
+  locationId: [{ required: true, message: '库区不能为空', trigger: 'change' }],
+  areaId: [{ required: true, message: '库位不能为空', trigger: 'change' }],
+  takingQuantity: [{ required: true, message: '盘点数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 
@@ -234,9 +247,8 @@ const openForm = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   dialogFormType.value = type
   resetForm()
-
   // 执行盘点模式下，加载盘点清单列表
-  if (isExecuteMode.value && !id) {
+  if (isExecute.value && !id) {
     formLoading.value = true
     try {
       taskLineList.value = await StockTakingTaskLineApi.getStockTakingTaskLineSimpleList(
@@ -246,7 +258,7 @@ const openForm = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
-
+  // 修改模式下，加载盘点结果数据
   if (id) {
     formLoading.value = true
     try {
@@ -294,16 +306,27 @@ const handleLocationChange = () => {
 /** 盘点清单行变化 */
 const handleLineChange = (lineId: number) => {
   const line = taskLineList.value.find((item) => item.id === lineId)
-  if (line) {
-    // TODO @AI：linter 报错；
-    formData.value.materialStockId = line.materialStockId
-    formData.value.itemId = line.itemId
-    formData.value.batchId = line.batchId
-    formData.value.batchCode = line.batchCode
-    formData.value.warehouseId = line.warehouseId
-    formData.value.locationId = line.locationId
-    formData.value.areaId = line.areaId
+  if (!line) {
+    return
   }
+  formData.value.materialStockId = line.materialStockId ?? undefined
+  formData.value.itemId = line.itemId ?? undefined
+  formData.value.batchId = line.batchId ?? undefined
+  formData.value.batchCode = line.batchCode ?? undefined
+  formData.value.warehouseId = line.warehouseId ?? undefined
+  formData.value.locationId = line.locationId ?? undefined
+  formData.value.areaId = line.areaId ?? undefined
+}
+
+/** 清除盘点清单选择 */
+const handleLineClear = () => {
+  formData.value.materialStockId = undefined
+  formData.value.itemId = undefined
+  formData.value.batchId = undefined
+  formData.value.batchCode = undefined
+  formData.value.warehouseId = undefined
+  formData.value.locationId = undefined
+  formData.value.areaId = undefined
 }
 
 /** 重置表单 */
@@ -319,7 +342,7 @@ const resetForm = () => {
     warehouseId: undefined,
     locationId: undefined,
     areaId: undefined,
-    quantity: undefined,
+    takingQuantity: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()

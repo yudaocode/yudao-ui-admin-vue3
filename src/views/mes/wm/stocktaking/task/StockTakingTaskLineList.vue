@@ -42,7 +42,7 @@
 
   <!-- 添加/编辑行弹窗 -->
   <!-- TODO @芋艿：后续要改成 stockSelect 批量选择后，进行处理； -->
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="700px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"

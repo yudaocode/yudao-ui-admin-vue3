@@ -32,10 +32,6 @@ export const StockTakingResultApi = {
     return await request.get({ url: '/mes/wm/stocktaking-task-result/get', params: { id } })
   },
 
-  getStockTakingResultList: async (params: any) => {
-    return await request.get({ url: '/mes/wm/stocktaking-task-result/list', params })
-  },
-
   createStockTakingResult: async (data: StockTakingResultVO) => {
     return await request.post({ url: '/mes/wm/stocktaking-task-result/create', data })
   },
