@@ -103,18 +103,6 @@
         </el-col>
       </el-row>
       <el-row>
-        <!-- TODO @AI：生产批号，改成 lotNumber；前后端，数据库实体；所有代码里，涉及到的，都需要修改下； -->
-        <el-col :span="8">
-          <el-form-item label="生产批号" prop="productionBatchNumber">
-            <el-input v-model="formData.productionBatchNumber" placeholder="请输入生产批号" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <!-- TODO @AI：请输入批次号，改成“由填写信息自动生成”；然后后端的 VO 也不用接收这个参数； -->
-          <el-form-item label="批次号" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
-          </el-form-item>
-        </el-col>
         <el-col :span="8">
           <el-form-item label="生产日期" prop="productionDate">
             <el-date-picker
@@ -135,6 +123,16 @@
               placeholder="请选择有效期"
               class="!w-1/1"
             />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="生产批号" prop="productionBatchNumber">
+            <el-input v-model="formData.productionBatchNumber" placeholder="请输入生产批号" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input v-model="formData.batchCode" disabled placeholder="由填写信息自动生成" />
           </el-form-item>
         </el-col>
       </el-row>

@@ -12,6 +12,7 @@ export interface WmItemReceiptLineVO {
   unitMeasureName: string
   receivedQuantity: number
   batchId: number
+  batchCode: string
   warehouseId: number
   warehouseName: string
   locationId: number
