@@ -21,7 +21,7 @@ export interface WmItemReceiptLineVO {
   areaName: string
   productionDate: string
   expireDate: string
-  productionBatchNumber: string
+  lotNumber: string
   iqcCheckFlag: boolean
   iqcId: number
   iqcCode: string

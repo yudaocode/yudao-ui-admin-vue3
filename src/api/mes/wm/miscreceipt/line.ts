@@ -13,7 +13,7 @@ export interface WmMiscReceiptLineVO {
   areaId: number
   productionDate: string
   expireDate: string
-  productionBatchNumber: string
+  lotNumber: string
   remark: string
   createTime: string
 }

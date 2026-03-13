@@ -126,8 +126,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="生产批号" prop="productionBatchNumber">
-            <el-input v-model="formData.productionBatchNumber" placeholder="请输入生产批号" />
+          <el-form-item label="批号" prop="lotNumber">
+            <el-input v-model="formData.lotNumber" placeholder="请输入批号" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -228,7 +228,7 @@ const formData = ref({
   batchCode: undefined,
   productionDate: undefined,
   expireDate: undefined,
-  productionBatchNumber: undefined,
+  lotNumber: undefined,
   remark: undefined
 })
 const formRules = reactive({
@@ -294,7 +294,7 @@ const resetForm = () => {
     batchCode: undefined,
     productionDate: undefined,
     expireDate: undefined,
-    productionBatchNumber: undefined,
+    lotNumber: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()
