@@ -48,45 +48,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="工单来源" prop="orderSourceType">
-        <el-select
-          v-model="queryParams.orderSourceType"
-          placeholder="请选择工单来源"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="批次号" prop="batchCode">
-        <el-input
-          v-model="queryParams.batchCode"
-          placeholder="请输入批次号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="工单状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择工单状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
+
       <el-form-item label="需求日期" prop="requestDate">
         <el-date-picker
           v-model="queryParams.requestDate"
@@ -249,6 +211,7 @@
             详情
           </el-button>
           <!-- 工单条码 -->
+          <!-- TODO @芋艿：这里应该是打印；后面在跟进把； -->
           <el-button
             link
             type="primary"
@@ -282,7 +245,11 @@ import { handleTree } from '@/utils/tree'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import WorkOrderForm from './WorkOrderForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { MesProWorkOrderStatusEnum, MesProWorkOrderTypeEnum, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+import {
+  MesProWorkOrderStatusEnum,
+  MesProWorkOrderTypeEnum,
+  BarcodeBizTypeEnum
+} from '@/views/mes/utils/constants'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
@@ -303,9 +270,6 @@ const queryParams = reactive({
   productId: undefined,
   clientId: undefined,
   type: undefined,
-  orderSourceType: undefined,
-  batchCode: undefined,
-  status: undefined,
   requestDate: undefined
 })
 const queryFormRef = ref() // 搜索的表单
