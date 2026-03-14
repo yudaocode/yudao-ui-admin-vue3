@@ -7,9 +7,18 @@ export interface WmOutsourceReceiptLineVO {
   itemId: number
   itemCode: string
   itemName: string
+  specification: string
   quantity: number
   unitId: number
   unitName: string
+  batchId: number
+  batchCode: string
+  productionDate: string
+  expireDate: string
+  lotNumber: string
+  iqcCheck: boolean
+  iqcId: number
+  qualityStatus: number
   remark: string
   createTime: string
 }
