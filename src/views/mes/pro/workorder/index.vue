@@ -95,7 +95,13 @@
       default-expand-all
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
-      <el-table-column label="工单编码" align="center" prop="code" width="140" />
+      <el-table-column label="工单编码" prop="code" width="220" fixed="left">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="工单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="工单类型" align="center" prop="type" width="100">
         <template #default="scope">
@@ -140,7 +146,7 @@
         :formatter="dateFormatter"
         width="180"
       />
-      <el-table-column label="操作" align="center" width="240" fixed="right">
+      <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
           <!-- 草稿状态：编辑、确认、删除 -->
           <template v-if="scope.row.status === MesProWorkOrderStatusEnum.PREPARE">
@@ -201,15 +207,6 @@
               取消
             </el-button>
           </template>
-          <!-- 所有状态：详情 -->
-          <el-button
-            link
-            type="primary"
-            @click="openForm('detail', scope.row.id)"
-            v-hasPermi="['mes:pro-work-order:query']"
-          >
-            详情
-          </el-button>
           <!-- 工单条码 -->
           <!-- TODO @芋艿：这里应该是打印；后面在跟进把； -->
           <el-button

@@ -87,8 +87,7 @@ const props = defineProps<{
   disabled?: boolean
 }>()
 
-// generate-work-order：通知 WorkOrderForm 用 BOM 行的物料作为产品，新建子工单
-const emit = defineEmits(['generate-work-order'])
+const emit = defineEmits(['generate-work-order']) // generate-work-order：通知 WorkOrderForm 用 BOM 行的物料作为产品，新建子工单
 
 const message = useMessage()
 const { t } = useI18n()
@@ -179,7 +178,7 @@ const submitForm = async () => {
   }
 }
 
-// ==================== 初始化 ====================
+/** 初始化 **/
 onMounted(async () => {
   await getBomList()
 })

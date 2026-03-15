@@ -77,7 +77,6 @@
             <MdItemSelect
               v-model="formData.productId"
               :disabled="isDetail"
-              @change="handleProductChange"
             />
           </el-form-item>
         </el-col>
@@ -175,7 +174,6 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
-import { MdItemVO } from '@/api/mes/md/item'
 import { generateRandomStr } from '@/utils'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
@@ -203,7 +201,6 @@ const formData = ref({
   orderSourceType: undefined,
   orderSourceCode: undefined,
   productId: undefined,
-  unitMeasureId: undefined,
   quantity: undefined,
   clientId: undefined,
   vendorId: undefined,
@@ -234,7 +231,11 @@ const generateCode = () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number, parentRow?: any) => {
   dialogVisible.value = true
-  dialogTitle.value = parentRow ? '新增子工单' : type === 'detail' ? '工单详情' : t('action.' + type)
+  dialogTitle.value = parentRow
+    ? '新增子工单'
+    : type === 'detail'
+      ? '工单详情'
+      : t('action.' + type)
   formType.value = type
   activeTab.value = 'bom'
   resetForm()
@@ -277,18 +278,10 @@ const handleGenerateWorkOrder = (bomRow: any) => {
   formData.value.vendorId = currentWorkOrder.vendorId
   formData.value.requestDate = currentWorkOrder.requestDate
   formData.value.productId = bomRow.itemId
-  formData.value.unitMeasureId = bomRow.unitMeasureId
   formData.value.quantity = bomRow.quantity
 }
 
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
-
-/** 产品变更：自动填充单位 */
-const handleProductChange = (product: MdItemVO) => {
-  if (product?.unitMeasureId) {
-    formData.value.unitMeasureId = product.unitMeasureId
-  }
-}
 
 /** 工单来源变更：非客户订单时清空来源单据编号 */
 watch(
@@ -342,7 +335,6 @@ const resetForm = () => {
     orderSourceType: undefined,
     orderSourceCode: undefined,
     productId: undefined,
-    unitMeasureId: undefined,
     quantity: undefined,
     clientId: undefined,
     vendorId: undefined,
