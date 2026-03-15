@@ -188,6 +188,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索表单 ref
 
+const ganttLoading = ref(false) // 甘特图加载状态
 const ganttTasks = ref<any[]>([]) // 甘特图任务数据，格式与 ProTaskVO 相同，供 GanttChart 组件渲染
 
 /** 查询待排产工单列表（支持父子工单树形展示） */
@@ -203,14 +204,12 @@ const getWorkOrderList = async () => {
 }
 
 /** 加载甘特图预览数据（查询所有任务，供甘特图组件渲染） */
-// TODO @芋艿：后续在对齐；
 const loadGanttPreview = async () => {
+  ganttLoading.value = true
   try {
-    const data = await ProTaskApi.getTaskPage({ pageNo: 1, pageSize: 999 })
-    ganttTasks.value = data.list
-  } catch (e) {
-    console.warn('加载甘特图数据失败', e)
-    ganttTasks.value = []
+    ganttTasks.value = await ProTaskApi.getGanttTaskList(queryParams)
+  } finally {
+    ganttLoading.value = false
   }
 }
 

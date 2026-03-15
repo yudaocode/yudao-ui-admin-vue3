@@ -70,5 +70,10 @@ export const ProTaskApi = {
   // 获得任务精简列表（下拉选项）
   getTaskSimpleList: async (workOrderId?: number) => {
     return await request.get({ url: `/mes/pro/task/simple-list`, params: { workOrderId } })
+  },
+
+  // 获得甘特图任务列表（非分页）
+  getGanttTaskList: async (params: any) => {
+    return await request.get({ url: `/mes/pro/task/gantt-list`, params })
   }
 }

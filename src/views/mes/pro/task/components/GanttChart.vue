@@ -114,7 +114,7 @@ const initGantt = () => {
   // 基础配置
   gantt.config.date_format = '%Y-%m-%d %H:%i:%s'
   gantt.config.duration_unit = 'hour'
-  gantt.config.duration_step = 8 // 1工作日 = 8小时
+  gantt.config.duration_step = 8 // 1 工作日 = 8 小时
   gantt.config.row_height = 36
   gantt.config.bar_height = 24
   gantt.config.fit_tasks = true
@@ -135,17 +135,25 @@ const initGantt = () => {
     gantt.config.drag_progress = false
   }
 
-  // 时间刻度：周 > 日
+  // 时间刻度：日 > 8小时（00:00 / 08:00 / 16:00）
   gantt.config.scales = [
-    { unit: 'week', step: 1, format: '%Y年 第%W周' },
-    { unit: 'day', step: 1, format: '%m/%d %D' }
+    { unit: 'day', step: 1, format: '%Y-%m-%d %D' },
+    {
+      unit: 'hour',
+      step: 8,
+      format: (date: Date) => {
+        return String(date.getHours()).padStart(2, '0') + ':00'
+      }
+    }
   ]
 
   // 左侧列配置
   gantt.config.columns = [
-    { name: 'text', label: '任务名称', tree: true, width: 200, resize: true },
-    { name: 'start_date', label: '开始时间', align: 'center', width: 100 },
-    { name: 'duration', label: '时长(天)', align: 'center', width: 60 }
+    { name: 'text', label: '任务名称', tree: true, width: 180, resize: true },
+    { name: 'workstationName', label: '工作站', align: 'center', width: 100, resize: true },
+    { name: 'processName', label: '工序', align: 'center', width: 100, resize: true },
+    { name: 'start_date', label: '开始时间', align: 'center', width: 130 },
+    { name: 'end_date', label: '结束时间', align: 'center', width: 130 }
   ]
 
   // 今天标记线
@@ -214,8 +222,10 @@ const convertToGanttData = (tasks: any[]) => {
         id: 'task_' + t.id,
         taskId: t.id,
         text: t.name,
+        workstationName: t.workstationName || '',
+        processName: t.processName || '',
         start_date: t.startTime ? new Date(t.startTime) : new Date(),
-        duration: (t.duration || 1) * 8, // 工作日→小时
+        duration: (t.duration || 1) * 8, // 工作日 -> 小时（end_date 由 gantt 自动计算）
         parent: 'wo_' + woId,
         progress: t.quantity > 0 ? t.producedQuantity / t.quantity : 0,
         color: t.colorCode || '#00AEF3'
