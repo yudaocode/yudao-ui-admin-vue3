@@ -65,7 +65,7 @@
 
   <!-- 甘特图预览 -->
   <ContentWrap title="排产甘特图">
-    <GanttChart ref="ganttPreviewRef" :tasks="ganttTasks" :readonly="true" :height="350" />
+    <GanttChart :tasks="ganttTasks" :readonly="true" :height="350" />
   </ContentWrap>
 
   <!-- 待排产工单列表 -->
@@ -81,7 +81,7 @@
     >
       <el-table-column label="工单编码" prop="code" width="220" fixed="left">
         <template #default="scope">
-          <el-button link type="primary" @click="openWorkOrderDetail(scope.row.id)">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
             {{ scope.row.code }}
           </el-button>
         </template>
@@ -120,9 +120,10 @@
       <el-table-column label="操作" align="center" width="160" fixed="right">
         <template #default="scope">
           <el-button
+            v-if="scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED"
             link
             type="primary"
-            @click="openScheduleDrawer(scope.row)"
+            @click="openForm('schedule', scope.row.id)"
             v-hasPermi="['mes:pro-task:create']"
           >
             排产
@@ -139,12 +140,10 @@
     />
   </ContentWrap>
 
-  <!-- 排产 Drawer -->
-  <ScheduleDrawer ref="scheduleDrawerRef" />
+  <!-- 排产对话框（工单详情 + 工序步骤 + 任务列表） -->
+  <WorkOrderForm2 ref="formRef" />
   <!-- 甘特图编辑 Dialog -->
   <GanttEdit ref="ganttEditRef" />
-  <!-- 工单详情弹窗 -->
-  <WorkOrderForm ref="workOrderFormRef" />
 </template>
 
 <script setup lang="ts">
@@ -158,8 +157,7 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import GanttChart from './components/GanttChart.vue'
 import GanttEdit from './GanttEdit.vue'
-import ScheduleDrawer from './ScheduleDrawer.vue'
-import WorkOrderForm from '@/views/mes/pro/workorder/WorkOrderForm.vue'
+import WorkOrderForm2 from './WorkOrderForm2.vue'
 
 defineOptions({ name: 'MesProTask' })
 
@@ -181,7 +179,6 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索表单 ref
 
 const ganttTasks = ref<any[]>([]) // 甘特图任务数据，格式与 ProTaskVO 相同，供 GanttChart 组件渲染
-const ganttPreviewRef = ref() // TODO @AI：是不是 ganttPreviewRef 可以去掉；
 
 /** 查询待排产工单列表（支持父子工单树形展示） */
 const getWorkOrderList = async () => {
@@ -223,17 +220,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 打开排产 Drawer */
-// TODO @芋艿：这里的作用，需要在看看；
-const scheduleDrawerRef = ref()
-const openScheduleDrawer = (row: any) => {
-  scheduleDrawerRef.value.open(row)
-}
-
-/** 点击工单编码，查看工单详情 */
-const workOrderFormRef = ref()
-const openWorkOrderDetail = (id: number) => {
-  workOrderFormRef.value.open('detail', id)
+/** 打开排产/详情对话框 */
+const formRef = ref()
+const openForm = (type: string, id: number) => {
+  formRef.value.open(type, id)
 }
 
 // TODO @芋艿：后续可以考虑把甘特图预览和编辑合并成一个组件，统一管理甘特图数据和刷新逻辑；
