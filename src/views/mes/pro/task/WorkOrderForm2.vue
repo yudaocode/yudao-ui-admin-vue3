@@ -1,12 +1,7 @@
 <!-- MES 生产排产 - 工单排产对话框（表单布局与 WorkOrderForm 保持一致，全部 disabled） -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
-    <el-form
-      ref="formRef"
-      :model="formData"
-      label-width="120px"
-      v-loading="formLoading"
-    >
+    <el-form ref="formRef" :model="formData" label-width="120px" v-loading="formLoading">
       <el-row>
         <el-col :span="12">
           <el-form-item label="工单编码" prop="code">
@@ -116,15 +111,16 @@
       </el-row>
     </el-form>
 
+    <!-- TODO @AI：都展示，不只 isSchedule -->
     <!-- 工序步骤导航（仅排产模式显示） -->
     <el-steps
       v-if="isSchedule && routeProcessList.length && formData.id"
       :active="activeProcessStep"
-      finish-status="success"
       align-center
       simple
-      class="my-15px"
+      class="my-10px"
     >
+      <!-- TODO @AI：style 改成 unocss -->
       <el-step
         v-for="(rp, index) in routeProcessList"
         :key="rp.processId"
@@ -152,8 +148,16 @@
         :process-list="routeProcessList"
       />
     </el-card>
-
+    <!-- TODO @AI：完成拿到 index.vue 里；这里不放 -->
     <template #footer>
+      <!-- TODO @芋艿：完成排产的逻辑，需要后端提供对应接口 -->
+      <el-button
+        v-if="isSchedule && formData.status === MesProWorkOrderStatusEnum.CONFIRMED && formData.id"
+        type="success"
+        @click="handleFinish"
+      >
+        完成
+      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -163,11 +167,14 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProWorkOrderApi } from '@/api/mes/pro/workorder'
 import { ProRouteProcessApi, ProRouteProcessVO } from '@/api/mes/pro/route/process'
-import { ProRouteProductApi } from '@/api/mes/pro/route/product'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
-import { MesProWorkOrderSourceTypeEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
+import {
+  MesProWorkOrderSourceTypeEnum,
+  MesProWorkOrderTypeEnum,
+  MesProWorkOrderStatusEnum
+} from '@/views/mes/utils/constants'
 import ProTaskList from './ProTaskList.vue'
 
 defineOptions({ name: 'WorkOrderForm2' })
@@ -206,8 +213,8 @@ const open = async (type: string, id: number) => {
     // 加载工单详情
     formData.value = await ProWorkOrderApi.getWorkOrder(id)
 
-    // 排产模式：加载工艺路线工序列表
-    if (type === 'schedule' && formData.value.productId) {
+    // 加载工艺路线工序列表
+    if (formData.value.productId) {
       await loadRouteProcesses(formData.value.productId)
     }
   } finally {
@@ -215,20 +222,31 @@ const open = async (type: string, id: number) => {
   }
 }
 
-/** 加载工艺路线工序列表 */
+/** 加载工艺路线工序列表（通过产品查找关联的工艺路线） */
+const message = useMessage()
 const loadRouteProcesses = async (productId: number) => {
   try {
-    // 临时方案：查所有工艺路线产品，前端匹配（后续需后端提供"根据产品查询工艺路线"接口）
-    const routeProducts = await ProRouteProductApi.getRouteProductListByRoute(0)
-    const matched = routeProducts?.find((rp: any) => rp.itemId === productId)
-    if (matched) {
-      currentRouteId.value = matched.routeId
-      const processes = await ProRouteProcessApi.getRouteProcessListByRoute(matched.routeId)
+    const processes = await ProRouteProcessApi.getRouteProcessListByProduct(productId)
+    if (processes && processes.length > 0) {
+      currentRouteId.value = processes[0].routeId
       routeProcessList.value = processes.sort((a: any, b: any) => a.sort - b.sort)
+    } else {
+      message.warning('当前产品未配置工艺路线，请先在工艺路线中维护')
     }
   } catch (e) {
     console.warn('加载工艺路线工序失败', e)
   }
+}
+
+/** 完成排产（对齐 KTG 的 handleFinish） */
+const handleFinish = async () => {
+  try {
+    await message.confirm('是否完成工单排产？【完成后将不能更改】')
+    // TODO @芋艿：调用后端接口，更新工单状态为已完成
+    // await ProWorkOrderApi.updateWorkOrderStatus(formData.value.id, MesProWorkOrderStatusEnum.FINISHED)
+    message.success('排产完成')
+    dialogVisible.value = false
+  } catch {}
 }
 
 defineExpose({ open })

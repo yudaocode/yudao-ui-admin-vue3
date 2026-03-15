@@ -1,5 +1,6 @@
 <!-- MES 生产任务表单 -->
 <!-- TODO @芋艿：晚点在 review -->
+<!-- TODO @AI：融合到 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/pro/task/ProTaskList.vue；参考  /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/productionissue/ProductionIssueLineList.vue -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="800px">
     <el-form
@@ -36,10 +37,7 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="工作站" prop="workstationId">
-            <MdWorkstationSelect
-              v-model="formData.workstationId"
-              :disabled="isDetail"
-            />
+            <MdWorkstationSelect v-model="formData.workstationId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -177,15 +175,19 @@ const isDetail = computed(() => formType.value === 'detail')
 /** 自动计算结束时间：startTime + duration * 8h */
 const computeEndTime = () => {
   if (formData.value.startTime && formData.value.duration) {
-    const start = typeof formData.value.startTime === 'number'
-      ? formData.value.startTime
-      : new Date(formData.value.startTime).getTime()
+    const start =
+      typeof formData.value.startTime === 'number'
+        ? formData.value.startTime
+        : new Date(formData.value.startTime).getTime()
     formData.value.endTime = start + formData.value.duration * 8 * 3600 * 1000
   }
 }
 
 // 监听开始时间变化也重新计算
-watch(() => formData.value.startTime, () => computeEndTime())
+watch(
+  () => formData.value.startTime,
+  () => computeEndTime()
+)
 
 /** 打开弹窗 */
 const open = async (
