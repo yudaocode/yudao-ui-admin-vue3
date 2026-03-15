@@ -27,9 +27,21 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：来源单据 -->
-      <!-- TODO @AI：产品 xxx；参考下别的模块 -->
-      <!-- TODO @AI：客户 xxx；参考下别的模块 -->
+      <el-form-item label="来源单据" prop="orderSourceCode">
+        <el-input
+          v-model="queryParams.orderSourceCode"
+          placeholder="请输入来源单据编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="产品" prop="productId">
+        <MdItemSelect v-model="queryParams.productId" placeholder="请选择产品" class="!w-240px" />
+      </el-form-item>
+      <el-form-item label="客户" prop="clientId">
+        <MdClientSelect v-model="queryParams.clientId" placeholder="请选择客户" class="!w-240px" />
+      </el-form-item>
       <el-form-item label="需求日期" prop="requestDate">
         <el-date-picker
           v-model="queryParams.requestDate"
@@ -63,20 +75,34 @@
       :data="workOrderList"
       :stripe="true"
       :show-overflow-tooltip="true"
+      row-key="id"
+      default-expand-all
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
-      <el-table-column label="工单编码" align="center" prop="code" width="140" />
+      <el-table-column label="工单编码" prop="code" width="220" fixed="left">
+        <template #default="scope">
+          <el-button link type="primary" @click="openWorkOrderDetail(scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="工单名称" align="center" prop="name" min-width="150" />
-      <!-- TODO @AI：工单来源 -->
-      <!-- TODO @AI：订单编号 -->
-      <!-- TODO @AI：订单编号 -->
+      <el-table-column label="工单来源" align="center" prop="orderSourceType" width="100">
+        <template #default="scope">
+          <dict-tag
+            :type="DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE"
+            :value="scope.row.orderSourceType"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column label="来源单据编号" align="center" prop="orderSourceCode" width="140" />
       <el-table-column label="产品编码" align="center" prop="productCode" width="120" />
       <el-table-column label="产品名称" align="center" prop="productName" min-width="120" />
       <el-table-column label="规格型号" align="center" prop="productSpec" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="工单数量" align="center" prop="quantity" width="100" />
       <el-table-column label="调整数量" align="center" prop="quantityChanged" width="100" />
-      <el-table-column label="已排产" align="center" prop="quantityScheduled" width="80" />
-      <el-table-column label="已生产数量" align="center" prop="quantityProduced" width="80" />
+      <el-table-column label="已生产数量" align="center" prop="quantityProduced" width="100" />
       <el-table-column label="客户编码" align="center" prop="clientCode" width="120" />
       <el-table-column label="客户名称" align="center" prop="clientName" width="120" />
       <el-table-column
@@ -86,7 +112,7 @@
         :formatter="dateFormatter2"
         width="120"
       />
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column label="排产状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="scope.row.status" />
         </template>
@@ -101,14 +127,6 @@
           >
             排产
           </el-button>
-          <el-button
-            link
-            type="success"
-            @click="openProgressDrawer(scope.row)"
-            v-hasPermi="['mes:pro-task:query']"
-          >
-            进度
-          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -122,113 +140,63 @@
   </ContentWrap>
 
   <!-- 排产 Drawer -->
-  <el-drawer v-model="scheduleDrawerVisible" title="排产" size="75%" :destroy-on-close="true">
-    <div v-if="currentWorkOrder">
-      <!-- 工单概要信息 -->
-      <el-descriptions :column="3" border class="mb-15px">
-        <el-descriptions-item label="工单编码">{{ currentWorkOrder.code }}</el-descriptions-item>
-        <el-descriptions-item label="工单名称">{{ currentWorkOrder.name }}</el-descriptions-item>
-        <el-descriptions-item label="产品">{{ currentWorkOrder.productName }}</el-descriptions-item>
-        <el-descriptions-item label="数量">{{ currentWorkOrder.quantity }}</el-descriptions-item>
-        <el-descriptions-item label="客户">{{ currentWorkOrder.clientName }}</el-descriptions-item>
-        <el-descriptions-item label="需求日期">
-          {{ formatDate(currentWorkOrder.requestDate, 'YYYY-MM-DD') }}
-        </el-descriptions-item>
-      </el-descriptions>
-
-      <!-- 工序步骤导航 -->
-      <el-steps
-        v-if="routeProcessList.length"
-        :active="activeProcessStep"
-        finish-status="success"
-        class="mb-15px"
-        @change="handleStepChange"
-      >
-        <el-step
-          v-for="(rp, index) in routeProcessList"
-          :key="rp.processId"
-          :title="rp.processName"
-          :description="'第' + (index + 1) + '道工序'"
-          style="cursor: pointer"
-          @click="handleStepClick(index)"
-        />
-      </el-steps>
-      <el-empty v-else description="该产品未配置工艺路线，请先在工艺路线中维护" />
-
-      <!-- 当前工序的任务列表 -->
-      <ProTaskList
-        v-if="currentProcess"
-        :work-order-id="currentWorkOrder.id"
-        :work-order-code="currentWorkOrder.code"
-        :work-order-name="currentWorkOrder.name"
-        :route-id="currentRouteId"
-        :process-id="currentProcess.processId"
-        :item-id="currentWorkOrder.productId"
-        :unit-measure-id="currentWorkOrder.unitMeasureId"
-        :process-list="routeProcessList"
-      />
-    </div>
-  </el-drawer>
-
-  <!-- 进度 Drawer -->
-  <el-drawer v-model="progressDrawerVisible" title="生产进度" size="60%" :destroy-on-close="true">
-    <ProTaskProgress v-if="currentWorkOrder" :work-order-id="currentWorkOrder.id" />
-  </el-drawer>
-
+  <ScheduleDrawer ref="scheduleDrawerRef" />
   <!-- 甘特图编辑 Dialog -->
   <GanttEdit ref="ganttEditRef" />
+  <!-- 工单详情弹窗 -->
+  <WorkOrderForm ref="workOrderFormRef" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { formatDate } from '@/utils/formatTime'
+import { handleTree } from '@/utils/tree'
 import { DICT_TYPE } from '@/utils/dict'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import { ProTaskApi } from '@/api/mes/pro/task'
-import { ProRouteProcessApi, ProRouteProcessVO } from '@/api/mes/pro/route/process'
-import { ProRouteProductApi } from '@/api/mes/pro/route/product'
 import { MesProWorkOrderStatusEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import GanttChart from './components/GanttChart.vue'
 import GanttEdit from './GanttEdit.vue'
-import ProTaskList from './ProTaskList.vue'
-import ProTaskProgress from './ProTaskProgress.vue'
+import ScheduleDrawer from './ScheduleDrawer.vue'
+import WorkOrderForm from '@/views/mes/pro/workorder/WorkOrderForm.vue'
 
 defineOptions({ name: 'MesProTask' })
 
-const loading = ref(true)
-const workOrderList = ref<ProWorkOrderVO[]>([])
-const total = ref(0)
+const loading = ref(true) // 列表加载状态
+const workOrderList = ref<ProWorkOrderVO[]>([]) // 工单列表数据
+const total = ref(0) // 总条数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
   name: undefined,
+  orderSourceCode: undefined,
   productId: undefined,
+  clientId: undefined,
   requestDate: undefined,
-  // 固定筛选：已确认 + 自行生产
-  status: MesProWorkOrderStatusEnum.CONFIRMED,
-  type: MesProWorkOrderTypeEnum.SELF
+  status: MesProWorkOrderStatusEnum.CONFIRMED, // 固定筛选：只查询"已确认"的工单
+  type: MesProWorkOrderTypeEnum.SELF // 固定筛选：只查询"自制"的工单
 })
-const queryFormRef = ref()
+const queryFormRef = ref() // 搜索表单 ref
 
-// 甘特图预览数据
-const ganttTasks = ref<any[]>([])
-const ganttPreviewRef = ref()
+const ganttTasks = ref<any[]>([]) // 甘特图任务数据，格式与 ProTaskVO 相同，供 GanttChart 组件渲染
+const ganttPreviewRef = ref() // TODO @AI：是不是 ganttPreviewRef 可以去掉；
 
-/** 查询待排产工单列表 */
+/** 查询待排产工单列表（支持父子工单树形展示） */
 const getWorkOrderList = async () => {
   loading.value = true
   try {
     const data = await ProWorkOrderApi.getWorkOrderPage(queryParams)
-    workOrderList.value = data.list
+    workOrderList.value = handleTree(data.list, 'id', 'parentId')
     total.value = data.total
   } finally {
     loading.value = false
   }
 }
 
-/** 加载甘特图预览数据（复用 page 接口，传大 pageSize） */
+/** 加载甘特图预览数据（查询所有任务，供甘特图组件渲染） */
+// TODO @芋艿：后续在对齐；
 const loadGanttPreview = async () => {
   try {
     const data = await ProTaskApi.getTaskPage({ pageNo: 1, pageSize: 999 })
@@ -251,59 +219,25 @@ const resetQuery = () => {
   // 恢复固定筛选
   queryParams.status = MesProWorkOrderStatusEnum.CONFIRMED
   queryParams.type = MesProWorkOrderTypeEnum.SELF
+  // 执行搜索
   handleQuery()
 }
 
-// ==================== 排产 Drawer ====================
-const scheduleDrawerVisible = ref(false)
-const currentWorkOrder = ref<any>(null)
-const routeProcessList = ref<ProRouteProcessVO[]>([])
-const activeProcessStep = ref(0)
-const currentRouteId = ref(0)
-
-const currentProcess = computed(() => {
-  return routeProcessList.value[activeProcessStep.value]
-})
-
 /** 打开排产 Drawer */
-const openScheduleDrawer = async (row: any) => {
-  currentWorkOrder.value = row
-  scheduleDrawerVisible.value = true
-  activeProcessStep.value = 0
-  routeProcessList.value = []
-
-  // 通过产品查找工艺路线，再加载工序列表
-  try {
-    // 临时方案：查所有工艺路线产品，前端匹配（后续需后端提供"根据产品查询工艺路线"接口）
-    const routeProducts = await ProRouteProductApi.getRouteProductListByRoute(0)
-    const matched = routeProducts?.find((rp: any) => rp.itemId === row.productId)
-    if (matched) {
-      currentRouteId.value = matched.routeId
-      const processes = await ProRouteProcessApi.getRouteProcessListByRoute(matched.routeId)
-      routeProcessList.value = processes.sort((a: any, b: any) => a.sort - b.sort)
-    }
-  } catch (e) {
-    console.warn('加载工艺路线工序失败', e)
-  }
+// TODO @芋艿：这里的作用，需要在看看；
+const scheduleDrawerRef = ref()
+const openScheduleDrawer = (row: any) => {
+  scheduleDrawerRef.value.open(row)
 }
 
-/** 工序步骤切换 */
-const handleStepChange = (index: number) => {
-  activeProcessStep.value = index
-}
-const handleStepClick = (index: number) => {
-  activeProcessStep.value = index
+/** 点击工单编码，查看工单详情 */
+const workOrderFormRef = ref()
+const openWorkOrderDetail = (id: number) => {
+  workOrderFormRef.value.open('detail', id)
 }
 
-// ==================== 进度 Drawer ====================
-const progressDrawerVisible = ref(false)
-
-const openProgressDrawer = (row: any) => {
-  currentWorkOrder.value = row
-  progressDrawerVisible.value = true
-}
-
-// ==================== 甘特图编辑 ====================
+// TODO @芋艿：后续可以考虑把甘特图预览和编辑合并成一个组件，统一管理甘特图数据和刷新逻辑；
+/** 打开甘特图编辑弹窗 */
 const ganttEditRef = ref()
 const openGanttEdit = () => {
   ganttEditRef.value.open()
