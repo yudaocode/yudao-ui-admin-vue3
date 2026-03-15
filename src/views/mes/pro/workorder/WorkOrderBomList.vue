@@ -7,21 +7,35 @@
       <el-table-column label="BOM 物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="规格型号" align="center" prop="itemSpec" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
+      <el-table-column label="物料/产品" align="center" prop="itemOrProduct" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT" :value="scope.row.itemOrProduct" />
+        </template>
+      </el-table-column>
       <el-table-column label="预计使用量" align="center" prop="quantity" width="120" />
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
-      <el-table-column label="操作" align="center" width="160" v-if="!disabled">
+      <el-table-column
+        label="操作"
+        align="center"
+        width="160"
+        fixed="right"
+        v-if="
+          [MesProWorkOrderStatusEnum.PREPARE, MesProWorkOrderStatusEnum.CONFIRMED].includes(
+            workOrder.status
+          )
+        "
+      >
         <template #default="scope">
           <!-- 草稿状态：编辑数量/备注 -->
-          <!-- TODO @AI：workOrder 来自父组件 WorkOrderForm 通过 prop :work-order="formData" 传入，即当前工单的完整数据 -->
           <el-button
             v-if="workOrder.status === MesProWorkOrderStatusEnum.PREPARE"
             link
             type="primary"
-            @click="openBomForm('update', scope.row)"
+            @click="openForm('update', scope.row)"
           >
             编辑
           </el-button>
-          <!-- 已确认 + 自行生产 + 产品类型 BOM 行：生成工单 -->
+          <!-- 已确认 + 自行生产 + 产品类型 BOM 行：生成子工单 -->
           <el-button
             v-if="
               workOrder.status === MesProWorkOrderStatusEnum.CONFIRMED &&
@@ -78,6 +92,7 @@
 <script setup lang="ts">
 import { ProWorkOrderBomApi, ProWorkOrderBomVO } from '@/api/mes/pro/workorder/bom'
 import { MesProWorkOrderStatusEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
+import { DICT_TYPE } from '@/utils/dict'
 
 defineOptions({ name: 'WorkOrderBomList' })
 
@@ -116,7 +131,6 @@ const getBomList = async () => {
 }
 
 /** 生成工单（通知父组件） */
-// todo @芋艿：后续在测试下该逻辑；
 const handleGenerateWorkOrder = (row: any) => {
   emit('generate-work-order', row)
 }
@@ -130,9 +144,6 @@ const formData = ref({
   id: undefined as number | undefined,
   workOrderId: undefined as number | undefined,
   itemId: undefined as number | undefined,
-  itemName: undefined as string | undefined,
-  unitMeasureId: undefined as number | undefined,
-  unitMeasureName: undefined as string | undefined,
   quantity: undefined as number | undefined,
   remark: undefined as string | undefined
 })
@@ -140,20 +151,24 @@ const formRules = reactive({
   quantity: [{ required: true, message: '预计使用量不能为空', trigger: 'blur' }]
 })
 
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    workOrderId: undefined,
+    itemId: undefined,
+    quantity: undefined,
+    remark: undefined
+  }
+  formRef.value?.resetFields()
+}
+
 /** 打开 BOM 编辑弹窗 */
-const openBomForm = (_type: string, row: any) => {
+const openForm = (_type: string, row: any) => {
+  resetForm()
   dialogVisible.value = true
   dialogTitle.value = '编辑 BOM 物料'
-  formData.value = {
-    id: row.id,
-    workOrderId: row.workOrderId,
-    itemId: row.itemId,
-    itemName: row.itemName,
-    unitMeasureId: row.unitMeasureId,
-    unitMeasureName: row.unitMeasureName,
-    quantity: row.quantity,
-    remark: row.remark
-  }
+  formData.value = { ...row }
 }
 
 /** 提交表单 */
@@ -161,14 +176,7 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = {
-      id: formData.value.id,
-      workOrderId: formData.value.workOrderId,
-      itemId: formData.value.itemId,
-      unitMeasureId: formData.value.unitMeasureId,
-      quantity: formData.value.quantity,
-      remark: formData.value.remark
-    } as unknown as ProWorkOrderBomVO
+    const data = formData.value as unknown as ProWorkOrderBomVO
     await ProWorkOrderBomApi.updateWorkOrderBom(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false

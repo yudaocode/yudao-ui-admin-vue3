@@ -253,6 +253,7 @@ export enum DICT_TYPE {
   IOT_MODBUS_FRAME_FORMAT = 'iot_modbus_frame_format', // IoT Modbus 帧格式
 
   // ========== MES - 制造执行系统模块  ==========
+  MES_MD_ITEM_OR_PRODUCT = 'mes_md_item_or_product', // MES 物料产品标识
   MES_CLIENT_TYPE = 'mes_client_type', // MES 客户类型
   MES_VENDOR_LEVEL = 'mes_vendor_level', // MES 供应商级别
   MES_CAL_HOLIDAY_TYPE = 'mes_cal_holiday_type', // MES 假期类型

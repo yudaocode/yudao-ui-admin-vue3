@@ -279,6 +279,9 @@ const handleGenerateWorkOrder = (bomRow: any) => {
   formData.value.requestDate = currentWorkOrder.requestDate
   formData.value.productId = bomRow.itemId
   formData.value.quantity = bomRow.quantity
+  formData.value.name = `${bomRow.itemName}【${bomRow.quantity}】${bomRow.unitMeasureName || ''}`
+  // 提示用户
+  message.info('已从 BOM 物料预填子工单，请补充工单编码等信息后保存')
 }
 
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
