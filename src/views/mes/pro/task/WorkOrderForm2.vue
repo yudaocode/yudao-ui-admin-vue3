@@ -137,13 +137,9 @@
     >
       <ProTaskList
         :work-order-id="formData.id!"
-        :work-order-code="formData.code!"
-        :work-order-name="formData.name!"
         :route-id="currentRouteId"
         :process-id="rp.processId"
         :item-id="formData.productId!"
-        :unit-measure-id="(formData as any).unitMeasureId"
-        :process-list="routeProcessList"
       />
     </el-card>
     <template #footer>

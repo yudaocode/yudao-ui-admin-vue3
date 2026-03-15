@@ -17,8 +17,6 @@ export interface ProTaskVO {
   itemName: string // 产品名称
   itemCode: string // 产品编码
   itemSpec: string // 规格型号
-  unitMeasureId: number // 单位编号
-  unitMeasureName: string // 单位名称
   quantity: number // 排产数量
   producedQuantity: number // 已生产数量
   qualifyQuantity: number // 合格品数量
@@ -28,7 +26,7 @@ export interface ProTaskVO {
   clientName: string // 客户名称
   startTime: Date // 开始生产时间
   duration: number // 生产时长（工作日，1=8小时）
-  endTime: Date // 结束生产时间
+  endTime: Date | number // 结束生产时间
   colorCode: string // 甘特图显示颜色
   requestDate: Date // 需求日期（从工单查）
   finishDate: Date // 完成日期

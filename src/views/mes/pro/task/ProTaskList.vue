@@ -1,15 +1,14 @@
 <!-- MES 生产任务列表（工单维度，排产对话框内使用） -->
-<!-- TODO @芋艿：待 review -->
 <template>
   <div>
+    <!-- DONE @AI：详情时，整个都不展示 -->
     <!-- 操作栏 -->
-    <div class="mb-10px">
+    <div v-if="!disabled" class="mb-10px">
       <el-button
         type="primary"
         plain
         @click="openForm('create')"
         v-hasPermi="['mes:pro-task:create']"
-        :disabled="disabled"
       >
         <Icon icon="ep:plus" class="mr-5px" /> 新增任务
       </el-button>
@@ -19,26 +18,26 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="任务编码" align="center" prop="code" width="140" />
       <el-table-column label="任务名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="工作站" align="center" prop="workstationName" width="120" />
+      <el-table-column label="工作站编号" align="center" prop="workstationCode" width="120" />
+      <el-table-column label="工作站名称" align="center" prop="workstationName" width="120" />
       <el-table-column label="排产数量" align="center" prop="quantity" width="100" />
-      <el-table-column label="已生产" align="center" prop="producedQuantity" width="80" />
-      <el-table-column label="合格" align="center" prop="qualifyQuantity" width="80" />
+      <el-table-column label="已生产数量" align="center" prop="producedQuantity" width="100" />
       <el-table-column
-        label="开始时间"
+        label="开始生产时间"
         align="center"
         prop="startTime"
         :formatter="dateFormatter"
         width="170"
       />
-      <el-table-column label="时长(天)" align="center" prop="duration" width="80" />
+      <el-table-column label="生产时长" align="center" prop="duration" width="80" />
       <el-table-column
-        label="结束时间"
+        label="预计完成时间"
         align="center"
         prop="endTime"
         :formatter="dateFormatter"
         width="170"
       />
-      <el-table-column label="颜色" align="center" prop="colorCode" width="60">
+      <el-table-column label="显示颜色" align="center" prop="colorCode" width="100">
         <template #default="scope">
           <div
             :style="{
@@ -51,102 +50,31 @@
           ></div>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column v-if="!disabled" label="操作" align="center" width="160" fixed="right">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_PRO_TASK_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" width="200" fixed="right">
-        <template #default="scope">
-          <!-- 草稿(0)：编辑/删除/开始 -->
-          <template v-if="scope.row.status === MesProTaskStatusEnum.NORMAL">
-            <el-button
-              link
-              type="primary"
-              @click="openForm('update', scope.row.id)"
-              v-hasPermi="['mes:pro-task:update']"
-            >
-              编辑
-            </el-button>
-            <el-button
-              link
-              type="danger"
-              @click="handleDelete(scope.row.id)"
-              v-hasPermi="['mes:pro-task:delete']"
-            >
-              删除
-            </el-button>
-          </template>
-          <!-- 进行中(1)：暂停/完成/取消 -->
-          <template v-if="scope.row.status === MesProTaskStatusEnum.START">
-            <el-button
-              link
-              type="warning"
-              @click="handleChangeStatus(scope.row.id, MesProTaskStatusEnum.PAUSE, '暂停')"
-              v-hasPermi="['mes:pro-task:update']"
-            >
-              暂停
-            </el-button>
-            <el-button
-              link
-              type="success"
-              @click="handleChangeStatus(scope.row.id, MesProTaskStatusEnum.FINISHED, '完成')"
-              v-hasPermi="['mes:pro-task:update']"
-            >
-              完成
-            </el-button>
-            <el-button
-              link
-              type="danger"
-              @click="handleChangeStatus(scope.row.id, MesProTaskStatusEnum.CANCELED, '取消')"
-              v-hasPermi="['mes:pro-task:update']"
-            >
-              取消
-            </el-button>
-          </template>
-          <!-- 暂停(2)：继续/完成/取消 -->
-          <template v-if="scope.row.status === MesProTaskStatusEnum.PAUSE">
-            <el-button
-              link
-              type="primary"
-              @click="handleChangeStatus(scope.row.id, MesProTaskStatusEnum.START, '继续')"
-              v-hasPermi="['mes:pro-task:update']"
-            >
-              继续
-            </el-button>
-            <el-button
-              link
-              type="success"
-              @click="handleChangeStatus(scope.row.id, MesProTaskStatusEnum.FINISHED, '完成')"
-              v-hasPermi="['mes:pro-task:update']"
-            >
-              完成
-            </el-button>
-            <el-button
-              link
-              type="danger"
-              @click="handleChangeStatus(scope.row.id, MesProTaskStatusEnum.CANCELED, '取消')"
-              v-hasPermi="['mes:pro-task:update']"
-            >
-              取消
-            </el-button>
-          </template>
-          <!-- 所有状态：详情 -->
           <el-button
             link
             type="primary"
-            @click="openForm('detail', scope.row.id)"
-            v-hasPermi="['mes:pro-task:query']"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['mes:pro-task:update']"
           >
-            详情
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['mes:pro-task:delete']"
+          >
+            删除
           </el-button>
         </template>
       </el-table-column>
     </el-table>
   </div>
 
-  <!-- 添加/编辑/详情任务弹窗 -->
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="800px">
+  <!-- 添加/编辑任务弹窗 -->
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -155,36 +83,12 @@
       v-loading="formLoading"
     >
       <el-row>
-        <el-col :span="12">
-          <el-form-item label="所属工单" prop="workOrderId">
-            <el-input :model-value="workOrderInfo" disabled />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="工序" prop="processId">
-            <el-select
-              v-model="formData.processId"
-              placeholder="请选择工序"
-              class="!w-1/1"
-              :disabled="isDetail"
-            >
-              <el-option
-                v-for="item in props.processList"
-                :key="item.processId"
-                :label="item.processName"
-                :value="item.processId"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="工作站" prop="workstationId">
             <MdWorkstationSelect v-model="formData.workstationId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="排产数量" prop="quantity">
             <el-input-number
               v-model="formData.quantity"
@@ -195,9 +99,14 @@
             />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="甘特颜色" prop="colorCode">
+            <el-color-picker v-model="formData.colorCode" :disabled="isDetail" />
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="开始时间" prop="startTime">
             <el-date-picker
               v-model="formData.startTime"
@@ -209,21 +118,19 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
-          <el-form-item label="生产时长(工作日)" prop="duration">
+        <el-col :span="8">
+          <el-form-item label="生产时长" prop="duration">
             <el-input-number
               v-model="formData.duration"
               :min="1"
               :precision="0"
               class="!w-1/1"
               :disabled="isDetail"
-              @change="computeEndTime"
+              @change="handleDurationChange"
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="结束时间">
             <el-date-picker
               v-model="formData.endTime"
@@ -232,18 +139,6 @@
               value-format="x"
               class="!w-1/1"
             />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="甘特颜色" prop="colorCode">
-            <el-color-picker v-model="formData.colorCode" :disabled="isDetail" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row v-if="taskFormType !== 'create'">
-        <el-col :span="12">
-          <el-form-item label="任务状态">
-            <dict-tag :type="DICT_TYPE.MES_PRO_TASK_STATUS" :value="formData.status" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -269,23 +164,17 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import { DICT_TYPE } from '@/utils/dict'
 import { ProTaskApi, ProTaskVO } from '@/api/mes/pro/task'
-import { ProRouteProcessVO } from '@/api/mes/pro/route/process'
-import { MesProTaskStatusEnum } from '@/views/mes/utils/constants'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 
 defineOptions({ name: 'ProTaskList' })
 
+// DONE @AI：移除了 workOrderCode、workOrderName、processList
 const props = defineProps<{
   workOrderId: number
-  workOrderCode?: string
-  workOrderName?: string
   routeId: number
   processId: number
   itemId?: number
-  unitMeasureId?: number
-  processList?: ProRouteProcessVO[]
   disabled?: boolean
 }>()
 
@@ -322,29 +211,25 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 变更任务状态 */
-const handleChangeStatus = async (id: number, status: number, actionName: string) => {
-  try {
-    await message.confirm(`确认要${actionName}该任务吗？`)
-    await ProTaskApi.updateTask({ id, status } as any)
-    message.success(`任务已${actionName}`)
-    await getList()
-  } catch {}
-}
-
-// ==================== 添加/编辑/详情表单 ====================
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const taskFormType = ref('')
-const formData = ref({
+// ==================== 添加/编辑表单 ====================
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const dialogTitle = computed(() => {
+  const typeMap: Record<string, string> = {
+    detail: '生产任务详情',
+    create: '新增生产任务',
+    update: '编辑生产任务'
+  }
+  return typeMap[formType.value] || ''
+})
+const formData = ref<ProTaskVO>({
   id: undefined,
   workOrderId: undefined,
   workstationId: undefined,
   routeId: undefined,
   processId: undefined,
   itemId: undefined,
-  unitMeasureId: undefined,
   quantity: undefined,
   startTime: undefined,
   duration: 1,
@@ -352,23 +237,18 @@ const formData = ref({
   colorCode: '#00AEF3',
   status: undefined,
   remark: undefined
-})
+} as unknown as ProTaskVO)
 const formRules = reactive({
   workstationId: [{ required: true, message: '工作站不能为空', trigger: 'change' }],
-  processId: [{ required: true, message: '工序不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '排产数量不能为空', trigger: 'blur' }],
   startTime: [{ required: true, message: '开始时间不能为空', trigger: 'change' }],
   duration: [{ required: true, message: '生产时长不能为空', trigger: 'blur' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
+const isDetail = computed(() => formType.value === 'detail')
 
-/** 工单信息（只读展示） */
-const workOrderInfo = ref('')
-
-const isDetail = computed(() => taskFormType.value === 'detail')
-
-/** 自动计算结束时间：startTime + duration * 8h */
-const computeEndTime = () => {
+/** 计算结束时间：开始时间 + 生产时长 * 8小时 */
+const handleDurationChange = () => {
   if (formData.value.startTime && formData.value.duration) {
     const start =
       typeof formData.value.startTime === 'number'
@@ -378,34 +258,29 @@ const computeEndTime = () => {
   }
 }
 
-// 监听开始时间变化也重新计算
+/** 监听开始时间变化也重新计算 */
 watch(
   () => formData.value.startTime,
-  () => computeEndTime()
+  () => handleDurationChange()
 )
 
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'detail' ? '任务详情' : type === 'create' ? '新增任务' : '编辑任务'
-  taskFormType.value = type
+  formType.value = type
   resetForm()
 
   if (type === 'create') {
     // 新增时预填工单信息
-    formData.value.workOrderId = props.workOrderId
-    formData.value.routeId = props.routeId
-    formData.value.processId = props.processId
-    formData.value.itemId = props.itemId
-    formData.value.unitMeasureId = props.unitMeasureId
-    workOrderInfo.value = `${props.workOrderCode || ''} ${props.workOrderName || ''}`
+    formData.value.workOrderId = props.workOrderId!
+    formData.value.routeId = props.routeId!
+    formData.value.processId = props.processId!
+    formData.value.itemId = props.itemId!
   } else if (id) {
-    // 编辑/详情：加载任务数据
+    // 编辑：加载任务数据
     formLoading.value = true
     try {
-      const data = await ProTaskApi.getTask(id)
-      formData.value = data
-      workOrderInfo.value = `${data.workOrderCode || ''} ${data.workOrderName || ''}`
+      formData.value = await ProTaskApi.getTask(id)
     } finally {
       formLoading.value = false
     }
@@ -418,7 +293,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as ProTaskVO
-    if (taskFormType.value === 'create') {
+    if (formType.value === 'create') {
       await ProTaskApi.createTask(data)
       message.success(t('common.createSuccess'))
     } else {
@@ -441,7 +316,6 @@ const resetForm = () => {
     routeId: undefined,
     processId: undefined,
     itemId: undefined,
-    unitMeasureId: undefined,
     quantity: undefined,
     startTime: undefined,
     duration: 1,
@@ -449,17 +323,20 @@ const resetForm = () => {
     colorCode: '#00AEF3',
     status: undefined,
     remark: undefined
-  }
+  } as unknown as ProTaskVO
   formRef.value?.resetFields()
 }
 
-// 监听 processId 切换重新加载
+/** 监听 processId 切换重新加载 */
 watch(
   () => props.processId,
   () => getList()
 )
 
-onMounted(() => getList())
+/** 初始化 */
+onMounted(() => {
+  getList()
+})
 
 defineExpose({ getList })
 </script>
