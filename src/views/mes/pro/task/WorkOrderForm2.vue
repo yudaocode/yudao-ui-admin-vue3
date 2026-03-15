@@ -111,29 +111,27 @@
       </el-row>
     </el-form>
 
-    <!-- TODO @AI：都展示，不只 isSchedule -->
-    <!-- 工序步骤导航（仅排产模式显示） -->
+    <!-- 工序步骤导航 -->
     <el-steps
-      v-if="isSchedule && routeProcessList.length && formData.id"
+      v-if="routeProcessList.length && formData.id"
       :active="activeProcessStep"
       align-center
       simple
       class="my-10px"
     >
-      <!-- TODO @AI：style 改成 unocss -->
       <el-step
         v-for="(rp, index) in routeProcessList"
         :key="rp.processId"
         :title="rp.processName"
-        style="cursor: pointer"
+        class="cursor-pointer"
         @click="activeProcessStep = index"
       />
     </el-steps>
 
-    <!-- 当前工序的任务列表（仅排产模式显示） -->
+    <!-- 当前工序的任务列表 -->
     <el-card
       v-for="(rp, index) in routeProcessList"
-      v-show="isSchedule && activeProcessStep === index && formData.id"
+      v-show="activeProcessStep === index && formData.id"
       :key="rp.processId"
       shadow="never"
     >
@@ -148,16 +146,7 @@
         :process-list="routeProcessList"
       />
     </el-card>
-    <!-- TODO @AI：完成拿到 index.vue 里；这里不放 -->
     <template #footer>
-      <!-- TODO @芋艿：完成排产的逻辑，需要后端提供对应接口 -->
-      <el-button
-        v-if="isSchedule && formData.status === MesProWorkOrderStatusEnum.CONFIRMED && formData.id"
-        type="success"
-        @click="handleFinish"
-      >
-        完成
-      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -170,36 +159,25 @@ import { ProRouteProcessApi, ProRouteProcessVO } from '@/api/mes/pro/route/proce
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
-import {
-  MesProWorkOrderSourceTypeEnum,
-  MesProWorkOrderTypeEnum,
-  MesProWorkOrderStatusEnum
-} from '@/views/mes/utils/constants'
+import { MesProWorkOrderSourceTypeEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
 import ProTaskList from './ProTaskList.vue'
 
 defineOptions({ name: 'WorkOrderForm2' })
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('') // 'detail' - 详情；'schedule' - 排产
+const message = useMessage() // 消息弹窗
+
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：detail - 详情；schedule - 排产
 const formData = ref<any>({})
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
-/** 是否为排产模式 */
-const isSchedule = computed(() => formType.value === 'schedule')
+const routeProcessList = ref<ProRouteProcessVO[]>([]) // 工艺路线工序列表
+const activeProcessStep = ref(0) // 当前工序步骤索引
+const currentRouteId = ref(0) // 当前工艺路线编号
 
-// ==================== 工序步骤 ====================
-const routeProcessList = ref<ProRouteProcessVO[]>([])
-const activeProcessStep = ref(0)
-const currentRouteId = ref(0)
-
-/**
- * 打开对话框
- *
- * @param type 'detail' - 工单详情；'schedule' - 生产排产
- * @param id 工单 ID
- */
+/** 打开弹窗 */
 const open = async (type: string, id: number) => {
   dialogVisible.value = true
   dialogTitle.value = type === 'schedule' ? '生产排产' : '工单详情'
@@ -208,11 +186,9 @@ const open = async (type: string, id: number) => {
   formData.value = {}
   routeProcessList.value = []
   activeProcessStep.value = 0
-
   try {
     // 加载工单详情
     formData.value = await ProWorkOrderApi.getWorkOrder(id)
-
     // 加载工艺路线工序列表
     if (formData.value.productId) {
       await loadRouteProcesses(formData.value.productId)
@@ -221,33 +197,20 @@ const open = async (type: string, id: number) => {
     formLoading.value = false
   }
 }
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 加载工艺路线工序列表（通过产品查找关联的工艺路线） */
-const message = useMessage()
+/** 加载工艺路线工序列表 */
 const loadRouteProcesses = async (productId: number) => {
   try {
     const processes = await ProRouteProcessApi.getRouteProcessListByProduct(productId)
-    if (processes && processes.length > 0) {
-      currentRouteId.value = processes[0].routeId
-      routeProcessList.value = processes.sort((a: any, b: any) => a.sort - b.sort)
-    } else {
+    if (!processes || processes.length === 0) {
       message.warning('当前产品未配置工艺路线，请先在工艺路线中维护')
+      return
     }
+    currentRouteId.value = processes[0].routeId
+    routeProcessList.value = processes.sort((a: any, b: any) => a.sort - b.sort)
   } catch (e) {
     console.warn('加载工艺路线工序失败', e)
   }
 }
-
-/** 完成排产（对齐 KTG 的 handleFinish） */
-const handleFinish = async () => {
-  try {
-    await message.confirm('是否完成工单排产？【完成后将不能更改】')
-    // TODO @芋艿：调用后端接口，更新工单状态为已完成
-    // await ProWorkOrderApi.updateWorkOrderStatus(formData.value.id, MesProWorkOrderStatusEnum.FINISHED)
-    message.success('排产完成')
-    dialogVisible.value = false
-  } catch {}
-}
-
-defineExpose({ open })
 </script>

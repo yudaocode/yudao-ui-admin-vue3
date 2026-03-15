@@ -1,4 +1,4 @@
-<!-- MES 生产任务列表（工单维度，排产 Drawer 内使用） -->
+<!-- MES 生产任务列表（工单维度，排产对话框内使用） -->
 <!-- TODO @芋艿：待 review -->
 <template>
   <div>
@@ -7,7 +7,7 @@
       <el-button
         type="primary"
         plain
-        @click="handleAdd"
+        @click="openForm('create')"
         v-hasPermi="['mes:pro-task:create']"
         :disabled="disabled"
       >
@@ -63,7 +63,7 @@
             <el-button
               link
               type="primary"
-              @click="handleEdit(scope.row)"
+              @click="openForm('update', scope.row.id)"
               v-hasPermi="['mes:pro-task:update']"
             >
               编辑
@@ -135,7 +135,7 @@
           <el-button
             link
             type="primary"
-            @click="handleDetail(scope.row)"
+            @click="openForm('detail', scope.row.id)"
             v-hasPermi="['mes:pro-task:query']"
           >
             详情
@@ -143,10 +143,128 @@
         </template>
       </el-table-column>
     </el-table>
-
-    <!-- 任务表单 -->
-    <ProTaskForm ref="formRef" @success="getList" />
   </div>
+
+  <!-- 添加/编辑/详情任务弹窗 -->
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="800px">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="120px"
+      v-loading="formLoading"
+    >
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="所属工单" prop="workOrderId">
+            <el-input :model-value="workOrderInfo" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="工序" prop="processId">
+            <el-select
+              v-model="formData.processId"
+              placeholder="请选择工序"
+              class="!w-1/1"
+              :disabled="isDetail"
+            >
+              <el-option
+                v-for="item in props.processList"
+                :key="item.processId"
+                :label="item.processName"
+                :value="item.processId"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="工作站" prop="workstationId">
+            <MdWorkstationSelect v-model="formData.workstationId" :disabled="isDetail" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="排产数量" prop="quantity">
+            <el-input-number
+              v-model="formData.quantity"
+              :min="0"
+              :precision="2"
+              class="!w-1/1"
+              :disabled="isDetail"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="开始时间" prop="startTime">
+            <el-date-picker
+              v-model="formData.startTime"
+              type="datetime"
+              placeholder="请选择开始时间"
+              value-format="x"
+              class="!w-1/1"
+              :disabled="isDetail"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="生产时长(工作日)" prop="duration">
+            <el-input-number
+              v-model="formData.duration"
+              :min="1"
+              :precision="0"
+              class="!w-1/1"
+              :disabled="isDetail"
+              @change="computeEndTime"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="结束时间">
+            <el-date-picker
+              v-model="formData.endTime"
+              type="datetime"
+              disabled
+              value-format="x"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="甘特颜色" prop="colorCode">
+            <el-color-picker v-model="formData.colorCode" :disabled="isDetail" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row v-if="taskFormType !== 'create'">
+        <el-col :span="12">
+          <el-form-item label="任务状态">
+            <dict-tag :type="DICT_TYPE.MES_PRO_TASK_STATUS" :value="formData.status" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
+            <el-input
+              type="textarea"
+              v-model="formData.remark"
+              placeholder="请输入备注"
+              :disabled="isDetail"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
+    <template #footer v-if="!isDetail">
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -155,7 +273,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { ProTaskApi, ProTaskVO } from '@/api/mes/pro/task'
 import { ProRouteProcessVO } from '@/api/mes/pro/route/process'
 import { MesProTaskStatusEnum } from '@/views/mes/utils/constants'
-import ProTaskForm from './ProTaskForm.vue'
+import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 
 defineOptions({ name: 'ProTaskList' })
 
@@ -174,6 +292,7 @@ const props = defineProps<{
 const { t } = useI18n()
 const message = useMessage()
 
+// ==================== 列表 ====================
 const loading = ref(false)
 const list = ref<ProTaskVO[]>([])
 
@@ -191,40 +310,6 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-/** 新增任务 */
-const formRef = ref()
-const handleAdd = () => {
-  formRef.value.open('create', {
-    workOrderId: props.workOrderId,
-    workOrderCode: props.workOrderCode,
-    workOrderName: props.workOrderName,
-    routeId: props.routeId,
-    processId: props.processId,
-    itemId: props.itemId,
-    unitMeasureId: props.unitMeasureId,
-    processList: props.processList
-  })
-}
-
-/** 编辑任务 */
-const handleEdit = (row: any) => {
-  formRef.value.open('update', {
-    id: row.id,
-    workOrderId: props.workOrderId,
-    workOrderCode: props.workOrderCode,
-    workOrderName: props.workOrderName,
-    processList: props.processList
-  })
-}
-
-/** 查看详情 */
-const handleDetail = (row: any) => {
-  formRef.value.open('detail', {
-    id: row.id,
-    processList: props.processList
-  })
 }
 
 /** 删除任务 */
@@ -245,6 +330,127 @@ const handleChangeStatus = async (id: number, status: number, actionName: string
     message.success(`任务已${actionName}`)
     await getList()
   } catch {}
+}
+
+// ==================== 添加/编辑/详情表单 ====================
+const dialogVisible = ref(false)
+const dialogTitle = ref('')
+const formLoading = ref(false)
+const taskFormType = ref('')
+const formData = ref({
+  id: undefined,
+  workOrderId: undefined,
+  workstationId: undefined,
+  routeId: undefined,
+  processId: undefined,
+  itemId: undefined,
+  unitMeasureId: undefined,
+  quantity: undefined,
+  startTime: undefined,
+  duration: 1,
+  endTime: undefined,
+  colorCode: '#00AEF3',
+  status: undefined,
+  remark: undefined
+})
+const formRules = reactive({
+  workstationId: [{ required: true, message: '工作站不能为空', trigger: 'change' }],
+  processId: [{ required: true, message: '工序不能为空', trigger: 'change' }],
+  quantity: [{ required: true, message: '排产数量不能为空', trigger: 'blur' }],
+  startTime: [{ required: true, message: '开始时间不能为空', trigger: 'change' }],
+  duration: [{ required: true, message: '生产时长不能为空', trigger: 'blur' }]
+})
+const formRef = ref()
+
+/** 工单信息（只读展示） */
+const workOrderInfo = ref('')
+
+const isDetail = computed(() => taskFormType.value === 'detail')
+
+/** 自动计算结束时间：startTime + duration * 8h */
+const computeEndTime = () => {
+  if (formData.value.startTime && formData.value.duration) {
+    const start =
+      typeof formData.value.startTime === 'number'
+        ? formData.value.startTime
+        : new Date(formData.value.startTime).getTime()
+    formData.value.endTime = start + formData.value.duration * 8 * 3600 * 1000
+  }
+}
+
+// 监听开始时间变化也重新计算
+watch(
+  () => formData.value.startTime,
+  () => computeEndTime()
+)
+
+/** 打开表单弹窗 */
+const openForm = async (type: string, id?: number) => {
+  dialogVisible.value = true
+  dialogTitle.value = type === 'detail' ? '任务详情' : type === 'create' ? '新增任务' : '编辑任务'
+  taskFormType.value = type
+  resetForm()
+
+  if (type === 'create') {
+    // 新增时预填工单信息
+    formData.value.workOrderId = props.workOrderId
+    formData.value.routeId = props.routeId
+    formData.value.processId = props.processId
+    formData.value.itemId = props.itemId
+    formData.value.unitMeasureId = props.unitMeasureId
+    workOrderInfo.value = `${props.workOrderCode || ''} ${props.workOrderName || ''}`
+  } else if (id) {
+    // 编辑/详情：加载任务数据
+    formLoading.value = true
+    try {
+      const data = await ProTaskApi.getTask(id)
+      formData.value = data
+      workOrderInfo.value = `${data.workOrderCode || ''} ${data.workOrderName || ''}`
+    } finally {
+      formLoading.value = false
+    }
+  }
+}
+
+/** 提交表单 */
+const submitForm = async () => {
+  await formRef.value.validate()
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as ProTaskVO
+    if (taskFormType.value === 'create') {
+      await ProTaskApi.createTask(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await ProTaskApi.updateTask(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    await getList()
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    workOrderId: undefined,
+    workstationId: undefined,
+    routeId: undefined,
+    processId: undefined,
+    itemId: undefined,
+    unitMeasureId: undefined,
+    quantity: undefined,
+    startTime: undefined,
+    duration: 1,
+    endTime: undefined,
+    colorCode: '#00AEF3',
+    status: undefined,
+    remark: undefined
+  }
+  formRef.value?.resetFields()
 }
 
 // 监听 processId 切换重新加载

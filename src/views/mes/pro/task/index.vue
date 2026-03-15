@@ -128,6 +128,15 @@
           >
             排产
           </el-button>
+          <el-button
+            v-if="scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED"
+            link
+            type="success"
+            @click="handleFinish(scope.row.id)"
+            v-hasPermi="['mes:pro-task:update']"
+          >
+            完成
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -161,6 +170,7 @@ import WorkOrderForm2 from './WorkOrderForm2.vue'
 
 defineOptions({ name: 'MesProTask' })
 
+const message = useMessage()
 const loading = ref(true) // 列表加载状态
 const workOrderList = ref<ProWorkOrderVO[]>([]) // 工单列表数据
 const total = ref(0) // 总条数
@@ -224,6 +234,16 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id: number) => {
   formRef.value.open(type, id)
+}
+
+/** 完成工单 */
+const handleFinish = async (id: number) => {
+  try {
+    await message.confirm('确认要完成该工单吗？')
+    await ProWorkOrderApi.finishWorkOrder(id)
+    message.success('工单已完成')
+    await getWorkOrderList()
+  } catch {}
 }
 
 // TODO @芋艿：后续可以考虑把甘特图预览和编辑合并成一个组件，统一管理甘特图数据和刷新逻辑；
