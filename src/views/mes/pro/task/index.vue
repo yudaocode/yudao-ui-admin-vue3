@@ -189,7 +189,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索表单 ref
 
 const ganttLoading = ref(false) // 甘特图加载状态
-const ganttTasks = ref<any[]>([]) // 甘特图任务数据，格式与 ProTaskVO 相同，供 GanttChart 组件渲染
+const ganttTasks = ref<any[]>([]) // 甘特图数据
 
 /** 查询待排产工单列表（支持父子工单树形展示） */
 const getWorkOrderList = async () => {
