@@ -423,6 +423,7 @@ export enum BarcodeBizTypeEnum {
   PROCARD = 300,
   WORKORDER = 301,
   TRANSORDER = 302,
+  TASK = 303,
   // DV 设备模块 [400, 500)
   MACHINERY = 400,
   // TM 工具模块 [500, 600)

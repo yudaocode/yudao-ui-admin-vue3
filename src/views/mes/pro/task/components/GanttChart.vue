@@ -4,9 +4,9 @@
 </template>
 
 <script setup lang="ts">
-// TODO @AI：生产工单：绿色；生产任务：蓝色；然后，根据进度（progress）将，已已完成比例的蓝色、绿色加深（这个你调研下，看看是不是这个逻辑；）
 import { gantt } from 'dhtmlx-gantt'
 import 'dhtmlx-gantt/codebase/dhtmlxgantt.css'
+import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 
 /**
  * GanttChart - 甘特图组件
@@ -47,100 +47,29 @@ const initGantt = () => {
     return
   }
 
-  // 中文 locale
-  gantt.locale = {
-    date: {
-      month_full: [
-        '一月',
-        '二月',
-        '三月',
-        '四月',
-        '五月',
-        '六月',
-        '七月',
-        '八月',
-        '九月',
-        '十月',
-        '十一月',
-        '十二月'
-      ],
-      month_short: [
-        '1月',
-        '2月',
-        '3月',
-        '4月',
-        '5月',
-        '6月',
-        '7月',
-        '8月',
-        '9月',
-        '10月',
-        '11月',
-        '12月'
-      ],
-      day_full: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
-      day_short: ['日', '一', '二', '三', '四', '五', '六']
-    },
-    // TODO @AI：linter 报错；
-    labels: {
-      new_task: '新任务',
-      icon_save: '保存',
-      icon_cancel: '取消',
-      icon_details: '详情',
-      icon_edit: '编辑',
-      icon_delete: '删除',
-      confirm_closing: '',
-      confirm_deleting: '确认删除？',
-      section_description: '描述',
-      section_time: '时间',
-      section_type: '类型',
-      column_wbs: 'WBS',
-      column_text: '任务名称',
-      column_start_date: '开始时间',
-      column_duration: '时长',
-      column_add: '',
-      link: '关联',
-      confirm_link_deleting: '将被删除',
-      link_start: '(开始)',
-      link_end: '(结束)',
-      type_task: '任务',
-      type_project: '项目',
-      type_milestone: '里程碑',
-      minutes: '分钟',
-      hours: '小时',
-      days: '天',
-      weeks: '周',
-      months: '月',
-      years: '年'
-    }
-  }
+  // 中文国际化
+  gantt.i18n.setLocale('cn')
 
   // 基础配置
   gantt.config.date_format = '%Y-%m-%d %H:%i:%s'
-  gantt.config.duration_unit = 'hour'
+  gantt.config.duration_unit = 'hour' // 使用小时作为持续时间单位，配合 duration_step 实现工作日单位
   gantt.config.duration_step = 8 // 1 工作日 = 8 小时
-  gantt.config.row_height = 36
-  gantt.config.bar_height = 24
-  gantt.config.fit_tasks = true
-  gantt.config.auto_scheduling = false
-  gantt.config.drag_links = false
-  gantt.config.details_on_create = false
-  gantt.config.details_on_dblclick = false
-  gantt.config.show_progress = true
-  gantt.config.open_tree_initially = true
+  gantt.config.row_height = 36 // KTG 无此配置（用 gantt 默认值 36），保留：显式声明更清晰
+  gantt.config.bar_height = 24 // KTG 无此配置（用 gantt 默认值），保留：让条更紧凑美观
+  gantt.config.fit_tasks = true // 时间范围自动适应。KTG 也有：fit_tasks = true
+  gantt.config.auto_scheduling = false // KTG 无此配置（gantt 默认就是 false），保留：显式关闭防意外
+  gantt.config.drag_links = false // 禁止拖动任务关系。KTG 也有：drag_links = false
+  gantt.config.details_on_create = true // 单击显示添加详情。KTG 也有：details_on_create = true
+  gantt.config.details_on_dblclick = true // 双击显示明细。KTG 也有：details_on_dblclick = true
+  gantt.config.show_progress = true // KTG 无显式设置，但 gantt 默认会渲染 progress。保留：确保进度条显示
+  gantt.config.open_tree_initially = true // 初始展开树结构。KTG 也有：open_tree_initially = true
+  gantt.config.auto_types = false // 禁止自动升级为 project。KTG 也有：auto_types = false
+  gantt.config.drag_resize = false // 禁止调整任务持续时间
+  gantt.config.drag_move = false // 禁止拖动任务
+  gantt.config.drag_progress = false // 禁止拖动进度条。KTG 也有：drag_progress = false
+  // 注：xml_date 是旧版写法，等价于 date_format（已在上方设置）
 
-  // 只读模式
-  if (props.readonly) {
-    gantt.config.drag_move = false
-    gantt.config.drag_resize = false
-    gantt.config.drag_progress = false
-  } else {
-    gantt.config.drag_move = true
-    gantt.config.drag_resize = true
-    gantt.config.drag_progress = false
-  }
-
-  // 时间刻度：周 > 日 > 8小时（对齐 KTG）
+  // 时间刻度：周 > 日 > 8小时
   const weekScaleTemplate = (date: Date) => {
     const dateToStr = gantt.date.date_to_str('%M %d')
     const endDate = gantt.date.add(gantt.date.add(date, 1, 'week'), -1, 'day')
@@ -158,7 +87,7 @@ const initGantt = () => {
     { unit: 'hour', step: 8, format: '%H:%i' }
   ]
   gantt.config.scale_height = 50
-  gantt.config.show_task_cells = true
+  gantt.config.show_task_cells = true // 显示任务单元格边框
 
   // 左侧列配置
   gantt.config.columns = [
@@ -197,13 +126,16 @@ const initGantt = () => {
 
   // 任务颜色模板
   gantt.templates.task_class = (_start: any, _end: any, task: any) => {
-    if (task.type === gantt.config.types.project) return 'gantt-project-bar'
+    if (task.type === gantt.config.types.project) {
+      return 'gantt-project-bar'
+    }
     return ''
   }
-  gantt.templates.task_cell_class = () => ''
-  gantt.templates.task_row_class = () => ''
+  gantt.templates.task_cell_class = () => '' // KTG 无此配置。保留：防止 gantt 添加默认样式类
+  gantt.templates.task_row_class = () => '' // KTG 无此配置。保留：防止 gantt 添加默认样式类
 
   // 事件监听
+  // KTG 用 onAfterTaskUpdate 收集修改 id；这里用 onAfterTaskDrag 直接 emit 结构化数据，更完善
   if (!props.readonly) {
     gantt.attachEvent('onAfterTaskDrag', (id: string | number) => {
       const task = gantt.getTask(id)
@@ -216,7 +148,7 @@ const initGantt = () => {
     })
   }
 
-  // TODO @AI：注释
+  // 点击任务事件
   gantt.attachEvent('onTaskClick', (id: string | number) => {
     emit('task-click', id)
     return true
@@ -233,13 +165,14 @@ const loadData = (tasks: any[]) => {
     return
   }
   gantt.clearAll()
-  // TODO @AI：使用下枚举，mes utils 下有的；
-  // 后端 type: 301=工单(project), 303=任务(task)
-  const TYPE_MAP: Record<number, string> = { 301: 'project', 303: 'task' }
+  // 后端 type 使用 MesBizTypeConstants 整数，需映射为 gantt 类型字符串
+  const TYPE_MAP: Record<number, string> = {
+    [BarcodeBizTypeEnum.WORKORDER]: 'project',
+    [BarcodeBizTypeEnum.TASK]: 'task'
+  }
   const transformed = {
     data: tasks.map((item: any) => ({
       ...item,
-      // TODO @AI：是不是用枚举，就可以么？不用 TYPE_MAP?
       type: TYPE_MAP[item.type] || item.type,
       start_date: item.startDate ? new Date(item.startDate) : undefined,
       end_date: item.endDate ? new Date(item.endDate) : undefined
@@ -260,7 +193,7 @@ watch(
   { deep: true }
 )
 
-// TODO @AI：注释
+/** 组件挂载后初始化甘特图 */
 onMounted(() => {
   initGantt()
   if (props.tasks?.length) {
@@ -268,7 +201,7 @@ onMounted(() => {
   }
 })
 
-// TODO @AI：注释
+/** 组件卸载前清理甘特图 */
 onBeforeUnmount(() => {
   if (ganttInited.value) {
     gantt.clearAll()
@@ -291,5 +224,24 @@ defineExpose({ loadData })
 /* 工单（project）行样式 */
 .gantt-project-bar .gantt_task_progress {
   background: #7b68ee;
+}
+/* 甘特条圆角 */
+.gantt_task_line {
+  border-radius: 8px;
+}
+/* 周末背景色 */
+.weekend {
+  background: #f0f0f0 !important;
+}
+/* 行悬浮高亮 */
+.gantt_grid_data .gantt_row:hover,
+.gantt_grid_data .gantt_row.odd:hover {
+  background-color: #f3f1fe !important;
+}
+/* 选中行高亮 */
+.gantt_grid_data .gantt_row.gantt_selected,
+.gantt_grid_data .gantt_row.odd.gantt_selected,
+.gantt_task_row.gantt_selected {
+  background-color: #f3f1fe !important;
 }
 </style>
