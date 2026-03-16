@@ -149,10 +149,7 @@
     />
   </ContentWrap>
 
-  <!-- 排产对话框（工单详情 + 工序步骤 + 任务列表） -->
   <WorkOrderForm2 ref="formRef" />
-  <!-- 甘特图编辑 Dialog -->
-  <GanttEdit ref="ganttEditRef" />
 </template>
 
 <script setup lang="ts">
@@ -165,7 +162,6 @@ import { MesProWorkOrderStatusEnum, MesProWorkOrderTypeEnum } from '@/views/mes/
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import GanttChart from './components/GanttChart.vue'
-import GanttEdit from './GanttEdit.vue'
 import WorkOrderForm2 from './WorkOrderForm2.vue'
 
 defineOptions({ name: 'MesProTask' })
@@ -245,11 +241,10 @@ const handleFinish = async (id: number) => {
   } catch {}
 }
 
-// TODO @芋艿：后续可以考虑把甘特图预览和编辑合并成一个组件，统一管理甘特图数据和刷新逻辑；
-/** 打开甘特图编辑弹窗 */
-const ganttEditRef = ref()
+/** 打开甘特图编辑页面 */
+const { push } = useRouter()
 const openGanttEdit = () => {
-  ganttEditRef.value.open()
+  push({ name: 'MesProTaskGanttEdit' })
 }
 
 /** 初始化 */

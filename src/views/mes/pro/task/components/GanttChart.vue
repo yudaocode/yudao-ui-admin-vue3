@@ -64,10 +64,16 @@ const initGantt = () => {
   gantt.config.show_progress = true // KTG 无显式设置，但 gantt 默认会渲染 progress。保留：确保进度条显示
   gantt.config.open_tree_initially = true // 初始展开树结构。KTG 也有：open_tree_initially = true
   gantt.config.auto_types = false // 禁止自动升级为 project。KTG 也有：auto_types = false
-  gantt.config.drag_resize = false // 禁止调整任务持续时间
   gantt.config.drag_move = false // 禁止拖动任务
-  gantt.config.drag_progress = false // 禁止拖动进度条。KTG 也有：drag_progress = false
-  // 注：xml_date 是旧版写法，等价于 date_format（已在上方设置）
+  gantt.config.drag_resize = false // 禁止调整任务持续时间
+  gantt.config.drag_progress = false // 禁止拖动进度条
+
+  // lightbox 弹窗配置：只保留时间编辑，去掉描述编辑和删除按钮
+  gantt.config.lightbox.sections = [
+    { name: 'time', type: 'duration', map_to: 'auto' }
+  ]
+  gantt.config.buttons_left = ['gantt_save_btn']
+  gantt.config.buttons_right = ['gantt_cancel_btn']
 
   // 时间刻度：周 > 日 > 8小时
   const weekScaleTemplate = (date: Date) => {
@@ -131,19 +137,18 @@ const initGantt = () => {
     }
     return ''
   }
-  gantt.templates.task_cell_class = () => '' // KTG 无此配置。保留：防止 gantt 添加默认样式类
+  gantt.templates.timeline_cell_class = () => '' // 防止 gantt 添加默认样式类
   gantt.templates.task_row_class = () => '' // KTG 无此配置。保留：防止 gantt 添加默认样式类
 
-  // 事件监听
-  // KTG 用 onAfterTaskUpdate 收集修改 id；这里用 onAfterTaskDrag 直接 emit 结构化数据，更完善
+  // 编辑事件监听（通过 lightbox 弹窗编辑后触发）
   if (!props.readonly) {
-    gantt.attachEvent('onAfterTaskDrag', (id: string | number) => {
+    gantt.attachEvent('onAfterTaskUpdate', (id: string | number) => {
       const task = gantt.getTask(id)
       emit('task-update', {
         id: task.originalId || id,
         startTime: task.start_date,
         endTime: task.end_date,
-        duration: (task.duration as number) / 8 // 转回工作日
+        duration: task.duration
       })
     })
   }
