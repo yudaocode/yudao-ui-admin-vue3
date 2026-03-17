@@ -92,7 +92,7 @@
           <el-form-item label="排产数量" prop="quantity">
             <el-input-number
               v-model="formData.quantity"
-              :min="0"
+              :min="0.01"
               :precision="2"
               class="!w-1/1"
               :disabled="isDetail"
@@ -169,28 +169,30 @@ import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorksta
 
 defineOptions({ name: 'ProTaskList' })
 
-// DONE @AI：移除了 workOrderCode、workOrderName、processList
 const props = defineProps<{
   workOrderId: number
   routeId: number
   processId: number
   itemId?: number
+  colorCode?: string
   disabled?: boolean
 }>()
 
 const { t } = useI18n()
 const message = useMessage()
+const getDefaultColor = () => props.colorCode || '#00AEF3'
 
 // ==================== 列表 ====================
 const loading = ref(false)
 const list = ref<ProTaskVO[]>([])
 
-/** 查询任务列表（按工单+工序过滤） */
+/** 查询任务列表（按工单 + 路线 + 工序过滤） */
 const getList = async () => {
   loading.value = true
   try {
     const data = await ProTaskApi.getTaskPage({
       workOrderId: props.workOrderId,
+      routeId: props.routeId,
       processId: props.processId,
       pageNo: 1,
       pageSize: 100
@@ -234,13 +236,16 @@ const formData = ref<ProTaskVO>({
   startTime: undefined,
   duration: 1,
   endTime: undefined,
-  colorCode: '#00AEF3',
+  colorCode: undefined,
   status: undefined,
   remark: undefined
 } as unknown as ProTaskVO)
 const formRules = reactive({
   workstationId: [{ required: true, message: '工作站不能为空', trigger: 'change' }],
-  quantity: [{ required: true, message: '排产数量不能为空', trigger: 'blur' }],
+  quantity: [
+    { required: true, message: '排产数量不能为空', trigger: 'blur' },
+    { type: 'number', min: 0.01, message: '排产数量必须大于 0', trigger: 'blur' }
+  ],
   startTime: [{ required: true, message: '开始时间不能为空', trigger: 'change' }],
   duration: [{ required: true, message: '生产时长不能为空', trigger: 'blur' }]
 })
@@ -276,6 +281,7 @@ const openForm = async (type: string, id?: number) => {
     formData.value.routeId = props.routeId!
     formData.value.processId = props.processId!
     formData.value.itemId = props.itemId!
+    formData.value.colorCode = getDefaultColor()
   } else if (id) {
     // 编辑：加载任务数据
     formLoading.value = true
@@ -320,7 +326,7 @@ const resetForm = () => {
     startTime: undefined,
     duration: 1,
     endTime: undefined,
-    colorCode: '#00AEF3',
+    colorCode: undefined,
     status: undefined,
     remark: undefined
   } as unknown as ProTaskVO

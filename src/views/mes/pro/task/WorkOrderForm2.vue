@@ -140,6 +140,7 @@
         :route-id="currentRouteId"
         :process-id="rp.processId"
         :item-id="formData.productId!"
+        :color-code="rp.colorCode"
         :disabled="formType === 'detail'"
       />
     </el-card>
