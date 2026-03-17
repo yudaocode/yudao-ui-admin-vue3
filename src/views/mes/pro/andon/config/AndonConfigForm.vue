@@ -1,6 +1,6 @@
 <!-- 安灯呼叫配置弹窗（内联编辑表格） -->
 <template>
-  <Dialog title="安灯呼叫设置" v-model="dialogVisible" width="900px">
+  <Dialog title="安灯呼叫设置" v-model="dialogVisible" width="1050px">
     <div class="mb-10px">
       <el-button
         type="primary"
@@ -37,12 +37,23 @@
           <dict-tag v-else :type="DICT_TYPE.MES_PRO_ANDON_LEVEL" :value="scope.row.level" />
         </template>
       </el-table-column>
-      <el-table-column label="处置人" align="center" width="200">
+      <el-table-column label="处置角色" align="center" width="160">
+        <template #default="scope">
+          <RoleSelect
+            v-if="scope.row.editing"
+            v-model="scope.row.handlerRoleId"
+            placeholder="请选择角色"
+          />
+          <RoleSelect v-else :model-value="scope.row.handlerRoleId" disabled />
+        </template>
+      </el-table-column>
+      <el-table-column label="处置人" align="center" width="180">
         <template #default="scope">
           <UserSelect
             v-if="scope.row.editing"
             v-model="scope.row.handlerUserId"
             placeholder="请选择处置人"
+            clearable
           />
           <span v-else>{{ scope.row.handlerUserNickname || scope.row.handlerUserId || '-' }}</span>
         </template>
@@ -94,6 +105,7 @@ import { ProAndonConfigApi, ProAndonConfigVO } from '@/api/mes/pro/andon/config'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProAndonLevelEnum } from '@/views/mes/utils/constants'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import RoleSelect from '@/views/system/role/components/RoleSelect.vue'
 
 /** 安灯呼叫配置弹窗（内联编辑表格） */
 defineOptions({ name: 'AndonConfigDialog' })
@@ -151,6 +163,10 @@ const handleSave = async (row: any) => {
   }
   if (!row.level) {
     message.warning('级别不能为空')
+    return
+  }
+  if (!row.handlerUserId && !row.handlerRoleId) {
+    message.warning('处置角色和处置人至少填一个')
     return
   }
   try {
