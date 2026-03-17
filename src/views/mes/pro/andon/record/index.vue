@@ -129,6 +129,7 @@
             详情
           </el-button>
           <el-button
+            v-if="scope.row.status === MesProAndonStatusEnum.ACTIVE"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
