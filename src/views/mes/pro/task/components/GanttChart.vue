@@ -51,6 +51,7 @@ const initGantt = () => {
   gantt.i18n.setLocale('cn')
 
   // 基础配置
+  gantt.config.readonly = props.readonly
   gantt.config.date_format = '%Y-%m-%d %H:%i:%s'
   gantt.config.duration_unit = 'hour' // 使用小时作为持续时间单位，配合 duration_step 实现工作日单位
   gantt.config.duration_step = 8 // 1 工作日 = 8 小时
@@ -64,8 +65,8 @@ const initGantt = () => {
   gantt.config.show_progress = true // KTG 无显式设置，但 gantt 默认会渲染 progress。保留：确保进度条显示
   gantt.config.open_tree_initially = true // 初始展开树结构。KTG 也有：open_tree_initially = true
   gantt.config.auto_types = false // 禁止自动升级为 project。KTG 也有：auto_types = false
-  gantt.config.drag_move = false // 禁止拖动任务
-  gantt.config.drag_resize = false // 禁止调整任务持续时间
+  gantt.config.drag_move = !props.readonly // 编辑态允许直接拖动任务
+  gantt.config.drag_resize = !props.readonly // 编辑态允许直接调整任务持续时间
   gantt.config.drag_progress = false // 禁止拖动进度条
 
   // lightbox 弹窗配置：只保留时间编辑，去掉描述编辑和删除按钮
@@ -144,8 +145,13 @@ const initGantt = () => {
   if (!props.readonly) {
     gantt.attachEvent('onAfterTaskUpdate', (id: string | number) => {
       const task = gantt.getTask(id)
+      // 生产排产只允许回写 task 节点，避免把工单(project)节点当成任务保存
+      if (task.type !== gantt.config.types.task || !task.originalId) {
+        return
+      }
+      // 触发 task-update 事件，通知父组件保存修改
       emit('task-update', {
-        id: task.originalId || id,
+        id: task.originalId,
         startTime: task.start_date,
         endTime: task.end_date,
         duration: task.duration

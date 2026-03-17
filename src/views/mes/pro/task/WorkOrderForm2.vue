@@ -140,6 +140,7 @@
         :route-id="currentRouteId"
         :process-id="rp.processId"
         :item-id="formData.productId!"
+        :disabled="formType === 'detail'"
       />
     </el-card>
     <template #footer>

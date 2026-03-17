@@ -2,7 +2,9 @@
 <template>
   <ContentWrap>
     <div class="mb-10px flex items-center justify-between">
-      <span class="text-14px text-gray-500">双击任务条可编辑开始时间和时长，修改后点击"批量保存"</span>
+      <span class="text-14px text-gray-500">
+        可直接拖拽/拉伸任务条，或双击编辑开始时间和时长，修改后点击"批量保存"
+      </span>
       <div>
         <el-badge :value="pendingCount" :hidden="pendingCount === 0" class="mr-10px">
           <el-button
