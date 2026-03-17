@@ -115,7 +115,7 @@
             v-if="scope.row.status === MesProAndonStatusEnum.ACTIVE"
             link
             type="success"
-            @click="openHandleForm(scope.row.id)"
+            @click="openRecordForm('update', scope.row.id)"
             v-hasPermi="['mes:pro-andon-record:update']"
           >
             处置
@@ -148,10 +148,8 @@
     />
   </ContentWrap>
 
-  <!-- 弹窗：新增/详情 -->
+  <!-- 弹窗：新增/处置/详情 -->
   <AndonRecordForm ref="recordFormRef" @success="getList" />
-  <!-- 弹窗：处置 -->
-  <AndonHandleForm ref="handleFormRef" @success="getList" />
   <!-- 弹窗：安灯设置 -->
   <AndonConfigDialog ref="configDialogRef" />
 </template>
@@ -161,7 +159,6 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ProAndonRecordApi, ProAndonRecordVO } from '@/api/mes/pro/andon/record'
 import AndonRecordForm from './AndonRecordForm.vue'
-import AndonHandleForm from './AndonHandleForm.vue'
 import AndonConfigDialog from '../config/AndonConfigForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProAndonStatusEnum } from '@/views/mes/utils/constants'
@@ -170,12 +167,12 @@ import UserSelect from '@/views/system/user/components/UserSelect.vue'
 
 defineOptions({ name: 'MesProAndon' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ProAndonRecordVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const list = ref<ProAndonRecordVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -185,7 +182,7 @@ const queryParams = reactive({
   status: undefined,
   createTime: undefined
 })
-const queryFormRef = ref() // 搜索的表单 Ref
+const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
@@ -212,16 +209,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 新增/详情弹窗 */
+/** 新增/处置/详情操作 */
 const recordFormRef = ref()
 const openRecordForm = (type: string, id?: number) => {
   recordFormRef.value.open(type, id)
-}
-
-/** 处置弹窗 */
-const handleFormRef = ref()
-const openHandleForm = (id: number) => {
-  handleFormRef.value.open(id)
 }
 
 /** 安灯设置弹窗 */
@@ -233,9 +224,12 @@ const openConfigDialog = () => {
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
+    // 删除的二次确认
     await message.delConfirm()
+    // 发起删除
     await ProAndonRecordApi.deleteAndonRecord(id)
     message.success(t('common.delSuccess'))
+    // 刷新列表
     await getList()
   } catch {}
 }
@@ -243,17 +237,20 @@ const handleDelete = async (id: number) => {
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {
+    // 导出的二次确认
     await message.exportConfirm()
+    // 发起导出
     exportLoading.value = true
     const data = await ProAndonRecordApi.exportAndonRecord(queryParams)
     download.excel(data, '安灯呼叫记录.xls')
+  } catch {
   } finally {
     exportLoading.value = false
   }
 }
 
-/** 初始化 **/
-onMounted(async () => {
-  await getList()
+/** 初始化 */
+onMounted(() => {
+  getList()
 })
 </script>

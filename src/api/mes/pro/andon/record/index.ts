@@ -45,9 +45,9 @@ export const ProAndonRecordApi = {
     return await request.delete({ url: `/mes/pro/andon-record/delete?id=` + id })
   },
 
-  // 处置安灯记录
-  handleAndonRecord: async (data: any) => {
-    return await request.put({ url: `/mes/pro/andon-record/handle`, data })
+  // 更新安灯记录（保存/已处置）
+  updateAndonRecord: async (data: any) => {
+    return await request.put({ url: `/mes/pro/andon-record/update`, data })
   },
 
   // 导出安灯记录 Excel

@@ -1,3 +1,4 @@
+<!-- TODO @AI：应该放到 md 里； -->
 <!-- MES 编码规则列表 -->
 <template>
   <ContentWrap>
