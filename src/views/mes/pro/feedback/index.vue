@@ -99,6 +99,7 @@
       :show-overflow-tooltip="true"
       row-key="id"
     >
+      <!-- TODO @AI：这里点击后，跳转详情；然后，去掉下面的【详情】按钮 -->
       <el-table-column label="报工单号" align="center" prop="code" width="160" />
       <el-table-column label="报工类型" align="center" prop="type" width="100">
         <template #default="scope">
@@ -157,6 +158,7 @@
             </el-button>
           </template>
           <!-- 审批中状态：驳回、执行、取消 -->
+          <!-- TODO @AI：把【审批】【驳回】融合，点击后，弹出一个界面，然后里面在通过，不通过； -->
           <template v-if="scope.row.status === MesProFeedbackStatusEnum.APPROVING">
             <el-button
               link
@@ -169,18 +171,11 @@
             <el-button
               link
               type="success"
-              @click="handleFinish(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:finish']"
+              @click="handleApprove(scope.row.id)"
+              v-hasPermi="['mes:pro-feedback:approve']"
             >
-              执行
+              审批
             </el-button>
-            <el-button
-              link
-              type="danger"
-              @click="handleCancel(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:update']"
-              >取消</el-button
-            >
           </template>
           <!-- 所有状态：详情 -->
           <el-button
@@ -293,20 +288,15 @@ const handleReject = async (id: number) => {
   } catch {}
 }
 
-const handleFinish = async (id: number) => {
+const handleApprove = async (id: number) => {
   try {
-    await message.confirm('确认要执行该报工单吗？')
-    await ProFeedbackApi.finishFeedback(id)
-    message.success('报工单已执行')
-    await getList()
-  } catch {}
-}
-
-const handleCancel = async (id: number) => {
-  try {
-    await message.confirm('确认要取消该报工单吗？')
-    await ProFeedbackApi.cancelFeedback(id)
-    message.success('报工单已取消')
+    await message.confirm('确认要审批该报工单吗？')
+    const status = await ProFeedbackApi.approveFeedback(id)
+    if (status === MesProFeedbackStatusEnum.UNCHECK) {
+      message.success('报工成功，请等待质量检验完成！')
+    } else {
+      message.success('报工单已审批完成')
+    }
     await getList()
   } catch {}
 }

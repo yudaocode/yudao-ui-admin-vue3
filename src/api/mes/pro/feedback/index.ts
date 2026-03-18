@@ -28,7 +28,6 @@ export interface ProFeedbackVO {
   unitMeasureId: number // 单位编号
   unitMeasureName: string // 单位名称
   expireDate: Date // 过期日期
-  batchCode: string // 批次号
   scheduledQuantity: number // 排产数量
   feedbackQuantity: number // 本次报工数量
   qualifiedQuantity: number // 合格品数量
@@ -79,12 +78,8 @@ export const ProFeedbackApi = {
   rejectFeedback: async (id: number) => {
     return await request.put({ url: `/mes/pro/feedback/reject?id=` + id })
   },
-  // 执行报工
-  finishFeedback: async (id: number) => {
-    return await request.put({ url: `/mes/pro/feedback/finish?id=` + id })
-  },
-  // 取消报工
-  cancelFeedback: async (id: number) => {
-    return await request.put({ url: `/mes/pro/feedback/cancel?id=` + id })
+  // 审批报工（返回审批后的状态）
+  approveFeedback: async (id: number) => {
+    return await request.put({ url: `/mes/pro/feedback/approve?id=` + id })
   }
 }

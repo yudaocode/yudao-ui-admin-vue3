@@ -32,24 +32,6 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <!-- TODO @芋艿：报告途径，是不是非必须？ -->
-          <el-form-item label="报工途径" prop="channel">
-            <el-select
-              v-model="formData.channel"
-              placeholder="请选择报工途径"
-              :disabled="isDetail"
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.MES_PRO_FEEDBACK_CHANNEL)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
       </el-row>
       <!-- 工单 / 任务 / 工作站 -->
       <el-row :gutter="20">
@@ -84,21 +66,11 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- 工序 / 批次号 -->
-      <!-- TODO @芋艿：是不是不用这个字段？【待定】 -->
+      <!-- 工序 -->
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="工序" prop="processId">
             <el-input v-model="processDisplay" disabled placeholder="由任务自动带入" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="批次号" prop="batchCode">
-            <el-input
-              v-model="formData.batchCode"
-              placeholder="请输入批次号"
-              :disabled="isDetail"
-            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -262,21 +234,16 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
 const formType = ref('') // 'create' | 'update' | 'detail'
-
 const formData = ref<Record<string, any>>({
   id: undefined,
   code: undefined,
   type: undefined,
-  channel: undefined,
   workstationId: undefined,
   routeId: undefined,
   processId: undefined,
   workOrderId: undefined,
   taskId: undefined,
-  itemId: undefined,
-  unitMeasureId: undefined,
   expireDate: undefined,
-  batchCode: undefined,
   feedbackQuantity: 0,
   qualifiedQuantity: 0,
   unqualifiedQuantity: 0,
@@ -289,7 +256,6 @@ const formData = ref<Record<string, any>>({
   approveUserId: undefined,
   remark: undefined
 })
-
 const formRules = reactive({
   type: [{ required: true, message: '报工类型不能为空', trigger: 'change' }],
   workOrderId: [{ required: true, message: '生产工单不能为空', trigger: 'change' }],
@@ -315,8 +281,6 @@ const handleWorkOrderChange = () => {
   formData.value.taskId = undefined
   formData.value.routeId = undefined
   formData.value.processId = undefined
-  formData.value.itemId = undefined
-  formData.value.unitMeasureId = undefined
   formData.value.workstationId = undefined
   processDisplay.value = ''
   checkFlag.value = false
@@ -329,8 +293,6 @@ const handleTaskChange = (task: any) => {
   }
   formData.value.routeId = task.routeId
   formData.value.processId = task.processId
-  formData.value.itemId = task.itemId
-  formData.value.unitMeasureId = task.unitMeasureId
   formData.value.workstationId = task.workstationId
   processDisplay.value = task.processCode ? task.processCode + ' - ' + task.processName : ''
   // TODO @芋艿：加载 checkFlag（查询 routeProcess）
@@ -339,6 +301,7 @@ const handleTaskChange = (task: any) => {
 // ==================== 报工单编号生成 ====================
 
 /** 生成报工单编号（前端生成） */
+// TODO @芋艿：这块的生成逻辑；
 const generateCode = () => {
   const now = new Date()
   const pad = (n: number) => n.toString().padStart(2, '0')
@@ -360,7 +323,13 @@ const generateCode = () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'detail' ? '报工详情' : t('action.' + type)
+  // TODO @AI：搞成 computed
+  dialogTitle.value =
+    type === 'detail'
+      ? '查看生产报工记录'
+      : type === 'create'
+        ? '添加生产报工记录'
+        : '修改生产报工记录'
   formType.value = type
   resetForm()
   if (id) {
@@ -409,16 +378,12 @@ const resetForm = () => {
     id: undefined,
     code: undefined,
     type: undefined,
-    channel: undefined,
     workstationId: undefined,
     routeId: undefined,
     processId: undefined,
     workOrderId: undefined,
     taskId: undefined,
-    itemId: undefined,
-    unitMeasureId: undefined,
     expireDate: undefined,
-    batchCode: undefined,
     feedbackQuantity: 0,
     qualifiedQuantity: 0,
     unqualifiedQuantity: 0,
