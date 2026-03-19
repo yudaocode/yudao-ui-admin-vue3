@@ -107,7 +107,6 @@
       :show-overflow-tooltip="true"
       row-key="id"
     >
-      <!-- DONE @AI：这里点击后，跳转详情；然后，去掉下面的【详情】按钮 -->
       <el-table-column label="报工单号" align="center" prop="code" width="160">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('detail', scope.row.id)">{{
@@ -171,14 +170,11 @@
               删除
             </el-button>
           </template>
-          <!-- 审批中状态：驳回、执行、取消 -->
-          <!-- DONE @AI：把【审批】【驳回】融合，点击后弹出一个界面，里面通过/不通过 -->
-          <!-- TODO @AI：弹出，继续是 Form 组件，参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/returnvendor/ReturnVendorForm.vue -->
-          <template v-if="scope.row.status === MesProFeedbackStatusEnum.APPROVING">
+          <template v-if="scope.row.status === MesProFeedbackStatusEnum.APPROVING && scope.row.approveUserId === currentUserId">
             <el-button
               link
               type="primary"
-              @click="openApproveDialog(scope.row.id)"
+              @click="openForm('approve', scope.row.id)"
               v-hasPermi="['mes:pro-feedback:approve']"
             >
               审批
@@ -198,17 +194,6 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <FeedbackForm ref="formRef" @success="getList" />
-
-  <!-- 审批弹窗 -->
-  <Dialog title="审批报工" v-model="approveDialogVisible" width="400px">
-    <div style="text-align: center; padding: 20px 0">
-      <p style="margin-bottom: 20px; font-size: 14px">请确认审批结果</p>
-      <el-button type="success" size="large" @click="handleApprove">通过</el-button>
-      <el-button type="danger" size="large" @click="handleReject" style="margin-left: 24px"
-        >不通过</el-button
-      >
-    </div>
-  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -221,15 +206,17 @@ import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import FeedbackForm from './FeedbackForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
+import { useUserStore } from '@/store/modules/user'
 
 defineOptions({ name: 'MesProFeedback' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
+const currentUserId = useUserStore().getUser.id // 当前登录用户 ID
 
-const loading = ref(true)
-const list = ref<ProFeedbackVO[]>([])
-const total = ref(0)
+const loading = ref(true) // 列表的加载中
+const list = ref<ProFeedbackVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -242,8 +229,8 @@ const queryParams = reactive({
   status: undefined,
   feedbackTime: undefined
 })
-const queryFormRef = ref()
-const exportLoading = ref(false)
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -257,75 +244,54 @@ const getList = async () => {
   }
 }
 
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
+
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
+/** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
+/** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
+    // 删除的二次确认
     await message.delConfirm()
+    // 发起删除
     await ProFeedbackApi.deleteFeedback(id)
     message.success(t('common.delSuccess'))
+    // 刷新列表
     await getList()
   } catch {}
 }
 
+/** 提交报工单 */
 const handleSubmit = async (id: number) => {
   try {
     await message.confirm('确认要提交该报工单吗？')
     await ProFeedbackApi.submitFeedback(id)
     message.success('报工单已提交')
+    // 刷新列表
     await getList()
   } catch {}
 }
 
-// ==================== 审批弹窗 ====================
-
-const approveDialogVisible = ref(false)
-const approveTargetId = ref<number>()
-
-const openApproveDialog = (id: number) => {
-  approveTargetId.value = id
-  approveDialogVisible.value = true
-}
-
-const handleApprove = async () => {
-  try {
-    const id = approveTargetId.value!
-    approveDialogVisible.value = false
-    const finished = await ProFeedbackApi.approveFeedback(id)
-    if (finished) {
-      message.success('报工单已审批完成')
-    } else {
-      message.success('报工成功，请等待质量检验完成！')
-    }
-    await getList()
-  } catch {}
-}
-
-const handleReject = async () => {
-  try {
-    const id = approveTargetId.value!
-    approveDialogVisible.value = false
-    await ProFeedbackApi.rejectFeedback(id)
-    message.success('报工单已驳回')
-    await getList()
-  } catch {}
-}
-
+/** 导出按钮操作 */
 const handleExport = async () => {
   try {
+    // 导出的二次确认
     await message.exportConfirm()
+    // 发起导出
     exportLoading.value = true
     const data = await ProFeedbackApi.exportFeedback(queryParams)
     download.excel(data, '生产报工.xls')
@@ -334,6 +300,7 @@ const handleExport = async () => {
   }
 }
 
+/** 初始化 */
 onMounted(async () => {
   await getList()
 })

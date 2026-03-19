@@ -207,9 +207,16 @@
         </el-col>
       </el-row>
     </el-form>
-    <template #footer v-if="!isDetail">
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+    <template #footer>
+      <template v-if="formType === 'approve'">
+        <el-button type="success" @click="handleApprove" :disabled="formLoading">通过</el-button>
+        <el-button type="danger" @click="handleReject" :disabled="formLoading">不通过</el-button>
+        <el-button @click="dialogVisible = false">取 消</el-button>
+      </template>
+      <template v-else-if="!isDetail">
+        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+        <el-button @click="dialogVisible = false">取 消</el-button>
+      </template>
     </template>
   </Dialog>
 </template>
@@ -238,6 +245,9 @@ const dialogTitle = computed(() => {
   }
   if (formType.value === 'create') {
     return '添加生产报工记录'
+  }
+  if (formType.value === 'approve') {
+    return '审批生产报工'
   }
   return '修改生产报工记录'
 })
@@ -275,7 +285,7 @@ const formRules = reactive({
   approveUserId: [{ required: true, message: '审核人不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
+const isDetail = computed(() => formType.value === 'detail' || formType.value === 'approve') // 是否为只读模式（详情/审批）
 const checkFlag = ref(true) // 是否需要检验（默认 true，未选任务时只展示报工数量）
 
 // ==================== 级联选择回调 ====================
@@ -409,6 +419,36 @@ const submitForm = async () => {
     }
     dialogVisible.value = false
     // 发送操作成功的事件
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 审批通过 */
+const handleApprove = async () => {
+  formLoading.value = true
+  try {
+    const finished = await ProFeedbackApi.approveFeedback(formData.value.id!)
+    if (finished) {
+      message.success('报工单已审批完成')
+    } else {
+      message.success('报工成功，请等待质量检验完成！')
+    }
+    dialogVisible.value = false
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 审批不通过（驳回） */
+const handleReject = async () => {
+  formLoading.value = true
+  try {
+    await ProFeedbackApi.rejectFeedback(formData.value.id!)
+    message.success('报工单已驳回')
+    dialogVisible.value = false
     emit('success')
   } finally {
     formLoading.value = false

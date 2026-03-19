@@ -164,13 +164,12 @@ export const MesQcStatusEnum = {
 }
 
 /** MES 生产报工状态枚举 */
-// TODO @芋艿：【晚点弄】需要对其 MesOrderStatusConstants
 export const MesProFeedbackStatusEnum = {
-  PREPARE: 0,   // 草稿
-  APPROVING: 1, // 审批中
-  UNCHECK: 2,   // 待检验
-  FINISHED: 3,  // 已完成
-  CANCELED: 4   // 已取消
+  PREPARE: MesOrderStatusConstants.DRAFT, // 草稿
+  APPROVING: MesOrderStatusConstants.APPROVING, // 审批中
+  UNCHECK: MesOrderStatusConstants.APPROVED, // 待检验
+  FINISHED: MesOrderStatusConstants.FINISHED, // 已完成
+  CANCELED: MesOrderStatusConstants.CANCELLED // 已取消
 }
 
 /** MES 安灯处置状态枚举 */
