@@ -34,13 +34,21 @@
         </el-select>
       </el-form-item>
       <el-form-item label="生产工单" prop="workOrderId">
-        <ProWorkOrderSelect v-model="queryParams.workOrderId" placeholder="请选择工单" class="!w-240px" />
+        <ProWorkOrderSelect
+          v-model="queryParams.workOrderId"
+          placeholder="请选择工单"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="产品物料" prop="itemId">
         <MdItemSelect v-model="queryParams.itemId" placeholder="请选择产品物料" class="!w-240px" />
       </el-form-item>
       <el-form-item label="报工人" prop="feedbackUserId">
-        <UserSelect v-model="queryParams.feedbackUserId" placeholder="请选择报工人" class="!w-240px" />
+        <UserSelect
+          v-model="queryParams.feedbackUserId"
+          placeholder="请选择报工人"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="记录人" prop="creator">
         <UserSelect v-model="queryParams.creator" placeholder="请选择记录人" class="!w-240px" />
@@ -99,8 +107,14 @@
       :show-overflow-tooltip="true"
       row-key="id"
     >
-      <!-- TODO @AI：这里点击后，跳转详情；然后，去掉下面的【详情】按钮 -->
-      <el-table-column label="报工单号" align="center" prop="code" width="160" />
+      <!-- DONE @AI：这里点击后，跳转详情；然后，去掉下面的【详情】按钮 -->
+      <el-table-column label="报工单号" align="center" prop="code" width="160">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">{{
+            scope.row.code
+          }}</el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="报工类型" align="center" prop="type" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_PRO_FEEDBACK_TYPE" :value="scope.row.type" />
@@ -111,7 +125,7 @@
       <el-table-column label="生产工单编码" align="center" prop="workOrderCode" width="160" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="120" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" width="120" />
-      <el-table-column label="规格型号" align="center" prop="itemSpec" width="120" />
+      <el-table-column label="规格型号" align="center" prop="itemSpecification" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="报工数量" align="center" prop="feedbackQuantity" width="100" />
       <el-table-column label="报工人" align="center" prop="feedbackUserNickname" width="100" />
@@ -158,33 +172,18 @@
             </el-button>
           </template>
           <!-- 审批中状态：驳回、执行、取消 -->
-          <!-- TODO @AI：把【审批】【驳回】融合，点击后，弹出一个界面，然后里面在通过，不通过； -->
+          <!-- DONE @AI：把【审批】【驳回】融合，点击后弹出一个界面，里面通过/不通过 -->
+          <!-- TODO @AI：弹出，继续是 Form 组件，参考 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/returnvendor/ReturnVendorForm.vue -->
           <template v-if="scope.row.status === MesProFeedbackStatusEnum.APPROVING">
             <el-button
               link
-              type="warning"
-              @click="handleReject(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:update']"
-            >
-              驳回
-            </el-button>
-            <el-button
-              link
-              type="success"
-              @click="handleApprove(scope.row.id)"
+              type="primary"
+              @click="openApproveDialog(scope.row.id)"
               v-hasPermi="['mes:pro-feedback:approve']"
             >
               审批
             </el-button>
           </template>
-          <!-- 所有状态：详情 -->
-          <el-button
-            link
-            type="primary"
-            @click="openForm('detail', scope.row.id)"
-            v-hasPermi="['mes:pro-feedback:query']"
-            >详情</el-button
-          >
         </template>
       </el-table-column>
     </el-table>
@@ -199,6 +198,17 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <FeedbackForm ref="formRef" @success="getList" />
+
+  <!-- 审批弹窗 -->
+  <Dialog title="审批报工" v-model="approveDialogVisible" width="400px">
+    <div style="text-align: center; padding: 20px 0">
+      <p style="margin-bottom: 20px; font-size: 14px">请确认审批结果</p>
+      <el-button type="success" size="large" @click="handleApprove">通过</el-button>
+      <el-button type="danger" size="large" @click="handleReject" style="margin-left: 24px"
+        >不通过</el-button
+      >
+    </div>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -279,24 +289,36 @@ const handleSubmit = async (id: number) => {
   } catch {}
 }
 
-const handleReject = async (id: number) => {
+// ==================== 审批弹窗 ====================
+
+const approveDialogVisible = ref(false)
+const approveTargetId = ref<number>()
+
+const openApproveDialog = (id: number) => {
+  approveTargetId.value = id
+  approveDialogVisible.value = true
+}
+
+const handleApprove = async () => {
   try {
-    await message.confirm('确认要驳回该报工单吗？')
-    await ProFeedbackApi.rejectFeedback(id)
-    message.success('报工单已驳回')
+    const id = approveTargetId.value!
+    approveDialogVisible.value = false
+    const finished = await ProFeedbackApi.approveFeedback(id)
+    if (finished) {
+      message.success('报工单已审批完成')
+    } else {
+      message.success('报工成功，请等待质量检验完成！')
+    }
     await getList()
   } catch {}
 }
 
-const handleApprove = async (id: number) => {
+const handleReject = async () => {
   try {
-    await message.confirm('确认要审批该报工单吗？')
-    const status = await ProFeedbackApi.approveFeedback(id)
-    if (status === MesProFeedbackStatusEnum.UNCHECK) {
-      message.success('报工成功，请等待质量检验完成！')
-    } else {
-      message.success('报工单已审批完成')
-    }
+    const id = approveTargetId.value!
+    approveDialogVisible.value = false
+    await ProFeedbackApi.rejectFeedback(id)
+    message.success('报工单已驳回')
     await getList()
   } catch {}
 }

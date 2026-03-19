@@ -24,7 +24,7 @@ export interface ProFeedbackVO {
   itemId: number // 产品物料编号
   itemCode: string // 物料编码
   itemName: string // 物料名称
-  itemSpec: string // 规格型号
+  itemSpecification: string // 规格型号
   unitMeasureId: number // 单位编号
   unitMeasureName: string // 单位名称
   expireDate: Date // 过期日期

@@ -15,7 +15,7 @@ export interface ProRouteProcessVO {
   waitTime?: number // 等待时间（分钟）
   colorCode?: string // 甘特图显示颜色
   keyFlag?: number // 是否关键工序
-  checkFlag?: number // 是否质检工序
+  checkFlag?: boolean // 是否质检工序
   remark?: string // 备注
   createTime?: Date // 创建时间
 }
@@ -35,6 +35,14 @@ export const ProRouteProcessApi = {
   // 查询工艺路线工序详情
   getRouteProcess: async (id: number) => {
     return await request.get({ url: `/mes/pro/route-process/get?id=` + id })
+  },
+
+  // 按工艺路线+工序精确查询工序配置
+  getRouteProcessByRouteAndProcess: async (routeId: number, processId: number) => {
+    return await request.get({
+      url: `/mes/pro/route-process/get-by-route-and-process`,
+      params: { routeId, processId }
+    })
   },
 
   // 新增工艺路线工序

@@ -66,17 +66,48 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- 工序 -->
-      <el-row :gutter="20">
+      <!-- 数量区域 -->
+      <el-divider content-position="left">报工数量</el-divider>
+      <!-- 非质检工序：报工数量(只读自动计算) + 合格品 + 不良品 -->
+      <el-row :gutter="20" v-if="!checkFlag">
         <el-col :span="8">
-          <el-form-item label="工序" prop="processId">
-            <el-input v-model="processDisplay" disabled placeholder="由任务自动带入" />
+          <el-form-item label="报工数量" prop="feedbackQuantity">
+            <el-input-number
+              v-model="formData.feedbackQuantity"
+              :min="0"
+              :precision="2"
+              disabled
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="合格品数量" prop="qualifiedQuantity">
+            <el-input-number
+              v-model="formData.qualifiedQuantity"
+              :min="0"
+              :precision="2"
+              :disabled="isDetail"
+              class="!w-1/1"
+              @change="handleQuantityChanged"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="不良品数量" prop="unqualifiedQuantity">
+            <el-input-number
+              v-model="formData.unqualifiedQuantity"
+              :min="0"
+              :precision="2"
+              :disabled="isDetail"
+              class="!w-1/1"
+              @change="handleQuantityChanged"
+            />
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- 数量区域 -->
-      <el-divider content-position="left">报工数量</el-divider>
-      <el-row :gutter="20">
+      <!-- 质检工序：只填报工数量 -->
+      <el-row :gutter="20" v-else>
         <el-col :span="8">
           <el-form-item label="报工数量" prop="feedbackQuantity">
             <el-input-number
@@ -88,46 +119,9 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @芋艿：在评审下 -->
-        <el-col :span="8" v-if="!checkFlag">
-          <el-form-item label="合格品数量" prop="qualifiedQuantity">
-            <el-input-number
-              v-model="formData.qualifiedQuantity"
-              :min="0"
-              :precision="2"
-              :disabled="isDetail"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-        <!-- TODO @芋艿：在评审下 -->
-        <el-col :span="8" v-if="!checkFlag">
-          <el-form-item label="不良品数量" prop="unqualifiedQuantity">
-            <el-input-number
-              v-model="formData.unqualifiedQuantity"
-              :min="0"
-              :precision="2"
-              :disabled="isDetail"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
-        <!-- TODO @芋艿：在评审下 -->
-        <el-col :span="8" v-if="checkFlag">
-          <el-form-item label="待检测数量">
-            <el-input-number
-              v-model="formData.uncheckQuantity"
-              :min="0"
-              :precision="2"
-              :disabled="isDetail"
-              class="!w-1/1"
-            />
-          </el-form-item>
-        </el-col>
       </el-row>
-      <!-- 废品分类（不良品>0 时展开） -->
-      <!-- TODO @芋艿：在评审下 -->
-      <el-row :gutter="20" v-if="formData.unqualifiedQuantity > 0">
+      <!-- 废品分类（非质检工序 且 不良品>0 时展开） -->
+      <el-row :gutter="20" v-if="!checkFlag && formData.unqualifiedQuantity > 0">
         <el-col :span="8">
           <el-form-item label="工废数量">
             <el-input-number
@@ -136,6 +130,7 @@
               :precision="2"
               :disabled="isDetail"
               class="!w-1/1"
+              @change="handleScrapChanged"
             />
           </el-form-item>
         </el-col>
@@ -147,6 +142,7 @@
               :precision="2"
               :disabled="isDetail"
               class="!w-1/1"
+              @change="handleScrapChanged"
             />
           </el-form-item>
         </el-col>
@@ -158,6 +154,7 @@
               :precision="2"
               :disabled="isDetail"
               class="!w-1/1"
+              @change="handleScrapChanged"
             />
           </el-form-item>
         </el-col>
@@ -178,7 +175,7 @@
             <el-date-picker
               v-model="formData.feedbackTime"
               type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
+              value-format="x"
               placeholder="请选择报工时间"
               :disabled="isDetail"
               class="!w-1/1"
@@ -218,22 +215,32 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProFeedbackApi, ProFeedbackVO } from '@/api/mes/pro/feedback'
+import { ProRouteProcessApi } from '@/api/mes/pro/route/process'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import { useUserStore } from '@/store/modules/user'
 
 defineOptions({ name: 'FeedbackForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('') // 'create' | 'update' | 'detail'
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const dialogTitle = computed(() => {
+  if (formType.value === 'detail') {
+    return '查看生产报工记录'
+  }
+  if (formType.value === 'create') {
+    return '添加生产报工记录'
+  }
+  return '修改生产报工记录'
+})
 const formData = ref<Record<string, any>>({
   id: undefined,
   code: undefined,
@@ -243,6 +250,7 @@ const formData = ref<Record<string, any>>({
   processId: undefined,
   workOrderId: undefined,
   taskId: undefined,
+  itemId: undefined,
   expireDate: undefined,
   feedbackQuantity: 0,
   qualifiedQuantity: 0,
@@ -261,20 +269,48 @@ const formRules = reactive({
   workOrderId: [{ required: true, message: '生产工单不能为空', trigger: 'change' }],
   taskId: [{ required: true, message: '生产任务不能为空', trigger: 'change' }],
   workstationId: [{ required: true, message: '工作站不能为空', trigger: 'change' }],
-  feedbackQuantity: [{ required: true, message: '报工数量不能为空', trigger: 'blur' }]
+  feedbackQuantity: [{ required: true, message: '报工数量不能为空', trigger: 'blur' }],
+  feedbackUserId: [{ required: true, message: '报工人不能为空', trigger: 'change' }],
+  feedbackTime: [{ required: true, message: '报工时间不能为空', trigger: 'change' }],
+  approveUserId: [{ required: true, message: '审核人不能为空', trigger: 'change' }]
 })
-const formRef = ref()
-
-/** 是否为详情模式 */
-const isDetail = computed(() => formType.value === 'detail')
-
-/** 是否需要检验（checkFlag） */
-const checkFlag = ref(false)
-
-/** 工序显示（只读） */
-const processDisplay = ref('')
+const formRef = ref() // 表单 Ref
+const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
+const checkFlag = ref(true) // 是否需要检验（默认 true，未选任务时只展示报工数量）
 
 // ==================== 级联选择回调 ====================
+
+/** 加载工序的 checkFlag */
+const loadCheckFlag = async (routeId?: number, processId?: number) => {
+  if (!routeId || !processId) {
+    checkFlag.value = true
+    return
+  }
+  try {
+    const routeProcess = await ProRouteProcessApi.getRouteProcessByRouteAndProcess(
+      routeId,
+      processId
+    )
+    checkFlag.value = routeProcess?.checkFlag ?? false
+  } catch {
+    checkFlag.value = true
+  }
+}
+
+/** 合格品/不良品变更：自动计算报工数量 = 合格 + 不良 */
+const handleQuantityChanged = () => {
+  formData.value.feedbackQuantity =
+    (formData.value.qualifiedQuantity || 0) + (formData.value.unqualifiedQuantity || 0)
+}
+
+/** 废品明细变更：自动计算不良品数量 = 工废 + 料废 + 其他 */
+const handleScrapChanged = () => {
+  formData.value.unqualifiedQuantity =
+    (formData.value.laborScrapQuantity || 0) +
+    (formData.value.materialScrapQuantity || 0) +
+    (formData.value.otherScrapQuantity || 0)
+  handleQuantityChanged()
+}
 
 /** 工单变更：清空任务相关字段 */
 const handleWorkOrderChange = () => {
@@ -282,25 +318,23 @@ const handleWorkOrderChange = () => {
   formData.value.routeId = undefined
   formData.value.processId = undefined
   formData.value.workstationId = undefined
-  processDisplay.value = ''
-  checkFlag.value = false
+  formData.value.itemId = undefined
+  checkFlag.value = true
 }
 
 /** 任务变更：自动填充关联字段 */
-const handleTaskChange = (task: any) => {
+const handleTaskChange = async (task: any) => {
   if (!task) {
     return
   }
   formData.value.routeId = task.routeId
   formData.value.processId = task.processId
   formData.value.workstationId = task.workstationId
-  processDisplay.value = task.processCode ? task.processCode + ' - ' + task.processName : ''
-  // TODO @芋艿：加载 checkFlag（查询 routeProcess）
+  formData.value.itemId = task.itemId
+  await loadCheckFlag(task.routeId, task.processId)
 }
 
-// ==================== 报工单编号生成 ====================
-
-/** 生成报工单编号（前端生成） */
+/** 生成报工单编号 */
 // TODO @芋艿：这块的生成逻辑；
 const generateCode = () => {
   const now = new Date()
@@ -323,33 +357,26 @@ const generateCode = () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  // TODO @AI：搞成 computed
-  dialogTitle.value =
-    type === 'detail'
-      ? '查看生产报工记录'
-      : type === 'create'
-        ? '添加生产报工记录'
-        : '修改生产报工记录'
   formType.value = type
   resetForm()
+  // 修改/详情时，设置数据
   if (id) {
     formLoading.value = true
     try {
       const data = await ProFeedbackApi.getFeedback(id)
       formData.value = data as any
-      // 填充显示字段
-      processDisplay.value = data.processCode ? data.processCode + ' - ' + data.processName : ''
-      checkFlag.value = (data as any).checkFlag || false
+      await loadCheckFlag(data.routeId, data.processId)
     } finally {
       formLoading.value = false
     }
   } else {
-    // 创建模式：自动生成报工单号
+    // 创建模式：自动生成报工单号 + 默认报工人为当前用户
     formData.value.code = generateCode()
+    formData.value.feedbackUserId = useUserStore().getUser.id
   }
 }
 
-defineExpose({ open })
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success'])
@@ -358,6 +385,21 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as ProFeedbackVO
+    // 提交前根据 checkFlag 对齐数量
+    if (checkFlag.value) {
+      // 质检工序：报工数量即待检数量，合格/不良/废品归零
+      data.uncheckQuantity = data.feedbackQuantity
+      data.qualifiedQuantity = 0
+      data.unqualifiedQuantity = 0
+      data.laborScrapQuantity = 0
+      data.materialScrapQuantity = 0
+      data.otherScrapQuantity = 0
+    } else {
+      // 非质检工序：报工数量 = 合格 + 不良，待检归零
+      data.feedbackQuantity = (data.qualifiedQuantity || 0) + (data.unqualifiedQuantity || 0)
+      data.uncheckQuantity = 0
+    }
+    // 执行提交
     if (formType.value === 'create') {
       await ProFeedbackApi.createFeedback(data)
       message.success(t('common.createSuccess'))
@@ -366,6 +408,7 @@ const submitForm = async () => {
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false
@@ -383,6 +426,7 @@ const resetForm = () => {
     processId: undefined,
     workOrderId: undefined,
     taskId: undefined,
+    itemId: undefined,
     expireDate: undefined,
     feedbackQuantity: 0,
     qualifiedQuantity: 0,
@@ -396,8 +440,7 @@ const resetForm = () => {
     approveUserId: undefined,
     remark: undefined
   }
-  processDisplay.value = ''
-  checkFlag.value = false
+  checkFlag.value = true
   formRef.value?.resetFields()
 }
 </script>
