@@ -220,7 +220,9 @@
       <el-tab-pane label="BOM 物资消耗">
         <ItemConsumeList :feedbackId="formData.id" />
       </el-tab-pane>
-      <!-- TODO @芋艿：产品产出 Tab 待补充 -->
+      <el-tab-pane label="产品产出">
+        <ProductProduceList :feedbackId="formData.id" />
+      </el-tab-pane>
     </el-tabs>
     <template #footer>
       <template v-if="formType === 'approve'">
@@ -245,6 +247,7 @@ import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import ItemConsumeList from './ItemConsumeList.vue'
+import ProductProduceList from './ProductProduceList.vue'
 import { useUserStore } from '@/store/modules/user'
 import { MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
 
