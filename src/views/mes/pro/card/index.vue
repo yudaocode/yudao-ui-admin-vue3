@@ -25,7 +25,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @芋艿：批次号 -->
       <el-form-item label="产品" prop="itemId">
         <MdItemSelect v-model="queryParams.itemId" placeholder="请选择产品" class="!w-240px" />
       </el-form-item>
@@ -38,27 +37,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
+      <!-- DONE @AI：前后端都去掉 status、createTime 筛选 -->
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -86,7 +65,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="流转卡编码" align="center" prop="code" width="140" />
+      <el-table-column label="流转卡编码" align="center" prop="code" width="140">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="生产工单编号" align="center" prop="workOrderCode" width="140" />
       <el-table-column label="工单名称" align="center" prop="workOrderName" min-width="150" />
       <el-table-column label="批次号" align="center" prop="batchCode" width="120" />
@@ -95,31 +80,9 @@
       <el-table-column label="规格型号" align="center" prop="specification" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="流转数量" align="center" prop="transferedQuantity" width="100" />
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column label="操作" align="center" width="160" fixed="right">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180"
-      />
-      <el-table-column label="操作" align="center" width="200" fixed="right">
-        <template #default="scope">
-          <!-- TODO @AI：状态怎么流转？是不是不用 status？ -->
           <!-- TODO @芋艿：打印 -->
-          <el-button
-            link
-            type="primary"
-            @click="openForm('detail', scope.row.id)"
-            v-hasPermi="['mes:pro-card:query']"
-          >
-            详情
-          </el-button>
-          <!-- TODO @芋艿：好像不用编辑、删除？？？ -->
           <el-button
             link
             type="primary"
@@ -153,11 +116,9 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ProCardApi, ProCardVO } from '@/api/mes/pro/card'
 import CardForm from './CardForm.vue'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 
@@ -175,9 +136,7 @@ const queryParams = reactive({
   code: undefined,
   workOrderId: undefined,
   itemId: undefined,
-  batchCode: undefined,
-  status: undefined,
-  createTime: undefined
+  batchCode: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中

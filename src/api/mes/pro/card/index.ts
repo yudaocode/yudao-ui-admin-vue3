@@ -12,11 +12,8 @@ export interface ProCardVO {
   itemCode: string // 产品编码
   itemName: string // 产品名称
   specification: string // 规格型号
-  unitMeasureId: number // 单位编号
   unitMeasureName: string // 单位名称
-  barcodeUrl: string // 条码地址
   transferedQuantity: number // 流转数量
-  status: number // 状态
   remark: string // 备注
 }
 

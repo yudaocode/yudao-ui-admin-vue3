@@ -29,11 +29,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="产品" prop="itemId">
-            <MdItemSelect
-              v-model="formData.itemId"
-              :disabled="isDetail"
-              @change="handleItemChange"
-            />
+            <MdItemSelect v-model="formData.itemId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -54,18 +50,6 @@
               placeholder="请输入批次号"
               :disabled="isDetail"
             />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="规格型号" prop="specification">
-            <el-input v-model="formData.specification" placeholder="选择产品后自动填充" disabled />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8" v-if="formType !== 'create'">
-          <el-form-item label="状态" prop="status">
-            <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="formData.status" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -96,9 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE } from '@/utils/dict'
 import { ProCardApi, ProCardVO } from '@/api/mes/pro/card'
-import { MdItemVO } from '@/api/mes/md/item'
 import { generateRandomStr } from '@/utils'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
@@ -120,11 +102,7 @@ const formData = ref({
   workOrderId: undefined,
   batchCode: undefined,
   itemId: undefined,
-  // TODO @AI：specification 不用展示；
-  specification: undefined, // 仅展示，不存储（从 item 获取）
-  barcodeUrl: undefined,
   transferedQuantity: undefined,
-  status: undefined,
   remark: undefined
 })
 const formRules = reactive({
@@ -163,11 +141,6 @@ const open = async (type: string, id?: number) => {
 
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 产品变更：自动填充规格型号（仅展示） */
-const handleItemChange = (item: MdItemVO) => {
-  formData.value.specification = item?.specification
-}
-
 /** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
@@ -197,10 +170,7 @@ const resetForm = () => {
     workOrderId: undefined,
     batchCode: undefined,
     itemId: undefined,
-    specification: undefined,
-    barcodeUrl: undefined,
     transferedQuantity: undefined,
-    status: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()

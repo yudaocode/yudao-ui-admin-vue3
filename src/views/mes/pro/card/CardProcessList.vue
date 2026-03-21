@@ -11,19 +11,33 @@
     <!-- 工序记录列表 -->
     <el-table v-loading="loading" :data="processList" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="序号" align="center" prop="sort" width="60" />
-      <el-table-column label="工序编码" align="center" prop="processCode" width="120" />
       <el-table-column label="工序名称" align="center" prop="processName" min-width="120" />
-      <el-table-column label="进入工序时间" align="center" prop="inputTime" :formatter="dateFormatter" width="180" />
-      <el-table-column label="出工序时间" align="center" prop="outputTime" :formatter="dateFormatter" width="180" />
+      <el-table-column label="工序编码" align="center" prop="processCode" width="120" />
+      <el-table-column
+        label="进入工序时间"
+        align="center"
+        prop="inputTime"
+        :formatter="dateFormatter"
+        width="180"
+      />
+      <el-table-column
+        label="出工序时间"
+        align="center"
+        prop="outputTime"
+        :formatter="dateFormatter"
+        width="180"
+      />
       <el-table-column label="投入数量" align="center" prop="inputQuantity" width="100" />
       <el-table-column label="产出数量" align="center" prop="outputQuantity" width="100" />
-      <el-table-column label="不合格数量" align="center" prop="unqualifiedQuantity" width="100" />
+      <el-table-column label="不良品数量" align="center" prop="unqualifiedQuantity" width="100" />
       <el-table-column label="工位编码" align="center" prop="workstationCode" width="120" />
       <el-table-column label="工位名称" align="center" prop="workstationName" min-width="120" />
       <el-table-column label="操作人" align="center" prop="nickname" width="100" />
       <el-table-column label="操作" align="center" width="160" v-if="!disabled">
         <template #default="scope">
-          <el-button link type="primary" @click="openProcessForm('update', scope.row)">编辑</el-button>
+          <el-button link type="primary" @click="openProcessForm('update', scope.row)">
+            编辑
+          </el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
@@ -84,17 +98,32 @@
         <el-row>
           <el-col :span="8">
             <el-form-item label="投入数量" prop="inputQuantity">
-              <el-input-number v-model="processFormData.inputQuantity" :min="0" :precision="2" class="!w-1/1" />
+              <el-input-number
+                v-model="processFormData.inputQuantity"
+                :min="0"
+                :precision="2"
+                class="!w-1/1"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="产出数量" prop="outputQuantity">
-              <el-input-number v-model="processFormData.outputQuantity" :min="0" :precision="2" class="!w-1/1" />
+              <el-input-number
+                v-model="processFormData.outputQuantity"
+                :min="0"
+                :precision="2"
+                class="!w-1/1"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="不合格数量" prop="unqualifiedQuantity">
-              <el-input-number v-model="processFormData.unqualifiedQuantity" :min="0" :precision="2" class="!w-1/1" />
+              <el-input-number
+                v-model="processFormData.unqualifiedQuantity"
+                :min="0"
+                :precision="2"
+                class="!w-1/1"
+              />
             </el-form-item>
           </el-col>
         </el-row>
@@ -114,7 +143,9 @@
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="submitProcessForm" type="primary" :disabled="processFormLoading">确 定</el-button>
+        <el-button @click="submitProcessForm" type="primary" :disabled="processFormLoading"
+          >确 定</el-button
+        >
         <el-button @click="processDialogVisible = false">取 消</el-button>
       </template>
     </Dialog>
