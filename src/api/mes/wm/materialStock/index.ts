@@ -8,7 +8,6 @@ export interface WmMaterialStockVO {
   itemCode: string
   itemName: string
   specification: string
-  unitMeasureId: number
   unitMeasureName: string
   batchId: number
   batchCode: string
@@ -20,13 +19,9 @@ export interface WmMaterialStockVO {
   areaName: string
   vendorId: number
   vendorName: string
-  workOrderId: number
-  workOrderCode: string
-  quantityOnhand: number
-  recptDate: string
-  productionDate: string
-  expireDate: string
-  frozen: boolean
+  quantity: number
+  receiptTime: string
+  frozenFlag: boolean
   createTime: string
 }
 
@@ -43,7 +38,7 @@ export const WmMaterialStockApi = {
   },
 
   // 更新库存冻结状态
-  updateMaterialStockFrozen: async (data: { id: number; frozen: boolean }) => {
+  updateMaterialStockFrozen: async (data: { id: number; frozenFlag: boolean }) => {
     return await request.put({ url: '/mes/wm/material-stock/update-frozen', data })
   },
 

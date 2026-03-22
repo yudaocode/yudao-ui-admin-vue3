@@ -38,7 +38,7 @@
       <el-table-column label="仓库" prop="warehouseName" width="150" />
       <el-table-column label="库区" prop="locationName" width="150" />
       <el-table-column label="库位" prop="areaName" width="150" />
-      <el-table-column label="可用数量" prop="quantityOnhand" width="120" />
+      <el-table-column label="可用数量" prop="quantity" width="120" />
       <el-table-column label="冻结数量" prop="quantityFrozen" width="120" />
     </el-table>
 
@@ -134,7 +134,7 @@ const handleConfirm = () => {
     locationName: selectedRow.value.locationName,
     areaId: selectedRow.value.areaId,
     areaName: selectedRow.value.areaName,
-    availableQuantity: selectedRow.value.quantityOnhand
+    availableQuantity: selectedRow.value.quantity
   })
   handleClose()
 }

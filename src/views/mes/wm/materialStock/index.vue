@@ -75,7 +75,7 @@
           <el-table-column label="产品物料编码" align="center" prop="itemCode" min-width="120" />
           <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="140" />
           <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
-          <el-table-column label="在库数量" align="center" prop="quantityOnhand" min-width="100" />
+          <el-table-column label="在库数量" align="center" prop="quantity" min-width="100" />
           <el-table-column label="单位" align="center" prop="unitMeasureName" min-width="80" />
           <!-- TODO @芋艿：批次号，待 mes_wm_batch 模块迁移后补充 -->
           <el-table-column label="仓库" align="center" prop="warehouseName" min-width="100" />
@@ -93,18 +93,17 @@
               <span v-else>-</span>
             </template>
           </el-table-column>
-          <el-table-column label="生产工单" align="center" prop="workOrderCode" min-width="120" />
           <el-table-column
             label="入库日期"
             align="center"
-            prop="recptDate"
+            prop="receiptTime"
             :formatter="dateFormatter2"
             width="180px"
           />
-          <el-table-column label="冻结" align="center" prop="frozen" min-width="80">
+          <el-table-column label="冻结" align="center" prop="frozenFlag" min-width="80">
             <template #default="scope">
               <el-switch
-                v-model="scope.row.frozen"
+                v-model="scope.row.frozenFlag"
                 :active-value="true"
                 :inactive-value="false"
                 v-hasPermi="['mes:wm-material-stock:update']"
@@ -197,13 +196,13 @@ const handleTypeNodeClick = (row: any) => {
 /** 处理冻结状态切换 */
 const handleFrozenChange = async (row: WmMaterialStockVO) => {
   try {
-    const text = row.frozen ? '冻结' : '解冻'
+    const text = row.frozenFlag ? '冻结' : '解冻'
     await message.confirm('确认要"' + text + '"该库存记录吗?')
-    await WmMaterialStockApi.updateMaterialStockFrozen({ id: row.id, frozen: row.frozen })
+    await WmMaterialStockApi.updateMaterialStockFrozen({ id: row.id, frozenFlag: row.frozenFlag })
     message.success(text + '成功')
   } catch {
     // 取消或失败时回滚
-    row.frozen = !row.frozen
+    row.frozenFlag = !row.frozenFlag
   }
 }
 
