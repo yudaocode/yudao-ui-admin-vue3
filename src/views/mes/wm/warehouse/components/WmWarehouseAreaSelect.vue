@@ -91,7 +91,6 @@ const loadList = async () => {
 watch(
   () => props.locationId,
   async () => {
-    selectValue.value = undefined
     await loadList()
   }
 )

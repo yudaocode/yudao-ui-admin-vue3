@@ -91,8 +91,6 @@ const loadList = async () => {
 watch(
   () => props.warehouseId,
   async () => {
-    // 仓库变化时，清空当前选中并重新加载
-    selectValue.value = undefined
     await loadList()
   }
 )

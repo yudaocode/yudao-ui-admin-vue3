@@ -135,7 +135,9 @@ const formData = ref({
 })
 const formRules = reactive({
   code: [{ required: true, message: '出库单编号不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '出库单名称不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '出库单名称不能为空', trigger: 'blur' }],
+  type: [{ required: true, message: '业务类型不能为空', trigger: 'change' }],
+  issueDate: [{ required: true, message: '出库日期不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
