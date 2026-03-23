@@ -383,6 +383,15 @@ export const MesAutoCodePaddedMethodEnum = {
   RIGHT: 2 // 右补齐
 }
 
+/** MES 自动编码规则 Code 枚举 */
+export const MesAutoCodeRuleCode = {
+  SN_CODE: 'WM_SN_CODE', // SN 码
+  PACKAGE_CODE: 'WM_PACKAGE_CODE', // 装箱单编码
+  BATCH_CODE: 'WM_BATCH_CODE', // 批次编码
+  TASK_CODE: 'PRO_TASK_CODE', // 生产任务编码
+  QC_IQC_CODE: 'QC_IQC_CODE' // 来料检验单编码
+} as const
+
 /** 获取物料/产品标识的标签 */
 export const getItemOrProductLabel = (value: string): string => {
   for (const item of Object.values(MesItemOrProductEnum)) {

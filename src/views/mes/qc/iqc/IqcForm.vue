@@ -29,7 +29,7 @@
         </el-col>
       </el-row>
 
-      <el-divider content-position="left">物料与供应商</el-divider>
+      <el-divider>物料与供应商</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="产品物料" prop="itemId">
@@ -58,7 +58,7 @@
         </el-col>
       </el-row>
 
-      <el-divider content-position="left">检测情况</el-divider>
+      <el-divider>检测情况</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="本次接收数量" prop="receivedQuantity">
@@ -107,6 +107,7 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检测人员" prop="inspectorUserId">
+            <!-- TODO @AI：需要 import 下 -->
             <UserSelect
               v-model="formData.inspectorUserId"
               placeholder="请选择检测人员"
@@ -152,7 +153,7 @@
       </el-row>
 
       <!-- 缺陷统计（只读） -->
-      <el-divider content-position="left">缺陷情况</el-divider>
+      <el-divider>缺陷情况</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="致命缺陷数">
@@ -213,13 +214,13 @@
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { generateRandomStr } from '@/utils'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { QcIqcApi, QcIqcVO } from '@/api/mes/qc/iqc'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import IqcLineList from './IqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
-import { MesQcTypeEnum } from '@/views/mes/utils/constants'
+import { MesQcTypeEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IqcForm' })
 
@@ -284,8 +285,8 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 生成检验单编号 */
-const generateCode = () => {
-  formData.value.code = 'IQC' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.QC_IQC_CODE)
 }
 
 /** 打开弹窗 */

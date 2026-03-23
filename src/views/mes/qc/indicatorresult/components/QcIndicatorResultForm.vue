@@ -30,7 +30,7 @@
       </el-row>
 
       <!-- 检测值列表 -->
-      <el-divider content-position="left">检测值</el-divider>
+      <el-divider>检测值</el-divider>
       <div v-for="(item, index) in formData.items" :key="index">
         <el-row :gutter="16">
           <el-col :span="12">

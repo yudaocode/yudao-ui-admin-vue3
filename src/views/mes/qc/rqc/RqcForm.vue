@@ -29,7 +29,7 @@
         </el-col>
       </el-row>
 
-      <el-divider content-position="left">物料信息</el-divider>
+      <el-divider>物料信息</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检验类型" prop="type">
@@ -67,7 +67,7 @@
         </el-col>
       </el-row>
 
-      <el-divider content-position="left">检测情况</el-divider>
+      <el-divider>检测情况</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检测数量" prop="checkQuantity">
@@ -151,7 +151,7 @@
       </el-row>
 
       <!-- 缺陷统计（只读） -->
-      <el-divider content-position="left">缺陷情况</el-divider>
+      <el-divider>缺陷情况</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="致命缺陷数">

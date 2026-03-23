@@ -159,6 +159,7 @@ import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMea
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import SubPackageList from './SubPackageList.vue'
 import PackageLineList from './PackageLineList.vue'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'PackageForm' })
 
@@ -203,8 +204,8 @@ const formRef = ref()
 
 /** 生成装箱单编号 */
 const generateCode = async () => {
-  // TODO @AI：看看 是不是在 mes constants 里。搞个枚举；【后面点弄】
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode('PACKAGE_CODE')
+  // DONE @AI：看看 是不是在 mes constants 里。搞个枚举；【后面点弄】
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.PACKAGE_CODE)
 }
 
 /** 打开弹窗 */
