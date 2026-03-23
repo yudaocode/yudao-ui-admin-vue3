@@ -100,10 +100,10 @@
             :formatter="dateFormatter2"
             width="180px"
           />
-          <el-table-column label="冻结" align="center" prop="frozenFlag" min-width="80">
+          <el-table-column label="冻结" align="center" prop="frozen" min-width="80">
             <template #default="scope">
               <el-switch
-                v-model="scope.row.frozenFlag"
+                v-model="scope.row.frozen"
                 :active-value="true"
                 :inactive-value="false"
                 v-hasPermi="['mes:wm-material-stock:update']"
@@ -196,13 +196,13 @@ const handleTypeNodeClick = (row: any) => {
 /** 处理冻结状态切换 */
 const handleFrozenChange = async (row: WmMaterialStockVO) => {
   try {
-    const text = row.frozenFlag ? '冻结' : '解冻'
+    const text = row.frozen ? '冻结' : '解冻'
     await message.confirm('确认要"' + text + '"该库存记录吗?')
-    await WmMaterialStockApi.updateMaterialStockFrozen({ id: row.id, frozenFlag: row.frozenFlag })
+    await WmMaterialStockApi.updateMaterialStockFrozen({ id: row.id, frozen: row.frozen })
     message.success(text + '成功')
   } catch {
     // 取消或失败时回滚
-    row.frozenFlag = !row.frozenFlag
+    row.frozen = !row.frozen
   }
 }
 

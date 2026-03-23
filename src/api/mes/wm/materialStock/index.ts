@@ -21,7 +21,7 @@ export interface WmMaterialStockVO {
   vendorName: string
   quantity: number
   receiptTime: string
-  frozenFlag: boolean
+  frozen: boolean
   createTime: string
 }
 
@@ -38,7 +38,7 @@ export const WmMaterialStockApi = {
   },
 
   // 更新库存冻结状态
-  updateMaterialStockFrozen: async (data: { id: number; frozenFlag: boolean }) => {
+  updateMaterialStockFrozen: async (data: { id: number; frozen: boolean }) => {
     return await request.put({ url: '/mes/wm/material-stock/update-frozen', data })
   },
 
