@@ -37,7 +37,7 @@
               v-model="formData.itemId"
               placeholder="请选择产品物料"
               class="!w-1/1"
-              :disabled="isFromPendingTask"
+              :disabled="isFromPendingTask || isUpdate"
             />
           </el-form-item>
         </el-col>
@@ -240,6 +240,7 @@ const dialogTitle = computed(() => {
   return titles[formType.value] || t('action.' + formType.value)
 }) // 弹窗标题，根据 formType 自动显示
 const isDetail = computed(() => formType.value === 'detail') // 表单是否为详情模式（只读）
+const isUpdate = computed(() => formType.value === 'update') // 表单是否为修改模式
 const isFromPendingTask = computed(
   () => formType.value === 'create' && formData.value.sourceDocId != null
 ) // 是否来自待检任务（有预填的来源单据信息）
