@@ -69,8 +69,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="冻结库存" prop="frozenFlag">
-            <el-switch v-model="formData.frozenFlag" :disabled="isDetail" />
+          <el-form-item label="冻结库存" prop="frozen">
+            <el-switch v-model="formData.frozen" :disabled="isDetail" />
           </el-form-item>
         </el-col>
         <el-col :span="24">
@@ -135,7 +135,7 @@ const formData = ref<StockTakingPlanVO>({
   startTime: undefined,
   endTime: undefined,
   blindFlag: false,
-  frozenFlag: false,
+  frozen: false,
   remark: undefined
 })
 const formRules = reactive({
@@ -197,7 +197,7 @@ const resetForm = () => {
     startTime: undefined,
     endTime: undefined,
     blindFlag: false,
-    frozenFlag: false,
+    frozen: false,
     remark: undefined
   }
   formRef.value?.resetFields()

@@ -90,8 +90,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="是否冻结库存" prop="frozenFlag">
-            <el-switch v-model="formData.frozenFlag" :disabled="isDetail" />
+          <el-form-item label="是否冻结库存" prop="frozen">
+            <el-switch v-model="formData.frozen" :disabled="isDetail" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -186,7 +186,7 @@ const formData = ref<StockTakingTaskVO>({
   startTime: undefined,
   endTime: undefined,
   blindFlag: false,
-  frozenFlag: false,
+  frozen: false,
   remark: undefined
 })
 const formRules = reactive({
@@ -196,7 +196,7 @@ const formRules = reactive({
   type: [{ required: true, message: '盘点类型不能为空', trigger: 'change' }],
   takingDate: [{ required: true, message: '盘点日期不能为空', trigger: 'change' }],
   blindFlag: [{ required: true, message: '是否盲盘不能为空', trigger: 'change' }],
-  frozenFlag: [{ required: true, message: '是否冻结库存不能为空', trigger: 'change' }],
+  frozen: [{ required: true, message: '是否冻结库存不能为空', trigger: 'change' }],
   userId: [{ required: true, message: '盘点人不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
@@ -260,7 +260,7 @@ const resetForm = () => {
     startTime: undefined,
     endTime: undefined,
     blindFlag: false,
-    frozenFlag: false,
+    frozen: false,
     remark: undefined
   }
   formRef.value?.resetFields()
@@ -275,7 +275,7 @@ const handlePlanChange = (plan?: StockTakingPlanVO) => {
   formData.value.startTime = plan.startTime
   formData.value.endTime = plan.endTime
   formData.value.blindFlag = !!plan.blindFlag
-  formData.value.frozenFlag = !!plan.frozenFlag
+  formData.value.frozen = !!plan.frozen
 }
 
 /** 执行盘点 */

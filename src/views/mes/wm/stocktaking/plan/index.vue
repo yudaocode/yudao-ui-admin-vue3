@@ -98,9 +98,9 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.blindFlag" />
         </template>
       </el-table-column>
-      <el-table-column label="是否冻结库存" align="center" prop="frozenFlag" width="110">
+      <el-table-column label="是否冻结库存" align="center" prop="frozen" width="110">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.frozenFlag" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.frozen" />
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status" width="120">

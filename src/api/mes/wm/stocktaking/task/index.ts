@@ -12,7 +12,7 @@ export interface StockTakingTaskVO {
   planCode?: string
   planName?: string
   blindFlag?: boolean
-  frozenFlag?: boolean
+  frozen?: boolean
   startTime?: string
   endTime?: string
   status?: number

@@ -8,7 +8,7 @@ export interface StockTakingPlanVO {
   startTime?: string
   endTime?: string
   blindFlag?: boolean
-  frozenFlag?: boolean
+  frozen?: boolean
   status?: number
   remark?: string
   createTime?: string
