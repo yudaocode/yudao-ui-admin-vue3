@@ -268,7 +268,7 @@ const openForm = (type: string, id?: number) => {
 const handleComplete = async (id: number) => {
   try {
     await message.confirm('是否完成来料检验单编制？【完成后将不能更改】')
-    await QcIqcApi.completeIqc(id)
+    await QcIqcApi.finishIqc(id)
     message.success('完成成功')
     await getList()
   } catch {}

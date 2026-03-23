@@ -44,7 +44,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_PRODUCTION_ISSUE_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_PRODUCT_ISSUE_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -58,7 +58,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['mes:wm-production-issue:create']"
+          v-hasPermi="['mes:wm-product-issue:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -67,7 +67,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['mes:wm-production-issue:export']"
+          v-hasPermi="['mes:wm-product-issue:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -98,7 +98,7 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="110">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_WM_PRODUCTION_ISSUE_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_WM_PRODUCT_ISSUE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
@@ -108,8 +108,8 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-product-issue:update']"
+            v-if="scope.row.status === MesWmProductIssueStatusEnum.PREPARE"
           >
             编辑
           </el-button>
@@ -117,8 +117,8 @@
             link
             type="warning"
             @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-product-issue:update']"
+            v-if="scope.row.status === MesWmProductIssueStatusEnum.PREPARE"
           >
             提交
           </el-button>
@@ -126,8 +126,8 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:delete']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.PREPARE"
+            v-hasPermi="['mes:wm-product-issue:delete']"
+            v-if="scope.row.status === MesWmProductIssueStatusEnum.PREPARE"
           >
             删除
           </el-button>
@@ -136,8 +136,8 @@
             link
             type="success"
             @click="openForm('stock', scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.APPROVING"
+            v-hasPermi="['mes:wm-product-issue:update']"
+            v-if="scope.row.status === MesWmProductIssueStatusEnum.APPROVING"
           >
             执行拣货
           </el-button>
@@ -146,8 +146,8 @@
             link
             type="success"
             @click="handleFinish(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:finish']"
-            v-if="scope.row.status === MesWmProductionIssueStatusEnum.APPROVED"
+            v-hasPermi="['mes:wm-product-issue:finish']"
+            v-if="scope.row.status === MesWmProductIssueStatusEnum.APPROVED"
           >
             完成
           </el-button>
@@ -156,9 +156,9 @@
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
-            v-hasPermi="['mes:wm-production-issue:update']"
+            v-hasPermi="['mes:wm-product-issue:update']"
             v-if="
-              [MesWmProductionIssueStatusEnum.APPROVING, MesWmProductionIssueStatusEnum.APPROVED].includes(
+              [MesWmProductIssueStatusEnum.APPROVING, MesWmProductIssueStatusEnum.APPROVED].includes(
                 scope.row.status
               )
             "
@@ -176,24 +176,24 @@
     />
   </ContentWrap>
 
-  <ProductionIssueForm ref="formRef" @success="getList" />
+  <ProductIssueForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
-import { WmProductionIssueApi, WmProductionIssueVO } from '@/api/mes/wm/productionissue'
-import ProductionIssueForm from './ProductionIssueForm.vue'
-import { MesWmProductionIssueStatusEnum } from '@/views/mes/utils/constants'
+import { WmProductIssueApi, WmProductIssueVO } from '@/api/mes/wm/productissue'
+import ProductIssueForm from './ProductIssueForm.vue'
+import { MesWmProductIssueStatusEnum } from '@/views/mes/utils/constants'
 
-defineOptions({ name: 'MesWmProductionIssue' })
+defineOptions({ name: 'MesWmProductIssue' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<WmProductionIssueVO[]>([]) // 列表的数据
+const list = ref<WmProductIssueVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
@@ -211,7 +211,7 @@ const formRef = ref() // 表单弹窗
 const getList = async () => {
   loading.value = true
   try {
-    const data = await WmProductionIssueApi.getProductionIssuePage(queryParams)
+    const data = await WmProductIssueApi.getProductIssuePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -240,7 +240,7 @@ const openForm = (type: string, id?: number) => {
 const handleSubmit = async (id: number) => {
   try {
     await message.confirm('确认提交该领料单进入审批流程吗？')
-    await WmProductionIssueApi.submitProductionIssue(id)
+    await WmProductIssueApi.submitProductIssue(id)
     message.success('提交成功')
     await getList()
   } catch {}
@@ -250,7 +250,7 @@ const handleSubmit = async (id: number) => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await WmProductionIssueApi.deleteProductionIssue(id)
+    await WmProductIssueApi.deleteProductIssue(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -260,7 +260,7 @@ const handleDelete = async (id: number) => {
 const handleCancel = async (id: number) => {
   try {
     await message.confirm('确认取消该领料出库单？取消后不可恢复。')
-    await WmProductionIssueApi.cancelProductionIssue(id)
+    await WmProductIssueApi.cancelProductIssue(id)
     message.success('取消成功')
     await getList()
   } catch {}
@@ -270,7 +270,7 @@ const handleCancel = async (id: number) => {
 const handleFinish = async (id: number) => {
   try {
     await message.confirm('确认完成该领料单并执行出库吗？')
-    await WmProductionIssueApi.finishProductionIssue(id)
+    await WmProductIssueApi.finishProductIssue(id)
     message.success('完成成功')
     await getList()
   } catch {}
@@ -281,7 +281,7 @@ const handleExport = async () => {
   try {
     await message.exportConfirm()
     exportLoading.value = true
-    const data = await WmProductionIssueApi.exportProductionIssue(queryParams)
+    const data = await WmProductIssueApi.exportProductIssue(queryParams)
     download.excel(data, '领料出库单.xls')
   } catch {
   } finally {

@@ -302,7 +302,7 @@ export enum DICT_TYPE {
   MES_WM_STOCK_TAKING_LINE_STATUS = 'mes_wm_stock_taking_task_line_status', // MES 盘点任务行状态
   MES_WM_STOCK_TAKING_PLAN_PARAM_TYPE = 'mes_wm_stock_taking_plan_param_type', // MES 盘点方案参数类型
   MES_WM_OUTSOURCE_RECPT_STATUS = 'mes_wm_outsource_recpt_status', // MES 外协入库单状态
-  MES_WM_PRODUCTION_ISSUE_STATUS = 'mes_wm_production_issue_status', // MES 领料出库单状态
+  MES_WM_PRODUCT_ISSUE_STATUS = 'mes_wm_product_issue_status', // MES 领料出库单状态
   MES_PRODUCT_PRODUCE_STATUS = 'mes_product_produce_status', // MES 生产入库单状态
   MES_RETURN_VENDOR_STATUS = 'mes_return_vendor_status', // MES 供应商退货单状态
   MES_WM_QUALITY_STATUS = 'mes_wm_quality_status', // MES 质量状态

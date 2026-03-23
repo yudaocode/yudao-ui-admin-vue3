@@ -69,7 +69,7 @@
     <!-- 非新建模式展示行项目信息（领料物料） -->
     <template v-if="formData.id">
       <el-divider content-position="center">物料信息</el-divider>
-      <ProductionIssueLineList :issue-id="formData.id" :form-type="formType" />
+      <ProductIssueLineList :issue-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
       <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
@@ -85,12 +85,12 @@
 
 <script setup lang="ts">
 import { generateRandomStr } from '@/utils'
-import { WmProductionIssueApi, WmProductionIssueVO } from '@/api/mes/wm/productionissue'
+import { WmProductIssueApi, WmProductIssueVO } from '@/api/mes/wm/productissue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
-import ProductionIssueLineList from './ProductionIssueLineList.vue'
+import ProductIssueLineList from './ProductIssueLineList.vue'
 
-defineOptions({ name: 'ProductionIssueForm' })
+defineOptions({ name: 'ProductIssueForm' })
 
 const message = useMessage() // 消息弹窗
 
@@ -141,7 +141,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await WmProductionIssueApi.getProductionIssue(id)
+      formData.value = await WmProductIssueApi.getProductIssue(id)
     } finally {
       formLoading.value = false
     }
@@ -157,14 +157,14 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as WmProductionIssueVO
+    const data = formData.value as unknown as WmProductIssueVO
     if (formType.value === 'create') {
-      const res = await WmProductionIssueApi.createProductionIssue(data)
+      const res = await WmProductIssueApi.createProductIssue(data)
       message.success('新增成功')
       formData.value.id = res
       formType.value = 'update'
     } else {
-      await WmProductionIssueApi.updateProductionIssue(data)
+      await WmProductIssueApi.updateProductIssue(data)
       message.success('修改成功')
     }
     // 发送操作成功的事件
@@ -179,11 +179,11 @@ const handleStock = async () => {
   try {
     formLoading.value = true
     // 校验领料数量与拣货数量是否一致
-    const quantityMatch = await WmProductionIssueApi.checkProductionIssueQuantity(formData.value.id!)
+    const quantityMatch = await WmProductIssueApi.checkProductIssueQuantity(formData.value.id!)
     if (!quantityMatch) {
       await message.confirm('领料数量与拣货数量不一致，确认执行拣货？')
     }
-    await WmProductionIssueApi.stockProductionIssue(formData.value.id!)
+    await WmProductIssueApi.stockProductIssue(formData.value.id!)
     message.success('拣货成功')
     dialogVisible.value = false
     emit('success')

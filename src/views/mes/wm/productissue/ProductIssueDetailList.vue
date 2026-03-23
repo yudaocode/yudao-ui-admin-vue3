@@ -28,11 +28,11 @@
 
 <script setup lang="ts">
 import {
-  WmProductionIssueDetailApi,
-  WmProductionIssueDetailVO
-} from '@/api/mes/wm/productionissue/detail'
+  WmProductIssueDetailApi,
+  WmProductIssueDetailVO
+} from '@/api/mes/wm/productissue/detail'
 
-defineOptions({ name: 'ProductionIssueDetailList' })
+defineOptions({ name: 'ProductIssueDetailList' })
 
 const props = defineProps<{
   issueId: number
@@ -47,13 +47,13 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表的加载中
-const list = ref<WmProductionIssueDetailVO[]>([]) // 明细列表
+const list = ref<WmProductIssueDetailVO[]>([]) // 明细列表
 
 /** 查询明细列表 */
 const getList = async () => {
   loading.value = true
   try {
-    list.value = await WmProductionIssueDetailApi.getProductionIssueDetailListByLineId(props.lineId)
+    list.value = await WmProductIssueDetailApi.getProductIssueDetailListByLineId(props.lineId)
   } finally {
     loading.value = false
   }
@@ -64,7 +64,7 @@ defineExpose({ getList })
 const handleDelete = async (detailId: number) => {
   try {
     await message.delConfirm()
-    await WmProductionIssueDetailApi.deleteProductionIssueDetail(detailId)
+    await WmProductIssueDetailApi.deleteProductIssueDetail(detailId)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}

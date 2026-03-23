@@ -45,15 +45,15 @@
 
 <script setup lang="ts">
 import {
-  WmProductionIssueDetailApi,
-  WmProductionIssueDetailVO
-} from '@/api/mes/wm/productionissue/detail'
+  WmProductIssueDetailApi,
+  WmProductIssueDetailVO
+} from '@/api/mes/wm/productissue/detail'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
 
-defineOptions({ name: 'ProductionIssueDetailForm' })
+defineOptions({ name: 'ProductIssueDetailForm' })
 
 const props = defineProps<{
   issueId: number
@@ -100,7 +100,7 @@ const open = async (type: string, lineId: number, itemId?: number, detailId?: nu
   if (detailId) {
     formLoading.value = true
     try {
-      formData.value = await WmProductionIssueDetailApi.getProductionIssueDetail(detailId)
+      formData.value = await WmProductIssueDetailApi.getProductIssueDetail(detailId)
     } finally {
       formLoading.value = false
     }
@@ -121,12 +121,12 @@ const submitForm = async () => {
       ...formData.value,
       issueId: props.issueId,
       lineId: currentLineId.value
-    } as unknown as WmProductionIssueDetailVO
+    } as unknown as WmProductIssueDetailVO
     if (formType.value === 'create') {
-      await WmProductionIssueDetailApi.createProductionIssueDetail(data)
+      await WmProductIssueDetailApi.createProductIssueDetail(data)
       message.success(t('common.createSuccess'))
     } else {
-      await WmProductionIssueDetailApi.updateProductionIssueDetail(data)
+      await WmProductIssueDetailApi.updateProductIssueDetail(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

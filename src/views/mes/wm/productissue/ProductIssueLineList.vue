@@ -14,7 +14,7 @@
     >
       <el-table-column type="expand">
         <template #default="scope">
-          <ProductionIssueDetailList
+          <ProductIssueDetailList
             :ref="(el: any) => setDetailListRef(scope.row.id, el)"
             :issue-id="props.issueId"
             :line-id="scope.row.id"
@@ -107,7 +107,7 @@
   </Dialog>
 
   <!-- 拣货明细添加/编辑弹窗 -->
-  <ProductionIssueDetailForm
+  <ProductIssueDetailForm
     ref="detailFormRef"
     :issue-id="props.issueId"
     @success="onDetailFormSuccess"
@@ -116,14 +116,14 @@
 
 <script setup lang="ts">
 import {
-  WmProductionIssueLineApi,
-  WmProductionIssueLineVO
-} from '@/api/mes/wm/productionissue/line'
+  WmProductIssueLineApi,
+  WmProductIssueLineVO
+} from '@/api/mes/wm/productissue/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import ProductionIssueDetailList from './ProductionIssueDetailList.vue'
-import ProductionIssueDetailForm from './ProductionIssueDetailForm.vue'
+import ProductIssueDetailList from './ProductIssueDetailList.vue'
+import ProductIssueDetailForm from './ProductIssueDetailForm.vue'
 
-defineOptions({ name: 'ProductionIssueLineList' })
+defineOptions({ name: 'ProductIssueLineList' })
 
 const props = defineProps<{
   issueId: number
@@ -138,7 +138,7 @@ const isStock = computed(() => props.formType === 'stock') // 是否为拣货模
 
 // ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
-const list = ref<WmProductionIssueLineVO[]>([]) // 行列表
+const list = ref<WmProductIssueLineVO[]>([]) // 行列表
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
@@ -151,7 +151,7 @@ const getList = async () => {
   loading.value = true
   try {
     queryParams.issueId = props.issueId
-    const data = await WmProductionIssueLineApi.getProductionIssueLinePage(queryParams)
+    const data = await WmProductIssueLineApi.getProductIssueLinePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -163,7 +163,7 @@ const getList = async () => {
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
-    await WmProductionIssueLineApi.deleteProductionIssueLine(id)
+    await WmProductIssueLineApi.deleteProductIssueLine(id)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -203,7 +203,7 @@ const openForm = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await WmProductionIssueLineApi.getProductionIssueLine(id)
+      formData.value = await WmProductIssueLineApi.getProductIssueLine(id)
     } finally {
       formLoading.value = false
     }
@@ -215,12 +215,12 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = { ...formData.value, issueId: props.issueId } as unknown as WmProductionIssueLineVO
+    const data = { ...formData.value, issueId: props.issueId } as unknown as WmProductIssueLineVO
     if (lineFormType.value === 'create') {
-      await WmProductionIssueLineApi.createProductionIssueLine(data)
+      await WmProductIssueLineApi.createProductIssueLine(data)
       message.success(t('common.createSuccess'))
     } else {
-      await WmProductionIssueLineApi.updateProductionIssueLine(data)
+      await WmProductIssueLineApi.updateProductIssueLine(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -243,7 +243,7 @@ const resetForm = () => {
 }
 
 // ==================== 展开行：拣货明细 ====================
-const detailListRefs = ref<Record<number, InstanceType<typeof ProductionIssueDetailList>>>({})
+const detailListRefs = ref<Record<number, InstanceType<typeof ProductIssueDetailList>>>({})
 
 /** 缓存子组件 ref */
 const setDetailListRef = (lineId: number, el: any) => {
