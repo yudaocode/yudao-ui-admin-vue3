@@ -16,6 +16,14 @@
 * 启动文档：<https://doc.iocoder.cn/quick-start/>
 * 视频教程：<https://doc.iocoder.cn/video/>
 
+## 依赖升级备注
+
+* 当前仓库已验证可在 `Node >= 20.19.0`、`pnpm >= 8.6.0` 下运行 `vite 8.x`
+* 升级到 `vite 8` 时，`vite.config.ts` 里的分包配置不能再使用对象形式的 `manualChunks`，需要改成 `codeSplitting.groups`
+* 当前样式中仍包含旧版 IE 的星号 hack（例如 `*zoom`），为保证 `vite 8` 默认的 Lightning CSS 压缩可通过，需要开启 `css.lightningcss.errorRecovery`
+* 依赖升级后的有效回归命令为：`pnpm build:dev`、`pnpm build:prod`、`pnpm test:e2e`
+* 当前仓库基线里，`pnpm exec eslint ./src` 为 warning-only；`pnpm ts:check` 与 `pnpm exec stylelint "./src/**/*.{vue,less,postcss,css,scss}"` 仍存在既有历史问题，不能单独作为依赖升级回归门禁
+
 ## 🐯 平台简介
 
 **芋道**，以开发者为中心，打造中国第一流的快速开发平台，全部开源，个人与企业可 100% 免费使用。
