@@ -92,6 +92,17 @@
             />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="来料日期" prop="receiveDate">
+            <el-date-picker
+              v-model="formData.receiveDate"
+              type="date"
+              value-format="x"
+              placeholder="请选择来料日期"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row :gutter="16">
         <el-col :span="8">
@@ -107,8 +118,8 @@
           <el-form-item label="检测日期" prop="inspectDate">
             <el-date-picker
               v-model="formData.inspectDate"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
+              type="date"
+              value-format="x"
               placeholder="请选择检测日期"
               class="!w-1/1"
             />
@@ -318,6 +329,7 @@ const submitForm = async () => {
     } else {
       await QcIqcApi.updateIqc(data)
       message.success(t('common.updateSuccess'))
+      // TODO @AI：更新的情况下，可以关闭窗口；
     }
     // 发送操作成功的事件
     emit('success')
