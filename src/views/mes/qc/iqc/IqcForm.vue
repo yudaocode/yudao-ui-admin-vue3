@@ -330,8 +330,6 @@ const submitForm = async () => {
     } else {
       await QcIqcApi.updateIqc(data)
       message.success(t('common.updateSuccess'))
-      // 更新成功后，关闭窗口
-      dialogVisible.value = false
     }
     // 发送操作成功的事件
     emit('success')
