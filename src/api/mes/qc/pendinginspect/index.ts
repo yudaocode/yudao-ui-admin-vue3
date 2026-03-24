@@ -13,7 +13,7 @@ export interface QcPendingInspectVO {
   itemName: string
   specification: string
   unitName: string
-  quantityToCheck: number
+  quantity: number
   vendorId: number
   vendorName: string
   recordTime: string
