@@ -33,9 +33,9 @@
       <el-table-column label="单位" align="center" prop="unitName" width="80" />
       <el-table-column label="入库数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
-      <el-table-column label="是否检验" align="center" prop="isInspection" width="100">
+      <el-table-column label="是否检验" align="center" prop="iqcCheck" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.isInspection" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.iqcCheck" />
         </template>
       </el-table-column>
       <el-table-column label="质量状态" align="center" prop="qualityStatus" min-width="100">
