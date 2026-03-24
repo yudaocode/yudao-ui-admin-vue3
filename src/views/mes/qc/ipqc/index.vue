@@ -123,7 +123,7 @@
         width="180px"
       />
       <el-table-column label="检测人员" align="center" prop="inspectorNickname" width="100" />
-      <el-table-column label="单据状态" align="center" prop="status" width="80">
+      <el-table-column label="单据状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_ORDER_STATUS" :value="scope.row.status" />
         </template>

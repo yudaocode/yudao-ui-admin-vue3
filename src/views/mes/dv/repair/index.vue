@@ -39,7 +39,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="单据状态" prop="status">
+      <el-form-item label="单据状态" prop="status" width="100">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_REPAIR_STATUS)"
@@ -108,12 +108,17 @@
       </el-table-column>
       <el-table-column label="维修人员" align="center" prop="acceptedUserNickname" />
       <el-table-column label="验收人员" align="center" prop="confirmUserNickname" />
-      <el-table-column label="单据状态" align="center" prop="status">
+      <el-table-column label="单据状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_DV_REPAIR_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="220">
+      <el-table-column
+        label="操作"
+        align="center"
+        class-name="small-padding fixed-width"
+        width="220"
+      >
         <template #default="scope">
           <el-button
             link
