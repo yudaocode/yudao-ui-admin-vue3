@@ -323,15 +323,13 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as QcIqcVO
     if (formType.value === 'create') {
-      const res = await QcIqcApi.createIqc(data)
+      await QcIqcApi.createIqc(data)
       message.success(t('common.createSuccess'))
-      // 新增成功后，切换到修改模式，设置 id（不关闭窗口）
-      formData.value.id = res
-      formType.value = 'update'
     } else {
       await QcIqcApi.updateIqc(data)
       message.success(t('common.updateSuccess'))
     }
+    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {

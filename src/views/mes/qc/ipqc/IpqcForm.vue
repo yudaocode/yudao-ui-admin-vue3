@@ -13,8 +13,13 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检验单编号" prop="code">
-            <!-- TODO @芋艿：自动编码未迁移，暂用手动输入 -->
-            <el-input v-model="formData.code" placeholder="请输入检验单编号" />
+            <el-input v-model="formData.code" placeholder="请输入检验单编号">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -109,6 +114,7 @@
               :precision="2"
               placeholder="请输入工废数量"
               class="!w-1/1"
+              @change="handleScrapChanged"
             />
           </el-form-item>
         </el-col>
@@ -120,6 +126,7 @@
               :precision="2"
               placeholder="请输入料废数量"
               class="!w-1/1"
+              @change="handleScrapChanged"
             />
           </el-form-item>
         </el-col>
@@ -131,6 +138,7 @@
               :precision="2"
               placeholder="请输入其他废品数量"
               class="!w-1/1"
+              @change="handleScrapChanged"
             />
           </el-form-item>
         </el-col>
@@ -149,8 +157,8 @@
           <el-form-item label="检测日期" prop="inspectDate">
             <el-date-picker
               v-model="formData.inspectDate"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
+              type="date"
+              value-format="x"
               placeholder="请选择检测日期"
               class="!w-1/1"
             />
@@ -175,7 +183,7 @@
         </el-col>
       </el-row>
       <el-row :gutter="16">
-        <el-col :span="16">
+        <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
           </el-form-item>
@@ -183,47 +191,45 @@
       </el-row>
 
       <!-- 缺陷统计（只读） -->
-      <template v-if="formType === 'update' && formData.id">
-        <el-divider>缺陷情况</el-divider>
-        <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="致命缺陷数">
-              <el-input :model-value="formData.criticalQuantity" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="严重缺陷数">
-              <el-input :model-value="formData.majorQuantity" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="轻微缺陷数">
-              <el-input :model-value="formData.minorQuantity" disabled />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16">
-          <el-col :span="8">
-            <el-form-item label="致命缺陷率">
-              <el-input :model-value="formData.criticalRate + '%'" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="严重缺陷率">
-              <el-input :model-value="formData.majorRate + '%'" disabled />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="轻微缺陷率">
-              <el-input :model-value="formData.minorRate + '%'" disabled />
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </template>
+      <el-divider>缺陷情况</el-divider>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="致命缺陷数">
+            <el-input :model-value="formData.criticalQuantity" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="严重缺陷数">
+            <el-input :model-value="formData.majorQuantity" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="轻微缺陷数">
+            <el-input :model-value="formData.minorQuantity" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="16">
+        <el-col :span="8">
+          <el-form-item label="致命缺陷率">
+            <el-input :model-value="formData.criticalRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="严重缺陷率">
+            <el-input :model-value="formData.majorRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="轻微缺陷率">
+            <el-input :model-value="formData.minorRate + '%'" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
     <!-- 子表标签页（编辑/详情模式下显示） -->
-    <template v-if="(formType === 'update' || formType === 'detail') && formData.id">
+    <template v-if="formType === 'update' && formData.id">
       <el-divider />
       <el-tabs v-model="activeTab">
         <el-tab-pane label="检验项" name="line">
@@ -246,6 +252,7 @@
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { QcIpqcApi, QcIpqcVO } from '@/api/mes/qc/ipqc'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
@@ -253,17 +260,17 @@ import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import IpqcLineList from './IpqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
-import { MesQcTypeEnum } from '@/views/mes/utils/constants'
+import { MesQcTypeEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IpqcForm' })
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const formType = ref('')
-const activeTab = ref('line')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const activeTab = ref('line') // 当前激活的标签页
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增过程检验单',
@@ -271,8 +278,8 @@ const dialogTitle = computed(() => {
     detail: '查看过程检验单'
   }
   return titles[formType.value] || t('action.' + formType.value)
-})
-const isDetail = computed(() => formType.value === 'detail')
+}) // 弹窗标题，根据 formType 自动显示
+const isDetail = computed(() => formType.value === 'detail') // 表单是否为详情模式（只读）
 
 const formData = ref({
   id: undefined as number | undefined,
@@ -321,7 +328,20 @@ const formRules = reactive({
   inspectorUserId: [{ required: true, message: '检测人员不能为空', trigger: 'change' }],
   inspectDate: [{ required: true, message: '检测日期不能为空', trigger: 'change' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
+
+/** 生成检验单编号 */
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.QC_IPQC_CODE)
+}
+
+/** 废品明细变更：自动计算不合格品数量 = 工废 + 料废 + 其他 */
+const handleScrapChanged = () => {
+  formData.value.unqualifiedQuantity =
+    (formData.value.laborScrapQuantity || 0) +
+    (formData.value.materialScrapQuantity || 0) +
+    (formData.value.otherScrapQuantity || 0)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -339,14 +359,16 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open })
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
+  // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as unknown as QcIpqcVO
@@ -358,6 +380,7 @@ const submitForm = async () => {
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false
