@@ -150,7 +150,10 @@
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
-import { QcTemplateIndicatorApi, QcTemplateIndicatorVO } from '@/api/mes/qc/template/indicator/index'
+import {
+  QcTemplateIndicatorApi,
+  QcTemplateIndicatorVO
+} from '@/api/mes/qc/template/indicator/index'
 import QcIndicatorSelect from '@/views/mes/qc/indicator/components/QcIndicatorSelect.vue'
 import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
 

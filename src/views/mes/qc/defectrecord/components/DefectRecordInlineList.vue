@@ -3,12 +3,7 @@
   <Dialog title="缺陷记录" v-model="dialogVisible" width="900px">
     <!-- 新增按钮 -->
     <el-row class="mb-10px">
-      <el-button
-        type="primary"
-        plain
-        @click="handleAdd"
-        v-hasPermi="['mes:qc-defect:create']"
-      >
+      <el-button type="primary" plain @click="handleAdd" v-hasPermi="['mes:qc-defect:create']">
         <Icon icon="ep:plus" class="mr-5px" /> 新增缺陷
       </el-button>
     </el-row>
@@ -27,11 +22,7 @@
       </el-table-column>
       <el-table-column label="缺陷等级" align="center" width="140">
         <template #default="scope">
-          <el-select
-            v-if="scope.row.editing"
-            v-model="scope.row.level"
-            placeholder="请选择"
-          >
+          <el-select v-if="scope.row.editing" v-model="scope.row.level" placeholder="请选择">
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.MES_DEFECT_LEVEL)"
               :key="dict.value"
@@ -56,11 +47,7 @@
       </el-table-column>
       <el-table-column label="备注" align="center" min-width="150">
         <template #default="scope">
-          <el-input
-            v-if="scope.row.editing"
-            v-model="scope.row.remark"
-            placeholder="请输入备注"
-          />
+          <el-input v-if="scope.row.editing" v-model="scope.row.remark" placeholder="请输入备注" />
           <span v-else>{{ scope.row.remark || '-' }}</span>
         </template>
       </el-table-column>

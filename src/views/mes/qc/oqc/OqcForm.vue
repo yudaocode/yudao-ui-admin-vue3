@@ -32,12 +32,22 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="产品物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择产品物料" class="!w-1/1" />
+            <MdItemSelect
+              v-model="formData.itemId"
+              placeholder="请选择产品物料"
+              class="!w-1/1"
+              :disabled="isFromPendingTask"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="客户" prop="clientId">
-            <MdClientSelect v-model="formData.clientId" placeholder="请选择客户" class="!w-1/1" />
+            <MdClientSelect
+              v-model="formData.clientId"
+              placeholder="请选择客户"
+              class="!w-1/1"
+              :disabled="isFromPendingTask"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -57,6 +67,7 @@
               :precision="2"
               placeholder="请输入发货数量"
               class="!w-1/1"
+              :disabled="isFromPendingTask"
             />
           </el-form-item>
         </el-col>
@@ -235,6 +246,9 @@ const dialogTitle = computed(() => {
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const activeTab = ref('line') // 当前激活的标签页
+const isFromPendingTask = computed(
+  () => formType.value === 'create' && formData.value.sourceDocId != null
+) // 是否来自待检任务（有预填的来源单据信息）
 
 const formData = ref({
   id: undefined as number | undefined,
@@ -284,7 +298,7 @@ const generateCode = () => {
 }
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, data?: QcOqcVO) => {
   dialogVisible.value = true
   formType.value = type
   activeTab.value = 'line'
@@ -297,6 +311,9 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else if (data) {
+    // 预填模式：来自待检任务（pending inspect）
+    Object.assign(formData.value, data)
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗

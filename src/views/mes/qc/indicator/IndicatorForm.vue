@@ -48,7 +48,11 @@
         </el-select>
       </el-form-item>
       <!-- 动态显示：FILE 类型 -->
-      <el-form-item v-if="formData.resultType === MesQcResultValueType.FILE" label="文件类型" prop="resultSpecification">
+      <el-form-item
+        v-if="formData.resultType === MesQcResultValueType.FILE"
+        label="文件类型"
+        prop="resultSpecification"
+      >
         <el-radio-group v-model="formData.resultSpecification">
           <el-radio label="IMG">图片/照片</el-radio>
           <el-radio label="FILE">文件</el-radio>

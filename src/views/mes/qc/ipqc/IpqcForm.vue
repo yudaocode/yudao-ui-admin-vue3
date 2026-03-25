@@ -49,6 +49,8 @@
               v-model="formData.workOrderId"
               placeholder="请选择生产工单"
               class="!w-1/1"
+              :disabled="isFromPendingTask"
+              @change="handleWorkOrderChange"
             />
           </el-form-item>
         </el-col>
@@ -58,12 +60,19 @@
               v-model="formData.workstationId"
               placeholder="请选择工位"
               class="!w-1/1"
+              :disabled="isFromPendingTask"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="生产任务" prop="taskId">
-            <ProTaskSelect v-model="formData.taskId" placeholder="请选择生产任务" class="!w-1/1" />
+            <ProTaskSelect
+              v-model="formData.taskId"
+              :workOrderId="formData.workOrderId"
+              placeholder="请选择生产任务"
+              class="!w-1/1"
+              :disabled="isFromPendingTask || (!isFromPendingTask && !formData.workOrderId)"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -78,6 +87,7 @@
               :precision="2"
               placeholder="请输入检测数量"
               class="!w-1/1"
+              :disabled="isFromPendingTask"
             />
           </el-form-item>
         </el-col>
@@ -280,6 +290,9 @@ const dialogTitle = computed(() => {
   return titles[formType.value] || t('action.' + formType.value)
 }) // 弹窗标题，根据 formType 自动显示
 const isDetail = computed(() => formType.value === 'detail') // 表单是否为详情模式（只读）
+const isFromPendingTask = computed(
+  () => formType.value === 'create' && formData.value.sourceDocId != null
+) // 是否来自待检任务（有预填的来源单据信息）
 
 const formData = ref({
   id: undefined as number | undefined,
@@ -343,8 +356,13 @@ const handleScrapChanged = () => {
     (formData.value.otherScrapQuantity || 0)
 }
 
+/** 生产工单变更：清空关联的任务等信息 */
+const handleWorkOrderChange = () => {
+  formData.value.taskId = undefined
+}
+
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, data?: QcIpqcVO) => {
   dialogVisible.value = true
   formType.value = type
   activeTab.value = 'line'
@@ -357,6 +375,9 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else if (data) {
+    // 预填模式：来自待检任务（pending inspect）
+    Object.assign(formData.value, data)
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗

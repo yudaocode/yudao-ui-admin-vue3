@@ -57,7 +57,6 @@
           <dict-tag :type="DICT_TYPE.MES_QC_TYPE" :value="scope.row.qcType" />
         </template>
       </el-table-column>
-      <el-table-column label="检验类型名称" align="center" prop="qcTypeName" width="120" />
       <el-table-column label="物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="规格型号" align="center" prop="specification" width="130" />
@@ -72,7 +71,34 @@
             v-if="scope.row.qcType === MesQcTypeEnum.IQC"
             v-hasPermi="['mes:qc-iqc:create']"
           >
-            创建检验单
+            来料检验
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleCreateIpqc(scope.row)"
+            v-if="scope.row.qcType === MesQcTypeEnum.IPQC"
+            v-hasPermi="['mes:qc-ipqc:create']"
+          >
+            过程检验
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleCreateRqc(scope.row)"
+            v-if="scope.row.qcType === MesQcTypeEnum.RQC"
+            v-hasPermi="['mes:qc-rqc:create']"
+          >
+            退货检验
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleCreateOqc(scope.row)"
+            v-if="scope.row.qcType === MesQcTypeEnum.OQC"
+            v-hasPermi="['mes:qc-oqc:create']"
+          >
+            出货检验
           </el-button>
         </template>
       </el-table-column>
@@ -85,8 +111,11 @@
     />
   </ContentWrap>
 
-  <!-- IQC 表单弹窗 -->
+  <!-- 表单弹窗 -->
   <IqcForm ref="iqcFormRef" @success="getList" />
+  <IpqcForm ref="ipqcFormRef" @success="getList" />
+  <RqcForm ref="rqcFormRef" @success="getList" />
+  <OqcForm ref="oqcFormRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -95,6 +124,9 @@ import { QcPendingInspectApi, QcPendingInspectVO } from '@/api/mes/qc/pendingins
 import { MesQcTypeEnum } from '@/views/mes/utils/constants'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import IqcForm from '@/views/mes/qc/iqc/IqcForm.vue'
+import IpqcForm from '@/views/mes/qc/ipqc/IpqcForm.vue'
+import RqcForm from '@/views/mes/qc/rqc/RqcForm.vue'
+import OqcForm from '@/views/mes/qc/oqc/OqcForm.vue'
 
 defineOptions({ name: 'MesQcPendingInspect' })
 
@@ -134,7 +166,7 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 创建 IQC 检验单 */
+/** 创建 IQC 来料检验单 */
 const iqcFormRef = ref()
 const handleCreateIqc = (row: QcPendingInspectVO) => {
   iqcFormRef.value.open('create', undefined, {
@@ -146,6 +178,52 @@ const handleCreateIqc = (row: QcPendingInspectVO) => {
     receivedQuantity: row.quantity,
     receiveDate: row.recordTime,
     name: row.sourceDocCode + ' 来料检验单'
+  })
+}
+
+/** 创建 IPQC 过程检验单 */
+const ipqcFormRef = ref()
+const handleCreateIpqc = (row: QcPendingInspectVO) => {
+  ipqcFormRef.value.open('create', undefined, {
+    sourceDocId: row.sourceDocId,
+    sourceDocType: row.sourceDocType,
+    sourceLineId: row.sourceLineId,
+    itemId: row.itemId,
+    workOrderId: row.workOrderId,
+    workstationId: row.workstationId,
+    taskId: row.taskId,
+    checkQuantity: row.quantity,
+    inspectDate: row.recordTime,
+    name: row.sourceDocCode + ' 过程检验单'
+  })
+}
+
+/** 创建 RQC 退货检验单 */
+const rqcFormRef = ref()
+const handleCreateRqc = (row: QcPendingInspectVO) => {
+  rqcFormRef.value.open('create', undefined, {
+    sourceDocId: row.sourceDocId,
+    sourceDocType: row.sourceDocType,
+    sourceLineId: row.sourceLineId,
+    itemId: row.itemId,
+    checkQuantity: row.quantity,
+    inspectDate: row.recordTime,
+    name: row.sourceDocCode + ' 退货检验单'
+  })
+}
+
+/** 创建 OQC 出货检验单 */
+const oqcFormRef = ref()
+const handleCreateOqc = (row: QcPendingInspectVO) => {
+  oqcFormRef.value.open('create', undefined, {
+    sourceDocId: row.sourceDocId,
+    sourceDocType: row.sourceDocType,
+    sourceLineId: row.sourceLineId,
+    clientId: row.clientId,
+    itemId: row.itemId,
+    outQuantity: row.quantity,
+    outDate: row.recordTime,
+    name: row.sourceDocCode + ' 出货检验单'
   })
 }
 

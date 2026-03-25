@@ -77,6 +77,7 @@
               :precision="2"
               placeholder="请输入"
               class="!w-1/1"
+              :disabled="isFromPendingTask"
             />
           </el-form-item>
         </el-col>

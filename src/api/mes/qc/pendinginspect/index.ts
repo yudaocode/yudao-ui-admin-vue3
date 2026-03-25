@@ -7,7 +7,6 @@ export interface QcPendingInspectVO {
   sourceDocCode: string
   sourceLineId: number
   qcType: number
-  qcTypeName: string
   itemId: number
   itemCode: string
   itemName: string
@@ -16,6 +15,15 @@ export interface QcPendingInspectVO {
   quantity: number
   vendorId: number
   vendorName: string
+  // 工单/工作站/任务（IPQC/RQC 场景）
+  workOrderId: number
+  workstationId: number
+  workstationName: string
+  taskId: number
+  taskCode: string
+  // 客户（OQC/RQC 场景）
+  clientId: number
+  clientName: string
   recordTime: string
 }
 

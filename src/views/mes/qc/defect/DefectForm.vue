@@ -11,9 +11,7 @@
       <el-form-item label="缺陷编码" prop="code">
         <el-input v-model="formData.code" placeholder="请输入缺陷编码">
           <template #append>
-            <el-button @click="generateCode" :disabled="formType === 'update'">
-              生成
-            </el-button>
+            <el-button @click="generateCode" :disabled="formType === 'update'"> 生成 </el-button>
           </template>
         </el-input>
       </el-form-item>
@@ -21,12 +19,7 @@
         <el-input type="textarea" v-model="formData.name" placeholder="请输入缺陷描述" />
       </el-form-item>
       <el-form-item label="检测项类型" prop="type">
-        <el-select
-          v-model="formData.type"
-          placeholder="请选择检测项类型"
-          clearable
-          class="!w-1/1"
-        >
+        <el-select v-model="formData.type" placeholder="请选择检测项类型" clearable class="!w-1/1">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDICATOR_TYPE)"
             :key="dict.value"
@@ -36,12 +29,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="缺陷等级" prop="level">
-        <el-select
-          v-model="formData.level"
-          placeholder="请选择缺陷等级"
-          clearable
-          class="!w-1/1"
-        >
+        <el-select v-model="formData.level" placeholder="请选择缺陷等级" clearable class="!w-1/1">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_DEFECT_LEVEL)"
             :key="dict.value"
