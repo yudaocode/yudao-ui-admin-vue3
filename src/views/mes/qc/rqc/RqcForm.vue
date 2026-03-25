@@ -213,13 +213,13 @@
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { generateRandomStr } from '@/utils'
 import { QcRqcApi, QcRqcVO } from '@/api/mes/qc/rqc'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import RqcLineList from './RqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
-import { MesQcTypeEnum } from '@/views/mes/utils/constants'
+import { MesQcTypeEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'RqcForm' })
 
@@ -283,8 +283,8 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 生成检验单编号 */
-const generateCode = () => {
-  formData.value.code = 'RQC' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.QC_RQC_CODE)
 }
 
 /** 打开弹窗 */
