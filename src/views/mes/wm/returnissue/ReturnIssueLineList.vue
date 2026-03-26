@@ -261,7 +261,7 @@ const resetForm = () => {
     issueId: undefined,
     itemId: undefined,
     quantity: undefined,
-    qcFlag: false, // TODO @AI：前端需要有填写的地方么？
+    qcFlag: false,
     remark: undefined
   }
   formRef.value?.resetFields()

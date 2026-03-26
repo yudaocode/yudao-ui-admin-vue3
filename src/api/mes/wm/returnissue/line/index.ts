@@ -13,7 +13,7 @@ export interface WmReturnIssueLineVO {
   batchId?: number
   qcFlag?: boolean
   qualityStatus?: number
-  ipqcId?: number
+  rqcId?: number
   remark?: string
 }
 

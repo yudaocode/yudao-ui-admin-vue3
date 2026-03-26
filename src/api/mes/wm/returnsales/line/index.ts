@@ -9,9 +9,11 @@ export interface WmReturnSalesLineVO {
   itemName?: string
   specification?: string
   unitMeasureName?: string
-  quantityReturned: number
-  batchId?: number
-  batchCode?: string
+  quantity: number
+  batchId: number
+  batchCode: string
+  qcFlag: boolean
+  rqcId: number
   qualityStatus?: number
   remark?: string
 }

@@ -33,6 +33,11 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="退货数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
+      <el-table-column label="是否需要质检" align="center" prop="qcFlag">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.qcFlag" />
+        </template>
+      </el-table-column>
       <el-table-column
         v-if="isUpdate || isStock"
         label="操作"
@@ -82,9 +87,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="退货数量" prop="quantityReturned">
+          <el-form-item label="退货数量" prop="quantity">
             <el-input-number
-              v-model="formData.quantityReturned"
+              v-model="formData.quantity"
               :precision="2"
               :min="0"
               controls-position="right"
@@ -99,7 +104,12 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="24">
+        <el-col :span="8">
+          <el-form-item label="需要质检" prop="qcFlag">
+            <el-switch v-model="formData.qcFlag" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="16">
           <el-form-item label="备注" prop="remark">
             <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
           </el-form-item>
@@ -121,6 +131,7 @@
 </template>
 
 <script setup lang="ts">
+import { DICT_TYPE } from '@/utils/dict'
 import { WmReturnSalesLineApi, WmReturnSalesLineVO } from '@/api/mes/wm/returnsales/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ReturnSalesDetailList from './ReturnSalesDetailList.vue'
@@ -181,13 +192,15 @@ const formData = ref({
   id: undefined,
   returnId: undefined as number | undefined,
   itemId: undefined,
-  quantityReturned: undefined,
+  quantity: undefined,
   batchCode: undefined,
+  qcFlag: true,
   remark: undefined
 })
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
-  quantityReturned: [{ required: true, message: '退货数量不能为空', trigger: 'blur' }]
+  quantity: [{ required: true, message: '退货数量不能为空', trigger: 'blur' }],
+  qcFlag: [{ required: true, message: '需要质检不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -236,8 +249,9 @@ const resetForm = () => {
     id: undefined,
     returnId: undefined,
     itemId: undefined,
-    quantityReturned: undefined,
+    quantity: undefined,
     batchCode: undefined,
+    qcFlag: false,
     remark: undefined
   }
   formRef.value?.resetFields()
