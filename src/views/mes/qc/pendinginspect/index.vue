@@ -205,6 +205,7 @@ const handleCreateRqc = (row: QcPendingInspectVO) => {
     sourceDocId: row.sourceDocId,
     sourceDocType: row.sourceDocType,
     sourceLineId: row.sourceLineId,
+    sourceDocCode: row.sourceDocCode,
     itemId: row.itemId,
     checkQuantity: row.quantity,
     inspectDate: row.recordTime,

@@ -41,6 +41,26 @@
         </el-col>
       </el-row>
 
+      <el-row :gutter="16" v-if="formData.sourceDocType">
+        <el-col :span="8">
+          <el-form-item label="来源单据类型">
+            <el-select v-model="formData.sourceDocType" class="!w-1/1" disabled>
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_SOURCE_DOC_TYPE)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="来源单据编号">
+            <el-input v-model="formData.sourceDocCode" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
       <el-divider>生产关联</el-divider>
       <el-row :gutter="16">
         <el-col :span="8">
@@ -302,6 +322,7 @@ const formData = ref({
   templateId: undefined,
   sourceDocId: undefined,
   sourceDocType: undefined,
+  sourceDocCode: undefined,
   sourceLineId: undefined,
   workOrderId: undefined,
   taskId: undefined,
@@ -418,6 +439,7 @@ const resetForm = () => {
     templateId: undefined,
     sourceDocId: undefined,
     sourceDocType: undefined,
+    sourceDocCode: undefined,
     sourceLineId: undefined,
     workOrderId: undefined,
     taskId: undefined,

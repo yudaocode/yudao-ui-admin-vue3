@@ -18,8 +18,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：应该字典处理下：来源单据类型 -->
-      <!--
+      <!-- DONE @AI：应该字典处理下：来源单据类型 -->
       <el-form-item label="来源单据类型" prop="sourceDocType">
         <el-select
           v-model="queryParams.sourceDocType"
@@ -28,15 +27,27 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_SOURCE_DOC_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_SOURCE_DOC_TYPE).filter(
+              (dict) =>
+                [MesQcSourceDocTypeEnum.RETURN_ISSUE, MesQcSourceDocTypeEnum.RETURN_SALES].includes(
+                  dict.value
+                )
+            )"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
         </el-select>
       </el-form-item>
-      -->
-      <!-- TODO @AI：来源单据编号；如果填写了，去相关的去查询，然后 IN 下； -->
+      <el-form-item label="来源单据编号" prop="sourceDocCode">
+        <el-input
+          v-model="queryParams.sourceDocCode"
+          placeholder="请输入来源单据编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="产品物料" prop="itemId">
         <MdItemSelect
           v-model="queryParams.itemId"
@@ -112,9 +123,14 @@
         </template>
       </el-table-column>
       <el-table-column label="检验单名称" align="center" prop="name" min-width="180" />
-      <!-- TODO @AI：应该字典处理下：来源单据类型 -->
-      <el-table-column label="来源单据类型" align="center" prop="sourceDocType" width="120" />
-      <!-- TODO @AI：来源单独编码，需要后端 RespVO 拼接下返回； -->
+      <!-- DONE @AI：应该字典处理下：来源单据类型 -->
+      <el-table-column label="来源单据类型" align="center" prop="sourceDocType" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_QC_SOURCE_DOC_TYPE" :value="scope.row.sourceDocType" />
+        </template>
+      </el-table-column>
+      <!-- DONE @AI：来源单据编码，后端 RespVO 已拼接返回 sourceDocCode -->
+      <el-table-column label="来源单据编码" align="center" prop="sourceDocCode" width="160" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="规格型号" align="center" prop="itemSpecification" width="130" />
@@ -191,7 +207,7 @@ import RqcForm from './RqcForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import { MesQcStatusEnum } from '@/views/mes/utils/constants'
+import { MesQcStatusEnum, MesQcSourceDocTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcRqc' })
 
@@ -206,6 +222,7 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   sourceDocType: undefined,
+  sourceDocCode: undefined,
   itemId: undefined,
   batchCode: undefined,
   checkResult: undefined,
