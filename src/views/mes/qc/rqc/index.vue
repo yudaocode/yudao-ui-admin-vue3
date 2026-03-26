@@ -18,8 +18,8 @@
           class="!w-240px"
         />
       </el-form-item>
+      <!-- TODO @AI：应该字典处理下：来源单据类型 -->
       <!--
-      TODO @芋艿：【暂时不用处理】等后面接完 source 业务！
       <el-form-item label="来源单据类型" prop="sourceDocType">
         <el-select
           v-model="queryParams.sourceDocType"
@@ -36,6 +36,7 @@
         </el-select>
       </el-form-item>
       -->
+      <!-- TODO @AI：来源单据编号；如果填写了，去相关的去查询，然后 IN 下； -->
       <el-form-item label="产品物料" prop="itemId">
         <MdItemSelect
           v-model="queryParams.itemId"
@@ -111,7 +112,9 @@
         </template>
       </el-table-column>
       <el-table-column label="检验单名称" align="center" prop="name" min-width="180" />
+      <!-- TODO @AI：应该字典处理下：来源单据类型 -->
       <el-table-column label="来源单据类型" align="center" prop="sourceDocType" width="120" />
+      <!-- TODO @AI：来源单独编码，需要后端 RespVO 拼接下返回； -->
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="规格型号" align="center" prop="itemSpecification" width="130" />
