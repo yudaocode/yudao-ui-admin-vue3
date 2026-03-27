@@ -223,6 +223,14 @@
       <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
         保 存
       </el-button>
+      <el-button
+        @click="handleFinish"
+        type="success"
+        :disabled="formLoading"
+        v-if="formType === 'update' && formData.status === MesQcStatusEnum.DRAFT"
+      >
+        完 成
+      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -236,7 +244,7 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import RqcLineList from './RqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
-import { MesQcTypeEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { MesQcTypeEnum, MesQcStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'RqcForm' })
 
@@ -264,6 +272,7 @@ const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
+  status: undefined as number | undefined,
   templateId: undefined,
   sourceDocId: undefined,
   sourceDocType: undefined,
@@ -299,6 +308,7 @@ const formRules = reactive({
   inspectorUserId: [{ required: true, message: '检测人员不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成检验单编号 */
 const generateCode = async () => {
@@ -323,6 +333,8 @@ const open = async (type: string, id?: number, data?: QcRqcVO) => {
     // 预填模式：来自待检任务（pending inspect）
     Object.assign(formData.value, data)
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -354,12 +366,35 @@ const submitForm = async () => {
   }
 }
 
+/** 完成操作：表单修改过则先保存，再完成 */
+const handleFinish = async () => {
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  try {
+    await message.confirm('是否完成退货检验单编制？【完成后将不能更改】')
+    formLoading.value = true
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as unknown as QcRqcVO
+      await QcRqcApi.updateRqc(data)
+    }
+    await QcRqcApi.finishRqc(formData.value.id!)
+    message.success('完成成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,
     code: undefined,
     name: undefined,
+    status: undefined,
     templateId: undefined,
     sourceDocId: undefined,
     sourceDocType: undefined,

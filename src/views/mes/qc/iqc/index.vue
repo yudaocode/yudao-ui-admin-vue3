@@ -168,15 +168,6 @@
           </el-button>
           <el-button
             link
-            type="success"
-            @click="handleComplete(scope.row.id)"
-            v-hasPermi="['mes:qc-iqc:update']"
-            v-if="scope.row.status === MesQcStatusEnum.DRAFT"
-          >
-            完成
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:qc-iqc:delete']"
@@ -263,16 +254,6 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 完成操作 */
-const handleComplete = async (id: number) => {
-  try {
-    await message.confirm('是否完成来料检验单编制？【完成后将不能更改】')
-    await QcIqcApi.finishIqc(id)
-    message.success('完成成功')
-    await getList()
-  } catch {}
 }
 
 /** 删除按钮操作 */
