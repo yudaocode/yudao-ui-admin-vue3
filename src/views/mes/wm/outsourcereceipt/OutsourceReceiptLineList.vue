@@ -33,9 +33,9 @@
       <el-table-column label="单位" align="center" prop="unitName" width="80" />
       <el-table-column label="入库数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
-      <el-table-column label="是否检验" align="center" prop="iqcCheck" width="100">
+      <el-table-column label="是否检验" align="center" prop="iqcCheckFlag" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.iqcCheck" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.iqcCheckFlag" />
         </template>
       </el-table-column>
       <el-table-column label="质量状态" align="center" prop="qualityStatus" min-width="100">
@@ -135,8 +135,8 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="是否质检" prop="iqcCheck">
-            <el-switch v-model="formData.iqcCheck" />
+          <el-form-item label="是否质检" prop="iqcCheckFlag">
+            <el-switch v-model="formData.iqcCheckFlag" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -232,7 +232,7 @@ const formData = ref({
   productionDate: undefined,
   expireDate: undefined,
   lotNumber: undefined,
-  iqcCheck: false,
+  iqcCheckFlag: false,
   remark: undefined
 })
 const formRules = reactive({
@@ -291,7 +291,7 @@ const resetForm = () => {
     productionDate: undefined,
     expireDate: undefined,
     lotNumber: undefined,
-    iqcCheck: false,
+    iqcCheckFlag: false,
     remark: undefined
   }
   formRef.value?.resetFields()

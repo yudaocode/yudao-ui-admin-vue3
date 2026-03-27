@@ -33,9 +33,9 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="出库数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
-      <el-table-column label="是否校验" align="center" prop="oqcCheck" width="100">
+      <el-table-column label="是否校验" align="center" prop="oqcCheckFlag" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.oqcCheck" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.oqcCheckFlag" />
         </template>
       </el-table-column>
       <el-table-column
@@ -107,8 +107,8 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="是否校验" prop="oqcCheck">
-            <el-radio-group v-model="formData.oqcCheck">
+          <el-form-item label="是否校验" prop="oqcCheckFlag">
+            <el-radio-group v-model="formData.oqcCheckFlag">
               <el-radio :label="true">是</el-radio>
               <el-radio :label="false">否</el-radio>
             </el-radio-group>
@@ -202,7 +202,7 @@ const formData = ref({
   itemId: undefined,
   quantity: undefined,
   batchId: undefined,
-  oqcCheck: false,
+  oqcCheckFlag: false,
   remark: undefined
 })
 const formRules = reactive({
@@ -255,7 +255,7 @@ const resetForm = () => {
     itemId: undefined,
     quantity: undefined,
     batchId: undefined,
-    oqcCheck: false,
+    oqcCheckFlag: false,
     remark: undefined
   }
   formRef.value?.resetFields()

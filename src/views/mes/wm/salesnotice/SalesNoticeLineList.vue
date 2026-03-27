@@ -11,9 +11,9 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column label="发货数量" align="center" prop="quantity" width="100" />
-      <el-table-column label="是否检验" align="center" prop="oqcCheck" width="90">
+      <el-table-column label="是否检验" align="center" prop="oqcCheckFlag" width="90">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.oqcCheck" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.oqcCheckFlag" />
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
@@ -66,8 +66,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="是否检验" prop="oqcCheck">
-            <el-switch v-model="formData.oqcCheck" />
+          <el-form-item label="是否检验" prop="oqcCheckFlag">
+            <el-switch v-model="formData.oqcCheckFlag" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -144,7 +144,7 @@ const formData = ref({
   itemId: undefined,
   batchCode: undefined,
   quantity: undefined,
-  oqcCheck: true,
+  oqcCheckFlag: true,
   remark: undefined
 })
 const formRules = reactive({
@@ -153,7 +153,7 @@ const formRules = reactive({
     { required: true, message: '发货数量不能为空', trigger: 'blur' },
     { type: 'number', min: 0.01, message: '发货数量必须大于0', trigger: 'blur' }
   ],
-  oqcCheck: [{ required: true, message: '是否检验不能为空', trigger: 'change' }]
+  oqcCheckFlag: [{ required: true, message: '是否检验不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
@@ -201,7 +201,7 @@ const resetForm = () => {
     itemId: undefined,
     batchCode: undefined,
     quantity: undefined,
-    oqcCheck: true,
+    oqcCheckFlag: true,
     remark: undefined
   }
   formRef.value?.resetFields()

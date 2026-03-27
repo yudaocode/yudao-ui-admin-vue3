@@ -33,9 +33,9 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="退料数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchNo" min-width="120" />
-      <el-table-column label="是否检测" align="center" prop="qcFlag" width="100">
+      <el-table-column label="是否检测" align="center" prop="rqcCheckFlag" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.qcFlag" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.rqcCheckFlag" />
         </template>
       </el-table-column>
       <el-table-column label="质量状态" align="center" prop="qualityStatus" width="100">
@@ -107,8 +107,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="需要质检" prop="qcFlag">
-            <el-switch v-model="formData.qcFlag" />
+          <el-form-item label="需要质检" prop="rqcCheckFlag">
+            <el-switch v-model="formData.rqcCheckFlag" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -201,13 +201,13 @@ const formData = ref({
   issueId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
-  qcFlag: false,
+  rqcCheckFlag: false,
   remark: undefined
 })
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '退料数量不能为空', trigger: 'blur' }],
-  qcFlag: [{ required: true, message: '需要质检不能为空', trigger: 'change' }]
+  rqcCheckFlag: [{ required: true, message: '需要质检不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -261,7 +261,7 @@ const resetForm = () => {
     issueId: undefined,
     itemId: undefined,
     quantity: undefined,
-    qcFlag: false,
+    rqcCheckFlag: false,
     remark: undefined
   }
   formRef.value?.resetFields()
