@@ -127,7 +127,6 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检测人员" prop="inspectorUserId">
-            <!-- TODO @AI：需要 import 下 -->
             <UserSelect
               v-model="formData.inspectorUserId"
               placeholder="请选择检测人员"
@@ -240,6 +239,7 @@ import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import IqcLineList from './IqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import { MesQcTypeEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IqcForm' })

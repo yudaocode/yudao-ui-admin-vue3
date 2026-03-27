@@ -39,8 +39,6 @@
 import { QcIndicatorResultApi, QcIndicatorResultVO } from '@/api/mes/qc/indicatorresult'
 import QcIndicatorResultForm from './QcIndicatorResultForm.vue'
 
-// TODO DONE @AI：补全注释，参考 system user index.vue => 已补全
-
 defineOptions({ name: 'QcIndicatorResultList' })
 
 const props = defineProps<{

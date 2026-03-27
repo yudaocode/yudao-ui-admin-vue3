@@ -10,9 +10,14 @@
     >
       <el-row :gutter="16">
         <el-col :span="12">
-          <!-- TODO @AI：这里需要有生成的方法，参考别的 -->
           <el-form-item label="样品编号" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入样品编号" />
+            <el-input v-model="formData.code" placeholder="请输入样品编号">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -93,6 +98,7 @@
 import { QcIndicatorResultApi } from '@/api/mes/qc/indicatorresult'
 import { getStrDictOptions } from '@/utils/dict'
 import { MesQcResultValueType } from '@/views/mes/utils/constants'
+import { generateRandomStr } from '@/utils'
 
 defineOptions({ name: 'QcIndicatorResultForm' })
 
@@ -121,6 +127,11 @@ const formRules = reactive({
   code: [{ required: true, message: '样品编号不能为空', trigger: 'blur' }]
 }) // 表单校验规则
 const formRef = ref() // 表单 Ref
+
+/** 生成样品编号 */
+const generateCode = () => {
+  formData.value.code = 'QR' + generateRandomStr(12)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
