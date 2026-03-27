@@ -359,6 +359,7 @@ export const MesWmProductReceiptStatusEnum = {
 /** MES 销售出库单状态枚举 */
 export const MesWmProductSalesStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
+  CONFIRMED: MesOrderStatusConstants.CONFIRMED,
   APPROVING: MesOrderStatusConstants.APPROVING,
   SHIPPING: 10, // 待填写运单
   APPROVED: MesOrderStatusConstants.APPROVED,

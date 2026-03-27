@@ -173,6 +173,7 @@
             v-hasPermi="['mes:wm-product-sales:cancel']"
             v-if="
               [
+                MesWmProductSalesStatusEnum.CONFIRMED,
                 MesWmProductSalesStatusEnum.APPROVING,
                 MesWmProductSalesStatusEnum.SHIPPING,
                 MesWmProductSalesStatusEnum.APPROVED
