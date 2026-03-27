@@ -8,6 +8,7 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row :gutter="16">
         <el-col :span="8">
@@ -136,8 +137,8 @@
           <el-form-item label="出货日期" prop="outDate">
             <el-date-picker
               v-model="formData.outDate"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
+              type="date"
+              value-format="x"
               placeholder="请选择出货日期"
               class="!w-1/1"
             />
@@ -149,8 +150,8 @@
           <el-form-item label="检测日期" prop="inspectDate">
             <el-date-picker
               v-model="formData.inspectDate"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
+              type="date"
+              value-format="x"
               placeholder="请选择检测日期"
               class="!w-1/1"
             />
@@ -219,7 +220,7 @@
     </el-form>
 
     <!-- 子表标签页（编辑模式下显示） -->
-    <template v-if="formType === 'update' && formData.id">
+    <template v-if="(formType === 'update' || isDetail) && formData.id">
       <el-divider />
       <el-tabs v-model="activeTab">
         <el-tab-pane label="检验项" name="line">
@@ -232,7 +233,7 @@
     </template>
 
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading"> 保 存 </el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail"> 保 存 </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -240,14 +241,14 @@
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { generateRandomStr } from '@/utils'
 import { QcOqcApi, QcOqcVO } from '@/api/mes/qc/oqc'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import OqcLineList from './OqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
-import { MesQcTypeEnum } from '@/views/mes/utils/constants'
+import { MesQcTypeEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'OqcForm' })
 
@@ -312,10 +313,11 @@ const formRules = reactive({
   inspectDate: [{ required: true, message: '检测日期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const isDetail = computed(() => formType.value === 'detail') // 表单是否为详情模式（只读）
 
 /** 生成检验单编号 */
-const generateCode = () => {
-  formData.value.code = 'OQC' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.QC_OQC_CODE)
 }
 
 /** 打开弹窗 */
@@ -396,4 +398,22 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+/** 数量互填：outQuantity 和 checkQuantity 互相填充 */
+watch(
+  () => formData.value.outQuantity,
+  (val) => {
+    if (formType.value === 'create' && val != null && formData.value.checkQuantity == null) {
+      formData.value.checkQuantity = val
+    }
+  }
+)
+watch(
+  () => formData.value.checkQuantity,
+  (val) => {
+    if (formType.value === 'create' && val != null && formData.value.outQuantity == null) {
+      formData.value.outQuantity = val
+    }
+  }
+)
 </script>

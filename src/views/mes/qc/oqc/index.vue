@@ -58,14 +58,6 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="检测人员" prop="inspectorUserId">
-        <UserSelect
-          v-model="queryParams.inspectorUserId"
-          placeholder="请选择检测人员"
-          clearable
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -93,18 +85,24 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="检验单编号" align="center" prop="code" width="160" />
+      <el-table-column label="检验单编号" align="center" prop="code" width="160">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="检验单名称" align="center" prop="name" min-width="180" />
       <el-table-column label="客户名称" align="center" prop="clientNickname" width="120" />
       <el-table-column label="批次号" align="center" prop="batchCode" width="130" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" width="130" />
       <el-table-column label="产品物料名称" align="center" prop="itemName" min-width="150" />
-      <el-table-column label="规格型号" align="center" prop="itemName" min-width="150" />
-      <el-table-column label="单位" align="center" prop="itemName" min-width="150" />
+      <el-table-column label="规格型号" align="center" prop="itemSpecification" min-width="150" />
+      <el-table-column label="单位" align="center" prop="unitName" width="80" />
       <el-table-column label="发货数量" align="center" prop="outQuantity" width="100" />
       <el-table-column label="检测数量" align="center" prop="checkQuantity" width="100" />
       <el-table-column label="不合格数" align="center" prop="unqualifiedQuantity" width="100" />
-      <el-table-column label="检测结果" align="center" prop="checkResult" width="100">
+      <el-table-column label="检测结果" align="center" prop="checkResult" width="110">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_QC_CHECK_RESULT" :value="scope.row.checkResult" />
         </template>
@@ -129,7 +127,7 @@
           <dict-tag :type="DICT_TYPE.MES_ORDER_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="180" fixed="right">
+      <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
           <el-button
             link
@@ -182,7 +180,6 @@ import OqcForm from './OqcForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import { MesQcStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcOqc' })
@@ -200,8 +197,7 @@ const queryParams = reactive({
   clientId: undefined,
   batchCode: undefined,
   itemId: undefined,
-  checkResult: undefined,
-  inspectorUserId: undefined
+  checkResult: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中

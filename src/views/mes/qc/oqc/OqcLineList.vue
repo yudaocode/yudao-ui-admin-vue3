@@ -9,6 +9,7 @@
           <dict-tag :type="DICT_TYPE.MES_INDICATOR_TYPE" :value="scope.row.indicatorType" />
         </template>
       </el-table-column>
+      <el-table-column label="检测工具" align="center" prop="tool" width="120" />
       <el-table-column label="检测方法" align="center" prop="checkMethod" min-width="180" />
       <el-table-column label="标准值" align="center" prop="standardValue" width="100" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
