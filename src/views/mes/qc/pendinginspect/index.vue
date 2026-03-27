@@ -52,12 +52,17 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" width="160" />
-      <el-table-column label="检验类型" align="center" prop="qcType" width="100">
+      <el-table-column label="来源单据类型" align="center" prop="sourceDocType" width="130">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_QC_SOURCE_DOC_TYPE" :value="scope.row.sourceDocType" />
+        </template>
+      </el-table-column>
+      <el-table-column label="检验类型" align="center" prop="qcType" min-width="150">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_QC_TYPE" :value="scope.row.qcType" />
         </template>
       </el-table-column>
-      <el-table-column label="物料编码" align="center" prop="itemCode" width="130" />
+      <el-table-column label="物料编码" align="center" prop="itemCode" min-width="130" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="150" />
       <el-table-column label="规格型号" align="center" prop="specification" width="130" />
       <el-table-column label="待检数量" align="center" prop="quantity" width="100" />
@@ -89,7 +94,7 @@
             v-if="scope.row.qcType === MesQcTypeEnum.RQC"
             v-hasPermi="['mes:qc-rqc:create']"
           >
-            退货检验
+            退料检验
           </el-button>
           <el-button
             link
@@ -172,6 +177,7 @@ const handleCreateIqc = (row: QcPendingInspectVO) => {
   iqcFormRef.value.open('create', undefined, {
     sourceDocId: row.sourceDocId,
     sourceDocType: row.sourceDocType,
+    sourceDocCode: row.sourceDocCode,
     sourceLineId: row.sourceLineId,
     vendorId: row.vendorId,
     itemId: row.itemId,
@@ -187,6 +193,7 @@ const handleCreateIpqc = (row: QcPendingInspectVO) => {
   ipqcFormRef.value.open('create', undefined, {
     sourceDocId: row.sourceDocId,
     sourceDocType: row.sourceDocType,
+    sourceDocCode: row.sourceDocCode,
     sourceLineId: row.sourceLineId,
     itemId: row.itemId,
     workOrderId: row.workOrderId,
@@ -206,10 +213,13 @@ const handleCreateRqc = (row: QcPendingInspectVO) => {
     sourceDocType: row.sourceDocType,
     sourceLineId: row.sourceLineId,
     sourceDocCode: row.sourceDocCode,
+    clientId: row.clientId,
+    workOrderId: row.workOrderId,
+    workstationId: row.workstationId,
     itemId: row.itemId,
     checkQuantity: row.quantity,
     inspectDate: row.recordTime,
-    name: row.sourceDocCode + ' 退货检验单'
+    name: row.sourceDocCode + ' 退料检验单'
   })
 }
 
@@ -219,6 +229,7 @@ const handleCreateOqc = (row: QcPendingInspectVO) => {
   oqcFormRef.value.open('create', undefined, {
     sourceDocId: row.sourceDocId,
     sourceDocType: row.sourceDocType,
+    sourceDocCode: row.sourceDocCode,
     sourceLineId: row.sourceLineId,
     clientId: row.clientId,
     itemId: row.itemId,
