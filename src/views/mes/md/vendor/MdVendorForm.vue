@@ -161,18 +161,18 @@
     </el-form>
     <!-- 编辑/详情时显示关联数据 tab -->
     <el-tabs v-if="formType !== 'create' && formData.id" v-model="activeTab" class="mt-10px">
-      <el-tab-pane label="供货记录" name="supplyRecord" lazy>
-        <VendorSupplyRecordTab :vendorId="formData.id" />
+      <el-tab-pane label="物料清单" name="itemReceiptLine" lazy>
+        <VendorItemReceiptLineTab :vendorId="formData.id" />
       </el-tab-pane>
-      <el-tab-pane label="退货记录" name="returnRecord" lazy>
-        <VendorReturnRecordTab :vendorId="formData.id" />
+      <el-tab-pane label="采购入库" name="itemReceipt" lazy>
+        <VendorItemReceiptTab :vendorId="formData.id" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
-        >确 定</el-button
-      >
-      <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -182,8 +182,8 @@ import { MdVendorApi, MdVendorVO } from '@/api/mes/md/vendor'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { CommonStatusEnum } from '@/utils/constants'
 import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
-import VendorSupplyRecordTab from './components/VendorSupplyRecordTab.vue'
-import VendorReturnRecordTab from './components/VendorReturnRecordTab.vue'
+import VendorItemReceiptLineTab from './VendorItemReceiptLineTab.vue'
+import VendorItemReceiptTab from './VendorItemReceiptTab.vue'
 
 defineOptions({ name: 'MdVendorForm' })
 
@@ -202,7 +202,7 @@ const dialogTitle = computed(() => {
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
-const activeTab = ref('supplyRecord') // 当前激活的 tab
+const activeTab = ref('itemReceiptLine') // 当前激活的 tab
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -231,7 +231,7 @@ const formRules = reactive({
   code: [{ required: true, message: '供应商编码不能为空', trigger: 'blur' }],
   name: [
     { required: true, message: '供应商名称不能为空', trigger: 'blur' },
-    { max: 100, message: '供应商名称不能超过100个字符', trigger: 'blur' }
+    { max: 100, message: '供应商名称不能超过 100 个字符', trigger: 'blur' }
   ],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }],
   email: [
@@ -267,7 +267,7 @@ const generateCode = async () => {
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
-  activeTab.value = 'supplyRecord'
+  activeTab.value = 'itemReceiptLine'
   resetForm()
   // 修改/详情时，设置数据
   if (id) {
