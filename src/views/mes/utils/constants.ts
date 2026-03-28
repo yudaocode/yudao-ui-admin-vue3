@@ -413,6 +413,7 @@ export const MesAutoCodePaddedMethodEnum = {
 
 /** MES 自动编码规则 Code 枚举 */
 export const MesAutoCodeRuleCode = {
+  ITEM_CODE: 'MD_ITEM_CODE', // 物料编码
   SN_CODE: 'WM_SN_CODE', // SN 码
   PACKAGE_CODE: 'WM_PACKAGE_CODE', // 装箱单编码
   BATCH_CODE: 'WM_BATCH_CODE', // 批次编码

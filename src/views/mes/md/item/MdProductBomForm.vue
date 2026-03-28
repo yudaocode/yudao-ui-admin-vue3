@@ -66,7 +66,7 @@
     </Dialog>
 
     <!-- 物料选择弹窗 -->
-    <ItemProductSelect ref="itemSelectRef" @selected="handleItemSelected" />
+    <MdItemSelectDialog ref="itemSelectRef" @selected="handleItemSelected" />
   </div>
 </template>
 
@@ -74,7 +74,7 @@
 import { MdProductBomApi, MdProductBomVO } from '@/api/mes/md/item/productBom'
 import { MdItemVO } from '@/api/mes/md/item'
 import { getItemOrProductLabel } from '@/views/mes/utils/constants'
-import ItemProductSelect from '@/views/mes/md/components/ItemProductSelect.vue'
+import MdItemSelectDialog from '@/views/mes/md/item/components/MdItemSelectDialog.vue'
 
 defineOptions({ name: 'MdProductBomForm' })
 

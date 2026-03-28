@@ -89,6 +89,7 @@
       <!-- 列表 -->
       <ContentWrap>
         <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+          <!-- TODO @AI：增加点击进入详情；formType = detail 这种； -->
           <el-table-column label="物料编码" align="center" prop="code" />
           <el-table-column label="物料名称" align="center" prop="name" />
           <el-table-column label="规格型号" align="center" prop="specification" />
@@ -104,6 +105,7 @@
               <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.safeStockFlag" />
             </template>
           </el-table-column>
+          <!-- TODO @AI：status 改成 switch 单独一个开关； -->
           <el-table-column label="状态" align="center" prop="status">
             <template #default="scope">
               <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -134,6 +136,7 @@
               >
                 删除
               </el-button>
+              <!-- TODO @芋艿：【HiPrint】标签打印 -->
               <el-button
                 link
                 type="primary"
@@ -253,12 +256,7 @@ const handleImport = () => {
 /** 查看物料条码 */
 const barcodeDetailRef = ref()
 const handleBarcode = async (row: MdItemVO) => {
-  await barcodeDetailRef.value.openByBusiness(
-    row.id,
-    BarcodeBizTypeEnum.ITEM,
-    row.code,
-    row.name
-  )
+  await barcodeDetailRef.value.openByBusiness(row.id, BarcodeBizTypeEnum.ITEM, row.code, row.name)
 }
 
 /** 导出按钮操作 */

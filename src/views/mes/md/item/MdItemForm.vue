@@ -37,6 +37,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="物料分类" prop="itemTypeId">
+            <!-- TODO @AI：在 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/md/item/type 增加一个物料的 select；注意，只允许选择子节点； -->
             <el-tree-select
               v-model="formData.itemTypeId"
               :data="itemTypeTree"
@@ -48,6 +49,7 @@
             />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：1）新建时，默认为【禁用】后端设置；2）这里只负责展示，后端的 save vo 不要接收该参数； -->
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <el-radio-group v-model="formData.status">
@@ -82,7 +84,7 @@
               v-model="formData.minStock"
               placeholder="请输入最低库存量"
               :min="0"
-              :precision="4"
+              :precision="2"
               class="!w-1/1"
             />
           </el-form-item>
@@ -93,7 +95,7 @@
               v-model="formData.maxStock"
               placeholder="请输入最高库存量"
               :min="0"
-              :precision="4"
+              :precision="2"
               class="!w-1/1"
             />
           </el-form-item>
@@ -113,7 +115,7 @@
       <el-tab-pane label="批次属性" name="batch" lazy v-if="formData.batchFlag">
         <MdItemBatchConfigForm :itemId="formData.id!" :itemOrProduct="currentItemOrProduct" />
       </el-tab-pane>
-      <!-- TODO @芋艿：替代品，等替代品模块实现后对接 -->
+      <!-- TODO @芋艿：【对齐】替代品，目前没这个，可忽略 -->
       <el-tab-pane label="替代品" name="substitute" lazy>
         <el-empty description="替代品（待实现）" />
       </el-tab-pane>
@@ -132,9 +134,9 @@
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { generateRandomStr } from '@/utils'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdItemBatchConfigForm from './MdItemBatchConfigForm.vue'
 import MdProductBomForm from './MdProductBomForm.vue'
 import MdProductSopForm from './MdProductSopForm.vue'
@@ -142,6 +144,7 @@ import MdProductSipForm from './MdProductSipForm.vue'
 import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 /** MES 物料产品 表单 */
 defineOptions({ name: 'MdItemForm' })
@@ -150,6 +153,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
+// TODO @AI：标题对齐下，使用 compute ，然后有新增物料/产品；修改物料/产品；查看物料/产品；
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
@@ -161,7 +165,7 @@ const formData = ref({
   specification: undefined,
   unitMeasureId: undefined,
   itemTypeId: undefined,
-  status: CommonStatusEnum.ENABLE,
+  status: CommonStatusEnum.DISABLE,
   safeStockFlag: false,
   minStock: 0,
   maxStock: 0,
@@ -190,9 +194,8 @@ const currentItemOrProduct = computed(() => {
 })
 
 /** 生成物料编码 */
-const generateCode = () => {
-  // TODO @芋艿：后续对接后端编码生成接口
-  formData.value.code = 'IF' + generateRandomStr(12)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.ITEM_CODE)
 }
 
 /** 打开弹窗 */
@@ -233,6 +236,7 @@ const submitForm = async () => {
       await MdItemApi.updateItem(data)
       message.success(t('common.updateSuccess'))
     }
+    // TODO @AI：【对齐】应该都不需要自动关闭；用户按需添加；
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
@@ -250,7 +254,7 @@ const resetForm = () => {
     specification: undefined,
     unitMeasureId: undefined,
     itemTypeId: undefined,
-    status: CommonStatusEnum.ENABLE,
+    status: CommonStatusEnum.DISABLE,
     safeStockFlag: false,
     minStock: 0,
     maxStock: 0,
