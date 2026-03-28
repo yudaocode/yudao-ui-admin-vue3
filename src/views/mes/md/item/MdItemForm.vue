@@ -38,7 +38,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="物料分类" prop="itemTypeId">
-            <MdItemTypeSelect v-model="formData.itemTypeId" />
+            <MdItemTypeSelect v-model="formData.itemTypeId" @change="handleItemTypeChange" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -150,9 +150,12 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = computed(() => {
-  if (formType.value === 'create') return '新增物料/产品'
-  if (formType.value === 'update') return '修改物料/产品'
-  return '查看物料/产品'
+  const titles: Record<string, string> = {
+    create: '新增物料/产品',
+    update: '修改物料/产品',
+    detail: '查看物料/产品'
+  }
+  return titles[formType.value] || formType.value
 }) // 弹窗标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
@@ -189,6 +192,11 @@ const generateCode = async () => {
   formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.ITEM_CODE)
 }
 
+/** 分类变更时，同步更新 itemOrProduct */
+const handleItemTypeChange = (type: any) => {
+  formData.value.itemOrProduct = type?.itemOrProduct
+}
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -217,14 +225,16 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as MdItemVO
     if (formType.value === 'create') {
-      await MdItemApi.createItem(data)
+      const id = await MdItemApi.createItem(data)
       message.success(t('common.createSuccess'))
+      // 新增成功后，切换为修改模式（留在弹窗内，可继续编辑子 Tab）
+      formData.value.id = id
+      formType.value = 'update'
     } else {
       await MdItemApi.updateItem(data)
       message.success(t('common.updateSuccess'))
     }
-    dialogVisible.value = false
-    // 发送操作成功的事件
+    // 发送操作成功的事件，刷新列表
     emit('success')
   } finally {
     formLoading.value = false
