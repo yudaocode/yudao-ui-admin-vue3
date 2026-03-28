@@ -50,8 +50,13 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：增加详情的操作 -->
-      <el-table-column label="库区编码" align="center" prop="code" min-width="120" />
+      <el-table-column label="库区编码" align="center" prop="code" min-width="120">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="库区名称" align="center" prop="name" min-width="140" />
       <el-table-column label="面积（㎡）" align="center" prop="area" min-width="100" />
       <el-table-column label="冻结" align="center" prop="frozen" min-width="80">

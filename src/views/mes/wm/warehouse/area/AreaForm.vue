@@ -6,6 +6,7 @@
       :rules="isDetail ? {} : formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
@@ -14,7 +15,7 @@
               v-model="selectedWarehouseId"
               placeholder="请选择仓库"
               class="!w-1/1"
-              :disabled="isDetail"
+
               @change="handleWarehouseChange"
             >
               <el-option
@@ -32,7 +33,7 @@
               v-model="formData.locationId"
               placeholder="请选择库区"
               class="!w-1/1"
-              :disabled="isDetail || !selectedWarehouseId"
+              :disabled="!selectedWarehouseId"
             >
               <el-option
                 v-for="location in locationList"
@@ -44,16 +45,21 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <!-- TODO @AI：增加一个生成逻辑 -->
           <el-form-item label="库位编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入库位编码" :disabled="isDetail" />
+            <el-input v-model="formData.code" placeholder="请输入库位编码">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
           <el-form-item label="库位名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入库位名称" :disabled="isDetail" />
+            <el-input v-model="formData.name" placeholder="请输入库位名称" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -64,7 +70,7 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-              :disabled="isDetail"
+
             />
           </el-form-item>
         </el-col>
@@ -76,7 +82,7 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-              :disabled="isDetail"
+
             />
           </el-form-item>
         </el-col>
@@ -89,7 +95,7 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-              :disabled="isDetail"
+
             />
           </el-form-item>
         </el-col>
@@ -100,7 +106,7 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-              :disabled="isDetail"
+
             />
           </el-form-item>
         </el-col>
@@ -111,7 +117,7 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-              :disabled="isDetail"
+
             />
           </el-form-item>
         </el-col>
@@ -123,7 +129,6 @@
               v-model="formData.status"
               placeholder="请选择"
               class="!w-1/1"
-              :disabled="isDetail"
             >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -136,19 +141,19 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="是否冻结" prop="frozen">
-            <el-switch v-model="formData.frozen" :disabled="isDetail" />
+            <el-switch v-model="formData.frozen" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
           <el-form-item label="允许物料混放" prop="allowItemMixing">
-            <el-switch v-model="formData.allowItemMixing" :disabled="isDetail" />
+            <el-switch v-model="formData.allowItemMixing" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="允许批次混放" prop="allowBatchMixing">
-            <el-switch v-model="formData.allowBatchMixing" :disabled="isDetail" />
+            <el-switch v-model="formData.allowBatchMixing" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -159,7 +164,6 @@
               v-model="formData.remark"
               type="textarea"
               placeholder="请输入备注"
-              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
@@ -170,7 +174,7 @@
       <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
       </el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>
 </template>
@@ -179,8 +183,10 @@
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
 import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/area'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'AreaForm' })
 
@@ -188,13 +194,26 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增库位',
+    update: '编辑库位',
+    detail: '库位详情'
+  }
+  return titles[formType.value] || formType.value
+})
+const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
 const selectedWarehouseId = ref<number | undefined>(undefined) // 当前选中的仓库 ID
 const warehouseList = ref<WmWarehouseVO[]>([]) // 仓库列表
 const locationList = ref<WmWarehouseLocationVO[]>([]) // 库区列表
+
+/** 生成库位编码 */
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_AREA_CODE)
+}
+
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -245,7 +264,6 @@ const open = async (
   defaultWarehouseId?: number
 ) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'detail' ? '库位详情' : t('action.' + type)
   formType.value = type
   resetForm()
   warehouseList.value = await WmWarehouseApi.getWarehouseSimpleList()

@@ -6,12 +6,18 @@
       :rules="formRules"
       label-width="110px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：增加一个生成逻辑 -->
           <el-form-item label="仓库编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入仓库编码" />
+            <el-input v-model="formData.code" placeholder="请输入仓库编码">
+              <template #append>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -69,15 +75,17 @@
       </el-row>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>
 </template>
 
 <script setup lang="ts">
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import * as UserApi from '@/api/system/user'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'WarehouseForm' })
 
@@ -85,10 +93,24 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增仓库',
+    update: '编辑仓库',
+    detail: '仓库详情'
+  }
+  return titles[formType.value] || formType.value
+})
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
+
+/** 生成仓库编码 */
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_WAREHOUSE_CODE)
+}
+
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -109,7 +131,6 @@ const formRef = ref() // 表单 Ref
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
   // 加载用户列表
