@@ -89,8 +89,13 @@
       <!-- 列表 -->
       <ContentWrap>
         <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-          <!-- TODO @AI：增加点击进入详情；formType = detail 这种； -->
-          <el-table-column label="物料编码" align="center" prop="code" />
+          <el-table-column label="物料编码" align="center" prop="code">
+            <template #default="scope">
+              <el-link type="primary" @click="openForm('detail', scope.row.id)">
+                {{ scope.row.code }}
+              </el-link>
+            </template>
+          </el-table-column>
           <el-table-column label="物料名称" align="center" prop="name" />
           <el-table-column label="规格型号" align="center" prop="specification" />
           <el-table-column label="单位" align="center" prop="unitMeasureName" />
@@ -105,10 +110,15 @@
               <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.safeStockFlag" />
             </template>
           </el-table-column>
-          <!-- TODO @AI：status 改成 switch 单独一个开关； -->
-          <el-table-column label="状态" align="center" prop="status">
+          <el-table-column label="状态" align="center" prop="status" width="80">
             <template #default="scope">
-              <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+              <el-switch
+                v-model="scope.row.status"
+                :active-value="0"
+                :inactive-value="1"
+                @change="handleStatusChange(scope.row)"
+                :disabled="!checkPermi(['mes:md-item:update'])"
+              />
             </template>
           </el-table-column>
           <el-table-column
@@ -169,8 +179,10 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { checkPermi } from '@/utils/permission'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
+import { CommonStatusEnum } from '@/utils/constants'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import MdItemForm from './MdItemForm.vue'
 import MdItemImportForm from './MdItemImportForm.vue'
@@ -232,6 +244,23 @@ const handleTypeNodeClick = (row: any) => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 切换物料状态 */
+const handleStatusChange = async (row: MdItemVO) => {
+  try {
+    // 修改状态的二次确认
+    const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
+    await message.confirm('确认要"' + text + '""' + row.name + '"物料吗?')
+    // 发起修改状态
+    await MdItemApi.updateItemStatus(row.id, row.status)
+    // 刷新列表
+    await getList()
+  } catch {
+    // 取消后，恢复按钮
+    row.status =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+  }
 }
 
 /** 删除按钮操作 */

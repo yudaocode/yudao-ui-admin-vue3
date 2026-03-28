@@ -37,22 +37,12 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="物料分类" prop="itemTypeId">
-            <!-- TODO @AI：在 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/md/item/type 增加一个物料的 select；注意，只允许选择子节点； -->
-            <el-tree-select
-              v-model="formData.itemTypeId"
-              :data="itemTypeTree"
-              :props="defaultProps"
-              check-strictly
-              default-expand-all
-              placeholder="请选择物料分类"
-              class="w-1/1"
-            />
+            <MdItemTypeSelect v-model="formData.itemTypeId" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：1）新建时，默认为【禁用】后端设置；2）这里只负责展示，后端的 save vo 不要接收该参数； -->
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
-            <el-radio-group v-model="formData.status">
+            <el-radio-group v-model="formData.status" disabled>
               <el-radio
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
                 :key="dict.value"
@@ -135,15 +125,14 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
-import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdItemBatchConfigForm from './MdItemBatchConfigForm.vue'
 import MdProductBomForm from './MdProductBomForm.vue'
 import MdProductSopForm from './MdProductSopForm.vue'
 import MdProductSipForm from './MdProductSipForm.vue'
 import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
+import MdItemTypeSelect from '@/views/mes/md/item/type/components/MdItemTypeSelect.vue'
 import { CommonStatusEnum } from '@/utils/constants'
-import { defaultProps, handleTree } from '@/utils/tree'
 import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 /** MES 物料产品 表单 */
@@ -153,8 +142,11 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-// TODO @AI：标题对齐下，使用 compute ，然后有新增物料/产品；修改物料/产品；查看物料/产品；
-const dialogTitle = ref('') // 弹窗的标题
+const dialogTitle = computed(() => {
+  if (formType.value === 'create') return '新增物料/产品'
+  if (formType.value === 'update') return '修改物料/产品'
+  return '查看物料/产品'
+}) // 弹窗标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const activeTab = ref('bom') // 当前激活的 Tab
@@ -171,7 +163,8 @@ const formData = ref({
   maxStock: 0,
   highValue: false,
   batchFlag: true,
-  remark: undefined
+  remark: undefined,
+  itemOrProduct: undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '物料编码不能为空', trigger: 'blur' }],
@@ -181,17 +174,7 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const itemTypeTree = ref<MdItemTypeVO[]>([]) // 物料分类树
-const itemTypeList = ref<MdItemTypeVO[]>([]) // 物料分类列表（扁平）
-
-/** 当前物料的「物料/产品」标识 */
-const currentItemOrProduct = computed(() => {
-  if (!formData.value.itemTypeId) {
-    return ''
-  }
-  const itemType = itemTypeList.value.find((t) => t.id === formData.value.itemTypeId)
-  return itemType?.itemOrProduct || ''
-})
+const currentItemOrProduct = computed(() => formData.value.itemOrProduct || '') // 物料/产品的标签
 
 /** 生成物料编码 */
 const generateCode = async () => {
@@ -201,7 +184,6 @@ const generateCode = async () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   activeTab.value = 'bom'
   resetForm()
@@ -214,9 +196,6 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
-  // 物料分类
-  itemTypeList.value = await MdItemTypeApi.getItemTypeSimpleList()
-  itemTypeTree.value = handleTree(itemTypeList.value)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -236,7 +215,6 @@ const submitForm = async () => {
       await MdItemApi.updateItem(data)
       message.success(t('common.updateSuccess'))
     }
-    // TODO @AI：【对齐】应该都不需要自动关闭；用户按需添加；
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
@@ -260,7 +238,8 @@ const resetForm = () => {
     maxStock: 0,
     highValue: false,
     batchFlag: true,
-    remark: undefined
+    remark: undefined,
+    itemOrProduct: undefined
   }
   formRef.value?.resetFields()
 }

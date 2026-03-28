@@ -47,6 +47,11 @@ export const MdItemApi = {
     return await request.put({ url: `/mes/md/item/update`, data })
   },
 
+  // 修改物料产品状态
+  updateItemStatus: async (id: number, status: number) => {
+    return await request.put({ url: `/mes/md/item/update-status`, params: { id, status } })
+  },
+
   // 删除物料产品
   deleteItem: async (id: number) => {
     return await request.delete({ url: `/mes/md/item/delete?id=` + id })
