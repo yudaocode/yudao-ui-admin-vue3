@@ -6,13 +6,14 @@
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
           <el-form-item label="工作站编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入工作站编码">
               <template #append>
-                <el-button @click="generateCode" :disabled="formType === 'update'">
+                <el-button @click="generateCode" :disabled="formType !== 'create'">
                   生成
                 </el-button>
               </template>
@@ -98,6 +99,16 @@
             </el-radio-group>
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="所属工序" prop="processId">
+            <ProProcessSelect
+              v-model="formData.processId"
+              placeholder="请选择所属工序"
+              clearable
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row>
         <el-col :span="24">
@@ -108,19 +119,21 @@
       </el-row>
     </el-form>
     <!-- 编辑时显示子资源 Tab -->
-    <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
+    <el-tabs v-if="formType !== 'create'" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="设备资源" name="machine">
-        <WorkstationMachineList :workstation-id="formData.id!" />
+        <WorkstationMachineList :workstation-id="formData.id!" :formType="formType" />
       </el-tab-pane>
       <el-tab-pane label="工装夹具" name="tool">
-        <WorkstationToolList :workstation-id="formData.id!" />
+        <WorkstationToolList :workstation-id="formData.id!" :formType="formType" />
       </el-tab-pane>
       <el-tab-pane label="人力资源" name="worker">
-        <WorkstationWorkerList :workstation-id="formData.id!" />
+        <WorkstationWorkerList :workstation-id="formData.id!" :formType="formType" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -129,12 +142,14 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdWorkstationApi, MdWorkstationVO } from '@/api/mes/md/workstation'
 import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
+import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import { WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
 import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/area'
 import { CommonStatusEnum } from '@/utils/constants'
-import { generateRandomStr } from '@/utils'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import WorkstationMachineList from './WorkstationMachineList.vue'
 import WorkstationToolList from './WorkstationToolList.vue'
 import WorkstationWorkerList from './WorkstationWorkerList.vue'
@@ -147,7 +162,8 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail')
 const activeTab = ref('machine') // 当前激活的资源 Tab
 const locationList = ref<WmWarehouseLocationVO[]>([]) // 库区下拉列表
 const areaList = ref<WmWarehouseAreaVO[]>([]) // 库位下拉列表
@@ -168,13 +184,16 @@ const formRules = reactive({
   code: [{ required: true, message: '工作站编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '工作站名称不能为空', trigger: 'blur' }],
   workshopId: [{ required: true, message: '所在车间不能为空', trigger: 'change' }],
+  processId: [{ required: true, message: '所属工序不能为空', trigger: 'change' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 }) // 表单校验规则
 const formRef = ref() // 表单 Ref
 
 /** 生成工作站编码 */
-const generateCode = () => {
-  formData.value.code = 'WS' + generateRandomStr(12)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.MD_WORKSTATION_CODE
+  )
 }
 
 /** 加载库区列表 */

@@ -2,7 +2,14 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-button type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
+    <el-button
+      type="primary"
+      plain
+      size="small"
+      @click="openForm('create')"
+      class="mb-10px"
+      v-if="!isDetail"
+    >
       <Icon icon="ep:plus" class="mr-5px" /> 添加人员
     </el-button>
     <!-- 列表 -->
@@ -11,7 +18,7 @@
       <el-table-column label="岗位名称" align="center" prop="postName" />
       <el-table-column label="数量" align="center" prop="quantity" width="100" />
       <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" width="120">
+      <el-table-column label="操作" align="center" width="120" v-if="!isDetail">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
@@ -21,13 +28,15 @@
 
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px" v-loading="formLoading">
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="formRules"
+        label-width="80px"
+        v-loading="formLoading"
+      >
         <el-form-item label="岗位" prop="postId">
-          <el-select
-            v-model="formData.postId"
-            placeholder="请选择岗位"
-            class="!w-1/1"
-          >
+          <el-select v-model="formData.postId" placeholder="请选择岗位" class="!w-1/1">
             <el-option
               v-for="post in postList"
               :key="post.id"
@@ -64,10 +73,12 @@ defineOptions({ name: 'WorkstationWorkerList' })
 
 const props = defineProps<{
   workstationId: number // 工作站编号
+  formType: string // 业务表单的类型
 }>()
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+const isDetail = computed(() => props.formType === 'detail') // 是否详情模式（只读）
 
 const loading = ref(false) // 列表的加载中
 const list = ref<MdWorkstationWorkerVO[]>([]) // 列表的数据
@@ -86,7 +97,7 @@ const getList = async () => {
 // ==================== 添加/修改 ====================
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const dialogFormType = ref('') // 表单的类型：create - 新增；update - 修改
 const formLoading = ref(false) // 表单的加载中
 const formRef = ref() // 表单 Ref
 const formData = ref({
@@ -105,7 +116,7 @@ const formRules = reactive({
 const openForm = async (type: string, row?: MdWorkstationWorkerVO) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
-  formType.value = type
+  dialogFormType.value = type
   resetForm()
   // 加载岗位列表
   postList.value = await PostApi.getSimplePostList()
@@ -125,7 +136,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as MdWorkstationWorkerVO
-    if (formType.value === 'create') {
+    if (dialogFormType.value === 'create') {
       await MdWorkstationWorkerApi.createWorkstationWorker(data)
       message.success(t('common.createSuccess'))
     } else {

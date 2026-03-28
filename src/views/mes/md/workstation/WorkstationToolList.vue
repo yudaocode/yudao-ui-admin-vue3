@@ -2,7 +2,14 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-button type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
+    <el-button
+      type="primary"
+      plain
+      size="small"
+      @click="openForm('create')"
+      class="mb-10px"
+      v-if="!isDetail"
+    >
       <Icon icon="ep:plus" class="mr-5px" /> 添加工具
     </el-button>
     <!-- 列表 -->
@@ -11,7 +18,7 @@
       <el-table-column label="工具类型名称" align="center" prop="toolTypeName" />
       <el-table-column label="数量" align="center" prop="quantity" width="100" />
       <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" width="120">
+      <el-table-column label="操作" align="center" width="120" v-if="!isDetail">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
@@ -34,7 +41,7 @@
             v-model="formData.toolTypeId"
             placeholder="请输入工具类型编号"
             class="!w-1/1"
-            :disabled="formType === 'update'"
+            :disabled="dialogFormType === 'update'"
           />
         </el-form-item>
         <el-form-item label="数量" prop="quantity">
@@ -64,10 +71,12 @@ defineOptions({ name: 'WorkstationToolList' })
 
 const props = defineProps<{
   workstationId: number // 工作站编号
+  formType: string // 业务表单的类型
 }>()
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+const isDetail = computed(() => props.formType === 'detail') // 是否详情模式（只读）
 
 const loading = ref(false) // 列表的加载中
 const list = ref<MdWorkstationToolVO[]>([]) // 列表的数据
@@ -85,7 +94,7 @@ const getList = async () => {
 // ==================== 添加/修改 ====================
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const dialogFormType = ref('') // 表单的类型：create - 新增；update - 修改
 const formLoading = ref(false) // 表单的加载中
 const formRef = ref() // 表单 Ref
 const formData = ref({
@@ -104,7 +113,7 @@ const formRules = reactive({
 const openForm = (type: string, row?: MdWorkstationToolVO) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
-  formType.value = type
+  dialogFormType.value = type
   resetForm()
   // 修改时，设置数据
   if (type === 'update' && row) {
@@ -122,7 +131,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as MdWorkstationToolVO
-    if (formType.value === 'create') {
+    if (dialogFormType.value === 'create') {
       await MdWorkstationToolApi.createWorkstationTool(data)
       message.success(t('common.createSuccess'))
     } else {

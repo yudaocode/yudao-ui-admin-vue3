@@ -29,6 +29,9 @@
       <el-form-item label="所在车间" prop="workshopId">
         <MdWorkshopSelect v-model="queryParams.workshopId" placeholder="请选择车间" clearable class="!w-240px" />
       </el-form-item>
+      <el-form-item label="所属工序" prop="processId">
+        <ProProcessSelect v-model="queryParams.processId" placeholder="请选择工序" clearable class="!w-240px" />
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
@@ -66,11 +69,17 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="工作站编码" align="center" prop="code" min-width="120" />
+      <el-table-column label="工作站编码" align="center" prop="code" min-width="120">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="工作站名称" align="center" prop="name" min-width="150" />
       <el-table-column label="工作站地点" align="center" prop="address" min-width="150" />
       <el-table-column label="所在车间" align="center" prop="workshopName" min-width="120" />
-      <!-- TODO @芋艿：所属工序，等工序模块完成后对接 -->
+      <el-table-column label="所属工序" align="center" prop="processName" min-width="120" />
       <el-table-column label="状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -101,6 +110,7 @@
           >
             删除
           </el-button>
+          <!-- TODO @芋艿：【对齐】后续搞：标签打印 -->
           <el-button
             link
             type="primary"
@@ -132,6 +142,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { MdWorkstationApi, MdWorkstationVO } from '@/api/mes/md/workstation'
 import MdWorkshopSelect from './components/MdWorkshopSelect.vue'
+import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
 import WorkstationForm from './WorkstationForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
@@ -151,6 +162,7 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   workshopId: undefined,
+  processId: undefined,
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单

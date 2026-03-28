@@ -118,7 +118,12 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
-            <el-select v-model="formData.status" placeholder="请选择" class="!w-1/1" :disabled="isDetail">
+            <el-select
+              v-model="formData.status"
+              placeholder="请选择"
+              class="!w-1/1"
+              :disabled="isDetail"
+            >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
                 :key="dict.value"
@@ -149,15 +154,22 @@
       <el-row>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
-            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" :disabled="isDetail" />
+            <el-input
+              v-model="formData.remark"
+              type="textarea"
+              placeholder="请输入备注"
+              :disabled="isDetail"
+            />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
     <template #footer>
       <!-- TODO @芋艿：barcodeimg -->
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
