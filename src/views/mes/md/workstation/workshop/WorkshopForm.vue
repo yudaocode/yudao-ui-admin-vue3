@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="12">
@@ -62,7 +63,7 @@
       </el-row>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -79,9 +80,17 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增车间',
+    update: '修改车间',
+    detail: '查看车间'
+  }
+  return titles[formType.value] || formType.value
+})
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 const formData = ref({
   id: undefined,
@@ -102,7 +111,6 @@ const formRef = ref() // 表单 Ref
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
   // 加载用户列表

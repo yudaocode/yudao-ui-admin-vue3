@@ -54,7 +54,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="车间编码" align="center" prop="code" />
+      <el-table-column label="车间编码" align="center" prop="code">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="车间名称" align="center" prop="name" width="150" />
       <el-table-column label="面积" align="center" prop="area" />
       <el-table-column label="负责人" align="center" prop="chargeUserName" />
