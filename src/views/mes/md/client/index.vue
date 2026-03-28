@@ -35,6 +35,15 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="英文名称" prop="englishName">
+        <el-input
+          v-model="queryParams.englishName"
+          placeholder="请输入客户英文名称"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="客户类型" prop="type">
         <el-select v-model="queryParams.type" placeholder="请选择客户类型" clearable class="!w-240px">
           <el-option
@@ -90,7 +99,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="客户编码" align="center" prop="code" />
+      <el-table-column label="客户编码" align="center" prop="code">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="客户名称" align="center" prop="name" width="150" />
       <el-table-column label="客户简称" align="center" prop="nickname" />
       <el-table-column label="客户类型" align="center" prop="type">
@@ -171,6 +186,7 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   nickname: undefined,
+  englishName: undefined,
   type: undefined,
   status: undefined
 })

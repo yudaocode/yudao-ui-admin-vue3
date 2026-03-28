@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="12">
@@ -149,19 +150,19 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- 编辑时显示关联数据 tab -->
-    <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
-      <el-tab-pane label="产品清单" name="item">
-        <!-- TODO @芋艿：客户详情-产品清单 tab，依赖物料模块按客户查询 -->
-        <el-empty description="功能开发中，敬请期待" />
+    <!-- 编辑/详情时显示关联数据 tab -->
+    <el-tabs v-if="formType !== 'create' && formData.id" v-model="activeTab" class="mt-10px">
+      <el-tab-pane label="产品清单" name="productSalesLine" lazy>
+        <ClientProductSalesLineTab :clientId="formData.id" />
       </el-tab-pane>
-      <el-tab-pane label="销售记录" name="salesRecord">
-        <!-- TODO @芋艿：客户详情-销售记录 tab，依赖 WM 销售出库模块 -->
-        <el-empty description="功能开发中，敬请期待" />
+      <el-tab-pane label="销售记录" name="productSales" lazy>
+        <ClientProductSalesTab :clientId="formData.id" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -169,8 +170,11 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdClientApi, MdClientVO } from '@/api/mes/md/client'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { CommonStatusEnum } from '@/utils/constants'
-import { generateRandomStr } from '@/utils'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import ClientProductSalesLineTab from './ClientProductSalesLineTab.vue'
+import ClientProductSalesTab from './ClientProductSalesTab.vue'
 
 defineOptions({ name: 'MdClientForm' })
 
@@ -178,10 +182,18 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增客户',
+    update: '修改客户',
+    detail: '查看客户'
+  }
+  return titles[formType.value] || formType.value
+})
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const activeTab = ref('item') // 当前激活的 tab
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
+const activeTab = ref('productSalesLine') // 当前激活的 tab
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -238,18 +250,17 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 生成客户编码 */
-const generateCode = () => {
-  // TODO @芋艿：后续对接后端编码生成接口
-  formData.value.code = 'CL' + generateRandomStr(12)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.MD_CLIENT_CODE)
 }
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
+  activeTab.value = 'productSalesLine'
   resetForm()
-  // 修改时，设置数据
+  // 修改/详情时，设置数据
   if (id) {
     formLoading.value = true
     try {
