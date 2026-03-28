@@ -189,7 +189,7 @@ const currentItemOrProduct = computed(() => formData.value.itemOrProduct || '') 
 
 /** 生成物料编码 */
 const generateCode = async () => {
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.ITEM_CODE)
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.MD_ITEM_CODE)
 }
 
 /** 分类变更时，同步更新 itemOrProduct */

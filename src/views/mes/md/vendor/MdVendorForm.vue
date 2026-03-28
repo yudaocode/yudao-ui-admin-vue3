@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="12">
@@ -52,7 +53,11 @@
       <el-row>
         <el-col :span="24">
           <el-form-item label="供应商简介" prop="description">
-            <el-input v-model="formData.description" type="textarea" placeholder="请输入供应商简介" />
+            <el-input
+              v-model="formData.description"
+              type="textarea"
+              placeholder="请输入供应商简介"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -143,8 +148,8 @@
       </el-row>
       <el-row>
         <el-col :span="12">
-          <el-form-item label="供应商LOGO" prop="logo">
-            <el-input v-model="formData.logo" placeholder="请输入供应商LOGO地址" />
+          <el-form-item label="供应商 LOGO" prop="logo">
+            <el-input v-model="formData.logo" placeholder="请输入供应商 LOGO 地址" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -154,28 +159,31 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- 编辑时显示关联数据 tab -->
-    <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
-      <el-tab-pane label="供货记录" name="supplyRecord">
-        <!-- TODO @芋艿：供应商详情-供货记录 tab，依赖 WM 采购入库模块 -->
-        <el-empty description="功能开发中，敬请期待" />
+    <!-- 编辑/详情时显示关联数据 tab -->
+    <el-tabs v-if="formType !== 'create' && formData.id" v-model="activeTab" class="mt-10px">
+      <el-tab-pane label="供货记录" name="supplyRecord" lazy>
+        <VendorSupplyRecordTab :vendorId="formData.id" />
       </el-tab-pane>
-      <el-tab-pane label="退货记录" name="returnRecord">
-        <!-- TODO @芋艿：供应商详情-退货记录 tab，依赖 WM 供应商退货模块 -->
-        <el-empty description="功能开发中，敬请期待" />
+      <el-tab-pane label="退货记录" name="returnRecord" lazy>
+        <VendorReturnRecordTab :vendorId="formData.id" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
+        >确 定</el-button
+      >
+      <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdVendorApi, MdVendorVO } from '@/api/mes/md/vendor'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { CommonStatusEnum } from '@/utils/constants'
-import { generateRandomStr } from '@/utils'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import VendorSupplyRecordTab from './components/VendorSupplyRecordTab.vue'
+import VendorReturnRecordTab from './components/VendorReturnRecordTab.vue'
 
 defineOptions({ name: 'MdVendorForm' })
 
@@ -183,9 +191,17 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增供应商',
+    update: '修改供应商',
+    detail: '查看供应商'
+  }
+  return titles[formType.value] || formType.value
+})
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
 const activeTab = ref('supplyRecord') // 当前激活的 tab
 const formData = ref({
   id: undefined,
@@ -243,18 +259,17 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 生成供应商编码 */
-const generateCode = () => {
-  // TODO @芋艿：后续对接后端编码生成接口
-  formData.value.code = 'VD' + generateRandomStr(12)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.MD_VENDOR_CODE)
 }
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
+  activeTab.value = 'supplyRecord'
   resetForm()
-  // 修改时，设置数据
+  // 修改/详情时，设置数据
   if (id) {
     formLoading.value = true
     try {

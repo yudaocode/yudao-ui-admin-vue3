@@ -35,15 +35,14 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="供应商等级" prop="level">
-        <el-select v-model="queryParams.level" placeholder="请选择供应商等级" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_VENDOR_LEVEL)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+      <el-form-item label="英文名称" prop="englishName">
+        <el-input
+          v-model="queryParams.englishName"
+          placeholder="请输入英文名称"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
@@ -66,12 +65,7 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-        <el-button
-          type="warning"
-          plain
-          @click="handleImport"
-          v-hasPermi="['mes:md-vendor:import']"
-        >
+        <el-button type="warning" plain @click="handleImport" v-hasPermi="['mes:md-vendor:import']">
           <Icon icon="ep:upload" class="mr-5px" /> 导入
         </el-button>
         <el-button
@@ -90,7 +84,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="供应商编码" align="center" prop="code" width="120" />
+      <el-table-column label="供应商编码" align="center" prop="code" width="120">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="供应商名称" align="center" prop="name" min-width="180" />
       <el-table-column label="供应商简称" align="center" prop="nickname" width="100" />
       <el-table-column label="供应商等级" align="center" prop="level" width="120">
@@ -143,12 +143,11 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { MdVendorApi, MdVendorVO } from '@/api/mes/md/vendor'
 import MdVendorForm from './MdVendorForm.vue'
 import MdVendorImportForm from './MdVendorImportForm.vue'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'MesMdVendor' })
 
@@ -164,7 +163,7 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   nickname: undefined,
-  level: undefined,
+  englishName: undefined,
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单

@@ -204,8 +204,7 @@ const formRef = ref()
 
 /** 生成装箱单编号 */
 const generateCode = async () => {
-  // DONE @AI：看看 是不是在 mes constants 里。搞个枚举；【后面点弄】
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.PACKAGE_CODE)
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_PACKAGE_CODE)
 }
 
 /** 打开弹窗 */
