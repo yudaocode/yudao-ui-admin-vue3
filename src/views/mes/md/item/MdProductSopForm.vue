@@ -1,7 +1,14 @@
 <!-- MES 产品SOP 列表 -->
 <template>
   <div>
-    <el-button type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
+    <el-button
+      v-if="!isReadOnly"
+      type="primary"
+      plain
+      size="small"
+      @click="openForm('create')"
+      class="mb-10px"
+    >
       <Icon icon="ep:plus" class="mr-5px" /> 添加 SOP
     </el-button>
     <!-- SOP 卡片列表 -->
@@ -25,7 +32,7 @@
               {{ item.description }}
             </div>
             <!-- 操作按钮 -->
-            <div class="flex justify-end mt-8px">
+            <div v-if="!isReadOnly" class="flex justify-end mt-8px">
               <el-button link type="primary" size="small" @click="openForm('update', item)">
                 编辑
               </el-button>
@@ -97,8 +104,11 @@ import { createImageViewer } from '@/components/ImageViewer'
 defineOptions({ name: 'MdProductSopForm' })
 
 const props = defineProps<{
-  itemId: number // 物料产品编号
+  itemId: number
+  formType?: string
 }>()
+
+const isReadOnly = computed(() => props.formType === 'detail') // 是否只读
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -126,7 +136,7 @@ const handlePreview = (url?: string) => {
 // ==================== 新增/编辑 ====================
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const dialogFormType = ref('') // 表单的类型：create - 新增；update - 修改
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formRef = ref() // 表单 Ref
 const formData = ref({
@@ -148,7 +158,7 @@ const formRules = reactive({
 const openForm = (type: string, row?: MdProductSopVO) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
-  formType.value = type
+  dialogFormType.value = type
   resetForm()
   // 修改时，设置数据
   if (type === 'update' && row) {
@@ -190,7 +200,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as MdProductSopVO
-    if (formType.value === 'create') {
+    if (dialogFormType.value === 'create') {
       await MdProductSopApi.createProductSop(data)
       message.success(t('common.createSuccess'))
     } else {

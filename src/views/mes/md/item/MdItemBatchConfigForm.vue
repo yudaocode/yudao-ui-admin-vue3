@@ -1,8 +1,10 @@
 <!-- MES 物料批次属性配置 -->
 <template>
-  <el-form ref="formRef" :model="formData" v-loading="loading">
-    <div class="flex justify-end mb-10px">
-      <el-button type="primary" size="small" @click="handleSave" :loading="loading">保存批次属性</el-button>
+  <el-form ref="formRef" :model="formData" v-loading="loading" :disabled="isReadOnly">
+    <div v-if="!isReadOnly" class="flex justify-end mb-10px">
+      <el-button type="primary" size="small" @click="handleSave" :loading="loading">
+        保存批次属性
+      </el-button>
     </div>
     <div class="grid grid-cols-5 gap-x-20px">
       <!-- 通用属性（ITEM 和 PRODUCT 都可见） -->
@@ -39,14 +41,14 @@ import { MesItemOrProductEnum } from '@/views/mes/utils/constants'
 defineOptions({ name: 'MdItemBatchConfigForm' })
 
 const props = defineProps<{
-  itemId: number // 物料编号
-  itemOrProduct: string // 区分原材料/产品：'ITEM' | 'PRODUCT'
+  itemId: number
+  itemOrProduct: string
+  formType?: string
 }>()
 
 const message = useMessage() // 消息弹窗
 const loading = ref(false) // 加载中
 const formRef = ref() // 表单 Ref
-/** 表单数据 */
 const formData = ref<MdItemBatchConfigVO>({
   itemId: props.itemId,
   produceDateFlag: false,
@@ -63,7 +65,8 @@ const formData = ref<MdItemBatchConfigVO>({
   moldFlag: false,
   lotNumberFlag: false,
   qualityStatusFlag: false
-})
+}) // 表单数据
+const isReadOnly = computed(() => props.formType === 'detail') // 是否只读
 
 /** 加载已有配置 */
 const loadData = async () => {

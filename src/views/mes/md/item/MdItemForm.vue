@@ -7,13 +7,14 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="物料编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入物料编码">
               <template #append>
-                <el-button @click="generateCode" :disabled="formType === 'update'">
+                <el-button @click="generateCode" :disabled="isDetail || formType === 'update'">
                   生成
                 </el-button>
               </template>
@@ -97,27 +98,33 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- 底部 Tab：仅修改时展示 -->
-    <el-tabs v-model="activeTab" v-if="formType === 'update' && formData.id">
+    <!-- 底部 Tab：修改/详情时展示 -->
+    <el-tabs v-model="activeTab" v-if="formType !== 'create' && formData.id">
       <el-tab-pane label="BOM 组成" name="bom" lazy>
-        <MdProductBomForm :itemId="formData.id!" />
+        <MdProductBomForm :itemId="formData.id!" :formType="formType" />
       </el-tab-pane>
       <el-tab-pane label="批次属性" name="batch" lazy v-if="formData.batchFlag">
-        <MdItemBatchConfigForm :itemId="formData.id!" :itemOrProduct="currentItemOrProduct" />
+        <MdItemBatchConfigForm
+          :itemId="formData.id!"
+          :itemOrProduct="currentItemOrProduct"
+          :formType="formType"
+        />
       </el-tab-pane>
       <!-- TODO @芋艿：【对齐】替代品，目前没这个，可忽略 -->
       <el-tab-pane label="替代品" name="substitute" lazy>
         <el-empty description="替代品（待实现）" />
       </el-tab-pane>
       <el-tab-pane label="SIP" name="sip" lazy>
-        <MdProductSipForm :itemId="formData.id!" />
+        <MdProductSipForm :itemId="formData.id!" :formType="formType" />
       </el-tab-pane>
       <el-tab-pane label="SOP" name="sop" lazy>
-        <MdProductSopForm :itemId="formData.id!" />
+        <MdProductSopForm :itemId="formData.id!" :formType="formType" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -148,7 +155,8 @@ const dialogTitle = computed(() => {
   return '查看物料/产品'
 }) // 弹窗标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
 const activeTab = ref('bom') // 当前激活的 Tab
 const formData = ref({
   id: undefined,
