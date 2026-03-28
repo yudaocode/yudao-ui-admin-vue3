@@ -9,6 +9,7 @@
     >
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：增加一个生成逻辑 -->
           <el-form-item label="库区编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入库区编码" />
           </el-form-item>

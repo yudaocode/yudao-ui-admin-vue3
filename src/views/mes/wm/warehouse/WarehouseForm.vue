@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="860px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -9,6 +9,7 @@
     >
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：增加一个生成逻辑 -->
           <el-form-item label="仓库编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入仓库编码" />
           </el-form-item>
@@ -53,8 +54,6 @@
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="8">
           <el-form-item label="是否冻结" prop="frozen">
             <el-switch v-model="formData.frozen" />

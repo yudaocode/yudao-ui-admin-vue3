@@ -74,6 +74,7 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <!-- TODO @AI：增加详情的操作 -->
       <el-table-column label="库位编码" align="center" prop="code" min-width="120" />
       <el-table-column label="库位名称" align="center" prop="name" min-width="140" />
       <el-table-column label="面积（㎡）" align="center" prop="area" min-width="90" />
@@ -159,7 +160,12 @@ const route = useRoute()
 const loading = ref(true) // 列表的加载中
 const list = ref<WmWarehouseAreaVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
-const currentLocation = ref<{ id: number; name: string; warehouseId: number; warehouseName: string }>({
+const currentLocation = ref<{
+  id: number
+  name: string
+  warehouseId: number
+  warehouseName: string
+}>({
   id: 0,
   name: '',
   warehouseId: 0,
@@ -223,7 +229,12 @@ const resetQuery = () => {
 /** 添加/修改操作 */
 const formRef = ref() // 表单 Ref
 const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id, currentLocation.value.id || undefined, currentLocation.value.warehouseId || undefined)
+  formRef.value.open(
+    type,
+    id,
+    currentLocation.value.id || undefined,
+    currentLocation.value.warehouseId || undefined
+  )
 }
 
 /** 删除按钮操作 */
@@ -239,12 +250,7 @@ const handleDelete = async (id: number) => {
 /** 查看库位条码 */
 const barcodeDetailRef = ref()
 const handleBarcode = async (row: WmWarehouseAreaVO) => {
-  await barcodeDetailRef.value.openByBusiness(
-    row.id,
-    BarcodeBizTypeEnum.AREA,
-    row.code,
-    row.name
-  )
+  await barcodeDetailRef.value.openByBusiness(row.id, BarcodeBizTypeEnum.AREA, row.code, row.name)
 }
 
 /** 初始化 */
