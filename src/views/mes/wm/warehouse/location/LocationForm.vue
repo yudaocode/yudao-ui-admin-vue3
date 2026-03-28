@@ -50,8 +50,6 @@
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="8">
           <el-form-item label="是否冻结" prop="frozen">
             <el-switch v-model="formData.frozen" />
