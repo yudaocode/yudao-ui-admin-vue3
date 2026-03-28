@@ -96,6 +96,7 @@
             编辑
           </el-button>
           <el-button
+            v-if="scope.row.parentId !== 0"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
