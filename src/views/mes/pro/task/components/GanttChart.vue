@@ -55,24 +55,22 @@ const initGantt = () => {
   gantt.config.date_format = '%Y-%m-%d %H:%i:%s'
   gantt.config.duration_unit = 'hour' // 使用小时作为持续时间单位，配合 duration_step 实现工作日单位
   gantt.config.duration_step = 8 // 1 工作日 = 8 小时
-  gantt.config.row_height = 36 // KTG 无此配置（用 gantt 默认值 36），保留：显式声明更清晰
-  gantt.config.bar_height = 24 // KTG 无此配置（用 gantt 默认值），保留：让条更紧凑美观
-  gantt.config.fit_tasks = true // 时间范围自动适应。KTG 也有：fit_tasks = true
-  gantt.config.auto_scheduling = false // KTG 无此配置（gantt 默认就是 false），保留：显式关闭防意外
-  gantt.config.drag_links = false // 禁止拖动任务关系。KTG 也有：drag_links = false
-  gantt.config.details_on_create = true // 单击显示添加详情。KTG 也有：details_on_create = true
-  gantt.config.details_on_dblclick = true // 双击显示明细。KTG 也有：details_on_dblclick = true
-  gantt.config.show_progress = true // KTG 无显式设置，但 gantt 默认会渲染 progress。保留：确保进度条显示
-  gantt.config.open_tree_initially = true // 初始展开树结构。KTG 也有：open_tree_initially = true
-  gantt.config.auto_types = false // 禁止自动升级为 project。KTG 也有：auto_types = false
+  gantt.config.row_height = 36 // 显式声明更清晰
+  gantt.config.bar_height = 24 // 让条更紧凑美观
+  gantt.config.fit_tasks = true // 时间范围自动适应
+  gantt.config.auto_scheduling = false // 显式关闭防意外
+  gantt.config.drag_links = false // 禁止拖动任务关系
+  gantt.config.details_on_create = true // 单击显示添加详情
+  gantt.config.details_on_dblclick = true // 双击显示明细
+  gantt.config.show_progress = true // 确保进度条显示
+  gantt.config.open_tree_initially = true // 初始展开树结构
+  gantt.config.auto_types = false // 禁止自动升级为 project
   gantt.config.drag_move = !props.readonly // 编辑态允许直接拖动任务
   gantt.config.drag_resize = !props.readonly // 编辑态允许直接调整任务持续时间
   gantt.config.drag_progress = false // 禁止拖动进度条
 
   // lightbox 弹窗配置：只保留时间编辑，去掉描述编辑和删除按钮
-  gantt.config.lightbox.sections = [
-    { name: 'time', type: 'duration', map_to: 'auto' }
-  ]
+  gantt.config.lightbox.sections = [{ name: 'time', type: 'duration', map_to: 'auto' }]
   gantt.config.buttons_left = ['gantt_save_btn']
   gantt.config.buttons_right = ['gantt_cancel_btn']
 
@@ -139,7 +137,7 @@ const initGantt = () => {
     return ''
   }
   gantt.templates.timeline_cell_class = () => '' // 防止 gantt 添加默认样式类
-  gantt.templates.task_row_class = () => '' // KTG 无此配置。保留：防止 gantt 添加默认样式类
+  gantt.templates.task_row_class = () => '' // 防止 gantt 添加默认样式类
 
   // 编辑事件监听（通过 lightbox 弹窗编辑后触发）
   if (!props.readonly) {

@@ -1,4 +1,4 @@
-<!-- MES 物料分类选择器：树形下拉，只允许选择叶节点（对齐 KTG disable-branch-nodes） -->
+<!-- MES 物料分类选择器：树形下拉，只允许选择叶节点 -->
 <template>
   <el-tree-select
     v-model="selectValue"
@@ -50,7 +50,7 @@ const handleChange = (val: number | undefined) => {
   emit('change', item)
 }
 
-/** 递归将有子节点的分支节点标记为 disabled，对齐 KTG 的 disable-branch-nodes */
+/** 递归将有子节点的分支节点标记为 disabled */
 const markParentsDisabled = (nodes: any[]): any[] => {
   return nodes.map((node) => {
     if (node.children?.length) {
