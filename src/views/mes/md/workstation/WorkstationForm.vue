@@ -38,15 +38,27 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="线边库" prop="warehouseId">
+          <el-form-item label="所属工序" prop="processId">
+            <ProProcessSelect
+              v-model="formData.processId"
+              placeholder="请选择所属工序"
+              clearable
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="仓库" prop="warehouseId">
             <WmWarehouseSelect
               v-model="formData.warehouseId"
-              placeholder="请选择线边库"
+              placeholder="请选择仓库"
               clearable
               @change="handleWarehouseSelectChange"
             />
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="8">
           <el-form-item label="库区" prop="locationId">
             <el-select
@@ -66,8 +78,6 @@
             </el-select>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="8">
           <el-form-item label="库位" prop="areaId">
             <el-select
@@ -97,16 +107,6 @@
                 {{ dict.label }}
               </el-radio>
             </el-radio-group>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="所属工序" prop="processId">
-            <ProProcessSelect
-              v-model="formData.processId"
-              placeholder="请选择所属工序"
-              clearable
-              class="!w-1/1"
-            />
           </el-form-item>
         </el-col>
       </el-row>

@@ -35,10 +35,9 @@
         v-loading="formLoading"
       >
         <el-form-item label="设备" prop="machineryId">
-          <!-- TODO @芋艿：对接设备下拉列表，等 DV 设备模块完成后对接 -->
-          <el-input-number
+          <DvMachinerySelect
             v-model="formData.machineryId"
-            placeholder="请输入设备编号"
+            placeholder="请选择设备"
             class="!w-1/1"
           />
         </el-form-item>
@@ -64,6 +63,7 @@
 
 <script setup lang="ts">
 import { MdWorkstationMachineApi, MdWorkstationMachineVO } from '@/api/mes/md/workstation/machine'
+import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 
 defineOptions({ name: 'WorkstationMachineList' })
 

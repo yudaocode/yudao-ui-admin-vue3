@@ -36,10 +36,9 @@
         v-loading="formLoading"
       >
         <el-form-item label="工具类型" prop="toolTypeId">
-          <!-- TODO @芋艿：对接工具类型下拉列表，等 TM 工具模块完成后对接 -->
-          <el-input-number
+          <TmToolTypeSelect
             v-model="formData.toolTypeId"
-            placeholder="请输入工具类型编号"
+            placeholder="请选择工具类型"
             class="!w-1/1"
             :disabled="dialogFormType === 'update'"
           />
@@ -66,6 +65,7 @@
 
 <script setup lang="ts">
 import { MdWorkstationToolApi, MdWorkstationToolVO } from '@/api/mes/md/workstation/tool'
+import TmToolTypeSelect from '@/views/mes/tm/tool/components/TmToolTypeSelect.vue'
 
 defineOptions({ name: 'WorkstationToolList' })
 
