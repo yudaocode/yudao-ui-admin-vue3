@@ -13,7 +13,7 @@
           <el-form-item label="流转卡编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入流转卡编码" :disabled="isDetail">
               <template #append>
-                <el-button @click="generateCode" :disabled="formType === 'update' || isDetail">
+                <el-button @click="generateCode">
                   生成
                 </el-button>
               </template>

@@ -17,7 +17,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode" :disabled="formType !== 'create'">
+                <el-button @click="generateCode">
                   生成
                 </el-button>
               </template>

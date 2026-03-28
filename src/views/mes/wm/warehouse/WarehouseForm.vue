@@ -13,7 +13,7 @@
           <el-form-item label="仓库编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入仓库编码">
               <template #append>
-                <el-button @click="generateCode" :disabled="formType === 'update'">
+                <el-button @click="generateCode">
                   生成
                 </el-button>
               </template>
