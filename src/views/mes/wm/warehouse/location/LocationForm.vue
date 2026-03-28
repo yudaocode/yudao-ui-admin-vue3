@@ -65,10 +65,46 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <!-- 编辑模式下，显示混放规则批量设置按钮 -->
+      <template v-if="formType === 'update'">
+        <el-divider content-position="left">库位混放规则（批量设置）</el-divider>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="产品混放">
+              <el-tooltip content="设置此库区下所有库位允许产品混放" placement="top">
+                <el-button type="primary" plain size="small" @click="setProductMixing(true)">
+                  允许
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="设置此库区下所有库位不允许产品混放" placement="top">
+                <el-button type="danger" plain size="small" @click="setProductMixing(false)">
+                  不允许
+                </el-button>
+              </el-tooltip>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="批次混放">
+              <el-tooltip content="设置此库区下所有库位允许批次混放" placement="top">
+                <el-button type="primary" plain size="small" @click="setBatchMixing(true)">
+                  允许
+                </el-button>
+              </el-tooltip>
+              <el-tooltip content="设置此库区下所有库位不允许批次混放" placement="top">
+                <el-button type="danger" plain size="small" @click="setBatchMixing(false)">
+                  不允许
+                </el-button>
+              </el-tooltip>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </template>
     </el-form>
     <template #footer>
       <!-- TODO @芋艿：barcodeimg -->
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
+        >确 定</el-button
+      >
       <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>
@@ -99,11 +135,6 @@ const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
 const warehouseList = ref<WmWarehouseVO[]>([]) // 仓库列表
-
-/** 生成库区编码 */
-const generateCode = async () => {
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_LOCATION_CODE)
-}
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -121,6 +152,13 @@ const formRules = reactive({
   frozen: [{ required: true, message: '是否冻结不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+
+/** 生成库区编码 */
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_LOCATION_CODE
+  )
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number, defaultWarehouseId?: number) => {
@@ -182,5 +220,27 @@ const resetForm = () => {
     remark: undefined
   }
   formRef.value?.resetFields()
+}
+
+/** 设置产品混放规则 */
+const setProductMixing = async (allow: boolean) => {
+  try {
+    await ElMessageBox.confirm('确认要重置库区下所有库位的产品混放规则吗？', '提示', {
+      type: 'warning'
+    })
+    await WmWarehouseLocationApi.updateAreaByLocationId(formData.value.id!, allow, undefined)
+    message.success('设置成功')
+  } catch {}
+}
+
+/** 设置批次混放规则 */
+const setBatchMixing = async (allow: boolean) => {
+  try {
+    await ElMessageBox.confirm('确认要重置库区下所有库位的批次混放规则吗？', '提示', {
+      type: 'warning'
+    })
+    await WmWarehouseLocationApi.updateAreaByLocationId(formData.value.id!, undefined, allow)
+    message.success('设置成功')
+  } catch {}
 }
 </script>

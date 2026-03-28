@@ -45,4 +45,12 @@ export const WmWarehouseLocationApi = {
   deleteWarehouseLocation: async (id: number) => {
     return await request.delete({ url: '/mes/wm/warehouse-location/delete?id=' + id })
   },
+
+  // 批量设置库区下所有库位的混放规则
+  updateAreaByLocationId: async (locationId: number, allowItemMixing?: boolean, allowBatchMixing?: boolean) => {
+    return await request.put({
+      url: '/mes/wm/warehouse-location/update-by-location-id',
+      params: { locationId, allowItemMixing, allowBatchMixing }
+    })
+  },
 }
