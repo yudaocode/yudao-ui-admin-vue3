@@ -69,9 +69,8 @@
             class="!w-1/1"
           />
         </el-form-item>
-        <!-- TODO @芋艿：所属工序，等工序模块完成后改为下拉选择 -->
         <el-form-item label="所属工序" prop="processId">
-          <el-input v-model="formData.processId" placeholder="请输入工序编号" />
+          <ProProcessSelect v-model="formData.processId" />
         </el-form-item>
         <el-form-item label="内容说明" prop="description">
           <el-input
@@ -100,6 +99,7 @@
 import { MdProductSopApi, MdProductSopVO } from '@/api/mes/md/item/productSop'
 import { UploadImg } from '@/components/UploadFile'
 import { createImageViewer } from '@/components/ImageViewer'
+import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
 
 defineOptions({ name: 'MdProductSopForm' })
 
