@@ -16,7 +16,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode">
+                <el-button @click="generateCode" :disabled="isHeaderReadonly">
                   生成
                 </el-button>
               </template>
@@ -116,10 +116,11 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { WmReturnVendorApi, WmReturnVendorVO } from '@/api/mes/wm/returnvendor'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import ReturnVendorLineList from './ReturnVendorLineList.vue'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ReturnVendorForm' })
 
@@ -163,8 +164,10 @@ const dialogTitle = computed(() => {
 })
 
 /** 生成退货单编号 */
-const generateCode = () => {
-  formData.value.code = 'RV' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_RETURN_VENDOR_CODE
+  )
 }
 
 /** 打开弹窗 */
