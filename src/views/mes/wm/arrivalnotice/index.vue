@@ -212,7 +212,7 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 删除 */
+/** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
@@ -222,7 +222,7 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 导出 */
+/** 导出按钮操作 */
 const handleExport = async () => {
   try {
     await message.exportConfirm()

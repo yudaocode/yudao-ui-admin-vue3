@@ -207,7 +207,7 @@ const getList = async () => {
   }
 }
 
-/** 删除 */
+/** 删除按钮操作 */
 const handleDelete = async (row: StockTakingPlanParamVO) => {
   try {
     await message.delConfirm()

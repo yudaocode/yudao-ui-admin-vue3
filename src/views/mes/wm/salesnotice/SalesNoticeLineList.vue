@@ -123,7 +123,7 @@ const getList = async () => {
   }
 }
 
-/** 删除 */
+/** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()

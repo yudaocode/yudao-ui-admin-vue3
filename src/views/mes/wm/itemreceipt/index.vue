@@ -217,7 +217,7 @@ const openForm = (type: string, id?: number) => {
 
 
 
-/** 取消 */
+/** 取消按钮操作 */
 const handleCancel = async (id: number) => {
   try {
     await message.confirm('确认取消该采购入库单？取消后不可恢复。')
@@ -227,7 +227,7 @@ const handleCancel = async (id: number) => {
   } catch {}
 }
 
-/** 删除 */
+/** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
@@ -237,7 +237,7 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 导出 */
+/** 导出按钮操作 */
 const handleExport = async () => {
   try {
     await message.exportConfirm()
