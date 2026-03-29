@@ -150,7 +150,7 @@ const handleDelete = async (id: number) => {
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型
+const dialogFormType = ref('') // 表单的类型
 const itemList = ref<any[]>([]) // 物料列表
 const formData = ref({
   id: undefined,
@@ -174,7 +174,7 @@ const formRef = ref() // 表单 Ref
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
-  formType.value = type
+  dialogFormType.value = type
   resetForm()
   itemList.value = await MdItemApi.getItemSimpleList()
   if (id) {
@@ -193,7 +193,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = { ...formData.value, noticeId: props.noticeId } as unknown as WmArrivalNoticeLineVO
-    if (formType.value === 'create') {
+    if (dialogFormType.value === 'create') {
       await WmArrivalNoticeLineApi.createArrivalNoticeLine(data)
       message.success(t('common.createSuccess'))
     } else {
