@@ -65,7 +65,13 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="入库单编号" align="center" prop="code" min-width="160" />
+      <el-table-column label="入库单编号" align="center" prop="code" min-width="160">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="120" />
       <el-table-column
