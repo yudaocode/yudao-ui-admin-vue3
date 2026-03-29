@@ -25,7 +25,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @芋艿：【待确认，先忽略】这里的字段映射 -->
       <el-form-item label="采购订单编号" prop="purchaseOrderCode">
         <el-input
           v-model="queryParams.purchaseOrderCode"
@@ -36,19 +35,7 @@
         />
       </el-form-item>
       <el-form-item label="供应商" prop="vendorId">
-        <el-select
-          v-model="queryParams.vendorId"
-          placeholder="请选择供应商"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="vendor in vendorList"
-            :key="vendor.id"
-            :label="vendor.name"
-            :value="vendor.id"
-          />
-        </el-select>
+        <MdVendorSelect v-model="queryParams.vendorId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="到货日期" prop="arrivalDate">
         <el-date-picker
@@ -61,21 +48,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="单据状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择单据状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_ARRIVAL_NOTICE_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
+
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -104,9 +77,9 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="通知单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
-          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
             {{ scope.row.code }}
-          </el-link>
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column label="通知单名称" align="center" prop="name" min-width="150" />
@@ -131,7 +104,7 @@
           <dict-tag :type="DICT_TYPE.MES_WM_ARRIVAL_NOTICE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="220" fixed="right">
+      <el-table-column label="操作" align="center" width="160" fixed="right">
         <template #default="scope">
           <el-button
             link
@@ -144,15 +117,6 @@
           </el-button>
           <el-button
             link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-arrival-notice:update']"
-            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-arrival-notice:delete']"
@@ -160,6 +124,7 @@
           >
             删除
           </el-button>
+          <!-- TODO @AI：【待入库】后，需要前往哪里操作？是不是得有个提示给用户 -->
         </template>
       </el-table-column>
     </el-table>
@@ -176,10 +141,10 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmArrivalNoticeApi, WmArrivalNoticeVO } from '@/api/mes/wm/arrivalnotice'
-import { MdVendorApi } from '@/api/mes/md/vendor'
+import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import ArrivalNoticeForm from './ArrivalNoticeForm.vue'
 import { MesWmArrivalNoticeStatusEnum } from '@/views/mes/utils/constants'
 
@@ -192,7 +157,6 @@ const loading = ref(true) // 列表的加载中
 const list = ref<WmArrivalNoticeVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const exportLoading = ref(false) // 导出的加载中
-const vendorList = ref<any[]>([]) // 供应商列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -200,8 +164,7 @@ const queryParams = reactive({
   name: undefined,
   purchaseOrderCode: undefined,
   vendorId: undefined,
-  arrivalDate: undefined,
-  status: undefined
+  arrivalDate: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -235,16 +198,6 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该到货通知单？')
-    await WmArrivalNoticeApi.submitArrivalNotice(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
 /** 删除 */
 const handleDelete = async (id: number) => {
   try {
@@ -269,8 +222,7 @@ const handleExport = async () => {
 }
 
 /** 初始化 */
-onMounted(async () => {
-  vendorList.value = await MdVendorApi.getVendorSimpleList()
-  await getList()
+onMounted(() => {
+  getList()
 })
 </script>

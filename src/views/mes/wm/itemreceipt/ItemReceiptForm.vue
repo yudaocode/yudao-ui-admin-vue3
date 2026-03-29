@@ -213,6 +213,7 @@ const submitForm = async () => {
     if (formType.value === 'create') {
       const res = await WmItemReceiptApi.createItemReceipt(data)
       message.success('新增成功')
+      // 创建成功后，更新表单数据和状态为编辑模式
       formData.value.id = res
       formData.value.status = MesWmItemReceiptStatusEnum.PREPARE
       formType.value = 'update'

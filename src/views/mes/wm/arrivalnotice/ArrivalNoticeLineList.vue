@@ -16,6 +16,7 @@
         </template>
       </el-table-column>
       <el-table-column label="合格数量" align="center" prop="qualifiedQuantity" width="100" />
+      <!-- TODO @AI：是不是按需读取下； -->
       <el-table-column label="检验单号" align="center" prop="iqcCode" min-width="140" />
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
       <el-table-column v-if="isEditable" label="操作" align="center" width="120">
@@ -34,6 +35,7 @@
   </div>
 
   <!-- 添加/编辑行弹窗 -->
+  <!-- TODO @AI：一行 3 个 -->
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="700px">
     <el-form
       ref="formRef"
@@ -45,6 +47,7 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="物料" prop="itemId">
+            <!-- TODO @AI：换成选择器 -->
             <el-select
               v-model="formData.itemId"
               placeholder="请选择物料"
@@ -73,7 +76,6 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- DONE @AI：已移除合格数量字段，该字段由 IQC 回调自动设置 -->
       <el-row>
         <el-col :span="12">
           <el-form-item label="是否检验" prop="iqcCheckFlag">
