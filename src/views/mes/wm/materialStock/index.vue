@@ -77,7 +77,8 @@
           <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
           <el-table-column label="在库数量" align="center" prop="quantity" min-width="100" />
           <el-table-column label="单位" align="center" prop="unitMeasureName" min-width="80" />
-          <!-- TODO @芋艿：批次号，待 mes_wm_batch 模块迁移后补充 -->
+          <!-- TODO @AI：对齐 ktg，这里应该有个【批次详情】 -->
+          <el-table-column label="批次号" align="center" prop="batchCode" min-width="140" />
           <el-table-column label="仓库" align="center" prop="warehouseName" min-width="100" />
           <el-table-column label="库区" align="center" prop="locationName" min-width="100" />
           <el-table-column label="库位" align="center" prop="areaName" min-width="100">

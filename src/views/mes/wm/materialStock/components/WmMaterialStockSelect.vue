@@ -11,13 +11,7 @@
         />
       </el-form-item>
       <el-form-item label="仓库">
-        <el-input
-          v-model="queryParams.warehouseName"
-          placeholder="请输入仓库名称"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-200px"
-        />
+        <WmWarehouseSelect v-model="queryParams.warehouseId" class="!w-200px" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="handleQuery">
@@ -39,7 +33,13 @@
       <el-table-column label="库区" prop="locationName" width="150" />
       <el-table-column label="库位" prop="areaName" width="150" />
       <el-table-column label="可用数量" prop="quantity" width="120" />
-      <el-table-column label="冻结数量" prop="quantityFrozen" width="120" />
+      <el-table-column label="是否冻结" prop="frozen" width="100">
+        <template #default="scope">
+          <el-tag :type="scope.row.frozen ? 'danger' : 'success'">
+            {{ scope.row.frozen ? '是' : '否' }}
+          </el-tag>
+        </template>
+      </el-table-column>
     </el-table>
 
     <Pagination
@@ -59,6 +59,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { WmMaterialStockApi } from '@/api/mes/wm/materialstock'
+import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 
 defineOptions({ name: 'WmMaterialStockSelect' })
 
@@ -76,7 +77,7 @@ const queryParams = reactive({
   pageSize: 10,
   itemId: undefined,
   batchCode: undefined,
-  warehouseName: undefined
+  warehouseId: undefined
 })
 
 const open = (itemId?: number) => {
@@ -110,7 +111,7 @@ const handleQuery = () => {
 
 const resetQuery = () => {
   queryParams.batchCode = undefined
-  queryParams.warehouseName = undefined
+  queryParams.warehouseId = undefined
   queryParams.itemId = currentItemId.value
   handleQuery()
 }
@@ -123,19 +124,7 @@ const handleConfirm = () => {
   if (!selectedRow.value) {
     return
   }
-  // TODO @芋艿：暂时不用提供 warehouseName、locationName、areaName 这种；
-  emit('select', {
-    materialStockId: selectedRow.value.id,
-    batchId: selectedRow.value.batchId,
-    batchCode: selectedRow.value.batchCode,
-    warehouseId: selectedRow.value.warehouseId,
-    warehouseName: selectedRow.value.warehouseName,
-    locationId: selectedRow.value.locationId,
-    locationName: selectedRow.value.locationName,
-    areaId: selectedRow.value.areaId,
-    areaName: selectedRow.value.areaName,
-    availableQuantity: selectedRow.value.quantity
-  })
+  emit('select', selectedRow.value)
   handleClose()
 }
 
