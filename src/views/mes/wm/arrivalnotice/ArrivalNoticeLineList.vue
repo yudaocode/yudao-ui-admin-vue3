@@ -16,7 +16,6 @@
         </template>
       </el-table-column>
       <el-table-column label="合格数量" align="center" prop="qualifiedQuantity" width="100" />
-      <!-- TODO @AI：是不是按需读取下； -->
       <el-table-column label="检验单号" align="center" prop="iqcCode" min-width="140" />
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
       <el-table-column v-if="isEditable" label="操作" align="center" width="120">
@@ -35,8 +34,7 @@
   </div>
 
   <!-- 添加/编辑行弹窗 -->
-  <!-- TODO @AI：一行 3 个 -->
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="700px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -45,26 +43,16 @@
       v-loading="formLoading"
     >
       <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="物料" prop="itemId">
-            <!-- TODO @AI：换成选择器 -->
-            <el-select
+            <MdItemSelect
               v-model="formData.itemId"
               placeholder="请选择物料"
-              filterable
-              clearable
               class="!w-1/1"
-            >
-              <el-option
-                v-for="item in itemList"
-                :key="item.id"
-                :label="`${item.code} - ${item.name}`"
-                :value="item.id"
-              />
-            </el-select>
+            />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="到货数量" prop="arrivalQuantity">
             <el-input-number
               v-model="formData.arrivalQuantity"
@@ -75,9 +63,7 @@
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="是否检验" prop="iqcCheckFlag">
             <el-switch v-model="formData.iqcCheckFlag" />
           </el-form-item>
@@ -101,7 +87,7 @@
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { WmArrivalNoticeLineApi, WmArrivalNoticeLineVO } from '@/api/mes/wm/arrivalnotice/line'
-import { MdItemApi } from '@/api/mes/md/item'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 
 defineOptions({ name: 'ArrivalNoticeLineList' })
 
@@ -110,10 +96,10 @@ const props = defineProps<{
   formType?: string
 }>()
 
-const isEditable = computed(() => ['create', 'update'].includes(props.formType || ''))
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
+const isEditable = computed(() => ['create', 'update'].includes(props.formType || ''))
 
 // ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
@@ -152,8 +138,7 @@ const handleDelete = async (id: number) => {
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const dialogFormType = ref('') // 表单的类型
-const itemList = ref<any[]>([]) // 物料列表
+const lineFormType = ref('') // 行表单的类型
 const formData = ref({
   id: undefined,
   noticeId: undefined as number | undefined,
@@ -175,10 +160,9 @@ const formRef = ref() // 表单 Ref
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
-  dialogFormType.value = type
+  dialogTitle.value = type === 'create' ? '添加到货通知单行' : '修改到货通知单行'
+  lineFormType.value = type
   resetForm()
-  itemList.value = await MdItemApi.getItemSimpleList()
   if (id) {
     formLoading.value = true
     try {
@@ -194,8 +178,11 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = { ...formData.value, noticeId: props.noticeId } as unknown as WmArrivalNoticeLineVO
-    if (dialogFormType.value === 'create') {
+    const data = {
+      ...formData.value,
+      noticeId: props.noticeId
+    } as unknown as WmArrivalNoticeLineVO
+    if (lineFormType.value === 'create') {
       await WmArrivalNoticeLineApi.createArrivalNoticeLine(data)
       message.success(t('common.createSuccess'))
     } else {

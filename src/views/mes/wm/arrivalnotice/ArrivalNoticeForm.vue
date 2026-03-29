@@ -116,11 +116,14 @@
 </template>
 
 <script setup lang="ts">
-import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
-import { MesAutoCodeRuleCode, MesWmArrivalNoticeStatusEnum } from '@/views/mes/utils/constants'
 import { WmArrivalNoticeApi, WmArrivalNoticeVO } from '@/api/mes/wm/arrivalnotice'
-import ArrivalNoticeLineList from './ArrivalNoticeLineList.vue'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
+import ArrivalNoticeLineList from './ArrivalNoticeLineList.vue'
+import {
+  MesAutoCodeRuleCode,
+  MesWmArrivalNoticeStatusEnum
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ArrivalNoticeForm' })
 const emit = defineEmits(['success'])
@@ -153,7 +156,6 @@ const formData = ref({
   contactTelephone: undefined,
   remark: undefined
 })
-const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 const formRules = reactive({
   code: [{ required: true, message: '通知单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '通知单名称不能为空', trigger: 'blur' }],
@@ -161,6 +163,7 @@ const formRules = reactive({
   arrivalDate: [{ required: true, message: '请选择到货日期', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成通知单编号 */
 const generateCode = async () => {

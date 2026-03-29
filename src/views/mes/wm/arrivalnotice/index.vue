@@ -48,7 +48,6 @@
           class="!w-240px"
         />
       </el-form-item>
-
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -124,7 +123,22 @@
           >
             删除
           </el-button>
-          <!-- TODO @AI：【待入库】后，需要前往哪里操作？是不是得有个提示给用户 -->
+          <el-button
+            link
+            type="warning"
+            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PENDING_QC"
+            @click="message.alert('请前往【质量管理 - 待检任务】中进行来料检验操作')"
+          >
+            执行质检
+          </el-button>
+          <el-button
+            link
+            type="success"
+            v-if="scope.row.status === MesWmArrivalNoticeStatusEnum.PENDING_RECEIPT"
+            @click="message.alert('请前往【仓库管理 - 采购入库】中进行入库操作')"
+          >
+            执行入库
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -167,6 +181,7 @@ const queryParams = reactive({
   arrivalDate: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -180,20 +195,19 @@ const getList = async () => {
   }
 }
 
-/** 搜索 */
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
-/** 重置 */
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
-/** 新增/修改/详情 */
-const formRef = ref() // 表单弹窗
+/** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
