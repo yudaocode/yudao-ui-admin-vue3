@@ -73,6 +73,7 @@
         </template>
       </el-table-column>
       <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
+      <el-table-column label="采购订单号" align="center" prop="purchaseOrderCode" min-width="140" />
       <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="120" />
       <el-table-column
         label="入库日期"
@@ -100,15 +101,6 @@
           </el-button>
           <el-button
             link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-item-receipt:update']"
-            v-if="scope.row.status === MesWmItemReceiptStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-item-receipt:delete']"
@@ -125,16 +117,6 @@
             v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVING"
           >
             执行上架
-          </el-button>
-          <!-- 待入库：执行入库、取消 -->
-          <el-button
-            link
-            type="primary"
-            @click="handleFinish(scope.row.id)"
-            v-hasPermi="['mes:wm-item-receipt:finish']"
-            v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVED"
-          >
-            执行入库
           </el-button>
           <el-button
             link
@@ -221,25 +203,9 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交按钮操作 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该采购入库单？')
-    await WmItemReceiptApi.submitItemReceipt(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
 
-/** 执行入库 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认执行入库？执行后将更新库存台账。')
-    await WmItemReceiptApi.finishItemReceipt(id)
-    message.success('入库成功')
-    await getList()
-  } catch {}
-}
+
+
 
 /** 取消 */
 const handleCancel = async (id: number) => {
