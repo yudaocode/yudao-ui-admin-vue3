@@ -7,12 +7,13 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="12">
           <el-form-item label="工具编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入工具编码">
-              <template #append>
+            <el-input v-model="formData.code" placeholder="请输入工具编码" :disabled="formType !== 'create'">
+              <template v-if="formType === 'create'" #append>
                 <el-button @click="generateCode">
                   生成
                 </el-button>
@@ -55,17 +56,18 @@
               :min="1"
               :disabled="selectedToolType?.codeFlag === true"
               class="!w-1/1"
+              @change="handleQuantityChange"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="可用数量" prop="quantityAvailable">
-            <el-input-number v-model="formData.quantityAvailable" :min="0" class="!w-1/1" />
+          <el-form-item label="可用数量" prop="availableQuantity">
+            <el-input-number v-model="formData.availableQuantity" :min="0" disabled class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
-            <el-select v-model="formData.status" placeholder="请选择状态" class="!w-1/1">
+            <el-select v-model="formData.status" placeholder="请选择状态" disabled class="!w-1/1">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_TM_TOOL_STATUS)"
                 :key="dict.value"
@@ -124,9 +126,9 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- TODO @芋艿：这里要有个 barcodeimg，后续在搞 -->
+    <!-- TODO @AI：条码相关，先忽略，后续加 -->
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -135,9 +137,9 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { TmToolApi, TmToolVO } from '@/api/mes/tm/tool'
 import { TmToolTypeVO } from '@/api/mes/tm/tool/type'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import TmToolTypeSelect from '@/views/mes/tm/tool/components/TmToolTypeSelect.vue'
-import { MesToolStatusEnum, MesMaintenTypeEnum } from '@/views/mes/utils/constants'
-import { generateRandomStr } from '@/utils'
+import { MesToolStatusEnum, MesMaintenTypeEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ToolForm' })
 
@@ -145,9 +147,17 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增工具',
+    update: '修改工具',
+    detail: '查看工具'
+  }
+  return titles[formType.value] || formType.value
+})
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -156,7 +166,7 @@ const formData = ref({
   spec: undefined,
   toolTypeId: undefined,
   quantity: 1,
-  quantityAvailable: 1,
+  availableQuantity: 1,
   maintenType: undefined,
   nextMaintenPeriod: undefined,
   nextMaintenDate: undefined,
@@ -164,10 +174,10 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
+  code: [{ required: true, message: '工具编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '工具名称不能为空', trigger: 'blur' }],
   toolTypeId: [{ required: true, message: '工具类型不能为空', trigger: 'change' }],
-  quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
+  quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const selectedToolType = ref<TmToolTypeVO>() // 当前选中的工具类型
@@ -175,10 +185,9 @@ const selectedToolType = ref<TmToolTypeVO>() // 当前选中的工具类型
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  // 修改时，设置数据
+  // 修改/详情时，设置数据
   if (id) {
     formLoading.value = true
     try {
@@ -191,9 +200,15 @@ const open = async (type: string, id?: number) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 生成工具编码 */
-const generateCode = () => {
-  // TODO @芋艿：后续对接后端编码生成接口
-  formData.value.code = 'TL' + generateRandomStr(12)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.TM_TOOL_CODE)
+}
+
+/** 库存数量变更：新增时联动同步可用数量 */
+const handleQuantityChange = (val: number) => {
+  if (formType.value === 'create') {
+    formData.value.availableQuantity = val
+  }
 }
 
 /** 工具类型变更 */
@@ -202,7 +217,7 @@ const handleToolTypeChange = (item: TmToolTypeVO | undefined) => {
   // 如果是编码管理，数量锁定为 1
   if (item?.codeFlag === true) {
     formData.value.quantity = 1
-    formData.value.quantityAvailable = 1
+    formData.value.availableQuantity = 1
   }
 }
 
@@ -240,7 +255,7 @@ const resetForm = () => {
     spec: undefined,
     toolTypeId: undefined,
     quantity: 1,
-    quantityAvailable: 1,
+    availableQuantity: 1,
     maintenType: undefined,
     nextMaintenPeriod: undefined,
     nextMaintenDate: undefined,

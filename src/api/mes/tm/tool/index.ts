@@ -10,7 +10,7 @@ export interface TmToolVO {
   toolTypeId: number // 工具类型编号
   toolTypeName: string // 工具类型名称
   quantity: number // 数量
-  quantityAvailable: number // 可用数量
+  availableQuantity: number // 可用数量
   maintenType: number // 保养维护类型
   nextMaintenPeriod: number // 下次保养周期（次数）
   nextMaintenDate: Date // 下次保养日期
