@@ -1,132 +1,99 @@
+<!-- MES 库存选择器：一次加载，前端过滤（支持按 itemId 检索） -->
 <template>
-  <el-dialog v-model="dialogVisible" title="选择库存" width="1200px" @close="handleClose">
-    <el-form :inline="true" :model="queryParams" class="mb-10px">
-      <el-form-item label="批次号">
-        <el-input
-          v-model="queryParams.batchCode"
-          placeholder="请输入批次号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-200px"
-        />
-      </el-form-item>
-      <el-form-item label="仓库">
-        <WmWarehouseSelect v-model="queryParams.warehouseId" class="!w-200px" />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" /> 搜索
-        </el-button>
-        <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" /> 重置 </el-button>
-      </el-form-item>
-    </el-form>
-
-    <el-table
-      v-loading="loading"
-      :data="list"
-      @row-click="handleRowClick"
-      highlight-current-row
-      max-height="400px"
+  <el-select
+    v-model="selectValue"
+    :placeholder="placeholder"
+    :disabled="disabled"
+    :clearable="clearable"
+    filterable
+    :filter-method="handleFilter"
+    class="!w-1/1"
+    @change="handleChange"
+  >
+    <el-option
+      v-for="item in filteredList"
+      :key="item.id"
+      :label="`${item.warehouseName} / ${item.batchCode || '-'} / 数量:${item.quantity}`"
+      :value="item.id"
     >
-      <el-table-column label="批次号" prop="batchCode" width="150" />
-      <el-table-column label="仓库" prop="warehouseName" width="150" />
-      <el-table-column label="库区" prop="locationName" width="150" />
-      <el-table-column label="库位" prop="areaName" width="150" />
-      <el-table-column label="可用数量" prop="quantity" width="120" />
-      <el-table-column label="是否冻结" prop="frozen" width="100">
-        <template #default="scope">
-          <el-tag :type="scope.row.frozen ? 'danger' : 'success'">
-            {{ scope.row.frozen ? '是' : '否' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <Pagination
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      :total="total"
-      @pagination="getList"
-    />
-
-    <template #footer>
-      <el-button @click="handleClose">取消</el-button>
-      <el-button type="primary" @click="handleConfirm">确定</el-button>
-    </template>
-  </el-dialog>
+      <div class="flex items-center gap-8px">
+        <span>{{ item.warehouseName }} / {{ item.locationName || '-' }} / {{ item.areaName || '-' }}</span>
+        <el-tag size="small" type="info" class="ml-4px">
+          {{ item.batchCode || '无批次' }} | {{ item.quantity }}
+        </el-tag>
+      </div>
+    </el-option>
+  </el-select>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { WmMaterialStockApi } from '@/api/mes/wm/materialstock'
-import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
+import { WmMaterialStockApi, WmMaterialStockVO } from '@/api/mes/wm/materialstock'
 
 defineOptions({ name: 'WmMaterialStockSelect' })
 
-const emit = defineEmits(['select'])
+const props = withDefaults(
+  defineProps<{
+    modelValue?: number
+    itemId?: number
+    disabled?: boolean
+    clearable?: boolean
+    placeholder?: string
+  }>(),
+  {
+    disabled: false,
+    clearable: true,
+    placeholder: '请选择库存'
+  }
+)
 
-const dialogVisible = ref(false)
-const loading = ref(false)
-const list = ref([])
-const total = ref(0)
-const selectedRow = ref(null)
-const currentItemId = ref(null)
+const emit = defineEmits<{
+  'update:modelValue': [value: number | undefined]
+  change: [item: WmMaterialStockVO | undefined]
+}>()
 
-const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
-  itemId: undefined,
-  batchCode: undefined,
-  warehouseId: undefined
+const allList = ref<WmMaterialStockVO[]>([])
+const filteredList = ref<WmMaterialStockVO[]>([])
+
+const selectValue = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
 })
 
-const open = (itemId?: number) => {
-  currentItemId.value = itemId
-  queryParams.itemId = itemId
-  dialogVisible.value = true
-  getList()
-}
-
-const handleClose = () => {
-  dialogVisible.value = false
-  selectedRow.value = null
-  currentItemId.value = null
-}
-
-const getList = async () => {
-  loading.value = true
-  try {
-    const data = await WmMaterialStockApi.getMaterialStockPage(queryParams)
-    list.value = data.list
-    total.value = data.total
-  } finally {
-    loading.value = false
-  }
-}
-
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
-}
-
-const resetQuery = () => {
-  queryParams.batchCode = undefined
-  queryParams.warehouseId = undefined
-  queryParams.itemId = currentItemId.value
-  handleQuery()
-}
-
-const handleRowClick = (row: any) => {
-  selectedRow.value = row
-}
-
-const handleConfirm = () => {
-  if (!selectedRow.value) {
+/** 前端过滤（仓库名 + 批次号） */
+const handleFilter = (query: string) => {
+  if (!query) {
+    filteredList.value = allList.value
     return
   }
-  emit('select', selectedRow.value)
-  handleClose()
+  const keyword = query.toLowerCase()
+  filteredList.value = allList.value.filter(
+    (item) =>
+      item.warehouseName?.toLowerCase().includes(keyword) ||
+      item.batchCode?.toLowerCase().includes(keyword) ||
+      item.areaName?.toLowerCase().includes(keyword)
+  )
 }
 
-defineExpose({ open })
+/** 选中变化 */
+const handleChange = (val: number | undefined) => {
+  const item = allList.value.find((o) => o.id === val)
+  emit('change', item)
+}
+
+/** 加载库存列表 */
+const loadData = async () => {
+  const list: WmMaterialStockVO[] = await WmMaterialStockApi.getMaterialStockSimpleList(props.itemId)
+  // 过滤掉冻结和零库存
+  allList.value = list.filter((item) => !item.frozen && item.quantity > 0)
+  filteredList.value = allList.value
+}
+
+/** 监听 itemId 变化重新加载 */
+watch(() => props.itemId, () => {
+  loadData()
+})
+
+onMounted(() => {
+  loadData()
+})
 </script>

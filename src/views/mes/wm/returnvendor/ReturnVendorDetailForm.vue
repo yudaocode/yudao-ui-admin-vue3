@@ -1,6 +1,6 @@
 <!-- MES 供应商退货拣货明细表单弹窗 -->
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -8,33 +8,66 @@
       label-width="110px"
       v-loading="formLoading"
     >
-      <el-form-item label="物料" prop="itemId">
-        <MdItemSelect v-model="formData.itemId" disabled />
-      </el-form-item>
-      <el-form-item label="退货仓库" prop="warehouseId">
-        <WmWarehouseSelect v-model="formData.warehouseId" />
-      </el-form-item>
-      <el-form-item label="库区" prop="locationId" v-if="formData.warehouseId">
-        <WmWarehouseLocationSelect
-          v-model="formData.locationId"
-          :warehouse-id="formData.warehouseId"
-        />
-      </el-form-item>
-      <el-form-item label="库位" prop="areaId" v-if="formData.locationId">
-        <WmWarehouseAreaSelect v-model="formData.areaId" :location-id="formData.locationId" />
-      </el-form-item>
-      <el-form-item label="批次号" prop="batchCode">
-        <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
-      </el-form-item>
-      <el-form-item label="数量" prop="quantity">
-        <el-input-number
-          v-model="formData.quantity"
-          :precision="2"
-          :min="0"
-          controls-position="right"
-          class="!w-1/1"
-        />
-      </el-form-item>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="物料" prop="itemId">
+            <MdItemSelect v-model="formData.itemId" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="库存记录" prop="materialStockId">
+            <WmMaterialStockSelect
+              v-model="formData.materialStockId"
+              :item-id="formData.itemId"
+              @change="handleStockChange"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="数量" prop="quantity">
+            <el-input-number
+              v-model="formData.quantity"
+              :precision="2"
+              :min="0"
+              :max="quantityMax"
+              controls-position="right"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="仓库" prop="warehouseId">
+            <WmWarehouseSelect v-model="formData.warehouseId" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="库区" prop="locationId">
+            <WmWarehouseLocationSelect
+              v-model="formData.locationId"
+              :warehouse-id="formData.warehouseId"
+              disabled
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="库位" prop="areaId">
+            <WmWarehouseAreaSelect
+              v-model="formData.areaId"
+              :location-id="formData.locationId"
+              disabled
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="批次号">
+            <el-input :model-value="formData.batchCode" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -44,11 +77,10 @@
 </template>
 
 <script setup lang="ts">
-import {
-  WmReturnVendorDetailApi,
-  WmReturnVendorDetailVO
-} from '@/api/mes/wm/returnvendor/detail'
+import { WmReturnVendorDetailApi, WmReturnVendorDetailVO } from '@/api/mes/wm/returnvendor/detail'
+import { WmMaterialStockVO } from '@/api/mes/wm/materialstock'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
@@ -68,12 +100,15 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：create / update
+const quantityMax = ref<number | undefined>(undefined) // 数量上限（在库数量）
 const formData = ref({
   id: undefined as number | undefined,
   lineId: undefined as number | undefined,
   returnId: undefined as number | undefined,
   itemId: undefined as number | undefined,
+  materialStockId: undefined as number | undefined,
   quantity: undefined as number | undefined,
+  batchId: undefined as number | undefined,
   batchCode: undefined as string | undefined,
   warehouseId: undefined as number | undefined,
   locationId: undefined as number | undefined,
@@ -81,12 +116,31 @@ const formData = ref({
 })
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
-  warehouseId: [{ required: true, message: '退货仓库不能为空', trigger: 'change' }],
-  locationId: [{ required: true, message: '库区不能为空', trigger: 'change' }],
-  areaId: [{ required: true, message: '库位不能为空', trigger: 'change' }],
+  materialStockId: [{ required: true, message: '请选择库存记录', trigger: 'change' }],
   quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+
+/** 库存选中回调 —— 自动回填仓库/库区/库位/批次/数量 */
+const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
+  if (!stock) {
+    formData.value.warehouseId = undefined
+    formData.value.locationId = undefined
+    formData.value.areaId = undefined
+    formData.value.batchId = undefined
+    formData.value.batchCode = undefined
+    formData.value.quantity = undefined
+    quantityMax.value = undefined
+    return
+  }
+  formData.value.warehouseId = stock.warehouseId
+  formData.value.locationId = stock.locationId
+  formData.value.areaId = stock.areaId
+  formData.value.batchId = stock.batchId
+  formData.value.batchCode = stock.batchCode
+  formData.value.quantity = stock.quantity
+  quantityMax.value = stock.quantity
+}
 
 /** 打开弹窗 */
 const open = async (type: string, lineId: number, itemId?: number, detailId?: number) => {
@@ -99,7 +153,8 @@ const open = async (type: string, lineId: number, itemId?: number, detailId?: nu
   if (detailId) {
     formLoading.value = true
     try {
-      formData.value = await WmReturnVendorDetailApi.getReturnVendorDetail(detailId)
+      const data = await WmReturnVendorDetailApi.getReturnVendorDetail(detailId)
+      formData.value = data
     } finally {
       formLoading.value = false
     }
@@ -141,12 +196,15 @@ const resetForm = () => {
     lineId: undefined,
     returnId: undefined,
     itemId: undefined,
+    materialStockId: undefined,
     quantity: undefined,
+    batchId: undefined,
     batchCode: undefined,
     warehouseId: undefined,
     locationId: undefined,
     areaId: undefined
   }
+  quantityMax.value = undefined
   formRef.value?.resetFields()
 }
 
