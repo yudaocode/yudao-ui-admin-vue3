@@ -90,7 +90,11 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="批次号" prop="batchId">
-            <el-input v-model="formData.batchId" placeholder="请输入批次号" />
+            <WmBatchSelect
+              v-model="formData.batchId"
+              :item-id="formData.itemId"
+              @change="handleBatchChange"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -140,7 +144,7 @@
 <script setup lang="ts">
 import { WmProductSalesLineApi, WmProductSalesLineVO } from '@/api/mes/wm/productsales/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-// import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
+import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 import ProductSalesDetailList from './ProductSalesDetailList.vue'
 import ProductSalesDetailForm from './ProductSalesDetailForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
@@ -201,7 +205,8 @@ const formData = ref({
   salesId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
-  batchId: undefined,
+  batchId: undefined as number | undefined,
+  batchCode: undefined as string | undefined,
   oqcCheckFlag: false,
   remark: undefined
 })
@@ -225,6 +230,11 @@ const openForm = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+}
+
+/** 批次选中回调，同步 batchCode */
+const handleBatchChange = (batch: any) => {
+  formData.value.batchCode = batch?.code
 }
 
 /** 提交表单 */
@@ -255,6 +265,7 @@ const resetForm = () => {
     itemId: undefined,
     quantity: undefined,
     batchId: undefined,
+    batchCode: undefined,
     oqcCheckFlag: false,
     remark: undefined
   }

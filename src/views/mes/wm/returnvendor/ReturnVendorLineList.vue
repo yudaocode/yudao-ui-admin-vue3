@@ -95,7 +95,11 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="批次号" prop="batchId">
-            <WmBatchSelect v-model="formData.batchId" @change="handleBatchChange" />
+            <WmBatchSelect
+              v-model="formData.batchId"
+              :item-id="formData.itemId"
+              @change="handleBatchChange"
+            />
           </el-form-item>
         </el-col>
       </el-row>

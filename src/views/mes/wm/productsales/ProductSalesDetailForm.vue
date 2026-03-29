@@ -24,7 +24,11 @@
         <WmWarehouseAreaSelect v-model="formData.areaId" :location-id="formData.locationId" />
       </el-form-item>
       <el-form-item label="批次号" prop="batchId">
-        <el-input v-model="formData.batchId" placeholder="请输入批次号" />
+        <WmBatchSelect
+          v-model="formData.batchId"
+          :item-id="formData.itemId"
+          @change="handleBatchChange"
+        />
       </el-form-item>
       <el-form-item label="数量" prop="quantity">
         <el-input-number
@@ -49,7 +53,7 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
-// import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
+import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 
 defineOptions({ name: 'ProductSalesDetailForm' })
 
@@ -77,7 +81,8 @@ const formData = ref({
   warehouseId: undefined as number | undefined,
   locationId: undefined as number | undefined,
   areaId: undefined as number | undefined,
-  batchId: undefined as number | undefined
+  batchId: undefined as number | undefined,
+  batchCode: undefined as string | undefined
 })
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
@@ -107,6 +112,11 @@ const open = async (type: string, lineId: number, itemId?: number, detailId?: nu
   }
 }
 defineExpose({ open })
+
+/** 批次选中回调，同步 batchCode */
+const handleBatchChange = (batch: any) => {
+  formData.value.batchCode = batch?.code
+}
 
 /** 提交表单 */
 const submitForm = async () => {
@@ -146,7 +156,8 @@ const resetForm = () => {
     warehouseId: undefined,
     locationId: undefined,
     areaId: undefined,
-    batchId: undefined
+    batchId: undefined,
+    batchCode: undefined
   }
   formRef.value?.resetFields()
 }

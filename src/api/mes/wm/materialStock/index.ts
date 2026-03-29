@@ -45,5 +45,13 @@ export const WmMaterialStockApi = {
   // 导出库存台账 Excel
   exportMaterialStock: async (params: any) => {
     return await request.download({ url: '/mes/wm/material-stock/export-excel', params })
+  },
+
+  // 获取库存精简列表（主要用于前端下拉，可按 itemId 过滤）
+  getMaterialStockSimpleList: async (itemId?: number) => {
+    return await request.get({
+      url: '/mes/wm/material-stock/simple-list',
+      params: { itemId }
+    })
   }
 }

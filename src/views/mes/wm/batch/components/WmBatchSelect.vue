@@ -29,6 +29,7 @@ defineOptions({ name: 'WmBatchSelect' })
 const props = withDefaults(
   defineProps<{
     modelValue?: number
+    itemId?: number
     disabled?: boolean
     clearable?: boolean
     placeholder?: string
@@ -62,10 +63,21 @@ const handleFilter = (query: string) => {
   const keyword = query.toLowerCase()
   filteredList.value = allList.value.filter(
     (item) =>
-      item.code?.toLowerCase().includes(keyword) ||
-      item.itemCode?.toLowerCase().includes(keyword)
+      item.code?.toLowerCase().includes(keyword) || item.itemCode?.toLowerCase().includes(keyword)
   )
 }
+
+/** 监听 itemId 变化，前端过滤（如果是基于 itemId 的过滤） */
+watch(
+  () => props.itemId,
+  (val) => {
+    if (val) {
+      filteredList.value = allList.value.filter((item) => item.itemId === val)
+    } else {
+      filteredList.value = allList.value
+    }
+  }
+)
 
 /** 选中变化 */
 const handleChange = (val: number | undefined) => {
@@ -76,6 +88,10 @@ const handleChange = (val: number | undefined) => {
 /** 加载批次列表 */
 onMounted(async () => {
   allList.value = await BatchApi.getBatchSimpleList()
-  filteredList.value = allList.value
+  if (props.itemId) {
+    filteredList.value = allList.value.filter((item) => item.itemId === props.itemId)
+  } else {
+    filteredList.value = allList.value
+  }
 })
 </script>
