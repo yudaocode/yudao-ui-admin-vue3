@@ -107,7 +107,7 @@
         保 存
       </el-button>
       <el-button
-        v-if="(isEditable && formData.status === MesWmReturnVendorStatusEnum.PREPARE) || isSubmit"
+        v-if="isEditable && formData.status === MesWmReturnVendorStatusEnum.PREPARE"
         @click="handleSubmit"
         type="warning"
         :disabled="formLoading"
@@ -136,7 +136,6 @@ defineOptions({ name: 'ReturnVendorForm' })
 const emit = defineEmits(['success'])
 
 const message = useMessage() // 消息弹窗
-
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formType = ref<string>('create') // 表单的类型：create / update / stock / finish / detail
@@ -157,9 +156,9 @@ const dialogTitle = computed(() => {
 })
 const formData = ref({
   id: undefined as number | undefined,
-  status: undefined as number | undefined,
   code: undefined,
   name: undefined,
+  status: undefined as number | undefined,
   purchaseOrderCode: undefined,
   vendorId: undefined,
   returnDate: undefined,
@@ -189,7 +188,7 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
-  // 修改/提交/拣货/完成/详情时，加载数据
+  // 修改/拣货/完成/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -202,7 +201,7 @@ const open = async (type: string, id?: number) => {
   originalFormData.value = JSON.stringify(formData.value)
 }
 
-/** 保存表单（create/update 模式） */
+/** 提交表单（create/update 模式） */
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
@@ -291,9 +290,9 @@ const handleFinish = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    status: undefined,
     code: undefined,
     name: undefined,
+    status: undefined,
     purchaseOrderCode: undefined,
     vendorId: undefined,
     returnDate: undefined,

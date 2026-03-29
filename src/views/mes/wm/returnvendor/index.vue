@@ -213,22 +213,22 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await WmReturnVendorApi.deleteReturnVendor(id)
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
 /** 取消按钮操作 */
 const handleCancel = async (id: number) => {
   try {
     await message.confirm('确认取消该供应商退货单？取消后不可恢复。')
     await WmReturnVendorApi.cancelReturnVendor(id)
     message.success('取消成功')
+    await getList()
+  } catch {}
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    await message.delConfirm()
+    await WmReturnVendorApi.deleteReturnVendor(id)
+    message.success(t('common.delSuccess'))
     await getList()
   } catch {}
 }
@@ -246,6 +246,7 @@ const handleExport = async () => {
   }
 }
 
+/** 初始化 */
 onMounted(() => {
   getList()
 })
