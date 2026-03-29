@@ -31,7 +31,7 @@
 import { WmProductSalesLineApi } from '@/api/mes/wm/productsales/line'
 import MdItemForm from '@/views/mes/md/item/MdItemForm.vue'
 
-defineOptions({ name: 'ClientProductSalesLineTab' })
+defineOptions({ name: 'ClientProductSalesLineList' })
 
 const props = defineProps<{
   clientId: number

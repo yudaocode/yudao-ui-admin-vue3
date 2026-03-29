@@ -162,10 +162,10 @@
     <!-- 编辑/详情时显示关联数据 tab -->
     <el-tabs v-if="formType !== 'create' && formData.id" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="物料清单" name="itemReceiptLine" lazy>
-        <VendorItemReceiptLineTab :vendorId="formData.id" />
+        <VendorItemReceiptLineList :vendorId="formData.id" />
       </el-tab-pane>
       <el-tab-pane label="采购入库" name="itemReceipt" lazy>
-        <VendorItemReceiptTab :vendorId="formData.id" />
+        <VendorItemReceiptList :vendorId="formData.id" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -182,8 +182,8 @@ import { MdVendorApi, MdVendorVO } from '@/api/mes/md/vendor'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { CommonStatusEnum } from '@/utils/constants'
 import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
-import VendorItemReceiptLineTab from './VendorItemReceiptLineTab.vue'
-import VendorItemReceiptTab from './VendorItemReceiptTab.vue'
+import VendorItemReceiptLineList from './VendorItemReceiptLineList.vue'
+import VendorItemReceiptList from './VendorItemReceiptList.vue'
 
 defineOptions({ name: 'MdVendorForm' })
 

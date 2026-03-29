@@ -1,6 +1,6 @@
 <!-- MES 装箱明细列表子组件 -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <el-button v-if="isEditable" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加明细
     </el-button>

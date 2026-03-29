@@ -153,10 +153,10 @@
     <!-- 编辑/详情时显示关联数据 tab -->
     <el-tabs v-if="formType !== 'create' && formData.id" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="产品清单" name="productSalesLine" lazy>
-        <ClientProductSalesLineTab :clientId="formData.id" />
+        <ClientProductSalesLineList :clientId="formData.id" />
       </el-tab-pane>
       <el-tab-pane label="销售记录" name="productSales" lazy>
-        <ClientProductSalesTab :clientId="formData.id" />
+        <ClientProductSalesList :clientId="formData.id" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -173,8 +173,8 @@ import { MdClientApi, MdClientVO } from '@/api/mes/md/client'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { CommonStatusEnum } from '@/utils/constants'
 import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
-import ClientProductSalesLineTab from './ClientProductSalesLineTab.vue'
-import ClientProductSalesTab from './ClientProductSalesTab.vue'
+import ClientProductSalesLineList from './ClientProductSalesLineList.vue'
+import ClientProductSalesList from './ClientProductSalesList.vue'
 
 defineOptions({ name: 'MdClientForm' })
 

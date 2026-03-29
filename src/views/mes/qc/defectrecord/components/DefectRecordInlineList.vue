@@ -1,6 +1,7 @@
 <!-- 缺陷记录内联编辑列表（通用组件，供 IQC/IPQC/OQC/RQC 各模块复用） -->
 <template>
   <Dialog title="缺陷记录" v-model="dialogVisible" width="900px">
+    <div class="overflow-hidden">
     <!-- 新增按钮 -->
     <el-row class="mb-10px">
       <el-button type="primary" plain @click="handleAdd" v-hasPermi="['mes:qc-defect:create']">
@@ -87,6 +88,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
+    </div>
   </Dialog>
 </template>
 

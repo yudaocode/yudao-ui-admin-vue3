@@ -1,6 +1,6 @@
 <!-- 产品产出记录行列表（只读，带分页） -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <el-table v-loading="loading" :data="list" stripe>
       <el-table-column label="物资编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物资名称" align="center" prop="itemName" min-width="140" />

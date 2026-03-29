@@ -1,6 +1,6 @@
 <!-- MES 来料检验单行 子列表（只读） -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="检测项名称" align="center" prop="indicatorName" width="150" />

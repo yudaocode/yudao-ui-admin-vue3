@@ -1,6 +1,6 @@
 <template>
   <div class="overflow-hidden">
-  <!-- 客户详情-产品清单 tab（复用 getProductSalesLinePage 分页接口） -->
+  <!-- 供应商详情-物料清单 tab（复用 getItemReceiptLinePage 分页接口） -->
   <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
     <el-table-column label="物料编码" align="center" prop="itemCode" width="140">
       <template #default="scope">
@@ -12,7 +12,7 @@
     <el-table-column label="物料名称" align="center" prop="itemName" />
     <el-table-column label="规格型号" align="center" prop="specification" />
     <el-table-column label="单位" align="center" prop="unitMeasureName" />
-    <el-table-column label="出库数量" align="center" prop="quantity" />
+    <el-table-column label="入库数量" align="center" prop="receivedQuantity" />
     <el-table-column label="批次号" align="center" prop="batchCode" />
   </el-table>
   <Pagination
@@ -28,13 +28,13 @@
 </template>
 
 <script setup lang="ts">
-import { WmProductSalesLineApi } from '@/api/mes/wm/productsales/line'
+import { WmItemReceiptLineApi } from '@/api/mes/wm/itemreceipt/line'
 import MdItemForm from '@/views/mes/md/item/MdItemForm.vue'
 
-defineOptions({ name: 'ClientProductSalesLineTab' })
+defineOptions({ name: 'VendorItemReceiptLineList' })
 
 const props = defineProps<{
-  clientId: number
+  vendorId: number
 }>()
 
 const loading = ref(false)
@@ -43,15 +43,15 @@ const total = ref(0)
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  clientId: undefined as number | undefined
+  vendorId: undefined as number | undefined
 })
 
 /** 查询列表 */
 const getList = async () => {
-  if (!queryParams.clientId) return
+  if (!queryParams.vendorId) return
   loading.value = true
   try {
-    const data = await WmProductSalesLineApi.getProductSalesLinePage(queryParams)
+    const data = await WmItemReceiptLineApi.getItemReceiptLinePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -65,11 +65,11 @@ const handleViewItem = (itemId: number) => {
   itemFormRef.value.open('detail', itemId)
 }
 
-/** 监听 clientId 变化，自动加载 */
+/** 监听 vendorId 变化，自动加载 */
 watch(
-  () => props.clientId,
+  () => props.vendorId,
   (val) => {
-    queryParams.clientId = val
+    queryParams.vendorId = val
     queryParams.pageNo = 1
     getList()
   },

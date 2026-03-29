@@ -1,6 +1,6 @@
 <!-- MES 检验结果列表子组件（嵌入 IQC 等质检单详情页） -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <!-- 操作按钮 -->
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">

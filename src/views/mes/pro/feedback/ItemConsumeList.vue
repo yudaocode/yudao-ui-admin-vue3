@@ -1,7 +1,7 @@
 <!-- 物料消耗记录行列表（只读，带分页） -->
 <!-- DONE @AI：挪到 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/pro/feedback；不作为 components -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <el-table v-loading="loading" :data="list" stripe>
       <el-table-column label="物资编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物资名称" align="center" prop="itemName" min-width="140" />

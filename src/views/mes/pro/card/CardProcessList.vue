@@ -1,6 +1,6 @@
 <!-- MES 流转卡工序记录列表子组件 -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <!-- 操作按钮 -->
     <div class="mb-10px" v-if="!disabled">
       <el-button type="primary" plain @click="openProcessForm('create')">

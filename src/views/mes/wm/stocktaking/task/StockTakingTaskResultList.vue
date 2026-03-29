@@ -1,6 +1,6 @@
 <!-- MES 盘点任务结果列表子组件 -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <!-- 新增按钮 -->
     <el-button
       v-if="!isReadOnly"

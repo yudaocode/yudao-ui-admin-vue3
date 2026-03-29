@@ -41,7 +41,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { WmProductSalesApi } from '@/api/mes/wm/productsales'
 import ProductSalesForm from '@/views/mes/wm/productsales/ProductSalesForm.vue'
 
-defineOptions({ name: 'ClientProductSalesTab' })
+defineOptions({ name: 'ClientProductSalesList' })
 
 const props = defineProps<{
   clientId: number

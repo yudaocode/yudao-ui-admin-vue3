@@ -1,7 +1,7 @@
 <!-- MES 外协发料单行列表子组件 -->
 <!-- DONE @芋艿：未 review（AI 未修复原因：标注为后续人工 review，需人工介入） -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加物料
     </el-button>

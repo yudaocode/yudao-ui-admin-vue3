@@ -43,14 +43,14 @@
     </el-descriptions>
     <el-tabs type="border-card" class="mt-10px">
       <el-tab-pane label="向前追溯">
-        <BatchTraceDetailTab
+        <BatchTraceDetailList
           :batchId="detailData.id"
           :batchCode="detailData.code"
           direction="forward"
         />
       </el-tab-pane>
       <el-tab-pane label="向后追溯">
-        <BatchTraceDetailTab
+        <BatchTraceDetailList
           :batchId="detailData.id"
           :batchCode="detailData.code"
           direction="backward"
@@ -62,7 +62,7 @@
 
 <script lang="ts" setup>
 import { BatchVO } from '@/api/mes/wm/batch'
-import BatchTraceDetailTab from './BatchTraceDetailTab.vue'
+import BatchTraceDetailList from './BatchTraceDetailList.vue'
 
 defineOptions({ name: 'BatchTraceDetail' })
 

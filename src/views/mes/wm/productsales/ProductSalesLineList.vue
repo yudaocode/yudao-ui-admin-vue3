@@ -1,6 +1,6 @@
 <!-- MES 销售出库单行列表子组件 -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加物料
     </el-button>

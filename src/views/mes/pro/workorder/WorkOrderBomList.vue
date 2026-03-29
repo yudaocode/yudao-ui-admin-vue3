@@ -1,6 +1,6 @@
 <!-- MES 生产工单 BOM 列表子组件 -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <!-- BOM 列表 -->
     <el-table v-loading="loading" :data="bomList" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="BOM 物料编码" align="center" prop="itemCode" width="120" />

@@ -1,6 +1,6 @@
 <!-- MES 设备保养记录明细列表 -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <!-- 操作栏 -->
     <el-row class="mb-10px" v-if="!disabled">
       <el-button type="primary" plain @click="openForm('create')">

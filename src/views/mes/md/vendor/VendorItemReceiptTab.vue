@@ -1,4 +1,5 @@
 <template>
+  <div class="overflow-hidden">
   <!-- 供应商详情-采购记录 tab（复用 getItemReceiptPage 分页接口） -->
   <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
     <el-table-column label="入库单编号" align="center" prop="code" min-width="160">
@@ -31,6 +32,7 @@
 
   <!-- 采购入库单详情弹窗 -->
   <ItemReceiptForm ref="formRef" />
+  </div>
 </template>
 
 <script setup lang="ts">

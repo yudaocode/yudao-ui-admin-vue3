@@ -1,6 +1,6 @@
 <!-- MES 盘点方案条件列表子组件 -->
 <template>
-  <div>
+  <div class="overflow-hidden">
     <el-button
       type="primary"
       plain

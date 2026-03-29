@@ -1,4 +1,5 @@
 <template>
+  <div class="overflow-hidden">
   <!-- 供应商详情-物料清单 tab（复用 getItemReceiptLinePage 分页接口） -->
   <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
     <el-table-column label="物料编码" align="center" prop="itemCode" width="140">
@@ -23,6 +24,7 @@
 
   <!-- 物料详情弹窗 -->
   <MdItemForm ref="itemFormRef" />
+  </div>
 </template>
 
 <script setup lang="ts">
