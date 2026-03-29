@@ -69,7 +69,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="类型编码" align="center" prop="code" width="120" />
+      <el-table-column label="类型编码" align="center" prop="code" width="120">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="类型名称" align="center" prop="name" min-width="150" />
       <el-table-column label="是否编码管理" align="center" prop="codeFlag" width="120">
         <template #default="scope">
@@ -78,7 +84,12 @@
       </el-table-column>
       <el-table-column label="保养维护类型" align="center" prop="maintenType" width="120">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_TM_MAINTEN_TYPE" :value="scope.row.maintenType" />
+          <dict-tag
+            v-if="scope.row.codeFlag"
+            :type="DICT_TYPE.MES_TM_MAINTEN_TYPE"
+            :value="scope.row.maintenType"
+          />
+          <span v-else>-</span>
         </template>
       </el-table-column>
       <el-table-column label="保养周期" align="center" prop="maintenPeriod" width="100">

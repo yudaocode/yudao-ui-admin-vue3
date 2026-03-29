@@ -417,6 +417,7 @@ export const MesAutoCodeRuleCode = {
   MD_VENDOR_CODE: 'MD_VENDOR_CODE', // 供应商编码
   MD_CLIENT_CODE: 'MD_CLIENT_CODE', // 客户编码
   MD_WORKSTATION_CODE: 'MD_WORKSTATION_CODE', // 工作站编码
+  TM_TOOL_TYPE_CODE: 'TM_TOOL_TYPE_CODE', // 工具类型编码
   WM_SN_CODE: 'WM_SN_CODE', // SN 码
   WM_PACKAGE_CODE: 'WM_PACKAGE_CODE', // 装箱单编码
   WM_BATCH_CODE: 'WM_BATCH_CODE', // 批次编码
