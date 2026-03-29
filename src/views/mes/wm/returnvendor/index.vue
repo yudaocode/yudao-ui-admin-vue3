@@ -88,7 +88,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
-          <!-- 草稿：编辑、提交、删除 -->
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
@@ -100,15 +100,6 @@
           </el-button>
           <el-button
             link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-return-vendor:update']"
-            v-if="scope.row.status === MesWmReturnVendorStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-return-vendor:delete']"
@@ -116,7 +107,7 @@
           >
             删除
           </el-button>
-          <!-- 待拣货：执行拣货 -->
+          <!-- 待拣货：执行拣货、取消 -->
           <el-button
             link
             type="success"
@@ -126,17 +117,16 @@
           >
             执行拣货
           </el-button>
-          <!-- 待执行退货：完成 -->
+          <!-- 待执行退货：完成退货、取消 -->
           <el-button
             link
             type="success"
-            @click="handleFinish(scope.row.id)"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm-return-vendor:update-status']"
             v-if="scope.row.status === MesWmReturnVendorStatusEnum.APPROVED"
           >
-            完成
+            完成退货
           </el-button>
-          <!-- 待拣货、待执行退货：取消 -->
           <el-button
             link
             type="danger"
@@ -223,16 +213,6 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交按钮操作 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该退货单？')
-    await WmReturnVendorApi.submitReturnVendor(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
@@ -249,16 +229,6 @@ const handleCancel = async (id: number) => {
     await message.confirm('确认取消该供应商退货单？取消后不可恢复。')
     await WmReturnVendorApi.cancelReturnVendor(id)
     message.success('取消成功')
-    await getList()
-  } catch {}
-}
-
-/** 完成按钮操作 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认完成该退货单并执行退货？')
-    await WmReturnVendorApi.finishReturnVendor(id)
-    message.success('完成成功')
     await getList()
   } catch {}
 }
