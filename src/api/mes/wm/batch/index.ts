@@ -52,5 +52,10 @@ export const BatchApi = {
   // 向后追溯
   getBackwardList: async (code: string) => {
     return await request.get({ url: `/mes/wm/batch/backward-list`, params: { code } })
+  },
+
+  // 获取批次精简列表（主要用于前端下拉）
+  getBatchSimpleList: async () => {
+    return await request.get({ url: `/mes/wm/batch/simple-list` })
   }
 }

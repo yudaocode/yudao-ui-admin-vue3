@@ -32,7 +32,7 @@
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="退货数量" align="center" prop="quantity" width="100" />
-      <el-table-column label="批次号" align="center" prop="batchId" width="80" />
+      <el-table-column label="批次号" align="center" prop="batchCode" width="150" />
       <el-table-column
         v-if="isUpdate || isStock"
         label="操作"
@@ -93,7 +93,11 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @芋艿：这里差一个批次号的选择器；【暂不处理】 -->
+        <el-col :span="8">
+          <el-form-item label="批次号" prop="batchId">
+            <WmBatchSelect v-model="formData.batchId" @change="handleBatchChange" />
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row>
         <el-col :span="24">
@@ -120,6 +124,7 @@
 <script setup lang="ts">
 import { WmReturnVendorLineApi, WmReturnVendorLineVO } from '@/api/mes/wm/returnvendor/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 import ReturnVendorDetailList from './ReturnVendorDetailList.vue'
 import ReturnVendorDetailForm from './ReturnVendorDetailForm.vue'
 
@@ -179,6 +184,8 @@ const formData = ref({
   returnId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
+  batchId: undefined as number | undefined,
+  batchCode: undefined as string | undefined,
   remark: undefined
 })
 const formRules = reactive({
@@ -192,6 +199,11 @@ const handleItemChange = (item: any) => {
   if (item) {
     formData.value.itemId = item.id
   }
+}
+
+/** 批次选中回调，同步 batchCode */
+const handleBatchChange = (batch: any) => {
+  formData.value.batchCode = batch?.code
 }
 
 /** 打开表单弹窗 */
@@ -240,6 +252,8 @@ const resetForm = () => {
     returnId: undefined,
     itemId: undefined,
     quantity: undefined,
+    batchId: undefined,
+    batchCode: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()

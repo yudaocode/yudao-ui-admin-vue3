@@ -11,6 +11,7 @@ export interface WmReturnVendorLineVO {
   unitMeasureName?: string
   quantity: number
   batchId?: number
+  batchCode?: string
   remark?: string
 }
 

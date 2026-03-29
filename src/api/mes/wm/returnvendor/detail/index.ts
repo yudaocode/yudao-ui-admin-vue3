@@ -5,7 +5,7 @@ export interface WmReturnVendorDetailVO {
   id?: number
   returnId: number
   lineId: number
-  materialStockId: number
+  materialStockId?: number
   itemId: number
   quantity: number
   batchId?: number
