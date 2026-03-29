@@ -34,6 +34,11 @@ export interface BatchVO {
 
 // 批次追溯 API
 export const BatchApi = {
+  // 获取批次详情
+  getBatch: async (id: number) => {
+    return await request.get({ url: `/mes/wm/batch/get?id=` + id })
+  },
+
   // 获取批次分页
   getBatchPage: async (params: PageParam) => {
     return await request.get({ url: `/mes/wm/batch/page`, params })
