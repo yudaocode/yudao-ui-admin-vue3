@@ -118,6 +118,16 @@
           >
             执行上架
           </el-button>
+          <!-- 待执行入库：执行入库、取消 -->
+          <el-button
+            link
+            type="success"
+            @click="openForm('finish', scope.row.id)"
+            v-hasPermi="['mes:wm-item-receipt:finish']"
+            v-if="scope.row.status === MesWmItemReceiptStatusEnum.APPROVED"
+          >
+            执行入库
+          </el-button>
           <el-button
             link
             type="danger"

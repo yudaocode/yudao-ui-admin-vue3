@@ -60,6 +60,15 @@
             <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="采购订单号" prop="purchaseOrderCode">
+            <el-input
+              v-model="formData.purchaseOrderCode"
+              placeholder="请输入采购订单号"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row>
         <el-col :span="24">
@@ -88,7 +97,7 @@
         保 存
       </el-button>
       <el-button
-        v-if="formType === 'update' && formData.status === MesWmItemReceiptStatusEnum.PREPARE"
+        v-if="isEditable && formData.status === MesWmItemReceiptStatusEnum.PREPARE"
         @click="handleSubmit"
         type="warning"
         :disabled="formLoading"
@@ -99,7 +108,7 @@
         执行上架
       </el-button>
       <el-button
-        v-if="formData.status === MesWmItemReceiptStatusEnum.APPROVED"
+        v-if="isFinish"
         @click="handleFinish"
         type="success"
         :disabled="formLoading"
@@ -129,7 +138,7 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / stock / detail
+const formType = ref<string>('create') // 表单的类型：create / update / stock / finish / detail
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
@@ -138,6 +147,7 @@ const formData = ref({
   vendorId: undefined,
   noticeId: undefined,
   iqcId: undefined,
+  purchaseOrderCode: undefined,
   receiptDate: undefined,
   remark: undefined
 })
@@ -149,13 +159,15 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
-const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
-const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value)) // 是否只读
+const isFinish = computed(() => formType.value === 'finish') // 是否为执行入库模式
+const isDetail = computed(() => ['detail', 'finish'].includes(formType.value)) // 是否为详情模式
+const isHeaderReadonly = computed(() => ['stock', 'detail', 'finish'].includes(formType.value)) // 是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增采购入库单',
     update: '编辑采购入库单',
     stock: '执行上架',
+    finish: '执行入库',
     detail: '采购入库单详情'
   }
   return titles[formType.value] || formType.value
@@ -173,6 +185,7 @@ const generateCode = async () => {
 const handleNoticeChange = (notice: any) => {
   if (notice) {
     formData.value.vendorId = notice.vendorId
+    formData.value.purchaseOrderCode = notice.purchaseOrderCode
   }
 }
 
@@ -286,6 +299,7 @@ const resetForm = () => {
     vendorId: undefined,
     noticeId: undefined,
     iqcId: undefined,
+    purchaseOrderCode: undefined,
     receiptDate: undefined,
     remark: undefined
   }

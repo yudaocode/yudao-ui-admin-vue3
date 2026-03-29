@@ -7,7 +7,7 @@
       <el-table-column label="库位名称" align="center" prop="areaName" min-width="100" />
       <el-table-column label="数量" align="center" prop="quantity" width="100" />
       <el-table-column
-        v-if="props.formType === 'stock'"
+        v-if="isStock"
         label="操作"
         align="center"
         width="120"
@@ -44,6 +44,7 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表的加载中
 const list = ref<WmItemReceiptDetailVO[]>([]) // 明细列表
+const isStock = computed(() => props.formType === 'stock') // 是否为上架模式
 
 /** 查询明细列表 */
 const getList = async () => {
