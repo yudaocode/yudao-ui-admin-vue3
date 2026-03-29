@@ -98,12 +98,12 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { WmItemReceiptApi, WmItemReceiptVO } from '@/api/mes/wm/itemreceipt'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import WmArrivalNoticeSelect from '@/views/mes/wm/arrivalnotice/components/WmArrivalNoticeSelect.vue'
 import ItemReceiptLineList from './ItemReceiptLineList.vue'
-import { MesWmArrivalNoticeStatusEnum } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, MesWmArrivalNoticeStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ItemReceiptForm' })
 
@@ -143,8 +143,8 @@ const dialogTitle = computed(() => {
 })
 
 /** 生成入库单编号 */
-const generateCode = () => {
-  formData.value.code = 'IR' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_ITEM_RECEIPT_CODE)
 }
 
 /** 到货通知单变化时，自动填充供应商 */
