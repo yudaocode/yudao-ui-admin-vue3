@@ -12,9 +12,7 @@
       <el-form-item label="类型编码" prop="code">
         <el-input v-model="formData.code" placeholder="请输入类型编码">
           <template #append>
-            <el-button @click="generateCode">
-              生成
-            </el-button>
+            <el-button @click="generateCode"> 生成 </el-button>
           </template>
         </el-input>
       </el-form-item>
@@ -118,13 +116,17 @@ const formData = ref({
 const formRules = reactive({
   code: [{ required: true, message: '类型编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '类型名称不能为空', trigger: 'blur' }],
-  codeFlag: [{ required: true, message: '是否编码管理不能为空', trigger: 'blur' }]
+  codeFlag: [{ required: true, message: '是否编码管理不能为空', trigger: 'blur' }],
+  maintenType: [{ required: true, message: '保养维护类型不能为空', trigger: 'change' }],
+  maintenPeriod: [{ required: true, message: '保养周期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
 /** 生成类型编码 */
 const generateCode = async () => {
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.TM_TOOL_TYPE_CODE)
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.TM_TOOL_TYPE_CODE
+  )
 }
 
 /** 监听 codeFlag 变化，清空保养相关字段 */

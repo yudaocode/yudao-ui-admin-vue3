@@ -82,7 +82,7 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.codeFlag" />
         </template>
       </el-table-column>
-      <el-table-column label="保养维护类型" align="center" prop="maintenType" width="120">
+      <el-table-column label="保养维护类型" align="center" prop="maintenType" width="130">
         <template #default="scope">
           <dict-tag
             v-if="scope.row.codeFlag"
