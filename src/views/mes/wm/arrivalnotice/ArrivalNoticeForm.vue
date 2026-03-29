@@ -69,10 +69,10 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- 编辑时展示物料信息 -->
-    <template v-if="formType === 'update' && formData.id">
+    <!-- 编辑/详情时展示物料信息 -->
+    <template v-if="['update', 'detail'].includes(formType) && formData.id">
       <el-divider content-position="center">物料信息</el-divider>
-      <ArrivalNoticeLineList :notice-id="formData.id" />
+      <ArrivalNoticeLineList :notice-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
@@ -84,7 +84,8 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import { WmArrivalNoticeApi, WmArrivalNoticeVO } from '@/api/mes/wm/arrivalnotice'
 import ArrivalNoticeLineList from './ArrivalNoticeLineList.vue'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
@@ -126,8 +127,8 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 生成通知单编号 */
-const generateCode = () => {
-  formData.value.code = 'AN' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_ARRIVAL_NOTICE_CODE)
 }
 
 /** 打开弹窗 */

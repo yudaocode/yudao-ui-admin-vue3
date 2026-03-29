@@ -1,7 +1,7 @@
 <!-- MES 到货通知单行列表子组件 -->
 <template>
   <div class="overflow-hidden">
-    <el-button type="primary" plain @click="openForm('create')" class="mb-10px">
+    <el-button v-if="isEditable" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加物料
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
@@ -18,7 +18,7 @@
       <el-table-column label="合格数量" align="center" prop="qualifiedQuantity" width="100" />
       <el-table-column label="检验单号" align="center" prop="iqcCode" min-width="140" />
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
-      <el-table-column label="操作" align="center" width="120">
+      <el-table-column v-if="isEditable" label="操作" align="center" width="120">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row.id)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
@@ -105,7 +105,10 @@ defineOptions({ name: 'ArrivalNoticeLineList' })
 
 const props = defineProps<{
   noticeId: number
+  formType?: string
 }>()
+
+const isEditable = computed(() => ['create', 'update'].includes(props.formType || ''))
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
