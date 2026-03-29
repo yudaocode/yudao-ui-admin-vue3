@@ -39,12 +39,13 @@ const props = defineProps<{
 
 const emit = defineEmits(['edit-detail'])
 
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
+const { t } = useI18n()
+const message = useMessage()
+
+const isStock = computed(() => props.formType === 'stock') // 是否为上架模式
 
 const loading = ref(false) // 列表的加载中
 const list = ref<WmItemReceiptDetailVO[]>([]) // 明细列表
-const isStock = computed(() => props.formType === 'stock') // 是否为上架模式
 
 /** 查询明细列表 */
 const getList = async () => {
@@ -55,7 +56,6 @@ const getList = async () => {
     loading.value = false
   }
 }
-defineExpose({ getList })
 
 /** 删除上架明细 */
 const handleDelete = async (detailId: number) => {
@@ -67,8 +67,8 @@ const handleDelete = async (detailId: number) => {
   } catch {}
 }
 
-/** 初始化：延迟加载，展开时才触发 */
 onMounted(() => {
   getList()
 })
+defineExpose({ getList })
 </script>

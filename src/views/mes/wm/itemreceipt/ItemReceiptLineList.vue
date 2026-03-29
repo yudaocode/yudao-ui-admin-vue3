@@ -311,7 +311,7 @@ const setDetailListRef = (lineId: number, el: any) => {
 }
 
 // ==================== 上架明细表单（LineList 层级持有） ====================
-const detailFormRef = ref()
+const detailFormRef = ref() // 上架明细表单 Ref
 
 /** 上架：直接打开明细创建表单 */
 const handleStock = (lineId: number) => {

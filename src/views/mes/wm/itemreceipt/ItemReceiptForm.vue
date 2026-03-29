@@ -107,12 +107,7 @@
       <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
         执行上架
       </el-button>
-      <el-button
-        v-if="isFinish"
-        @click="handleFinish"
-        type="success"
-        :disabled="formLoading"
-      >
+      <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
         执行入库
       </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
@@ -133,12 +128,27 @@ import {
 } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ItemReceiptForm' })
+const emit = defineEmits(['success'])
 
 const message = useMessage() // 消息弹窗
-
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formType = ref<string>('create') // 表单的类型：create / update / stock / finish / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
+const isFinish = computed(() => formType.value === 'finish') // 是否为执行入库模式
+const isDetail = computed(() => ['detail', 'finish'].includes(formType.value)) // 是否为详情模式
+const isHeaderReadonly = computed(() => ['stock', 'detail', 'finish'].includes(formType.value)) // 是否只读
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增采购入库单',
+    update: '编辑采购入库单',
+    stock: '执行上架',
+    finish: '执行入库',
+    detail: '采购入库单详情'
+  }
+  return titles[formType.value] || formType.value
+})
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
@@ -157,21 +167,6 @@ const formRules = reactive({
   vendorId: [{ required: true, message: '供应商不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
-const isFinish = computed(() => formType.value === 'finish') // 是否为执行入库模式
-const isDetail = computed(() => ['detail', 'finish'].includes(formType.value)) // 是否为详情模式
-const isHeaderReadonly = computed(() => ['stock', 'detail', 'finish'].includes(formType.value)) // 是否只读
-const dialogTitle = computed(() => {
-  const titles = {
-    create: '新增采购入库单',
-    update: '编辑采购入库单',
-    stock: '执行上架',
-    finish: '执行入库',
-    detail: '采购入库单详情'
-  }
-  return titles[formType.value] || formType.value
-})
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成入库单编号 */
@@ -181,7 +176,7 @@ const generateCode = async () => {
   )
 }
 
-/** 到货通知单变化时，自动填充供应商 */
+/** 到货通知单变化时，自动填充供应商和采购订单号 */
 const handleNoticeChange = (notice: any) => {
   if (notice) {
     formData.value.vendorId = notice.vendorId
@@ -206,10 +201,8 @@ const open = async (type: string, id?: number) => {
   // 保存原始数据快照
   originalFormData.value = JSON.stringify(formData.value)
 }
-defineExpose({ open })
 
 /** 提交表单（create/update 模式） */
-const emit = defineEmits(['success'])
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
@@ -305,4 +298,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

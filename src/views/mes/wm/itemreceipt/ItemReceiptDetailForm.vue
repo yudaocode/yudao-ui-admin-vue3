@@ -55,15 +55,13 @@ const props = defineProps<{
 
 const emit = defineEmits(['success'])
 
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
+const { t } = useI18n()
+const message = useMessage()
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：create / update
-const currentLineId = ref<number>() // 当前操作的行 ID
-const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,
   lineId: undefined as number | undefined,
@@ -81,14 +79,15 @@ const formRules = reactive({
   areaId: [{ required: true, message: '库位不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
 })
+const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, lineId: number, itemId?: number, detailId?: number) => {
   dialogVisible.value = true
   dialogTitle.value = type === 'create' ? '添加上架明细' : '编辑上架明细'
   formType.value = type
-  currentLineId.value = lineId
   resetForm()
+  formData.value.lineId = lineId
   // 修改时，设置数据
   if (detailId) {
     formLoading.value = true
@@ -101,7 +100,6 @@ const open = async (type: string, lineId: number, itemId?: number, detailId?: nu
     formData.value.itemId = itemId
   }
 }
-defineExpose({ open })
 
 /** 提交表单 */
 const submitForm = async () => {
@@ -112,8 +110,7 @@ const submitForm = async () => {
   try {
     const data = {
       ...formData.value,
-      receiptId: props.receiptId,
-      lineId: currentLineId.value
+      receiptId: props.receiptId
     } as unknown as WmItemReceiptDetailVO
     if (formType.value === 'create') {
       await WmItemReceiptDetailApi.createItemReceiptDetail(data)
@@ -124,7 +121,7 @@ const submitForm = async () => {
     }
     dialogVisible.value = false
     // 发送操作成功的事件
-    emit('success', currentLineId.value)
+    emit('success', formData.value.lineId)
   } finally {
     formLoading.value = false
   }
@@ -144,4 +141,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>
