@@ -83,9 +83,18 @@
       v-loading="formLoading"
     >
       <el-row>
+        <el-col :span="8" v-if="hasNoticeId">
+          <el-form-item label="发货通知单行" prop="noticeLineId">
+            <WmSalesNoticeLineSelect
+              v-model="formData.noticeLineId"
+              :notice-id="props.noticeId"
+              @change="handleNoticeLineChange"
+            />
+          </el-form-item>
+        </el-col>
         <el-col :span="8">
           <el-form-item label="产品" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择产品" class="!w-1/1" />
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择产品" class="!w-1/1" :disabled="!!formData.noticeLineId" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -145,6 +154,7 @@
 import { WmProductSalesLineApi, WmProductSalesLineVO } from '@/api/mes/wm/productsales/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
+import WmSalesNoticeLineSelect from '@/views/mes/wm/salesnotice/components/WmSalesNoticeLineSelect.vue'
 import ProductSalesDetailList from './ProductSalesDetailList.vue'
 import ProductSalesDetailForm from './ProductSalesDetailForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
@@ -153,6 +163,7 @@ defineOptions({ name: 'ProductSalesLineList' })
 
 const props = defineProps<{
   salesId: number
+  noticeId?: number
   formType: string
 }>()
 
@@ -161,6 +172,7 @@ const message = useMessage() // 消息弹窗
 
 const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
 const isPick = computed(() => props.formType === 'pick') // 是否为拣货模式
+const hasNoticeId = computed(() => !!props.noticeId) // 是否有关联的发货通知单
 
 // ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
@@ -203,6 +215,7 @@ const lineFormType = ref('') // 行表单的类型
 const formData = ref({
   id: undefined,
   salesId: undefined as number | undefined,
+  noticeLineId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
   batchId: undefined as number | undefined,
@@ -237,6 +250,17 @@ const handleBatchChange = (batch: any) => {
   formData.value.batchCode = batch?.code
 }
 
+/** 发货通知单行变化时，自动填充物料信息 */
+const handleNoticeLineChange = (line: any) => {
+  if (line) {
+    formData.value.itemId = line.itemId
+    formData.value.quantity = line.quantity
+    formData.value.batchId = line.batchId
+    formData.value.batchCode = line.batchCode
+    formData.value.oqcCheckFlag = line.oqcCheckFlag ?? false
+  }
+}
+
 /** 提交表单 */
 const submitForm = async () => {
   await formRef.value.validate()
@@ -262,6 +286,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     salesId: undefined,
+    noticeLineId: undefined,
     itemId: undefined,
     quantity: undefined,
     batchId: undefined,

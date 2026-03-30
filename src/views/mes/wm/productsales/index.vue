@@ -49,7 +49,12 @@
         />
       </el-form-item>
       <el-form-item label="单据状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择单据状态" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择单据状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_PRODUCT_SALES_STATUS)"
             :key="dict.value"
@@ -84,6 +89,7 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <!-- TODO @AI：增加【详情】，通过 code 打开； -->
       <el-table-column label="出库单编号" align="center" prop="code" min-width="160" />
       <el-table-column label="出库单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="发货通知单号" align="center" prop="noticeCode" min-width="160" />
@@ -92,6 +98,7 @@
       <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
       <el-table-column label="收货人" align="center" prop="contactName" min-width="100" />
       <el-table-column label="联系方式" align="center" prop="contactTelephone" min-width="120" />
+      <el-table-column label="收货地址" align="center" prop="address" min-width="180" />
       <el-table-column label="承运商" align="center" prop="carrier" min-width="120" />
       <el-table-column label="运输单号" align="center" prop="shippingNumber" min-width="160" />
       <el-table-column
@@ -118,6 +125,7 @@
           >
             编辑
           </el-button>
+          <!-- TODO @AI：对齐 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/itemreceipt 交互 -->
           <el-button
             link
             type="warning"
@@ -157,6 +165,7 @@
             填写运单
           </el-button>
           <!-- 待出库：执行出库、取消 -->
+          <!-- TODO @AI：对齐 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/itemreceipt 交互 -->
           <el-button
             link
             type="primary"

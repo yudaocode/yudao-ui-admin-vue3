@@ -437,7 +437,8 @@ export const MesAutoCodeRuleCode = {
   QC_RQC_CODE: 'QC_RQC_CODE', // 退货检验单编码
   WM_WAREHOUSE_CODE: 'WM_WAREHOUSE_CODE', // 仓库编码
   WM_LOCATION_CODE: 'WM_LOCATION_CODE', // 库区编码
-  WM_AREA_CODE: 'WM_AREA_CODE' // 库位编码
+  WM_AREA_CODE: 'WM_AREA_CODE', // 库位编码
+  WM_PRODUCT_SALES_CODE: 'WM_PRODUCT_SALES_CODE' // 销售出库单编码
 } as const
 
 /** 获取物料/产品标识的标签 */

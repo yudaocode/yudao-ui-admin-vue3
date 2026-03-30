@@ -11,6 +11,13 @@
       <el-form-item label="物料" prop="itemId">
         <MdItemSelect v-model="formData.itemId" disabled />
       </el-form-item>
+      <el-form-item label="选择库存" prop="materialStockId">
+        <WmMaterialStockSelect
+          v-model="formData.materialStockId"
+          :item-id="formData.itemId"
+          @change="handleStockChange"
+        />
+      </el-form-item>
       <el-form-item label="出库仓库" prop="warehouseId">
         <WmWarehouseSelect v-model="formData.warehouseId" />
       </el-form-item>
@@ -54,6 +61,7 @@ import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSe
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
 import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
+import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
 
 defineOptions({ name: 'ProductSalesDetailForm' })
 
@@ -78,6 +86,7 @@ const formData = ref({
   salesId: undefined as number | undefined,
   itemId: undefined as number | undefined,
   quantity: undefined as number | undefined,
+  materialStockId: undefined as number | undefined,
   warehouseId: undefined as number | undefined,
   locationId: undefined as number | undefined,
   areaId: undefined as number | undefined,
@@ -118,6 +127,18 @@ const handleBatchChange = (batch: any) => {
   formData.value.batchCode = batch?.code
 }
 
+/** 库存选中回调，自动填充仓库/库区/库位/批次 */
+// TODO @AI：参考下别的模块 handleStockChange；有不同的逻辑；对齐下；
+const handleStockChange = (stock: any) => {
+  if (stock) {
+    formData.value.warehouseId = stock.warehouseId
+    formData.value.locationId = stock.locationId
+    formData.value.areaId = stock.areaId
+    formData.value.batchId = stock.batchId
+    formData.value.batchCode = stock.batchCode
+  }
+}
+
 /** 提交表单 */
 const submitForm = async () => {
   // 校验表单
@@ -153,6 +174,7 @@ const resetForm = () => {
     salesId: undefined,
     itemId: undefined,
     quantity: undefined,
+    materialStockId: undefined,
     warehouseId: undefined,
     locationId: undefined,
     areaId: undefined,

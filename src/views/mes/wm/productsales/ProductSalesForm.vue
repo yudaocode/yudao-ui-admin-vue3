@@ -16,9 +16,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -32,6 +30,7 @@
             />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：选择完后，自动填写 salesOrderCode、客户 -->
         <el-col :span="8">
           <el-form-item label="发货通知单" prop="noticeId">
             <WmSalesNoticeSelect v-model="formData.noticeId" :disabled="isHeaderReadonly" />
@@ -39,8 +38,6 @@
         </el-col>
       </el-row>
       <el-row>
-        <!-- DONE @芋艿：【暂时先忽略我这个想法】销售订单编号、出库日期，是不是不用记录 -->
-        <!-- DONE @芋艿：【暂时先忽略我这个想法】目前发货通知单选择后，可设置销售订单比那好、出库日期、客户；（和上面这个 DONE 有关联）（暂时保持手动填写，未来可考虑自动填充） -->
         <el-col :span="8">
           <el-form-item label="销售订单编号" prop="salesOrderCode">
             <el-input
@@ -87,6 +84,15 @@
             />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="收货地址" prop="address">
+            <el-input
+              v-model="formData.address"
+              placeholder="请输入收货地址"
+              :disabled="isHeaderReadonly"
+            />
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row>
         <el-col :span="24">
@@ -100,6 +106,7 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <!-- TODO @AI：可能要某个状态下，才进行展示； -->
       <el-divider content-position="left">运输信息</el-divider>
       <el-row>
         <el-col :span="8">
@@ -125,7 +132,11 @@
     <!-- 非新建模式展示行项目信息（出库物料） -->
     <template v-if="formData.id">
       <el-divider content-position="center">物料信息</el-divider>
-      <ProductSalesLineList :sales-id="formData.id" :form-type="formType" />
+      <ProductSalesLineList
+        :sales-id="formData.id"
+        :notice-id="formData.noticeId"
+        :form-type="formType"
+      />
     </template>
     <template #footer>
       <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
@@ -143,8 +154,9 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { WmProductSalesApi, WmProductSalesVO } from '@/api/mes/wm/productsales'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import WmSalesNoticeSelect from '@/views/mes/wm/salesnotice/components/WmSalesNoticeSelect.vue'
 import ProductSalesLineList from './ProductSalesLineList.vue'
@@ -166,6 +178,7 @@ const formData = ref({
   salesDate: undefined,
   contactName: undefined,
   contactTelephone: undefined,
+  address: undefined,
   carrier: undefined,
   shippingNumber: undefined,
   remark: undefined
@@ -194,8 +207,10 @@ const dialogTitle = computed(() => {
 })
 
 /** 生成出库单编号 */
-const generateCode = () => {
-  formData.value.code = 'PS' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_PRODUCT_SALES_CODE
+  )
 }
 
 /** 打开弹窗 */
@@ -291,6 +306,7 @@ const resetForm = () => {
     salesDate: undefined,
     contactName: undefined,
     contactTelephone: undefined,
+    address: undefined,
     carrier: undefined,
     shippingNumber: undefined,
     remark: undefined
