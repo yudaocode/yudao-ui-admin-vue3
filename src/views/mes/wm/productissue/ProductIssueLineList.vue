@@ -115,10 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  WmProductIssueLineApi,
-  WmProductIssueLineVO
-} from '@/api/mes/wm/productissue/line'
+import { WmProductIssueLineApi, WmProductIssueLineVO } from '@/api/mes/wm/productissue/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProductIssueDetailList from './ProductIssueDetailList.vue'
 import ProductIssueDetailForm from './ProductIssueDetailForm.vue'

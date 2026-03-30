@@ -45,11 +45,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="物料" prop="itemId">
-            <MdItemSelect
-              v-model="formData.itemId"
-              placeholder="请选择物料"
-              class="!w-1/1"
-            />
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">

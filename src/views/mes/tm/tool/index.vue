@@ -28,7 +28,12 @@
         />
       </el-form-item>
       <el-form-item label="工具类型" prop="toolTypeId">
-        <TmToolTypeSelect v-model="queryParams.toolTypeId" placeholder="请选择工具类型" clearable class="!w-240px" />
+        <TmToolTypeSelect
+          v-model="queryParams.toolTypeId"
+          placeholder="请选择工具类型"
+          clearable
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="品牌" prop="brand">
         <el-input

@@ -16,9 +16,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -131,9 +129,7 @@ const formType = ref<string>('create') // 表单的类型：create / update / st
 const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isStock = computed(() => formType.value === 'stock') // 是否为入库上架模式
 const isFinish = computed(() => formType.value === 'finish') // 是否为执行退料模式
-const isHeaderReadonly = computed(() =>
-  ['stock', 'detail', 'finish'].includes(formType.value)
-) // 表头是否只读
+const isHeaderReadonly = computed(() => ['stock', 'detail', 'finish'].includes(formType.value)) // 表头是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增生产退料单',

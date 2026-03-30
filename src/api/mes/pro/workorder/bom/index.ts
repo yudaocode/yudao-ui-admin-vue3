@@ -44,6 +44,8 @@ export const ProWorkOrderBomApi = {
 
   // 获取工单物料需求列表
   getWorkOrderBomItemListByWorkOrderId: async (workOrderId: number) => {
-    return await request.get({ url: `/mes/pro/work-order-bom/item-list-by-work-order-id?workOrderId=` + workOrderId })
+    return await request.get({
+      url: `/mes/pro/work-order-bom/item-list-by-work-order-id?workOrderId=` + workOrderId
+    })
   }
 }

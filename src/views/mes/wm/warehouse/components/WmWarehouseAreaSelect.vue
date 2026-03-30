@@ -70,8 +70,7 @@ const applyFilter = () => {
   const keyword = filterQuery.value.toLowerCase()
   filteredList.value = allList.value.filter(
     (item) =>
-      item.name?.toLowerCase().includes(keyword) ||
-      item.code?.toLowerCase().includes(keyword)
+      item.name?.toLowerCase().includes(keyword) || item.code?.toLowerCase().includes(keyword)
   )
 }
 

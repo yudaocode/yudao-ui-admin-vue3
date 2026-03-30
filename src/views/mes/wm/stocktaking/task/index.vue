@@ -105,7 +105,13 @@
         </template>
       </el-table-column>
       <el-table-column label="盘点方案" align="center" prop="planName" min-width="180" />
-      <el-table-column label="盘点日期" align="center" prop="takingDate" :formatter="dateFormatter2" min-width="180" />
+      <el-table-column
+        label="盘点日期"
+        align="center"
+        prop="takingDate"
+        :formatter="dateFormatter2"
+        min-width="180"
+      />
       <el-table-column label="盘点人" align="center" prop="userNickname" min-width="120" />
       <el-table-column label="单据状态" align="center" prop="status" min-width="110">
         <template #default="scope">

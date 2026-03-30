@@ -17,7 +17,10 @@
       :value="item.id"
     >
       <div class="flex items-center gap-8px">
-        <span>{{ item.warehouseName }} / {{ item.locationName || '-' }} / {{ item.areaName || '-' }}</span>
+        <span
+          >{{ item.warehouseName }} / {{ item.locationName || '-' }} /
+          {{ item.areaName || '-' }}</span
+        >
         <el-tag size="small" type="info" class="ml-4px">
           {{ item.batchCode || '无批次' }} | {{ item.quantity }}
         </el-tag>
@@ -82,16 +85,21 @@ const handleChange = (val: number | undefined) => {
 
 /** 加载库存列表 */
 const loadData = async () => {
-  const list: WmMaterialStockVO[] = await WmMaterialStockApi.getMaterialStockSimpleList(props.itemId)
+  const list: WmMaterialStockVO[] = await WmMaterialStockApi.getMaterialStockSimpleList(
+    props.itemId
+  )
   // 过滤掉冻结和零库存
   allList.value = list.filter((item) => !item.frozen && item.quantity > 0)
   filteredList.value = allList.value
 }
 
 /** 监听 itemId 变化重新加载 */
-watch(() => props.itemId, () => {
-  loadData()
-})
+watch(
+  () => props.itemId,
+  () => {
+    loadData()
+  }
+)
 
 onMounted(() => {
   loadData()

@@ -12,9 +12,7 @@
           <el-form-item label="计划编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入计划编码">
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -74,7 +72,10 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="8" v-if="formData.shiftType && formData.shiftType !== MesCalShiftTypeEnum.SINGLE">
+        <el-col
+          :span="8"
+          v-if="formData.shiftType && formData.shiftType !== MesCalShiftTypeEnum.SINGLE"
+        >
           <el-form-item label="倒班方式" prop="shiftMethod">
             <el-select v-model="formData.shiftMethod" placeholder="请选择倒班方式" class="!w-1/1">
               <el-option
@@ -139,7 +140,11 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CalPlanApi, CalPlanVO } from '@/api/mes/cal/plan'
 import { generateRandomStr } from '@/utils'
-import { MesCalPlanStatusEnum, MesCalShiftTypeEnum, MesCalShiftMethodEnum } from '@/views/mes/utils/constants'
+import {
+  MesCalPlanStatusEnum,
+  MesCalShiftTypeEnum,
+  MesCalShiftMethodEnum
+} from '@/views/mes/utils/constants'
 import CalShiftList from './CalShiftList.vue'
 import CalPlanTeamList from './CalPlanTeamList.vue'
 

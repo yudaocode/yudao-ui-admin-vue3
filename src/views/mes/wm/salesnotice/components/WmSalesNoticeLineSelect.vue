@@ -10,7 +10,12 @@
     class="!w-1/1"
     @change="handleChange"
   >
-    <el-option v-for="item in filteredList" :key="item.id" :label="`${item.itemCode} - ${item.itemName}`" :value="item.id">
+    <el-option
+      v-for="item in filteredList"
+      :key="item.id"
+      :label="`${item.itemCode} - ${item.itemName}`"
+      :value="item.id"
+    >
       <div class="flex items-center gap-8px">
         <span>{{ item.itemCode }}</span>
         <span class="text-gray-500">{{ item.itemName }}</span>
@@ -90,9 +95,12 @@ const loadList = async () => {
 }
 
 /** 监听 noticeId 变化重新加载 */
-watch(() => props.noticeId, () => {
-  loadList()
-})
+watch(
+  () => props.noticeId,
+  () => {
+    loadList()
+  }
+)
 
 onMounted(() => {
   loadList()

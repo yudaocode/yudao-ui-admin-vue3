@@ -19,7 +19,6 @@ export const StockTakingPlanParamApi = {
     return await request.get({ url: '/mes/wm/stocktaking-plan-param/page', params })
   },
 
-
   createStockTakingPlanParam: async (data: StockTakingPlanParamVO) => {
     return await request.post({ url: '/mes/wm/stocktaking-plan-param/create', data })
   },

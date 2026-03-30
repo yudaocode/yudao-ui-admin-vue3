@@ -131,9 +131,7 @@ const isEditable = computed(() => ['create', 'update'].includes(formType.value))
 const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
 const isFinish = computed(() => formType.value === 'finish') // 是否为执行退货模式
 const isDetail = computed(() => ['detail', 'finish'].includes(formType.value)) // 是否为详情模式
-const isHeaderReadonly = computed(() =>
-  ['stock', 'detail', 'finish'].includes(formType.value)
-) // 表头是否只读
+const isHeaderReadonly = computed(() => ['stock', 'detail', 'finish'].includes(formType.value)) // 表头是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增销售退货单',

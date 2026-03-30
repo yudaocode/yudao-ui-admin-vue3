@@ -20,7 +20,13 @@
 
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px" v-loading="formLoading">
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="formRules"
+        label-width="80px"
+        v-loading="formLoading"
+      >
         <el-form-item label="班组" prop="teamId">
           <el-select v-model="formData.teamId" placeholder="请选择班组" class="!w-1/1">
             <el-option

@@ -23,7 +23,10 @@ export interface WmProductIssueDetailVO {
 export const WmProductIssueDetailApi = {
   // 查询领料出库明细列表（按行编号）
   getProductIssueDetailListByLineId: async (lineId: number) => {
-    return await request.get({ url: '/mes/wm/product-issue-detail/list-by-line', params: { lineId } })
+    return await request.get({
+      url: '/mes/wm/product-issue-detail/list-by-line',
+      params: { lineId }
+    })
   },
 
   // 查询领料出库明细详情

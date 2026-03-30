@@ -14,7 +14,9 @@ export interface MdWorkstationToolVO {
 export const MdWorkstationToolApi = {
   // 查询工装夹具资源列表
   getWorkstationToolList: async (workstationId: number) => {
-    return await request.get({ url: `/mes/md-workstation-tool/list-by-workstation?workstationId=` + workstationId })
+    return await request.get({
+      url: `/mes/md-workstation-tool/list-by-workstation?workstationId=` + workstationId
+    })
   },
 
   // 新增工装夹具资源

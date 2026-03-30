@@ -10,13 +10,7 @@
     >
       <Icon icon="ep:plus" class="mr-5px" /> 添加条件
     </el-button>
-    <el-table
-      v-loading="loading"
-      :data="list"
-      :stripe="true"
-      :show-overflow-tooltip="true"
-      border
-    >
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
       <el-table-column label="条件类型" align="center" min-width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_WM_STOCK_TAKING_PLAN_PARAM_TYPE" :value="scope.row.type" />
@@ -118,7 +112,12 @@
             <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.ITEM">
               <MdItemSelect v-model="formData.valueId" @change="handleSelectorChange" />
             </template>
-            <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.BATCH || formData.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS">
+            <template
+              v-else-if="
+                formData.type === MesWmStockTakingParamTypeEnum.BATCH ||
+                formData.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS
+              "
+            >
               <!-- TODO @芋艿：后续来跟进 -->
               <el-row :gutter="8" class="w-full">
                 <el-col :span="8">

@@ -28,7 +28,10 @@ export interface WmOutsourceIssueDetailVO {
 export const WmOutsourceIssueDetailApi = {
   // 查询外协发料单明细列表（按行编号）
   getOutsourceIssueDetailListByLineId: async (lineId: number) => {
-    return await request.get({ url: '/mes/wm/outsource-issue-detail/list-by-line', params: { lineId } })
+    return await request.get({
+      url: '/mes/wm/outsource-issue-detail/list-by-line',
+      params: { lineId }
+    })
   },
 
   // 查询外协发料单明细详情

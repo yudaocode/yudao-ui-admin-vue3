@@ -23,7 +23,10 @@ export interface WmReturnIssueDetailVO {
 export const WmReturnIssueDetailApi = {
   // 查询生产退料明细列表（按行编号）
   getReturnIssueDetailListByLineId: async (lineId: number) => {
-    return await request.get({ url: '/mes/wm/return-issue-detail/list-by-line', params: { lineId } })
+    return await request.get({
+      url: '/mes/wm/return-issue-detail/list-by-line',
+      params: { lineId }
+    })
   },
 
   // 查询生产退料明细详情

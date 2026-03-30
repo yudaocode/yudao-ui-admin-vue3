@@ -30,7 +30,10 @@ export const StockTakingTaskLineApi = {
   },
 
   getStockTakingTaskLineSimpleList: async (taskId: number) => {
-    return await request.get({ url: '/mes/wm/stocktaking-task-line/simple-list', params: { taskId } })
+    return await request.get({
+      url: '/mes/wm/stocktaking-task-line/simple-list',
+      params: { taskId }
+    })
   },
 
   getStockTakingTaskLine: async (id: number) => {

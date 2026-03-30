@@ -51,7 +51,11 @@
             </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="异常描述" prop="checkResult" v-if="formData.checkStatus === MesDvCheckResultEnum.ABNORMAL">
+        <el-form-item
+          label="异常描述"
+          prop="checkResult"
+          v-if="formData.checkStatus === MesDvCheckResultEnum.ABNORMAL"
+        >
           <el-input v-model="formData.checkResult" type="textarea" placeholder="请输入异常描述" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">

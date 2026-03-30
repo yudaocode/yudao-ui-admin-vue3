@@ -24,7 +24,10 @@ export interface WmProductSalesDetailVO {
 export const WmProductSalesDetailApi = {
   // 查询销售出库明细列表（按行编号）
   getProductSalesDetailListByLineId: async (lineId: number) => {
-    return await request.get({ url: '/mes/wm/product-sales-detail/list-by-line', params: { lineId } })
+    return await request.get({
+      url: '/mes/wm/product-sales-detail/list-by-line',
+      params: { lineId }
+    })
   },
 
   // 查询销售出库明细详情

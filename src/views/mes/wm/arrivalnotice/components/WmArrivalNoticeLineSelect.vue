@@ -10,7 +10,12 @@
     class="!w-1/1"
     @change="handleChange"
   >
-    <el-option v-for="item in filteredList" :key="item.id" :label="`${item.itemCode} - ${item.itemName}`" :value="item.id">
+    <el-option
+      v-for="item in filteredList"
+      :key="item.id"
+      :label="`${item.itemCode} - ${item.itemName}`"
+      :value="item.id"
+    >
       <div class="flex items-center gap-8px">
         <span>{{ item.itemCode }}</span>
         <span class="text-gray-500">{{ item.itemName }}</span>

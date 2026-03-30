@@ -23,12 +23,23 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="面积" prop="area">
-            <el-input-number v-model="formData.area" :precision="2" :min="0" controls-position="right" class="!w-1/1" />
+            <el-input-number
+              v-model="formData.area"
+              :precision="2"
+              :min="0"
+              controls-position="right"
+              class="!w-1/1"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="负责人" prop="chargeUserId">
-            <el-select v-model="formData.chargeUserId" placeholder="请选择负责人" clearable class="!w-1/1">
+            <el-select
+              v-model="formData.chargeUserId"
+              placeholder="请选择负责人"
+              clearable
+              class="!w-1/1"
+            >
               <el-option
                 v-for="user in userList"
                 :key="user.id"
@@ -63,7 +74,9 @@
       </el-row>
     </el-form>
     <template #footer>
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
+        >确 定</el-button
+      >
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>

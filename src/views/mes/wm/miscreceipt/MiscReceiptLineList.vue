@@ -4,13 +4,7 @@
     <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加物料
     </el-button>
-    <el-table
-      v-loading="loading"
-      :data="list"
-      :stripe="true"
-      :show-overflow-tooltip="true"
-      border
-    >
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
       <el-table-column label="物料编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
@@ -20,20 +14,12 @@
       <el-table-column label="仓库" align="center" prop="warehouseName" min-width="100" />
       <el-table-column label="库区" align="center" prop="locationName" min-width="100" />
       <el-table-column label="库位" align="center" prop="areaName" min-width="100" />
-      <el-table-column
-        v-if="isUpdate"
-        label="操作"
-        align="center"
-        width="160"
-        fixed="right"
-      >
+      <el-table-column v-if="isUpdate" label="操作" align="center" width="160" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row.id)">
             编辑
           </el-button>
-          <el-button link type="danger" @click="handleDelete(scope.row.id)">
-            删除
-          </el-button>
+          <el-button link type="danger" @click="handleDelete(scope.row.id)"> 删除 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -51,11 +37,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="物料" prop="itemId">
-            <MdItemSelect
-              v-model="formData.itemId"
-              placeholder="请选择物料"
-              class="!w-1/1"
-            />
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">

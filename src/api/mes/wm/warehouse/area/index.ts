@@ -52,5 +52,5 @@ export const WmWarehouseAreaApi = {
   // 删除库位
   deleteWarehouseArea: async (id: number) => {
     return await request.delete({ url: '/mes/wm/warehouse-area/delete?id=' + id })
-  },
+  }
 }

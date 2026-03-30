@@ -1,11 +1,6 @@
 <template>
   <Dialog title="批次详情" v-model="dialogVisible" width="980px">
-    <el-form
-      :model="formData"
-      label-width="120px"
-      v-loading="formLoading"
-      disabled
-    >
+    <el-form :model="formData" label-width="120px" v-loading="formLoading" disabled>
       <el-row>
         <el-col :span="8">
           <el-form-item label="批次编号">
@@ -43,17 +38,29 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="生产日期">
-            <el-input :model-value="formData.produceDate ? formatDate(formData.produceDate, 'YYYY-MM-DD') : ''" />
+            <el-input
+              :model-value="
+                formData.produceDate ? formatDate(formData.produceDate, 'YYYY-MM-DD') : ''
+              "
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="有效期">
-            <el-input :model-value="formData.expireDate ? formatDate(formData.expireDate, 'YYYY-MM-DD') : ''" />
+            <el-input
+              :model-value="
+                formData.expireDate ? formatDate(formData.expireDate, 'YYYY-MM-DD') : ''
+              "
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="入库日期">
-            <el-input :model-value="formData.receiptDate ? formatDate(formData.receiptDate, 'YYYY-MM-DD') : ''" />
+            <el-input
+              :model-value="
+                formData.receiptDate ? formatDate(formData.receiptDate, 'YYYY-MM-DD') : ''
+              "
+            />
           </el-form-item>
         </el-col>
       </el-row>

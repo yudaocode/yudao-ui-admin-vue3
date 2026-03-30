@@ -23,7 +23,10 @@ export interface WmReturnVendorDetailVO {
 export const WmReturnVendorDetailApi = {
   // 查询供应商退货明细列表（按行编号）
   getReturnVendorDetailListByLineId: async (lineId: number) => {
-    return await request.get({ url: '/mes/wm/return-vendor-detail/list-by-line', params: { lineId } })
+    return await request.get({
+      url: '/mes/wm/return-vendor-detail/list-by-line',
+      params: { lineId }
+    })
   },
 
   // 查询供应商退货明细详情

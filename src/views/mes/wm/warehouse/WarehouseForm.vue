@@ -13,9 +13,7 @@
           <el-form-item label="仓库编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入仓库编码">
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -75,7 +73,9 @@
       </el-row>
     </el-form>
     <template #footer>
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
+        >确 定</el-button
+      >
       <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>
@@ -108,7 +108,9 @@ const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
 /** 生成仓库编码 */
 const generateCode = async () => {
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_WAREHOUSE_CODE)
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_WAREHOUSE_CODE
+  )
 }
 
 const formData = ref({

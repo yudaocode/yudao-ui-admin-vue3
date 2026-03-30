@@ -45,7 +45,12 @@
         />
       </el-form-item>
       <el-form-item label="客户类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择客户类型" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.type"
+          placeholder="请选择客户类型"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_CLIENT_TYPE)"
             :key="dict.value"
@@ -75,12 +80,7 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-        <el-button
-          type="warning"
-          plain
-          @click="handleImport"
-          v-hasPermi="['mes:md-client:import']"
-        >
+        <el-button type="warning" plain @click="handleImport" v-hasPermi="['mes:md-client:import']">
           <Icon icon="ep:upload" class="mr-5px" /> 导入
         </el-button>
         <el-button

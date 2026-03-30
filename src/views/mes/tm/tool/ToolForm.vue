@@ -12,11 +12,13 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="工具编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入工具编码" :disabled="formType !== 'create'">
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入工具编码"
+              :disabled="formType !== 'create'"
+            >
               <template v-if="formType === 'create'" #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -62,7 +64,12 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="可用数量" prop="availableQuantity">
-            <el-input-number v-model="formData.availableQuantity" :min="0" disabled class="!w-1/1" />
+            <el-input-number
+              v-model="formData.availableQuantity"
+              :min="0"
+              disabled
+              class="!w-1/1"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -128,7 +135,9 @@
     </el-form>
     <!-- TODO @AI：条码相关，先忽略，后续加 -->
     <template #footer>
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
+        >确 定</el-button
+      >
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -139,7 +148,11 @@ import { TmToolApi, TmToolVO } from '@/api/mes/tm/tool'
 import { TmToolTypeVO } from '@/api/mes/tm/tool/type'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import TmToolTypeSelect from '@/views/mes/tm/tool/components/TmToolTypeSelect.vue'
-import { MesToolStatusEnum, MesMaintenTypeEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import {
+  MesToolStatusEnum,
+  MesMaintenTypeEnum,
+  MesAutoCodeRuleCode
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ToolForm' })
 

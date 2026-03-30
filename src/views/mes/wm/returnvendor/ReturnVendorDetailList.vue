@@ -7,13 +7,7 @@
       <el-table-column label="库区名称" align="center" prop="locationName" min-width="100" />
       <el-table-column label="库位名称" align="center" prop="areaName" min-width="100" />
       <el-table-column label="数量" align="center" prop="quantity" width="100" />
-      <el-table-column
-        v-if="isStock"
-        label="操作"
-        align="center"
-        width="120"
-        fixed="right"
-      >
+      <el-table-column v-if="isStock" label="操作" align="center" width="120" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="emit('edit-detail', scope.row.id)">
             编辑
@@ -26,10 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  WmReturnVendorDetailApi,
-  WmReturnVendorDetailVO
-} from '@/api/mes/wm/returnvendor/detail'
+import { WmReturnVendorDetailApi, WmReturnVendorDetailVO } from '@/api/mes/wm/returnvendor/detail'
 
 defineOptions({ name: 'ReturnVendorDetailList' })
 

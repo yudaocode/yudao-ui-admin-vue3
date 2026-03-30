@@ -143,9 +143,11 @@
             type="danger"
             @click="handleCancel(scope.row.id)"
             v-hasPermi="['mes:wm-outsource-issue:update']"
-            v-if="scope.row.status === MesWmOutsourceIssueStatusEnum.PREPARE ||
-                  scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVING ||
-                  scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVED"
+            v-if="
+              scope.row.status === MesWmOutsourceIssueStatusEnum.PREPARE ||
+              scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVING ||
+              scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVED
+            "
           >
             取消
           </el-button>

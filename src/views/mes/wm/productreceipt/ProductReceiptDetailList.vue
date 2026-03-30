@@ -25,7 +25,10 @@
 </template>
 
 <script setup lang="ts">
-import { WmProductReceiptDetailApi, WmProductReceiptDetailVO } from '@/api/mes/wm/productreceipt/detail'
+import {
+  WmProductReceiptDetailApi,
+  WmProductReceiptDetailVO
+} from '@/api/mes/wm/productreceipt/detail'
 
 defineOptions({ name: 'ProductReceiptDetailList' })
 

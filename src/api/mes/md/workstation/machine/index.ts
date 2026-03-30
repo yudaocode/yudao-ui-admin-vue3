@@ -15,7 +15,9 @@ export interface MdWorkstationMachineVO {
 export const MdWorkstationMachineApi = {
   // 查询设备资源列表
   getWorkstationMachineList: async (workstationId: number) => {
-    return await request.get({ url: `/mes/md-workstation-machine/list-by-workstation?workstationId=` + workstationId })
+    return await request.get({
+      url: `/mes/md-workstation-machine/list-by-workstation?workstationId=` + workstationId
+    })
   },
 
   // 新增设备资源

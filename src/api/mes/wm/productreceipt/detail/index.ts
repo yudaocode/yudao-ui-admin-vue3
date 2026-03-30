@@ -28,7 +28,10 @@ export const WmProductReceiptDetailApi = {
 
   // 根据行项目ID查询产品入库单明细列表
   getProductReceiptDetailListByLineId: async (lineId: number) => {
-    return await request.get({ url: '/mes/wm/product-receipt-detail/list-by-line', params: { lineId } })
+    return await request.get({
+      url: '/mes/wm/product-receipt-detail/list-by-line',
+      params: { lineId }
+    })
   },
 
   // 查询产品入库单明细详情

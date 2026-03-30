@@ -63,8 +63,7 @@ const handleFilter = (query: string) => {
   const keyword = query.toLowerCase()
   filteredList.value = allList.value.filter(
     (item) =>
-      item.code?.toLowerCase().includes(keyword) ||
-      item.vendorName?.toLowerCase().includes(keyword)
+      item.code?.toLowerCase().includes(keyword) || item.vendorName?.toLowerCase().includes(keyword)
   )
 }
 

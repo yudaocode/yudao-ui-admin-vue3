@@ -60,11 +60,7 @@
       </el-table-column>
       <el-table-column label="备注" align="center" width="150">
         <template #default="scope">
-          <el-input
-            v-if="scope.row.editing"
-            v-model="scope.row.remark"
-            placeholder="请输入备注"
-          />
+          <el-input v-if="scope.row.editing" v-model="scope.row.remark" placeholder="请输入备注" />
           <span v-else>{{ scope.row.remark || '-' }}</span>
         </template>
       </el-table-column>

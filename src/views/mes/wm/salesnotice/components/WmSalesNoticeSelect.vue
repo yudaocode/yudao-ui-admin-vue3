@@ -10,7 +10,12 @@
     class="!w-1/1"
     @change="handleChange"
   >
-    <el-option v-for="item in filteredList" :key="item.id" :label="item.noticeName" :value="item.id">
+    <el-option
+      v-for="item in filteredList"
+      :key="item.id"
+      :label="item.noticeName"
+      :value="item.id"
+    >
       <div class="flex items-center gap-8px">
         <span>{{ item.noticeName }}</span>
         <el-tag v-if="item.noticeCode" size="small" type="info" class="ml-4px">

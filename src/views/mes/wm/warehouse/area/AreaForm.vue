@@ -15,7 +15,6 @@
               v-model="selectedWarehouseId"
               placeholder="请选择仓库"
               class="!w-1/1"
-
               @change="handleWarehouseChange"
             >
               <el-option
@@ -48,9 +47,7 @@
           <el-form-item label="库位编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入库位编码">
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -70,7 +67,6 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-
             />
           </el-form-item>
         </el-col>
@@ -82,7 +78,6 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-
             />
           </el-form-item>
         </el-col>
@@ -95,7 +90,6 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-
             />
           </el-form-item>
         </el-col>
@@ -106,7 +100,6 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-
             />
           </el-form-item>
         </el-col>
@@ -117,7 +110,6 @@
               :min="0"
               controls-position="right"
               class="!w-1/1"
-
             />
           </el-form-item>
         </el-col>
@@ -125,11 +117,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
-            <el-select
-              v-model="formData.status"
-              placeholder="请选择"
-              class="!w-1/1"
-            >
+            <el-select v-model="formData.status" placeholder="请选择" class="!w-1/1">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
                 :key="dict.value"
@@ -160,11 +148,7 @@
       <el-row>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
-            <el-input
-              v-model="formData.remark"
-              type="textarea"
-              placeholder="请输入备注"
-            />
+            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
           </el-form-item>
         </el-col>
       </el-row>

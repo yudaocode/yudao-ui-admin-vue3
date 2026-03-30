@@ -20,7 +20,10 @@ export interface WmOutsourceReceiptDetailVO {
 export const WmOutsourceReceiptDetailApi = {
   // 查询委外收货明细列表（按行编号）
   getOutsourceReceiptDetailListByLineId: async (lineId: number) => {
-    return await request.get({ url: '/mes/wm/outsource-receipt-detail/list-by-line', params: { lineId } })
+    return await request.get({
+      url: '/mes/wm/outsource-receipt-detail/list-by-line',
+      params: { lineId }
+    })
   },
 
   // 查询委外收货明细详情

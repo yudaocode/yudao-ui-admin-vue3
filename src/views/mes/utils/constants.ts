@@ -132,11 +132,11 @@ export const MesDvCheckResultEnum = {
 
 /** MES 质检结果值类型枚举 */
 export const MesQcResultValueType = {
-  FLOAT: 1,    // 浮点
-  INTEGER: 2,  // 整数
-  TEXT: 3,     // 文本
-  DICT: 4,     // 字典
-  FILE: 5      // 文件
+  FLOAT: 1, // 浮点
+  INTEGER: 2, // 整数
+  TEXT: 3, // 文本
+  DICT: 4, // 字典
+  FILE: 5 // 文件
 } as const
 
 /** MES 业务类型常量 */
@@ -168,10 +168,10 @@ export const MesQcSourceDocTypeEnum = {
 
 /** MES 质检类型枚举 */
 export const MesQcTypeEnum = {
-  IQC: 1,  // 来料检验
+  IQC: 1, // 来料检验
   IPQC: 2, // 过程检验
-  OQC: 3,  // 出货检验
-  RQC: 4   // 退货检验
+  OQC: 3, // 出货检验
+  RQC: 4 // 退货检验
 }
 
 /** MES 单据状态常量 */
@@ -201,21 +201,21 @@ export const MesProFeedbackStatusEnum = {
 
 /** MES 安灯处置状态枚举 */
 export const MesProAndonStatusEnum = {
-  ACTIVE: 0,  // 未处置
-  HANDLED: 1  // 已处置
+  ACTIVE: 0, // 未处置
+  HANDLED: 1 // 已处置
 }
 
 /** MES 安灯级别枚举 */
 export const MesProAndonLevelEnum = {
   LEVEL1: 1, // 一级
   LEVEL2: 2, // 二级
-  LEVEL3: 3  // 三级
+  LEVEL3: 3 // 三级
 }
 
 /** MES 生产报工类型枚举 */
 export const MesProFeedbackTypeEnum = {
-  SELF: 1,    // 自行报工
-  UNIFIED: 2  // 统一报工
+  SELF: 1, // 自行报工
+  UNIFIED: 2 // 统一报工
 }
 
 /** MES 到货通知单状态枚举 */

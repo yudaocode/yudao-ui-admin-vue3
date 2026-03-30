@@ -170,7 +170,12 @@
               删除
             </el-button>
           </template>
-          <template v-if="scope.row.status === MesProFeedbackStatusEnum.APPROVING && scope.row.approveUserId === currentUserId">
+          <template
+            v-if="
+              scope.row.status === MesProFeedbackStatusEnum.APPROVING &&
+              scope.row.approveUserId === currentUserId
+            "
+          >
             <el-button
               link
               type="primary"

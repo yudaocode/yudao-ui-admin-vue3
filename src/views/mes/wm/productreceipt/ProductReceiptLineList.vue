@@ -50,9 +50,7 @@
           <el-button v-if="isStock" link type="success" @click="handleStock(scope.row.id)">
             上架
           </el-button>
-          <el-button link type="primary" @click="handleBarcode(scope.row)">
-            条码
-          </el-button>
+          <el-button link type="primary" @click="handleBarcode(scope.row)"> 条码 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -249,7 +247,10 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = { ...formData.value, receiptId: props.receiptId } as unknown as WmProductReceiptLineVO
+    const data = {
+      ...formData.value,
+      receiptId: props.receiptId
+    } as unknown as WmProductReceiptLineVO
     if (lineFormType.value === 'create') {
       await WmProductReceiptLineApi.createProductReceiptLine(data)
       message.success(t('common.createSuccess'))

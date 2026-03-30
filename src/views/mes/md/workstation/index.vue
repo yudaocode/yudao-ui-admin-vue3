@@ -27,10 +27,20 @@
         />
       </el-form-item>
       <el-form-item label="所在车间" prop="workshopId">
-        <MdWorkshopSelect v-model="queryParams.workshopId" placeholder="请选择车间" clearable class="!w-240px" />
+        <MdWorkshopSelect
+          v-model="queryParams.workshopId"
+          placeholder="请选择车间"
+          clearable
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="所属工序" prop="processId">
-        <ProProcessSelect v-model="queryParams.processId" placeholder="请选择工序" clearable class="!w-240px" />
+        <ProProcessSelect
+          v-model="queryParams.processId"
+          placeholder="请选择工序"
+          clearable
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">

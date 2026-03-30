@@ -26,10 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  WmReturnSalesDetailApi,
-  WmReturnSalesDetailVO
-} from '@/api/mes/wm/returnsales/detail'
+import { WmReturnSalesDetailApi, WmReturnSalesDetailVO } from '@/api/mes/wm/returnsales/detail'
 
 defineOptions({ name: 'ReturnSalesDetailList' })
 

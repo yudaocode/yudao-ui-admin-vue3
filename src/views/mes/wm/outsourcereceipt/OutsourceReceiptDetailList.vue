@@ -1,20 +1,21 @@
 <!-- MES 外协收货明细列表（展开行内嵌子组件） -->
 <template>
   <div class="pl-60px pr-20px py-10px">
-    <el-button v-if="isUpdate" type="primary" plain size="small" @click="emit('edit-detail', undefined)" class="mb-10px">
+    <el-button
+      v-if="isUpdate"
+      type="primary"
+      plain
+      size="small"
+      @click="emit('edit-detail', undefined)"
+      class="mb-10px"
+    >
       <Icon icon="ep:plus" class="mr-5px" /> 添加明细
     </el-button>
     <el-table v-loading="loading" :data="list" border size="small">
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column label="库位名称" align="center" prop="locationName" min-width="100" />
       <el-table-column label="数量" align="center" prop="quantity" width="100" />
-      <el-table-column
-        v-if="isUpdate"
-        label="操作"
-        align="center"
-        width="120"
-        fixed="right"
-      >
+      <el-table-column v-if="isUpdate" label="操作" align="center" width="120" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="emit('edit-detail', scope.row.id)">
             编辑
@@ -27,7 +28,10 @@
 </template>
 
 <script setup lang="ts">
-import { WmOutsourceReceiptDetailApi, WmOutsourceReceiptDetailVO } from '@/api/mes/wm/outsourcereceipt/detail'
+import {
+  WmOutsourceReceiptDetailApi,
+  WmOutsourceReceiptDetailVO
+} from '@/api/mes/wm/outsourcereceipt/detail'
 
 defineOptions({ name: 'OutsourceReceiptDetailList' })
 
@@ -52,7 +56,9 @@ const list = ref<WmOutsourceReceiptDetailVO[]>([])
 const getList = async () => {
   loading.value = true
   try {
-    list.value = await WmOutsourceReceiptDetailApi.getOutsourceReceiptDetailListByLineId(props.lineId)
+    list.value = await WmOutsourceReceiptDetailApi.getOutsourceReceiptDetailListByLineId(
+      props.lineId
+    )
   } finally {
     loading.value = false
   }

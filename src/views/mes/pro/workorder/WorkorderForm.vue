@@ -13,9 +13,7 @@
           <el-form-item label="工单编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入工单编码" :disabled="isDetail">
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -74,10 +72,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="产品" prop="productId">
-            <MdItemSelect
-              v-model="formData.productId"
-              :disabled="isDetail"
-            />
+            <MdItemSelect v-model="formData.productId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
         <el-col :span="8">

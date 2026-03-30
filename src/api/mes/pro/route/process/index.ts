@@ -29,7 +29,9 @@ export const ProRouteProcessApi = {
 
   // 按产品查询工序列表（自动查找关联的工艺路线）
   getRouteProcessListByProduct: async (productId: number) => {
-    return await request.get({ url: `/mes/pro/route-process/list-by-product?productId=` + productId })
+    return await request.get({
+      url: `/mes/pro/route-process/list-by-product?productId=` + productId
+    })
   },
 
   // 查询工艺路线工序详情

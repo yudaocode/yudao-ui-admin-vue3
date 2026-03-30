@@ -94,10 +94,7 @@
         <!-- DONE @AI：移出仓库/库区/库位改为可编辑选择，符合当前录入要求 -->
         <el-col :span="8">
           <el-form-item label="移出仓库" prop="fromWarehouseId">
-            <WmWarehouseSelect
-              v-model="formData.fromWarehouseId"
-              @change="handleWarehouseChange"
-            />
+            <WmWarehouseSelect v-model="formData.fromWarehouseId" @change="handleWarehouseChange" />
           </el-form-item>
         </el-col>
         <el-col v-if="formData.fromWarehouseId" :span="8">

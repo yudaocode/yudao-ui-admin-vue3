@@ -22,7 +22,10 @@ export interface WmReturnSalesDetailVO {
 export const WmReturnSalesDetailApi = {
   // 查询销售退货明细列表（按行编号）
   getReturnSalesDetailListByLineId: async (lineId: number) => {
-    return await request.get({ url: '/mes/wm/return-sales-detail/list-by-line', params: { lineId } })
+    return await request.get({
+      url: '/mes/wm/return-sales-detail/list-by-line',
+      params: { lineId }
+    })
   },
 
   // 查询销售退货明细详情

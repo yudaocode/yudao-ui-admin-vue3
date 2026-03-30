@@ -27,11 +27,10 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_SOURCE_DOC_TYPE).filter(
-              (dict) =>
-                [MesQcSourceDocTypeEnum.RETURN_ISSUE, MesQcSourceDocTypeEnum.RETURN_SALES].includes(
-                  dict.value
-                )
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_QC_SOURCE_DOC_TYPE).filter((dict) =>
+              [MesQcSourceDocTypeEnum.RETURN_ISSUE, MesQcSourceDocTypeEnum.RETURN_SALES].includes(
+                dict.value
+              )
             )"
             :key="dict.value"
             :label="dict.label"

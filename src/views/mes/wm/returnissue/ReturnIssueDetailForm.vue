@@ -77,10 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  WmReturnIssueDetailApi,
-  WmReturnIssueDetailVO
-} from '@/api/mes/wm/returnissue/detail'
+import { WmReturnIssueDetailApi, WmReturnIssueDetailVO } from '@/api/mes/wm/returnissue/detail'
 import { WmMaterialStockVO } from '@/api/mes/wm/materialstock'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'

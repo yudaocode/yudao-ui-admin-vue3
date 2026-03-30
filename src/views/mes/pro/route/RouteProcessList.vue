@@ -10,8 +10,20 @@
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="序号" align="center" prop="sort" width="70" fixed="left" />
-      <el-table-column label="工序编码" align="center" prop="processCode" width="120" fixed="left" />
-      <el-table-column label="工序名称" align="center" prop="processName" width="120" fixed="left" />
+      <el-table-column
+        label="工序编码"
+        align="center"
+        prop="processCode"
+        width="120"
+        fixed="left"
+      />
+      <el-table-column
+        label="工序名称"
+        align="center"
+        prop="processName"
+        width="120"
+        fixed="left"
+      />
       <el-table-column label="下一道工序" align="center" prop="nextProcessName" width="120" />
       <el-table-column label="与下一道工序关系" align="center" prop="linkType" width="150">
         <template #default="scope">
@@ -40,7 +52,10 @@
       </el-table-column>
       <el-table-column label="颜色" align="center" prop="colorCode" width="100">
         <template #default="scope">
-          <div v-if="scope.row.colorCode" style="display: flex; align-items: center; justify-content: center; gap: 4px">
+          <div
+            v-if="scope.row.colorCode"
+            style="display: flex; align-items: center; justify-content: center; gap: 4px"
+          >
             <div
               :style="{
                 backgroundColor: scope.row.colorCode,

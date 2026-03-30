@@ -10,12 +10,7 @@
     class="!w-1/1"
     @change="handleChange"
   >
-    <el-option
-      v-for="item in filteredList"
-      :key="item.id"
-      :label="item.code"
-      :value="item.id"
-    >
+    <el-option v-for="item in filteredList" :key="item.id" :label="item.code" :value="item.id">
       <div class="flex items-center gap-8px">
         <span>{{ item.code }}</span>
         <el-tag v-if="item.clientName" size="small" type="info" class="ml-4px">
@@ -48,8 +43,8 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:modelValue': [value: number | undefined]
-change: [item: WmPackageVO | undefined]
-}>() 
+  change: [item: WmPackageVO | undefined]
+}>()
 
 const allList = ref<WmPackageVO[]>([])
 const filteredList = ref<WmPackageVO[]>([])
@@ -77,8 +72,7 @@ const handleFilter = (query: string) => {
   const keyword = query.toLowerCase()
   filteredList.value = available.filter(
     (item) =>
-      item.code?.toLowerCase().includes(keyword) ||
-      item.clientName?.toLowerCase().includes(keyword)
+      item.code?.toLowerCase().includes(keyword) || item.clientName?.toLowerCase().includes(keyword)
   )
 }
 

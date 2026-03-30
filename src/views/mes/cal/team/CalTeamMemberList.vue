@@ -28,12 +28,7 @@
         v-loading="formLoading"
       >
         <el-form-item label="用户" prop="userId">
-          <el-select
-            v-model="formData.userId"
-            placeholder="请选择用户"
-            filterable
-            class="!w-1/1"
-          >
+          <el-select v-model="formData.userId" placeholder="请选择用户" filterable class="!w-1/1">
             <el-option
               v-for="user in userList"
               :key="user.id"

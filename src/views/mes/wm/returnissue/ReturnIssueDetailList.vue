@@ -26,10 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  WmReturnIssueDetailApi,
-  WmReturnIssueDetailVO
-} from '@/api/mes/wm/returnissue/detail'
+import { WmReturnIssueDetailApi, WmReturnIssueDetailVO } from '@/api/mes/wm/returnissue/detail'
 
 defineOptions({ name: 'ReturnIssueDetailList' })
 

@@ -47,7 +47,10 @@
 </template>
 
 <script setup lang="ts">
-import { WmOutsourceReceiptDetailApi, WmOutsourceReceiptDetailVO } from '@/api/mes/wm/outsourcereceipt/detail'
+import {
+  WmOutsourceReceiptDetailApi,
+  WmOutsourceReceiptDetailVO
+} from '@/api/mes/wm/outsourcereceipt/detail'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'

@@ -13,9 +13,7 @@
           <el-form-item label="装箱单编号" prop="code">
             <el-input v-model="formData.code" placeholder="请输入装箱单编号">
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -204,7 +202,9 @@ const formRef = ref()
 
 /** 生成装箱单编号 */
 const generateCode = async () => {
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_PACKAGE_CODE)
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_PACKAGE_CODE
+  )
 }
 
 /** 打开弹窗 */

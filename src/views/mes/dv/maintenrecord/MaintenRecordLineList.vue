@@ -175,5 +175,4 @@ watch(
   },
   { immediate: true }
 )
-
 </script>

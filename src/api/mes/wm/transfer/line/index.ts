@@ -49,6 +49,5 @@ export const WmTransferLineApi = {
   // 删除转移单行
   deleteTransferLine: async (id: number) => {
     return await request.delete({ url: '/mes/wm/transfer-line/delete?id=' + id })
-  },
-
+  }
 }

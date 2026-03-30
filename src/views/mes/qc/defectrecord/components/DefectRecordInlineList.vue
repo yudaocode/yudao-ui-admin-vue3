@@ -2,92 +2,96 @@
 <template>
   <Dialog title="缺陷记录" v-model="dialogVisible" width="900px">
     <div class="overflow-hidden">
-    <!-- 新增按钮 -->
-    <el-row class="mb-10px">
-      <el-button type="primary" plain @click="handleAdd" v-hasPermi="['mes:qc-defect:create']">
-        <Icon icon="ep:plus" class="mr-5px" /> 新增缺陷
-      </el-button>
-    </el-row>
+      <!-- 新增按钮 -->
+      <el-row class="mb-10px">
+        <el-button type="primary" plain @click="handleAdd" v-hasPermi="['mes:qc-defect:create']">
+          <Icon icon="ep:plus" class="mr-5px" /> 新增缺陷
+        </el-button>
+      </el-row>
 
-    <!-- 内联编辑表格 -->
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="缺陷描述" align="center" min-width="200">
-        <template #default="scope">
-          <el-input
-            v-if="scope.row.editing"
-            v-model="scope.row.name"
-            placeholder="请输入缺陷描述"
-          />
-          <span v-else>{{ scope.row.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="缺陷等级" align="center" width="140">
-        <template #default="scope">
-          <el-select v-if="scope.row.editing" v-model="scope.row.level" placeholder="请选择">
-            <el-option
-              v-for="dict in getIntDictOptions(DICT_TYPE.MES_DEFECT_LEVEL)"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
+      <!-- 内联编辑表格 -->
+      <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+        <el-table-column label="缺陷描述" align="center" min-width="200">
+          <template #default="scope">
+            <el-input
+              v-if="scope.row.editing"
+              v-model="scope.row.name"
+              placeholder="请输入缺陷描述"
             />
-          </el-select>
-          <dict-tag v-else :type="DICT_TYPE.MES_DEFECT_LEVEL" :value="scope.row.level" />
-        </template>
-      </el-table-column>
-      <el-table-column label="缺陷数量" align="center" width="120">
-        <template #default="scope">
-          <el-input-number
-            v-if="scope.row.editing"
-            v-model="scope.row.quantity"
-            :min="1"
-            controls-position="right"
-            class="!w-1/1"
-          />
-          <span v-else>{{ scope.row.quantity }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" align="center" min-width="150">
-        <template #default="scope">
-          <el-input v-if="scope.row.editing" v-model="scope.row.remark" placeholder="请输入备注" />
-          <span v-else>{{ scope.row.remark || '-' }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" width="130" fixed="right">
-        <template #default="scope">
-          <template v-if="scope.row.editing">
-            <el-button link type="success" @click="handleSave(scope.row)">保存</el-button>
-            <el-button link type="info" @click="handleCancel(scope.row, scope.$index)">
-              取消
-            </el-button>
+            <span v-else>{{ scope.row.name }}</span>
           </template>
-          <template v-else>
-            <el-button
-              link
-              type="primary"
-              @click="handleEdit(scope.row)"
-              v-hasPermi="['mes:qc-defect:update']"
-            >
-              编辑
-            </el-button>
-            <el-button
-              link
-              type="danger"
-              @click="handleDelete(scope.row.id)"
-              v-hasPermi="['mes:qc-defect:update']"
-            >
-              删除
-            </el-button>
+        </el-table-column>
+        <el-table-column label="缺陷等级" align="center" width="140">
+          <template #default="scope">
+            <el-select v-if="scope.row.editing" v-model="scope.row.level" placeholder="请选择">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_DEFECT_LEVEL)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+            <dict-tag v-else :type="DICT_TYPE.MES_DEFECT_LEVEL" :value="scope.row.level" />
           </template>
-        </template>
-      </el-table-column>
-    </el-table>
-    <!-- 分页 -->
-    <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
+        </el-table-column>
+        <el-table-column label="缺陷数量" align="center" width="120">
+          <template #default="scope">
+            <el-input-number
+              v-if="scope.row.editing"
+              v-model="scope.row.quantity"
+              :min="1"
+              controls-position="right"
+              class="!w-1/1"
+            />
+            <span v-else>{{ scope.row.quantity }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="备注" align="center" min-width="150">
+          <template #default="scope">
+            <el-input
+              v-if="scope.row.editing"
+              v-model="scope.row.remark"
+              placeholder="请输入备注"
+            />
+            <span v-else>{{ scope.row.remark || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="130" fixed="right">
+          <template #default="scope">
+            <template v-if="scope.row.editing">
+              <el-button link type="success" @click="handleSave(scope.row)">保存</el-button>
+              <el-button link type="info" @click="handleCancel(scope.row, scope.$index)">
+                取消
+              </el-button>
+            </template>
+            <template v-else>
+              <el-button
+                link
+                type="primary"
+                @click="handleEdit(scope.row)"
+                v-hasPermi="['mes:qc-defect:update']"
+              >
+                编辑
+              </el-button>
+              <el-button
+                link
+                type="danger"
+                @click="handleDelete(scope.row.id)"
+                v-hasPermi="['mes:qc-defect:update']"
+              >
+                删除
+              </el-button>
+            </template>
+          </template>
+        </el-table-column>
+      </el-table>
+      <!-- 分页 -->
+      <Pagination
+        :total="total"
+        v-model:page="queryParams.pageNo"
+        v-model:limit="queryParams.pageSize"
+        @pagination="getList"
+      />
     </div>
   </Dialog>
 </template>

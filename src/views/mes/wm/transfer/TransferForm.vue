@@ -180,7 +180,7 @@ const formRules = reactive({
   code: [{ required: true, message: '转移单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '转移单名称不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '转移单类型不能为空', trigger: 'change' }],
-  transferDate: [{ required: true, message: '转移日期不能为空', trigger: 'change' }],
+  transferDate: [{ required: true, message: '转移日期不能为空', trigger: 'change' }]
 })
 
 const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式

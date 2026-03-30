@@ -14,9 +14,7 @@
           <el-form-item label="方案编号" prop="code">
             <el-input v-model="formData.code" placeholder="请输入方案编号">
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>

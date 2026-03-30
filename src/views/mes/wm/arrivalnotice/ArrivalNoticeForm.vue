@@ -120,10 +120,7 @@ import { WmArrivalNoticeApi, WmArrivalNoticeVO } from '@/api/mes/wm/arrivalnotic
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import ArrivalNoticeLineList from './ArrivalNoticeLineList.vue'
-import {
-  MesAutoCodeRuleCode,
-  MesWmArrivalNoticeStatusEnum
-} from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, MesWmArrivalNoticeStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ArrivalNoticeForm' })
 const emit = defineEmits(['success'])

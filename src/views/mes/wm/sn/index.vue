@@ -134,7 +134,8 @@ const message = useMessage() // 消息弹窗
 const loading = ref(true) // 列表的加载中
 const list = ref<WmSnApi.WmSnGroupVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
-const queryParams = reactive({ // 查询参数
+const queryParams = reactive({
+  // 查询参数
   pageNo: 1,
   pageSize: 10,
   uuid: undefined,

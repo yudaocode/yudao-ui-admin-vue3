@@ -35,6 +35,9 @@ export const CalTeamMemberApi = {
 
   // 查询多个班组的成员列表
   getTeamMemberListByTeamIds: async (teamIds: number[]) => {
-    return await request.get({ url: `/mes/cal/team-member/list-by-team`, params: { teamIds: teamIds.join(',') } })
+    return await request.get({
+      url: `/mes/cal/team-member/list-by-team`,
+      params: { teamIds: teamIds.join(',') }
+    })
   }
 }

@@ -1,37 +1,37 @@
 <template>
   <div class="overflow-hidden">
-  <!-- 供应商详情-采购记录 tab（复用 getItemReceiptPage 分页接口） -->
-  <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-    <el-table-column label="入库单编号" align="center" prop="code" min-width="160">
-      <template #default="scope">
-        <el-button link type="primary" @click="handleDetail(scope.row.id)">
-          {{ scope.row.code }}
-        </el-button>
-      </template>
-    </el-table-column>
-    <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
-    <el-table-column
-      label="入库日期"
-      align="center"
-      prop="receiptDate"
-      :formatter="dateFormatter2"
-      width="180px"
+    <!-- 供应商详情-采购记录 tab（复用 getItemReceiptPage 分页接口） -->
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <el-table-column label="入库单编号" align="center" prop="code" min-width="160">
+        <template #default="scope">
+          <el-button link type="primary" @click="handleDetail(scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
+      <el-table-column
+        label="入库日期"
+        align="center"
+        prop="receiptDate"
+        :formatter="dateFormatter2"
+        width="180px"
+      />
+      <el-table-column label="单据状态" align="center" prop="status" min-width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_WM_ITEM_RECEIPT_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+    </el-table>
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
     />
-    <el-table-column label="单据状态" align="center" prop="status" min-width="100">
-      <template #default="scope">
-        <dict-tag :type="DICT_TYPE.MES_WM_ITEM_RECEIPT_STATUS" :value="scope.row.status" />
-      </template>
-    </el-table-column>
-  </el-table>
-  <Pagination
-    :total="total"
-    v-model:page="queryParams.pageNo"
-    v-model:limit="queryParams.pageSize"
-    @pagination="getList"
-  />
 
-  <!-- 采购入库单详情弹窗 -->
-  <ItemReceiptForm ref="formRef" />
+    <!-- 采购入库单详情弹窗 -->
+    <ItemReceiptForm ref="formRef" />
   </div>
 </template>
 

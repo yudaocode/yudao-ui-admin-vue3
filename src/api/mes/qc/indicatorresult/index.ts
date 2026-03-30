@@ -36,7 +36,10 @@ export const QcIndicatorResultApi = {
 
   // 查询检验结果明细（含检测项模板）：编辑传 id，新增不传
   getDetail: async (qcId: number, qcType: number, id?: number) => {
-    return await request.get({ url: `/mes/qc/indicator-result/get-detail`, params: { id, qcId, qcType } })
+    return await request.get({
+      url: `/mes/qc/indicator-result/get-detail`,
+      params: { id, qcId, qcType }
+    })
   },
 
   // 新增检验结果

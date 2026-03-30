@@ -13,9 +13,7 @@
           <el-form-item label="发料单编号" prop="code" required>
             <el-input v-model="formData.code" placeholder="请输入发料单编号">
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>

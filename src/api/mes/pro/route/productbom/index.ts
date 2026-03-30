@@ -19,7 +19,11 @@ export interface ProRouteProductBomVO {
 // MES 工艺路线产品 BOM API
 export const ProRouteProductBomApi = {
   // 查询工艺路线产品 BOM 列表
-  getRouteProductBomList: async (params: { routeId: number; processId?: number; productId?: number }) => {
+  getRouteProductBomList: async (params: {
+    routeId: number
+    processId?: number
+    productId?: number
+  }) => {
     return await request.get({ url: `/mes/pro/route-product-bom/list`, params })
   },
 

@@ -10,12 +10,7 @@
     class="!w-1/1"
     @change="handleChange"
   >
-    <el-option
-      v-for="item in filteredList"
-      :key="item.id"
-      :label="item.reason"
-      :value="item.id"
-    >
+    <el-option v-for="item in filteredList" :key="item.id" :label="item.reason" :value="item.id">
       <div class="flex items-center gap-8px">
         <span>{{ item.reason }}</span>
         <dict-tag :type="DICT_TYPE.MES_PRO_ANDON_LEVEL" :value="item.level" />
@@ -64,9 +59,7 @@ const handleFilter = (query: string) => {
     return
   }
   const keyword = query.toLowerCase()
-  filteredList.value = allList.value.filter(
-    (item) => item.reason?.toLowerCase().includes(keyword)
-  )
+  filteredList.value = allList.value.filter((item) => item.reason?.toLowerCase().includes(keyword))
 }
 
 /** 选中变化 */

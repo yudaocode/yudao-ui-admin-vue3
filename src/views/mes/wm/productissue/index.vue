@@ -158,9 +158,10 @@
             @click="handleCancel(scope.row.id)"
             v-hasPermi="['mes:wm-product-issue:update']"
             v-if="
-              [MesWmProductIssueStatusEnum.APPROVING, MesWmProductIssueStatusEnum.APPROVED].includes(
-                scope.row.status
-              )
+              [
+                MesWmProductIssueStatusEnum.APPROVING,
+                MesWmProductIssueStatusEnum.APPROVED
+              ].includes(scope.row.status)
             "
           >
             取消

@@ -27,7 +27,12 @@
         />
       </el-form-item>
       <el-form-item label="项目类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择项目类型" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.type"
+          placeholder="请选择项目类型"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_SUBJECT_TYPE)"
             :key="dict.value"

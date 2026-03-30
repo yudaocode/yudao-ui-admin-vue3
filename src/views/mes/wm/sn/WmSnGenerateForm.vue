@@ -28,13 +28,15 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：提交的按钮禁用
-const formData = ref<WmSnApi.WmSnGenerateVO>({ // 表单数据
+const formData = ref<WmSnApi.WmSnGenerateVO>({
+  // 表单数据
   itemId: undefined,
   batchCode: undefined,
   workOrderId: undefined,
   count: 100
 })
-const formRules = reactive({ // 表单校验
+const formRules = reactive({
+  // 表单校验
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   count: [{ required: true, message: '生成数量不能为空', trigger: 'blur' }]
 })

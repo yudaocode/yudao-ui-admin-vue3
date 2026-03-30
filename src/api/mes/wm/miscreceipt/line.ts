@@ -27,7 +27,9 @@ export const WmMiscReceiptLineApi = {
 
   // 查询杂项入库单行列表
   getMiscReceiptLineListByReceiptId: async (receiptId: number) => {
-    return await request.get({ url: '/mes/wm/misc-receipt-line/list-by-receipt-id?receiptId=' + receiptId })
+    return await request.get({
+      url: '/mes/wm/misc-receipt-line/list-by-receipt-id?receiptId=' + receiptId
+    })
   },
 
   // 新增杂项入库单行

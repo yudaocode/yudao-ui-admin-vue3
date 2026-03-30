@@ -1,29 +1,29 @@
 <template>
   <div class="overflow-hidden">
-  <!-- 供应商详情-物料清单 tab（复用 getItemReceiptLinePage 分页接口） -->
-  <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-    <el-table-column label="物料编码" align="center" prop="itemCode" width="140">
-      <template #default="scope">
-        <el-button link type="primary" @click="handleViewItem(scope.row.itemId)">
-          {{ scope.row.itemCode }}
-        </el-button>
-      </template>
-    </el-table-column>
-    <el-table-column label="物料名称" align="center" prop="itemName" />
-    <el-table-column label="规格型号" align="center" prop="specification" />
-    <el-table-column label="单位" align="center" prop="unitMeasureName" />
-    <el-table-column label="入库数量" align="center" prop="receivedQuantity" />
-    <el-table-column label="批次号" align="center" prop="batchCode" />
-  </el-table>
-  <Pagination
-    :total="total"
-    v-model:page="queryParams.pageNo"
-    v-model:limit="queryParams.pageSize"
-    @pagination="getList"
-  />
+    <!-- 供应商详情-物料清单 tab（复用 getItemReceiptLinePage 分页接口） -->
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <el-table-column label="物料编码" align="center" prop="itemCode" width="140">
+        <template #default="scope">
+          <el-button link type="primary" @click="handleViewItem(scope.row.itemId)">
+            {{ scope.row.itemCode }}
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="物料名称" align="center" prop="itemName" />
+      <el-table-column label="规格型号" align="center" prop="specification" />
+      <el-table-column label="单位" align="center" prop="unitMeasureName" />
+      <el-table-column label="入库数量" align="center" prop="receivedQuantity" />
+      <el-table-column label="批次号" align="center" prop="batchCode" />
+    </el-table>
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
 
-  <!-- 物料详情弹窗 -->
-  <MdItemForm ref="itemFormRef" />
+    <!-- 物料详情弹窗 -->
+    <MdItemForm ref="itemFormRef" />
   </div>
 </template>
 

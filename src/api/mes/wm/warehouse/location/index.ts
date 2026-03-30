@@ -23,7 +23,10 @@ export const WmWarehouseLocationApi = {
 
   // 查询库区精简列表
   getWarehouseLocationSimpleList: async (warehouseId?: number) => {
-    return await request.get({ url: '/mes/wm/warehouse-location/simple-list', params: { warehouseId } })
+    return await request.get({
+      url: '/mes/wm/warehouse-location/simple-list',
+      params: { warehouseId }
+    })
   },
 
   // 查询库区详情
@@ -47,10 +50,14 @@ export const WmWarehouseLocationApi = {
   },
 
   // 批量设置库区下所有库位的混放规则
-  updateAreaByLocationId: async (locationId: number, allowItemMixing?: boolean, allowBatchMixing?: boolean) => {
+  updateAreaByLocationId: async (
+    locationId: number,
+    allowItemMixing?: boolean,
+    allowBatchMixing?: boolean
+  ) => {
     return await request.put({
       url: '/mes/wm/warehouse-location/update-by-location-id',
       params: { locationId, allowItemMixing, allowBatchMixing }
     })
-  },
+  }
 }

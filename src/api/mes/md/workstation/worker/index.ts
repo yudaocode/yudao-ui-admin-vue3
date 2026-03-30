@@ -14,7 +14,9 @@ export interface MdWorkstationWorkerVO {
 export const MdWorkstationWorkerApi = {
   // 查询人力资源列表
   getWorkstationWorkerList: async (workstationId: number) => {
-    return await request.get({ url: `/mes/md-workstation-worker/list-by-workstation?workstationId=` + workstationId })
+    return await request.get({
+      url: `/mes/md-workstation-worker/list-by-workstation?workstationId=` + workstationId
+    })
   },
 
   // 新增人力资源

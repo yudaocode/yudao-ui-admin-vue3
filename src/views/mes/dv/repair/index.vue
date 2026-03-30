@@ -30,7 +30,12 @@
         <DvMachinerySelect v-model="queryParams.machineryId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="维修结果" prop="result">
-        <el-select v-model="queryParams.result" placeholder="请选择维修结果" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.result"
+          placeholder="请选择维修结果"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_REPAIR_RESULT)"
             :key="dict.value"

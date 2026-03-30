@@ -49,6 +49,5 @@ export const WmTransferDetailApi = {
   // 删除调拨明细
   deleteTransferDetail: async (id: number) => {
     return await request.delete({ url: '/mes/wm/transfer-detail/delete?id=' + id })
-  },
-
+  }
 }

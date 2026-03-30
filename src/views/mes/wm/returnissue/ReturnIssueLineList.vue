@@ -60,9 +60,7 @@
           <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
             上架
           </el-button>
-          <el-button link type="primary" @click="handleBarcode(scope.row)">
-            条码
-          </el-button>
+          <el-button link type="primary" @click="handleBarcode(scope.row)"> 条码 </el-button>
         </template>
       </el-table-column>
     </el-table>

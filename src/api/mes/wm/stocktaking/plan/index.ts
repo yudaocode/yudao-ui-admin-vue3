@@ -16,7 +16,9 @@ export interface StockTakingPlanVO {
 
 export const StockTakingPlanApi = {
   updateStockTakingPlanStatus: async (id: number, status: number) => {
-    return await request.put({ url: '/mes/wm/stocktaking-plan/update-status?id=' + id + '&status=' + status })
+    return await request.put({
+      url: '/mes/wm/stocktaking-plan/update-status?id=' + id + '&status=' + status
+    })
   },
 
   getStockTakingPlanPage: async (params: any) => {

@@ -155,11 +155,13 @@
             执行转移
           </el-button>
           <el-button
-            v-if="[
-              MesWmTransferStatusEnum.UNCONFIRMED,
-              MesWmTransferStatusEnum.APPROVING,
-              MesWmTransferStatusEnum.APPROVED
-            ].includes(scope.row.status)"
+            v-if="
+              [
+                MesWmTransferStatusEnum.UNCONFIRMED,
+                MesWmTransferStatusEnum.APPROVING,
+                MesWmTransferStatusEnum.APPROVED
+              ].includes(scope.row.status)
+            "
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
