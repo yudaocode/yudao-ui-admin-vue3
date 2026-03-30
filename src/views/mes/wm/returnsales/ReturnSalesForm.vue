@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="110px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
@@ -16,9 +17,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode" :disabled="isHeaderReadonly"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -55,8 +54,8 @@
               type="date"
               value-format="x"
               placeholder="选择退货日期"
+              class="!w-1/1"
               :disabled="isHeaderReadonly"
-              class="!w-full"
             />
           </el-form-item>
         </el-col>
@@ -106,6 +105,9 @@
       <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
         执行上架
       </el-button>
+      <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
+        执行退货
+      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -122,18 +124,22 @@ defineOptions({ name: 'ReturnSalesForm' })
 const emit = defineEmits(['success'])
 
 const message = useMessage() // 消息弹窗
-
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / stock / detail
+const formType = ref<string>('create') // 表单的类型：create / update / stock / finish / detail
 const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
-const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value)) // 是否只读
+const isFinish = computed(() => formType.value === 'finish') // 是否为执行退货模式
+const isDetail = computed(() => ['detail', 'finish'].includes(formType.value)) // 是否为详情模式
+const isHeaderReadonly = computed(() =>
+  ['stock', 'detail', 'finish'].includes(formType.value)
+) // 表头是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增销售退货单',
     update: '编辑销售退货单',
     stock: '执行上架',
+    finish: '执行退货',
     detail: '销售退货单详情'
   }
   return titles[formType.value] || formType.value
@@ -142,11 +148,11 @@ const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
+  status: undefined as number | undefined,
   salesOrderCode: undefined,
   clientId: undefined,
   returnDate: undefined,
   returnReason: undefined,
-  status: undefined as number | undefined,
   remark: undefined
 })
 const formRules = reactive({
@@ -171,7 +177,7 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
-  // 修改/上架/详情时，加载数据
+  // 修改/上架/执行退货/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -183,9 +189,8 @@ const open = async (type: string, id?: number) => {
   // 保存原始数据快照
   originalFormData.value = JSON.stringify(formData.value)
 }
-defineExpose({ open })
 
-/** 保存表单（create/update 模式的保存按钮） */
+/** 保存表单（create/update 模式） */
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
@@ -251,19 +256,36 @@ const handleStock = async () => {
   }
 }
 
+/** 执行退货 */
+const handleFinish = async () => {
+  try {
+    await message.confirm('确认执行退货？执行后将进入待上架状态。')
+    formLoading.value = true
+    await WmReturnSalesApi.finishReturnSales(formData.value.id!)
+    message.success('执行退货成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,
     code: undefined,
     name: undefined,
+    status: undefined,
     salesOrderCode: undefined,
     clientId: undefined,
     returnDate: undefined,
     returnReason: undefined,
-    status: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

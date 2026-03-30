@@ -118,17 +118,17 @@
           >
             执行质检
           </el-button>
-          <!-- 待执行：执行退货 -->
+          <!-- 待执行：执行退货（进入弹窗） -->
           <el-button
             link
-            type="primary"
-            @click="handleFinish(scope.row.id)"
+            type="success"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm-return-sales:finish']"
             v-if="scope.row.status === MesWmReturnSalesStatusEnum.APPROVING"
           >
             执行退货
           </el-button>
-          <!-- 待上架：执行上架 -->
+          <!-- 待上架：执行上架（进入弹窗） -->
           <el-button
             link
             type="success"
@@ -224,16 +224,6 @@ const resetQuery = () => {
 /** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 执行退货 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认执行退货？')
-    await WmReturnSalesApi.finishReturnSales(id)
-    message.success('执行成功')
-    await getList()
-  } catch {}
 }
 
 /** 取消按钮操作 */
