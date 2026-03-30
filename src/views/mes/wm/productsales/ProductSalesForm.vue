@@ -111,28 +111,30 @@
         </el-col>
       </el-row>
       <!-- 运输信息：填写运单/详情模式下展示，或已有运输数据时展示 -->
-      <template v-if="isShipping || formType === 'detail' || formData.carrier || formData.shippingNumber">
+      <template
+        v-if="isShipping || formType === 'detail' || formData.carrier || formData.shippingNumber"
+      >
         <el-divider content-position="left">运输信息</el-divider>
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="承运商" prop="carrier">
-            <el-input
-              v-model="formData.carrier"
-              placeholder="请输入承运商"
-              :disabled="!isShipping && isHeaderReadonly"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="运输单号" prop="shippingNumber">
-            <el-input
-              v-model="formData.shippingNumber"
-              placeholder="请输入运输单号"
-              :disabled="!isShipping && isHeaderReadonly"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="承运商" prop="carrier">
+              <el-input
+                v-model="formData.carrier"
+                placeholder="请输入承运商"
+                :disabled="!isShipping && isHeaderReadonly"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="运输单号" prop="shippingNumber">
+              <el-input
+                v-model="formData.shippingNumber"
+                placeholder="请输入运输单号"
+                :disabled="!isShipping && isHeaderReadonly"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </template>
     </el-form>
     <!-- 非新建模式展示行项目信息（出库物料） -->
@@ -191,7 +193,9 @@ const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) /
 const isPick = computed(() => formType.value === 'stock') // 是否为拣货模式
 const isShipping = computed(() => formType.value === 'shipping') // 是否为填写运单模式
 const isFinish = computed(() => formType.value === 'finish') // 是否为执行出库模式
-const isHeaderReadonly = computed(() => ['stock', 'shipping', 'finish', 'detail'].includes(formType.value)) // 是否只读
+const isHeaderReadonly = computed(() =>
+  ['stock', 'shipping', 'finish', 'detail'].includes(formType.value)
+) // 是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增销售出库单',

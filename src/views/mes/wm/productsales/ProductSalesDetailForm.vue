@@ -1,5 +1,6 @@
 <!-- MES 销售出库拣货明细表单弹窗 -->
 <template>
+  <!-- TODO @AI：改成 3 行 -->
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
     <el-form
       ref="formRef"
@@ -18,6 +19,7 @@
           @change="handleStockChange"
         />
       </el-form-item>
+      <!-- TODO @AI：下面应该都是 disabled？我记得有模块是这么干的； -->
       <el-form-item label="出库仓库" prop="warehouseId">
         <WmWarehouseSelect v-model="formData.warehouseId" />
       </el-form-item>

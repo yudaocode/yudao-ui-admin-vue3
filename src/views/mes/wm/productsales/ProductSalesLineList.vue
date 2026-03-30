@@ -94,7 +94,12 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="产品" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择产品" class="!w-1/1" :disabled="!!formData.noticeLineId" />
+            <MdItemSelect
+              v-model="formData.itemId"
+              placeholder="请选择产品"
+              class="!w-1/1"
+              :disabled="!!formData.noticeLineId"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
