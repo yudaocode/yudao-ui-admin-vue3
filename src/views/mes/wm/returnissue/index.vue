@@ -98,7 +98,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
-          <!-- 草稿：编辑、提交、删除 -->
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
@@ -110,21 +110,21 @@
           </el-button>
           <el-button
             link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-return-issue:update']"
-            v-if="scope.row.status === MesWmReturnIssueStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-return-issue:delete']"
             v-if="scope.row.status === MesWmReturnIssueStatusEnum.PREPARE"
           >
             删除
+          </el-button>
+          <!-- 待检验：执行质检（提示去质检模块操作） -->
+          <el-button
+            link
+            type="warning"
+            v-if="scope.row.status === MesWmReturnIssueStatusEnum.CONFIRMED"
+            @click="message.alert('请前往【质量管理 - 退货检验（RQC）】中进行退料检验操作')"
+          >
+            执行质检
           </el-button>
           <!-- 待上架：执行上架 -->
           <el-button
@@ -136,26 +136,28 @@
           >
             执行上架
           </el-button>
-          <!-- 已入库：执行退料 -->
+          <!-- 待执行退料：执行退料 -->
           <el-button
             link
             type="success"
-            @click="handleFinish(scope.row.id)"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm-return-issue:finish']"
             v-if="scope.row.status === MesWmReturnIssueStatusEnum.APPROVED"
           >
             执行退料
           </el-button>
-          <!-- 待入库、已入库：取消 -->
+          <!-- 待检验、待上架、待执行退料：取消 -->
           <el-button
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
             v-hasPermi="['mes:wm-return-issue:update']"
             v-if="
-              [MesWmReturnIssueStatusEnum.APPROVING, MesWmReturnIssueStatusEnum.APPROVED].includes(
-                scope.row.status
-              )
+              [
+                MesWmReturnIssueStatusEnum.CONFIRMED,
+                MesWmReturnIssueStatusEnum.APPROVING,
+                MesWmReturnIssueStatusEnum.APPROVED
+              ].includes(scope.row.status)
             "
           >
             取消
@@ -232,26 +234,6 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交按钮操作（草稿 → 待检验/待上架） */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该退料单吗？系统将根据是否需要质检自动流转状态。')
-    await WmReturnIssueApi.submitReturnIssue(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await WmReturnIssueApi.deleteReturnIssue(id)
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
 /** 取消按钮操作 */
 const handleCancel = async (id: number) => {
   try {
@@ -262,12 +244,12 @@ const handleCancel = async (id: number) => {
   } catch {}
 }
 
-/** 完成按钮操作 */
-const handleFinish = async (id: number) => {
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
   try {
-    await message.confirm('确认完成该退料单并执行入库吗？')
-    await WmReturnIssueApi.finishReturnIssue(id)
-    message.success('完成成功')
+    await message.delConfirm()
+    await WmReturnIssueApi.deleteReturnIssue(id)
+    message.success(t('common.delSuccess'))
     await getList()
   } catch {}
 }
@@ -285,6 +267,7 @@ const handleExport = async () => {
   }
 }
 
+/** 初始化 */
 onMounted(() => {
   getList()
 })

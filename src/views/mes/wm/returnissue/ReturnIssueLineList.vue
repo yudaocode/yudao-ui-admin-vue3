@@ -115,17 +115,12 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="物料">
-            <el-input :model-value="stockInfo.itemName" disabled placeholder="选择库存后自动带出" />
+            <MdItemSelect v-model="formData.itemId" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="批次号">
             <el-input :model-value="formData.batchCode" disabled placeholder="选择库存后自动带出" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="库存数量">
-            <el-input :model-value="stockInfo.stockQuantity" disabled placeholder="选择库存后自动带出" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -158,6 +153,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { WmReturnIssueLineApi, WmReturnIssueLineVO } from '@/api/mes/wm/returnissue/line'
 import { WmMaterialStockVO } from '@/api/mes/wm/materialstock'
 import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ReturnIssueDetailList from './ReturnIssueDetailList.vue'
 import ReturnIssueDetailForm from './ReturnIssueDetailForm.vue'
 import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
