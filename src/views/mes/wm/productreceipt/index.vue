@@ -57,7 +57,13 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="入库单编号" align="center" prop="code" min-width="160" />
+      <el-table-column label="入库单编号" align="center" prop="code" min-width="160">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="生产工单" align="center" prop="workOrderCode" min-width="140" />
       <el-table-column label="产品物料编码" align="center" prop="itemCode" min-width="120" />
@@ -78,7 +84,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
-          <!-- 草稿：编辑、提交、删除 -->
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
@@ -90,15 +96,6 @@
           </el-button>
           <el-button
             link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-product-receipt:update']"
-            v-if="scope.row.status === MesWmProductReceiptStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-product-receipt:delete']"
@@ -106,7 +103,7 @@
           >
             删除
           </el-button>
-          <!-- 待拣货：执行上架 -->
+          <!-- 待上架：执行上架、取消 -->
           <el-button
             link
             type="success"
@@ -116,17 +113,16 @@
           >
             执行上架
           </el-button>
-          <!-- 待执行入库：执行入库 -->
+          <!-- 待执行入库：执行入库、取消 -->
           <el-button
             link
-            type="primary"
-            @click="handleFinish(scope.row.id)"
+            type="success"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm-product-receipt:finish']"
             v-if="scope.row.status === MesWmProductReceiptStatusEnum.APPROVED"
           >
             执行入库
           </el-button>
-          <!-- 待拣货、待执行入库：取消 -->
           <el-button
             link
             type="danger"
@@ -167,13 +163,13 @@ import { MesWmProductReceiptStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesWmProductReceipt' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const list = ref<WmProductReceiptVO[]>([])
-const total = ref(0)
-const exportLoading = ref(false)
+const loading = ref(true) // 列表的加载中
+const list = ref<WmProductReceiptVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -182,8 +178,8 @@ const queryParams = reactive({
   workOrderId: undefined,
   itemId: undefined
 })
-const queryFormRef = ref()
-const formRef = ref()
+const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -212,26 +208,6 @@ const resetQuery = () => {
 /** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 提交按钮操作 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该产品入库单？')
-    await WmProductReceiptApi.submitProductReceipt(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 执行入库 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认执行入库？执行后将更新库存台账。')
-    await WmProductReceiptApi.finishProductReceipt(id)
-    message.success('入库成功')
-    await getList()
-  } catch {}
 }
 
 /** 取消按钮操作 */
