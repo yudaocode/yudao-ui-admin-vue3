@@ -35,19 +35,7 @@
         />
       </el-form-item>
       <el-form-item label="客户" prop="clientId">
-        <el-select
-          v-model="queryParams.clientId"
-          placeholder="请选择客户"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="client in clientList"
-            :key="client.id"
-            :label="client.name"
-            :value="client.id"
-          />
-        </el-select>
+        <MdClientSelect v-model="queryParams.clientId" class="!w-240px" />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -77,9 +65,9 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="通知单编号" align="center" prop="noticeCode" min-width="160">
         <template #default="scope">
-          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
             {{ scope.row.noticeCode }}
-          </el-link>
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column label="通知单名称" align="center" prop="noticeName" min-width="150" />
@@ -100,8 +88,9 @@
           <dict-tag :type="DICT_TYPE.MES_SALES_NOTICE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="220" fixed="right">
+      <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
@@ -113,21 +102,22 @@
           </el-button>
           <el-button
             link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-sales-notice:update']"
-            v-if="scope.row.status === MesWmSalesNoticeStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-sales-notice:delete']"
             v-if="scope.row.status === MesWmSalesNoticeStatusEnum.PREPARE"
           >
             删除
+          </el-button>
+          <!-- 待出库：执行出库 -->
+          <el-button
+            link
+            type="success"
+            @click="openForm('finish', scope.row.id)"
+            v-hasPermi="['mes:wm-sales-notice:update']"
+            v-if="scope.row.status === MesWmSalesNoticeStatusEnum.APPROVED"
+          >
+            执行出库
           </el-button>
         </template>
       </el-table-column>
@@ -145,23 +135,22 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmSalesNoticeApi, WmSalesNoticeVO } from '@/api/mes/wm/salesnotice'
-import { MdClientApi } from '@/api/mes/md/client'
+import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import SalesNoticeForm from './SalesNoticeForm.vue'
 import { MesWmSalesNoticeStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesWmSalesNotice' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const list = ref<WmSalesNoticeVO[]>([])
-const total = ref(0)
-const exportLoading = ref(false)
-const clientList = ref<any[]>([])
+const loading = ref(true) // 列表的加载中
+const list = ref<WmSalesNoticeVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -170,7 +159,8 @@ const queryParams = reactive({
   salesOrderCode: undefined,
   clientId: undefined
 })
-const queryFormRef = ref()
+const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -184,32 +174,21 @@ const getList = async () => {
   }
 }
 
-/** 搜索 */
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
-/** 重置 */
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
-/** 新增/修改/详情 */
-const formRef = ref()
+/** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 提交 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该发货通知单？')
-    await WmSalesNoticeApi.submitSalesNotice(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
 }
 
 /** 删除按钮操作 */
@@ -236,8 +215,7 @@ const handleExport = async () => {
 }
 
 /** 初始化 */
-onMounted(async () => {
-  clientList.value = await MdClientApi.getClientSimpleList()
-  await getList()
+onMounted(() => {
+  getList()
 })
 </script>
