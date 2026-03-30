@@ -40,7 +40,24 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：【来源单据编号】【来源单据类型】；手填 -->
+      <el-form-item label="来源单据编号" prop="sourceDocCode">
+        <el-input
+          v-model="queryParams.sourceDocCode"
+          placeholder="请输入来源单据编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="来源单据类型" prop="sourceDocType">
+        <el-input
+          v-model="queryParams.sourceDocType"
+          placeholder="请输入来源单据类型"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="出库日期" prop="issueDate">
         <el-date-picker
           v-model="queryParams.issueDate"
@@ -95,9 +112,9 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="出库单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
-          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
             {{ scope.row.code }}
-          </el-link>
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column label="出库单名称" align="center" prop="name" min-width="150" />
@@ -106,7 +123,8 @@
           <dict-tag :type="DICT_TYPE.MES_WM_MISC_ISSUE_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <!-- TODO @AI：【来源单据编号】【来源单据类型】；手填-->
+      <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" min-width="150" />
+      <el-table-column label="来源单据类型" align="center" prop="sourceDocType" min-width="120" />
       <el-table-column
         label="出库日期"
         align="center"
@@ -116,7 +134,6 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <!-- TODO @AI：数据库里，缺少状态；这里也缺少变量； -->
           <dict-tag :type="DICT_TYPE.MES_WM_MISC_ISSUE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
@@ -132,10 +149,11 @@
           >
             编辑
           </el-button>
+          <!-- TODO @AI：提交，合并到“编辑”里。因为打开后，就能看到【提交】呀 -->
           <el-button
             link
             type="warning"
-            @click="handleSubmit(scope.row.id)"
+            @click="openForm('submit', scope.row.id)"
             v-hasPermi="['mes:wm-misc-issue:update']"
             v-if="scope.row.status === MesWmMiscIssueStatusEnum.PREPARE"
           >
@@ -154,7 +172,7 @@
           <el-button
             link
             type="success"
-            @click="handleFinish(scope.row.id)"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm-misc-issue:finish']"
             v-if="scope.row.status === MesWmMiscIssueStatusEnum.APPROVED"
           >
@@ -206,10 +224,13 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   type: undefined,
+  sourceDocCode: undefined,
+  sourceDocType: undefined,
   issueDate: undefined,
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -235,30 +256,9 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 新增/修改/详情 */
-const formRef = ref() // 表单弹窗
+/** 添加/修改/详情/提交/执行出库 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 提交 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该杂项出库单？')
-    await WmMiscIssueApi.submitMiscIssue(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 执行出库 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认执行出库？执行后将更新库存台账。')
-    await WmMiscIssueApi.finishMiscIssue(id)
-    message.success('出库成功')
-    await getList()
-  } catch {}
 }
 
 /** 取消按钮操作 */

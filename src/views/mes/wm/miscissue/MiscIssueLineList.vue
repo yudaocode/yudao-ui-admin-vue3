@@ -48,6 +48,7 @@
       v-loading="formLoading"
     >
       <el-row>
+        <!-- TODO @AI：WmMaterialStockSelect，/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/productsales -->
         <!-- TODO @AI：库存物资选择；选择后，物料、批次号、仓库位置就自动选上；他们都是 disabled disabled； -->
         <el-col :span="8">
           <el-form-item label="物料" prop="itemId">
