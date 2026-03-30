@@ -104,10 +104,7 @@
         保 存
       </el-button>
       <el-button
-        v-if="
-          (isEditable && formData.id && formData.status === MesWmMiscIssueStatusEnum.PREPARE) ||
-          isSubmit
-        "
+        v-if="isEditable && formData.id && formData.status === MesWmMiscIssueStatusEnum.PREPARE"
         @click="handleSubmit"
         type="warning"
         :disabled="formLoading"
@@ -135,17 +132,15 @@ const emit = defineEmits(['success'])
 const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / submit / finish / detail
+const formType = ref<string>('create') // 表单的类型：create / update / finish / detail
 const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isSubmit = computed(() => formType.value === 'submit') // 是否为提交模式
 const isFinish = computed(() => formType.value === 'finish') // 是否为执行出库模式
-const isDetail = computed(() => ['detail', 'submit', 'finish'].includes(formType.value)) // 是否为详情模式
-const isHeaderReadonly = computed(() => ['submit', 'detail', 'finish'].includes(formType.value)) // 是否只读
+const isDetail = computed(() => ['detail', 'finish'].includes(formType.value)) // 是否为详情模式
+const isHeaderReadonly = computed(() => ['detail', 'finish'].includes(formType.value)) // 是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增杂项出库单',
     update: '编辑杂项出库单',
-    submit: '提交杂项出库单',
     finish: '执行出库',
     detail: '杂项出库单详情'
   }
@@ -183,7 +178,7 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
-  // 修改/提交/执行出库/详情时，加载数据
+  // 修改/执行出库/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {

@@ -149,16 +149,6 @@
           >
             编辑
           </el-button>
-          <!-- TODO @AI：提交，合并到“编辑”里。因为打开后，就能看到【提交】呀 -->
-          <el-button
-            link
-            type="warning"
-            @click="openForm('submit', scope.row.id)"
-            v-hasPermi="['mes:wm-misc-issue:update']"
-            v-if="scope.row.status === MesWmMiscIssueStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
           <el-button
             link
             type="danger"

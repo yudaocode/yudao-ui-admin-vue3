@@ -48,11 +48,13 @@
       v-loading="formLoading"
     >
       <el-row>
-        <!-- TODO @AI：WmMaterialStockSelect，/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/productsales -->
-        <!-- TODO @AI：库存物资选择；选择后，物料、批次号、仓库位置就自动选上；他们都是 disabled disabled； -->
         <el-col :span="8">
-          <el-form-item label="物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" class="!w-1/1" />
+          <el-form-item label="库存物资" prop="materialStockId">
+            <WmMaterialStockSelect
+              v-model="formData.materialStockId"
+              :item-id="formData.itemId"
+              @change="handleStockChange"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -68,14 +70,14 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="批次号" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
+            <el-input v-model="formData.batchCode" placeholder="批次号" disabled />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
           <el-form-item label="仓库" prop="warehouseId">
-            <WmWarehouseSelect v-model="formData.warehouseId" @change="handleWarehouseChange" />
+            <WmWarehouseSelect v-model="formData.warehouseId" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -83,13 +85,17 @@
             <WmWarehouseLocationSelect
               v-model="formData.locationId"
               :warehouse-id="formData.warehouseId"
-              @change="handleLocationChange"
+              disabled
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="库位" prop="areaId">
-            <WmWarehouseAreaSelect v-model="formData.areaId" :location-id="formData.locationId" />
+            <WmWarehouseAreaSelect
+              v-model="formData.areaId"
+              :location-id="formData.locationId"
+              disabled
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -110,7 +116,8 @@
 
 <script setup lang="ts">
 import { WmMiscIssueLineApi, WmMiscIssueLineVO } from '@/api/mes/wm/miscissue/line'
-import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import { WmMaterialStockVO } from '@/api/mes/wm/materialstock'
+import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
@@ -168,6 +175,7 @@ const lineFormType = ref('') // 行表单的类型
 const formData = ref({
   id: undefined,
   issueId: undefined as number | undefined,
+  materialStockId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
   batchCode: undefined,
@@ -177,7 +185,7 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
-  itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
+  materialStockId: [{ required: true, message: '请选择库存物资', trigger: 'change' }],
   quantity: [
     { required: true, message: '出库数量不能为空', trigger: 'blur' },
     { type: 'number', min: 0.01, message: '出库数量必须大于等于0.01', trigger: 'blur' }
@@ -185,15 +193,21 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 
-/** 仓库变化时，清空库区和库位 */
-const handleWarehouseChange = () => {
-  formData.value.locationId = undefined
-  formData.value.areaId = undefined
-}
-
-/** 库区变化时，清空库位 */
-const handleLocationChange = () => {
-  formData.value.areaId = undefined
+/** 库存物资选择变化时，自动回填物料、批次号、仓库位置 */
+const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
+  if (stock) {
+    formData.value.itemId = stock.itemId
+    formData.value.batchCode = stock.batchCode
+    formData.value.warehouseId = stock.warehouseId
+    formData.value.locationId = stock.locationId
+    formData.value.areaId = stock.areaId
+  } else {
+    formData.value.itemId = undefined
+    formData.value.batchCode = undefined
+    formData.value.warehouseId = undefined
+    formData.value.locationId = undefined
+    formData.value.areaId = undefined
+  }
 }
 
 /** 打开表单弹窗 */
@@ -237,6 +251,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     issueId: undefined,
+    materialStockId: undefined,
     itemId: undefined,
     quantity: undefined,
     batchCode: undefined,

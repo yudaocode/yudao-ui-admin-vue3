@@ -127,8 +127,8 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / submit / stock / finish / detail
-const isEditable = computed(() => ['create', 'update', 'submit'].includes(formType.value)) // 是否为编辑模式
+const formType = ref<string>('create') // 表单的类型：create / update / stock / finish / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isStock = computed(() => formType.value === 'stock') // 是否为入库上架模式
 const isFinish = computed(() => formType.value === 'finish') // 是否为执行退料模式
 const isHeaderReadonly = computed(() =>
@@ -138,7 +138,6 @@ const dialogTitle = computed(() => {
   const titles = {
     create: '新增生产退料单',
     update: '编辑生产退料单',
-    submit: '提交生产退料单',
     stock: '入库上架',
     finish: '执行退料',
     detail: '生产退料单详情'
@@ -177,7 +176,7 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
-  // 修改/提交/上架/完成/详情时，加载数据
+  // 修改/上架/完成/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -190,7 +189,7 @@ const open = async (type: string, id?: number) => {
   originalFormData.value = JSON.stringify(formData.value)
 }
 
-/** 保存表单（create/update/submit 模式的保存按钮） */
+/** 保存表单（create/update 模式的保存按钮） */
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
