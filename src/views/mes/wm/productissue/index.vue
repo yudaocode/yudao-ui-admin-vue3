@@ -116,7 +116,7 @@
           <el-button
             link
             type="warning"
-            @click="handleSubmit(scope.row.id)"
+            @click="openForm('submit', scope.row.id)"
             v-hasPermi="['mes:wm-product-issue:update']"
             v-if="scope.row.status === MesWmProductIssueStatusEnum.PREPARE"
           >
@@ -145,7 +145,7 @@
           <el-button
             link
             type="success"
-            @click="handleFinish(scope.row.id)"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm-product-issue:finish']"
             v-if="scope.row.status === MesWmProductIssueStatusEnum.APPROVED"
           >
@@ -236,26 +236,6 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交按钮操作 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该领料单进入审批流程吗？')
-    await WmProductIssueApi.submitProductIssue(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await WmProductIssueApi.deleteProductIssue(id)
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
 /** 取消按钮操作 */
 const handleCancel = async (id: number) => {
   try {
@@ -266,12 +246,12 @@ const handleCancel = async (id: number) => {
   } catch {}
 }
 
-/** 完成按钮操作 */
-const handleFinish = async (id: number) => {
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
   try {
-    await message.confirm('确认完成该领料单并执行出库吗？')
-    await WmProductIssueApi.finishProductIssue(id)
-    message.success('完成成功')
+    await message.delConfirm()
+    await WmProductIssueApi.deleteProductIssue(id)
+    message.success(t('common.delSuccess'))
     await getList()
   } catch {}
 }
@@ -289,6 +269,7 @@ const handleExport = async () => {
   }
 }
 
+/** 初始化 */
 onMounted(() => {
   getList()
 })

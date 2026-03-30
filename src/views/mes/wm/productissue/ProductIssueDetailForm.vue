@@ -102,7 +102,6 @@ const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：create / update
 const currentLineId = ref<number>() // 当前操作的行 ID
 const quantityMax = ref<number | undefined>(undefined) // 数量上限（在库数量）
-const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,
   lineId: undefined as number | undefined,
@@ -121,6 +120,7 @@ const formRules = reactive({
   materialStockId: [{ required: true, message: '请选择库存记录', trigger: 'change' }],
   quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
 })
+const formRef = ref() // 表单 Ref
 
 /** 库存选中回调 —— 自动回填仓库/库区/库位/批次/数量 */
 const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
@@ -162,7 +162,6 @@ const open = async (type: string, lineId: number, itemId?: number, detailId?: nu
     formData.value.itemId = itemId
   }
 }
-defineExpose({ open })
 
 /** 提交表单 */
 const submitForm = async () => {
@@ -209,4 +208,6 @@ const resetForm = () => {
   quantityMax.value = undefined
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

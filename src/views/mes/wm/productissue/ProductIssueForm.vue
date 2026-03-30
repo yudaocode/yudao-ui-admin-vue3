@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="110px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
@@ -16,7 +17,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode"> 生成 </el-button>
+                <el-button @click="generateCode" :disabled="isHeaderReadonly"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -70,13 +71,24 @@
       <ProductIssueLineList :issue-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
-      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
-        确 定
+      <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
+        保 存
+      </el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesWmProductIssueStatusEnum.PREPARE"
+        @click="handleSubmit"
+        type="warning"
+        :disabled="formLoading"
+      >
+        提 交
       </el-button>
       <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
         执行拣货
       </el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
+        完 成
+      </el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -84,22 +96,42 @@
 <script setup lang="ts">
 import { WmProductIssueApi, WmProductIssueVO } from '@/api/mes/wm/productissue'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
-import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, MesWmProductIssueStatusEnum } from '@/views/mes/utils/constants'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import ProductIssueLineList from './ProductIssueLineList.vue'
 
 defineOptions({ name: 'ProductIssueForm' })
+const emit = defineEmits(['success'])
 
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / stock / detail
+const formType = ref<string>('create') // 表单的类型：create / update / submit / stock / finish / detail
+const isEditable = computed(() => ['create', 'update', 'submit'].includes(formType.value)) // 是否为编辑模式
+const isStock = computed(() => formType.value === 'stock') // 是否为拣货模式
+const isFinish = computed(() => formType.value === 'finish') // 是否为完成出库模式
+const isDetail = computed(() => ['detail', 'finish'].includes(formType.value)) // 是否为详情模式（表单禁用）
+const isHeaderReadonly = computed(() =>
+  ['stock', 'detail', 'finish'].includes(formType.value)
+) // 表头是否只读
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增领料出库单',
+    update: '编辑领料出库单',
+    submit: '提交领料出库单',
+    stock: '执行拣货',
+    finish: '完成领料出库',
+    detail: '领料出库单详情'
+  }
+  return titles[formType.value] || formType.value
+})
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
+  status: undefined as number | undefined,
   workOrderId: undefined,
   workstationId: undefined,
   requiredTime: undefined,
@@ -112,19 +144,7 @@ const formRules = reactive({
   requiredTime: [{ required: true, message: '需求时间不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-
-const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isStock = computed(() => formType.value === 'stock') // 是否为拣货模式
-const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value)) // 是否只读
-const dialogTitle = computed(() => {
-  const titles = {
-    create: '新增领料出库单',
-    update: '编辑领料出库单',
-    stock: '执行拣货',
-    detail: '领料出库单详情'
-  }
-  return titles[formType.value] || formType.value
-})
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成领料单编号 */
 const generateCode = async () => {
@@ -138,7 +158,7 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
-  // 修改/拣货/详情时，加载数据
+  // 修改/提交/拣货/完成/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -147,11 +167,11 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
-defineExpose({ open })
 
-/** 提交表单（create/update 模式） */
-const emit = defineEmits(['success'])
+/** 提交表单（create/update/submit 模式的保存按钮） */
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
@@ -162,14 +182,41 @@ const submitForm = async () => {
     if (formType.value === 'create') {
       const res = await WmProductIssueApi.createProductIssue(data)
       message.success('新增成功')
+      // 创建成功后，更新表单数据和状态为编辑模式
       formData.value.id = res
+      formData.value.status = MesWmProductIssueStatusEnum.PREPARE
       formType.value = 'update'
     } else {
       await WmProductIssueApi.updateProductIssue(data)
       message.success('修改成功')
     }
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
     // 发送操作成功的事件
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  // 校验表单
+  await formRef.value.validate()
+  try {
+    await message.confirm('确认提交该领料出库单？【提交后将不能修改】')
+    formLoading.value = true
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as unknown as WmProductIssueVO
+      await WmProductIssueApi.updateProductIssue(data)
+    }
+    // 2. 提交领料单
+    await WmProductIssueApi.submitProductIssue(formData.value.id!)
+    message.success('提交成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -194,12 +241,28 @@ const handleStock = async () => {
   }
 }
 
+/** 完成领料出库 */
+const handleFinish = async () => {
+  try {
+    await message.confirm('确认完成该领料单并执行出库吗？')
+    formLoading.value = true
+    await WmProductIssueApi.finishProductIssue(formData.value.id!)
+    message.success('完成成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,
     code: undefined,
     name: undefined,
+    status: undefined,
     workOrderId: undefined,
     workstationId: undefined,
     requiredTime: undefined,
@@ -207,4 +270,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>
