@@ -63,6 +63,7 @@
               v-model="formData.quantity"
               :precision="2"
               :min="0.01"
+              :max="formData.quantityMax"
               controls-position="right"
               class="!w-1/1"
             />
@@ -182,7 +183,8 @@ const formData = ref({
   warehouseId: undefined,
   locationId: undefined,
   areaId: undefined,
-  remark: undefined
+  remark: undefined,
+  quantityMax: undefined as number | undefined
 })
 const formRules = reactive({
   materialStockId: [{ required: true, message: '请选择库存物资', trigger: 'change' }],
@@ -201,12 +203,14 @@ const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
     formData.value.warehouseId = stock.warehouseId
     formData.value.locationId = stock.locationId
     formData.value.areaId = stock.areaId
+    formData.value.quantityMax = stock.quantity
   } else {
     formData.value.itemId = undefined
     formData.value.batchCode = undefined
     formData.value.warehouseId = undefined
     formData.value.locationId = undefined
     formData.value.areaId = undefined
+    formData.value.quantityMax = undefined
   }
 }
 
@@ -258,7 +262,8 @@ const resetForm = () => {
     warehouseId: undefined,
     locationId: undefined,
     areaId: undefined,
-    remark: undefined
+    remark: undefined,
+    quantityMax: undefined
   }
   formRef.value?.resetFields()
 }
