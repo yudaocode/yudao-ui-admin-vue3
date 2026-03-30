@@ -16,9 +16,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -84,8 +82,9 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { WmProductIssueApi, WmProductIssueVO } from '@/api/mes/wm/productissue'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import ProductIssueLineList from './ProductIssueLineList.vue'
@@ -128,8 +127,10 @@ const dialogTitle = computed(() => {
 })
 
 /** 生成领料单编号 */
-const generateCode = () => {
-  formData.value.code = 'PI' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_PRODUCT_ISSUE_CODE
+  )
 }
 
 /** 打开弹窗 */

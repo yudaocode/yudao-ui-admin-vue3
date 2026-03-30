@@ -85,10 +85,10 @@
         </template>
       </el-table-column>
       <el-table-column label="领料单名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="生产工单" align="center" prop="workorderCode" min-width="140" />
+      <el-table-column label="生产工单" align="center" prop="workOrderCode" min-width="140" />
       <el-table-column label="工作站" align="center" prop="workstationName" min-width="120" />
       <el-table-column label="客户编号" align="center" prop="clientCode" min-width="120" />
-      <el-table-column label="客户名称" align="center" prop="clientName" min-width="150" />
+      <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
       <el-table-column
         label="需求时间"
         align="center"
