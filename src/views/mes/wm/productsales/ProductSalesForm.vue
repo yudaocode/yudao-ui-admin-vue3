@@ -30,10 +30,14 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：选择完后，自动填写 salesOrderCode、客户 -->
+        <!-- 选择发货通知单后，自动填写 salesOrderCode、客户、收货人等 -->
         <el-col :span="8">
           <el-form-item label="发货通知单" prop="noticeId">
-            <WmSalesNoticeSelect v-model="formData.noticeId" :disabled="isHeaderReadonly" />
+            <WmSalesNoticeSelect
+              v-model="formData.noticeId"
+              :disabled="isHeaderReadonly"
+              @change="handleNoticeChange"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -85,9 +89,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="收货地址" prop="address">
+          <el-form-item label="收货地址" prop="contactAddress">
             <el-input
-              v-model="formData.address"
+              v-model="formData.contactAddress"
               placeholder="请输入收货地址"
               :disabled="isHeaderReadonly"
             />
@@ -106,8 +110,9 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- TODO @AI：可能要某个状态下，才进行展示； -->
-      <el-divider content-position="left">运输信息</el-divider>
+      <!-- 运输信息：填写运单/详情模式下展示，或已有运输数据时展示 -->
+      <template v-if="isShipping || formType === 'detail' || formData.carrier || formData.shippingNumber">
+        <el-divider content-position="left">运输信息</el-divider>
       <el-row>
         <el-col :span="8">
           <el-form-item label="承运商" prop="carrier">
@@ -128,6 +133,7 @@
           </el-form-item>
         </el-col>
       </el-row>
+      </template>
     </el-form>
     <!-- 非新建模式展示行项目信息（出库物料） -->
     <template v-if="formData.id">
@@ -148,6 +154,9 @@
       <el-button v-if="isShipping" @click="handleShipping" type="primary" :disabled="formLoading">
         确认填写
       </el-button>
+      <el-button v-if="isFinish" @click="handleFinish" type="primary" :disabled="formLoading">
+        确认出库
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -159,6 +168,7 @@ import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import WmSalesNoticeSelect from '@/views/mes/wm/salesnotice/components/WmSalesNoticeSelect.vue'
+import { WmSalesNoticeVO } from '@/api/mes/wm/salesnotice'
 import ProductSalesLineList from './ProductSalesLineList.vue'
 
 defineOptions({ name: 'ProductSalesForm' })
@@ -167,7 +177,7 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / pick / shipping / detail
+const formType = ref<string>('create') // 表单的类型：create / update / stock / shipping / finish / detail
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
@@ -178,7 +188,7 @@ const formData = ref({
   salesDate: undefined,
   contactName: undefined,
   contactTelephone: undefined,
-  address: undefined,
+  contactAddress: undefined,
   carrier: undefined,
   shippingNumber: undefined,
   remark: undefined
@@ -192,15 +202,17 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isPick = computed(() => formType.value === 'pick') // 是否为拣货模式
+const isPick = computed(() => formType.value === 'stock') // 是否为拣货模式
 const isShipping = computed(() => formType.value === 'shipping') // 是否为填写运单模式
-const isHeaderReadonly = computed(() => ['pick', 'shipping', 'detail'].includes(formType.value)) // 是否只读
+const isFinish = computed(() => formType.value === 'finish') // 是否为执行出库模式
+const isHeaderReadonly = computed(() => ['stock', 'shipping', 'finish', 'detail'].includes(formType.value)) // 是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增销售出库单',
     update: '编辑销售出库单',
-    pick: '执行拣货',
+    stock: '执行拣货',
     shipping: '填写运单',
+    finish: '执行出库',
     detail: '销售出库单详情'
   }
   return titles[formType.value] || formType.value
@@ -211,6 +223,18 @@ const generateCode = async () => {
   formData.value.code = await AutoCodeRecordApi.generateAutoCode(
     MesAutoCodeRuleCode.WM_PRODUCT_SALES_CODE
   )
+}
+
+/** 发货通知单选中后，自动填充 salesOrderCode、客户、收货人信息 */
+const handleNoticeChange = (notice: WmSalesNoticeVO | undefined) => {
+  if (!notice) {
+    return
+  }
+  formData.value.salesOrderCode = notice.salesOrderCode
+  formData.value.clientId = notice.clientId
+  formData.value.contactName = notice.recipientName
+  formData.value.contactTelephone = notice.recipientTelephone
+  formData.value.contactAddress = notice.recipientAddress
 }
 
 /** 打开弹窗 */
@@ -294,6 +318,21 @@ const handleShipping = async () => {
   }
 }
 
+/** 执行出库 */
+const handleFinish = async () => {
+  try {
+    await message.confirm('确认执行出库？执行后将扣减库存。')
+    formLoading.value = true
+    await WmProductSalesApi.finishProductSales(formData.value.id!)
+    message.success('出库成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
@@ -306,7 +345,7 @@ const resetForm = () => {
     salesDate: undefined,
     contactName: undefined,
     contactTelephone: undefined,
-    address: undefined,
+    contactAddress: undefined,
     carrier: undefined,
     shippingNumber: undefined,
     remark: undefined

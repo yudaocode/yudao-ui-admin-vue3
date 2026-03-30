@@ -42,6 +42,7 @@
           v-model="formData.quantity"
           :precision="2"
           :min="0"
+          :max="quantityMax"
           controls-position="right"
           class="!w-1/1"
         />
@@ -56,6 +57,7 @@
 
 <script setup lang="ts">
 import { WmProductSalesDetailApi, WmProductSalesDetailVO } from '@/api/mes/wm/productsales/detail'
+import { WmMaterialStockVO } from '@/api/mes/wm/materialstock'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
@@ -93,11 +95,10 @@ const formData = ref({
   batchId: undefined as number | undefined,
   batchCode: undefined as string | undefined
 })
+const quantityMax = ref<number | undefined>(undefined) // 数量上限（在库数量）
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
-  warehouseId: [{ required: true, message: '出库仓库不能为空', trigger: 'change' }],
-  locationId: [{ required: true, message: '库区不能为空', trigger: 'change' }],
-  areaId: [{ required: true, message: '库位不能为空', trigger: 'change' }],
+  materialStockId: [{ required: true, message: '请选择库存记录', trigger: 'change' }],
   quantity: [{ required: true, message: '数量不能为空', trigger: 'blur' }]
 })
 
@@ -127,16 +128,25 @@ const handleBatchChange = (batch: any) => {
   formData.value.batchCode = batch?.code
 }
 
-/** 库存选中回调，自动填充仓库/库区/库位/批次 */
-// TODO @AI：参考下别的模块 handleStockChange；有不同的逻辑；对齐下；
-const handleStockChange = (stock: any) => {
-  if (stock) {
-    formData.value.warehouseId = stock.warehouseId
-    formData.value.locationId = stock.locationId
-    formData.value.areaId = stock.areaId
-    formData.value.batchId = stock.batchId
-    formData.value.batchCode = stock.batchCode
+/** 库存选中回调 —— 自动回填仓库/库区/库位/批次/数量 */
+const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
+  if (!stock) {
+    formData.value.warehouseId = undefined
+    formData.value.locationId = undefined
+    formData.value.areaId = undefined
+    formData.value.batchId = undefined
+    formData.value.batchCode = undefined
+    formData.value.quantity = undefined
+    quantityMax.value = undefined
+    return
   }
+  formData.value.warehouseId = stock.warehouseId
+  formData.value.locationId = stock.locationId
+  formData.value.areaId = stock.areaId
+  formData.value.batchId = stock.batchId
+  formData.value.batchCode = stock.batchCode
+  formData.value.quantity = stock.quantity
+  quantityMax.value = stock.quantity
 }
 
 /** 提交表单 */
@@ -181,6 +191,7 @@ const resetForm = () => {
     batchId: undefined,
     batchCode: undefined
   }
+  quantityMax.value = undefined
   formRef.value?.resetFields()
 }
 </script>
