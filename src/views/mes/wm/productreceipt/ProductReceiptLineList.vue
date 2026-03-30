@@ -74,10 +74,14 @@
       v-loading="formLoading"
     >
       <el-row>
-        <!-- TODO @芋艿：【后面处理】库存物资选择 -->
         <el-col :span="8">
-          <el-form-item label="物料物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料物料" class="!w-1/1" />
+          <el-form-item label="库存记录" prop="materialStockId">
+            <WmMaterialStockSelect
+              v-model="formData.materialStockId"
+              placeholder="请选择库存"
+              class="!w-1/1"
+              @change="handleStockChange"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -86,14 +90,22 @@
               v-model="formData.quantity"
               :precision="2"
               :min="0"
+              :max="quantityMax"
               controls-position="right"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="批次号" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
+          <el-form-item label="批次号">
+            <el-input :model-value="formData.batchCode" disabled placeholder="选择库存后自动带出" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="物料">
+            <MdItemSelect v-model="formData.itemId" disabled />
           </el-form-item>
         </el-col>
       </el-row>
@@ -123,6 +135,8 @@
 
 <script setup lang="ts">
 import { WmProductReceiptLineApi, WmProductReceiptLineVO } from '@/api/mes/wm/productreceipt/line'
+import { WmMaterialStockVO } from '@/api/mes/wm/materialstock'
+import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProductReceiptDetailList from './ProductReceiptDetailList.vue'
 import ProductReceiptDetailForm from './ProductReceiptDetailForm.vue'
@@ -180,20 +194,39 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
 const lineFormType = ref('')
+const quantityMax = ref<number | undefined>(undefined)
 const formData = ref({
   id: undefined,
   receiptId: undefined as number | undefined,
-  itemId: undefined,
-  quantity: undefined,
-  batchId: undefined,
-  batchCode: undefined,
+  materialStockId: undefined as number | undefined,
+  itemId: undefined as number | undefined,
+  quantity: undefined as number | undefined,
+  batchId: undefined as number | undefined,
+  batchCode: undefined as string | undefined,
   remark: undefined
 })
 const formRules = reactive({
-  itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
+  materialStockId: [{ required: true, message: '请选择库存记录', trigger: 'change' }],
   quantity: [{ required: true, message: '入库数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
+
+/** 库存选中回调 —— 自动回填物料ID/批次/数量上限 */
+const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
+  if (!stock) {
+    formData.value.itemId = undefined
+    formData.value.batchId = undefined
+    formData.value.batchCode = undefined
+    formData.value.quantity = undefined
+    quantityMax.value = undefined
+    return
+  }
+  formData.value.itemId = stock.itemId
+  formData.value.batchId = stock.batchId
+  formData.value.batchCode = stock.batchCode
+  formData.value.quantity = stock.quantity
+  quantityMax.value = stock.quantity
+}
 
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
@@ -236,12 +269,14 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     receiptId: undefined,
+    materialStockId: undefined,
     itemId: undefined,
     quantity: undefined,
     batchId: undefined,
     batchCode: undefined,
     remark: undefined
   }
+  quantityMax.value = undefined
   formRef.value?.resetFields()
 }
 

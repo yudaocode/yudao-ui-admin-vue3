@@ -5,6 +5,7 @@ export interface WmProductReceiptLineVO {
   id: number
   receiptId: number
   itemId: number
+  materialStockId: number
   itemCode: string
   itemName: string
   specification: string
