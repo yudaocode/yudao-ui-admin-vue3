@@ -32,7 +32,7 @@
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="退料数量" align="center" prop="quantity" width="100" />
-      <el-table-column label="批次号" align="center" prop="batchNo" min-width="120" />
+      <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column label="是否检测" align="center" prop="rqcCheckFlag" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.rqcCheckFlag" />
@@ -85,13 +85,12 @@
     >
       <el-row>
         <el-col :span="8">
-          <!-- TODO @芋艿：【StockSelect】需要使用库存选择器； -->
-          <el-form-item label="产品物料" prop="itemId">
-            <MdItemSelect
-              v-model="formData.itemId"
-              placeholder="请选择产品物料"
+          <el-form-item label="库存记录" prop="materialStockId">
+            <WmMaterialStockSelect
+              v-model="formData.materialStockId"
+              placeholder="请选择库存"
               class="!w-1/1"
-              @change="handleItemChange"
+              @change="handleStockChange"
             />
           </el-form-item>
         </el-col>
@@ -101,6 +100,7 @@
               v-model="formData.quantity"
               :precision="2"
               :min="0"
+              :max="quantityMax"
               controls-position="right"
               class="!w-1/1"
             />
@@ -109,6 +109,23 @@
         <el-col :span="8">
           <el-form-item label="需要质检" prop="rqcCheckFlag">
             <el-switch v-model="formData.rqcCheckFlag" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="物料">
+            <el-input :model-value="stockInfo.itemName" disabled placeholder="选择库存后自动带出" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="批次号">
+            <el-input :model-value="formData.batchCode" disabled placeholder="选择库存后自动带出" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="库存数量">
+            <el-input :model-value="stockInfo.stockQuantity" disabled placeholder="选择库存后自动带出" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -139,7 +156,8 @@
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { WmReturnIssueLineApi, WmReturnIssueLineVO } from '@/api/mes/wm/returnissue/line'
-import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import { WmMaterialStockVO } from '@/api/mes/wm/materialstock'
+import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
 import ReturnIssueDetailList from './ReturnIssueDetailList.vue'
 import ReturnIssueDetailForm from './ReturnIssueDetailForm.vue'
 import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
@@ -196,25 +214,48 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
 const lineFormType = ref('') // 行表单的类型
+const quantityMax = ref<number | undefined>(undefined) // 数量上限（在库数量）
+const stockInfo = ref({
+  itemName: undefined as string | undefined,
+  stockQuantity: undefined as number | undefined
+})
 const formData = ref({
   id: undefined,
   issueId: undefined as number | undefined,
-  itemId: undefined,
-  quantity: undefined,
+  itemId: undefined as number | undefined,
+  materialStockId: undefined as number | undefined,
+  quantity: undefined as number | undefined,
+  batchId: undefined as number | undefined,
+  batchCode: undefined as string | undefined,
   rqcCheckFlag: false,
   remark: undefined
 })
 const formRules = reactive({
-  itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
+  materialStockId: [{ required: true, message: '请选择库存记录', trigger: 'change' }],
   quantity: [{ required: true, message: '退料数量不能为空', trigger: 'blur' }],
   rqcCheckFlag: [{ required: true, message: '需要质检不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
-/** 物料变化时，自动填充信息 */
-const handleItemChange = (item: any) => {
-  if (item) {
-    formData.value.itemId = item.id
+/** 库存选中回调 —— 自动回填物料ID/批次/数量上限 */
+const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
+  if (!stock) {
+    formData.value.itemId = undefined
+    formData.value.batchId = undefined
+    formData.value.batchCode = undefined
+    formData.value.quantity = undefined
+    quantityMax.value = undefined
+    stockInfo.value = { itemName: undefined, stockQuantity: undefined }
+    return
+  }
+  formData.value.itemId = stock.itemId
+  formData.value.batchId = stock.batchId
+  formData.value.batchCode = stock.batchCode
+  formData.value.quantity = stock.quantity
+  quantityMax.value = stock.quantity
+  stockInfo.value = {
+    itemName: stock.itemName || `物料 #${stock.itemId}`,
+    stockQuantity: stock.quantity
   }
 }
 
@@ -260,10 +301,15 @@ const resetForm = () => {
     id: undefined,
     issueId: undefined,
     itemId: undefined,
+    materialStockId: undefined,
     quantity: undefined,
+    batchId: undefined,
+    batchCode: undefined,
     rqcCheckFlag: false,
     remark: undefined
   }
+  quantityMax.value = undefined
+  stockInfo.value = { itemName: undefined, stockQuantity: undefined }
   formRef.value?.resetFields()
 }
 

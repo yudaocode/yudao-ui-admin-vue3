@@ -54,7 +54,6 @@
             <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
-        <!-- TODO @芋艿：貌似前端不用选择；关注下； -->
         <el-col :span="8">
           <el-form-item label="工作站" prop="workstationId">
             <MdWorkstationSelect v-model="formData.workstationId" :disabled="isHeaderReadonly" />
@@ -103,8 +102,9 @@
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { generateRandomStr } from '@/utils'
 import { WmReturnIssueApi, WmReturnIssueVO } from '@/api/mes/wm/returnissue'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import ReturnIssueLineList from './ReturnIssueLineList.vue'
@@ -148,8 +148,10 @@ const dialogTitle = computed(() => {
 })
 
 /** 生成退料单编号 */
-const generateCode = () => {
-  formData.value.code = 'RI' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_RETURN_ISSUE_CODE
+  )
 }
 
 /** 打开弹窗 */
