@@ -52,8 +52,8 @@
           <el-form-item label="退货日期" prop="returnDate">
             <el-date-picker
               v-model="formData.returnDate"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
+              type="date"
+              value-format="x"
               placeholder="选择退货日期"
               :disabled="isHeaderReadonly"
               class="!w-full"
@@ -92,50 +92,41 @@
       <ReturnSalesLineList :return-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
-      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
-        确 定
+      <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
+        保 存
+      </el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesWmReturnSalesStatusEnum.PREPARE"
+        @click="handleSubmit"
+        type="warning"
+        :disabled="formLoading"
+      >
+        提 交
       </el-button>
       <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
         执行上架
       </el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { WmReturnSalesApi, WmReturnSalesVO } from '@/api/mes/wm/returnsales'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode, MesWmReturnSalesStatusEnum } from '@/views/mes/utils/constants'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import ReturnSalesLineList from './ReturnSalesLineList.vue'
 
 defineOptions({ name: 'ReturnSalesForm' })
+const emit = defineEmits(['success'])
 
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formType = ref<string>('create') // 表单的类型：create / update / stock / detail
-const formData = ref({
-  id: undefined as number | undefined,
-  code: undefined,
-  name: undefined,
-  salesOrderCode: undefined,
-  clientId: undefined,
-  returnDate: undefined,
-  returnReason: undefined,
-  remark: undefined
-})
-const formRules = reactive({
-  code: [{ required: true, message: '退货单编号不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '退货单名称不能为空', trigger: 'blur' }],
-  clientId: [{ required: true, message: '客户不能为空', trigger: 'change' }],
-  returnDate: [{ required: true, message: '退货日期不能为空', trigger: 'change' }],
-  returnReason: [{ required: true, message: '退货原因不能为空', trigger: 'blur' }]
-})
-const formRef = ref() // 表单 Ref
-
-const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
 const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value)) // 是否只读
 const dialogTitle = computed(() => {
@@ -147,10 +138,32 @@ const dialogTitle = computed(() => {
   }
   return titles[formType.value] || formType.value
 })
+const formData = ref({
+  id: undefined as number | undefined,
+  code: undefined,
+  name: undefined,
+  salesOrderCode: undefined,
+  clientId: undefined,
+  returnDate: undefined,
+  returnReason: undefined,
+  status: undefined as number | undefined,
+  remark: undefined
+})
+const formRules = reactive({
+  code: [{ required: true, message: '退货单编号不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '退货单名称不能为空', trigger: 'blur' }],
+  clientId: [{ required: true, message: '客户不能为空', trigger: 'change' }],
+  returnDate: [{ required: true, message: '退货日期不能为空', trigger: 'change' }],
+  returnReason: [{ required: true, message: '退货原因不能为空', trigger: 'blur' }]
+})
+const formRef = ref() // 表单 Ref
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成退货单编号 */
-const generateCode = () => {
-  formData.value.code = 'RS' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_RETURN_SALES_CODE
+  )
 }
 
 /** 打开弹窗 */
@@ -167,11 +180,12 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
 defineExpose({ open })
 
-/** 提交表单（create/update 模式） */
-const emit = defineEmits(['success'])
+/** 保存表单（create/update 模式的保存按钮） */
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
@@ -182,14 +196,41 @@ const submitForm = async () => {
     if (formType.value === 'create') {
       const res = await WmReturnSalesApi.createReturnSales(data)
       message.success('新增成功')
+      // 创建成功后，更新表单数据和状态为编辑模式
       formData.value.id = res
+      formData.value.status = MesWmReturnSalesStatusEnum.PREPARE
       formType.value = 'update'
     } else {
       await WmReturnSalesApi.updateReturnSales(data)
       message.success('修改成功')
     }
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
     // 发送操作成功的事件
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  // 校验表单
+  await formRef.value.validate()
+  try {
+    await message.confirm('确认提交该销售退货单？【提交后将不能修改】')
+    formLoading.value = true
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as unknown as WmReturnSalesVO
+      await WmReturnSalesApi.updateReturnSales(data)
+    }
+    // 2. 提交退货单
+    await WmReturnSalesApi.submitReturnSales(formData.value.id!)
+    message.success('提交成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -220,6 +261,7 @@ const resetForm = () => {
     clientId: undefined,
     returnDate: undefined,
     returnReason: undefined,
+    status: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()

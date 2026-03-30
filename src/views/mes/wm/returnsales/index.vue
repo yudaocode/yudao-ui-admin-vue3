@@ -90,6 +90,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
@@ -101,21 +102,21 @@
           </el-button>
           <el-button
             link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-return-sales:submit']"
-            v-if="scope.row.status === MesWmReturnSalesStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-return-sales:delete']"
             v-if="scope.row.status === MesWmReturnSalesStatusEnum.PREPARE"
           >
             删除
+          </el-button>
+          <!-- 待检验：执行质检（提示去质检模块操作） -->
+          <el-button
+            link
+            type="warning"
+            v-if="scope.row.status === MesWmReturnSalesStatusEnum.CONFIRMED"
+            @click="message.alert('请前往【质量管理 - 退货检验（RQC）】中进行退货检验操作')"
+          >
+            执行质检
           </el-button>
           <!-- 待执行：执行退货 -->
           <el-button
@@ -137,16 +138,18 @@
           >
             执行上架
           </el-button>
-          <!-- 待执行、待上架：取消 -->
+          <!-- 待检验、待执行、待上架：取消 -->
           <el-button
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
             v-hasPermi="['mes:wm-return-sales:cancel']"
             v-if="
-              [MesWmReturnSalesStatusEnum.APPROVING, MesWmReturnSalesStatusEnum.APPROVED].includes(
-                scope.row.status
-              )
+              [
+                MesWmReturnSalesStatusEnum.CONFIRMED,
+                MesWmReturnSalesStatusEnum.APPROVING,
+                MesWmReturnSalesStatusEnum.APPROVED
+              ].includes(scope.row.status)
             "
           >
             取消
@@ -221,16 +224,6 @@ const resetQuery = () => {
 /** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 提交按钮操作 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该销售退货单？')
-    await WmReturnSalesApi.submitReturnSales(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
 }
 
 /** 执行退货 */

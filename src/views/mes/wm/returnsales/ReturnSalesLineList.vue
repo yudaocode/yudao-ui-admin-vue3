@@ -38,6 +38,11 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.rqcCheckFlag" />
         </template>
       </el-table-column>
+      <el-table-column label="质量状态" align="center" prop="qualityStatus" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_WM_QUALITY_STATUS" :value="scope.row.qualityStatus" />
+        </template>
+      </el-table-column>
       <el-table-column
         v-if="isUpdate || isStock"
         label="操作"
@@ -98,8 +103,13 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="批次编码" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次编码" />
+          <el-form-item label="批次" prop="batchId">
+            <WmBatchSelect
+              v-model="formData.batchId"
+              :item-id="formData.itemId"
+              placeholder="请选择批次"
+              class="!w-1/1"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -134,6 +144,7 @@
 import { DICT_TYPE } from '@/utils/dict'
 import { WmReturnSalesLineApi, WmReturnSalesLineVO } from '@/api/mes/wm/returnsales/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 import ReturnSalesDetailList from './ReturnSalesDetailList.vue'
 import ReturnSalesDetailForm from './ReturnSalesDetailForm.vue'
 
@@ -193,7 +204,7 @@ const formData = ref({
   returnId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
-  batchCode: undefined,
+  batchId: undefined as number | undefined,
   rqcCheckFlag: true,
   remark: undefined
 })
@@ -250,7 +261,7 @@ const resetForm = () => {
     returnId: undefined,
     itemId: undefined,
     quantity: undefined,
-    batchCode: undefined,
+    batchId: undefined,
     rqcCheckFlag: false,
     remark: undefined
   }

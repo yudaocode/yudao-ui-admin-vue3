@@ -324,6 +324,7 @@ export const MesWmReturnVendorStatusEnum = {
 /** MES 销售退货单状态枚举 */
 export const MesWmReturnSalesStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,
+  CONFIRMED: MesOrderStatusConstants.CONFIRMED,
   APPROVING: MesOrderStatusConstants.APPROVING,
   APPROVED: MesOrderStatusConstants.APPROVED,
   FINISHED: MesOrderStatusConstants.FINISHED,
@@ -423,6 +424,7 @@ export const MesAutoCodeRuleCode = {
   WM_RETURN_VENDOR_CODE: 'WM_RETURN_VENDOR_CODE', // 采购退货单编码
   WM_PRODUCT_ISSUE_CODE: 'WM_PRODUCT_ISSUE_CODE', // 生产领料出库单编码
   WM_RETURN_ISSUE_CODE: 'WM_RETURN_ISSUE_CODE', // 生产退料单编码
+  WM_RETURN_SALES_CODE: 'WM_RETURN_SALES_CODE', // 销售退货单编码
   PRODUCTRECPT_CODE: 'PRODUCTRECPT_CODE', // 产品入库单编码
   WM_SALES_NOTICE_CODE: 'WM_SALES_NOTICE_CODE', // 发货通知单编码
   WM_SN_CODE: 'WM_SN_CODE', // SN 码
