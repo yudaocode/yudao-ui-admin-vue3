@@ -1,4 +1,3 @@
-<!-- TODO @AI：/Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/wm/productsales 模块下，减少 formType == ；而是更过 isXXX，通过 compute 计算 -->
 <template>
   <ContentWrap>
     <el-form

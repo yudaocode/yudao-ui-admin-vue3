@@ -1,7 +1,7 @@
 <!-- MES 销售出库拣货明细表单弹窗 -->
 <template>
-  <!-- TODO @AI：改成 3 行 -->
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
+  <!-- DONE @AI：改成 3 行 -->
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -9,46 +9,71 @@
       label-width="110px"
       v-loading="formLoading"
     >
-      <el-form-item label="物料" prop="itemId">
-        <MdItemSelect v-model="formData.itemId" disabled />
-      </el-form-item>
-      <el-form-item label="选择库存" prop="materialStockId">
-        <WmMaterialStockSelect
-          v-model="formData.materialStockId"
-          :item-id="formData.itemId"
-          @change="handleStockChange"
-        />
-      </el-form-item>
-      <!-- TODO @AI：下面应该都是 disabled？我记得有模块是这么干的； -->
-      <el-form-item label="出库仓库" prop="warehouseId">
-        <WmWarehouseSelect v-model="formData.warehouseId" />
-      </el-form-item>
-      <el-form-item label="库区" prop="locationId" v-if="formData.warehouseId">
-        <WmWarehouseLocationSelect
-          v-model="formData.locationId"
-          :warehouse-id="formData.warehouseId"
-        />
-      </el-form-item>
-      <el-form-item label="库位" prop="areaId" v-if="formData.locationId">
-        <WmWarehouseAreaSelect v-model="formData.areaId" :location-id="formData.locationId" />
-      </el-form-item>
-      <el-form-item label="批次号" prop="batchId">
-        <WmBatchSelect
-          v-model="formData.batchId"
-          :item-id="formData.itemId"
-          @change="handleBatchChange"
-        />
-      </el-form-item>
-      <el-form-item label="数量" prop="quantity">
-        <el-input-number
-          v-model="formData.quantity"
-          :precision="2"
-          :min="0"
-          :max="quantityMax"
-          controls-position="right"
-          class="!w-1/1"
-        />
-      </el-form-item>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="物料" prop="itemId">
+            <MdItemSelect v-model="formData.itemId" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="选择库存" prop="materialStockId">
+            <WmMaterialStockSelect
+              v-model="formData.materialStockId"
+              :item-id="formData.itemId"
+              @change="handleStockChange"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="数量" prop="quantity">
+            <el-input-number
+              v-model="formData.quantity"
+              :precision="2"
+              :min="0"
+              :max="quantityMax"
+              controls-position="right"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="出库仓库" prop="warehouseId">
+            <WmWarehouseSelect v-model="formData.warehouseId" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="库区" prop="locationId">
+            <WmWarehouseLocationSelect
+              v-model="formData.locationId"
+              :warehouse-id="formData.warehouseId"
+              disabled
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="库位" prop="areaId">
+            <WmWarehouseAreaSelect
+              v-model="formData.areaId"
+              :location-id="formData.locationId"
+              disabled
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="批次号" prop="batchId">
+            <WmBatchSelect
+              v-model="formData.batchId"
+              :item-id="formData.itemId"
+              @change="handleBatchChange"
+              disabled
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>

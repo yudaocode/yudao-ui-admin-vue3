@@ -111,9 +111,7 @@
         </el-col>
       </el-row>
       <!-- 运输信息：填写运单/详情模式下展示，或已有运输数据时展示 -->
-      <template
-        v-if="isShipping || formType === 'detail' || formData.carrier || formData.shippingNumber"
-      >
+      <template v-if="isShipping || isDetail || formData.carrier || formData.shippingNumber">
         <el-divider content-position="left">运输信息</el-divider>
         <el-row>
           <el-col :span="8">
@@ -193,6 +191,7 @@ const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) /
 const isPick = computed(() => formType.value === 'stock') // 是否为拣货模式
 const isShipping = computed(() => formType.value === 'shipping') // 是否为填写运单模式
 const isFinish = computed(() => formType.value === 'finish') // 是否为执行出库模式
+const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
 const isHeaderReadonly = computed(() =>
   ['stock', 'shipping', 'finish', 'detail'].includes(formType.value)
 ) // 是否只读

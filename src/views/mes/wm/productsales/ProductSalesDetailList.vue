@@ -7,13 +7,7 @@
       <el-table-column label="库位名称" align="center" prop="areaName" min-width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column label="数量" align="center" prop="quantity" width="100" />
-      <el-table-column
-        v-if="props.formType === 'pick'"
-        label="操作"
-        align="center"
-        width="120"
-        fixed="right"
-      >
+      <el-table-column v-if="isPick" label="操作" align="center" width="120" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="emit('edit-detail', scope.row.id)">
             编辑
@@ -41,6 +35,8 @@ const emit = defineEmits(['edit-detail'])
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
+const isPick = computed(() => props.formType === 'stock') // 是否为拣货模式
 
 const loading = ref(false) // 列表的加载中
 const list = ref<WmProductSalesDetailVO[]>([]) // 明细列表
