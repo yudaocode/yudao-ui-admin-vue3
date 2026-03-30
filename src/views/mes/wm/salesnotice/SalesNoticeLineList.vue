@@ -24,13 +24,7 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
-      <el-table-column
-        v-if="isUpdate"
-        label="操作"
-        align="center"
-        width="120"
-        fixed="right"
-      >
+      <el-table-column v-if="isUpdate" label="操作" align="center" width="120" fixed="right">
         <template #default="scope">
           <el-button v-if="isUpdate" link type="primary" @click="openForm('update', scope.row.id)">
             编辑
@@ -60,13 +54,8 @@
     >
       <el-row>
         <el-col :span="8">
-          <el-form-item label="库存记录" prop="materialStockId">
-            <WmMaterialStockSelect
-              v-model="formData.materialStockId"
-              placeholder="请选择库存"
-              class="!w-1/1"
-              @change="handleStockChange"
-            />
+          <el-form-item label="物料" prop="itemId">
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -74,25 +63,19 @@
             <el-input-number
               v-model="formData.quantity"
               :precision="2"
-              :min="0"
-              :max="quantityMax"
+              :min="0.01"
               controls-position="right"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="批次号">
-            <el-input :model-value="formData.batchCode" disabled placeholder="选择库存后自动带出" />
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="8">
-          <el-form-item label="物料">
-            <MdItemSelect v-model="formData.itemId" disabled />
-          </el-form-item>
-        </el-col>
         <el-col :span="8">
           <el-form-item label="是否检验" prop="oqcCheckFlag">
             <el-switch v-model="formData.oqcCheckFlag" />
@@ -117,8 +100,6 @@
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { WmSalesNoticeLineApi, WmSalesNoticeLineVO } from '@/api/mes/wm/salesnotice/line'
-import { WmMaterialStockVO } from '@/api/mes/wm/materialstock'
-import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 
 defineOptions({ name: 'SalesNoticeLineList' })
@@ -171,40 +152,20 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
 const lineFormType = ref('')
-const quantityMax = ref<number | undefined>(undefined)
 const formData = ref({
   id: undefined,
   noticeId: undefined as number | undefined,
-  materialStockId: undefined as number | undefined,
   itemId: undefined as number | undefined,
-  quantity: undefined as number | undefined,
-  batchId: undefined as number | undefined,
   batchCode: undefined as string | undefined,
+  quantity: undefined as number | undefined,
   oqcCheckFlag: true,
   remark: undefined
 })
 const formRules = reactive({
-  materialStockId: [{ required: true, message: '请选择库存记录', trigger: 'change' }],
+  itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '发货数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
-
-/** 库存选中回调 —— 自动回填物料ID/批次/数量上限 */
-const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
-  if (!stock) {
-    formData.value.itemId = undefined
-    formData.value.batchId = undefined
-    formData.value.batchCode = undefined
-    formData.value.quantity = undefined
-    quantityMax.value = undefined
-    return
-  }
-  formData.value.itemId = stock.itemId
-  formData.value.batchId = stock.batchId
-  formData.value.batchCode = stock.batchCode
-  formData.value.quantity = stock.quantity
-  quantityMax.value = stock.quantity
-}
 
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
@@ -247,15 +208,12 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     noticeId: undefined,
-    materialStockId: undefined,
     itemId: undefined,
-    quantity: undefined,
-    batchId: undefined,
     batchCode: undefined,
+    quantity: undefined,
     oqcCheckFlag: true,
     remark: undefined
   }
-  quantityMax.value = undefined
   formRef.value?.resetFields()
 }
 
