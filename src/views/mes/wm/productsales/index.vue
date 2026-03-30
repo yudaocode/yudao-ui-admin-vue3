@@ -132,15 +132,6 @@
           </el-button>
           <el-button
             link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-product-sales:submit']"
-            v-if="scope.row.status === MesWmProductSalesStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-product-sales:delete']"
@@ -266,16 +257,6 @@ const resetQuery = () => {
 /** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 提交按钮操作 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该销售出库单？')
-    await WmProductSalesApi.submitProductSales(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
 }
 
 /** 取消按钮操作 */

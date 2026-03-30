@@ -10,6 +10,8 @@ export interface WmProductSalesLineVO {
   quantity: number
   pickedQuantity: number
   batchId: number
+  batchCode: string
+  oqcCheckFlag: boolean
   remark: string
   createTime: string
 }

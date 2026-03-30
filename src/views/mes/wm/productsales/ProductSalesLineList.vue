@@ -98,12 +98,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="批次号" prop="batchId">
-            <WmBatchSelect
-              v-model="formData.batchId"
-              :item-id="formData.itemId"
-              @change="handleBatchChange"
-            />
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -153,7 +149,6 @@
 <script setup lang="ts">
 import { WmProductSalesLineApi, WmProductSalesLineVO } from '@/api/mes/wm/productsales/line'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 import WmSalesNoticeLineSelect from '@/views/mes/wm/salesnotice/components/WmSalesNoticeLineSelect.vue'
 import ProductSalesDetailList from './ProductSalesDetailList.vue'
 import ProductSalesDetailForm from './ProductSalesDetailForm.vue'
@@ -171,7 +166,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
-const isPick = computed(() => props.formType === 'pick') // 是否为拣货模式
+const isPick = computed(() => props.formType === 'stock') // 是否为拣货模式
 const hasNoticeId = computed(() => !!props.noticeId) // 是否有关联的发货通知单
 
 // ==================== 列表 ====================
@@ -218,7 +213,6 @@ const formData = ref({
   noticeLineId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
-  batchId: undefined as number | undefined,
   batchCode: undefined as string | undefined,
   oqcCheckFlag: false,
   remark: undefined
@@ -245,17 +239,11 @@ const openForm = async (type: string, id?: number) => {
   }
 }
 
-/** 批次选中回调，同步 batchCode */
-const handleBatchChange = (batch: any) => {
-  formData.value.batchCode = batch?.code
-}
-
 /** 发货通知单行变化时，自动填充物料信息 */
 const handleNoticeLineChange = (line: any) => {
   if (line) {
     formData.value.itemId = line.itemId
     formData.value.quantity = line.quantity
-    formData.value.batchId = line.batchId
     formData.value.batchCode = line.batchCode
     formData.value.oqcCheckFlag = line.oqcCheckFlag ?? false
   }
@@ -289,7 +277,6 @@ const resetForm = () => {
     noticeLineId: undefined,
     itemId: undefined,
     quantity: undefined,
-    batchId: undefined,
     batchCode: undefined,
     oqcCheckFlag: false,
     remark: undefined

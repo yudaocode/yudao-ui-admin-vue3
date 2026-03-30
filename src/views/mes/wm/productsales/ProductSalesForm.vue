@@ -146,7 +146,15 @@
     </template>
     <template #footer>
       <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
-        确 定
+        保 存
+      </el-button>
+      <el-button
+        v-if="isUpdate && formData.status === MesWmProductSalesStatusEnum.PREPARE"
+        @click="handleSubmit"
+        type="warning"
+        :disabled="formLoading"
+      >
+        提 交
       </el-button>
       <el-button v-if="isPick" @click="handleStock" type="primary" :disabled="formLoading">
         执行拣货
@@ -157,7 +165,7 @@
       <el-button v-if="isFinish" @click="handleFinish" type="primary" :disabled="formLoading">
         确认出库
       </el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -165,23 +173,41 @@
 <script setup lang="ts">
 import { WmProductSalesApi, WmProductSalesVO } from '@/api/mes/wm/productsales'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
-import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, MesWmProductSalesStatusEnum } from '@/views/mes/utils/constants'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import WmSalesNoticeSelect from '@/views/mes/wm/salesnotice/components/WmSalesNoticeSelect.vue'
 import { WmSalesNoticeVO } from '@/api/mes/wm/salesnotice'
 import ProductSalesLineList from './ProductSalesLineList.vue'
 
 defineOptions({ name: 'ProductSalesForm' })
+const emit = defineEmits(['success'])
 
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formType = ref<string>('create') // 表单的类型：create / update / stock / shipping / finish / detail
+const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isPick = computed(() => formType.value === 'stock') // 是否为拣货模式
+const isShipping = computed(() => formType.value === 'shipping') // 是否为填写运单模式
+const isFinish = computed(() => formType.value === 'finish') // 是否为执行出库模式
+const isHeaderReadonly = computed(() => ['stock', 'shipping', 'finish', 'detail'].includes(formType.value)) // 是否只读
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增销售出库单',
+    update: '编辑销售出库单',
+    stock: '执行拣货',
+    shipping: '填写运单',
+    finish: '执行出库',
+    detail: '销售出库单详情'
+  }
+  return titles[formType.value] || formType.value
+})
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
+  status: undefined as number | undefined,
   clientId: undefined,
   noticeId: undefined,
   salesOrderCode: undefined,
@@ -200,23 +226,7 @@ const formRules = reactive({
   clientId: [{ required: true, message: '客户不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-
-const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isPick = computed(() => formType.value === 'stock') // 是否为拣货模式
-const isShipping = computed(() => formType.value === 'shipping') // 是否为填写运单模式
-const isFinish = computed(() => formType.value === 'finish') // 是否为执行出库模式
-const isHeaderReadonly = computed(() => ['stock', 'shipping', 'finish', 'detail'].includes(formType.value)) // 是否只读
-const dialogTitle = computed(() => {
-  const titles = {
-    create: '新增销售出库单',
-    update: '编辑销售出库单',
-    stock: '执行拣货',
-    shipping: '填写运单',
-    finish: '执行出库',
-    detail: '销售出库单详情'
-  }
-  return titles[formType.value] || formType.value
-})
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成出库单编号 */
 const generateCode = async () => {
@@ -251,11 +261,11 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
-defineExpose({ open })
 
 /** 提交表单（create/update 模式） */
-const emit = defineEmits(['success'])
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
@@ -267,13 +277,39 @@ const submitForm = async () => {
       const res = await WmProductSalesApi.createProductSales(data)
       message.success('新增成功')
       formData.value.id = res
+      formData.value.status = MesWmProductSalesStatusEnum.PREPARE
       formType.value = 'update'
     } else {
       await WmProductSalesApi.updateProductSales(data)
       message.success('修改成功')
     }
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
     // 发送操作成功的事件
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  // 校验表单
+  await formRef.value.validate()
+  try {
+    await message.confirm('确认提交该销售出库单？【提交后将不能修改】')
+    formLoading.value = true
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as unknown as WmProductSalesVO
+      await WmProductSalesApi.updateProductSales(data)
+    }
+    // 2. 提交出库单
+    await WmProductSalesApi.submitProductSales(formData.value.id!)
+    message.success('提交成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -339,6 +375,7 @@ const resetForm = () => {
     id: undefined,
     code: undefined,
     name: undefined,
+    status: undefined,
     clientId: undefined,
     noticeId: undefined,
     salesOrderCode: undefined,
@@ -352,4 +389,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>
