@@ -89,10 +89,11 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { WmSalesNoticeApi, WmSalesNoticeVO } from '@/api/mes/wm/salesnotice'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import SalesNoticeLineList from './SalesNoticeLineList.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'SalesNoticeForm' })
 
@@ -132,8 +133,10 @@ const formRules = reactive({
 const formRef = ref()
 
 /** 生成通知单编号 */
-const generateCode = () => {
-  formData.value.noticeCode = 'SN' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.noticeCode = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_SALES_NOTICE_CODE
+  )
 }
 
 /** 打开弹窗 */
