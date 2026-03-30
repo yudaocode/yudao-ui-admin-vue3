@@ -25,6 +25,15 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="销售订单号" prop="salesOrderCode">
+        <el-input
+          v-model="queryParams.salesOrderCode"
+          placeholder="请输入销售订单号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="客户" prop="clientId">
         <MdClientSelect v-model="queryParams.clientId" clearable class="!w-240px" />
       </el-form-item>
@@ -191,6 +200,7 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
+  salesOrderCode: undefined,
   clientId: undefined,
   status: undefined
 })
