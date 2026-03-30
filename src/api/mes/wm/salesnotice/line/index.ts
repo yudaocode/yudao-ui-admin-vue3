@@ -5,6 +5,7 @@ export interface WmSalesNoticeLineVO {
   id: number
   noticeId: number
   itemId: number
+  materialStockId: number
   itemCode: string
   itemName: string
   specification: string

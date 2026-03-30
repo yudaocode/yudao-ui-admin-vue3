@@ -13,9 +13,7 @@
           <el-form-item label="通知单编号" prop="noticeCode">
             <el-input v-model="formData.noticeCode" placeholder="请输入通知单编号">
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -45,6 +43,7 @@
               value-format="x"
               placeholder="请选择发货日期"
               class="!w-1/1"
+              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
@@ -74,16 +73,24 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- 编辑时展示物料信息 -->
-    <template v-if="formType === 'update' && formData.id">
+    <!-- 非新建模式展示物料信息 -->
+    <template v-if="formData.id">
       <el-divider content-position="center">物料信息</el-divider>
-      <SalesNoticeLineList :notice-id="formData.id" />
+      <SalesNoticeLineList :notice-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
-        确 定
+      <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
+        保 存
       </el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesWmSalesNoticeStatusEnum.PREPARE"
+        @click="handleSubmit"
+        type="warning"
+        :disabled="formLoading"
+      >
+        提 交
+      </el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -93,32 +100,34 @@ import { WmSalesNoticeApi, WmSalesNoticeVO } from '@/api/mes/wm/salesnotice'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import SalesNoticeLineList from './SalesNoticeLineList.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
-import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, MesWmSalesNoticeStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'SalesNoticeForm' })
+const emit = defineEmits(['success'])
 
-const { t } = useI18n()
-const message = useMessage()
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const formType = ref('')
-const isDetail = computed(() => formType.value === 'detail')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const formType = ref<string>('create') // 表单的类型：create / update / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
 const dialogTitle = computed(() => {
-  const titles = {
+  const titles: Record<string, string> = {
     create: '新增发货通知单',
     update: '修改发货通知单',
     detail: '查看发货通知单'
   }
-  return titles[formType.value] || t('action.' + formType.value)
+  return titles[formType.value] || formType.value
 })
 const formData = ref({
-  id: undefined,
+  id: undefined as number | undefined,
   noticeCode: undefined,
   noticeName: undefined,
   salesOrderCode: undefined,
   clientId: undefined,
   salesDate: undefined,
+  status: undefined as number | undefined,
   recipientName: undefined,
   recipientTelephone: undefined,
   recipientAddress: undefined,
@@ -130,7 +139,8 @@ const formRules = reactive({
   clientId: [{ required: true, message: '请选择客户', trigger: 'change' }],
   salesDate: [{ required: true, message: '请选择发货日期', trigger: 'change' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成通知单编号 */
 const generateCode = async () => {
@@ -152,11 +162,11 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
-defineExpose({ open })
 
-/** 提交表单 */
-const emit = defineEmits(['success'])
+/** 提交表单（create/update 模式） */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
@@ -164,15 +174,39 @@ const submitForm = async () => {
     const data = formData.value as unknown as WmSalesNoticeVO
     if (formType.value === 'create') {
       const res = await WmSalesNoticeApi.createSalesNotice(data)
-      message.success(t('common.createSuccess'))
+      message.success('新增成功')
       formData.value.id = res
+      formData.value.status = MesWmSalesNoticeStatusEnum.PREPARE
       formType.value = 'update'
     } else {
       await WmSalesNoticeApi.updateSalesNotice(data)
-      message.success(t('common.updateSuccess'))
-      dialogVisible.value = false
+      message.success('修改成功')
     }
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  await formRef.value.validate()
+  try {
+    await message.confirm('确认提交该发货通知单？【提交后将不能修改】')
+    formLoading.value = true
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as unknown as WmSalesNoticeVO
+      await WmSalesNoticeApi.updateSalesNotice(data)
+    }
+    // 2. 提交发货通知单
+    await WmSalesNoticeApi.submitSalesNotice(formData.value.id!)
+    message.success('提交成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -187,6 +221,7 @@ const resetForm = () => {
     salesOrderCode: undefined,
     clientId: undefined,
     salesDate: undefined,
+    status: undefined,
     recipientName: undefined,
     recipientTelephone: undefined,
     recipientAddress: undefined,
@@ -194,4 +229,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

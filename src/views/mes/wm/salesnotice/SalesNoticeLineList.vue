@@ -1,26 +1,43 @@
 <!-- MES 发货通知单行列表子组件 -->
 <template>
   <div class="overflow-hidden">
-    <el-button type="primary" plain @click="openForm('create')" class="mb-10px">
+    <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加物料
     </el-button>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      border
+      :row-key="(row: any) => row.id"
+    >
       <el-table-column label="物料编码" align="center" prop="itemCode" min-width="120" />
       <el-table-column label="物料名称" align="center" prop="itemName" min-width="140" />
       <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
-      <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column label="发货数量" align="center" prop="quantity" width="100" />
+      <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
       <el-table-column label="是否检验" align="center" prop="oqcCheckFlag" width="90">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.oqcCheckFlag" />
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
-      <el-table-column label="操作" align="center" width="120">
+      <el-table-column
+        v-if="isUpdate"
+        label="操作"
+        align="center"
+        width="120"
+        fixed="right"
+      >
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('update', scope.row.id)">编辑</el-button>
-          <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+          <el-button v-if="isUpdate" link type="primary" @click="openForm('update', scope.row.id)">
+            编辑
+          </el-button>
+          <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -33,7 +50,7 @@
   </div>
 
   <!-- 添加/编辑行弹窗 -->
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="700px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -42,30 +59,41 @@
       v-loading="formLoading"
     >
       <el-row>
-        <el-col :span="12">
-          <el-form-item label="物料" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" />
+        <el-col :span="8">
+          <el-form-item label="库存记录" prop="materialStockId">
+            <WmMaterialStockSelect
+              v-model="formData.materialStockId"
+              placeholder="请选择库存"
+              class="!w-1/1"
+              @change="handleStockChange"
+            />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
-          <el-form-item label="批次号" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
+        <el-col :span="8">
           <el-form-item label="发货数量" prop="quantity">
             <el-input-number
               v-model="formData.quantity"
               :precision="2"
-              :min="0.01"
+              :min="0"
+              :max="quantityMax"
               controls-position="right"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="8">
+          <el-form-item label="批次号">
+            <el-input :model-value="formData.batchCode" disabled placeholder="选择库存后自动带出" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="物料">
+            <MdItemSelect v-model="formData.itemId" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="是否检验" prop="oqcCheckFlag">
             <el-switch v-model="formData.oqcCheckFlag" />
           </el-form-item>
@@ -89,16 +117,21 @@
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { WmSalesNoticeLineApi, WmSalesNoticeLineVO } from '@/api/mes/wm/salesnotice/line'
+import { WmMaterialStockVO } from '@/api/mes/wm/materialstock'
+import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 
 defineOptions({ name: 'SalesNoticeLineList' })
 
 const props = defineProps<{
   noticeId: number
+  formType: string
 }>()
 
 const { t } = useI18n()
 const message = useMessage()
+
+const isUpdate = computed(() => ['create', 'update'].includes(props.formType))
 
 // ==================== 列表 ====================
 const loading = ref(false)
@@ -137,31 +170,47 @@ const handleDelete = async (id: number) => {
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
-const formType = ref('')
+const lineFormType = ref('')
+const quantityMax = ref<number | undefined>(undefined)
 const formData = ref({
   id: undefined,
   noticeId: undefined as number | undefined,
-  itemId: undefined,
-  batchCode: undefined,
-  quantity: undefined,
+  materialStockId: undefined as number | undefined,
+  itemId: undefined as number | undefined,
+  quantity: undefined as number | undefined,
+  batchId: undefined as number | undefined,
+  batchCode: undefined as string | undefined,
   oqcCheckFlag: true,
   remark: undefined
 })
 const formRules = reactive({
-  itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
-  quantity: [
-    { required: true, message: '发货数量不能为空', trigger: 'blur' },
-    { type: 'number', min: 0.01, message: '发货数量必须大于0', trigger: 'blur' }
-  ],
-  oqcCheckFlag: [{ required: true, message: '是否检验不能为空', trigger: 'change' }]
+  materialStockId: [{ required: true, message: '请选择库存记录', trigger: 'change' }],
+  quantity: [{ required: true, message: '发货数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
+
+/** 库存选中回调 —— 自动回填物料ID/批次/数量上限 */
+const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
+  if (!stock) {
+    formData.value.itemId = undefined
+    formData.value.batchId = undefined
+    formData.value.batchCode = undefined
+    formData.value.quantity = undefined
+    quantityMax.value = undefined
+    return
+  }
+  formData.value.itemId = stock.itemId
+  formData.value.batchId = stock.batchId
+  formData.value.batchCode = stock.batchCode
+  formData.value.quantity = stock.quantity
+  quantityMax.value = stock.quantity
+}
 
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
-  formType.value = type
+  dialogTitle.value = type === 'create' ? '添加发货通知单行' : '修改发货通知单行'
+  lineFormType.value = type
   resetForm()
   if (id) {
     formLoading.value = true
@@ -179,7 +228,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = { ...formData.value, noticeId: props.noticeId } as unknown as WmSalesNoticeLineVO
-    if (formType.value === 'create') {
+    if (lineFormType.value === 'create') {
       await WmSalesNoticeLineApi.createSalesNoticeLine(data)
       message.success(t('common.createSuccess'))
     } else {
@@ -198,12 +247,15 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     noticeId: undefined,
+    materialStockId: undefined,
     itemId: undefined,
-    batchCode: undefined,
     quantity: undefined,
+    batchId: undefined,
+    batchCode: undefined,
     oqcCheckFlag: true,
     remark: undefined
   }
+  quantityMax.value = undefined
   formRef.value?.resetFields()
 }
 
