@@ -21,20 +21,12 @@
       <el-table-column label="仓库" align="center" prop="warehouseName" min-width="120" />
       <el-table-column label="库区" align="center" prop="locationName" min-width="120" />
       <el-table-column label="库位" align="center" prop="areaName" min-width="120" />
-      <el-table-column
-        v-if="isUpdate"
-        label="操作"
-        align="center"
-        width="120"
-        fixed="right"
-      >
+      <el-table-column v-if="isUpdate" label="操作" align="center" width="120" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row.id)">
             编辑
           </el-button>
-          <el-button link type="danger" @click="handleDelete(scope.row.id)">
-            删除
-          </el-button>
+          <el-button link type="danger" @click="handleDelete(scope.row.id)"> 删除 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -56,13 +48,10 @@
       v-loading="formLoading"
     >
       <el-row>
+        <!-- TODO @AI：库存物资选择；选择后，物料、批次号、仓库位置就自动选上；他们都是 disabled disabled； -->
         <el-col :span="8">
           <el-form-item label="物料" prop="itemId">
-            <MdItemSelect
-              v-model="formData.itemId"
-              placeholder="请选择物料"
-              class="!w-1/1"
-            />
+            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" class="!w-1/1" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -77,18 +66,15 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="批次编码" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次编码" />
+          <el-form-item label="批次号" prop="batchCode">
+            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
           <el-form-item label="仓库" prop="warehouseId">
-            <WmWarehouseSelect
-              v-model="formData.warehouseId"
-              @change="handleWarehouseChange"
-            />
+            <WmWarehouseSelect v-model="formData.warehouseId" @change="handleWarehouseChange" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -102,10 +88,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="库位" prop="areaId">
-            <WmWarehouseAreaSelect
-              v-model="formData.areaId"
-              :location-id="formData.locationId"
-            />
+            <WmWarehouseAreaSelect v-model="formData.areaId" :location-id="formData.locationId" />
           </el-form-item>
         </el-col>
       </el-row>

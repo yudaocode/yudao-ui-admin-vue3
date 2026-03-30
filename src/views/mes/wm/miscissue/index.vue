@@ -40,7 +40,7 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @芋艿：【来源单据编号】【来源单据类型】；不用改 -->
+      <!-- TODO @AI：【来源单据编号】【来源单据类型】；手填 -->
       <el-form-item label="出库日期" prop="issueDate">
         <el-date-picker
           v-model="queryParams.issueDate"
@@ -106,7 +106,7 @@
           <dict-tag :type="DICT_TYPE.MES_WM_MISC_ISSUE_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <!-- TODO @芋艿：【来源单据编号】【来源单据类型】；不用改 -->
+      <!-- TODO @AI：【来源单据编号】【来源单据类型】；手填-->
       <el-table-column
         label="出库日期"
         align="center"
@@ -116,6 +116,7 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
+          <!-- TODO @AI：数据库里，缺少状态；这里也缺少变量； -->
           <dict-tag :type="DICT_TYPE.MES_WM_MISC_ISSUE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>

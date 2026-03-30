@@ -16,9 +16,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode">
-                  生成
-                </el-button>
+                <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -63,7 +61,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @芋艿：后续这块怎么处理； -->
         <el-col :span="8">
           <el-form-item label="来源单据编号" prop="sourceDocCode">
             <el-input
@@ -153,6 +150,7 @@ const dialogTitle = computed(() => {
 })
 
 /** 生成出库单编号 */
+// TODO @AI：编码规则；接入；数据库也要插入；
 const generateCode = () => {
   formData.value.code = 'MI' + generateRandomStr(10)
 }
