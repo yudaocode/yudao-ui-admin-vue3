@@ -99,8 +99,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="批次号" prop="batchCode">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
+          <el-form-item label="批次号">
+            <el-input v-model="formData.batchCode" placeholder="系统自动生成" disabled />
           </el-form-item>
         </el-col>
       </el-row>
@@ -228,7 +228,7 @@ const formData = ref({
   receiptId: undefined as number | undefined,
   itemId: undefined,
   quantity: undefined,
-  batchCode: undefined,
+  batchCode: undefined, // 仅展示，不提交
   productionDate: undefined,
   expireDate: undefined,
   lotNumber: undefined,
@@ -262,8 +262,9 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
+    const { batchCode, ...rest } = formData.value // batchCode 不提交，由后端自动生成
     const data = {
-      ...formData.value,
+      ...rest,
       receiptId: props.receiptId
     } as unknown as WmOutsourceReceiptLineVO
     if (lineFormType.value === 'create') {
