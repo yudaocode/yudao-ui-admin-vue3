@@ -33,7 +33,7 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="领料数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
-      <!-- TODO @AI：增加“备注” -->
+      <el-table-column label="备注" align="center" prop="remark" min-width="150" show-overflow-tooltip />
       <el-table-column
         v-if="isUpdate || isStock"
         label="操作"
@@ -88,7 +88,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：batchCode 查询 batchId；fillBatchId；后端；对齐下； -->
         <el-col :span="8">
           <el-form-item label="批次号" prop="batchCode">
             <el-input v-model="formData.batchCode" placeholder="请输入批次号" />

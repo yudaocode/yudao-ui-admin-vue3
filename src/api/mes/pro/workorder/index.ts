@@ -81,7 +81,7 @@ export const ProWorkOrderApi = {
   },
 
   // 获得工单精简列表（下拉选项）
-  getWorkOrderSimpleList: async () => {
-    return await request.get({ url: `/mes/pro/work-order/simple-list` })
+  getWorkOrderSimpleList: async (type?: number) => {
+    return await request.get({ url: `/mes/pro/work-order/simple-list`, params: { type } })
   }
 }

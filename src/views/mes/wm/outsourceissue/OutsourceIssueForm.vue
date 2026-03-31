@@ -46,11 +46,13 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：workorderType 需要过滤下 type；【对齐】后端应该也要校验下类型； -->
-          <!-- TODO @AI：outsourcereceipt 也有类似的问题； -->
           <el-form-item label="外协工单" prop="workOrderId">
-            <!-- TODO @AI：change 的事件，设置到 vendorId 中； -->
-            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
+            <ProWorkOrderSelect
+              v-model="formData.workOrderId"
+              :type="MesProWorkOrderTypeEnum.OUTSOURCE"
+              :disabled="isHeaderReadonly"
+              @change="handleWorkOrderChange"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -106,7 +108,8 @@ import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import OutsourceIssueLineList from './OutsourceIssueLineList.vue'
-import { MesAutoCodeRuleCode, MesWmOutsourceIssueStatusEnum } from '@/views/mes/utils/constants'
+import { ProWorkOrderVO } from '@/api/mes/pro/workorder'
+import { MesAutoCodeRuleCode, MesWmOutsourceIssueStatusEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'OutsourceIssueForm' })
 const emit = defineEmits(['success'])
@@ -153,6 +156,11 @@ const generateCode = async () => {
   formData.value.code = await AutoCodeRecordApi.generateAutoCode(
     MesAutoCodeRuleCode.WM_OUTSOURCE_ISSUE_CODE
   )
+}
+
+/** 工单选中回调 —— 自动回填供应商 */
+const handleWorkOrderChange = (workOrder: ProWorkOrderVO | undefined) => {
+  formData.value.vendorId = workOrder?.vendorId ?? undefined
 }
 
 /** 打开弹窗 */

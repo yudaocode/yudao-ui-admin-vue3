@@ -29,6 +29,7 @@ defineOptions({ name: 'ProWorkOrderSelect' })
 const props = withDefaults(
   defineProps<{
     modelValue?: number
+    type?: number
     disabled?: boolean
     clearable?: boolean
     placeholder?: string
@@ -73,8 +74,20 @@ const handleChange = (val: number | undefined) => {
 }
 
 /** 加载工单列表 */
-onMounted(async () => {
-  allList.value = await ProWorkOrderApi.getWorkOrderSimpleList()
+const loadData = async () => {
+  allList.value = await ProWorkOrderApi.getWorkOrderSimpleList(props.type)
   filteredList.value = allList.value
+}
+
+/** 监听 type 变化重新加载 */
+watch(
+  () => props.type,
+  () => {
+    loadData()
+  }
+)
+
+onMounted(() => {
+  loadData()
 })
 </script>

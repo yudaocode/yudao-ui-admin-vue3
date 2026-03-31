@@ -32,8 +32,12 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="外协工单" prop="workOrderId">
-            <!-- DONE @芋艿：外协工单【后续在处理】这里是有个过滤条件的；（AI 未修复原因：标注为后续处理，需人工介入） -->
-            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
+            <ProWorkOrderSelect
+              v-model="formData.workOrderId"
+              :type="MesProWorkOrderTypeEnum.OUTSOURCE"
+              :disabled="isHeaderReadonly"
+              @change="handleWorkOrderChange"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -89,9 +93,11 @@
 <script setup lang="ts">
 import { generateRandomStr } from '@/utils'
 import { WmOutsourceReceiptApi, WmOutsourceReceiptVO } from '@/api/mes/wm/outsourcereceipt'
+import { ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import OutsourceReceiptLineList from './OutsourceReceiptLineList.vue'
+import { MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'OutsourceReceiptForm' })
 
@@ -133,6 +139,11 @@ const dialogTitle = computed(() => {
 /** 生成入库单编号 */
 const generateCode = () => {
   formData.value.code = 'OR' + generateRandomStr(10)
+}
+
+/** 工单选中回调 —— 自动回填供应商 */
+const handleWorkOrderChange = (workOrder: ProWorkOrderVO | undefined) => {
+  formData.value.vendorId = workOrder?.vendorId ?? undefined
 }
 
 /** 打开弹窗 */
