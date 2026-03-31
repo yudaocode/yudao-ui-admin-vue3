@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="110px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
@@ -126,20 +127,31 @@
     </el-tabs>
 
     <template #footer>
+      <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
+        保 存
+      </el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesWmStockTakingTaskStatusEnum.PREPARE"
+        @click="handleSubmit"
+        type="warning"
+        :disabled="formLoading"
+      >
+        提 交
+      </el-button>
+      <el-button v-if="isSubmit" @click="handleSubmit" type="warning" :disabled="formLoading">
+        提 交
+      </el-button>
       <el-button v-if="isExecute" @click="handleExecute" type="primary" :disabled="formLoading">
         执行盘点
       </el-button>
-      <el-button v-else-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
-        确 定
-      </el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { StockTakingApi, type StockTakingTaskVO } from '@/api/mes/wm/stocktaking/task/index'
 import { type StockTakingPlanVO } from '@/api/mes/wm/stocktaking/plan/index'
 import StockTakingPlanSelect from '@/views/mes/wm/stocktaking/plan/components/StockTakingPlanSelect.vue'
@@ -147,9 +159,11 @@ import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import StockTakingTaskLineList from './StockTakingTaskLineList.vue'
 import StockTakingTaskResultList from './StockTakingTaskResultList.vue'
 import {
+  MesAutoCodeRuleCode,
   MesWmStockTakingTypeEnum,
   MesWmStockTakingTaskStatusEnum
 } from '@/views/mes/utils/constants'
+import { useUserStore } from '@/store/modules/user'
 
 defineOptions({ name: 'StockTakingForm' })
 
@@ -158,28 +172,33 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref<string>('create') // 表单的类型：create / update / submit / execute / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isSubmit = computed(() => formType.value === 'submit') // 是否为提交模式
+const isExecute = computed(() => formType.value === 'execute') // 是否为执行盘点模式
+const isDetail = computed(() => ['detail', 'submit', 'execute'].includes(formType.value)) // 是否只读
+const isHeaderReadonly = computed(() => ['submit', 'execute', 'detail'].includes(formType.value)) // 头部是否只读
+const resultVisible = computed(
+  () => formData.value.status && formData.value.status !== MesWmStockTakingTaskStatusEnum.PREPARE
+)
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增盘点任务',
     update: '编辑盘点任务',
-    detail: '盘点任务详情',
-    execute: '执行盘点'
+    submit: '提交盘点任务',
+    execute: '执行盘点',
+    detail: '盘点任务详情'
   }
   return titles[formType.value] || formType.value
 }) // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('create') // 表单的类型：create - 新增；update - 修改；detail - 详情；execute - 执行盘点
-const isDetail = computed(() => formType.value === 'detail') // 是否只读
-const isExecute = computed(() => formType.value === 'execute') // 是否执行盘点模式
-const resultVisible = computed(
-  () => formData.value.status && formData.value.status !== MesWmStockTakingTaskStatusEnum.PREPARE
-)
 const formData = ref<StockTakingTaskVO>({
   id: undefined,
   code: undefined,
   name: undefined,
   takingDate: undefined,
   type: undefined,
+  status: undefined,
   userId: undefined,
   userNickname: undefined,
   planId: undefined,
@@ -202,10 +221,26 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const activeTab = ref('lines') // 当前激活的 tab
 const resultListRef = ref() // 盘点结果列表 Ref
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成任务编码 */
-const generateCode = () => {
-  formData.value.code = 'ST' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_STOCK_TAKING_CODE
+  )
+}
+
+/** 方案变化处理 */
+const handlePlanChange = (plan?: StockTakingPlanVO) => {
+  if (!plan) {
+    return
+  }
+  formData.value.name = plan.name
+  formData.value.type = plan.type
+  formData.value.startTime = plan.startTime
+  formData.value.endTime = plan.endTime
+  formData.value.blindFlag = !!plan.blindFlag
+  formData.value.frozen = !!plan.frozen
 }
 
 /** 打开弹窗 */
@@ -221,26 +256,71 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else {
+    // 新建时，默认设置当前登录用户为盘点人
+    formData.value.userId = useUserStore().getUser.id
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
 defineExpose({ open })
 
-/** 提交表单 */
+/** 提交表单（create/update 模式） */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
     const data = formData.value as unknown as StockTakingTaskVO
     if (formType.value === 'create') {
-      await StockTakingApi.createStockTaking(data)
+      const res = await StockTakingApi.createStockTaking(data)
       message.success(t('common.createSuccess'))
-      dialogVisible.value = false
+      // 创建成功后，更新表单数据和状态为编辑模式
+      formData.value.id = res
+      formData.value.status = MesWmStockTakingTaskStatusEnum.PREPARE
+      formType.value = 'update'
     } else {
       await StockTakingApi.updateStockTaking(data)
       message.success(t('common.updateSuccess'))
-      dialogVisible.value = false
     }
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  try {
+    await message.confirm('确认提交该盘点任务？【提交后将不能修改】')
+    formLoading.value = true
+    // 1. 编辑模式下，表单有修改时先保存
+    if (isEditable.value && JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as unknown as StockTakingTaskVO
+      await StockTakingApi.updateStockTaking(data)
+    }
+    // 2. 提交任务
+    await StockTakingApi.submitStockTaking(formData.value.id!)
+    message.success('提交成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 执行盘点 */
+const handleExecute = async () => {
+  try {
+    await message.confirm('确认执行盘点操作？')
+    formLoading.value = true
+    await StockTakingApi.finishStockTaking(formData.value.id!)
+    message.success('执行盘点成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -254,6 +334,7 @@ const resetForm = () => {
     name: undefined,
     takingDate: undefined,
     type: undefined,
+    status: undefined,
     userId: undefined,
     userNickname: undefined,
     planId: undefined,
@@ -264,35 +345,5 @@ const resetForm = () => {
     remark: undefined
   }
   formRef.value?.resetFields()
-}
-
-/** 方案变化处理 */
-const handlePlanChange = (plan?: StockTakingPlanVO) => {
-  if (!plan) {
-    return
-  }
-  formData.value.type = plan.type
-  formData.value.startTime = plan.startTime
-  formData.value.endTime = plan.endTime
-  formData.value.blindFlag = !!plan.blindFlag
-  formData.value.frozen = !!plan.frozen
-}
-
-/** 执行盘点 */
-const handleExecute = async () => {
-  try {
-    await message.confirm('确认执行盘点操作？')
-    formLoading.value = true
-
-    // 完成盘点任务
-    await StockTakingApi.finishStockTaking(formData.value.id!)
-
-    message.success('执行盘点成功')
-    dialogVisible.value = false
-    emit('success')
-  } catch {
-  } finally {
-    formLoading.value = false
-  }
 }
 </script>

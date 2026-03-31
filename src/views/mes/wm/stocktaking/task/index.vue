@@ -120,6 +120,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="360" fixed="right">
         <template #default="scope">
+          <!-- 草稿：编辑、提交、删除 -->
           <el-button
             v-if="scope.row.status === MesWmStockTakingTaskStatusEnum.PREPARE"
             link
@@ -133,19 +134,10 @@
             v-if="scope.row.status === MesWmStockTakingTaskStatusEnum.PREPARE"
             link
             type="success"
-            @click="handleSubmit(scope.row.id)"
+            @click="openForm('submit', scope.row.id)"
             v-hasPermi="['mes:wm-stock-taking-task:update']"
           >
             提交
-          </el-button>
-          <el-button
-            v-if="scope.row.status === MesWmStockTakingTaskStatusEnum.APPROVING"
-            link
-            type="primary"
-            @click="handleExecute(scope.row.id)"
-            v-hasPermi="['mes:wm-stock-taking-task:update']"
-          >
-            执行盘点
           </el-button>
           <el-button
             v-if="scope.row.status === MesWmStockTakingTaskStatusEnum.PREPARE"
@@ -155,6 +147,16 @@
             v-hasPermi="['mes:wm-stock-taking-task:delete']"
           >
             删除
+          </el-button>
+          <!-- 审批中：执行盘点、取消 -->
+          <el-button
+            v-if="scope.row.status === MesWmStockTakingTaskStatusEnum.APPROVING"
+            link
+            type="success"
+            @click="openForm('execute', scope.row.id)"
+            v-hasPermi="['mes:wm-stock-taking-task:update']"
+          >
+            执行盘点
           </el-button>
           <el-button
             v-if="scope.row.status === MesWmStockTakingTaskStatusEnum.APPROVING"
@@ -237,25 +239,10 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交审批 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该盘点任务进行审批？')
-    await StockTakingApi.submitStockTaking(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 执行盘点 */
-const handleExecute = (id: number) => {
-  formRef.value.open('execute', id)
-}
-
 /** 取消任务 */
 const handleCancel = async (id: number) => {
   try {
-    await message.confirm('确认取消该盘点任务？')
+    await message.confirm('确认取消该盘点任务？取消后不可恢复。')
     await StockTakingApi.cancelStockTaking(id)
     message.success('取消成功')
     await getList()
