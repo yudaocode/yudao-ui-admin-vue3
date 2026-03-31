@@ -116,24 +116,40 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
-          <el-button
-            v-if="scope.row.status === CommonStatusEnum.DISABLE"
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:wm-stock-taking-plan:update']"
+          <el-tooltip
+            :disabled="scope.row.status === CommonStatusEnum.DISABLE"
+            content="仅关闭状态，才可以操作"
+            placement="top"
           >
-            编辑
-          </el-button>
-          <el-button
-            v-if="scope.row.status === CommonStatusEnum.DISABLE"
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:wm-stock-taking-plan:delete']"
+            <span class="inline-block cursor-not-allowed">
+              <el-button
+                link
+                type="primary"
+                @click="openForm('update', scope.row.id)"
+                v-hasPermi="['mes:wm-stock-taking-plan:update']"
+                :disabled="scope.row.status !== CommonStatusEnum.DISABLE"
+              >
+                编辑
+              </el-button>
+            </span>
+          </el-tooltip>
+          <el-tooltip
+            :disabled="scope.row.status === CommonStatusEnum.DISABLE"
+            content="仅关闭状态，才可以操作"
+            placement="top"
           >
-            删除
-          </el-button>
+            <span class="inline-block cursor-not-allowed ml-10px">
+              <el-button
+                link
+                type="danger"
+                @click="handleDelete(scope.row.id)"
+                v-hasPermi="['mes:wm-stock-taking-plan:delete']"
+                :disabled="scope.row.status !== CommonStatusEnum.DISABLE"
+              >
+                删除
+              </el-button>
+            </span>
+          </el-tooltip>
         </template>
       </el-table-column>
     </el-table>
@@ -163,8 +179,9 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const total = ref(0) // 列表的总页数
 const list = ref<StockTakingPlanVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -173,6 +190,7 @@ const queryParams = reactive({
   type: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -199,7 +217,6 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
@@ -222,23 +239,17 @@ const handleStatusChange = async (row: StockTakingPlanVO) => {
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
-    // 删除的二次确认
     await message.delConfirm()
-    // 发起删除
     await StockTakingPlanApi.deleteStockTakingPlan(id)
     message.success(t('common.delSuccess'))
-    // 刷新列表
     await getList()
   } catch {}
 }
 
 /** 导出按钮操作 */
-const exportLoading = ref(false)
 const handleExport = async () => {
   try {
-    // 导出的二次确认
     await message.exportConfirm()
-    // 发起导出
     exportLoading.value = true
     const data = await StockTakingPlanApi.exportStockTakingPlan(queryParams)
     download.excel(data, '盘点方案.xls')

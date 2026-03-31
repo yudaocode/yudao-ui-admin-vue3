@@ -86,10 +86,10 @@
       </el-row>
     </el-form>
 
-    <!-- 编辑时展示盘点参数 -->
-    <template v-if="formType === 'update' && formData.id">
+    <!-- 编辑或详情时展示盘点参数 -->
+    <template v-if="(formType === 'update' || formType === 'detail') && formData.id">
       <el-divider content-position="center">盘点参数</el-divider>
-      <StockTakingPlanParamList :plan-id="formData.id" />
+      <StockTakingPlanParamList :plan-id="formData.id" :disabled="formType === 'detail'" />
     </template>
 
     <template #footer>
@@ -102,11 +102,11 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { StockTakingPlanApi, type StockTakingPlanVO } from '@/api/mes/wm/stocktaking/plan/index'
 import StockTakingPlanParamList from './StockTakingPlanParamList.vue'
-import { MesWmStockTakingTypeEnum } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, MesWmStockTakingTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'StockTakingPlanForm' })
 
@@ -115,6 +115,9 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('create') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail') // 是否只读
 const dialogTitle = computed(() => {
   const titles = {
     create: '新增盘点方案',
@@ -123,10 +126,6 @@ const dialogTitle = computed(() => {
   }
   return titles[formType.value] || formType.value
 }) // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('create') // 表单的类型：create - 新增；update - 修改；detail - 详情
-const isDetail = computed(() => formType.value === 'detail') // 是否只读
-const formRef = ref() // 表单 Ref
 const formData = ref<StockTakingPlanVO>({
   id: undefined,
   code: undefined,
@@ -143,10 +142,13 @@ const formRules = reactive({
   name: [{ required: true, message: '方案名称不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '盘点类型不能为空', trigger: 'change' }]
 })
+const formRef = ref() // 表单 Ref
 
 /** 生成方案编码 */
-const generateCode = () => {
-  formData.value.code = 'STP' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_STOCK_TAKING_PLAN_CODE
+  )
 }
 
 /** 打开弹窗 */
