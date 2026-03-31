@@ -89,7 +89,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
-          <!-- 草稿：编辑、完成、删除 -->
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
@@ -98,15 +98,6 @@
             v-if="scope.row.status === MesWmPackageStatusEnum.PREPARE"
           >
             编辑
-          </el-button>
-          <el-button
-            link
-            type="warning"
-            @click="openForm('finish', scope.row.id)"
-            v-hasPermi="['mes:wm-package:update']"
-            v-if="scope.row.status === MesWmPackageStatusEnum.PREPARE"
-          >
-            完成
           </el-button>
           <el-button
             link
