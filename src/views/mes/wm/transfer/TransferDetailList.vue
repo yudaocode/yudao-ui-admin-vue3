@@ -6,7 +6,7 @@
       <el-table-column label="移入库位" align="center" prop="toAreaName" min-width="100" />
       <el-table-column label="数量" align="center" prop="quantity" width="100" />
       <el-table-column
-        v-if="props.formType === 'stock'"
+        v-if="isStock"
         label="操作"
         align="center"
         width="120"
@@ -39,6 +39,7 @@ const emit = defineEmits(['edit-detail'])
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
+const isStock = computed(() => props.formType === 'stock') // 是否为上架模式
 const loading = ref(false) // 列表的加载中
 const list = ref<WmTransferDetailVO[]>([]) // 明细列表
 

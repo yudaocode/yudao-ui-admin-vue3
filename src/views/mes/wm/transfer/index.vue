@@ -98,63 +98,62 @@
           <dict-tag :type="DICT_TYPE.MES_WM_TRANSFER_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="280" fixed="right">
+      <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
+          <!-- 草稿：编辑、删除 -->
           <el-button
-            v-if="scope.row.status === MesWmTransferStatusEnum.PREPARE"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:wm-transfer:update']"
+            v-if="scope.row.status === MesWmTransferStatusEnum.PREPARE"
           >
             编辑
           </el-button>
           <el-button
-            v-if="scope.row.status === MesWmTransferStatusEnum.PREPARE"
-            link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-transfer:update']"
-          >
-            提交
-          </el-button>
-          <el-button
-            v-if="scope.row.status === MesWmTransferStatusEnum.PREPARE"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:wm-transfer:delete']"
+            v-if="scope.row.status === MesWmTransferStatusEnum.PREPARE"
           >
             删除
           </el-button>
+          <!-- 待确认：到货确认、取消 -->
           <el-button
-            v-if="scope.row.status === MesWmTransferStatusEnum.UNCONFIRMED"
             link
             type="success"
-            @click="handleConfirm(scope.row.id)"
+            @click="openForm('confirm', scope.row.id)"
             v-hasPermi="['mes:wm-transfer:update']"
+            v-if="scope.row.status === MesWmTransferStatusEnum.UNCONFIRMED"
           >
             到货确认
           </el-button>
+          <!-- 待上架：执行上架、取消 -->
           <el-button
-            v-if="scope.row.status === MesWmTransferStatusEnum.APPROVING"
             link
             type="success"
             @click="openForm('stock', scope.row.id)"
             v-hasPermi="['mes:wm-transfer:update']"
+            v-if="scope.row.status === MesWmTransferStatusEnum.APPROVING"
           >
             执行上架
           </el-button>
+          <!-- 待执行：执行转移、取消 -->
           <el-button
-            v-if="scope.row.status === MesWmTransferStatusEnum.APPROVED"
             link
-            type="primary"
-            @click="handleFinish(scope.row.id)"
+            type="success"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm-transfer:finish']"
+            v-if="scope.row.status === MesWmTransferStatusEnum.APPROVED"
           >
             执行转移
           </el-button>
           <el-button
+            link
+            type="danger"
+            @click="handleCancel(scope.row.id)"
+            v-hasPermi="['mes:wm-transfer:update']"
             v-if="
               [
                 MesWmTransferStatusEnum.UNCONFIRMED,
@@ -162,10 +161,6 @@
                 MesWmTransferStatusEnum.APPROVED
               ].includes(scope.row.status)
             "
-            link
-            type="danger"
-            @click="handleCancel(scope.row.id)"
-            v-hasPermi="['mes:wm-transfer:update']"
           >
             取消
           </el-button>
@@ -237,36 +232,6 @@ const resetQuery = () => {
 /** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 提交按钮操作 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该转移单？')
-    await WmTransferApi.submitTransfer(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 到货确认按钮操作 */
-const handleConfirm = async (id: number) => {
-  try {
-    await message.confirm('确认到货后，将进入待上架状态，是否继续？')
-    await WmTransferApi.confirmTransfer(id)
-    message.success('确认成功')
-    await getList()
-  } catch {}
-}
-
-/** 执行转移按钮操作 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认执行调拨？执行后将更新库存。')
-    await WmTransferApi.finishTransfer(id)
-    message.success('执行成功')
-    await getList()
-  } catch {}
 }
 
 /** 取消按钮操作 */

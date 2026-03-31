@@ -136,15 +136,12 @@
 
 <script setup lang="ts">
 import { WmTransferLineApi, WmTransferLineVO } from '@/api/mes/wm/transfer/line'
-import { WmTransferDetailApi } from '@/api/mes/wm/transfer/detail'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
 import TransferDetailList from './TransferDetailList.vue'
 import TransferDetailForm from './TransferDetailForm.vue'
-
-// DONE @AI：当前保留展开明细与分配刷新逻辑，避免影响上架场景交互
 
 defineOptions({ name: 'TransferLineList' })
 
@@ -159,17 +156,35 @@ const message = useMessage()
 const isUpdate = computed(() => ['create', 'update'].includes(props.formType))
 const isStock = computed(() => props.formType === 'stock')
 
+// ==================== 列表 ====================
 const loading = ref(false)
 const list = ref<WmTransferLineVO[]>([])
-const detailFormRef = ref()
-const detailListRefs = ref<Record<number, InstanceType<typeof TransferDetailList>>>({})
-const allocatedQuantityMap = ref<Record<number, number>>({})
 
+/** 查询行列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    list.value = await WmTransferLineApi.getTransferLineList(props.transferId)
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    await message.delConfirm()
+    await WmTransferLineApi.deleteTransferLine(id)
+    message.success(t('common.delSuccess'))
+    await getList()
+  } catch {}
+}
+
+// ==================== 添加/编辑表单 ====================
 const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
 const lineFormType = ref('')
-const formRef = ref()
 const formData = ref({
   id: undefined as number | undefined,
   transferId: undefined as number | undefined,
@@ -190,7 +205,6 @@ const formData = ref({
   fromAreaName: undefined,
   remark: undefined
 })
-
 const formRules = reactive({
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '转移数量不能为空', trigger: 'blur' }],
@@ -198,43 +212,9 @@ const formRules = reactive({
   fromLocationId: [{ required: true, message: '移出库区不能为空', trigger: 'change' }],
   fromAreaId: [{ required: true, message: '移出库位不能为空', trigger: 'change' }]
 })
+const formRef = ref()
 
-const getList = async () => {
-  loading.value = true
-  try {
-    list.value = await WmTransferLineApi.getTransferLineList(props.transferId)
-  } finally {
-    loading.value = false
-  }
-}
-
-const refreshAllDetailAllocated = async () => {
-  if (!list.value.length) {
-    allocatedQuantityMap.value = {}
-    return
-  }
-  const entries = await Promise.all(
-    list.value.map(async (row) => {
-      const details = await WmTransferDetailApi.getTransferDetailListByLineId(row.id)
-      const total = details.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
-      return [row.id, total] as const
-    })
-  )
-  allocatedQuantityMap.value = Object.fromEntries(entries)
-}
-
-defineExpose({ getList })
-
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await WmTransferLineApi.deleteTransferLine(id)
-    message.success(t('common.delSuccess'))
-    await getList()
-    await refreshAllDetailAllocated()
-  } catch {}
-}
-
+/** 仓库变化时清空库区和库位 */
 const handleWarehouseChange = () => {
   formData.value.fromLocationId = undefined
   formData.value.fromLocationName = undefined
@@ -242,11 +222,13 @@ const handleWarehouseChange = () => {
   formData.value.fromAreaName = undefined
 }
 
+/** 库区变化时清空库位 */
 const handleLocationChange = () => {
   formData.value.fromAreaId = undefined
   formData.value.fromAreaName = undefined
 }
 
+/** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = type === 'create' ? '添加调拨物料' : '编辑调拨物料'
@@ -262,6 +244,7 @@ const openForm = async (type: string, id?: number) => {
   }
 }
 
+/** 提交表单 */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
@@ -276,12 +259,12 @@ const submitForm = async () => {
     }
     dialogVisible.value = false
     await getList()
-    await refreshAllDetailAllocated()
   } finally {
     formLoading.value = false
   }
 }
 
+/** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,
@@ -306,28 +289,39 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
+// ==================== 展开行：上架明细 ====================
+const detailListRefs = ref<Record<number, InstanceType<typeof TransferDetailList>>>({})
+
+/** 缓存子组件 ref */
 const setDetailListRef = (lineId: number, el: any) => {
   if (el) {
     detailListRefs.value[lineId] = el
   }
 }
 
+// ==================== 上架明细表单（LineList 层级持有） ====================
+const detailFormRef = ref()
+
+/** 上架：直接打开明细创建表单 */
 const handleStock = (lineId: number) => {
   const row = list.value.find((r) => r.id === lineId)
   openDetailForm('create', lineId, row?.itemId)
 }
 
+/** 打开上架明细表单 */
 const openDetailForm = (type: string, lineId: number, itemId?: number, detailId?: number) => {
   detailFormRef.value.open(type, lineId, itemId, detailId)
 }
 
-const onDetailFormSuccess = async (lineId: number) => {
-  await detailListRefs.value[lineId]?.getList()
-  await refreshAllDetailAllocated()
+/** 明细表单提交成功后，刷新已展开行的 DetailList */
+const onDetailFormSuccess = (lineId: number) => {
+  detailListRefs.value[lineId]?.getList()
 }
+
+// ==================== 初始化 ====================
+defineExpose({ getList })
 
 onMounted(async () => {
   await getList()
-  await refreshAllDetailAllocated()
 })
 </script>

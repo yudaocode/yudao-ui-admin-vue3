@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="110px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
@@ -16,7 +17,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode">生成</el-button>
+                <el-button @click="generateCode" :disabled="isHeaderReadonly">生成</el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -134,13 +135,27 @@
     </template>
 
     <template #footer>
-      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
-        确 定
+      <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
+        保 存
+      </el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesWmTransferStatusEnum.PREPARE"
+        @click="handleSubmit"
+        type="warning"
+        :disabled="formLoading"
+      >
+        提 交
+      </el-button>
+      <el-button v-if="isConfirm" @click="handleConfirm" type="success" :disabled="formLoading">
+        到货确认
       </el-button>
       <el-button v-if="isStock" @click="handleStock" type="primary" :disabled="formLoading">
         执行上架
       </el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
+        执行转移
+      </el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -149,21 +164,42 @@
 import { generateRandomStr } from '@/utils'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { WmTransferApi, WmTransferVO } from '@/api/mes/wm/transfer'
+import { MesWmTransferStatusEnum } from '@/views/mes/utils/constants'
 import TransferLineList from './TransferLineList.vue'
 
 defineOptions({ name: 'TransferForm' })
-
 const emit = defineEmits(['success'])
-const message = useMessage() // 消息弹窗
 
+const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / stock / detail
-const formRef = ref() // 表单 Ref
+const formType = ref<string>('create') // 表单的类型：create / update / confirm / stock / finish / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isConfirm = computed(() => formType.value === 'confirm') // 是否为到货确认模式
+const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
+const isFinish = computed(() => formType.value === 'finish') // 是否为执行转移模式
+const isDetail = computed(() => ['detail', 'confirm', 'finish'].includes(formType.value)) // 是否为详情模式
+const isHeaderReadonly = computed(
+  () => ['stock', 'confirm', 'finish', 'detail'].includes(formType.value) // 表头是否只读
+)
+const isOuterType = computed(() => !!formData.value.type && Number(formData.value.type) === 2)
+const showDeliveryFields = computed(() => isOuterType.value && !!formData.value.deliveryFlag)
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增转移单',
+    update: '编辑转移单',
+    confirm: '到货确认',
+    stock: '执行上架',
+    finish: '执行转移',
+    detail: '转移单详情'
+  }
+  return titles[formType.value] || formType.value
+})
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
+  status: undefined as number | undefined,
   type: undefined as number | undefined,
   deliveryFlag: false,
   recipientName: undefined,
@@ -175,52 +211,19 @@ const formData = ref({
   transferDate: undefined,
   remark: undefined
 })
-
 const formRules = reactive({
   code: [{ required: true, message: '转移单编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '转移单名称不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '转移单类型不能为空', trigger: 'change' }],
   transferDate: [{ required: true, message: '转移日期不能为空', trigger: 'change' }]
 })
-
-const isUpdate = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isStock = computed(() => formType.value === 'stock') // 是否为上架模式
-const isHeaderReadonly = computed(() => ['stock', 'detail'].includes(formType.value)) // 是否只读
-const isOuterType = computed(() => !!formData.value.type && Number(formData.value.type) === 2) // 是否外部转移
-const showDeliveryFields = computed(() => isOuterType.value && !!formData.value.deliveryFlag) // 是否显示配送信息
-const dialogTitle = computed(() => {
-  const titles = {
-    create: '新增转移单',
-    update: '编辑转移单',
-    stock: '执行上架',
-    detail: '转移单详情'
-  }
-  return titles[formType.value] || formType.value
-})
+const formRef = ref() // 表单 Ref
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成转移单编号 */
+// TODO @AI：编码规则；
 const generateCode = () => {
   formData.value.code = 'TR' + generateRandomStr(10)
-}
-
-/** 重置表单 */
-const resetForm = () => {
-  formData.value = {
-    id: undefined,
-    code: undefined,
-    name: undefined,
-    type: undefined,
-    deliveryFlag: false,
-    recipientName: undefined,
-    recipientTelephone: undefined,
-    destinationAddress: undefined,
-    carrier: undefined,
-    shippingNumber: undefined,
-    confirmFlag: false,
-    transferDate: undefined,
-    remark: undefined
-  }
-  formRef.value?.resetFields()
 }
 
 /** 打开弹窗 */
@@ -228,7 +231,7 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
-  // 修改/上架/详情时，加载数据
+  // 修改/确认/上架/完成/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -237,39 +240,66 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
-defineExpose({ open })
 
-/** 提交表单（create/update 模式） */
+/** 提交表单（create/update 模式，保存） */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const { confirmFlag: _confirmFlag, status: _status, ...data } = formData.value
-    if (!isOuterType.value) {
-      data.deliveryFlag = false
-      data.recipientName = undefined
-      data.recipientTelephone = undefined
-      data.destinationAddress = undefined
-      data.carrier = undefined
-      data.shippingNumber = undefined
-    } else if (!showDeliveryFields.value) {
-      data.recipientName = undefined
-      data.recipientTelephone = undefined
-      data.destinationAddress = undefined
-      data.carrier = undefined
-      data.shippingNumber = undefined
-    }
+    const data = cleanFormData()
     if (formType.value === 'create') {
       const id = await WmTransferApi.createTransfer(data as unknown as WmTransferVO)
       message.success('新增成功')
       formData.value.id = id
+      formData.value.status = MesWmTransferStatusEnum.PREPARE
       formType.value = 'update'
     } else {
       await WmTransferApi.updateTransfer(data as unknown as WmTransferVO)
       message.success('修改成功')
     }
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  await formRef.value.validate()
+  try {
+    await message.confirm('确认提交该转移单？【提交后将不能修改】')
+    formLoading.value = true
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = cleanFormData()
+      await WmTransferApi.updateTransfer(data as unknown as WmTransferVO)
+    }
+    // 2. 提交转移单
+    await WmTransferApi.submitTransfer(formData.value.id!)
+    message.success('提交成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 到货确认 */
+const handleConfirm = async () => {
+  try {
+    await message.confirm('确认到货后，将进入待上架状态，是否继续？')
+    formLoading.value = true
+    await WmTransferApi.confirmTransfer(formData.value.id!)
+    message.success('确认成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -289,4 +319,63 @@ const handleStock = async () => {
     formLoading.value = false
   }
 }
+
+/** 执行转移 */
+const handleFinish = async () => {
+  try {
+    await message.confirm('确认执行调拨？执行后将更新库存。')
+    formLoading.value = true
+    await WmTransferApi.finishTransfer(formData.value.id!)
+    message.success('执行成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 清理表单数据（去除非业务字段，处理配送信息） */
+// TODO @AI：是不是不去 clean；反正整个保存下，不是很有所谓；
+const cleanFormData = () => {
+  const { confirmFlag: _confirmFlag, status: _status, ...data } = formData.value
+  if (!isOuterType.value) {
+    data.deliveryFlag = false
+    data.recipientName = undefined
+    data.recipientTelephone = undefined
+    data.destinationAddress = undefined
+    data.carrier = undefined
+    data.shippingNumber = undefined
+  } else if (!showDeliveryFields.value) {
+    data.recipientName = undefined
+    data.recipientTelephone = undefined
+    data.destinationAddress = undefined
+    data.carrier = undefined
+    data.shippingNumber = undefined
+  }
+  return data
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    code: undefined,
+    name: undefined,
+    status: undefined,
+    type: undefined,
+    deliveryFlag: false,
+    recipientName: undefined,
+    recipientTelephone: undefined,
+    destinationAddress: undefined,
+    carrier: undefined,
+    shippingNumber: undefined,
+    confirmFlag: false,
+    transferDate: undefined,
+    remark: undefined
+  }
+  formRef.value?.resetFields()
+}
+
+defineExpose({ open })
 </script>
