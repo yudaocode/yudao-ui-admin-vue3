@@ -40,6 +40,24 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="来源单据编号" prop="sourceDocCode">
+        <el-input
+          v-model="queryParams.sourceDocCode"
+          placeholder="请输入来源单据编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="来源单据类型" prop="sourceDocType">
+        <el-input
+          v-model="queryParams.sourceDocType"
+          placeholder="请输入来源单据类型"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="入库日期" prop="receiptDate">
         <el-date-picker
           v-model="queryParams.receiptDate"
@@ -58,6 +76,7 @@
           clearable
           class="!w-240px"
         >
+          <!-- DONE @AI：状态需要放到数据库中；目前没弄；然后，MES_WM_MISC_RECEIPT_STATUS 也没生命到变量里； -->
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_MISC_RECEIPT_STATUS)"
             :key="dict.value"
@@ -105,7 +124,8 @@
           <dict-tag :type="DICT_TYPE.MES_WM_MISC_RECEIPT_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <!-- TODO @芋艿：【待定】来源单据编号、来源单据类型 -->
+      <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" min-width="150" />
+      <el-table-column label="来源单据类型" align="center" prop="sourceDocType" min-width="120" />
       <el-table-column
         label="入库日期"
         align="center"
@@ -195,6 +215,8 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   type: undefined,
+  sourceDocCode: undefined,
+  sourceDocType: undefined,
   status: undefined,
   receiptDate: undefined
 })

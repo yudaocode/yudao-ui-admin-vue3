@@ -1,7 +1,6 @@
 import request from '@/config/axios'
 
 // MES 杂项入库单行 VO
-// TODO @AI：搞到：line/index.ts 里；
 export interface WmMiscReceiptLineVO {
   id: number
   receiptId: number

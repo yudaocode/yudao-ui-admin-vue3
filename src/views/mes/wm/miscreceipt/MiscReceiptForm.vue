@@ -122,11 +122,11 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { WmMiscReceiptApi, WmMiscReceiptVO } from '@/api/mes/wm/miscreceipt'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MiscReceiptLineList from './MiscReceiptLineList.vue'
-import { MesWmMiscReceiptStatusEnum } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, MesWmMiscReceiptStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MiscReceiptForm' })
 const emit = defineEmits(['success'])
@@ -171,8 +171,10 @@ const formRef = ref()
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成入库单编号 */
-const generateCode = () => {
-  formData.value.code = 'MR' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.WM_MISC_RECEIPT_CODE
+  )
 }
 
 /** 打开弹窗 */

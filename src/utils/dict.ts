@@ -315,6 +315,7 @@ export enum DICT_TYPE {
   MES_WM_MISC_ISSUE_TYPE = 'mes_wm_misc_issue_type', // MES 杂项出库类型
   MES_WM_MISC_ISSUE_STATUS = 'mes_wm_misc_issue_status', // MES 杂项出库单状态
   MES_WM_MISC_RECEIPT_TYPE = 'mes_wm_misc_receipt_type', // MES 杂项单类型
+  MES_WM_MISC_RECEIPT_STATUS = 'mes_wm_misc_receipt_status', // MES 杂项入库单状态
   MES_WM_OUTSOURCE_RECEIPT_STATUS = 'mes_wm_outsource_receipt_status', // MES 外协入库单状态
   MES_WM_OUTSOURCE_ISSUE_STATUS = 'mes_wm_outsource_issue_status', // MES 外协出库单状态
   MES_MD_AUTO_CODE_PART_TYPE = 'mes_md_auto_code_part_type', // MES 编码规则分段类型

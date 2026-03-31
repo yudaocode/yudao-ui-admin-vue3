@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { WmMiscReceiptLineApi, WmMiscReceiptLineVO } from '@/api/mes/wm/miscreceipt/line'
+import { WmMiscReceiptLineApi, WmMiscReceiptLineVO } from '@/api/mes/wm/miscreceipt/line/index'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
@@ -171,7 +171,9 @@ const formRules = reactive({
     { required: true, message: '入库数量不能为空', trigger: 'blur' },
     { type: 'number', min: 0.01, message: '入库数量必须大于 0', trigger: 'blur' }
   ],
-  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
+  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }],
+  locationId: [{ required: true, message: '库区不能为空', trigger: 'change' }],
+  areaId: [{ required: true, message: '库位不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 

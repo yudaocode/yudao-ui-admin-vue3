@@ -439,7 +439,8 @@ export const MesAutoCodeRuleCode = {
   WM_LOCATION_CODE: 'WM_LOCATION_CODE', // 库区编码
   WM_AREA_CODE: 'WM_AREA_CODE', // 库位编码
   WM_PRODUCT_SALES_CODE: 'WM_PRODUCT_SALES_CODE', // 销售出库单编码
-  WM_MISC_ISSUE_CODE: 'WM_MISC_ISSUE_CODE' // 杂项出库单编码
+  WM_MISC_ISSUE_CODE: 'WM_MISC_ISSUE_CODE', // 杂项出库单编码
+  WM_MISC_RECEIPT_CODE: 'WM_MISC_RECEIPT_CODE' // 杂项入库单编码
 } as const
 
 /** 获取物料/产品标识的标签 */
