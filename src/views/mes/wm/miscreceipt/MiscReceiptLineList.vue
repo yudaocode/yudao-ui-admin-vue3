@@ -1,7 +1,7 @@
 <!-- MES 杂项入库单行列表子组件 -->
 <template>
   <div>
-    <el-button v-if="isUpdate" type="primary" plain @click="openForm('create')" class="mb-10px">
+    <el-button v-if="isEditable" type="primary" plain @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加物料
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
@@ -14,7 +14,7 @@
       <el-table-column label="仓库" align="center" prop="warehouseName" min-width="100" />
       <el-table-column label="库区" align="center" prop="locationName" min-width="100" />
       <el-table-column label="库位" align="center" prop="areaName" min-width="100" />
-      <el-table-column v-if="isUpdate" label="操作" align="center" width="160" fixed="right">
+      <el-table-column v-if="isEditable" label="操作" align="center" width="160" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row.id)">
             编辑
@@ -114,24 +114,46 @@ import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehou
 
 defineOptions({ name: 'MiscReceiptLineList' })
 
+const props = defineProps<{
+  receiptId: number
+  formType: string
+}>()
+
 const message = useMessage()
 
-const props = defineProps({
-  receiptId: {
-    type: Number,
-    required: true
-  },
-  formType: {
-    type: String,
-    required: true
-  }
-})
+const isEditable = computed(() => ['create', 'update'].includes(props.formType))
 
+// ==================== 列表 ====================
 const loading = ref(false)
 const list = ref<WmMiscReceiptLineVO[]>([])
+
+/** 查询行列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    list.value = await WmMiscReceiptLineApi.getMiscReceiptLineListByReceiptId(props.receiptId)
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    await message.delConfirm()
+    await WmMiscReceiptLineApi.deleteMiscReceiptLine(id)
+    message.success('删除成功')
+    await getList()
+  } catch {}
+}
+
+// ==================== 添加/编辑表单 ====================
 const dialogVisible = ref(false)
 const formLoading = ref(false)
 const lineFormType = ref<string>('create')
+const dialogTitle = computed(() => {
+  return lineFormType.value === 'create' ? '添加物料' : '编辑物料'
+})
 const formData = ref({
   id: undefined as number | undefined,
   receiptId: props.receiptId,
@@ -153,21 +175,6 @@ const formRules = reactive({
 })
 const formRef = ref()
 
-const isUpdate = computed(() => ['create', 'update'].includes(props.formType))
-const dialogTitle = computed(() => {
-  return lineFormType.value === 'create' ? '添加物料' : '编辑物料'
-})
-
-/** 查询列表 */
-const getList = async () => {
-  loading.value = true
-  try {
-    list.value = await WmMiscReceiptLineApi.getMiscReceiptLineListByReceiptId(props.receiptId)
-  } finally {
-    loading.value = false
-  }
-}
-
 /** 仓库变化时，清空库区和库位 */
 const handleWarehouseChange = () => {
   formData.value.locationId = undefined
@@ -179,7 +186,7 @@ const handleLocationChange = () => {
   formData.value.areaId = undefined
 }
 
-/** 打开表单 */
+/** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
   lineFormType.value = type
@@ -214,16 +221,6 @@ const submitForm = async () => {
   }
 }
 
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await WmMiscReceiptLineApi.deleteMiscReceiptLine(id)
-    message.success('删除成功')
-    await getList()
-  } catch {}
-}
-
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
@@ -240,6 +237,7 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
+/** 初始化 */
 onMounted(() => {
   getList()
 })

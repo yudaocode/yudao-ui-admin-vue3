@@ -11,9 +11,6 @@ export interface WmMiscReceiptLineVO {
   warehouseId: number
   locationId: number
   areaId: number
-  productionDate: string
-  expireDate: string
-  lotNumber: string
   remark: string
   createTime: string
 }

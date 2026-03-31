@@ -7,6 +7,7 @@
       :rules="formRules"
       label-width="110px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
@@ -17,7 +18,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode"> 生成 </el-button>
+                <el-button @click="generateCode" :disabled="isHeaderReadonly"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -101,10 +102,21 @@
       <MiscReceiptLineList :receipt-id="formData.id" :form-type="formType" />
     </template>
     <template #footer>
-      <el-button v-if="isUpdate" @click="submitForm" type="primary" :disabled="formLoading">
-        确 定
+      <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
+        保 存
       </el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesWmMiscReceiptStatusEnum.PREPARE"
+        @click="handleSubmit"
+        type="warning"
+        :disabled="formLoading"
+      >
+        提 交
+      </el-button>
+      <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
+        执行入库
+      </el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -114,19 +126,35 @@ import { generateRandomStr } from '@/utils'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { WmMiscReceiptApi, WmMiscReceiptVO } from '@/api/mes/wm/miscreceipt'
 import MiscReceiptLineList from './MiscReceiptLineList.vue'
+import { MesWmMiscReceiptStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MiscReceiptForm' })
+const emit = defineEmits(['success'])
 
 const message = useMessage()
 
 const dialogVisible = ref(false)
 const formLoading = ref(false)
-const formType = ref<string>('create') // create / update / detail
+const formType = ref<string>('create') // create / update / finish / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value))
+const isFinish = computed(() => formType.value === 'finish')
+const isDetail = computed(() => ['detail', 'finish'].includes(formType.value))
+const isHeaderReadonly = computed(() => ['detail', 'finish'].includes(formType.value))
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增杂项入库单',
+    update: '编辑杂项入库单',
+    finish: '执行入库',
+    detail: '杂项入库单详情'
+  }
+  return titles[formType.value] || formType.value
+})
 const formData = ref({
   id: undefined as number | undefined,
   code: undefined,
   name: undefined,
   type: undefined,
+  status: undefined as number | undefined,
   sourceDocId: undefined,
   sourceDocCode: undefined,
   sourceDocType: undefined,
@@ -140,17 +168,7 @@ const formRules = reactive({
   receiptDate: [{ required: true, message: '入库日期不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
-
-const isUpdate = computed(() => ['create', 'update'].includes(formType.value))
-const isHeaderReadonly = computed(() => formType.value === 'detail')
-const dialogTitle = computed(() => {
-  const titles = {
-    create: '新增杂项入库单',
-    update: '编辑杂项入库单',
-    detail: '杂项入库单详情'
-  }
-  return titles[formType.value] || formType.value
-})
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成入库单编号 */
 const generateCode = () => {
@@ -170,11 +188,12 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
 defineExpose({ open })
 
-/** 提交表单 */
-const emit = defineEmits(['success'])
+/** 保存表单（create/update 模式） */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
@@ -184,12 +203,52 @@ const submitForm = async () => {
       const res = await WmMiscReceiptApi.createMiscReceipt(data)
       message.success('新增成功')
       formData.value.id = res
+      formData.value.status = MesWmMiscReceiptStatusEnum.PREPARE
       formType.value = 'update'
     } else {
       await WmMiscReceiptApi.updateMiscReceipt(data)
       message.success('修改成功')
     }
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  await formRef.value.validate()
+  try {
+    await message.confirm('确认提交该杂项入库单？【提交后将不能修改】')
+    formLoading.value = true
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as unknown as WmMiscReceiptVO
+      await WmMiscReceiptApi.updateMiscReceipt(data)
+    }
+    // 2. 提交入库单
+    await WmMiscReceiptApi.submitMiscReceipt(formData.value.id!)
+    message.success('提交成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 执行入库 */
+const handleFinish = async () => {
+  try {
+    await message.confirm('确认执行入库？执行后将更新库存台账。')
+    formLoading.value = true
+    await WmMiscReceiptApi.finishMiscReceipt(formData.value.id!)
+    message.success('入库成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -202,6 +261,7 @@ const resetForm = () => {
     code: undefined,
     name: undefined,
     type: undefined,
+    status: undefined,
     sourceDocId: undefined,
     sourceDocCode: undefined,
     sourceDocType: undefined,

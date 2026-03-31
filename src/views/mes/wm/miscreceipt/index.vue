@@ -92,7 +92,13 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="入库单编号" align="center" prop="code" min-width="160" />
+      <el-table-column label="入库单编号" align="center" prop="code" min-width="160">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="杂项类型" align="center" prop="type" min-width="100">
         <template #default="scope">
@@ -114,7 +120,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
-          <!-- 草稿：编辑、提交、删除 -->
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
@@ -123,15 +129,6 @@
             v-if="scope.row.status === MesWmMiscReceiptStatusEnum.PREPARE"
           >
             编辑
-          </el-button>
-          <el-button
-            link
-            type="warning"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm:misc-receipt:submit']"
-            v-if="scope.row.status === MesWmMiscReceiptStatusEnum.PREPARE"
-          >
-            提交
           </el-button>
           <el-button
             link
@@ -145,8 +142,8 @@
           <!-- 已审批：执行入库、取消 -->
           <el-button
             link
-            type="primary"
-            @click="handleFinish(scope.row.id)"
+            type="success"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm:misc-receipt:finish']"
             v-if="scope.row.status === MesWmMiscReceiptStatusEnum.APPROVED"
           >
@@ -160,20 +157,6 @@
             v-if="scope.row.status === MesWmMiscReceiptStatusEnum.APPROVED"
           >
             取消
-          </el-button>
-          <!-- 已完成/已取消：查看详情 -->
-          <el-button
-            link
-            type="primary"
-            @click="openForm('detail', scope.row.id)"
-            v-hasPermi="['mes:wm:misc-receipt:query']"
-            v-if="
-              [MesWmMiscReceiptStatusEnum.FINISHED, MesWmMiscReceiptStatusEnum.CANCELED].includes(
-                scope.row.status
-              )
-            "
-          >
-            详情
           </el-button>
         </template>
       </el-table-column>
@@ -191,7 +174,7 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmMiscReceiptApi, WmMiscReceiptVO } from '@/api/mes/wm/miscreceipt'
 import MiscReceiptForm from './MiscReceiptForm.vue'
@@ -247,42 +230,22 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await WmMiscReceiptApi.deleteMiscReceipt(id)
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
-/** 提交按钮操作 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该杂项入库单吗？')
-    await WmMiscReceiptApi.submitMiscReceipt(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 执行入库按钮操作 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认执行入库吗？')
-    await WmMiscReceiptApi.finishMiscReceipt(id)
-    message.success('入库成功')
-    await getList()
-  } catch {}
-}
-
 /** 取消按钮操作 */
 const handleCancel = async (id: number) => {
   try {
     await message.confirm('确认取消该杂项入库单吗？')
     await WmMiscReceiptApi.cancelMiscReceipt(id)
     message.success('取消成功')
+    await getList()
+  } catch {}
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    await message.delConfirm()
+    await WmMiscReceiptApi.deleteMiscReceipt(id)
+    message.success(t('common.delSuccess'))
     await getList()
   } catch {}
 }
@@ -300,6 +263,7 @@ const handleExport = async () => {
   }
 }
 
+/** 初始化 */
 onMounted(() => {
   getList()
 })
