@@ -112,36 +112,26 @@
             <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.ITEM">
               <MdItemSelect v-model="formData.valueId" @change="handleSelectorChange" />
             </template>
+            <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.BATCH">
+              <!-- DONE 后续接入批次选择器和质量状态选择器 -->
+              <WmBatchSelect v-model="formData.valueId" @change="handleBatchChange" />
+            </template>
             <template
-              v-else-if="
-                formData.type === MesWmStockTakingParamTypeEnum.BATCH ||
-                formData.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS
-              "
+              v-else-if="formData.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS"
             >
-              <!-- TODO @芋艿：后续来跟进 -->
-              <el-row :gutter="8" class="w-full">
-                <el-col :span="8">
-                  <el-input
-                    v-model="formData.valueId"
-                    placeholder="值ID"
-                    @change="handleManualChange"
-                  />
-                </el-col>
-                <el-col :span="8">
-                  <el-input
-                    v-model="formData.valueCode"
-                    placeholder="值编码"
-                    @change="handleManualChange"
-                  />
-                </el-col>
-                <el-col :span="8">
-                  <el-input
-                    v-model="formData.valueName"
-                    placeholder="值名称"
-                    @change="handleManualChange"
-                  />
-                </el-col>
-              </el-row>
+              <el-select
+                v-model="formData.valueCode"
+                placeholder="请选择质量状态"
+                class="!w-full"
+                @change="handleQualityStatusChange"
+              >
+                <el-option
+                  v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="dict.value"
+                />
+              </el-select>
             </template>
           </el-form-item>
         </el-col>
@@ -160,7 +150,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import {
   StockTakingPlanParamApi,
   type StockTakingPlanParamVO
@@ -170,6 +160,7 @@ import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSe
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 import { WmWarehouseLocationApi } from '@/api/mes/wm/warehouse/location'
 import { WmWarehouseAreaApi } from '@/api/mes/wm/warehouse/area'
 
@@ -269,7 +260,7 @@ const submitForm = async () => {
     const data = {
       ...formData.value,
       planId: props.planId,
-      valueId: Number(formData.value.valueId)
+      valueId: formData.value.valueId != null ? Number(formData.value.valueId) : undefined
     } as StockTakingPlanParamVO
     if (formType.value === 'create') {
       await StockTakingPlanParamApi.createStockTakingPlanParam(data)
@@ -322,17 +313,22 @@ const handleSelectorChange = (item?: any) => {
   formData.value.valueName = item?.name || item?.nickname || ''
 }
 
-/** 手动输入变化 */
-const handleManualChange = () => {
-  if (
-    formData.value.valueId !== undefined &&
-    formData.value.valueId !== null &&
-    formData.value.valueId !== ''
-  ) {
-    const num = Number(formData.value.valueId)
-    formData.value.valueId = Number.isNaN(num) ? formData.value.valueId : num
-  }
+/** 批次选择器变化 */
+const handleBatchChange = (batch?: any) => {
+  formData.value.valueId = batch?.id
+  formData.value.valueCode = batch?.code || ''
+  formData.value.valueName = batch?.code || ''
 }
+
+/** 质量状态选择器变化 */
+const handleQualityStatusChange = (val: string) => {
+  const dictOptions = getStrDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)
+  const selected = dictOptions.find((d) => d.value === val)
+  formData.value.valueId = val // 质量状态无实体 ID，与 valueCode 保持一致
+  formData.value.valueCode = val
+  formData.value.valueName = selected?.label || ''
+}
+
 
 /** 库区仓库选择回调：清空库区 */
 const handleLocationWarehouseChange = () => {
