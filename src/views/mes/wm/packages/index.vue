@@ -89,6 +89,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
+          <!-- 草稿：编辑、完成、删除 -->
           <el-button
             link
             type="primary"
@@ -101,7 +102,7 @@
           <el-button
             link
             type="warning"
-            @click="handleFinish(scope.row.id)"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm-package:update']"
             v-if="scope.row.status === MesWmPackageStatusEnum.PREPARE"
           >
@@ -157,6 +158,7 @@ const queryParams = reactive({
   inspectorUserId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -170,52 +172,35 @@ const getList = async () => {
   }
 }
 
-/** 搜索 */
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
-/** 重置 */
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
-/** 新增/修改/详情 */
-const formRef = ref()
+/** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 完成 */
-const handleFinish = async (id: number) => {
-  try {
-    // 完成的二次确认
-    await message.confirm('确认完成该装箱单？完成后将不可编辑。')
-    // 发起完成
-    await WmPackageApi.finishPackage(id)
-    message.success('完成成功')
-    // 刷新列表
-    await getList()
-  } catch {}
 }
 
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
-    // 删除的二次确认
     await message.delConfirm()
-    // 发起删除
     await WmPackageApi.deletePackage(id)
     message.success(t('common.delSuccess'))
-    // 刷新列表
     await getList()
   } catch {}
 }
 
 /** 初始化 */
-onMounted(async () => {
-  await getList()
+onMounted(() => {
+  getList()
 })
 </script>
