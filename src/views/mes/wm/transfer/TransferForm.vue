@@ -248,15 +248,15 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = cleanFormData()
+    const data = formData.value as unknown as WmTransferVO
     if (formType.value === 'create') {
-      const id = await WmTransferApi.createTransfer(data as unknown as WmTransferVO)
+      const id = await WmTransferApi.createTransfer(data)
       message.success('新增成功')
       formData.value.id = id
       formData.value.status = MesWmTransferStatusEnum.PREPARE
       formType.value = 'update'
     } else {
-      await WmTransferApi.updateTransfer(data as unknown as WmTransferVO)
+      await WmTransferApi.updateTransfer(data)
       message.success('修改成功')
     }
     // 更新快照
@@ -275,8 +275,8 @@ const handleSubmit = async () => {
     formLoading.value = true
     // 1. 表单有修改时，先保存
     if (JSON.stringify(formData.value) !== originalFormData.value) {
-      const data = cleanFormData()
-      await WmTransferApi.updateTransfer(data as unknown as WmTransferVO)
+      const data = formData.value as unknown as WmTransferVO
+      await WmTransferApi.updateTransfer(data)
     }
     // 2. 提交转移单
     await WmTransferApi.submitTransfer(formData.value.id!)
@@ -332,27 +332,6 @@ const handleFinish = async () => {
   } finally {
     formLoading.value = false
   }
-}
-
-/** 清理表单数据（去除非业务字段，处理配送信息） */
-// TODO @AI：是不是不去 clean；反正整个保存下，不是很有所谓；
-const cleanFormData = () => {
-  const { confirmFlag: _confirmFlag, status: _status, ...data } = formData.value
-  if (!isOuterType.value) {
-    data.deliveryFlag = false
-    data.recipientName = undefined
-    data.recipientTelephone = undefined
-    data.destinationAddress = undefined
-    data.carrier = undefined
-    data.shippingNumber = undefined
-  } else if (!showDeliveryFields.value) {
-    data.recipientName = undefined
-    data.recipientTelephone = undefined
-    data.destinationAddress = undefined
-    data.carrier = undefined
-    data.shippingNumber = undefined
-  }
-  return data
 }
 
 /** 重置表单 */
