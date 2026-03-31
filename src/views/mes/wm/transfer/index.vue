@@ -40,6 +40,21 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="单据状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择单据状态"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_TRANSFER_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -200,7 +215,8 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
-  type: undefined
+  type: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const formRef = ref() // 表单弹窗

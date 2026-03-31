@@ -161,10 +161,10 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { WmTransferApi, WmTransferVO } from '@/api/mes/wm/transfer'
-import { MesWmTransferStatusEnum } from '@/views/mes/utils/constants'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode, MesWmTransferStatusEnum } from '@/views/mes/utils/constants'
 import TransferLineList from './TransferLineList.vue'
 
 defineOptions({ name: 'TransferForm' })
@@ -221,9 +221,8 @@ const formRef = ref() // 表单 Ref
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成转移单编号 */
-// TODO @AI：编码规则；
-const generateCode = () => {
-  formData.value.code = 'TR' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_TRANSFER_CODE)
 }
 
 /** 打开弹窗 */
