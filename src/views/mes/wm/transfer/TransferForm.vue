@@ -222,7 +222,7 @@ const originalFormData = ref<string>('') // 原始表单数据快照，用于脏
 
 /** 生成转移单编号 */
 const generateCode = async () => {
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.WM_TRANSFER_CODE)
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.TRANSFER_CODE)
 }
 
 /** 打开弹窗 */
