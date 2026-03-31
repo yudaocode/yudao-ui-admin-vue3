@@ -25,8 +25,27 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="外协工单号" prop="workOrderCode">
+        <el-input
+          v-model="queryParams.workOrderCode"
+          placeholder="请输入外协工单号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="供应商" prop="vendorId">
         <MdVendorSelect v-model="queryParams.vendorId" class="!w-240px" />
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择单据状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_OUTSOURCE_RECEIPT_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="入库日期" prop="receiptDate">
         <el-date-picker
@@ -158,7 +177,7 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmOutsourceReceiptApi, WmOutsourceReceiptVO } from '@/api/mes/wm/outsourcereceipt'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
@@ -180,6 +199,8 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   vendorId: undefined,
+  status: undefined,
+  workOrderCode: undefined,
   receiptDate: undefined
 })
 const queryFormRef = ref() // 搜索的表单
