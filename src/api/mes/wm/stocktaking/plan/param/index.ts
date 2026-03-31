@@ -4,7 +4,7 @@ export interface StockTakingPlanParamVO {
   id?: number
   planId?: number
   type?: number
-  valueId?: number | string
+  valueId?: number
   valueCode?: string
   valueName?: string
   remark?: string

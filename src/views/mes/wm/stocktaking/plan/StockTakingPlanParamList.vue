@@ -154,7 +154,7 @@ import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import {
   StockTakingPlanParamApi,
   type StockTakingPlanParamVO
-} from '@/api/mes/wm/stocktaking/plan/param/index'
+} from '@/api/mes/wm/stocktaking/plan/param'
 import { MesWmStockTakingParamTypeEnum } from '@/views/mes/utils/constants'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
@@ -223,7 +223,19 @@ const formData = ref<StockTakingPlanParamVO>({
 })
 const formRules = reactive({
   type: [{ required: true, message: '请选择条件类型', trigger: 'change' }],
-  valueId: [{ required: true, message: '条件值不能为空', trigger: 'change' }]
+  valueId: [
+    {
+      validator: (_rule: any, _value: any, callback: any) => {
+        // 质量状态类型不使用 valueId，校验 valueCode
+        if (formData.value.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS) {
+          callback(formData.value.valueCode ? undefined : new Error('请选择质量状态'))
+        } else {
+          callback(formData.value.valueId ? undefined : new Error('条件值不能为空'))
+        }
+      },
+      trigger: 'change'
+    }
+  ]
 })
 const formRef = ref()
 
@@ -324,7 +336,7 @@ const handleBatchChange = (batch?: any) => {
 const handleQualityStatusChange = (val: string) => {
   const dictOptions = getStrDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)
   const selected = dictOptions.find((d) => d.value === val)
-  formData.value.valueId = val // 质量状态无实体 ID，与 valueCode 保持一致
+  formData.value.valueId = undefined // 质量状态无实体 ID
   formData.value.valueCode = val
   formData.value.valueName = selected?.label || ''
 }
@@ -358,16 +370,17 @@ const loadCascadeData = async () => {
     return
   }
   try {
+    const vid = formData.value.valueId as number
     // 库区类型：需要查询库区信息，获取所属仓库ID
     if (formData.value.type === MesWmStockTakingParamTypeEnum.LOCATION) {
-      const location = await WmWarehouseLocationApi.getWarehouseLocation(formData.value.valueId)
+      const location = await WmWarehouseLocationApi.getWarehouseLocation(vid)
       if (location?.warehouseId) {
         locationWarehouseId.value = location.warehouseId
       }
     }
     // 库位类型：需要查询库位信息，获取所属仓库ID和库区ID
     else if (formData.value.type === MesWmStockTakingParamTypeEnum.AREA) {
-      const area = await WmWarehouseAreaApi.getWarehouseArea(formData.value.valueId)
+      const area = await WmWarehouseAreaApi.getWarehouseArea(vid)
       if (area?.warehouseId) {
         areaWarehouseId.value = area.warehouseId
       }
