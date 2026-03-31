@@ -46,7 +46,10 @@
       </el-row>
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：workorderType 需要过滤下 type；【对齐】后端应该也要校验下类型； -->
+          <!-- TODO @AI：outsourcereceipt 也有类似的问题； -->
           <el-form-item label="外协工单" prop="workOrderId">
+            <!-- TODO @AI：change 的事件，设置到 vendorId 中； -->
             <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>

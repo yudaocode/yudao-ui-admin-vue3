@@ -1,6 +1,7 @@
 <!-- MES 外协发料单明细表单弹窗 -->
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="600px">
+  <!-- TODO @AI：每行 3 个；改下； -->
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -8,6 +9,7 @@
       label-width="110px"
       v-loading="formLoading"
     >
+      <!-- TODO @AI：库存物资的选择，参考别的模块，选择 WmMaterialStockSelect；然后选择它后，设置到下面的字段；这些字段要 disabled；你参考下别的模块； -->
       <el-form-item label="物料" prop="itemId" required>
         <MdItemSelect v-model="formData.itemId" disabled />
       </el-form-item>
