@@ -443,7 +443,8 @@ export const MesAutoCodeRuleCode = {
   WM_MISC_RECEIPT_CODE: 'WM_MISC_RECEIPT_CODE', // 杂项入库单编码
   WM_STOCK_TAKING_PLAN_CODE: 'WM_STOCK_TAKING_PLAN_CODE', // 盘点方案编码
   WM_STOCK_TAKING_CODE: 'WM_STOCK_TAKING_CODE', // 盘点任务编码
-  TRANSFER_CODE: 'TRANSFER_CODE' // 转移调拨单编码
+  TRANSFER_CODE: 'TRANSFER_CODE', // 转移调拨单编码
+  WM_OUTSOURCE_ISSUE_CODE: 'WM_OUTSOURCE_ISSUE_CODE' // 外协发料单编码
 } as const
 
 /** 获取物料/产品标识的标签 */

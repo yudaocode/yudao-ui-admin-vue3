@@ -67,13 +67,13 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="发料单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
-          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
             {{ scope.row.code }}
-          </el-link>
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column label="发料单名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="生产工单号" align="center" prop="workorderId" min-width="140" />
+      <el-table-column label="生产工单号" align="center" prop="workOrderCode" min-width="140" />
       <el-table-column label="供应商名称" align="center" prop="vendorName" min-width="120" />
       <el-table-column
         label="发料日期"
@@ -87,9 +87,9 @@
           <dict-tag :type="DICT_TYPE.MES_WM_OUTSOURCE_ISSUE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="260" fixed="right">
+      <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
-          <!-- 草稿状态：编辑、删除、提交 -->
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
@@ -108,45 +108,35 @@
           >
             删除
           </el-button>
+          <!-- 待拣货：执行拣货、取消 -->
           <el-button
             link
             type="success"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:wm-outsource-issue:update']"
-            v-if="scope.row.status === MesWmOutsourceIssueStatusEnum.PREPARE"
-          >
-            提交
-          </el-button>
-          <!-- 待拣货状态：执行拣货 -->
-          <el-button
-            link
-            type="primary"
             @click="openForm('stock', scope.row.id)"
             v-hasPermi="['mes:wm-outsource-issue:update']"
             v-if="scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVING"
           >
             执行拣货
           </el-button>
-          <!-- 待执行出库状态：执行出库 -->
+          <!-- 待执行出库：执行领出、取消 -->
           <el-button
             link
-            type="warning"
-            @click="handleFinish(scope.row.id)"
+            type="success"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:wm-outsource-issue:finish']"
             v-if="scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVED"
           >
             执行领出
           </el-button>
-          <!-- 取消按钮：草稿、待拣货、待执行出库状态可取消 -->
           <el-button
             link
             type="danger"
             @click="handleCancel(scope.row.id)"
             v-hasPermi="['mes:wm-outsource-issue:update']"
             v-if="
-              scope.row.status === MesWmOutsourceIssueStatusEnum.PREPARE ||
-              scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVING ||
-              scope.row.status === MesWmOutsourceIssueStatusEnum.APPROVED
+              [MesWmOutsourceIssueStatusEnum.APPROVING, MesWmOutsourceIssueStatusEnum.APPROVED].includes(
+                scope.row.status
+              )
             "
           >
             取消
@@ -167,7 +157,7 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmOutsourceIssueApi, WmOutsourceIssueVO } from '@/api/mes/wm/outsourceissue'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
@@ -192,6 +182,7 @@ const queryParams = reactive({
   issueDate: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -205,48 +196,27 @@ const getList = async () => {
   }
 }
 
-/** 搜索 */
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
-/** 重置 */
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
-/** 新增/修改/详情 */
-const formRef = ref() // 表单弹窗
+/** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 提交到待拣货 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交到待拣货状态吗？')
-    await WmOutsourceIssueApi.submitOutsourceIssue(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 完成出库 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认执行出库吗？执行后将扣减库存，且无法撤销。')
-    await WmOutsourceIssueApi.finishOutsourceIssue(id)
-    message.success('出库成功')
-    await getList()
-  } catch {}
-}
-
-/** 取消发料单 */
+/** 取消按钮操作 */
 const handleCancel = async (id: number) => {
   try {
-    await message.confirm('确认取消该发料单吗？')
+    await message.confirm('确认取消该外协发料单？取消后不可恢复。')
     await WmOutsourceIssueApi.cancelOutsourceIssue(id)
     message.success('取消成功')
     await getList()
@@ -277,7 +247,7 @@ const handleExport = async () => {
 }
 
 /** 初始化 */
-onMounted(async () => {
-  await getList()
+onMounted(() => {
+  getList()
 })
 </script>
