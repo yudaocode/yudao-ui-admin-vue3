@@ -76,5 +76,10 @@ export const WmPackageApi = {
   // 可添加为子箱的装箱单精简列表（无父箱 + 已完成状态，用于选择父箱）
   getChildablePackageSimpleList: async () => {
     return await request.get<WmPackageVO[]>({ url: '/mes/wm/package/childable-simple-list' })
+  },
+
+  // 获取装箱单精简列表
+  getPackageSimpleList: async () => {
+    return await request.get<WmPackageVO[]>({ url: '/mes/wm/package/simple-list' })
   }
 }

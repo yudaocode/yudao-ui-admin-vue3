@@ -137,7 +137,35 @@
       >
         <TmToolSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
       </el-form-item>
-      <!-- TODO @芋艿：以下业务类型暂无对应的 Select 组件：PACKAGE(装箱单)、STOCK(库存)、BATCH(批次)、PROCARD(流转卡)、TRANSORDER(流转单) -->
+      <el-form-item
+        v-else-if="formData.bizType === BarcodeBizTypeEnum.PACKAGE"
+        label="装箱单"
+        prop="bizId"
+      >
+        <BarcodePackageSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
+      </el-form-item>
+      <el-form-item
+        v-else-if="formData.bizType === BarcodeBizTypeEnum.STOCK"
+        label="库存"
+        prop="bizId"
+      >
+        <WmMaterialStockSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
+      </el-form-item>
+      <el-form-item
+        v-else-if="formData.bizType === BarcodeBizTypeEnum.BATCH"
+        label="批次"
+        prop="bizId"
+      >
+        <WmBatchSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
+      </el-form-item>
+      <el-form-item
+        v-else-if="formData.bizType === BarcodeBizTypeEnum.PROCARD"
+        label="流转卡"
+        prop="bizId"
+      >
+        <ProCardSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
+      </el-form-item>
+      <!-- TODO 流转单（TRANSORDER）后端模块尚未实现，待后续补充 -->
       <el-form-item v-else-if="formData.bizType" label="暂未接入" prop="bizId">
         <el-input-number
           v-model="formData.bizId"
@@ -194,6 +222,10 @@ import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSe
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import TmToolSelect from '@/views/mes/tm/tool/components/TmToolSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import BarcodePackageSelect from './components/BarcodePackageSelect.vue'
+import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
+import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
+import ProCardSelect from '@/views/mes/pro/card/components/ProCardSelect.vue'
 import { WmWarehouseLocationApi } from '@/api/mes/wm/warehouse/location'
 import { WmWarehouseAreaApi } from '@/api/mes/wm/warehouse/area'
 
@@ -240,8 +272,28 @@ const handleBizSelect = async (item: any) => {
     return
   }
   formData.value.bizId = item.id
-  formData.value.bizCode = item.code || item.username
-  formData.value.bizName = item.name || item.nickname
+  // 根据业务类型映射字段
+  switch (formData.value.bizType) {
+    case BarcodeBizTypeEnum.STOCK:
+      formData.value.bizCode = item.itemCode
+      formData.value.bizName = item.itemName
+      break
+    case BarcodeBizTypeEnum.PACKAGE:
+      formData.value.bizCode = item.code
+      formData.value.bizName = item.clientName || item.code
+      break
+    case BarcodeBizTypeEnum.BATCH:
+      formData.value.bizCode = item.code
+      formData.value.bizName = item.itemName || item.code
+      break
+    case BarcodeBizTypeEnum.PROCARD:
+      formData.value.bizCode = item.code
+      formData.value.bizName = item.workOrderName || item.code
+      break
+    default:
+      formData.value.bizCode = item.code || item.username
+      formData.value.bizName = item.name || item.nickname
+  }
 
   // 自动生成条码内容
   if (formData.value.bizType && formData.value.bizCode) {

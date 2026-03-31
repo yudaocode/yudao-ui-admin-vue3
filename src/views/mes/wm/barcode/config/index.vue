@@ -81,6 +81,12 @@
         :show-overflow-tooltip="true"
       />
       <el-table-column
+        label="默认打印模板"
+        align="center"
+        prop="defaultTemplate"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column
         label="自动生成"
         align="center"
         key="autoGenerateFlag"

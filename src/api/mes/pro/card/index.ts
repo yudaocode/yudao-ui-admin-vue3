@@ -47,5 +47,10 @@ export const ProCardApi = {
   // 导出生产流转卡 Excel
   exportCard: async (params: any) => {
     return await request.download({ url: `/mes/pro/card/export-excel`, params })
+  },
+
+  // 获取生产流转卡精简列表
+  getCardSimpleList: async () => {
+    return await request.get<ProCardVO[]>({ url: `/mes/pro/card/simple-list` })
   }
 }
