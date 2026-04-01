@@ -1,4 +1,3 @@
-<!-- TODO @芋艿：暂未 review -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
@@ -11,12 +10,16 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="班组编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入班组编码" />
+            <el-input v-model="formData.code" placeholder="请输入班组编码" :maxlength="64">
+              <template #append>
+                <el-button @click="generateCode">生成</el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="班组名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入班组名称" />
+            <el-input v-model="formData.name" placeholder="请输入班组名称" :maxlength="100" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -35,7 +38,7 @@
       <el-row>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
-            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
+            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" :maxlength="250" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -56,6 +59,8 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CalTeamApi, CalTeamVO } from '@/api/mes/cal/team'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import CalTeamMemberList from './CalTeamMemberList.vue'
 
 defineOptions({ name: 'CalTeamForm' })
@@ -76,10 +81,22 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
-  code: [{ required: true, message: '班组编码不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '班组名称不能为空', trigger: 'blur' }]
+  code: [
+    { required: true, message: '班组编码不能为空', trigger: 'blur' },
+    { max: 64, message: '班组编码不能超过 64 个字符', trigger: 'blur' }
+  ],
+  name: [
+    { required: true, message: '班组名称不能为空', trigger: 'blur' },
+    { max: 100, message: '班组名称不能超过 100 个字符', trigger: 'blur' }
+  ],
+  calendarType: [{ required: true, message: '班组类型不能为空', trigger: 'change' }]
 })
 const formRef = ref()
+
+/** 生成班组编码 */
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.CAL_TEAM_CODE)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {

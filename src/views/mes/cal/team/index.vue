@@ -1,4 +1,3 @@
-<!-- TODO @芋艿：暂未 review -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -27,6 +26,7 @@
           class="!w-240px"
         />
       </el-form-item>
+      <!-- TODO @AI：查询下，mysql 对应的数据字典，然后对齐 -->
       <el-form-item label="班组类型" prop="calendarType">
         <el-select
           v-model="queryParams.calendarType"
@@ -69,6 +69,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <!-- TODO @AI：详情，点击后查看；看看别的模块，isDetai 哪个 -->
       <el-table-column label="班组编码" align="center" prop="code" min-width="120" />
       <el-table-column label="班组名称" align="center" prop="name" min-width="150" />
       <el-table-column label="班组类型" align="center" prop="calendarType" min-width="100">
