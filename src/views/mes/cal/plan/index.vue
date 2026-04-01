@@ -1,7 +1,6 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
-    <!-- TODO @AI：【开始时间】、【结束时间】； -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -24,6 +23,28 @@
           placeholder="请输入计划名称"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="开始日期" prop="startDate">
+        <el-date-picker
+          v-model="queryParams.startDate"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="结束日期" prop="endDate">
+        <el-date-picker
+          v-model="queryParams.endDate"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
         />
       </el-form-item>
@@ -79,27 +100,31 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：编码查看，不用【查看】按钮； -->
-      <el-table-column label="计划编码" align="center" prop="code" min-width="120" />
+      <el-table-column label="计划编码" align="center" prop="code" min-width="120">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="计划名称" align="center" prop="name" min-width="150" />
       <el-table-column label="班组类型" align="center" prop="calendarType" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_CAL_CALENDAR_TYPE" :value="scope.row.calendarType" />
         </template>
       </el-table-column>
-      <!-- TODO @AI：dateFormatter2、dateFormatter2； -->
       <el-table-column
         label="开始日期"
         align="center"
         prop="startDate"
-        :formatter="dateFormatter"
+        :formatter="dateFormatter2"
         width="180px"
       />
       <el-table-column
         label="结束日期"
         align="center"
         prop="endDate"
-        :formatter="dateFormatter"
+        :formatter="dateFormatter2"
         width="180px"
       />
       <el-table-column label="轮班方式" align="center" prop="shiftType" min-width="100">
@@ -124,11 +149,8 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="150">
+      <el-table-column label="操作" align="center" width="120">
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
-            查看
-          </el-button>
           <el-button
             v-if="scope.row.status === MesCalPlanStatusEnum.PREPARE"
             link
@@ -164,7 +186,7 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { CalPlanApi, CalPlanVO } from '@/api/mes/cal/plan'
 import CalPlanForm from './CalPlanForm.vue'
@@ -184,6 +206,8 @@ const queryParams = reactive({
   pageSize: 10,
   code: undefined,
   name: undefined,
+  startDate: undefined,
+  endDate: undefined,
   shiftType: undefined,
   status: undefined
 })

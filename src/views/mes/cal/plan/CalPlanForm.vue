@@ -6,7 +6,7 @@
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
-      :disabled="formType === 'detail'"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
@@ -98,6 +98,7 @@
             />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：去掉状态的展示；没意义； -->
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
             <dict-tag :type="DICT_TYPE.MES_CAL_PLAN_STATUS" :value="formData.status" />
@@ -113,16 +114,16 @@
       </el-row>
     </el-form>
     <!-- 编辑/查看时显示子资源 Tab -->
-    <el-tabs v-if="formType === 'update' || formType === 'detail'" v-model="activeTab" class="mt-10px">
+    <el-tabs v-if="formType === 'update' || isDetail" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="班次" name="shift">
-        <CalShiftList :plan-id="formData.id!" :readonly="formType === 'detail'" />
+        <CalShiftList :plan-id="formData.id!" :readonly="isDetail" />
       </el-tab-pane>
       <el-tab-pane label="班组" name="team">
-        <CalPlanTeamList :plan-id="formData.id!" :readonly="formType === 'detail'" />
+        <CalPlanTeamList :plan-id="formData.id!" :readonly="isDetail" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <template v-if="formType !== 'detail'">
+      <template v-if="!isDetail">
         <!-- 确认按钮：仅草稿状态显示 -->
         <el-button
           v-if="formType === 'update' && formData.status === MesCalPlanStatusEnum.PREPARE"
@@ -145,25 +146,33 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CalPlanApi, CalPlanVO } from '@/api/mes/cal/plan'
-import { generateRandomStr } from '@/utils'
 import {
   MesCalPlanStatusEnum,
   MesCalShiftTypeEnum,
-  MesCalShiftMethodEnum
+  MesCalShiftMethodEnum,
+  MesAutoCodeRuleCode
 } from '@/views/mes/utils/constants'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import CalShiftList from './CalShiftList.vue'
 import CalPlanTeamList from './CalPlanTeamList.vue'
 
-// TODO @AI：isDetail，这种 compute 计算；
 defineOptions({ name: 'CalPlanForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 查看
+const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式（只读）
+const dialogTitle = computed(() => {
+  const titles = {
+    create: '新增排班计划',
+    update: '修改排班计划',
+    detail: '查看排班计划'
+  }
+  return titles[formType.value] || formType.value
+}) // 弹窗的标题
 const activeTab = ref('shift') // 当前激活的资源 Tab
 const formData = ref({
   id: undefined,
@@ -189,16 +198,13 @@ const formRules = reactive({
 const formRef = ref()
 
 /** 生成计划编码 */
-const generateCode = () => {
-  // TODO @AI：接入编码规则；
-  formData.value.code = 'PLAN' + generateRandomStr(8)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.CAL_PLAN_CODE)
 }
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  // TODO @AI：dialogtitle，通过 compute 实现；
-  dialogTitle.value = type === 'detail' ? '查看' : t('action.' + type)
   formType.value = type
   resetForm()
   // 修改/查看时，设置数据

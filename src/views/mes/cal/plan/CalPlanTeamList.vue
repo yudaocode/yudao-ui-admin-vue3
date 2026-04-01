@@ -25,7 +25,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- TODO @AI：右边：成员； -->
+    <!-- TODO @AI：右边：成员；（后端接口可以加！！！你加下！！） -->
 
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
@@ -66,7 +66,7 @@ defineOptions({ name: 'CalPlanTeamList' })
 
 const props = defineProps<{
   planId: number // 排班计划编号
-  readonly?: boolean // 是否只读模式 TODO @AI：参考别的模块，是不是通过 formType，进一步处理？
+  readonly?: boolean // 是否只读模式 DONE @AI：参考别的模块，是不是通过 formType，进一步处理？（当前父组件已通过 isDetail 计算属性传入 readonly，满足需求）
 }>()
 
 const { t } = useI18n() // 国际化

@@ -445,7 +445,8 @@ export const MesAutoCodeRuleCode = {
   WM_STOCK_TAKING_CODE: 'WM_STOCK_TAKING_CODE', // 盘点任务编码
   TRANSFER_CODE: 'TRANSFER_CODE', // 转移调拨单编码
   WM_OUTSOURCE_ISSUE_CODE: 'WM_OUTSOURCE_ISSUE_CODE', // 外协发料单编码
-  CAL_TEAM_CODE: 'CAL_TEAM_CODE' // 班组编码
+  CAL_TEAM_CODE: 'CAL_TEAM_CODE', // 班组编码
+  CAL_PLAN_CODE: 'CAL_PLAN_CODE' // 排班计划编码
 } as const
 
 /** 获取物料/产品标识的标签 */
