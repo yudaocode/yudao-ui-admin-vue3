@@ -26,7 +26,8 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：查询下，mysql 对应的数据字典，然后对齐 -->
+      <!-- DONE @AI：查询下，mysql 对应的数据字典，然后对齐 -->
+      <!-- 说明：已使用 mes_cal_calendar_type 数据字典，前后端对齐 -->
       <el-form-item label="班组类型" prop="calendarType">
         <el-select
           v-model="queryParams.calendarType"
@@ -69,8 +70,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：详情，点击后查看；看看别的模块，isDetai 哪个 -->
-      <el-table-column label="班组编码" align="center" prop="code" min-width="120" />
+      <el-table-column label="班组编码" align="center" prop="code" min-width="120">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="班组名称" align="center" prop="name" min-width="150" />
       <el-table-column label="班组类型" align="center" prop="calendarType" min-width="100">
         <template #default="scope">
@@ -85,8 +91,16 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="150">
+      <el-table-column label="操作" align="center" width="200">
         <template #default="scope">
+          <!-- TODO @AI：详情，有点无用；上面有了； -->
+          <el-button
+            link
+            type="primary"
+            @click="openForm('detail', scope.row.id)"
+          >
+            详情
+          </el-button>
           <el-button
             link
             type="primary"
@@ -115,7 +129,7 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
+  <!-- 表单弹窗：添加/修改/详情 -->
   <CalTeamForm ref="formRef" @success="getList" />
 </template>
 

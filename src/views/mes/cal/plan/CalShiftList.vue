@@ -2,7 +2,7 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-button type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
+    <el-button v-if="!readonly" type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加班次
     </el-button>
     <!-- 列表 -->
@@ -12,7 +12,7 @@
       <el-table-column label="开始时间" align="center" prop="startTime" width="100" />
       <el-table-column label="结束时间" align="center" prop="endTime" width="100" />
       <el-table-column label="备注" align="center" prop="remark" min-width="150" />
-      <el-table-column label="操作" align="center" width="120">
+      <el-table-column v-if="!readonly" label="操作" align="center" width="120">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
@@ -40,11 +40,24 @@
         <el-form-item label="班次名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入班次名称" />
         </el-form-item>
+        <!-- TODO @芋艿：这块要测试下 -->
         <el-form-item label="开始时间" prop="startTime">
-          <el-input v-model="formData.startTime" placeholder="请输入开始时间（如 08:00）" />
+          <el-time-picker
+            v-model="formData.startTime"
+            format="HH:mm"
+            value-format="HH:mm"
+            placeholder="请选择开始时间"
+            class="!w-1/1"
+          />
         </el-form-item>
         <el-form-item label="结束时间" prop="endTime">
-          <el-input v-model="formData.endTime" placeholder="请输入结束时间（如 17:00）" />
+          <el-time-picker
+            v-model="formData.endTime"
+            format="HH:mm"
+            value-format="HH:mm"
+            placeholder="请选择结束时间"
+            class="!w-1/1"
+          />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
@@ -65,6 +78,7 @@ defineOptions({ name: 'CalShiftList' })
 
 const props = defineProps<{
   planId: number // 排班计划编号
+  readonly?: boolean // 是否只读模式 TODO @AI：参考别的模块，是不是通过 formType，进一步处理？
 }>()
 
 const { t } = useI18n() // 国际化

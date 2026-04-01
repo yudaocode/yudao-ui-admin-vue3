@@ -2,7 +2,7 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-button type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
+    <el-button v-if="!readonly" type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加班组
     </el-button>
     <!-- 列表 -->
@@ -11,7 +11,7 @@
       <el-table-column label="班组编码" align="center" prop="teamCode" min-width="120" />
       <el-table-column label="班组名称" align="center" prop="teamName" min-width="120" />
       <el-table-column label="备注" align="center" prop="remark" min-width="150" />
-      <el-table-column label="操作" align="center" width="80">
+      <el-table-column v-if="!readonly" label="操作" align="center" width="80">
         <template #default="scope">
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
@@ -57,6 +57,7 @@ defineOptions({ name: 'CalPlanTeamList' })
 
 const props = defineProps<{
   planId: number // 排班计划编号
+  readonly?: boolean // 是否只读模式 TODO @AI：参考别的模块，是不是通过 formType，进一步处理？
 }>()
 
 const { t } = useI18n() // 国际化

@@ -78,6 +78,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <!-- TODO @AI：编码查看，不用【查看】按钮； -->
       <el-table-column label="计划编码" align="center" prop="code" min-width="120" />
       <el-table-column label="计划名称" align="center" prop="name" min-width="150" />
       <el-table-column label="班组类型" align="center" prop="calendarType" min-width="100">
@@ -123,6 +124,13 @@
       />
       <el-table-column label="操作" align="center" width="150">
         <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openForm('detail', scope.row.id)"
+          >
+            查看
+          </el-button>
           <el-button
             v-if="scope.row.status === MesCalPlanStatusEnum.PREPARE"
             link
