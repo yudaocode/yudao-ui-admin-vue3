@@ -2,7 +2,7 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-button type="primary" plain size="small" @click="openForm()" class="mb-10px">
+    <el-button v-if="isEditable" type="primary" plain size="small" @click="openForm()" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加成员
     </el-button>
     <!-- 列表 -->
@@ -11,7 +11,7 @@
       <el-table-column label="用户昵称" align="center" prop="nickname" min-width="120" />
       <el-table-column label="手机号" align="center" prop="telephone" min-width="120" />
       <el-table-column label="备注" align="center" prop="remark" min-width="150" />
-      <el-table-column label="操作" align="center" width="80">
+      <el-table-column v-if="isEditable" label="操作" align="center" width="80">
         <template #default="scope">
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
@@ -58,11 +58,14 @@ defineOptions({ name: 'CalTeamMemberList' })
 
 const props = defineProps<{
   teamId: number // 班组编号
+  formType: string // 表单类型：create / update / detail
 }>()
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
+const isEditable = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
+
+// ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
 const list = ref<CalTeamMemberVO[]>([]) // 列表的数据
 
@@ -74,6 +77,16 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    await message.delConfirm()
+    await CalTeamMemberApi.deleteTeamMember(id)
+    message.success('删除成功')
+    await getList()
+  } catch {}
 }
 
 // ==================== 添加/修改 ====================
@@ -106,23 +119,12 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     await CalTeamMemberApi.createTeamMember(formData.value as unknown as CalTeamMemberVO)
-    message.success(t('common.createSuccess'))
+    message.success('添加成功')
     dialogVisible.value = false
-    // 刷新列表
     await getList()
   } finally {
     formLoading.value = false
   }
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await CalTeamMemberApi.deleteTeamMember(id)
-    message.success('删除成功')
-    await getList()
-  } catch {}
 }
 
 /** 监听 teamId 变化，加载列表 */

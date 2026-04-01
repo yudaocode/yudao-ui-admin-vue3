@@ -59,7 +59,7 @@
       <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
       </el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -72,16 +72,23 @@ import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import CalTeamMemberList from './CalTeamMemberList.vue'
 
 defineOptions({ name: 'CalTeamForm' })
+const emit = defineEmits(['success'])
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const activeTab = ref('member') // 当前激活的资源 Tab
 const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增班组',
+    update: '编辑班组',
+    detail: '班组详情'
+  }
+  return titles[formType.value] || formType.value
+})
 const formData = ref({
   id: undefined,
   code: undefined,
@@ -110,10 +117,9 @@ const generateCode = async () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  // 修改时，设置数据
+  // 修改/详情时，设置数据
   if (id) {
     formLoading.value = true
     try {
@@ -123,10 +129,8 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open })
 
 /** 提交表单 */
-const emit = defineEmits(['success'])
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
@@ -134,10 +138,10 @@ const submitForm = async () => {
     const data = formData.value as unknown as CalTeamVO
     if (formType.value === 'create') {
       await CalTeamApi.createTeam(data)
-      message.success(t('common.createSuccess'))
+      message.success('新增成功')
     } else {
       await CalTeamApi.updateTeam(data)
-      message.success(t('common.updateSuccess'))
+      message.success('修改成功')
     }
     dialogVisible.value = false
     emit('success')
@@ -157,4 +161,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>
