@@ -26,8 +26,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- DONE @AI：查询下，mysql 对应的数据字典，然后对齐 -->
-      <!-- 说明：已使用 mes_cal_calendar_type 数据字典，前后端对齐 -->
       <el-form-item label="班组类型" prop="calendarType">
         <el-select
           v-model="queryParams.calendarType"
@@ -91,16 +89,8 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="200">
+      <el-table-column label="操作" align="center" width="150">
         <template #default="scope">
-          <!-- TODO @AI：详情，有点无用；上面有了； -->
-          <el-button
-            link
-            type="primary"
-            @click="openForm('detail', scope.row.id)"
-          >
-            详情
-          </el-button>
           <el-button
             link
             type="primary"

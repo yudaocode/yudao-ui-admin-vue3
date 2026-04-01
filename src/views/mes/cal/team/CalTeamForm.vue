@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
@@ -38,19 +39,26 @@
       <el-row>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
-            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" :maxlength="250" />
+            <el-input
+              v-model="formData.remark"
+              type="textarea"
+              placeholder="请输入备注"
+              :maxlength="250"
+            />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
-    <!-- 编辑时显示成员管理 Tab -->
-    <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
+    <!-- 编辑/查看时显示成员管理 Tab -->
+    <el-tabs v-if="formType === 'update' || isDetail" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="班组成员" name="member">
-        <CalTeamMemberList :team-id="formData.id!" />
+        <CalTeamMemberList :team-id="formData.id!" :form-type="formType" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -73,6 +81,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const activeTab = ref('member') // 当前激活的资源 Tab
+const isDetail = computed(() => formType.value === 'detail') // 是否详情模式（只读）
 const formData = ref({
   id: undefined,
   code: undefined,

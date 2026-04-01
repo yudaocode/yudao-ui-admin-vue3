@@ -5,7 +5,6 @@ export interface CalTeamMemberVO {
   id: number
   teamId: number // 班组编号
   userId: number // 用户编号
-  userName: string // 用户名称（关联查询）
   nickname: string // 用户昵称（关联查询）
   telephone: string // 用户手机号（关联查询）
   remark: string // 备注
