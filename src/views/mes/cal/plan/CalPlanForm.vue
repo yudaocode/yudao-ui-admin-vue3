@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
+      :disabled="formType === 'detail'"
     >
       <el-row>
         <el-col :span="8">
@@ -111,27 +112,32 @@
         </el-col>
       </el-row>
     </el-form>
-    <!-- 编辑时显示子资源 Tab -->
-    <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
+    <!-- 编辑/查看时显示子资源 Tab -->
+    <el-tabs v-if="formType === 'update' || formType === 'detail'" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="班次" name="shift">
-        <CalShiftList :plan-id="formData.id!" />
+        <CalShiftList :plan-id="formData.id!" :readonly="formType === 'detail'" />
       </el-tab-pane>
       <el-tab-pane label="班组" name="team">
-        <CalPlanTeamList :plan-id="formData.id!" />
+        <CalPlanTeamList :plan-id="formData.id!" :readonly="formType === 'detail'" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <!-- 确认按钮：仅草稿状态显示 -->
-      <el-button
-        v-if="formType === 'update' && formData.status === MesCalPlanStatusEnum.PREPARE"
-        type="warning"
-        @click="handleConfirm"
-        :disabled="formLoading"
-      >
-        确认计划
-      </el-button>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <template v-if="formType !== 'detail'">
+        <!-- 确认按钮：仅草稿状态显示 -->
+        <el-button
+          v-if="formType === 'update' && formData.status === MesCalPlanStatusEnum.PREPARE"
+          type="warning"
+          @click="handleConfirm"
+          :disabled="formLoading"
+        >
+          确认计划
+        </el-button>
+        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+        <el-button @click="dialogVisible = false">取 消</el-button>
+      </template>
+      <template v-else>
+        <el-button @click="dialogVisible = false">关 闭</el-button>
+      </template>
     </template>
   </Dialog>
 </template>
@@ -148,6 +154,7 @@ import {
 import CalShiftList from './CalShiftList.vue'
 import CalPlanTeamList from './CalPlanTeamList.vue'
 
+// TODO @AI：isDetail，这种 compute 计算；
 defineOptions({ name: 'CalPlanForm' })
 
 const { t } = useI18n() // 国际化
@@ -174,23 +181,27 @@ const formData = ref({
 const formRules = reactive({
   code: [{ required: true, message: '计划编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '计划名称不能为空', trigger: 'blur' }],
+  calendarType: [{ required: true, message: '班组类型不能为空', trigger: 'change' }],
   startDate: [{ required: true, message: '开始日期不能为空', trigger: 'change' }],
-  endDate: [{ required: true, message: '结束日期不能为空', trigger: 'change' }]
+  endDate: [{ required: true, message: '结束日期不能为空', trigger: 'change' }],
+  shiftType: [{ required: true, message: '轮班方式不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
 /** 生成计划编码 */
 const generateCode = () => {
+  // TODO @AI：接入编码规则；
   formData.value.code = 'PLAN' + generateRandomStr(8)
 }
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
+  // TODO @AI：dialogtitle，通过 compute 实现；
+  dialogTitle.value = type === 'detail' ? '查看' : t('action.' + type)
   formType.value = type
   resetForm()
-  // 修改时，设置数据
+  // 修改/查看时，设置数据
   if (id) {
     formLoading.value = true
     try {
@@ -223,11 +234,16 @@ const submitForm = async () => {
   }
 }
 
-/** 确认计划 */
+/** 确认计划（先自动保存再确认） */
 const handleConfirm = async () => {
   try {
-    await message.confirm('确认该排班计划？确认后将不可修改或删除。')
+    // 1. 先校验并保存表单
+    await formRef.value.validate()
     formLoading.value = true
+    const data = formData.value as unknown as CalPlanVO
+    await CalPlanApi.updatePlan(data)
+    // 2. 再确认计划
+    await message.confirm('确认该排班计划？确认后将不可修改或删除。')
     await CalPlanApi.confirmPlan(formData.value.id!)
     message.success('确认成功')
     dialogVisible.value = false

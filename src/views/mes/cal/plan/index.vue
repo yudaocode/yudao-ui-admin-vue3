@@ -1,6 +1,7 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
+    <!-- TODO @AI：【开始时间】、【结束时间】； -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -86,6 +87,7 @@
           <dict-tag :type="DICT_TYPE.MES_CAL_CALENDAR_TYPE" :value="scope.row.calendarType" />
         </template>
       </el-table-column>
+      <!-- TODO @AI：dateFormatter2、dateFormatter2； -->
       <el-table-column
         label="开始日期"
         align="center"
@@ -124,11 +126,7 @@
       />
       <el-table-column label="操作" align="center" width="150">
         <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openForm('detail', scope.row.id)"
-          >
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
             查看
           </el-button>
           <el-button

@@ -2,10 +2,18 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-button v-if="!readonly" type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
+    <el-button
+      v-if="!readonly"
+      type="primary"
+      plain
+      size="small"
+      @click="openForm('create')"
+      class="mb-10px"
+    >
       <Icon icon="ep:plus" class="mr-5px" /> 添加班组
     </el-button>
     <!-- 列表 -->
+    <!-- TODO @AI：左边：班组； -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
       <el-table-column label="班组编号" align="center" prop="teamId" width="120" />
       <el-table-column label="班组编码" align="center" prop="teamCode" min-width="120" />
@@ -17,6 +25,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- TODO @AI：右边：成员； -->
 
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">

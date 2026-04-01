@@ -40,7 +40,6 @@
         <el-form-item label="班次名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入班次名称" />
         </el-form-item>
-        <!-- TODO @芋艿：这块要测试下 -->
         <el-form-item label="开始时间" prop="startTime">
           <el-time-picker
             v-model="formData.startTime"
