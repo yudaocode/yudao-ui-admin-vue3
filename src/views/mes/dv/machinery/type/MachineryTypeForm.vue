@@ -19,8 +19,9 @@
           class="w-1/1"
         />
       </el-form-item>
-      <el-form-item label="设备类型编码" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入类型编码" />
+      <el-form-item label="设备类型编码" prop="code" v-if="formType === 'update'">
+        <!-- TODO @AI：点击后生成，不要这里自动生成； -->
+        <el-input v-model="formData.code" placeholder="系统自动生成" disabled />
       </el-form-item>
       <el-form-item label="设备类型名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入类型名称" />
@@ -75,7 +76,6 @@ const formData = ref({
 })
 const formRules = reactive({
   parentId: [{ required: true, message: '上级类型不能为空', trigger: 'blur' }],
-  code: [{ required: true, message: '类型编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '类型名称不能为空', trigger: 'blur' }],
   sort: [{ required: true, message: '显示排序不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]

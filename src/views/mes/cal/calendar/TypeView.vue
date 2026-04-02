@@ -33,91 +33,38 @@
 </template>
 
 <script setup lang="ts">
-import { CalCalendarApi, CalCalendarDayVO } from '@/api/mes/cal/calendar'
-import { CalHolidayApi, CalHolidayVO } from '@/api/mes/cal/holiday'
-import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { HolidayType } from '@/views/mes/utils/constants'
 import CalendarDateCell from './CalendarDateCell.vue'
 import CalendarLegend from './CalendarLegend.vue'
-import dayjs from 'dayjs'
-import 'dayjs/locale/zh-cn'
-import PluginLunar from 'dayjs-plugin-lunar'
+import { useCalendar } from './useCalendar'
 
-dayjs.locale('zh-cn')
-dayjs.extend(PluginLunar)
+const { loading, currentDate, calendarDayMap, holidaySet, loadHolidays, fetchCalendar, watchMonth } =
+  useCalendar()
 
-const loading = ref(false)
-const currentDate = ref(new Date()) // 日历当前显示月份
 const selectedType = ref<number>() // 当前选中的班组类型（枚举 MES_CAL_CALENDAR_TYPE）
-const calendarDayMap = ref<Map<string, CalCalendarDayVO>>(new Map()) // key: yyyy-MM-dd
-const holidaySet = ref(new Set<string>()) // 节假日日期集合，key: yyyy-MM-dd
-
-/** 获取节假日列表，构建节假日日期集合 */
-const getHolidayList = async () => {
-  holidaySet.value.clear()
-  const list = await CalHolidayApi.getHolidayList()
-  if (!list) {
-    return
-  }
-  list.forEach((item: CalHolidayVO) => {
-    const day = item.day ? formatDate(item.day as any, 'YYYY-MM-DD') : ''
-    if (day && item.type === HolidayType.HOLIDAY) {
-      holidaySet.value.add(day)
-    }
-  })
-}
 
 /** 查询当前月份的排班日历，按选中分类过滤 */
-const fetchCalendar = async () => {
+const doFetch = () => {
   if (!selectedType.value) return
-  loading.value = true
-  try {
-    // 计算当前月份的起止时间
-    const date = currentDate.value
-    const year = date.getFullYear()
-    const month = date.getMonth()
-    const startDay = new Date(year, month, 1)
-    const endDay = new Date(year, month + 1, 0, 23, 59, 59)
-    const list = await CalCalendarApi.getCalendarList({
-      queryType: 'TYPE',
-      calendarType: selectedType.value,
-      startDay: formatDate(startDay, 'YYYY-MM-DD HH:mm:ss'),
-      endDay: formatDate(endDay, 'YYYY-MM-DD HH:mm:ss')
-    })
-    // 转为 Map 方便按日期快速查找
-    calendarDayMap.value.clear()
-    if (!list) {
-      return
-    }
-    list.forEach((item: CalCalendarDayVO) => {
-      // 后端返回的 day 为时间戳（long），格式化为 yyyy-MM-dd 作为 Map key
-      const day = item.day ? formatDate(item.day as any, 'YYYY-MM-DD') : ''
-      if (day) {
-        calendarDayMap.value.set(day, { ...item, day })
-      }
-    })
-  } finally {
-    loading.value = false
-  }
+  fetchCalendar({ queryType: 'TYPE', calendarType: selectedType.value })
 }
 
 /** 点击左侧分类后切换并刷新日历 */
 const onSelectType = (value: number) => {
   selectedType.value = value
-  fetchCalendar()
+  doFetch()
 }
 
 /** 监听月份切换，重新加载当月排班 */
-watch(currentDate, () => {
+watchMonth(() => {
   if (selectedType.value) {
-    fetchCalendar()
+    doFetch()
   }
 })
 
 /** 初始化：加载节假日，并默认选中第一个分类 */
 onMounted(() => {
-  getHolidayList()
+  loadHolidays()
   const opts = getIntDictOptions(DICT_TYPE.MES_CAL_CALENDAR_TYPE)
   if (opts.length > 0) {
     onSelectType(opts[0].value as number)
