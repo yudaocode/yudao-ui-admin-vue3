@@ -75,6 +75,7 @@
               placeholder="请选择最近点检时间"
               value-format="x"
               class="!w-1/1"
+              disabled
             />
           </el-form-item>
         </el-col>
@@ -86,6 +87,7 @@
               placeholder="请选择最近保养时间"
               value-format="x"
               class="!w-1/1"
+              disabled
             />
           </el-form-item>
         </el-col>
@@ -124,9 +126,11 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { DvMachineryApi, DvMachineryVO } from '@/api/mes/dv/machinery'
 import { DvMachineryTypeApi } from '@/api/mes/dv/machinery/type'
+import { WmBarcodeApi } from '@/api/mes/wm/barcode'
 import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
+import Barcode from '@/views/mes/wm/barcode/components/Barcode.vue'
 import { defaultProps, handleTree } from '@/utils/tree'
-import { MesDvMachineryStatusEnum } from '@/views/mes/utils/constants'
+import { MesDvMachineryStatusEnum, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 import { generateRandomStr } from '@/utils'
 
 defineOptions({ name: 'MachineryForm' })
@@ -161,9 +165,13 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const machineryTypeTree = ref<any[]>([]) // 设备类型树
+const barcodeContent = ref('') // 条码内容
+const barcodeFormat = ref(0) // 条码格式
 
 /** 生成设备编码 */
 const generateCode = () => {
+  // TODO @AI：这里接上编码规则；
+  // TODO @AI：导入接口，增加一个用户手动填写 code；不用后端生成；
   formData.value.code = 'M' + generateRandomStr(12)
 }
 
@@ -181,6 +189,19 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await DvMachineryApi.getMachinery(id)
+      // 加载条码数据
+      try {
+        const barcode = await WmBarcodeApi.getBarcodeByBusiness(
+          BarcodeBizTypeEnum.MACHINERY,
+          id
+        )
+        if (barcode) {
+          barcodeContent.value = barcode.content || ''
+          barcodeFormat.value = barcode.format || 0
+        }
+      } catch {
+        // 条码加载失败不阻塞表单
+      }
     } finally {
       formLoading.value = false
     }
@@ -227,6 +248,8 @@ const resetForm = () => {
     lastMaintenTime: undefined,
     remark: undefined
   }
+  barcodeContent.value = ''
+  barcodeFormat.value = 0
   formRef.value?.resetFields()
 }
 </script>
