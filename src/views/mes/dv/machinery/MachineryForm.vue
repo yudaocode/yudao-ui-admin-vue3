@@ -11,9 +11,15 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="设备编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入设备编码">
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入设备编码"
+              :disabled="formType === 'update'"
+            >
               <template #append>
-                <el-button @click="generateCode"> 生成 </el-button>
+                <el-button @click="generateCode" :disabled="formType === 'update'">
+                  生成
+                </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -31,6 +37,7 @@
       </el-row>
       <el-row>
         <el-col :span="8">
+          <!-- TODO @AI：抽成一个独立的 components 到 type 模块里；然后只允许选择子节点；你看看，有分类实现了这个功能的。 -->
           <el-form-item label="设备类型" prop="machineryTypeId">
             <el-tree-select
               v-model="formData.machineryTypeId"
@@ -67,6 +74,7 @@
             <el-input v-model="formData.spec" placeholder="请输入规格型号" />
           </el-form-item>
         </el-col>
+        <!-- TODO @AI：最近 xx 两个字段，仅详情时展示；然后不需要 placeholder -->
         <el-col :span="8">
           <el-form-item label="最近点检时间" prop="lastCheckTime">
             <el-date-picker
@@ -104,15 +112,15 @@
     <!-- 编辑时显示子资源 Tab -->
     <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="点检记录" name="check">
-        <!-- TODO 等点检模块实现后对接 -->
+        <!-- TODO TODO @AI：等点检模块实现后对接 -->
         <el-empty description="暂无点检记录" />
       </el-tab-pane>
       <el-tab-pane label="保养记录" name="mainten">
-        <!-- TODO 等保养模块实现后对接 -->
+        <!-- TODO TODO @AI： 等保养模块实现后对接 -->
         <el-empty description="暂无保养记录" />
       </el-tab-pane>
       <el-tab-pane label="维修工单" name="repair">
-        <!-- TODO 等维修模块实现后对接 -->
+        <!-- TODO TODO @AI： 等维修模块实现后对接 -->
         <el-empty description="暂无维修工单" />
       </el-tab-pane>
     </el-tabs>
@@ -129,10 +137,7 @@ import { DvMachineryTypeApi } from '@/api/mes/dv/machinery/type'
 
 import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
 import { defaultProps, handleTree } from '@/utils/tree'
-import {
-  MesDvMachineryStatusEnum,
-  MesAutoCodeRuleCode
-} from '@/views/mes/utils/constants'
+import { MesDvMachineryStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 
 defineOptions({ name: 'MachineryForm' })
@@ -168,7 +173,6 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const machineryTypeTree = ref<any[]>([]) // 设备类型树
 
-
 /** 生成设备编码 */
 const generateCode = async () => {
   formData.value.code = await AutoCodeRecordApi.generateAutoCode(
@@ -190,7 +194,6 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await DvMachineryApi.getMachinery(id)
-
     } finally {
       formLoading.value = false
     }
