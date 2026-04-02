@@ -58,6 +58,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { DvMachineryTypeApi, DvMachineryTypeVO } from '@/api/mes/dv/machinery/type'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { CommonStatusEnum } from '@/utils/constants'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 
 defineOptions({ name: 'MachineryTypeForm' })
@@ -151,7 +152,9 @@ const resetForm = () => {
 
 /** 生成设备类型编码 */
 const generateCode = async () => {
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode('DV_MACHINERY_TYPE_CODE')
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.DV_MACHINERY_TYPE_CODE
+  )
 }
 
 /** 获得设备类型树 */
