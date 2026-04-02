@@ -2,11 +2,10 @@
 <template>
   <div class="overflow-hidden">
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：维护单编号、维修单名称、保修日期、维修完成日期、验收日期、维修结果、维修人员、验收人员、单据状态 -->
-      <el-table-column label="工单编码" align="center" prop="code" width="120" />
-      <el-table-column label="工单名称" align="center" prop="name" min-width="120" />
+      <el-table-column label="维护单编号" align="center" prop="code" width="120" />
+      <el-table-column label="维修单名称" align="center" prop="name" min-width="120" />
       <el-table-column
-        label="报修日期"
+        label="保修日期"
         align="center"
         prop="requireDate"
         :formatter="dateFormatter"
@@ -26,14 +25,14 @@
         :formatter="dateFormatter"
         width="180"
       />
-      <el-table-column label="维修人" align="center" prop="acceptedUserNickname" width="100" />
-      <el-table-column label="验收人" align="center" prop="confirmUserNickname" width="100" />
+      <el-table-column label="维修人员" align="center" prop="acceptedUserNickname" width="100" />
+      <el-table-column label="验收人员" align="center" prop="confirmUserNickname" width="100" />
       <el-table-column label="维修结果" align="center" prop="result" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_DV_REPAIR_RESULT" :value="scope.row.result" />
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column label="单据状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_DV_REPAIR_STATUS" :value="scope.row.status" />
         </template>

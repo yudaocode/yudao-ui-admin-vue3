@@ -2,8 +2,28 @@
 <template>
   <div class="overflow-hidden">
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：计划编码、计划名称、开始时间、结束日期、频率、状态 -->
+      <el-table-column label="计划编码" align="center" prop="planCode" width="120" />
       <el-table-column label="计划名称" align="center" prop="planName" min-width="120" />
+      <el-table-column
+        label="开始时间"
+        align="center"
+        prop="planStartDate"
+        :formatter="dateFormatter"
+        width="180"
+      />
+      <el-table-column
+        label="结束日期"
+        align="center"
+        prop="planEndDate"
+        :formatter="dateFormatter"
+        width="180"
+      />
+      <el-table-column label="频率数量" align="center" prop="planCycleCount" width="100" />
+      <el-table-column label="频率类型" align="center" prop="planCycleType" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MES_DV_CYCLE_TYPE" :value="scope.row.planCycleType" />
+        </template>
+      </el-table-column>
       <el-table-column
         label="点检时间"
         align="center"
