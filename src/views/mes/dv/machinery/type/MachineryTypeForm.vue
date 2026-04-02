@@ -19,9 +19,12 @@
           class="w-1/1"
         />
       </el-form-item>
-      <el-form-item label="设备类型编码" prop="code" v-if="formType === 'update'">
-        <!-- TODO @AI：点击后生成，不要这里自动生成； -->
-        <el-input v-model="formData.code" placeholder="系统自动生成" disabled />
+      <el-form-item label="设备类型编码" prop="code">
+        <el-input v-model="formData.code" placeholder="请输入设备类型编码，或点击生成">
+          <template #append>
+            <el-button @click="generateCode">生成</el-button>
+          </template>
+        </el-input>
       </el-form-item>
       <el-form-item label="设备类型名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入类型名称" />
@@ -55,6 +58,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { DvMachineryTypeApi, DvMachineryTypeVO } from '@/api/mes/dv/machinery/type'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { CommonStatusEnum } from '@/utils/constants'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 
 defineOptions({ name: 'MachineryTypeForm' })
 
@@ -75,6 +79,7 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
+  code: [{ required: true, message: '设备类型编码不能为空', trigger: 'blur' }],
   parentId: [{ required: true, message: '上级类型不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '类型名称不能为空', trigger: 'blur' }],
   sort: [{ required: true, message: '显示排序不能为空', trigger: 'blur' }],
@@ -142,6 +147,11 @@ const resetForm = () => {
     remark: undefined
   }
   formRef.value?.resetFields()
+}
+
+/** 生成设备类型编码 */
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode('DV_MACHINERY_TYPE_CODE')
 }
 
 /** 获得设备类型树 */
