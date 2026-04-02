@@ -151,6 +151,7 @@ import CalShiftList from './CalShiftList.vue'
 import CalPlanTeamList from './CalPlanTeamList.vue'
 
 defineOptions({ name: 'CalPlanForm' })
+const emit = defineEmits(['success'])
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -211,10 +212,7 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open })
-
 /** 提交表单 */
-const emit = defineEmits(['success'])
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
@@ -271,4 +269,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

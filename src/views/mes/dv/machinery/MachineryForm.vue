@@ -7,17 +7,14 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
           <el-form-item label="设备编码" prop="code">
-            <el-input
-              v-model="formData.code"
-              placeholder="请输入设备编码"
-              :disabled="formType === 'update'"
-            >
+            <el-input v-model="formData.code" placeholder="请输入设备编码">
               <template #append>
-                <el-button @click="generateCode" :disabled="formType === 'update'">
+                <el-button @click="generateCode" :disabled="formType !== 'create'">
                   生成
                 </el-button>
               </template>
@@ -37,17 +34,8 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <!-- TODO @AI：抽成一个独立的 components 到 type 模块里；然后只允许选择子节点；你看看，有分类实现了这个功能的。 -->
           <el-form-item label="设备类型" prop="machineryTypeId">
-            <el-tree-select
-              v-model="formData.machineryTypeId"
-              :data="machineryTypeTree"
-              :props="defaultProps"
-              check-strictly
-              default-expand-all
-              placeholder="请选择设备类型"
-              class="!w-1/1"
-            />
+            <DvMachineryTypeSelect v-model="formData.machineryTypeId" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -74,25 +62,22 @@
             <el-input v-model="formData.spec" placeholder="请输入规格型号" />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：最近 xx 两个字段，仅详情时展示；然后不需要 placeholder -->
-        <el-col :span="8">
+        <el-col v-if="isDetail" :span="8">
           <el-form-item label="最近点检时间" prop="lastCheckTime">
             <el-date-picker
               v-model="formData.lastCheckTime"
               type="datetime"
-              placeholder="请选择最近点检时间"
               value-format="x"
               class="!w-1/1"
               disabled
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col v-if="isDetail" :span="8">
           <el-form-item label="最近保养时间" prop="lastMaintenTime">
             <el-date-picker
               v-model="formData.lastMaintenTime"
               type="datetime"
-              placeholder="请选择最近保养时间"
               value-format="x"
               class="!w-1/1"
               disabled
@@ -109,23 +94,22 @@
       </el-row>
     </el-form>
 
-    <!-- 编辑时显示子资源 Tab -->
-    <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
-      <el-tab-pane label="点检记录" name="check">
-        <!-- TODO TODO @AI：等点检模块实现后对接 -->
-        <el-empty description="暂无点检记录" />
+    <!-- 编辑/详情时显示子资源 Tab -->
+    <el-tabs v-if="formType !== 'create' && formData.id" v-model="activeTab" class="mt-10px">
+      <el-tab-pane label="点检记录" name="check" lazy>
+        <MachineryCheckRecordList :machinery-id="formData.id" />
       </el-tab-pane>
-      <el-tab-pane label="保养记录" name="mainten">
-        <!-- TODO TODO @AI： 等保养模块实现后对接 -->
-        <el-empty description="暂无保养记录" />
+      <el-tab-pane label="保养记录" name="mainten" lazy>
+        <MachineryMaintenRecordList :machinery-id="formData.id" />
       </el-tab-pane>
-      <el-tab-pane label="维修工单" name="repair">
-        <!-- TODO TODO @AI： 等维修模块实现后对接 -->
-        <el-empty description="暂无维修工单" />
+      <el-tab-pane label="维修记录" name="repair" lazy>
+        <MachineryRepairList :machinery-id="formData.id" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
+        >确 定</el-button
+      >
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -133,10 +117,11 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { DvMachineryApi, DvMachineryVO } from '@/api/mes/dv/machinery'
-import { DvMachineryTypeApi } from '@/api/mes/dv/machinery/type'
-
 import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
-import { defaultProps, handleTree } from '@/utils/tree'
+import DvMachineryTypeSelect from '@/views/mes/dv/machinery/type/components/DvMachineryTypeSelect.vue'
+import MachineryCheckRecordList from './MachineryCheckRecordList.vue'
+import MachineryMaintenRecordList from './MachineryMaintenRecordList.vue'
+import MachineryRepairList from './MachineryRepairList.vue'
 import { MesDvMachineryStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 
@@ -146,9 +131,17 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const isDetail = computed(() => formType.value === 'detail')
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增设备',
+    update: '修改设备',
+    detail: '查看设备'
+  }
+  return titles[formType.value] || formType.value
+})
 const activeTab = ref('check') // 当前激活的资源 Tab
 const formData = ref({
   id: undefined,
@@ -171,7 +164,6 @@ const formRules = reactive({
   status: [{ required: true, message: '设备状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-const machineryTypeTree = ref<any[]>([]) // 设备类型树
 
 /** 生成设备编码 */
 const generateCode = async () => {
@@ -183,13 +175,9 @@ const generateCode = async () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  // 加载设备类型树
-  const typeData = await DvMachineryTypeApi.getMachineryTypeSimpleList()
-  machineryTypeTree.value = handleTree(typeData)
-  // 修改时，设置数据
+  // 修改/详情时，设置数据
   if (id) {
     formLoading.value = true
     try {
@@ -197,6 +185,7 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+    activeTab.value = 'check'
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -242,5 +231,6 @@ const resetForm = () => {
   }
 
   formRef.value?.resetFields()
+  activeTab.value = 'check'
 }
 </script>

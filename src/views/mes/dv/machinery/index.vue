@@ -80,7 +80,6 @@
             >
               <Icon icon="ep:plus" class="mr-5px" /> 新增
             </el-button>
-            <!-- TODO @AI：导入的 mysql 权限标识没插入，你处理下； -->
             <el-button
               type="warning"
               plain
@@ -105,8 +104,13 @@
       <!-- 列表 -->
       <ContentWrap>
         <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-          <!-- TODO @AI：点击【设备编码】查看详情，对标其他界面的交互； -->
-          <el-table-column label="设备编码" align="center" prop="code" width="120" />
+          <el-table-column label="设备编码" align="center" prop="code" width="120">
+            <template #default="scope">
+              <el-link type="primary" @click="openForm('detail', scope.row.id)">
+                {{ scope.row.code }}
+              </el-link>
+            </template>
+          </el-table-column>
           <el-table-column label="设备名称" align="center" prop="name" min-width="150" />
           <el-table-column label="品牌" align="center" prop="brand" width="100" />
           <el-table-column label="规格型号" align="center" prop="spec" width="120" />

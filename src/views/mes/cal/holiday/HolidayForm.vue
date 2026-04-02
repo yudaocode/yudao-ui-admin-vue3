@@ -39,6 +39,7 @@ import { formatDate } from '@/utils/formatTime'
 import { HolidayType } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'HolidayForm' })
+const emit = defineEmits(['success'])
 
 const message = useMessage()
 
@@ -73,10 +74,7 @@ const open = async (day: string) => {
     formLoading.value = false
   }
 }
-defineExpose({ open })
-
 /** 提交表单 */
-const emit = defineEmits(['success'])
 const submitForm = async () => {
   // 校验表单
   if (!formRef) return
@@ -105,4 +103,6 @@ const resetForm = () => {
   dayDisplay.value = ''
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>
