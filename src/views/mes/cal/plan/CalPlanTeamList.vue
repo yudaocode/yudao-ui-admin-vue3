@@ -108,7 +108,7 @@ defineOptions({ name: 'CalPlanTeamList' })
 
 const props = defineProps<{
   planId: number // 排班计划编号
-  readonly?: boolean // 是否只读模式 DONE @AI：参考别的模块，是不是通过 formType，进一步处理？（当前父组件已通过 isDetail 计算属性传入 readonly，满足需求）
+  readonly?: boolean // 是否只读模式 TODO @AI：【听我的】，参考别的模块，基于 formType 做判断；你参考下；
 }>()
 
 const { t } = useI18n() // 国际化

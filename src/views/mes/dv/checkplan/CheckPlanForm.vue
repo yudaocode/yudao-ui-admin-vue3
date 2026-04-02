@@ -1,5 +1,6 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
+    <!-- TODO @AI：disabled 是不是全局 form？别的模块是这么干的。 -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -10,8 +11,9 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="方案编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入方案编码">
-              <template #append>
+            <el-input v-model="formData.code" placeholder="请输入方案编码" :disabled="isDetail">
+              <!-- TODO @AI：对齐别的模块，看看 isDetail 要不要保留生成按钮； -->
+              <template v-if="!isDetail" #append>
                 <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
@@ -19,12 +21,17 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="方案名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入方案名称" />
+            <el-input v-model="formData.name" placeholder="请输入方案名称" :disabled="isDetail" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="方案类型" prop="type">
-            <el-select v-model="formData.type" placeholder="请选择方案类型" class="!w-1/1">
+            <el-select
+              v-model="formData.type"
+              placeholder="请选择方案类型"
+              class="!w-1/1"
+              :disabled="isDetail"
+            >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_SUBJECT_TYPE)"
                 :key="dict.value"
@@ -43,12 +50,18 @@
               :min="1"
               controls-position="right"
               class="!w-1/1"
+              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="周期类型" prop="cycleType">
-            <el-select v-model="formData.cycleType" placeholder="请选择周期类型" class="!w-1/1">
+            <el-select
+              v-model="formData.cycleType"
+              placeholder="请选择周期类型"
+              class="!w-1/1"
+              :disabled="isDetail"
+            >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_CYCLE_TYPE)"
                 :key="dict.value"
@@ -73,6 +86,7 @@
               value-format="x"
               placeholder="请选择开始日期"
               class="!w-1/1"
+              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
@@ -84,6 +98,7 @@
               value-format="x"
               placeholder="请选择结束日期"
               class="!w-1/1"
+              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
@@ -91,23 +106,35 @@
       <el-row>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
-            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
+            <el-input
+              v-model="formData.remark"
+              type="textarea"
+              placeholder="请输入备注"
+              :disabled="isDetail"
+            />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
-    <!-- 编辑时显示子资源 Tab -->
-    <el-tabs v-if="formType === 'update'" v-model="activeTab" class="mt-10px">
+    <!-- 编辑/查看时显示子资源 Tab -->
+    <!-- todo @AI：formtype 的处理；isXXX 这种 compute 计算； -->
+    <el-tabs
+      v-if="formType === 'update' || formType === 'detail'"
+      v-model="activeTab"
+      class="mt-10px"
+    >
       <el-tab-pane label="设备清单" name="machinery">
-        <CheckPlanMachineryList :plan-id="formData.id!" />
+        <CheckPlanMachineryList :plan-id="formData.id!" :readonly="isDetail" />
       </el-tab-pane>
-      <el-tab-pane label="点检保养项目" name="subject">
-        <CheckPlanSubjectList :plan-id="formData.id!" />
+      <el-tab-pane label="保养项目" name="subject">
+        <CheckPlanSubjectList :plan-id="formData.id!" :readonly="isDetail" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
+        >确 定</el-button
+      >
+      <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>
 </template>
@@ -128,7 +155,8 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 查看
+const isDetail = computed(() => formType.value === 'detail') // 是否为查看模式
 const activeTab = ref('machinery') // 当前激活的资源 Tab
 const formData = ref({
   id: undefined,
@@ -153,13 +181,14 @@ const formRef = ref()
 
 /** 生成方案编码 */
 const generateCode = () => {
+  // TODO @AI：接入编码规则。mysql 直接插入下，已经启动。
   formData.value.code = 'CHP' + generateRandomStr(8)
 }
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
+  dialogTitle.value = type === 'detail' ? '查看' : t('action.' + type)
   formType.value = type
   resetForm()
   // 修改时，设置数据

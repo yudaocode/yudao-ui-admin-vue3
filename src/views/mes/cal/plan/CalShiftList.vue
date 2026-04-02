@@ -2,7 +2,14 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-button v-if="!readonly" type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
+    <el-button
+      v-if="!readonly"
+      type="primary"
+      plain
+      size="small"
+      @click="openForm('create')"
+      class="mb-10px"
+    >
       <Icon icon="ep:plus" class="mr-5px" /> 添加班次
     </el-button>
     <!-- 列表 -->
@@ -77,7 +84,7 @@ defineOptions({ name: 'CalShiftList' })
 
 const props = defineProps<{
   planId: number // 排班计划编号
-  readonly?: boolean // 是否只读模式 TODO @AI：参考别的模块，是不是通过 formType，进一步处理？
+  readonly?: boolean // 是否只读模式 TODO @AI：【听我的】，参考别的模块，基于 formType 做判断；你参考下；
 }>()
 
 const { t } = useI18n() // 国际化

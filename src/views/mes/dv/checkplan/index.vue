@@ -118,8 +118,18 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="150">
+      <el-table-column label="操作" align="center" width="200">
         <template #default="scope">
+          <!-- TODO @AI：查看，挪到【方案编码】点击打开；并且不用判断状态； -->
+          <el-button
+            v-if="scope.row.status !== MesDvCheckPlanStatusEnum.PREPARE"
+            link
+            type="primary"
+            @click="openForm('detail', scope.row.id)"
+            v-hasPermi="['mes:dv-check-plan:query']"
+          >
+            查看
+          </el-button>
           <el-button
             v-if="scope.row.status === MesDvCheckPlanStatusEnum.PREPARE"
             link

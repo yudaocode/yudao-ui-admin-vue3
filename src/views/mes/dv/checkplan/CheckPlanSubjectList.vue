@@ -2,7 +2,14 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-button type="primary" plain size="small" @click="openForm('create')" class="mb-10px">
+    <el-button
+      v-if="!readonly"
+      type="primary"
+      plain
+      size="small"
+      @click="openForm('create')"
+      class="mb-10px"
+    >
       <Icon icon="ep:plus" class="mr-5px" /> 添加项目
     </el-button>
     <!-- 列表 -->
@@ -16,7 +23,7 @@
       </el-table-column>
       <el-table-column label="项目内容" align="center" prop="subjectContent" min-width="150" />
       <el-table-column label="标准" align="center" prop="subjectStandard" min-width="120" />
-      <el-table-column label="操作" align="center" width="80">
+      <el-table-column v-if="!readonly" label="操作" align="center" width="80">
         <template #default="scope">
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
@@ -56,6 +63,7 @@ defineOptions({ name: 'CheckPlanSubjectList' })
 
 const props = defineProps<{
   planId: number // 方案编号
+  readonly?: boolean // 是否只读模式 TODO @AI：【听我的】，参考别的模块，基于 formType 做判断；你参考下；
 }>()
 
 const { t } = useI18n() // 国际化
