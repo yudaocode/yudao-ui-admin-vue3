@@ -1,4 +1,4 @@
-<!-- MES 排班计划-班组 列表 -->
+<!-- MES 排班计划-班组 列表（左：班组表格，右：成员预览） -->
 <template>
   <div>
     <!-- 操作栏 -->
@@ -12,20 +12,61 @@
     >
       <Icon icon="ep:plus" class="mr-5px" /> 添加班组
     </el-button>
-    <!-- 列表 -->
-    <!-- TODO @AI：左边：班组； -->
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
-      <el-table-column label="班组编号" align="center" prop="teamId" width="120" />
-      <el-table-column label="班组编码" align="center" prop="teamCode" min-width="120" />
-      <el-table-column label="班组名称" align="center" prop="teamName" min-width="120" />
-      <el-table-column label="备注" align="center" prop="remark" min-width="150" />
-      <el-table-column v-if="!readonly" label="操作" align="center" width="80">
-        <template #default="scope">
-          <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <!-- TODO @AI：右边：成员；（后端接口可以加！！！你加下！！） -->
+    <!-- DONE @AI：左边：班组；右边：成员 -->
+    <el-row :gutter="20">
+      <!-- 左侧：班组列表 -->
+      <el-col :span="14">
+        <el-table
+          v-loading="loading"
+          :data="list"
+          :stripe="true"
+          :show-overflow-tooltip="true"
+          border
+          highlight-current-row
+          @current-change="handleTeamSelect"
+        >
+          <el-table-column label="班组编号" align="center" prop="teamId" width="100" />
+          <el-table-column label="班组编码" align="center" prop="teamCode" min-width="100" />
+          <el-table-column label="班组名称" align="center" prop="teamName" min-width="100" />
+          <el-table-column label="备注" align="center" prop="remark" min-width="120" />
+          <el-table-column v-if="!readonly" label="操作" align="center" width="80">
+            <template #default="scope">
+              <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-col>
+      <!-- DONE @AI：右边：成员；（后端接口已有 /mes/cal/team-member/list-by-team） -->
+      <!-- 右侧：成员预览 -->
+      <el-col :span="10">
+        <el-card shadow="never" class="member-card">
+          <template #header>
+            <div class="member-card-header">
+              <span>{{ selectedTeamName ? `「${selectedTeamName}」班组成员` : '班组成员' }}</span>
+            </div>
+          </template>
+          <div v-if="!selectedTeamId" class="member-empty-tip">
+            <el-empty description="请点击左侧班组查看成员" :image-size="60" />
+          </div>
+          <el-table
+            v-else
+            v-loading="memberLoading"
+            :data="memberList"
+            :stripe="true"
+            :show-overflow-tooltip="true"
+            border
+            size="small"
+          >
+            <el-table-column label="用户昵称" align="center" prop="nickname" min-width="100" />
+            <el-table-column label="手机号" align="center" prop="telephone" min-width="120" />
+            <el-table-column label="备注" align="center" prop="remark" min-width="100" />
+          </el-table>
+          <div v-if="selectedTeamId && !memberLoading && memberList.length === 0" class="member-empty-tip">
+            <el-empty description="暂无成员" :image-size="60" />
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
 
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
@@ -61,6 +102,7 @@
 <script setup lang="ts">
 import { CalPlanTeamApi, CalPlanTeamVO } from '@/api/mes/cal/plan/team'
 import { CalTeamApi, CalTeamVO } from '@/api/mes/cal/team'
+import { CalTeamMemberApi, CalTeamMemberVO } from '@/api/mes/cal/team/member'
 
 defineOptions({ name: 'CalPlanTeamList' })
 
@@ -83,6 +125,30 @@ const getList = async () => {
     list.value = await CalPlanTeamApi.getPlanTeamListByPlan(props.planId)
   } finally {
     loading.value = false
+  }
+}
+
+// ==================== 成员预览 ====================
+const selectedTeamId = ref<number>() // 当前选中的班组编号
+const selectedTeamName = ref('') // 当前选中的班组名称
+const memberLoading = ref(false) // 成员列表的加载中
+const memberList = ref<CalTeamMemberVO[]>([]) // 成员列表的数据
+
+/** 点击班组行，加载成员列表 */
+const handleTeamSelect = async (row: CalPlanTeamVO | null) => {
+  if (!row) {
+    selectedTeamId.value = undefined
+    selectedTeamName.value = ''
+    memberList.value = []
+    return
+  }
+  selectedTeamId.value = row.teamId
+  selectedTeamName.value = row.teamName || ''
+  memberLoading.value = true
+  try {
+    memberList.value = await CalTeamMemberApi.getTeamMemberListByTeam(row.teamId)
+  } finally {
+    memberLoading.value = false
   }
 }
 
@@ -147,6 +213,13 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     await CalPlanTeamApi.deletePlanTeam(id)
     message.success('删除成功')
+    // 如果删除的是当前选中的班组，清空成员预览
+    const deletedItem = list.value.find((item) => item.id === id)
+    if (deletedItem && deletedItem.teamId === selectedTeamId.value) {
+      selectedTeamId.value = undefined
+      selectedTeamName.value = ''
+      memberList.value = []
+    }
     await getList()
   } catch {}
 }
@@ -162,3 +235,23 @@ watch(
   { immediate: true }
 )
 </script>
+
+<style scoped>
+.member-card {
+  height: 100%;
+}
+
+.member-card-header {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.member-empty-tip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+}
+</style>

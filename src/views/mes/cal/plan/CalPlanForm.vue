@@ -98,12 +98,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @AI：去掉状态的展示；没意义； -->
-        <el-col :span="8">
-          <el-form-item label="状态" prop="status">
-            <dict-tag :type="DICT_TYPE.MES_CAL_PLAN_STATUS" :value="formData.status" />
-          </el-form-item>
-        </el-col>
       </el-row>
       <el-row>
         <el-col :span="24">
