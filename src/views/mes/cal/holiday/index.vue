@@ -47,11 +47,16 @@ const message = useMessage()
 const currentDate = ref(new Date())
 const holidaySet = ref(new Set<string>()) // 节假日日期集合
 const formRef = ref()
+const lastFetchedMonth = ref('') // 用于避免同月重复请求
 
-/** 获取假期列表 */
+/** 获取假期列表（按当前日历可见范围过滤） */
 const getList = async () => {
   holidaySet.value.clear()
-  const list = await CalHolidayApi.getHolidayList()
+  // 计算日历组件可见范围：当月 ± 1 月（el-calendar 会显示上月末和下月初）
+  const current = dayjs(currentDate.value)
+  const startDay = current.subtract(1, 'month').startOf('month').format('YYYY-MM-DD 00:00:00')
+  const endDay = current.add(1, 'month').endOf('month').format('YYYY-MM-DD 23:59:59')
+  const list = await CalHolidayApi.getHolidayList({ startDay, endDay })
   if (list) {
     list.forEach((item: CalHolidayVO) => {
       // 后端返回的 day 为时间戳（long），格式化为 yyyy-MM-dd
@@ -61,7 +66,16 @@ const getList = async () => {
       }
     })
   }
+  lastFetchedMonth.value = current.format('YYYY-MM')
 }
+
+/** 监听月份切换，重新加载可见范围内的数据 */
+watch(currentDate, (newDate) => {
+  const newMonth = dayjs(newDate).format('YYYY-MM')
+  if (newMonth !== lastFetchedMonth.value) {
+    getList()
+  }
+})
 
 /** 点击日期 */
 const onClickDay = (data: { type: string; day: string }) => {

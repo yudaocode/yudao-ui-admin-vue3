@@ -11,9 +11,9 @@ export interface CalHolidayVO {
 
 // MES 假期设置 API
 export const CalHolidayApi = {
-  // 查询所有假期设置列表
-  getHolidayList: async () => {
-    return await request.get({ url: `/mes/cal/holiday/list` })
+  // 查询假期设置列表（支持可选日期范围过滤）
+  getHolidayList: async (params?: { startDay?: string; endDay?: string }) => {
+    return await request.get({ url: `/mes/cal/holiday/list`, params })
   },
 
   // 根据日期查询假期设置
