@@ -106,10 +106,13 @@ export const MesDvMaintenStatusEnum = {
   ABNORMAL: 2 // 异常
 }
 
-/** MES 维修工单状态枚举 */
+/** MES 维修工单状态枚举（值对应 MesOrderStatusConstants） */
 export const MesDvRepairStatusEnum = {
-  DRAFT: 10, // 草稿
-  CONFIRMED: 20 // 已确认
+  // TODO @AI：是不是应该对齐 MesOrderStatusConstants
+  PREPARE: 0, // 草稿
+  CONFIRMED: 1, // 维修中
+  APPROVING: 2, // 待验收
+  FINISHED: 4 // 已确认（终态）
 }
 
 /** MES 维修结果枚举（对应字典 mes_dv_repair_result） */

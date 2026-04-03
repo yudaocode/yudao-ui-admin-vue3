@@ -57,12 +57,22 @@ export const DvRepairApi = {
     return await request.download({ url: `/mes/dv/repair/export-excel`, params })
   },
 
-  // 通过维修工单
+  // 提交维修工单（草稿→维修中）
+  submitRepair: async (id: number) => {
+    return await request.put({ url: `/mes/dv/repair/submit?id=` + id })
+  },
+
+  // 完成维修（维修中→待验收）
+  finishRepair: async (id: number) => {
+    return await request.put({ url: `/mes/dv/repair/finish?id=` + id })
+  },
+
+  // 验收通过（待验收→已确认）
   confirmRepair: async (id: number) => {
     return await request.put({ url: `/mes/dv/repair/confirm?id=` + id })
   },
 
-  // 不通过维修工单
+  // 验收不通过（待验收→已确认）
   rejectRepair: async (id: number) => {
     return await request.put({ url: `/mes/dv/repair/reject?id=` + id })
   }
