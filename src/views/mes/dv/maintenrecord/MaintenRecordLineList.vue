@@ -36,7 +36,6 @@
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="formTitle" v-model="formVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
-        <!-- DONE @AI：这里的项目，是不是全称；另外，搞个 subject 的 select 组件，更好的复用呀； -->
         <el-form-item label="项目" prop="subjectId">
           <DvSubjectSelect v-model="formData.subjectId" />
         </el-form-item>

@@ -46,11 +46,14 @@
       </el-row>
     </el-form>
     <template v-if="formData.id">
-      <el-divider content-position="center">保养项目明细</el-divider>
+      <el-divider content-position="center">保养项目</el-divider>
       <MaintenRecordLineList :record-id="formData.id" :disabled="isDetail" />
     </template>
     <template #footer>
-      <el-button v-if="!isDetail" :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
+      <el-button v-if="!isDetail" :disabled="formLoading" type="primary" @click="submitForm">
+        确 定
+      </el-button>
+      <!-- TODO @AI：所有 isDetail ? '关 闭' : '取 消'，这种，都改成 “取 消” -->
       <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>
