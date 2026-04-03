@@ -2,11 +2,9 @@
 <template>
   <div class="overflow-hidden">
     <!-- 操作栏 -->
-    <el-row class="mb-10px" v-if="!disabled">
-      <el-button type="primary" plain @click="openForm('create')">
-        <Icon icon="ep:plus" class="mr-5px" /> 添加明细
-      </el-button>
-    </el-row>
+    <el-button v-if="!disabled" type="primary" plain @click="openForm('create')" class="mb-10px">
+      <Icon icon="ep:plus" class="mr-5px" /> 添加明细
+    </el-button>
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="项目名称" align="center" prop="subjectName" />
@@ -22,7 +20,6 @@
         </template>
       </el-table-column>
     </el-table>
-
     <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
@@ -31,7 +28,7 @@
     />
 
     <!-- 表单弹窗：添加/修改 -->
-    <Dialog :title="formTitle" v-model="formVisible" width="500px">
+    <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
         <el-form-item label="项目" prop="subjectId">
           <el-select
@@ -64,8 +61,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="formVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
+        <el-button @click="submitForm" type="primary" :loading="formLoading">确 定</el-button>
+        <el-button @click="dialogVisible = false">取 消</el-button>
       </template>
     </Dialog>
   </div>
@@ -82,9 +79,10 @@ const props = defineProps<{
   disabled?: boolean
 }>()
 
-const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
+// ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
 const list = ref([]) // 列表的数据
 const total = ref(0) // 列表的总页数
@@ -93,18 +91,6 @@ const queryParams = reactive({
   pageSize: 10,
   repairId: props.repairId
 })
-
-// 表单相关
-const formVisible = ref(false) // 表单弹窗的是否展示
-const formTitle = ref('') // 表单弹窗的标题
-const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formRef = ref() // 表单 Ref
-const formData = ref<any>({}) // 表单数据
-const formRules = reactive({
-  malfunction: [{ required: true, message: '故障描述不能为空', trigger: 'blur' }]
-})
-const subjectOptions = ref<any[]>([]) // 项目选项列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -118,11 +104,41 @@ const getList = async () => {
   }
 }
 
-/** 添加/修改操作 */
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    await message.delConfirm()
+    await DvRepairLineApi.deleteRepairLine(id)
+    message.success(t('common.delSuccess'))
+    await getList()
+  } catch {}
+}
+
+// ==================== 添加/编辑表单 ====================
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const lineFormType = ref('') // 行表单的类型：create / update
+const subjectOptions = ref<any[]>([]) // 项目选项列表
+const formData = ref<any>({}) // 表单数据
+const formRules = reactive({
+  malfunction: [{ required: true, message: '故障描述不能为空', trigger: 'blur' }]
+})
+const formRef = ref() // 表单 Ref
+
+/** 获取项目选项 */
+const getSubjectOptions = async (query: string) => {
+  try {
+    const data = await DvSubjectApi.getSubjectPage({ name: query, pageNo: 1, pageSize: 20 })
+    subjectOptions.value = data.list
+  } catch {}
+}
+
+/** 打开表单弹窗 */
 const openForm = async (type: string, row?: any) => {
-  formVisible.value = true
-  formTitle.value = type === 'create' ? '添加明细' : '编辑明细'
-  formType.value = type
+  dialogVisible.value = true
+  dialogTitle.value = type === 'create' ? '添加明细' : '编辑明细'
+  lineFormType.value = type
   if (type === 'create') {
     formData.value = {
       repairId: props.repairId,
@@ -144,40 +160,21 @@ const openForm = async (type: string, row?: any) => {
 
 /** 提交表单 */
 const submitForm = async () => {
-  const valid = await formRef.value.validate()
-  if (!valid) return
+  await formRef.value.validate()
   formLoading.value = true
   try {
-    if (formType.value === 'create') {
+    if (lineFormType.value === 'create') {
       await DvRepairLineApi.createRepairLine(formData.value)
       message.success(t('common.createSuccess'))
     } else {
       await DvRepairLineApi.updateRepairLine(formData.value)
       message.success(t('common.updateSuccess'))
     }
-    formVisible.value = false
+    dialogVisible.value = false
     await getList()
   } finally {
     formLoading.value = false
   }
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await DvRepairLineApi.deleteRepairLine(id)
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
-/** 获取项目选项 */
-const getSubjectOptions = async (query: string) => {
-  try {
-    const data = await DvSubjectApi.getSubjectPage({ name: query, pageNo: 1, pageSize: 20 })
-    subjectOptions.value = data.list
-  } catch {}
 }
 
 /** 监听工单编号变化 */

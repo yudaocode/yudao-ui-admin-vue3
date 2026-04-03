@@ -50,28 +50,18 @@
           </el-form-item>
         </el-col>
         <el-col :span="8" v-if="showFinishFields">
-          <!-- TODO @AI：默认把 required 加进去；放到 rules 里； -->
-          <!-- TODO @AI：维修完成时，需要允许修改； -->
-          <el-form-item
-            label="维修完成日期"
-            prop="finishDate"
-            :rules="
-              formType === 'confirm'
-                ? [{ required: true, message: '维修完成日期不能为空', trigger: 'change' }]
-                : []
-            "
-          >
-            <!-- TODO @AI：isConfirm 这样； -->
+          <el-form-item label="维修完成日期" prop="finishDate">
             <el-date-picker
               v-model="formData.finishDate"
               type="datetime"
               value-format="x"
               placeholder="选择完成日期"
-              :disabled="formType !== 'confirm'"
+              :disabled="!isConfirm"
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8" v-if="showConfirmFields">
+        <!-- DONE @AI：验收日期由后端自动设置，仅详情时展示 -->
+        <el-col :span="8" v-if="showDetailFields">
           <el-form-item label="验收日期" prop="confirmDate">
             <el-date-picker
               v-model="formData.confirmDate"
@@ -84,9 +74,15 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="8" v-if="showFinishFields">
+        <!-- DONE @AI：维修结果在验收(finish)时可选择，详情(detail)时只读展示 -->
+        <el-col :span="8" v-if="isFinish || showDetailFields">
           <el-form-item label="维修结果" prop="result">
-            <el-select v-model="formData.result" placeholder="请选择维修结果" clearable disabled>
+            <el-select
+              v-model="formData.result"
+              placeholder="请选择维修结果"
+              clearable
+              :disabled="!isFinish"
+            >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_REPAIR_RESULT)"
                 :key="dict.value"
@@ -96,12 +92,12 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8" v-if="showFinishFields">
+        <el-col :span="8" v-if="showConfirmFields">
           <el-form-item label="维修人" prop="acceptedUserId">
             <UserSelect v-model="formData.acceptedUserId" placeholder="请选择维修人" disabled />
           </el-form-item>
         </el-col>
-        <el-col :span="8" v-if="showConfirmFields">
+        <el-col :span="8" v-if="showDetailFields">
           <el-form-item label="验收人" prop="confirmUserId">
             <UserSelect v-model="formData.confirmUserId" placeholder="请选择验收人" disabled />
           </el-form-item>
@@ -130,23 +126,18 @@
         保 存
       </el-button>
       <el-button
-        v-if="formType === 'update'"
+        v-if="isEditable && formData.status === MesDvRepairStatusEnum.PREPARE"
         @click="handleSubmit"
-        type="success"
+        type="warning"
         :disabled="formLoading"
       >
         提 交
       </el-button>
-      <el-button
-        v-if="formType === 'confirm'"
-        @click="handleConfirm"
-        type="primary"
-        :disabled="formLoading"
-      >
+      <el-button v-if="isConfirm" @click="handleConfirm" type="primary" :disabled="formLoading">
         完成维修
       </el-button>
       <el-button
-        v-if="formType === 'finish'"
+        v-if="isFinish"
         @click="handleFinish(MesDvRepairResultEnum.PASS)"
         type="success"
         :disabled="formLoading"
@@ -154,7 +145,7 @@
         验 收 通 过
       </el-button>
       <el-button
-        v-if="formType === 'finish'"
+        v-if="isFinish"
         @click="handleFinish(MesDvRepairResultEnum.FAIL)"
         type="warning"
         :disabled="formLoading"
@@ -187,8 +178,11 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formType = ref<string>('create') // 表单类型：create / update / confirm / finish / detail
 const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isDetail = computed(() => !isEditable.value) // 是否为详情模式（confirm/finish/detail 均只读）
-const isHeaderReadonly = computed(() => !isEditable.value) // 是否只读
+const isConfirm = computed(() => formType.value === 'confirm') // 是否为完成维修模式
+const isFinish = computed(() => formType.value === 'finish') // 是否为验收模式
+// DONE @AI：finish 从 isDetail 移除，因验收时维修结果字段需可编辑
+const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式（仅 detail 全局只读）
+const isHeaderReadonly = computed(() => ['confirm', 'finish', 'detail'].includes(formType.value)) // 是否只读
 const showFinishFields = computed(() => {
   const status = formData.value.status
   if (status == null) {
@@ -203,6 +197,13 @@ const showConfirmFields = computed(() => {
   }
   return status >= MesDvRepairStatusEnum.APPROVING
 }) // 待验收(2)及之后显示
+const showDetailFields = computed(() => {
+  const status = formData.value.status
+  if (status == null) {
+    return false
+  }
+  return status >= MesDvRepairStatusEnum.FINISHED
+}) // 已确认(4)及之后显示
 const dialogTitle = computed(() => {
   const titles: Record<string, string> = {
     create: '新增维修工单',
@@ -231,9 +232,12 @@ const formRules = reactive({
   code: [{ required: true, message: '维修单编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '维修单名称不能为空', trigger: 'blur' }],
   machineryId: [{ required: true, message: '设备不能为空', trigger: 'blur' }],
-  requireDate: [{ required: true, message: '报修日期不能为空', trigger: 'blur' }]
+  requireDate: [{ required: true, message: '报修日期不能为空', trigger: 'blur' }],
+  finishDate: [{ required: true, message: '维修完成日期不能为空', trigger: 'change' }],
+  result: [{ required: true, message: '维修结果不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成维修单编码 */
 const generateCode = async () => {
@@ -254,34 +258,51 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
 
 /** 提交表单（create/update 模式） */
 const submitForm = async () => {
+  // 校验表单
   await formRef.value.validate()
+  // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as any
     if (formType.value === 'create') {
-      await DvRepairApi.createRepair(data)
+      const res = await DvRepairApi.createRepair(data)
       message.success('新增成功')
+      // 创建成功后，更新表单数据和状态为编辑模式
+      formData.value.id = res
+      formData.value.status = MesDvRepairStatusEnum.PREPARE
+      formType.value = 'update'
     } else {
       await DvRepairApi.updateRepair(data)
       message.success('修改成功')
     }
-    dialogVisible.value = false
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false
   }
 }
 
-/** 提交维修工单（草稿→维修中） */
+/** 提交操作：表单修改过则先保存，再提交（草稿→维修中） */
 const handleSubmit = async () => {
+  // 校验表单
+  await formRef.value.validate()
   try {
-    // TODO @AI： /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/dv/maintenrecord/MaintenRecordForm.vue 参考类似的；
-    await message.confirm('确认提交该维修工单？提交后将进入维修中状态')
+    await message.confirm('确认提交该维修工单？【提交后将不能修改】')
     formLoading.value = true
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as any
+      await DvRepairApi.updateRepair(data)
+    }
+    // 2. 提交维修工单
     await DvRepairApi.submitRepair(formData.value.id!)
     message.success('提交成功')
     dialogVisible.value = false

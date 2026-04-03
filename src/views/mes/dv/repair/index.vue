@@ -129,7 +129,7 @@
           <dict-tag :type="DICT_TYPE.MES_DV_REPAIR_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="220" fixed="right">
+      <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
           <!-- 草稿：编辑、删除 -->
           <el-button
@@ -153,7 +153,7 @@
           <!-- 维修中：完成维修 -->
           <el-button
             link
-            type="primary"
+            type="success"
             @click="openForm('confirm', scope.row.id)"
             v-hasPermi="['mes:dv-repair:update']"
             v-if="scope.row.status === MesDvRepairStatusEnum.CONFIRMED"
