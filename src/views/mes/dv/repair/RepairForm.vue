@@ -60,29 +60,16 @@
             />
           </el-form-item>
         </el-col>
-        <!-- DONE @AI：验收日期由后端自动设置，仅详情时展示 -->
-        <el-col :span="8" v-if="showDetailFields">
-          <el-form-item label="验收日期" prop="confirmDate">
-            <el-date-picker
-              v-model="formData.confirmDate"
-              type="datetime"
-              value-format="x"
-              placeholder="选择验收日期"
-              disabled
-            />
+        <el-col :span="8" v-if="showConfirmFields">
+          <el-form-item label="维修人" prop="acceptedUserId">
+            <UserSelect v-model="formData.acceptedUserId" placeholder="请选择维修人" disabled />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
-        <!-- DONE @AI：维修结果在验收(finish)时可选择，详情(detail)时只读展示 -->
-        <el-col :span="8" v-if="isFinish || showDetailFields">
+        <el-col :span="8" v-if="showDetailFields">
           <el-form-item label="维修结果" prop="result">
-            <el-select
-              v-model="formData.result"
-              placeholder="请选择维修结果"
-              clearable
-              :disabled="!isFinish"
-            >
+            <el-select v-model="formData.result" placeholder="请选择维修结果" clearable disabled>
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_REPAIR_RESULT)"
                 :key="dict.value"
@@ -92,9 +79,15 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8" v-if="showConfirmFields">
-          <el-form-item label="维修人" prop="acceptedUserId">
-            <UserSelect v-model="formData.acceptedUserId" placeholder="请选择维修人" disabled />
+        <el-col :span="8" v-if="showDetailFields">
+          <el-form-item label="验收日期" prop="confirmDate">
+            <el-date-picker
+              v-model="formData.confirmDate"
+              type="datetime"
+              value-format="x"
+              placeholder="选择验收日期"
+              disabled
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8" v-if="showDetailFields">
@@ -180,7 +173,6 @@ const formType = ref<string>('create') // 表单类型：create / update / confi
 const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isConfirm = computed(() => formType.value === 'confirm') // 是否为完成维修模式
 const isFinish = computed(() => formType.value === 'finish') // 是否为验收模式
-// DONE @AI：finish 从 isDetail 移除，因验收时维修结果字段需可编辑
 const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式（仅 detail 全局只读）
 const isHeaderReadonly = computed(() => ['confirm', 'finish', 'detail'].includes(formType.value)) // 是否只读
 const showFinishFields = computed(() => {
@@ -233,8 +225,7 @@ const formRules = reactive({
   name: [{ required: true, message: '维修单名称不能为空', trigger: 'blur' }],
   machineryId: [{ required: true, message: '设备不能为空', trigger: 'blur' }],
   requireDate: [{ required: true, message: '报修日期不能为空', trigger: 'blur' }],
-  finishDate: [{ required: true, message: '维修完成日期不能为空', trigger: 'change' }],
-  result: [{ required: true, message: '维修结果不能为空', trigger: 'change' }]
+  finishDate: [{ required: true, message: '维修完成日期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
