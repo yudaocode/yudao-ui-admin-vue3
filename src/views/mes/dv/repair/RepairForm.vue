@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="900px">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
     <el-form
       ref="formRef"
       v-loading="formLoading"
       :model="formData"
       :rules="formRules"
-      label-width="100px"
+      label-width="110px"
       :disabled="isDetail"
     >
       <el-row>
@@ -50,13 +50,24 @@
           </el-form-item>
         </el-col>
         <el-col :span="8" v-if="showFinishFields">
-          <el-form-item label="维修完成日期" prop="finishDate">
+          <!-- TODO @AI：默认把 required 加进去；放到 rules 里； -->
+          <!-- TODO @AI：维修完成时，需要允许修改； -->
+          <el-form-item
+            label="维修完成日期"
+            prop="finishDate"
+            :rules="
+              formType === 'confirm'
+                ? [{ required: true, message: '维修完成日期不能为空', trigger: 'change' }]
+                : []
+            "
+          >
+            <!-- TODO @AI：isConfirm 这样； -->
             <el-date-picker
               v-model="formData.finishDate"
               type="datetime"
               value-format="x"
               placeholder="选择完成日期"
-              disabled
+              :disabled="formType !== 'confirm'"
             />
           </el-form-item>
         </el-col>
@@ -87,20 +98,12 @@
         </el-col>
         <el-col :span="8" v-if="showFinishFields">
           <el-form-item label="维修人" prop="acceptedUserId">
-            <UserSelect
-              v-model="formData.acceptedUserId"
-              placeholder="请选择维修人"
-              disabled
-            />
+            <UserSelect v-model="formData.acceptedUserId" placeholder="请选择维修人" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8" v-if="showConfirmFields">
           <el-form-item label="验收人" prop="confirmUserId">
-            <UserSelect
-              v-model="formData.confirmUserId"
-              placeholder="请选择验收人"
-              disabled
-            />
+            <UserSelect v-model="formData.confirmUserId" placeholder="请选择验收人" disabled />
           </el-form-item>
         </el-col>
       </el-row>
@@ -148,7 +151,7 @@
         type="success"
         :disabled="formLoading"
       >
-        通 过
+        验 收 通 过
       </el-button>
       <el-button
         v-if="formType === 'finish'"
@@ -156,7 +159,7 @@
         type="warning"
         :disabled="formLoading"
       >
-        不通过
+        不 通 过
       </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
@@ -186,23 +189,20 @@ const formType = ref<string>('create') // 表单类型：create / update / confi
 const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isDetail = computed(() => !isEditable.value) // 是否为详情模式（confirm/finish/detail 均只读）
 const isHeaderReadonly = computed(() => !isEditable.value) // 是否只读
-
-// DONE @AI；注释在字段后面，对齐上面的标准
-const showFinishFields = computed(() => { // 维修中(1)及之后显示
+const showFinishFields = computed(() => {
   const status = formData.value.status
   if (status == null) {
     return false
   }
   return status >= MesDvRepairStatusEnum.CONFIRMED
-})
-const showConfirmFields = computed(() => { // 待验收(2)及之后显示
+}) // 维修中(1)及之后显示
+const showConfirmFields = computed(() => {
   const status = formData.value.status
   if (status == null) {
     return false
   }
   return status >= MesDvRepairStatusEnum.APPROVING
-})
-
+}) // 待验收(2)及之后显示
 const dialogTitle = computed(() => {
   const titles: Record<string, string> = {
     create: '新增维修工单',
@@ -229,6 +229,7 @@ const formData = ref({
 })
 const formRules = reactive({
   code: [{ required: true, message: '维修单编码不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '维修单名称不能为空', trigger: 'blur' }],
   machineryId: [{ required: true, message: '设备不能为空', trigger: 'blur' }],
   requireDate: [{ required: true, message: '报修日期不能为空', trigger: 'blur' }]
 })
@@ -236,9 +237,7 @@ const formRef = ref() // 表单 Ref
 
 /** 生成维修单编码 */
 const generateCode = async () => {
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
-    MesAutoCodeRuleCode.DV_REPAIR_CODE
-  )
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.DV_REPAIR_CODE)
 }
 
 /** 打开弹窗 */
@@ -257,7 +256,6 @@ const open = async (type: string, id?: number) => {
   }
 }
 
-// DONE @AI：对齐，是不是应该直接 close 的？
 /** 提交表单（create/update 模式） */
 const submitForm = async () => {
   await formRef.value.validate()
@@ -281,6 +279,7 @@ const submitForm = async () => {
 /** 提交维修工单（草稿→维修中） */
 const handleSubmit = async () => {
   try {
+    // TODO @AI： /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/views/mes/dv/maintenrecord/MaintenRecordForm.vue 参考类似的；
     await message.confirm('确认提交该维修工单？提交后将进入维修中状态')
     formLoading.value = true
     await DvRepairApi.submitRepair(formData.value.id!)
@@ -295,10 +294,14 @@ const handleSubmit = async () => {
 
 /** 确认维修完成（维修中→待验收） */
 const handleConfirm = async () => {
+  await formRef.value.validate()
   try {
     await message.confirm('确认完成维修？完成后将进入待验收状态')
     formLoading.value = true
-    await DvRepairApi.confirmRepair(formData.value.id!)
+    await DvRepairApi.confirmRepair({
+      id: formData.value.id!,
+      finishDate: formData.value.finishDate
+    })
     message.success('操作成功')
     dialogVisible.value = false
     emit('success')

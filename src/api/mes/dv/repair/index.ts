@@ -63,8 +63,8 @@ export const DvRepairApi = {
   },
 
   // 确认维修完成（维修中→待验收）
-  confirmRepair: async (id: number) => {
-    return await request.put({ url: `/mes/dv/repair/confirm?id=` + id })
+  confirmRepair: async (data: any) => {
+    return await request.put({ url: `/mes/dv/repair/confirm`, data })
   },
 
   // 完成验收（待验收→已确认）
