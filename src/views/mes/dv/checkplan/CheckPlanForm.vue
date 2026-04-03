@@ -1,19 +1,18 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="960px">
-    <!-- TODO @AI：disabled 是不是全局 form？别的模块是这么干的。 -->
     <el-form
       ref="formRef"
       :model="formData"
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="8">
           <el-form-item label="方案编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入方案编码" :disabled="isDetail">
-              <!-- TODO @AI：对齐别的模块，看看 isDetail 要不要保留生成按钮； -->
-              <template v-if="!isDetail" #append>
+            <el-input v-model="formData.code" placeholder="请输入方案编码">
+              <template #append>
                 <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
@@ -21,7 +20,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="方案名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入方案名称" :disabled="isDetail" />
+            <el-input v-model="formData.name" placeholder="请输入方案名称" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -30,7 +29,6 @@
               v-model="formData.type"
               placeholder="请选择方案类型"
               class="!w-1/1"
-              :disabled="isDetail"
             >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_SUBJECT_TYPE)"
@@ -50,7 +48,6 @@
               :min="1"
               controls-position="right"
               class="!w-1/1"
-              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
@@ -60,7 +57,6 @@
               v-model="formData.cycleType"
               placeholder="请选择周期类型"
               class="!w-1/1"
-              :disabled="isDetail"
             >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_CYCLE_TYPE)"
@@ -86,7 +82,6 @@
               value-format="x"
               placeholder="请选择开始日期"
               class="!w-1/1"
-              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
@@ -98,7 +93,6 @@
               value-format="x"
               placeholder="请选择结束日期"
               class="!w-1/1"
-              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
@@ -110,24 +104,18 @@
               v-model="formData.remark"
               type="textarea"
               placeholder="请输入备注"
-              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
     <!-- 编辑/查看时显示子资源 Tab -->
-    <!-- todo @AI：formtype 的处理；isXXX 这种 compute 计算； -->
-    <el-tabs
-      v-if="formType === 'update' || formType === 'detail'"
-      v-model="activeTab"
-      class="mt-10px"
-    >
+    <el-tabs v-if="formData.id" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="设备清单" name="machinery">
-        <CheckPlanMachineryList :plan-id="formData.id!" :readonly="isDetail" />
+        <CheckPlanMachineryList :plan-id="formData.id!" :form-type="formType" />
       </el-tab-pane>
       <el-tab-pane label="保养项目" name="subject">
-        <CheckPlanSubjectList :plan-id="formData.id!" :readonly="isDetail" />
+        <CheckPlanSubjectList :plan-id="formData.id!" :form-type="formType" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -142,8 +130,8 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { DvCheckPlanApi, DvCheckPlanVO } from '@/api/mes/dv/checkplan'
-import { generateRandomStr } from '@/utils'
-import { MesDvCheckPlanStatusEnum } from '@/views/mes/utils/constants'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode, MesDvCheckPlanStatusEnum } from '@/views/mes/utils/constants'
 import CheckPlanMachineryList from './CheckPlanMachineryList.vue'
 import CheckPlanSubjectList from './CheckPlanSubjectList.vue'
 
@@ -180,15 +168,16 @@ const formRules = reactive({
 const formRef = ref()
 
 /** 生成方案编码 */
-const generateCode = () => {
-  // TODO @AI：接入编码规则。mysql 直接插入下，已经启动。
-  formData.value.code = 'CHP' + generateRandomStr(8)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.DV_CHECK_PLAN_CODE
+  )
 }
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'detail' ? '查看' : t('action.' + type)
+  dialogTitle.value = type === 'detail' ? '方案详情' : t('action.' + type)
   formType.value = type
   resetForm()
   // 修改时，设置数据

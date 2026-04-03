@@ -3,7 +3,7 @@
   <div>
     <!-- 操作栏 -->
     <el-button
-      v-if="!readonly"
+      v-if="isUpdate"
       type="primary"
       plain
       size="small"
@@ -23,7 +23,7 @@
       </el-table-column>
       <el-table-column label="项目内容" align="center" prop="subjectContent" min-width="150" />
       <el-table-column label="标准" align="center" prop="subjectStandard" min-width="120" />
-      <el-table-column v-if="!readonly" label="操作" align="center" width="80">
+      <el-table-column v-if="isUpdate" label="操作" align="center" width="80">
         <template #default="scope">
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
@@ -63,11 +63,13 @@ defineOptions({ name: 'CheckPlanSubjectList' })
 
 const props = defineProps<{
   planId: number // 方案编号
-  readonly?: boolean // 是否只读模式 TODO @AI：【听我的】，参考别的模块，基于 formType 做判断；你参考下；
+  formType: string // 表单类型
 }>()
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
+const isUpdate = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
 
 const loading = ref(false) // 列表的加载中
 const list = ref<DvCheckPlanSubjectVO[]>([]) // 列表的数据

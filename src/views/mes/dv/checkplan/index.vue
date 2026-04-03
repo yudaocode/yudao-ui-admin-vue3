@@ -79,7 +79,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="方案编码" align="center" prop="code" min-width="120" />
+      <el-table-column label="方案编码" align="center" prop="code" min-width="120">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="方案名称" align="center" prop="name" min-width="150" />
       <el-table-column label="方案类型" align="center" prop="type" min-width="100">
         <template #default="scope">
@@ -120,16 +126,6 @@
       />
       <el-table-column label="操作" align="center" width="200">
         <template #default="scope">
-          <!-- TODO @AI：查看，挪到【方案编码】点击打开；并且不用判断状态； -->
-          <el-button
-            v-if="scope.row.status !== MesDvCheckPlanStatusEnum.PREPARE"
-            link
-            type="primary"
-            @click="openForm('detail', scope.row.id)"
-            v-hasPermi="['mes:dv-check-plan:query']"
-          >
-            查看
-          </el-button>
           <el-button
             v-if="scope.row.status === MesDvCheckPlanStatusEnum.PREPARE"
             link
