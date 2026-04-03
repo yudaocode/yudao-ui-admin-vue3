@@ -131,8 +131,7 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
-          <!-- 草稿：编辑、提交、删除 -->
-          <!-- TODO @AI：MesDvRepairStatusEnum 枚举缺失；在 mes constant 里； -->
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
@@ -141,16 +140,6 @@
             v-if="scope.row.status === MesDvRepairStatusEnum.PREPARE"
           >
             编辑
-          </el-button>
-          <!-- TODO @AI：提交融合到【编辑】弹窗里？ -->
-          <el-button
-            link
-            type="success"
-            @click="handleSubmit(scope.row.id)"
-            v-hasPermi="['mes:dv-repair:update']"
-            v-if="scope.row.status === MesDvRepairStatusEnum.PREPARE"
-          >
-            提交
           </el-button>
           <el-button
             link
@@ -162,35 +151,24 @@
             删除
           </el-button>
           <!-- 维修中：完成维修 -->
-          <!-- TODO @AI：提交融合到【编辑】弹窗里？ -->
           <el-button
             link
             type="primary"
-            @click="handleFinish(scope.row.id)"
+            @click="openForm('confirm', scope.row.id)"
             v-hasPermi="['mes:dv-repair:update']"
             v-if="scope.row.status === MesDvRepairStatusEnum.CONFIRMED"
           >
             完成维修
           </el-button>
-          <!-- 待验收：通过、不通过 -->
-          <!-- TODO @AI：提交融合到【编辑】弹窗里？改成叫“验收”，然后里面是通过、不通过？ -->
+          <!-- 待验收：验收 -->
           <el-button
             link
             type="success"
-            @click="handleConfirm(scope.row.id)"
+            @click="openForm('finish', scope.row.id)"
             v-hasPermi="['mes:dv-repair:update']"
             v-if="scope.row.status === MesDvRepairStatusEnum.APPROVING"
           >
-            验收通过
-          </el-button>
-          <el-button
-            link
-            type="warning"
-            @click="handleReject(scope.row.id)"
-            v-hasPermi="['mes:dv-repair:update']"
-            v-if="scope.row.status === MesDvRepairStatusEnum.APPROVING"
-          >
-            不通过
+            验收
           </el-button>
         </template>
       </el-table-column>
@@ -262,49 +240,9 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改/详情操作 */
+/** 添加/修改/详情/完成维修/验收操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 提交按钮操作 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认提交该维修工单？提交后将进入维修中状态')
-    await DvRepairApi.submitRepair(id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
-}
-
-/** 完成维修按钮操作 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认完成维修？完成后将进入待验收状态')
-    await DvRepairApi.finishRepair(id)
-    message.success('操作成功')
-    await getList()
-  } catch {}
-}
-
-/** 验收通过按钮操作 */
-const handleConfirm = async (id: number) => {
-  try {
-    await message.confirm('确认验收通过该维修工单？')
-    await DvRepairApi.confirmRepair(id)
-    message.success('验收通过')
-    await getList()
-  } catch {}
-}
-
-/** 验收不通过按钮操作 */
-const handleReject = async (id: number) => {
-  try {
-    await message.confirm('确认验收不通过该维修工单？')
-    await DvRepairApi.rejectRepair(id)
-    message.success('操作成功')
-    await getList()
-  } catch {}
 }
 
 /** 删除按钮操作 */

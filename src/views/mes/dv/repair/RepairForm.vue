@@ -73,7 +73,6 @@
         </el-col>
       </el-row>
       <el-row>
-        <!-- 维修结果：维修中及之后显示 -->
         <el-col :span="8" v-if="showFinishFields">
           <el-form-item label="维修结果" prop="result">
             <el-select v-model="formData.result" placeholder="请选择维修结果" clearable disabled>
@@ -86,7 +85,6 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <!-- 维修人：维修中及之后显示（自动设置，只读） -->
         <el-col :span="8" v-if="showFinishFields">
           <el-form-item label="维修人" prop="acceptedUserId">
             <UserSelect
@@ -96,7 +94,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- 验收人：待验收及之后显示（自动设置，只读） -->
         <el-col :span="8" v-if="showConfirmFields">
           <el-form-item label="验收人" prop="confirmUserId">
             <UserSelect
@@ -129,6 +126,38 @@
       <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
         保 存
       </el-button>
+      <el-button
+        v-if="formType === 'update'"
+        @click="handleSubmit"
+        type="success"
+        :disabled="formLoading"
+      >
+        提 交
+      </el-button>
+      <el-button
+        v-if="formType === 'confirm'"
+        @click="handleConfirm"
+        type="primary"
+        :disabled="formLoading"
+      >
+        完成维修
+      </el-button>
+      <el-button
+        v-if="formType === 'finish'"
+        @click="handleFinish(MesDvRepairResultEnum.PASS)"
+        type="success"
+        :disabled="formLoading"
+      >
+        通 过
+      </el-button>
+      <el-button
+        v-if="formType === 'finish'"
+        @click="handleFinish(MesDvRepairResultEnum.FAIL)"
+        type="warning"
+        :disabled="formLoading"
+      >
+        不通过
+      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -141,7 +170,11 @@ import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySe
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import RepairLineList from './RepairLineList.vue'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { MesAutoCodeRuleCode, MesDvRepairStatusEnum } from '@/views/mes/utils/constants'
+import {
+  MesAutoCodeRuleCode,
+  MesDvRepairStatusEnum,
+  MesDvRepairResultEnum
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'RepairForm' })
 const emit = defineEmits(['success'])
@@ -149,20 +182,20 @@ const emit = defineEmits(['success'])
 const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单类型：create / update / detail
+const formType = ref<string>('create') // 表单类型：create / update / confirm / finish / detail
 const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
-const isHeaderReadonly = computed(() => formType.value === 'detail') // 是否只读
+const isDetail = computed(() => !isEditable.value) // 是否为详情模式（confirm/finish/detail 均只读）
+const isHeaderReadonly = computed(() => !isEditable.value) // 是否只读
 
-// 根据状态控制 4 状态字段显隐 TODO @AI；注释在字段后面，对齐上面的标准
-const showFinishFields = computed(() => {
+// DONE @AI；注释在字段后面，对齐上面的标准
+const showFinishFields = computed(() => { // 维修中(1)及之后显示
   const status = formData.value.status
   if (status == null) {
     return false
   }
   return status >= MesDvRepairStatusEnum.CONFIRMED
 })
-const showConfirmFields = computed(() => {
+const showConfirmFields = computed(() => { // 待验收(2)及之后显示
   const status = formData.value.status
   if (status == null) {
     return false
@@ -174,6 +207,8 @@ const dialogTitle = computed(() => {
   const titles: Record<string, string> = {
     create: '新增维修工单',
     update: '编辑维修工单',
+    confirm: '完成维修',
+    finish: '验收',
     detail: '维修工单详情'
   }
   return titles[formType.value] || formType.value
@@ -194,7 +229,8 @@ const formData = ref({
 })
 const formRules = reactive({
   code: [{ required: true, message: '维修单编码不能为空', trigger: 'blur' }],
-  machineryId: [{ required: true, message: '设备不能为空', trigger: 'blur' }]
+  machineryId: [{ required: true, message: '设备不能为空', trigger: 'blur' }],
+  requireDate: [{ required: true, message: '报修日期不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -210,7 +246,7 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
-  // 修改/详情时，加载数据
+  // 修改/完成维修/验收/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -221,6 +257,7 @@ const open = async (type: string, id?: number) => {
   }
 }
 
+// DONE @AI：对齐，是不是应该直接 close 的？
 /** 提交表单（create/update 模式） */
 const submitForm = async () => {
   await formRef.value.validate()
@@ -228,18 +265,60 @@ const submitForm = async () => {
   try {
     const data = formData.value as any
     if (formType.value === 'create') {
-      const res = await DvRepairApi.createRepair(data)
+      await DvRepairApi.createRepair(data)
       message.success('新增成功')
-      // 创建成功后，更新表单数据和状态为编辑模式
-      // TODO @AI：对齐，是不是应该直接 close 的？
-      formData.value.id = res
-      formData.value.status = MesDvRepairStatusEnum.PREPARE
-      formType.value = 'update'
     } else {
       await DvRepairApi.updateRepair(data)
       message.success('修改成功')
     }
+    dialogVisible.value = false
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交维修工单（草稿→维修中） */
+const handleSubmit = async () => {
+  try {
+    await message.confirm('确认提交该维修工单？提交后将进入维修中状态')
+    formLoading.value = true
+    await DvRepairApi.submitRepair(formData.value.id!)
+    message.success('提交成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 确认维修完成（维修中→待验收） */
+const handleConfirm = async () => {
+  try {
+    await message.confirm('确认完成维修？完成后将进入待验收状态')
+    formLoading.value = true
+    await DvRepairApi.confirmRepair(formData.value.id!)
+    message.success('操作成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 完成验收（待验收→已确认） */
+const handleFinish = async (result: number) => {
+  const label = result === MesDvRepairResultEnum.PASS ? '通过' : '不通过'
+  try {
+    await message.confirm(`确认验收${label}该维修工单？`)
+    formLoading.value = true
+    await DvRepairApi.finishRepair(formData.value.id!, result)
+    message.success(`验收${label}`)
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }

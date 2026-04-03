@@ -62,18 +62,13 @@ export const DvRepairApi = {
     return await request.put({ url: `/mes/dv/repair/submit?id=` + id })
   },
 
-  // 完成维修（维修中→待验收）
-  finishRepair: async (id: number) => {
-    return await request.put({ url: `/mes/dv/repair/finish?id=` + id })
-  },
-
-  // 验收通过（待验收→已确认）
+  // 确认维修完成（维修中→待验收）
   confirmRepair: async (id: number) => {
     return await request.put({ url: `/mes/dv/repair/confirm?id=` + id })
   },
 
-  // 验收不通过（待验收→已确认）
-  rejectRepair: async (id: number) => {
-    return await request.put({ url: `/mes/dv/repair/reject?id=` + id })
+  // 完成验收（待验收→已确认）
+  finishRepair: async (id: number, result: number) => {
+    return await request.put({ url: `/mes/dv/repair/finish?id=` + id + `&result=` + result })
   }
 }
