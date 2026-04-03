@@ -50,11 +50,18 @@
       <MaintenRecordLineList :record-id="formData.id" :disabled="isDetail" />
     </template>
     <template #footer>
-      <el-button v-if="!isDetail" :disabled="formLoading" type="primary" @click="submitForm">
-        确 定
+      <el-button v-if="isEditable" :disabled="formLoading" type="primary" @click="submitForm">
+        保 存
       </el-button>
-      <!-- TODO @AI：所有 isDetail ? '关 闭' : '取 消'，这种，都改成 “取 消” -->
-      <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesDvMaintenRecordStatusEnum.PREPARE"
+        :disabled="formLoading"
+        type="warning"
+        @click="handleSubmit"
+      >
+        提 交
+      </el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -66,24 +73,35 @@ import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSe
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import MaintenRecordLineList from './MaintenRecordLineList.vue'
 import { useUserStore } from '@/store/modules/user'
+import { MesDvMaintenRecordStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MaintenRecordForm' })
+const emit = defineEmits(['success'])
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 const userStore = useUserStore()
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const formLoading = ref(false) // 表单的加载中
+const formType = ref<string>('create') // 表单的类型：create / update / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
 const isDetail = computed(() => formType.value === 'detail') // 是否为详情模式
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增保养记录',
+    update: '编辑保养记录',
+    detail: '保养记录详情'
+  }
+  return titles[formType.value] || formType.value
+})
 const formData = ref({
-  id: undefined,
+  id: undefined as number | undefined,
   planId: undefined,
   machineryId: undefined,
   maintenTime: undefined,
   userId: undefined,
+  status: undefined as number | undefined,
   remark: ''
 })
 const formRules = reactive({
@@ -91,11 +109,11 @@ const formRules = reactive({
   maintenTime: [{ required: true, message: '保养时间不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'detail' ? '保养记录详情' : t('action.' + type)
   formType.value = type
   resetForm()
   // 修改/详情时，设置数据
@@ -111,30 +129,56 @@ const open = async (type: string, id?: number) => {
   if (type === 'create') {
     formData.value.userId = userStore.getUser.id
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 提交表单 */
-const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+/** 提交表单（create/update 模式） */
 const submitForm = async () => {
   // 校验表单
-  if (!formRef) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
+  await formRef.value.validate()
   // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as any
     if (formType.value === 'create') {
-      await DvMaintenRecordApi.createMaintenRecord(data)
+      const res = await DvMaintenRecordApi.createMaintenRecord(data)
       message.success(t('common.createSuccess'))
+      // 创建成功后，更新表单数据和状态为编辑模式
+      formData.value.id = res
+      formData.value.status = MesDvMaintenRecordStatusEnum.PREPARE
+      formType.value = 'update'
     } else {
       await DvMaintenRecordApi.updateMaintenRecord(data)
       message.success(t('common.updateSuccess'))
     }
-    dialogVisible.value = false
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
     // 发送操作成功的事件
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  // 校验表单
+  await formRef.value.validate()
+  try {
+    await message.confirm('确认提交该保养记录？【提交后将不能修改】')
+    formLoading.value = true
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as any
+      await DvMaintenRecordApi.updateMaintenRecord(data)
+    }
+    // 2. 提交保养记录
+    await DvMaintenRecordApi.submitMaintenRecord(formData.value.id!)
+    message.success('提交成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -148,8 +192,11 @@ const resetForm = () => {
     machineryId: undefined,
     maintenTime: undefined,
     userId: undefined,
+    status: undefined,
     remark: ''
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

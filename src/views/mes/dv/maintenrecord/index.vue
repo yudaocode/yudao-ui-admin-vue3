@@ -55,8 +55,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO @AI：增加一个【查看】操作，设备编码； -->
-      <el-table-column label="设备编码" align="center" prop="machineryCode" />
+      <el-table-column label="设备编码" align="center" prop="machineryCode" min-width="160">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.machineryCode }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="设备名称" align="center" prop="machineryName" />
       <el-table-column label="品牌" align="center" prop="machineryBrand" />
       <el-table-column label="规格型号" align="center" prop="machinerySpec" />
@@ -74,36 +79,24 @@
           <dict-tag :type="DICT_TYPE.MES_MAINTEN_RECORD_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="160" fixed="right">
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
-            查看
-          </el-button>
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-if="scope.row.status === MesDvMaintenRecordStatusEnum.PREPARE"
             v-hasPermi="['mes:dv-mainten-record:update']"
+            v-if="scope.row.status === MesDvMaintenRecordStatusEnum.PREPARE"
           >
             编辑
-          </el-button>
-          <!-- TODO @AI：提交融合到【编辑】弹窗里； -->
-          <el-button
-            link
-            type="success"
-            @click="handleSubmit(scope.row)"
-            v-if="scope.row.status === MesDvMaintenRecordStatusEnum.PREPARE"
-            v-hasPermi="['mes:dv-mainten-record:update']"
-          >
-            提交
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-if="scope.row.status === MesDvMaintenRecordStatusEnum.PREPARE"
             v-hasPermi="['mes:dv-mainten-record:delete']"
+            v-if="scope.row.status === MesDvMaintenRecordStatusEnum.PREPARE"
           >
             删除
           </el-button>
@@ -125,13 +118,13 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
+import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { DvMaintenRecordApi } from '@/api/mes/dv/maintenrecord'
-import MaintenRecordForm from './MaintenRecordForm.vue'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
-import { DICT_TYPE } from '@/utils/dict'
+import MaintenRecordForm from './MaintenRecordForm.vue'
 import { MesDvMaintenRecordStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesDvMaintenRecord' })
@@ -142,6 +135,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const list = ref([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -151,7 +145,7 @@ const queryParams = reactive({
   maintenTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -178,19 +172,8 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 提交按钮操作 */
-const handleSubmit = async (row: any) => {
-  try {
-    await message.confirm('确认提交该保养记录吗？')
-    await DvMaintenRecordApi.submitMaintenRecord(row.id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
 }
 
 /** 删除按钮操作 */
@@ -216,7 +199,7 @@ const handleExport = async () => {
   }
 }
 
-/** 初始化 **/
+/** 初始化 */
 onMounted(() => {
   getList()
 })
