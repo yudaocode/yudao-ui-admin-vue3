@@ -81,10 +81,16 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="维修单编号" align="center" prop="code" />
-      <el-table-column label="维修单名称" align="center" prop="name" />
-      <el-table-column label="设备编码" align="center" prop="machineryCode" />
-      <el-table-column label="设备名称" align="center" prop="machineryName" />
+      <el-table-column label="维修单编号" align="center" prop="code" min-width="160">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="维修单名称" align="center" prop="name" min-width="150" />
+      <el-table-column label="设备编码" align="center" prop="machineryCode" min-width="120" />
+      <el-table-column label="设备名称" align="center" prop="machineryName" min-width="120" />
       <el-table-column
         label="报修日期"
         align="center"
@@ -106,49 +112,45 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="维修结果" align="center" prop="result">
+      <el-table-column label="维修结果" align="center" prop="result" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_DV_REPAIR_RESULT" :value="scope.row.result" />
         </template>
       </el-table-column>
-      <el-table-column label="维修人员" align="center" prop="acceptedUserNickname" />
-      <el-table-column label="验收人员" align="center" prop="confirmUserNickname" />
-      <el-table-column label="单据状态" align="center" prop="status" width="100">
+      <el-table-column label="维修人员" align="center" prop="acceptedUserNickname" min-width="100" />
+      <el-table-column label="验收人员" align="center" prop="confirmUserNickname" min-width="100" />
+      <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_DV_REPAIR_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column
-        label="操作"
-        align="center"
-        class-name="small-padding fixed-width"
-        width="220"
-      >
+      <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
+          <!-- 草稿：编辑、通过、不通过、删除 -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
             v-hasPermi="['mes:dv-repair:update']"
+            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
           >
             编辑
           </el-button>
           <el-button
             link
             type="success"
-            @click="handleConfirm(scope.row.id)"
-            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
+            @click="openForm('confirm', scope.row.id)"
             v-hasPermi="['mes:dv-repair:update']"
+            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
           >
             通过
           </el-button>
           <el-button
             link
             type="warning"
-            @click="handleReject(scope.row.id)"
-            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
+            @click="openForm('reject', scope.row.id)"
             v-hasPermi="['mes:dv-repair:update']"
+            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
           >
             不通过
           </el-button>
@@ -156,8 +158,8 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
             v-hasPermi="['mes:dv-repair:delete']"
+            v-if="scope.row.status === MesDvRepairStatusEnum.DRAFT"
           >
             删除
           </el-button>
@@ -179,11 +181,11 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { DvRepairApi } from '@/api/mes/dv/repair'
-import RepairForm from './RepairForm.vue'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import RepairForm from './RepairForm.vue'
 import { MesDvRepairStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesDvRepair' })
@@ -194,6 +196,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const list = ref([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -204,7 +207,7 @@ const queryParams = reactive({
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -230,30 +233,9 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
+/** 添加/修改/通过/不通过/详情操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 通过按钮操作 */
-const handleConfirm = async (id: number) => {
-  try {
-    await message.confirm('确认通过该维修工单吗？')
-    await DvRepairApi.confirmRepair(id)
-    message.success('操作成功')
-    await getList()
-  } catch {}
-}
-
-/** 不通过按钮操作 */
-const handleReject = async (id: number) => {
-  try {
-    await message.confirm('确认不通过该维修工单吗？')
-    await DvRepairApi.rejectRepair(id)
-    message.success('操作成功')
-    await getList()
-  } catch {}
 }
 
 /** 删除按钮操作 */
@@ -279,7 +261,7 @@ const handleExport = async () => {
   }
 }
 
-/** 初始化 **/
+/** 初始化 */
 onMounted(() => {
   getList()
 })
