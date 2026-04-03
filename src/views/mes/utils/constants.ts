@@ -449,7 +449,8 @@ export const MesAutoCodeRuleCode = {
   CAL_PLAN_CODE: 'CAL_PLAN_CODE', // 排班计划编码
   DV_MACHINERY_CODE: 'DV_MACHINERY_CODE', // 设备编码
   DV_MACHINERY_TYPE_CODE: 'DV_MACHINERY_TYPE_CODE', // 设备类型编码
-  DV_CHECK_PLAN_CODE: 'DV_CHECK_PLAN_CODE' // 点检保养方案编码
+  DV_CHECK_PLAN_CODE: 'DV_CHECK_PLAN_CODE', // 点检保养方案编码
+  DV_SUBJECT_CODE: 'DV_SUBJECT_CODE' // 点检保养项目编码
 } as const
 
 /** 获取物料/产品标识的标签 */

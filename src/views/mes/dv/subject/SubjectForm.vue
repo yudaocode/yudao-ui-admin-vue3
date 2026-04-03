@@ -72,7 +72,8 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { DvSubjectApi, DvSubjectVO } from '@/api/mes/dv/subject'
 import { CommonStatusEnum } from '@/utils/constants'
-import { generateRandomStr } from '@/utils'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 
 defineOptions({ name: 'SubjectForm' })
 
@@ -102,8 +103,10 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 生成项目编码 */
-const generateCode = () => {
-  formData.value.code = 'SUBJECT' + generateRandomStr(8)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.DV_SUBJECT_CODE
+  )
 }
 
 /** 打开弹窗 */
