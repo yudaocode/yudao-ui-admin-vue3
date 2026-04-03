@@ -55,6 +55,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <!-- TODO @AI：增加一个【查看】操作，设备编码； -->
       <el-table-column label="设备编码" align="center" prop="machineryCode" />
       <el-table-column label="设备名称" align="center" prop="machineryName" />
       <el-table-column label="品牌" align="center" prop="machineryBrand" />
@@ -67,18 +68,22 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="保养人" align="center" prop="nickname" />
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="保养人" align="center" prop="nickname" width="120px" />
+      <el-table-column label="状态" align="center" prop="status" width="100px">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_MAINTEN_RECORD_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            查看
+          </el-button>
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
+            v-if="scope.row.status === MesDvMaintenRecordStatusEnum.PREPARE"
             v-hasPermi="['mes:dv-mainten-record:update']"
           >
             编辑
