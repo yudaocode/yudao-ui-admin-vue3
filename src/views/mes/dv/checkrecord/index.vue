@@ -65,11 +65,18 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="设备编码" align="center" prop="machineryCode" />
-      <el-table-column label="设备名称" align="center" prop="machineryName" />
+      <el-table-column label="设备编码" align="center" prop="machineryCode" min-width="140">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.machineryCode }}
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="设备名称" align="center" prop="machineryName" min-width="120" />
       <el-table-column label="品牌" align="center" prop="machineryBrand" />
-      <el-table-column label="规格型号" align="center" prop="machinerySpec" />
-      <el-table-column label="计划名称" align="center" prop="planName" />
+      <el-table-column label="规格型号" align="center" prop="machinerySpec" min-width="120" />
+      <el-table-column label="计划编码" align="center" prop="planCode" min-width="120" />
+      <el-table-column label="计划名称" align="center" prop="planName" min-width="120" />
       <el-table-column
         label="点检时间"
         align="center"
@@ -83,32 +90,24 @@
           <dict-tag :type="DICT_TYPE.MES_DV_CHECK_RECORD_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
+          <!-- 草稿：编辑、删除 -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-if="scope.row.status === MesDvCheckRecordStatusEnum.DRAFT"
             v-hasPermi="['mes:dv-check-record:update']"
+            v-if="scope.row.status === MesDvCheckRecordStatusEnum.DRAFT"
           >
             编辑
           </el-button>
           <el-button
             link
-            type="success"
-            @click="handleSubmit(scope.row)"
-            v-if="scope.row.status === MesDvCheckRecordStatusEnum.DRAFT"
-            v-hasPermi="['mes:dv-check-record:update']"
-          >
-            提交
-          </el-button>
-          <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-if="scope.row.status === MesDvCheckRecordStatusEnum.DRAFT"
             v-hasPermi="['mes:dv-check-record:delete']"
+            v-if="scope.row.status === MesDvCheckRecordStatusEnum.DRAFT"
           >
             删除
           </el-button>
@@ -130,8 +129,8 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import download from '@/utils/download'
 import { DvCheckRecordApi } from '@/api/mes/dv/checkrecord'
 import CheckRecordForm from './CheckRecordForm.vue'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
@@ -147,6 +146,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const list = ref([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -157,7 +157,7 @@ const queryParams = reactive({
   checkTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -184,19 +184,8 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 提交按钮操作 */
-const handleSubmit = async (row: any) => {
-  try {
-    await message.confirm('确认提交该点检记录吗？')
-    await DvCheckRecordApi.submitCheckRecord(row.id)
-    message.success('提交成功')
-    await getList()
-  } catch {}
 }
 
 /** 删除按钮操作 */
@@ -222,7 +211,7 @@ const handleExport = async () => {
   }
 }
 
-/** 初始化 **/
+/** 初始化 */
 onMounted(() => {
   getList()
 })
