@@ -9,14 +9,14 @@
       v-loading="formLoading"
     >
       <el-form-item label="检测项编码" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入检测项编码">
+        <el-input v-model="formData.code" placeholder="请输入检测项编码" :maxlength="64">
           <template #append>
             <el-button @click="generateCode"> 生成 </el-button>
           </template>
         </el-input>
       </el-form-item>
       <el-form-item label="检测项名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入检测项名称" />
+        <el-input v-model="formData.name" placeholder="请输入检测项名称" :maxlength="100" />
       </el-form-item>
       <el-form-item label="检测项类型" prop="type">
         <el-select v-model="formData.type" placeholder="请选择检测项类型" clearable class="!w-1/1">
@@ -29,7 +29,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="检测工具" prop="tool">
-        <el-input v-model="formData.tool" placeholder="请输入检测工具" />
+        <el-input v-model="formData.tool" placeholder="请输入检测工具" :maxlength="100" />
       </el-form-item>
       <el-form-item label="结果值类型" prop="resultType">
         <el-select
@@ -64,13 +64,27 @@
         label="字典类型"
         prop="resultSpecification"
       >
-        <el-input
+        <el-select
           v-model="formData.resultSpecification"
-          placeholder="请输入字典类型名（如 sys_yes_no）"
-        />
+          placeholder="请选择字典类型"
+          filterable
+          class="!w-1/1"
+        >
+          <el-option
+            v-for="dictType in dictTypeList"
+            :key="dictType.type"
+            :label="dictType.name"
+            :value="dictType.type"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
+        <el-input
+          type="textarea"
+          v-model="formData.remark"
+          placeholder="请输入备注"
+          :maxlength="250"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -82,17 +96,19 @@
 <script setup lang="ts">
 import { getStrDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { QcIndicatorApi, QcIndicatorVO } from '@/api/mes/qc/indicator'
-import { generateRandomStr } from '@/utils'
-import { MesQcResultValueType } from '@/views/mes/utils/constants'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { getSimpleDictTypeList, DictTypeVO } from '@/api/system/dict/dict.type'
+import { MesAutoCodeRuleCode, MesQcResultValueType } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IndicatorForm' })
+const emit = defineEmits(['success'])
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
@@ -105,17 +121,27 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
-  code: [{ required: true, message: '检测项编码不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '检测项名称不能为空', trigger: 'blur' }],
+  code: [
+    { required: true, message: '检测项编码不能为空', trigger: 'blur' },
+    { max: 64, message: '检测项编码长度不能超过 64 个字符', trigger: 'blur' }
+  ],
+  name: [
+    { required: true, message: '检测项名称不能为空', trigger: 'blur' },
+    { max: 100, message: '检测项名称长度不能超过 100 个字符', trigger: 'blur' }
+  ],
   type: [{ required: true, message: '检测项类型不能为空', trigger: 'change' }],
-  resultType: [{ required: true, message: '结果值类型不能为空', trigger: 'change' }]
+  resultType: [{ required: true, message: '结果值类型不能为空', trigger: 'change' }],
+  resultSpecification: [{ required: true, message: '结果值属性不能为空', trigger: 'change' }],
+  remark: [{ max: 250, message: '备注长度不能超过 250 个字符', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const dictTypeList = ref<DictTypeVO[]>([]) // 系统字典类型列表
 
 /** 生成检测项编码 */
-const generateCode = () => {
-  // TODO @芋艿：后续对接后端编码生成接口
-  formData.value.code = 'QI' + generateRandomStr(12)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.QC_INDICATOR_CODE
+  )
 }
 
 /** 结果值类型变更时清空结果值属性 */
@@ -129,6 +155,10 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
+  // 加载字典类型列表（供 DICT 类型选择使用）
+  if (dictTypeList.value.length === 0) {
+    dictTypeList.value = await getSimpleDictTypeList()
+  }
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -139,10 +169,8 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
@@ -179,4 +207,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>
