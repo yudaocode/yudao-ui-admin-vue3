@@ -2,7 +2,7 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-row class="mb-10px">
+    <el-row v-if="isEditable" class="mb-10px">
       <el-button type="primary" plain @click="openForm('create')">
         <Icon icon="ep:plus" class="mr-5px" /> 关联产品
       </el-button>
@@ -23,7 +23,7 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
-      <el-table-column label="操作" align="center" width="130" fixed="right">
+      <el-table-column v-if="isEditable" label="操作" align="center" width="130" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
@@ -69,7 +69,7 @@
         </el-form-item>
       </el-form>
       <!-- 编辑时展示产品 BOM 配置 -->
-      <template v-if="formType === 'update' && formData.id">
+      <template v-if="formType2 === 'update' && formData.id">
         <el-divider content-position="left">产品 BOM 配置</el-divider>
         <RouteProductBomList
           :routeId="routeId"
@@ -78,8 +78,8 @@
         />
       </template>
       <template #footer>
+        <el-button type="primary" @click="submitForm" :disabled="formLoading">确 定</el-button>
         <el-button @click="formVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
       </template>
     </Dialog>
   </div>
@@ -95,24 +95,17 @@ defineOptions({ name: 'RouteProductList' })
 
 const props = defineProps<{
   routeId: number
+  formType: string
 }>()
 
-const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
+const isEditable = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
+
+// ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
 const list = ref<ProRouteProductVO[]>([]) // 列表的数据
-
-// 表单相关
-const formVisible = ref(false) // 表单弹窗的是否展示
-const formTitle = ref('') // 表单弹窗的标题
-const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formRef = ref() // 表单 Ref
-const formData = ref<any>({}) // 表单数据
-const formRules = reactive({
-  itemId: [{ required: true, message: '产品不能为空', trigger: 'change' }]
-})
 
 /** 查询列表 */
 const getList = async () => {
@@ -124,11 +117,22 @@ const getList = async () => {
   }
 }
 
+// ==================== 添加/编辑表单 ====================
+const formVisible = ref(false) // 表单弹窗的是否展示
+const formTitle = ref('') // 表单弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType2 = ref('') // 表单的类型：create - 新增；update - 修改
+const formData = ref<any>({}) // 表单数据
+const formRules = reactive({
+  itemId: [{ required: true, message: '产品不能为空', trigger: 'change' }]
+})
+const formRef = ref() // 表单 Ref
+
 /** 添加/修改操作 */
 const openForm = (type: string, row?: ProRouteProductVO) => {
   formVisible.value = true
   formTitle.value = type === 'create' ? '关联产品' : '编辑产品'
-  formType.value = type
+  formType2.value = type
   if (type === 'create') {
     formData.value = {
       routeId: props.routeId,
@@ -148,7 +152,7 @@ const submitForm = async () => {
   if (!valid) return
   formLoading.value = true
   try {
-    if (formType.value === 'create') {
+    if (formType2.value === 'create') {
       await ProRouteProductApi.createRouteProduct(formData.value)
       message.success(t('common.createSuccess'))
     } else {

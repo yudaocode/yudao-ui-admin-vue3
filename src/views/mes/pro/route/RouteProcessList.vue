@@ -2,7 +2,7 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-row class="mb-10px">
+    <el-row v-if="isEditable" class="mb-10px">
       <el-button type="primary" plain @click="openForm('create')">
         <Icon icon="ep:plus" class="mr-5px" /> 添加工序
       </el-button>
@@ -68,7 +68,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="130" fixed="right">
+      <el-table-column v-if="isEditable" label="操作" align="center" width="130" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
@@ -151,8 +151,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
+        <el-button type="primary" @click="submitForm" :disabled="formLoading">确 定</el-button>
         <el-button @click="formVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
       </template>
     </Dialog>
   </div>
@@ -167,27 +167,18 @@ defineOptions({ name: 'RouteProcessList' })
 
 const props = defineProps<{
   routeId: number
+  formType: string
 }>()
 
-const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
+const isEditable = computed(() => ['create', 'update'].includes(props.formType)) // 是否为编辑模式
+
+// ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
 const list = ref<ProRouteProcessVO[]>([]) // 列表的数据
 const processList = ref<any[]>([]) // 工序下拉列表
-
-// 表单相关
-const formVisible = ref(false) // 表单弹窗的是否展示
-const formTitle = ref('') // 表单弹窗的标题
-const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formRef = ref() // 表单 Ref
-const formData = ref<any>({}) // 表单数据
-const formRules = reactive({
-  sort: [{ required: true, message: '序号不能为空', trigger: 'blur' }],
-  processId: [{ required: true, message: '工序不能为空', trigger: 'change' }],
-  linkType: [{ required: true, message: '工序关系不能为空', trigger: 'change' }]
-})
 
 /** 查询列表 */
 const getList = async () => {
@@ -199,6 +190,19 @@ const getList = async () => {
   }
 }
 
+// ==================== 添加/编辑表单 ====================
+const formVisible = ref(false) // 表单弹窗的是否展示
+const formTitle = ref('') // 表单弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType2 = ref('') // 表单的类型：create - 新增；update - 修改
+const formData = ref<any>({}) // 表单数据
+const formRules = reactive({
+  sort: [{ required: true, message: '序号不能为空', trigger: 'blur' }],
+  processId: [{ required: true, message: '工序不能为空', trigger: 'change' }],
+  linkType: [{ required: true, message: '工序关系不能为空', trigger: 'change' }]
+})
+const formRef = ref() // 表单 Ref
+
 /** 加载工序列表 */
 const loadProcessList = async () => {
   processList.value = await ProProcessApi.getProcessSimpleList()
@@ -208,7 +212,7 @@ const loadProcessList = async () => {
 const openForm = (type: string, row?: ProRouteProcessVO) => {
   formVisible.value = true
   formTitle.value = type === 'create' ? '添加工序' : '编辑工序'
-  formType.value = type
+  formType2.value = type
   if (type === 'create') {
     const maxSort = list.value.reduce((max, item) => Math.max(max, item.sort || 0), 0)
     formData.value = {
@@ -233,7 +237,7 @@ const submitForm = async () => {
   if (!valid) return
   formLoading.value = true
   try {
-    if (formType.value === 'create') {
+    if (formType2.value === 'create') {
       await ProRouteProcessApi.createRouteProcess(formData.value)
       message.success(t('common.createSuccess'))
     } else {

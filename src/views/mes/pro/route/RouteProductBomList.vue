@@ -50,8 +50,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
+        <el-button type="primary" @click="submitForm" :disabled="formLoading">确 定</el-button>
         <el-button @click="formVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
       </template>
     </Dialog>
   </div>
@@ -70,25 +70,14 @@ const props = defineProps<{
   productName?: string
 }>()
 
-const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
+// ==================== 列表 ====================
 const loading = ref(false) // 列表的加载中
 const bomList = ref<ProRouteProductBomVO[]>([]) // BOM 列表的数据
 const processList = ref<any[]>([]) // 工序列表（用于 Tab）
 const activeProcessId = ref('') // 当前选中的工序 Tab
-
-// 表单相关
-const formVisible = ref(false) // 表单弹窗的是否展示
-const formTitle = ref('') // 表单弹窗的标题
-const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formRef = ref() // 表单 Ref
-const formData = ref<any>({}) // 表单数据
-const formRules = reactive({
-  itemId: [{ required: true, message: 'BOM 物料不能为空', trigger: 'change' }],
-  quantity: [{ required: true, message: '用料比例不能为空', trigger: 'blur' }]
-})
 
 /** 查询工序列表 */
 const loadProcessList = async () => {
@@ -119,6 +108,18 @@ const getBomList = async () => {
 const handleTabChange = () => {
   getBomList()
 }
+
+// ==================== 添加/编辑表单 ====================
+const formVisible = ref(false) // 表单弹窗的是否展示
+const formTitle = ref('') // 表单弹窗的标题
+const formLoading = ref(false) // 表单的加载中
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formData = ref<any>({}) // 表单数据
+const formRules = reactive({
+  itemId: [{ required: true, message: 'BOM 物料不能为空', trigger: 'change' }],
+  quantity: [{ required: true, message: '用料比例不能为空', trigger: 'blur' }]
+})
+const formRef = ref() // 表单 Ref
 
 /** 添加/修改操作 */
 const openForm = (type: string, row?: ProRouteProductBomVO) => {

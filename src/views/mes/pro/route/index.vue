@@ -38,8 +38,8 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" /> 搜索 </el-button>
-        <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" /> 重置 </el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
           plain
@@ -64,10 +64,16 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="路线编码" align="center" prop="code" width="180" />
-      <el-table-column label="路线名称" align="center" prop="name" width="200" />
+      <el-table-column label="路线编码" align="center" prop="code" min-width="180">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="路线名称" align="center" prop="name" min-width="200" />
       <el-table-column label="路线说明" align="center" prop="description" min-width="200" />
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column label="状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
@@ -80,32 +86,45 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="220">
+      <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
+          <!-- 停用状态：编辑、启用、删除 -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:pro-route:update']"
+            v-if="scope.row.status === CommonStatusEnum.DISABLE"
           >
             编辑
           </el-button>
           <el-button
             link
-            :type="scope.row.status === CommonStatusEnum.ENABLE ? 'warning' : 'success'"
-            @click="handleStatusChange(scope.row)"
+            type="success"
+            @click="openForm('enable', scope.row.id)"
             v-hasPermi="['mes:pro-route:update']"
+            v-if="scope.row.status === CommonStatusEnum.DISABLE"
           >
-            {{ scope.row.status === CommonStatusEnum.ENABLE ? '禁用' : '启用' }}
+            启用
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:pro-route:delete']"
-            :disabled="scope.row.status === CommonStatusEnum.ENABLE"
+            v-if="scope.row.status === CommonStatusEnum.DISABLE"
           >
             删除
+          </el-button>
+          <!-- 启用状态：禁用 -->
+          <el-button
+            link
+            type="warning"
+            @click="handleDisable(scope.row)"
+            v-hasPermi="['mes:pro-route:update']"
+            v-if="scope.row.status === CommonStatusEnum.ENABLE"
+          >
+            禁用
           </el-button>
         </template>
       </el-table-column>
@@ -119,7 +138,7 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
+  <!-- 表单弹窗：添加/修改/启用/详情 -->
   <RouteForm ref="formRef" @success="getList" />
 </template>
 
@@ -139,6 +158,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const list = ref<ProRouteVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -147,7 +167,7 @@ const queryParams = reactive({
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -174,24 +194,16 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 修改工艺路线状态 */
-const handleStatusChange = async (row: ProRouteVO) => {
+/** 禁用按钮操作 */
+const handleDisable = async (row: ProRouteVO) => {
   try {
-    // 目标状态：当前禁用 → 启用
-    const newStatus =
-      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
-    const text = newStatus === CommonStatusEnum.ENABLE ? '启用' : '停用'
-    // 修改状态的二次确认
-    await message.confirm('确认要"' + text + '""' + row.name + '"工艺路线吗?')
-    // 发起修改状态
-    await ProRouteApi.updateRouteStatus(row.id!, newStatus)
-    message.success(text + '成功')
-    // 刷新列表
+    await message.confirm('确认要停用"' + row.name + '"工艺路线吗?')
+    await ProRouteApi.updateRouteStatus(row.id!, CommonStatusEnum.DISABLE)
+    message.success('停用成功')
     await getList()
   } catch {}
 }
@@ -199,11 +211,8 @@ const handleStatusChange = async (row: ProRouteVO) => {
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
-    // 删除的二次确认
     await message.delConfirm()
-    // 发起删除
     await ProRouteApi.deleteRoute(id)
-    // 删除成功的提示
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
@@ -216,13 +225,14 @@ const handleExport = async () => {
     exportLoading.value = true
     const data = await ProRouteApi.exportRoute(queryParams)
     download.excel(data, '工艺路线.xls')
+  } catch {
   } finally {
     exportLoading.value = false
   }
 }
 
-/** 初始化 **/
-onMounted(async () => {
-  await getList()
+/** 初始化 */
+onMounted(() => {
+  getList()
 })
 </script>

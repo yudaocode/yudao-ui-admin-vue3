@@ -7,11 +7,12 @@
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入编码">
+            <el-input v-model="formData.code" placeholder="请输入编码" :disabled="isHeaderReadonly">
               <template #append>
                 <el-button @click="generateCode"> 生成 </el-button>
               </template>
@@ -20,12 +21,16 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入名称" />
+            <el-input
+              v-model="formData.name"
+              placeholder="请输入名称"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="状态" prop="status">
-            <el-radio-group v-model="formData.status">
+            <el-radio-group v-model="formData.status" :disabled="isHeaderReadonly">
               <el-radio
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
                 :key="dict.value"
@@ -43,27 +48,48 @@
           type="textarea"
           :rows="3"
           placeholder="请输入工艺路线说明"
+          :disabled="isHeaderReadonly"
         />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
+        <el-input
+          v-model="formData.remark"
+          type="textarea"
+          placeholder="请输入备注"
+          :disabled="isHeaderReadonly"
+        />
       </el-form-item>
-      <!-- 编辑时展示 Tab -->
+      <!-- 编辑/启用/详情时展示 Tab -->
       <template v-if="formData.id">
         <el-divider content-position="left">详细信息</el-divider>
         <el-tabs v-model="activeTab">
           <el-tab-pane label="组成工序" name="process">
-            <RouteProcessList :routeId="formData.id" />
+            <RouteProcessList :routeId="formData.id" :form-type="formType" />
           </el-tab-pane>
           <el-tab-pane label="关联产品" name="product">
-            <RouteProductList :routeId="formData.id" />
+            <RouteProductList :routeId="formData.id" :form-type="formType" />
           </el-tab-pane>
         </el-tabs>
       </template>
     </el-form>
     <template #footer>
-      <el-button @click="dialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
+      <el-button
+        v-if="isEditable"
+        type="primary"
+        @click="submitForm"
+        :disabled="formLoading"
+      >
+        保 存
+      </el-button>
+      <el-button
+        v-if="isEnable"
+        type="success"
+        @click="handleEnable"
+        :disabled="formLoading"
+      >
+        确认启用
+      </el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -77,14 +103,25 @@ import RouteProcessList from './RouteProcessList.vue'
 import RouteProductList from './RouteProductList.vue'
 
 defineOptions({ name: 'RouteForm' })
+const emit = defineEmits(['success'])
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formLoading = ref(false) // 表单的加载中
+const formType = ref<string>('create') // 表单的类型：create / update / enable / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isEnable = computed(() => formType.value === 'enable') // 是否为启用模式
+const isDetail = computed(() => ['detail', 'enable'].includes(formType.value)) // 是否为详情模式（只读）
+const isHeaderReadonly = computed(() => ['enable', 'detail'].includes(formType.value)) // 是否只读
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增工艺路线',
+    update: '编辑工艺路线',
+    enable: '启用工艺路线',
+    detail: '工艺路线详情'
+  }
+  return titles[formType.value] || formType.value
+})
 const activeTab = ref('process') // 子表当前激活的 Tab
 const formData = ref<ProRouteVO>({
   id: undefined,
@@ -109,10 +146,10 @@ const generateCode = () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'create' ? '新增工艺路线' : '编辑工艺路线'
   formType.value = type
   activeTab.value = 'process'
   resetForm()
+  // 修改/启用/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -122,26 +159,40 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open })
 
-/** 提交表单 */
-const emit = defineEmits(['success'])
+/** 提交表单（create/update 模式） */
 const submitForm = async () => {
-  if (!formRef) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
+  await formRef.value.validate()
   formLoading.value = true
   try {
     const data = { ...formData.value }
     if (formType.value === 'create') {
-      await ProRouteApi.createRoute(data)
-      message.success(t('common.createSuccess'))
+      const res = await ProRouteApi.createRoute(data)
+      message.success('新增成功')
+      // 创建成功后，更新表单数据和状态为编辑模式
+      formData.value.id = res
+      formData.value.status = CommonStatusEnum.DISABLE
+      formType.value = 'update'
     } else {
       await ProRouteApi.updateRoute(data)
-      message.success(t('common.updateSuccess'))
+      message.success('修改成功')
     }
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 确认启用 */
+const handleEnable = async () => {
+  try {
+    await message.confirm('确认启用"' + formData.value.name + '"工艺路线吗？启用前请确认工序和产品 BOM 配置完整。')
+    formLoading.value = true
+    await ProRouteApi.updateRouteStatus(formData.value.id!, CommonStatusEnum.ENABLE)
+    message.success('启用成功')
     dialogVisible.value = false
     emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -159,4 +210,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>
