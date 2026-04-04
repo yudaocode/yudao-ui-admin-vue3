@@ -21,7 +21,7 @@
       <el-form-item label="检测项类型" prop="type">
         <el-select v-model="formData.type" placeholder="请选择检测项类型" clearable class="!w-1/1">
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDICATOR_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.MES_DEFECT_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -48,19 +48,22 @@
     </template>
   </Dialog>
 </template>
+
 <script setup lang="ts">
 import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { QcDefectApi, QcDefectVO } from '@/api/mes/qc/defect'
-import { generateRandomStr } from '@/utils'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'DefectForm' })
+const emit = defineEmits(['success'])
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
@@ -79,9 +82,10 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 生成缺陷编码 */
-const generateCode = () => {
-  // TODO @芋艿：后续对接后端编码生成接口
-  formData.value.code = 'DF' + generateRandomStr(12)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.QC_DEFECT_CODE
+  )
 }
 
 /** 打开弹窗 */
@@ -100,10 +104,8 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
@@ -138,4 +140,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

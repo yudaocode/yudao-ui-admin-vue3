@@ -35,7 +35,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDICATOR_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.MES_DEFECT_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -88,7 +88,7 @@
       <el-table-column label="缺陷描述" align="center" prop="name" min-width="200" />
       <el-table-column label="检测项类型" align="center" prop="type" width="120">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_INDICATOR_TYPE" :value="scope.row.type" />
+          <dict-tag :type="DICT_TYPE.MES_DEFECT_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
       <el-table-column label="缺陷等级" align="center" prop="level" width="120">
@@ -140,10 +140,10 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { QcDefectApi, QcDefectVO } from '@/api/mes/qc/defect'
 import DefectForm from './DefectForm.vue'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'MesQcDefect' })
 
@@ -153,6 +153,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const list = ref<QcDefectVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -162,7 +163,7 @@ const queryParams = reactive({
   level: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -189,7 +190,6 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
@@ -197,12 +197,9 @@ const openForm = (type: string, id?: number) => {
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
-    // 删除的二次确认
     await message.delConfirm()
-    // 发起删除
     await QcDefectApi.deleteDefect(id)
     message.success(t('common.delSuccess'))
-    // 刷新列表
     await getList()
   } catch {}
 }
@@ -210,9 +207,7 @@ const handleDelete = async (id: number) => {
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {
-    // 导出的二次确认
     await message.exportConfirm()
-    // 发起导出
     exportLoading.value = true
     const data = await QcDefectApi.exportDefect(queryParams)
     download.excel(data, '缺陷类型.xls')
@@ -222,7 +217,7 @@ const handleExport = async () => {
   }
 }
 
-/** 初始化 **/
+/** 初始化 */
 onMounted(() => {
   getList()
 })
