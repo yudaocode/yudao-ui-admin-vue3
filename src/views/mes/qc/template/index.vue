@@ -79,7 +79,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="方案编号" align="center" prop="code" width="150" />
+      <el-table-column label="方案编号" align="center" prop="code" width="150">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="方案名称" align="center" prop="name" min-width="200" />
       <el-table-column label="检测种类" align="center" prop="types" min-width="200">
         <template #default="scope">

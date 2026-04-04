@@ -8,6 +8,7 @@
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row :gutter="16">
         <el-col :span="8">
@@ -67,7 +68,7 @@
     </el-form>
 
     <!-- 子表标签页（编辑模式下显示） -->
-    <template v-if="formType === 'update' && formData.id">
+    <template v-if="formData.id">
       <el-divider />
       <el-tabs v-model="activeTab">
         <el-tab-pane label="检测指标项" name="indicator">
@@ -80,7 +81,9 @@
     </template>
 
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!isDetail">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -90,8 +93,9 @@
 import type { FormRules } from 'element-plus'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import { generateRandomStr } from '@/utils'
 import { QcTemplateApi, QcTemplateVO } from '@/api/mes/qc/template'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import TemplateIndicatorList from './TemplateIndicatorList.vue'
 import TemplateItemList from './TemplateItemList.vue'
 
@@ -122,10 +126,13 @@ const formRules = reactive<FormRules>({
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const isDetail = computed(() => formType.value === 'detail') // 表单是否为详情模式（只读）
 
 /** 生成方案编号 */
-const generateCode = () => {
-  formData.value.code = 'QCT' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.QC_TEMPLATE_CODE
+  )
 }
 
 /** 打开弹窗 */
