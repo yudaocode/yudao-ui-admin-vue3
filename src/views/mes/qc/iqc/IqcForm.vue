@@ -207,12 +207,12 @@
       </el-row>
     </el-form>
 
-    <!-- 子表标签页（编辑模式下显示） -->
-    <template v-if="formType === 'update' && formData.id">
+    <!-- 子表标签页（编辑/详情模式下显示） -->
+    <template v-if="formData.id">
       <el-divider />
       <el-tabs v-model="activeTab">
         <el-tab-pane label="检验项" name="line">
-          <IqcLineList :iqc-id="formData.id" />
+          <IqcLineList :iqc-id="formData.id" :form-type="formType" />
         </el-tab-pane>
         <el-tab-pane label="检测结果" name="result">
           <QcIndicatorResultList :qc-id="formData.id!" :qc-type="MesQcTypeEnum.IQC" />

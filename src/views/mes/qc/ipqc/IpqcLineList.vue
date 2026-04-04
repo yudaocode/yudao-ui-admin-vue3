@@ -33,7 +33,7 @@
     />
 
     <!-- 缺陷记录弹窗（内联编辑） -->
-    <DefectRecordInlineList ref="defectListRef" @refresh="getList" />
+    <DefectRecordInlineList ref="defectListRef" :form-type="formType" @refresh="getList" />
   </div>
 </template>
 
@@ -45,7 +45,10 @@ import { MesQcTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IpqcLineList' })
 
-const props = defineProps<{ ipqcId: number }>()
+const props = defineProps<{
+  ipqcId: number
+  formType?: string // 表单类型：传递给缺陷记录弹窗
+}>()
 
 const loading = ref(false) // 列表的加载中
 const list = ref<QcIpqcLineVO[]>([]) // 列表的数据

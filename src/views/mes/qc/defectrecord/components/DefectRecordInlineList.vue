@@ -3,7 +3,7 @@
   <Dialog title="缺陷记录" v-model="dialogVisible" width="900px">
     <div class="overflow-hidden">
       <!-- 新增按钮 -->
-      <el-row class="mb-10px">
+      <el-row v-if="!isDetail" class="mb-10px">
         <el-button type="primary" plain @click="handleAdd" v-hasPermi="['mes:qc-defect:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增缺陷
         </el-button>
@@ -16,6 +16,8 @@
             <el-input
               v-if="scope.row.editing"
               v-model="scope.row.name"
+              type="textarea"
+              :autosize="{ minRows: 1, maxRows: 4 }"
               placeholder="请输入缺陷描述"
             />
             <span v-else>{{ scope.row.name }}</span>
@@ -56,7 +58,7 @@
             <span v-else>{{ scope.row.remark || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="130" fixed="right">
+        <el-table-column v-if="!isDetail" label="操作" align="center" width="130" fixed="right">
           <template #default="scope">
             <template v-if="scope.row.editing">
               <el-button link type="success" @click="handleSave(scope.row)">保存</el-button>
@@ -103,11 +105,16 @@ import { QcDefectRecordApi, QcDefectRecordVO } from '@/api/mes/qc/defectrecord'
 /** 缺陷记录内联编辑弹窗（通用组件，供 IQC/IPQC/OQC/RQC 各模块复用） */
 defineOptions({ name: 'DefectRecordInlineList' })
 
+const props = defineProps<{
+  formType?: string // 表单类型：update - 编辑；detail - 详情（只读）
+}>()
+
 const emit = defineEmits(['refresh']) // 通知父组件刷新行统计
 
 const message = useMessage()
 const { t } = useI18n()
 
+const isDetail = computed(() => props.formType === 'detail') // 是否为详情模式（只读）
 const dialogVisible = ref(false)
 const loading = ref(false)
 const list = ref<any[]>([])
