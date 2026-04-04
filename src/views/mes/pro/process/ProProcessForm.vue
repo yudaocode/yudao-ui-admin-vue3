@@ -68,6 +68,7 @@ import { ProProcessApi, ProProcessVO } from '@/api/mes/pro/process'
 import ProProcessContentList from './ProProcessContentList.vue'
 
 defineOptions({ name: 'ProProcessForm' })
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -112,10 +113,8 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   // 校验表单
   if (!formRef) return
@@ -152,4 +151,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>

@@ -84,18 +84,6 @@ const { t } = useI18n() // 国际化
 
 const loading = ref(false) // 列表的加载中
 const list = ref<ProProcessContentVO[]>([]) // 列表的数据
-
-/** 查询列表 */
-const getList = async () => {
-  loading.value = true
-  try {
-    list.value = await ProProcessContentApi.getProcessContentListByProcessId(props.processId)
-  } finally {
-    loading.value = false
-  }
-}
-
-// ==================== 添加/修改 ====================
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
@@ -114,6 +102,16 @@ const formData = ref<Partial<ProProcessContentVO>>({
 const formRules = reactive({
   sort: [{ required: true, message: '序号不能为空', trigger: 'blur' }]
 })
+
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    list.value = await ProProcessContentApi.getProcessContentListByProcessId(props.processId)
+  } finally {
+    loading.value = false
+  }
+}
 
 /** 添加/修改操作 */
 const openForm = (type: string, row?: ProProcessContentVO) => {
