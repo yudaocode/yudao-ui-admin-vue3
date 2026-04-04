@@ -13,7 +13,6 @@
       <el-table-column label="产品物料名称" align="center" prop="itemName" width="150" />
       <el-table-column label="规格型号" align="center" prop="specification" width="150" />
       <el-table-column label="单位" align="center" prop="unitName" width="80" />
-      <!-- TODO @AI：对齐的话，生产数量、生产用时、生产单位，是不是不需要这些字段？？？ -->
       <el-table-column label="生产数量" align="center" prop="quantity" width="100" />
       <el-table-column label="生产用时" align="center" width="120">
         <template #default="scope">
@@ -35,26 +34,31 @@
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="formTitle" v-model="formVisible" width="960px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
-        <el-form-item label="产品" prop="itemId">
-          <MdItemSelect v-model="formData.itemId" />
-        </el-form-item>
-        <el-form-item label="生产数量" prop="quantity">
-          <el-input-number v-model="formData.quantity" :min="1" controls-position="right" />
-        </el-form-item>
         <el-row :gutter="20">
-          <el-col :span="14">
+          <el-col :span="12">
+            <el-form-item label="产品" prop="itemId">
+              <MdItemSelect v-model="formData.itemId" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="生产数量" prop="quantity">
+              <el-input-number v-model="formData.quantity" :min="1" controls-position="right" class="!w-1/1" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
             <el-form-item label="生产用时" prop="productionTime">
               <el-input-number
                 v-model="formData.productionTime"
                 :min="0"
                 :precision="2"
                 controls-position="right"
+                class="!w-1/1"
               />
             </el-form-item>
           </el-col>
-          <el-col :span="10">
+          <el-col :span="12">
             <el-form-item label="时间单位" prop="timeUnitType">
-              <el-select v-model="formData.timeUnitType" placeholder="请选择">
+              <el-select v-model="formData.timeUnitType" placeholder="请选择" class="!w-1/1">
                 <el-option
                   v-for="dict in getStrDictOptions(DICT_TYPE.MES_TIME_UNIT_TYPE)"
                   :key="dict.value"

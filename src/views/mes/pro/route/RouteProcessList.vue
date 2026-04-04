@@ -52,17 +52,10 @@
       </el-table-column>
       <el-table-column label="甘特图颜色" align="center" prop="colorCode" width="100">
         <template #default="scope">
-          <div
-            v-if="scope.row.colorCode"
-            style="display: flex; align-items: center; justify-content: center; gap: 4px"
-          >
+          <div v-if="scope.row.colorCode" class="flex items-center justify-center gap-4px">
             <div
-              :style="{
-                backgroundColor: scope.row.colorCode,
-                width: '16px',
-                height: '16px',
-                borderRadius: '4px'
-              }"
+              :style="{ backgroundColor: scope.row.colorCode }"
+              class="w-16px h-16px rounded-4px"
             ></div>
             <span>{{ scope.row.colorCode }}</span>
           </div>
@@ -78,7 +71,7 @@
 
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="formTitle" v-model="formVisible" width="960px">
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="130px">
+      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="140px">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="序号" prop="sort">
@@ -113,8 +106,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="甘特图颜色" prop="colorCode">
-              <!-- TODO @AI：unocss 哈 -->
-              <div style="display: flex; align-items: center; gap: 8px">
+              <div class="flex items-center gap-8px">
                 <el-color-picker v-model="formData.colorCode" />
                 <span v-if="formData.colorCode">{{ formData.colorCode }}</span>
               </div>
@@ -200,8 +192,9 @@ const formData = ref<any>({}) // 表单数据
 const formRules = reactive({
   sort: [{ required: true, message: '序号不能为空', trigger: 'blur' }],
   processId: [{ required: true, message: '工序不能为空', trigger: 'change' }],
-  linkType: [{ required: true, message: '工序关系不能为空', trigger: 'change' }]
-  // TODO @AI：keyFlag、checkFlag 必填；
+  linkType: [{ required: true, message: '工序关系不能为空', trigger: 'change' }],
+  keyFlag: [{ required: true, message: '是否关键工序不能为空', trigger: 'change' }],
+  checkFlag: [{ required: true, message: '是否需要质检确认不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 

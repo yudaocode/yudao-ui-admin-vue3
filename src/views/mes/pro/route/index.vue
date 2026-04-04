@@ -73,10 +73,15 @@
       </el-table-column>
       <el-table-column label="路线名称" align="center" prop="name" min-width="200" />
       <el-table-column label="路线说明" align="center" prop="description" min-width="200" />
-      <!-- TODO @AI：改成 el-switch 形式 -->
       <el-table-column label="状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <el-switch
+            v-model="scope.row.status"
+            :active-value="0"
+            :inactive-value="1"
+            @change="handleStatusChange(scope.row)"
+            :disabled="!checkPermi(['mes:pro-route:update'])"
+          />
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
@@ -89,45 +94,40 @@
       />
       <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
-          <!-- 停用状态：编辑、启用、删除 -->
-          <!-- TODO @AI：禁用不可编辑、删除时，有个 tooltip disable 这样，不要直接隐藏； -->
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:pro-route:update']"
-            v-if="scope.row.status === CommonStatusEnum.DISABLE"
+          <el-tooltip
+            :disabled="scope.row.status === CommonStatusEnum.DISABLE"
+            content="仅停用状态，才可以操作"
+            placement="top"
           >
-            编辑
-          </el-button>
-          <el-button
-            link
-            type="success"
-            @click="openForm('enable', scope.row.id)"
-            v-hasPermi="['mes:pro-route:update']"
-            v-if="scope.row.status === CommonStatusEnum.DISABLE"
+            <span class="inline-block cursor-not-allowed">
+              <el-button
+                link
+                type="primary"
+                @click="openForm('update', scope.row.id)"
+                v-hasPermi="['mes:pro-route:update']"
+                :disabled="scope.row.status !== CommonStatusEnum.DISABLE"
+              >
+                编辑
+              </el-button>
+            </span>
+          </el-tooltip>
+          <el-tooltip
+            :disabled="scope.row.status === CommonStatusEnum.DISABLE"
+            content="仅停用状态，才可以操作"
+            placement="top"
           >
-            启用
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:pro-route:delete']"
-            v-if="scope.row.status === CommonStatusEnum.DISABLE"
-          >
-            删除
-          </el-button>
-          <!-- 启用状态：禁用 -->
-          <el-button
-            link
-            type="warning"
-            @click="handleDisable(scope.row)"
-            v-hasPermi="['mes:pro-route:update']"
-            v-if="scope.row.status === CommonStatusEnum.ENABLE"
-          >
-            禁用
-          </el-button>
+            <span class="inline-block cursor-not-allowed">
+              <el-button
+                link
+                type="danger"
+                @click="handleDelete(scope.row.id)"
+                v-hasPermi="['mes:pro-route:delete']"
+                :disabled="scope.row.status !== CommonStatusEnum.DISABLE"
+              >
+                删除
+              </el-button>
+            </span>
+          </el-tooltip>
         </template>
       </el-table-column>
     </el-table>
@@ -148,6 +148,7 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { CommonStatusEnum } from '@/utils/constants'
+import { checkPermi } from '@/utils/permission'
 import download from '@/utils/download'
 import { ProRouteApi, ProRouteVO } from '@/api/mes/pro/route'
 import RouteForm from './RouteForm.vue'
@@ -195,19 +196,22 @@ const resetQuery = () => {
   handleQuery()
 }
 
+/** 状态开关操作 */
+const handleStatusChange = async (row: ProRouteVO) => {
+  try {
+    const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
+    await message.confirm('确认要“' + text + '”“' + row.name + '”工艺路线吗?')
+    await ProRouteApi.updateRouteStatus(row.id!, row.status!)
+    await getList()
+  } catch {
+    row.status =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+  }
+}
+
 /** 添加/修改操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 禁用按钮操作 */
-const handleDisable = async (row: ProRouteVO) => {
-  try {
-    await message.confirm('确认要停用"' + row.name + '"工艺路线吗?')
-    await ProRouteApi.updateRouteStatus(row.id!, CommonStatusEnum.DISABLE)
-    message.success('停用成功')
-    await getList()
-  } catch {}
 }
 
 /** 删除按钮操作 */

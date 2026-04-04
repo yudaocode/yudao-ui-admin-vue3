@@ -6,7 +6,7 @@ export interface ProRouteVO {
   code: string // 工艺路线编码
   name: string // 工艺路线名称
   description?: string // 工艺路线说明
-  status: number // 状态
+  status?: number // 状态
   remark?: string // 备注
   createTime?: Date // 创建时间
 }

@@ -10,7 +10,7 @@
       :disabled="isDetail"
     >
       <el-row :gutter="20">
-        <el-col :span="8">
+        <el-col :span="12">
           <el-form-item label="编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入编码" :disabled="isHeaderReadonly">
               <template #append>
@@ -19,26 +19,13 @@
             </el-input>
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="12">
           <el-form-item label="名称" prop="name">
             <el-input
               v-model="formData.name"
               placeholder="请输入名称"
               :disabled="isHeaderReadonly"
             />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="状态" prop="status">
-            <el-radio-group v-model="formData.status" :disabled="isHeaderReadonly">
-              <el-radio
-                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-                :key="dict.value"
-                :value="dict.value"
-              >
-                {{ dict.label }}
-              </el-radio>
-            </el-radio-group>
           </el-form-item>
         </el-col>
       </el-row>
@@ -61,7 +48,6 @@
       </el-form-item>
       <!-- 编辑/启用/详情时展示 Tab -->
       <template v-if="formData.id">
-        <el-divider content-position="left">详细信息</el-divider>
         <el-tabs v-model="activeTab">
           <el-tab-pane label="组成工序" name="process">
             <RouteProcessList :routeId="formData.id" :form-type="formType" />
@@ -73,20 +59,10 @@
       </template>
     </el-form>
     <template #footer>
-      <el-button
-        v-if="isEditable"
-        type="primary"
-        @click="submitForm"
-        :disabled="formLoading"
-      >
+      <el-button v-if="isEditable" type="primary" @click="submitForm" :disabled="formLoading">
         保 存
       </el-button>
-      <el-button
-        v-if="isEnable"
-        type="success"
-        @click="handleEnable"
-        :disabled="formLoading"
-      >
+      <el-button v-if="isEnable" type="success" @click="handleEnable" :disabled="formLoading">
         确认启用
       </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
@@ -95,10 +71,10 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import { generateRandomStr } from '@/utils'
 import { ProRouteApi, ProRouteVO } from '@/api/mes/pro/route'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 import RouteProcessList from './RouteProcessList.vue'
 import RouteProductList from './RouteProductList.vue'
 
@@ -128,21 +104,17 @@ const formData = ref<ProRouteVO>({
   code: '',
   name: '',
   description: '',
-  status: CommonStatusEnum.ENABLE,
   remark: ''
 })
 const formRules = reactive({
   code: [{ required: true, message: '编码不能为空', trigger: 'blur' }],
-  name: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
-  // TODO @AI：生成时，默认是禁用的；后端默认禁用状态；save 不要接收状态；
-  status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
+  name: [{ required: true, message: '名称不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
 /** 生成编码 */
-const generateCode = () => {
-  // TODO @AI：编码规则；mysql 也需要插入下；
-  formData.value.code = 'ROUTE' + generateRandomStr(8)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.PRO_ROUTE_CODE)
 }
 
 /** 打开弹窗 */
@@ -173,7 +145,6 @@ const submitForm = async () => {
       message.success('新增成功')
       // 创建成功后，更新表单数据和状态为编辑模式
       formData.value.id = res
-      formData.value.status = CommonStatusEnum.DISABLE
       formType.value = 'update'
     } else {
       await ProRouteApi.updateRoute(data)
@@ -188,7 +159,9 @@ const submitForm = async () => {
 /** 确认启用 */
 const handleEnable = async () => {
   try {
-    await message.confirm('确认启用"' + formData.value.name + '"工艺路线吗？启用前请确认工序和产品 BOM 配置完整。')
+    await message.confirm(
+      '确认启用"' + formData.value.name + '"工艺路线吗？启用前请确认工序和产品 BOM 配置完整。'
+    )
     formLoading.value = true
     await ProRouteApi.updateRouteStatus(formData.value.id!, CommonStatusEnum.ENABLE)
     message.success('启用成功')
@@ -207,7 +180,6 @@ const resetForm = () => {
     code: '',
     name: '',
     description: '',
-    status: CommonStatusEnum.ENABLE,
     remark: ''
   }
   formRef.value?.resetFields()
