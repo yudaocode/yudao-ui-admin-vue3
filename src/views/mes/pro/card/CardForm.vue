@@ -86,8 +86,8 @@
       >
         提 交
       </el-button>
-      <el-button v-if="isExecute" @click="handleExecute" type="success" :disabled="formLoading">
-        执 行
+      <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
+        完 成
       </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
@@ -96,11 +96,11 @@
 
 <script setup lang="ts">
 import { ProCardApi, ProCardVO } from '@/api/mes/pro/card'
-import { generateRandomStr } from '@/utils'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import CardProcessList from './CardProcessList.vue'
-import { MesProCardStatusEnum } from '@/views/mes/utils/constants'
+import { MesProCardStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'CardForm' })
 const emit = defineEmits(['success'])
@@ -108,16 +108,16 @@ const emit = defineEmits(['success'])
 const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref<string>('create') // 表单的类型：create / update / execute / detail
+const formType = ref<string>('create') // 表单的类型：create / update / finish / detail
 const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
-const isExecute = computed(() => formType.value === 'execute') // 是否为执行模式
-const isDetail = computed(() => ['detail', 'execute'].includes(formType.value)) // 是否为详情模式（表单只读）
-const isHeaderReadonly = computed(() => ['execute', 'detail'].includes(formType.value)) // 头部是否只读
+const isFinish = computed(() => formType.value === 'finish') // 是否为完成模式
+const isDetail = computed(() => ['detail', 'finish'].includes(formType.value)) // 是否为详情模式（表单只读）
+const isHeaderReadonly = computed(() => ['finish', 'detail'].includes(formType.value)) // 头部是否只读
 const dialogTitle = computed(() => {
   const titles: Record<string, string> = {
     create: '新增流转卡',
     update: '编辑流转卡',
-    execute: '执行流转卡',
+    finish: '完成流转卡',
     detail: '流转卡详情'
   }
   return titles[formType.value] || formType.value
@@ -142,8 +142,8 @@ const formRef = ref() // 表单 Ref
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成流转卡编码 */
-const generateCode = () => {
-  formData.value.code = 'CARD' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.PRO_CARD_CODE)
 }
 
 /** 打开弹窗 */
@@ -211,13 +211,13 @@ const handleSubmit = async () => {
   }
 }
 
-/** 执行流转卡 */
-const handleExecute = async () => {
+/** 完成流转卡 */
+const handleFinish = async () => {
   try {
-    await message.confirm('确认执行该流转卡？')
+    await message.confirm('确认完成该流转卡？')
     formLoading.value = true
-    await ProCardApi.executeCard(formData.value.id!)
-    message.success('执行成功')
+    await ProCardApi.finishCard(formData.value.id!)
+    message.success('完成成功')
     dialogVisible.value = false
     emit('success')
   } catch {

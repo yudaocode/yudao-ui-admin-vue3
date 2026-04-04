@@ -55,9 +55,9 @@ export const ProCardApi = {
     return await request.put({ url: `/mes/pro/card/submit?id=` + id })
   },
 
-  // 执行生产流转卡
-  executeCard: async (id: number) => {
-    return await request.put({ url: `/mes/pro/card/execute?id=` + id })
+  // 完成生产流转卡
+  finishCard: async (id: number) => {
+    return await request.put({ url: `/mes/pro/card/finish?id=` + id })
   },
 
   // 取消生产流转卡

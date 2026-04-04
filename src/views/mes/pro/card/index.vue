@@ -109,11 +109,11 @@
           <el-button
             link
             type="success"
-            @click="openForm('execute', scope.row.id)"
-            v-hasPermi="['mes:pro-card:update']"
+            @click="openForm('finish', scope.row.id)"
+            v-hasPermi="['mes:pro-card:finish']"
             v-if="scope.row.status === MesProCardStatusEnum.CONFIRMED"
           >
-            执行
+            完成
           </el-button>
           <el-button
             link
