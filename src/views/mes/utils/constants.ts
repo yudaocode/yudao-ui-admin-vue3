@@ -456,6 +456,7 @@ export const MesAutoCodeRuleCode = {
   DV_REPAIR_CODE: 'DV_REPAIR_CODE', // 维修单编码
   PRO_PROCESS_CODE: 'PRO_PROCESS_CODE', // 工序编码
   PRO_ROUTE_CODE: 'PRO_ROUTE_CODE', // 工艺路线编码
+  PRO_FEEDBACK_CODE: 'PRO_FEEDBACK_CODE', // 生产报工单编码
   PRO_WORK_ORDER_CODE: 'PRO_WORK_ORDER_CODE' // 生产工单编码
 } as const
 

@@ -7,12 +7,21 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <!-- 基本信息 -->
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="报工单号" prop="code">
-            <el-input v-model="formData.code" disabled placeholder="自动生成" />
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入报工单号"
+              :disabled="isHeaderReadonly"
+            >
+              <template #append>
+                <el-button @click="generateCode"> 生成 </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -20,7 +29,7 @@
             <el-select
               v-model="formData.type"
               placeholder="请选择报工类型"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
               class="!w-1/1"
             >
               <el-option
@@ -39,7 +48,7 @@
           <el-form-item label="生产工单" prop="workOrderId">
             <ProWorkOrderSelect
               v-model="formData.workOrderId"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
               placeholder="请选择工单"
               @change="handleWorkOrderChange"
             />
@@ -50,7 +59,7 @@
             <ProTaskSelect
               v-model="formData.taskId"
               :workOrderId="formData.workOrderId"
-              :disabled="isDetail || !formData.workOrderId"
+              :disabled="isHeaderReadonly || !formData.workOrderId"
               placeholder="请选择任务"
               @change="handleTaskChange"
             />
@@ -60,9 +69,32 @@
           <el-form-item label="工作站" prop="workstationId">
             <MdWorkstationSelect
               v-model="formData.workstationId"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
               placeholder="请选择工作站"
             />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <!-- 产品信息（只读展示） -->
+      <el-row :gutter="20" v-if="productInfo.itemCode">
+        <el-col :span="8">
+          <el-form-item label="产品编码">
+            <el-input :model-value="productInfo.itemCode" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="产品名称">
+            <el-input :model-value="productInfo.itemName" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="4">
+          <el-form-item label="单位" label-width="60px">
+            <el-input :model-value="productInfo.unitMeasureName" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="4">
+          <el-form-item label="规格" label-width="60px">
+            <el-input :model-value="productInfo.itemSpecification" disabled />
           </el-form-item>
         </el-col>
       </el-row>
@@ -87,7 +119,6 @@
               v-model="formData.qualifiedQuantity"
               :min="0"
               :precision="2"
-              :disabled="isDetail"
               class="!w-1/1"
               @change="handleQuantityChanged"
             />
@@ -99,7 +130,6 @@
               v-model="formData.unqualifiedQuantity"
               :min="0"
               :precision="2"
-              :disabled="isDetail"
               class="!w-1/1"
               @change="handleQuantityChanged"
             />
@@ -114,7 +144,6 @@
               v-model="formData.feedbackQuantity"
               :min="0"
               :precision="2"
-              :disabled="isDetail"
               class="!w-1/1"
             />
           </el-form-item>
@@ -128,7 +157,6 @@
               v-model="formData.laborScrapQuantity"
               :min="0"
               :precision="2"
-              :disabled="isDetail"
               class="!w-1/1"
               @change="handleScrapChanged"
             />
@@ -140,7 +168,6 @@
               v-model="formData.materialScrapQuantity"
               :min="0"
               :precision="2"
-              :disabled="isDetail"
               class="!w-1/1"
               @change="handleScrapChanged"
             />
@@ -152,7 +179,6 @@
               v-model="formData.otherScrapQuantity"
               :min="0"
               :precision="2"
-              :disabled="isDetail"
               class="!w-1/1"
               @change="handleScrapChanged"
             />
@@ -165,7 +191,7 @@
           <el-form-item label="报工人" prop="feedbackUserId">
             <UserSelect
               v-model="formData.feedbackUserId"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
               placeholder="请选择报工人"
             />
           </el-form-item>
@@ -177,7 +203,7 @@
               type="datetime"
               value-format="x"
               placeholder="请选择报工时间"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
               class="!w-1/1"
             />
           </el-form-item>
@@ -186,7 +212,7 @@
           <el-form-item label="审核人" prop="approveUserId">
             <UserSelect
               v-model="formData.approveUserId"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
               placeholder="请选择审核人"
             />
           </el-form-item>
@@ -201,13 +227,12 @@
               type="textarea"
               :rows="3"
               placeholder="请输入备注"
-              :disabled="isDetail"
             />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
-    <!-- BOM 物资消耗 Tab：仅非草稿、非审批中时显示（即已执行后） -->
+    <!-- BOM 物资消耗 / 产品产出 Tab：仅非草稿、非审批中时显示 -->
     <el-tabs
       v-if="
         formData.id &&
@@ -225,15 +250,34 @@
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <template v-if="formType === 'approve'">
-        <el-button type="success" @click="handleApprove" :disabled="formLoading">通过</el-button>
-        <el-button type="danger" @click="handleReject" :disabled="formLoading">不通过</el-button>
-        <el-button @click="dialogVisible = false">取 消</el-button>
-      </template>
-      <template v-else-if="!isDetail">
-        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-        <el-button @click="dialogVisible = false">取 消</el-button>
-      </template>
+      <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
+        保 存
+      </el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesProFeedbackStatusEnum.PREPARE"
+        @click="handleSubmit"
+        type="warning"
+        :disabled="formLoading"
+      >
+        提 交
+      </el-button>
+      <el-button
+        v-if="formType === 'approve'"
+        type="success"
+        @click="handleApprove"
+        :disabled="formLoading"
+      >
+        通 过
+      </el-button>
+      <el-button
+        v-if="formType === 'approve'"
+        type="danger"
+        @click="handleReject"
+        :disabled="formLoading"
+      >
+        不通过
+      </el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -241,6 +285,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProFeedbackApi, ProFeedbackVO } from '@/api/mes/pro/feedback'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { ProRouteProcessApi } from '@/api/mes/pro/route/process'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
@@ -249,27 +294,29 @@ import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import ItemConsumeList from './ItemConsumeList.vue'
 import ProductProduceList from './ProductProduceList.vue'
 import { useUserStore } from '@/store/modules/user'
-import { MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'FeedbackForm' })
+const emit = defineEmits(['success'])
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
+const formType = ref<string>('create') // 表单的类型：create / update / submit / approve / detail
+const isEditable = computed(() => ['create', 'update', 'submit'].includes(formType.value))
+const isDetail = computed(() => ['detail', 'approve'].includes(formType.value))
+const isHeaderReadonly = computed(() => ['submit', 'detail', 'approve'].includes(formType.value))
 const dialogTitle = computed(() => {
-  if (formType.value === 'detail') {
-    return '查看生产报工记录'
+  const titles: Record<string, string> = {
+    create: '新增生产报工',
+    update: '编辑生产报工',
+    submit: '提交生产报工',
+    approve: '审批生产报工',
+    detail: '生产报工详情'
   }
-  if (formType.value === 'create') {
-    return '添加生产报工记录'
-  }
-  if (formType.value === 'approve') {
-    return '审批生产报工'
-  }
-  return '修改生产报工记录'
+  return titles[formType.value] || formType.value
 })
 const formData = ref<Record<string, any>>({
   id: undefined,
@@ -292,9 +339,11 @@ const formData = ref<Record<string, any>>({
   feedbackUserId: undefined,
   feedbackTime: undefined,
   approveUserId: undefined,
+  status: undefined,
   remark: undefined
 })
 const formRules = reactive({
+  code: [{ required: true, message: '报工单号不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '报工类型不能为空', trigger: 'change' }],
   workOrderId: [{ required: true, message: '生产工单不能为空', trigger: 'change' }],
   taskId: [{ required: true, message: '生产任务不能为空', trigger: 'change' }],
@@ -305,10 +354,22 @@ const formRules = reactive({
   approveUserId: [{ required: true, message: '审核人不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-const isDetail = computed(() => formType.value === 'detail' || formType.value === 'approve') // 是否为只读模式（详情/审批）
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 const checkFlag = ref(true) // 是否需要检验（默认 true，未选任务时只展示报工数量）
+// 产品信息展示（只读）
+const productInfo = ref({
+  itemCode: '',
+  itemName: '',
+  unitMeasureName: '',
+  itemSpecification: ''
+})
 
-// ==================== 级联选择回调 ====================
+/** 生成报工单编号 */
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.PRO_FEEDBACK_CODE
+  )
+}
 
 /** 加载工序的 checkFlag */
 const loadCheckFlag = async (routeId?: number, processId?: number) => {
@@ -327,6 +388,36 @@ const loadCheckFlag = async (routeId?: number, processId?: number) => {
   }
 }
 
+/** 工单变更：清空任务相关字段 */
+const handleWorkOrderChange = () => {
+  formData.value.taskId = undefined
+  formData.value.routeId = undefined
+  formData.value.processId = undefined
+  formData.value.workstationId = undefined
+  formData.value.itemId = undefined
+  checkFlag.value = true
+  productInfo.value = { itemCode: '', itemName: '', unitMeasureName: '', itemSpecification: '' }
+}
+
+/** 任务变更：自动填充关联字段 + 产品信息 */
+const handleTaskChange = async (task: any) => {
+  if (!task) {
+    return
+  }
+  formData.value.routeId = task.routeId
+  formData.value.processId = task.processId
+  formData.value.workstationId = task.workstationId
+  formData.value.itemId = task.itemId
+  // 填充产品信息展示
+  productInfo.value = {
+    itemCode: task.itemCode || '',
+    itemName: task.itemName || '',
+    unitMeasureName: '',
+    itemSpecification: task.itemSpec || ''
+  }
+  await loadCheckFlag(task.routeId, task.processId)
+}
+
 /** 合格品/不良品变更：自动计算报工数量 = 合格 + 不良 */
 const handleQuantityChanged = () => {
   formData.value.feedbackQuantity =
@@ -342,104 +433,104 @@ const handleScrapChanged = () => {
   handleQuantityChanged()
 }
 
-/** 工单变更：清空任务相关字段 */
-const handleWorkOrderChange = () => {
-  formData.value.taskId = undefined
-  formData.value.routeId = undefined
-  formData.value.processId = undefined
-  formData.value.workstationId = undefined
-  formData.value.itemId = undefined
-  checkFlag.value = true
-}
-
-/** 任务变更：自动填充关联字段 */
-const handleTaskChange = async (task: any) => {
-  if (!task) {
-    return
+/** 对齐数量：提交前根据 checkFlag 设置待检/合格/不良数量 */
+const alignQuantity = (data: ProFeedbackVO) => {
+  if (checkFlag.value) {
+    // 质检工序：报工数量即待检数量，合格/不良/废品归零
+    data.uncheckQuantity = data.feedbackQuantity
+    data.qualifiedQuantity = 0
+    data.unqualifiedQuantity = 0
+    data.laborScrapQuantity = 0
+    data.materialScrapQuantity = 0
+    data.otherScrapQuantity = 0
+  } else {
+    // 非质检工序：报工数量 = 合格 + 不良，待检归零
+    data.feedbackQuantity = (data.qualifiedQuantity || 0) + (data.unqualifiedQuantity || 0)
+    data.uncheckQuantity = 0
   }
-  formData.value.routeId = task.routeId
-  formData.value.processId = task.processId
-  formData.value.workstationId = task.workstationId
-  formData.value.itemId = task.itemId
-  await loadCheckFlag(task.routeId, task.processId)
 }
-
-/** 生成报工单编号 */
-// TODO @芋艿：这块的生成逻辑；
-const generateCode = () => {
-  const now = new Date()
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  const dateStr =
-    now.getFullYear().toString() +
-    pad(now.getMonth() + 1) +
-    pad(now.getDate()) +
-    pad(now.getHours()) +
-    pad(now.getMinutes()) +
-    pad(now.getSeconds())
-  const random = Math.floor(Math.random() * 1000)
-    .toString()
-    .padStart(3, '0')
-  return 'FB' + dateStr + random
-}
-
-// ==================== 弹窗操作 ====================
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
-  // 修改/详情时，设置数据
+  // 修改/提交/审批/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
       const data = await ProFeedbackApi.getFeedback(id)
       formData.value = data as any
       await loadCheckFlag(data.routeId, data.processId)
+      // 填充产品信息展示
+      productInfo.value = {
+        itemCode: data.itemCode || '',
+        itemName: data.itemName || '',
+        unitMeasureName: data.unitMeasureName || '',
+        itemSpecification: data.itemSpecification || ''
+      }
     } finally {
       formLoading.value = false
     }
   } else {
-    // 创建模式：自动生成报工单号 + 默认报工人为当前用户
-    formData.value.code = generateCode()
+    // 创建模式：默认报工人为当前用户
     formData.value.feedbackUserId = useUserStore().getUser.id
+    // 自动生成报工单号
+    await generateCode()
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
 
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
-
-/** 提交表单 */
-const emit = defineEmits(['success'])
+/** 提交表单（保存 create/update） */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
     const data = formData.value as unknown as ProFeedbackVO
-    // 提交前根据 checkFlag 对齐数量
-    if (checkFlag.value) {
-      // 质检工序：报工数量即待检数量，合格/不良/废品归零
-      data.uncheckQuantity = data.feedbackQuantity
-      data.qualifiedQuantity = 0
-      data.unqualifiedQuantity = 0
-      data.laborScrapQuantity = 0
-      data.materialScrapQuantity = 0
-      data.otherScrapQuantity = 0
-    } else {
-      // 非质检工序：报工数量 = 合格 + 不良，待检归零
-      data.feedbackQuantity = (data.qualifiedQuantity || 0) + (data.unqualifiedQuantity || 0)
-      data.uncheckQuantity = 0
-    }
-    // 执行提交
+    alignQuantity(data)
     if (formType.value === 'create') {
-      await ProFeedbackApi.createFeedback(data)
+      const res = await ProFeedbackApi.createFeedback(data)
       message.success(t('common.createSuccess'))
+      // 创建成功后，切换为编辑模式
+      formData.value.id = res
+      formData.value.status = MesProFeedbackStatusEnum.PREPARE
+      formType.value = 'update'
     } else {
       await ProFeedbackApi.updateFeedback(data)
       message.success(t('common.updateSuccess'))
     }
-    dialogVisible.value = false
-    // 发送操作成功的事件
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
     emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  await formRef.value.validate()
+  try {
+    await message.confirm('确认提交该报工单？【提交后将不能修改】')
+    formLoading.value = true
+    const data = formData.value as unknown as ProFeedbackVO
+    alignQuantity(data)
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      if (formType.value === 'create') {
+        const res = await ProFeedbackApi.createFeedback(data)
+        formData.value.id = res
+      } else {
+        await ProFeedbackApi.updateFeedback(data)
+      }
+    }
+    // 2. 提交报工单
+    await ProFeedbackApi.submitFeedback(formData.value.id!)
+    message.success('报工单已提交')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -498,9 +589,13 @@ const resetForm = () => {
     feedbackUserId: undefined,
     feedbackTime: undefined,
     approveUserId: undefined,
+    status: undefined,
     remark: undefined
   }
   checkFlag.value = true
+  productInfo.value = { itemCode: '', itemName: '', unitMeasureName: '', itemSpecification: '' }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

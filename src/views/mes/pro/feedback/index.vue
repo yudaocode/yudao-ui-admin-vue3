@@ -109,9 +109,9 @@
     >
       <el-table-column label="报工单号" align="center" prop="code" width="160">
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('detail', scope.row.id)">{{
-            scope.row.code
-          }}</el-button>
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column label="报工类型" align="center" prop="type" width="100">
@@ -144,47 +144,46 @@
       <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
           <!-- 草稿状态：编辑、提交、删除 -->
-          <template v-if="scope.row.status === MesProFeedbackStatusEnum.PREPARE">
-            <el-button
-              link
-              type="primary"
-              @click="openForm('update', scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:update']"
-            >
-              编辑
-            </el-button>
-            <el-button
-              link
-              type="success"
-              @click="handleSubmit(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:update']"
-            >
-              提交
-            </el-button>
-            <el-button
-              link
-              type="danger"
-              @click="handleDelete(scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:delete']"
-            >
-              删除
-            </el-button>
-          </template>
-          <template
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['mes:pro-feedback:update']"
+            v-if="scope.row.status === MesProFeedbackStatusEnum.PREPARE"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="success"
+            @click="openForm('submit', scope.row.id)"
+            v-hasPermi="['mes:pro-feedback:update']"
+            v-if="scope.row.status === MesProFeedbackStatusEnum.PREPARE"
+          >
+            提交
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['mes:pro-feedback:delete']"
+            v-if="scope.row.status === MesProFeedbackStatusEnum.PREPARE"
+          >
+            删除
+          </el-button>
+          <!-- 审批中状态：审批（仅限审核人本人） -->
+          <el-button
+            link
+            type="primary"
+            @click="openForm('approve', scope.row.id)"
+            v-hasPermi="['mes:pro-feedback:approve']"
             v-if="
               scope.row.status === MesProFeedbackStatusEnum.APPROVING &&
               scope.row.approveUserId === currentUserId
             "
           >
-            <el-button
-              link
-              type="primary"
-              @click="openForm('approve', scope.row.id)"
-              v-hasPermi="['mes:pro-feedback:approve']"
-            >
-              审批
-            </el-button>
-          </template>
+            审批
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -197,19 +196,19 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
+  <!-- 表单弹窗：添加/修改/提交/审批/详情 -->
   <FeedbackForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { ProFeedbackApi, ProFeedbackVO } from '@/api/mes/pro/feedback'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import FeedbackForm from './FeedbackForm.vue'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
 import { useUserStore } from '@/store/modules/user'
 
@@ -222,6 +221,7 @@ const currentUserId = useUserStore().getUser.id // 当前登录用户 ID
 const loading = ref(true) // 列表的加载中
 const list = ref<ProFeedbackVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -235,7 +235,7 @@ const queryParams = reactive({
   feedbackTime: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -261,8 +261,7 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
+/** 添加/修改/提交/审批/详情操作 */
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
@@ -270,23 +269,9 @@ const openForm = (type: string, id?: number) => {
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
-    // 删除的二次确认
     await message.delConfirm()
-    // 发起删除
     await ProFeedbackApi.deleteFeedback(id)
     message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
-
-/** 提交报工单 */
-const handleSubmit = async (id: number) => {
-  try {
-    await message.confirm('确认要提交该报工单吗？')
-    await ProFeedbackApi.submitFeedback(id)
-    message.success('报工单已提交')
-    // 刷新列表
     await getList()
   } catch {}
 }
@@ -294,19 +279,18 @@ const handleSubmit = async (id: number) => {
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {
-    // 导出的二次确认
     await message.exportConfirm()
-    // 发起导出
     exportLoading.value = true
     const data = await ProFeedbackApi.exportFeedback(queryParams)
     download.excel(data, '生产报工.xls')
+  } catch {
   } finally {
     exportLoading.value = false
   }
 }
 
 /** 初始化 */
-onMounted(async () => {
-  await getList()
+onMounted(() => {
+  getList()
 })
 </script>
