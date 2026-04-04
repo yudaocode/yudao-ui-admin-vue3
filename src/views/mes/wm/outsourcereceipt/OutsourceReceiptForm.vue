@@ -103,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { generateRandomStr } from '@/utils'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { WmOutsourceReceiptApi, WmOutsourceReceiptVO } from '@/api/mes/wm/outsourcereceipt'
 import { ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
@@ -156,8 +156,8 @@ const formRef = ref() // 表单 Ref
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成入库单编号 */
-const generateCode = () => {
-  formData.value.code = 'OR' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode('WM_OUTSOURCE_RECEIPT_CODE')
 }
 
 /** 工单选中回调 —— 自动回填供应商 */

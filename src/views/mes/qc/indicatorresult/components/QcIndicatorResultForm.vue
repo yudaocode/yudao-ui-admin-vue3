@@ -96,7 +96,7 @@
 import { QcIndicatorResultApi } from '@/api/mes/qc/indicatorresult'
 import { getStrDictOptions } from '@/utils/dict'
 import { MesQcResultValueType } from '@/views/mes/utils/constants'
-import { generateRandomStr } from '@/utils'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 
 defineOptions({ name: 'QcIndicatorResultForm' })
 
@@ -127,8 +127,8 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 生成样品编号 */
-const generateCode = () => {
-  formData.value.code = 'QR' + generateRandomStr(12)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode('QC_INDICATOR_RESULT_CODE')
 }
 
 /** 打开弹窗 */
