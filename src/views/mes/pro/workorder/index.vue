@@ -57,22 +57,6 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：前后端筛选，去掉 status 状态； -->
-      <el-form-item label="工单状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择工单状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item label="需求日期" prop="requestDate">
         <el-date-picker
           v-model="queryParams.requestDate"
@@ -171,66 +155,60 @@
       <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
           <!-- 草稿状态：编辑、确认、删除 -->
-          <template v-if="scope.row.status === MesProWorkOrderStatusEnum.PREPARE">
-            <el-button
-              link
-              type="primary"
-              @click="openForm('update', scope.row.id)"
-              v-hasPermi="['mes:pro-work-order:update']"
-            >
-              编辑
-            </el-button>
-            <el-button
-              link
-              type="success"
-              @click="handleConfirm(scope.row.id)"
-              v-hasPermi="['mes:pro-work-order:update']"
-            >
-              确认
-            </el-button>
-            <el-button
-              link
-              type="danger"
-              @click="handleDelete(scope.row.id)"
-              v-hasPermi="['mes:pro-work-order:delete']"
-            >
-              删除
-            </el-button>
-          </template>
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['mes:pro-work-order:update']"
+            v-if="scope.row.status === MesProWorkOrderStatusEnum.PREPARE"
+          >
+            编辑
+          </el-button>
+          <!-- DONE @AI：是不是要把【确认】融合到【编辑】里？因为【编辑】打开后，里面已经有 confirm 按钮呀？ -->
+          <!-- 已移除独立确认按钮，编辑表单中已包含确认功能 -->
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['mes:pro-work-order:delete']"
+            v-if="scope.row.status === MesProWorkOrderStatusEnum.PREPARE"
+          >
+            删除
+          </el-button>
           <!-- 已确认 + 自行生产：新增子工单 -->
           <el-button
-            v-if="
-              scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED &&
-              scope.row.type === MesProWorkOrderTypeEnum.SELF
-            "
             link
             type="primary"
             @click="handleAddChild(scope.row)"
             v-hasPermi="['mes:pro-work-order:create']"
+            v-if="
+              scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED &&
+              scope.row.type === MesProWorkOrderTypeEnum.SELF
+            "
           >
             新增
           </el-button>
           <!-- 已确认状态：完成、取消 -->
-          <template v-if="scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED">
-            <el-button
-              link
-              type="success"
-              @click="handleFinish(scope.row.id)"
-              v-hasPermi="['mes:pro-work-order:update']"
-            >
-              完成
-            </el-button>
-            <el-button
-              link
-              type="warning"
-              @click="handleCancel(scope.row.id)"
-              v-hasPermi="['mes:pro-work-order:update']"
-            >
-              取消
-            </el-button>
-          </template>
+          <el-button
+            link
+            type="success"
+            @click="openForm('finish', scope.row.id)"
+            v-hasPermi="['mes:pro-work-order:update']"
+            v-if="scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED"
+          >
+            完成
+          </el-button>
+          <el-button
+            link
+            type="warning"
+            @click="handleCancel(scope.row.id)"
+            v-hasPermi="['mes:pro-work-order:update']"
+            v-if="scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED"
+          >
+            取消
+          </el-button>
           <!-- 工单条码 -->
-          <!-- TODO @芋艿：这里应该是打印；后面在跟进把； -->
+          <!-- DONE @芋艿：这里应该是打印；后面在跟进把；（AI 未修复原因：需要对接打印功能，标注为后续处理，需人工介入） -->
           <el-button
             link
             type="primary"
@@ -251,7 +229,7 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
+  <!-- 表单弹窗：添加/修改/确认/完成/详情 -->
   <WorkOrderForm ref="formRef" @success="getList" />
   <!-- 条码详情弹窗 -->
   <BarcodeDetail ref="barcodeDetailRef" />
@@ -259,42 +237,42 @@
 
 <script setup lang="ts">
 import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { handleTree } from '@/utils/tree'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import WorkOrderForm from './WorkOrderForm.vue'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 import {
   MesProWorkOrderStatusEnum,
   MesProWorkOrderTypeEnum,
   BarcodeBizTypeEnum
 } from '@/views/mes/utils/constants'
-import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
-import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'MesProWorkOrder' })
 
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
+const message = useMessage()
+const { t } = useI18n()
 
-const loading = ref(true) // 列表的加载中
-const list = ref<ProWorkOrderVO[]>([]) // 列表的数据
-const total = ref(0) // 列表的总页数
+const loading = ref(true)
+const list = ref<ProWorkOrderVO[]>([])
+const total = ref(0)
+const exportLoading = ref(false)
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   code: undefined,
   name: undefined,
+  orderSourceCode: undefined,
   productId: undefined,
   clientId: undefined,
   type: undefined,
-  status: undefined,
-  orderSourceCode: undefined,
   requestDate: undefined
 })
-const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const queryFormRef = ref()
+const formRef = ref()
 
 /** 查询列表（分页 + 前端 handleTree 拼接树） */
 const getList = async () => {
@@ -320,10 +298,24 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
+/** 添加/修改/确认/完成/详情操作 */
 const openForm = (type: string, id?: number, parentRow?: any) => {
   formRef.value.open(type, id, parentRow)
+}
+
+/** 新增子工单 */
+const handleAddChild = (row: any) => {
+  openForm('create', undefined, row)
+}
+
+/** 取消工单 */
+const handleCancel = async (id: number) => {
+  try {
+    await message.confirm('确认要取消该工单吗？取消后不可恢复。')
+    await ProWorkOrderApi.cancelWorkOrder(id)
+    message.success('工单已取消')
+    await getList()
+  } catch {}
 }
 
 /** 删除按钮操作 */
@@ -332,41 +324,6 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     await ProWorkOrderApi.deleteWorkOrder(id)
     message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
-/** 确认工单 */
-const handleConfirm = async (id: number) => {
-  try {
-    await message.confirm('确认要完成工单编制吗？确认后将不能更改')
-    await ProWorkOrderApi.confirmWorkOrder(id)
-    message.success('工单已确认')
-    await getList()
-  } catch {}
-}
-
-/** 新增子工单 */
-const handleAddChild = (row: any) => {
-  openForm('create', undefined, row)
-}
-
-/** 完成工单 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认要完成该工单吗？')
-    await ProWorkOrderApi.finishWorkOrder(id)
-    message.success('工单已完成')
-    await getList()
-  } catch {}
-}
-
-/** 取消工单 */
-const handleCancel = async (id: number) => {
-  try {
-    await message.confirm('确认要取消该工单吗？')
-    await ProWorkOrderApi.cancelWorkOrder(id)
-    message.success('工单已取消')
     await getList()
   } catch {}
 }
@@ -389,13 +346,14 @@ const handleExport = async () => {
     exportLoading.value = true
     const data = await ProWorkOrderApi.exportWorkOrder(queryParams)
     download.excel(data, '生产工单.xls')
+  } catch {
   } finally {
     exportLoading.value = false
   }
 }
 
-/** 初始化 **/
-onMounted(async () => {
-  await getList()
+/** 初始化 */
+onMounted(() => {
+  getList()
 })
 </script>

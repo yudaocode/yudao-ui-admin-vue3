@@ -7,20 +7,29 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="12">
           <el-form-item label="工单编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入工单编码" :disabled="isDetail">
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入工单编码"
+              :disabled="isHeaderReadonly"
+            >
               <template #append>
-                <el-button @click="generateCode"> 生成 </el-button>
+                <el-button @click="generateCode" :disabled="isHeaderReadonly"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="工单名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入工单名称" :disabled="isDetail" />
+            <el-input
+              v-model="formData.name"
+              placeholder="请输入工单名称"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -31,7 +40,7 @@
               v-model="formData.orderSourceType"
               placeholder="请选择工单来源"
               class="!w-1/1"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE)"
@@ -47,7 +56,7 @@
             <el-input
               v-model="formData.orderSourceCode"
               placeholder="请输入来源单据编号"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
@@ -57,7 +66,7 @@
               v-model="formData.type"
               placeholder="请选择工单类型"
               class="!w-1/1"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_TYPE)"
@@ -72,7 +81,7 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="产品" prop="productId">
-            <MdItemSelect v-model="formData.productId" :disabled="isDetail" />
+            <MdItemSelect v-model="formData.productId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -82,13 +91,13 @@
               :min="1"
               :precision="2"
               class="!w-1/1"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="客户" prop="clientId">
-            <MdClientSelect v-model="formData.clientId" :disabled="isDetail" />
+            <MdClientSelect v-model="formData.clientId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -101,7 +110,7 @@
           "
         >
           <el-form-item label="供应商" prop="vendorId">
-            <MdVendorSelect v-model="formData.vendorId" :disabled="isDetail" />
+            <MdVendorSelect v-model="formData.vendorId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -109,7 +118,7 @@
             <el-input
               v-model="formData.batchCode"
               placeholder="请输入批次号"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
@@ -121,7 +130,7 @@
               placeholder="请选择需求日期"
               value-format="x"
               class="!w-1/1"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
@@ -138,30 +147,47 @@
               type="textarea"
               v-model="formData.remark"
               placeholder="请输入备注"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
-    <!-- BOM Tab：编辑/详情时显示 -->
-    <el-tabs v-if="formType !== 'create'" v-model="activeTab" class="mt-15px">
-      <el-tab-pane label="工单 BOM" name="bom">
-        <WorkOrderBomList
-          v-if="formData.id"
-          :work-order-id="formData.id"
-          :work-order="formData"
-          :disabled="isDetail"
-          @generate-work-order="handleGenerateWorkOrder"
-        />
-      </el-tab-pane>
-      <el-tab-pane label="物料需求" name="item">
-        <WorkOrderItemList v-if="formData.id" :work-order-id="formData.id" />
-      </el-tab-pane>
-    </el-tabs>
-    <template #footer v-if="!isDetail">
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+    <!-- BOM / 物料需求 Tab：非新建模式时显示 -->
+    <template v-if="formData.id">
+      <el-tabs v-model="activeTab" class="mt-15px">
+        <el-tab-pane label="工单 BOM" name="bom">
+          <WorkOrderBomList
+            :work-order-id="formData.id"
+            :work-order="formData"
+            :form-type="formType"
+            @generate-work-order="handleGenerateWorkOrder"
+          />
+        </el-tab-pane>
+        <el-tab-pane label="物料需求" name="item">
+          <WorkOrderItemList :work-order-id="formData.id" />
+        </el-tab-pane>
+      </el-tabs>
+    </template>
+    <template #footer>
+      <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
+        保 存
+      </el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesProWorkOrderStatusEnum.PREPARE"
+        @click="handleConfirm"
+        type="warning"
+        :disabled="formLoading"
+      >
+        确 认
+      </el-button>
+      <el-button v-if="isConfirm" @click="handleConfirm" type="warning" :disabled="formLoading">
+        确 认
+      </el-button>
+      <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
+        完 成
+      </el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -178,22 +204,40 @@ import WorkOrderItemList from './WorkOrderItemList.vue'
 import {
   MesProWorkOrderSourceTypeEnum,
   MesProWorkOrderTypeEnum,
+  MesProWorkOrderStatusEnum,
   MesAutoCodeRuleCode
 } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'WorkOrderForm' })
+const emit = defineEmits(['success'])
 
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
+const message = useMessage()
 
-const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
-const activeTab = ref('bom') // 活跃的 Tab
+const dialogVisible = ref(false)
+const formLoading = ref(false)
+const formType = ref<string>('create') // create / update / confirm / finish / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value))
+const isConfirm = computed(() => formType.value === 'confirm')
+const isFinish = computed(() => formType.value === 'finish')
+const isDetail = computed(() => ['detail', 'confirm', 'finish'].includes(formType.value))
+const isHeaderReadonly = computed(() => ['confirm', 'finish', 'detail'].includes(formType.value))
+const dialogTitle = computed(() => {
+  if (['create', 'update'].includes(formType.value) && formData.value.parentId) {
+    return formType.value === 'create' ? '新增子工单' : '编辑子工单'
+  }
+  const titles: Record<string, string> = {
+    create: '新增工单',
+    update: '编辑工单',
+    confirm: '确认工单',
+    finish: '完成工单',
+    detail: '工单详情'
+  }
+  return titles[formType.value] || formType.value
+})
+const activeTab = ref('bom')
 const formData = ref({
-  id: undefined,
-  parentId: undefined,
+  id: undefined as number | undefined,
+  parentId: undefined as number | undefined,
   code: undefined,
   name: undefined,
   type: undefined,
@@ -205,7 +249,7 @@ const formData = ref({
   vendorId: undefined,
   batchCode: undefined,
   requestDate: undefined,
-  status: undefined,
+  status: undefined as number | undefined,
   remark: undefined
 })
 const formRules = reactive({
@@ -217,10 +261,8 @@ const formRules = reactive({
   quantity: [{ required: true, message: '工单数量不能为空', trigger: 'blur' }],
   requestDate: [{ required: true, message: '需求日期不能为空', trigger: 'change' }]
 })
-const formRef = ref() // 表单 Ref
-
-/** 是否为详情模式 */
-const isDetail = computed(() => formType.value === 'detail')
+const formRef = ref()
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成工单编码 */
 const generateCode = async () => {
@@ -232,16 +274,10 @@ const generateCode = async () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number, parentRow?: any) => {
   dialogVisible.value = true
-  // todo @AI：有什么办法，计算 compute 计算么？结果 formData.parentid + type？
-  dialogTitle.value = parentRow
-    ? '新增子工单'
-    : type === 'detail'
-      ? '工单详情'
-      : t('action.' + type)
   formType.value = type
   activeTab.value = 'bom'
   resetForm()
-  // 修改/详情时，设置数据
+  // 修改/确认/完成/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -260,15 +296,14 @@ const open = async (type: string, id?: number, parentRow?: any) => {
     formData.value.vendorId = parentRow.vendorId
     formData.value.requestDate = parentRow.requestDate
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
 
 /** 从 BOM 行生成子工单 */
 const handleGenerateWorkOrder = (bomRow: any) => {
-  // 保存当前工单信息
   const currentWorkOrder = { ...formData.value }
   resetForm()
-  // 设置弹窗状态
-  dialogTitle.value = '新增子工单'
   formType.value = 'create'
   activeTab.value = 'bom'
   // 预填父工单信息 + BOM 物料作为产品
@@ -282,11 +317,10 @@ const handleGenerateWorkOrder = (bomRow: any) => {
   formData.value.productId = bomRow.itemId
   formData.value.quantity = bomRow.quantity
   formData.value.name = `${bomRow.itemName}【${bomRow.quantity}】${bomRow.unitMeasureName || ''}`
-  // 提示用户
   message.info('已从 BOM 物料预填子工单，请补充工单编码等信息后保存')
 }
 
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+defineExpose({ open })
 
 /** 工单来源变更：非客户订单时清空来源单据编号 */
 watch(
@@ -308,22 +342,64 @@ watch(
   }
 )
 
-/** 提交表单 */
-const emit = defineEmits(['success'])
+/** 保存表单（create/update 模式） */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
     const data = formData.value as unknown as ProWorkOrderVO
     if (formType.value === 'create') {
-      await ProWorkOrderApi.createWorkOrder(data)
-      message.success(t('common.createSuccess'))
+      const res = await ProWorkOrderApi.createWorkOrder(data)
+      message.success('新增成功')
+      // 创建成功后，更新表单数据和状态为编辑模式
+      formData.value.id = res
+      formData.value.status = MesProWorkOrderStatusEnum.PREPARE
+      formType.value = 'update'
     } else {
       await ProWorkOrderApi.updateWorkOrder(data)
-      message.success(t('common.updateSuccess'))
+      message.success('修改成功')
     }
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 确认工单：表单修改过则先保存，再确认 */
+const handleConfirm = async () => {
+  if (isEditable.value) {
+    await formRef.value.validate()
+  }
+  try {
+    await message.confirm('确认要完成工单编制吗？确认后将不能更改。')
+    formLoading.value = true
+    // 编辑模式下，表单有修改时先保存
+    if (isEditable.value && JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as unknown as ProWorkOrderVO
+      await ProWorkOrderApi.updateWorkOrder(data)
+    }
+    await ProWorkOrderApi.confirmWorkOrder(formData.value.id!)
+    message.success('工单已确认')
     dialogVisible.value = false
     emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 完成工单 */
+const handleFinish = async () => {
+  try {
+    await message.confirm('确认要完成该工单吗？')
+    formLoading.value = true
+    await ProWorkOrderApi.finishWorkOrder(formData.value.id!)
+    message.success('工单已完成')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
