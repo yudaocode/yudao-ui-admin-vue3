@@ -14,6 +14,7 @@ export interface ProCardVO {
   specification: string // 规格型号
   unitMeasureName: string // 单位名称
   transferedQuantity: number // 流转数量
+  status: number // 状态
   remark: string // 备注
 }
 
@@ -47,6 +48,21 @@ export const ProCardApi = {
   // 导出生产流转卡 Excel
   exportCard: async (params: any) => {
     return await request.download({ url: `/mes/pro/card/export-excel`, params })
+  },
+
+  // 提交生产流转卡
+  submitCard: async (id: number) => {
+    return await request.put({ url: `/mes/pro/card/submit?id=` + id })
+  },
+
+  // 执行生产流转卡
+  executeCard: async (id: number) => {
+    return await request.put({ url: `/mes/pro/card/execute?id=` + id })
+  },
+
+  // 取消生产流转卡
+  cancelCard: async (id: number) => {
+    return await request.put({ url: `/mes/pro/card/cancel?id=` + id })
   },
 
   // 获取生产流转卡精简列表

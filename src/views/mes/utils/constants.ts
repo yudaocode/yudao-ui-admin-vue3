@@ -66,6 +66,14 @@ export const MesProWorkOrderStatusEnum = {
   CANCELED: 3 // 已取消
 }
 
+/** MES 生产流转卡状态枚举（复用工单状态值） */
+export const MesProCardStatusEnum = {
+  PREPARE: 0, // 草稿
+  CONFIRMED: 1, // 已确认
+  FINISHED: 2, // 已完成
+  CANCELED: 3 // 已取消
+}
+
 /** MES 工单类型枚举 */
 export const MesProWorkOrderTypeEnum = {
   SELF: 1, // 自行生产

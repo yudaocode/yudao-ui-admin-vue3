@@ -7,11 +7,16 @@
       :rules="formRules"
       label-width="120px"
       v-loading="formLoading"
+      :disabled="isDetail"
     >
       <el-row>
         <el-col :span="12">
           <el-form-item label="流转卡编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入流转卡编码" :disabled="isDetail">
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入流转卡编码"
+              :disabled="isHeaderReadonly"
+            >
               <template #append>
                 <el-button @click="generateCode"> 生成 </el-button>
               </template>
@@ -20,14 +25,14 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isDetail" />
+            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
           <el-form-item label="产品" prop="itemId">
-            <MdItemSelect v-model="formData.itemId" :disabled="isDetail" />
+            <MdItemSelect v-model="formData.itemId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -37,7 +42,7 @@
               :min="0"
               :precision="2"
               class="!w-1/1"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
@@ -46,7 +51,7 @@
             <el-input
               v-model="formData.batchCode"
               placeholder="请输入批次号"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
@@ -58,21 +63,33 @@
               type="textarea"
               v-model="formData.remark"
               placeholder="请输入备注"
-              :disabled="isDetail"
+              :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
-    <!-- 工序记录子表：编辑/详情时显示 -->
-    <el-tabs v-if="formType !== 'create'" v-model="activeTab" class="mt-15px">
-      <el-tab-pane label="工序记录" name="process">
-        <CardProcessList v-if="formData.id" :card-id="formData.id" :disabled="isDetail" />
-      </el-tab-pane>
-    </el-tabs>
-    <template #footer v-if="!isDetail">
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
+    <!-- 工序记录子表：非新建模式显示 -->
+    <template v-if="formData.id">
+      <el-divider content-position="center">工序记录</el-divider>
+      <CardProcessList :card-id="formData.id" :disabled="!isEditable" />
+    </template>
+    <template #footer>
+      <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">
+        保 存
+      </el-button>
+      <el-button
+        v-if="isEditable && formData.status === MesProCardStatusEnum.PREPARE"
+        @click="handleSubmit"
+        type="warning"
+        :disabled="formLoading"
+      >
+        提 交
+      </el-button>
+      <el-button v-if="isExecute" @click="handleExecute" type="success" :disabled="formLoading">
+        执 行
+      </el-button>
+      <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
 </template>
@@ -83,25 +100,37 @@ import { generateRandomStr } from '@/utils'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import CardProcessList from './CardProcessList.vue'
+import { MesProCardStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'CardForm' })
+const emit = defineEmits(['success'])
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
-const activeTab = ref('process') // 活跃的 Tab
+const formType = ref<string>('create') // 表单的类型：create / update / execute / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isExecute = computed(() => formType.value === 'execute') // 是否为执行模式
+const isDetail = computed(() => ['detail', 'execute'].includes(formType.value)) // 是否为详情模式（表单只读）
+const isHeaderReadonly = computed(() => ['execute', 'detail'].includes(formType.value)) // 头部是否只读
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增流转卡',
+    update: '编辑流转卡',
+    execute: '执行流转卡',
+    detail: '流转卡详情'
+  }
+  return titles[formType.value] || formType.value
+})
 const formData = ref({
-  id: undefined,
-  code: undefined,
-  workOrderId: undefined,
-  batchCode: undefined,
-  itemId: undefined,
-  transferedQuantity: undefined,
-  remark: undefined
+  id: undefined as number | undefined,
+  code: undefined as string | undefined,
+  workOrderId: undefined as number | undefined,
+  batchCode: undefined as string | undefined,
+  itemId: undefined as number | undefined,
+  transferedQuantity: undefined as number | undefined,
+  status: undefined as number | undefined,
+  remark: undefined as string | undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '流转卡编码不能为空', trigger: 'blur' }],
@@ -110,9 +139,7 @@ const formRules = reactive({
   transferedQuantity: [{ required: true, message: '流转数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-
-/** 是否为详情模式 */
-const isDetail = computed(() => formType.value === 'detail')
+const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成流转卡编码 */
 const generateCode = () => {
@@ -122,11 +149,9 @@ const generateCode = () => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'detail' ? '流转卡详情' : t('action.' + type)
   formType.value = type
-  activeTab.value = 'process'
   resetForm()
-  // 修改/详情时，设置数据
+  // 修改/执行/详情时，加载数据
   if (id) {
     formLoading.value = true
     try {
@@ -135,26 +160,67 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 保存原始数据快照
+  originalFormData.value = JSON.stringify(formData.value)
 }
 
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
-
-/** 提交表单 */
-const emit = defineEmits(['success'])
+/** 提交表单（create/update 模式） */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
     const data = formData.value as unknown as ProCardVO
     if (formType.value === 'create') {
-      await ProCardApi.createCard(data)
-      message.success(t('common.createSuccess'))
+      const res = await ProCardApi.createCard(data)
+      message.success('新增成功')
+      // 创建成功后，更新表单数据和状态为编辑模式
+      formData.value.id = res
+      formData.value.status = MesProCardStatusEnum.PREPARE
+      formType.value = 'update'
     } else {
       await ProCardApi.updateCard(data)
-      message.success(t('common.updateSuccess'))
+      message.success('修改成功')
     }
+    // 更新快照
+    originalFormData.value = JSON.stringify(formData.value)
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 提交操作：表单修改过则先保存，再提交 */
+const handleSubmit = async () => {
+  await formRef.value.validate()
+  try {
+    await message.confirm('确认提交该流转卡？【提交后将不能修改】')
+    formLoading.value = true
+    // 1. 表单有修改时，先保存
+    if (JSON.stringify(formData.value) !== originalFormData.value) {
+      const data = formData.value as unknown as ProCardVO
+      await ProCardApi.updateCard(data)
+    }
+    // 2. 提交流转卡
+    await ProCardApi.submitCard(formData.value.id!)
+    message.success('提交成功')
     dialogVisible.value = false
     emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 执行流转卡 */
+const handleExecute = async () => {
+  try {
+    await message.confirm('确认执行该流转卡？')
+    formLoading.value = true
+    await ProCardApi.executeCard(formData.value.id!)
+    message.success('执行成功')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
   } finally {
     formLoading.value = false
   }
@@ -169,8 +235,11 @@ const resetForm = () => {
     batchCode: undefined,
     itemId: undefined,
     transferedQuantity: undefined,
+    status: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

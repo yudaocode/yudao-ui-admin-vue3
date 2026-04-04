@@ -37,7 +37,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- DONE @AI：前后端都去掉 status、createTime 筛选 -->
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -80,14 +79,20 @@
       <el-table-column label="规格型号" align="center" prop="specification" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="流转数量" align="center" prop="transferedQuantity" width="100" />
-      <el-table-column label="操作" align="center" width="160" fixed="right">
+      <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <!-- TODO @芋艿：打印 -->
+          <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" align="center" width="240" fixed="right">
+        <template #default="scope">
+          <!-- 草稿：编辑、提交、删除 -->
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['mes:pro-card:update']"
+            v-if="scope.row.status === MesProCardStatusEnum.PREPARE"
           >
             编辑
           </el-button>
@@ -96,8 +101,28 @@
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mes:pro-card:delete']"
+            v-if="scope.row.status === MesProCardStatusEnum.PREPARE"
           >
             删除
+          </el-button>
+          <!-- 已确认：执行、取消 -->
+          <el-button
+            link
+            type="success"
+            @click="openForm('execute', scope.row.id)"
+            v-hasPermi="['mes:pro-card:update']"
+            v-if="scope.row.status === MesProCardStatusEnum.CONFIRMED"
+          >
+            执行
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleCancel(scope.row.id)"
+            v-hasPermi="['mes:pro-card:update']"
+            v-if="scope.row.status === MesProCardStatusEnum.CONFIRMED"
+          >
+            取消
           </el-button>
         </template>
       </el-table-column>
@@ -116,11 +141,13 @@
 </template>
 
 <script setup lang="ts">
+import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { ProCardApi, ProCardVO } from '@/api/mes/pro/card'
 import CardForm from './CardForm.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
+import { MesProCardStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesProCard' })
 
@@ -130,6 +157,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const list = ref<ProCardVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -139,7 +167,7 @@ const queryParams = reactive({
   batchCode: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const formRef = ref() // 表单弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -166,9 +194,18 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 取消按钮操作 */
+const handleCancel = async (id: number) => {
+  try {
+    await message.confirm('确认取消该流转卡？取消后不可恢复。')
+    await ProCardApi.cancelCard(id)
+    message.success('取消成功')
+    await getList()
+  } catch {}
 }
 
 /** 删除按钮操作 */
@@ -188,13 +225,14 @@ const handleExport = async () => {
     exportLoading.value = true
     const data = await ProCardApi.exportCard(queryParams)
     download.excel(data, '生产流转卡.xls')
+  } catch {
   } finally {
     exportLoading.value = false
   }
 }
 
-/** 初始化 **/
-onMounted(async () => {
-  await getList()
+/** 初始化 */
+onMounted(() => {
+  getList()
 })
 </script>

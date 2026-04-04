@@ -133,6 +133,11 @@
               <MdWorkstationSelect v-model="processFormData.workstationId" />
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="操作人" prop="userId">
+              <UserSelect v-model="processFormData.userId" />
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row>
           <el-col :span="24">
@@ -143,9 +148,9 @@
         </el-row>
       </el-form>
       <template #footer>
-        <el-button @click="submitProcessForm" type="primary" :disabled="processFormLoading"
-          >确 定</el-button
-        >
+        <el-button @click="submitProcessForm" type="primary" :disabled="processFormLoading">
+          确 定
+        </el-button>
         <el-button @click="processDialogVisible = false">取 消</el-button>
       </template>
     </Dialog>
@@ -157,6 +162,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { ProCardProcessApi, ProCardProcessVO } from '@/api/mes/pro/card/process'
 import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 
 defineOptions({ name: 'CardProcessList' })
 
@@ -201,7 +207,7 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-// ==================== 工序记录编辑表单（内联） ====================
+// ==================== 工序记录编辑表单 ====================
 const processDialogVisible = ref(false)
 const processDialogTitle = ref('')
 const processFormLoading = ref(false)
@@ -217,6 +223,7 @@ const processFormData = ref({
   outputQuantity: undefined as number | undefined,
   unqualifiedQuantity: undefined as number | undefined,
   workstationId: undefined as number | undefined,
+  userId: undefined as number | undefined,
   remark: undefined as string | undefined
 })
 const processFormRules = reactive({})
@@ -237,6 +244,7 @@ const openProcessForm = (type: string, row?: any) => {
       outputQuantity: undefined,
       unqualifiedQuantity: undefined,
       workstationId: undefined,
+      userId: undefined,
       remark: undefined
     }
   } else {
@@ -251,6 +259,7 @@ const openProcessForm = (type: string, row?: any) => {
       outputQuantity: row.outputQuantity,
       unqualifiedQuantity: row.unqualifiedQuantity,
       workstationId: row.workstationId,
+      userId: row.userId,
       remark: row.remark
     }
   }
