@@ -453,7 +453,8 @@ export const MesAutoCodeRuleCode = {
   DV_MACHINERY_TYPE_CODE: 'DV_MACHINERY_TYPE_CODE', // 设备类型编码
   DV_CHECK_PLAN_CODE: 'DV_CHECK_PLAN_CODE', // 点检保养方案编码
   DV_SUBJECT_CODE: 'DV_SUBJECT_CODE', // 点检保养项目编码
-  DV_REPAIR_CODE: 'DV_REPAIR_CODE' // 维修单编码
+  DV_REPAIR_CODE: 'DV_REPAIR_CODE', // 维修单编码
+  PRO_WORK_ORDER_CODE: 'PRO_WORK_ORDER_CODE' // 生产工单编码
 } as const
 
 /** 获取物料/产品标识的标签 */

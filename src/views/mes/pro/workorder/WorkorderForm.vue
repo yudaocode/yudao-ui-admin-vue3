@@ -79,7 +79,7 @@
           <el-form-item label="工单数量" prop="quantity">
             <el-input-number
               v-model="formData.quantity"
-              :min="0"
+              :min="1"
               :precision="2"
               class="!w-1/1"
               :disabled="isDetail"
@@ -169,13 +169,17 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
-import { generateRandomStr } from '@/utils'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import WorkOrderBomList from './WorkOrderBomList.vue'
 import WorkOrderItemList from './WorkOrderItemList.vue'
-import { MesProWorkOrderSourceTypeEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
+import {
+  MesProWorkOrderSourceTypeEnum,
+  MesProWorkOrderTypeEnum,
+  MesAutoCodeRuleCode
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'WorkOrderForm' })
 
@@ -219,13 +223,16 @@ const formRef = ref() // 表单 Ref
 const isDetail = computed(() => formType.value === 'detail')
 
 /** 生成工单编码 */
-const generateCode = () => {
-  formData.value.code = 'MO' + generateRandomStr(10)
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.PRO_WORK_ORDER_CODE
+  )
 }
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number, parentRow?: any) => {
   dialogVisible.value = true
+  // todo @AI：有什么办法，计算 compute 计算么？结果 formData.parentid + type？
   dialogTitle.value = parentRow
     ? '新增子工单'
     : type === 'detail'
