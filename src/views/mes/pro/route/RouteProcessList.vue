@@ -35,7 +35,7 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.keyFlag" />
         </template>
       </el-table-column>
-      <el-table-column label="质检工序" align="center" prop="checkFlag" width="80">
+      <el-table-column label="质检确认" align="center" prop="checkFlag" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.checkFlag" />
         </template>
@@ -50,7 +50,7 @@
           {{ scope.row.waitTime ? scope.row.waitTime + '分钟' : '' }}
         </template>
       </el-table-column>
-      <el-table-column label="颜色" align="center" prop="colorCode" width="100">
+      <el-table-column label="甘特图颜色" align="center" prop="colorCode" width="100">
         <template #default="scope">
           <div
             v-if="scope.row.colorCode"
@@ -78,7 +78,7 @@
 
     <!-- 表单弹窗：添加/修改 -->
     <Dialog :title="formTitle" v-model="formVisible" width="960px">
-      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
+      <el-form ref="formRef" :model="formData" :rules="formRules" label-width="130px">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="序号" prop="sort">
@@ -112,7 +112,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="颜色" prop="colorCode">
+            <el-form-item label="甘特图颜色" prop="colorCode">
+              <!-- TODO @AI：unocss 哈 -->
               <div style="display: flex; align-items: center; gap: 8px">
                 <el-color-picker v-model="formData.colorCode" />
                 <span v-if="formData.colorCode">{{ formData.colorCode }}</span>
@@ -122,12 +123,12 @@
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="关键工序" prop="keyFlag">
+            <el-form-item label="是否关键工序" prop="keyFlag">
               <el-switch v-model="formData.keyFlag" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="质检工序" prop="checkFlag">
+            <el-form-item label="是否需要质检确认" prop="checkFlag">
               <el-switch v-model="formData.checkFlag" />
             </el-form-item>
           </el-col>
@@ -200,6 +201,7 @@ const formRules = reactive({
   sort: [{ required: true, message: '序号不能为空', trigger: 'blur' }],
   processId: [{ required: true, message: '工序不能为空', trigger: 'change' }],
   linkType: [{ required: true, message: '工序关系不能为空', trigger: 'change' }]
+  // TODO @AI：keyFlag、checkFlag 必填；
 })
 const formRef = ref() // 表单 Ref
 

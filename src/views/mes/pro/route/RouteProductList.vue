@@ -13,6 +13,7 @@
       <el-table-column label="产品物料名称" align="center" prop="itemName" width="150" />
       <el-table-column label="规格型号" align="center" prop="specification" width="150" />
       <el-table-column label="单位" align="center" prop="unitName" width="80" />
+      <!-- TODO @AI：对齐的话，生产数量、生产用时、生产单位，是不是不需要这些字段？？？ -->
       <el-table-column label="生产数量" align="center" prop="quantity" width="100" />
       <el-table-column label="生产用时" align="center" width="120">
         <template #default="scope">

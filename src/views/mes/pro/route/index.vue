@@ -73,6 +73,7 @@
       </el-table-column>
       <el-table-column label="路线名称" align="center" prop="name" min-width="200" />
       <el-table-column label="路线说明" align="center" prop="description" min-width="200" />
+      <!-- TODO @AI：改成 el-switch 形式 -->
       <el-table-column label="状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -89,6 +90,7 @@
       <el-table-column label="操作" align="center" width="220" fixed="right">
         <template #default="scope">
           <!-- 停用状态：编辑、启用、删除 -->
+          <!-- TODO @AI：禁用不可编辑、删除时，有个 tooltip disable 这样，不要直接隐藏； -->
           <el-button
             link
             type="primary"

@@ -134,12 +134,14 @@ const formData = ref<ProRouteVO>({
 const formRules = reactive({
   code: [{ required: true, message: '编码不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
+  // TODO @AI：生成时，默认是禁用的；后端默认禁用状态；save 不要接收状态；
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
 /** 生成编码 */
 const generateCode = () => {
+  // TODO @AI：编码规则；mysql 也需要插入下；
   formData.value.code = 'ROUTE' + generateRandomStr(8)
 }
 
