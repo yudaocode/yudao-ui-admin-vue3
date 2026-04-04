@@ -70,8 +70,13 @@
       :show-overflow-tooltip="true"
       row-key="id"
     >
-      <!-- TODO @AI：增加【详情】操作；点击下；工序编码； -->
-      <el-table-column label="工序编码" align="center" prop="code" width="150" />
+      <el-table-column label="工序编码" align="center" prop="code" width="150">
+        <template #default="scope">
+          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="工序名称" align="center" prop="name" width="200" />
       <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
