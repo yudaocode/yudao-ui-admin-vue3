@@ -52,6 +52,18 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <el-form-item label="规格型号" prop="productSpec">
+            <el-input v-model="formData.productSpec" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="单位" prop="unitMeasureName">
+            <el-input v-model="formData.unitMeasureName" disabled />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
           <el-form-item label="工单数量" prop="quantity">
             <el-input-number
               v-model="formData.quantity"
@@ -141,10 +153,18 @@
         :process-id="rp.processId"
         :item-id="formData.productId!"
         :color-code="rp.colorCode"
-        :disabled="formType === 'detail'"
+        :disabled="isReadonly"
       />
     </el-card>
     <template #footer>
+      <el-button
+        v-if="formType === 'schedule'"
+        @click="handleFinish"
+        type="success"
+        :disabled="formLoading"
+      >
+        完 成
+      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
@@ -161,6 +181,7 @@ import { MesProWorkOrderSourceTypeEnum, MesProWorkOrderTypeEnum } from '@/views/
 import ProTaskList from './ProTaskList.vue'
 
 defineOptions({ name: 'WorkOrderForm2' })
+const emit = defineEmits(['success'])
 
 const message = useMessage() // 消息弹窗
 
@@ -168,6 +189,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：detail - 详情；schedule - 排产
+const isReadonly = computed(() => formType.value === 'detail') // 是否只读
 const formData = ref<any>({})
 const formRef = ref() // 表单 Ref
 
@@ -178,8 +200,8 @@ const currentRouteId = ref(0) // 当前工艺路线编号
 /** 打开弹窗 */
 const open = async (type: string, id: number) => {
   dialogVisible.value = true
-  dialogTitle.value = type === 'schedule' ? '生产排产' : '工单详情'
   formType.value = type
+  dialogTitle.value = { schedule: '生产排产', detail: '工单详情' }[type] || type
   formLoading.value = true
   formData.value = {}
   routeProcessList.value = []
@@ -196,6 +218,21 @@ const open = async (type: string, id: number) => {
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 完成工单 */
+const handleFinish = async () => {
+  try {
+    await message.confirm('确认要完成该工单吗？完成后工单下所有任务将标记为已完成。')
+    formLoading.value = true
+    await ProWorkOrderApi.finishWorkOrder(formData.value.id!)
+    message.success('工单已完成')
+    dialogVisible.value = false
+    emit('success')
+  } catch {
+  } finally {
+    formLoading.value = false
+  }
+}
 
 /** 加载工艺路线工序列表 */
 const loadRouteProcesses = async (productId: number) => {

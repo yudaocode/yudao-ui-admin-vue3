@@ -180,13 +180,37 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const message = useMessage()
-const getDefaultColor = () => props.colorCode || '#00AEF3'
 
 // ==================== 列表 ====================
 const loading = ref(false)
 const list = ref<ProTaskVO[]>([])
 
-/** 查询任务列表（按工单 + 路线 + 工序过滤） */
+// ==================== 表单弹窗 ====================
+const dialogVisible = ref(false)
+const dialogTitle = computed(() => {
+  const titles: Record<string, string> = {
+    create: '新增生产任务',
+    update: '编辑生产任务',
+    detail: '生产任务详情'
+  }
+  return titles[formType.value] || ''
+})
+const formLoading = ref(false)
+const formType = ref('')
+const isDetail = computed(() => formType.value === 'detail')
+const formData = ref<ProTaskVO>({} as unknown as ProTaskVO)
+const formRules = reactive({
+  workstationId: [{ required: true, message: '工作站不能为空', trigger: 'change' }],
+  quantity: [
+    { required: true, message: '排产数量不能为空', trigger: 'blur' },
+    { type: 'number', min: 0.01, message: '排产数量必须大于 0', trigger: 'blur' }
+  ],
+  startTime: [{ required: true, message: '开始时间不能为空', trigger: 'change' }],
+  duration: [{ required: true, message: '生产时长不能为空', trigger: 'blur' }]
+})
+const formRef = ref()
+
+/** 查询任务列表 */
 const getList = async () => {
   loading.value = true
   try {
@@ -203,87 +227,18 @@ const getList = async () => {
   }
 }
 
-/** 删除任务 */
-const handleDelete = async (id: number) => {
-  try {
-    await message.delConfirm()
-    await ProTaskApi.deleteTask(id)
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
-// ==================== 添加/编辑表单 ====================
-const dialogVisible = ref(false) // 弹窗的是否展示
-const formLoading = ref(false) // 表单的加载中
-const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
-const dialogTitle = computed(() => {
-  const typeMap: Record<string, string> = {
-    detail: '生产任务详情',
-    create: '新增生产任务',
-    update: '编辑生产任务'
-  }
-  return typeMap[formType.value] || ''
-})
-const formData = ref<ProTaskVO>({
-  id: undefined,
-  workOrderId: undefined,
-  workstationId: undefined,
-  routeId: undefined,
-  processId: undefined,
-  itemId: undefined,
-  quantity: undefined,
-  startTime: undefined,
-  duration: 1,
-  endTime: undefined,
-  colorCode: undefined,
-  status: undefined,
-  remark: undefined
-} as unknown as ProTaskVO)
-const formRules = reactive({
-  workstationId: [{ required: true, message: '工作站不能为空', trigger: 'change' }],
-  quantity: [
-    { required: true, message: '排产数量不能为空', trigger: 'blur' },
-    { type: 'number', min: 0.01, message: '排产数量必须大于 0', trigger: 'blur' }
-  ],
-  startTime: [{ required: true, message: '开始时间不能为空', trigger: 'change' }],
-  duration: [{ required: true, message: '生产时长不能为空', trigger: 'blur' }]
-})
-const formRef = ref() // 表单 Ref
-const isDetail = computed(() => formType.value === 'detail')
-
-/** 计算结束时间：开始时间 + 生产时长 * 8小时 */
-const handleDurationChange = () => {
-  if (formData.value.startTime && formData.value.duration) {
-    const start =
-      typeof formData.value.startTime === 'number'
-        ? formData.value.startTime
-        : new Date(formData.value.startTime).getTime()
-    formData.value.endTime = start + formData.value.duration * 8 * 3600 * 1000
-  }
-}
-
-/** 监听开始时间变化也重新计算 */
-watch(
-  () => formData.value.startTime,
-  () => handleDurationChange()
-)
-
 /** 打开表单弹窗 */
 const openForm = async (type: string, id?: number) => {
   dialogVisible.value = true
   formType.value = type
   resetForm()
-
   if (type === 'create') {
-    // 新增时预填工单信息
     formData.value.workOrderId = props.workOrderId!
     formData.value.routeId = props.routeId!
     formData.value.processId = props.processId!
     formData.value.itemId = props.itemId!
-    formData.value.colorCode = getDefaultColor()
+    formData.value.colorCode = props.colorCode || '#00AEF3'
   } else if (id) {
-    // 编辑：加载任务数据
     formLoading.value = true
     try {
       formData.value = await ProTaskApi.getTask(id)
@@ -313,6 +268,27 @@ const submitForm = async () => {
   }
 }
 
+/** 删除任务 */
+const handleDelete = async (id: number) => {
+  try {
+    await message.delConfirm()
+    await ProTaskApi.deleteTask(id)
+    message.success(t('common.delSuccess'))
+    await getList()
+  } catch {}
+}
+
+/** 计算结束时间：开始时间 + 生产时长 × 8小时 */
+const handleDurationChange = () => {
+  if (formData.value.startTime && formData.value.duration) {
+    const start =
+      typeof formData.value.startTime === 'number'
+        ? formData.value.startTime
+        : new Date(formData.value.startTime).getTime()
+    formData.value.endTime = start + formData.value.duration * 8 * 3600 * 1000
+  }
+}
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
@@ -332,6 +308,12 @@ const resetForm = () => {
   } as unknown as ProTaskVO
   formRef.value?.resetFields()
 }
+
+/** 监听开始时间变化重新计算结束时间 */
+watch(
+  () => formData.value.startTime,
+  () => handleDurationChange()
+)
 
 /** 监听 processId 切换重新加载 */
 watch(

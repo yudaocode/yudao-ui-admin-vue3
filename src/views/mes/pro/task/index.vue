@@ -117,7 +117,7 @@
           <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="160" fixed="right">
+      <el-table-column label="操作" align="center" width="100" fixed="right">
         <template #default="scope">
           <el-button
             v-if="scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED"
@@ -127,15 +127,6 @@
             v-hasPermi="['mes:pro-task:create']"
           >
             排产
-          </el-button>
-          <el-button
-            v-if="scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED"
-            link
-            type="success"
-            @click="handleFinish(scope.row.id)"
-            v-hasPermi="['mes:pro-task:update']"
-          >
-            完成
           </el-button>
         </template>
       </el-table-column>
@@ -149,7 +140,7 @@
     />
   </ContentWrap>
 
-  <WorkOrderForm2 ref="formRef" />
+  <WorkOrderForm2 ref="formRef" @success="getWorkOrderList" />
 </template>
 
 <script setup lang="ts">
@@ -166,10 +157,12 @@ import WorkOrderForm2 from './WorkOrderForm2.vue'
 
 defineOptions({ name: 'MesProTask' })
 
-const message = useMessage()
+const { push } = useRouter()
+
 const loading = ref(true) // 列表加载状态
 const workOrderList = ref<ProWorkOrderVO[]>([]) // 工单列表数据
 const total = ref(0) // 总条数
+const ganttTasks = ref<any[]>([]) // 甘特图数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -183,9 +176,7 @@ const queryParams = reactive({
   type: MesProWorkOrderTypeEnum.SELF // 固定筛选：只查询"自制"的工单
 })
 const queryFormRef = ref() // 搜索表单 ref
-
-const ganttLoading = ref(false) // 甘特图加载状态
-const ganttTasks = ref<any[]>([]) // 甘特图数据
+const formRef = ref() // 表单弹窗 ref
 
 /** 查询待排产工单列表（支持父子工单树形展示） */
 const getWorkOrderList = async () => {
@@ -199,50 +190,33 @@ const getWorkOrderList = async () => {
   }
 }
 
-/** 加载甘特图预览数据（查询所有任务，供甘特图组件渲染） */
+/** 加载甘特图预览数据 */
 const loadGanttPreview = async () => {
-  ganttLoading.value = true
   try {
     ganttTasks.value = await ProTaskApi.getGanttTaskList(queryParams)
-  } finally {
-    ganttLoading.value = false
-  }
+  } catch {}
 }
 
-/** 搜索 */
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getWorkOrderList()
 }
 
-/** 重置 */
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
-  // 恢复固定筛选
   queryParams.status = MesProWorkOrderStatusEnum.CONFIRMED
   queryParams.type = MesProWorkOrderTypeEnum.SELF
-  // 执行搜索
   handleQuery()
 }
 
-/** 打开排产/详情对话框 */
-const formRef = ref()
+/** 打开排产/详情/完成对话框 */
 const openForm = (type: string, id: number) => {
   formRef.value.open(type, id)
 }
 
-/** 完成工单 */
-const handleFinish = async (id: number) => {
-  try {
-    await message.confirm('确认要完成该工单吗？')
-    await ProWorkOrderApi.finishWorkOrder(id)
-    message.success('工单已完成')
-    await getWorkOrderList()
-  } catch {}
-}
-
 /** 打开甘特图编辑页面 */
-const { push } = useRouter()
 const openGanttEdit = () => {
   push({ name: 'MesProTaskGanttEdit' })
 }
