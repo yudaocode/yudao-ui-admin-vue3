@@ -95,7 +95,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="8" v-if="formData.orderSourceType === MesProWorkOrderSourceTypeEnum.ORDER">
           <el-form-item label="客户" prop="clientId">
             <MdClientSelect v-model="formData.clientId" :disabled="isHeaderReadonly" />
           </el-form-item>
@@ -211,16 +211,16 @@ import {
 defineOptions({ name: 'WorkOrderForm' })
 const emit = defineEmits(['success'])
 
-const message = useMessage()
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const formType = ref<string>('create') // create / update / confirm / finish / detail
-const isEditable = computed(() => ['create', 'update'].includes(formType.value))
-const isConfirm = computed(() => formType.value === 'confirm')
-const isFinish = computed(() => formType.value === 'finish')
-const isDetail = computed(() => ['detail', 'confirm', 'finish'].includes(formType.value))
-const isHeaderReadonly = computed(() => ['confirm', 'finish', 'detail'].includes(formType.value))
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const formType = ref<string>('create') // 表单的类型：create / update / confirm / finish / detail
+const isEditable = computed(() => ['create', 'update'].includes(formType.value)) // 是否为编辑模式
+const isConfirm = computed(() => formType.value === 'confirm') // 是否为确认模式
+const isFinish = computed(() => formType.value === 'finish') // 是否为完成模式
+const isDetail = computed(() => ['detail', 'confirm', 'finish'].includes(formType.value)) // 是否为详情模式
+const isHeaderReadonly = computed(() => ['confirm', 'finish', 'detail'].includes(formType.value)) // 表头是否只读
 const dialogTitle = computed(() => {
   if (['create', 'update'].includes(formType.value) && formData.value.parentId) {
     return formType.value === 'create' ? '新增子工单' : '编辑子工单'
@@ -234,7 +234,7 @@ const dialogTitle = computed(() => {
   }
   return titles[formType.value] || formType.value
 })
-const activeTab = ref('bom')
+const activeTab = ref('bom') // 当前选中的 Tab
 const formData = ref({
   id: undefined as number | undefined,
   parentId: undefined as number | undefined,
@@ -261,7 +261,7 @@ const formRules = reactive({
   quantity: [{ required: true, message: '工单数量不能为空', trigger: 'blur' }],
   requestDate: [{ required: true, message: '需求日期不能为空', trigger: 'change' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成工单编码 */
@@ -320,14 +320,14 @@ const handleGenerateWorkOrder = (bomRow: any) => {
   message.info('已从 BOM 物料预填子工单，请补充工单编码等信息后保存')
 }
 
-defineExpose({ open })
 
-/** 工单来源变更：非客户订单时清空来源单据编号 */
+/** 工单来源变更：非客户订单时清空来源单据编号和客户 */
 watch(
   () => formData.value.orderSourceType,
   (val) => {
     if (val !== MesProWorkOrderSourceTypeEnum.ORDER) {
       formData.value.orderSourceCode = undefined
+      formData.value.clientId = undefined
     }
   }
 )
@@ -375,11 +375,12 @@ const handleConfirm = async () => {
   try {
     await message.confirm('确认要完成工单编制吗？确认后将不能更改。')
     formLoading.value = true
-    // 编辑模式下，表单有修改时先保存
+    // 1. 编辑模式下，表单有修改时先保存
     if (isEditable.value && JSON.stringify(formData.value) !== originalFormData.value) {
       const data = formData.value as unknown as ProWorkOrderVO
       await ProWorkOrderApi.updateWorkOrder(data)
     }
+    // 2. 确认工单
     await ProWorkOrderApi.confirmWorkOrder(formData.value.id!)
     message.success('工单已确认')
     dialogVisible.value = false
@@ -426,4 +427,6 @@ const resetForm = () => {
   }
   formRef.value?.resetFields()
 }
+
+defineExpose({ open })
 </script>

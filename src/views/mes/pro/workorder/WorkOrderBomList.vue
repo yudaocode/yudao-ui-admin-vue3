@@ -117,9 +117,9 @@ const isEditable = computed(
 const isConfirmed = computed(() => props.workOrder.status === MesProWorkOrderStatusEnum.CONFIRMED) // 是否确认
 
 // ==================== BOM 列表 ====================
-const loading = ref(false)
-const bomList = ref<ProWorkOrderBomVO[]>([])
-const bomTotal = ref(0)
+const loading = ref(false) // 列表的加载中
+const bomList = ref<ProWorkOrderBomVO[]>([]) // 列表的数据
+const bomTotal = ref(0) // 列表的总页数
 const bomQueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -155,12 +155,11 @@ const handleDelete = async (id: number) => {
 }
 
 // ==================== BOM 新增/编辑表单 ====================
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-// TODO @AI：这里的 create | update 不用枚举，简洁一点；
-const bomFormType = ref<'create' | 'update'>('update')
-const formRef = ref()
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
+const bomFormType = ref('create') // 表单类型
+const dialogTitle = computed(() => bomFormType.value === 'create' ? '添加 BOM 物料' : '编辑 BOM 物料')
+const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,
   workOrderId: undefined as number | undefined,
@@ -190,17 +189,13 @@ const resetForm = () => {
 }
 
 /** 打开 BOM 弹窗 */
-// TODO @AI：这里的 create | update 不用写，简洁一点；
-const openForm = (type: 'create' | 'update', row?: any) => {
+const openForm = (type: string, row?: any) => {
   resetForm()
   bomFormType.value = type
   dialogVisible.value = true
   if (type === 'create') {
-    // TODO @AI：dialogTitle 通过 compute 计算
-    dialogTitle.value = '添加 BOM 物料'
     formData.value.workOrderId = props.workOrderId
   } else {
-    dialogTitle.value = '编辑 BOM 物料'
     formData.value = { ...row }
   }
 }

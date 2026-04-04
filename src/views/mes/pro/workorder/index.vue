@@ -253,13 +253,13 @@ import {
 
 defineOptions({ name: 'MesProWorkOrder' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const list = ref<ProWorkOrderVO[]>([])
-const total = ref(0)
-const exportLoading = ref(false)
+const loading = ref(true) // 列表的加载中
+const list = ref<ProWorkOrderVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -271,8 +271,9 @@ const queryParams = reactive({
   type: undefined,
   requestDate: undefined
 })
-const queryFormRef = ref()
-const formRef = ref()
+const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 表单弹窗
+const barcodeDetailRef = ref() // 条码详情弹窗
 
 /** 查询列表（分页 + 前端 handleTree 拼接树） */
 const getList = async () => {
@@ -329,7 +330,6 @@ const handleDelete = async (id: number) => {
 }
 
 /** 查看工单条码 */
-const barcodeDetailRef = ref()
 const handleBarcode = async (row: ProWorkOrderVO) => {
   await barcodeDetailRef.value.openByBusiness(
     row.id,
