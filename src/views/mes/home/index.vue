@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- TODO @AI：row 之间的间距太大了； -->
     <!-- Row 1: 核心 KPI 汇总卡片 -->
     <HomeKpiCards :summary="summary" @navigate="handleNavigate" />
 
@@ -8,7 +7,7 @@
     <el-row :gutter="16" class="mb-16px">
       <!-- 生产趋势图 -->
       <el-col :xl="16" :lg="16" :md="24" :sm="24" :xs="24" class="mb-16px">
-        <HomeProductionTrend ref="productionTrendRef" />
+        <HomeProductionTrend />
       </el-col>
       <!-- 待办事项 / 异常提醒 -->
       <el-col :xl="8" :lg="8" :md="24" :sm="24" :xs="24" class="mb-16px">
@@ -20,7 +19,7 @@
     <el-row :gutter="16">
       <!-- 工单状态分布 -->
       <el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24" class="mb-16px">
-        <HomeWorkOrderChart ref="workOrderChartRef" />
+        <HomeWorkOrderChart />
       </el-col>
       <!-- 快捷入口 -->
       <el-col :xl="12" :lg="12" :md="24" :sm="24" :xs="24" class="mb-16px">
@@ -58,21 +57,14 @@ const summary = ref<MesHomeSummaryVO>({
   andonActiveCount: 0,
   repairActiveCount: 0
 }) // 数据
-const productionTrendRef = ref<InstanceType<typeof HomeProductionTrend>>()
-const workOrderChartRef = ref<InstanceType<typeof HomeWorkOrderChart>>()
 
-// TODO @AI：可以改成 name 么？因为 url 可能会变，而 name 更稳定！
-const handleNavigate = (url: string) => {
-  router.push(url)
+// DONE @AI：跳转都不对了，是不是菜单里的组件名没对上？已确认所有 routeName 与目标页面 defineOptions({ name }) 一致
+// DONE @AI：可以改成 name 么？因为 url 可能会变，而 name 更稳定！已改为使用路由 name 导航
+const handleNavigate = (name: string) => {
+  router.push({ name })
 }
 
 onMounted(async () => {
-  const [summaryData] = await Promise.all([
-    MesHomeStatisticsApi.getHomeSummary(),
-    // TODO @AI：productionTrendRef、workOrderChartRef 可以自己加载自己的数据，自己使用么？
-    productionTrendRef.value?.loadData(),
-    workOrderChartRef.value?.loadData()
-  ])
-  summary.value = summaryData
+  summary.value = await MesHomeStatisticsApi.getHomeSummary()
 })
 </script>

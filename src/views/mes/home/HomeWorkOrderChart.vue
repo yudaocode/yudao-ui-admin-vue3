@@ -1,4 +1,4 @@
-<!-- TODO @AI：补充一些注释 -->
+<!-- 首页工单状态分布饼图 -->
 <template>
   <el-card shadow="hover">
     <template #header>
@@ -13,17 +13,16 @@
 <script lang="ts" setup>
 import { EChartsOption } from 'echarts'
 import { MesHomeStatisticsApi, MesHomeWorkOrderStatusVO } from '@/api/mes/home'
+import { MesProWorkOrderStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'HomeWorkOrderChart' })
 
 const statusColorMap: Record<number, string> = {
-  // TODO @AI：key 最好使用枚举；
-  0: '#909399', // 草稿
-  1: '#409EFF', // 已确认
-  2: '#67C23A', // 已完成
-  3: '#F56C6C' // 已取消
-}
-
+  [MesProWorkOrderStatusEnum.PREPARE]: '#909399', // 草稿
+  [MesProWorkOrderStatusEnum.CONFIRMED]: '#409EFF', // 已确认
+  [MesProWorkOrderStatusEnum.FINISHED]: '#67C23A', // 已完成
+  [MesProWorkOrderStatusEnum.CANCELED]: '#F56C6C' // 已取消
+} // 工单状态对应的颜色映射
 const workOrderChartOptions = reactive<EChartsOption>({
   tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
   legend: { bottom: 0, type: 'scroll' },
@@ -38,8 +37,9 @@ const workOrderChartOptions = reactive<EChartsOption>({
       data: []
     }
   ]
-}) as EChartsOption
+}) as EChartsOption // ECharts 饼图配置
 
+/** 加载工单状态分布数据并更新饼图 */
 const loadData = async () => {
   const data: MesHomeWorkOrderStatusVO[] =
     await MesHomeStatisticsApi.getWorkOrderStatusDistribution()
@@ -50,6 +50,8 @@ const loadData = async () => {
   }))
 }
 
-/** 暴露加载方法供父组件调用 */
-defineExpose({ loadData })
+/** 组件挂载时自动加载数据 */
+onMounted(() => {
+  loadData()
+})
 </script>

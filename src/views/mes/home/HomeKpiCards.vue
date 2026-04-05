@@ -1,11 +1,18 @@
-<!-- TODO @AI：补充一些注释 -->
+<!--
+  HomeKpiCards - 首页核心 KPI 汇总卡片
+  以 4 列卡片形式展示关键生产指标：
+  1. 生产工单 —— 进行中数量 / 待排产 / 已完成
+  2. 今日产量 —— 今日产出件数，对比昨日
+  3. 质量合格率 —— 合格品 / 不良品计算百分比
+  4. 设备状态 —— 运行中 / 停机 / 维护中
+-->
 <template>
   <el-row :gutter="16" class="mb-16px">
     <el-col :xl="6" :lg="6" :md="12" :sm="12" :xs="24" class="mb-16px">
       <el-card
         shadow="hover"
         class="kpi-card kpi-card--production"
-        @click="handleNavigate('/mes/pro/workorder')"
+        @click="handleNavigate('MesProWorkOrder')"
       >
         <div class="flex items-center gap-16px">
           <div
@@ -37,7 +44,7 @@
       <el-card
         shadow="hover"
         class="kpi-card kpi-card--output"
-        @click="handleNavigate('/mes/pro/feedback')"
+        @click="handleNavigate('MesProFeedback')"
       >
         <div class="flex items-center gap-16px">
           <div
@@ -67,7 +74,7 @@
       <el-card
         shadow="hover"
         class="kpi-card kpi-card--quality"
-        @click="handleNavigate('/mes/qc/iqc')"
+        @click="handleNavigate('MesQcIqc')"
       >
         <div class="flex items-center gap-16px">
           <div
@@ -100,7 +107,7 @@
       <el-card
         shadow="hover"
         class="kpi-card kpi-card--equipment"
-        @click="handleNavigate('/mes/dv/machinery')"
+        @click="handleNavigate('MesDvMachinery')"
       >
         <div class="flex items-center gap-16px">
           <div
@@ -143,17 +150,19 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  navigate: [url: string]
+  navigate: [name: string]
 }>()
 
+/** 质量合格率 = 合格品 / (合格品 + 不良品) * 100，默认 100% */
 const qualityRate = computed(() => {
   const total = props.summary.todayQualifiedQuantity + props.summary.todayUnqualifiedQuantity
   if (total === 0) return 100
   return (props.summary.todayQualifiedQuantity / total) * 100
 })
 
-const handleNavigate = (url: string) => {
-  emit('navigate', url)
+/** 导航到目标页面，参数为路由 name */
+const handleNavigate = (name: string) => {
+  emit('navigate', name)
 }
 </script>
 

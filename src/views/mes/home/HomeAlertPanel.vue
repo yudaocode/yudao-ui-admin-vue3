@@ -1,4 +1,4 @@
-<!-- TODO @AI：补充一些注释 -->
+<!-- 首页待办与异常提醒面板 -->
 <template>
   <el-card shadow="hover" class="h-full alert-card">
     <template #header>
@@ -11,7 +11,7 @@
         v-for="item in alertItems"
         :key="item.label"
         class="flex items-center gap-12px px-20px py-16px cursor-pointer border-b border-b-[var(--el-border-color-lighter)] last:border-b-0 transition-colors hover:bg-[var(--el-fill-color-light)]"
-        @click="emit('navigate', item.url)"
+        @click="emit('navigate', item.routeName)"
       >
         <div
           class="w-40px h-40px rounded-10px flex items-center justify-center flex-shrink-0"
@@ -39,15 +39,16 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  navigate: [url: string]
+  navigate: [name: string]
 }>()
 
+/** 待办提醒列表：每项包含标签、描述、图标、目标路由名称、数量 */
 const alertItems = computed(() => [
   {
     label: '安灯报警',
     desc: '未处置的安灯呼叫',
     icon: 'ep:warning-filled',
-    url: '/mes/pro/andon',
+    routeName: 'MesProAndon',
     count: props.summary.andonActiveCount,
     iconClass: 'bg-[rgba(245,108,108,0.1)] color-[#f56c6c]'
   },
@@ -55,7 +56,7 @@ const alertItems = computed(() => [
     label: '设备维修',
     desc: '待处理的维修工单',
     icon: 'ep:set-up',
-    url: '/mes/dv/repair',
+    routeName: 'MesDvRepair',
     count: props.summary.repairActiveCount,
     iconClass: 'bg-[rgba(230,162,60,0.1)] color-[#e6a23c]'
   },
@@ -63,7 +64,7 @@ const alertItems = computed(() => [
     label: '待排产工单',
     desc: '草稿状态的生产工单',
     icon: 'ep:document-checked',
-    url: '/mes/pro/workorder',
+    routeName: 'MesProWorkOrder',
     count: props.summary.workOrderPrepareCount,
     iconClass: 'bg-[rgba(64,158,255,0.1)] color-[#409eff]'
   }

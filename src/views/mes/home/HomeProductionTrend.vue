@@ -1,4 +1,4 @@
-<!-- TODO @AI：补充一些注释 -->
+<!-- 首页生产趋势图表 -->
 <template>
   <el-card shadow="hover">
     <template #header>
@@ -20,7 +20,7 @@ import { MesHomeStatisticsApi, MesHomeProductionTrendVO } from '@/api/mes/home'
 
 defineOptions({ name: 'HomeProductionTrend' })
 
-const trendDays = ref(7)
+const trendDays = ref(7) // 当前选中的天数范围
 const trendChartOptions = reactive<EChartsOption>({
   tooltip: {
     trigger: 'axis',
@@ -54,8 +54,9 @@ const trendChartOptions = reactive<EChartsOption>({
       itemStyle: { color: '#F56C6C' }
     }
   ]
-}) as EChartsOption
+}) as EChartsOption // ECharts 图表配置（reactive 以支持动态更新数据）
 
+/** 加载生产趋势数据并更新图表 */
 const loadData = async () => {
   const data: MesHomeProductionTrendVO[] = await MesHomeStatisticsApi.getProductionTrend(
     trendDays.value
@@ -63,13 +64,15 @@ const loadData = async () => {
   const dates = data.map((d) => d.date.substring(5))
   const quantities = data.map((d) => d.quantity)
   const qualified = data.map((d) => d.qualifiedQuantity)
-  const unqualified = data.map((d) => d.unqualifiedQuantity)
-  ;(trendChartOptions as any).xAxis.data = dates
-  ;(trendChartOptions as any).series[0].data = quantities
-  ;(trendChartOptions as any).series[1].data = qualified
-  ;(trendChartOptions as any).series[2].data = unqualified
+  const unqualified = data.map((d) => d.unqualifiedQuantity);
+  (trendChartOptions as any).xAxis.data = dates;
+  (trendChartOptions as any).series[0].data = quantities;
+  (trendChartOptions as any).series[1].data = qualified;
+  (trendChartOptions as any).series[2].data = unqualified
 }
 
-/** 暴露加载方法供父组件调用 */
-defineExpose({ loadData })
+/** 组件挂载时自动加载数据 */
+onMounted(() => {
+  loadData()
+})
 </script>
