@@ -85,7 +85,7 @@
       <el-table-column label="收货地址" align="center" prop="recipientAddress" min-width="200" />
       <el-table-column label="单据状态" align="center" prop="status" min-width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_SALES_NOTICE_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_WM_SALES_NOTICE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="200" fixed="right">

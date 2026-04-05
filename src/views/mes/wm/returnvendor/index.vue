@@ -83,7 +83,7 @@
       />
       <el-table-column label="单据状态" align="center" prop="status" min-width="110">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_RETURN_VENDOR_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MES_WM_RETURN_VENDOR_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="240" fixed="right">
