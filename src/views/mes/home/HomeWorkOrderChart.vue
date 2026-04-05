@@ -1,6 +1,6 @@
 <!-- 首页工单状态分布饼图 -->
 <template>
-  <el-card shadow="hover">
+  <el-card shadow="hover" class="h-full">
     <template #header>
       <div class="flex justify-between items-center">
         <span class="text-16px font-600">工单状态分布</span>

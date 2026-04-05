@@ -74,7 +74,7 @@
       <el-card
         shadow="hover"
         class="kpi-card kpi-card--quality"
-        @click="handleNavigate('MesQcIqc')"
+        @click="handleNavigate('MesProFeedback')"
       >
         <div class="flex items-center gap-16px">
           <div
@@ -95,9 +95,12 @@
               <span class="text-13px color-[var(--el-text-color-secondary)]">%</span>
             </div>
             <div class="text-12px color-[var(--el-text-color-placeholder)] mt-4px">
-              <span>合格 {{ summary.todayQualifiedQuantity }}</span>
-              <el-divider direction="vertical" />
-              <span>不良 {{ summary.todayUnqualifiedQuantity }}</span>
+              <template v-if="hasQualityData">
+                <span>合格 {{ summary.todayQualifiedQuantity }}</span>
+                <el-divider direction="vertical" />
+                <span>不良 {{ summary.todayUnqualifiedQuantity }}</span>
+              </template>
+              <span v-else>暂无数据</span>
             </div>
           </div>
         </div>
@@ -153,10 +156,15 @@ const emit = defineEmits<{
   navigate: [name: string]
 }>()
 
-/** 质量合格率 = 合格品 / (合格品 + 不良品) * 100，默认 100% */
+/** 是否有质量数据（合格品 + 不良品 > 0） */
+const hasQualityData = computed(() => {
+  return props.summary.todayQualifiedQuantity + props.summary.todayUnqualifiedQuantity > 0
+})
+
+/** 质量合格率 = 合格品 / (合格品 + 不良品) * 100，无数据时为 0 */
 const qualityRate = computed(() => {
   const total = props.summary.todayQualifiedQuantity + props.summary.todayUnqualifiedQuantity
-  if (total === 0) return 100
+  if (total === 0) return 0
   return (props.summary.todayQualifiedQuantity / total) * 100
 })
 
