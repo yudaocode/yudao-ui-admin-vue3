@@ -101,9 +101,8 @@ import BatchTraceDetail from './BatchTraceDetail.vue'
 defineOptions({ name: 'BatchTrace' })
 
 const loading = ref(true) // 列表的加载中
-const total = ref(0) // 列表的总页数
 const list = ref<BatchVO[]>([]) // 列表的数据
-const queryFormRef = ref() // 搜索的表单
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -114,6 +113,8 @@ const queryParams = reactive({
   salesOrderCode: undefined,
   purchaseOrderCode: undefined
 })
+const queryFormRef = ref() // 搜索的表单
+const detailRef = ref() // 详情弹窗
 
 /** 查询列表 */
 const getList = async () => {
@@ -140,7 +141,6 @@ const resetQuery = () => {
 }
 
 /** 批次追溯按钮操作 */
-const detailRef = ref()
 const openDetail = (row: BatchVO) => {
   detailRef.value.open(row)
 }

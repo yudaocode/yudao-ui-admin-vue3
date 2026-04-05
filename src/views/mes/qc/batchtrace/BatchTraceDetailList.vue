@@ -25,14 +25,6 @@ const props = defineProps<{
 const loading = ref(true) // 列表的加载中
 const batchList = ref<BatchVO[]>([]) // 列表的数据
 
-watch(
-  () => props.batchCode,
-  (val) => {
-    if (val) {
-      getList()
-    }
-  }
-)
 /** 查询列表 */
 const getList = async () => {
   if (!props.batchCode) {
@@ -48,6 +40,16 @@ const getList = async () => {
     loading.value = false
   }
 }
+
+/** 监听批次编号变化 */
+watch(
+  () => props.batchCode,
+  (val) => {
+    if (val) {
+      getList()
+    }
+  }
+)
 
 /** 初始化 */
 onMounted(() => {
