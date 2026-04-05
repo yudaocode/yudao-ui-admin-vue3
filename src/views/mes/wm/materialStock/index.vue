@@ -4,7 +4,7 @@
     <!-- 左侧分类树 -->
     <el-col :span="4" :xs="24">
       <ContentWrap class="h-1/1">
-        <ItemTypeTree @node-click="handleTypeNodeClick" />
+        <MdItemTypeTree @node-click="handleTypeNodeClick" />
       </ContentWrap>
     </el-col>
     <el-col :span="20" :xs="24">
@@ -146,7 +146,7 @@
 import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { WmMaterialStockApi, WmMaterialStockVO } from '@/api/mes/wm/materialstock'
-import ItemTypeTree from '@/views/mes/md/item/ItemTypeTree.vue'
+import MdItemTypeTree from '@/views/mes/md/item/type/components/MdItemTypeTree.vue'
 import AreaForm from '@/views/mes/wm/warehouse/area/AreaForm.vue'
 import BatchForm from '@/views/mes/wm/batch/BatchForm.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'

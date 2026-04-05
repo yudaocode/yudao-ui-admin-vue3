@@ -4,7 +4,7 @@
     <!-- 左侧分类树 -->
     <el-col :span="4" :xs="24">
       <ContentWrap class="h-1/1">
-        <ItemTypeTree @node-click="handleTypeNodeClick" />
+        <MdItemTypeTree @node-click="handleTypeNodeClick" />
       </ContentWrap>
     </el-col>
     <el-col :span="20" :xs="24">
@@ -186,7 +186,7 @@ import { CommonStatusEnum } from '@/utils/constants'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import MdItemForm from './MdItemForm.vue'
 import MdItemImportForm from './MdItemImportForm.vue'
-import ItemTypeTree from './ItemTypeTree.vue'
+import MdItemTypeTree from './type/components/MdItemTypeTree.vue'
 import { getItemOrProductLabel, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 

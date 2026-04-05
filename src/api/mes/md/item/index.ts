@@ -27,11 +27,6 @@ export const MdItemApi = {
     return await request.get({ url: `/mes/md/item/page`, params })
   },
 
-  // 查询物料产品精简列表
-  getItemSimpleList: async () => {
-    return await request.get({ url: `/mes/md/item/simple-list` })
-  },
-
   // 查询物料产品详情
   getItem: async (id: number) => {
     return await request.get({ url: `/mes/md/item/get?id=` + id })

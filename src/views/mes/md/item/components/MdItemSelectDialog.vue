@@ -1,26 +1,19 @@
-<!-- MES 物料产品 弹窗选择器 -->
+<!--
+  MES 物料产品弹窗选择器 V2（支持单选/多选）
+
+  Props:
+    multiple — true 多选（checkbox），false 单选（radio）；默认 true
+  Events:
+    selected(rows: MdItemVO[]) — 确认选择后触发，单选时数组长度为 1
+  Expose:
+    open(selectedIds?: number[]) — 打开弹窗，可传入已选 ID 用于预选高亮
+-->
 <template>
   <Dialog title="物料产品选择" v-model="dialogVisible" width="80%">
     <el-row :gutter="20">
       <!-- 左侧：分类树 -->
       <el-col :span="5">
-        <el-input
-          v-model="filterText"
-          placeholder="搜索分类"
-          clearable
-          class="mb-12px"
-          :prefix-icon="iconSearch"
-        />
-        <el-tree
-          ref="treeRef"
-          :data="itemTypeTree"
-          :props="treeProps"
-          :expand-on-click-node="false"
-          :filter-node-method="filterNode"
-          default-expand-all
-          highlight-current
-          @node-click="handleNodeClick"
-        />
+        <MdItemTypeTree ref="typeTreeRef" @node-click="handleNodeClick" />
       </el-col>
       <!-- 右侧：物料表格 -->
       <el-col :span="19">
@@ -51,26 +44,56 @@
             </el-button>
           </el-form-item>
         </el-form>
-        <!-- 数据表格 -->
+        <!-- 数据表格：单选 radio / 多选 checkbox 统一在一个 table 内 -->
         <el-table
+          ref="tableRef"
           v-loading="loading"
           :data="list"
           :stripe="true"
           :show-overflow-tooltip="true"
           border
+          row-key="id"
+          :highlight-current-row="!multiple"
           @selection-change="handleSelectionChange"
+          @row-click="handleRowClick"
+          @row-dblclick="handleRowDblClick"
         >
-          <el-table-column type="selection" width="50" align="center" />
-          <el-table-column label="物料编码" align="center" prop="code" width="120" />
-          <el-table-column label="物料名称" align="center" prop="name" min-width="120" />
-          <el-table-column label="规格型号" align="center" prop="specification" />
+          <!-- 多选：checkbox（reserve-selection 保证跨页勾选不丢失） -->
+          <el-table-column
+            v-if="multiple"
+            type="selection"
+            :reserve-selection="true"
+            width="50"
+            align="center"
+          />
+          <!-- 单选：radio -->
+          <el-table-column v-else width="50" align="center">
+            <template #default="{ row }">
+              <el-radio
+                v-model="selectedRadioId"
+                :value="row.id"
+                class="radio-no-label"
+                @change="handleRadioChange(row)"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column label="物料编码" align="center" prop="code" width="200" />
+          <el-table-column label="物料名称" align="left" prop="name" min-width="150" />
+          <el-table-column label="规格型号" align="left" prop="specification" min-width="120" />
           <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
           <el-table-column label="物料/产品" align="center" prop="itemOrProduct" width="100">
             <template #default="scope">
-              {{ getItemOrProductLabel(scope.row.itemOrProduct) }}
+              <dict-tag :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT" :value="scope.row.itemOrProduct" />
             </template>
           </el-table-column>
           <el-table-column label="所属分类" align="center" prop="itemTypeName" width="120" />
+          <el-table-column
+            label="创建时间"
+            align="center"
+            prop="createTime"
+            :formatter="dateFormatter"
+            width="180"
+          />
         </el-table>
         <!-- 分页 -->
         <Pagination
@@ -89,109 +112,191 @@
 </template>
 
 <script setup lang="ts">
+import { DICT_TYPE } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
-import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
-import { handleTree } from '@/utils/tree'
-import { getItemOrProductLabel } from '@/views/mes/utils/constants'
-import { Search as iconSearch } from '@element-plus/icons-vue'
+import { MdItemTypeVO } from '@/api/mes/md/item/type'
+import MdItemTypeTree from '@/views/mes/md/item/type/components/MdItemTypeTree.vue'
 
 defineOptions({ name: 'MdItemSelectDialog' })
 
-const message = useMessage() // 消息弹窗
+const props = withDefaults(
+  defineProps<{
+    multiple?: boolean // true 多选（checkbox），false 单选（radio）
+  }>(),
+  {
+    multiple: true
+  }
+)
+
+const message = useMessage()
 const emit = defineEmits<{
-  selected: [rows: MdItemVO[]] // 确认选择事件
+  selected: [rows: MdItemVO[]]
 }>()
 
-const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗是否展示
 const loading = ref(false) // 列表加载中
 const list = ref<MdItemVO[]>([]) // 物料列表
 const total = ref(0) // 总条数
-const selectedRows = ref<MdItemVO[]>([]) // 选中行
 
-// ==================== 分类树 ====================
-const treeRef = ref() // 树组件 Ref
-const filterText = ref('') // 分类搜索文本
-const itemTypeTree = ref<MdItemTypeVO[]>([]) // 分类树数据
-const treeProps = { children: 'children', label: 'name' } // 树属性配置
+// ==================== 选中状态 ====================
+const tableRef = ref() // 表格 Ref
+const typeTreeRef = ref() // 分类树 Ref
+const selectedRows = ref<MdItemVO[]>([]) // 多选模式：选中行
+const selectedRadioId = ref<number>() // 单选模式：选中 ID
+const currentRadioRow = ref<MdItemVO>() // 单选模式：选中行对象
+const preSelectedIds = ref<number[]>([]) // 打开弹窗时传入的已选 ID
 
-/** 过滤树节点 */
-const filterNode = (value: string, data: MdItemTypeVO) => {
-  if (!value) return true
-  return data.name?.includes(value)
+/** 多选：checkbox 变化 */
+const handleSelectionChange = (rows: MdItemVO[]) => {
+  if (props.multiple) {
+    selectedRows.value = rows
+  }
 }
 
-/** 监听筛选文本变化 */
-watch(filterText, (val) => {
-  treeRef.value?.filter(val)
-})
+/** 单选：radio 变化 */
+const handleRadioChange = (row: MdItemVO) => {
+  currentRadioRow.value = row
+}
 
-/** 点击树节点 */
-const handleNodeClick = (data: MdItemTypeVO) => {
-  queryParams.itemTypeId = data.id
+/** 单击行：单选模式下点击整行即选中（降低操作成本），多选不处理（避免和 dblclick 冲突） */
+const handleRowClick = (row: MdItemVO) => {
+  if (props.multiple) {
+    return
+  }
+  selectedRadioId.value = row.id
+  currentRadioRow.value = row
+}
+
+/** 双击行：多选模式切换勾选，单选模式直接确认 */
+const handleRowDblClick = (row: MdItemVO) => {
+  if (props.multiple) {
+    tableRef.value?.toggleRowSelection(row)
+    return
+  }
+  selectedRadioId.value = row.id
+  currentRadioRow.value = row
+  confirmSelect()
+}
+
+// ==================== 分类树 ====================
+
+/** 点击分类树节点，按分类筛选（支持取消选中） */
+const handleNodeClick = (data: MdItemTypeVO | undefined) => {
+  queryParams.itemTypeId = data?.id
   handleQuery()
 }
 
 // ==================== 物料查询 ====================
 const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
-  code: undefined as string | undefined,
-  name: undefined as string | undefined,
-  itemTypeId: undefined as number | undefined
+  pageNo: 1, // 页码
+  pageSize: 10, // 每页条数
+  code: undefined as string | undefined, // 物料编码
+  name: undefined as string | undefined, // 物料名称
+  itemTypeId: undefined as number | undefined // 物料分类编号
 })
 
-/** 查询列表 */
+/** 查询物料列表 */
 const getList = async () => {
   loading.value = true
   try {
     const data = await MdItemApi.getItemPage(queryParams)
     list.value = data.list
     total.value = data.total
+    await nextTick()
+    applyPreSelection()
   } finally {
     loading.value = false
   }
 }
 
-/** 搜索 */
+/** 恢复预选状态（当前页可见范围内） */
+const applyPreSelection = () => {
+  if (preSelectedIds.value.length === 0) {
+    return
+  }
+  if (props.multiple) {
+    const table = tableRef.value
+    if (!table) {
+      return
+    }
+    list.value.forEach((row) => {
+      if (preSelectedIds.value.includes(row.id)) {
+        table.toggleRowSelection(row, true)
+      }
+    })
+  } else {
+    const match = list.value.find((row) => preSelectedIds.value.includes(row.id))
+    if (match) {
+      selectedRadioId.value = match.id
+      currentRadioRow.value = match
+    }
+  }
+}
+
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
-/** 重置 */
+/** 重置查询条件（同步清除左侧树高亮和搜索词） */
 const resetQuery = () => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.itemTypeId = undefined
+  typeTreeRef.value?.reset()
   handleQuery()
-}
-
-/** 选中变化 */
-const handleSelectionChange = (rows: MdItemVO[]) => {
-  selectedRows.value = rows
 }
 
 /** 确认选择 */
 const confirmSelect = () => {
-  if (selectedRows.value.length === 0) {
-    message.warning('请至少选择一条数据')
-    return
+  if (props.multiple) {
+    if (selectedRows.value.length === 0) {
+      message.warning('请至少选择一条数据')
+      return
+    }
+    emit('selected', selectedRows.value)
+  } else {
+    if (!currentRadioRow.value) {
+      message.warning('请选择一条数据')
+      return
+    }
+    emit('selected', [currentRadioRow.value])
   }
-  emit('selected', selectedRows.value)
   dialogVisible.value = false
 }
 
 // ==================== 打开弹窗 ====================
 
-/** 打开弹窗 */
-const open = async () => {
+/** 打开弹窗，可传入已选 ID 用于预选高亮 */
+const open = async (selectedIds?: number[]) => {
   dialogVisible.value = true
+  // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
+  queryParams.code = undefined
+  queryParams.name = undefined
+  queryParams.itemTypeId = undefined
+  queryParams.pageNo = 1
+  // 重置分类树（清高亮 + 清搜索词）
+  typeTreeRef.value?.reset()
+  // 清空上一次的选中状态
   selectedRows.value = []
-  // 加载分类树
-  const typeList = await MdItemTypeApi.getItemTypeSimpleList()
-  itemTypeTree.value = handleTree(typeList)
-  // 加载物料列表
+  selectedRadioId.value = undefined
+  currentRadioRow.value = undefined
+  preSelectedIds.value = selectedIds ?? []
+  // 多选模式清空跨页缓存的勾选
+  await nextTick()
+  tableRef.value?.clearSelection()
   await getList()
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+defineExpose({ open })
 </script>
+
+<style lang="scss" scoped>
+/* 隐藏 radio 的 label 文字，只保留圆圈 */
+.radio-no-label {
+  :deep(.el-radio__label) {
+    display: none;
+  }
+}
+</style>
