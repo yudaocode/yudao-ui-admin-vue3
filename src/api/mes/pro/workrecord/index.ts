@@ -13,6 +13,18 @@ export interface ProWorkRecordLogVO {
   createTime: Date
 }
 
+// MES 当前工作站绑定状态 VO
+export interface ProWorkRecordVO {
+  userId: number
+  userNickname: string
+  workstationId: number
+  workstationCode: string
+  workstationName: string
+  type: number // 1=上工 2=下工
+  clockInTime: Date
+  clockOutTime: Date
+}
+
 // MES 工作记录 API
 export const ProWorkRecordApi = {
   // 查询工作记录分页

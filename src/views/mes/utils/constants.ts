@@ -222,6 +222,12 @@ export const MesProAndonLevelEnum = {
   LEVEL3: 3 // 三级
 }
 
+/** MES 上下工操作类型枚举 */
+export const MesProWorkRecordTypeEnum = {
+  CLOCK_IN: 1, // 上工
+  CLOCK_OUT: 2 // 下工
+}
+
 /** MES 生产报工类型枚举 */
 export const MesProFeedbackTypeEnum = {
   SELF: 1, // 自行报工
