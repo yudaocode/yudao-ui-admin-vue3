@@ -58,8 +58,6 @@ const summary = ref<MesHomeSummaryVO>({
   repairActiveCount: 0
 }) // 数据
 
-// DONE @AI：跳转都不对了，是不是菜单里的组件名没对上？已确认所有 routeName 与目标页面 defineOptions({ name }) 一致
-// DONE @AI：可以改成 name 么？因为 url 可能会变，而 name 更稳定！已改为使用路由 name 导航
 const handleNavigate = (name: string) => {
   router.push({ name })
 }
