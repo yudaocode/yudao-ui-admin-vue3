@@ -33,11 +33,6 @@ export const MdVendorApi = {
     return await request.get({ url: `/mes/md-vendor/page`, params })
   },
 
-  // 查询供应商精简列表
-  getVendorSimpleList: async () => {
-    return await request.get({ url: `/mes/md-vendor/simple-list` })
-  },
-
   // 查询供应商详情
   getVendor: async (id: number) => {
     return await request.get({ url: `/mes/md-vendor/get?id=` + id })

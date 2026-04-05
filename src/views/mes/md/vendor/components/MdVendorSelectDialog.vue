@@ -1,37 +1,37 @@
 <!--
-  MES 客户弹窗选择器（支持单选/多选）
+  MES 供应商弹窗选择器（支持单选/多选）
 
   Props:
     multiple — true 多选（checkbox），false 单选（radio）；默认 true
   Events:
-    selected(rows: MdClientVO[]) — 确认选择后触发，单选时数组长度为 1
+    selected(rows: MdVendorVO[]) — 确认选择后触发，单选时数组长度为 1
   Expose:
     open(selectedIds?: number[]) — 打开弹窗，可传入已选 ID 用于预选高亮
 -->
 <template>
-  <Dialog title="客户选择" v-model="dialogVisible" width="70%">
+  <Dialog title="供应商选择" v-model="dialogVisible" width="70%">
     <!-- 搜索表单 -->
     <el-form :inline="true" :model="queryParams" class="mb-10px" label-width="80px">
-      <el-form-item label="客户编码">
+      <el-form-item label="供应商编码">
         <el-input
           v-model="queryParams.code"
-          placeholder="请输入客户编码"
+          placeholder="请输入供应商编码"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="客户名称">
+      <el-form-item label="供应商名称">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入客户名称"
+          placeholder="请输入供应商名称"
           clearable
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="客户简称">
+      <el-form-item label="供应商简称">
         <el-input
           v-model="queryParams.nickname"
-          placeholder="请输入客户简称"
+          placeholder="请输入供应商简称"
           clearable
           @keyup.enter="handleQuery"
         />
@@ -78,15 +78,14 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="客户编码" align="center" prop="code" width="200" />
-      <el-table-column label="客户名称" align="left" prop="name" min-width="150" />
-      <el-table-column label="客户简称" align="center" prop="nickname" width="120" />
-      <el-table-column label="客户类型" align="center" prop="type" width="100">
+      <el-table-column label="供应商编码" align="center" prop="code" width="200" />
+      <el-table-column label="供应商名称" align="left" prop="name" min-width="150" />
+      <el-table-column label="供应商简称" align="center" prop="nickname" width="120" />
+      <el-table-column label="供应商等级" align="center" prop="level" width="110">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_CLIENT_TYPE" :value="scope.row.type" />
+          <dict-tag :type="DICT_TYPE.MES_VENDOR_LEVEL" :value="scope.row.level" />
         </template>
       </el-table-column>
-      <el-table-column label="联系人" align="center" prop="contact1Name" width="100" />
       <el-table-column label="联系电话" align="center" prop="telephone" width="130" />
       <el-table-column label="状态" align="center" prop="status" width="80">
         <template #default="scope">
@@ -111,9 +110,9 @@
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
-import { MdClientApi, MdClientVO } from '@/api/mes/md/client'
+import { MdVendorApi, MdVendorVO } from '@/api/mes/md/vendor'
 
-defineOptions({ name: 'MdClientSelectDialog' })
+defineOptions({ name: 'MdVendorSelectDialog' })
 
 const props = withDefaults(
   defineProps<{
@@ -126,35 +125,35 @@ const props = withDefaults(
 
 const message = useMessage()
 const emit = defineEmits<{
-  selected: [rows: MdClientVO[]]
+  selected: [rows: MdVendorVO[]]
 }>()
 
 const dialogVisible = ref(false) // 弹窗是否展示
 const loading = ref(false) // 列表加载中
-const list = ref<MdClientVO[]>([]) // 客户列表
+const list = ref<MdVendorVO[]>([]) // 供应商列表
 const total = ref(0) // 总条数
 
 // ==================== 选中状态 ====================
 const tableRef = ref() // 表格 Ref
-const selectedRows = ref<MdClientVO[]>([]) // 多选模式：选中行
+const selectedRows = ref<MdVendorVO[]>([]) // 多选模式：选中行
 const selectedRadioId = ref<number>() // 单选模式：选中 ID
-const currentRadioRow = ref<MdClientVO>() // 单选模式：选中行对象
+const currentRadioRow = ref<MdVendorVO>() // 单选模式：选中行对象
 const preSelectedIds = ref<number[]>([]) // 打开弹窗时传入的已选 ID
 
 /** 多选：checkbox 变化 */
-const handleSelectionChange = (rows: MdClientVO[]) => {
+const handleSelectionChange = (rows: MdVendorVO[]) => {
   if (props.multiple) {
     selectedRows.value = rows
   }
 }
 
 /** 单选：radio 变化 */
-const handleRadioChange = (row: MdClientVO) => {
+const handleRadioChange = (row: MdVendorVO) => {
   currentRadioRow.value = row
 }
 
 /** 单击行：单选模式下点击整行即选中（降低操作成本），多选不处理（避免和 dblclick 冲突） */
-const handleRowClick = (row: MdClientVO) => {
+const handleRowClick = (row: MdVendorVO) => {
   if (props.multiple) {
     return
   }
@@ -163,7 +162,7 @@ const handleRowClick = (row: MdClientVO) => {
 }
 
 /** 双击行：多选模式切换勾选，单选模式直接确认 */
-const handleRowDblClick = (row: MdClientVO) => {
+const handleRowDblClick = (row: MdVendorVO) => {
   if (props.multiple) {
     tableRef.value?.toggleRowSelection(row)
     return
@@ -173,20 +172,20 @@ const handleRowDblClick = (row: MdClientVO) => {
   confirmSelect()
 }
 
-// ==================== 客户查询 ====================
+// ==================== 供应商查询 ====================
 const queryParams = reactive({
   pageNo: 1, // 页码
   pageSize: 10, // 每页条数
-  code: undefined as string | undefined, // 客户编码
-  name: undefined as string | undefined, // 客户名称
-  nickname: undefined as string | undefined // 客户简称
+  code: undefined as string | undefined, // 供应商编码
+  name: undefined as string | undefined, // 供应商名称
+  nickname: undefined as string | undefined // 供应商简称
 })
 
-/** 查询客户列表 */
+/** 查询供应商列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await MdClientApi.getClientPage(queryParams)
+    const data = await MdVendorApi.getVendorPage(queryParams)
     list.value = data.list
     total.value = data.total
     await nextTick()
