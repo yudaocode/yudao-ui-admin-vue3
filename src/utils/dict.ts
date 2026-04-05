@@ -293,6 +293,7 @@ export enum DICT_TYPE {
   MES_PRO_FEEDBACK_CHANNEL = 'mes_pro_feedback_channel', // MES 生产报工途径
   MES_PRO_ANDON_STATUS = 'mes_pro_andon_status', // MES 安灯处置状态
   MES_PRO_ANDON_LEVEL = 'mes_pro_andon_level', // MES 安灯级别
+  MES_PRO_WORK_RECORD_TYPE = 'mes_pro_work_record_type', // MES 上下工状态类型
   MES_RQC_TYPE = 'mes_rqc_type', // MES 退货检验类型
   MES_WM_ARRIVAL_NOTICE_STATUS = 'mes_wm_arrival_notice_status', // MES 到货通知单状态
   MES_WM_ITEM_RECEIPT_STATUS = 'mes_wm_item_receipt_status', // MES 物料接收单状态
