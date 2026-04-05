@@ -32,10 +32,8 @@ export const MdClientApi = {
     return await request.get({ url: `/mes/md-client/page`, params })
   },
 
-  // 查询客户精简列表
-  getClientSimpleList: async () => {
-    return await request.get({ url: `/mes/md-client/simple-list` })
-  },
+
+
 
   // 查询客户详情
   getClient: async (id: number) => {
