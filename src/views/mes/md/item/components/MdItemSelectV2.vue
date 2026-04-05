@@ -13,6 +13,7 @@
 -->
 <template>
   <div
+    v-bind="attrs"
     class="w-full"
     :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
     @click="handleClick"
@@ -37,9 +38,9 @@
         :class="disabled ? 'is-select-disabled' : 'is-select-clickable'"
       />
     </el-tooltip>
-    <!-- 弹窗选择器（单选模式），放在 div 内部保持单根节点，Vue 自动继承 attrs -->
-    <MdItemSelectDialogV2 ref="dialogRef" :multiple="false" @selected="handleSelected" />
   </div>
+  <!-- 弹窗必须放在 div 外部，否则弹窗内的点击事件会冒泡到 div 触发 handleClick -->
+  <MdItemSelectDialogV2 ref="dialogRef" :multiple="false" @selected="handleSelected" />
 </template>
 
 <script setup lang="ts">
@@ -47,7 +48,11 @@ import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import { Search, CircleClose } from '@element-plus/icons-vue'
 import MdItemSelectDialogV2 from './MdItemSelectDialogV2.vue'
 
-defineOptions({ name: 'MdItemSelectV2' })
+// 组件有两个根节点（div + Dialog），Vue 不会自动继承 attrs；
+// 手动透传到外层 div，确保父组件传入的 class / style 等生效
+const attrs = useAttrs()
+
+defineOptions({ name: 'MdItemSelectV2', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{
