@@ -11,6 +11,7 @@
   Expose:
     loadTree() — 手动刷新分类树
     clearCurrent() — 清除当前选中节点高亮
+    reset() — 重置整个树状态（清高亮 + 清搜索词）
 -->
 <template>
   <el-input
@@ -93,5 +94,11 @@ const clearCurrent = () => {
   currentNodeId = undefined
 }
 
-defineExpose({ loadTree, clearCurrent })
+/** 重置整个树状态（清高亮 + 清搜索词） */
+const reset = () => {
+  clearCurrent()
+  filterText.value = ''
+}
+
+defineExpose({ loadTree, clearCurrent, reset })
 </script>

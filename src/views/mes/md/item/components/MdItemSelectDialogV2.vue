@@ -52,12 +52,20 @@
           :stripe="true"
           :show-overflow-tooltip="true"
           border
+          row-key="id"
           :highlight-current-row="!multiple"
           @selection-change="handleSelectionChange"
+          @row-click="handleRowClick"
           @row-dblclick="handleRowDblClick"
         >
-          <!-- 多选：checkbox -->
-          <el-table-column v-if="multiple" type="selection" width="50" align="center" />
+          <!-- 多选：checkbox（reserve-selection 保证跨页勾选不丢失） -->
+          <el-table-column
+            v-if="multiple"
+            type="selection"
+            :reserve-selection="true"
+            width="50"
+            align="center"
+          />
           <!-- 单选：radio -->
           <el-table-column v-else width="50" align="center">
             <template #default="{ row }">
@@ -151,9 +159,19 @@ const handleRadioChange = (row: MdItemVO) => {
   currentRadioRow.value = row
 }
 
-/** 双击行：单选模式直接确认 */
+/** 单击行：单选模式下点击整行即选中（降低操作成本），多选不处理（避免和 dblclick 冲突） */
+const handleRowClick = (row: MdItemVO) => {
+  if (props.multiple) {
+    return
+  }
+  selectedRadioId.value = row.id
+  currentRadioRow.value = row
+}
+
+/** 双击行：多选模式切换勾选，单选模式直接确认 */
 const handleRowDblClick = (row: MdItemVO) => {
   if (props.multiple) {
+    tableRef.value?.toggleRowSelection(row)
     return
   }
   selectedRadioId.value = row.id
@@ -163,9 +181,9 @@ const handleRowDblClick = (row: MdItemVO) => {
 
 // ==================== 分类树 ====================
 
-/** 点击分类树节点，按分类筛选 */
-const handleNodeClick = (data: MdItemTypeVO) => {
-  queryParams.itemTypeId = data.id
+/** 点击分类树节点，按分类筛选（支持取消选中） */
+const handleNodeClick = (data: MdItemTypeVO | undefined) => {
+  queryParams.itemTypeId = data?.id
   handleQuery()
 }
 
@@ -222,11 +240,12 @@ const handleQuery = () => {
   getList()
 }
 
-/** 重置查询条件 */
+/** 重置查询条件（同步清除左侧树高亮和搜索词） */
 const resetQuery = () => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.itemTypeId = undefined
+  typeTreeRef.value?.reset()
   handleQuery()
 }
 
@@ -253,10 +272,21 @@ const confirmSelect = () => {
 /** 打开弹窗，可传入已选 ID 用于预选高亮 */
 const open = async (selectedIds?: number[]) => {
   dialogVisible.value = true
+  // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
+  queryParams.code = undefined
+  queryParams.name = undefined
+  queryParams.itemTypeId = undefined
+  queryParams.pageNo = 1
+  // 重置分类树（清高亮 + 清搜索词）
+  typeTreeRef.value?.reset()
+  // 清空上一次的选中状态
   selectedRows.value = []
   selectedRadioId.value = undefined
   currentRadioRow.value = undefined
   preSelectedIds.value = selectedIds ?? []
+  // 多选模式清空跨页缓存的勾选
+  await nextTick()
+  tableRef.value?.clearSelection()
   await getList()
 }
 defineExpose({ open })
