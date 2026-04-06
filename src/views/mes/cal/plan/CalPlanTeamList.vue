@@ -12,7 +12,6 @@
     >
       <Icon icon="ep:plus" class="mr-5px" /> 添加班组
     </el-button>
-    <!-- DONE @AI：左边：班组；右边：成员 -->
     <el-row :gutter="20">
       <!-- 左侧：班组列表 -->
       <el-col :span="14">
@@ -36,7 +35,6 @@
           </el-table-column>
         </el-table>
       </el-col>
-      <!-- DONE @AI：右边：成员；（后端接口已有 /mes/cal/team-member/list-by-team） -->
       <!-- 右侧：成员预览 -->
       <el-col :span="10">
         <el-card shadow="never" class="member-card">
