@@ -9,6 +9,7 @@
       </div>
     </template>
     <el-select
+      v-bind="$attrs"
       v-model="selectValue"
       :placeholder="placeholder"
       :disabled="disabled"
@@ -33,7 +34,7 @@
 <script setup lang="ts">
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
 
-defineOptions({ name: 'WmWarehouseSelect' })
+defineOptions({ name: 'WmWarehouseSelect', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{

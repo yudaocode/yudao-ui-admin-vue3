@@ -13,6 +13,7 @@
       </div>
     </template>
     <el-select
+      v-bind="$attrs"
       v-model="selectValue"
       :placeholder="placeholder"
       :disabled="disabled"
@@ -37,7 +38,7 @@
 <script setup lang="ts">
 import { MdUnitMeasureApi, MdUnitMeasureVO } from '@/api/mes/md/unitmeasure'
 
-defineOptions({ name: 'MdUnitMeasureSelect' })
+defineOptions({ name: 'MdUnitMeasureSelect', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{

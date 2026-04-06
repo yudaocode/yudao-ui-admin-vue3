@@ -10,6 +10,7 @@
       </div>
     </template>
     <el-select
+      v-bind="$attrs"
       v-model="selectValue"
       :placeholder="placeholder"
       :disabled="disabled"
@@ -34,7 +35,7 @@
 <script setup lang="ts">
 import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
 
-defineOptions({ name: 'MdWorkshopSelect' })
+defineOptions({ name: 'MdWorkshopSelect', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{

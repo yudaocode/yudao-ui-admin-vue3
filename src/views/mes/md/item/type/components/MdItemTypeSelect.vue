@@ -9,6 +9,7 @@
       </div>
     </template>
     <el-tree-select
+      v-bind="$attrs"
       v-model="selectValue"
       :data="treeData"
       :props="defaultProps"
@@ -27,7 +28,7 @@
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
 import { defaultProps, handleTree } from '@/utils/tree'
 
-defineOptions({ name: 'MdItemTypeSelect' })
+defineOptions({ name: 'MdItemTypeSelect', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{

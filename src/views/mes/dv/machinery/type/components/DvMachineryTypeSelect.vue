@@ -9,6 +9,7 @@
       </div>
     </template>
     <el-tree-select
+      v-bind="$attrs"
       v-model="selectValue"
       :data="treeData"
       :props="defaultProps"
@@ -27,7 +28,7 @@
 import { DvMachineryTypeApi, DvMachineryTypeVO } from '@/api/mes/dv/machinery/type'
 import { defaultProps, handleTree } from '@/utils/tree'
 
-defineOptions({ name: 'DvMachineryTypeSelect' })
+defineOptions({ name: 'DvMachineryTypeSelect', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{

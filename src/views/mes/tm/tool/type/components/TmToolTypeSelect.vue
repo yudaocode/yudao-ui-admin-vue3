@@ -10,6 +10,7 @@
       </div>
     </template>
     <el-select
+      v-bind="$attrs"
       v-model="selectValue"
       :placeholder="placeholder"
       :disabled="disabled"
@@ -34,7 +35,7 @@
 <script setup lang="ts">
 import { TmToolTypeApi, TmToolTypeVO } from '@/api/mes/tm/tool/type'
 
-defineOptions({ name: 'TmToolTypeSelect' })
+defineOptions({ name: 'TmToolTypeSelect', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{

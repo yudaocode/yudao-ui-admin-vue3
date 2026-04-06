@@ -10,6 +10,7 @@
       </div>
     </template>
     <el-select
+      v-bind="$attrs"
       v-model="selectValue"
       :placeholder="placeholder"
       :disabled="disabled"
@@ -32,7 +33,7 @@
 <script setup lang="ts">
 import { ProProcessApi, ProProcessVO } from '@/api/mes/pro/process'
 
-defineOptions({ name: 'ProProcessSelect' })
+defineOptions({ name: 'ProProcessSelect', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{
