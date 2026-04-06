@@ -135,13 +135,12 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 处置；detail - 详情
 const dialogTitle = computed(() =>
-  // 弹窗的标题
   formType.value === 'create'
     ? '新增安灯呼叫'
     : formType.value === 'update'
       ? '处置安灯呼叫'
       : '安灯呼叫详情'
-)
+) // 弹窗的标题
 const formData = ref<any>({}) // 表单数据
 const formRef = ref() // 表单 Ref
 const createRules = reactive({
