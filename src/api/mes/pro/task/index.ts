@@ -9,6 +9,7 @@ export interface ProTaskVO {
   workOrderCode: string // 工单编码
   workOrderName: string // 工单名称
   workstationId: number // 工作站编号
+  workstationCode: string // 工作站编码
   workstationName: string // 工作站名称
   routeId: number // 工艺路线编号
   processId: number // 工序编号
@@ -65,11 +66,6 @@ export const ProTaskApi = {
   // 导出生产任务 Excel
   exportTask: async (params: any) => {
     return await request.download({ url: `/mes/pro/task/export-excel`, params })
-  },
-
-  // 获得任务精简列表（下拉选项）
-  getTaskSimpleList: async (workOrderId?: number) => {
-    return await request.get({ url: `/mes/pro/task/simple-list`, params: { workOrderId } })
   },
 
   // 获得甘特图任务列表（非分页）
