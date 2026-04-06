@@ -19,11 +19,6 @@ export const QcIndicatorApi = {
     return await request.get({ url: `/mes/qc/indicator/page`, params })
   },
 
-  // 查询质检指标精简列表
-  getIndicatorSimpleList: async () => {
-    return await request.get({ url: `/mes/qc/indicator/simple-list` })
-  },
-
   // 查询质检指标详情
   getIndicator: async (id: number) => {
     return await request.get({ url: `/mes/qc/indicator/get?id=` + id })
