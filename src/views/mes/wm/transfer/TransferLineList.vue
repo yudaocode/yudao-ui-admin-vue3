@@ -70,9 +70,17 @@
     >
       <el-row>
         <el-col :span="8">
+          <el-form-item label="选择库存" prop="materialStockId">
+            <WmMaterialStockSelect
+              v-model="formData.materialStockId"
+              @change="handleStockChange"
+              class="!w-full"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" v-if="formData.itemId">
           <el-form-item label="物料" prop="itemId">
-            <!-- DONE @AI：已移除来源库存选择逻辑，改为直接选择物料 -->
-            <MdItemSelect v-model="formData.itemId" placeholder="请选择物料" class="!w-full" />
+            <MdItemSelect v-model="formData.itemId" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -81,6 +89,7 @@
               v-model="formData.quantity"
               :precision="2"
               :min="0"
+              :max="quantityMax"
               controls-position="right"
               class="!w-full"
             />
@@ -88,29 +97,29 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="批次号">
-            <el-input v-model="formData.batchCode" placeholder="请输入批次号" />
+            <el-input v-model="formData.batchCode" placeholder="请输入批次号" disabled />
           </el-form-item>
         </el-col>
-        <!-- DONE @AI：移出仓库/库区/库位改为可编辑选择，符合当前录入要求 -->
         <el-col :span="8">
           <el-form-item label="移出仓库" prop="fromWarehouseId">
-            <WmWarehouseSelect v-model="formData.fromWarehouseId" @change="handleWarehouseChange" />
+            <WmWarehouseSelect v-model="formData.fromWarehouseId" disabled />
           </el-form-item>
         </el-col>
-        <el-col v-if="formData.fromWarehouseId" :span="8">
+        <el-col :span="8">
           <el-form-item label="移出库区" prop="fromLocationId">
             <WmWarehouseLocationSelect
               v-model="formData.fromLocationId"
               :warehouse-id="formData.fromWarehouseId"
-              @change="handleLocationChange"
+              disabled
             />
           </el-form-item>
         </el-col>
-        <el-col v-if="formData.fromLocationId" :span="8">
+        <el-col :span="8">
           <el-form-item label="移出库位" prop="fromAreaId">
             <WmWarehouseAreaSelect
               v-model="formData.fromAreaId"
               :location-id="formData.fromLocationId"
+              disabled
             />
           </el-form-item>
         </el-col>
@@ -140,6 +149,8 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
+import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
+import { WmMaterialStockApi, WmMaterialStockVO } from '@/api/mes/wm/materialstock'
 import TransferDetailList from './TransferDetailList.vue'
 import TransferDetailForm from './TransferDetailForm.vue'
 
@@ -206,6 +217,7 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
+  materialStockId: [{ required: true, message: '请选择库存', trigger: 'change' }],
   itemId: [{ required: true, message: '物料不能为空', trigger: 'change' }],
   quantity: [{ required: true, message: '转移数量不能为空', trigger: 'blur' }],
   fromWarehouseId: [{ required: true, message: '移出仓库不能为空', trigger: 'change' }],
@@ -213,19 +225,29 @@ const formRules = reactive({
   fromAreaId: [{ required: true, message: '移出库位不能为空', trigger: 'change' }]
 })
 const formRef = ref()
+const quantityMax = ref<number | undefined>(undefined)
 
-/** 仓库变化时清空库区和库位 */
-const handleWarehouseChange = () => {
-  formData.value.fromLocationId = undefined
-  formData.value.fromLocationName = undefined
-  formData.value.fromAreaId = undefined
-  formData.value.fromAreaName = undefined
-}
-
-/** 库区变化时清空库位 */
-const handleLocationChange = () => {
-  formData.value.fromAreaId = undefined
-  formData.value.fromAreaName = undefined
+/** 库存选中回来，自动回填属性 */
+const handleStockChange = (stock: WmMaterialStockVO | undefined) => {
+  if (!stock) {
+    formData.value.itemId = undefined
+    formData.value.fromWarehouseId = undefined
+    formData.value.fromLocationId = undefined
+    formData.value.fromAreaId = undefined
+    formData.value.batchId = undefined
+    formData.value.batchCode = undefined
+    formData.value.quantity = undefined
+    quantityMax.value = undefined
+    return
+  }
+  formData.value.itemId = stock.itemId
+  formData.value.fromWarehouseId = stock.warehouseId
+  formData.value.fromLocationId = stock.locationId
+  formData.value.fromAreaId = stock.areaId
+  formData.value.batchId = stock.batchId
+  formData.value.batchCode = stock.batchCode
+  formData.value.quantity = stock.quantity
+  quantityMax.value = stock.quantity
 }
 
 /** 打开表单弹窗 */
@@ -238,6 +260,16 @@ const openForm = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await WmTransferLineApi.getTransferLine(id)
+      // 编辑时：如果行关联了库存台账，查询当前在库量作为数量上限
+      if (formData.value.materialStockId) {
+        try {
+          const stock = await WmMaterialStockApi.getMaterialStock(formData.value.materialStockId)
+          quantityMax.value = stock?.quantity
+        } catch {
+          // 台账记录可能已不存在，不限制上限
+          quantityMax.value = undefined
+        }
+      }
     } finally {
       formLoading.value = false
     }
@@ -286,6 +318,7 @@ const resetForm = () => {
     fromAreaName: undefined,
     remark: undefined
   }
+  quantityMax.value = undefined
   formRef.value?.resetFields()
 }
 
