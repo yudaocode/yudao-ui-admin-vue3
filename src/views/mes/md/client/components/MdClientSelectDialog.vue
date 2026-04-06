@@ -116,6 +116,7 @@
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
 import { MdClientApi, MdClientVO } from '@/api/mes/md/client'
 
 defineOptions({ name: 'MdClientSelectDialog' })
@@ -184,7 +185,8 @@ const queryParams = reactive({
   pageSize: 10, // 每页条数
   code: undefined as string | undefined, // 客户编码
   name: undefined as string | undefined, // 客户名称
-  nickname: undefined as string | undefined // 客户简称
+  nickname: undefined as string | undefined, // 客户简称
+  status: CommonStatusEnum.ENABLE as number | undefined // 状态：默认只查启用
 })
 
 /** 查询客户列表 */
@@ -236,6 +238,7 @@ const resetQuery = () => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.nickname = undefined
+  queryParams.status = CommonStatusEnum.ENABLE
   handleQuery()
 }
 
@@ -266,6 +269,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.nickname = undefined
+  queryParams.status = CommonStatusEnum.ENABLE
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []

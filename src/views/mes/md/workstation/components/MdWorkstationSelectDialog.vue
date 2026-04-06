@@ -101,6 +101,7 @@
 
 <script setup lang="ts">
 import { MdWorkstationApi, MdWorkstationVO } from '@/api/mes/md/workstation'
+import { CommonStatusEnum } from '@/utils/constants'
 import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
 import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
 
@@ -170,7 +171,8 @@ const queryParams = reactive({
   pageSize: 10, // 每页条数
   code: undefined as string | undefined, // 工作站编码
   processId: undefined as number | undefined, // 工序编号
-  workshopId: undefined as number | undefined // 车间编号
+  workshopId: undefined as number | undefined, // 车间编号
+  status: CommonStatusEnum.ENABLE as number | undefined // 状态：默认只查启用
 })
 
 /** 查询工作站列表 */
@@ -222,6 +224,7 @@ const resetQuery = () => {
   queryParams.code = undefined
   queryParams.processId = undefined
   queryParams.workshopId = undefined
+  queryParams.status = CommonStatusEnum.ENABLE
   handleQuery()
 }
 
@@ -252,6 +255,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.code = undefined
   queryParams.processId = undefined
   queryParams.workshopId = undefined
+  queryParams.status = CommonStatusEnum.ENABLE
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []

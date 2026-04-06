@@ -140,6 +140,7 @@
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
 import { MdVendorApi, MdVendorVO } from '@/api/mes/md/vendor'
 
 defineOptions({ name: 'MdVendorSelectDialog' })
@@ -210,7 +211,7 @@ const queryParams = reactive({
   name: undefined as string | undefined, // 供应商名称
   nickname: undefined as string | undefined, // 供应商简称
   englishName: undefined as string | undefined, // 英文名称
-  status: undefined as number | undefined // 状态
+  status: CommonStatusEnum.ENABLE as number | undefined // 状态：默认只查启用
 })
 
 /** 查询供应商列表 */
@@ -263,7 +264,7 @@ const resetQuery = () => {
   queryParams.name = undefined
   queryParams.nickname = undefined
   queryParams.englishName = undefined
-  queryParams.status = undefined
+  queryParams.status = CommonStatusEnum.ENABLE
   handleQuery()
 }
 
@@ -295,7 +296,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.name = undefined
   queryParams.nickname = undefined
   queryParams.englishName = undefined
-  queryParams.status = undefined
+  queryParams.status = 0
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []

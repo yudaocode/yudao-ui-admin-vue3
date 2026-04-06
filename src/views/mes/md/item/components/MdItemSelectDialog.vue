@@ -121,6 +121,7 @@
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
 import { dateFormatter } from '@/utils/formatTime'
 import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import { MdItemTypeVO } from '@/api/mes/md/item/type'
@@ -201,7 +202,8 @@ const queryParams = reactive({
   pageSize: 10, // 每页条数
   code: undefined as string | undefined, // 物料编码
   name: undefined as string | undefined, // 物料名称
-  itemTypeId: undefined as number | undefined // 物料分类编号
+  itemTypeId: undefined as number | undefined, // 物料分类编号
+  status: CommonStatusEnum.ENABLE as number | undefined // 状态：默认只查启用
 })
 
 /** 查询物料列表 */
@@ -253,6 +255,7 @@ const resetQuery = () => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.itemTypeId = undefined
+  queryParams.status = CommonStatusEnum.ENABLE
   typeTreeRef.value?.reset()
   handleQuery()
 }
@@ -284,6 +287,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.itemTypeId = undefined
+  queryParams.status = 0
   queryParams.pageNo = 1
   // 重置分类树（清高亮 + 清搜索词）
   typeTreeRef.value?.reset()
