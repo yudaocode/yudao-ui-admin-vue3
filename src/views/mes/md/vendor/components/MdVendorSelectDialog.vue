@@ -10,97 +10,127 @@
 -->
 <template>
   <Dialog title="供应商选择" v-model="dialogVisible" width="70%">
-    <!-- 搜索表单 -->
-    <el-form :inline="true" :model="queryParams" class="mb-10px" label-width="80px">
-      <el-form-item label="供应商编码">
-        <el-input
-          v-model="queryParams.code"
-          placeholder="请输入供应商编码"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商名称">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入供应商名称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商简称">
-        <el-input
-          v-model="queryParams.nickname"
-          placeholder="请输入供应商简称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" /> 搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon icon="ep:refresh" class="mr-5px" /> 重置
-        </el-button>
-      </el-form-item>
-    </el-form>
-    <!-- 数据表格：单选 radio / 多选 checkbox 统一在一个 table 内 -->
-    <el-table
-      ref="tableRef"
-      v-loading="loading"
-      :data="list"
-      :stripe="true"
-      :show-overflow-tooltip="true"
-      border
-      row-key="id"
-      :highlight-current-row="!multiple"
-      @selection-change="handleSelectionChange"
-      @row-click="handleRowClick"
-      @row-dblclick="handleRowDblClick"
-    >
-      <!-- 多选：checkbox（reserve-selection 保证跨页勾选不丢失） -->
-      <el-table-column
-        v-if="multiple"
-        type="selection"
-        :reserve-selection="true"
-        width="50"
-        align="center"
-      />
-      <!-- 单选：radio -->
-      <el-table-column v-else width="50" align="center">
-        <template #default="{ row }">
-          <el-radio
-            v-model="selectedRadioId"
-            :value="row.id"
-            class="radio-no-label"
-            @change="handleRadioChange(row)"
+    <ContentWrap>
+      <el-form :inline="true" :model="queryParams" label-width="85px">
+        <el-form-item label="供应商编码">
+          <el-input
+            v-model="queryParams.code"
+            placeholder="请输入供应商编码"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-220px"
           />
-        </template>
-      </el-table-column>
-      <el-table-column label="供应商编码" align="center" prop="code" width="200" />
-      <el-table-column label="供应商名称" align="left" prop="name" min-width="150" />
-      <el-table-column label="供应商简称" align="center" prop="nickname" width="120" />
-      <el-table-column label="供应商等级" align="center" prop="level" width="110">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_VENDOR_LEVEL" :value="scope.row.level" />
-        </template>
-      </el-table-column>
-      <el-table-column label="联系电话" align="center" prop="telephone" width="130" />
-      <el-table-column label="状态" align="center" prop="status" width="80">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-    </el-table>
-    <div class="overflow-hidden">
+        </el-form-item>
+        <el-form-item label="供应商名称">
+          <el-input
+            v-model="queryParams.name"
+            placeholder="请输入供应商名称"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-220px"
+          />
+        </el-form-item>
+        <el-form-item label="供应商简称">
+          <el-input
+            v-model="queryParams.nickname"
+            placeholder="请输入供应商简称"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-220px"
+          />
+        </el-form-item>
+        <el-form-item label="英文名称">
+          <el-input
+            v-model="queryParams.englishName"
+            placeholder="请输入英文名称"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-220px"
+          />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select
+            v-model="queryParams.status"
+            placeholder="请选择状态"
+            clearable
+            class="!w-220px"
+          >
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="handleQuery">
+            <Icon icon="ep:search" class="mr-5px" /> 搜索
+          </el-button>
+          <el-button @click="resetQuery">
+            <Icon icon="ep:refresh" class="mr-5px" /> 重置
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </ContentWrap>
+    <!-- 数据表格：单选 radio / 多选 checkbox 统一在一个 table 内 -->
+    <ContentWrap>
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        :data="list"
+        :stripe="true"
+        :show-overflow-tooltip="true"
+        border
+        row-key="id"
+        :highlight-current-row="!multiple"
+        @selection-change="handleSelectionChange"
+        @row-click="handleRowClick"
+        @row-dblclick="handleRowDblClick"
+      >
+        <!-- 多选：checkbox（reserve-selection 保证跨页勾选不丢失） -->
+        <el-table-column
+          v-if="multiple"
+          type="selection"
+          :reserve-selection="true"
+          width="50"
+          align="center"
+        />
+        <!-- 单选：radio -->
+        <el-table-column v-else width="50" align="center">
+          <template #default="{ row }">
+            <el-radio
+              v-model="selectedRadioId"
+              :value="row.id"
+              class="radio-no-label"
+              @change="handleRadioChange(row)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="供应商编码" align="center" prop="code" width="200" />
+        <el-table-column label="供应商名称" align="left" prop="name" min-width="150" />
+        <el-table-column label="供应商简称" align="center" prop="nickname" width="120" />
+        <el-table-column label="供应商等级" align="center" prop="level" width="110">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.MES_VENDOR_LEVEL" :value="scope.row.level" />
+          </template>
+        </el-table-column>
+        <el-table-column label="供应商评分" align="center" prop="score" width="100" />
+        <el-table-column label="联系电话" align="center" prop="telephone" width="130" />
+        <el-table-column label="状态" align="center" prop="status" width="80">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          </template>
+        </el-table-column>
+        <el-table-column label="备注" align="center" prop="remark" min-width="120" />
+      </el-table>
       <Pagination
         :total="total"
         v-model:page="queryParams.pageNo"
         v-model:limit="queryParams.pageSize"
         @pagination="getList"
       />
-    </div>
+    </ContentWrap>
     <template #footer>
       <el-button type="primary" @click="confirmSelect">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -109,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MdVendorApi, MdVendorVO } from '@/api/mes/md/vendor'
 
 defineOptions({ name: 'MdVendorSelectDialog' })
@@ -178,7 +208,9 @@ const queryParams = reactive({
   pageSize: 10, // 每页条数
   code: undefined as string | undefined, // 供应商编码
   name: undefined as string | undefined, // 供应商名称
-  nickname: undefined as string | undefined // 供应商简称
+  nickname: undefined as string | undefined, // 供应商简称
+  englishName: undefined as string | undefined, // 英文名称
+  status: undefined as number | undefined // 状态
 })
 
 /** 查询供应商列表 */
@@ -230,6 +262,8 @@ const resetQuery = () => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.nickname = undefined
+  queryParams.englishName = undefined
+  queryParams.status = undefined
   handleQuery()
 }
 
@@ -260,6 +294,8 @@ const open = async (selectedIds?: number[]) => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.nickname = undefined
+  queryParams.englishName = undefined
+  queryParams.status = undefined
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []

@@ -12,96 +12,104 @@
   <Dialog title="物料产品选择" v-model="dialogVisible" width="80%">
     <el-row :gutter="20">
       <!-- 左侧：分类树 -->
-      <el-col :span="5">
-        <MdItemTypeTree ref="typeTreeRef" @node-click="handleNodeClick" />
+      <el-col :span="5" :xs="24">
+        <ContentWrap class="h-1/1">
+          <MdItemTypeTree ref="typeTreeRef" @node-click="handleNodeClick" />
+        </ContentWrap>
       </el-col>
       <!-- 右侧：物料表格 -->
-      <el-col :span="19">
+      <el-col :span="19" :xs="24">
         <!-- 搜索表单 -->
-        <el-form :inline="true" :model="queryParams" class="mb-10px" label-width="80px">
-          <el-form-item label="物料编码">
-            <el-input
-              v-model="queryParams.code"
-              placeholder="请输入物料编码"
-              clearable
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="物料名称">
-            <el-input
-              v-model="queryParams.name"
-              placeholder="请输入物料名称"
-              clearable
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="handleQuery">
-              <Icon icon="ep:search" class="mr-5px" /> 搜索
-            </el-button>
-            <el-button @click="resetQuery">
-              <Icon icon="ep:refresh" class="mr-5px" /> 重置
-            </el-button>
-          </el-form-item>
-        </el-form>
-        <!-- 数据表格：单选 radio / 多选 checkbox 统一在一个 table 内 -->
-        <el-table
-          ref="tableRef"
-          v-loading="loading"
-          :data="list"
-          :stripe="true"
-          :show-overflow-tooltip="true"
-          border
-          row-key="id"
-          :highlight-current-row="!multiple"
-          @selection-change="handleSelectionChange"
-          @row-click="handleRowClick"
-          @row-dblclick="handleRowDblClick"
-        >
-          <!-- 多选：checkbox（reserve-selection 保证跨页勾选不丢失） -->
-          <el-table-column
-            v-if="multiple"
-            type="selection"
-            :reserve-selection="true"
-            width="50"
-            align="center"
-          />
-          <!-- 单选：radio -->
-          <el-table-column v-else width="50" align="center">
-            <template #default="{ row }">
-              <el-radio
-                v-model="selectedRadioId"
-                :value="row.id"
-                class="radio-no-label"
-                @change="handleRadioChange(row)"
+        <ContentWrap>
+          <el-form :inline="true" :model="queryParams" label-width="68px">
+            <el-form-item label="物料编码">
+              <el-input
+                v-model="queryParams.code"
+                placeholder="请输入物料编码"
+                clearable
+                @keyup.enter="handleQuery"
+                class="!w-220px"
               />
-            </template>
-          </el-table-column>
-          <el-table-column label="物料编码" align="center" prop="code" width="200" />
-          <el-table-column label="物料名称" align="left" prop="name" min-width="150" />
-          <el-table-column label="规格型号" align="left" prop="specification" min-width="120" />
-          <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
-          <el-table-column label="物料/产品" align="center" prop="itemOrProduct" width="100">
-            <template #default="scope">
-              <dict-tag :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT" :value="scope.row.itemOrProduct" />
-            </template>
-          </el-table-column>
-          <el-table-column label="所属分类" align="center" prop="itemTypeName" width="120" />
-          <el-table-column
-            label="创建时间"
-            align="center"
-            prop="createTime"
-            :formatter="dateFormatter"
-            width="180"
+            </el-form-item>
+            <el-form-item label="物料名称">
+              <el-input
+                v-model="queryParams.name"
+                placeholder="请输入物料名称"
+                clearable
+                @keyup.enter="handleQuery"
+                class="!w-220px"
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button @click="handleQuery">
+                <Icon icon="ep:search" class="mr-5px" /> 搜索
+              </el-button>
+              <el-button @click="resetQuery">
+                <Icon icon="ep:refresh" class="mr-5px" /> 重置
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </ContentWrap>
+        <!-- 数据表格：单选 radio / 多选 checkbox 统一在一个 table 内 -->
+        <ContentWrap>
+          <el-table
+            ref="tableRef"
+            v-loading="loading"
+            :data="list"
+            :stripe="true"
+            :show-overflow-tooltip="true"
+            border
+            row-key="id"
+            :highlight-current-row="!multiple"
+            @selection-change="handleSelectionChange"
+            @row-click="handleRowClick"
+            @row-dblclick="handleRowDblClick"
+          >
+            <!-- 多选：checkbox（reserve-selection 保证跨页勾选不丢失） -->
+            <el-table-column
+              v-if="multiple"
+              type="selection"
+              :reserve-selection="true"
+              width="50"
+              align="center"
+            />
+            <!-- 单选：radio -->
+            <el-table-column v-else width="50" align="center">
+              <template #default="{ row }">
+                <el-radio
+                  v-model="selectedRadioId"
+                  :value="row.id"
+                  class="radio-no-label"
+                  @change="handleRadioChange(row)"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="物料编码" align="center" prop="code" width="200" />
+            <el-table-column label="物料名称" align="left" prop="name" min-width="150" />
+            <el-table-column label="规格型号" align="left" prop="specification" min-width="120" />
+            <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
+            <el-table-column label="物料/产品" align="center" prop="itemOrProduct" width="100">
+              <template #default="scope">
+                <dict-tag :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT" :value="scope.row.itemOrProduct" />
+              </template>
+            </el-table-column>
+            <el-table-column label="所属分类" align="center" prop="itemTypeName" width="120" />
+            <el-table-column
+              label="创建时间"
+              align="center"
+              prop="createTime"
+              :formatter="dateFormatter"
+              width="180"
+            />
+          </el-table>
+          <!-- 分页 -->
+          <Pagination
+            :total="total"
+            v-model:page="queryParams.pageNo"
+            v-model:limit="queryParams.pageSize"
+            @pagination="getList"
           />
-        </el-table>
-        <!-- 分页 -->
-        <Pagination
-          :total="total"
-          v-model:page="queryParams.pageNo"
-          v-model:limit="queryParams.pageSize"
-          @pagination="getList"
-        />
+        </ContentWrap>
       </el-col>
     </el-row>
     <template #footer>
