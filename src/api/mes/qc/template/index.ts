@@ -17,10 +17,6 @@ export const QcTemplateApi = {
     return await request.get({ url: `/mes/qc/template/page`, params })
   },
 
-  // 查询质检方案精简列表
-  getTemplateSimpleList: async () => {
-    return await request.get({ url: `/mes/qc/template/simple-list` })
-  },
 
   // 查询质检方案详情
   getTemplate: async (id: number) => {
