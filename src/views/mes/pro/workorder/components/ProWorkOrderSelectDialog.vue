@@ -10,105 +10,102 @@
 -->
 <template>
   <Dialog title="生产工单选择" v-model="dialogVisible" width="80%">
-    <!-- 搜索表单 -->
-    <el-form :inline="true" :model="queryParams" class="mb-10px" label-width="80px">
-      <el-form-item label="工单编码">
-        <el-input
-          v-model="queryParams.code"
-          placeholder="请输入工单编码"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="工单名称">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入工单名称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <!-- DONE @AI：筛选增加：产品、客户的 select； -->
-      <el-form-item label="产品">
-        <MdItemSelect v-model="queryParams.productId" placeholder="请选择产品" class="!w-200px" />
-      </el-form-item>
-      <el-form-item label="客户">
-        <MdClientSelect v-model="queryParams.clientId" placeholder="请选择客户" class="!w-200px" />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" /> 搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon icon="ep:refresh" class="mr-5px" /> 重置
-        </el-button>
-      </el-form-item>
-    </el-form>
-    <!-- 数据表格：单选 radio / 多选 checkbox 统一在一个 table 内 -->
-    <el-table
-      ref="tableRef"
-      v-loading="loading"
-      :data="list"
-      :stripe="true"
-      :show-overflow-tooltip="true"
-      border
-      row-key="id"
-      :highlight-current-row="!multiple"
-      @selection-change="handleSelectionChange"
-      @row-click="handleRowClick"
-      @row-dblclick="handleRowDblClick"
-    >
-      <!-- 多选：checkbox（reserve-selection 保证跨页勾选不丢失） -->
-      <el-table-column
-        v-if="multiple"
-        type="selection"
-        :reserve-selection="true"
-        width="50"
-        align="center"
-      />
-      <!-- 单选：radio -->
-      <el-table-column v-else width="50" align="center">
-        <template #default="{ row }">
-          <el-radio
-            v-model="selectedRadioId"
-            :value="row.id"
-            class="radio-no-label"
-            @change="handleRadioChange(row)"
+    <!-- 搜索 -->
+    <ContentWrap>
+      <el-form :inline="true" :model="queryParams" label-width="80px">
+        <el-form-item label="工单编码">
+          <el-input
+            v-model="queryParams.code"
+            placeholder="请输入工单编码"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-240px"
           />
-        </template>
-      </el-table-column>
-      <!-- DONE @AI：字段对齐：/Users/yunai/Java/ktg-mes-delete-new/ktg-mes-ui/src/components/workorderSelect/single.vue -->
-      <el-table-column label="工单编码" align="center" prop="code" width="180" />
-      <el-table-column label="工单名称" align="center" prop="name" min-width="200" />
-      <el-table-column label="工单来源" align="center" prop="orderSourceType" width="100">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE" :value="scope.row.orderSourceType" />
-        </template>
-      </el-table-column>
-      <el-table-column label="订单编号" align="center" prop="orderSourceCode" width="140" />
-      <el-table-column label="产品编号" align="center" prop="productCode" width="120" />
-      <el-table-column label="产品名称" align="center" prop="productName" min-width="200" />
-      <el-table-column label="规格型号" align="center" prop="productSpec" min-width="120" />
-      <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
-      <el-table-column label="工单数量" align="center" prop="quantity" width="100" />
-      <el-table-column label="客户编码" align="center" prop="clientCode" width="120" />
-      <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
-      <el-table-column
-        label="需求日期"
-        align="center"
-        prop="requestDate"
-        :formatter="dateFormatter2"
-        width="120"
-      />
-    </el-table>
-    <div class="overflow-hidden">
+        </el-form-item>
+        <el-form-item label="工单名称">
+          <el-input
+            v-model="queryParams.name"
+            placeholder="请输入工单名称"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-240px"
+          />
+        </el-form-item>
+        <el-form-item label="产品">
+          <MdItemSelect v-model="queryParams.productId" placeholder="请选择产品" class="!w-240px" />
+        </el-form-item>
+        <el-form-item label="客户">
+          <MdClientSelect v-model="queryParams.clientId" placeholder="请选择客户" class="!w-240px" />
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
+          <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        </el-form-item>
+      </el-form>
+    </ContentWrap>
+    <!-- 列表 -->
+    <ContentWrap>
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        :data="list"
+        :stripe="true"
+        :show-overflow-tooltip="true"
+        row-key="id"
+        :highlight-current-row="!multiple"
+        @selection-change="handleSelectionChange"
+        @row-click="handleRowClick"
+        @row-dblclick="handleRowDblClick"
+      >
+        <!-- 多选：checkbox（reserve-selection 保证跨页勾选不丢失） -->
+        <el-table-column
+          v-if="multiple"
+          type="selection"
+          :reserve-selection="true"
+          width="50"
+          align="center"
+        />
+        <!-- 单选：radio -->
+        <el-table-column v-else width="50" align="center">
+          <template #default="{ row }">
+            <el-radio
+              v-model="selectedRadioId"
+              :value="row.id"
+              class="radio-no-label"
+              @change="handleRadioChange(row)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="工单编码" align="center" prop="code" width="180" />
+        <el-table-column label="工单名称" align="center" prop="name" min-width="200" />
+        <el-table-column label="工单来源" align="center" prop="orderSourceType" width="100">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE" :value="scope.row.orderSourceType" />
+          </template>
+        </el-table-column>
+        <el-table-column label="订单编号" align="center" prop="orderSourceCode" width="140" />
+        <el-table-column label="产品编号" align="center" prop="productCode" width="120" />
+        <el-table-column label="产品名称" align="center" prop="productName" min-width="200" />
+        <el-table-column label="规格型号" align="center" prop="productSpec" min-width="120" />
+        <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
+        <el-table-column label="工单数量" align="center" prop="quantity" width="100" />
+        <el-table-column label="客户编码" align="center" prop="clientCode" width="120" />
+        <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
+        <el-table-column
+          label="需求日期"
+          align="center"
+          prop="requestDate"
+          :formatter="dateFormatter2"
+          width="120"
+        />
+      </el-table>
       <Pagination
         :total="total"
         v-model:page="queryParams.pageNo"
         v-model:limit="queryParams.pageSize"
         @pagination="getList"
       />
-    </div>
+    </ContentWrap>
     <template #footer>
       <el-button type="primary" @click="confirmSelect">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
