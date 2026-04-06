@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
 export interface StockTakingTaskLineVO {
-  id: number
+  id?: number
   taskId: number
   materialStockId?: number
   itemId?: number
