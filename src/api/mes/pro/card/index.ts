@@ -64,9 +64,4 @@ export const ProCardApi = {
   cancelCard: async (id: number) => {
     return await request.put({ url: `/mes/pro/card/cancel?id=` + id })
   },
-
-  // 获取生产流转卡精简列表
-  getCardSimpleList: async () => {
-    return await request.get<ProCardVO[]>({ url: `/mes/pro/card/simple-list` })
-  }
 }

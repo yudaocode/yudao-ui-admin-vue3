@@ -1,37 +1,65 @@
-<!-- MES 流转卡选择器：一次加载全量，前端过滤（支持 code） -->
+<!--
+  MES 流转卡选择器：只读输入框 + 点击弹窗选择
+
+  交互：显示为只读 el-input，点击打开弹窗（单选模式）进行选择
+  Props:
+    modelValue  — 绑定的流转卡 ID（v-model）
+    disabled    — 是否禁用
+    clearable   — 是否允许清空（鼠标悬停时显示清除图标）
+    placeholder — 占位文字
+  Events:
+    update:modelValue — v-model 更新
+    change(item)      — 选中流转卡变化时触发，传递完整 ProCardVO（清空时为 undefined）
+-->
 <template>
-  <el-select
-    v-model="selectValue"
-    :placeholder="placeholder"
-    :disabled="disabled"
-    :clearable="clearable"
-    filterable
-    :filter-method="handleFilter"
-    class="!w-1/1"
-    @change="handleChange"
+  <div
+    v-bind="attrs"
+    class="w-full"
+    :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
+    @click="handleClick"
+    @mouseenter="hovering = true"
+    @mouseleave="hovering = false"
   >
-    <el-option v-for="item in filteredList" :key="item.id" :label="item.code" :value="item.id">
-      <div class="flex items-center gap-8px">
-        <span>{{ item.code }}</span>
-        <el-tag v-if="item.workOrderCode" size="small" type="info" class="ml-4px">
-          {{ item.workOrderCode }}
-        </el-tag>
-      </div>
-    </el-option>
-  </el-select>
+    <el-tooltip :disabled="!selectedItem" placement="top" :show-after="500">
+      <template #content>
+        <div v-if="selectedItem" class="leading-6">
+          <div>编号：{{ selectedItem.code }}</div>
+          <div>工单：{{ selectedItem.workOrderCode || '-' }}</div>
+          <div>批次：{{ selectedItem.batchCode || '-' }}</div>
+          <div>产品：{{ selectedItem.itemName || '-' }}</div>
+        </div>
+      </template>
+      <el-input
+        :model-value="displayLabel"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        readonly
+        :suffix-icon="suffixIcon"
+        :class="disabled ? 'is-select-disabled' : 'is-select-clickable'"
+      />
+    </el-tooltip>
+  </div>
+  <!-- 弹窗必须放在 div 外部，否则弹窗内的点击事件会冒泡到 div 触发 handleClick -->
+  <ProCardSelectDialog ref="dialogRef" :multiple="false" @selected="handleSelected" />
 </template>
 
 <script setup lang="ts">
 import { ProCardApi, ProCardVO } from '@/api/mes/pro/card'
+import { Search, CircleClose } from '@element-plus/icons-vue'
+import ProCardSelectDialog from './ProCardSelectDialog.vue'
 
-defineOptions({ name: 'ProCardSelect' })
+// 组件有两个根节点（div + Dialog），Vue 不会自动继承 attrs；
+// 手动透传到外层 div，确保父组件传入的 class / style 等生效
+const attrs = useAttrs()
+
+defineOptions({ name: 'ProCardSelect', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: number
-    disabled?: boolean
-    clearable?: boolean
-    placeholder?: string
+    modelValue?: number // 绑定的流转卡 ID
+    disabled?: boolean // 是否禁用
+    clearable?: boolean // 是否允许清空
+    placeholder?: string // 占位文字
   }>(),
   {
     disabled: false,
@@ -45,37 +73,98 @@ const emit = defineEmits<{
   change: [item: ProCardVO | undefined]
 }>()
 
-const allList = ref<ProCardVO[]>([])
-const filteredList = ref<ProCardVO[]>([])
+const dialogRef = ref() // 弹窗 Ref
+const hovering = ref(false) // 鼠标是否悬停
 
-const selectValue = computed({
-  get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+// ==================== 名称回显 ====================
+const selectedItem = ref<ProCardVO | undefined>() // 当前选中的流转卡对象
+
+/** 输入框显示文本：只展示流转卡编码，保持简洁 */
+const displayLabel = computed(() => {
+  return selectedItem.value?.code ?? ''
 })
 
-/** 前端过滤（code + workOrderCode） */
-const handleFilter = (query: string) => {
-  if (!query) {
-    filteredList.value = allList.value
+/** 是否显示清除图标 */
+const showClear = computed(() => {
+  return props.clearable && !props.disabled && hovering.value && props.modelValue != null
+})
+
+/** 后缀图标：悬停且有值时显示清除，否则显示搜索 */
+const suffixIcon = computed(() => {
+  return showClear.value ? CircleClose : Search
+})
+
+/** 根据 ID 单条查询流转卡信息（用于编辑回显） */
+const resolveItemById = async (id: number | undefined) => {
+  if (id == null) {
+    selectedItem.value = undefined
     return
   }
-  const keyword = query.toLowerCase()
-  filteredList.value = allList.value.filter(
-    (item) =>
-      item.code?.toLowerCase().includes(keyword) ||
-      item.workOrderCode?.toLowerCase().includes(keyword)
-  )
+  if (selectedItem.value?.id === id) {
+    return
+  }
+  try {
+    selectedItem.value = await ProCardApi.getCard(id)
+  } catch (e) {
+    console.error('[ProCardSelect] resolveItemById failed:', e)
+  }
 }
 
-/** 选中变化 */
-const handleChange = (val: number | undefined) => {
-  const item = allList.value.find((o) => o.id === val)
+/** 监听 modelValue 变化，触发回显 */
+watch(
+  () => props.modelValue,
+  (val) => {
+    resolveItemById(val)
+  },
+  { immediate: true }
+)
+
+// ==================== 点击交互 ====================
+
+/** 点击组件：清除或打开弹窗 */
+const handleClick = (e: MouseEvent) => {
+  if (props.disabled) {
+    return
+  }
+  // 点击清除图标：清空选中
+  const target = e.target as HTMLElement
+  if (showClear.value && target.closest('.el-input__suffix')) {
+    e.stopPropagation()
+    selectedItem.value = undefined
+    emit('update:modelValue', undefined)
+    emit('change', undefined)
+    return
+  }
+  // 打开弹窗，传入当前选中 ID 用于预选高亮
+  const selectedIds = props.modelValue != null ? [props.modelValue] : []
+  dialogRef.value.open(selectedIds)
+}
+
+/** 弹窗选中回调 */
+const handleSelected = (rows: ProCardVO[]) => {
+  if (!rows || rows.length === 0) {
+    return
+  }
+  const item = rows[0]
+  selectedItem.value = item
+  emit('update:modelValue', item.id)
   emit('change', item)
 }
-
-/** 加载流转卡列表 */
-onMounted(async () => {
-  allList.value = await ProCardApi.getCardSimpleList()
-  filteredList.value = allList.value
-})
 </script>
+
+<style lang="scss" scoped>
+/* :deep 用于穿透 el-input 内部元素的 cursor 样式，UnoCSS 无法直接处理组件内部 DOM */
+.is-select-clickable {
+  :deep(.el-input__wrapper),
+  :deep(.el-input__inner) {
+    cursor: pointer;
+  }
+}
+
+.is-select-disabled {
+  :deep(.el-input__wrapper),
+  :deep(.el-input__inner) {
+    cursor: not-allowed;
+  }
+}
+</style>
