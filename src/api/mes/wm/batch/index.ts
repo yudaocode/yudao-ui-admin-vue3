@@ -22,9 +22,11 @@ export interface BatchVO {
   workOrderId?: number
   workOrderCode?: string
   taskId?: number
+  taskCode?: string
   workstationId?: number
   workstationCode?: string
   toolId?: number
+  toolCode?: string
   moldId?: number
   lotNumber?: string
   qualityStatus?: string

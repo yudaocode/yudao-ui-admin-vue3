@@ -1,3 +1,4 @@
+<script setup lang="ts"></script>
 <!--
   MES 批次弹窗选择器（支持单选/多选）
 
@@ -31,10 +32,50 @@
             class="!w-200px"
           />
         </el-form-item>
+        <el-form-item label="供应商">
+          <MdVendorSelect
+            v-model="queryParams.vendorId"
+            placeholder="请选择供应商"
+            class="!w-200px"
+          />
+        </el-form-item>
+        <el-form-item label="客户">
+          <MdClientSelect
+            v-model="queryParams.clientId"
+            placeholder="请选择客户"
+            class="!w-200px"
+          />
+        </el-form-item>
         <el-form-item label="生产工单">
           <ProWorkOrderSelect
             v-model="queryParams.workOrderId"
             placeholder="请选择生产工单"
+            class="!w-200px"
+          />
+        </el-form-item>
+        <el-form-item label="生产任务">
+          <ProTaskSelect
+            v-model="queryParams.taskId"
+            placeholder="请选择生产任务"
+            class="!w-200px"
+          />
+        </el-form-item>
+        <el-form-item label="工作站">
+          <MdWorkstationSelect
+            v-model="queryParams.workstationId"
+            placeholder="请选择工作站"
+            class="!w-200px"
+          />
+        </el-form-item>
+        <el-form-item label="工具">
+          <TmToolSelect v-model="queryParams.toolId" placeholder="请选择工具" class="!w-200px" />
+        </el-form-item>
+        <el-form-item label="模具编号">
+          <el-input
+            v-model="queryParams.moldId"
+            placeholder="请输入模具编号"
+            clearable
+            @keyup.enter="handleQuery"
             class="!w-200px"
           />
         </el-form-item>
@@ -54,6 +95,63 @@
             clearable
             @keyup.enter="handleQuery"
             class="!w-200px"
+          />
+        </el-form-item>
+        <el-form-item label="生产批号">
+          <el-input
+            v-model="queryParams.lotNumber"
+            placeholder="请输入生产批号"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-200px"
+          />
+        </el-form-item>
+        <el-form-item label="质量状态">
+          <el-select
+            v-model="queryParams.qualityStatus"
+            placeholder="请选择质量状态"
+            clearable
+            class="!w-200px"
+          >
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="生产日期">
+          <el-date-picker
+            v-model="queryParams.produceDate"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            type="daterange"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+            class="!w-220px"
+          />
+        </el-form-item>
+        <el-form-item label="有效期">
+          <el-date-picker
+            v-model="queryParams.expireDate"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            type="daterange"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+            class="!w-220px"
+          />
+        </el-form-item>
+        <el-form-item label="入库日期">
+          <el-date-picker
+            v-model="queryParams.receiptDate"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            type="daterange"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item>
@@ -112,7 +210,15 @@
         <el-table-column label="销售订单编号" align="center" prop="salesOrderCode" width="140" />
         <el-table-column label="采购订单编号" align="center" prop="purchaseOrderCode" width="140" />
         <el-table-column label="工单编码" align="center" prop="workOrderCode" width="140" />
+        <el-table-column label="工作站编码" align="center" prop="workstationCode" width="120" />
+        <el-table-column label="生产任务编号" align="center" prop="taskCode" width="140" />
+        <el-table-column label="工具编号" align="center" prop="toolCode" width="120" />
         <el-table-column label="生产批号" align="center" prop="lotNumber" width="120" />
+        <el-table-column label="质量状态" align="center" prop="qualityStatus" width="100">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.MES_WM_QUALITY_STATUS" :value="scope.row.qualityStatus" />
+          </template>
+        </el-table-column>
         <el-table-column label="生产日期" align="center" prop="produceDate" width="120">
           <template #default="scope">
             <span>{{ formatDate(scope.row.produceDate, 'YYYY-MM-DD') }}</span>
@@ -145,9 +251,15 @@
 
 <script setup lang="ts">
 import { formatDate } from '@/utils/formatTime'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { BatchApi, BatchVO } from '@/api/mes/wm/batch'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
+import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
+import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
+import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
+import TmToolSelect from '@/views/mes/tm/tool/components/TmToolSelect.vue'
 
 defineOptions({ name: 'WmBatchSelectDialog' })
 
@@ -215,9 +327,20 @@ const queryParams = reactive({
   pageSize: 10, // 每页条数
   code: undefined as string | undefined, // 批次编码
   itemId: undefined as number | undefined, // 物料 ID（MdItemSelect）
+  vendorId: undefined as number | undefined, // 供应商 ID（MdVendorSelect）
+  clientId: undefined as number | undefined, // 客户 ID（MdClientSelect）
   workOrderId: undefined as number | undefined, // 工单 ID（ProWorkOrderSelect）
+  taskId: undefined as number | undefined, // 生产任务 ID（ProTaskSelect）
+  workstationId: undefined as number | undefined, // 工作站 ID（MdWorkstationSelect）
+  toolId: undefined as number | undefined, // 工具 ID（TmToolSelect）
+  moldId: undefined as number | undefined, // 模具 ID
   salesOrderCode: undefined as string | undefined, // 销售订单编号
-  purchaseOrderCode: undefined as string | undefined // 采购订单编号
+  purchaseOrderCode: undefined as string | undefined, // 采购订单编号
+  lotNumber: undefined as string | undefined, // 生产批号
+  qualityStatus: undefined as number | undefined, // 质量状态
+  produceDate: undefined as string[] | undefined, // 生产日期范围
+  expireDate: undefined as string[] | undefined, // 有效期范围
+  receiptDate: undefined as string[] | undefined // 入库日期范围
 })
 
 /** 查询批次列表 */
@@ -268,9 +391,20 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryParams.code = undefined
   queryParams.itemId = undefined
+  queryParams.vendorId = undefined
+  queryParams.clientId = undefined
   queryParams.workOrderId = undefined
+  queryParams.taskId = undefined
+  queryParams.workstationId = undefined
+  queryParams.toolId = undefined
+  queryParams.moldId = undefined
   queryParams.salesOrderCode = undefined
   queryParams.purchaseOrderCode = undefined
+  queryParams.lotNumber = undefined
+  queryParams.qualityStatus = undefined
+  queryParams.produceDate = undefined
+  queryParams.expireDate = undefined
+  queryParams.receiptDate = undefined
   handleQuery()
 }
 
@@ -304,9 +438,20 @@ const open = async (selectedIds?: number[], itemId?: number) => {
   // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
   queryParams.code = undefined
   queryParams.itemId = itemId ?? undefined // 传入 itemId 则默认按物料过滤
+  queryParams.vendorId = undefined
+  queryParams.clientId = undefined
   queryParams.workOrderId = undefined
+  queryParams.taskId = undefined
+  queryParams.workstationId = undefined
+  queryParams.toolId = undefined
+  queryParams.moldId = undefined
   queryParams.salesOrderCode = undefined
   queryParams.purchaseOrderCode = undefined
+  queryParams.lotNumber = undefined
+  queryParams.qualityStatus = undefined
+  queryParams.produceDate = undefined
+  queryParams.expireDate = undefined
+  queryParams.receiptDate = undefined
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []
