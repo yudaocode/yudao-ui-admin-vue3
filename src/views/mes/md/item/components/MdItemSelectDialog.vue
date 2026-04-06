@@ -58,7 +58,6 @@
             :data="list"
             :stripe="true"
             :show-overflow-tooltip="true"
-            border
             row-key="id"
             :highlight-current-row="!multiple"
             @selection-change="handleSelectionChange"

@@ -1,40 +1,30 @@
 <!--
-  MES 客户弹窗选择器（支持单选/多选）
+  MES 点检保养方案弹窗选择器（支持单选/多选）
 
   Props:
     multiple — true 多选（checkbox），false 单选（radio）；默认 true
   Events:
-    selected(rows: MdClientVO[]) — 确认选择后触发，单选时数组长度为 1
+    selected(rows: DvCheckPlanVO[]) — 确认选择后触发，单选时数组长度为 1
   Expose:
     open(selectedIds?: number[]) — 打开弹窗，可传入已选 ID 用于预选高亮
 -->
 <template>
-  <Dialog title="客户选择" v-model="dialogVisible" width="70%">
-    <!-- 搜索表单 -->
+  <Dialog title="点检方案选择" v-model="dialogVisible" width="70%">
     <ContentWrap>
-      <el-form :inline="true" :model="queryParams" label-width="68px">
-        <el-form-item label="客户编码">
+      <el-form :inline="true" :model="queryParams" label-width="85px">
+        <el-form-item label="计划编号">
           <el-input
             v-model="queryParams.code"
-            placeholder="请输入客户编码"
+            placeholder="请输入计划编号"
             clearable
             @keyup.enter="handleQuery"
             class="!w-220px"
           />
         </el-form-item>
-        <el-form-item label="客户名称">
+        <el-form-item label="计划名称">
           <el-input
             v-model="queryParams.name"
-            placeholder="请输入客户名称"
-            clearable
-            @keyup.enter="handleQuery"
-            class="!w-220px"
-          />
-        </el-form-item>
-        <el-form-item label="客户简称">
-          <el-input
-            v-model="queryParams.nickname"
-            placeholder="请输入客户简称"
+            placeholder="请输入计划名称"
             clearable
             @keyup.enter="handleQuery"
             class="!w-220px"
@@ -64,7 +54,7 @@
         @row-click="handleRowClick"
         @row-dblclick="handleRowDblClick"
       >
-        <!-- 多选：checkbox（reserve-selection 保证跨页勾选不丢失） -->
+        <!-- 多选：checkbox -->
         <el-table-column
           v-if="multiple"
           type="selection"
@@ -83,19 +73,40 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="客户编码" align="center" prop="code" width="200" />
-        <el-table-column label="客户名称" align="left" prop="name" min-width="150" />
-        <el-table-column label="客户简称" align="center" prop="nickname" width="120" />
-        <el-table-column label="客户类型" align="center" prop="type" width="100">
+        <el-table-column label="计划编码" align="center" prop="code" width="200" />
+        <el-table-column label="计划名称" align="left" prop="name" min-width="150" />
+        <el-table-column label="计划类型" align="center" prop="type" width="120">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.MES_CLIENT_TYPE" :value="scope.row.type" />
+            <dict-tag :type="DICT_TYPE.MES_DV_SUBJECT_TYPE" :value="scope.row.type" />
           </template>
         </el-table-column>
-        <el-table-column label="联系人" align="center" prop="contact1Name" width="100" />
-        <el-table-column label="联系电话" align="center" prop="telephone" width="130" />
-        <el-table-column label="状态" align="center" prop="status" width="80">
+        <el-table-column
+          label="开始日期"
+          align="center"
+          prop="startDate"
+          :formatter="dateFormatter2"
+          width="120"
+        />
+        <el-table-column
+          label="结束日期"
+          align="center"
+          prop="endDate"
+          :formatter="dateFormatter2"
+          width="120"
+        />
+        <el-table-column label="频率" align="center" width="120">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+            {{ scope.row.cycleCount }}
+            <dict-tag
+              class="ml-4px"
+              :type="DICT_TYPE.MES_DV_CYCLE_TYPE"
+              :value="scope.row.cycleType"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" align="center" prop="status" width="100">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.MES_DV_CHECK_PLAN_STATUS" :value="scope.row.status" />
           </template>
         </el-table-column>
       </el-table>
@@ -115,14 +126,15 @@
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
-import { CommonStatusEnum } from '@/utils/constants'
-import { MdClientApi, MdClientVO } from '@/api/mes/md/client'
+import { dateFormatter2 } from '@/utils/formatTime'
+import { DvCheckPlanApi, DvCheckPlanVO } from '@/api/mes/dv/checkplan'
 
-defineOptions({ name: 'MdClientSelectDialog' })
+defineOptions({ name: 'DvCheckPlanSelectDialog' })
 
 const props = withDefaults(
   defineProps<{
     multiple?: boolean // true 多选（checkbox），false 单选（radio）
+    type?: number // 过滤特定计划类型
   }>(),
   {
     multiple: true
@@ -131,35 +143,35 @@ const props = withDefaults(
 
 const message = useMessage()
 const emit = defineEmits<{
-  selected: [rows: MdClientVO[]]
+  selected: [rows: DvCheckPlanVO[]]
 }>()
 
 const dialogVisible = ref(false) // 弹窗是否展示
 const loading = ref(false) // 列表加载中
-const list = ref<MdClientVO[]>([]) // 客户列表
+const list = ref<DvCheckPlanVO[]>([]) // 列表
 const total = ref(0) // 总条数
 
 // ==================== 选中状态 ====================
 const tableRef = ref() // 表格 Ref
-const selectedRows = ref<MdClientVO[]>([]) // 多选模式：选中行
+const selectedRows = ref<DvCheckPlanVO[]>([]) // 多选模式：选中行
 const selectedRadioId = ref<number>() // 单选模式：选中 ID
-const currentRadioRow = ref<MdClientVO>() // 单选模式：选中行对象
+const currentRadioRow = ref<DvCheckPlanVO>() // 单选模式：选中行对象
 const preSelectedIds = ref<number[]>([]) // 打开弹窗时传入的已选 ID
 
 /** 多选：checkbox 变化 */
-const handleSelectionChange = (rows: MdClientVO[]) => {
+const handleSelectionChange = (rows: DvCheckPlanVO[]) => {
   if (props.multiple) {
     selectedRows.value = rows
   }
 }
 
 /** 单选：radio 变化 */
-const handleRadioChange = (row: MdClientVO) => {
+const handleRadioChange = (row: DvCheckPlanVO) => {
   currentRadioRow.value = row
 }
 
 /** 单击行：单选模式下点击整行即选中（降低操作成本），多选不处理（避免和 dblclick 冲突） */
-const handleRowClick = (row: MdClientVO) => {
+const handleRowClick = (row: DvCheckPlanVO) => {
   if (props.multiple) {
     return
   }
@@ -168,7 +180,7 @@ const handleRowClick = (row: MdClientVO) => {
 }
 
 /** 双击行：多选模式切换勾选，单选模式直接确认 */
-const handleRowDblClick = (row: MdClientVO) => {
+const handleRowDblClick = (row: DvCheckPlanVO) => {
   if (props.multiple) {
     tableRef.value?.toggleRowSelection(row)
     return
@@ -178,21 +190,20 @@ const handleRowDblClick = (row: MdClientVO) => {
   confirmSelect()
 }
 
-// ==================== 客户查询 ====================
+// ==================== 查询 ====================
 const queryParams = reactive({
   pageNo: 1, // 页码
   pageSize: 10, // 每页条数
-  code: undefined as string | undefined, // 客户编码
-  name: undefined as string | undefined, // 客户名称
-  nickname: undefined as string | undefined, // 客户简称
-  status: CommonStatusEnum.ENABLE as number | undefined // 状态：默认只查启用
+  code: undefined as string | undefined,
+  name: undefined as string | undefined,
+  type: undefined as number | undefined
 })
 
-/** 查询客户列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await MdClientApi.getClientPage(queryParams)
+    const data = await DvCheckPlanApi.getCheckPlanPage(queryParams)
     list.value = data.list
     total.value = data.total
     await nextTick()
@@ -236,8 +247,6 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryParams.code = undefined
   queryParams.name = undefined
-  queryParams.nickname = undefined
-  queryParams.status = CommonStatusEnum.ENABLE
   handleQuery()
 }
 
@@ -267,8 +276,7 @@ const open = async (selectedIds?: number[]) => {
   // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
   queryParams.code = undefined
   queryParams.name = undefined
-  queryParams.nickname = undefined
-  queryParams.status = CommonStatusEnum.ENABLE
+  queryParams.type = props.type
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []
