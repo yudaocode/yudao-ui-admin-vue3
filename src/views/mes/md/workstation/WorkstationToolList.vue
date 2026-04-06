@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { MdWorkstationToolApi, MdWorkstationToolVO } from '@/api/mes/md/workstation/tool'
-import TmToolTypeSelect from '@/views/mes/tm/tool/components/TmToolTypeSelect.vue'
+import TmToolTypeSelect from '@/views/mes/tm/tool/type/components/TmToolTypeSelect.vue'
 
 defineOptions({ name: 'WorkstationToolList' })
 

@@ -147,7 +147,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { TmToolApi, TmToolVO } from '@/api/mes/tm/tool'
 import { TmToolTypeVO } from '@/api/mes/tm/tool/type'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
-import TmToolTypeSelect from '@/views/mes/tm/tool/components/TmToolTypeSelect.vue'
+import TmToolTypeSelect from '@/views/mes/tm/tool/type/components/TmToolTypeSelect.vue'
 import {
   MesToolStatusEnum,
   MesMaintenTypeEnum,

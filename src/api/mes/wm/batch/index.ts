@@ -54,5 +54,5 @@ export const BatchApi = {
   // 向后追溯
   getBackwardList: async (code: string) => {
     return await request.get({ url: `/mes/wm/batch/backward-list`, params: { code } })
-  },
+  }
 }

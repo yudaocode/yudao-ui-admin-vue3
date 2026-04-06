@@ -45,5 +45,5 @@ export const WmMaterialStockApi = {
   // 导出库存台账 Excel
   exportMaterialStock: async (params: any) => {
     return await request.download({ url: '/mes/wm/material-stock/export-excel', params })
-  },
+  }
 }

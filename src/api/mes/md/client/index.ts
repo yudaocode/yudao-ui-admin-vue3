@@ -32,9 +32,6 @@ export const MdClientApi = {
     return await request.get({ url: `/mes/md-client/page`, params })
   },
 
-
-
-
   // 查询客户详情
   getClient: async (id: number) => {
     return await request.get({ url: `/mes/md-client/get?id=` + id })

@@ -78,5 +78,5 @@ export const ProWorkOrderApi = {
   // 确认工单
   confirmWorkOrder: async (id: number) => {
     return await request.put({ url: `/mes/pro/work-order/confirm?id=` + id })
-  },
+  }
 }

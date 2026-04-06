@@ -24,7 +24,6 @@ export const MdWorkstationApi = {
     return await request.get({ url: `/mes/md-workstation/page`, params })
   },
 
-
   // 查询工作站详情
   getWorkstation: async (id: number) => {
     return await request.get({ url: `/mes/md-workstation/get?id=` + id })

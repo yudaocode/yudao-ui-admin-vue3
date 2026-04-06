@@ -1,165 +1,167 @@
 <!-- MES 工具台账列表 -->
 <template>
-  <ContentWrap>
-    <!-- 搜索工作栏 -->
-    <el-form
-      class="-mb-15px"
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="100px"
-    >
-      <el-form-item label="工具编码" prop="code">
-        <el-input
-          v-model="queryParams.code"
-          placeholder="请输入工具编码"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="工具名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入工具名称"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="工具类型" prop="toolTypeId">
-        <TmToolTypeSelect
-          v-model="queryParams.toolTypeId"
-          placeholder="请选择工具类型"
-          clearable
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="品牌" prop="brand">
-        <el-input
-          v-model="queryParams.brand"
-          placeholder="请输入品牌"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="型号规格" prop="spec">
-        <el-input
-          v-model="queryParams.spec"
-          placeholder="请输入型号规格"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_TM_TOOL_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['mes:tm-tool:create']"
+  <el-row :gutter="20">
+    <!-- 左侧分类树 -->
+    <el-col :span="4" :xs="24">
+      <ContentWrap class="h-1/1">
+        <TmToolTypeList @node-click="handleTypeNodeClick" />
+      </ContentWrap>
+    </el-col>
+    <el-col :span="20" :xs="24">
+      <ContentWrap>
+        <!-- 搜索工作栏 -->
+        <el-form
+          class="-mb-15px"
+          :model="queryParams"
+          ref="queryFormRef"
+          :inline="true"
+          label-width="100px"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['mes:tm-tool:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
-      </el-form-item>
-    </el-form>
-  </ContentWrap>
+          <el-form-item label="工具编码" prop="code">
+            <el-input
+              v-model="queryParams.code"
+              placeholder="请输入工具编码"
+              clearable
+              @keyup.enter="handleQuery"
+              class="!w-240px"
+            />
+          </el-form-item>
+          <el-form-item label="工具名称" prop="name">
+            <el-input
+              v-model="queryParams.name"
+              placeholder="请输入工具名称"
+              clearable
+              @keyup.enter="handleQuery"
+              class="!w-240px"
+            />
+          </el-form-item>
+          <el-form-item label="品牌" prop="brand">
+            <el-input
+              v-model="queryParams.brand"
+              placeholder="请输入品牌"
+              clearable
+              @keyup.enter="handleQuery"
+              class="!w-240px"
+            />
+          </el-form-item>
+          <el-form-item label="型号规格" prop="spec">
+            <el-input
+              v-model="queryParams.spec"
+              placeholder="请输入型号规格"
+              clearable
+              @keyup.enter="handleQuery"
+              class="!w-240px"
+            />
+          </el-form-item>
+          <el-form-item label="状态" prop="status">
+            <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_TM_TOOL_STATUS)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+            <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+            <el-button
+              type="primary"
+              plain
+              @click="openForm('create')"
+              v-hasPermi="['mes:tm-tool:create']"
+            >
+              <Icon icon="ep:plus" class="mr-5px" /> 新增
+            </el-button>
+            <el-button
+              type="success"
+              plain
+              @click="handleExport"
+              :loading="exportLoading"
+              v-hasPermi="['mes:tm-tool:export']"
+            >
+              <Icon icon="ep:download" class="mr-5px" /> 导出
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </ContentWrap>
 
-  <!-- 列表 -->
-  <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="工具编码" align="center" prop="code" width="120">
-        <template #default="scope">
-          <el-link type="primary" @click="openForm('detail', scope.row.id)">
-            {{ scope.row.code }}
-          </el-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="工具名称" align="center" prop="name" min-width="150" />
-      <el-table-column label="品牌" align="center" prop="brand" width="100" />
-      <el-table-column label="型号规格" align="center" prop="spec" width="120" />
-      <el-table-column label="工具类型" align="center" prop="toolTypeName" width="120" />
-      <el-table-column label="库存数量" align="center" prop="quantity" width="100" />
-      <el-table-column label="可用数量" align="center" prop="availableQuantity" width="100" />
-      <el-table-column label="保养维护类型" align="center" prop="maintenType" width="130">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_TM_MAINTEN_TYPE" :value="scope.row.maintenType" />
-        </template>
-      </el-table-column>
-      <el-table-column label="下次保养" align="center" width="200">
-        <template #default="scope">
-          <span v-if="scope.row.maintenType === MesMaintenTypeEnum.REGULAR">
-            {{ scope.row.nextMaintenDate ? formatDate(scope.row.nextMaintenDate) : '-' }}
-          </span>
-          <span v-else-if="scope.row.maintenType === MesMaintenTypeEnum.USAGE">
-            {{ scope.row.nextMaintenPeriod != null ? scope.row.nextMaintenPeriod + ' 次' : '-' }}
-          </span>
-          <span v-else>-</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" align="center" prop="status" width="100">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_TM_TOOL_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="操作" align="center" width="130">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['mes:tm-tool:update']"
-          >
-            编辑
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['mes:tm-tool:delete']"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <!-- 分页 -->
-    <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
-  </ContentWrap>
+      <!-- 列表 -->
+      <ContentWrap>
+        <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+          <el-table-column label="工具编码" align="center" prop="code" width="120">
+            <template #default="scope">
+              <el-link type="primary" @click="openForm('detail', scope.row.id)">
+                {{ scope.row.code }}
+              </el-link>
+            </template>
+          </el-table-column>
+          <el-table-column label="工具名称" align="center" prop="name" min-width="150" />
+          <el-table-column label="品牌" align="center" prop="brand" width="100" />
+          <el-table-column label="型号规格" align="center" prop="spec" width="120" />
+          <el-table-column label="工具类型" align="center" prop="toolTypeName" width="120" />
+          <el-table-column label="库存数量" align="center" prop="quantity" width="100" />
+          <el-table-column label="可用数量" align="center" prop="availableQuantity" width="100" />
+          <el-table-column label="保养维护类型" align="center" prop="maintenType" width="130">
+            <template #default="scope">
+              <dict-tag :type="DICT_TYPE.MES_TM_MAINTEN_TYPE" :value="scope.row.maintenType" />
+            </template>
+          </el-table-column>
+          <el-table-column label="下次保养" align="center" width="200">
+            <template #default="scope">
+              <span v-if="scope.row.maintenType === MesMaintenTypeEnum.REGULAR">
+                {{ scope.row.nextMaintenDate ? formatDate(scope.row.nextMaintenDate) : '-' }}
+              </span>
+              <span v-else-if="scope.row.maintenType === MesMaintenTypeEnum.USAGE">
+                {{ scope.row.nextMaintenPeriod != null ? scope.row.nextMaintenPeriod + ' 次' : '-' }}
+              </span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="状态" align="center" prop="status" width="100">
+            <template #default="scope">
+              <dict-tag :type="DICT_TYPE.MES_TM_TOOL_STATUS" :value="scope.row.status" />
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="创建时间"
+            align="center"
+            prop="createTime"
+            :formatter="dateFormatter"
+            width="180px"
+          />
+          <el-table-column label="操作" align="center" width="130">
+            <template #default="scope">
+              <el-button
+                link
+                type="primary"
+                @click="openForm('update', scope.row.id)"
+                v-hasPermi="['mes:tm-tool:update']"
+              >
+                编辑
+              </el-button>
+              <el-button
+                link
+                type="danger"
+                @click="handleDelete(scope.row.id)"
+                v-hasPermi="['mes:tm-tool:delete']"
+              >
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <!-- 分页 -->
+        <Pagination
+          :total="total"
+          v-model:page="queryParams.pageNo"
+          v-model:limit="queryParams.pageSize"
+          @pagination="getList"
+        />
+      </ContentWrap>
+    </el-col>
+  </el-row>
 
   <!-- 表单弹窗：添加/修改 -->
   <ToolForm ref="formRef" @success="getList" />
@@ -169,7 +171,7 @@
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { TmToolApi, TmToolVO } from '@/api/mes/tm/tool'
-import TmToolTypeSelect from './components/TmToolTypeSelect.vue'
+import TmToolTypeList from './type/components/TmToolTypeList.vue'
 import ToolForm from './ToolForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesMaintenTypeEnum } from '@/views/mes/utils/constants'
@@ -216,6 +218,13 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
+  queryParams.toolTypeId = undefined
+  handleQuery()
+}
+
+/** 处理分类树节点点击 */
+const handleTypeNodeClick = (row: any) => {
+  queryParams.toolTypeId = row?.id
   handleQuery()
 }
 
