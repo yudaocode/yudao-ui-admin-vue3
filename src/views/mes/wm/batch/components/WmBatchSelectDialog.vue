@@ -2,9 +2,6 @@
 <!--
   MES 批次弹窗选择器（支持单选/多选）
 
-  对齐 KTG batchSelect/single.vue 的搜索字段和展示字段
-  架构对齐 MdVendorSelectDialog.vue（ContentWrap 两栏布局 + 分页）
-
   Props:
     multiple — true 多选（checkbox），false 单选（radio）；默认 true
   Events:
