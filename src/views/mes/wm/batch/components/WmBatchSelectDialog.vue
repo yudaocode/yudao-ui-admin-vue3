@@ -161,7 +161,7 @@
         </el-form-item>
       </el-form>
     </ContentWrap>
-    <!-- 数据表格：对齐 KTG 展示字段 -->
+    <!-- 数据表格 -->
     <ContentWrap>
       <el-table
         ref="tableRef"

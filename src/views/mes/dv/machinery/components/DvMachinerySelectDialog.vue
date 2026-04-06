@@ -128,7 +128,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { DvMachineryApi, DvMachineryVO } from '@/api/mes/dv/machinery'
 import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
-import MachineryTypeTree from '../MachineryTypeTree.vue'
+import MachineryTypeTree from '../type/components/MachineryTypeTree.vue'
 
 defineOptions({ name: 'DvMachinerySelectDialog' })
 
