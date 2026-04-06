@@ -22,53 +22,53 @@
             placeholder="请输入批次编号"
             clearable
             @keyup.enter="handleQuery"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="产品物料">
           <MdItemSelect
             v-model="queryParams.itemId"
             placeholder="请选择产品物料"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="供应商">
           <MdVendorSelect
             v-model="queryParams.vendorId"
             placeholder="请选择供应商"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="客户">
           <MdClientSelect
             v-model="queryParams.clientId"
             placeholder="请选择客户"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="生产工单">
           <ProWorkOrderSelect
             v-model="queryParams.workOrderId"
             placeholder="请选择生产工单"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="生产任务">
           <ProTaskSelect
             v-model="queryParams.taskId"
             placeholder="请选择生产任务"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="工作站">
           <MdWorkstationSelect
             v-model="queryParams.workstationId"
             placeholder="请选择工作站"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="工具">
-          <TmToolSelect v-model="queryParams.toolId" placeholder="请选择工具" class="!w-200px" />
+          <TmToolSelect v-model="queryParams.toolId" placeholder="请选择工具" class="!w-220px" />
         </el-form-item>
         <el-form-item label="模具编号">
           <el-input
@@ -76,7 +76,7 @@
             placeholder="请输入模具编号"
             clearable
             @keyup.enter="handleQuery"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="销售订单编号">
@@ -85,7 +85,7 @@
             placeholder="请输入销售订单编号"
             clearable
             @keyup.enter="handleQuery"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="采购订单编号">
@@ -94,7 +94,7 @@
             placeholder="请输入采购订单编号"
             clearable
             @keyup.enter="handleQuery"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="生产批号">
@@ -103,7 +103,7 @@
             placeholder="请输入生产批号"
             clearable
             @keyup.enter="handleQuery"
-            class="!w-200px"
+            class="!w-220px"
           />
         </el-form-item>
         <el-form-item label="质量状态">
@@ -111,7 +111,7 @@
             v-model="queryParams.qualityStatus"
             placeholder="请选择质量状态"
             clearable
-            class="!w-200px"
+            class="!w-220px"
           >
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)"
