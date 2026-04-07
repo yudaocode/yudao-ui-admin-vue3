@@ -1,7 +1,7 @@
 <!-- MES 子箱列表子组件 -->
 <template>
   <div class="overflow-hidden">
-    <el-button v-if="isEditable" type="primary" plain @click="openForm('create')" class="mb-10px">
+    <el-button v-if="isEditable" type="primary" plain @click="handleAddChild" class="mb-10px">
       <Icon icon="ep:plus" class="mr-5px" /> 添加子箱
     </el-button>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" border>
@@ -36,12 +36,7 @@
       </el-table-column>
       <el-table-column v-if="isEditable" label="操作" align="center" width="120">
         <template #default="scope">
-          <el-button
-            link
-            type="danger"
-            @click="handleRemoveChild(scope.row.id)"
-            v-if="scope.row.status === MesWmPackageStatusEnum.PREPARE"
-          >
+          <el-button link type="danger" @click="handleRemoveChild(scope.row.id)">
             移除
           </el-button>
         </template>
@@ -55,36 +50,21 @@
     />
   </div>
 
-  <!-- 添加子箱弹窗：选择已有装箱单作为子箱 -->
-  <Dialog title="添加子箱" v-model="dialogVisible" width="500px">
-    <el-form
-      ref="formRef"
-      :model="formData"
-      :rules="formRules"
-      label-width="110px"
-      v-loading="formLoading"
-    >
-      <el-form-item label="选择装箱单" prop="childId">
-        <WmPackageSelect
-          v-model="formData.childId"
-          :exclude-id="props.packageId"
-          placeholder="请选择要作为子箱的装箱单"
-        />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="dialogVisible = false">取 消</el-button>
-    </template>
-  </Dialog>
+  <!-- 添加子箱：直接打开装箱单选择弹窗（单选） -->
+  <WmPackageSelectDialog
+    ref="dialogRef"
+    :multiple="false"
+    :exclude-id="props.packageId"
+    childable-only
+    @selected="handleSelected"
+  />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
-import { MesWmPackageStatusEnum } from '@/views/mes/utils/constants'
-import WmPackageSelect from './components/WmPackageSelect.vue'
+import WmPackageSelectDialog from './components/WmPackageSelectDialog.vue'
 
 defineOptions({ name: 'SubPackageList' })
 
@@ -131,36 +111,24 @@ const handleRemoveChild = async (childId: number) => {
   } catch {}
 }
 
-// ==================== 添加子箱表单 ====================
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const formData = ref({
-  childId: undefined as number | undefined
-})
-const formRules = reactive({
-  childId: [{ required: true, message: '请选择装箱单', trigger: 'change' }]
-})
-const formRef = ref()
+// ==================== 添加子箱 ====================
+const dialogRef = ref()
 
-/** 打开添加子箱弹窗 */
-const openForm = async (_type: string) => {
-  dialogVisible.value = true
-  formData.value.childId = undefined
-  formRef.value?.resetFields()
+/** 打开装箱单选择弹窗 */
+const handleAddChild = () => {
+  dialogRef.value.open()
 }
 
-/** 提交：将选中的装箱单设为当前装箱单的子箱 */
-const submitForm = async () => {
-  await formRef.value.validate()
-  formLoading.value = true
-  try {
-    await WmPackageApi.addChildPackage(props.packageId, formData.value.childId!)
-    message.success(t('common.createSuccess'))
-    dialogVisible.value = false
-    await getList()
-  } finally {
-    formLoading.value = false
+/** 选中回调：将选中的装箱单添加为子箱 */
+const handleSelected = async (rows: WmPackageVO[]) => {
+  if (!rows || rows.length === 0) {
+    return
   }
+  try {
+    await WmPackageApi.addChildPackage(props.packageId, rows[0].id)
+    message.success(t('common.createSuccess'))
+    await getList()
+  } catch {}
 }
 
 /** 初始化 */

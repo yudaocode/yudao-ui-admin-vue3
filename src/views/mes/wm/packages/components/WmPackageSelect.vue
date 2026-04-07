@@ -1,43 +1,79 @@
-<!-- MES 装箱单选择器：纯下拉，前端过滤（支持 code），用于选择父箱 -->
+<!--
+  MES 装箱单选择器：只读输入框 + 点击弹窗选择
+
+  交互：显示为只读 el-input，点击打开弹窗（单选模式）进行选择
+  Props:
+    modelValue  — 绑定的装箱单 ID（v-model）
+    disabled    — 是否禁用
+    clearable   — 是否允许清空（鼠标悬停时显示清除图标）
+    placeholder — 占位文字
+  Events:
+    update:modelValue — v-model 更新
+    change(item)      — 选中装箱单变化时触发，传递完整 WmPackageVO（清空时为 undefined）
+-->
 <template>
-  <el-select
-    v-model="selectValue"
-    :placeholder="placeholder"
-    :disabled="disabled"
-    :clearable="clearable"
-    filterable
-    :filter-method="handleFilter"
-    class="!w-1/1"
-    @change="handleChange"
+  <div
+    v-bind="attrs"
+    class="w-full"
+    :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
+    @click="handleClick"
+    @mouseenter="hovering = true"
+    @mouseleave="hovering = false"
   >
-    <el-option v-for="item in filteredList" :key="item.id" :label="item.code" :value="item.id">
-      <div class="flex items-center gap-8px">
-        <span>{{ item.code }}</span>
-        <el-tag v-if="item.clientName" size="small" type="info" class="ml-4px">
-          {{ item.clientName }}
-        </el-tag>
-      </div>
-    </el-option>
-  </el-select>
+    <el-tooltip :disabled="!selectedItem" placement="top" :show-after="500">
+      <template #content>
+        <div v-if="selectedItem" class="leading-6">
+          <div>编号：{{ selectedItem.code }}</div>
+          <div>客户：{{ selectedItem.clientName || '-' }}</div>
+          <div>销售订单：{{ selectedItem.salesOrderCode || '-' }}</div>
+          <div>状态：{{ selectedItem.status }}</div>
+        </div>
+      </template>
+      <el-input
+        :model-value="displayLabel"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        readonly
+        :suffix-icon="suffixIcon"
+        :class="disabled ? 'is-select-disabled' : 'is-select-clickable'"
+      />
+    </el-tooltip>
+  </div>
+  <!-- 弹窗必须放在 div 外部，否则弹窗内的点击事件会冒泡到 div 触发 handleClick -->
+  <WmPackageSelectDialog
+    ref="dialogRef"
+    :multiple="false"
+    :exclude-id="excludeId"
+    :childable-only="childableOnly"
+    @selected="handleSelected"
+  />
 </template>
 
 <script setup lang="ts">
 import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
+import { Search, CircleClose } from '@element-plus/icons-vue'
+import WmPackageSelectDialog from './WmPackageSelectDialog.vue'
 
-defineOptions({ name: 'WmPackageSelect' })
+// 组件有两个根节点（div + Dialog），Vue 不会自动继承 attrs；
+// 手动透传到外层 div，确保父组件传入的 class / style 等生效
+const attrs = useAttrs()
+
+defineOptions({ name: 'WmPackageSelect', inheritAttrs: false })
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: number
-    disabled?: boolean
-    clearable?: boolean
-    placeholder?: string
+    modelValue?: number // 绑定的装箱单 ID
+    disabled?: boolean // 是否禁用
+    clearable?: boolean // 是否允许清空
+    placeholder?: string // 占位文字
     excludeId?: number // 排除的 ID（避免选择自己作为父箱）
+    childableOnly?: boolean // 只展示可作为子箱的装箱单（无父箱 + 已完成状态）
   }>(),
   {
     disabled: false,
     clearable: true,
-    placeholder: '请选择父箱'
+    placeholder: '请选择装箱单',
+    childableOnly: false
   }
 )
 
@@ -46,59 +82,98 @@ const emit = defineEmits<{
   change: [item: WmPackageVO | undefined]
 }>()
 
-const allList = ref<WmPackageVO[]>([])
-const filteredList = ref<WmPackageVO[]>([])
+const dialogRef = ref() // 弹窗 Ref
+const hovering = ref(false) // 鼠标是否悬停
 
-const selectValue = computed({
-  get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+// ==================== 名称回显 ====================
+const selectedItem = ref<WmPackageVO | undefined>() // 当前选中的装箱单对象
+
+/** 输入框显示文本：展示装箱单编号 */
+const displayLabel = computed(() => {
+  return selectedItem.value?.code ?? ''
 })
 
-/** 获取排除后的列表 */
-const getAvailableList = () => {
-  if (!props.excludeId) {
-    return allList.value
-  }
-  return allList.value.filter((item) => item.id !== props.excludeId)
-}
+/** 是否显示清除图标 */
+const showClear = computed(() => {
+  return props.clearable && !props.disabled && hovering.value && props.modelValue != null
+})
 
-/** 前端过滤（code + clientName） */
-const handleFilter = (query: string) => {
-  const available = getAvailableList()
-  if (!query) {
-    filteredList.value = available
+/** 后缀图标：悬停且有值时显示清除，否则显示搜索 */
+const suffixIcon = computed(() => {
+  return showClear.value ? CircleClose : Search
+})
+
+/** 根据 ID 单条查询装箱单信息（用于编辑回显） */
+const resolveItemById = async (id: number | undefined) => {
+  if (id == null) {
+    selectedItem.value = undefined
     return
   }
-  const keyword = query.toLowerCase()
-  filteredList.value = available.filter(
-    (item) =>
-      item.code?.toLowerCase().includes(keyword) || item.clientName?.toLowerCase().includes(keyword)
-  )
-}
-
-/** 选中变化 */
-const handleChange = (val: number | undefined) => {
-  const item = allList.value.find((o) => o.id === val)
-  emit('change', item)
-}
-
-/** 加载装箱单列表（无父箱 + 已完成状态） */
-const loadList = async () => {
-  const data = await WmPackageApi.getChildablePackageSimpleList()
-  allList.value = Array.isArray(data) ? data : []
-  filteredList.value = getAvailableList()
-}
-
-/** 监听 excludeId 变化 */
-watch(
-  () => props.excludeId,
-  () => {
-    filteredList.value = getAvailableList()
+  if (selectedItem.value?.id === id) {
+    return
   }
+  try {
+    selectedItem.value = await WmPackageApi.getPackage(id)
+  } catch (e) {
+    console.error('[WmPackageSelect] resolveItemById failed:', e)
+  }
+}
+
+/** 监听 modelValue 变化，触发回显 */
+watch(
+  () => props.modelValue,
+  (val) => {
+    resolveItemById(val)
+  },
+  { immediate: true }
 )
 
-/** 初始化 */
-onMounted(async () => {
-  await loadList()
-})
+// ==================== 点击交互 ====================
+
+/** 点击组件：清除或打开弹窗 */
+const handleClick = (e: MouseEvent) => {
+  if (props.disabled) {
+    return
+  }
+  // 点击清除图标：清空选中
+  const target = e.target as HTMLElement
+  if (showClear.value && target.closest('.el-input__suffix')) {
+    e.stopPropagation()
+    selectedItem.value = undefined
+    emit('update:modelValue', undefined)
+    emit('change', undefined)
+    return
+  }
+  // 打开弹窗，传入当前选中 ID 用于预选高亮
+  const selectedIds = props.modelValue != null ? [props.modelValue] : []
+  dialogRef.value.open(selectedIds)
+}
+
+/** 弹窗选中回调 */
+const handleSelected = (rows: WmPackageVO[]) => {
+  if (!rows || rows.length === 0) {
+    return
+  }
+  const item = rows[0]
+  selectedItem.value = item
+  emit('update:modelValue', item.id)
+  emit('change', item)
+}
 </script>
+
+<style lang="scss" scoped>
+/* :deep 用于穿透 el-input 内部元素的 cursor 样式，UnoCSS 无法直接处理组件内部 DOM */
+.is-select-clickable {
+  :deep(.el-input__wrapper),
+  :deep(.el-input__inner) {
+    cursor: pointer;
+  }
+}
+
+.is-select-disabled {
+  :deep(.el-input__wrapper),
+  :deep(.el-input__inner) {
+    cursor: not-allowed;
+  }
+}
+</style>
