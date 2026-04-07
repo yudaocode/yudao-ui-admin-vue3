@@ -54,7 +54,12 @@
             />
           </el-form-item>
           <el-form-item label="状态" prop="status">
-            <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
+            <el-select
+              v-model="queryParams.status"
+              placeholder="请选择状态"
+              clearable
+              class="!w-240px"
+            >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_TM_TOOL_STATUS)"
                 :key="dict.value"
@@ -64,8 +69,12 @@
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-            <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+            <el-button @click="handleQuery"
+              ><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button
+            >
+            <el-button @click="resetQuery"
+              ><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button
+            >
             <el-button
               type="primary"
               plain
@@ -114,7 +123,9 @@
                 {{ scope.row.nextMaintenDate ? formatDate(scope.row.nextMaintenDate) : '-' }}
               </span>
               <span v-else-if="scope.row.maintenType === MesMaintenTypeEnum.USAGE">
-                {{ scope.row.nextMaintenPeriod != null ? scope.row.nextMaintenPeriod + ' 次' : '-' }}
+                {{
+                  scope.row.nextMaintenPeriod != null ? scope.row.nextMaintenPeriod + ' 次' : '-'
+                }}
               </span>
               <span v-else>-</span>
             </template>

@@ -295,7 +295,7 @@ const open = async (selectedIds?: number[]) => {
   selectedRadioId.value = undefined
   currentRadioRow.value = undefined
   preSelectedIds.value = selectedIds ?? []
-  
+
   if (workshopList.value.length === 0) {
     workshopList.value = await MdWorkshopApi.getWorkshopSimpleList()
   }

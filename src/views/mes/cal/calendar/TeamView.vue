@@ -38,8 +38,15 @@ import CalendarDateCell from './CalendarDateCell.vue'
 import CalendarLegend from './CalendarLegend.vue'
 import { useCalendar } from './useCalendar'
 
-const { loading, currentDate, calendarDayMap, holidaySet, loadHolidays, fetchCalendar, watchMonth } =
-  useCalendar()
+const {
+  loading,
+  currentDate,
+  calendarDayMap,
+  holidaySet,
+  loadHolidays,
+  fetchCalendar,
+  watchMonth
+} = useCalendar()
 
 const selectedTeamId = ref<number>() // 当前选中的班组编号
 const teamList = ref<CalTeamVO[]>([]) // 所有班组列表

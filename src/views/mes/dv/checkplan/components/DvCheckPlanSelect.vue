@@ -26,7 +26,14 @@
         <div v-if="selectedItem" class="leading-6">
           <div>编码：{{ selectedItem.code }}</div>
           <div>名称：{{ selectedItem.name }}</div>
-          <div>频度：{{ selectedItem.cycleCount || '-' }} <dict-tag class="ml-4px" :type="DICT_TYPE.MES_DV_CYCLE_TYPE" :value="selectedItem.cycleType" /></div>
+          <div>
+            频度：{{ selectedItem.cycleCount || '-' }}
+            <dict-tag
+              class="ml-4px"
+              :type="DICT_TYPE.MES_DV_CYCLE_TYPE"
+              :value="selectedItem.cycleType"
+            />
+          </div>
         </div>
       </template>
       <el-input
@@ -40,7 +47,12 @@
     </el-tooltip>
   </div>
   <!-- 弹窗必须放在 div 外部，否则弹窗内的点击事件会冒泡到 div 触发 handleClick -->
-  <DvCheckPlanSelectDialog ref="dialogRef" :multiple="false" :type="type" @selected="handleSelected" />
+  <DvCheckPlanSelectDialog
+    ref="dialogRef"
+    :multiple="false"
+    :type="type"
+    @selected="handleSelected"
+  />
 </template>
 
 <script setup lang="ts">

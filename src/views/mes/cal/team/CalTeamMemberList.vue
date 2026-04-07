@@ -2,7 +2,14 @@
 <template>
   <div>
     <!-- 操作栏 -->
-    <el-button v-if="isEditable" type="primary" plain size="small" @click="openForm()" class="mb-10px">
+    <el-button
+      v-if="isEditable"
+      type="primary"
+      plain
+      size="small"
+      @click="openForm()"
+      class="mb-10px"
+    >
       <Icon icon="ep:plus" class="mr-5px" /> 添加成员
     </el-button>
     <!-- 列表 -->

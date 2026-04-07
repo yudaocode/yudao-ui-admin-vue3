@@ -116,9 +116,7 @@
               <!-- DONE 后续接入批次选择器和质量状态选择器 -->
               <WmBatchSelect v-model="formData.valueId" @change="handleBatchChange" />
             </template>
-            <template
-              v-else-if="formData.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS"
-            >
+            <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS">
               <el-select
                 v-model="formData.valueCode"
                 placeholder="请选择质量状态"
@@ -340,7 +338,6 @@ const handleQualityStatusChange = (val: string) => {
   formData.value.valueCode = val
   formData.value.valueName = selected?.label || ''
 }
-
 
 /** 库区仓库选择回调：清空库区 */
 const handleLocationWarehouseChange = () => {

@@ -87,7 +87,12 @@
           :formatter="dateFormatter2"
           width="120"
         />
-        <el-table-column label="销售订单编号" align="center" prop="salesOrderCode" min-width="140" />
+        <el-table-column
+          label="销售订单编号"
+          align="center"
+          prop="salesOrderCode"
+          min-width="140"
+        />
         <el-table-column label="发票编号" align="center" prop="invoiceCode" min-width="120" />
         <el-table-column label="客户编码" align="center" prop="clientCode" min-width="100" />
         <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />

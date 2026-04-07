@@ -64,11 +64,11 @@ const loadData = async () => {
   const dates = data.map((d) => d.date.substring(5))
   const quantities = data.map((d) => d.quantity)
   const qualified = data.map((d) => d.qualifiedQuantity)
-  const unqualified = data.map((d) => d.unqualifiedQuantity);
-  (trendChartOptions as any).xAxis.data = dates;
-  (trendChartOptions as any).series[0].data = quantities;
-  (trendChartOptions as any).series[1].data = qualified;
-  (trendChartOptions as any).series[2].data = unqualified
+  const unqualified = data.map((d) => d.unqualifiedQuantity)
+  ;(trendChartOptions as any).xAxis.data = dates
+  ;(trendChartOptions as any).series[0].data = quantities
+  ;(trendChartOptions as any).series[1].data = qualified
+  ;(trendChartOptions as any).series[2].data = unqualified
 }
 
 /** 组件挂载时自动加载数据 */

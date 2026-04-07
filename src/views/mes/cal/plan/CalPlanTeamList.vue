@@ -59,7 +59,10 @@
             <el-table-column label="手机号" align="center" prop="telephone" min-width="120" />
             <el-table-column label="备注" align="center" prop="remark" min-width="100" />
           </el-table>
-          <div v-if="selectedTeamId && !memberLoading && memberList.length === 0" class="member-empty-tip">
+          <div
+            v-if="selectedTeamId && !memberLoading && memberList.length === 0"
+            class="member-empty-tip"
+          >
             <el-empty description="暂无成员" :image-size="60" />
           </div>
         </el-card>

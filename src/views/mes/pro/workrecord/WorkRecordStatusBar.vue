@@ -76,9 +76,7 @@ const message = useMessage() // 消息弹窗
 const myWorkstation = ref<ProWorkRecordVO | null>(null) // 当前工作站绑定状态
 const clockInPopoverVisible = ref(false) // 上工弹窗是否可见
 const selectedWorkstationId = ref<number>() // 选中的工作站编号
-const isClockIn = computed(
-  () => myWorkstation.value?.type === MesProWorkRecordTypeEnum.CLOCK_IN
-) // 是否处于上工状态
+const isClockIn = computed(() => myWorkstation.value?.type === MesProWorkRecordTypeEnum.CLOCK_IN) // 是否处于上工状态
 
 /** 查询当前用户工作站 */
 const loadMyWorkstation = async () => {

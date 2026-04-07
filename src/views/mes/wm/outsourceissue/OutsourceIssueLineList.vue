@@ -33,7 +33,13 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="领料数量" align="center" prop="quantity" width="100" />
       <el-table-column label="批次号" align="center" prop="batchCode" min-width="120" />
-      <el-table-column label="备注" align="center" prop="remark" min-width="150" show-overflow-tooltip />
+      <el-table-column
+        label="备注"
+        align="center"
+        prop="remark"
+        min-width="150"
+        show-overflow-tooltip
+      />
       <el-table-column
         v-if="isUpdate || isStock"
         label="操作"

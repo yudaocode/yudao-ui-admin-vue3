@@ -174,7 +174,11 @@
 <script setup lang="ts">
 import { WmProductSalesApi, WmProductSalesVO } from '@/api/mes/wm/productsales'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
-import { MesAutoCodeRuleCode, MesWmProductSalesStatusEnum, MesWmSalesNoticeStatusEnum } from '@/views/mes/utils/constants'
+import {
+  MesAutoCodeRuleCode,
+  MesWmProductSalesStatusEnum,
+  MesWmSalesNoticeStatusEnum
+} from '@/views/mes/utils/constants'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import WmSalesNoticeSelect from '@/views/mes/wm/salesnotice/components/WmSalesNoticeSelect.vue'
 import { WmSalesNoticeVO } from '@/api/mes/wm/salesnotice'

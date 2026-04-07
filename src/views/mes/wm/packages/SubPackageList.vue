@@ -36,9 +36,7 @@
       </el-table-column>
       <el-table-column v-if="isEditable" label="操作" align="center" width="120">
         <template #default="scope">
-          <el-button link type="danger" @click="handleRemoveChild(scope.row.id)">
-            移除
-          </el-button>
+          <el-button link type="danger" @click="handleRemoveChild(scope.row.id)"> 移除 </el-button>
         </template>
       </el-table-column>
     </el-table>

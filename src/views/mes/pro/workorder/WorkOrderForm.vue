@@ -320,7 +320,6 @@ const handleGenerateWorkOrder = (bomRow: any) => {
   message.info('已从 BOM 物料预填子工单，请补充工单编码等信息后保存')
 }
 
-
 /** 工单来源变更：非客户订单时清空来源单据编号和客户 */
 watch(
   () => formData.value.orderSourceType,

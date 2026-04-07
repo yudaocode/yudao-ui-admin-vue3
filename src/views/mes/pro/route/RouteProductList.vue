@@ -42,7 +42,12 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="生产数量" prop="quantity">
-              <el-input-number v-model="formData.quantity" :min="1" controls-position="right" class="!w-1/1" />
+              <el-input-number
+                v-model="formData.quantity"
+                :min="1"
+                controls-position="right"
+                class="!w-1/1"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="12">

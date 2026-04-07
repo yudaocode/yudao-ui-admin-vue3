@@ -89,7 +89,10 @@
             <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
             <el-table-column label="物料/产品" align="center" prop="itemOrProduct" width="100">
               <template #default="scope">
-                <dict-tag :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT" :value="scope.row.itemOrProduct" />
+                <dict-tag
+                  :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT"
+                  :value="scope.row.itemOrProduct"
+                />
               </template>
             </el-table-column>
             <el-table-column label="所属分类" align="center" prop="itemTypeName" width="120" />

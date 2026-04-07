@@ -163,7 +163,9 @@ const handleDelete = async (id: number) => {
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const bomFormType = ref('create') // 表单类型
-const dialogTitle = computed(() => bomFormType.value === 'create' ? '添加 BOM 物料' : '编辑 BOM 物料')
+const dialogTitle = computed(() =>
+  bomFormType.value === 'create' ? '添加 BOM 物料' : '编辑 BOM 物料'
+)
 const formRef = ref() // 表单 Ref
 const formData = ref({
   id: undefined as number | undefined,

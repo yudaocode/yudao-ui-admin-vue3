@@ -134,9 +134,10 @@
             @click="handleCancel(scope.row.id)"
             v-hasPermi="['mes:wm-outsource-issue:update']"
             v-if="
-              [MesWmOutsourceIssueStatusEnum.APPROVING, MesWmOutsourceIssueStatusEnum.APPROVED].includes(
-                scope.row.status
-              )
+              [
+                MesWmOutsourceIssueStatusEnum.APPROVING,
+                MesWmOutsourceIssueStatusEnum.APPROVED
+              ].includes(scope.row.status)
             "
           >
             取消

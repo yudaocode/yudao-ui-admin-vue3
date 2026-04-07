@@ -83,9 +83,7 @@ const formRef = ref() // 表单 Ref
 
 /** 生成缺陷编码 */
 const generateCode = async () => {
-  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
-    MesAutoCodeRuleCode.QC_DEFECT_CODE
-  )
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.QC_DEFECT_CODE)
 }
 
 /** 打开弹窗 */

@@ -25,11 +25,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="方案类型" prop="type">
-            <el-select
-              v-model="formData.type"
-              placeholder="请选择方案类型"
-              class="!w-1/1"
-            >
+            <el-select v-model="formData.type" placeholder="请选择方案类型" class="!w-1/1">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_SUBJECT_TYPE)"
                 :key="dict.value"
@@ -53,11 +49,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="周期类型" prop="cycleType">
-            <el-select
-              v-model="formData.cycleType"
-              placeholder="请选择周期类型"
-              class="!w-1/1"
-            >
+            <el-select v-model="formData.cycleType" placeholder="请选择周期类型" class="!w-1/1">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.MES_DV_CYCLE_TYPE)"
                 :key="dict.value"
@@ -100,11 +92,7 @@
       <el-row>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
-            <el-input
-              v-model="formData.remark"
-              type="textarea"
-              placeholder="请输入备注"
-            />
+            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
           </el-form-item>
         </el-col>
       </el-row>
