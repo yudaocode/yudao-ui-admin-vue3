@@ -12,7 +12,7 @@ export interface WmSalesNoticeLineVO {
   batchId: number
   batchCode: string
   quantity: number
-  oqcCheck: boolean
+  oqcCheckFlag: boolean
   remark: string
   createTime: string
 }
