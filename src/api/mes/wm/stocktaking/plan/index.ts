@@ -29,10 +29,6 @@ export const StockTakingPlanApi = {
     return await request.get({ url: '/mes/wm/stocktaking-plan/get?id=' + id })
   },
 
-  getEnabledConfirmedStockTakingPlanSimpleList: async () => {
-    return await request.get({ url: '/mes/wm/stocktaking-plan/simple-list' })
-  },
-
   createStockTakingPlan: async (data: StockTakingPlanVO) => {
     return await request.post({ url: '/mes/wm/stocktaking-plan/create', data })
   },
