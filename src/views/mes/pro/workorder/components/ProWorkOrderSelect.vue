@@ -44,6 +44,7 @@
     ref="dialogRef"
     :multiple="false"
     :status="status"
+    :type="type"
     @selected="handleSelected"
   />
 </template>
@@ -65,7 +66,8 @@ const props = withDefaults(
     disabled?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字
-    status?: number // 弹窗打开时的默认状态过滤（透传给 Dialog）
+    status?: number // 弹窗打开时的默认状态过滤
+    type?: number // 工单类型过滤
   }>(),
   {
     disabled: false,

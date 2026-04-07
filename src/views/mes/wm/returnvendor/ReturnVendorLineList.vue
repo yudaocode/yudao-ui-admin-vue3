@@ -98,6 +98,7 @@
             <WmBatchSelect
               v-model="formData.batchId"
               :item-id="formData.itemId"
+              :vendor-id="props.vendorId"
               @change="handleBatchChange"
             />
           </el-form-item>
@@ -137,6 +138,7 @@ defineOptions({ name: 'ReturnVendorLineList' })
 const props = defineProps<{
   returnId: number
   formType: string
+  vendorId?: number // 供应商 ID，用于透传给批次选择器过滤
 }>()
 
 const { t } = useI18n() // 国际化

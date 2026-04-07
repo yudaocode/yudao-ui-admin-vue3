@@ -100,7 +100,11 @@
     <!-- 非新建模式展示行项目信息（退货物料） -->
     <template v-if="formData.id">
       <el-divider content-position="center">物料信息</el-divider>
-      <ReturnVendorLineList :return-id="formData.id" :form-type="formType" />
+      <ReturnVendorLineList
+        :return-id="formData.id"
+        :form-type="formType"
+        :vendor-id="formData.vendorId"
+      />
     </template>
     <template #footer>
       <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">

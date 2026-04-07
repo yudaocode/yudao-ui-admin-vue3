@@ -88,7 +88,11 @@
     <!-- 非新建模式展示行项目信息（退货物料） -->
     <template v-if="formData.id">
       <el-divider content-position="center">物料信息</el-divider>
-      <ReturnSalesLineList :return-id="formData.id" :form-type="formType" />
+      <ReturnSalesLineList
+        :return-id="formData.id"
+        :form-type="formType"
+        :client-id="formData.clientId"
+      />
     </template>
     <template #footer>
       <el-button v-if="isEditable" @click="submitForm" type="primary" :disabled="formLoading">

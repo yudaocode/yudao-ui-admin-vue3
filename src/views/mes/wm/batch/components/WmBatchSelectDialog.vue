@@ -12,6 +12,14 @@
 <template>
   <Dialog title="批次选择" v-model="dialogVisible" width="75%">
     <ContentWrap>
+      <el-alert
+        v-if="externalClientId != null || externalVendorId != null"
+        :title="alertTitle"
+        type="info"
+        :closable="false"
+        show-icon
+        class="!mb-10px"
+      />
       <el-form :inline="true" :model="queryParams" label-width="100px">
         <el-form-item label="批次编号">
           <el-input
@@ -387,8 +395,8 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryParams.code = undefined
   queryParams.itemId = undefined
-  queryParams.vendorId = undefined
-  queryParams.clientId = undefined
+  queryParams.vendorId = externalVendorId.value
+  queryParams.clientId = externalClientId.value
   queryParams.workOrderId = undefined
   queryParams.taskId = undefined
   queryParams.workstationId = undefined
@@ -422,20 +430,38 @@ const confirmSelect = () => {
   dialogVisible.value = false
 }
 
-// ==================== 打开弹窗 ====================
+const externalClientId = ref<number | undefined>() // 记录外部传入的 clientId
+const externalVendorId = ref<number | undefined>() // 记录外部传入的 vendorId
+
+/** 拼装 el-alert 提示文字 */
+const alertTitle = computed(() => {
+  const parts: string[] = []
+  if (externalClientId.value != null) parts.push('客户')
+  if (externalVendorId.value != null) parts.push('供应商')
+  return `已按${parts.join('/')}预过滤`
+})
 
 /**
  * 打开弹窗
  * @param selectedIds 已选 ID，用于预选高亮
- * @param itemId 默认过滤的物料 ID（由外层 WmBatchSelect 的 itemId prop 传入）
+ * @param itemId 默认过滤的物料 ID
+ * @param clientId 默认过滤的客户 ID
+ * @param vendorId 默认过滤的供应商 ID
  */
-const open = async (selectedIds?: number[], itemId?: number) => {
+const open = async (
+  selectedIds?: number[],
+  itemId?: number,
+  clientId?: number,
+  vendorId?: number
+) => {
   dialogVisible.value = true
-  // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
+  externalClientId.value = clientId
+  externalVendorId.value = vendorId
+  // 重置查询条件 + 页码
   queryParams.code = undefined
-  queryParams.itemId = itemId ?? undefined // 传入 itemId 则默认按物料过滤
-  queryParams.vendorId = undefined
-  queryParams.clientId = undefined
+  queryParams.itemId = itemId ?? undefined
+  queryParams.vendorId = vendorId ?? undefined
+  queryParams.clientId = clientId ?? undefined
   queryParams.workOrderId = undefined
   queryParams.taskId = undefined
   queryParams.workstationId = undefined
@@ -454,7 +480,6 @@ const open = async (selectedIds?: number[], itemId?: number) => {
   selectedRadioId.value = undefined
   currentRadioRow.value = undefined
   preSelectedIds.value = selectedIds ?? []
-  // 多选模式清空跨页缓存的勾选
   await nextTick()
   tableRef.value?.clearSelection()
   await getList()

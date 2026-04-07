@@ -16,7 +16,11 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="点检计划" prop="planId">
-            <DvCheckPlanSelect v-model="formData.planId" :type="MesDvSubjectTypeEnum.CHECK" />
+            <DvCheckPlanSelect
+              v-model="formData.planId"
+              :type="MesDvSubjectTypeEnum.CHECK"
+              :status="MesDvCheckPlanStatusEnum.ENABLED"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -73,7 +77,11 @@ import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySe
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import CheckRecordLineList from './CheckRecordLineList.vue'
-import { MesDvCheckRecordStatusEnum, MesDvSubjectTypeEnum } from '@/views/mes/utils/constants'
+import {
+  MesDvCheckRecordStatusEnum,
+  MesDvSubjectTypeEnum,
+  MesDvCheckPlanStatusEnum
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'CheckRecordForm' })
 const emit = defineEmits(['success'])

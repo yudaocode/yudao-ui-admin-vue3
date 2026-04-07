@@ -51,6 +51,7 @@
     ref="dialogRef"
     :multiple="false"
     :type="type"
+    :status="status"
     @selected="handleSelected"
   />
 </template>
@@ -74,6 +75,7 @@ const props = withDefaults(
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字
     type?: number // 计划类型过滤
+    status?: number // 状态过滤（如仅已启用）
   }>(),
   {
     disabled: false,

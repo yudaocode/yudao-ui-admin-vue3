@@ -12,6 +12,14 @@
   <Dialog title="生产工单选择" v-model="dialogVisible" width="80%">
     <!-- 搜索 -->
     <ContentWrap>
+      <el-alert
+        v-if="type != null"
+        :title="`仅展示【${getDictLabel(DICT_TYPE.MES_PRO_WORK_ORDER_TYPE, type)}】类型的工单`"
+        type="info"
+        :closable="false"
+        show-icon
+        class="!mb-10px"
+      />
       <el-form :inline="true" :model="queryParams" label-width="80px">
         <el-form-item label="工单编码">
           <el-input
@@ -142,7 +150,7 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getDictLabel, getIntDictOptions } from '@/utils/dict'
 import { ProWorkOrderApi, ProWorkOrderVO } from '@/api/mes/pro/workorder'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
@@ -153,6 +161,7 @@ const props = withDefaults(
   defineProps<{
     multiple?: boolean // true 多选（checkbox），false 单选（radio）
     status?: number // 打开弹窗时的默认状态过滤（不传则不预设）
+    type?: number // 工单类型过滤（不传则不限制）
   }>(),
   {
     multiple: true
@@ -216,7 +225,8 @@ const queryParams = reactive({
   name: undefined as string | undefined, // 工单名称
   productId: undefined as number | undefined, // 产品编号
   clientId: undefined as number | undefined, // 客户编号
-  status: undefined as number | undefined // 工单状态
+  status: undefined as number | undefined, // 工单状态
+  type: undefined as number | undefined // 工单类型
 })
 
 /** 查询工单列表 */
@@ -270,6 +280,7 @@ const resetQuery = () => {
   queryParams.productId = undefined
   queryParams.clientId = undefined
   queryParams.status = props.status
+  queryParams.type = props.type
   handleQuery()
 }
 
@@ -302,6 +313,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.productId = undefined
   queryParams.clientId = undefined
   queryParams.status = props.status
+  queryParams.type = props.type
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []

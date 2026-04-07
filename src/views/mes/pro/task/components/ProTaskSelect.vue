@@ -44,7 +44,12 @@
     </el-tooltip>
   </div>
   <!-- 弹窗必须放在 div 外部，否则弹窗内的点击事件会冒泡到 div 触发 handleClick -->
-  <ProTaskSelectDialog ref="dialogRef" :multiple="false" :statuses="statuses" @selected="handleSelected" />
+  <ProTaskSelectDialog
+    ref="dialogRef"
+    :multiple="false"
+    :statuses="statuses"
+    @selected="handleSelected"
+  />
 </template>
 
 <script setup lang="ts">
@@ -62,6 +67,7 @@ const props = withDefaults(
   defineProps<{
     modelValue?: number // 绑定的任务 ID
     workOrderId?: number // 可选，打开弹窗时默认按此工单过滤
+    workstationId?: number // 可选，打开弹窗时默认按此工位过滤
     statuses?: number[] // 可选，任务状态列表（IN 查询）
     disabled?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
@@ -143,7 +149,7 @@ const handleClick = (e: MouseEvent) => {
   }
   // 打开弹窗，传入当前选中 ID 用于预选高亮
   const selectedIds = props.modelValue != null ? [props.modelValue] : []
-  dialogRef.value.open(selectedIds, props.workOrderId)
+  dialogRef.value.open(selectedIds, props.workOrderId, props.workstationId)
 }
 
 /** 弹窗选中回调 */

@@ -147,7 +147,12 @@
         label="装箱单"
         prop="bizId"
       >
-        <WmPackageSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
+        <WmPackageSelect
+          v-model="formData.bizId"
+          :childable-only="true"
+          @change="handleBizSelect"
+          class="!w-1/1"
+        />
       </el-form-item>
       <el-form-item
         v-else-if="formData.bizType === BarcodeBizTypeEnum.STOCK"

@@ -60,7 +60,12 @@
             <ProTaskSelect
               v-model="formData.taskId"
               :workOrderId="formData.workOrderId"
-              :statuses="[MesProTaskStatusEnum.NORMAL, MesProTaskStatusEnum.START, MesProTaskStatusEnum.PAUSE]"
+              :workstationId="formData.workstationId"
+              :statuses="[
+                MesProTaskStatusEnum.NORMAL,
+                MesProTaskStatusEnum.START,
+                MesProTaskStatusEnum.PAUSE
+              ]"
               :disabled="isHeaderReadonly || !formData.workOrderId"
               placeholder="请选择任务"
               @change="handleTaskChange"

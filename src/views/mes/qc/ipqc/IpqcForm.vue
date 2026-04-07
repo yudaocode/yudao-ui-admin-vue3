@@ -88,7 +88,12 @@
             <ProTaskSelect
               v-model="formData.taskId"
               :workOrderId="formData.workOrderId"
-              :statuses="[MesProTaskStatusEnum.NORMAL, MesProTaskStatusEnum.START, MesProTaskStatusEnum.PAUSE]"
+              :workstationId="formData.workstationId"
+              :statuses="[
+                MesProTaskStatusEnum.NORMAL,
+                MesProTaskStatusEnum.START,
+                MesProTaskStatusEnum.PAUSE
+              ]"
               placeholder="请选择生产任务"
               class="!w-1/1"
               :disabled="isFromPendingTask || (!isFromPendingTask && !formData.workOrderId)"

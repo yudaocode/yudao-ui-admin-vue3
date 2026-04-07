@@ -12,8 +12,8 @@
   <Dialog title="点检方案选择" v-model="dialogVisible" width="70%">
     <ContentWrap>
       <el-alert
-        v-if="type != null"
-        :title="`仅展示【${getDictLabel(DICT_TYPE.MES_DV_SUBJECT_TYPE, type)}】类型的计划`"
+        v-if="type != null || status != null"
+        :title="alertTitle"
         type="info"
         :closable="false"
         show-icon
@@ -143,11 +143,24 @@ const props = withDefaults(
   defineProps<{
     multiple?: boolean // true 多选（checkbox），false 单选（radio）
     type?: number // 过滤特定计划类型
+    status?: number // 过滤特定状态（如已启用 = 1）
   }>(),
   {
     multiple: true
   }
 )
+
+/** 拼装 el-alert 提示文字 */
+const alertTitle = computed(() => {
+  const parts: string[] = []
+  if (props.type != null) {
+    parts.push(`类型【${getDictLabel(DICT_TYPE.MES_DV_SUBJECT_TYPE, props.type)}】`)
+  }
+  if (props.status != null) {
+    parts.push(`状态【${getDictLabel(DICT_TYPE.MES_DV_CHECK_PLAN_STATUS, props.status)}】`)
+  }
+  return `仅展示${parts.join('且')}的方案`
+})
 
 const message = useMessage()
 const emit = defineEmits<{
@@ -204,7 +217,8 @@ const queryParams = reactive({
   pageSize: 10, // 每页条数
   code: undefined as string | undefined,
   name: undefined as string | undefined,
-  type: undefined as number | undefined
+  type: undefined as number | undefined,
+  status: undefined as number | undefined
 })
 
 /** 查询列表 */
@@ -285,6 +299,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.type = props.type
+  queryParams.status = props.status
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []

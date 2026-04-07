@@ -110,6 +110,7 @@ defineOptions({ name: 'MdWorkstationSelectDialog' })
 const props = withDefaults(
   defineProps<{
     multiple?: boolean // true 多选（checkbox），false 单选（radio）
+    processId?: number // 工序预过滤（不传则不限制）
   }>(),
   {
     multiple: true
@@ -222,7 +223,7 @@ const handleQuery = () => {
 /** 重置查询条件 */
 const resetQuery = () => {
   queryParams.code = undefined
-  queryParams.processId = undefined
+  queryParams.processId = props.processId // 保持外部传入的工序过滤
   queryParams.workshopId = undefined
   queryParams.status = CommonStatusEnum.ENABLE
   handleQuery()
@@ -251,9 +252,9 @@ const confirmSelect = () => {
 /** 打开弹窗，可传入已选 ID 用于预选高亮 */
 const open = async (selectedIds?: number[]) => {
   dialogVisible.value = true
-  // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
+  // 重置查询条件 + 页码
   queryParams.code = undefined
-  queryParams.processId = undefined
+  queryParams.processId = props.processId // 外部传入 processId 则默认按工序过滤
   queryParams.workshopId = undefined
   queryParams.status = CommonStatusEnum.ENABLE
   queryParams.pageNo = 1
@@ -262,7 +263,6 @@ const open = async (selectedIds?: number[]) => {
   selectedRadioId.value = undefined
   currentRadioRow.value = undefined
   preSelectedIds.value = selectedIds ?? []
-  // 多选模式清空跨页缓存的勾选
   await nextTick()
   tableRef.value?.clearSelection()
   await getList()

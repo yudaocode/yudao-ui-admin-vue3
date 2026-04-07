@@ -103,6 +103,7 @@
             <WmBatchSelect
               v-model="formData.batchId"
               :item-id="formData.itemId"
+              :client-id="props.clientId"
               placeholder="请选择批次"
               class="!w-1/1"
             />
@@ -149,6 +150,7 @@ defineOptions({ name: 'ReturnSalesLineList' })
 const props = defineProps<{
   returnId: number
   formType: string
+  clientId?: number // 客户 ID，用于透传给批次选择器过滤
 }>()
 
 const { t } = useI18n() // 国际化

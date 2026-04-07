@@ -41,7 +41,12 @@
     </el-tooltip>
   </div>
   <!-- 弹窗必须放在 div 外部，否则弹窗内的点击事件会冒泡到 div 触发 handleClick -->
-  <MdWorkstationSelectDialog ref="dialogRef" :multiple="false" @selected="handleSelected" />
+  <MdWorkstationSelectDialog
+    ref="dialogRef"
+    :multiple="false"
+    :process-id="processId"
+    @selected="handleSelected"
+  />
 </template>
 
 <script setup lang="ts">
@@ -58,6 +63,7 @@ defineOptions({ name: 'MdWorkstationSelect', inheritAttrs: false })
 const props = withDefaults(
   defineProps<{
     modelValue?: number // 绑定的工作站 ID
+    processId?: number // 工序过滤（透传给 Dialog）
     disabled?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字

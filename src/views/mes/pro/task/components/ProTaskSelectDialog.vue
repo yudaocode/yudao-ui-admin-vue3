@@ -278,7 +278,7 @@ const resetQuery = () => {
   queryParams.name = undefined
   queryParams.processId = undefined
   queryParams.workOrderId = undefined
-  queryParams.workstationId = undefined
+  queryParams.workstationId = externalWorkstationId.value // 保持外部传入的工位过滤
   queryParams.statuses = props.statuses // 保持 props 传入的状态过滤
   handleQuery()
 }
@@ -303,15 +303,18 @@ const confirmSelect = () => {
 
 // ==================== 打开弹窗 ====================
 
-/** 打开弹窗，可传入已选 ID 用于预选高亮，workOrderId 用于默认过滤工单 */
-const open = async (selectedIds?: number[], workOrderId?: number) => {
+const externalWorkstationId = ref<number | undefined>() // 记录外部传入的 workstationId，用于 resetQuery 时保持过滤条件
+
+/** 打开弹窗，可传入已选 ID 用于预选高亮，workOrderId / workstationId 用于默认过滤 */
+const open = async (selectedIds?: number[], workOrderId?: number, workstationId?: number) => {
   dialogVisible.value = true
+  externalWorkstationId.value = workstationId
   // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.processId = undefined
   queryParams.workOrderId = workOrderId ?? undefined // 传入 workOrderId 则默认按工单过滤
-  queryParams.workstationId = undefined
+  queryParams.workstationId = workstationId ?? undefined // 传入 workstationId 则默认按工位过滤
   queryParams.statuses = props.statuses // 固定状态过滤条件（从 props 传入）
   queryParams.pageNo = 1
   // 清空上一次的选中状态

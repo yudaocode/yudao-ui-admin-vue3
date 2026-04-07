@@ -59,6 +59,8 @@ const props = withDefaults(
   defineProps<{
     modelValue?: number // 绑定的批次 ID
     itemId?: number // 默认过滤的物料 ID
+    clientId?: number // 默认过滤的客户 ID
+    vendorId?: number // 默认过滤的供应商 ID
     disabled?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字
@@ -139,7 +141,7 @@ const handleClick = (e: MouseEvent) => {
   }
   // 打开弹窗，传入当前选中 ID 用于预选高亮，传入 itemId 用于默认过滤
   const selectedIds = props.modelValue != null ? [props.modelValue] : []
-  dialogRef.value.open(selectedIds, props.itemId)
+  dialogRef.value.open(selectedIds, props.itemId, props.clientId, props.vendorId)
 }
 
 /** 弹窗选中回调 */
