@@ -67,7 +67,11 @@
         v-loading="formLoading"
       >
         <el-form-item v-if="bomFormType === 'create'" label="物料" prop="itemId">
-          <MdItemSelect v-model="formData.itemId" />
+          <MdProductBomSelect
+            v-model="formData.itemId"
+            :itemId="props.workOrder.productId"
+            @change="handleBomItemChange"
+          />
         </el-form-item>
         <el-form-item v-else label="物料">
           <el-input :model-value="formData.itemName" disabled />
@@ -94,7 +98,8 @@
 import { ProWorkOrderBomApi, ProWorkOrderBomVO } from '@/api/mes/pro/workorder/bom'
 import { MesProWorkOrderStatusEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
 import { DICT_TYPE } from '@/utils/dict'
-import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import MdProductBomSelect from '@/views/mes/md/item/components/MdProductBomSelect.vue'
+import { MdProductBomVO } from '@/api/mes/md/item/productBom'
 
 defineOptions({ name: 'WorkOrderBomList' })
 
@@ -186,6 +191,13 @@ const resetForm = () => {
     remark: undefined
   }
   formRef.value?.resetFields()
+}
+
+/** BOM 物料选中变化：自动回填预计使用量 */
+const handleBomItemChange = (bom: MdProductBomVO | undefined) => {
+  if (bom) {
+    formData.value.quantity = bom.quantity ?? undefined
+  }
 }
 
 /** 打开 BOM 弹窗 */

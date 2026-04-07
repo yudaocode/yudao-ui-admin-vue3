@@ -35,7 +35,12 @@
     <Dialog :title="formTitle" v-model="formVisible" width="500px">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="100px">
         <el-form-item label="BOM 物料" prop="itemId">
-          <MdItemSelect v-model="formData.itemId" placeholder="请选择 BOM 物料" />
+          <MdProductBomSelect
+            v-model="formData.itemId"
+            :itemId="productId"
+            placeholder="请选择 BOM 物料"
+            @change="handleBomItemChange"
+          />
         </el-form-item>
         <el-form-item label="用料比例" prop="quantity">
           <el-input-number
@@ -60,7 +65,8 @@
 <script setup lang="ts">
 import { ProRouteProductBomApi, ProRouteProductBomVO } from '@/api/mes/pro/route/productbom'
 import { ProRouteProcessApi } from '@/api/mes/pro/route/process'
-import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
+import MdProductBomSelect from '@/views/mes/md/item/components/MdProductBomSelect.vue'
+import { MdProductBomVO } from '@/api/mes/md/item/productBom'
 
 defineOptions({ name: 'RouteProductBomList' })
 
@@ -137,6 +143,13 @@ const openForm = (type: string, row?: ProRouteProductBomVO) => {
     formData.value = { ...row }
   }
   formRef.value?.resetFields()
+}
+
+/** BOM 物料选中变化：自动回填用量比例 */
+const handleBomItemChange = (bom: MdProductBomVO | undefined) => {
+  if (bom) {
+    formData.value.quantity = bom.quantity ?? 1
+  }
 }
 
 /** 提交表单 */
