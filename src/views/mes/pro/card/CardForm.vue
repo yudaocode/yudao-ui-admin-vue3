@@ -25,7 +25,11 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
+            <ProWorkOrderSelect
+              v-model="formData.workOrderId"
+              :status="MesProWorkOrderStatusEnum.CONFIRMED"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -100,7 +104,11 @@ import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import CardProcessList from './CardProcessList.vue'
-import { MesProCardStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import {
+  MesProCardStatusEnum,
+  MesProWorkOrderStatusEnum,
+  MesAutoCodeRuleCode
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'CardForm' })
 const emit = defineEmits(['success'])

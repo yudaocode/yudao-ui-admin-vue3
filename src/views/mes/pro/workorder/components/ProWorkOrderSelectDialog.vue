@@ -35,7 +35,26 @@
           <MdItemSelect v-model="queryParams.productId" placeholder="请选择产品" class="!w-240px" />
         </el-form-item>
         <el-form-item label="客户">
-          <MdClientSelect v-model="queryParams.clientId" placeholder="请选择客户" class="!w-240px" />
+          <MdClientSelect
+            v-model="queryParams.clientId"
+            placeholder="请选择客户"
+            class="!w-240px"
+          />
+        </el-form-item>
+        <el-form-item label="工单状态">
+          <el-select
+            v-model="queryParams.status"
+            placeholder="请选择状态"
+            clearable
+            class="!w-240px"
+          >
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.MES_PRO_WORK_ORDER_STATUS)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
@@ -80,7 +99,10 @@
         <el-table-column label="工单名称" align="center" prop="name" min-width="200" />
         <el-table-column label="工单来源" align="center" prop="orderSourceType" width="100">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE" :value="scope.row.orderSourceType" />
+            <dict-tag
+              :type="DICT_TYPE.MES_PRO_WORK_ORDER_SOURCE_TYPE"
+              :value="scope.row.orderSourceType"
+            />
           </template>
         </el-table-column>
         <el-table-column label="订单编号" align="center" prop="orderSourceCode" width="140" />
@@ -91,6 +113,11 @@
         <el-table-column label="工单数量" align="center" prop="quantity" width="100" />
         <el-table-column label="客户编码" align="center" prop="clientCode" width="120" />
         <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
+        <el-table-column label="工单状态" align="center" prop="status" width="100">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="scope.row.status" />
+          </template>
+        </el-table-column>
         <el-table-column
           label="需求日期"
           align="center"
@@ -125,6 +152,7 @@ defineOptions({ name: 'ProWorkOrderSelectDialog' })
 const props = withDefaults(
   defineProps<{
     multiple?: boolean // true 多选（checkbox），false 单选（radio）
+    status?: number // 打开弹窗时的默认状态过滤（不传则不预设）
   }>(),
   {
     multiple: true
@@ -187,7 +215,8 @@ const queryParams = reactive({
   code: undefined as string | undefined, // 工单编码
   name: undefined as string | undefined, // 工单名称
   productId: undefined as number | undefined, // 产品编号
-  clientId: undefined as number | undefined // 客户编号
+  clientId: undefined as number | undefined, // 客户编号
+  status: undefined as number | undefined // 工单状态
 })
 
 /** 查询工单列表 */
@@ -240,6 +269,7 @@ const resetQuery = () => {
   queryParams.name = undefined
   queryParams.productId = undefined
   queryParams.clientId = undefined
+  queryParams.status = props.status
   handleQuery()
 }
 
@@ -271,6 +301,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.name = undefined
   queryParams.productId = undefined
   queryParams.clientId = undefined
+  queryParams.status = props.status
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []

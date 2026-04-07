@@ -65,6 +65,7 @@
           <el-form-item label="生产工单" prop="workOrderId">
             <ProWorkOrderSelect
               v-model="formData.workOrderId"
+              :status="MesProWorkOrderStatusEnum.CONFIRMED"
               placeholder="请选择生产工单"
               class="!w-1/1"
               :disabled="isFromPendingTask"
@@ -296,7 +297,12 @@ import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import IpqcLineList from './IpqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
-import { MesQcTypeEnum, MesQcStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import {
+  MesQcTypeEnum,
+  MesQcStatusEnum,
+  MesAutoCodeRuleCode,
+  MesProWorkOrderStatusEnum
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IpqcForm' })
 

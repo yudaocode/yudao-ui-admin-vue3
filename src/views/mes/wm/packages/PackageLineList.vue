@@ -47,7 +47,10 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect v-model="formData.workOrderId" />
+            <ProWorkOrderSelect
+              v-model="formData.workOrderId"
+              :status="MesProWorkOrderStatusEnum.CONFIRMED"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -100,6 +103,7 @@
 import { dateFormatter2 } from '@/utils/formatTime'
 import { WmPackageLineApi, WmPackageLineVO } from '@/api/mes/wm/packages/line'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
+import { MesProWorkOrderStatusEnum } from '@/views/mes/utils/constants'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 
 defineOptions({ name: 'PackageLineList' })

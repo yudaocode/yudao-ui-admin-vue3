@@ -40,7 +40,12 @@
     </el-tooltip>
   </div>
   <!-- 弹窗必须放在 div 外部，否则弹窗内的点击事件会冒泡到 div 触发 handleClick -->
-  <ProWorkOrderSelectDialog ref="dialogRef" :multiple="false" @selected="handleSelected" />
+  <ProWorkOrderSelectDialog
+    ref="dialogRef"
+    :multiple="false"
+    :status="status"
+    @selected="handleSelected"
+  />
 </template>
 
 <script setup lang="ts">
@@ -60,6 +65,7 @@ const props = withDefaults(
     disabled?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字
+    status?: number // 弹窗打开时的默认状态过滤（透传给 Dialog）
   }>(),
   {
     disabled: false,

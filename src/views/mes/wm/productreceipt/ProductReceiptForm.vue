@@ -47,7 +47,11 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
+            <ProWorkOrderSelect
+              v-model="formData.workOrderId"
+              :status="MesProWorkOrderStatusEnum.CONFIRMED"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -97,7 +101,11 @@ import { WmProductReceiptApi, WmProductReceiptVO } from '@/api/mes/wm/productrec
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import ProductReceiptLineList from './ProductReceiptLineList.vue'
-import { MesAutoCodeRuleCode, MesWmProductReceiptStatusEnum } from '@/views/mes/utils/constants'
+import {
+  MesAutoCodeRuleCode,
+  MesProWorkOrderStatusEnum,
+  MesWmProductReceiptStatusEnum
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ProductReceiptForm' })
 const emit = defineEmits(['success'])

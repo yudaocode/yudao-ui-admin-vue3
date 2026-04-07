@@ -50,6 +50,7 @@
             <ProWorkOrderSelect
               v-model="formData.workOrderId"
               :type="MesProWorkOrderTypeEnum.OUTSOURCE"
+              :status="MesProWorkOrderStatusEnum.CONFIRMED"
               :disabled="isHeaderReadonly"
               @change="handleWorkOrderChange"
             />
@@ -109,7 +110,12 @@ import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import OutsourceIssueLineList from './OutsourceIssueLineList.vue'
 import { ProWorkOrderVO } from '@/api/mes/pro/workorder'
-import { MesAutoCodeRuleCode, MesWmOutsourceIssueStatusEnum, MesProWorkOrderTypeEnum } from '@/views/mes/utils/constants'
+import {
+  MesAutoCodeRuleCode,
+  MesProWorkOrderStatusEnum,
+  MesWmOutsourceIssueStatusEnum,
+  MesProWorkOrderTypeEnum
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'OutsourceIssueForm' })
 const emit = defineEmits(['success'])

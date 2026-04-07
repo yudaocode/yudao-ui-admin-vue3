@@ -25,6 +25,7 @@
         <ProWorkOrderSelect
           v-if="formType === 'create'"
           v-model="formData.workOrderId"
+          :status="MesProWorkOrderStatusEnum.CONFIRMED"
           placeholder="请选择工单（可选）"
         />
         <el-input v-else :model-value="formData.workOrderCode || '-'" disabled />
@@ -119,7 +120,7 @@ import { ProAndonConfigVO } from '@/api/mes/pro/andon/config'
 import { DICT_TYPE } from '@/utils/dict'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { formatDate } from '@/utils/formatTime'
-import { MesProAndonStatusEnum } from '@/views/mes/utils/constants'
+import { MesProAndonStatusEnum, MesProWorkOrderStatusEnum } from '@/views/mes/utils/constants'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'

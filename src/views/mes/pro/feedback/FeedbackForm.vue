@@ -48,6 +48,7 @@
           <el-form-item label="生产工单" prop="workOrderId">
             <ProWorkOrderSelect
               v-model="formData.workOrderId"
+              :status="MesProWorkOrderStatusEnum.CONFIRMED"
               :disabled="isHeaderReadonly"
               placeholder="请选择工单"
               @change="handleWorkOrderChange"
@@ -294,7 +295,11 @@ import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import ItemConsumeList from './ItemConsumeList.vue'
 import ProductProduceList from './ProductProduceList.vue'
 import { useUserStore } from '@/store/modules/user'
-import { MesAutoCodeRuleCode, MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
+import {
+  MesAutoCodeRuleCode,
+  MesProFeedbackStatusEnum,
+  MesProWorkOrderStatusEnum
+} from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'FeedbackForm' })
 const emit = defineEmits(['success'])

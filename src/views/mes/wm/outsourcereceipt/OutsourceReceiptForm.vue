@@ -36,6 +36,7 @@
             <ProWorkOrderSelect
               v-model="formData.workOrderId"
               :type="MesProWorkOrderTypeEnum.OUTSOURCE"
+              :status="MesProWorkOrderStatusEnum.CONFIRMED"
               :disabled="isHeaderReadonly"
               @change="handleWorkOrderChange"
             />
@@ -111,6 +112,7 @@ import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrde
 import OutsourceReceiptLineList from './OutsourceReceiptLineList.vue'
 import {
   MesProWorkOrderTypeEnum,
+  MesProWorkOrderStatusEnum,
   MesWmOutsourceReceiptStatusEnum
 } from '@/views/mes/utils/constants'
 

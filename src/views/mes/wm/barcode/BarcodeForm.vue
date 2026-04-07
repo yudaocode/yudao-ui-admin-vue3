@@ -78,7 +78,12 @@
         label="工单"
         prop="bizId"
       >
-        <ProWorkOrderSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1//1" />
+        <ProWorkOrderSelect
+          v-model="formData.bizId"
+          :status="MesProWorkOrderStatusEnum.CONFIRMED"
+          @change="handleBizSelect"
+          class="!w-1//1"
+        />
       </el-form-item>
       <el-form-item
         v-else-if="formData.bizType === BarcodeBizTypeEnum.MACHINERY"
@@ -209,7 +214,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { WmBarcodeApi, type WmBarcodeVO } from '@/api/mes/wm/barcode'
-import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+import { BarcodeBizTypeEnum, MesProWorkOrderStatusEnum } from '@/views/mes/utils/constants'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'

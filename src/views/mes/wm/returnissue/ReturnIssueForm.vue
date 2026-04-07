@@ -49,7 +49,11 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="生产工单" prop="workOrderId">
-            <ProWorkOrderSelect v-model="formData.workOrderId" :disabled="isHeaderReadonly" />
+            <ProWorkOrderSelect
+              v-model="formData.workOrderId"
+              :status="MesProWorkOrderStatusEnum.CONFIRMED"
+              :disabled="isHeaderReadonly"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -113,7 +117,11 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { WmReturnIssueApi, WmReturnIssueVO } from '@/api/mes/wm/returnissue'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
-import { MesAutoCodeRuleCode, MesWmReturnIssueStatusEnum } from '@/views/mes/utils/constants'
+import {
+  MesAutoCodeRuleCode,
+  MesProWorkOrderStatusEnum,
+  MesWmReturnIssueStatusEnum
+} from '@/views/mes/utils/constants'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import ReturnIssueLineList from './ReturnIssueLineList.vue'
