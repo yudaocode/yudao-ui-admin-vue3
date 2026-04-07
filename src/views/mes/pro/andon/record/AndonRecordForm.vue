@@ -18,7 +18,7 @@
         <el-input v-else :model-value="formData.workstationName" disabled />
       </el-form-item>
       <el-form-item label="发起人" prop="userId">
-        <UserSelect v-if="formType === 'create'" v-model="formData.userId" />
+        <UserSelectV2 v-if="formType === 'create'" v-model="formData.userId" />
         <el-input v-else :model-value="formData.userNickname" disabled />
       </el-form-item>
       <el-form-item label="生产工单" prop="workOrderId">
@@ -75,7 +75,7 @@
           <el-input v-else :model-value="formData.handleTime || '-'" disabled />
         </el-form-item>
         <el-form-item label="处置人">
-          <UserSelect v-if="formType === 'update'" v-model="formData.handlerUserId" />
+          <UserSelectV2 v-if="formType === 'update'" v-model="formData.handlerUserId" />
           <el-input v-else :model-value="formData.handlerUserNickname || '-'" disabled />
         </el-form-item>
       </template>
@@ -123,7 +123,7 @@ import { MesProAndonStatusEnum } from '@/views/mes/utils/constants'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import AndonConfigSelect from '../config/components/AndonConfigSelect.vue'
 
 defineOptions({ name: 'AndonRecordForm' })

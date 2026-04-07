@@ -29,7 +29,7 @@
         <MdClientSelect v-model="queryParams.clientId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="检查员" prop="inspectorUserId">
-        <UserSelect v-model="queryParams.inspectorUserId" class="!w-240px" />
+        <UserSelectV2 v-model="queryParams.inspectorUserId" class="!w-240px" />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -128,7 +128,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
 import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import PackageForm from './PackageForm.vue'
 import { MesWmPackageStatusEnum } from '@/views/mes/utils/constants'
 

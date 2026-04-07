@@ -15,7 +15,7 @@
         <DvMachinerySelect v-model="queryParams.machineryId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="点检人" prop="userId">
-        <UserSelect v-model="queryParams.userId" placeholder="请选择点检人" class="!w-240px" />
+        <UserSelectV2 v-model="queryParams.userId" placeholder="请选择点检人" class="!w-240px" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
@@ -135,7 +135,7 @@ import { DvCheckRecordApi } from '@/api/mes/dv/checkrecord'
 import CheckRecordForm from './CheckRecordForm.vue'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import { MesDvCheckRecordStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesDvCheckRecord' })

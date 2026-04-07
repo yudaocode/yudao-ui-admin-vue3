@@ -125,7 +125,7 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检测人员" prop="inspectorUserId">
-            <UserSelect
+            <UserSelectV2
               v-model="formData.inspectorUserId"
               placeholder="请选择检测人员"
               class="!w-1/1"
@@ -245,7 +245,7 @@ import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import IqcLineList from './IqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import { MesQcTypeEnum, MesQcStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'IqcForm' })

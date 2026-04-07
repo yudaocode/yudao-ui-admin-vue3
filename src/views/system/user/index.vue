@@ -7,7 +7,7 @@
     <!-- 左侧部门树 -->
     <el-col :span="4" :xs="24">
       <ContentWrap class="h-1/1">
-        <DeptTree @node-click="handleDeptNodeClick" />
+        <DeptTreeSelect @node-click="handleDeptNodeClick" />
       </ContentWrap>
     </el-col>
     <el-col :span="20" :xs="24">
@@ -219,7 +219,7 @@ import * as UserApi from '@/api/system/user'
 import UserForm from './UserForm.vue'
 import UserImportForm from './UserImportForm.vue'
 import UserAssignRoleForm from './UserAssignRoleForm.vue'
-import DeptTree from './DeptTree.vue'
+import DeptTreeSelect from '@/views/system/dept/components/DeptTreeSelect.vue'
 
 defineOptions({ name: 'SystemUser' })
 
@@ -265,14 +265,9 @@ const resetQuery = () => {
 }
 
 /** 处理部门被点击 */
-const handleDeptNodeClick = async (row: any) => {
-  if (row === undefined) {
-    queryParams.deptId = undefined
-    await getList()
-  } else {
-    queryParams.deptId = row.id
-    await getList()
-  }
+const handleDeptNodeClick = async (deptId: number | undefined) => {
+  queryParams.deptId = deptId
+  await getList()
 }
 
 /** 添加/修改操作 */

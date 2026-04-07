@@ -36,7 +36,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="检查员" prop="inspectorUserId">
-            <UserSelect v-model="formData.inspectorUserId" :disabled="isHeaderReadonly" />
+            <UserSelectV2 v-model="formData.inspectorUserId" :disabled="isHeaderReadonly" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -183,7 +183,7 @@ import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import SubPackageList from './SubPackageList.vue'
 import PackageLineList from './PackageLineList.vue'
 import { MesAutoCodeRuleCode, MesWmPackageStatusEnum } from '@/views/mes/utils/constants'

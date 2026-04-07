@@ -135,7 +135,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="操作人" prop="userId">
-              <UserSelect v-model="processFormData.userId" />
+              <UserSelectV2 v-model="processFormData.userId" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -162,7 +162,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { ProCardProcessApi, ProCardProcessVO } from '@/api/mes/pro/card/process'
 import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 
 defineOptions({ name: 'CardProcessList' })
 

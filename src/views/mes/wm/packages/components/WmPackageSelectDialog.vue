@@ -34,7 +34,7 @@
           <MdClientSelect v-model="queryParams.clientId" class="!w-220px" />
         </el-form-item>
         <el-form-item label="检查员">
-          <UserSelect v-model="queryParams.inspectorUserId" class="!w-220px" />
+          <UserSelectV2 v-model="queryParams.inspectorUserId" class="!w-220px" />
         </el-form-item>
         <el-form-item>
           <el-button @click="handleQuery">
@@ -124,7 +124,7 @@ import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { WmPackageApi, WmPackageVO } from '@/api/mes/wm/packages'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import { MesWmPackageStatusEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'WmPackageSelectDialog' })

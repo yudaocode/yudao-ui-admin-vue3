@@ -21,7 +21,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="保养人" prop="userId">
-            <UserSelect v-model="formData.userId" placeholder="请选择保养人" />
+            <UserSelectV2 v-model="formData.userId" placeholder="请选择保养人" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -70,7 +70,7 @@
 import { DvMaintenRecordApi } from '@/api/mes/dv/maintenrecord'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import MaintenRecordLineList from './MaintenRecordLineList.vue'
 import { useUserStore } from '@/store/modules/user'
 import { MesDvMaintenRecordStatusEnum } from '@/views/mes/utils/constants'

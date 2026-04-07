@@ -133,7 +133,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="检测人员" prop="inspectorUserId">
-            <UserSelect
+            <UserSelectV2
               v-model="formData.inspectorUserId"
               placeholder="请选择检测人员"
               class="!w-1/1"
@@ -239,7 +239,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { QcRqcApi, QcRqcVO } from '@/api/mes/qc/rqc'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import RqcLineList from './RqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
 import { MesQcTypeEnum, MesQcStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'

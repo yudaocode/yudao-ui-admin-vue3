@@ -62,7 +62,7 @@
         </el-col>
         <el-col :span="8" v-if="showConfirmFields">
           <el-form-item label="维修人" prop="acceptedUserId">
-            <UserSelect v-model="formData.acceptedUserId" placeholder="请选择维修人" disabled />
+            <UserSelectV2 v-model="formData.acceptedUserId" placeholder="请选择维修人" disabled />
           </el-form-item>
         </el-col>
       </el-row>
@@ -92,7 +92,7 @@
         </el-col>
         <el-col :span="8" v-if="showDetailFields">
           <el-form-item label="验收人" prop="confirmUserId">
-            <UserSelect v-model="formData.confirmUserId" placeholder="请选择验收人" disabled />
+            <UserSelectV2 v-model="formData.confirmUserId" placeholder="请选择验收人" disabled />
           </el-form-item>
         </el-col>
       </el-row>
@@ -154,7 +154,7 @@
 import { DvRepairApi } from '@/api/mes/dv/repair'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import RepairLineList from './RepairLineList.vue'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import {

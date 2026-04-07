@@ -49,7 +49,7 @@
       </el-table-column>
       <el-table-column label="处置人" align="center" width="180">
         <template #default="scope">
-          <UserSelect
+          <UserSelectV2
             v-if="scope.row.editing"
             v-model="scope.row.handlerUserId"
             placeholder="请选择处置人"
@@ -100,7 +100,7 @@
 import { ProAndonConfigApi, ProAndonConfigVO } from '@/api/mes/pro/andon/config'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProAndonLevelEnum } from '@/views/mes/utils/constants'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import RoleSelect from '@/views/system/role/components/RoleSelect.vue'
 
 /** 安灯呼叫配置弹窗（内联编辑表格） */

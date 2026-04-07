@@ -4,7 +4,7 @@
     <!-- 顶部：人员选择 -->
     <el-form :inline="true" label-width="80px" class="mb-10px">
       <el-form-item label="人员">
-        <UserSelect
+        <UserSelectV2
           v-model="userId"
           placeholder="请输入人员姓名搜索"
           class="!w-200px"
@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import CalendarDateCell from './CalendarDateCell.vue'
 import CalendarLegend from './CalendarLegend.vue'
 import { useCalendar } from './useCalendar'

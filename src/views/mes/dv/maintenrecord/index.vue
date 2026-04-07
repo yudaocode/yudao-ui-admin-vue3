@@ -15,7 +15,7 @@
         <DvMachinerySelect v-model="queryParams.machineryId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="保养人" prop="userId">
-        <UserSelect v-model="queryParams.userId" placeholder="请选择保养人" class="!w-240px" />
+        <UserSelectV2 v-model="queryParams.userId" placeholder="请选择保养人" class="!w-240px" />
       </el-form-item>
       <el-form-item label="保养时间" prop="maintenTime">
         <el-date-picker
@@ -123,7 +123,7 @@ import download from '@/utils/download'
 import { DvMaintenRecordApi } from '@/api/mes/dv/maintenrecord'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import MaintenRecordForm from './MaintenRecordForm.vue'
 import { MesDvMaintenRecordStatusEnum } from '@/views/mes/utils/constants'
 

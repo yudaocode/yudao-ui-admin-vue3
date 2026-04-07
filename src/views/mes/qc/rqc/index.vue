@@ -80,7 +80,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="检测人员" prop="inspectorUserId">
-        <UserSelect
+        <UserSelectV2
           v-model="queryParams.inspectorUserId"
           placeholder="请选择检测人员"
           clearable
@@ -196,7 +196,7 @@ import { QcRqcApi, QcRqcVO } from '@/api/mes/qc/rqc'
 import RqcForm from './RqcForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import { MesQcStatusEnum, MesQcSourceDocTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MesQcRqc' })

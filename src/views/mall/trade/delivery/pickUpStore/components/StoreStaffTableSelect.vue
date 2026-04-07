@@ -5,7 +5,7 @@
       <!-- 左侧部门树 -->
       <el-col :span="4" :xs="24">
         <ContentWrap class="h-1/1">
-          <DeptTree @node-click="handleDeptNodeClick" />
+          <DeptTreeSelect @node-click="handleDeptNodeClick" />
         </ContentWrap>
       </el-col>
       <el-col :span="20" :xs="24">
@@ -137,7 +137,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as UserApi from '@/api/system/user'
-import DeptTree from '@/views/system/user/DeptTree.vue'
+import DeptTreeSelect from '@/views/system/dept/components/DeptTreeSelect.vue'
 
 // 是否全选
 const isCheckAll = ref(false)
@@ -189,8 +189,8 @@ const resetQuery = () => {
 }
 
 /** 处理部门被点击 */
-const handleDeptNodeClick = async (row) => {
-  queryParams.deptId = row.id
+const handleDeptNodeClick = async (deptId: number | undefined) => {
+  queryParams.deptId = deptId
   await getList()
 }
 

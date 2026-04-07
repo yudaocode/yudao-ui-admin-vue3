@@ -17,10 +17,10 @@
         />
       </el-form-item>
       <el-form-item label="发起人" prop="userId">
-        <UserSelect v-model="queryParams.userId" class="!w-240px" />
+        <UserSelectV2 v-model="queryParams.userId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="处置人" prop="handlerUserId">
-        <UserSelect v-model="queryParams.handlerUserId" class="!w-240px" />
+        <UserSelectV2 v-model="queryParams.handlerUserId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="处理状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
@@ -164,7 +164,7 @@ import AndonConfigDialog from '../config/AndonConfigForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MesProAndonStatusEnum } from '@/views/mes/utils/constants'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 
 defineOptions({ name: 'MesProAndon' })
 

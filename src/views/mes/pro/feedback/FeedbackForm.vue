@@ -189,7 +189,7 @@
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="报工人" prop="feedbackUserId">
-            <UserSelect
+            <UserSelectV2
               v-model="formData.feedbackUserId"
               :disabled="isHeaderReadonly"
               placeholder="请选择报工人"
@@ -210,7 +210,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="审核人" prop="approveUserId">
-            <UserSelect
+            <UserSelectV2
               v-model="formData.approveUserId"
               :disabled="isHeaderReadonly"
               placeholder="请选择审核人"
@@ -290,7 +290,7 @@ import { ProRouteProcessApi } from '@/api/mes/pro/route/process'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import ItemConsumeList from './ItemConsumeList.vue'
 import ProductProduceList from './ProductProduceList.vue'
 import { useUserStore } from '@/store/modules/user'

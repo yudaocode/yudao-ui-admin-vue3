@@ -21,7 +21,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="点检人" prop="userId">
-            <UserSelect v-model="formData.userId" placeholder="请选择点检人" />
+            <UserSelectV2 v-model="formData.userId" placeholder="请选择点检人" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -71,7 +71,7 @@
 import { DvCheckRecordApi } from '@/api/mes/dv/checkrecord'
 import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySelect.vue'
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import CheckRecordLineList from './CheckRecordLineList.vue'
 import { MesDvCheckRecordStatusEnum } from '@/views/mes/utils/constants'
 

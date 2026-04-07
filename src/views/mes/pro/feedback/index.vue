@@ -44,14 +44,14 @@
         <MdItemSelect v-model="queryParams.itemId" placeholder="请选择产品物料" class="!w-240px" />
       </el-form-item>
       <el-form-item label="报工人" prop="feedbackUserId">
-        <UserSelect
+        <UserSelectV2
           v-model="queryParams.feedbackUserId"
           placeholder="请选择报工人"
           class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="记录人" prop="creator">
-        <UserSelect v-model="queryParams.creator" placeholder="请选择记录人" class="!w-240px" />
+        <UserSelectV2 v-model="queryParams.creator" placeholder="请选择记录人" class="!w-240px" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
@@ -207,7 +207,7 @@ import download from '@/utils/download'
 import { ProFeedbackApi, ProFeedbackVO } from '@/api/mes/pro/feedback'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import FeedbackForm from './FeedbackForm.vue'
 import { MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
 import { useUserStore } from '@/store/modules/user'

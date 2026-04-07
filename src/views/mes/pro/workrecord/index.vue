@@ -12,7 +12,7 @@
       label-width="100px"
     >
       <el-form-item label="用户" prop="userId">
-        <UserSelect v-model="queryParams.userId" placeholder="请选择用户" class="!w-240px" />
+        <UserSelectV2 v-model="queryParams.userId" placeholder="请选择用户" class="!w-240px" />
       </el-form-item>
       <el-form-item label="工作站" prop="workstationId">
         <MdWorkstationSelect
@@ -105,7 +105,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { ProWorkRecordApi, type ProWorkRecordLogVO } from '@/api/mes/pro/workrecord'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import WorkRecordStatusBar from './WorkRecordStatusBar.vue'
 
 defineOptions({ name: 'MesProWorkRecordLog' })

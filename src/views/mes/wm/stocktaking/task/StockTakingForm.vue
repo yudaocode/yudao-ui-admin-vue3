@@ -97,7 +97,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="盘点人" prop="userId">
-            <UserSelect v-model="formData.userId" :disabled="isDetail" />
+            <UserSelectV2 v-model="formData.userId" :disabled="isDetail" />
           </el-form-item>
         </el-col>
         <el-col :span="24">
@@ -155,7 +155,7 @@ import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { StockTakingApi, type StockTakingTaskVO } from '@/api/mes/wm/stocktaking/task/index'
 import { type StockTakingPlanVO } from '@/api/mes/wm/stocktaking/plan/index'
 import StockTakingPlanSelect from '@/views/mes/wm/stocktaking/plan/components/StockTakingPlanSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import StockTakingTaskLineList from './StockTakingTaskLineList.vue'
 import StockTakingTaskResultList from './StockTakingTaskResultList.vue'
 import {

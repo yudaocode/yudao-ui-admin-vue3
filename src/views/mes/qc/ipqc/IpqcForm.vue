@@ -174,7 +174,7 @@
       <el-row :gutter="16">
         <el-col :span="8">
           <el-form-item label="检测人员" prop="inspectorUserId">
-            <UserSelect
+            <UserSelectV2
               v-model="formData.inspectorUserId"
               placeholder="请选择检测人员"
               class="!w-1/1"
@@ -293,7 +293,7 @@ import { QcIpqcApi, QcIpqcVO } from '@/api/mes/qc/ipqc'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
 import ProTaskSelect from '@/views/mes/pro/task/components/ProTaskSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import IpqcLineList from './IpqcLineList.vue'
 import QcIndicatorResultList from '@/views/mes/qc/indicatorresult/components/QcIndicatorResultList.vue'
 import { MesQcTypeEnum, MesQcStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'

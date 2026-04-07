@@ -121,7 +121,7 @@
         label="人员"
         prop="bizId"
       >
-        <UserSelect v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
+        <UserSelectV2 v-model="formData.bizId" @change="handleBizSelect" class="!w-1/1" />
       </el-form-item>
       <el-form-item
         v-else-if="formData.bizType === BarcodeBizTypeEnum.CLIENT"
@@ -221,7 +221,7 @@ import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorksta
 import MdWorkshopSelect from '@/views/mes/md/workstation/components/MdWorkshopSelect.vue'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'
 import TmToolSelect from '@/views/mes/tm/tool/components/TmToolSelect.vue'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import WmPackageSelect from '@/views/mes/wm/packages/components/WmPackageSelect.vue'
 import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMaterialStockSelect.vue'
 import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
