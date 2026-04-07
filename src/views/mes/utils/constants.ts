@@ -96,6 +96,12 @@ export const MesProTaskStatusEnum = {
   CANCELED: 4 // 已取消
 }
 
+/** MES 点检保养项目类型枚举（对应字典 mes_dv_subject_type） */
+export const MesDvSubjectTypeEnum = {
+  CHECK: 1, // 点检
+  MAINTENANCE: 2 // 保养
+}
+
 /** MES 点检保养方案状态枚举 */
 export const MesDvCheckPlanStatusEnum = {
   PREPARE: 0, // 草稿

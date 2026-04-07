@@ -16,7 +16,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="保养计划" prop="planId">
-            <DvCheckPlanSelect v-model="formData.planId" />
+            <DvCheckPlanSelect v-model="formData.planId" :type="MesDvSubjectTypeEnum.MAINTENANCE" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -73,7 +73,7 @@ import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSe
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import MaintenRecordLineList from './MaintenRecordLineList.vue'
 import { useUserStore } from '@/store/modules/user'
-import { MesDvMaintenRecordStatusEnum } from '@/views/mes/utils/constants'
+import { MesDvMaintenRecordStatusEnum, MesDvSubjectTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MaintenRecordForm' })
 const emit = defineEmits(['success'])

@@ -5,6 +5,7 @@
   Props:
     modelValue  — 绑定的任务 ID（v-model）
     workOrderId — 可选，打开弹窗时默认按此工单过滤
+    statuses    — 可选，任务状态列表（IN 查询），仅展示这些状态的任务
     disabled    — 是否禁用
     clearable   — 是否允许清空（鼠标悬停时显示清除图标）
     placeholder — 占位文字
@@ -43,7 +44,7 @@
     </el-tooltip>
   </div>
   <!-- 弹窗必须放在 div 外部，否则弹窗内的点击事件会冒泡到 div 触发 handleClick -->
-  <ProTaskSelectDialog ref="dialogRef" :multiple="false" @selected="handleSelected" />
+  <ProTaskSelectDialog ref="dialogRef" :multiple="false" :statuses="statuses" @selected="handleSelected" />
 </template>
 
 <script setup lang="ts">
@@ -61,6 +62,7 @@ const props = withDefaults(
   defineProps<{
     modelValue?: number // 绑定的任务 ID
     workOrderId?: number // 可选，打开弹窗时默认按此工单过滤
+    statuses?: number[] // 可选，任务状态列表（IN 查询）
     disabled?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字

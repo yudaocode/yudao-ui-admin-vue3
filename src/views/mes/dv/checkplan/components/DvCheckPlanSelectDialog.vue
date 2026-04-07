@@ -11,6 +11,14 @@
 <template>
   <Dialog title="点检方案选择" v-model="dialogVisible" width="70%">
     <ContentWrap>
+      <el-alert
+        v-if="type != null"
+        :title="`仅展示【${getDictLabel(DICT_TYPE.MES_DV_SUBJECT_TYPE, type)}】类型的计划`"
+        type="info"
+        :closable="false"
+        show-icon
+        class="!mb-10px"
+      />
       <el-form :inline="true" :model="queryParams" label-width="85px">
         <el-form-item label="计划编号">
           <el-input
@@ -125,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { dateFormatter2 } from '@/utils/formatTime'
 import { DvCheckPlanApi, DvCheckPlanVO } from '@/api/mes/dv/checkplan'
 

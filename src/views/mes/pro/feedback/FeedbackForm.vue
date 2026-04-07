@@ -60,6 +60,7 @@
             <ProTaskSelect
               v-model="formData.taskId"
               :workOrderId="formData.workOrderId"
+              :statuses="[MesProTaskStatusEnum.NORMAL, MesProTaskStatusEnum.START, MesProTaskStatusEnum.PAUSE]"
               :disabled="isHeaderReadonly || !formData.workOrderId"
               placeholder="请选择任务"
               @change="handleTaskChange"
@@ -298,6 +299,7 @@ import { useUserStore } from '@/store/modules/user'
 import {
   MesAutoCodeRuleCode,
   MesProFeedbackStatusEnum,
+  MesProTaskStatusEnum,
   MesProWorkOrderStatusEnum
 } from '@/views/mes/utils/constants'
 

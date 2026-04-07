@@ -11,6 +11,14 @@
 <template>
   <Dialog title="装箱单选择" v-model="dialogVisible" width="80%">
     <ContentWrap>
+      <el-alert
+        v-if="childableOnly"
+        title="仅展示可作为子箱的装箱单（无父箱 + 已完成）"
+        type="info"
+        :closable="false"
+        show-icon
+        class="!mb-10px"
+      />
       <el-form :inline="true" :model="queryParams" label-width="100px">
         <el-form-item label="装箱单编号">
           <el-input

@@ -12,6 +12,14 @@
 <template>
   <Dialog title="发货通知单选择" v-model="dialogVisible" width="70%">
     <ContentWrap>
+      <el-alert
+        v-if="status != null"
+        :title="`仅展示状态为【${getDictLabel(DICT_TYPE.MES_WM_SALES_NOTICE_STATUS, status)}】的发货通知单`"
+        type="info"
+        :closable="false"
+        show-icon
+        class="!mb-10px"
+      />
       <el-form :inline="true" :model="queryParams" label-width="100px">
         <el-form-item label="通知单编号">
           <el-input
@@ -134,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import { WmSalesNoticeApi, WmSalesNoticeVO } from '@/api/mes/wm/salesnotice'
 import MdClientSelect from '@/views/mes/md/client/components/MdClientSelect.vue'

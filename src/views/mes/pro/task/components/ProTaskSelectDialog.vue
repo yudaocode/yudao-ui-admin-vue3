@@ -9,10 +9,20 @@
     selected(rows: ProTaskVO[]) — 确认选择后触发，单选时数组长度为 1
   Expose:
     open(selectedIds?: number[], workOrderId?: number) — 打开弹窗，可传入已选 ID 和工单 ID 用于预选／过滤
+
+  支持通过 statuses prop 传入状态列表，后端 IN 查询，只展示指定状态的任务
 -->
 <template>
   <Dialog title="生产任务选择" v-model="dialogVisible" width="80%">
     <ContentWrap>
+      <el-alert
+        v-if="statuses?.length"
+        :title="`仅展示状态为【${statuses!.map((s) => getDictLabel(DICT_TYPE.MES_PRO_TASK_STATUS, s)).join('、')}】的任务`"
+        type="info"
+        :closable="false"
+        show-icon
+        class="!mb-10px"
+      />
       <el-form :inline="true" :model="queryParams" label-width="100px">
         <el-form-item label="所属工序">
           <ProProcessSelect
@@ -139,7 +149,7 @@
 
 <script setup lang="ts">
 import { formatDate } from '@/utils/formatTime'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { ProTaskApi, ProTaskVO } from '@/api/mes/pro/task'
 import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
@@ -150,6 +160,7 @@ defineOptions({ name: 'ProTaskSelectDialog' })
 const props = withDefaults(
   defineProps<{
     multiple?: boolean // true 多选（checkbox），false 单选（radio）
+    statuses?: number[] // 可选：任务状态列表（IN 查询），仅展示这些状态的任务
   }>(),
   {
     multiple: true
@@ -213,7 +224,8 @@ const queryParams = reactive({
   name: undefined as string | undefined, // 任务名称
   processId: undefined as number | undefined, // 所属工序
   workOrderId: undefined as number | undefined, // 生产工单
-  workstationId: undefined as number | undefined // 工作站
+  workstationId: undefined as number | undefined, // 工作站
+  statuses: undefined as number[] | undefined // 任务状态列表（IN 查询）
 })
 
 /** 查询任务列表 */
@@ -267,6 +279,7 @@ const resetQuery = () => {
   queryParams.processId = undefined
   queryParams.workOrderId = undefined
   queryParams.workstationId = undefined
+  queryParams.statuses = props.statuses // 保持 props 传入的状态过滤
   handleQuery()
 }
 
@@ -299,6 +312,7 @@ const open = async (selectedIds?: number[], workOrderId?: number) => {
   queryParams.processId = undefined
   queryParams.workOrderId = workOrderId ?? undefined // 传入 workOrderId 则默认按工单过滤
   queryParams.workstationId = undefined
+  queryParams.statuses = props.statuses // 固定状态过滤条件（从 props 传入）
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []
