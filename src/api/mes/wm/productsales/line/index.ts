@@ -4,6 +4,7 @@ import request from '@/config/axios'
 export interface WmProductSalesLineVO {
   id: number
   salesId: number
+  noticeLineId: number
   itemId: number
   itemCode: string
   itemName: string
