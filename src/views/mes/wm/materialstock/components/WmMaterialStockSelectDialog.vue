@@ -159,7 +159,6 @@ import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
-import { MesWmWarehouseConstants } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'WmMaterialStockSelectDialog' })
 
@@ -247,7 +246,8 @@ const queryParams = reactive({
   warehouseId: undefined as number | undefined, // 仓库编号
   locationId: undefined as number | undefined, // 库区编号
   areaId: undefined as number | undefined, // 库位编号
-  frozen: false as boolean | undefined // 默认只查未冻结
+  frozen: false as boolean | undefined, // 默认只查未冻结
+  virtualFilter: undefined as string | undefined // 虚拟仓过滤：exclude / only，由后端处理
 })
 
 /** 仓库切换时清空库区、库位 */
@@ -266,20 +266,7 @@ const getList = async () => {
   loading.value = true
   try {
     const data = await WmMaterialStockApi.getMaterialStockPage(queryParams)
-    // 前端过滤虚拟线边仓
-    if (props.virtualFilter === 'only') {
-      // 只看虚拟仓：正向限定
-      list.value = data.list.filter((row: WmMaterialStockVO) =>
-        row.warehouseCode?.includes(MesWmWarehouseConstants.WIP_VIRTUAL)
-      )
-    } else if (props.virtualFilter === 'exclude') {
-      // 排除虚拟仓
-      list.value = data.list.filter(
-        (row: WmMaterialStockVO) => !row.warehouseCode?.includes(MesWmWarehouseConstants.WIP_VIRTUAL)
-      )
-    } else {
-      list.value = data.list
-    }
+    list.value = data.list
     total.value = data.total
     await nextTick()
     applyPreSelection()
@@ -326,6 +313,7 @@ const resetQuery = () => {
   queryParams.batchCode = undefined
   queryParams.batchId = props.batchId // 保持 props 传入的批次过滤
   queryParams.warehouseId = props.warehouseId // 保持 props 传入的仓库过滤
+  queryParams.virtualFilter = props.virtualFilter === 'all' ? undefined : props.virtualFilter
   queryParams.locationId = undefined
   queryParams.areaId = undefined
   typeTreeRef.value?.reset()
@@ -366,6 +354,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.itemId = props.itemId
   queryParams.batchId = props.batchId
   queryParams.warehouseId = props.warehouseId
+  queryParams.virtualFilter = props.virtualFilter === 'all' ? undefined : props.virtualFilter
   // 默认只查未冻结
   queryParams.frozen = false
   // 重置分类树（清高亮 + 清搜索词）
