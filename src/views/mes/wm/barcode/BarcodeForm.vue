@@ -62,14 +62,14 @@
             :warehouse-id="areaWarehouseId"
             @change="handleAreaLocationChange"
             class="!w-1/1"
-            placeholder="请选择库位"
+            placeholder="请选择库区"
           />
           <WmWarehouseAreaSelect
             v-model="formData.bizId"
-            :warehouse-id="areaWarehouseId"
+            :location-id="areaLocationId"
             @change="handleBizSelect"
             class="!w-1/1"
-            placeholder="请选择库区"
+            placeholder="请选择库位"
           />
         </div>
       </el-form-item>

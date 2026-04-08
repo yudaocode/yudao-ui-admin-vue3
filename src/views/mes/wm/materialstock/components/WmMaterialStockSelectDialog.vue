@@ -6,7 +6,7 @@
     itemId         — 按物料 ID 过滤库存（可选）
     batchId        — 按批次 ID 过滤库存（可选）
     warehouseId    — 按仓库 ID 过滤库存（可选）
-    excludeVirtual — 是否排除虚拟线边仓库存（默认 true）
+    virtualFilter  — 虚拟线边仓过滤模式：'exclude' 排除虚拟仓（默认），'only' 只看虚拟仓，'all' 不过滤
   Events:
     selected(rows: WmMaterialStockVO[]) — 确认选择后触发，单选时数组长度为 1
   Expose:
@@ -159,6 +159,7 @@ import MdVendorSelect from '@/views/mes/md/vendor/components/MdVendorSelect.vue'
 import WmWarehouseSelect from '@/views/mes/wm/warehouse/components/WmWarehouseSelect.vue'
 import WmWarehouseLocationSelect from '@/views/mes/wm/warehouse/components/WmWarehouseLocationSelect.vue'
 import WmWarehouseAreaSelect from '@/views/mes/wm/warehouse/components/WmWarehouseAreaSelect.vue'
+import { MesWmWarehouseConstants } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'WmMaterialStockSelectDialog' })
 
@@ -168,11 +169,11 @@ const props = withDefaults(
     itemId?: number // 按物料 ID 过滤
     batchId?: number // 按批次 ID 过滤
     warehouseId?: number // 按仓库 ID 过滤
-    excludeVirtual?: boolean // 是否排除虚拟线边仓库存（默认 true）
+    virtualFilter?: 'exclude' | 'only' | 'all' // 虚拟仓过滤：'exclude' 排除（默认），'only' 只看，'all' 不过滤
   }>(),
   {
     multiple: true,
-    excludeVirtual: true
+    virtualFilter: 'exclude'
   }
 )
 
@@ -265,10 +266,16 @@ const getList = async () => {
   loading.value = true
   try {
     const data = await WmMaterialStockApi.getMaterialStockPage(queryParams)
-    // 前端过滤虚拟线边仓（非虚拟仓查询时排除 warehouseCode 含 WIP_VIRTUAL 的记录）
-    if (props.excludeVirtual) {
+    // 前端过滤虚拟线边仓
+    if (props.virtualFilter === 'only') {
+      // 只看虚拟仓：正向限定
+      list.value = data.list.filter((row: WmMaterialStockVO) =>
+        row.warehouseCode?.includes(MesWmWarehouseConstants.WIP_VIRTUAL)
+      )
+    } else if (props.virtualFilter === 'exclude') {
+      // 排除虚拟仓
       list.value = data.list.filter(
-        (row: WmMaterialStockVO) => !row.warehouseCode?.includes('WIP_VIRTUAL')
+        (row: WmMaterialStockVO) => !row.warehouseCode?.includes(MesWmWarehouseConstants.WIP_VIRTUAL)
       )
     } else {
       list.value = data.list
@@ -380,15 +387,21 @@ defineExpose({ open })
 /** 拼装 el-alert 提示文字 */
 const alertTitle = computed(() => {
   const parts: string[] = []
-  if (props.batchId != null) parts.push('批次')
-  if (props.warehouseId != null) parts.push('仓库')
-  if (props.excludeVirtual) parts.push('排除虚拟仓')
+  if (props.batchId != null) {
+    parts.push('批次')
+  }
+  if (props.warehouseId != null) {
+    parts.push('仓库')
+  }
+  if (props.virtualFilter === 'only') {
+    parts.push('只看虚拟仓')
+  }
   return `已按${parts.join('/')}预过滤`
 })
 
 /** 是否显示 alert 提示 */
 const showAlert = computed(() => {
-  return props.batchId != null || props.warehouseId != null
+  return props.batchId != null || props.warehouseId != null || props.virtualFilter === 'only'
 })
 </script>
 

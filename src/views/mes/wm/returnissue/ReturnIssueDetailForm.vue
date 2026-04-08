@@ -19,6 +19,7 @@
             <WmMaterialStockSelect
               v-model="formData.materialStockId"
               :item-id="formData.itemId"
+              virtual-filter="only"
               @change="handleStockChange"
             />
           </el-form-item>

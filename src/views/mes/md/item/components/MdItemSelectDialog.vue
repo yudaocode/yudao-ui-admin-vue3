@@ -289,7 +289,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.itemTypeId = undefined
-  queryParams.status = 0
+  queryParams.status = CommonStatusEnum.ENABLE
   queryParams.pageNo = 1
   // 重置分类树（清高亮 + 清搜索词）
   typeTreeRef.value?.reset()

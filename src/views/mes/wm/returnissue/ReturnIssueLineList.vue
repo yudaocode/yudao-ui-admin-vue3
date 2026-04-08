@@ -88,6 +88,7 @@
               v-model="formData.materialStockId"
               placeholder="请选择库存"
               class="!w-1/1"
+              virtual-filter="only"
               @change="handleStockChange"
             />
           </el-form-item>

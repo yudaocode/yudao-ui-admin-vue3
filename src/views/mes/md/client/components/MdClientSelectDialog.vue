@@ -40,6 +40,15 @@
             class="!w-220px"
           />
         </el-form-item>
+        <el-form-item label="英文名称">
+          <el-input
+            v-model="queryParams.englishName"
+            placeholder="请输入客户英文名称"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-220px"
+          />
+        </el-form-item>
         <el-form-item>
           <el-button @click="handleQuery">
             <Icon icon="ep:search" class="mr-5px" /> 搜索
@@ -93,6 +102,7 @@
         </el-table-column>
         <el-table-column label="联系人" align="center" prop="contact1Name" width="100" />
         <el-table-column label="联系电话" align="center" prop="telephone" width="130" />
+        <el-table-column label="联系人-电话" align="center" prop="contact1Telephone" width="130" />
         <el-table-column label="状态" align="center" prop="status" width="80">
           <template #default="scope">
             <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -185,6 +195,7 @@ const queryParams = reactive({
   code: undefined as string | undefined, // 客户编码
   name: undefined as string | undefined, // 客户名称
   nickname: undefined as string | undefined, // 客户简称
+  englishName: undefined as string | undefined, // 客户英文名称
   status: CommonStatusEnum.ENABLE as number | undefined // 状态：默认只查启用
 })
 
@@ -237,6 +248,7 @@ const resetQuery = () => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.nickname = undefined
+  queryParams.englishName = undefined
   queryParams.status = CommonStatusEnum.ENABLE
   handleQuery()
 }
@@ -268,6 +280,7 @@ const open = async (selectedIds?: number[]) => {
   queryParams.code = undefined
   queryParams.name = undefined
   queryParams.nickname = undefined
+  queryParams.englishName = undefined
   queryParams.status = CommonStatusEnum.ENABLE
   queryParams.pageNo = 1
   // 清空上一次的选中状态

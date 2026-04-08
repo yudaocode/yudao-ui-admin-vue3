@@ -396,6 +396,12 @@ export const MesWmSalesNoticeStatusEnum = {
   APPROVED: MesOrderStatusConstants.APPROVED
 }
 
+/** MES 仓库常量 */
+export const MesWmWarehouseConstants = {
+  /** 虚拟线边仓编码关键字（对应后端 MesWmWarehouseDO.WIP_VIRTUAL_WAREHOUSE） */
+  WIP_VIRTUAL: 'WIP_VIRTUAL'
+} as const
+
 /** MES 装箱单状态枚举 */
 export const MesWmPackageStatusEnum = {
   PREPARE: MesOrderStatusConstants.DRAFT,

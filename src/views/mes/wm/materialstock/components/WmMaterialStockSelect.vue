@@ -7,7 +7,7 @@
     itemId         — 按物料 ID 过滤库存（可选，透传给弹窗）
     batchId        — 按批次 ID 过滤库存（可选，透传给弹窗）
     warehouseId    — 按仓库 ID 过滤库存（可选，透传给弹窗）
-    excludeVirtual — 是否排除虚拟线边仓库存（默认 true）
+    virtualFilter  — 虚拟线边仓过滤模式：'exclude' 排除虚拟仓（默认），'only' 只看虚拟仓，'all' 不过滤
     disabled       — 是否禁用
     clearable      — 是否允许清空（鼠标悬停时显示清除图标）
     placeholder    — 占位文字
@@ -52,7 +52,7 @@
     :item-id="itemId"
     :batch-id="batchId"
     :warehouse-id="warehouseId"
-    :exclude-virtual="excludeVirtual"
+    :virtual-filter="virtualFilter"
     @selected="handleSelected"
   />
 </template>
@@ -74,13 +74,13 @@ const props = withDefaults(
     itemId?: number // 按物料 ID 过滤
     batchId?: number // 按批次 ID 过滤
     warehouseId?: number // 按仓库 ID 过滤
-    excludeVirtual?: boolean // 是否排除虚拟线边仓库存（默认 true）
+    virtualFilter?: 'exclude' | 'only' | 'all' // 虚拟仓过滤：'exclude' 排除（默认），'only' 只看，'all' 不过滤
     disabled?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字
   }>(),
   {
-    excludeVirtual: true,
+    virtualFilter: 'exclude',
     disabled: false,
     clearable: true,
     placeholder: '请选择库存'

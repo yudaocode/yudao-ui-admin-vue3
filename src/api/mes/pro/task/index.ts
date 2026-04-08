@@ -33,6 +33,7 @@ export interface ProTaskVO {
   finishDate: Date // 完成日期
   cancelDate: Date // 取消日期
   status: number // 任务状态
+  checkFlag: boolean // 是否质检（派生自工艺路线工序）
   remark: string // 备注
 }
 

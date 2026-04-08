@@ -109,6 +109,11 @@
         <el-table-column label="工作站编码" align="center" prop="workstationCode" width="140" />
         <el-table-column label="工作站名称" align="center" prop="workstationName" width="140" />
         <el-table-column label="工序" align="center" prop="processName" width="120" />
+        <el-table-column label="是否质检" align="center" prop="checkFlag" width="100">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.checkFlag" />
+          </template>
+        </el-table-column>
         <el-table-column label="物料编码" align="center" prop="itemCode" width="140" />
         <el-table-column label="物料名称" align="center" prop="itemName" width="140" />
         <el-table-column label="规格型号" align="center" prop="itemSpec" width="120" />
