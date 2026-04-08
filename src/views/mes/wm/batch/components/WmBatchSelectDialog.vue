@@ -1,4 +1,3 @@
-<script setup lang="ts"></script>
 <!--
   MES 批次弹窗选择器（支持单选/多选）
 
