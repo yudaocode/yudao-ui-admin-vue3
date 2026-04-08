@@ -110,10 +110,10 @@
     <!-- 编辑/查看时显示子资源 Tab -->
     <el-tabs v-if="formType === 'update' || isDetail" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="班次" name="shift">
-        <CalShiftList :plan-id="formData.id!" :readonly="isDetail" />
+        <CalShiftList :plan-id="formData.id!" :form-type="formType" />
       </el-tab-pane>
       <el-tab-pane label="班组" name="team">
-        <CalPlanTeamList :plan-id="formData.id!" :readonly="isDetail" />
+        <CalPlanTeamList :plan-id="formData.id!" :form-type="formType" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
