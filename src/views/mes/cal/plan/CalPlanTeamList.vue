@@ -79,14 +79,7 @@
         v-loading="formLoading"
       >
         <el-form-item label="班组" prop="teamId">
-          <el-select v-model="formData.teamId" placeholder="请选择班组" class="!w-1/1">
-            <el-option
-              v-for="team in teamList"
-              :key="team.id"
-              :label="team.name"
-              :value="team.id"
-            />
-          </el-select>
+          <CalTeamSelect v-model="formData.teamId" class="!w-1/1" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
@@ -102,8 +95,8 @@
 
 <script setup lang="ts">
 import { CalPlanTeamApi, CalPlanTeamVO } from '@/api/mes/cal/plan/team'
-import { CalTeamApi, CalTeamVO } from '@/api/mes/cal/team'
 import { CalTeamMemberApi, CalTeamMemberVO } from '@/api/mes/cal/team/member'
+import CalTeamSelect from '@/views/mes/cal/team/components/CalTeamSelect.vue'
 
 defineOptions({ name: 'CalPlanTeamList' })
 
@@ -117,7 +110,6 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表的加载中
 const list = ref<CalPlanTeamVO[]>([]) // 列表的数据
-const teamList = ref<CalTeamVO[]>([]) // 班组下拉列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -173,8 +165,6 @@ const openForm = async (type: string) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   resetForm()
-  // 加载班组下拉列表
-  teamList.value = await CalTeamApi.getTeamList()
 }
 
 /** 提交表单 */
