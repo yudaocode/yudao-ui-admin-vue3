@@ -2,8 +2,11 @@
   MES 库存弹窗选择器（支持单选/多选）
 
   Props:
-    multiple — true 多选（checkbox），false 单选（radio）；默认 true
-    itemId   — 按物料 ID 过滤库存（可选）
+    multiple       — true 多选（checkbox），false 单选（radio）；默认 true
+    itemId         — 按物料 ID 过滤库存（可选）
+    batchId        — 按批次 ID 过滤库存（可选）
+    warehouseId    — 按仓库 ID 过滤库存（可选）
+    excludeVirtual — 是否排除虚拟线边仓库存（默认 true）
   Events:
     selected(rows: WmMaterialStockVO[]) — 确认选择后触发，单选时数组长度为 1
   Expose:
@@ -20,8 +23,16 @@
       </el-col>
       <!-- 右侧：搜索 + 表格 -->
       <el-col :span="20" :xs="24">
-        <!-- 搜索 -->
+        <!-- 预过滤提示 -->
         <ContentWrap>
+          <el-alert
+            v-if="showAlert"
+            :title="alertTitle"
+            type="info"
+            :closable="false"
+            show-icon
+            class="!mb-10px"
+          />
           <el-form :inline="true" :model="queryParams" label-width="68px">
             <el-form-item label="物料">
               <MdItemSelect v-model="queryParams.itemId" class="!w-220px" />
@@ -155,9 +166,13 @@ const props = withDefaults(
   defineProps<{
     multiple?: boolean // true 多选（checkbox），false 单选（radio）
     itemId?: number // 按物料 ID 过滤
+    batchId?: number // 按批次 ID 过滤
+    warehouseId?: number // 按仓库 ID 过滤
+    excludeVirtual?: boolean // 是否排除虚拟线边仓库存（默认 true）
   }>(),
   {
-    multiple: true
+    multiple: true,
+    excludeVirtual: true
   }
 )
 
@@ -227,6 +242,7 @@ const queryParams = reactive({
   itemId: undefined as number | undefined, // 物料编号
   vendorId: undefined as number | undefined, // 供应商编号
   batchCode: undefined as string | undefined, // 批次号
+  batchId: undefined as number | undefined, // 批次 ID
   warehouseId: undefined as number | undefined, // 仓库编号
   locationId: undefined as number | undefined, // 库区编号
   areaId: undefined as number | undefined, // 库位编号
@@ -249,7 +265,14 @@ const getList = async () => {
   loading.value = true
   try {
     const data = await WmMaterialStockApi.getMaterialStockPage(queryParams)
-    list.value = data.list
+    // 前端过滤虚拟线边仓（非虚拟仓查询时排除 warehouseCode 含 WIP_VIRTUAL 的记录）
+    if (props.excludeVirtual) {
+      list.value = data.list.filter(
+        (row: WmMaterialStockVO) => !row.warehouseCode?.includes('WIP_VIRTUAL')
+      )
+    } else {
+      list.value = data.list
+    }
     total.value = data.total
     await nextTick()
     applyPreSelection()
@@ -294,7 +317,8 @@ const resetQuery = () => {
   queryParams.itemId = props.itemId // 保持 props 传入的物料过滤
   queryParams.vendorId = undefined
   queryParams.batchCode = undefined
-  queryParams.warehouseId = undefined
+  queryParams.batchId = props.batchId // 保持 props 传入的批次过滤
+  queryParams.warehouseId = props.warehouseId // 保持 props 传入的仓库过滤
   queryParams.locationId = undefined
   queryParams.areaId = undefined
   typeTreeRef.value?.reset()
@@ -328,12 +352,13 @@ const open = async (selectedIds?: number[]) => {
   queryParams.itemTypeId = undefined
   queryParams.vendorId = undefined
   queryParams.batchCode = undefined
-  queryParams.warehouseId = undefined
   queryParams.locationId = undefined
   queryParams.areaId = undefined
   queryParams.pageNo = 1
-  // 固定 itemId 过滤条件（从 props 传入）
+  // 固定过滤条件（从 props 传入）
   queryParams.itemId = props.itemId
+  queryParams.batchId = props.batchId
+  queryParams.warehouseId = props.warehouseId
   // 默认只查未冻结
   queryParams.frozen = false
   // 重置分类树（清高亮 + 清搜索词）
@@ -349,6 +374,22 @@ const open = async (selectedIds?: number[]) => {
   await getList()
 }
 defineExpose({ open })
+
+// ==================== 预过滤提示 ====================
+
+/** 拼装 el-alert 提示文字 */
+const alertTitle = computed(() => {
+  const parts: string[] = []
+  if (props.batchId != null) parts.push('批次')
+  if (props.warehouseId != null) parts.push('仓库')
+  if (props.excludeVirtual) parts.push('排除虚拟仓')
+  return `已按${parts.join('/')}预过滤`
+})
+
+/** 是否显示 alert 提示 */
+const showAlert = computed(() => {
+  return props.batchId != null || props.warehouseId != null
+})
 </script>
 
 <style lang="scss" scoped>

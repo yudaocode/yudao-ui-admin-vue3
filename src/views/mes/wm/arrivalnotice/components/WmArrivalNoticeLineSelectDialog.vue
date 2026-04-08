@@ -1,9 +1,6 @@
 <!--
   MES 到货通知单行弹窗选择器（单选模式）
 
-  对齐 KTG noticeSelect/lineSingle.vue：
-    展示字段：物料编码、物料名称、规格型号、单位、到货数量、是否检验、合格数量、检验单号、备注
-
   Props:
     noticeId — 到货通知单编号（必传，按此筛选行数据）
   Events:

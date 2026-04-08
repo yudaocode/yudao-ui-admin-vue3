@@ -92,6 +92,7 @@
         :return-id="formData.id"
         :form-type="formType"
         :client-id="formData.clientId"
+        :sales-order-code="formData.salesOrderCode"
       />
     </template>
     <template #footer>

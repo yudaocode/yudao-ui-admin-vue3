@@ -3,10 +3,13 @@
 
   交互：显示为只读 el-input，点击打开弹窗（单选模式）进行选择
   Props:
-    modelValue  — 绑定的批次 ID（v-model）
-    itemId      — 默认过滤的物料 ID（打开弹窗时预设物料过滤条件）
-    disabled    — 是否禁用
-    clearable   — 是否允许清空（鼠标悬停时显示清除图标）
+    modelValue      — 绑定的批次 ID（v-model）
+    itemId          — 默认过滤的物料 ID（打开弹窗时预设物料过滤条件）
+    clientId        — 默认过滤的客户 ID
+    vendorId        — 默认过滤的供应商 ID
+    salesOrderCode  — 默认过滤的销售订单编号
+    disabled        — 是否禁用
+    clearable       — 是否允许清空（鼠标悬停时显示清除图标）
     placeholder — 占位文字
   Events:
     update:modelValue — v-model 更新
@@ -61,6 +64,7 @@ const props = withDefaults(
     itemId?: number // 默认过滤的物料 ID
     clientId?: number // 默认过滤的客户 ID
     vendorId?: number // 默认过滤的供应商 ID
+    salesOrderCode?: string // 默认过滤的销售订单编号
     disabled?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字
@@ -141,7 +145,7 @@ const handleClick = (e: MouseEvent) => {
   }
   // 打开弹窗，传入当前选中 ID 用于预选高亮，传入 itemId 用于默认过滤
   const selectedIds = props.modelValue != null ? [props.modelValue] : []
-  dialogRef.value.open(selectedIds, props.itemId, props.clientId, props.vendorId)
+  dialogRef.value.open(selectedIds, props.itemId, props.clientId, props.vendorId, props.salesOrderCode)
 }
 
 /** 弹窗选中回调 */

@@ -20,6 +20,7 @@
             <WmMaterialStockSelect
               v-model="formData.materialStockId"
               :item-id="formData.itemId"
+              :batch-id="formData.batchId"
               @change="handleStockChange"
             />
           </el-form-item>

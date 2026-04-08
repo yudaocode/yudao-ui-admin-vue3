@@ -1,8 +1,6 @@
 <!--
   MES 生产任务弹窗选择器（支持单选/多选）
 
-  搜索字段、展示字段对齐 KTG TaskSelect
-
   Props:
     multiple — true 多选（checkbox），false 单选（radio）；默认 true
   Events:

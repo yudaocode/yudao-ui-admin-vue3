@@ -12,6 +12,7 @@ export interface WmMaterialStockVO {
   batchId: number
   batchCode: string
   warehouseId: number
+  warehouseCode: string
   warehouseName: string
   locationId: number
   locationName: string

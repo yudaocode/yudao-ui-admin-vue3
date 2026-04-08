@@ -13,7 +13,7 @@
   <Dialog title="批次选择" v-model="dialogVisible" width="75%">
     <ContentWrap>
       <el-alert
-        v-if="externalClientId != null || externalVendorId != null"
+        v-if="showAlert"
         :title="alertTitle"
         type="info"
         :closable="false"
@@ -402,7 +402,7 @@ const resetQuery = () => {
   queryParams.workstationId = undefined
   queryParams.toolId = undefined
   queryParams.moldId = undefined
-  queryParams.salesOrderCode = undefined
+  queryParams.salesOrderCode = externalSalesOrderCode.value
   queryParams.purchaseOrderCode = undefined
   queryParams.lotNumber = undefined
   queryParams.qualityStatus = undefined
@@ -432,13 +432,30 @@ const confirmSelect = () => {
 
 const externalClientId = ref<number | undefined>() // 记录外部传入的 clientId
 const externalVendorId = ref<number | undefined>() // 记录外部传入的 vendorId
+const externalSalesOrderCode = ref<string | undefined>() // 记录外部传入的 salesOrderCode
 
 /** 拼装 el-alert 提示文字 */
 const alertTitle = computed(() => {
   const parts: string[] = []
-  if (externalClientId.value != null) parts.push('客户')
-  if (externalVendorId.value != null) parts.push('供应商')
+  if (externalClientId.value != null) {
+    parts.push('客户')
+  }
+  if (externalVendorId.value != null) {
+    parts.push('供应商')
+  }
+  if (externalSalesOrderCode.value != null) {
+    parts.push('销售订单')
+  }
   return `已按${parts.join('/')}预过滤`
+})
+
+/** 是否显示 alert 提示 */
+const showAlert = computed(() => {
+  return (
+    externalClientId.value != null ||
+    externalVendorId.value != null ||
+    externalSalesOrderCode.value != null
+  )
 })
 
 /**
@@ -447,16 +464,19 @@ const alertTitle = computed(() => {
  * @param itemId 默认过滤的物料 ID
  * @param clientId 默认过滤的客户 ID
  * @param vendorId 默认过滤的供应商 ID
+ * @param salesOrderCode 默认过滤的销售订单编号
  */
 const open = async (
   selectedIds?: number[],
   itemId?: number,
   clientId?: number,
-  vendorId?: number
+  vendorId?: number,
+  salesOrderCode?: string
 ) => {
   dialogVisible.value = true
   externalClientId.value = clientId
   externalVendorId.value = vendorId
+  externalSalesOrderCode.value = salesOrderCode
   // 重置查询条件 + 页码
   queryParams.code = undefined
   queryParams.itemId = itemId ?? undefined
@@ -467,7 +487,7 @@ const open = async (
   queryParams.workstationId = undefined
   queryParams.toolId = undefined
   queryParams.moldId = undefined
-  queryParams.salesOrderCode = undefined
+  queryParams.salesOrderCode = salesOrderCode ?? undefined
   queryParams.purchaseOrderCode = undefined
   queryParams.lotNumber = undefined
   queryParams.qualityStatus = undefined

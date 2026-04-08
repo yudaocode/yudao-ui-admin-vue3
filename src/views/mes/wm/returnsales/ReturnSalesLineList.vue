@@ -104,6 +104,7 @@
               v-model="formData.batchId"
               :item-id="formData.itemId"
               :client-id="props.clientId"
+              :sales-order-code="props.salesOrderCode"
               placeholder="请选择批次"
               class="!w-1/1"
             />
@@ -151,6 +152,7 @@ const props = defineProps<{
   returnId: number
   formType: string
   clientId?: number // 客户 ID，用于透传给批次选择器过滤
+  salesOrderCode?: string // 销售订单编号，用于透传给批次选择器过滤
 }>()
 
 const { t } = useI18n() // 国际化

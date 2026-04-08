@@ -3,11 +3,14 @@
 
   交互：显示为只读 el-input，点击打开弹窗（单选模式）进行选择
   Props:
-    modelValue  — 绑定的库存 ID（v-model）
-    itemId      — 按物料 ID 过滤库存（可选，透传给弹窗）
-    disabled    — 是否禁用
-    clearable   — 是否允许清空（鼠标悬停时显示清除图标）
-    placeholder — 占位文字
+    modelValue     — 绑定的库存 ID（v-model）
+    itemId         — 按物料 ID 过滤库存（可选，透传给弹窗）
+    batchId        — 按批次 ID 过滤库存（可选，透传给弹窗）
+    warehouseId    — 按仓库 ID 过滤库存（可选，透传给弹窗）
+    excludeVirtual — 是否排除虚拟线边仓库存（默认 true）
+    disabled       — 是否禁用
+    clearable      — 是否允许清空（鼠标悬停时显示清除图标）
+    placeholder    — 占位文字
   Events:
     update:modelValue — v-model 更新
     change(item)      — 选中库存变化时触发，传递完整 WmMaterialStockVO（清空时为 undefined）
@@ -47,6 +50,9 @@
     ref="dialogRef"
     :multiple="false"
     :item-id="itemId"
+    :batch-id="batchId"
+    :warehouse-id="warehouseId"
+    :exclude-virtual="excludeVirtual"
     @selected="handleSelected"
   />
 </template>
@@ -66,11 +72,15 @@ const props = withDefaults(
   defineProps<{
     modelValue?: number // 绑定的库存 ID
     itemId?: number // 按物料 ID 过滤
+    batchId?: number // 按批次 ID 过滤
+    warehouseId?: number // 按仓库 ID 过滤
+    excludeVirtual?: boolean // 是否排除虚拟线边仓库存（默认 true）
     disabled?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字
   }>(),
   {
+    excludeVirtual: true,
     disabled: false,
     clearable: true,
     placeholder: '请选择库存'
