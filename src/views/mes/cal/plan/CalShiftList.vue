@@ -3,7 +3,7 @@
   <div>
     <!-- 操作栏 -->
     <el-button
-      v-if="!readonly"
+      v-if="!isDetail"
       type="primary"
       plain
       size="small"
@@ -19,7 +19,7 @@
       <el-table-column label="开始时间" align="center" prop="startTime" width="100" />
       <el-table-column label="结束时间" align="center" prop="endTime" width="100" />
       <el-table-column label="备注" align="center" prop="remark" min-width="150" />
-      <el-table-column v-if="!readonly" label="操作" align="center" width="120">
+      <el-table-column v-if="!isDetail" label="操作" align="center" width="120">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('update', scope.row)">编辑</el-button>
           <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
@@ -84,8 +84,10 @@ defineOptions({ name: 'CalShiftList' })
 
 const props = defineProps<{
   planId: number // 排班计划编号
-  readonly?: boolean // 是否只读模式 TODO @AI：【听我的】，参考别的模块，基于 formType 做判断；你参考下；
+  formType: string // 表单的类型：create / update / detail
 }>()
+
+const isDetail = computed(() => props.formType === 'detail') // DONE @AI：【听我的】，参考别的模块，基于 formType 做判断；你参考下；
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

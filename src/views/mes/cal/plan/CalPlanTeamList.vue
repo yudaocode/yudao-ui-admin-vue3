@@ -3,11 +3,11 @@
   <div>
     <!-- 操作栏 -->
     <el-button
-      v-if="!readonly"
+      v-if="!isDetail"
       type="primary"
       plain
       size="small"
-      @click="openForm('create')"
+      @click="openTeamSelect"
       class="mb-10px"
     >
       <Icon icon="ep:plus" class="mr-5px" /> 添加班组
@@ -28,7 +28,7 @@
           <el-table-column label="班组编码" align="center" prop="teamCode" min-width="100" />
           <el-table-column label="班组名称" align="center" prop="teamName" min-width="100" />
           <el-table-column label="备注" align="center" prop="remark" min-width="120" />
-          <el-table-column v-if="!readonly" label="操作" align="center" width="80">
+          <el-table-column v-if="!isDetail" label="操作" align="center" width="80">
             <template #default="scope">
               <el-button link type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
             </template>
@@ -69,41 +69,25 @@
       </el-col>
     </el-row>
 
-    <!-- 表单弹窗：添加/修改 -->
-    <Dialog :title="dialogTitle" v-model="dialogVisible" width="500px">
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="formRules"
-        label-width="80px"
-        v-loading="formLoading"
-      >
-        <el-form-item label="班组" prop="teamId">
-          <CalTeamSelect v-model="formData.teamId" class="!w-1/1" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-        <el-button @click="dialogVisible = false">取 消</el-button>
-      </template>
-    </Dialog>
+    <!-- 班组多选弹窗 -->
+    <CalTeamSelectDialog ref="teamDialogRef" :multiple="true" @selected="handleTeamsSelected" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { CalPlanTeamApi, CalPlanTeamVO } from '@/api/mes/cal/plan/team'
 import { CalTeamMemberApi, CalTeamMemberVO } from '@/api/mes/cal/team/member'
-import CalTeamSelect from '@/views/mes/cal/team/components/CalTeamSelect.vue'
+import { CalTeamVO } from '@/api/mes/cal/team'
+import CalTeamSelectDialog from '@/views/mes/cal/team/components/CalTeamSelectDialog.vue'
 
 defineOptions({ name: 'CalPlanTeamList' })
 
 const props = defineProps<{
   planId: number // 排班计划编号
-  readonly?: boolean // 是否只读模式 TODO @AI：【听我的】，参考别的模块，基于 formType 做判断；你参考下；
+  formType: string // 表单的类型：create / update / detail
 }>()
+
+const isDetail = computed(() => props.formType === 'detail') // DONE @AI：【听我的】，参考别的模块，基于 formType 做判断；你参考下；
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -145,57 +129,42 @@ const handleTeamSelect = async (row: CalPlanTeamVO | null) => {
   }
 }
 
-// ==================== 添加/修改 ====================
-const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中
-const formRef = ref() // 表单 Ref
-const formData = ref({
-  id: undefined as number | undefined,
-  planId: undefined as number | undefined,
-  teamId: undefined as number | undefined,
-  remark: undefined as string | undefined
-})
-const formRules = reactive({
-  teamId: [{ required: true, message: '班组不能为空', trigger: 'blur' }]
-})
+// ==================== 多选班组批量添加 ====================
+const teamDialogRef = ref()
 
-/** 打开表单弹窗 */
-const openForm = async (type: string) => {
-  dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
-  resetForm()
+/** 打开班组多选弹窗 */
+const openTeamSelect = () => {
+  // 传入已关联的班组 ID 列表，方便高亮已选
+  const existingTeamIds = list.value.map((item) => item.teamId)
+  teamDialogRef.value.open(existingTeamIds)
 }
 
-/** 提交表单 */
-const submitForm = async () => {
-  // 校验表单
-  if (!formRef) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
-  // 提交请求
-  formLoading.value = true
+/** 多选班组确认后，批量创建关联 */
+const handleTeamsSelected = async (rows: CalTeamVO[]) => {
+  if (!rows || rows.length === 0) {
+    return
+  }
+  // 过滤掉已经存在的班组
+  const existingTeamIds = new Set(list.value.map((item) => item.teamId))
+  const newTeams = rows.filter((team) => !existingTeamIds.has(team.id))
+  if (newTeams.length === 0) {
+    message.warning('所选班组已全部添加过')
+    return
+  }
+  // 逐个创建（后端为单条创建接口）
+  loading.value = true
   try {
-    const data = formData.value as unknown as CalPlanTeamVO
-    await CalPlanTeamApi.createPlanTeam(data)
-    message.success(t('common.createSuccess'))
-    dialogVisible.value = false
-    // 刷新列表
+    for (const team of newTeams) {
+      await CalPlanTeamApi.createPlanTeam({
+        planId: props.planId,
+        teamId: team.id
+      } as unknown as CalPlanTeamVO)
+    }
+    message.success(`成功添加 ${newTeams.length} 个班组`)
     await getList()
   } finally {
-    formLoading.value = false
+    loading.value = false
   }
-}
-
-/** 重置表单 */
-const resetForm = () => {
-  formData.value = {
-    id: undefined,
-    planId: props.planId,
-    teamId: undefined,
-    remark: undefined
-  }
-  formRef.value?.resetFields()
 }
 
 /** 删除按钮操作 */
