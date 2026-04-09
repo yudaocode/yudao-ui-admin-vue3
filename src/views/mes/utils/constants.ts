@@ -441,6 +441,7 @@ export const MesAutoCodePaddedMethodEnum = {
 
 /** MES 自动编码规则 Code 枚举 */
 export const MesAutoCodeRuleCode = {
+  MD_ITEM_TYPE_CODE: 'MD_ITEM_TYPE_CODE', // 物料分类编码
   MD_ITEM_CODE: 'MD_ITEM_CODE', // 物料编码
   MD_VENDOR_CODE: 'MD_VENDOR_CODE', // 供应商编码
   MD_CLIENT_CODE: 'MD_CLIENT_CODE', // 客户编码

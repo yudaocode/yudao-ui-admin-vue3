@@ -10,6 +10,7 @@
         </template>
       </el-table-column>
       <el-table-column label="出库单名称" align="center" prop="name" min-width="150" />
+      <el-table-column label="销售订单编号" align="center" prop="salesOrderCode" min-width="120" />
       <el-table-column
         label="出库日期"
         align="center"

@@ -20,7 +20,11 @@
         />
       </el-form-item>
       <el-form-item label="分类编码" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入分类编码" />
+        <el-input v-model="formData.code" placeholder="请输入分类编码">
+          <template #append>
+            <el-button @click="handleGenerateCode">自动生成</el-button>
+          </template>
+        </el-input>
       </el-form-item>
       <el-form-item label="分类名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入分类名称" />
@@ -58,9 +62,10 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { CommonStatusEnum } from '@/utils/constants'
-import { MesItemOrProductEnum } from '@/views/mes/utils/constants'
+import { MesItemOrProductEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'MdItemTypeForm' })
 
@@ -161,5 +166,16 @@ const getItemTypeTree = async () => {
   const root: Tree = { id: 0, name: '顶级分类', children: [] }
   root.children = handleTree(data)
   itemTypeTree.value.push(root)
+}
+
+/** 自动生成分类编码 */
+const handleGenerateCode = async () => {
+  try {
+    formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+      MesAutoCodeRuleCode.MD_ITEM_TYPE_CODE
+    )
+  } catch (e) {
+    console.error(e)
+  }
 }
 </script>
