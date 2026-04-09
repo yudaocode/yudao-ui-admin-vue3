@@ -21,7 +21,7 @@
             @change="handleQuery"
           >
             <el-option
-              v-for="dict in getStrDictOptions(DICT_TYPE.MES_INDICATOR_TYPE)"
+              v-for="dict in getIntDictOptions(DICT_TYPE.MES_INDICATOR_TYPE)"
               :key="dict.value"
               :label="dict.label"
               :value="dict.value"
@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { QcIndicatorApi, QcIndicatorVO } from '@/api/mes/qc/indicator'
 
 defineOptions({ name: 'QcIndicatorSelectDialog' })
@@ -173,7 +173,7 @@ const queryParams = reactive({
   pageNo: 1, // 页码
   pageSize: 10, // 每页条数
   name: undefined as string | undefined, // 检测项名称
-  type: undefined as string | undefined // 检测项类型
+  type: undefined as number | undefined // 检测项类型
 })
 
 /** 查询指标列表 */

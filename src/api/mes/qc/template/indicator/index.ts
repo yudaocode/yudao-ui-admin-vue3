@@ -15,7 +15,7 @@ export interface QcTemplateIndicatorVO {
   // JOIN mes_qc_indicator
   indicatorCode: string // 检测项编码
   indicatorName: string // 检测项名称
-  indicatorType: string // 检测项类型（字典 mes_index_type）
+  indicatorType: number // 检测项类型
   indicatorTool: string // 检测工具
   // JOIN mes_md_unit_measure
   unitMeasureName: string // 计量单位名称
