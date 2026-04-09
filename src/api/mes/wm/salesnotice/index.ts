@@ -53,5 +53,5 @@ export const WmSalesNoticeApi = {
   // 导出发货通知单 Excel
   exportSalesNotice: async (params: any) => {
     return await request.download({ url: '/mes/wm/sales-notice/export-excel', params })
-  },
+  }
 }

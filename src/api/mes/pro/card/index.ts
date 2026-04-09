@@ -63,5 +63,5 @@ export const ProCardApi = {
   // 取消生产流转卡
   cancelCard: async (id: number) => {
     return await request.put({ url: `/mes/pro/card/cancel?id=` + id })
-  },
+  }
 }

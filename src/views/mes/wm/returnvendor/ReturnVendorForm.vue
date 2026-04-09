@@ -50,7 +50,7 @@
             <el-date-picker
               v-model="formData.returnDate"
               type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
+              value-format="x"
               placeholder="选择退货日期"
               :disabled="isHeaderReadonly"
               class="!w-full"

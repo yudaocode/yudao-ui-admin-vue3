@@ -36,7 +36,7 @@
             <el-date-picker
               v-model="formData.requiredTime"
               type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
+              value-format="x"
               placeholder="选择需求时间"
               :disabled="isHeaderReadonly"
               class="!w-full"

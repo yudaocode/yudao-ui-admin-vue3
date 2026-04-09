@@ -125,7 +125,7 @@
             <el-date-picker
               v-model="formData.inspectDate"
               type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
+              value-format="x"
               placeholder="请选择检测日期"
               class="!w-1/1"
             />

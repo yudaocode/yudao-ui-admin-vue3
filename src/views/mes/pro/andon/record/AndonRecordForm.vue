@@ -69,7 +69,7 @@
             v-if="formType === 'update'"
             v-model="formData.handleTime"
             type="datetime"
-            value-format="YYYY-MM-DD HH:mm:ss"
+            value-format="x"
             placeholder="请选择处置时间"
             class="!w-full"
           />

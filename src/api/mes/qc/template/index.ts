@@ -17,7 +17,6 @@ export const QcTemplateApi = {
     return await request.get({ url: `/mes/qc/template/page`, params })
   },
 
-
   // 查询质检方案详情
   getTemplate: async (id: number) => {
     return await request.get({ url: `/mes/qc/template/get?id=` + id })
