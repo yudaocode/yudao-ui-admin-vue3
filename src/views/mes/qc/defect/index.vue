@@ -35,7 +35,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_DEFECT_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_DEFECT_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -140,7 +140,7 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { QcDefectApi, QcDefectVO } from '@/api/mes/qc/defect'
 import DefectForm from './DefectForm.vue'

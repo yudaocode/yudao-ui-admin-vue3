@@ -5,7 +5,7 @@ export interface QcDefectVO {
   id: number // 编号
   code: string // 缺陷编码
   name: string // 缺陷描述
-  type: string // 检测项类型
+  type: number // 检测项类型
   level: number // 缺陷等级
   remark: string // 备注
 }
