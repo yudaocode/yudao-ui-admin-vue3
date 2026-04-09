@@ -7,6 +7,7 @@ export interface WmSnGroupVO {
   itemCode?: string
   itemName?: string
   specification?: string
+  unitName?: string
   batchCode?: string
   workOrderId?: number
   createTime?: Date
