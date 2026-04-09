@@ -5,12 +5,18 @@
     <el-table-column label="物料名称" align="center" prop="itemName" min-width="150" />
     <el-table-column label="规格型号" align="center" prop="itemSpec" width="120" />
     <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
+    <el-table-column label="物料/产品" align="center" prop="itemOrProduct" width="100">
+      <template #default="scope">
+        <dict-tag :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT" :value="scope.row.itemOrProduct" />
+      </template>
+    </el-table-column>
     <el-table-column label="需求数量" align="center" prop="quantity" width="120" />
   </el-table>
 </template>
 
 <script setup lang="ts">
 import { ProWorkOrderBomApi } from '@/api/mes/pro/workorder/bom'
+import { DICT_TYPE } from '@/utils/dict'
 
 defineOptions({ name: 'WorkOrderItemList' })
 

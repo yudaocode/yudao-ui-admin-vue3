@@ -158,11 +158,11 @@
       </el-row>
     </el-form>
     <!-- 编辑/详情时显示关联数据 tab -->
-    <el-tabs v-if="formType !== 'create' && formData.id" v-model="activeTab" class="mt-10px">
+    <el-tabs v-if="formData.id" v-model="activeTab" class="mt-10px">
       <el-tab-pane label="物料清单" name="itemReceiptLine" lazy>
         <VendorItemReceiptLineList :vendorId="formData.id" />
       </el-tab-pane>
-      <el-tab-pane label="采购入库" name="itemReceipt" lazy>
+      <el-tab-pane label="采购记录" name="itemReceipt" lazy>
         <VendorItemReceiptList :vendorId="formData.id" />
       </el-tab-pane>
     </el-tabs>

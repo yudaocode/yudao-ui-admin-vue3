@@ -1,27 +1,20 @@
 <template>
   <div class="overflow-hidden">
-    <!-- 供应商详情-采购记录 tab（复用 getItemReceiptPage 分页接口） -->
+    <!-- 供应商详情-采购记录 tab -->
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="入库单编号" align="center" prop="code" min-width="160">
+      <el-table-column label="入库单编号" align="center" prop="receiptCode" min-width="160">
         <template #default="scope">
-          <el-button link type="primary" @click="handleDetail(scope.row.id)">
-            {{ scope.row.code }}
+          <el-button link type="primary" @click="handleDetail(scope.row.receiptId)">
+            {{ scope.row.receiptCode }}
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="入库单名称" align="center" prop="name" min-width="150" />
-      <el-table-column
-        label="入库日期"
-        align="center"
-        prop="receiptDate"
-        :formatter="dateFormatter2"
-        width="180px"
-      />
-      <el-table-column label="单据状态" align="center" prop="status" min-width="100">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MES_WM_ITEM_RECEIPT_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
+      <el-table-column label="采购订单号" align="center" prop="purchaseOrderCode" min-width="150" />
+      <el-table-column label="物料编码" align="center" prop="itemCode" width="140" />
+      <el-table-column label="物料名称" align="center" prop="itemName" min-width="150" />
+      <el-table-column label="规格型号" align="center" prop="specification" min-width="120" />
+      <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
+      <el-table-column label="入库数量" align="center" prop="receivedQuantity" width="100" />
     </el-table>
     <Pagination
       :total="total"
@@ -36,9 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE } from '@/utils/dict'
-import { WmItemReceiptApi } from '@/api/mes/wm/itemreceipt'
+import { WmItemReceiptLineApi } from '@/api/mes/wm/itemreceipt/line'
 import ItemReceiptForm from '@/views/mes/wm/itemreceipt/ItemReceiptForm.vue'
 
 defineOptions({ name: 'VendorItemReceiptList' })
@@ -61,7 +52,7 @@ const getList = async () => {
   if (!queryParams.vendorId) return
   loading.value = true
   try {
-    const data = await WmItemReceiptApi.getItemReceiptPage(queryParams)
+    const data = await WmItemReceiptLineApi.getItemReceiptLinePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -71,8 +62,8 @@ const getList = async () => {
 
 /** 查看详情 */
 const formRef = ref()
-const handleDetail = (id: number) => {
-  formRef.value.open('detail', id)
+const handleDetail = (receiptId: number) => {
+  formRef.value.open('detail', receiptId)
 }
 
 /** 监听 vendorId 变化，自动加载 */
