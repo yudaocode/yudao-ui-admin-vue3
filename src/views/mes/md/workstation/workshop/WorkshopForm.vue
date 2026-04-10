@@ -11,7 +11,11 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="车间编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入车间编码" />
+            <el-input v-model="formData.code" placeholder="请输入车间编码">
+              <template #append>
+                <el-button @click="generateCode"> 生成 </el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -85,6 +89,8 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
 import { CommonStatusEnum } from '@/utils/constants'
+import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'WorkshopForm' })
@@ -120,6 +126,13 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+
+/** 生成车间编码 */
+const generateCode = async () => {
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
+    MesAutoCodeRuleCode.MD_WORKSHOP_CODE
+  )
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
