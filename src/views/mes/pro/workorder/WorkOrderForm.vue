@@ -187,9 +187,14 @@
       <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
         完 成
       </el-button>
+      <el-button v-if="formType === 'detail' && formData.id" type="primary" plain @click="handleBarcode">
+        查看条码
+      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
+  <!-- 条码详情弹窗（详情模式下展示） -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -205,8 +210,10 @@ import {
   MesProWorkOrderSourceTypeEnum,
   MesProWorkOrderTypeEnum,
   MesProWorkOrderStatusEnum,
-  MesAutoCodeRuleCode
+  MesAutoCodeRuleCode,
+  BarcodeBizTypeEnum
 } from '@/views/mes/utils/constants'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'WorkOrderForm' })
 const emit = defineEmits(['success'])
@@ -262,7 +269,15 @@ const formRules = reactive({
   requestDate: [{ required: true, message: '需求日期不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const barcodeDetailRef = ref() // 条码详情弹窗 Ref
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
+
+/** 查看条码 */
+const handleBarcode = () => {
+  barcodeDetailRef.value?.openByBusiness(
+    formData.value.id!, BarcodeBizTypeEnum.WORKORDER, formData.value.code, formData.value.name
+  )
+}
 
 /** 生成工单编码 */
 const generateCode = async () => {

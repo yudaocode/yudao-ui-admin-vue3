@@ -78,20 +78,26 @@
       </el-row>
     </el-form>
     <template #footer>
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
-        >确 定</el-button
-      >
+      <el-button v-if="isDetail && formData.id" type="primary" plain @click="handleBarcode">
+        查看条码
+      </el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <!-- 条码详情弹窗（详情模式下展示） -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdWorkshopApi, MdWorkshopVO } from '@/api/mes/md/workstation/workshop'
 import { CommonStatusEnum } from '@/utils/constants'
-import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import * as UserApi from '@/api/system/user'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'WorkshopForm' })
 
@@ -126,6 +132,14 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const barcodeDetailRef = ref() // 条码详情弹窗 Ref
+
+/** 查看条码 */
+const handleBarcode = () => {
+  barcodeDetailRef.value?.openByBusiness(
+    formData.value.id!, BarcodeBizTypeEnum.WORKSHOP, formData.value.code, formData.value.name
+  )
+}
 
 /** 生成车间编码 */
 const generateCode = async () => {

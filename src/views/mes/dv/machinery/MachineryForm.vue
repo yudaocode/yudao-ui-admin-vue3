@@ -107,12 +107,17 @@
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
-        >确 定</el-button
-      >
+      <el-button v-if="isDetail && formData.id" type="primary" plain @click="handleBarcode">
+        查看条码
+      </el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <!-- 条码详情弹窗（详情模式下展示） -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
@@ -122,8 +127,9 @@ import DvMachineryTypeSelect from '@/views/mes/dv/machinery/type/components/DvMa
 import MachineryCheckRecordList from './MachineryCheckRecordList.vue'
 import MachineryMaintenRecordList from './MachineryMaintenRecordList.vue'
 import MachineryRepairList from './MachineryRepairList.vue'
-import { MesDvMachineryStatusEnum, MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { MesDvMachineryStatusEnum, MesAutoCodeRuleCode, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'MachineryForm' })
 
@@ -164,6 +170,14 @@ const formRules = reactive({
   status: [{ required: true, message: '设备状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const barcodeDetailRef = ref() // 条码详情弹窗 Ref
+
+/** 查看条码 */
+const handleBarcode = () => {
+  barcodeDetailRef.value?.openByBusiness(
+    formData.value.id!, BarcodeBizTypeEnum.MACHINERY, formData.value.code, formData.value.name
+  )
+}
 
 /** 生成设备编码 */
 const generateCode = async () => {

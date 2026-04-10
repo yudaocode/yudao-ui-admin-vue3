@@ -93,9 +93,14 @@
       <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
         完 成
       </el-button>
+      <el-button v-if="formType === 'detail' && formData.id" type="primary" plain @click="handleBarcode">
+        查看条码
+      </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
     </template>
   </Dialog>
+  <!-- 条码详情弹窗（详情模式下展示） -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -107,8 +112,10 @@ import CardProcessList from './CardProcessList.vue'
 import {
   MesProCardStatusEnum,
   MesProWorkOrderStatusEnum,
-  MesAutoCodeRuleCode
+  MesAutoCodeRuleCode,
+  BarcodeBizTypeEnum
 } from '@/views/mes/utils/constants'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'CardForm' })
 const emit = defineEmits(['success'])
@@ -147,7 +154,15 @@ const formRules = reactive({
   transferedQuantity: [{ required: true, message: '流转数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const barcodeDetailRef = ref() // 条码详情弹窗 Ref
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
+
+/** 查看条码 */
+const handleBarcode = () => {
+  barcodeDetailRef.value?.openByBusiness(
+    formData.value.id!, BarcodeBizTypeEnum.PROCARD, formData.value.code
+  )
+}
 
 /** 生成流转卡编码 */
 const generateCode = async () => {

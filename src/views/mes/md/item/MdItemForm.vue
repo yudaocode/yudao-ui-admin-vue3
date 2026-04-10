@@ -120,12 +120,17 @@
       </el-tab-pane>
     </el-tabs>
     <template #footer>
+      <el-button v-if="isDetail && formData.id" type="primary" plain @click="handleBarcode">
+        查看条码
+      </el-button>
       <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
       </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <!-- 条码详情弹窗（详情模式下展示） -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
@@ -138,7 +143,8 @@ import MdProductSipForm from './MdProductSipForm.vue'
 import MdUnitMeasureSelect from '@/views/mes/md/unitmeasure/components/MdUnitMeasureSelect.vue'
 import MdItemTypeSelect from '@/views/mes/md/item/type/components/MdItemTypeSelect.vue'
 import { CommonStatusEnum } from '@/utils/constants'
-import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
 /** MES 物料产品 表单 */
 defineOptions({ name: 'MdItemForm' })
@@ -183,6 +189,7 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const barcodeDetailRef = ref() // 条码详情弹窗 Ref
 const currentItemOrProduct = computed(() => formData.value.itemOrProduct || '') // 物料/产品的标签
 
 /** 生成物料编码 */
@@ -193,6 +200,16 @@ const generateCode = async () => {
 /** 分类变更时，同步更新 itemOrProduct */
 const handleItemTypeChange = (type: any) => {
   formData.value.itemOrProduct = type?.itemOrProduct
+}
+
+/** 查看条码 */
+const handleBarcode = () => {
+  barcodeDetailRef.value?.openByBusiness(
+    formData.value.id!,
+    BarcodeBizTypeEnum.ITEM,
+    formData.value.code,
+    formData.value.name
+  )
 }
 
 /** 打开弹窗 */

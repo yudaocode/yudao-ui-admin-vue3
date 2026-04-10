@@ -97,13 +97,17 @@
       </template>
     </el-form>
     <template #footer>
-      <!-- TODO @芋艿：barcodeimg -->
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
-        >确 定</el-button
-      >
+      <el-button v-if="isDetail && formData.id" type="primary" plain @click="handleBarcode">
+        查看条码
+      </el-button>
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>
+  <!-- 条码详情弹窗（详情模式下展示） -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -111,7 +115,8 @@ import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { CommonStatusEnum } from '@/utils/constants'
-import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'LocationForm' })
 
@@ -148,6 +153,14 @@ const formRules = reactive({
   frozen: [{ required: true, message: '是否冻结不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const barcodeDetailRef = ref() // 条码详情弹窗 Ref
+
+/** 查看条码 */
+const handleBarcode = () => {
+  barcodeDetailRef.value?.openByBusiness(
+    formData.value.id!, BarcodeBizTypeEnum.LOCATION, formData.value.code, formData.value.name
+  )
+}
 
 /** 生成库区编码 */
 const generateCode = async () => {

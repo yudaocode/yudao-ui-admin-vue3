@@ -154,13 +154,17 @@
       </el-row>
     </el-form>
     <template #footer>
-      <!-- TODO @芋艿：barcodeimg -->
+      <el-button v-if="isDetail && formData.id" type="primary" plain @click="handleBarcode">
+        查看条码
+      </el-button>
       <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
         确 定
       </el-button>
       <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>
+  <!-- 条码详情弹窗（详情模式下展示） -->
+  <BarcodeDetail ref="barcodeDetailRef" />
 </template>
 
 <script setup lang="ts">
@@ -170,7 +174,8 @@ import { WmWarehouseAreaApi, WmWarehouseAreaVO } from '@/api/mes/wm/warehouse/ar
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import { MesAutoCodeRuleCode } from '@/views/mes/utils/constants'
+import { MesAutoCodeRuleCode, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'AreaForm' })
 
@@ -224,6 +229,14 @@ const formRules = reactive({
   allowBatchMixing: [{ required: true, message: '批次混放开关不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const barcodeDetailRef = ref() // 条码详情弹窗 Ref
+
+/** 查看条码 */
+const handleBarcode = () => {
+  barcodeDetailRef.value?.openByBusiness(
+    formData.value.id!, BarcodeBizTypeEnum.AREA, formData.value.code, formData.value.name
+  )
+}
 
 /** 加载库区列表 */
 const loadLocationList = async (warehouseId?: number) => {
