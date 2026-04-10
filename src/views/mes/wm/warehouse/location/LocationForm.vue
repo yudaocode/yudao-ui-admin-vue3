@@ -114,7 +114,6 @@
 import { WmWarehouseApi, WmWarehouseVO } from '@/api/mes/wm/warehouse'
 import { WmWarehouseLocationApi, WmWarehouseLocationVO } from '@/api/mes/wm/warehouse/location'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
-import { CommonStatusEnum } from '@/utils/constants'
 import { MesAutoCodeRuleCode, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
@@ -142,7 +141,6 @@ const formData = ref({
   name: undefined,
   warehouseId: undefined as number | undefined,
   area: undefined,
-  areaStatus: CommonStatusEnum.ENABLE,
   frozen: false,
   remark: undefined
 })
@@ -224,7 +222,6 @@ const resetForm = () => {
     name: undefined,
     warehouseId: undefined as number | undefined,
     area: undefined,
-    areaStatus: CommonStatusEnum.ENABLE,
     frozen: false,
     remark: undefined
   }

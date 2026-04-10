@@ -8,7 +8,6 @@ export interface WmWarehouseLocationVO {
   warehouseId: number
   warehouseName: string
   area: number
-  areaStatus: number
   frozen: boolean
   remark: string
   createTime: string
