@@ -45,8 +45,13 @@
       <el-form-item label="自动生成" prop="autoGenerateFlag">
         <el-switch v-model="formData.autoGenerateFlag" />
       </el-form-item>
+      <!-- TODO @芋艿：后续对接 UReport 报表选择器，实现打印模板选择功能 -->
       <el-form-item label="默认打印模板" prop="defaultTemplate">
-        <el-input v-model="formData.defaultTemplate" placeholder="请输入默认打印模板" />
+        <el-input v-model="formData.defaultTemplate" placeholder="请选择打印模板" readonly class="!w-1/1">
+          <template #append>
+            <el-button @click="handleSelectTemplate">设置</el-button>
+          </template>
+        </el-input>
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -143,6 +148,12 @@ const submitForm = async () => {
   } finally {
     formLoading.value = false
   }
+}
+
+/** 选择打印模板 */
+// TODO @芋艿：后续对接 UReport 报表选择器（reportSelect），实现打印模板选择功能
+const handleSelectTemplate = () => {
+  ElMessage.warning('打印模板选择功能暂未实现，敬请期待')
 }
 
 /** 重置表单 */

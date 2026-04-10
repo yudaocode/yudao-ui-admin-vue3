@@ -124,6 +124,7 @@
           >
             取消
           </el-button>
+          <PrinterLabel :bizId="scope.row.id" :bizCode="scope.row.code" bizType="PROCARD" />
         </template>
       </el-table-column>
     </el-table>
@@ -148,6 +149,7 @@ import CardForm from './CardForm.vue'
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProWorkOrderSelect from '@/views/mes/pro/workorder/components/ProWorkOrderSelect.vue'
 import { MesProCardStatusEnum } from '@/views/mes/utils/constants'
+import { PrinterLabel } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'MesProCard' })
 

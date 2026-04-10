@@ -50,6 +50,7 @@
           <el-button v-if="isStock" link type="success" @click="handleStock(scope.row.id)">
             上架
           </el-button>
+          <PrinterLabel v-if="isStock" :bizId="scope.row.batchId" :bizCode="scope.row.batchCode" bizType="ITEM_BATCH" />
         </template>
       </el-table-column>
     </el-table>
@@ -164,6 +165,7 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmArrivalNoticeLineSelect from '@/views/mes/wm/arrivalnotice/components/WmArrivalNoticeLineSelect.vue'
 import ItemReceiptDetailList from './ItemReceiptDetailList.vue'
 import ItemReceiptDetailForm from './ItemReceiptDetailForm.vue'
+import { PrinterLabel } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'ItemReceiptLineList' })
 

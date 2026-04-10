@@ -60,7 +60,7 @@
           <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
             上架
           </el-button>
-          <!-- DONE @芋艿：标签打印；（AI 未修复原因：标注为人工处理，需产品经理确认功能需求） -->
+          <PrinterLabel v-if="isStock" :bizId="scope.row.batchId" :bizCode="scope.row.batchCode" bizType="BATCH" />
         </template>
       </el-table-column>
     </el-table>
@@ -171,6 +171,7 @@ import {
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import OutsourceReceiptDetailList from './OutsourceReceiptDetailList.vue'
 import OutsourceReceiptDetailForm from './OutsourceReceiptDetailForm.vue'
+import { PrinterLabel } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'OutsourceReceiptLineList' })
 

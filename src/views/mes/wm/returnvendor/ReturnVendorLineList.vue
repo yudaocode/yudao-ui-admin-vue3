@@ -50,7 +50,7 @@
           <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
             拣货
           </el-button>
-          <!-- TODO @芋艿：【标签打印】后续在加； -->
+          <PrinterLabel v-if="isStock" :bizId="scope.row.batchId" :bizCode="scope.row.batchCode" bizType="BATCH" />
         </template>
       </el-table-column>
     </el-table>
@@ -132,6 +132,7 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmBatchSelect from '@/views/mes/wm/batch/components/WmBatchSelect.vue'
 import ReturnVendorDetailList from './ReturnVendorDetailList.vue'
 import ReturnVendorDetailForm from './ReturnVendorDetailForm.vue'
+import { PrinterLabel } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'ReturnVendorLineList' })
 

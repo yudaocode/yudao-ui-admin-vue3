@@ -37,10 +37,14 @@
         </el-col>
         <el-col :span="24">
           <el-form-item label="是否补齐" prop="padded">
-            <!-- DONE @AI：改成 radio group -->
             <el-radio-group v-model="formData.padded">
-              <el-radio :value="true">是</el-radio>
-              <el-radio :value="false">否</el-radio>
+              <el-radio
+                v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
+                :key="dict.value + ''"
+                :value="dict.value"
+              >
+                {{ dict.label }}
+              </el-radio>
             </el-radio-group>
           </el-form-item>
         </el-col>
@@ -96,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getBoolDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { AutoCodeRuleApi, AutoCodeRuleVO } from '@/api/mes/md/autocode/rule'
 import AutoCodePartList from './AutoCodePartList.vue'
 import { CommonStatusEnum } from '@/utils/constants'

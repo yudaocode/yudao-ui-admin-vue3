@@ -102,7 +102,7 @@
           <el-table-column label="物料分类" align="center" prop="itemTypeName" />
           <el-table-column label="物料/产品" align="center" prop="itemOrProduct">
             <template #default="scope">
-              {{ getItemOrProductLabel(scope.row.itemOrProduct) }}
+              <dict-tag :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT" :value="scope.row.itemOrProduct" />
             </template>
           </el-table-column>
           <el-table-column label="安全库存" align="center" prop="safeStockFlag">
@@ -128,7 +128,7 @@
             :formatter="dateFormatter"
             width="180px"
           />
-          <el-table-column label="操作" align="center" width="160">
+          <el-table-column label="操作" align="center" width="200">
             <template #default="scope">
               <el-button
                 link
@@ -146,15 +146,7 @@
               >
                 删除
               </el-button>
-              <!-- TODO @芋艿：【HiPrint】标签打印 -->
-              <el-button
-                link
-                type="primary"
-                @click="handleBarcode(scope.row)"
-                v-hasPermi="['mes:md-item:query']"
-              >
-                条码
-              </el-button>
+              <PrinterLabel :bizId="scope.row.id" :bizCode="scope.row.code" bizType="ITEM" />
             </template>
           </el-table-column>
         </el-table>
@@ -187,8 +179,8 @@ import { MdItemApi, MdItemVO } from '@/api/mes/md/item'
 import MdItemForm from './MdItemForm.vue'
 import MdItemImportForm from './MdItemImportForm.vue'
 import MdItemTypeTree from './type/components/MdItemTypeTree.vue'
-import { getItemOrProductLabel, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
-import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
+
+import { BarcodeDetail, PrinterLabel } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'MesMdItem' })
 
@@ -280,12 +272,6 @@ const handleDelete = async (id: number) => {
 const importFormRef = ref()
 const handleImport = () => {
   importFormRef.value.open()
-}
-
-/** 查看物料条码 */
-const barcodeDetailRef = ref()
-const handleBarcode = async (row: MdItemVO) => {
-  await barcodeDetailRef.value.openByBusiness(row.id, BarcodeBizTypeEnum.ITEM, row.code, row.name)
 }
 
 /** 导出按钮操作 */

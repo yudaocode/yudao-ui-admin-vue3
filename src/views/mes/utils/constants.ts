@@ -492,16 +492,6 @@ export const MesAutoCodeRuleCode = {
   PRO_CARD_CODE: 'PRO_CARD_CODE' // 流转卡编码
 } as const
 
-/** 获取物料/产品标识的标签 */
-export const getItemOrProductLabel = (value: string): string => {
-  for (const item of Object.values(MesItemOrProductEnum)) {
-    if (item.value === value) {
-      return item.label
-    }
-  }
-  return value
-}
-
 /** MES 条码格式枚举 */
 export enum BarcodeFormatEnum {
   QR_CODE = 1,

@@ -123,8 +123,13 @@
         <el-col :span="8">
           <el-form-item label="是否校验" prop="oqcCheckFlag">
             <el-radio-group v-model="formData.oqcCheckFlag">
-              <el-radio :label="true">是</el-radio>
-              <el-radio :label="false">否</el-radio>
+              <el-radio
+                v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
+                :key="dict.value + ''"
+                :value="dict.value"
+              >
+                {{ dict.label }}
+              </el-radio>
             </el-radio-group>
           </el-form-item>
         </el-col>
@@ -157,7 +162,7 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import WmSalesNoticeLineSelect from '@/views/mes/wm/salesnotice/components/WmSalesNoticeLineSelect.vue'
 import ProductSalesDetailList from './ProductSalesDetailList.vue'
 import ProductSalesDetailForm from './ProductSalesDetailForm.vue'
-import { DICT_TYPE } from '@/utils/dict'
+import { getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
 
 defineOptions({ name: 'ProductSalesLineList' })
 

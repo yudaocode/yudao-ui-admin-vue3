@@ -51,6 +51,7 @@
             上架
           </el-button>
           <el-button link type="primary" @click="handleBarcode(scope.row)"> 条码 </el-button>
+          <PrinterLabel v-if="isStock" :bizId="scope.row.batchId" :bizCode="scope.row.batchCode" bizType="BATCH" />
         </template>
       </el-table-column>
     </el-table>
@@ -139,7 +140,7 @@ import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMat
 import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import ProductReceiptDetailList from './ProductReceiptDetailList.vue'
 import ProductReceiptDetailForm from './ProductReceiptDetailForm.vue'
-import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
+import { BarcodeDetail, PrinterLabel } from '@/views/mes/wm/barcode/components'
 import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
 
 defineOptions({ name: 'ProductReceiptLineList' })

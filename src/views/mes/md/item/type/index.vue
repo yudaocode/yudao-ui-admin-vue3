@@ -61,7 +61,7 @@
       <el-table-column label="分类编码" align="center" prop="code" />
       <el-table-column label="物料/产品" align="center" prop="itemOrProduct">
         <template #default="scope">
-          {{ getItemOrProductLabel(scope.row.itemOrProduct) }}
+          <dict-tag :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT" :value="scope.row.itemOrProduct" />
         </template>
       </el-table-column>
       <el-table-column label="排序" align="center" prop="sort" />
@@ -118,7 +118,6 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { handleTree } from '@/utils/tree'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
-import { getItemOrProductLabel } from '@/views/mes/utils/constants'
 import MdItemTypeForm from './MdItemTypeForm.vue'
 
 defineOptions({ name: 'MesMdItemType' })

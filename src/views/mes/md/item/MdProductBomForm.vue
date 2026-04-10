@@ -18,7 +18,7 @@
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="物料/产品" align="center" prop="itemOrProduct" width="100">
         <template #default="scope">
-          {{ getItemOrProductLabel(scope.row.itemOrProduct) }}
+          <dict-tag :type="DICT_TYPE.MES_MD_ITEM_OR_PRODUCT" :value="scope.row.itemOrProduct" />
         </template>
       </el-table-column>
       <el-table-column label="用量比例" align="center" prop="quantity" width="100" />
@@ -80,7 +80,7 @@
 <script setup lang="ts">
 import { MdProductBomApi, MdProductBomVO } from '@/api/mes/md/item/productBom'
 import { MdItemVO } from '@/api/mes/md/item'
-import { getItemOrProductLabel } from '@/views/mes/utils/constants'
+import { DICT_TYPE } from '@/utils/dict'
 import MdItemSelectDialog from '@/views/mes/md/item/components/MdItemSelectDialog.vue'
 
 defineOptions({ name: 'MdProductBomForm' })

@@ -50,11 +50,10 @@
           <el-button v-if="isUpdate" link type="danger" @click="handleDelete(scope.row.id)">
             删除
           </el-button>
-          <!-- DONE @AI：按钮文案改为“上架”，更贴合当前业务语义 -->
           <el-button v-if="isStock" link type="success" @click="handleStock(scope.row.id)">
             上架
           </el-button>
-          <!-- DONE @芋艿：【标签打印】（AI 未修复原因：标注为人工后续处理） -->
+          <PrinterLabel v-if="isStock" :bizId="scope.row.batchId" :bizCode="scope.row.batchCode" bizType="BATCH" />
         </template>
       </el-table-column>
     </el-table>
@@ -153,6 +152,7 @@ import WmMaterialStockSelect from '@/views/mes/wm/materialstock/components/WmMat
 import { WmMaterialStockApi, WmMaterialStockVO } from '@/api/mes/wm/materialstock'
 import TransferDetailList from './TransferDetailList.vue'
 import TransferDetailForm from './TransferDetailForm.vue'
+import { PrinterLabel } from '@/views/mes/wm/barcode/components'
 
 defineOptions({ name: 'TransferLineList' })
 

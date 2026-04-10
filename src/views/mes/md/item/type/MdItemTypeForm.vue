@@ -31,8 +31,13 @@
       </el-form-item>
       <el-form-item label="物料/产品标识" prop="itemOrProduct">
         <el-radio-group v-model="formData.itemOrProduct">
-          <el-radio :value="MesItemOrProductEnum.ITEM.value">物料</el-radio>
-          <el-radio :value="MesItemOrProductEnum.PRODUCT.value">产品</el-radio>
+          <el-radio
+            v-for="dict in getStrDictOptions(DICT_TYPE.MES_MD_ITEM_OR_PRODUCT)"
+            :key="dict.value"
+            :value="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="显示排序" prop="sort">
@@ -60,7 +65,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { MdItemTypeApi, MdItemTypeVO } from '@/api/mes/md/item/type'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { defaultProps, handleTree } from '@/utils/tree'
