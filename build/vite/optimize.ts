@@ -2,22 +2,18 @@ const include = [
   'qs',
   'url',
   'vue',
-  'sass',
   'mitt',
   'axios',
   'pinia',
   'dayjs',
   'qrcode',
-  'unocss',
   'vue-router',
   'vue-types',
-  'vue-i18n',
   'crypto-js',
   'cropperjs',
   'lodash-es',
   'nprogress',
   'web-storage-cache',
-  '@iconify/iconify',
   '@vueuse/core',
   '@zxcvbn-ts/core',
   'echarts/core',
@@ -91,18 +87,8 @@ const include = [
   'element-plus/es/components/dropdown-menu/style/css',
   'element-plus/es/components/dropdown-item/style/css',
   'element-plus/es/components/skeleton/style/css',
-  'element-plus/es/components/skeleton/style/css',
-  'element-plus/es/components/backtop/style/css',
-  'element-plus/es/components/menu/style/css',
-  'element-plus/es/components/sub-menu/style/css',
-  'element-plus/es/components/menu-item/style/css',
-  'element-plus/es/components/dropdown/style/css',
   'element-plus/es/components/tree/style/css',
-  'element-plus/es/components/dropdown-menu/style/css',
-  'element-plus/es/components/dropdown-item/style/css',
   'element-plus/es/components/badge/style/css',
-  'element-plus/es/components/breadcrumb/style/css',
-  'element-plus/es/components/breadcrumb-item/style/css',
   'element-plus/es/components/image/style/css',
   'element-plus/es/components/collapse-transition/style/css',
   'element-plus/es/components/timeline/style/css',
@@ -119,6 +105,6 @@ const include = [
   'element-plus/es/components/progress/style/css'
 ]
 
-const exclude = ['@iconify/json']
+const exclude: string[] = []
 
 export { include, exclude }

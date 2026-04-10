@@ -1,49 +1,22 @@
 <template>
-  <div :class="getClass" :style="getWrapperStyle">
+  <div ref="containerRef" :class="getClass" :style="getWrapperStyle">
     <img
-      v-show="isReady"
+      v-show="false"
       ref="imgElRef"
       :alt="alt"
       :crossorigin="crossorigin"
       :src="src"
-      :style="getImageStyle"
     />
   </div>
 </template>
 <script lang="ts" setup>
 import { CSSProperties, PropType } from 'vue'
 import Cropper from 'cropperjs'
-import 'cropperjs/dist/cropper.css'
 import { useDesign } from '@/hooks/web/useDesign'
 import { propTypes } from '@/utils/propTypes'
 import { useDebounceFn } from '@vueuse/core'
 
 defineOptions({ name: 'Cropper' })
-
-type Options = Cropper.Options
-
-const defaultOptions: Options = {
-  aspectRatio: 1,
-  zoomable: true,
-  zoomOnTouch: true,
-  zoomOnWheel: true,
-  cropBoxMovable: true,
-  cropBoxResizable: true,
-  toggleDragModeOnDblclick: true,
-  autoCrop: true,
-  background: true,
-  highlight: true,
-  center: true,
-  responsive: true,
-  restore: true,
-  checkCrossOrigin: true,
-  checkOrientation: true,
-  scalable: true,
-  modal: true,
-  guides: true,
-  movable: true,
-  rotatable: true
-}
 
 const props = defineProps({
   src: propTypes.string.def(''),
@@ -56,35 +29,21 @@ const props = defineProps({
     default: undefined
   },
   imageStyle: { type: Object as PropType<CSSProperties>, default: () => ({}) },
-  options: { type: Object as PropType<Options>, default: () => ({}) }
+  options: { type: Object as PropType<Record<string, any>>, default: () => ({}) }
 })
 
 const emit = defineEmits(['cropend', 'ready', 'cropendError'])
 const attrs = useAttrs()
-const imgElRef = ref<ElRef<HTMLImageElement>>()
-const cropper = ref<Nullable<Cropper>>()
-const isReady = ref(false)
+const imgElRef = ref<HTMLImageElement>()
+const containerRef = ref<HTMLElement>()
+const cropper = ref<Cropper>()
 
 const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('cropper-image')
 const debounceRealTimeCroppered = useDebounceFn(realTimeCroppered, 80)
 
-const getImageStyle = computed((): CSSProperties => {
-  return {
-    height: props.height,
-    maxWidth: '100%',
-    ...props.imageStyle
-  }
-})
-
 const getClass = computed(() => {
-  return [
-    prefixCls,
-    attrs.class,
-    {
-      [`${prefixCls}--circled`]: props.circled
-    }
-  ]
+  return [prefixCls, attrs.class]
 })
 const getWrapperStyle = computed((): CSSProperties => {
   return { height: `${props.height}`.replace(/px/, '') + 'px' }
@@ -98,27 +57,39 @@ onUnmounted(() => {
 
 async function init() {
   const imgEl = unref(imgElRef)
-  if (!imgEl) {
-    return
-  }
+  const containerEl = unref(containerRef)
+  if (!imgEl || !containerEl) return
+
   cropper.value = new Cropper(imgEl, {
-    ...defaultOptions,
-    ready: () => {
-      isReady.value = true
-      realTimeCroppered()
-      emit('ready', cropper.value)
-    },
-    crop() {
-      debounceRealTimeCroppered()
-    },
-    zoom() {
-      debounceRealTimeCroppered()
-    },
-    cropmove() {
-      debounceRealTimeCroppered()
-    },
+    container: containerEl,
     ...props.options
   })
+
+  // Wait for custom elements to be ready, then configure
+  await nextTick()
+  const cropperSelection = cropper.value.getCropperSelection()
+  const cropperImage = cropper.value.getCropperImage()
+
+  if (cropperSelection) {
+    cropperSelection.initialCoverage = 0.5
+    cropperSelection.aspectRatio = 1
+    cropperSelection.movable = true
+    cropperSelection.resizable = true
+    cropperSelection.addEventListener('change', () => {
+      debounceRealTimeCroppered()
+    })
+  }
+
+  if (cropperImage) {
+    cropperImage.addEventListener('transform', () => {
+      debounceRealTimeCroppered()
+    })
+    // Emit ready once image loads
+    cropperImage.addEventListener('load', () => {
+      emit('ready', cropper.value)
+      realTimeCroppered()
+    })
+  }
 }
 
 // Real-time display preview
@@ -127,33 +98,40 @@ function realTimeCroppered() {
 }
 
 // event: return base64 and width and height information after cropping
-function croppered() {
-  if (!cropper.value) {
-    return
+async function croppered() {
+  if (!cropper.value) return
+
+  const selection = cropper.value.getCropperSelection()
+  if (!selection) return
+
+  const imgInfo = { x: selection.x, y: selection.y, width: selection.width, height: selection.height }
+
+  try {
+    let canvas = await selection.$toCanvas()
+    if (props.circled) {
+      canvas = getRoundedCanvas(canvas)
+    }
+    canvas.toBlob((blob) => {
+      if (!blob) return
+      const fileReader = new FileReader()
+      fileReader.readAsDataURL(blob)
+      fileReader.onloadend = (e) => {
+        emit('cropend', {
+          imgBase64: e.target?.result ?? '',
+          imgInfo
+        })
+      }
+      fileReader.onerror = () => {
+        emit('cropendError')
+      }
+    }, 'image/png')
+  } catch {
+    // Selection may not be ready yet
   }
-  let imgInfo = cropper.value.getData()
-  const canvas = props.circled ? getRoundedCanvas() : cropper.value.getCroppedCanvas()
-  canvas.toBlob((blob) => {
-    if (!blob) {
-      return
-    }
-    let fileReader: FileReader = new FileReader()
-    fileReader.readAsDataURL(blob)
-    fileReader.onloadend = (e) => {
-      emit('cropend', {
-        imgBase64: e.target?.result ?? '',
-        imgInfo
-      })
-    }
-    fileReader.onerror = () => {
-      emit('cropendError')
-    }
-  }, 'image/png')
 }
 
 // Get a circular picture canvas
-function getRoundedCanvas() {
-  const sourceCanvas = cropper.value!.getCroppedCanvas()
+function getRoundedCanvas(sourceCanvas: HTMLCanvasElement) {
   const canvas = document.createElement('canvas')
   const context = canvas.getContext('2d')!
   const width = sourceCanvas.width
@@ -169,15 +147,3 @@ function getRoundedCanvas() {
   return canvas
 }
 </script>
-<style lang="scss">
-$prefix-cls: #{$namespace}-cropper-image;
-
-.#{$prefix-cls} {
-  &--circled {
-    .cropper-view-box,
-    .cropper-face {
-      border-radius: 50%;
-    }
-  }
-}
-</style>

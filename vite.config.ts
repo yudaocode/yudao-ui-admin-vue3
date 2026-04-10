@@ -41,21 +41,20 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
         // 项目使用的vite插件。 单独提取到build/vite/plugin中管理
         plugins: createVitePlugins(),
         css: {
+            lightningcss: {
+                // Preserve legacy star-hack declarations by stripping invalid syntax during minification.
+                errorRecovery: true
+            },
             preprocessorOptions: {
                 scss: {
                     additionalData: '@use "@/styles/variables.scss" as *;',
-                    javascriptEnabled: true,
-                    silenceDeprecations: ["legacy-js-api"], // 参考自 https://stackoverflow.com/questions/78997907/the-legacy-js-api-is-deprecated-and-will-be-removed-in-dart-sass-2-0-0
+                    api: 'modern-compiler'
                 }
             }
         },
         resolve: {
             extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss', '.css'],
             alias: [
-                {
-                    find: 'vue-i18n',
-                    replacement: 'vue-i18n/dist/vue-i18n.cjs.js'
-                },
                 {
                     find: /\@\//,
                     replacement: `${pathResolve('src')}/`
@@ -75,10 +74,12 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             },
             rollupOptions: {
                 output: {
-                    manualChunks: {
-                      echarts: ['echarts'], // 将 echarts 单独打包，参考 https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues/IAB1SX 讨论
-                      'form-create': ['@form-create/element-ui'], // 参考 https://github.com/yudaocode/yudao-ui-admin-vue3/issues/148 讨论
-                      'form-designer': ['@form-create/designer'],
+                    codeSplitting: {
+                        groups: [
+                            { name: 'echarts', test: /node_modules[\\/]echarts[\\/]/ }, // 将 echarts 单独打包，参考 https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues/IAB1SX 讨论
+                            { name: 'form-create', test: /node_modules[\\/]@form-create[\\/]element-ui[\\/]/ }, // 参考 https://github.com/yudaocode/yudao-ui-admin-vue3/issues/148 讨论
+                            { name: 'form-designer', test: /node_modules[\\/]@form-create[\\/]designer[\\/]/ }
+                        ]
                     }
                 },
             },
