@@ -11,8 +11,8 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="车间编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入车间编码">
-              <template #append>
+            <el-input v-model="formData.code" placeholder="请输入车间编码" :disabled="formType === 'update'">
+              <template v-if="formType === 'create'" #append>
                 <el-button @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
