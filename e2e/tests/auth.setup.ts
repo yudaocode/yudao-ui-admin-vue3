@@ -7,21 +7,17 @@ const authFile = 'e2e/.auth/user.json'
 
 /**
  * 认证 Setup Project
- * 1. 导航到登录页（建立 origin）
- * 2. 使用 evaluate 直接设置 localStorage（web-storage-cache 格式）
- * 3. 重新加载页面，验证认证生效
+ * 1. 在页面脚本执行前注入 localStorage（web-storage-cache 格式）
+ * 2. 导航到首页，让 Vue app 在启动时直接读取认证信息
+ * 3. 验证认证生效并保存 storageState
  */
 setup('authenticate', async ({ page }) => {
   // 设置 API Mock
   await setupAuthMocks(page)
 
-  // 步骤1：导航到登录页，建立 origin
-  await page.goto('/login')
-  await page.waitForLoadState('domcontentloaded')
-
-  // 步骤2：直接设置 localStorage
+  // 步骤1：在应用脚本运行前注入 localStorage，避免页面跳转时 evaluate 失效
   // web-storage-cache 格式：{ c: createTime, e: expiresTime, v: JSON.stringify(value) }
-  await page.evaluate(
+  await page.addInitScript(
     ({ token, permInfo }) => {
       const now = Date.now()
       const expireTime = now + 24 * 60 * 60 * 1000
@@ -50,11 +46,11 @@ setup('authenticate', async ({ page }) => {
     { token: loginSuccessData, permInfo: adminPermissionInfo }
   )
 
-  // 步骤3：重新加载，让 Vue app 读取 localStorage 中的 token
+  // 步骤2：首次导航时，Vue app 会直接读取 localStorage 中的 token
   await page.goto('/')
   await page.waitForLoadState('networkidle')
 
-  // 验证不在登录页
+  // 步骤3：验证不在登录页
   await expect(page).not.toHaveURL(/\/login/, { timeout: 15000 })
 
   // 保存认证状态
