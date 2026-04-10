@@ -116,7 +116,7 @@
           <el-button
             link
             type="warning"
-            @click="openForm('submit', scope.row.id)"
+            @click="handleSubmit(scope.row.id)"
             v-hasPermi="['mes:wm-product-issue:update']"
             v-if="scope.row.status === MesWmProductIssueStatusEnum.PREPARE"
           >
@@ -243,6 +243,16 @@ const handleCancel = async (id: number) => {
     await message.confirm('确认取消该领料出库单？取消后不可恢复。')
     await WmProductIssueApi.cancelProductIssue(id)
     message.success('取消成功')
+    await getList()
+  } catch {}
+}
+
+/** 提交按钮操作 */
+const handleSubmit = async (id: number) => {
+  try {
+    await message.confirm('确认提交该领料出库单？提交后将不能修改。')
+    await WmProductIssueApi.submitProductIssue(id)
+    message.success('提交成功')
     await getList()
   } catch {}
 }
