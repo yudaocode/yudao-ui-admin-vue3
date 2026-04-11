@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【仓库】仓库与库区库位、条码赋码、SN码" url="https://doc.iocoder.cn/mes/warehouse-setup/" />
+
   <ContentWrap>
     <el-alert
       v-if="currentLocation.id"

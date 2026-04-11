@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【基础】车间设置、工作站设置" url="https://doc.iocoder.cn/mes/workshop/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

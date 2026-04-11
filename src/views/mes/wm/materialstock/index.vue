@@ -1,5 +1,7 @@
 <!-- MES 库存台账列表 -->
 <template>
+  <doc-alert title="【仓库】批次管理、库存现有量、库存事务" url="https://doc.iocoder.cn/mes/stock/" />
+
   <el-row :gutter="20">
     <!-- 左侧分类树 -->
     <el-col :span="4" :xs="24">

@@ -1,5 +1,7 @@
 <!-- MES 退货检验单（RQC）列表 -->
 <template>
+  <doc-alert title="【质量】退货检验（RQC）" url="https://doc.iocoder.cn/mes/rqc/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

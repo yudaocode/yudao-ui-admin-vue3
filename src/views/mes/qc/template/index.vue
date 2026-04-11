@@ -1,5 +1,7 @@
 <!-- MES 质检方案列表 -->
 <template>
+  <doc-alert title="【质量】质检方案" url="https://doc.iocoder.cn/mes/qc-template/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

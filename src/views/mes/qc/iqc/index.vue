@@ -1,5 +1,7 @@
 <!-- MES 来料检验单（IQC）列表 -->
 <template>
+  <doc-alert title="【质量】来料检验（IQC）" url="https://doc.iocoder.cn/mes/iqc/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

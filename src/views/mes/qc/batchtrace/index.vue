@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【仓库】批次管理、库存现有量、库存事务" url="https://doc.iocoder.cn/mes/stock/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

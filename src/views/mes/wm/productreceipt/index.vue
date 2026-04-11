@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【仓库】产品产出、产品入库" url="https://doc.iocoder.cn/mes/product-in/" />
+
   <ContentWrap>
     <el-form
       class="-mb-15px"

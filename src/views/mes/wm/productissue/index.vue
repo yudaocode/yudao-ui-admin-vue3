@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【仓库】生产领料、生产退料、物料消耗" url="https://doc.iocoder.cn/mes/issue-return/" />
+
   <ContentWrap>
     <el-form
       class="-mb-15px"

@@ -1,5 +1,7 @@
 <!-- MES 生产工序列表 -->
 <template>
+  <doc-alert title="【生产】工序设置、工艺流程" url="https://doc.iocoder.cn/mes/process-route/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

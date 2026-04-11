@@ -1,5 +1,7 @@
 <!-- MES 设备台账列表 -->
 <template>
+  <doc-alert title="【设备】设备类型、设备台账" url="https://doc.iocoder.cn/mes/device/" />
+
   <el-row :gutter="20">
     <!-- 左侧分类树 -->
     <el-col :span="4" :xs="24">

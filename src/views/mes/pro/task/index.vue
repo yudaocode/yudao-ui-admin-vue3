@@ -1,5 +1,7 @@
 <!-- MES 生产排产 -->
 <template>
+  <doc-alert title="【生产】生产排产、工序流转卡" url="https://doc.iocoder.cn/mes/schedule-card/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

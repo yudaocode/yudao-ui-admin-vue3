@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【仓库】其他入库、其他出库" url="https://doc.iocoder.cn/mes/misc-wm/" />
+
   <ContentWrap>
     <el-form
       class="-mb-15px"

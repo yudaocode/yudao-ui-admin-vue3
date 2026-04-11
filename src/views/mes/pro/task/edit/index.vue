@@ -1,5 +1,7 @@
 <!-- MES 甘特图编辑 -->
 <template>
+  <doc-alert title="【生产】生产排产、工序流转卡" url="https://doc.iocoder.cn/mes/schedule-card/" />
+
   <ContentWrap>
     <div class="mb-10px flex items-center justify-between">
       <span class="text-14px text-gray-500">

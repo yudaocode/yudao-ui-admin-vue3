@@ -1,5 +1,7 @@
 <!-- MES 待检任务列表 -->
 <template>
+  <doc-alert title="【质量】待检任务、检验结果、缺陷记录" url="https://doc.iocoder.cn/mes/qc-result/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

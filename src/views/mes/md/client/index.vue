@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【基础】客户管理、供应商管理" url="https://doc.iocoder.cn/mes/client-vendor/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【设备】点检保养项目、点检保养方案" url="https://doc.iocoder.cn/mes/check-plan/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

@@ -1,5 +1,7 @@
 <!-- MES 出货检验单（OQC）列表 -->
 <template>
+  <doc-alert title="【质量】出货检验（OQC）" url="https://doc.iocoder.cn/mes/oqc/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

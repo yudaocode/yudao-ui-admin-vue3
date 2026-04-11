@@ -1,5 +1,7 @@
 <!-- MES 安灯呼叫记录列表 -->
 <template>
+  <doc-alert title="【生产】安灯配置、安灯呼叫" url="https://doc.iocoder.cn/mes/andon/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

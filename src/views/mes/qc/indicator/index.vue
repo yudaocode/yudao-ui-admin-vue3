@@ -1,5 +1,7 @@
 <!-- MES 质检指标列表 -->
 <template>
+  <doc-alert title="【质量】检测项设置、常见缺陷" url="https://doc.iocoder.cn/mes/qc-base/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

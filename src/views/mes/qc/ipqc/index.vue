@@ -1,5 +1,7 @@
 <!-- MES 过程检验单（IPQC）列表 -->
 <template>
+  <doc-alert title="【质量】过程检验（IPQC）" url="https://doc.iocoder.cn/mes/ipqc/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

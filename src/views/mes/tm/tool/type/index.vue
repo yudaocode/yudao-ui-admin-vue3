@@ -1,5 +1,7 @@
 <!-- MES 工具类型列表 -->
 <template>
+  <doc-alert title="【工具】工具类型、工装夹具台账" url="https://doc.iocoder.cn/mes/tool/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

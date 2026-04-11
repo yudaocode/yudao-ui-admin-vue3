@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【仓库】库存盘点" url="https://doc.iocoder.cn/mes/stocktaking/" />
+
   <ContentWrap>
     <el-form
       ref="queryFormRef"
