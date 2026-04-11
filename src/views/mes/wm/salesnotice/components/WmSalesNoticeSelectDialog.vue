@@ -23,7 +23,7 @@
       <el-form :inline="true" :model="queryParams" label-width="100px">
         <el-form-item label="通知单编号">
           <el-input
-            v-model="queryParams.noticeCode"
+            v-model="queryParams.code"
             placeholder="请输入通知单编号"
             clearable
             @keyup.enter="handleQuery"
@@ -32,7 +32,7 @@
         </el-form-item>
         <el-form-item label="通知单名称">
           <el-input
-            v-model="queryParams.noticeName"
+            v-model="queryParams.name"
             placeholder="请输入通知单名称"
             clearable
             @keyup.enter="handleQuery"
@@ -109,8 +109,8 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="通知单编号" align="center" prop="noticeCode" width="180" />
-        <el-table-column label="通知单名称" align="left" prop="noticeName" min-width="150" />
+        <el-table-column label="通知单编号" align="center" prop="code" width="180" />
+        <el-table-column label="通知单名称" align="left" prop="name" min-width="150" />
         <el-table-column label="销售订单编号" align="center" prop="salesOrderCode" width="160" />
         <el-table-column label="客户名称" align="center" prop="clientName" width="120" />
         <el-table-column label="发货日期" align="center" prop="salesDate" width="120">
@@ -212,8 +212,8 @@ const handleRowDblClick = (row: WmSalesNoticeVO) => {
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  noticeCode: undefined as string | undefined,
-  noticeName: undefined as string | undefined,
+  code: undefined as string | undefined,
+  name: undefined as string | undefined,
   salesOrderCode: undefined as string | undefined,
   clientId: undefined as number | undefined,
   status: undefined as number | undefined
@@ -265,8 +265,8 @@ const handleQuery = () => {
 
 /** 重置查询条件 */
 const resetQuery = () => {
-  queryParams.noticeCode = undefined
-  queryParams.noticeName = undefined
+  queryParams.code = undefined
+  queryParams.name = undefined
   queryParams.salesOrderCode = undefined
   queryParams.clientId = undefined
   queryParams.status = props.status
@@ -297,8 +297,8 @@ const confirmSelect = () => {
 const open = async (selectedIds?: number[]) => {
   dialogVisible.value = true
   // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
-  queryParams.noticeCode = undefined
-  queryParams.noticeName = undefined
+  queryParams.code = undefined
+  queryParams.name = undefined
   queryParams.salesOrderCode = undefined
   queryParams.clientId = undefined
   queryParams.status = props.status != null ? props.status : undefined

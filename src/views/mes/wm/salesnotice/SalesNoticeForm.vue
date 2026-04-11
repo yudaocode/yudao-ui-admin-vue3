@@ -10,9 +10,9 @@
     >
       <el-row>
         <el-col :span="8">
-          <el-form-item label="通知单编号" prop="noticeCode">
+          <el-form-item label="通知单编号" prop="code">
             <el-input
-              v-model="formData.noticeCode"
+              v-model="formData.code"
               placeholder="请输入通知单编号"
               :disabled="isHeaderReadonly"
             >
@@ -23,9 +23,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="通知单名称" prop="noticeName">
+          <el-form-item label="通知单名称" prop="name">
             <el-input
-              v-model="formData.noticeName"
+              v-model="formData.name"
               placeholder="请输入通知单名称"
               :disabled="isHeaderReadonly"
             />
@@ -156,8 +156,8 @@ const dialogTitle = computed(() => {
 })
 const formData = ref({
   id: undefined as number | undefined,
-  noticeCode: undefined,
-  noticeName: undefined,
+  code: undefined,
+  name: undefined,
   salesOrderCode: undefined,
   clientId: undefined,
   salesDate: undefined,
@@ -168,8 +168,8 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
-  noticeCode: [{ required: true, message: '通知单编号不能为空', trigger: 'blur' }],
-  noticeName: [{ required: true, message: '通知单名称不能为空', trigger: 'blur' }],
+  code: [{ required: true, message: '通知单编号不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '通知单名称不能为空', trigger: 'blur' }],
   clientId: [{ required: true, message: '请选择客户', trigger: 'change' }],
   salesDate: [{ required: true, message: '请选择发货日期', trigger: 'change' }]
 })
@@ -178,7 +178,7 @@ const originalFormData = ref<string>('') // 原始表单数据快照，用于脏
 
 /** 生成通知单编号 */
 const generateCode = async () => {
-  formData.value.noticeCode = await AutoCodeRecordApi.generateAutoCode(
+  formData.value.code = await AutoCodeRecordApi.generateAutoCode(
     MesAutoCodeRuleCode.WM_SALES_NOTICE_CODE
   )
 }
@@ -261,8 +261,8 @@ const handleFinish = () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    noticeCode: undefined,
-    noticeName: undefined,
+    code: undefined,
+    name: undefined,
     salesOrderCode: undefined,
     clientId: undefined,
     salesDate: undefined,

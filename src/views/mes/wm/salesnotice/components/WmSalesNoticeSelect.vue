@@ -24,8 +24,8 @@
     <el-tooltip :disabled="!selectedItem" placement="top" :show-after="500">
       <template #content>
         <div v-if="selectedItem" class="leading-6">
-          <div>编号：{{ selectedItem.noticeCode }}</div>
-          <div>名称：{{ selectedItem.noticeName || '-' }}</div>
+          <div>编号：{{ selectedItem.code }}</div>
+          <div>名称：{{ selectedItem.name || '-' }}</div>
           <div>客户：{{ selectedItem.clientName || '-' }}</div>
           <div>销售订单：{{ selectedItem.salesOrderCode || '-' }}</div>
         </div>
@@ -88,7 +88,7 @@ const selectedItem = ref<WmSalesNoticeVO | undefined>() // 当前选中的发货
 
 /** 输入框显示文本：展示通知单名称，保持简洁 */
 const displayLabel = computed(() => {
-  return selectedItem.value?.noticeName ?? ''
+  return selectedItem.value?.name ?? ''
 })
 
 /** 是否显示清除图标 */

@@ -3,8 +3,8 @@ import request from '@/config/axios'
 // MES 发货通知单 VO
 export interface WmSalesNoticeVO {
   id: number
-  noticeCode: string
-  noticeName: string
+  code: string
+  name: string
   salesOrderCode: string
   clientId: number
   clientCode: string

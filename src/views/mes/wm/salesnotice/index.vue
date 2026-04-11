@@ -7,18 +7,18 @@
       :inline="true"
       label-width="100px"
     >
-      <el-form-item label="通知单编号" prop="noticeCode">
+      <el-form-item label="通知单编号" prop="code">
         <el-input
-          v-model="queryParams.noticeCode"
+          v-model="queryParams.code"
           placeholder="请输入通知单编号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="通知单名称" prop="noticeName">
+      <el-form-item label="通知单名称" prop="name">
         <el-input
-          v-model="queryParams.noticeName"
+          v-model="queryParams.name"
           placeholder="请输入通知单名称"
           clearable
           @keyup.enter="handleQuery"
@@ -63,14 +63,14 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="通知单编号" align="center" prop="noticeCode" min-width="160">
+      <el-table-column label="通知单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
           <el-button link type="primary" @click="openForm('detail', scope.row.id)">
-            {{ scope.row.noticeCode }}
+            {{ scope.row.code }}
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="通知单名称" align="center" prop="noticeName" min-width="150" />
+      <el-table-column label="通知单名称" align="center" prop="name" min-width="150" />
       <el-table-column label="销售订单编号" align="center" prop="salesOrderCode" min-width="140" />
       <el-table-column label="客户名称" align="center" prop="clientName" min-width="120" />
       <el-table-column
@@ -154,8 +154,8 @@ const exportLoading = ref(false) // 导出的加载中
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  noticeCode: undefined,
-  noticeName: undefined,
+  code: undefined,
+  name: undefined,
   salesOrderCode: undefined,
   clientId: undefined
 })
