@@ -108,7 +108,7 @@ const getList = async () => {
 // ==================== 添加/修改 ====================
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const dialogType = ref('') // 表单的类型：create - 新增；update - 修改
 const formLoading = ref(false) // 表单的加载中
 const formRef = ref() // 表单 Ref
 const formData = ref({
@@ -131,7 +131,7 @@ const formRules = reactive({
 const openForm = (type: string, row?: CalPlanShiftVO) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
-  formType.value = type
+  dialogType.value = type
   resetForm()
   // 修改时，设置数据
   if (type === 'update' && row) {
@@ -157,7 +157,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as CalPlanShiftVO
-    if (formType.value === 'create') {
+    if (dialogType.value === 'create') {
       await CalPlanShiftApi.createPlanShift(data)
       message.success(t('common.createSuccess'))
     } else {
