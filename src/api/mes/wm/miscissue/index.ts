@@ -6,9 +6,9 @@ export interface WmMiscIssueVO {
   code: string
   name: string
   type: string
+  sourceDocType: string
   sourceDocId: number
   sourceDocCode: string
-  sourceDocType: string
   issueDate: string
   status: number
   remark: string

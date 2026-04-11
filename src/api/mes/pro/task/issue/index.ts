@@ -6,11 +6,11 @@ export interface ProTaskIssueVO {
   taskId: number // 生产任务编号
   workOrderId: number // 生产工单编号
   workstationId: number // 工作站编号
-  sourceDocId: number // 来源单据编号
-  sourceDocCode: string // 来源单据编码
   sourceDocType: string // 来源单据类型
-  batchCode: string // 投料批次
+  sourceDocId: number // 来源单据编号
   sourceLineId: number // 来源单据行编号
+  sourceDocCode: string // 来源单据编码
+  batchCode: string // 投料批次
   itemId: number // 产品物料编号
   itemName: string // 产品名称
   itemCode: string // 产品编码

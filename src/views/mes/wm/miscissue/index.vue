@@ -40,19 +40,19 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="来源单据编号" prop="sourceDocCode">
+      <el-form-item label="来源单据类型" prop="sourceDocType">
         <el-input
-          v-model="queryParams.sourceDocCode"
-          placeholder="请输入来源单据编号"
+          v-model="queryParams.sourceDocType"
+          placeholder="请输入来源单据类型"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="来源单据类型" prop="sourceDocType">
+      <el-form-item label="来源单据编号" prop="sourceDocCode">
         <el-input
-          v-model="queryParams.sourceDocType"
-          placeholder="请输入来源单据类型"
+          v-model="queryParams.sourceDocCode"
+          placeholder="请输入来源单据编号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -123,8 +123,8 @@
           <dict-tag :type="DICT_TYPE.MES_WM_MISC_ISSUE_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" min-width="150" />
       <el-table-column label="来源单据类型" align="center" prop="sourceDocType" min-width="120" />
+      <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" min-width="150" />
       <el-table-column
         label="出库日期"
         align="center"
@@ -214,8 +214,8 @@ const queryParams = reactive({
   code: undefined,
   name: undefined,
   type: undefined,
-  sourceDocCode: undefined,
   sourceDocType: undefined,
+  sourceDocCode: undefined,
   issueDate: undefined,
   status: undefined
 })

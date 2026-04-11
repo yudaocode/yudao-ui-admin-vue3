@@ -2,10 +2,10 @@ import request from '@/config/axios'
 
 // MES 待检任务 VO
 export interface QcPendingInspectVO {
-  sourceDocId: number
   sourceDocType: number
-  sourceDocCode: string
+  sourceDocId: number
   sourceLineId: number
+  sourceDocCode: string
   qcType: number
   itemId: number
   itemCode: string

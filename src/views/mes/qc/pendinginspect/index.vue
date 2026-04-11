@@ -51,12 +51,12 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" width="160" />
       <el-table-column label="来源单据类型" align="center" prop="sourceDocType" width="130">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_QC_SOURCE_DOC_TYPE" :value="scope.row.sourceDocType" />
         </template>
       </el-table-column>
+      <el-table-column label="来源单据编号" align="center" prop="sourceDocCode" width="160" />
       <el-table-column label="检验类型" align="center" prop="qcType" min-width="150">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MES_QC_TYPE" :value="scope.row.qcType" />
@@ -175,10 +175,10 @@ const resetQuery = () => {
 const iqcFormRef = ref()
 const handleCreateIqc = (row: QcPendingInspectVO) => {
   iqcFormRef.value.open('create', undefined, {
-    sourceDocId: row.sourceDocId,
     sourceDocType: row.sourceDocType,
-    sourceDocCode: row.sourceDocCode,
+    sourceDocId: row.sourceDocId,
     sourceLineId: row.sourceLineId,
+    sourceDocCode: row.sourceDocCode,
     vendorId: row.vendorId,
     itemId: row.itemId,
     receivedQuantity: row.quantity,
@@ -191,10 +191,10 @@ const handleCreateIqc = (row: QcPendingInspectVO) => {
 const ipqcFormRef = ref()
 const handleCreateIpqc = (row: QcPendingInspectVO) => {
   ipqcFormRef.value.open('create', undefined, {
-    sourceDocId: row.sourceDocId,
     sourceDocType: row.sourceDocType,
-    sourceDocCode: row.sourceDocCode,
+    sourceDocId: row.sourceDocId,
     sourceLineId: row.sourceLineId,
+    sourceDocCode: row.sourceDocCode,
     itemId: row.itemId,
     workOrderId: row.workOrderId,
     workstationId: row.workstationId,
@@ -209,8 +209,8 @@ const handleCreateIpqc = (row: QcPendingInspectVO) => {
 const rqcFormRef = ref()
 const handleCreateRqc = (row: QcPendingInspectVO) => {
   rqcFormRef.value.open('create', undefined, {
-    sourceDocId: row.sourceDocId,
     sourceDocType: row.sourceDocType,
+    sourceDocId: row.sourceDocId,
     sourceLineId: row.sourceLineId,
     sourceDocCode: row.sourceDocCode,
     clientId: row.clientId,
@@ -227,10 +227,10 @@ const handleCreateRqc = (row: QcPendingInspectVO) => {
 const oqcFormRef = ref()
 const handleCreateOqc = (row: QcPendingInspectVO) => {
   oqcFormRef.value.open('create', undefined, {
-    sourceDocId: row.sourceDocId,
     sourceDocType: row.sourceDocType,
-    sourceDocCode: row.sourceDocCode,
+    sourceDocId: row.sourceDocId,
     sourceLineId: row.sourceLineId,
+    sourceDocCode: row.sourceDocCode,
     clientId: row.clientId,
     itemId: row.itemId,
     outQuantity: row.quantity,

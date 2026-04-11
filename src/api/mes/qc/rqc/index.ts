@@ -6,8 +6,8 @@ export interface QcRqcVO {
   code: string // 检验单编号
   name: string // 检验单名称
   templateId: number // 检验模板 ID
-  sourceDocId: number // 来源单据 ID
   sourceDocType: string // 来源单据类型
+  sourceDocId: number // 来源单据 ID
   sourceLineId: number // 来源单据行 ID
   type: number // 检验类型
   itemId: number // 产品物料 ID
@@ -26,12 +26,12 @@ export interface QcRqcVO {
   status: number // 状态
   remark: string // 备注
   // 缺陷统计
-  criticalQuantity: number // 致命缺陷数量
-  majorQuantity: number // 严重缺陷数量
-  minorQuantity: number // 轻微缺陷数量
   criticalRate: number // 致命缺陷率（%）
   majorRate: number // 严重缺陷率（%）
   minorRate: number // 轻微缺陷率（%）
+  criticalQuantity: number // 致命缺陷数量
+  majorQuantity: number // 严重缺陷数量
+  minorQuantity: number // 轻微缺陷数量
 }
 
 // MES 退货检验单 API

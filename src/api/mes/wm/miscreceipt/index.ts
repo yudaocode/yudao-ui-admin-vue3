@@ -6,9 +6,9 @@ export interface WmMiscReceiptVO {
   code: string
   name: string
   type: number
+  sourceDocType: string
   sourceDocId: number
   sourceDocCode: string
-  sourceDocType: string
   receiptDate: string
   status: number
   remark: string

@@ -53,19 +53,19 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="来源单据编码" prop="sourceDocCode">
+          <el-form-item label="来源单据类型" prop="sourceDocType">
             <el-input
-              v-model="formData.sourceDocCode"
-              placeholder="请输入来源单据编码"
+              v-model="formData.sourceDocType"
+              placeholder="请输入来源单据类型"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="来源单据类型" prop="sourceDocType">
+          <el-form-item label="来源单据编码" prop="sourceDocCode">
             <el-input
-              v-model="formData.sourceDocType"
-              placeholder="请输入来源单据类型"
+              v-model="formData.sourceDocCode"
+              placeholder="请输入来源单据编码"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
@@ -155,9 +155,9 @@ const formData = ref({
   name: undefined,
   type: undefined,
   status: undefined as number | undefined,
+  sourceDocType: undefined,
   sourceDocId: undefined,
   sourceDocCode: undefined,
-  sourceDocType: undefined,
   receiptDate: undefined,
   remark: undefined
 })
@@ -264,9 +264,9 @@ const resetForm = () => {
     name: undefined,
     type: undefined,
     status: undefined,
+    sourceDocType: undefined,
     sourceDocId: undefined,
     sourceDocCode: undefined,
-    sourceDocType: undefined,
     receiptDate: undefined,
     remark: undefined
   }

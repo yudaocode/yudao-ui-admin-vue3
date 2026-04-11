@@ -6,8 +6,8 @@ export interface QcOqcVO {
   code: string // 检验单编号
   name: string // 检验单名称
   templateId: number // 检验模板 ID
-  sourceDocId: number // 来源单据 ID
   sourceDocType: string // 来源单据类型
+  sourceDocId: number // 来源单据 ID
   sourceLineId: number // 来源单据行 ID
   clientId: number // 客户 ID
   clientNickname: string // 客户简称（关联查询）

@@ -7,8 +7,8 @@ export interface QcIpqcVO {
   name: string // 检验单名称
   type: string // IPQC 检验类型
   templateId: number // 检验模板 ID
-  sourceDocId: number // 来源单据 ID
   sourceDocType: number // 来源单据类型
+  sourceDocId: number // 来源单据 ID
   sourceLineId: number // 来源单据行 ID
   workOrderId: number // 生产工单 ID
   workOrderCode: string // 工单编号（关联查询）

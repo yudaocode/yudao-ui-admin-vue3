@@ -28,19 +28,19 @@
             class="!w-220px"
           />
         </el-form-item>
+        <el-form-item label="产品物料" prop="itemId">
+          <MdItemSelect
+            v-model="queryParams.itemId"
+            placeholder="请选择产品物料"
+            class="!w-220px"
+          />
+        </el-form-item>
         <el-form-item label="批次号" prop="batchCode">
           <el-input
             v-model="queryParams.batchCode"
             placeholder="请输入批次号"
             clearable
             @keyup.enter="handleQuery"
-            class="!w-220px"
-          />
-        </el-form-item>
-        <el-form-item label="产品物料" prop="itemId">
-          <MdItemSelect
-            v-model="queryParams.itemId"
-            placeholder="请选择产品物料"
             class="!w-220px"
           />
         </el-form-item>
@@ -89,8 +89,8 @@
         </el-table-column>
         <el-table-column label="流转卡编号" align="center" prop="code" width="160" />
         <el-table-column label="生产工单编号" align="center" prop="workOrderCode" width="160" />
-        <el-table-column label="批次号" align="center" prop="batchCode" width="120" />
         <el-table-column label="产品物料编码" align="center" prop="itemCode" width="140" />
+        <el-table-column label="批次号" align="center" prop="batchCode" width="120" />
         <el-table-column label="产品物料名称" align="left" prop="itemName" min-width="150" />
         <el-table-column label="规格型号" align="center" prop="specification" width="120" />
         <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
@@ -181,8 +181,8 @@ const queryParams = reactive({
   pageSize: 10, // 每页条数
   code: undefined as string | undefined, // 流转卡编号
   workOrderId: undefined as number | undefined, // 生产工单编号
-  batchCode: undefined as string | undefined, // 批次号
-  itemId: undefined as number | undefined // 产品物料编号
+  itemId: undefined as number | undefined, // 产品物料编号
+  batchCode: undefined as string | undefined // 批次号
 })
 
 /** 查询流转卡列表 */
@@ -233,8 +233,8 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryParams.code = undefined
   queryParams.workOrderId = undefined
-  queryParams.batchCode = undefined
   queryParams.itemId = undefined
+  queryParams.batchCode = undefined
   handleQuery()
 }
 
@@ -264,8 +264,8 @@ const open = async (selectedIds?: number[]) => {
   // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
   queryParams.code = undefined
   queryParams.workOrderId = undefined
-  queryParams.batchCode = undefined
   queryParams.itemId = undefined
+  queryParams.batchCode = undefined
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []

@@ -63,19 +63,19 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="来源单据编号" prop="sourceDocCode">
+          <el-form-item label="来源单据类型" prop="sourceDocType">
             <el-input
-              v-model="formData.sourceDocCode"
-              placeholder="请输入来源单据编号"
+              v-model="formData.sourceDocType"
+              placeholder="请输入来源单据类型"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="来源单据类型" prop="sourceDocType">
+          <el-form-item label="来源单据编号" prop="sourceDocCode">
             <el-input
-              v-model="formData.sourceDocType"
-              placeholder="请输入来源单据类型"
+              v-model="formData.sourceDocCode"
+              placeholder="请输入来源单据编号"
               :disabled="isHeaderReadonly"
             />
           </el-form-item>
@@ -153,8 +153,8 @@ const formData = ref({
   type: undefined,
   status: undefined as number | undefined,
   issueDate: undefined,
-  sourceDocCode: undefined,
   sourceDocType: undefined,
+  sourceDocCode: undefined,
   remark: undefined
 })
 const formRules = reactive({
@@ -262,8 +262,8 @@ const resetForm = () => {
     type: undefined,
     status: undefined,
     issueDate: undefined,
-    sourceDocCode: undefined,
     sourceDocType: undefined,
+    sourceDocCode: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()
