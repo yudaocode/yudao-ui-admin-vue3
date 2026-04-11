@@ -113,7 +113,7 @@
           </el-table-column>
           <el-table-column label="设备名称" align="center" prop="name" min-width="150" />
           <el-table-column label="品牌" align="center" prop="brand" width="100" />
-          <el-table-column label="规格型号" align="center" prop="spec" width="120" />
+          <el-table-column label="规格型号" align="center" prop="specification" width="120" />
           <el-table-column label="设备类型" align="center" prop="machineryTypeName" width="120" />
           <el-table-column label="所属车间" align="center" prop="workshopName" width="120" />
           <el-table-column label="设备状态" align="center" prop="status" width="100">

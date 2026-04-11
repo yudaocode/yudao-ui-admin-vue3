@@ -44,9 +44,9 @@
               class="!w-240px"
             />
           </el-form-item>
-          <el-form-item label="型号规格" prop="spec">
+          <el-form-item label="型号规格" prop="specification">
             <el-input
-              v-model="queryParams.spec"
+              v-model="queryParams.specification"
               placeholder="请输入型号规格"
               clearable
               @keyup.enter="handleQuery"
@@ -108,7 +108,7 @@
           </el-table-column>
           <el-table-column label="工具名称" align="center" prop="name" min-width="150" />
           <el-table-column label="品牌" align="center" prop="brand" width="100" />
-          <el-table-column label="型号规格" align="center" prop="spec" width="120" />
+          <el-table-column label="型号规格" align="center" prop="specification" width="120" />
           <el-table-column label="工具类型" align="center" prop="toolTypeName" width="120" />
           <el-table-column label="库存数量" align="center" prop="quantity" width="100" />
           <el-table-column label="可用数量" align="center" prop="availableQuantity" width="100" />
@@ -202,7 +202,7 @@ const queryParams = reactive({
   name: undefined,
   toolTypeId: undefined,
   brand: undefined,
-  spec: undefined,
+  specification: undefined,
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单

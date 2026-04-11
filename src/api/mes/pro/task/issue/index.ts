@@ -14,7 +14,7 @@ export interface ProTaskIssueVO {
   itemId: number // 产品物料编号
   itemName: string // 产品名称
   itemCode: string // 产品编码
-  itemSpec: string // 规格型号
+  itemSpecification: string // 规格型号
   unitMeasureId: number // 单位编号
   unitMeasureName: string // 单位名称
   issuedQuantity: number // 总投料数量

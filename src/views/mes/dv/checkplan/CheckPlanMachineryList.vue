@@ -17,7 +17,7 @@
       <el-table-column label="设备编码" align="center" prop="machineryCode" min-width="120" />
       <el-table-column label="设备名称" align="center" prop="machineryName" min-width="150" />
       <el-table-column label="品牌" align="center" prop="machineryBrand" min-width="100" />
-      <el-table-column label="规格型号" align="center" prop="machinerySpec" min-width="120" />
+      <el-table-column label="规格型号" align="center" prop="machinerySpecification" min-width="120" />
       <el-table-column label="备注" align="center" prop="remark" min-width="120" />
       <el-table-column v-if="isUpdate" label="操作" align="center" width="80">
         <template #default="scope">

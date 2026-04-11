@@ -11,7 +11,7 @@
     <el-table v-loading="loading" :data="bomList" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="BOM 物料编码" align="center" prop="itemCode" width="120" />
       <el-table-column label="BOM 物料名称" align="center" prop="itemName" min-width="150" />
-      <el-table-column label="规格型号" align="center" prop="itemSpec" width="120" />
+      <el-table-column label="规格型号" align="center" prop="itemSpecification" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="物料/产品" align="center" prop="itemOrProduct" width="100">
         <template #default="scope">

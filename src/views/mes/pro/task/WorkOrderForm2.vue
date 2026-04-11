@@ -52,8 +52,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="规格型号" prop="productSpec">
-            <el-input v-model="formData.productSpec" disabled />
+          <el-form-item label="规格型号" prop="productSpecification">
+            <el-input v-model="formData.productSpecification" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">

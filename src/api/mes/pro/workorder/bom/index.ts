@@ -7,7 +7,7 @@ export interface ProWorkOrderBomVO {
   itemId: number // BOM 物料编号
   itemName: string // 物料名称
   itemCode: string // 物料编码
-  itemSpec: string // 规格型号
+  itemSpecification: string // 规格型号
   unitMeasureId: number // 单位编号
   unitMeasureName: string // 单位名称
   quantity: number // 预计使用量

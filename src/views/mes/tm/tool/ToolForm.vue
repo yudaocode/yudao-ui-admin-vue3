@@ -45,8 +45,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="型号规格" prop="spec">
-            <el-input v-model="formData.spec" placeholder="请输入型号规格" />
+          <el-form-item label="型号规格" prop="specification">
+            <el-input v-model="formData.specification" placeholder="请输入型号规格" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -182,7 +182,7 @@ const formData = ref({
   code: undefined,
   name: undefined,
   brand: undefined,
-  spec: undefined,
+  specification: undefined,
   toolTypeId: undefined,
   quantity: 1,
   availableQuantity: 1,
@@ -279,7 +279,7 @@ const resetForm = () => {
     code: undefined,
     name: undefined,
     brand: undefined,
-    spec: undefined,
+    specification: undefined,
     toolTypeId: undefined,
     quantity: 1,
     availableQuantity: 1,

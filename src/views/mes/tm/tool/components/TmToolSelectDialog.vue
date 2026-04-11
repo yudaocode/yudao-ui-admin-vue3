@@ -99,7 +99,7 @@
         <el-table-column label="工具编码" align="center" prop="code" width="120" />
         <el-table-column label="工具名称" align="left" prop="name" min-width="120" />
         <el-table-column label="品牌" align="left" prop="brand" min-width="100" />
-        <el-table-column label="型号规格" align="left" prop="spec" min-width="100" />
+        <el-table-column label="型号规格" align="left" prop="specification" min-width="100" />
         <el-table-column label="工具类型" align="center" prop="toolTypeName" width="120" />
         <el-table-column label="库存数量" align="center" prop="quantity" width="100" />
         <el-table-column label="可用数量" align="center" prop="availableQuantity" width="100" />

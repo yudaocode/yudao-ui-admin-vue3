@@ -26,7 +26,7 @@
           <div>设备编码：{{ selectedItem.code }}</div>
           <div>设备名称：{{ selectedItem.name }}</div>
           <div v-if="selectedItem.brand">品牌：{{ selectedItem.brand }}</div>
-          <div v-if="selectedItem.spec">规格型号：{{ selectedItem.spec }}</div>
+          <div v-if="selectedItem.specification">规格型号：{{ selectedItem.specification }}</div>
         </div>
       </template>
       <el-input

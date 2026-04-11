@@ -30,7 +30,7 @@
           <div>工序：{{ selectedItem.processName || '-' }}</div>
           <div>工作站：{{ selectedItem.workstationName || '-' }}</div>
           <div>物料：{{ selectedItem.itemName || '-' }}</div>
-          <div>规格：{{ selectedItem.itemSpec || '-' }}</div>
+          <div>规格：{{ selectedItem.itemSpecification || '-' }}</div>
         </div>
       </template>
       <el-input

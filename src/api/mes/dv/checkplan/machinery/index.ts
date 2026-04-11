@@ -8,7 +8,7 @@ export interface DvCheckPlanMachineryVO {
   machineryCode: string // 设备编码
   machineryName: string // 设备名称
   machineryBrand: string // 品牌
-  machinerySpec: string // 规格型号
+  machinerySpecification: string // 规格型号
   remark: string // 备注
 }
 

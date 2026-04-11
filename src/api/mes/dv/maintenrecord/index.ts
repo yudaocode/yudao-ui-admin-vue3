@@ -9,7 +9,7 @@ export interface DvMaintenRecordVO {
   machineryCode?: string // 设备编码
   machineryName?: string // 设备名称
   machineryBrand?: string // 品牌
-  machinerySpec?: string // 规格型号
+  machinerySpecification?: string // 规格型号
   maintenTime: Date // 保养时间
   userId: number // 用户编号
   nickname?: string // 保养人名称

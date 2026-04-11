@@ -11,7 +11,7 @@ export interface ProWorkOrderVO {
   productId: number // 产品编号
   productName: string // 产品名称
   productCode: string // 产品编码
-  productSpec: string // 规格型号
+  productSpecification: string // 规格型号
   unitMeasureName: string // 单位名称
   quantity: number // 生产数量
   quantityProduced: number // 已生产数量

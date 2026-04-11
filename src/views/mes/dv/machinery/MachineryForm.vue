@@ -58,8 +58,8 @@
       </el-row>
       <el-row>
         <el-col :span="8">
-          <el-form-item label="规格型号" prop="spec">
-            <el-input v-model="formData.spec" placeholder="请输入规格型号" />
+          <el-form-item label="规格型号" prop="specification">
+            <el-input v-model="formData.specification" placeholder="请输入规格型号" />
           </el-form-item>
         </el-col>
         <el-col v-if="isDetail" :span="8">
@@ -154,7 +154,7 @@ const formData = ref({
   code: undefined,
   name: undefined,
   brand: undefined,
-  spec: undefined,
+  specification: undefined,
   machineryTypeId: undefined,
   workshopId: undefined,
   status: MesDvMachineryStatusEnum.STOP,
@@ -235,7 +235,7 @@ const resetForm = () => {
     code: undefined,
     name: undefined,
     brand: undefined,
-    spec: undefined,
+    specification: undefined,
     machineryTypeId: undefined,
     workshopId: undefined,
     status: MesDvMachineryStatusEnum.STOP,

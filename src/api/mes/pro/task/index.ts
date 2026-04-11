@@ -17,7 +17,7 @@ export interface ProTaskVO {
   itemId: number // 产品物料编号
   itemName: string // 产品名称
   itemCode: string // 产品编码
-  itemSpec: string // 规格型号
+  itemSpecification: string // 规格型号
   quantity: number // 排产数量
   producedQuantity: number // 已生产数量
   qualifyQuantity: number // 合格品数量

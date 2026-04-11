@@ -26,7 +26,7 @@
           <div>工具编码：{{ selectedItem.code }}</div>
           <div>工具名称：{{ selectedItem.name }}</div>
           <div v-if="selectedItem.brand">品牌：{{ selectedItem.brand }}</div>
-          <div v-if="selectedItem.spec">型号规格：{{ selectedItem.spec }}</div>
+          <div v-if="selectedItem.specification">型号规格：{{ selectedItem.specification }}</div>
           <div v-if="selectedItem.toolTypeName">工具类型：{{ selectedItem.toolTypeName }}</div>
         </div>
       </template>

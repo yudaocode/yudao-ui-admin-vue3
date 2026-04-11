@@ -9,7 +9,7 @@ export interface DvRepairVO {
   machineryCode?: string // 设备编码
   machineryName?: string // 设备名称
   machineryBrand?: string // 品牌
-  machinerySpec?: string // 规格型号
+  machinerySpecification?: string // 规格型号
   requireDate: Date // 报修日期
   finishDate: Date // 维修完成日期
   confirmDate: Date // 验收日期

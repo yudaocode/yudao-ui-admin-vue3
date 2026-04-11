@@ -9,7 +9,7 @@ export interface DvCheckRecordVO {
   machineryCode?: string // 设备编码
   machineryName?: string // 设备名称
   machineryBrand?: string // 品牌
-  machinerySpec?: string // 规格型号
+  machinerySpecification?: string // 规格型号
   checkTime: Date // 点检时间
   userId: number // 点检人编号
   nickname?: string // 点检人名称

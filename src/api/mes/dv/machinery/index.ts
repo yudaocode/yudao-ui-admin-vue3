@@ -6,7 +6,7 @@ export interface DvMachineryVO {
   code: string // 设备编码
   name: string // 设备名称
   brand: string // 品牌
-  spec: string // 规格型号
+  specification: string // 规格型号
   machineryTypeId: number // 设备类型编号
   machineryTypeName: string // 设备类型名称
   workshopId: number // 所属车间编号

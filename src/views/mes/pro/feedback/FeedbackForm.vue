@@ -425,7 +425,7 @@ const handleTaskChange = async (task: any) => {
     itemCode: task.itemCode || '',
     itemName: task.itemName || '',
     unitMeasureName: '',
-    itemSpecification: task.itemSpec || ''
+    itemSpecification: task.itemSpecification || ''
   }
   await loadCheckFlag(task.routeId, task.processId)
 }

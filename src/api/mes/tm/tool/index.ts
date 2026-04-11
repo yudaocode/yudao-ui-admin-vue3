@@ -6,7 +6,7 @@ export interface TmToolVO {
   code: string // 工具编码
   name: string // 工具名称
   brand: string // 品牌
-  spec: string // 型号规格
+  specification: string // 型号规格
   toolTypeId: number // 工具类型编号
   toolTypeName: string // 工具类型名称
   quantity: number // 数量

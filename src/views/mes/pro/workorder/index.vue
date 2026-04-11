@@ -127,7 +127,7 @@
       <el-table-column label="来源单据编号" align="center" prop="orderSourceCode" width="140" />
       <el-table-column label="产品编码" align="center" prop="productCode" width="120" />
       <el-table-column label="产品名称" align="center" prop="productName" min-width="120" />
-      <el-table-column label="规格型号" align="center" prop="productSpec" width="120" />
+      <el-table-column label="规格型号" align="center" prop="productSpecification" width="120" />
       <el-table-column label="单位" align="center" prop="unitMeasureName" width="80" />
       <el-table-column label="工单数量" align="center" prop="quantity" width="100" />
       <el-table-column label="已生产数量" align="center" prop="quantityProduced" width="100" />

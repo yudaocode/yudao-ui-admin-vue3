@@ -74,7 +74,7 @@
       </el-table-column>
       <el-table-column label="设备名称" align="center" prop="machineryName" min-width="120" />
       <el-table-column label="品牌" align="center" prop="machineryBrand" />
-      <el-table-column label="规格型号" align="center" prop="machinerySpec" min-width="120" />
+      <el-table-column label="规格型号" align="center" prop="machinerySpecification" min-width="120" />
       <el-table-column label="计划编码" align="center" prop="planCode" min-width="120" />
       <el-table-column label="计划名称" align="center" prop="planName" min-width="120" />
       <el-table-column
