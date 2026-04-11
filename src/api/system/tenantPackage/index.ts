@@ -36,6 +36,12 @@ export const updateTenantPackage = (data: TenantPackageVO) => {
 export const deleteTenantPackage = (id: number) => {
   return request.delete({ url: '/system/tenant-package/delete?id=' + id })
 }
+
+// 批量删除租户套餐
+export const deleteTenantPackageList = (ids: number[]) => {
+  return request.delete({ url: '/system/tenant-package/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 获取租户套餐精简信息列表
 export const getTenantPackageList = () => {
   return request.get({ url: '/system/tenant-package/simple-list' })

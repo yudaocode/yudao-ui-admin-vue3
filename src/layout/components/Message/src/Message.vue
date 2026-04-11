@@ -1,10 +1,17 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'
+import { useUserStoreWithOut } from '@/store/modules/user'
+import { propTypes } from '@/utils/propTypes'
 
 defineOptions({ name: 'Message' })
 
+defineProps({
+  color: propTypes.string.def('')
+})
+
 const { push } = useRouter()
+const userStore = useUserStoreWithOut()
 const activeName = ref('notice')
 const unreadCount = ref(0) // 未读消息数量
 const list = ref<any[]>([]) // 消息列表
@@ -37,7 +44,11 @@ onMounted(() => {
   // 轮询刷新小红点
   setInterval(
     () => {
-      getUnreadCount()
+      if (userStore.getIsSetUser) {
+        getUnreadCount()
+      } else {
+        unreadCount.value = 0
+      }
     },
     1000 * 60 * 2
   )
@@ -48,7 +59,7 @@ onMounted(() => {
     <ElPopover :width="400" placement="bottom" trigger="click">
       <template #reference>
         <ElBadge :is-dot="unreadCount > 0" class="item">
-          <Icon :size="18" class="cursor-pointer" icon="ep:bell" @click="getList" />
+          <Icon :size="18" class="cursor-pointer" icon="ep:bell" :color="color" @click="getList" />
         </ElBadge>
       </template>
       <ElTabs v-model="activeName">

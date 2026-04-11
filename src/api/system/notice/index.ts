@@ -36,6 +36,11 @@ export const deleteNotice = (id: number) => {
   return request.delete({ url: '/system/notice/delete?id=' + id })
 }
 
+// 批量删除公告
+export const deleteNoticeList = (ids: number[]) => {
+  return request.delete({ url: '/system/notice/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 推送公告
 export const pushNotice = (id: number) => {
   return request.post({ url: '/system/notice/push?id=' + id })

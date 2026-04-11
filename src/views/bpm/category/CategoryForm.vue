@@ -13,6 +13,9 @@
       <el-form-item label="分类标志" prop="code">
         <el-input v-model="formData.code" placeholder="请输入分类标志" />
       </el-form-item>
+      <el-form-item label="分类描述" prop="description">
+        <el-input v-model="formData.description" type="textarea" placeholder="请输入分类描述" />
+      </el-form-item>
       <el-form-item label="分类状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
@@ -42,6 +45,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
+import { CommonStatusEnum } from '@/utils/constants'
 
 /** BPM 流程分类 表单 */
 defineOptions({ name: 'CategoryForm' })
@@ -57,7 +61,8 @@ const formData = ref({
   id: undefined,
   name: undefined,
   code: undefined,
-  status: undefined,
+  description: undefined,
+  status: CommonStatusEnum.ENABLE,
   sort: undefined
 })
 const formRules = reactive({
@@ -116,7 +121,8 @@ const resetForm = () => {
     id: undefined,
     name: undefined,
     code: undefined,
-    status: undefined,
+    description: undefined,
+    status: CommonStatusEnum.ENABLE,
     sort: undefined
   }
   formRef.value?.resetFields()

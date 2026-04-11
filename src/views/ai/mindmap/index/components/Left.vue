@@ -8,7 +8,7 @@
         <el-input
           v-model="formData.prompt"
           maxlength="1024"
-          rows="5"
+          :rows="5"
           class="w-100% mt-15px"
           input-style="border-radius: 7px;"
           placeholder="请输入提示词，让AI帮你完善"
@@ -29,7 +29,7 @@
         <el-input
           v-model="generatedContent"
           maxlength="1024"
-          rows="5"
+          :rows="5"
           class="w-100% mt-15px"
           input-style="border-radius: 7px;"
           placeholder="例如：童话里的小屋应该是什么样子？"

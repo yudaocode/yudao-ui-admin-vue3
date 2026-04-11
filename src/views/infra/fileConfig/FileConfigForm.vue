@@ -5,7 +5,7 @@
       v-loading="formLoading"
       :model="formData"
       :rules="formRules"
-      label-width="120px"
+      label-width="130px"
     >
       <el-form-item label="配置名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入配置名" />
@@ -83,6 +83,30 @@
       <el-form-item v-if="formData.storage === 20" label="accessSecret" prop="config.accessSecret">
         <el-input v-model="formData.config.accessSecret" placeholder="请输入 accessSecret" />
       </el-form-item>
+      <el-form-item
+        v-if="formData.storage === 20"
+        label="是否 Path Style"
+        prop="config.enablePathStyleAccess"
+      >
+        <el-radio-group v-model="formData.config.enablePathStyleAccess">
+          <el-radio key="true" :value="true">启用</el-radio>
+          <el-radio key="false" :value="false">禁用</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item
+        v-if="formData.storage === 20"
+        label="公开访问"
+        prop="config.enablePublicAccess"
+      >
+        <el-radio-group v-model="formData.config.enablePublicAccess">
+          <el-radio key="true" :value="true">公开</el-radio>
+          <el-radio key="false" :value="false">私有</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item v-if="formData.storage === 20" label="区域">
+        <!-- 选填，无需参数校验 -->
+        <el-input v-model="formData.config.region" placeholder="请填写区域，一般仅 AWS 需要填写" />
+      </el-form-item>
       <!-- 通用 -->
       <el-form-item v-if="formData.storage === 20" label="自定义域名">
         <!-- 无需参数校验，所以去掉 prop -->
@@ -133,6 +157,10 @@ const formRules = reactive<FormRules>({
     bucket: [{ required: true, message: '存储 bucket 不能为空', trigger: 'blur' }],
     accessKey: [{ required: true, message: 'accessKey 不能为空', trigger: 'blur' }],
     accessSecret: [{ required: true, message: 'accessSecret 不能为空', trigger: 'blur' }],
+    enablePathStyleAccess: [
+      { required: true, message: '是否 PathStyle 访问不能为空', trigger: 'change' }
+    ],
+    enablePublicAccess: [{ required: true, message: '公开访问设置不能为空', trigger: 'change' }],
     domain: [{ required: true, message: '自定义域名不能为空', trigger: 'blur' }]
   } as FormRules
 })

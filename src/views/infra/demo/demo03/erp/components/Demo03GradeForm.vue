@@ -7,7 +7,7 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="名字" prop="name">
+       <el-form-item label="名字" prop="name">
         <el-input v-model="formData.name" placeholder="请输入名字" />
       </el-form-item>
       <el-form-item label="班主任" prop="teacher">
@@ -21,7 +21,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/erp'
+import { Demo03StudentApi, Demo03Grade } from '@/api/infra/demo/demo03/erp'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -34,22 +34,22 @@ const formData = ref({
   id: undefined,
   studentId: undefined,
   name: undefined,
-  teacher: undefined
+  teacher: undefined,
 })
 const formRules = reactive({
   studentId: [{ required: true, message: '学生编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
-  teacher: [{ required: true, message: '班主任不能为空', trigger: 'blur' }]
+  teacher: [{ required: true, message: '班主任不能为空', trigger: 'blur' }],
 })
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number, studentId: number) => {
+const open = async (type: string, id?: number, studentId?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  formData.value.studentId = studentId
+  formData.value.studentId = studentId  as any
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -70,7 +70,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value
+    const data = formData.value as unknown as  Demo03Grade
     if (formType.value === 'create') {
       await Demo03StudentApi.createDemo03Grade(data)
       message.success(t('common.createSuccess'))
@@ -92,7 +92,7 @@ const resetForm = () => {
     id: undefined,
     studentId: undefined,
     name: undefined,
-    teacher: undefined
+    teacher: undefined,
   }
   formRef.value?.resetFields()
 }

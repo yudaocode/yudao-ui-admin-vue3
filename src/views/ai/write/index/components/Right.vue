@@ -45,7 +45,7 @@
 import { useClipboard } from '@vueuse/core'
 
 const message = useMessage() // 消息弹窗
-const { copied, copy } = useClipboard() // 粘贴板
+const { copied, copy } = useClipboard({ legacy: true }) // 粘贴板
 
 const props = defineProps({
   content: {

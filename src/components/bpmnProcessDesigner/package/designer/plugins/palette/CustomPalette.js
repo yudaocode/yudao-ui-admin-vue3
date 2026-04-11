@@ -165,6 +165,18 @@ F.prototype.getPaletteEntries = function () {
       'bpmn-icon-user-task',
       translate('Create User Task')
     ),
+    'create.call-activity': createAction(
+      'bpmn:CallActivity',
+      'activity',
+      'bpmn-icon-call-activity',
+      translate('Create Call Activity')
+    ),
+    'create.service-task': createAction(
+      'bpmn:ServiceTask',
+      'activity',
+      'bpmn-icon-service',
+      translate('Create Service Task')
+    ),
     'create.data-object': createAction(
       'bpmn:DataObjectReference',
       'data-object',

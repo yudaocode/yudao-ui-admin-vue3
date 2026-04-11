@@ -1,4 +1,5 @@
 <!-- 列表选择通用组件，参考 ProductList 组件使用 -->
+<!-- TODO 芋艿：可能会移除 -->
 <template>
   <Dialog v-model="dialogVisible" :appendToBody="true" :scroll="true" :title="title" width="60%">
     <el-table

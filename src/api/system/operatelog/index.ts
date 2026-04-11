@@ -26,5 +26,5 @@ export const getOperateLogPage = (params: PageParam) => {
 }
 // 导出操作日志
 export const exportOperateLog = (params: any) => {
-  return request.download({ url: '/system/operate-log/export', params })
+  return request.download({ url: '/system/operate-log/export-excel', params })
 }

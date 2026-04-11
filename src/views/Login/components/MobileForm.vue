@@ -9,14 +9,14 @@
     label-width="120px"
     size="large"
   >
-    <el-row style="margin-right: -10px; margin-left: -10px">
+    <el-row class="mx-[-10px]">
       <!-- 租户名 -->
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item>
-          <LoginFormTitle style="width: 100%" />
+          <LoginFormTitle class="w-full" />
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item v-if="loginData.tenantEnable === 'true'" prop="tenantName">
           <el-input
             v-model="loginData.loginForm.tenantName"
@@ -28,7 +28,7 @@
         </el-form-item>
       </el-col>
       <!-- 手机号 -->
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item prop="mobileNumber">
           <el-input
             v-model="loginData.loginForm.mobileNumber"
@@ -38,7 +38,7 @@
         </el-form-item>
       </el-col>
       <!-- 验证码 -->
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item prop="code">
           <el-row :gutter="5" justify="space-between" style="width: 100%">
             <el-col :span="24">
@@ -68,23 +68,23 @@
         </el-form-item>
       </el-col>
       <!-- 登录按钮 / 返回按钮 -->
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item>
           <XButton
             :loading="loginLoading"
             :title="t('login.login')"
-            class="w-[100%]"
+            class="w-full"
             type="primary"
             @click="signIn()"
           />
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+      <el-col :span="24" class="px-10px">
         <el-form-item>
           <XButton
             :loading="loginLoading"
             :title="t('login.backLogin')"
-            class="w-[100%]"
+            class="w-full"
             @click="handleBackLogin()"
           />
         </el-form-item>

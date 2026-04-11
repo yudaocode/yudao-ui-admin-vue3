@@ -17,13 +17,7 @@
             :rules="formRules.warehouseId"
             class="mb-0px!"
           >
-            <el-select
-              v-model="row.warehouseId"
-              clearable
-              filterable
-              placeholder="请选择仓库"
-              @change="onChangeWarehouse($event, row)"
-            >
+            <el-select v-model="row.warehouseId" clearable filterable placeholder="请选择仓库">
               <el-option
                 v-for="item in warehouseList"
                 :key="item.id"

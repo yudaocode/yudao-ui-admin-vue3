@@ -1,18 +1,17 @@
 <template>
   <div
     class="h-50px bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
-    v-if="runningTask.id"
   >
     <!-- 【通过】按钮 -->
     <el-popover
-      :visible="passVisible"
+      :visible="popOverVisible.approve"
       placement="top-end"
-      :width="500"
+      :width="420"
       trigger="click"
-      v-if="isShowButton(OperationButtonType.APPROVE)"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
     >
       <template #reference>
-        <el-button plain type="success" @click="openPopover('1')">
+        <el-button plain type="success" @click="openPopover('approve')">
           <Icon icon="ep:select" />&nbsp; {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
         </el-button>
       </template>
@@ -21,18 +20,12 @@
         <el-form
           label-position="top"
           class="mb-auto"
-          ref="formRef"
-          :model="auditForm"
-          :rules="auditRule"
+          ref="approveFormRef"
+          :model="approveReasonForm"
+          :rules="approveReasonRule"
           label-width="100px"
         >
-          <el-form-item v-if="processInstance && processInstance.startUser" label="流程发起人">
-            {{ processInstance?.startUser.nickname }}
-            <el-tag size="small" type="info" class="ml-8px">
-              {{ processInstance?.startUser.deptName }}
-            </el-tag>
-          </el-form-item>
-          <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
+          <el-card v-if="runningTask?.formId > 0" class="mb-15px !-mt-10px">
             <template #header>
               <span class="el-icon-picture-outline"> 填写表单【{{ runningTask?.formName }}】 </span>
             </template>
@@ -43,25 +36,52 @@
               :rule="approveForm.rule"
             />
           </el-card>
-          <el-form-item label="审批建议" prop="reason">
-            <el-input v-model="auditForm.reason" placeholder="请输入审批建议" type="textarea" />
+          <el-form-item :label="`${nodeTypeName}意见`" prop="reason">
+            <el-input
+              v-model="approveReasonForm.reason"
+              :placeholder="`请输入${nodeTypeName}意见`"
+              type="textarea"
+              :rows="4"
+            />
           </el-form-item>
-          <el-form-item label="抄送人" prop="copyUserIds">
-            <el-select v-model="auditForm.copyUserIds" multiple placeholder="请选择抄送人">
-              <el-option
-                v-for="itemx in userOptions"
-                :key="itemx.id"
-                :label="itemx.nickname"
-                :value="itemx.id"
+          <el-form-item
+            label="下一个节点的审批人"
+            prop="nextAssignees"
+            v-if="nextAssigneesActivityNode.length > 0"
+          >
+            <div class="ml-10px -mt-15px -mb-35px">
+              <ProcessInstanceTimeline
+                ref="nextAssigneesTimelineRef"
+                :activity-nodes="nextAssigneesActivityNode"
+                :show-status-icon="false"
+                :enable-approve-user-select="true"
+                @select-user-confirm="selectNextAssigneesConfirm"
               />
-            </el-select>
+            </div>
           </el-form-item>
-
+          <el-form-item
+            v-if="runningTask.signEnable"
+            label="签名"
+            prop="signPicUrl"
+            ref="approveSignFormRef"
+          >
+            <el-button @click="signRef.open()">点击签名</el-button>
+            <el-image
+              class="w-90px h-40px ml-5px"
+              v-if="approveReasonForm.signPicUrl"
+              :src="approveReasonForm.signPicUrl"
+              :preview-src-list="[approveReasonForm.signPicUrl]"
+            />
+          </el-form-item>
           <el-form-item>
-            <el-button :disabled="formLoading" type="success" @click="handleAudit(true)">
+            <el-button
+              :disabled="formLoading"
+              type="success"
+              @click="handleAudit(true, approveFormRef)"
+            >
               {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
             </el-button>
-            <el-button @click="passVisible = false"> 取消 </el-button>
+            <el-button @click="closePopover('approve', approveFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -69,14 +89,14 @@
 
     <!-- 【拒绝】按钮 -->
     <el-popover
-      :visible="rejectVisible"
+      :visible="popOverVisible.reject"
       placement="top-end"
-      :width="500"
+      :width="420"
       trigger="click"
-      v-if="isShowButton(OperationButtonType.REJECT)"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.REJECT)"
     >
       <template #reference>
-        <el-button class="mr-20px" plain type="danger" @click="openPopover('2')">
+        <el-button class="mr-20px" plain type="danger" @click="openPopover('reject')">
           <Icon icon="ep:close" />&nbsp; {{ getButtonDisplayName(OperationButtonType.REJECT) }}
         </el-button>
       </template>
@@ -85,128 +105,573 @@
         <el-form
           label-position="top"
           class="mb-auto"
-          ref="formRef"
-          :model="auditForm"
-          :rules="auditRule"
+          ref="rejectFormRef"
+          :model="rejectReasonForm"
+          :rules="rejectReasonRule"
           label-width="100px"
         >
-          <el-form-item v-if="processInstance && processInstance.startUser" label="流程发起人">
-            {{ processInstance?.startUser.nickname }}
-            <el-tag size="small" type="info" class="ml-8px">
-              {{ processInstance?.startUser.deptName }}
-            </el-tag>
-          </el-form-item>
-          <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
-            <template #header>
-              <span class="el-icon-picture-outline"> 填写表单【{{ runningTask?.formName }}】 </span>
-            </template>
-            <form-create
-              v-model="approveForm.value"
-              v-model:api="approveFormFApi"
-              :option="approveForm.option"
-              :rule="approveForm.rule"
+          <el-form-item label="审批意见" prop="reason">
+            <el-input
+              v-model="rejectReasonForm.reason"
+              placeholder="请输入审批意见"
+              type="textarea"
+              :rows="4"
             />
-          </el-card>
-          <el-form-item label="审批建议" prop="reason">
-            <el-input v-model="auditForm.reason" placeholder="请输入审批建议" type="textarea" />
           </el-form-item>
-          <el-form-item label="抄送人" prop="copyUserIds">
-            <el-select v-model="auditForm.copyUserIds" multiple placeholder="请选择抄送人">
-              <el-option
-                v-for="itemx in userOptions"
-                :key="itemx.id"
-                :label="itemx.nickname"
-                :value="itemx.id"
-              />
-            </el-select>
-          </el-form-item>
-
           <el-form-item>
-            <el-button :disabled="formLoading" type="danger" @click="handleAudit(false)">
+            <el-button
+              :disabled="formLoading"
+              type="danger"
+              @click="handleAudit(false, rejectFormRef)"
+            >
               {{ getButtonDisplayName(OperationButtonType.REJECT) }}
             </el-button>
-            <el-button @click="rejectVisible = false"> 取消 </el-button>
+            <el-button @click="closePopover('reject', rejectFormRef)"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
     </el-popover>
 
     <!-- 【抄送】按钮 -->
-    <div @click="handleSend"> <Icon :size="14" icon="svg-icon:send" />&nbsp;抄送 </div>
+    <el-popover
+      :visible="popOverVisible.copy"
+      placement="top-start"
+      :width="420"
+      trigger="click"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.COPY)"
+    >
+      <template #reference>
+        <div @click="openPopover('copy')" class="hover-bg-gray-100 rounded-xl p-6px">
+          <Icon :size="14" icon="svg-icon:send" />&nbsp;
+          {{ getButtonDisplayName(OperationButtonType.COPY) }}
+        </div>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="copyFormRef"
+          :model="copyForm"
+          :rules="copyFormRule"
+          label-width="100px"
+        >
+          <el-form-item label="抄送人" prop="copyUserIds">
+            <el-select
+              v-model="copyForm.copyUserIds"
+              clearable
+              style="width: 100%"
+              multiple
+              placeholder="请选择抄送人"
+            >
+              <el-option
+                v-for="item in userOptions"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="抄送意见" prop="copyReason">
+            <el-input
+              v-model="copyForm.copyReason"
+              clearable
+              placeholder="请输入抄送意见"
+              type="textarea"
+              :rows="3"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="handleCopy">
+              {{ getButtonDisplayName(OperationButtonType.COPY) }}
+            </el-button>
+            <el-button @click="closePopover('copy', copyFormRef)"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
 
-    <!-- 【转交】按钮 -->
-    <div @click="openTaskUpdateAssigneeForm" v-if="isShowButton(OperationButtonType.TRANSFER)">
-      <Icon :size="14" icon="fa:share-square-o" />&nbsp;
-      {{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
-    </div>
+    <!-- 【转办】按钮 -->
+    <el-popover
+      :visible="popOverVisible.transfer"
+      placement="top-start"
+      :width="420"
+      trigger="click"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.TRANSFER)"
+    >
+      <template #reference>
+        <div @click="openPopover('transfer')" class="hover-bg-gray-100 rounded-xl p-6px">
+          <Icon :size="14" icon="fa:share-square-o" />&nbsp;
+          {{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
+        </div>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="transferFormRef"
+          :model="transferForm"
+          :rules="transferFormRule"
+          label-width="100px"
+        >
+          <el-form-item label="新审批人" prop="assigneeUserId">
+            <el-select v-model="transferForm.assigneeUserId" clearable style="width: 100%">
+              <el-option
+                v-for="item in userOptions"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="审批意见" prop="reason">
+            <el-input
+              v-model="transferForm.reason"
+              clearable
+              placeholder="请输入审批意见"
+              type="textarea"
+              :rows="3"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="handleTransfer()">
+              {{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
+            </el-button>
+            <el-button @click="closePopover('transfer', transferFormRef)"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
 
-    <!-- 【委托】按钮 -->
-    <div @click="handleDelegate" v-if="isShowButton(OperationButtonType.DELEGATE)">
-      <Icon :size="14" icon="ep:position" />&nbsp;
-      {{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
-    </div>
+    <!-- 【委派】按钮 -->
+    <el-popover
+      :visible="popOverVisible.delegate"
+      placement="top-start"
+      :width="420"
+      trigger="click"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.DELEGATE)"
+    >
+      <template #reference>
+        <div @click="openPopover('delegate')" class="hover-bg-gray-100 rounded-xl p-6px">
+          <Icon :size="14" icon="ep:position" />&nbsp;
+          {{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
+        </div>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="delegateFormRef"
+          :model="delegateForm"
+          :rules="delegateFormRule"
+          label-width="100px"
+        >
+          <el-form-item label="接收人" prop="delegateUserId">
+            <el-select v-model="delegateForm.delegateUserId" clearable style="width: 100%">
+              <el-option
+                v-for="item in userOptions"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="审批意见" prop="reason">
+            <el-input
+              v-model="delegateForm.reason"
+              clearable
+              placeholder="请输入审批意见"
+              type="textarea"
+              :rows="3"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="handleDelegate()">
+              {{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
+            </el-button>
+            <el-button @click="closePopover('delegate', delegateFormRef)"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
 
-    <!-- 【加签】 -->
-    <div @click="handleSign" v-if="isShowButton(OperationButtonType.ADD_SIGN)">
-      <Icon :size="14" icon="ep:plus" />&nbsp;
-      {{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
-    </div>
-    <!-- TODO @jason：减签 -->
+    <!-- 【加签】按钮 当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
+    <el-popover
+      :visible="popOverVisible.addSign"
+      placement="top-start"
+      :width="420"
+      trigger="click"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.ADD_SIGN)"
+    >
+      <template #reference>
+        <div @click="openPopover('addSign')" class="hover-bg-gray-100 rounded-xl p-6px">
+          <Icon :size="14" icon="ep:plus" />&nbsp;
+          {{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
+        </div>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="addSignFormRef"
+          :model="addSignForm"
+          :rules="addSignFormRule"
+          label-width="100px"
+        >
+          <el-form-item label="加签处理人" prop="addSignUserIds">
+            <el-select v-model="addSignForm.addSignUserIds" multiple clearable style="width: 100%">
+              <el-option
+                v-for="item in userOptions"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="审批意见" prop="reason">
+            <el-input
+              v-model="addSignForm.reason"
+              clearable
+              placeholder="请输入审批意见"
+              type="textarea"
+              :rows="3"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="handlerAddSign('before')">
+              向前{{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
+            </el-button>
+            <el-button :disabled="formLoading" type="primary" @click="handlerAddSign('after')">
+              向后{{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
+            </el-button>
+            <el-button @click="closePopover('addSign', addSignFormRef)"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
+
+    <!-- 【减签】按钮 -->
+    <el-popover
+      :visible="popOverVisible.deleteSign"
+      placement="top-start"
+      :width="420"
+      trigger="click"
+      v-if="runningTask?.children.length > 0"
+    >
+      <template #reference>
+        <div @click="openPopover('deleteSign')" class="hover-bg-gray-100 rounded-xl p-6px">
+          <Icon :size="14" icon="ep:semi-select" />&nbsp; 减签
+        </div>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="deleteSignFormRef"
+          :model="deleteSignForm"
+          :rules="deleteSignFormRule"
+          label-width="100px"
+        >
+          <el-form-item label="减签人员" prop="deleteSignTaskId">
+            <el-select v-model="deleteSignForm.deleteSignTaskId" clearable style="width: 100%">
+              <el-option
+                v-for="item in runningTask.children"
+                :key="item.id"
+                :label="getDeleteSignUserLabel(item)"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="审批意见" prop="reason">
+            <el-input
+              v-model="deleteSignForm.reason"
+              clearable
+              placeholder="请输入审批意见"
+              type="textarea"
+              :rows="3"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="handlerDeleteSign()">
+              减签
+            </el-button>
+            <el-button @click="closePopover('deleteSign', deleteSignFormRef)"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
 
     <!-- 【退回】按钮 -->
-    <div @click="handleBack" v-if="isShowButton(OperationButtonType.RETURN)">
-      <Icon :size="14" icon="fa:mail-reply" />&nbsp;
-      {{ getButtonDisplayName(OperationButtonType.RETURN) }}
-    </div>
+    <el-popover
+      :visible="popOverVisible.return"
+      placement="top-start"
+      :width="420"
+      trigger="click"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.RETURN)"
+    >
+      <template #reference>
+        <div @click="openPopover('return')" class="hover-bg-gray-100 rounded-xl p-6px">
+          <Icon :size="14" icon="ep:back" />&nbsp;
+          {{ getButtonDisplayName(OperationButtonType.RETURN) }}
+        </div>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="returnFormRef"
+          :model="returnForm"
+          :rules="returnFormRule"
+          label-width="100px"
+        >
+          <el-form-item label="退回节点" prop="targetTaskDefinitionKey">
+            <el-select v-model="returnForm.targetTaskDefinitionKey" clearable style="width: 100%">
+              <el-option
+                v-for="item in returnList"
+                :key="item.taskDefinitionKey"
+                :label="item.name"
+                :value="item.taskDefinitionKey"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="退回理由" prop="returnReason">
+            <el-input
+              v-model="returnForm.returnReason"
+              clearable
+              placeholder="请输入退回理由"
+              type="textarea"
+              :rows="3"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="handleReturn()">
+              {{ getButtonDisplayName(OperationButtonType.RETURN) }}
+            </el-button>
+            <el-button @click="closePopover('return', returnFormRef)"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
 
-    <!--TODO @jason：撤回 -->
-    <!--TODO @jason：再次发起 -->
+    <!--【取消】按钮 这个对应发起人的取消, 只有发起人可以取消 -->
+    <el-popover
+      :visible="popOverVisible.cancel"
+      placement="top-start"
+      :width="420"
+      trigger="click"
+      v-if="
+        userId === processInstance?.startUser?.id && !isEndProcessStatus(processInstance?.status)
+      "
+    >
+      <template #reference>
+        <div @click="openPopover('cancel')" class="hover-bg-gray-100 rounded-xl p-6px">
+          <Icon :size="14" icon="fa:mail-reply" />&nbsp; 取消
+        </div>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="cancelFormRef"
+          :model="cancelForm"
+          :rules="cancelFormRule"
+          label-width="100px"
+        >
+          <el-form-item label="取消理由" prop="cancelReason">
+            <span class="text-#878c93 text-12px">&nbsp; 取消后，该审批流程将自动结束</span>
+            <el-input
+              v-model="cancelForm.cancelReason"
+              clearable
+              placeholder="请输入取消理由"
+              type="textarea"
+              :rows="3"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="handleCancel()">
+              确认
+            </el-button>
+            <el-button @click="closePopover('cancel', cancelFormRef)"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
+    <!-- 【再次提交】 按钮-->
+    <div
+      @click="handleReCreate()"
+      class="hover-bg-gray-100 rounded-xl p-6px"
+      v-if="
+        userId === processInstance?.startUser?.id &&
+        isEndProcessStatus(processInstance?.status) &&
+        processDefinition?.formType === 10
+      "
+    >
+      <Icon :size="14" icon="ep:refresh" />&nbsp; 再次提交
+    </div>
   </div>
 
-  <!-- 弹窗：转派审批人 -->
-  <TaskTransferForm ref="taskTransferFormRef" @success="getDetail" />
-  <!-- 弹窗：回退节点 -->
-  <TaskReturnForm ref="taskReturnFormRef" @success="getDetail" />
-  <!-- 弹窗：委派，将任务委派给别人处理，处理完成后，会重新回到原审批人手中-->
-  <TaskDelegateForm ref="taskDelegateForm" @success="getDetail" />
-  <!-- 弹窗：加签，当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
-  <TaskSignCreateForm ref="taskSignCreateFormRef" @success="getDetail" />
+  <!-- 签名弹窗 -->
+  <SignDialog ref="signRef" @success="handleSignFinish" />
 </template>
 <script lang="ts" setup>
+import { useUserStoreWithOut } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
-import { useUserStore } from '@/store/modules/user'
 import * as TaskApi from '@/api/bpm/task'
-import { propTypes } from '@/utils/propTypes'
-import TaskReturnForm from './dialog/TaskReturnForm.vue'
-import TaskDelegateForm from './dialog/TaskDelegateForm.vue'
-import TaskTransferForm from './dialog/TaskTransferForm.vue'
-import TaskSignCreateForm from './dialog/TaskSignCreateForm.vue'
-import { isEmpty } from '@/utils/is'
+import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+import * as UserApi from '@/api/system/user'
 import {
+  NodeType,
+  OPERATION_BUTTON_NAME,
   OperationButtonType,
-  OPERATION_BUTTON_NAME
+  CandidateStrategy
 } from '@/components/SimpleProcessDesignerV2/src/consts'
-defineOptions({ name: 'ProcessInstanceBtnConatiner' })
+import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/constants'
+import type { FormInstance, FormRules } from 'element-plus'
+import SignDialog from './SignDialog.vue'
+import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
+import { isEmpty } from '@/utils/is'
 
-const userId = useUserStore().getUser.id // 当前登录的编号
+defineOptions({ name: 'ProcessInstanceBtnContainer' })
+
+const router = useRouter() // 路由
 const message = useMessage() // 消息弹窗
-const { proxy } = getCurrentInstance() as any
+
+const userId = useUserStoreWithOut().getUser.id // 当前登录的编号
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-defineProps({
-  processInstance: propTypes.any, // 流程实例信息
-  userOptions: propTypes.any
-})
+
+const props = defineProps<{
+  processInstance: any // 流程实例信息
+  processDefinition: any // 流程定义信息
+  userOptions: UserApi.UserVO[]
+  normalForm: any // 流程表单 formCreate
+  normalFormApi: any // 流程表单 formCreate Api
+  writableFields: string[] // 流程表单可以编辑的字段
+}>()
+
 const formLoading = ref(false) // 表单加载中
-const passVisible = ref(false) // 是否显示
-const rejectVisible = ref(false) // 是否显示
+const popOverVisible = ref({
+  approve: false,
+  reject: false,
+  transfer: false,
+  delegate: false,
+  addSign: false,
+  return: false,
+  copy: false,
+  cancel: false,
+  deleteSign: false
+}) // 气泡卡是否展示
+const returnList = ref([] as any) // 退回节点
+
 // ========== 审批信息 ==========
-const runningTask = ref<any>({}) // 运行中的任务
-const auditForm = ref<any>({}) // 审批任务的表单
+const runningTask = ref<any>() // 运行中的任务
 const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
-const formRef = ref()
-const auditRule = reactive({
-  reason: [{ required: true, message: '审批建议不能为空', trigger: 'blur' }]
+const nodeTypeName = ref('审批') // 节点类型名称
+
+// 审批通过意见表单
+const reasonRequire = ref()
+const approveFormRef = ref<FormInstance>()
+const signRef = ref()
+const approveSignFormRef = ref()
+const nextAssigneesActivityNode = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 下一个审批节点信息
+const nextAssigneesTimelineRef = ref() // 下一个节点审批人时间线组件的引用
+const approveReasonForm = reactive({
+  reason: '',
+  signPicUrl: '',
+  nextAssignees: {}
+})
+const approveReasonRule = computed(() => {
+  return {
+    reason: [
+      { required: reasonRequire.value, message: nodeTypeName.value + '意见不能为空', trigger: 'blur' }
+    ],
+    signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
+    nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
+  }
+})
+
+// 拒绝表单
+const rejectFormRef = ref<FormInstance>()
+const rejectReasonForm = reactive({
+  reason: ''
+})
+const rejectReasonRule = computed(() => {
+  return {
+    reason: [{ required: reasonRequire.value, message: '审批意见不能为空', trigger: 'blur' }]
+  }
+})
+
+// 抄送表单
+const copyFormRef = ref<FormInstance>()
+const copyForm = reactive({
+  copyUserIds: [],
+  copyReason: ''
+})
+const copyFormRule = reactive<FormRules<typeof copyForm>>({
+  copyUserIds: [{ required: true, message: '抄送人不能为空', trigger: 'change' }]
+})
+
+// 转办表单
+const transferFormRef = ref<FormInstance>()
+const transferForm = reactive({
+  assigneeUserId: undefined,
+  reason: ''
+})
+const transferFormRule = reactive<FormRules<typeof transferForm>>({
+  assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
+  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+})
+
+// 委派表单
+const delegateFormRef = ref<FormInstance>()
+const delegateForm = reactive({
+  delegateUserId: undefined,
+  reason: ''
+})
+const delegateFormRule = reactive<FormRules<typeof delegateForm>>({
+  delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
+  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+})
+
+// 加签表单
+const addSignFormRef = ref<FormInstance>()
+const addSignForm = reactive({
+  addSignUserIds: undefined,
+  reason: ''
+})
+const addSignFormRule = reactive<FormRules<typeof addSignForm>>({
+  addSignUserIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
+  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+})
+
+// 减签表单
+const deleteSignFormRef = ref<FormInstance>()
+const deleteSignForm = reactive({
+  deleteSignTaskId: undefined,
+  reason: ''
+})
+const deleteSignFormRule = reactive<FormRules<typeof deleteSignForm>>({
+  deleteSignTaskId: [{ required: true, message: '减签人员不能为空', trigger: 'change' }],
+  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+})
+
+// 退回表单
+const returnFormRef = ref<FormInstance>()
+const returnForm = reactive({
+  targetTaskDefinitionKey: undefined,
+  returnReason: ''
+})
+const returnFormRule = reactive<FormRules<typeof returnForm>>({
+  targetTaskDefinitionKey: [{ required: true, message: '退回节点不能为空', trigger: 'change' }],
+  returnReason: [{ required: true, message: '退回理由不能为空', trigger: 'blur' }]
+})
+
+// 取消表单
+const cancelFormRef = ref<FormInstance>()
+const cancelForm = reactive({
+  cancelReason: ''
+})
+const cancelFormRule = reactive<FormRules<typeof cancelForm>>({
+  cancelReason: [{ required: true, message: '取消理由不能为空', trigger: 'blur' }]
 })
 
 /** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
@@ -221,64 +686,133 @@ watch(
   }
 )
 
-// TODO @jaosn：具体的审批任务，要不改成后端返回。让前端弱化下
-/**
- * 设置 runningTasks 中的任务
- */
-const loadRunningTask = (tasks: any[]) => {
-  runningTask.value = {}
-  auditForm.value = {}
-  approveForm.value = {}
-  approveFormFApi.value = {}
-  tasks.forEach((task: any) => {
-    if (!isEmpty(task.children)) {
-      loadRunningTask(task.children)
-    }
-    // 2.1 只有待处理才需要
-    if (task.status !== 1 && task.status !== 6) {
+/** 弹出气泡卡 */
+const openPopover = async (type: string) => {
+  if (popOverVisible.value[type] === true) return
+  if (type === 'approve') {
+    // 校验流程表单
+    const valid = await validateNormalForm()
+    if (!valid) {
+      message.warning('表单校验不通过，请先完善表单!!')
       return
     }
-    // 2.2 自己不是处理人
-    if (!task.assigneeUser || task.assigneeUser.id !== userId) {
+    initNextAssigneesFormField()
+  }
+  if (type === 'return') {
+    // 获取退回节点
+    returnList.value = await TaskApi.getTaskListByReturn(runningTask.value.id)
+    if (returnList.value.length === 0) {
+      message.warning('当前没有可退回的节点')
       return
     }
-    // 2.3 添加到处理任务
-    runningTask.value = { ...task }
-    auditForm.value = {
-      reason: '',
-      copyUserIds: []
-    }
-
-    // 2.4 处理 approve 表单
-    if (task.formId && task.formConf) {
-      const tempApproveForm = {}
-      setConfAndFields2(tempApproveForm, task.formConf, task.formFields, task.formVariables)
-      approveForm.value = tempApproveForm
-    } else {
-      approveForm.value = {} // 占位，避免为空
-    }
+  }
+  Object.keys(popOverVisible.value).forEach((item) => {
+    popOverVisible.value[item] = item === type
   })
+  // await nextTick()
+  // formRef.value.resetFields()
+}
+
+/** 关闭气泡卡 */
+const closePopover = (type: string, formRef: FormInstance | undefined) => {
+  if (formRef) {
+    formRef.resetFields()
+  }
+  popOverVisible.value[type] = false
+  nextAssigneesActivityNode.value = []
+  // 清理 Timeline 组件中的自定义审批人数据
+  if (nextAssigneesTimelineRef.value) {
+    nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
+  }
+}
+
+/** 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人 */
+const initNextAssigneesFormField = async () => {
+  // 获取修改的流程变量, 暂时只支持流程表单
+  const variables = getUpdatedProcessInstanceVariables()
+  const data = await ProcessInstanceApi.getNextApprovalNodes({
+    processInstanceId: props.processInstance.id,
+    taskId: runningTask.value.id,
+    processVariablesStr: JSON.stringify(variables)
+  })
+  if (data && data.length > 0) {
+    const customApproveUsersData: Record<string, any[]> = {} // 用于收集需要设置到 Timeline 组件的自定义审批人数据
+    data.forEach((node: any) => {
+      if (
+        // 情况一：当前节点没有审批人，并且是发起人自选
+        (isEmpty(node.tasks) &&
+          isEmpty(node.candidateUsers) &&
+          CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
+        // 情况二：当前节点是审批人自选
+        CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy
+      ) {
+        nextAssigneesActivityNode.value.push(node)
+      }
+
+      // 如果节点有 candidateUsers，设置到 customApproveUsers 中
+      if (node.candidateUsers && node.candidateUsers.length > 0) {
+        customApproveUsersData[node.id] = node.candidateUsers
+      }
+    })
+
+    // 将 candidateUsers 设置到 Timeline 组件中
+    await nextTick() // 等待下一个 tick，确保 Timeline 组件已经渲染
+    if (nextAssigneesTimelineRef.value && Object.keys(customApproveUsersData).length > 0) {
+      nextAssigneesTimelineRef.value.batchSetCustomApproveUsers(customApproveUsersData)
+    }
+  }
+}
+
+/** 选择下一个节点的审批人 */
+const selectNextAssigneesConfirm = (id: string, userList: any[]) => {
+  approveReasonForm.nextAssignees[id] = userList?.map((item: any) => item.id)
+}
+/** 审批通过时，校验每个自选审批人的节点是否都已配置了审批人 */
+const validateNextAssignees = () => {
+  if (Object.keys(nextAssigneesActivityNode.value).length === 0) {
+    return true
+  }
+  // 如果需要自选审批人，则校验每个节点是否都已配置审批人
+  for (const item of nextAssigneesActivityNode.value) {
+    if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
+      message.warning('下一个节点的审批人不能为空!')
+      return false
+    }
+  }
+  return true
 }
 
 /** 处理审批通过和不通过的操作 */
-const handleAudit = async (pass: any) => {
+const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => {
   formLoading.value = true
   try {
-    const auditFormRef = proxy.$refs['formRef']
-    // 1.2 校验表单
-    const elForm = unref(auditFormRef)
-    if (!elForm) return
-    const valid = await elForm.validate()
-    if (!valid) return
-
-    // 2.1 提交审批
-    const data = {
-      id: runningTask.value.id,
-      reason: auditForm.value.reason,
-      copyUserIds: auditForm.value.copyUserIds
+    // 校验表单
+    if (!formRef) return
+    await formRef.validate()
+    // 校验流程表单必填字段
+    const valid = await validateNormalForm()
+    if (!valid) {
+      message.warning('表单校验不通过，请先完善表单!!')
+      return
     }
+
     if (pass) {
-      // 审批通过，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
+      const nextAssigneesValid = validateNextAssignees()
+      if (!nextAssigneesValid) return
+      const variables = getUpdatedProcessInstanceVariables()
+      // 审批通过数据
+      const data = {
+        id: runningTask.value.id,
+        reason: approveReasonForm.reason,
+        variables, // 审批通过, 把修改的字段值赋于流程实例变量
+        nextAssignees: approveReasonForm.nextAssignees // 下个自选节点选择的审批人信息
+      } as any
+      // 签名
+      if (runningTask.value.signEnable) {
+        data.signPicUrl = approveReasonForm.signPicUrl
+      }
+      // 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
+      // TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
       const formCreateApi = approveFormFApi.value
       if (Object.keys(formCreateApi)?.length > 0) {
         await formCreateApi.validate()
@@ -286,61 +820,243 @@ const handleAudit = async (pass: any) => {
         data.variables = approveForm.value.value
       }
       await TaskApi.approveTask(data)
+      popOverVisible.value.approve = false
+      nextAssigneesActivityNode.value = []
+      // 清理 Timeline 组件中的自定义审批人数据
+      if (nextAssigneesTimelineRef.value) {
+        nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
+      }
       message.success('审批通过成功')
     } else {
+      // 审批不通过数据
+      const data = {
+        id: runningTask.value.id,
+        reason: rejectReasonForm.reason
+      }
       await TaskApi.rejectTask(data)
+      popOverVisible.value.reject = false
       message.success('审批不通过成功')
     }
-    // 2.2 加载最新数据
-    getDetail()
+    // 重置表单
+    formRef.resetFields()
+    // 加载最新数据
+    reload()
   } finally {
     formLoading.value = false
   }
 }
 
-/* 抄送 TODO */
-const handleSend = () => {}
-
-// TODO 代码优化：这里 flag 改成 approve: boolean 。因为 flag 目前就只有 1 和 2
-const openPopover = (flag) => {
-  passVisible.value = false
-  rejectVisible.value = false
-  formRef.value.resetFields()
-  flag === '1' ? (passVisible.value = true) : (rejectVisible.value = true)
+/** 处理抄送 */
+const handleCopy = async () => {
+  formLoading.value = true
+  try {
+    // 1. 校验表单
+    if (!copyFormRef.value) return
+    await copyFormRef.value.validate()
+    // 2. 提交抄送
+    const data = {
+      id: runningTask.value.id,
+      reason: copyForm.copyReason,
+      copyUserIds: copyForm.copyUserIds
+    }
+    await TaskApi.copyTask(data)
+    copyFormRef.value.resetFields()
+    popOverVisible.value.copy = false
+    message.success('操作成功')
+  } finally {
+    formLoading.value = false
+  }
 }
 
-/** 转派审批人 */
-const taskTransferFormRef = ref()
-const openTaskUpdateAssigneeForm = () => {
-  taskTransferFormRef.value.open(runningTask.value.id)
+/** 处理转交 */
+const handleTransfer = async () => {
+  formLoading.value = true
+  try {
+    // 1.1 校验表单
+    if (!transferFormRef.value) return
+    await transferFormRef.value.validate()
+    // 1.2 提交转交
+    const data = {
+      id: runningTask.value.id,
+      reason: transferForm.reason,
+      assigneeUserId: transferForm.assigneeUserId
+    }
+    await TaskApi.transferTask(data)
+    transferFormRef.value.resetFields()
+    popOverVisible.value.transfer = false
+    message.success('操作成功')
+    // 2. 加载最新数据
+    reload()
+  } finally {
+    formLoading.value = false
+  }
 }
 
-/** 处理审批退回的操作 */
-const taskDelegateForm = ref()
+/** 处理委派 */
 const handleDelegate = async () => {
-  taskDelegateForm.value.open(runningTask.value.id)
+  formLoading.value = true
+  try {
+    // 1.1 校验表单
+    if (!delegateFormRef.value) return
+    await delegateFormRef.value.validate()
+    // 1.2 处理委派
+    const data = {
+      id: runningTask.value.id,
+      reason: delegateForm.reason,
+      delegateUserId: delegateForm.delegateUserId
+    }
+
+    await TaskApi.delegateTask(data)
+    popOverVisible.value.delegate = false
+    delegateFormRef.value.resetFields()
+    message.success('操作成功')
+    // 2. 加载最新数据
+    reload()
+  } finally {
+    formLoading.value = false
+  }
 }
 
-/** 处理审批退回的操作 */
-const taskReturnFormRef = ref()
-const handleBack = async () => {
-  taskReturnFormRef.value.open(runningTask.value.id)
+/** 处理加签 */
+const handlerAddSign = async (type: string) => {
+  formLoading.value = true
+  try {
+    // 1.1 校验表单
+    if (!addSignFormRef.value) return
+    await addSignFormRef.value.validate()
+    // 1.2 提交加签
+    const data = {
+      id: runningTask.value.id,
+      type,
+      reason: addSignForm.reason,
+      userIds: addSignForm.addSignUserIds
+    }
+    await TaskApi.signCreateTask(data)
+    message.success('操作成功')
+    addSignFormRef.value.resetFields()
+    popOverVisible.value.addSign = false
+    // 2 加载最新数据
+    reload()
+  } finally {
+    formLoading.value = false
+  }
 }
 
-/** 处理审批加签的操作 */
-const taskSignCreateFormRef = ref()
-const handleSign = async () => {
-  taskSignCreateFormRef.value.open(runningTask.value.id)
+/** 处理退回 */
+const handleReturn = async () => {
+  formLoading.value = true
+  try {
+    // 1.1 校验表单
+    if (!returnFormRef.value) return
+    await returnFormRef.value.validate()
+    // 1.2 提交退回
+    const data = {
+      id: runningTask.value.id,
+      reason: returnForm.returnReason,
+      targetTaskDefinitionKey: returnForm.targetTaskDefinitionKey
+    }
+
+    await TaskApi.returnTask(data)
+    popOverVisible.value.return = false
+    returnFormRef.value.resetFields()
+    message.success('操作成功')
+    // 2 重新加载数据
+    reload()
+  } finally {
+    formLoading.value = false
+  }
 }
-/** 获得详情 */
-const getDetail = () => {
+
+/** 处理取消 */
+const handleCancel = async () => {
+  formLoading.value = true
+  try {
+    // 1.1 校验表单
+    if (!cancelFormRef.value) return
+    await cancelFormRef.value.validate()
+    // 1.2 提交取消
+    await ProcessInstanceApi.cancelProcessInstanceByStartUser(
+      props.processInstance.id,
+      cancelForm.cancelReason
+    )
+    popOverVisible.value.return = false
+    message.success('操作成功')
+    cancelFormRef.value.resetFields()
+    // 2 重新加载数据
+    reload()
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 处理再次提交 */
+const handleReCreate = async () => {
+  // 跳转发起流程界面
+  await router.push({
+    name: 'BpmProcessInstanceCreate',
+    query: { processInstanceId: props.processInstance?.id }
+  })
+}
+
+/** 获取减签人员标签 */
+const getDeleteSignUserLabel = (task: any): string => {
+  const deptName = task?.assigneeUser?.deptName || task?.ownerUser?.deptName
+  const nickname = task?.assigneeUser?.nickname || task?.ownerUser?.nickname
+  return `${nickname} ( 所属部门：${deptName} )`
+}
+/** 处理减签 */
+const handlerDeleteSign = async () => {
+  formLoading.value = true
+  try {
+    // 1.1 校验表单
+    if (!deleteSignFormRef.value) return
+    await deleteSignFormRef.value.validate()
+    // 1.2 提交减签
+    const data = {
+      id: deleteSignForm.deleteSignTaskId,
+      reason: deleteSignForm.reason
+    }
+    await TaskApi.signDeleteTask(data)
+    message.success('减签成功')
+    deleteSignFormRef.value.resetFields()
+    popOverVisible.value.deleteSign = false
+    // 2 加载最新数据
+    reload()
+  } finally {
+    formLoading.value = false
+  }
+}
+/** 重新加载数据 */
+const reload = () => {
   emit('success')
+}
+
+/** 任务是否为处理中状态 */
+const isHandleTaskStatus = () => {
+  let canHandle = false
+  if (TaskApi.TaskStatusEnum.RUNNING === runningTask.value?.status) {
+    canHandle = true
+  }
+  return canHandle
+}
+
+/** 流程状态是否为结束状态 */
+const isEndProcessStatus = (status: number) => {
+  let isEndStatus = false
+  if (
+    BpmProcessInstanceStatus.APPROVE === status ||
+    BpmProcessInstanceStatus.REJECT === status ||
+    BpmProcessInstanceStatus.CANCEL === status
+  ) {
+    isEndStatus = true
+  }
+  return isEndStatus
 }
 
 /** 是否显示按钮 */
 const isShowButton = (btnType: OperationButtonType): boolean => {
   let isShow = true
-  if (runningTask.value.buttonsSetting && runningTask.value.buttonsSetting[btnType]) {
+  if (runningTask.value?.buttonsSetting && runningTask.value?.buttonsSetting[btnType]) {
     isShow = runningTask.value.buttonsSetting[btnType].enable
   }
   return isShow
@@ -349,13 +1065,59 @@ const isShowButton = (btnType: OperationButtonType): boolean => {
 /** 获取按钮的显示名称 */
 const getButtonDisplayName = (btnType: OperationButtonType) => {
   let displayName = OPERATION_BUTTON_NAME.get(btnType)
-  if (runningTask.value.buttonsSetting && runningTask.value.buttonsSetting[btnType]) {
+  if (runningTask.value?.buttonsSetting && runningTask.value?.buttonsSetting[btnType]) {
     displayName = runningTask.value.buttonsSetting[btnType].displayName
   }
   return displayName
 }
 
-defineExpose({ loadRunningTask })
+const loadTodoTask = (task: any) => {
+  approveForm.value = {}
+  runningTask.value = task
+  approveFormFApi.value = {}
+  reasonRequire.value = task?.reasonRequire ?? false
+  nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
+  // 处理 approve 表单.
+  if (task && task.formId && task.formConf) {
+    const tempApproveForm = {}
+    setConfAndFields2(tempApproveForm, task.formConf, task.formFields, task.formVariables)
+    approveForm.value = tempApproveForm
+  } else {
+    approveForm.value = {} // 占位，避免为空
+  }
+}
+
+/** 校验流程表单 */
+const validateNormalForm = async () => {
+  if (props.processDefinition?.formType === BpmModelFormType.NORMAL) {
+    let valid = true
+    try {
+      await props.normalFormApi?.validate()
+    } catch {
+      valid = false
+    }
+    return valid
+  } else {
+    return true
+  }
+}
+
+/** 从可以编辑的流程表单字段，获取需要修改的流程实例的变量 */
+const getUpdatedProcessInstanceVariables = () => {
+  const variables = {}
+  props.writableFields.forEach((field) => {
+    variables[field] = props.normalFormApi.getValue(field)
+  })
+  return variables
+}
+
+/** 处理签名完成 */
+const handleSignFinish = (url: string) => {
+  approveReasonForm.signPicUrl = url
+  approveSignFormRef.value.validate('change')
+}
+
+defineExpose({ loadTodoTask })
 </script>
 
 <style lang="scss" scoped>
@@ -366,7 +1128,7 @@ defineExpose({ loadRunningTask })
 .btn-container {
   > div {
     display: flex;
-    margin: 0 15px;
+    margin: 0 8px;
     cursor: pointer;
     align-items: center;
 

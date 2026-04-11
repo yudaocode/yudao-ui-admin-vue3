@@ -1,21 +1,15 @@
 import type { App } from 'vue'
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+import { useUserStore } from '@/store/modules/user'
 
 const { t } = useI18n() // 国际化
 
+/** 判断权限的指令 directive */
 export function hasPermi(app: App<Element>) {
   app.directive('hasPermi', (el, binding) => {
-    const { wsCache } = useCache()
     const { value } = binding
-    const all_permission = '*:*:*'
-    const permissions = wsCache.get(CACHE_KEY.USER).permissions
 
     if (value && value instanceof Array && value.length > 0) {
-      const permissionFlag = value
-
-      const hasPermissions = permissions.some((permission: string) => {
-        return all_permission === permission || permissionFlag.includes(permission)
-      })
+      const hasPermissions = hasPermission(value)
 
       if (!hasPermissions) {
         el.parentNode && el.parentNode.removeChild(el)
@@ -24,4 +18,14 @@ export function hasPermi(app: App<Element>) {
       throw new Error(t('permission.hasPermission'))
     }
   })
+}
+
+/** 判断权限的方法 function */
+const userStore = useUserStore()
+const all_permission = '*:*:*'
+export const hasPermission = (permission: string[]) => {
+  return (
+    userStore.permissions.has(all_permission) ||
+    permission.some((permission) => userStore.permissions.has(permission))
+  )
 }

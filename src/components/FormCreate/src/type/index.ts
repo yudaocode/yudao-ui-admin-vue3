@@ -1,5 +1,3 @@
-import { Rule } from '@form-create/element-ui' //左侧拖拽按钮
-
 // 左侧拖拽按钮
 export interface MenuItem {
   label: string
@@ -12,24 +10,6 @@ export interface Menu {
   title: string
   name: string
   list: MenuItem[]
-}
-
-export interface MenuList extends Array<Menu> {}
-
-// 拖拽组件的规则
-export interface DragRule {
-  icon: string
-  name: string
-  label: string
-  children?: string
-  inside?: true
-  drag?: true | String
-  dragBtn?: false
-  mask?: false
-
-  rule(): Rule
-
-  props(v: any, v1: any): Rule[]
 }
 
 // 通用下拉组件 Props 类型
@@ -47,4 +27,5 @@ export interface SelectRuleOption {
   name: string // 组件名称
   icon: string // 组件图标
   props?: any[] // 组件规则
+  event?: any[] // 事件配置
 }

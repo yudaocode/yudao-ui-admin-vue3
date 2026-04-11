@@ -38,6 +38,11 @@ export const deleteJob = (id: number) => {
   return request.delete({ url: '/infra/job/delete?id=' + id })
 }
 
+// 批量删除定时任务调度
+export const deleteJobList = (ids: number[]) => {
+  return request.delete({ url: '/infra/job/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 导出定时任务调度
 export const exportJob = (params) => {
   return request.download({ url: '/infra/job/export-excel', params })

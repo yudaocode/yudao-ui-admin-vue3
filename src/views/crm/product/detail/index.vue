@@ -24,7 +24,7 @@ defineOptions({ name: 'CrmProductDetail' })
 
 const route = useRoute()
 const message = useMessage()
-const id = Number(route.params.id) // 编号
+const id = route.params.id // 编号
 const loading = ref(true) // 加载中
 const product = ref<ProductApi.ProductVO>({} as ProductApi.ProductVO) // 详情
 

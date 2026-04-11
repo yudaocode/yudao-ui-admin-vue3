@@ -101,7 +101,7 @@ const uploadVideoRef = ref<UploadInstance | null>(null)
 const submitVideo = () => {
   uploadFormRef.value?.validate((valid) => {
     if (!valid) {
-      return false
+      return
     }
     uploadVideoRef.value?.submit()
   })

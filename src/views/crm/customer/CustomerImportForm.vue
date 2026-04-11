@@ -56,7 +56,7 @@ import type { UploadUserFile } from 'element-plus'
 import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
 
-defineOptions({ name: 'SystemUserImportForm' })
+defineOptions({ name: 'CrmCustomerImportForm' })
 
 const message = useMessage() // 消息弹窗
 
@@ -132,7 +132,7 @@ const submitFormSuccess = (response: any) => {
 /** 上传错误提示 */
 const submitFormError = (): void => {
   message.error('上传失败，请您重新上传！')
-  formLoading.value = false
+  resetForm()
 }
 
 /** 重置表单 */

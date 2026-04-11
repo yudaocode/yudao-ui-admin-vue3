@@ -1,17 +1,15 @@
 <!-- chat 角色仓库 -->
 <template>
-  <el-container class="role-container">
+  <el-container class="bg-[var(--el-bg-color)] -mt-25px">
     <ChatRoleForm ref="formRef" @success="handlerAddRoleSuccess" />
-    <!-- header  -->
-    <RoleHeader title="角色仓库" class="relative" />
-    <!--  main  -->
-    <el-main class="role-main">
-      <div class="search-container">
+    <!-- main -->
+    <el-main class="flex-1 overflow-hidden m-0 !p-0 relative">
+      <div class="mx-3 mt-3 mb-0 absolute right-0 -top-1.25 z-100">
         <!-- 搜索按钮 -->
         <el-input
           :loading="loading"
           v-model="search"
-          class="search-input"
+          class="!w-60"
           size="default"
           placeholder="请输入搜索的内容"
           :suffix-icon="Search"
@@ -23,13 +21,13 @@
           @click="handlerAddRole"
           class="ml-20px"
         >
-          <Icon icon="ep:user" style="margin-right: 5px;" />
+          <Icon icon="ep:user" class="mr-1.25" />
           添加角色
         </el-button>
       </div>
       <!-- tabs -->
-      <el-tabs v-model="activeTab" class="tabs" @tab-click="handleTabsClick">
-        <el-tab-pane class="role-pane" label="我的角色" name="my-role">
+      <el-tabs v-model="activeTab" @tab-click="handleTabsClick" class="relative h-full">
+        <el-tab-pane label="我的角色" name="my-role" class="flex flex-col h-full overflow-y-auto">
           <RoleList
             :loading="loading"
             :role-list="myRoleList"
@@ -38,12 +36,12 @@
             @on-edit="handlerCardEdit"
             @on-use="handlerCardUse"
             @on-page="handlerCardPage('my')"
-            class="mt-20px"
+            class="mt-3"
           />
         </el-tab-pane>
-        <el-tab-pane label="公共角色" name="public-role">
+        <el-tab-pane label="公共角色" name="public-role" class="!pt-2">
           <RoleCategoryList
-            class="role-category-list"
+            class="mx-3"
             :category-list="categoryList"
             :active="activeCategory"
             @on-category-click="handlerCategoryClick"
@@ -54,7 +52,7 @@
             @on-edit="handlerCardEdit"
             @on-use="handlerCardUse"
             @on-page="handlerCardPage('public')"
-            class="mt-20px"
+            class="mt-3"
             loading
           />
         </el-tab-pane>
@@ -64,17 +62,19 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue'
-import RoleHeader from './RoleHeader.vue'
+import { ref } from 'vue'
 import RoleList from './RoleList.vue'
 import ChatRoleForm from '@/views/ai/model/chatRole/ChatRoleForm.vue'
 import RoleCategoryList from './RoleCategoryList.vue'
-import {ChatRoleApi, ChatRolePageReqVO, ChatRoleVO} from '@/api/ai/model/chatRole'
-import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
-import {Search} from '@element-plus/icons-vue'
-import {TabsPaneContext} from 'element-plus'
+import { ChatRoleApi, ChatRolePageReqVO, ChatRoleVO } from '@/api/ai/model/chatRole'
+import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
+import { Search } from '@element-plus/icons-vue'
+import { TabsPaneContext } from 'element-plus'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 
 const router = useRouter() // 路由对象
+const { currentRoute } = useRouter() // 路由
+const { delView } = useTagsViewStore() // 视图操作
 
 // 属性定义
 const loading = ref<boolean>(false) // 加载中
@@ -124,7 +124,7 @@ const getPublicRole = async (append?: boolean) => {
     name: search.value,
     publicStatus: true
   }
-  const { total, list } = await ChatRoleApi.getMyPage(params)
+  const { list } = await ChatRoleApi.getMyPage(params)
   if (append) {
     publicRoleList.value.push.apply(publicRoleList.value, list)
   } else {
@@ -204,7 +204,8 @@ const handlerCardUse = async (role) => {
   const conversationId = await ChatConversationApi.createChatConversationMy(data)
 
   // 2. 跳转页面
-  await router.push({
+  delView(unref(currentRoute))
+  await router.replace({
     name: 'AiChat',
     query: {
       conversationId: conversationId
@@ -220,70 +221,26 @@ onMounted(async () => {
   await getActiveTabsRole()
 })
 </script>
-<!-- 覆盖 element ui css -->
+<!-- 覆盖 element plus css -->
 <style lang="scss">
-.el-tabs__content {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-}
 .el-tabs__nav-scroll {
-  margin: 10px 20px;
+  margin: 2px 8px !important;
 }
-</style>
-<!-- 样式 -->
-<style scoped lang="scss">
-// 跟容器
-.role-container {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-color: #ffffff;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
 
-  .role-main {
-    flex: 1;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
-    position: relative;
+.el-tabs__header {
+  margin: 0 !important;
+  padding: 0 !important;
+}
 
-    .search-container {
-      margin: 20px 20px 0px 20px;
-      position: absolute;
-      right: 0;
-      top: -5px;
-      z-index: 100;
-    }
+.el-tabs__nav-wrap {
+  margin-bottom: 0 !important;
+}
 
-    .search-input {
-      width: 240px;
-    }
+.el-tabs__content {
+  padding: 0 !important;
+}
 
-    .tabs {
-      position: relative;
-      height: 100%;
-
-      .role-category-list {
-        margin: 0 27px;
-      }
-    }
-
-    .role-pane {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      overflow-y: auto;
-      position: relative;
-    }
-  }
+.el-tab-pane {
+  padding: 8px 0 0 0 !important;
 }
 </style>

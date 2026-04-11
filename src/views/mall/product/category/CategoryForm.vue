@@ -62,8 +62,10 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
+  parentId: 0,
   name: '',
   picUrl: '',
+  sort: 0,
   status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({
@@ -126,8 +128,10 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
+    parentId: 0,
     name: '',
     picUrl: '',
+    sort: 0,
     status: CommonStatusEnum.ENABLE
   }
   formRef.value?.resetFields()

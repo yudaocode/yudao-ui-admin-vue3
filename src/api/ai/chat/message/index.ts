@@ -13,10 +13,27 @@ export interface ChatMessageVO {
   model: number // 模型标志
   modelId: number // 模型编号
   content: string // 聊天内容
+  reasoningContent?: string // 推理内容
+  attachmentUrls?: string[] // 附件 URL 数组
   tokens: number // 消耗 Token 数量
+  segmentIds?: number[] // 段落编号
+  segments?: {
+    id: number // 段落编号
+    content: string // 段落内容
+    documentId: number // 文档编号
+    documentName: string // 文档名称
+  }[]
+  webSearchPages?: {
+    name: string // 名称
+    icon: string // 图标
+    title: string // 标题
+    url: string // URL
+    snippet: string // 内容的简短描述
+    summary: string // 内容的文本摘要
+  }[]
   createTime: Date // 创建时间
   roleAvatar: string // 角色头像
-  userAvatar: string // 创建时间
+  userAvatar: string // 用户头像
 }
 
 // AI chat 聊天
@@ -35,9 +52,11 @@ export const ChatMessageApi = {
     content: string,
     ctrl,
     enableContext: boolean,
+    enableWebSearch: boolean,
     onMessage,
     onError,
-    onClose
+    onClose,
+    attachmentUrls?: string[]
   ) => {
     const token = getAccessToken()
     return fetchEventSource(`${config.base_url}/ai/chat/message/send-stream`, {
@@ -50,7 +69,9 @@ export const ChatMessageApi = {
       body: JSON.stringify({
         conversationId,
         content,
-        useContext: enableContext
+        useContext: enableContext,
+        useSearch: enableWebSearch,
+        attachmentUrls: attachmentUrls || []
       }),
       onmessage: onMessage,
       onerror: onError,

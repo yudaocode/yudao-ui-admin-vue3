@@ -361,7 +361,7 @@ const openChannelForm = async (row, payCode) => {
     mockFormRef.value.open(row.id, payCode)
   }
   if (payCode.indexOf('wallet') === 0) {
-    mockFormRef.value.open(row.id, payCode)
+    walletFormRef.value.open(row.id, payCode)
   }
 }
 

@@ -40,7 +40,12 @@ export const deletePost = async (id: number) => {
   return await request.delete({ url: '/system/post/delete?id=' + id })
 }
 
+// 批量删除岗位
+export const deletePostList = async (ids: number[]) => {
+  return await request.delete({ url: '/system/post/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 导出岗位
 export const exportPost = async (params) => {
-  return await request.download({ url: '/system/post/export', params })
+  return await request.download({ url: '/system/post/export-excel', params })
 }

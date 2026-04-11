@@ -2,7 +2,7 @@
   <el-text type="info" size="small"> 拖动左上角的小圆点可对其排序 </el-text>
   <VueDraggable
     :list="formData"
-    :force-fallback="true"
+    :force-fallback="false"
     :animation="200"
     handle=".drag-icon"
     class="m-t-8px"
@@ -13,15 +13,22 @@
         class="mb-4px flex flex-col gap-4px border border-gray-2 border-rounded rounded border-solid p-8px"
       >
         <!-- 操作按钮区 -->
-        <div class="m--8px m-b-4px flex flex-row items-center justify-between p-8px" style="background-color: var(--app-content-bg-color);">
+        <div
+          class="m--8px m-b-4px flex flex-row items-center justify-between p-8px"
+          style="background-color: var(--app-content-bg-color)"
+        >
           <el-tooltip content="拖动排序">
-            <Icon icon="ic:round-drag-indicator" class="drag-icon cursor-move" style="color: #8a909c;" />
+            <Icon
+              icon="ic:round-drag-indicator"
+              class="drag-icon cursor-move"
+              style="color: #8a909c"
+            />
           </el-tooltip>
           <el-tooltip content="删除">
             <Icon
               icon="ep:delete"
               class="cursor-pointer text-red-5"
-              v-if="formData.length > 1"
+              v-if="formData.length > min"
               @click="handleDelete(index)"
             />
           </el-tooltip>
@@ -47,7 +54,7 @@
 <script setup lang="ts">
 // 拖拽组件
 import VueDraggable from 'vuedraggable'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import { any, array } from 'vue-types'
 import { propTypes } from '@/utils/propTypes'
 import { cloneDeep } from 'lodash-es'
@@ -62,11 +69,13 @@ const props = defineProps({
   // 空的元素：点击添加按钮时，创建元素并添加到列表；默认为空对象
   emptyItem: any<unknown>().def({}),
   // 数量限制：默认为0，表示不限制
-  limit: propTypes.number.def(0)
+  limit: propTypes.number.def(0),
+  // 最小数量：默认为1
+  min: propTypes.number.def(1)
 })
 // 定义事件
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 // 处理添加
 const handleAdd = () => formData.value.push(cloneDeep(props.emptyItem || {}))

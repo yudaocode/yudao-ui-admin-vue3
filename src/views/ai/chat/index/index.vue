@@ -1,8 +1,8 @@
 <template>
-  <el-container class="ai-layout">
+  <el-container class="absolute flex-1 top-0 left-0 h-full w-full">
     <!-- 左侧：对话列表 -->
     <ConversationList
-      :active-id="activeConversationId"
+      :active-id="activeConversationId?.toString() || ''"
       ref="conversationListRef"
       @on-conversation-create="handleConversationCreateSuccess"
       @on-conversation-click="handleConversationClick"
@@ -10,33 +10,38 @@
       @on-conversation-delete="handlerConversationDelete"
     />
     <!-- 右侧：对话详情 -->
-    <el-container class="detail-container">
-      <el-header class="header">
-        <div class="title">
+    <el-container class="bg-[var(--el-bg-color)]">
+      <el-header
+        class="flex flex-row items-center justify-between bg-[var(--el-bg-color-page)] shadow-[0_0_0_0_var(--el-border-color-light)]"
+      >
+        <div class="text-18px font-bold">
           {{ activeConversation?.title ? activeConversation?.title : '对话' }}
           <span v-if="activeMessageList.length">({{ activeMessageList.length }})</span>
         </div>
-        <div class="btns" v-if="activeConversation">
+        <div class="flex w-300px flex-row justify-end" v-if="activeConversation">
           <el-button type="primary" bg plain size="small" @click="openChatConversationUpdateForm">
             <span v-html="activeConversation?.modelName"></span>
             <Icon icon="ep:setting" class="ml-10px" />
           </el-button>
-          <el-button size="small" class="btn" @click="handlerMessageClear">
-            <Icon icon="heroicons-outline:archive-box-x-mark" color="#787878" />
+          <el-button size="small" class="p-10px" @click="handlerMessageClear">
+            <Icon
+              icon="heroicons-outline:archive-box-x-mark"
+              color="var(--el-text-color-placeholder)"
+            />
           </el-button>
-          <el-button size="small" class="btn">
-            <Icon icon="ep:download" color="#787878" />
+          <el-button size="small" class="p-10px">
+            <Icon icon="ep:download" color="var(--el-text-color-placeholder)" />
           </el-button>
-          <el-button size="small" class="btn" @click="handleGoTopMessage">
-            <Icon icon="ep:top" color="#787878" />
+          <el-button size="small" class="p-10px" @click="handleGoTopMessage">
+            <Icon icon="ep:top" color="var(--el-text-color-placeholder)" />
           </el-button>
         </div>
       </el-header>
 
       <!-- main：消息列表 -->
-      <el-main class="main-container">
+      <el-main class="m-0 p-0 relative h-full w-full">
         <div>
-          <div class="message-container">
+          <div class="absolute top-0 bottom-0 left-0 right-0 overflow-y-hidden p-0 m-0">
             <!-- 情况一：消息加载中 -->
             <MessageLoading v-if="activeMessageListLoading" />
             <!-- 情况二：无聊天对话时 -->
@@ -51,7 +56,7 @@
             />
             <!-- 情况四：消息列表不为空 -->
             <MessageList
-              v-if="!activeMessageListLoading && messageList.length > 0"
+              v-if="!activeMessageListLoading && messageList.length > 0 && activeConversation"
               ref="messageRef"
               :conversation="activeConversation"
               :list="messageList"
@@ -64,21 +69,29 @@
       </el-main>
 
       <!-- 底部 -->
-      <el-footer class="footer-container">
-        <form class="prompt-from">
+      <el-footer class="flex flex-col !h-auto !p-0">
+        <!-- TODO @芋艿：这块要想办法迁移下！ -->
+        <form
+          class="mt-10px mx-20px mb-20px py-9px px-10px flex flex-col h-auto rounded-10px"
+          style="border: 1px solid var(--el-border-color)"
+        >
           <textarea
-            class="prompt-input"
+            class="h-80px border-none box-border resize-none py-0 px-2px overflow-auto focus:outline-none"
             v-model="prompt"
             @keydown="handleSendByKeydown"
             @input="handlePromptInput"
             @compositionstart="onCompositionstart"
             @compositionend="onCompositionend"
             placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
-          ></textarea>
-          <div class="prompt-btns">
-            <div>
+          >
+          </textarea>
+          <div class="flex justify-between pb-0 pt-5px">
+            <div class="flex items-center">
+              <MessageFileUpload v-model="uploadFiles" :limit="5" :max-size="10" class="mr-10px" />
               <el-switch v-model="enableContext" />
-              <span class="ml-5px text-14px text-#8f8f8f">上下文</span>
+              <span class="ml-5px mr-15px text-14px text-#8f8f8f">上下文</span>
+              <el-switch v-model="enableWebSearch" />
+              <span class="ml-5px text-14px text-#8f8f8f">联网搜索</span>
             </div>
             <el-button
               type="primary"
@@ -119,6 +132,7 @@ import MessageList from './components/message/MessageList.vue'
 import MessageListEmpty from './components/message/MessageListEmpty.vue'
 import MessageLoading from './components/message/MessageLoading.vue'
 import MessageNewConversation from './components/message/MessageNewConversation.vue'
+import MessageFileUpload from './components/message/MessageFileUpload.vue'
 
 /** AI 聊天对话 列表 */
 defineOptions({ name: 'AiChat' })
@@ -147,6 +161,8 @@ const conversationInAbortController = ref<any>() // 对话进行中 abort 控制
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
 const enableContext = ref<boolean>(true) // 是否开启上下文
+const enableWebSearch = ref<boolean>(false) // 是否开启联网搜索
+const uploadFiles = ref<string[]>([]) // 上传的文件 URL 列表
 // 接收 Stream 消息
 const receiveMessageFullText = ref('')
 const receiveMessageDisplayedText = ref('')
@@ -188,6 +204,8 @@ const handleConversationClick = async (conversation: ChatConversationVO) => {
   scrollToBottom(true)
   // 清空输入框
   prompt.value = ''
+  // 清空文件列表
+  uploadFiles.value = []
   return true
 }
 
@@ -229,6 +247,8 @@ const handleConversationCreate = async () => {
 const handleConversationCreateSuccess = async () => {
   // 创建新的对话，清空输入框
   prompt.value = ''
+  // 清空文件列表
+  uploadFiles.value = []
 }
 
 // =========== 【消息列表】相关 ===========
@@ -276,9 +296,18 @@ const messageList = computed(() => {
     return [
       {
         id: 0,
+        conversationId: activeConversation.value.id || 0,
         type: 'system',
-        content: activeConversation.value.systemMessage
-      }
+        userId: '',
+        roleId: '',
+        model: 0,
+        modelId: 0,
+        content: activeConversation.value.systemMessage,
+        tokens: 0,
+        createTime: new Date(),
+        roleAvatar: '',
+        userAvatar: ''
+      } as ChatMessageVO
     ]
   }
   return []
@@ -386,12 +415,19 @@ const doSendMessage = async (content: string) => {
     message.error('还没创建对话，不能发送!')
     return
   }
-  // 清空输入框
+
+  // 准备附件 URL 数组
+  const attachmentUrls = [...uploadFiles.value]
+
+  // 清空输入框和文件列表
   prompt.value = ''
+  uploadFiles.value = []
+
   // 执行发送
   await doSendMessageStream({
     conversationId: activeConversationId.value,
-    content: content
+    content: content,
+    attachmentUrls: attachmentUrls
   } as ChatMessageVO)
 }
 
@@ -411,6 +447,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'user',
       content: userMessage.content,
+      attachmentUrls: userMessage.attachmentUrls || [],
       createTime: new Date()
     } as ChatMessageVO)
     activeMessageList.value.push({
@@ -418,6 +455,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'assistant',
       content: '思考中...',
+      reasoningContent: '',
       createTime: new Date()
     } as ChatMessageVO)
     // 1.2 滚动到最下面
@@ -433,17 +471,23 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       userMessage.content,
       conversationInAbortController.value,
       enableContext.value,
+      enableWebSearch.value,
       async (res) => {
         const { code, data, msg } = JSON.parse(res.data)
         if (code !== 0) {
           message.alert(`对话异常! ${msg}`)
+          // 如果未接收到消息，则进行删除
+          if (receiveMessageFullText.value === '') {
+            activeMessageList.value.pop()
+          }
           return
         }
 
         // 如果内容为空，就不处理。
-        if (data.receive.content === '') {
+        if (data.receive.content === '' && !data.receive.reasoningContent) {
           return
         }
+
         // 首次返回需要添加一个 message 到页面，后面的都是更新
         if (isFirstChunk) {
           isFirstChunk = false
@@ -452,20 +496,35 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
           activeMessageList.value.pop()
           // 更新返回的数据
           activeMessageList.value.push(data.send)
+          data.send.attachmentUrls = userMessage.attachmentUrls
           activeMessageList.value.push(data.receive)
         }
-        // debugger
-        receiveMessageFullText.value = receiveMessageFullText.value + data.receive.content
+
+        // 处理 reasoningContent
+        if (data.receive.reasoningContent) {
+          const lastMessage = activeMessageList.value[activeMessageList.value.length - 1]
+          lastMessage.reasoningContent =
+            lastMessage.reasoningContent + data.receive.reasoningContent
+        }
+
+        // 处理正常内容
+        if (data.receive.content !== '') {
+          receiveMessageFullText.value = receiveMessageFullText.value + data.receive.content
+        }
         // 滚动到最下面
         await scrollToBottom()
       },
-      (error) => {
-        message.alert(`对话异常! ${error}`)
+      (error: any) => {
+        // 异常提示，并停止流
+        message.alert(`对话异常！`)
         stopStream()
+        // 需要抛出异常，禁止重试
+        throw error
       },
       () => {
         stopStream()
-      }
+      },
+      userMessage.attachmentUrls
     )
   } catch {}
 }
@@ -569,204 +628,3 @@ onMounted(async () => {
   await getMessageList()
 })
 </script>
-
-<style lang="scss" scoped>
-.ai-layout {
-  position: absolute;
-  flex: 1;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-}
-
-.conversation-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 10px 10px 0;
-
-  .btn-new-conversation {
-    padding: 18px 0;
-  }
-
-  .search-input {
-    margin-top: 20px;
-  }
-
-  .conversation-list {
-    margin-top: 20px;
-
-    .conversation {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      flex: 1;
-      padding: 0 5px;
-      margin-top: 10px;
-      cursor: pointer;
-      border-radius: 5px;
-      align-items: center;
-      line-height: 30px;
-
-      &.active {
-        background-color: #e6e6e6;
-
-        .button {
-          display: inline-block;
-        }
-      }
-
-      .title-wrapper {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .title {
-        padding: 5px 10px;
-        max-width: 220px;
-        font-size: 14px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-
-      .avatar {
-        width: 28px;
-        height: 28px;
-        display: flex;
-        flex-direction: row;
-        justify-items: center;
-      }
-
-      // 对话编辑、删除
-      .button-wrapper {
-        right: 2px;
-        display: flex;
-        flex-direction: row;
-        justify-items: center;
-        color: #606266;
-
-        .el-icon {
-          margin-right: 5px;
-        }
-      }
-    }
-  }
-
-  // 角色仓库、清空未设置对话
-  .tool-box {
-    line-height: 35px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--el-text-color);
-
-    > div {
-      display: flex;
-      align-items: center;
-      color: #606266;
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-
-      > span {
-        margin-left: 5px;
-      }
-    }
-  }
-}
-
-// 头部
-.detail-container {
-  background: #ffffff;
-
-  .header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    background: #fbfbfb;
-    box-shadow: 0 0 0 0 #dcdfe6;
-
-    .title {
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .btns {
-      display: flex;
-      width: 300px;
-      flex-direction: row;
-      justify-content: flex-end;
-      //justify-content: space-between;
-
-      .btn {
-        padding: 10px;
-      }
-    }
-  }
-}
-
-// main 容器
-.main-container {
-  margin: 0;
-  padding: 0;
-  position: relative;
-  height: 100%;
-  width: 100%;
-
-  .message-container {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    overflow-y: hidden;
-    padding: 0;
-    margin: 0;
-  }
-}
-
-// 底部
-.footer-container {
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  margin: 0;
-  padding: 0;
-
-  .prompt-from {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    border: 1px solid #e3e3e3;
-    border-radius: 10px;
-    margin: 10px 20px 20px 20px;
-    padding: 9px 10px;
-  }
-
-  .prompt-input {
-    height: 80px;
-    //box-shadow: none;
-    border: none;
-    box-sizing: border-box;
-    resize: none;
-    padding: 0 2px;
-    overflow: auto;
-  }
-
-  .prompt-input:focus {
-    outline: none;
-  }
-
-  .prompt-btns {
-    display: flex;
-    justify-content: space-between;
-    padding-bottom: 0;
-    padding-top: 5px;
-  }
-}
-</style>

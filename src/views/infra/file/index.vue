@@ -44,13 +44,23 @@
         <el-button type="primary" plain @click="openForm">
           <Icon icon="ep:upload" class="mr-5px" /> 上传文件
         </el-button>
+        <el-button
+          type="danger"
+          plain
+          :disabled="checkedIds.length === 0"
+          @click="handleDeleteBatch"
+          v-hasPermi="['infra:file:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column label="文件名" align="center" prop="name" :show-overflow-tooltip="true" />
       <el-table-column label="文件路径" align="center" prop="path" :show-overflow-tooltip="true" />
       <el-table-column label="URL" align="center" prop="url" :show-overflow-tooltip="true" />
@@ -95,6 +105,9 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
+          <el-button link type="primary" @click="copyToClipboard(scope.row.url)">
+            复制链接
+          </el-button>
           <el-button
             link
             type="danger"
@@ -123,6 +136,7 @@ import { fileSizeFormatter } from '@/utils'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FileApi from '@/api/infra/file'
 import FileForm from './FileForm.vue'
+import { useClipboard } from '@vueuse/core'
 
 defineOptions({ name: 'InfraFile' })
 
@@ -172,6 +186,19 @@ const openForm = () => {
   formRef.value.open()
 }
 
+/** 复制到剪贴板方法 */
+const copyToClipboard = async (text: string) => {
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: text })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+    return
+  }
+  await copy()
+  if (unref(copied)) {
+    message.success(t('common.copySuccess'))
+  }
+}
+
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
@@ -179,6 +206,25 @@ const handleDelete = async (id: number) => {
     await message.delConfirm()
     // 发起删除
     await FileApi.deleteFile(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 批量删除按钮操作 */
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (rows) => {
+  checkedIds.value = rows.map((row) => row.id)
+}
+
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起批量删除
+    await FileApi.deleteFileList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

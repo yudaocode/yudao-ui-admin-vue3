@@ -406,6 +406,31 @@
           "name": "variableMappingDelegateExpression",
           "isAttr": true,
           "type": "String"
+        },
+        {
+          "name": "calledElementType",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "processInstanceName",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "inheritBusinessKey",
+          "isAttr": true,
+          "type": "Boolean"
+        },
+        {
+          "name": "businessKey",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "inheritVariables",
+          "isAttr": true,
+          "type": "Boolean"
         }
       ]
     },
@@ -989,6 +1014,16 @@
           "name": "fields",
           "type": "Field",
           "isMany": true
+        },
+        {
+          "name": "id",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "eventDefinitions",
+          "type": "bpmn:TimerEventDefinition",
+          "isMany": true
         }
       ]
     },
@@ -1209,6 +1244,247 @@
           "name": "sort",
           "type": "Integer",
           "isAttr": true
+        }
+      ]
+    },
+    {
+      "name": "AssignStartUserHandlerType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:StartEvent", "bpmn:UserTask"]
+      },
+      "properties": [
+      {
+        "name": "value",
+        "type": "Integer",
+        "isBody": true
+      }
+      ]
+    },
+    {
+      "name": "RejectHandlerType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "RejectReturnTaskId",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "String",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "AssignEmptyHandlerType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "AssignEmptyUserIds",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "String",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "ButtonsSetting",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "flowable:id",
+          "type": "Integer",
+          "isAttr": true
+        },
+        {
+          "name": "flowable:enable",
+          "type": "Boolean",
+          "isAttr": true
+        },
+        {
+          "name": "flowable:displayName",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
+    },
+    {
+      "name": "FieldsPermission",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "flowable:field",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "flowable:title",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "flowable:permission",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
+    },
+    {
+      "name": "BoundaryEventType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:BoundaryEvent"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "TimeoutHandlerType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:BoundaryEvent"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "ApproveType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "ApproveMethod",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "CandidateStrategy",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "CandidateParam",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "String",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "SignEnable",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Boolean",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "SkipExpression",
+      "extends": ["bpmn:UserTask"],
+      "properties": [
+        {
+          "name": "skipExpression",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "ReasonRequire",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Boolean",
+          "isBody": true
         }
       ]
     }

@@ -26,8 +26,22 @@
             placeholder="请输入微信 APPID"
           />
         </el-form-item>
+        <el-form-item label-width="180px">
+          <a
+            href="https://pay.weixin.qq.com/index.php/extend/merchant_appid/mapay_platform/account_manage"
+            target="_blank"
+          >
+            前往微信商户平台查看 APPID
+          </a>
+        </el-form-item>
         <el-form-item label="商户号" label-width="180px" prop="config.mchId">
           <el-input v-model="formData.config.mchId" :style="{ width: '100%' }" />
+        </el-form-item>
+
+        <el-form-item label-width="180px">
+          <a href="https://pay.weixin.qq.com/index.php/extend/pay_setting" target="_blank">
+            前往微信商户平台查看商户号
+          </a>
         </el-form-item>
         <el-form-item label="渠道状态" label-width="180px" prop="status">
           <el-radio-group v-model="formData.status">
@@ -57,11 +71,12 @@
           >
             <el-input
               v-model="formData.config.keyContent"
-              :autosize="{ minRows: 8, maxRows: 8 }"
+              :autosize="{ minRows: 2, maxRows: 4 }"
               :style="{ width: '100%' }"
               placeholder="请上传 apiclient_cert.p12 证书"
               readonly
               type="textarea"
+              :rows="2"
             />
           </el-form-item>
           <el-form-item label="" label-width="180px">
@@ -94,11 +109,12 @@
           >
             <el-input
               v-model="formData.config.privateKeyContent"
-              :autosize="{ minRows: 8, maxRows: 8 }"
+              :autosize="{ minRows: 2, maxRows: 4 }"
               :style="{ width: '100%' }"
               placeholder="请上传 apiclient_key.pem 证书"
               readonly
               type="textarea"
+              :rows="2"
             />
           </el-form-item>
           <el-form-item label="" label-width="180px" prop="privateKeyContentFile">
@@ -122,6 +138,52 @@
               clearable
               placeholder="请输入证书序列号"
             />
+          </el-form-item>
+          <el-form-item label-width="180px">
+            <a
+              href="https://pay.weixin.qq.com/index.php/core/cert/api_cert#/api-cert-manage"
+              target="_blank"
+            >
+              前往微信商户平台查看证书序列号
+            </a>
+          </el-form-item>
+          <el-form-item
+            label="public_key.pem 证书"
+            label-width="180px"
+            prop="config.publicKeyContent"
+          >
+            <el-input
+              v-model="formData.config.publicKeyContent"
+              :autosize="{ minRows: 2, maxRows: 4 }"
+              :style="{ width: '100%' }"
+              placeholder="请上传 public_key.pem 证书"
+              readonly
+              type="textarea"
+              :rows="2"
+            />
+          </el-form-item>
+          <el-form-item label="" label-width="180px" prop="publicKeyContentFile">
+            <el-upload
+              ref="publicKeyContentFile"
+              :before-upload="pemFileBeforeUpload"
+              :http-request="publicKeyContentUpload"
+              :limit="1"
+              accept=".pem"
+              action=""
+            >
+              <el-button type="primary">
+                <Icon class="mr-5px" icon="ep:upload" />
+                点击上传
+              </el-button>
+            </el-upload>
+          </el-form-item>
+          <el-form-item label="公钥 ID" label-width="180px" prop="config.publicKeyId">
+            <el-input v-model="formData.config.publicKeyId" clearable placeholder="请输入公钥 ID" />
+          </el-form-item>
+          <el-form-item label-width="180px">
+            <a href="https://pay.weixin.qq.com/doc/v3/merchant/4012153196" target="_blank">
+              微信支付公钥产品简介及使用说明
+            </a>
           </el-form-item>
         </div>
         <el-form-item label="备注" label-width="180px" prop="remark">
@@ -162,7 +224,9 @@ const formData = ref<any>({
     keyContent: '',
     privateKeyContent: '',
     certSerialNo: '',
-    apiV3Key: ''
+    apiV3Key: '',
+    publicKeyContent: '',
+    publicKeyId: ''
   }
 })
 const formRules = {
@@ -179,6 +243,7 @@ const formRules = {
     { required: true, message: '请上传 apiclient_key.pem 证书', trigger: 'blur' }
   ],
   'config.certSerialNo': [{ required: true, message: '请输入证书序列号', trigger: 'blur' }],
+  'config.publicKeyId': [{ required: true, message: '请输入公钥 ID', trigger: 'blur' }],
   'config.apiV3Key': [{ required: true, message: '请上传 api V3 密钥值', trigger: 'blur' }]
 }
 const formRef = ref() // 表单 Ref
@@ -245,7 +310,9 @@ const resetForm = (appId, code) => {
       keyContent: '',
       privateKeyContent: '',
       certSerialNo: '',
-      apiV3Key: ''
+      apiV3Key: '',
+      publicKeyContent: '',
+      publicKeyId: ''
     }
   }
   formRef.value?.resetFields()
@@ -257,7 +324,6 @@ const resetForm = (appId, code) => {
 const fileBeforeUpload = (file, fileAccept) => {
   let format = '.' + file.name.split('.')[1]
   if (format !== fileAccept) {
-    debugger
     message.error('请上传指定格式"' + fileAccept + '"文件')
     return false
   }
@@ -296,5 +362,16 @@ const keyContentUpload = async (event) => {
     formData.value.config.keyContent = e.target.result.split(',')[1]
   }
   readFile.readAsDataURL(event.file) // 读成 base64
+}
+
+/**
+ * 读取 public_key.pem 到 publicKeyContent 字段
+ */
+const publicKeyContentUpload = async (event) => {
+  const readFile = new FileReader()
+  readFile.onload = (e: any) => {
+    formData.value.config.publicKeyContent = e.target.result
+  }
+  readFile.readAsText(event.file)
 }
 </script>

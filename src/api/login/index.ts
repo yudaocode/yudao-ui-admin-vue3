@@ -1,5 +1,4 @@
 import request from '@/config/axios'
-import { getRefreshToken } from '@/utils/auth'
 import type { RegisterVO, UserLoginVO } from './types'
 
 export interface SmsCodeVO {
@@ -14,17 +13,18 @@ export interface SmsLoginVO {
 
 // 登录
 export const login = (data: UserLoginVO) => {
-  return request.post({ url: '/system/auth/login', data })
+  return request.post({
+    url: '/system/auth/login',
+    data,
+    headers: {
+      isEncrypt: false
+    }
+  })
 }
 
 // 注册
 export const register = (data: RegisterVO) => {
   return request.post({ url: '/system/auth/register', data })
-}
-
-// 刷新访问令牌
-export const refreshToken = () => {
-  return request.post({ url: '/system/auth/refresh-token?refreshToken=' + getRefreshToken() })
 }
 
 // 使用租户名，获得租户编号
@@ -76,11 +76,16 @@ export const socialAuthRedirect = (type: number, redirectUri: string) => {
   })
 }
 // 获取验证图片以及 token
-export const getCode = (data) => {
+export const getCode = (data: any) => {
   return request.postOriginal({ url: 'system/captcha/get', data })
 }
 
 // 滑动或者点选验证
-export const reqCheck = (data) => {
+export const reqCheck = (data: any) => {
   return request.postOriginal({ url: 'system/captcha/check', data })
+}
+
+// 通过短信重置密码
+export const smsResetPassword = (data: any) => {
+  return request.post({ url: '/system/auth/reset-password', data })
 }

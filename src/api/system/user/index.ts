@@ -36,6 +36,7 @@ export const getDeptUser = (id: number): Promise<UserVO[]> => {
   return request.get({ url: '/system/user/simple-list?id=' + id })
 }
 
+
 // 查询用户详情
 export const getUser = (id: number) => {
   return request.get({ url: '/system/user/get?id=' + id })
@@ -56,9 +57,14 @@ export const deleteUser = (id: number) => {
   return request.delete({ url: '/system/user/delete?id=' + id })
 }
 
+// 批量删除用户
+export const deleteUserList = (ids: number[]) => {
+  return request.delete({ url: '/system/user/delete-list', params: { ids: ids.join(',') } })
+}
+
 // 导出用户
-export const exportUser = (params) => {
-  return request.download({ url: '/system/user/export', params })
+export const exportUser = (params: any) => {
+  return request.download({ url: '/system/user/export-excel', params })
 }
 
 // 下载用户导入模板
@@ -67,7 +73,7 @@ export const importUserTemplate = () => {
 }
 
 // 用户密码重置
-export const resetUserPwd = (id: number, password: string) => {
+export const resetUserPassword = (id: number, password: string) => {
   const data = {
     id,
     password

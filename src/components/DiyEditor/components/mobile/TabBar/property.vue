@@ -80,13 +80,13 @@
 
 <script setup lang="ts">
 import { TabBarProperty, component, THEME_LIST } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 // 底部导航栏
 defineOptions({ name: 'TabBarProperty' })
 
 const props = defineProps<{ modelValue: TabBarProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 // 将数据库的值更新到右侧属性栏
 component.property.items = formData.value.items

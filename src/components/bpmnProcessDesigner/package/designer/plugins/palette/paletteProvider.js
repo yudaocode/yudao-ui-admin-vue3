@@ -171,6 +171,12 @@ PaletteProvider.prototype.getPaletteEntries = function () {
       'bpmn-icon-user-task',
       translate('Create User Task')
     ),
+    'create.service-task': createAction(
+      'bpmn:ServiceTask',
+      'activity',
+      'bpmn-icon-service',
+      translate('Create Service Task')
+    ),
     'create.data-object': createAction(
       'bpmn:DataObjectReference',
       'data-object',

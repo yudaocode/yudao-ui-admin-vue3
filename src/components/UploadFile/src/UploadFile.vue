@@ -86,7 +86,8 @@ const props = defineProps({
   autoUpload: propTypes.bool.def(true), // 自动上传
   drag: propTypes.bool.def(false), // 拖拽上传
   isShowTip: propTypes.bool.def(true), // 是否显示提示
-  disabled: propTypes.bool.def(false) // 是否禁用上传组件 ==> 非必传（默认为 false）
+  disabled: propTypes.bool.def(false), // 是否禁用上传组件 ==> 非必传（默认为 false）
+  directory: propTypes.string.def(undefined) // 上传目录 ==> 非必传（默认为 undefined）
 })
 
 // ========== 上传相关 ==========
@@ -95,7 +96,7 @@ const uploadList = ref<UploadUserFile[]>([])
 const fileList = ref<UploadUserFile[]>([])
 const uploadNumber = ref<number>(0)
 
-const { uploadUrl, httpRequest } = useUpload()
+const { uploadUrl, httpRequest } = useUpload(props.directory)
 
 // 文件上传之前判断
 const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
@@ -121,7 +122,9 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
     return false
   }
   message.success('正在上传文件，请稍候...')
+  // 只有在验证通过后才增加计数器
   uploadNumber.value++
+  return true
 }
 // 处理上传的文件发生变化
 // const handleFileChange = (uploadFile: UploadFile): void => {
@@ -148,6 +151,8 @@ const handleExceed: UploadProps['onExceed'] = (): void => {
 // 上传错误提示
 const excelUploadError: UploadProps['onError'] = (): void => {
   message.error('导入数据失败，请您重新上传！')
+  // 上传失败时减少计数器，避免后续上传被阻塞
+  uploadNumber.value = Math.max(0, uploadNumber.value - 1)
 }
 // 删除上传文件
 const handleRemove = (file: UploadFile) => {

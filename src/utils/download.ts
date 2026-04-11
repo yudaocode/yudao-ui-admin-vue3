@@ -33,6 +33,10 @@ const download = {
   markdown: (data: Blob, fileName: string) => {
     download0(data, fileName, 'text/markdown')
   },
+  // 下载 Json 方法
+  json: (data: Blob, fileName: string) => {
+    download0(data, fileName, 'application/json')
+  },
   // 下载图片（允许跨域）
   image: ({
     url,
@@ -65,6 +69,31 @@ const download = {
       a.download = 'image.png'
       a.click()
     }
+  },
+  base64ToFile: (base64: any, fileName: string) => {
+    // 将base64按照 , 进行分割 将前缀  与后续内容分隔开
+    const data = base64.split(',')
+    // 利用正则表达式 从前缀中获取图片的类型信息（image/png、image/jpeg、image/webp等）
+    const type = data[0].match(/:(.*?);/)[1]
+    // 从图片的类型信息中 获取具体的文件格式后缀（png、jpeg、webp）
+    const suffix = type.split('/')[1]
+    // 使用atob()对base64数据进行解码  结果是一个文件数据流 以字符串的格式输出
+    const bstr = window.atob(data[1])
+    // 获取解码结果字符串的长度
+    let n = bstr.length
+    // 根据解码结果字符串的长度创建一个等长的整形数字数组
+    // 但在创建时 所有元素初始值都为 0
+    const u8arr = new Uint8Array(n)
+    // 将整形数组的每个元素填充为解码结果字符串对应位置字符的UTF-16 编码单元
+    while (n--) {
+      // charCodeAt()：获取给定索引处字符对应的 UTF-16 代码单元
+      u8arr[n] = bstr.charCodeAt(n)
+    }
+
+    // 将File文件对象返回给方法的调用者
+    return new File([u8arr], `${fileName}.${suffix}`, {
+      type: type
+    })
   }
 }
 

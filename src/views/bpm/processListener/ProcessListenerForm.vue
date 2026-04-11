@@ -39,8 +39,8 @@
         <el-select v-model="formData.event" placeholder="请选择事件">
           <el-option
             v-for="event in formData.type == 'execution'
-              ? ['start', 'end']
-              : ['create', 'assignment', 'complete', 'delete', 'update', 'timeout']"
+              ? ['开始', '结束']
+              : ['创建', '指派', '完成', '删除', '更新', '超时']"
             :label="event"
             :value="event"
             :key="event"

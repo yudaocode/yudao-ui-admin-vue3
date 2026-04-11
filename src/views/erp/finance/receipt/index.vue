@@ -33,16 +33,16 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="供应商" prop="supplierId">
+      <el-form-item label="客户" prop="customerId">
         <el-select
-          v-model="queryParams.supplierId"
+          v-model="queryParams.customerId"
           clearable
           filterable
-          placeholder="请选择供供应商"
+          placeholder="请选择供客户"
           class="!w-240px"
         >
           <el-option
-            v-for="item in supplierList"
+            v-for="item in customerList"
             :key="item.id"
             :label="item.name"
             :value="item.id"
@@ -272,8 +272,8 @@ import FinanceReceiptForm from './FinanceReceiptForm.vue'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
 import { erpPriceTableColumnFormatter } from '@/utils'
-import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
+import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 
 /** ERP 收款单列表 */
 defineOptions({ name: 'ErpPurchaseOrder' })
@@ -289,7 +289,7 @@ const queryParams = reactive({
   pageSize: 10,
   no: undefined,
   receiptTime: [],
-  supplierId: undefined,
+  customerId: undefined,
   creator: undefined,
   financeUserId: undefined,
   accountId: undefined,
@@ -299,7 +299,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const supplierList = ref<SupplierVO[]>([]) // 供应商列表
+const customerList = ref<CustomerVO[]>([]) // 客户列表
 const userList = ref<UserVO[]>([]) // 用户列表
 const accountList = ref<AccountVO[]>([]) // 账户列表
 
@@ -384,8 +384,8 @@ const handleSelectionChange = (rows: FinanceReceiptVO[]) => {
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  // 加载供应商、用户、账户
-  supplierList.value = await SupplierApi.getSupplierSimpleList()
+  // 加载客户、用户、账户
+  customerList.value = await CustomerApi.getCustomerSimpleList()
   userList.value = await UserApi.getSimpleUserList()
   accountList.value = await AccountApi.getAccountSimpleList()
 })

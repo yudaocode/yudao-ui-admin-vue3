@@ -4,7 +4,9 @@ export interface MailLogVO {
   id: number
   userId: number
   userType: number
-  toMail: string
+  toMails: string[]
+  ccMails?: string[]
+  bccMails?: string[]
   accountId: number
   fromMail: string
   templateId: number
@@ -27,4 +29,9 @@ export const getMailLogPage = async (params: PageParam) => {
 // 查询邮件日志详情
 export const getMailLog = async (id: number) => {
   return await request.get({ url: '/system/mail-log/get?id=' + id })
+}
+
+// 导出邮件日志
+export const exportMailLog = (params) => {
+  return request.download({ url: '/system/mail-log/export-excel', params })
 }

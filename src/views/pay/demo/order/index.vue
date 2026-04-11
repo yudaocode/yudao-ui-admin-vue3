@@ -110,7 +110,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup name="PayDemoOrder">
-import * as PayDemoApi from '@/api/pay/demo'
+import * as PayDemoApi from '@/api/pay/demo/order'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 

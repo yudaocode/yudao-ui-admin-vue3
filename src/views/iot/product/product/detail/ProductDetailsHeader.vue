@@ -1,0 +1,113 @@
+<template>
+  <div>
+    <div class="flex items-start justify-between">
+      <div>
+        <el-col>
+          <el-row>
+            <span class="text-xl font-bold">{{ product.name }}</span>
+          </el-row>
+        </el-col>
+      </div>
+      <div>
+        <!-- 右上：按钮 -->
+        <el-button
+          @click="openForm('update', product.id)"
+          v-hasPermi="['iot:product:update']"
+          :disabled="product.status === 1"
+        >
+          编辑
+        </el-button>
+        <el-button
+          type="primary"
+          @click="confirmPublish(product.id)"
+          v-hasPermi="['iot:product:update']"
+          v-if="product.status === 0"
+        >
+          发布
+        </el-button>
+        <el-button
+          type="danger"
+          @click="confirmUnpublish(product.id)"
+          v-hasPermi="['iot:product:update']"
+          v-if="product.status === 1"
+        >
+          撤销发布
+        </el-button>
+      </div>
+    </div>
+  </div>
+  <ContentWrap class="mt-10px">
+    <el-descriptions :column="1" direction="horizontal">
+      <el-descriptions-item label="ProductKey">
+        {{ product.productKey }}
+        <el-button @click="copyToClipboard(product.productKey)">复制</el-button>
+      </el-descriptions-item>
+      <el-descriptions-item label="设备总数">
+        <span class="ml-20px mr-10px">{{ product.deviceCount ?? '加载中...' }}</span>
+        <el-button @click="goToDeviceList(product.id)">前往管理</el-button>
+      </el-descriptions-item>
+    </el-descriptions>
+  </ContentWrap>
+  <!-- 表单弹窗：添加/修改 -->
+  <ProductForm ref="formRef" @success="emit('refresh')" />
+</template>
+<script setup lang="ts">
+import ProductForm from '@/views/iot/product/product/ProductForm.vue'
+import { ProductApi, ProductVO } from '@/api/iot/product/product'
+import { useClipboard } from '@vueuse/core'
+
+const message = useMessage()
+const { t } = useI18n() // 国际化
+
+const { product } = defineProps<{ product: ProductVO }>() // 定义 Props
+
+/** 复制到剪贴板方法 */
+const copyToClipboard = async (text: string) => {
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: text })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+    return
+  }
+  await copy()
+  if (unref(copied)) {
+    message.success(t('common.copySuccess'))
+  }
+}
+
+/** 路由跳转到设备管理 */
+const { push } = useRouter()
+const goToDeviceList = (productId: number) => {
+  push({ name: 'IoTDevice', query: { productId } })
+}
+
+/** 修改操作 */
+const emit = defineEmits(['refresh']) // 定义 Emits
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+/** 发布操作 */
+const confirmPublish = async (id: number) => {
+  try {
+    await ProductApi.updateProductStatus(id, 1)
+    message.success('发布成功')
+    formRef.value.close() // 关闭弹框
+    emit('refresh')
+  } catch (error) {
+    message.error('发布失败')
+  }
+}
+
+/** 撤销发布操作 */
+const confirmUnpublish = async (id: number) => {
+  try {
+    await ProductApi.updateProductStatus(id, 0)
+    message.success('撤销发布成功')
+    formRef.value.close() // 关闭弹框
+    emit('refresh')
+  } catch (error) {
+    message.error('撤销发布失败')
+  }
+}
+</script>

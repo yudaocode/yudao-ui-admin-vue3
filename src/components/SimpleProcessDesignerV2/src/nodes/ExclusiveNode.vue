@@ -1,7 +1,17 @@
 <template>
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
-      <div class="branch-node-add" @click="addCondition">添加条件</div>
+      <div
+        v-if="readonly"
+        class="branch-node-readonly"
+        :class="`${useTaskStatusClass(currentNode?.activityStatus)}`"
+      >
+        <span class="iconfont icon-exclusive icon-size condition"></span>
+      </div>
+      <el-button v-else class="branch-node-add" color="#67c23a" @click="addCondition" plain
+        >添加条件</el-button
+      >
+
       <div
         class="branch-node-item"
         v-for="(item, index) in currentNode.conditionNodes"
@@ -17,9 +27,15 @@
         </template>
         <div class="node-wrapper">
           <div class="node-container">
-            <div class="node-box" :class="{ 'node-config-error': !item.showText }">
+            <div
+              class="node-box"
+              :class="[
+                { 'node-config-error': !item.showText },
+                `${useTaskStatusClass(item.activityStatus)}`
+              ]"
+            >
               <div class="branch-node-title-container">
-                <div v-if="showInputs[index]">
+                <div v-if="!readonly && showInputs[index]">
                   <input
                     type="text"
                     class="input-max-width editable-title-input"
@@ -39,7 +55,10 @@
                   {{ NODE_DEFAULT_TEXT.get(NodeType.CONDITION_NODE) }}
                 </div>
               </div>
-              <div class="node-toolbar" v-if="index + 1 !== currentNode.conditionNodes?.length">
+              <div
+                class="node-toolbar"
+                v-if="!readonly && index + 1 !== currentNode.conditionNodes?.length"
+              >
                 <div class="toolbar-icon">
                   <Icon
                     color="#0089ff"
@@ -65,7 +84,7 @@
                 <Icon icon="ep:arrow-right" />
               </div>
             </div>
-            <NodeHandler v-model:child-node="item.childNode" />
+            <NodeHandler v-model:child-node="item.childNode" :current-node="item" />
           </div>
         </div>
         <ConditionNodeConfig :node-index="index" :condition-node="item" :ref="item.id" />
@@ -78,26 +97,34 @@
         />
       </div>
     </div>
-    <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
+    <NodeHandler
+      v-if="currentNode"
+      v-model:child-node="currentNode.childNode"
+      :current-node="currentNode"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import NodeHandler from '../NodeHandler.vue'
 import ProcessNodeTree from '../ProcessNodeTree.vue'
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
+import {
+  SimpleFlowNode,
+  NodeType,
+  ConditionType,
+  DEFAULT_CONDITION_GROUP_VALUE,
+  NODE_DEFAULT_TEXT
+} from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
+import { useTaskStatusClass } from '../node'
 import { generateUUID } from '@/utils'
 import ConditionNodeConfig from '../nodes-config/ConditionNodeConfig.vue'
+import { cloneDeep } from 'lodash-es'
 const { proxy } = getCurrentInstance() as any
 defineOptions({
   name: 'ExclusiveNode'
 })
 const props = defineProps({
-  // parentNode : {
-  //   type: Object as () => SimpleFlowNode,
-  //   required: true
-  // },
   flowNode: {
     type: Object as () => SimpleFlowNode,
     required: true
@@ -113,10 +140,9 @@ const emits = defineEmits<{
     nodeType: number
   ]
 }>()
-
+// 是否只读
+const readonly = inject<Boolean>('readonly')
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
-// const conditionNodes = computed(() => currentNode.value.conditionNodes);
-
 watch(
   () => props.flowNode,
   (newValue) => {
@@ -130,7 +156,8 @@ const blurEvent = (index: number) => {
   showInputs.value[index] = false
   const conditionNode = currentNode.value.conditionNodes?.at(index) as SimpleFlowNode
   conditionNode.name =
-    conditionNode.name || getDefaultConditionNodeName(index, conditionNode.defaultFlow)
+    conditionNode.name ||
+    getDefaultConditionNodeName(index, conditionNode.conditionSetting?.defaultFlow)
 }
 
 // 点击条件名称
@@ -139,6 +166,9 @@ const clickEvent = (index: number) => {
 }
 
 const conditionNodeConfig = (nodeId: string) => {
+  if (readonly) {
+    return
+  }
   const conditionNode = proxy.$refs[nodeId][0]
   conditionNode.open()
 }
@@ -156,8 +186,11 @@ const addCondition = () => {
       type: NodeType.CONDITION_NODE,
       childNode: undefined,
       conditionNodes: [],
-      conditionType: 1,
-      defaultFlow: false
+      conditionSetting: {
+        defaultFlow: false,
+        conditionType: ConditionType.RULE,
+        conditionGroups: cloneDeep(DEFAULT_CONDITION_GROUP_VALUE)
+      }
     }
     conditionNodes.splice(lastIndex, 0, conditionData)
   }
@@ -193,7 +226,7 @@ const recursiveFindParentNode = (
   node: SimpleFlowNode,
   nodeType: number
 ) => {
-  if (!node || node.type === NodeType.START_EVENT_NODE) {
+  if (!node || node.type === NodeType.START_USER_NODE) {
     return
   }
   if (node.type === nodeType) {

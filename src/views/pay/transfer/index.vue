@@ -66,11 +66,19 @@
           />
         </el-select>
       </el-form-item>
-
       <el-form-item label="收款人姓名" prop="userName">
         <el-input
           v-model="queryParams.userName"
           placeholder="请输入收款人姓名"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="收款人账号" prop="accountNo">
+        <el-input
+          v-model="queryParams.accountNo"
+          placeholder="请输入收款人账号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -99,6 +107,15 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['pay:transfer:export']"
+        >
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -114,12 +131,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="应用编号" align="center" prop="appId" />
-      <el-table-column label="类型" align="center" prop="type" width="120">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PAY_TRANSFER_TYPE" :value="scope.row.type" />
-        </template>
-      </el-table-column>
+      <el-table-column label="支付应用" align="center" prop="appName" min-width="100" />
       <el-table-column label="转账金额" align="center" prop="price">
         <template #default="scope">
           <span>￥{{ (scope.row.price / 100.0).toFixed(2) }}</span>
@@ -147,18 +159,7 @@
         </template>
       </el-table-column>
       <el-table-column label="收款人姓名" align="center" prop="userName" width="120" />
-      <el-table-column label="收款账号" align="left" width="200">
-        <template #default="scope">
-          <p class="transfer-font" v-if="scope.row.alipayLogonId">
-            <el-tag size="small">支付宝登录号</el-tag>
-            {{ scope.row.alipayLogonId }}
-          </p>
-          <p class="transfer-font" v-if="scope.row.openid">
-            <el-tag size="small">微信 openId</el-tag>
-            {{ scope.row.openid }}
-          </p>
-        </template>
-      </el-table-column>
+      <el-table-column label="收款账号" align="left" prop="userAccount" width="200" />
       <el-table-column label="转账标题" align="center" prop="subject" width="120" />
       <el-table-column label="转账渠道" align="center" prop="channelCode">
         <template #default="scope">
@@ -194,10 +195,11 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as TransferApi from '@/api/pay/transfer'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import TransferDetail from './TransferDetail.vue'
+import download from '@/utils/download'
+
 defineOptions({ name: 'PayTransfer' })
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -216,8 +218,7 @@ const queryParams = reactive({
   price: null,
   subject: null,
   userName: null,
-  alipayLogonId: null,
-  openid: null,
+  userAccount: null,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -245,6 +246,21 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
+}
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await TransferApi.exportTransfer(queryParams)
+    download.excel(data, '转账单.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 /** 添加/修改操作 */

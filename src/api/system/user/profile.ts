@@ -16,10 +16,6 @@ export interface ProfileVO {
     id: number
     name: string
   }[]
-  socialUsers: {
-    type: number
-    openid: string
-  }[]
   email: string
   mobile: string
   sex: number
@@ -32,10 +28,11 @@ export interface ProfileVO {
 }
 
 export interface UserProfileUpdateReqVO {
-  nickname: string
-  email: string
-  mobile: string
-  sex: number
+  nickname?: string
+  email?: string
+  mobile?: string
+  sex?: number
+  avatar?: string
 }
 
 // 查询用户个人信息
@@ -57,9 +54,4 @@ export const updateUserPassword = (oldPassword: string, newPassword: string) => 
       newPassword: newPassword
     }
   })
-}
-
-// 用户头像上传
-export const uploadAvatar = (data) => {
-  return request.upload({ url: '/system/user/profile/update-avatar', data: data })
 }

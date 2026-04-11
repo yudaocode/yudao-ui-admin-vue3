@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="AI 写作助手" url="https://doc.iocoder.cn/ai/write/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -39,7 +41,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="平台" prop="platform">
-        <el-select v-model="queryParams.platform" placeholder="请选择平台" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.platform"
+          placeholder="请选择平台"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.AI_PLATFORM)"
             :key="dict.value"
@@ -62,24 +69,6 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['ai:write:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <!-- TODO @YunaiV  目前没有导出接口，需要导出吗 -->
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['ai:write:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -143,15 +132,6 @@
       <el-table-column label="错误信息" align="center" prop="errorMessage" />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-<!--          TODO @YunaiV 目前没有修改接口，写作要可以更改吗-->
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['ai:write:update']"
-          >
-            编辑
-          </el-button>
           <el-button
             link
             type="danger"
@@ -223,15 +203,6 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
-}
-
-/** 新增方法，跳转到写作页面 **/
-const openForm = (type: string, id?: number) => {
-  switch (type) {
-    case 'create':
-      router.push('/ai/write')
-      break
-  }
 }
 
 /** 删除按钮操作 */

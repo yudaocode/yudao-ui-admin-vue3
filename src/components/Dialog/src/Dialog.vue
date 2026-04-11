@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
+
 defineOptions({ name: 'Dialog' })
 
 const slots = useSlots()
+const emits = defineEmits(['update:modelValue'])
 
 const props = defineProps({
   modelValue: propTypes.bool.def(false),
@@ -55,6 +57,17 @@ const dialogStyle = computed(() => {
     height: unref(dialogHeight)
   }
 })
+
+const closing = ref(false)
+
+function closeHandler() {
+  emits('update:modelValue', false)
+  closing.value = true
+}
+
+function closedHandler() {
+  closing.value = false
+}
 </script>
 
 <template>
@@ -68,6 +81,8 @@ const dialogStyle = computed(() => {
     draggable
     class="com-dialog"
     :show-close="false"
+    @close="closeHandler"
+    @closed="closedHandler"
   >
     <template #header="{ close }">
       <div class="relative h-54px flex items-center justify-between pl-15px pr-15px">
@@ -90,7 +105,7 @@ const dialogStyle = computed(() => {
             icon="ep:close"
             hover-color="var(--el-color-primary)"
             color="var(--el-color-info)"
-            @click="close"
+            @click.stop="close"
           />
         </div>
       </div>
@@ -101,7 +116,9 @@ const dialogStyle = computed(() => {
     </ElScrollbar>
     <slot v-else></slot>
     <template v-if="slots.footer" #footer>
-      <slot name="footer"></slot>
+      <div :style="{ 'pointer-events': closing ? 'none' : 'auto' }">
+        <slot name="footer"></slot>
+      </div>
     </template>
   </ElDialog>
 </template>

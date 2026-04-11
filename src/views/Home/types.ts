@@ -10,6 +10,7 @@ export type Project = {
   message: string
   personal: string
   time: Date | number | string
+  color: string
 }
 
 export type Notice = {
@@ -23,6 +24,7 @@ export type Shortcut = {
   name: string
   icon: string
   url: string
+  color: string
 }
 
 export type RadarData = {

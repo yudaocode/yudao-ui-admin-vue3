@@ -49,10 +49,13 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/inner'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { Demo03Student, Demo03StudentApi } from '@/api/infra/demo/demo03/inner'
 import Demo03CourseForm from './components/Demo03CourseForm.vue'
 import Demo03GradeForm from './components/Demo03GradeForm.vue'
+
+/** 学生 表单 */
+defineOptions({ name: 'Demo03StudentForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -120,7 +123,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as Demo03StudentApi.Demo03StudentVO
+    const data = formData.value as unknown as Demo03Student
     // 拼接子表的数据
     data.demo03Courses = demo03CourseFormRef.value.getData()
     data.demo03Grade = demo03GradeFormRef.value.getData()

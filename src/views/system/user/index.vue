@@ -41,7 +41,7 @@
           <el-form-item label="状态" prop="status">
             <el-select
               v-model="queryParams.status"
-              placeholder="用户状态"
+              placeholder="请选择用户状态"
               clearable
               class="!w-240px"
             >
@@ -91,11 +91,21 @@
             >
               <Icon icon="ep:download" />导出
             </el-button>
+            <el-button
+              type="danger"
+              plain
+              :disabled="checkedIds.length === 0"
+              @click="handleDeleteBatch"
+              v-hasPermi="['system:user:delete']"
+            >
+              <Icon icon="ep:delete" />批量删除
+            </el-button>
           </el-form-item>
         </el-form>
       </ContentWrap>
       <ContentWrap>
-        <el-table v-loading="loading" :data="list">
+        <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+          <el-table-column type="selection" width="55" />
           <el-table-column label="用户编号" align="center" key="id" prop="id" />
           <el-table-column
             label="用户名称"
@@ -124,6 +134,7 @@
                 :active-value="0"
                 :inactive-value="1"
                 @change="handleStatusChange(scope.row)"
+                :disabled="!checkPermi(['system:user:update'])"
               />
             </template>
           </el-table-column>
@@ -254,9 +265,14 @@ const resetQuery = () => {
 }
 
 /** 处理部门被点击 */
-const handleDeptNodeClick = async (row) => {
-  queryParams.deptId = row.id
-  await getList()
+const handleDeptNodeClick = async (row: any) => {
+  if (row === undefined) {
+    queryParams.deptId = undefined
+    await getList()
+  } else {
+    queryParams.deptId = row.id
+    await getList()
+  }
 }
 
 /** 添加/修改操作 */
@@ -334,6 +350,25 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
+/** 批量删除按钮操作 */
+const checkedIds = ref<number[]>([])
+const handleRowCheckboxChange = (rows: UserApi.UserVO[]) => {
+  checkedIds.value = rows.map((row) => row.id)
+}
+
+const handleDeleteBatch = async () => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起批量删除
+    await UserApi.deleteUserList(checkedIds.value)
+    checkedIds.value = []
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
 /** 重置密码 */
 const handleResetPwd = async (row: UserApi.UserVO) => {
   try {
@@ -344,7 +379,7 @@ const handleResetPwd = async (row: UserApi.UserVO) => {
     )
     const password = result.value
     // 发起重置
-    await UserApi.resetUserPwd(row.id, password)
+    await UserApi.resetUserPassword(row.id, password)
     message.success('修改成功，新密码是：' + password)
   } catch {}
 }

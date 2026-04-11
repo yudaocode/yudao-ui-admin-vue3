@@ -11,6 +11,7 @@
       :on-change="handleFileChange"
       :on-error="submitFormError"
       :on-exceed="handleExceed"
+      :on-progress="handleProgress"
       :on-success="submitFormSuccess"
       :http-request="httpRequest"
       accept=".jpg, .png, .gif"
@@ -32,6 +33,7 @@
 </template>
 <script lang="ts" setup>
 import { useUpload } from '@/components/UploadFile/src/useUpload'
+import { UploadFile, UploadProgressEvent } from 'element-plus/es/components/upload/src/upload'
 
 defineOptions({ name: 'InfraFileForm' })
 
@@ -54,8 +56,13 @@ const open = async () => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 处理上传的文件发生变化 */
-const handleFileChange = (file) => {
+const handleFileChange = (file: UploadFile) => {
   data.value.path = file.name
+}
+
+/** 处理文件上传进度显示 */
+const handleProgress = (upEvt: UploadProgressEvent, file: UploadFile) => {
+  file.percentage = upEvt.percent
 }
 
 /** 提交表单 */
@@ -64,6 +71,7 @@ const submitFileForm = () => {
     message.error('请上传文件')
     return
   }
+  formLoading.value = true
   unref(uploadRef)?.submit()
 }
 

@@ -49,7 +49,11 @@ const designerConfig = ref({
   switchType: [], // 是否可以切换组件类型,或者可以相互切换的字段
   autoActive: true, // 是否自动选中拖入的组件
   useTemplate: false, // 是否生成vue2语法的模板组件
-  formOptions: {}, // 定义表单配置默认值
+  formOptions: {
+    form: {
+      labelWidth: '100px' // 设置默认的 label 宽度为 100px
+    }
+  }, // 定义表单配置默认值
   fieldReadonly: false, // 配置field是否可以编辑
   hiddenDragMenu: false, // 隐藏拖拽操作按钮
   hiddenDragBtn: false, // 隐藏拖拽按钮
@@ -131,7 +135,8 @@ const makeTemplate = () => {
 
 /** 复制 **/
 const copy = async (text: string) => {
-  const { copy, copied, isSupported } = useClipboard({ source: text })
+  const textToCopy = JSON.stringify(text, null, 2)
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: textToCopy })
   if (!isSupported) {
     message.error(t('common.copyError'))
   } else {
@@ -145,17 +150,18 @@ const copy = async (text: string) => {
 /**
  * 代码高亮
  */
-const highlightedCode = (code) => {
+const highlightedCode = (code: string) => {
   // 处理语言和代码
   let language = 'json'
   if (formType.value === 2) {
     language = 'xml'
   }
+  // debugger
   if (!isString(code)) {
-    code = JSON.stringify(code)
+    code = JSON.stringify(code, null, 2)
   }
   // 高亮
-  const result = hljs.highlight(language, code, true)
+  const result = hljs.highlight(code, { language: language, ignoreIllegals: true })
   return result.value || '&nbsp;'
 }
 

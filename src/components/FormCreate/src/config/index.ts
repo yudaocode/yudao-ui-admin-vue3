@@ -4,6 +4,8 @@ import { useUploadImgsRule } from './useUploadImgsRule'
 import { useDictSelectRule } from './useDictSelectRule'
 import { useEditorRule } from './useEditorRule'
 import { useSelectRule } from './useSelectRule'
+import { useIframeRule } from './useIframeRule'
+import { useAreaSelectRule } from './useAreaSelectRule'
 
 export {
   useUploadFileRule,
@@ -11,5 +13,7 @@ export {
   useUploadImgsRule,
   useDictSelectRule,
   useEditorRule,
-  useSelectRule
+  useSelectRule,
+  useIframeRule,
+  useAreaSelectRule
 }

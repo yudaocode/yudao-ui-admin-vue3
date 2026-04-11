@@ -237,7 +237,7 @@ const props = defineProps({
 const prefix = inject('prefix')
 const width = inject('width')
 
-const formKey = ref('')
+const formKey = ref(undefined)
 const businessKey = ref('')
 const optionModelTitle = ref('')
 const fieldList = ref<any[]>([])
@@ -268,9 +268,9 @@ const bpmnInstances = () => (window as any)?.bpmnInstances
 const resetFormList = () => {
   bpmnELement.value = bpmnInstances().bpmnElement
   formKey.value = bpmnELement.value.businessObject.formKey
-  if (formKey.value?.length > 0) {
-    formKey.value = parseInt(formKey.value)
-  }
+  // if (formKey.value?.length > 0) {
+  //   formKey.value = parseInt(formKey.value)
+  // }
   // 获取元素扩展属性 或者 创建扩展属性
   elExtensionElements.value =
     bpmnELement.value.businessObject.get('extensionElements') ||
@@ -462,6 +462,7 @@ const updateElementExtensions = () => {
 const formList = ref([]) // 流程表单的下拉框的数据
 onMounted(async () => {
   formList.value = await FormApi.getFormSimpleList()
+  formKey.value = parseInt(formKey.value)
 })
 
 watch(

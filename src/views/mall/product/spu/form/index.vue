@@ -62,6 +62,7 @@ import OtherForm from './OtherForm.vue'
 import SkuForm from './SkuForm.vue'
 import DeliveryForm from './DeliveryForm.vue'
 import { convertToInteger, floatToFixed2, formatToFraction } from '@/utils'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'ProductSpuAdd' })
 
@@ -94,6 +95,7 @@ const formData = ref<ProductSpuApi.Spu>({
   subCommissionType: false, // 分销类型
   skus: [
     {
+      name: '', // SKU 名称，提交时会自动使用 SPU 名称
       price: 0, // 商品价格
       marketPrice: 0, // 市场价
       costPrice: 0, // 成本价
@@ -158,8 +160,13 @@ const submitForm = async () => {
     await unref(otherRef)?.validate()
     // 深拷贝一份, 这样最终 server 端不满足，不需要影响原始数据
     const deepCopyFormData = cloneDeep(unref(formData.value)) as ProductSpuApi.Spu
+    // 校验商品名称不能为空（用于 SKU name）
+    if (isEmpty(deepCopyFormData.name)) {
+      message.error('商品名称不能为空')
+      return
+    }
     deepCopyFormData.skus!.forEach((item) => {
-      // 给sku name赋值
+      // 给sku name赋值（使用商品名称作为 SKU 名称）
       item.name = deepCopyFormData.name
       // sku相关价格元转分
       item.price = convertToInteger(item.price)

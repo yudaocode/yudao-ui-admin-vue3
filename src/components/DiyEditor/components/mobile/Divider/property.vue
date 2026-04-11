@@ -45,12 +45,12 @@
 
 <script setup lang="ts">
 import { DividerProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 // 导航栏属性面板
 defineOptions({ name: 'DividerProperty' })
 const props = defineProps<{ modelValue: DividerProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 //线类型
 const BORDER_TYPES = [

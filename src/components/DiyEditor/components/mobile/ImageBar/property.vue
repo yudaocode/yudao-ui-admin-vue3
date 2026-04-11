@@ -21,14 +21,14 @@
 
 <script setup lang="ts">
 import { ImageBarProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 
 // 图片展示属性面板
 defineOptions({ name: 'ImageBarProperty' })
 
 const props = defineProps<{ modelValue: ImageBarProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 </script>
 
 <style scoped lang="scss"></style>

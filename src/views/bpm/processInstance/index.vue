@@ -10,7 +10,7 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="流程名称" prop="name">
+      <el-form-item label="" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入流程名称"
@@ -19,21 +19,18 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="所属流程" prop="processDefinitionKey">
-        <el-input
-          v-model="queryParams.processDefinitionKey"
-          placeholder="请输入流程定义的标识"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
+
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
       </el-form-item>
-      <el-form-item label="流程分类" prop="category">
+
+      <el-form-item label="" prop="category" class="absolute right-[300px]">
         <el-select
           v-model="queryParams.category"
           placeholder="请选择流程分类"
           clearable
-          class="!w-240px"
+          class="!w-155px"
+          @change="handleQuery"
         >
           <el-option
             v-for="category in categoryList"
@@ -43,12 +40,13 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="流程状态" prop="status">
+      <el-form-item label="" prop="status" class="absolute right-[130px]">
         <el-select
           v-model="queryParams.status"
           placeholder="请选择流程状态"
           clearable
-          class="!w-240px"
+          class="!w-155px"
+          @change="handleQuery"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
@@ -58,28 +56,61 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="发起时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          v-hasPermi="['bpm:process-instance:query']"
-          @click="handleCreate(undefined)"
+
+      <!-- 高级筛选 -->
+      <el-form-item class="absolute right-0">
+        <el-popover
+          :visible="showPopover"
+          persistent
+          :width="400"
+          :show-arrow="false"
+          placement="bottom-end"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 发起流程
-        </el-button>
+          <template #reference>
+            <el-button @click="showPopover = !showPopover">
+              <Icon icon="ep:plus" class="mr-5px" />高级筛选
+            </el-button>
+          </template>
+          <el-form-item
+            label="所属流程"
+            class="font-bold"
+            label-position="top"
+            prop="processDefinitionKey"
+          >
+            <el-select
+              v-model="queryParams.processDefinitionKey"
+              placeholder="请选择流程定义"
+              clearable
+              class="!w-390px"
+              @change="handleQuery"
+            >
+              <el-option
+                v-for="item in processDefinitionList"
+                :key="item.key"
+                :label="item.name"
+                :value="item.key"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="发起时间" class="font-bold" label-position="top" prop="createTime">
+            <el-date-picker
+              v-model="queryParams.createTime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              type="daterange"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+              class="!w-240px"
+            />
+          </el-form-item>
+          <el-form-item class="font-bold" label-position="top">
+            <div class="flex justify-end w-full">
+              <el-button @click="resetQuery">清空</el-button>
+              <el-button @click="showPopover = false">取消</el-button>
+              <el-button type="primary" @click="handleQuery">确认</el-button>
+            </div>
+          </el-form-item>
+        </el-popover>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -88,6 +119,15 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="流程名称" align="center" prop="name" min-width="200px" fixed="left" />
+      <el-table-column label="摘要" prop="summary" width="180" fixed="left">
+        <template #default="scope">
+          <div class="flex flex-col" v-if="scope.row.summary && scope.row.summary.length > 0">
+            <div v-for="(item, index) in scope.row.summary" :key="index">
+              <el-text type="info"> {{ item.key }} : {{ item.value }} </el-text>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         label="流程分类"
         align="center"
@@ -95,9 +135,37 @@
         min-width="100"
         fixed="left"
       />
-      <el-table-column label="流程状态" prop="status" width="120">
+      <el-table-column label="流程状态" prop="status" min-width="200">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
+          <!-- 审批中状态 -->
+          <template
+            v-if="
+              scope.row.status === BpmProcessInstanceStatus.RUNNING && scope.row.tasks?.length > 0
+            "
+          >
+            <!-- 单人审批 -->
+            <template v-if="scope.row.tasks.length === 1">
+              <span>
+                <el-button link type="primary" @click="handleDetail(scope.row)">
+                  {{ scope.row.tasks[0].assigneeUser?.nickname }}
+                </el-button>
+                ({{ scope.row.tasks[0].name }}) 审批中
+              </span>
+            </template>
+            <!-- 多人审批 -->
+            <template v-else>
+              <span>
+                <el-button link type="primary" @click="handleDetail(scope.row)">
+                  {{ scope.row.tasks[0].assigneeUser?.nickname }}
+                </el-button>
+                等 {{ scope.row.tasks.length }} 人 ({{ scope.row.tasks[0].name }})审批中
+              </span>
+            </template>
+          </template>
+          <!-- 非审批中状态 -->
+          <template v-else>
+            <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
+          </template>
         </template>
       </el-table-column>
       <el-table-column
@@ -114,19 +182,6 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
-        <template #default="scope">
-          {{ scope.row.durationInMillis > 0 ? formatPast2(scope.row.durationInMillis) : '-' }}
-        </template>
-      </el-table-column>
-      <el-table-column label="当前审批任务" align="center" prop="tasks" min-width="120px">
-        <template #default="scope">
-          <el-button type="primary" v-for="task in scope.row.tasks" :key="task.id" link>
-            <span>{{ task.name }}</span>
-          </el-button>
-        </template>
-      </el-table-column>
-      <el-table-column label="流程编号" align="center" prop="id" min-width="320px" />
       <el-table-column label="操作" align="center" fixed="right" width="180">
         <template #default="scope">
           <el-button
@@ -163,12 +218,13 @@
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter, formatPast2 } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { CategoryApi } from '@/api/bpm/category'
+import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import { ProcessInstanceVO } from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
+import { BpmProcessInstanceStatus } from '@/utils/constants'
 
 defineOptions({ name: 'BpmProcessInstanceMy' })
 
@@ -179,6 +235,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
+const processDefinitionList = ref<any[]>([]) // 流程定义列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -189,7 +246,8 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const categoryList = ref([]) // 流程分类列表
+const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
+const showPopover = ref(false) // 高级筛选是否展示
 
 /** 查询列表 */
 const getList = async () => {
@@ -217,26 +275,30 @@ const resetQuery = () => {
 
 /** 发起流程操作 **/
 const handleCreate = async (row?: ProcessInstanceVO) => {
-  // 如果是【业务表单】，不支持重新发起
   if (row?.id) {
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
       row.processDefinitionId
     )
-    debugger
+    // 如果是【业务表单】，跳转到对应的发起界面
     if (processDefinitionDetail.formType === 20) {
-      message.error('重新发起流程失败，原因：该流程使用业务表单，不支持重新发起')
-      return
+      await router.push({
+        path: processDefinitionDetail.formCustomCreatePath,
+        query: {
+          id: row.businessKey
+        }
+      })
+    } else if (processDefinitionDetail.formType === 10) {
+      //如果是【流程表单】，跳转到流程发起界面
+      await router.push({
+        name: 'BpmProcessInstanceCreate',
+        query: { processInstanceId: row.id }
+      })
     }
   }
-  // 跳转发起流程界面
-  await router.push({
-    name: 'BpmProcessInstanceCreate',
-    query: { processInstanceId: row?.id }
-  })
 }
 
 /** 查看详情 */
-const handleDetail = (row) => {
+const handleDetail = (row: ProcessInstanceVO) => {
   router.push({
     name: 'BpmProcessInstanceDetail',
     query: {
@@ -246,7 +308,7 @@ const handleDetail = (row) => {
 }
 
 /** 取消按钮操作 */
-const handleCancel = async (row) => {
+const handleCancel = async (row: ProcessInstanceVO) => {
   // 二次确认
   const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
     confirmButtonText: t('common.ok'),
@@ -270,5 +332,7 @@ onActivated(() => {
 onMounted(async () => {
   await getList()
   categoryList.value = await CategoryApi.getCategorySimpleList()
+  // 获取流程定义列表
+  processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
 })
 </script>

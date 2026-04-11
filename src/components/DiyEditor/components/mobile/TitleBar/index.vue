@@ -1,14 +1,16 @@
 <template>
-  <div class="title-bar">
+  <div class="title-bar" :style="{ height: `${property.height}px` }">
     <el-image v-if="property.bgImgUrl" :src="property.bgImgUrl" fit="cover" class="w-full" />
-    <div class="absolute left-0 top-0 w-full">
+    <div class="absolute left-0 top-0 w-full h-full flex flex-col justify-center">
       <!-- 标题 -->
       <div
         :style="{
           fontSize: `${property.titleSize}px`,
           fontWeight: property.titleWeight,
           color: property.titleColor,
-          textAlign: property.textAlign
+          textAlign: property.textAlign,
+          marginLeft: `${property.marginLeft}px`,
+          marginBottom: '4px'
         }"
         v-if="property.title"
       >
@@ -20,9 +22,9 @@
           fontSize: `${property.descriptionSize}px`,
           fontWeight: property.descriptionWeight,
           color: property.descriptionColor,
-          textAlign: property.textAlign
+          textAlign: property.textAlign,
+          marginLeft: `${property.marginLeft}px`
         }"
-        class="m-t-8px"
         v-if="property.description"
       >
         {{ property.description }}

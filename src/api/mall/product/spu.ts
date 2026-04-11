@@ -101,8 +101,8 @@ export const deleteSpu = (id: number) => {
 }
 
 // 导出商品 Spu Excel
-export const exportSpu = async (params) => {
-  return await request.download({ url: '/product/spu/export', params })
+export const exportSpu = async (params: any) => {
+  return await request.download({ url: '/product/spu/export-excel', params })
 }
 
 // 获得商品 SPU 精简列表

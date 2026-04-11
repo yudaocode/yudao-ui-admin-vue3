@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import {
   EMPTY_MENU_LIST_ITEM_PROPERTY,
   MenuListProperty
@@ -39,7 +39,7 @@ defineOptions({ name: 'MenuListProperty' })
 
 const props = defineProps<{ modelValue: MenuListProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 </script>
 
 <style scoped lang="scss"></style>

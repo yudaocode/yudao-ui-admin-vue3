@@ -411,7 +411,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await ProductSpuApi.exportSpu(queryParams)
+    const data = await ProductSpuApi.exportSpu(queryParams.value)
     download.excel(data, '商品列表.xls')
   } catch {
   } finally {
@@ -434,7 +434,7 @@ onActivated(() => {
 onMounted(async () => {
   // 解析路由的 categoryId
   if (route.query.categoryId) {
-    queryParams.value.categoryId = Number(route.query.categoryId)
+    queryParams.value.categoryId = route.query.categoryId
   }
   // 获得商品信息
   await getTabsCount()

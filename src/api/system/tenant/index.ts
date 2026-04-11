@@ -12,6 +12,7 @@ export interface TenantVO {
   password: string
   expireTime: Date
   accountCount: number
+  websites: string[]
   createTime: Date
 }
 
@@ -41,6 +42,11 @@ export const getTenant = (id: number) => {
   return request.get({ url: '/system/tenant/get?id=' + id })
 }
 
+// 获取租户精简信息列表
+export const getTenantList = () => {
+  return request.get({ url: '/system/tenant/simple-list' })
+}
+
 // 新增租户
 export const createTenant = (data: TenantVO) => {
   return request.post({ url: '/system/tenant/create', data })
@@ -54,6 +60,11 @@ export const updateTenant = (data: TenantVO) => {
 // 删除租户
 export const deleteTenant = (id: number) => {
   return request.delete({ url: '/system/tenant/delete?id=' + id })
+}
+
+// 批量删除租户
+export const deleteTenantList = (ids: number[]) => {
+  return request.delete({ url: '/system/tenant/delete-list', params: { ids: ids.join(',') } })
 }
 
 // 导出租户

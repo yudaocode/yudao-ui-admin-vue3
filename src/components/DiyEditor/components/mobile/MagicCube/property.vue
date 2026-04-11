@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import { MagicCubeProperty } from '@/components/DiyEditor/components/mobile/MagicCube/config'
 
 /** 广告魔方属性面板 */
@@ -64,7 +64,7 @@ defineOptions({ name: 'MagicCubeProperty' })
 
 const props = defineProps<{ modelValue: MagicCubeProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 // 选中的热区
 const selectedHotAreaIndex = ref(-1)

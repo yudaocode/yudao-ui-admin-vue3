@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click.stop>
     <Dialog
       v-model="dialogVisible"
       :canFullscreen="false"

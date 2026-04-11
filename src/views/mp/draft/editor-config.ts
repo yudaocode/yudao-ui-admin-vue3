@@ -1,4 +1,4 @@
-import { IEditorConfig } from '@wangeditor/editor'
+import { IEditorConfig } from '@wangeditor-next/editor'
 import { getAccessToken, getTenantId } from '@/utils/auth'
 
 const message = useMessage()

@@ -17,7 +17,7 @@
             :group="{ name: 'component', pull: 'clone', put: false }"
             :clone="handleCloneComponent"
             :animation="200"
-            :force-fallback="true"
+            :force-fallback="false"
           >
             <template #item="{ element }">
               <div>

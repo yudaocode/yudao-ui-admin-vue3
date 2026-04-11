@@ -1,17 +1,17 @@
 <template>
-  <el-row v-show="getShow" class="login-form" style="margin-right: -10px; margin-left: -10px">
-    <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
-      <LoginFormTitle style="width: 100%" />
+  <el-row v-show="getShow" class="login-form mx-[-10px]">
+    <el-col :span="24" class="px-10px">
+      <LoginFormTitle class="w-full" />
     </el-col>
-    <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
+    <el-col :span="24" class="px-10px">
       <el-card class="mb-10px text-center" shadow="hover">
         <Qrcode :logo="logoImg" />
       </el-card>
     </el-col>
     <el-divider class="enter-x">{{ t('login.qrcode') }}</el-divider>
-    <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
-      <div class="mt-15px w-[100%]">
-        <XButton :title="t('login.backLogin')" class="w-[100%]" @click="handleBackLogin()" />
+    <el-col :span="24" class="px-10px">
+      <div class="mt-4 w-full">
+        <XButton :title="t('login.backLogin')" class="w-full" @click="handleBackLogin()" />
       </div>
     </el-col>
   </el-row>

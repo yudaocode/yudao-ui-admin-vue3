@@ -1,11 +1,12 @@
-import { defineStore } from 'pinia'
-import { store } from '../index'
-import { humpToUnderline, setCssVar } from '@/utils'
-import { ElMessage } from 'element-plus'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 import { ElementPlusSize } from '@/types/elementPlus'
 import { LayoutType } from '@/types/layout'
 import { ThemeTypes } from '@/types/theme'
+import { humpToUnderline, setCssVar } from '@/utils'
+import { getCssColorVariable, hexToRGB, mix } from '@/utils/color'
+import { ElMessage } from 'element-plus'
+import { defineStore } from 'pinia'
+import { store } from '../index'
 
 const { wsCache } = useCache()
 
@@ -183,6 +184,40 @@ export const useAppStore = defineStore('app', {
     }
   },
   actions: {
+    setPrimaryLight() {
+      if (this.theme.elColorPrimary) {
+        const elColorPrimary = this.theme.elColorPrimary
+        const color = this.isDark ? '#000000' : '#ffffff'
+        const lightList = [3, 5, 7, 8, 9]
+        lightList.forEach((v) => {
+          setCssVar(`--el-color-primary-light-${v}`, mix(color, elColorPrimary, v / 10))
+        })
+        setCssVar(`--el-color-primary-dark-2`, mix(color, elColorPrimary, 0.2))
+
+        this.setAllColorRgbVars()
+      }
+    },
+
+    // 处理element自带的主题色和辅助色的-rgb切换主题变化，如：--el-color-primary-rgb
+    setAllColorRgbVars() {
+      // 需要处理的颜色类型列表
+      const colorTypes = ['primary', 'success', 'warning', 'danger', 'error', 'info']
+
+      colorTypes.forEach((type) => {
+        // 获取当前颜色值
+        const colorValue = getCssColorVariable(`--el-color-${type}`)
+        if (colorValue) {
+          // 转换为rgba并提取RGB部分
+          const rgbaString = hexToRGB(colorValue, 1)
+          const rgbValues = rgbaString.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i)
+          if (rgbValues) {
+            const [, r, g, b] = rgbValues
+            // 设置对应的RGB变量
+            setCssVar(`--el-color-${type}-rgb`, `${r}, ${g}, ${b}`)
+          }
+        }
+      })
+    },
     setBreadcrumb(breadcrumb: boolean) {
       this.breadcrumb = breadcrumb
     },
@@ -256,6 +291,7 @@ export const useAppStore = defineStore('app', {
         document.documentElement.classList.remove('dark')
       }
       wsCache.set(CACHE_KEY.IS_DARK, this.isDark)
+      this.setPrimaryLight()
     },
     setCurrentSize(currentSize: ElementPlusSize) {
       this.currentSize = currentSize
@@ -272,6 +308,7 @@ export const useAppStore = defineStore('app', {
       for (const key in this.theme) {
         setCssVar(`--${humpToUnderline(key)}`, this.theme[key])
       }
+      this.setPrimaryLight()
     },
     setFooter(footer: boolean) {
       this.footer = footer

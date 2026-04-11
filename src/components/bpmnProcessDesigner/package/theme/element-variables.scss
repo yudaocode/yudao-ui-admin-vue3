@@ -5,7 +5,7 @@ $--color-danger: #ff4d4f;
 /* 改变 icon 字体路径变量，必需 */
 $--font-path: '~element-ui/lib/theme-chalk/fonts';
 
-@import '~element-ui/packages/theme-chalk/src/index';
+@use '~element-ui/packages/theme-chalk/src/index';
 
 .el-table td,
 .el-table th {

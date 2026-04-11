@@ -180,7 +180,7 @@ const handleFiles = (datas: CodegenApi.CodegenPreviewVO[]) => {
 
 /** 复制 **/
 const copy = async (text: string) => {
-  const { copy, copied, isSupported } = useClipboard({ source: text })
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: text })
   if (!isSupported) {
     message.error(t('common.copyError'))
     return

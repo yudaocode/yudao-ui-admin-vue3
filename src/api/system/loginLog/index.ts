@@ -21,5 +21,5 @@ export const getLoginLogPage = (params: PageParam) => {
 
 // 导出登录日志
 export const exportLoginLog = (params) => {
-  return request.download({ url: '/system/login-log/export', params })
+  return request.download({ url: '/system/login-log/export-excel', params })
 }

@@ -82,8 +82,8 @@ export const component = {
       bgEndColor: '#FE832A',
       imgUrl: ''
     },
-    borderRadiusTop: 8,
-    borderRadiusBottom: 8,
+    borderRadiusTop: 6,
+    borderRadiusBottom: 6,
     space: 8,
     spuIds: [],
     style: {

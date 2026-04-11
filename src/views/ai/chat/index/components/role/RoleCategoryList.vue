@@ -1,6 +1,6 @@
 <template>
-  <div class="category-list">
-    <div class="category" v-for="category in categoryList" :key="category">
+  <div class="flex flex-row flex-wrap items-center">
+    <div class="flex flex-row mr-10px" v-for="category in categoryList" :key="category">
       <el-button
         plain
         round
@@ -37,17 +37,3 @@ const handleCategoryClick = async (category: string) => {
   emits('onCategoryClick', category)
 }
 </script>
-<style scoped lang="scss">
-.category-list {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-
-  .category {
-    display: flex;
-    flex-direction: row;
-    margin-right: 10px;
-  }
-}
-</style>

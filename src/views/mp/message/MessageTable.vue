@@ -59,6 +59,9 @@
           >
             <el-tag>选择地理位置</el-tag>
           </div>
+          <div v-else-if="scope.row.type === MsgType.Event && scope.row.event === 'SCAN'">
+            <el-tag type="success">扫码</el-tag>
+          </div>
           <div v-else-if="scope.row.type === MsgType.Event">
             <el-tag type="danger">未知事件类型</el-tag>
           </div>

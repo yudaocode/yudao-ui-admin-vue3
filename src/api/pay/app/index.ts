@@ -8,6 +8,7 @@ export interface AppVO {
   remark: string
   payNotifyUrl: string
   refundNotifyUrl: string
+  transferNotifyUrl: string
   merchantId: number
   merchantName: string
   createTime: Date
@@ -19,6 +20,7 @@ export interface AppPageReqVO extends PageParam {
   remark?: string
   payNotifyUrl?: string
   refundNotifyUrl?: string
+  transferNotifyUrl?: string
   merchantName?: string
   createTime?: Date[]
 }

@@ -2,6 +2,7 @@ import request from '@/config/axios'
 import { isEmpty } from '@/utils/is'
 import { ApiSelectProps } from '@/components/FormCreate/src/type'
 import { jsonParse } from '@/utils'
+import { useUserStoreWithOut } from '@/store/modules/user'
 
 export const useApiSelect = (option: ApiSelectProps) => {
   return defineComponent({
@@ -56,24 +57,76 @@ export const useApiSelect = (option: ApiSelectProps) => {
       remoteField: {
         type: String,
         default: 'label'
+      },
+      // 返回值类型（用于部门选择器等）：id 返回 ID，name 返回名称
+      returnType: {
+        type: String,
+        default: 'id'
+      },
+      // 是否默认选中当前用户（仅 UserSelect 使用）
+      defaultCurrentUser: {
+        type: Boolean,
+        default: false
       }
     },
-    setup(props) {
+    setup(props, { emit }) {
       const attrs = useAttrs()
       const options = ref<any[]>([]) // 下拉数据
       const loading = ref(false) // 是否正在从远程获取数据
       const queryParam = ref<any>() // 当前输入的值
+
+      // 检查是否有有效的预设值
+      const hasValidPresetValue = (): boolean => {
+        const value = attrs.modelValue
+        if (value === undefined || value === null || value === '') {
+          return false
+        }
+        if (Array.isArray(value)) {
+          return value.length > 0
+        }
+        return true
+      }
+
+      // 设置默认当前用户（仅当 defaultCurrentUser 为 true 且无预设值时）
+      const setDefaultCurrentUser = () => {
+        // 仅当组件名为 UserSelect 且 defaultCurrentUser 为 true 时处理
+        if (option.name !== 'UserSelect' || !props.defaultCurrentUser) {
+          return
+        }
+        // 检查是否已有预设值（预设值优先级高于默认当前用户）
+        if (hasValidPresetValue()) {
+          return
+        }
+
+        // 获取当前用户 ID
+        const userStore = useUserStoreWithOut()
+        const user = userStore.getUser
+        const currentUserId = user?.id
+        if (currentUserId) {
+          // 根据多选/单选模式设置默认值
+          const defaultValue = props.multiple ? [currentUserId] : currentUserId
+          emit('update:modelValue', defaultValue)
+        }
+      }
+
       const getOptions = async () => {
         options.value = []
         // 接口选择器
         if (isEmpty(props.url)) {
           return
         }
+
         switch (props.method) {
           case 'GET':
             let url: string = props.url
             if (props.remote) {
-              url = `${url}?${props.remoteField}=${queryParam.value}`
+              if (queryParam.value != undefined) {
+                if (url.includes('?')) {
+                  url = `${url}&${props.remoteField}=${queryParam.value}`
+                } else {
+                  url = `${url}?${props.remoteField}=${queryParam.value}`
+                }
+              }
             }
             parseOptions(await request.get({ url: url }))
             break
@@ -112,10 +165,21 @@ export const useApiSelect = (option: ApiSelectProps) => {
 
       function parseOptions0(data: any[]) {
         if (Array.isArray(data)) {
-          options.value = data.map((item: any) => ({
-            label: parseExpression(item, props.labelField),
-            value: parseExpression(item, props.valueField)
-          }))
+          options.value = data.map((item: any) => {
+            const label = parseExpression(item, props.labelField)
+            let value = parseExpression(item, props.valueField)
+
+            // 根据 returnType 决定返回值
+            // 如果设置了 returnType 为 'name'，则返回 label 作为 value
+            if (props.returnType === 'name') {
+              value = label
+            }
+
+            return {
+              label: label,
+              value: value
+            }
+          })
           return
         }
         console.warn(`接口[${props.url}] 返回结果不是一个数组`)
@@ -165,6 +229,8 @@ export const useApiSelect = (option: ApiSelectProps) => {
 
       onMounted(async () => {
         await getOptions()
+        // 设置默认当前用户（在数据加载完成后）
+        setDefaultCurrentUser()
       })
 
       const buildSelect = () => {
@@ -185,7 +251,6 @@ export const useApiSelect = (option: ApiSelectProps) => {
             </el-select>
           )
         }
-        debugger
         return (
           <el-select
             class="w-1/1"

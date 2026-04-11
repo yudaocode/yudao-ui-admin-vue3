@@ -117,6 +117,78 @@ export function toAnyString() {
 }
 
 /**
+ * 生成指定长度的随机字符串
+ *
+ * @param length 字符串长度
+ */
+export function generateRandomStr(length: number): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  let result = ''
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return result
+}
+
+/**
+ * 根据支持的文件类型生成 accept 属性值
+ *
+ * @param supportedFileTypes 支持的文件类型数组，如 ['PDF', 'DOC', 'DOCX']
+ * @returns 用于文件上传组件 accept 属性的字符串
+ */
+export const generateAcceptedFileTypes = (supportedFileTypes: string[]): string => {
+  const allowedExtensions = supportedFileTypes.map((ext) => ext.toLowerCase())
+  const mimeTypes: string[] = []
+
+  // 添加常见的 MIME 类型映射
+  if (allowedExtensions.includes('txt')) {
+    mimeTypes.push('text/plain')
+  }
+  if (allowedExtensions.includes('pdf')) {
+    mimeTypes.push('application/pdf')
+  }
+  if (allowedExtensions.includes('html') || allowedExtensions.includes('htm')) {
+    mimeTypes.push('text/html')
+  }
+  if (allowedExtensions.includes('csv')) {
+    mimeTypes.push('text/csv')
+  }
+  if (allowedExtensions.includes('xlsx') || allowedExtensions.includes('xls')) {
+    mimeTypes.push('application/vnd.ms-excel')
+    mimeTypes.push('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  }
+  if (allowedExtensions.includes('docx') || allowedExtensions.includes('doc')) {
+    mimeTypes.push('application/msword')
+    mimeTypes.push('application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+  }
+  if (allowedExtensions.includes('pptx') || allowedExtensions.includes('ppt')) {
+    mimeTypes.push('application/vnd.ms-powerpoint')
+    mimeTypes.push('application/vnd.openxmlformats-officedocument.presentationml.presentation')
+  }
+  if (allowedExtensions.includes('xml')) {
+    mimeTypes.push('application/xml')
+    mimeTypes.push('text/xml')
+  }
+  if (allowedExtensions.includes('md') || allowedExtensions.includes('markdown')) {
+    mimeTypes.push('text/markdown')
+  }
+  if (allowedExtensions.includes('epub')) {
+    mimeTypes.push('application/epub+zip')
+  }
+  if (allowedExtensions.includes('eml')) {
+    mimeTypes.push('message/rfc822')
+  }
+  if (allowedExtensions.includes('msg')) {
+    mimeTypes.push('application/vnd.ms-outlook')
+  }
+
+  // 添加文件扩展名
+  const extensions = allowedExtensions.map((ext) => `.${ext}`)
+
+  return [...mimeTypes, ...extensions].join(',')
+}
+
+/**
  * 首字母大写
  */
 export function firstUpperCase(str: string) {
@@ -445,7 +517,21 @@ export function jsonParse(str: string) {
   try {
     return JSON.parse(str)
   } catch (e) {
-    console.error(`str[${str}] 不是一个 JSON 字符串`)
-    return ''
+    console.warn(`str[${str}] 不是一个 JSON 字符串`)
+    return str
   }
+}
+
+/**
+ * 截取字符串
+ *
+ * @param str 字符串
+ * @param start 开始位置
+ * @param end 结束位置
+ */
+export const subString = (str: string, start: number, end: number) => {
+  if (str.length > end) {
+    return str.slice(start, end)
+  }
+  return str
 }

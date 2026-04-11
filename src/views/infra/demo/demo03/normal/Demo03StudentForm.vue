@@ -50,9 +50,12 @@
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/normal'
+import { Demo03StudentApi, Demo03Student } from '@/api/infra/demo/demo03/normal'
 import Demo03CourseForm from './components/Demo03CourseForm.vue'
 import Demo03GradeForm from './components/Demo03GradeForm.vue'
+
+/** 学生 表单 */
+defineOptions({ name: 'Demo03StudentForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -66,13 +69,13 @@ const formData = ref({
   name: undefined,
   sex: undefined,
   birthday: undefined,
-  description: undefined
+  description: undefined,
 })
 const formRules = reactive({
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
   sex: [{ required: true, message: '性别不能为空', trigger: 'blur' }],
   birthday: [{ required: true, message: '出生日期不能为空', trigger: 'blur' }],
-  description: [{ required: true, message: '简介不能为空', trigger: 'blur' }]
+  description: [{ required: true, message: '简介不能为空', trigger: 'blur' }],
 })
 const formRef = ref() // 表单 Ref
 
@@ -120,7 +123,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as Demo03StudentApi.Demo03StudentVO
+    const data = formData.value as unknown as Demo03Student
     // 拼接子表的数据
     data.demo03Courses = demo03CourseFormRef.value.getData()
     data.demo03Grade = demo03GradeFormRef.value.getData()
@@ -146,7 +149,7 @@ const resetForm = () => {
     name: undefined,
     sex: undefined,
     birthday: undefined,
-    description: undefined
+    description: undefined,
   }
   formRef.value?.resetFields()
 }

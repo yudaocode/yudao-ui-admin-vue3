@@ -44,8 +44,23 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
+      <!-- TODO 芋艿：增加摘要 -->
       <el-table-column align="center" label="流程名" prop="processInstanceName" min-width="180" />
-      <el-table-column align="center" label="流程发起人" prop="startUserName" min-width="100" />
+      <el-table-column label="摘要" prop="summary" min-width="180">
+        <template #default="scope">
+          <div class="flex flex-col" v-if="scope.row.summary && scope.row.summary.length > 0">
+            <div v-for="(item, index) in scope.row.summary" :key="index">
+              <el-text type="info"> {{ item.key }} : {{ item.value }} </el-text>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
+        align="center"
+        label="流程发起人"
+        prop="startUser.nickname"
+        min-width="100"
+      />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -53,8 +68,11 @@
         prop="processInstanceStartTime"
         width="180"
       />
-      <el-table-column align="center" label="抄送任务" prop="taskName" min-width="180" />
-      <el-table-column align="center" label="抄送人" prop="creatorName" min-width="100" />
+      <el-table-column align="center" label="抄送节点" prop="activityName" min-width="180" />
+      <el-table-column align="center" label="抄送人" min-width="100">
+        <template #default="scope"> {{ scope.row.createUser?.nickname || '系统' }} </template>
+      </el-table-column>
+      <el-table-column align="center" label="抄送意见" prop="reason" width="150" />
       <el-table-column
         align="center"
         label="抄送时间"

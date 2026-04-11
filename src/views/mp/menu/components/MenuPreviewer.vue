@@ -131,7 +131,7 @@ const onParentDragEnd = ({ oldIndex, newIndex }) => {
   }
 
   // 使用一个辅助数组来模拟菜单移动，然后找到展开的二级菜单的新下标`newParent`
-  let positions = new Array<boolean>(menuList.value.length).fill(false)
+  const positions = new Array<boolean>(menuList.value.length).fill(false)
   positions[props.parentIndex] = true
   const [out] = positions.splice(oldIndex, 1) // 移出菜单，保存到变量out
   positions.splice(newIndex, 0, out) // 把out变量插入被移出的菜单

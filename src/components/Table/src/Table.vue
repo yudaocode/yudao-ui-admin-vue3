@@ -56,7 +56,7 @@ export default defineComponent({
     // 注册
     onMounted(() => {
       const tableRef = unref(elTableRef)
-      emit('register', tableRef?.$parent, elTableRef)
+      emit('register', tableRef?.$parent, elTableRef.value)
     })
 
     const pageSizeRef = ref(props.pageSize)

@@ -8,6 +8,7 @@ export interface SocialClientVO {
   clientId: string
   clientSecret: string
   agentId: string
+  publicKey: string
   status: number
 }
 

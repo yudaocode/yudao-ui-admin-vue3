@@ -10,7 +10,8 @@ const RefreshTokenKey = 'REFRESH_TOKEN'
 // 获取token
 export const getAccessToken = () => {
   // 此处与TokenKey相同，此写法解决初始化时Cookies中不存在TokenKey报错
-  return wsCache.get(AccessTokenKey) ? wsCache.get(AccessTokenKey) : wsCache.get('ACCESS_TOKEN')
+  const accessToken = wsCache.get(AccessTokenKey)
+  return accessToken ? accessToken : wsCache.get('ACCESS_TOKEN')
 }
 
 // 刷新token
@@ -66,6 +67,14 @@ export const getTenantId = () => {
   return wsCache.get(CACHE_KEY.TenantId)
 }
 
-export const setTenantId = (username: string) => {
-  wsCache.set(CACHE_KEY.TenantId, username)
+export const setTenantId = (tenantId: number) => {
+  wsCache.set(CACHE_KEY.TenantId, tenantId)
+}
+
+export const getVisitTenantId = () => {
+  return wsCache.get(CACHE_KEY.VisitTenantId)
+}
+
+export const setVisitTenantId = (visitTenantId: number) => {
+  wsCache.set(CACHE_KEY.VisitTenantId, visitTenantId)
 }

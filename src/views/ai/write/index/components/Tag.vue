@@ -29,4 +29,3 @@ const emits = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
 </script>
-<style scoped></style>

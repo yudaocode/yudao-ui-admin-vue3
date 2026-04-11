@@ -132,7 +132,7 @@
     </el-table>
   </el-form>
   <el-row justify="center" class="mt-3" v-if="!disabled">
-    <el-button @click="handleAdd" round>+ 添加采购产品</el-button>
+    <el-button @click="handleAdd" round>+ 添加销售产品</el-button>
   </el-row>
 </template>
 <script setup lang="ts">

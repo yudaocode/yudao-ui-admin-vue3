@@ -132,6 +132,7 @@ import svg_wx_lite from '@/assets/svgs/pay/icon/wx_lite.svg'
 import svg_wx_app from '@/assets/svgs/pay/icon/wx_app.svg'
 import svg_wx_native from '@/assets/svgs/pay/icon/wx_native.svg'
 import svg_wx_bar from '@/assets/svgs/pay/icon/wx_bar.svg'
+import svg_wallet from '@/assets/svgs/pay/icon/wallet.svg'
 import svg_mock from '@/assets/svgs/pay/icon/mock.svg'
 
 defineOptions({ name: 'PayCashier' })
@@ -201,6 +202,11 @@ const channelsWechat = [
 ]
 const channelsMock = [
   {
+    name: '钱包支付',
+    icon: svg_wallet,
+    code: 'wallet'
+  },
+  {
     name: '模拟支付',
     icon: svg_mock,
     code: 'mock'
@@ -232,7 +238,6 @@ const getDetail = async () => {
     return
   }
   const data = await PayOrderApi.getOrder(id.value, true)
-  payOrder.value = data
   // 1.2 无法查询到支付信息
   if (!data) {
     message.error('支付订单不存在，请检查！')
@@ -249,6 +254,8 @@ const getDetail = async () => {
     goReturnUrl('close')
     return
   }
+  // 2. 正常展示支付信息
+  payOrder.value = data
 }
 
 /** 提交支付 */
@@ -452,6 +459,11 @@ onMounted(() => {
     returnUrl.value = decodeURIComponent(route.query.returnUrl)
   }
   getDetail()
+})
+
+/** 销毁 */
+onBeforeUnmount(() => {
+  clearQueryInterval()
 })
 </script>
 

@@ -1,4 +1,3 @@
-import { ref, Ref } from 'vue'
 import { PageConfigProperty } from '@/components/DiyEditor/components/mobile/PageConfig/config'
 import { NavigationBarProperty } from '@/components/DiyEditor/components/mobile/NavigationBar/config'
 import { TabBarProperty } from '@/components/DiyEditor/components/mobile/TabBar/config'
@@ -77,34 +76,6 @@ export interface PageConfig {
 }
 // 页面组件，只保留组件ID，组件属性
 export interface PageComponent extends Pick<DiyComponent<any>, 'id' | 'property'> {}
-
-// 属性表单监听
-export function usePropertyForm<T>(modelValue: T, emit: Function): { formData: Ref<T> } {
-  const formData = ref<T>()
-  // 监听属性数据变动
-  watch(
-    () => modelValue,
-    () => {
-      formData.value = modelValue
-    },
-    {
-      deep: true,
-      immediate: true
-    }
-  )
-  // 监听表单数据变动
-  watch(
-    () => formData.value,
-    () => {
-      emit('update:modelValue', formData.value)
-    },
-    {
-      deep: true
-    }
-  )
-
-  return { formData } as { formData: Ref<T> }
-}
 
 // 页面组件库
 export const PAGE_LIBS = [

@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import { HotZoneProperty } from '@/components/DiyEditor/components/mobile/HotZone/config'
 import HotZoneEditDialog from './components/HotZoneEditDialog/index.vue'
 
@@ -29,7 +29,7 @@ defineOptions({ name: 'HotZoneProperty' })
 
 const props = defineProps<{ modelValue: HotZoneProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 // 热区编辑对话框
 const editDialogRef = ref()

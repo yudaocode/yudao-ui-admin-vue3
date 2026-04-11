@@ -18,7 +18,7 @@
     >
       转化为客户
     </el-button>
-    <el-button v-else disabled type="success">已转化客户</el-button>
+    <el-button v-if="clue.transformStatus" disabled type="success">已转化客户</el-button>
   </ClueDetailsHeader>
   <el-col>
     <el-tabs>

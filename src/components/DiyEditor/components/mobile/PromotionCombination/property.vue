@@ -140,7 +140,7 @@
 
 <script setup lang="ts">
 import { PromotionCombinationProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
 import { CommonStatusEnum } from '@/utils/constants'
 import CombinationShowcase from '@/views/mall/promotion/combination/components/CombinationShowcase.vue'
@@ -150,7 +150,7 @@ defineOptions({ name: 'PromotionCombinationProperty' })
 
 const props = defineProps<{ modelValue: PromotionCombinationProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 // 活动列表
 const activityList = ref<CombinationActivityApi.CombinationActivityVO[]>([])
 onMounted(async () => {

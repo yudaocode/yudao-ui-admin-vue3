@@ -101,7 +101,7 @@
             <el-input
               disabled
               v-model="formData.totalProductPrice"
-              :formatter="erpPriceTableColumnFormatter"
+              :formatter="erpPriceInputFormatter"
             />
           </el-form-item>
         </el-col>
@@ -123,7 +123,7 @@
               disabled
               v-model="formData.totalPrice"
               placeholder="请输入商机金额"
-              :formatter="erpPriceTableColumnFormatter"
+              :formatter="erpPriceInputFormatter"
             />
           </el-form-item>
         </el-col>
@@ -142,7 +142,7 @@ import * as CustomerApi from '@/api/crm/customer'
 import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
 import BusinessProductForm from './components/BusinessProductForm.vue'
-import { erpPriceMultiply, erpPriceTableColumnFormatter } from '@/utils'
+import { erpPriceMultiply, erpPriceInputFormatter } from '@/utils'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

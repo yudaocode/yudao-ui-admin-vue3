@@ -1,11 +1,17 @@
 <template>
   <Dialog v-model="dialogVisible" title="通知详情" width="50%">
     <el-descriptions :column="2">
-      <el-descriptions-item label="商户订单编号">
+      <el-descriptions-item label="通知状态" :span="2">
+        <dict-tag :type="DICT_TYPE.PAY_NOTIFY_STATUS" :value="detailData.status" />
+      </el-descriptions-item>
+      <el-descriptions-item label="商户订单编号" :span="2">
         <el-tag>{{ detailData.merchantOrderId }}</el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="通知状态">
-        <dict-tag :type="DICT_TYPE.PAY_NOTIFY_STATUS" :value="detailData.status" />
+      <el-descriptions-item label="商户退款编号" :span="2" v-if="detailData.merchantRefundId">
+        <el-tag>{{ detailData.merchantRefundId }}</el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="商户转账编号" :span="2" v-if="detailData.merchantTransferId">
+        <el-tag>{{ detailData.merchantTransferId }}</el-tag>
       </el-descriptions-item>
 
       <el-descriptions-item label="应用编号">{{ detailData.appId }}</el-descriptions-item>

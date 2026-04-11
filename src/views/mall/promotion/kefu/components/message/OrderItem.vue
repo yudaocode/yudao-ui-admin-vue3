@@ -14,11 +14,11 @@
       </div>
       <div v-for="item in getMessageContent.items" :key="item.id" class="border-bottom">
         <ProductItem
-          :spu-id="item.spuId"
           :num="item.count"
           :picUrl="item.picUrl"
           :price="item.price"
           :skuText="item.properties.map((property: any) => property.valueName).join(' ')"
+          :spu-id="item.spuId"
           :title="item.spuName"
         />
       </div>
@@ -112,14 +112,14 @@ function formatOrderStatus(order: any) {
   border-radius: 10px;
   padding: 10px;
   border: 1px var(--el-border-color) solid;
-  background-color: var(--app-content-bg-color);
+  background-color: rgba(128, 128, 128, 0.3); // 透明色，暗黑模式下也能体现
 
   .order-card-header {
     height: 28px;
+    font-weight: bold;
 
     .order-no {
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 13px;
 
       span {
         &:hover {
@@ -128,27 +128,29 @@ function formatOrderStatus(order: any) {
         }
       }
     }
+
+    .order-state {
+      font-size: 13px;
+    }
   }
 
   .pay-box {
     padding-top: 10px;
+    font-weight: bold;
 
     .discounts-title {
       font-size: 16px;
       line-height: normal;
-      color: #999999;
     }
 
     .discounts-money {
       font-size: 16px;
       line-height: normal;
-      color: #999;
       font-family: OPPOSANS;
     }
 
     .pay-color {
       font-size: 13px;
-      color: var(--left-menu-text-color);
     }
   }
 }

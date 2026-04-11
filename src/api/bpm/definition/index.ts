@@ -20,3 +20,9 @@ export const getProcessDefinitionList = async (params) => {
     params
   })
 }
+
+export const getSimpleProcessDefinitionList = async () => {
+  return await request.get({
+    url: '/bpm/process-definition/simple-list'
+  })
+}

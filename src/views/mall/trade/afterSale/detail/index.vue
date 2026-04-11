@@ -90,11 +90,15 @@
       <el-descriptions-item labelClassName="no-colon">
         <el-row :gutter="20">
           <el-col :span="15">
-            <el-table :data="[formData.orderItem]" border>
+            <el-table v-if="formData.orderItem" :data="[formData.orderItem]" border>
               <el-table-column label="商品" prop="spuName" width="auto">
                 <template #default="{ row }">
                   {{ row.spuName }}
-                  <el-tag v-for="property in row.properties" :key="property.propertyId">
+                  <el-tag
+                    v-for="property in row.properties"
+                    :key="property.propertyId"
+                    class="mr-10px"
+                  >
                     {{ property.propertyName }}: {{ property.valueName }}
                   </el-tag>
                 </template>

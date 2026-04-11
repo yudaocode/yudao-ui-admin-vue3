@@ -106,7 +106,7 @@ watch(
     if (temp) {
       reply.value = temp
     } else {
-      let newData = createEmptyReply(reply)
+      const newData = createEmptyReply(reply)
       newData.type = newTab
       reply.value = newData
     }

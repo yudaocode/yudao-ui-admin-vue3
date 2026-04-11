@@ -2,11 +2,11 @@
 <template>
   <div class="prompt">
     <el-text tag="b">画面描述</el-text>
-    <el-text tag="p">建议使用“形容词+动词+风格”的格式，使用“，”隔开</el-text>
+    <el-text tag="p">建议使用"形容词 + 动词 + 风格"的格式，使用"，"隔开</el-text>
     <el-input
       v-model="prompt"
       maxlength="1024"
-      rows="5"
+      :rows="5"
       class="w-100% mt-15px"
       input-style="border-radius: 7px;"
       placeholder="例如：童话里的小屋应该是什么样子？"
@@ -14,14 +14,14 @@
       type="textarea"
     />
   </div>
-  <div class="hot-words">
+  <div class="flex flex-col mt-30px">
     <div>
       <el-text tag="b">随机热词</el-text>
     </div>
-    <el-space wrap class="word-list">
+    <el-space wrap class="flex flex-row flex-wrap justify-start mt-15px">
       <el-button
         round
-        class="btn"
+        class="m-0"
         :type="selectHotWord === hotWord ? 'primary' : 'default'"
         v-for="hotWord in ImageHotWords"
         :key="hotWord"
@@ -31,58 +31,65 @@
       </el-button>
     </el-space>
   </div>
-  <div class="model">
+  <div class="mt-30px">
     <div>
       <el-text tag="b">模型选择</el-text>
     </div>
-    <el-space wrap class="model-list">
+    <el-space wrap class="mt-15px">
       <div
-        :class="selectModel === model.key ? 'modal-item selectModel' : 'modal-item'"
+        :class="selectModel === model.key ? 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-#1293ff rounded-5px cursor-pointer' : 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-transparent cursor-pointer'"
         v-for="model in Dall3Models"
         :key="model.key"
       >
         <el-image :src="model.image" fit="contain" @click="handleModelClick(model)" />
-        <div class="model-font">{{ model.name }}</div>
+        <div class="text-14px color-#3e3e3e font-bold">{{ model.name }}</div>
       </div>
     </el-space>
   </div>
-  <div class="image-style">
+  <div class="mt-30px">
     <div>
       <el-text tag="b">风格选择</el-text>
     </div>
-    <el-space wrap class="image-style-list">
+    <el-space wrap class="mt-15px">
       <div
-        :class="style === imageStyle.key ? 'image-style-item selectImageStyle' : 'image-style-item'"
+        :class="style === imageStyle.key ? 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-#1293ff rounded-5px cursor-pointer' : 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-transparent cursor-pointer'"
         v-for="imageStyle in Dall3StyleList"
         :key="imageStyle.key"
       >
         <el-image :src="imageStyle.image" fit="contain" @click="handleStyleClick(imageStyle)" />
-        <div class="style-font">{{ imageStyle.name }}</div>
+        <div class="text-14px color-#3e3e3e font-bold">{{ imageStyle.name }}</div>
       </div>
     </el-space>
   </div>
-  <div class="image-size">
+  <div class="w-full mt-30px">
     <div>
       <el-text tag="b">画面比例</el-text>
     </div>
-    <el-space wrap class="size-list">
+    <el-space wrap class="flex flex-row justify-between w-full mt-20px">
       <div
-        class="size-item"
+        class="flex flex-col items-center cursor-pointer"
         v-for="imageSize in Dall3SizeList"
         :key="imageSize.key"
         @click="handleSizeClick(imageSize)"
       >
         <div
-          :class="selectSize === imageSize.key ? 'size-wrapper selectImageSize' : 'size-wrapper'"
+          :class="selectSize === imageSize.key ? 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-#1293ff' : 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-white'"
         >
           <div :style="imageSize.style"></div>
         </div>
-        <div class="size-font">{{ imageSize.name }}</div>
+        <div class="text-14px color-#3e3e3e font-bold">{{ imageSize.name }}</div>
       </div>
     </el-space>
   </div>
-  <div class="btns">
-    <el-button type="primary" size="large" round :loading="drawIn" @click="handleGenerateImage">
+  <div class="flex justify-center mt-50px">
+    <el-button
+      type="primary"
+      size="large"
+      round
+      :loading="drawIn"
+      :disabled="prompt.length === 0"
+      @click="handleGenerateImage"
+    >
       {{ drawIn ? '生成中' : '生成内容' }}
     </el-button>
   </div>
@@ -95,10 +102,21 @@ import {
   ImageHotWords,
   Dall3SizeList,
   ImageModelVO,
-  AiPlatformEnum
+  AiPlatformEnum,
+  ImageSizeVO
 } from '@/views/ai/utils/constants'
+import { ModelVO } from '@/api/ai/model/model'
 
 const message = useMessage() // 消息弹窗
+
+// 接收父组件传入的模型列表
+const props = defineProps({
+  models: {
+    type: Array<ModelVO>,
+    default: () => [] as ModelVO[]
+  }
+})
+const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
 
 // 定义属性
 const prompt = ref<string>('') // 提示词
@@ -107,8 +125,6 @@ const selectHotWord = ref<string>('') // 选中的热词
 const selectModel = ref<string>('dall-e-3') // 模型
 const selectSize = ref<string>('1024x1024') // 选中 size
 const style = ref<string>('vivid') // style 样式
-
-const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
 
 /** 选择热词 */
 const handleHotWordClick = async (hotWord: string) => {
@@ -126,6 +142,27 @@ const handleHotWordClick = async (hotWord: string) => {
 /** 选择 model 模型 */
 const handleModelClick = async (model: ImageModelVO) => {
   selectModel.value = model.key
+  // 可以在这里添加模型特定的处理逻辑
+  // 例如，如果未来需要根据不同模型设置不同参数
+  if (model.key === 'dall-e-3') {
+    // DALL-E-3 模型特定的处理
+    style.value = 'vivid' // 默认设置vivid风格
+  } else if (model.key === 'dall-e-2') {
+    // DALL-E-2 模型特定的处理
+    style.value = 'natural' // 如果有其他DALL-E-2适合的默认风格
+  }
+
+  // 更新其他相关参数
+  // 例如可以默认选择最适合当前模型的尺寸
+  const recommendedSize = Dall3SizeList.find(
+    (size) =>
+      (model.key === 'dall-e-3' && size.key === '1024x1024') ||
+      (model.key === 'dall-e-2' && size.key === '512x512')
+  )
+
+  if (recommendedSize) {
+    selectSize.value = recommendedSize.key
+  }
 }
 
 /** 选择 style 样式  */
@@ -140,6 +177,15 @@ const handleSizeClick = async (imageSize: ImageSizeVO) => {
 
 /**  图片生产  */
 const handleGenerateImage = async () => {
+  // 从 models 中查找匹配的模型
+  const matchedModel = props.models.find(
+    (item) => item.model === selectModel.value && item.platform === AiPlatformEnum.OPENAI
+  )
+  if (!matchedModel) {
+    message.error('该模型不可用，请选择其它模型')
+    return
+  }
+
   // 二次确认
   await message.confirm(`确认生成内容?`)
   try {
@@ -151,7 +197,8 @@ const handleGenerateImage = async () => {
     const form = {
       platform: AiPlatformEnum.OPENAI,
       prompt: prompt.value, // 提示词
-      model: selectModel.value, // 模型
+      modelId: matchedModel.id, // 使用匹配到的模型
+      style: style.value, // 图像生成的风格
       width: imageSize.width, // size 不能为空
       height: imageSize.height, // size 不能为空
       options: {
@@ -182,139 +229,4 @@ const settingValues = async (detail: ImageVO) => {
 /** 暴露组件方法 */
 defineExpose({ settingValues })
 </script>
-<style scoped lang="scss">
-// 提示词
-.prompt {
-}
 
-// 热词
-.hot-words {
-  display: flex;
-  flex-direction: column;
-  margin-top: 30px;
-
-  .word-list {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: start;
-    margin-top: 15px;
-
-    .btn {
-      margin: 0;
-    }
-  }
-}
-
-// 模型
-.model {
-  margin-top: 30px;
-
-  .model-list {
-    margin-top: 15px;
-
-    .modal-item {
-      width: 110px;
-      //outline: 1px solid blue;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      border: 3px solid transparent;
-      cursor: pointer;
-
-      .model-font {
-        font-size: 14px;
-        color: #3e3e3e;
-        font-weight: bold;
-      }
-    }
-
-    .selectModel {
-      border: 3px solid #1293ff;
-      border-radius: 5px;
-    }
-  }
-}
-
-// 样式 style
-.image-style {
-  margin-top: 30px;
-
-  .image-style-list {
-    margin-top: 15px;
-
-    .image-style-item {
-      width: 110px;
-      //outline: 1px solid blue;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      border: 3px solid transparent;
-      cursor: pointer;
-
-      .style-font {
-        font-size: 14px;
-        color: #3e3e3e;
-        font-weight: bold;
-      }
-    }
-
-    .selectImageStyle {
-      border: 3px solid #1293ff;
-      border-radius: 5px;
-    }
-  }
-}
-
-// 尺寸
-.image-size {
-  width: 100%;
-  margin-top: 30px;
-
-  .size-list {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: 20px;
-
-    .size-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      cursor: pointer;
-
-      .size-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border-radius: 7px;
-        padding: 4px;
-        width: 50px;
-        height: 50px;
-        background-color: #fff;
-        border: 1px solid #fff;
-      }
-
-      .size-font {
-        font-size: 14px;
-        color: #3e3e3e;
-        font-weight: bold;
-      }
-    }
-  }
-
-  .selectImageSize {
-    border: 1px solid #1293ff !important;
-  }
-}
-
-.btns {
-  display: flex;
-  justify-content: center;
-  margin-top: 50px;
-}
-</style>

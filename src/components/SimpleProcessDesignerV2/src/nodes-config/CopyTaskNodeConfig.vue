@@ -60,7 +60,8 @@
             <el-form-item
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
-                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER
+                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
               "
               label="指定部门"
               prop="deptIds"
@@ -122,7 +123,57 @@
                 />
               </el-select>
             </el-form-item>
-
+            <el-form-item
+              v-if="configForm.candidateStrategy === CandidateStrategy.FORM_USER"
+              label="表单内用户字段"
+              prop="formUser"
+            >
+              <el-select v-model="configForm.formUser" clearable style="width: 100%">
+                <el-option
+                  v-for="(item, idx) in userFieldOnFormOptions"
+                  :key="idx"
+                  :label="item.title"
+                  :value="item.field"
+                  :disabled="!item.required"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              v-if="configForm.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER"
+              label="表单内部门字段"
+              prop="formDept"
+            >
+              <el-select v-model="configForm.formDept" clearable style="width: 100%">
+                <el-option
+                  v-for="(item, idx) in deptFieldOnFormOptions"
+                  :key="idx"
+                  :label="item.title"
+                  :value="item.field"
+                  :disabled="!item.required"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              v-if="
+                configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+                configForm.candidateStrategy ==
+                  CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
+              "
+              :label="deptLevelLabel!"
+              prop="deptLevel"
+              span="24"
+            >
+              <el-select v-model="configForm.deptLevel" clearable>
+                <el-option
+                  v-for="(item, index) in MULTI_LEVEL_DEPT"
+                  :key="index"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
             <el-form-item
               v-if="configForm.candidateStrategy === CandidateStrategy.EXPRESSION"
               label="流程表达式"
@@ -144,9 +195,15 @@
           <div class="field-permit-title">
             <div class="setting-title-label first-title"> 字段名称 </div>
             <div class="other-titles">
-              <span class="setting-title-label">只读</span>
-              <span class="setting-title-label">可编辑</span>
-              <span class="setting-title-label">隐藏</span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')">
+                只读
+              </span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')">
+                可编辑
+              </span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')">
+                隐藏
+              </span>
             </div>
           </div>
           <div
@@ -201,7 +258,8 @@ import {
   CandidateStrategy,
   NodeType,
   CANDIDATE_STRATEGY,
-  FieldPermissionType
+  FieldPermissionType,
+  MULTI_LEVEL_DEPT
 } from '../consts'
 import {
   useWatchNode,
@@ -221,6 +279,15 @@ const props = defineProps({
     required: true
   }
 })
+const deptLevelLabel = computed(() => {
+  let label = '部门负责人来源'
+  if (configForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
+    label = label + '(指定部门向上)'
+  } else {
+    label = label + '(发起人部门向上)'
+  }
+  return label
+})
 // 抽屉配置
 const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 // 当前节点
@@ -230,9 +297,16 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.COPY_
 // 激活的 Tab 标签页
 const activeTabName = ref('user')
 // 表单字段权限配置
-const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
-  FieldPermissionType.READ
-)
+const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } =
+  useFormFieldsPermission(FieldPermissionType.READ)
+// 表单内用户字段选项, 必须是必填和用户选择器
+const userFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'UserSelect')
+})
+// 表单内部门字段选项, 必须是必填和部门选择器
+const deptFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'DeptSelect')
+})
 // 抄送人表单配置
 const formRef = ref() // 表单 Ref
 // 表单校验规则
@@ -243,6 +317,8 @@ const formRules = reactive({
   deptIds: [{ required: true, message: '部门不能为空', trigger: 'change' }],
   userGroups: [{ required: true, message: '用户组不能为空', trigger: 'change' }],
   postIds: [{ required: true, message: '岗位不能为空', trigger: 'change' }],
+  formUser: [{ required: true, message: '表单内用户字段不能为空', trigger: 'change' }],
+  formDept: [{ required: true, message: '表单内部门字段不能为空', trigger: 'change' }],
   expression: [{ required: true, message: '流程表达式不能为空', trigger: 'blur' }]
 })
 
@@ -260,11 +336,7 @@ const {
 const configForm = tempConfigForm as Ref<CopyTaskFormType>
 // 抄送人策略， 去掉发起人自选 和 发起人自己
 const copyUserStrategies = computed(() => {
-  return CANDIDATE_STRATEGY.filter(
-    (item) =>
-      item.value !== CandidateStrategy.START_USER_SELECT &&
-      item.value !== CandidateStrategy.START_USER
-  )
+  return CANDIDATE_STRATEGY.filter((item) => item.value !== CandidateStrategy.START_USER)
 })
 // 改变抄送人设置策略
 const changeCandidateStrategy = () => {
@@ -274,6 +346,7 @@ const changeCandidateStrategy = () => {
   configForm.value.postIds = []
   configForm.value.userGroups = []
   configForm.value.deptLevel = 1
+  configForm.value.formUser = ''
 }
 // 保存配置
 const saveConfig = async () => {
@@ -299,6 +372,18 @@ const showCopyTaskNodeConfig = (node: SimpleFlowNode) => {
   parseCandidateParam(node.candidateStrategy!, node?.candidateParam)
   // 表单字段权限
   getNodeConfigFormFields(node.fieldsPermission)
+}
+
+/** 批量更新权限 */
+const updatePermission = (type: string) => {
+  fieldsPermissionConfig.value.forEach((field) => {
+    field.permission =
+      type === 'READ'
+        ? FieldPermissionType.READ
+        : type === 'WRITE'
+          ? FieldPermissionType.WRITE
+          : FieldPermissionType.NONE
+  })
 }
 
 defineExpose({ openDrawer, showCopyTaskNodeConfig }) // 暴露方法给父组件

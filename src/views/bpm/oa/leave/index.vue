@@ -140,6 +140,15 @@
           >
             取消
           </el-button>
+          <el-button
+            v-if="scope.row.status !== 1"
+            v-hasPermi="['bpm:oa-leave:create']"
+            link
+            type="primary"
+            @click="handleReCreate(scope.row)"
+          >
+            重新发起
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -206,6 +215,16 @@ const handleCreate = () => {
   router.push({ name: 'OALeaveCreate' })
 }
 
+/** 重新发起操作 */
+const handleReCreate = (row: LeaveApi.LeaveVO) => {
+  router.push({
+    name: 'OALeaveCreate',
+    query: {
+      id: row.id
+    }
+  })
+}
+
 /** 详情操作 */
 const handleDetail = (row: LeaveApi.LeaveVO) => {
   router.push({
@@ -242,7 +261,6 @@ const handleProcessDetail = (row) => {
   })
 }
 
-// fix: 列表不刷新的问题。
 watch(
   () => router.currentRoute.value,
   () => {

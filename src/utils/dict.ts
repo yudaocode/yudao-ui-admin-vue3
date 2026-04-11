@@ -159,7 +159,6 @@ export enum DICT_TYPE {
   PAY_NOTIFY_STATUS = 'pay_notify_status', // 商户支付回调状态
   PAY_NOTIFY_TYPE = 'pay_notify_type', // 商户支付回调状态
   PAY_TRANSFER_STATUS = 'pay_transfer_status', // 转账订单状态
-  PAY_TRANSFER_TYPE = 'pay_transfer_type', // 转账订单状态
 
   // ========== MP 模块 ==========
   MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
@@ -219,6 +218,7 @@ export enum DICT_TYPE {
 
   // ========== AI - 人工智能模块  ==========
   AI_PLATFORM = 'ai_platform', // AI 平台
+  AI_MODEL_TYPE = 'ai_model_type', // AI 模型类型
   AI_IMAGE_STATUS = 'ai_image_status', // AI 图片状态
   AI_MUSIC_STATUS = 'ai_music_status', // AI 音乐状态
   AI_GENERATE_MODE = 'ai_generate_mode', // AI 生成模式
@@ -227,17 +227,28 @@ export enum DICT_TYPE {
   AI_WRITE_FORMAT = 'ai_write_format', // AI 写作格式
   AI_WRITE_TONE = 'ai_write_tone', // AI 写作语气
   AI_WRITE_LANGUAGE = 'ai_write_language', // AI 写作语言
+  AI_MCP_CLIENT_NAME = 'ai_mcp_client_name', // AI MCP Client 名字
 
   // ========== IOT - 物联网模块  ==========
   IOT_NET_TYPE = 'iot_net_type', // IOT 联网方式
-  IOT_VALIDATE_TYPE = 'iot_validate_type', // IOT 数据校验级别
   IOT_PRODUCT_STATUS = 'iot_product_status', // IOT 产品状态
   IOT_PRODUCT_DEVICE_TYPE = 'iot_product_device_type', // IOT 产品设备类型
-  IOT_DATA_FORMAT = 'iot_data_format', // IOT 数据格式
-  IOT_PROTOCOL_TYPE = 'iot_protocol_type', // IOT 接入网关协议
-  IOT_DEVICE_STATUS = 'iot_device_status', // IOT 设备状态
-  IOT_PRODUCT_FUNCTION_TYPE = 'iot_product_function_type', // IOT 产品功能类型
-  IOT_DATA_TYPE = 'iot_data_type', // IOT 数据类型
-  IOT_UNIT_TYPE = 'iot_unit_type', // IOT 单位类型
-  IOT_RW_TYPE = 'iot_rw_type' // IOT 读写类型
+  IOT_PROTOCOL_TYPE = 'iot_protocol_type', // IOT 协议类型
+  IOT_SERIALIZE_TYPE = 'iot_serialize_type', // IOT 序列化类型
+  IOT_LOCATION_TYPE = 'iot_location_type', // IOT 定位类型
+  IOT_DEVICE_STATE = 'iot_device_state', // IOT 设备状态
+  IOT_THING_MODEL_TYPE = 'iot_thing_model_type', // IOT 产品功能类型
+  IOT_THING_MODEL_UNIT = 'iot_thing_model_unit', // IOT 物模型单位
+  IOT_RW_TYPE = 'iot_rw_type', // IOT 读写类型
+  // TODO @芋艿：貌似这几个多了 _enum 后缀
+  IOT_DATA_SINK_TYPE_ENUM = 'iot_data_sink_type_enum', // IoT 数据流转目的类型
+  IOT_RULE_SCENE_TRIGGER_TYPE_ENUM = 'iot_rule_scene_trigger_type_enum', // IoT 场景流转的触发类型枚举
+  IOT_RULE_SCENE_ACTION_TYPE_ENUM = 'iot_rule_scene_action_type_enum', // IoT 规则场景的触发类型枚举
+  IOT_ALERT_LEVEL = 'iot_alert_level', // IoT 告警级别
+  IOT_ALERT_RECEIVE_TYPE = 'iot_alert_receive_type', // IoT 告警接收类型
+  IOT_OTA_TASK_DEVICE_SCOPE = 'iot_ota_task_device_scope', // IoT OTA任务设备范围
+  IOT_OTA_TASK_STATUS = 'iot_ota_task_status', // IoT OTA 任务状态
+  IOT_OTA_TASK_RECORD_STATUS = 'iot_ota_task_record_status', // IoT OTA 记录状态
+  IOT_MODBUS_MODE = 'iot_modbus_mode', // IoT Modbus 工作模式
+  IOT_MODBUS_FRAME_FORMAT = 'iot_modbus_frame_format' // IoT Modbus 帧格式
 }

@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import { ProductListProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
 
 // 商品栏属性面板
@@ -93,7 +93,7 @@ defineOptions({ name: 'ProductListProperty' })
 
 const props = defineProps<{ modelValue: ProductListProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 </script>
 
 <style scoped lang="scss"></style>

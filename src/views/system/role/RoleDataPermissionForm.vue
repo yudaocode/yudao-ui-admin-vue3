@@ -20,7 +20,7 @@
     </el-form>
     <el-form-item
       v-if="formData.dataScope === SystemDataScopeEnum.DEPT_CUSTOM"
-      label="权限范围"
+      label="部门范围"
       label-width="80px"
     >
       <el-card class="w-full h-400px !overflow-y-scroll" shadow="never">

@@ -10,6 +10,8 @@ export interface CarouselProperty {
   autoplay: boolean
   // 播放间隔
   interval: number
+  // 轮播高度
+  height: number
   // 轮播内容
   items: CarouselItemProperty[]
   // 组件样式
@@ -37,6 +39,7 @@ export const component = {
     indicator: 'dot',
     autoplay: false,
     interval: 3,
+    height: 174,
     items: [
       { type: 'img', imgUrl: 'https://static.iocoder.cn/mall/banner-01.jpg', videoUrl: '' },
       { type: 'img', imgUrl: 'https://static.iocoder.cn/mall/banner-02.jpg', videoUrl: '' }

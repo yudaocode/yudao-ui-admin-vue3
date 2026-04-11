@@ -1,11 +1,11 @@
 <template>
   <el-container v-if="showKeFuMessageList" class="kefu">
-    <el-header>
+    <el-header class="kefu-header">
       <div class="kefu-title">{{ conversation.userNickname }}</div>
     </el-header>
     <el-main class="kefu-content overflow-visible">
-      <el-scrollbar ref="scrollbarRef" always height="calc(100vh - 495px)" @scroll="handleScroll">
-        <div v-if="refreshContent" ref="innerRef" class="w-[100%] pb-3px">
+      <el-scrollbar ref="scrollbarRef" always @scroll="handleScroll">
+        <div v-if="refreshContent" ref="innerRef" class="w-[100%] px-10px">
           <!-- 消息列表 -->
           <div v-for="(item, index) in getMessageList0" :key="item.id" class="w-[100%]">
             <div class="flex justify-center items-center mb-20px">
@@ -43,15 +43,16 @@
                 class="w-60px h-60px"
               />
               <div
-                :class="{ 'kefu-message': KeFuMessageContentTypeEnum.TEXT === item.contentType }"
-                class="p-10px"
+                :class="{
+                  'kefu-message': KeFuMessageContentTypeEnum.TEXT === item.contentType
+                }"
               >
                 <!-- 文本消息 -->
                 <MessageItem :message="item">
                   <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
                     <div
-                      v-dompurify-html="replaceEmoji(item.content)"
-                      class="flex items-center"
+                      v-dompurify-html="replaceEmoji(getMessageContent(item).text || item.content)"
+                      class="line-height-normal text-justify h-1/1 w-full"
                     ></div>
                   </template>
                 </MessageItem>
@@ -60,9 +61,9 @@
                   <el-image
                     v-if="KeFuMessageContentTypeEnum.IMAGE === item.contentType"
                     :initial-index="0"
-                    :preview-src-list="[item.content]"
-                    :src="item.content"
-                    class="w-200px"
+                    :preview-src-list="[getMessageContent(item).picUrl || item.content]"
+                    :src="getMessageContent(item).picUrl || item.content"
+                    class="w-200px mx-10px"
                     fit="contain"
                     preview-teleported
                   />
@@ -71,14 +72,13 @@
                 <MessageItem :message="item">
                   <ProductItem
                     v-if="KeFuMessageContentTypeEnum.PRODUCT === item.contentType"
-                    :spuId="getMessageContent(item).spuId"
                     :picUrl="getMessageContent(item).picUrl"
                     :price="getMessageContent(item).price"
-                    :skuText="getMessageContent(item).introduction"
+                    :sales-count="getMessageContent(item).salesCount"
+                    :spuId="getMessageContent(item).spuId"
+                    :stock="getMessageContent(item).stock"
                     :title="getMessageContent(item).spuName"
-                    :titleWidth="400"
-                    class="max-w-70%"
-                    priceColor="#FF3000"
+                    class="max-w-300px mx-10px"
                   />
                 </MessageItem>
                 <!-- 订单消息 -->
@@ -86,7 +86,7 @@
                   <OrderItem
                     v-if="KeFuMessageContentTypeEnum.ORDER === item.contentType"
                     :message="item"
-                    class="max-w-100%"
+                    class="max-w-100% mx-10px"
                   />
                 </MessageItem>
               </div>
@@ -108,23 +108,29 @@
         <Icon class="ml-5px" icon="ep:bottom" />
       </div>
     </el-main>
-    <el-footer height="230px">
-      <div class="h-[100%]">
-        <div class="chat-tools flex items-center">
-          <EmojiSelectPopover @select-emoji="handleEmojiSelect" />
-          <PictureSelectUpload
-            class="ml-15px mt-3px cursor-pointer"
-            @send-picture="handleSendPicture"
-          />
-        </div>
-        <el-input v-model="message" :rows="6" style="border-style: none" type="textarea" />
-        <div class="h-45px flex justify-end">
-          <el-button class="mt-10px" type="primary" @click="handleSendMessage">发送</el-button>
-        </div>
+    <el-footer class="kefu-footer">
+      <div class="chat-tools flex items-center">
+        <EmojiSelectPopover @select-emoji="handleEmojiSelect" />
+        <PictureSelectUpload
+          class="ml-15px mt-3px cursor-pointer"
+          @send-picture="handleSendPicture"
+        />
       </div>
+      <el-input
+        v-model="message"
+        :rows="6"
+        placeholder="输入消息，Enter发送，Shift+Enter换行"
+        style="border-style: none"
+        type="textarea"
+        @keyup.enter.prevent="handleSendMessage"
+      />
     </el-footer>
   </el-container>
-  <el-empty v-else description="请选择左侧的一个会话后开始" />
+  <el-container v-else class="kefu">
+    <el-main>
+      <el-empty description="请选择左侧的一个会话后开始" />
+    </el-main>
+  </el-container>
 </template>
 
 <script lang="ts" setup>
@@ -144,6 +150,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { debounce } from 'lodash-es'
 import { jsonParse } from '@/utils'
+import { useMallKefuStore } from '@/store/modules/mall/kefu'
 
 dayjs.extend(relativeTime)
 
@@ -156,25 +163,31 @@ const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
 const conversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
 const showNewMessageTip = ref(false) // 显示有新消息提示
 const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
-  conversationId: 0
+  conversationId: 0,
+  createTime: undefined
 })
 const total = ref(0) // 消息总条数
 const refreshContent = ref(false) // 内容刷新,主要解决会话消息页面高度不一致导致的滚动功能精度失效
+const kefuStore = useMallKefuStore() // 客服缓存
 
 /** 获悉消息内容 */
 const getMessageContent = computed(() => (item: any) => jsonParse(item.content))
 /** 获得消息列表 */
 const getMessageList = async () => {
-  const res = await KeFuMessageApi.getKeFuMessagePage(queryParams)
-  total.value = res.total
+  const res = await KeFuMessageApi.getKeFuMessageList(queryParams)
+  if (isEmpty(res)) {
+    // 当返回的是空列表说明没有消息或者已经查询完了历史消息
+    skipGetMessageList.value = true
+    return
+  }
+  queryParams.createTime = formatDate(res.at(-1).createTime) as any
+
   // 情况一：加载最新消息
-  if (queryParams.pageNo === 1) {
-    messageList.value = res.list
+  if (!queryParams.createTime) {
+    messageList.value = res
   } else {
     // 情况二：加载历史消息
-    for (const item of res.list) {
+    for (const item of res) {
       pushMessage(item)
     }
   }
@@ -208,8 +221,7 @@ const refreshMessageList = async (message?: any) => {
     }
     pushMessage(message)
   } else {
-    // TODO @puhui999：不基于 page 做。而是流式分页；通过 createTime 排序查询；
-    queryParams.pageNo = 1
+    queryParams.createTime = undefined
     await getMessageList()
   }
 
@@ -222,28 +234,27 @@ const refreshMessageList = async (message?: any) => {
   }
 }
 
-/** 获得新会话的消息列表 */
-// TODO @puhui999：可优化：可以考虑本地做每个会话的消息 list 缓存；然后点击切换时，读取缓存；然后异步获取新消息，merge 下；
+/** 获得新会话的消息列表, 点击切换时，读取缓存；然后异步获取新消息，merge 下； */
 const getNewMessageList = async (val: KeFuConversationRespVO) => {
-  // 会话切换,重置相关参数
-  queryParams.pageNo = 1
-  messageList.value = []
-  total.value = 0
+  // 1. 缓存当前会话消息列表
+  kefuStore.saveMessageList(conversation.value.id, messageList.value)
+  // 2.1 会话切换,重置相关参数
+  messageList.value = kefuStore.getConversationMessageList(val.id) || []
+  total.value = messageList.value.length || 0
   loadHistory.value = false
   refreshContent.value = false
-  // 设置会话相关属性
+  skipGetMessageList.value = false
+  // 2.2 设置会话相关属性
   conversation.value = val
   queryParams.conversationId = val.id
-  // 获取消息
+  queryParams.createTime = undefined
+  // 3. 获取消息
   await refreshMessageList()
 }
 defineExpose({ getNewMessageList, refreshMessageList })
 
 const showKeFuMessageList = computed(() => !isEmpty(conversation.value)) // 是否显示聊天区域
-const skipGetMessageList = computed(() => {
-  // 已加载到最后一页的话则不触发新的消息获取
-  return total.value > 0 && Math.ceil(total.value / queryParams.pageSize) === queryParams.pageNo
-}) // 跳过消息获取
+const skipGetMessageList = ref(false) // 跳过消息获取
 
 /** 处理表情选择 */
 const handleEmojiSelect = (item: Emoji) => {
@@ -256,23 +267,28 @@ const handleSendPicture = async (picUrl: string) => {
   const msg = {
     conversationId: conversation.value.id,
     contentType: KeFuMessageContentTypeEnum.IMAGE,
-    content: picUrl
+    content: JSON.stringify({ picUrl })
   }
   await sendMessage(msg)
 }
 
 /** 发送文本消息 */
-const handleSendMessage = async () => {
+const handleSendMessage = async (event: any) => {
+  // shift 不发送
+  if (event.shiftKey) {
+    return
+  }
   // 1. 校验消息是否为空
-  if (isEmpty(unref(message.value))) {
+  if (isEmpty(unref(message.value)?.trim())) {
     messageTool.notifyWarning('请输入消息后再发送哦！')
+    message.value = ''
     return
   }
   // 2. 组织发送消息
   const msg = {
     conversationId: conversation.value.id,
     contentType: KeFuMessageContentTypeEnum.TEXT,
-    content: message.value
+    content: JSON.stringify({ text: message.value })
   }
   await sendMessage(msg)
 }
@@ -284,6 +300,8 @@ const sendMessage = async (msg: any) => {
   message.value = ''
   // 加载消息列表
   await refreshMessageList()
+  // 更新会话缓存
+  await kefuStore.updateConversation(conversation.value.id)
 }
 
 /** 滚动到底部 */
@@ -333,8 +351,6 @@ const handleOldMessage = async () => {
     return
   }
   loadHistory.value = true
-  // 加载消息列表
-  queryParams.pageNo += 1
   await getMessageList()
   // 等页面加载完后，获得上一页最后一条消息的位置，控制滚动到它所在位置
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight - oldPageHeight)
@@ -357,14 +373,51 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
 <style lang="scss" scoped>
 .kefu {
-  &-title {
-    border-bottom: #e4e0e0 solid 1px;
-    height: 60px;
-    line-height: 60px;
+  background-color: var(--app-content-bg-color);
+  position: relative;
+  width: calc(100% - 300px - 260px);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px; /* 实际宽度 */
+    height: 100%;
+    background-color: var(--el-border-color);
+    transform: scaleX(0.3); /* 缩小宽度 */
+  }
+
+  .kefu-header {
+    background-color: var(--app-content-bg-color);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px; /* 初始宽度 */
+      background-color: var(--el-border-color);
+      transform: scaleY(0.3); /* 缩小视觉高度 */
+    }
+
+    &-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
   }
 
   &-content {
+    margin: 0;
+    padding: 10px;
     position: relative;
+    height: 100%;
+    width: 100%;
 
     .newMessageTip {
       position: absolute;
@@ -381,21 +434,12 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       justify-content: flex-start;
 
       .kefu-message {
-        margin-left: 20px;
-        position: relative;
-
-        &::before {
-          content: '';
-          width: 10px;
-          height: 10px;
-          left: -19px;
-          top: calc(50% - 10px);
-          position: absolute;
-          border-left: 5px solid transparent;
-          border-bottom: 5px solid transparent;
-          border-top: 5px solid transparent;
-          border-right: 5px solid var(--app-content-bg-color);
-        }
+        background-color: #fff;
+        margin-left: 10px;
+        margin-top: 3px;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        border-bottom-left-radius: 10px;
       }
     }
 
@@ -403,37 +447,25 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       justify-content: flex-end;
 
       .kefu-message {
-        margin-right: 20px;
-        position: relative;
-
-        &::after {
-          content: '';
-          width: 10px;
-          height: 10px;
-          right: -19px;
-          top: calc(50% - 10px);
-          position: absolute;
-          border-left: 5px solid var(--app-content-bg-color);
-          border-bottom: 5px solid transparent;
-          border-top: 5px solid transparent;
-          border-right: 5px solid transparent;
-        }
+        background-color: rgb(206, 223, 255);
+        margin-right: 10px;
+        margin-top: 3px;
+        border-top-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        border-bottom-left-radius: 10px;
       }
     }
 
     // 消息气泡
     .kefu-message {
-      color: #a9a9a9;
-      border-radius: 5px;
-      box-shadow: 3px 3px 5px rgba(220, 220, 220, 0.1);
+      color: #414141;
+      font-weight: 500;
       padding: 5px 10px;
       width: auto;
       max-width: 50%;
-      text-align: left;
-      display: inline-block !important;
-      position: relative;
-      word-break: break-all;
-      background-color: var(--app-content-bg-color);
+      //text-align: left;
+      //display: inline-block !important;
+      //word-break: break-all;
       transition: all 0.2s;
 
       &:hover {
@@ -444,24 +476,51 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
     .date-message,
     .system-message {
       width: fit-content;
-      border-radius: 12rpx;
-      padding: 8rpx 16rpx;
-      margin-bottom: 16rpx;
-      //background-color: #e8e8e8;
-      color: #999;
-      font-size: 24rpx;
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 0 5px;
+      color: #fff;
+      font-size: 10px;
     }
   }
 
-  .chat-tools {
-    width: 100%;
-    border: var(--el-border-color) solid 1px;
-    border-radius: 10px;
-    height: 44px;
+  .kefu-footer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    margin: 0;
+    padding: 0;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px; /* 初始宽度 */
+      background-color: var(--el-border-color);
+      transform: scaleY(0.3); /* 缩小视觉高度 */
+    }
+
+    .chat-tools {
+      width: 100%;
+      height: 44px;
+    }
   }
 
   ::v-deep(textarea) {
     resize: none;
+    background-color: var(--app-content-bg-color);
+  }
+
+  :deep(.el-input__wrapper) {
+    box-shadow: none !important;
+    border-radius: 0;
+  }
+
+  ::v-deep(.el-textarea__inner) {
+    box-shadow: none !important;
   }
 }
 </style>

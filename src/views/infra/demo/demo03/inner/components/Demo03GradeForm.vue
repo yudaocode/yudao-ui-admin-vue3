@@ -15,13 +15,13 @@
   </el-form>
 </template>
 <script setup lang="ts">
-import * as Demo03StudentApi from '@/api/infra/demo/demo03/inner'
+import { Demo03StudentApi } from '@/api/infra/demo/demo03/inner'
 
 const props = defineProps<{
-  studentId: undefined // 学生编号（主表的关联字段）
+  studentId: number // 学生编号（主表的关联字段）
 }>()
 const formLoading = ref(false) // 表单的加载中
-const formData = ref([])
+const formData = ref<any>({})
 const formRules = reactive({
   studentId: [{ required: true, message: '学生编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],

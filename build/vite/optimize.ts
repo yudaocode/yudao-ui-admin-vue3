@@ -25,8 +25,8 @@ const include = [
   'echarts/components',
   'echarts/renderers',
   'echarts-wordcloud',
-  '@wangeditor/editor',
-  '@wangeditor/editor-for-vue',
+  '@wangeditor-next/editor',
+  '@wangeditor-next/editor-for-vue',
   '@microsoft/fetch-event-source',
   'markdown-it',
   'markmap-view',
@@ -114,7 +114,9 @@ const include = [
   'element-plus/es/components/segmented/style/css',
   '@element-plus/icons-vue',
   'element-plus/es/components/footer/style/css',
-  'element-plus/es/components/empty/style/css'
+  'element-plus/es/components/empty/style/css',
+  'element-plus/es/components/mention/style/css',
+  'element-plus/es/components/progress/style/css'
 ]
 
 const exclude = ['@iconify/json']

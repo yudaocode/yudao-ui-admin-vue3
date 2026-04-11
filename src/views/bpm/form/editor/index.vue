@@ -50,11 +50,13 @@ import FcDesigner from '@form-create/designer'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/formCreate'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useFormCreateDesigner } from '@/components/FormCreate'
+import { useRoute } from 'vue-router'
 
 defineOptions({ name: 'BpmFormEditor' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息
+const route = useRoute() // 路由
 const { push, currentRoute } = useRouter() // 路由
 const { query } = useRoute() // 路由信息
 const { delView } = useTagsViewStore() // 视图操作
@@ -64,7 +66,11 @@ const designerConfig = ref({
   switchType: [], // 是否可以切换组件类型,或者可以相互切换的字段
   autoActive: true, // 是否自动选中拖入的组件
   useTemplate: false, // 是否生成vue2语法的模板组件
-  formOptions: {}, // 定义表单配置默认值
+  formOptions: {
+    form: {
+      labelWidth: '100px' // 设置默认的 label 宽度为 100px
+    }
+  }, // 定义表单配置默认值
   fieldReadonly: false, // 配置field是否可以编辑
   hiddenDragMenu: false, // 隐藏拖拽操作按钮
   hiddenDragBtn: false, // 隐藏拖拽按钮
@@ -146,6 +152,14 @@ onMounted(async () => {
   const data = await FormApi.getForm(id)
   formData.value = data
   setConfAndFields(designer, data.conf, data.fields)
+
+  if (route.query.type !== 'copy') {
+    return
+  }
+  // 场景三： 复制表单
+  const { id: foo, ...copied } = data
+  formData.value = copied
+  formData.value.name += '_copy'
 })
 </script>
 

@@ -92,7 +92,7 @@ export default defineComponent({
 $prefix-cls: #{$elNamespace}-breadcrumb;
 
 .#{$prefix-cls} {
-  :deep(&__item) {
+  :deep(.#{$prefix-cls}__item) {
     display: flex;
     .#{$prefix-cls}__inner {
       display: flex;
@@ -105,7 +105,7 @@ $prefix-cls: #{$elNamespace}-breadcrumb;
     }
   }
 
-  :deep(&__item):not(:last-child) {
+  :deep(.#{$prefix-cls}__item):not(:last-child) {
     .#{$prefix-cls}__inner {
       color: var(--top-header-text-color);
 
@@ -115,7 +115,7 @@ $prefix-cls: #{$elNamespace}-breadcrumb;
     }
   }
 
-  :deep(&__item):last-child {
+  :deep(.#{$prefix-cls}__item):last-child {
     .#{$prefix-cls}__inner {
       display: flex;
       align-items: center;

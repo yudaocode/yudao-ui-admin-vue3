@@ -12,17 +12,17 @@
       <el-button-group class="header-right">
         <el-tooltip content="重置">
           <el-button @click="handleReset">
-            <Icon icon="system-uicons:reset-alt" :size="24" />
+            <Icon :size="24" icon="system-uicons:reset-alt" />
           </el-button>
         </el-tooltip>
-        <el-tooltip content="预览" v-if="previewUrl">
+        <el-tooltip v-if="previewUrl" content="预览">
           <el-button @click="handlePreview">
-            <Icon icon="ep:view" :size="24" />
+            <Icon :size="24" icon="ep:view" />
           </el-button>
         </el-tooltip>
         <el-tooltip content="保存">
           <el-button @click="handleSave">
-            <Icon icon="ep:check" :size="24" />
+            <Icon :size="24" icon="ep:check" />
           </el-button>
         </el-tooltip>
       </el-button-group>
@@ -31,21 +31,21 @@
     <!-- 中心区域 -->
     <el-container class="editor-container">
       <!-- 左侧：组件库（ComponentLibrary） -->
-      <ComponentLibrary ref="componentLibrary" :list="libs" v-if="libs && libs.length > 0" />
+      <ComponentLibrary v-if="libs && libs.length > 0" ref="componentLibrary" :list="libs" />
       <!-- 中心：设计区域（ComponentContainer） -->
       <div class="editor-center page-prop-area" @click="handlePageSelected">
         <!-- 手机顶部 -->
         <div class="editor-design-top">
           <!-- 手机顶部状态栏 -->
-          <img src="@/assets/imgs/diy/statusBar.png" alt="" class="status-bar" />
+          <img alt="" class="status-bar" src="@/assets/imgs/diy/statusBar.png" />
           <!-- 手机顶部导航栏 -->
           <ComponentContainer
             v-if="showNavigationBar"
+            :active="selectedComponent?.id === navigationBarComponent.id"
             :component="navigationBarComponent"
             :show-toolbar="false"
-            :active="selectedComponent?.id === navigationBarComponent.id"
-            @click="handleNavigationBarSelected"
             class="cursor-pointer!"
+            @click="handleNavigationBarSelected"
           />
         </div>
         <!-- 绝对定位的组件：例如 弹窗、浮动按钮等 -->
@@ -55,43 +55,43 @@
           @click="handleComponentSelected(component, index)"
         >
           <component
-            v-if="component.position === 'fixed' && selectedComponent?.uid === component.uid"
             :is="component.id"
+            v-if="component.position === 'fixed' && selectedComponent?.uid === component.uid"
             :property="component.property"
           />
         </div>
         <!-- 手机页面编辑区域 -->
         <el-scrollbar
-          height="100%"
-          wrap-class="editor-design-center page-prop-area"
-          view-class="phone-container"
           :view-style="{
             backgroundColor: pageConfigComponent.property.backgroundColor,
             backgroundImage: `url(${pageConfigComponent.property.backgroundImage})`
           }"
+          height="100%"
+          view-class="phone-container"
+          wrap-class="editor-design-center page-prop-area"
         >
           <draggable
-            class="page-prop-area drag-area"
             v-model="pageComponents"
-            item-key="index"
             :animation="200"
+            :force-fallback="false"
+            class="page-prop-area drag-area"
             filter=".component-toolbar"
             ghost-class="draggable-ghost"
-            :force-fallback="true"
             group="component"
+            item-key="index"
             @change="handleComponentChange"
           >
             <template #item="{ element, index }">
               <ComponentContainer
                 v-if="!element.position || element.position === 'center'"
-                :component="element"
                 :active="selectedComponentIndex === index"
-                :can-move-up="index > 0"
                 :can-move-down="index < pageComponents.length - 1"
-                @move="(direction) => handleMoveComponent(index, direction)"
+                :can-move-up="index > 0"
+                :component="element"
+                @click="handleComponentSelected(element, index)"
                 @copy="handleCopyComponent(index)"
                 @delete="handleDeleteComponent(index)"
-                @click="handleComponentSelected(element, index)"
+                @move="(direction) => handleMoveComponent(index, direction)"
               />
             </template>
           </draggable>
@@ -99,9 +99,9 @@
         <!-- 手机底部导航 -->
         <div v-if="showTabBar" :class="['editor-design-bottom', 'component', 'cursor-pointer!']">
           <ComponentContainer
+            :active="selectedComponent?.id === tabBarComponent.id"
             :component="tabBarComponent"
             :show-toolbar="false"
-            :active="selectedComponent?.id === tabBarComponent.id"
             @click="handleTabBarSelected"
           />
         </div>
@@ -109,9 +109,9 @@
         <div class="fixed-component-action-group">
           <el-tag
             v-if="showPageConfig"
-            size="large"
             :effect="selectedComponent?.uid === pageConfigComponent.uid ? 'dark' : 'plain'"
-            :type="selectedComponent?.uid === pageConfigComponent.uid ? '' : 'info'"
+            :type="selectedComponent?.uid === pageConfigComponent.uid ? 'primary' : 'info'"
+            size="large"
             @click="handleComponentSelected(pageConfigComponent)"
           >
             <Icon :icon="pageConfigComponent.icon" :size="12" />
@@ -120,10 +120,10 @@
           <template v-for="(component, index) in pageComponents" :key="index">
             <el-tag
               v-if="component.position === 'fixed'"
-              size="large"
-              closable
               :effect="selectedComponent?.uid === component.uid ? 'dark' : 'plain'"
-              :type="selectedComponent?.uid === component.uid ? '' : 'info'"
+              :type="selectedComponent?.uid === component.uid ? 'primary' : 'info'"
+              closable
+              size="large"
               @click="handleComponentSelected(component)"
               @close="handleDeleteComponent(index)"
             >
@@ -134,11 +134,11 @@
         </div>
       </div>
       <!-- 右侧：属性面板（ComponentContainerProperty） -->
-      <el-aside class="editor-right" width="350px" v-if="selectedComponent?.property">
+      <el-aside v-if="selectedComponent?.property" class="editor-right" width="350px">
         <el-card
-          shadow="never"
           body-class="h-[calc(100%-var(--el-card-padding)-var(--el-card-padding))]"
           class="h-full"
+          shadow="never"
         >
           <!-- 组件名称 -->
           <template #header>
@@ -152,8 +152,8 @@
             view-class="p-[var(--el-card-padding)] p-b-[calc(var(--el-card-padding)+var(--el-card-padding))] property"
           >
             <component
-              :key="selectedComponent?.uid || selectedComponent?.id"
               :is="selectedComponent?.id + 'Property'"
+              :key="selectedComponent?.uid || selectedComponent?.id"
               v-model="selectedComponent.property"
             />
           </el-scrollbar>
@@ -166,8 +166,8 @@
   <Dialog v-model="previewDialogVisible" title="预览" width="700">
     <div class="flex justify-around">
       <IFrame
-        class="w-375px border-4px border-rounded-8px border-solid p-2px h-667px!"
         :src="previewUrl"
+        class="w-375px border-4px border-rounded-8px border-solid p-2px h-667px!"
       />
       <div class="flex flex-col">
         <el-text>手机扫码预览</el-text>
@@ -179,6 +179,7 @@
 <script lang="ts">
 // 注册所有的组件
 import { components } from './components/mobile/index'
+
 export default {
   components: { ...components }
 }
@@ -190,7 +191,7 @@ import { cloneDeep, includes } from 'lodash-es'
 import { component as PAGE_CONFIG_COMPONENT } from '@/components/DiyEditor/components/mobile/PageConfig/config'
 import { component as NAVIGATION_BAR_COMPONENT } from './components/mobile/NavigationBar/config'
 import { component as TAB_BAR_COMPONENT } from './components/mobile/TabBar/config'
-import { isString } from '@/utils/is'
+import { isEmpty, isString } from '@/utils/is'
 import { DiyComponent, DiyComponentLibrary, PageConfig } from '@/components/DiyEditor/util'
 import { componentConfigs } from '@/components/DiyEditor/components/mobile'
 import { array, oneOfType } from 'vue-types'
@@ -237,26 +238,54 @@ const props = defineProps({
 watch(
   () => props.modelValue,
   () => {
-    const modelValue = isString(props.modelValue)
-      ? (JSON.parse(props.modelValue) as PageConfig)
-      : props.modelValue
-    pageConfigComponent.value.property = modelValue?.page || PAGE_CONFIG_COMPONENT.property
+    const modelValue =
+      isString(props.modelValue) && !isEmpty(props.modelValue)
+        ? (JSON.parse(props.modelValue) as PageConfig)
+        : props.modelValue
+    pageConfigComponent.value.property =
+      (typeof modelValue !== 'string' && modelValue?.page) || PAGE_CONFIG_COMPONENT.property
     navigationBarComponent.value.property =
-      modelValue?.navigationBar || NAVIGATION_BAR_COMPONENT.property
-    tabBarComponent.value.property = modelValue?.tabBar || TAB_BAR_COMPONENT.property
+      (typeof modelValue !== 'string' && modelValue?.navigationBar) ||
+      NAVIGATION_BAR_COMPONENT.property
+    tabBarComponent.value.property =
+      (typeof modelValue !== 'string' && modelValue?.tabBar) || TAB_BAR_COMPONENT.property
     // 查找对应的页面组件
-    pageComponents.value = (modelValue?.components || []).map((item) => {
-      const component = componentConfigs[item.id]
-      return { ...component, property: item.property }
-    })
+    pageComponents.value = ((typeof modelValue !== 'string' && modelValue?.components) || []).map(
+      (item) => {
+        const component = componentConfigs[item.id]
+        return { ...component, property: item.property }
+      }
+    )
   },
   {
     immediate: true
   }
 )
 
+/** 选择组件修改其属性后更新它的配置 */
+watch(
+  selectedComponent,
+  (val: any) => {
+    if (!val || selectedComponentIndex.value === -1) {
+      return
+    }
+    // 如果是基础设置页，默认选中的索引改成 -1，为了防止删除组件后切换到此页导致报错
+    // https://gitee.com/yudaocode/yudao-ui-admin-vue3/pulls/792
+    if (props.showTabBar) {
+      selectedComponentIndex.value = -1
+    }
+    pageComponents.value[selectedComponentIndex.value] = selectedComponent.value!
+  },
+  { deep: true }
+)
+
 // 保存
 const handleSave = () => {
+  // 发送保存通知
+  emits('save')
+}
+// 监听配置修改
+const pageConfigChange = () => {
   const pageConfig = {
     page: pageConfigComponent.value.property,
     navigationBar: navigationBarComponent.value.property,
@@ -272,10 +301,19 @@ const handleSave = () => {
   // 发送数据更新通知
   const modelValue = isString(props.modelValue) ? JSON.stringify(pageConfig) : pageConfig
   emits('update:modelValue', modelValue)
-  // 发送保存通知
-  emits('save', pageConfig)
 }
-
+watch(
+  () => [
+    pageConfigComponent.value.property,
+    navigationBarComponent.value.property,
+    tabBarComponent.value.property,
+    pageComponents.value
+  ],
+  () => {
+    pageConfigChange()
+  },
+  { deep: true }
+)
 // 处理页面选中：显示属性表单
 const handlePageSelected = (event: any) => {
   if (!props.showPageConfig) return
@@ -547,6 +585,7 @@ $toolbar-height: 42px;
         :deep(.el-tag) {
           box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
           border: none;
+
           .el-tag__content {
             width: 100%;
             display: flex;

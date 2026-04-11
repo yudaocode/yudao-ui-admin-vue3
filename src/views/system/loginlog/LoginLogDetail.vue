@@ -4,7 +4,7 @@
       <el-descriptions-item label="日志编号" min-width="120">
         {{ detailData.id }}
       </el-descriptions-item>
-      <el-descriptions-item label="操作类型">
+      <el-descriptions-item label="登录类型">
         <dict-tag :type="DICT_TYPE.SYSTEM_LOGIN_TYPE" :value="detailData.logType" />
       </el-descriptions-item>
       <el-descriptions-item label="用户名称">

@@ -15,7 +15,7 @@ interface UserVO {
 
 interface UserInfoVO {
   // USER 缓存
-  permissions: string[]
+  permissions: Set<string>
   roles: string[]
   isSetUser: boolean
   user: UserVO
@@ -23,7 +23,7 @@ interface UserInfoVO {
 
 export const useUserStore = defineStore('admin-user', {
   state: (): UserInfoVO => ({
-    permissions: [],
+    permissions: new Set<string>(),
     roles: [],
     isSetUser: false,
     user: {
@@ -34,7 +34,7 @@ export const useUserStore = defineStore('admin-user', {
     }
   }),
   getters: {
-    getPermissions(): string[] {
+    getPermissions(): Set<string> {
       return this.permissions
     },
     getRoles(): string[] {
@@ -56,8 +56,13 @@ export const useUserStore = defineStore('admin-user', {
       let userInfo = wsCache.get(CACHE_KEY.USER)
       if (!userInfo) {
         userInfo = await getInfo()
+      } else {
+        // 特殊：在有缓存的情况下，进行加载。但是即使加载失败，也不影响后续的操作，保证可以进入系统
+        try {
+          userInfo = await getInfo()
+        } catch (error) {}
       }
-      this.permissions = userInfo.permissions
+      this.permissions = new Set(userInfo.permissions || []) // 兜底为 [] https://t.zsxq.com/xCJew
       this.roles = userInfo.roles
       this.user = userInfo.user
       this.isSetUser = true
@@ -85,7 +90,7 @@ export const useUserStore = defineStore('admin-user', {
       this.resetState()
     },
     resetState() {
-      this.permissions = []
+      this.permissions = new Set<string>()
       this.roles = []
       this.isSetUser = false
       this.user = {

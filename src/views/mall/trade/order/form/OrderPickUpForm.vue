@@ -13,7 +13,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button type="primary" :disabled="formLoading" @click="getOrderByPickUpVerifyCode">
+      <el-button type="primary" :disabled="formLoading" @click="getOrderByPickUpVerifyCodeClick">
         查询
       </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -52,9 +52,14 @@ const formRef = ref() // 表单 Ref
 const orderDetails = ref<OrderVO>({})
 
 /** 打开弹窗 */
-const open = async () => {
+const open = async (pickUpVerifyCode: string) => {
   resetForm()
-  dialogVisible.value = true
+  if(pickUpVerifyCode != null){
+    formData.value.pickUpVerifyCode = pickUpVerifyCode;
+    await getOrderByPickUpVerifyCode()
+  }else{
+    dialogVisible.value = true
+  }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -83,18 +88,21 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
-/** 查询核销码对应的订单 */
-const getOrderByPickUpVerifyCode = async () => {
+const getOrderByPickUpVerifyCodeClick = async () => {
   // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  await getOrderByPickUpVerifyCode()
+}
 
+/** 查询核销码对应的订单 */
+const getOrderByPickUpVerifyCode = async () => {
   formLoading.value = true
   const data = await TradeOrderApi.getOrderByPickUpVerifyCode(formData.value.pickUpVerifyCode)
   formLoading.value = false
   if (data?.deliveryType !== DeliveryTypeEnum.PICK_UP.type) {
-    message.error('请输入正确的核销码')
+    message.error('未查询到订单')
     return
   }
   if (data?.status !== TradeOrderStatusEnum.UNDELIVERED.status) {

@@ -93,7 +93,7 @@ export const useEmoji = () => {
           const emojiFile = getEmojiFileByName(item)
           newData = newData.replace(
             item,
-            `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${emojiFile}" alt=""/>`
+            `<img style="width: 20px;height: 20px;margin:0 1px 3px 1px;vertical-align: middle;" src="${emojiFile}" alt=""/>`
           )
         })
       }

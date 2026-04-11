@@ -14,7 +14,10 @@
       :key="index"
     >
       <!-- 角标 -->
-      <div v-if="property.badge.show" class="absolute left-0 top-0 z-1 items-center justify-center">
+      <div
+        v-if="property.badge.show && property.badge.imgUrl"
+        class="absolute left-0 top-0 z-1 items-center justify-center"
+      >
         <el-image fit="cover" :src="property.badge.imgUrl" class="h-26px w-38px" />
       </div>
       <!-- 商品封面图 -->

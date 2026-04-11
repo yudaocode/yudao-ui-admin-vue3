@@ -75,7 +75,7 @@ watch(
 
 <template>
   <ElIcon :class="prefixCls" :color="color" :size="size">
-    <svg v-if="isLocal" :class="getSvgClass" aria-hidden="true">
+    <svg v-if="isLocal" :class="getSvgClass">
       <use :xlink:href="symbolId" />
     </svg>
 

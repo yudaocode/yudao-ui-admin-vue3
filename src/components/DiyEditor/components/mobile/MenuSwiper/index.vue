@@ -39,7 +39,7 @@
           </span>
         </div>
       </div>
-    </el-carousel-item>
+    </el-carousel-item> 
   </el-carousel>
 </template>
 
@@ -51,7 +51,7 @@ const props = defineProps<{ property: MenuSwiperProperty }>()
 // 标题的高度
 const TITLE_HEIGHT = 20
 // 图标的高度
-const ICON_SIZE = 42
+const ICON_SIZE = 32
 // 垂直间距：一行上下的间距
 const SPACE_Y = 16
 
