@@ -127,7 +127,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
       }
     ]
   },
-
   {
     path: '/codegen',
     component: Layout,
@@ -232,6 +231,16 @@ const remainingRouter: AppRouteRecordRaw[] = [
       hidden: true,
       title: '500',
       noTagsView: true
+    }
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('@/views/Error/404.vue'),
+    name: '',
+    meta: {
+      title: '404',
+      hidden: true,
+      breadcrumb: false
     }
   },
   {
@@ -695,16 +704,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/:pathMatch(.*)*',
-    component: () => import('@/views/Error/404.vue'),
-    name: '',
-    meta: {
-      title: '404',
-      hidden: true,
-      breadcrumb: false
-    }
-  },
-  {
     path: '/iot',
     component: Layout,
     name: 'IOT',
@@ -744,6 +743,55 @@ const remainingRouter: AppRouteRecordRaw[] = [
           activeMenu: '/iot/operation/ota/firmware'
         },
         component: () => import('@/views/iot/ota/firmware/detail/index.vue')
+      }
+    ]
+  },
+  {
+    path: '/mes',
+    component: Layout,
+    name: 'MesWmRouter',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'wm/warehouse/location',
+        component: () => import('@/views/mes/wm/warehouse/location/index.vue'),
+        name: 'MesWmLocation',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          icon: '',
+          title: '库区设置',
+          activeMenu: '/mes/wm/warehouse'
+        }
+      },
+      {
+        path: 'wm/warehouse/area',
+        component: () => import('@/views/mes/wm/warehouse/area/index.vue'),
+        name: 'MesWmArea',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          icon: '',
+          title: '库位设置',
+          activeMenu: '/mes/wm/warehouse'
+        }
+      },
+      {
+        path: 'pro/task/gantt-edit',
+        component: () => import('@/views/mes/pro/task/edit/index.vue'),
+        name: 'MesProTaskGanttEdit',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          icon: '',
+          title: '甘特图编辑',
+          activeMenu: '/mes/pro/task'
+        }
       }
     ]
   }

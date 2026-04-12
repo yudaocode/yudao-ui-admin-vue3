@@ -1,0 +1,251 @@
+<template>
+  <doc-alert title="【基础】车间设置、工作站设置" url="https://doc.iocoder.cn/mes/workshop/" />
+
+  <ContentWrap>
+    <!-- 搜索工作栏 -->
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="85px"
+    >
+      <el-form-item label="工作站编码" prop="code">
+        <el-input
+          v-model="queryParams.code"
+          placeholder="请输入工作站编码"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="工作站名称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入工作站名称"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="所在车间" prop="workshopId">
+        <MdWorkshopSelect
+          v-model="queryParams.workshopId"
+          placeholder="请选择车间"
+          clearable
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="所属工序" prop="processId">
+        <ProProcessSelect
+          v-model="queryParams.processId"
+          placeholder="请选择工序"
+          clearable
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['mes:md-workstation:create']"
+        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+        <el-button
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['mes:md-workstation:export']"
+        >
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </ContentWrap>
+
+  <!-- 列表 -->
+  <ContentWrap>
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <el-table-column label="工作站编码" align="center" prop="code" min-width="120">
+        <template #default="scope">
+          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+            {{ scope.row.code }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column label="工作站名称" align="center" prop="name" min-width="150" />
+      <el-table-column label="工作站地点" align="center" prop="address" min-width="150" />
+      <el-table-column label="所在车间" align="center" prop="workshopName" min-width="120" />
+      <el-table-column label="所属工序" align="center" prop="processName" min-width="120" />
+      <el-table-column label="状态" align="center" prop="status" min-width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column label="操作" align="center" width="190">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['mes:md-workstation:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['mes:md-workstation:delete']"
+          >
+            删除
+          </el-button>
+          <!-- TODO @芋艿：【对齐】后续搞：标签打印 -->
+          <el-button
+            link
+            type="primary"
+            @click="handleBarcode(scope.row)"
+            v-hasPermi="['mes:md-workstation:query']"
+          >
+            条码
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </ContentWrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <WorkstationForm ref="formRef" @success="getList" />
+  <!-- 条码详情弹窗 -->
+  <BarcodeDetail ref="barcodeDetailRef" />
+</template>
+
+<script setup lang="ts">
+import { dateFormatter } from '@/utils/formatTime'
+import download from '@/utils/download'
+import { MdWorkstationApi, MdWorkstationVO } from '@/api/mes/md/workstation'
+import MdWorkshopSelect from './components/MdWorkshopSelect.vue'
+import ProProcessSelect from '@/views/mes/pro/process/components/ProProcessSelect.vue'
+import WorkstationForm from './WorkstationForm.vue'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
+import { BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+
+defineOptions({ name: 'MesMdWorkstation' })
+
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
+
+const loading = ref(true) // 列表的加载中
+const list = ref<MdWorkstationVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  code: undefined,
+  name: undefined,
+  workshopId: undefined,
+  processId: undefined,
+  status: undefined
+})
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
+
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await MdWorkstationApi.getWorkstationPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    await message.delConfirm()
+    await MdWorkstationApi.deleteWorkstation(id)
+    message.success(t('common.delSuccess'))
+    await getList()
+  } catch {}
+}
+
+/** 查看工位条码 */
+const barcodeDetailRef = ref()
+const handleBarcode = async (row: MdWorkstationVO) => {
+  await barcodeDetailRef.value.openByBusiness(
+    row.id,
+    BarcodeBizTypeEnum.WORKSTATION,
+    row.code,
+    row.name
+  )
+}
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    await message.exportConfirm()
+    exportLoading.value = true
+    const data = await MdWorkstationApi.exportWorkstation(queryParams)
+    download.excel(data, '工作站.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+/** 初始化 **/
+onMounted(async () => {
+  await getList()
+})
+</script>

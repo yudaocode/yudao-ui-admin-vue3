@@ -70,6 +70,11 @@ const download = {
       a.click()
     }
   },
+  // 下载 Base64 图片（将 base64 转为文件并触发下载）
+  base64Image: (base64: string, fileName: string) => {
+    const file = download.base64ToFile(base64, fileName)
+    download0(file, file.name, file.type)
+  },
   base64ToFile: (base64: any, fileName: string) => {
     // 将base64按照 , 进行分割 将前缀  与后续内容分隔开
     const data = base64.split(',')
