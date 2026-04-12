@@ -87,7 +87,7 @@
 
 * 通用模块（必选）：系统功能、基础设施
 * 通用模块（可选）：工作流程、支付系统、数据报表、会员中心
-* 业务系统（按需）：ERP 系统、CRM 系统、MES 系统、商城系统、微信公众号、AI 大模型
+* 业务系统（按需）：ERP 系统、CRM 系统、MES 系统、商城系统、微信公众号、AI 大模型、IoT 物联网
 
 ### 系统功能
 
@@ -259,6 +259,22 @@
 ![功能图](/.image/common/ai-feature.png)
 
 ![功能图](/.image/common/ai-preview.gif)
+
+### MES 系统
+
+演示地址：<https://doc.iocoder.cn/mes-preview/>
+
+![功能图](/.image/common/mes-feature.png)
+
+![预览图](/.image/common/mes-preview.png)
+
+### IoT 物联网
+
+演示地址：<https://doc.iocoder.cn/iot/build>
+
+![功能图](/.image/common/iot-feature.png)
+
+![预览图](/.image/common/iot-preview.png)
 
 ## 🐷 演示图
 
