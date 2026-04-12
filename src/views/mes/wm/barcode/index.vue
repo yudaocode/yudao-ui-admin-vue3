@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="【仓库】仓库与库区库位、条码赋码、SN码" url="https://doc.iocoder.cn/mes/warehouse-setup/" />
+  <doc-alert title="【仓库】仓库与库区库位、条码赋码、SN码" url="https://doc.iocoder.cn/mes/wm/warehouse-setup/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

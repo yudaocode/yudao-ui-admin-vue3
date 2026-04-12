@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="【设备】点检记录、保养记录、维修单" url="https://doc.iocoder.cn/mes/check-record/" />
+  <doc-alert title="【设备】点检记录、保养记录、维修单" url="https://doc.iocoder.cn/mes/dv/check-record/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

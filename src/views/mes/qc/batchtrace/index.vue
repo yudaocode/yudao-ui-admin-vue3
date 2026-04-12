@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="【仓库】批次管理、库存现有量、库存事务" url="https://doc.iocoder.cn/mes/stock/" />
+  <doc-alert title="【仓库】批次管理、库存现有量、库存事务" url="https://doc.iocoder.cn/mes/wm/stock/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

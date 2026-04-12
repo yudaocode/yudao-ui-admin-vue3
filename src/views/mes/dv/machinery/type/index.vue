@@ -1,6 +1,6 @@
 <!-- MES 设备类型列表 -->
 <template>
-  <doc-alert title="【设备】设备类型、设备台账" url="https://doc.iocoder.cn/mes/device/" />
+  <doc-alert title="【设备】设备类型、设备台账" url="https://doc.iocoder.cn/mes/dv/device/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

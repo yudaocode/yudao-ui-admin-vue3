@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="【仓库】到货通知、采购入库、采购退货" url="https://doc.iocoder.cn/mes/purchase-in/" />
+  <doc-alert title="【仓库】到货通知、采购入库、采购退货" url="https://doc.iocoder.cn/mes/wm/purchase-in/" />
 
   <ContentWrap>
     <el-form
