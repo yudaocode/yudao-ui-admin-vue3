@@ -1,6 +1,6 @@
 <!-- MES 编码规则列表 -->
 <template>
-  <doc-alert title="【基础】编码规则" url="https://doc.iocoder.cn/mes/autocode/" />
+  <doc-alert title="【基础】编码规则" url="https://doc.iocoder.cn/mes/md/autocode/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

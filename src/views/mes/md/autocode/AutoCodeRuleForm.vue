@@ -89,7 +89,7 @@
     </el-form>
     <!-- 底部 Tab：仅修改时展示 -->
     <template v-if="formType === 'update' && formData.id">
-      <el-divider>物料信息</el-divider>
+      <el-divider>规则组成</el-divider>
       <AutoCodePartList :ruleId="formData.id!" />
     </template>
     <template #footer>

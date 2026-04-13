@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="【仓库】外协发料、外协入库" url="https://doc.iocoder.cn/mes/outsource-wm/" />
+  <doc-alert title="【仓库】外协发料、外协入库" url="https://doc.iocoder.cn/mes/wm/outsource/" />
 
   <ContentWrap>
     <el-form

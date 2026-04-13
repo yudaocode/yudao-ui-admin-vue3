@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="【仓库】发货通知、销售出库、销售退货" url="https://doc.iocoder.cn/mes/sales-out/" />
+  <doc-alert title="【仓库】发货通知、销售出库、销售退货" url="https://doc.iocoder.cn/mes/wm/sales-out/" />
 
   <ContentWrap>
     <el-form

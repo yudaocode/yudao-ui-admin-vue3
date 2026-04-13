@@ -1,6 +1,6 @@
 <!-- MES 生产报工列表 -->
 <template>
-  <doc-alert title="【生产】生产报工" url="https://doc.iocoder.cn/mes/feedback/" />
+  <doc-alert title="【生产】生产报工" url="https://doc.iocoder.cn/mes/pro/feedback/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

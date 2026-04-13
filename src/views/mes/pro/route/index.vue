@@ -1,6 +1,6 @@
 <!-- MES 工艺路线列表 -->
 <template>
-  <doc-alert title="【生产】工序设置、工艺流程" url="https://doc.iocoder.cn/mes/process-route/" />
+  <doc-alert title="【生产】工序设置、工艺流程" url="https://doc.iocoder.cn/mes/pro/process-route/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

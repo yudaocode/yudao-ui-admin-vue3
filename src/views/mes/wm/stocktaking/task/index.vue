@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="【仓库】库存盘点" url="https://doc.iocoder.cn/mes/stocktaking/" />
+  <doc-alert title="【仓库】库存盘点" url="https://doc.iocoder.cn/mes/wm/stocktaking/" />
 
   <ContentWrap>
     <el-form

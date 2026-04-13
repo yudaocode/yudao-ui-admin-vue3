@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="【排班】班组设置、节假日设置" url="https://doc.iocoder.cn/mes/team/" />
+  <doc-alert title="【排班】班组设置、节假日设置" url="https://doc.iocoder.cn/mes/cal/team/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

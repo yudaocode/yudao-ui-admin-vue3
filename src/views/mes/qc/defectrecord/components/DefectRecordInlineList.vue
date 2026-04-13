@@ -79,7 +79,7 @@
                 link
                 type="danger"
                 @click="handleDelete(scope.row.id)"
-                v-hasPermi="['mes:qc-defect:update']"
+                v-hasPermi="['mes:qc-defect:delete']"
               >
                 删除
               </el-button>

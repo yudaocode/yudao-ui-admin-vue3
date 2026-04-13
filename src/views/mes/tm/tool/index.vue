@@ -1,6 +1,6 @@
 <!-- MES 工具台账列表 -->
 <template>
-  <doc-alert title="【工具】工具类型、工装夹具台账" url="https://doc.iocoder.cn/mes/tool/" />
+  <doc-alert title="【工具】工具类型、工装夹具台账" url="https://doc.iocoder.cn/mes/tm/tool/" />
 
   <el-row :gutter="20">
     <!-- 左侧分类树 -->
