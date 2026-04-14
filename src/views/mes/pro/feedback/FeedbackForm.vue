@@ -485,8 +485,9 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   } else {
-    // 创建模式：默认报工人为当前用户
+    // 创建模式：默认报工人为当前用户，报工时间为当前时间
     formData.value.feedbackUserId = useUserStore().getUser.id
+    formData.value.feedbackTime = new Date()
     // 自动生成报工单号
     await generateCode()
   }
