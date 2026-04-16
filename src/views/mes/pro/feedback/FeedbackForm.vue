@@ -62,9 +62,7 @@
               :workOrderId="formData.workOrderId"
               :workstationId="formData.workstationId"
               :statuses="[
-                MesProTaskStatusEnum.NORMAL,
-                MesProTaskStatusEnum.START,
-                MesProTaskStatusEnum.PAUSE
+                MesProTaskStatusEnum.PREPARE
               ]"
               :disabled="isHeaderReadonly || !formData.workOrderId"
               placeholder="请选择任务"
