@@ -1,8 +1,8 @@
 <!--
   系统用户弹窗选择器（V2，支持单选/多选）
 
-  对齐 MdVendorSelectDialog 架构模式 + KTG userSelect 左侧部门树
-  搜索字段 & 展示字段对齐 KTG userSelect：用户名称、用户昵称、部门、手机号码
+  对齐 MdVendorSelectDialog 架构模式 + userSelect 左侧部门树
+  搜索字段 & 展示字段：用户名称、用户昵称、部门、手机号码
 
   Props:
     multiple — true 多选（checkbox），false 单选（radio）；默认 true
