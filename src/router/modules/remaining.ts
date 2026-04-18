@@ -1,5 +1,4 @@
 import { Layout } from '@/utils/routerHelper'
-import ChatPage from '../../views/chat/ChatPage/Index.vue'
 
 const { t } = useI18n()
 /**
@@ -747,11 +746,107 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/iot/ota/firmware/detail/index.vue')
       }
     ]
-  }, {
-    path: '/chat',
-    component: ChatPage,
-    name: 'chat',
-    meta: { hidden: false }
+  },
+  {
+    // 统一 /im 分组：下分 home（聊天壳）+ manager（Layout 管理壳）
+    path: '/im',
+    name: 'Im',
+    redirect: '/im/home/message',
+    meta: { hidden: false, title: 'IM 即时通讯' },
+    children: [
+      {
+        // 聊天壳：全屏沉浸式应用，带 ToolBar + keep-alive
+        // hidden:true 不在 yudao 侧边栏菜单显示；三个子 Tab 通过内部 ToolBar 切换
+        path: 'home',
+        component: () => import('@/views/im/home/Index.vue'),
+        name: 'ImHome',
+        redirect: '/im/home/message',
+        meta: { hidden: true, title: '聊天' },
+        children: [
+          {
+            path: 'message',
+            component: () => import('@/views/im/home/pages/MessagePage.vue'),
+            name: 'ImHomeMessage',
+            meta: { hidden: true, title: '消息' }
+          },
+          {
+            path: 'friend',
+            component: () => import('@/views/im/home/pages/FriendPage.vue'),
+            name: 'ImHomeFriend',
+            meta: { hidden: true, title: '好友' }
+          },
+          {
+            path: 'group',
+            component: () => import('@/views/im/home/pages/GroupPage.vue'),
+            name: 'ImHomeGroup',
+            meta: { hidden: true, title: '群聊' }
+          }
+        ]
+      },
+      {
+        path: 'manager/message',
+        component: Layout,
+        name: 'ImManagerMessage',
+        redirect: '/im/manager/message/index',
+        meta: { hidden: false },
+        children: [
+          {
+            path: 'index',
+            component: () => import('@/views/im/manager/message/index.vue'),
+            name: 'ImManagerMessageIndex',
+            meta: {
+              canTo: true,
+              hidden: false,
+              noTagsView: false,
+              icon: 'ep:chat-dot-round',
+              title: '消息管理'
+            }
+          }
+        ]
+      },
+      {
+        path: 'manager/friend',
+        component: Layout,
+        name: 'ImManagerFriend',
+        redirect: '/im/manager/friend/index',
+        meta: { hidden: false },
+        children: [
+          {
+            path: 'index',
+            component: () => import('@/views/im/manager/friend/index.vue'),
+            name: 'ImManagerFriendIndex',
+            meta: {
+              canTo: true,
+              hidden: false,
+              noTagsView: false,
+              icon: 'ep:user',
+              title: '好友管理'
+            }
+          }
+        ]
+      },
+      {
+        path: 'manager/group',
+        component: Layout,
+        name: 'ImManagerGroup',
+        redirect: '/im/manager/group/index',
+        meta: { hidden: false },
+        children: [
+          {
+            path: 'index',
+            component: () => import('@/views/im/manager/group/index.vue'),
+            name: 'ImManagerGroupIndex',
+            meta: {
+              canTo: true,
+              hidden: false,
+              noTagsView: false,
+              icon: 'ep:user-filled',
+              title: '群管理'
+            }
+          }
+        ]
+      }
+    ]
   }
 ]
 
