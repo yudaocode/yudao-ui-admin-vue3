@@ -67,7 +67,7 @@ importers:
         version: 1.11.13
       dayjs-plugin-lunar:
         specifier: ^1.4.1
-        version: 1.4.1(dayjs@1.11.13)(tyme4ts@1.4.2)
+        version: 1.4.1(dayjs@1.11.13)(tyme4ts@1.4.6)
       dhtmlx-gantt:
         specifier: ^9.1.1
         version: 9.1.1
@@ -149,6 +149,9 @@ importers:
       steady-xml:
         specifier: ^0.1.0
         version: 0.1.0
+      tyme4ts:
+        specifier: ^1.4.6
+        version: 1.4.6
       url:
         specifier: ^0.11.3
         version: 0.11.4
@@ -4799,8 +4802,8 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
-  tyme4ts@1.4.2:
-    resolution: {integrity: sha512-3rUMpQv3Oz9V0f/GOPVHn+PC6eqR4CyMYQu02B8bUA5+BWvYALJapfwjOS7GH5NFK7mAS3LCUzSEYkQc4rkk6Q==, tarball: https://registry.npmmirror.com/tyme4ts/-/tyme4ts-1.4.2.tgz}
+  tyme4ts@1.4.6:
+    resolution: {integrity: sha512-6uiAlUxS4BNu2FGsKg0KdUr329jJjhnEURhURR8v5GKXnv1B7Z4kAZHjOByhGcCJ+jhuQskR5kmGSvZJ7fE/VA==, tarball: https://registry.npmmirror.com/tyme4ts/-/tyme4ts-1.4.6.tgz}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -8235,10 +8238,10 @@ snapshots:
 
   dargs@8.1.0: {}
 
-  dayjs-plugin-lunar@1.4.1(dayjs@1.11.13)(tyme4ts@1.4.2):
+  dayjs-plugin-lunar@1.4.1(dayjs@1.11.13)(tyme4ts@1.4.6):
     dependencies:
       dayjs: 1.11.13
-      tyme4ts: 1.4.2
+      tyme4ts: 1.4.6
 
   dayjs@1.11.13: {}
 
@@ -10143,7 +10146,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tyme4ts@1.4.2: {}
+  tyme4ts@1.4.6: {}
 
   type-check@0.4.0:
     dependencies:
