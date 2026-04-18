@@ -90,9 +90,7 @@
               :workOrderId="formData.workOrderId"
               :workstationId="formData.workstationId"
               :statuses="[
-                MesProTaskStatusEnum.NORMAL,
-                MesProTaskStatusEnum.START,
-                MesProTaskStatusEnum.PAUSE
+                MesProTaskStatusEnum.PREPARE
               ]"
               placeholder="请选择生产任务"
               class="!w-1/1"

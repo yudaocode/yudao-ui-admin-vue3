@@ -1,5 +1,8 @@
 <template>
-  <doc-alert title="【仓库】仓库与库区库位、条码赋码、SN码" url="https://doc.iocoder.cn/mes/wm/warehouse-setup/" />
+  <doc-alert
+    title="【仓库】仓库与库区库位、条码赋码、SN码"
+    url="https://doc.iocoder.cn/mes/wm/warehouse-setup/"
+  />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -57,8 +60,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
-      :show-overflow-tooltip="true"
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" key="id" prop="id" width="100" />
       <el-table-column label="条码格式" align="center" key="format" prop="format" width="100">
         <template #default="scope">

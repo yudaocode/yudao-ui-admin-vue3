@@ -69,7 +69,7 @@ const props = withDefaults(
     workOrderId?: number // 可选，打开弹窗时默认按此工单过滤
     workstationId?: number // 可选，打开弹窗时默认按此工位过滤
     statuses?: number[] // 可选，任务状态列表（IN 查询）
-    disabled?: boolean // 是否禁用
+    m?: boolean // 是否禁用
     clearable?: boolean // 是否允许清空
     placeholder?: string // 占位文字
   }>(),

@@ -1,3 +1,13 @@
+/** MES 单据状态常量 */
+export const MesOrderStatusConstants = {
+  DRAFT: 0,
+  CONFIRMED: 1,
+  APPROVING: 2,
+  APPROVED: 3,
+  FINISHED: 4,
+  CANCELLED: 5
+} as const
+
 /** MES 工具状态枚举 */
 export const MesToolStatusEnum = {
   STORE: 1, // 在库
@@ -89,11 +99,9 @@ export const MesProWorkOrderSourceTypeEnum = {
 
 /** MES 生产任务状态枚举 */
 export const MesProTaskStatusEnum = {
-  NORMAL: 0, // 草稿
-  START: 1, // 进行中
-  PAUSE: 2, // 暂停
-  FINISHED: 3, // 已完成
-  CANCELED: 4 // 已取消
+  PREPARE: MesOrderStatusConstants.DRAFT, // 草稿
+  FINISHED: MesOrderStatusConstants.FINISHED, // 已完成
+  CANCELED: MesOrderStatusConstants.CANCELLED // 已取消
 }
 
 /** MES 点检保养项目类型枚举（对应字典 mes_dv_subject_type） */
@@ -110,8 +118,8 @@ export const MesDvCheckPlanStatusEnum = {
 
 /** MES 设备保养记录状态枚举 */
 export const MesDvMaintenRecordStatusEnum = {
-  PREPARE: 0, // 草稿
-  SUBMITTED: 1 // 已提交
+  PREPARE: MesOrderStatusConstants.DRAFT, // 草稿
+  SUBMITTED: MesOrderStatusConstants.FINISHED // 已提交
 }
 
 /** MES 设备保养明细结果枚举（对应字典 mes_mainten_status） */
@@ -175,16 +183,6 @@ export const MesQcTypeEnum = {
   OQC: 3, // 出货检验
   RQC: 4 // 退货检验
 }
-
-/** MES 单据状态常量 */
-export const MesOrderStatusConstants = {
-  DRAFT: 0,
-  CONFIRMED: 1,
-  APPROVING: 2,
-  APPROVED: 3,
-  FINISHED: 4,
-  CANCELLED: 5
-} as const
 
 /** MES 维修工单状态枚举 */
 export const MesDvRepairStatusEnum = {
