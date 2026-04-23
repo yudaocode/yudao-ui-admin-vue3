@@ -751,33 +751,31 @@ const remainingRouter: AppRouteRecordRaw[] = [
     // 统一 /im 分组：下分 home（聊天壳）+ manager（Layout 管理壳）
     path: '/im',
     name: 'Im',
-    redirect: '/im/home/message',
+    redirect: '/im/home/chat',
     meta: { hidden: false, title: 'IM 即时通讯' },
     children: [
       {
-        // 聊天壳：全屏沉浸式应用，带 ToolBar + keep-alive
-        // hidden:true 不在 yudao 侧边栏菜单显示；三个子 Tab 通过内部 ToolBar 切换
         path: 'home',
         component: () => import('@/views/im/home/Index.vue'),
         name: 'ImHome',
-        redirect: '/im/home/message',
+        redirect: '/im/home/chat',
         meta: { hidden: true, title: '聊天' },
         children: [
           {
-            path: 'message',
-            component: () => import('@/views/im/home/pages/MessagePage.vue'),
-            name: 'ImHomeMessage',
+            path: 'chat',
+            component: () => import('@/views/im/home/pages/chat/MessagePage.vue'),
+            name: 'ImHomeChat',
             meta: { hidden: true, title: '消息' }
           },
           {
             path: 'friend',
-            component: () => import('@/views/im/home/pages/FriendPage.vue'),
+            component: () => import('@/views/im/home/pages/friend/FriendPage.vue'),
             name: 'ImHomeFriend',
             meta: { hidden: true, title: '好友' }
           },
           {
             path: 'group',
-            component: () => import('@/views/im/home/pages/GroupPage.vue'),
+            component: () => import('@/views/im/home/pages/group/GroupPage.vue'),
             name: 'ImHomeGroup',
             meta: { hidden: true, title: '群聊' }
           }
