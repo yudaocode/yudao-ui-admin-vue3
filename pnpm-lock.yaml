@@ -86,9 +86,6 @@ importers:
       highlight.js:
         specifier: ^11.9.0
         version: 11.10.0
-      idb:
-        specifier: ^8.0.0
-        version: 8.0.3
       jsencrypt:
         specifier: ^3.3.2
         version: 3.3.2
@@ -3503,9 +3500,6 @@ packages:
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
-
-  idb@8.0.3:
-    resolution: {integrity: sha512-LtwtVyVYO5BqRvcsKuB2iUMnHwPVByPCXFXOpuU96IZPPoPN6xjOGxZQ74pgSVVLQWtUOYgyeL4GE98BY5D3wg==, tarball: https://registry.npmmirror.com/idb/-/idb-8.0.3.tgz}
 
   ids@1.0.5:
     resolution: {integrity: sha512-XQ0yom/4KWTL29sLG+tyuycy7UmeaM/79GRtSJq6IG9cJGIPeBz5kwDCguie3TwxaMNIc3WtPi0cTa1XYHicpw==}
@@ -8902,8 +8896,6 @@ snapshots:
   iconv-lite@0.6.3:
     dependencies:
       safer-buffer: 2.1.2
-
-  idb@8.0.3: {}
 
   ids@1.0.5: {}
 
