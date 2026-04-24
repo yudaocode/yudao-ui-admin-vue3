@@ -191,6 +191,18 @@ export function formatPast2(ms: number): string {
 }
 
 /**
+ * 将秒数格式化为 mm:ss，适用于音视频时长、倒计时等
+ *
+ * @param seconds 秒数
+ */
+export function formatSeconds(seconds: number): string {
+  const s = Math.max(0, Math.floor(seconds || 0))
+  const mm = Math.floor(s / 60).toString().padStart(2, '0')
+  const ss = (s % 60).toString().padStart(2, '0')
+  return `${mm}:${ss}`
+}
+
+/**
  * element plus 的时间 Formatter 实现，使用 YYYY-MM-DD HH:mm:ss 格式
  *
  * @param row 行数据

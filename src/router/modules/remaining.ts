@@ -751,20 +751,20 @@ const remainingRouter: AppRouteRecordRaw[] = [
     // 统一 /im 分组：下分 home（聊天壳）+ manager（Layout 管理壳）
     path: '/im',
     name: 'Im',
-    redirect: '/im/home/chat',
+    redirect: '/im/home/conversation',
     meta: { hidden: false, title: 'IM 即时通讯' },
     children: [
       {
         path: 'home',
         component: () => import('@/views/im/home/Index.vue'),
         name: 'ImHome',
-        redirect: '/im/home/chat',
+        redirect: '/im/home/conversation',
         meta: { hidden: true, title: '聊天' },
         children: [
           {
-            path: 'chat',
-            component: () => import('@/views/im/home/pages/chat/MessagePage.vue'),
-            name: 'ImHomeChat',
+            path: 'conversation',
+            component: () => import('@/views/im/home/pages/conversation/MessagePage.vue'),
+            name: 'ImHomeConversation',
             meta: { hidden: true, title: '消息' }
           },
           {

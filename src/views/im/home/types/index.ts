@@ -1,0 +1,90 @@
+// ==================== 本地会话 / 消息结构 ====================
+
+// 会话数据结构（前端自有结构，后端无对应实体）
+export interface Conversation {
+  // ========== 核心标识 ==========
+  targetId: number // 会话目标编号：私聊=对方 userId；群聊=groupId
+  type: number // 会话类型，对齐 ImConversationType
+
+  // ========== 展示字段 ==========
+  showName: string // 展示名称
+  showImage: string // 头像
+  lastContent: string // 会话列表展示的最后一条消息摘要
+  lastSendTime: number // 最后一条消息时间，用于排序
+  unreadCount: number // 未读数
+  messages: Message[] // 消息列表
+  senderNickName?: string // 最后一条消息的发送者昵称（群聊列表前缀展示用）
+
+  // ========== UI 状态 ==========
+  deleted?: boolean // 是否已删除（软删标记，持久化时过滤）
+  top?: boolean // 是否置顶（排序时优先）
+  muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
+  atMe?: boolean // 群聊：是否有人 @我
+  atAll?: boolean // 群聊：是否有人 @全体成员
+  lastReadCount?: number // 群回执：当前会话最近一条需回执消息的已读人数
+  lastTimeTip?: number // 最后一条"时间分隔线"的时间戳，判断是否需要插入下一条 TIP_TIME
+}
+
+// 消息数据结构
+export interface Message {
+  // ========== 后端字段（对齐 ImPrivateMessageDTO / ImGroupMessageDTO） ==========
+  id: number // 服务端消息编号，发送中为 0
+  clientMessageId: string // 客户端消息编号，本地生成用于合并去重
+  type: number // 消息类型，对齐 ImMessageType
+  content: string // 消息内容，JSON 字符串
+  status: number // 消息状态，对齐 ImMessageStatus
+  sendTime: number // 发送时间（前端转毫秒时间戳；后端为 LocalDateTime 字符串）
+  senderId: number // 发送人编号
+  atUserIds?: number[] // 群 @ 目标用户列表
+  receiverUserIds?: number[] // 群定向接收用户列表
+  receiptStatus?: number // 群回执状态，对齐 ImGroupReceiptStatus（仅群消息）
+  readCount?: number // 群回执已读人数（仅群消息）
+
+  // ========== 前端扩展字段 ==========
+  senderNickName: string // 发送人昵称（前端从 friendStore / groupStore 补全）
+  targetId: number // 会话目标编号（私聊=receiverId / 群聊=groupId），与 Conversation.targetId 一致
+  selfSend: boolean // 是否自己发送（前端按 senderId 计算）
+}
+
+// localStorage 存储结构：按用户 ID 分桶，保存所有会话元数据
+export interface ConversationsData {
+  privateMessageMaxId: number // 私聊消息最大编号
+  groupMessageMaxId: number // 群聊消息最大编号
+  conversations: Conversation[] // 会话列表
+}
+
+// ==================== WebSocket 帧 / 事件 ====================
+
+// 后端 WebSocket 统一帧结构：{ type, content }
+export interface WebSocketFrame {
+  type: string // 帧类型，对齐 ImWebSocketMessageType
+  content: string // 帧内容（JSON 字符串）
+}
+
+// 私聊消息 DTO（对齐后端 ImPrivateMessageDTO）
+export interface ImPrivateMessageDTO {
+  id: number // 消息编号
+  clientMessageId: string // 客户端消息编号
+  senderId: number // 发送人编号
+  receiverId: number // 接收人编号
+  type: number // 消息类型
+  content: string // 消息内容
+  status: number // 消息状态
+  sendTime: string // 发送时间
+}
+
+// 群聊消息 DTO（对齐后端 ImGroupMessageDTO）
+export interface ImGroupMessageDTO {
+  id: number // 消息编号
+  clientMessageId: string // 客户端消息编号
+  senderId: number // 发送人编号
+  groupId: number // 群编号
+  type: number // 消息类型
+  content: string // 消息内容
+  status: number // 消息状态
+  sendTime: string // 发送时间
+  atUserIds?: number[] // 群 @ 目标用户列表
+  receiverUserIds?: number[] // 群定向接收用户列表
+  readCount?: number // 群回执已读人数（type = RECEIPT 时使用）
+  receiptStatus?: number // 群回执状态（type = RECEIPT 时使用）
+}

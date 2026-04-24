@@ -47,13 +47,13 @@ export const ImMessageStatus = {
 } as const
 
 /** IM 会话类型枚举 */
-export const ImChatType = {
+export const ImConversationType = {
   PRIVATE: 1, // 私聊
   GROUP: 2 // 群聊
 } as const
 
-/** IM WebSocket 外层事件类型（对齐后端 ImPrivateMessageDTO.TYPE / ImGroupMessageDTO.TYPE） */
-export const ImWsEventType = {
+/** IM WebSocket 外层帧类型（对齐后端 ImPrivateMessageDTO.TYPE / ImGroupMessageDTO.TYPE） */
+export const ImWebSocketMessageType = {
   PRIVATE_MESSAGE: 'im-private-message', // 私聊通道
   GROUP_MESSAGE: 'im-group-message' // 群聊通道
 } as const
@@ -70,3 +70,6 @@ export const PRIVATE_MESSAGE_PULL_SIZE = 100
 
 /** 每次拉取群聊消息的最大条数（后端上限 1000，前端取保守值 100） */
 export const GROUP_MESSAGE_PULL_SIZE = 100
+
+/** 会话之间插入"时间分隔线"的阈值：10 分钟 */
+export const TIME_TIP_GAP_MS = 10 * 60 * 1000
