@@ -79,7 +79,7 @@ export const parseMessage = <T>(content: string): T | null => {
 /** 序列化消息 payload 为 content JSON 字符串；与 parseMessage 对称 */
 export const serializeMessage = <T>(payload: T): string => JSON.stringify(payload)
 
-// ==================== 撤回提示文案 ====================
+// ==================== 撤回 ====================
 
 /**
  * 生成本地「撤回提示消息」的展示内容
@@ -87,6 +87,19 @@ export const serializeMessage = <T>(payload: T): string => JSON.stringify(payloa
  */
 export const buildRecallTip = (senderName: string, selfSend: boolean): string => {
   return selfSend ? '你撤回了一条消息' : `${senderName || '对方'} 撤回了一条消息`
+}
+
+/**
+ * 从后端下发的撤回 TIP_TEXT content 中解析出被撤回的原消息 id
+ * content 形如 `{"messageId": 123}`，若不含 messageId 则返回 0（表示这条不是撤回 tip）
+ */
+export const parseRecallMessageId = (content: string): number => {
+  try {
+    const parsed = JSON.parse(content)
+    return parsed?.messageId != null ? Number(parsed.messageId) : 0
+  } catch {
+    return 0
+  }
 }
 
 // ==================== 新消息提示音 ====================

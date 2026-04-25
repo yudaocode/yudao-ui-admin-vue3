@@ -1,3 +1,39 @@
+// ==================== WebSocket 帧 / 事件 ====================
+
+// 后端 WebSocket 统一帧结构：{ type, content }
+export interface WebSocketFrame {
+  type: string // 帧类型，对齐 ImWebSocketMessageType
+  content: string // 帧内容（JSON 字符串）
+}
+
+// 私聊消息 DTO（对齐后端 ImPrivateMessageDTO）
+export interface ImPrivateMessageDTO {
+  id: number // 消息编号
+  clientMessageId: string // 客户端消息编号
+  senderId: number // 发送人编号
+  receiverId: number // 接收人编号
+  type: number // 消息类型
+  content: string // 消息内容
+  status: number // 消息状态
+  sendTime: string // 发送时间
+}
+
+// 群聊消息 DTO（对齐后端 ImGroupMessageDTO）
+export interface ImGroupMessageDTO {
+  id: number // 消息编号
+  clientMessageId: string // 客户端消息编号
+  senderId: number // 发送人编号
+  groupId: number // 群编号
+  type: number // 消息类型
+  content: string // 消息内容
+  status: number // 消息状态
+  sendTime: string // 发送时间
+  atUserIds?: number[] // 群 @ 目标用户列表
+  receiverUserIds?: number[] // 群定向接收用户列表
+  readCount?: number // 群回执已读人数（type = RECEIPT 时使用）
+  receiptStatus?: number // 群回执状态（type = RECEIPT 时使用）
+}
+
 // ==================== 本地会话 / 消息结构 ====================
 
 // 会话数据结构（前端自有结构，后端无对应实体）
@@ -7,8 +43,8 @@ export interface Conversation {
   type: number // 会话类型，对齐 ImConversationType
 
   // ========== 展示字段 ==========
-  showName: string // 展示名称
-  showImage: string // 头像
+  name: string // 展示名称（私聊=好友昵称；群聊=群名）
+  avatar: string // 头像
   lastContent: string // 会话列表展示的最后一条消息摘要
   lastSendTime: number // 最后一条消息时间，用于排序
   unreadCount: number // 未读数
@@ -53,38 +89,50 @@ export interface ConversationsData {
   conversations: Conversation[] // 会话列表
 }
 
-// ==================== WebSocket 帧 / 事件 ====================
+// ==================== 群 / 群成员 ====================
 
-// 后端 WebSocket 统一帧结构：{ type, content }
-export interface WebSocketFrame {
-  type: string // 帧类型，对齐 ImWebSocketMessageType
-  content: string // 帧内容（JSON 字符串）
+// 群实体（前端内部结构）
+export interface Group {
+  // ========== 后端字段（对齐 ImGroupRespVO） ==========
+  id: number // 群编号
+  name: string // 群名称
+  avatar?: string // 群头像
+  notice?: string // 群公告
+  ownerUserId?: number // 群主用户编号
+
+  // ========== 前端扩展字段 ==========
+  muted?: boolean // 是否免打扰（来自当前用户的 ImGroupMemberRespVO.muted）
+  members?: GroupMember[] // 群成员缓存（按需懒加载）
+  memberCount?: number // 成员总数
 }
 
-// 私聊消息 DTO（对齐后端 ImPrivateMessageDTO）
-export interface ImPrivateMessageDTO {
-  id: number // 消息编号
-  clientMessageId: string // 客户端消息编号
-  senderId: number // 发送人编号
-  receiverId: number // 接收人编号
-  type: number // 消息类型
-  content: string // 消息内容
-  status: number // 消息状态
-  sendTime: string // 发送时间
-}
-
-// 群聊消息 DTO（对齐后端 ImGroupMessageDTO）
-export interface ImGroupMessageDTO {
-  id: number // 消息编号
-  clientMessageId: string // 客户端消息编号
-  senderId: number // 发送人编号
+// 群成员实体（前端内部结构）
+export interface GroupMember {
+  // ========== 后端字段（对齐 ImGroupMemberRespVO） ==========
+  id?: number // 群成员关系记录编号
   groupId: number // 群编号
-  type: number // 消息类型
-  content: string // 消息内容
-  status: number // 消息状态
-  sendTime: string // 发送时间
-  atUserIds?: number[] // 群 @ 目标用户列表
-  receiverUserIds?: number[] // 群定向接收用户列表
-  readCount?: number // 群回执已读人数（type = RECEIPT 时使用）
-  receiptStatus?: number // 群回执状态（type = RECEIPT 时使用）
+  userId: number // 用户编号
+  avatar?: string // 头像
+  nickname: string // 用户昵称
+  displayUserName?: string // 组内显示名（不与 nickname 合并，由消费方按需取舍）
+  displayGroupName?: string // 群显示备注（当前用户对该群的自定义名）
+  status?: number // 在群 / 退群状态，对齐 CommonStatusEnum
+
+  // ========== 前端扩展字段 ==========
+  isOwner?: boolean // 是否群主（前端从 Group.ownerUserId 计算）
+}
+
+// ==================== 好友 ====================
+
+// 好友实体（前端内部结构）
+export interface Friend {
+  // ========== 后端字段（对齐 ImFriendRespVO） ==========
+  id?: number // 好友关系记录编号（本地乐观新增时可能暂缺）
+  friendUserId: number // 好友用户编号（与 Conversation.targetId 对齐）
+  nickname: string // 好友昵称
+  avatar?: string // 好友头像
+  muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
+  status?: number // 好友状态，对齐 CommonStatusEnum（DISABLE = 已删除/墓碑）
+  addTime?: string // 添加好友时间
+  deleteTime?: string // 删除好友时间
 }

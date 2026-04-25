@@ -41,7 +41,7 @@ export const useConversationStore = defineStore('imConversationStore', {
      * 1. 置顶优先（top=true 的在前）
      * 2. 同级别按 lastSendTime 降序
      */
-    sortedConversations(state): Conversation[] {
+    getSortedConversations(state): Conversation[] {
       return [...state.conversations]
         .filter((c) => !c.deleted)
         .sort((a, b) => {
@@ -54,15 +54,21 @@ export const useConversationStore = defineStore('imConversationStore', {
         })
     },
     /** 当前会话的消息列表 */
-    activeMessages(state): Message[] {
+    getActiveMessages(state): Message[] {
       return state.activeConversation?.messages || []
     },
     /** 未读总数（免打扰会话不计入）—— 用于 ToolBar 红点 */
-    totalUnread(state): number {
+    getTotalUnread(state): number {
       return state.conversations
         .filter((c) => !c.deleted && !c.muted)
         .reduce((sum, c) => sum + (c.unreadCount || 0), 0)
-    }
+    },
+    /** 查找会话：按 (type, targetId) 组合主键 */
+    getConversation:
+      (state) =>
+      (type: number, targetId: number): Conversation | undefined => {
+        return state.conversations.find((c) => c.type === type && c.targetId === targetId)
+      }
   },
 
   actions: {
@@ -122,11 +128,6 @@ export const useConversationStore = defineStore('imConversationStore', {
 
     // ==================== 会话查找 / 打开 ====================
 
-    /** 查找会话：按 (type, targetId) 组合主键 */
-    findConversation(type: number, targetId: number): Conversation | undefined {
-      return this.conversations.find((c) => c.type === type && c.targetId === targetId)
-    },
-
     /**
      * 打开或创建一个会话，并设为激活
      *
@@ -137,25 +138,25 @@ export const useConversationStore = defineStore('imConversationStore', {
     openConversation(
       targetId: number,
       type: number,
-      showName: string,
-      showImage: string,
+      name: string,
+      avatar: string,
       options?: { muted?: boolean }
     ): Conversation {
       // 按 (type, targetId) 查找已有会话，不存在则新建并插到列表头部
-      let conversation = this.findConversation(type, targetId)
+      let conversation = this.getConversation(type, targetId)
       if (!conversation) {
-        conversation = this.createEmptyConversation(type, targetId, showName, showImage)
+        conversation = this.createEmptyConversation(type, targetId, name, avatar)
         if (options?.muted !== undefined) {
           conversation.muted = options.muted
         }
         this.conversations.unshift(conversation)
       } else {
-        // 已存在会话：用最新元数据刷新 showName / showImage / muted
-        if (showName) {
-          conversation.showName = showName
+        // 已存在会话：用最新元数据刷新 name / avatar / muted
+        if (name) {
+          conversation.name = name
         }
-        if (showImage) {
-          conversation.showImage = showImage
+        if (avatar) {
+          conversation.avatar = avatar
         }
         if (options?.muted !== undefined) {
           conversation.muted = options.muted
@@ -177,12 +178,12 @@ export const useConversationStore = defineStore('imConversationStore', {
     },
 
     /** 创建空会话（抽取公共逻辑，供 insertMessage / openConversation 复用） */
-    createEmptyConversation(type: number, targetId: number, showName: string, showImage: string): Conversation {
+    createEmptyConversation(type: number, targetId: number, name: string, avatar: string): Conversation {
       return {
         targetId,
         type,
-        showName,
-        showImage,
+        name,
+        avatar,
         lastContent: '',
         lastSendTime: 0,
         unreadCount: 0,
@@ -201,7 +202,7 @@ export const useConversationStore = defineStore('imConversationStore', {
 
     /** 将某个会话置顶态切换 */
     setTop(type: number, targetId: number, top: boolean) {
-      const conversation = this.findConversation(type, targetId)
+      const conversation = this.getConversation(type, targetId)
       if (!conversation) {
         return
       }
@@ -211,7 +212,7 @@ export const useConversationStore = defineStore('imConversationStore', {
 
     /** 设置会话免打扰（本地状态；后端同步由 friendStore / groupStore + /muted API 负责） */
     setMuted(type: number, targetId: number, muted: boolean) {
-      const conversation = this.findConversation(type, targetId)
+      const conversation = this.getConversation(type, targetId)
       if (!conversation) {
         return
       }
@@ -221,7 +222,7 @@ export const useConversationStore = defineStore('imConversationStore', {
 
     /** 删除会话（软删：标记 deleted=true，持久化时过滤）*/
     removeConversation(type: number, targetId: number) {
-      const conversation = this.findConversation(type, targetId)
+      const conversation = this.getConversation(type, targetId)
       if (!conversation) {
         return
       }
@@ -252,17 +253,17 @@ export const useConversationStore = defineStore('imConversationStore', {
      * 4. 收尾：更新游标 + 持久化
      */
     insertMessage(
-      conversationInfo: { type: number; targetId: number; showName: string; showImage: string },
+      conversationInfo: { type: number; targetId: number; name: string; avatar: string },
       messageInfo: Message
     ) {
       // 1.1 查找或自动创建会话
-      let conversation = this.findConversation(conversationInfo.type, conversationInfo.targetId)
+      let conversation = this.getConversation(conversationInfo.type, conversationInfo.targetId)
       if (!conversation) {
         conversation = this.createEmptyConversation(
           conversationInfo.type,
           conversationInfo.targetId,
-          conversationInfo.showName,
-          conversationInfo.showImage
+          conversationInfo.name,
+          conversationInfo.avatar
         )
         this.conversations.unshift(conversation)
       }
@@ -396,7 +397,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       clientMessageId: string,
       updates: Partial<Message>
     ) {
-      const conversation = this.findConversation(conversationType, targetId)
+      const conversation = this.getConversation(conversationType, targetId)
       if (!conversation) {
         return
       }
@@ -422,7 +423,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       senderNickName: string,
       selfSend: boolean
     ) {
-      const conversation = this.findConversation(conversationType, targetId)
+      const conversation = this.getConversation(conversationType, targetId)
       if (!conversation) {
         return
       }
@@ -453,7 +454,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       readCount?: number
       receiptStatus?: number
     }) {
-      const conversation = this.findConversation(options.conversationType, options.targetId)
+      const conversation = this.getConversation(options.conversationType, options.targetId)
       if (!conversation) {
         return
       }
@@ -486,7 +487,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       targetId: number,
       key: { id?: number; clientMessageId?: string }
     ) {
-      const conversation = this.findConversation(conversationType, targetId)
+      const conversation = this.getConversation(conversationType, targetId)
       if (!conversation) {
         return
       }
@@ -551,43 +552,29 @@ export const useConversationStore = defineStore('imConversationStore', {
       this.saveToStorage()
     },
 
-    /** 根据 friendStore 最新的好友信息同步对应私聊会话的展示名 / 头像 / 免打扰 */
-    updateConversationFromFriend(friendId: number, info: { nickName?: string; showImage?: string; muted?: boolean }) {
-      const conversation = this.findConversation(ImConversationType.PRIVATE, friendId)
+    /**
+     * 同步会话的展示元数据（name / avatar / muted）
+     *
+     * 调用方负责把好友 / 群的信息整理成 Conversation 视角的字段：
+     * - 私聊：name = friend.nickname；avatar = friend.avatar
+     * - 群聊：name = group.name（或叠加 displayGroupName）；avatar = group.avatar
+     */
+    updateConversation(
+      type: number,
+      targetId: number,
+      info: { name?: string; avatar?: string; muted?: boolean }
+    ) {
+      const conversation = this.getConversation(type, targetId)
       if (!conversation) {
         return
       }
       let changed = false
-      if (info.nickName && conversation.showName !== info.nickName) {
-        conversation.showName = info.nickName
+      if (info.name && conversation.name !== info.name) {
+        conversation.name = info.name
         changed = true
       }
-      if (info.showImage !== undefined && conversation.showImage !== info.showImage) {
-        conversation.showImage = info.showImage || ''
-        changed = true
-      }
-      if (info.muted !== undefined && conversation.muted !== info.muted) {
-        conversation.muted = info.muted
-        changed = true
-      }
-      if (changed) {
-        this.saveToStorage()
-      }
-    },
-
-    /** 根据 groupStore 最新的群信息同步对应群聊会话的展示名 / 头像 / 免打扰 */
-    updateConversationFromGroup(groupId: number, info: { name?: string; showImage?: string; muted?: boolean }) {
-      const conversation = this.findConversation(ImConversationType.GROUP, groupId)
-      if (!conversation) {
-        return
-      }
-      let changed = false
-      if (info.name && conversation.showName !== info.name) {
-        conversation.showName = info.name
-        changed = true
-      }
-      if (info.showImage !== undefined && conversation.showImage !== info.showImage) {
-        conversation.showImage = info.showImage || ''
+      if (info.avatar !== undefined && conversation.avatar !== info.avatar) {
+        conversation.avatar = info.avatar || ''
         changed = true
       }
       if (info.muted !== undefined && conversation.muted !== info.muted) {
