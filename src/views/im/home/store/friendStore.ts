@@ -52,7 +52,7 @@ export const useFriendStore = defineStore('imFriendStore', {
         return
       }
       const list = await apiGetMyFriendList()
-      this.friends = (list || []).map(toFriend)
+      this.friends = (list || []).map(convertFriend)
       this.loaded = true
       // 同步 conversationStore 私聊会话的展示名 / 头像 / 免打扰
       const conversationStore = useConversationStore()
@@ -72,7 +72,7 @@ export const useFriendStore = defineStore('imFriendStore', {
         if (!data) {
           return
         }
-        this.upsertFriend(toFriend(data))
+        this.upsertFriend(convertFriend(data))
       } catch (e) {
         console.warn('[IM friendStore] loadFriendInfo 失败', e)
       }
@@ -154,7 +154,7 @@ export const useFriendStore = defineStore('imFriendStore', {
   }
 })
 
-function toFriend(vo: ImFriendRespVO): Friend {
+function convertFriend(vo: ImFriendRespVO): Friend {
   return {
     id: vo.id,
     friendUserId: vo.friendUserId,

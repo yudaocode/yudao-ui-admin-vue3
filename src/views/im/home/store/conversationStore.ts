@@ -13,6 +13,7 @@ import {
   buildRecallTip,
   generateClientMessageId,
   parseMessage,
+  parseRecallMessageId,
   type TextMessage
 } from '../../utils/message'
 import type { Conversation, ConversationStoreMeta, Message } from '../types'
@@ -475,17 +476,18 @@ export const useConversationStore = defineStore('imConversationStore', {
       this.saveConversations(conversation)
     },
 
-    /**
-     * 撤回消息：将原消息 type 改为 RECALL，并刷新会话摘要
-     * 对应后端 RECALL 事件：按原 messageId 更新
-     */
+    /** 撤回消息：解析撤回信号 content（`{"messageId": xxx}`），找到原消息翻成 RECALL 态 + 刷新会话摘要 */
     recallMessage(
       conversationType: number,
       targetId: number,
-      messageId: number,
+      recallSignalContent: string,
       senderNickName: string,
       selfSend: boolean
     ) {
+      const messageId = parseRecallMessageId(recallSignalContent)
+      if (messageId <= 0) {
+        return
+      }
       const conversation = this.getConversation(conversationType, targetId)
       if (!conversation) {
         return

@@ -44,7 +44,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
       // 拉取当前登录用户加入的所有群（不带成员；成员按需再走 loadGroupMembers）
       const list = await apiGetMyGroupList()
-      this.groups = (list || []).map(toGroup)
+      this.groups = (list || []).map(convertGroup)
       this.loaded = true
       const conversationStore = useConversationStore()
       for (const g of this.groups) {
@@ -63,7 +63,7 @@ export const useGroupStore = defineStore('imGroupStore', {
         if (!data) {
           return
         }
-        this.upsertGroup(toGroup(data))
+        this.upsertGroup(convertGroup(data))
       } catch (e) {
         console.warn('[IM groupStore] loadGroupInfo 失败', e)
       }
@@ -79,7 +79,7 @@ export const useGroupStore = defineStore('imGroupStore', {
 
       // 拉取该群所有成员（聚合自 AdminUser，含 nickname / avatar / displayUserName）
       const list = await apiGetGroupMemberList(groupId)
-      const members = (list || []).map((member) => toGroupMember(member, groupId))
+      const members = (list || []).map((member) => convertGroupMember(member, groupId))
       // 成员列表可能在群列表之前触发，此时需要占位一个 group
       if (!group) {
         this.upsertGroup({
@@ -138,7 +138,7 @@ export const useGroupStore = defineStore('imGroupStore', {
   }
 })
 
-function toGroup(vo: ImGroupRespVO): Group {
+function convertGroup(vo: ImGroupRespVO): Group {
   return {
     id: vo.id,
     name: vo.name,
@@ -148,7 +148,7 @@ function toGroup(vo: ImGroupRespVO): Group {
   }
 }
 
-function toGroupMember(member: ImGroupMemberRespVO, groupId: number): GroupMember {
+function convertGroupMember(member: ImGroupMemberRespVO, groupId: number): GroupMember {
   return {
     id: member.id,
     userId: member.userId,

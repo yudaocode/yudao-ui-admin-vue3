@@ -4,7 +4,7 @@ import { getRefreshToken } from '@/utils/auth'
 import { useUserStore } from '@/store/modules/user'
 
 import { ImWebSocketMessageType, ImMessageType, ImConversationType } from '../../utils/constants'
-import { parseRecallMessageId, playAudioTip } from '../../utils/message'
+import { playAudioTip } from '../../utils/message'
 import { useConversationStore } from './conversationStore'
 import { useFriendStore } from './friendStore'
 import { useGroupStore } from './groupStore'
@@ -16,6 +16,44 @@ import type {
   ImGroupMessageDTO,
   Message
 } from '../types'
+
+/** WebSocket 私聊 DTO -> 前端 Message：sendTime 转毫秒；senderNickName 由调用方按好友信息补 */
+const convertPrivateMessage = (
+  websocketMessage: ImPrivateMessageDTO,
+  currentUserId: number,
+  senderNickName: string
+): Message => ({
+  id: websocketMessage.id,
+  clientMessageId: websocketMessage.clientMessageId,
+  type: websocketMessage.type,
+  content: websocketMessage.content,
+  status: websocketMessage.status,
+  sendTime: new Date(websocketMessage.sendTime).getTime(),
+  senderId: websocketMessage.senderId,
+  senderNickName,
+  targetId: websocketMessage.receiverId,
+  selfSend: websocketMessage.senderId === currentUserId
+})
+
+/** WebSocket 群聊 DTO -> 前端 Message：群消息额外带 atUserIds / receiverUserIds，给 @ 标记和回执用 */
+const convertGroupMessage = (
+  websocketMessage: ImGroupMessageDTO,
+  currentUserId: number,
+  senderNickName: string
+): Message => ({
+  id: websocketMessage.id,
+  clientMessageId: websocketMessage.clientMessageId,
+  type: websocketMessage.type,
+  content: websocketMessage.content,
+  status: websocketMessage.status,
+  sendTime: new Date(websocketMessage.sendTime).getTime(),
+  senderId: websocketMessage.senderId,
+  senderNickName,
+  targetId: websocketMessage.groupId,
+  selfSend: websocketMessage.senderId === currentUserId,
+  atUserIds: websocketMessage.atUserIds || [],
+  receiverUserIds: websocketMessage.receiverUserIds || []
+})
 
 /**
  * IM WebSocket Store
@@ -38,8 +76,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     reconnectTimer: null as ReturnType<typeof setTimeout> | null,
     heartbeatTimer: null as ReturnType<typeof setInterval> | null,
     messageBuffer: [] as Array<
-      | { kind: 'private'; payload: ImPrivateMessageDTO }
-      | { kind: 'group'; payload: ImGroupMessageDTO }
+      | { conversationType: typeof ImConversationType.PRIVATE; payload: ImPrivateMessageDTO }
+      | { conversationType: typeof ImConversationType.GROUP; payload: ImGroupMessageDTO }
     > // 初始化加载期内，先把普通消息丢进缓冲区，pull 完成后再一次性回放
   }),
 
@@ -228,7 +266,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const conversationStore = useConversationStore()
       // 1. 离线加载期间先缓冲，等 pull 完成后再统一回放，避免重复或顺序错乱
       if (conversationStore.loading) {
-        this.messageBuffer.push({ kind: 'private', payload: websocketMessage })
+        this.messageBuffer.push({
+          conversationType: ImConversationType.PRIVATE,
+          payload: websocketMessage
+        })
         return
       }
 
@@ -247,32 +288,18 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`（对齐 ImMessageTypeEnum.RECALL → RecallMessage）
       // 这里拦截下来改走 recallMessage（把原消息翻转为 RECALL 态），不让它作为新消息进列表
       if (websocketMessage.type === ImMessageType.RECALL) {
-        const recallMessageId = parseRecallMessageId(websocketMessage.content)
-        if (recallMessageId) {
-          conversationStore.recallMessage(
-            ImConversationType.PRIVATE,
-            peerId,
-            recallMessageId,
-            friend?.nickname || '',
-            selfSend
-          )
-          return
-        }
+        conversationStore.recallMessage(
+          ImConversationType.PRIVATE,
+          peerId,
+          websocketMessage.content,
+          friend?.nickname || '',
+          selfSend
+        )
+        return
       }
 
-      // 4. 后端 DTO → 前端 Message：sendTime 转毫秒；selfSend / senderNickName 是前端补的
-      const message: Message = {
-        id: websocketMessage.id,
-        clientMessageId: websocketMessage.clientMessageId,
-        type: websocketMessage.type,
-        content: websocketMessage.content,
-        status: websocketMessage.status,
-        sendTime: new Date(websocketMessage.sendTime).getTime(),
-        senderId: websocketMessage.senderId,
-        senderNickName: friend?.nickname || '',
-        targetId: websocketMessage.receiverId,
-        selfSend
-      }
+      // 4. 后端 DTO → 前端 Message
+      const message = convertPrivateMessage(websocketMessage, currentUserId, friend?.nickname || '')
       conversationStore.insertMessage(
         {
           type: ImConversationType.PRIVATE,
@@ -339,7 +366,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const conversationStore = useConversationStore()
       // 1. 离线加载期缓冲（与私聊对称）
       if (conversationStore.loading) {
-        this.messageBuffer.push({ kind: 'group', payload: websocketMessage })
+        this.messageBuffer.push({
+          conversationType: ImConversationType.GROUP,
+          payload: websocketMessage
+        })
         return
       }
       const userStore = useUserStore()
@@ -359,34 +389,18 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`
       // 这里拦截下来改走 recallMessage（把原消息翻转为 RECALL 态）
       if (websocketMessage.type === ImMessageType.RECALL) {
-        const recallMessageId = parseRecallMessageId(websocketMessage.content)
-        if (recallMessageId) {
-          conversationStore.recallMessage(
-            ImConversationType.GROUP,
-            websocketMessage.groupId,
-            recallMessageId,
-            senderNickName,
-            selfSend
-          )
-          return
-        }
+        conversationStore.recallMessage(
+          ImConversationType.GROUP,
+          websocketMessage.groupId,
+          websocketMessage.content,
+          senderNickName,
+          selfSend
+        )
+        return
       }
 
-      // 4. 后端 DTO → 前端 Message：群消息额外带 atUserIds / receiverUserIds，给 @ 标记和回执用
-      const message: Message = {
-        id: websocketMessage.id,
-        clientMessageId: websocketMessage.clientMessageId,
-        type: websocketMessage.type,
-        content: websocketMessage.content,
-        status: websocketMessage.status,
-        sendTime: new Date(websocketMessage.sendTime).getTime(),
-        senderId: websocketMessage.senderId,
-        senderNickName,
-        targetId: websocketMessage.groupId,
-        selfSend,
-        atUserIds: websocketMessage.atUserIds || [],
-        receiverUserIds: websocketMessage.receiverUserIds || []
-      }
+      // 4. 后端 DTO → 前端 Message
+      const message = convertGroupMessage(websocketMessage, currentUserId, senderNickName)
       conversationStore.insertMessage(
         {
           type: ImConversationType.GROUP,
