@@ -133,6 +133,18 @@ export interface Friend {
   avatar?: string // 好友头像
   muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
   status?: number // 好友状态，对齐 CommonStatusEnum（DISABLE = 已删除/墓碑）
-  addTime?: string // 添加好友时间
-  deleteTime?: string // 删除好友时间
+  addTime?: number // 添加好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 toFriend 转换）
+  deleteTime?: number // 删除好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 toFriend 转换）
+}
+
+// ==================== 用户名片 ====================
+
+// 用户精简信息（对齐后端 UserSimpleRespVO，名片 / 头像 hover 等场景共用）
+export interface UserInfo {
+  id: number
+  nickname?: string
+  avatar?: string
+  sex?: number
+  deptId?: number
+  deptName?: string
 }

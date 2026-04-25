@@ -101,8 +101,6 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 本地合并 / 新增某个好友（WebSocket 事件 & 手动刷新都用） */
     upsertFriend(friend: Friend) {
-      // TODO DONE @AI：index
-      // TODO DONE @AI：注释
       // 按 friendUserId 查已有记录下标：>=0 命中则覆盖合并，<0 则追加
       const index = this.friends.findIndex((f) => f.friendUserId === friend.friendUserId)
       if (index >= 0) {
@@ -128,14 +126,12 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 本地标记删除（WebSocket FRIEND_DEL 事件触发；同时级联清私聊会话） */
     removeFriend(friendUserId: number) {
-      // TODO DONE @AI：变量叫 friend
-      // 标记墓碑：保留记录但置为 DISABLE，避免后续误判"陌生人"
+      // 软删：保留记录但置为 DISABLE，避免后续误判"陌生人"
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.status = CommonStatusEnum.DISABLE
-        friend.deleteTime = new Date().toISOString()
+        friend.deleteTime = Date.now()
       }
-      // TODO DONE @AI：注释
       // 级联清理：把对应的私聊会话也软删，避免会话列表里留着已删好友
       const conversationStore = useConversationStore()
       conversationStore.removePrivateConversation(friendUserId)
@@ -144,7 +140,6 @@ export const useFriendStore = defineStore('imFriendStore', {
     /** 切换免打扰 */
     async setMuted(friendUserId: number, muted: boolean) {
       await apiUpdateFriend({ friendUserId, muted })
-      // TODO DONE @AI：变量叫 friend
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.muted = muted
@@ -167,8 +162,8 @@ function toFriend(vo: ImFriendRespVO): Friend {
     avatar: vo.avatar,
     muted: !!vo.muted,
     status: vo.status,
-    addTime: vo.addTime,
-    deleteTime: vo.deleteTime
+    addTime: vo.addTime ? new Date(vo.addTime).getTime() : undefined,
+    deleteTime: vo.deleteTime ? new Date(vo.deleteTime).getTime() : undefined
   }
 }
 

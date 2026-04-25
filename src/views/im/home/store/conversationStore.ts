@@ -13,6 +13,9 @@ import { parseMessage, buildRecallTip, type TextMessage } from '../../utils/mess
 import type { Conversation, Message, ConversationsData } from '../types'
 
 const AT_ALL_FLAG = -1 // @全体成员 的特殊 userId 标识：atUserIds 中包含 -1 表示 @all
+// 单会话持久化消息数上限：localStorage 整体配额一般 5~10MB，全量序列化容易撑爆。
+// 内存里保留完整历史，落盘只截最近 N 条；用户重启后历史不够再向后端拉。
+const MAX_PERSISTED_MESSAGES_PER_CONVERSATION = 100
 
 /** 获取当前登录用户编号 */
 function getCurrentUserId(): number {
@@ -113,11 +116,17 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
 
-      // TODO @AI：这个方案，可能存不下太多数据，需要调整！
+      // TODO @AI：可能要调整存储方案；
+      // 落盘前对每个会话的 messages 做尾部截断，避免长会话把 localStorage 撑爆
       const storageData: ConversationsData = {
         privateMessageMaxId: this.privateMessageMaxId,
         groupMessageMaxId: this.groupMessageMaxId,
-        conversations: this.conversations.filter((c) => !c.deleted)
+        conversations: this.conversations
+          .filter((c) => !c.deleted)
+          .map((c) => ({
+            ...c,
+            messages: c.messages.slice(-MAX_PERSISTED_MESSAGES_PER_CONVERSATION)
+          }))
       }
       try {
         localStorage.setItem(currentConversationsKey(), JSON.stringify(storageData))
