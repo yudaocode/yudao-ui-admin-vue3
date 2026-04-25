@@ -8,14 +8,16 @@ import {
   ImMessageStatus,
   TIME_TIP_GAP_MS
 } from '../../utils/constants'
-import { StorageKeys } from '../../utils/storage'
-import { parseMessage, buildRecallTip, type TextMessage } from '../../utils/message'
-import type { Conversation, Message, ConversationsData } from '../types'
+import { imStorage, StorageKeys } from '../../utils/storage'
+import {
+  buildRecallTip,
+  generateClientMessageId,
+  parseMessage,
+  type TextMessage
+} from '../../utils/message'
+import type { Conversation, ConversationStoreMeta, Message } from '../types'
 
 const AT_ALL_FLAG = -1 // @全体成员 的特殊 userId 标识：atUserIds 中包含 -1 表示 @all
-// 单会话持久化消息数上限：localStorage 整体配额一般 5~10MB，全量序列化容易撑爆。
-// 内存里保留完整历史，落盘只截最近 N 条；用户重启后历史不够再向后端拉。
-const MAX_PERSISTED_MESSAGES_PER_CONVERSATION = 100
 
 /** 获取当前登录用户编号 */
 function getCurrentUserId(): number {
@@ -24,18 +26,13 @@ function getCurrentUserId(): number {
   return Number(user?.id) || 0
 }
 
-/** 当前登录用户的会话列表 localStorage key */
-function currentConversationsKey(): string {
-  return StorageKeys.conversations(getCurrentUserId())
-}
-
 export const useConversationStore = defineStore('imConversationStore', {
   state: () => ({
     conversations: [] as Conversation[], // 全量会话列表（私聊 + 群聊）
     activeConversation: null as Conversation | null, // 当前激活的会话
     privateMessageMaxId: 0, // 私聊最大消息 id，作为 pull 的游标
     groupMessageMaxId: 0, // 群聊最大消息 id，作为 pull 的游标
-    loading: false // 是否正在批量加载（例如离线消息拉取期间），避免频繁写 localStorage
+    loading: false // 是否正在批量加载（例如离线消息拉取期间），避免频繁写存储
   }),
 
   getters: {
@@ -77,62 +74,116 @@ export const useConversationStore = defineStore('imConversationStore', {
   actions: {
     // ==================== 本地存储 ====================
 
-    /** 从 localStorage 恢复会话数据 */
-    loadConversations() {
-      const item = localStorage.getItem(currentConversationsKey())
-      if (!item) {
+    /**
+     * 从 IndexedDB 恢复会话数据
+     *
+     * 1. 读 meta（游标 + 会话索引），无 meta 直接返回
+     * 2. 并发读取每个会话的消息 key，组装回 Conversation
+     * 3. 修正重启前遗留的"发送中"状态为失败
+     */
+    async loadConversations() {
+      const userId = getCurrentUserId()
+      if (!userId) {
         return
       }
-
       try {
-        // 反序列化缓存数据，恢复消息游标（privateMessageMaxId / groupMessageMaxId）
-        const storageData = JSON.parse(item) as ConversationsData
-        this.privateMessageMaxId = Number(storageData.privateMessageMaxId) || 0
-        this.groupMessageMaxId = Number(storageData.groupMessageMaxId) || 0
-
-        // 回放会话列表，同时修正重启前遗留的"发送中"状态
-        if (storageData.conversations && storageData.conversations.length > 0) {
-          for (const conversation of storageData.conversations) {
-            if (conversation.messages) {
-              conversation.messages.forEach((message) => {
-                // 发送中状态的消息标记为失败：重启后不可能仍处在发送中
-                if (message.status === ImMessageStatus.SENDING) {
-                  message.status = ImMessageStatus.FAILED
-                }
-              })
-            }
-          }
-          this.conversations = storageData.conversations
+        const meta = await imStorage.getItem<ConversationStoreMeta>(
+          StorageKeys.conversationMeta(userId)
+        )
+        if (!meta) {
+          return
         }
+        this.privateMessageMaxId = Number(meta.privateMessageMaxId) || 0
+        this.groupMessageMaxId = Number(meta.groupMessageMaxId) || 0
+        if (!meta.conversations || meta.conversations.length === 0) {
+          return
+        }
+
+        // 并发拉取每个会话的消息，组装回完整 Conversation；
+        // 单会话失败时退化为空消息列表 + 打印日志，避免拖垮整体加载
+        const tasks = meta.conversations.map(async (conversation): Promise<Conversation> => {
+          try {
+            const messages =
+              (await imStorage.getItem<Message[]>(
+                StorageKeys.conversationMessage(userId, conversation.type, conversation.targetId)
+              )) || []
+            // 发送中状态的消息标记为失败：重启后不可能仍处在发送中
+            messages.forEach((message) => {
+              if (message.status === ImMessageStatus.SENDING) {
+                message.status = ImMessageStatus.FAILED
+              }
+            })
+            return { ...conversation, messages }
+          } catch (e) {
+            console.warn(
+              '[IM] 单会话消息加载失败',
+              { type: conversation.type, targetId: conversation.targetId },
+              e
+            )
+            return { ...conversation, messages: [] }
+          }
+        })
+        this.conversations = await Promise.all(tasks)
       } catch (e) {
         console.error('[IM] 本地消息缓存读取失败', e)
       }
     },
 
-    /** 持久化到 localStorage */
-    saveToStorage() {
-      // loading 期间跳过，避免大量写入阻塞主线程
+    /**
+     * 持久化到 IndexedDB（fire-and-forget；调用方无需 await）
+     *
+     * - 不传 target：仅写 meta（适用于 top / muted / unread 等元数据变更）
+     * - 传单个 conversation：写 meta + 该会话的消息（单条消息变更走这里）
+     * - 传数组：写 meta + 数组里所有未删除会话的消息（loading 完成后兜底 flush 用）
+     *
+     * 按会话分桶后，单条消息变更只重写当前会话的消息 key，避免老方案的全量序列化。
+     * 写入失败已在内部 catch 兜底（仅打印日志），不影响 UI 流程，所以接口签名设为 void。
+     */
+    saveConversations(target?: Conversation | Conversation[] | null): void {
+      // loading 期间跳过，避免离线消息批量到达时的密集写入
       if (this.loading) {
         return
       }
-
-      // TODO @AI：可能要调整存储方案；
-      // 落盘前对每个会话的 messages 做尾部截断，避免长会话把 localStorage 撑爆
-      const storageData: ConversationsData = {
+      const userId = getCurrentUserId()
+      if (!userId) {
+        return
+      }
+      // 1. meta：游标 + 会话索引（剔除 messages，过滤软删除）
+      const meta: ConversationStoreMeta = {
         privateMessageMaxId: this.privateMessageMaxId,
         groupMessageMaxId: this.groupMessageMaxId,
         conversations: this.conversations
           .filter((c) => !c.deleted)
-          .map((c) => ({
-            ...c,
-            messages: c.messages.slice(-MAX_PERSISTED_MESSAGES_PER_CONVERSATION)
-          }))
+          .map(({ messages, ...rest }) => rest)
       }
-      try {
-        localStorage.setItem(currentConversationsKey(), JSON.stringify(storageData))
-      } catch (e) {
-        console.error('[IM] 本地消息缓存存储失败', e)
+      const tasks: Promise<unknown>[] = [
+        imStorage.setItem(StorageKeys.conversationMeta(userId), meta)
+      ]
+      // 2. 归一化 target 为待 flush 的会话列表，过滤掉已软删除的
+      const conversationsToFlush: Conversation[] = (
+        Array.isArray(target) ? target : target ? [target] : []
+      ).filter((c) => !c.deleted)
+      for (const conversation of conversationsToFlush) {
+        tasks.push(
+          imStorage.setItem(
+            StorageKeys.conversationMessage(userId, conversation.type, conversation.targetId),
+            conversation.messages
+          )
+        )
       }
+      // 3. fire-and-forget：失败仅打日志，不影响 UI
+      void Promise.all(tasks).catch((e) => console.error('[IM] 本地消息缓存存储失败', e))
+    },
+
+    /** 物理删除某个会话的消息 key（软删除会话时释放空间；fire-and-forget） */
+    removeConversationMessages(type: number, targetId: number): void {
+      const userId = getCurrentUserId()
+      if (!userId) {
+        return
+      }
+      void imStorage
+        .removeItem(StorageKeys.conversationMessage(userId, type, targetId))
+        .catch((e) => console.error('[IM] 本地消息缓存删除失败', e))
     },
 
     // ==================== 会话查找 / 打开 ====================
@@ -182,7 +233,8 @@ export const useConversationStore = defineStore('imConversationStore', {
         conversation.unreadCount = 0
         conversation.atMe = false
         conversation.atAll = false
-        this.saveToStorage()
+        // 仅元数据变更（unreadCount / atMe / atAll），不动 messages
+        this.saveConversations()
       }
     },
 
@@ -216,7 +268,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
       conversation.top = top
-      this.saveToStorage()
+      this.saveConversations()
     },
 
     /** 设置会话免打扰（本地状态；后端同步由 friendStore / groupStore + /muted API 负责） */
@@ -226,10 +278,10 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
       conversation.muted = muted
-      this.saveToStorage()
+      this.saveConversations()
     },
 
-    /** 删除会话（软删：标记 deleted=true，持久化时过滤）*/
+    /** 删除会话（软删：标记 deleted=true，持久化时过滤；同步物理删除消息 key 释放空间）*/
     removeConversation(type: number, targetId: number) {
       const conversation = this.getConversation(type, targetId)
       if (!conversation) {
@@ -239,7 +291,9 @@ export const useConversationStore = defineStore('imConversationStore', {
         this.activeConversation = null
       }
       conversation.deleted = true
-      this.saveToStorage()
+      // 软删后会话的消息文件不再有用，物理删除该 key
+      this.removeConversationMessages(type, targetId)
+      this.saveConversations()
     },
 
     removePrivateConversation(friendId: number) {
@@ -289,7 +343,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         conversation.messages[existingIndex] = { ...conversation.messages[existingIndex], ...messageInfo }
         conversation.lastSendTime = messageInfo.sendTime || conversation.lastSendTime
         this.updateMaxId(conversationInfo.type, messageInfo.id)
-        this.saveToStorage()
+        this.saveConversations(conversation)
         return
       }
 
@@ -336,7 +390,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (!conversation.lastTimeTip || conversation.lastTimeTip < sendTime - TIME_TIP_GAP_MS) {
         conversation.messages.push({
           id: 0,
-          clientMessageId: `tip-${sendTime}`,
+          clientMessageId: generateClientMessageId(),
           type: ImMessageType.TIP_TIME,
           content: '',
           status: ImMessageStatus.UNREAD,
@@ -369,8 +423,8 @@ export const useConversationStore = defineStore('imConversationStore', {
       // 4.1 更新游标
       this.updateMaxId(conversationInfo.type, messageInfo.id)
 
-      // 4.2 持久化到 localStorage
-      this.saveToStorage()
+      // 4.2 持久化：消息 + meta
+      this.saveConversations(conversation)
     },
 
     /** 根据消息类型计算会话列表最后一条摘要 */
@@ -400,7 +454,7 @@ export const useConversationStore = defineStore('imConversationStore', {
      * 乐观更新回填：本地先以 SENDING 状态插入临时消息（id=0 + clientMessageId），
      * 待服务端返回后再用此方法回填真实 id、sendTime、status 等字段。
      */
-    updateMessageState(
+    ackMessage(
       conversationType: number,
       targetId: number,
       clientMessageId: string,
@@ -418,14 +472,14 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (updates.id) {
         this.updateMaxId(conversationType, updates.id)
       }
-      this.saveToStorage()
+      this.saveConversations(conversation)
     },
 
     /**
      * 撤回消息：将原消息 type 改为 RECALL，并刷新会话摘要
      * 对应后端 RECALL 事件：按原 messageId 更新
      */
-    applyRecall(
+    recallMessage(
       conversationType: number,
       targetId: number,
       messageId: number,
@@ -449,7 +503,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (conversation.messages[conversation.messages.length - 1]?.id === messageId) {
         conversation.lastContent = buildRecallTip(senderNickName, selfSend)
       }
-      this.saveToStorage()
+      this.saveConversations(conversation)
     },
 
     /** 处理对方已读 / 群回执：更新发送方自己消息的 status / readCount / receiptStatus */
@@ -484,14 +538,14 @@ export const useConversationStore = defineStore('imConversationStore', {
           }
         }
       }
-      this.saveToStorage()
+      this.saveConversations(conversation)
     },
 
     /**
      * 从本地消息列表移除一条消息（右键"删除"；不同步后端）
      * 按 id 优先匹配；若 id 为 0（本地发送中），则按 clientMessageId 匹配
      */
-    removeLocalMessage(
+    removeMessage(
       conversationType: number,
       targetId: number,
       key: { id?: number; clientMessageId?: string }
@@ -517,7 +571,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         conversation.lastSendTime = last?.sendTime || conversation.lastSendTime
         conversation.senderNickName = last?.senderNickName || ''
       }
-      this.saveToStorage()
+      this.saveConversations(conversation)
     },
 
     /**
@@ -536,7 +590,7 @@ export const useConversationStore = defineStore('imConversationStore', {
           message.status = ImMessageStatus.READ
         }
       })
-      this.saveToStorage()
+      this.saveConversations(this.activeConversation)
     },
 
     /** 更新 privateMessageMaxId / groupMessageMaxId 游标 */
@@ -555,10 +609,15 @@ export const useConversationStore = defineStore('imConversationStore', {
       }
     },
 
-    /** 离线消息加载完后重排：按 lastSendTime 倒序并持久化 */
-    refreshConversations() {
+    /**
+     * 离线消息加载完后重排：按 lastSendTime 倒序，并把 loading 期间累积的内存变更全量 flush
+     *
+     * loading 期间 saveConversations 都会被早 return 跳过，这里把所有会话作为数组传入兜底，
+     * 否则离线拉取的消息只在内存里、未落盘，重启会丢。
+     */
+    sortConversations() {
       this.conversations.sort((a, b) => b.lastSendTime - a.lastSendTime)
-      this.saveToStorage()
+      this.saveConversations(this.conversations)
     },
 
     /**
@@ -591,7 +650,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         changed = true
       }
       if (changed) {
-        this.saveToStorage()
+        this.saveConversations()
       }
     }
   }

@@ -220,7 +220,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      * 流程：
      * 1. 离线加载期缓冲（避开与 pull 回填的竞态）
      * 2. 计算 selfSend / peerId 维度，拉好友信息回填展示字段
-     * 3. 撤回 TIP 短路：转走 applyRecall，不进消息列表
+     * 3. 撤回 TIP 短路：转走 recallMessage，不进消息列表
      * 4. 构造前端 Message，插入到对应私聊会话
      * 5. 当前会话激活时自动上报已读；否则非免打扰响提示音
      */
@@ -245,11 +245,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       }
 
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`（对齐 ImMessageTypeEnum.RECALL → RecallMessage）
-      // 这里拦截下来改走 applyRecall（把原消息翻转为 RECALL 态），不让它作为新消息进列表
+      // 这里拦截下来改走 recallMessage（把原消息翻转为 RECALL 态），不让它作为新消息进列表
       if (websocketMessage.type === ImMessageType.RECALL) {
         const recallMessageId = parseRecallMessageId(websocketMessage.content)
         if (recallMessageId) {
-          conversationStore.applyRecall(
+          conversationStore.recallMessage(
             ImConversationType.PRIVATE,
             peerId,
             recallMessageId,
@@ -312,7 +312,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (conversation) {
         conversation.unreadCount = 0
       }
-      conversationStore.saveToStorage()
+      conversationStore.saveConversations()
     },
 
     /** 私聊 RECEIPT 事件：对方读了我的消息，把和对方会话里自己发的消息标为已读 */
@@ -357,11 +357,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const senderNickName = senderMember?.displayUserName || senderMember?.nickname || ''
 
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`
-      // 这里拦截下来改走 applyRecall（把原消息翻转为 RECALL 态）
+      // 这里拦截下来改走 recallMessage（把原消息翻转为 RECALL 态）
       if (websocketMessage.type === ImMessageType.RECALL) {
         const recallMessageId = parseRecallMessageId(websocketMessage.content)
         if (recallMessageId) {
-          conversationStore.applyRecall(
+          conversationStore.recallMessage(
             ImConversationType.GROUP,
             websocketMessage.groupId,
             recallMessageId,
@@ -430,7 +430,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (conversation) {
         conversation.unreadCount = 0
       }
-      conversationStore.saveToStorage()
+      conversationStore.saveConversations()
     },
 
     /** 群聊 RECEIPT：更新某条群消息的 readCount / receiptStatus */

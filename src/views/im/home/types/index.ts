@@ -57,7 +57,6 @@ export interface Conversation {
   muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
   atMe?: boolean // 群聊：是否有人 @我
   atAll?: boolean // 群聊：是否有人 @全体成员
-  lastReadCount?: number // 群回执：当前会话最近一条需回执消息的已读人数
   lastTimeTip?: number // 最后一条"时间分隔线"的时间戳，判断是否需要插入下一条 TIP_TIME
 }
 
@@ -82,11 +81,20 @@ export interface Message {
   selfSend: boolean // 是否自己发送（前端按 senderId 计算）
 }
 
-// localStorage 存储结构：按用户 ID 分桶，保存所有会话元数据
-export interface ConversationsData {
+/**
+ * 会话索引项：基于 Conversation 派生，但剥离 messages 字段（消息按会话独立存到 messages key）
+ *
+ * Omit<T, K> 是 TS 内置工具类型：从类型 T 中剔除 K 指定的字段，得到剩余字段组成的新类型。
+ * 这里 `Omit<Conversation, 'messages'>` 等价于"Conversation 去掉 messages 字段后的版本"，
+ * 与"Conversation 派生但少一个 messages 字段"的语义一致，不需要再手写一份重复结构。
+ */
+export type ConversationMeta = Omit<Conversation, 'messages'>
+
+// 持久化的会话索引：游标 + 会话元数据列表，按用户 ID 分桶
+export interface ConversationStoreMeta {
   privateMessageMaxId: number // 私聊消息最大编号
   groupMessageMaxId: number // 群聊消息最大编号
-  conversations: Conversation[] // 会话列表
+  conversations: ConversationMeta[] // 会话索引（不含 messages）
 }
 
 // ==================== 群 / 群成员 ====================
