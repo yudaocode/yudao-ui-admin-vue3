@@ -544,9 +544,15 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     /** 主动断开（切换用户 / 退出登录时用）：关 socket + 停心跳 + 取消待重连 */
     disconnect() {
       if (this.socket) {
+        // close() 异步触发 onclose / onerror，回调里会无条件 reconnect；
+        // 主动关闭路径必须先解绑这两个 handler，否则 3 秒后会自动连回去
+        this.socket.onclose = null
+        this.socket.onerror = null
         this.socket.close()
         this.socket = null
       }
+      // onclose 已被解绑，不会再帮我们设 isConnected=false，这里手动复位
+      this.isConnected = false
       this.stopHeartbeat()
       if (this.reconnectTimer) {
         clearTimeout(this.reconnectTimer)
@@ -557,7 +563,9 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     /** 自动重连，3 秒后再试（onclose / onerror 都会进来，靠 reconnectTimer 自身防重） */
     reconnect() {
       this.stopHeartbeat()
-      if (this.reconnectTimer) clearTimeout(this.reconnectTimer)
+      if (this.reconnectTimer) {
+        clearTimeout(this.reconnectTimer)
+      }
       this.reconnectTimer = setTimeout(() => {
         console.log('[IM WS] reconnecting...')
         this.connect()
