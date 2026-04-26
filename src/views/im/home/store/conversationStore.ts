@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { toRaw } from 'vue'
 import { store } from '@/store'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 
@@ -168,10 +169,12 @@ export const useConversationStore = defineStore('imConversationStore', {
         Array.isArray(target) ? target : target ? [target] : []
       ).filter((c) => !c.deleted)
       for (const conversation of conversationsToFlush) {
+        // toRaw 拆掉 Vue reactive Proxy：IDB 的 structuredClone 不接受 Proxy，
+        // 不拆会抛 DataCloneError 静默落盘失败（只 meta 写得进去，messages 永远丢）
         tasks.push(
           imStorage.setItem(
             StorageKeys.conversationMessage(userId, conversation.type, conversation.targetId),
-            conversation.messages
+            toRaw(conversation.messages)
           )
         )
       }
