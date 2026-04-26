@@ -175,6 +175,12 @@ export const useMessagePuller = () => {
   /** 同一时刻只允许一次 pull：Index.vue 的手动调用与重连 watch 触发可能并发，共用同一个 promise 即可去重 */
   let pullPromise: Promise<void> | null = null
 
+  /**
+   * 首次 pull 是否已完成。仅在置 true 后，isConnected watch 才会触发 pull。
+   * 防止 socket onopen 比 friendStore/groupStore 预拉先到达时，watcher 抢跑导致群消息缺 senderNickName
+   */
+  let bootstrapped = false
+
   /** 执行一次全量增量拉取（重入安全：进行中再次调用复用同一个 promise） */
   const pullOnce = (): Promise<void> => {
     if (!currentUserId) {
@@ -192,22 +198,25 @@ export const useMessagePuller = () => {
             pullByType(ImConversationType.PRIVATE, conversationStore.privateMessageMaxId),
             pullByType(ImConversationType.GROUP, conversationStore.groupMessageMaxId)
           ])
-
-          // 回放 WebSocket 在 loading 期间收到的缓冲消息
-          const buffered = wsStore.flushBuffer()
-          for (const item of buffered) {
-            if (item.conversationType === ImConversationType.PRIVATE) {
-              wsStore.handlePrivateMessage(item.payload)
-            } else {
-              wsStore.handleGroupMessage(item.payload)
-            }
-          }
         } catch (e) {
           console.error('[IM] 拉取离线消息失败:', e)
         } finally {
+          // 关闭 buffer 模式必须早于 flushBuffer，否则 handler 看到 loading=true 会把消息又 push 回 buffer
           conversationStore.loading = false
-          conversationStore.sortConversations()
         }
+
+        // 回放 WebSocket 在 loading 期间收到的缓冲消息（此刻走正常 insertMessage 路径）
+        const buffered = wsStore.flushBuffer()
+        for (const item of buffered) {
+          if (item.conversationType === ImConversationType.PRIVATE) {
+            wsStore.handlePrivateMessage(item.payload)
+          } else {
+            wsStore.handleGroupMessage(item.payload)
+          }
+        }
+
+        // pull + replay 都完成后再排序，避免回放消息打乱顺序
+        conversationStore.sortConversations()
 
         // 重连 / 冷启动后补齐当前激活私聊会话的「对方已读位置」
         // 离线期间错过的 RECEIPT 推送会被这里补回；其他私聊会话等用户点开时由 Index.vue 的 watch 触发
@@ -229,6 +238,7 @@ export const useMessagePuller = () => {
       } finally {
         // 整个 IIFE 全部完成（含已读位置补齐）后才允许下一次 pullOnce 重入
         pullPromise = null
+        bootstrapped = true
       }
     })()
     return pullPromise
@@ -236,12 +246,12 @@ export const useMessagePuller = () => {
 
   /**
    * 断网期间 WS 收不到推送，期间产生的消息只能靠拉取接口按 minId 游标补齐；
-   * 首次连接由 Index.vue 显式调 pullOnce，这里订阅 isConnected 的 false→true 转换，覆盖后续每次重连
+   * 首次连接由 Index.vue 显式调 pullOnce 完成 bootstrap，这里仅覆盖之后的重连
    */
   watch(
     () => wsStore.isConnected,
     (isConnected) => {
-      if (isConnected) {
+      if (isConnected && bootstrapped) {
         void pullOnce()
       }
     }

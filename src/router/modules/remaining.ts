@@ -756,7 +756,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'home',
-        component: () => import('@/views/im/home/Index.vue'),
+        component: () => import('@/views/im/home/index.vue'),
         name: 'ImHome',
         redirect: '/im/home/conversation',
         meta: { hidden: true, title: '聊天' },
