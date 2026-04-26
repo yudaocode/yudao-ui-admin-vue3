@@ -1,8 +1,11 @@
 import { watch } from 'vue'
 import { useConversationStore } from '../store/conversationStore'
 import { useImWebSocketStore } from '../store/websocketStore'
+import { useFriendStore } from '../store/friendStore'
+import { useGroupStore } from '../store/groupStore'
 import {
   pullPrivateMessages as apiPullPrivateMessages,
+  getPrivateMaxReadMessageId as apiGetPrivateMaxReadMessageId,
   type ImPrivateMessageRespVO
 } from '@/api/im/message/private'
 import {
@@ -33,10 +36,24 @@ export const useMessagePuller = () => {
   const conversationStore = useConversationStore()
   const wsStore = useImWebSocketStore()
   const userStore = useUserStore()
+  const friendStore = useFriendStore()
+  const groupStore = useGroupStore()
   const currentUserId = Number(userStore.getUser?.id) || 0
+
+  /** 私聊会话归属：自己发的算"发给 receiverId 的会话"，否则算"发送方的会话" */
+  const getPrivatePeerId = (message: ImPrivateMessageRespVO) =>
+    message.senderId === currentUserId ? message.receiverId : message.senderId
+
+  /** 群消息发送者在群内的展示名（群备注 > 用户昵称） */
+  const getGroupSenderNickName = (message: ImGroupMessageRespVO): string => {
+    const group = groupStore.getGroup(message.groupId)
+    const member = group?.members?.find((m) => m.userId === message.senderId)
+    return member?.displayUserName || member?.nickname || ''
+  }
 
   /** 服务端私聊消息 -> 本地 Message */
   const convertPrivateMessage = (message: ImPrivateMessageRespVO): Message => {
+    const friend = friendStore.getFriend(getPrivatePeerId(message))
     return {
       id: message.id,
       clientMessageId: message.clientMessageId || '',
@@ -45,7 +62,7 @@ export const useMessagePuller = () => {
       status: message.status,
       sendTime: new Date(message.sendTime).getTime(),
       senderId: message.senderId,
-      senderNickName: '',
+      senderNickName: friend?.nickname || '',
       targetId: message.receiverId,
       selfSend: message.senderId === currentUserId
     }
@@ -61,7 +78,7 @@ export const useMessagePuller = () => {
       status: message.status,
       sendTime: new Date(message.sendTime).getTime(),
       senderId: message.senderId,
-      senderNickName: '',
+      senderNickName: getGroupSenderNickName(message),
       targetId: message.groupId,
       selfSend: message.senderId === currentUserId,
       atUserIds: message.atUserIds || [],
@@ -73,22 +90,24 @@ export const useMessagePuller = () => {
 
   /** 私聊：会话归属到对端 userId */
   const convertPrivateConversation = (message: ImPrivateMessageRespVO) => {
-    const targetId = message.senderId === currentUserId ? message.receiverId : message.senderId
+    const targetId = getPrivatePeerId(message)
+    const friend = friendStore.getFriend(targetId)
     return {
       type: ImConversationType.PRIVATE,
       targetId,
-      name: String(targetId),
-      avatar: ''
+      name: friend?.nickname || String(targetId),
+      avatar: friend?.avatar || ''
     }
   }
 
   /** 群聊：会话归属到 groupId */
   const convertGroupConversation = (message: ImGroupMessageRespVO) => {
+    const group = groupStore.getGroup(message.groupId)
     return {
       type: ImConversationType.GROUP,
       targetId: message.groupId,
-      name: String(message.groupId),
-      avatar: ''
+      name: group?.name || String(message.groupId),
+      avatar: group?.avatar || ''
     }
   }
 
@@ -112,11 +131,12 @@ export const useMessagePuller = () => {
         if (isPrivate) {
           const message = raw as ImPrivateMessageRespVO
           if (message.type === ImMessageType.RECALL) {
+            const peerId = getPrivatePeerId(message)
             conversationStore.recallMessage(
               ImConversationType.PRIVATE,
-              message.senderId === currentUserId ? message.receiverId : message.senderId,
+              peerId,
               message.content,
-              '',
+              friendStore.getFriend(peerId)?.nickname || '',
               message.senderId === currentUserId
             )
             continue
@@ -132,7 +152,7 @@ export const useMessagePuller = () => {
               ImConversationType.GROUP,
               message.groupId,
               message.content,
-              '',
+              getGroupSenderNickName(message),
               message.senderId === currentUserId
             )
             continue
@@ -164,28 +184,50 @@ export const useMessagePuller = () => {
       return pullPromise
     }
     pullPromise = (async () => {
-      conversationStore.loading = true
       try {
-        // 并发拉取私聊 + 群聊，降低初始加载耗时
-        await Promise.all([
-          pullByType(ImConversationType.PRIVATE, conversationStore.privateMessageMaxId),
-          pullByType(ImConversationType.GROUP, conversationStore.groupMessageMaxId)
-        ])
+        conversationStore.loading = true
+        try {
+          // 并发拉取私聊 + 群聊，降低初始加载耗时
+          await Promise.all([
+            pullByType(ImConversationType.PRIVATE, conversationStore.privateMessageMaxId),
+            pullByType(ImConversationType.GROUP, conversationStore.groupMessageMaxId)
+          ])
 
-        // 回放 WebSocket 在 loading 期间收到的缓冲消息
-        const buffered = wsStore.flushBuffer()
-        for (const item of buffered) {
-          if (item.conversationType === ImConversationType.PRIVATE) {
-            wsStore.handlePrivateMessage(item.payload)
-          } else {
-            wsStore.handleGroupMessage(item.payload)
+          // 回放 WebSocket 在 loading 期间收到的缓冲消息
+          const buffered = wsStore.flushBuffer()
+          for (const item of buffered) {
+            if (item.conversationType === ImConversationType.PRIVATE) {
+              wsStore.handlePrivateMessage(item.payload)
+            } else {
+              wsStore.handleGroupMessage(item.payload)
+            }
+          }
+        } catch (e) {
+          console.error('[IM] 拉取离线消息失败:', e)
+        } finally {
+          conversationStore.loading = false
+          conversationStore.sortConversations()
+        }
+
+        // 重连 / 冷启动后补齐当前激活私聊会话的「对方已读位置」
+        // 离线期间错过的 RECEIPT 推送会被这里补回；其他私聊会话等用户点开时由 Index.vue 的 watch 触发
+        const active = conversationStore.activeConversation
+        if (active && active.type === ImConversationType.PRIVATE) {
+          try {
+            const maxReadId = await apiGetPrivateMaxReadMessageId(active.targetId)
+            if (maxReadId) {
+              conversationStore.applyReadReceipt({
+                conversationType: ImConversationType.PRIVATE,
+                targetId: active.targetId,
+                privateReadMaxId: maxReadId
+              })
+            }
+          } catch (e) {
+            console.warn('[IM] 拉取对方已读位置失败', e)
           }
         }
-      } catch (e) {
-        console.error('[IM] 拉取离线消息失败:', e)
       } finally {
-        conversationStore.loading = false
-        conversationStore.sortConversations()
+        // 整个 IIFE 全部完成（含已读位置补齐）后才允许下一次 pullOnce 重入
         pullPromise = null
       }
     })()

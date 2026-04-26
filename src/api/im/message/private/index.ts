@@ -51,6 +51,14 @@ export const readPrivateMessages = (receiverId: number | string, messageId: numb
   })
 }
 
+// 查询对方已读到我发的最大消息 id（多端 / 离线后用于补齐已读状态）
+export const getPrivateMaxReadMessageId = (peerId: number | string) => {
+  return request.get<number | null>({
+    url: '/im/message/private/max-read-message-id',
+    params: { peerId }
+  })
+}
+
 // 撤回私聊消息
 export const recallPrivateMessage = (id: number | string) => {
   return request.delete<ImPrivateMessageRespVO>({
