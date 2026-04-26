@@ -20,6 +20,9 @@ import type { Conversation, ConversationStoreMeta, Message } from '../types'
 
 const AT_ALL_FLAG = -1 // @全体成员 的特殊 userId 标识：atUserIds 中包含 -1 表示 @all
 
+// TODO @芋艿：单个 conversation 的消息过多后，可能存储起来会很慢，后续看看怎么优化。
+// TODO @芋艿：首次拉取消息时，如果消息过多，可能导致渲染卡顿。（1% 场景）
+
 /** 获取当前登录用户编号 */
 function getCurrentUserId(): number {
   const { wsCache } = useCache()
@@ -476,7 +479,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       this.saveConversations(conversation)
     },
 
-    /** 撤回消息：解析撤回信号 content（`{"messageId": xxx}`），找到原消息翻成 RECALL 态 + 刷新会话摘要 */
+    /** 撤回消息：解析撤回信号 content（`{"messageId": xxx}`），找到原消息更新为 RECALL 态 + 刷新会话摘要 */
     recallMessage(
       conversationType: number,
       targetId: number,

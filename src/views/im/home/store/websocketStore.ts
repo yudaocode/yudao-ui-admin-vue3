@@ -286,7 +286,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       }
 
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`（对齐 ImMessageTypeEnum.RECALL → RecallMessage）
-      // 这里拦截下来改走 recallMessage（把原消息翻转为 RECALL 态），不让它作为新消息进列表
+      // 这里拦截下来改走 recallMessage（把原消息更新为 RECALL 态），不让它作为新消息进列表
       if (websocketMessage.type === ImMessageType.RECALL) {
         conversationStore.recallMessage(
           ImConversationType.PRIVATE,
@@ -395,7 +395,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const senderNickName = senderMember?.displayUserName || senderMember?.nickname || ''
 
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`
-      // 这里拦截下来改走 recallMessage（把原消息翻转为 RECALL 态）
+      // 这里拦截下来改走 recallMessage（把原消息更新为 RECALL 态）
       if (websocketMessage.type === ImMessageType.RECALL) {
         conversationStore.recallMessage(
           ImConversationType.GROUP,
