@@ -8,6 +8,7 @@
   <div
     class="relative inline-flex"
     :style="{ cursor: clickable && !previewable ? 'pointer' : 'default' }"
+    v-bind="$attrs"
     @click="handleClick"
   >
     <el-image
@@ -126,12 +127,13 @@ function handleClick(e: MouseEvent) {
     return
   }
   // 情况二：无预传 user 信息：打开名片，传最小必要信息（id + 昵称 + 头像），位置在鼠标右侧
-  if (props.id == null) {
+  const numId = Number(props.id)
+  if (!numId || numId <= 0) {
     return
   }
   uiStore.openUserInfoCard(
     {
-      id: Number(props.id),
+      id: numId,
       nickname: props.name,
       avatar: props.url
     },
