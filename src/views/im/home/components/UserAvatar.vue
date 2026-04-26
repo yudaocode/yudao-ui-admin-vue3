@@ -1,0 +1,141 @@
+<template>
+  <!--
+    通用用户头像组件
+    - 有 url 时展示图片；无 url 时展示色卡 + 首字母/首字
+    - 点击默认触发 UserInfoCard（clickable）
+    - previewable=true 时改为点头像直接放大预览（用于名片 / 详情页等大头像位）
+  -->
+  <div
+    class="relative inline-flex"
+    :style="{ cursor: clickable && !previewable ? 'pointer' : 'default' }"
+    @click="handleClick"
+  >
+    <el-image
+      v-if="url && previewable"
+      class="block overflow-hidden"
+      :src="url"
+      :preview-src-list="[url]"
+      :preview-teleported="true"
+      :style="imgStyle"
+      fit="cover"
+    />
+    <img
+      v-else-if="url"
+      class="block overflow-hidden object-cover"
+      :src="url"
+      :style="imgStyle"
+      loading="lazy"
+      :alt="name || 'avatar'"
+    />
+    <div
+      v-else
+      class="flex items-center justify-center text-white font-medium select-none"
+      :style="textStyle"
+    >
+      {{ avatarText }}
+    </div>
+    <!-- 允许外部插入装饰，如群聊角标 -->
+    <slot></slot>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { computed } from 'vue'
+
+import { useImUiStore } from '../store/uiStore'
+import type { UserInfo } from '../types'
+
+defineOptions({ name: 'ImUserAvatar', inheritAttrs: false })
+
+const props = withDefaults(
+  defineProps<{
+    id?: string | number // 用户 id；传了才能点开名片
+    url?: string // 头像图片 URL；为空时走色卡文字
+    name?: string // 用户名（色卡文字 + 名片备用）
+    size?: number // 尺寸（px），正方形；优先于 width/height
+    radius?: string // 圆角，支持 CSS 长度；默认 15% 方块小圆角（参考微信）
+    clickable?: boolean // 是否点击弹出 UserInfoCard；默认 true
+    previewable?: boolean // 是否点头像直接放大预览；开启后忽略 clickable，不再弹名片
+    user?: UserInfo // 额外的用户信息，传了点击就不用现拉接口（弹名片用）
+  }>(),
+  {
+    size: 42,
+    radius: '15%',
+    clickable: true,
+    previewable: false
+  }
+)
+
+const uiStore = useImUiStore()
+
+const imgStyle = computed(() => ({
+  width: `${props.size}px`,
+  height: `${props.size}px`,
+  borderRadius: props.radius
+}))
+
+const textStyle = computed(() => ({
+  width: `${props.size}px`,
+  height: `${props.size}px`,
+  fontSize: `${Math.floor(props.size * (avatarText.value.length > 1 ? 0.34 : 0.42))}px`,
+  background: textColor.value,
+  borderRadius: props.radius
+}))
+
+/** 色卡首字：中文取 1 个字；英文/拉丁取前 2 个字母（跳过数字、空格、符号） */
+const avatarText = computed(() => {
+  const trimmed = props.name?.trim()
+  if (!trimmed) {
+    return ''
+  }
+  const first = trimmed.charAt(0)
+  const code = first.charCodeAt(0)
+  if (code >= 0x4e00 && code <= 0x9fa5) {
+    return first
+  }
+  const letters = trimmed.match(/[A-Za-z]/g)
+  if (!letters || letters.length === 0) {
+    return first.toUpperCase()
+  }
+  return letters.slice(0, 2).join('').toUpperCase()
+})
+
+const colors = ['#07C160', '#1A95FF', '#FA9D3B', '#9163E0', '#F76760', '#1ABC9C'] // 基于用户名哈希的色卡色，参考微信调色板
+const textColor = computed(() => {
+  if (!props.name) {
+    return '#909399'
+  }
+  let hash = 0
+  for (let i = 0; i < props.name.length; i++) {
+    hash += props.name.charCodeAt(i)
+  }
+  return colors[hash % colors.length]
+})
+
+/** 头像点击：previewable 走 el-image 预览不弹名片；否则按 user / id 任一入参打开名片 */
+function handleClick(e: MouseEvent) {
+  if (props.previewable) {
+    return
+  }
+  if (!props.clickable) {
+    return
+  }
+  // 情况一：有预传 user 信息：就直接用，省一次接口
+  if (props.user) {
+    uiStore.openUserInfoCard(props.user, { x: e.clientX + 20, y: e.clientY })
+    return
+  }
+  // 情况二：无预传 user 信息：打开名片，传最小必要信息（id + 昵称 + 头像），位置在鼠标右侧
+  if (props.id == null) {
+    return
+  }
+  uiStore.openUserInfoCard(
+    {
+      id: Number(props.id),
+      nickname: props.name,
+      avatar: props.url
+    },
+    { x: e.clientX + 20, y: e.clientY }
+  )
+}
+</script>
