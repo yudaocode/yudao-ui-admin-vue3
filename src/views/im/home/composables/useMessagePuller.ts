@@ -125,8 +125,8 @@ export const useMessagePuller = () => {
         break
       }
 
-      // 逐条 dispatch：原消息走 insertMessage；RECALL 信号走 recallMessage 把同批内已 insert 的原消息翻成撤回提示。
-      // 后端按 id 升序返回，且信号 id 一定 > 原消息 id（先翻 status 再插信号），所以原消息一定先到、recallMessage 找得到
+      // 逐条 dispatch：原消息走 insertMessage；RECALL 信号走 recallMessage 把同批内已 insert 的原消息更新为撤回提示。
+      // 后端按 id 升序返回，且信号 id 一定 > 原消息 id（先更新 status 再插信号），所以原消息一定先到、recallMessage 找得到
       for (const raw of list) {
         if (isPrivate) {
           const message = raw as ImPrivateMessageRespVO
