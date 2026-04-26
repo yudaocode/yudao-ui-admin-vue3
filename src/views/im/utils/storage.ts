@@ -44,6 +44,6 @@ export const StorageKeys = {
   conversationMessage: (userId: number | string, type: number, targetId: number) =>
     `conversation:message:${userId}:${type}:${targetId}`,
 
-  /** 侧边栏宽度（localStorage）；page 区分消息 / 好友 / 群三个 Tab，独立记忆。 */
-  asideWidth: (page: 'message' | 'friend' | 'group') => `im:aside:${page}`
+  /** 侧边栏宽度（localStorage）；三个 Tab 共用一份记忆，对齐微信（拖一次到处一致）。 */
+  asideWidth: 'im:aside'
 } as const
