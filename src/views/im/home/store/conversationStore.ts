@@ -512,8 +512,9 @@ export const useConversationStore = defineStore('imConversationStore', {
     applyReadReceipt(options: {
       conversationType: number
       targetId: number
-      // 私聊：把和该好友的「自己发送的」消息标为已读
-      markPrivateRead?: boolean
+      // 私聊：把和该好友的「自己发送的、id <= privateReadMaxId 的」消息标为已读
+      // 必须卡 maxId 边界：回执在路上时新发的消息不能被误标为已读
+      privateReadMaxId?: number
       // 群聊：针对单条消息的回执刷新
       groupMessageId?: number
       readCount?: number
@@ -523,9 +524,15 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (!conversation) {
         return
       }
-      if (options.conversationType === ImConversationType.PRIVATE && options.markPrivateRead) {
+      if (options.conversationType === ImConversationType.PRIVATE && options.privateReadMaxId) {
+        const maxReadId = options.privateReadMaxId
         conversation.messages.forEach((message) => {
-          if (message.selfSend && message.status !== ImMessageStatus.RECALL) {
+          if (
+            message.selfSend &&
+            message.id &&
+            message.id <= maxReadId &&
+            message.status !== ImMessageStatus.RECALL
+          ) {
             message.status = ImMessageStatus.READ
           }
         })

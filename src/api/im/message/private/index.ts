@@ -38,13 +38,17 @@ export const pullPrivateMessages = (params: { minId: number | string; size: numb
 }
 
 // 查询私聊历史消息
+// TODO @AI：历史消息，是不是通过这个接口？
 export const getPrivateMessageList = (params: ImPrivateMessageListReqVO) => {
   return request.get<ImPrivateMessageRespVO[]>({ url: '/im/message/private/list', params })
 }
 
 // 标记私聊消息已读
-export const readPrivateMessages = (receiverId: number | string) => {
-  return request.put<boolean>({ url: '/im/message/private/read', params: { receiverId } })
+export const readPrivateMessages = (receiverId: number | string, messageId: number | string) => {
+  return request.put<boolean>({
+    url: '/im/message/private/read',
+    params: { receiverId, messageId }
+  })
 }
 
 // 撤回私聊消息

@@ -318,8 +318,9 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationStore.activeConversation?.targetId === peerId
         if (isActive) {
           // 聊天窗口打开 = 实际看到了：本端清未读 + 上报后端，让对方 UI 立刻切到"已读"
+          // 已读位置直接用刚到的消息 id（这条就是当前会话最大 id）
           conversationStore.markActiveAsRead()
-          apiReadPrivateMessages(peerId).catch((e) => {
+          apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
             console.warn('[IM WS] 自动已读上报失败', e)
           })
         } else if (!conversation?.muted) {
@@ -342,13 +343,20 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       conversationStore.saveConversations()
     },
 
-    /** 私聊 RECEIPT 事件：对方读了我的消息，把和对方会话里自己发的消息标为已读 */
+    /**
+     * 私聊 RECEIPT 事件：对方读了我的消息，把和对方会话里自己发的消息标为已读
+     * 后端将 maxReadId 编码在 DTO 的 id 字段（见 ImPrivateMessageDTO.ofReceipt），
+     * 这里据此卡边界，避免把"回执在路上时刚发的消息"误标为已读。
+     */
     handlePrivateReceipt(websocketMessage: ImPrivateMessageDTO) {
+      if (!websocketMessage.id) {
+        return
+      }
       const conversationStore = useConversationStore()
       conversationStore.applyReadReceipt({
         conversationType: ImConversationType.PRIVATE,
         targetId: websocketMessage.senderId,
-        markPrivateRead: true
+        privateReadMaxId: websocketMessage.id
       })
     },
 
