@@ -17,6 +17,7 @@
       :src="url"
       :preview-src-list="[url]"
       :preview-teleported="true"
+      :z-index="previewZIndex"
       :style="imgStyle"
       fit="cover"
     />
@@ -57,13 +58,15 @@ const props = withDefaults(
     radius?: string // 圆角，支持 CSS 长度；默认 15% 方块小圆角（参考微信）
     clickable?: boolean // 是否点击弹出 UserInfoCard；默认 true
     previewable?: boolean // 是否点头像直接放大预览；开启后忽略 clickable，不再弹名片
+    previewZIndex?: number // 预览层 z-index；放在高 z-index 弹层（如 UserInfoCard）里时需手动抬高
     user?: UserInfo // 额外的用户信息，传了点击就不用现拉接口（弹名片用）
   }>(),
   {
     size: 42,
     radius: '15%',
     clickable: true,
-    previewable: false
+    previewable: false,
+    previewZIndex: 2000
   }
 )
 
