@@ -620,7 +620,7 @@ async function uploadAndSendImage(file: File) {
   try {
     const form = new FormData()
     form.append('file', file)
-    const url = (await updateFile(form)) as unknown as string
+    const url = ((await updateFile(form)) as { data?: string })?.data
     if (!url) {
       return
     }
@@ -636,7 +636,7 @@ async function uploadAndSendFile(file: File) {
   try {
     const form = new FormData()
     form.append('file', file)
-    const url = (await updateFile(form)) as unknown as string
+    const url = ((await updateFile(form)) as { data?: string })?.data
     if (!url) {
       return
     }
@@ -678,7 +678,8 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
     const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
     const form = new FormData()
     form.append('file', file)
-    const url = (await updateFile(form)) as unknown as string
+    // request.upload 返回完整 axios response（不是 res.data，跟 get/post/put 不一样），URL 在 .data 里取
+    const url = ((await updateFile(form)) as { data?: string })?.data
     if (!url) {
       return
     }
