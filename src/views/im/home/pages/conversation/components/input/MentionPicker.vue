@@ -9,9 +9,9 @@
     v-show="visible && showMembers.length > 0"
     class="message-input__mention-picker !fixed z-100 w-50 rounded-md bg-[var(--el-bg-color)] shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
     :style="{
-      left: pos.x + 'px',
-      top: pos.top != null ? pos.top + 'px' : 'auto',
-      bottom: pos.bottom != null ? pos.bottom + 'px' : 'auto'
+      left: position.x + 'px',
+      top: position.top != null ? position.top + 'px' : 'auto',
+      bottom: position.bottom != null ? position.bottom + 'px' : 'auto'
     }"
   >
     <el-scrollbar ref="scrollRef" max-height="300px">
@@ -25,7 +25,7 @@
         <div
           class="flex items-center justify-center w-[30px] h-[30px] rounded text-white bg-[var(--el-color-primary)] flex-shrink-0"
         >
-          <el-icon :size="18"><UserFilled /></el-icon>
+          <Icon icon="ep:user-filled" :size="18" />
         </div>
         <span class="overflow-hidden text-sm truncate text-[var(--el-text-color-regular)]">
           {{ allItem.showNickName }}
@@ -42,13 +42,13 @@
 
       <!-- 真成员行 -->
       <ChatGroupMember
-        v-for="(m, idx) in memberItems"
-        :key="m.userId"
-        :member="m"
+        v-for="(member, idx) in memberItems"
+        :key="member.userId"
+        :member="member"
         :height="40"
         :active="activeIdx === (allItem ? idx + 1 : idx)"
         :clickable="false"
-        @click.stop="handleSelect(m)"
+        @click.stop="handleSelect(member)"
       />
     </el-scrollbar>
 
@@ -60,8 +60,8 @@
 <script lang="ts" setup>
 import { computed, ref, useTemplateRef, watch } from 'vue'
 import { ElScrollbar } from 'element-plus'
-import { UserFilled } from '@element-plus/icons-vue'
 
+import Icon from '@/components/Icon/src/Icon.vue'
 import { useUserStore } from '@/store/modules/user'
 import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
 import ChatGroupMember, { type GroupMemberLite } from '../ChatGroupMember.vue'
@@ -72,14 +72,14 @@ const props = withDefaults(
   defineProps<{
     visible: boolean // 是否显示
     // 浮层位置：x 横坐标 + top / bottom 二选一（bottom 锚定时 picker 下沿贴 @ 上方）
-    pos: { x: number; top?: number; bottom?: number }
+    position: { x: number; top?: number; bottom?: number }
     members: GroupMemberLite[] // 当前群的成员列表
     searchText?: string // @ 后输入的过滤文本
     ownerId?: number // 群主 id，判断是否能展示"所有人"
   }>(),
   {
     searchText: '',
-    pos: () => ({ x: 0, bottom: 0 })
+    position: () => ({ x: 0, bottom: 0 })
   }
 )
 
@@ -151,31 +151,34 @@ watch(
 
 /** el-scrollbar 没暴露 scrollTo，直接拿内部 wrap 调 scrollTop */
 function scrollToTop() {
-  const wrap = scrollRef.value?.$el?.querySelector('.el-scrollbar__wrap') as HTMLElement | null
-  if (wrap) {
-    wrap.scrollTop = 0
+  const scrollWrap = scrollRef.value?.$el?.querySelector(
+    '.el-scrollbar__wrap'
+  ) as HTMLElement | null
+  if (scrollWrap) {
+    scrollWrap.scrollTop = 0
   }
 }
 
 /** 键盘上下导航时把高亮项滚到可视区：超出底边下推、超出顶边上拉，否则不动 */
-// TODO @AI：变量尽量完整！
 function scrollToActive() {
-  const wrap = scrollRef.value?.$el?.querySelector('.el-scrollbar__wrap') as HTMLElement | null
-  if (!wrap) {
+  const scrollWrap = scrollRef.value?.$el?.querySelector(
+    '.el-scrollbar__wrap'
+  ) as HTMLElement | null
+  if (!scrollWrap) {
     return
   }
-  const itemH = 40
-  const activeTop = activeIdx.value * itemH
-  if (activeTop + itemH > wrap.scrollTop + wrap.clientHeight) {
-    wrap.scrollTop = activeTop + itemH - wrap.clientHeight
-  } else if (activeTop < wrap.scrollTop) {
-    wrap.scrollTop = activeTop
+  const itemHeight = 40
+  const activeOffsetTop = activeIdx.value * itemHeight
+  if (activeOffsetTop + itemHeight > scrollWrap.scrollTop + scrollWrap.clientHeight) {
+    scrollWrap.scrollTop = activeOffsetTop + itemHeight - scrollWrap.clientHeight
+  } else if (activeOffsetTop < scrollWrap.scrollTop) {
+    scrollWrap.scrollTop = activeOffsetTop
   }
 }
 
 /** 选中一项：emit 给 MessageInput 落 token，同时关掉浮层 */
-function handleSelect(m: GroupMemberLite) {
-  emit('select', m)
+function handleSelect(member: GroupMemberLite) {
+  emit('select', member)
   emit('update:visible', false)
 }
 

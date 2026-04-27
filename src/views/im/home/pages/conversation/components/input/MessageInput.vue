@@ -77,7 +77,7 @@
     <MentionPicker
       ref="mentionRef"
       v-model:visible="mentionVisible"
-      :pos="mentionPos"
+      :position="mentionPosition"
       :members="groupMembers"
       :search-text="mentionSearchText"
       :owner-id="groupOwnerId"
@@ -171,7 +171,6 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
   let text = ''
 
   function walk(node: Node) {
-    // 1. text 节点
     if (node.nodeType === Node.TEXT_NODE) {
       text += (node.textContent || '').replace(/​/g, '')
       return
@@ -181,12 +180,10 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
     }
     const el = node as HTMLElement
     const tag = el.tagName.toLowerCase()
-    // 2. br
     if (tag === 'br') {
       text += '\n'
       return
     }
-    // 3. span[data-id]：mention token
     if (tag === 'span' && el.dataset.id) {
       text += el.textContent || ''
       const id = Number(el.dataset.id)
@@ -195,7 +192,6 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
       }
       return
     }
-    // 4. div：行级换行容器
     if (tag === 'div') {
       if (text && !text.endsWith('\n')) {
         text += '\n'
@@ -203,10 +199,10 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
       el.childNodes.forEach(walk)
       return
     }
-    // 5. 其他元素：递归
     el.childNodes.forEach(walk)
   }
 
+  // 直接从 root.childNodes 开始，避免把 root 本身也当元素处理（虽然目前没有特殊样式，但以防未来改动）
   root.childNodes.forEach(walk)
   return {
     text: text.trim(),
@@ -225,21 +221,18 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
  * 5. 上送：atUserIds 非空才传，避免发空数组
  */
 async function handleSend() {
-  // 1.
   const editor = editorRef.value
   if (!canSend.value || !editor) {
     return
   }
-  // 2.
   const { text, atUserIds } = collectFromEditor(editor)
-  // 3.
   if (!text) {
     return
   }
-  // 4.
+  // 1. 清空 + 同步状态
   editor.innerHTML = ''
   syncEditorState()
-  // 5.
+  // 2. 发送
   await send(text, atUserIds.length > 0 ? { atUserIds } : undefined)
 }
 
@@ -251,7 +244,22 @@ async function handleSend() {
  */
 let savedRange: Range | null = null
 
-// TODO @AI：方法注释、方法内注释；
+/**
+ * 走 native execCommand，保留浏览器原生 undo 栈
+ *
+ * execCommand 在 lib.dom 里被标 @deprecated（IDE 显示删除线），但 'insertText' /
+ * 'insertLineBreak' 没有等价的 W3C 标准替代——Range/Selection 自己拼 DOM 会让 Ctrl+Z 失效。
+ * 集中到这里调用，调用点不必散落 ts-expect-error；不引入 eslint disable（项目当前
+ * @typescript-eslint v7 没有 no-deprecated 规则，加了也无效，反而让 lint 报"规则不存在"）
+ */
+function nativeExec(command: 'insertText' | 'insertLineBreak', value?: string) {
+  document.execCommand(command, false, value)
+}
+
+/**
+ * document selectionchange 监听：把落在 editor 内的 selection 缓存到 savedRange，
+ * insertText 在焦点被偷走后用它把光标恢复到原插入点
+ */
 function onSelectionChange() {
   const editor = editorRef.value
   const sel = window.getSelection()
@@ -299,10 +307,13 @@ onBeforeUnmount(() => {
 })
 
 /**
- * 把字符串插入光标处。execCommand('insertText') 而非自己拼 DOM，是为了保留浏览器
- * 原生 undo 栈（Range API 替代实现会让 Ctrl+Z 失效）
+ * 把字符串插入光标处（emoji 面板等场景调用）
+ *
+ * 1. editor 没挂直接返回
+ * 2. 焦点回到 editor + 把 savedRange 恢复成当前 selection（emoji 面板偷焦点后还能回原位）
+ * 3. nativeExec 插文本，保留浏览器原生 undo 栈
+ * 4. 同步 canSend / placeholder
  */
-// TODO @AI：方法注释、方法内注释；
 function insertText(str: string) {
   const editor = editorRef.value
   if (!editor) {
@@ -316,21 +327,51 @@ function insertText(str: string) {
       sel.addRange(savedRange)
     }
   }
-  // TODO @AI：linter 报错
-  document.execCommand('insertText', false, str)
+  // 1. nativeExec 插文本，保留浏览器原生 undo 栈
+  nativeExec('insertText', str)
+  // 2. 同步 canSend / placeholder
   syncEditorState()
 }
 
-/** 粘贴：剥掉外部样式 / 脚本，只留 plain text */
+/**
+ * 粘贴处理
+ *
+ * 1. 优先扫 clipboardData.items 找文件类型条目（截图、拖入的图片 / 文件等）
+ *    - image/* → 走 IMAGE 上传发送
+ *    - 其它 file → 走 FILE 上传发送
+ *    - 一次粘贴只处理第一个文件，避免一次粘贴发出多条消息
+ * 2. 没文件再走 plain text：剥掉外部样式 / 脚本，避免外站 inline style 污染 editor
+ *    （contenteditable 默认粘贴会带 HTML，所以模板上 @paste.prevent 拦截）
+ */
 function onPaste(e: ClipboardEvent) {
+  // 1. 优先扫 clipboardData.items 找文件类型条目（截图、拖入的图片 / 文件等）
+  const items = e.clipboardData?.items
+  if (items?.length) {
+    // TODO @AI：这了有 linter 报错；
+    for (const item of items) {
+      if (item.kind !== 'file') {
+        continue
+      }
+      const file = item.getAsFile()
+      if (!file) {
+        continue
+      }
+      if (item.type.startsWith('image/')) {
+        void uploadAndSendImage(file)
+      } else {
+        void uploadAndSendFile(file)
+      }
+      return
+    }
+  }
+  // 2. 没文件再走 plain text：剥掉外部样式 / 脚本，避免外站 inline style 污染 editor
   const text = e.clipboardData?.getData('text/plain') || ''
   if (text) {
-    // TODO @AI：linter 报错
-    document.execCommand('insertText', false, text)
+    nativeExec('insertText', text)
   }
 }
 
-// TODO @AI：方法注释、方法内注释；
+/** 编辑器内容变化的统一入口：先同步 canSend / placeholder，再判 @ 浮层是否要展开 */
 function onInput() {
   syncEditorState()
   detectAtMention()
@@ -353,6 +394,7 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
   if (!conversation || conversation.type !== ImConversationType.GROUP) {
     return []
   }
+  // TODO @AI：g 变 group
   const g = groupStore.getGroup(conversation.targetId)
   return (g?.members || []).map((m) => ({
     userId: m.userId,
@@ -374,7 +416,7 @@ const mentionVisible = ref(false)
 const mentionSearchText = ref('')
 /** 浮层定位：x 是左边距；top / bottom 二选一—— bottom 锚定（picker 下沿贴 @）是默认，
  *  上方放不下时退化为 top 锚定（picker 上沿贴 @ 下方） */
-const mentionPos = ref<{ x: number; top?: number; bottom?: number }>({ x: 0, bottom: 0 })
+const mentionPosition = ref<{ x: number; top?: number; bottom?: number }>({ x: 0, bottom: 0 })
 
 /** MentionPicker 的容器宽度（与组件里的 w-50 对齐），用于视口右沿回弹；
  *  高度不再用常量算位置——bottom 锚定后 picker 内容多寡都不影响下沿位置，自然贴 @ */
@@ -436,18 +478,18 @@ function detectAtMention() {
  *    无论 1 项还是 N 项 picker 下沿都贴 @）；不够则翻到 @ 下方走 top 锚定
  */
 function positionMention(node: Node, atOffset: number) {
-  // 1.
+  // 1. 计算 @ 字符屏幕坐标 rect
   const anchor = document.createRange()
   anchor.setStart(node, atOffset)
   anchor.collapse(true)
   const rect = anchor.getBoundingClientRect()
-  // 2.
+  // 2. 横向：picker 左边对齐 @，越过视口右沿则左推；至少留 8px 留白
   const left = Math.max(8, Math.min(rect.left, window.innerWidth - MENTION_WIDTH - 8))
-  // 3.
+  // 3. 纵向：上方剩余 ≥ MENTION_MIN_FIT_ABOVE 走 bottom 锚定
   if (rect.top >= MENTION_MIN_FIT_ABOVE) {
-    mentionPos.value = { x: left, bottom: window.innerHeight - rect.top + 8 }
+    mentionPosition.value = { x: left, bottom: window.innerHeight - rect.top + 8 }
   } else {
-    mentionPos.value = { x: left, top: rect.bottom + 8 }
+    mentionPosition.value = { x: left, top: rect.bottom + 8 }
   }
 }
 
@@ -496,9 +538,18 @@ function onMentionSelect(member: GroupMemberLite) {
   syncEditorState()
 }
 
-// TODO @AI：方法注释、方法内注释；
+/**
+ * 键盘事件分发
+ *
+ * 1. mention 浮层打开时
+ *    1.1 ↑/↓ 移动高亮
+ *    1.2 Enter 有候选 → 选中；无候选 fall through 到下面的发送分支，避免按 Enter 没反应
+ *    1.3 Esc 关浮层
+ * 2. Shift+Enter 换行：强制走 br（浏览器默认会插 div，DOM walk 拼接更复杂）
+ * 3. 普通 Enter 发送（IME composition 期间不触发，避免选词被误发）
+ */
 function onKeydown(e: KeyboardEvent) {
-  // @ 浮层打开时键盘上下 / Enter / Esc 由浮层消费
+  // 1. mention 浮层打开时
   if (mentionVisible.value) {
     if (e.key === 'ArrowUp') {
       e.preventDefault()
@@ -511,7 +562,6 @@ function onKeydown(e: KeyboardEvent) {
       return
     }
     if (e.key === 'Enter' && !e.isComposing) {
-      // 有候选才拦 Enter 选中；无候选 fall through 到下面的发送分支，避免按 Enter 没反应
       if (mentionRef.value?.hasCandidates()) {
         e.preventDefault()
         mentionRef.value?.pickActive()
@@ -523,14 +573,14 @@ function onKeydown(e: KeyboardEvent) {
       return
     }
   }
-  // Shift+Enter 强制走 br：浏览器默认会插 div，DOM walk 时拼接更复杂
+  // 2. Shift+Enter 换行：强制走 br（浏览器默认会插 div，DOM walk 拼接更复杂）
   if (e.key === 'Enter' && e.shiftKey && !e.isComposing) {
     e.preventDefault()
-    document.execCommand('insertLineBreak')
+    nativeExec('insertLineBreak')
     syncEditorState()
     return
   }
-  // 普通 Enter 发送（IME composition 中除外）
+  // 3. 普通 Enter 发送（IME composition 期间不触发，避免选词被误发）
   if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.isComposing) {
     e.preventDefault()
     handleSend()
@@ -538,14 +588,8 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 // ==================== 图片 / 文件上传 ====================
-// TODO @AI：方法注释、方法内注释；
-async function onImagePicked(e: Event) {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-  if (!file) {
-    return
-  }
+/** 上传并发送 IMAGE 消息；文件选择器和粘贴板都复用这条 */
+async function uploadAndSendImage(file: File) {
   try {
     const form = new FormData()
     form.append('file', file)
@@ -560,14 +604,8 @@ async function onImagePicked(e: Event) {
   }
 }
 
-// TODO @AI：方法注释、方法内注释；
-async function onFilePicked(e: Event) {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-  if (!file) {
-    return
-  }
+/** 上传并发送 FILE 消息；附原始 name / size 让接收端展示文件名和体积 */
+async function uploadAndSendFile(file: File) {
   try {
     const form = new FormData()
     form.append('file', file)
@@ -585,9 +623,29 @@ async function onFilePicked(e: Event) {
   }
 }
 
+/** 图片选完即上传 + 发送 IMAGE 消息（不放入 editor，整体走 sendRaw） */
+async function onImagePicked(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (file) {
+    await uploadAndSendImage(file)
+  }
+}
+
+/** 文件选完即上传 + 发送 FILE 消息（携带原始 name / size 元数据） */
+async function onFilePicked(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (file) {
+    await uploadAndSendFile(file)
+  }
+}
+
 // ==================== 语音 ====================
 const voiceVisible = ref(false)
-// TODO @AI：方法注释、方法内注释；
+/** VoiceRecorder 录完后回传 blob，包成 webm 文件上传，发送 VOICE 消息 */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   try {
     const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
