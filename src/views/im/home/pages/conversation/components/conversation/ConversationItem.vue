@@ -71,7 +71,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 
 import Icon from '@/components/Icon/src/Icon.vue'
@@ -146,19 +146,26 @@ function handleTop() {
 }
 
 /**
- * 切换免打扰：会话级 muted 立刻同步，friend / group 侧在后台异步推后端 + 落本地
+ * 切换免打扰：乐观 UI（先落本地，再异步推后端），失败回滚 + 提示
  *
- * 不 await friend / group 的 setMuted：UI 已经通过 conversationStore.setMuted 完成视觉切换，
- * 后台 /im/friend/update / /im/group-member/update 失败也不应阻塞菜单关闭；用 void 显式表达 fire-and-forget
+ * 不 await：UI 已经通过 conversationStore.setMuted 完成视觉切换，菜单立即关闭；
+ * 后端 /im/friend/update / /im/group-member/update 失败时回滚 conversationStore，
+ * 避免本地（已经 saveConversations 落 IndexedDB）跟服务端长期不一致
+ * （friend / group 自身的 setMuted 在 await 失败时不会落本地，只有 conversation 需要回滚）
  */
 function handleMuted() {
   const next = !props.conversation.muted
-  conversationStore.setMuted(props.conversation.type, props.conversation.targetId, next)
-  if (props.conversation.type === ImConversationType.PRIVATE) {
-    void friendStore.setMuted(props.conversation.targetId, next)
-  } else {
-    void groupStore.setMuted(props.conversation.targetId, next)
-  }
+  const { type, targetId } = props.conversation
+  conversationStore.setMuted(type, targetId, next)
+  const sync =
+    type === ImConversationType.PRIVATE
+      ? friendStore.setMuted(targetId, next)
+      : groupStore.setMuted(targetId, next)
+  sync.catch((e) => {
+    console.error('[IM] 切换免打扰失败', e)
+    ElMessage.error('切换免打扰失败')
+    conversationStore.setMuted(type, targetId, !next)
+  })
 }
 
 /** 删除会话：二次确认后软删（用户取消走 catch 静默） */
