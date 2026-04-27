@@ -75,7 +75,6 @@ import { ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 
 import Icon from '@/components/Icon/src/Icon.vue'
-import { isSameDay } from '@/utils/formatTime'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
 import { useGroupStore } from '../../../../store/groupStore'
@@ -85,6 +84,9 @@ import type { Conversation } from '../../../../types'
 import UserAvatar from '../../../../components/UserAvatar.vue'
 
 defineOptions({ name: 'ImConversationItem' })
+
+/** 周中文名（dayjs 的 day() 返回 0-6，0=周日）；项目没全局装 dayjs/locale/zh-cn，本地映射避免引副作用 */
+const WEEKDAY_NAMES = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
 const props = defineProps<{
   conversation: Conversation
@@ -162,11 +164,9 @@ function handleMuted() {
 /** 删除会话：二次确认后软删（用户取消走 catch 静默） */
 async function handleDelete() {
   try {
-    await ElMessageBox.confirm(
-      `确定删除与「${props.conversation.name}」的会话吗？`,
-      '删除会话',
-      { type: 'warning' }
-    )
+    await ElMessageBox.confirm(`确定删除与「${props.conversation.name}」的会话吗？`, '删除会话', {
+      type: 'warning'
+    })
     conversationStore.removeConversation(props.conversation.type, props.conversation.targetId)
   } catch {
     // 用户取消
@@ -194,14 +194,32 @@ function handleContextMenu(e: MouseEvent) {
   )
 }
 
-/** 会话列表时间：当天显示 HH:mm，否则显示 MM-DD（微信风格） */
+/**
+ * 会话列表时间，对齐微信：
+ * - 今天 → HH:mm
+ * - 昨天 → 昨天 HH:mm
+ * - 本周内（2-6 天前）→ 星期X
+ * - 同年其他 → MM/DD
+ * - 跨年 → YYYY/MM/DD
+ */
 function formatTime(timestamp: number): string {
   if (!timestamp) {
     return ''
   }
-  return isSameDay(timestamp, Date.now())
-    ? dayjs(timestamp).format('HH:mm')
-    : dayjs(timestamp).format('MM-DD')
+  const target = dayjs(timestamp)
+  const now = dayjs()
+  if (target.isSame(now, 'day')) {
+    return target.format('HH:mm')
+  }
+  if (target.isSame(now.subtract(1, 'day'), 'day')) {
+    return `昨天 ${target.format('HH:mm')}`
+  }
+  // 用 startOf('day') 兜底跨时间点的差值，避免接近凌晨时取到 1.x → diff 算成 1 漏掉昨天分支
+  const diffDays = now.startOf('day').diff(target.startOf('day'), 'day')
+  if (diffDays >= 2 && diffDays <= 6) {
+    return WEEKDAY_NAMES[target.day()]
+  }
+  return target.year() === now.year() ? target.format('MM/DD') : target.format('YYYY/MM/DD')
 }
 </script>
 
