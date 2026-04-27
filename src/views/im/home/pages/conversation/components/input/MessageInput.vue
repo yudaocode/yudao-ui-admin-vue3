@@ -347,8 +347,8 @@ function onPaste(e: ClipboardEvent) {
   // 1. 优先扫 clipboardData.items 找文件类型条目（截图、拖入的图片 / 文件等）
   const items = e.clipboardData?.items
   if (items?.length) {
-    // TODO @AI：这了有 linter 报错；
-    for (const item of items) {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
       if (item.kind !== 'file') {
         continue
       }
@@ -452,9 +452,10 @@ function detectAtMention() {
   const node = range.startContainer
   const offset = range.startOffset
   const before = (node.textContent || '').slice(0, offset)
-  // (?:^|\s) 强制 @ 前是行首或空白，避免 email-like "test@example.com" 误触发
-  // match[1] 是关键词；@ 符号位置 = offset - keyword.length - 1
-  const match = before.match(/(?:^|\s)@([^\s@]*)$/)
+  // 直接找最近的 @：不限制前置字符，对齐微信"中文紧贴 @ 也能联想"（你好@张三、，@张三 都触发）；
+  // 代价是 email-like "test@example.com" 也会触发，但聊天输入里粘 email 的概率低，
+  // 且用户按 Esc 即可关浮层；兜底由 [^\s@] 保证一旦输入空格 / 第二个 @ 就停下
+  const match = before.match(/@([^\s@]*)$/)
   if (!match) {
     closeMention()
     return
