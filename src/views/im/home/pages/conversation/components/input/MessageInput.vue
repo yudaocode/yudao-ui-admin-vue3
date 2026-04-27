@@ -2,55 +2,8 @@
   <div
     class="relative flex flex-col bg-[var(--el-bg-color)] border-t border-[var(--el-border-color-lighter)]"
   >
-    <!-- 顶部工具栏：表情 / 图片 / 文件 / 语音 / 历史 -->
-    <div class="relative flex items-center gap-2 h-9 px-3">
-      <el-tooltip content="表情" placement="top">
-        <el-icon
-          class="message-input__tool box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-          @click.stop="toggleEmoji"
-        >
-          <Sunny />
-        </el-icon>
-      </el-tooltip>
-      <el-tooltip content="发送图片" placement="top">
-        <el-icon
-          class="message-input__tool box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-          @click="imageInputRef?.click()"
-        >
-          <Picture />
-        </el-icon>
-      </el-tooltip>
-      <el-tooltip content="发送文件" placement="top">
-        <el-icon
-          class="message-input__tool box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-          @click="fileInputRef?.click()"
-        >
-          <Paperclip />
-        </el-icon>
-      </el-tooltip>
-      <el-tooltip content="语音消息" placement="top">
-        <el-icon
-          class="message-input__tool box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-          @click="voiceVisible = true"
-        >
-          <Microphone />
-        </el-icon>
-      </el-tooltip>
-      <el-tooltip content="历史消息" placement="top">
-        <el-icon
-          class="message-input__tool box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-          @click="$emit('openHistory')"
-        >
-          <Tickets />
-        </el-icon>
-      </el-tooltip>
-
-      <!-- 浮层：表情面板，绝对定位到工具栏左上方 -->
-      <EmojiPicker v-model:visible="emojiVisible" class="bottom-9 left-3" @select="insertText" />
-    </div>
-
     <!--
-      输入区：contenteditable div（取代 textarea）
+      输入区在上：contenteditable div（取代 textarea，对齐微信 PC：输入区在上，操作在下）
       - 让 @ 浮层能拿到真实光标 rect（textarea 拿不到）
       - 让 @ 成员以 <span data-id> token 节点存在，删 token 即删 id，避免 stale atUserIds
       - placeholder 通过 data-empty + ::before 模拟（contenteditable 没有原生 placeholder）
@@ -68,9 +21,61 @@
       @paste.prevent="onPaste"
     ></div>
 
-    <!-- 发送按钮 -->
-    <div class="flex justify-end px-3 pt-1.5 pb-2.5">
+    <!--
+      底部工具栏：左侧操作图标 + 右侧发送按钮（对齐微信 PC：操作图标统一放底部）
+      - relative 给 EmojiPicker 提供 absolute 锚点，picker 用 bottom-full 向上弹出
+      - 图标统一 30×30 点击区（18px icon + p-1.5），gap-1 让间距贴合微信观感
+    -->
+    <div class="relative flex items-center justify-between gap-2 px-3 pb-2">
+      <div class="flex items-center gap-1">
+        <!--
+          所有 icon 统一走 Iconify（ant-design outlined 系列）：
+          - 视觉风格更接近微信 PC（线性、圆角，比 Element Plus 内置的更轻量）
+          - 笑脸 / 图片 / 文件夹 / 麦克风 同源，避免一个走 ep 一个走 antd 视觉割裂
+          - 外层 span 复用 .message-input__tool 的 padding / hover 样式，scoped CSS 的 :deep(svg) 仍能命中
+        -->
+        <el-tooltip content="表情" placement="top">
+          <span
+            class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
+            @click.stop="toggleEmoji"
+          >
+            <Icon icon="ant-design:smile-outlined" :size="18" />
+          </span>
+        </el-tooltip>
+        <el-tooltip content="发送图片" placement="top">
+          <span
+            class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
+            @click="imageInputRef?.click()"
+          >
+            <Icon icon="ant-design:picture-outlined" :size="18" />
+          </span>
+        </el-tooltip>
+        <el-tooltip content="发送文件" placement="top">
+          <span
+            class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
+            @click="fileInputRef?.click()"
+          >
+            <Icon icon="ant-design:folder-outlined" :size="18" />
+          </span>
+        </el-tooltip>
+        <el-tooltip content="语音消息" placement="top">
+          <span
+            class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
+            @click="voiceVisible = true"
+          >
+            <Icon icon="ant-design:audio-outlined" :size="18" />
+          </span>
+        </el-tooltip>
+      </div>
+
       <el-button type="primary" :disabled="!canSend" @click="handleSend">发 送</el-button>
+
+      <!-- 表情面板：bottom-full 让 picker 下沿贴工具栏顶部，向上弹出（对齐工具栏左侧首图标） -->
+      <EmojiPicker
+        v-model:visible="emojiVisible"
+        class="bottom-full left-3 mb-2"
+        @select="insertText"
+      />
     </div>
 
     <!-- @ 选择浮层：群聊才启用 -->
@@ -95,9 +100,9 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
-import { Sunny, Picture, Paperclip, Microphone, Tickets } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
+import Icon from '@/components/Icon/src/Icon.vue'
 import { CommonStatusEnum } from '@/utils/constants'
 import { updateFile } from '@/api/infra/file'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
@@ -117,10 +122,6 @@ import VoiceRecorder from './VoiceRecorder.vue'
 import type { GroupMemberLite } from '../ChatGroupMember.vue'
 
 defineOptions({ name: 'ImMessageInput' })
-
-defineEmits<{
-  openHistory: [] // 打开历史消息抽屉（由 ChatPanel / MessagePage 承接）
-}>()
 
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
@@ -682,12 +683,14 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   color: var(--el-color-primary) !important;
 }
 
+/* 输入区在上、工具栏在下时，编辑区视觉上承担"主体"，min-height 撑大一些贴近微信观感；
+   max-height 不再无限增长，超过则内部滚动，避免聊天列表被挤太短 */
 .message-input__editor {
   position: relative;
-  min-height: 80px;
+  min-height: 100px;
   max-height: 160px;
   overflow-y: auto;
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 14px;
   line-height: 1.5;
   outline: none;
