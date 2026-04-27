@@ -217,6 +217,7 @@ import { CommonStatusEnum } from '@/utils/constants'
 import {
   parseMessage,
   buildRecallTip,
+  resolveTipText,
   type TextMessage,
   type ImageMessage,
   type FileMessage,
@@ -319,21 +320,8 @@ function formatTipTime(timestamp: number): string {
 /** 文本内容 */
 const textContent = computed(() => parseMessage<TextMessage>(props.message.content)?.content ?? '')
 
-/**
- * TIP_TEXT 文案：后端这里 content 通常是裸字符串（群解散 / 退群 / 踢人 等系统提示），
- * 老接口可能包成 {"content": "..."}；解析得到 .content 就用，否则当裸文案展示，避免出现空行
- */
-const tipText = computed(() => {
-  const raw = props.message.content || ''
-  if (!raw) {
-    return ''
-  }
-  const parsed = parseMessage<TextMessage>(raw)
-  if (parsed && typeof parsed.content === 'string') {
-    return parsed.content
-  }
-  return raw
-})
+/** TIP_TEXT 文案：与 conversationStore.resolveLastContent / MessageHistory.renderContent 共用 helper，避免兼容性逻辑分裂 */
+const tipText = computed(() => resolveTipText(props.message.content))
 const imagePayload = computed(() =>
   isImage.value ? parseMessage<ImageMessage>(props.message.content) : null
 )

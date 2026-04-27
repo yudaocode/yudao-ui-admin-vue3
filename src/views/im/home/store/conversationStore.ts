@@ -16,6 +16,7 @@ import {
   generateClientMessageId,
   parseMessage,
   parseRecallMessageId,
+  resolveTipText,
   type TextMessage
 } from '../../utils/message'
 import type { Conversation, ConversationStoreMeta, Message } from '../types'
@@ -449,8 +450,10 @@ export const useConversationStore = defineStore('imConversationStore', {
         case ImMessageType.RECALL:
           return buildRecallTip(messageInfo.senderNickName, messageInfo.selfSend)
         case ImMessageType.TEXT:
-        case ImMessageType.TIP_TEXT:
           return parseMessage<TextMessage>(messageInfo.content)?.content ?? ''
+        case ImMessageType.TIP_TEXT:
+          // TIP_TEXT 后端常发裸字符串（群解散 / 退群 / 踢人），不能按 TextMessage JSON 解析，否则摘要变空
+          return resolveTipText(messageInfo.content)
         default:
           return parseMessage<TextMessage>(messageInfo.content)?.content ?? ''
       }

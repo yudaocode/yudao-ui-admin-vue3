@@ -7,6 +7,9 @@ import { generateUUID } from '@/utils'
 // cn.iocoder.yudao.module.im.service.websocket.dto.message.* 下的 DTO。
 // 各类消息 payload interface 字段对齐后端；解析统一用 parseMessage<T>，
 // 序列化直接 JSON.stringify(payload)。
+//
+// 例外：TIP_TEXT（系统提示，群解散 / 退群 / 踢人 等）后端会直接发裸字符串，
+//      展示侧需走 resolveTipText 兼容裸字符串 + 老接口可能的 {"content":"..."} 两种形态。
 // ====================================================================
 
 // ==================== 客户端 ID ====================
@@ -78,6 +81,29 @@ export const parseMessage = <T>(content: string): T | null => {
 
 /** 序列化消息 payload 为 content JSON 字符串；与 parseMessage 对称 */
 export const serializeMessage = <T>(payload: T): string => JSON.stringify(payload)
+
+// ==================== TIP_TEXT ====================
+
+/**
+ * 解析 TIP_TEXT（系统提示）文案
+ *
+ * 后端：群解散 / 退群 / 踢人 等系统提示直接发裸字符串；老接口可能包成 {"content": "..."}。
+ * 解析得到 .content 就用，否则当裸文案返回，避免出现空行。
+ *
+ * MessageItem / conversationStore.resolveLastContent / MessageHistory.renderContent 三处共用，
+ * 修一处兼容性问题不会漏到另两处
+ */
+export const resolveTipText = (content: string): string => {
+  const raw = content || ''
+  if (!raw) {
+    return ''
+  }
+  const parsed = parseMessage<TextMessage>(raw)
+  if (parsed && typeof parsed.content === 'string') {
+    return parsed.content
+  }
+  return raw
+}
 
 // ==================== 撤回 ====================
 
