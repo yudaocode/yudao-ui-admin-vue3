@@ -8,6 +8,7 @@ import {
 } from '@/api/im/group'
 import {
   getGroupMemberList as apiGetGroupMemberList,
+  updateGroupMember as apiUpdateGroupMember,
   type ImGroupMemberRespVO
 } from '@/api/im/group/member'
 import { useConversationStore } from './conversationStore'
@@ -121,9 +122,9 @@ export const useGroupStore = defineStore('imGroupStore', {
       conversationStore.removeGroupConversation(id)
     },
 
-    /** 切换免打扰（仅本地状态；后端 /im/group/update 接入 muted 字段后再补） */
-    setMuted(id: number, muted: boolean) {
-      // 在本地 group 上直接打 muted 标记；conversationStore 的会话级 muted 由 ConversationItem 单独 setMuted 写
+    /** 切换免打扰：调 /im/group-member/update 推后端，再把当前用户在该群的 muted 标记落到本地 */
+    async setMuted(id: number, muted: boolean) {
+      await apiUpdateGroupMember({ groupId: id, muted })
       const group = this.getGroup(id)
       if (group) {
         group.muted = muted

@@ -27,7 +27,6 @@
           <span class="overflow-hidden text-sm truncate text-[var(--el-text-color-primary)]">
             {{ conversation.name }}
           </span>
-          <!-- TODO @AI：不要有动效 -->
           <el-tag
             v-if="isGroup"
             type="primary"
@@ -57,15 +56,14 @@
         >
           {{ conversation.lastContent }}
         </span>
-        <!-- 置顶 & 免打扰图标 -->
-        <el-icon
+        <!-- 免打扰图标 -->
+        <Icon
           v-if="conversation.muted"
-          class="conversation-item__muted flex-shrink-0 ml-1 text-14px text-[var(--el-text-color-disabled)]"
+          icon="mdi:bell-off-outline"
+          :size="14"
+          class="conversation-item__muted flex-shrink-0 ml-1 text-[var(--el-text-color-disabled)]"
           title="消息免打扰"
-        >
-          <!-- TODO @AI：消息免打扰后，是个 / 铃铛； -->
-          <Bell />
-        </el-icon>
+        />
       </div>
     </div>
   </div>
@@ -73,9 +71,11 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { Bell } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
+import dayjs from 'dayjs'
 
+import Icon from '@/components/Icon/src/Icon.vue'
+import { isSameDay } from '@/utils/formatTime'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
 import { useGroupStore } from '../../../../store/groupStore'
@@ -103,8 +103,7 @@ const isActive = computed(
 
 const isGroup = computed(() => props.conversation.type === ImConversationType.GROUP)
 
-// 群聊 + 有发送者昵称 + 最后一条是普通消息 时，显示发送者前缀
-// TODO @AI：注释风格；
+/** 群聊 + 有发送者昵称 + 最后一条是普通消息 时，显示发送者前缀 */
 const showSendName = computed(() => {
   if (!isGroup.value) {
     return false
@@ -119,8 +118,7 @@ const showSendName = computed(() => {
   return isNormalMessage(last.type)
 })
 
-// 会话列表 "@ 我" / "@ 全体成员" 红字提示
-// TODO @AI：注释风格；
+/** 会话列表 "@ 我" / "@ 全体成员" 红字提示 */
 const atText = computed(() => {
   if (props.conversation.atMe) {
     return '[有人@我]'
@@ -131,83 +129,91 @@ const atText = computed(() => {
   return ''
 })
 
+/** 点击切会话 */
 function handleClick() {
   conversationStore.setActiveConversation(props.conversation)
 }
 
-// 右键菜单：置顶 / 免打扰 / 删除会话
-// TODO @AI：注释风格；
+/** 切换置顶 */
+function handleTop() {
+  conversationStore.setTop(
+    props.conversation.type,
+    props.conversation.targetId,
+    !props.conversation.top
+  )
+}
+
+/**
+ * 切换免打扰：会话级 muted 立刻同步，friend / group 侧在后台异步推后端 + 落本地
+ *
+ * 不 await friend / group 的 setMuted：UI 已经通过 conversationStore.setMuted 完成视觉切换，
+ * 后台 /im/friend/update / /im/group-member/update 失败也不应阻塞菜单关闭；用 void 显式表达 fire-and-forget
+ */
+function handleMuted() {
+  const next = !props.conversation.muted
+  conversationStore.setMuted(props.conversation.type, props.conversation.targetId, next)
+  if (props.conversation.type === ImConversationType.PRIVATE) {
+    void friendStore.setMuted(props.conversation.targetId, next)
+  } else {
+    void groupStore.setMuted(props.conversation.targetId, next)
+  }
+}
+
+/** 删除会话：二次确认后软删（用户取消走 catch 静默） */
+async function handleDelete() {
+  try {
+    await ElMessageBox.confirm(
+      `确定删除与「${props.conversation.name}」的会话吗？`,
+      '删除会话',
+      { type: 'warning' }
+    )
+    conversationStore.removeConversation(props.conversation.type, props.conversation.targetId)
+  } catch {
+    // 用户取消
+  }
+}
+
+/** 右键菜单：置顶 / 免打扰 / 删除 */
 function handleContextMenu(e: MouseEvent) {
   uiStore.openContextMenu(
     { x: e.clientX, y: e.clientY },
-    // TODO @AI：TOP/MUTED 下面的删除，可以加个横线，类似微信。然后颜色是红色么？【删除会话，简化为删除】
     [
       { key: 'TOP', name: props.conversation.top ? '取消置顶' : '置顶' },
-      // TODO @AI：消息免打扰、允许消息通知。
-      { key: 'MUTED', name: props.conversation.muted ? '新消息提醒' : '消息免打扰' },
-      { key: 'DELETE', name: '删除会话' }
+      { key: 'MUTED', name: props.conversation.muted ? '允许消息通知' : '消息免打扰' },
+      { key: 'DELETE', name: '删除', divided: true, danger: true }
     ],
-    async (item) => {
-      // TODO @AI：是不是抽成小方法。handleXXX；下面的每个 key；
+    (item) => {
       if (item.key === 'TOP') {
-        conversationStore.setTop(
-          props.conversation.type,
-          props.conversation.targetId,
-          !props.conversation.top
-        )
+        handleTop()
       } else if (item.key === 'MUTED') {
-        // TODO 群聊 /im/group/update 接入 muted 字段后，groupStore.setMuted 里也要调后端（好友侧已经在 friendStore.setMuted 里调过 /im/friend/update）
-        // 当前同步刷新 friendStore / groupStore，保证两边状态一致（避免点头像名片再看时还显示旧值）
-        const next = !props.conversation.muted
-        conversationStore.setMuted(props.conversation.type, props.conversation.targetId, next)
-        // TODO @AI：要 await 么？
-        if (props.conversation.type === ImConversationType.PRIVATE) {
-          friendStore.setMuted(props.conversation.targetId, next)
-        } else {
-          groupStore.setMuted(props.conversation.targetId, next)
-        }
+        handleMuted()
       } else if (item.key === 'DELETE') {
-        try {
-          await ElMessageBox.confirm(
-            `确定删除与「${props.conversation.name}」的会话吗？`,
-            '删除会话',
-            { type: 'warning' }
-          )
-          conversationStore.removeConversation(props.conversation.type, props.conversation.targetId)
-        } catch {
-          // 用户取消
-        }
+        void handleDelete()
       }
     }
   )
 }
 
-// TODO @AI：全局的 format 或者 date 有相关工具方法么？
+/** 会话列表时间：当天显示 HH:mm，否则显示 MM-DD（微信风格） */
 function formatTime(timestamp: number): string {
   if (!timestamp) {
     return ''
   }
-  const date = new Date(timestamp)
-  const now = new Date()
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  const isToday =
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  if (isToday) {
-    return `${pad(date.getHours())}:${pad(date.getMinutes())}`
-  }
-  return `${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+  return isSameDay(timestamp, Date.now())
+    ? dayjs(timestamp).format('HH:mm')
+    : dayjs(timestamp).format('MM-DD')
 }
 </script>
 
 <style scoped>
 /* el-tag 内部尺寸走 CSS 变量，UnoCSS 的高度/内边距会被 el-tag 自身的样式覆盖，用 :deep 微调 */
+/* transition:none 是为了消掉 el-tag 切会话时 active 底色变化的渐变（看起来像闪烁） */
 .conversation-item__tag {
   flex-shrink: 0;
   height: 18px;
   padding: 0 4px;
   line-height: 16px;
+  transition: none !important;
 }
 
 /* el-icon 的全局 color:var(--color) 在暗色模式下会渲染成白色，这里用 :deep + !important 锁定 */

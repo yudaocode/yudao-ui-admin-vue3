@@ -40,6 +40,8 @@ export const useImUiStore = defineStore('imUiStore', () => {
     key: string
     name: string
     disabled?: boolean
+    divided?: boolean // 是否在该项上方显示分割线（用于把"删除"等危险操作与上面的常规项隔开）
+    danger?: boolean // 是否走危险操作样式（红色文字）
   }
 
   const contextMenu = reactive({

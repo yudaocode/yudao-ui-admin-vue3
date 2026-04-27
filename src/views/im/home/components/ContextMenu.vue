@@ -15,15 +15,26 @@
         class="fixed min-w-30 py-1 bg-[var(--el-bg-color-overlay)] rounded-md shadow-lg"
         :style="{ left: adjustedPosition.x + 'px', top: adjustedPosition.y + 'px' }"
       >
-        <div
-          v-for="item in contextMenu.items"
-          :key="item.key"
-          class="px-4 py-2 text-13px text-center cursor-pointer transition-colors text-[var(--el-text-color-primary)] hover:bg-[var(--el-fill-color)]"
-          :class="{ '!text-[var(--el-text-color-disabled)] cursor-not-allowed hover:!bg-transparent': item.disabled }"
-          @click.stop="handleSelect(item)"
-        >
-          {{ item.name }}
-        </div>
+        <template v-for="(item, index) in contextMenu.items" :key="item.key">
+          <!-- divided 项上方插一条分割线（首项跳过，避免空白）；用 bg+h-[1px] 而非 border，UnoCSS 不带 border-style preflight -->
+          <div
+            v-if="item.divided && index > 0"
+            class="my-1 mx-2 h-[1px] bg-[var(--el-border-color-lighter)]"
+          ></div>
+          <div
+            class="px-4 py-2 text-13px text-left cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
+            :class="[
+              item.disabled
+                ? '!text-[var(--el-text-color-disabled)] cursor-not-allowed hover:!bg-transparent'
+                : item.danger
+                  ? 'text-[#f56c6c]'
+                  : 'text-[var(--el-text-color-primary)]'
+            ]"
+            @click.stop="handleSelect(item)"
+          >
+            {{ item.name }}
+          </div>
+        </template>
       </div>
     </div>
   </teleport>
@@ -43,12 +54,14 @@ const contextMenu = computed(() => uiStore.contextMenu)
  * 计算菜单实际渲染坐标：靠近视口右 / 下边缘时回弹，避免菜单被裁剪
  *
  * itemHeight / menuWidth 是和模板里 px-4 py-2 + text-13px / min-w-30 配套的实际尺寸；
+ * dividerHeight = 9px（my-1 上下各 4 + 1px border），仅非首项的 divided 计入；
  * menuHeight 额外加 8 是外层 py-1 的上下 padding 之和（4px × 2）
  */
 const adjustedPosition = computed(() => {
   const items = contextMenu.value.items
   const itemHeight = 34
-  const menuHeight = items.length * itemHeight + 8
+  const dividerCount = items.filter((it, i) => it.divided && i > 0).length
+  const menuHeight = items.length * itemHeight + dividerCount * 9 + 8
   const menuWidth = 120
   let x = contextMenu.value.position.x
   let y = contextMenu.value.position.y
