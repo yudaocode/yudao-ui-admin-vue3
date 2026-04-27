@@ -4,11 +4,14 @@
     布局：顶部头像 → 中间三 Tab（消息/好友/群聊）→ 底部设置
   -->
   <div class="flex flex-col items-center w-14 pt-4 pb-3 gap-2 flex-shrink-0 bg-[#2b2b2b]">
-    <!-- 顶部用户头像，点击跳个人中心；方块小圆角对齐 UserAvatar 风格 -->
+    <!-- 顶部用户头像，点击跳个人中心；走 UserAvatar 统一首字 / 哈希配色规则 -->
     <div class="mb-2 cursor-pointer" @click="goProfile">
-      <el-avatar :size="36" :src="avatar" shape="square" :style="{ borderRadius: '6px' }">
-        {{ nicknameShort }}
-      </el-avatar>
+      <UserAvatar
+        :url="userStore.getUser?.avatar"
+        :name="userStore.getUser?.nickname"
+        :size="36"
+        :clickable="false"
+      />
     </div>
 
     <!-- 中间三 Tab -->
@@ -54,6 +57,7 @@ import { Setting } from '@element-plus/icons-vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../store/conversationStore'
+import UserAvatar from './UserAvatar.vue'
 
 defineOptions({ name: 'ImToolBar' })
 
@@ -79,14 +83,6 @@ const tabs = [
 
 /** 当前路由是否命中 Tab：直接比对 route.name */
 const isActive = (name: string) => route.name === name
-
-const avatar = computed(() => userStore.getUser?.avatar || '')
-
-/** 头像兜底：取昵称最后一个字符，避免空头像时的灰底过于突兀 */
-const nicknameShort = computed(() => {
-  const name = userStore.getUser?.nickname || ''
-  return name ? name.slice(-1) : '我'
-})
 
 /** 切换 Tab：当前 Tab 已选中时跳过，避免无意义的导航 */
 const goTab = (name: string) => {

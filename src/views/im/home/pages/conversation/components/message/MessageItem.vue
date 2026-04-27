@@ -538,7 +538,7 @@ async function handleRecall() {
  * 失败消息点击重试：先把 FAILED 的本地占位消息从列表里去掉，再用同样的 type + content 走一遍 sendRaw，
  * 后者会新建 clientMessageId 并重新跑乐观更新流程
  *
- * 不还原原 needReceipt：群回执是发送时的扩展选项、不会持久化到 message，强行猜测可能与原意不符；
+ * 不还原原 receipt：群回执是发送时的扩展选项、不会持久化到 message，强行猜测可能与原意不符；
  * 默认按"无回执"重发，绝大多数场景符合预期，要回执就重新发一次更直观
  */
 async function handleResend() {
