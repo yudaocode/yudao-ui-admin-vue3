@@ -257,5 +257,5 @@ export const useMessagePuller = () => {
     }
   )
 
-  return { pullOnce }
+  return { pullOnce, convertPrivateMessage, convertGroupMessage }
 }

@@ -42,7 +42,7 @@
           class="flex items-center justify-center w-10 h-10 rounded-lg text-[#a0a0a0] cursor-pointer transition-all hover:text-white hover:bg-white/10"
           @click="goProfile"
         >
-          <el-icon :size="22"><Setting /></el-icon>
+          <Icon icon="ant-design:setting-outlined" :size="22" />
         </div>
       </el-tooltip>
     </div>
@@ -52,8 +52,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Setting } from '@element-plus/icons-vue'
-
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../store/conversationStore'

@@ -561,6 +561,42 @@ export const useConversationStore = defineStore('imConversationStore', {
     },
 
     /**
+     * 把"更早的历史消息"批量插到会话消息列表的最前面（合并 + 去重）
+     *
+     * MessageHistory 弹窗的"加载更早"按钮调用：调用方先调 /im/message/{private,group}/list 拉一页 +
+     * 用 useMessagePuller 的 convert 函数转好，再传进来。
+     *
+     * 不更新 lastContent / lastSendTime / unreadCount：这些字段反映"最新一条"，加载老消息时不应改动；
+     * 也不触发 conversation 排序，避免会话列表抖动
+     */
+    prependMessages(conversationType: number, targetId: number, earlierMessages: Message[]) {
+      if (earlierMessages.length === 0) {
+        return
+      }
+      const conversation = this.getConversation(conversationType, targetId)
+      if (!conversation) {
+        return
+      }
+      // 1. 去重：拿当前会话已有消息的 id 集合，把入参里 id 撞上的过滤掉
+      //    （后端返回的"更早消息"可能跟本地缓存有重叠，比如增量 pull 拉到过同一段）
+      //    id=0 是本地占位消息，不参与去重判定（也不会被 prepend，下面 filter 一并卡掉）
+      const existingIds = new Set(
+        conversation.messages.map((message) => message.id).filter((id) => id > 0)
+      )
+      // 2. 过滤后按 id 升序：list 接口虽然按 id desc 返回，前端要展示成"早 → 晚"，
+      //    所以 prepend 之前先 sort asc，让 fresh 数组本身的相对顺序符合时间线
+      const fresh = earlierMessages
+        .filter((message) => message.id > 0 && !existingIds.has(message.id))
+        .sort((a, b) => a.id - b.id)
+      if (fresh.length === 0) {
+        return
+      }
+      // 3. 拼接 + 落盘：fresh 在前、原 messages 在后；持久化让下次冷启动不用再调接口
+      conversation.messages = [...fresh, ...conversation.messages]
+      this.saveConversations(conversation)
+    },
+
+    /**
      * 从本地消息列表移除一条消息（右键"删除"；不同步后端）
      * 按 id 优先匹配；若 id 为 0（本地发送中），则按 clientMessageId 匹配
      */
