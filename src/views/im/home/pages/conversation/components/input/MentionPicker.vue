@@ -1,33 +1,69 @@
 <template>
   <!--
-    @ 成员选择浮层
+    @ 成员选择浮层（对齐微信 PC：所有人在顶 + 群成员分组 + 底部三角指针）
     - 父组件通过 v-model:visible 控制显隐，searchText 过滤
     - 父组件通过 ref 调 moveUp / moveDown / pickActive 实现键盘上下 + Enter 选中
     - @select 发射被选中的成员
   -->
-  <el-scrollbar
+  <div
     v-show="visible && showMembers.length > 0"
-    ref="scrollRef"
-    class="fixed z-100 w-50 h-75 rounded-md bg-[var(--el-bg-color)] shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
-    :style="{ left: pos.x + 'px', top: pos.y + 'px' }"
+    class="message-input__mention-picker !fixed z-100 w-50 rounded-md bg-[var(--el-bg-color)] shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
+    :style="{
+      left: pos.x + 'px',
+      top: pos.top != null ? pos.top + 'px' : 'auto',
+      bottom: pos.bottom != null ? pos.bottom + 'px' : 'auto'
+    }"
   >
-    <ChatGroupMember
-      v-for="(m, idx) in showMembers"
-      :key="m.userId"
-      :member="m"
-      :height="40"
-      :active="activeIdx === idx"
-      :clickable="false"
-      @click.stop="handleSelect(m)"
-    />
-  </el-scrollbar>
+    <el-scrollbar ref="scrollRef" max-height="300px">
+      <!-- 所有人：虚拟项，仅群主可选；蓝色方块 + 群体图标，跟下面的成员头像区分 -->
+      <div
+        v-if="allItem"
+        class="flex items-center gap-2.5 px-[5px] h-10 cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
+        :class="{ 'bg-[#e1eaf7] dark:bg-[var(--el-color-primary-light-9)]': activeIdx === 0 }"
+        @click.stop="handleSelect(allItem)"
+      >
+        <div
+          class="flex items-center justify-center w-[30px] h-[30px] rounded text-white bg-[var(--el-color-primary)] flex-shrink-0"
+        >
+          <el-icon :size="18"><UserFilled /></el-icon>
+        </div>
+        <span class="overflow-hidden text-sm truncate text-[var(--el-text-color-regular)]">
+          {{ allItem.showNickName }}
+        </span>
+      </div>
+
+      <!-- 群成员 section header：只有"所有人 + 真成员"两边都在时才出现，避免单一来源时显得多余 -->
+      <div
+        v-if="allItem && memberItems.length > 0"
+        class="px-2 pt-2 pb-1 text-12px text-[var(--el-text-color-secondary)]"
+      >
+        群成员
+      </div>
+
+      <!-- 真成员行 -->
+      <ChatGroupMember
+        v-for="(m, idx) in memberItems"
+        :key="m.userId"
+        :member="m"
+        :height="40"
+        :active="activeIdx === (allItem ? idx + 1 : idx)"
+        :clickable="false"
+        @click.stop="handleSelect(m)"
+      />
+    </el-scrollbar>
+
+    <!-- 底部三角指针：旋转 45° 的方块半露出底边，指向输入区里的 @ 字符 -->
+    <div class="absolute left-4 -bottom-1.5 w-3 h-3 rotate-45 bg-[var(--el-bg-color)]"></div>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, useTemplateRef, watch } from 'vue'
 import { ElScrollbar } from 'element-plus'
+import { UserFilled } from '@element-plus/icons-vue'
 
 import { useUserStore } from '@/store/modules/user'
+import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
 import ChatGroupMember, { type GroupMemberLite } from '../ChatGroupMember.vue'
 
 defineOptions({ name: 'ImMentionPicker' })
@@ -35,14 +71,15 @@ defineOptions({ name: 'ImMentionPicker' })
 const props = withDefaults(
   defineProps<{
     visible: boolean // 是否显示
-    pos: { x: number; y: number } // 浮层位置（一般贴在 @ 符号上方）
+    // 浮层位置：x 横坐标 + top / bottom 二选一（bottom 锚定时 picker 下沿贴 @ 上方）
+    pos: { x: number; top?: number; bottom?: number }
     members: GroupMemberLite[] // 当前群的成员列表
     searchText?: string // @ 后输入的过滤文本
-    ownerId?: number // 群主 id，判断是否能展示"全体成员"
+    ownerId?: number // 群主 id，判断是否能展示"所有人"
   }>(),
   {
     searchText: '',
-    pos: () => ({ x: 0, y: 0 })
+    pos: () => ({ x: 0, bottom: 0 })
   }
 )
 
@@ -55,45 +92,53 @@ const userStore = useUserStore()
 const scrollRef = useTemplateRef<InstanceType<typeof ElScrollbar>>('scrollRef')
 const activeIdx = ref(0)
 
-/** 当前登录用户 id（群成员过滤掉自己） */
+/** 当前登录用户 id（成员列表过滤掉自己） */
 const selfUserId = computed(() => Number(userStore.getUser?.id) || 0)
 
-/** 是否群主（只有群主能 @ 全体成员） */
+/** 是否群主（只有群主能 @ 所有人，对齐微信） */
 const isOwner = computed(() => {
   return props.ownerId != null && props.ownerId === selfUserId.value
 })
 
-/** 过滤后的显示列表（最多 100 条） */
-const showMembers = computed<GroupMemberLite[]>(() => {
-  const result: GroupMemberLite[] = []
-  const keyword = props.searchText
-  // 群主 + 关键字是"全体成员"前缀时，插入虚拟"全体成员"条目
-  const allTag = '全体成员'
-  if (isOwner.value && allTag.startsWith(keyword)) {
-    result.push({ userId: -1, showNickName: allTag })
+/**
+ * 虚拟"所有人"项：群主 + 关键字命中"所有人"前缀时存在
+ *
+ * MessageInput 走 token data-id 收集 atUserIds，不依赖文案字符串；
+ * 这里的 userId / 文案都从 im/utils/constants 取，避免散落
+ */
+const allItem = computed<GroupMemberLite | null>(() => {
+  if (!isOwner.value) {
+    return null
   }
-  for (const m of props.members) {
-    if (result.length > 100) {
-      break
-    }
-    if (m.userId === selfUserId.value) {
-      continue
-    }
-    if (m.quit) {
-      continue
-    }
-    if (m.showNickName && m.showNickName.startsWith(keyword)) {
-      result.push(m)
-    }
+  if (!IM_AT_ALL_NICKNAME.startsWith(props.searchText)) {
+    return null
   }
-  return result
+  return { userId: IM_AT_ALL_USER_ID, showNickName: IM_AT_ALL_NICKNAME }
 })
 
+/** 真成员：过滤自己 / 退群 / 不匹配关键字；不截断数量，浮层 max-height + el-scrollbar 撑滚动 */
+const memberItems = computed<GroupMemberLite[]>(() =>
+  props.members.filter(
+    (m) =>
+      m.userId !== selfUserId.value &&
+      !m.quit &&
+      !!m.showNickName &&
+      m.showNickName.startsWith(props.searchText)
+  )
+)
+
+/** 键盘导航与 pickActive 走的扁平列表，allItem 在前、memberItems 在后 */
+const showMembers = computed<GroupMemberLite[]>(() => {
+  return allItem.value ? [allItem.value, ...memberItems.value] : memberItems.value
+})
+
+/** 候选列表变化（用户输入关键词在过滤）→ 重置高亮到首项 + 滚回顶 */
 watch(showMembers, (list) => {
   activeIdx.value = list.length > 0 ? 0 : -1
   scrollToTop()
 })
 
+/** 浮层重新打开 → 重置高亮 + 滚回顶（避免上次的中间状态残留） */
 watch(
   () => props.visible,
   (v) => {
@@ -104,6 +149,7 @@ watch(
   }
 )
 
+/** el-scrollbar 没暴露 scrollTo，直接拿内部 wrap 调 scrollTop */
 function scrollToTop() {
   const wrap = scrollRef.value?.$el?.querySelector('.el-scrollbar__wrap') as HTMLElement | null
   if (wrap) {
@@ -111,6 +157,8 @@ function scrollToTop() {
   }
 }
 
+/** 键盘上下导航时把高亮项滚到可视区：超出底边下推、超出顶边上拉，否则不动 */
+// TODO @AI：变量尽量完整！
 function scrollToActive() {
   const wrap = scrollRef.value?.$el?.querySelector('.el-scrollbar__wrap') as HTMLElement | null
   if (!wrap) {
@@ -125,6 +173,7 @@ function scrollToActive() {
   }
 }
 
+/** 选中一项：emit 给 MessageInput 落 token，同时关掉浮层 */
 function handleSelect(m: GroupMemberLite) {
   emit('select', m)
   emit('update:visible', false)
@@ -152,4 +201,3 @@ defineExpose({
   hasCandidates: () => showMembers.value.length > 0
 })
 </script>
-

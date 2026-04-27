@@ -2,12 +2,8 @@
   <div
     class="relative flex flex-col bg-[var(--el-bg-color)] border-t border-[var(--el-border-color-lighter)]"
   >
-    <!-- 顶部工具栏：表情/图片/文件/语音/历史 -->
+    <!-- 顶部工具栏：表情 / 图片 / 文件 / 语音 / 历史 -->
     <div class="relative flex items-center gap-2 h-9 px-3">
-      <!--
-        注意：el-icon 默认 box-sizing:border-box + width:1em，所以这里显式 box-content 才能让 p-1.5
-        不把 1em 的图标挤瘪；hover 态走 UnoCSS 的 hover: 前缀
-      -->
       <el-tooltip content="表情" placement="top">
         <el-icon
           class="message-input__tool box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
@@ -49,26 +45,28 @@
         </el-icon>
       </el-tooltip>
 
-      <!-- 浮层：表情面板；绝对定位到工具栏左上方 -->
-      <EmojiPicker
-        v-model:visible="emojiVisible"
-        class="bottom-9 left-3"
-        @select="insertText"
-      />
+      <!-- 浮层：表情面板，绝对定位到工具栏左上方 -->
+      <EmojiPicker v-model:visible="emojiVisible" class="bottom-9 left-3" @select="insertText" />
     </div>
 
-    <!-- 输入区 -->
-    <el-input
-      ref="inputRef"
-      v-model="text"
-      type="textarea"
-      :rows="4"
-      resize="none"
-      placeholder="按 Enter 发送，Shift+Enter 换行"
-      class="message-input__textarea"
+    <!--
+      输入区：contenteditable div（取代 textarea）
+      - 让 @ 浮层能拿到真实光标 rect（textarea 拿不到）
+      - 让 @ 成员以 <span data-id> token 节点存在，删 token 即删 id，避免 stale atUserIds
+      - placeholder 通过 data-empty + ::before 模拟（contenteditable 没有原生 placeholder）
+    -->
+    <div
+      ref="editorRef"
+      class="message-input__editor"
+      contenteditable="true"
+      data-placeholder="按 Enter 发送，Shift+Enter 换行"
+      data-empty=""
+      role="textbox"
       @keydown="onKeydown"
       @input="onInput"
-    />
+      @scroll.passive="onEditorScroll"
+      @paste.prevent="onPaste"
+    ></div>
 
     <!-- 发送按钮 -->
     <div class="flex justify-end px-3 pt-1.5 pb-2.5">
@@ -96,9 +94,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { Sunny, Picture, Paperclip, Microphone, Tickets } from '@element-plus/icons-vue'
-import { ElInput, ElMessage } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 import { CommonStatusEnum } from '@/utils/constants'
 import { updateFile } from '@/api/infra/file'
@@ -121,78 +119,221 @@ import type { GroupMemberLite } from '../ChatGroupMember.vue'
 defineOptions({ name: 'ImMessageInput' })
 
 defineEmits<{
-  openHistory: [] // 打开历史消息抽屉（由 ChatPanel 或 MessagePage 承接）
+  openHistory: [] // 打开历史消息抽屉（由 ChatPanel / MessagePage 承接）
 }>()
 
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const { send, sendRaw } = useMessageSender()
 
-const inputRef = useTemplateRef<InstanceType<typeof ElInput>>('inputRef')
+const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
 const imageInputRef = useTemplateRef<HTMLInputElement>('imageInputRef')
 const fileInputRef = useTemplateRef<HTMLInputElement>('fileInputRef')
 const mentionRef = useTemplateRef<InstanceType<typeof MentionPicker>>('mentionRef')
 
 // ==================== 文本 / 发送 ====================
-const text = ref('')
-const canSend = computed(() => !!text.value.trim() && !!conversationStore.activeConversation)
+/** editor 是否有可发送内容；contenteditable 没 v-model，靠 input 事件主动同步 */
+const canSend = ref(false)
+
+/** 维护 canSend + data-empty（撑起 placeholder） */
+function syncEditorState() {
+  const editor = editorRef.value
+  if (!editor) {
+    return
+  }
+  const raw = editor.textContent || ''
+  // canSend 按 trim 后判断（空格 / 换行不算可发送内容）
+  canSend.value = !!raw.trim() && !!conversationStore.activeConversation
+  // data-empty 按原始内容判断：用户敲一个空格也要让 placeholder 隐藏，避免视觉叠加
+  // 用属性"存在 / 缺失"而非 'true'/'false' 字符串：CSS [data-empty]::before 命中即可，
+  // 比 [data-empty='true'] 直观；浏览器删空后留 <br> → :empty 不命中，所以必须 JS 维护
+  if (raw) {
+    delete editor.dataset.empty
+  } else {
+    editor.dataset.empty = ''
+  }
+}
 
 /**
- * 提交时从文本里实际存在的 @ 段重新收集 atUserIds
- * - 用户先 @ 后又把 "@张三 " 整段删掉时，旧 push 模型仍会带上张三的 id（与文本不一致）
- * - "@全体成员" 走虚拟 userId=-1，对齐 MentionPicker 里的 allTag 约定
- * - 同名成员碰撞时第一条匹配胜出（textarea 没有不可编辑 token，也只能这么做）
+ * 走 DOM 把 editor 内容拼回 plain text + atUserIds
+ *
+ * 节点分支：
+ * 1. text 节点：直接拼 textContent；过程中滤掉 ZWSP（token 首位锚点用，不进发送内容）
+ * 2. br：拼 \n（Shift+Enter 走 execCommand('insertLineBreak') 产物）
+ * 3. span[data-id]：拼 token 显示文本 + 把 dataset.id 收到 atUserIds（不递归 span 内部）
+ * 4. div：浏览器在 contenteditable 里默认换行容器，前置 \n 后递归子节点
+ * 5. 其他元素：透传，递归子节点
+ *
+ * atUserIds 走 Set 去重：用户 @ 张三两次时 atUserIds 只出现一次；trim 末尾空白
  */
-function collectAtUserIds(): number[] {
-  if (!isGroup.value) {
-    return []
-  }
-  const userIds = new Set<number>()
-  const regex = /@([^\s@]+)/g
-  let match: RegExpExecArray | null
-  while ((match = regex.exec(text.value)) !== null) {
-    const name = match[1]
-    if (name === '全体成员') {
-      userIds.add(-1)
-      continue
+function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number[] } {
+  const userIds: number[] = []
+  let text = ''
+
+  function walk(node: Node) {
+    // 1. text 节点
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += (node.textContent || '').replace(/​/g, '')
+      return
     }
-    const member = groupMembers.value.find((m) => m.showNickName === name)
-    if (member?.userId != null) {
-      userIds.add(member.userId)
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return
     }
+    const el = node as HTMLElement
+    const tag = el.tagName.toLowerCase()
+    // 2. br
+    if (tag === 'br') {
+      text += '\n'
+      return
+    }
+    // 3. span[data-id]：mention token
+    if (tag === 'span' && el.dataset.id) {
+      text += el.textContent || ''
+      const id = Number(el.dataset.id)
+      if (!Number.isNaN(id)) {
+        userIds.push(id)
+      }
+      return
+    }
+    // 4. div：行级换行容器
+    if (tag === 'div') {
+      if (text && !text.endsWith('\n')) {
+        text += '\n'
+      }
+      el.childNodes.forEach(walk)
+      return
+    }
+    // 5. 其他元素：递归
+    el.childNodes.forEach(walk)
   }
-  return Array.from(userIds)
+
+  root.childNodes.forEach(walk)
+  return {
+    text: text.trim(),
+    atUserIds: [...new Set(userIds)]
+  }
 }
 
+/**
+ * 发送：从 DOM 收 text + atUserIds → 清空编辑器 → 走 useMessageSender.send
+ *
+ * 1. 防御：canSend 是 false（trim 后空 / 没激活会话）或 editor 没 mount → 直接 return
+ * 2. 收集：DOM walk 拿到要发送的文本 + atUserIds
+ * 3. 二次防御：collectFromEditor 走 trim，可能比 syncEditorState 更严格（例如全 ZWSP），仍空就 return
+ * 4. 清空 + 同步状态：先清 innerHTML 再 syncEditorState 让 placeholder / canSend 一起回归
+ *    （顺序很重要：先清后 sync，否则 sync 看到旧内容会误判）
+ * 5. 上送：atUserIds 非空才传，避免发空数组
+ */
 async function handleSend() {
-  if (!canSend.value) {
+  // 1.
+  const editor = editorRef.value
+  if (!canSend.value || !editor) {
     return
   }
-  const atUserIds = collectAtUserIds()
-  const txt = text.value
-  text.value = ''
-  await send(txt, atUserIds.length > 0 ? { atUserIds } : undefined)
+  // 2.
+  const { text, atUserIds } = collectFromEditor(editor)
+  // 3.
+  if (!text) {
+    return
+  }
+  // 4.
+  editor.innerHTML = ''
+  syncEditorState()
+  // 5.
+  await send(text, atUserIds.length > 0 ? { atUserIds } : undefined)
 }
 
+// ==================== 选区 / 插入 ====================
+/**
+ * 上次落在 editor 内的 selection（焦点被表情面板等夺走时用来回到原插入点）
+ *
+ * 监听 document.selectionchange 比 editor.@blur 更可靠：blur 时 selection 已经移走
+ */
+let savedRange: Range | null = null
+
+// TODO @AI：方法注释、方法内注释；
+function onSelectionChange() {
+  const editor = editorRef.value
+  const sel = window.getSelection()
+  if (!editor || !sel || sel.rangeCount === 0) {
+    return
+  }
+  const range = sel.getRangeAt(0)
+  if (editor.contains(range.startContainer)) {
+    savedRange = range.cloneRange()
+  }
+}
+
+/**
+ * 点击 editor / picker 外部时关掉浮层，避免输入 @keyword 后用户点别处浮层不消失
+ *
+ * 用 mousedown 而非 click：click 在某些浏览器里 picker 元素消失后回不到原 target，会被吞掉
+ */
+function onDocMousedown(e: MouseEvent) {
+  if (!mentionVisible.value) {
+    return
+  }
+  const target = e.target as Node | null
+  if (!target) {
+    return
+  }
+  if (editorRef.value?.contains(target)) {
+    return
+  }
+  // picker 是 fixed 定位的兄弟节点，不在 editor 子树里；用类名定位
+  const pickerEl = document.querySelector('.message-input__mention-picker')
+  if (pickerEl?.contains(target)) {
+    return
+  }
+  closeMention()
+}
+
+onMounted(() => {
+  document.addEventListener('selectionchange', onSelectionChange)
+  document.addEventListener('mousedown', onDocMousedown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('selectionchange', onSelectionChange)
+  document.removeEventListener('mousedown', onDocMousedown)
+})
+
+/**
+ * 把字符串插入光标处。execCommand('insertText') 而非自己拼 DOM，是为了保留浏览器
+ * 原生 undo 栈（Range API 替代实现会让 Ctrl+Z 失效）
+ */
+// TODO @AI：方法注释、方法内注释；
 function insertText(str: string) {
-  const ta = getTextarea()
-  if (!ta) {
-    text.value += str
+  const editor = editorRef.value
+  if (!editor) {
     return
   }
-  const start = ta.selectionStart ?? text.value.length
-  const end = ta.selectionEnd ?? text.value.length
-  text.value = text.value.slice(0, start) + str + text.value.slice(end)
-  nextTick(() => {
-    ta.focus()
-    const caret = start + str.length
-    ta.setSelectionRange(caret, caret)
-  })
+  editor.focus()
+  if (savedRange) {
+    const sel = window.getSelection()
+    if (sel) {
+      sel.removeAllRanges()
+      sel.addRange(savedRange)
+    }
+  }
+  // TODO @AI：linter 报错
+  document.execCommand('insertText', false, str)
+  syncEditorState()
 }
 
-function getTextarea(): HTMLTextAreaElement | null {
-  // ElInput 在 type=textarea 时内部是 <textarea>，需要在 DOM 上查找
-  return (inputRef.value?.$el?.querySelector('textarea') as HTMLTextAreaElement) || null
+/** 粘贴：剥掉外部样式 / 脚本，只留 plain text */
+function onPaste(e: ClipboardEvent) {
+  const text = e.clipboardData?.getData('text/plain') || ''
+  if (text) {
+    // TODO @AI：linter 报错
+    document.execCommand('insertText', false, text)
+  }
+}
+
+// TODO @AI：方法注释、方法内注释；
+function onInput() {
+  syncEditorState()
+  detectAtMention()
 }
 
 // ==================== 表情 ====================
@@ -220,6 +361,7 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
     quit: m.status === CommonStatusEnum.DISABLE
   }))
 })
+
 const groupOwnerId = computed<number | undefined>(() => {
   const conversation = conversationStore.activeConversation
   if (!conversation || conversation.type !== ImConversationType.GROUP) {
@@ -230,56 +372,133 @@ const groupOwnerId = computed<number | undefined>(() => {
 
 const mentionVisible = ref(false)
 const mentionSearchText = ref('')
-const mentionPos = ref({ x: 0, y: 0 })
+/** 浮层定位：x 是左边距；top / bottom 二选一—— bottom 锚定（picker 下沿贴 @）是默认，
+ *  上方放不下时退化为 top 锚定（picker 上沿贴 @ 下方） */
+const mentionPos = ref<{ x: number; top?: number; bottom?: number }>({ x: 0, bottom: 0 })
 
-/** 当前输入里 @ 符号的起始光标位置，用于选中成员后做替换 */
-let atStartPos = -1
+/** MentionPicker 的容器宽度（与组件里的 w-50 对齐），用于视口右沿回弹；
+ *  高度不再用常量算位置——bottom 锚定后 picker 内容多寡都不影响下沿位置，自然贴 @ */
+const MENTION_WIDTH = 200
+/** 上方剩余空间至少这么多才放上方，否则翻到下方（避免 picker 被视口顶 / 顶部 chat header 切掉） */
+const MENTION_MIN_FIT_ABOVE = 120
 
-function onInput() {
+/** 当前 @ 关键词在 editor 里的范围；onMentionSelect 用它定位删除 + 插入 token */
+let mentionRange: Range | null = null
+
+/** 关闭浮层 + 清掉 range，避免上次残留的 range 被下一次 onMentionSelect 误用 */
+function closeMention() {
+  mentionVisible.value = false
+  mentionRange = null
+}
+
+/** 在光标当前文本节点里向前找 @keyword，命中则展开浮层 */
+function detectAtMention() {
   if (!isGroup.value) {
+    closeMention()
     return
   }
-  const ta = getTextarea()
-  if (!ta) {
+  const sel = window.getSelection()
+  if (!sel || sel.rangeCount === 0) {
+    closeMention()
     return
   }
-  const caret = ta.selectionStart ?? 0
-  const before = text.value.slice(0, caret)
-  // 找最近的 @ 且 @ 后没有空格（允许汉字、字母、数字）
-  const match = before.match(/@([^\s@]*)$/)
-  if (match) {
-    atStartPos = caret - match[0].length
-    mentionSearchText.value = match[1]
-    // 贴在输入框左上方
-    const rect = ta.getBoundingClientRect()
-    mentionPos.value = { x: rect.left + 20, y: rect.top - 10 }
-    mentionVisible.value = true
+  const range = sel.getRangeAt(0)
+  if (!range.collapsed || range.startContainer.nodeType !== Node.TEXT_NODE) {
+    closeMention()
+    return
+  }
+  const node = range.startContainer
+  const offset = range.startOffset
+  const before = (node.textContent || '').slice(0, offset)
+  // (?:^|\s) 强制 @ 前是行首或空白，避免 email-like "test@example.com" 误触发
+  // match[1] 是关键词；@ 符号位置 = offset - keyword.length - 1
+  const match = before.match(/(?:^|\s)@([^\s@]*)$/)
+  if (!match) {
+    closeMention()
+    return
+  }
+  const atOffset = offset - match[1].length - 1
+  mentionRange = document.createRange()
+  mentionRange.setStart(node, atOffset)
+  mentionRange.setEnd(node, offset)
+  mentionSearchText.value = match[1]
+  // 锚定在 @ 符号本身，而非当前 caret——否则用户每多敲一个字浮层就跟着右移（"飘"）
+  positionMention(node, atOffset)
+  mentionVisible.value = true
+}
+
+/**
+ * 浮层位置：默认 bottom 锚定（picker 下沿贴 @ 上方 8px），上方不够才翻成 top 锚定
+ *
+ * 1. 计算 @ 字符屏幕坐标 rect
+ * 2. 横向：picker 左边对齐 @，越过视口右沿则左推；至少留 8px 留白
+ * 3. 纵向：上方剩余 ≥ MENTION_MIN_FIT_ABOVE 走 bottom 锚定（不依赖 picker 实际高度，
+ *    无论 1 项还是 N 项 picker 下沿都贴 @）；不够则翻到 @ 下方走 top 锚定
+ */
+function positionMention(node: Node, atOffset: number) {
+  // 1.
+  const anchor = document.createRange()
+  anchor.setStart(node, atOffset)
+  anchor.collapse(true)
+  const rect = anchor.getBoundingClientRect()
+  // 2.
+  const left = Math.max(8, Math.min(rect.left, window.innerWidth - MENTION_WIDTH - 8))
+  // 3.
+  if (rect.top >= MENTION_MIN_FIT_ABOVE) {
+    mentionPos.value = { x: left, bottom: window.innerHeight - rect.top + 8 }
   } else {
-    mentionVisible.value = false
-    atStartPos = -1
+    mentionPos.value = { x: left, top: rect.bottom + 8 }
   }
+}
+
+/** editor 内部滚动时同步浮层位置（多行 + 触发滚动条场景） */
+function onEditorScroll() {
+  if (!mentionVisible.value || !mentionRange) {
+    return
+  }
+  positionMention(mentionRange.startContainer, mentionRange.startOffset)
 }
 
 function onMentionSelect(member: GroupMemberLite) {
-  const ta = getTextarea()
-  if (!ta || atStartPos < 0) {
+  const editor = editorRef.value
+  if (!editor || !mentionRange) {
     return
   }
-  const caret = ta.selectionStart ?? atStartPos
-  const insert = `@${member.showNickName} `
-  text.value = text.value.slice(0, atStartPos) + insert + text.value.slice(caret)
-  // userId 不再 push 到本地状态，由 collectAtUserIds 在 send 时从 text 里重新收集
-  nextTick(() => {
-    ta.focus()
-    const newCaret = atStartPos + insert.length
-    ta.setSelectionRange(newCaret, newCaret)
-  })
-  mentionVisible.value = false
-  atStartPos = -1
+  // 删 @keyword，插入 contenteditable=false 的 token：
+  // 删除时整段消除 + 不会被光标拆穿；data-id 是后续 collectFromEditor 收 atUserIds 的钩子
+  mentionRange.deleteContents()
+  const span = document.createElement('span')
+  span.className = 'mention-token'
+  span.dataset.id = String(member.userId)
+  span.contentEditable = 'false'
+  span.textContent = `@${member.showNickName}`
+  mentionRange.insertNode(span)
+  // token 在 editor 首位时，contenteditable=false 边缘会让光标无法挪到 token 前
+  // 补一个零宽空格 ​ 当锚点；DOM walk 时会被滤掉，不进入发送内容
+  const prev = span.previousSibling
+  if (!prev || (prev.nodeType === Node.TEXT_NODE && !prev.textContent)) {
+    span.parentNode?.insertBefore(document.createTextNode('​'), span)
+  }
+  // 在 token 后补一个 NBSP，让光标可以继续输入；NBSP 比普通空格更稳，避免被浏览器折叠
+  const space = document.createTextNode(' ')
+  span.parentNode?.insertBefore(space, span.nextSibling)
+  // 光标移到 NBSP 之后
+  const sel = window.getSelection()
+  if (sel) {
+    const newRange = document.createRange()
+    newRange.setStartAfter(space)
+    newRange.collapse(true)
+    sel.removeAllRanges()
+    sel.addRange(newRange)
+  }
+  closeMention()
+  editor.focus()
+  syncEditorState()
 }
 
+// TODO @AI：方法注释、方法内注释；
 function onKeydown(e: KeyboardEvent) {
-  // @ 浮层打开时，键盘上下 + Enter 由浮层消费
+  // @ 浮层打开时键盘上下 / Enter / Esc 由浮层消费
   if (mentionVisible.value) {
     if (e.key === 'ArrowUp') {
       e.preventDefault()
@@ -291,19 +510,27 @@ function onKeydown(e: KeyboardEvent) {
       mentionRef.value?.moveDown()
       return
     }
-    if (e.key === 'Enter') {
-      e.preventDefault()
+    if (e.key === 'Enter' && !e.isComposing) {
+      // 有候选才拦 Enter 选中；无候选 fall through 到下面的发送分支，避免按 Enter 没反应
       if (mentionRef.value?.hasCandidates()) {
+        e.preventDefault()
         mentionRef.value?.pickActive()
         return
       }
     }
     if (e.key === 'Escape') {
-      mentionVisible.value = false
+      closeMention()
       return
     }
   }
-  // 普通 Enter → 发送；Shift+Enter / Ctrl+Enter → 换行
+  // Shift+Enter 强制走 br：浏览器默认会插 div，DOM walk 时拼接更复杂
+  if (e.key === 'Enter' && e.shiftKey && !e.isComposing) {
+    e.preventDefault()
+    document.execCommand('insertLineBreak')
+    syncEditorState()
+    return
+  }
+  // 普通 Enter 发送（IME composition 中除外）
   if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.isComposing) {
     e.preventDefault()
     handleSend()
@@ -311,6 +538,7 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 // ==================== 图片 / 文件上传 ====================
+// TODO @AI：方法注释、方法内注释；
 async function onImagePicked(e: Event) {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -332,6 +560,7 @@ async function onImagePicked(e: Event) {
   }
 }
 
+// TODO @AI：方法注释、方法内注释；
 async function onFilePicked(e: Event) {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -358,6 +587,7 @@ async function onFilePicked(e: Event) {
 
 // ==================== 语音 ====================
 const voiceVisible = ref(false)
+// TODO @AI：方法注释、方法内注释；
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   try {
     const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
@@ -393,15 +623,29 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   color: var(--el-color-primary) !important;
 }
 
-/* el-textarea 是 ElInput 内部的 textarea，需要 :deep() 去掉默认边框 / 圆角 */
-.message-input__textarea :deep(.el-textarea__inner) {
+.message-input__editor {
+  position: relative;
+  min-height: 80px;
+  max-height: 160px;
+  overflow-y: auto;
   padding: 8px 12px;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
+  font-size: 14px;
+  line-height: 1.5;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.message-input__textarea :deep(.el-textarea__inner):focus {
-  box-shadow: none;
+/* 用 data-empty 而非 :empty：浏览器在删空后会留下 <br>，:empty 不命中；data-empty 由 syncEditorState 维护 */
+.message-input__editor[data-empty]::before {
+  content: attr(data-placeholder);
+  color: var(--el-text-color-placeholder);
+  pointer-events: none;
+  position: absolute;
+}
+
+/* @ token 走主色高亮；contenteditable=false 让 backspace 整段删而不是逐字符 */
+.message-input__editor :deep(.mention-token) {
+  color: var(--el-color-primary);
 }
 </style>
