@@ -63,6 +63,7 @@ import { ElScrollbar } from 'element-plus'
 
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useUserStore } from '@/store/modules/user'
+import { CommonStatusEnum } from '@/utils/constants'
 import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
 import ChatGroupMember, { type GroupMemberLite } from '../ChatGroupMember.vue'
 
@@ -119,11 +120,11 @@ const allItem = computed<GroupMemberLite | null>(() => {
 /** 真成员：过滤自己 / 退群 / 不匹配关键字；不截断数量，浮层 max-height + el-scrollbar 撑滚动 */
 const memberItems = computed<GroupMemberLite[]>(() =>
   props.members.filter(
-    (m) =>
-      m.userId !== selfUserId.value &&
-      !m.quit &&
-      !!m.showNickName &&
-      m.showNickName.startsWith(props.searchText)
+    (member) =>
+      member.userId !== selfUserId.value &&
+      member.status !== CommonStatusEnum.DISABLE &&
+      !!member.showNickName &&
+      member.showNickName.startsWith(props.searchText)
   )
 )
 

@@ -1,8 +1,10 @@
 <template>
-  <!-- TODO @AI：自己发的消息，是不是头像在最右侧； -->
-  <!-- TODO @AI：消息内容的气泡，是不是指向自己。 -->
   <!-- TODO @AI：@全部、人的消息高亮；在消息内容里 -->
-  <!-- TODO @AI：文件消息，展示的不如微信的好看。可能要优化下； -->
+  <!--
+    布局约定：DOM 顺序永远是「头像在前 / 气泡在后」，对方消息走默认 row（头像顶左），
+    自己消息靠外层 flex-row-reverse 翻视觉（头像顶右、气泡在头像左侧），跟微信对齐。
+    早先双 v-if 头像 + row-reverse 会让自己消息时气泡顶右、头像反而在气泡左边。
+  -->
   <!-- 时间分隔线（TIP_TIME=20）：居中灰色时间 -->
   <div
     v-if="isTipTime"
@@ -34,12 +36,16 @@
     :class="{ 'flex-row-reverse': message.selfSend }"
     @contextmenu.prevent="handleContextMenu"
   >
-    <!-- 对方消息：头像在左，点头像弹 UserInfoCard -->
+    <!-- 头像：DOM 顺序固定为「头像在前 / 气泡在后」，selfSend 走 flex-row-reverse 翻视觉；
+         点头像弹 UserInfoCard 由 UserAvatar 内部承接 -->
     <UserAvatar
-      v-if="!message.selfSend"
-      :id="message.senderId"
-      :name="message.senderNickName || String(message.senderId)"
-      :url="senderAvatar"
+      :id="message.selfSend ? userStore.getUser?.id : message.senderId"
+      :name="
+        message.selfSend
+          ? userStore.getUser?.nickname
+          : message.senderNickName || String(message.senderId)
+      "
+      :url="message.selfSend ? userStore.getUser?.avatar : senderAvatar"
       :size="36"
     />
 
@@ -56,12 +62,13 @@
         <!-- 文本消息 -->
         <div
           v-if="isText"
-          class="px-3.5 py-2.5 text-sm leading-normal break-words whitespace-pre-wrap rounded-lg"
-          :class="
+          class="relative px-3.5 py-2.5 text-sm leading-normal break-words whitespace-pre-wrap rounded-lg"
+          :class="[
+            message.selfSend ? 'message-bubble--self' : 'message-bubble--other',
             message.selfSend
               ? 'text-black bg-[#95ec69]'
               : 'text-[var(--el-text-color-primary)] bg-[var(--el-fill-color-light)]'
-          "
+          ]"
         >
           {{ textContent }}
         </div>
@@ -74,36 +81,43 @@
           :preview-teleported="true"
           fit="contain"
         />
-        <!-- 文件消息 -->
+        <!-- 文件消息：对齐微信观感 —— 文件名 + 大小靠左、按扩展名分配的大彩色图标贴右 -->
         <div
           v-else-if="isFile && filePayload"
-          class="flex gap-2.5 items-center min-w-[220px] max-w-[320px] px-3.5 py-2.5 border rounded cursor-pointer transition-colors"
-          :class="
+          class="relative flex gap-3 items-center min-w-[260px] max-w-[340px] px-3.5 py-3 border rounded cursor-pointer transition-colors"
+          :class="[
+            message.selfSend ? 'message-bubble--self' : 'message-bubble--other',
             message.selfSend
               ? 'bg-[#95ec69] border-[var(--el-border-color-lighter)]'
               : 'bg-[var(--el-bg-color)] border-[var(--el-border-color-light)] hover:border-[#409eff]'
-          "
+          ]"
           @click="handleFileClick"
         >
-          <el-icon class="message-bubble__file-icon flex-shrink-0 !text-[32px]">
-            <Document />
-          </el-icon>
           <div class="flex-1 min-w-0">
             <div
               class="overflow-hidden text-sm font-medium truncate text-[var(--el-text-color-primary)]"
             >
               {{ filePayload.name }}
             </div>
-            <div class="mt-0.5 text-12px text-[var(--el-text-color-secondary)]">
+            <div class="mt-1 text-12px text-[var(--el-text-color-secondary)]">
               {{ formatFileSize(filePayload.size) }}
             </div>
           </div>
+          <Icon
+            :icon="fileIconInfo.icon"
+            :color="fileIconInfo.color"
+            :size="40"
+            class="flex-shrink-0"
+          />
         </div>
         <!-- 语音消息 -->
         <div
           v-else-if="isVoice && voicePayload"
-          class="flex gap-2 items-center min-w-[120px] px-3.5 py-2.5 rounded-lg cursor-pointer"
-          :class="message.selfSend ? 'bg-[#95ec69]' : 'bg-[var(--el-fill-color-light)]'"
+          class="relative flex gap-2 items-center min-w-[120px] px-3.5 py-2.5 rounded-lg cursor-pointer"
+          :class="[
+            message.selfSend ? 'message-bubble--self' : 'message-bubble--other',
+            message.selfSend ? 'bg-[#95ec69]' : 'bg-[var(--el-fill-color-light)]'
+          ]"
           @click="handleVoiceClick"
         >
           <el-icon
@@ -191,21 +205,15 @@
       </div>
     </div>
 
-    <!-- 自己消息：头像在右，点头像也能弹 UserInfoCard -->
-    <UserAvatar
-      v-if="message.selfSend"
-      :id="userStore.getUser?.id"
-      :name="userStore.getUser?.nickname"
-      :url="userStore.getUser?.avatar"
-      :size="36"
-    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { Loading, WarningFilled, Document, Microphone } from '@element-plus/icons-vue'
+import { Loading, WarningFilled, Microphone } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
+
+import Icon from '@/components/Icon/src/Icon.vue'
 
 import {
   ImMessageType,
@@ -213,7 +221,6 @@ import {
   ImGroupReceiptStatus,
   ImConversationType
 } from '../../../../../utils/constants'
-import { CommonStatusEnum } from '@/utils/constants'
 import {
   parseMessage,
   buildRecallTip,
@@ -278,7 +285,9 @@ const senderAvatar = computed(() => {
   }
   if (conversation.type === ImConversationType.GROUP) {
     const group = groupStore.getGroup(conversation.targetId)
-    return group?.members?.find((m) => m.userId === props.message.senderId)?.avatar || ''
+    return (
+      group?.members?.find((member) => member.userId === props.message.senderId)?.avatar || ''
+    )
   }
   return conversation.avatar || ''
 })
@@ -294,27 +303,27 @@ function formatTipTime(timestamp: number): string {
   if (!timestamp) {
     return ''
   }
-  const d = new Date(timestamp)
+  const messageDate = new Date(timestamp)
   const now = new Date()
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  const hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`
-  const sameDay = (a: Date, b: Date) =>
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  if (sameDay(d, now)) {
-    return hm
+  const pad = (value: number) => value.toString().padStart(2, '0')
+  const hourMinute = `${pad(messageDate.getHours())}:${pad(messageDate.getMinutes())}`
+  const sameDay = (left: Date, right: Date) =>
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  if (sameDay(messageDate, now)) {
+    return hourMinute
   }
   const yesterday = new Date(now)
   yesterday.setDate(now.getDate() - 1)
-  if (sameDay(d, yesterday)) {
-    return `昨天 ${hm}`
+  if (sameDay(messageDate, yesterday)) {
+    return `昨天 ${hourMinute}`
   }
-  if (now.getTime() - d.getTime() < 7 * 24 * 60 * 60 * 1000) {
-    const weeks = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    return `${weeks[d.getDay()]} ${hm}`
+  if (now.getTime() - messageDate.getTime() < 7 * 24 * 60 * 60 * 1000) {
+    const weekNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    return `${weekNames[messageDate.getDay()]} ${hourMinute}`
   }
-  return `${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${hm}`
+  return `${pad(messageDate.getMonth() + 1)}-${pad(messageDate.getDate())} ${hourMinute}`
 }
 
 /** 文本内容 */
@@ -334,6 +343,45 @@ const voicePayload = computed(() =>
 const videoPayload = computed(() =>
   isVideo.value ? parseMessage<VideoMessage>(props.message.content) : null
 )
+
+/**
+ * 文件类型图标 + 配色（按扩展名分发）
+ *
+ * 对齐微信观感：PDF 红 / Word 蓝 / Excel 绿 / PPT 橘 / 压缩包 黄 / 媒体 紫 / 文本 灰，
+ * 其它走通用 file-filled。后续多了类型在这里加 case，不动模板
+ */
+const fileIconInfo = computed<{ icon: string; color: string }>(() => {
+  const name = filePayload.value?.name || ''
+  const ext = name.split('.').pop()?.toLowerCase() || ''
+  if (ext === 'pdf') {
+    return { icon: 'ant-design:file-pdf-filled', color: '#ed5757' }
+  }
+  if (['doc', 'docx'].includes(ext)) {
+    return { icon: 'ant-design:file-word-filled', color: '#2b7cd3' }
+  }
+  if (['xls', 'xlsx'].includes(ext)) {
+    return { icon: 'ant-design:file-excel-filled', color: '#1f7244' }
+  }
+  if (['ppt', 'pptx'].includes(ext)) {
+    return { icon: 'ant-design:file-ppt-filled', color: '#d24726' }
+  }
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+    return { icon: 'ant-design:file-zip-filled', color: '#f0ad4e' }
+  }
+  if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(ext)) {
+    return { icon: 'ant-design:file-image-filled', color: '#9c27b0' }
+  }
+  if (['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv'].includes(ext)) {
+    return { icon: 'ant-design:video-camera-filled', color: '#9c27b0' }
+  }
+  if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(ext)) {
+    return { icon: 'ant-design:audio-filled', color: '#9c27b0' }
+  }
+  if (['txt', 'md', 'log', 'json', 'xml'].includes(ext)) {
+    return { icon: 'ant-design:file-text-filled', color: '#909399' }
+  }
+  return { icon: 'ant-design:file-filled', color: '#909399' }
+})
 
 /** 文件点击 → 新窗口下载 */
 function handleFileClick() {
@@ -413,19 +461,23 @@ const showGroupReadStatus = computed(() => {
   return status !== ImGroupReceiptStatus.NO_RECEIPT
 })
 
-// 当前群成员（供 MessageReadStatus 计算未读列表用）
+/**
+ * 当前群成员（供 MessageReadStatus 计算未读列表用）
+ *
+ * 群成员是按需懒加载到 groupStore（loadGroupMembers），未加载完 group?.members 为 undefined →
+ * 兜底空数组，MessageReadStatus 拿空数组就不渲染未读名单，不会出错
+ */
 const groupMembersForReadStatus = computed<GroupMemberLite[]>(() => {
   const conversation = conversationStore.activeConversation
   if (!conversation || conversation.type !== ImConversationType.GROUP) {
     return []
   }
-  // TODO @AI：group；注释；
-  const g = groupStore.getGroup(conversation.targetId)
-  return (g?.members || []).map((m) => ({
-    userId: m.userId,
-    showNickName: m.displayUserName || m.nickname,
-    showImage: m.avatar,
-    quit: m.status === CommonStatusEnum.DISABLE
+  const group = groupStore.getGroup(conversation.targetId)
+  return (group?.members || []).map((member) => ({
+    userId: member.userId,
+    showNickName: member.displayUserName || member.nickname,
+    showImage: member.avatar,
+    status: member.status
   }))
 })
 
@@ -450,14 +502,14 @@ async function handleContextMenu(e: MouseEvent) {
     return
   }
 
-  // TODO @AI：右键菜单；注释；
+  // "删除"对所有消息开放（纯本地清理，无后端影响）；"撤回"必须满足 自己发 + 已落库（id≠0）+ 未撤回
   const items: Array<{ key: string; name: string; disabled?: boolean }> = [
     { key: 'DELETE', name: '删除' }
   ]
   if (props.message.selfSend && !!props.message.id && !isRecall.value) {
     items.push({ key: 'RECALL', name: '撤回' })
   }
-  // TODO @AI：右键菜单；注释；
+  // 把菜单渲染交给全局 uiStore（单例，避免每条消息都挂一份菜单 DOM）；callback 按 key 分发
   uiStore.openContextMenu({ x: e.clientX, y: e.clientY }, items, async (item) => {
     if (item.key === 'RECALL') {
       await handleRecall()
@@ -467,13 +519,18 @@ async function handleContextMenu(e: MouseEvent) {
   })
 }
 
-// TODO @AI：注释缺少；
+/**
+ * 撤回消息：弹确认框 → 调 useMessageSender.recall → 后端通过 WS RECALL 事件推回，
+ * websocketStore 把对应 message 的 type 改成 RECALL，UI 自动切到"XX 撤回了一条消息"
+ *
+ * 不做乐观撤回：失败 / 超时 / 后端拒绝时本端状态可能与服务端漂移，统一让 WS 回推最稳
+ */
 async function handleRecall() {
   try {
     await ElMessageBox.confirm('确定要撤回这条消息吗？', '撤回消息', { type: 'warning' })
     await recall(props.message)
   } catch {
-    // 用户取消
+    // ElMessageBox 在用户点取消时会 reject，吃掉即可
   }
 }
 
@@ -501,7 +558,10 @@ async function handleResend() {
   })
 }
 
-// TODO @AI：注释缺少；
+/**
+ * 删除消息：本地软删，仅从 conversationStore.messages 移除，不调后端
+ * 区别于"撤回"：服务端没动，多端登录时其它客户端 / 群里其他人依然能看到这条
+ */
 function handleDelete() {
   const conversation = conversationStore.activeConversation
   if (!conversation) {
@@ -515,11 +575,32 @@ function handleDelete() {
 </script>
 
 <style scoped>
-/* el-icon 在暗色模式下全局 color 被 .el-icon{color:var(--color)} 干扰；
-   这里把 file / voice 图标的 fill 锁死，避免字体色跟随主题变白 */
-.message-bubble__file-icon :deep(svg) {
-  fill: #409eff !important;
+/* 气泡尾巴：小三角伪元素，指向对应头像（对方在左、自己在右），对齐微信观感
+   - 用 border 4 边色画三角：透明 3 边 + 实色 1 边，省一张图片
+   - 颜色对应气泡背景，留 1px 视觉吃进去；UnoCSS 写不顺手，索性用 scoped CSS */
+.message-bubble--other::before,
+.message-bubble--self::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-style: solid;
 }
+.message-bubble--other::before {
+  left: -5px;
+  border-width: 5px 6px 5px 0;
+  border-color: transparent var(--el-fill-color-light) transparent transparent;
+}
+.message-bubble--self::before {
+  right: -5px;
+  border-width: 5px 0 5px 6px;
+  border-color: transparent transparent transparent #95ec69;
+}
+
+/* el-icon 在暗色模式下全局 color 被 .el-icon{color:var(--color)} 干扰；
+   这里把 voice 图标的 fill 锁死，避免字体色跟随主题变白；
+   file 图标已迁到 Iconify 按扩展名走彩色，不在这里强制 */
 .message-bubble__voice-icon :deep(svg) {
   fill: #606266 !important;
 }

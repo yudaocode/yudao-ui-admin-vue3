@@ -103,7 +103,6 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import Icon from '@/components/Icon/src/Icon.vue'
-import { CommonStatusEnum } from '@/utils/constants'
 import { updateFile } from '@/api/infra/file'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
@@ -395,13 +394,12 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
   if (!conversation || conversation.type !== ImConversationType.GROUP) {
     return []
   }
-  // TODO @AI：g 变 group
-  const g = groupStore.getGroup(conversation.targetId)
-  return (g?.members || []).map((m) => ({
-    userId: m.userId,
-    showNickName: m.displayUserName || m.nickname,
-    showImage: m.avatar,
-    quit: m.status === CommonStatusEnum.DISABLE
+  const group = groupStore.getGroup(conversation.targetId)
+  return (group?.members || []).map((member) => ({
+    userId: member.userId,
+    showNickName: member.displayUserName || member.nickname,
+    showImage: member.avatar,
+    status: member.status
   }))
 })
 
