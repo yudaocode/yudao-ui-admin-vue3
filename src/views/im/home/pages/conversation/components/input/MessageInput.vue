@@ -68,7 +68,24 @@
         </el-tooltip>
       </div>
 
-      <el-button type="primary" :disabled="!canSend" @click="handleSend">发 送</el-button>
+      <!-- 群聊：发送按钮 + ▼ 下拉菜单（点主按钮普通发送 / 点 ▼ 选「发送回执消息」），对齐微信 PC -->
+      <el-dropdown
+        v-if="isGroup"
+        split-button
+        type="primary"
+        :disabled="!canSend"
+        @click="handleSend()"
+        @command="handleSendCommand"
+      >
+        发 送
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="receipt">发送回执消息</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <!-- 私聊：普通发送按钮（私聊没有群回执概念） -->
+      <el-button v-else type="primary" :disabled="!canSend" @click="handleSend()">发 送</el-button>
 
       <!-- 表情面板：bottom-full 让 picker 下沿贴工具栏顶部，向上弹出（对齐工具栏左侧首图标） -->
       <EmojiPicker
@@ -220,7 +237,7 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
  *    （顺序很重要：先清后 sync，否则 sync 看到旧内容会误判）
  * 5. 上送：atUserIds 非空才传，避免发空数组
  */
-async function handleSend() {
+async function handleSend(options?: { receipt?: boolean }) {
   const editor = editorRef.value
   if (!canSend.value || !editor) {
     return
@@ -233,7 +250,17 @@ async function handleSend() {
   editor.innerHTML = ''
   syncEditorState()
   // 2. 发送
-  await send(text, atUserIds.length > 0 ? { atUserIds } : undefined)
+  await send(text, {
+    atUserIds: atUserIds.length > 0 ? atUserIds : undefined,
+    receipt: options?.receipt
+  })
+}
+
+/** 发送按钮 dropdown 菜单回调：选"发送回执消息"时这一次带 receipt=true，每次独立决定 */
+function handleSendCommand(command: string) {
+  if (command === 'receipt') {
+    handleSend({ receipt: true })
+  }
 }
 
 // ==================== 选区 / 插入 ====================

@@ -18,7 +18,7 @@ import { useUserStore } from '@/store/modules/user'
 /** 非文本消息的扩展选项（通用） */
 interface SendExtOptions {
   atUserIds?: number[] // 群聊 @ 的用户编号列表
-  needReceipt?: boolean // 是否需要群回执（默认 false）
+  receipt?: boolean // 是否需要群回执（默认 false）
   targetId?: number // 覆盖默认的 targetId
 }
 
@@ -110,7 +110,7 @@ export const useMessageSender = () => {
           type,
           content,
           atUserIds: options?.atUserIds,
-          receipt: options?.needReceipt
+          receipt: options?.receipt
         })
         conversationStore.ackMessage(conversation.type, realTarget, clientMessageId, {
           id: data.id,
