@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore, acceptHMRUpdate } from 'pinia'
 import { reactive } from 'vue'
 
 import type { UserInfo } from '../types'
@@ -80,3 +80,9 @@ export const useImUiStore = defineStore('imUiStore', () => {
     closeContextMenu
   }
 })
+
+// dev: 让 Pinia 的 actions / state 改动支持 HMR，避免每次改 store 都得硬刷
+// 否则 Vite 把新模块推下来后，老 store 实例的 action 闭包仍指向旧函数体
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useImUiStore, import.meta.hot))
+}

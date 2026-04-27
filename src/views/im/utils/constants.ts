@@ -73,3 +73,14 @@ export const GROUP_MESSAGE_PULL_SIZE = 100
 
 /** 会话之间插入"时间分隔线"的阈值：10 分钟 */
 export const TIME_TIP_GAP_MS = 10 * 60 * 1000
+
+/**
+ * @全体成员 的特殊 userId 标识：atUserIds 中包含 -1 表示 @ 全体成员
+ *
+ * 与后端约定：群消息 atUserIds 数组里出现 -1 时，所有成员都收到提醒
+ * MentionPicker 渲染虚拟项 + conversationStore.applyAt 判定 atAll 都靠这个值
+ */
+export const IM_AT_ALL_USER_ID = -1
+
+/** @全体成员 的展示名（对齐微信 PC） */
+export const IM_AT_ALL_NICKNAME = '所有人'

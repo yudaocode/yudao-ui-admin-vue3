@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore, acceptHMRUpdate } from 'pinia'
 import { store } from '@/store'
 
 import { CommonStatusEnum } from '@/utils/constants'
@@ -29,14 +29,17 @@ export const useFriendStore = defineStore('imFriendStore', {
   }),
 
   getters: {
+    /** 按 friendUserId 找好友（含已软删的 DISABLE 记录，调用方自行判定） */
     getFriend:
       (state) =>
       (friendUserId: number): Friend | undefined => {
         return state.friends.find((f) => f.friendUserId === friendUserId)
       },
+    /** 当前生效的好友列表（过滤掉 DISABLE 软删记录） */
     getActiveFriends: (state): Friend[] => {
       return state.friends.filter((f) => f.status !== CommonStatusEnum.DISABLE)
     },
+    /** 判断对方是否是当前用户的有效好友（存在 + 非 DISABLE） */
     isFriend() {
       return (friendUserId: number): boolean => {
         const entry = this.getFriend(friendUserId)
@@ -93,7 +96,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       }
     },
 
-    /** 删除好友（保留墓碑记录，同时级联清理本地私聊会话） */
+    /** 删除好友（软删，保留记录但置 DISABLE；同时级联清理本地私聊会话） */
     async deleteFriend(friendUserId: number) {
       await apiDeleteFriend(friendUserId)
       this.removeFriend(friendUserId)
@@ -168,3 +171,9 @@ function convertFriend(vo: ImFriendRespVO): Friend {
 }
 
 export const useFriendStoreWithOut = () => useFriendStore(store)
+
+// dev: 让 Pinia 的 actions / state 改动支持 HMR，避免每次改 store 都得硬刷
+// 否则 Vite 把新模块推下来后，老 store 实例的 action 闭包仍指向旧函数体
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useFriendStore, import.meta.hot))
+}

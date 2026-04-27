@@ -141,7 +141,7 @@ export interface Friend {
   nickname: string // 好友昵称
   avatar?: string // 好友头像
   muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
-  status?: number // 好友状态，对齐 CommonStatusEnum（DISABLE = 已删除/墓碑）
+  status?: number // 好友状态，对齐 CommonStatusEnum（DISABLE = 已删除，软删保留记录）
   addTime?: number // 添加好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
   deleteTime?: number // 删除好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
 }

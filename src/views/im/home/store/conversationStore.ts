@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore, acceptHMRUpdate } from 'pinia'
 import { toRaw } from 'vue'
 import { store } from '@/store'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
@@ -7,6 +7,7 @@ import {
   ImConversationType,
   ImMessageType,
   ImMessageStatus,
+  IM_AT_ALL_USER_ID,
   TIME_TIP_GAP_MS
 } from '../../utils/constants'
 import { imStorage, StorageKeys } from '../../utils/storage'
@@ -18,8 +19,6 @@ import {
   type TextMessage
 } from '../../utils/message'
 import type { Conversation, ConversationStoreMeta, Message } from '../types'
-
-const AT_ALL_FLAG = -1 // @全体成员 的特殊 userId 标识：atUserIds 中包含 -1 表示 @all
 
 // TODO @芋艿：单个 conversation 的消息过多后，可能存储起来会很慢，后续看看怎么优化。
 // TODO @芋艿：首次拉取消息时，如果消息过多，可能导致渲染卡顿。（1% 场景）
@@ -303,10 +302,12 @@ export const useConversationStore = defineStore('imConversationStore', {
       this.saveConversations()
     },
 
+    /** 删私聊会话的语义糖：friendStore 删好友时调，避免外面手写 ImConversationType.PRIVATE */
     removePrivateConversation(friendId: number) {
       this.removeConversation(ImConversationType.PRIVATE, friendId)
     },
 
+    /** 删群聊会话的语义糖：groupStore 群解散时调，避免外面手写 ImConversationType.GROUP */
     removeGroupConversation(groupId: number) {
       this.removeConversation(ImConversationType.GROUP, groupId)
     },
@@ -371,7 +372,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         if (currentUserId && messageInfo.atUserIds.includes(currentUserId)) {
           conversation.atMe = true
         }
-        if (messageInfo.atUserIds.includes(AT_ALL_FLAG)) {
+        if (messageInfo.atUserIds.includes(IM_AT_ALL_USER_ID)) {
           conversation.atAll = true
         }
       }
@@ -673,4 +674,10 @@ export const useConversationStore = defineStore('imConversationStore', {
 
 export const useConversationStoreWithOut = () => {
   return useConversationStore(store)
+}
+
+// dev: 让 Pinia 的 actions / state 改动支持 HMR，避免每次改 store 都得硬刷
+// 否则 Vite 把新模块推下来后，老 store 实例的 action 闭包仍指向旧函数体
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useConversationStore, import.meta.hot))
 }

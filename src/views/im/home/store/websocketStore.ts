@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore, acceptHMRUpdate } from 'pinia'
 import { store } from '@/store'
 import { getRefreshToken } from '@/utils/auth'
 import { useUserStore } from '@/store/modules/user'
@@ -582,6 +582,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       }, 5000)
     },
 
+    /** 停心跳：disconnect / 重连前调，避免老 timer 在新 socket 上继续触发 sendHeartBeat */
     stopHeartbeat() {
       if (this.heartbeatTimer) {
         clearInterval(this.heartbeatTimer)
@@ -593,4 +594,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
 
 export const useImWebSocketStoreWithOut = () => {
   return useImWebSocketStore(store)
+}
+
+// dev: 让 Pinia 的 actions / state 改动支持 HMR，避免每次改 store 都得硬刷
+// 否则 Vite 把新模块推下来后，老 store 实例的 action 闭包仍指向旧函数体
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useImWebSocketStore, import.meta.hot))
 }
