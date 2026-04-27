@@ -125,6 +125,7 @@ export interface GroupMember {
   displayUserName?: string // 组内显示名（不与 nickname 合并，由消费方按需取舍）
   displayGroupName?: string // 群显示备注（当前用户对该群的自定义名）
   status?: number // 在群 / 退群状态，对齐 CommonStatusEnum
+  muted?: boolean // 当前成员对该群的免打扰开关（loadGroupMembers 用它回填 Group.muted）
 
   // ========== 前端扩展字段 ==========
   isOwner?: boolean // 是否群主（前端从 Group.ownerUserId 计算）

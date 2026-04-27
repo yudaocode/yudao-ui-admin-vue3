@@ -11,6 +11,7 @@ import {
   updateGroupMember as apiUpdateGroupMember,
   type ImGroupMemberRespVO
 } from '@/api/im/group/member'
+import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from './conversationStore'
 import { ImConversationType } from '../../utils/constants'
 import type { Group, GroupMember } from '../types'
@@ -81,17 +82,28 @@ export const useGroupStore = defineStore('imGroupStore', {
       // 拉取该群所有成员（聚合自 AdminUser，含 nickname / avatar / displayUserName）
       const list = await apiGetGroupMemberList(groupId)
       const members = (list || []).map((member) => convertGroupMember(member, groupId))
+      // 后端只在成员维度返回当前用户的 muted（apiGetMyGroupList 不带），借这次拉成员一起回填
+      // 否则冷启动 / 清缓存后，服务端已免打扰的群在会话列表里仍显示为未免打扰
+      const userStore = useUserStore()
+      const currentUserId = Number(userStore.getUser?.id) || 0
+      const me = members.find((m) => m.userId === currentUserId)
+      const muted = !!me?.muted
       // 成员列表可能在群列表之前触发，此时需要占位一个 group
       if (!group) {
         this.upsertGroup({
           id: groupId,
           name: String(groupId),
           members,
-          memberCount: members.length
+          memberCount: members.length,
+          muted
         })
       } else {
         group.members = members
         group.memberCount = members.length
+        group.muted = muted
+        // 已有 group 分支没走 upsertGroup，单独把 muted 推回 conversation 保证会话列表展示一致
+        const conversationStore = useConversationStore()
+        conversationStore.updateConversation(ImConversationType.GROUP, groupId, { muted })
       }
       return members
     },
@@ -158,7 +170,8 @@ function convertGroupMember(member: ImGroupMemberRespVO, groupId: number): Group
     avatar: member.avatar,
     displayUserName: member.displayUserName,
     displayGroupName: member.displayGroupName,
-    status: member.status
+    status: member.status,
+    muted: member.muted
   }
 }
 
