@@ -9,11 +9,13 @@
       >
         <el-input v-model="keyword" placeholder="搜索" clearable class="flex-1">
           <template #prefix>
-            <el-icon><Search /></el-icon>
+            <Icon icon="ant-design:search-outlined" />
           </template>
         </el-input>
         <el-dropdown trigger="click" placement="bottom">
-          <el-button size="small" :icon="Plus" circle />
+          <el-button size="small" circle>
+            <Icon icon="ant-design:plus-outlined" />
+          </el-button>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="createGroupVisible = true">
@@ -60,8 +62,6 @@
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { Search, Plus } from '@element-plus/icons-vue'
-
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useConversationStore } from '../../store/conversationStore'
 import { useFriendStore } from '../../store/friendStore'
