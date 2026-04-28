@@ -120,12 +120,12 @@
           ]"
           @click="handleVoiceClick"
         >
-          <el-icon
-            class="message-bubble__voice-icon !text-[18px]"
+          <Icon
+            icon="ant-design:audio-outlined"
+            :size="18"
+            class="message-bubble__voice-icon"
             :class="{ 'im-voice-playing': voicePlaying }"
-          >
-            <Microphone />
-          </el-icon>
+          />
           <span class="text-13px text-[var(--el-text-color-primary)]">
             {{ formatSeconds(voicePayload.duration) }}
           </span>
@@ -158,18 +158,19 @@
         <!-- 状态区：自己消息展示发送状态 + 已读/群回执；对方消息 + @自己时展示 @徽标 -->
         <div class="flex gap-1.5 items-center text-base">
           <template v-if="message.selfSend">
-            <el-icon v-if="message.status === ImMessageStatus.SENDING" class="is-loading">
-              <Loading />
-            </el-icon>
-            <el-icon
+            <Icon
+              v-if="message.status === ImMessageStatus.SENDING"
+              icon="ant-design:loading-outlined"
+              class="im-loading-spin"
+            />
+            <Icon
               v-else-if="message.status === ImMessageStatus.FAILED"
+              icon="ant-design:warning-filled"
               color="#f56c6c"
               class="cursor-pointer"
               title="发送失败，点击重试"
               @click="handleResend"
-            >
-              <WarningFilled />
-            </el-icon>
+            />
             <!-- 已读态（私聊） -->
             <span
               v-else-if="privateReadLabel"
@@ -210,7 +211,6 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { Loading, WarningFilled, Microphone } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
 import Icon from '@/components/Icon/src/Icon.vue'
@@ -620,6 +620,16 @@ function handleDelete() {
   }
   50% {
     transform: scale(1.15);
+  }
+}
+
+/* SENDING 状态的转圈动画：el-icon 自带 .is-loading 旋转，迁到 Iconify 后丢了，自己补一份 */
+.im-loading-spin {
+  animation: im-loading-spin 1s linear infinite;
+}
+@keyframes im-loading-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>

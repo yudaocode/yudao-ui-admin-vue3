@@ -29,7 +29,11 @@
         >
           {{ filterChipLabel }}
         </el-tag>
-        <el-icon v-else class="text-[var(--el-text-color-secondary)]"><Search /></el-icon>
+        <Icon
+          v-else
+          icon="ant-design:search-outlined"
+          class="text-[var(--el-text-color-secondary)]"
+        />
         <input
           v-model="keyword"
           type="text"
@@ -109,7 +113,7 @@
           <div>
             <el-input v-model="memberSearchKeyword" placeholder="搜索群成员" size="small">
               <template #prefix>
-                <el-icon><Search /></el-icon>
+                <Icon icon="ant-design:search-outlined" />
               </template>
             </el-input>
             <div class="max-h-[360px] overflow-y-auto mt-2">
@@ -293,7 +297,6 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 

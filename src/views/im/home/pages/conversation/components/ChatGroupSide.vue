@@ -27,7 +27,7 @@
           class="mb-2.5"
         >
           <template #prefix>
-            <el-icon><Search /></el-icon>
+            <Icon icon="ant-design:search-outlined" />
           </template>
         </el-input>
 
@@ -41,7 +41,7 @@
             <div
               class="im-chat-group-side__tool-btn flex items-center justify-center w-[38px] h-[38px] text-[18px] cursor-pointer border border-dashed border-[var(--el-border-color)] rounded text-[var(--el-text-color-regular)] hover:text-[#409eff] hover:border-[#409eff]"
             >
-              <el-icon><Plus /></el-icon>
+              <Icon icon="ant-design:plus-outlined" />
             </div>
             <div class="mt-1 text-12px text-[var(--el-text-color-regular)]">邀请</div>
           </div>
@@ -56,7 +56,7 @@
             <div
               class="im-chat-group-side__tool-btn flex items-center justify-center w-[38px] h-[38px] text-[18px] cursor-pointer border border-dashed border-[var(--el-border-color)] rounded text-[var(--el-text-color-regular)] hover:text-[#409eff] hover:border-[#409eff]"
             >
-              <el-icon><Minus /></el-icon>
+              <Icon icon="ant-design:minus-outlined" />
             </div>
             <div class="mt-1 text-12px text-[var(--el-text-color-regular)]">移除</div>
           </div>
@@ -121,7 +121,7 @@
 <script lang="ts" setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Plus, Minus } from '@element-plus/icons-vue'
+import Icon from '@/components/Icon/src/Icon.vue'
 
 import { useUserStore } from '@/store/modules/user'
 import { CommonStatusEnum } from '@/utils/constants'
