@@ -71,10 +71,10 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 
 import Icon from '@/components/Icon/src/Icon.vue'
+import { useMessage } from '@/hooks/web/useMessage'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
 import { useGroupStore } from '../../../../store/groupStore'
@@ -96,6 +96,7 @@ const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 const uiStore = useImUiStore()
+const message = useMessage()
 
 const isActive = computed(
   () =>
@@ -163,7 +164,7 @@ function handleMuted() {
       : groupStore.setMuted(targetId, next)
   sync.catch((e) => {
     console.error('[IM] 切换免打扰失败', e)
-    ElMessage.error('切换免打扰失败')
+    message.error('切换免打扰失败')
     conversationStore.setMuted(type, targetId, !next)
   })
 }
@@ -171,9 +172,7 @@ function handleMuted() {
 /** 删除会话：二次确认后软删（用户取消走 catch 静默） */
 async function handleDelete() {
   try {
-    await ElMessageBox.confirm(`确定删除与「${props.conversation.name}」的会话吗？`, '删除会话', {
-      type: 'warning'
-    })
+    await message.confirm(`确定删除与「${props.conversation.name}」的会话吗？`, '删除会话')
     conversationStore.removeConversation(props.conversation.type, props.conversation.targetId)
   } catch {
     // 用户取消

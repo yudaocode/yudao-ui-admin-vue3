@@ -211,9 +211,8 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { ElMessageBox } from 'element-plus'
-
 import Icon from '@/components/Icon/src/Icon.vue'
+import { useMessage } from '@/hooks/web/useMessage'
 
 import {
   ImMessageType,
@@ -254,6 +253,8 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const uiStore = useImUiStore()
 const { recall, sendRaw } = useMessageSender()
+// 仅用 confirm，避免 message 跟 props.message 同名冲突（vue/no-dupe-keys）
+const { confirm: confirmDialog } = useMessage()
 
 /** 是否已撤回：pull / WS 两路都会调 recallMessage 把原消息更新为 type=RECALL，渲染只需识别 type */
 const isRecall = computed(() => props.message.type === ImMessageType.RECALL)
@@ -527,7 +528,7 @@ async function handleContextMenu(e: MouseEvent) {
  */
 async function handleRecall() {
   try {
-    await ElMessageBox.confirm('确定要撤回这条消息吗？', '撤回消息', { type: 'warning' })
+    await confirmDialog('确定要撤回这条消息吗？', '撤回消息')
     await recall(props.message)
   } catch {
     // ElMessageBox 在用户点取消时会 reject，吃掉即可

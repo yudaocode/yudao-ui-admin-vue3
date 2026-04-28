@@ -117,7 +117,7 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
-import { ElMessage } from 'element-plus'
+import { useMessage } from '@/hooks/web/useMessage'
 
 import Icon from '@/components/Icon/src/Icon.vue'
 import { updateFile } from '@/api/infra/file'
@@ -142,6 +142,7 @@ defineOptions({ name: 'ImMessageInput' })
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const { send, sendRaw } = useMessageSender()
+const message = useMessage()
 
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
 const imageInputRef = useTemplateRef<HTMLInputElement>('imageInputRef')
@@ -627,7 +628,7 @@ async function uploadAndSendImage(file: File) {
     await sendRaw(ImMessageType.IMAGE, serializeMessage<ImageMessage>({ url }))
   } catch (err) {
     console.error('[IM] 图片上传失败:', err)
-    ElMessage.error('图片上传失败')
+    message.error('图片上传失败')
   }
 }
 
@@ -646,7 +647,7 @@ async function uploadAndSendFile(file: File) {
     )
   } catch (err) {
     console.error('[IM] 文件上传失败:', err)
-    ElMessage.error('文件上传失败')
+    message.error('文件上传失败')
   }
 }
 
@@ -689,7 +690,7 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
     )
   } catch (err) {
     console.error('[IM] 语音上传失败:', err)
-    ElMessage.error('语音上传失败')
+    message.error('语音上传失败')
   }
 }
 </script>

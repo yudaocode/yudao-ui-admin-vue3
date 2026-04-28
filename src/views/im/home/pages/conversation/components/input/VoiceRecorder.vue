@@ -36,7 +36,7 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { useMessage } from '@/hooks/web/useMessage'
 import { formatSeconds } from '@/utils/formatTime'
 
 defineOptions({ name: 'ImVoiceRecorder' })
@@ -55,6 +55,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   send: [payload: { blob: Blob; duration: number }] // 录制完成：返回录音 Blob 和时长（秒）
 }>()
+
+const message = useMessage()
 
 const visible = computed({
   get: () => props.modelValue,
@@ -76,13 +78,13 @@ watch(visible, (v) => {
 
 async function startRecord() {
   if (!navigator.mediaDevices?.getUserMedia) {
-    ElMessage.error('当前浏览器不支持录音（需要 HTTPS 或 localhost）')
+    message.error('当前浏览器不支持录音（需要 HTTPS 或 localhost）')
     return
   }
   try {
     mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true })
   } catch (e) {
-    ElMessage.error('无法获取麦克风权限')
+    message.error('无法获取麦克风权限')
     return
   }
   audioChunks = []

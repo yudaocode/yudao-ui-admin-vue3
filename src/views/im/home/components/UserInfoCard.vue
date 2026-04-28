@@ -51,7 +51,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { useMessage } from '@/hooks/web/useMessage'
 
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { getSimpleUser } from '@/api/system/user'
@@ -70,6 +70,7 @@ const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
 const userStore = useUserStore()
 const router = useRouter()
+const message = useMessage()
 
 const card = computed(() => uiStore.userInfoCard)
 const user = computed(() => card.value.user)
@@ -161,14 +162,14 @@ async function handleAddFriend() {
       nickname: user.value.nickname,
       avatar: user.value.avatar
     })
-    ElMessage.success('已添加好友')
+    message.success('已添加好友')
   } catch (e: any) {
     console.error(
       '[IM] 添加好友失败',
       { userId: user.value?.id, nickname: user.value?.nickname },
       e
     )
-    ElMessage.error(e?.message || '添加好友失败')
+    message.error(e?.message || '添加好友失败')
   }
 }
 </script>
