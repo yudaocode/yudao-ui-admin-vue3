@@ -41,7 +41,7 @@
       </div>
 
       <!-- 真成员行 -->
-      <ChatGroupMember
+      <GroupMember
         v-for="(member, idx) in memberItems"
         :key="member.userId"
         :member="member"
@@ -65,7 +65,7 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useUserStore } from '@/store/modules/user'
 import { CommonStatusEnum } from '@/utils/constants'
 import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
-import ChatGroupMember, { type GroupMemberLite } from '../ChatGroupMember.vue'
+import GroupMember, { type GroupMemberLite } from '../../../../components/GroupMember.vue'
 
 defineOptions({ name: 'ImMentionPicker' })
 

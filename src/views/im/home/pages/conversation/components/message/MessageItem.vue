@@ -240,7 +240,7 @@ import { useMessageSender } from '../../../../composables/useMessageSender'
 import type { Message } from '../../../../types'
 import MessageReadStatus from './MessageReadStatus.vue'
 import UserAvatar from '../../../../components/UserAvatar.vue'
-import type { GroupMemberLite } from '../ChatGroupMember.vue'
+import type { GroupMemberLite } from '../../../../components/GroupMember.vue'
 
 defineOptions({ name: 'ImMessageItem' })
 

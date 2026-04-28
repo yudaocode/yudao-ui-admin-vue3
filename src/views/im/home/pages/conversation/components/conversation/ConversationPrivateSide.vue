@@ -1,9 +1,8 @@
 <template>
   <!-- TODO @AI：不够对齐微信。如果让你改时，需要提醒我给你图片 -->
-  <!-- TODO @AI：新建一个 components/side？ -->
   <!--
     私聊侧边抽屉
-    - 抽屉形态：受 v-model 控制，由父组件 ChatPanel 管理开关
+    - 抽屉形态：受 v-model 控制，由父组件 MessagePanel 管理开关
     - 顶部：好友头像 + 昵称
     - 操作：消息免打扰 / 置顶聊天
     - 与会话列表右键菜单同语义：免打扰联动 friendStore.setMuted
@@ -26,7 +25,7 @@
         </div>
       </div>
 
-      <el-divider class="im-chat-private-side__divider" />
+      <el-divider class="im-conversation-private-side__divider" />
 
       <!-- 操作项 -->
       <div class="flex flex-col gap-3.5 text-sm">
@@ -46,13 +45,13 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import { useConversationStore } from '../../../store/conversationStore'
-import { useFriendStore } from '../../../store/friendStore'
-import { ImConversationType } from '../../../../utils/constants'
-import type { Conversation, Friend } from '../../../types'
-import UserAvatar from '../../../components/UserAvatar.vue'
+import { useConversationStore } from '../../../../store/conversationStore'
+import { useFriendStore } from '../../../../store/friendStore'
+import { ImConversationType } from '../../../../../utils/constants'
+import type { Conversation, Friend } from '../../../../types'
+import UserAvatar from '../../../../components/UserAvatar.vue'
 
-defineOptions({ name: 'ImChatPrivateSide' })
+defineOptions({ name: 'ImConversationPrivateSide' })
 
 const props = withDefaults(
   defineProps<{
@@ -98,7 +97,7 @@ function onTopChange(value: boolean | string | number) {
 
 <style scoped>
 /* el-divider 默认 margin 较大，压成 8px，和群聊抽屉视觉对齐 */
-.im-chat-private-side__divider {
+.im-conversation-private-side__divider {
   margin: 8px 0;
 }
 </style>

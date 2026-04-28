@@ -135,7 +135,7 @@ import {
 import EmojiPicker from './EmojiPicker.vue'
 import MentionPicker from './MentionPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
-import type { GroupMemberLite } from '../ChatGroupMember.vue'
+import type { GroupMemberLite } from '../../../../components/GroupMember.vue'
 
 defineOptions({ name: 'ImMessageInput' })
 
@@ -416,7 +416,7 @@ const isGroup = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.GROUP
 )
 
-/** 从 groupStore 读当前激活群的成员（切会话时由 ChatPanel 预拉） */
+/** 从 groupStore 读当前激活群的成员（切会话时由 MessagePanel 预拉） */
 const groupMembers = computed<GroupMemberLite[]>(() => {
   const conversation = conversationStore.activeConversation
   if (!conversation || conversation.type !== ImConversationType.GROUP) {

@@ -94,7 +94,7 @@
             </div>
           </div>
         </el-popover>
-        <!-- 群成员：仅群聊；popover 内自带搜索 + ChatGroupMember 列表 -->
+        <!-- 群成员：仅群聊；popover 内自带搜索 + GroupMember 列表 -->
         <el-popover
           v-if="isGroup"
           v-model:visible="memberPopoverVisible"
@@ -117,7 +117,7 @@
               </template>
             </el-input>
             <div class="max-h-[360px] overflow-y-auto mt-2">
-              <ChatGroupMember
+              <GroupMember
                 v-for="member in filteredMembersForPicker"
                 :key="member.userId"
                 :member="member"
@@ -321,7 +321,7 @@ import {
 } from '../../../../../utils/message'
 import type { Message } from '../../../../types'
 import UserAvatar from '../../../../components/UserAvatar.vue'
-import ChatGroupMember, { type GroupMemberLite } from '../ChatGroupMember.vue'
+import GroupMember, { type GroupMemberLite } from '../../../../components/GroupMember.vue'
 
 defineOptions({ name: 'ImMessageHistory' })
 
@@ -330,7 +330,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  // 历史消息行上的"定位"按钮：通知父组件 ChatPanel 滚到对应消息位置 + 关掉自己
+  // 历史消息行上的"定位"按钮：通知父组件 MessagePanel 滚到对应消息位置 + 关掉自己
   locate: [messageId: number]
 }>()
 
@@ -697,7 +697,7 @@ function openFile(url?: string) {
 }
 
 /**
- * 定位到聊天位置：emit 给 ChatPanel 走 scrollIntoView + 短暂高亮，再关掉自己
+ * 定位到聊天位置：emit 给 MessagePanel 走 scrollIntoView + 短暂高亮，再关掉自己
  * messageId === 0（本地占位消息）跳过——还没拿到真实 id，DOM 上没法 querySelector
  */
 function locateMessage(messageId: number) {

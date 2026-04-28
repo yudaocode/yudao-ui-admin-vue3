@@ -14,7 +14,7 @@
             <Icon
               icon="ant-design:profile-outlined"
               :size="20"
-              class="chat-panel__header-icon cursor-pointer"
+              class="message-panel__header-icon cursor-pointer"
               @click="historyVisible = true"
             />
           </el-tooltip>
@@ -24,7 +24,7 @@
             <Icon
               icon="ant-design:more-outlined"
               :size="20"
-              class="chat-panel__header-icon cursor-pointer"
+              class="message-panel__header-icon cursor-pointer"
               @click="toggleSide"
             />
           </el-tooltip>
@@ -49,16 +49,16 @@
           v-for="msg in messages"
           :key="msg.id || msg.clientMessageId"
           :data-message-id="msg.id || ''"
-          class="chat-panel__message-anchor"
+          class="message-panel__message-anchor"
         >
           <MessageItem :message="msg" />
         </div>
 
         <!-- 回到底部浮动按钮（滚动不在底部时显示） -->
-        <transition name="chat-panel__jump-fade">
+        <transition name="message-panel__jump-fade">
           <div
             v-if="showJumpToBottom"
-            class="chat-panel__jump-bottom sticky bottom-3 left-1/2 inline-flex gap-1.5 items-center w-fit mx-auto px-3.5 py-1.5 text-xs text-[#409eff] bg-[var(--el-bg-color-overlay)] rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.12)] cursor-pointer hover:text-white hover:bg-[#409eff]"
+            class="message-panel__jump-bottom sticky bottom-3 left-1/2 inline-flex gap-1.5 items-center w-fit mx-auto px-3.5 py-1.5 text-xs text-[#409eff] bg-[var(--el-bg-color-overlay)] rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.12)] cursor-pointer hover:text-white hover:bg-[#409eff]"
             @click="scrollToBottom(true)"
           >
             <Icon icon="ant-design:down-outlined" :size="14" />
@@ -78,7 +78,7 @@
       <MessageInput :key="messageInputKey" />
 
       <!-- 右侧信息抽屉：群聊 / 私聊各自一份 -->
-      <ChatGroupSide
+      <ConversationGroupSide
         v-if="isGroup"
         v-model="sideVisible"
         :group="groupInfo"
@@ -86,7 +86,7 @@
         :friends="groupFriends"
         @reload="reloadGroupData"
       />
-      <ChatPrivateSide
+      <ConversationPrivateSide
         v-else
         v-model="sideVisible"
         :conversation="conversationStore.activeConversation"
@@ -109,21 +109,21 @@
 import { ref, watch, nextTick, computed } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 
-import { useConversationStore } from '../../../store/conversationStore'
-import { useFriendStore } from '../../../store/friendStore'
-import { useGroupStore } from '../../../store/groupStore'
-import { ImConversationType } from '../../../../utils/constants'
+import { useConversationStore } from '../../../../store/conversationStore'
+import { useFriendStore } from '../../../../store/friendStore'
+import { useGroupStore } from '../../../../store/groupStore'
+import { ImConversationType } from '../../../../../utils/constants'
 import { CommonStatusEnum } from '@/utils/constants'
-import MessageItem from './message/MessageItem.vue'
-import MessageInput from './input/MessageInput.vue'
-import MessageHistory from './message/MessageHistory.vue'
-import ChatGroupSide from './ChatGroupSide.vue'
-import ChatPrivateSide from './ChatPrivateSide.vue'
-import type { GroupLite } from '../../group/components/GroupItem.vue'
-import type { GroupMemberLite } from './ChatGroupMember.vue'
-import type { FriendLite } from '../../friend/components/FriendItem.vue'
+import MessageItem from './MessageItem.vue'
+import MessageInput from '../input/MessageInput.vue'
+import MessageHistory from './MessageHistory.vue'
+import ConversationGroupSide from '../conversation/ConversationGroupSide.vue'
+import ConversationPrivateSide from '../conversation/ConversationPrivateSide.vue'
+import type { GroupLite } from '../../../group/components/GroupItem.vue'
+import type { GroupMemberLite } from '../../../../components/GroupMember.vue'
+import type { FriendLite } from '../../../friend/components/FriendItem.vue'
 
-defineOptions({ name: 'ImChatPanel' })
+defineOptions({ name: 'ImMessagePanel' })
 
 const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
@@ -212,13 +212,13 @@ const groupFriends = computed<FriendLite[]>(() =>
  */
 function ensureGroupData(groupId: number) {
   groupStore.loadGroupInfo(groupId).catch((error) => {
-    console.warn('[IM ChatPanel] loadGroupInfo 失败', { groupId }, error)
+    console.warn('[IM MessagePanel] loadGroupInfo 失败', { groupId }, error)
   })
   groupStore.loadGroupMembers(groupId).catch((error) => {
-    console.warn('[IM ChatPanel] loadGroupMembers 失败', { groupId }, error)
+    console.warn('[IM MessagePanel] loadGroupMembers 失败', { groupId }, error)
   })
   friendStore.loadFriends().catch((error) => {
-    console.warn('[IM ChatPanel] loadFriends 失败', { groupId }, error)
+    console.warn('[IM MessagePanel] loadFriends 失败', { groupId }, error)
   })
 }
 
@@ -238,7 +238,7 @@ function reloadGroupData() {
 
 const historyVisible = ref(false)
 /**
- * 信息抽屉的开关（纯 ChatPanel 本地 UI 状态）
+ * 信息抽屉的开关（纯 MessagePanel 本地 UI 状态）
  *
  * 群聊 / 私聊共用一个 ref：模板里 v-if-else 决定挂哪个抽屉，同一时刻只有一个组件
  * 在 DOM 里，所以一个布尔够用。早先拆成 sideVisible + privateSideVisible 是冗余
@@ -324,9 +324,9 @@ async function handleLocate(messageId: number) {
     return
   }
   target.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  target.classList.add('chat-panel__message-anchor--highlight')
+  target.classList.add('message-panel__message-anchor--highlight')
   setTimeout(() => {
-    target.classList.remove('chat-panel__message-anchor--highlight')
+    target.classList.remove('message-panel__message-anchor--highlight')
   }, 1600)
 }
 
@@ -379,20 +379,20 @@ watch(
 <style scoped>
 /* el-icon 全局规则 .el-icon{color:var(--color,inherit)} 优先级胜过 UnoCSS，这里用 :deep + !important 兜底；
    颜色直接引用 Element Plus 主题变量，暗色模式自动切到更亮的灰 */
-.chat-panel__header-icon,
-.chat-panel__header-icon :deep(svg) {
+.message-panel__header-icon,
+.message-panel__header-icon :deep(svg) {
   color: var(--el-text-color-regular) !important;
   fill: currentColor !important;
   transition: color 0.15s;
 }
-.chat-panel__header-icon:hover,
-.chat-panel__header-icon:hover :deep(svg) {
+.message-panel__header-icon:hover,
+.message-panel__header-icon:hover :deep(svg) {
   color: var(--el-color-primary) !important;
 }
 
 /* sticky + translate 居中：fit-content 宽度不会撑满，transform 做水平 -50% 偏移；
    UnoCSS 表达 transform+transition 多 value 不太方便，这里用最小的 scoped CSS 承接 */
-.chat-panel__jump-bottom {
+.message-panel__jump-bottom {
   transform: translateX(-50%);
   transition:
     opacity 0.2s,
@@ -400,23 +400,23 @@ watch(
 }
 
 /* MessageHistory "定位" 跳过来时短暂高亮：1.6s 后由 JS 移除 class，配合 transition 缓出黄底 */
-.chat-panel__message-anchor {
+.message-panel__message-anchor {
   transition: background-color 0.6s ease;
 }
-.chat-panel__message-anchor--highlight {
+.message-panel__message-anchor--highlight {
   background-color: var(--el-color-warning-light-9);
 }
 
 /* 回到底部按钮的 Vue transition 钩子类名 */
-.chat-panel__jump-fade-enter-active,
-.chat-panel__jump-fade-leave-active {
+.message-panel__jump-fade-enter-active,
+.message-panel__jump-fade-leave-active {
   transition:
     opacity 0.2s,
     transform 0.2s;
 }
 
-.chat-panel__jump-fade-enter-from,
-.chat-panel__jump-fade-leave-to {
+.message-panel__jump-fade-enter-from,
+.message-panel__jump-fade-leave-to {
   opacity: 0;
   transform: translate(-50%, 20px);
 }

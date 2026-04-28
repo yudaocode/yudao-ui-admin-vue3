@@ -25,7 +25,7 @@
       <el-tab-pane :label="`已读(${readMembers.length})`" name="read">
         <PagedScroller :items="readMembers" :page-size="20" class="h-75">
           <template #default="{ item }">
-            <ChatGroupMember :member="item as GroupMemberLite" :height="40" :clickable="false" />
+            <GroupMember :member="item as GroupMemberLite" :height="40" :clickable="false" />
           </template>
         </PagedScroller>
         <div
@@ -38,7 +38,7 @@
       <el-tab-pane :label="`未读(${unreadMembers.length})`" name="unread">
         <PagedScroller :items="unreadMembers" :page-size="20" class="h-75">
           <template #default="{ item }">
-            <ChatGroupMember :member="item as GroupMemberLite" :height="40" :clickable="false" />
+            <GroupMember :member="item as GroupMemberLite" :height="40" :clickable="false" />
           </template>
         </PagedScroller>
         <div
@@ -60,14 +60,14 @@ import { CommonStatusEnum } from '@/utils/constants'
 import { ImConversationType, ImGroupReceiptStatus } from '../../../../../utils/constants'
 import type { Message } from '../../../../types'
 import { useConversationStore } from '../../../../store/conversationStore'
-import ChatGroupMember, { type GroupMemberLite } from '../ChatGroupMember.vue'
+import GroupMember, { type GroupMemberLite } from '../../../../components/GroupMember.vue'
 import PagedScroller from '../../../../components/PagedScroller.vue'
 
 defineOptions({ name: 'ImMessageReadStatus' })
 
 const props = defineProps<{
   message: Message
-  // 当前群所有成员（外部 ChatPanel.groupMembers 传入；没有就传空数组，未读列表会变空但不报错）
+  // 当前群所有成员（外部 MessagePanel.groupMembers 传入；没有就传空数组，未读列表会变空但不报错）
   groupMembers: GroupMemberLite[]
   // 当前群编号；供 loadReadUsers 作为 /im/message/group/get-read-users 的入参
   groupId: number

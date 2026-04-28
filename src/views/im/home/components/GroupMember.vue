@@ -1,7 +1,7 @@
 <template>
   <!--
     群成员单行
-    跨子域复用：@候选 (MentionPicker) / 已读列表 (MessageReadStatus) / 群成员宫格 (ChatGroupSide)
+    跨子域复用：@候选 (MentionPicker) / 已读列表 (MessageReadStatus) / 群成员宫格 (ConversationGroupSide)
   -->
   <div
     class="relative flex items-center px-[5px] box-border whitespace-nowrap"
@@ -27,9 +27,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import UserAvatar from '../../../components/UserAvatar.vue'
+import UserAvatar from './UserAvatar.vue'
 
-defineOptions({ name: 'ImChatGroupMember' })
+defineOptions({ name: 'ImGroupMember' })
 
 /** 群成员结构（跨多处使用，放这里做窄接口；独立于 types/index.ts） */
 export interface GroupMemberLite {

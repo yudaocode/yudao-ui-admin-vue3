@@ -48,7 +48,7 @@
     </ResizableAside>
 
     <!-- 右侧聊天面板 -->
-    <ChatPanel />
+    <MessagePanel />
 
     <!-- 添加朋友 / 发起群聊弹窗 -->
     <AddFriendDialog v-model="addFriendVisible" @added="handleFriendAdded" />
@@ -73,7 +73,7 @@ import type { Friend } from '../../types'
 import type { FriendLite } from '../friend/components/FriendItem.vue'
 import ResizableAside from '../../components/ResizableAside.vue'
 import ConversationItem from './components/conversation/ConversationItem.vue'
-import ChatPanel from './components/ChatPanel.vue'
+import MessagePanel from './components/message/MessagePanel.vue'
 import AddFriendDialog from '../friend/components/AddFriendDialog.vue'
 import CreateGroupDialog from '../group/components/CreateGroupDialog.vue'
 
@@ -115,7 +115,7 @@ async function handleFriendAdded() {
   await friendStore.loadFriends(true)
 }
 
-/** 建群成功后刷新群列表，并直接打开新群会话（自动选中并渲染到右侧 ChatPanel） */
+/** 建群成功后刷新群列表，并直接打开新群会话（自动选中并渲染到右侧 MessagePanel） */
 async function handleGroupCreated(groupId: number) {
   await groupStore.loadGroups(true)
   const group = groupStore.getGroup(groupId)
