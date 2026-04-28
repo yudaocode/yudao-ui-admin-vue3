@@ -21,7 +21,7 @@ import type { Group, GroupMember } from '../types'
  *
  * 负责：
  * - 拉取 / 缓存当前登录用户加入的群列表
- * - 按 groupId 懒加载群成员（供 ChatGroupSide / MentionPicker / MessageReadStatus 消费）
+ * - 按 groupId 懒加载群成员（供 ConversationGroupSide / MentionPicker / MessageReadStatus 消费）
  * - 成员"已读 / 未读"等聚合查询由 MessageReadStatus 另行组合
  */
 export const useGroupStore = defineStore('imGroupStore', {

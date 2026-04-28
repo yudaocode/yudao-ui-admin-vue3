@@ -9,7 +9,7 @@
     <ToolBar />
     <!--
       keep-alive 缓存子页面：
-      - 切 Tab 不重建组件，ChatPanel 滚动位置、输入框草稿等 UI 状态不丢
+      - 切 Tab 不重建组件，MessagePanel 滚动位置、输入框草稿等 UI 状态不丢
       - Vue 3 里 keep-alive 不能直接包 <router-view>（会有警告），必须走 v-slot 拿 Component
     -->
     <router-view v-slot="{ Component }">
