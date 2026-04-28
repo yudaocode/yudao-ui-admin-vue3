@@ -2,6 +2,7 @@ import { watch } from 'vue'
 import { useConversationStore } from '../store/conversationStore'
 import { useImWebSocketStore } from '../store/websocketStore'
 import { useFriendStore } from '../store/friendStore'
+import { getFriendDisplayName } from '../../utils/user'
 import { useGroupStore } from '../store/groupStore'
 import {
   pullPrivateMessages as apiPullPrivateMessages,
@@ -44,16 +45,8 @@ export const useMessagePuller = () => {
   const getPrivatePeerId = (message: ImPrivateMessageRespVO) =>
     message.senderId === currentUserId ? message.receiverId : message.senderId
 
-  /** 群消息发送者在群内的展示名（群备注 > 用户昵称） */
-  const getGroupSenderNickName = (message: ImGroupMessageRespVO): string => {
-    const group = groupStore.getGroup(message.groupId)
-    const member = group?.members?.find((m) => m.userId === message.senderId)
-    return member?.displayUserName || member?.nickname || ''
-  }
-
   /** 服务端私聊消息 -> 本地 Message */
   const convertPrivateMessage = (message: ImPrivateMessageRespVO): Message => {
-    const friend = friendStore.getFriend(getPrivatePeerId(message))
     return {
       id: message.id,
       clientMessageId: message.clientMessageId || '',
@@ -62,7 +55,6 @@ export const useMessagePuller = () => {
       status: message.status,
       sendTime: new Date(message.sendTime).getTime(),
       senderId: message.senderId,
-      senderNickName: friend?.nickname || '',
       targetId: message.receiverId,
       selfSend: message.senderId === currentUserId
     }
@@ -78,7 +70,6 @@ export const useMessagePuller = () => {
       status: message.status,
       sendTime: new Date(message.sendTime).getTime(),
       senderId: message.senderId,
-      senderNickName: getGroupSenderNickName(message),
       targetId: message.groupId,
       selfSend: message.senderId === currentUserId,
       atUserIds: message.atUserIds || [],
@@ -95,7 +86,7 @@ export const useMessagePuller = () => {
     return {
       type: ImConversationType.PRIVATE,
       targetId,
-      name: friend?.nickname || String(targetId),
+      name: friend ? getFriendDisplayName(friend) : String(targetId), // 会话列表 / 顶部标题展示：好友备注 > 真实昵称
       avatar: friend?.avatar || ''
     }
   }
@@ -131,13 +122,10 @@ export const useMessagePuller = () => {
         if (isPrivate) {
           const message = raw as ImPrivateMessageRespVO
           if (message.type === ImMessageType.RECALL) {
-            const peerId = getPrivatePeerId(message)
             conversationStore.recallMessage(
               ImConversationType.PRIVATE,
-              peerId,
-              message.content,
-              friendStore.getFriend(peerId)?.nickname || '',
-              message.senderId === currentUserId
+              getPrivatePeerId(message),
+              message.content
             )
             continue
           }
@@ -151,9 +139,7 @@ export const useMessagePuller = () => {
             conversationStore.recallMessage(
               ImConversationType.GROUP,
               message.groupId,
-              message.content,
-              getGroupSenderNickName(message),
-              message.senderId === currentUserId
+              message.content
             )
             continue
           }
@@ -177,7 +163,7 @@ export const useMessagePuller = () => {
 
   /**
    * 首次 pull 是否已完成。仅在置 true 后，isConnected watch 才会触发 pull。
-   * 防止 socket onopen 比 friendStore/groupStore 预拉先到达时，watcher 抢跑导致群消息缺 senderNickName
+   * 防止 socket onopen 比 friendStore/groupStore 预拉先到达时，watcher 抢跑造成消息插入早于会话元数据可见
    */
   let bootstrapped = false
 

@@ -12,6 +12,7 @@ import {
 } from '@/api/im/friend'
 import { useConversationStore } from './conversationStore'
 import { ImConversationType } from '../../utils/constants'
+import { getFriendDisplayName } from '../../utils/user'
 import type { Friend } from '../types'
 
 /**
@@ -61,7 +62,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       const conversationStore = useConversationStore()
       for (const f of this.friends) {
         conversationStore.updateConversation(ImConversationType.PRIVATE, f.friendUserId, {
-          name: f.nickname,
+          name: getFriendDisplayName(f),
           avatar: f.avatar,
           muted: f.muted
         })
@@ -120,8 +121,9 @@ export const useFriendStore = defineStore('imFriendStore', {
       }
       // 同步对应私聊会话的展示
       const conversationStore = useConversationStore()
+      const merged = this.getFriend(friend.friendUserId)
       conversationStore.updateConversation(ImConversationType.PRIVATE, friend.friendUserId, {
-        name: friend.nickname,
+        name: merged ? getFriendDisplayName(merged) : friend.nickname,
         avatar: friend.avatar,
         muted: friend.muted
       })
@@ -149,6 +151,26 @@ export const useFriendStore = defineStore('imFriendStore', {
       }
     },
 
+    /**
+     * 修改好友展示备注（仅自己可见）
+     *
+     * 走后端 /im/friend/update 接口；保存成功后再同步本地 friend + 会话列表 name，
+     * 失败就直接抛给上层，让 UI 决定是否回滚 / 提示用户
+     */
+    async setDisplayName(friendUserId: number, displayName: string) {
+      const value = displayName.trim()
+      // 后端的 displayName 语义：null/undefined = 不改，"" = 清空，所以这里直接传 value（可能是空串）
+      await apiUpdateFriend({ friendUserId, displayName: value })
+      const friend = this.getFriend(friendUserId)
+      if (friend) {
+        friend.displayName = value
+        const conversationStore = useConversationStore()
+        conversationStore.updateConversation(ImConversationType.PRIVATE, friendUserId, {
+          name: getFriendDisplayName(friend)
+        })
+      }
+    },
+
     /** 切换用户时清空 */
     clear() {
       this.friends = []
@@ -164,6 +186,7 @@ function convertFriend(vo: ImFriendRespVO): Friend {
     nickname: vo.nickname || String(vo.friendUserId),
     avatar: vo.avatar,
     muted: !!vo.muted,
+    displayName: vo.displayName || '',
     status: vo.status,
     addTime: vo.addTime ? new Date(vo.addTime).getTime() : undefined,
     deleteTime: vo.deleteTime ? new Date(vo.deleteTime).getTime() : undefined

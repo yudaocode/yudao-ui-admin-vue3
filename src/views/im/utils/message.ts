@@ -108,14 +108,6 @@ export const resolveTipText = (content: string): string => {
 // ==================== 撤回 ====================
 
 /**
- * 生成本地「撤回提示消息」的展示内容
- * 对齐后端 ImMessageType.TIP_TEXT(21) 语义：用灰色系统文案展示。
- */
-export const buildRecallTip = (senderName: string, selfSend: boolean): string => {
-  return selfSend ? '你撤回了一条消息' : `${senderName || '对方'} 撤回了一条消息`
-}
-
-/**
  * 从后端下发的撤回 TIP_TEXT content 中解析出被撤回的原消息 id
  * content 形如 `{"messageId": 123}`，若不含 messageId 则返回 0（表示这条不是撤回 tip）
  */

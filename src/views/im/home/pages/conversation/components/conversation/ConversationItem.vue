@@ -44,17 +44,17 @@
       <div class="flex items-center mt-1 leading-5">
         <!-- @红字提示：atMe 优先于 atAll -->
         <span v-if="atText" class="flex-shrink-0 text-12px text-[#c70b0b]">{{ atText }}</span>
-        <!-- 群聊最后一条发送者前缀 -->
+        <!-- 群聊最后一条发送者前缀：实时按 lastSenderId + 当前会话上下文算名字 -->
         <span
           v-if="showSendName"
           class="flex-shrink-0 text-12px text-[var(--el-text-color-secondary)] whitespace-nowrap"
         >
-          {{ conversation.senderNickName }}:&nbsp;
+          {{ lastSenderDisplayName }}:&nbsp;
         </span>
         <span
           class="flex-1 overflow-hidden text-12px truncate text-[var(--el-text-color-secondary)]"
         >
-          {{ conversation.lastContent }}
+          {{ lastContentDisplay }}
         </span>
         <!-- 免打扰图标 -->
         <Icon
@@ -79,7 +79,9 @@ import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useImUiStore } from '../../../../store/uiStore'
-import { ImConversationType, isNormalMessage } from '../../../../../utils/constants'
+import { ImConversationType, ImMessageType, isNormalMessage } from '../../../../../utils/constants'
+import { getSenderDisplayName } from '@/views/im/utils/user'
+import { buildRecallTip } from '@/views/im/utils/conversation'
 import type { Conversation } from '../../../../types'
 import UserAvatar from '../../../../components/UserAvatar.vue'
 
@@ -106,19 +108,48 @@ const isActive = computed(
 
 const isGroup = computed(() => props.conversation.type === ImConversationType.GROUP)
 
-/** 群聊 + 有发送者昵称 + 最后一条是普通消息 时，显示发送者前缀 */
+/** 最后一条消息发送者的展示名：按 conversation 上下文走 WeChat 优先级实时算 */
+const lastSenderDisplayName = computed(() => {
+  const senderId = props.conversation.lastSenderId
+  if (!senderId) {
+    return ''
+  }
+  return getSenderDisplayName(senderId, props.conversation.type, props.conversation.targetId)
+})
+
+/** 群聊 + 有最后发送者 + 最后一条是普通消息 时，显示发送者前缀 */
 const showSendName = computed(() => {
   if (!isGroup.value) {
     return false
   }
-  if (!props.conversation.senderNickName) {
+  if (!props.conversation.lastSenderId) {
     return false
   }
-  const last = props.conversation.messages?.[props.conversation.messages.length - 1]
-  if (!last) {
+  // 走 lastMessageType 索引（避免再去翻 messages 数组），TIP_TIME / TIP_TEXT / RECALL 不带前缀
+  const lastType = props.conversation.lastMessageType
+  if (lastType == null) {
     return false
   }
-  return isNormalMessage(last.type)
+  return isNormalMessage(lastType)
+})
+
+/**
+ * 列表展示文案：撤回类型实时按 lastSenderId 算，避免改备注后老 lastContent 文案过期；
+ * 其余类型直接用 conversation.lastContent（按消息进来时固化的摘要）
+ */
+const lastContentDisplay = computed(() => {
+  if (
+    props.conversation.lastMessageType === ImMessageType.RECALL &&
+    props.conversation.lastSenderId != null
+  ) {
+    return buildRecallTip(
+      props.conversation.lastSenderId,
+      !!props.conversation.lastSelfSend,
+      props.conversation.type,
+      props.conversation.targetId
+    )
+  }
+  return props.conversation.lastContent
 })
 
 /** 会话列表 "@ 我" / "@ 全体成员" 红字提示 */

@@ -411,7 +411,7 @@ const visibleMembers = computed(() =>
   props.members.filter(
     (member) =>
       member.status !== CommonStatusEnum.DISABLE &&
-      (member.showNickName || '').includes(searchText.value)
+      (member.showName || '').includes(searchText.value)
   )
 )
 

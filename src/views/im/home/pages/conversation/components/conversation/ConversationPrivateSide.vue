@@ -116,7 +116,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
-import { getFriendShowName } from '@/views/im/utils/user'
+import { getFriendDisplayName } from '@/views/im/utils/user'
 import { ImConversationType } from '@/views/im/utils/constants'
 import type { Conversation, Friend } from '../../../../types'
 
@@ -148,7 +148,7 @@ const friendStore = useFriendStore()
 const message = useMessage()
 
 /** tile 标签 / 后续聊天界面用的展示名：备注优先 */
-const displayName = computed(() => (props.friend ? getFriendShowName(props.friend) : ''))
+const displayName = computed(() => (props.friend ? getFriendDisplayName(props.friend) : ''))
 
 const displayNamePopoverVisible = ref(false)
 const editDisplayName = ref('')

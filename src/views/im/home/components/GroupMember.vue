@@ -10,8 +10,8 @@
   >
     <UserAvatar
       :size="avatarSize"
-      :name="member.showNickName"
-      :url="member.showImage"
+      :name="member.nickname"
+      :url="member.avatar"
       :clickable="clickable"
       :id="member.userId"
     />
@@ -19,7 +19,7 @@
       class="flex-1 h-full pl-2.5 overflow-hidden text-sm text-left truncate text-[var(--el-text-color-regular)]"
       :style="{ lineHeight: height + 'px' }"
     >
-      {{ member.showNickName }}
+      {{ member.showName }}
     </div>
   </div>
 </template>
@@ -34,10 +34,9 @@ defineOptions({ name: 'ImGroupMember' })
 /** 群成员结构（跨多处使用，放这里做窄接口；独立于 types/index.ts） */
 export interface GroupMemberLite {
   userId: number // 用户编号；特殊值见 IM_AT_ALL_USER_ID（@ 全体成员）
-  showNickName: string // 展示昵称：优先群备注，再群昵称，再用户昵称
-  showImage?: string
-  // 群成员状态：直接透传 GroupMember.status；消费方（过滤已退群成员等）按
-  // CommonStatusEnum.DISABLE 自行判断，不在 producer 端预翻译成 quit
+  nickname: string // 真实昵称：永远是用户的 nickname，专给 UserAvatar 色卡用，保证同一个人色卡首字母在所有界面一致
+  showName: string // 展示昵称：好友备注 > 用户群备注（displayUserName） > 真实昵称（nickname），给"显示给用户看"的位置用（行内文字、@候选标签等）
+  avatar?: string
   status?: number
 }
 

@@ -28,7 +28,7 @@
           <Icon icon="ep:user-filled" :size="18" />
         </div>
         <span class="overflow-hidden text-sm truncate text-[var(--el-text-color-regular)]">
-          {{ allItem.showNickName }}
+          {{ allItem.showName }}
         </span>
       </div>
 
@@ -117,8 +117,7 @@ const allItem = computed<GroupMemberLite | null>(() => {
   // @所有人 是个伪成员，nickname 给 IM_AT_ALL_NICKNAME 让头像 :name 行为对齐普通成员
   return {
     userId: IM_AT_ALL_USER_ID,
-    // TODO @AI：改成 displayName 会更好
-    showNickName: IM_AT_ALL_NICKNAME,
+    showName: IM_AT_ALL_NICKNAME,
     nickname: IM_AT_ALL_NICKNAME
   }
 })
@@ -129,8 +128,8 @@ const memberItems = computed<GroupMemberLite[]>(() =>
     (member) =>
       member.userId !== selfUserId.value &&
       member.status !== CommonStatusEnum.DISABLE &&
-      !!member.showNickName &&
-      member.showNickName.startsWith(props.searchText)
+      !!member.showName &&
+      member.showName.startsWith(props.searchText)
   )
 )
 

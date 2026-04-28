@@ -40,11 +40,7 @@
          点头像弹 UserInfoCard 由 UserAvatar 内部承接 -->
     <UserAvatar
       :id="message.selfSend ? userStore.getUser?.id : message.senderId"
-      :name="
-        message.selfSend
-          ? userStore.getUser?.nickname
-          : message.senderNickName || String(message.senderId)
-      "
+      :name="senderRealNickname"
       :url="message.selfSend ? userStore.getUser?.avatar : senderAvatar"
       :size="36"
     />
@@ -55,7 +51,7 @@
         v-if="showSenderName"
         class="mb-0.5 text-12px text-[var(--el-text-color-secondary)] leading-tight"
       >
-        {{ message.senderNickName || message.senderId }}
+        {{ senderDisplayName }}
       </div>
       <div class="flex gap-1.5 items-center" :class="{ 'flex-row-reverse': message.selfSend }">
         <!-- 消息内容：按 type 走 v-if 分支 -->
@@ -222,7 +218,6 @@ import {
 } from '../../../../../utils/constants'
 import {
   parseMessage,
-  buildRecallTip,
   resolveTipText,
   type TextMessage,
   type ImageMessage,
@@ -230,11 +225,18 @@ import {
   type AudioMessage,
   type VideoMessage
 } from '../../../../../utils/message'
+import { buildRecallTip } from '../../../../../utils/conversation'
 import { formatSeconds } from '@/utils/formatTime'
 import { formatFileSize } from '@/utils/file'
 import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
+import { useFriendStore } from '../../../../store/friendStore'
+import {
+  getMemberDisplayName,
+  getSenderDisplayName,
+  getSenderRealNickname
+} from '../../../../../utils/user'
 import { useImUiStore } from '../../../../store/uiStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
 import type { Message } from '../../../../types'
@@ -251,6 +253,7 @@ const props = defineProps<{
 const userStore = useUserStore()
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
+const friendStore = useFriendStore()
 const uiStore = useImUiStore()
 const { recall, sendRaw } = useMessageSender()
 // 仅用 confirm，避免 message 跟 props.message 同名冲突（vue/no-dupe-keys）
@@ -424,11 +427,36 @@ onBeforeUnmount(() => {
   voicePlaying.value = false
 })
 
-// 撤回文案：统一用 buildRecallTip 生成，避免离线拉取时 content 还保留着原文而被当成提示语展示。
-// recallMessage 写入的 "你撤回了一条消息" 与这里的结果一致，所以实时路径也是相同文案。
-const recallTip = computed(() =>
-  buildRecallTip(props.message.senderNickName, props.message.selfSend)
-)
+// 撤回文案：buildRecallTip 实时算 sender 名（按 conversation 上下文走 WeChat 优先级）
+const recallTip = computed(() => {
+  const conversation = conversationStore.activeConversation
+  return buildRecallTip(
+    props.message.senderId,
+    props.message.selfSend,
+    conversation?.type ?? 0,
+    conversation?.targetId ?? 0
+  )
+})
+
+/** 头像色卡 fallback 文本：永远是真实昵称，不掺备注 */
+const senderRealNickname = computed(() => {
+  const conversation = conversationStore.activeConversation
+  return getSenderRealNickname(
+    props.message.senderId,
+    conversation?.type ?? 0,
+    conversation?.targetId ?? 0
+  )
+})
+
+/** 气泡上方发送人显示名（仅群聊对方消息显示）：好友备注 > 群备注 > 真实昵称 */
+const senderDisplayName = computed(() => {
+  const conversation = conversationStore.activeConversation
+  return getSenderDisplayName(
+    props.message.senderId,
+    conversation?.type ?? 0,
+    conversation?.targetId ?? 0
+  )
+})
 
 /** 私聊「已读 / 未读」态（仅对自己发送的私聊消息展示） */
 const privateReadLabel = computed(() => {
@@ -474,12 +502,16 @@ const groupMembersForReadStatus = computed<GroupMemberLite[]>(() => {
     return []
   }
   const group = groupStore.getGroup(conversation.targetId)
-  return (group?.members || []).map((member) => ({
-    userId: member.userId,
-    showNickName: member.displayUserName || member.nickname,
-    showImage: member.avatar,
-    status: member.status
-  }))
+  return (group?.members || []).map((member) => {
+    const friend = friendStore.getFriend(member.userId)
+    return {
+      userId: member.userId,
+      showName: getMemberDisplayName(member, friend),
+      nickname: member.nickname,
+      avatar: member.avatar,
+      status: member.status
+    }
+  })
 })
 
 /** 是否 @我（群消息展示小徽标） */

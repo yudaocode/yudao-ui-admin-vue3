@@ -35,26 +35,27 @@ export const useMessageSender = () => {
   const conversationStore = useConversationStore()
   const userStore = useUserStore()
 
-  /** 构造本地乐观消息对象（id=0 表示尚未拿到服务端消息 id） */
+  /**构造本地乐观消息对象（id=0 表示尚未拿到服务端消息 id） */
   const buildLocalMessage = (opts: {
     clientMessageId: string
     content: string
     targetId: number
     type: number
     atUserIds?: number[]
-  }): Message => ({
-    id: 0,
-    clientMessageId: opts.clientMessageId,
-    type: opts.type,
-    content: opts.content,
-    status: ImMessageStatus.SENDING,
-    sendTime: Date.now(),
-    senderId: Number(userStore.getUser?.id) || 0,
-    senderNickName: userStore.getUser?.nickname || '',
-    targetId: opts.targetId,
-    selfSend: true,
-    atUserIds: opts.atUserIds
-  })
+  }): Message => {
+    return {
+      id: 0,
+      clientMessageId: opts.clientMessageId,
+      type: opts.type,
+      content: opts.content,
+      status: ImMessageStatus.SENDING,
+      sendTime: Date.now(),
+      senderId: Number(userStore.getUser?.id) || 0,
+      targetId: opts.targetId,
+      selfSend: true,
+      atUserIds: opts.atUserIds
+    }
+  }
 
   /**
    * 发送任意类型的消息（底层实现）

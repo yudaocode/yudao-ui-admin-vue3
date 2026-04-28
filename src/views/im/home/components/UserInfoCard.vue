@@ -59,6 +59,7 @@ import { useUserStore } from '@/store/modules/user'
 import { useImUiStore } from '../store/uiStore'
 import { useConversationStore } from '../store/conversationStore'
 import { useFriendStore } from '../store/friendStore'
+import { getFriendDisplayName } from '../../utils/user'
 import { ImConversationType } from '../../utils/constants'
 import type { UserInfo } from '../types'
 import UserAvatar from './UserAvatar.vue'
@@ -136,14 +137,17 @@ function handleSendMessage() {
   if (!user.value) {
     return
   }
-  // 同步 friendStore 里的 muted，避免新建的私聊会话丢失"消息免打扰"状态（与 FriendPage.onChat 行为一致）
-  const friendEntry = friendStore.getFriend(user.value.id)
+  // 取 friendStore 里的最新备注 / 免打扰，避免新建会话用过期数据
+  const friend = friendStore.getFriend(user.value.id)
+  const conversationName = friend
+    ? getFriendDisplayName(friend)
+    : user.value.nickname || ''
   conversationStore.openConversation(
     user.value.id,
     ImConversationType.PRIVATE,
-    user.value.nickname || '',
+    conversationName,
     user.value.avatar || '',
-    { muted: !!friendEntry?.muted }
+    { muted: !!friend?.muted }
   )
   // 跳转到聊天 tab（如果已经在了就算了）
   if (router.currentRoute.value.name !== 'ImHomeConversation') {

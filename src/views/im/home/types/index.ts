@@ -49,7 +49,14 @@ export interface Conversation {
   lastSendTime: number // 最后一条消息时间，用于排序
   unreadCount: number // 未读数
   messages: Message[] // 消息列表
-  senderNickName?: string // 最后一条消息的发送者昵称（群聊列表前缀展示用）
+  /**
+   * 最后一条消息的事实索引（"谁、什么类型、是不是我发的"）
+   * 给会话列表前缀 / 撤回摘要等位置实时算展示文案——发送人名走 utils/user.getSenderDisplayName，
+   * 永远不存名字快照，改备注 / 改群昵称后所有界面会自动响应式刷新
+   */
+  lastSenderId?: number
+  lastMessageType?: number
+  lastSelfSend?: boolean
 
   // ========== UI 状态 ==========
   deleted?: boolean // 是否已删除（软删标记，持久化时过滤）
@@ -76,7 +83,8 @@ export interface Message {
   readCount?: number // 群回执已读人数（仅群消息）
 
   // ========== 前端扩展字段 ==========
-  senderNickName: string // 发送人昵称（前端从 friendStore / groupStore 补全）
+  // 发送人显示名一律渲染时实时算：utils/user.getSenderDisplayName / getSenderRealNickname
+  // 不在 Message 上存任何名字快照，避免备注 / 群昵称变更后历史消息显示陈旧
   targetId: number // 会话目标编号（私聊=receiverId / 群聊=groupId），与 Conversation.targetId 一致
   selfSend: boolean // 是否自己发送（前端按 senderId 计算）
 }
@@ -138,9 +146,10 @@ export interface Friend {
   // ========== 后端字段（对齐 ImFriendRespVO） ==========
   id?: number // 好友关系记录编号（本地乐观新增时可能暂缺）
   friendUserId: number // 好友用户编号（与 Conversation.targetId 对齐）
-  nickname: string // 好友昵称
+  nickname: string // 好友昵称（对方真实昵称，永远不被备注覆盖；UI 显示走 displayName || nickname）
   avatar?: string // 好友头像
   muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
+  displayName?: string // 好友展示备注：仅自己可见的别名（命名对齐 GroupMember.displayGroupName 风格，单字段不歧义就不带 Friend 前缀）
   status?: number // 好友状态，对齐 CommonStatusEnum（DISABLE = 已删除，软删保留记录）
   addTime?: number // 添加好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
   deleteTime?: number // 删除好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）

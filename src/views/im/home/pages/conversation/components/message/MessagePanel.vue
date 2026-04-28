@@ -82,15 +82,18 @@
         v-if="isGroup"
         v-model="sideVisible"
         :group="groupInfo"
+        :conversation="conversationStore.activeConversation"
         :members="groupMembers"
         :friends="groupFriends"
         @reload="reloadGroupData"
+        @open-history="historyVisible = true"
       />
       <ConversationPrivateSide
         v-else
         v-model="sideVisible"
         :conversation="conversationStore.activeConversation"
         :friend="privateFriend"
+        @open-history="historyVisible = true"
       />
 
       <!-- 历史消息抽屉 -->
@@ -111,6 +114,7 @@ import Icon from '@/components/Icon/src/Icon.vue'
 
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
+import { getMemberDisplayName } from '../../../../../utils/user'
 import { useGroupStore } from '../../../../store/groupStore'
 import { ImConversationType } from '../../../../../utils/constants'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -185,12 +189,17 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
     return []
   }
   const group = groupStore.getGroup(conversation.targetId)
-  return (group?.members || []).map((member) => ({
-    userId: member.userId,
-    showNickName: member.displayUserName || member.nickname,
-    showImage: member.avatar,
-    status: member.status
-  }))
+  return (group?.members || []).map((member) => {
+    // 显示名走「好友备注 > 群备注 > 真实昵称」三级；头像走 nickname 保稳定
+    const friend = friendStore.getFriend(member.userId)
+    return {
+      userId: member.userId,
+      showName: getMemberDisplayName(member, friend),
+      nickname: member.nickname,
+      avatar: member.avatar,
+      status: member.status
+    }
+  })
 })
 
 /** 好友列表（用于"邀请入群"对话框）：把 friendStore 的全量好友 map 成 FriendLite 窄接口 */

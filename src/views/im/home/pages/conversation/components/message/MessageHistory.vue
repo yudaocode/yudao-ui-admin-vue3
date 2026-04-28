@@ -159,11 +159,7 @@
           >
             <UserAvatar
               :url="getAvatar(message)"
-              :name="
-                message.selfSend
-                  ? userStore.getUser?.nickname
-                  : message.senderNickName || '对方'
-              "
+              :name="senderRealNicknameOf(message)"
               :size="36"
               :clickable="false"
             />
@@ -172,11 +168,7 @@
                 class="flex justify-between items-start text-12px text-[var(--el-text-color-secondary)]"
               >
                 <span class="font-medium text-[var(--el-text-color-regular)]">
-                  {{
-                    message.selfSend
-                      ? userStore.getUser?.nickname || ''
-                      : message.senderNickName || ''
-                  }}
+                  {{ senderDisplayNameOf(message) }}
                 </span>
                 <span class="im-message-history__meta relative flex-shrink-0">
                   <span class="block text-right">{{ formatTime(message.sendTime) }}</span>
@@ -257,7 +249,7 @@
                 v-else-if="message.type === ImMessageType.RECALL"
                 class="text-sm italic text-[var(--el-text-color-secondary)]"
               >
-                {{ buildRecallTip(message.senderNickName || '', !!message.selfSend) }}
+                {{ recallTipOf(message) }}
               </div>
 
               <!-- 兜底 -->
@@ -308,18 +300,24 @@ import { getPrivateMessageList as apiGetPrivateMessageList } from '@/api/im/mess
 import { getGroupMessageList as apiGetGroupMessageList } from '@/api/im/message/group'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
-import { useMessagePuller } from '../../../../composables/useMessagePuller'
-import { ImConversationType, ImMessageType } from '../../../../../utils/constants'
+import { useFriendStore } from '../../../../store/friendStore'
+import {
+  getMemberDisplayName,
+  getSenderDisplayName,
+  getSenderRealNickname
+} from '@/views/im/utils/user'
+import { buildRecallTip } from '@/views/im/utils/conversation'
+import { useMessagePuller } from '@/views/im/home/composables/useMessagePuller'
+import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
 import {
   parseMessage,
-  buildRecallTip,
   resolveTipText,
   type TextMessage,
   type ImageMessage,
   type FileMessage,
   type AudioMessage
-} from '../../../../../utils/message'
-import type { Message } from '../../../../types'
+} from '@/views/im/utils/message'
+import type { Message } from '@/views/im/home/types'
 import UserAvatar from '../../../../components/UserAvatar.vue'
 import GroupMember, { type GroupMemberLite } from '../../../../components/GroupMember.vue'
 
@@ -337,6 +335,7 @@ const emit = defineEmits<{
 const userStore = useUserStore()
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
+const friendStore = useFriendStore()
 const { convertPrivateMessage, convertGroupMessage } = useMessagePuller()
 const message = useMessage()
 
@@ -348,6 +347,34 @@ const visible = computed({
 const conversation = computed(() => conversationStore.activeConversation)
 const isGroup = computed(() => conversation.value?.type === ImConversationType.GROUP)
 const allMessages = computed<Message[]>(() => conversation.value?.messages || [])
+
+/** 单条消息的发送人显示名：渲染时按 conversation 上下文走 WeChat 优先级实时算 */
+function senderDisplayNameOf(message: Message): string {
+  return getSenderDisplayName(
+    message.senderId,
+    conversation.value?.type ?? 0,
+    conversation.value?.targetId ?? 0
+  )
+}
+
+/** 单条消息的发送人真实昵称：给 UserAvatar 色卡 / alt 用，永远是 nickname 不掺备注 */
+function senderRealNicknameOf(message: Message): string {
+  return getSenderRealNickname(
+    message.senderId,
+    conversation.value?.type ?? 0,
+    conversation.value?.targetId ?? 0
+  )
+}
+
+/** 单条撤回消息的 tip 文案：buildRecallTip 内部按 conversation 上下文实时算 sender 名 */
+function recallTipOf(message: Message): string {
+  return buildRecallTip(
+    message.senderId,
+    !!message.selfSend,
+    conversation.value?.type ?? 0,
+    conversation.value?.targetId ?? 0
+  )
+}
 
 // ==================== 标题 ====================
 
@@ -442,17 +469,21 @@ const filteredMembersForPicker = computed<GroupMemberLite[]>(() => {
     return []
   }
   const group = groupStore.getGroup(conversation.value.targetId)
-  const all = (group?.members || []).map((member) => ({
-    userId: member.userId,
-    showNickName: member.displayUserName || member.nickname,
-    showImage: member.avatar,
-    status: member.status
-  }))
+  const all = (group?.members || []).map((member) => {
+    const friend = friendStore.getFriend(member.userId)
+    return {
+      userId: member.userId,
+      showName: getMemberDisplayName(member, friend),
+      nickname: member.nickname,
+      avatar: member.avatar,
+      status: member.status
+    }
+  })
   const trimmedKeyword = memberSearchKeyword.value.trim()
   if (!trimmedKeyword) {
     return all
   }
-  return all.filter((member) => member.showNickName.includes(trimmedKeyword))
+  return all.filter((member) => member.showName.includes(trimmedKeyword))
 })
 
 /** 群成员 picker 选择：落 activeFilter + 关 popover + 清搜索词 */
@@ -460,7 +491,7 @@ function onMemberSelect(member: GroupMemberLite) {
   activeFilter.value = {
     kind: 'member',
     userId: member.userId,
-    nickname: member.showNickName
+    nickname: member.showName
   }
   memberPopoverVisible.value = false
   memberSearchKeyword.value = ''
@@ -536,7 +567,7 @@ async function loadEarlier() {
     const maxId = Number.isFinite(earliestId) ? earliestId : undefined
 
     // 3. 调后端 list 接口：私聊 / 群聊接口签名不同，分支调度；返回结果用 useMessagePuller
-    //    暴露的 convert 函数转成本地 Message（沿用同一份 senderNickName 等字段补全规则）
+    //    暴露的 convert 函数转成本地 Message（与 puller 同一份字段映射，避免分歧）
     let earlier: Message[] = []
     if (isGroup.value) {
       const list = await apiGetGroupMessageList({
@@ -645,7 +676,7 @@ function textSnippetOf(message: Message): string {
     case ImMessageType.VIDEO:
       return '[视频]'
     case ImMessageType.RECALL:
-      return buildRecallTip(message.senderNickName || '', !!message.selfSend)
+      return recallTipOf(message)
     default:
       return ''
   }

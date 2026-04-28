@@ -124,7 +124,7 @@ import { updateFile } from '@/api/infra/file'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
-import { getMemberShowName } from '@/views/im/utils/user'
+import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
 import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
 import {
@@ -430,7 +430,7 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
     const friend = friendStore.getFriend(member.userId)
     return {
       userId: member.userId,
-      showNickName: getMemberShowName(member, friend),
+      showName: getMemberDisplayName(member, friend),
       nickname: member.nickname,
       avatar: member.avatar,
       status: member.status
@@ -548,7 +548,7 @@ function onMentionSelect(member: GroupMemberLite) {
   span.className = 'mention-token'
   span.dataset.id = String(member.userId)
   span.contentEditable = 'false'
-  span.textContent = `@${member.showNickName}`
+  span.textContent = `@${member.showName}`
   mentionRange.insertNode(span)
   // token 在 editor 首位时，contenteditable=false 边缘会让光标无法挪到 token 前
   // 补一个零宽空格 ​ 当锚点；DOM walk 时会被滤掉，不进入发送内容

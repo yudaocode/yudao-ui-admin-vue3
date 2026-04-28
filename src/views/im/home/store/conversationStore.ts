@@ -11,14 +11,8 @@ import {
   TIME_TIP_GAP_MS
 } from '../../utils/constants'
 import { imStorage, StorageKeys } from '../../utils/storage'
-import {
-  buildRecallTip,
-  generateClientMessageId,
-  parseMessage,
-  parseRecallMessageId,
-  resolveTipText,
-  type TextMessage
-} from '../../utils/message'
+import { generateClientMessageId, parseRecallMessageId } from '../../utils/message'
+import { resolveConversationLastContent } from '../../utils/conversation'
 import type { Conversation, ConversationStoreMeta, Message } from '../types'
 
 // TODO @芋艿：单个 conversation 的消息过多后，可能存储起来会很慢，后续看看怎么优化。
@@ -246,7 +240,12 @@ export const useConversationStore = defineStore('imConversationStore', {
     },
 
     /** 创建空会话（抽取公共逻辑，供 insertMessage / openConversation 复用） */
-    createEmptyConversation(type: number, targetId: number, name: string, avatar: string): Conversation {
+    createEmptyConversation(
+      type: number,
+      targetId: number,
+      name: string,
+      avatar: string
+    ): Conversation {
       return {
         targetId,
         type,
@@ -261,7 +260,6 @@ export const useConversationStore = defineStore('imConversationStore', {
         muted: false,
         atMe: false,
         atAll: false,
-        senderNickName: '',
         lastTimeTip: 0
       }
     },
@@ -345,21 +343,35 @@ export const useConversationStore = defineStore('imConversationStore', {
         if (messageInfo.id && message.id && message.id === messageInfo.id) {
           return true
         }
-        return !!(messageInfo.clientMessageId && message.clientMessageId && message.clientMessageId === messageInfo.clientMessageId)
+        return !!(
+          messageInfo.clientMessageId &&
+          message.clientMessageId &&
+          message.clientMessageId === messageInfo.clientMessageId
+        )
       })
       if (existingIndex >= 0) {
-        // 覆盖更新，保留本地已有但服务端未带的字段（如 senderNickName）
-        conversation.messages[existingIndex] = { ...conversation.messages[existingIndex], ...messageInfo }
+        // 覆盖更新：服务端字段优先，本地已有的扩展字段（如 selfSend）保留
+        conversation.messages[existingIndex] = {
+          ...conversation.messages[existingIndex],
+          ...messageInfo
+        }
         conversation.lastSendTime = messageInfo.sendTime || conversation.lastSendTime
         this.updateMaxId(conversationInfo.type, messageInfo.id)
         this.saveConversations(conversation)
         return
       }
 
-      // 2.1 更新会话摘要（lastContent / lastSendTime / senderNickName）
-      conversation.lastContent = this.resolveLastContent(messageInfo)
+      // 2.1 更新会话摘要（lastContent / lastSendTime + 事实索引 lastSenderId / lastMessageType / lastSelfSend）；
+      //     发送人名不存快照，由 ConversationItem 渲染时通过 utils/user.getSenderDisplayName 实时算
+      conversation.lastContent = resolveConversationLastContent(
+        messageInfo,
+        conversation.type,
+        conversation.targetId
+      )
       conversation.lastSendTime = messageInfo.sendTime || Date.now()
-      conversation.senderNickName = messageInfo.senderNickName || ''
+      conversation.lastSenderId = messageInfo.senderId
+      conversation.lastMessageType = messageInfo.type
+      conversation.lastSelfSend = messageInfo.selfSend
 
       // 2.2 群聊 @ 标记（仅对方消息 + 未读态有效）
       if (
@@ -405,7 +417,6 @@ export const useConversationStore = defineStore('imConversationStore', {
           status: ImMessageStatus.UNREAD,
           sendTime,
           senderId: 0,
-          senderNickName: '',
           targetId: conversationInfo.targetId,
           selfSend: false
         })
@@ -436,29 +447,6 @@ export const useConversationStore = defineStore('imConversationStore', {
       this.saveConversations(conversation)
     },
 
-    /** 根据消息类型计算会话列表最后一条摘要 */
-    resolveLastContent(messageInfo: Message): string {
-      switch (messageInfo.type) {
-        case ImMessageType.IMAGE:
-          return '[图片]'
-        case ImMessageType.FILE:
-          return '[文件]'
-        case ImMessageType.VOICE:
-          return '[语音]'
-        case ImMessageType.VIDEO:
-          return '[视频]'
-        case ImMessageType.RECALL:
-          return buildRecallTip(messageInfo.senderNickName, messageInfo.selfSend)
-        case ImMessageType.TEXT:
-          return parseMessage<TextMessage>(messageInfo.content)?.content ?? ''
-        case ImMessageType.TIP_TEXT:
-          // TIP_TEXT 后端常发裸字符串（群解散 / 退群 / 踢人），不能按 TextMessage JSON 解析，否则摘要变空
-          return resolveTipText(messageInfo.content)
-        default:
-          return parseMessage<TextMessage>(messageInfo.content)?.content ?? ''
-      }
-    },
-
     /**
      * 根据 clientMessageId 更新消息状态
      *
@@ -486,14 +474,11 @@ export const useConversationStore = defineStore('imConversationStore', {
       this.saveConversations(conversation)
     },
 
-    /** 撤回消息：解析撤回信号 content（`{"messageId": xxx}`），找到原消息更新为 RECALL 态 + 刷新会话摘要 */
-    recallMessage(
-      conversationType: number,
-      targetId: number,
-      recallSignalContent: string,
-      senderNickName: string,
-      selfSend: boolean
-    ) {
+    /**
+     * 撤回消息：解析撤回信号 content（`{"messageId": xxx}`），找到原消息更新为 RECALL 态 + 刷新会话摘要
+     * 撤回提示文案不固化，由 ConversationItem / MessageItem 渲染时调 buildRecallTip 实时算
+     */
+    recallMessage(conversationType: number, targetId: number, recallSignalContent: string) {
       const messageId = parseRecallMessageId(recallSignalContent)
       if (messageId <= 0) {
         return
@@ -508,12 +493,17 @@ export const useConversationStore = defineStore('imConversationStore', {
       }
       message.type = ImMessageType.RECALL
       message.status = ImMessageStatus.RECALL
-      message.content = JSON.stringify({
-        content: buildRecallTip(senderNickName, selfSend)
-      })
-      // 最后一条消息是刚撤回的，才更新会话摘要
+      // content 不再写撤回文案：渲染层走 buildRecallTip(senderId, selfSend, ...) 实时算
+      // 这里清空，避免老 content 被误认为有效消息文本
+      message.content = ''
+      // 最后一条消息是刚撤回的，才更新会话摘要 + 事实索引
       if (conversation.messages[conversation.messages.length - 1]?.id === messageId) {
-        conversation.lastContent = buildRecallTip(senderNickName, selfSend)
+        conversation.lastContent = resolveConversationLastContent(
+          message,
+          conversation.type,
+          conversation.targetId
+        )
+        conversation.lastMessageType = ImMessageType.RECALL
       }
       this.saveConversations(conversation)
     },
@@ -613,18 +603,26 @@ export const useConversationStore = defineStore('imConversationStore', {
         if (key.id && message.id && message.id === key.id) {
           return true
         }
-        return !!(key.clientMessageId && message.clientMessageId && message.clientMessageId === key.clientMessageId)
+        return !!(
+          key.clientMessageId &&
+          message.clientMessageId &&
+          message.clientMessageId === key.clientMessageId
+        )
       })
       if (index < 0) {
         return
       }
       conversation.messages.splice(index, 1)
-      // 如果删的是最后一条，刷新摘要
+      // 如果删的是最后一条，按倒数第二条重算摘要 + 事实索引
       if (index === conversation.messages.length) {
         const last = conversation.messages[conversation.messages.length - 1]
-        conversation.lastContent = last ? this.resolveLastContent(last) : ''
+        conversation.lastContent = last
+          ? resolveConversationLastContent(last, conversation.type, conversation.targetId)
+          : ''
         conversation.lastSendTime = last?.sendTime || conversation.lastSendTime
-        conversation.senderNickName = last?.senderNickName || ''
+        conversation.lastSenderId = last?.senderId
+        conversation.lastMessageType = last?.type
+        conversation.lastSelfSend = last?.selfSend
       }
       this.saveConversations(conversation)
     },

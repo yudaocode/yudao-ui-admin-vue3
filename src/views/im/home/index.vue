@@ -59,7 +59,8 @@ onMounted(async () => {
   // ========== 2. 远端通信 + 数据同步 ==========
   // 2.1 建立 WebSocket 长连接（跨 Tab 持续保持，不因路由切换断开）
   wsStore.connect()
-  // 2.2 预拉好友 / 群列表：必须 await，pullOnce 内部要靠 friendStore / groupStore 补 senderNickName 和会话 name/avatar
+  // 2.2 预拉好友 / 群列表：必须 await，pullOnce 内部要靠 friendStore / groupStore 补会话 name/avatar；
+  //     发送人名渲染时再走 utils/user 实时算，不依赖这里的 store 数据，但避免冷启动期间 ConversationItem 显示 senderId 数字
   await Promise.all([
     friendStore.loadFriends().catch((e) => console.warn('[IM] 预拉好友失败', e)),
     groupStore.loadGroups().catch((e) => console.warn('[IM] 预拉群列表失败', e))
