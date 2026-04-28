@@ -123,6 +123,8 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { updateFile } from '@/api/infra/file'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
+import { useFriendStore } from '@/views/im/home/store/friendStore'
+import { getMemberShowName } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
 import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
 import {
@@ -141,6 +143,7 @@ defineOptions({ name: 'ImMessageInput' })
 
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
+const friendStore = useFriendStore()
 const { send, sendRaw } = useMessageSender()
 const message = useMessage()
 
@@ -423,12 +426,16 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
     return []
   }
   const group = groupStore.getGroup(conversation.targetId)
-  return (group?.members || []).map((member) => ({
-    userId: member.userId,
-    showNickName: member.displayUserName || member.nickname,
-    showImage: member.avatar,
-    status: member.status
-  }))
+  return (group?.members || []).map((member) => {
+    const friend = friendStore.getFriend(member.userId)
+    return {
+      userId: member.userId,
+      showNickName: getMemberShowName(member, friend),
+      nickname: member.nickname,
+      avatar: member.avatar,
+      status: member.status
+    }
+  })
 })
 
 const groupOwnerId = computed<number | undefined>(() => {
