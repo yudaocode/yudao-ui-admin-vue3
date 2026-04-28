@@ -763,19 +763,19 @@ const remainingRouter: AppRouteRecordRaw[] = [
         children: [
           {
             path: 'conversation',
-            component: () => import('@/views/im/home/pages/conversation/MessagePage.vue'),
+            component: () => import('@/views/im/home/pages/conversation/index.vue'),
             name: 'ImHomeConversation',
             meta: { hidden: true, title: '消息' }
           },
           {
             path: 'friend',
-            component: () => import('@/views/im/home/pages/friend/FriendPage.vue'),
+            component: () => import('@/views/im/home/pages/friend/index.vue'),
             name: 'ImHomeFriend',
             meta: { hidden: true, title: '好友' }
           },
           {
             path: 'group',
-            component: () => import('@/views/im/home/pages/group/GroupPage.vue'),
+            component: () => import('@/views/im/home/pages/group/index.vue'),
             name: 'ImHomeGroup',
             meta: { hidden: true, title: '群聊' }
           }

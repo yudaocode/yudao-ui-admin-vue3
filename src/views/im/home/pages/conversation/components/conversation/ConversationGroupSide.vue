@@ -1,94 +1,276 @@
 <template>
-  <!-- TODO @AI：不够对齐微信。如果让你改时，需要提醒我给你图片 -->
-  <!-- 聊天面板右侧信息抽屉：群成员宫格 + 群信息表单 + 退群 / 移除等动作 -->
+  <!-- 聊天面板右侧群信息抽屉：成员宫格 + 群信息 + 开关 + 退出群聊，整体对齐微信 PC -->
   <el-drawer
     v-model="visible"
     :with-header="false"
     direction="rtl"
-    size="360px"
+    size="380px"
     append-to-body
     modal-class="im-conversation-group-side__modal"
   >
-    <div class="flex flex-col h-full p-2.5">
-      <!-- 群成员区 -->
-      <div v-if="group" class="mb-2.5">
-        <el-input
-          v-model="searchText"
-          placeholder="搜索群成员"
-          clearable
-          size="small"
-          class="mb-2.5"
-        >
-          <template #prefix>
-            <Icon icon="ant-design:search-outlined" />
-          </template>
-        </el-input>
+    <div v-if="group" class="im-conversation-group-side flex flex-col h-full">
+      <!-- 上部：可滚动内容区 -->
+      <div class="im-conversation-group-side__scroll flex-1 overflow-y-auto">
+        <!-- 群成员区 -->
+        <div class="im-conversation-group-side__section im-conversation-group-side__members">
+          <el-input v-model="searchText" placeholder="搜索群成员" clearable>
+            <template #prefix>
+              <Icon
+                icon="ant-design:search-outlined"
+                class="text-[var(--el-text-color-placeholder)]"
+              />
+            </template>
+          </el-input>
 
-        <div class="flex flex-wrap gap-1">
-          <!-- 邀请按钮 -->
-          <div
-            class="flex flex-col items-center w-[54px]"
-            title="邀请好友入群"
-            @click="inviteVisible = true"
-          >
+          <div class="im-conversation-group-side__grid">
+            <GroupMemberGrid
+              v-for="member in displayMembers"
+              :key="member.userId"
+              :member="member"
+              :size="50"
+              clickable
+            />
+
+            <!-- 添加（任何成员都能邀请） -->
             <div
-              class="im-conversation-group-side__tool-btn flex items-center justify-center w-[38px] h-[38px] text-[18px] cursor-pointer border border-dashed border-[var(--el-border-color)] rounded text-[var(--el-text-color-regular)] hover:text-[#409eff] hover:border-[#409eff]"
+              class="im-conversation-group-side__tile-wrap"
+              title="邀请好友入群"
+              @click="inviteVisible = true"
             >
-              <Icon icon="ant-design:plus-outlined" />
+              <div class="im-conversation-group-side__icon-tile">
+                <Icon icon="ant-design:plus-outlined" />
+              </div>
+              <div class="im-conversation-group-side__tile-label">添加</div>
             </div>
-            <div class="mt-1 text-12px text-[var(--el-text-color-regular)]">邀请</div>
+
+            <!-- 移出（仅群主） -->
+            <div
+              v-if="isOwner"
+              class="im-conversation-group-side__tile-wrap"
+              title="移出群成员"
+              @click="removeVisible = true"
+            >
+              <div class="im-conversation-group-side__icon-tile">
+                <Icon icon="ant-design:minus-outlined" />
+              </div>
+              <div class="im-conversation-group-side__tile-label">移出</div>
+            </div>
           </div>
 
-          <!-- 移除按钮（仅群主） -->
+          <!-- 大群折叠：默认只展示前 N 个，点 "查看更多" 全展开（搜索时不折叠） -->
           <div
+            v-if="moreMembersHidden"
+            class="im-conversation-group-side__more"
+            @click="showAllMembers = true"
+          >
+            查看更多
+            <Icon icon="ant-design:down-outlined" :size="10" />
+          </div>
+        </div>
+
+        <div class="im-conversation-group-side__spacer"></div>
+
+        <!-- 群信息：label 在上、value 在下，纵向堆叠（对齐微信 PC 设计）；只有 "群公告" 因为内容长加 > chevron -->
+        <div class="im-conversation-group-side__section">
+          <!-- 群聊名称（群主可改） -->
+          <el-popover
             v-if="isOwner"
-            class="flex flex-col items-center w-[54px]"
-            title="移出成员"
-            @click="removeVisible = true"
+            v-model:visible="namePopoverVisible"
+            trigger="click"
+            placement="left-start"
+            :width="280"
           >
-            <div
-              class="im-conversation-group-side__tool-btn flex items-center justify-center w-[38px] h-[38px] text-[18px] cursor-pointer border border-dashed border-[var(--el-border-color)] rounded text-[var(--el-text-color-regular)] hover:text-[#409eff] hover:border-[#409eff]"
-            >
-              <Icon icon="ant-design:minus-outlined" />
+            <template #reference>
+              <div
+                class="im-conversation-group-side__row im-conversation-group-side__row--vertical im-conversation-group-side__row--clickable"
+              >
+                <span class="im-conversation-group-side__label">群聊名称</span>
+                <span class="im-conversation-group-side__value truncate">{{ group.name }}</span>
+              </div>
+            </template>
+            <div class="flex flex-col gap-2">
+              <el-input v-model="editName" maxlength="20" placeholder="请输入群聊名称" />
+              <div class="flex justify-end gap-2">
+                <el-button size="small" @click="namePopoverVisible = false">取消</el-button>
+                <el-button size="small" type="primary" @click="saveName">保存</el-button>
+              </div>
             </div>
-            <div class="mt-1 text-12px text-[var(--el-text-color-regular)]">移除</div>
+          </el-popover>
+          <div
+            v-else
+            class="im-conversation-group-side__row im-conversation-group-side__row--vertical"
+          >
+            <span class="im-conversation-group-side__label">群聊名称</span>
+            <span class="im-conversation-group-side__value truncate">{{ group.name }}</span>
           </div>
 
-          <!-- 成员宫格：抽屉里点头像弹 UserInfoCard -->
-          <GroupMemberGrid v-for="m in filteredMembers" :key="m.userId" :member="m" clickable />
+          <!-- 群公告（群主可改）：内容可能很长，加 > chevron 表示可展开编辑 -->
+          <el-popover
+            v-if="isOwner"
+            v-model:visible="noticePopoverVisible"
+            trigger="click"
+            placement="left-start"
+            :width="320"
+          >
+            <template #reference>
+              <div
+                class="im-conversation-group-side__row im-conversation-group-side__row--vertical im-conversation-group-side__row--clickable"
+              >
+                <div class="im-conversation-group-side__row-header">
+                  <span class="im-conversation-group-side__label">群公告</span>
+                  <Icon
+                    icon="ant-design:right-outlined"
+                    :size="11"
+                    class="im-conversation-group-side__chevron"
+                  />
+                </div>
+                <span
+                  v-if="group.notice"
+                  class="im-conversation-group-side__value im-conversation-group-side__value--clamp"
+                >
+                  {{ group.notice }}
+                </span>
+                <span v-else class="im-conversation-group-side__value-placeholder">未设置</span>
+              </div>
+            </template>
+            <div class="flex flex-col gap-2">
+              <el-input
+                v-model="editNotice"
+                type="textarea"
+                :rows="4"
+                maxlength="1024"
+                show-word-limit
+                placeholder="请输入群公告"
+              />
+              <div class="flex justify-end gap-2">
+                <el-button size="small" @click="noticePopoverVisible = false">取消</el-button>
+                <el-button size="small" type="primary" @click="saveNotice">保存</el-button>
+              </div>
+            </div>
+          </el-popover>
+          <div
+            v-else
+            class="im-conversation-group-side__row im-conversation-group-side__row--vertical"
+          >
+            <span class="im-conversation-group-side__label">群公告</span>
+            <span
+              v-if="group.notice"
+              class="im-conversation-group-side__value im-conversation-group-side__value--clamp"
+            >
+              {{ group.notice }}
+            </span>
+            <span v-else class="im-conversation-group-side__value-placeholder">未设置</span>
+          </div>
+
+          <!-- 备注（仅自己可见的群备注；后端没字段，落 localStorage 做"个人记忆"用） -->
+          <el-popover
+            v-model:visible="notePopoverVisible"
+            trigger="click"
+            placement="left-start"
+            :width="280"
+          >
+            <template #reference>
+              <div
+                class="im-conversation-group-side__row im-conversation-group-side__row--vertical im-conversation-group-side__row--clickable"
+              >
+                <span class="im-conversation-group-side__label">备注</span>
+                <span
+                  v-if="personalNote"
+                  class="im-conversation-group-side__value im-conversation-group-side__value--clamp"
+                >
+                  {{ personalNote }}
+                </span>
+                <span v-else class="im-conversation-group-side__value-placeholder"
+                  >群聊的备注仅自己可见</span
+                >
+              </div>
+            </template>
+            <div class="flex flex-col gap-2">
+              <el-input
+                v-model="editNote"
+                type="textarea"
+                :rows="3"
+                maxlength="200"
+                show-word-limit
+                placeholder="仅自己可见"
+              />
+              <div class="flex justify-end gap-2">
+                <el-button size="small" @click="notePopoverVisible = false">取消</el-button>
+                <el-button size="small" type="primary" @click="saveNote">保存</el-button>
+              </div>
+            </div>
+          </el-popover>
+
+          <!-- 我在本群的昵称（任何成员都能改自己的） -->
+          <el-popover
+            v-model:visible="remarkPopoverVisible"
+            trigger="click"
+            placement="left-start"
+            :width="280"
+          >
+            <template #reference>
+              <div
+                class="im-conversation-group-side__row im-conversation-group-side__row--vertical im-conversation-group-side__row--clickable"
+              >
+                <span class="im-conversation-group-side__label">我在本群的昵称</span>
+                <span
+                  v-if="group.remarkNickName"
+                  class="im-conversation-group-side__value truncate"
+                >
+                  {{ group.remarkNickName }}
+                </span>
+                <span v-else class="im-conversation-group-side__value-placeholder"
+                  >点击设置</span
+                >
+              </div>
+            </template>
+            <div class="flex flex-col gap-2">
+              <el-input v-model="editRemark" maxlength="20" placeholder="请输入本群昵称" />
+              <div class="flex justify-end gap-2">
+                <el-button size="small" @click="remarkPopoverVisible = false">取消</el-button>
+                <el-button size="small" type="primary" @click="saveRemark">保存</el-button>
+              </div>
+            </div>
+          </el-popover>
+        </div>
+
+        <div class="im-conversation-group-side__spacer"></div>
+
+        <!-- 查找聊天内容（点击 → 父组件打开 MessageHistory 弹窗） -->
+        <div class="im-conversation-group-side__section">
+          <div
+            class="im-conversation-group-side__row im-conversation-group-side__row--clickable"
+            @click="emit('open-history')"
+          >
+            <span class="im-conversation-group-side__label">查找聊天内容</span>
+            <Icon
+              icon="ant-design:right-outlined"
+              :size="11"
+              class="im-conversation-group-side__chevron"
+            />
+          </div>
+        </div>
+
+        <div class="im-conversation-group-side__spacer"></div>
+
+        <!-- 开关项 -->
+        <div class="im-conversation-group-side__section">
+          <div class="im-conversation-group-side__row">
+            <span class="im-conversation-group-side__label">消息免打扰</span>
+            <el-switch :model-value="!!conversation?.muted" @change="onMutedChange" />
+          </div>
+          <div class="im-conversation-group-side__row">
+            <span class="im-conversation-group-side__label">置顶聊天</span>
+            <el-switch :model-value="!!conversation?.top" @change="onTopChange" />
+          </div>
         </div>
       </div>
 
-      <el-divider />
-
-      <!-- 群信息表单 -->
-      <div v-if="group" class="flex-1 overflow-y-auto">
-        <el-form label-position="top" size="small">
-          <el-form-item label="群聊名称">
-            <el-input v-model="formData.name" :disabled="!editing" maxlength="20" />
-          </el-form-item>
-          <el-form-item label="群主">
-            <el-input :model-value="ownerName" disabled />
-          </el-form-item>
-          <el-form-item label="群公告">
-            <el-input
-              v-model="formData.notice"
-              :disabled="!editing"
-              type="textarea"
-              maxlength="1024"
-              :rows="3"
-            />
-          </el-form-item>
-          <el-form-item label="我在本群的昵称">
-            <el-input v-model="formData.remarkNickName" :disabled="!editing" maxlength="20" />
-          </el-form-item>
-        </el-form>
-
-        <div class="flex gap-2 justify-center mt-3">
-          <el-button v-if="editing" type="success" @click="handleSave">保存</el-button>
-          <el-button v-else type="primary" @click="editing = true">编辑</el-button>
-          <el-button v-if="!isOwner" type="danger" @click="handleQuit">退出群聊</el-button>
-        </div>
+      <!-- 底部：退出群聊（仅非群主入口；群主退出走"解散群"另起一条路径，这里不处理） -->
+      <div v-if="!isOwner" class="im-conversation-group-side__footer">
+        <el-button class="im-conversation-group-side__quit-btn" type="danger" plain @click="handleQuit">
+          退出群聊
+        </el-button>
       </div>
     </div>
 
@@ -112,7 +294,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
@@ -122,22 +304,28 @@ import { updateGroup } from '@/api/im/group'
 import { quitGroup, removeGroupMember, updateGroupMember } from '@/api/im/group/member'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
-import { ImConversationType } from '../../../../../utils/constants'
+import { ImConversationType } from '@/views/im/utils/constants'
 import GroupMemberGrid from '../../../group/components/GroupMemberGrid.vue'
 import AddGroupMemberDialog from '../../../group/components/AddGroupMemberDialog.vue'
 import GroupMemberSelector, {
   type GroupMemberFlag
 } from '../../../group/components/GroupMemberSelector.vue'
 import type { GroupLite } from '../../../group/components/GroupItem.vue'
+import type { Conversation } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/GroupMember.vue'
 import type { FriendLite } from '../../../friend/components/FriendItem.vue'
 
 defineOptions({ name: 'ImConversationGroupSide' })
 
+/** 大群默认只展示前 N 个成员，避免抽屉一打开拖到很长 */
+// TODO @AI：需要解释下，为什么是 14 个。因为 4 x 4 - 2，,2 预留给添加和移除
+const MEMBER_PREVIEW_COUNT = 14
+
 const props = withDefaults(
   defineProps<{
     modelValue?: boolean // 抽屉是否打开（v-model）
     group?: GroupLite & { notice?: string; remarkNickName?: string } // 当前群信息（可空：无激活群会话时）
+    conversation?: Conversation | null // 当前会话：用于读 / 切免打扰、置顶状态
     members?: GroupMemberLite[]
     friends?: FriendLite[]
   }>(),
@@ -151,6 +339,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   reload: [] // 邀请 / 移除 / 修改群资料后，父组件重新拉群数据
+  'open-history': [] // 点击 "查找聊天内容" 行 → 父组件打开 MessageHistory 弹窗
 }>()
 
 const userStore = useUserStore()
@@ -164,36 +353,61 @@ const visible = computed({
 })
 
 const searchText = ref('')
-const editing = ref(false)
 const inviteVisible = ref(false)
 const removeVisible = ref(false)
+const showAllMembers = ref(false)
+const namePopoverVisible = ref(false)
+const noticePopoverVisible = ref(false)
+const remarkPopoverVisible = ref(false)
+const notePopoverVisible = ref(false)
+const editName = ref('')
+const editNotice = ref('')
+const editRemark = ref('')
+const editNote = ref('')
 
-const formData = reactive({
-  name: '',
-  notice: '',
-  remarkNickName: ''
-})
+// 备注是"仅自己可见"的本地标签，后端没字段；按 groupId 落 localStorage，跟当前群绑定
+const NOTE_STORAGE_PREFIX = 'im:group:note:'
+const personalNote = ref('')
 
 watch(
-  () => props.group,
-  (g) => {
-    formData.name = g?.name || ''
-    formData.notice = g?.notice || ''
-    formData.remarkNickName = g?.remarkNickName || ''
+  () => props.group?.id,
+  (groupId) => {
+    personalNote.value = groupId ? localStorage.getItem(NOTE_STORAGE_PREFIX + groupId) || '' : ''
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 )
+
+// 抽屉关闭时重置临时态：搜索 / 折叠展开 / 还在打开的 popover 都清掉
+watch(visible, (v) => {
+  if (!v) {
+    searchText.value = ''
+    showAllMembers.value = false
+    namePopoverVisible.value = false
+    noticePopoverVisible.value = false
+    remarkPopoverVisible.value = false
+    notePopoverVisible.value = false
+  }
+})
+
+// popover 弹出时把当前值灌进编辑态，避免上次未保存的脏值
+watch(namePopoverVisible, (v) => {
+  if (v) editName.value = props.group?.name || ''
+})
+watch(noticePopoverVisible, (v) => {
+  if (v) editNotice.value = props.group?.notice || ''
+})
+watch(remarkPopoverVisible, (v) => {
+  if (v) editRemark.value = props.group?.remarkNickName || ''
+})
+watch(notePopoverVisible, (v) => {
+  if (v) editNote.value = personalNote.value
+})
 
 const myId = computed(() => Number(userStore.getUser?.id) || 0)
 const isOwner = computed(() => props.group != null && props.group.ownerId === myId.value)
-const ownerName = computed(() => {
-  if (!props.group) {
-    return ''
-  }
-  const owner = props.members.find((m) => m.userId === props.group!.ownerId)
-  return owner?.showNickName || '-'
-})
-const filteredMembers = computed(() =>
+
+// 排除已退群成员 + 关键字过滤
+const visibleMembers = computed(() =>
   props.members.filter(
     (member) =>
       member.status !== CommonStatusEnum.DISABLE &&
@@ -201,38 +415,110 @@ const filteredMembers = computed(() =>
   )
 )
 
-/**
- * 保存群信息
- * - 群主：群名 / 群公告 走 /im/group/update；自己在群里的昵称 走 /im/group-member/update
- * - 普通成员：仅自己的群昵称（群名 / 公告 disabled，但兜底防表单被绕开）
- */
-async function handleSave() {
+// 折叠规则：搜索 / 已展开 时不折叠，其余只取前 N 个
+const moreMembersHidden = computed(
+  () =>
+    !searchText.value &&
+    !showAllMembers.value &&
+    visibleMembers.value.length > MEMBER_PREVIEW_COUNT
+)
+const displayMembers = computed(() =>
+  moreMembersHidden.value
+    ? visibleMembers.value.slice(0, MEMBER_PREVIEW_COUNT)
+    : visibleMembers.value
+)
+
+/** 群主：保存群名（走 /im/group/update） */
+async function saveName() {
   if (!props.group) {
     return
   }
-  const groupId = props.group.id
   try {
-    // 1. 群主才允许更新群名 / 公告（普通成员表单上虽然 disabled，仍兜底防表单被绕开）
-    if (isOwner.value) {
-      await updateGroup({
-        id: groupId,
-        name: formData.name,
-        notice: formData.notice
-      })
-    }
-    // 2. 任何成员都能改自己在群里的昵称（displayUserName）
-    await updateGroupMember({
-      groupId,
-      displayUserName: formData.remarkNickName
-    })
-    // 3. emit reload 让父组件 MessagePanel 走 reloadGroupData 把最新群资料 + 成员拉一份
+    await updateGroup({ id: props.group.id, name: editName.value })
+    namePopoverVisible.value = false
     message.success('保存成功')
-    editing.value = false
     emit('reload')
   } catch (error) {
-    console.error('[IM ConversationGroupSide] 保存群信息失败', { groupId }, error)
+    console.error('[IM ConversationGroupSide] 保存群名失败', error)
     message.error('保存失败')
   }
+}
+
+/** 群主：保存群公告 */
+async function saveNotice() {
+  if (!props.group) {
+    return
+  }
+  try {
+    await updateGroup({ id: props.group.id, notice: editNotice.value })
+    noticePopoverVisible.value = false
+    message.success('保存成功')
+    emit('reload')
+  } catch (error) {
+    console.error('[IM ConversationGroupSide] 保存群公告失败', error)
+    message.error('保存失败')
+  }
+}
+
+/** 备注：仅本地 localStorage 落盘（后端无字段；多端不同步是已知限制） */
+function saveNote() {
+  if (!props.group) {
+    return
+  }
+  const value = editNote.value.trim()
+  if (value) {
+    localStorage.setItem(NOTE_STORAGE_PREFIX + props.group.id, value)
+  } else {
+    localStorage.removeItem(NOTE_STORAGE_PREFIX + props.group.id)
+  }
+  personalNote.value = value
+  notePopoverVisible.value = false
+}
+
+/** 任何成员：保存自己在群里的昵称（走 /im/group-member/update） */
+async function saveRemark() {
+  if (!props.group) {
+    return
+  }
+  try {
+    await updateGroupMember({
+      groupId: props.group.id,
+      displayUserName: editRemark.value
+    })
+    remarkPopoverVisible.value = false
+    message.success('保存成功')
+    emit('reload')
+  } catch (error) {
+    console.error('[IM ConversationGroupSide] 保存本群昵称失败', error)
+    message.error('保存失败')
+  }
+}
+
+/**
+ * 消息免打扰：本地 conversationStore 立即切；后端 /muted 异步同步，失败回滚本地
+ *
+ * 与 ConversationItem 右键菜单的"消息免打扰"语义一致；区别仅在 UI 入口
+ */
+function onMutedChange(value: boolean | string | number) {
+  if (!props.conversation) {
+    return
+  }
+  const next = !!value
+  const { type, targetId } = props.conversation
+  conversationStore.setMuted(type, targetId, next)
+  groupStore.setMuted(targetId, next).catch((error) => {
+    console.error('[IM ConversationGroupSide] setMuted 失败', { targetId }, error)
+    conversationStore.setMuted(type, targetId, !next)
+    message.error('操作失败')
+  })
+}
+
+/** 置顶聊天：纯本地 conversationStore 排序态（无后端字段） */
+function onTopChange(value: boolean | string | number) {
+  if (!props.conversation) {
+    return
+  }
+  conversationStore.setTop(props.conversation.type, props.conversation.targetId, !!value)
 }
 
 /** 退出群聊（普通成员入口；群主退出走"解散群"是另一条路径，这里不处理） */
@@ -240,7 +526,7 @@ async function handleQuit() {
   if (!props.group) {
     return
   }
-  // 1. 二次确认（用户点取消时 ElMessageBox 抛 reject，吃掉直接 return）
+  // 1. 二次确认（用户点取消时 message.confirm 抛 reject，吃掉直接 return）
   try {
     await message.confirm('退出群聊后将不再接收群里的消息，确认退出吗？', '确认退出')
   } catch {
@@ -285,8 +571,180 @@ async function handleRemoveComplete(members: GroupMemberFlag[]) {
 </script>
 
 <style scoped>
-/* el-icon 的全局 color 在暗色模式下会被主题盖过；:deep(svg) 锁 fill 到当前色 */
-.im-conversation-group-side__tool-btn :deep(svg) {
+.im-conversation-group-side {
+  background-color: var(--el-bg-color);
+}
+
+/* 滚动区底色用浅灰，和 section 的白色形成 “块” 视觉，spacer 自动融入背景就不用单独画线 */
+.im-conversation-group-side__scroll {
+  background-color: var(--el-fill-color-light);
+}
+
+.im-conversation-group-side__section {
+  background-color: var(--el-bg-color);
+}
+
+/* 群成员区：搜索 + 宫格 + 查看更多 */
+.im-conversation-group-side__members {
+  padding: 16px 16px 10px;
+}
+
+.im-conversation-group-side__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 4px;
+  margin-top: 14px;
+}
+
+/* 添加 / 移出 宫格 wrapper */
+.im-conversation-group-side__tile-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 66px;
+  cursor: pointer;
+}
+
+/* 添加 / 移出 的方块按钮：用浅底 + 虚线边，hover 走主色让交互可读 */
+.im-conversation-group-side__icon-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+  color: var(--el-text-color-regular);
+  background-color: var(--el-fill-color-lighter);
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  transition:
+    color 0.18s,
+    border-color 0.18s,
+    background-color 0.18s;
+}
+.im-conversation-group-side__tile-wrap:hover .im-conversation-group-side__icon-tile {
+  color: var(--el-color-primary);
+  border-color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
+}
+.im-conversation-group-side__tile-label {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--el-text-color-regular);
+  text-align: center;
+}
+/* el-icon 全局 color 在暗色模式下被主题盖过；:deep(svg) 锁 fill 到当前色 */
+.im-conversation-group-side__icon-tile :deep(svg) {
   fill: currentColor !important;
+}
+
+/* 查看更多 */
+.im-conversation-group-side__more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 6px 0 2px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.im-conversation-group-side__more:hover {
+  color: var(--el-color-primary);
+}
+
+/* section 之间的灰条：靠滚动区底色透出来即可，spacer 高度决定块间距 */
+.im-conversation-group-side__spacer {
+  flex-shrink: 0;
+  height: 10px;
+}
+
+/* 信息行：默认左 label 右 value（开关行），__row--vertical 切到 label 在上、value 在下（编辑字段行） */
+.im-conversation-group-side__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 16px;
+  font-size: 14px;
+  min-height: 24px;
+  transition: background-color 0.15s;
+}
+.im-conversation-group-side__row + .im-conversation-group-side__row {
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+.im-conversation-group-side__row--clickable {
+  cursor: pointer;
+}
+.im-conversation-group-side__row--clickable:hover {
+  background-color: var(--el-fill-color-lighter);
+}
+.im-conversation-group-side__row--vertical {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 14px 16px;
+}
+
+.im-conversation-group-side__label {
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--el-text-color-primary);
+}
+
+/* 编辑字段行的 header：label 居左，可选 chevron 居右 */
+.im-conversation-group-side__row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.im-conversation-group-side__value {
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+  word-break: break-all;
+  line-height: 1.6;
+}
+.im-conversation-group-side__value--clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.im-conversation-group-side__value-placeholder {
+  font-size: 13px;
+  color: var(--el-text-color-placeholder);
+  line-height: 1.6;
+}
+
+/* chevron 统一调成 placeholder 灰，避免 opacity hack 在暗色下偏色 */
+.im-conversation-group-side__chevron {
+  color: var(--el-text-color-placeholder);
+}
+
+/* 底部退出群聊：浅灰分隔条 + 内边距，给按钮喘气空间 */
+.im-conversation-group-side__footer {
+  flex-shrink: 0;
+  padding: 14px 16px 18px;
+  background-color: var(--el-bg-color);
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+.im-conversation-group-side__quit-btn {
+  width: 100%;
+  height: 36px;
+  font-size: 14px;
+}
+</style>
+
+<!-- el-drawer 用 append-to-body 后被传送出当前 scoped 边界，scoped CSS 的 data-v 不会落到 body 上；
+     这里靠 modal-class（在 .el-overlay 上，是 .el-drawer__body 的祖先）写一段全局规则压掉默认 padding -->
+<style>
+.im-conversation-group-side__modal .el-drawer__body {
+  padding: 0;
 }
 </style>

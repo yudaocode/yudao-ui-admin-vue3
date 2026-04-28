@@ -114,7 +114,13 @@ const allItem = computed<GroupMemberLite | null>(() => {
   if (!IM_AT_ALL_NICKNAME.startsWith(props.searchText)) {
     return null
   }
-  return { userId: IM_AT_ALL_USER_ID, showNickName: IM_AT_ALL_NICKNAME }
+  // @所有人 是个伪成员，nickname 给 IM_AT_ALL_NICKNAME 让头像 :name 行为对齐普通成员
+  return {
+    userId: IM_AT_ALL_USER_ID,
+    // TODO @AI：改成 displayName 会更好
+    showNickName: IM_AT_ALL_NICKNAME,
+    nickname: IM_AT_ALL_NICKNAME
+  }
 })
 
 /** 真成员：过滤自己 / 退群 / 不匹配关键字；不截断数量，浮层 max-height + el-scrollbar 撑滚动 */

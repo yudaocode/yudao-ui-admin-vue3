@@ -5,6 +5,7 @@ export interface ImFriendRespVO {
   id: number // 关系记录编号
   friendUserId: number // 好友的用户编号
   muted?: boolean // 是否免打扰
+  displayName?: string // 好友展示备注（仅自己可见）
   status?: number // 好友状态（0=正常，1=已删除）
   addTime?: string // 添加好友时间
   deleteTime?: string // 删除好友时间
@@ -16,7 +17,8 @@ export interface ImFriendRespVO {
 // IM 好友更新 Request VO
 export interface ImFriendUpdateReqVO {
   friendUserId: number // 好友的用户编号
-  muted: boolean // 是否免打扰
+  muted?: boolean // 是否免打扰
+  displayName?: string // 好友展示备注
 }
 
 // 获得当前登录用户的好友列表
@@ -39,7 +41,7 @@ export const deleteFriend = (friendUserId: number | string) => {
   return request.delete<boolean>({ url: '/im/friend/delete', params: { friendUserId } })
 }
 
-// 更新好友信息（当前仅免打扰）
+// 更新好友信息
 export const updateFriend = (data: ImFriendUpdateReqVO) => {
   return request.put<boolean>({ url: '/im/friend/update', data })
 }
