@@ -51,7 +51,7 @@
     <MessagePanel />
 
     <!-- 添加朋友 / 发起群聊弹窗 -->
-    <AddFriendDialog v-model="addFriendVisible" @added="handleFriendAdded" />
+    <AddFriendDialog v-model="addFriendVisible" />
     <CreateGroupDialog
       v-model="createGroupVisible"
       :friends="friends"
@@ -110,20 +110,14 @@ const friends = computed<FriendLite[]>(() =>
   }))
 )
 
-/** 加好友成功后强制刷新好友列表，让群聊弹窗的勾选项也能看到新好友 */
-async function handleFriendAdded() {
-  // TODO @AI：添加完后，不要重新啥新，成本太高了。。。
-  await friendStore.fetchFriends(true)
-}
-
-/** 建群成功后刷新群列表，并直接打开新群会话（自动选中并渲染到右侧 MessagePanel） */
-async function handleGroupCreated(groupId: number) {
-  // TODO @AI：建群成功后，是不是可以不加载 group；按道理说，新建完，直接写入 groups 里面就好了。这里只负责 get 下；
-  await groupStore.fetchGroups(true)
+/** 处理建群成功 */
+function handleGroupCreated(groupId: number) {
+  // CreateGroupDialog 已经 upsertGroup 把新群写进 store，这里只 get + 打开会话
   const group = groupStore.getGroup(groupId)
   if (!group) {
     return
   }
+  // 打开会话
   conversationStore.openConversation(
     groupId,
     ImConversationType.GROUP,

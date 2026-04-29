@@ -530,8 +530,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     /**
      * GROUP_MEMBER_UPDATE：多端同步成员属性变更（昵称 / 免打扰 / 退群等）
      *
-     * 必须强刷成员而非群元数据——这些字段都在 ImGroupMemberRespVO 上，apiGetMyGroupList 不带；
-     * 持久化后若不强刷，IDB 成员桶会长期陈旧
+     * 必须强刷成员而非群元数据——这些字段都在 ImGroupMemberRespVO 上，apiGetMyGroupList 不带；持久化后若不强刷，IDB 成员桶会长期陈旧
      */
     handleGroupMemberUpdate(websocketMessage: ImGroupMessageDTO) {
       const groupStore = useGroupStore()

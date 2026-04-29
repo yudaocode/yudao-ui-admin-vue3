@@ -41,33 +41,26 @@ import ContextMenu from './components/ContextMenu.vue'
 defineOptions({ name: 'ImIndex' })
 
 const conversationStore = useConversationStore()
-// TODO @AI：webSocketStore 全称更合适。
-const wsStore = useImWebSocketStore()
+const webSocketStore = useImWebSocketStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 const { pullOnce } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
 
-/** 初始化：本地缓存恢复 → 远端通信/同步 → 默认视图 */
-// TODO @AI：上面的“初始化：本地缓存恢复 → 远端通信/同步 → 默认视图”，有点不好理解。
+/** 初始化：先吃本地缓存让首屏立即渲染，再远端刷新最新数据，最后建实时通信拉离线消息 */
 onMounted(async () => {
-  // TODO @AI：WS 全称 WebSocket，不要缩写。其他地方也是
-  // loading=true 整段阻断 saveConversations 抖动写盘 + WS 普通消息进缓冲，
-  // 避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
+  // 1.1 整段 loading=true 阻断 saveConversations 抖动写盘 + WebSocket 普通消息进缓冲，避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
   conversationStore.loading = true
   try {
-    // TODO @AI：1 和 2，是不是改成 1.1 1.2；先拉取本地缓存。拉不到在拉远端数据。感觉更清晰一些。
-    // 1. IDB 并发恢复（loadConversations 返回 void；load{Friends,Groups} 返回是否有缓存）
+    // 1.2 三个 store 并发吃 IDB（loadConversations 返回 void；load{Friends,Groups} 返回是否命中缓存）
     const [, hasCachedFriends, hasCachedGroups] = await Promise.all([
       conversationStore.loadConversations(),
       friendStore.loadFriends(),
       groupStore.loadGroups()
     ])
 
-    // TODO @AI：SWR 这个注释，看看怎么更好的理解。
-    // TODO @AI：下面这个注释，感觉没啥层次感。
-    // 2. SWR 刷新：有缓存背景刷；无缓存必须 await + 抛错中断——否则 pullOnce 会用 senderId
-    //    数字给会话起名落到 IDB 后续很难自愈。无缓存分支两个 fetch 并发 Promise.all 省一个 RTT
+    // 2.1 有缓存：异步背景刷新，失败仅记日志（IDB 数据已经够撑首屏，pullOnce 也能正常入库）
+    // 2.2 无缓存（首登 / 切账号回切）：必须 await + 失败抛出中断本轮 onMounted，否则 pullOnce 会用 senderId 数字给会话起名落到 IDB 后续基本无法自愈；无缓存分支两个 fetch 并发 Promise.all 省一个 RTT
     const requiredFetches: Promise<unknown>[] = []
     if (hasCachedFriends) {
       void friendStore.fetchFriends().catch((e) => console.warn('[IM] 后台刷好友失败', e))
@@ -82,41 +75,34 @@ onMounted(async () => {
     if (requiredFetches.length > 0) {
       await Promise.all(requiredFetches)
     }
-    // TODO @AI：3.1 3.2 是不是一起。一个是 websocket 加载数据；一个是加载离线消息。本质是解决实时通信；
-    // 3. 数据就绪后再 connect——无缓存 fetch 失败会走外层 catch 提前 return，避免 WS 已连
-    //    但 friend/group store 空，handle*Message 用 senderId 数字落库
-    wsStore.connect()
-    // 4. 拉离线消息；pullOnce finally 里把 loading 归位
+
+    // 3. 实时通信：建 WebSocket 长连接 + 拉离线消息（pullOnce finally 把 loading 归位）；上一步无缓存 fetch 失败会被外层 catch 提前 return 不到这里，避免 WebSocket 已连但 friend/group store 是空的、handle*Message 用 senderId 数字落库
+    webSocketStore.connect()
     await pullOnce()
 
-    // 5. 默认选中第一个会话
+    // 4. 默认选中第一个会话
     const sorted = conversationStore.getSortedConversations
     if (sorted.length > 0 && !conversationStore.activeConversation) {
       conversationStore.setActiveConversation(sorted[0])
     }
   } catch (e) {
-    // TODO @AI：注释可以写的超过一行；尽量换行的时候，是一个事情写完，不然读起来很累。【其他地方也是！！！】例子如下：
-    // TODO ！首拉失败：手动复位 loading（pullOnce 没跑到，它的 finally 兜不到这里），否则后续 saveConversations 全被早 return 阻断。
-    // TODO WS 不在这里 disconnect —— 路由离开走 onUnmounted 自然清理，用户也可以刷新重试
-    // 首拉失败：手动复位 loading（pullOnce 没跑到，它的 finally 兜不到这里），
-    // 否则后续 saveConversations 全被早 return 阻断。WS 不在这里 disconnect——
-    // 路由离开走 onUnmounted 自然清理，用户也可以刷新重试
+    // 1. 首拉失败：手动复位 loading（pullOnce 没跑到，它的 finally 兜不到这里），否则后续 saveConversations 全被早 return 阻断
+    // 2. WebSocket 不在这里 disconnect——路由离开会走 onUnmounted 自然清理，用户也可以刷新重试
     conversationStore.loading = false
     console.error('[IM] 初始化失败', e)
   }
 })
 
-/** 离开 IM 主壳：主动断 WS（disconnect 内部已清掉 onclose 防自动重连） */
+/** 离开 IM 主壳：主动断 WebSocket（disconnect 内部已清掉 onclose 防自动重连） */
 onUnmounted(() => {
-  wsStore.disconnect()
+  webSocketStore.disconnect()
 })
 
-// TODO @AI：要说下，当前对话的处理。因为不涉及其他对话呀。
 /**
- * 会话切换时自动标记为已读 + 私聊下拉对方已读位置：
- * - 立刻清零本地未读
- * - 同步后端已读状态；服务端会广播 READ/RECEIPT 事件通知其它端与对方
- * - 私聊额外补一次「对方已读到哪条」，弥补离线 / 多端漏掉的 RECEIPT 推送
+ * 当前会话切换：本地清零未读 + 上报后端已读 + 私聊补"对方已读到哪条"
+ *
+ * 只针对当前 active 会话做处理，其它会话已读状态由 WebSocket READ/RECEIPT 事件被动同步。
+ * 私聊补一次拉对方已读位置，弥补离线 / 多端漏掉的 RECEIPT 推送
  */
 watch(
   () => conversationStore.activeConversation?.targetId,

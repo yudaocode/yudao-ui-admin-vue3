@@ -212,38 +212,25 @@ const groupFriends = computed<FriendLite[]>(() =>
   }))
 )
 
-// TODO @AI：SWR 这个缩写，大家不一定看的懂。
-/** 切换到群会话时按 SWR 同步群 / 成员 / 好友；各自 fire-and-forget + catch，任何一项失败不牵连其它 */
+/** 切换到群会话时同步群信息 + 成员；各自 fire-and-forget + catch，任何一项失败不牵连其它 */
 async function ensureGroupData(groupId: number) {
-  // TODO @AI：从远程异步拉取群信息，保证数据是最新的
+  // 远程异步拉群信息（群名 / 公告 / 群主等元数据）
   groupStore.fetchGroupInfo(groupId).catch((error) => {
     console.warn('[IM MessagePanel] fetchGroupInfo 失败', { groupId }, error)
   })
 
-  // TODO @AI：先从 IDB 同步加载群成员，保证首帧就有成员名 / 头像；这样注释更好？
-  // 先吃 IDB 让首帧立即出成员名 / 头像
+  // 先从 IDB 同步加载群成员，让首帧立即出成员名 / 头像
   await groupStore.loadGroupMembers(groupId).catch((error) => {
     console.warn('[IM MessagePanel] loadGroupMembers 失败', { groupId }, error)
     return null
   })
-  // TODO @AI：再从远程异步拉取群成员信息，保证数据是最新的
-  // force=true 跳过上一行刚塞进 in-memory 的短路，保证每次进群拿到最新成员状态
+  // 再从远程异步拉成员，强刷以跳过 in-memory 短路，每次进群都能拿到最新成员状态
   groupStore.fetchGroupMembers(groupId, true).catch((error) => {
     console.warn('[IM MessagePanel] fetchGroupMembers 失败', { groupId }, error)
   })
-
-  // TODO @AI：每次切换群，不用拉取 friend 吧？开销太大了。只要首屏拉取就行了呀。
-  friendStore.fetchFriends().catch((error) => {
-    console.warn('[IM MessagePanel] fetchFriends 失败', { groupId }, error)
-  })
 }
 
-// TODO @AI：是不是只要说，刷新就好了。然后下面的 await 相关注释，写到方法体里。
-/**
- * 群信息抽屉里点"刷新"等触发：强拉一次最新群元数据 + 群成员（force=true 跳过缓存）
- *
- * 仅在当前会话仍是同一个群时执行，避免 await 期间用户已经切走、把别的群数据也跟着重拉
- */
+/** 群信息抽屉里点"刷新"：强拉一次最新群元数据 + 群成员 */
 function reloadGroupData() {
   const conversation = conversationStore.activeConversation
   if (!conversation || conversation.type !== ImConversationType.GROUP) {
@@ -254,13 +241,7 @@ function reloadGroupData() {
 }
 
 const historyVisible = ref(false)
-/**
- * 信息抽屉的开关（纯 MessagePanel 本地 UI 状态）
- *
- * 群聊 / 私聊共用一个 ref：模板里 v-if-else 决定挂哪个抽屉，同一时刻只有一个组件
- * 在 DOM 里，所以一个布尔够用。早先拆成 sideVisible + privateSideVisible 是冗余
- */
-const sideVisible = ref(false)
+const sideVisible = ref(false) // 信息抽屉开关：群聊 / 私聊共用一个 ref
 
 /** 信息抽屉的 toggle：跟 header 上 3 点图标按钮共用 */
 function toggleSide() {
@@ -384,7 +365,7 @@ watch(
     newMessageCount.value = 0
     showJumpToBottom.value = false
     scrollToBottom()
-    // 仅群聊预拉详情 / 成员 / 好友（私聊只需 friendStore 里的对端，已经 globally pull 了）
+    // 仅群聊预拉详情 / 成员（私聊对端在首屏 fetchFriends 时就拉了）
     if (targetId && conversationStore.activeConversation?.type === ImConversationType.GROUP) {
       ensureGroupData(targetId)
     }

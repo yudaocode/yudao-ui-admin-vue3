@@ -12,7 +12,7 @@ import {
 } from '@/api/im/friend'
 import { useConversationStore } from './conversationStore'
 import { ImConversationType } from '../../utils/constants'
-import { getCurrentUserId, imStorage, safeImSet, StorageKeys } from '../../utils/storage'
+import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../utils/storage'
 import { getFriendDisplayName } from '../../utils/user'
 import type { Friend } from '../types'
 
@@ -54,11 +54,10 @@ export const useFriendStore = defineStore('imFriendStore', {
   actions: {
     // ==================== 本地缓存 ====================
 
-    // TODO @AI：是不是不用 “不更新 conversationStore——会话缓存和好友缓存是同一会话写入的，名字头像天然一致” 注释。只要说明 boolean 是啥就行了把。
     /**
-     * 从 IDB 恢复好友列表，返回 boolean 给首屏 SWR 决策用
+     * 从 IDB 恢复好友列表
      *
-     * 不更新 conversationStore——会话缓存和好友缓存是同一会话写入的，名字头像天然一致
+     * @return 返回是否命中缓存
      */
     async loadFriends(): Promise<boolean> {
       const userId = getCurrentUserId()
@@ -84,7 +83,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       if (!userId) {
         return
       }
-      safeImSet(StorageKeys.friends(userId), this.friends, '[IM friendStore] 本地好友缓存写入失败')
+      setQuietly(StorageKeys.friends(userId), this.friends, '[IM friendStore] 本地好友缓存写入失败')
     },
 
     // ==================== 远端拉取 ====================
@@ -197,8 +196,7 @@ export const useFriendStore = defineStore('imFriendStore', {
     /**
      * 修改好友展示备注（仅自己可见）
      *
-     * 走后端 /im/friend/update 接口；保存成功后再同步本地 friend + 会话列表 name，
-     * 失败就直接抛给上层，让 UI 决定是否回滚 / 提示用户
+     * 走后端 /im/friend/update 接口；保存成功后再同步本地 friend + 会话列表 name，失败直接抛给上层让 UI 决定回滚 / 提示
      */
     async setDisplayName(friendUserId: number, displayName: string) {
       const value = displayName.trim()

@@ -45,17 +45,16 @@ export interface Conversation {
   // ========== 展示字段 ==========
   name: string // 展示名称（私聊=好友昵称；群聊=群名）
   avatar: string // 头像
-  lastContent: string // 会话列表展示的最后一条消息摘要
-  lastSendTime: number // 最后一条消息时间，用于排序
   unreadCount: number // 未读数
   messages: Message[] // 消息列表
-  // TODO @AI：lastMessage 对象，会不会更干净一点。然后把需要的字段放进去？
-  /** 最后一条消息的事实索引；展示名实时算（getSenderDisplayName），不存名字快照 */
-  lastSenderId?: number
-  lastMessageType?: number
-  lastSelfSend?: boolean
-  /** 发送人显示名快照——仅作 getSenderDisplayName 算不出名字时的 fallback */
-  lastSenderDisplayName?: string
+
+  // ========== 最后一条消息事实索引 ==========
+  lastContent: string // 会话列表展示的最后一条消息摘要
+  lastSendTime: number // 最后一条消息时间，用于排序
+  lastSenderId?: number // 发送人编号
+  lastMessageType?: number // 消息类型，对齐 ImMessageType
+  lastSelfSend?: boolean // 是否自己发的
+  lastSenderDisplayName?: string // 发送人显示名快照——仅作 utils/user.getSenderDisplayName 实时算不出真名时的 fallback
 
   // ========== UI 状态 ==========
   deleted?: boolean // 是否已删除（软删标记，持久化时过滤）
@@ -115,9 +114,11 @@ export interface Group {
   notice?: string // 群公告
   ownerUserId?: number // 群主用户编号
 
-  // ========== 前端扩展字段 ==========
-  muted?: boolean // 是否免打扰（来自当前用户的 ImGroupMemberRespVO.muted）
+  // ========== 前端扩展字段（user-per-group 维度） ==========
+  muted?: boolean // 是否免打扰。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
+  displayGroupName?: string // 群显示备注。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
   members?: GroupMember[] // 群成员缓存（按需懒加载）
+  membersLoaded?: boolean // members 是否"完整加载"——只有整群 loadGroupMembers / fetchGroupMembers 命中时为 true；fetchGroupMember 单成员补齐不置位，避免 fetchGroupMembers(force=false) 短路时误判整群已加载
   memberCount?: number // 成员总数
 }
 
@@ -129,11 +130,8 @@ export interface GroupMember {
   userId: number // 用户编号
   avatar?: string // 头像
   nickname: string // 用户昵称
-  // TODO @AI：还不是把 muted 字段是不是放到 Group 里？displayUserName、displayGroupName、muted；
-  displayUserName?: string // 组内显示名（不与 nickname 合并，由消费方按需取舍）
-  displayGroupName?: string // 群显示备注（当前用户对该群的自定义名）
+  displayUserName?: string // 该成员在群内自定义昵称（每个 member 一份；不与 nickname 合并，由消费方按需取舍）
   status?: number // 在群 / 退群状态，对齐 CommonStatusEnum
-  muted?: boolean // 当前成员对该群的免打扰开关（fetchGroupMembers 用它回填 Group.muted）
 
   // ========== 前端扩展字段 ==========
   isOwner?: boolean // 是否群主（前端从 Group.ownerUserId 计算）
@@ -149,7 +147,7 @@ export interface Friend {
   nickname: string // 好友昵称（对方真实昵称，永远不被备注覆盖；UI 显示走 displayName || nickname）
   avatar?: string // 好友头像
   muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
-  displayName?: string // 好友展示备注：仅自己可见的别名（命名对齐 GroupMember.displayGroupName 风格，单字段不歧义就不带 Friend 前缀）
+  displayName?: string // 好友展示备注：仅自己可见的别名（单字段不歧义，不带 Friend 前缀）
   status?: number // 好友状态，对齐 CommonStatusEnum（DISABLE = 已删除，软删保留记录）
   addTime?: number // 添加好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
   deleteTime?: number // 删除好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）

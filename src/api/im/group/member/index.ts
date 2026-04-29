@@ -53,8 +53,11 @@ export const removeGroupMember = (data: ImGroupMemberRemoveReqVO) => {
 }
 
 // 获得群成员详情
-export const getGroupMember = (id: number | string) => {
-  return request.get<ImGroupMemberRespVO>({ url: '/im/group-member/get', params: { id } })
+export const getGroupMember = (groupId: number, userId: number) => {
+  return request.get<ImGroupMemberRespVO>({
+    url: '/im/group-member/get',
+    params: { groupId, userId }
+  })
 }
 
 // 获得指定群的成员列表（聚合 AdminUser 昵称 / 头像）

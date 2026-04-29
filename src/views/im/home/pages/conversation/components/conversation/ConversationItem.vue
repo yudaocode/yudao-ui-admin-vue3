@@ -44,7 +44,7 @@
       <div class="flex items-center mt-1 leading-5">
         <!-- @红字提示：atMe 优先于 atAll -->
         <span v-if="atText" class="flex-shrink-0 text-12px text-[#c70b0b]">{{ atText }}</span>
-        <!-- 群聊最后一条发送者前缀：实时按 lastSenderId + 当前会话上下文算名字 -->
+        <!-- 群聊最后一条发送者前缀：按 lastSenderId + 当前会话上下文实时算名字 -->
         <span
           v-if="showSendName"
           class="flex-shrink-0 text-12px text-[var(--el-text-color-secondary)] whitespace-nowrap"
@@ -122,7 +122,7 @@ const lastSenderDisplayName = computed(() => {
   )
 })
 
-/** 群聊 + 有最后发送者 + 最后一条是普通消息 时，显示发送者前缀 */
+/** 群聊 + 有最后发送者 + 最后一条是普通消息时，显示发送者前缀（TIP_TIME / TIP_TEXT / RECALL 不带前缀） */
 const showSendName = computed(() => {
   if (!isGroup.value) {
     return false
@@ -130,18 +130,11 @@ const showSendName = computed(() => {
   if (!props.conversation.lastSenderId) {
     return false
   }
-  // 走 lastMessageType 索引（避免再去翻 messages 数组），TIP_TIME / TIP_TEXT / RECALL 不带前缀
   const lastType = props.conversation.lastMessageType
-  if (lastType == null) {
-    return false
-  }
-  return isNormalMessage(lastType)
+  return lastType != null && isNormalMessage(lastType)
 })
 
-/**
- * 列表展示文案：撤回类型实时按 lastSenderId 算，避免改备注后老 lastContent 文案过期；
- * 其余类型直接用 conversation.lastContent（按消息进来时固化的摘要）
- */
+/** 列表展示文案：撤回类型实时算（避免改备注后老 lastContent 过期），其余直接用 lastContent */
 const lastContentDisplay = computed(() => {
   if (
     props.conversation.lastMessageType === ImMessageType.RECALL &&
@@ -183,15 +176,7 @@ function handleTop() {
   )
 }
 
-// TODO @AI：这块注释，会不会台复杂了。
-/**
- * 切换免打扰：乐观 UI（先落本地，再异步推后端），失败回滚 + 提示
- *
- * 不 await：UI 已经通过 conversationStore.setMuted 完成视觉切换，菜单立即关闭；
- * 后端 /im/friend/update / /im/group-member/update 失败时回滚 conversationStore，
- * 避免本地（已经 saveConversations 落 IndexedDB）跟服务端长期不一致
- * （friend / group 自身的 setMuted 在 await 失败时不会落本地，只有 conversation 需要回滚）
- */
+/** 切换免打扰：乐观 UI（先本地切换，菜单立即关；后端失败回滚 conversation 状态） */
 function handleMuted() {
   const next = !props.conversation.muted
   const { type, targetId } = props.conversation

@@ -9,45 +9,53 @@ import {
   IM_AT_ALL_USER_ID,
   TIME_TIP_GAP_MS
 } from '../../utils/constants'
-import { getCurrentUserId, imStorage, safeImRemove, StorageKeys } from '../../utils/storage'
+import { getCurrentUserId, imStorage, removeQuietly, StorageKeys } from '../../utils/storage'
 import { generateClientMessageId, parseRecallMessageId } from '../../utils/message'
 import { resolveConversationLastContent } from '../../utils/conversation'
-import { getSenderDisplayName } from '../../utils/user'
+import { tryGetSenderDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import type { Conversation, ConversationStoreMeta, Message } from '../types'
 
-// TODO @AI：这个是不是 user.ts 增加一个类似的方法。只有解析到，才返回，没解析到，就返回 undefined 的。然后需要的地方，自己按需 set 到 conversation 里？
 /**
- * 刷新 lastSenderDisplayName 快照——必须在调用方更新 conversation.lastSenderId
- * **之前**执行，靠它判断是否"同一发送人"决定旧快照保留 / 清空
+ * 算出新一条 lastSenderDisplayName 快照——caller 拿这个值去赋 conversation.lastSenderDisplayName
+ *
+ * 1. 能算出真名 → 用真名
+ * 2. 算不出 + 同发送人 → 沿用旧快照（冷拉期间常见）
+ * 3. 算不出 + 换发送人 → undefined（旧快照不再适用）
+ *
+ * 群聊算不出真名时顺手触发兜底拉成员（store 内部已并发去重），让后续渲染能命中真名
  */
-function refreshLastSenderDisplayName(conversation: Conversation, senderId: number): void {
-  const liveSenderName = getSenderDisplayName(senderId, conversation.type, conversation.targetId)
-  const isRealName = liveSenderName !== String(senderId)
-  const isSameSender = conversation.lastSenderId === senderId
-  if (isRealName) {
-    conversation.lastSenderDisplayName = liveSenderName
-    return
+function deriveLastSenderDisplayName(
+  conversation: Conversation,
+  senderId: number
+): string | undefined {
+  // 1. 严格版算名字：能拿到 displayUserName / 备注 / 真实昵称就直接用，对应规则 1
+  const liveSenderName = tryGetSenderDisplayName(senderId, conversation.type, conversation.targetId)
+  if (liveSenderName) {
+    return liveSenderName
   }
 
-  // 群聊算不出真名：单靠快照覆盖不了"换发送人 + members 没加载"，主动补成员（store 内部已单飞）
-  // TODO @AI：是不是可以增加一个，补齐单个人？这样，改造这个方法。支持传递 groupId + memberUserId；
+  // 2. 群聊兜底拉成员：分两种情况
+  //    a. members 完全没加载（!membersLoaded）→ 拉整群（pullOnce 期间多个 senderId 都缺时，单飞表会 dedup 成一次请求）
+  //    b. members 已加载但缺这一个（新加入的成员，本端未收到 GROUP_MEMBER_UPDATE）→ 补齐这一个
   if (conversation.type === ImConversationType.GROUP) {
-    useGroupStore()
-      .fetchGroupMembers(conversation.targetId, true)
-      .catch((e) =>
-        console.warn(
-          '[IM conversationStore] 兜底拉群成员失败',
-          { groupId: conversation.targetId },
-          e
-        )
+    const groupStore = useGroupStore()
+    const group = groupStore.getGroup(conversation.targetId)
+    const fetchPromise = group?.membersLoaded
+      ? groupStore.fetchGroupMember(conversation.targetId, senderId)
+      : groupStore.fetchGroupMembers(conversation.targetId)
+    fetchPromise.catch((e) =>
+      console.warn(
+        '[IM conversationStore] 兜底拉群成员失败',
+        { groupId: conversation.targetId, senderId, fullFetch: !group?.membersLoaded },
+        e
       )
+    )
   }
 
-  // 同发送人沿用旧快照（冷拉期间常见），换人则清掉避免显示成上一个人
-  if (!isSameSender) {
-    conversation.lastSenderDisplayName = undefined
-  }
+  // 3. 算不出真名：同发送人沿用旧快照（规则 2），换人则清掉避免显示成上一个人（规则 3）
+  const isSameSender = conversation.lastSenderId === senderId
+  return isSameSender ? conversation.lastSenderDisplayName : undefined
 }
 
 // TODO @芋艿：单个 conversation 的消息过多后，可能存储起来会很慢，后续看看怎么优化。
@@ -163,8 +171,7 @@ export const useConversationStore = defineStore('imConversationStore', {
      * - 传单个 conversation：写 meta + 该会话的消息（单条消息变更走这里）
      * - 传数组：写 meta + 数组里所有未删除会话的消息（loading 完成后兜底 flush 用）
      *
-     * 按会话分桶后，单条消息变更只重写当前会话的消息 key，避免老方案的全量序列化。
-     * 写入失败已在内部 catch 兜底（仅打印日志），不影响 UI 流程，所以接口签名设为 void。
+     * 按会话分桶后，单条消息变更只重写当前会话的消息 key，避免老方案的全量序列化；写入失败已在内部 catch 兜底（仅打印日志）不影响 UI 流程，所以接口签名设为 void
      */
     saveConversations(target?: Conversation | Conversation[] | null): void {
       // loading 期间跳过，避免离线消息批量到达时的密集写入
@@ -191,8 +198,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         Array.isArray(target) ? target : target ? [target] : []
       ).filter((c) => !c.deleted)
       for (const conversation of conversationsToFlush) {
-        // toRaw 拆掉 Vue reactive Proxy：IDB 的 structuredClone 不接受 Proxy，
-        // 不拆会抛 DataCloneError 静默落盘失败（只 meta 写得进去，messages 永远丢）
+        // toRaw 拆掉 Vue reactive Proxy：IDB 的 structuredClone 不接受 Proxy，不拆会抛 DataCloneError 静默落盘失败（只 meta 写得进去，messages 永远丢）
         tasks.push(
           imStorage.setItem(
             StorageKeys.conversationMessages(userId, conversation.type, conversation.targetId),
@@ -210,7 +216,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (!userId) {
         return
       }
-      safeImRemove(
+      removeQuietly(
         StorageKeys.conversationMessages(userId, type, targetId),
         '[IM] 本地消息缓存删除失败'
       )
@@ -390,18 +396,20 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
 
-      // 2.1 更新会话摘要 + 事实索引 + 发送人名快照
-      refreshLastSenderDisplayName(conversation, messageInfo.senderId)
+      // 2.1 更新会话摘要 + 最后一条消息事实索引（含发送人名快照）。
+      //     deriveLastSenderDisplayName 必须在更新 lastSenderId 之前调用，靠旧值判断"同发送人"
+      const senderDisplayName = deriveLastSenderDisplayName(conversation, messageInfo.senderId)
       conversation.lastContent = resolveConversationLastContent(
         messageInfo,
         conversation.type,
         conversation.targetId,
-        conversation.lastSenderDisplayName
+        senderDisplayName
       )
       conversation.lastSendTime = messageInfo.sendTime || Date.now()
       conversation.lastSenderId = messageInfo.senderId
       conversation.lastMessageType = messageInfo.type
       conversation.lastSelfSend = messageInfo.selfSend
+      conversation.lastSenderDisplayName = senderDisplayName
 
       // 2.2 群聊 @ 标记（仅对方消息 + 未读态有效）
       if (
@@ -523,10 +531,9 @@ export const useConversationStore = defineStore('imConversationStore', {
       }
       message.type = ImMessageType.RECALL
       message.status = ImMessageStatus.RECALL
-      // content 不再写撤回文案：渲染层走 buildRecallTip(senderId, selfSend, ...) 实时算
-      // 这里清空，避免老 content 被误认为有效消息文本
+      // 清空 content：撤回文案由渲染层 buildRecallTip 实时算，老 content 留着会被误认为有效消息文本
       message.content = ''
-      // 最后一条消息是刚撤回的，才更新会话摘要 + 事实索引（lastSenderId 不变，沿用快照）
+      // 最后一条消息是刚撤回的，才更新会话摘要 + lastMessageType（senderId 不变，沿用旧快照）
       if (conversation.messages[conversation.messages.length - 1]?.id === messageId) {
         conversation.lastContent = resolveConversationLastContent(
           message,
@@ -644,27 +651,28 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
       conversation.messages.splice(index, 1)
-      // 如果删的是最后一条，按倒数第二条重算摘要 + 事实索引 + 发送人名快照
+      // 如果删的是最后一条，按倒数第二条重算摘要 + 事实索引
       if (index === conversation.messages.length) {
         const last = conversation.messages[conversation.messages.length - 1]
         if (last) {
-          refreshLastSenderDisplayName(conversation, last.senderId)
+          const senderDisplayName = deriveLastSenderDisplayName(conversation, last.senderId)
           conversation.lastContent = resolveConversationLastContent(
             last,
             conversation.type,
             conversation.targetId,
-            conversation.lastSenderDisplayName
+            senderDisplayName
           )
           conversation.lastSendTime = last.sendTime || conversation.lastSendTime
           conversation.lastSenderId = last.senderId
           conversation.lastMessageType = last.type
           conversation.lastSelfSend = last.selfSend
+          conversation.lastSenderDisplayName = senderDisplayName
         } else {
           conversation.lastContent = ''
-          conversation.lastSenderDisplayName = undefined
           conversation.lastSenderId = undefined
           conversation.lastMessageType = undefined
           conversation.lastSelfSend = undefined
+          conversation.lastSenderDisplayName = undefined
         }
       }
       this.saveConversations(conversation)

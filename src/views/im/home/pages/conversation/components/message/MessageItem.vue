@@ -1,9 +1,6 @@
 <template>
-  <!-- TODO @AI：@全部、人的消息高亮；在消息内容里 -->
   <!--
-    布局约定：DOM 顺序永远是「头像在前 / 气泡在后」，对方消息走默认 row（头像顶左），
-    自己消息靠外层 flex-row-reverse 翻视觉（头像顶右、气泡在头像左侧），跟微信对齐。
-    早先双 v-if 头像 + row-reverse 会让自己消息时气泡顶右、头像反而在气泡左边。
+    布局约定：DOM 顺序永远是「头像在前 / 气泡在后」，对方消息走默认 row（头像顶左），自己消息靠外层 flex-row-reverse 翻视觉（头像顶右、气泡在头像左侧），跟微信对齐
   -->
   <!-- 时间分隔线（TIP_TIME=20）：居中灰色时间 -->
   <div
@@ -490,13 +487,7 @@ const showGroupReadStatus = computed(() => {
   return status !== ImGroupReceiptStatus.NO_RECEIPT
 })
 
-/**
- * 当前群成员（供 MessageReadStatus 计算未读列表用）
- *
- * // TODO @AI：下面的注释，会不会台复杂了。是不是拿到方法体里？
- * 群成员是按需懒加载到 groupStore（loadGroupMembers / fetchGroupMembers），未加载完 group?.members 为 undefined →
- * 兜底空数组，MessageReadStatus 拿空数组就不渲染未读名单，不会出错
- */
+/** 当前群成员（供 MessageReadStatus 计算未读名单；未加载完时兜底空数组不渲染） */
 const groupMembersForReadStatus = computed<GroupMemberLite[]>(() => {
   const conversation = conversationStore.activeConversation
   if (!conversation || conversation.type !== ImConversationType.GROUP) {

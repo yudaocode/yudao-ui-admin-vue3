@@ -7,6 +7,7 @@ import {
   type ImGroupRespVO
 } from '@/api/im/group'
 import {
+  getGroupMember as apiGetGroupMember,
   getGroupMemberList as apiGetGroupMemberList,
   updateGroupMember as apiUpdateGroupMember,
   type ImGroupMemberRespVO
@@ -16,20 +17,29 @@ import { ImConversationType } from '../../utils/constants'
 import {
   getCurrentUserId,
   imStorage,
-  safeImRemove,
-  safeImSet,
+  removeQuietly,
+  setQuietly,
   StorageKeys
 } from '../../utils/storage'
+import { getGroupDisplayName } from '../../utils/user'
 import type { Group, GroupMember } from '../types'
 
 /**
- * fetchGroupMembers 单飞表：同 groupId 并发只打一次接口
+ * fetchGroupMembers 并发去重表：同 groupId 同时进的请求共用一个 Promise
  *
- * key 必须带 userId——账号切换时 A 的 in-flight 不能被 B 复用，否则 IIFE 内部
- * 的 saveGroupMembers 会把 A 的成员数据写进 B 的 IDB 桶
+ * key 必须带 userId——账号切换时 A 的请求不能被 B 复用，否则 IIFE 内部的 saveGroupMembers 会把 A 的成员数据写进 B 的 IDB 桶
  */
 const pendingMemberFetches = new Map<string, Promise<GroupMember[]>>()
 const pendingMemberKey = (userId: number, groupId: number) => `${userId}:${groupId}`
+
+/**
+ * fetchGroupMember 单成员并发去重表：同 (groupId, memberUserId) 同时进的请求共用一个 Promise
+ *
+ * 跟整群表分开：单成员 fetch 跟整群 fetch 语义不同（单成员不回填 me 的 muted），不能互相代替
+ */
+const pendingSingleMemberFetches = new Map<string, Promise<GroupMember | null>>()
+const pendingSingleMemberKey = (userId: number, groupId: number, memberUserId: number) =>
+  `${userId}:${groupId}:${memberUserId}`
 
 /**
  * IM 群 Store
@@ -57,12 +67,7 @@ export const useGroupStore = defineStore('imGroupStore', {
   actions: {
     // ==================== 本地缓存 ====================
 
-    // TODO @AI：简化注释，参考 friendStore；
-    /**
-     * 从 IDB 恢复群列表（不带 members），返回 boolean 给首屏 SWR 决策用
-     *
-     * 不更新 conversationStore——会话缓存和群缓存是同一会话写入的，名字头像天然一致
-     */
+    /** 从 IDB 恢复群列表（不带 members），返回是否命中缓存 */
     async loadGroups(): Promise<boolean> {
       const userId = getCurrentUserId()
       if (!userId) {
@@ -88,24 +93,24 @@ export const useGroupStore = defineStore('imGroupStore', {
         return
       }
       const groupsWithoutMembers = this.groups.map(({ members, ...rest }) => rest)
-      safeImSet(
+      setQuietly(
         StorageKeys.groups(userId),
         groupsWithoutMembers,
         '[IM groupStore] 本地群缓存写入失败'
       )
     },
 
-    // TODO @AI：命中返回数组（caller 紧接渲染省一次二次访问），未命中返回 null 是不是没必要注释？只是说返回结果而已。。。
-    /** 从 IDB 恢复指定群成员；命中返回数组（caller 紧接渲染省一次二次访问），未命中返回 null */
+    /** 从 IDB 恢复指定群成员；命中返回成员数组，未命中返回 null */
     async loadGroupMembers(groupId: number): Promise<GroupMember[] | null> {
       const userId = getCurrentUserId()
       if (!userId) {
         return null
       }
-      // in-memory 已就位（同会话二次进群 / fetchGroupMembers 已跑过）：直接复用
-      const cachedInMemory = this.getGroup(groupId)?.members
-      if (cachedInMemory && cachedInMemory.length > 0) {
-        return cachedInMemory
+      // in-memory 已"完整"加载（fetchGroupMembers 跑过或上次冷启动从 IDB 整桶恢复过）：直接复用；
+      // 单成员补齐（fetchGroupMember）写进的 partial members 不在此短路——其 membersLoaded=false
+      const cachedGroup = this.getGroup(groupId)
+      if (cachedGroup?.members && cachedGroup.membersLoaded) {
+        return cachedGroup.members
       }
       try {
         const cached = await imStorage.getItem<GroupMember[]>(
@@ -117,17 +122,19 @@ export const useGroupStore = defineStore('imGroupStore', {
         // 把 IDB 拿到的成员落到对应 group
         const group = this.getGroup(groupId)
         if (!group) {
-          // group 还没就位：仅 in-memory 占位（name='' 表示未知），不调 upsertGroup 。
-          // 原因：避免把假名灌进 conversation.name + groups IDB 桶；等 fetchGroups 浅合并时被真名覆盖
+          // group 还没就位：仅 in-memory 占位（name='' 表示未知），不调 upsertGroup —— 避免把假名灌进 conversation.name + groups IDB 桶；
+          // 后续，等 fetchGroups 浅合并时，被真名覆盖
           this.groups.push({
             id: groupId,
             name: '',
             members: cached,
-            memberCount: cached.length
+            memberCount: cached.length,
+            membersLoaded: true
           })
         } else {
           group.members = cached
           group.memberCount = cached.length
+          group.membersLoaded = true
         }
         return cached
       } catch (e) {
@@ -146,7 +153,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (!members) {
         return
       }
-      safeImSet(
+      setQuietly(
         StorageKeys.groupMembers(userId, groupId),
         members,
         `[IM groupStore] 本地群成员缓存写入失败 (groupId=${groupId})`
@@ -163,8 +170,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       // 拉取当前登录用户加入的所有群（不带成员；成员按需再走 fetchGroupMembers）
       const list = await apiGetMyGroupList()
       const fresh = (list || []).map(convertGroup)
-      // 合并而非全量替换：保留 loadGroupMembers / fetchGroupMembers 已经写入的 members / memberCount / muted
-      // （这些字段不在 ImGroupRespVO 里，全量替换会把成员级数据全冲掉）
+      // 合并而非全量替换：保留 user-per-group 字段（muted / displayGroupName）+ 成员缓存——这些字段不在 ImGroupRespVO 里，全量替换会把它们冲掉
       const groupMap = new Map(this.groups.map((group) => [group.id, group]))
       this.groups = fresh.map((group) => {
         const existing = groupMap.get(group.id)
@@ -175,14 +181,16 @@ export const useGroupStore = defineStore('imGroupStore', {
           ...group,
           members: existing.members,
           memberCount: existing.memberCount ?? group.memberCount,
-          muted: existing.muted ?? group.muted
+          muted: existing.muted ?? group.muted,
+          displayGroupName: existing.displayGroupName,
+          membersLoaded: existing.membersLoaded
         }
       })
       this.loaded = true
       const conversationStore = useConversationStore()
       for (const group of this.groups) {
         conversationStore.updateConversation(ImConversationType.GROUP, group.id, {
-          name: group.name,
+          name: getGroupDisplayName(group),
           avatar: group.avatar,
           muted: group.muted
         })
@@ -203,79 +211,143 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
     },
 
-    // TODO @AI：in-flight 单飞；这个注释有点奇怪
-    /** 按群拉取成员（in-memory 缓存 + in-flight 单飞，force=true 强刷）+ 落 IDB */
+    /** 按群拉取成员（in-memory 缓存 + 并发去重，force=true 强刷）+ 落 IDB */
     fetchGroupMembers(groupId: number, force = false): Promise<GroupMember[]> {
+      // in-memory "完整"加载过才命中——单成员补齐写入的 partial members 不在此短路（membersLoaded=false）
       const cached = this.getGroup(groupId)
-      if (cached && cached.members && !force) {
+      if (cached && cached.members && cached.membersLoaded && !force) {
         return Promise.resolve(cached.members)
       }
+      // 未登录：不发起请求也不登记 in-flight，避免污染单飞表
       const requestUserId = getCurrentUserId()
       if (!requestUserId) {
         return Promise.resolve([])
       }
-      // TODO @AI：最好这里注释下。
+      // 同 (userId, groupId) 已经有正在飞的请求：直接复用，避免重复打接口
       const key = pendingMemberKey(requestUserId, groupId)
       const inflight = pendingMemberFetches.get(key)
       if (inflight) {
         return inflight
       }
       const promise = (async () => {
-        // TODO @AI：这里是不是要注释下
+        // 拉接口 + 单 pass 转换：同时捕获 me 的原始 VO，给下面回填 user-per-group 字段（muted / displayGroupName）用
+        // convertGroupMember 不带 muted / displayGroupName（已搬到 Group 上），所以从 raw VO 里捞
         const list = await apiGetGroupMemberList(groupId)
-        const members = (list || []).map((member) => convertGroupMember(member, groupId))
-        // 网络往返期间用户可能已切——A 的数据写到 B 的 store / IDB 是数据互串，丢弃
-        // TODO @AI：这个应该不存在把？有点过度设计了。
-        if (getCurrentUserId() !== requestUserId) {
-          return []
-        }
-
-        // muted 是成员维度字段（apiGetMyGroupList 不带），借这次拉成员回填到 group / conversation
-        const me = members.find((m) => m.userId === requestUserId)
-        const muted = !!me?.muted
+        let meRaw: ImGroupMemberRespVO | undefined
+        const members = (list || []).map((member) => {
+          if (member.userId === requestUserId) {
+            meRaw = member
+          }
+          return convertGroupMember(member, groupId)
+        })
+        const muted = !!meRaw?.muted
+        const displayGroupName = meRaw?.displayGroupName || ''
 
         // 必须 await 之后重新 getGroup，避免 fetchGroups 已并发写入真实 group 的 race
         const group = this.getGroup(groupId)
         const isPlaceholder = !group
-        let mutedChanged = false
+        let groupFieldsChanged = false
         if (!group) {
-          // group 还没就位：仅 in-memory push 占位（name='' 表示未知），不调 upsertGroup
-          // 避免把假名灌进 conversation.name + groups IDB 桶。等 fetchGroups 浅合并时被真名覆盖
+          // group 还没就位：仅 in-memory push 占位（name='' 表示未知），不调 upsertGroup——避免把假名灌进 conversation.name + groups IDB 桶；
+          // 后续，等 fetchGroups 浅合并时，被真名覆盖
           this.groups.push({
             id: groupId,
             name: '',
             members,
             memberCount: members.length,
-            muted
+            muted,
+            displayGroupName,
+            membersLoaded: true
           })
         } else {
           group.members = members
           group.memberCount = members.length
-          // TODO @AI：这里最好注释下。
-          if (group.muted !== muted) {
+          group.membersLoaded = true
+          // muted / displayGroupName 任一变化就同步到 conversation + 触发 saveGroups；
+          // 后续，displayGroupName 变化要刷会话名（"我对该群的备注"是会话列表的展示名）
+          if (group.muted !== muted || group.displayGroupName !== displayGroupName) {
             group.muted = muted
-            mutedChanged = true
+            group.displayGroupName = displayGroupName
+            groupFieldsChanged = true
             const conversationStore = useConversationStore()
-            conversationStore.updateConversation(ImConversationType.GROUP, groupId, { muted })
+            conversationStore.updateConversation(ImConversationType.GROUP, groupId, {
+              name: getGroupDisplayName(group),
+              muted
+            })
           }
         }
 
-        // TODO @AI：“避免批量进群 fan-out 时重复重写整桶”调整下。fan-out 不太好理解。
-        // groups 桶仅在 muted 实际变化时写——避免批量进群 fan-out 时重复重写整桶
+        // groups 桶仅在 user-per-group 字段实际变化时写——避免一次批量进群引发多次整桶重写
         this.saveGroupMembers(groupId)
-        if (!isPlaceholder && mutedChanged) {
+        if (!isPlaceholder && groupFieldsChanged) {
           this.saveGroups()
         }
         return members
-        // TODO @AI：finally 最注释下，好理解；
+        // 无论成功 / 失败都要从单飞表清掉，否则后续同 group 请求永远拿到这个 stale Promise
       })().finally(() => pendingMemberFetches.delete(key))
 
-      // TODO @AI：这里是不是要注释下
+      // 把 Promise 登记进单飞表，让此后短时间内的同 (userId, groupId) 请求复用
       pendingMemberFetches.set(key, promise)
       return promise
     },
 
-    /** 按 id 插入或合并群（命中则浅合并保留旧字段，未命中则追加），同步把 name / avatar / muted 推到对应会话 */
+    /**
+     * 按 (groupId, memberUserId) 单成员补齐——deriveLastSenderDisplayName 兜底场景用
+     *
+     * 跟 fetchGroupMembers 区别：只拉这一个成员，不动 me 的 muted / displayGroupName（不是 me 的话拿不到）；
+     * 命中时把成员 upsert 进 group.members 数组并落 IDB，让后续渲染能用 displayUserName
+     */
+    fetchGroupMember(groupId: number, memberUserId: number): Promise<GroupMember | null> {
+      // in-memory 命中直接返回，不打接口
+      const cached = this.getGroup(groupId)?.members?.find((m) => m.userId === memberUserId)
+      if (cached) {
+        return Promise.resolve(cached)
+      }
+      // 未登录：不发起请求也不登记 in-flight，避免污染单飞表
+      const requestUserId = getCurrentUserId()
+      if (!requestUserId) {
+        return Promise.resolve(null)
+      }
+      // 同 (userId, groupId, memberUserId) 已经有正在飞的请求：直接复用
+      const key = pendingSingleMemberKey(requestUserId, groupId, memberUserId)
+      const inflight = pendingSingleMemberFetches.get(key)
+      if (inflight) {
+        return inflight
+      }
+      const promise = (async () => {
+        const data = await apiGetGroupMember(groupId, memberUserId)
+        if (!data) {
+          return null
+        }
+        const member = convertGroupMember(data, groupId)
+        // 把这一条 upsert 进 group.members 仅供 in-memory 渲染兜底；group 还没就位则用 placeholder
+        // 注意：不写 IDB——成员桶语义是"全量"，存"1 人桶"会污染下次冷启动的 loadGroupMembers
+        const group = this.getGroup(groupId)
+        if (!group) {
+          // memberCount 不设：后续 fetchGroups 合并 `existing.memberCount ?? fresh.memberCount` 时，
+          // 占位值会顶替真实值（fresh 不带 memberCount），等 fetchGroupMembers 跑过才能拿到真实数
+          this.groups.push({
+            id: groupId,
+            name: '',
+            members: [member]
+          })
+        } else {
+          const memberList = group.members ?? []
+          const index = memberList.findIndex((m) => m.userId === memberUserId)
+          if (index >= 0) {
+            memberList[index] = member
+          } else {
+            memberList.push(member)
+          }
+          group.members = memberList
+        }
+        return member
+      })().finally(() => pendingSingleMemberFetches.delete(key))
+      pendingSingleMemberFetches.set(key, promise)
+      return promise
+    },
+
+    /** 按 id 插入或合并群（命中则浅合并保留旧字段，未命中则追加），同步把展示名 / 头像 / 免打扰推到对应会话 */
     upsertGroup(group: Group) {
       const index = this.groups.findIndex((g) => g.id === group.id)
       if (index >= 0) {
@@ -283,14 +355,15 @@ export const useGroupStore = defineStore('imGroupStore', {
       } else {
         this.groups.push(group)
       }
-      // TODO @AI：这里注释下
+      // 同步推到 conversation：群名 / 头像 / 免打扰是会话列表展示用的，必须紧随 group 变更
+      const merged = this.getGroup(group.id) ?? group
       const conversationStore = useConversationStore()
       conversationStore.updateConversation(ImConversationType.GROUP, group.id, {
-        name: group.name,
-        avatar: group.avatar,
-        muted: group.muted
+        name: getGroupDisplayName(merged),
+        avatar: merged.avatar,
+        muted: merged.muted
       })
-      // TODO @AI：这里注释下
+      // 持久化到 IDB（fire-and-forget）
       this.saveGroups()
     },
 
@@ -301,11 +374,10 @@ export const useGroupStore = defineStore('imGroupStore', {
       const conversationStore = useConversationStore()
       conversationStore.removeGroupConversation(id)
       this.saveGroups()
-      // TODO @AI：避免 IDB 留 orphan；注释调整下，orphan 有点不好理解。
-      // 把对应的群成员桶物理删掉，避免 IDB 留 orphan
+      // 群解散后顺手删 IDB 里该群的成员桶——这桶仅靠 groupId 索引，不删会一直留在 IDB 占空间
       const userId = getCurrentUserId()
       if (userId) {
-        safeImRemove(
+        removeQuietly(
           StorageKeys.groupMembers(userId, id),
           `[IM groupStore] 群成员缓存删除失败 (groupId=${id})`
         )
@@ -327,9 +399,9 @@ export const useGroupStore = defineStore('imGroupStore', {
     clear() {
       this.groups = []
       this.loaded = false
-      // TODO @AI：in-flight 这种调整下，不好理解。
-      // 旧账号的 in-flight 即便 resolve 也会被 IIFE 内部的 userId 校验丢弃，索性清掉避免悬挂
+      // 单飞表跟 in-memory state 一起重置；旧账号 in-flight 的请求 finally 也会自己 delete key，提前清空只是更干脆
       pendingMemberFetches.clear()
+      pendingSingleMemberFetches.clear()
     }
   }
 })
@@ -352,9 +424,7 @@ function convertGroupMember(member: ImGroupMemberRespVO, groupId: number): Group
     nickname: member.nickname || String(member.userId),
     avatar: member.avatar,
     displayUserName: member.displayUserName,
-    displayGroupName: member.displayGroupName,
-    status: member.status,
-    muted: member.muted
+    status: member.status
   }
 }
 
