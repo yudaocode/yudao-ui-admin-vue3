@@ -12,6 +12,7 @@ import {
 } from '@/api/im/friend'
 import { useConversationStore } from './conversationStore'
 import { ImConversationType } from '../../utils/constants'
+import { getCurrentUserId, imStorage, safeImSet, StorageKeys } from '../../utils/storage'
 import { getFriendDisplayName } from '../../utils/user'
 import type { Friend } from '../types'
 
@@ -26,6 +27,7 @@ import type { Friend } from '../types'
 export const useFriendStore = defineStore('imFriendStore', {
   state: () => ({
     friends: [] as Friend[],
+    // 仅 fetchFriends 成功后置位；loadFriends（IDB）不置位，否则后台 SWR 刷新会被短路
     loaded: false
   }),
 
@@ -50,8 +52,45 @@ export const useFriendStore = defineStore('imFriendStore', {
   },
 
   actions: {
-    /** 从后端拉取并覆盖本地列表；同步刷新对应私聊会话的展示名 / 头像 */
-    async loadFriends(force = false) {
+    // ==================== 本地缓存 ====================
+
+    // TODO @AI：是不是不用 “不更新 conversationStore——会话缓存和好友缓存是同一会话写入的，名字头像天然一致” 注释。只要说明 boolean 是啥就行了把。
+    /**
+     * 从 IDB 恢复好友列表，返回 boolean 给首屏 SWR 决策用
+     *
+     * 不更新 conversationStore——会话缓存和好友缓存是同一会话写入的，名字头像天然一致
+     */
+    async loadFriends(): Promise<boolean> {
+      const userId = getCurrentUserId()
+      if (!userId) {
+        return false
+      }
+      try {
+        const cached = await imStorage.getItem<Friend[]>(StorageKeys.friends(userId))
+        if (!cached || cached.length === 0) {
+          return false
+        }
+        this.friends = cached
+        return true
+      } catch (e) {
+        console.warn('[IM friendStore] 本地好友缓存读取失败', e)
+        return false
+      }
+    },
+
+    /** 整桶持久化好友列表（量级有限，不维护增量） */
+    saveFriends(): void {
+      const userId = getCurrentUserId()
+      if (!userId) {
+        return
+      }
+      safeImSet(StorageKeys.friends(userId), this.friends, '[IM friendStore] 本地好友缓存写入失败')
+    },
+
+    // ==================== 远端拉取 ====================
+
+    /** 从后端拉取并覆盖本地列表；同步刷新对应私聊会话的展示名 / 头像 + 落 IDB */
+    async fetchFriends(force = false) {
       if (this.loaded && !force) {
         return
       }
@@ -60,13 +99,14 @@ export const useFriendStore = defineStore('imFriendStore', {
       this.loaded = true
       // 同步 conversationStore 私聊会话的展示名 / 头像 / 免打扰
       const conversationStore = useConversationStore()
-      for (const f of this.friends) {
-        conversationStore.updateConversation(ImConversationType.PRIVATE, f.friendUserId, {
-          name: getFriendDisplayName(f),
-          avatar: f.avatar,
-          muted: f.muted
+      for (const friend of this.friends) {
+        conversationStore.updateConversation(ImConversationType.PRIVATE, friend.friendUserId, {
+          name: getFriendDisplayName(friend),
+          avatar: friend.avatar,
+          muted: friend.muted
         })
       }
+      this.saveFriends()
     },
 
     /** 按 friendUserId 获取详情并合并到本地（保证 nickname / avatar 最新） */
@@ -82,7 +122,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       }
     },
 
-    /** 添加好友：后端双向建立关系后，本地占位插入（服务端返回后可 loadFriends 刷新） */
+    /** 添加好友：后端双向建立关系后，本地占位插入（服务端返回后可 fetchFriends 刷新） */
     async addFriend(friendUserId: number, preview?: Partial<Friend>) {
       await apiAddFriend(friendUserId)
       if (preview) {
@@ -127,6 +167,7 @@ export const useFriendStore = defineStore('imFriendStore', {
         avatar: friend.avatar,
         muted: friend.muted
       })
+      this.saveFriends()
     },
 
     /** 本地标记删除（WebSocket FRIEND_DEL 事件触发；同时级联清私聊会话） */
@@ -140,6 +181,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       // 级联清理：把对应的私聊会话也软删，避免会话列表里留着已删好友
       const conversationStore = useConversationStore()
       conversationStore.removePrivateConversation(friendUserId)
+      this.saveFriends()
     },
 
     /** 切换免打扰 */
@@ -148,6 +190,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.muted = muted
+        this.saveFriends()
       }
     },
 
@@ -168,10 +211,11 @@ export const useFriendStore = defineStore('imFriendStore', {
         conversationStore.updateConversation(ImConversationType.PRIVATE, friendUserId, {
           name: getFriendDisplayName(friend)
         })
+        this.saveFriends()
       }
     },
 
-    /** 切换用户时清空 */
+    /** 切账号时仅清 in-memory，IDB 按 userId 分桶天然隔离，回切秒开 */
     clear() {
       this.friends = []
       this.loaded = false

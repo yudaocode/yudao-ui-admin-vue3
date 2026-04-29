@@ -1,7 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { toRaw } from 'vue'
 import { store } from '@/store'
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 
 import {
   ImConversationType,
@@ -10,20 +9,49 @@ import {
   IM_AT_ALL_USER_ID,
   TIME_TIP_GAP_MS
 } from '../../utils/constants'
-import { imStorage, StorageKeys } from '../../utils/storage'
+import { getCurrentUserId, imStorage, safeImRemove, StorageKeys } from '../../utils/storage'
 import { generateClientMessageId, parseRecallMessageId } from '../../utils/message'
 import { resolveConversationLastContent } from '../../utils/conversation'
+import { getSenderDisplayName } from '../../utils/user'
+import { useGroupStore } from './groupStore'
 import type { Conversation, ConversationStoreMeta, Message } from '../types'
+
+// TODO @AI：这个是不是 user.ts 增加一个类似的方法。只有解析到，才返回，没解析到，就返回 undefined 的。然后需要的地方，自己按需 set 到 conversation 里？
+/**
+ * 刷新 lastSenderDisplayName 快照——必须在调用方更新 conversation.lastSenderId
+ * **之前**执行，靠它判断是否"同一发送人"决定旧快照保留 / 清空
+ */
+function refreshLastSenderDisplayName(conversation: Conversation, senderId: number): void {
+  const liveSenderName = getSenderDisplayName(senderId, conversation.type, conversation.targetId)
+  const isRealName = liveSenderName !== String(senderId)
+  const isSameSender = conversation.lastSenderId === senderId
+  if (isRealName) {
+    conversation.lastSenderDisplayName = liveSenderName
+    return
+  }
+
+  // 群聊算不出真名：单靠快照覆盖不了"换发送人 + members 没加载"，主动补成员（store 内部已单飞）
+  // TODO @AI：是不是可以增加一个，补齐单个人？这样，改造这个方法。支持传递 groupId + memberUserId；
+  if (conversation.type === ImConversationType.GROUP) {
+    useGroupStore()
+      .fetchGroupMembers(conversation.targetId, true)
+      .catch((e) =>
+        console.warn(
+          '[IM conversationStore] 兜底拉群成员失败',
+          { groupId: conversation.targetId },
+          e
+        )
+      )
+  }
+
+  // 同发送人沿用旧快照（冷拉期间常见），换人则清掉避免显示成上一个人
+  if (!isSameSender) {
+    conversation.lastSenderDisplayName = undefined
+  }
+}
 
 // TODO @芋艿：单个 conversation 的消息过多后，可能存储起来会很慢，后续看看怎么优化。
 // TODO @芋艿：首次拉取消息时，如果消息过多，可能导致渲染卡顿。（1% 场景）
-
-/** 获取当前登录用户编号 */
-function getCurrentUserId(): number {
-  const { wsCache } = useCache()
-  const user = wsCache.get(CACHE_KEY.USER)?.user
-  return Number(user?.id) || 0
-}
 
 export const useConversationStore = defineStore('imConversationStore', {
   state: () => ({
@@ -104,7 +132,7 @@ export const useConversationStore = defineStore('imConversationStore', {
           try {
             const messages =
               (await imStorage.getItem<Message[]>(
-                StorageKeys.conversationMessage(userId, conversation.type, conversation.targetId)
+                StorageKeys.conversationMessages(userId, conversation.type, conversation.targetId)
               )) || []
             // 发送中状态的消息标记为失败：重启后不可能仍处在发送中
             messages.forEach((message) => {
@@ -167,7 +195,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         // 不拆会抛 DataCloneError 静默落盘失败（只 meta 写得进去，messages 永远丢）
         tasks.push(
           imStorage.setItem(
-            StorageKeys.conversationMessage(userId, conversation.type, conversation.targetId),
+            StorageKeys.conversationMessages(userId, conversation.type, conversation.targetId),
             toRaw(conversation.messages)
           )
         )
@@ -182,9 +210,10 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (!userId) {
         return
       }
-      void imStorage
-        .removeItem(StorageKeys.conversationMessage(userId, type, targetId))
-        .catch((e) => console.error('[IM] 本地消息缓存删除失败', e))
+      safeImRemove(
+        StorageKeys.conversationMessages(userId, type, targetId),
+        '[IM] 本地消息缓存删除失败'
+      )
     },
 
     // ==================== 会话查找 / 打开 ====================
@@ -361,12 +390,13 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
 
-      // 2.1 更新会话摘要（lastContent / lastSendTime + 事实索引 lastSenderId / lastMessageType / lastSelfSend）；
-      //     发送人名不存快照，由 ConversationItem 渲染时通过 utils/user.getSenderDisplayName 实时算
+      // 2.1 更新会话摘要 + 事实索引 + 发送人名快照
+      refreshLastSenderDisplayName(conversation, messageInfo.senderId)
       conversation.lastContent = resolveConversationLastContent(
         messageInfo,
         conversation.type,
-        conversation.targetId
+        conversation.targetId,
+        conversation.lastSenderDisplayName
       )
       conversation.lastSendTime = messageInfo.sendTime || Date.now()
       conversation.lastSenderId = messageInfo.senderId
@@ -496,12 +526,13 @@ export const useConversationStore = defineStore('imConversationStore', {
       // content 不再写撤回文案：渲染层走 buildRecallTip(senderId, selfSend, ...) 实时算
       // 这里清空，避免老 content 被误认为有效消息文本
       message.content = ''
-      // 最后一条消息是刚撤回的，才更新会话摘要 + 事实索引
+      // 最后一条消息是刚撤回的，才更新会话摘要 + 事实索引（lastSenderId 不变，沿用快照）
       if (conversation.messages[conversation.messages.length - 1]?.id === messageId) {
         conversation.lastContent = resolveConversationLastContent(
           message,
           conversation.type,
-          conversation.targetId
+          conversation.targetId,
+          conversation.lastSenderDisplayName
         )
         conversation.lastMessageType = ImMessageType.RECALL
       }
@@ -613,16 +644,28 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
       conversation.messages.splice(index, 1)
-      // 如果删的是最后一条，按倒数第二条重算摘要 + 事实索引
+      // 如果删的是最后一条，按倒数第二条重算摘要 + 事实索引 + 发送人名快照
       if (index === conversation.messages.length) {
         const last = conversation.messages[conversation.messages.length - 1]
-        conversation.lastContent = last
-          ? resolveConversationLastContent(last, conversation.type, conversation.targetId)
-          : ''
-        conversation.lastSendTime = last?.sendTime || conversation.lastSendTime
-        conversation.lastSenderId = last?.senderId
-        conversation.lastMessageType = last?.type
-        conversation.lastSelfSend = last?.selfSend
+        if (last) {
+          refreshLastSenderDisplayName(conversation, last.senderId)
+          conversation.lastContent = resolveConversationLastContent(
+            last,
+            conversation.type,
+            conversation.targetId,
+            conversation.lastSenderDisplayName
+          )
+          conversation.lastSendTime = last.sendTime || conversation.lastSendTime
+          conversation.lastSenderId = last.senderId
+          conversation.lastMessageType = last.type
+          conversation.lastSelfSend = last.selfSend
+        } else {
+          conversation.lastContent = ''
+          conversation.lastSenderDisplayName = undefined
+          conversation.lastSenderId = undefined
+          conversation.lastMessageType = undefined
+          conversation.lastSelfSend = undefined
+        }
       }
       this.saveConversations(conversation)
     },

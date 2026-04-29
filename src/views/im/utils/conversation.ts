@@ -1,9 +1,13 @@
 // ====================================================================
 // IM 会话 / 撤回展示 utility
 // ====================================================================
+// TODO @AI：这里的注释，不用写历史，只写当下。
 // 职责：基于会话上下文 + sender 信息实时算"展示文案"。
-// 之前这些值是写入消息时固化到 Message.senderShowName / Conversation.senderShowName，
-// 改备注 / 改群昵称后历史消息不会刷新；改成实时算后字段语义彻底干净。
+// 历史上 Message / Conversation 上有 senderShowName 快照字段，改备注 / 改群昵称后历史消息
+// 不会刷新；现在 Message 不再带任何名字快照，发送人名一律由 utils/user.getSenderDisplayName
+// 实时算。Conversation.lastSenderDisplayName 仅作 fallback 快照（解决"没打开过的群"
+// members 没加载时的兜底显示），通过 fallback 参数透传到本文件的 buildRecallTip /
+// resolveConversationLastContent 而非内部硬编码读取
 //
 // 与 utils/user.ts 的关系：
 //   user.ts 回答"谁叫什么名字"，conversation.ts 在它基础上拼"撤回 tip / 摘要"等文案
@@ -14,35 +18,33 @@ import { parseMessage, resolveTipText, type TextMessage } from './message'
 import { getSenderDisplayName } from './user'
 import type { Message } from '../home/types'
 
-/**
- * 撤回提示文案：自己撤回固定 "你撤回了一条消息"，对方撤回带按 WeChat 优先级算的发送人名
- *
- * 发送人名一律实时算（改备注 / 改群昵称后立即刷新），store 没 ready 时由
- * getSenderDisplayName 内部退到 String(senderId)，最差兜底显示"对方"
- */
+/** 撤回提示文案：自己撤回固定文案，对方撤回带 sender 名（实时算 + fallback 兜底） */
+// TODO @AI：fallbackName
 export function buildRecallTip(
   senderId: number,
   selfSend: boolean,
   conversationType: number,
-  conversationTargetId: number
+  conversationTargetId: number,
+  fallback?: string
 ): string {
   if (selfSend) {
     return '你撤回了一条消息'
   }
-  const senderDisplayName = getSenderDisplayName(senderId, conversationType, conversationTargetId)
+  const senderDisplayName = getSenderDisplayName(
+    senderId,
+    conversationType,
+    conversationTargetId,
+    fallback
+  )
   return `${senderDisplayName || '对方'} 撤回了一条消息`
 }
 
-/**
- * 根据消息类型计算会话列表最后一条摘要
- *
- * RECALL 分支走实时 buildRecallTip（不再依赖 message 上的 senderShowName 快照）；
- * 其它分支照旧由 message.content 派生
- */
+/** 会话列表最后一条摘要：RECALL 走 buildRecallTip + fallback；其它按消息类型派生 */
 export function resolveConversationLastContent(
   message: Message,
   conversationType: number,
-  conversationTargetId: number
+  conversationTargetId: number,
+  fallback?: string
 ): string {
   switch (message.type) {
     case ImMessageType.IMAGE:
@@ -58,7 +60,8 @@ export function resolveConversationLastContent(
         message.senderId,
         message.selfSend,
         conversationType,
-        conversationTargetId
+        conversationTargetId,
+        fallback
       )
     case ImMessageType.TEXT:
       return parseMessage<TextMessage>(message.content)?.content ?? ''

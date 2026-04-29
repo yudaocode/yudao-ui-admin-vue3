@@ -493,7 +493,8 @@ const showGroupReadStatus = computed(() => {
 /**
  * 当前群成员（供 MessageReadStatus 计算未读列表用）
  *
- * 群成员是按需懒加载到 groupStore（loadGroupMembers），未加载完 group?.members 为 undefined →
+ * // TODO @AI：下面的注释，会不会台复杂了。是不是拿到方法体里？
+ * 群成员是按需懒加载到 groupStore（loadGroupMembers / fetchGroupMembers），未加载完 group?.members 为 undefined →
  * 兜底空数组，MessageReadStatus 拿空数组就不渲染未读名单，不会出错
  */
 const groupMembersForReadStatus = computed<GroupMemberLite[]>(() => {

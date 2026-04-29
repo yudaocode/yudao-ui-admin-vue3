@@ -112,12 +112,14 @@ const friends = computed<FriendLite[]>(() =>
 
 /** 加好友成功后强制刷新好友列表，让群聊弹窗的勾选项也能看到新好友 */
 async function handleFriendAdded() {
-  await friendStore.loadFriends(true)
+  // TODO @AI：添加完后，不要重新啥新，成本太高了。。。
+  await friendStore.fetchFriends(true)
 }
 
 /** 建群成功后刷新群列表，并直接打开新群会话（自动选中并渲染到右侧 MessagePanel） */
 async function handleGroupCreated(groupId: number) {
-  await groupStore.loadGroups(true)
+  // TODO @AI：建群成功后，是不是可以不加载 group；按道理说，新建完，直接写入 groups 里面就好了。这里只负责 get 下；
+  await groupStore.fetchGroups(true)
   const group = groupStore.getGroup(groupId)
   if (!group) {
     return

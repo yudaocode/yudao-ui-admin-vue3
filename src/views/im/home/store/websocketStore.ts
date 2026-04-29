@@ -394,7 +394,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       // 2. 未知群时自动拉群详情 + 成员（被拉入群但还没收到 GROUP_CREATE 时的兜底）
       const group = groupStore.getGroup(websocketMessage.groupId)
       if (!group) {
-        groupStore.loadGroupInfo(websocketMessage.groupId).catch(() => undefined)
+        groupStore.fetchGroupInfo(websocketMessage.groupId).catch(() => undefined)
       }
 
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`
@@ -512,13 +512,13 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     /** GROUP_CREATE：本端入群（建群 / 被拉入）；拉取群详情入库 */
     handleGroupCreate(websocketMessage: ImGroupMessageDTO) {
       const groupStore = useGroupStore()
-      groupStore.loadGroupInfo(websocketMessage.groupId).catch(() => undefined)
+      groupStore.fetchGroupInfo(websocketMessage.groupId).catch(() => undefined)
     },
 
     /** GROUP_UPDATE：群信息变更，重新拉一次群详情 */
     handleGroupUpdate(websocketMessage: ImGroupMessageDTO) {
       const groupStore = useGroupStore()
-      groupStore.loadGroupInfo(websocketMessage.groupId).catch(() => undefined)
+      groupStore.fetchGroupInfo(websocketMessage.groupId).catch(() => undefined)
     },
 
     /** GROUP_DELETE：群解散 / 自己退群 / 被踢出；本端清除群 + 级联清理群聊会话 */
@@ -527,10 +527,15 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       groupStore.removeGroup(websocketMessage.groupId)
     },
 
-    /** GROUP_MEMBER_UPDATE：多端同步自己在某群的成员属性变更（当前主要是免打扰）；重新拉群详情 */
+    /**
+     * GROUP_MEMBER_UPDATE：多端同步成员属性变更（昵称 / 免打扰 / 退群等）
+     *
+     * 必须强刷成员而非群元数据——这些字段都在 ImGroupMemberRespVO 上，apiGetMyGroupList 不带；
+     * 持久化后若不强刷，IDB 成员桶会长期陈旧
+     */
     handleGroupMemberUpdate(websocketMessage: ImGroupMessageDTO) {
       const groupStore = useGroupStore()
-      groupStore.loadGroupInfo(websocketMessage.groupId).catch(() => undefined)
+      groupStore.fetchGroupMembers(websocketMessage.groupId, true).catch(() => undefined)
     },
 
     // ==================== 心跳 / 重连 ====================

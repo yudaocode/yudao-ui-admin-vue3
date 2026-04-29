@@ -46,26 +46,26 @@ export function getMemberDisplayName(
   return resolveRemark(friend) || member.displayUserName || member.nickname
 }
 
+// TODO @AI：fallbackName？这样更清晰？
 /**
- * 消息发送者「显示名」：渲染时实时算，按 conversation 上下文走 WeChat 优先级
+ * 消息发送者显示名：渲染时实时算，按 WeChat 优先级
  *
- * - 自己（senderId === currentUserId）：当前用户真实昵称
+ * - 自己：userStore.nickname
  * - 私聊对方：好友备注 > 真实昵称
  * - 群聊对方：好友备注 > 群备注（displayUserName） > 真实昵称
- * - 查不到（store 还没 ready / 陌生人）：兜底返回 String(senderId)
- *
- * 用在所有"展示给用户看的发送人名"位置（气泡上方、群聊列表前缀、撤回 tip 等）。
- * 不写入 message 字段——改备注 / 改群昵称后历史消息能跟着 Vue 响应式自动刷新
+ * - 查不到：fallback || String(senderId)
  */
 export function getSenderDisplayName(
   senderId: number,
   conversationType: number,
-  conversationTargetId: number
+  conversationTargetId: number,
+  fallback?: string
 ): string {
+  // TODO @AI：getCurrentUserId；貌似可以复用；
   const userStore = useUserStore()
-  const selfId = Number(userStore.getUser?.id) || 0
+  const selfId = Number(userStore.getUser?.id) || 0 // TODO @AI：selfUserId 更好一点；
 
-  // 群聊场景所有人（含自己）都走 member + friend 三级——自己设了"我在本群昵称"也要生效
+  // 自己也走 member 分支：要尊重"我在本群昵称"（GroupMember.displayUserName）
   if (conversationType === ImConversationType.GROUP) {
     const group = useGroupStore().getGroup(conversationTargetId)
     const member = group?.members?.find((m) => m.userId === senderId)
@@ -73,32 +73,33 @@ export function getSenderDisplayName(
       const friend = useFriendStore().getFriend(senderId)
       return getMemberDisplayName(member, friend)
     }
-    // member 没加载到——self 兜底走 userStore，对方兜底走 senderId 字符串
+    // member 没加载——self 走 userStore，对方走 fallback
     if (senderId === selfId) {
-      return userStore.getUser?.nickname || String(senderId)
+      return userStore.getUser?.nickname || fallback || String(senderId)
     }
-    return String(senderId)
+    return fallback || String(senderId)
   }
 
   // 私聊场景：自己直接走 userStore；对方走好友备注 > 真实昵称
   if (conversationType === ImConversationType.PRIVATE) {
     if (senderId === selfId) {
-      return userStore.getUser?.nickname || String(senderId)
+      return userStore.getUser?.nickname || fallback || String(senderId)
     }
     const friend = useFriendStore().getFriend(senderId)
     if (friend) {
       return getFriendDisplayName(friend)
     }
-    return String(senderId)
+    return fallback || String(senderId)
   }
 
   // 未知会话类型兜底
   if (senderId === selfId) {
-    return userStore.getUser?.nickname || String(senderId)
+    return userStore.getUser?.nickname || fallback || String(senderId)
   }
-  return String(senderId)
+  return fallback || String(senderId)
 }
 
+// TODO @AI：是不是参考 getSenderDisplayName 注释风格。- xxx - xxx；
 /**
  * 消息发送者「真实昵称」：永远是 nickname，不掺备注
  *
@@ -110,6 +111,7 @@ export function getSenderRealNickname(
   conversationType: number,
   conversationTargetId: number
 ): string {
+  // TODO @AI：getCurrentUserId；貌似可以复用；
   const userStore = useUserStore()
   const selfId = Number(userStore.getUser?.id) || 0
 
@@ -126,6 +128,7 @@ export function getSenderRealNickname(
     return String(senderId)
   }
 
+  // TODO @AI：这里要注释下么？
   if (conversationType === ImConversationType.PRIVATE) {
     if (senderId === selfId) {
       return userStore.getUser?.nickname || String(senderId)
@@ -134,6 +137,7 @@ export function getSenderRealNickname(
     return friend?.nickname || String(senderId)
   }
 
+  // TODO @AI：这里要注释下么？
   if (senderId === selfId) {
     return userStore.getUser?.nickname || String(senderId)
   }

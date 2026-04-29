@@ -108,13 +108,18 @@ const isActive = computed(
 
 const isGroup = computed(() => props.conversation.type === ImConversationType.GROUP)
 
-/** 最后一条消息发送者的展示名：按 conversation 上下文走 WeChat 优先级实时算 */
+/** 最后一条消息发送者的展示名：实时算 + 快照 fallback（getSenderDisplayName 算不出时兜底） */
 const lastSenderDisplayName = computed(() => {
   const senderId = props.conversation.lastSenderId
   if (!senderId) {
     return ''
   }
-  return getSenderDisplayName(senderId, props.conversation.type, props.conversation.targetId)
+  return getSenderDisplayName(
+    senderId,
+    props.conversation.type,
+    props.conversation.targetId,
+    props.conversation.lastSenderDisplayName
+  )
 })
 
 /** 群聊 + 有最后发送者 + 最后一条是普通消息 时，显示发送者前缀 */
@@ -146,7 +151,8 @@ const lastContentDisplay = computed(() => {
       props.conversation.lastSenderId,
       !!props.conversation.lastSelfSend,
       props.conversation.type,
-      props.conversation.targetId
+      props.conversation.targetId,
+      props.conversation.lastSenderDisplayName
     )
   }
   return props.conversation.lastContent
@@ -177,6 +183,7 @@ function handleTop() {
   )
 }
 
+// TODO @AI：这块注释，会不会台复杂了。
 /**
  * 切换免打扰：乐观 UI（先落本地，再异步推后端），失败回滚 + 提示
  *

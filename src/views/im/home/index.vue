@@ -41,6 +41,7 @@ import ContextMenu from './components/ContextMenu.vue'
 defineOptions({ name: 'ImIndex' })
 
 const conversationStore = useConversationStore()
+// TODO @AI：webSocketStore 全称更合适。
 const wsStore = useImWebSocketStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
@@ -48,31 +49,60 @@ const { pullOnce } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
 
 /** 初始化：本地缓存恢复 → 远端通信/同步 → 默认视图 */
+// TODO @AI：上面的“初始化：本地缓存恢复 → 远端通信/同步 → 默认视图”，有点不好理解。
 onMounted(async () => {
-  // ========== 1. 本地状态准备 ==========
-  // 1.1 整段初始化期间 loading=true：阻断 saveConversations 抖动写盘 + 让 WS 普通消息进缓冲区，
-  //     避免 connect 后到 pullOnce 之间到达的实时消息推进 maxId，导致 pull 跳过断线积压消息
+  // TODO @AI：WS 全称 WebSocket，不要缩写。其他地方也是
+  // loading=true 整段阻断 saveConversations 抖动写盘 + WS 普通消息进缓冲，
+  // 避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
   conversationStore.loading = true
-  // 1.2 从 IndexedDB 恢复本地会话数据（按会话分桶，需 await 以保证后续步骤拿到完整列表）
-  await conversationStore.loadConversations()
+  try {
+    // TODO @AI：1 和 2，是不是改成 1.1 1.2；先拉取本地缓存。拉不到在拉远端数据。感觉更清晰一些。
+    // 1. IDB 并发恢复（loadConversations 返回 void；load{Friends,Groups} 返回是否有缓存）
+    const [, hasCachedFriends, hasCachedGroups] = await Promise.all([
+      conversationStore.loadConversations(),
+      friendStore.loadFriends(),
+      groupStore.loadGroups()
+    ])
 
-  // ========== 2. 远端通信 + 数据同步 ==========
-  // 2.1 建立 WebSocket 长连接（跨 Tab 持续保持，不因路由切换断开）
-  wsStore.connect()
-  // 2.2 预拉好友 / 群列表：必须 await，pullOnce 内部要靠 friendStore / groupStore 补会话 name/avatar；
-  //     发送人名渲染时再走 utils/user 实时算，不依赖这里的 store 数据，但避免冷启动期间 ConversationItem 显示 senderId 数字
-  await Promise.all([
-    friendStore.loadFriends().catch((e) => console.warn('[IM] 预拉好友失败', e)),
-    groupStore.loadGroups().catch((e) => console.warn('[IM] 预拉群列表失败', e))
-  ])
-  // 2.3 增量拉取离线消息（私聊 + 群聊，使用各自 minId 游标）；pullOnce finally 里把 loading 归位
-  await pullOnce()
+    // TODO @AI：SWR 这个注释，看看怎么更好的理解。
+    // TODO @AI：下面这个注释，感觉没啥层次感。
+    // 2. SWR 刷新：有缓存背景刷；无缓存必须 await + 抛错中断——否则 pullOnce 会用 senderId
+    //    数字给会话起名落到 IDB 后续很难自愈。无缓存分支两个 fetch 并发 Promise.all 省一个 RTT
+    const requiredFetches: Promise<unknown>[] = []
+    if (hasCachedFriends) {
+      void friendStore.fetchFriends().catch((e) => console.warn('[IM] 后台刷好友失败', e))
+    } else {
+      requiredFetches.push(friendStore.fetchFriends())
+    }
+    if (hasCachedGroups) {
+      void groupStore.fetchGroups().catch((e) => console.warn('[IM] 后台刷群列表失败', e))
+    } else {
+      requiredFetches.push(groupStore.fetchGroups())
+    }
+    if (requiredFetches.length > 0) {
+      await Promise.all(requiredFetches)
+    }
+    // TODO @AI：3.1 3.2 是不是一起。一个是 websocket 加载数据；一个是加载离线消息。本质是解决实时通信；
+    // 3. 数据就绪后再 connect——无缓存 fetch 失败会走外层 catch 提前 return，避免 WS 已连
+    //    但 friend/group store 空，handle*Message 用 senderId 数字落库
+    wsStore.connect()
+    // 4. 拉离线消息；pullOnce finally 里把 loading 归位
+    await pullOnce()
 
-  // ========== 3. 默认视图 ==========
-  // 3.1 默认选中第一个会话（仅在消息 Tab 可见）
-  const sorted = conversationStore.getSortedConversations
-  if (sorted.length > 0 && !conversationStore.activeConversation) {
-    conversationStore.setActiveConversation(sorted[0])
+    // 5. 默认选中第一个会话
+    const sorted = conversationStore.getSortedConversations
+    if (sorted.length > 0 && !conversationStore.activeConversation) {
+      conversationStore.setActiveConversation(sorted[0])
+    }
+  } catch (e) {
+    // TODO @AI：注释可以写的超过一行；尽量换行的时候，是一个事情写完，不然读起来很累。【其他地方也是！！！】例子如下：
+    // TODO ！首拉失败：手动复位 loading（pullOnce 没跑到，它的 finally 兜不到这里），否则后续 saveConversations 全被早 return 阻断。
+    // TODO WS 不在这里 disconnect —— 路由离开走 onUnmounted 自然清理，用户也可以刷新重试
+    // 首拉失败：手动复位 loading（pullOnce 没跑到，它的 finally 兜不到这里），
+    // 否则后续 saveConversations 全被早 return 阻断。WS 不在这里 disconnect——
+    // 路由离开走 onUnmounted 自然清理，用户也可以刷新重试
+    conversationStore.loading = false
+    console.error('[IM] 初始化失败', e)
   }
 })
 
@@ -81,6 +111,7 @@ onUnmounted(() => {
   wsStore.disconnect()
 })
 
+// TODO @AI：要说下，当前对话的处理。因为不涉及其他对话呀。
 /**
  * 会话切换时自动标记为已读 + 私聊下拉对方已读位置：
  * - 立刻清零本地未读

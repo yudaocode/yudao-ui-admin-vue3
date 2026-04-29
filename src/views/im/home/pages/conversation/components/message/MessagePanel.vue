@@ -212,25 +212,33 @@ const groupFriends = computed<FriendLite[]>(() =>
   }))
 )
 
-/**
- * 切换到群会话时，自动从后端拉取 group / members / 好友（store 内自带缓存）
- *
- * 三件事各自 fire-and-forget + 各自 catch：之前用 Promise.all 时任意一项失败会让其它
- * 已成功的结果只记一条笼统日志，丢掉具体出错点。这里拆开，谁挂谁单独记，不互相牵连。
- * 错误日志把 groupId 一起带上，多群环境下排查问题能直接定位
- */
-function ensureGroupData(groupId: number) {
-  groupStore.loadGroupInfo(groupId).catch((error) => {
-    console.warn('[IM MessagePanel] loadGroupInfo 失败', { groupId }, error)
+// TODO @AI：SWR 这个缩写，大家不一定看的懂。
+/** 切换到群会话时按 SWR 同步群 / 成员 / 好友；各自 fire-and-forget + catch，任何一项失败不牵连其它 */
+async function ensureGroupData(groupId: number) {
+  // TODO @AI：从远程异步拉取群信息，保证数据是最新的
+  groupStore.fetchGroupInfo(groupId).catch((error) => {
+    console.warn('[IM MessagePanel] fetchGroupInfo 失败', { groupId }, error)
   })
-  groupStore.loadGroupMembers(groupId).catch((error) => {
+
+  // TODO @AI：先从 IDB 同步加载群成员，保证首帧就有成员名 / 头像；这样注释更好？
+  // 先吃 IDB 让首帧立即出成员名 / 头像
+  await groupStore.loadGroupMembers(groupId).catch((error) => {
     console.warn('[IM MessagePanel] loadGroupMembers 失败', { groupId }, error)
+    return null
   })
-  friendStore.loadFriends().catch((error) => {
-    console.warn('[IM MessagePanel] loadFriends 失败', { groupId }, error)
+  // TODO @AI：再从远程异步拉取群成员信息，保证数据是最新的
+  // force=true 跳过上一行刚塞进 in-memory 的短路，保证每次进群拿到最新成员状态
+  groupStore.fetchGroupMembers(groupId, true).catch((error) => {
+    console.warn('[IM MessagePanel] fetchGroupMembers 失败', { groupId }, error)
+  })
+
+  // TODO @AI：每次切换群，不用拉取 friend 吧？开销太大了。只要首屏拉取就行了呀。
+  friendStore.fetchFriends().catch((error) => {
+    console.warn('[IM MessagePanel] fetchFriends 失败', { groupId }, error)
   })
 }
 
+// TODO @AI：是不是只要说，刷新就好了。然后下面的 await 相关注释，写到方法体里。
 /**
  * 群信息抽屉里点"刷新"等触发：强拉一次最新群元数据 + 群成员（force=true 跳过缓存）
  *
@@ -241,8 +249,8 @@ function reloadGroupData() {
   if (!conversation || conversation.type !== ImConversationType.GROUP) {
     return
   }
-  groupStore.loadGroupInfo(conversation.targetId)
-  groupStore.loadGroupMembers(conversation.targetId, true)
+  groupStore.fetchGroupInfo(conversation.targetId)
+  groupStore.fetchGroupMembers(conversation.targetId, true)
 }
 
 const historyVisible = ref(false)

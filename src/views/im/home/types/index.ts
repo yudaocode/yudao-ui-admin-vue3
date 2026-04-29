@@ -49,14 +49,13 @@ export interface Conversation {
   lastSendTime: number // 最后一条消息时间，用于排序
   unreadCount: number // 未读数
   messages: Message[] // 消息列表
-  /**
-   * 最后一条消息的事实索引（"谁、什么类型、是不是我发的"）
-   * 给会话列表前缀 / 撤回摘要等位置实时算展示文案——发送人名走 utils/user.getSenderDisplayName，
-   * 永远不存名字快照，改备注 / 改群昵称后所有界面会自动响应式刷新
-   */
+  // TODO @AI：lastMessage 对象，会不会更干净一点。然后把需要的字段放进去？
+  /** 最后一条消息的事实索引；展示名实时算（getSenderDisplayName），不存名字快照 */
   lastSenderId?: number
   lastMessageType?: number
   lastSelfSend?: boolean
+  /** 发送人显示名快照——仅作 getSenderDisplayName 算不出名字时的 fallback */
+  lastSenderDisplayName?: string
 
   // ========== UI 状态 ==========
   deleted?: boolean // 是否已删除（软删标记，持久化时过滤）
@@ -130,10 +129,11 @@ export interface GroupMember {
   userId: number // 用户编号
   avatar?: string // 头像
   nickname: string // 用户昵称
+  // TODO @AI：还不是把 muted 字段是不是放到 Group 里？displayUserName、displayGroupName、muted；
   displayUserName?: string // 组内显示名（不与 nickname 合并，由消费方按需取舍）
   displayGroupName?: string // 群显示备注（当前用户对该群的自定义名）
   status?: number // 在群 / 退群状态，对齐 CommonStatusEnum
-  muted?: boolean // 当前成员对该群的免打扰开关（loadGroupMembers 用它回填 Group.muted）
+  muted?: boolean // 当前成员对该群的免打扰开关（fetchGroupMembers 用它回填 Group.muted）
 
   // ========== 前端扩展字段 ==========
   isOwner?: boolean // 是否群主（前端从 Group.ownerUserId 计算）
