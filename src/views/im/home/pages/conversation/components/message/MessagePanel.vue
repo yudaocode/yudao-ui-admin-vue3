@@ -1,12 +1,22 @@
 <template>
   <div class="flex flex-1 flex-col min-w-0 bg-[var(--el-fill-color-light)]">
     <template v-if="conversationStore.activeConversation">
-      <!-- 顶部：会话名 + 右侧功能图标 -->
+      <!-- 顶部：会话名（群聊带人数）+ 右侧功能图标；border 走 scoped CSS（项目 UnoCSS 不带 border-style preflight） -->
       <div
-        class="flex items-center justify-between h-14 px-5 bg-[var(--el-fill-color-light)] border-b border-[var(--el-border-color-light)]"
+        class="message-panel__header flex items-center justify-between h-14 px-5 bg-[var(--el-fill-color-light)]"
       >
-        <span class="text-base font-medium text-[var(--el-text-color-primary)]">
-          {{ conversationStore.activeConversation?.name || '' }}
+        <span class="flex items-baseline gap-1.5 min-w-0">
+          <span
+            class="overflow-hidden text-base font-medium truncate text-[var(--el-text-color-primary)]"
+          >
+            {{ conversationStore.activeConversation?.name || '' }}
+          </span>
+          <span
+            v-if="isGroup && headerMemberCount > 0"
+            class="flex-shrink-0 text-sm text-[var(--el-text-color-secondary)]"
+          >
+            ({{ headerMemberCount }})
+          </span>
         </span>
         <div class="flex gap-3 items-center">
           <!-- 聊天历史：从输入区底部工具栏挪到顶部右上角，对齐微信 PC（点击弹窗承接历史消息） -->
@@ -141,6 +151,21 @@ const isGroup = computed(
 )
 
 /**
+ * 群聊 header 显示的人数：优先 groupStore.memberCount（无需等成员列表），无值再回退 members.length
+ *
+ * 之所以不直接用 groupMembers.value.length：成员列表是按需懒加载的，刚切到群时未加载完，
+ * 而 groupInfo.memberCount 跟群信息一起来，能更早显示人数避免"先空再蹦"
+ */
+const headerMemberCount = computed(() => {
+  const conversation = conversationStore.activeConversation
+  if (!conversation || conversation.type !== ImConversationType.GROUP) {
+    return 0
+  }
+  const group = groupStore.getGroup(conversation.targetId)
+  return group?.memberCount ?? group?.members?.length ?? 0
+})
+
+/**
  * MessageInput 的 :key —— 切群时强制 unmount + remount，让 editor / mention range /
  * 上一会话草稿全部归零；用 fallback 'none' 避开 activeConversation 短暂为 null 的窗口
  */
@@ -149,13 +174,9 @@ const messageInputKey = computed(() => {
   return conv ? getConversationKey(conv) : 'none'
 })
 
-/** "是否停留在底部"的阈值：距离底部 < 80px 视为底部 */
-const BOTTOM_THRESHOLD = 80
-
-/** 当前是否已不在底部（显示"回到底部"按钮） */
-const showJumpToBottom = ref(false)
-/** 不在底部期间累计的新消息数 */
-const newMessageCount = ref(0)
+const BOTTOM_THRESHOLD = 80 // "是否停留在底部"的阈值：距离底部 < 80px 视为底部
+const showJumpToBottom = ref(false) // 当前是否已不在底部（显示"回到底部"按钮）
+const newMessageCount = ref(0) // 不在底部期间累计的新消息数
 
 /**
  * 当前激活的群详情：优先 groupStore（带详细字段），未加载完时用 activeConversation 兜底
@@ -376,6 +397,11 @@ watch(
 </script>
 
 <style scoped>
+/* 顶部分隔线：UnoCSS 不带 border-style preflight，class 写法只设色 / 宽不出线，走 scoped 显式 shorthand */
+.message-panel__header {
+  border-bottom: 1px solid var(--el-border-color-light);
+}
+
 /* el-icon 全局规则 .el-icon{color:var(--color,inherit)} 优先级胜过 UnoCSS，这里用 :deep + !important 兜底；
    颜色直接引用 Element Plus 主题变量，暗色模式自动切到更亮的灰 */
 .message-panel__header-icon,

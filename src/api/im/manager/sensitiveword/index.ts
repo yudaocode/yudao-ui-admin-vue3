@@ -5,6 +5,7 @@ export interface ImManagerSensitiveWordVO {
   word: string
   status: number
   creator?: string
+  creatorName?: string
   createTime?: Date
 }
 

@@ -3,9 +3,9 @@
   <div class="flex flex-1 min-w-0 h-full">
     <!-- 左侧会话列表（可拖拽宽度） -->
     <ResizableAside :default-width="260" :storage-key="StorageKeys.asideWidth">
-      <!-- 顶部：搜索框 + "+" 号下拉（对齐微信 PC：发起群聊 / 添加朋友） -->
+      <!-- 顶部：搜索框 + "+" 号下拉（对齐微信 PC：发起群聊 / 添加朋友）；h-14 与右侧 MessagePanel 头部对齐 -->
       <div
-        class="flex flex-shrink-0 gap-2 items-center px-4 py-2 border-b border-[var(--el-border-color-lighter)]"
+        class="flex flex-shrink-0 gap-2 items-center h-14 px-4 border-b border-[var(--el-border-color-lighter)]"
       >
         <el-input v-model="keyword" placeholder="搜索" clearable class="flex-1">
           <template #prefix>

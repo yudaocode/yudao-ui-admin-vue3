@@ -12,6 +12,7 @@ export interface ImManagerGroupMessageVO {
   content: string
   status: number
   atUserIds?: number[]
+  atUserNicknames?: string[]
   receiptStatus?: number
   sendTime: Date
   createTime: Date

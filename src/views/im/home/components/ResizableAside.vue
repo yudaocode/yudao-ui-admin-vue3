@@ -5,7 +5,7 @@
     - 拖拽区在右边缘，鼠标变 col-resize
   -->
   <aside
-    class="relative flex flex-col shrink-0 bg-[var(--el-bg-color)] border-r border-[var(--el-border-color-lighter)] shadow-[2px_0_8px_rgba(0,0,0,0.05)]"
+    class="relative flex flex-col shrink-0 bg-[var(--el-fill-color-light)] border-r border-[var(--el-border-color-lighter)] shadow-[2px_0_8px_rgba(0,0,0,0.05)]"
     :style="{ width: asideWidth + 'px' }"
   >
     <slot></slot>

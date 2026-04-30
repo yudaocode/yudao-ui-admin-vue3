@@ -1,98 +1,111 @@
 <template>
-  <div
-    class="relative flex flex-col bg-[var(--el-bg-color)] border-t border-[var(--el-border-color-lighter)]"
-  >
+  <!--
+    外层底色与消息流（bg-color-page）保持一致，让"消息 → 输入"无色差过渡；
+    padding 给内层白卡片呼吸空间，卡片自带边框就够区分输入区，不再需要一条 border-t
+  -->
+  <div class="relative bg-[var(--el-bg-color-page)] px-3 pt-2 pb-3">
     <!--
-      输入区在上：contenteditable div（取代 textarea，对齐微信 PC：输入区在上，操作在下）
-      - 让 @ 浮层能拿到真实光标 rect（textarea 拿不到）
-      - 让 @ 成员以 <span data-id> token 节点存在，删 token 即删 id，避免 stale atUserIds
-      - placeholder 通过 data-empty + ::before 模拟（contenteditable 没有原生 placeholder）
+      内层白色圆角卡片 = editor + 工具栏；border + rounded 模拟微信"输入框"边界，
+      避免之前"无框 Web 输入"的散开感；border 走 scoped CSS（UnoCSS 不带 border-style preflight）
     -->
-    <div
-      ref="editorRef"
-      class="message-input__editor"
-      contenteditable="true"
-      data-placeholder="按 Enter 发送，Shift+Enter 换行"
-      data-empty=""
-      role="textbox"
-      @keydown="onKeydown"
-      @input="onInput"
-      @scroll.passive="onEditorScroll"
-      @paste.prevent="onPaste"
-    ></div>
+    <div class="message-input__card relative flex flex-col bg-[var(--el-bg-color)] rounded-lg">
+      <!--
+        输入区在上：contenteditable div（取代 textarea，对齐微信 PC：输入区在上，操作在下）
+        - 让 @ 浮层能拿到真实光标 rect（textarea 拿不到）
+        - 让 @ 成员以 <span data-id> token 节点存在，删 token 即删 id，避免 stale atUserIds
+        - placeholder 通过 data-empty + ::before 模拟（contenteditable 没有原生 placeholder）
+      -->
+      <div
+        ref="editorRef"
+        class="message-input__editor"
+        contenteditable="true"
+        data-placeholder="按 Enter 发送，Shift+Enter 换行"
+        data-empty=""
+        role="textbox"
+        @keydown="onKeydown"
+        @input="onInput"
+        @scroll.passive="onEditorScroll"
+        @paste.prevent="onPaste"
+      ></div>
 
-    <!--
-      底部工具栏：左侧操作图标 + 右侧发送按钮（对齐微信 PC：操作图标统一放底部）
-      - relative 给 EmojiPicker 提供 absolute 锚点，picker 用 bottom-full 向上弹出
-      - 图标统一 30×30 点击区（18px icon + p-1.5），gap-1 让间距贴合微信观感
-    -->
-    <div class="relative flex items-center justify-between gap-2 px-3 pb-2">
-      <div class="flex items-center gap-1">
-        <!--
-          所有 icon 统一走 Iconify（ant-design outlined 系列）：
-          - 视觉风格更接近微信 PC（线性、圆角，比 Element Plus 内置的更轻量）
-          - 笑脸 / 图片 / 文件夹 / 麦克风 同源，避免一个走 ep 一个走 antd 视觉割裂
-          - 外层 span 复用 .message-input__tool 的 padding / hover 样式，scoped CSS 的 :deep(svg) 仍能命中
-        -->
-        <el-tooltip content="表情" placement="top">
-          <span
-            class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-            @click.stop="toggleEmoji"
-          >
-            <Icon icon="ant-design:smile-outlined" :size="18" />
-          </span>
-        </el-tooltip>
-        <el-tooltip content="发送图片" placement="top">
-          <span
-            class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-            @click="imageInputRef?.click()"
-          >
-            <Icon icon="ant-design:picture-outlined" :size="18" />
-          </span>
-        </el-tooltip>
-        <el-tooltip content="发送文件" placement="top">
-          <span
-            class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-            @click="fileInputRef?.click()"
-          >
-            <Icon icon="ant-design:folder-outlined" :size="18" />
-          </span>
-        </el-tooltip>
-        <el-tooltip content="语音消息" placement="top">
-          <span
-            class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-            @click="voiceVisible = true"
-          >
-            <Icon icon="ant-design:audio-outlined" :size="18" />
-          </span>
-        </el-tooltip>
-      </div>
-
-      <!-- 群聊：发送按钮 + ▼ 下拉菜单（点主按钮普通发送 / 点 ▼ 选「发送回执消息」），对齐微信 PC -->
-      <el-dropdown
-        v-if="isGroup"
-        split-button
-        type="primary"
-        :disabled="!canSend"
-        @click="handleSend()"
-        @command="handleSendCommand"
+      <!--
+        底部工具栏：左侧操作图标 + 右侧发送按钮（对齐微信 PC：操作图标统一放底部）
+        - relative 给 EmojiPicker 提供 absolute 锚点，picker 用 bottom-full 向上弹出
+        - 图标统一 30×30 点击区（18px icon + p-1.5），gap-1 让间距贴合微信观感
+        - border-t 在编辑区与工具栏之间画一条与 card 边框同色的细线（scoped CSS 避绕 UnoCSS preflight 缺失）
+      -->
+      <div
+        class="message-input__toolbar relative flex items-center justify-between gap-2 px-3 py-2"
       >
-        发 送
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item command="receipt">发送回执消息</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-      <!-- 私聊：普通发送按钮（私聊没有群回执概念） -->
-      <el-button v-else type="primary" :disabled="!canSend" @click="handleSend()">发 送</el-button>
+        <div class="flex items-center gap-1">
+          <!--
+            所有 icon 统一走 Iconify（ant-design outlined 系列）：
+            - 视觉风格更接近微信 PC（线性、圆角，比 Element Plus 内置的更轻量）
+            - 笑脸 / 图片 / 文件夹 / 麦克风 同源，避免一个走 ep 一个走 antd 视觉割裂
+            - 外层 span 复用 .message-input__tool 的 padding / hover 样式，scoped CSS 的 :deep(svg) 仍能命中
+          -->
+          <el-tooltip content="表情" placement="top">
+            <span
+              class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
+              @click.stop="toggleEmoji"
+            >
+              <Icon icon="ant-design:smile-outlined" :size="18" />
+            </span>
+          </el-tooltip>
+          <el-tooltip content="发送图片" placement="top">
+            <span
+              class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
+              @click="imageInputRef?.click()"
+            >
+              <Icon icon="ant-design:picture-outlined" :size="18" />
+            </span>
+          </el-tooltip>
+          <el-tooltip content="发送文件" placement="top">
+            <span
+              class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
+              @click="fileInputRef?.click()"
+            >
+              <Icon icon="ant-design:folder-outlined" :size="18" />
+            </span>
+          </el-tooltip>
+          <el-tooltip content="语音消息" placement="top">
+            <span
+              class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
+              @click="voiceVisible = true"
+            >
+              <Icon icon="ant-design:audio-outlined" :size="18" />
+            </span>
+          </el-tooltip>
+        </div>
 
-      <!-- 表情面板：bottom-full 让 picker 下沿贴工具栏顶部，向上弹出（对齐工具栏左侧首图标） -->
-      <EmojiPicker
-        v-model:visible="emojiVisible"
-        class="bottom-full left-3 mb-2"
-        @select="insertText"
-      />
+        <!-- 群聊：发送按钮 + ▼ 下拉菜单（点主按钮普通发送 / 点 ▼ 选「发送回执消息」），对齐微信 PC -->
+        <el-dropdown
+          v-if="isGroup"
+          split-button
+          type="primary"
+          :disabled="!canSend"
+          @click="handleSend()"
+          @command="handleSendCommand"
+        >
+          发 送
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="receipt">发送回执消息</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <!-- 私聊：普通发送按钮（私聊没有群回执概念） -->
+        <el-button v-else type="primary" :disabled="!canSend" @click="handleSend()">
+          发 送
+        </el-button>
+
+        <!-- 表情面板：bottom-full 让 picker 下沿贴工具栏顶部，向上弹出（对齐工具栏左侧首图标） -->
+        <EmojiPicker
+          v-model:visible="emojiVisible"
+          class="bottom-full left-3 mb-2"
+          @select="insertText"
+        />
+      </div>
     </div>
 
     <!-- @ 选择浮层：群聊才启用 -->
@@ -686,6 +699,15 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
 </script>
 
 <style scoped>
+/* 输入框卡片外框 + 编辑区与工具栏之间的分隔线：UnoCSS 不带 border-style preflight，
+   border-* 类只设色 / 宽不出线，统一走 scoped 显式 shorthand 兜底 */
+.message-input__card {
+  border: 1px solid var(--el-border-color-lighter);
+}
+.message-input__toolbar {
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
 /* el-icon 全局规则 .el-icon{color:var(--color,inherit); font-size:inherit; width:1em; height:1em}
    会盖过 UnoCSS 原子类；用字面选择器 + !important 兜底。
    颜色取 Element Plus 主题变量，暗色自动切到浅灰 */
@@ -700,14 +722,14 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   color: var(--el-color-primary) !important;
 }
 
-/* 输入区在上、工具栏在下时，编辑区视觉上承担"主体"，min-height 撑大一些贴近微信观感；
-   max-height 不再无限增长，超过则内部滚动，避免聊天列表被挤太短 */
+/* 输入区在上、工具栏在下时，编辑区视觉上承担"主体"，min-height / padding 都比早期版本撑大，
+   贴近微信 PC 的"大输入框"观感；max-height 限内部滚动，避免聊天列表被挤太短 */
 .message-input__editor {
   position: relative;
-  min-height: 100px;
-  max-height: 160px;
+  min-height: 120px;
+  max-height: 200px;
   overflow-y: auto;
-  padding: 10px 14px;
+  padding: 14px 16px;
   font-size: 14px;
   line-height: 1.5;
   outline: none;
