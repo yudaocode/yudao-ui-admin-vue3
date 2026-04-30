@@ -145,9 +145,11 @@ export interface Friend {
   id?: number // 好友关系记录编号（本地乐观新增时可能暂缺）
   friendUserId: number // 好友用户编号（与 Conversation.targetId 对齐）
   nickname: string // 好友昵称（对方真实昵称，永远不被备注覆盖；UI 显示走 displayName || nickname）
+  nicknamePinyin?: string // 昵称的拼音（后端用 Pinyin4j 算好回填，小写无空格）
   avatar?: string // 好友头像
   muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
   displayName?: string // 好友展示备注：仅自己可见的别名（单字段不歧义，不带 Friend 前缀）
+  displayNamePinyin?: string // 备注的拼音（后端用 Pinyin4j 算好回填，小写无空格）
   status?: number // 好友状态，对齐 CommonStatusEnum（DISABLE = 已删除，软删保留记录）
   addTime?: number // 添加好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
   deleteTime?: number // 删除好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
@@ -175,8 +177,10 @@ export interface User {
 export interface FriendLite {
   id: number
   nickname: string
+  nicknamePinyin?: string // 昵称拼音（用于字母分桶 / 拼音搜索）
   avatar?: string
   displayName?: string
+  displayNamePinyin?: string // 备注拼音（优先于 nicknamePinyin 参与分桶）
   deleted?: boolean
 }
 

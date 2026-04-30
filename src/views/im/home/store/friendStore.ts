@@ -226,9 +226,11 @@ function convertFriend(vo: ImFriendRespVO): Friend {
     id: vo.id,
     friendUserId: vo.friendUserId,
     nickname: vo.nickname || String(vo.friendUserId),
+    nicknamePinyin: vo.nicknamePinyin,
     avatar: vo.avatar,
     muted: !!vo.muted,
     displayName: vo.displayName || '',
+    displayNamePinyin: vo.displayNamePinyin,
     status: vo.status,
     addTime: vo.addTime ? new Date(vo.addTime).getTime() : undefined,
     deleteTime: vo.deleteTime ? new Date(vo.deleteTime).getTime() : undefined

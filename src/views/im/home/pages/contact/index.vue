@@ -108,12 +108,15 @@ type Selection = { type: 'friend'; friend: FriendLite } | { type: 'group'; group
 const selection = ref<Selection | null>(null)
 const keyword = ref('')
 
+/** 好友列表的展示快照：附带后端算好的拼音，给 FriendList 做字母分桶 / 拼音搜索 */
 const friends = computed<FriendLite[]>(() =>
   friendStore.getActiveFriends.map((friend: Friend) => ({
     id: friend.friendUserId,
     nickname: friend.nickname,
+    nicknamePinyin: friend.nicknamePinyin,
     avatar: friend.avatar,
     displayName: friend.displayName,
+    displayNamePinyin: friend.displayNamePinyin,
     deleted: friend.status === CommonStatusEnum.DISABLE
   }))
 )
