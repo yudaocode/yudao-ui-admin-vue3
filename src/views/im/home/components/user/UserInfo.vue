@@ -41,19 +41,11 @@
       </div>
       <!-- 右上 "..." 菜单：仅 friend 态展示，菜单项目前只有"删除联系人"（其它 WeChat 选项业务上未支持） -->
       <div v-if="relation === 'friend'" class="flex-shrink-0">
-        <el-dropdown
-          trigger="click"
-          placement="bottom-end"
-          popper-class="im-user-info__more-menu"
-        >
+        <el-dropdown trigger="click" placement="bottom-end" popper-class="im-user-info__more-menu">
           <div
             class="flex items-center justify-center w-7 h-7 rounded cursor-pointer hover:bg-[var(--el-fill-color-light)]"
           >
-            <Icon
-              icon="ep:more-filled"
-              :size="18"
-              class="text-[var(--el-text-color-secondary)]"
-            />
+            <Icon icon="ep:more-filled" :size="18" class="text-[var(--el-text-color-secondary)]" />
           </div>
           <template #dropdown>
             <el-dropdown-menu>
@@ -76,7 +68,7 @@
             ? 'group cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color-lighter)]'
             : ''
         "
-        @click="onRowClick"
+        @click="handleRowClick"
       >
         <span class="flex-shrink-0 w-14 text-[var(--el-text-color-secondary)]">备注</span>
         <el-input
@@ -127,14 +119,14 @@
         </div>
         <div
           class="flex flex-col gap-1.5 items-center cursor-pointer text-13px text-[var(--el-color-primary)] transition-opacity hover:opacity-75"
-          @click="onComingSoon('语音聊天')"
+          @click="handleComingSoon('语音聊天')"
         >
           <Icon icon="ant-design:phone-outlined" :size="22" />
           <span>语音聊天</span>
         </div>
         <div
           class="flex flex-col gap-1.5 items-center cursor-pointer text-13px text-[var(--el-color-primary)] transition-opacity hover:opacity-75"
-          @click="onComingSoon('视频聊天')"
+          @click="handleComingSoon('视频聊天')"
         >
           <Icon icon="ant-design:video-camera-outlined" :size="22" />
           <span>视频聊天</span>
@@ -159,6 +151,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 import UserAvatar from './UserAvatar.vue'
 import { getSimpleUser } from '@/api/system/user'
 import { useFriendStore } from '../../store/friendStore'
+import { getGenderColor, getGenderIcon } from '../../../utils/user'
 import type { User } from '../../types'
 
 defineOptions({ name: 'ImUserInfo' })
@@ -208,29 +201,8 @@ const headerName = computed(() => props.displayName || full.value?.nickname || '
 
 const deptText = computed(() => full.value?.deptName || '-')
 
-/** 性别图标：男 1 / 女 2，0 / null / undefined 一律不展示 */
-const genderIcon = computed(() => {
-  // TODO @AI: 有没更好看的图标。
-  const sex = full.value?.sex
-  if (sex === 1) {
-    return 'mdi:human-male'
-  }
-  if (sex === 2) {
-    return 'mdi:human-female'
-  }
-  return ''
-})
-
-const genderColor = computed(() => {
-  const sex = full.value?.sex
-  if (sex === 1) {
-    return '#5b97f5'
-  }
-  if (sex === 2) {
-    return '#f56c92'
-  }
-  return ''
-})
+const genderIcon = computed(() => getGenderIcon(full.value?.sex))
+const genderColor = computed(() => getGenderColor(full.value?.sex))
 
 /** 备注内联编辑：editingRemark 控制输入态；user 切换时由下面的 watch 复位避免脏态泄漏 */
 const editingRemark = ref(false)
@@ -251,33 +223,25 @@ watch(
     if (!id) {
       return
     }
-    try {
-      const data = (await getSimpleUser(id)) as User
-      if (props.user?.id !== id) {
-        return
-      }
-      full.value = { ...props.user, ...data }
-    } catch (e) {
-      // TODO @AI：最好把 id 打印进去
-      console.warn('[IM] 获取用户详情失败', e)
+    const data = (await getSimpleUser(id)) as User
+    if (props.user?.id !== id) {
+      return
     }
+    full.value = { ...props.user, ...data }
   },
   { immediate: true }
 )
 
-// TODO @AI：目前项目里，更多使用 handleXXX 为主；可能要统一跟进下；
-// TODO @AI：是不是通过 await 做；
-// TODO @AI：注释一下；
-function onRowClick() {
+/** 备注行点击：进编辑态 + 把当前备注灌进输入框，下一帧把焦点 / 全选交给 el-input */
+async function handleRowClick() {
   if (editingRemark.value) {
     return
   }
   remarkInput.value = props.displayName || ''
   editingRemark.value = true
-  void nextTick(() => {
-    remarkInputRef.value?.focus()
-    remarkInputRef.value?.select()
-  })
+  await nextTick()
+  remarkInputRef.value?.focus()
+  remarkInputRef.value?.select()
 }
 
 /**
@@ -335,29 +299,25 @@ async function handleDeleteFriend() {
     return
   }
   const target = props.user
-  // 二次确认（用户点取消时 message.confirm 抛 reject，吃掉直接 return）
-  try {
-    await message.confirm(`确定删除好友「${target.nickname || ''}」吗？`, '删除联系人')
-  } catch {
-    return
-  }
+  // 二次确认
+  await message.confirm(`确定删除好友「${target.nickname || ''}」吗？`, '删除联系人')
+  // 删除好友
   await friendStore.deleteFriend(target.id)
   message.success('已删除好友')
   emit('deleted', target)
 }
 
 /** 占位提示：语音 / 视频聊天能力尚未接入，先以"开发中"友好提示 */
-function onComingSoon(featureName: string) {
+function handleComingSoon(featureName: string) {
   message.info(`${featureName} 功能开发中`)
 }
 </script>
 
-<!--
-TODO @AI：这个是不是注释到 style 里？
+<style>
+/*
   非 scoped：el-dropdown 的下拉菜单走 teleport 到 body，scoped 选不到。
   UserInfoCard 浮层用 z-9998，要把这块抬到更高（默认 --el-popper-z-index ~2050 会被遮罩压住）。
--->
-<style>
+*/
 .im-user-info__more-menu {
   z-index: 10000 !important;
 }

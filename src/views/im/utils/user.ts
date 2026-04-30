@@ -1,11 +1,12 @@
 // ====================================================================
-// IM 用户展示名 utility
+// IM 用户展示 utility
 // ====================================================================
-// 职责：统一回答"某个用户在 UI 上应该叫什么名字"。拆两层：
-// 1. 纯派生（getFriendDisplayName / getMemberDisplayName / getGroupDisplayName）：输入 friend / member / group 对象，不查 store，给 store 内部 / 各种组装点复用，避免逻辑散落
-// 2. 上下文感知（getSenderDisplayName / getSenderRealNickname / tryGetSenderDisplayName）：渲染时按 conversation 上下文实时查 friendStore / groupStore / userStore，让备注 / 群昵称 / 真实昵称变更后所有历史消息立即响应式刷新
+// 职责：统一回答"某个用户在 UI 上应该如何展示"，包含：
+// 1. 显示名（getFriendDisplayName / getMemberDisplayName / getGroupDisplayName / getSenderDisplayName 等）
+// 2. 上下文感知名（tryGetSenderDisplayName / getSenderRealNickname）：渲染时按 conversation 上下文实时查 friendStore / groupStore / userStore，让备注 / 群昵称 / 真实昵称变更后所有历史消息立即响应式刷新
+// 3. 性别图标 / 颜色（getGenderIcon / getGenderColor）：男蓝、女粉，未知不展示，所有 UserInfo 卡片 / 列表行共用
 //
-// 命名约定：函数名一律使用 displayName，与 friend.displayName / member.displayUserName 字段对齐
+// 命名约定：显示名相关函数一律使用 displayName，与 friend.displayName / member.displayUserName 字段对齐
 // ====================================================================
 
 import { useUserStore } from '@/store/modules/user'
@@ -147,4 +148,26 @@ export function getSenderRealNickname(
     return userStore.getUser?.nickname || String(senderId)
   }
   return String(senderId)
+}
+
+/** 性别图标：男 1 / 女 2，0 / null / undefined 一律不展示，对齐微信留白 */
+export function getGenderIcon(sex?: number): string {
+  if (sex === 1) {
+    return 'mdi:human-male'
+  }
+  if (sex === 2) {
+    return 'mdi:human-female'
+  }
+  return ''
+}
+
+/** 性别图标主题色：男蓝、女粉 */
+export function getGenderColor(sex?: number): string {
+  if (sex === 1) {
+    return '#5b97f5'
+  }
+  if (sex === 2) {
+    return '#f56c92'
+  }
+  return ''
 }
