@@ -14,7 +14,7 @@
           placeholder="请输入敏感词"
           clearable
           @keyup.enter="handleQuery"
-          class="!w-200px"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
@@ -22,7 +22,7 @@
           v-model="queryParams.status"
           placeholder="请选择状态"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -78,7 +78,7 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="创建人" align="center" prop="creator" width="120" />
+      <el-table-column label="创建人" align="center" prop="creatorName" width="120" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -121,7 +121,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as ManagerSensitiveWordApi from '@/api/im/manager/sensitiveWord'
+import * as ManagerSensitiveWordApi from '@/api/im/manager/sensitiveword'
 import SensitiveWordForm from './SensitiveWordForm.vue'
 
 defineOptions({ name: 'ImSensitiveWord' })

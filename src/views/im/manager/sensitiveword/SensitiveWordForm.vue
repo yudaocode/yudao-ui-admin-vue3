@@ -8,7 +8,12 @@
       label-width="80px"
     >
       <el-form-item label="敏感词" prop="word">
-        <el-input v-model="formData.word" placeholder="请输入敏感词" maxlength="64" show-word-limit />
+        <el-input
+          v-model="formData.word"
+          placeholder="请输入敏感词"
+          maxlength="64"
+          show-word-limit
+        />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -32,7 +37,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import * as ManagerSensitiveWordApi from '@/api/im/manager/sensitiveWord'
+import * as ManagerSensitiveWordApi from '@/api/im/manager/sensitiveword'
 
 defineOptions({ name: 'ImSensitiveWordForm' })
 
