@@ -1,32 +1,19 @@
 <template>
-  <el-dialog v-model="dialogVisible" title="群聊消息详情" width="700">
+  <el-dialog v-model="dialogVisible" title="私聊消息详情" width="700">
     <el-descriptions :column="2" border>
       <el-descriptions-item label="编号">{{ detail.id }}</el-descriptions-item>
       <el-descriptions-item label="客户端编号">{{ detail.clientMessageId || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="群">
-        {{ detail.groupName }} ({{ detail.groupId }})
-      </el-descriptions-item>
       <el-descriptions-item label="发送人">
         {{ detail.senderNickname }} ({{ detail.senderId }})
+      </el-descriptions-item>
+      <el-descriptions-item label="接收人">
+        {{ detail.receiverNickname }} ({{ detail.receiverId }})
       </el-descriptions-item>
       <el-descriptions-item label="类型">
         <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="detail.type" />
       </el-descriptions-item>
       <el-descriptions-item label="状态">
-        <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_STATUS" :value="detail.status" />
-      </el-descriptions-item>
-      <el-descriptions-item label="@用户" :span="2">
-        <template v-if="detail.atUserIds?.length">
-          <span v-for="(userId, idx) in detail.atUserIds" :key="userId">
-            <span v-if="idx > 0">、</span>
-            <template v-if="userId === IM_AT_ALL_USER_ID">@{{ IM_AT_ALL_NICKNAME }}</template>
-            <template v-else>
-              @{{ detail.atUserNicknames?.[idx] || userId }}
-              <span class="text-gray-400">({{ userId }})</span>
-            </template>
-          </span>
-        </template>
-        <span v-else>-</span>
+        <dict-tag :type="DICT_TYPE.IM_PRIVATE_MESSAGE_STATUS" :value="detail.status" />
       </el-descriptions-item>
       <el-descriptions-item label="发送时间" :span="2">
         {{ formatDate(detail.sendTime) }}
@@ -44,20 +31,19 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
-import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
 import { formatJson } from '@/views/im/utils/message'
-import * as ManagerGroupMessageApi from '@/api/im/manager/message/group'
+import * as ManagerPrivateMessageApi from '@/api/im/manager/message/private'
 import MessageContentPreview from '../MessageContentPreview.vue'
 
-defineOptions({ name: 'ImGroupMessageDetail' })
+defineOptions({ name: 'ImPrivateMessageDetail' })
 
 const dialogVisible = ref(false) // 弹窗的显示
-const detail = ref<ManagerGroupMessageApi.ImManagerGroupMessageVO>(
-  {} as ManagerGroupMessageApi.ImManagerGroupMessageVO
+const detail = ref<ManagerPrivateMessageApi.ImManagerPrivateMessageVO>(
+  {} as ManagerPrivateMessageApi.ImManagerPrivateMessageVO
 ) // 当前详情数据
 
 /** 打开详情弹窗 */
-const open = (row: ManagerGroupMessageApi.ImManagerGroupMessageVO) => {
+const open = (row: ManagerPrivateMessageApi.ImManagerPrivateMessageVO) => {
   detail.value = row
   dialogVisible.value = true
 }

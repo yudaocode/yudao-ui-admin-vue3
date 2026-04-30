@@ -6,24 +6,26 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="80px"
+      label-width="88px"
     >
+      <!-- TODO @AI：使用 userselectv2；可以晚点处理； -->
       <el-form-item label="发送人编号" prop="senderId">
         <el-input
           v-model="queryParams.senderId"
           placeholder="请输入发送人用户编号"
           clearable
           @keyup.enter="handleQuery"
-          class="!w-200px"
+          class="!w-240px"
         />
       </el-form-item>
+      <!-- TODO @AI：使用 userselectv2；可以晚点处理； -->
       <el-form-item label="接收人编号" prop="receiverId">
         <el-input
           v-model="queryParams.receiverId"
           placeholder="请输入接收人用户编号"
           clearable
           @keyup.enter="handleQuery"
-          class="!w-200px"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="消息类型" prop="type">
@@ -31,7 +33,7 @@
           v-model="queryParams.type"
           placeholder="请选择消息类型"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.IM_MESSAGE_TYPE)"
@@ -41,15 +43,16 @@
           />
         </el-select>
       </el-form-item>
+      <!-- TODO @AI：不用消息状态检索；改成内容检索； -->
       <el-form-item label="消息状态" prop="status">
         <el-select
           v-model="queryParams.status"
           placeholder="请选择消息状态"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IM_MESSAGE_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IM_PRIVATE_MESSAGE_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -95,14 +98,14 @@
           <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="内容预览" align="left" min-width="240" show-overflow-tooltip>
+      <el-table-column label="内容预览" align="left" min-width="240">
         <template #default="{ row }">
-          {{ getContentPreview(row.content) }}
+          <MessageContentPreview :type="row.type" :content="row.content" />
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.IM_MESSAGE_STATUS" :value="row.status" />
+          <dict-tag :type="DICT_TYPE.IM_PRIVATE_MESSAGE_STATUS" :value="row.status" />
         </template>
       </el-table-column>
       <el-table-column
@@ -133,33 +136,16 @@
     />
   </ContentWrap>
 
-  <!-- 详情弹窗 -->
-  <el-dialog v-model="detailVisible" title="私聊消息详情" width="700">
-    <el-descriptions :column="2" border>
-      <el-descriptions-item label="编号">{{ detail.id }}</el-descriptions-item>
-      <el-descriptions-item label="客户端编号">{{ detail.clientMessageId || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="发送人">{{ detail.senderNickname }} ({{ detail.senderId }})</el-descriptions-item>
-      <el-descriptions-item label="接收人">{{ detail.receiverNickname }} ({{ detail.receiverId }})</el-descriptions-item>
-      <el-descriptions-item label="类型">
-        <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="detail.type" />
-      </el-descriptions-item>
-      <el-descriptions-item label="状态">
-        <dict-tag :type="DICT_TYPE.IM_MESSAGE_STATUS" :value="detail.status" />
-      </el-descriptions-item>
-      <el-descriptions-item label="发送时间">{{ formatDate(detail.sendTime) }}</el-descriptions-item>
-      <el-descriptions-item label="创建时间">{{ formatDate(detail.createTime) }}</el-descriptions-item>
-      <el-descriptions-item label="消息内容（原始 JSON）" :span="2">
-        <pre class="content-pre">{{ formatJson(detail.content) }}</pre>
-      </el-descriptions-item>
-    </el-descriptions>
-  </el-dialog>
+  <!-- 详情 -->
+  <PrivateMessageDetail ref="detailRef" />
 </template>
 
 <script lang="ts" setup>
-import { dateFormatter, formatDate } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as ManagerPrivateMessageApi from '@/api/im/manager/message/private'
-import { getContentPreview, formatJson } from '@/views/im/utils/message'
+import MessageContentPreview from '../MessageContentPreview.vue'
+import PrivateMessageDetail from './PrivateMessageDetail.vue'
 
 defineOptions({ name: 'ImPrivateMessage' })
 
@@ -201,16 +187,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 详情弹窗 */
-const detailVisible = ref(false) // 详情弹窗的显示
-const detail = ref<ManagerPrivateMessageApi.ImManagerPrivateMessageVO>(
-  {} as ManagerPrivateMessageApi.ImManagerPrivateMessageVO
-) // 当前详情数据
-
 /** 打开详情弹窗 */
+const detailRef = ref<InstanceType<typeof PrivateMessageDetail>>() // 详情弹窗 Ref
 const openDetail = (row: ManagerPrivateMessageApi.ImManagerPrivateMessageVO) => {
-  detail.value = row
-  detailVisible.value = true
+  detailRef.value?.open(row)
 }
 
 /** 初始化 */
@@ -218,16 +198,3 @@ onMounted(() => {
   getList()
 })
 </script>
-
-<style scoped>
-.content-pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-  font-family: 'Menlo', 'Consolas', monospace;
-  font-size: 12px;
-  background: #f5f5f5;
-  padding: 8px;
-  border-radius: 4px;
-}
-</style>

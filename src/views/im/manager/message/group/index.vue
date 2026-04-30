@@ -8,6 +8,7 @@
       :inline="true"
       label-width="88px"
     >
+      <!-- TODO @AI：groupselect；在 group components 提供一个组件 -->
       <el-form-item label="群编号" prop="groupId">
         <el-input
           v-model="queryParams.groupId"
@@ -17,6 +18,7 @@
           class="!w-240px"
         />
       </el-form-item>
+      <!-- TODO @AI：使用 userselectv2；可以晚点处理； -->
       <el-form-item label="发送人编号" prop="senderId">
         <el-input
           v-model="queryParams.senderId"
@@ -41,6 +43,7 @@
           />
         </el-select>
       </el-form-item>
+      <!-- TODO @AI：不用消息状态检索；改成内容检索； -->
       <el-form-item label="消息状态" prop="status">
         <el-select
           v-model="queryParams.status"
@@ -95,11 +98,6 @@
           <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="内容预览" align="left" min-width="240">
-        <template #default="{ row }">
-          <MessageContentPreview :type="row.type" :content="row.content" />
-        </template>
-      </el-table-column>
       <el-table-column
         label="发送时间"
         align="center"
@@ -107,6 +105,11 @@
         width="180"
         :formatter="dateFormatter"
       />
+      <el-table-column label="内容预览" align="left" min-width="240">
+        <template #default="{ row }">
+          <MessageContentPreview :type="row.type" :content="row.content" />
+        </template>
+      </el-table-column>
       <el-table-column label="@用户" align="left" min-width="200" show-overflow-tooltip>
         <template #default="{ row }">
           <template v-if="row.atUserIds?.length">
