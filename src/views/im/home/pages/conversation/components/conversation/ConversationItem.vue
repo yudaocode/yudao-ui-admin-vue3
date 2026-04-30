@@ -192,14 +192,12 @@ function handleMuted() {
   })
 }
 
-/** 删除会话：二次确认后软删（用户取消走 catch 静默） */
+/** 删除会话：二次确认后软删 */
 async function handleDelete() {
   try {
     await message.confirm(`确定删除与「${props.conversation.name}」的会话吗？`, '删除会话')
     conversationStore.removeConversation(props.conversation.type, props.conversation.targetId)
-  } catch {
-    // 用户取消
-  }
+  } catch {}
 }
 
 /** 右键菜单：置顶 / 免打扰 / 删除 */

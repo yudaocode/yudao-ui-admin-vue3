@@ -198,7 +198,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -286,9 +285,7 @@ const senderAvatar = computed(() => {
   }
   if (conversation.type === ImConversationType.GROUP) {
     const group = groupStore.getGroup(conversation.targetId)
-    return (
-      group?.members?.find((member) => member.userId === props.message.senderId)?.avatar || ''
-    )
+    return group?.members?.find((member) => member.userId === props.message.senderId)?.avatar || ''
   }
   return conversation.avatar || ''
 })
@@ -554,9 +551,7 @@ async function handleRecall() {
   try {
     await confirmDialog('确定要撤回这条消息吗？', '撤回消息')
     await recall(props.message)
-  } catch {
-    // ElMessageBox 在用户点取消时会 reject，吃掉即可
-  }
+  } catch {}
 }
 
 /**

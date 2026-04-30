@@ -431,15 +431,10 @@ async function saveName() {
   if (!props.group) {
     return
   }
-  try {
-    await updateGroup({ id: props.group.id, name: editName.value })
-    namePopoverVisible.value = false
-    message.success('保存成功')
-    emit('reload')
-  } catch (error) {
-    console.error('[IM ConversationGroupSide] 保存群名失败', error)
-    message.error('保存失败')
-  }
+  await updateGroup({ id: props.group.id, name: editName.value })
+  namePopoverVisible.value = false
+  message.success('保存成功')
+  emit('reload')
 }
 
 /** 群主：保存群公告 */
@@ -447,15 +442,10 @@ async function saveNotice() {
   if (!props.group) {
     return
   }
-  try {
-    await updateGroup({ id: props.group.id, notice: editNotice.value })
-    noticePopoverVisible.value = false
-    message.success('保存成功')
-    emit('reload')
-  } catch (error) {
-    console.error('[IM ConversationGroupSide] 保存群公告失败', error)
-    message.error('保存失败')
-  }
+  await updateGroup({ id: props.group.id, notice: editNotice.value })
+  noticePopoverVisible.value = false
+  message.success('保存成功')
+  emit('reload')
 }
 
 /** 备注：仅本地 localStorage 落盘（后端无字段；多端不同步是已知限制） */
@@ -478,18 +468,13 @@ async function saveRemark() {
   if (!props.group) {
     return
   }
-  try {
-    await updateGroupMember({
-      groupId: props.group.id,
-      displayUserName: editRemark.value
-    })
-    remarkPopoverVisible.value = false
-    message.success('保存成功')
-    emit('reload')
-  } catch (error) {
-    console.error('[IM ConversationGroupSide] 保存本群昵称失败', error)
-    message.error('保存失败')
-  }
+  await updateGroupMember({
+    groupId: props.group.id,
+    displayUserName: editRemark.value
+  })
+  remarkPopoverVisible.value = false
+  message.success('保存成功')
+  emit('reload')
 }
 
 /**
@@ -524,26 +509,19 @@ async function handleQuit() {
   if (!props.group) {
     return
   }
-  // 1. 二次确认（用户点取消时 message.confirm 抛 reject，吃掉直接 return）
+  // 二次确认（用户点取消时 message.confirm 抛 reject，吃掉直接 return）
   try {
     await message.confirm('退出群聊后将不再接收群里的消息，确认退出吗？', '确认退出')
   } catch {
     return
   }
   const groupId = props.group.id
-  try {
-    // 2. 调后端 /im/group/quit
-    await quitGroup(groupId)
-    // 3. 同步清本地：会话列表 + 群 store；不清的话冷启动前还会残留这条群 / 会话
-    conversationStore.removeConversation(ImConversationType.GROUP, groupId)
-    groupStore.removeGroup(groupId)
-    // 4. 关抽屉，让用户回到主面板
-    message.success('已退出群聊')
-    visible.value = false
-  } catch (error) {
-    console.error('[IM ConversationGroupSide] 退出群聊失败', { groupId }, error)
-    message.error('退出群聊失败')
-  }
+  await quitGroup(groupId)
+  // 同步清本地：会话列表 + 群 store；不清的话冷启动前还会残留这条群 / 会话
+  conversationStore.removeConversation(ImConversationType.GROUP, groupId)
+  groupStore.removeGroup(groupId)
+  message.success('已退出群聊')
+  visible.value = false
 }
 
 /** 移除群成员（仅群主入口）*/
@@ -551,20 +529,13 @@ async function handleRemoveComplete(members: GroupMemberFlag[]) {
   if (!props.group || members.length === 0) {
     return
   }
-  const groupId = props.group.id
-  try {
-    // 1. 一次性批量踢人：把选中成员 userId 数组传给后端，比循环调 N 次接口省往返
-    await removeGroupMember({
-      groupId,
-      memberUserIds: members.map((member) => member.userId)
-    })
-    // 2. emit reload 让父组件重新拉群成员，UI 刷新看到被踢的人消失
-    message.success(`已移除 ${members.length} 位成员`)
-    emit('reload')
-  } catch (error) {
-    console.error('[IM ConversationGroupSide] 移除群成员失败', { groupId }, error)
-    message.error('移除成员失败')
-  }
+  // 一次性批量踢人：把选中成员 userId 数组传给后端，比循环调 N 次接口省往返
+  await removeGroupMember({
+    groupId: props.group.id,
+    memberUserIds: members.map((member) => member.userId)
+  })
+  message.success(`已移除 ${members.length} 位成员`)
+  emit('reload')
 }
 </script>
 

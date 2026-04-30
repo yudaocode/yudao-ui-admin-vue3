@@ -289,7 +289,6 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
-import { useMessage } from '@/hooks/web/useMessage'
 import dayjs from 'dayjs'
 
 import Icon from '@/components/Icon/src/Icon.vue'
@@ -337,7 +336,6 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const { convertPrivateMessage, convertGroupMessage } = useMessagePuller()
-const message = useMessage()
 
 const visible = computed({
   get: () => props.modelValue,
@@ -598,9 +596,6 @@ async function loadEarlier() {
       conversation.value.targetId,
       earlier
     )
-  } catch (error) {
-    console.error('[IM] 加载更早历史消息失败', error)
-    message.error('加载历史消息失败')
   } finally {
     loadingMore.value = false
   }

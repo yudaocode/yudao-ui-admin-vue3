@@ -300,15 +300,9 @@ async function saveRemark() {
   if (next === (props.displayName || '')) {
     return
   }
-  try {
-    await friendStore.setDisplayName(userId, next)
-    message.success('已更新备注')
-    emit('saved', next)
-  } catch (e) {
-    // TODO @AI：这里也是，需要有个 userId 之类的上下文
-    console.error('[IM] 更新备注失败', e)
-    message.error('更新备注失败')
-  }
+  await friendStore.setDisplayName(userId, next)
+  message.success('已更新备注')
+  emit('saved', next)
 }
 
 function cancelEditRemark() {
@@ -328,16 +322,11 @@ async function handleAddFriend() {
   if (!props.user?.id) {
     return
   }
-  try {
-    await friendStore.addFriend(props.user.id, {
-      nickname: props.user.nickname,
-      avatar: props.user.avatar
-    })
-    message.success('已添加好友')
-  } catch (e: any) {
-    console.error('[IM] 添加好友失败', e)
-    message.error(e?.message || '添加好友失败')
-  }
+  await friendStore.addFriend(props.user.id, {
+    nickname: props.user.nickname,
+    avatar: props.user.avatar
+  })
+  message.success('已添加好友')
 }
 
 /** 删除联系人：confirm → friendStore.deleteFriend（内部级联清会话）→ 通知父级关浮层 / 清选中 */
@@ -346,17 +335,15 @@ async function handleDeleteFriend() {
     return
   }
   const target = props.user
+  // 二次确认（用户点取消时 message.confirm 抛 reject，吃掉直接 return）
   try {
     await message.confirm(`确定删除好友「${target.nickname || ''}」吗？`, '删除联系人')
-    await friendStore.deleteFriend(target.id)
-    message.success('已删除好友')
-    emit('deleted', target)
-  } catch (e) {
-    if (e !== 'cancel' && e !== 'close') {
-      console.error('[IM] 删除好友失败', e)
-      message.error('删除好友失败')
-    }
+  } catch {
+    return
   }
+  await friendStore.deleteFriend(target.id)
+  message.success('已删除好友')
+  emit('deleted', target)
 }
 
 /** 占位提示：语音 / 视频聊天能力尚未接入，先以"开发中"友好提示 */

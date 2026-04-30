@@ -172,26 +172,29 @@ async function handleSaveDisplayName() {
   if (!props.friend) {
     return
   }
-  try {
-    await friendStore.setDisplayName(props.friend.friendUserId, editDisplayName.value)
-    displayNamePopoverVisible.value = false
-    message.success('保存成功')
-  } catch (error) {
-    console.error('[IM ConversationPrivateSide] 保存好友备注失败', error)
-    message.error('保存失败')
-  }
+  await friendStore.setDisplayName(props.friend.friendUserId, editDisplayName.value)
+  displayNamePopoverVisible.value = false
+  message.success('保存成功')
 }
 
-/** 切免打扰：双写 conversationStore（本地排序状态）+ friendStore（与后端同步） */
+/**
+ * 切免打扰：乐观双写 conversationStore + friendStore；后端失败回滚 conversation 状态，保持与 ConversationItem.handleMuted 一致
+ */
 function handleMutedChange(value: boolean | string | number) {
   if (!props.conversation) {
     return
   }
   const next = !!value
-  conversationStore.setMuted(props.conversation.type, props.conversation.targetId, next)
-  if (props.conversation.type === ImConversationType.PRIVATE) {
-    friendStore.setMuted(props.conversation.targetId, next)
+  const { type, targetId } = props.conversation
+  conversationStore.setMuted(type, targetId, next)
+  if (type !== ImConversationType.PRIVATE) {
+    return
   }
+  friendStore.setMuted(targetId, next).catch((e) => {
+    console.error('[IM ConversationPrivateSide] 切换免打扰失败', { targetId }, e)
+    message.error('切换免打扰失败')
+    conversationStore.setMuted(type, targetId, !next)
+  })
 }
 
 /** 切置顶：纯本地 conversationStore 排序态（无后端字段） */

@@ -117,7 +117,6 @@
 
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
-import { useMessage } from '@/hooks/web/useMessage'
 
 import Icon from '@/components/Icon/src/Icon.vue'
 import { updateFile } from '@/api/infra/file'
@@ -145,7 +144,6 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const { send, sendRaw } = useMessageSender()
-const message = useMessage()
 
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
 const imageInputRef = useTemplateRef<HTMLInputElement>('imageInputRef')
@@ -625,37 +623,27 @@ function onKeydown(e: KeyboardEvent) {
 // ==================== 图片 / 文件上传 ====================
 /** 上传并发送 IMAGE 消息；文件选择器和粘贴板都复用这条 */
 async function uploadAndSendImage(file: File) {
-  try {
-    const form = new FormData()
-    form.append('file', file)
-    const url = ((await updateFile(form)) as { data?: string })?.data
-    if (!url) {
-      return
-    }
-    await sendRaw(ImMessageType.IMAGE, serializeMessage<ImageMessage>({ url }))
-  } catch (err) {
-    console.error('[IM] 图片上传失败:', err)
-    message.error('图片上传失败')
+  const form = new FormData()
+  form.append('file', file)
+  const url = ((await updateFile(form)) as { data?: string })?.data
+  if (!url) {
+    return
   }
+  await sendRaw(ImMessageType.IMAGE, serializeMessage<ImageMessage>({ url }))
 }
 
 /** 上传并发送 FILE 消息；附原始 name / size 让接收端展示文件名和体积 */
 async function uploadAndSendFile(file: File) {
-  try {
-    const form = new FormData()
-    form.append('file', file)
-    const url = ((await updateFile(form)) as { data?: string })?.data
-    if (!url) {
-      return
-    }
-    await sendRaw(
-      ImMessageType.FILE,
-      serializeMessage<FileMessage>({ url, name: file.name, size: file.size })
-    )
-  } catch (err) {
-    console.error('[IM] 文件上传失败:', err)
-    message.error('文件上传失败')
+  const form = new FormData()
+  form.append('file', file)
+  const url = ((await updateFile(form)) as { data?: string })?.data
+  if (!url) {
+    return
   }
+  await sendRaw(
+    ImMessageType.FILE,
+    serializeMessage<FileMessage>({ url, name: file.name, size: file.size })
+  )
 }
 
 /** 图片选完即上传 + 发送 IMAGE 消息（不放入 editor，整体走 sendRaw） */
@@ -682,23 +670,18 @@ async function onFilePicked(e: Event) {
 const voiceVisible = ref(false)
 /** VoiceRecorder 录完后回传 blob，包成 webm 文件上传，发送 VOICE 消息 */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
-  try {
-    const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
-    const form = new FormData()
-    form.append('file', file)
-    // request.upload 返回完整 axios response（不是 res.data，跟 get/post/put 不一样），URL 在 .data 里取
-    const url = ((await updateFile(form)) as { data?: string })?.data
-    if (!url) {
-      return
-    }
-    await sendRaw(
-      ImMessageType.VOICE,
-      serializeMessage<AudioMessage>({ url, duration: payload.duration })
-    )
-  } catch (err) {
-    console.error('[IM] 语音上传失败:', err)
-    message.error('语音上传失败')
+  const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
+  const form = new FormData()
+  form.append('file', file)
+  // request.upload 返回完整 axios response（不是 res.data，跟 get/post/put 不一样），URL 在 .data 里取
+  const url = ((await updateFile(form)) as { data?: string })?.data
+  if (!url) {
+    return
   }
+  await sendRaw(
+    ImMessageType.VOICE,
+    serializeMessage<AudioMessage>({ url, duration: payload.duration })
+  )
 }
 </script>
 
