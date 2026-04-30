@@ -11,6 +11,11 @@ import { parseMessage, resolveTipText, type TextMessage } from './message'
 import { getSenderDisplayName } from './user'
 import type { Message } from '../home/types'
 
+/** 会话主键：`type-targetId` 拼成稳定字符串，给 v-for :key、active 比对、map key 等场景共用 */
+export function getConversationKey(conversation: { type: number; targetId: number }): string {
+  return `${conversation.type}-${conversation.targetId}`
+}
+
 /** 撤回提示文案：自己撤回固定文案，对方撤回带 sender 名（实时算 + fallbackName 兜底） */
 export function buildRecallTip(
   senderId: number,

@@ -115,9 +115,10 @@ import Icon from '@/components/Icon/src/Icon.vue'
 
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
-import { getMemberDisplayName } from '../../../../../utils/user'
+import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useGroupStore } from '../../../../store/groupStore'
-import { ImConversationType } from '../../../../../utils/constants'
+import { ImConversationType } from '@/views/im/utils/constants'
+import { getConversationKey } from '@/views/im/utils/conversation'
 import { CommonStatusEnum } from '@/utils/constants'
 import MessageItem from './MessageItem.vue'
 import MessageInput from '../input/MessageInput.vue'
@@ -145,7 +146,7 @@ const isGroup = computed(
  */
 const messageInputKey = computed(() => {
   const conv = conversationStore.activeConversation
-  return conv ? `${conv.type}-${conv.targetId}` : 'none'
+  return conv ? getConversationKey(conv) : 'none'
 })
 
 /** "是否停留在底部"的阈值：距离底部 < 80px 视为底部 */

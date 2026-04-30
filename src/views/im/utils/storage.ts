@@ -54,7 +54,9 @@ export const StorageKeys = {
     `groupMembers:${userId}:${groupId}`,
 
   /** 侧边栏宽度（localStorage）；三个 Tab 共用一份记忆，对齐微信（拖一次到处一致）。 */
-  asideWidth: 'im:aside'
+  asideWidth: 'im:aside',
+  /** 会话列表置顶折叠展开态（localStorage）；轻量 UI 偏好。 */
+  conversationPinnedExpanded: 'im:conversation:pinnedExpanded'
 } as const
 
 /** 取当前登录用户编号；返回 0 表示未登录，调用方一律早 return 不写无主 key */

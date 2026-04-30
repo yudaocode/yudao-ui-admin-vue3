@@ -37,20 +37,20 @@
         <template v-if="!showPinnedSection">
           <ConversationItem
             v-for="conversation in pinnedConversations"
-            :key="`${conversation.type}-${conversation.targetId}`"
+            :key="getConversationKey(conversation)"
             :conversation="conversation"
           />
         </template>
         <div v-else class="bg-[var(--el-fill-color-light)]">
           <ConversationItem
             v-for="conversation in renderedPinnedConversations"
-            :key="`${conversation.type}-${conversation.targetId}`"
+            :key="getConversationKey(conversation)"
             :conversation="conversation"
           />
 
           <!-- 折叠头：放在置顶区底部对齐 WeChat mac；展开 / 折叠态共用，仅在还有"可折叠"内容、或当前已展开时出现 -->
           <div
-            v-if="foldablePinnedConversations.length > 0 || pinnedExpanded"
+            v-if="pinnedGroups.foldable.length > 0 || pinnedExpanded"
             class="flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors text-13px text-[var(--el-text-color-regular)] border-y border-[var(--el-border-color-lighter)] hover:bg-[var(--el-fill-color)]"
             @click="togglePinnedExpanded"
           >
@@ -59,7 +59,7 @@
               {{
                 pinnedExpanded
                   ? '折叠置顶聊天'
-                  : `${foldablePinnedConversations.length} 个置顶聊天`
+                  : `${pinnedGroups.foldable.length} 个置顶聊天`
               }}
             </span>
             <Icon
@@ -73,7 +73,7 @@
         <!-- 普通会话 -->
         <ConversationItem
           v-for="conversation in normalConversations"
-          :key="`${conversation.type}-${conversation.targetId}`"
+          :key="getConversationKey(conversation)"
           :conversation="conversation"
         />
 
@@ -107,6 +107,7 @@ import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { StorageKeys } from '../../../utils/storage'
 import { ImConversationType } from '../../../utils/constants'
+import { getConversationKey } from '../../../utils/conversation'
 import { CommonStatusEnum } from '@/utils/constants'
 import type { Conversation, Friend, FriendLite } from '../../types'
 import ResizableAside from '../../components/ResizableAside.vue'
@@ -160,23 +161,28 @@ const pinnedConversations = computed(() => filteredConversations.value.filter((c
 /** 非置顶会话：折叠态下始终铺开在折叠头之下 */
 const normalConversations = computed(() => filteredConversations.value.filter((c) => !c.top))
 
-/** 置顶 + 无未读 / 免打扰且非激活：折叠时藏在折叠头之下，决定折叠头计数 + 是否要显示折叠头 */
-const foldablePinnedConversations = computed(() =>
-  pinnedConversations.value.filter((c) => !isActiveConversation(c) && !hasUnreadBadge(c))
-)
-
 /**
- * 折叠时只渲未读 + 当前激活（穿透折叠）；展开时渲全部置顶
+ * 置顶分两堆：visible（折叠头之上 = 未读 + 当前激活）/ foldable（折叠头之下）；一次 partition 完成
  *
- * 展开后不沿用「visible 在前 + foldable 在后」的分组：会让点击折叠区某条跨组上跳、
- * 上一条激活的会从 visible 掉到 foldable，视觉上像"互换位置"——按 lastSendTime 自然顺序铺最稳
+ * 当前激活会话也"钉"在 visible：避免点开未读置顶 → 立刻被读 → 列表一闪重排回折叠的体验
  */
-const renderedPinnedConversations = computed(() => {
-  if (pinnedExpanded.value) {
-    return pinnedConversations.value
+const pinnedGroups = computed(() => {
+  const visible: Conversation[] = []
+  const foldable: Conversation[] = []
+  for (const conversation of pinnedConversations.value) {
+    if (isActiveConversation(conversation) || hasUnreadBadge(conversation)) {
+      visible.push(conversation)
+    } else {
+      foldable.push(conversation)
+    }
   }
-  return pinnedConversations.value.filter((c) => isActiveConversation(c) || hasUnreadBadge(c))
+  return { visible, foldable }
 })
+
+/** 折叠时只渲 visible（未读 / 激活穿透）；展开时渲全部 —— 展开后不分组，避免点击折叠区跨组上跳 */
+const renderedPinnedConversations = computed(() =>
+  pinnedExpanded.value ? pinnedConversations.value : pinnedGroups.value.visible
+)
 
 /** 与会话项右上角红点的可见条件保持一致：免打扰不亮，无未读不亮 */
 function hasUnreadBadge(conversation: Conversation): boolean {
@@ -186,7 +192,7 @@ function hasUnreadBadge(conversation: Conversation): boolean {
 /** 是否为当前激活会话 */
 function isActiveConversation(conversation: Conversation): boolean {
   const active = conversationStore.activeConversation
-  return !!active && active.type === conversation.type && active.targetId === conversation.targetId
+  return !!active && getConversationKey(active) === getConversationKey(conversation)
 }
 
 /**
