@@ -79,6 +79,7 @@ import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useImUiStore } from '../../../../store/uiStore'
+import { useDraftStore } from '../../../../store/draftStore'
 import { ImConversationType, ImMessageType, isNormalMessage } from '../../../../../utils/constants'
 import { getSenderDisplayName } from '@/views/im/utils/user'
 import { buildRecallTip } from '@/views/im/utils/conversation'
@@ -98,7 +99,11 @@ const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 const uiStore = useImUiStore()
+const draftStore = useDraftStore()
 const message = useMessage()
+
+/** 当前会话的草稿快照：存在时列表显示 [草稿] 前缀 + plain 文本，盖掉 sender 前缀和 @我 红字 */
+const draft = computed(() => draftStore.getDraft(props.conversation))
 
 const isActive = computed(
   () =>
@@ -122,8 +127,11 @@ const lastSenderDisplayName = computed(() => {
   )
 })
 
-/** 群聊 + 有最后发送者 + 最后一条是普通消息时，显示发送者前缀（TIP_TIME / TIP_TEXT / RECALL 不带前缀） */
+/** 群聊 + 有最后发送者 + 最后一条是普通消息时，显示发送者前缀（TIP_TIME / TIP_TEXT / RECALL / 草稿态不带前缀） */
 const showSendName = computed(() => {
+  if (draft.value) {
+    return false
+  }
   if (!isGroup.value) {
     return false
   }
@@ -134,8 +142,11 @@ const showSendName = computed(() => {
   return lastType != null && isNormalMessage(lastType)
 })
 
-/** 列表展示文案：撤回类型实时算（避免改备注后老 lastContent 过期），其余直接用 lastContent */
+/** 列表展示文案：草稿优先（对齐微信 PC：有草稿时盖掉最后一条预览）→ 撤回实时算 → lastContent 兜底 */
 const lastContentDisplay = computed(() => {
+  if (draft.value) {
+    return draft.value.plain
+  }
   if (
     props.conversation.lastMessageType === ImMessageType.RECALL &&
     props.conversation.lastSenderId != null
@@ -151,8 +162,11 @@ const lastContentDisplay = computed(() => {
   return props.conversation.lastContent
 })
 
-/** 会话列表 "@ 我" / "@ 全体成员" 红字提示 */
+/** 会话列表 "[草稿]" / "@ 我" / "@ 全体成员" 红字提示；草稿优先（对齐微信 PC） */
 const atText = computed(() => {
+  if (draft.value) {
+    return '[草稿]'
+  }
   if (props.conversation.atMe) {
     return '[有人@我]'
   }

@@ -80,12 +80,8 @@
         </transition>
       </div>
 
-      <!-- 底部：输入框
-        :key 绑会话标识，切换 A → B 时强制重建组件 → editor / mention range / pendingAtUserIds
-        全部清零，避免上一会话的草稿和 @ 被发到新会话 -->
-      <!-- TODO @AI：切换时，之前的要被保留！ -->
-      <!-- TODO @AI：切换时，用户如果有输入信息，需要把 lastContent 变成输入信息； -->
-      <MessageInput :key="messageInputKey" />
+      <!-- 底部：输入框 -->
+      <MessageInput />
 
       <!-- 右侧信息抽屉：群聊 / 私聊各自一份 -->
       <ConversationGroupSide
@@ -128,7 +124,6 @@ import { useFriendStore } from '../../../../store/friendStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useGroupStore } from '../../../../store/groupStore'
 import { ImConversationType } from '@/views/im/utils/constants'
-import { getConversationKey } from '@/views/im/utils/conversation'
 import { CommonStatusEnum } from '@/utils/constants'
 import MessageItem from './MessageItem.vue'
 import MessageInput from '../input/MessageInput.vue'
@@ -163,15 +158,6 @@ const headerMemberCount = computed(() => {
   }
   const group = groupStore.getGroup(conversation.targetId)
   return group?.memberCount ?? group?.members?.length ?? 0
-})
-
-/**
- * MessageInput 的 :key —— 切群时强制 unmount + remount，让 editor / mention range /
- * 上一会话草稿全部归零；用 fallback 'none' 避开 activeConversation 短暂为 null 的窗口
- */
-const messageInputKey = computed(() => {
-  const conv = conversationStore.activeConversation
-  return conv ? getConversationKey(conv) : 'none'
 })
 
 const BOTTOM_THRESHOLD = 80 // "是否停留在底部"的阈值：距离底部 < 80px 视为底部

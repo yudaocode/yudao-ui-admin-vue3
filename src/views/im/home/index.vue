@@ -31,6 +31,7 @@ import { useConversationStore } from './store/conversationStore'
 import { useImWebSocketStore } from './store/websocketStore'
 import { useFriendStore } from './store/friendStore'
 import { useGroupStore } from './store/groupStore'
+import { useDraftStore } from './store/draftStore'
 import { useMessagePuller } from './composables/useMessagePuller'
 import { useMessageSender } from './composables/useMessageSender'
 import { ImConversationType } from '../utils/constants'
@@ -44,6 +45,7 @@ const conversationStore = useConversationStore()
 const webSocketStore = useImWebSocketStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
+const draftStore = useDraftStore()
 const { pullOnce } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
 
@@ -52,15 +54,17 @@ onMounted(async () => {
   // 1.1 整段 loading=true 阻断 saveConversations 抖动写盘 + WebSocket 普通消息进缓冲，避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
   conversationStore.loading = true
   try {
-    // 1.2 三个 store 并发吃 IDB（loadConversations 返回 void；load{Friends,Groups} 返回是否命中缓存）
+    // 1.2 四个 store 并发从 IDB 读取本地缓存（loadConversations / loadDrafts 返回 void；load{Friends,Groups} 返回是否命中缓存）
     const [, hasCachedFriends, hasCachedGroups] = await Promise.all([
       conversationStore.loadConversations(),
       friendStore.loadFriends(),
-      groupStore.loadGroups()
+      groupStore.loadGroups(),
+      draftStore.loadDrafts()
     ])
 
     // 2.1 有缓存：异步背景刷新，失败仅记日志（IDB 数据已经够撑首屏，pullOnce 也能正常入库）
-    // 2.2 无缓存（首登 / 切账号回切）：必须 await + 失败抛出中断本轮 onMounted，否则 pullOnce 会用 senderId 数字给会话起名落到 IDB 后续基本无法自愈；无缓存分支两个 fetch 并发 Promise.all 省一个 RTT
+    // 2.2 无缓存（首登 / 切账号回切）：必须 await + 失败抛出中断本轮 onMounted，
+    //     否则 pullOnce 会用 senderId 数字给会话起名落到 IDB 后续基本无法自愈；无缓存分支两个 fetch 并发 Promise.all 省一个 RTT
     const requiredFetches: Promise<unknown>[] = []
     if (hasCachedFriends) {
       void friendStore.fetchFriends().catch((e) => console.warn('[IM] 后台刷好友失败', e))
@@ -76,7 +80,7 @@ onMounted(async () => {
       await Promise.all(requiredFetches)
     }
 
-    // 3. 实时通信：建 WebSocket 长连接 + 拉离线消息（pullOnce finally 把 loading 归位）；上一步无缓存 fetch 失败会被外层 catch 提前 return 不到这里，避免 WebSocket 已连但 friend/group store 是空的、handle*Message 用 senderId 数字落库
+    // 3. 实时通信：建 WebSocket 长连接 + 拉离线消息（pullOnce finally 把 loading 归位）
     webSocketStore.connect()
     await pullOnce()
 
@@ -93,9 +97,17 @@ onMounted(async () => {
   }
 })
 
-/** 离开 IM 主壳：主动断 WebSocket（disconnect 内部已清掉 onclose 防自动重连） */
+/** 标签关闭前 flush 草稿队列；debounce 默认 trail-edge 触发，最后一次输入可能还压在队列里 */
+function onBeforeUnload() {
+  draftStore.flushPersist()
+}
+window.addEventListener('beforeunload', onBeforeUnload)
+
+/** 离开 IM 主壳：主动断 WebSocket（disconnect 内部已清掉 onclose 防自动重连）+ flush 草稿 + 解绑 unload */
 onUnmounted(() => {
   webSocketStore.disconnect()
+  draftStore.flushPersist()
+  window.removeEventListener('beforeunload', onBeforeUnload)
 })
 
 /**

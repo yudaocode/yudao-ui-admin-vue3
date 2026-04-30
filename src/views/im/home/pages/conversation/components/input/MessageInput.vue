@@ -129,15 +129,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import Icon from '@/components/Icon/src/Icon.vue'
 import { updateFile } from '@/api/infra/file'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
+import { useDraftStore } from '@/views/im/home/store/draftStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
+import { getConversationKey } from '@/views/im/utils/conversation'
 import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
 import {
   serializeMessage,
@@ -156,6 +158,7 @@ defineOptions({ name: 'ImMessageInput' })
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
+const draftStore = useDraftStore()
 const { send, sendRaw } = useMessageSender()
 
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
@@ -164,15 +167,10 @@ const fileInputRef = useTemplateRef<HTMLInputElement>('fileInputRef')
 const mentionRef = useTemplateRef<InstanceType<typeof MentionPicker>>('mentionRef')
 
 // ==================== 文本 / 发送 ====================
-/** editor 是否有可发送内容；contenteditable 没 v-model，靠 input 事件主动同步 */
-const canSend = ref(false)
+const canSend = ref(false) // editor 是否有可发送内容；contenteditable 没 v-model，靠 input 事件主动同步
 
-/** 维护 canSend + data-empty（撑起 placeholder） */
-function syncEditorState() {
-  const editor = editorRef.value
-  if (!editor) {
-    return
-  }
+/** 维护 canSend + data-empty（撑起 placeholder）；不写草稿，restoreDraftToEditor 复用避免回流 */
+function applyEditorUiState(editor: HTMLDivElement) {
   const raw = editor.textContent || ''
   // canSend 按 trim 后判断（空格 / 换行不算可发送内容）
   canSend.value = !!raw.trim() && !!conversationStore.activeConversation
@@ -184,6 +182,56 @@ function syncEditorState() {
   } else {
     editor.dataset.empty = ''
   }
+}
+
+/** 用户编辑入口的统一收尾：UI 状态同步 + 草稿写回 store（列表立即出 [草稿] 前缀） */
+function syncEditorState() {
+  const editor = editorRef.value
+  if (!editor) {
+    return
+  }
+  applyEditorUiState(editor)
+  syncDraftToStore(editor)
+}
+
+/** 把 editor 当前内容写到 draftStore；plain 由 collectFromEditor 拿，与发送时同源避免列表与实发不一致 */
+function syncDraftToStore(editor: HTMLDivElement) {
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return
+  }
+  // collectFromEditor 已 trim，plain 为空时 store 内部按 clearDraft 处理
+  const { text } = collectFromEditor(editor)
+  draftStore.setDraft(conversation, { html: editor.innerHTML, plain: text })
+}
+
+/** 切会话时把 store 里的草稿还原到 editor；只更 UI 不回写草稿，避免 store→editor→store 回流 */
+function restoreDraftToEditor() {
+  const editor = editorRef.value
+  if (!editor) {
+    return
+  }
+  const conversation = conversationStore.activeConversation
+  const draft = conversation ? draftStore.getDraft(conversation) : undefined
+  editor.innerHTML = draft?.html || ''
+  applyEditorUiState(editor)
+  // 把光标移到末尾，让用户接着输入；空内容直接 focus 即可
+  if (draft?.html) {
+    placeCaretAtEnd(editor)
+  }
+}
+
+/** 把光标放到 contenteditable 元素的末尾——切回有草稿的会话时光标自然落在尾部，对齐微信 */
+function placeCaretAtEnd(el: HTMLElement) {
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  range.collapse(false)
+  const sel = window.getSelection()
+  if (!sel) {
+    return
+  }
+  sel.removeAllRanges()
+  sel.addRange(range)
 }
 
 /**
@@ -261,8 +309,12 @@ async function handleSend(options?: { receipt?: boolean }) {
   if (!text) {
     return
   }
-  // 1. 清空 + 同步状态
+  // 1. 清空 editor + 当前会话草稿；syncEditorState 后 plain 已为空，store 内部会自动清，
+  //    但显式 clearDraft 能立即同步、不依赖 debounce 时序，列表上的 [草稿] 立即消失
   editor.innerHTML = ''
+  if (conversationStore.activeConversation) {
+    draftStore.clearDraft(conversationStore.activeConversation)
+  }
   syncEditorState()
   // 2. 发送
   await send(text, {
@@ -341,12 +393,34 @@ function onDocMousedown(e: MouseEvent) {
 onMounted(() => {
   document.addEventListener('selectionchange', onSelectionChange)
   document.addEventListener('mousedown', onDocMousedown)
+  restoreDraftToEditor()
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('selectionchange', onSelectionChange)
   document.removeEventListener('mousedown', onDocMousedown)
 })
+
+/**
+ * 切会话时还原对方的草稿到 editor
+ *
+ * 同步关 @ / 表情 / 语音浮层并清 savedRange：
+ * - mentionRange / savedRange 旧引用还指向上一会话的 DOM 节点，不清下次插 token 会落错位置
+ * - 语音录制弹窗保留时，录完触发的 onVoiceSend 会读当前 activeConversation，把语音发到新会话
+ */
+watch(
+  () =>
+    conversationStore.activeConversation
+      ? getConversationKey(conversationStore.activeConversation)
+      : null,
+  () => {
+    closeMention()
+    emojiVisible.value = false
+    voiceVisible.value = false
+    savedRange = null
+    restoreDraftToEditor()
+  }
+)
 
 /**
  * 把字符串插入光标处（emoji 面板等场景调用）

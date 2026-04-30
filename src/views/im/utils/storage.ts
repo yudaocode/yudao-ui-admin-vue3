@@ -45,6 +45,13 @@ export const StorageKeys = {
   conversationMessages: (userId: number | string, type: number, targetId: number) =>
     `conversation:messages:${userId}:${type}:${targetId}`,
 
+  /**
+   * 输入框草稿整桶：Record<`${type}:${targetId}`, DraftSnapshot>
+   *
+   * 草稿端本地、量级小（每会话至多几百字节），整桶整写够用；持久化按 userId 分桶与其它业务一致
+   */
+  drafts: (userId: number | string) => `drafts:${userId}`,
+
   /** 好友列表整桶（含 DISABLE 软删记录）；好友量级有限，不维护增量 */
   friends: (userId: number | string) => `friends:${userId}`,
   /** 群列表整桶（不含 members，剥离到独立 key），保证整桶写不带成员爆量 */

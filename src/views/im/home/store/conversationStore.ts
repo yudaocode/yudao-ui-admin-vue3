@@ -14,6 +14,7 @@ import { generateClientMessageId, parseRecallMessageId } from '../../utils/messa
 import { resolveConversationLastContent } from '../../utils/conversation'
 import { tryGetSenderDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
+import { useDraftStore } from './draftStore'
 import type { Conversation, ConversationStoreMeta, Message } from '../types'
 
 /**
@@ -333,6 +334,8 @@ export const useConversationStore = defineStore('imConversationStore', {
       conversation.deleted = true
       // 软删后会话的消息文件不再有用，物理删除该 key
       this.removeConversationMessages(type, targetId)
+      // 同步清掉该会话的草稿，避免重建同 key 会话时残留 [草稿]
+      useDraftStore().clearDraft({ type, targetId })
       this.saveConversations()
     },
 
