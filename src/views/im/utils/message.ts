@@ -151,3 +151,27 @@ export const playAudioTip = () => {
     console.debug('[IM] playAudioTip 失败', e)
   }
 }
+
+// ==================== 管理后台展示工具 ====================
+
+/** 消息内容（JSON）取首层 content 字段做列表预览，解析失败时回退原文 */
+export const getContentPreview = (content?: string): string => {
+  if (!content) return ''
+  try {
+    const parsed = JSON.parse(content)
+    if (typeof parsed === 'object' && parsed.content) return String(parsed.content)
+    return content
+  } catch {
+    return content
+  }
+}
+
+/** 详情弹窗里把 content JSON 美化成 2 缩进 */
+export const formatJson = (content?: string): string => {
+  if (!content) return ''
+  try {
+    return JSON.stringify(JSON.parse(content), null, 2)
+  } catch {
+    return content
+  }
+}

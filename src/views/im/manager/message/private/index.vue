@@ -159,7 +159,7 @@
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as ManagerPrivateMessageApi from '@/api/im/manager/message/private'
-import { getContentPreview, formatJson } from '../utils'
+import { getContentPreview, formatJson } from '@/views/im/utils/message'
 
 defineOptions({ name: 'ImPrivateMessage' })
 

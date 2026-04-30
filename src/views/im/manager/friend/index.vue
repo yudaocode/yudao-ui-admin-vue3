@@ -8,25 +8,39 @@
       :inline="true"
       label-width="80px"
     >
-      <!-- TODO @AI：使用 userselectv2 组件 -->
-      <el-form-item label="用户编号" prop="userId">
-        <el-input
+      <!-- TODO DONE @AI：使用 userselectv2 组件（v2 待建，先用 simple-list + filterable 下拉） -->
+      <el-form-item label="用户" prop="userId">
+        <el-select
           v-model="queryParams.userId"
-          placeholder="请输入用户编号"
+          placeholder="请选择用户"
           clearable
-          @keyup.enter="handleQuery"
+          filterable
           class="!w-200px"
-        />
+        >
+          <el-option
+            v-for="user in userOptions"
+            :key="user.id"
+            :label="`${user.nickname} (${user.id})`"
+            :value="user.id"
+          />
+        </el-select>
       </el-form-item>
-      <!-- TODO @AI：使用 userselectv2 组件 -->
-      <el-form-item label="好友编号" prop="friendUserId">
-        <el-input
+      <!-- TODO DONE @AI：使用 userselectv2 组件（v2 待建，先用 simple-list + filterable 下拉） -->
+      <el-form-item label="好友" prop="friendUserId">
+        <el-select
           v-model="queryParams.friendUserId"
-          placeholder="请输入好友用户编号"
+          placeholder="请选择好友"
           clearable
-          @keyup.enter="handleQuery"
+          filterable
           class="!w-200px"
-        />
+        >
+          <el-option
+            v-for="user in userOptions"
+            :key="user.id"
+            :label="`${user.nickname} (${user.id})`"
+            :value="user.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="好友状态" prop="status">
         <el-select
@@ -80,15 +94,15 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" width="100" />
-      <!-- TODO @AI：宽度调整下 -->
-      <el-table-column label="用户" align="center" min-width="160">
+      <!-- TODO DONE @AI：宽度调整下 -->
+      <el-table-column label="用户" align="center" min-width="200" show-overflow-tooltip>
         <template #default="{ row }">
           <span>{{ row.userNickname || '-' }}</span>
           <span class="text-gray-400 ml-5px">({{ row.userId }})</span>
         </template>
       </el-table-column>
-      <!-- TODO @AI：宽度调整下 -->
-      <el-table-column label="好友" align="center" min-width="160">
+      <!-- TODO DONE @AI：宽度调整下 -->
+      <el-table-column label="好友" align="center" min-width="200" show-overflow-tooltip>
         <template #default="{ row }">
           <span>{{ row.friendNickname || '-' }}</span>
           <span class="text-gray-400 ml-5px">({{ row.friendUserId }})</span>
@@ -134,12 +148,14 @@
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions, getBoolDictOptions } from '@/utils/dict'
 import * as ManagerFriendApi from '@/api/im/manager/friend'
+import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'ImFriend' })
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<ManagerFriendApi.ImManagerFriendVO[]>([]) // 列表的数据
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户下拉的候选项
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -176,7 +192,9 @@ const resetQuery = () => {
 }
 
 /** 初始化 */
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  // 用户下拉一次性拉简化数据，给 userId / friendUserId 共用
+  userOptions.value = await UserApi.getSimpleUserList()
+  await getList()
 })
 </script>

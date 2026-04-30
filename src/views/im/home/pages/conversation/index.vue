@@ -33,11 +33,50 @@
 
       <!-- 会话列表主体 -->
       <div class="flex-1 overflow-y-auto">
+        <!-- 置顶会话：数量 < 阈值或搜索中直接铺开；否则进入分组模式（独立浅底 + 可选折叠头） -->
+        <template v-if="!showPinnedSection">
+          <ConversationItem
+            v-for="conversation in pinnedConversations"
+            :key="`${conversation.type}-${conversation.targetId}`"
+            :conversation="conversation"
+          />
+        </template>
+        <div v-else class="bg-[var(--el-fill-color-light)]">
+          <ConversationItem
+            v-for="conversation in renderedPinnedConversations"
+            :key="`${conversation.type}-${conversation.targetId}`"
+            :conversation="conversation"
+          />
+
+          <!-- 折叠头：放在置顶区底部对齐 WeChat mac；展开 / 折叠态共用，仅在还有"可折叠"内容、或当前已展开时出现 -->
+          <div
+            v-if="foldablePinnedConversations.length > 0 || pinnedExpanded"
+            class="flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors text-13px text-[var(--el-text-color-regular)] border-y border-[var(--el-border-color-lighter)] hover:bg-[var(--el-fill-color)]"
+            @click="togglePinnedExpanded"
+          >
+            <span class="flex items-center gap-1.5">
+              <Icon icon="ant-design:menu-outlined" :size="14" />
+              {{
+                pinnedExpanded
+                  ? '折叠置顶聊天'
+                  : `${foldablePinnedConversations.length} 个置顶聊天`
+              }}
+            </span>
+            <Icon
+              :icon="pinnedExpanded ? 'ant-design:up-outlined' : 'ant-design:down-outlined'"
+              :size="11"
+              class="text-[var(--el-text-color-placeholder)]"
+            />
+          </div>
+        </div>
+
+        <!-- 普通会话 -->
         <ConversationItem
-          v-for="conversation in filteredConversations"
+          v-for="conversation in normalConversations"
           :key="`${conversation.type}-${conversation.targetId}`"
           :conversation="conversation"
         />
+
         <div
           v-if="filteredConversations.length === 0"
           class="flex items-center justify-center py-10 text-sm text-[var(--el-text-color-secondary)]"
@@ -69,7 +108,7 @@ import { useGroupStore } from '../../store/groupStore'
 import { StorageKeys } from '../../../utils/storage'
 import { ImConversationType } from '../../../utils/constants'
 import { CommonStatusEnum } from '@/utils/constants'
-import type { Friend, FriendLite } from '../../types'
+import type { Conversation, Friend, FriendLite } from '../../types'
 import ResizableAside from '../../components/ResizableAside.vue'
 import ConversationItem from './components/conversation/ConversationItem.vue'
 import MessagePanel from './components/message/MessagePanel.vue'
@@ -99,6 +138,67 @@ const filteredConversations = computed(() => {
   )
 })
 
+// ==================== 置顶相关 ====================
+
+/** 置顶超过该数量时显示折叠入口；以下数量直接铺开（避免单条置顶就出折叠头视觉太重） */
+const PINNED_FOLD_THRESHOLD = 3
+
+/** 置顶折叠展开态：localStorage 持久化，刷新后保留用户上次的选择，对齐微信 */
+const pinnedExpanded = ref(
+  localStorage.getItem(StorageKeys.conversationPinnedExpanded) === 'true'
+)
+
+/** toggle + 写盘 */
+function togglePinnedExpanded() {
+  pinnedExpanded.value = !pinnedExpanded.value
+  localStorage.setItem(StorageKeys.conversationPinnedExpanded, String(pinnedExpanded.value))
+}
+
+/** 置顶会话：单独切片，给折叠头计数 + 折叠区渲染用 */
+const pinnedConversations = computed(() => filteredConversations.value.filter((c) => c.top))
+
+/** 非置顶会话：折叠态下始终铺开在折叠头之下 */
+const normalConversations = computed(() => filteredConversations.value.filter((c) => !c.top))
+
+/** 置顶 + 无未读 / 免打扰且非激活：折叠时藏在折叠头之下，决定折叠头计数 + 是否要显示折叠头 */
+const foldablePinnedConversations = computed(() =>
+  pinnedConversations.value.filter((c) => !isActiveConversation(c) && !hasUnreadBadge(c))
+)
+
+/**
+ * 折叠时只渲未读 + 当前激活（穿透折叠）；展开时渲全部置顶
+ *
+ * 展开后不沿用「visible 在前 + foldable 在后」的分组：会让点击折叠区某条跨组上跳、
+ * 上一条激活的会从 visible 掉到 foldable，视觉上像"互换位置"——按 lastSendTime 自然顺序铺最稳
+ */
+const renderedPinnedConversations = computed(() => {
+  if (pinnedExpanded.value) {
+    return pinnedConversations.value
+  }
+  return pinnedConversations.value.filter((c) => isActiveConversation(c) || hasUnreadBadge(c))
+})
+
+/** 与会话项右上角红点的可见条件保持一致：免打扰不亮，无未读不亮 */
+function hasUnreadBadge(conversation: Conversation): boolean {
+  return !conversation.muted && (conversation.unreadCount || 0) > 0
+}
+
+/** 是否为当前激活会话 */
+function isActiveConversation(conversation: Conversation): boolean {
+  const active = conversationStore.activeConversation
+  return !!active && active.type === conversation.type && active.targetId === conversation.targetId
+}
+
+/**
+ * 是否进入"分组模式"（独立浅底 + 可能有折叠头）：搜索时不分组（用户在找人，别再让折叠挡住）；
+ * 置顶数 < 阈值也不分组，避免单条置顶就出折叠头视觉太重
+ */
+const showPinnedSection = computed(
+  () => !keyword.value.trim() && pinnedConversations.value.length >= PINNED_FOLD_THRESHOLD
+)
+
+// ==================== 建群相关 ====================
+
 /** GroupCreateDialog 需要全量好友列表来勾选成员，结构与通讯录里好友/群分组保持一致 */
 const friends = computed<FriendLite[]>(() =>
   friendStore.getActiveFriends.map((friend: Friend) => ({
@@ -116,7 +216,6 @@ function handleGroupCreated(groupId: number) {
   if (!group) {
     return
   }
-  // 打开会话
   conversationStore.openConversation(
     groupId,
     ImConversationType.GROUP,
