@@ -748,11 +748,10 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    // 统一 /im 分组：下分 home（聊天壳）+ manager（Layout 管理壳）
     path: '/im',
     name: 'Im',
     redirect: '/im/home/conversation',
-    meta: { hidden: false, title: 'IM 即时通讯' },
+    meta: { hidden: true, title: 'IM 即时通讯' },
     children: [
       {
         path: 'home',
@@ -772,132 +771,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
             component: () => import('@/views/im/home/pages/contact/index.vue'),
             name: 'ImHomeContact',
             meta: { hidden: true, title: '通讯录' }
-          }
-        ]
-      },
-      {
-        path: 'manager/message/private',
-        component: Layout,
-        name: 'ImManagerPrivateMessage',
-        redirect: '/im/manager/message/private/index',
-        meta: { hidden: false },
-        children: [
-          {
-            path: 'index',
-            component: () => import('@/views/im/manager/message/private/index.vue'),
-            name: 'ImManagerPrivateMessageIndex',
-            meta: {
-              canTo: true,
-              hidden: false,
-              noTagsView: false,
-              icon: 'ep:user',
-              title: '私聊消息'
-            }
-          }
-        ]
-      },
-      {
-        path: 'manager/message/group',
-        component: Layout,
-        name: 'ImManagerGroupMessage',
-        redirect: '/im/manager/message/group/index',
-        meta: { hidden: false },
-        children: [
-          {
-            path: 'index',
-            component: () => import('@/views/im/manager/message/group/index.vue'),
-            name: 'ImManagerGroupMessageIndex',
-            meta: {
-              canTo: true,
-              hidden: false,
-              noTagsView: false,
-              icon: 'ep:chat-line-round',
-              title: '群聊消息'
-            }
-          }
-        ]
-      },
-      {
-        path: 'manager/friend',
-        component: Layout,
-        name: 'ImManagerFriend',
-        redirect: '/im/manager/friend/index',
-        meta: { hidden: false },
-        children: [
-          {
-            path: 'index',
-            component: () => import('@/views/im/manager/friend/index.vue'),
-            name: 'ImManagerFriendIndex',
-            meta: {
-              canTo: true,
-              hidden: false,
-              noTagsView: false,
-              icon: 'ep:user',
-              title: '好友管理'
-            }
-          }
-        ]
-      },
-      {
-        path: 'manager/group',
-        component: Layout,
-        name: 'ImManagerGroup',
-        redirect: '/im/manager/group/index',
-        meta: { hidden: false },
-        children: [
-          {
-            path: 'index',
-            component: () => import('@/views/im/manager/group/index.vue'),
-            name: 'ImManagerGroupIndex',
-            meta: {
-              canTo: true,
-              hidden: false,
-              noTagsView: false,
-              icon: 'ep:user-filled',
-              title: '群管理'
-            }
-          }
-        ]
-      },
-      {
-        path: 'manager/sensitive-word',
-        component: Layout,
-        name: 'ImManagerSensitiveWord',
-        redirect: '/im/manager/sensitive-word/index',
-        meta: { hidden: false },
-        children: [
-          {
-            path: 'index',
-            component: () => import('@/views/im/manager/sensitive-word/index.vue'),
-            name: 'ImManagerSensitiveWordIndex',
-            meta: {
-              canTo: true,
-              hidden: false,
-              noTagsView: false,
-              icon: 'ep:warning',
-              title: '敏感词管理'
-            }
-          }
-        ]
-      },
-      {
-        path: 'manager/statistics',
-        component: Layout,
-        name: 'ImManagerStatistics',
-        redirect: '/im/manager/statistics/index',
-        meta: { hidden: false },
-        children: [
-          {
-            path: 'index',
-            component: () => import('@/views/im/manager/statistics/index.vue'),
-            name: 'ImManagerStatisticsIndex',
-            meta: {
-              canTo: true,
-              hidden: false,
-              noTagsView: false,
-              icon: 'ep:trend-charts',
-              title: '数据看板'
-            }
           }
         ]
       }

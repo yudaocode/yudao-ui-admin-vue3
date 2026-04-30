@@ -250,5 +250,12 @@ export enum DICT_TYPE {
   IOT_OTA_TASK_STATUS = 'iot_ota_task_status', // IoT OTA 任务状态
   IOT_OTA_TASK_RECORD_STATUS = 'iot_ota_task_record_status', // IoT OTA 记录状态
   IOT_MODBUS_MODE = 'iot_modbus_mode', // IoT Modbus 工作模式
-  IOT_MODBUS_FRAME_FORMAT = 'iot_modbus_frame_format' // IoT Modbus 帧格式
+  IOT_MODBUS_FRAME_FORMAT = 'iot_modbus_frame_format', // IoT Modbus 帧格式
+
+  // ========== IM - 即时通讯模块  ==========
+  IM_MESSAGE_TYPE = 'im_message_type', // IM 消息类型
+  IM_MESSAGE_STATUS = 'im_message_status', // IM 消息状态
+  IM_GROUP_MESSAGE_RECEIPT_STATUS = 'im_group_message_receipt_status', // IM 群消息回执状态
+  IM_FRIEND_STATUS = 'im_friend_status', // IM 好友状态
+  IM_GROUP_STATUS = 'im_group_status' // IM 群状态
 }
