@@ -65,7 +65,7 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useUserStore } from '@/store/modules/user'
 import { CommonStatusEnum } from '@/utils/constants'
 import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
-import GroupMember, { type GroupMemberLite } from '../../../../components/GroupMember.vue'
+import GroupMember, { type GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
 defineOptions({ name: 'ImMentionPicker' })
 

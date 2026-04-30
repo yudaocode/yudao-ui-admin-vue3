@@ -35,7 +35,7 @@ import { useMessagePuller } from './composables/useMessagePuller'
 import { useMessageSender } from './composables/useMessageSender'
 import { ImConversationType } from '../utils/constants'
 import ToolBar from './components/ToolBar.vue'
-import UserInfoCard from './components/UserInfoCard.vue'
+import UserInfoCard from './components/user/UserInfoCard.vue'
 import ContextMenu from './components/ContextMenu.vue'
 
 defineOptions({ name: 'ImIndex' })

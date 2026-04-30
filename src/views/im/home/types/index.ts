@@ -156,11 +156,41 @@ export interface Friend {
 // ==================== 用户名片 ====================
 
 // 用户精简信息（对齐后端 UserSimpleRespVO，名片 / 头像 hover 等场景共用）
-export interface UserInfo {
+export interface User {
   id: number
   nickname?: string
   avatar?: string
   sex?: number
   deptId?: number
   deptName?: string
+}
+
+// ==================== 列表行展示用 Lite 类型 ====================
+
+/**
+ * 好友列表行：从 Friend 派生的展示快照
+ * - id 用 friendUserId（与列表 click / 选中比对一致），不是 Friend.id（关系记录主键）
+ * - deleted 派生自 Friend.status === DISABLE（软删保留），调用方按场景过滤
+ */
+export interface FriendLite {
+  id: number
+  nickname: string
+  avatar?: string
+  displayName?: string
+  deleted?: boolean
+}
+
+/**
+ * 群列表行：从 Group 派生的展示快照
+ * - showGroupName / showImage：调用方决定带不带备注（如个人备注群名）；展示按 show* > 原值兜底
+ * - showImageThumb：高频列表用缩略图，避免拉原图阻塞滚动
+ */
+export interface GroupLite {
+  id: number
+  name?: string
+  showGroupName?: string
+  showImage?: string
+  showImageThumb?: string
+  memberCount?: number
+  ownerId?: number
 }

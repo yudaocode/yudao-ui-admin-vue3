@@ -60,7 +60,7 @@ import { CommonStatusEnum } from '@/utils/constants'
 import { ImConversationType, ImGroupReceiptStatus } from '../../../../../utils/constants'
 import type { Message } from '../../../../types'
 import { useConversationStore } from '../../../../store/conversationStore'
-import GroupMember, { type GroupMemberLite } from '../../../../components/GroupMember.vue'
+import GroupMember, { type GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 import PagedScroller from '../../../../components/PagedScroller.vue'
 
 defineOptions({ name: 'ImMessageReadStatus' })

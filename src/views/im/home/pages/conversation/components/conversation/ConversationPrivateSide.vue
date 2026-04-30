@@ -111,7 +111,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
-import UserAvatar from '../../../../components/UserAvatar.vue'
+import UserAvatar from '../../../../components/user/UserAvatar.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import { useConversationStore } from '@/views/im/home/store/conversationStore'

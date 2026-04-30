@@ -318,8 +318,8 @@ import {
   type AudioMessage
 } from '@/views/im/utils/message'
 import type { Message } from '@/views/im/home/types'
-import UserAvatar from '../../../../components/UserAvatar.vue'
-import GroupMember, { type GroupMemberLite } from '../../../../components/GroupMember.vue'
+import UserAvatar from '../../../../components/user/UserAvatar.vue'
+import GroupMember, { type GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
 defineOptions({ name: 'ImMessageHistory' })
 

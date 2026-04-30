@@ -55,7 +55,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../store/conversationStore'
-import UserAvatar from './UserAvatar.vue'
+import UserAvatar from './user/UserAvatar.vue'
 
 defineOptions({ name: 'ImToolBar' })
 
@@ -68,15 +68,14 @@ const conversationStore = useConversationStore()
 const totalUnread = computed(() => conversationStore.getTotalUnread)
 
 /**
- * 三个主 Tab 的配置，name 对应路由 ImHomeConversation/Friend/Group
+ * 两个主 Tab 的配置，name 对应路由 ImHomeConversation/Contact
  * 用 name 而非 path：path 后期容易变（前缀调整、嵌套加层），name 更稳定
  * icon 走通用 <Icon> 组件，支持 iconify 全部前缀（ep: / ant-design: / svg-icon: 等）
- * 群聊用 ant-design:team（三人组合）：ep 没有"群体"图标，三人剪影跟 ep:user（单人）一眼区分单人 / 群体
+ * 通讯录用 ant-design:contacts-outlined：与消息图标一眼区分；好友 + 群聊在通讯录内分组展示
  */
 const tabs = [
   { name: 'ImHomeConversation', label: '消息', icon: 'ep:chat-dot-round' },
-  { name: 'ImHomeFriend', label: '好友', icon: 'ep:user' },
-  { name: 'ImHomeGroup', label: '群聊', icon: 'ant-design:team' }
+  { name: 'ImHomeContact', label: '通讯录', icon: 'ant-design:contacts-outlined' }
 ]
 
 /** 当前路由是否命中 Tab：直接比对 route.name */

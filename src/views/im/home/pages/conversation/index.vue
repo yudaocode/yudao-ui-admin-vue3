@@ -51,8 +51,8 @@
     <MessagePanel />
 
     <!-- 添加朋友 / 发起群聊弹窗 -->
-    <AddFriendDialog v-model="addFriendVisible" />
-    <CreateGroupDialog
+    <FriendAddDialog v-model="addFriendVisible" />
+    <GroupCreateDialog
       v-model="createGroupVisible"
       :friends="friends"
       @created="handleGroupCreated"
@@ -69,13 +69,12 @@ import { useGroupStore } from '../../store/groupStore'
 import { StorageKeys } from '../../../utils/storage'
 import { ImConversationType } from '../../../utils/constants'
 import { CommonStatusEnum } from '@/utils/constants'
-import type { Friend } from '../../types'
-import type { FriendLite } from '../friend/components/FriendItem.vue'
+import type { Friend, FriendLite } from '../../types'
 import ResizableAside from '../../components/ResizableAside.vue'
 import ConversationItem from './components/conversation/ConversationItem.vue'
 import MessagePanel from './components/message/MessagePanel.vue'
-import AddFriendDialog from '../friend/components/AddFriendDialog.vue'
-import CreateGroupDialog from '../group/components/CreateGroupDialog.vue'
+import FriendAddDialog from '../../components/friend/FriendAddDialog.vue'
+import GroupCreateDialog from '../../components/group/GroupCreateDialog.vue'
 
 defineOptions({ name: 'ImMessagePage' })
 
@@ -100,7 +99,7 @@ const filteredConversations = computed(() => {
   )
 })
 
-/** CreateGroupDialog 需要全量好友列表来勾选成员，结构与 friend / group Tab 保持一致 */
+/** GroupCreateDialog 需要全量好友列表来勾选成员，结构与通讯录里好友/群分组保持一致 */
 const friends = computed<FriendLite[]>(() =>
   friendStore.getActiveFriends.map((friend: Friend) => ({
     id: friend.friendUserId,
@@ -112,7 +111,7 @@ const friends = computed<FriendLite[]>(() =>
 
 /** 处理建群成功 */
 function handleGroupCreated(groupId: number) {
-  // CreateGroupDialog 已经 upsertGroup 把新群写进 store，这里只 get + 打开会话
+  // GroupCreateDialog 已经 upsertGroup 把新群写进 store，这里只 get + 打开会话
   const group = groupStore.getGroup(groupId)
   if (!group) {
     return

@@ -768,36 +768,51 @@ const remainingRouter: AppRouteRecordRaw[] = [
             meta: { hidden: true, title: '消息' }
           },
           {
-            path: 'friend',
-            component: () => import('@/views/im/home/pages/friend/index.vue'),
-            name: 'ImHomeFriend',
-            meta: { hidden: true, title: '好友' }
-          },
-          {
-            path: 'group',
-            component: () => import('@/views/im/home/pages/group/index.vue'),
-            name: 'ImHomeGroup',
-            meta: { hidden: true, title: '群聊' }
+            path: 'contact',
+            component: () => import('@/views/im/home/pages/contact/index.vue'),
+            name: 'ImHomeContact',
+            meta: { hidden: true, title: '通讯录' }
           }
         ]
       },
       {
-        path: 'manager/message',
+        path: 'manager/message/private',
         component: Layout,
-        name: 'ImManagerMessage',
-        redirect: '/im/manager/message/index',
+        name: 'ImManagerPrivateMessage',
+        redirect: '/im/manager/message/private/index',
         meta: { hidden: false },
         children: [
           {
             path: 'index',
-            component: () => import('@/views/im/manager/message/index.vue'),
-            name: 'ImManagerMessageIndex',
+            component: () => import('@/views/im/manager/message/private/index.vue'),
+            name: 'ImManagerPrivateMessageIndex',
             meta: {
               canTo: true,
               hidden: false,
               noTagsView: false,
-              icon: 'ep:chat-dot-round',
-              title: '消息管理'
+              icon: 'ep:user',
+              title: '私聊消息'
+            }
+          }
+        ]
+      },
+      {
+        path: 'manager/message/group',
+        component: Layout,
+        name: 'ImManagerGroupMessage',
+        redirect: '/im/manager/message/group/index',
+        meta: { hidden: false },
+        children: [
+          {
+            path: 'index',
+            component: () => import('@/views/im/manager/message/group/index.vue'),
+            name: 'ImManagerGroupMessageIndex',
+            meta: {
+              canTo: true,
+              hidden: false,
+              noTagsView: false,
+              icon: 'ep:chat-line-round',
+              title: '群聊消息'
             }
           }
         ]
@@ -840,6 +855,48 @@ const remainingRouter: AppRouteRecordRaw[] = [
               noTagsView: false,
               icon: 'ep:user-filled',
               title: '群管理'
+            }
+          }
+        ]
+      },
+      {
+        path: 'manager/sensitive-word',
+        component: Layout,
+        name: 'ImManagerSensitiveWord',
+        redirect: '/im/manager/sensitive-word/index',
+        meta: { hidden: false },
+        children: [
+          {
+            path: 'index',
+            component: () => import('@/views/im/manager/sensitive-word/index.vue'),
+            name: 'ImManagerSensitiveWordIndex',
+            meta: {
+              canTo: true,
+              hidden: false,
+              noTagsView: false,
+              icon: 'ep:warning',
+              title: '敏感词管理'
+            }
+          }
+        ]
+      },
+      {
+        path: 'manager/statistics',
+        component: Layout,
+        name: 'ImManagerStatistics',
+        redirect: '/im/manager/statistics/index',
+        meta: { hidden: false },
+        children: [
+          {
+            path: 'index',
+            component: () => import('@/views/im/manager/statistics/index.vue'),
+            name: 'ImManagerStatisticsIndex',
+            meta: {
+              canTo: true,
+              hidden: false,
+              noTagsView: false,
+              icon: 'ep:trend-charts',
+              title: '数据看板'
             }
           }
         ]

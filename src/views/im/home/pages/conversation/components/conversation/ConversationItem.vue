@@ -83,7 +83,7 @@ import { ImConversationType, ImMessageType, isNormalMessage } from '../../../../
 import { getSenderDisplayName } from '@/views/im/utils/user'
 import { buildRecallTip } from '@/views/im/utils/conversation'
 import type { Conversation } from '../../../../types'
-import UserAvatar from '../../../../components/UserAvatar.vue'
+import UserAvatar from '../../../../components/user/UserAvatar.vue'
 
 defineOptions({ name: 'ImConversationItem' })
 

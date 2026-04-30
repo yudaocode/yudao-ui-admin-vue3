@@ -44,8 +44,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import { useImUiStore } from '../store/uiStore'
-import type { UserInfo } from '../types'
+import { useImUiStore } from '../../store/uiStore'
+import type { User } from '../../types'
 
 defineOptions({ name: 'ImUserAvatar', inheritAttrs: false })
 
@@ -59,7 +59,7 @@ const props = withDefaults(
     clickable?: boolean // 是否点击弹出 UserInfoCard；默认 true
     previewable?: boolean // 是否点头像直接放大预览；开启后忽略 clickable，不再弹名片
     previewZIndex?: number // 预览层 z-index；放在高 z-index 弹层（如 UserInfoCard）里时需手动抬高
-    user?: UserInfo // 额外的用户信息，传了点击就不用现拉接口（弹名片用）
+    user?: User // 额外的用户信息，传了点击就不用现拉接口（弹名片用）
   }>(),
   {
     size: 42,

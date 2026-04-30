@@ -274,8 +274,8 @@
       </div>
     </div>
 
-    <!-- 子对话框（跨 page 引用 pages/group/ 下的组件） -->
-    <AddGroupMemberDialog
+    <!-- 子对话框：邀请新成员 / 选成员移除 -->
+    <GroupMemberAddDialog
       v-model="inviteVisible"
       :group-id="group?.id"
       :members="members"
@@ -305,15 +305,13 @@ import { quitGroup, removeGroupMember, updateGroupMember } from '@/api/im/group/
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { ImConversationType } from '@/views/im/utils/constants'
-import GroupMemberGrid from '../../../group/components/GroupMemberGrid.vue'
-import AddGroupMemberDialog from '../../../group/components/AddGroupMemberDialog.vue'
+import GroupMemberGrid from '../../../../components/group/GroupMemberGrid.vue'
+import GroupMemberAddDialog from '../../../../components/group/GroupMemberAddDialog.vue'
 import GroupMemberSelector, {
   type GroupMemberFlag
-} from '../../../group/components/GroupMemberSelector.vue'
-import type { GroupLite } from '../../../group/components/GroupItem.vue'
-import type { Conversation } from '../../../../types'
-import type { GroupMemberLite } from '../../../../components/GroupMember.vue'
-import type { FriendLite } from '../../../friend/components/FriendItem.vue'
+} from '../../../../components/group/GroupMemberSelector.vue'
+import type { Conversation, FriendLite, GroupLite } from '../../../../types'
+import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
 defineOptions({ name: 'ImConversationGroupSide' })
 

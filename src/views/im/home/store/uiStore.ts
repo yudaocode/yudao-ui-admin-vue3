@@ -1,7 +1,7 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { reactive } from 'vue'
 
-import type { UserInfo } from '../types'
+import type { User } from '../types'
 
 /**
  * IM 全局 UI store
@@ -15,12 +15,12 @@ export const useImUiStore = defineStore('imUiStore', () => {
   // 用户名片悬浮卡：头像 / 昵称等触发点遍布会话、群成员、@ 选择器等列表，
   const userInfoCard = reactive({
     show: false,
-    user: null as UserInfo | null,
+    user: null as User | null,
     position: { x: 0, y: 0 }
   })
 
   /** 打开用户名片 */
-  function openUserInfoCard(user: UserInfo, position: { x: number; y: number }) {
+  function openUserInfoCard(user: User, position: { x: number; y: number }) {
     const viewportWidth = document.documentElement.clientWidth
     const viewportHeight = document.documentElement.clientHeight
     userInfoCard.user = user

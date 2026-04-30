@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 
-import UserAvatar from './UserAvatar.vue'
+import UserAvatar from '../user/UserAvatar.vue'
 
 defineOptions({ name: 'ImGroupMember' })
 

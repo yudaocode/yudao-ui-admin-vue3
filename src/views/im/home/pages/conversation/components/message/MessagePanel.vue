@@ -123,9 +123,8 @@ import MessageInput from '../input/MessageInput.vue'
 import MessageHistory from './MessageHistory.vue'
 import ConversationGroupSide from '../conversation/ConversationGroupSide.vue'
 import ConversationPrivateSide from '../conversation/ConversationPrivateSide.vue'
-import type { GroupLite } from '../../../group/components/GroupItem.vue'
-import type { GroupMemberLite } from '../../../../components/GroupMember.vue'
-import type { FriendLite } from '../../../friend/components/FriendItem.vue'
+import type { FriendLite, GroupLite } from '../../../../types'
+import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
 defineOptions({ name: 'ImMessagePanel' })
 

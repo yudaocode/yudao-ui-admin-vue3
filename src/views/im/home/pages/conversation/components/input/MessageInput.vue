@@ -137,7 +137,7 @@ import {
 import EmojiPicker from './EmojiPicker.vue'
 import MentionPicker from './MentionPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
-import type { GroupMemberLite } from '../../../../components/GroupMember.vue'
+import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
 defineOptions({ name: 'ImMessageInput' })
 
