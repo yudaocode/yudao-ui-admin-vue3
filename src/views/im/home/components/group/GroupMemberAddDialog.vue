@@ -1,38 +1,40 @@
 <template>
   <!--
     邀请好友入群对话框
-    - 左：好友列表（带 checkbox）
-    - 右：已勾选预览
-    - 已在群内的好友标记为 disabled
-    - TODO 接入 /im/group/invite；TODO 这个是不是已经接入了？
+    - 左：好友列表（checkbox 前置）
+    - 右：已勾选预览（每行可 x 移除）
+    - 已在群内的好友 disabled，复用 GroupCreateDialog 的视觉
   -->
   <el-dialog v-model="visible" title="邀请好友" width="620px" :close-on-click-modal="false">
     <div class="flex gap-2.5">
       <div
         class="flex flex-col flex-1 overflow-hidden rounded border border-[var(--el-border-color)]"
       >
-        <el-input v-model="searchText" placeholder="搜索好友" size="small" clearable>
-          <template #suffix>
-            <Icon icon="ant-design:search-outlined" />
+        <el-input v-model="searchText" placeholder="搜索好友" clearable>
+          <template #prefix>
+            <Icon
+              icon="ant-design:search-outlined"
+              class="text-[var(--el-text-color-placeholder)]"
+            />
           </template>
         </el-input>
         <el-scrollbar class="h-[400px]">
-          <!-- TODO @ai: friend? -->
           <FriendItem
-            v-for="f in shownFriends"
-            :key="f.id"
-            :friend="f"
+            v-for="friend in shownFriends"
+            :key="friend.id"
+            :friend="friend"
             :menu="false"
             :active="false"
-            @click="handleToggleCheck(f)"
+            @click="handleToggleCheck(friend)"
           >
-            <!-- TODO @AI：checked？ -->
-            <el-checkbox
-              :model-value="f.isCheck"
-              :disabled="f.disabled"
-              @click.stop
-              @change="(v) => (f.isCheck = !!v)"
-            />
+            <template #prefix>
+              <el-checkbox
+                :model-value="friend.checked"
+                :disabled="friend.disabled"
+                @click.stop
+                @change="(value) => handleCheckChange(friend, !!value)"
+              />
+            </template>
           </FriendItem>
         </el-scrollbar>
       </div>
@@ -44,26 +46,35 @@
       <div
         class="flex flex-col flex-1 overflow-hidden rounded border border-[var(--el-border-color)]"
       >
+        <!-- 标题高度对齐左侧 el-input default（32px），保证两侧第一项起点在同一水平 -->
         <div
-          class="h-10 pl-2.5 leading-10 text-13px text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
+          class="h-8 pl-2.5 leading-8 text-13px text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
         >
-          已勾选 {{ checkCount }} 位好友
+          已勾选 {{ checkedFriends.length }} 位好友
         </div>
         <el-scrollbar class="h-[400px]">
           <FriendItem
-            v-for="f in checkedFriends"
-            :key="f.id"
-            :friend="f"
+            v-for="friend in checkedFriends"
+            :key="friend.id"
+            :friend="friend"
             :menu="false"
             :active="false"
-          />
+          >
+            <Icon
+              icon="ant-design:close-outlined"
+              class="im-group-member-add-dialog__remove"
+              @click.stop="handleUncheck(friend)"
+            />
+          </FriendItem>
         </el-scrollbar>
       </div>
     </div>
 
     <template #footer>
-      <el-button @click="visible = false">取 消</el-button>
-      <el-button type="primary" @click="handleOk">确 定</el-button>
+      <el-button @click="visible = false">取消</el-button>
+      <el-button type="primary" :loading="submitting" :disabled="!canSubmit" @click="handleOk">
+        完成
+      </el-button>
     </template>
   </el-dialog>
 </template>
@@ -74,6 +85,7 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import { CommonStatusEnum } from '@/utils/constants'
+import { inviteGroupMember } from '@/api/im/group/member'
 import FriendItem from '../friend/FriendItem.vue'
 import type { FriendLite } from '../../types'
 import type { GroupMemberLite } from './GroupMember.vue'
@@ -81,8 +93,8 @@ import type { GroupMemberLite } from './GroupMember.vue'
 defineOptions({ name: 'ImGroupMemberAddDialog' })
 
 interface FriendCheckable extends FriendLite {
-  isCheck?: boolean
-  disabled?: boolean
+  checked?: boolean
+  disabled?: boolean // 已在群里的标记：checkbox 灰态 + 不计入新邀请，不进右侧列表
 }
 
 const props = withDefaults(
@@ -112,15 +124,16 @@ const visible = computed({
 })
 
 const searchText = ref('')
-/** 本地工作副本（带 isCheck / disabled 标记）；和 props.friends 区分以避免直接改 prop */
-const workingFriends = ref<FriendCheckable[]>([])
+const submitting = ref(false)
+const workingFriends = ref<FriendCheckable[]>([]) // 工作副本（带 checked / disabled 标记），与 prop 隔离
 
 watch(
   visible,
-  (v) => {
-    if (!v) {
+  (open) => {
+    if (!open) {
       return
     }
+    searchText.value = ''
     workingFriends.value = props.friends
       .filter((friend) => !friend.deleted)
       .map((friend) => {
@@ -129,8 +142,8 @@ watch(
         )
         return {
           ...friend,
-          disabled: inGroup,
-          isCheck: inGroup
+          checked: inGroup,
+          disabled: inGroup
         }
       })
   },
@@ -139,36 +152,68 @@ watch(
 
 /** 左侧展示的好友：按搜索关键字过滤 workingFriends */
 const shownFriends = computed(() =>
-  workingFriends.value.filter((f) => f.nickname.includes(searchText.value))
+  workingFriends.value.filter((friend) => friend.nickname.includes(searchText.value))
 )
 
 /** 本次将被邀请的好友：勾选 + 非已在群成员（disabled 不计入） */
-const checkedFriends = computed(() => workingFriends.value.filter((f) => f.isCheck && !f.disabled))
+const checkedFriends = computed(() =>
+  workingFriends.value.filter((friend) => friend.checked && !friend.disabled)
+)
 
-/** 已勾选数量：右侧标题展示 */
-const checkCount = computed(() => checkedFriends.value.length)
+/** 完成按钮可点：至少有 1 个新邀请的好友 */
+const canSubmit = computed(() => checkedFriends.value.length > 0)
 
 /** 行点击：切换勾选态，已在群（disabled）的不响应 */
-function handleToggleCheck(f: FriendCheckable) {
-  if (!f.disabled) {
-    f.isCheck = !f.isCheck
-  }
-}
-
-// TODO @AI：这里接入下？
-/**
- * 邀请入群：占位实现——抛 reload 让父侧关弹窗 / 刷新
- *
- * TODO 接入 /im/group/invite
- */
-async function handleOk() {
-  const ids = checkedFriends.value.map((f) => f.id)
-  if (ids.length === 0) {
-    message.warning('请选择至少一个好友')
+function handleToggleCheck(friend: FriendCheckable) {
+  if (friend.disabled) {
     return
   }
-  message.info('邀请入群接口待接入，当前为占位实现')
-  emit('reload', ids)
-  visible.value = false
+  friend.checked = !friend.checked
+}
+
+/** checkbox change：直接落 value（disabled 已由属性拦截，这里再守一层） */
+function handleCheckChange(friend: FriendCheckable, value: boolean) {
+  if (friend.disabled) {
+    return
+  }
+  friend.checked = value
+}
+
+/** 右侧 x 点击：取消勾选（disabled 不会进右侧列表，到这里说明非 disabled） */
+function handleUncheck(friend: FriendCheckable) {
+  friend.checked = false
+}
+
+/** 邀请入群：调 /im/group/invite，成功后 emit reload 让父侧刷新群成员 */
+async function handleOk() {
+  if (!props.groupId) {
+    return
+  }
+  const memberUserIds = checkedFriends.value.map((friend) => friend.id)
+  if (memberUserIds.length === 0) {
+    return
+  }
+  submitting.value = true
+  try {
+    await inviteGroupMember({ groupId: props.groupId, memberUserIds })
+    message.success('邀请成功')
+    emit('reload', memberUserIds)
+    visible.value = false
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
+
+<style scoped>
+/* 右侧已选行的 x：默认浅灰，hover 转危险色，提示"点了就移除" */
+.im-group-member-add-dialog__remove {
+  font-size: 14px;
+  color: var(--el-text-color-placeholder);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.im-group-member-add-dialog__remove:hover {
+  color: var(--el-color-danger);
+}
+</style>

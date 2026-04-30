@@ -1,8 +1,9 @@
 <template>
   <!--
     私聊侧边抽屉
-    - 整体结构对齐 ConversationGroupSide：宫格 + 信息行 + 开关；
-    - "添加 / 清空聊天记录" 按钮在 WeChat 里有，但目前后端没建群-from-私聊 / 清空消息能力，先不加避免做半吊子
+    - 整体结构对齐 ConversationGroupSide：宫格 + 信息行 + 开关
+    - 顶部好友宫格 + "+" tile：点 + 调起 GroupCreateDialog 并锁定对方，对齐微信"基于私聊发起群聊"
+    - "清空聊天记录"按钮在 WeChat 里有，但目前后端没建消息清空能力，先不加避免做半吊子
   -->
   <el-drawer
     v-model="visible"
@@ -14,7 +15,7 @@
   >
     <div v-if="friend" class="im-conversation-private-side flex flex-col h-full">
       <div class="im-conversation-private-side__scroll flex-1 overflow-y-auto">
-        <!-- 好友宫格：单个头像 tile，对齐 GroupSide 视觉，让两种抽屉看起来是一家的 -->
+        <!-- 好友宫格：原 tile + "+" tile，对齐 GroupSide 视觉，让两种抽屉看起来是一家的 -->
         <div class="im-conversation-private-side__section im-conversation-private-side__friend">
           <div class="im-conversation-private-side__tile-wrap">
             <UserAvatar
@@ -27,6 +28,18 @@
             <div class="im-conversation-private-side__tile-label">
               {{ displayName }}
             </div>
+          </div>
+
+          <!-- + tile：点击调起 GroupCreateDialog，把对方 id 作为 lockedIds 传入 -->
+          <div
+            class="im-conversation-private-side__tile-wrap im-conversation-private-side__tile-wrap--clickable"
+            title="发起群聊"
+            @click="createGroupVisible = true"
+          >
+            <div class="im-conversation-private-side__icon-tile">
+              <Icon icon="ant-design:plus-outlined" />
+            </div>
+            <div class="im-conversation-private-side__tile-label">添加</div>
           </div>
         </div>
 
@@ -105,6 +118,14 @@
         </div>
       </div>
     </div>
+
+    <!-- 子对话框：发起群聊（锁定对方为已选） -->
+    <GroupCreateDialog
+      v-model="createGroupVisible"
+      :friends="friends"
+      :locked-ids="lockedIds"
+      @created="handleGroupCreated"
+    />
   </el-drawer>
 </template>
 
@@ -112,13 +133,15 @@
 import { computed, ref, watch } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
+import GroupCreateDialog from '../../../../components/group/GroupCreateDialog.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
+import { useGroupStore } from '@/views/im/home/store/groupStore'
 import { getFriendDisplayName } from '@/views/im/utils/user'
 import { ImConversationType } from '@/views/im/utils/constants'
-import type { Conversation, Friend } from '../../../../types'
+import type { Conversation, Friend, FriendLite } from '../../../../types'
 
 defineOptions({ name: 'ImConversationPrivateSide' })
 
@@ -127,9 +150,11 @@ const props = withDefaults(
     modelValue?: boolean // 抽屉开关（v-model）
     conversation?: Conversation | null // 当前会话（取置顶 / 免打扰态）
     friend?: Friend // 对方好友信息（取头像 / 昵称）
+    friends?: FriendLite[] // 全量好友（"+创建群"时给 GroupCreateDialog 选人）
   }>(),
   {
-    modelValue: false
+    modelValue: false,
+    friends: () => []
   }
 )
 
@@ -145,13 +170,20 @@ const visible = computed({
 
 const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
+const groupStore = useGroupStore()
 const message = useMessage()
 
 /** tile 标签 / 后续聊天界面用的展示名：备注优先 */
 const displayName = computed(() => (props.friend ? getFriendDisplayName(props.friend) : ''))
 
+/** GroupCreateDialog 锁定 id：把对方默认勾上且不可取消，对应微信"基于私聊发起群聊" */
+const lockedIds = computed<number[]>(() =>
+  props.friend ? [props.friend.friendUserId] : []
+)
+
 const displayNamePopoverVisible = ref(false)
 const editDisplayName = ref('')
+const createGroupVisible = ref(false)
 
 // popover 弹出时把当前备注灌进编辑态，避免上次未保存的脏值
 watch(displayNamePopoverVisible, (open) => {
@@ -190,8 +222,8 @@ function handleMutedChange(value: boolean | string | number) {
   if (type !== ImConversationType.PRIVATE) {
     return
   }
-  friendStore.setMuted(targetId, next).catch((e) => {
-    console.error('[IM ConversationPrivateSide] 切换免打扰失败', { targetId }, e)
+  friendStore.setMuted(targetId, next).catch((error) => {
+    console.error('[IM ConversationPrivateSide] 切换免打扰失败', { targetId }, error)
     message.error('切换免打扰失败')
     conversationStore.setMuted(type, targetId, !next)
   })
@@ -203,6 +235,22 @@ function handleTopChange(value: boolean | string | number) {
     return
   }
   conversationStore.setTop(props.conversation.type, props.conversation.targetId, !!value)
+}
+
+/** 群创建成功：跳到新群会话 + 关掉本侧抽屉，让用户专注新群 */
+function handleGroupCreated(groupId: number) {
+  const group = groupStore.getGroup(groupId)
+  if (!group) {
+    return
+  }
+  conversationStore.openConversation(
+    groupId,
+    ImConversationType.GROUP,
+    group.name,
+    group.avatar || '',
+    { muted: !!group.muted }
+  )
+  visible.value = false
 }
 </script>
 
@@ -220,8 +268,11 @@ function handleTopChange(value: boolean | string | number) {
   background-color: var(--el-bg-color);
 }
 
-/* 好友宫格区：留白和 GroupSide__members 对齐，单 tile 居左展示 */
+/* 好友宫格区：留白和 GroupSide__members 对齐，friend tile + "+" tile 横排 */
 .im-conversation-private-side__friend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
   padding: 16px 16px 14px;
 }
 
@@ -230,6 +281,9 @@ function handleTopChange(value: boolean | string | number) {
   flex-direction: column;
   align-items: center;
   width: 66px;
+}
+.im-conversation-private-side__tile-wrap--clickable {
+  cursor: pointer;
 }
 
 .im-conversation-private-side__tile-label {
@@ -242,6 +296,33 @@ function handleTopChange(value: boolean | string | number) {
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* "+" 加号 tile：浅底 + 虚线边，hover 走主色让交互可读，与 GroupSide 一致 */
+.im-conversation-private-side__icon-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+  color: var(--el-text-color-regular);
+  background-color: var(--el-fill-color-lighter);
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  transition:
+    color 0.18s,
+    border-color 0.18s,
+    background-color 0.18s;
+}
+.im-conversation-private-side__tile-wrap--clickable:hover .im-conversation-private-side__icon-tile {
+  color: var(--el-color-primary);
+  border-color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
+}
+/* el-icon 全局 color 在暗色模式下被主题盖过；:deep(svg) 锁 fill 到当前色 */
+.im-conversation-private-side__icon-tile :deep(svg) {
+  fill: currentColor !important;
 }
 
 /* section 间隔条 */

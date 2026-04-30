@@ -84,7 +84,7 @@
         :group="groupInfo"
         :conversation="conversationStore.activeConversation"
         :members="groupMembers"
-        :friends="groupFriends"
+        :friends="friends"
         @reload="reloadGroupData"
         @open-history="historyVisible = true"
       />
@@ -93,6 +93,7 @@
         v-model="sideVisible"
         :conversation="conversationStore.activeConversation"
         :friend="privateFriend"
+        :friends="friends"
         @open-history="historyVisible = true"
       />
 
@@ -201,8 +202,8 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
   })
 })
 
-/** 好友列表（用于"邀请入群"对话框）：把 friendStore 的全量好友 map 成 FriendLite 窄接口 */
-const groupFriends = computed<FriendLite[]>(() =>
+/** 好友列表：群侧用于"邀请入群"，私聊侧用于"+创建群"，统一从 friendStore 映射成 FriendLite 窄接口 */
+const friends = computed<FriendLite[]>(() =>
   friendStore.getActiveFriends.map((friend) => ({
     id: friend.friendUserId,
     nickname: friend.nickname,
