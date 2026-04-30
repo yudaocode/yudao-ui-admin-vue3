@@ -1,3 +1,6 @@
+<!-- TODO @AI git mv 到 /Users/yunai/Java/yudao-all-in-im/yudao-ui-admin-vue3/src/views/im/manager/group -->
+<!-- TODO @AI：需要增加状态；然后有个筛选：仅展示当前群内的成员；和不选中，就是全部； -->
+<!-- TODO @AI：displayUserName、displayGroupName、muted；群成员状态；退群时间；需要也展示； -->
 <template>
   <el-drawer v-model="drawerVisible" :title="drawerTitle" size="600px" :destroy-on-close="true">
     <el-table v-loading="loading" :data="memberList" border>

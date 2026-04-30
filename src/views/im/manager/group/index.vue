@@ -6,7 +6,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="80px"
+      label-width="68px"
     >
       <el-form-item label="群名称" prop="name">
         <el-input
@@ -14,7 +14,7 @@
           placeholder="请输入群名称"
           clearable
           @keyup.enter="handleQuery"
-          class="!w-200px"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="群主编号" prop="ownerUserId">
@@ -23,7 +23,7 @@
           placeholder="请输入群主用户编号"
           clearable
           @keyup.enter="handleQuery"
-          class="!w-200px"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="群状态" prop="status">
@@ -31,7 +31,7 @@
           v-model="queryParams.status"
           placeholder="请选择群状态"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.IM_GROUP_STATUS)"
@@ -46,7 +46,7 @@
           v-model="queryParams.banned"
           placeholder="请选择封禁状态"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
@@ -85,7 +85,13 @@
           </el-avatar>
         </template>
       </el-table-column>
-      <el-table-column label="群名称" align="center" prop="name" min-width="160" show-overflow-tooltip />
+      <el-table-column
+        label="群名称"
+        align="center"
+        prop="name"
+        min-width="160"
+        show-overflow-tooltip
+      />
       <el-table-column label="群主" align="center" min-width="160">
         <template #default="{ row }">
           <span>{{ row.ownerNickname || '-' }}</span>
@@ -154,9 +160,11 @@
   </ContentWrap>
 
   <!-- 群成员抽屉 -->
+  <!-- TODO @AI：DrawerRef 简化下 -->
   <GroupMemberDrawer ref="memberDrawerRef" />
 
   <!-- 封禁原因弹窗 -->
+  <!-- TODO @AI：独立出来 -->
   <el-dialog v-model="banDialogVisible" title="封禁群" width="500" :close-on-click-modal="false">
     <el-form :model="banForm" :rules="banFormRules" ref="banFormRef" label-width="80px">
       <el-form-item label="群名称">
@@ -189,7 +197,7 @@ import GroupMemberDrawer from './components/GroupMemberDrawer.vue'
 defineOptions({ name: 'ImGroup' })
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
+const { t } = useI18n() // 国际化 TODO @AI：这里 linter 报错；
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -270,6 +278,7 @@ const submitBan = async () => {
 
 /** 解封按钮操作 */
 const handleUnban = async (row: ManagerGroupApi.ImManagerGroupVO) => {
+  // TODO @AI：对齐 system user info 写的习惯；manager 下其他写的，也检查下；
   try {
     // 解封的二次确认
     await message.confirm(`确认解封群「${row.name}」吗？`)
