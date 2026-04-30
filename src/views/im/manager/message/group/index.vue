@@ -6,7 +6,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="80px"
+      label-width="88px"
     >
       <el-form-item label="群编号" prop="groupId">
         <el-input
@@ -14,7 +14,7 @@
           placeholder="请输入群编号"
           clearable
           @keyup.enter="handleQuery"
-          class="!w-200px"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="发送人编号" prop="senderId">
@@ -23,7 +23,7 @@
           placeholder="请输入发送人用户编号"
           clearable
           @keyup.enter="handleQuery"
-          class="!w-200px"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="消息类型" prop="type">
@@ -31,7 +31,7 @@
           v-model="queryParams.type"
           placeholder="请选择消息类型"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.IM_MESSAGE_TYPE)"
@@ -46,10 +46,10 @@
           v-model="queryParams.status"
           placeholder="请选择消息状态"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IM_MESSAGE_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IM_GROUP_MESSAGE_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -95,24 +95,9 @@
           <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="row.type" />
         </template>
       </el-table-column>
-      <el-table-column label="内容预览" align="left" min-width="240" show-overflow-tooltip>
+      <el-table-column label="内容预览" align="left" min-width="240">
         <template #default="{ row }">
-          {{ getContentPreview(row.content) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="@" align="center" width="80">
-        <template #default="{ row }">
-          {{ row.atUserIds?.length ? row.atUserIds.length : '-' }}
-        </template>
-      </el-table-column>
-      <el-table-column label="回执" align="center" prop="receiptStatus" width="100">
-        <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_RECEIPT_STATUS" :value="row.receiptStatus" />
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" align="center" prop="status" width="100">
-        <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.IM_MESSAGE_STATUS" :value="row.status" />
+          <MessageContentPreview :type="row.type" :content="row.content" />
         </template>
       </el-table-column>
       <el-table-column
@@ -122,6 +107,31 @@
         width="180"
         :formatter="dateFormatter"
       />
+      <el-table-column label="@用户" align="left" min-width="200" show-overflow-tooltip>
+        <template #default="{ row }">
+          <template v-if="row.atUserIds?.length">
+            <span v-for="(userId, idx) in row.atUserIds" :key="userId">
+              <span v-if="idx > 0">、</span>
+              <template v-if="userId === IM_AT_ALL_USER_ID">@{{ IM_AT_ALL_NICKNAME }}</template>
+              <template v-else>
+                @{{ row.atUserNicknames?.[idx] || userId }}
+                <span class="text-gray-400">({{ userId }})</span>
+              </template>
+            </span>
+          </template>
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="回执" align="center" prop="receiptStatus" width="110">
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_RECEIPT_STATUS" :value="row.receiptStatus" />
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" align="center" prop="status" width="100">
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_STATUS" :value="row.status" />
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" width="100" fixed="right">
         <template #default="{ row }">
           <el-button
@@ -135,6 +145,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
     <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
@@ -143,36 +154,17 @@
     />
   </ContentWrap>
 
-  <!-- 详情弹窗 -->
-  <el-dialog v-model="detailVisible" title="群聊消息详情" width="700">
-    <el-descriptions :column="2" border>
-      <el-descriptions-item label="编号">{{ detail.id }}</el-descriptions-item>
-      <el-descriptions-item label="客户端编号">{{ detail.clientMessageId || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="群">{{ detail.groupName }} ({{ detail.groupId }})</el-descriptions-item>
-      <el-descriptions-item label="发送人">{{ detail.senderNickname }} ({{ detail.senderId }})</el-descriptions-item>
-      <el-descriptions-item label="类型">
-        <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="detail.type" />
-      </el-descriptions-item>
-      <el-descriptions-item label="状态">
-        <dict-tag :type="DICT_TYPE.IM_MESSAGE_STATUS" :value="detail.status" />
-      </el-descriptions-item>
-      <el-descriptions-item label="@ 用户" :span="2">
-        {{ detail.atUserIds?.length ? detail.atUserIds.join(', ') : '-' }}
-      </el-descriptions-item>
-      <el-descriptions-item label="发送时间">{{ formatDate(detail.sendTime) }}</el-descriptions-item>
-      <el-descriptions-item label="创建时间">{{ formatDate(detail.createTime) }}</el-descriptions-item>
-      <el-descriptions-item label="消息内容（原始 JSON）" :span="2">
-        <pre class="content-pre">{{ formatJson(detail.content) }}</pre>
-      </el-descriptions-item>
-    </el-descriptions>
-  </el-dialog>
+  <!-- 详情 -->
+  <GroupMessageDetail ref="detailRef" />
 </template>
 
 <script lang="ts" setup>
-import { dateFormatter, formatDate } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
 import * as ManagerGroupMessageApi from '@/api/im/manager/message/group'
-import { getContentPreview, formatJson } from '@/views/im/utils/message'
+import MessageContentPreview from '../MessageContentPreview.vue'
+import GroupMessageDetail from './GroupMessageDetail.vue'
 
 defineOptions({ name: 'ImGroupMessage' })
 
@@ -214,16 +206,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 详情弹窗 */
-const detailVisible = ref(false) // 详情弹窗的显示
-const detail = ref<ManagerGroupMessageApi.ImManagerGroupMessageVO>(
-  {} as ManagerGroupMessageApi.ImManagerGroupMessageVO
-) // 当前详情数据
-
 /** 打开详情弹窗 */
+const detailRef = ref<InstanceType<typeof GroupMessageDetail>>() // 详情弹窗 Ref
 const openDetail = (row: ManagerGroupMessageApi.ImManagerGroupMessageVO) => {
-  detail.value = row
-  detailVisible.value = true
+  detailRef.value?.open(row)
 }
 
 /** 初始化 */
@@ -231,16 +217,3 @@ onMounted(() => {
   getList()
 })
 </script>
-
-<style scoped>
-.content-pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-  font-family: 'Menlo', 'Consolas', monospace;
-  font-size: 12px;
-  background: #f5f5f5;
-  padding: 8px;
-  border-radius: 4px;
-}
-</style>
