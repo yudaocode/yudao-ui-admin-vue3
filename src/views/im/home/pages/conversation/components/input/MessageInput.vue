@@ -546,6 +546,15 @@ function clearReply() {
   draftStore.clearReply(conversation)
 }
 
+/** 取走当前 reply 快照（抓一次清一次），媒体上传链路在动手前统一调它拿 quote */
+function consumeReply(): QuoteMessage | undefined {
+  const quote = replyTarget.value
+  if (quote) {
+    clearReply()
+  }
+  return quote
+}
+
 // ==================== 表情 ====================
 const emojiVisible = ref(false)
 /** 切换表情面板；打开时互斥关掉语音面板 */
@@ -767,8 +776,7 @@ function onKeydown(e: KeyboardEvent) {
 // ==================== 图片 / 文件上传 ====================
 /** 上传并发送 IMAGE 消息;quote 抓取后立即清 draft.reply 让顶部引用条同步消失 */
 async function uploadAndSendImage(file: File) {
-  const replyQuote = replyTarget.value
-  clearReply()
+  const replyQuote = consumeReply()
   const form = new FormData()
   form.append('file', file)
   const url = ((await updateFile(form)) as { data?: string })?.data
@@ -781,8 +789,7 @@ async function uploadAndSendImage(file: File) {
 
 /** 上传并发送 FILE 消息；附原始 name / size 让接收端展示文件名和体积 */
 async function uploadAndSendFile(file: File) {
-  const replyQuote = replyTarget.value
-  clearReply()
+  const replyQuote = consumeReply()
   const form = new FormData()
   form.append('file', file)
   const url = ((await updateFile(form)) as { data?: string })?.data
@@ -825,8 +832,7 @@ function openVoice() {
 }
 /** VoiceRecorder 录完后回传 blob，包成 webm 文件上传，发送 VOICE 消息 */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
-  const replyQuote = replyTarget.value
-  clearReply()
+  const replyQuote = consumeReply()
   const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
   const form = new FormData()
   form.append('file', file)
@@ -955,8 +961,7 @@ async function uploadAndSendVideo(file: File) {
   }
   const startKey = getConversationKey(startConversation)
   // 1.2 quote 抓取后立即清 draft.reply，与图片 / 文件 / 语音上传链路一致
-  const replyQuote = replyTarget.value
-  clearReply()
+  const replyQuote = consumeReply()
 
   // 2. 三路并行起跑（probe 与两条上传无依赖，封面上传等 probe 出 cover 后立即接力）
   // 2.1 视频本体上传：立即 catch 兜底为 url=undefined，由 step 3.2 拿不到 url 时放弃；同时让 promise 不再 floating

@@ -1,10 +1,10 @@
 <template>
   <!--
-    引用消息预览块,对齐微信 PC:浅灰底块 + 大 padding + 文本可换行(line-clamp 2 行)
-    - clickable=true(气泡内): 点击触发 locate emit;撤回态禁用跳转
-    - closable=true(输入条): 显示右上 × 圆形按钮,hover 时显示圆形底
-    - 撤回降级:命中本地缓存且 type === RECALL 时显示「原消息已撤回」斜体灰字
-    - 富预览:type 为 IMAGE / VIDEO 时直接从 quote.content 取缩略图,不依赖本地缓存
+    引用消息预览块，对齐微信 PC：浅灰底块 + 大 padding + 文本可换行（line-clamp 2 行）
+    - clickable=true（气泡内）：点击触发 locate emit；撤回态禁用跳转
+    - closable=true（输入条）：显示右上 × 圆形按钮，hover 时显示圆形底
+    - 撤回降级：命中本地缓存且 type === RECALL 时显示「原消息已撤回」斜体灰字
+    - 富预览：type 为 IMAGE / VIDEO 时直接从 quote.content 取缩略图，不依赖本地缓存
   -->
   <div
     class="im-reply-preview flex gap-2 items-start min-w-0 px-3 py-2 rounded text-13px bg-[var(--el-fill-color-light)]"
@@ -101,25 +101,29 @@ const senderName = computed(() => {
   return getSenderDisplayName(props.quote.senderId, conversation.type, conversation.targetId)
 })
 
-/** 摘要文案:已撤回降级,否则按 type 从 quote.content 派生(文本截断 / 非文本走类型 tag) */
+/** quote.content 解析一次缓存，让 snippetText / thumbnailUrl 复用，长会话每条引用气泡少一次 JSON.parse */
+type AnyQuotePayload = Partial<TextMessage & ImageMessage & FileMessage & AudioMessage & VideoMessage>
+const parsedPayload = computed(() => parseMessage<AnyQuotePayload>(props.quote.content))
+
+/** 摘要文案：已撤回降级，否则按 type 从 quote.content 派生（文本截断 / 非文本走类型 tag） */
 const snippetText = computed(() => {
   if (isRecalled.value) {
     return '原消息已撤回'
   }
-  const { type, content } = props.quote
+  const { type } = props.quote
   if (type === ImMessageType.TEXT) {
-    const text = parseMessage<TextMessage>(content)?.content ?? ''
+    const text = parsedPayload.value?.content ?? ''
     return text.length <= MAX_TEXT_PREVIEW_LEN ? text : `${text.substring(0, MAX_TEXT_PREVIEW_LEN)}…`
   }
   if (type === ImMessageType.IMAGE) {
     return '[图片]'
   }
   if (type === ImMessageType.FILE) {
-    const name = parseMessage<FileMessage>(content)?.name
+    const name = parsedPayload.value?.name
     return name ? `[文件 ${name}]` : '[文件]'
   }
   if (type === ImMessageType.VOICE) {
-    const duration = parseMessage<AudioMessage>(content)?.duration
+    const duration = parsedPayload.value?.duration
     return duration ? `[语音 ${duration}″]` : '[语音]'
   }
   if (type === ImMessageType.VIDEO) {
@@ -128,18 +132,17 @@ const snippetText = computed(() => {
   return ''
 })
 
-/** 缩略图 URL:仅图片 / 视频从 quote.content 直接取,不依赖本地缓存 */
+/** 缩略图 URL：仅图片 / 视频从 quote.content 直接取，不依赖本地缓存 */
 const thumbnailUrl = computed<string | undefined>(() => {
   if (isRecalled.value) {
     return undefined
   }
-  const { type, content } = props.quote
+  const { type } = props.quote
   if (type === ImMessageType.IMAGE) {
-    const payload = parseMessage<ImageMessage>(content)
-    return payload?.thumbnailUrl || payload?.url
+    return parsedPayload.value?.thumbnailUrl || parsedPayload.value?.url
   }
   if (type === ImMessageType.VIDEO) {
-    return parseMessage<VideoMessage>(content)?.coverUrl
+    return parsedPayload.value?.coverUrl
   }
   return undefined
 })
