@@ -31,7 +31,7 @@ const buildOption = (dates: string[], reg: number[], act: number[]): echarts.ECh
   xAxis: {
     type: 'category',
     data: dates,
-    axisLabel: { formatter: (v: string) => v.substring(5) }
+    axisLabel: { formatter: (v: string) => v.slice(5, 10) }
   },
   yAxis: [
     { type: 'value', name: '新增注册', position: 'left' },

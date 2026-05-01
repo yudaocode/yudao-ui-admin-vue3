@@ -31,7 +31,7 @@ const buildOption = (dates: string[], priv: number[], grp: number[]): echarts.EC
   xAxis: {
     type: 'category',
     data: dates,
-    axisLabel: { formatter: (v: string) => v.substring(5) }
+    axisLabel: { formatter: (v: string) => v.slice(5, 10) }
   },
   yAxis: { type: 'value', name: '消息量' },
   series: [

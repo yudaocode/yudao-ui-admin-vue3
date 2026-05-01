@@ -1,55 +1,67 @@
 <template>
   <el-card shadow="never" class="chart-card">
     <template #header>消息发送 TOP 10</template>
-    <div ref="chartRef" style="width: 100%; height: 320px"></div>
+    <div ref="chartRef" v-loading="loading" style="width: 100%; height: 320px"></div>
   </el-card>
 </template>
 
 <script lang="ts" setup>
 import * as echarts from 'echarts'
+import * as StatisticsApi from '@/api/im/manager/statistics'
 
 defineOptions({ name: 'ImStatisticsTopSendersChart' })
 
-const props = defineProps<{
-  data: { userId: number; nickname: string; messageCount: number }[]
-}>()
-
 const chartRef = ref<HTMLElement>()
+const loading = ref(false)
 let chart: echarts.ECharts | null = null
 
-const render = () => {
-  if (!chart) return
-  // 横向条形图：从下到上排名
-  const sorted = [...props.data].sort((a, b) => a.messageCount - b.messageCount)
-  chart.setOption({
+/** 渲染横向条形图（从下到上排名） */
+const render = (data: StatisticsApi.ImStatisticsTopSenderVO[]) => {
+  const sorted = [...data].sort((a, b) => a.messageCount - b.messageCount)
+  chart?.setOption({
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     grid: { left: '3%', right: '4%', bottom: '3%', top: 20, containLabel: true },
     xAxis: { type: 'value', name: '消息数' },
     yAxis: {
       type: 'category',
-      data: sorted.map((d) => `${d.nickname}(${d.userId})`),
+      data: sorted.map((d) => `${d.nickname || d.userId}(${d.userId})`),
       axisLabel: { width: 110, overflow: 'truncate' }
     },
-    series: [{
-      type: 'bar',
-      data: sorted.map((d) => d.messageCount),
-      itemStyle: { color: '#409EFF', borderRadius: [0, 4, 4, 0] },
-      barMaxWidth: 18
-    }]
+    series: [
+      {
+        type: 'bar',
+        data: sorted.map((d) => d.messageCount),
+        itemStyle: { color: '#409EFF', borderRadius: [0, 4, 4, 0] },
+        barMaxWidth: 18
+      }
+    ]
   })
+}
+
+/** 拉取并渲染数据 */
+const loadData = async () => {
+  loading.value = true
+  try {
+    const data = await StatisticsApi.getTopSenders()
+    render(data)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(async () => {
   await nextTick()
   if (chartRef.value) {
     chart = echarts.init(chartRef.value)
-    render()
+    await loadData()
   }
 })
-watch(() => props.data, render, { deep: true })
 onUnmounted(() => chart?.dispose())
 </script>
 
 <style scoped>
-.chart-card { border-radius: 8px; margin-bottom: 16px; }
+.chart-card {
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
 </style>

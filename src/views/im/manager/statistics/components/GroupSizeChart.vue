@@ -1,47 +1,62 @@
 <template>
   <el-card shadow="never" class="chart-card">
     <template #header>群规模分布</template>
-    <div ref="chartRef" style="width: 100%; height: 320px"></div>
+    <div ref="chartRef" v-loading="loading" style="width: 100%; height: 320px"></div>
   </el-card>
 </template>
 
 <script lang="ts" setup>
 import * as echarts from 'echarts'
+import * as StatisticsApi from '@/api/im/manager/statistics'
 
 defineOptions({ name: 'ImStatisticsGroupSizeChart' })
 
-const props = defineProps<{ data: { range: string; count: number }[] }>()
-
 const chartRef = ref<HTMLElement>()
+const loading = ref(false)
 let chart: echarts.ECharts | null = null
 
-const render = () => {
-  if (!chart) return
-  chart.setOption({
+/** 渲染柱状图 */
+const render = (data: StatisticsApi.ImStatisticsGroupSizeVO[]) => {
+  chart?.setOption({
     tooltip: { trigger: 'axis' },
     grid: { left: '3%', right: '4%', bottom: '3%', top: 30, containLabel: true },
-    xAxis: { type: 'category', data: props.data.map((d) => d.range) },
+    xAxis: { type: 'category', data: data.map((d) => d.range) },
     yAxis: { type: 'value', name: '群组数' },
-    series: [{
-      type: 'bar',
-      data: props.data.map((d) => d.count),
-      itemStyle: { color: '#67C23A', borderRadius: [4, 4, 0, 0] },
-      barMaxWidth: 48
-    }]
+    series: [
+      {
+        type: 'bar',
+        data: data.map((d) => d.count),
+        itemStyle: { color: '#67C23A', borderRadius: [4, 4, 0, 0] },
+        barMaxWidth: 48
+      }
+    ]
   })
+}
+
+/** 拉取并渲染数据 */
+const loadData = async () => {
+  loading.value = true
+  try {
+    const data = await StatisticsApi.getGroupSizeDistribution()
+    render(data)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(async () => {
   await nextTick()
   if (chartRef.value) {
     chart = echarts.init(chartRef.value)
-    render()
+    await loadData()
   }
 })
-watch(() => props.data, render, { deep: true })
 onUnmounted(() => chart?.dispose())
 </script>
 
 <style scoped>
-.chart-card { border-radius: 8px; margin-bottom: 16px; }
+.chart-card {
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
 </style>
