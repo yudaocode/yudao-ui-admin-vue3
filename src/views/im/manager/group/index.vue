@@ -17,12 +17,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="群主编号" prop="ownerUserId">
-        <el-input
+      <el-form-item label="群主" prop="ownerUserId">
+        <UserSelectV2
           v-model="queryParams.ownerUserId"
-          placeholder="请输入群主用户编号"
-          clearable
-          @keyup.enter="handleQuery"
+          placeholder="请选择群主"
           class="!w-240px"
         />
       </el-form-item>
@@ -169,6 +167,7 @@
 import { DICT_TYPE, getIntDictOptions, getBoolDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as ManagerGroupApi from '@/api/im/manager/group'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import GroupDetail from './GroupDetail.vue'
 import GroupBanForm from './GroupBanForm.vue'
 

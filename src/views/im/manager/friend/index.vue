@@ -8,39 +8,11 @@
       :inline="true"
       label-width="80px"
     >
-      <!-- TODO DONE @AI：使用 userselectv2 组件（v2 待建，先用 simple-list + filterable 下拉） -->
       <el-form-item label="用户" prop="userId">
-        <el-select
-          v-model="queryParams.userId"
-          placeholder="请选择用户"
-          clearable
-          filterable
-          class="!w-200px"
-        >
-          <el-option
-            v-for="user in userOptions"
-            :key="user.id"
-            :label="`${user.nickname} (${user.id})`"
-            :value="user.id"
-          />
-        </el-select>
+        <UserSelectV2 v-model="queryParams.userId" class="!w-200px" />
       </el-form-item>
-      <!-- TODO DONE @AI：使用 userselectv2 组件（v2 待建，先用 simple-list + filterable 下拉） -->
       <el-form-item label="好友" prop="friendUserId">
-        <el-select
-          v-model="queryParams.friendUserId"
-          placeholder="请选择好友"
-          clearable
-          filterable
-          class="!w-200px"
-        >
-          <el-option
-            v-for="user in userOptions"
-            :key="user.id"
-            :label="`${user.nickname} (${user.id})`"
-            :value="user.id"
-          />
-        </el-select>
+        <UserSelectV2 v-model="queryParams.friendUserId" placeholder="请选择好友" class="!w-200px" />
       </el-form-item>
       <el-form-item label="好友状态" prop="status">
         <el-select
@@ -94,14 +66,12 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" width="100" />
-      <!-- TODO DONE @AI：宽度调整下 -->
       <el-table-column label="用户" align="center" min-width="200" show-overflow-tooltip>
         <template #default="{ row }">
           <span>{{ row.userNickname || '-' }}</span>
           <span class="text-gray-400 ml-5px">({{ row.userId }})</span>
         </template>
       </el-table-column>
-      <!-- TODO DONE @AI：宽度调整下 -->
       <el-table-column label="好友" align="center" min-width="200" show-overflow-tooltip>
         <template #default="{ row }">
           <span>{{ row.friendNickname || '-' }}</span>
@@ -148,14 +118,13 @@
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions, getBoolDictOptions } from '@/utils/dict'
 import * as ManagerFriendApi from '@/api/im/manager/friend'
-import * as UserApi from '@/api/system/user'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 
 defineOptions({ name: 'ImFriend' })
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<ManagerFriendApi.ImManagerFriendVO[]>([]) // 列表的数据
-const userOptions = ref<UserApi.UserVO[]>([]) // 用户下拉的候选项
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -192,9 +161,7 @@ const resetQuery = () => {
 }
 
 /** 初始化 */
-onMounted(async () => {
-  // 用户下拉一次性拉简化数据，给 userId / friendUserId 共用
-  userOptions.value = await UserApi.getSimpleUserList()
-  await getList()
+onMounted(() => {
+  getList()
 })
 </script>

@@ -8,23 +8,13 @@
       :inline="true"
       label-width="88px"
     >
-      <!-- TODO @AI：groupselect；在 group components 提供一个组件 -->
-      <el-form-item label="群编号" prop="groupId">
-        <el-input
-          v-model="queryParams.groupId"
-          placeholder="请输入群编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
+      <el-form-item label="群" prop="groupId">
+        <GroupSelect v-model="queryParams.groupId" class="!w-240px" />
       </el-form-item>
-      <!-- TODO @AI：使用 userselectv2；可以晚点处理； -->
-      <el-form-item label="发送人编号" prop="senderId">
-        <el-input
+      <el-form-item label="发送人" prop="senderId">
+        <UserSelectV2
           v-model="queryParams.senderId"
-          placeholder="请输入发送人用户编号"
-          clearable
-          @keyup.enter="handleQuery"
+          placeholder="请选择发送人"
           class="!w-240px"
         />
       </el-form-item>
@@ -43,21 +33,14 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：不用消息状态检索；改成内容检索； -->
-      <el-form-item label="消息状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择消息状态"
+      <el-form-item label="消息内容" prop="content">
+        <el-input
+          v-model="queryParams.content"
+          placeholder="请输入消息内容"
           clearable
+          @keyup.enter="handleQuery"
           class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IM_GROUP_MESSAGE_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        />
       </el-form-item>
       <el-form-item label="发送时间" prop="sendTime">
         <el-date-picker
@@ -166,6 +149,8 @@ import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
 import * as ManagerGroupMessageApi from '@/api/im/manager/message/group'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
+import GroupSelect from '@/views/im/manager/group/components/GroupSelect.vue'
 import MessageContentPreview from '../MessageContentPreview.vue'
 import GroupMessageDetail from './GroupMessageDetail.vue'
 
@@ -180,7 +165,7 @@ const queryParams = reactive({
   groupId: undefined as number | undefined,
   senderId: undefined as number | undefined,
   type: undefined as number | undefined,
-  status: undefined as number | undefined,
+  content: undefined as string | undefined,
   sendTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单

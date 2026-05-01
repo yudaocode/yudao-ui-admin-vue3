@@ -8,23 +8,17 @@
       :inline="true"
       label-width="88px"
     >
-      <!-- TODO @AI：使用 userselectv2；可以晚点处理； -->
-      <el-form-item label="发送人编号" prop="senderId">
-        <el-input
+      <el-form-item label="发送人" prop="senderId">
+        <UserSelectV2
           v-model="queryParams.senderId"
-          placeholder="请输入发送人用户编号"
-          clearable
-          @keyup.enter="handleQuery"
+          placeholder="请选择发送人"
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO @AI：使用 userselectv2；可以晚点处理； -->
-      <el-form-item label="接收人编号" prop="receiverId">
-        <el-input
+      <el-form-item label="接收人" prop="receiverId">
+        <UserSelectV2
           v-model="queryParams.receiverId"
-          placeholder="请输入接收人用户编号"
-          clearable
-          @keyup.enter="handleQuery"
+          placeholder="请选择接收人"
           class="!w-240px"
         />
       </el-form-item>
@@ -43,21 +37,14 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @AI：不用消息状态检索；改成内容检索； -->
-      <el-form-item label="消息状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择消息状态"
+      <el-form-item label="消息内容" prop="content">
+        <el-input
+          v-model="queryParams.content"
+          placeholder="请输入消息内容"
           clearable
+          @keyup.enter="handleQuery"
           class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IM_PRIVATE_MESSAGE_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        />
       </el-form-item>
       <el-form-item label="发送时间" prop="sendTime">
         <el-date-picker
@@ -144,6 +131,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as ManagerPrivateMessageApi from '@/api/im/manager/message/private'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import MessageContentPreview from '../MessageContentPreview.vue'
 import PrivateMessageDetail from './PrivateMessageDetail.vue'
 
@@ -158,7 +146,7 @@ const queryParams = reactive({
   senderId: undefined as number | undefined,
   receiverId: undefined as number | undefined,
   type: undefined as number | undefined,
-  status: undefined as number | undefined,
+  content: undefined as string | undefined,
   sendTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单
