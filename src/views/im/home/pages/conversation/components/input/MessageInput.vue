@@ -555,6 +555,22 @@ function consumeReply(): QuoteMessage | undefined {
   return quote
 }
 
+/** 抓当前激活会话的 key，媒体上传开始前调；无激活会话返回 undefined */
+function getActiveConversationKey(): string | undefined {
+  const conversation = conversationStore.activeConversation
+  return conversation ? getConversationKey(conversation) : undefined
+}
+
+/** 校验当前激活会话仍是 startKey；切走了记日志 + 返回 false，调用方放弃发送 */
+function isStillSameConversation(startKey: string, kind: string): boolean {
+  const conversation = conversationStore.activeConversation
+  if (!conversation || getConversationKey(conversation) !== startKey) {
+    console.warn(`[IM] ${kind}上传期间切换了会话，放弃发送`, { startKey })
+    return false
+  }
+  return true
+}
+
 // ==================== 表情 ====================
 const emojiVisible = ref(false)
 /** 切换表情面板；打开时互斥关掉语音面板 */
@@ -776,11 +792,18 @@ function onKeydown(e: KeyboardEvent) {
 // ==================== 图片 / 文件上传 ====================
 /** 上传并发送 IMAGE 消息;quote 抓取后立即清 draft.reply 让顶部引用条同步消失 */
 async function uploadAndSendImage(file: File) {
+  const startKey = getActiveConversationKey()
+  if (!startKey) {
+    return
+  }
   const replyQuote = consumeReply()
   const form = new FormData()
   form.append('file', file)
   const url = ((await updateFile(form)) as { data?: string })?.data
   if (!url) {
+    return
+  }
+  if (!isStillSameConversation(startKey, '图片')) {
     return
   }
   const payload = withQuotePayload<ImageMessage>({ url }, replyQuote)
@@ -789,11 +812,18 @@ async function uploadAndSendImage(file: File) {
 
 /** 上传并发送 FILE 消息；附原始 name / size 让接收端展示文件名和体积 */
 async function uploadAndSendFile(file: File) {
+  const startKey = getActiveConversationKey()
+  if (!startKey) {
+    return
+  }
   const replyQuote = consumeReply()
   const form = new FormData()
   form.append('file', file)
   const url = ((await updateFile(form)) as { data?: string })?.data
   if (!url) {
+    return
+  }
+  if (!isStillSameConversation(startKey, '文件')) {
     return
   }
   const payload = withQuotePayload<FileMessage>(
@@ -832,6 +862,10 @@ function openVoice() {
 }
 /** VoiceRecorder 录完后回传 blob，包成 webm 文件上传，发送 VOICE 消息 */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
+  const startKey = getActiveConversationKey()
+  if (!startKey) {
+    return
+  }
   const replyQuote = consumeReply()
   const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
   const form = new FormData()
@@ -839,6 +873,9 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   // request.upload 返回完整 axios response（不是 res.data，跟 get/post/put 不一样），URL 在 .data 里取
   const url = ((await updateFile(form)) as { data?: string })?.data
   if (!url) {
+    return
+  }
+  if (!isStillSameConversation(startKey, '语音')) {
     return
   }
   const audioPayload = withQuotePayload<AudioMessage>(
@@ -953,14 +990,12 @@ async function probeVideoFile(file: File): Promise<VideoProbe> {
  * 否则会落到错误的会话里；切走再切回来不算变化（key 仍相等）。
  */
 async function uploadAndSendVideo(file: File) {
-  // 1. 锁定起始会话 key
-  // 1.1 上传期间用户切走则不发到错误目标；切走再切回来 key 仍相等，不算变化
-  const startConversation = conversationStore.activeConversation
-  if (!startConversation) {
+  // 1. 锁定起始会话 key（上传期间用户切走则不发到错误目标；切走再切回来 key 仍相等，不算变化）
+  const startKey = getActiveConversationKey()
+  if (!startKey) {
     return
   }
-  const startKey = getConversationKey(startConversation)
-  // 1.2 quote 抓取后立即清 draft.reply，与图片 / 文件 / 语音上传链路一致
+  // quote 抓取后立即清 draft.reply，与图片 / 文件 / 语音上传链路一致
   const replyQuote = consumeReply()
 
   // 2. 三路并行起跑（probe 与两条上传无依赖，封面上传等 probe 出 cover 后立即接力）
@@ -1006,10 +1041,8 @@ async function uploadAndSendVideo(file: File) {
   if (!url) {
     return
   }
-  // 3.3 校验会话仍是发送时锁定的那个，否则放弃；视频链路耗时长，这个窗口很实际
-  const currentConversation = conversationStore.activeConversation
-  if (!currentConversation || getConversationKey(currentConversation) !== startKey) {
-    console.warn('[IM] 视频上传期间切换了会话，放弃发送', { startKey })
+  // 3.3 校验会话仍是发送时锁定的那个（视频链路耗时长，这个窗口很实际）
+  if (!isStillSameConversation(startKey, '视频')) {
     return
   }
 
