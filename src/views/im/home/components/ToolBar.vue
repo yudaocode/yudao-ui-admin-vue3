@@ -67,15 +67,10 @@ const conversationStore = useConversationStore()
 /** 消息 Tab 的红点：所有非免打扰会话的未读总和 */
 const totalUnread = computed(() => conversationStore.getTotalUnread)
 
-/**
- * 两个主 Tab 的配置，name 对应路由 ImHomeConversation/Contact
- * 用 name 而非 path：path 后期容易变（前缀调整、嵌套加层），name 更稳定
- * icon 走通用 <Icon> 组件，支持 iconify 全部前缀（ep: / ant-design: / svg-icon: 等）
- * 通讯录用 ant-design:contacts-outlined：与消息图标一眼区分；好友 + 群聊在通讯录内分组展示
- */
+/** 两个主 Tab；用路由 name 而非 path，避免前缀 / 嵌套调整后失效 */
 const tabs = [
-  { name: 'ImHomeConversation', label: '消息', icon: 'ep:chat-dot-round' },
-  { name: 'ImHomeContact', label: '通讯录', icon: 'ant-design:contacts-outlined' }
+  { name: 'ImHomeConversation', label: '消息', icon: 'ep:chat-round' },
+  { name: 'ImHomeContact', label: '通讯录', icon: 'mingcute:contacts-line' }
 ]
 
 /** 当前路由是否命中 Tab：直接比对 route.name */
