@@ -20,7 +20,12 @@ export interface ImManagerGroupMemberVO {
   userId: number
   nickname?: string
   avatar?: string
+  displayUserName?: string
+  displayGroupName?: string
+  muted?: boolean
+  status: number
   joinTime?: Date
+  quitTime?: Date
 }
 
 // 获得群分页
@@ -43,7 +48,7 @@ export const unbanManagerGroup = (id: number) => {
   return request.put({ url: '/im/manager/group/unban?id=' + id })
 }
 
-// 获得群成员列表
+// 获得群成员列表（含已退群成员，由前端按需过滤）
 export const getManagerGroupMemberList = (groupId: number) => {
   return request.get({ url: '/im/manager/group/member/list?groupId=' + groupId })
 }

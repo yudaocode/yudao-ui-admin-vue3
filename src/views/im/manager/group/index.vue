@@ -125,10 +125,10 @@
           <el-button
             link
             type="primary"
-            @click="openMemberDrawer(row)"
+            @click="openDetail(row)"
             v-hasPermi="['im:manager:group:query']"
           >
-            成员
+            详情
           </el-button>
           <el-button
             v-if="!row.banned"
@@ -159,45 +159,22 @@
     />
   </ContentWrap>
 
-  <!-- 群成员抽屉 -->
-  <!-- TODO @AI：DrawerRef 简化下 -->
-  <GroupMemberDrawer ref="memberDrawerRef" />
-
-  <!-- 封禁原因弹窗 -->
-  <!-- TODO @AI：独立出来 -->
-  <el-dialog v-model="banDialogVisible" title="封禁群" width="500" :close-on-click-modal="false">
-    <el-form :model="banForm" :rules="banFormRules" ref="banFormRef" label-width="80px">
-      <el-form-item label="群名称">
-        <span>{{ banForm.groupName }}</span>
-      </el-form-item>
-      <el-form-item label="封禁原因" prop="reason">
-        <el-input
-          v-model="banForm.reason"
-          type="textarea"
-          :rows="3"
-          maxlength="200"
-          show-word-limit
-          placeholder="请输入封禁原因"
-        />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button :loading="banSubmitting" type="primary" @click="submitBan">确 定</el-button>
-      <el-button @click="banDialogVisible = false">取 消</el-button>
-    </template>
-  </el-dialog>
+  <!-- 群详情 -->
+  <GroupDetail ref="detailRef" />
+  <!-- 群封禁因弹窗 -->
+  <GroupBanForm ref="banFormRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions, getBoolDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as ManagerGroupApi from '@/api/im/manager/group'
-import GroupMemberDrawer from './components/GroupMemberDrawer.vue'
+import GroupDetail from './GroupDetail.vue'
+import GroupBanForm from './GroupBanForm.vue'
 
 defineOptions({ name: 'ImGroup' })
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化 TODO @AI：这里 linter 报错；
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -237,59 +214,29 @@ const resetQuery = () => {
   handleQuery()
 }
 
-const memberDrawerRef = ref<InstanceType<typeof GroupMemberDrawer>>() // 群成员抽屉 Ref
-
-/** 打开群成员抽屉 */
-const openMemberDrawer = (row: ManagerGroupApi.ImManagerGroupVO) => {
-  memberDrawerRef.value?.open(row.id, row.name)
-}
-
-const banDialogVisible = ref(false) // 封禁弹窗的显示
-const banSubmitting = ref(false) // 封禁提交的加载中
-const banForm = reactive({ id: 0, groupName: '', reason: '' }) // 封禁表单
-const banFormRef = ref() // 封禁表单 Ref
-const banFormRules = {
-  reason: [{ required: true, message: '封禁原因不能为空', trigger: 'blur' }]
+/** 打开群详情 */
+const detailRef = ref()
+const openDetail = (row: ManagerGroupApi.ImManagerGroupVO) => {
+  detailRef.value.open(row)
 }
 
 /** 打开封禁弹窗 */
+const banFormRef = ref()
 const openBanDialog = (row: ManagerGroupApi.ImManagerGroupVO) => {
-  banForm.id = row.id
-  banForm.groupName = row.name
-  banForm.reason = ''
-  banDialogVisible.value = true
-}
-
-/** 提交封禁 */
-const submitBan = async () => {
-  await banFormRef.value.validate()
-  banSubmitting.value = true
-  try {
-    // 发起封禁
-    await ManagerGroupApi.banManagerGroup({ id: banForm.id, reason: banForm.reason })
-    message.success('封禁成功')
-    banDialogVisible.value = false
-    // 刷新列表
-    await getList()
-  } finally {
-    banSubmitting.value = false
-  }
+  banFormRef.value.open(row)
 }
 
 /** 解封按钮操作 */
 const handleUnban = async (row: ManagerGroupApi.ImManagerGroupVO) => {
-  // TODO @AI：对齐 system user info 写的习惯；manager 下其他写的，也检查下；
   try {
     // 解封的二次确认
     await message.confirm(`确认解封群「${row.name}」吗？`)
-  } catch {
-    return
-  }
-  // 发起解封
-  await ManagerGroupApi.unbanManagerGroup(row.id)
-  message.success('解封成功')
-  // 刷新列表
-  await getList()
+    // 发起解封
+    await ManagerGroupApi.unbanManagerGroup(row.id)
+    message.success('解封成功')
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
 /** 初始化 */
