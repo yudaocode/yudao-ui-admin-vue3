@@ -50,14 +50,6 @@
       >
         {{ senderDisplayName }}
       </div>
-      <!-- 引用块:气泡正上方,与气泡同侧;点击触发 MessagePanel 滚定位 -->
-      <ReplyPreview
-        v-if="quote"
-        :quote="quote"
-        clickable
-        class="max-w-[280px]"
-        @locate="emit('locate', $event)"
-      />
       <div class="flex gap-1.5 items-center" :class="{ 'flex-row-reverse': message.selfSend }">
         <!-- 消息内容：按 type 走 v-if 分支 -->
         <!-- 文本消息 -->
@@ -205,6 +197,15 @@
           </el-tag>
         </div>
       </div>
+      <!-- 引用块：气泡下方与气泡同侧；selfSend 时竖线镜像到右侧 -->
+      <ReplyPreview
+        v-if="quote"
+        :quote="quote"
+        clickable
+        :mirrored="message.selfSend"
+        class="max-w-[280px]"
+        @locate="emit('locate', $event)"
+      />
     </div>
   </div>
 </template>
@@ -225,6 +226,7 @@ import {
   getQuoteFromMessage,
   parseMessage,
   resolveTipText,
+  getFileIconInfo,
   type TextMessage,
   type ImageMessage,
   type FileMessage,
@@ -363,44 +365,8 @@ const videoPayload = computed(() =>
   isVideo.value ? parseMessage<VideoMessage>(props.message.content) : null
 )
 
-/**
- * 文件类型图标 + 配色（按扩展名分发）
- *
- * 对齐微信观感：PDF 红 / Word 蓝 / Excel 绿 / PPT 橘 / 压缩包 黄 / 媒体 紫 / 文本 灰，
- * 其它走通用 file-filled。后续多了类型在这里加 case，不动模板
- */
-const fileIconInfo = computed<{ icon: string; color: string }>(() => {
-  const name = filePayload.value?.name || ''
-  const ext = name.split('.').pop()?.toLowerCase() || ''
-  if (ext === 'pdf') {
-    return { icon: 'ant-design:file-pdf-filled', color: '#ed5757' }
-  }
-  if (['doc', 'docx'].includes(ext)) {
-    return { icon: 'ant-design:file-word-filled', color: '#2b7cd3' }
-  }
-  if (['xls', 'xlsx'].includes(ext)) {
-    return { icon: 'ant-design:file-excel-filled', color: '#1f7244' }
-  }
-  if (['ppt', 'pptx'].includes(ext)) {
-    return { icon: 'ant-design:file-ppt-filled', color: '#d24726' }
-  }
-  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
-    return { icon: 'ant-design:file-zip-filled', color: '#f0ad4e' }
-  }
-  if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(ext)) {
-    return { icon: 'ant-design:file-image-filled', color: '#9c27b0' }
-  }
-  if (['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv'].includes(ext)) {
-    return { icon: 'ant-design:video-camera-filled', color: '#9c27b0' }
-  }
-  if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(ext)) {
-    return { icon: 'ant-design:audio-filled', color: '#9c27b0' }
-  }
-  if (['txt', 'md', 'log', 'json', 'xml'].includes(ext)) {
-    return { icon: 'ant-design:file-text-filled', color: '#909399' }
-  }
-  return { icon: 'ant-design:file-filled', color: '#909399' }
-})
+/** 文件类型图标 + 配色：按扩展名分发，跟 ReplyPreview 共用 getFileIconInfo */
+const fileIconInfo = computed(() => getFileIconInfo(filePayload.value?.name))
 
 /** 文件点击 → 新窗口下载 */
 function handleFileClick() {
