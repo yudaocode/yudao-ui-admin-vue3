@@ -42,6 +42,7 @@ export const useImUiStore = defineStore('imUiStore', () => {
     disabled?: boolean
     divided?: boolean // 是否在该项上方显示分割线（用于把"删除"等危险操作与上面的常规项隔开）
     danger?: boolean // 是否走危险操作样式（红色文字）
+    icon?: string // 可选 iconify 图标名（如 ant-design:delete-outlined）；不传则不渲染前置图标
   }
 
   const contextMenu = reactive({

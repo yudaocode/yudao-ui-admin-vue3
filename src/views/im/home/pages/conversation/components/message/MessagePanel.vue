@@ -304,24 +304,76 @@ function handleScroll() {
 }
 
 /**
- * 滚到底部：切会话 / 收到新消息（且当前在底部）/ 用户主动点"回到底部" 都走这里
+ * 滚到底部：切会话 / 收到新消息（且当前在底部）/ 用户主动点「回到底部」 都走这里
  *
- * 包 nextTick 是为了等 v-for 把新消息真正渲染进 DOM 后再算 scrollHeight，
- * 否则可能滚到的还是旧高度（差最后一条的位置）。smooth=true 走平滑动画，
- * 适合用户主动点击；初始 / 自动滚动用 auto，避免用户感知到动画拖拽
+ * smooth=true 走平滑动画，适合用户主动点击；初始 / 自动滚动用 auto，避免用户感知到动画拖拽
  */
-function scrollToBottom(smooth = false) {
-  nextTick(() => {
-    if (!listRef.value) {
-      return
-    }
-    listRef.value.scrollTo({
-      top: listRef.value.scrollHeight,
-      behavior: smooth ? 'smooth' : 'auto'
-    })
-    newMessageCount.value = 0
-    showJumpToBottom.value = false
+async function scrollToBottom(smooth = false) {
+  // 1. 滚到当前 scrollHeight 的底部（图片 / 视频还在加载时只是大致到底）
+  // 1.1 等 v-for 把新消息真正渲染进 DOM 后再算 scrollHeight，否则差最后一条的位置
+  await nextTick()
+  if (!listRef.value) {
+    return
+  }
+  // 1.2 触发滚动；smooth 仅 user 主动点「回到底部」用，初始 / 自动滚走 auto 避免动画拖拽感
+  listRef.value.scrollTo({
+    top: listRef.value.scrollHeight,
+    behavior: smooth ? 'smooth' : 'auto'
   })
+  newMessageCount.value = 0
+  showJumpToBottom.value = false
+  // 1.3 记下「期望停下的 scrollTop」；图片 / 视频加载完底部会上移，scrollTop 没动就说明用户没手动滚走
+  //     不能用 distanceFromBottom 判断：底部上移会让 distance 变大，被误判为「用户滚走了」直接放弃补滚
+  const expectedScrollTop = listRef.value.scrollHeight - listRef.value.clientHeight
+
+  // 2. 等媒体加载完后补滚到真实底部
+  // 2.1 等容器内未加载完的图片 / 视频元数据；加载完后 scrollHeight 会增长到真实底部
+  await waitMediaSettled()
+  if (!listRef.value) {
+    return
+  }
+  // 2.2 仅在用户没手动滚走时（scrollTop 仍贴近 expectedScrollTop）才补滚，避免等待期间用户上翻被打断
+  if (Math.abs(listRef.value.scrollTop - expectedScrollTop) > BOTTOM_THRESHOLD) {
+    return
+  }
+  // 2.3 补滚到新底部
+  listRef.value.scrollTo({ top: listRef.value.scrollHeight, behavior: 'auto' })
+}
+
+/**
+ * 等待容器内未加载完的图片 / 视频；最多等 2s 防止超大资源把整个滚动跟进卡住
+ *
+ * 仅关心元数据（loadedmetadata / img.complete），不等真正解码，因为尺寸够算 scrollHeight 就行
+ */
+function waitMediaSettled(): Promise<void> {
+  // 1. 收集容器内未加载完的图片 / 视频
+  if (!listRef.value) {
+    return Promise.resolve()
+  }
+  // 1.1 一次扫 img + video，按 element 类型分别看「complete / readyState」过滤 pending
+  const pendingMedia = Array.from(
+    listRef.value.querySelectorAll<HTMLImageElement | HTMLVideoElement>('img, video')
+  ).filter((el) => (el instanceof HTMLImageElement ? !el.complete : el.readyState < 1))
+  // 1.2 没有 pending 直接返回，省掉 Promise.race / setTimeout 闭包构造
+  if (pendingMedia.length === 0) {
+    return Promise.resolve()
+  }
+
+  // 2. 等所有 pending 资源 load / error，最长 2s 兜底
+  // 2.1 每个 element 都监听对应 loadedEvent + error，任一触发即 resolve（不让单条失败卡 race）
+  const loadAll = Promise.all(
+    pendingMedia.map(
+      (el) =>
+        new Promise<void>((resolve) => {
+          const loadedEvent = el instanceof HTMLImageElement ? 'load' : 'loadedmetadata'
+          el.addEventListener(loadedEvent, () => resolve(), { once: true })
+          el.addEventListener('error', () => resolve(), { once: true })
+        })
+    )
+  ).then(() => undefined)
+  // 2.2 2s 超时兜底，防止超大资源 / 网络挂起把整个滚动跟进永久卡住
+  const timeout = new Promise<void>((resolve) => setTimeout(resolve, 2000))
+  return Promise.race([loadAll, timeout])
 }
 
 /**

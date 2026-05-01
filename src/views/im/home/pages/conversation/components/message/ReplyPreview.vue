@@ -38,22 +38,22 @@
         :size="14"
         class="flex-shrink-0"
       />
-      <span v-if="filePayload?.name" class="im-reply-preview__text min-w-0">
-        {{ filePayload.name }}
+      <span v-if="parsedPayload?.name" class="im-reply-preview__text min-w-0">
+        {{ parsedPayload.name }}
       </span>
       <span
-        v-if="filePayload?.size"
+        v-if="parsedPayload?.size"
         class="flex-shrink-0 text-[var(--el-text-color-placeholder)]"
       >
-        {{ formatFileSize(filePayload.size) }}
+        {{ formatFileSize(parsedPayload.size) }}
       </span>
     </template>
 
     <!-- 语音：audio icon + 时长 -->
     <template v-else-if="isVoice">
       <Icon icon="ant-design:audio-outlined" :size="14" class="flex-shrink-0" />
-      <span v-if="voicePayload?.duration" class="flex-shrink-0">
-        {{ formatSeconds(voicePayload.duration) }}
+      <span v-if="parsedPayload?.duration" class="flex-shrink-0">
+        {{ formatSeconds(parsedPayload.duration) }}
       </span>
     </template>
 
@@ -165,12 +165,8 @@ const textPreview = computed(() => {
     : `${text.substring(0, MAX_TEXT_PREVIEW_LEN)}…`
 })
 
-/** 文件 / 语音 payload 直接复用 parsedPayload，省一次解析 */
-const filePayload = computed(() => parsedPayload.value)
-const voicePayload = computed(() => parsedPayload.value)
-
 /** 文件 icon：按扩展名挑色，跟主气泡渲染同源 */
-const fileIcon = computed(() => getFileIconInfo(filePayload.value?.name))
+const fileIcon = computed(() => getFileIconInfo(parsedPayload.value?.name))
 
 /** 缩略图 URL：仅图片 / 视频从 quote.content 直接取，不依赖本地缓存 */
 const thumbnailUrl = computed<string | undefined>(() => {

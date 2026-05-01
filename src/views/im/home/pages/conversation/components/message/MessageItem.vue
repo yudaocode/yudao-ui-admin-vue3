@@ -537,7 +537,7 @@ async function handleContextMenu(e: MouseEvent) {
   })
 }
 
-/** 进入回复模式:把当前消息构造成 QuoteMessage 写入 draftStore,MessageInput 顶部引用条响应式出现 */
+/** 进入引用模式：把当前消息构造成 QuoteMessage 写入 draftStore，MessageInput 顶部引用条响应式出现 */
 function handleReply() {
   const conversation = conversationStore.activeConversation
   if (!conversation) {

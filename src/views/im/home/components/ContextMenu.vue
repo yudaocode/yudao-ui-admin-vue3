@@ -22,7 +22,7 @@
             class="my-1 mx-2 h-[1px] bg-[var(--el-border-color-lighter)]"
           ></div>
           <div
-            class="px-4 py-2 text-13px text-left cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
+            class="flex gap-2 items-center px-4 py-2 text-13px text-left cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
             :class="[
               item.disabled
                 ? '!text-[var(--el-text-color-disabled)] cursor-not-allowed hover:!bg-transparent'
@@ -32,7 +32,8 @@
             ]"
             @click.stop="handleSelect(item)"
           >
-            {{ item.name }}
+            <Icon v-if="item.icon" :icon="item.icon" :size="14" />
+            <span>{{ item.name }}</span>
           </div>
         </template>
       </div>
@@ -42,6 +43,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import Icon from '@/components/Icon/src/Icon.vue'
 
 import { useImUiStore } from '../store/uiStore'
 
