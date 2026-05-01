@@ -1,4 +1,5 @@
 import { generateUUID } from '@/utils'
+import type { Message } from '../home/types'
 
 // ====================================================================
 // IM 消息 content 编解码 & 展示工具
@@ -19,15 +20,30 @@ export const generateClientMessageId = (): string => {
   return generateUUID()
 }
 
+// ==================== 引用消息 ====================
+
+/** 引用消息 payload(对齐后端 QuoteMessage) */
+export interface QuoteMessage {
+  messageId: number
+  senderId: number
+  type: number
+  content: string
+}
+
+/** 引用容器：5 种普通消息(TEXT / IMAGE / FILE / VOICE / VIDEO)都可携带 quote */
+interface Quotable {
+  quote?: QuoteMessage
+}
+
 // ==================== 消息 payload ====================
 
 /** 文本消息 payload（对齐后端 TextMessage） */
-export interface TextMessage {
+export interface TextMessage extends Quotable {
   content: string
 }
 
 /** 图片消息 payload（对齐后端 ImageMessage） */
-export interface ImageMessage {
+export interface ImageMessage extends Quotable {
   url: string
   /** 缩略图 URL */
   thumbnailUrl?: string
@@ -40,7 +56,7 @@ export interface ImageMessage {
 }
 
 /** 语音消息 payload（对齐后端 AudioMessage；ImMessageType 保留 VOICE 命名） */
-export interface AudioMessage {
+export interface AudioMessage extends Quotable {
   url: string
   /** 时长（秒） */
   duration: number
@@ -49,7 +65,7 @@ export interface AudioMessage {
 }
 
 /** 文件消息 payload（对齐后端 FileMessage） */
-export interface FileMessage {
+export interface FileMessage extends Quotable {
   url: string
   name: string
   size: number
@@ -58,7 +74,7 @@ export interface FileMessage {
 }
 
 /** 视频消息 payload（对齐后端 VideoMessage；暂未接入渲染） */
-export interface VideoMessage {
+export interface VideoMessage extends Quotable {
   url: string
   /** 封面 URL */
   coverUrl?: string
@@ -81,6 +97,54 @@ export const parseMessage = <T>(content: string): T | null => {
 
 /** 序列化消息 payload 为 content JSON 字符串；与 parseMessage 对称 */
 export const serializeMessage = <T>(payload: T): string => JSON.stringify(payload)
+
+// ==================== 引用消息 helper ====================
+
+/** 把 quote 合进 payload(序列化前调用);quote 缺失时原样返回 */
+export const withQuotePayload = <T extends Quotable>(payload: T, quote?: QuoteMessage): T => {
+  if (!quote) {
+    return payload
+  }
+  return { ...payload, quote }
+}
+
+/**
+ * 从 content JSON 字符串里清掉 quote 字段
+ *
+ * 客户端乐观渲染构造 quote 时调用,避免"回复一条带引用的消息"造成 quote 嵌套滚雪球;
+ * 与后端 ImMessageUtils.removeQuote 对齐
+ */
+export const removeQuotePayload = (content: string): string => {
+  if (!content || !content.includes('"quote"')) {
+    return content
+  }
+  const parsed = parseMessage<Record<string, unknown>>(content)
+  if (!parsed || !('quote' in parsed)) {
+    return content
+  }
+  delete parsed.quote
+  return JSON.stringify(parsed)
+}
+
+/** 由 Message 派生 QuoteMessage 用于乐观渲染;ack 后会被服务端权威版本覆盖 */
+export const buildQuoteFromMessage = (message: Message): QuoteMessage => {
+  return {
+    messageId: message.id,
+    senderId: message.senderId,
+    type: message.type,
+    content: removeQuotePayload(message.content)
+  }
+}
+
+/** 从已序列化 message.content 中解出 quote;非 JSON / 无 quote 返回 null */
+export const getQuoteFromMessage = (content: string): QuoteMessage | null => {
+  // 长会话每条消息渲染都走 quote computed,非引用消息字符串预扫直接返回,免一次 JSON.parse
+  if (!content || !content.includes('"quote"')) {
+    return null
+  }
+  const parsed = parseMessage<Quotable>(content)
+  return parsed?.quote ?? null
+}
 
 // ==================== TIP_TEXT ====================
 

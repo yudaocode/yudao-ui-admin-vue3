@@ -52,7 +52,7 @@ const pendingSingleMemberKey = (userId: number, groupId: number, memberUserId: n
 export const useGroupStore = defineStore('imGroupStore', {
   state: () => ({
     groups: [] as Group[],
-    // 仅 fetchGroups 成功后置位；loadGroups（IDB）不置位，否则后台 SWR 刷新会被短路
+    // 仅 fetchGroups 成功后置位；loadGroups（IDB）不置位，否则后台 SWR 刷新会被缓存命中跳过
     loaded: false
   }),
 
@@ -107,7 +107,7 @@ export const useGroupStore = defineStore('imGroupStore', {
         return null
       }
       // in-memory 已"完整"加载（fetchGroupMembers 跑过或上次冷启动从 IDB 整桶恢复过）：直接复用；
-      // 单成员补齐（fetchGroupMember）写进的 partial members 不在此短路——其 membersLoaded=false
+      // 单成员补齐（fetchGroupMember）写进的 partial members 不在此返回缓存——其 membersLoaded=false
       const cachedGroup = this.getGroup(groupId)
       if (cachedGroup?.members && cachedGroup.membersLoaded) {
         return cachedGroup.members
@@ -213,7 +213,7 @@ export const useGroupStore = defineStore('imGroupStore', {
 
     /** 按群拉取成员（in-memory 缓存 + 并发去重，force=true 强刷）+ 落 IDB */
     fetchGroupMembers(groupId: number, force = false): Promise<GroupMember[]> {
-      // in-memory "完整"加载过才命中——单成员补齐写入的 partial members 不在此短路（membersLoaded=false）
+      // in-memory "完整"加载过才命中——单成员补齐写入的 partial members 不在此返回（membersLoaded=false）
       const cached = this.getGroup(groupId)
       if (cached && cached.members && cached.membersLoaded && !force) {
         return Promise.resolve(cached.members)

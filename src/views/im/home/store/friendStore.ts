@@ -27,7 +27,7 @@ import type { Friend } from '../types'
 export const useFriendStore = defineStore('imFriendStore', {
   state: () => ({
     friends: [] as Friend[],
-    // 仅 fetchFriends 成功后置位；loadFriends（IDB）不置位，否则后台 SWR 刷新会被短路
+    // 仅 fetchFriends 成功后置位；loadFriends（IDB）不置位，否则后台 SWR 刷新会被缓存命中跳过
     loaded: false
   }),
 

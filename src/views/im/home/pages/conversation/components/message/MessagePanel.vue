@@ -69,7 +69,7 @@
           :data-message-id="msg.id || ''"
           class="message-panel__message-anchor"
         >
-          <MessageItem :message="msg" />
+          <MessageItem :message="msg" @locate="handleLocate" />
         </div>
 
         <!-- 回到底部浮动按钮（滚动不在底部时显示） -->
@@ -242,7 +242,7 @@ async function ensureGroupData(groupId: number) {
     console.warn('[IM MessagePanel] loadGroupMembers 失败', { groupId }, error)
     return null
   })
-  // 再从远程异步拉成员，强刷以跳过 in-memory 短路，每次进群都能拿到最新成员状态
+  // 再从远程异步拉成员，强刷以跳过 in-memory 缓存，每次进群都能拿到最新成员状态
   groupStore.fetchGroupMembers(groupId, true).catch((error) => {
     console.warn('[IM MessagePanel] fetchGroupMembers 失败', { groupId }, error)
   })
@@ -325,12 +325,13 @@ function scrollToBottom(smooth = false) {
 }
 
 /**
- * 定位到聊天位置：MessageHistory 行上"定位"按钮触发
+ * 定位到聊天位置：MessageHistory 行上"定位"按钮 / 气泡内引用块点击触发
  *
  * 1. 先关掉历史弹窗（避免 scroll 时遮挡 + dialog 关闭后让聊天面板拿回焦点）
  * 2. nextTick 等弹窗 leave 动画 / 列表渲染稳定后再查 DOM
  * 3. 按 data-message-id 找 wrapper，scrollIntoView({ block: center }) 让消息落到视口中部
  * 4. 加 --highlight class 短暂高亮，提示用户"就是这条"
+ * 5. 找不到 wrapper(原消息已分页出去)时弹 warning 提示,与微信"消息已不在窗口"观感一致
  */
 async function handleLocate(messageId: number) {
   if (!messageId) {
@@ -342,6 +343,7 @@ async function handleLocate(messageId: number) {
   }
   const target = listRef.value.querySelector<HTMLElement>(`[data-message-id="${messageId}"]`)
   if (!target) {
+    message.warning('原消息不在视野')
     return
   }
   target.scrollIntoView({ behavior: 'smooth', block: 'center' })

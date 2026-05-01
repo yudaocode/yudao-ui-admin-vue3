@@ -28,6 +28,15 @@
         @paste.prevent="onPaste"
       ></div>
 
+      <!-- 引用预览条 -->
+      <ReplyPreview
+        v-if="replyTarget"
+        :quote="replyTarget"
+        closable
+        class="mx-3 mb-1.5"
+        @close="clearReply"
+      />
+
       <!--
         底部工具栏：左侧操作图标 + 右侧发送按钮（对齐微信 PC：操作图标统一放底部）
         - relative 给 EmojiPicker 提供 absolute 锚点，picker 用 bottom-full 向上弹出
@@ -115,11 +124,7 @@
         />
 
         <!-- 语音录制面板：与表情面板同处工具栏，bottom-full 向上弹出，避免离触发的麦克风图标过远 -->
-        <VoiceRecorder
-          v-model="voiceVisible"
-          class="bottom-full left-3 mb-2"
-          @send="onVoiceSend"
-        />
+        <VoiceRecorder v-model="voiceVisible" class="bottom-full left-3 mb-2" @send="onVoiceSend" />
       </div>
     </div>
 
@@ -159,12 +164,15 @@ import {
   type ImageMessage,
   type FileMessage,
   type AudioMessage,
-  type VideoMessage
+  type VideoMessage,
+  type QuoteMessage,
+  withQuotePayload
 } from '@/views/im/utils/message'
 
 import EmojiPicker from './EmojiPicker.vue'
 import MentionPicker from './MentionPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
+import ReplyPreview from '../message/ReplyPreview.vue'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
 defineOptions({ name: 'ImMessageInput' })
@@ -216,8 +224,14 @@ function syncDraftToStore(editor: HTMLDivElement) {
     return
   }
   // collectFromEditor 已 trim，plain 为空时 store 内部按 clearDraft 处理
+  // reply 透传当前快照：setDraft 是整对象替换，不读旧 reply 会让用户每敲一个键就把引用条擦掉
   const { text } = collectFromEditor(editor)
-  draftStore.setDraft(conversation, { html: editor.innerHTML, plain: text })
+  const existing = draftStore.getDraft(conversation)
+  draftStore.setDraft(conversation, {
+    html: editor.innerHTML,
+    plain: text,
+    reply: existing?.reply
+  })
 }
 
 /** 切会话时把 store 里的草稿还原到 editor；只更 UI 不回写草稿，避免 store→editor→store 回流 */
@@ -313,7 +327,7 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
  * 3. 二次防御：collectFromEditor 走 trim，可能比 syncEditorState 更严格（例如全 ZWSP），仍空就 return
  * 4. 清空 + 同步状态：先清 innerHTML 再 syncEditorState 让 placeholder / canSend 一起回归
  *    （顺序很重要：先清后 sync，否则 sync 看到旧内容会误判）
- * 5. 上送：atUserIds 非空才传，避免发空数组
+ * 5. 上送：atUserIds 非空才传，避免发空数组；quote 由 clearDraft 前抓取,确保引用条立即消失
  */
 async function handleSend(options?: { receipt?: boolean }) {
   const editor = editorRef.value
@@ -324,8 +338,9 @@ async function handleSend(options?: { receipt?: boolean }) {
   if (!text) {
     return
   }
-  // 1. 清空 editor + 当前会话草稿；syncEditorState 后 plain 已为空，store 内部会自动清，
-  //    但显式 clearDraft 能立即同步、不依赖 debounce 时序，列表上的 [草稿] 立即消失
+  // 1. 抓 quote 后清空 editor + 当前会话草稿(包含 reply);syncEditorState 后 plain / reply 都为空,
+  //    store 内部会自动清,但显式 clearDraft 能立即同步、不依赖 debounce 时序,列表上的 [草稿] 立即消失
+  const replyQuote = replyTarget.value
   editor.innerHTML = ''
   if (conversationStore.activeConversation) {
     draftStore.clearDraft(conversationStore.activeConversation)
@@ -334,7 +349,8 @@ async function handleSend(options?: { receipt?: boolean }) {
   // 2. 发送
   await send(text, {
     atUserIds: atUserIds.length > 0 ? atUserIds : undefined,
-    receipt: options?.receipt
+    receipt: options?.receipt,
+    quote: replyQuote
   })
 }
 
@@ -508,6 +524,26 @@ function onPaste(e: ClipboardEvent) {
 function onInput() {
   syncEditorState()
   detectAtMention()
+}
+
+// ==================== 引用 / 回复 ====================
+
+/** 当前会话的「正在回复」对象，从 draftStore 派生(MessageItem 写、MessageInput 读) */
+const replyTarget = computed<QuoteMessage | undefined>(() => {
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return undefined
+  }
+  return draftStore.getDraft(conversation)?.reply
+})
+
+/** 清掉当前 reply 但保留正文草稿：点 × 关闭 / 发送即将进行时调 */
+function clearReply() {
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return
+  }
+  draftStore.clearReply(conversation)
 }
 
 // ==================== 表情 ====================
@@ -729,29 +765,35 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 // ==================== 图片 / 文件上传 ====================
-/** 上传并发送 IMAGE 消息；文件选择器和粘贴板都复用这条 */
+/** 上传并发送 IMAGE 消息;quote 抓取后立即清 draft.reply 让顶部引用条同步消失 */
 async function uploadAndSendImage(file: File) {
+  const replyQuote = replyTarget.value
+  clearReply()
   const form = new FormData()
   form.append('file', file)
   const url = ((await updateFile(form)) as { data?: string })?.data
   if (!url) {
     return
   }
-  await sendRaw(ImMessageType.IMAGE, serializeMessage<ImageMessage>({ url }))
+  const payload = withQuotePayload<ImageMessage>({ url }, replyQuote)
+  await sendRaw(ImMessageType.IMAGE, serializeMessage(payload))
 }
 
 /** 上传并发送 FILE 消息；附原始 name / size 让接收端展示文件名和体积 */
 async function uploadAndSendFile(file: File) {
+  const replyQuote = replyTarget.value
+  clearReply()
   const form = new FormData()
   form.append('file', file)
   const url = ((await updateFile(form)) as { data?: string })?.data
   if (!url) {
     return
   }
-  await sendRaw(
-    ImMessageType.FILE,
-    serializeMessage<FileMessage>({ url, name: file.name, size: file.size })
+  const payload = withQuotePayload<FileMessage>(
+    { url, name: file.name, size: file.size },
+    replyQuote
   )
+  await sendRaw(ImMessageType.FILE, serializeMessage(payload))
 }
 
 /** 图片选完即上传 + 发送 IMAGE 消息（不放入 editor，整体走 sendRaw） */
@@ -783,6 +825,8 @@ function openVoice() {
 }
 /** VoiceRecorder 录完后回传 blob，包成 webm 文件上传，发送 VOICE 消息 */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
+  const replyQuote = replyTarget.value
+  clearReply()
   const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
   const form = new FormData()
   form.append('file', file)
@@ -791,10 +835,11 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   if (!url) {
     return
   }
-  await sendRaw(
-    ImMessageType.VOICE,
-    serializeMessage<AudioMessage>({ url, duration: payload.duration })
+  const audioPayload = withQuotePayload<AudioMessage>(
+    { url, duration: payload.duration },
+    replyQuote
   )
+  await sendRaw(ImMessageType.VOICE, serializeMessage(audioPayload))
 }
 
 // ==================== 视频 ====================
@@ -909,6 +954,9 @@ async function uploadAndSendVideo(file: File) {
     return
   }
   const startKey = getConversationKey(startConversation)
+  // 1.2 quote 抓取后立即清 draft.reply，与图片 / 文件 / 语音上传链路一致
+  const replyQuote = replyTarget.value
+  clearReply()
 
   // 2. 三路并行起跑（probe 与两条上传无依赖，封面上传等 probe 出 cover 后立即接力）
   // 2.1 视频本体上传：立即 catch 兜底为 url=undefined，由 step 3.2 拿不到 url 时放弃；同时让 promise 不再 floating
@@ -961,17 +1009,18 @@ async function uploadAndSendVideo(file: File) {
   }
 
   // 4. 拼 VideoMessage payload 走通用 sendRaw（与图片 / 文件 / 语音同链路）
-  await sendRaw(
-    ImMessageType.VIDEO,
-    serializeMessage<VideoMessage>({
+  const videoPayload = withQuotePayload<VideoMessage>(
+    {
       url,
       coverUrl,
       duration: probe.duration,
       width: probe.width,
       height: probe.height,
       size: file.size
-    })
+    },
+    replyQuote
   )
+  await sendRaw(ImMessageType.VIDEO, serializeMessage(videoPayload))
 }
 
 /** 视频选完即上传 + 发送 VIDEO 消息（不放入 editor，整体走 sendRaw） */

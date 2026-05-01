@@ -118,7 +118,7 @@ export interface Group {
   muted?: boolean // 是否免打扰。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
   displayGroupName?: string // 群显示备注。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
   members?: GroupMember[] // 群成员缓存（按需懒加载）
-  membersLoaded?: boolean // members 是否"完整加载"——只有整群 loadGroupMembers / fetchGroupMembers 命中时为 true；fetchGroupMember 单成员补齐不置位，避免 fetchGroupMembers(force=false) 短路时误判整群已加载
+  membersLoaded?: boolean // members 是否"完整加载"——只有整群 loadGroupMembers / fetchGroupMembers 命中时为 true；fetchGroupMember 单成员补齐不置位，避免 fetchGroupMembers(force=false) 命中缓存时误判整群已加载
   memberCount?: number // 成员总数
 }
 

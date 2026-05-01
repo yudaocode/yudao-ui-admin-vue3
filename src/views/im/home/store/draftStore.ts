@@ -5,15 +5,18 @@ import { store } from '@/store'
 
 import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../utils/storage'
 import { getConversationKey } from '../../utils/conversation'
+import type { QuoteMessage } from '../../utils/message'
 
 /**
  * 草稿快照
  * - html：editor 是 contenteditable，含 @-token / <br>，回填编辑器用整段 innerHTML 才能还原
  * - plain：纯文本预览，给会话列表 [草稿] 文案展示用，避免列表渲染时再 strip HTML
+ * - reply：当前会话的「正在引用」对象,跟随草稿走;切会话保留,发送后清空
  */
 export interface DraftSnapshot {
   html: string
   plain: string
+  reply?: QuoteMessage
 }
 
 /** 草稿持久化整桶结构：Record<会话 key, 快照>；草稿量级小（每会话至多几百字节），整桶整写够用 */
@@ -63,13 +66,13 @@ export const useDraftStore = defineStore('imDraft', {
     /**
      * 写草稿 + debounce 落盘
      *
-     * plain 为空（仅含 <br> / 空白）按 clear 处理：避免列表残留 [草稿] 与编辑器实际为空对不上
+     * plain 空且 reply 也空才按 clear 处理：用户只点了回复未输入正文时，切会话回来引用条仍要在
      */
     setDraft(
       conversation: { type: number; targetId: number },
       snapshot: DraftSnapshot
     ): void {
-      if (!snapshot.plain.trim()) {
+      if (!snapshot.plain.trim() && !snapshot.reply) {
         this.clearDraft(conversation)
         return
       }
@@ -85,6 +88,28 @@ export const useDraftStore = defineStore('imDraft', {
       }
       delete this.drafts[key]
       this.schedulePersist()
+    },
+
+    /** 进入回复模式:把 quote 写到当前草稿,正文 html / plain 保留 */
+    setReply(
+      conversation: { type: number; targetId: number },
+      quote: QuoteMessage
+    ): void {
+      const existing = this.getDraft(conversation)
+      this.setDraft(conversation, {
+        html: existing?.html ?? '',
+        plain: existing?.plain ?? '',
+        reply: quote
+      })
+    },
+
+    /** 退出回复模式：仅清掉 reply，正文草稿保留；无 reply 时直接返回 */
+    clearReply(conversation: { type: number; targetId: number }): void {
+      const existing = this.getDraft(conversation)
+      if (!existing?.reply) {
+        return
+      }
+      this.setDraft(conversation, { ...existing, reply: undefined })
     },
 
     /** 调度 debounce 写盘；未登录时直接跳过（无主 key 不写） */

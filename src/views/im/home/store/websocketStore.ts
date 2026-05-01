@@ -264,7 +264,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      * 流程：
      * 1. 离线加载期缓冲（避开与 pull 回填的竞态）
      * 2. 计算 selfSend / peerId 维度，拉好友信息回填展示字段
-     * 3. 撤回 TIP 短路：转走 recallMessage，不进消息列表
+     * 3. 撤回 TIP 直接转走 recallMessage，不进消息列表
      * 4. 构造前端 Message，插入到对应私聊会话
      * 5. 当前会话激活时自动上报已读；否则非免打扰响提示音
      */
@@ -372,7 +372,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      * 流程：
      * 1. 离线加载期缓冲
      * 2. 未知群时拉群详情兜底
-     * 3. 撤回 TIP 短路
+     * 3. 撤回 TIP 直接转走
      * 4. 构造 Message + at 字段，插入到对应群聊会话（发送人名渲染时实时算）
      * 5. 当前会话激活时自动上报已读（带 lastMessageId）；否则非免打扰响提示音
      */

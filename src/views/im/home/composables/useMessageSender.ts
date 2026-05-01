@@ -10,7 +10,13 @@ import {
   readGroupMessages as apiReadGroupMessages,
   recallGroupMessage as apiRecallGroupMessage
 } from '@/api/im/message/group'
-import { generateClientMessageId, serializeMessage, type TextMessage } from '../../utils/message'
+import {
+  generateClientMessageId,
+  serializeMessage,
+  withQuotePayload,
+  type QuoteMessage,
+  type TextMessage
+} from '../../utils/message'
 import { ImMessageType, ImMessageStatus, ImConversationType } from '../../utils/constants'
 import type { Message } from '../types'
 import { useUserStore } from '@/store/modules/user'
@@ -20,6 +26,8 @@ interface SendExtOptions {
   atUserIds?: number[] // 群聊 @ 的用户编号列表
   receipt?: boolean // 是否需要群回执（默认 false）
   targetId?: number // 覆盖默认的 targetId
+  /** 被引用消息（可选）：写进 content.quote 用于乐观渲染，服务端按 quote.messageId 反查重算覆盖 */
+  quote?: QuoteMessage
 }
 
 /**
@@ -102,7 +110,8 @@ export const useMessageSender = () => {
         conversationStore.ackMessage(conversation.type, realTarget, clientMessageId, {
           id: data.id,
           sendTime: new Date(data.sendTime).getTime(),
-          status: data.status
+          status: data.status,
+          content: data.content
         })
       } else if (conversation.type === ImConversationType.GROUP) {
         const data = await apiSendGroupMessage({
@@ -118,7 +127,8 @@ export const useMessageSender = () => {
           sendTime: new Date(data.sendTime).getTime(),
           status: data.status,
           receiptStatus: data.receiptStatus,
-          readCount: data.readCount
+          readCount: data.readCount,
+          content: data.content
         })
       }
     } catch (e) {
@@ -134,7 +144,8 @@ export const useMessageSender = () => {
     if (!text.trim()) {
       return
     }
-    await sendRaw(ImMessageType.TEXT, serializeMessage<TextMessage>({ content: text }), options)
+    const payload = withQuotePayload<TextMessage>({ content: text }, options?.quote)
+    await sendRaw(ImMessageType.TEXT, serializeMessage(payload), options)
   }
 
   /**

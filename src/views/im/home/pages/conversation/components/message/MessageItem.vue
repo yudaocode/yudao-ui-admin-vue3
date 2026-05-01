@@ -50,6 +50,14 @@
       >
         {{ senderDisplayName }}
       </div>
+      <!-- 引用块:气泡正上方,与气泡同侧;点击触发 MessagePanel 滚定位 -->
+      <ReplyPreview
+        v-if="quote"
+        :quote="quote"
+        clickable
+        class="max-w-[280px]"
+        @locate="emit('locate', $event)"
+      />
       <div class="flex gap-1.5 items-center" :class="{ 'flex-row-reverse': message.selfSend }">
         <!-- 消息内容：按 type 走 v-if 分支 -->
         <!-- 文本消息 -->
@@ -213,6 +221,8 @@ import {
   ImConversationType
 } from '../../../../../utils/constants'
 import {
+  buildQuoteFromMessage,
+  getQuoteFromMessage,
   parseMessage,
   resolveTipText,
   type TextMessage,
@@ -228,6 +238,7 @@ import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useFriendStore } from '../../../../store/friendStore'
+import { useDraftStore } from '../../../../store/draftStore'
 import {
   getMemberDisplayName,
   getSenderDisplayName,
@@ -237,6 +248,7 @@ import { useImUiStore } from '../../../../store/uiStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
 import type { Message } from '../../../../types'
 import MessageReadStatus from './MessageReadStatus.vue'
+import ReplyPreview from './ReplyPreview.vue'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
@@ -246,10 +258,16 @@ const props = defineProps<{
   message: Message
 }>()
 
+const emit = defineEmits<{
+  /** 引用块点击 → MessagePanel 滚定位 + 高亮 */
+  locate: [messageId: number]
+}>()
+
 const userStore = useUserStore()
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
+const draftStore = useDraftStore()
 const uiStore = useImUiStore()
 const { recall, sendRaw } = useMessageSender()
 // 仅用 confirm，避免 message 跟 props.message 同名冲突（vue/no-dupe-keys）
@@ -268,6 +286,9 @@ const isImage = computed(() => props.message.type === ImMessageType.IMAGE)
 const isFile = computed(() => props.message.type === ImMessageType.FILE)
 const isVoice = computed(() => props.message.type === ImMessageType.VOICE)
 const isVideo = computed(() => props.message.type === ImMessageType.VIDEO)
+
+/** 引用对象：气泡内嵌入展示；非引用消息返回 null，模板 v-if 不渲染 */
+const quote = computed(() => getQuoteFromMessage(props.message.content))
 
 /** 群聊 + 对方消息 时，在气泡上方显示发送者昵称 */
 const showSenderName = computed(() => {
@@ -514,6 +535,7 @@ const isAtMe = computed(() => {
 
 /**
  * 右键菜单项：
+ * - 回复：仅已落库(id≠0)且未撤回的消息可引用,引用块写入 draftStore.reply
  * - 删除：从本地消息列表移除（不动后端）
  * - 撤回：仅自己发送、已送达（有 id）的消息
  *
@@ -524,21 +546,38 @@ async function handleContextMenu(e: MouseEvent) {
     return
   }
 
-  // "删除"对所有消息开放（纯本地清理，无后端影响）；"撤回"必须满足 自己发 + 已落库（id≠0）+ 未撤回
-  const items: Array<{ key: string; name: string; disabled?: boolean }> = [
-    { key: 'DELETE', name: '删除' }
-  ]
+  const items: Array<{ key: string; name: string; disabled?: boolean }> = []
+  // "回复"必须满足 已落库(id≠0) + 未撤回;本地占位消息不允许引用,避免引用一条还没拿到 id 的消息
+  // TODO @AI：应该是“引用”。你看看注释，中文，是不是都要调整下。
+  if (!!props.message.id && !isRecall.value) {
+    items.push({ key: 'REPLY', name: '回复' })
+  }
+  // TODO @AI：这里加个注释；
   if (props.message.selfSend && !!props.message.id && !isRecall.value) {
     items.push({ key: 'RECALL', name: '撤回' })
   }
+  // "删除"对所有消息开放（纯本地清理，无后端影响）；"撤回"必须满足 自己发 + 已落库（id≠0）+ 未撤回
+  // TODO @AI：删除应该有个 --- 横线；然后是红色的，对齐微信；
+  items.push({ key: 'DELETE', name: '删除' })
   // 把菜单渲染交给全局 uiStore（单例，避免每条消息都挂一份菜单 DOM）；callback 按 key 分发
   uiStore.openContextMenu({ x: e.clientX, y: e.clientY }, items, async (item) => {
-    if (item.key === 'RECALL') {
+    if (item.key === 'REPLY') {
+      handleReply()
+    } else if (item.key === 'RECALL') {
       await handleRecall()
     } else if (item.key === 'DELETE') {
       handleDelete()
     }
   })
+}
+
+/** 进入回复模式:把当前消息构造成 QuoteMessage 写入 draftStore,MessageInput 顶部引用条响应式出现 */
+function handleReply() {
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return
+  }
+  draftStore.setReply(conversation, buildQuoteFromMessage(props.message))
 }
 
 /**
