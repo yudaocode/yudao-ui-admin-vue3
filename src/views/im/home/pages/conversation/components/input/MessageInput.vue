@@ -76,6 +76,14 @@
               <Icon icon="ant-design:audio-outlined" :size="18" />
             </span>
           </el-tooltip>
+          <el-tooltip content="发送视频" placement="top">
+            <span
+              class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
+              @click="videoInputRef?.click()"
+            >
+              <Icon icon="ant-design:video-camera-outlined" :size="18" />
+            </span>
+          </el-tooltip>
         </div>
 
         <!-- 群聊：发送按钮 + ▼ 下拉菜单（点主按钮普通发送 / 点 ▼ 选「发送回执消息」），对齐微信 PC -->
@@ -125,6 +133,7 @@
     <!-- 隐藏的文件选择器 -->
     <input ref="imageInputRef" type="file" accept="image/*" hidden @change="onImagePicked" />
     <input ref="fileInputRef" type="file" hidden @change="onFilePicked" />
+    <input ref="videoInputRef" type="file" accept="video/*" hidden @change="onVideoPicked" />
   </div>
 </template>
 
@@ -145,7 +154,8 @@ import {
   serializeMessage,
   type ImageMessage,
   type FileMessage,
-  type AudioMessage
+  type AudioMessage,
+  type VideoMessage
 } from '@/views/im/utils/message'
 
 import EmojiPicker from './EmojiPicker.vue'
@@ -164,6 +174,7 @@ const { send, sendRaw } = useMessageSender()
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
 const imageInputRef = useTemplateRef<HTMLInputElement>('imageInputRef')
 const fileInputRef = useTemplateRef<HTMLInputElement>('fileInputRef')
+const videoInputRef = useTemplateRef<HTMLInputElement>('videoInputRef')
 const mentionRef = useTemplateRef<InstanceType<typeof MentionPicker>>('mentionRef')
 
 // ==================== 文本 / 发送 ====================
@@ -771,6 +782,193 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
     ImMessageType.VOICE,
     serializeMessage<AudioMessage>({ url, duration: payload.duration })
   )
+}
+
+// ==================== 视频 ====================
+type VideoProbe = {
+  duration?: number
+  width?: number
+  height?: number
+  cover?: Blob
+}
+
+const VIDEO_COVER_MAX_DIM = 720 // 封面最长边 cap：聊天列表里的视频封面没必要原视频分辨率，4K 原尺寸 jpeg 1-3MB 太浪费
+
+/**
+ * 加载视频本地预览，一次性拿到 metadata（duration / 宽高）+ 首帧封面 blob
+ *
+ * 一个 video 元素串两件事是为了避免重复 decode：metadata 解完后直接 seek 首帧再截图。
+ * 截图失败不抛异常，只让 cover 缺失，保证主流程仍能上传视频本体。
+ *
+ * finally 里显式断引用是因为：仅 revokeObjectURL 不足以让 video decoder 立即释放，
+ * 部分浏览器版本上 4K 视频解码 buffer 可滞留数十 MB 几秒到十几秒，连发几条会累计放大。
+ */
+async function probeVideoFile(file: File): Promise<VideoProbe> {
+  // 1. 准备离屏 video
+  // 1.1 muted + preload=metadata：只下载文件头，不预加载整条流
+  const objectUrl = URL.createObjectURL(file)
+  const video = document.createElement('video')
+  video.preload = 'metadata'
+  video.muted = true
+  video.src = objectUrl
+  try {
+    // 1.2 等 metadata 加载：解出 duration / 宽高才有 seek + 截图的依据
+    await new Promise<void>((resolve, reject) => {
+      video.onloadedmetadata = () => resolve()
+      video.onerror = () => reject(new Error('video metadata load error'))
+    })
+    // 1.3 抽元信息：duration 偶有 NaN（极少数损坏文件），软处理为 undefined
+    const meta = {
+      duration: Number.isFinite(video.duration) ? Math.round(video.duration) : undefined,
+      width: video.videoWidth || undefined,
+      height: video.videoHeight || undefined
+    }
+
+    // 2. 截首帧封面（独立 try：失败仅降级 cover 为空，不影响 meta）
+    let cover: Blob | undefined
+    try {
+      // 2.1 算 seek 时间：0.1s 避开常见的纯黑首帧；时长 < 0.2s 的极短视频退化为 0
+      const seekTo = video.duration > 0.2 ? 0.1 : 0
+      // 2.2 seek + 3s 超时：currentTime 设为当前值（譬如已经是 0 的极短视频）
+      //     部分浏览器不触发 onseeked，promise 会一直 pending 卡死整条链路
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('video seek timeout')), 3000)
+        video.onseeked = () => {
+          clearTimeout(timer)
+          resolve()
+        }
+        video.onerror = () => {
+          clearTimeout(timer)
+          reject(new Error('video seek error'))
+        }
+        video.currentTime = seekTo
+      })
+      // 2.3 离屏 canvas 等比缩放：长边 cap 720（VIDEO_COVER_MAX_DIM）
+      const canvas = document.createElement('canvas')
+      const ratio = Math.min(1, VIDEO_COVER_MAX_DIM / Math.max(video.videoWidth, video.videoHeight))
+      canvas.width = Math.round(video.videoWidth * ratio)
+      canvas.height = Math.round(video.videoHeight * ratio)
+      const ctx = canvas.getContext('2d')
+      if (ctx && canvas.width && canvas.height) {
+        // 2.4 当前帧绘到 canvas → toBlob 拿 jpeg；0.8 质量是聊天封面常用甜点
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        cover =
+          (await new Promise<Blob | null>((resolve) =>
+            canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.8)
+          )) ?? undefined
+        // 2.5 提前释放 canvas backing store（4K 原尺寸 33MB），别等 GC
+        canvas.width = 0
+        canvas.height = 0
+      }
+    } catch (e) {
+      console.warn('[IM] 视频封面截取失败', e)
+    }
+    return { ...meta, cover }
+  } finally {
+    // 3. 显式释放 video 资源
+    // 3.1 revoke 本地 objectUrl
+    URL.revokeObjectURL(objectUrl)
+    // 3.2 解绑事件 + 触发 unload，让 decoder buffer 立即释放（不然可滞留数十 MB 数秒）
+    video.onloadedmetadata = null
+    video.onseeked = null
+    video.onerror = null
+    video.removeAttribute('src')
+    video.load()
+  }
+}
+
+/**
+ * 上传并发送 VIDEO 消息
+ *
+ * 1. probe 与视频上传同步起跑；封面上传等 probe 出 cover 后与视频上传竞速
+ *    （probe 解码 + 封面上传通常被视频上传时长完全遮蔽，体感节省几百 ms 起步）
+ * 2. 视频本体上传必须成功，拿不到 url 就直接 return
+ * 3. 封面是锦上添花：上传失败仅日志，coverUrl 留空，气泡 <video> 自带黑底播放按钮兜底
+ *
+ * 视频链路耗时长（probe + 双上传），上传期间用户切会话则放弃发送，
+ * 否则会落到错误的会话里；切走再切回来不算变化（key 仍相等）。
+ */
+async function uploadAndSendVideo(file: File) {
+  // 1. 锁定起始会话 key
+  // 1.1 上传期间用户切走则不发到错误目标；切走再切回来 key 仍相等，不算变化
+  const startConversation = conversationStore.activeConversation
+  if (!startConversation) {
+    return
+  }
+  const startKey = getConversationKey(startConversation)
+
+  // 2. 三路并行起跑（probe 与两条上传无依赖，封面上传等 probe 出 cover 后立即接力）
+  // 2.1 视频本体上传：立即 catch 兜底为 url=undefined，由 step 3.2 拿不到 url 时放弃；同时让 promise 不再 floating
+  const videoForm = new FormData()
+  videoForm.append('file', file)
+  const videoUploadPromise = (updateFile(videoForm) as Promise<{ data?: string }>).catch((e) => {
+    console.warn('[IM] 视频本体上传失败', e)
+    return { data: undefined as string | undefined }
+  })
+  // 2.2 probe 拿元信息 + 封面 blob：解码失败降级为空 probe，不阻断视频上传
+  const probePromise = probeVideoFile(file).catch((e): VideoProbe => {
+    console.warn('[IM] 视频元信息加载失败，降级为仅 url + size', e)
+    return {}
+  })
+  // 2.3 封面上传：等 probe.cover 出来后接力起跑，与视频上传竞速；失败降级 coverUrl 为空
+  const coverUploadPromise = probePromise.then(async (probe) => {
+    if (!probe.cover) {
+      return { probe, coverUrl: undefined as string | undefined }
+    }
+    try {
+      const coverForm = new FormData()
+      coverForm.append(
+        'file',
+        new File([probe.cover], `cover-${Date.now()}.jpg`, { type: 'image/jpeg' })
+      )
+      const coverUrl = ((await updateFile(coverForm)) as { data?: string })?.data || undefined
+      return { probe, coverUrl }
+    } catch (e) {
+      console.warn('[IM] 视频封面上传失败', e)
+      return { probe, coverUrl: undefined as string | undefined }
+    }
+  })
+
+  // 3. 收口校验
+  // 3.1 等两条上传链路汇合
+  const [videoRes, { probe, coverUrl }] = await Promise.all([
+    videoUploadPromise,
+    coverUploadPromise
+  ])
+  // 3.2 视频本体没 url 直接放弃（封面也不再有意义）
+  const url = videoRes?.data
+  if (!url) {
+    return
+  }
+  // 3.3 校验会话仍是发送时锁定的那个，否则放弃；视频链路耗时长，这个窗口很实际
+  const currentConversation = conversationStore.activeConversation
+  if (!currentConversation || getConversationKey(currentConversation) !== startKey) {
+    console.warn('[IM] 视频上传期间切换了会话，放弃发送', { startKey })
+    return
+  }
+
+  // 4. 拼 VideoMessage payload 走通用 sendRaw（与图片 / 文件 / 语音同链路）
+  await sendRaw(
+    ImMessageType.VIDEO,
+    serializeMessage<VideoMessage>({
+      url,
+      coverUrl,
+      duration: probe.duration,
+      width: probe.width,
+      height: probe.height,
+      size: file.size
+    })
+  )
+}
+
+/** 视频选完即上传 + 发送 VIDEO 消息（不放入 editor，整体走 sendRaw） */
+async function onVideoPicked(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (file) {
+    await uploadAndSendVideo(file)
+  }
 }
 </script>
 

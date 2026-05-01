@@ -27,11 +27,31 @@
     <span>{{ formatSeconds(voicePayload.duration ?? 0) }}</span>
   </span>
 
-  <!-- 视频：图标 + 占位文案 + 大小 -->
-  <span v-else-if="isVideo" class="inline-flex gap-1.5 items-center">
-    <Icon icon="ant-design:video-camera-filled" :size="16" color="#9c27b0" />
-    <span>[视频]</span>
-    <span v-if="videoPayload?.size" class="text-12px text-[var(--el-text-color-secondary)]">
+  <!-- 视频：封面缩略图 + 时长 + 大小；封面缺失时降级图标占位 -->
+  <span v-else-if="isVideo && videoPayload" class="inline-flex gap-1.5 items-center">
+    <span
+      v-if="videoPayload.coverUrl"
+      class="relative inline-block w-60px h-60px rounded overflow-hidden align-middle cursor-pointer"
+      :title="videoPayload.url ? '点击新标签播放' : ''"
+      @click="openVideo"
+    >
+      <img :src="videoPayload.coverUrl" class="w-full h-full object-cover" />
+      <Icon
+        icon="ant-design:play-circle-filled"
+        :size="22"
+        color="#fff"
+        class="absolute inset-0 m-auto pointer-events-none"
+        style="filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))"
+      />
+    </span>
+    <span v-else class="inline-flex gap-1.5 items-center">
+      <Icon icon="ant-design:video-camera-filled" :size="16" color="#9c27b0" />
+      <span>[视频]</span>
+    </span>
+    <span v-if="videoPayload.duration" class="text-12px text-[var(--el-text-color-secondary)]">
+      {{ formatSeconds(videoPayload.duration) }}
+    </span>
+    <span v-if="videoPayload.size" class="text-12px text-[var(--el-text-color-secondary)]">
       {{ formatFileSize(videoPayload.size) }}
     </span>
   </span>
@@ -108,6 +128,14 @@ const voicePayload = computed(() =>
 const videoPayload = computed(() =>
   isVideo.value ? parseMessage<VideoMessage>(props.content || '') : null
 )
+
+/** 点击视频封面：在新标签打开视频 url（不在管理后台内嵌播放，避免列表里多个 video 同时占资源） */
+function openVideo() {
+  const url = videoPayload.value?.url
+  if (url) {
+    window.open(url, '_blank')
+  }
+}
 
 /** 文件图标：按扩展名分配 icon + 颜色，对齐 home 端 MessageItem 的观感 */
 const fileIconInfo = computed<{ icon: string; color: string }>(() => {
