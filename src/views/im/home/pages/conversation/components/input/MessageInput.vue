@@ -71,7 +71,7 @@
           <el-tooltip content="语音消息" placement="top">
             <span
               class="message-input__tool inline-flex items-center justify-center box-content p-1.5 cursor-pointer rounded transition-colors hover:bg-[var(--el-fill-color)]"
-              @click="voiceVisible = true"
+              @click.stop="openVoice"
             >
               <Icon icon="ant-design:audio-outlined" :size="18" />
             </span>
@@ -113,6 +113,13 @@
           class="bottom-full left-3 mb-2"
           @select="insertText"
         />
+
+        <!-- 语音录制面板：与表情面板同处工具栏，bottom-full 向上弹出，避免离触发的麦克风图标过远 -->
+        <VoiceRecorder
+          v-model="voiceVisible"
+          class="bottom-full left-3 mb-2"
+          @send="onVoiceSend"
+        />
       </div>
     </div>
 
@@ -126,9 +133,6 @@
       :owner-id="groupOwnerId"
       @select="onMentionSelect"
     />
-
-    <!-- 语音录制对话框 -->
-    <VoiceRecorder v-model="voiceVisible" @send="onVoiceSend" />
 
     <!-- 隐藏的文件选择器 -->
     <input ref="imageInputRef" type="file" accept="image/*" hidden @change="onImagePicked" />
@@ -508,8 +512,12 @@ function onInput() {
 
 // ==================== 表情 ====================
 const emojiVisible = ref(false)
+/** 切换表情面板；打开时互斥关掉语音面板 */
 function toggleEmoji() {
   emojiVisible.value = !emojiVisible.value
+  if (emojiVisible.value) {
+    voiceVisible.value = false
+  }
 }
 
 // ==================== @ 成员选择（群聊） ====================
@@ -768,6 +776,11 @@ async function onFilePicked(e: Event) {
 
 // ==================== 语音 ====================
 const voiceVisible = ref(false)
+/** 打开语音录制面板；互斥关掉表情面板 */
+function openVoice() {
+  voiceVisible.value = true
+  emojiVisible.value = false
+}
 /** VoiceRecorder 录完后回传 blob，包成 webm 文件上传，发送 VOICE 消息 */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })

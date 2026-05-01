@@ -9,7 +9,7 @@
   <div
     v-if="visible"
     ref="rootRef"
-    class="absolute z-100 w-80 p-2 rounded-md bg-[var(--el-bg-color)] shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
+    class="im-popover-arrow absolute z-100 w-80 p-2 rounded-md bg-[var(--el-bg-color)] shadow-[0_4px_16px_rgba(0,0,0,0.12)]"
     @click.stop
   >
     <el-scrollbar max-height="240px">
@@ -98,4 +98,18 @@ onUnmounted(() => {
   document.removeEventListener('click', handleDocumentClick)
 })
 </script>
+
+<style scoped>
+/* 底部小三角：指向触发图标，仿微信 PC 气泡指针；left 偏移对应表情按钮（工具栏 1st icon） */
+.im-popover-arrow::after {
+  content: '';
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 10px;
+  border-style: solid;
+  border-width: 6px 6px 0 6px;
+  border-color: var(--el-bg-color) transparent transparent transparent;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
+}
+</style>
 
