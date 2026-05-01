@@ -484,6 +484,8 @@ function onPaste(e: ClipboardEvent) {
   const text = e.clipboardData?.getData('text/plain') || ''
   if (text) {
     nativeExec('insertText', text)
+    // @paste.prevent 阻断了浏览器默认 input 事件，需手动同步草稿 / canSend，与 insertText() 路径一致
+    syncEditorState()
   }
 }
 
