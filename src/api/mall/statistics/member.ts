@@ -79,7 +79,7 @@ export const getMemberSummary = () => {
 export const getMemberAnalyse = (params: MemberAnalyseReqVO) => {
   return request.get<MemberAnalyseRespVO>({
     url: '/statistics/member/analyse',
-    params: { times: [formatDate(params.times[0]), formatDate(params.times[1])] }
+    params: { times: [formatDate(params.times[0] as any), formatDate(params.times[1] as any)] }
   })
 }
 
@@ -118,6 +118,6 @@ export const getMemberRegisterCountList = (
 ) => {
   return request.get<MemberRegisterCountRespVO[]>({
     url: '/statistics/member/register-count-list',
-    params: { times: [formatDate(beginTime), formatDate(endTime)] }
+    params: { times: [formatDate(beginTime as any), formatDate(endTime as any)] }
   })
 }
