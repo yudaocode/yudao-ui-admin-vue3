@@ -499,11 +499,21 @@ const isAtMe = computed(() => {
   return (props.message.atUserIds || []).includes(myId)
 })
 
+/** 右键菜单 key 常量；push 端和分发端从同一处取，typo 编译期就能抓 */
+const MENU_KEYS = {
+  REPLY: 'REPLY',
+  RECALL: 'RECALL',
+  DELETE: 'DELETE'
+} as const
+type MenuKey = (typeof MENU_KEYS)[keyof typeof MENU_KEYS]
+
+/** 撤回时间窗：自己发送的消息超过这个时长就不能再撤回，菜单回退为「删除」（对齐微信 2 分钟） */
+const RECALL_WINDOW_MS = 2 * 60 * 1000
+
 /**
  * 右键菜单项：
- * - 回复：仅已落库（id≠0）且未撤回的消息可引用，引用块写入 draftStore.reply
- * - 删除：从本地消息列表移除（不动后端）
- * - 撤回：仅自己发送、已送达（有 id）的消息
+ * - 引用：已落库（id≠0）+ 未撤回的消息可引用，引用块写入 draftStore.reply
+ * - 撤回 / 删除：互斥；自己发送 + 已落库 + 未撤回 + 2 分钟内显示「撤回」（推服务器），其它显示「删除」（仅本地清）
  *
  * TIP_TIME / TIP_TEXT 态不弹菜单
  */
@@ -512,26 +522,56 @@ async function handleContextMenu(e: MouseEvent) {
     return
   }
 
-  const items: Array<{ key: string; name: string; disabled?: boolean }> = []
-  // "回复"必须满足 已落库(id≠0) + 未撤回;本地占位消息不允许引用,避免引用一条还没拿到 id 的消息
-  // TODO @AI：应该是“引用”。你看看注释，中文，是不是都要调整下。
+  const items: Array<{
+    key: MenuKey
+    name: string
+    disabled?: boolean
+    divided?: boolean
+    danger?: boolean
+    icon?: string
+  }> = []
+  // 「引用」：已落库（id≠0）+ 未撤回；本地占位消息（id=0）不允许引用，避免引用一条还没拿到 id 的消息
   if (!!props.message.id && !isRecall.value) {
-    items.push({ key: 'REPLY', name: '回复' })
+    items.push({
+      key: MENU_KEYS.REPLY,
+      name: '引用',
+      icon: 'bxs:quote-alt-left'
+    })
   }
-  // TODO @AI：这里加个注释；
-  if (props.message.selfSend && !!props.message.id && !isRecall.value) {
-    items.push({ key: 'RECALL', name: '撤回' })
+  // 「撤回 / 删除」二选一：
+  // - 自己发送 + 已落库（id≠0）+ 未撤回 + 在撤回窗口内 → 撤回（推服务器把消息态置 RECALL）
+  // - 其它（对方消息 / 已撤回 / 超出撤回窗口）→ 删除（仅本地清，不动后端）
+  // divided 把这一项和上面的「引用」隔开，danger 显红对齐微信
+  const canRecall =
+    props.message.selfSend &&
+    !!props.message.id &&
+    !isRecall.value &&
+    Date.now() - props.message.sendTime <= RECALL_WINDOW_MS
+  if (canRecall) {
+    items.push({
+      key: MENU_KEYS.RECALL,
+      name: '撤回',
+      icon: 'ant-design:undo-outlined',
+      divided: true,
+      danger: true
+    })
+  } else {
+    items.push({
+      key: MENU_KEYS.DELETE,
+      name: '删除',
+      icon: 'ant-design:delete-outlined',
+      divided: true,
+      danger: true
+    })
   }
-  // "删除"对所有消息开放（纯本地清理，无后端影响）；"撤回"必须满足 自己发 + 已落库（id≠0）+ 未撤回
-  // TODO @AI：删除应该有个 --- 横线；然后是红色的，对齐微信；
-  items.push({ key: 'DELETE', name: '删除' })
+
   // 把菜单渲染交给全局 uiStore（单例，避免每条消息都挂一份菜单 DOM）；callback 按 key 分发
   uiStore.openContextMenu({ x: e.clientX, y: e.clientY }, items, async (item) => {
-    if (item.key === 'REPLY') {
+    if (item.key === MENU_KEYS.REPLY) {
       handleReply()
-    } else if (item.key === 'RECALL') {
+    } else if (item.key === MENU_KEYS.RECALL) {
       await handleRecall()
-    } else if (item.key === 'DELETE') {
+    } else if (item.key === MENU_KEYS.DELETE) {
       handleDelete()
     }
   })
