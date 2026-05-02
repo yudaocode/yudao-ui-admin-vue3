@@ -27,6 +27,18 @@ export interface ImGroupUpdateReqVO {
   notice?: string // 群公告
 }
 
+// 添加 / 撤销群管理员 Request VO
+export interface ImGroupAdminReqVO {
+  groupId: number // 群编号
+  userIds: number[] // 目标用户编号列表
+}
+
+// 群主转让 Request VO
+export interface ImGroupTransferOwnerReqVO {
+  groupId: number // 群编号
+  newOwnerUserId: number // 新群主用户编号
+}
+
 // 获得当前登录用户的群列表
 export const getMyGroupList = () => {
   return request.get<ImGroupRespVO[]>({ url: '/im/group/list' })
@@ -50,4 +62,19 @@ export const updateGroup = (data: ImGroupUpdateReqVO) => {
 // 解散群
 export const dissolveGroup = (id: number | string) => {
   return request.delete<boolean>({ url: '/im/group/dissolve', params: { id } })
+}
+
+// 添加群管理员（仅群主可调）
+export const addGroupAdmin = (data: ImGroupAdminReqVO) => {
+  return request.put<boolean>({ url: '/im/group/add-admin', data })
+}
+
+// 撤销群管理员（仅群主可调）
+export const removeGroupAdmin = (data: ImGroupAdminReqVO) => {
+  return request.put<boolean>({ url: '/im/group/remove-admin', data })
+}
+
+// 转让群主（仅老群主可调；旧群主转让后降为普通成员）
+export const transferGroupOwner = (data: ImGroupTransferOwnerReqVO) => {
+  return request.put<boolean>({ url: '/im/group/transfer-owner', data })
 }

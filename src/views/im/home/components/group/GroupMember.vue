@@ -38,6 +38,7 @@ export interface GroupMemberLite {
   showName: string // 展示昵称：好友备注 > 用户群备注（displayUserName） > 真实昵称（nickname），给"显示给用户看"的位置用（行内文字、@候选标签等）
   avatar?: string
   status?: number
+  role?: number // 成员角色，仅在群信息抽屉等需要展示角色标签的场景透传；@候选 / 已读列表等场景可不传
 }
 
 const props = withDefaults(

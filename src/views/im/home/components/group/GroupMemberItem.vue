@@ -23,6 +23,14 @@
     >
       {{ member.showName }}
     </div>
+    <!-- 角色标签：群主 / 管理员；普通成员不显示。仅在传入 member.role 时生效 -->
+    <span
+      v-if="roleLabel"
+      class="px-1.5 py-px rounded text-xs whitespace-nowrap"
+      :class="roleLabelClass"
+    >
+      {{ roleLabel }}
+    </span>
     <slot></slot>
   </div>
 </template>
@@ -32,6 +40,8 @@ import { computed } from 'vue'
 
 import UserAvatar from '../user/UserAvatar.vue'
 import type { GroupMemberLite } from './GroupMember.vue'
+import { ImGroupMemberRole } from '../../../utils/constants'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 
 defineOptions({ name: 'ImGroupMemberItem' })
 
@@ -52,4 +62,21 @@ defineEmits<{
 }>()
 
 const avatarSize = computed(() => Math.ceil(props.height * 0.75))
+
+/** 角色标签文案：普通成员不显示，其余取 im_group_member_role 字典 label */
+// TODO DONE @AI：排除成员，剩余通过字典去 get 下，这样逻辑更统一！
+const roleLabel = computed(() => {
+  if (props.member.role == null || props.member.role === ImGroupMemberRole.NORMAL) {
+    return ''
+  }
+  return getDictLabel(DICT_TYPE.IM_GROUP_MEMBER_ROLE, props.member.role)
+})
+
+/** 角色标签样式：群主用主色；管理员用次要色 */
+const roleLabelClass = computed(() => {
+  if (props.member.role === ImGroupMemberRole.OWNER) {
+    return 'text-[var(--el-color-primary)] bg-[var(--el-color-primary-light-9)]'
+  }
+  return 'text-[var(--el-color-info)] bg-[var(--el-fill-color)]'
+})
 </script>

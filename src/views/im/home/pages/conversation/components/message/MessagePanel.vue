@@ -5,17 +5,26 @@
       <div
         class="message-panel__header flex items-center justify-between h-14 px-5 bg-[var(--el-fill-color-light)]"
       >
-        <span class="flex items-baseline gap-1.5 min-w-0">
-          <span
-            class="overflow-hidden text-base font-medium truncate text-[var(--el-text-color-primary)]"
-          >
-            {{ conversationStore.activeConversation?.name || '' }}
+        <span class="flex flex-col min-w-0">
+          <span class="flex items-baseline gap-1.5 min-w-0">
+            <span
+              class="overflow-hidden text-base font-medium truncate text-[var(--el-text-color-primary)]"
+            >
+              {{ conversationStore.activeConversation?.name || '' }}
+            </span>
+            <span
+              v-if="isGroup && headerMemberCount > 0"
+              class="flex-shrink-0 text-sm text-[var(--el-text-color-secondary)]"
+            >
+              ({{ headerMemberCount }})
+            </span>
           </span>
+          <!-- 副标题：备注 ≠ 群名时展示原群名，提示用户当前看到的主名是自己设的备注 -->
           <span
-            v-if="isGroup && headerMemberCount > 0"
-            class="flex-shrink-0 text-sm text-[var(--el-text-color-secondary)]"
+            v-if="headerSubtitle"
+            class="overflow-hidden text-xs truncate text-[var(--el-text-color-secondary)]"
           >
-            ({{ headerMemberCount }})
+            {{ headerSubtitle }}
           </span>
         </span>
         <div class="flex gap-3 items-center">
@@ -170,6 +179,13 @@ const headerMemberCount = computed(() => {
   return group?.memberCount ?? group?.members?.length ?? 0
 })
 
+/** 顶部副标题：仅当群备注 ≠ 原群名时显示原群名（对齐微信 PC 双行 header） */
+const headerSubtitle = computed(() => {
+  const remark = groupInfo.value?.groupRemark
+  const name = groupInfo.value?.name
+  return remark && name && remark !== name ? name : ''
+})
+
 const BOTTOM_THRESHOLD = 80 // "是否停留在底部"的阈值：距离底部 < 80px 视为底部
 const showJumpToBottom = ref(false) // 当前是否已不在底部（显示"回到底部"按钮）
 const newMessageCount = ref(0) // 不在底部期间累计的新消息数
@@ -182,7 +198,13 @@ const newMessageCount = ref(0) // 不在底部期间累计的新消息数
  * 必须等 store 就位才有值（这些字段在 conversation 里没有）
  */
 const groupInfo = computed<
-  (GroupLite & { notice?: string; remarkNickName?: string; ownerId?: number }) | undefined
+  | (GroupLite & {
+      notice?: string
+      remarkNickName?: string
+      groupRemark?: string
+      ownerId?: number
+    })
+  | undefined
 >(() => {
   const conversation = conversationStore.activeConversation
   if (!conversation || conversation.type !== ImConversationType.GROUP) {
@@ -195,6 +217,7 @@ const groupInfo = computed<
     showGroupName: group?.name || conversation.name,
     showImage: group?.avatar || conversation.avatar,
     notice: group?.notice,
+    groupRemark: group?.groupRemark,
     ownerId: group?.ownerUserId,
     memberCount: group?.memberCount
   }
@@ -215,7 +238,8 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
       showName: getMemberDisplayName(member, friend),
       nickname: member.nickname,
       avatar: member.avatar,
-      status: member.status
+      status: member.status,
+      role: member.role
     }
   })
 })

@@ -731,7 +731,7 @@ export const useConversationStore = defineStore('imConversationStore', {
      *
      * 调用方负责把好友 / 群的信息整理成 Conversation 视角的字段：
      * - 私聊：name = friend.nickname；avatar = friend.avatar
-     * - 群聊：name = group.name（或叠加 displayGroupName）；avatar = group.avatar
+     * - 群聊：name = group.name（或叠加 groupRemark）；avatar = group.avatar
      */
     updateConversation(
       type: number,

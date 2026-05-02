@@ -65,6 +65,16 @@ export const ImGroupReceiptStatus = {
   DONE: 2 // 已完成
 } as const
 
+/** 群成员角色（对齐后端 ImGroupMemberRoleEnum） */
+export const ImGroupMemberRole = {
+  OWNER: 1, // 群主
+  ADMIN: 2, // 管理员
+  NORMAL: 3 // 普通成员
+} as const
+
+/** 群管理员人数上限（对齐后端 GROUP_ADMIN_MAX_COUNT） */
+export const GROUP_ADMIN_MAX_COUNT = 3
+
 /** 每次拉取私聊消息的最大条数（后端上限 1000，前端取保守值 100） */
 export const PRIVATE_MESSAGE_PULL_SIZE = 100
 

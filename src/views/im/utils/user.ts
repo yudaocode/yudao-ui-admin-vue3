@@ -39,9 +39,9 @@ export function getMemberDisplayName(
   return friend?.displayName || member.displayUserName || member.nickname
 }
 
-/** 群显示名：当前用户对该群的备注（displayGroupName） > 群名（name） */
-export function getGroupDisplayName(group: Pick<Group, 'name' | 'displayGroupName'>): string {
-  return group.displayGroupName || group.name
+/** 群显示名：当前用户对该群的备注（groupRemark） > 群名（name） */
+export function getGroupDisplayName(group: Pick<Group, 'name' | 'groupRemark'>): string {
+  return group.groupRemark || group.name
 }
 
 /**

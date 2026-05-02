@@ -333,5 +333,6 @@ export enum DICT_TYPE {
   IM_GROUP_MESSAGE_STATUS = 'im_group_message_status', // IM 群聊消息状态：0=正常 / 2=已撤回
   IM_GROUP_MESSAGE_RECEIPT_STATUS = 'im_group_message_receipt_status', // IM 群消息回执状态
   IM_FRIEND_STATUS = 'im_friend_status', // IM 好友状态
-  IM_GROUP_STATUS = 'im_group_status' // IM 群状态
+  IM_GROUP_STATUS = 'im_group_status', // IM 群状态
+  IM_GROUP_MEMBER_ROLE = 'im_group_member_role' // IM 群成员角色
 }

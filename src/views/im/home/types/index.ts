@@ -115,8 +115,8 @@ export interface Group {
   ownerUserId?: number // 群主用户编号
 
   // ========== 前端扩展字段（user-per-group 维度） ==========
-  muted?: boolean // 是否免打扰。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
-  displayGroupName?: string // 群显示备注。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
+  muted?: boolean // 是否免打扰。从当前用户的 GroupMember 回填
+  groupRemark?: string // 群备注。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
   members?: GroupMember[] // 群成员缓存（按需懒加载）
   membersLoaded?: boolean // members 是否"完整加载"——只有整群 loadGroupMembers / fetchGroupMembers 命中时为 true；fetchGroupMember 单成员补齐不置位，避免 fetchGroupMembers(force=false) 命中缓存时误判整群已加载
   memberCount?: number // 成员总数
@@ -132,6 +132,7 @@ export interface GroupMember {
   nickname: string // 用户昵称
   displayUserName?: string // 该成员在群内自定义昵称（每个 member 一份；不与 nickname 合并，由消费方按需取舍）
   status?: number // 在群 / 退群状态，对齐 CommonStatusEnum
+  role?: number // 成员角色，参见 ImGroupMemberRole 枚举：1=群主 2=管理员 3=普通成员
 
   // ========== 前端扩展字段 ==========
   isOwner?: boolean // 是否群主（前端从 Group.ownerUserId 计算）

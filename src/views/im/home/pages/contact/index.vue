@@ -125,8 +125,7 @@ const groups = computed<GroupLite[]>(() =>
   groupStore.groups.map((group: Group) => ({
     id: group.id,
     name: group.name,
-    // 优先用群备注 displayGroupName，没设置时回落到原群名；避免点"进入群聊"时把已同步的备注会话名刷回原名
-    showGroupName: getGroupDisplayName(group),
+    showGroupName: getGroupDisplayName(group), // 优先用群备注 groupRemark，没设置时回落到原群名；避免点"进入群聊"时把已同步的备注会话名刷回原名
     showImage: group.avatar,
     showImageThumb: group.avatar,
     memberCount: group.memberCount

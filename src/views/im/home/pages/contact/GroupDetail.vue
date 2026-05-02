@@ -85,7 +85,8 @@ function convertGroupMemberLite(member: GroupMember, friend: Friend | undefined)
     showName: getMemberDisplayName(member, friend),
     nickname: member.nickname,
     avatar: member.avatar,
-    status: member.status
+    status: member.status,
+    role: member.role
   }
 }
 </script>

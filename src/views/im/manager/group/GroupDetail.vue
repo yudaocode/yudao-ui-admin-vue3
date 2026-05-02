@@ -40,6 +40,11 @@
         </template>
       </el-table-column>
       <el-table-column label="用户编号" prop="userId" width="100" align="center" />
+      <el-table-column label="角色" prop="role" width="100" align="center">
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.IM_GROUP_MEMBER_ROLE" :value="row.role" />
+        </template>
+      </el-table-column>
       <el-table-column label="昵称" prop="nickname" min-width="120" show-overflow-tooltip />
       <el-table-column
         label="组内显示名"
@@ -50,12 +55,12 @@
         <template #default="{ row }">{{ row.displayUserName || '-' }}</template>
       </el-table-column>
       <el-table-column
-        label="群显示备注"
-        prop="displayGroupName"
+        label="群备注"
+        prop="groupRemark"
         min-width="120"
         show-overflow-tooltip
       >
-        <template #default="{ row }">{{ row.displayGroupName || '-' }}</template>
+        <template #default="{ row }">{{ row.groupRemark || '-' }}</template>
       </el-table-column>
       <el-table-column label="免打扰" prop="muted" width="80" align="center">
         <template #default="{ row }">

@@ -13,7 +13,7 @@ import {
   type ImGroupMemberRespVO
 } from '@/api/im/group/member'
 import { useConversationStore } from './conversationStore'
-import { ImConversationType } from '../../utils/constants'
+import { ImConversationType, ImGroupMemberRole } from '../../utils/constants'
 import {
   getCurrentUserId,
   imStorage,
@@ -170,7 +170,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       // 拉取当前登录用户加入的所有群（不带成员；成员按需再走 fetchGroupMembers）
       const list = await apiGetMyGroupList()
       const fresh = (list || []).map(convertGroup)
-      // 合并而非全量替换：保留 user-per-group 字段（muted / displayGroupName）+ 成员缓存——这些字段不在 ImGroupRespVO 里，全量替换会把它们冲掉
+      // 合并而非全量替换：muted / groupRemark / 成员缓存这些字段不在 ImGroupRespVO 里，得从旧 group 保留
       const groupMap = new Map(this.groups.map((group) => [group.id, group]))
       this.groups = fresh.map((group) => {
         const existing = groupMap.get(group.id)
@@ -182,7 +182,7 @@ export const useGroupStore = defineStore('imGroupStore', {
           members: existing.members,
           memberCount: existing.memberCount ?? group.memberCount,
           muted: existing.muted ?? group.muted,
-          displayGroupName: existing.displayGroupName,
+          groupRemark: existing.groupRemark,
           membersLoaded: existing.membersLoaded
         }
       })
@@ -230,8 +230,7 @@ export const useGroupStore = defineStore('imGroupStore', {
         return inflight
       }
       const promise = (async () => {
-        // 拉接口 + 单 pass 转换：同时捕获 me 的原始 VO，给下面回填 user-per-group 字段（muted / displayGroupName）用
-        // convertGroupMember 不带 muted / displayGroupName（已搬到 Group 上），所以从 raw VO 里捞
+        // 拉接口 + 单 pass 转换：同时捕获 me 的原始 VO，给下面回填 user-per-group 字段（muted / groupRemark）用
         const list = await apiGetGroupMemberList(groupId)
         let meRaw: ImGroupMemberRespVO | undefined
         const members = (list || []).map((member) => {
@@ -241,7 +240,7 @@ export const useGroupStore = defineStore('imGroupStore', {
           return convertGroupMember(member, groupId)
         })
         const muted = !!meRaw?.muted
-        const displayGroupName = meRaw?.displayGroupName || ''
+        const groupRemark = meRaw?.groupRemark || ''
 
         // 必须 await 之后重新 getGroup，避免 fetchGroups 已并发写入真实 group 的 race
         const group = this.getGroup(groupId)
@@ -256,18 +255,17 @@ export const useGroupStore = defineStore('imGroupStore', {
             members,
             memberCount: members.length,
             muted,
-            displayGroupName,
+            groupRemark,
             membersLoaded: true
           })
         } else {
           group.members = members
           group.memberCount = members.length
           group.membersLoaded = true
-          // muted / displayGroupName 任一变化就同步到 conversation + 触发 saveGroups；
-          // 后续，displayGroupName 变化要刷会话名（"我对该群的备注"是会话列表的展示名）
-          if (group.muted !== muted || group.displayGroupName !== displayGroupName) {
+          // muted / groupRemark 任一变化才同步到 conversation 和 IDB；groupRemark 变化要顺带刷会话名
+          if (group.muted !== muted || group.groupRemark !== groupRemark) {
             group.muted = muted
-            group.displayGroupName = displayGroupName
+            group.groupRemark = groupRemark
             groupFieldsChanged = true
             const conversationStore = useConversationStore()
             conversationStore.updateConversation(ImConversationType.GROUP, groupId, {
@@ -294,7 +292,7 @@ export const useGroupStore = defineStore('imGroupStore', {
     /**
      * 按 (groupId, memberUserId) 单成员补齐——deriveLastSenderDisplayName 兜底场景用
      *
-     * 跟 fetchGroupMembers 区别：只拉这一个成员，不动 me 的 muted / displayGroupName（不是 me 的话拿不到）；
+     * 跟 fetchGroupMembers 区别：只拉这一个成员，不动 me 的 muted / groupRemark（不是 me 的话拿不到）；
      * 命中时把成员 upsert 进 group.members 数组并落 IDB，让后续渲染能用 displayUserName
      */
     fetchGroupMember(groupId: number, memberUserId: number): Promise<GroupMember | null> {
@@ -395,6 +393,44 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.saveGroups()
     },
 
+    /** 批量更新群成员角色；本地不命中则忽略，等 fetchGroupMembers 兜底 */
+    updateMembersRole(groupId: number, userIds: number[], role: number) {
+      const group = this.getGroup(groupId)
+      if (!group?.members?.length) {
+        return
+      }
+      // TODO @AI：计算是否更新？【优化注释】
+      const idSet = new Set(userIds)
+      let changed = false
+      // TODO @AI：newMembers 更合适？
+      // TODO @AI：m 是不是改成 member；
+      const next = group.members.map((m) => {
+        if (!idSet.has(m.userId) || m.role === role) {
+          return m
+        }
+        changed = true
+        return { ...m, role }
+      })
+      // TODO @AI：有更新则进行替换，补充下注释【优化注释】
+      if (changed) {
+        group.members = next
+      }
+    },
+
+    /** 群主转让：群表 ownerUserId 改为新值；旧群主 role → NORMAL；新群主 role → OWNER */
+    transferOwner(groupId: number, oldOwnerId: number, newOwnerId: number) {
+      const group = this.getGroup(groupId)
+      if (!group) {
+        return
+      }
+      if (group.ownerUserId !== newOwnerId) {
+        group.ownerUserId = newOwnerId
+      }
+      this.updateMembersRole(groupId, [oldOwnerId], ImGroupMemberRole.NORMAL)
+      this.updateMembersRole(groupId, [newOwnerId], ImGroupMemberRole.OWNER)
+      this.saveGroups()
+    },
+
     /** 切账号时仅清 in-memory，IDB 按 userId 分桶天然隔离，回切秒开 */
     clear() {
       this.groups = []
@@ -424,7 +460,8 @@ function convertGroupMember(member: ImGroupMemberRespVO, groupId: number): Group
     nickname: member.nickname || String(member.userId),
     avatar: member.avatar,
     displayUserName: member.displayUserName,
-    status: member.status
+    status: member.status,
+    role: member.role
   }
 }
 
