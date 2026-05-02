@@ -18,6 +18,14 @@
     {{ tipText }}
   </div>
 
+  <!-- 群广播事件（1501-1520 / 1530）：跟 TIP_TEXT 同样的居中灰色样式，文案按 type 拼装 -->
+  <div
+    v-else-if="isGroupNotificationMessage"
+    class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-secondary)]"
+  >
+    {{ groupNotificationText }}
+  </div>
+
   <!-- 撤回消息：整行展示灰色 tip 文案 -->
   <div
     v-else-if="isRecall"
@@ -219,7 +227,8 @@ import {
   ImMessageType,
   ImMessageStatus,
   ImGroupReceiptStatus,
-  ImConversationType
+  ImConversationType,
+  isGroupNotification
 } from '../../../../../utils/constants'
 import {
   buildQuoteFromMessage,
@@ -244,7 +253,8 @@ import { useDraftStore } from '../../../../store/draftStore'
 import {
   getMemberDisplayName,
   getSenderDisplayName,
-  getSenderRealNickname
+  getSenderRealNickname,
+  resolveGroupNotificationText
 } from '../../../../../utils/user'
 import { useImUiStore } from '../../../../store/uiStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
@@ -352,6 +362,10 @@ const textContent = computed(() => parseMessage<TextMessage>(props.message.conte
 
 /** TIP_TEXT 文案：与 conversationStore.resolveLastContent / MessageHistory.renderContent 共用 helper，避免兼容性逻辑分裂 */
 const tipText = computed(() => resolveTipText(props.message.content))
+
+/** 群广播事件（1501-1520 / 1530） */
+const isGroupNotificationMessage = computed(() => isGroupNotification(props.message.type))
+const groupNotificationText = computed(() => resolveGroupNotificationText(props.message))
 const imagePayload = computed(() =>
   isImage.value ? parseMessage<ImageMessage>(props.message.content) : null
 )

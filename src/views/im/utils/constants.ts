@@ -13,11 +13,52 @@ export const ImMessageType = {
   FRIEND_ADD: 100, // 好友添加
   FRIEND_DELETE: 101, // 好友删除
   FRIEND_UPDATE: 102, // 好友更新（客户端收到后自行拉取）
-  GROUP_CREATE: 200, // 群创建
-  GROUP_UPDATE: 201, // 群信息变更
-  GROUP_DELETE: 202, // 群删除（解散 / 退群 / 踢出均用此类型）
-  GROUP_MEMBER_UPDATE: 203 // 群成员信息变更（客户端收到后自行拉取）
+  // 群事件（1501-1520 直接复用 OpenIM 段位编号；1530+ 我们独有扩展；persistent=true 广播 + persistent=false 个人信号）
+  // 1500 mirror OpenIM GroupNotificationBegin marker，不使用
+  GROUP_CREATE: 1501, // 群创建
+  GROUP_INFO_UPDATE: 1502, // 群信息变更，NAME / NOTICE 之外字段兜底
+  // 1503 GROUP_JOIN_APPLICATION TODO 未实现：入群申请
+  GROUP_MEMBER_QUIT: 1504, // 成员退群
+  // 1505 GROUP_APPLICATION_ACCEPTED TODO 未实现
+  // 1506 GROUP_APPLICATION_REJECTED TODO 未实现
+  GROUP_OWNER_TRANSFER: 1507, // 群主转让
+  GROUP_MEMBER_KICK: 1508, // 成员被移出
+  GROUP_MEMBER_INVITE: 1509, // 成员加入
+  // 1510 GROUP_MEMBER_ENTER TODO 未实现：自由进群
+  GROUP_DISSOLVE: 1511, // 群解散
+  // 1512 GROUP_MEMBER_MUTED TODO 未实现：单成员禁言
+  // 1513 GROUP_MEMBER_CANCEL_MUTED TODO 未实现
+  // 1514 GROUP_MUTED TODO 未实现：全群禁言
+  // 1515 GROUP_CANCEL_MUTED TODO 未实现
+  GROUP_MEMBER_NICKNAME_UPDATE: 1516, // 成员昵称变更（窄化到 displayUserName）
+  GROUP_ADMIN_ADD: 1517, // 添加管理员
+  GROUP_ADMIN_REMOVE: 1518, // 撤销管理员
+  GROUP_NOTICE_UPDATE: 1519, // 群公告变更
+  GROUP_NAME_UPDATE: 1520, // 群名变更
+  // 1530+ 我们独有扩展段
+  GROUP_MEMBER_SETTING_UPDATE: 1530 // 群成员个人设置变更：muted / groupRemark 多端同步（个人）
 } as const
+
+/** 群广播事件 type 集合：1501-1520 OpenIM 段位（除 1530 个人设置同步），前端按 type 分发到 applyGroupNotification */
+const ImGroupNotificationTypes: number[] = [
+  ImMessageType.GROUP_CREATE,
+  ImMessageType.GROUP_NAME_UPDATE,
+  ImMessageType.GROUP_NOTICE_UPDATE,
+  ImMessageType.GROUP_INFO_UPDATE,
+  ImMessageType.GROUP_DISSOLVE,
+  ImMessageType.GROUP_MEMBER_INVITE,
+  ImMessageType.GROUP_MEMBER_QUIT,
+  ImMessageType.GROUP_MEMBER_KICK,
+  ImMessageType.GROUP_MEMBER_NICKNAME_UPDATE,
+  ImMessageType.GROUP_ADMIN_ADD,
+  ImMessageType.GROUP_ADMIN_REMOVE,
+  ImMessageType.GROUP_OWNER_TRANSFER
+]
+
+/** 判断是否「群广播事件」 */
+export function isGroupNotification(type: number): boolean {
+  return ImGroupNotificationTypes.includes(type)
+}
 
 /** IM 普通消息类型集合（聊天气泡中显示，并作为会话最后一条摘要） */
 const ImMessageTypeNormals: number[] = [

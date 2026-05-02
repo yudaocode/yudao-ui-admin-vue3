@@ -76,7 +76,15 @@
     [回执]
   </span>
 
-  <!-- 系统事件类（FRIEND_* / GROUP_*）：content 通常是结构化 JSON，回退原始预览 -->
+  <!-- 群广播事件（1501-1520 / 1530）：拼装中文 tip 文案，operator 用 senderNickname，member / newOwner 退化为 用户(id) -->
+  <span
+    v-else-if="isGroupNotificationType"
+    class="text-12px text-[var(--el-text-color-secondary)]"
+  >
+    {{ groupNotificationText }}
+  </span>
+
+  <!-- 系统事件类（FRIEND_*）：content 通常是结构化 JSON，回退原始预览 -->
   <span v-else class="whitespace-pre-wrap break-all">{{ fallbackText }}</span>
 </template>
 
@@ -85,7 +93,7 @@ import { computed } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { formatFileSize } from '@/utils/file'
 import { formatSeconds } from '@/utils/formatTime'
-import { ImMessageType } from '@/views/im/utils/constants'
+import { ImMessageType, isGroupNotification } from '@/views/im/utils/constants'
 import {
   parseMessage,
   resolveTipText,
@@ -94,6 +102,8 @@ import {
   type AudioMessage,
   type VideoMessage
 } from '@/views/im/utils/message'
+import { resolveGroupNotificationText } from '@/views/im/utils/user'
+import type { Message } from '@/views/im/home/types'
 
 defineOptions({ name: 'ImMessageContentPreview' })
 
@@ -102,6 +112,8 @@ const props = defineProps<{
   type?: number
   /** 消息 content（JSON 字符串或裸文本） */
   content?: string
+  /** 发送人昵称：群广播事件用作 operatorName 兜底渲染 */
+  senderNickname?: string
 }>()
 
 /** 各类型判定 */
@@ -185,4 +197,31 @@ const fallbackText = computed(() => {
   } catch {}
   return raw
 })
+
+/** 是否群广播事件（1501-1520 / 1530） */
+const isGroupNotificationType = computed(() => isGroupNotification(props.type ?? -1))
+
+/** 群广播事件 operatorUserId：用于把 senderNickname 仅覆盖到 operator 这一个 id 上 */
+const groupOperatorUserId = computed<number | undefined>(() => {
+  try {
+    return JSON.parse(props.content || '{}')?.operatorUserId
+  } catch {
+    return undefined
+  }
+})
+
+/** 群广播事件文案：复用 utils/user.resolveGroupNotificationText，admin 端 resolveName 用 senderNickname（仅 operator）+ 用户(id) 兜底 */
+const groupNotificationText = computed(() =>
+  resolveGroupNotificationText(
+    {
+      type: props.type as number,
+      content: props.content || '',
+      targetId: 0
+    } as Pick<Message, 'type' | 'content' | 'targetId'>,
+    (id) =>
+      id === groupOperatorUserId.value && props.senderNickname
+        ? props.senderNickname
+        : `用户(${id})`
+  )
+)
 </script>

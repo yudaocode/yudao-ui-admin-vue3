@@ -2,7 +2,9 @@
   <el-dialog v-model="dialogVisible" title="私聊消息详情" width="700">
     <el-descriptions :column="2" border>
       <el-descriptions-item label="编号">{{ detail.id }}</el-descriptions-item>
-      <el-descriptions-item label="客户端编号">{{ detail.clientMessageId || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="客户端编号">{{
+        detail.clientMessageId || '-'
+      }}</el-descriptions-item>
       <el-descriptions-item label="发送人">
         {{ detail.senderNickname }} ({{ detail.senderId }})
       </el-descriptions-item>
@@ -19,7 +21,11 @@
         {{ formatDate(detail.sendTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="消息内容" :span="2">
-        <MessageContentPreview :type="detail.type" :content="detail.content" />
+        <MessageContentPreview
+          :type="detail.type"
+          :content="detail.content"
+          :sender-nickname="detail.senderNickname"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="原始 JSON" :span="2">
         <pre class="content-pre">{{ formatJson(detail.content) }}</pre>

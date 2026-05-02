@@ -17,6 +17,7 @@ export interface ImGroupRespVO {
 // 群创建 Request VO
 export interface ImGroupCreateReqVO {
   name: string // 群名称
+  memberUserIds?: number[] // 初始成员用户编号列表（建群同时邀请的好友，不含创建者自己）
 }
 
 // 群更新 Request VO

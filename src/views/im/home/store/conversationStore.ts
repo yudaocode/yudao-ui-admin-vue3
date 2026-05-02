@@ -8,6 +8,7 @@ import {
   ImMessageStatus,
   IM_AT_ALL_USER_ID,
   TIME_TIP_GAP_MS,
+  isGroupNotification,
   isNormalMessage
 } from '../../utils/constants'
 import { getCurrentUserId, imStorage, removeQuietly, StorageKeys } from '../../utils/storage'
@@ -39,7 +40,7 @@ function deriveLastSenderDisplayName(
 
   // 2. 群聊兜底拉成员：分两种情况
   //    a. members 完全没加载（!membersLoaded）→ 拉整群（pullOnce 期间多个 senderId 都缺时，单飞表会 dedup 成一次请求）
-  //    b. members 已加载但缺这一个（新加入的成员，本端未收到 GROUP_MEMBER_UPDATE）→ 补齐这一个
+  //    b. members 已加载但缺这一个（新加入的成员，本端未收到 GROUP_MEMBER_SETTING_UPDATE）→ 补齐这一个
   if (conversation.type === ImConversationType.GROUP) {
     const groupStore = useGroupStore()
     const group = groupStore.getGroup(conversation.targetId)
@@ -365,6 +366,18 @@ export const useConversationStore = defineStore('imConversationStore', {
       conversationInfo: { type: number; targetId: number; name: string; avatar: string },
       messageInfo: Message
     ) {
+      // 0. 群广播事件旁路：按 type 局部更新 groupStore 的 role / ownerUserId / 成员列表等状态
+      if (
+        conversationInfo.type === ImConversationType.GROUP &&
+        isGroupNotification(messageInfo.type)
+      ) {
+        useGroupStore().applyGroupNotification(
+          conversationInfo.targetId,
+          messageInfo.type,
+          messageInfo.content
+        )
+      }
+
       // 1.1 查找或自动创建会话
       let conversation = this.getConversation(conversationInfo.type, conversationInfo.targetId)
       if (!conversation) {

@@ -32,7 +32,11 @@
         {{ formatDate(detail.sendTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="消息内容" :span="2">
-        <MessageContentPreview :type="detail.type" :content="detail.content" />
+        <MessageContentPreview
+          :type="detail.type"
+          :content="detail.content"
+          :sender-nickname="detail.senderNickname"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="原始 JSON" :span="2">
         <pre class="content-pre">{{ formatJson(detail.content) }}</pre>

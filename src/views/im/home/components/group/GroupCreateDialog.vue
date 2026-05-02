@@ -93,7 +93,6 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import { createGroup } from '@/api/im/group'
-import { inviteGroupMember } from '@/api/im/group/member'
 import { useGroupStore } from '../../store/groupStore'
 import FriendItem from '../friend/FriendItem.vue'
 import type { FriendLite } from '../../types'
@@ -195,7 +194,7 @@ function handleUncheck(friend: FriendCheckable) {
   friend.checked = false
 }
 
-/** 创建群聊：建群 → 拉人 → upsert groupStore，最后 emit('created') 让父页跳转新会话 */
+/** 创建群聊：建群（同时邀请初始成员）→ upsert groupStore → emit('created') 让父页跳转新会话 */
 async function handleOk() {
   const name = groupName.value.trim()
   const memberUserIds = checkedFriends.value.map((friend) => friend.id)
@@ -205,13 +204,11 @@ async function handleOk() {
   }
   submitting.value = true
   try {
-    // 1.1 新建群聊
-    const group = await createGroup({ name })
+    // 1. 新建群聊
+    const group = await createGroup({ name, memberUserIds })
     if (!group?.id) {
       throw new Error('创建群失败：未返回群编号')
     }
-    // 1.2 拉好友入群
-    await inviteGroupMember({ groupId: group.id, memberUserIds })
 
     // 2.1 直接 upsert 进 groupStore，省一次 fetchGroups——服务端返回 VO 已经够建会话了
     groupStore.upsertGroup({

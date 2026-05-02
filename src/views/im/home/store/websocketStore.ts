@@ -73,7 +73,7 @@ const convertGroupMessage = (
  *    - 普通消息（TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT）：入库 + 当前会话自动已读 / 提示音
  *    - 已读 / 回执（READ / RECEIPT）：多端已读同步、对方读后回执
  *    - 好友变更（FRIEND_ADD / DELETE / UPDATE）：同步 friendStore + 级联刷新私聊会话
- *    - 群变更（GROUP_CREATE / UPDATE / DELETE / MEMBER_UPDATE）：同步 groupStore + 级联刷新群聊会话
+ *    - 群个人信号（1530 GROUP_MEMBER_SETTING_UPDATE）：同步 groupStore + 级联刷新群聊会话；群广播事件（1501-1520 OpenIM 段位）走 handleGroupMessage + applyGroupNotification 旁路（含 DISSOLVE/QUIT/KICK 自判清群）
  */
 export const useImWebSocketStore = defineStore('imWebSocketStore', {
   state: () => ({
@@ -228,9 +228,9 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     },
 
     /**
-     * 群聊统一帧分发：按 payload.type（ImMessageType）分到已读 / 回执 / 群变更 / 普通消息
+     * 群聊统一帧分发：按 payload.type（ImMessageType）分到已读 / 回执 / 群个人信号 / 普通消息
      *
-     * 对应后端 ImGroupMessageDTO 的 ofRead / ofReceipt / ofGroupCreate / ofGroupUpdate / ofGroupDelete / ofGroupMemberUpdate / ofSend
+     * 1530 GROUP_MEMBER_SETTING_UPDATE 是个人信号；其它（普通消息 + 1501-1520 OpenIM 段位群广播事件）走 handleGroupMessage 入库 + 触发 applyGroupNotification 旁路
      */
     dispatchGroupFrame(websocketMessage: ImGroupMessageDTO) {
       switch (websocketMessage.type) {
@@ -240,20 +240,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         case ImMessageType.RECEIPT:
           this.handleGroupReceipt(websocketMessage)
           break
-        case ImMessageType.GROUP_CREATE:
-          this.handleGroupCreate(websocketMessage)
-          break
-        case ImMessageType.GROUP_UPDATE:
-          this.handleGroupUpdate(websocketMessage)
-          break
-        case ImMessageType.GROUP_DELETE:
-          this.handleGroupDelete(websocketMessage)
-          break
-        case ImMessageType.GROUP_MEMBER_UPDATE:
-          this.handleGroupMemberUpdate(websocketMessage)
+        case ImMessageType.GROUP_MEMBER_SETTING_UPDATE:
+          this.handleGroupMemberSettingUpdate(websocketMessage)
           break
         default:
-          // TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT 等普通消息
+          // TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT + GROUP_* 群广播事件
           this.handleGroupMessage(websocketMessage)
       }
     },
@@ -509,32 +500,34 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
 
     // ==================== 群关系事件（承载于群聊通道，按 inner type 分流） ====================
 
-    /** GROUP_CREATE：本端入群（建群 / 被拉入）；拉取群详情入库 */
-    handleGroupCreate(websocketMessage: ImGroupMessageDTO) {
-      const groupStore = useGroupStore()
-      groupStore.fetchGroupInfo(websocketMessage.groupId).catch(() => undefined)
-    },
-
-    /** GROUP_UPDATE：群信息变更，重新拉一次群详情 */
-    handleGroupUpdate(websocketMessage: ImGroupMessageDTO) {
-      const groupStore = useGroupStore()
-      groupStore.fetchGroupInfo(websocketMessage.groupId).catch(() => undefined)
-    },
-
-    /** GROUP_DELETE：群解散 / 自己退群 / 被踢出；本端清除群 + 级联清理群聊会话 */
-    handleGroupDelete(websocketMessage: ImGroupMessageDTO) {
-      const groupStore = useGroupStore()
-      groupStore.removeGroup(websocketMessage.groupId)
-    },
-
     /**
-     * GROUP_MEMBER_UPDATE：多端同步成员属性变更（昵称 / 免打扰 / 退群等）
+     * GROUP_MEMBER_SETTING_UPDATE：多端同步成员个人设置变更（muted / groupRemark）
      *
-     * 必须强刷成员而非群元数据——这些字段都在 ImGroupMemberRespVO 上，apiGetMyGroupList 不带；持久化后若不强刷，IDB 成员桶会长期陈旧
+     * payload 携带变更字段，按非 null 字段直接局部更新；省一次 fetchGroupMembers 接口
      */
-    handleGroupMemberUpdate(websocketMessage: ImGroupMessageDTO) {
+    handleGroupMemberSettingUpdate(websocketMessage: ImGroupMessageDTO) {
+      let payload: { muted?: boolean; groupRemark?: string } = {}
+      try {
+        payload = JSON.parse(websocketMessage.content || '{}')
+      } catch (error) {
+        console.warn('[IM WS] handleGroupMemberSettingUpdate 解析 content 失败', error)
+        return
+      }
       const groupStore = useGroupStore()
-      groupStore.fetchGroupMembers(websocketMessage.groupId, true).catch(() => undefined)
+      const group = groupStore.getGroup(websocketMessage.groupId)
+      if (!group) {
+        return
+      }
+      const fields: Partial<typeof group> = {}
+      if (payload.muted != null) {
+        fields.muted = payload.muted
+      }
+      if (payload.groupRemark != null) {
+        fields.groupRemark = payload.groupRemark
+      }
+      if (Object.keys(fields).length > 0) {
+        groupStore.updateGroupFields(websocketMessage.groupId, fields)
+      }
     },
 
     // ==================== 心跳 / 重连 ====================

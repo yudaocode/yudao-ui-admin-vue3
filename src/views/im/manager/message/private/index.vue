@@ -87,7 +87,11 @@
       </el-table-column>
       <el-table-column label="内容预览" align="left" min-width="240">
         <template #default="{ row }">
-          <MessageContentPreview :type="row.type" :content="row.content" />
+          <MessageContentPreview
+            :type="row.type"
+            :content="row.content"
+            :sender-nickname="row.senderNickname"
+          />
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status" width="100">

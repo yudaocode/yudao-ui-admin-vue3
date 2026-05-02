@@ -13,7 +13,7 @@ import {
   type ImGroupMemberRespVO
 } from '@/api/im/group/member'
 import { useConversationStore } from './conversationStore'
-import { ImConversationType, ImGroupMemberRole } from '../../utils/constants'
+import { ImConversationType, ImGroupMemberRole, ImMessageType } from '../../utils/constants'
 import {
   getCurrentUserId,
   imStorage,
@@ -429,6 +429,152 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.updateMembersRole(groupId, [oldOwnerId], ImGroupMemberRole.NORMAL)
       this.updateMembersRole(groupId, [newOwnerId], ImGroupMemberRole.OWNER)
       this.saveGroups()
+    },
+
+    /** 本地剔除群成员（GROUP_MEMBER_QUIT / KICK 事件）；不命中则等 fetchGroupMembers 兜底 */
+    removeMembersLocal(groupId: number, userIds: number[]) {
+      const group = this.getGroup(groupId)
+      if (!group?.members?.length || !userIds.length) {
+        return
+      }
+      const idSet = new Set(userIds)
+      const next = group.members.filter((member) => !idSet.has(member.userId))
+      if (next.length === group.members.length) {
+        return
+      }
+      group.members = next
+      group.memberCount = next.length
+      this.saveGroupMembers(groupId)
+    },
+
+    /** 本地更新群成员的 displayUserName（GROUP_MEMBER_NICKNAME_UPDATE 事件）；不命中则等 fetchGroupMembers 兜底 */
+    updateMemberDisplayUserName(groupId: number, userId: number, displayUserName: string) {
+      const group = this.getGroup(groupId)
+      const member = group?.members?.find((m) => m.userId === userId)
+      if (!member || member.displayUserName === displayUserName) {
+        return
+      }
+      member.displayUserName = displayUserName
+      this.saveGroupMembers(groupId)
+    },
+
+    /** 局部更新群字段（name / notice / avatar 等）；未命中本地缓存时静默忽略，等 fetchGroups 兜底 */
+    updateGroupFields(groupId: number, fields: Partial<Group>) {
+      const group = this.getGroup(groupId)
+      if (!group) {
+        return
+      }
+      Object.assign(group, fields)
+      const conversationStore = useConversationStore()
+      conversationStore.updateConversation(ImConversationType.GROUP, groupId, {
+        name: getGroupDisplayName(group),
+        avatar: group.avatar,
+        muted: group.muted
+      })
+      this.saveGroups()
+    },
+
+    /**
+     * 接收 GROUP_* 群广播事件，按 type 分发到对应 mutation
+     *
+     * WebSocket 实时收 + useMessagePuller 离线 pull 都走 conversationStore.insertMessage 旁路调用
+     * store 里没缓存的群静默忽略，等 fetchGroups 兜底
+     */
+    applyGroupNotification(groupId: number, type: number, content?: string) {
+      if (!groupId) {
+        return
+      }
+      let payload: Record<string, any> = {}
+      try {
+        payload = content ? JSON.parse(content) : {}
+      } catch (error) {
+        console.warn('[IM groupStore] applyGroupNotification 解析 content 失败', { groupId, type, content }, error)
+        return
+      }
+      switch (type) {
+        case ImMessageType.GROUP_CREATE: {
+          // 创建群广播：创建者多端同步 + 初始成员 bootstrap；payload.memberUserIds 含自己 → 拉群详情 / 成员
+          const selfUserId = getCurrentUserId()
+          const memberIds: number[] = payload.memberUserIds || []
+          if (selfUserId && memberIds.includes(selfUserId)) {
+            this.fetchGroupInfo(groupId).catch(() => undefined)
+            this.fetchGroupMembers(groupId, true).catch(() => undefined)
+          }
+          break
+        }
+        case ImMessageType.GROUP_NAME_UPDATE:
+          if (payload.newName) {
+            this.updateGroupFields(groupId, { name: payload.newName })
+          }
+          break
+        case ImMessageType.GROUP_NOTICE_UPDATE:
+          this.updateGroupFields(groupId, { notice: payload.notice ?? '' })
+          break
+        case ImMessageType.GROUP_INFO_UPDATE: {
+          // 兜底 NAME / NOTICE 之外的群字段变更（avatar 等）；按非 null 字段累积更新
+          const fields: Partial<Group> = {}
+          if (payload.avatar) {
+            fields.avatar = payload.avatar
+          }
+          if (Object.keys(fields).length > 0) {
+            this.updateGroupFields(groupId, fields)
+          }
+          break
+        }
+        case ImMessageType.GROUP_DISSOLVE:
+          // 群解散：所有成员（含群主）收到广播 → 本端自行清群
+          this.removeGroup(groupId)
+          break
+        case ImMessageType.GROUP_MEMBER_INVITE: {
+          // 被邀请者：本端 group 还没就位，先 fetchGroupInfo bootstrap，再拉成员
+          // 已在群成员：只刷成员列表（新成员 nickname / avatar 不在 payload，必须 fetch）
+          const selfUserId = getCurrentUserId()
+          const memberIds: number[] = payload.memberUserIds || []
+          const selfInvited = !!selfUserId && memberIds.includes(selfUserId)
+          if (selfInvited && !this.getGroup(groupId)) {
+            this.fetchGroupInfo(groupId).catch(() => undefined)
+          }
+          this.fetchGroupMembers(groupId, true).catch(() => undefined)
+          break
+        }
+        case ImMessageType.GROUP_MEMBER_QUIT: {
+          // 退群者本人多端同步：清群；其他成员：从本地成员列表移除
+          const selfUserId = getCurrentUserId()
+          if (selfUserId && payload.operatorUserId === selfUserId) {
+            this.removeGroup(groupId)
+          } else if (payload.operatorUserId) {
+            this.removeMembersLocal(groupId, [payload.operatorUserId])
+          }
+          break
+        }
+        case ImMessageType.GROUP_MEMBER_KICK: {
+          // 被踢者本人：清群；其他成员：从本地成员列表移除
+          const selfUserId = getCurrentUserId()
+          const memberIds: number[] = payload.memberUserIds || []
+          if (selfUserId && memberIds.includes(selfUserId)) {
+            this.removeGroup(groupId)
+          } else if (memberIds.length) {
+            this.removeMembersLocal(groupId, memberIds)
+          }
+          break
+        }
+        case ImMessageType.GROUP_MEMBER_NICKNAME_UPDATE:
+          if (payload.operatorUserId) {
+            this.updateMemberDisplayUserName(groupId, payload.operatorUserId, payload.displayUserName ?? '')
+          }
+          break
+        case ImMessageType.GROUP_ADMIN_ADD:
+          this.updateMembersRole(groupId, payload.memberUserIds || [], ImGroupMemberRole.ADMIN)
+          break
+        case ImMessageType.GROUP_ADMIN_REMOVE:
+          this.updateMembersRole(groupId, payload.memberUserIds || [], ImGroupMemberRole.NORMAL)
+          break
+        case ImMessageType.GROUP_OWNER_TRANSFER:
+          if (payload.operatorUserId && payload.newOwnerUserId) {
+            this.transferOwner(groupId, payload.operatorUserId, payload.newOwnerUserId)
+          }
+          break
+      }
     },
 
     /** 切账号时仅清 in-memory，IDB 按 userId 分桶天然隔离，回切秒开 */

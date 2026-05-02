@@ -152,6 +152,14 @@
             {{ resolveTipText(message.content) }}
           </div>
 
+          <!-- 群广播事件文案（1501-1520 / 1530）：跟 TIP_TEXT 同样的居中灰色样式 -->
+          <div
+            v-else-if="isGroupNotification(message.type)"
+            class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
+          >
+            {{ resolveGroupNotificationText(message) }}
+          </div>
+
           <!-- 普通消息行 -->
           <div
             v-else
@@ -303,11 +311,12 @@ import { useFriendStore } from '../../../../store/friendStore'
 import {
   getMemberDisplayName,
   getSenderDisplayName,
-  getSenderRealNickname
+  getSenderRealNickname,
+  resolveGroupNotificationText
 } from '@/views/im/utils/user'
 import { buildRecallTip } from '@/views/im/utils/conversation'
 import { useMessagePuller } from '@/views/im/home/composables/useMessagePuller'
-import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
+import { ImConversationType, ImMessageType, isGroupNotification } from '@/views/im/utils/constants'
 import {
   parseMessage,
   resolveTipText,
