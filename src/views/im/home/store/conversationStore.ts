@@ -7,7 +7,8 @@ import {
   ImMessageType,
   ImMessageStatus,
   IM_AT_ALL_USER_ID,
-  TIME_TIP_GAP_MS
+  TIME_TIP_GAP_MS,
+  isNormalMessage
 } from '../../utils/constants'
 import { getCurrentUserId, imStorage, removeQuietly, StorageKeys } from '../../utils/storage'
 import { generateClientMessageId, parseRecallMessageId } from '../../utils/message'
@@ -431,16 +432,14 @@ export const useConversationStore = defineStore('imConversationStore', {
         }
       }
 
-      // 2.3 未读数：非当前会话 + 非自己发送 + 非系统 tip + 非已读 => +1
+      // 2.3 未读数：非当前会话 + 非自己发送 + 普通消息 + 非已读 => +1
       const isActive =
         this.activeConversation?.type === conversationInfo.type &&
         this.activeConversation?.targetId === conversationInfo.targetId
-      const isTipMessage =
-        messageInfo.type === ImMessageType.TIP_TEXT || messageInfo.type === ImMessageType.TIP_TIME
       if (
         !messageInfo.selfSend &&
         !isActive &&
-        !isTipMessage &&
+        isNormalMessage(messageInfo.type) &&
         messageInfo.status !== ImMessageStatus.READ &&
         messageInfo.status !== ImMessageStatus.RECALL
       ) {
