@@ -635,7 +635,8 @@ export const useGroupStore = defineStore('imGroupStore', {
 
     /** 群消息置顶：从 payload 直接拿完整消息对象 push 到 pinnedMessages */
     applyGroupMessagePinNotification(groupId: number, payload: GroupNotificationPayload) {
-      if (!payload.message) {
+      const message = payload.message
+      if (!message) {
         return
       }
       const group = this.getGroup(groupId)
@@ -644,19 +645,18 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
       // 幂等：已存在同 messageId 不重复 push
       const existing = group.pinnedMessages || []
-      // TODO @AI：TS18048: payload.message is possibly undefined
-      if (existing.some((m) => m.id === payload.message.id)) {
+      if (existing.some((msg) => msg.id === message.id)) {
         return
       }
-      // payload.message 字段名跟 Message 一致（仅 sendTime 需要从 ISO 串转毫秒戳，selfSend 按当前用户算）
+      // message 字段名跟 Message 一致（仅 sendTime 需要从 ISO 串转毫秒戳，selfSend 按当前用户算）
       const newMessage: Message = {
-        ...payload.message,
-        clientMessageId: payload.message.clientMessageId || '',
-        sendTime: new Date(payload.message.sendTime).getTime(),
-        targetId: payload.message.groupId,
-        selfSend: payload.message.senderId === getCurrentUserId(),
-        atUserIds: payload.message.atUserIds || [],
-        receiverUserIds: payload.message.receiverUserIds || []
+        ...message,
+        clientMessageId: message.clientMessageId || '',
+        sendTime: new Date(message.sendTime).getTime(),
+        targetId: message.groupId,
+        selfSend: message.senderId === getCurrentUserId(),
+        atUserIds: message.atUserIds || [],
+        receiverUserIds: message.receiverUserIds || []
       }
       group.pinnedMessages = [...existing, newMessage]
       this.saveGroups()

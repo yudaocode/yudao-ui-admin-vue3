@@ -64,7 +64,6 @@ defineEmits<{
 const avatarSize = computed(() => Math.ceil(props.height * 0.75))
 
 /** 角色标签文案：普通成员不显示，其余取 im_group_member_role 字典 label */
-// TODO DONE @AI：排除成员，剩余通过字典去 get 下，这样逻辑更统一！
 const roleLabel = computed(() => {
   if (props.member.role == null || props.member.role === ImGroupMemberRole.NORMAL) {
     return ''

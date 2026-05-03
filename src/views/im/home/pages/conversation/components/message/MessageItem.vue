@@ -1,7 +1,4 @@
 <template>
-  <!--
-    布局约定：DOM 顺序永远是「头像在前 / 气泡在后」，对方消息走默认 row（头像顶左），自己消息靠外层 flex-row-reverse 翻视觉（头像顶右、气泡在头像左侧），跟微信对齐
-  -->
   <!-- 时间分隔线（TIP_TIME=20）：居中灰色时间 -->
   <div
     v-if="isTipTime"
@@ -41,8 +38,7 @@
     :class="{ 'flex-row-reverse': message.selfSend }"
     @contextmenu.prevent="handleContextMenu"
   >
-    <!-- 头像：DOM 顺序固定为「头像在前 / 气泡在后」，selfSend 走 flex-row-reverse 翻视觉；
-         点头像弹 UserInfoCard 由 UserAvatar 内部承接 -->
+    <!-- 头像：点击弹 UserInfoCard 由 UserAvatar 内部承接 -->
     <UserAvatar
       :id="message.selfSend ? userStore.getUser?.id : message.senderId"
       :name="senderRealNickname"
@@ -205,7 +201,7 @@
           </el-tag>
         </div>
       </div>
-      <!-- 引用块：气泡下方与气泡同侧；selfSend 时竖线镜像到右侧 -->
+      <!-- 引用块：气泡下方，selfSend 时竖线在右侧 -->
       <ReplyPreview
         v-if="quote"
         :quote="quote"
@@ -222,6 +218,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
+import { ElMessageBox } from 'element-plus'
 
 import {
   ImMessageType,
@@ -650,8 +647,11 @@ async function handlePin() {
     return
   }
   try {
-    // TODO @AI：这个会不会有问题 TS2554: Expected 1-2 arguments, but got 3
-    await confirmDialog('将在当前群成员的聊天中置顶', '置顶消息', { confirmButtonText: '置顶' })
+    await ElMessageBox.confirm('将在当前群成员的聊天中置顶', '置顶消息', {
+      confirmButtonText: '置顶',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
     await apiPinGroupMessage({ groupId: group.id, messageId: props.message.id })
     successMessage('已置顶')
   } catch {}
