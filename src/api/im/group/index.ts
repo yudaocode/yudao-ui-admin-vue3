@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import type { ImGroupMessageRespVO } from '@/api/im/message/group'
 
 // 群 Response VO
 export interface ImGroupRespVO {
@@ -12,6 +13,14 @@ export interface ImGroupRespVO {
   status: number // 群状态（0=正常，1=已解散）
   dissolvedTime?: string // 解散时间
   createTime?: string // 创建时间
+  // TODO @AI：不太对，返回的就是 ImGroupMessageRespVO 数组
+  pinnedMessages?: ImGroupMessageRespVO[] // 群置顶消息列表（后端关联回填，仅当登录用户是群成员时非空）
+}
+
+// 群消息置顶 / 取消置顶 Request VO
+export interface ImGroupMessagePinReqVO {
+  groupId: number // 群编号
+  messageId: number // 消息编号
 }
 
 // 群创建 Request VO
@@ -78,4 +87,14 @@ export const removeGroupAdmin = (data: ImGroupAdminReqVO) => {
 // 转让群主（仅老群主可调；旧群主转让后降为普通成员）
 export const transferGroupOwner = (data: ImGroupTransferOwnerReqVO) => {
   return request.put<boolean>({ url: '/im/group/transfer-owner', data })
+}
+
+// 置顶群消息（仅群主 / 管理员可调）
+export const pinGroupMessage = (data: ImGroupMessagePinReqVO) => {
+  return request.put<boolean>({ url: '/im/group/pin-message', data })
+}
+
+// 取消置顶群消息（仅群主 / 管理员可调）
+export const unpinGroupMessage = (data: ImGroupMessagePinReqVO) => {
+  return request.put<boolean>({ url: '/im/group/unpin-message', data })
 }

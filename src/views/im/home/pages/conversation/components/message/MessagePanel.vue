@@ -1,61 +1,68 @@
 <template>
   <div class="flex flex-1 flex-col min-w-0 bg-[var(--el-fill-color-light)]">
     <template v-if="conversationStore.activeConversation">
-      <!-- 顶部：会话名（群聊带人数）+ 右侧功能图标；border 走 scoped CSS（项目 UnoCSS 不带 border-style preflight） -->
-      <div
-        class="message-panel__header flex items-center justify-between h-14 px-5 bg-[var(--el-fill-color-light)]"
-      >
-        <span class="flex flex-col min-w-0">
-          <span class="flex items-baseline gap-1.5 min-w-0">
-            <span
-              class="overflow-hidden text-base font-medium truncate text-[var(--el-text-color-primary)]"
-            >
-              {{ conversationStore.activeConversation?.name || '' }}
+      <!-- 顶部 header：第一行群名 + 右侧图标，第二行嵌入置顶气泡（仅群聊 + 有置顶）；border 走 scoped CSS -->
+      <div class="message-panel__header flex flex-col bg-[var(--el-fill-color-light)]">
+        <div class="flex items-center justify-between h-14 px-5">
+          <span class="flex flex-col min-w-0">
+            <span class="flex items-baseline gap-1.5 min-w-0">
+              <span
+                class="overflow-hidden text-base font-medium truncate text-[var(--el-text-color-primary)]"
+              >
+                {{ conversationStore.activeConversation?.name || '' }}
+              </span>
+              <span
+                v-if="isGroup && headerMemberCount > 0"
+                class="flex-shrink-0 text-sm text-[var(--el-text-color-secondary)]"
+              >
+                ({{ headerMemberCount }})
+              </span>
             </span>
+            <!-- 副标题：备注 ≠ 群名时展示原群名，提示用户当前看到的主名是自己设的备注 -->
             <span
-              v-if="isGroup && headerMemberCount > 0"
-              class="flex-shrink-0 text-sm text-[var(--el-text-color-secondary)]"
+              v-if="headerSubtitle"
+              class="overflow-hidden text-xs truncate text-[var(--el-text-color-secondary)]"
             >
-              ({{ headerMemberCount }})
+              {{ headerSubtitle }}
             </span>
           </span>
-          <!-- 副标题：备注 ≠ 群名时展示原群名，提示用户当前看到的主名是自己设的备注 -->
-          <span
-            v-if="headerSubtitle"
-            class="overflow-hidden text-xs truncate text-[var(--el-text-color-secondary)]"
-          >
-            {{ headerSubtitle }}
-          </span>
-        </span>
-        <div class="flex gap-3 items-center">
-          <!-- 聊天历史 -->
-          <el-tooltip content="聊天历史" placement="bottom">
-            <Icon
-              icon="ep:chat-dot-round"
-              :size="20"
-              class="message-panel__header-icon cursor-pointer"
-              @click="historyVisible = true"
-            />
-          </el-tooltip>
-          <!-- 通话入口：暂未开放，先放占位图标对齐微信 PC -->
-          <el-tooltip content="通话" placement="bottom">
-            <Icon
-              icon="ant-design:phone-outlined"
-              :size="20"
-              class="message-panel__header-icon cursor-pointer"
-              @click="handleCall"
-            />
-          </el-tooltip>
-          <!-- 信息抽屉入口 -->
-          <el-tooltip :content="isGroup ? '群聊信息' : '聊天信息'" placement="bottom">
-            <Icon
-              icon="ant-design:ellipsis-outlined"
-              :size="20"
-              class="message-panel__header-icon cursor-pointer"
-              @click="toggleSide"
-            />
-          </el-tooltip>
+          <div class="flex gap-3 items-center">
+            <!-- 聊天历史 -->
+            <el-tooltip content="聊天历史" placement="bottom">
+              <Icon
+                icon="ep:chat-dot-round"
+                :size="20"
+                class="message-panel__header-icon cursor-pointer"
+                @click="historyVisible = true"
+              />
+            </el-tooltip>
+            <!-- 通话入口：暂未开放，先放占位图标对齐微信 PC -->
+            <el-tooltip content="通话" placement="bottom">
+              <Icon
+                icon="ant-design:phone-outlined"
+                :size="20"
+                class="message-panel__header-icon cursor-pointer"
+                @click="handleCall"
+              />
+            </el-tooltip>
+            <!-- 信息抽屉入口 -->
+            <el-tooltip :content="isGroup ? '群聊信息' : '聊天信息'" placement="bottom">
+              <Icon
+                icon="ant-design:ellipsis-outlined"
+                :size="20"
+                class="message-panel__header-icon cursor-pointer"
+                @click="toggleSide"
+              />
+            </el-tooltip>
+          </div>
         </div>
+
+        <!-- 群置顶消息：第二行嵌入 header；仅群聊 + 有置顶时显示 -->
+        <ConversationGroupPinned
+          v-if="isGroup && conversationStore.activeConversation"
+          :group-id="conversationStore.activeConversation.targetId"
+          @locate="handleLocate"
+        />
       </div>
 
       <!-- 中间：消息列表 -->
@@ -147,6 +154,7 @@ import MessageItem from './MessageItem.vue'
 import MessageInput from '../input/MessageInput.vue'
 import MessageHistory from './MessageHistory.vue'
 import ConversationGroupSide from '../conversation/ConversationGroupSide.vue'
+import ConversationGroupPinned from './ConversationGroupPinned.vue'
 import ConversationPrivateSide from '../conversation/ConversationPrivateSide.vue'
 import type { FriendLite, GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
@@ -478,6 +486,7 @@ watch(
 <style scoped>
 /* 顶部分隔线：UnoCSS 不带 border-style preflight，class 写法只设色 / 宽不出线，走 scoped 显式 shorthand */
 .message-panel__header {
+  flex-shrink: 0;
   border-bottom: 1px solid var(--el-border-color-light);
 }
 

@@ -228,8 +228,11 @@ import {
   ImMessageStatus,
   ImGroupReceiptStatus,
   ImConversationType,
-  isGroupNotification
-} from '../../../../../utils/constants'
+  ImGroupMemberRole,
+  isGroupNotification,
+  isNormalMessage
+} from '@/views/im/utils/constants'
+import { pinGroupMessage as apiPinGroupMessage } from '@/api/im/group'
 import {
   buildQuoteFromMessage,
   getQuoteFromMessage,
@@ -241,7 +244,7 @@ import {
   type FileMessage,
   type AudioMessage,
   type VideoMessage
-} from '../../../../../utils/message'
+} from '@/views/im/utils/message'
 import { buildRecallTip } from '../../../../../utils/conversation'
 import { formatSeconds } from '@/utils/formatTime'
 import { formatFileSize } from '@/utils/file'
@@ -255,7 +258,7 @@ import {
   getSenderDisplayName,
   getSenderRealNickname,
   resolveGroupNotificationText
-} from '../../../../../utils/user'
+} from '@/views/im/utils/user'
 import { useImUiStore } from '../../../../store/uiStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
 import type { Message } from '../../../../types'
@@ -263,6 +266,8 @@ import MessageReadStatus from './MessageReadStatus.vue'
 import ReplyPreview from './ReplyPreview.vue'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
+
+// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-im/yudao-ui-admin-vue3/src/views/im/home/pages/conversation/components/conversation/ConversationGroupSide.vue 做下分块？
 
 defineOptions({ name: 'ImMessageItem' })
 
@@ -283,7 +288,7 @@ const draftStore = useDraftStore()
 const uiStore = useImUiStore()
 const { recall, sendRaw } = useMessageSender()
 // 仅用 confirm，避免 message 跟 props.message 同名冲突（vue/no-dupe-keys）
-const { confirm: confirmDialog } = useMessage()
+const { confirm: confirmDialog, success: successMessage } = useMessage()
 
 /** 是否已撤回：pull / WS 两路都会调 recallMessage 把原消息更新为 type=RECALL，渲染只需识别 type */
 const isRecall = computed(() => props.message.type === ImMessageType.RECALL)
@@ -516,6 +521,7 @@ const isAtMe = computed(() => {
 /** 右键菜单 key 常量；push 端和分发端从同一处取，typo 编译期就能抓 */
 const MENU_KEYS = {
   REPLY: 'REPLY',
+  PIN: 'PIN',
   RECALL: 'RECALL',
   DELETE: 'DELETE'
 } as const
@@ -552,6 +558,15 @@ async function handleContextMenu(e: MouseEvent) {
       icon: 'bxs:quote-alt-left'
     })
   }
+  // 「置顶」：仅群聊 + 普通消息 + 已落库 + 未撤回 + 群主或管理员；已置顶不再展示，由置顶面板的「移除」入口承接
+  // 不本地预判上限，让后端校验，超限时通过 error toast 反馈
+  if (canPin.value) {
+    items.push({
+      key: MENU_KEYS.PIN,
+      name: '置顶',
+      icon: 'ant-design:pushpin-outlined'
+    })
+  }
   // 「撤回 / 删除」二选一：
   // - 自己发送 + 已落库（id≠0）+ 未撤回 + 在撤回窗口内 → 撤回（推服务器把消息态置 RECALL）
   // - 其它（对方消息 / 已撤回 / 超出撤回窗口）→ 删除（仅本地清，不动后端）
@@ -583,12 +598,53 @@ async function handleContextMenu(e: MouseEvent) {
   uiStore.openContextMenu({ x: e.clientX, y: e.clientY }, items, async (item) => {
     if (item.key === MENU_KEYS.REPLY) {
       handleReply()
+    } else if (item.key === MENU_KEYS.PIN) {
+      await handlePin()
     } else if (item.key === MENU_KEYS.RECALL) {
       await handleRecall()
     } else if (item.key === MENU_KEYS.DELETE) {
       handleDelete()
     }
   })
+}
+
+/** 当前激活会话对应的群（私聊场景为 undefined） */
+const currentGroup = computed(() => {
+  const conversation = conversationStore.activeConversation
+  if (!conversation || conversation.type !== ImConversationType.GROUP) {
+    return undefined
+  }
+  return groupStore.getGroup(conversation.targetId)
+})
+
+/** 当前用户在该群里的角色；私聊或非群成员 → undefined */
+const myGroupRole = computed(() => {
+  const myId = Number(userStore.getUser?.id) || 0
+  return currentGroup.value?.members?.find((m) => m.userId === myId)?.role
+})
+
+/** 是否允许置顶（已置顶消息不再展示菜单项，由置顶面板的「移除」入口承接）：群聊 + 普通消息 + 已落库 + 未撤回 + 群主或管理员 + 未置顶 */
+const canPin = computed(
+  () =>
+    !!currentGroup.value &&
+    isNormalMessage(props.message.type) &&
+    !!props.message.id &&
+    !isRecall.value &&
+    (myGroupRole.value === ImGroupMemberRole.OWNER || myGroupRole.value === ImGroupMemberRole.ADMIN) &&
+    !currentGroup.value.pinnedMessages?.some((m) => m.id === props.message.id)
+)
+
+/** 置顶消息：二次确认 → 调后端 pin-message；后端广播 GROUP_MESSAGE_PIN，本端 dispatcher 拉最新 pinnedMessages */
+async function handlePin() {
+  const group = currentGroup.value
+  if (!group) {
+    return
+  }
+  try {
+    await confirmDialog('将在当前群成员的聊天中置顶', '置顶消息', { confirmButtonText: '置顶' })
+    await apiPinGroupMessage({ groupId: group.id, messageId: props.message.id })
+    successMessage('已置顶')
+  } catch {}
 }
 
 /** 进入引用模式：把当前消息构造成 QuoteMessage 写入 draftStore，MessageInput 顶部引用条响应式出现 */

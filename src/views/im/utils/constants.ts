@@ -34,12 +34,18 @@ export const ImMessageType = {
   GROUP_ADMIN_REMOVE: 1518, // 撤销管理员
   GROUP_NOTICE_UPDATE: 1519, // 群公告变更
   GROUP_NAME_UPDATE: 1520, // 群名变更
-  GROUP_MEMBER_SETTING_UPDATE: 1530 // 群成员个人设置变更：muted / groupRemark 个人多端同步
+  GROUP_MEMBER_SETTING_UPDATE: 1530, // 群成员个人设置变更：muted / groupRemark 个人多端同步
+  GROUP_MESSAGE_PIN: 1531, // 群消息置顶
+  GROUP_MESSAGE_UNPIN: 1532 // 群消息取消置顶
 } as const
 
-/** 判断是否「群广播事件」：[GROUP_CREATE, GROUP_MEMBER_SETTING_UPDATE) 段位都算，GROUP_MEMBER_SETTING_UPDATE 是个人信号不算 */
+/** 判断是否「群广播事件」：[GROUP_CREATE, GROUP_MESSAGE_UNPIN] 段位都算，仅 GROUP_MEMBER_SETTING_UPDATE 是个人信号排除 */
 export function isGroupNotification(type: number): boolean {
-  return type >= ImMessageType.GROUP_CREATE && type < ImMessageType.GROUP_MEMBER_SETTING_UPDATE
+  return (
+    type >= ImMessageType.GROUP_CREATE
+    && type <= ImMessageType.GROUP_MESSAGE_UNPIN
+    && type !== ImMessageType.GROUP_MEMBER_SETTING_UPDATE
+  )
 }
 
 /** IM 普通消息类型集合（聊天气泡中显示，并作为会话最后一条摘要） */
@@ -97,6 +103,9 @@ export const ImGroupMemberRole = {
 
 /** 群管理员人数上限（对齐后端 GROUP_ADMIN_MAX_COUNT） */
 export const GROUP_ADMIN_MAX_COUNT = 3
+
+/** 群置顶消息条数上限（对齐后端 GROUP_PIN_MAX_COUNT） */
+export const GROUP_PIN_MAX_COUNT = 5
 
 /** 每次拉取私聊消息的最大条数（后端上限 1000，前端取保守值 100） */
 export const PRIVATE_MESSAGE_PULL_SIZE = 100

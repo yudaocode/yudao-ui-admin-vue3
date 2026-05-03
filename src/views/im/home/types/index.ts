@@ -113,6 +113,7 @@ export interface Group {
   avatar?: string // 群头像
   notice?: string // 群公告
   ownerUserId?: number // 群主用户编号
+  pinnedMessages?: Message[] // 群置顶消息列表
 
   // ========== 前端扩展字段（user-per-group 维度） ==========
   muted?: boolean // 是否免打扰。从当前用户的 GroupMember 回填

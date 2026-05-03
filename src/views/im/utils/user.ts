@@ -166,6 +166,22 @@ export type GroupNotificationPayload = {
   oldAvatar?: string
   newAvatar?: string
   displayUserName?: string
+  messageId?: number
+  /** PIN 事件携带的完整被置顶消息对象（前端直接 push 进 group.pinnedMessages，避免回查群详情） */
+  message?: {
+    id: number
+    clientMessageId?: string
+    senderId: number
+    groupId: number
+    type: number
+    content: string
+    status: number
+    sendTime: string
+    atUserIds?: number[]
+    receiverUserIds?: number[]
+    receiptStatus?: number
+    readCount?: number
+  }
 }
 
 export function resolveGroupNotificationText(
@@ -216,6 +232,10 @@ export function resolveGroupNotificationText(
       return `${operatorName} 撤销了 ${memberNames} 的管理员身份`
     case ImMessageType.GROUP_OWNER_TRANSFER:
       return `${operatorName} 已将群主转让给 ${newOwnerName}`
+    case ImMessageType.GROUP_MESSAGE_PIN:
+      return `${operatorName} 置顶了一条消息`
+    case ImMessageType.GROUP_MESSAGE_UNPIN:
+      return `${operatorName} 取消了一条置顶消息`
     default:
       return ''
   }

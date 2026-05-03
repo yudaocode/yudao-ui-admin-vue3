@@ -22,7 +22,7 @@ import {
   StorageKeys
 } from '../../utils/storage'
 import { getGroupDisplayName, type GroupNotificationPayload } from '../../utils/user'
-import type { Group, GroupMember } from '../types'
+import type { Group, GroupMember, Message } from '../types'
 
 /**
  * fetchGroupMembers 并发去重表：同 groupId 同时进的请求共用一个 Promise
@@ -543,6 +543,12 @@ export const useGroupStore = defineStore('imGroupStore', {
         case ImMessageType.GROUP_OWNER_TRANSFER:
           this.applyGroupOwnerTransferNotification(groupId, payload)
           break
+        case ImMessageType.GROUP_MESSAGE_PIN:
+          this.applyGroupMessagePinNotification(groupId, payload)
+          break
+        case ImMessageType.GROUP_MESSAGE_UNPIN:
+          this.applyGroupMessageUnpinNotification(groupId, payload)
+          break
       }
     },
 
@@ -629,6 +635,58 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
     },
 
+    /** 群消息置顶：从 payload 直接拿完整消息对象 push 到 pinnedMessages */
+    applyGroupMessagePinNotification(groupId: number, payload: GroupNotificationPayload) {
+      if (!payload.message) {
+        return
+      }
+      const group = this.getGroup(groupId)
+      if (!group) {
+        return
+      }
+      // TODO @AI：可以直接使用 payload，简化这样设置。。。
+      const message: Message = {
+        id: payload.message.id,
+        clientMessageId: payload.message.clientMessageId || '',
+        type: payload.message.type,
+        content: payload.message.content,
+        status: payload.message.status,
+        sendTime: new Date(payload.message.sendTime).getTime(),
+        senderId: payload.message.senderId,
+        targetId: payload.message.groupId,
+        selfSend: payload.message.senderId === getCurrentUserId(),
+        atUserIds: payload.message.atUserIds || [],
+        receiverUserIds: payload.message.receiverUserIds || [],
+        receiptStatus: payload.message.receiptStatus,
+        readCount: payload.message.readCount
+      }
+      // 幂等：已存在同 messageId 不重复 push
+      const existing = group.pinnedMessages || []
+      if (existing.some((m) => m.id === message.id)) {
+        return
+      }
+      group.pinnedMessages = [...existing, message]
+      this.saveGroups()
+    },
+
+    /** 群消息取消置顶：按 messageId 从本地置顶列表中移除 */
+    applyGroupMessageUnpinNotification(groupId: number, payload: GroupNotificationPayload) {
+      if (!payload.messageId) {
+        return
+      }
+      const group = this.getGroup(groupId)
+      if (!group?.pinnedMessages?.length) {
+        return
+      }
+      // TODO @AI：不要用 next 这样的单词，大家不好理解。可以用 newXXXX 这样。其它地方也看看。
+      const next = group.pinnedMessages.filter((m) => m.id !== payload.messageId)
+      if (next.length === group.pinnedMessages.length) {
+        return
+      }
+      group.pinnedMessages = next
+      this.saveGroups()
+    },
+
     /** 切账号时仅清 in-memory，IDB 按 userId 分桶天然隔离，回切秒开 */
     clear() {
       this.groups = []
@@ -646,7 +704,28 @@ function convertGroup(vo: ImGroupRespVO): Group {
     name: vo.name,
     avatar: vo.avatar,
     notice: vo.notice,
-    ownerUserId: vo.ownerUserId
+    ownerUserId: vo.ownerUserId,
+    pinnedMessages: vo.pinnedMessages?.map(convertGroupMessageVO)
+  }
+}
+
+/** 后端 ImGroupMessageRespVO -> 前端 Message：补 targetId / selfSend / sendTime 等派生字段 */
+function convertGroupMessageVO(message: NonNullable<ImGroupRespVO['pinnedMessages']>[number]): Message {
+  const currentUserId = getCurrentUserId()
+  return {
+    id: message.id,
+    clientMessageId: message.clientMessageId || '',
+    type: message.type,
+    content: message.content,
+    status: message.status,
+    sendTime: new Date(message.sendTime).getTime(),
+    senderId: message.senderId,
+    targetId: message.groupId,
+    selfSend: !!currentUserId && message.senderId === currentUserId,
+    atUserIds: message.atUserIds || [],
+    receiverUserIds: message.receiverUserIds || [],
+    receiptStatus: message.receiptStatus,
+    readCount: message.readCount
   }
 }
 

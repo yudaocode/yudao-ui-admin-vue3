@@ -237,6 +237,9 @@
 
         <!-- ==================== 查找聊天内容 ==================== -->
         <!-- 点击 → 父组件打开 MessageHistory 弹窗 -->
+
+        <div class="im-conversation-group-side__spacer"></div>
+
         <div class="im-conversation-group-side__section">
           <div
             class="im-conversation-group-side__row im-conversation-group-side__row--clickable"
@@ -356,15 +359,16 @@ import { useMessage } from '@/hooks/web/useMessage'
 
 import { useUserStore } from '@/store/modules/user'
 import { CommonStatusEnum } from '@/utils/constants'
-import { updateGroup, addGroupAdmin, removeGroupAdmin, transferGroupOwner } from '@/api/im/group'
+import {
+  updateGroup,
+  addGroupAdmin,
+  removeGroupAdmin,
+  transferGroupOwner
+} from '@/api/im/group'
 import { quitGroup, removeGroupMember, updateGroupMember } from '@/api/im/group/member'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
-import {
-  GROUP_ADMIN_MAX_COUNT,
-  ImConversationType,
-  ImGroupMemberRole
-} from '@/views/im/utils/constants'
+import { GROUP_ADMIN_MAX_COUNT, ImConversationType, ImGroupMemberRole } from '@/views/im/utils/constants'
 import GroupMemberGrid from '../../../../components/group/GroupMemberGrid.vue'
 import GroupMemberAddDialog from '../../../../components/group/GroupMemberAddDialog.vue'
 import GroupMemberSelector, {
@@ -461,6 +465,7 @@ const myRole = computed(() => props.members.find((m) => m.userId === myId.value)
 const isOwnerOrAdmin = computed(
   () => myRole.value === ImGroupMemberRole.OWNER || myRole.value === ImGroupMemberRole.ADMIN
 )
+
 
 // 排除已退群成员 + 关键字过滤；按角色排序：群主→管理员→普通成员（同角色按 userId 稳定）
 const visibleMembers = computed(() => {
