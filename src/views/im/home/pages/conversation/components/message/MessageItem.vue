@@ -18,7 +18,7 @@
     {{ tipText }}
   </div>
 
-  <!-- 群广播事件（1501-1520 / 1530）：跟 TIP_TEXT 同样的居中灰色样式，文案按 type 拼装 -->
+  <!-- 群广播事件：跟 TIP_TEXT 同样的居中灰色样式，文案按 type 拼装 -->
   <div
     v-else-if="isGroupNotificationMessage"
     class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-secondary)]"
@@ -363,7 +363,7 @@ const textContent = computed(() => parseMessage<TextMessage>(props.message.conte
 /** TIP_TEXT 文案：与 conversationStore.resolveLastContent / MessageHistory.renderContent 共用 helper，避免兼容性逻辑分裂 */
 const tipText = computed(() => resolveTipText(props.message.content))
 
-/** 群广播事件（1501-1520 / 1530） */
+/** 群广播事件 */
 const isGroupNotificationMessage = computed(() => isGroupNotification(props.message.type))
 const groupNotificationText = computed(() => resolveGroupNotificationText(props.message))
 const imagePayload = computed(() =>

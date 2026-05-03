@@ -626,10 +626,11 @@ async function handleRemoveComplete(members: GroupMemberFlag[]) {
 
 // ---------- 设置群管理员 ----------
 
-/** 当前管理员的 userId 列表，作为 Selector 默认勾选 */
+/** 当前管理员的 userId 列表，作为 Selector 默认勾选；过滤已退群成员，避免 maxSize 名额被隐藏成员占用导致无法新增管理员 */
 const adminCheckedIds = computed(() =>
   props.members
-    .filter((member) => member.role === ImGroupMemberRole.ADMIN)
+    .filter((member) => member.role === ImGroupMemberRole.ADMIN
+        && member.status !== CommonStatusEnum.DISABLE)
     .map((member) => member.userId)
 )
 

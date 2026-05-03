@@ -14,16 +14,14 @@ import { ImConversationType, ImMessageType } from './constants'
 import { getCurrentUserId } from './storage'
 import { useFriendStore } from '../home/store/friendStore'
 import { useGroupStore } from '../home/store/groupStore'
-import type { Friend, Group, Message } from '../home/types'
+import type { Friend, Group } from '../home/types'
 
 /**
  * 私聊好友显示名：备注 > 真实昵称
  *
  * displayName 是「我对这个人的私人称呼」属于我的数据，删好友（DISABLE）也保留；删了再加回来时备注自然延续，历史消息里仍以备注辨识
  */
-export function getFriendDisplayName(
-  friend: Pick<Friend, 'nickname' | 'displayName'>
-): string {
+export function getFriendDisplayName(friend: Pick<Friend, 'nickname' | 'displayName'>): string {
   return friend.displayName || friend.nickname
 }
 
@@ -151,35 +149,42 @@ export function getSenderRealNickname(
 }
 
 /**
- * 群广播事件（GROUP_* 1501-1520 / 1530）的中文文案
+ * 群广播事件（GROUP_* 系列）的中文文案
  *
  * 按 message.type 取 content payload 字段，昵称默认走 getSenderDisplayName（备注 / 群昵称 / 真实昵称兜底）；
  * 管理后台无 store，可传入 resolveName 自定义 id → 名字（如 senderNickname + 用户(id) 兜底）；
  * home 端 MessageItem.vue / ConversationItem.vue / MessageHistory.vue 与 admin 端 MessageContentPreview.vue 共用
  */
+export type GroupNotificationPayload = {
+  operatorUserId?: number
+  memberUserIds?: number[]
+  newOwnerUserId?: number
+  oldName?: string
+  newName?: string
+  oldNotice?: string
+  newNotice?: string
+  oldAvatar?: string
+  newAvatar?: string
+  displayUserName?: string
+}
+
 export function resolveGroupNotificationText(
-  message: Pick<Message, 'type' | 'content' | 'targetId'>,
-  resolveName?: (userId: number) => string
+  message: { type?: number; content?: string; targetId?: number },
+  resolveName?: (userId: number) => string,
+  operatorNameOverride?: string
 ): string {
-  const groupId = message.targetId
-  let payload: {
-    operatorUserId?: number
-    memberUserIds?: number[]
-    newOwnerUserId?: number
-    oldName?: string
-    newName?: string
-    notice?: string
-    avatar?: string
-    displayUserName?: string
-  } = {}
+  let payload: GroupNotificationPayload = {}
   try {
     payload = JSON.parse(message.content || '{}')
   } catch {
     return ''
   }
   const resolve =
-    resolveName || ((id: number) => getSenderDisplayName(id, ImConversationType.GROUP, groupId))
-  const operatorName = payload.operatorUserId ? resolve(payload.operatorUserId) : ''
+    resolveName ||
+    ((id: number) => getSenderDisplayName(id, ImConversationType.GROUP, message.targetId ?? 0))
+  const operatorName = payload.operatorUserId
+    ? (operatorNameOverride ?? resolve(payload.operatorUserId))
+    : ''
   const memberNames = (payload.memberUserIds || []).map(resolve).join('、')
   const newOwnerName = payload.newOwnerUserId ? resolve(payload.newOwnerUserId) : ''
   switch (message.type) {
@@ -191,7 +196,7 @@ export function resolveGroupNotificationText(
       return `${operatorName} 更新了群公告`
     case ImMessageType.GROUP_INFO_UPDATE:
       // 兜底事件：按非 null 字段优先匹配特化文案，全部为空时降级为 "更新了群信息" 通用文案
-      if (payload.avatar) {
+      if (payload.newAvatar) {
         return `${operatorName} 更换了群头像`
       }
       return `${operatorName} 更新了群信息`

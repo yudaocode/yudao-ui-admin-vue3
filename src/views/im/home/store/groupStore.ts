@@ -21,7 +21,7 @@ import {
   setQuietly,
   StorageKeys
 } from '../../utils/storage'
-import { getGroupDisplayName } from '../../utils/user'
+import { getGroupDisplayName, type GroupNotificationPayload } from '../../utils/user'
 import type { Group, GroupMember } from '../types'
 
 /**
@@ -38,8 +38,15 @@ const pendingMemberKey = (userId: number, groupId: number) => `${userId}:${group
  * 跟整群表分开：单成员 fetch 跟整群 fetch 语义不同（单成员不回填 me 的 muted），不能互相代替
  */
 const pendingSingleMemberFetches = new Map<string, Promise<GroupMember | null>>()
+
 const pendingSingleMemberKey = (userId: number, groupId: number, memberUserId: number) =>
   `${userId}:${groupId}:${memberUserId}`
+
+/** 判断当前用户是否在 payload.memberUserIds 里（GROUP_CREATE / INVITE / KICK 自判用） */
+function isSelfInPayloadMembers(payload: GroupNotificationPayload): boolean {
+  const selfUserId = getCurrentUserId()
+  return !!selfUserId && (payload.memberUserIds || []).includes(selfUserId)
+}
 
 /**
  * IM 群 Store
@@ -458,10 +465,14 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.saveGroupMembers(groupId)
     },
 
-    /** 局部更新群字段（name / notice / avatar 等）；未命中本地缓存时静默忽略，等 fetchGroups 兜底 */
+    /** 局部更新群字段（name / notice / avatar 等）；未命中本地缓存时静默忽略，等 fetchGroups 兜底；新值跟旧值都相同时跳过响应式 + IDB 写 */
     updateGroupFields(groupId: number, fields: Partial<Group>) {
       const group = this.getGroup(groupId)
       if (!group) {
+        return
+      }
+      const changed = (Object.keys(fields) as (keyof Group)[]).some((k) => group[k] !== fields[k])
+      if (!changed) {
         return
       }
       Object.assign(group, fields)
@@ -475,7 +486,7 @@ export const useGroupStore = defineStore('imGroupStore', {
     },
 
     /**
-     * 接收 GROUP_* 群广播事件，按 type 分发到对应 mutation
+     * 接收 GROUP_* 群广播事件，按 type 分发到对应私有 action
      *
      * WebSocket 实时收 + useMessagePuller 离线 pull 都走 conversationStore.insertMessage 旁路调用
      * store 里没缓存的群静默忽略，等 fetchGroups 兜底
@@ -484,84 +495,44 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (!groupId) {
         return
       }
-      let payload: Record<string, any> = {}
+      let payload: GroupNotificationPayload = {}
       try {
         payload = content ? JSON.parse(content) : {}
       } catch (error) {
-        console.warn('[IM groupStore] applyGroupNotification 解析 content 失败', { groupId, type, content }, error)
+        console.warn(
+          '[IM groupStore] applyGroupNotification 解析 content 失败',
+          { groupId, type, contentLength: content?.length ?? 0 },
+          error
+        )
         return
       }
       switch (type) {
-        case ImMessageType.GROUP_CREATE: {
-          // 创建群广播：创建者多端同步 + 初始成员 bootstrap；payload.memberUserIds 含自己 → 拉群详情 / 成员
-          const selfUserId = getCurrentUserId()
-          const memberIds: number[] = payload.memberUserIds || []
-          if (selfUserId && memberIds.includes(selfUserId)) {
-            this.fetchGroupInfo(groupId).catch(() => undefined)
-            this.fetchGroupMembers(groupId, true).catch(() => undefined)
-          }
+        case ImMessageType.GROUP_CREATE:
+          this.applyGroupCreateNotification(groupId, payload)
           break
-        }
         case ImMessageType.GROUP_NAME_UPDATE:
-          if (payload.newName) {
-            this.updateGroupFields(groupId, { name: payload.newName })
-          }
+          this.applyGroupNameUpdateNotification(groupId, payload)
           break
         case ImMessageType.GROUP_NOTICE_UPDATE:
-          this.updateGroupFields(groupId, { notice: payload.notice ?? '' })
+          this.applyGroupNoticeUpdateNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_INFO_UPDATE: {
-          // 兜底 NAME / NOTICE 之外的群字段变更（avatar 等）；按非 null 字段累积更新
-          const fields: Partial<Group> = {}
-          if (payload.avatar) {
-            fields.avatar = payload.avatar
-          }
-          if (Object.keys(fields).length > 0) {
-            this.updateGroupFields(groupId, fields)
-          }
+        case ImMessageType.GROUP_INFO_UPDATE:
+          this.applyGroupInfoUpdateNotification(groupId, payload)
           break
-        }
         case ImMessageType.GROUP_DISSOLVE:
-          // 群解散：所有成员（含群主）收到广播 → 本端自行清群
           this.removeGroup(groupId)
           break
-        case ImMessageType.GROUP_MEMBER_INVITE: {
-          // 被邀请者：本端 group 还没就位，先 fetchGroupInfo bootstrap，再拉成员
-          // 已在群成员：只刷成员列表（新成员 nickname / avatar 不在 payload，必须 fetch）
-          const selfUserId = getCurrentUserId()
-          const memberIds: number[] = payload.memberUserIds || []
-          const selfInvited = !!selfUserId && memberIds.includes(selfUserId)
-          if (selfInvited && !this.getGroup(groupId)) {
-            this.fetchGroupInfo(groupId).catch(() => undefined)
-          }
-          this.fetchGroupMembers(groupId, true).catch(() => undefined)
+        case ImMessageType.GROUP_MEMBER_INVITE:
+          this.applyGroupMemberInviteNotification(groupId, payload)
           break
-        }
-        case ImMessageType.GROUP_MEMBER_QUIT: {
-          // 退群者本人多端同步：清群；其他成员：从本地成员列表移除
-          const selfUserId = getCurrentUserId()
-          if (selfUserId && payload.operatorUserId === selfUserId) {
-            this.removeGroup(groupId)
-          } else if (payload.operatorUserId) {
-            this.removeMembersLocal(groupId, [payload.operatorUserId])
-          }
+        case ImMessageType.GROUP_MEMBER_QUIT:
+          this.applyGroupMemberQuitNotification(groupId, payload)
           break
-        }
-        case ImMessageType.GROUP_MEMBER_KICK: {
-          // 被踢者本人：清群；其他成员：从本地成员列表移除
-          const selfUserId = getCurrentUserId()
-          const memberIds: number[] = payload.memberUserIds || []
-          if (selfUserId && memberIds.includes(selfUserId)) {
-            this.removeGroup(groupId)
-          } else if (memberIds.length) {
-            this.removeMembersLocal(groupId, memberIds)
-          }
+        case ImMessageType.GROUP_MEMBER_KICK:
+          this.applyGroupMemberKickNotification(groupId, payload)
           break
-        }
         case ImMessageType.GROUP_MEMBER_NICKNAME_UPDATE:
-          if (payload.operatorUserId) {
-            this.updateMemberDisplayUserName(groupId, payload.operatorUserId, payload.displayUserName ?? '')
-          }
+          this.applyGroupMemberNicknameUpdateNotification(groupId, payload)
           break
         case ImMessageType.GROUP_ADMIN_ADD:
           this.updateMembersRole(groupId, payload.memberUserIds || [], ImGroupMemberRole.ADMIN)
@@ -570,10 +541,91 @@ export const useGroupStore = defineStore('imGroupStore', {
           this.updateMembersRole(groupId, payload.memberUserIds || [], ImGroupMemberRole.NORMAL)
           break
         case ImMessageType.GROUP_OWNER_TRANSFER:
-          if (payload.operatorUserId && payload.newOwnerUserId) {
-            this.transferOwner(groupId, payload.operatorUserId, payload.newOwnerUserId)
-          }
+          this.applyGroupOwnerTransferNotification(groupId, payload)
           break
+      }
+    },
+
+    /** 创建群广播：创建者多端同步 + 初始成员 bootstrap；payload.memberUserIds 含自己 → 拉群详情 / 成员；本端发起者已经 upsert 过本群，跳过避免双拉 */
+    applyGroupCreateNotification(groupId: number, payload: GroupNotificationPayload) {
+      if (!isSelfInPayloadMembers(payload)) {
+        return
+      }
+      const selfUserId = getCurrentUserId()
+      const selfIsOperator = !!selfUserId && payload.operatorUserId === selfUserId
+      if (selfIsOperator && this.getGroup(groupId)) {
+        return
+      }
+      this.fetchGroupInfo(groupId).catch(() => undefined)
+      this.fetchGroupMembers(groupId, true).catch(() => undefined)
+    },
+
+    /** 群名变更：按 newName 局部更新本地群名 */
+    applyGroupNameUpdateNotification(groupId: number, payload: GroupNotificationPayload) {
+      if (payload.newName) {
+        this.updateGroupFields(groupId, { name: payload.newName })
+      }
+    },
+
+    /** 群公告变更：按 newNotice 局部更新（允许空串作为「清空公告」） */
+    applyGroupNoticeUpdateNotification(groupId: number, payload: GroupNotificationPayload) {
+      this.updateGroupFields(groupId, { notice: payload.newNotice ?? '' })
+    },
+
+    /** 群信息变更（NAME / NOTICE 之外字段，当前承载头像变更） */
+    applyGroupInfoUpdateNotification(groupId: number, payload: GroupNotificationPayload) {
+      const fields: Partial<Group> = {}
+      if (payload.newAvatar) {
+        fields.avatar = payload.newAvatar
+      }
+      if (Object.keys(fields).length > 0) {
+        this.updateGroupFields(groupId, fields)
+      }
+    },
+
+    /** 成员加入：被邀请者本端 group 未就位先 fetchGroupInfo bootstrap；所有人都刷成员列表（新成员 nickname / avatar 不在 payload） */
+    applyGroupMemberInviteNotification(groupId: number, payload: GroupNotificationPayload) {
+      if (isSelfInPayloadMembers(payload) && !this.getGroup(groupId)) {
+        this.fetchGroupInfo(groupId).catch(() => undefined)
+      }
+      this.fetchGroupMembers(groupId, true).catch(() => undefined)
+    },
+
+    /** 成员退群：退群者本人多端同步走 removeGroup；其他成员从本地列表移除 quitter */
+    applyGroupMemberQuitNotification(groupId: number, payload: GroupNotificationPayload) {
+      const selfUserId = getCurrentUserId()
+      if (selfUserId && payload.operatorUserId === selfUserId) {
+        this.removeGroup(groupId)
+      } else if (payload.operatorUserId) {
+        this.removeMembersLocal(groupId, [payload.operatorUserId])
+      }
+    },
+
+    /** 成员被移出：被踢者本人 removeGroup；其他成员从本地列表移除被踢者 */
+    applyGroupMemberKickNotification(groupId: number, payload: GroupNotificationPayload) {
+      const memberIds = payload.memberUserIds || []
+      if (isSelfInPayloadMembers(payload)) {
+        this.removeGroup(groupId)
+      } else if (memberIds.length) {
+        this.removeMembersLocal(groupId, memberIds)
+      }
+    },
+
+    /** 成员昵称变更：按 operatorUserId 局部更新对应 member.displayUserName */
+    applyGroupMemberNicknameUpdateNotification(groupId: number, payload: GroupNotificationPayload) {
+      if (payload.operatorUserId) {
+        this.updateMemberDisplayUserName(
+          groupId,
+          payload.operatorUserId,
+          payload.displayUserName ?? ''
+        )
+      }
+    },
+
+    /** 群主转让：旧群主 → NORMAL，新群主 → OWNER */
+    applyGroupOwnerTransferNotification(groupId: number, payload: GroupNotificationPayload) {
+      if (payload.operatorUserId && payload.newOwnerUserId) {
+        this.transferOwner(groupId, payload.operatorUserId, payload.newOwnerUserId)
       }
     },
 

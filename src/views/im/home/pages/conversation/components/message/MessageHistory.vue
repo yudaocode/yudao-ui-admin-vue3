@@ -152,7 +152,7 @@
             {{ resolveTipText(message.content) }}
           </div>
 
-          <!-- 群广播事件文案（1501-1520 / 1530）：跟 TIP_TEXT 同样的居中灰色样式 -->
+          <!-- 群广播事件文案：跟 TIP_TEXT 同样的居中灰色样式 -->
           <div
             v-else-if="isGroupNotification(message.type)"
             class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"

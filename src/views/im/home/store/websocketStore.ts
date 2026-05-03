@@ -15,7 +15,8 @@ import type {
   WebSocketFrame,
   ImPrivateMessageDTO,
   ImGroupMessageDTO,
-  Message
+  Message,
+  Group
 } from '../types'
 
 /**
@@ -73,7 +74,8 @@ const convertGroupMessage = (
  *    - 普通消息（TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT）：入库 + 当前会话自动已读 / 提示音
  *    - 已读 / 回执（READ / RECEIPT）：多端已读同步、对方读后回执
  *    - 好友变更（FRIEND_ADD / DELETE / UPDATE）：同步 friendStore + 级联刷新私聊会话
- *    - 群个人信号（1530 GROUP_MEMBER_SETTING_UPDATE）：同步 groupStore + 级联刷新群聊会话；群广播事件（1501-1520 OpenIM 段位）走 handleGroupMessage + applyGroupNotification 旁路（含 DISSOLVE/QUIT/KICK 自判清群）
+ *    - 群个人信号（GROUP_MEMBER_SETTING_UPDATE）：同步 groupStore + 级联刷新群聊会话
+ *    - 群广播事件（GROUP_*）：走 handleGroupMessage + applyGroupNotification 旁路（含 DISSOLVE / QUIT / KICK 自判清群）
  */
 export const useImWebSocketStore = defineStore('imWebSocketStore', {
   state: () => ({
@@ -518,7 +520,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!group) {
         return
       }
-      const fields: Partial<typeof group> = {}
+      const fields: Partial<Group> = {}
       if (payload.muted != null) {
         fields.muted = payload.muted
       }
