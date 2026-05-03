@@ -69,5 +69,5 @@ export const getGroupReadUsers = (params: {
   groupId: number | string
   messageId: number | string
 }) => {
-  return request.get<number[]>({ url: '/im/message/group/read-users', params })
+  return request.get<number[]>({ url: '/im/message/group/get-read-user-ids', params })
 }

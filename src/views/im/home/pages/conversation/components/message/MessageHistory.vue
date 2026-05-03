@@ -219,8 +219,8 @@
                 @click="openFile(fileOf(message)?.url)"
               >
                 <Icon
-                  :icon="getFileIcon(fileOf(message)?.name || '').icon"
-                  :color="getFileIcon(fileOf(message)?.name || '').color"
+                  :icon="getFileIconInfo(fileOf(message)?.name).icon"
+                  :color="getFileIconInfo(fileOf(message)?.name).color"
                   :size="32"
                   class="flex-shrink-0"
                 />
@@ -320,6 +320,7 @@ import { ImConversationType, ImMessageType, isGroupNotification } from '@/views/
 import {
   parseMessage,
   resolveTipText,
+  getFileIconInfo,
   type TextMessage,
   type ImageMessage,
   type FileMessage,
@@ -686,42 +687,6 @@ function textSnippetOf(message: Message): string {
   }
 }
 
-/**
- * 文件类型图标 + 配色（按扩展名分发，与 MessageItem 同款逻辑）
- *
- * TODO @AI：MessageItem 也有一份完全相同的实现，下次顺手抽到 utils/message.ts 里去重
- */
-function getFileIcon(name: string): { icon: string; color: string } {
-  const ext = name.split('.').pop()?.toLowerCase() || ''
-  if (ext === 'pdf') {
-    return { icon: 'ant-design:file-pdf-filled', color: '#ed5757' }
-  }
-  if (['doc', 'docx'].includes(ext)) {
-    return { icon: 'ant-design:file-word-filled', color: '#2b7cd3' }
-  }
-  if (['xls', 'xlsx'].includes(ext)) {
-    return { icon: 'ant-design:file-excel-filled', color: '#1f7244' }
-  }
-  if (['ppt', 'pptx'].includes(ext)) {
-    return { icon: 'ant-design:file-ppt-filled', color: '#d24726' }
-  }
-  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
-    return { icon: 'ant-design:file-zip-filled', color: '#f0ad4e' }
-  }
-  if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(ext)) {
-    return { icon: 'ant-design:file-image-filled', color: '#9c27b0' }
-  }
-  if (['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv'].includes(ext)) {
-    return { icon: 'ant-design:video-camera-filled', color: '#9c27b0' }
-  }
-  if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(ext)) {
-    return { icon: 'ant-design:audio-filled', color: '#9c27b0' }
-  }
-  if (['txt', 'md', 'log', 'json', 'xml'].includes(ext)) {
-    return { icon: 'ant-design:file-text-filled', color: '#909399' }
-  }
-  return { icon: 'ant-design:file-filled', color: '#909399' }
-}
 
 /** 文件点击 → 新窗口打开下载 */
 function openFile(url?: string) {

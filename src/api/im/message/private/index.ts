@@ -38,7 +38,6 @@ export const pullPrivateMessages = (params: { minId: number | string; size: numb
 }
 
 // 查询私聊历史消息
-// TODO @AI：历史消息，是不是通过这个接口？
 export const getPrivateMessageList = (params: ImPrivateMessageListReqVO) => {
   return request.get<ImPrivateMessageRespVO[]>({ url: '/im/message/private/list', params })
 }

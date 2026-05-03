@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：应该是 message/group/xxx，保持和前端一致
 export interface ImManagerGroupMessageVO {
   id: number
   clientMessageId?: string

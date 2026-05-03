@@ -535,3 +535,15 @@ export const subString = (str: string, start: number, end: number) => {
   }
   return str
 }
+
+/** HTML 转义函数，防止 XSS */
+export const escapeHtml = (text: string): string => {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  }
+  return text.replace(/[&<>"']/g, (char) => map[char])
+}

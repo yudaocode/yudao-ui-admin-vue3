@@ -13,7 +13,6 @@ export interface ImGroupRespVO {
   status: number // 群状态（0=正常，1=已解散）
   dissolvedTime?: string // 解散时间
   createTime?: string // 创建时间
-  // TODO @AI：不太对，返回的就是 ImGroupMessageRespVO 数组
   pinnedMessages?: ImGroupMessageRespVO[] // 群置顶消息列表（后端关联回填，仅当登录用户是群成员时非空）
 }
 

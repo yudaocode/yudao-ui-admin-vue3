@@ -406,21 +406,19 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (!group?.members?.length) {
         return
       }
-      // TODO @AI：计算是否更新？【优化注释】
+      // 命中目标且角色已变化才标记 changed，避免无变化时整数组重建触发响应式
       const idSet = new Set(userIds)
       let changed = false
-      // TODO @AI：newMembers 更合适？
-      // TODO @AI：m 是不是改成 member；
-      const next = group.members.map((m) => {
-        if (!idSet.has(m.userId) || m.role === role) {
-          return m
+      const newMembers = group.members.map((member) => {
+        if (!idSet.has(member.userId) || member.role === role) {
+          return member
         }
         changed = true
-        return { ...m, role }
+        return { ...member, role }
       })
-      // TODO @AI：有更新则进行替换，补充下注释【优化注释】
+      // 有变化才整组替换，让响应式只在真有更新时通知下游
       if (changed) {
-        group.members = next
+        group.members = newMembers
       }
     },
 
@@ -644,28 +642,23 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (!group) {
         return
       }
-      // TODO @AI：可以直接使用 payload，简化这样设置。。。
-      const message: Message = {
-        id: payload.message.id,
+      // 幂等：已存在同 messageId 不重复 push
+      const existing = group.pinnedMessages || []
+      // TODO @AI：TS18048: payload.message is possibly undefined
+      if (existing.some((m) => m.id === payload.message.id)) {
+        return
+      }
+      // payload.message 字段名跟 Message 一致（仅 sendTime 需要从 ISO 串转毫秒戳，selfSend 按当前用户算）
+      const newMessage: Message = {
+        ...payload.message,
         clientMessageId: payload.message.clientMessageId || '',
-        type: payload.message.type,
-        content: payload.message.content,
-        status: payload.message.status,
         sendTime: new Date(payload.message.sendTime).getTime(),
-        senderId: payload.message.senderId,
         targetId: payload.message.groupId,
         selfSend: payload.message.senderId === getCurrentUserId(),
         atUserIds: payload.message.atUserIds || [],
-        receiverUserIds: payload.message.receiverUserIds || [],
-        receiptStatus: payload.message.receiptStatus,
-        readCount: payload.message.readCount
+        receiverUserIds: payload.message.receiverUserIds || []
       }
-      // 幂等：已存在同 messageId 不重复 push
-      const existing = group.pinnedMessages || []
-      if (existing.some((m) => m.id === message.id)) {
-        return
-      }
-      group.pinnedMessages = [...existing, message]
+      group.pinnedMessages = [...existing, newMessage]
       this.saveGroups()
     },
 
@@ -678,12 +671,11 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (!group?.pinnedMessages?.length) {
         return
       }
-      // TODO @AI：不要用 next 这样的单词，大家不好理解。可以用 newXXXX 这样。其它地方也看看。
-      const next = group.pinnedMessages.filter((m) => m.id !== payload.messageId)
-      if (next.length === group.pinnedMessages.length) {
+      const newPinnedMessages = group.pinnedMessages.filter((m) => m.id !== payload.messageId)
+      if (newPinnedMessages.length === group.pinnedMessages.length) {
         return
       }
-      group.pinnedMessages = next
+      group.pinnedMessages = newPinnedMessages
       this.saveGroups()
     },
 

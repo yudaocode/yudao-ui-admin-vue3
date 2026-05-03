@@ -267,8 +267,6 @@ import ReplyPreview from './ReplyPreview.vue'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
-// TODO @AI：参考 /Users/yunai/Java/yudao-all-in-im/yudao-ui-admin-vue3/src/views/im/home/pages/conversation/components/conversation/ConversationGroupSide.vue 做下分块？
-
 defineOptions({ name: 'ImMessageItem' })
 
 const props = defineProps<{
@@ -280,6 +278,8 @@ const emit = defineEmits<{
   locate: [messageId: number]
 }>()
 
+// ==================== Stores / Hooks ====================
+
 const userStore = useUserStore()
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
@@ -289,6 +289,8 @@ const uiStore = useImUiStore()
 const { recall, sendRaw } = useMessageSender()
 // 仅用 confirm，避免 message 跟 props.message 同名冲突（vue/no-dupe-keys）
 const { confirm: confirmDialog, success: successMessage } = useMessage()
+
+// ==================== 消息类型判断 ====================
 
 /** 是否已撤回：pull / WS 两路都会调 recallMessage 把原消息更新为 type=RECALL，渲染只需识别 type */
 const isRecall = computed(() => props.message.type === ImMessageType.RECALL)
@@ -362,6 +364,8 @@ function formatTipTime(timestamp: number): string {
   return `${pad(messageDate.getMonth() + 1)}-${pad(messageDate.getDate())} ${hourMinute}`
 }
 
+// ==================== 消息内容解析 / payload ====================
+
 /** 文本内容 */
 const textContent = computed(() => parseMessage<TextMessage>(props.message.content)?.content ?? '')
 
@@ -426,6 +430,8 @@ onBeforeUnmount(() => {
   }
   voicePlaying.value = false
 })
+
+// ==================== 发送人 / 已读 / @ ====================
 
 // 撤回文案：buildRecallTip 实时算 sender 名（按 conversation 上下文走 WeChat 优先级）
 const recallTip = computed(() => {
@@ -517,6 +523,8 @@ const isAtMe = computed(() => {
   }
   return (props.message.atUserIds || []).includes(myId)
 })
+
+// ==================== 右键菜单 / 操作 ====================
 
 /** 右键菜单 key 常量；push 端和分发端从同一处取，typo 编译期就能抓 */
 const MENU_KEYS = {
@@ -630,7 +638,8 @@ const canPin = computed(
     isNormalMessage(props.message.type) &&
     !!props.message.id &&
     !isRecall.value &&
-    (myGroupRole.value === ImGroupMemberRole.OWNER || myGroupRole.value === ImGroupMemberRole.ADMIN) &&
+    (myGroupRole.value === ImGroupMemberRole.OWNER ||
+      myGroupRole.value === ImGroupMemberRole.ADMIN) &&
     !currentGroup.value.pinnedMessages?.some((m) => m.id === props.message.id)
 )
 
@@ -641,6 +650,7 @@ async function handlePin() {
     return
   }
   try {
+    // TODO @AI：这个会不会有问题 TS2554: Expected 1-2 arguments, but got 3
     await confirmDialog('将在当前群成员的聊天中置顶', '置顶消息', { confirmButtonText: '置顶' })
     await apiPinGroupMessage({ groupId: group.id, messageId: props.message.id })
     successMessage('已置顶')

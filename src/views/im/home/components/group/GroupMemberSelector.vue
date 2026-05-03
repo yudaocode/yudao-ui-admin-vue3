@@ -128,12 +128,11 @@ watch(
 
 /** 重建工作副本：把 checkedIds / lockedIds / hideIds 翻译成每个 member 的 flag */
 function rebuild() {
-  // TODO @AI：member 不要缩写成 m；
-  workingMembers.value = props.members.map((m) => ({
-    ...m,
-    checked: props.checkedIds.some((id) => id === m.userId),
-    locked: props.lockedIds.some((id) => id === m.userId),
-    hide: props.hideIds.some((id) => id === m.userId)
+  workingMembers.value = props.members.map((member) => ({
+    ...member,
+    checked: props.checkedIds.some((id) => id === member.userId),
+    locked: props.lockedIds.some((id) => id === member.userId),
+    hide: props.hideIds.some((id) => id === member.userId)
   }))
 }
 
@@ -148,32 +147,28 @@ const showMembers = computed(() =>
 )
 
 /** 已勾选成员：右侧宫格预览 + complete 抛参 */
-const checkedMembers = computed(() => workingMembers.value.filter((m) => m.checked))
+const checkedMembers = computed(() => workingMembers.value.filter((member) => member.checked))
 
 /** 落勾选并校验上限：超过 maxSize 时自动取消并提示，避免出现"勾上但实际不算"的中间态 */
-// TODO @AI：member？
-// TODO @AI：val 改成 checked？
-function applyCheck(m: GroupMemberFlag, val: boolean) {
-  m.checked = val
+function applyCheck(member: GroupMemberFlag, checked: boolean) {
+  member.checked = checked
   if (props.maxSize > 0 && checkedMembers.value.length > props.maxSize) {
     message.error(`最多选择 ${props.maxSize} 位成员`)
-    m.checked = false
+    member.checked = false
   }
 }
 
 /** 行点击：切换勾选态，locked 的不响应 */
-// TODO @AI：member？
-function handleToggleCheck(m: GroupMemberFlag) {
-  if (m.locked) {
+function handleToggleCheck(member: GroupMemberFlag) {
+  if (member.locked) {
     return
   }
-  applyCheck(m, !m.checked)
+  applyCheck(member, !member.checked)
 }
 
-/** checkbox change：直接落 val（locked 已由 disabled 拦截） */
-// TODO @AI：member？
-function handleCheckChange(m: GroupMemberFlag, val: boolean) {
-  applyCheck(m, val)
+/** checkbox change：直接落 checked（locked 已由 disabled 拦截） */
+function handleCheckChange(member: GroupMemberFlag, checked: boolean) {
+  applyCheck(member, checked)
 }
 
 /** 确定：把已勾选成员通过 complete 抛给父侧 */
