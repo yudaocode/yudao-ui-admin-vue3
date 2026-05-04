@@ -172,7 +172,8 @@ const friendStore = useFriendStore()
 const userStore = useUserStore()
 const message = useMessage()
 
-const currentUserId = getCurrentUserId() // 当前登录用户编号
+/** 当前登录用户编号；用 computed 包一层，切账号后随 wsCache 重取，避免顶层求值在 keep-alive 实例里持有旧 id */
+const currentUserId = computed(() => getCurrentUserId())
 const keyword = ref('')
 const users = ref<UserVO[]>([])
 const searched = ref(false)
@@ -266,6 +267,11 @@ async function handleSubmitApply() {
   if (!targetUser.value) {
     return
   }
+  // 预校验：不能加自己（搜索列表已过滤，这里兜底 presetUser / 名片入口等场景）
+  if (targetUser.value.id === currentUserId.value) {
+    message.warning('不能添加自己为好友')
+    return
+  }
   submitting.value = true
   try {
     const requestId = await friendStore.applyFriend({
@@ -274,7 +280,14 @@ async function handleSubmitApply() {
       displayName: displayName.value.trim() || undefined,
       addSource: props.addSource
     })
+    // silent 分支（已是单向好友被静默重启）：主动 loadFriendInfo 入库，不依赖 WS FRIEND_ADD 推送，避免丢推时列表看不到
+    if (requestId === null) {
+      await friendStore.loadFriendInfo(targetUser.value.id)
+    }
     message.success(requestId ? '申请已发送，等待对方验证' : '已添加为好友')
+    visible.value = false
+  } catch {
+    // 业务错误（已是好友 / 被对方拉黑 / 用户被禁用 等）：全局拦截器已弹错误提示，本地关弹窗避免脏状态停留
     visible.value = false
   } finally {
     submitting.value = false

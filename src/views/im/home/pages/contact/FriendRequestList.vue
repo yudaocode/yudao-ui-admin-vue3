@@ -82,30 +82,31 @@ const emit = defineEmits<{
 }>()
 
 const expanded = ref(true)
-const currentUserId = getCurrentUserId()
+/** 当前登录用户编号；用 computed 包一层，切账号后随 wsCache 重取，避免顶层求值在 keep-alive 实例里持有旧 id */
+const currentUserId = computed(() => getCurrentUserId())
 
 /** 未处理 + 别人加我的（接收方=我）才进红点；我发起的不进 */
 const unhandledCount = computed(
   () => props.requests.filter(
-    (r) => r.handleResult === ImFriendRequestHandleResult.UNHANDLED && r.toUserId === currentUserId
+    (r) => r.handleResult === ImFriendRequestHandleResult.UNHANDLED && r.toUserId === currentUserId.value
   ).length
 )
 
 /** 列表项展示对端：fromUserId == 我 → 对端 = toUser；否则对端 = fromUser */
 function getPeerUserId(request: FriendRequest): number {
-  return request.fromUserId === currentUserId ? request.toUserId : request.fromUserId
+  return request.fromUserId === currentUserId.value ? request.toUserId : request.fromUserId
 }
 
 /** 列表项展示对端的昵称（fromUserId == 我 → toUser 昵称；否则 fromUser 昵称；缺则用 id 兜底） */
 function getPeerNickname(request: FriendRequest): string {
-  return request.fromUserId === currentUserId
+  return request.fromUserId === currentUserId.value
     ? request.toNickname || String(request.toUserId)
     : request.fromNickname || String(request.fromUserId)
 }
 
 /** 列表项展示对端的头像（fromUserId == 我 → toUser 头像；否则 fromUser 头像） */
 function getPeerAvatar(request: FriendRequest): string | undefined {
-  return request.fromUserId === currentUserId ? request.toAvatar : request.fromAvatar
+  return request.fromUserId === currentUserId.value ? request.toAvatar : request.fromAvatar
 }
 
 </script>

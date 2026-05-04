@@ -104,10 +104,11 @@ const emit = defineEmits<{
 const friendStore = useFriendStore()
 const message = useMessage()
 
-const currentUserId = Number(getCurrentUserId() || 0)
+/** 当前登录用户编号；用 computed 包一层，切账号后随 wsCache 重取，避免顶层求值在 keep-alive 实例里持有旧 id */
+const currentUserId = computed(() => getCurrentUserId())
 
 /** 是不是我发起的（fromUserId === me） */
-const iSentIt = computed(() => props.request.fromUserId === currentUserId)
+const iSentIt = computed(() => props.request.fromUserId === currentUserId.value)
 
 /** 是否「已拒绝」态：模板里多处用到，computed 一次省得到处写枚举比对 */
 const refused = computed(
