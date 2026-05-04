@@ -7,6 +7,8 @@ import {
   getFriend as apiGetFriend,
   deleteFriend as apiDeleteFriend,
   updateFriend as apiUpdateFriend,
+  blockFriend as apiBlockFriend,
+  unblockFriend as apiUnblockFriend,
   type ImFriendRespVO
 } from '@/api/im/friend'
 import {
@@ -231,6 +233,26 @@ export const useFriendStore = defineStore('imFriendStore', {
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.pinned = pinned
+        this.saveFriends()
+      }
+    },
+
+    /** 拉黑好友：本端乐观更新 + 调接口；后端 FRIEND_BLOCK 推到时由 dispatcher 兜底同步多端 */
+    async blockFriend(friendUserId: number) {
+      await apiBlockFriend(friendUserId)
+      const friend = this.getFriend(friendUserId)
+      if (friend) {
+        friend.blocked = true
+        this.saveFriends()
+      }
+    },
+
+    /** 移出黑名单：本端乐观更新 + 调接口；后端 FRIEND_UNBLOCK 推到时由 dispatcher 兜底同步多端 */
+    async unblockFriend(friendUserId: number) {
+      await apiUnblockFriend(friendUserId)
+      const friend = this.getFriend(friendUserId)
+      if (friend) {
+        friend.blocked = false
         this.saveFriends()
       }
     },

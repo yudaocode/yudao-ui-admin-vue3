@@ -47,3 +47,13 @@ export const updateFriend = (data: ImFriendUpdateReqVO) => {
   return request.put<boolean>({ url: '/im/friend/update', data })
 }
 
+// 拉黑好友（必须先是好友；单边屏蔽对方私聊消息）
+export const blockFriend = (friendUserId: number | string) => {
+  return request.put<boolean>({ url: '/im/friend/block', params: { friendUserId } })
+}
+
+// 移出黑名单
+export const unblockFriend = (friendUserId: number | string) => {
+  return request.put<boolean>({ url: '/im/friend/unblock', params: { friendUserId } })
+}
+

@@ -39,7 +39,7 @@
           <div class="truncate">部门：{{ deptText }}</div>
         </div>
       </div>
-      <!-- 右上 "..." 菜单：仅 friend 态展示，菜单项目前只有"删除联系人"（其它 WeChat 选项业务上未支持） -->
+      <!-- 右上 "..." 菜单：仅 friend 态展示；含「加入/移出黑名单」 + 「删除联系人」 -->
       <div v-if="relation === 'friend'" class="flex-shrink-0">
         <el-dropdown trigger="click" placement="bottom-end" popper-class="im-user-info__more-menu">
           <div
@@ -49,7 +49,10 @@
           </div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item @click="handleDeleteFriend">
+              <!-- 拉黑 / 移出黑名单：按 friendInfo.blocked 切换文案 -->
+              <el-dropdown-item v-if="!isBlocked" @click="handleBlock">加入黑名单</el-dropdown-item>
+              <el-dropdown-item v-else @click="handleUnblock">移出黑名单</el-dropdown-item>
+              <el-dropdown-item divided @click="handleDeleteFriend">
                 <span class="text-[var(--el-color-danger)]">删除联系人</span>
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -237,10 +240,13 @@ const deptText = computed(() => full.value?.deptName || '-')
 const genderIcon = computed(() => getGenderIcon(full.value?.sex))
 const genderColor = computed(() => getGenderColor(full.value?.sex))
 
-/** 好友关系记录：来源 / 添加时间从这里取（仅 friend 态下才有意义） */
+/** 好友关系记录：来源 / 添加时间 / 是否拉黑从这里取（仅 friend 态下才有意义） */
 const friendInfo = computed(() =>
   props.user?.id ? friendStore.getFriend(props.user.id) : undefined
 )
+
+/** 是否已拉黑：菜单项「加入黑名单 / 移出黑名单」按这个切换 */
+const isBlocked = computed(() => !!friendInfo.value?.blocked)
 
 /** 备注内联编辑：editingRemark 控制输入态；user 切换时由下面的 watch 复位避免脏态泄漏 */
 const editingRemark = ref(false)
@@ -344,6 +350,26 @@ function handleAddFriend() {
     deptName: props.user.deptName
   } as UserVO
   addFriendVisible.value = true
+}
+
+/** 加入黑名单：confirm → friendStore.blockFriend；后端 FRIEND_BLOCK 推到时由 dispatcher 同步多端 */
+async function handleBlock() {
+  if (!props.user?.id) {
+    return
+  }
+  const target = props.user
+  await message.confirm(`确定将「${target.nickname || ''}」加入黑名单吗？`, '加入黑名单')
+  await friendStore.blockFriend(target.id)
+  message.success('已加入黑名单')
+}
+
+/** 移出黑名单：操作温和不弹 confirm；后端 FRIEND_UNBLOCK 推到时由 dispatcher 同步多端 */
+async function handleUnblock() {
+  if (!props.user?.id) {
+    return
+  }
+  await friendStore.unblockFriend(props.user.id)
+  message.success('已移出黑名单')
 }
 
 /** 删除联系人：confirm → friendStore.deleteFriend（内部级联清会话）→ 通知父级关浮层 / 清选中 */
