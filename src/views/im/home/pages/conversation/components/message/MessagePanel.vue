@@ -63,7 +63,7 @@
           :group-id="conversationStore.activeConversation.targetId"
           @locate="handleLocate"
         />
-        <!-- 私聊：对方不再是好友（删了 / 被删了）；胶囊嵌在 header 内（跟群置顶同级），点击弹 UserInfoCard -->
+        <!-- 私聊：对方不再是有效好友（我删了对方 / 从未加过；单边设计下「被对方删除」本端 friendStore 不更新故不会触发）；胶囊嵌在 header 内（跟群置顶同级），点击弹 UserInfoCard -->
         <div v-if="showNotFriendBanner" class="message-panel__not-friend-container">
           <div class="message-panel__not-friend" @click="handleNotFriendClick">
             <span class="message-panel__not-friend-icon">
@@ -192,7 +192,7 @@ const isGroup = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.GROUP
 )
 
-/** 私聊会话且对端不是有效好友（删了 / 被删了），顶部展示「对方还不是你的朋友」黄色横幅 */
+/** 私聊会话且对端不是有效好友（本端 friend 记录缺失或 DISABLE）；单边删除语义下「被对方删除」不触发本端横幅 */
 const showNotFriendBanner = computed(() => {
   const conversation = conversationStore.activeConversation
   if (!conversation || conversation.type !== ImConversationType.PRIVATE) {
