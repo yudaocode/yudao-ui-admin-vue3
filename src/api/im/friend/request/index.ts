@@ -45,7 +45,22 @@ export const refuseFriendRequest = (id: number | string, handleContent?: string)
   })
 }
 
-// 查询「我相关」的好友申请列表（含我发起的、别人加我的）
-export const getMyFriendRequestList = () => {
-  return request.get<ImFriendRequestRespVO[]>({ url: '/im/friend-request/list' })
+// 查询「我相关」的好友申请列表（游标分页：传 lastRequestId 加载更多）
+export const getMyFriendRequestList = (limit: number, lastRequestId?: number) => {
+  const params: Record<string, number> = { limit }
+  if (lastRequestId != null) {
+    params.lastRequestId = lastRequestId
+  }
+  return request.get<ImFriendRequestRespVO[]>({
+    url: '/im/friend-request/list',
+    params
+  })
+}
+
+// 按 id 单查「我相关」的申请记录（带越权过滤；WebSocket 通知到达后用）
+export const getMyFriendRequest = (id: number) => {
+  return request.get<ImFriendRequestRespVO | null>({
+    url: '/im/friend-request/get',
+    params: { id }
+  })
 }

@@ -141,6 +141,9 @@ export const PRIVATE_MESSAGE_PULL_SIZE = 100
 /** 每次拉取群聊消息的最大条数（后端上限 1000，前端取保守值 100） */
 export const GROUP_MESSAGE_PULL_SIZE = 100
 
+/** 「我相关」好友申请列表的单次拉取条数（游标分页 page size，前端控制） */
+export const FRIEND_REQUEST_PAGE_SIZE = 100
+
 /** 消息之间渲染「时间分隔条」的阈值：10 分钟 */
 export const TIME_TIP_GAP_MS = 10 * 60 * 1000
 

@@ -62,6 +62,14 @@
       >
         暂无新的朋友
       </div>
+      <!-- 加载更多：按本地最旧 requestId 游标分页拉下一批；hasMore=false 不展示 -->
+      <div
+        v-else-if="friendStore.hasMoreFriendRequests"
+        class="py-2 text-12px text-center cursor-pointer text-[var(--el-text-color-secondary)] hover:bg-[var(--el-fill-color-light)]"
+        @click="handleLoadMore"
+      >
+        {{ loadingMore ? '加载中…' : '加载更多' }}
+      </div>
     </div>
   </div>
 </template>
@@ -108,4 +116,17 @@ const enrichedRequests = computed(() =>
   props.requests.map((request) => ({ request, peer: getPeer(request) }))
 )
 
+/** 点击「加载更多」拉下一页；store 内部按 lastRequestId 游标分页 + pending 去重 */
+const loadingMore = ref(false)
+async function handleLoadMore() {
+  if (loadingMore.value) {
+    return
+  }
+  loadingMore.value = true
+  try {
+    await friendStore.loadMoreFriendRequests()
+  } finally {
+    loadingMore.value = false
+  }
+}
 </script>

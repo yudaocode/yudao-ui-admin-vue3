@@ -16,11 +16,16 @@ import {
   agreeFriendRequest as apiAgreeFriendRequest,
   refuseFriendRequest as apiRefuseFriendRequest,
   getMyFriendRequestList as apiGetMyFriendRequestList,
+  getMyFriendRequest as apiGetMyFriendRequest,
   type ImFriendRequestApplyReqVO,
   type ImFriendRequestRespVO
 } from '@/api/im/friend/request'
 import { useConversationStore } from './conversationStore'
-import { ImConversationType, ImFriendRequestHandleResult } from '../../utils/constants'
+import {
+  FRIEND_REQUEST_PAGE_SIZE,
+  ImConversationType,
+  ImFriendRequestHandleResult
+} from '../../utils/constants'
 import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../utils/storage'
 import { getFriendDisplayName } from '../../utils/user'
 import type { Friend, FriendRequest } from '../types'
@@ -29,6 +34,8 @@ import type { Friend, FriendRequest } from '../types'
 let pendingFetchFriends: Promise<void> | null = null
 /** 当前正在进行的好友申请列表拉取；多端连续多条申请到达时复用同一 Promise，避免雪崩重拉 */
 let pendingFetchRequests: Promise<void> | null = null
+/** 当前正在进行的「加载更多申请」请求 */
+let pendingLoadMoreRequests: Promise<void> | null = null
 
 /** 好友通知 payload（对齐后端 BaseFriendNotification + 子类裁减后的字段） */
 export interface FriendNotificationPayload {
@@ -61,8 +68,10 @@ export const useFriendStore = defineStore('imFriendStore', {
     friends: [] as Friend[],
     // 仅 fetchFriends 成功后置位；loadFriends（IDB）不置位，否则后台 SWR 刷新会被缓存命中跳过
     loaded: false,
-    /** 我相关的好友申请列表（含我发起的 + 别人加我的；后端按 id 倒序，前端不再分页） */
-    friendRequests: [] as FriendRequest[]
+    /** 我相关的好友申请列表（含我发起的 + 别人加我的；后端按 id 倒序游标分页） */
+    friendRequests: [] as FriendRequest[],
+    /** 是否还有更早的申请记录可加载；返回不满 page size 即置 false */
+    hasMoreFriendRequests: true
   }),
 
   getters: {
@@ -191,9 +200,8 @@ export const useFriendStore = defineStore('imFriendStore', {
         request.handleResult = ImFriendRequestHandleResult.AGREED
         request.handleTime = Date.now()
       } else {
-        // 列表过期场景兜底重拉
-        // TODO @AI：是不是只拉这个人？避免拉所有？
-        await this.fetchFriendRequests()
+        // 本地列表没这条，按 id 单查兜底
+        await this.loadFriendRequest(requestId)
       }
     },
 
@@ -206,18 +214,21 @@ export const useFriendStore = defineStore('imFriendStore', {
         request.handleContent = handleContent
         request.handleTime = Date.now()
       } else {
-        await this.fetchFriendRequests()
+        await this.loadFriendRequest(requestId)
       }
     },
 
-    /** 拉取「我相关」的好友申请列表（页面打开时 / 收到 FRIEND_REQUEST_RECEIVED 时刷新）；pending 期间复用同一 Promise */
+    /** 拉取「我相关」的好友申请列表首页（页面打开 / 收到 FRIEND_REQUEST_RECEIVED 时刷新）；pending 期间复用同一 Promise */
     async fetchFriendRequests() {
       if (pendingFetchRequests) {
         return pendingFetchRequests
       }
-      pendingFetchRequests = apiGetMyFriendRequestList()
+      pendingFetchRequests = apiGetMyFriendRequestList(FRIEND_REQUEST_PAGE_SIZE)
         .then((list) => {
-          this.friendRequests = (list || []).map(convertFriendRequest)
+          const items = (list || []).map(convertFriendRequest)
+          this.friendRequests = items
+          // 不足一页即没有更多；满页可能还有，等 loadMore 拉到 0 条再确定
+          this.hasMoreFriendRequests = items.length >= FRIEND_REQUEST_PAGE_SIZE
         })
         .finally(() => {
           pendingFetchRequests = null
@@ -225,9 +236,45 @@ export const useFriendStore = defineStore('imFriendStore', {
       return pendingFetchRequests
     },
 
+    /** 加载更多申请（按本地最旧 requestId 游标分页）；无更多 / pending 中直接返回 */
+    async loadMoreFriendRequests() {
+      if (!this.hasMoreFriendRequests || pendingLoadMoreRequests || pendingFetchRequests) {
+        return
+      }
+      const oldest = this.friendRequests[this.friendRequests.length - 1]
+      if (!oldest) {
+        return this.fetchFriendRequests()
+      }
+      pendingLoadMoreRequests = apiGetMyFriendRequestList(FRIEND_REQUEST_PAGE_SIZE, oldest.id)
+        .then((list) => {
+          const items = (list || []).map(convertFriendRequest)
+          this.friendRequests.push(...items)
+          this.hasMoreFriendRequests = items.length >= FRIEND_REQUEST_PAGE_SIZE
+        })
+        .finally(() => {
+          pendingLoadMoreRequests = null
+        })
+      return pendingLoadMoreRequests
+    },
+
     /** 按 id 查申请记录；列表是按 id 倒序的小列表，O(n) find 即可，不再维护 Map 索引 */
     findFriendRequest(requestId: number): FriendRequest | undefined {
       return this.friendRequests.find((request) => request.id === requestId)
+    },
+
+    /** 按 id 从后端单查并 upsert 到本地（dispatcher 兜底用，避免全量重拉）；后端带越权过滤 */
+    async loadFriendRequest(requestId: number) {
+      const data = await apiGetMyFriendRequest(requestId)
+      if (!data) {
+        return
+      }
+      const next = convertFriendRequest(data)
+      const existing = this.findFriendRequest(requestId)
+      if (existing) {
+        Object.assign(existing, next)
+      } else {
+        this.friendRequests.unshift(next)
+      }
     },
 
     // ==================== 好友关系操作 ====================
@@ -364,8 +411,8 @@ export const useFriendStore = defineStore('imFriendStore', {
         request.handleResult = ImFriendRequestHandleResult.AGREED
         request.handleTime = Date.now()
       } else {
-        // 本地列表可能未初始化（例如刚登录还没进 contact 页），兜底重拉
-        void this.fetchFriendRequests()
+        // 本地列表可能没这条（例如刚登录还没进 contact 页），按 id 单查兜底
+        void this.loadFriendRequest(payload.requestId!)
       }
     },
 
@@ -377,7 +424,7 @@ export const useFriendStore = defineStore('imFriendStore', {
         request.handleContent = payload.handleContent
         request.handleTime = Date.now()
       } else {
-        void this.fetchFriendRequests()
+        void this.loadFriendRequest(payload.requestId!)
       }
     },
 
@@ -442,6 +489,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       this.friends = []
       this.friendRequests = []
       this.loaded = false
+      this.hasMoreFriendRequests = true
     }
   }
 })
