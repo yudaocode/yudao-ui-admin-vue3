@@ -29,6 +29,7 @@
               :member="member"
               :size="50"
               clickable
+              :group-name="group.name"
             />
 
             <!-- 添加（任何成员都能邀请） -->

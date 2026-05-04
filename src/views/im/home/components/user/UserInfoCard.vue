@@ -17,6 +17,8 @@
           :display-name="remark"
           :relation="relation"
           :preview-z-index="10000"
+          :add-source="card.addSource"
+          :add-source-extra="card.addSourceExtra"
           @chat="handleSendMessage"
           @deleted="handleClose"
         />

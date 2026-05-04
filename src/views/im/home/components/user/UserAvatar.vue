@@ -60,13 +60,16 @@ const props = withDefaults(
     previewable?: boolean // 是否点头像直接放大预览；开启后忽略 clickable，不再弹名片
     previewZIndex?: number // 预览层 z-index；放在高 z-index 弹层（如 UserInfoCard）里时需手动抬高
     user?: User // 额外的用户信息，传了点击就不用现拉接口（弹名片用）
+    addSource?: number // 加好友来源；点头像弹 UserInfoCard 时透传给 FriendAddDialog（默认 1=搜索）
+    addSourceExtra?: string // 加好友来源附加：addSource=2（群聊）时传群名，话术拼为「我是 XX 群的 YY」
   }>(),
   {
     size: 42,
     radius: '15%',
     clickable: true,
     previewable: false,
-    previewZIndex: 2000
+    previewZIndex: 2000,
+    addSource: 1 // @AI：是不是枚举下；
   }
 )
 
@@ -126,7 +129,12 @@ function handleClick(e: MouseEvent) {
   }
   // 情况一：有预传 user 信息：就直接用，省一次接口
   if (props.user) {
-    uiStore.openUserInfoCard(props.user, { x: e.clientX + 20, y: e.clientY })
+    uiStore.openUserInfoCard(
+      props.user,
+      { x: e.clientX + 20, y: e.clientY },
+      props.addSource,
+      props.addSourceExtra
+    )
     return
   }
   // 情况二：无预传 user 信息：打开名片，传最小必要信息（id + 昵称 + 头像），位置在鼠标右侧
@@ -140,7 +148,9 @@ function handleClick(e: MouseEvent) {
       nickname: props.name,
       avatar: props.url
     },
-    { x: e.clientX + 20, y: e.clientY }
+    { x: e.clientX + 20, y: e.clientY },
+    props.addSource,
+    props.addSourceExtra
   )
 }
 </script>

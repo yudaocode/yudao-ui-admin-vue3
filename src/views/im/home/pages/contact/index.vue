@@ -18,8 +18,13 @@
         </el-input>
       </div>
 
-      <!-- 列表主体：拆 GroupList / FriendList 两个子组件，各自管理折叠 + 过滤；本页只透传选中态 -->
+      <!-- 列表主体：拆 FriendRequestList / GroupList / FriendList 三个子组件，各自管理折叠 + 过滤；本页只透传选中态 -->
       <el-scrollbar class="flex-1">
+        <FriendRequestList
+          :requests="friendRequests"
+          :active-id="selection?.type === 'request' ? selection.request.id : undefined"
+          @select="handleSelectRequest"
+        />
         <GroupList
           :groups="groups"
           :keyword="keyword"
@@ -70,6 +75,12 @@
         :group="selection.group"
         @chat="handleChatGroup"
       />
+      <!-- 新的朋友 - 申请详情 -->
+      <FriendRequestDetail
+        v-else-if="selection.type === 'request'"
+        :request="currentRequest"
+        @chat="handleChatPeer"
+      />
     </div>
   </div>
 </template>
@@ -83,13 +94,15 @@ import { useRouter } from 'vue-router'
 import ResizableAside from '../../components/ResizableAside.vue'
 import UserInfo from '../../components/user/UserInfo.vue'
 import FriendList from './FriendList.vue'
+import FriendRequestList from './FriendRequestList.vue'
+import FriendRequestDetail from './FriendRequestDetail.vue'
 import GroupList from './GroupList.vue'
 import GroupDetail from './GroupDetail.vue'
 import { useConversationStore } from '../../store/conversationStore'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { getFriendDisplayName, getGroupDisplayName } from '../../../utils/user'
-import type { Friend, FriendLite, Group, GroupLite, User } from '../../types'
+import type { Friend, FriendLite, FriendRequest, Group, GroupLite, User } from '../../types'
 import { ImConversationType } from '../../../utils/constants'
 import { StorageKeys } from '../../../utils/storage'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -102,11 +115,26 @@ const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 const message = useMessage()
 
-/** 用 type 判别选中是好友还是群聊 */
-type Selection = { type: 'friend'; friend: FriendLite } | { type: 'group'; group: GroupLite }
+/** 用 type 判别选中是好友 / 群聊 / 好友申请 */
+type Selection =
+  | { type: 'friend'; friend: FriendLite }
+  | { type: 'group'; group: GroupLite }
+  | { type: 'request'; request: FriendRequest }
 
 const selection = ref<Selection | null>(null)
 const keyword = ref('')
+
+/** 选中申请详情：详情用 store 里的最新副本（同意 / 拒绝后状态会变） */
+const currentRequest = computed<FriendRequest>(() => {
+  const req = selection.value?.type === 'request' ? selection.value.request : null
+  if (!req) {
+    return {} as FriendRequest
+  }
+  return friendStore.findFriendRequest(req.id) || req
+})
+
+/** 我相关的申请列表（用 friendStore 里的实时副本，便于通知到达后自动刷新） */
+const friendRequests = computed<FriendRequest[]>(() => friendStore.friendRequests)
 
 /** 好友列表的展示快照：附带后端算好的拼音，给 FriendList 做字母分桶 / 拼音搜索 */
 const friends = computed<FriendLite[]>(() =>
@@ -145,7 +173,11 @@ const friendUser = computed<User | null>(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([friendStore.fetchFriends(), groupStore.fetchGroups()])
+  await Promise.all([
+    friendStore.fetchFriends(),
+    friendStore.fetchFriendRequests(),
+    groupStore.fetchGroups()
+  ])
 })
 
 /** 选中好友 → 切到好友详情 */
@@ -156,6 +188,25 @@ function handleSelectFriend(friend: FriendLite) {
 /** 选中群聊 → 切到群详情 */
 function handleSelectGroup(group: GroupLite) {
   selection.value = { type: 'group', group }
+}
+
+/** 选中好友申请 → 切到「新的朋友」详情 */
+function handleSelectRequest(request: FriendRequest) {
+  selection.value = { type: 'request', request }
+}
+
+/** 申请详情里点「发消息」：直接进与对端的私聊会话 */
+function handleChatPeer(peerUserId: number) {
+  const friend = friendStore.getFriend(peerUserId)
+  const conversationName = friend ? getFriendDisplayName(friend) : String(peerUserId)
+  conversationStore.openConversation(
+    peerUserId,
+    ImConversationType.PRIVATE,
+    conversationName,
+    friend?.avatar || '',
+    { muted: !!friend?.muted }
+  )
+  router.push({ name: 'ImHomeConversation' })
 }
 
 /** 进入与该好友的私聊会话 */

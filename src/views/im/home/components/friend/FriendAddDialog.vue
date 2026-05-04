@@ -1,75 +1,129 @@
 <template>
   <!--
-    添加好友对话框
-    - 按昵称搜索用户列表（最多 20 条）
-    - 点 "添加" 直接发好友申请，friendStore 落地后按钮自动切到 "已添加"
+    添加好友对话框（双层流程）
+    - 第一层 search：按昵称搜索用户列表
+    - 第二层 apply：选中用户后展开「申请添加朋友」表单（申请理由 + 备注）
   -->
-  <el-dialog v-model="visible" title="添加好友" width="480px" :close-on-click-modal="false">
-    <el-input
-      v-model="keyword"
-      placeholder="输入昵称回车搜索（最多展示 20 条）"
-      clearable
-      @keyup.enter="handleSearch"
-    >
-      <template #suffix>
-        <Icon icon="ant-design:search-outlined" class="cursor-pointer" @click="handleSearch" />
-      </template>
-    </el-input>
-
-    <el-scrollbar v-loading="loading" class="h-[400px] mt-2.5">
-      <div
-        v-if="users.length === 0"
-        class="py-10 text-13px text-center text-[var(--el-text-color-disabled)]"
+  <el-dialog v-model="visible" :title="dialogTitle" width="480px" :close-on-click-modal="false">
+    <!-- 第一层：搜索 + 用户列表 -->
+    <template v-if="step === 'search'">
+      <el-input
+        v-model="keyword"
+        placeholder="输入昵称回车搜索（最多展示 20 条）"
+        clearable
+        @keyup.enter="handleSearch"
       >
-        {{ searched ? '没有搜到用户' : '输入关键字后回车开始搜索' }}
-      </div>
+        <template #suffix>
+          <Icon icon="ant-design:search-outlined" class="cursor-pointer" @click="handleSearch" />
+        </template>
+      </el-input>
+
+      <el-scrollbar v-loading="loading" class="h-[400px] mt-2.5">
+        <div
+          v-if="users.length === 0"
+          class="py-10 text-13px text-center text-[var(--el-text-color-disabled)]"
+        >
+          {{ searched ? '没有搜到用户' : '输入关键字后回车开始搜索' }}
+        </div>
+        <div
+          v-for="user in users"
+          :key="user.id"
+          v-show="user.id !== currentUserId"
+          class="flex gap-3 items-center px-2 py-2.5 border-b border-[var(--el-border-color-lighter)]"
+        >
+          <UserAvatar
+            :id="user.id"
+            :url="user.avatar"
+            :name="user.nickname"
+            :size="42"
+            :clickable="false"
+          />
+          <div class="flex-1 min-w-0 overflow-hidden">
+            <!-- 昵称 + 性别图标 -->
+            <div
+              class="flex items-center gap-1 text-sm font-semibold text-[var(--el-text-color-primary)]"
+            >
+              <span class="truncate">{{ user.nickname }}</span>
+              <Icon
+                v-if="getGenderIcon(user.sex)"
+                :icon="getGenderIcon(user.sex)"
+                :size="14"
+                :color="getGenderColor(user.sex)"
+                class="flex-shrink-0"
+              />
+            </div>
+            <!-- 部门 -->
+            <div
+              v-if="user.deptName"
+              class="mt-0.5 text-xs truncate text-[var(--el-text-color-secondary)]"
+            >
+              {{ user.deptName }}
+            </div>
+          </div>
+          <!-- 已是好友显示「已添加」；否则显示「添加」（点击进入 apply 步骤） -->
+          <el-button
+            v-if="!friendStore.isFriend(user.id)"
+            type="primary"
+            size="small"
+            @click="enterApply(user)"
+          >
+            添加
+          </el-button>
+          <el-button v-else size="small" disabled>已添加</el-button>
+        </div>
+      </el-scrollbar>
+    </template>
+
+    <!-- 第二层：申请表单（对齐微信「申请添加朋友」） -->
+    <template v-if="step === 'apply' && targetUser">
+      <!-- 选中的用户卡片 -->
       <div
-        v-for="user in users"
-        :key="user.id"
-        v-show="user.id !== currentUserId"
-        class="flex gap-3 items-center px-2 py-2.5 border-b border-[var(--el-border-color-lighter)]"
+        class="flex gap-3 items-center px-2 py-3 mb-4 rounded-md bg-[var(--el-fill-color-light)]"
       >
         <UserAvatar
-          :id="user.id"
-          :url="user.avatar"
-          :name="user.nickname"
+          :id="targetUser.id"
+          :url="targetUser.avatar"
+          :name="targetUser.nickname"
           :size="42"
           :clickable="false"
         />
         <div class="flex-1 min-w-0 overflow-hidden">
-          <!-- 昵称 + 性别图标 -->
-          <div
-            class="flex items-center gap-1 text-sm font-semibold text-[var(--el-text-color-primary)]"
-          >
-            <span class="truncate">{{ user.nickname }}</span>
-            <Icon
-              v-if="getGenderIcon(user.sex)"
-              :icon="getGenderIcon(user.sex)"
-              :size="14"
-              :color="getGenderColor(user.sex)"
-              class="flex-shrink-0"
-            />
+          <div class="text-sm font-semibold text-[var(--el-text-color-primary)] truncate">
+            {{ targetUser.nickname }}
           </div>
-          <!-- 部门 -->
           <div
-            v-if="user.deptName"
+            v-if="targetUser.deptName"
             class="mt-0.5 text-xs truncate text-[var(--el-text-color-secondary)]"
           >
-            {{ user.deptName }}
+            {{ targetUser.deptName }}
           </div>
         </div>
-        <!-- 添加操作 -->
-        <el-button
-          v-if="!friendStore.isFriend(user.id)"
-          type="primary"
-          size="small"
-          @click="handleAdd(user)"
-        >
-          添加
-        </el-button>
-        <el-button v-else size="small" disabled>已添加</el-button>
       </div>
-    </el-scrollbar>
+
+      <div class="text-13px text-[var(--el-text-color-secondary)] mb-1.5">发送添加朋友申请</div>
+      <el-input
+        v-model="applyContent"
+        type="textarea"
+        :rows="3"
+        :maxlength="255"
+        show-word-limit
+        placeholder="请填写申请理由"
+      />
+
+      <div class="text-13px text-[var(--el-text-color-secondary)] mt-3 mb-1.5">备注</div>
+      <el-input
+        v-model="displayName"
+        :maxlength="16"
+        placeholder="给对方起个备注（仅自己可见，可不填）"
+      />
+    </template>
+
+    <!-- 仅在 apply 步骤显示 footer 操作按钮（slot 必须是 el-dialog 直接子节点） -->
+    <template v-if="step === 'apply'" #footer>
+      <!-- 预填模式无搜索步骤，「取消」直接关闭弹窗 -->
+      <el-button @click="presetMode ? (visible = false) : backToSearch()">取消</el-button>
+      <el-button type="primary" :loading="submitting" @click="handleSubmitApply"> 确定 </el-button>
+    </template>
   </el-dialog>
 </template>
 
@@ -77,6 +131,7 @@
 import { computed, ref, watch } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
+import { useUserStore } from '@/store/modules/user'
 
 import UserAvatar from '../user/UserAvatar.vue'
 import { useFriendStore } from '../../store/friendStore'
@@ -86,9 +141,21 @@ import { getSimpleUserListByNickname, type UserVO } from '@/api/system/user'
 
 defineOptions({ name: 'ImFriendAddDialog' })
 
-const props = defineProps<{
-  modelValue: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    /** 预填目标用户：不为空时跳过搜索步骤，直接进入申请表单（群成员加好友 / 名片加好友等场景） */
+    presetUser?: UserVO | null
+    /** 添加来源；参见 ImFriendAddSourceEnum */
+    addSource?: number
+    /** 来源附带信息：addSource=2（群聊）时传群名，话术拼为「我是 XX 群的 YY」 */
+    addSourceExtra?: string
+  }>(),
+  {
+    presetUser: null,
+    addSource: 1
+  }
+)
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
@@ -101,6 +168,7 @@ const visible = computed({
 })
 
 const friendStore = useFriendStore()
+const userStore = useUserStore()
 const message = useMessage()
 
 const currentUserId = getCurrentUserId() // 当前登录用户编号
@@ -109,14 +177,59 @@ const users = ref<UserVO[]>([])
 const searched = ref(false)
 const loading = ref(false)
 
-// 每次重新打开都把搜索态清空，避免上次的关键字 / 结果泄漏到下次
+/** 当前步骤：search=搜索列表；apply=申请表单 */
+const step = ref<'search' | 'apply'>('search')
+/** 申请目标用户 */
+const targetUser = ref<UserVO | null>(null)
+/** 申请理由（默认填「我是 ${当前昵称}」，对齐微信交互） */
+const applyContent = ref('')
+/** 对接收方的备注（仅自己可见） */
+const displayName = ref('')
+const submitting = ref(false)
+
+/** 弹窗标题随步骤切换 */
+const dialogTitle = computed(() => (step.value === 'apply' ? '申请添加朋友' : '添加好友'))
+
+/** 是否预填模式（presetUser 不为空 → 跳过搜索，关闭即销毁，无「取消返回搜索」按钮） */
+const presetMode = computed(() => !!props.presetUser)
+
+/** 每次重新打开都把搜索态 / 申请态清空，避免上次的数据泄漏到下次 */
 watch(visible, (open) => {
   if (open) {
-    keyword.value = ''
-    users.value = []
-    searched.value = false
+    resetAll()
   }
 })
+
+function resetAll() {
+  keyword.value = ''
+  users.value = []
+  searched.value = false
+  // 预填模式：直接进申请表单，targetUser 取自 presetUser；申请理由按 addSource 区分话术
+  if (props.presetUser) {
+    targetUser.value = props.presetUser
+    applyContent.value = buildPresetApplyContent()
+    displayName.value = ''
+    step.value = 'apply'
+    return
+  }
+  // 非预填模式：默认进搜索步骤
+  step.value = 'search'
+  targetUser.value = null
+  applyContent.value = ''
+  displayName.value = ''
+}
+
+/** 预填模式下的申请理由话术：群聊「我是"XX 群"的 YY」；其它「我是 YY」 */
+function buildPresetApplyContent(): string {
+  const myNickname = userStore.getUser?.nickname || ''
+  if (!myNickname) {
+    return ''
+  }
+  // 群聊场景拼带群名的话术；其它场景默认「我是 YY」
+  // TODO @AI：使用 addSource 的枚举；
+  const groupExtra = props.addSource === 2 ? props.addSourceExtra : ''
+  return groupExtra ? `我是"${groupExtra}"的${myNickname}` : `我是${myNickname}`
+}
 
 /** 按昵称搜索用户：空关键字直接清空结果 */
 async function handleSearch() {
@@ -133,12 +246,38 @@ async function handleSearch() {
   }
 }
 
-/** 发起好友申请：成功后 friendStore 已落地，按钮自动切到 "已添加" */
-async function handleAdd(user: UserVO) {
-  await friendStore.addFriend(user.id, {
-    nickname: user.nickname,
-    avatar: user.avatar
-  })
-  message.success('已添加好友')
+/** 进入申请步骤：预填申请理由「我是 ${当前用户昵称}」（对齐微信交互） */
+function enterApply(user: UserVO) {
+  targetUser.value = user
+  const myNickname = userStore.getUser?.nickname || ''
+  applyContent.value = myNickname ? `我是${myNickname}` : ''
+  displayName.value = ''
+  step.value = 'apply'
+}
+
+/** 取消申请，回到搜索步骤 */
+function backToSearch() {
+  step.value = 'search'
+  targetUser.value = null
+}
+
+/** 提交好友申请 */
+async function handleSubmitApply() {
+  if (!targetUser.value) {
+    return
+  }
+  submitting.value = true
+  try {
+    await friendStore.applyFriend({
+      toUserId: targetUser.value.id,
+      applyContent: applyContent.value.trim() || undefined,
+      displayName: displayName.value.trim() || undefined,
+      addSource: props.addSource
+    })
+    message.success('申请已发送，等待对方验证')
+    visible.value = false
+  } finally {
+    submitting.value = false
+  }
 }
 </script>

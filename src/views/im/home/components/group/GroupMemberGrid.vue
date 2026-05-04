@@ -8,12 +8,15 @@
     class="relative flex flex-col items-center px-0.5 py-1"
     :style="{ width: `${size! + 16}px` }"
   >
+    <!-- TODO @AI：add source 增加枚举； -->
     <UserAvatar
       :id="member.userId"
       :url="member.avatar"
       :name="member.nickname"
       :size="size"
       :clickable="clickable"
+      :add-source="2"
+      :add-source-extra="groupName"
     />
     <div
       class="w-full mt-1 overflow-hidden text-12px leading-[18px] text-center truncate text-[var(--el-text-color-regular)]"
@@ -35,10 +38,12 @@ withDefaults(
     member: GroupMemberLite
     clickable?: boolean // 头像点击是否弹 UserInfoCard；选择器宫格里需要保持关闭，避免和勾选交互冲突
     size?: number // 头像像素大小；默认 38（兼容选择器右侧已选区），群信息抽屉传 50 对齐微信 PC
+    groupName?: string // 群名：加好友时拼「我是 'XX 群' 的 YY」话术，落库 add_source=GROUP
   }>(),
   {
     clickable: false,
-    size: 38
+    size: 38,
+    groupName: ''
   }
 )
 </script>

@@ -14,6 +14,8 @@
       :url="member.avatar"
       :clickable="clickable"
       :id="member.userId"
+      :add-source="2"
+      :add-source-extra="groupName"
     />
     <div
       class="flex-1 h-full pl-2.5 overflow-hidden text-sm text-left truncate text-[var(--el-text-color-regular)]"
@@ -47,11 +49,13 @@ const props = withDefaults(
     height?: number // 行高（px），影响头像大小
     active?: boolean // 选中态（@候选键盘高亮等）
     clickable?: boolean // 头像点击是否弹 UserInfoCard；@候选场景通常禁用（避免嵌套交互）
+    groupName?: string // 群名：加好友时拼「我是 'XX 群' 的 YY」话术，落库 add_source=GROUP
   }>(),
   {
     height: 50,
     active: false,
-    clickable: false
+    clickable: false,
+    groupName: ''
   }
 )
 

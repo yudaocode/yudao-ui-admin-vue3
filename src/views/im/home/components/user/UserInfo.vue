@@ -139,6 +139,14 @@
         <el-button type="primary" @click="handleAddFriend">加为好友</el-button>
       </div>
     </template>
+
+    <!-- 加好友弹窗：携带预填用户跳过搜索步骤，直接进申请表单（理由按 addSource 区分话术） -->
+    <FriendAddDialog
+      v-model="addFriendVisible"
+      :preset-user="presetUserForAdd"
+      :add-source="addSource"
+      :add-source-extra="addSourceExtra"
+    />
   </div>
 </template>
 
@@ -149,7 +157,8 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import UserAvatar from './UserAvatar.vue'
-import { getSimpleUser } from '@/api/system/user'
+import FriendAddDialog from '../friend/FriendAddDialog.vue'
+import { getSimpleUser, type UserVO } from '@/api/system/user'
 import { useFriendStore } from '../../store/friendStore'
 import { getGenderColor, getGenderIcon } from '../../../utils/user'
 import type { User } from '../../types'
@@ -174,10 +183,15 @@ const props = withDefaults(
     displayName?: string
     /** UserAvatar 预览层 z-index；放在高 z-index 浮层（如 UserInfoCard）里需手动抬高 */
     previewZIndex?: number
+    /** 加好友来源：1=搜索 2=群聊 3=扫码 4=名片；默认 1（搜索）；参见 ImFriendAddSourceEnum */
+    addSource?: number
+    /** 来源附带信息：addSource=2（群聊）时传群名，用于「我是 XX 群的 YY」预填话术 */
+    addSourceExtra?: string
   }>(),
   {
     relation: 'readonly',
-    previewZIndex: 2000
+    previewZIndex: 2000,
+    addSource: 1
   }
 )
 
@@ -281,16 +295,26 @@ function handleChat() {
   emit('chat', props.user)
 }
 
-/** 加为好友：成功后 friendStore 反应到 isFriend，父级的 relation 自然翻 friend，本组件随之换装到 3 图标 */
-async function handleAddFriend() {
+// TODO @AI：添加好友、删除好友，作为一个 ==== 栏目，这样好理解点；
+
+// 加好友弹窗显隐 + 预填用户（点「加为好友」时把 props.user 传给 FriendAddDialog 跳过搜索）
+const addFriendVisible = ref(false)
+const presetUserForAdd = ref<UserVO | null>(null)
+
+/** 加为好友：弹 FriendAddDialog（带预填用户），让用户填申请理由 + 备注后再发申请 */
+function handleAddFriend() {
   if (!props.user?.id) {
     return
   }
-  await friendStore.addFriend(props.user.id, {
+  presetUserForAdd.value = {
+    id: props.user.id,
     nickname: props.user.nickname,
-    avatar: props.user.avatar
-  })
-  message.success('已添加好友')
+    avatar: props.user.avatar,
+    sex: props.user.sex,
+    deptId: props.user.deptId,
+    deptName: props.user.deptName
+  } as UserVO
+  addFriendVisible.value = true
 }
 
 /** 删除联系人：confirm → friendStore.deleteFriend（内部级联清会话）→ 通知父级关浮层 / 清选中 */

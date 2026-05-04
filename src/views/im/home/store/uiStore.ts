@@ -12,20 +12,32 @@ import type { User } from '../types'
  */
 export const useImUiStore = defineStore('imUiStore', () => {
   // ==================== 用户名片 UserInfoCard ====================
-  // 用户名片悬浮卡：头像 / 昵称等触发点遍布会话、群成员、@ 选择器等列表，
+  // 用户名片悬浮卡
+
   const userInfoCard = reactive({
     show: false,
     user: null as User | null,
-    position: { x: 0, y: 0 }
+    position: { x: 0, y: 0 },
+    // TODO @AI：1 要走枚举
+    addSource: 1 as number, // addSource / addSourceExtra 跟随触发点带入「加好友」来源（群成员入口 = GROUP + 群名；其余默认搜索）
+    addSourceExtra: '' as string
   })
 
   /** 打开用户名片 */
-  function openUserInfoCard(user: User, position: { x: number; y: number }) {
+  function openUserInfoCard(
+    user: User,
+    position: { x: number; y: number },
+    // TODO @AI：1 要走枚举
+    addSource: number = 1,
+    addSourceExtra: string = ''
+  ) {
     const viewportWidth = document.documentElement.clientWidth
     const viewportHeight = document.documentElement.clientHeight
     userInfoCard.user = user
     userInfoCard.position.x = Math.min(position.x, viewportWidth - 350)
     userInfoCard.position.y = Math.min(position.y, viewportHeight - 220)
+    userInfoCard.addSource = addSource
+    userInfoCard.addSourceExtra = addSourceExtra
     userInfoCard.show = true
   }
 

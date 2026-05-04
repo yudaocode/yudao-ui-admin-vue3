@@ -21,7 +21,13 @@
       <div class="text-13px text-[var(--el-text-color-secondary)]"> {{ memberCount }} 位成员 </div>
       <!-- 成员宫格：纯展示，宽度跟着 320 容器自动换行；不带"邀请 +"瓦片 -->
       <div class="flex flex-wrap gap-2 justify-center w-full pt-2">
-        <GroupMemberGrid v-for="member in members" :key="member.userId" :member="member" />
+        <!-- TODO @AI：是不是传入 groupname 更合适？不应该给别人看到，我自己自定义的。 -->
+        <GroupMemberGrid
+          v-for="member in members"
+          :key="member.userId"
+          :member="member"
+          :group-name="group.showGroupName || group.name"
+        />
       </div>
       <div class="mt-4">
         <el-button type="primary" @click="emit('chat', group)">进入群聊</el-button>
