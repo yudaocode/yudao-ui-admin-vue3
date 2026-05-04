@@ -14,7 +14,7 @@
       :url="member.avatar"
       :clickable="clickable"
       :id="member.userId"
-      :add-source="2"
+      :add-source="ImFriendAddSource.GROUP"
       :add-source-extra="groupName"
     />
     <div
@@ -30,6 +30,7 @@
 import { computed } from 'vue'
 
 import UserAvatar from '../user/UserAvatar.vue'
+import { ImFriendAddSource } from '../../../utils/constants'
 
 defineOptions({ name: 'ImGroupMember' })
 

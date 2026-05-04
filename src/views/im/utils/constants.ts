@@ -114,6 +114,21 @@ export const ImGroupMemberRole = {
   NORMAL: 3 // 普通成员
 } as const
 
+/** 好友添加来源（对齐后端 ImFriendAddSourceEnum） */
+export const ImFriendAddSource = {
+  SEARCH: 1, // 搜索
+  GROUP: 2, // 群聊
+  QR_CODE: 3, // 扫码
+  CARD: 4 // 名片
+} as const
+
+/** 好友申请处理结果（对齐后端 ImFriendRequestHandleResultEnum） */
+export const ImFriendRequestHandleResult = {
+  UNHANDLED: 0, // 未处理
+  AGREED: 1, // 同意
+  REFUSED: 2 // 拒绝
+} as const
+
 /** 群管理员人数上限（对齐后端 GROUP_ADMIN_MAX_COUNT） */
 export const GROUP_ADMIN_MAX_COUNT = 3
 

@@ -7,7 +7,6 @@
   -->
   <div>
     <!-- 折叠分组头 -->
-    <!-- TODO @AI：tool 那，应该因为通讯录（新的朋友）有个计数；未处理数量； -->
     <div
       class="flex gap-2 items-center px-3.5 py-2.5 text-15px text-[var(--el-text-color-primary)] cursor-pointer select-none hover:bg-[var(--el-fill-color-light)]"
       @click="expanded = !expanded"
@@ -67,6 +66,8 @@ import { computed, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import UserAvatar from '../../components/user/UserAvatar.vue'
 import { getCurrentUserId } from '../../../utils/storage'
+import { ImFriendRequestHandleResult } from '../../../utils/constants'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import type { FriendRequest } from '../../types'
 
 defineOptions({ name: 'ImContactFriendRequestList' })
@@ -81,12 +82,13 @@ const emit = defineEmits<{
 }>()
 
 const expanded = ref(true)
-// TODO @AI：是不是不用 Number 处理；
-const currentUserId = Number(getCurrentUserId() || 0)
+const currentUserId = getCurrentUserId()
 
 /** 未处理 + 别人加我的（接收方=我）才进红点；我发起的不进 */
 const unhandledCount = computed(
-  () => props.requests.filter((r) => r.handleResult === 0 && r.toUserId === currentUserId).length
+  () => props.requests.filter(
+    (r) => r.handleResult === ImFriendRequestHandleResult.UNHANDLED && r.toUserId === currentUserId
+  ).length
 )
 
 /** 列表项展示对端：fromUserId == 我 → 对端 = toUser；否则对端 = fromUser */
@@ -94,27 +96,21 @@ function getPeerUserId(request: FriendRequest): number {
   return request.fromUserId === currentUserId ? request.toUserId : request.fromUserId
 }
 
-// TODO @AI：注释
+/** 列表项展示对端的昵称（fromUserId == 我 → toUser 昵称；否则 fromUser 昵称；缺则用 id 兜底） */
 function getPeerNickname(request: FriendRequest): string {
   return request.fromUserId === currentUserId
     ? request.toNickname || String(request.toUserId)
     : request.fromNickname || String(request.fromUserId)
 }
 
-// TODO @AI：注释
+/** 列表项展示对端的头像（fromUserId == 我 → toUser 头像；否则 fromUser 头像） */
 function getPeerAvatar(request: FriendRequest): string | undefined {
   return request.fromUserId === currentUserId ? request.toAvatar : request.fromAvatar
 }
 
-/** 状态文案：未处理 / 同意 / 拒绝 */
-// TODO @AI：字典添加下；这里简化掉；
+/** 状态文案：走字典，对齐后端 ImFriendRequestHandleResultEnum */
+// TODO @AI：直接在 html 里，vue 渲染掉；
 function statusLabel(request: FriendRequest): string {
-  if (request.handleResult === 1) {
-    return '已添加'
-  }
-  if (request.handleResult === 2) {
-    return '已拒绝'
-  }
-  return '等待验证'
+  return getDictLabel(DICT_TYPE.IM_FRIEND_REQUEST_HANDLE_RESULT, request.handleResult)
 }
 </script>

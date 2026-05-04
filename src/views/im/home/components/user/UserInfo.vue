@@ -295,7 +295,12 @@ function handleChat() {
   emit('chat', props.user)
 }
 
-// TODO @AI：添加好友、删除好友，作为一个 ==== 栏目，这样好理解点；
+/** 占位提示：语音 / 视频聊天能力尚未接入，先以"开发中"友好提示 */
+function handleComingSoon(featureName: string) {
+  message.info(`${featureName} 功能开发中`)
+}
+
+// ==================== 添加好友 / 删除好友 ====================
 
 // 加好友弹窗显隐 + 预填用户（点「加为好友」时把 props.user 传给 FriendAddDialog 跳过搜索）
 const addFriendVisible = ref(false)
@@ -329,11 +334,6 @@ async function handleDeleteFriend() {
   await friendStore.deleteFriend(target.id)
   message.success('已删除好友')
   emit('deleted', target)
-}
-
-/** 占位提示：语音 / 视频聊天能力尚未接入，先以"开发中"友好提示 */
-function handleComingSoon(featureName: string) {
-  message.info(`${featureName} 功能开发中`)
 }
 </script>
 

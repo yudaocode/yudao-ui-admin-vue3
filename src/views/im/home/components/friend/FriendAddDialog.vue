@@ -136,6 +136,7 @@ import { useUserStore } from '@/store/modules/user'
 import UserAvatar from '../user/UserAvatar.vue'
 import { useFriendStore } from '../../store/friendStore'
 import { getCurrentUserId } from '../../../utils/storage'
+import { ImFriendAddSource } from '../../../utils/constants'
 import { getGenderColor, getGenderIcon } from '../../../utils/user'
 import { getSimpleUserListByNickname, type UserVO } from '@/api/system/user'
 
@@ -153,7 +154,7 @@ const props = withDefaults(
   }>(),
   {
     presetUser: null,
-    addSource: 1
+    addSource: ImFriendAddSource.SEARCH
   }
 )
 
@@ -226,8 +227,7 @@ function buildPresetApplyContent(): string {
     return ''
   }
   // 群聊场景拼带群名的话术；其它场景默认「我是 YY」
-  // TODO @AI：使用 addSource 的枚举；
-  const groupExtra = props.addSource === 2 ? props.addSourceExtra : ''
+  const groupExtra = props.addSource === ImFriendAddSource.GROUP ? props.addSourceExtra : ''
   return groupExtra ? `我是"${groupExtra}"的${myNickname}` : `我是${myNickname}`
 }
 

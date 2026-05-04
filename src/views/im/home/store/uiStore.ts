@@ -1,6 +1,7 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { reactive } from 'vue'
 
+import { ImFriendAddSource } from '../../utils/constants'
 import type { User } from '../types'
 
 /**
@@ -18,8 +19,8 @@ export const useImUiStore = defineStore('imUiStore', () => {
     show: false,
     user: null as User | null,
     position: { x: 0, y: 0 },
-    // TODO @AI：1 要走枚举
-    addSource: 1 as number, // addSource / addSourceExtra 跟随触发点带入「加好友」来源（群成员入口 = GROUP + 群名；其余默认搜索）
+    // addSource / addSourceExtra 跟随触发点带入「加好友」来源（群成员入口 = GROUP + 群名；其余默认搜索）
+    addSource: ImFriendAddSource.SEARCH as number,
     addSourceExtra: '' as string
   })
 
@@ -27,8 +28,7 @@ export const useImUiStore = defineStore('imUiStore', () => {
   function openUserInfoCard(
     user: User,
     position: { x: number; y: number },
-    // TODO @AI：1 要走枚举
-    addSource: number = 1,
+    addSource: number = ImFriendAddSource.SEARCH,
     addSourceExtra: string = ''
   ) {
     const viewportWidth = document.documentElement.clientWidth

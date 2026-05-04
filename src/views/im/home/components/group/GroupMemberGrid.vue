@@ -8,14 +8,13 @@
     class="relative flex flex-col items-center px-0.5 py-1"
     :style="{ width: `${size! + 16}px` }"
   >
-    <!-- TODO @AI：add source 增加枚举； -->
     <UserAvatar
       :id="member.userId"
       :url="member.avatar"
       :name="member.nickname"
       :size="size"
       :clickable="clickable"
-      :add-source="2"
+      :add-source="ImFriendAddSource.GROUP"
       :add-source-extra="groupName"
     />
     <div
@@ -29,6 +28,7 @@
 
 <script lang="ts" setup>
 import UserAvatar from '../user/UserAvatar.vue'
+import { ImFriendAddSource } from '../../../utils/constants'
 import type { GroupMemberLite } from './GroupMember.vue'
 
 defineOptions({ name: 'ImGroupMemberGrid' })

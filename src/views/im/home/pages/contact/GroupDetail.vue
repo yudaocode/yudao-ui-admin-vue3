@@ -21,12 +21,12 @@
       <div class="text-13px text-[var(--el-text-color-secondary)]"> {{ memberCount }} 位成员 </div>
       <!-- 成员宫格：纯展示，宽度跟着 320 容器自动换行；不带"邀请 +"瓦片 -->
       <div class="flex flex-wrap gap-2 justify-center w-full pt-2">
-        <!-- TODO @AI：是不是传入 groupname 更合适？不应该给别人看到，我自己自定义的。 -->
+        <!-- 注意！！！加好友话术里的群名一律用 group.name（原始名）；showGroupName 是我自定义的群备注，不能带给对端 -->
         <GroupMemberGrid
           v-for="member in members"
           :key="member.userId"
           :member="member"
-          :group-name="group.showGroupName || group.name"
+          :group-name="group.name"
         />
       </div>
       <div class="mt-4">

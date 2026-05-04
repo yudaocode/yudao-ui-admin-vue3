@@ -45,6 +45,7 @@
 import { computed } from 'vue'
 
 import { useImUiStore } from '../../store/uiStore'
+import { ImFriendAddSource } from '../../../utils/constants'
 import type { User } from '../../types'
 
 defineOptions({ name: 'ImUserAvatar', inheritAttrs: false })
@@ -69,7 +70,7 @@ const props = withDefaults(
     clickable: true,
     previewable: false,
     previewZIndex: 2000,
-    addSource: 1 // @AI：是不是枚举下；
+    addSource: ImFriendAddSource.SEARCH
   }
 )
 

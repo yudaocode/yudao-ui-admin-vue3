@@ -30,6 +30,14 @@
           >
             <Icon :icon="item.icon" :size="22" />
           </el-badge>
+          <el-badge
+            v-else-if="item.name === 'ImHomeContact' && unhandledRequestCount > 0"
+            :value="unhandledRequestCount"
+            :max="99"
+            class="tool-bar__badge"
+          >
+            <Icon :icon="item.icon" :size="22" />
+          </el-badge>
           <Icon v-else :icon="item.icon" :size="22" />
         </div>
       </el-tooltip>
@@ -55,6 +63,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../store/conversationStore'
+import { useFriendStore } from '../store/friendStore'
 import UserAvatar from './user/UserAvatar.vue'
 
 defineOptions({ name: 'ImToolBar' })
@@ -63,15 +72,15 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const conversationStore = useConversationStore()
+const friendStore = useFriendStore()
 
-/** 消息 Tab 的红点：所有非免打扰会话的未读总和 */
-const totalUnread = computed(() => conversationStore.getTotalUnread)
+const totalUnread = computed(() => conversationStore.getTotalUnread) // 消息 Tab 的红点：所有非免打扰会话的未读总和
+const unhandledRequestCount = computed(() => friendStore.getUnhandledRequestCount) // 通讯录 Tab 的红点：未处理好友申请数（接收方=我）
 
-/** 两个主 Tab；用路由 name 而非 path，避免前缀 / 嵌套调整后失效 */
 const tabs = [
   { name: 'ImHomeConversation', label: '消息', icon: 'ep:chat-round' },
   { name: 'ImHomeContact', label: '通讯录', icon: 'mingcute:contacts-line' }
-]
+] // 两个主 Tab；用路由 name 而非 path，避免前缀 / 嵌套调整后失效
 
 /** 当前路由是否命中 Tab：直接比对 route.name */
 const isActive = (name: string) => route.name === name
