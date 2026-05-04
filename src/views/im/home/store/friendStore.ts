@@ -67,11 +67,11 @@ export const useFriendStore = defineStore('imFriendStore', {
     getFriend:
       (state) =>
       (friendUserId: number): Friend | undefined => {
-        return state.friends.find((f) => f.friendUserId === friendUserId)
+        return state.friends.find((friend) => friend.friendUserId === friendUserId)
       },
     /** 当前生效的好友列表（过滤掉 DISABLE 软删记录） */
     getActiveFriends: (state): Friend[] => {
-      return state.friends.filter((f) => f.status !== CommonStatusEnum.DISABLE)
+      return state.friends.filter((friend) => friend.status !== CommonStatusEnum.DISABLE)
     },
     /** 判断对方是否是当前用户的有效好友（存在 + 非 DISABLE） */
     isFriend() {
@@ -83,7 +83,7 @@ export const useFriendStore = defineStore('imFriendStore', {
     /** 我的黑名单（blocked=true 且 ENABLE） */
     getBlockedFriends: (state): Friend[] => {
       return state.friends.filter(
-        (f) => f.status !== CommonStatusEnum.DISABLE && f.blocked === true
+        (friend) => friend.status !== CommonStatusEnum.DISABLE && friend.blocked === true
       )
     },
     /** 未处理申请数（接收方=我）—— 实时派生，「新的朋友」红点用 */
@@ -293,7 +293,7 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 本地合并 / 新增某个好友（WebSocket 事件 & 手动刷新都用） */
     upsertFriend(friend: Friend) {
-      const index = this.friends.findIndex((f) => f.friendUserId === friend.friendUserId)
+      const index = this.friends.findIndex((existing) => existing.friendUserId === friend.friendUserId)
       if (index >= 0) {
         this.friends[index] = {
           ...this.friends[index],
