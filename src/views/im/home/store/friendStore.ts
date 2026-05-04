@@ -380,10 +380,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       }
     },
 
-    /**
-     * FRIEND_INFO_UPDATED(1209)：好友资料变更（昵称 / 头像）；重拉详情
-     * TODO @AI：后端暂未实现 1209 推送；待 system 模块改昵称 / 头像时回调触发，本 dispatcher 已就绪
-     */
+    /** FRIEND_INFO_UPDATED(1209)：好友资料变更（昵称 / 头像）；重拉详情 */
     applyFriendInfoUpdatedNotification(payload: FriendNotificationPayload) {
       if (payload.friendUserId) {
         this.loadFriendInfo(payload.friendUserId).catch(() => undefined)
