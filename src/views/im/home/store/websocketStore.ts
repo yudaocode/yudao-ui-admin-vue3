@@ -486,8 +486,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const payload = JSON.parse(websocketMessage.content || '{}') as FriendNotificationPayload
       const friendStore = useFriendStore()
       switch (websocketMessage.type) {
-        case ImMessageType.FRIEND_APPLICATION:
-          friendStore.applyFriendRequestNotification(payload)
+        case ImMessageType.FRIEND_REQUEST_RECEIVED:
+          friendStore.applyFriendRequestReceivedNotification(payload)
           break
         case ImMessageType.FRIEND_REQUEST_APPROVED:
           friendStore.applyFriendRequestApprovedNotification(payload)

@@ -12,7 +12,7 @@ export const ImMessageType = {
   // ========== 好友通知（1201-1210 直接复用 OpenIM 段位编号） ==========
   FRIEND_REQUEST_APPROVED: 1201, // 好友申请被同意
   FRIEND_REQUEST_REJECTED: 1202, // 好友申请被拒绝
-  FRIEND_APPLICATION: 1203, // 收到新的好友申请
+  FRIEND_REQUEST_RECEIVED: 1203, // 收到新的好友申请
   FRIEND_ADD: 1204, // 新增好友（双方建立关系）
   FRIEND_DELETE: 1205, // 好友被删除
   // 1206 对应 OpenIM FriendRemarkSetNotification；本系统并入 FRIEND_UPDATE(1210) 统一推送，单一字段变更不再独立通道

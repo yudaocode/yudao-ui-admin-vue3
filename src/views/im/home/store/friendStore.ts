@@ -25,14 +25,16 @@ import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../util
 import { getFriendDisplayName } from '../../utils/user'
 import type { Friend, FriendRequest } from '../types'
 
+/** 当前正在进行的好友列表拉取；多 dispatcher 同时触发时复用同一 Promise，避免雪崩重拉 */
+let pendingFetchFriends: Promise<void> | null = null
 /** 当前正在进行的好友申请列表拉取；多端连续多条申请到达时复用同一 Promise，避免雪崩重拉 */
-let inflightFetchRequests: Promise<void> | null = null
+let pendingFetchRequests: Promise<void> | null = null
 
 /** 好友通知 payload（对齐后端 BaseFriendNotification + 子类裁减后的字段） */
 export interface FriendNotificationPayload {
   operatorUserId: number
   friendUserId: number
-  // FRIEND_APPLICATION 系列：申请记录的核心字段（避免 payload 携带完整 DO）
+  // FRIEND_REQUEST_* 系列：申请记录的核心字段（避免 payload 携带完整 DO）
   requestId?: number
   applyContent?: string
   handleContent?: string
@@ -128,24 +130,34 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     // ==================== 远端拉取 ====================
 
-    /** 从后端拉取并覆盖本地列表；同步刷新对应私聊会话的展示名 / 头像 + 落 IDB */
+    /** 从后端拉取并覆盖本地列表；同步刷新对应私聊会话的展示名 / 头像 + 落 IDB；pending 期间复用同一 Promise */
     async fetchFriends(force = false) {
       if (this.loaded && !force) {
         return
       }
-      const list = await apiGetMyFriendList()
-      this.friends = (list || []).map(convertFriend)
-      this.loaded = true
-      // 同步 conversationStore 私聊会话的展示名 / 头像 / 免打扰
-      const conversationStore = useConversationStore()
-      for (const friend of this.friends) {
-        conversationStore.updateConversation(ImConversationType.PRIVATE, friend.friendUserId, {
-          name: getFriendDisplayName(friend),
-          avatar: friend.avatar,
-          muted: friend.muted
-        })
+      if (pendingFetchFriends) {
+        return pendingFetchFriends
       }
-      this.saveFriends()
+      pendingFetchFriends = apiGetMyFriendList()
+        .then((list) => {
+          this.friends = (list || []).map(convertFriend)
+          this.loaded = true
+          // 同步 conversationStore 私聊会话的展示名 / 头像 / 免打扰
+          const conversationStore = useConversationStore()
+          for (const friend of this.friends) {
+            conversationStore.updateConversation(ImConversationType.PRIVATE, friend.friendUserId, {
+              name: getFriendDisplayName(friend),
+              avatar: friend.avatar,
+              muted: friend.muted
+            })
+          }
+          // 落本地缓存
+          this.saveFriends()
+        })
+        .finally(() => {
+          pendingFetchFriends = null
+        })
+      return pendingFetchFriends
     },
 
     /** 按 friendUserId 获取详情并合并到本地（保证 nickname / avatar 最新） */
@@ -195,19 +207,19 @@ export const useFriendStore = defineStore('imFriendStore', {
       }
     },
 
-    /** 拉取「我相关」的好友申请列表（页面打开时 / 收到 FRIEND_APPLICATION 时刷新）；in-flight 期间复用同一 Promise */
+    /** 拉取「我相关」的好友申请列表（页面打开时 / 收到 FRIEND_REQUEST_RECEIVED 时刷新）；pending 期间复用同一 Promise */
     async fetchFriendRequests() {
-      if (inflightFetchRequests) {
-        return inflightFetchRequests
+      if (pendingFetchRequests) {
+        return pendingFetchRequests
       }
-      inflightFetchRequests = apiGetMyFriendRequestList()
+      pendingFetchRequests = apiGetMyFriendRequestList()
         .then((list) => {
           this.friendRequests = (list || []).map(convertFriendRequest)
         })
         .finally(() => {
-          inflightFetchRequests = null
+          pendingFetchRequests = null
         })
-      return inflightFetchRequests
+      return pendingFetchRequests
     },
 
     /** 按 id 查申请记录；列表是按 id 倒序的小列表，O(n) find 即可，不再维护 Map 索引 */
@@ -320,8 +332,8 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     // ==================== WebSocket 事件 dispatcher（1201-1210 段） ====================
 
-    /** FRIEND_APPLICATION(1203)：收到新申请；payload 已裁减为核心字段，本地拉一次列表补齐 fromUser 等聚合字段 */
-    applyFriendRequestNotification(_payload: FriendNotificationPayload) {
+    /** FRIEND_REQUEST_RECEIVED(1203)：收到新申请；payload 已裁减为核心字段，本地拉一次列表补齐 fromUser 等聚合字段 */
+    applyFriendRequestReceivedNotification(_payload: FriendNotificationPayload) {
       this.fetchFriendRequests().catch(() => undefined)
     },
 
