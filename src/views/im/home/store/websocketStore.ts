@@ -7,7 +7,8 @@ import {
   ImWebSocketMessageType,
   ImMessageType,
   ImConversationType,
-  isFriendNotification
+  isFriendNotification,
+  isNormalMessage
 } from '../../utils/constants'
 import { playAudioTip } from '../../utils/message'
 import { useConversationStore } from './conversationStore'
@@ -332,8 +333,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
             console.warn('[IM WS] 自动已读上报失败', e)
           })
-        } else if (!conversation?.muted) {
-          // 非当前会话且未免打扰：响一下提示音（带节流，详见 playAudioTip）
+        } else if (!conversation?.muted && isNormalMessage(websocketMessage.type)) {
+          // 非当前会话且未免打扰：响一下提示音（带节流，详见 playAudioTip）；TIP_TEXT 等系统提示不响
           playAudioTip()
         }
       }
@@ -438,7 +439,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id).catch((e) => {
             console.warn('[IM WS] 自动已读上报失败', e)
           })
-        } else if (!conversation?.muted) {
+        } else if (!conversation?.muted && isNormalMessage(websocketMessage.type)) {
+          // GROUP_* 群广播事件 / TIP_TEXT 等系统提示不响提示音
           playAudioTip()
         }
       }
