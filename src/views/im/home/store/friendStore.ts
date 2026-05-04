@@ -177,6 +177,7 @@ export const useFriendStore = defineStore('imFriendStore', {
         request.handleTime = Date.now()
       } else {
         // 列表过期场景兜底重拉
+        // TODO @AI：是不是只拉这个人？避免拉所有？
         await this.fetchFriendRequests()
       }
     },
@@ -202,6 +203,7 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 按 id 查申请记录 */
     findFriendRequest(requestId: number): FriendRequest | undefined {
+      // TODO @AI：request
       return this.friendRequests.find((r) => r.id === requestId)
     },
 

@@ -1,12 +1,21 @@
 <template>
   <!--
     新的朋友详情面板
-    - 头像 + 昵称
-    - 申请理由块
-    - 来源行
-    - 操作按钮：按「我发起 / 别人加我」 + 「未处理 / 同意 / 拒绝」状态切换
+    - 已通过 → 直接走 UserInfo 好友详情，跟通讯录里点开好友的体验完全一致
+    - 未处理 / 已拒绝 → 申请态面板：头像 + 申请/拒绝对话气泡 + 来源 + 操作按钮
   -->
-  <div class="flex flex-col items-center px-6 pt-12">
+  <div v-if="agreed" class="flex justify-center pt-12 px-6">
+    <div class="w-full max-w-[320px]">
+      <UserInfo
+        :user="peerUser"
+        :display-name="friendStore.getFriend(peerUserId)?.displayName || ''"
+        relation="friend"
+        @chat="emit('chat', peerUserId)"
+      />
+    </div>
+  </div>
+
+  <div v-else class="flex flex-col items-center px-6 pt-12">
     <UserAvatar
       :id="peerUserId"
       :url="peerAvatar"
@@ -18,32 +27,32 @@
       {{ peerNickname }}
     </div>
 
-    <!-- 申请理由块 -->
+    <!-- 申请理由块：仿微信灰底气泡，按申请方身份前缀；长文本 break-words 折行 -->
     <div
       v-if="request.applyContent"
-      class="w-full max-w-[420px] mt-6 px-3.5 py-3 rounded-md bg-[var(--el-fill-color-light)] text-13px text-[var(--el-text-color-primary)]"
+      class="w-full max-w-[420px] mt-6 px-3.5 py-3 rounded-md bg-[var(--el-fill-color-light)] text-13px text-[var(--el-text-color-primary)] break-words"
     >
-      <span v-if="iSentIt">我:</span>
+      <span class="text-[var(--el-text-color-secondary)]">
+        {{ iSentIt ? '我' : peerNickname }}:
+      </span>
       <span class="ml-1">{{ request.applyContent }}</span>
     </div>
-    <!-- 来源行 -->
+    <!-- 来源行：label 左、value 右，对齐微信「来源」行 -->
     <div
-      v-if="addSourceLabel"
+      v-if="request.addSource"
       class="w-full max-w-[420px] mt-3 flex items-center text-13px text-[var(--el-text-color-secondary)]"
     >
-      <span class="w-12 flex-shrink-0">来源</span>
-      <span class="text-[var(--el-text-color-primary)]">{{ addSourceLabel }}</span>
+      <span class="w-16 flex-shrink-0 whitespace-nowrap">来源</span>
+      <span class="text-[var(--el-text-color-primary)]">
+        {{ getDictLabel(DICT_TYPE.IM_FRIEND_ADD_SOURCE, request.addSource) }}
+      </span>
     </div>
-    <!-- 拒绝理由（拒绝状态展示）：长文本走 break-words 自动折行，避免横向溢出 -->
-    <!-- TODO @AI：会折行，拒绝理由； -->
-    <!-- TODO @AI：我指的是： -->
-    <!-- TODO @AI：尽量对齐下微信的样式 /Users/yunai/Downloads/iShot_2026-05-04_10.42.58.png
-/Users/yunai/Downloads/iShot_2026-05-04_10.42.46.png -->
+    <!-- 拒绝理由：label 左、value 右；长文本 break-words 自动折行 -->
     <div
-      v-if="request.handleResult === ImFriendRequestHandleResult.REFUSED && request.handleContent"
+      v-if="refused && request.handleContent"
       class="w-full max-w-[420px] mt-3 flex items-start text-13px text-[var(--el-text-color-secondary)]"
     >
-      <span class="w-12 flex-shrink-0">拒绝理由</span>
+      <span class="w-16 flex-shrink-0 whitespace-nowrap">拒绝理由</span>
       <span class="flex-1 min-w-0 break-words text-[var(--el-text-color-primary)]">
         {{ request.handleContent }}
       </span>
@@ -63,18 +72,8 @@
         <el-button @click="handleRefuse" :loading="refusing">拒绝</el-button>
         <el-button type="primary" @click="handleAgree" :loading="agreeing"> 同意 </el-button>
       </template>
-      <!-- 已同意：发消息 -->
-      <el-button
-        v-if="request.handleResult === ImFriendRequestHandleResult.AGREED"
-        type="primary"
-        @click="emit('chat', peerUserId)"
-      >
-        发消息
-      </el-button>
       <!-- 已拒绝：占位禁用按钮 -->
-      <el-button v-if="request.handleResult === ImFriendRequestHandleResult.REFUSED" disabled>
-        已拒绝
-      </el-button>
+      <el-button v-if="refused" disabled>已拒绝</el-button>
     </div>
   </div>
 </template>
@@ -85,11 +84,12 @@ import { useMessage } from '@/hooks/web/useMessage'
 import { ElMessageBox } from 'element-plus'
 
 import UserAvatar from '../../components/user/UserAvatar.vue'
+import UserInfo from '../../components/user/UserInfo.vue'
 import { useFriendStore } from '../../store/friendStore'
 import { getCurrentUserId } from '../../../utils/storage'
 import { ImFriendRequestHandleResult } from '../../../utils/constants'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
-import type { FriendRequest } from '../../types'
+import type { FriendRequest, User } from '../../types'
 
 defineOptions({ name: 'ImContactFriendRequestDetail' })
 
@@ -109,6 +109,16 @@ const currentUserId = Number(getCurrentUserId() || 0)
 /** 是不是我发起的（fromUserId === me） */
 const iSentIt = computed(() => props.request.fromUserId === currentUserId)
 
+/** 是否「已拒绝」态：模板里多处用到，computed 一次省得到处写枚举比对 */
+const refused = computed(
+  () => props.request.handleResult === ImFriendRequestHandleResult.REFUSED
+)
+
+/** 是否「已通过」态：转走 UserInfo 好友详情入口 */
+const agreed = computed(
+  () => props.request.handleResult === ImFriendRequestHandleResult.AGREED
+)
+
 /** 对端的用户编号 / 昵称 / 头像 */
 const peerUserId = computed(() =>
   iSentIt.value ? props.request.toUserId : props.request.fromUserId
@@ -122,13 +132,12 @@ const peerAvatar = computed(() =>
   iSentIt.value ? props.request.toAvatar : props.request.fromAvatar
 )
 
-/** 添加来源文案：走字典，对齐后端 ImFriendAddSourceEnum */
-// TODO @AI：通过 html 里处理掉。不用抽个方法；
-const addSourceLabel = computed(() =>
-  props.request.addSource
-    ? getDictLabel(DICT_TYPE.IM_FRIEND_ADD_SOURCE, props.request.addSource)
-    : ''
-)
+/** 透给 UserInfo 的最小用户信息；UserInfo 内部会按 id 调 getSimpleUser 补齐性别 / 部门 */
+const peerUser = computed<User>(() => ({
+  id: peerUserId.value,
+  nickname: peerNickname.value,
+  avatar: peerAvatar.value
+}))
 
 const agreeing = ref(false)
 const refusing = ref(false)

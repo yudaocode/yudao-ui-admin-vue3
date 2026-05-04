@@ -70,7 +70,7 @@
         "
         @click="handleRowClick"
       >
-        <span class="flex-shrink-0 w-14 text-[var(--el-text-color-secondary)]">备注</span>
+        <span class="flex-shrink-0 w-16 whitespace-nowrap text-[var(--el-text-color-secondary)]">备注</span>
         <el-input
           v-if="editingRemark"
           ref="remarkInputRef"
@@ -103,6 +103,23 @@
           />
         </template>
       </div>
+
+      <!-- ==================== 更多信息：来源 / 添加时间，对齐微信「朋友资料」分块 ==================== -->
+      <template v-if="friendInfo?.addSource || friendInfo?.addTime">
+        <div class="my-4 h-px bg-[var(--el-border-color-lighter)]"></div>
+        <div v-if="friendInfo?.addSource" class="flex gap-5 items-center px-1.5 py-1.5 text-sm">
+          <span class="flex-shrink-0 w-16 whitespace-nowrap text-[var(--el-text-color-secondary)]">来源</span>
+          <span class="flex-1 min-w-0 truncate text-[var(--el-text-color-primary)]">
+            {{ getDictLabel(DICT_TYPE.IM_FRIEND_ADD_SOURCE, friendInfo.addSource) }}
+          </span>
+        </div>
+        <div v-if="friendInfo?.addTime" class="flex gap-5 items-center px-1.5 py-1.5 text-sm">
+          <span class="flex-shrink-0 w-16 whitespace-nowrap text-[var(--el-text-color-secondary)]">添加时间</span>
+          <span class="flex-1 min-w-0 truncate text-[var(--el-text-color-primary)]">
+            {{ formatDate(new Date(friendInfo.addTime), 'YYYY-MM-DD') }}
+          </span>
+        </div>
+      </template>
     </template>
 
     <!-- 动作区：好友 = 3 图标；陌生人 = 加为好友按钮；自己 = disabled；readonly 不渲染 -->
@@ -161,6 +178,8 @@ import FriendAddDialog from '../friend/FriendAddDialog.vue'
 import { getSimpleUser, type UserVO } from '@/api/system/user'
 import { useFriendStore } from '../../store/friendStore'
 import { getGenderColor, getGenderIcon } from '../../../utils/user'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
+import { formatDate } from '@/utils/formatTime'
 import type { User } from '../../types'
 
 defineOptions({ name: 'ImUserInfo' })
@@ -217,6 +236,11 @@ const deptText = computed(() => full.value?.deptName || '-')
 
 const genderIcon = computed(() => getGenderIcon(full.value?.sex))
 const genderColor = computed(() => getGenderColor(full.value?.sex))
+
+/** 好友关系记录：来源 / 添加时间从这里取（仅 friend 态下才有意义） */
+const friendInfo = computed(() =>
+  props.user?.id ? friendStore.getFriend(props.user.id) : undefined
+)
 
 /** 备注内联编辑：editingRemark 控制输入态；user 切换时由下面的 watch 复位避免脏态泄漏 */
 const editingRemark = ref(false)

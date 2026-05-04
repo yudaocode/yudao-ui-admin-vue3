@@ -261,20 +261,20 @@ function backToSearch() {
   targetUser.value = null
 }
 
-/** 提交好友申请 */
+/** 提交好友申请：返回 requestId 走「等待验证」；返回 null 表示后端命中「单向好友静默重启」分支，已直接成为好友 */
 async function handleSubmitApply() {
   if (!targetUser.value) {
     return
   }
   submitting.value = true
   try {
-    await friendStore.applyFriend({
+    const requestId = await friendStore.applyFriend({
       toUserId: targetUser.value.id,
       applyContent: applyContent.value.trim() || undefined,
       displayName: displayName.value.trim() || undefined,
       addSource: props.addSource
     })
-    message.success('申请已发送，等待对方验证')
+    message.success(requestId ? '申请已发送，等待对方验证' : '已添加为好友')
     visible.value = false
   } finally {
     submitting.value = false

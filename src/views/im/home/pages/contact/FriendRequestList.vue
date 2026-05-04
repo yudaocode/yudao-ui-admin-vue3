@@ -40,7 +40,7 @@
               {{ getPeerNickname(request) }}
             </span>
             <span class="flex-shrink-0 text-12px text-[var(--el-text-color-secondary)]">
-              {{ statusLabel(request) }}
+              {{ getDictLabel(DICT_TYPE.IM_FRIEND_REQUEST_HANDLE_RESULT, request.handleResult) }}
             </span>
           </div>
           <div
@@ -108,9 +108,4 @@ function getPeerAvatar(request: FriendRequest): string | undefined {
   return request.fromUserId === currentUserId ? request.toAvatar : request.fromAvatar
 }
 
-/** 状态文案：走字典，对齐后端 ImFriendRequestHandleResultEnum */
-// TODO @AI：直接在 html 里，vue 渲染掉；
-function statusLabel(request: FriendRequest): string {
-  return getDictLabel(DICT_TYPE.IM_FRIEND_REQUEST_HANDLE_RESULT, request.handleResult)
-}
 </script>
