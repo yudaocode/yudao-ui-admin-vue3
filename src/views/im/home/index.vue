@@ -35,6 +35,8 @@ import { useDraftStore } from './store/draftStore'
 import { useMessagePuller } from './composables/useMessagePuller'
 import { useMessageSender } from './composables/useMessageSender'
 import { ImConversationType } from '../utils/constants'
+import { StorageKeys } from '../utils/storage'
+import type { Conversation } from './types'
 import ToolBar from './components/ToolBar.vue'
 import UserInfoCard from './components/user/UserInfoCard.vue'
 import ContextMenu from './components/ContextMenu.vue'
@@ -84,10 +86,11 @@ onMounted(async () => {
     webSocketStore.connect()
     await pullOnce()
 
-    // 4. 默认选中第一个会话
+    // 4. 默认选中第一个会话；若置顶分组处于折叠态，需跳过被折叠隐藏的置顶项，避免自动展开折叠
     const sorted = conversationStore.getSortedConversations
-    if (sorted.length > 0 && !conversationStore.activeConversation) {
-      conversationStore.setActiveConversation(sorted[0])
+    const firstVisible = pickFirstVisibleConversation(sorted)
+    if (firstVisible && !conversationStore.activeConversation) {
+      conversationStore.setActiveConversation(firstVisible)
     }
   } catch (e) {
     // 1. 首拉失败：手动复位 loading（pullOnce 没跑到，它的 finally 兜不到这里），否则后续 saveConversations 全被早 return 阻断
@@ -96,6 +99,22 @@ onMounted(async () => {
     console.error('[IM] 初始化失败', e)
   }
 })
+
+/**
+ * 选首屏自动激活的会话；置顶分组折叠时跳过被折叠隐藏的置顶项，避免激活后被自动顶上来
+ *
+ * 折叠态判定只看用户开关；非置顶 / 有未读的置顶项始终可见，全是可折叠置顶时回退到 sorted[0] 兜底
+ */
+function pickFirstVisibleConversation(sorted: Conversation[]): Conversation | undefined {
+  if (sorted.length === 0) {
+    return undefined
+  }
+  const pinnedExpanded = localStorage.getItem(StorageKeys.conversationPinnedExpanded) === 'true'
+  if (pinnedExpanded) {
+    return sorted[0]
+  }
+  return sorted.find((c) => !c.top || (!c.muted && (c.unreadCount || 0) > 0)) ?? sorted[0]
+}
 
 /** 标签关闭前 flush 草稿队列；debounce 默认 trail-edge 触发，最后一次输入可能还压在队列里 */
 function onBeforeUnload() {
