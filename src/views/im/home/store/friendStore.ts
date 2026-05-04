@@ -39,6 +39,9 @@ export interface FriendNotificationPayload {
   applyContent?: string
   handleContent?: string
   addSource?: number
+  // FRIEND_REQUEST_RECEIVED：申请方聚合字段，供前端直推 push 进列表，无需回拉
+  fromNickname?: string
+  fromAvatar?: string
   // FRIEND_UPDATE：单边属性变更
   displayName?: string
   muted?: boolean
@@ -235,12 +238,14 @@ export const useFriendStore = defineStore('imFriendStore', {
       this.removeFriend(friendUserId)
     },
 
-    /** 切换免打扰 */
+    /** 切换免打扰：同步会话的 muted 字段，避免会话列表 muted 图标等 1210 推到才更新 */
     async setMuted(friendUserId: number, muted: boolean) {
       await apiUpdateFriend({ friendUserId, muted })
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.muted = muted
+        const conversationStore = useConversationStore()
+        conversationStore.updateConversation(ImConversationType.PRIVATE, friendUserId, { muted })
         this.saveFriends()
       }
     },
@@ -320,9 +325,9 @@ export const useFriendStore = defineStore('imFriendStore', {
     removeFriend(friendUserId: number) {
       const friend = this.getFriend(friendUserId)
       if (friend) {
+        // blocked 不动，跟后端 deleteFriend0「删好友期间保留拉黑状态」对齐
         friend.status = CommonStatusEnum.DISABLE
         friend.deleteTime = Date.now()
-        friend.blocked = false
       }
       // 级联清理：把对应的私聊会话也软删，避免会话列表里留着已删好友
       const conversationStore = useConversationStore()
@@ -332,46 +337,58 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     // ==================== WebSocket 事件 dispatcher（1201-1210 段） ====================
 
-    /** FRIEND_REQUEST_RECEIVED(1203)：收到新申请；payload 已裁减为核心字段，本地拉一次列表补齐 fromUser 等聚合字段 */
-    applyFriendRequestReceivedNotification(_payload: FriendNotificationPayload) {
-      this.fetchFriendRequests().catch(() => undefined)
+    /** FRIEND_REQUEST_RECEIVED(1203)：收到新申请；payload 已带申请方昵称 / 头像，按 requestId 直推 push 进列表 */
+    applyFriendRequestReceivedNotification(payload: FriendNotificationPayload) {
+      // 多端可能重复推同一 requestId，已存在则跳过
+      if (this.findFriendRequest(payload.requestId!)) {
+        return
+      }
+      const currentUserId = Number(getCurrentUserId() || 0)
+      this.friendRequests.unshift({
+        id: payload.requestId!,
+        fromUserId: payload.operatorUserId,
+        toUserId: currentUserId,
+        handleResult: ImFriendRequestHandleResult.UNHANDLED,
+        applyContent: payload.applyContent,
+        addSource: payload.addSource,
+        createTime: Date.now(),
+        fromNickname: payload.fromNickname,
+        fromAvatar: payload.fromAvatar
+      })
     },
 
     /** FRIEND_REQUEST_APPROVED(1201)：我的申请被同意；按 requestId 更新状态（FRIEND_ADD 会另外推） */
     applyFriendRequestApprovedNotification(payload: FriendNotificationPayload) {
-      const request = payload.requestId ? this.findFriendRequest(payload.requestId) : undefined
+      const request = this.findFriendRequest(payload.requestId!)
       if (request) {
         request.handleResult = ImFriendRequestHandleResult.AGREED
         request.handleTime = Date.now()
       } else {
-        this.fetchFriendRequests().catch(() => undefined)
+        // 本地列表可能未初始化（例如刚登录还没进 contact 页），兜底重拉
+        void this.fetchFriendRequests()
       }
     },
 
     /** FRIEND_REQUEST_REJECTED(1202)：我的申请被拒绝；按 requestId 更新状态 */
     applyFriendRequestRejectedNotification(payload: FriendNotificationPayload) {
-      const request = payload.requestId ? this.findFriendRequest(payload.requestId) : undefined
+      const request = this.findFriendRequest(payload.requestId!)
       if (request) {
         request.handleResult = ImFriendRequestHandleResult.REFUSED
         request.handleContent = payload.handleContent
         request.handleTime = Date.now()
       } else {
-        this.fetchFriendRequests().catch(() => undefined)
+        void this.fetchFriendRequests()
       }
     },
 
     /** FRIEND_ADD(1204)：新增好友；本端拉取好友详情并入库 */
     applyFriendAddNotification(payload: FriendNotificationPayload) {
-      if (payload.friendUserId) {
-        this.loadFriendInfo(payload.friendUserId).catch(() => undefined)
-      }
+      void this.loadFriendInfo(payload.friendUserId)
     },
 
     /** FRIEND_DELETE(1205)：好友被删除；本端清理 + 级联会话 */
     applyFriendDeleteNotification(payload: FriendNotificationPayload) {
-      if (payload.friendUserId) {
-        this.removeFriend(payload.friendUserId)
-      }
+      this.removeFriend(payload.friendUserId)
     },
 
     /** FRIEND_BLOCK(1207)：拉黑；多端同步 */
@@ -394,9 +411,7 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** FRIEND_INFO_UPDATED(1209)：好友资料变更（昵称 / 头像）；重拉详情 */
     applyFriendInfoUpdatedNotification(payload: FriendNotificationPayload) {
-      if (payload.friendUserId) {
-        this.loadFriendInfo(payload.friendUserId).catch(() => undefined)
-      }
+      void this.loadFriendInfo(payload.friendUserId)
     },
 
     /** FRIEND_UPDATE(1210)：批量更新（备注 / 免打扰 / 联系人置顶）；多端同步 */
