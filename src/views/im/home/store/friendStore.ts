@@ -272,8 +272,19 @@ export const useFriendStore = defineStore('imFriendStore', {
       const existing = this.findFriendRequest(requestId)
       if (existing) {
         Object.assign(existing, next)
+        return
+      }
+      // 比本地最旧 id 还老：不入列表，让 loadMore 自然带回，避免破坏 id 倒序 / 后续 loadMore 重复 push
+      const oldest = this.friendRequests[this.friendRequests.length - 1]
+      if (oldest && requestId < oldest.id) {
+        return
+      }
+      // 按 id 倒序找首个比自己小的位置插入；找不到则追加末尾
+      const insertIndex = this.friendRequests.findIndex((request) => request.id < requestId)
+      if (insertIndex < 0) {
+        this.friendRequests.push(next)
       } else {
-        this.friendRequests.unshift(next)
+        this.friendRequests.splice(insertIndex, 0, next)
       }
     },
 
