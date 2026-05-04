@@ -10,9 +10,17 @@ export const ImMessageType = {
   RECEIPT: 12, // 回执
   TIP_TIME: 20, // 时间分隔线（前端本地生成，不发送到后端）
   TIP_TEXT: 21, // 提示文本（撤回提示等）
-  FRIEND_ADD: 100, // 好友添加
-  FRIEND_DELETE: 101, // 好友删除
-  FRIEND_UPDATE: 102, // 好友更新（客户端收到后自行拉取）
+  // 好友通知（1201-1210 复用 OpenIM 段位编号）
+  FRIEND_REQUEST_APPROVED: 1201, // 好友申请被同意
+  FRIEND_REQUEST_REJECTED: 1202, // 好友申请被拒绝
+  FRIEND_APPLICATION: 1203, // 收到新的好友申请
+  FRIEND_ADD: 1204, // 新增好友（双方建立关系）
+  FRIEND_DELETE: 1205, // 好友被删除
+  // 1206 对应 OpenIM FriendRemarkSetNotification；本系统并入 FRIEND_UPDATE(1210) 统一推送
+  FRIEND_BLOCK: 1207, // 加入黑名单
+  FRIEND_UNBLOCK: 1208, // 移出黑名单
+  FRIEND_INFO_UPDATED: 1209, // 好友资料变更（昵称 / 头像）
+  FRIEND_UPDATE: 1210, // 好友信息批量更新（muted / pinned）
   // 群事件（1501-1520 复用 OpenIM 段位编号；1530+ 自有扩展段）
   GROUP_CREATE: 1501, // 群创建
   GROUP_INFO_UPDATE: 1502, // 群信息变更（NAME / NOTICE 之外字段兜底）
@@ -46,6 +54,11 @@ export function isGroupNotification(type: number): boolean {
     && type <= ImMessageType.GROUP_MESSAGE_UNPIN
     && type !== ImMessageType.GROUP_MEMBER_SETTING_UPDATE
   )
+}
+
+/** 判断是否「好友通知事件」：1201-1210 段位 */
+export function isFriendNotification(type: number): boolean {
+  return type >= ImMessageType.FRIEND_REQUEST_APPROVED && type <= ImMessageType.FRIEND_UPDATE
 }
 
 /** IM 普通消息类型集合（聊天气泡中显示，并作为会话最后一条摘要） */

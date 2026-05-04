@@ -153,8 +153,33 @@ export interface Friend {
   displayName?: string // 好友展示备注：仅自己可见的别名（单字段不歧义，不带 Friend 前缀）
   displayNamePinyin?: string // 备注的拼音（后端用 Pinyin4j 算好回填，小写无空格）
   status?: number // 好友状态，对齐 CommonStatusEnum（DISABLE = 已删除，软删保留记录）
+  addSource?: number // 添加来源；参见 ImFriendAddSourceEnum
+  pinned?: boolean // 是否置顶联系人
+  blocked?: boolean // 是否拉黑（仅自己可见，单边屏蔽对方私聊消息）
   addTime?: number // 添加好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
   deleteTime?: number // 删除好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
+}
+
+/**
+ * 好友申请记录（前端内部结构，对齐后端 ImFriendRequestRespVO）
+ */
+export interface FriendRequest {
+  // ========== 后端字段（对齐 ImFriendRequestRespVO） ==========
+  id: number // 申请编号
+  fromUserId: number // 发起方用户编号
+  toUserId: number // 接收方用户编号
+  handleResult: number // 处理结果：0=未处理；1=同意；2=拒绝
+  applyContent?: string // 申请理由（发起方填写）
+  handleContent?: string // 处理理由（接收方拒绝时可选填）
+  addSource?: number // 添加来源；参见 ImFriendAddSourceEnum
+  handleTime?: number // 处理时间（毫秒时间戳）
+  createTime: number // 申请创建时间（毫秒时间戳）
+
+  // ========== 聚合字段（自 AdminUser，仅展示用） ==========
+  fromNickname?: string // 发起方昵称
+  fromAvatar?: string // 发起方头像
+  toNickname?: string // 接收方昵称
+  toAvatar?: string // 接收方头像
 }
 
 // ==================== 用户名片 ====================

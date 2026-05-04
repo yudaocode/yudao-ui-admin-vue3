@@ -3,10 +3,15 @@ import { store } from '@/store'
 import { getRefreshToken } from '@/utils/auth'
 import { useUserStore } from '@/store/modules/user'
 
-import { ImWebSocketMessageType, ImMessageType, ImConversationType } from '../../utils/constants'
+import {
+  ImWebSocketMessageType,
+  ImMessageType,
+  ImConversationType,
+  isFriendNotification
+} from '../../utils/constants'
 import { playAudioTip } from '../../utils/message'
 import { useConversationStore } from './conversationStore'
-import { useFriendStore } from './friendStore'
+import { useFriendStore, type FriendNotificationPayload } from './friendStore'
 import { getFriendDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/message/private'
@@ -202,30 +207,30 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     // ==================== 普通消息 ====================
 
     /**
-     * 私聊统一帧分发：按 payload.type（ImMessageType）分到已读 / 回执 / 好友变更 / 普通消息
+     * 私聊统一帧分发：按 payload.type（ImMessageType）分到已读 / 回执 / 好友通知 / 普通消息
      *
-     * 对应后端 ImPrivateMessageDTO 的 ofRead / ofReceipt / ofFriendAdd / ofFriendDelete / ofFriendUpdate / ofSend
+     * 对应后端 ImPrivateMessageDTO 的 ofRead / ofReceipt / ofFriendNotification / ofSend
      */
     dispatchPrivateFrame(websocketMessage: ImPrivateMessageDTO) {
-      switch (websocketMessage.type) {
-        case ImMessageType.READ:
-          this.handlePrivateRead(websocketMessage)
-          break
-        case ImMessageType.RECEIPT:
-          this.handlePrivateReceipt(websocketMessage)
-          break
-        case ImMessageType.FRIEND_ADD:
-          this.handleFriendAdd(websocketMessage)
-          break
-        case ImMessageType.FRIEND_DELETE:
-          this.handleFriendDelete(websocketMessage)
-          break
-        case ImMessageType.FRIEND_UPDATE:
-          this.handleFriendUpdate(websocketMessage)
-          break
-        default:
-          // TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT 等普通消息
-          this.handlePrivateMessage(websocketMessage)
+      try {
+        switch (websocketMessage.type) {
+          case ImMessageType.READ:
+            this.handlePrivateRead(websocketMessage)
+            break
+          case ImMessageType.RECEIPT:
+            this.handlePrivateReceipt(websocketMessage)
+            break
+          default:
+            if (isFriendNotification(websocketMessage.type)) {
+              this.handleFriendNotification(websocketMessage)
+            } else {
+              // TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT 等普通消息
+              this.handlePrivateMessage(websocketMessage)
+            }
+        }
+      } catch (e) {
+        // 单条帧的处理异常不应阻断后续帧；打印完整 websocketMessage 便于排查
+        console.warn('[IM WS] dispatchPrivateFrame 处理失败', websocketMessage, e)
       }
     },
 
@@ -235,19 +240,24 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      * 1530 GROUP_MEMBER_SETTING_UPDATE 是个人信号；其它（普通消息 + 1501-1520 OpenIM 段位群广播事件）走 handleGroupMessage 入库 + 触发 applyGroupNotification 旁路
      */
     dispatchGroupFrame(websocketMessage: ImGroupMessageDTO) {
-      switch (websocketMessage.type) {
-        case ImMessageType.READ:
-          this.handleGroupRead(websocketMessage)
-          break
-        case ImMessageType.RECEIPT:
-          this.handleGroupReceipt(websocketMessage)
-          break
-        case ImMessageType.GROUP_MEMBER_SETTING_UPDATE:
-          this.handleGroupMemberSettingUpdate(websocketMessage)
-          break
-        default:
-          // TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT + GROUP_* 群广播事件
-          this.handleGroupMessage(websocketMessage)
+      try {
+        switch (websocketMessage.type) {
+          case ImMessageType.READ:
+            this.handleGroupRead(websocketMessage)
+            break
+          case ImMessageType.RECEIPT:
+            this.handleGroupReceipt(websocketMessage)
+            break
+          case ImMessageType.GROUP_MEMBER_SETTING_UPDATE:
+            this.handleGroupMemberSettingUpdate(websocketMessage)
+            break
+          default:
+            // TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT + GROUP_* 群广播事件
+            this.handleGroupMessage(websocketMessage)
+        }
+      } catch (e) {
+        // 单条帧的处理异常不应阻断后续帧；打印完整 websocketMessage 便于排查
+        console.warn('[IM WS] dispatchGroupFrame 处理失败', websocketMessage, e)
       }
     },
 
@@ -461,43 +471,49 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       })
     },
 
-    // ==================== 好友关系事件（承载于私聊通道，按 inner type 分流） ====================
+    // ==================== 好友通知（1201-1210 段位，承载于私聊通道） ====================
 
-    /** FRIEND_ADD：后端推送给好友双方；本端拉取好友详情并入库，级联刷新私聊会话展示 */
-    handleFriendAdd(websocketMessage: ImPrivateMessageDTO) {
+    /**
+     * 好友通知统一入口：解析 content 里的 payload，按 type 分发到 friendStore 内部 dispatcher
+     *
+     * 对应后端 ImPrivateMessageDTO.ofFriendNotification 系列；payload 实际类型见
+     * BaseFriendNotification 子类（FriendRequestNotification / FriendAddNotification 等）
+     */
+    handleFriendNotification(websocketMessage: ImPrivateMessageDTO) {
+      // content 解析失败由外层 dispatchPrivateFrame 的 try-catch 兜底（含 websocketMessage 打印），不重复 catch
+      const payload = JSON.parse(websocketMessage.content || '{}') as FriendNotificationPayload
       const friendStore = useFriendStore()
-      // 后端 DTO 里只带 senderId/receiverId；收到这条时，对端 = 非自己的那一方
-      const userStore = useUserStore()
-      const selfId = Number(userStore.getUser?.id) || 0
-      const friendUserId =
-        websocketMessage.senderId === selfId
-          ? websocketMessage.receiverId
-          : websocketMessage.senderId
-      friendStore.loadFriendInfo(friendUserId).catch(() => undefined)
-    },
-
-    /** FRIEND_DELETE：本端标记好友已删 + 级联清理私聊会话 */
-    handleFriendDelete(websocketMessage: ImPrivateMessageDTO) {
-      const friendStore = useFriendStore()
-      const userStore = useUserStore()
-      const selfId = Number(userStore.getUser?.id) || 0
-      const friendUserId =
-        websocketMessage.senderId === selfId
-          ? websocketMessage.receiverId
-          : websocketMessage.senderId
-      friendStore.removeFriend(friendUserId)
-    },
-
-    /** FRIEND_UPDATE：多端同步好友属性变更（当前主要是免打扰）；重新拉取好友详情即可 */
-    handleFriendUpdate(websocketMessage: ImPrivateMessageDTO) {
-      const friendStore = useFriendStore()
-      const userStore = useUserStore()
-      const selfId = Number(userStore.getUser?.id) || 0
-      const friendUserId =
-        websocketMessage.senderId === selfId
-          ? websocketMessage.receiverId
-          : websocketMessage.senderId
-      friendStore.loadFriendInfo(friendUserId).catch(() => undefined)
+      switch (websocketMessage.type) {
+        case ImMessageType.FRIEND_APPLICATION:
+          friendStore.applyFriendRequestNotification(payload)
+          break
+        case ImMessageType.FRIEND_REQUEST_APPROVED:
+          friendStore.applyFriendRequestApprovedNotification(payload)
+          break
+        case ImMessageType.FRIEND_REQUEST_REJECTED:
+          friendStore.applyFriendRequestRejectedNotification(payload)
+          break
+        case ImMessageType.FRIEND_ADD:
+          friendStore.applyFriendAddNotification(payload)
+          break
+        case ImMessageType.FRIEND_DELETE:
+          friendStore.applyFriendDeleteNotification(payload)
+          break
+        case ImMessageType.FRIEND_BLOCK:
+          friendStore.applyFriendBlockNotification(payload)
+          break
+        case ImMessageType.FRIEND_UNBLOCK:
+          friendStore.applyFriendUnblockNotification(payload)
+          break
+        case ImMessageType.FRIEND_INFO_UPDATED:
+          friendStore.applyFriendInfoUpdatedNotification(payload)
+          break
+        case ImMessageType.FRIEND_UPDATE:
+          friendStore.applyFriendUpdateNotification(payload)
+          break
+        default:
+          console.debug('[IM WS] 未识别好友通知', websocketMessage)
+      }
     },
 
     // ==================== 群关系事件（承载于群聊通道，按 inner type 分流） ====================
@@ -508,13 +524,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      * payload 携带变更字段，按非 null 字段直接局部更新；省一次 fetchGroupMembers 接口
      */
     handleGroupMemberSettingUpdate(websocketMessage: ImGroupMessageDTO) {
-      let payload: { muted?: boolean; groupRemark?: string } = {}
-      try {
-        payload = JSON.parse(websocketMessage.content || '{}')
-      } catch (error) {
-        console.warn('[IM WS] handleGroupMemberSettingUpdate 解析 content 失败', error)
-        return
-      }
+      // content 解析失败由外层 dispatchGroupFrame 的 try-catch 兜底（含 websocketMessage 打印），不重复 catch
+      const payload: { muted?: boolean; groupRemark?: string } = JSON.parse(
+        websocketMessage.content || '{}'
+      )
       const groupStore = useGroupStore()
       const group = groupStore.getGroup(websocketMessage.groupId)
       if (!group) {

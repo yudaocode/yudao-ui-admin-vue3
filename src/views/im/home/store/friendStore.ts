@@ -5,30 +5,61 @@ import { CommonStatusEnum } from '@/utils/constants'
 import {
   getMyFriendList as apiGetMyFriendList,
   getFriend as apiGetFriend,
-  addFriend as apiAddFriend,
   deleteFriend as apiDeleteFriend,
   updateFriend as apiUpdateFriend,
   type ImFriendRespVO
 } from '@/api/im/friend'
+import {
+  applyFriendRequest as apiApplyFriendRequest,
+  agreeFriendRequest as apiAgreeFriendRequest,
+  refuseFriendRequest as apiRefuseFriendRequest,
+  getMyFriendRequestList as apiGetMyFriendRequestList,
+  type ImFriendRequestApplyReqVO,
+  type ImFriendRequestRespVO
+} from '@/api/im/friend/request'
 import { useConversationStore } from './conversationStore'
 import { ImConversationType } from '../../utils/constants'
 import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../utils/storage'
 import { getFriendDisplayName } from '../../utils/user'
-import type { Friend } from '../types'
+import type { Friend, FriendRequest } from '../types'
+
+/** 好友申请处理结果（对齐后端 ImFriendRequestHandleResultEnum） */
+const FriendRequestHandleResult = {
+  UNHANDLED: 0,
+  AGREED: 1,
+  REFUSED: 2
+} as const
+
+/** 好友通知 payload（对齐后端 BaseFriendNotification + 子类裁减后的字段） */
+export interface FriendNotificationPayload {
+  operatorUserId: number
+  friendUserId: number
+  // FRIEND_APPLICATION 系列：申请记录的核心字段（避免 payload 携带完整 DO）
+  requestId?: number
+  applyContent?: string
+  handleContent?: string
+  addSource?: number
+  // FRIEND_UPDATE：单边属性变更
+  displayName?: string
+  muted?: boolean
+  pinned?: boolean
+}
 
 /**
  * IM 好友 Store
  *
  * 负责：
- * - 拉取 / 缓存当前登录用户的好友列表
- * - 加好友 / 删好友（走后端 API + 本地乐观同步）
- * - 被 ConversationItem / FriendPage / MessageInput 等多处消费
+ * - 拉取 / 缓存当前登录用户的好友列表 + 申请列表
+ * - 申请-审批流程（apply / agree / refuse）+ 备注 / 免打扰 / 联系人置顶 / 拉黑
+ * - 接收 WebSocket 1201-1210 段位通知，按事件分发到 friendStore 内部各 dispatcher
  */
 export const useFriendStore = defineStore('imFriendStore', {
   state: () => ({
     friends: [] as Friend[],
     // 仅 fetchFriends 成功后置位；loadFriends（IDB）不置位，否则后台 SWR 刷新会被缓存命中跳过
-    loaded: false
+    loaded: false,
+    /** 我相关的好友申请列表（含我发起的 + 别人加我的；后端按 id 倒序，前端不再分页） */
+    friendRequests: [] as FriendRequest[]
   }),
 
   getters: {
@@ -48,17 +79,26 @@ export const useFriendStore = defineStore('imFriendStore', {
         const entry = this.getFriend(friendUserId)
         return !!entry && entry.status !== CommonStatusEnum.DISABLE
       }
+    },
+    /** 我的黑名单（blocked=true 且 ENABLE） */
+    getBlockedFriends: (state): Friend[] => {
+      return state.friends.filter(
+        (f) => f.status !== CommonStatusEnum.DISABLE && f.blocked === true
+      )
+    },
+    /** 未处理申请数（接收方=我）—— 实时派生，「新的朋友」红点用 */
+    getUnhandledRequestCount: (state): number => {
+      const me = Number(getCurrentUserId() || 0)
+      return state.friendRequests.filter(
+        (r) => r.handleResult === FriendRequestHandleResult.UNHANDLED && r.toUserId === me
+      ).length
     }
   },
 
   actions: {
     // ==================== 本地缓存 ====================
 
-    /**
-     * 从 IDB 恢复好友列表
-     *
-     * @return 返回是否命中缓存
-     */
+    /** 从 IDB 恢复好友列表 */
     async loadFriends(): Promise<boolean> {
       const userId = getCurrentUserId()
       if (!userId) {
@@ -121,30 +161,96 @@ export const useFriendStore = defineStore('imFriendStore', {
       }
     },
 
-    /** 添加好友：后端双向建立关系后，本地占位插入（服务端返回后可 fetchFriends 刷新） */
-    async addFriend(friendUserId: number, preview?: Partial<Friend>) {
-      await apiAddFriend(friendUserId)
-      if (preview) {
-        this.upsertFriend({
-          friendUserId,
-          nickname: preview.nickname || String(friendUserId),
-          avatar: preview.avatar,
-          status: CommonStatusEnum.ENABLE
-        })
+    // ==================== 申请-审批 ====================
+
+    /** 发起好友申请：成功后等待对方同意（不直接落地为好友） */
+    async applyFriend(reqVO: ImFriendRequestApplyReqVO): Promise<number | null> {
+      return await apiApplyFriendRequest(reqVO)
+    },
+
+    /** 同意一条好友申请；后端会双向落库 + 推 FRIEND_ADD，本端等通知到达再 upsertFriend */
+    async agreeFriendRequest(requestId: number) {
+      await apiAgreeFriendRequest(requestId)
+      const request = this.findFriendRequest(requestId)
+      if (request) {
+        request.handleResult = FriendRequestHandleResult.AGREED
+        request.handleTime = Date.now()
       } else {
-        await this.loadFriendInfo(friendUserId)
+        // 列表过期场景兜底重拉
+        await this.fetchFriendRequests()
       }
     },
 
-    /** 删除好友（软删，保留记录但置 DISABLE；同时级联清理本地私聊会话） */
+    /** 拒绝一条好友申请 */
+    async refuseFriendRequest(requestId: number, handleContent?: string) {
+      await apiRefuseFriendRequest(requestId, handleContent)
+      const request = this.findFriendRequest(requestId)
+      if (request) {
+        request.handleResult = FriendRequestHandleResult.REFUSED
+        request.handleContent = handleContent
+        request.handleTime = Date.now()
+      } else {
+        await this.fetchFriendRequests()
+      }
+    },
+
+    /** 拉取「我相关」的好友申请列表（页面打开时 / 收到 FRIEND_APPLICATION 时刷新） */
+    async fetchFriendRequests() {
+      const list = await apiGetMyFriendRequestList()
+      this.friendRequests = (list || []).map(convertFriendRequest)
+    },
+
+    /** 按 id 查申请记录 */
+    findFriendRequest(requestId: number): FriendRequest | undefined {
+      return this.friendRequests.find((r) => r.id === requestId)
+    },
+
+    // ==================== 好友关系操作 ====================
+
+    /** 删除好友（单向软删，本端置 DISABLE；级联清理本地私聊会话） */
     async deleteFriend(friendUserId: number) {
       await apiDeleteFriend(friendUserId)
       this.removeFriend(friendUserId)
     },
 
+    /** 切换免打扰 */
+    async setMuted(friendUserId: number, muted: boolean) {
+      await apiUpdateFriend({ friendUserId, muted })
+      const friend = this.getFriend(friendUserId)
+      if (friend) {
+        friend.muted = muted
+        this.saveFriends()
+      }
+    },
+
+    /** 切换联系人置顶 */
+    async setPinned(friendUserId: number, pinned: boolean) {
+      await apiUpdateFriend({ friendUserId, pinned })
+      const friend = this.getFriend(friendUserId)
+      if (friend) {
+        friend.pinned = pinned
+        this.saveFriends()
+      }
+    },
+
+    /** 修改好友展示备注（仅自己可见） */
+    async setDisplayName(friendUserId: number, displayName: string) {
+      const value = displayName.trim()
+      // 后端 displayName 语义：null/undefined = 不改，"" = 清空，所以这里直接传 value（可能是空串）
+      await apiUpdateFriend({ friendUserId, displayName: value })
+      const friend = this.getFriend(friendUserId)
+      if (friend) {
+        friend.displayName = value
+        const conversationStore = useConversationStore()
+        conversationStore.updateConversation(ImConversationType.PRIVATE, friendUserId, {
+          name: getFriendDisplayName(friend)
+        })
+        this.saveFriends()
+      }
+    },
+
     /** 本地合并 / 新增某个好友（WebSocket 事件 & 手动刷新都用） */
     upsertFriend(friend: Friend) {
-      // 按 friendUserId 查已有记录下标：>=0 命中则覆盖合并，<0 则追加
       const index = this.friends.findIndex((f) => f.friendUserId === friend.friendUserId)
       if (index >= 0) {
         this.friends[index] = {
@@ -158,7 +264,6 @@ export const useFriendStore = defineStore('imFriendStore', {
           status: friend.status ?? CommonStatusEnum.ENABLE
         })
       }
-      // 同步对应私聊会话的展示
       const conversationStore = useConversationStore()
       const merged = this.getFriend(friend.friendUserId)
       conversationStore.updateConversation(ImConversationType.PRIVATE, friend.friendUserId, {
@@ -169,13 +274,13 @@ export const useFriendStore = defineStore('imFriendStore', {
       this.saveFriends()
     },
 
-    /** 本地标记删除（WebSocket FRIEND_DEL 事件触发；同时级联清私聊会话） */
+    /** 本地标记删除（WebSocket FRIEND_DELETE 事件触发；同时级联清私聊会话） */
     removeFriend(friendUserId: number) {
-      // 软删：保留记录但置为 DISABLE，避免后续误判"陌生人"
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.status = CommonStatusEnum.DISABLE
         friend.deleteTime = Date.now()
+        friend.blocked = false
       }
       // 级联清理：把对应的私聊会话也软删，避免会话列表里留着已删好友
       const conversationStore = useConversationStore()
@@ -183,39 +288,105 @@ export const useFriendStore = defineStore('imFriendStore', {
       this.saveFriends()
     },
 
-    /** 切换免打扰 */
-    async setMuted(friendUserId: number, muted: boolean) {
-      await apiUpdateFriend({ friendUserId, muted })
-      const friend = this.getFriend(friendUserId)
+    // ==================== WebSocket 事件 dispatcher（1201-1210 段） ====================
+
+    /** FRIEND_APPLICATION(1203)：收到新申请；payload 已裁减为核心字段，本地拉一次列表补齐 fromUser 等聚合字段 */
+    applyFriendRequestNotification(_payload: FriendNotificationPayload) {
+      this.fetchFriendRequests().catch(() => undefined)
+    },
+
+    /** FRIEND_REQUEST_APPROVED(1201)：我的申请被同意；按 requestId 更新状态（FRIEND_ADD 会另外推） */
+    applyFriendRequestApprovedNotification(payload: FriendNotificationPayload) {
+      const request = payload.requestId ? this.findFriendRequest(payload.requestId) : undefined
+      if (request) {
+        request.handleResult = FriendRequestHandleResult.AGREED
+        request.handleTime = Date.now()
+      } else {
+        this.fetchFriendRequests().catch(() => undefined)
+      }
+    },
+
+    /** FRIEND_REQUEST_REJECTED(1202)：我的申请被拒绝；按 requestId 更新状态 */
+    applyFriendRequestRejectedNotification(payload: FriendNotificationPayload) {
+      const request = payload.requestId ? this.findFriendRequest(payload.requestId) : undefined
+      if (request) {
+        request.handleResult = FriendRequestHandleResult.REFUSED
+        request.handleContent = payload.handleContent
+        request.handleTime = Date.now()
+      } else {
+        this.fetchFriendRequests().catch(() => undefined)
+      }
+    },
+
+    /** FRIEND_ADD(1204)：新增好友；本端拉取好友详情并入库 */
+    applyFriendAddNotification(payload: FriendNotificationPayload) {
+      if (payload.friendUserId) {
+        this.loadFriendInfo(payload.friendUserId).catch(() => undefined)
+      }
+    },
+
+    /** FRIEND_DELETE(1205)：好友被删除；本端清理 + 级联会话 */
+    applyFriendDeleteNotification(payload: FriendNotificationPayload) {
+      if (payload.friendUserId) {
+        this.removeFriend(payload.friendUserId)
+      }
+    },
+
+    /** FRIEND_BLOCK(1207)：拉黑；多端同步 */
+    applyFriendBlockNotification(payload: FriendNotificationPayload) {
+      const friend = this.getFriend(payload.friendUserId)
       if (friend) {
-        friend.muted = muted
+        friend.blocked = true
+        this.saveFriends()
+      }
+    },
+
+    /** FRIEND_UNBLOCK(1208)：移出黑名单；多端同步 */
+    applyFriendUnblockNotification(payload: FriendNotificationPayload) {
+      const friend = this.getFriend(payload.friendUserId)
+      if (friend) {
+        friend.blocked = false
         this.saveFriends()
       }
     },
 
     /**
-     * 修改好友展示备注（仅自己可见）
-     *
-     * 走后端 /im/friend/update 接口；保存成功后再同步本地 friend + 会话列表 name，失败直接抛给上层让 UI 决定回滚 / 提示
+     * FRIEND_INFO_UPDATED(1209)：好友资料变更（昵称 / 头像）；重拉详情
+     * TODO @AI：后端暂未实现 1209 推送；待 system 模块改昵称 / 头像时回调触发，本 dispatcher 已就绪
      */
-    async setDisplayName(friendUserId: number, displayName: string) {
-      const value = displayName.trim()
-      // 后端的 displayName 语义：null/undefined = 不改，"" = 清空，所以这里直接传 value（可能是空串）
-      await apiUpdateFriend({ friendUserId, displayName: value })
-      const friend = this.getFriend(friendUserId)
-      if (friend) {
-        friend.displayName = value
-        const conversationStore = useConversationStore()
-        conversationStore.updateConversation(ImConversationType.PRIVATE, friendUserId, {
-          name: getFriendDisplayName(friend)
-        })
-        this.saveFriends()
+    applyFriendInfoUpdatedNotification(payload: FriendNotificationPayload) {
+      if (payload.friendUserId) {
+        this.loadFriendInfo(payload.friendUserId).catch(() => undefined)
       }
+    },
+
+    /** FRIEND_UPDATE(1210)：批量更新（备注 / 免打扰 / 联系人置顶）；多端同步 */
+    applyFriendUpdateNotification(payload: FriendNotificationPayload) {
+      const friend = this.getFriend(payload.friendUserId)
+      if (!friend) {
+        return
+      }
+      if (payload.displayName != null) {
+        friend.displayName = payload.displayName
+      }
+      if (payload.muted != null) {
+        friend.muted = payload.muted
+      }
+      if (payload.pinned != null) {
+        friend.pinned = payload.pinned
+      }
+      const conversationStore = useConversationStore()
+      conversationStore.updateConversation(ImConversationType.PRIVATE, payload.friendUserId, {
+        name: getFriendDisplayName(friend),
+        muted: friend.muted
+      })
+      this.saveFriends()
     },
 
     /** 切账号时仅清 in-memory，IDB 按 userId 分桶天然隔离，回切秒开 */
     clear() {
       this.friends = []
+      this.friendRequests = []
       this.loaded = false
     }
   }
@@ -231,16 +402,36 @@ function convertFriend(vo: ImFriendRespVO): Friend {
     muted: !!vo.muted,
     displayName: vo.displayName || '',
     displayNamePinyin: vo.displayNamePinyin,
+    addSource: vo.addSource,
+    pinned: !!vo.pinned,
+    blocked: !!vo.blocked,
     status: vo.status,
     addTime: vo.addTime ? new Date(vo.addTime).getTime() : undefined,
     deleteTime: vo.deleteTime ? new Date(vo.deleteTime).getTime() : undefined
   }
 }
 
+function convertFriendRequest(vo: ImFriendRequestRespVO): FriendRequest {
+  return {
+    id: vo.id,
+    fromUserId: vo.fromUserId,
+    toUserId: vo.toUserId,
+    handleResult: vo.handleResult,
+    applyContent: vo.applyContent,
+    handleContent: vo.handleContent,
+    addSource: vo.addSource,
+    handleTime: vo.handleTime ? new Date(vo.handleTime).getTime() : undefined,
+    createTime: vo.createTime ? new Date(vo.createTime).getTime() : 0,
+    fromNickname: vo.fromNickname,
+    fromAvatar: vo.fromAvatar,
+    toNickname: vo.toNickname,
+    toAvatar: vo.toAvatar
+  }
+}
+
 export const useFriendStoreWithOut = () => useFriendStore(store)
 
 // dev: 让 Pinia 的 actions / state 改动支持 HMR，避免每次改 store 都得硬刷
-// 否则 Vite 把新模块推下来后，老 store 实例的 action 闭包仍指向旧函数体
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useFriendStore, import.meta.hot))
 }
