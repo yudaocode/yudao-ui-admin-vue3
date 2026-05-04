@@ -23,7 +23,6 @@
               :url="friend.avatar"
               :name="friend.nickname"
               :size="50"
-              :clickable="false"
             />
             <div class="im-conversation-private-side__tile-label">
               {{ displayName }}
