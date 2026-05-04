@@ -473,6 +473,8 @@ watch(
     // 切群时上一会话的"未读累计 + 浮窗显示"必须清掉，否则会带到新会话里看起来很突兀
     newMessageCount.value = 0
     showJumpToBottom.value = false
+    // 抽屉里展示的群信息 / 好友信息属于上一会话，切会话时统一关掉
+    sideVisible.value = false
     scrollToBottom()
     // 仅群聊预拉详情 / 成员（私聊对端在首屏 fetchFriends 时就拉了）
     if (targetId && conversationStore.activeConversation?.type === ImConversationType.GROUP) {
