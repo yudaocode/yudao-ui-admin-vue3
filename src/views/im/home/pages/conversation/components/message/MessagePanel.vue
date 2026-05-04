@@ -63,6 +63,20 @@
           :group-id="conversationStore.activeConversation.targetId"
           @locate="handleLocate"
         />
+        <!-- 私聊：对方不再是好友（删了 / 被删了）；胶囊嵌在 header 内（跟群置顶同级），点击弹 UserInfoCard -->
+        <div v-if="showNotFriendBanner" class="message-panel__not-friend-container">
+          <div class="message-panel__not-friend" @click="handleNotFriendClick">
+            <span class="message-panel__not-friend-icon">
+              <Icon icon="ant-design:user-outlined" :size="11" />
+            </span>
+            <span>对方还不是你的朋友</span>
+            <Icon
+              icon="ep:arrow-right"
+              :size="12"
+              class="text-[var(--el-text-color-secondary)]"
+            />
+          </div>
+        </div>
       </div>
 
       <!-- 中间：消息列表 -->
@@ -150,6 +164,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
+import { useImUiStore } from '../../../../store/uiStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useGroupStore } from '../../../../store/groupStore'
 import { ImConversationType } from '@/views/im/utils/constants'
@@ -167,6 +182,7 @@ defineOptions({ name: 'ImMessagePanel' })
 
 const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
+const uiStore = useImUiStore()
 const groupStore = useGroupStore()
 const message = useMessage()
 const listRef = ref<HTMLElement>()
@@ -175,6 +191,32 @@ const messages = computed(() => conversationStore.getActiveMessages)
 const isGroup = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.GROUP
 )
+
+/** 私聊会话且对端不是有效好友（删了 / 被删了），顶部展示「对方还不是你的朋友」黄色横幅 */
+const showNotFriendBanner = computed(() => {
+  const conversation = conversationStore.activeConversation
+  if (!conversation || conversation.type !== ImConversationType.PRIVATE) {
+    return false
+  }
+  return !friendStore.isFriend(conversation.targetId)
+})
+
+/** 点击「对方还不是你的朋友」胶囊：打开 UserInfoCard，引导用户重新添加 */
+function handleNotFriendClick(event: MouseEvent) {
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return
+  }
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  uiStore.openUserInfoCard(
+    {
+      id: conversation.targetId,
+      nickname: conversation.name,
+      avatar: conversation.avatar
+    },
+    { x: rect.left, y: rect.bottom + 4 }
+  )
+}
 
 /**
  * 群聊 header 显示的人数：优先 groupStore.memberCount（无需等成员列表），无值再回退 members.length
@@ -507,6 +549,42 @@ watch(
 .message-panel__header-icon:hover,
 .message-panel__header-icon:hover :deep(svg) {
   color: var(--el-color-primary) !important;
+}
+
+/* 「对方还不是你的朋友」胶囊：嵌在 header 内（跟群置顶同级），不占整行；padding 跟群置顶 padding 对齐 */
+.message-panel__not-friend-container {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  padding: 0 16px 8px;
+  background-color: var(--el-fill-color-light);
+}
+.message-panel__not-friend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--el-text-color-primary);
+  background-color: var(--el-color-warning-light-9);
+  transition: background-color 0.15s;
+}
+.message-panel__not-friend:hover {
+  background-color: var(--el-color-warning-light-8);
+}
+/* 圆形小图标，深黄底色配白色 icon —— 跟微信一致的视觉锤 */
+.message-panel__not-friend-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  color: #fff;
+  background-color: var(--el-color-warning);
+  flex-shrink: 0;
 }
 
 /* sticky + translate 居中：fit-content 宽度不会撑满，transform 做水平 -50% 偏移；

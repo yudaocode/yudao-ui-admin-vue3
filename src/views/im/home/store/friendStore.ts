@@ -53,6 +53,8 @@ export interface FriendNotificationPayload {
   displayName?: string
   muted?: boolean
   pinned?: boolean
+  // FRIEND_DELETE：是否级联清理本端相关数据（如私聊会话）
+  clear?: boolean
 }
 
 /**
@@ -142,7 +144,7 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     // ==================== 远端拉取 ====================
 
-    /** 从后端拉取并覆盖本地列表；同步刷新对应私聊会话的展示名 / 头像 + 落 IDB；pending 期间复用同一 Promise */
+    /** 从后端拉取并覆盖本地列表（含 DISABLE 历史好友给已删对话兜底）；只同步 ENABLE 的会话信息，DISABLE 的不动 —— cascade 清会话由 WS dispatcher 按 payload.clear 处理，避免 fetchFriends 覆盖用户「不清空聊天记录」的选择 */
     async fetchFriends(force = false) {
       if (this.loaded && !force) {
         return
@@ -154,16 +156,17 @@ export const useFriendStore = defineStore('imFriendStore', {
         .then((list) => {
           this.friends = (list || []).map(convertFriend)
           this.loaded = true
-          // 同步 conversationStore 私聊会话的展示名 / 头像 / 免打扰
           const conversationStore = useConversationStore()
           for (const friend of this.friends) {
+            if (friend.status === CommonStatusEnum.DISABLE) {
+              continue
+            }
             conversationStore.updateConversation(ImConversationType.PRIVATE, friend.friendUserId, {
               name: getFriendDisplayName(friend),
               avatar: friend.avatar,
               muted: friend.muted
             })
           }
-          // 落本地缓存
           this.saveFriends()
         })
         .finally(() => {
@@ -195,27 +198,31 @@ export const useFriendStore = defineStore('imFriendStore', {
     /** 同意一条好友申请；后端会双向落库 + 推 FRIEND_ADD，本端等通知到达再 upsertFriend */
     async agreeFriendRequest(requestId: number) {
       await apiAgreeFriendRequest(requestId)
-      const request = this.findFriendRequest(requestId)
-      if (request) {
-        request.handleResult = ImFriendRequestHandleResult.AGREED
-        request.handleTime = Date.now()
-      } else {
-        // 本地列表没这条，按 id 单查兜底
-        await this.loadFriendRequest(requestId)
-      }
+      await this.applyHandleResult(requestId, ImFriendRequestHandleResult.AGREED)
     },
 
     /** 拒绝一条好友申请 */
     async refuseFriendRequest(requestId: number, handleContent?: string) {
       await apiRefuseFriendRequest(requestId, handleContent)
+      await this.applyHandleResult(requestId, ImFriendRequestHandleResult.REFUSED, handleContent)
+    },
+
+    /** 把 handleResult 应用到本地申请记录；找不到就按 id 单查兜底 upsert，避免破坏 id 倒序 */
+    async applyHandleResult(
+      requestId: number,
+      result: number,
+      handleContent?: string
+    ): Promise<void> {
       const request = this.findFriendRequest(requestId)
       if (request) {
-        request.handleResult = ImFriendRequestHandleResult.REFUSED
-        request.handleContent = handleContent
+        request.handleResult = result
+        if (handleContent !== undefined) {
+          request.handleContent = handleContent
+        }
         request.handleTime = Date.now()
-      } else {
-        await this.loadFriendRequest(requestId)
+        return
       }
+      await this.loadFriendRequest(requestId)
     },
 
     /** 拉取「我相关」的好友申请列表首页（页面打开 / 收到 FRIEND_REQUEST_RECEIVED 时刷新）；pending 期间复用同一 Promise */
@@ -290,10 +297,10 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     // ==================== 好友关系操作 ====================
 
-    /** 删除好友（单向软删，本端置 DISABLE；级联清理本地私聊会话） */
-    async deleteFriend(friendUserId: number) {
-      await apiDeleteFriend(friendUserId)
-      this.removeFriend(friendUserId)
+    /** 删除好友（单向软删，本端置 DISABLE）；clear=true 时级联清理本地相关数据（如私聊会话），并透传后端给多端同步 */
+    async deleteFriend(friendUserId: number, clear: boolean = true) {
+      await apiDeleteFriend(friendUserId, clear)
+      this.removeFriend(friendUserId, clear)
     },
 
     /** 切换免打扰：同步会话的 muted 字段，避免会话列表 muted 图标等 1210 推到才更新 */
@@ -379,17 +386,18 @@ export const useFriendStore = defineStore('imFriendStore', {
       this.saveFriends()
     },
 
-    /** 本地标记删除（WebSocket FRIEND_DELETE 事件触发；同时级联清私聊会话） */
-    removeFriend(friendUserId: number) {
+    /** 本地标记删除（WebSocket FRIEND_DELETE 事件触发；clear=true 时级联清相关数据如私聊会话） */
+    removeFriend(friendUserId: number, clear: boolean = true) {
       const friend = this.getFriend(friendUserId)
       if (friend) {
         // blocked 不动，跟后端 deleteFriend0「删好友期间保留拉黑状态」对齐
         friend.status = CommonStatusEnum.DISABLE
         friend.deleteTime = Date.now()
       }
-      // 级联清理：把对应的私聊会话也软删，避免会话列表里留着已删好友
-      const conversationStore = useConversationStore()
-      conversationStore.removePrivateConversation(friendUserId)
+      if (clear) {
+        const conversationStore = useConversationStore()
+        conversationStore.removePrivateConversation(friendUserId)
+      }
       this.saveFriends()
     },
 
@@ -417,26 +425,16 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** FRIEND_REQUEST_APPROVED(1201)：我的申请被同意；按 requestId 更新状态（FRIEND_ADD 会另外推） */
     applyFriendRequestApprovedNotification(payload: FriendNotificationPayload) {
-      const request = this.findFriendRequest(payload.requestId!)
-      if (request) {
-        request.handleResult = ImFriendRequestHandleResult.AGREED
-        request.handleTime = Date.now()
-      } else {
-        // 本地列表可能没这条（例如刚登录还没进 contact 页），按 id 单查兜底
-        void this.loadFriendRequest(payload.requestId!)
-      }
+      void this.applyHandleResult(payload.requestId!, ImFriendRequestHandleResult.AGREED)
     },
 
     /** FRIEND_REQUEST_REJECTED(1202)：我的申请被拒绝；按 requestId 更新状态 */
     applyFriendRequestRejectedNotification(payload: FriendNotificationPayload) {
-      const request = this.findFriendRequest(payload.requestId!)
-      if (request) {
-        request.handleResult = ImFriendRequestHandleResult.REFUSED
-        request.handleContent = payload.handleContent
-        request.handleTime = Date.now()
-      } else {
-        void this.loadFriendRequest(payload.requestId!)
-      }
+      void this.applyHandleResult(
+        payload.requestId!,
+        ImFriendRequestHandleResult.REFUSED,
+        payload.handleContent
+      )
     },
 
     /** FRIEND_ADD(1204)：新增好友；本端拉取好友详情并入库 */
@@ -444,9 +442,9 @@ export const useFriendStore = defineStore('imFriendStore', {
       void this.loadFriendInfo(payload.friendUserId)
     },
 
-    /** FRIEND_DELETE(1205)：好友被删除；本端清理 + 级联会话 */
+    /** FRIEND_DELETE(1205)：好友被删除；本端清理 + 按 payload.clear 决定是否级联清会话（多端跟主操作端一致） */
     applyFriendDeleteNotification(payload: FriendNotificationPayload) {
-      this.removeFriend(payload.friendUserId)
+      this.removeFriend(payload.friendUserId, payload.clear !== false)
     },
 
     /** FRIEND_BLOCK(1207)：拉黑；多端同步 */

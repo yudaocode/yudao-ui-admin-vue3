@@ -171,8 +171,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, watch } from 'vue'
-import type { InputInstance } from 'element-plus'
+import { computed, h, nextTick, ref, watch } from 'vue'
+import { ElCheckbox, ElMessageBox, type InputInstance } from 'element-plus'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
@@ -373,16 +373,39 @@ async function handleUnblock() {
   message.success('已移出黑名单')
 }
 
-/** 删除联系人：confirm → friendStore.deleteFriend（内部级联清会话）→ 通知父级关浮层 / 清选中 */
+/** 删除联系人：弹自定义确认（含「同时清空聊天记录」选项）→ friendStore.deleteFriend → 通知父级关浮层 / 清选中 */
 async function handleDeleteFriend() {
   if (!props.user?.id) {
     return
   }
   const target = props.user
-  // 二次确认
-  await message.confirm(`确定删除好友「${target.nickname || ''}」吗？`, '删除联系人')
-  // 删除好友
-  await friendStore.deleteFriend(target.id)
+  const clearConversation = ref(true)
+  try {
+    await ElMessageBox({
+      title: '删除联系人',
+      message: () =>
+        h('div', { class: 'flex flex-col gap-3 text-sm' }, [
+          h('div', `确定删除好友「${target.nickname || ''}」?`),
+          h(
+            ElCheckbox,
+            {
+              modelValue: clearConversation.value,
+              'onUpdate:modelValue': (value: boolean) => {
+                clearConversation.value = value
+              }
+            },
+            () => '同时清空聊天记录'
+          )
+        ]),
+      showCancelButton: true,
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      confirmButtonClass: 'el-button--danger'
+    })
+  } catch {
+    return
+  }
+  await friendStore.deleteFriend(target.id, clearConversation.value)
   message.success('已删除好友')
   emit('deleted', target)
 }

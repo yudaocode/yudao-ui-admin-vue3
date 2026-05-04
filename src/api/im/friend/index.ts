@@ -38,8 +38,11 @@ export const getFriend = (friendUserId: number | string) => {
 }
 
 // 删除好友（单向软删除）
-export const deleteFriend = (friendUserId: number | string) => {
-  return request.delete<boolean>({ url: '/im/friend/delete', params: { friendUserId } })
+export const deleteFriend = (friendUserId: number | string, clear: boolean) => {
+  return request.delete<boolean>({
+    url: '/im/friend/delete',
+    params: { friendUserId, clear }
+  })
 }
 
 // 更新好友信息（备注 / 免打扰 / 联系人置顶）
