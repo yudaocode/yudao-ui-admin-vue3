@@ -13,13 +13,18 @@
     >
       <Icon :icon="expanded ? 'ep:caret-bottom' : 'ep:caret-right'" :size="14" />
       <span class="flex-1">新的朋友</span>
-      <!-- 红点：未处理且别人加我的 -->
-      <el-badge v-if="unhandledCount > 0" :value="unhandledCount" :max="99" class="mr-2" />
+      <!-- 红点：未处理且别人加我的（统一走 store getter，避免本地 computed 跟 store 双口径） -->
+      <el-badge
+        v-if="friendStore.getUnhandledRequestCount > 0"
+        :value="friendStore.getUnhandledRequestCount"
+        :max="99"
+        class="mr-2"
+      />
       <span class="text-sm text-[var(--el-text-color-secondary)]">{{ requests.length }}</span>
     </div>
     <div v-show="expanded">
       <div
-        v-for="request in requests"
+        v-for="{ request, peer } in enrichedRequests"
         :key="request.id"
         class="flex gap-3 items-start px-3.5 py-2.5 cursor-pointer transition-colors hover:bg-[var(--el-fill-color-light)]"
         :class="{
@@ -28,16 +33,16 @@
         @click="emit('select', request)"
       >
         <UserAvatar
-          :id="getPeerUserId(request)"
-          :url="getPeerAvatar(request)"
-          :name="getPeerNickname(request)"
+          :id="peer.id"
+          :url="peer.avatar"
+          :name="peer.nickname"
           :size="36"
           :clickable="false"
         />
         <div class="flex-1 min-w-0 overflow-hidden">
           <div class="flex justify-between gap-2 items-center">
             <span class="flex-1 text-sm font-medium truncate text-[var(--el-text-color-primary)]">
-              {{ getPeerNickname(request) }}
+              {{ peer.nickname }}
             </span>
             <span class="flex-shrink-0 text-12px text-[var(--el-text-color-secondary)]">
               {{ getDictLabel(DICT_TYPE.IM_FRIEND_REQUEST_HANDLE_RESULT, request.handleResult) }}
@@ -65,8 +70,8 @@
 import { computed, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import UserAvatar from '../../components/user/UserAvatar.vue'
+import { useFriendStore } from '../../store/friendStore'
 import { getCurrentUserId } from '../../../utils/storage'
-import { ImFriendRequestHandleResult } from '../../../utils/constants'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import type { FriendRequest } from '../../types'
 
@@ -81,32 +86,26 @@ const emit = defineEmits<{
   select: [request: FriendRequest]
 }>()
 
+const friendStore = useFriendStore()
 const expanded = ref(true)
 /** 当前登录用户编号；用 computed 包一层，切账号后随 wsCache 重取，避免顶层求值在 keep-alive 实例里持有旧 id */
 const currentUserId = computed(() => getCurrentUserId())
 
-/** 未处理 + 别人加我的（接收方=我）才进红点；我发起的不进 */
-const unhandledCount = computed(
-  () => props.requests.filter(
-    (r) => r.handleResult === ImFriendRequestHandleResult.UNHANDLED && r.toUserId === currentUserId.value
-  ).length
-)
-
 /** 列表项展示对端：fromUserId == 我 → 对端 = toUser；否则对端 = fromUser */
-function getPeerUserId(request: FriendRequest): number {
-  return request.fromUserId === currentUserId.value ? request.toUserId : request.fromUserId
+function getPeer(request: FriendRequest) {
+  const sentByMe = request.fromUserId === currentUserId.value
+  return {
+    id: sentByMe ? request.toUserId : request.fromUserId,
+    nickname: sentByMe
+      ? request.toNickname || String(request.toUserId)
+      : request.fromNickname || String(request.fromUserId),
+    avatar: sentByMe ? request.toAvatar : request.fromAvatar
+  }
 }
 
-/** 列表项展示对端的昵称（fromUserId == 我 → toUser 昵称；否则 fromUser 昵称；缺则用 id 兜底） */
-function getPeerNickname(request: FriendRequest): string {
-  return request.fromUserId === currentUserId.value
-    ? request.toNickname || String(request.toUserId)
-    : request.fromNickname || String(request.fromUserId)
-}
-
-/** 列表项展示对端的头像（fromUserId == 我 → toUser 头像；否则 fromUser 头像） */
-function getPeerAvatar(request: FriendRequest): string | undefined {
-  return request.fromUserId === currentUserId.value ? request.toAvatar : request.fromAvatar
-}
+/** 列表项预先附 peer 字段，模板里直接 {{ peer.xxx }} 一次成型，省 3 次 helper 调用 */
+const enrichedRequests = computed(() =>
+  props.requests.map((request) => ({ request, peer: getPeer(request) }))
+)
 
 </script>

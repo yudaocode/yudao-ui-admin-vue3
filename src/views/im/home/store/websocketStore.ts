@@ -238,7 +238,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     /**
      * 群聊统一帧分发：按 payload.type（ImMessageType）分到已读 / 回执 / 群个人信号 / 普通消息
      *
-     * 1530 GROUP_MEMBER_SETTING_UPDATE 是个人信号；其它（普通消息 + 1501-1520 OpenIM 段位群广播事件）走 handleGroupMessage 入库 + 触发 applyGroupNotification 旁路
+     * 1530 GROUP_MEMBER_SETTING_UPDATE 是个人信号；其它（普通消息 + 1501-1520 段位群广播事件）走 handleGroupMessage 入库 + 触发 applyGroupNotification 旁路
      */
     dispatchGroupFrame(websocketMessage: ImGroupMessageDTO) {
       try {

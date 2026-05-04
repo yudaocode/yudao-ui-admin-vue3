@@ -20,15 +20,14 @@
 
       <el-scrollbar v-loading="loading" class="h-[400px] mt-2.5">
         <div
-          v-if="users.length === 0"
+          v-if="visibleUsers.length === 0"
           class="py-10 text-13px text-center text-[var(--el-text-color-disabled)]"
         >
           {{ searched ? '没有搜到用户' : '输入关键字后回车开始搜索' }}
         </div>
         <div
-          v-for="user in users"
+          v-for="user in visibleUsers"
           :key="user.id"
-          v-show="user.id !== currentUserId"
           class="flex gap-3 items-center px-2 py-2.5 border-b border-[var(--el-border-color-lighter)]"
         >
           <UserAvatar
@@ -174,6 +173,9 @@ const message = useMessage()
 
 /** 当前登录用户编号；用 computed 包一层，切账号后随 wsCache 重取，避免顶层求值在 keep-alive 实例里持有旧 id */
 const currentUserId = computed(() => getCurrentUserId())
+
+/** 搜索结果过滤掉自己；用 v-if 而非 v-show，避免 DOM 占位 + 头像无效请求 */
+const visibleUsers = computed(() => users.value.filter((u) => u.id !== currentUserId.value))
 const keyword = ref('')
 const users = ref<UserVO[]>([])
 const searched = ref(false)

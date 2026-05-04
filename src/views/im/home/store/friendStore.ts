@@ -20,17 +20,13 @@ import {
   type ImFriendRequestRespVO
 } from '@/api/im/friend/request'
 import { useConversationStore } from './conversationStore'
-import { ImConversationType } from '../../utils/constants'
+import { ImConversationType, ImFriendRequestHandleResult } from '../../utils/constants'
 import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../utils/storage'
 import { getFriendDisplayName } from '../../utils/user'
 import type { Friend, FriendRequest } from '../types'
 
-/** 好友申请处理结果（对齐后端 ImFriendRequestHandleResultEnum） */
-const FriendRequestHandleResult = {
-  UNHANDLED: 0,
-  AGREED: 1,
-  REFUSED: 2
-} as const
+/** 当前正在进行的好友申请列表拉取；多端连续多条申请到达时复用同一 Promise，避免雪崩重拉 */
+let inflightFetchRequests: Promise<void> | null = null
 
 /** 好友通知 payload（对齐后端 BaseFriendNotification + 子类裁减后的字段） */
 export interface FriendNotificationPayload {
@@ -90,9 +86,11 @@ export const useFriendStore = defineStore('imFriendStore', {
     },
     /** 未处理申请数（接收方=我）—— 实时派生，「新的朋友」红点用 */
     getUnhandledRequestCount: (state): number => {
-      const me = Number(getCurrentUserId() || 0)
+      const currentUserId = Number(getCurrentUserId() || 0)
       return state.friendRequests.filter(
-        (r) => r.handleResult === FriendRequestHandleResult.UNHANDLED && r.toUserId === me
+        (request) =>
+          request.handleResult === ImFriendRequestHandleResult.UNHANDLED &&
+          request.toUserId === currentUserId
       ).length
     }
   },
@@ -175,7 +173,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       await apiAgreeFriendRequest(requestId)
       const request = this.findFriendRequest(requestId)
       if (request) {
-        request.handleResult = FriendRequestHandleResult.AGREED
+        request.handleResult = ImFriendRequestHandleResult.AGREED
         request.handleTime = Date.now()
       } else {
         // 列表过期场景兜底重拉
@@ -189,7 +187,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       await apiRefuseFriendRequest(requestId, handleContent)
       const request = this.findFriendRequest(requestId)
       if (request) {
-        request.handleResult = FriendRequestHandleResult.REFUSED
+        request.handleResult = ImFriendRequestHandleResult.REFUSED
         request.handleContent = handleContent
         request.handleTime = Date.now()
       } else {
@@ -197,16 +195,24 @@ export const useFriendStore = defineStore('imFriendStore', {
       }
     },
 
-    /** 拉取「我相关」的好友申请列表（页面打开时 / 收到 FRIEND_APPLICATION 时刷新） */
+    /** 拉取「我相关」的好友申请列表（页面打开时 / 收到 FRIEND_APPLICATION 时刷新）；in-flight 期间复用同一 Promise */
     async fetchFriendRequests() {
-      const list = await apiGetMyFriendRequestList()
-      this.friendRequests = (list || []).map(convertFriendRequest)
+      if (inflightFetchRequests) {
+        return inflightFetchRequests
+      }
+      inflightFetchRequests = apiGetMyFriendRequestList()
+        .then((list) => {
+          this.friendRequests = (list || []).map(convertFriendRequest)
+        })
+        .finally(() => {
+          inflightFetchRequests = null
+        })
+      return inflightFetchRequests
     },
 
-    /** 按 id 查申请记录 */
+    /** 按 id 查申请记录；列表是按 id 倒序的小列表，O(n) find 即可，不再维护 Map 索引 */
     findFriendRequest(requestId: number): FriendRequest | undefined {
-      // TODO @AI：request
-      return this.friendRequests.find((r) => r.id === requestId)
+      return this.friendRequests.find((request) => request.id === requestId)
     },
 
     // ==================== 好友关系操作 ====================
@@ -323,7 +329,7 @@ export const useFriendStore = defineStore('imFriendStore', {
     applyFriendRequestApprovedNotification(payload: FriendNotificationPayload) {
       const request = payload.requestId ? this.findFriendRequest(payload.requestId) : undefined
       if (request) {
-        request.handleResult = FriendRequestHandleResult.AGREED
+        request.handleResult = ImFriendRequestHandleResult.AGREED
         request.handleTime = Date.now()
       } else {
         this.fetchFriendRequests().catch(() => undefined)
@@ -334,7 +340,7 @@ export const useFriendStore = defineStore('imFriendStore', {
     applyFriendRequestRejectedNotification(payload: FriendNotificationPayload) {
       const request = payload.requestId ? this.findFriendRequest(payload.requestId) : undefined
       if (request) {
-        request.handleResult = FriendRequestHandleResult.REFUSED
+        request.handleResult = ImFriendRequestHandleResult.REFUSED
         request.handleContent = payload.handleContent
         request.handleTime = Date.now()
       } else {

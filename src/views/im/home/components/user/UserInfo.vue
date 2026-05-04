@@ -180,6 +180,7 @@ import UserAvatar from './UserAvatar.vue'
 import FriendAddDialog from '../friend/FriendAddDialog.vue'
 import { getSimpleUser, type UserVO } from '@/api/system/user'
 import { useFriendStore } from '../../store/friendStore'
+import { ImFriendAddSource } from '../../../utils/constants'
 import { getGenderColor, getGenderIcon } from '../../../utils/user'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -205,15 +206,15 @@ const props = withDefaults(
     displayName?: string
     /** UserAvatar 预览层 z-index；放在高 z-index 浮层（如 UserInfoCard）里需手动抬高 */
     previewZIndex?: number
-    /** 加好友来源：1=搜索 2=群聊 3=扫码 4=名片；默认 1（搜索）；参见 ImFriendAddSourceEnum */
+    /** 加好友来源；默认 SEARCH；参见 ImFriendAddSource */
     addSource?: number
-    /** 来源附带信息：addSource=2（群聊）时传群名，用于「我是 XX 群的 YY」预填话术 */
+    /** 来源附带信息：addSource=GROUP（群聊）时传群名，用于「我是 XX 群的 YY」预填话术 */
     addSourceExtra?: string
   }>(),
   {
     relation: 'readonly',
     previewZIndex: 2000,
-    addSource: 1
+    addSource: ImFriendAddSource.SEARCH
   }
 )
 

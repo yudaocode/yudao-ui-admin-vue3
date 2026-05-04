@@ -9,18 +9,18 @@ export const ImMessageType = {
   READ: 11, // 已读
   RECEIPT: 12, // 回执
   TIP_TEXT: 21, // 提示文本（撤回提示等）
-  // 好友通知（1201-1210 复用 OpenIM 段位编号）
+  // ========== 好友通知（1201-1210 直接复用 OpenIM 段位编号） ==========
   FRIEND_REQUEST_APPROVED: 1201, // 好友申请被同意
   FRIEND_REQUEST_REJECTED: 1202, // 好友申请被拒绝
   FRIEND_APPLICATION: 1203, // 收到新的好友申请
   FRIEND_ADD: 1204, // 新增好友（双方建立关系）
   FRIEND_DELETE: 1205, // 好友被删除
-  // 1206 对应 OpenIM FriendRemarkSetNotification；本系统并入 FRIEND_UPDATE(1210) 统一推送
+  // 1206 对应 OpenIM FriendRemarkSetNotification；本系统并入 FRIEND_UPDATE(1210) 统一推送，单一字段变更不再独立通道
   FRIEND_BLOCK: 1207, // 加入黑名单
   FRIEND_UNBLOCK: 1208, // 移出黑名单
   FRIEND_INFO_UPDATED: 1209, // 好友资料变更（昵称 / 头像）
   FRIEND_UPDATE: 1210, // 好友信息批量更新（muted / pinned）
-  // 群事件（1501-1520 复用 OpenIM 段位编号；1530+ 自有扩展段）
+  // ========== 群事件（1501-1520 直接复用 OpenIM 段位编号；1530+ 自有扩展段） ==========
   GROUP_CREATE: 1501, // 群创建
   GROUP_INFO_UPDATE: 1502, // 群信息变更（NAME / NOTICE 之外字段兜底）
   // 1503 GROUP_JOIN_APPLICATION TODO 未实现：入群申请
@@ -41,9 +41,10 @@ export const ImMessageType = {
   GROUP_ADMIN_REMOVE: 1518, // 撤销管理员
   GROUP_NOTICE_UPDATE: 1519, // 群公告变更
   GROUP_NAME_UPDATE: 1520, // 群名变更
+  // ========== 自有扩展段（1530+，OpenIM 1500-1520 段位无对应物） ==========
   GROUP_MEMBER_SETTING_UPDATE: 1530, // 群成员个人设置变更：muted / groupRemark 个人多端同步
-  GROUP_MESSAGE_PIN: 1531, // 群消息置顶
-  GROUP_MESSAGE_UNPIN: 1532 // 群消息取消置顶
+  GROUP_MESSAGE_PIN: 1531, // 群消息置顶（自有扩展，OpenIM 无）
+  GROUP_MESSAGE_UNPIN: 1532 // 群消息取消置顶（自有扩展，OpenIM 无）
 } as const
 
 /** 判断是否「群广播事件」：[GROUP_CREATE, GROUP_MESSAGE_UNPIN] 段位都算，仅 GROUP_MEMBER_SETTING_UPDATE 是个人信号排除 */
