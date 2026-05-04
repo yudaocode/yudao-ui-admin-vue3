@@ -8,7 +8,6 @@ export const ImMessageType = {
   RECALL: 10, // 撤回
   READ: 11, // 已读
   RECEIPT: 12, // 回执
-  TIP_TIME: 20, // 时间分隔线（前端本地生成，不发送到后端）
   TIP_TEXT: 21, // 提示文本（撤回提示等）
   // 好友通知（1201-1210 复用 OpenIM 段位编号）
   FRIEND_REQUEST_APPROVED: 1201, // 好友申请被同意
@@ -141,7 +140,7 @@ export const PRIVATE_MESSAGE_PULL_SIZE = 100
 /** 每次拉取群聊消息的最大条数（后端上限 1000，前端取保守值 100） */
 export const GROUP_MESSAGE_PULL_SIZE = 100
 
-/** 会话之间插入"时间分隔线"的阈值：10 分钟 */
+/** 消息之间渲染「时间分隔条」的阈值：10 分钟 */
 export const TIME_TIP_GAP_MS = 10 * 60 * 1000
 
 /**

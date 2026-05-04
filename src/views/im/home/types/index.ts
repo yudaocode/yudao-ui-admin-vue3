@@ -62,7 +62,6 @@ export interface Conversation {
   muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
   atMe?: boolean // 群聊：是否有人 @我
   atAll?: boolean // 群聊：是否有人 @全体成员
-  lastTimeTip?: number // 最后一条"时间分隔线"的时间戳，判断是否需要插入下一条 TIP_TIME
 }
 
 // 消息数据结构

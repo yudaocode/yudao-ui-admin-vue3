@@ -80,12 +80,16 @@
         <!-- data-message-id 给 MessageHistory "定位到聊天位置" 用：父级通过 querySelector
              找到这层 wrapper，scrollIntoView + 加高亮 class；id=0 的本地占位消息跳过 -->
         <div
-          v-for="msg in messages"
+          v-for="(msg, index) in messages"
           :key="msg.id || msg.clientMessageId"
           :data-message-id="msg.id || ''"
           class="message-panel__message-anchor"
         >
-          <MessageItem :message="msg" @locate="handleLocate" />
+          <MessageItem
+            :message="msg"
+            :prev-message="messages[index - 1]"
+            @locate="handleLocate"
+          />
         </div>
 
         <!-- 回到底部浮动按钮（滚动不在底部时显示） -->

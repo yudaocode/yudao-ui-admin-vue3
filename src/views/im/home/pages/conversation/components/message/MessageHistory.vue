@@ -529,16 +529,13 @@ function matchesActiveFilter(message: Message): boolean {
 }
 
 /**
- * 当前列表：先剔除 TIP_TIME（每行已有绝对时间，时间分隔线无意义）、
- * 再 activeFilter 过滤、再 keyword 模糊命中、最后 reverse（最新在前）
+ * 当前列表：先 activeFilter 过滤、再 keyword 模糊命中、最后 reverse（最新在前）
  *
  * 关键字命中走 textSnippetOf —— 文本拿原文、媒体拿"[图片]"等占位词、文件拿文件名
  */
 const currentList = computed<Message[]>(() => {
   const trimmedKeyword = keyword.value.trim()
-  let list = allMessages.value
-    .filter((message) => message.type !== ImMessageType.TIP_TIME)
-    .filter(matchesActiveFilter)
+  let list = allMessages.value.filter(matchesActiveFilter)
   if (trimmedKeyword) {
     list = list.filter((message) => textSnippetOf(message).includes(trimmedKeyword))
   }

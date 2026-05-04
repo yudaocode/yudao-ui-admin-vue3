@@ -1,15 +1,15 @@
 <template>
-  <!-- 时间分隔线（TIP_TIME=20）：居中灰色时间 -->
+  <!-- 时间分隔条：列表第一条 / 距上一条超过阈值时居中显示灰色时间 -->
   <div
-    v-if="isTipTime"
-    class="flex items-center justify-center px-4 pt-2.5 pb-0.5 text-12px text-[var(--el-text-color-disabled)]"
+    v-if="shouldShowTimeTip"
+    class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-disabled)]"
   >
     {{ formatTipTime(message.sendTime) }}
   </div>
 
   <!-- 系统提示文案（TIP_TEXT=21） -->
   <div
-    v-else-if="isTipText"
+    v-if="isTipText"
     class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-secondary)]"
   >
     {{ tipText }}
@@ -226,6 +226,7 @@ import {
   ImGroupReceiptStatus,
   ImConversationType,
   ImGroupMemberRole,
+  TIME_TIP_GAP_MS,
   isGroupNotification,
   isNormalMessage
 } from '@/views/im/utils/constants'
@@ -268,6 +269,8 @@ defineOptions({ name: 'ImMessageItem' })
 
 const props = defineProps<{
   message: Message
+  /** 列表中的上一条消息，用于判断是否要在当前消息上方渲染时间分隔条；不传按列表第一条处理 */
+  prevMessage?: Message
 }>()
 
 const emit = defineEmits<{
@@ -292,9 +295,19 @@ const { confirm: confirmDialog, success: successMessage } = useMessage()
 /** 是否已撤回：pull / WS 两路都会调 recallMessage 把原消息更新为 type=RECALL，渲染只需识别 type */
 const isRecall = computed(() => props.message.type === ImMessageType.RECALL)
 
-/** 时间分隔线 / 系统提示文案 */
-const isTipTime = computed(() => props.message.type === ImMessageType.TIP_TIME)
+/** 系统提示文案 */
 const isTipText = computed(() => props.message.type === ImMessageType.TIP_TEXT)
+
+/** 是否在当前消息上方渲染时间分隔条：列表第一条 / 距上一条超过阈值；缺 sendTime 不渲染 */
+const shouldShowTimeTip = computed(() => {
+  if (!props.message.sendTime) {
+    return false
+  }
+  if (!props.prevMessage?.sendTime) {
+    return true
+  }
+  return props.message.sendTime - props.prevMessage.sendTime > TIME_TIP_GAP_MS
+})
 
 /** 是否文本消息 */
 const isText = computed(() => props.message.type === ImMessageType.TEXT)
@@ -540,10 +553,10 @@ const RECALL_WINDOW_MS = 2 * 60 * 1000
  * - 引用：已落库（id≠0）+ 未撤回的消息可引用，引用块写入 draftStore.reply
  * - 撤回 / 删除：互斥；自己发送 + 已落库 + 未撤回 + 2 分钟内显示「撤回」（推服务器），其它显示「删除」（仅本地清）
  *
- * TIP_TIME / TIP_TEXT 态不弹菜单
+ * TIP_TEXT 态不弹菜单
  */
 async function handleContextMenu(e: MouseEvent) {
-  if (isTipTime.value || isTipText.value) {
+  if (isTipText.value) {
     return
   }
 

@@ -7,12 +7,11 @@ import {
   ImMessageType,
   ImMessageStatus,
   IM_AT_ALL_USER_ID,
-  TIME_TIP_GAP_MS,
   isGroupNotification,
   isNormalMessage
 } from '../../utils/constants'
 import { getCurrentUserId, imStorage, removeQuietly, StorageKeys } from '../../utils/storage'
-import { generateClientMessageId, parseRecallMessageId } from '../../utils/message'
+import { parseRecallMessageId } from '../../utils/message'
 import { resolveConversationLastContent } from '../../utils/conversation'
 import { tryGetSenderDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
@@ -297,8 +296,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         top: false,
         muted: false,
         atMe: false,
-        atAll: false,
-        lastTimeTip: 0
+        atAll: false
       }
     },
 
@@ -359,7 +357,7 @@ export const useConversationStore = defineStore('imConversationStore', {
      * 主要行为（子步骤见函数内 // x.y 注释）：
      * 1. 会话定位：查找或创建 + 去重合并
      * 2. 更新会话元数据：摘要、@ 标记、未读数
-     * 3. 插入消息：时间分隔线 + 按 id 有序插入
+     * 3. 按 id 有序插入消息
      * 4. 收尾：更新游标 + 持久化
      */
     insertMessage(
@@ -459,32 +457,12 @@ export const useConversationStore = defineStore('imConversationStore', {
         conversation.unreadCount++
       }
 
-      // 3.1 时间分隔线：距上条 TIP_TIME 超过 10 分钟则插入一条
-      const sendTime = messageInfo.sendTime || Date.now()
-      if (!conversation.lastTimeTip || conversation.lastTimeTip < sendTime - TIME_TIP_GAP_MS) {
-        conversation.messages.push({
-          id: 0,
-          clientMessageId: generateClientMessageId(),
-          type: ImMessageType.TIP_TIME,
-          content: '',
-          status: ImMessageStatus.UNREAD,
-          sendTime,
-          senderId: 0,
-          targetId: conversationInfo.targetId,
-          selfSend: false
-        })
-        conversation.lastTimeTip = sendTime
-      }
-
-      // 3.2 根据 id 插入到正确位置（防止乱序）；tip 消息 / 本地临时消息直接追加末尾
+      // 3. 按真实 id 升序插入；id=0 的本地占位（SENDING）固定停在末尾，
+      //    并发场景下：占位仍在末尾时收到的真实消息会追加在占位之后，列表不严格按 id 升序
       let insertIndex = conversation.messages.length
       if (messageInfo.id) {
         for (let index = 0; index < conversation.messages.length; index++) {
           const existing = conversation.messages[index]
-          // TIP_TIME 没有 id，不参与排序
-          if (existing.type === ImMessageType.TIP_TIME) {
-            continue
-          }
           if (existing.id && messageInfo.id < existing.id) {
             insertIndex = index
             break
