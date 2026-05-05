@@ -437,14 +437,21 @@ export const useFriendStore = defineStore('imFriendStore', {
       )
     },
 
-    /** FRIEND_ADD(1204)：新增好友；本端拉取好友详情并入库 */
-    applyFriendAddNotification(payload: FriendNotificationPayload) {
-      void this.loadFriendInfo(payload.friendUserId)
+    /**
+     * FRIEND_ADD(1204)：新增好友；本端拉取好友详情并入库
+     * peerUserId 由 websocketStore 按帧 sender / receiver 算好传入：becomeFriends 单条入库后双方收到同一份 payload，
+     * 本端真正的「对端」是帧上的另一个用户，不是 payload.friendUserId（payload 里固定是 toUserId）。
+     */
+    applyFriendAddNotification(_payload: FriendNotificationPayload, peerUserId: number) {
+      void this.loadFriendInfo(peerUserId)
     },
 
-    /** FRIEND_DELETE(1205)：好友被删除；本端清理 + 按 payload.clear 决定是否级联清会话（多端跟主操作端一致） */
-    applyFriendDeleteNotification(payload: FriendNotificationPayload) {
-      this.removeFriend(payload.friendUserId, payload.clear !== false)
+    /**
+     * FRIEND_DELETE(1205)：好友被删除；本端清理 + 按 payload.clear 决定是否级联清会话（多端跟主操作端一致）
+     * peerUserId 由 websocketStore 按帧 sender / receiver 算好传入；与 FRIEND_ADD 保持一致的 peer 推断
+     */
+    applyFriendDeleteNotification(payload: FriendNotificationPayload, peerUserId: number) {
+      this.removeFriend(peerUserId, payload.clear !== false)
     },
 
     /** FRIEND_BLOCK(1207)：拉黑；多端同步 */

@@ -26,6 +26,19 @@ import type {
   Group
 } from '../types'
 
+/** FRIEND_DELETE 帧 payload 是否带 clear=true：clear 语义是清会话本身，跳过气泡渲染 */
+const isFriendDeleteWithClear = (frame: ImPrivateMessageDTO): boolean => {
+  if (frame.type !== ImMessageType.FRIEND_DELETE) {
+    return false
+  }
+  try {
+    const payload = JSON.parse(frame.content || '{}') as { clear?: boolean }
+    return payload.clear === true
+  } catch {
+    return false
+  }
+}
+
 /**
  * WebSocket 私聊 DTO -> 前端 Message
  * 不写发送人名字段：渲染层走 utils/user 实时算（备注 / 群昵称变更后历史消息自动刷新）
@@ -225,9 +238,13 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           default:
             if (isFriendNotification(websocketMessage.type)) {
               this.handleFriendNotification(websocketMessage)
-              // FRIEND_ADD / FRIEND_DELETE 同时作为会话事件气泡插入消息列表（becomeFriends 入库
-              // 帧 + silent / delete 单边推送帧统一走入库去重路径，前端按 type 渲染灰色提示）
-              if (isFriendChatTip(websocketMessage.type)) {
+              // FRIEND_ADD / FRIEND_DELETE：同时作为会话事件气泡插入消息列表
+              //            （becomeFriends 入库帧 + silent / delete 单边推送帧统一走入库去重路径，前端按 type 渲染灰色提示）；
+              // FRIEND_DELETE 的 clear=true 语义是清会话本身，跳过气泡避免在已清会话里写入虚拟消息
+              if (
+                isFriendChatTip(websocketMessage.type) &&
+                !isFriendDeleteWithClear(websocketMessage)
+              ) {
                 this.handlePrivateMessage(websocketMessage)
               }
             } else {
@@ -482,10 +499,20 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     // ==================== 好友通知（1201-1210 段位，承载于私聊通道） ====================
 
     /**
+     * 算 FRIEND_ADD / FRIEND_DELETE 帧的「对端 userId」：
+     *    becomeFriends 单条入库后双方收到同一份 payload，payload.friendUserId 固定是 toUserId，本端真正的对端要从帧 sender / receiver 反推
+     */
+    computeFriendPeerId(frame: ImPrivateMessageDTO): number {
+      const userStore = useUserStore()
+      const currentUserId = Number(userStore.getUser?.id) || 0
+      return frame.senderId === currentUserId ? frame.receiverId : frame.senderId
+    },
+
+    /**
      * 好友通知统一入口：解析 content 里的 payload，按 type 分发到 friendStore 内部 dispatcher
      *
-     * 对应后端 ImPrivateMessageDTO.ofFriendNotification 系列；payload 实际类型见
-     * BaseFriendNotification 子类（FriendRequestNotification / FriendAddNotification 等）
+     * 对应后端 ImPrivateMessageDTO.ofFriendNotification 系列；
+     * payload 实际类型见 BaseFriendNotification 子类（FriendRequestNotification / FriendAddNotification 等）
      */
     handleFriendNotification(websocketMessage: ImPrivateMessageDTO) {
       // content 解析失败由外层 dispatchPrivateFrame 的 try-catch 兜底（含 websocketMessage 打印），不重复 catch
@@ -502,10 +529,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           friendStore.applyFriendRequestRejectedNotification(payload)
           break
         case ImMessageType.FRIEND_ADD:
-          friendStore.applyFriendAddNotification(payload)
+          friendStore.applyFriendAddNotification(payload, this.computeFriendPeerId(websocketMessage))
           break
         case ImMessageType.FRIEND_DELETE:
-          friendStore.applyFriendDeleteNotification(payload)
+          friendStore.applyFriendDeleteNotification(payload, this.computeFriendPeerId(websocketMessage))
           break
         case ImMessageType.FRIEND_BLOCK:
           friendStore.applyFriendBlockNotification(payload)
