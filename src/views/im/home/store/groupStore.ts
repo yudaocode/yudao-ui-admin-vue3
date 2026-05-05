@@ -35,7 +35,7 @@ const pendingMemberKey = (userId: number, groupId: number) => `${userId}:${group
 /**
  * fetchGroupMember 单成员并发去重表：同 (groupId, memberUserId) 同时进的请求共用一个 Promise
  *
- * 跟整群表分开：单成员 fetch 跟整群 fetch 语义不同（单成员不回填 me 的 muted），不能互相代替
+ * 跟整群表分开：单成员 fetch 跟整群 fetch 语义不同（单成员不回填 me 的 silent），不能互相代替
  */
 const pendingSingleMemberFetches = new Map<string, Promise<GroupMember | null>>()
 
@@ -177,7 +177,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       // 拉取当前登录用户加入的所有群（不带成员；成员按需再走 fetchGroupMembers）
       const list = await apiGetMyGroupList()
       const fresh = (list || []).map(convertGroup)
-      // 合并而非全量替换：muted / groupRemark / 成员缓存这些字段不在 ImGroupRespVO 里，得从旧 group 保留
+      // 合并而非全量替换：silent / groupRemark / 成员缓存这些字段不在 ImGroupRespVO 里，得从旧 group 保留
       const groupMap = new Map(this.groups.map((group) => [group.id, group]))
       this.groups = fresh.map((group) => {
         const existing = groupMap.get(group.id)
@@ -188,7 +188,7 @@ export const useGroupStore = defineStore('imGroupStore', {
           ...group,
           members: existing.members,
           memberCount: existing.memberCount ?? group.memberCount,
-          muted: existing.muted ?? group.muted,
+          silent: existing.silent ?? group.silent,
           groupRemark: existing.groupRemark,
           membersLoaded: existing.membersLoaded
         }
@@ -199,7 +199,7 @@ export const useGroupStore = defineStore('imGroupStore', {
         conversationStore.updateConversation(ImConversationType.GROUP, group.id, {
           name: getGroupDisplayName(group),
           avatar: group.avatar,
-          muted: group.muted
+          silent: group.silent
         })
       }
       this.saveGroups()
@@ -237,7 +237,7 @@ export const useGroupStore = defineStore('imGroupStore', {
         return inflight
       }
       const promise = (async () => {
-        // 拉接口 + 单 pass 转换：同时捕获 me 的原始 VO，给下面回填 user-per-group 字段（muted / groupRemark）用
+        // 拉接口 + 单 pass 转换：同时捕获 me 的原始 VO，给下面回填 user-per-group 字段（silent / groupRemark）用
         const list = await apiGetGroupMemberList(groupId)
         let meRaw: ImGroupMemberRespVO | undefined
         const members = (list || []).map((member) => {
@@ -246,7 +246,7 @@ export const useGroupStore = defineStore('imGroupStore', {
           }
           return convertGroupMember(member, groupId)
         })
-        const muted = !!meRaw?.muted
+        const silent = !!meRaw?.silent
         const groupRemark = meRaw?.groupRemark || ''
 
         // 必须 await 之后重新 getGroup，避免 fetchGroups 已并发写入真实 group 的 race
@@ -261,7 +261,7 @@ export const useGroupStore = defineStore('imGroupStore', {
             name: '',
             members,
             memberCount: members.length,
-            muted,
+            silent,
             groupRemark,
             membersLoaded: true
           })
@@ -269,15 +269,15 @@ export const useGroupStore = defineStore('imGroupStore', {
           group.members = members
           group.memberCount = members.length
           group.membersLoaded = true
-          // muted / groupRemark 任一变化才同步到 conversation 和 IDB；groupRemark 变化要顺带刷会话名
-          if (group.muted !== muted || group.groupRemark !== groupRemark) {
-            group.muted = muted
+          // silent / groupRemark 任一变化才同步到 conversation 和 IDB；groupRemark 变化要顺带刷会话名
+          if (group.silent !== silent || group.groupRemark !== groupRemark) {
+            group.silent = silent
             group.groupRemark = groupRemark
             groupFieldsChanged = true
             const conversationStore = useConversationStore()
             conversationStore.updateConversation(ImConversationType.GROUP, groupId, {
               name: getGroupDisplayName(group),
-              muted
+              silent
             })
           }
         }
@@ -299,7 +299,7 @@ export const useGroupStore = defineStore('imGroupStore', {
     /**
      * 按 (groupId, memberUserId) 单成员补齐——deriveLastSenderDisplayName 兜底场景用
      *
-     * 跟 fetchGroupMembers 区别：只拉这一个成员，不动 me 的 muted / groupRemark（不是 me 的话拿不到）；
+     * 跟 fetchGroupMembers 区别：只拉这一个成员，不动 me 的 silent / groupRemark（不是 me 的话拿不到）；
      * 命中时把成员 upsert 进 group.members 数组并落 IDB，让后续渲染能用 displayUserName
      */
     fetchGroupMember(groupId: number, memberUserId: number): Promise<GroupMember | null> {
@@ -366,7 +366,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       conversationStore.updateConversation(ImConversationType.GROUP, group.id, {
         name: getGroupDisplayName(merged),
         avatar: merged.avatar,
-        muted: merged.muted
+        silent: merged.silent
       })
       // 持久化到 IDB（fire-and-forget）
       this.saveGroups()
@@ -390,13 +390,13 @@ export const useGroupStore = defineStore('imGroupStore', {
     },
 
     /** 切换免打扰：推后端 + 落本地 */
-    async setMuted(id: number, muted: boolean) {
-      await apiUpdateGroupMember({ groupId: id, muted })
+    async setSilent(id: number, silent: boolean) {
+      await apiUpdateGroupMember({ groupId: id, silent })
       const group = this.getGroup(id)
       if (!group) {
         return
       }
-      group.muted = muted
+      group.silent = silent
       this.saveGroups()
     },
 
@@ -478,7 +478,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       conversationStore.updateConversation(ImConversationType.GROUP, groupId, {
         name: getGroupDisplayName(group),
         avatar: group.avatar,
-        muted: group.muted
+        silent: group.silent
       })
       this.saveGroups()
     },

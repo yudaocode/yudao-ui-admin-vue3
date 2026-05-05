@@ -7,7 +7,7 @@ export interface ImGroupMemberRespVO {
   userId: number // 用户编号
   displayUserName?: string // 组内显示名（群主设置的备注）
   groupRemark?: string // 群备注（当前用户对群的备注）
-  muted?: boolean // 是否免打扰
+  silent?: boolean // 是否免打扰
   status?: number // 成员状态（0=在群，1=退群）
   role?: number // 成员角色，参见 ImGroupMemberRole 枚举
   joinTime?: string // 入群时间
@@ -35,7 +35,7 @@ export interface ImGroupMemberUpdateReqVO {
   groupId: number // 群编号
   displayUserName?: string // 群内昵称
   groupRemark?: string // 群备注
-  muted?: boolean // 是否免打扰
+  silent?: boolean // 是否免打扰
 }
 
 // 邀请用户加入群

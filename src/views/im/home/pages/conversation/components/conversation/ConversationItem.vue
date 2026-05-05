@@ -14,7 +14,7 @@
         :clickable="false"
       />
       <span
-        v-show="!conversation.muted && conversation.unreadCount > 0"
+        v-show="!conversation.silent && conversation.unreadCount > 0"
         class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1.5 text-11px leading-[18px] text-white text-center bg-[#f56c6c] border border-white dark:border-[var(--el-bg-color)] rounded-full box-border whitespace-nowrap"
       >
         {{ conversation.unreadCount > 99 ? '99+' : conversation.unreadCount }}
@@ -58,10 +58,10 @@
         </span>
         <!-- 免打扰图标 -->
         <Icon
-          v-if="conversation.muted"
+          v-if="conversation.silent"
           icon="mdi:bell-off-outline"
           :size="14"
-          class="conversation-item__muted flex-shrink-0 ml-1 text-[var(--el-text-color-disabled)]"
+          class="conversation-item__silent flex-shrink-0 ml-1 text-[var(--el-text-color-disabled)]"
           title="消息免打扰"
         />
       </div>
@@ -192,17 +192,17 @@ function handleTop() {
 
 /** 切换免打扰：乐观 UI（先本地切换，菜单立即关；后端失败回滚 conversation 状态） */
 function handleMuted() {
-  const next = !props.conversation.muted
+  const next = !props.conversation.silent
   const { type, targetId } = props.conversation
-  conversationStore.setMuted(type, targetId, next)
+  conversationStore.setSilent(type, targetId, next)
   const sync =
     type === ImConversationType.PRIVATE
-      ? friendStore.setMuted(targetId, next)
-      : groupStore.setMuted(targetId, next)
+      ? friendStore.setSilent(targetId, next)
+      : groupStore.setSilent(targetId, next)
   sync.catch((e) => {
     console.error('[IM] 切换免打扰失败', e)
     message.error('切换免打扰失败')
-    conversationStore.setMuted(type, targetId, !next)
+    conversationStore.setSilent(type, targetId, !next)
   })
 }
 
@@ -220,7 +220,7 @@ function handleContextMenu(e: MouseEvent) {
     { x: e.clientX, y: e.clientY },
     [
       { key: 'TOP', name: props.conversation.top ? '取消置顶' : '置顶' },
-      { key: 'MUTED', name: props.conversation.muted ? '允许消息通知' : '消息免打扰' },
+      { key: 'MUTED', name: props.conversation.silent ? '允许消息通知' : '消息免打扰' },
       { key: 'DELETE', name: '删除', divided: true, danger: true }
     ],
     (item) => {
@@ -276,7 +276,7 @@ function formatTime(timestamp: number): string {
 }
 
 /* el-icon 的全局 color:var(--color) 在暗色模式下会渲染成白色，这里用 :deep + !important 锁定 */
-.conversation-item__muted :deep(svg) {
+.conversation-item__silent :deep(svg) {
   fill: currentColor !important;
 }
 </style>

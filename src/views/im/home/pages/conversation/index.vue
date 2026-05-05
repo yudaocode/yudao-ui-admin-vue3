@@ -186,7 +186,7 @@ const renderedPinnedConversations = computed(() =>
 
 /** 与会话项右上角红点的可见条件保持一致：免打扰不亮，无未读不亮 */
 function hasUnreadBadge(conversation: Conversation): boolean {
-  return !conversation.muted && (conversation.unreadCount || 0) > 0
+  return !conversation.silent && (conversation.unreadCount || 0) > 0
 }
 
 /** 是否为当前激活会话 */
@@ -227,7 +227,7 @@ function handleGroupCreated(groupId: number) {
     ImConversationType.GROUP,
     group.name,
     group.avatar || '',
-    { muted: !!group.muted }
+    { silent: !!group.silent }
   )
 }
 </script>

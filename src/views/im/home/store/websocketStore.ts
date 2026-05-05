@@ -333,7 +333,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
             console.warn('[IM WS] 自动已读上报失败', e)
           })
-        } else if (!conversation?.muted && isNormalMessage(websocketMessage.type)) {
+        } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
           // 非当前会话且未免打扰：响一下提示音（带节流，详见 playAudioTip）；TIP_TEXT 等系统提示不响
           playAudioTip()
         }
@@ -439,7 +439,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id).catch((e) => {
             console.warn('[IM WS] 自动已读上报失败', e)
           })
-        } else if (!conversation?.muted && isNormalMessage(websocketMessage.type)) {
+        } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
           // GROUP_* 群广播事件 / TIP_TEXT 等系统提示不响提示音
           playAudioTip()
         }
@@ -521,13 +521,13 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     // ==================== 群关系事件（承载于群聊通道，按 inner type 分流） ====================
 
     /**
-     * GROUP_MEMBER_SETTING_UPDATE：多端同步成员个人设置变更（muted / groupRemark）
+     * GROUP_MEMBER_SETTING_UPDATE：多端同步成员个人设置变更（silent / groupRemark）
      *
      * payload 携带变更字段，按非 null 字段直接局部更新；省一次 fetchGroupMembers 接口
      */
     handleGroupMemberSettingUpdate(websocketMessage: ImGroupMessageDTO) {
       // content 解析失败由外层 dispatchGroupFrame 的 try-catch 兜底（含 websocketMessage 打印），不重复 catch
-      const payload: { muted?: boolean; groupRemark?: string } = JSON.parse(
+      const payload: { silent?: boolean; groupRemark?: string } = JSON.parse(
         websocketMessage.content || '{}'
       )
       const groupStore = useGroupStore()
@@ -536,8 +536,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         return
       }
       const fields: Partial<Group> = {}
-      if (payload.muted != null) {
-        fields.muted = payload.muted
+      if (payload.silent != null) {
+        fields.silent = payload.silent
       }
       if (payload.groupRemark != null) {
         fields.groupRemark = payload.groupRemark

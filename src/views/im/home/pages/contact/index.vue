@@ -204,7 +204,7 @@ function handleChatPeer(peerUserId: number) {
     ImConversationType.PRIVATE,
     conversationName,
     friend?.avatar || '',
-    { muted: !!friend?.muted }
+    { silent: !!friend?.silent }
   )
   router.push({ name: 'ImHomeConversation' })
 }
@@ -219,7 +219,7 @@ function handleChatFriend(friend: FriendLite) {
     ImConversationType.PRIVATE,
     conversationName,
     friend.avatar || '',
-    { muted: !!entry?.muted }
+    { silent: !!entry?.silent }
   )
   router.push({ name: 'ImHomeConversation' })
 }
@@ -232,7 +232,7 @@ function handleChatGroup(group: GroupLite) {
     ImConversationType.GROUP,
     group.showGroupName || group.name || '',
     group.showImage || group.showImageThumb || '',
-    { muted: !!entry?.muted }
+    { silent: !!entry?.silent }
   )
   router.push({ name: 'ImHomeConversation' })
 }

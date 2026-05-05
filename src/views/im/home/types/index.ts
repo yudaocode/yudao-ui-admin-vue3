@@ -59,7 +59,7 @@ export interface Conversation {
   // ========== UI 状态 ==========
   deleted?: boolean // 是否已删除（软删标记，持久化时过滤）
   top?: boolean // 是否置顶（排序时优先）
-  muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
+  silent?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
   atMe?: boolean // 群聊：是否有人 @我
   atAll?: boolean // 群聊：是否有人 @全体成员
 }
@@ -115,7 +115,7 @@ export interface Group {
   pinnedMessages?: Message[] // 群置顶消息列表
 
   // ========== 前端扩展字段（user-per-group 维度） ==========
-  muted?: boolean // 是否免打扰。从当前用户的 GroupMember 回填
+  silent?: boolean // 是否免打扰。从当前用户的 GroupMember 回填
   groupRemark?: string // 群备注。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
   members?: GroupMember[] // 群成员缓存（按需懒加载）
   membersLoaded?: boolean // members 是否"完整加载"——只有整群 loadGroupMembers / fetchGroupMembers 命中时为 true；fetchGroupMember 单成员补齐不置位，避免 fetchGroupMembers(force=false) 命中缓存时误判整群已加载
@@ -148,7 +148,7 @@ export interface Friend {
   nickname: string // 好友昵称（对方真实昵称，永远不被备注覆盖；UI 显示走 displayName || nickname）
   nicknamePinyin?: string // 昵称的拼音（后端用 Pinyin4j 算好回填，小写无空格）
   avatar?: string // 好友头像
-  muted?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
+  silent?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
   displayName?: string // 好友展示备注：仅自己可见的别名（单字段不歧义，不带 Friend 前缀）
   displayNamePinyin?: string // 备注的拼音（后端用 Pinyin4j 算好回填，小写无空格）
   status?: number // 好友状态，对齐 CommonStatusEnum（DISABLE = 已删除，软删保留记录）

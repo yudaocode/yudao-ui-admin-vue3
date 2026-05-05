@@ -22,7 +22,7 @@ export interface ImManagerGroupMemberVO {
   avatar?: string
   displayUserName?: string
   groupRemark?: string
-  muted?: boolean
+  silent?: boolean
   status: number
   role?: number // 成员角色，参见 ImGroupMemberRole 枚举
   joinTime?: Date

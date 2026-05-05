@@ -97,7 +97,7 @@ export const useConversationStore = defineStore('imConversationStore', {
     /** 未读总数（免打扰会话不计入）—— 用于 ToolBar 红点 */
     getTotalUnread(state): number {
       return state.conversations
-        .filter((c) => !c.deleted && !c.muted)
+        .filter((c) => !c.deleted && !c.silent)
         .reduce((sum, c) => sum + (c.unreadCount || 0), 0)
     },
     /** 查找会话：按 (type, targetId) 组合主键 */
@@ -169,7 +169,7 @@ export const useConversationStore = defineStore('imConversationStore', {
     /**
      * 持久化到 IndexedDB（fire-and-forget；调用方无需 await）
      *
-     * - 不传 target：仅写 meta（适用于 top / muted / unread 等元数据变更）
+     * - 不传 target：仅写 meta（适用于 top / silent / unread 等元数据变更）
      * - 传单个 conversation：写 meta + 该会话的消息（单条消息变更走这里）
      * - 传数组：写 meta + 数组里所有未删除会话的消息（loading 完成后兜底 flush 用）
      *
@@ -229,7 +229,7 @@ export const useConversationStore = defineStore('imConversationStore', {
     /**
      * 打开或创建一个会话，并设为激活
      *
-     * 调用方应该把从 friendStore / groupStore 拿到的最新元数据（muted 等）
+     * 调用方应该把从 friendStore / groupStore 拿到的最新元数据（silent 等）
      * 通过 options 传进来，避免新建/复用的会话显示陈旧状态。
      * 此处不在 conversationStore 里反向 import friendStore/groupStore，是为了避免循环依赖。
      */
@@ -238,26 +238,26 @@ export const useConversationStore = defineStore('imConversationStore', {
       type: number,
       name: string,
       avatar: string,
-      options?: { muted?: boolean }
+      options?: { silent?: boolean }
     ): Conversation {
       // 按 (type, targetId) 查找已有会话，不存在则新建并插到列表头部
       let conversation = this.getConversation(type, targetId)
       if (!conversation) {
         conversation = this.createEmptyConversation(type, targetId, name, avatar)
-        if (options?.muted !== undefined) {
-          conversation.muted = options.muted
+        if (options?.silent !== undefined) {
+          conversation.silent = options.silent
         }
         this.conversations.unshift(conversation)
       } else {
-        // 已存在会话：用最新元数据刷新 name / avatar / muted
+        // 已存在会话：用最新元数据刷新 name / avatar / silent
         if (name) {
           conversation.name = name
         }
         if (avatar) {
           conversation.avatar = avatar
         }
-        if (options?.muted !== undefined) {
-          conversation.muted = options.muted
+        if (options?.silent !== undefined) {
+          conversation.silent = options.silent
         }
       }
       this.setActiveConversation(conversation)
@@ -294,7 +294,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         messages: [],
         deleted: false,
         top: false,
-        muted: false,
+        silent: false,
         atMe: false,
         atAll: false
       }
@@ -312,13 +312,13 @@ export const useConversationStore = defineStore('imConversationStore', {
       this.saveConversations()
     },
 
-    /** 设置会话免打扰（本地状态；后端同步由 friendStore / groupStore + /muted API 负责） */
-    setMuted(type: number, targetId: number, muted: boolean) {
+    /** 设置会话免打扰（本地状态；后端同步由 friendStore / groupStore + /silent API 负责） */
+    setSilent(type: number, targetId: number, silent: boolean) {
       const conversation = this.getConversation(type, targetId)
       if (!conversation) {
         return
       }
-      conversation.muted = muted
+      conversation.silent = silent
       this.saveConversations()
     },
 
@@ -718,7 +718,7 @@ export const useConversationStore = defineStore('imConversationStore', {
     },
 
     /**
-     * 同步会话的展示元数据（name / avatar / muted）
+     * 同步会话的展示元数据（name / avatar / silent）
      *
      * 调用方负责把好友 / 群的信息整理成 Conversation 视角的字段：
      * - 私聊：name = friend.nickname；avatar = friend.avatar
@@ -727,7 +727,7 @@ export const useConversationStore = defineStore('imConversationStore', {
     updateConversation(
       type: number,
       targetId: number,
-      info: { name?: string; avatar?: string; muted?: boolean }
+      info: { name?: string; avatar?: string; silent?: boolean }
     ) {
       const conversation = this.getConversation(type, targetId)
       if (!conversation) {
@@ -742,8 +742,8 @@ export const useConversationStore = defineStore('imConversationStore', {
         conversation.avatar = info.avatar || ''
         changed = true
       }
-      if (info.muted !== undefined && conversation.muted !== info.muted) {
-        conversation.muted = info.muted
+      if (info.silent !== undefined && conversation.silent !== info.silent) {
+        conversation.silent = info.silent
         changed = true
       }
       if (changed) {

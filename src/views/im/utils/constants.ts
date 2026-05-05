@@ -19,7 +19,7 @@ export const ImMessageType = {
   FRIEND_BLOCK: 1207, // 加入黑名单
   FRIEND_UNBLOCK: 1208, // 移出黑名单
   FRIEND_INFO_UPDATED: 1209, // 好友资料变更（昵称 / 头像）
-  FRIEND_UPDATE: 1210, // 好友信息批量更新（muted / pinned）
+  FRIEND_UPDATE: 1210, // 好友信息批量更新（silent / pinned）
   // ========== 群事件（1501-1520 直接复用 OpenIM 段位编号；1530+ 自有扩展段） ==========
   GROUP_CREATE: 1501, // 群创建
   GROUP_INFO_UPDATE: 1502, // 群信息变更（NAME / NOTICE 之外字段兜底）
@@ -42,7 +42,7 @@ export const ImMessageType = {
   GROUP_NOTICE_UPDATE: 1519, // 群公告变更
   GROUP_NAME_UPDATE: 1520, // 群名变更
   // ========== 自有扩展段（1530+，OpenIM 1500-1520 段位无对应物） ==========
-  GROUP_MEMBER_SETTING_UPDATE: 1530, // 群成员个人设置变更：muted / groupRemark 个人多端同步
+  GROUP_MEMBER_SETTING_UPDATE: 1530, // 群成员个人设置变更：silent / groupRemark 个人多端同步
   GROUP_MESSAGE_PIN: 1531, // 群消息置顶（自有扩展，OpenIM 无）
   GROUP_MESSAGE_UNPIN: 1532 // 群消息取消置顶（自有扩展，OpenIM 无）
 } as const

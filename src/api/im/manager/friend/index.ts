@@ -7,7 +7,7 @@ export interface ImManagerFriendVO {
   friendUserId: number
   friendNickname?: string
   displayName?: string
-  muted: boolean
+  silent: boolean
   status: number
   addTime?: Date
   deleteTime?: Date

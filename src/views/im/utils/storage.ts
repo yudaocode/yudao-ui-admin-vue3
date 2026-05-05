@@ -31,7 +31,7 @@ export const StorageKeys = {
   /**
    * 会话索引：游标 + 会话元数据（不含 messages），对应 ConversationStoreMeta
    *
-   * 任何会话级元数据变更（top / muted / unread / 列表增删 / 排序）都会重写这一个 key；由于 messages 已剥离到独立 key，单次写体积稳定（仅元数据，量级 KB 级）
+   * 任何会话级元数据变更（top / silent / unread / 列表增删 / 排序）都会重写这一个 key；由于 messages 已剥离到独立 key，单次写体积稳定（仅元数据，量级 KB 级）
    */
   conversationMeta: (userId: number | string) => `conversation:meta:${userId}`,
   /**

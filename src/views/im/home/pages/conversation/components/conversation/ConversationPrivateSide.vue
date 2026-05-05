@@ -108,7 +108,7 @@
         <div class="im-conversation-private-side__section">
           <div class="im-conversation-private-side__row">
             <span class="im-conversation-private-side__label">消息免打扰</span>
-            <el-switch :model-value="!!conversation?.muted" @change="handleMutedChange" />
+            <el-switch :model-value="!!conversation?.silent" @change="handleMutedChange" />
           </div>
           <div class="im-conversation-private-side__row">
             <span class="im-conversation-private-side__label">置顶聊天</span>
@@ -217,14 +217,14 @@ function handleMutedChange(value: boolean | string | number) {
   }
   const next = !!value
   const { type, targetId } = props.conversation
-  conversationStore.setMuted(type, targetId, next)
+  conversationStore.setSilent(type, targetId, next)
   if (type !== ImConversationType.PRIVATE) {
     return
   }
-  friendStore.setMuted(targetId, next).catch((error) => {
+  friendStore.setSilent(targetId, next).catch((error) => {
     console.error('[IM ConversationPrivateSide] 切换免打扰失败', { targetId }, error)
     message.error('切换免打扰失败')
-    conversationStore.setMuted(type, targetId, !next)
+    conversationStore.setSilent(type, targetId, !next)
   })
 }
 
@@ -247,7 +247,7 @@ function handleGroupCreated(groupId: number) {
     ImConversationType.GROUP,
     group.name,
     group.avatar || '',
-    { muted: !!group.muted }
+    { silent: !!group.silent }
   )
   visible.value = false
 }

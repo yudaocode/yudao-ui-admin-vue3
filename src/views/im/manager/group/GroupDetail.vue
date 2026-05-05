@@ -62,9 +62,9 @@
       >
         <template #default="{ row }">{{ row.groupRemark || '-' }}</template>
       </el-table-column>
-      <el-table-column label="免打扰" prop="muted" width="80" align="center">
+      <el-table-column label="免打扰" prop="silent" width="80" align="center">
         <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.muted" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.silent" />
         </template>
       </el-table-column>
       <el-table-column label="状态" prop="status" width="100" align="center">

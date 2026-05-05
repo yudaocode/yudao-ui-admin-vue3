@@ -29,9 +29,9 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="免打扰" prop="muted">
+      <el-form-item label="免打扰" prop="silent">
         <el-select
-          v-model="queryParams.muted"
+          v-model="queryParams.silent"
           placeholder="请选择免打扰状态"
           clearable
           class="!w-160px"
@@ -79,9 +79,9 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="displayName" width="120" />
-      <el-table-column label="免打扰" align="center" prop="muted" width="80">
+      <el-table-column label="免打扰" align="center" prop="silent" width="80">
         <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.muted" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.silent" />
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status" width="100">
@@ -131,7 +131,7 @@ const queryParams = reactive({
   userId: undefined as number | undefined,
   friendUserId: undefined as number | undefined,
   status: undefined as number | undefined,
-  muted: undefined as boolean | undefined,
+  silent: undefined as boolean | undefined,
   addTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单

@@ -261,7 +261,7 @@
         <div class="im-conversation-group-side__section">
           <div class="im-conversation-group-side__row">
             <span class="im-conversation-group-side__label">消息免打扰</span>
-            <el-switch :model-value="!!conversation?.muted" @change="onMutedChange" />
+            <el-switch :model-value="!!conversation?.silent" @change="onMutedChange" />
           </div>
           <div class="im-conversation-group-side__row">
             <span class="im-conversation-group-side__label">置顶聊天</span>
@@ -549,7 +549,7 @@ async function saveRemark() {
 // ==================== 开关切换 ====================
 
 /**
- * 消息免打扰：本地 conversationStore 立即切；后端 /muted 异步同步，失败回滚本地
+ * 消息免打扰：本地 conversationStore 立即切；后端 /silent 异步同步，失败回滚本地
  *
  * 与 ConversationItem 右键菜单的"消息免打扰"语义一致；区别仅在 UI 入口
  */
@@ -559,10 +559,10 @@ function onMutedChange(value: boolean | string | number) {
   }
   const next = !!value
   const { type, targetId } = props.conversation
-  conversationStore.setMuted(type, targetId, next)
-  groupStore.setMuted(targetId, next).catch((error) => {
-    console.error('[IM ConversationGroupSide] setMuted 失败', { targetId }, error)
-    conversationStore.setMuted(type, targetId, !next)
+  conversationStore.setSilent(type, targetId, next)
+  groupStore.setSilent(targetId, next).catch((error) => {
+    console.error('[IM ConversationGroupSide] setSilent 失败', { targetId }, error)
+    conversationStore.setSilent(type, targetId, !next)
     message.error('操作失败')
   })
 }

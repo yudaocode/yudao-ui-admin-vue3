@@ -113,7 +113,7 @@ function pickFirstVisibleConversation(sorted: Conversation[]): Conversation | un
   if (pinnedExpanded) {
     return sorted[0]
   }
-  return sorted.find((c) => !c.top || (!c.muted && (c.unreadCount || 0) > 0)) ?? sorted[0]
+  return sorted.find((c) => !c.top || (!c.silent && (c.unreadCount || 0) > 0)) ?? sorted[0]
 }
 
 /** 标签关闭前 flush 草稿队列；debounce 默认 trail-edge 触发，最后一次输入可能还压在队列里 */

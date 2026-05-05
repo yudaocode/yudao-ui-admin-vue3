@@ -4,7 +4,7 @@ import request from '@/config/axios'
 export interface ImFriendRespVO {
   id: number // 关系记录编号
   friendUserId: number // 好友的用户编号
-  muted?: boolean // 是否免打扰
+  silent?: boolean // 是否免打扰
   displayName?: string // 好友展示备注（仅自己可见）
   displayNamePinyin?: string // 备注的拼音（小写无空格，前端按首字母分桶 / 拼音搜索）
   addSource?: number // 添加来源；参见 ImFriendAddSourceEnum
@@ -22,7 +22,7 @@ export interface ImFriendRespVO {
 // IM 好友更新 Request VO
 export interface ImFriendUpdateReqVO {
   friendUserId: number // 好友的用户编号
-  muted?: boolean // 是否免打扰
+  silent?: boolean // 是否免打扰
   displayName?: string // 好友展示备注
   pinned?: boolean // 是否置顶联系人
 }

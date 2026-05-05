@@ -51,7 +51,7 @@ export interface FriendNotificationPayload {
   fromAvatar?: string
   // FRIEND_UPDATE：单边属性变更
   displayName?: string
-  muted?: boolean
+  silent?: boolean
   pinned?: boolean
   // FRIEND_DELETE：是否级联清理本端相关数据（如私聊会话）
   clear?: boolean
@@ -164,7 +164,7 @@ export const useFriendStore = defineStore('imFriendStore', {
             conversationStore.updateConversation(ImConversationType.PRIVATE, friend.friendUserId, {
               name: getFriendDisplayName(friend),
               avatar: friend.avatar,
-              muted: friend.muted
+              silent: friend.silent
             })
           }
           this.saveFriends()
@@ -303,14 +303,14 @@ export const useFriendStore = defineStore('imFriendStore', {
       this.removeFriend(friendUserId, clear)
     },
 
-    /** 切换免打扰：同步会话的 muted 字段，避免会话列表 muted 图标等 1210 推到才更新 */
-    async setMuted(friendUserId: number, muted: boolean) {
-      await apiUpdateFriend({ friendUserId, muted })
+    /** 切换免打扰：同步会话的 silent 字段，避免会话列表 silent 图标等 1210 推到才更新 */
+    async setSilent(friendUserId: number, silent: boolean) {
+      await apiUpdateFriend({ friendUserId, silent })
       const friend = this.getFriend(friendUserId)
       if (friend) {
-        friend.muted = muted
+        friend.silent = silent
         const conversationStore = useConversationStore()
-        conversationStore.updateConversation(ImConversationType.PRIVATE, friendUserId, { muted })
+        conversationStore.updateConversation(ImConversationType.PRIVATE, friendUserId, { silent })
         this.saveFriends()
       }
     },
@@ -381,7 +381,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       conversationStore.updateConversation(ImConversationType.PRIVATE, friend.friendUserId, {
         name: merged ? getFriendDisplayName(merged) : friend.nickname,
         avatar: friend.avatar,
-        muted: friend.muted
+        silent: friend.silent
       })
       this.saveFriends()
     },
@@ -479,8 +479,8 @@ export const useFriendStore = defineStore('imFriendStore', {
       if (payload.displayName != null) {
         friend.displayName = payload.displayName
       }
-      if (payload.muted != null) {
-        friend.muted = payload.muted
+      if (payload.silent != null) {
+        friend.silent = payload.silent
       }
       if (payload.pinned != null) {
         friend.pinned = payload.pinned
@@ -488,7 +488,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       const conversationStore = useConversationStore()
       conversationStore.updateConversation(ImConversationType.PRIVATE, payload.friendUserId, {
         name: getFriendDisplayName(friend),
-        muted: friend.muted
+        silent: friend.silent
       })
       this.saveFriends()
     },
@@ -510,7 +510,7 @@ function convertFriend(vo: ImFriendRespVO): Friend {
     nickname: vo.nickname || String(vo.friendUserId),
     nicknamePinyin: vo.nicknamePinyin,
     avatar: vo.avatar,
-    muted: !!vo.muted,
+    silent: !!vo.silent,
     displayName: vo.displayName || '',
     displayNamePinyin: vo.displayNamePinyin,
     addSource: vo.addSource,

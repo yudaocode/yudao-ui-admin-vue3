@@ -110,7 +110,7 @@ function handleSendMessage() {
     ImConversationType.PRIVATE,
     conversationName,
     user.value.avatar || '',
-    { muted: !!friend?.muted }
+    { silent: !!friend?.silent }
   )
   // 跳转会话 Tab（如果不在的话），并且不管当前路由是啥都先切到会话列表页
   if (router.currentRoute.value.name !== 'ImHomeConversation') {
