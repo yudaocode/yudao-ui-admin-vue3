@@ -725,17 +725,16 @@ export const useGroupStore = defineStore('imGroupStore', {
   }
 })
 
-//  TODO @AI：vo 改成 group，更好理解点；
-function convertGroup(vo: ImGroupRespVO): Group {
+function convertGroup(group: ImGroupRespVO): Group {
   return {
-    id: vo.id,
-    name: vo.name,
-    avatar: vo.avatar,
-    notice: vo.notice,
-    ownerUserId: vo.ownerUserId,
-    pinnedMessages: vo.pinnedMessages?.map(convertGroupMessageVO),
-    mutedAll: vo.mutedAll,
-    banned: vo.banned
+    id: group.id,
+    name: group.name,
+    avatar: group.avatar,
+    notice: group.notice,
+    ownerUserId: group.ownerUserId,
+    pinnedMessages: group.pinnedMessages?.map(convertGroupMessageVO),
+    mutedAll: group.mutedAll,
+    banned: group.banned
   }
 }
 

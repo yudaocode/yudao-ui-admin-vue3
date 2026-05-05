@@ -608,11 +608,10 @@ async function onMuteAllChange(value: boolean | string | number) {
   if (!props.group) {
     return
   }
-  // TODO @AI：不要用 next，最好是类似 newValue 这种，更好理解。
-  const next = !!value
+  const newValue = !!value
   try {
-    await muteAll({ groupId: props.group.id, mutedAll: next })
-    message.success(next ? '已开启全群禁言' : '已关闭全群禁言')
+    await muteAll({ groupId: props.group.id, mutedAll: newValue })
+    message.success(newValue ? '已开启全群禁言' : '已关闭全群禁言')
     emit('reload')
   } catch {
     message.error('操作失败')
