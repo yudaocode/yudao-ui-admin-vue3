@@ -1,32 +1,34 @@
 <template>
   <!-- 禁言时长选择弹窗 -->
-  <!-- TODO @AI：样式有点丑？你看看怎么优化下？例如说，横着 radio？/Users/yunai/Downloads/iShot_2026-05-05_17.51.35.png -->
-  <el-dialog v-model="visible" title="设置禁言" width="360px" :close-on-click-modal="false">
-    <div class="flex flex-col gap-3">
-      <div class="text-sm text-[var(--el-text-color-regular)]">
-        禁言成员：<span class="font-medium text-[var(--el-text-color-primary)]">{{
-          memberName
-        }}</span>
+  <el-dialog v-model="visible" title="设置禁言" width="560px" :close-on-click-modal="false">
+    <div class="flex flex-col gap-4">
+      <!-- 成员信息卡：和 FriendAddDialog 的 user 卡保持一致的浅色背景 -->
+      <div
+        class="flex items-center gap-2 px-3 py-2.5 rounded-md bg-[var(--el-fill-color-light)]"
+      >
+        <span class="text-13px text-[var(--el-text-color-secondary)]">禁言成员</span>
+        <span
+          class="text-sm font-medium text-[var(--el-text-color-primary)] truncate"
+        >
+          {{ memberName }}
+        </span>
       </div>
-      <el-radio-group v-model="selected" class="flex flex-col gap-2">
-        <el-radio v-for="opt in presets" :key="opt.value" :value="opt.value">
-          {{ opt.label }}
-        </el-radio>
-        <el-radio :value="0">
-          <div class="flex items-center gap-2">
-            <span>自定义</span>
-            <el-input-number
-              v-model="customMinutes"
-              :min="1"
-              :max="43200"
-              :disabled="selected !== 0"
-              size="small"
-              class="!w-100px"
-            />
-            <span class="text-sm">分钟</span>
-          </div>
-        </el-radio>
-      </el-radio-group>
+
+      <!-- 禁言时长选项：用 el-button 平铺，选中走 primary，靠 gap-2 留间距 -->
+      <div>
+        <div class="mb-2 text-13px text-[var(--el-text-color-secondary)]">禁言时长</div>
+        <div class="grid grid-cols-3 gap-2">
+          <el-button
+            v-for="opt in presets"
+            :key="opt.value"
+            :type="selected === opt.value ? 'primary' : ''"
+            class="!ml-0 w-full"
+            @click="selected = opt.value"
+          >
+            {{ opt.label }}
+          </el-button>
+        </div>
+      </div>
     </div>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
@@ -54,14 +56,14 @@ const groupId = ref(0)
 const userId = ref(0)
 const memberName = ref('')
 const selected = ref(600) // 默认 10 分钟
-const customMinutes = ref(30)
 
 const presets = [
   { label: '10 分钟', value: 600 },
   { label: '1 小时', value: 3600 },
   { label: '12 小时', value: 43200 },
   { label: '1 天', value: 86400 },
-  { label: '7 天', value: 604800 }
+  { label: '7 天', value: 604800 },
+  { label: '30 天', value: 2592000 }
 ]
 
 /** 打开弹窗 */
@@ -70,19 +72,18 @@ function open(gid: number, uid: number, name: string) {
   userId.value = uid
   memberName.value = name
   selected.value = 600
-  customMinutes.value = 30
   visible.value = true
 }
 
 /** 确认禁言 */
 async function handleConfirm() {
-  const seconds = selected.value === 0 ? customMinutes.value * 60 : selected.value
-  if (seconds <= 0) {
-    return
-  }
   loading.value = true
   try {
-    await muteMember({ groupId: groupId.value, userId: userId.value, mutedSeconds: seconds })
+    await muteMember({
+      groupId: groupId.value,
+      userId: userId.value,
+      mutedSeconds: selected.value
+    })
     successMessage('禁言成功')
     visible.value = false
     emit('success')
