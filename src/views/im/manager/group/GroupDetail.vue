@@ -16,9 +16,13 @@
       <el-descriptions-item label="群状态">
         <dict-tag :type="DICT_TYPE.IM_GROUP_STATUS" :value="detail.status" />
       </el-descriptions-item>
-      <el-descriptions-item label="封禁状态" :span="2">
+      <el-descriptions-item label="封禁状态">
         <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="detail.banned" />
         <span v-if="detail.banned" class="ml-5px text-gray-400">{{ detail.bannedReason }}</span>
+      </el-descriptions-item>
+      <el-descriptions-item label="全群禁言">
+        <el-tag v-if="detail.mutedAll" type="danger">已禁言</el-tag>
+        <el-tag v-else type="info">未禁言</el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="群公告" :span="2">{{ detail.notice || '-' }}</el-descriptions-item>
       <el-descriptions-item label="创建时间" :span="2">
@@ -86,6 +90,15 @@
         align="center"
         :formatter="dateFormatter"
       />
+      <el-table-column label="禁言状态" width="170" align="center">
+        <template #default="{ row }">
+          <template v-if="row.muteEndTime && new Date(row.muteEndTime) > new Date()">
+            <el-tag type="danger">禁言中</el-tag>
+            <div class="text-xs text-gray-400 mt-2px">{{ formatDate(row.muteEndTime) }}</div>
+          </template>
+          <span v-else class="text-gray-400">-</span>
+        </template>
+      </el-table-column>
     </el-table>
   </el-drawer>
 </template>

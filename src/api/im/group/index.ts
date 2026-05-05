@@ -9,6 +9,7 @@ export interface ImGroupRespVO {
   avatar?: string // 群头像
   notice?: string // 群公告
   banned?: boolean // 是否封禁
+  mutedAll?: boolean // 是否全群禁言
   bannedTime?: string // 封禁时间
   status: number // 群状态（0=正常，1=已解散）
   dissolvedTime?: string // 解散时间
@@ -96,4 +97,19 @@ export const pinGroupMessage = (data: ImGroupMessagePinReqVO) => {
 // 取消置顶群消息（仅群主 / 管理员可调）
 export const unpinGroupMessage = (data: ImGroupMessagePinReqVO) => {
   return request.put<boolean>({ url: '/im/group/unpin-message', data })
+}
+
+// 全群禁言 / 取消（仅群主 / 管理员可调）
+export const muteAll = (data: { groupId: number; mutedAll: boolean }) => {
+  return request.put<boolean>({ url: '/im/group/mute-all', data })
+}
+
+// 禁言成员
+export const muteMember = (data: { groupId: number; userId: number; mutedSeconds: number }) => {
+  return request.put<boolean>({ url: '/im/group/mute-member', data })
+}
+
+// 取消成员禁言
+export const cancelMuteMember = (data: { groupId: number; userId: number }) => {
+  return request.put<boolean>({ url: '/im/group/cancel-mute-member', data })
 }

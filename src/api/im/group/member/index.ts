@@ -12,6 +12,7 @@ export interface ImGroupMemberRespVO {
   role?: number // 成员角色，参见 ImGroupMemberRole 枚举
   joinTime?: string // 入群时间
   quitTime?: string // 退群时间
+  muteEndTime?: string // 禁言到期时间
   createTime?: string // 创建时间
   // 聚合字段（自 AdminUser）
   nickname?: string // 用户昵称

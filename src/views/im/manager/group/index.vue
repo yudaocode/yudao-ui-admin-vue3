@@ -111,6 +111,12 @@
           <dict-tag v-else :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.banned" />
         </template>
       </el-table-column>
+      <el-table-column label="全群禁言" align="center" prop="mutedAll" width="100">
+        <template #default="{ row }">
+          <el-tag v-if="row.mutedAll" type="danger">已禁言</el-tag>
+          <el-tag v-else type="info">未禁言</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"

@@ -10,6 +10,7 @@ export interface ImManagerGroupVO {
   memberCount?: number
   status: number
   banned: boolean
+  mutedAll?: boolean // 是否全群禁言
   bannedReason?: string
   bannedTime?: Date
   dissolvedTime?: Date
@@ -27,6 +28,7 @@ export interface ImManagerGroupMemberVO {
   role?: number // 成员角色，参见 ImGroupMemberRole 枚举
   joinTime?: Date
   quitTime?: Date
+  muteEndTime?: Date // 禁言到期时间
 }
 
 // 获得群分页
