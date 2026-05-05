@@ -1,5 +1,5 @@
 <template>
-  <!-- 文本 / 系统提示文本：直接显示纯文本 -->
+  <!-- 文本：直接显示纯文本 -->
   <span v-if="isText" class="whitespace-pre-wrap break-all">{{ textContent }}</span>
 
   <!-- 图片：缩略图 + 点击放大 -->
@@ -84,7 +84,15 @@
     {{ groupNotificationText }}
   </span>
 
-  <!-- 系统事件类（FRIEND_*）：content 通常是结构化 JSON，回退原始预览 -->
+  <!-- 好友会话事件（FRIEND_ADD / FRIEND_DELETE）：固定中文文案 -->
+  <span
+    v-else-if="isFriendChatTipType"
+    class="text-12px text-[var(--el-text-color-secondary)]"
+  >
+    {{ friendChatTipText }}
+  </span>
+
+  <!-- 其它系统事件 / 未知类型：content 通常是结构化 JSON，回退原始预览 -->
   <span v-else class="whitespace-pre-wrap break-all">{{ fallbackText }}</span>
 </template>
 
@@ -93,16 +101,23 @@ import { computed } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { formatFileSize } from '@/utils/file'
 import { formatSeconds } from '@/utils/formatTime'
-import { ImMessageType, isGroupNotification } from '@/views/im/utils/constants'
+import {
+  ImMessageType,
+  isFriendChatTip,
+  isGroupNotification
+} from '@/views/im/utils/constants'
 import {
   parseMessage,
-  resolveTipText,
   type ImageMessage,
   type FileMessage,
   type AudioMessage,
-  type VideoMessage
+  type VideoMessage,
+  type TextMessage
 } from '@/views/im/utils/message'
-import { resolveGroupNotificationText } from '@/views/im/utils/user'
+import {
+  resolveFriendNotificationText,
+  resolveGroupNotificationText
+} from '@/views/im/utils/user'
 
 defineOptions({ name: 'ImMessageContentPreview' })
 
@@ -116,16 +131,16 @@ const props = defineProps<{
 }>()
 
 /** 各类型判定 */
-const isText = computed(
-  () => props.type === ImMessageType.TEXT || props.type === ImMessageType.TIP_TEXT
-)
+const isText = computed(() => props.type === ImMessageType.TEXT)
 const isImage = computed(() => props.type === ImMessageType.IMAGE)
 const isFile = computed(() => props.type === ImMessageType.FILE)
 const isVoice = computed(() => props.type === ImMessageType.VOICE)
 const isVideo = computed(() => props.type === ImMessageType.VIDEO)
 
-/** 文本内容：兼容 JSON 包裹和裸字符串两种形态 */
-const textContent = computed(() => resolveTipText(props.content || ''))
+/** 文本内容：从 TextMessage payload 取 .content */
+const textContent = computed(
+  () => parseMessage<TextMessage>(props.content || '')?.content ?? ''
+)
 
 const imagePayload = computed(() =>
   isImage.value ? parseMessage<ImageMessage>(props.content || '') : null
@@ -196,6 +211,12 @@ const fallbackText = computed(() => {
   } catch {}
   return raw
 })
+
+/** 是否好友会话事件气泡（FRIEND_ADD / FRIEND_DELETE） */
+const isFriendChatTipType = computed(() => isFriendChatTip(props.type ?? -1))
+
+/** 好友会话事件文案：固定文案，不依赖 payload */
+const friendChatTipText = computed(() => resolveFriendNotificationText({ type: props.type }))
 
 /** 是否群广播事件 */
 const isGroupNotificationType = computed(() => isGroupNotification(props.type ?? -1))

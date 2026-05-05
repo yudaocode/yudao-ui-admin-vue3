@@ -258,6 +258,18 @@ export function resolveGroupNotificationText(
   }
 }
 
+/** 会话内好友事件文案：FRIEND_ADD / FRIEND_DELETE 渲染成灰色提示气泡，文案固定不依赖 payload */
+export function resolveFriendNotificationText(message: { type?: number }): string {
+  switch (message.type) {
+    case ImMessageType.FRIEND_ADD:
+      return '你们已经是好友了，开始聊天吧'
+    case ImMessageType.FRIEND_DELETE:
+      return '你已删除好友'
+    default:
+      return ''
+  }
+}
+
 /** 性别图标：男 1 / 女 2，0 / null / undefined 一律不展示，对齐微信留白 */
 export function getGenderIcon(sex?: number): string {
   if (sex === 1) {

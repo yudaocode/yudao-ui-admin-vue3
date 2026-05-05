@@ -143,16 +143,16 @@
           v-for="message in currentList"
           :key="message.id || message.clientMessageId"
         >
-          <!-- TIP_TEXT 系统提示（"你们已成为好友"等）：居中灰色，不挂头像 / sender，
+          <!-- 好友会话事件（FRIEND_ADD / FRIEND_DELETE）：居中灰色，不挂头像 / sender，
                跟主聊天面板里 MessageItem 的渲染语义对齐 -->
           <div
-            v-if="message.type === ImMessageType.TIP_TEXT"
+            v-if="isFriendChatTip(message.type)"
             class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
           >
-            {{ resolveTipText(message.content) }}
+            {{ resolveFriendNotificationText(message) }}
           </div>
 
-          <!-- 群广播事件文案：跟 TIP_TEXT 同样的居中灰色样式 -->
+          <!-- 群广播事件文案：跟好友事件同灰色样式 -->
           <div
             v-else-if="isGroupNotification(message.type)"
             class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
@@ -312,14 +312,19 @@ import {
   getMemberDisplayName,
   getSenderDisplayName,
   getSenderRealNickname,
+  resolveFriendNotificationText,
   resolveGroupNotificationText
 } from '@/views/im/utils/user'
 import { buildRecallTip } from '@/views/im/utils/conversation'
 import { useMessagePuller } from '@/views/im/home/composables/useMessagePuller'
-import { ImConversationType, ImMessageType, isGroupNotification } from '@/views/im/utils/constants'
+import {
+  ImConversationType,
+  ImMessageType,
+  isFriendChatTip,
+  isGroupNotification
+} from '@/views/im/utils/constants'
 import {
   parseMessage,
-  resolveTipText,
   getFileIconInfo,
   type TextMessage,
   type ImageMessage,
@@ -664,11 +669,12 @@ function audioOf(message: Message): AudioMessage | null {
 
 /** 关键字命中文本：文本类返回原文、文件返回文件名（利于按文件名搜）、其他返回占位词 */
 function textSnippetOf(message: Message): string {
+  if (isFriendChatTip(message.type)) {
+    return resolveFriendNotificationText(message)
+  }
   switch (message.type) {
     case ImMessageType.TEXT:
       return parseMessage<TextMessage>(message.content)?.content ?? ''
-    case ImMessageType.TIP_TEXT:
-      return resolveTipText(message.content)
     case ImMessageType.IMAGE:
       return '[图片]'
     case ImMessageType.FILE:

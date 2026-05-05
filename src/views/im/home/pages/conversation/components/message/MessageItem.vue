@@ -7,15 +7,15 @@
     {{ formatTipTime(message.sendTime) }}
   </div>
 
-  <!-- 系统提示文案（TIP_TEXT=21） -->
+  <!-- 好友会话事件（FRIEND_ADD / FRIEND_DELETE）：跟群广播事件同灰色样式，文案固定 -->
   <div
-    v-if="isTipText"
+    v-if="isFriendChatTipMessage"
     class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-secondary)]"
   >
-    {{ tipText }}
+    {{ friendChatTipText }}
   </div>
 
-  <!-- 群广播事件：跟 TIP_TEXT 同样的居中灰色样式，文案按 type 拼装 -->
+  <!-- 群广播事件：跟好友事件同灰色样式，文案按 type 拼装 -->
   <div
     v-else-if="isGroupNotificationMessage"
     class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-secondary)]"
@@ -227,6 +227,7 @@ import {
   ImConversationType,
   ImGroupMemberRole,
   TIME_TIP_GAP_MS,
+  isFriendChatTip,
   isGroupNotification,
   isNormalMessage
 } from '@/views/im/utils/constants'
@@ -236,7 +237,6 @@ import {
   buildQuoteFromMessage,
   getQuoteFromMessage,
   parseMessage,
-  resolveTipText,
   getFileIconInfo,
   type TextMessage,
   type ImageMessage,
@@ -256,10 +256,12 @@ import {
   getMemberDisplayName,
   getSenderDisplayName,
   getSenderRealNickname,
+  resolveFriendNotificationText,
   resolveGroupNotificationText
 } from '@/views/im/utils/user'
 import { useImUiStore } from '../../../../store/uiStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
+import { useMuteOverlay } from '../../../../composables/useMuteOverlay'
 import type { Message } from '../../../../types'
 import MessageReadStatus from './MessageReadStatus.vue'
 import ReplyPreview from './ReplyPreview.vue'
@@ -292,6 +294,7 @@ const friendStore = useFriendStore()
 const draftStore = useDraftStore()
 const uiStore = useImUiStore()
 const { recall, sendRaw } = useMessageSender()
+const muteOverlay = useMuteOverlay()
 // 仅用 confirm，避免 message 跟 props.message 同名冲突（vue/no-dupe-keys）
 const { confirm: confirmDialog, success: successMessage } = useMessage()
 
@@ -300,8 +303,8 @@ const { confirm: confirmDialog, success: successMessage } = useMessage()
 /** 是否已撤回：pull / WS 两路都会调 recallMessage 把原消息更新为 type=RECALL，渲染只需识别 type */
 const isRecall = computed(() => props.message.type === ImMessageType.RECALL)
 
-/** 系统提示文案 */
-const isTipText = computed(() => props.message.type === ImMessageType.TIP_TEXT)
+/** 是否会话内好友事件气泡（FRIEND_ADD / FRIEND_DELETE） */
+const isFriendChatTipMessage = computed(() => isFriendChatTip(props.message.type))
 
 /** 是否在当前消息上方渲染时间分隔条：列表第一条 / 距上一条超过阈值；缺 sendTime 不渲染 */
 const shouldShowTimeTip = computed(() => {
@@ -384,8 +387,8 @@ function formatTipTime(timestamp: number): string {
 /** 文本内容 */
 const textContent = computed(() => parseMessage<TextMessage>(props.message.content)?.content ?? '')
 
-/** TIP_TEXT 文案：与 conversationStore.resolveLastContent / MessageHistory.renderContent 共用 helper，避免兼容性逻辑分裂 */
-const tipText = computed(() => resolveTipText(props.message.content))
+/** 好友会话事件文案：FRIEND_ADD / FRIEND_DELETE 渲染成灰色提示，文案固定 */
+const friendChatTipText = computed(() => resolveFriendNotificationText(props.message))
 
 /** 群广播事件 */
 const isGroupNotificationMessage = computed(() => isGroupNotification(props.message.type))
@@ -561,10 +564,10 @@ const RECALL_WINDOW_MS = 2 * 60 * 1000
  * - 引用：已落库（id≠0）+ 未撤回的消息可引用，引用块写入 draftStore.reply
  * - 撤回 / 删除：互斥；自己发送 + 已落库 + 未撤回 + 2 分钟内显示「撤回」（推服务器），其它显示「删除」（仅本地清）
  *
- * TIP_TEXT 态不弹菜单
+ * 好友事件气泡态不弹菜单
  */
 async function handleContextMenu(e: MouseEvent) {
-  if (isTipText.value) {
+  if (isFriendChatTipMessage.value) {
     return
   }
 
@@ -759,6 +762,10 @@ async function handleResend() {
   }
   const conversation = conversationStore.activeConversation
   if (!conversation) {
+    return
+  }
+  // 禁言 / 封禁时拦截：避免重试绕过 MessageInput 的 muteOverlay 又走一次 sendRaw 让后端拒
+  if (muteOverlay.value) {
     return
   }
   conversationStore.removeMessage(conversation.type, conversation.targetId, {

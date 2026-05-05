@@ -1,14 +1,15 @@
 /** IM 消息类型枚举（对齐后端 ImMessageTypeEnum） */
 export const ImMessageType = {
-  TEXT: 0, // 文本
-  IMAGE: 1, // 图片
-  FILE: 2, // 文件
-  VOICE: 3, // 语音
-  VIDEO: 4, // 视频
-  RECALL: 10, // 撤回
-  READ: 11, // 已读
-  RECEIPT: 12, // 回执
-  TIP_TEXT: 21, // 提示文本（撤回提示等）
+  // ========== 用户聊天消息（101-105 直接复用 OpenIM 段位编号） ==========
+  TEXT: 101, // 文本（对应 OpenIM Text=101）
+  IMAGE: 102, // 图片（对应 OpenIM Picture=102）
+  VOICE: 103, // 语音（对应 OpenIM Sound=103）
+  VIDEO: 104, // 视频（对应 OpenIM Video=104）
+  FILE: 105, // 文件（对应 OpenIM File=105）
+  // ========== 信号类（2101 / 2200 直接复用 OpenIM 段位编号；2201 自有扩展） ==========
+  RECALL: 2101, // 撤回（对应 OpenIM RevokeNotification=2101）
+  RECEIPT: 2200, // 回执（对应 OpenIM HasReadReceipt=2200）
+  READ: 2201, // 已读（多端同步，OpenIM 无对应；自有扩展）
   // ========== 好友通知（1201-1210 直接复用 OpenIM 段位编号） ==========
   FRIEND_REQUEST_APPROVED: 1201, // 好友申请被同意
   FRIEND_REQUEST_REJECTED: 1202, // 好友申请被拒绝
@@ -60,6 +61,11 @@ export function isGroupNotification(type: number): boolean {
 /** 判断是否「好友通知事件」：1201-1210 段位 */
 export function isFriendNotification(type: number): boolean {
   return type >= ImMessageType.FRIEND_REQUEST_APPROVED && type <= ImMessageType.FRIEND_UPDATE
+}
+
+/** 判断是否「会话内的好友事件气泡」：FRIEND_ADD / FRIEND_DELETE 直接渲染成灰色提示，与群事件同处理 */
+export function isFriendChatTip(type: number): boolean {
+  return type === ImMessageType.FRIEND_ADD || type === ImMessageType.FRIEND_DELETE
 }
 
 /** IM 普通消息类型集合（聊天气泡中显示，并作为会话最后一条摘要） */

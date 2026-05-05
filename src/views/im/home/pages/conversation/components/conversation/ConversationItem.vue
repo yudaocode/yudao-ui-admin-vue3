@@ -127,7 +127,7 @@ const lastSenderDisplayName = computed(() => {
   )
 })
 
-/** 群聊 + 有最后发送者 + 最后一条是普通消息时，显示发送者前缀（TIP_TEXT / RECALL / 草稿态不带前缀） */
+/** 群聊 + 有最后发送者 + 最后一条是普通消息时，显示发送者前缀（FRIEND_* / GROUP_* / RECALL / 草稿态不带前缀） */
 const showSendName = computed(() => {
   if (draft.value) {
     return false

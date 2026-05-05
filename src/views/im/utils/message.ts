@@ -8,9 +8,6 @@ import type { Message } from '../home/types'
 // cn.iocoder.yudao.module.im.service.websocket.dto.message.* 下的 DTO。
 // 各类消息 payload interface 字段对齐后端；解析统一用 parseMessage<T>，
 // 序列化直接 JSON.stringify(payload)。
-//
-// 例外：TIP_TEXT（私聊好友建立 / 解除等系统提示）后端会直接发裸字符串，
-//      展示侧需走 resolveTipText 兼容裸字符串 + 老接口可能的 {"content":"..."} 两种形态。
 // ====================================================================
 
 // ==================== 客户端 ID ====================
@@ -146,34 +143,11 @@ export const getQuoteFromMessage = (content: string): QuoteMessage | null => {
   return parsed?.quote ?? null
 }
 
-// ==================== TIP_TEXT ====================
-
-/**
- * 解析 TIP_TEXT（系统提示）文案
- *
- * 后端：私聊好友建立 / 解除等系统提示直接发裸字符串；老接口可能包成 {"content": "..."}。
- * 解析得到 .content 就用，否则当裸文案返回，避免出现空行。
- *
- * MessageItem / conversationStore.resolveLastContent / MessageHistory.renderContent 三处共用，
- * 修一处兼容性问题不会漏到另两处
- */
-export const resolveTipText = (content: string): string => {
-  const raw = content || ''
-  if (!raw) {
-    return ''
-  }
-  const parsed = parseMessage<TextMessage>(raw)
-  if (parsed && typeof parsed.content === 'string') {
-    return parsed.content
-  }
-  return raw
-}
-
 // ==================== 撤回 ====================
 
 /**
- * 从后端下发的撤回 TIP_TEXT content 中解析出被撤回的原消息 id
- * content 形如 `{"messageId": 123}`，若不含 messageId 则返回 0（表示这条不是撤回 tip）
+ * 从后端下发的撤回 RecallMessage content 中解析出被撤回的原消息 id
+ * content 形如 `{"messageId": 123}`，若不含 messageId 则返回 0（表示这条不是撤回消息）
  */
 export const parseRecallMessageId = (content: string): number => {
   try {

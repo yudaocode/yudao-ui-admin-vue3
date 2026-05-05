@@ -6,9 +6,13 @@
 // 2. fallbackName 由调用方传入（典型来源：Conversation.lastSenderDisplayName 快照），透传到 getSenderDisplayName 内部，算不出真名时兜底
 // ====================================================================
 
-import { ImMessageType, isGroupNotification } from './constants'
-import { parseMessage, resolveTipText, type TextMessage } from './message'
-import { getSenderDisplayName, resolveGroupNotificationText } from './user'
+import { ImMessageType, isFriendChatTip, isGroupNotification } from './constants'
+import { parseMessage, type TextMessage } from './message'
+import {
+  getSenderDisplayName,
+  resolveFriendNotificationText,
+  resolveGroupNotificationText
+} from './user'
 import type { Message } from '../home/types'
 
 /** 会话主键：`type-targetId` 拼成稳定字符串，给 v-for :key、active 比对、map key 等场景共用 */
@@ -62,10 +66,10 @@ export function resolveConversationLastContent(
       )
     case ImMessageType.TEXT:
       return parseMessage<TextMessage>(message.content)?.content ?? ''
-    case ImMessageType.TIP_TEXT:
-      // TIP_TEXT 后端常发裸字符串（私聊好友建立 / 解除等），不能按 TextMessage JSON 解析，否则摘要变空
-      return resolveTipText(message.content)
     default:
+      if (isFriendChatTip(message.type)) {
+        return resolveFriendNotificationText(message)
+      }
       if (isGroupNotification(message.type)) {
         return resolveGroupNotificationText(message)
       }

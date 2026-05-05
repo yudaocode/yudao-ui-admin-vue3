@@ -7,6 +7,7 @@ import {
   ImWebSocketMessageType,
   ImMessageType,
   ImConversationType,
+  isFriendChatTip,
   isFriendNotification,
   isNormalMessage
 } from '../../utils/constants'
@@ -77,9 +78,9 @@ const convertGroupMessage = (
  * 2. 帧分发：dispatchFrame → dispatchPrivateFrame / dispatchGroupFrame，按 ImMessageType 再分流
  * 3. 缓冲：初始化加载期（conversationStore.loading=true）暂存消息，等 pull 完成后由 useMessagePuller 调 flushBuffer 回放
  * 4. 事件处理（按类型分发到对应 handle*，联动 conversation / friend / group store）：
- *    - 普通消息（TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT）：入库 + 当前会话自动已读 / 提示音
+ *    - 普通消息（TEXT / IMAGE / FILE / VOICE / VIDEO）：入库 + 当前会话自动已读 / 提示音
  *    - 已读 / 回执（READ / RECEIPT）：多端已读同步、对方读后回执
- *    - 好友变更（FRIEND_ADD / DELETE / UPDATE）：同步 friendStore + 级联刷新私聊会话
+ *    - 好友变更（FRIEND_*）：同步 friendStore + 级联刷新私聊会话；FRIEND_ADD / FRIEND_DELETE 额外插入会话气泡
  *    - 群个人信号（GROUP_MEMBER_SETTING_UPDATE）：同步 groupStore + 级联刷新群聊会话
  *    - 群广播事件（GROUP_*）：走 handleGroupMessage + applyGroupNotification 旁路（含 DISSOLVE / QUIT / KICK 自判清群）
  */
@@ -224,8 +225,13 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           default:
             if (isFriendNotification(websocketMessage.type)) {
               this.handleFriendNotification(websocketMessage)
+              // FRIEND_ADD / FRIEND_DELETE 同时作为会话事件气泡插入消息列表（becomeFriends 入库
+              // 帧 + silent / delete 单边推送帧统一走入库去重路径，前端按 type 渲染灰色提示）
+              if (isFriendChatTip(websocketMessage.type)) {
+                this.handlePrivateMessage(websocketMessage)
+              }
             } else {
-              // TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT 等普通消息
+              // TEXT / IMAGE / FILE / VOICE / VIDEO 等普通消息
               this.handlePrivateMessage(websocketMessage)
             }
         }
@@ -253,7 +259,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
             this.handleGroupMemberSettingUpdate(websocketMessage)
             break
           default:
-            // TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT + GROUP_* 群广播事件
+            // TEXT / IMAGE / FILE / VOICE / VIDEO + GROUP_* 群广播事件
             this.handleGroupMessage(websocketMessage)
         }
       } catch (e) {
@@ -263,7 +269,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     },
 
     /**
-     * 私聊普通消息（TEXT / IMAGE / FILE / VOICE / VIDEO / TIP_TEXT）入库 + 自动已读
+     * 私聊普通消息（TEXT / IMAGE / FILE / VOICE / VIDEO）入库 + 自动已读
      *
      * 流程：
      * 1. 离线加载期缓冲（避开与 pull 回填的竞态）
@@ -334,7 +340,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
             console.warn('[IM WS] 自动已读上报失败', e)
           })
         } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
-          // 非当前会话且未免打扰：响一下提示音（带节流，详见 playAudioTip）；TIP_TEXT 等系统提示不响
+          // 非当前会话且未免打扰：响一下提示音（带节流，详见 playAudioTip）；FRIEND_* 等系统事件不响
           playAudioTip()
         }
       }
@@ -440,7 +446,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
             console.warn('[IM WS] 自动已读上报失败', e)
           })
         } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
-          // GROUP_* 群广播事件 / TIP_TEXT 等系统提示不响提示音
+          // GROUP_* 群广播事件等系统消息不响提示音
           playAudioTip()
         }
       }
