@@ -9,17 +9,17 @@
       label-width="80px"
     >
       <el-form-item label="用户" prop="userId">
-        <UserSelectV2 v-model="queryParams.userId" class="!w-200px" />
+        <UserSelectV2 v-model="queryParams.userId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="好友" prop="friendUserId">
-        <UserSelectV2 v-model="queryParams.friendUserId" placeholder="请选择好友" class="!w-200px" />
+        <UserSelectV2 v-model="queryParams.friendUserId" placeholder="请选择好友" class="!w-240px" />
       </el-form-item>
       <el-form-item label="好友状态" prop="status">
         <el-select
           v-model="queryParams.status"
           placeholder="请选择好友状态"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.IM_FRIEND_STATUS)"
@@ -34,7 +34,7 @@
           v-model="queryParams.silent"
           placeholder="请选择免打扰状态"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
@@ -79,9 +79,24 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="displayName" width="120" />
+      <el-table-column label="添加来源" align="center" prop="addSource" width="120">
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.IM_FRIEND_ADD_SOURCE" :value="row.addSource" />
+        </template>
+      </el-table-column>
       <el-table-column label="免打扰" align="center" prop="silent" width="80">
         <template #default="{ row }">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.silent" />
+        </template>
+      </el-table-column>
+      <el-table-column label="置顶" align="center" prop="pinned" width="80">
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.pinned" />
+        </template>
+      </el-table-column>
+      <el-table-column label="拉黑" align="center" prop="blocked" width="80">
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.blocked" />
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status" width="100">
@@ -103,6 +118,17 @@
         width="180"
         :formatter="dateFormatter"
       />
+      <el-table-column label="操作" align="center" width="100" fixed="right">
+        <template #default="{ row }">
+          <el-button
+            link
+            type="primary"
+            @click="goConversation(row)"
+          >
+            查看对话
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -121,6 +147,8 @@ import * as ManagerFriendApi from '@/api/im/manager/friend'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 
 defineOptions({ name: 'ImFriend' })
+
+const { push } = useRouter()
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -158,6 +186,14 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
+}
+
+/** 跳转到私聊消息页面，查看该好友关系的对话 */
+const goConversation = (row: ManagerFriendApi.ImManagerFriendVO) => {
+  push({
+    name: 'ImPrivateMessage',
+    query: { senderId: row.userId, receiverId: row.friendUserId }
+  })
 }
 
 /** 初始化 */

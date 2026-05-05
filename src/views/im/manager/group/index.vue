@@ -124,7 +124,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center" width="220" fixed="right">
+      <el-table-column label="操作" align="center" width="280" fixed="right">
         <template #default="{ row }">
           <el-button
             link
@@ -133,6 +133,13 @@
             v-hasPermi="['im:manager:group:query']"
           >
             详情
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="goConversation(row)"
+          >
+            查看对话
           </el-button>
           <el-button
             v-if="!row.banned"
@@ -179,6 +186,7 @@ import GroupBanForm from './GroupBanForm.vue'
 
 defineOptions({ name: 'ImGroup' })
 
+const { push } = useRouter()
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
@@ -242,6 +250,14 @@ const handleUnban = async (row: ManagerGroupApi.ImManagerGroupVO) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 跳转到群聊消息页面，查看该群的对话 */
+const goConversation = (row: ManagerGroupApi.ImManagerGroupVO) => {
+  push({
+    name: 'ImGroupMessage',
+    query: { groupId: row.id }
+  })
 }
 
 /** 初始化 */

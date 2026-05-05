@@ -160,6 +160,8 @@ import GroupMessageDetail from './GroupMessageDetail.vue'
 
 defineOptions({ name: 'ImGroupMessage' })
 
+const { currentRoute } = useRouter()
+
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<ManagerGroupMessageApi.ImManagerGroupMessageVO[]>([]) // 列表的数据
@@ -204,8 +206,12 @@ const openDetail = (row: ManagerGroupMessageApi.ImManagerGroupMessageVO) => {
   detailRef.value?.open(row)
 }
 
-/** 初始化 */
+/** 初始化：从路由 query 读取搜索参数 */
 onMounted(() => {
+  const query = currentRoute.value.query
+  if (query.groupId) {
+    queryParams.groupId = Number(query.groupId)
+  }
   getList()
 })
 </script>

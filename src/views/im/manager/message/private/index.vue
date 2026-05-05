@@ -141,6 +141,8 @@ import PrivateMessageDetail from './PrivateMessageDetail.vue'
 
 defineOptions({ name: 'ImPrivateMessage' })
 
+const { currentRoute } = useRouter()
+
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<ManagerPrivateMessageApi.ImManagerPrivateMessageVO[]>([]) // 列表的数据
@@ -185,8 +187,15 @@ const openDetail = (row: ManagerPrivateMessageApi.ImManagerPrivateMessageVO) => 
   detailRef.value?.open(row)
 }
 
-/** 初始化 */
+/** 初始化：从路由 query 读取搜索参数 */
 onMounted(() => {
+  const query = currentRoute.value.query
+  if (query.senderId) {
+    queryParams.senderId = Number(query.senderId)
+  }
+  if (query.receiverId) {
+    queryParams.receiverId = Number(query.receiverId)
+  }
   getList()
 })
 </script>
