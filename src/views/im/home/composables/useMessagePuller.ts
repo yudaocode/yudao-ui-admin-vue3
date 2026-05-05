@@ -17,7 +17,9 @@ import {
   ImConversationType,
   ImMessageType,
   PRIVATE_MESSAGE_PULL_SIZE,
-  GROUP_MESSAGE_PULL_SIZE
+  GROUP_MESSAGE_PULL_SIZE,
+  isFriendChatTip,
+  isFriendNotification
 } from '../../utils/constants'
 import { useUserStore } from '@/store/modules/user'
 import type { Message } from '../types'
@@ -121,6 +123,7 @@ export const useMessagePuller = () => {
       for (const raw of list) {
         if (isPrivate) {
           const message = raw as ImPrivateMessageRespVO
+          // 特殊：撤回消息的处理
           if (message.type === ImMessageType.RECALL) {
             conversationStore.recallMessage(
               ImConversationType.PRIVATE,
@@ -129,12 +132,23 @@ export const useMessagePuller = () => {
             )
             continue
           }
+          // 特殊：离线 pull 期间入库的 FRIEND_* 帧（目前仅 FRIEND_ADD persistent=true）也要走好友数据分发，
+          //      否则断线期间的好友列表更新会丢失；与 WebSocket 路径 dispatchPrivateFrame 保持对称
+          if (isFriendNotification(message.type)) {
+            wsStore.handleFriendNotification(message)
+            // 仅 FRIEND_ADD / FRIEND_DELETE 才作为会话气泡入消息列表
+            if (!isFriendChatTip(message.type)) {
+              continue
+            }
+          }
+          // 其它消息正常入会话消息列表
           conversationStore.insertMessage(
             convertPrivateConversation(message),
             convertPrivateMessage(message)
           )
         } else {
           const message = raw as ImGroupMessageRespVO
+          // 特殊：撤回消息的处理
           if (message.type === ImMessageType.RECALL) {
             conversationStore.recallMessage(
               ImConversationType.GROUP,
@@ -143,6 +157,7 @@ export const useMessagePuller = () => {
             )
             continue
           }
+          // 其它消息正常入会话消息列表
           conversationStore.insertMessage(
             convertGroupConversation(message),
             convertGroupMessage(message)
