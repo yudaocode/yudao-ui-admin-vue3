@@ -164,11 +164,11 @@ import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useDraftStore } from '@/views/im/home/store/draftStore'
-import { useUserStore } from '@/store/modules/user'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
+import { useMuteOverlay } from '@/views/im/home/composables/useMuteOverlay'
 import { getConversationKey } from '@/views/im/utils/conversation'
-import { ImConversationType, ImMessageType, ImGroupMemberRole } from '@/views/im/utils/constants'
+import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
 import {
   serializeMessage,
   type ImageMessage,
@@ -191,7 +191,6 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const draftStore = useDraftStore()
-const userStore = useUserStore()
 const { send, sendRaw } = useMessageSender()
 
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
@@ -597,55 +596,10 @@ const isGroup = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.GROUP
 )
 
-// ==================== 禁言 / 封禁状态检测 ====================
+// ==================== 禁言 / 封禁状态 ====================
 
-/** 禁言/封禁覆盖层信息：优先级 封禁 > 全群禁言（群主/管理员豁免） > 成员禁言 */
-const muteOverlay = computed<{ text: string; icon: string } | null>(() => {
-  const conversation = conversationStore.activeConversation
-  if (!conversation || conversation.type !== ImConversationType.GROUP) {
-    return null
-  }
-  const group = groupStore.getGroup(conversation.targetId)
-  if (!group) {
-    return null
-  }
-  const myId = Number(userStore.getUser?.id) || 0
-  // 群封禁（管理后台操作，所有人不可发送）
-  if (group.banned) {
-    return { text: '该群已被管理员封禁，无法发送消息', icon: 'ant-design:stop-outlined' }
-  }
-  // 全群禁言（群主 / 管理员豁免）
-  if (group.mutedAll) {
-    // 群主直接豁免（不依赖成员列表是否已加载）
-    if (myId === group.ownerUserId) {
-      // 群主不受全群禁言限制，继续检查成员禁言
-    } else {
-      const myMember = group.members?.find((m) => m.userId === myId)
-      // 成员列表未加载时角色未知，不默认禁言（避免群主/管理员被误拦截）
-      const myRole = myMember?.role
-      if (!myRole || myRole === ImGroupMemberRole.NORMAL) {
-        // 角色未知（成员未加载）时不拦截，让后端校验
-        if (myRole === ImGroupMemberRole.NORMAL) {
-          return { text: '全群禁言中，暂时无法发送消息', icon: 'ant-design:audio-muted-outlined' }
-        }
-      }
-    }
-  }
-  // 成员禁言
-  const myMember = group.members?.find((m) => m.userId === myId)
-  if (myMember?.muteEndTime) {
-    const endTime = new Date(myMember.muteEndTime)
-    if (endTime > new Date()) {
-      const pad = (n: number) => n.toString().padStart(2, '0')
-      const timeStr = `${pad(endTime.getMonth() + 1)}-${pad(endTime.getDate())} ${pad(endTime.getHours())}:${pad(endTime.getMinutes())}`
-      return {
-        text: `您已被禁言，解除时间：${timeStr}`,
-        icon: 'ant-design:audio-muted-outlined'
-      }
-    }
-  }
-  return null
-})
+/** 禁言 / 封禁覆盖层；handleResend 重试 / uploadAndSendMedia 上传完后也共用同一份，避免绕过 overlay */
+const muteOverlay = useMuteOverlay()
 
 /** 从 groupStore 读当前激活群的成员（切会话时由 MessagePanel 预拉） */
 const groupMembers = computed<GroupMemberLite[]>(() => {
@@ -850,9 +804,19 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
-// ==================== 图片 / 文件上传 ====================
-/** 上传并发送 IMAGE 消息;quote 抓取后立即清 draft.reply 让顶部引用条同步消失 */
-async function uploadAndSendImage(file: File) {
+// ==================== 图片 / 文件 / 语音 上传 ====================
+
+/**
+ * 媒体上传 → 发送的公共骨架（image / file / voice 共用；video 因 probe + 双上传链路保留独立）
+ *
+ * 禁言态直接返回；锁会话 key + 消费 reply → 上传 → 校验仍在原会话 → 拼 payload + quote → sendRaw
+ */
+async function uploadAndSendMedia<P extends { quote?: QuoteMessage }>(opts: {
+  file: File
+  type: number
+  kind: string
+  buildPayload: (url: string) => P
+}) {
   if (muteOverlay.value) {
     return
   }
@@ -862,42 +826,40 @@ async function uploadAndSendImage(file: File) {
   }
   const replyQuote = consumeReply()
   const form = new FormData()
-  form.append('file', file)
+  form.append('file', opts.file)
   const url = ((await updateFile(form)) as { data?: string })?.data
   if (!url) {
     return
   }
-  if (!isStillSameConversation(startKey, '图片')) {
+  if (!isStillSameConversation(startKey, opts.kind)) {
     return
   }
-  const payload = withQuotePayload<ImageMessage>({ url }, replyQuote)
-  await sendRaw(ImMessageType.IMAGE, serializeMessage(payload))
+  // 上传期间被禁言也要拦：上传可能耗时几秒到几十秒，期间 muteOverlay 会变
+  if (muteOverlay.value) {
+    return
+  }
+  const payload = withQuotePayload<P>(opts.buildPayload(url), replyQuote)
+  await sendRaw(opts.type, serializeMessage(payload))
+}
+
+/** 上传并发送 IMAGE 消息 */
+async function uploadAndSendImage(file: File) {
+  await uploadAndSendMedia<ImageMessage>({
+    file,
+    type: ImMessageType.IMAGE,
+    kind: '图片',
+    buildPayload: (url) => ({ url })
+  })
 }
 
 /** 上传并发送 FILE 消息；附原始 name / size 让接收端展示文件名和体积 */
 async function uploadAndSendFile(file: File) {
-  if (muteOverlay.value) {
-    return
-  }
-  const startKey = getActiveConversationKey()
-  if (!startKey) {
-    return
-  }
-  const replyQuote = consumeReply()
-  const form = new FormData()
-  form.append('file', file)
-  const url = ((await updateFile(form)) as { data?: string })?.data
-  if (!url) {
-    return
-  }
-  if (!isStillSameConversation(startKey, '文件')) {
-    return
-  }
-  const payload = withQuotePayload<FileMessage>(
-    { url, name: file.name, size: file.size },
-    replyQuote
-  )
-  await sendRaw(ImMessageType.FILE, serializeMessage(payload))
+  await uploadAndSendMedia<FileMessage>({
+    file,
+    type: ImMessageType.FILE,
+    kind: '文件',
+    buildPayload: (url) => ({ url, name: file.name, size: file.size })
+  })
 }
 
 /** 图片选完即上传 + 发送 IMAGE 消息（不放入 editor，整体走 sendRaw） */
@@ -927,32 +889,15 @@ function openVoice() {
   voiceVisible.value = true
   emojiVisible.value = false
 }
-/** VoiceRecorder 录完后回传 blob，包成 webm 文件上传，发送 VOICE 消息 */
+/** VoiceRecorder 录完回传 blob，包成 webm File 后走通用 uploadAndSendMedia */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
-  if (muteOverlay.value) {
-    return
-  }
-  const startKey = getActiveConversationKey()
-  if (!startKey) {
-    return
-  }
-  const replyQuote = consumeReply()
   const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
-  const form = new FormData()
-  form.append('file', file)
-  // request.upload 返回完整 axios response（不是 res.data，跟 get/post/put 不一样），URL 在 .data 里取
-  const url = ((await updateFile(form)) as { data?: string })?.data
-  if (!url) {
-    return
-  }
-  if (!isStillSameConversation(startKey, '语音')) {
-    return
-  }
-  const audioPayload = withQuotePayload<AudioMessage>(
-    { url, duration: payload.duration },
-    replyQuote
-  )
-  await sendRaw(ImMessageType.VOICE, serializeMessage(audioPayload))
+  await uploadAndSendMedia<AudioMessage>({
+    file,
+    type: ImMessageType.VOICE,
+    kind: '语音',
+    buildPayload: (url) => ({ url, duration: payload.duration })
+  })
 }
 
 // ==================== 视频 ====================
@@ -1116,6 +1061,10 @@ async function uploadAndSendVideo(file: File) {
   }
   // 3.3 校验会话仍是发送时锁定的那个（视频链路耗时长，这个窗口很实际）
   if (!isStillSameConversation(startKey, '视频')) {
+    return
+  }
+  // 3.4 视频上传期间被禁言也要拦：链路最长，最容易踩到 muteOverlay 期间触发
+  if (muteOverlay.value) {
     return
   }
 
