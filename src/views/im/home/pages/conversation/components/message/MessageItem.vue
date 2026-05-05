@@ -230,7 +230,8 @@ import {
   isGroupNotification,
   isNormalMessage
 } from '@/views/im/utils/constants'
-import { pinGroupMessage as apiPinGroupMessage } from '@/api/im/group'
+import { pinGroupMessage as apiPinGroupMessage, cancelMuteMember } from '@/api/im/group'
+import { removeGroupMember } from '@/api/im/group/member'
 import {
   buildQuoteFromMessage,
   getQuoteFromMessage,
@@ -276,6 +277,10 @@ const props = defineProps<{
 const emit = defineEmits<{
   /** 引用块点击 → MessagePanel 滚定位 + 高亮 */
   locate: [messageId: number]
+  /** 禁言：需要父组件打开时长选择弹窗 */
+  mute: [groupId: number, userId: number, displayName: string]
+  /** 数据变更后刷新群信息 */
+  reload: []
 }>()
 
 // ==================== Stores / Hooks ====================
@@ -540,6 +545,9 @@ const isAtMe = computed(() => {
 const MENU_KEYS = {
   REPLY: 'REPLY',
   PIN: 'PIN',
+  MUTE: 'MUTE',
+  UNMUTE: 'UNMUTE',
+  KICK: 'KICK',
   RECALL: 'RECALL',
   DELETE: 'DELETE'
 } as const
@@ -585,6 +593,32 @@ async function handleContextMenu(e: MouseEvent) {
       icon: 'ant-design:pushpin-outlined'
     })
   }
+  // 「禁言 / 解禁 / 移除」：群聊 + 非自己消息 + 我是群主或管理员
+  if (currentGroup.value && !props.message.selfSend && canManageSender.value) {
+    const senderMember = currentGroup.value.members?.find((m) => m.userId === props.message.senderId)
+    const isMuted = senderMember?.muteEndTime && new Date(senderMember.muteEndTime) > new Date()
+    if (isMuted) {
+      items.push({
+        key: MENU_KEYS.UNMUTE,
+        name: '解除禁言',
+        icon: 'ant-design:audio-outlined',
+        divided: true
+      })
+    } else {
+      items.push({
+        key: MENU_KEYS.MUTE,
+        name: '禁言',
+        icon: 'ant-design:audio-muted-outlined',
+        divided: true
+      })
+    }
+    items.push({
+      key: MENU_KEYS.KICK,
+      name: '移除',
+      icon: 'ant-design:user-delete-outlined',
+      danger: true
+    })
+  }
   // 「撤回 / 删除」二选一：
   // - 自己发送 + 已落库（id≠0）+ 未撤回 + 在撤回窗口内 → 撤回（推服务器把消息态置 RECALL）
   // - 其它（对方消息 / 已撤回 / 超出撤回窗口）→ 删除（仅本地清，不动后端）
@@ -618,6 +652,12 @@ async function handleContextMenu(e: MouseEvent) {
       handleReply()
     } else if (item.key === MENU_KEYS.PIN) {
       await handlePin()
+    } else if (item.key === MENU_KEYS.MUTE) {
+      handleMute()
+    } else if (item.key === MENU_KEYS.UNMUTE) {
+      await handleUnmute()
+    } else if (item.key === MENU_KEYS.KICK) {
+      await handleKick()
     } else if (item.key === MENU_KEYS.RECALL) {
       await handleRecall()
     } else if (item.key === MENU_KEYS.DELETE) {
@@ -639,6 +679,20 @@ const currentGroup = computed(() => {
 const myGroupRole = computed(() => {
   const myId = Number(userStore.getUser?.id) || 0
   return currentGroup.value?.members?.find((m) => m.userId === myId)?.role
+})
+
+/** 是否可管理该消息发送人：我的角色高于目标角色（群主 > 管理员 > 普通成员）；目标角色未知时不展示 */
+const canManageSender = computed(() => {
+  if (!currentGroup.value || !myGroupRole.value) {
+    return false
+  }
+  const senderMember = currentGroup.value.members?.find((m) => m.userId === props.message.senderId)
+  // 成员缓存不完整时不展示管理操作，等成员数据补齐后再判断
+  if (!senderMember?.role) {
+    return false
+  }
+  // 角色数值：1=群主 2=管理员 3=普通成员；数值越小权限越高
+  return myGroupRole.value < senderMember.role
 })
 
 /** 是否允许置顶（已置顶消息不再展示菜单项，由置顶面板的「移除」入口承接）：群聊 + 普通消息 + 已落库 + 未撤回 + 群主或管理员 + 未置顶 */
@@ -720,6 +774,45 @@ async function handleResend() {
  * 删除消息：本地软删，仅从 conversationStore.messages 移除，不调后端
  * 区别于"撤回"：服务端没动，多端登录时其它客户端 / 群里其他人依然能看到这条
  */
+/** 禁言：emit 给父组件打开时长选择弹窗（避免 MessageItem 过重） */
+function handleMute() {
+  const group = currentGroup.value
+  if (!group) {
+    return
+  }
+  const name = senderDisplayName.value || '该成员'
+  emit('mute', group.id, props.message.senderId, name)
+}
+
+/** 解除禁言 */
+async function handleUnmute() {
+  const group = currentGroup.value
+  if (!group) {
+    return
+  }
+  try {
+    await confirmDialog('确定解除该成员的禁言吗？', '解除禁言')
+    await cancelMuteMember({ groupId: group.id, userId: props.message.senderId })
+    successMessage('已解除禁言')
+    emit('reload')
+  } catch {}
+}
+
+/** 移除群成员 */
+async function handleKick() {
+  const group = currentGroup.value
+  if (!group) {
+    return
+  }
+  const name = senderDisplayName.value || '该成员'
+  try {
+    await confirmDialog(`确定将「${name}」移出群聊吗？`, '移除成员')
+    await removeGroupMember({ groupId: group.id, memberUserIds: [props.message.senderId] })
+    successMessage('已移除')
+    emit('reload')
+  } catch {}
+}
+
 function handleDelete() {
   const conversation = conversationStore.activeConversation
   if (!conversation) {

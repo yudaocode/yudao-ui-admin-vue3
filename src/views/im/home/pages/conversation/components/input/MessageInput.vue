@@ -4,6 +4,15 @@
     padding 给内层白卡片呼吸空间，卡片自带边框就够区分输入区，不再需要一条 border-t
   -->
   <div class="relative bg-[var(--el-bg-color-page)] px-3 pt-2 pb-3">
+    <!-- 禁言 / 封禁覆盖层：优先级 封禁 > 全群禁言 > 成员禁言 -->
+    <div
+      v-if="muteOverlay"
+      class="message-input__mute-overlay"
+      :class="{ 'message-input__mute-overlay--banned': muteOverlay.icon === 'ant-design:stop-outlined' }"
+    >
+      <Icon :icon="muteOverlay.icon" :size="18" />
+      <span>{{ muteOverlay.text }}</span>
+    </div>
     <!--
       内层白色圆角卡片 = editor + 工具栏；border + rounded 模拟微信"输入框"边界，
       避免之前"无框 Web 输入"的散开感；border 走 scoped CSS（UnoCSS 不带 border-style preflight）
@@ -155,10 +164,11 @@ import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useDraftStore } from '@/views/im/home/store/draftStore'
+import { useUserStore } from '@/store/modules/user'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
 import { getConversationKey } from '@/views/im/utils/conversation'
-import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
+import { ImConversationType, ImMessageType, ImGroupMemberRole } from '@/views/im/utils/constants'
 import {
   serializeMessage,
   type ImageMessage,
@@ -181,6 +191,7 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const draftStore = useDraftStore()
+const userStore = useUserStore()
 const { send, sendRaw } = useMessageSender()
 
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
@@ -195,8 +206,8 @@ const canSend = ref(false) // editor 是否有可发送内容；contenteditable 
 /** 维护 canSend + data-empty（撑起 placeholder）；不写草稿，restoreDraftToEditor 复用避免回流 */
 function applyEditorUiState(editor: HTMLDivElement) {
   const raw = editor.textContent || ''
-  // canSend 按 trim 后判断（空格 / 换行不算可发送内容）
-  canSend.value = !!raw.trim() && !!conversationStore.activeConversation
+  // canSend 按 trim 后判断（空格 / 换行不算可发送内容）；禁言态直接禁用
+  canSend.value = !!raw.trim() && !!conversationStore.activeConversation && !muteOverlay.value
   // data-empty 按原始内容判断：用户敲一个空格也要让 placeholder 隐藏，避免视觉叠加
   // 用属性"存在 / 缺失"而非 'true'/'false' 字符串：CSS [data-empty]::before 命中即可，
   // 比 [data-empty='true'] 直观；浏览器删空后留 <br> → :empty 不命中，所以必须 JS 维护
@@ -331,7 +342,7 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
  */
 async function handleSend(options?: { receipt?: boolean }) {
   const editor = editorRef.value
-  if (!canSend.value || !editor) {
+  if (!canSend.value || !editor || muteOverlay.value) {
     return
   }
   const { text, atUserIds } = collectFromEditor(editor)
@@ -586,6 +597,56 @@ const isGroup = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.GROUP
 )
 
+// ==================== 禁言 / 封禁状态检测 ====================
+
+/** 禁言/封禁覆盖层信息：优先级 封禁 > 全群禁言（群主/管理员豁免） > 成员禁言 */
+const muteOverlay = computed<{ text: string; icon: string } | null>(() => {
+  const conversation = conversationStore.activeConversation
+  if (!conversation || conversation.type !== ImConversationType.GROUP) {
+    return null
+  }
+  const group = groupStore.getGroup(conversation.targetId)
+  if (!group) {
+    return null
+  }
+  const myId = Number(userStore.getUser?.id) || 0
+  // 群封禁（管理后台操作，所有人不可发送）
+  if (group.banned) {
+    return { text: '该群已被管理员封禁，无法发送消息', icon: 'ant-design:stop-outlined' }
+  }
+  // 全群禁言（群主 / 管理员豁免）
+  if (group.mutedAll) {
+    // 群主直接豁免（不依赖成员列表是否已加载）
+    if (myId === group.ownerUserId) {
+      // 群主不受全群禁言限制，继续检查成员禁言
+    } else {
+      const myMember = group.members?.find((m) => m.userId === myId)
+      // 成员列表未加载时角色未知，不默认禁言（避免群主/管理员被误拦截）
+      const myRole = myMember?.role
+      if (!myRole || myRole === ImGroupMemberRole.NORMAL) {
+        // 角色未知（成员未加载）时不拦截，让后端校验
+        if (myRole === ImGroupMemberRole.NORMAL) {
+          return { text: '全群禁言中，暂时无法发送消息', icon: 'ant-design:audio-muted-outlined' }
+        }
+      }
+    }
+  }
+  // 成员禁言
+  const myMember = group.members?.find((m) => m.userId === myId)
+  if (myMember?.muteEndTime) {
+    const endTime = new Date(myMember.muteEndTime)
+    if (endTime > new Date()) {
+      const pad = (n: number) => n.toString().padStart(2, '0')
+      const timeStr = `${pad(endTime.getMonth() + 1)}-${pad(endTime.getDate())} ${pad(endTime.getHours())}:${pad(endTime.getMinutes())}`
+      return {
+        text: `您已被禁言，解除时间：${timeStr}`,
+        icon: 'ant-design:audio-muted-outlined'
+      }
+    }
+  }
+  return null
+})
+
 /** 从 groupStore 读当前激活群的成员（切会话时由 MessagePanel 预拉） */
 const groupMembers = computed<GroupMemberLite[]>(() => {
   const conversation = conversationStore.activeConversation
@@ -792,6 +853,9 @@ function onKeydown(e: KeyboardEvent) {
 // ==================== 图片 / 文件上传 ====================
 /** 上传并发送 IMAGE 消息;quote 抓取后立即清 draft.reply 让顶部引用条同步消失 */
 async function uploadAndSendImage(file: File) {
+  if (muteOverlay.value) {
+    return
+  }
   const startKey = getActiveConversationKey()
   if (!startKey) {
     return
@@ -812,6 +876,9 @@ async function uploadAndSendImage(file: File) {
 
 /** 上传并发送 FILE 消息；附原始 name / size 让接收端展示文件名和体积 */
 async function uploadAndSendFile(file: File) {
+  if (muteOverlay.value) {
+    return
+  }
   const startKey = getActiveConversationKey()
   if (!startKey) {
     return
@@ -862,6 +929,9 @@ function openVoice() {
 }
 /** VoiceRecorder 录完后回传 blob，包成 webm 文件上传，发送 VOICE 消息 */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
+  if (muteOverlay.value) {
+    return
+  }
   const startKey = getActiveConversationKey()
   if (!startKey) {
     return
@@ -990,6 +1060,9 @@ async function probeVideoFile(file: File): Promise<VideoProbe> {
  * 否则会落到错误的会话里；切走再切回来不算变化（key 仍相等）。
  */
 async function uploadAndSendVideo(file: File) {
+  if (muteOverlay.value) {
+    return
+  }
   // 1. 锁定起始会话 key（上传期间用户切走则不发到错误目标；切走再切回来 key 仍相等，不算变化）
   const startKey = getActiveConversationKey()
   if (!startKey) {
@@ -1122,5 +1195,27 @@ async function onVideoPicked(e: Event) {
 /* @ token 走主色高亮；contenteditable=false 让 backspace 整段删而不是逐字符 */
 .message-input__editor :deep(.mention-token) {
   color: var(--el-color-primary);
+}
+
+/* 禁言 / 封禁覆盖层：绝对定位在外层容器上，遮挡整个输入卡片 */
+.message-input__mute-overlay {
+  position: absolute;
+  inset: 8px 12px 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--el-color-warning-dark-2);
+  background-color: var(--el-color-warning-light-9);
+  border: 1px solid var(--el-color-warning-light-5);
+}
+/* 封禁态：红底，区别于禁言的橙底 */
+.message-input__mute-overlay--banned {
+  color: var(--el-color-danger-dark-2);
+  background-color: var(--el-color-danger-light-9);
+  border-color: var(--el-color-danger-light-5);
 }
 </style>

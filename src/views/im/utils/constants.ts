@@ -32,10 +32,10 @@ export const ImMessageType = {
   GROUP_MEMBER_INVITE: 1509, // 成员加入
   // 1510 GROUP_MEMBER_ENTER TODO 未实现：自由进群
   GROUP_DISSOLVE: 1511, // 群解散
-  // 1512 GROUP_MEMBER_MUTED TODO 未实现：单成员禁言
-  // 1513 GROUP_MEMBER_CANCEL_MUTED TODO 未实现：单成员取消禁言
-  // 1514 GROUP_MUTED TODO 未实现：全群禁言
-  // 1515 GROUP_CANCEL_MUTED TODO 未实现：全群取消禁言
+  GROUP_MEMBER_MUTED: 1512, // 单成员禁言
+  GROUP_MEMBER_CANCEL_MUTED: 1513, // 单成员取消禁言
+  GROUP_MUTED: 1514, // 全群禁言
+  GROUP_CANCEL_MUTED: 1515, // 全群取消禁言
   GROUP_MEMBER_NICKNAME_UPDATE: 1516, // 成员昵称变更（窄化到 displayUserName）
   GROUP_ADMIN_ADD: 1517, // 添加管理员
   GROUP_ADMIN_REMOVE: 1518, // 撤销管理员
@@ -44,14 +44,15 @@ export const ImMessageType = {
   // ========== 自有扩展段（1530+，OpenIM 1500-1520 段位无对应物） ==========
   GROUP_MEMBER_SETTING_UPDATE: 1530, // 群成员个人设置变更：silent / groupRemark 个人多端同步
   GROUP_MESSAGE_PIN: 1531, // 群消息置顶（自有扩展，OpenIM 无）
-  GROUP_MESSAGE_UNPIN: 1532 // 群消息取消置顶（自有扩展，OpenIM 无）
+  GROUP_MESSAGE_UNPIN: 1532, // 群消息取消置顶（自有扩展，OpenIM 无）
+  GROUP_BANNED: 1533 // 群封禁变更（自有扩展，OpenIM 无）
 } as const
 
-/** 判断是否「群广播事件」：[GROUP_CREATE, GROUP_MESSAGE_UNPIN] 段位都算，仅 GROUP_MEMBER_SETTING_UPDATE 是个人信号排除 */
+/** 判断是否「群广播事件」：[GROUP_CREATE, GROUP_BANNED] 段位都算，仅 GROUP_MEMBER_SETTING_UPDATE 是个人信号排除 */
 export function isGroupNotification(type: number): boolean {
   return (
     type >= ImMessageType.GROUP_CREATE
-    && type <= ImMessageType.GROUP_MESSAGE_UNPIN
+    && type <= ImMessageType.GROUP_BANNED
     && type !== ImMessageType.GROUP_MEMBER_SETTING_UPDATE
   )
 }

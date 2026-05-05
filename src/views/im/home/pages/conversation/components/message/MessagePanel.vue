@@ -103,6 +103,8 @@
             :message="msg"
             :prev-message="messages[index - 1]"
             @locate="handleLocate"
+            @mute="handleMuteMember"
+            @reload="reloadGroupData"
           />
         </div>
 
@@ -147,6 +149,9 @@
 
       <!-- 历史消息抽屉 -->
       <MessageHistory v-model="historyVisible" @locate="handleLocate" />
+
+      <!-- 禁言时长选择弹窗 -->
+      <GroupMuteMemberDialog ref="muteMemberDialogRef" @success="reloadGroupData" />
     </template>
     <div
       v-else
@@ -177,6 +182,7 @@ import ConversationGroupPinned from './ConversationGroupPinned.vue'
 import ConversationPrivateSide from '../conversation/ConversationPrivateSide.vue'
 import type { FriendLite, GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
+import GroupMuteMemberDialog from '../../../../components/group/GroupMuteMemberDialog.vue'
 
 defineOptions({ name: 'ImMessagePanel' })
 
@@ -338,6 +344,12 @@ function reloadGroupData() {
 
 const historyVisible = ref(false)
 const sideVisible = ref(false) // 信息抽屉开关：群聊 / 私聊共用一个 ref
+const muteMemberDialogRef = ref<InstanceType<typeof GroupMuteMemberDialog>>()
+
+/** 消息右键菜单「禁言」→ 打开时长选择弹窗 */
+function handleMuteMember(groupId: number, userId: number, displayName: string) {
+  muteMemberDialogRef.value?.open(groupId, userId, displayName)
+}
 
 /** 信息抽屉的 toggle：跟 header 上 3 点图标按钮共用 */
 function toggleSide() {

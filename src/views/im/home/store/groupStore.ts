@@ -547,6 +547,21 @@ export const useGroupStore = defineStore('imGroupStore', {
         case ImMessageType.GROUP_MESSAGE_UNPIN:
           this.applyGroupMessageUnpinNotification(groupId, payload)
           break
+        case ImMessageType.GROUP_MEMBER_MUTED:
+          this.applyGroupMemberMutedNotification(groupId, payload)
+          break
+        case ImMessageType.GROUP_MEMBER_CANCEL_MUTED:
+          this.applyGroupMemberCancelMutedNotification(groupId, payload)
+          break
+        case ImMessageType.GROUP_MUTED:
+          this.updateGroupFields(groupId, { mutedAll: true })
+          break
+        case ImMessageType.GROUP_CANCEL_MUTED:
+          this.updateGroupFields(groupId, { mutedAll: false })
+          break
+        case ImMessageType.GROUP_BANNED:
+          this.updateGroupFields(groupId, { banned: !!payload.banned })
+          break
       }
     },
 
@@ -679,6 +694,26 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.saveGroups()
     },
 
+    /** 单成员禁言：更新目标成员的 muteEndTime */
+    applyGroupMemberMutedNotification(groupId: number, payload: GroupNotificationPayload) {
+      const group = this.getGroup(groupId)
+      const member = group?.members?.find((m) => m.userId === payload.mutedUserId)
+      if (member && payload.muteEndTime) {
+        member.muteEndTime = payload.muteEndTime
+        this.saveGroupMembers(groupId)
+      }
+    },
+
+    /** 单成员取消禁言：清空目标成员的 muteEndTime */
+    applyGroupMemberCancelMutedNotification(groupId: number, payload: GroupNotificationPayload) {
+      const group = this.getGroup(groupId)
+      const member = group?.members?.find((m) => m.userId === payload.mutedUserId)
+      if (member) {
+        member.muteEndTime = undefined
+        this.saveGroupMembers(groupId)
+      }
+    },
+
     /** 切账号时仅清 in-memory，IDB 按 userId 分桶天然隔离，回切秒开 */
     clear() {
       this.groups = []
@@ -690,6 +725,7 @@ export const useGroupStore = defineStore('imGroupStore', {
   }
 })
 
+//  TODO @AI：vo 改成 group，更好理解点；
 function convertGroup(vo: ImGroupRespVO): Group {
   return {
     id: vo.id,
@@ -697,7 +733,9 @@ function convertGroup(vo: ImGroupRespVO): Group {
     avatar: vo.avatar,
     notice: vo.notice,
     ownerUserId: vo.ownerUserId,
-    pinnedMessages: vo.pinnedMessages?.map(convertGroupMessageVO)
+    pinnedMessages: vo.pinnedMessages?.map(convertGroupMessageVO),
+    mutedAll: vo.mutedAll,
+    banned: vo.banned
   }
 }
 
@@ -730,7 +768,8 @@ function convertGroupMember(member: ImGroupMemberRespVO, groupId: number): Group
     avatar: member.avatar,
     displayUserName: member.displayUserName,
     status: member.status,
-    role: member.role
+    role: member.role,
+    muteEndTime: member.muteEndTime
   }
 }
 

@@ -267,6 +267,11 @@
             <span class="im-conversation-group-side__label">置顶聊天</span>
             <el-switch :model-value="!!conversation?.top" @change="onTopChange" />
           </div>
+          <!-- 全群禁言：仅群主或管理员可操作 -->
+          <div v-if="isOwnerOrAdmin" class="im-conversation-group-side__row">
+            <span class="im-conversation-group-side__label">全群禁言</span>
+            <el-switch :model-value="!!currentMutedAll" @change="onMuteAllChange" />
+          </div>
         </div>
 
         <!-- ==================== 群主操作 ==================== -->
@@ -300,10 +305,21 @@
         </template>
       </div>
 
-      <!-- ==================== 底部：退出群聊 ==================== -->
-      <!-- 仅非群主入口；群主退出走"解散群"另起一条路径，这里不处理 -->
-      <div v-if="!isOwner" class="im-conversation-group-side__footer">
+      <!-- ==================== 底部：退出 / 解散群聊 ==================== -->
+      <div class="im-conversation-group-side__footer">
+        <!-- 群主：解散群聊 -->
         <el-button
+          v-if="isOwner"
+          class="im-conversation-group-side__quit-btn"
+          type="danger"
+          plain
+          @click="handleDissolve"
+        >
+          解散群聊
+        </el-button>
+        <!-- 非群主：退出群聊 -->
+        <el-button
+          v-else
           class="im-conversation-group-side__quit-btn"
           type="danger"
           plain
@@ -364,7 +380,9 @@ import {
   updateGroup,
   addGroupAdmin,
   removeGroupAdmin,
-  transferGroupOwner
+  transferGroupOwner,
+  muteAll,
+  dissolveGroup
 } from '@/api/im/group'
 import { quitGroup, removeGroupMember, updateGroupMember } from '@/api/im/group/member'
 import { useConversationStore } from '../../../../store/conversationStore'
@@ -575,6 +593,32 @@ function onTopChange(value: boolean | string | number) {
   conversationStore.setTop(props.conversation.type, props.conversation.targetId, !!value)
 }
 
+// ==================== 全群禁言 ====================
+
+/** 当前群是否全群禁言 */
+const currentMutedAll = computed(() => {
+  if (!props.group) {
+    return false
+  }
+  return groupStore.getGroup(props.group.id)?.mutedAll ?? false
+})
+
+/** 全群禁言开关切换 */
+async function onMuteAllChange(value: boolean | string | number) {
+  if (!props.group) {
+    return
+  }
+  // TODO @AI：不要用 next，最好是类似 newValue 这种，更好理解。
+  const next = !!value
+  try {
+    await muteAll({ groupId: props.group.id, mutedAll: next })
+    message.success(next ? '已开启全群禁言' : '已关闭全群禁言')
+    emit('reload')
+  } catch {
+    message.error('操作失败')
+  }
+}
+
 // ==================== 退出群聊 ====================
 
 /** 退出群聊（普通成员入口；群主退出走"解散群"是另一条路径，这里不处理） */
@@ -594,6 +638,24 @@ async function handleQuit() {
   conversationStore.removeConversation(ImConversationType.GROUP, groupId)
   groupStore.removeGroup(groupId)
   message.success('已退出群聊')
+  visible.value = false
+}
+
+/** 解散群聊（仅群主入口） */
+async function handleDissolve() {
+  if (!props.group) {
+    return
+  }
+  try {
+    await message.confirm('解散后所有成员将被移出，且无法恢复，确认解散吗？', '确认解散')
+  } catch {
+    return
+  }
+  const groupId = props.group.id
+  await dissolveGroup(groupId)
+  conversationStore.removeConversation(ImConversationType.GROUP, groupId)
+  groupStore.removeGroup(groupId)
+  message.success('群聊已解散')
   visible.value = false
 }
 

@@ -113,6 +113,8 @@ export interface Group {
   notice?: string // 群公告
   ownerUserId?: number // 群主用户编号
   pinnedMessages?: Message[] // 群置顶消息列表
+  mutedAll?: boolean // 是否全群禁言
+  banned?: boolean // 是否被管理员封禁
 
   // ========== 前端扩展字段（user-per-group 维度） ==========
   silent?: boolean // 是否免打扰。从当前用户的 GroupMember 回填
@@ -133,6 +135,7 @@ export interface GroupMember {
   displayUserName?: string // 该成员在群内自定义昵称（每个 member 一份；不与 nickname 合并，由消费方按需取舍）
   status?: number // 在群 / 退群状态，对齐 CommonStatusEnum
   role?: number // 成员角色，参见 ImGroupMemberRole 枚举：1=群主 2=管理员 3=普通成员
+  muteEndTime?: string // 禁言到期时间（ISO 字符串）
 
   // ========== 前端扩展字段 ==========
   isOwner?: boolean // 是否群主（前端从 Group.ownerUserId 计算）

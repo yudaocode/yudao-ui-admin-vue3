@@ -167,7 +167,10 @@ export type GroupNotificationPayload = {
   newAvatar?: string
   displayUserName?: string
   messageId?: number
-  /** PIN 事件携带的完整被置顶消息对象（前端直接 push 进 group.pinnedMessages，避免回查群详情） */
+  mutedUserId?: number // 禁言目标用户
+  muteEndTime?: string // 禁言到期时间
+  banned?: boolean // 封禁状态
+  /** PIN 事件携带的完整被置顶消息对象 */
   message?: {
     id: number
     clientMessageId?: string
@@ -236,6 +239,20 @@ export function resolveGroupNotificationText(
       return `${operatorName} 置顶了一条消息`
     case ImMessageType.GROUP_MESSAGE_UNPIN:
       return `${operatorName} 取消了一条置顶消息`
+    case ImMessageType.GROUP_MEMBER_MUTED: {
+      const mutedName = payload.mutedUserId ? resolve(payload.mutedUserId) : ''
+      return `${operatorName} 将 ${mutedName} 禁言`
+    }
+    case ImMessageType.GROUP_MEMBER_CANCEL_MUTED: {
+      const mutedName = payload.mutedUserId ? resolve(payload.mutedUserId) : ''
+      return `${operatorName} 解除了 ${mutedName} 的禁言`
+    }
+    case ImMessageType.GROUP_MUTED:
+      return `${operatorName} 开启了全群禁言`
+    case ImMessageType.GROUP_CANCEL_MUTED:
+      return `${operatorName} 关闭了全群禁言`
+    case ImMessageType.GROUP_BANNED:
+      return payload.banned ? `${operatorName} 封禁了该群` : `${operatorName} 解封了该群`
     default:
       return ''
   }
