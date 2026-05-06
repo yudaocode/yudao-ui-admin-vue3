@@ -10,11 +10,13 @@ export interface ImGroupRespVO {
   notice?: string // 群公告
   banned?: boolean // 是否封禁
   mutedAll?: boolean // 是否全群禁言
+  joinType?: number // 加群方式；参见 ImGroupJoinTypeEnum
   bannedTime?: string // 封禁时间
   status: number // 群状态（0=正常，1=已解散）
   dissolvedTime?: string // 解散时间
   createTime?: string // 创建时间
   pinnedMessages?: ImGroupMessageRespVO[] // 群置顶消息列表（后端关联回填，仅当登录用户是群成员时非空）
+  pendingRequestCount?: number // 未处理加群申请数；后端关联回填，仅当登录用户是该群群主 / 管理员时非空 TODO @AI：看看这里，是不是可以不返回？
 }
 
 // 群消息置顶 / 取消置顶 Request VO
@@ -27,6 +29,7 @@ export interface ImGroupMessagePinReqVO {
 export interface ImGroupCreateReqVO {
   name: string // 群名称
   memberUserIds?: number[] // 初始成员用户编号列表（建群同时邀请的好友，不含创建者自己）
+  joinType?: number // 加群方式；不传默认 0 自由进群 TODO @AI：不要写 0，而是写对应的枚举
 }
 
 // 群更新 Request VO
@@ -35,6 +38,7 @@ export interface ImGroupUpdateReqVO {
   name?: string // 群名称
   avatar?: string // 群头像
   notice?: string // 群公告
+  joinType?: number // 加群方式
 }
 
 // 添加 / 撤销群管理员 Request VO

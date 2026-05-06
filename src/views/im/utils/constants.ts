@@ -7,6 +7,7 @@ export const ImMessageType = {
   VIDEO: 104, // 视频（对应 OpenIM Video=104）
   FILE: 105, // 文件（对应 OpenIM File=105）
   CARD: 108, // 名片（对应 OpenIM Card=108）
+  FACE: 115, // 表情贴图（对应 OpenIM Face=115；Unicode emoji 仍走 TEXT）
   // ========== 信号类（2101 / 2200 直接复用 OpenIM 段位编号；2201 自有扩展） ==========
   RECALL: 2101, // 撤回（对应 OpenIM RevokeNotification=2101）
   RECEIPT: 2200, // 回执（对应 OpenIM HasReadReceipt=2200）
@@ -25,14 +26,14 @@ export const ImMessageType = {
   // ========== 群事件（1501-1520 直接复用 OpenIM 段位编号；1530+ 自有扩展段） ==========
   GROUP_CREATE: 1501, // 群创建
   GROUP_INFO_UPDATE: 1502, // 群信息变更（NAME / NOTICE 之外字段兜底）
-  // 1503 GROUP_JOIN_APPLICATION TODO 未实现：入群申请
+  GROUP_REQUEST_RECEIVED: 1503, // 收到新的入群申请（私聊定向推送给群主 + 全部管理员）
   GROUP_MEMBER_QUIT: 1504, // 成员退群
-  // 1505 GROUP_APPLICATION_ACCEPTED TODO 未实现：入群申请通过
-  // 1506 GROUP_APPLICATION_REJECTED TODO 未实现：入群申请拒绝
+  GROUP_REQUEST_APPROVED: 1505, // 入群申请被同意（私聊推给申请人 + 群主 + 全部管理员）
+  GROUP_REQUEST_REJECTED: 1506, // 入群申请被拒绝（同上）
   GROUP_OWNER_TRANSFER: 1507, // 群主转让
   GROUP_MEMBER_KICK: 1508, // 成员被移出
   GROUP_MEMBER_INVITE: 1509, // 成员加入
-  // 1510 GROUP_MEMBER_ENTER TODO 未实现：自由进群
+  GROUP_MEMBER_ENTER: 1510, // 自由进群（FREE 模式或申请通过后；全员广播）
   GROUP_DISSOLVE: 1511, // 群解散
   GROUP_MEMBER_MUTED: 1512, // 单成员禁言
   GROUP_MEMBER_CANCEL_MUTED: 1513, // 单成员取消禁言
@@ -64,6 +65,15 @@ export function isFriendNotification(type: number): boolean {
   return type >= ImMessageType.FRIEND_REQUEST_APPROVED && type <= ImMessageType.FRIEND_UPDATE
 }
 
+/** 判断是否「加群申请通知事件」：1503/1505/1506 走私聊通道，按段位识别 */
+export function isGroupRequestNotification(type: number): boolean {
+  return (
+    type === ImMessageType.GROUP_REQUEST_RECEIVED
+    || type === ImMessageType.GROUP_REQUEST_APPROVED
+    || type === ImMessageType.GROUP_REQUEST_REJECTED
+  )
+}
+
 /** 判断是否「会话内的好友事件气泡」：FRIEND_ADD / FRIEND_DELETE 直接渲染成灰色提示，与群事件同处理 */
 export function isFriendChatTip(type: number): boolean {
   return type === ImMessageType.FRIEND_ADD || type === ImMessageType.FRIEND_DELETE
@@ -78,7 +88,7 @@ export function isFriendChatTip(type: number): boolean {
  * 3. 前端会话列表 lastType / @ 标签（ConversationItem）—— 只有 normal 才算「最后一条聊天消息」
  * 4. 前端群消息置顶菜单（MessageItem.vue 的 canPin）—— normal 才允许群主 / 管理员置顶
  *
- * 名片（CARD）属于「用户主动发的聊天消息」，1/2/3 都符合预期；4 同时被放开 = 群主可置顶名片，语义合理
+ * 名片（CARD）/ 表情（FACE）都是「用户主动发的聊天消息」，1/2/3 都符合预期；4 同时放开 = 群主可置顶，语义合理
  */
 const ImMessageTypeNormals: number[] = [
   ImMessageType.TEXT,
@@ -86,7 +96,8 @@ const ImMessageTypeNormals: number[] = [
   ImMessageType.FILE,
   ImMessageType.VOICE,
   ImMessageType.VIDEO,
-  ImMessageType.CARD
+  ImMessageType.CARD,
+  ImMessageType.FACE
 ]
 
 /** 判断是否"普通消息" */
@@ -146,6 +157,35 @@ export const ImGroupMemberRole = {
   NORMAL: 3 // 普通成员
 } as const
 
+/** 加群方式（对齐后端 ImGroupJoinTypeEnum） */
+export const ImGroupJoinType = {
+  FREE: 0, // 自由进群
+  APPLY: 1, // 申请需审批，邀请直进
+  APPLY_AND_NORMAL_INVITE: 2 // 申请、及普通成员邀请均需审批
+} as const
+
+/** 加群方式文案 */
+export const IM_GROUP_JOIN_TYPE_LABELS: Record<number, string> = {
+  [ImGroupJoinType.FREE]: '自由进群',
+  [ImGroupJoinType.APPLY]: '申请需审批',
+  [ImGroupJoinType.APPLY_AND_NORMAL_INVITE]: '申请、及普通成员邀请均需审批'
+}
+
+/** 加群来源（对齐后端 ImGroupAddSourceEnum） */
+export const ImGroupAddSource = {
+  SEARCH: 1, // 搜索
+  INVITE: 2, // 邀请
+  QR_CODE: 3, // 扫码
+  SHARE_LINK: 4 // 分享链接
+} as const
+
+/** 加群申请处理结果（对齐后端 ImGroupRequestHandleResultEnum） */
+export const ImGroupRequestHandleResult = {
+  UNHANDLED: 0, // 未处理
+  AGREED: 1, // 同意
+  REFUSED: 2 // 拒绝
+} as const
+
 /** 好友添加来源（对齐后端 ImFriendAddSourceEnum） */
 export const ImFriendAddSource = {
   SEARCH: 1, // 搜索
@@ -175,6 +215,9 @@ export const GROUP_MESSAGE_PULL_SIZE = 100
 
 /** 「我相关」好友申请列表的单次拉取条数（游标分页 page size，前端控制） */
 export const FRIEND_REQUEST_PAGE_SIZE = 100
+
+/** 「我相关」加群申请列表的单次拉取条数 */
+export const GROUP_REQUEST_PAGE_SIZE = 100
 
 /** 消息之间渲染「时间分隔条」的阈值：10 分钟 */
 export const TIME_TIP_GAP_MS = 10 * 60 * 1000

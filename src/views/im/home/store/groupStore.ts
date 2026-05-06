@@ -734,7 +734,9 @@ function convertGroup(group: ImGroupRespVO): Group {
     ownerUserId: group.ownerUserId,
     pinnedMessages: group.pinnedMessages?.map(convertGroupMessageVO),
     mutedAll: group.mutedAll,
-    banned: group.banned
+    banned: group.banned,
+    joinType: group.joinType,
+    pendingRequestCount: group.pendingRequestCount
   }
 }
 
