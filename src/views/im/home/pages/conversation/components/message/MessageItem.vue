@@ -507,7 +507,7 @@ const uploadProgressText = computed(() => `${uploadProgress.value}%`)
 /**
  * 是否在气泡尾部显示「发送中」loading 转圈
  *
- * 图片 / 视频 / 文件气泡内嵌已有进度反馈（遮罩 / 进度条），外层 loading 多余则抑制；
+ * 图片 / 视频 / 文件气泡内嵌已有进度反馈（遮罩 / 进度条），外层 loading 不再叠加；
  * 语音气泡只有麦克风 + 时长，无内嵌进度，必须保留外层 loading 让用户感知正在发送
  */
 const showSendingLoading = computed(

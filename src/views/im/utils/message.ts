@@ -105,12 +105,15 @@ export const parseMessage = <T>(content: string): T | null => {
 /** 序列化消息 payload 为 content JSON 字符串；与 parseMessage 对称 */
 export const serializeMessage = <T>(payload: T): string => JSON.stringify(payload)
 
+/** `URL.createObjectURL(file)` 生成的 URL 前缀；占位 / revoke / 重传旧值识别共用 */
+export const BLOB_URL_PREFIX = 'blob:'
+
 /**
  * 媒体 payload 里可能包含 blob URL 的字段（图片/文件/视频/语音都对齐这套 url 字段命名）
  *
  * 跟随 ImageMessage / VideoMessage / FileMessage / AudioMessage interface 定义同步：
  * - url：主体资源（占位时是 blob URL，ack 后是真实 URL）
- * - coverUrl：视频封面（占位时跟 url 同 blob，cover 上传成功后是真实 URL）
+ * - coverUrl：视频封面（commit 后是真实 URL；占位阶段不设以避免传 blob 当 poster 在部分浏览器退化）
  * - thumbnailUrl：图片缩略图（当前未占位时使用 blob，预留）
  */
 const MEDIA_BLOB_URL_FIELDS = ['url', 'coverUrl', 'thumbnailUrl'] as const
@@ -122,7 +125,7 @@ const MEDIA_BLOB_URL_FIELDS = ['url', 'coverUrl', 'thumbnailUrl'] as const
  * 仅对当前 document 内创建的 blob URL 有效；IndexedDB 恢复出来的旧 blob URL 已随旧 document 失效，调它无害但无意义
  */
 export const revokeBlobUrlsInContent = (content: string): void => {
-  if (!content || !content.includes('blob:')) {
+  if (!content || !content.includes(BLOB_URL_PREFIX)) {
     return
   }
   const payload = parseMessage<Record<string, unknown>>(content)
@@ -131,7 +134,7 @@ export const revokeBlobUrlsInContent = (content: string): void => {
   }
   for (const field of MEDIA_BLOB_URL_FIELDS) {
     const value = payload[field]
-    if (typeof value === 'string' && value.startsWith('blob:')) {
+    if (typeof value === 'string' && value.startsWith(BLOB_URL_PREFIX)) {
       URL.revokeObjectURL(value)
     }
   }

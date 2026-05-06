@@ -7,6 +7,7 @@ import { useMuteOverlay } from './useMuteOverlay'
 import { ImMessageStatus, ImMessageType } from '../../utils/constants'
 import { getConversationKey } from '../../utils/conversation'
 import {
+  BLOB_URL_PREFIX,
   generateClientMessageId,
   parseMessage,
   serializeMessage,
@@ -27,7 +28,7 @@ export type MediaPayload = ImageMessage | FileMessage | AudioMessage | VideoMess
  *
  * - voiceDuration：语音时长（秒），首发由 VoiceRecorder 给，重传从旧 AudioMessage.duration 取
  * - videoProbe：视频元信息（首发由 probeVideoFile 解出，重传从旧 VideoMessage 直接拷字段）
- * - videoCoverUrl：视频封面真实 URL；占位阶段用 blob，commit 用真实 URL，重传时旧值若是 blob 会被跳过
+ * - videoCoverUrl：视频封面真实 URL；占位阶段不设（避免传 blob 当 poster 在部分浏览器退化），commit 阶段由 cover 上传结果填入；重传时从旧 VideoMessage.coverUrl 复用，旧值若是 blob 会被跳过
  */
 export interface MediaTypeContext {
   voiceDuration?: number
@@ -79,7 +80,7 @@ export const mediaTypeHandlers: Partial<Record<number, MediaTypeHandler>> = {
     extractResendContext: (oldContent) => {
       const old = parseMessage<VideoMessage>(oldContent)
       // 旧 coverUrl 是 blob 说明上传期失败（cover 没传成功），不复用；真实 URL 直接复用，省一次封面上传
-      const reuseCover = old?.coverUrl && !old.coverUrl.startsWith('blob:') ? old.coverUrl : undefined
+      const reuseCover = old?.coverUrl && !old.coverUrl.startsWith(BLOB_URL_PREFIX) ? old.coverUrl : undefined
       return {
         videoProbe: { duration: old?.duration, width: old?.width, height: old?.height },
         videoCoverUrl: reuseCover

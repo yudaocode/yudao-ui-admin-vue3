@@ -67,8 +67,8 @@ function deriveLastSenderDisplayName(
 /**
  * 按 conversation.messages 末尾重算 last* 系列摘要 / 事实索引
  *
- * 用于：删除最后一条消息 / loadConversations drop 媒体占位后；剩余消息为空则字段一并清空。
- * 不重算 lastSendTime 兜底（保留原 conversation 现值），与 removeMessage 旧行为一致
+ * 用于：删除最后一条消息 / loadConversations drop 媒体占位后；剩余消息为空则字段一并清空（含 lastSendTime=0），让空会话排到列表末尾。
+ * 末条消息存在时，lastSendTime 取该消息的 sendTime；缺失时沿用 conversation 现值
  */
 function recomputeConversationLast(conversation: Conversation): void {
   const last = conversation.messages[conversation.messages.length - 1]
@@ -627,11 +627,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (!changed) {
         return
       }
-      // 替换 content 时 revoke 旧 blob URL，与 ackMessage 同语义
-      if (patch.content && patch.content !== message.content) {
-        revokeBlobUrlsInContent(message.content)
-      }
-      Object.assign(message, patch)
+      applyServerMessageUpdate(message, patch)
     },
 
     /**
