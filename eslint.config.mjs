@@ -17,7 +17,6 @@ export default tseslint.config(
       'test/unit/coverage/',
       'node_modules/',
       'src/main.ts',
-      'e2e/',
       'src/types/auto-components.d.ts'
     ]
   },
