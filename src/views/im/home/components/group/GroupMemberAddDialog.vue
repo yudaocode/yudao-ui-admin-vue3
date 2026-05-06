@@ -86,6 +86,9 @@ import { useMessage } from '@/hooks/web/useMessage'
 
 import { CommonStatusEnum } from '@/utils/constants'
 import { inviteGroupMember } from '@/api/im/group/member'
+import { useUserStore } from '@/store/modules/user'
+import { ImGroupMemberRole } from '@/views/im/utils/constants'
+import { useGroupStore } from '../../store/groupStore'
 import FriendItem from '../friend/FriendItem.vue'
 import type { FriendLite } from '../../types'
 import type { GroupMemberLite } from './GroupMember.vue'
@@ -116,11 +119,31 @@ const emit = defineEmits<{
 }>()
 
 const message = useMessage()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
 
 /** 弹窗显隐：把父侧 v-model 转双向计算 */
 const visible = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
+})
+
+/**
+ * 是否走审批：群开启 joinApproval + 当前用户是普通成员；群主 / 管理员邀请绕过审批（对齐后端）
+ *
+ * 用于切换提交后的提示文案：审批分支后端只创建待审批记录，没把人拉进群，提示「等待审批」更准确
+ */
+const willGoApproval = computed(() => {
+  if (!props.groupId) {
+    return false
+  }
+  const group = groupStore.getGroup(props.groupId)
+  if (!group?.joinApproval) {
+    return false
+  }
+  const myId = Number(userStore.getUser?.id) || 0
+  const myRole = props.members.find((m) => m.userId === myId)?.role
+  return myRole !== ImGroupMemberRole.OWNER && myRole !== ImGroupMemberRole.ADMIN
 })
 
 const searchText = ref('')
@@ -196,7 +219,8 @@ async function handleOk() {
   submitting.value = true
   try {
     await inviteGroupMember({ groupId: props.groupId, memberUserIds })
-    message.success('邀请成功')
+    // 审批分支后端仅落待审批记录，没把人拉进群；普通入群直接邀请成功
+    message.success(willGoApproval.value ? '邀请已发起，等待群主 / 管理员审批' : '邀请成功')
     emit('reload', memberUserIds)
     visible.value = false
   } finally {

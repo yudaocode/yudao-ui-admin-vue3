@@ -1,5 +1,4 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
-import { ElNotification } from 'element-plus'
 import { store } from '@/store'
 import { getRefreshToken } from '@/utils/auth'
 import { useUserStore } from '@/store/modules/user'
@@ -565,39 +564,23 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      *
      * 对应后端 ImPrivateMessageDTO.ofGroupNotification 系列：
      * - 1503：admin 侧拉单条 push 进 unhandledList；申请人侧不收
-     * - 1505 / 1506：双端都收 — admin 侧从 unhandledList 移除；申请人侧弹 toast
+     * - 1505 / 1506：admin 侧从 unhandledList 移除；同意走 1509 / 1510 群事件渲染系统提示，拒绝静默不打扰
      */
     handleGroupRequestNotification(websocketMessage: ImPrivateMessageDTO) {
       const payload = JSON.parse(websocketMessage.content || '{}') as {
         requestId?: number
-        groupId?: number
-        userId?: number
-        handleContent?: string
       }
       if (!payload.requestId) {
         return
       }
       const groupRequestStore = useGroupRequestStore()
-      const userStore = useUserStore()
-      const myId = Number(userStore.getUser?.id) || 0
       switch (websocketMessage.type) {
         case ImMessageType.GROUP_REQUEST_RECEIVED:
           groupRequestStore.addByRequestId(payload.requestId).catch(() => undefined)
           break
         case ImMessageType.GROUP_REQUEST_APPROVED:
-          groupRequestStore.removeByRequestId(payload.requestId)
-          if (payload.userId === myId) {
-            ElNotification.success({ title: '入群申请已通过', message: '可以开始群聊了' })
-          }
-          break
         case ImMessageType.GROUP_REQUEST_REJECTED:
           groupRequestStore.removeByRequestId(payload.requestId)
-          if (payload.userId === myId) {
-            ElNotification.warning({
-              title: '入群申请被拒绝',
-              message: payload.handleContent || ''
-            })
-          }
           break
         default:
           break

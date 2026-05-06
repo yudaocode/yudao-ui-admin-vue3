@@ -51,17 +51,18 @@ export const useGroupRequestStore = defineStore('imGroupRequestStore', {
       this.loaded = true
     },
 
-    /** WS 收到 1503：按 requestId 单查 + push 进列表头；payload 已带申请方昵称 / 头像可减一次回查 */
+    /**
+     * WS 收到 1503：按 requestId 单查 + 排到列表头
+     *
+     * 同一对 group_id, user_id 的申请记录会被复用，再次申请 / 邀请时 requestId 不变但 applyContent / inviterUserId
+     * 等会刷新；不能因 id 已存在就跳过，必须 fetch 最新内容并把它顶到最前面（与后端 update_time 倒序对齐）
+     */
     async addByRequestId(requestId: number) {
-      const exists = this.unhandledList.some((r) => r.id === requestId)
-      if (exists) {
-        return
-      }
       const request = await apiGetMyGroupRequest(requestId)
       if (!request) {
         return
       }
-      this.unhandledList.unshift(request)
+      this.unhandledList = [request, ...this.unhandledList.filter((r) => r.id !== requestId)]
     },
 
     /** WS 收到 1505 / 1506 或本端处理完一条：按 requestId 从列表移除 */

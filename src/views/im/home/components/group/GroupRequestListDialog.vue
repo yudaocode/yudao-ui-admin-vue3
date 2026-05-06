@@ -203,6 +203,32 @@ watch(
   { immediate: true }
 )
 
+/**
+ * 单群模式下订阅 store 中归属本群的未处理列表变化：增 / 减都 refetch 一次拿到最新 handleResult
+ *
+ * 触发场景：① WS 1503 收到新申请 → store 头部 unshift；② 其他管理员 / 远端处理 → store 移除该项
+ * 本端 agreeRequest / refuseRequest 内部也会 removeByRequestId 从而触发；fetchList 拉到的 handleResult
+ * 与 updateLocalResult 写的一致，不冲突；仅多一次网络请求，可接受
+ */
+// TODO @AI：减少缩写，类似 r、curr、prev；还是完整点，不会有啥影响的；
+watch(
+  () =>
+    props.groupId && visible.value
+      ? groupRequestStore.unhandledList
+          .filter((r) => r.groupId === props.groupId)
+          .map((r) => r.id)
+          .join(',')
+      : null,
+  (curr, prev) => {
+    if (curr === null || prev === undefined || curr === prev) {
+      return
+    }
+    if (props.groupId) {
+      void fetchList(props.groupId)
+    }
+  }
+)
+
 async function fetchList(groupId: number) {
   loading.value = true
   try {
