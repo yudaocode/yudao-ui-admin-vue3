@@ -157,6 +157,21 @@
         >
           [视频消息]
         </div>
+        <!-- 表情贴图：裸 <img>，不套气泡（对齐微信观感：贴图本体就是装饰，再叠气泡显累赘） -->
+        <div
+          v-else-if="isFace && facePayload"
+          class="inline-block"
+        >
+          <img
+            :src="facePayload.url"
+            :alt="facePayload.name || '表情'"
+            :title="facePayload.name || ''"
+            :width="facePayload.width"
+            :height="facePayload.height"
+            class="block max-w-[160px] max-h-[160px] object-contain"
+            draggable="false"
+          />
+        </div>
         <!-- 名片消息：头像 + 昵称 + 「个人名片」标签；点击气泡弹被推荐用户的名片浮层
              参照微信观感：自己 / 对方都是浅灰白卡片不染绿，头像圆角块，底部分隔条灰字「个人名片」 -->
         <div
@@ -275,6 +290,7 @@ import { pinGroupMessage as apiPinGroupMessage, cancelMuteMember } from '@/api/i
 import { removeGroupMember } from '@/api/im/group/member'
 import {
   buildQuoteFromMessage,
+  extractAddableFace,
   getQuoteFromMessage,
   parseMessage,
   getFileIconInfo,
@@ -283,9 +299,10 @@ import {
   type FileMessage,
   type AudioMessage,
   type VideoMessage,
-  type CardMessage
+  type CardMessage,
+  type FaceMessage
 } from '@/views/im/utils/message'
-import { buildRecallTip } from '../../../../../utils/conversation'
+import { buildRecallTip } from '@/views/im/utils/conversation'
 import { formatSeconds } from '@/utils/formatTime'
 import { formatFileSize } from '@/utils/file'
 import { useUserStore } from '@/store/modules/user'
@@ -293,6 +310,7 @@ import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useFriendStore } from '../../../../store/friendStore'
 import { useDraftStore } from '../../../../store/draftStore'
+import { useFaceStore } from '../../../../store/faceStore'
 import {
   getMemberDisplayName,
   getSenderDisplayName,
@@ -334,6 +352,7 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const draftStore = useDraftStore()
+const faceStore = useFaceStore()
 const uiStore = useImUiStore()
 const { recall, sendRaw } = useMessageSender()
 const { uploadAndSendMedia } = useMediaUploader()
@@ -361,6 +380,7 @@ const isFile = computed(() => props.message.type === ImMessageType.FILE)
 const isVoice = computed(() => props.message.type === ImMessageType.VOICE)
 const isVideo = computed(() => props.message.type === ImMessageType.VIDEO)
 const isCard = computed(() => props.message.type === ImMessageType.CARD)
+const isFace = computed(() => props.message.type === ImMessageType.FACE)
 
 // ==================== 气泡配色 helper ====================
 // self / other 两侧 ::before 三角靠 message-bubble--self/other 类承载；本 helper 把 4 处 selfSend ternary
@@ -476,6 +496,9 @@ const videoPayload = computed(() =>
 )
 const cardPayload = computed(() =>
   isCard.value ? parseMessage<CardMessage>(props.message.content) : null
+)
+const facePayload = computed(() =>
+  isFace.value ? parseMessage<FaceMessage>(props.message.content) : null
 )
 
 /** 名片点击：弹被推荐用户的 UserInfoCard；陌生人名片走「名片」加好友来源 */
@@ -666,6 +689,7 @@ const isAtMe = computed(() => {
 const MENU_KEYS = {
   REPLY: 'REPLY',
   PIN: 'PIN',
+  ADD_TO_FACE: 'ADD_TO_FACE',
   MUTE: 'MUTE',
   UNMUTE: 'UNMUTE',
   KICK: 'KICK',
@@ -712,6 +736,14 @@ async function handleContextMenu(e: MouseEvent) {
       key: MENU_KEYS.PIN,
       name: '置顶',
       icon: 'ant-design:pushpin-outlined'
+    })
+  }
+  // 「添加到表情」：FACE / IMAGE 消息 + 已落库 + 未撤回；写入个人表情包，对照微信「添加到表情」
+  if (canAddToFace.value) {
+    items.push({
+      key: MENU_KEYS.ADD_TO_FACE,
+      name: '添加到表情',
+      icon: 'ant-design:smile-outlined'
     })
   }
   // 「禁言 / 解禁 / 移除」：群聊 + 非自己消息 + 我是群主或管理员
@@ -775,6 +807,8 @@ async function handleContextMenu(e: MouseEvent) {
       handleReply()
     } else if (item.key === MENU_KEYS.PIN) {
       await handlePin()
+    } else if (item.key === MENU_KEYS.ADD_TO_FACE) {
+      await handleAddToFace()
     } else if (item.key === MENU_KEYS.MUTE) {
       handleMute()
     } else if (item.key === MENU_KEYS.UNMUTE) {
@@ -787,6 +821,30 @@ async function handleContextMenu(e: MouseEvent) {
       handleDelete()
     }
   })
+}
+
+/** 是否可「添加到表情」：FACE / IMAGE 消息 + 已落库 + 未撤回（GIF / 静图都允许） */
+const canAddToFace = computed(() => {
+  if (isRecall.value || !props.message.id) {
+    return false
+  }
+  return extractAddableFace(props.message) !== null
+})
+
+/** 添加到个人表情：从 message 抽 url + 尺寸 + name 写入个人表情库；幂等失败时返回 false 走 toast 兜底 */
+async function handleAddToFace() {
+  const payload = extractAddableFace(props.message)
+  if (!payload) {
+    return
+  }
+  // TODO @AI：改成 data；更符合预期
+  const ok = await faceStore.addFaceUserItem({
+    ...payload,
+    sourceMessageId: props.message.id
+  })
+  if (ok) {
+    successMessage('已添加到表情')
+  }
 }
 
 /** 当前激活会话对应的群（私聊场景为 undefined） */

@@ -261,6 +261,15 @@
                 <span>个人名片：{{ cardOf(message)?.nickname || '' }}</span>
               </div>
 
+              <!-- 表情贴图：直接渲染图片，对照微信观感 -->
+              <img
+                v-else-if="message.type === ImMessageType.FACE && faceOf(message)?.url"
+                :src="faceOf(message)?.url"
+                :alt="faceOf(message)?.name || '表情'"
+                class="block max-w-[120px] max-h-[120px] object-contain"
+                draggable="false"
+              />
+
               <!-- 撤回 -->
               <div
                 v-else-if="message.type === ImMessageType.RECALL"
@@ -324,7 +333,7 @@ import {
   resolveFriendNotificationText,
   resolveGroupNotificationText
 } from '@/views/im/utils/user'
-import { buildRecallTip } from '@/views/im/utils/conversation'
+import { buildFacePreviewText, buildRecallTip } from '@/views/im/utils/conversation'
 import { useMessagePuller } from '@/views/im/home/composables/useMessagePuller'
 import {
   ImConversationType,
@@ -339,7 +348,8 @@ import {
   type ImageMessage,
   type FileMessage,
   type AudioMessage,
-  type CardMessage
+  type CardMessage,
+  type FaceMessage
 } from '@/views/im/utils/message'
 import type { Message } from '@/views/im/home/types'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
@@ -679,6 +689,9 @@ function audioOf(message: Message): AudioMessage | null {
 function cardOf(message: Message): CardMessage | null {
   return parseMessage<CardMessage>(message.content)
 }
+function faceOf(message: Message): FaceMessage | null {
+  return parseMessage<FaceMessage>(message.content)
+}
 
 /** 关键字命中文本：文本类返回原文、文件返回文件名（利于按文件名搜）、其他返回占位词 */
 function textSnippetOf(message: Message): string {
@@ -698,6 +711,8 @@ function textSnippetOf(message: Message): string {
       return '[视频]'
     case ImMessageType.CARD:
       return `[个人名片] ${parseMessage<CardMessage>(message.content)?.nickname ?? ''}`
+    case ImMessageType.FACE:
+      return buildFacePreviewText(faceOf(message))
     case ImMessageType.RECALL:
       return recallTipOf(message)
     default:

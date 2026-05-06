@@ -148,7 +148,7 @@
             </div>
           </div>
 
-          <!-- 留言（单行）：右侧表情按钮触发 EmojiPicker，所选 emoji 直接拼接到输入末尾 -->
+          <!-- 留言（单行）：右侧表情按钮触发 FacePicker(emoji-only)，所选 emoji 直接拼接到输入末尾 -->
           <div class="relative">
             <el-input v-model="leaveMessage" :maxlength="100" placeholder="给朋友留言">
               <template #suffix>
@@ -161,10 +161,11 @@
               </template>
             </el-input>
             <!-- bottom-full 让 picker 下沿贴 input 顶部，向上弹出；right-0 对齐 input 右侧表情按钮 -->
-            <EmojiPicker
+            <FacePicker
               v-model:visible="emojiVisible"
+              mode="emoji-only"
               class="bottom-full right-0 mb-2"
-              @select="handleEmojiSelect"
+              @select-emoji="handleEmojiSelect"
             />
           </div>
 
@@ -192,7 +193,7 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import UserAvatar from './UserAvatar.vue'
-import EmojiPicker from '../../pages/conversation/components/input/EmojiPicker.vue'
+import FacePicker from '../../pages/conversation/components/input/FacePicker.vue'
 import { useConversationStore } from '../../store/conversationStore'
 import { useMessageSender } from '../../composables/useMessageSender'
 import { ImConversationType, ImMessageType } from '../../../utils/constants'
@@ -243,7 +244,7 @@ function resetForm() {
   emojiVisible.value = false
 }
 
-/** 选中 emoji：直接拼到留言末尾；EmojiPicker 自身 emit('update:visible', false) 关闭面板 */
+/** 选中 emoji：直接拼到留言末尾；FacePicker 自身 emit('update:visible', false) 关闭面板 */
 function handleEmojiSelect(emoji: string) {
   leaveMessage.value = `${leaveMessage.value}${emoji}`
 }

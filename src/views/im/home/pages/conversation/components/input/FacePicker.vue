@@ -33,6 +33,7 @@
       <el-scrollbar v-if="isFullMode" v-show="activeTab === FACE_TAB.MINE" height="300px">
         <div class="grid grid-cols-5 gap-2 p-3">
           <!-- 上传入口固定放第一格，对齐微信 -->
+          <!-- TODO @AI：这里的界面，有点丑，你看看：/Users/yunai/Downloads/iShot_2026-05-06_21.07.24.png -->
           <button
             class="aspect-square flex items-center justify-center rounded-md border border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)] text-2xl text-[var(--el-text-color-placeholder)] cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
             type="button"
@@ -187,6 +188,7 @@ import type { ImFacePackUserItemVO, ImFaceUserItemVO } from '@/api/im/face'
 defineOptions({ name: 'ImFacePicker' })
 
 /** 面板模式 */
+// TODO @AI：直接就叫 emoji，不用带 only
 type FacePickerMode = 'full' | 'emoji-only'
 
 const props = withDefaults(
@@ -349,7 +351,9 @@ onUnmounted(() => {
   background-color: transparent;
   color: var(--el-text-color-regular);
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 .im-face-tab:hover {
   background-color: var(--el-fill-color);
