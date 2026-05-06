@@ -2,7 +2,8 @@
   <!--
     表情面板（多 tab）：emoji / 个人表情 / N 个系统表情包
     - 对齐微信 PC：底部 tab 栏切换面板内容；emoji 保持 Unicode（仍由 TEXT 通道发送）
-    - 个人表情 / 系统表情走 FACE 消息类型，通过 select-face 事件由 MessageInput 走 sendRaw 发送
+    - 个人表情 / 系统表情走 FACE 消息类型，通过 select-face 事件由调用方走 sendRaw 发送
+    - mode='emoji-only' 时只显示 emoji tab + 隐藏底部 tab 栏，给留言 / 评论这类只发文本的场景用
     - 定位由调用方决定（通常浮在表情按钮上方）
   -->
   <div
@@ -14,10 +15,10 @@
     <!-- 主内容区：高度固定 + 各 tab 用 v-show 切换，避免每次切 tab 重建 scrollbar 造成滚动位置丢失 -->
     <div class="relative h-[300px] overflow-hidden">
       <!-- emoji 网格 -->
-      <el-scrollbar v-show="activeTab === 'emoji'" height="300px">
+      <el-scrollbar v-show="activeTab === FACE_TAB.EMOJI" height="300px">
         <div class="grid grid-cols-10 gap-0.5 p-2">
           <button
-            v-for="emoji in EMOJI_LIST"
+            v-for="emoji in IM_EMOJI_LIST"
             :key="emoji"
             class="p-1 text-xl leading-none bg-transparent border-none rounded cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
             type="button"
@@ -29,7 +30,7 @@
       </el-scrollbar>
 
       <!-- 个人表情：5 列方格，无名字标签；末尾「+」上传 -->
-      <el-scrollbar v-show="activeTab === 'mine'" height="300px">
+      <el-scrollbar v-if="isFullMode" v-show="activeTab === FACE_TAB.MINE" height="300px">
         <div class="grid grid-cols-5 gap-2 p-3">
           <!-- 上传入口固定放第一格，对齐微信 -->
           <button
@@ -68,56 +69,59 @@
       </el-scrollbar>
 
       <!-- 系统表情包：5 列方格 + 下方表情名（无 name 时不显示标签，保持高度一致） -->
-      <el-scrollbar
-        v-for="pack in faceStore.facePacks"
-        v-show="activeTab === `pack:${pack.id}`"
-        :key="pack.id"
-        height="300px"
-      >
-        <div class="grid grid-cols-5 gap-2 p-3">
-          <div
-            v-for="item in pack.items"
-            :key="item.id"
-            class="im-face-grid-cell flex flex-col items-center gap-1 cursor-pointer rounded-md p-1 transition-colors hover:bg-[var(--el-fill-color)]"
-            :title="item.name || ''"
-            @click="handleSelectPackItem(item)"
-          >
+      <template v-if="isFullMode">
+        <el-scrollbar
+          v-for="pack in faceStore.facePacks"
+          v-show="activeTab === packTabKey(pack.id)"
+          :key="pack.id"
+          height="300px"
+        >
+          <div class="grid grid-cols-5 gap-2 p-3">
             <div
-              class="aspect-square w-full flex items-center justify-center bg-[var(--el-fill-color-lighter)] rounded"
+              v-for="item in pack.items"
+              :key="item.id"
+              class="im-face-grid-cell flex flex-col items-center gap-1 cursor-pointer rounded-md p-1 transition-colors hover:bg-[var(--el-fill-color)]"
+              :title="item.name || ''"
+              @click="handleSelectPackItem(item)"
             >
-              <img
-                :src="item.url"
-                :alt="item.name || '表情'"
-                class="max-w-full max-h-full object-contain"
-                draggable="false"
-              />
+              <div
+                class="aspect-square w-full flex items-center justify-center bg-[var(--el-fill-color-lighter)] rounded"
+              >
+                <img
+                  :src="item.url"
+                  :alt="item.name || '表情'"
+                  class="max-w-full max-h-full object-contain"
+                  draggable="false"
+                />
+              </div>
+              <div
+                class="h-4 text-xs text-[var(--el-text-color-secondary)] truncate w-full text-center leading-4"
+              >
+                {{ item.name || '' }}
+              </div>
             </div>
             <div
-              class="h-4 text-xs text-[var(--el-text-color-secondary)] truncate w-full text-center leading-4"
+              v-if="!pack.items.length"
+              class="col-span-5 flex items-center justify-center py-12 text-sm text-[var(--el-text-color-placeholder)]"
             >
-              {{ item.name || '' }}
+              该表情包暂无表情
             </div>
           </div>
-          <div
-            v-if="!pack.items.length"
-            class="col-span-5 flex items-center justify-center py-12 text-sm text-[var(--el-text-color-placeholder)]"
-          >
-            该表情包暂无表情
-          </div>
-        </div>
-      </el-scrollbar>
+        </el-scrollbar>
+      </template>
     </div>
 
-    <!-- 底部 tab 栏：[ emoji / 个人 / 系统包 1..N ] -->
+    <!-- 底部 tab 栏：[ emoji / 个人 / 系统包 1..N ]；emoji-only 模式下隐藏 -->
     <div
+      v-if="isFullMode"
       class="flex flex-shrink-0 items-center gap-1 px-2 py-1.5 border-t border-[var(--el-border-color-lighter)]"
     >
       <el-tooltip content="Emoji 表情" placement="top" :show-after="300">
         <button
           class="im-face-tab"
-          :class="{ 'im-face-tab--active': activeTab === 'emoji' }"
+          :class="{ 'im-face-tab--active': activeTab === FACE_TAB.EMOJI }"
           type="button"
-          @click="activeTab = 'emoji'"
+          @click="activeTab = FACE_TAB.EMOJI"
         >
           <Icon icon="ant-design:smile-outlined" :size="18" />
         </button>
@@ -125,9 +129,9 @@
       <el-tooltip content="个人表情" placement="top" :show-after="300">
         <button
           class="im-face-tab"
-          :class="{ 'im-face-tab--active': activeTab === 'mine' }"
+          :class="{ 'im-face-tab--active': activeTab === FACE_TAB.MINE }"
           type="button"
-          @click="activeTab = 'mine'"
+          @click="activeTab = FACE_TAB.MINE"
         >
           <Icon icon="ant-design:heart-outlined" :size="18" />
         </button>
@@ -141,9 +145,9 @@
       >
         <button
           class="im-face-tab"
-          :class="{ 'im-face-tab--active': activeTab === `pack:${pack.id}` }"
+          :class="{ 'im-face-tab--active': activeTab === packTabKey(pack.id) }"
           type="button"
-          @click="activeTab = `pack:${pack.id}`"
+          @click="activeTab = packTabKey(pack.id)"
         >
           <img
             v-if="pack.iconUrl"
@@ -158,24 +162,41 @@
     </div>
 
     <!-- 隐藏的文件选择器（点 + 时触发） -->
-    <input ref="uploadInputRef" type="file" accept="image/*" hidden @change="onUploadPicked" />
+    <input
+      v-if="isFullMode"
+      ref="uploadInputRef"
+      type="file"
+      accept="image/*"
+      hidden
+      @change="onUploadPicked"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import Icon from '@/components/Icon/src/Icon.vue'
 import { updateFile } from '@/api/infra/file'
 import { useFaceStore } from '@/views/im/home/store/faceStore'
+import { IM_EMOJI_LIST } from '@/views/im/utils/emoji'
+import { probeImageSize } from '@/views/im/utils/image'
 import type { ImFacePackUserItemVO, ImFaceUserItemVO } from '@/api/im/face'
 
 defineOptions({ name: 'ImFacePicker' })
 
-const props = defineProps<{
-  visible: boolean
-}>()
+/** 面板模式 */
+type FacePickerMode = 'full' | 'emoji-only'
+
+const props = withDefaults(
+  defineProps<{
+    visible: boolean
+    /** full：emoji + 个人表情 + 系统包（聊天主输入用）；emoji-only：仅 emoji（留言 / 评论场景） */
+    mode?: FacePickerMode
+  }>(),
+  { mode: 'full' }
+)
 
 const emit = defineEmits<{
   'update:visible': [value: boolean]
@@ -185,35 +206,26 @@ const emit = defineEmits<{
   'select-face': [face: { url: string; width: number; height: number; name?: string }]
 }>()
 
-// TODO @AI：emoji 和 facepicker 可以做一个融合么？不然代码有点冗余。
-
 const rootRef = useTemplateRef<HTMLDivElement>('rootRef')
 const uploadInputRef = useTemplateRef<HTMLInputElement>('uploadInputRef')
 
 const faceStore = useFaceStore()
 
-/** 当前激活的 tab：emoji / mine / pack:{id} */
-const activeTab = ref<string>('emoji')
+/** tab 标识常量；pack:N 类用 packTabKey() 拼出，避免散落字符串字面量 */
+const FACE_TAB = {
+  EMOJI: 'emoji',
+  MINE: 'mine'
+} as const
+const packTabKey = (packId: number) => `pack:${packId}`
 
-/** 上传中标记，避免连续点击 + 触发并发上传 */
+/** 当前激活的 tab */
+const activeTab = ref<string>(FACE_TAB.EMOJI)
+
+/** 是否完整模式（含个人 / 系统包 tab） */
+const isFullMode = computed(() => props.mode === 'full')
+
+/** 上传中标记，避免连续点击触发并发上传 */
 const uploading = ref(false)
-
-/** 常用 Unicode emoji 列表（所见即所得，不依赖图片资源） */
-const EMOJI_LIST = [
-  '😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊',
-  '😋', '😎', '😍', '😘', '😗', '😙', '😚', '🙂', '🤗', '🤩',
-  '🤔', '🤨', '😐', '😑', '😶', '🙄', '😏', '😣', '😥', '😮',
-  '🤐', '😯', '😪', '😫', '😴', '😌', '😛', '😜', '😝', '🤤',
-  '😒', '😓', '😔', '😕', '🙃', '🤑', '😲', '☹️', '🙁', '😖',
-  '😞', '😟', '😤', '😢', '😭', '😦', '😧', '😨', '😩', '🤯',
-  '😬', '😰', '😱', '🥵', '🥶', '😳', '🤪', '😵', '😡', '😠',
-  '🤬', '😷', '🤒', '🤕', '🤢', '🤮', '🤧', '😇', '🤠', '🥳',
-  '👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉',
-  '👆', '👇', '✋', '🤚', '🖐', '🖖', '👋', '🤝', '🙏', '💪',
-  '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '💔', '💕', '💖',
-  '🎉', '🎊', '🎁', '🎂', '🍰', '🌹', '🌷', '🌸', '🎵', '🎶',
-  '⭐', '🌟', '✨', '💫', '🔥', '💯', '✅', '❌', '⚠️', '❓'
-]
 
 /** 选 emoji 字符：插到输入框；选完不关面板，方便用户连发多个 */
 function handleSelectEmoji(emoji: string) {
@@ -234,7 +246,7 @@ function handleSelectPackItem(item: ImFacePackUserItemVO) {
 
 /** 长按 / 右键删除个人表情 */
 async function handleDeleteUserItem(item: ImFaceUserItemVO) {
-  if (!confirm(`确认删除该表情？`)) {
+  if (!confirm('确认删除该表情？')) {
     return
   }
   await faceStore.removeFaceUserItem(item.id)
@@ -243,23 +255,6 @@ async function handleDeleteUserItem(item: ImFaceUserItemVO) {
 /** 点 + 触发文件选择 */
 function onUploadClick() {
   uploadInputRef.value?.click()
-}
-
-/** 加载图片元信息（宽高），失败回退 200×200 */
-function probeImageSize(file: File): Promise<{ width: number; height: number }> {
-  return new Promise((resolve) => {
-    const objectUrl = URL.createObjectURL(file)
-    const img = new Image()
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl)
-      resolve({ width: img.naturalWidth || 200, height: img.naturalHeight || 200 })
-    }
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl)
-      resolve({ width: 200, height: 200 })
-    }
-    img.src = objectUrl
-  })
 }
 
 /** 文件选完即上传，成功后写入 faceStore 个人表情列表 */
@@ -284,7 +279,10 @@ async function onUploadPicked(e: Event) {
       ElMessage.error('上传失败')
       return
     }
-    await faceStore.addFaceUserItem({ url, width: size.width, height: size.height })
+    const ok = await faceStore.addFaceUserItem({ url, width: size.width, height: size.height })
+    if (!ok) {
+      ElMessage.error('添加失败，可能已添加过')
+    }
   } catch (err) {
     console.warn('[IM] 上传个人表情失败', err)
     ElMessage.error('上传失败')
@@ -293,18 +291,22 @@ async function onUploadPicked(e: Event) {
   }
 }
 
-/** 面板首次展开时拉数据；emoji tab 直接渲染本地常量，不需要预拉 */
+/** 面板展开时拉数据 + 挂全局 click；emoji-only 模式下不拉系统包 / 个人表情 */
 watch(
   () => props.visible,
-  async (visible) => {
+  (visible) => {
     if (visible) {
       document.addEventListener('click', handleDocumentClick)
-      // 系统包 + 个人表情都按需拉，避免没打开过面板的用户白白请求
-      await Promise.all([faceStore.ensureFacePacks(), faceStore.ensureFaceUserItems()])
+      if (isFullMode.value) {
+        // 系统包通常已被 home onMounted 预拉过；ensureXxx 内部 promise 缓存避免重复请求
+        void faceStore.ensureFacePacks()
+        void faceStore.ensureFaceUserItems()
+      }
     } else {
       document.removeEventListener('click', handleDocumentClick)
     }
-  }
+  },
+  { immediate: true }
 )
 
 /** 点击面板外部关闭 */
@@ -316,12 +318,6 @@ function handleDocumentClick(e: MouseEvent) {
     emit('update:visible', false)
   }
 }
-
-onMounted(() => {
-  if (props.visible) {
-    document.addEventListener('click', handleDocumentClick)
-  }
-})
 
 onUnmounted(() => {
   document.removeEventListener('click', handleDocumentClick)

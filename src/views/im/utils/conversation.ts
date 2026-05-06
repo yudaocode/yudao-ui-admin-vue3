@@ -7,7 +7,7 @@
 // ====================================================================
 
 import { ImMessageType, isFriendChatTip, isGroupNotification } from './constants'
-import { parseMessage, type TextMessage } from './message'
+import { parseMessage, type FaceMessage, type TextMessage } from './message'
 import {
   getSenderDisplayName,
   resolveFriendNotificationText,
@@ -30,6 +30,14 @@ export function filterConversationsByKeyword<T extends { name?: string }>(
     return list
   }
   return list.filter((c) => (c.name || '').toLowerCase().includes(trimmed))
+}
+
+/**
+ * 表情消息的统一文本预览：摘要 / 历史搜索 / 引用块 / 管理后台预览共用一份
+ * 有 name 时走 `[表情] name`（系统包），无 name 时走 `[表情]`（个人表情通常无 name）
+ */
+export function buildFacePreviewText(facePayload: { name?: string } | null | undefined): string {
+  return facePayload?.name ? `[表情] ${facePayload.name}` : '[表情]'
 }
 
 /** 撤回提示文案：自己撤回固定文案，对方撤回带 sender 名（实时算 + fallbackName 兜底） */
@@ -70,10 +78,8 @@ export function resolveConversationLastContent(
       return '[视频]'
     case ImMessageType.CARD:
       return '[个人名片]'
-    case ImMessageType.FACE: {
-      const facePayload = parseMessage<{ name?: string }>(message.content)
-      return facePayload?.name ? `[表情] ${facePayload.name}` : '[表情]'
-    }
+    case ImMessageType.FACE:
+      return buildFacePreviewText(parseMessage<FaceMessage>(message.content))
     case ImMessageType.RECALL:
       return buildRecallTip(
         message.senderId,

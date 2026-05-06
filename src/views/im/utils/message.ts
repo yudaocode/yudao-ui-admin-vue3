@@ -1,4 +1,5 @@
 import { generateUUID } from '@/utils'
+import { ImMessageType } from './constants'
 import type { Message } from '../home/types'
 
 // ====================================================================
@@ -97,12 +98,43 @@ export interface CardMessage extends Quotable {
 export interface FaceMessage extends Quotable {
   /** 表情图 URL */
   url: string
-  /** 渲染宽度（像素），避免布局抖动 */
-  width: number
-  /** 渲染高度（像素） */
-  height: number
+  /** 渲染宽度（像素），避免布局抖动；可选，缺失时调用方走 CSS max-w 兜底 */
+  width?: number
+  /** 渲染高度（像素），可选 */
+  height?: number
   /** 表情名（系统包通常有，个人表情包通常无） */
   name?: string
+}
+
+/** 「添加到表情」的可发起源：FACE / IMAGE 都允许（GIF 图片也常被收藏） */
+export interface AddableFacePayload {
+  url: string
+  width: number
+  height: number
+  name?: string
+}
+
+/**
+ * 从消息抽取「添加到表情」的 payload；当前消息类型不可添加返回 null
+ *
+ * 调用方（MessageItem 的右键菜单）按 nullable 决定是否展示「添加到表情」入口
+ */
+export function extractAddableFace(message: Message): AddableFacePayload | null {
+  if (message.type === ImMessageType.FACE) {
+    const face = parseMessage<FaceMessage>(message.content)
+    if (!face?.url) {
+      return null
+    }
+    return { url: face.url, width: face.width || 200, height: face.height || 200, name: face.name }
+  }
+  if (message.type === ImMessageType.IMAGE) {
+    const image = parseMessage<ImageMessage>(message.content)
+    if (!image?.url) {
+      return null
+    }
+    return { url: image.url, width: image.width || 200, height: image.height || 200 }
+  }
+  return null
 }
 
 /** 解析消息 content（JSON 字符串）为指定 payload，非法 JSON 返回 null */

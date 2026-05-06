@@ -4,7 +4,7 @@ import { store } from '@/store'
 
 import {
   getFacePackList as apiGetFacePackList,
-  getMyFaceUserItemList as apiGetMyFaceUserItemList,
+  getFaceUserItemList as apiGetFaceUserItemList,
   createFaceUserItem as apiCreateFaceUserItem,
   deleteFaceUserItem as apiDeleteFaceUserItem,
   type ImFacePackUserVO,
@@ -15,8 +15,9 @@ import {
 /**
  * IM 表情面板数据 store（系统表情包 + 个人表情）
  *
- * 不持久化：数据小、低频；每次进 IM 第一次打开表情面板时按需拉，关 tab 即丢弃。
- * 系统包面板在面板首次展开时 ensureFacePacks；个人表情在切到「收藏」tab 或要发送 / 添加时 ensureFaceUserItems。
+ * 不持久化：数据小、低频；每次进 IM 第一次打开表情面板时按需拉，关 tab 即丢弃
+ * - 系统包：IM 主页 onMounted 后台预拉（不阻塞首屏），消除面板首次展开的白屏
+ * - 个人表情：切到「收藏」tab / 长按消息「添加到表情」时按需拉
  */
 export const useFaceStore = defineStore('imFace', () => {
 
@@ -25,69 +26,60 @@ export const useFaceStore = defineStore('imFace', () => {
   /** 个人表情包列表（用户长按「添加到表情」/ 上传产生） */
   const faceUserItems = ref<ImFaceUserItemVO[]>([])
 
-  /** 已成功拉取过系统包；后续切 tab 不再重复请求 */
-  const facePacksLoaded = ref(false)
-  /** 已成功拉取过个人表情 */
-  const faceUserItemsLoaded = ref(false)
-
-  /** 拉取系统表情包；同 promise 去重，并发调用共用一个请求 */
-  let facePacksFetching: Promise<void> | null = null
-  /** 按需拉取系统表情包（已拉过则直接复用） */
+  /**
+   * 系统表情包拉取 promise；ensureFacePacks 内 cache：
+   * - null = 还没拉过，下次调用真发请求
+   * - resolve 后保留对象 = 后续调用 await 立即返回，不再发请求
+   * - reject 后置回 null，让调用方下次重试
+   */
+  let facePacksPromise: Promise<void> | null = null
+  /** 按需拉取系统表情包（已拉过则直接复用 cached promise） */
   async function ensureFacePacks(): Promise<void> {
-    if (facePacksLoaded.value) {
-      return
+    if (!facePacksPromise) {
+      facePacksPromise = apiGetFacePackList()
+        .then((data) => {
+          facePacks.value = data || []
+        })
+        .catch((e) => {
+          console.warn('[IM] 拉取表情包失败', e)
+          facePacksPromise = null
+          throw e
+        })
     }
-    if (facePacksFetching) {
-      return facePacksFetching
-    }
-    facePacksFetching = (async () => {
-      try {
-        facePacks.value = (await apiGetFacePackList()) || []
-        facePacksLoaded.value = true
-      } catch (e) {
-        console.warn('[IM] 拉取表情包失败', e)
-      } finally {
-        facePacksFetching = null
-      }
-    })()
-    return facePacksFetching
+    return facePacksPromise
   }
 
-  // TODO @AI：是不是也要注释下，风格一致；
-  let faceUserItemsFetching: Promise<void> | null = null
-  /** 按需拉取个人表情 */
+  /** 个人表情拉取 promise；语义同上 */
+  let faceUserItemsPromise: Promise<void> | null = null
+  /** 按需拉取个人表情（已拉过则直接复用 cached promise） */
   async function ensureFaceUserItems(): Promise<void> {
-    if (faceUserItemsLoaded.value) {
-      return
+    if (!faceUserItemsPromise) {
+      faceUserItemsPromise = apiGetFaceUserItemList()
+        .then((data) => {
+          faceUserItems.value = data || []
+        })
+        .catch((e) => {
+          console.warn('[IM] 拉取个人表情失败', e)
+          faceUserItemsPromise = null
+          throw e
+        })
     }
-    if (faceUserItemsFetching) {
-      return faceUserItemsFetching
-    }
-    faceUserItemsFetching = (async () => {
-      try {
-        faceUserItems.value = (await apiGetMyFaceUserItemList()) || []
-        faceUserItemsLoaded.value = true
-      } catch (e) {
-        console.warn('[IM] 拉取个人表情失败', e)
-      } finally {
-        faceUserItemsFetching = null
-      }
-    })()
-    return faceUserItemsFetching
+    return faceUserItemsPromise
   }
 
   /**
-   * 添加个人表情；服务端对同 URL 幂等返回旧 id，本地缓存按 id 去重
+   * 添加个人表情；服务端对同 URL 抛 FACE_USER_ITEM_DUPLICATED 错误
    *
    * 来源：1. 用户在表情面板「+」上传图片  2. 长按消息「添加到表情」（带 sourceMessageId）
+   * 返回 true / false 与 removeFaceUserItem 风格对齐；调用方按 boolean 决定是否提示
    */
-  async function addFaceUserItem(reqVO: ImFaceUserItemSaveReqVO): Promise<number | undefined> {
+  async function addFaceUserItem(reqVO: ImFaceUserItemSaveReqVO): Promise<boolean> {
     try {
       const id = await apiCreateFaceUserItem(reqVO)
       if (!id) {
-        return undefined
+        return false
       }
-      // id 不在缓存里才插入，避免重复添加同张图触发列表里出现两条
+      // id 不在缓存里才插入；服务端唯一约束兜底了 race，本地理论上不会拿到重复 id
       if (!faceUserItems.value.some((item) => item.id === id)) {
         faceUserItems.value.unshift({
           id,
@@ -97,11 +89,10 @@ export const useFaceStore = defineStore('imFace', () => {
           height: reqVO.height
         })
       }
-      return id
+      return true
     } catch (e) {
-      console.warn('[IM] 添加个人表情失败', e)
-      // TODO @AI：应该把参数打印出来，reqVO；
-      return undefined
+      console.warn('[IM] 添加个人表情失败', { reqVO }, e)
+      return false
     }
   }
 
@@ -112,8 +103,7 @@ export const useFaceStore = defineStore('imFace', () => {
       faceUserItems.value = faceUserItems.value.filter((item) => item.id !== id)
       return true
     } catch (e) {
-      // TODO @AI：应该把参数打印出来，id；
-      console.warn('[IM] 删除个人表情失败', e)
+      console.warn('[IM] 删除个人表情失败', { id }, e)
       return false
     }
   }
@@ -122,8 +112,8 @@ export const useFaceStore = defineStore('imFace', () => {
   function reset(): void {
     facePacks.value = []
     faceUserItems.value = []
-    facePacksLoaded.value = false
-    faceUserItemsLoaded.value = false
+    facePacksPromise = null
+    faceUserItemsPromise = null
   }
 
   return {

@@ -71,7 +71,7 @@
       class="w-30px h-30px rounded object-contain align-middle"
       draggable="false"
     />
-    <span>{{ facePayload.name ? `[表情] ${facePayload.name}` : '[表情]' }}</span>
+    <span>{{ buildFacePreviewText(facePayload) }}</span>
   </span>
 
   <!-- 控制类消息：撤回 / 已读 / 回执 -->
@@ -138,6 +138,7 @@ import {
   resolveFriendNotificationText,
   resolveGroupNotificationText
 } from '@/views/im/utils/user'
+import { buildFacePreviewText } from '@/views/im/utils/conversation'
 
 defineOptions({ name: 'ImMessageContentPreview' })
 

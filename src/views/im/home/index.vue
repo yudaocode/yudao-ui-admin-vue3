@@ -33,6 +33,7 @@ import { useFriendStore } from './store/friendStore'
 import { useGroupStore } from './store/groupStore'
 import { useGroupRequestStore } from './store/groupRequestStore'
 import { useDraftStore } from './store/draftStore'
+import { useFaceStore } from './store/faceStore'
 import { useMessagePuller } from './composables/useMessagePuller'
 import { useMessageSender } from './composables/useMessageSender'
 import { ImConversationType } from '../utils/constants'
@@ -50,6 +51,7 @@ const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 const groupRequestStore = useGroupRequestStore()
 const draftStore = useDraftStore()
+const faceStore = useFaceStore()
 const { pullOnce } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
 
@@ -92,6 +94,9 @@ onMounted(async () => {
     void groupRequestStore.fetchUnhandledList().catch((e) =>
       console.warn('[IM] 拉取未处理加群申请失败', e)
     )
+    // 3.2 系统表情包后台预拉，消除表情面板首次展开的白屏；个人表情保持「点开 tab 才拉」
+    // TODO @AI：同上；
+    void faceStore.ensureFacePacks().catch((e) => console.warn('[IM] 后台预拉表情包失败', e))
 
     // 4. 默认选中第一个会话；若置顶分组处于折叠态，需跳过被折叠隐藏的置顶项，避免自动展开折叠
     const sorted = conversationStore.getSortedConversations
@@ -129,10 +134,11 @@ function onBeforeUnload() {
 }
 window.addEventListener('beforeunload', onBeforeUnload)
 
-/** 离开 IM 主壳：主动断 WebSocket（disconnect 内部已清掉 onclose 防自动重连）+ flush 草稿 + 解绑 unload */
+/** 离开 IM 主壳：主动断 WebSocket（disconnect 内部已清掉 onclose 防自动重连）+ flush 草稿 + 表情缓存 reset + 解绑 unload */
 onUnmounted(() => {
   webSocketStore.disconnect()
   draftStore.flushPersist()
+  faceStore.reset()
   window.removeEventListener('beforeunload', onBeforeUnload)
 })
 

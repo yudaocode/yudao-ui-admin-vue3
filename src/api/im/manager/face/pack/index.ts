@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO @AI：face/pack/index.ts
 export interface ImManagerFacePackVO {
   id: number
   name: string
