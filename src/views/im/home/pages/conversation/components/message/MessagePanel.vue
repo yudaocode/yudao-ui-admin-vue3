@@ -63,6 +63,11 @@
           :group-id="conversationStore.activeConversation.targetId"
           @locate="handleLocate"
         />
+        <!-- 群顶部「待处理加群申请」横幅：仅群聊 + owner / admin + count > 0 时显示 -->
+        <ConversationGroupRequestPending
+          v-if="isGroup && conversationStore.activeConversation"
+          :group-id="conversationStore.activeConversation.targetId"
+        />
         <!-- 私聊：对方不再是有效好友（我删了对方 / 从未加过；单边设计下「被对方删除」本端 friendStore 不更新故不会触发）；胶囊嵌在 header 内（跟群置顶同级），点击弹 UserInfoCard -->
         <div v-if="showNotFriendBanner" class="message-panel__not-friend-container">
           <div class="message-panel__not-friend" @click="handleNotFriendClick">
@@ -179,6 +184,7 @@ import MessageInput from '../input/MessageInput.vue'
 import MessageHistory from './MessageHistory.vue'
 import ConversationGroupSide from '../conversation/ConversationGroupSide.vue'
 import ConversationGroupPinned from './ConversationGroupPinned.vue'
+import ConversationGroupRequestPending from './ConversationGroupRequestPending.vue'
 import ConversationPrivateSide from '../conversation/ConversationPrivateSide.vue'
 import type { FriendLite, GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
@@ -279,7 +285,8 @@ const groupInfo = computed<
     notice: group?.notice,
     groupRemark: group?.groupRemark,
     ownerId: group?.ownerUserId,
-    memberCount: group?.memberCount
+    memberCount: group?.memberCount,
+    joinApproval: group?.joinApproval
   }
 })
 
