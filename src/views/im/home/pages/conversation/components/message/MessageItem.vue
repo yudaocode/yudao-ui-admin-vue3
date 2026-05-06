@@ -496,9 +496,20 @@ const videoPayload = computed(() =>
 const cardPayload = computed(() =>
   isCard.value ? parseMessage<CardMessage>(props.message.content) : null
 )
-const facePayload = computed(() =>
-  isFace.value ? parseMessage<FaceMessage>(props.message.content) : null
-)
+/** 表情 payload；非法宽高（缺失 / 0 / 负数 / 超出 2048）派生成 undefined，让 <img> 走 CSS max-w / max-h 兜底 */
+const FACE_DIMENSION_MAX = 2048
+const facePayload = computed(() => {
+  if (!isFace.value) {
+    return null
+  }
+  const raw = parseMessage<FaceMessage>(props.message.content)
+  if (!raw) {
+    return null
+  }
+  const sanitize = (v: number | undefined) =>
+    v && v > 0 && v <= FACE_DIMENSION_MAX ? v : undefined
+  return { ...raw, width: sanitize(raw.width), height: sanitize(raw.height) }
+})
 
 /** 名片点击：弹被推荐用户的 UserInfoCard；陌生人名片走「名片」加好友来源 */
 function handleCardClick(e: MouseEvent) {

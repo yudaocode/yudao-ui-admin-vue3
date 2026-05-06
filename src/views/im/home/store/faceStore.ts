@@ -4,13 +4,15 @@ import { store } from '@/store'
 
 import {
   getFacePackList as apiGetFacePackList,
+  type ImFacePackUserVO
+} from '@/api/im/face/pack'
+import {
   getFaceUserItemList as apiGetFaceUserItemList,
   createFaceUserItem as apiCreateFaceUserItem,
   deleteFaceUserItem as apiDeleteFaceUserItem,
-  type ImFacePackUserVO,
   type ImFaceUserItemVO,
   type ImFaceUserItemSaveReqVO
-} from '@/api/im/face'
+} from '@/api/im/face/useritem'
 
 /**
  * IM 表情面板数据 store（系统表情包 + 个人表情）

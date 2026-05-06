@@ -22,21 +22,21 @@
       <el-form-item label="尺寸">
         <el-input-number
           v-model="formData.width"
-          :min="0"
-          :max="9999"
+          :min="1"
+          :max="2048"
           controls-position="right"
           class="!w-1/3"
         />
         <span class="mx-2 text-[var(--el-text-color-secondary)]">×</span>
         <el-input-number
           v-model="formData.height"
-          :min="0"
-          :max="9999"
+          :min="1"
+          :max="2048"
           controls-position="right"
           class="!w-1/3"
         />
         <span class="ml-2 text-12px text-[var(--el-text-color-placeholder)]">
-          上传后自动探测；可手动调整
+          上传后自动探测；可手动调整（1 ~ 2048 像素）
         </span>
       </el-form-item>
       <el-form-item label="排序" prop="sort">
@@ -92,8 +92,8 @@ const formData = ref({
   packId: 0,
   url: '',
   name: '',
-  width: 0,
-  height: 0,
+  width: undefined as number | undefined,
+  height: undefined as number | undefined,
   sort: 0,
   status: CommonStatusEnum.ENABLE
 })
@@ -106,8 +106,8 @@ const formRef = ref() // 表单 Ref
 /** 上传完成后从 URL 回探宽高，自动填表单（用户仍可手改） */
 async function onUrlChange(url: string) {
   if (!url) {
-    formData.value.width = 0
-    formData.value.height = 0
+    formData.value.width = undefined
+    formData.value.height = undefined
     return
   }
   const size = await probeImageSize(url)
@@ -165,8 +165,8 @@ const resetForm = () => {
     packId: props.packId,
     url: '',
     name: '',
-    width: 0,
-    height: 0,
+    width: undefined,
+    height: undefined,
     sort: 0,
     status: CommonStatusEnum.ENABLE
   }

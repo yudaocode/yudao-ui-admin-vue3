@@ -108,7 +108,7 @@
 
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
-import * as ManagerFaceUserItemApi from '@/api/im/manager/face/userItem'
+import * as ManagerFaceUserItemApi from '@/api/im/manager/face/useritem'
 
 defineOptions({ name: 'ImManagerFaceUserItem' })
 
