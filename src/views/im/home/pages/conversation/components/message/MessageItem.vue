@@ -171,19 +171,11 @@
         >
           [视频消息]
         </div>
-        <!-- 名片消息：头像 + 昵称 + 「个人名片」标签；点击气泡弹被推荐用户的名片浮层 -->
-        <!-- TODO @AI：卡片样式，/Users/yunai/Downloads/iShot_2026-05-06_00.00.04.png；
-         TODO @AI：messagepreview 是不是也要加下？管理后台的；manager；
-         -->
+        <!-- 名片消息：头像 + 昵称 + 「个人名片」标签；点击气泡弹被推荐用户的名片浮层
+             参照微信观感：自己 / 对方都是浅灰白卡片不染绿，头像圆角块，底部分隔条灰字「个人名片」 -->
         <div
           v-else-if="isCard && cardPayload"
-          class="flex flex-col min-w-[220px] max-w-[260px] rounded cursor-pointer overflow-hidden"
-          :class="[
-            message.selfSend ? 'message-bubble--self' : 'message-bubble--other',
-            message.selfSend
-              ? 'bg-[#95ec69]'
-              : 'bg-[var(--el-bg-color)] border border-[var(--el-border-color-light)]'
-          ]"
+          class="flex flex-col w-[240px] rounded-md overflow-hidden cursor-pointer bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
           @click="handleCardClick"
         >
           <div class="flex gap-2.5 items-center px-3 py-2.5">
@@ -194,15 +186,12 @@
               :size="40"
               :clickable="false"
             />
-            <div class="flex-1 min-w-0">
-              <div class="text-sm font-medium truncate text-[var(--el-text-color-primary)]">
-                {{ cardPayload.nickname }}
-              </div>
+            <div class="flex-1 min-w-0 text-sm font-medium truncate text-[var(--el-text-color-primary)]">
+              {{ cardPayload.nickname }}
             </div>
           </div>
           <div
-            class="px-3 py-1 text-12px border-t text-[var(--el-text-color-secondary)] border-[var(--el-border-color-lighter)]"
-            :class="message.selfSend ? 'bg-[#86d65f]' : 'bg-[var(--el-fill-color-lighter)]'"
+            class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
           >
             个人名片
           </div>
