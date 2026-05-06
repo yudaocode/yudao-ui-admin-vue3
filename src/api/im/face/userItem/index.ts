@@ -15,7 +15,6 @@ export interface ImFaceUserItemSaveReqVO {
   name?: string
   width: number
   height: number
-  sourceMessageId?: number // 来源消息编号（从消息「添加到表情」时传，自己上传不传）
 }
 
 /** 获取我的个人表情列表 */

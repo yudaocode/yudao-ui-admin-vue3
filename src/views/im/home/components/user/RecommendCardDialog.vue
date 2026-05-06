@@ -148,7 +148,7 @@
             </div>
           </div>
 
-          <!-- 留言（单行）：右侧表情按钮触发 FacePicker(emoji-only)，所选 emoji 直接拼接到输入末尾 -->
+          <!-- 留言（单行）：右侧表情按钮触发 FacePicker(mode=emoji)，所选 emoji 直接拼接到输入末尾 -->
           <div class="relative">
             <el-input v-model="leaveMessage" :maxlength="100" placeholder="给朋友留言">
               <template #suffix>
@@ -163,7 +163,7 @@
             <!-- bottom-full 让 picker 下沿贴 input 顶部，向上弹出；right-0 对齐 input 右侧表情按钮 -->
             <FacePicker
               v-model:visible="emojiVisible"
-              mode="emoji-only"
+              mode="emoji"
               class="bottom-full right-0 mb-2"
               @select-emoji="handleEmojiSelect"
             />

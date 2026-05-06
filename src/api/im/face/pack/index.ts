@@ -13,7 +13,7 @@ export interface ImFacePackUserItemVO {
 export interface ImFacePackUserVO {
   id: number
   name: string
-  iconUrl?: string
+  icon?: string
   items: ImFacePackUserItemVO[]
 }
 

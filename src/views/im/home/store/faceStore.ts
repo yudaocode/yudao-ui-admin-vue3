@@ -70,7 +70,7 @@ export const useFaceStore = defineStore('imFace', () => {
   /**
    * 添加个人表情；服务端对同 URL 抛 FACE_USER_ITEM_DUPLICATED 错误
    *
-   * 来源：1. 用户在表情面板「+」上传图片  2. 长按消息「添加到表情」（带 sourceMessageId）
+   * 来源：1. 用户在表情面板「+」上传图片  2. 长按消息「添加到表情」
    * 返回 true / false 与 removeFaceUserItem 风格对齐；调用方按 boolean 决定是否提示
    */
   async function addFaceUserItem(reqVO: ImFaceUserItemSaveReqVO): Promise<boolean> {

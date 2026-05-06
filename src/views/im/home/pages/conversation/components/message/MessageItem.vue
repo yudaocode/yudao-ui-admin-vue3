@@ -158,10 +158,7 @@
           [视频消息]
         </div>
         <!-- 表情贴图：裸 <img>，不套气泡（对齐微信观感：贴图本体就是装饰，再叠气泡显累赘） -->
-        <div
-          v-else-if="isFace && facePayload"
-          class="inline-block"
-        >
+        <div v-else-if="isFace && facePayload" class="inline-block">
           <img
             :src="facePayload.url"
             :alt="facePayload.name || '表情'"
@@ -187,7 +184,9 @@
               :size="40"
               :clickable="false"
             />
-            <div class="flex-1 min-w-0 text-sm font-medium truncate text-[var(--el-text-color-primary)]">
+            <div
+              class="flex-1 min-w-0 text-sm font-medium truncate text-[var(--el-text-color-primary)]"
+            >
               {{ cardPayload.nickname }}
             </div>
           </div>
@@ -837,12 +836,8 @@ async function handleAddToFace() {
   if (!payload) {
     return
   }
-  // TODO @AI：改成 data；更符合预期
-  const ok = await faceStore.addFaceUserItem({
-    ...payload,
-    sourceMessageId: props.message.id
-  })
-  if (ok) {
+  const data = await faceStore.addFaceUserItem(payload)
+  if (data) {
     successMessage('已添加到表情')
   }
 }

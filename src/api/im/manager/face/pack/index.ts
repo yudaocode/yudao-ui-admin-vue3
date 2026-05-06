@@ -3,7 +3,7 @@ import request from '@/config/axios'
 export interface ImManagerFacePackVO {
   id: number
   name: string
-  iconUrl?: string
+  icon?: string
   sort: number
   status: number
   createTime?: Date

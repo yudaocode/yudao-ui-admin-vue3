@@ -3,7 +3,7 @@
     表情面板（多 tab）：emoji / 个人表情 / N 个系统表情包
     - 对齐微信 PC：底部 tab 栏切换面板内容；emoji 保持 Unicode（仍由 TEXT 通道发送）
     - 个人表情 / 系统表情走 FACE 消息类型，通过 select-face 事件由调用方走 sendRaw 发送
-    - mode='emoji-only' 时只显示 emoji tab + 隐藏底部 tab 栏，给留言 / 评论这类只发文本的场景用
+    - mode='emoji' 时只显示 emoji tab + 隐藏底部 tab 栏，给留言 / 评论这类只发文本的场景用
     - 定位由调用方决定（通常浮在表情按钮上方）
   -->
   <div
@@ -32,17 +32,17 @@
       <!-- 个人表情：5 列方格，无名字标签；末尾「+」上传 -->
       <el-scrollbar v-if="isFullMode" v-show="activeTab === FACE_TAB.MINE" height="300px">
         <div class="grid grid-cols-5 gap-2 p-3">
-          <!-- 上传入口固定放第一格，对齐微信 -->
-          <!-- TODO @AI：这里的界面，有点丑，你看看：/Users/yunai/Downloads/iShot_2026-05-06_21.07.24.png -->
+          <!-- 上传入口固定放第一格；dashed border 与表情格子区分视觉语义，对齐 el-upload 观感 -->
           <button
-            class="aspect-square flex items-center justify-center rounded-md border border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)] text-2xl text-[var(--el-text-color-placeholder)] cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
+            class="im-face-upload-btn aspect-square flex items-center justify-center rounded-md cursor-pointer transition-colors"
             type="button"
             :disabled="uploading"
+            :title="uploading ? '上传中…' : '上传图片到个人表情'"
             @click="onUploadClick"
           >
             <Icon
               :icon="uploading ? 'eos-icons:bubble-loading' : 'ant-design:plus-outlined'"
-              :size="20"
+              :size="22"
             />
           </button>
           <div
@@ -112,7 +112,7 @@
       </template>
     </div>
 
-    <!-- 底部 tab 栏：[ emoji / 个人 / 系统包 1..N ]；emoji-only 模式下隐藏 -->
+    <!-- 底部 tab 栏：[ emoji / 个人 / 系统包 1..N ]；mode='emoji' 时隐藏 -->
     <div
       v-if="isFullMode"
       class="flex flex-shrink-0 items-center gap-1 px-2 py-1.5 border-t border-[var(--el-border-color-lighter)]"
@@ -151,8 +151,8 @@
           @click="activeTab = packTabKey(pack.id)"
         >
           <img
-            v-if="pack.iconUrl"
-            :src="pack.iconUrl"
+            v-if="pack.icon"
+            :src="pack.icon"
             :alt="pack.name"
             class="w-[18px] h-[18px] object-contain"
             draggable="false"
@@ -188,13 +188,12 @@ import type { ImFacePackUserItemVO, ImFaceUserItemVO } from '@/api/im/face'
 defineOptions({ name: 'ImFacePicker' })
 
 /** 面板模式 */
-// TODO @AI：直接就叫 emoji，不用带 only
-type FacePickerMode = 'full' | 'emoji-only'
+type FacePickerMode = 'full' | 'emoji'
 
 const props = withDefaults(
   defineProps<{
     visible: boolean
-    /** full：emoji + 个人表情 + 系统包（聊天主输入用）；emoji-only：仅 emoji（留言 / 评论场景） */
+    /** full：emoji + 个人表情 + 系统包（聊天主输入用）；emoji：仅 emoji（留言 / 评论场景） */
     mode?: FacePickerMode
   }>(),
   { mode: 'full' }
@@ -293,7 +292,7 @@ async function onUploadPicked(e: Event) {
   }
 }
 
-/** 面板展开时拉数据 + 挂全局 click；emoji-only 模式下不拉系统包 / 个人表情 */
+/** 面板展开时拉数据 + 挂全局 click；mode='emoji' 时不拉系统包 / 个人表情 */
 watch(
   () => props.visible,
   (visible) => {
@@ -361,5 +360,20 @@ onUnmounted(() => {
 .im-face-tab--active {
   background-color: var(--el-fill-color);
   color: var(--el-color-primary);
+}
+
+/* 个人表情上传按钮：dashed border 区分视觉语义，对齐 el-upload */
+.im-face-upload-btn {
+  border: 1px dashed var(--el-border-color);
+  background-color: transparent;
+  color: var(--el-text-color-placeholder);
+}
+.im-face-upload-btn:hover {
+  border-color: var(--el-color-primary);
+  color: var(--el-color-primary);
+}
+.im-face-upload-btn:disabled {
+  cursor: not-allowed;
+  color: var(--el-text-color-disabled);
 }
 </style>
