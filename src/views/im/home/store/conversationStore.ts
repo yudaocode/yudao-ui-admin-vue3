@@ -19,6 +19,9 @@ import { useGroupStore } from './groupStore'
 import { useDraftStore } from './draftStore'
 import type { Conversation, ConversationStoreMeta, Message } from '../types'
 
+// TODO @芋艿：单个 conversation 的消息过多后，可能存储起来会很慢，后续看看怎么优化。
+// TODO @芋艿：首次拉取消息时，如果消息过多，可能导致渲染卡顿。（1% 场景）
+
 /**
  * 算出新一条 lastSenderDisplayName 快照——caller 拿这个值去赋 conversation.lastSenderDisplayName
  *
@@ -61,8 +64,57 @@ function deriveLastSenderDisplayName(
   return isSameSender ? conversation.lastSenderDisplayName : undefined
 }
 
-// TODO @芋艿：单个 conversation 的消息过多后，可能存储起来会很慢，后续看看怎么优化。
-// TODO @芋艿：首次拉取消息时，如果消息过多，可能导致渲染卡顿。（1% 场景）
+/**
+ * 按 conversation.messages 末尾重算 last* 系列摘要 / 事实索引
+ *
+ * 用于：删除最后一条消息 / loadConversations drop 媒体占位后；剩余消息为空则字段一并清空。
+ * 不重算 lastSendTime 兜底（保留原 conversation 现值），与 removeMessage 旧行为一致
+ */
+function recomputeConversationLast(conversation: Conversation): void {
+  const last = conversation.messages[conversation.messages.length - 1]
+  if (last) {
+    const senderDisplayName = deriveLastSenderDisplayName(conversation, last.senderId)
+    conversation.lastContent = resolveConversationLastContent(
+      last,
+      conversation.type,
+      conversation.targetId,
+      senderDisplayName
+    )
+    conversation.lastSendTime = last.sendTime || conversation.lastSendTime
+    conversation.lastSenderId = last.senderId
+    conversation.lastMessageType = last.type
+    conversation.lastSelfSend = last.selfSend
+    conversation.lastSenderDisplayName = senderDisplayName
+  } else {
+    conversation.lastContent = ''
+    conversation.lastSenderId = undefined
+    conversation.lastMessageType = undefined
+    conversation.lastSelfSend = undefined
+    conversation.lastSenderDisplayName = undefined
+  }
+}
+
+/**
+ * 把服务端字段（REST ack / WS 推送 / pull 回填）合并到本地消息
+ *
+ * - content 被替换时 revoke 旧 blob URL（媒体占位转真实 url 释放 File 内存）
+ * - 状态离开 SENDING 后清 uploadProgress（让 isUploading 不再命中、进度遮罩消失）
+ * - 状态非 FAILED 终态再清 _localFile（FAILED 留着供重试 uploadAndSendMedia）
+ *
+ * 同时被 ackMessage / insertMessage(existingIndex 覆盖路径) 使用，确保 REST / WS 两路都做相同清理
+ */
+function applyServerMessageUpdate(message: Message, updates: Partial<Message>): void {
+  if (updates.content && updates.content !== message.content) {
+    revokeBlobUrlsInContent(message.content)
+  }
+  Object.assign(message, updates)
+  if (updates.status !== undefined && updates.status !== ImMessageStatus.SENDING) {
+    message.uploadProgress = undefined
+    if (updates.status !== ImMessageStatus.FAILED) {
+      message._localFile = undefined
+    }
+  }
+}
 
 export const useConversationStore = defineStore('imConversationStore', {
   state: () => ({
@@ -157,9 +209,15 @@ export const useConversationStore = defineStore('imConversationStore', {
                 message.status = ImMessageStatus.FAILED
                 return true
               }
-              return !(message.status === ImMessageStatus.FAILED && isMedia);
+              return !(message.status === ImMessageStatus.FAILED && isMedia)
             })
-            return { ...conversation, messages }
+            const restored: Conversation = { ...conversation, messages }
+            // 媒体占位被 drop 时，conversation 旧 lastContent / lastSendTime 等仍指向已不存在的占位，
+            //                   按剩余消息末尾重算，避免会话列表显示一条摘要、消息面板里却没对应消息
+            if (messages.length !== rawMessages.length) {
+              recomputeConversationLast(restored)
+            }
+            return restored
           } catch (e) {
             console.warn(
               '[IM] 单会话消息加载失败',
@@ -348,6 +406,13 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (this.activeConversation === conversation) {
         this.activeConversation = null
       }
+      // 释放媒体占位的 blob URL + _localFile：未持久化资源，软删后没人渲染，留着只占内存（视频几百 MB），
+      //        同步清空 messages 让 GC 早回收（软删的会话被 getSortedConversations 过滤，messages 留着无意义）
+      conversation.messages.forEach((message) => {
+        revokeBlobUrlsInContent(message.content)
+        message._localFile = undefined
+      })
+      conversation.messages = []
       conversation.deleted = true
       // 软删后会话的消息文件不再有用，物理删除该 key
       this.removeConversationMessages(type, targetId)
@@ -417,11 +482,9 @@ export const useConversationStore = defineStore('imConversationStore', {
         )
       })
       if (existingIndex >= 0) {
-        // 覆盖更新：服务端字段优先，本地已有的扩展字段（如 selfSend）保留
-        conversation.messages[existingIndex] = {
-          ...conversation.messages[existingIndex],
-          ...messageInfo
-        }
+        // 覆盖更新：与 ackMessage 走同一份 applyServerMessageUpdate；
+        //         WebSocket / pull 比 REST ack 先到的场景下，blob revoke 和 uploadProgress / _localFile 清理在这里完成
+        applyServerMessageUpdate(conversation.messages[existingIndex], messageInfo)
         conversation.lastSendTime = messageInfo.sendTime || conversation.lastSendTime
         this.updateMaxId(conversationInfo.type, messageInfo.id)
         this.saveConversations(conversation)
@@ -515,19 +578,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (!message) {
         return
       }
-      // 媒体消息 ack 服务端返回真实 url 时，旧 content 里的 blob URL 不再被渲染，立即释放对应 File 内存
-      if (updates.content && updates.content !== message.content) {
-        revokeBlobUrlsInContent(message.content)
-      }
-      Object.assign(message, updates)
-      // ① 状态离开 SENDING 后进度条没意义：成功（UNREAD/READ）和失败（FAILED）都清掉 uploadProgress
-      // ② _localFile 区别对待：FAILED 留着供重试 uploadAndSendMedia；非 FAILED 终态可清
-      if (updates.status !== undefined && updates.status !== ImMessageStatus.SENDING) {
-        message.uploadProgress = undefined
-        if (updates.status !== ImMessageStatus.FAILED) {
-          message._localFile = undefined
-        }
-      }
+      applyServerMessageUpdate(message, updates)
       if (updates.id) {
         this.updateMaxId(conversationType, updates.id)
       }
@@ -702,29 +753,9 @@ export const useConversationStore = defineStore('imConversationStore', {
       // 媒体消息占位 / FAILED 删除时释放 content 里的 blob URL，避免 File 对象内存泄漏
       revokeBlobUrlsInContent(conversation.messages[index].content)
       conversation.messages.splice(index, 1)
-      // 如果删的是最后一条，按倒数第二条重算摘要 + 事实索引
+      // 删的是最后一条时按剩余末尾重算摘要 + 事实索引
       if (index === conversation.messages.length) {
-        const last = conversation.messages[conversation.messages.length - 1]
-        if (last) {
-          const senderDisplayName = deriveLastSenderDisplayName(conversation, last.senderId)
-          conversation.lastContent = resolveConversationLastContent(
-            last,
-            conversation.type,
-            conversation.targetId,
-            senderDisplayName
-          )
-          conversation.lastSendTime = last.sendTime || conversation.lastSendTime
-          conversation.lastSenderId = last.senderId
-          conversation.lastMessageType = last.type
-          conversation.lastSelfSend = last.selfSend
-          conversation.lastSenderDisplayName = senderDisplayName
-        } else {
-          conversation.lastContent = ''
-          conversation.lastSenderId = undefined
-          conversation.lastMessageType = undefined
-          conversation.lastSelfSend = undefined
-          conversation.lastSenderDisplayName = undefined
-        }
+        recomputeConversationLast(conversation)
       }
       this.saveConversations(conversation)
     },
