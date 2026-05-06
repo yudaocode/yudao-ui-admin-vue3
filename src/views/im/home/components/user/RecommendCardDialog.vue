@@ -148,8 +148,25 @@
             </div>
           </div>
 
-          <!-- 留言（单行） -->
-          <el-input v-model="leaveMessage" :maxlength="100" placeholder="给朋友留言" />
+          <!-- 留言（单行）：右侧表情按钮触发 EmojiPicker，所选 emoji 直接拼接到输入末尾 -->
+          <div class="relative">
+            <el-input v-model="leaveMessage" :maxlength="100" placeholder="给朋友留言">
+              <template #suffix>
+                <Icon
+                  icon="ant-design:smile-outlined"
+                  :size="18"
+                  class="cursor-pointer text-[var(--el-text-color-secondary)] hover:text-[var(--el-color-primary)]"
+                  @click.stop="emojiVisible = !emojiVisible"
+                />
+              </template>
+            </el-input>
+            <!-- bottom-full 让 picker 下沿贴 input 顶部，向上弹出；right-0 对齐 input 右侧表情按钮 -->
+            <EmojiPicker
+              v-model:visible="emojiVisible"
+              class="bottom-full right-0 mb-2"
+              @select="handleEmojiSelect"
+            />
+          </div>
 
           <!-- 操作按钮：选 0/1 显示「发送」、多个显示「分别发送(n)」 -->
           <div class="flex gap-2 justify-end">
@@ -175,10 +192,11 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import UserAvatar from './UserAvatar.vue'
+import EmojiPicker from '../../pages/conversation/components/input/EmojiPicker.vue'
 import { useConversationStore } from '../../store/conversationStore'
 import { useMessageSender } from '../../composables/useMessageSender'
 import { ImConversationType, ImMessageType } from '../../../utils/constants'
-import { getConversationKey } from '../../../utils/conversation'
+import { filterConversationsByKeyword, getConversationKey } from '../../../utils/conversation'
 import { serializeMessage, type CardMessage } from '../../../utils/message'
 import type { Conversation, User } from '../../types'
 
@@ -207,6 +225,8 @@ const visible = computed({
 const keyword = ref('')
 const leaveMessage = ref('')
 const sending = ref(false)
+/** 表情面板显隐：右侧 smile icon 切换 */
+const emojiVisible = ref(false)
 /** 已勾选的会话 key 列表（type:targetId 组合主键）；selectedSet 派生用于 row 快查 */
 const selectedKeys = ref<string[]>([])
 /** 已选 key 集合：handlerToggle 写数组，row isSelected 走 set 快查避免 O(N) 扫描 */
@@ -220,6 +240,12 @@ function resetForm() {
   keyword.value = ''
   leaveMessage.value = ''
   selectedKeys.value = []
+  emojiVisible.value = false
+}
+
+/** 选中 emoji：直接拼到留言末尾；EmojiPicker 自身 emit('update:visible', false) 关闭面板 */
+function handleEmojiSelect(emoji: string) {
+  leaveMessage.value = `${leaveMessage.value}${emoji}`
 }
 
 /** 候选会话：私聊「推荐给本人」过滤掉避免无意义自推 */
@@ -231,15 +257,9 @@ const candidateConversations = computed<Conversation[]>(() => {
 })
 
 /** 按搜索关键字过滤展示列表（仅按 name 模糊匹配） */
-const shownConversations = computed(() => {
-  const keywordLower = keyword.value.trim().toLowerCase()
-  if (!keywordLower) {
-    return candidateConversations.value
-  }
-  return candidateConversations.value.filter((c) =>
-    (c.name || '').toLowerCase().includes(keywordLower)
-  )
-})
+const shownConversations = computed(() =>
+  filterConversationsByKeyword(candidateConversations.value, keyword.value)
+)
 
 /** 已选会话：右栏预览渲染用，按 selectedKeys 顺序展示 */
 const selectedConversations = computed<Conversation[]>(() => {

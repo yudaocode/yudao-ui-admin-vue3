@@ -130,12 +130,7 @@ function handleClick(e: MouseEvent) {
   }
   // 情况一：有预传 user 信息：就直接用，省一次接口
   if (props.user) {
-    uiStore.openUserInfoCard(
-      props.user,
-      { x: e.clientX + 20, y: e.clientY },
-      props.addSource,
-      props.addSourceExtra
-    )
+    uiStore.openUserInfoCardAtEvent(props.user, e, props.addSource, props.addSourceExtra)
     return
   }
   // 情况二：无预传 user 信息：打开名片，传最小必要信息（id + 昵称 + 头像），位置在鼠标右侧
@@ -143,13 +138,13 @@ function handleClick(e: MouseEvent) {
   if (!numId || numId <= 0) {
     return
   }
-  uiStore.openUserInfoCard(
+  uiStore.openUserInfoCardAtEvent(
     {
       id: numId,
       nickname: props.name,
       avatar: props.url
     },
-    { x: e.clientX + 20, y: e.clientY },
+    e,
     props.addSource,
     props.addSourceExtra
   )

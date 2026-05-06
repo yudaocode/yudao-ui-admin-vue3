@@ -20,6 +20,18 @@ export function getConversationKey(conversation: { type: number; targetId: numbe
   return `${conversation.type}-${conversation.targetId}`
 }
 
+/** 按昵称模糊过滤会话列表：空 keyword 原样返回，命中走 toLowerCase 不区分大小写 */
+export function filterConversationsByKeyword<T extends { name?: string }>(
+  list: T[],
+  keyword: string
+): T[] {
+  const trimmed = keyword.trim().toLowerCase()
+  if (!trimmed) {
+    return list
+  }
+  return list.filter((c) => (c.name || '').toLowerCase().includes(trimmed))
+}
+
 /** 撤回提示文案：自己撤回固定文案，对方撤回带 sender 名（实时算 + fallbackName 兜底） */
 export function buildRecallTip(
   senderId: number,

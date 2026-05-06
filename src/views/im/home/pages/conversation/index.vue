@@ -107,7 +107,7 @@ import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { StorageKeys } from '../../../utils/storage'
 import { ImConversationType } from '../../../utils/constants'
-import { getConversationKey } from '../../../utils/conversation'
+import { filterConversationsByKeyword, getConversationKey } from '../../../utils/conversation'
 import { CommonStatusEnum } from '@/utils/constants'
 import type { Conversation, Friend, FriendLite } from '../../types'
 import ResizableAside from '../../components/ResizableAside.vue'
@@ -129,15 +129,9 @@ const createGroupVisible = ref(false)
 const sortedConversations = computed(() => conversationStore.getSortedConversations)
 
 /** 顶部搜索框过滤会话：只按 name 模糊匹配，避免命中 lastContent 等次要字段干扰 */
-const filteredConversations = computed(() => {
-  const keywordLower = keyword.value.trim().toLowerCase()
-  if (!keywordLower) {
-    return sortedConversations.value
-  }
-  return sortedConversations.value.filter((c) =>
-    (c.name || '').toLowerCase().includes(keywordLower)
-  )
-})
+const filteredConversations = computed(() =>
+  filterConversationsByKeyword(sortedConversations.value, keyword.value)
+)
 
 // ==================== 置顶相关 ====================
 

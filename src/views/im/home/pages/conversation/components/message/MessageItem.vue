@@ -60,12 +60,7 @@
         <div
           v-if="isText"
           class="relative px-3.5 py-2.5 text-sm leading-normal break-words whitespace-pre-wrap rounded-lg"
-          :class="[
-            message.selfSend ? 'message-bubble--self' : 'message-bubble--other',
-            message.selfSend
-              ? 'text-black bg-[#95ec69]'
-              : 'text-[var(--el-text-color-primary)] bg-[var(--el-fill-color-light)]'
-          ]"
+          :class="bubbleClass('text')"
         >
           {{ textContent }}
         </div>
@@ -89,13 +84,7 @@
         <div
           v-else-if="isFile && filePayload"
           class="relative flex gap-3 items-center min-w-[260px] max-w-[340px] px-3.5 py-3 border rounded transition-colors"
-          :class="[
-            message.selfSend ? 'message-bubble--self' : 'message-bubble--other',
-            message.selfSend
-              ? 'bg-[#95ec69] border-[var(--el-border-color-lighter)]'
-              : 'bg-[var(--el-bg-color)] border-[var(--el-border-color-light)] hover:border-[#409eff]',
-            isUploading ? 'cursor-default' : 'cursor-pointer'
-          ]"
+          :class="[bubbleClass('file'), isUploading ? 'cursor-default' : 'cursor-pointer']"
           @click="handleFileClick"
         >
           <div class="flex-1 min-w-0">
@@ -204,9 +193,10 @@
         <!-- 状态区：自己消息展示发送状态 + 已读/群回执；对方消息 + @自己时展示 @徽标 -->
         <div class="flex gap-1.5 items-center text-base">
           <template v-if="message.selfSend">
-            <!-- 媒体消息 SENDING 时气泡自身已显示进度遮罩/进度条，外层 loading 多余；其它消息（含语音）保留 loading 表达 -->
+            <!-- SENDING 显示外层 loading；图片/视频/文件气泡自身有进度反馈则抑制；
+                 语音气泡只有麦克风 + 时长，无内嵌进度条，必须保留外层 loading 让用户感知正在发送 -->
             <Icon
-              v-if="message.status === ImMessageStatus.SENDING && !isUploading"
+              v-if="message.status === ImMessageStatus.SENDING && (!isUploading || isVoice)"
               icon="ant-design:loading-outlined"
               class="im-loading-spin"
             />
@@ -374,6 +364,34 @@ const isVoice = computed(() => props.message.type === ImMessageType.VOICE)
 const isVideo = computed(() => props.message.type === ImMessageType.VIDEO)
 const isCard = computed(() => props.message.type === ImMessageType.CARD)
 
+// ==================== 气泡配色 helper ====================
+// self / other 两侧 ::before 三角靠 message-bubble--self/other 类承载；本 helper 把 4 处 selfSend ternary
+// 集中到一处，新增 variant 直接在 switch 加 case；class 字面量保留以便 UnoCSS 静态扫描
+
+/** 文本 / 文件 / 语音气泡的整体 class（含 selfSend 配色 + ::before 三角的 side class） */
+function bubbleClass(variant: 'text' | 'file' | 'voice'): string[] {
+  const isSelf = props.message.selfSend
+  const side = isSelf ? 'message-bubble--self' : 'message-bubble--other'
+  switch (variant) {
+    case 'text':
+      return [
+        side,
+        isSelf
+          ? 'text-black bg-[#95ec69]'
+          : 'text-[var(--el-text-color-primary)] bg-[var(--el-fill-color-light)]'
+      ]
+    case 'file':
+      return [
+        side,
+        isSelf
+          ? 'bg-[#95ec69] border-[var(--el-border-color-lighter)]'
+          : 'bg-[var(--el-bg-color)] border-[var(--el-border-color-light)] hover:border-[#409eff]'
+      ]
+    case 'voice':
+      return [side, isSelf ? 'bg-[#95ec69]' : 'bg-[var(--el-fill-color-light)]']
+  }
+}
+
 // TODO @AI：抽到 message.ts 里？作为一个工具方法？
 /**
  * 时间分隔线文案：
@@ -468,13 +486,13 @@ function handleCardClick(e: MouseEvent) {
   if (!card?.userId) {
     return
   }
-  uiStore.openUserInfoCard(
+  uiStore.openUserInfoCardAtEvent(
     {
       id: card.userId,
       nickname: card.nickname,
       avatar: card.avatar
     },
-    { x: e.clientX + 20, y: e.clientY },
+    e,
     ImFriendAddSource.CARD
   )
 }

@@ -41,6 +41,16 @@ export const useImUiStore = defineStore('imUiStore', () => {
     userInfoCard.show = true
   }
 
+  /** 鼠标点击位置 + 20px 横向偏移打开名片：避免名片直接覆盖触发元素，对齐头像 / 名片消息等点击交互的统一观感 */
+  function openUserInfoCardAtEvent(
+    user: User,
+    e: MouseEvent,
+    addSource: number = ImFriendAddSource.SEARCH,
+    addSourceExtra: string = ''
+  ) {
+    openUserInfoCard(user, { x: e.clientX + 20, y: e.clientY }, addSource, addSourceExtra)
+  }
+
   /** 关闭用户名片 */
   function closeUserInfoCard() {
     userInfoCard.show = false
@@ -86,6 +96,7 @@ export const useImUiStore = defineStore('imUiStore', () => {
   return {
     userInfoCard,
     openUserInfoCard,
+    openUserInfoCardAtEvent,
     closeUserInfoCard,
 
     contextMenu,
