@@ -57,6 +57,13 @@ const { readActive, syncPrivateReadStatus } = useMessageSender()
 
 /** 初始化：先吃本地缓存让首屏立即渲染，再远端刷新最新数据，最后建实时通信拉离线消息 */
 onMounted(async () => {
+  // 0.1 系统表情包后台预拉：独立链路与首屏 IDB / 远端拉取并发，消除表情面板首次展开白屏；失败仅记日志，不阻塞主流程
+  void faceStore.ensureFacePacks().catch((e) => console.warn('[IM] 后台预拉表情包失败', e))
+  // 0.2 我管理的群下未处理加群申请：会话列表全局入口 / 群顶部横幅都从这份 store 派生；后台拉，不阻断
+  void groupRequestStore.fetchUnhandledList().catch((e) =>
+    console.warn('[IM] 拉取未处理加群申请失败', e)
+  )
+
   // 1.1 整段 loading=true 阻断 saveConversations 抖动写盘 + WebSocket 普通消息进缓冲，避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
   conversationStore.loading = true
   try {

@@ -47,23 +47,18 @@ export const refuseGroupRequest = (id: number | string, handleContent?: string) 
   })
 }
 
-// 查询「我相关」的加群申请列表（含我主动申请、我被邀请待审）；游标分页
-// TODO @AI：这个 list 接口，改成传递 groupId，查询这个群下，所有的申请。然后，group size 增加一个：「群申请列表」，里面可以看到所有的。
-export const getMyGroupRequestList = (limit: number, lastRequestId?: number) => {
-  const params: Record<string, number> = { limit }
-  if (lastRequestId != null) {
-    params.lastRequestId = lastRequestId
-  }
-  return request.get<ImGroupRequestRespVO[]>({
-    url: '/im/group-request/list',
-    params
-  })
-}
-
 // 查询「我管理的所有群」下的未处理加群申请列表（不分页）；前端 store 据此派生横幅红点 + Drawer 列表
 export const getUnhandledRequestList = () => {
   return request.get<ImGroupRequestRespVO[]>({
     url: '/im/group-request/unhandled-list'
+  })
+}
+
+// 查询指定群下的全部加群申请（含已处理）；仅群主 / 管理员可查
+export const getGroupRequestListByGroupId = (groupId: number) => {
+  return request.get<ImGroupRequestRespVO[]>({
+    url: '/im/group-request/list-by-group',
+    params: { groupId }
   })
 }
 

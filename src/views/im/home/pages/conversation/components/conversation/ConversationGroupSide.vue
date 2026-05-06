@@ -272,12 +272,33 @@
             <span class="im-conversation-group-side__label">全群禁言</span>
             <el-switch :model-value="!!currentMutedAll" @change="onMuteAllChange" />
           </div>
-          <!-- 进群审批：仅群主可操作；开启后所有「申请」「邀请」路径都需群主 / 管理员同意 -->
-          <div v-if="isOwner" class="im-conversation-group-side__row">
-            <span class="im-conversation-group-side__label">进群需要群主 / 群管理确认</span>
-            <el-switch :model-value="!!group.joinApproval" @change="onJoinApprovalChange" />
-          </div>
         </div>
+
+        <!-- ==================== 进群审批 ==================== -->
+        <!-- 单独一段：群主开关 + 紧跟「- 进群申请」子项；与微信群管理布局对齐 -->
+        <template v-if="isOwner || (isOwnerOrAdmin && !!group.joinApproval)">
+          <div class="im-conversation-group-side__spacer"></div>
+          <div class="im-conversation-group-side__section">
+            <!-- 进群审批：仅群主可操作；开启后普通成员的「申请」「邀请」路径都需群主 / 管理员同意；群主 / 管理员邀请直进 -->
+            <div v-if="isOwner" class="im-conversation-group-side__row">
+              <span class="im-conversation-group-side__label">进群需要群主 / 群管理确认</span>
+              <el-switch :model-value="!!group.joinApproval" @change="onJoinApprovalChange" />
+            </div>
+            <!-- 进群申请子项：仅当开启审批 + 当前用户是 owner / admin 时出现；点击进列表 dialog -->
+            <div
+              v-if="isOwnerOrAdmin && !!group.joinApproval"
+              class="im-conversation-group-side__row im-conversation-group-side__row--clickable"
+              @click="requestListVisible = true"
+            >
+              <span class="im-conversation-group-side__label">- 进群申请</span>
+              <Icon
+                icon="ant-design:right-outlined"
+                :size="11"
+                class="im-conversation-group-side__chevron"
+              />
+            </div>
+          </div>
+        </template>
 
         <!-- ==================== 群主操作 ==================== -->
         <!-- 仅群主可见，含管理员设置 + 群主管理权转让 -->
@@ -371,6 +392,9 @@
       :max-size="1"
       @complete="handleTransferOwnerComplete"
     />
+
+    <!-- 进群申请列表（仅当开启审批 + 当前用户是 owner / admin 时入口可见） -->
+    <GroupRequestListDialog v-model="requestListVisible" :group-id="group?.id" />
   </el-drawer>
 </template>
 
@@ -402,6 +426,7 @@ import GroupMemberAddDialog from '../../../../components/group/GroupMemberAddDia
 import GroupMemberSelector, {
   type GroupMemberFlag
 } from '../../../../components/group/GroupMemberSelector.vue'
+import GroupRequestListDialog from '../../../../components/group/GroupRequestListDialog.vue'
 import type { Conversation, FriendLite, GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
@@ -445,6 +470,7 @@ const inviteVisible = ref(false)
 const removeVisible = ref(false)
 const adminVisible = ref(false)
 const transferOwnerVisible = ref(false)
+const requestListVisible = ref(false)
 const showAllMembers = ref(false)
 const namePopoverVisible = ref(false)
 const noticePopoverVisible = ref(false)

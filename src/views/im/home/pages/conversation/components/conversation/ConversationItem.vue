@@ -42,6 +42,10 @@
         </span>
       </div>
       <div class="flex items-center mt-1 leading-5">
+        <!-- 进群申请红字前缀：群主 / 管理员看到自己管理的群下还有未处理申请时显示 -->
+        <span v-if="requestText" class="flex-shrink-0 text-12px text-[#c70b0b]">
+          {{ requestText }}
+        </span>
         <!-- @红字提示：atMe 优先于 atAll -->
         <span v-if="atText" class="flex-shrink-0 text-12px text-[#c70b0b]">{{ atText }}</span>
         <!-- 群聊最后一条发送者前缀：按 lastSenderId + 当前会话上下文实时算名字 -->
@@ -78,6 +82,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
 import { useGroupStore } from '../../../../store/groupStore'
+import { useGroupRequestStore } from '../../../../store/groupRequestStore'
 import { useImUiStore } from '../../../../store/uiStore'
 import { useDraftStore } from '../../../../store/draftStore'
 import { ImConversationType, ImMessageType, isNormalMessage } from '../../../../../utils/constants'
@@ -98,6 +103,7 @@ const props = defineProps<{
 const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
+const groupRequestStore = useGroupRequestStore()
 const uiStore = useImUiStore()
 const draftStore = useDraftStore()
 const message = useMessage()
@@ -174,6 +180,15 @@ const atText = computed(() => {
     return '[@全体成员]'
   }
   return ''
+})
+
+/** 群聊未处理加群申请红字前缀；store 已经按「我管理的群」过滤过，count > 0 即可显示 */
+const requestText = computed(() => {
+  if (!isGroup.value) {
+    return ''
+  }
+  const count = groupRequestStore.getUnhandledCountByGroupId(props.conversation.targetId)
+  return count > 0 ? `[${count}条进群申请]` : ''
 })
 
 /** 点击切会话 */
