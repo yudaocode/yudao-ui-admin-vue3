@@ -52,7 +52,7 @@
 
       <!--
         底部工具栏：左侧操作图标 + 右侧发送按钮（对齐微信 PC：操作图标统一放底部）
-        - relative 给 EmojiPicker 提供 absolute 锚点，picker 用 bottom-full 向上弹出
+        - relative 给 FacePicker 提供 absolute 锚点，picker 用 bottom-full 向上弹出
         - 图标统一 30×30 点击区（18px icon + p-1.5），gap-1 让间距贴合微信观感
         - border-t 在编辑区与工具栏之间画一条与 card 边框同色的细线（scoped CSS 避绕 UnoCSS preflight 缺失）
       -->
@@ -130,10 +130,11 @@
         </el-button>
 
         <!-- 表情面板：bottom-full 让 picker 下沿贴工具栏顶部，向上弹出（对齐工具栏左侧首图标） -->
-        <EmojiPicker
+        <FacePicker
           v-model:visible="emojiVisible"
           class="bottom-full left-3 mb-2"
-          @select="insertText"
+          @select-emoji="insertText"
+          @select-face="onSelectFace"
         />
 
         <!-- 语音录制面板：与表情面板同处工具栏，bottom-full 向上弹出，避免离触发的麦克风图标过远 -->
@@ -176,11 +177,12 @@ import { getConversationKey } from '@/views/im/utils/conversation'
 import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
 import {
   serializeMessage,
+  type FaceMessage,
   type QuoteMessage,
   withQuotePayload
 } from '@/views/im/utils/message'
 
-import EmojiPicker from './EmojiPicker.vue'
+import FacePicker from './FacePicker.vue'
 import MentionPicker from './MentionPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
 import ReplyPreview from '../message/ReplyPreview.vue'
@@ -193,7 +195,7 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const draftStore = useDraftStore()
-const { send } = useMessageSender()
+const { send, sendRaw } = useMessageSender()
 const {
   uploadAndSendMedia,
   insertMediaPlaceholder,
@@ -584,6 +586,23 @@ function toggleEmoji() {
   if (emojiVisible.value) {
     voiceVisible.value = false
   }
+}
+
+/** 选中表情贴图：拼 FaceMessage payload 直接走 sendRaw 发送（quote 复用当前 reply 快照） */
+async function onSelectFace(face: { url: string; width: number; height: number; name?: string }) {
+  if (muteOverlay.value) {
+    return
+  }
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return
+  }
+  const replyQuote = consumeReply()
+  const payload = withQuotePayload<FaceMessage>(
+    { url: face.url, width: face.width, height: face.height, name: face.name },
+    replyQuote
+  )
+  await sendRaw(ImMessageType.FACE, serializeMessage(payload), { conversation })
 }
 
 // ==================== @ 成员选择（群聊） ====================

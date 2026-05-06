@@ -1,10 +1,9 @@
 <template>
   <!--
-    表情选择器
-    当前实现简化为：
-    - 直接用 Unicode emoji，插入到输入框即所见即所得
+    简版 emoji 选择器：只渲染 Unicode emoji，所选直接拼到调用方文本
+    - 给「留言 / 表单」这类轻量场景用，避免把 FacePicker 整套（个人 + 系统包）塞进单行输入框边
     - 调用方通过 v-model:visible 控制显隐，通过 @select 接收选中的 emoji 字符
-    - 定位由调用方决定（通常是「浮在表情按钮上方」）
+    - 主聊天输入框场景请用 FacePicker.vue（多 tab）
   -->
   <div
     v-if="visible"
@@ -112,4 +111,3 @@ onUnmounted(() => {
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
 }
 </style>
-

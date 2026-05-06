@@ -62,6 +62,18 @@
     <span>个人名片：{{ cardPayload.nickname }}</span>
   </span>
 
+  <!-- 表情贴图：缩略图 + 表情名（无名字时仅 [表情]） -->
+  <span v-else-if="isFace && facePayload" class="inline-flex gap-1.5 items-center">
+    <img
+      v-if="facePayload.url"
+      :src="facePayload.url"
+      :alt="facePayload.name || '表情'"
+      class="w-30px h-30px rounded object-contain align-middle"
+      draggable="false"
+    />
+    <span>{{ facePayload.name ? `[表情] ${facePayload.name}` : '[表情]' }}</span>
+  </span>
+
   <!-- 控制类消息：撤回 / 已读 / 回执 -->
   <span
     v-else-if="props.type === ImMessageType.RECALL"
@@ -119,7 +131,8 @@ import {
   type AudioMessage,
   type VideoMessage,
   type TextMessage,
-  type CardMessage
+  type CardMessage,
+  type FaceMessage
 } from '@/views/im/utils/message'
 import {
   resolveFriendNotificationText,
@@ -144,6 +157,7 @@ const isFile = computed(() => props.type === ImMessageType.FILE)
 const isVoice = computed(() => props.type === ImMessageType.VOICE)
 const isVideo = computed(() => props.type === ImMessageType.VIDEO)
 const isCard = computed(() => props.type === ImMessageType.CARD)
+const isFace = computed(() => props.type === ImMessageType.FACE)
 
 /** 文本内容：从 TextMessage payload 取 .content */
 const textContent = computed(
@@ -164,6 +178,9 @@ const videoPayload = computed(() =>
 )
 const cardPayload = computed(() =>
   isCard.value ? parseMessage<CardMessage>(props.content || '') : null
+)
+const facePayload = computed(() =>
+  isFace.value ? parseMessage<FaceMessage>(props.content || '') : null
 )
 
 /** 点击视频封面：在新标签打开视频 url（不在管理后台内嵌播放，避免列表里多个 video 同时占资源） */

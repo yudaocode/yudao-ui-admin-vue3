@@ -93,6 +93,18 @@ export interface CardMessage extends Quotable {
   avatar?: string
 }
 
+/** 表情消息 payload（对齐后端 FaceMessage；Unicode emoji 仍走 TEXT，本类型只承载贴图 / 自定义表情包） */
+export interface FaceMessage extends Quotable {
+  /** 表情图 URL */
+  url: string
+  /** 渲染宽度（像素），避免布局抖动 */
+  width: number
+  /** 渲染高度（像素） */
+  height: number
+  /** 表情名（系统包通常有，个人表情包通常无） */
+  name?: string
+}
+
 /** 解析消息 content（JSON 字符串）为指定 payload，非法 JSON 返回 null */
 export const parseMessage = <T>(content: string): T | null => {
   try {

@@ -70,6 +70,10 @@ export function resolveConversationLastContent(
       return '[视频]'
     case ImMessageType.CARD:
       return '[个人名片]'
+    case ImMessageType.FACE: {
+      const facePayload = parseMessage<{ name?: string }>(message.content)
+      return facePayload?.name ? `[表情] ${facePayload.name}` : '[表情]'
+    }
     case ImMessageType.RECALL:
       return buildRecallTip(
         message.senderId,
