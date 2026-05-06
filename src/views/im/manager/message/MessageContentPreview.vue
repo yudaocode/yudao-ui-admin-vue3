@@ -56,6 +56,12 @@
     </span>
   </span>
 
+  <!-- 名片：人形 icon + 昵称（管理后台单行预览，不渲染头像图片） -->
+  <span v-else-if="isCard && cardPayload" class="inline-flex gap-1.5 items-center">
+    <Icon icon="ant-design:user-outlined" :size="16" color="#606266" />
+    <span>个人名片：{{ cardPayload.nickname }}</span>
+  </span>
+
   <!-- 控制类消息：撤回 / 已读 / 回执 -->
   <span
     v-else-if="props.type === ImMessageType.RECALL"
@@ -112,7 +118,8 @@ import {
   type FileMessage,
   type AudioMessage,
   type VideoMessage,
-  type TextMessage
+  type TextMessage,
+  type CardMessage
 } from '@/views/im/utils/message'
 import {
   resolveFriendNotificationText,
@@ -136,6 +143,7 @@ const isImage = computed(() => props.type === ImMessageType.IMAGE)
 const isFile = computed(() => props.type === ImMessageType.FILE)
 const isVoice = computed(() => props.type === ImMessageType.VOICE)
 const isVideo = computed(() => props.type === ImMessageType.VIDEO)
+const isCard = computed(() => props.type === ImMessageType.CARD)
 
 /** 文本内容：从 TextMessage payload 取 .content */
 const textContent = computed(
@@ -153,6 +161,9 @@ const voicePayload = computed(() =>
 )
 const videoPayload = computed(() =>
   isVideo.value ? parseMessage<VideoMessage>(props.content || '') : null
+)
+const cardPayload = computed(() =>
+  isCard.value ? parseMessage<CardMessage>(props.content || '') : null
 )
 
 /** 点击视频封面：在新标签打开视频 url（不在管理后台内嵌播放，避免列表里多个 video 同时占资源） */

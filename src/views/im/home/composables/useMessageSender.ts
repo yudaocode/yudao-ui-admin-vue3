@@ -18,7 +18,7 @@ import {
   type TextMessage
 } from '../../utils/message'
 import { ImMessageType, ImMessageStatus, ImConversationType } from '../../utils/constants'
-import type { Message } from '../types'
+import type { Conversation, Message } from '../types'
 import { useUserStore } from '@/store/modules/user'
 
 /** 非文本消息的扩展选项（通用） */
@@ -26,6 +26,13 @@ interface SendExtOptions {
   atUserIds?: number[] // 群聊 @ 的用户编号列表
   receipt?: boolean // 是否需要群回执（默认 false）
   targetId?: number // 覆盖默认的 targetId
+  /**
+   * 显式指定目标会话（转发 / 名片推荐场景）
+   *
+   * 不传时默认取 conversationStore.activeConversation；传入时按本值发送 + 乐观更新到对应会话，
+   * 不要求该会话当前是激活状态（适合发给「非当前会话」的多个目标）
+   */
+  conversation?: Conversation
   /** 被引用消息（可选）：写进 content.quote 用于乐观渲染，服务端按 quote.messageId 反查重算覆盖 */
   quote?: QuoteMessage
   /**
@@ -78,8 +85,8 @@ export const useMessageSender = () => {
    * 2. type / content 由调用方构造
    */
   const sendRaw = async (type: number, content: string, options?: SendExtOptions) => {
-    // 1. 参数校验：必须有激活会话和目标 id
-    const conversation = conversationStore.activeConversation
+    // 1. 参数校验：优先用显式传入的 conversation（转发场景），否则取激活会话
+    const conversation = options?.conversation ?? conversationStore.activeConversation
     if (!conversation) {
       return
     }

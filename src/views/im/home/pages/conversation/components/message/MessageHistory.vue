@@ -252,6 +252,15 @@
                 [视频]
               </div>
 
+              <!-- 名片：人形 icon + 「个人名片：昵称」 -->
+              <div
+                v-else-if="message.type === ImMessageType.CARD"
+                class="inline-flex gap-1.5 items-center text-sm text-[var(--el-text-color-secondary)]"
+              >
+                <Icon icon="ant-design:user-outlined" :size="14" />
+                <span>个人名片：{{ cardOf(message)?.nickname || '' }}</span>
+              </div>
+
               <!-- 撤回 -->
               <div
                 v-else-if="message.type === ImMessageType.RECALL"
@@ -329,7 +338,8 @@ import {
   type TextMessage,
   type ImageMessage,
   type FileMessage,
-  type AudioMessage
+  type AudioMessage,
+  type CardMessage
 } from '@/views/im/utils/message'
 import type { Message } from '@/views/im/home/types'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
@@ -666,6 +676,9 @@ function fileOf(message: Message): FileMessage | null {
 function audioOf(message: Message): AudioMessage | null {
   return parseMessage<AudioMessage>(message.content)
 }
+function cardOf(message: Message): CardMessage | null {
+  return parseMessage<CardMessage>(message.content)
+}
 
 /** 关键字命中文本：文本类返回原文、文件返回文件名（利于按文件名搜）、其他返回占位词 */
 function textSnippetOf(message: Message): string {
@@ -683,6 +696,8 @@ function textSnippetOf(message: Message): string {
       return '[语音]'
     case ImMessageType.VIDEO:
       return '[视频]'
+    case ImMessageType.CARD:
+      return `[个人名片] ${parseMessage<CardMessage>(message.content)?.nickname ?? ''}`
     case ImMessageType.RECALL:
       return recallTipOf(message)
     default:

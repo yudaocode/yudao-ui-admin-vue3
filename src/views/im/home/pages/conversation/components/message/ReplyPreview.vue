@@ -57,6 +57,14 @@
       </span>
     </template>
 
+    <!-- 名片：人形 icon + 「个人名片：昵称」 -->
+    <template v-else-if="isCard">
+      <Icon icon="ant-design:user-outlined" :size="14" class="flex-shrink-0" />
+      <span class="im-reply-preview__text min-w-0">
+        个人名片：{{ parsedPayload?.nickname || '' }}
+      </span>
+    </template>
+
     <!-- 图片 / 视频缩略图 -->
     <img
       v-if="thumbnailUrl"
@@ -90,6 +98,7 @@ import {
   parseMessage,
   getFileIconInfo,
   type AudioMessage,
+  type CardMessage,
   type FileMessage,
   type ImageMessage,
   type TextMessage,
@@ -149,13 +158,14 @@ const senderName = computed(() => {
 
 /** quote.content 解析一次缓存，让多个 computed 复用，长会话每条引用气泡少一次 JSON.parse */
 type AnyQuotePayload = Partial<
-  TextMessage & ImageMessage & FileMessage & AudioMessage & VideoMessage
+  TextMessage & ImageMessage & FileMessage & AudioMessage & VideoMessage & CardMessage
 >
 const parsedPayload = computed(() => parseMessage<AnyQuotePayload>(props.quote.content))
 
 const isText = computed(() => props.quote.type === ImMessageType.TEXT)
 const isFile = computed(() => props.quote.type === ImMessageType.FILE)
 const isVoice = computed(() => props.quote.type === ImMessageType.VOICE)
+const isCard = computed(() => props.quote.type === ImMessageType.CARD)
 
 /** 文本超过 MAX_TEXT_PREVIEW_LEN 截断，长内容不撑爆引用块 */
 const textPreview = computed(() => {
