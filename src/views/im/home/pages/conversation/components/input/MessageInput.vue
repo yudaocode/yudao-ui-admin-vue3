@@ -8,7 +8,9 @@
     <div
       v-if="muteOverlay"
       class="message-input__mute-overlay"
-      :class="{ 'message-input__mute-overlay--banned': muteOverlay.icon === 'ant-design:stop-outlined' }"
+      :class="{
+        'message-input__mute-overlay--banned': muteOverlay.icon === 'ant-design:stop-outlined'
+      }"
     >
       <Icon :icon="muteOverlay.icon" :size="18" />
       <span>{{ muteOverlay.text }}</span>
@@ -17,7 +19,9 @@
       内层白色圆角卡片 = editor + 工具栏；border + rounded 模拟微信"输入框"边界，
       避免之前"无框 Web 输入"的散开感；border 走 scoped CSS（UnoCSS 不带 border-style preflight）
     -->
-    <div class="message-input__card relative flex flex-col bg-[var(--el-bg-color)] rounded-lg">
+    <div
+      class="relative flex flex-col bg-[var(--el-bg-color)] rounded-lg border border-[var(--el-border-color-lighter)]"
+    >
       <!--
         输入区在上：contenteditable div（取代 textarea，对齐微信 PC：输入区在上，操作在下）
         - 让 @ 浮层能拿到真实光标 rect（textarea 拿不到）
@@ -26,7 +30,7 @@
       -->
       <div
         ref="editorRef"
-        class="message-input__editor"
+        class="message-input__editor relative min-h-[120px] max-h-[200px] overflow-y-auto py-3.5 px-4 text-sm leading-normal outline-none whitespace-pre-wrap break-words"
         contenteditable="true"
         data-placeholder="按 Enter 发送，Shift+Enter 换行"
         data-empty=""
@@ -53,7 +57,7 @@
         - border-t 在编辑区与工具栏之间画一条与 card 边框同色的细线（scoped CSS 避绕 UnoCSS preflight 缺失）
       -->
       <div
-        class="message-input__toolbar relative flex items-center justify-between gap-2 px-3 py-2"
+        class="relative flex items-center justify-between gap-2 px-3 py-2 border-t border-[var(--el-border-color-lighter)]"
       >
         <div class="flex items-center gap-1">
           <!--
@@ -166,6 +170,7 @@ import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useDraftStore } from '@/views/im/home/store/draftStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
+import { useMediaUploader } from '@/views/im/home/composables/useMediaUploader'
 import { useMuteOverlay } from '@/views/im/home/composables/useMuteOverlay'
 import { getConversationKey } from '@/views/im/utils/conversation'
 import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
@@ -184,6 +189,7 @@ import MentionPicker from './MentionPicker.vue'
 import VoiceRecorder from './VoiceRecorder.vue'
 import ReplyPreview from '../message/ReplyPreview.vue'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
+import type { Conversation } from '@/views/im/home/types'
 
 defineOptions({ name: 'ImMessageInput' })
 
@@ -191,7 +197,9 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const draftStore = useDraftStore()
-const { send, sendRaw } = useMessageSender()
+const { send } = useMessageSender()
+const { uploadAndSendMedia, insertMediaPlaceholder, markMediaFailed, commitMediaPlaceholder } =
+  useMediaUploader()
 
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
 const imageInputRef = useTemplateRef<HTMLInputElement>('imageInputRef')
@@ -565,12 +573,6 @@ function consumeReply(): QuoteMessage | undefined {
   return quote
 }
 
-/** 抓当前激活会话的 key，媒体上传开始前调；无激活会话返回 undefined */
-function getActiveConversationKey(): string | undefined {
-  const conversation = conversationStore.activeConversation
-  return conversation ? getConversationKey(conversation) : undefined
-}
-
 /** 校验当前激活会话仍是 startKey；切走了记日志 + 返回 false，调用方放弃发送 */
 function isStillSameConversation(startKey: string, kind: string): boolean {
   const conversation = conversationStore.activeConversation
@@ -806,63 +808,51 @@ function onKeydown(e: KeyboardEvent) {
 
 // ==================== 图片 / 文件 / 语音 上传 ====================
 
-/**
- * 媒体上传 → 发送的公共骨架（image / file / voice 共用；video 因 probe + 双上传链路保留独立）
- *
- * 禁言态直接返回；锁会话 key + 消费 reply → 上传 → 校验仍在原会话 → 拼 payload + quote → sendRaw
- */
-async function uploadAndSendMedia<P extends { quote?: QuoteMessage }>(opts: {
-  file: File
-  type: number
-  kind: string
-  buildPayload: (url: string) => P
-}) {
+/** 上传前的统一拦截：禁言态 / 无激活会话直接放弃；返回当前 conversation 与抓走的 quote */
+function prepareMediaUpload(): { conversation: Conversation; quote?: QuoteMessage } | undefined {
   if (muteOverlay.value) {
-    return
+    return undefined
   }
-  const startKey = getActiveConversationKey()
-  if (!startKey) {
-    return
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return undefined
   }
-  const replyQuote = consumeReply()
-  const form = new FormData()
-  form.append('file', opts.file)
-  const url = ((await updateFile(form)) as { data?: string })?.data
-  if (!url) {
-    return
-  }
-  if (!isStillSameConversation(startKey, opts.kind)) {
-    return
-  }
-  // 上传期间被禁言也要拦：上传可能耗时几秒到几十秒，期间 muteOverlay 会变
-  if (muteOverlay.value) {
-    return
-  }
-  const payload = withQuotePayload<P>(opts.buildPayload(url), replyQuote)
-  await sendRaw(opts.type, serializeMessage(payload))
+  return { conversation, quote: consumeReply() }
 }
 
-/** 上传并发送 IMAGE 消息 */
+/** 上传并发送 IMAGE 消息（占位 + 进度 + 真实 url ack 由 useMediaUploader 处理） */
 async function uploadAndSendImage(file: File) {
+  const context = prepareMediaUpload()
+  if (!context) {
+    return
+  }
   await uploadAndSendMedia<ImageMessage>({
     file,
     type: ImMessageType.IMAGE,
     kind: '图片',
+    quote: context.quote,
+    conversation: context.conversation,
     buildPayload: (url) => ({ url })
   })
 }
 
 /** 上传并发送 FILE 消息；附原始 name / size 让接收端展示文件名和体积 */
 async function uploadAndSendFile(file: File) {
+  const context = prepareMediaUpload()
+  if (!context) {
+    return
+  }
   await uploadAndSendMedia<FileMessage>({
     file,
     type: ImMessageType.FILE,
     kind: '文件',
+    quote: context.quote,
+    conversation: context.conversation,
     buildPayload: (url) => ({ url, name: file.name, size: file.size })
   })
 }
 
-/** 图片选完即上传 + 发送 IMAGE 消息（不放入 editor，整体走 sendRaw） */
+/** 图片选完即上传 + 发送 IMAGE 消息（不放入 editor，由 useMediaUploader 接管占位 / 进度 / ack） */
 async function onImagePicked(e: Event) {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -891,11 +881,17 @@ function openVoice() {
 }
 /** VoiceRecorder 录完回传 blob，包成 webm File 后走通用 uploadAndSendMedia */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
+  const context = prepareMediaUpload()
+  if (!context) {
+    return
+  }
   const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
   await uploadAndSendMedia<AudioMessage>({
     file,
     type: ImMessageType.VOICE,
     kind: '语音',
+    quote: context.quote,
+    conversation: context.conversation,
     buildPayload: (url) => ({ url, duration: payload.duration })
   })
 }
@@ -964,10 +960,10 @@ async function probeVideoFile(file: File): Promise<VideoProbe> {
       const ratio = Math.min(1, VIDEO_COVER_MAX_DIM / Math.max(video.videoWidth, video.videoHeight))
       canvas.width = Math.round(video.videoWidth * ratio)
       canvas.height = Math.round(video.videoHeight * ratio)
-      const ctx = canvas.getContext('2d')
-      if (ctx && canvas.width && canvas.height) {
+      const context = canvas.getContext('2d')
+      if (context && canvas.width && canvas.height) {
         // 2.4 当前帧绘到 canvas → toBlob 拿 jpeg；0.8 质量是聊天封面常用甜点
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        context.drawImage(video, 0, 0, canvas.width, canvas.height)
         cover =
           (await new Promise<Blob | null>((resolve) =>
             canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.8)
@@ -996,31 +992,51 @@ async function probeVideoFile(file: File): Promise<VideoProbe> {
 /**
  * 上传并发送 VIDEO 消息
  *
- * 1. probe 与视频上传同步起跑；封面上传等 probe 出 cover 后与视频上传竞速
+ * 1. 立即占位：blob URL 既当 video src 也当 poster，浏览器会拿首帧绘制 cover；status=SENDING + 进度条
+ * 2. probe 与视频上传同步起跑；封面上传等 probe 出 cover 后与视频上传竞速
  *    （probe 解码 + 封面上传通常被视频上传时长完全遮蔽，体感节省几百 ms 起步）
- * 2. 视频本体上传必须成功，拿不到 url 就直接 return
- * 3. 封面是锦上添花：上传失败仅日志，coverUrl 留空，气泡 <video> 自带黑底播放按钮兜底
- *
- * 视频链路耗时长（probe + 双上传），上传期间用户切会话则放弃发送，
- * 否则会落到错误的会话里；切走再切回来不算变化（key 仍相等）。
+ * 3. 视频本体上传必须成功，拿不到 url 就把占位置 FAILED；封面是锦上添花，失败仅日志
+ * 4. 视频链路耗时长，上传期间用户切会话则放弃发送（避免落到错误会话里）；切走再切回来不算变化（key 仍相等）
  */
 async function uploadAndSendVideo(file: File) {
-  if (muteOverlay.value) {
+  const context = prepareMediaUpload()
+  if (!context) {
     return
   }
-  // 1. 锁定起始会话 key（上传期间用户切走则不发到错误目标；切走再切回来 key 仍相等，不算变化）
-  const startKey = getActiveConversationKey()
-  if (!startKey) {
-    return
-  }
-  // quote 抓取后立即清 draft.reply，与图片 / 文件 / 语音上传链路一致
-  const replyQuote = consumeReply()
+  const { conversation } = context
+  const replyQuote = context.quote
+  const startKey = getConversationKey(conversation)
+
+  // 1. 立即占位：blob URL 同时作 url + coverUrl 让 <video> 渲染首帧；_localFile 留 file 供失败重试
+  const buildPlaceholderContent = (blobUrl: string): string =>
+    serializeMessage(
+      withQuotePayload<VideoMessage>(
+        { url: blobUrl, coverUrl: blobUrl, size: file.size },
+        replyQuote
+      )
+    )
+  const { clientMessageId } = insertMediaPlaceholder({
+    file,
+    type: ImMessageType.VIDEO,
+    conversation,
+    buildContent: buildPlaceholderContent
+  })
 
   // 2. 三路并行起跑（probe 与两条上传无依赖，封面上传等 probe 出 cover 后立即接力）
-  // 2.1 视频本体上传：立即 catch 兜底为 url=undefined，由 step 3.2 拿不到 url 时放弃；同时让 promise 不再 floating
+  // 2.1 视频本体上传：进度回调 patch uploadProgress；立即 catch 兜底为 url=undefined，由 step 3 拿不到 url 时收尾
   const videoForm = new FormData()
   videoForm.append('file', file)
-  const videoUploadPromise = (updateFile(videoForm) as Promise<{ data?: string }>).catch((e) => {
+  const videoUploadPromise = (
+    updateFile(videoForm, (event: ProgressEvent) => {
+      if (!event.total) {
+        return
+      }
+      const percent = Math.round((event.loaded / event.total) * 100)
+      conversationStore.patchMessage(conversation.type, conversation.targetId, clientMessageId, {
+        uploadProgress: percent
+      })
+    }) as Promise<{ data?: string }>
+  ).catch((e) => {
     console.warn('[IM] 视频本体上传失败', e)
     return { data: undefined as string | undefined }
   })
@@ -1054,36 +1070,46 @@ async function uploadAndSendVideo(file: File) {
     videoUploadPromise,
     coverUploadPromise
   ])
-  // 3.2 视频本体没 url 直接放弃（封面也不再有意义）
+  // 3.2 视频本体没 url：占位置 FAILED，让用户决定重试 / 删除（_localFile 在内存里）
   const url = videoRes?.data
   if (!url) {
+    markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
     return
   }
   // 3.3 校验会话仍是发送时锁定的那个（视频链路耗时长，这个窗口很实际）
   if (!isStillSameConversation(startKey, '视频')) {
+    markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
     return
   }
   // 3.4 视频上传期间被禁言也要拦：链路最长，最容易踩到 muteOverlay 期间触发
   if (muteOverlay.value) {
+    markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
     return
   }
 
-  // 4. 拼 VideoMessage payload 走通用 sendRaw（与图片 / 文件 / 语音同链路）
-  const videoPayload = withQuotePayload<VideoMessage>(
-    {
-      url,
-      coverUrl,
-      duration: probe.duration,
-      width: probe.width,
-      height: probe.height,
-      size: file.size
-    },
-    replyQuote
+  // 4. 拼真实 VideoMessage payload，patch 进占位 + 走 sendRaw 复用占位发送
+  const realContent = serializeMessage(
+    withQuotePayload<VideoMessage>(
+      {
+        url,
+        coverUrl,
+        duration: probe.duration,
+        width: probe.width,
+        height: probe.height,
+        size: file.size
+      },
+      replyQuote
+    )
   )
-  await sendRaw(ImMessageType.VIDEO, serializeMessage(videoPayload))
+  await commitMediaPlaceholder({
+    type: ImMessageType.VIDEO,
+    conversation,
+    clientMessageId,
+    realContent
+  })
 }
 
-/** 视频选完即上传 + 发送 VIDEO 消息（不放入 editor，整体走 sendRaw） */
+/** 视频选完即上传 + 发送 VIDEO 消息（不放入 editor，独立链路：probe + 双上传，最终走 commitMediaPlaceholder 收尾） */
 async function onVideoPicked(e: Event) {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -1095,15 +1121,6 @@ async function onVideoPicked(e: Event) {
 </script>
 
 <style scoped>
-/* 输入框卡片外框 + 编辑区与工具栏之间的分隔线：UnoCSS 不带 border-style preflight，
-   border-* 类只设色 / 宽不出线，统一走 scoped 显式 shorthand 兜底 */
-.message-input__card {
-  border: 1px solid var(--el-border-color-lighter);
-}
-.message-input__toolbar {
-  border-top: 1px solid var(--el-border-color-lighter);
-}
-
 /* el-icon 全局规则 .el-icon{color:var(--color,inherit); font-size:inherit; width:1em; height:1em}
    会盖过 UnoCSS 原子类；用字面选择器 + !important 兜底。
    颜色取 Element Plus 主题变量，暗色自动切到浅灰 */
@@ -1116,21 +1133,6 @@ async function onVideoPicked(e: Event) {
 .message-input__tool:hover,
 .message-input__tool:hover:deep(svg) {
   color: var(--el-color-primary) !important;
-}
-
-/* 输入区在上、工具栏在下时，编辑区视觉上承担"主体"，min-height / padding 都比早期版本撑大，
-   贴近微信 PC 的"大输入框"观感；max-height 限内部滚动，避免聊天列表被挤太短 */
-.message-input__editor {
-  position: relative;
-  min-height: 120px;
-  max-height: 200px;
-  overflow-y: auto;
-  padding: 14px 16px;
-  font-size: 14px;
-  line-height: 1.5;
-  outline: none;
-  white-space: pre-wrap;
-  word-break: break-word;
 }
 
 /* 用 data-empty 而非 :empty：浏览器在删空后会留下 <br>，:empty 不命中；data-empty 由 syncEditorState 维护 */

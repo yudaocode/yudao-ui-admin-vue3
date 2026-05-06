@@ -69,24 +69,32 @@
         >
           {{ textContent }}
         </div>
-        <!-- 图片消息：点击大图预览，由 <el-image> 自身承接 -->
-        <el-image
-          v-else-if="isImage && imagePayload"
-          class="max-w-[220px] rounded cursor-zoom-in"
-          :src="imagePayload.thumbnailUrl || imagePayload.url"
-          :preview-src-list="[imagePayload.url]"
-          :preview-teleported="true"
-          fit="contain"
-        />
-        <!-- 文件消息：对齐微信观感 —— 文件名 + 大小靠左、按扩展名分配的大彩色图标贴右 -->
+        <!-- 图片消息：点击大图预览，由 <el-image> 自身承接；上传中时套一层半透明遮罩显示进度 -->
+        <div v-else-if="isImage && imagePayload" class="relative inline-block">
+          <el-image
+            class="max-w-[220px] rounded cursor-zoom-in"
+            :src="imagePayload.thumbnailUrl || imagePayload.url"
+            :preview-src-list="isUploading ? [] : [imagePayload.url]"
+            :preview-teleported="true"
+            fit="contain"
+          />
+          <div
+            v-if="isUploading"
+            class="absolute inset-0 flex items-center justify-center text-sm text-white bg-black bg-opacity-45 rounded pointer-events-none"
+          >
+            {{ uploadProgressText }}
+          </div>
+        </div>
+        <!-- 文件消息：对齐微信观感 —— 文件名 + 大小靠左、按扩展名分配的大彩色图标贴右；上传中文件名下方插一条进度条 -->
         <div
           v-else-if="isFile && filePayload"
-          class="relative flex gap-3 items-center min-w-[260px] max-w-[340px] px-3.5 py-3 border rounded cursor-pointer transition-colors"
+          class="relative flex gap-3 items-center min-w-[260px] max-w-[340px] px-3.5 py-3 border rounded transition-colors"
           :class="[
             message.selfSend ? 'message-bubble--self' : 'message-bubble--other',
             message.selfSend
               ? 'bg-[#95ec69] border-[var(--el-border-color-lighter)]'
-              : 'bg-[var(--el-bg-color)] border-[var(--el-border-color-light)] hover:border-[#409eff]'
+              : 'bg-[var(--el-bg-color)] border-[var(--el-border-color-light)] hover:border-[#409eff]',
+            isUploading ? 'cursor-default' : 'cursor-pointer'
           ]"
           @click="handleFileClick"
         >
@@ -98,6 +106,18 @@
             </div>
             <div class="mt-1 text-12px text-[var(--el-text-color-secondary)]">
               {{ formatFileSize(filePayload.size) }}
+            </div>
+            <!-- 上传中：薄进度条 + 百分比文案 -->
+            <div v-if="isUploading" class="flex gap-2 items-center mt-1.5">
+              <div class="overflow-hidden flex-1 h-1 rounded bg-[var(--el-fill-color-dark)]">
+                <div
+                  class="h-full bg-[var(--el-color-primary)] transition-[width] duration-150"
+                  :style="{ width: uploadProgress + '%' }"
+                ></div>
+              </div>
+              <span class="text-11px text-[var(--el-text-color-secondary)] tabular-nums">
+                {{ uploadProgressText }}
+              </span>
             </div>
           </div>
           <Icon
@@ -128,21 +148,64 @@
           </span>
         </div>
         <!-- 视频消息：直接用原生 <video controls> 内嵌播放，poster 取后端给的封面图；
-             不接入第三方播放器、不重写 UI，保持和图片 / 文件分支一样的轻量观感 -->
-        <video
-          v-else-if="isVideo && videoPayload?.url"
-          class="max-w-[280px] max-h-[320px] rounded bg-black"
-          :src="videoPayload.url"
-          :poster="videoPayload.coverUrl"
-          controls
-          preload="metadata"
-        ></video>
+             不接入第三方播放器、不重写 UI，保持和图片 / 文件分支一样的轻量观感；上传中半透明遮罩显示进度 -->
+        <div v-else-if="isVideo && videoPayload?.url" class="relative inline-block">
+          <video
+            class="max-w-[280px] max-h-[320px] rounded bg-black"
+            :src="videoPayload.url"
+            :poster="videoPayload.coverUrl"
+            :controls="!isUploading"
+            preload="metadata"
+          ></video>
+          <div
+            v-if="isUploading"
+            class="absolute inset-0 flex items-center justify-center text-sm text-white bg-black bg-opacity-45 rounded pointer-events-none"
+          >
+            {{ uploadProgressText }}
+          </div>
+        </div>
         <!-- 视频消息但 payload 解析失败 / 没 url：降级展示，避免出现裸的 [视频消息] -->
         <div
           v-else-if="isVideo"
           class="px-3.5 py-2.5 text-sm italic rounded-lg text-[var(--el-text-color-secondary)] bg-[var(--el-fill-color-light)]"
         >
           [视频消息]
+        </div>
+        <!-- 名片消息：头像 + 昵称 + 「个人名片」标签；点击气泡弹被推荐用户的名片浮层 -->
+        <!-- TODO @AI：卡片样式，/Users/yunai/Downloads/iShot_2026-05-06_00.00.04.png；
+         TODO @AI：messagepreview 是不是也要加下？管理后台的；manager；
+         -->
+        <div
+          v-else-if="isCard && cardPayload"
+          class="flex flex-col min-w-[220px] max-w-[260px] rounded cursor-pointer overflow-hidden"
+          :class="[
+            message.selfSend ? 'message-bubble--self' : 'message-bubble--other',
+            message.selfSend
+              ? 'bg-[#95ec69]'
+              : 'bg-[var(--el-bg-color)] border border-[var(--el-border-color-light)]'
+          ]"
+          @click="handleCardClick"
+        >
+          <div class="flex gap-2.5 items-center px-3 py-2.5">
+            <UserAvatar
+              :id="cardPayload.userId"
+              :url="cardPayload.avatar"
+              :name="cardPayload.nickname"
+              :size="40"
+              :clickable="false"
+            />
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-medium truncate text-[var(--el-text-color-primary)]">
+                {{ cardPayload.nickname }}
+              </div>
+            </div>
+          </div>
+          <div
+            class="px-3 py-1 text-12px border-t text-[var(--el-text-color-secondary)] border-[var(--el-border-color-lighter)]"
+            :class="message.selfSend ? 'bg-[#86d65f]' : 'bg-[var(--el-fill-color-lighter)]'"
+          >
+            个人名片
+          </div>
         </div>
         <!-- 未知类型降级展示 -->
         <div
@@ -155,8 +218,9 @@
         <!-- 状态区：自己消息展示发送状态 + 已读/群回执；对方消息 + @自己时展示 @徽标 -->
         <div class="flex gap-1.5 items-center text-base">
           <template v-if="message.selfSend">
+            <!-- 媒体消息 SENDING 时气泡自身已显示进度遮罩/进度条，外层 loading 多余；其它消息（含语音）保留 loading 表达 -->
             <Icon
-              v-if="message.status === ImMessageStatus.SENDING"
+              v-if="message.status === ImMessageStatus.SENDING && !isUploading"
               icon="ant-design:loading-outlined"
               class="im-loading-spin"
             />
@@ -225,10 +289,12 @@ import {
   ImMessageStatus,
   ImGroupReceiptStatus,
   ImConversationType,
+  ImFriendAddSource,
   ImGroupMemberRole,
   TIME_TIP_GAP_MS,
   isFriendChatTip,
   isGroupNotification,
+  isMediaMessageType,
   isNormalMessage
 } from '@/views/im/utils/constants'
 import { pinGroupMessage as apiPinGroupMessage, cancelMuteMember } from '@/api/im/group'
@@ -242,7 +308,8 @@ import {
   type ImageMessage,
   type FileMessage,
   type AudioMessage,
-  type VideoMessage
+  type VideoMessage,
+  type CardMessage
 } from '@/views/im/utils/message'
 import { buildRecallTip } from '../../../../../utils/conversation'
 import { formatSeconds } from '@/utils/formatTime'
@@ -261,6 +328,7 @@ import {
 } from '@/views/im/utils/user'
 import { useImUiStore } from '../../../../store/uiStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
+import { useMediaUploader } from '../../../../composables/useMediaUploader'
 import { useMuteOverlay } from '../../../../composables/useMuteOverlay'
 import type { Message } from '../../../../types'
 import MessageReadStatus from './MessageReadStatus.vue'
@@ -294,17 +362,12 @@ const friendStore = useFriendStore()
 const draftStore = useDraftStore()
 const uiStore = useImUiStore()
 const { recall, sendRaw } = useMessageSender()
+const { uploadAndSendMedia } = useMediaUploader()
 const muteOverlay = useMuteOverlay()
 // 仅用 confirm，避免 message 跟 props.message 同名冲突（vue/no-dupe-keys）
 const { confirm: confirmDialog, success: successMessage } = useMessage()
 
 // ==================== 消息类型判断 ====================
-
-/** 是否已撤回：pull / WS 两路都会调 recallMessage 把原消息更新为 type=RECALL，渲染只需识别 type */
-const isRecall = computed(() => props.message.type === ImMessageType.RECALL)
-
-/** 是否会话内好友事件气泡（FRIEND_ADD / FRIEND_DELETE） */
-const isFriendChatTipMessage = computed(() => isFriendChatTip(props.message.type))
 
 /** 是否在当前消息上方渲染时间分隔条：列表第一条 / 距上一条超过阈值；缺 sendTime 不渲染 */
 const shouldShowTimeTip = computed(() => {
@@ -323,31 +386,9 @@ const isImage = computed(() => props.message.type === ImMessageType.IMAGE)
 const isFile = computed(() => props.message.type === ImMessageType.FILE)
 const isVoice = computed(() => props.message.type === ImMessageType.VOICE)
 const isVideo = computed(() => props.message.type === ImMessageType.VIDEO)
+const isCard = computed(() => props.message.type === ImMessageType.CARD)
 
-/** 引用对象：气泡内嵌入展示；非引用消息返回 null，模板 v-if 不渲染 */
-const quote = computed(() => getQuoteFromMessage(props.message.content))
-
-/** 群聊 + 对方消息 时，在气泡上方显示发送者昵称 */
-const showSenderName = computed(() => {
-  if (props.message.selfSend) {
-    return false
-  }
-  return conversationStore.activeConversation?.type === ImConversationType.GROUP
-})
-
-// 私聊的 conversation.avatar 就是对方头像（openConversation 入参约定）
-const senderAvatar = computed(() => {
-  const conversation = conversationStore.activeConversation
-  if (!conversation || props.message.selfSend) {
-    return ''
-  }
-  if (conversation.type === ImConversationType.GROUP) {
-    const group = groupStore.getGroup(conversation.targetId)
-    return group?.members?.find((member) => member.userId === props.message.senderId)?.avatar || ''
-  }
-  return conversation.avatar || ''
-})
-
+// TODO @AI：抽到 message.ts 里？作为一个工具方法？
 /**
  * 时间分隔线文案：
  * - 今天：HH:mm
@@ -382,17 +423,43 @@ function formatTipTime(timestamp: number): string {
   return `${pad(messageDate.getMonth() + 1)}-${pad(messageDate.getDate())} ${hourMinute}`
 }
 
+// ==================== 事件消息（撤回 / 好友 / 群广播） ====================
+// 这三类不走普通气泡，渲染成居中灰色 tip；判断 + 文案配对放一起，新增第四类事件只需在本块改完
+
+/** 是否已撤回：pull / WS 两路都会调 recallMessage 把原消息更新为 type=RECALL，渲染只需识别 type */
+const isRecall = computed(() => props.message.type === ImMessageType.RECALL)
+
+/** 撤回提示文案：buildRecallTip 实时算 sender 名（按 conversation 上下文走 WeChat 优先级） */
+const recallTip = computed(() => {
+  const conversation = conversationStore.activeConversation
+  return buildRecallTip(
+    props.message.senderId,
+    props.message.selfSend,
+    conversation?.type ?? 0,
+    conversation?.targetId ?? 0
+  )
+})
+
+/** 是否会话内好友事件气泡（FRIEND_ADD / FRIEND_DELETE） */
+const isFriendChatTipMessage = computed(() => isFriendChatTip(props.message.type))
+
+/** 好友事件文案：FRIEND_ADD / FRIEND_DELETE 渲染成灰色提示，文案固定 */
+const friendChatTipText = computed(() => resolveFriendNotificationText(props.message))
+
+/** 是否群广播事件（GROUP_CREATE..GROUP_BANNED 段位，排除 GROUP_MEMBER_SETTING_UPDATE 个人信号） */
+const isGroupNotificationMessage = computed(() => isGroupNotification(props.message.type))
+
+/** 群广播事件文案：按 type 拼装（成员加入 / 退群 / 公告变更等） */
+const groupNotificationText = computed(() => resolveGroupNotificationText(props.message))
+
 // ==================== 消息内容解析 / payload ====================
 
 /** 文本内容 */
 const textContent = computed(() => parseMessage<TextMessage>(props.message.content)?.content ?? '')
 
-/** 好友会话事件文案：FRIEND_ADD / FRIEND_DELETE 渲染成灰色提示，文案固定 */
-const friendChatTipText = computed(() => resolveFriendNotificationText(props.message))
+/** 引用对象：气泡内嵌入展示；非引用消息返回 null，模板 v-if 不渲染 */
+const quote = computed(() => getQuoteFromMessage(props.message.content))
 
-/** 群广播事件 */
-const isGroupNotificationMessage = computed(() => isGroupNotification(props.message.type))
-const groupNotificationText = computed(() => resolveGroupNotificationText(props.message))
 const imagePayload = computed(() =>
   isImage.value ? parseMessage<ImageMessage>(props.message.content) : null
 )
@@ -405,13 +472,42 @@ const voicePayload = computed(() =>
 const videoPayload = computed(() =>
   isVideo.value ? parseMessage<VideoMessage>(props.message.content) : null
 )
+const cardPayload = computed(() =>
+  isCard.value ? parseMessage<CardMessage>(props.message.content) : null
+)
+
+/** 名片点击：弹被推荐用户的 UserInfoCard；陌生人名片走「名片」加好友来源 */
+function handleCardClick(e: MouseEvent) {
+  const card = cardPayload.value
+  if (!card?.userId) {
+    return
+  }
+  uiStore.openUserInfoCard(
+    {
+      id: card.userId,
+      nickname: card.nickname,
+      avatar: card.avatar
+    },
+    { x: e.clientX + 20, y: e.clientY },
+    ImFriendAddSource.CARD
+  )
+}
+
+/** 媒体消息上传中：插入占位时 uploadProgress=0，ack 成功后被清成 undefined */
+const isUploading = computed(() => props.message.uploadProgress != null)
+
+/** 上传进度（0-100）；undefined 兜底为 0 避免遮罩文案出现 NaN */
+const uploadProgress = computed(() => props.message.uploadProgress ?? 0)
+
+/** 上传进度文案；图片/视频遮罩、文件进度条尾巴共用 */
+const uploadProgressText = computed(() => `${uploadProgress.value}%`)
 
 /** 文件类型图标 + 配色：按扩展名分发，跟 ReplyPreview 共用 getFileIconInfo */
 const fileIconInfo = computed(() => getFileIconInfo(filePayload.value?.name))
 
-/** 文件点击 → 新窗口下载 */
+/** 文件点击 → 新窗口下载；上传中点击无意义（url 还是 blob），直接跳过 */
 function handleFileClick() {
-  if (!filePayload.value?.url) {
+  if (isUploading.value || !filePayload.value?.url) {
     return
   }
   window.open(filePayload.value.url, '_blank')
@@ -451,15 +547,25 @@ onBeforeUnmount(() => {
 
 // ==================== 发送人 / 已读 / @ ====================
 
-// 撤回文案：buildRecallTip 实时算 sender 名（按 conversation 上下文走 WeChat 优先级）
-const recallTip = computed(() => {
+/** 群聊 + 对方消息 时，在气泡上方显示发送者昵称 */
+const showSenderName = computed(() => {
+  if (props.message.selfSend) {
+    return false
+  }
+  return conversationStore.activeConversation?.type === ImConversationType.GROUP
+})
+
+/** 发送者头像；私聊的 conversation.avatar 就是对方头像（openConversation 入参约定） */
+const senderAvatar = computed(() => {
   const conversation = conversationStore.activeConversation
-  return buildRecallTip(
-    props.message.senderId,
-    props.message.selfSend,
-    conversation?.type ?? 0,
-    conversation?.targetId ?? 0
-  )
+  if (!conversation || props.message.selfSend) {
+    return ''
+  }
+  if (conversation.type === ImConversationType.GROUP) {
+    const group = groupStore.getGroup(conversation.targetId)
+    return group?.members?.find((member) => member.userId === props.message.senderId)?.avatar || ''
+  }
+  return conversation.avatar || ''
 })
 
 /** 头像色卡 fallback 文本：永远是真实昵称，不掺备注 */
@@ -598,7 +704,9 @@ async function handleContextMenu(e: MouseEvent) {
   }
   // 「禁言 / 解禁 / 移除」：群聊 + 非自己消息 + 我是群主或管理员
   if (currentGroup.value && !props.message.selfSend && canManageSender.value) {
-    const senderMember = currentGroup.value.members?.find((m) => m.userId === props.message.senderId)
+    const senderMember = currentGroup.value.members?.find(
+      (m) => m.userId === props.message.senderId
+    )
     const isMuted = senderMember?.muteEndTime && new Date(senderMember.muteEndTime) > new Date()
     if (isMuted) {
       items.push({
@@ -750,8 +858,13 @@ async function handleRecall() {
 }
 
 /**
- * 失败消息点击重试：先把 FAILED 的本地占位消息从列表里去掉，再用同样的 type + content 走一遍 sendRaw，
- * 后者会新建 clientMessageId 并重新跑乐观更新流程
+ * 失败消息点击重试
+ *
+ * - 媒体消息（image / file / voice / video）：_localFile 在内存就重走 uploadAndSendMedia（重新上传 + 占位 + 进度）
+ * - 文本消息：移除 FAILED 占位 + 用原 content 走一遍 sendRaw 新建占位
+ *
+ * 媒体类型若 _localFile 已丢（理论上 IDB 恢复阶段就被 drop，进不到这里；保险起见仍走文本兜底）则按 sendRaw 重发，
+ * 后端拒绝失效 blob URL 时再次 FAILED，用户可右键删除
  *
  * 不还原原 receipt：群回执是发送时的扩展选项、不会持久化到 message，强行猜测可能与原意不符；
  * 默认按"无回执"重发，绝大多数场景符合预期，要回执就重新发一次更直观
@@ -768,12 +881,74 @@ async function handleResend() {
   if (muteOverlay.value) {
     return
   }
+  const message = props.message
+  const file = message._localFile
+
+  // 媒体类型 + _localFile 在 → 重走 uploadAndSendMedia；按 type 分发 buildPayload，旧元数据从 content 解出复用
+  if (isMediaMessageType(message.type) && file) {
+    const oldQuote = getQuoteFromMessage(message.content) ?? undefined
+    conversationStore.removeMessage(conversation.type, conversation.targetId, {
+      id: message.id,
+      clientMessageId: message.clientMessageId
+    })
+    if (message.type === ImMessageType.IMAGE) {
+      await uploadAndSendMedia<ImageMessage>({
+        file,
+        type: ImMessageType.IMAGE,
+        kind: '图片',
+        quote: oldQuote,
+        conversation,
+        buildPayload: (url) => ({ url })
+      })
+    } else if (message.type === ImMessageType.FILE) {
+      await uploadAndSendMedia<FileMessage>({
+        file,
+        type: ImMessageType.FILE,
+        kind: '文件',
+        quote: oldQuote,
+        conversation,
+        buildPayload: (url) => ({ url, name: file.name, size: file.size })
+      })
+    } else if (message.type === ImMessageType.VOICE) {
+      const oldVoice = parseMessage<AudioMessage>(message.content)
+      await uploadAndSendMedia<AudioMessage>({
+        file,
+        type: ImMessageType.VOICE,
+        kind: '语音',
+        quote: oldQuote,
+        conversation,
+        buildPayload: (url) => ({ url, duration: oldVoice?.duration ?? 0 })
+      })
+    } else if (message.type === ImMessageType.VIDEO) {
+      const oldVideo = parseMessage<VideoMessage>(message.content)
+      // 视频不重 probe + 重传 cover，沿用旧 coverUrl；旧 coverUrl 是 blob 时（占位失败）丢掉，让接收端无 poster 但仍可播
+      const reuseCover = oldVideo?.coverUrl?.startsWith('blob:') ? undefined : oldVideo?.coverUrl
+      await uploadAndSendMedia<VideoMessage>({
+        file,
+        type: ImMessageType.VIDEO,
+        kind: '视频',
+        quote: oldQuote,
+        conversation,
+        buildPayload: (url) => ({
+          url,
+          coverUrl: reuseCover,
+          duration: oldVideo?.duration,
+          width: oldVideo?.width,
+          height: oldVideo?.height,
+          size: file.size
+        })
+      })
+    }
+    return
+  }
+
+  // 文本类型 / 媒体类型但 _localFile 已丢：原 content 走 sendRaw 重发
   conversationStore.removeMessage(conversation.type, conversation.targetId, {
-    id: props.message.id,
-    clientMessageId: props.message.clientMessageId
+    id: message.id,
+    clientMessageId: message.clientMessageId
   })
-  await sendRaw(props.message.type, props.message.content, {
-    atUserIds: props.message.atUserIds
+  await sendRaw(message.type, message.content, {
+    atUserIds: message.atUserIds
   })
 }
 

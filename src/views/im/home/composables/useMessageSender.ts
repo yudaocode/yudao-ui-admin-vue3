@@ -28,6 +28,13 @@ interface SendExtOptions {
   targetId?: number // 覆盖默认的 targetId
   /** 被引用消息（可选）：写进 content.quote 用于乐观渲染，服务端按 quote.messageId 反查重算覆盖 */
   quote?: QuoteMessage
+  /**
+   * 复用已存在的本地占位消息 clientMessageId（媒体上传场景）
+   *
+   * 媒体上传链路在请求服务端前已经 insertMessage 了占位（带 blob URL + 进度条），
+   * 这里跳过 buildLocalMessage / insertMessage，直接拿这个 id 走 ackMessage 收尾，避免重复插入两条
+   */
+  existingClientMessageId?: string
 }
 
 /**
@@ -81,22 +88,36 @@ export const useMessageSender = () => {
       return
     }
 
-    // 2. 构造本地消息并乐观插入会话；状态先置 SENDING，请求结果回来由 ackMessage 更新
-    const clientMessageId = generateClientMessageId()
-    const message = buildLocalMessage({
-      clientMessageId,
-      content,
-      targetId: realTarget,
-      type,
-      atUserIds: options?.atUserIds
-    })
-    const conversationInfo = {
-      type: conversation.type,
-      targetId: realTarget,
-      name: conversation.name || String(realTarget),
-      avatar: conversation.avatar || ''
+    // 2. 准备 clientMessageId：媒体上传链路在 step 1 已经 insertMessage 占位，这里直接复用 id；其余场景走默认乐观插入
+    let clientMessageId: string
+    if (options?.existingClientMessageId) {
+      clientMessageId = options.existingClientMessageId
+      // 占位若已被删除（上传期间用户右键删除 / 撤回 / removeMessage 等）则放弃发送，
+      // 否则 sendRaw 仍会把消息推到服务端，导致"本地无气泡 / 对方却收到一条"
+      const targetConversation = conversationStore.getConversation(conversation.type, realTarget)
+      const stillExists = targetConversation?.messages.some(
+        (m) => m.clientMessageId === clientMessageId
+      )
+      if (!stillExists) {
+        return
+      }
+    } else {
+      clientMessageId = generateClientMessageId()
+      const message = buildLocalMessage({
+        clientMessageId,
+        content,
+        targetId: realTarget,
+        type,
+        atUserIds: options?.atUserIds
+      })
+      const conversationInfo = {
+        type: conversation.type,
+        targetId: realTarget,
+        name: conversation.name || String(realTarget),
+        avatar: conversation.avatar || ''
+      }
+      conversationStore.insertMessage(conversationInfo, message)
     }
-    conversationStore.insertMessage(conversationInfo, message)
 
     // 3. 发送请求：按会话类型分发到不同接口；成功后 ackMessage 更新为 UNREAD，失败更新为 FAILED
     try {

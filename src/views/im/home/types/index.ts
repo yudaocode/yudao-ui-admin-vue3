@@ -84,6 +84,10 @@ export interface Message {
   // 不在 Message 上存任何名字快照，避免备注 / 群昵称变更后历史消息显示陈旧
   targetId: number // 会话目标编号（私聊=receiverId / 群聊=groupId），与 Conversation.targetId 一致
   selfSend: boolean // 是否自己发送（前端按 senderId 计算）
+  uploadProgress?: number // 媒体消息上传进度（0-100）；status=SENDING 期间持续更新；ack 后置 undefined
+  // 媒体消息内存中保留的原始 File；下划线前缀表示不进 JSON / 不持久化（IDB 恢复后必为 undefined）
+  // 失败重试时按它重走上传；页面刷新后该字段丢失，恢复阶段直接 drop 整条消息
+  _localFile?: File
 }
 
 /**

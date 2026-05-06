@@ -8,10 +8,11 @@ import {
   ImMessageStatus,
   IM_AT_ALL_USER_ID,
   isGroupNotification,
+  isMediaMessageType,
   isNormalMessage
 } from '../../utils/constants'
 import { getCurrentUserId, imStorage, removeQuietly, StorageKeys } from '../../utils/storage'
-import { parseRecallMessageId } from '../../utils/message'
+import { parseRecallMessageId, revokeBlobUrlsInContent } from '../../utils/message'
 import { resolveConversationLastContent } from '../../utils/conversation'
 import { tryGetSenderDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
@@ -140,15 +141,23 @@ export const useConversationStore = defineStore('imConversationStore', {
         // 单会话失败时退化为空消息列表 + 打印日志，避免拖垮整体加载
         const tasks = meta.conversations.map(async (conversation): Promise<Conversation> => {
           try {
-            const messages =
+            const rawMessages =
               (await imStorage.getItem<Message[]>(
                 StorageKeys.conversationMessages(userId, conversation.type, conversation.targetId)
               )) || []
-            // 发送中状态的消息标记为失败：重启后不可能仍处在发送中
-            messages.forEach((message) => {
+            // 【媒体消息】（IMAGE / FILE / VOICE / VIDEO）SENDING 或 FAILED 都直接 drop：
+            //            _localFile 持久化时已被剥掉，刷新后重传必拿不到 file，content 里又可能是失效的 blob URL，留着只会让用户点重试时把 blob URL 当真实 url 发到服务端
+            // 【文本类】SENDING 转 FAILED 仍可重发（content 里就是 plain text）
+            const messages = rawMessages.filter((message) => {
+              const isMedia = isMediaMessageType(message.type)
               if (message.status === ImMessageStatus.SENDING) {
+                if (isMedia) {
+                  return false
+                }
                 message.status = ImMessageStatus.FAILED
+                return true
               }
+              return !(message.status === ImMessageStatus.FAILED && isMedia);
             })
             return { ...conversation, messages }
           } catch (e) {
@@ -200,11 +209,19 @@ export const useConversationStore = defineStore('imConversationStore', {
         Array.isArray(target) ? target : target ? [target] : []
       ).filter((c) => !c.deleted)
       for (const conversation of conversationsToFlush) {
-        // toRaw 拆掉 Vue reactive Proxy：IDB 的 structuredClone 不接受 Proxy，不拆会抛 DataCloneError 静默落盘失败（只 meta 写得进去，messages 永远丢）
+        // ① toRaw 拆掉 Vue reactive Proxy：IDB 的 structuredClone 不接受 Proxy，不拆会抛 DataCloneError 静默落盘失败（只 meta 写得进去，messages 永远丢）
+        // ② 剥掉 _localFile：IDB 能 structuredClone File 对象，但视频几百 MB 落盘没意义，刷新后媒体 SENDING / FAILED 重传也走不通
+        const messagesForFlush = toRaw(conversation.messages).map((message) => {
+          if (message._localFile == null) {
+            return message
+          }
+          const { _localFile: _omitted, ...rest } = message
+          return rest
+        })
         tasks.push(
           imStorage.setItem(
             StorageKeys.conversationMessages(userId, conversation.type, conversation.targetId),
-            toRaw(conversation.messages)
+            messagesForFlush
           )
         )
       }
@@ -498,11 +515,50 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (!message) {
         return
       }
+      // 媒体消息 ack 服务端返回真实 url 时，旧 content 里的 blob URL 不再被渲染，立即释放对应 File 内存
+      if (updates.content && updates.content !== message.content) {
+        revokeBlobUrlsInContent(message.content)
+      }
       Object.assign(message, updates)
+      // ① 状态离开 SENDING 后进度条没意义：成功（UNREAD/READ）和失败（FAILED）都清掉 uploadProgress
+      // ② _localFile 区别对待：FAILED 留着供重试 uploadAndSendMedia；非 FAILED 终态可清
+      if (updates.status !== undefined && updates.status !== ImMessageStatus.SENDING) {
+        message.uploadProgress = undefined
+        if (updates.status !== ImMessageStatus.FAILED) {
+          message._localFile = undefined
+        }
+      }
       if (updates.id) {
         this.updateMaxId(conversationType, updates.id)
       }
       this.saveConversations(conversation)
+    },
+
+    /**
+     * 局部更新一条本地消息（不持久化、不更新游标）
+     *
+     * 媒体上传链路高频调用：onUploadProgress 每次回调都 patch uploadProgress；上传完成 patch content（替换 blob → 真实 url）。
+     * 不落 IDB 是性能取舍 ── progress 高频写盘会卡 UI；后续 sendRaw 的 ackMessage 会自然把最终态持久化
+     */
+    patchMessage(
+      conversationType: number,
+      targetId: number,
+      clientMessageId: string,
+      patch: Partial<Message>
+    ) {
+      const conversation = this.getConversation(conversationType, targetId)
+      if (!conversation) {
+        return
+      }
+      const message = conversation.messages.find((item) => item.clientMessageId === clientMessageId)
+      if (!message) {
+        return
+      }
+      // 替换 content 时 revoke 旧 blob URL，与 ackMessage 同语义
+      if (patch.content && patch.content !== message.content) {
+        revokeBlobUrlsInContent(message.content)
+      }
+      Object.assign(message, patch)
     },
 
     /**
@@ -643,6 +699,8 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (index < 0) {
         return
       }
+      // 媒体消息占位 / FAILED 删除时释放 content 里的 blob URL，避免 File 对象内存泄漏
+      revokeBlobUrlsInContent(conversation.messages[index].content)
       conversation.messages.splice(index, 1)
       // 如果删的是最后一条，按倒数第二条重算摘要 + 事实索引
       if (index === conversation.messages.length) {
