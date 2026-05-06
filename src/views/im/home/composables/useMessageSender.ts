@@ -83,16 +83,22 @@ export const useMessageSender = () => {
    * 发送任意类型的消息（底层实现）
    * 1. 文本、图片、文件、语音等都走这里
    * 2. type / content 由调用方构造
+   * 3. 返回值：成功 true / 失败 false（失败时本地占位已标 FAILED）；参数缺失等无法发送的场景也返 false
+   *    转发 / 名片推荐等场景按返回值决定是否继续后续动作（如有留言时仅在名片成功后再发留言）
    */
-  const sendRaw = async (type: number, content: string, options?: SendExtOptions) => {
+  const sendRaw = async (
+    type: number,
+    content: string,
+    options?: SendExtOptions
+  ): Promise<boolean> => {
     // 1. 参数校验：优先用显式传入的 conversation（转发场景），否则取激活会话
     const conversation = options?.conversation ?? conversationStore.activeConversation
     if (!conversation) {
-      return
+      return false
     }
     const realTarget = options?.targetId || conversation.targetId
     if (!realTarget) {
-      return
+      return false
     }
 
     // 2. 准备 clientMessageId：媒体上传链路在 step 1 已经 insertMessage 占位，这里直接复用 id；其余场景走默认乐观插入
@@ -106,7 +112,7 @@ export const useMessageSender = () => {
         (m) => m.clientMessageId === clientMessageId
       )
       if (!stillExists) {
-        return
+        return false
       }
     } else {
       clientMessageId = generateClientMessageId()
@@ -159,21 +165,26 @@ export const useMessageSender = () => {
           content: data.content
         })
       }
+      return true
     } catch (e) {
       console.error('[IM] 消息发送失败', { type, realTarget, clientMessageId }, e)
       conversationStore.ackMessage(conversation.type, realTarget, clientMessageId, {
         status: ImMessageStatus.FAILED
       })
+      return false
     }
   }
 
-  /** 发送文本消息（最常用的快捷入口）：MessageInput.vue 文本回车走这里 */
-  const send = async (text: string, options?: SendExtOptions) => {
+  /**
+   * 发送文本消息（最常用的快捷入口）：MessageInput.vue 文本回车走这里
+   * 返回值：成功 true / 失败 false / 空文本 false（与 sendRaw 对齐，转发场景按返回值判断）
+   */
+  const send = async (text: string, options?: SendExtOptions): Promise<boolean> => {
     if (!text.trim()) {
-      return
+      return false
     }
     const payload = withQuotePayload<TextMessage>({ content: text }, options?.quote)
-    await sendRaw(ImMessageType.TEXT, serializeMessage(payload), options)
+    return sendRaw(ImMessageType.TEXT, serializeMessage(payload), options)
   }
 
   /**

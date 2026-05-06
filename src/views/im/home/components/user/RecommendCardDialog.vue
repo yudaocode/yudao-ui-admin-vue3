@@ -293,7 +293,12 @@ function buildCardContent(user: User): string {
   return serializeMessage(payload)
 }
 
-/** 确认发送：每个选中会话先发 CARD 再发 TEXT 留言；失败的消息会以 FAILED 状态留在对应会话气泡里供右键重试 */
+/**
+ * 确认发送：每个选中会话先发 CARD，CARD 成功后才发留言（保证「先看到名片」的顺序意图，CARD 失败时不发留言避免错序）
+ *
+ * 文案聚合：全部成功「已转发」、全部失败「转发失败：A、B」、部分失败「已转发，但 X、Y 失败」（具体列出失败会话名方便定位）；
+ * 失败的消息以 FAILED 状态留在对应会话气泡里，可右键重试
+ */
 async function handleSend() {
   const user = props.user
   if (!user?.id || selectedKeys.value.length === 0) {
@@ -305,13 +310,22 @@ async function handleSend() {
   sending.value = true
   try {
     const tasks = targets.map(async (target) => {
-      await sendRaw(ImMessageType.CARD, cardContent, { conversation: target })
-      if (leaveText) {
-        await send(leaveText, { conversation: target })
+      const cardOk = await sendRaw(ImMessageType.CARD, cardContent, { conversation: target })
+      if (!cardOk) {
+        return { target, ok: false }
       }
+      const ok = leaveText ? await send(leaveText, { conversation: target }) : true
+      return { target, ok }
     })
-    await Promise.all(tasks)
-    message.success('已转发')
+    const results = await Promise.all(tasks)
+    const failedNames = results.filter((r) => !r.ok).map((r) => r.target.name || '未命名会话')
+    if (failedNames.length === 0) {
+      message.success('已转发')
+    } else if (failedNames.length === targets.length) {
+      message.error(`转发失败：${failedNames.join('、')}`)
+    } else {
+      message.warning(`已转发，但 ${failedNames.join('、')} 失败`)
+    }
     visible.value = false
   } finally {
     sending.value = false
