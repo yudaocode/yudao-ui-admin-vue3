@@ -272,6 +272,11 @@
             <span class="im-conversation-group-side__label">全群禁言</span>
             <el-switch :model-value="!!currentMutedAll" @change="onMuteAllChange" />
           </div>
+          <!-- 进群审批：仅群主可操作；开启后所有「申请」「邀请」路径都需群主 / 管理员同意 -->
+          <div v-if="isOwner" class="im-conversation-group-side__row">
+            <span class="im-conversation-group-side__label">进群需要群主 / 群管理确认</span>
+            <el-switch :model-value="!!group.joinApproval" @change="onJoinApprovalChange" />
+          </div>
         </div>
 
         <!-- ==================== 群主操作 ==================== -->
@@ -387,7 +392,11 @@ import {
 import { quitGroup, removeGroupMember, updateGroupMember } from '@/api/im/group/member'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
-import { GROUP_ADMIN_MAX_COUNT, ImConversationType, ImGroupMemberRole } from '@/views/im/utils/constants'
+import {
+  GROUP_ADMIN_MAX_COUNT,
+  ImConversationType,
+  ImGroupMemberRole
+} from '@/views/im/utils/constants'
 import GroupMemberGrid from '../../../../components/group/GroupMemberGrid.vue'
 import GroupMemberAddDialog from '../../../../components/group/GroupMemberAddDialog.vue'
 import GroupMemberSelector, {
@@ -485,7 +494,6 @@ const isOwnerOrAdmin = computed(
   () => myRole.value === ImGroupMemberRole.OWNER || myRole.value === ImGroupMemberRole.ADMIN
 )
 
-
 // 排除已退群成员 + 关键字过滤；按角色排序：群主→管理员→普通成员（同角色按 userId 稳定）
 const visibleMembers = computed(() => {
   return props.members
@@ -532,6 +540,17 @@ async function saveNotice() {
   }
   await updateGroup({ id: props.group.id, notice: editNotice.value })
   noticePopoverVisible.value = false
+  message.success('保存成功')
+  emit('reload')
+}
+
+/** 群主：切换「进群审批」开关；开启后所有「申请」「邀请」路径都需群主 / 管理员同意 */
+// TODO @AI：应该是 handleXXX；别的方法也看看，是不是统一调整过来。
+async function onJoinApprovalChange(value: boolean | string | number) {
+  if (!props.group) {
+    return
+  }
+  await updateGroup({ id: props.group.id, joinApproval: !!value })
   message.success('保存成功')
   emit('reload')
 }
@@ -696,8 +715,10 @@ async function handleRemoveComplete(members: GroupMemberFlag[]) {
 /** 当前管理员的 userId 列表，作为 Selector 默认勾选；过滤已退群成员，避免 maxSize 名额被隐藏成员占用导致无法新增管理员 */
 const adminCheckedIds = computed(() =>
   props.members
-    .filter((member) => member.role === ImGroupMemberRole.ADMIN
-        && member.status !== CommonStatusEnum.DISABLE)
+    .filter(
+      (member) =>
+        member.role === ImGroupMemberRole.ADMIN && member.status !== CommonStatusEnum.DISABLE
+    )
     .map((member) => member.userId)
 )
 

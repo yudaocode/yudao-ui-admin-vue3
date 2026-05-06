@@ -11,6 +11,12 @@
     <div class="flex flex-col gap-3">
       <el-input v-model="groupName" placeholder="请输入群名称" maxlength="20" show-word-limit />
 
+      <!-- TODO @AI：暂时不用这个入口；对齐微信； -->
+      <div class="flex items-center gap-2 text-13px text-[var(--el-text-color-secondary)]">
+        <span class="shrink-0">进群需要群主 / 群管理确认</span>
+        <el-switch v-model="joinApproval" />
+      </div>
+
       <div class="flex gap-2.5">
         <div
           class="flex flex-col flex-1 overflow-hidden rounded border border-[var(--el-border-color)]"
@@ -131,6 +137,7 @@ const visible = computed({
 })
 
 const groupName = ref('')
+const joinApproval = ref<boolean>(false) // 默认不需审批，自由进群
 const searchText = ref('')
 const submitting = ref(false)
 const workingFriends = ref<FriendCheckable[]>([]) // 工作副本（带 checked / disabled 标记），与 prop 隔离
@@ -142,6 +149,7 @@ watch(
       return
     }
     groupName.value = ''
+    joinApproval.value = false
     searchText.value = ''
     workingFriends.value = props.friends
       .filter((friend) => !friend.deleted)
@@ -205,7 +213,7 @@ async function handleOk() {
   submitting.value = true
   try {
     // 1. 新建群聊
-    const group = await createGroup({ name, memberUserIds })
+    const group = await createGroup({ name, memberUserIds, joinApproval: joinApproval.value })
     if (!group?.id) {
       throw new Error('创建群失败：未返回群编号')
     }

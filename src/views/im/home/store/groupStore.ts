@@ -13,6 +13,7 @@ import {
   type ImGroupMemberRespVO
 } from '@/api/im/group/member'
 import { useConversationStore } from './conversationStore'
+import { useGroupRequestStore } from './groupRequestStore'
 import { ImConversationType, ImGroupMemberRole, ImMessageType } from '../../utils/constants'
 import {
   getCurrentUserId,
@@ -523,6 +524,9 @@ export const useGroupStore = defineStore('imGroupStore', {
         case ImMessageType.GROUP_MEMBER_INVITE:
           this.applyGroupMemberInviteNotification(groupId, payload)
           break
+        case ImMessageType.GROUP_MEMBER_ENTER:
+          this.applyGroupMemberEnterNotification(groupId, payload)
+          break
         case ImMessageType.GROUP_MEMBER_QUIT:
           this.applyGroupMemberQuitNotification(groupId, payload)
           break
@@ -534,6 +538,10 @@ export const useGroupStore = defineStore('imGroupStore', {
           break
         case ImMessageType.GROUP_ADMIN_ADD:
           this.updateMembersRole(groupId, payload.memberUserIds || [], ImGroupMemberRole.ADMIN)
+          // 自己被加为管理员，原本看不到的群下未处理申请现在变可见，重新拉一次 unhandledList
+          if (isSelfInPayloadMembers(payload)) {
+            useGroupRequestStore().fetchUnhandledList().catch(() => undefined)
+          }
           break
         case ImMessageType.GROUP_ADMIN_REMOVE:
           this.updateMembersRole(groupId, payload.memberUserIds || [], ImGroupMemberRole.NORMAL)
@@ -610,6 +618,15 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.fetchGroupMembers(groupId, true).catch(() => undefined)
     },
 
+    /** 自由进群：进群者本端 group 未就位先 fetchGroupInfo bootstrap；所有人都刷成员列表 */
+    applyGroupMemberEnterNotification(groupId: number, payload: GroupNotificationPayload) {
+      const selfUserId = getCurrentUserId()
+      if (selfUserId && payload.entrantUserId === selfUserId && !this.getGroup(groupId)) {
+        this.fetchGroupInfo(groupId).catch(() => undefined)
+      }
+      this.fetchGroupMembers(groupId, true).catch(() => undefined)
+    },
+
     /** 成员退群：退群者本人多端同步走 removeGroup；其他成员从本地列表移除 quitter */
     applyGroupMemberQuitNotification(groupId: number, payload: GroupNotificationPayload) {
       const selfUserId = getCurrentUserId()
@@ -641,10 +658,15 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
     },
 
-    /** 群主转让：旧群主 → NORMAL，新群主 → OWNER */
+    /** 群主转让：旧群主 → NORMAL，新群主 → OWNER；新群主自己侧重新拉申请列表 */
     applyGroupOwnerTransferNotification(groupId: number, payload: GroupNotificationPayload) {
       if (payload.operatorUserId && payload.newOwnerUserId) {
         this.transferOwner(groupId, payload.operatorUserId, payload.newOwnerUserId)
+      }
+      // 自己接管群主：原本看不到的群下未处理申请现在变可见，重新拉一次 unhandledList
+      const selfUserId = getCurrentUserId()
+      if (selfUserId && payload.newOwnerUserId === selfUserId) {
+        useGroupRequestStore().fetchUnhandledList().catch(() => undefined)
       }
     },
 
@@ -735,8 +757,7 @@ function convertGroup(group: ImGroupRespVO): Group {
     pinnedMessages: group.pinnedMessages?.map(convertGroupMessageVO),
     mutedAll: group.mutedAll,
     banned: group.banned,
-    joinType: group.joinType,
-    pendingRequestCount: group.pendingRequestCount
+    joinApproval: group.joinApproval
   }
 }
 

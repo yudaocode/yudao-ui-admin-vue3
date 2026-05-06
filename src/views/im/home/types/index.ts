@@ -119,8 +119,7 @@ export interface Group {
   pinnedMessages?: Message[] // 群置顶消息列表
   mutedAll?: boolean // 是否全群禁言
   banned?: boolean // 是否被管理员封禁
-  joinType?: number // 加群方式；参见 ImGroupJoinType
-  pendingRequestCount?: number // 未处理加群申请数；后端关联回填，仅当登录用户是该群群主 / 管理员时非空
+  joinApproval?: boolean // 进群是否需群主 / 管理员审批
 
   // ========== 前端扩展字段（user-per-group 维度） ==========
   silent?: boolean // 是否免打扰。从当前用户的 GroupMember 回填
@@ -232,5 +231,5 @@ export interface GroupLite {
   showImageThumb?: string
   memberCount?: number
   ownerId?: number
-  joinType?: number // 加群方式；参见 ImGroupJoinType
+  joinApproval?: boolean // 进群是否需群主 / 管理员审批
 }

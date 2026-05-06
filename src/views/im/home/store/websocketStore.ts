@@ -1,4 +1,5 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
+import { ElNotification } from 'element-plus'
 import { store } from '@/store'
 import { getRefreshToken } from '@/utils/auth'
 import { useUserStore } from '@/store/modules/user'
@@ -9,6 +10,7 @@ import {
   ImConversationType,
   isFriendChatTip,
   isFriendNotification,
+  isGroupRequestNotification,
   isNormalMessage
 } from '../../utils/constants'
 import { playAudioTip } from '../../utils/message'
@@ -16,6 +18,7 @@ import { useConversationStore } from './conversationStore'
 import { useFriendStore, type FriendNotificationPayload } from './friendStore'
 import { getFriendDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
+import { useGroupRequestStore } from './groupRequestStore'
 import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/message/private'
 import { readGroupMessages as apiReadGroupMessages } from '@/api/im/message/group'
 import type {
@@ -247,6 +250,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
               ) {
                 this.handlePrivateMessage(websocketMessage)
               }
+            } else if (isGroupRequestNotification(websocketMessage.type)) {
+              // 加群申请通知（1503 / 1505 / 1506）走私聊通道，与好友通知同段位但分开 dispatcher
+              // TODO @AI：改成走群聊通道。不然消息不好拉到！！！
+              this.handleGroupRequestNotification(websocketMessage)
             } else {
               // TEXT / IMAGE / FILE / VOICE / VIDEO 等普通消息
               this.handlePrivateMessage(websocketMessage)
@@ -548,6 +555,52 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           break
         default:
           console.debug('[IM WS] 未识别好友通知', websocketMessage)
+      }
+    },
+
+    // ==================== 加群申请通知（1503 / 1505 / 1506，承载于私聊通道） ====================
+
+    /**
+     * 加群申请通知统一入口：分发到 groupRequestStore，驱动横幅 + Drawer 同步
+     *
+     * 对应后端 ImPrivateMessageDTO.ofGroupNotification 系列：
+     * - 1503：admin 侧拉单条 push 进 unhandledList；申请人侧不收
+     * - 1505 / 1506：双端都收 — admin 侧从 unhandledList 移除；申请人侧弹 toast
+     */
+    handleGroupRequestNotification(websocketMessage: ImPrivateMessageDTO) {
+      const payload = JSON.parse(websocketMessage.content || '{}') as {
+        requestId?: number
+        groupId?: number
+        userId?: number
+        handleContent?: string
+      }
+      if (!payload.requestId) {
+        return
+      }
+      const groupRequestStore = useGroupRequestStore()
+      const userStore = useUserStore()
+      const myId = Number(userStore.getUser?.id) || 0
+      switch (websocketMessage.type) {
+        case ImMessageType.GROUP_REQUEST_RECEIVED:
+          groupRequestStore.addByRequestId(payload.requestId).catch(() => undefined)
+          break
+        case ImMessageType.GROUP_REQUEST_APPROVED:
+          groupRequestStore.removeByRequestId(payload.requestId)
+          if (payload.userId === myId) {
+            ElNotification.success({ title: '入群申请已通过', message: '可以开始群聊了' })
+          }
+          break
+        case ImMessageType.GROUP_REQUEST_REJECTED:
+          groupRequestStore.removeByRequestId(payload.requestId)
+          if (payload.userId === myId) {
+            ElNotification.warning({
+              title: '入群申请被拒绝',
+              message: payload.handleContent || ''
+            })
+          }
+          break
+        default:
+          break
       }
     },
 

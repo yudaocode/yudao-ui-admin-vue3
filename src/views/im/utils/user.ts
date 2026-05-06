@@ -170,6 +170,8 @@ export type GroupNotificationPayload = {
   mutedUserId?: number // 禁言目标用户
   muteEndTime?: string // 禁言到期时间
   banned?: boolean // 封禁状态
+  entrantUserId?: number // 自由进群事件：进群者用户编号
+  addSource?: number // 自由进群事件：来源（搜索 / 二维码 / 分享链接）
   /** PIN 事件携带的完整被置顶消息对象 */
   message?: {
     id: number
@@ -223,6 +225,11 @@ export function resolveGroupNotificationText(
       return `${operatorName} 解散了群聊`
     case ImMessageType.GROUP_MEMBER_INVITE:
       return `${operatorName} 邀请 ${memberNames} 加入群聊`
+    case ImMessageType.GROUP_MEMBER_ENTER: {
+      // 自由进群 / 主动申请通过：操作人 = 进群者；文案统一展示「XX 加入了群聊」
+      const entrantName = payload.entrantUserId ? resolve(payload.entrantUserId) : operatorName
+      return `${entrantName} 加入了群聊`
+    }
     case ImMessageType.GROUP_MEMBER_QUIT:
       return `${operatorName} 退出了群聊`
     case ImMessageType.GROUP_MEMBER_KICK:

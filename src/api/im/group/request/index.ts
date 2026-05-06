@@ -48,6 +48,7 @@ export const refuseGroupRequest = (id: number | string, handleContent?: string) 
 }
 
 // 查询「我相关」的加群申请列表（含我主动申请、我被邀请待审）；游标分页
+// TODO @AI：这个 list 接口，改成传递 groupId，查询这个群下，所有的申请。然后，group size 增加一个：「群申请列表」，里面可以看到所有的。
 export const getMyGroupRequestList = (limit: number, lastRequestId?: number) => {
   const params: Record<string, number> = { limit }
   if (lastRequestId != null) {
@@ -59,23 +60,14 @@ export const getMyGroupRequestList = (limit: number, lastRequestId?: number) => 
   })
 }
 
-// 查询指定群的未处理加群申请（仅群主或管理员可调）；游标分页
-export const getPendingGroupRequestList = (
-  groupId: number | string,
-  limit: number,
-  lastRequestId?: number
-) => {
-  const params: Record<string, number | string> = { groupId, limit }
-  if (lastRequestId != null) {
-    params.lastRequestId = lastRequestId
-  }
+// 查询「我管理的所有群」下的未处理加群申请列表（不分页）；前端 store 据此派生横幅红点 + Drawer 列表
+export const getUnhandledRequestList = () => {
   return request.get<ImGroupRequestRespVO[]>({
-    url: '/im/group-request/list-pending',
-    params
+    url: '/im/group-request/unhandled-list'
   })
 }
 
-// 按 id 单查「我相关」的申请记录（带越权过滤；WebSocket 通知到达后用）
+// 按 id 单查申请记录（带越权过滤；WebSocket 通知到达后用）
 export const getMyGroupRequest = (id: number) => {
   return request.get<ImGroupRequestRespVO | null>({
     url: '/im/group-request/get',

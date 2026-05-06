@@ -157,20 +157,6 @@ export const ImGroupMemberRole = {
   NORMAL: 3 // 普通成员
 } as const
 
-/** 加群方式（对齐后端 ImGroupJoinTypeEnum） */
-export const ImGroupJoinType = {
-  FREE: 0, // 自由进群
-  APPLY: 1, // 申请需审批，邀请直进
-  APPLY_AND_NORMAL_INVITE: 2 // 申请、及普通成员邀请均需审批
-} as const
-
-/** 加群方式文案 */
-export const IM_GROUP_JOIN_TYPE_LABELS: Record<number, string> = {
-  [ImGroupJoinType.FREE]: '自由进群',
-  [ImGroupJoinType.APPLY]: '申请需审批',
-  [ImGroupJoinType.APPLY_AND_NORMAL_INVITE]: '申请、及普通成员邀请均需审批'
-}
-
 /** 加群来源（对齐后端 ImGroupAddSourceEnum） */
 export const ImGroupAddSource = {
   SEARCH: 1, // 搜索

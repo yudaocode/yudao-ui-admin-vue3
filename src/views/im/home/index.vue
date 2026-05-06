@@ -31,6 +31,7 @@ import { useConversationStore } from './store/conversationStore'
 import { useImWebSocketStore } from './store/websocketStore'
 import { useFriendStore } from './store/friendStore'
 import { useGroupStore } from './store/groupStore'
+import { useGroupRequestStore } from './store/groupRequestStore'
 import { useDraftStore } from './store/draftStore'
 import { useMessagePuller } from './composables/useMessagePuller'
 import { useMessageSender } from './composables/useMessageSender'
@@ -47,6 +48,7 @@ const conversationStore = useConversationStore()
 const webSocketStore = useImWebSocketStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
+const groupRequestStore = useGroupRequestStore()
 const draftStore = useDraftStore()
 const { pullOnce } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
@@ -85,6 +87,11 @@ onMounted(async () => {
     // 3. 实时通信：建 WebSocket 长连接 + 拉离线消息（pullOnce finally 把 loading 归位）
     webSocketStore.connect()
     await pullOnce()
+    // 3.1 我管理的群下未处理加群申请，给顶部横幅 / Drawer 派生 count 与 list；失败不阻断主流程
+    // TODO @AI：可以挪到 1.2 那么？不阻塞就行呀。
+    void groupRequestStore.fetchUnhandledList().catch((e) =>
+      console.warn('[IM] 拉取未处理加群申请失败', e)
+    )
 
     // 4. 默认选中第一个会话；若置顶分组处于折叠态，需跳过被折叠隐藏的置顶项，避免自动展开折叠
     const sorted = conversationStore.getSortedConversations
