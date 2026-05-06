@@ -128,13 +128,19 @@ const validateTriggers = (_rule: any, value: any, callback: any) => {
         callback(new Error(`触发器 ${i + 1}: 物模型标识符不能为空`))
         return
       }
-      if (!trigger.operator) {
-        callback(new Error(`触发器 ${i + 1}: 操作符不能为空`))
-        return
-      }
-      if (trigger.value === undefined || trigger.value === null || trigger.value === '') {
-        callback(new Error(`触发器 ${i + 1}: 参数值不能为空`))
-        return
+      // 事件上报 / 服务调用：operator 由前端自动设为 '='，参数值留空表示"事件 / 调用发生即匹配"
+      const isEventOrService =
+        trigger.type === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST ||
+        trigger.type === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
+      if (!isEventOrService) {
+        if (!trigger.operator) {
+          callback(new Error(`触发器 ${i + 1}: 操作符不能为空`))
+          return
+        }
+        if (trigger.value === undefined || trigger.value === null || trigger.value === '') {
+          callback(new Error(`触发器 ${i + 1}: 参数值不能为空`))
+          return
+        }
       }
     }
 

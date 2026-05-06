@@ -30,6 +30,10 @@
         v-model="formData.config"
       />
       <MqttConfigForm v-if="IotDataSinkTypeEnum.MQTT === formData.type" v-model="formData.config" />
+      <DatabaseConfigForm
+        v-if="IotDataSinkTypeEnum.DATABASE === formData.type"
+        v-model="formData.config"
+      />
       <RocketMQConfigForm
         v-if="IotDataSinkTypeEnum.ROCKETMQ === formData.type"
         v-model="formData.config"
@@ -69,6 +73,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { DataSinkApi, DataSinkVO, IotDataSinkTypeEnum } from '@/api/iot/rule/data/sink'
 import {
+  DatabaseConfigForm,
   HttpConfigForm,
   KafkaMQConfigForm,
   MqttConfigForm,
@@ -116,6 +121,9 @@ const formRules = reactive({
   'config.password': [{ required: true, message: '密码不能为空', trigger: 'blur' }],
   'config.clientId': [{ required: true, message: '客户端 ID 不能为空', trigger: 'blur' }],
   'config.topic': [{ required: true, message: '主题不能为空', trigger: 'blur' }],
+  // Database 配置
+  'config.jdbcUrl': [{ required: true, message: 'JDBC 连接地址不能为空', trigger: 'blur' }],
+  'config.tableName': [{ required: true, message: '目标表名不能为空', trigger: 'blur' }],
   // RocketMQ 配置
   'config.nameServer': [{ required: true, message: 'NameServer 地址不能为空', trigger: 'blur' }],
   'config.accessKey': [{ required: true, message: 'AccessKey 不能为空', trigger: 'blur' }],

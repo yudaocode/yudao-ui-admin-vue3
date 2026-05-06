@@ -80,14 +80,20 @@
               :config="serviceConfig"
               placeholder="请输入 JSON 格式的服务参数"
             />
-            <!-- 事件上报参数配置 -->
-            <JsonParamsInput
-              v-else-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST"
-              v-model="condition.value"
-              type="event"
-              :config="eventConfig"
-              placeholder="请输入 JSON 格式的事件参数"
-            />
+            <!-- 事件上报比较值：标量填裸值；结构体／数组填 JSON 整体相等；留空则事件发生即匹配 -->
+            <template v-else-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST">
+              <el-input
+                :model-value="condition.value"
+                @update:model-value="(value) => updateConditionField('value', value)"
+                placeholder="留空则事件发生即匹配"
+              />
+              <div class="text-12px text-[var(--el-text-color-secondary)] mt-4px leading-relaxed">
+                标量事件值填裸值（如
+                <code class="px-2px">normal</code>）；结构体／数组事件值填合法
+                JSON（如
+                <code class="px-2px">{"level":"high"}</code>）
+              </div>
+            </template>
             <!-- 普通值输入 -->
             <ValueInput
               v-else
@@ -270,19 +276,6 @@ const serviceConfig = computed(() => {
       service: {
         name: propertyConfig.value.name || '服务',
         inputParams: propertyConfig.value.inputParams || []
-      }
-    }
-  }
-  return undefined
-})
-
-// 计算属性：事件配置 - 用于 JsonParamsInput
-const eventConfig = computed(() => {
-  if (propertyConfig.value && props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST) {
-    return {
-      event: {
-        name: propertyConfig.value.name || '事件',
-        outputParams: propertyConfig.value.outputParams || []
       }
     }
   }

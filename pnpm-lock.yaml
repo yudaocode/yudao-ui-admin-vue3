@@ -65,6 +65,12 @@ importers:
       dayjs:
         specifier: ^1.11.20
         version: 1.11.20
+      dayjs-plugin-lunar:
+        specifier: ^1.4.1
+        version: 1.4.1(dayjs@1.11.20)(tyme4ts@1.4.6)
+      dhtmlx-gantt:
+        specifier: ^9.1.1
+        version: 9.1.4
       diagram-js:
         specifier: ^15.11.0
         version: 15.11.0
@@ -80,9 +86,15 @@ importers:
       element-plus:
         specifier: 2.13.6
         version: 2.13.6(typescript@6.0.2)(vue@3.5.32(typescript@6.0.2))
+      fast-xml-parser:
+        specifier: ^4.3.2
+        version: 4.5.6
       highlight.js:
         specifier: ^11.11.1
         version: 11.11.1
+      jsbarcode:
+        specifier: ^3.12.3
+        version: 3.12.3
       jsencrypt:
         specifier: ^3.5.4
         version: 3.5.4
@@ -137,6 +149,9 @@ importers:
       steady-xml:
         specifier: ^0.1.0
         version: 0.1.0
+      tyme4ts:
+        specifier: ^1.4.6
+        version: 1.4.6
       url:
         specifier: ^0.11.4
         version: 0.11.4
@@ -3422,6 +3437,12 @@ packages:
     resolution: {integrity: sha512-MOqHvMWF9/9MX6nza0KgvFH4HpMU0EF5uUDXqX/BtxtU8NfB0QzRtJ8Oe/6SuS4kbhyzVJwjd97EA4PKrzJ8bw==}
     engines: {node: '>=0.12'}
 
+  dayjs-plugin-lunar@1.4.1:
+    resolution: {integrity: sha512-nHKJMKoVAGt/Wp6x3xH8GrjWhB25YBYd6iYTCfLkCm4GAS6q3jvfHpLwRnIX8bjHgl8sPlTPiLFcylcEaEnj8Q==}
+    peerDependencies:
+      dayjs: ^1.0.0
+      tyme4ts: ^1.0.0
+
   dayjs@1.11.20:
     resolution: {integrity: sha512-YbwwqR/uYpeoP4pu043q+LTDLFBLApUP6VxRihdfNTqu4ubqMlGDLd6ErXhEgsyvY0K6nCs7nggYumAN+9uEuQ==}
 
@@ -3460,6 +3481,9 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  dhtmlx-gantt@9.1.4:
+    resolution: {integrity: sha512-XCNA5QUiuV79Xq1ykNpH9LFNR2IVpDZMqnmBV6dsBeOkHyPMOpkyQ/gqAPCcK2GAvYHoN2nGAMYb2LldCWhMuQ==}
 
   diagram-js-direct-editing@3.3.0:
     resolution: {integrity: sha512-EjXYb35J3qBU8lLz5U81hn7wNykVmF7U5DXZ7BvPok2IX7rmPz+ZyaI5AEMiqaC6lpSnHqPxFcPgKEiJcAiv5w==}
@@ -3782,6 +3806,10 @@ packages:
 
   fast-uri@3.1.0:
     resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
+
+  fast-xml-parser@4.5.6:
+    resolution: {integrity: sha512-Yd4vkROfJf8AuJrDIVMVmYfULKmIJszVsMv7Vo71aocsKgFxpdlpSHXSaInvyYfgw2PRuObQSW2GFpVMUjxu9A==}
+    hasBin: true
 
   fastest-levenshtein@1.0.16:
     resolution: {integrity: sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==}
@@ -4203,6 +4231,9 @@ packages:
   js-yaml@4.1.1:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
     hasBin: true
+
+  jsbarcode@3.12.3:
+    resolution: {integrity: sha512-CuHU9hC6dPsHF5oVFMo8NW76uQVjH4L22CsP4hW+dNnGywJHC/B0ThA1CTDVLnxKLrrpYdicBLnd2xsgTfRnvg==}
 
   jsencrypt@3.5.4:
     resolution: {integrity: sha512-kNjfYEMNASxrDGsmcSQh/rUTmcoRfSUkxnAz+MMywM8jtGu+fFEZ3nJjHM58zscVnwR0fYmG9sGkTDjqUdpiwA==}
@@ -5287,6 +5318,9 @@ packages:
   strip-literal@3.1.0:
     resolution: {integrity: sha512-8r3mkIM/2+PpjHoOtiAW8Rg3jJLHaV7xPwG+YRGrv6FP0wwk/toTpATxWYOW0BKdWwl82VT2tFYi5DlROa0Mxg==}
 
+  strnum@1.1.2:
+    resolution: {integrity: sha512-vrN+B7DBIoTTZjnPNewwhx6cBA/H+IS7rfW68n7XxC1y7uoiGQBxaKzqucGUgavX15dJgiGztLJ8vxuEzwqBdA==}
+
   style-mod@4.1.3:
     resolution: {integrity: sha512-i/n8VsZydrugj3Iuzll8+x/00GH2vnYsk1eomD8QiRrSAeW6ItbCQDtfXCeJHd0iwiNagqjQkvpvREEPtW3IoQ==}
 
@@ -5419,6 +5453,9 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  tyme4ts@1.4.6:
+    resolution: {integrity: sha512-6uiAlUxS4BNu2FGsKg0KdUr329jJjhnEURhURR8v5GKXnv1B7Z4kAZHjOByhGcCJ+jhuQskR5kmGSvZJ7fE/VA==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -5773,6 +5810,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -9235,6 +9273,11 @@ snapshots:
       es5-ext: 0.10.64
       type: 2.7.3
 
+  dayjs-plugin-lunar@1.4.1(dayjs@1.11.20)(tyme4ts@1.4.6):
+    dependencies:
+      dayjs: 1.11.20
+      tyme4ts: 1.4.6
+
   dayjs@1.11.20: {}
 
   debug@4.4.3:
@@ -9258,6 +9301,8 @@ snapshots:
   destr@2.0.5: {}
 
   detect-libc@2.1.2: {}
+
+  dhtmlx-gantt@9.1.4: {}
 
   diagram-js-direct-editing@3.3.0(diagram-js@15.11.0):
     dependencies:
@@ -9711,6 +9756,10 @@ snapshots:
 
   fast-uri@3.1.0: {}
 
+  fast-xml-parser@4.5.6:
+    dependencies:
+      strnum: 1.1.2
+
   fastest-levenshtein@1.0.16: {}
 
   fastq@1.20.1:
@@ -10132,6 +10181,8 @@ snapshots:
   js-yaml@4.1.1:
     dependencies:
       argparse: 2.0.1
+
+  jsbarcode@3.12.3: {}
 
   jsencrypt@3.5.4: {}
 
@@ -11194,6 +11245,8 @@ snapshots:
     dependencies:
       js-tokens: 9.0.1
 
+  strnum@1.1.2: {}
+
   style-mod@4.1.3: {}
 
   stylelint-config-html@1.1.0(postcss-html@1.8.1)(stylelint@17.6.0(typescript@6.0.2)):
@@ -11349,6 +11402,8 @@ snapshots:
   tslib@2.3.0: {}
 
   tslib@2.8.1: {}
+
+  tyme4ts@1.4.6: {}
 
   type-check@0.4.0:
     dependencies:

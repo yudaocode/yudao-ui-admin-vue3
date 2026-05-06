@@ -78,7 +78,7 @@ export const useTagsViewStore = defineStore('tagsView', {
     // 删除某个
     delView(view: RouteLocationNormalizedLoaded) {
       this.delVisitedView(view)
-      this.delCachedView()
+      this.addCachedView()
     },
     // 删除tag
     delVisitedView(view: RouteLocationNormalizedLoaded) {
@@ -106,7 +106,7 @@ export const useTagsViewStore = defineStore('tagsView', {
     // 删除所有缓存和tag
     delAllViews() {
       this.delAllVisitedViews()
-      this.delCachedView()
+      this.addCachedView()
     },
     // 删除所有tag
     delAllVisitedViews() {

@@ -13,6 +13,7 @@ export interface DataSinkVO {
     | TcpConfig
     | WebSocketConfig
     | MqttConfig
+    | DatabaseConfig
     | RocketMQConfig
     | KafkaMQConfig
     | RabbitMQConfig
@@ -71,6 +72,14 @@ export interface MqttConfig extends Config {
   password: string
   clientId: string
   topic: string
+}
+
+/** Database 配置 */
+export interface DatabaseConfig extends Config {
+  jdbcUrl: string
+  username: string
+  password: string
+  tableName: string
 }
 
 /** RocketMQ 配置 */
