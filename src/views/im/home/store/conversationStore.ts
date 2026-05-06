@@ -268,14 +268,19 @@ export const useConversationStore = defineStore('imConversationStore', {
       ).filter((c) => !c.deleted)
       for (const conversation of conversationsToFlush) {
         // ① toRaw 拆掉 Vue reactive Proxy：IDB 的 structuredClone 不接受 Proxy，不拆会抛 DataCloneError 静默落盘失败（只 meta 写得进去，messages 永远丢）
-        // ② 剥掉 _localFile：IDB 能 structuredClone File 对象，但视频几百 MB 落盘没意义，刷新后媒体 SENDING / FAILED 重传也走不通
-        const messagesForFlush = toRaw(conversation.messages).map((message) => {
-          if (message._localFile == null) {
-            return message
-          }
-          const { _localFile: _omitted, ...rest } = message
-          return rest
-        })
+        // ② 剥 _localFile：IDB 能 structuredClone File 对象，但视频几百 MB 落盘没意义；
+        //    fast path：先扫一眼整条链路有无 _localFile，没有就直接 toRaw —— 绝大部分会话不会同时有上传中的媒体，每次 ack 都全量 map+spread 浪费
+        const rawMessages = toRaw(conversation.messages)
+        const hasLocalFile = rawMessages.some((message) => message._localFile != null)
+        const messagesForFlush = hasLocalFile
+          ? rawMessages.map((message) => {
+              if (message._localFile == null) {
+                return message
+              }
+              const { _localFile: _omitted, ...rest } = message
+              return rest
+            })
+          : rawMessages
         tasks.push(
           imStorage.setItem(
             StorageKeys.conversationMessages(userId, conversation.type, conversation.targetId),
