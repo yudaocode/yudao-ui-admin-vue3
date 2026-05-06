@@ -4,23 +4,97 @@ import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../store/conversationStore'
 import { useMessageSender } from './useMessageSender'
 import { useMuteOverlay } from './useMuteOverlay'
-import { ImMessageStatus } from '../../utils/constants'
+import { ImMessageStatus, ImMessageType } from '../../utils/constants'
 import { getConversationKey } from '../../utils/conversation'
 import {
   generateClientMessageId,
+  parseMessage,
   serializeMessage,
   withQuotePayload,
-  type QuoteMessage
+  type AudioMessage,
+  type FileMessage,
+  type ImageMessage,
+  type QuoteMessage,
+  type VideoMessage
 } from '../../utils/message'
 import type { Conversation, Message } from '../types'
 
-/** 单次媒体上传的入参（image / file / voice 共用；video 走低层 helper 自行组装） */
-export interface UploadAndSendMediaOptions<P extends { quote?: QuoteMessage }> {
+/** 单条媒体 payload 联合（覆盖 IMAGE / FILE / VOICE / VIDEO 四种） */
+export type MediaPayload = ImageMessage | FileMessage | AudioMessage | VideoMessage
+
+/**
+ * 媒体特定的元数据上下文：首发 / 重传共用入参；不同 type 关心不同字段
+ *
+ * - voiceDuration：语音时长（秒），首发由 VoiceRecorder 给，重传从旧 AudioMessage.duration 取
+ * - videoProbe：视频元信息（首发由 probeVideoFile 解出，重传从旧 VideoMessage 直接拷字段）
+ * - videoCoverUrl：视频封面真实 URL；占位阶段用 blob，commit 用真实 URL，重传时旧值若是 blob 会被跳过
+ */
+export interface MediaTypeContext {
+  voiceDuration?: number
+  videoProbe?: { duration?: number; width?: number; height?: number }
+  videoCoverUrl?: string
+}
+
+interface MediaTypeHandler {
+  /** 中文名，仅日志用（替代之前散落 9 处的 kind 字符串） */
+  kind: string
+  /** 由 file + url + context 生成 payload；占位时 url 是 blob URL，commit 时是真实 url */
+  build: (file: File, url: string, context: MediaTypeContext) => MediaPayload
+  /** 重传场景：从旧 content 提取 context（让重传不需要重做 probe / 重录语音） */
+  extractResendContext: (oldContent: string) => MediaTypeContext
+}
+
+/** 媒体类型注册表：image / file / voice / video 各自的 kind + 首发 / 重传共用的 build / extract */
+export const mediaTypeHandlers: Partial<Record<number, MediaTypeHandler>> = {
+  [ImMessageType.IMAGE]: {
+    kind: '图片',
+    build: (_file, url) => ({ url }) as ImageMessage,
+    extractResendContext: () => ({})
+  },
+  [ImMessageType.FILE]: {
+    kind: '文件',
+    build: (file, url) => ({ url, name: file.name, size: file.size }) as FileMessage,
+    extractResendContext: () => ({})
+  },
+  [ImMessageType.VOICE]: {
+    kind: '语音',
+    build: (_file, url, context) =>
+      ({ url, duration: context.voiceDuration ?? 0 }) as AudioMessage,
+    extractResendContext: (oldContent) => {
+      const old = parseMessage<AudioMessage>(oldContent)
+      return { voiceDuration: old?.duration ?? 0 }
+    }
+  },
+  [ImMessageType.VIDEO]: {
+    kind: '视频',
+    build: (file, url, context) =>
+      ({
+        url,
+        coverUrl: context.videoCoverUrl,
+        duration: context.videoProbe?.duration,
+        width: context.videoProbe?.width,
+        height: context.videoProbe?.height,
+        size: file.size
+      }) as VideoMessage,
+    extractResendContext: (oldContent) => {
+      const old = parseMessage<VideoMessage>(oldContent)
+      // 旧 coverUrl 是 blob 说明上传期失败（cover 没传成功），不复用；真实 URL 直接复用，省一次封面上传
+      const reuseCover = old?.coverUrl && !old.coverUrl.startsWith('blob:') ? old.coverUrl : undefined
+      return {
+        videoProbe: { duration: old?.duration, width: old?.width, height: old?.height },
+        videoCoverUrl: reuseCover
+      }
+    }
+  }
+}
+
+/** 单次媒体上传的入参（image / file / voice 走 uploadAndSendMedia；video 走低层 helper 自行组装） */
+export interface UploadAndSendMediaOptions {
   file: File
-  type: number // 对齐 ImMessageType
-  kind: string // 文案：「图片」/「文件」/「语音」，仅日志用
-  /** 由 url 生成消息 payload；占位阶段传 blob URL，上传成功后再用真实 url 重生成 */
-  buildPayload: (url: string) => P
+  /** 对齐 ImMessageType；mediaTypeHandlers 必须有对应项 */
+  type: number
+  /** 媒体特定的元数据（如语音时长 / 视频元信息）；不传按空对象处理 */
+  context?: MediaTypeContext
   /** 引用消息（若有），写进 payload.quote */
   quote?: QuoteMessage
   /** 锁定起始会话，上传期间会话切走则放弃发送 */
@@ -102,6 +176,57 @@ export const useMediaUploader = () => {
   }
 
   /**
+   * 生成 axios `onUploadProgress` 回调：用 closure 缓存上次百分比，未变化直接 return 不进 store
+   *
+   * XHR onProgress 大文件下每秒触发 10-50 次，但 Math.round 后百分比有大量重复（一秒内可能十几次同一个数字）；
+   * 在源头去重，能省掉 store 的 find + Object.assign + Vue reactivity 触发链
+   */
+  const createUploadProgressHandler = (conversation: Conversation, clientMessageId: string) => {
+    let lastPercent = -1
+    return (event: ProgressEvent): void => {
+      if (!event.total) {
+        return
+      }
+      const percent = Math.round((event.loaded / event.total) * 100)
+      if (percent === lastPercent) {
+        return
+      }
+      lastPercent = percent
+      conversationStore.patchMessage(conversation.type, conversation.targetId, clientMessageId, {
+        uploadProgress: percent
+      })
+    }
+  }
+
+  /** 取媒体类型中文名（仅日志用）；未注册 type 退化为通用「媒体」 */
+  const getMediaKind = (type: number): string => mediaTypeHandlers[type]?.kind ?? '媒体'
+
+  /**
+   * 上传完成后的收口校验：会话仍是占位时锁定的那个 + 当前未被禁言；任一不满足 markMediaFailed + 返回 false
+   *
+   * image / file / voice / video 链路都要在「拿到真实 url 后、调 sendRaw 之前」过一遍这两道
+   */
+  const verifyMediaUploadStillAllowed = (
+    conversation: Conversation,
+    startKey: string,
+    type: number,
+    clientMessageId: string
+  ): boolean => {
+    const activeConversation = conversationStore.activeConversation
+    if (!activeConversation || getConversationKey(activeConversation) !== startKey) {
+      console.warn(`[IM] ${getMediaKind(type)}上传期间切换了会话，放弃发送`, { startKey })
+      markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
+      return false
+    }
+    if (muteOverlay.value) {
+      console.warn(`[IM] ${getMediaKind(type)}上传期间被禁言，放弃发送`, { startKey })
+      markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
+      return false
+    }
+    return true
+  }
+
+  /**
    * 占位完成后用真实 url 替换 content，再走 sendRaw 完成发送
    *
    * 上传成功 → patch content → sendRaw 复用 existingClientMessageId；store 内部 revoke 旧 blob URL
@@ -118,30 +243,38 @@ export const useMediaUploader = () => {
       opts.clientMessageId,
       { content: opts.realContent }
     )
+    // 显式传 conversation 而非依赖 sendRaw 内部取 active：
+    // verifyMediaUploadStillAllowed 与 sendRaw 之间存在微秒窗口，期间用户切会话也能保证发到原会话
     await sendRaw(opts.type, opts.realContent, {
       existingClientMessageId: opts.clientMessageId,
-      targetId: opts.conversation.targetId
+      targetId: opts.conversation.targetId,
+      conversation: opts.conversation
     })
   }
 
   /**
-   * 上传媒体文件并发送消息（高层入口；image / file / voice 用）
+   * 上传媒体文件并发送消息（高层入口；image / file / voice 用，video 走低层 helper 自行组装）
    *
    * @returns 占位消息的 clientMessageId（调用方按需用于后续 patch / 移除；上传失败时占位仍保留为 FAILED 态）
    */
-  const uploadAndSendMedia = async <P extends { quote?: QuoteMessage }>(
-    opts: UploadAndSendMediaOptions<P>
-  ): Promise<string> => {
+  const uploadAndSendMedia = async (opts: UploadAndSendMediaOptions): Promise<string> => {
     const { conversation } = opts
+    const handler = mediaTypeHandlers[opts.type]
+    if (!handler) {
+      console.warn('[IM] uploadAndSendMedia 收到未注册的媒体类型', { type: opts.type })
+      return ''
+    }
     const startKey = getConversationKey(conversation)
+    const context = opts.context ?? {}
+    const buildContent = (url: string): string =>
+      serializeMessage(withQuotePayload(handler.build(opts.file, url, context), opts.quote))
 
     // 1. 立即占位
     const { clientMessageId } = insertMediaPlaceholder({
       file: opts.file,
       type: opts.type,
       conversation,
-      buildContent: (blobUrl) =>
-        serializeMessage(withQuotePayload<P>(opts.buildPayload(blobUrl), opts.quote))
+      buildContent
     })
 
     // 2. 上传：进度回调 patch uploadProgress；失败保留 _localFile 供重试
@@ -149,18 +282,13 @@ export const useMediaUploader = () => {
     try {
       const form = new FormData()
       form.append('file', opts.file)
-      const res = (await updateFile(form, (event: ProgressEvent) => {
-        if (!event.total) {
-          return
-        }
-        const percent = Math.round((event.loaded / event.total) * 100)
-        conversationStore.patchMessage(conversation.type, conversation.targetId, clientMessageId, {
-          uploadProgress: percent
-        })
-      })) as { data?: string }
+      const res = (await updateFile(
+        form,
+        createUploadProgressHandler(conversation, clientMessageId)
+      )) as { data?: string }
       url = res?.data
     } catch (e) {
-      console.error(`[IM] ${opts.kind}上传失败`, e)
+      console.error(`[IM] ${handler.kind}上传失败`, e)
     }
     if (!url) {
       markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
@@ -168,30 +296,27 @@ export const useMediaUploader = () => {
     }
 
     // 3. 上传期间会话切换 / 用户登出 / 被禁言：任一情况都放弃发送，占位置 FAILED
-    const activeConversation = conversationStore.activeConversation
-    if (!activeConversation || getConversationKey(activeConversation) !== startKey) {
-      console.warn(`[IM] ${opts.kind}上传期间切换了会话，放弃发送`, { startKey })
-      markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
-      return clientMessageId
-    }
-    if (muteOverlay.value) {
-      console.warn(`[IM] ${opts.kind}上传期间被禁言，放弃发送`, { startKey })
-      markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
+    if (!verifyMediaUploadStillAllowed(conversation, startKey, opts.type, clientMessageId)) {
       return clientMessageId
     }
 
     // 4. patch content + sendRaw 收尾
-    const realContent = serializeMessage(
-      withQuotePayload<P>(opts.buildPayload(url), opts.quote)
-    )
     await commitMediaPlaceholder({
       type: opts.type,
       conversation,
       clientMessageId,
-      realContent
+      realContent: buildContent(url)
     })
     return clientMessageId
   }
 
-  return { uploadAndSendMedia, insertMediaPlaceholder, markMediaFailed, commitMediaPlaceholder }
+  return {
+    uploadAndSendMedia,
+    insertMediaPlaceholder,
+    markMediaFailed,
+    commitMediaPlaceholder,
+    createUploadProgressHandler,
+    verifyMediaUploadStillAllowed,
+    getMediaKind
+  }
 }

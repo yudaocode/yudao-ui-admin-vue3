@@ -131,10 +131,7 @@
         <div
           v-else-if="isVoice && voicePayload"
           class="relative flex gap-2 items-center min-w-[120px] px-3.5 py-2.5 rounded-lg cursor-pointer"
-          :class="[
-            message.selfSend ? 'message-bubble--self' : 'message-bubble--other',
-            message.selfSend ? 'bg-[#95ec69]' : 'bg-[var(--el-fill-color-light)]'
-          ]"
+          :class="bubbleClass('voice')"
           @click="handleVoiceClick"
         >
           <Icon
@@ -317,7 +314,7 @@ import {
 } from '@/views/im/utils/user'
 import { useImUiStore } from '../../../../store/uiStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
-import { useMediaUploader } from '../../../../composables/useMediaUploader'
+import { mediaTypeHandlers, useMediaUploader } from '../../../../composables/useMediaUploader'
 import { useMuteOverlay } from '../../../../composables/useMuteOverlay'
 import type { Message } from '../../../../types'
 import MessageReadStatus from './MessageReadStatus.vue'
@@ -873,62 +870,25 @@ async function handleResend() {
   const message = props.message
   const file = message._localFile
 
-  // 媒体类型 + _localFile 在 → 重走 uploadAndSendMedia；按 type 分发 buildPayload，旧元数据从 content 解出复用
+  // 媒体类型 + _localFile 在 → 重走 uploadAndSendMedia；type 分发 + 旧元数据复用统一在 mediaTypeHandlers 表里
   if (isMediaMessageType(message.type) && file) {
-    const oldQuote = getQuoteFromMessage(message.content) ?? undefined
-    conversationStore.removeMessage(conversation.type, conversation.targetId, {
-      id: message.id,
-      clientMessageId: message.clientMessageId
-    })
-    if (message.type === ImMessageType.IMAGE) {
-      await uploadAndSendMedia<ImageMessage>({
+    const handler = mediaTypeHandlers[message.type]
+    if (handler) {
+      const oldQuote = getQuoteFromMessage(message.content) ?? undefined
+      const context = handler.extractResendContext(message.content)
+      conversationStore.removeMessage(conversation.type, conversation.targetId, {
+        id: message.id,
+        clientMessageId: message.clientMessageId
+      })
+      await uploadAndSendMedia({
         file,
-        type: ImMessageType.IMAGE,
-        kind: '图片',
+        type: message.type,
         quote: oldQuote,
         conversation,
-        buildPayload: (url) => ({ url })
+        context
       })
-    } else if (message.type === ImMessageType.FILE) {
-      await uploadAndSendMedia<FileMessage>({
-        file,
-        type: ImMessageType.FILE,
-        kind: '文件',
-        quote: oldQuote,
-        conversation,
-        buildPayload: (url) => ({ url, name: file.name, size: file.size })
-      })
-    } else if (message.type === ImMessageType.VOICE) {
-      const oldVoice = parseMessage<AudioMessage>(message.content)
-      await uploadAndSendMedia<AudioMessage>({
-        file,
-        type: ImMessageType.VOICE,
-        kind: '语音',
-        quote: oldQuote,
-        conversation,
-        buildPayload: (url) => ({ url, duration: oldVoice?.duration ?? 0 })
-      })
-    } else if (message.type === ImMessageType.VIDEO) {
-      const oldVideo = parseMessage<VideoMessage>(message.content)
-      // 视频不重 probe + 重传 cover，沿用旧 coverUrl；旧 coverUrl 是 blob 时（占位失败）丢掉，让接收端无 poster 但仍可播
-      const reuseCover = oldVideo?.coverUrl?.startsWith('blob:') ? undefined : oldVideo?.coverUrl
-      await uploadAndSendMedia<VideoMessage>({
-        file,
-        type: ImMessageType.VIDEO,
-        kind: '视频',
-        quote: oldQuote,
-        conversation,
-        buildPayload: (url) => ({
-          url,
-          coverUrl: reuseCover,
-          duration: oldVideo?.duration,
-          width: oldVideo?.width,
-          height: oldVideo?.height,
-          size: file.size
-        })
-      })
+      return
     }
-    return
   }
 
   // 文本类型 / 媒体类型但 _localFile 已丢：原 content 走 sendRaw 重发

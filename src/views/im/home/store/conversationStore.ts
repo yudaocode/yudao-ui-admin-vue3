@@ -605,6 +605,21 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (!message) {
         return
       }
+      // 值未变就早返回：onUploadProgress 高频回调里同 percent 重复 patch 时直接跳过响应式更新链
+      //              （createUploadProgressHandler 在源头已去重；这里是最后兜底，对 patch.uploadProgress / status 等字段都生效）
+      let changed = false
+      for (const key in patch) {
+        if (
+          Object.prototype.hasOwnProperty.call(patch, key)
+          && (patch as Record<string, unknown>)[key] !== (message as unknown as Record<string, unknown>)[key]
+        ) {
+          changed = true
+          break
+        }
+      }
+      if (!changed) {
+        return
+      }
       // 替换 content 时 revoke 旧 blob URL，与 ackMessage 同语义
       if (patch.content && patch.content !== message.content) {
         revokeBlobUrlsInContent(message.content)

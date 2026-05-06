@@ -170,16 +170,15 @@ import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useDraftStore } from '@/views/im/home/store/draftStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
-import { useMediaUploader } from '@/views/im/home/composables/useMediaUploader'
+import {
+  mediaTypeHandlers,
+  useMediaUploader
+} from '@/views/im/home/composables/useMediaUploader'
 import { useMuteOverlay } from '@/views/im/home/composables/useMuteOverlay'
 import { getConversationKey } from '@/views/im/utils/conversation'
 import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
 import {
   serializeMessage,
-  type ImageMessage,
-  type FileMessage,
-  type AudioMessage,
-  type VideoMessage,
   type QuoteMessage,
   withQuotePayload
 } from '@/views/im/utils/message'
@@ -198,8 +197,14 @@ const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const draftStore = useDraftStore()
 const { send } = useMessageSender()
-const { uploadAndSendMedia, insertMediaPlaceholder, markMediaFailed, commitMediaPlaceholder } =
-  useMediaUploader()
+const {
+  uploadAndSendMedia,
+  insertMediaPlaceholder,
+  markMediaFailed,
+  commitMediaPlaceholder,
+  createUploadProgressHandler,
+  verifyMediaUploadStillAllowed
+} = useMediaUploader()
 
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
 const imageInputRef = useTemplateRef<HTMLInputElement>('imageInputRef')
@@ -573,16 +578,6 @@ function consumeReply(): QuoteMessage | undefined {
   return quote
 }
 
-/** 校验当前激活会话仍是 startKey；切走了记日志 + 返回 false，调用方放弃发送 */
-function isStillSameConversation(startKey: string, kind: string): boolean {
-  const conversation = conversationStore.activeConversation
-  if (!conversation || getConversationKey(conversation) !== startKey) {
-    console.warn(`[IM] ${kind}上传期间切换了会话，放弃发送`, { startKey })
-    return false
-  }
-  return true
-}
-
 // ==================== 表情 ====================
 const emojiVisible = ref(false)
 /** 切换表情面板；打开时互斥关掉语音面板 */
@@ -826,29 +821,25 @@ async function uploadAndSendImage(file: File) {
   if (!context) {
     return
   }
-  await uploadAndSendMedia<ImageMessage>({
+  await uploadAndSendMedia({
     file,
     type: ImMessageType.IMAGE,
-    kind: '图片',
     quote: context.quote,
-    conversation: context.conversation,
-    buildPayload: (url) => ({ url })
+    conversation: context.conversation
   })
 }
 
-/** 上传并发送 FILE 消息；附原始 name / size 让接收端展示文件名和体积 */
+/** 上传并发送 FILE 消息；payload 由 mediaTypeHandlers[FILE] 自动拼 url + name + size */
 async function uploadAndSendFile(file: File) {
   const context = prepareMediaUpload()
   if (!context) {
     return
   }
-  await uploadAndSendMedia<FileMessage>({
+  await uploadAndSendMedia({
     file,
     type: ImMessageType.FILE,
-    kind: '文件',
     quote: context.quote,
-    conversation: context.conversation,
-    buildPayload: (url) => ({ url, name: file.name, size: file.size })
+    conversation: context.conversation
   })
 }
 
@@ -879,20 +870,19 @@ function openVoice() {
   voiceVisible.value = true
   emojiVisible.value = false
 }
-/** VoiceRecorder 录完回传 blob，包成 webm File 后走通用 uploadAndSendMedia */
+/** VoiceRecorder 录完回传 blob，包成 webm File 后走通用 uploadAndSendMedia；duration 走 context */
 async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   const context = prepareMediaUpload()
   if (!context) {
     return
   }
   const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
-  await uploadAndSendMedia<AudioMessage>({
+  await uploadAndSendMedia({
     file,
     type: ImMessageType.VOICE,
-    kind: '语音',
     quote: context.quote,
     conversation: context.conversation,
-    buildPayload: (url) => ({ url, duration: payload.duration })
+    context: { voiceDuration: payload.duration }
   })
 }
 
@@ -1008,12 +998,11 @@ async function uploadAndSendVideo(file: File) {
   const startKey = getConversationKey(conversation)
 
   // 1. 立即占位：blob URL 同时作 url + coverUrl 让 <video> 渲染首帧；_localFile 留 file 供失败重试
+  //    payload 拼装走 mediaTypeHandlers[VIDEO].build 与 commit 阶段共享同一份逻辑
+  const videoHandler = mediaTypeHandlers[ImMessageType.VIDEO]!
   const buildPlaceholderContent = (blobUrl: string): string =>
     serializeMessage(
-      withQuotePayload<VideoMessage>(
-        { url: blobUrl, coverUrl: blobUrl, size: file.size },
-        replyQuote
-      )
+      withQuotePayload(videoHandler.build(file, blobUrl, { videoCoverUrl: blobUrl }), replyQuote)
     )
   const { clientMessageId } = insertMediaPlaceholder({
     file,
@@ -1023,23 +1012,21 @@ async function uploadAndSendVideo(file: File) {
   })
 
   // 2. 三路并行起跑（probe 与两条上传无依赖，封面上传等 probe 出 cover 后立即接力）
-  // 2.1 视频本体上传：进度回调 patch uploadProgress；立即 catch 兜底为 url=undefined，由 step 3 拿不到 url 时收尾
+  // 2.1 视频本体上传：async IIFE 包一层让 await 显式可见（lint 不再误判 floating promise），
+  //     失败兜底为 url=undefined，由 step 3 拿不到 url 时收尾
   const videoForm = new FormData()
   videoForm.append('file', file)
-  const videoUploadPromise = (
-    updateFile(videoForm, (event: ProgressEvent) => {
-      if (!event.total) {
-        return
-      }
-      const percent = Math.round((event.loaded / event.total) * 100)
-      conversationStore.patchMessage(conversation.type, conversation.targetId, clientMessageId, {
-        uploadProgress: percent
-      })
-    }) as Promise<{ data?: string }>
-  ).catch((e) => {
-    console.warn('[IM] 视频本体上传失败', e)
-    return { data: undefined as string | undefined }
-  })
+  const videoUploadPromise: Promise<{ data?: string }> = (async () => {
+    try {
+      return (await updateFile(
+        videoForm,
+        createUploadProgressHandler(conversation, clientMessageId)
+      )) as { data?: string }
+    } catch (e) {
+      console.warn('[IM] 视频本体上传失败', e)
+      return { data: undefined }
+    }
+  })()
   // 2.2 probe 拿元信息 + 封面 blob：解码失败降级为空 probe，不阻断视频上传
   const probePromise = probeVideoFile(file).catch((e): VideoProbe => {
     console.warn('[IM] 视频元信息加载失败，降级为仅 url + size', e)
@@ -1076,28 +1063,18 @@ async function uploadAndSendVideo(file: File) {
     markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
     return
   }
-  // 3.3 校验会话仍是发送时锁定的那个（视频链路耗时长，这个窗口很实际）
-  if (!isStillSameConversation(startKey, '视频')) {
-    markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
-    return
-  }
-  // 3.4 视频上传期间被禁言也要拦：链路最长，最容易踩到 muteOverlay 期间触发
-  if (muteOverlay.value) {
-    markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
+  // 3.3 上传后会话校验 + muteOverlay 复查（与 useMediaUploader.uploadAndSendMedia 同一道）
+  if (!verifyMediaUploadStillAllowed(conversation, startKey, ImMessageType.VIDEO, clientMessageId)) {
     return
   }
 
   // 4. 拼真实 VideoMessage payload，patch 进占位 + 走 sendRaw 复用占位发送
   const realContent = serializeMessage(
-    withQuotePayload<VideoMessage>(
-      {
-        url,
-        coverUrl,
-        duration: probe.duration,
-        width: probe.width,
-        height: probe.height,
-        size: file.size
-      },
+    withQuotePayload(
+      videoHandler.build(file, url, {
+        videoProbe: { duration: probe.duration, width: probe.width, height: probe.height },
+        videoCoverUrl: coverUrl
+      }),
       replyQuote
     )
   )

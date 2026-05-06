@@ -106,19 +106,35 @@ export const parseMessage = <T>(content: string): T | null => {
 export const serializeMessage = <T>(payload: T): string => JSON.stringify(payload)
 
 /**
- * 释放 content 中所有 blob: URL 的内存映射
+ * 媒体 payload 里可能包含 blob URL 的字段（图片/文件/视频/语音都对齐这套 url 字段命名）
  *
- * 媒体上传链路占位时用 URL.createObjectURL(file) 当临时 url 写进 content；
- * ack / 重发 / 删除消息时调本函数把映射释放，避免 File 对象在浏览器内存里悬空（视频几百 MB 很伤）
+ * 跟随 ImageMessage / VideoMessage / FileMessage / AudioMessage interface 定义同步：
+ * - url：主体资源（占位时是 blob URL，ack 后是真实 URL）
+ * - coverUrl：视频封面（占位时跟 url 同 blob，cover 上传成功后是真实 URL）
+ * - thumbnailUrl：图片缩略图（当前未占位时使用 blob，预留）
+ */
+const MEDIA_BLOB_URL_FIELDS = ['url', 'coverUrl', 'thumbnailUrl'] as const
+
+/**
+ * 释放 content 中媒体 payload 字段上的 blob URL 内存映射
  *
+ * 仅扫描 url / coverUrl / thumbnailUrl 三个已知字段，避免 regex 全文 grep 误伤 quote.content 里嵌套的同名 blob URL。
  * 仅对当前 document 内创建的 blob URL 有效；IndexedDB 恢复出来的旧 blob URL 已随旧 document 失效，调它无害但无意义
  */
 export const revokeBlobUrlsInContent = (content: string): void => {
   if (!content || !content.includes('blob:')) {
     return
   }
-  const matches = content.match(/blob:[^"'\s)]+/g)
-  matches?.forEach((url) => URL.revokeObjectURL(url))
+  const payload = parseMessage<Record<string, unknown>>(content)
+  if (!payload) {
+    return
+  }
+  for (const field of MEDIA_BLOB_URL_FIELDS) {
+    const value = payload[field]
+    if (typeof value === 'string' && value.startsWith('blob:')) {
+      URL.revokeObjectURL(value)
+    }
+  }
 }
 
 // ==================== 引用消息 helper ====================
