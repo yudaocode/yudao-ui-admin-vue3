@@ -49,9 +49,13 @@
           </div>
           <template #dropdown>
             <el-dropdown-menu>
+              <!-- 把他推荐给朋友：以个人名片消息形式发到选中的会话 -->
+              <el-dropdown-item @click="handleRecommend">把他推荐给朋友</el-dropdown-item>
               <!-- 拉黑 / 移出黑名单：按 friendInfo.blocked 切换文案 -->
-              <el-dropdown-item v-if="!isBlocked" @click="handleBlock">加入黑名单</el-dropdown-item>
-              <el-dropdown-item v-else @click="handleUnblock">移出黑名单</el-dropdown-item>
+              <el-dropdown-item v-if="!isBlocked" divided @click="handleBlock"
+                >加入黑名单</el-dropdown-item
+              >
+              <el-dropdown-item v-else divided @click="handleUnblock">移出黑名单</el-dropdown-item>
               <el-dropdown-item divided @click="handleDeleteFriend">
                 <span class="text-[var(--el-color-danger)]">删除联系人</span>
               </el-dropdown-item>
@@ -73,7 +77,9 @@
         "
         @click="handleRowClick"
       >
-        <span class="flex-shrink-0 w-16 whitespace-nowrap text-[var(--el-text-color-secondary)]">备注</span>
+        <span class="flex-shrink-0 w-16 whitespace-nowrap text-[var(--el-text-color-secondary)]"
+          >备注</span
+        >
         <el-input
           v-if="editingRemark"
           ref="remarkInputRef"
@@ -111,13 +117,17 @@
       <template v-if="friendInfo?.addSource || friendInfo?.addTime">
         <div class="my-4 h-px bg-[var(--el-border-color-lighter)]"></div>
         <div v-if="friendInfo?.addSource" class="flex gap-5 items-center px-1.5 py-1.5 text-sm">
-          <span class="flex-shrink-0 w-16 whitespace-nowrap text-[var(--el-text-color-secondary)]">来源</span>
+          <span class="flex-shrink-0 w-16 whitespace-nowrap text-[var(--el-text-color-secondary)]"
+            >来源</span
+          >
           <span class="flex-1 min-w-0 truncate text-[var(--el-text-color-primary)]">
             {{ getDictLabel(DICT_TYPE.IM_FRIEND_ADD_SOURCE, friendInfo.addSource) }}
           </span>
         </div>
         <div v-if="friendInfo?.addTime" class="flex gap-5 items-center px-1.5 py-1.5 text-sm">
-          <span class="flex-shrink-0 w-16 whitespace-nowrap text-[var(--el-text-color-secondary)]">添加时间</span>
+          <span class="flex-shrink-0 w-16 whitespace-nowrap text-[var(--el-text-color-secondary)]"
+            >添加时间</span
+          >
           <span class="flex-1 min-w-0 truncate text-[var(--el-text-color-primary)]">
             {{ formatDate(new Date(friendInfo.addTime), 'YYYY-MM-DD') }}
           </span>
@@ -167,6 +177,9 @@
       :add-source="addSource"
       :add-source-extra="addSourceExtra"
     />
+
+    <!-- 把他推荐给朋友弹窗：仅 friend 态下出现入口 -->
+    <RecommendCardDialog v-model="recommendVisible" :user="full" />
   </div>
 </template>
 
@@ -178,6 +191,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 
 import UserAvatar from './UserAvatar.vue'
 import FriendAddDialog from '../friend/FriendAddDialog.vue'
+import RecommendCardDialog from './RecommendCardDialog.vue'
 import { getSimpleUser, type UserVO } from '@/api/system/user'
 import { useFriendStore } from '../../store/friendStore'
 import { ImFriendAddSource } from '../../../utils/constants'
@@ -336,6 +350,15 @@ function handleComingSoon(featureName: string) {
 // 加好友弹窗显隐 + 预填用户（点「加为好友」时把 props.user 传给 FriendAddDialog 跳过搜索）
 const addFriendVisible = ref(false)
 const presetUserForAdd = ref<UserVO | null>(null)
+
+/** 把他推荐给朋友：弹 RecommendCardDialog 选目标会话 */
+const recommendVisible = ref(false) // 推荐名片弹窗显隐：「把他推荐给朋友」入口控制
+function handleRecommend() {
+  if (!props.user?.id) {
+    return
+  }
+  recommendVisible.value = true
+}
 
 /** 加为好友：弹 FriendAddDialog（带预填用户），让用户填申请理由 + 备注后再发申请 */
 function handleAddFriend() {

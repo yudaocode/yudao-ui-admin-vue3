@@ -6,6 +6,7 @@ export const ImMessageType = {
   VOICE: 103, // 语音（对应 OpenIM Sound=103）
   VIDEO: 104, // 视频（对应 OpenIM Video=104）
   FILE: 105, // 文件（对应 OpenIM File=105）
+  CARD: 108, // 名片（对应 OpenIM Card=108）
   // ========== 信号类（2101 / 2200 直接复用 OpenIM 段位编号；2201 自有扩展） ==========
   RECALL: 2101, // 撤回（对应 OpenIM RevokeNotification=2101）
   RECEIPT: 2200, // 回执（对应 OpenIM HasReadReceipt=2200）
@@ -74,12 +75,26 @@ const ImMessageTypeNormals: number[] = [
   ImMessageType.IMAGE,
   ImMessageType.FILE,
   ImMessageType.VOICE,
-  ImMessageType.VIDEO
+  ImMessageType.VIDEO,
+  ImMessageType.CARD
 ]
 
 /** 判断是否"普通消息" */
 export function isNormalMessage(type: number): boolean {
   return ImMessageTypeNormals.includes(type)
+}
+
+/** IM 媒体消息类型集合：发送依赖本地 File 上传，刷新后 _localFile 丢失即不可恢复 */
+const ImMessageTypeMedia: number[] = [
+  ImMessageType.IMAGE,
+  ImMessageType.FILE,
+  ImMessageType.VOICE,
+  ImMessageType.VIDEO
+]
+
+/** 判断是否「媒体消息」：图片 / 文件 / 语音 / 视频 */
+export function isMediaMessageType(type: number): boolean {
+  return ImMessageTypeMedia.includes(type)
 }
 
 /**

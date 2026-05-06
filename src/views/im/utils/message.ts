@@ -83,6 +83,16 @@ export interface VideoMessage extends Quotable {
   size?: number
 }
 
+/** 名片消息 payload（对齐后端 CardMessage） */
+export interface CardMessage extends Quotable {
+  /** 名片用户编号 */
+  userId: number
+  /** 名片用户昵称（取真实昵称，非备注） */
+  nickname: string
+  /** 名片用户头像 */
+  avatar?: string
+}
+
 /** 解析消息 content（JSON 字符串）为指定 payload，非法 JSON 返回 null */
 export const parseMessage = <T>(content: string): T | null => {
   try {
@@ -94,6 +104,22 @@ export const parseMessage = <T>(content: string): T | null => {
 
 /** 序列化消息 payload 为 content JSON 字符串；与 parseMessage 对称 */
 export const serializeMessage = <T>(payload: T): string => JSON.stringify(payload)
+
+/**
+ * 释放 content 中所有 blob: URL 的内存映射
+ *
+ * 媒体上传链路占位时用 URL.createObjectURL(file) 当临时 url 写进 content；
+ * ack / 重发 / 删除消息时调本函数把映射释放，避免 File 对象在浏览器内存里悬空（视频几百 MB 很伤）
+ *
+ * 仅对当前 document 内创建的 blob URL 有效；IndexedDB 恢复出来的旧 blob URL 已随旧 document 失效，调它无害但无意义
+ */
+export const revokeBlobUrlsInContent = (content: string): void => {
+  if (!content || !content.includes('blob:')) {
+    return
+  }
+  const matches = content.match(/blob:[^"'\s)]+/g)
+  matches?.forEach((url) => URL.revokeObjectURL(url))
+}
 
 // ==================== 引用消息 helper ====================
 

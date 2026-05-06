@@ -56,6 +56,8 @@ export function resolveConversationLastContent(
       return '[语音]'
     case ImMessageType.VIDEO:
       return '[视频]'
+    case ImMessageType.CARD:
+      return '[个人名片]'
     case ImMessageType.RECALL:
       return buildRecallTip(
         message.senderId,
