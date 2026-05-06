@@ -170,10 +170,7 @@ import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useDraftStore } from '@/views/im/home/store/draftStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
-import {
-  mediaTypeHandlers,
-  useMediaUploader
-} from '@/views/im/home/composables/useMediaUploader'
+import { useMediaUploader } from '@/views/im/home/composables/useMediaUploader'
 import { useMuteOverlay } from '@/views/im/home/composables/useMuteOverlay'
 import { getConversationKey } from '@/views/im/utils/conversation'
 import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
@@ -203,7 +200,8 @@ const {
   markMediaFailed,
   commitMediaPlaceholder,
   createUploadProgressHandler,
-  verifyMediaUploadStillAllowed
+  verifyMediaUploadStillAllowed,
+  requireMediaHandler
 } = useMediaUploader()
 
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
@@ -997,13 +995,13 @@ async function uploadAndSendVideo(file: File) {
   const replyQuote = context.quote
   const startKey = getConversationKey(conversation)
 
-  // 1. 立即占位：blob URL 同时作 url + coverUrl 让 <video> 渲染首帧；_localFile 留 file 供失败重试
+  // 1. 立即占位：url 走 blob 让 <video src> 拉首字节渲染；coverUrl 不设 blob
+  //    （<video poster> 期待图片资源，传 video blob 在部分浏览器会退化成黑底，不是稳定行为）
+  //    cover 等 probe 异步出真实 URL 后由 commit 阶段一起 patch；_localFile 留 file 供失败重试
   //    payload 拼装走 mediaTypeHandlers[VIDEO].build 与 commit 阶段共享同一份逻辑
-  const videoHandler = mediaTypeHandlers[ImMessageType.VIDEO]!
+  const videoHandler = requireMediaHandler(ImMessageType.VIDEO)
   const buildPlaceholderContent = (blobUrl: string): string =>
-    serializeMessage(
-      withQuotePayload(videoHandler.build(file, blobUrl, { videoCoverUrl: blobUrl }), replyQuote)
-    )
+    serializeMessage(withQuotePayload(videoHandler.build(file, blobUrl, {}), replyQuote))
   const { clientMessageId } = insertMediaPlaceholder({
     file,
     type: ImMessageType.VIDEO,

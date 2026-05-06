@@ -91,6 +91,8 @@ function recomputeConversationLast(conversation: Conversation): void {
     conversation.lastMessageType = undefined
     conversation.lastSelfSend = undefined
     conversation.lastSenderDisplayName = undefined
+    // 排序时间也要清，否则空会话仍按旧 lastSendTime 排在前面（刷新后媒体占位被 drop 时容易踩到）
+    conversation.lastSendTime = 0
   }
 }
 

@@ -35,7 +35,7 @@ export interface MediaTypeContext {
   videoCoverUrl?: string
 }
 
-interface MediaTypeHandler {
+export interface MediaTypeHandler {
   /** 中文名，仅日志用（替代之前散落 9 处的 kind 字符串） */
   kind: string
   /** 由 file + url + context 生成 payload；占位时 url 是 blob URL，commit 时是真实 url */
@@ -202,6 +202,20 @@ export const useMediaUploader = () => {
   const getMediaKind = (type: number): string => mediaTypeHandlers[type]?.kind ?? '媒体'
 
   /**
+   * 按 type 取 handler，缺则抛错（程序错误集中在这一处）
+   *
+   * 调用方拿到的是 `MediaTypeHandler`（非 undefined），不再需要 `!` 断言。
+   * 仅给「确定 type 在表里」的调用方用 —— image/file/voice/video 四类入口；通用 dispatcher 仍可用 `mediaTypeHandlers[type]?.` optional chain
+   */
+  const requireMediaHandler = (type: number): MediaTypeHandler => {
+    const handler = mediaTypeHandlers[type]
+    if (!handler) {
+      throw new Error(`[IM] 未注册的媒体类型 ${type}`)
+    }
+    return handler
+  }
+
+  /**
    * 上传完成后的收口校验：会话仍是占位时锁定的那个 + 当前未被禁言；任一不满足 markMediaFailed + 返回 false
    *
    * image / file / voice / video 链路都要在「拿到真实 url 后、调 sendRaw 之前」过一遍这两道
@@ -317,6 +331,7 @@ export const useMediaUploader = () => {
     commitMediaPlaceholder,
     createUploadProgressHandler,
     verifyMediaUploadStillAllowed,
-    getMediaKind
+    getMediaKind,
+    requireMediaHandler
   }
 }

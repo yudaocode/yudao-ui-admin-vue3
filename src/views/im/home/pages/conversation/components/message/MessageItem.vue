@@ -193,10 +193,8 @@
         <!-- 状态区：自己消息展示发送状态 + 已读/群回执；对方消息 + @自己时展示 @徽标 -->
         <div class="flex gap-1.5 items-center text-base">
           <template v-if="message.selfSend">
-            <!-- SENDING 显示外层 loading；图片/视频/文件气泡自身有进度反馈则抑制；
-                 语音气泡只有麦克风 + 时长，无内嵌进度条，必须保留外层 loading 让用户感知正在发送 -->
             <Icon
-              v-if="message.status === ImMessageStatus.SENDING && (!isUploading || isVoice)"
+              v-if="showSendingLoading"
               icon="ant-design:loading-outlined"
               class="im-loading-spin"
             />
@@ -505,6 +503,16 @@ const uploadProgress = computed(() => props.message.uploadProgress ?? 0)
 
 /** 上传进度文案；图片/视频遮罩、文件进度条尾巴共用 */
 const uploadProgressText = computed(() => `${uploadProgress.value}%`)
+
+/**
+ * 是否在气泡尾部显示「发送中」loading 转圈
+ *
+ * 图片 / 视频 / 文件气泡内嵌已有进度反馈（遮罩 / 进度条），外层 loading 多余则抑制；
+ * 语音气泡只有麦克风 + 时长，无内嵌进度，必须保留外层 loading 让用户感知正在发送
+ */
+const showSendingLoading = computed(
+  () => props.message.status === ImMessageStatus.SENDING && (!isUploading.value || isVoice.value)
+)
 
 /** 文件类型图标 + 配色：按扩展名分发，跟 ReplyPreview 共用 getFileIconInfo */
 const fileIconInfo = computed(() => getFileIconInfo(filePayload.value?.name))
