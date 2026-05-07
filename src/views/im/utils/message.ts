@@ -47,14 +47,11 @@ export function joinMentionSegments(
   separator: string,
   resolveName: (userId: number) => string
 ): TipSegment[] {
-  const out: TipSegment[] = []
-  userIds.forEach((id, index) => {
-    if (index > 0) {
-      out.push(tipText(separator))
-    }
-    out.push(tipMention(id, resolveName(id)))
-  })
-  return out
+  return userIds.flatMap((id, index) =>
+    index === 0
+      ? [tipMention(id, resolveName(id))]
+      : [tipText(separator), tipMention(id, resolveName(id))]
+  )
 }
 
 // ==================== 引用消息 ====================
