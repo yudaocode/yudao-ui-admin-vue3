@@ -37,6 +37,7 @@ import { useDraftStore } from './store/draftStore'
 import { useFaceStore } from './store/faceStore'
 import { useMessagePuller } from './composables/useMessagePuller'
 import { useMessageSender } from './composables/useMessageSender'
+import { useVoicePlayer } from './composables/useVoicePlayer'
 import { ImConversationType } from '../utils/constants'
 import { StorageKeys } from '../utils/storage'
 import type { Conversation } from './types'
@@ -56,6 +57,7 @@ const draftStore = useDraftStore()
 const faceStore = useFaceStore()
 const { pullOnce } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
+const voicePlayer = useVoicePlayer()
 
 /** 初始化：先吃本地缓存让首屏立即渲染，再远端刷新最新数据，最后建实时通信拉离线消息 */
 onMounted(async () => {
@@ -135,11 +137,13 @@ function onBeforeUnload() {
 }
 window.addEventListener('beforeunload', onBeforeUnload)
 
-/** 离开 IM 主壳：主动断 WebSocket（disconnect 内部已清掉 onclose 防自动重连）+ flush 草稿 + 表情缓存 reset + 解绑 unload */
+/** 离开 IM 主壳：主动断 WebSocket（disconnect 内部已清掉 onclose 防自动重连）+ flush 草稿 + 表情缓存 reset + 解绑 unload + 停语音 */
 onUnmounted(() => {
   webSocketStore.disconnect()
   draftStore.flushPersist()
   faceStore.reset()
+  // 模块级单例 audio 不会随视图卸载自动停，主动停掉避免切路由后语音继续响
+  voicePlayer.stop()
   window.removeEventListener('beforeunload', onBeforeUnload)
 })
 

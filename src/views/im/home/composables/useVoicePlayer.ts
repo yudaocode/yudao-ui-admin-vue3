@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 /**
  * 语音播放全局互斥
@@ -37,7 +37,10 @@ function stop(key?: VoiceKey) {
     return
   }
   task.audio.pause()
-  task.audio.src = ''
+  // removeAttribute('src') + load() 是 W3C 推荐的释放姿势：不会触发空 src 加载导致的 error 事件，
+  // 也能让浏览器立即释放底层 decoder buffer，比 audio.src = '' 更干净
+  task.audio.removeAttribute('src')
+  task.audio.load()
   currentTask.value = null
 }
 
@@ -52,7 +55,7 @@ function play(key: VoiceKey, url: string) {
     return
   }
   if (currentTask.value?.key === key) {
-    stop()
+    stop(key)
     return
   }
   stop()
@@ -71,11 +74,9 @@ function play(key: VoiceKey, url: string) {
 }
 
 export function useVoicePlayer() {
-  /** 当前播放的 key；给气泡 / 调试用 */
-  const currentKey = computed(() => currentTask.value?.key ?? null)
   /** 指定 key 是否正在播放 */
   function isPlaying(key: VoiceKey): boolean {
     return currentTask.value?.key === key
   }
-  return { currentKey, isPlaying, play, stop }
+  return { isPlaying, play, stop }
 }
