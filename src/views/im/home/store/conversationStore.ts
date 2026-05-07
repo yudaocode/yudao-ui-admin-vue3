@@ -465,7 +465,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         )
       }
 
-      // 1.1 查找或自动创建会话
+      // 1.1 查找或自动创建会话；命中软删会话需要复活（场景：A 退群后被重新拉入、用户主动删了对话又收到新消息）
       let conversation = this.getConversation(conversationInfo.type, conversationInfo.targetId)
       if (!conversation) {
         conversation = this.createEmptyConversation(
@@ -475,6 +475,10 @@ export const useConversationStore = defineStore('imConversationStore', {
           conversationInfo.avatar
         )
         this.conversations.unshift(conversation)
+      } else if (conversation.deleted) {
+        conversation.deleted = false
+        conversation.name = conversationInfo.name || conversation.name
+        conversation.avatar = conversationInfo.avatar || conversation.avatar
       }
 
       // 1.2 去重合并：优先按 id，其次按 clientMessageId。命中则覆盖更新并返回
