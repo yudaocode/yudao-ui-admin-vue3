@@ -38,7 +38,7 @@
           </el-tag>
         </span>
         <span class="flex-shrink-0 ml-1 text-12px text-[var(--el-text-color-secondary)]">
-          {{ formatTime(conversation.lastSendTime) }}
+          {{ formatConversationTime(conversation.lastSendTime) }}
         </span>
       </div>
       <div class="flex items-center mt-1 leading-5">
@@ -75,7 +75,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import dayjs from 'dayjs'
+import { formatConversationTime } from '@/views/im/utils/time'
 
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
@@ -94,7 +94,6 @@ import UserAvatar from '../../../../components/user/UserAvatar.vue'
 defineOptions({ name: 'ImConversationItem' })
 
 /** 周中文名（dayjs 的 day() 返回 0-6，0=周日）；项目没全局装 dayjs/locale/zh-cn，本地映射避免引副作用 */
-const WEEKDAY_NAMES = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 
 const props = defineProps<{
   conversation: Conversation
@@ -250,33 +249,6 @@ function handleContextMenu(e: MouseEvent) {
   )
 }
 
-/**
- * 会话列表时间，对齐微信：
- * - 今天 → HH:mm
- * - 昨天 → 昨天 HH:mm
- * - 本周内（2-6 天前）→ 星期X
- * - 同年其他 → MM/DD
- * - 跨年 → YYYY/MM/DD
- */
-function formatTime(timestamp: number): string {
-  if (!timestamp) {
-    return ''
-  }
-  const target = dayjs(timestamp)
-  const now = dayjs()
-  if (target.isSame(now, 'day')) {
-    return target.format('HH:mm')
-  }
-  if (target.isSame(now.subtract(1, 'day'), 'day')) {
-    return `昨天 ${target.format('HH:mm')}`
-  }
-  // 用 startOf('day') 兜底跨时间点的差值，避免接近凌晨时取到 1.x → diff 算成 1 漏掉昨天分支
-  const diffDays = now.startOf('day').diff(target.startOf('day'), 'day')
-  if (diffDays >= 2 && diffDays <= 6) {
-    return WEEKDAY_NAMES[target.day()]
-  }
-  return target.year() === now.year() ? target.format('MM/DD') : target.format('YYYY/MM/DD')
-}
 </script>
 
 <style scoped>

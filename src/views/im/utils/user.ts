@@ -186,7 +186,7 @@ export function getSenderAvatar(
  *
  * 按 message.type 取 content payload 字段，昵称默认走 getSenderDisplayName（备注 / 群昵称 / 真实昵称兜底）；
  * 管理后台无 store，可传入 resolveName 自定义 id → 名字（如 senderNickname + 用户(id) 兜底）；
- * MessageItem.vue / ConversationItem.vue / MessageHistory.vue / MessageContentPreview.vue 共用
+ * home 端 MessageItem.vue / ConversationItem.vue / MessageHistory.vue 与 admin 端 MessageContentPreview.vue 共用
  */
 export type GroupNotificationPayload = {
   operatorUserId?: number

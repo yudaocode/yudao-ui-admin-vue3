@@ -59,6 +59,18 @@
   <!-- 名片 -->
   <CardLineLabel v-else-if="isCard && cardPayload" :card="cardPayload" :icon-size="16" />
 
+  <!-- 合并转发：title + 前 N 条摘要 -->
+  <span v-else-if="isMerge && mergePayload" class="inline-flex flex-col gap-0.5 align-middle">
+    <span class="text-13px text-[var(--el-text-color-primary)]">[聊天记录] {{ mergePayload.title }}</span>
+    <span
+      v-for="(line, idx) in mergePreviewLines"
+      :key="idx"
+      class="text-12px truncate text-[var(--el-text-color-secondary)]"
+    >
+      {{ line }}
+    </span>
+  </span>
+
   <!-- 表情贴图：缩略图 + 表情名（无名字时仅 [表情]） -->
   <span v-else-if="isFace && facePayload" class="inline-flex gap-1.5 items-center">
     <img

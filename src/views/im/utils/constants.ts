@@ -6,6 +6,7 @@ export const ImMessageType = {
   VOICE: 103, // 语音（对应 OpenIM Sound=103）
   VIDEO: 104, // 视频（对应 OpenIM Video=104）
   FILE: 105, // 文件（对应 OpenIM File=105）
+  MERGE: 107, // 合并转发（对应 OpenIM Merger=107；payload 内嵌完整快照）
   CARD: 108, // 名片（对应 OpenIM Card=108）
   FACE: 115, // 表情贴图（对应 OpenIM Face=115；Unicode emoji 仍走 TEXT）
   // ========== 信号类（2101 / 2200 直接复用 OpenIM 段位编号；2201 自有扩展） ==========
@@ -97,7 +98,8 @@ const ImMessageTypeNormals: number[] = [
   ImMessageType.VOICE,
   ImMessageType.VIDEO,
   ImMessageType.CARD,
-  ImMessageType.FACE
+  ImMessageType.FACE,
+  ImMessageType.MERGE
 ]
 
 /** 判断是否"普通消息" */
@@ -136,6 +138,19 @@ export const ImConversationType = {
   PRIVATE: 1, // 私聊
   GROUP: 2 // 群聊
 } as const
+
+/** ImConversationType 取值（用于消息 payload 字段类型收窄） */
+export type ImConversationTypeValue = (typeof ImConversationType)[keyof typeof ImConversationType]
+
+/** 是否私聊会话；同时收窄类型 */
+export function isPrivateConversation(type: number | undefined): boolean {
+  return type === ImConversationType.PRIVATE
+}
+
+/** 是否群聊会话；同时收窄类型 */
+export function isGroupConversation(type: number | undefined): boolean {
+  return type === ImConversationType.GROUP
+}
 
 /** IM WebSocket 外层帧类型（对齐后端 ImPrivateMessageDTO.TYPE / ImGroupMessageDTO.TYPE） */
 export const ImWebSocketMessageType = {
@@ -218,3 +233,15 @@ export const IM_AT_ALL_USER_ID = -1
 
 /** @全体成员 的展示名（对齐微信 PC） */
 export const IM_AT_ALL_NICKNAME = '所有人'
+
+/** 合并转发气泡内预览的最大行数（对齐微信「聊天记录」气泡） */
+export const MERGE_FORWARD_PREVIEW_LINES = 3
+
+/** 转发模式：SINGLE 逐条原样转 / MERGE 打包成 MergeMessage */
+export const ImForwardMode = {
+  SINGLE: 'single',
+  MERGE: 'merge'
+} as const
+
+/** ImForwardMode 取值类型 */
+export type ImForwardModeValue = (typeof ImForwardMode)[keyof typeof ImForwardMode]

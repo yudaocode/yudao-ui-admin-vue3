@@ -58,13 +58,13 @@
         </div>
 
         <!-- 群置顶消息：第二行嵌入 header；仅群聊 + 有置顶时显示 -->
-        <ConversationGroupPinned
+        <GroupPinnedMessage
           v-if="isGroup && conversationStore.activeConversation"
           :group-id="conversationStore.activeConversation.targetId"
           @locate="handleLocate"
         />
         <!-- 群顶部「待处理加群申请」横幅：仅群聊 + owner / admin + count > 0 时显示 -->
-        <ConversationGroupRequestPending
+        <GroupRequestPending
           v-if="isGroup && conversationStore.activeConversation"
           :group-id="conversationStore.activeConversation.targetId"
         />
@@ -129,8 +129,14 @@
         </transition>
       </div>
 
-      <!-- 底部：输入框 -->
-      <MessageInput />
+      <!-- 底部：输入框常驻；多选模式底栏作为浮层盖在上面，保持下方输入框尺寸不变 -->
+      <div class="relative">
+        <MessageInput />
+        <MessageMultiSelectBar
+          v-if="multiSelect.state.active"
+          class="absolute inset-0 z-10"
+        />
+      </div>
 
       <!-- 右侧信息抽屉：群聊 / 私聊各自一份 -->
       <ConversationGroupSide
@@ -155,6 +161,10 @@
       <!-- 历史消息抽屉 -->
       <MessageHistory v-model="historyVisible" @locate="handleLocate" />
 
+      <!-- 转发弹窗 / 合并消息详情：在 MessagePanel 子树内挂载，子组件通过 inject 触发 -->
+      <MessageForwardDialog ref="forwardDialogRef" />
+      <MessageMergeDetailDialog ref="mergeDetailDialogRef" />
+
       <!-- 禁言时长选择弹窗 -->
       <GroupMuteMemberDialog ref="muteMemberDialogRef" @success="reloadGroupData" />
     </template>
@@ -168,7 +178,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, nextTick, computed } from 'vue'
+import { ref, watch, nextTick, computed, provide } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
@@ -181,10 +191,15 @@ import { ImConversationType } from '@/views/im/utils/constants'
 import { CommonStatusEnum } from '@/utils/constants'
 import MessageItem from './MessageItem.vue'
 import MessageInput from '../input/MessageInput.vue'
+import MessageMultiSelectBar from '../input/MessageMultiSelectBar.vue'
+import MessageForwardDialog from './forward/MessageForwardDialog.vue'
+import MessageMergeDetailDialog from './forward/MessageMergeDetailDialog.vue'
+import { IM_FORWARD_DIALOG_KEY, IM_MERGE_DETAIL_DIALOG_KEY } from './forward/keys'
+import { useMessageMultiSelect } from '../../../../composables/useMessageMultiSelect'
 import MessageHistory from './MessageHistory.vue'
 import ConversationGroupSide from '../conversation/ConversationGroupSide.vue'
-import ConversationGroupPinned from './ConversationGroupPinned.vue'
-import ConversationGroupRequestPending from './ConversationGroupRequestPending.vue'
+import GroupPinnedMessage from './GroupPinnedMessage.vue'
+import GroupRequestPending from './GroupRequestPending.vue'
 import ConversationPrivateSide from '../conversation/ConversationPrivateSide.vue'
 import type { FriendLite, GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
@@ -198,6 +213,26 @@ const uiStore = useImUiStore()
 const groupStore = useGroupStore()
 const message = useMessage()
 const listRef = ref<HTMLElement>()
+
+// ==================== 转发 / 合并消息详情：本地 dialog 浮层 ====================
+// MessageItem / MessageMultiSelectBar / MessageHistory 通过 inject 触发；不挂全局 store
+
+const forwardDialogRef = ref<InstanceType<typeof MessageForwardDialog>>()
+const mergeDetailDialogRef = ref<InstanceType<typeof MessageMergeDetailDialog>>()
+
+provide(IM_FORWARD_DIALOG_KEY, (opts) => forwardDialogRef.value?.open(opts))
+provide(IM_MERGE_DETAIL_DIALOG_KEY, (content) => mergeDetailDialogRef.value?.open(content))
+
+// ==================== 多选模式 ====================
+// 模块级单例 state（composable）；本组件仅做切会话退出 + template 显隐判定
+
+const multiSelect = useMessageMultiSelect()
+
+/** 切会话退出多选；避免上一会话的勾选状态泄漏到新会话 */
+watch(
+  () => conversationStore.activeConversation?.targetId,
+  () => multiSelect.exit()
+)
 
 const messages = computed(() => conversationStore.getActiveMessages)
 const isGroup = computed(

@@ -1,6 +1,10 @@
 import { generateUUID } from '@/utils'
-import { ImMessageType } from './constants'
-import type { Message } from '../home/types'
+import { useUserStore } from '@/store/modules/user'
+import { ImConversationType, ImMessageType, type ImConversationTypeValue } from './constants'
+import { getCurrentUserId } from './storage'
+import { useFriendStore } from '../home/store/friendStore'
+import { useGroupStore } from '../home/store/groupStore'
+import type { Conversation, Message, User, GroupLite } from '../home/types'
 
 // ====================================================================
 // IM 消息 content 编解码 & 展示工具
@@ -84,14 +88,71 @@ export interface VideoMessage extends Quotable {
   size?: number
 }
 
-/** 名片消息 payload（对齐后端 CardMessage） */
+/**
+ * 名片消息 payload（对齐后端 CardMessage）
+ *
+ * 按 targetType 区分用户名片 / 群名片：
+ * - PRIVATE：targetId = 用户编号，name = 用户昵称（取真实昵称，非备注）
+ * - GROUP：targetId = 群编号，name = 群名，可带 memberCount
+ */
 export interface CardMessage extends Quotable {
-  /** 名片用户编号 */
-  userId: number
-  /** 名片用户昵称（取真实昵称，非备注） */
-  nickname: string
-  /** 名片用户头像 */
+  /** 名片对象类型 */
+  targetType: ImConversationTypeValue
+  /** 目标对象编号：PRIVATE 时 = userId；GROUP 时 = groupId */
+  targetId: number
+  /** 显示名快照：PRIVATE 时 = 用户昵称；GROUP 时 = 群名 */
+  name: string
+  /** 头像（快照） */
   avatar?: string
+  /** 群成员数（仅 targetType = GROUP；接收端展示「N 人群聊」） */
+  memberCount?: number
+}
+
+/**
+ * 名片转发的源对象（RecommendCardDialog 入参）；字段与 CardMessage 1:1，无 quote
+ */
+export type CardTarget = Omit<CardMessage, 'quote'>
+
+/** 用户对象 → 用户名片源（PRIVATE）；缺 id 返回 null 让调用方 v-bind 绑定为不渲染 */
+export function toUserCardTarget(user: User | null | undefined): CardTarget | null {
+  if (!user?.id) {
+    return null
+  }
+  return {
+    targetType: ImConversationType.PRIVATE,
+    targetId: user.id,
+    name: user.nickname || '',
+    avatar: user.avatar
+  }
+}
+
+/** 群对象 → 群名片源（GROUP）；缺 id 返回 null */
+export function toGroupCardTarget(group: GroupLite | null | undefined): CardTarget | null {
+  if (!group?.id) {
+    return null
+  }
+  return {
+    targetType: ImConversationType.GROUP,
+    targetId: group.id,
+    name: group.name || '',
+    avatar: group.showImage || group.showImageThumb,
+    memberCount: group.memberCount
+  }
+}
+
+/**
+ * 名片标签 + 图标（按 targetType 二分），统一聊天气泡 / 引用预览 / 历史摘要 / 后台预览的文案与图标
+ *
+ * 缺失 / 非法 targetType 走「个人名片」兜底，避免老消息或脏数据导致 UI 空白
+ */
+export function getCardLabelInfo(card: { targetType?: number } | null | undefined): {
+  label: string
+  icon: string
+} {
+  if (card?.targetType === ImConversationType.GROUP) {
+    return { label: '群名片', icon: 'ant-design:usergroup-outlined' }
+  }
+  return { label: '个人名片', icon: 'ant-design:user-outlined' }
 }
 
 /** 表情消息 payload（对齐后端 FaceMessage；Unicode emoji 仍走 TEXT，本类型只承载贴图 / 自定义表情包） */
@@ -104,6 +165,125 @@ export interface FaceMessage extends Quotable {
   height?: number
   /** 表情名（系统包通常有，个人表情包通常无） */
   name?: string
+}
+
+/** 合并转发的单条内嵌消息快照（对齐后端 MergeMessage.Item） */
+export interface MergeMessageItem {
+  // TODO @AI：是不是把 messageId 改成 id，和原本的更统一一点？
+  /** 原消息编号；仅做溯源标识 */
+  messageId: number
+  /** 发送人编号 */
+  senderId: number
+  /** 发送人昵称快照；对端可能不在原会话里，无法实时查到 */
+  senderNickname: string
+  /** 发送人头像快照 */
+  senderAvatar?: string
+  /** 消息类型，对齐 ImMessageType */
+  type: number
+  /** 原消息 content（JSON）；嵌套合并消息时仍按本结构层层展开 */
+  content: string
+  /** 发送时间戳（毫秒） */
+  sendTime: number
+}
+
+/** 合并转发消息 payload（对齐后端 MergeMessage） */
+export interface MergeMessage {
+  /** 合并标题；例：「张三和李四的聊天记录」「群聊的聊天记录」 */
+  title: string
+  /** 内嵌的完整消息快照 */
+  messages: MergeMessageItem[]
+}
+
+// ==================== 合并转发 payload 构造 ====================
+
+/** 单个发送人的快照昵称 / 头像 */
+interface SenderSnapshot {
+  nickname: string
+  avatar: string
+}
+
+/**
+ * 一次性构造 senderId → SenderSnapshot 映射；避免 N 条消息逐条 find 群成员
+ *
+ * 群聊从 group.members 一次性 indexBy；私聊只需 self + friend；外加全体 senderId 上做 friend 兜底
+ */
+function buildSenderSnapshotMap(
+  senderIds: number[],
+  conversation: Conversation
+): Map<number, SenderSnapshot> {
+  const userStore = useUserStore()
+  const friendStore = useFriendStore()
+  const selfUserId = getCurrentUserId()
+  const result = new Map<number, SenderSnapshot>()
+
+  let groupMembers: Map<number, { nickname: string; avatar?: string }> | null = null
+  if (conversation.type === ImConversationType.GROUP) {
+    const group = useGroupStore().getGroup(conversation.targetId)
+    groupMembers = new Map((group?.members || []).map((m) => [m.userId, m]))
+  }
+
+  for (const senderId of senderIds) {
+    if (result.has(senderId)) {
+      continue
+    }
+    if (senderId === selfUserId) {
+      result.set(senderId, {
+        nickname: userStore.getUser?.nickname || String(senderId),
+        avatar: userStore.getUser?.avatar || ''
+      })
+      continue
+    }
+    const member = groupMembers?.get(senderId)
+    if (member?.nickname) {
+      result.set(senderId, { nickname: member.nickname, avatar: member.avatar || '' })
+      continue
+    }
+    const friend = friendStore.getFriend(senderId)
+    result.set(senderId, {
+      nickname: friend?.nickname || String(senderId),
+      avatar: friend?.avatar || ''
+    })
+  }
+  return result
+}
+
+/** 把单条 Message 转成 MergeMessageItem 快照；剥离 quote 防引用穿透 */
+function mapMessageToMergeItem(
+  message: Message,
+  senderSnapshots: Map<number, SenderSnapshot>
+): MergeMessageItem {
+  const snapshot = senderSnapshots.get(message.senderId)
+  return {
+    messageId: message.id,
+    senderId: message.senderId,
+    senderNickname: snapshot?.nickname ?? String(message.senderId),
+    senderAvatar: snapshot?.avatar ?? '',
+    type: message.type,
+    content: removeQuotePayload(message.content),
+    sendTime: message.sendTime
+  }
+}
+
+/** 合并转发标题：私聊「{对方} 和 {自己} 的聊天记录」；群聊「{群名} 的聊天记录」 */
+export function buildMergeTitle(conversation: Conversation): string {
+  if (conversation.type === ImConversationType.GROUP) {
+    return `${conversation.name || '群聊'} 的聊天记录`
+  }
+  const myName = useUserStore().getUser?.nickname || '我'
+  return `${conversation.name || '对方'} 和 ${myName} 的聊天记录`
+}
+
+/** 把一组 Message 打包成 MergeMessage payload；调用方负责按 sendTime 排序后传入 */
+export function buildMergeMessagePayload(
+  messages: Message[],
+  conversation: Conversation
+): MergeMessage {
+  const senderIds = messages.map((m) => m.senderId)
+  const senderSnapshots = buildSenderSnapshotMap(senderIds, conversation)
+  return {
+    title: buildMergeTitle(conversation),
+    messages: messages.map((m) => mapMessageToMergeItem(m, senderSnapshots))
+  }
 }
 
 /** 「添加到表情」的可发起源：FACE / IMAGE 都允许（GIF 图片也常被收藏） */

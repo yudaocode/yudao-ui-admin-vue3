@@ -5,18 +5,18 @@
     - count 从 groupRequestStore 派生（全局存）；本端处理 / WS 通知到达后 store 自动更新
     - 点击横幅打开 GroupRequestListDialog（含历史已处理记录），不再就地展开
   -->
-  <div v-if="canManage && pendingCount > 0" class="im-conversation-group-request">
-    <div class="im-conversation-group-request__row" @click="dialogVisible = true">
+  <div v-if="canManage && pendingCount > 0" class="im-group-request-pending">
+    <div class="im-group-request-pending__row" @click="dialogVisible = true">
       <Icon
         icon="ant-design:user-add-outlined"
         :size="14"
-        class="im-conversation-group-request__icon"
+        class="im-group-request-pending__icon"
       />
-      <span class="im-conversation-group-request__text"> 新进群申请（{{ pendingCount }}） </span>
+      <span class="im-group-request-pending__text"> 新进群申请（{{ pendingCount }}） </span>
       <Icon
         icon="ant-design:right-outlined"
         :size="11"
-        class="im-conversation-group-request__chevron"
+        class="im-group-request-pending__chevron"
       />
     </div>
 
@@ -35,7 +35,7 @@ import { useGroupStore } from '../../../../store/groupStore'
 import { useGroupRequestStore } from '../../../../store/groupRequestStore'
 import GroupRequestListDialog from '../../../../components/group/GroupRequestListDialog.vue'
 
-defineOptions({ name: 'ImConversationGroupRequestPending' })
+defineOptions({ name: 'ImGroupRequestPending' })
 
 const props = defineProps<{
   groupId: number
@@ -70,7 +70,7 @@ const pendingCount = computed(() => groupRequestStore.getUnhandledCountByGroupId
 
 <style scoped>
 /* 容器：align-items flex-start 让胶囊靠左、不占整行；高度由内容撑开，与置顶消息横幅节奏对齐 */
-.im-conversation-group-request {
+.im-group-request-pending {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -79,8 +79,8 @@ const pendingCount = computed(() => groupRequestStore.getUnhandledCountByGroupId
   background-color: var(--el-fill-color-light);
 }
 
-/* 胶囊本体：内容自适应宽度，padding / 圆角 / 阴影对齐 ConversationGroupPinned 的 __row */
-.im-conversation-group-request__row {
+/* 胶囊本体：内容自适应宽度，padding / 圆角 / 阴影对齐 GroupPinnedMessage 的 __row */
+.im-group-request-pending__row {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -93,20 +93,20 @@ const pendingCount = computed(() => groupRequestStore.getUnhandledCountByGroupId
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   transition: background-color 0.15s;
 }
-.im-conversation-group-request__row:hover {
+.im-group-request-pending__row:hover {
   background-color: var(--el-fill-color-lighter);
 }
 
 /* 绿色「加好友」icon：与置顶消息黄色 pushpin 同节奏，仅换色调；svg 强制 currentColor 应对暗色覆盖 */
-.im-conversation-group-request__icon {
+.im-group-request-pending__icon {
   flex-shrink: 0;
   color: var(--el-color-success);
 }
-.im-conversation-group-request__icon :deep(svg) {
+.im-group-request-pending__icon :deep(svg) {
   fill: currentColor !important;
 }
 
-.im-conversation-group-request__text {
+.im-group-request-pending__text {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -114,7 +114,7 @@ const pendingCount = computed(() => groupRequestStore.getUnhandledCountByGroupId
   text-overflow: ellipsis;
 }
 
-.im-conversation-group-request__chevron {
+.im-group-request-pending__chevron {
   flex-shrink: 0;
   color: var(--el-text-color-placeholder);
 }

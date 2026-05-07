@@ -179,7 +179,7 @@
                   {{ senderDisplayNameOf(message) }}
                 </span>
                 <span class="im-message-history__meta relative flex-shrink-0">
-                  <span class="block text-right">{{ formatTime(message.sendTime) }}</span>
+                  <span class="block text-right">{{ formatHistoryTime(message.sendTime) }}</span>
                   <!-- 定位到聊天位置：absolute 浮在时间下方，行 hover 才显示，
                        不参与右侧栏 flex 排版（避免隐藏时占位让"我"和内容之间留空）；
                        仅有真实 id 的消息才支持（本地占位消息 id=0 不行） -->
@@ -194,93 +194,21 @@
               </div>
 
               <div class="mt-1.5">
-                <!-- 文本 -->
+                <!-- 撤回：单独走灰色 tip 文案，不渲染气泡 -->
                 <div
-                  v-if="message.type === ImMessageType.TEXT"
-                  class="text-sm leading-normal break-all text-[var(--el-text-color-primary)]"
+                  v-if="message.type === ImMessageType.RECALL"
+                  class="text-sm italic text-[var(--el-text-color-secondary)]"
                 >
-                  {{ parseMessage<TextMessage>(message.content)?.content ?? '' }}
+                  {{ recallTipOf(message) }}
                 </div>
-
-              <!-- 图片：el-image 缩略 + 点击预览 -->
-              <el-image
-                v-else-if="message.type === ImMessageType.IMAGE && imageOf(message)"
-                class="max-w-[160px] max-h-[120px] rounded cursor-zoom-in"
-                :src="imageOf(message)?.thumbnailUrl || imageOf(message)?.url"
-                :preview-src-list="[imageOf(message)?.url || '']"
-                :preview-teleported="true"
-                fit="cover"
-              />
-
-              <!-- 文件：彩色文件类型图标 + 名 + 大小，点击新窗口打开 -->
-              <div
-                v-else-if="message.type === ImMessageType.FILE && fileOf(message)"
-                class="inline-flex gap-2 items-center max-w-[300px] px-3 py-2 border rounded cursor-pointer transition-colors hover:border-[#409eff]"
-                @click="openFile(fileOf(message)?.url)"
-              >
-                <Icon
-                  :icon="getFileIconInfo(fileOf(message)?.name).icon"
-                  :color="getFileIconInfo(fileOf(message)?.name).color"
-                  :size="32"
-                  class="flex-shrink-0"
+                <!-- 其它类型走 MessageBubble 复用主聊天气泡 -->
+                <MessageBubble
+                  v-else
+                  :type="message.type"
+                  :content="message.content"
+                  @open-merge="openMergeDetail?.($event)"
                 />
-                <div class="flex-1 min-w-0">
-                  <div
-                    class="overflow-hidden text-sm font-medium truncate text-[var(--el-text-color-primary)]"
-                  >
-                    {{ fileOf(message)?.name }}
-                  </div>
-                  <div class="mt-0.5 text-12px text-[var(--el-text-color-secondary)]">
-                    {{ formatFileSize(fileOf(message)?.size || 0) }}
-                  </div>
-                </div>
               </div>
-
-              <!-- 语音 -->
-              <div
-                v-else-if="message.type === ImMessageType.VOICE"
-                class="text-sm text-[var(--el-text-color-secondary)]"
-              >
-                [语音 {{ formatSeconds(audioOf(message)?.duration || 0) }}]
-              </div>
-
-              <!-- 视频 -->
-              <div
-                v-else-if="message.type === ImMessageType.VIDEO"
-                class="text-sm text-[var(--el-text-color-secondary)]"
-              >
-                [视频]
-              </div>
-
-              <!-- 名片 -->
-              <CardLineLabel
-                v-else-if="message.type === ImMessageType.CARD"
-                :card="cardOf(message)"
-                class="text-sm text-[var(--el-text-color-secondary)]"
-              />
-
-              <!-- 表情贴图：直接渲染图片，对照微信观感 -->
-              <img
-                v-else-if="message.type === ImMessageType.FACE && faceOf(message)?.url"
-                :src="faceOf(message)?.url"
-                :alt="faceOf(message)?.name || '表情'"
-                class="block max-w-[120px] max-h-[120px] object-contain"
-                draggable="false"
-              />
-
-              <!-- 撤回 -->
-              <div
-                v-else-if="message.type === ImMessageType.RECALL"
-                class="text-sm italic text-[var(--el-text-color-secondary)]"
-              >
-                {{ recallTipOf(message) }}
-              </div>
-
-              <!-- 兜底 -->
-              <div v-else class="text-sm italic text-[var(--el-text-color-secondary)]">
-                [不支持的消息类型]
-              </div>
-            </div>
             </div>
           </div>
         </template>
@@ -312,18 +240,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import dayjs from 'dayjs'
+import { formatHistoryTime } from '@/views/im/utils/time'
 
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useUserStore } from '@/store/modules/user'
-import { formatFileSize } from '@/utils/file'
-import { formatSeconds } from '@/utils/formatTime'
 import { getPrivateMessageList as apiGetPrivateMessageList } from '@/api/im/message/private'
 import { getGroupMessageList as apiGetGroupMessageList } from '@/api/im/message/group'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useFriendStore } from '../../../../store/friendStore'
+import { IM_MERGE_DETAIL_DIALOG_KEY } from './forward/keys'
 import {
   getMemberDisplayName,
   getSenderDisplayName,
@@ -341,16 +269,16 @@ import {
 } from '@/views/im/utils/constants'
 import {
   parseMessage,
-  getFileIconInfo,
+  getCardLabelInfo,
   type TextMessage,
-  type ImageMessage,
   type FileMessage,
-  type AudioMessage,
   type CardMessage,
-  type FaceMessage
+  type FaceMessage,
+  type MergeMessage
 } from '@/views/im/utils/message'
 import type { Message } from '@/views/im/home/types'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
+import MessageBubble from './MessageBubble.vue'
 import GroupMember, { type GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
 defineOptions({ name: 'ImMessageHistory' })
@@ -368,6 +296,7 @@ const userStore = useUserStore()
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
+const openMergeDetail = inject(IM_MERGE_DETAIL_DIALOG_KEY)
 const { convertPrivateMessage, convertGroupMessage } = useMessagePuller()
 
 const visible = computed({
@@ -674,23 +603,6 @@ function getAvatar(message: Message): string {
   return conversation.value.avatar || ''
 }
 
-/** 媒体 payload helper：模板里多次用避免重复 parseMessage */
-function imageOf(message: Message): ImageMessage | null {
-  return parseMessage<ImageMessage>(message.content)
-}
-function fileOf(message: Message): FileMessage | null {
-  return parseMessage<FileMessage>(message.content)
-}
-function audioOf(message: Message): AudioMessage | null {
-  return parseMessage<AudioMessage>(message.content)
-}
-function cardOf(message: Message): CardMessage | null {
-  return parseMessage<CardMessage>(message.content)
-}
-function faceOf(message: Message): FaceMessage | null {
-  return parseMessage<FaceMessage>(message.content)
-}
-
 /** 关键字命中文本：文本类返回原文、文件返回文件名（利于按文件名搜）、其他返回占位词 */
 function textSnippetOf(message: Message): string {
   if (isFriendChatTip(message.type)) {
@@ -712,21 +624,16 @@ function textSnippetOf(message: Message): string {
       return `[${getCardLabelInfo(card).label}] ${card?.name ?? ''}`
     }
     case ImMessageType.FACE:
-      return buildFacePreviewText(faceOf(message))
+      return buildFacePreviewText(parseMessage<FaceMessage>(message.content))
+    case ImMessageType.MERGE: {
+      const merge = parseMessage<MergeMessage>(message.content)
+      return merge?.title ?? '[聊天记录]'
+    }
     case ImMessageType.RECALL:
       return recallTipOf(message)
     default:
       return ''
   }
-}
-
-
-/** 文件点击 → 新窗口打开下载 */
-function openFile(url?: string) {
-  if (!url) {
-    return
-  }
-  window.open(url, '_blank')
 }
 
 /**
@@ -741,20 +648,6 @@ function locateMessage(messageId: number) {
   visible.value = false
 }
 
-/**
- * 时间格式：参考微信 —— 历史消息列表里展示绝对日期，跟会话列表的相对时间不一样
- * - 跨年：YYYY年M月D日 HH:mm
- * - 同年：M月D日 HH:mm
- */
-function formatTime(timestamp: number): string {
-  if (!timestamp) {
-    return ''
-  }
-  const target = dayjs(timestamp)
-  return target.year() === dayjs().year()
-    ? target.format('M月D日 HH:mm')
-    : target.format('YYYY年M月D日 HH:mm')
-}
 </script>
 
 <style scoped>

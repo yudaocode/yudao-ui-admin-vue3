@@ -4,7 +4,7 @@
     v-if="shouldShowTimeTip"
     class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-disabled)]"
   >
-    {{ formatTipTime(message.sendTime) }}
+    {{ formatTimeTip(message.sendTime) }}
   </div>
 
   <!-- 好友会话事件（FRIEND_ADD / FRIEND_DELETE）：跟群广播事件同灰色样式，文案固定 -->
@@ -35,16 +35,35 @@
   <div
     v-else
     class="flex gap-2 items-start px-4 py-2"
-    :class="{ 'flex-row-reverse': message.selfSend }"
+    :class="{ 'cursor-pointer': isInMultiSelect }"
     @contextmenu.prevent="handleContextMenu"
+    @click.capture="handleMultiSelectClick"
   >
-    <!-- 头像：点击弹 UserInfoCard 由 UserAvatar 内部承接 -->
-    <UserAvatar
-      :id="message.selfSend ? userStore.getUser?.id : message.senderId"
-      :name="senderRealNickname"
-      :url="message.selfSend ? userStore.getUser?.avatar : senderAvatar"
-      :size="36"
-    />
+    <!-- 多选指示：永远在整行最左侧（自己 / 对方消息一致），不参与 selfSend reverse -->
+    <span
+      v-if="isInMultiSelect"
+      class="flex flex-shrink-0 items-center justify-center mt-3 w-5 h-5 rounded-full transition-colors"
+      :class="
+        isMessageChecked
+          ? 'bg-[#07c160]'
+          : 'border border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
+      "
+    >
+      <Icon v-if="isMessageChecked" icon="ant-design:check-outlined" :size="12" color="#fff" />
+    </span>
+
+    <!-- 消息行：头像 + 气泡内部按 selfSend reverse -->
+    <div
+      class="flex flex-1 min-w-0 gap-2 items-start"
+      :class="{ 'flex-row-reverse': message.selfSend }"
+    >
+      <!-- 头像：点击弹 UserInfoCard 由 UserAvatar 内部承接 -->
+      <UserAvatar
+        :id="message.selfSend ? userStore.getUser?.id : message.senderId"
+        :name="senderRealNickname"
+        :url="message.selfSend ? userStore.getUser?.avatar : senderAvatar"
+        :size="36"
+      />
 
     <div class="flex flex-col gap-0.5 max-w-[70%]" :class="{ 'items-end': message.selfSend }">
       <!-- 群聊对方消息：气泡上方显示发送者昵称 -->
@@ -55,154 +74,15 @@
         {{ senderDisplayName }}
       </div>
       <div class="flex gap-1.5 items-center" :class="{ 'flex-row-reverse': message.selfSend }">
-        <!-- 消息内容：按 type 走 v-if 分支 -->
-        <!-- 文本消息 -->
-        <div
-          v-if="isText"
-          class="relative px-3.5 py-2.5 text-sm leading-normal break-words whitespace-pre-wrap rounded-lg"
-          :class="bubbleClass('text')"
-        >
-          {{ textContent }}
-        </div>
-        <!-- 图片消息：点击大图预览，由 <el-image> 自身承接；上传中时套一层半透明遮罩显示进度 -->
-        <div v-else-if="isImage && imagePayload" class="relative inline-block">
-          <el-image
-            class="max-w-[220px] rounded cursor-zoom-in"
-            :src="imagePayload.thumbnailUrl || imagePayload.url"
-            :preview-src-list="isUploading ? [] : [imagePayload.url]"
-            :preview-teleported="true"
-            fit="contain"
-          />
-          <div
-            v-if="isUploading"
-            class="absolute inset-0 flex items-center justify-center text-sm text-white bg-black bg-opacity-45 rounded pointer-events-none"
-          >
-            {{ uploadProgressText }}
-          </div>
-        </div>
-        <!-- 文件消息：对齐微信观感 —— 文件名 + 大小靠左、按扩展名分配的大彩色图标贴右；上传中文件名下方插一条进度条 -->
-        <div
-          v-else-if="isFile && filePayload"
-          class="relative flex gap-3 items-center min-w-[260px] max-w-[340px] px-3.5 py-3 border rounded transition-colors"
-          :class="[bubbleClass('file'), isUploading ? 'cursor-default' : 'cursor-pointer']"
-          @click="handleFileClick"
-        >
-          <div class="flex-1 min-w-0">
-            <div
-              class="overflow-hidden text-sm font-medium truncate text-[var(--el-text-color-primary)]"
-            >
-              {{ filePayload.name }}
-            </div>
-            <div class="mt-1 text-12px text-[var(--el-text-color-secondary)]">
-              {{ formatFileSize(filePayload.size) }}
-            </div>
-            <!-- 上传中：薄进度条 + 百分比文案 -->
-            <div v-if="isUploading" class="flex gap-2 items-center mt-1.5">
-              <div class="overflow-hidden flex-1 h-1 rounded bg-[var(--el-fill-color-dark)]">
-                <div
-                  class="h-full bg-[var(--el-color-primary)] transition-[width] duration-150"
-                  :style="{ width: uploadProgress + '%' }"
-                ></div>
-              </div>
-              <span class="text-11px text-[var(--el-text-color-secondary)] tabular-nums">
-                {{ uploadProgressText }}
-              </span>
-            </div>
-          </div>
-          <Icon
-            :icon="fileIconInfo.icon"
-            :color="fileIconInfo.color"
-            :size="40"
-            class="flex-shrink-0"
-          />
-        </div>
-        <!-- 语音消息 -->
-        <div
-          v-else-if="isVoice && voicePayload"
-          class="relative flex gap-2 items-center min-w-[120px] px-3.5 py-2.5 rounded-lg cursor-pointer"
-          :class="bubbleClass('voice')"
-          @click="handleVoiceClick"
-        >
-          <Icon
-            icon="ant-design:audio-outlined"
-            :size="18"
-            class="message-bubble__voice-icon"
-            :class="{ 'im-voice-playing': voicePlaying }"
-          />
-          <span class="text-13px text-[var(--el-text-color-primary)]">
-            {{ formatSeconds(voicePayload.duration) }}
-          </span>
-        </div>
-        <!-- 视频消息：直接用原生 <video controls> 内嵌播放，poster 取后端给的封面图；
-             不接入第三方播放器、不重写 UI，保持和图片 / 文件分支一样的轻量观感；上传中半透明遮罩显示进度 -->
-        <div v-else-if="isVideo && videoPayload?.url" class="relative inline-block">
-          <video
-            class="max-w-[280px] max-h-[320px] rounded bg-black"
-            :src="videoPayload.url"
-            :poster="videoPayload.coverUrl"
-            :controls="!isUploading"
-            preload="metadata"
-          ></video>
-          <div
-            v-if="isUploading"
-            class="absolute inset-0 flex items-center justify-center text-sm text-white bg-black bg-opacity-45 rounded pointer-events-none"
-          >
-            {{ uploadProgressText }}
-          </div>
-        </div>
-        <!-- 视频消息但 payload 解析失败 / 没 url：降级展示，避免出现裸的 [视频消息] -->
-        <div
-          v-else-if="isVideo"
-          class="px-3.5 py-2.5 text-sm italic rounded-lg text-[var(--el-text-color-secondary)] bg-[var(--el-fill-color-light)]"
-        >
-          [视频消息]
-        </div>
-        <!-- 表情贴图：裸 <img>，不套气泡（对齐微信观感：贴图本体就是装饰，再叠气泡显累赘） -->
-        <div v-else-if="isFace && facePayload" class="inline-block">
-          <img
-            :src="facePayload.url"
-            :alt="facePayload.name || '表情'"
-            :title="facePayload.name || ''"
-            :width="facePayload.width"
-            :height="facePayload.height"
-            class="block max-w-[160px] max-h-[160px] object-contain"
-            draggable="false"
-          />
-        </div>
-        <!-- 名片消息：头像 + 昵称 + 「个人名片」标签；点击气泡弹被推荐用户的名片浮层
-             参照微信观感：自己 / 对方都是浅灰白卡片不染绿，头像圆角块，底部分隔条灰字「个人名片」 -->
-        <div
-          v-else-if="isCard && cardPayload"
-          class="flex flex-col w-[240px] rounded-md overflow-hidden cursor-pointer bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
-          @click="handleCardClick"
-        >
-          <div class="flex gap-2.5 items-center px-3 py-2.5">
-            <UserAvatar
-              :id="cardPayload.userId"
-              :url="cardPayload.avatar"
-              :name="cardPayload.nickname"
-              :size="40"
-              :clickable="false"
-            />
-            <div
-              class="flex-1 min-w-0 text-sm font-medium truncate text-[var(--el-text-color-primary)]"
-            >
-              {{ cardPayload.nickname }}
-            </div>
-          </div>
-          <div
-            class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
-          >
-            个人名片
-          </div>
-        </div>
-        <!-- 未知类型降级展示 -->
-        <div
-          v-else
-          class="px-3.5 py-2.5 text-sm italic rounded-lg text-[var(--el-text-color-secondary)] bg-[var(--el-fill-color-light)]"
-        >
-          [不支持的消息类型]
-        </div>
+        <!-- 消息内容：按 type 走 9 类气泡，统一由 MessageBubble 渲染 -->
+        <MessageBubble
+          :type="message.type"
+          :content="message.content"
+          :self-send="message.selfSend"
+          :upload-progress="message.uploadProgress"
+          @click-card="handleCardClick"
+          @open-merge="handleMergeOpen"
+        />
 
         <!-- 状态区：自己消息展示发送状态 + 已读/群回执；对方消息 + @自己时展示 @徽标 -->
         <div class="flex gap-1.5 items-center text-base">
@@ -263,16 +143,18 @@
         @locate="emit('locate', $event)"
       />
     </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, inject } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { ElMessageBox } from 'element-plus'
 
 import {
+  ImForwardMode,
   ImMessageType,
   ImMessageStatus,
   ImGroupReceiptStatus,
@@ -291,19 +173,10 @@ import {
   buildQuoteFromMessage,
   extractAddableFace,
   getQuoteFromMessage,
-  parseMessage,
-  getFileIconInfo,
-  type TextMessage,
-  type ImageMessage,
-  type FileMessage,
-  type AudioMessage,
-  type VideoMessage,
-  type CardMessage,
-  type FaceMessage
+  type CardMessage
 } from '@/views/im/utils/message'
 import { buildRecallTip } from '@/views/im/utils/conversation'
-import { formatSeconds } from '@/utils/formatTime'
-import { formatFileSize } from '@/utils/file'
+import { formatTimeTip } from '@/views/im/utils/time'
 import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
@@ -325,6 +198,9 @@ import type { Message } from '../../../../types'
 import MessageReadStatus from './MessageReadStatus.vue'
 import ReplyPreview from './ReplyPreview.vue'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
+import MessageBubble from './MessageBubble.vue'
+import { IM_FORWARD_DIALOG_KEY, IM_MERGE_DETAIL_DIALOG_KEY } from './forward/keys'
+import { useMessageMultiSelect } from '../../../../composables/useMessageMultiSelect'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
 defineOptions({ name: 'ImMessageItem' })
@@ -372,77 +248,10 @@ const shouldShowTimeTip = computed(() => {
   return props.message.sendTime - props.prevMessage.sendTime > TIME_TIP_GAP_MS
 })
 
-/** 是否文本消息 */
-const isText = computed(() => props.message.type === ImMessageType.TEXT)
-const isImage = computed(() => props.message.type === ImMessageType.IMAGE)
-const isFile = computed(() => props.message.type === ImMessageType.FILE)
+/** 仅 MessageItem 自身仍要用到的 type 判定（其它分支已下沉到 MessageBubble） */
 const isVoice = computed(() => props.message.type === ImMessageType.VOICE)
-const isVideo = computed(() => props.message.type === ImMessageType.VIDEO)
-const isCard = computed(() => props.message.type === ImMessageType.CARD)
-const isFace = computed(() => props.message.type === ImMessageType.FACE)
+const isMerge = computed(() => props.message.type === ImMessageType.MERGE)
 
-// ==================== 气泡配色 helper ====================
-// self / other 两侧 ::before 三角靠 message-bubble--self/other 类承载；本 helper 把 4 处 selfSend ternary
-// 集中到一处，新增 variant 直接在 switch 加 case；class 字面量保留以便 UnoCSS 静态扫描
-
-/** 文本 / 文件 / 语音气泡的整体 class（含 selfSend 配色 + ::before 三角的 side class） */
-function bubbleClass(variant: 'text' | 'file' | 'voice'): string[] {
-  const isSelf = props.message.selfSend
-  const side = isSelf ? 'message-bubble--self' : 'message-bubble--other'
-  switch (variant) {
-    case 'text':
-      return [
-        side,
-        isSelf
-          ? 'text-black bg-[#95ec69]'
-          : 'text-[var(--el-text-color-primary)] bg-[var(--el-fill-color-light)]'
-      ]
-    case 'file':
-      return [
-        side,
-        isSelf
-          ? 'bg-[#95ec69] border-[var(--el-border-color-lighter)]'
-          : 'bg-[var(--el-bg-color)] border-[var(--el-border-color-light)] hover:border-[#409eff]'
-      ]
-    case 'voice':
-      return [side, isSelf ? 'bg-[#95ec69]' : 'bg-[var(--el-fill-color-light)]']
-  }
-}
-
-// TODO @AI：抽到 message.ts 里？作为一个工具方法？
-/**
- * 时间分隔线文案：
- * - 今天：HH:mm
- * - 昨天：昨天 HH:mm
- * - 一周内：周X HH:mm
- * - 超过一周：MM-dd HH:mm
- */
-function formatTipTime(timestamp: number): string {
-  if (!timestamp) {
-    return ''
-  }
-  const messageDate = new Date(timestamp)
-  const now = new Date()
-  const pad = (value: number) => value.toString().padStart(2, '0')
-  const hourMinute = `${pad(messageDate.getHours())}:${pad(messageDate.getMinutes())}`
-  const sameDay = (left: Date, right: Date) =>
-    left.getFullYear() === right.getFullYear() &&
-    left.getMonth() === right.getMonth() &&
-    left.getDate() === right.getDate()
-  if (sameDay(messageDate, now)) {
-    return hourMinute
-  }
-  const yesterday = new Date(now)
-  yesterday.setDate(now.getDate() - 1)
-  if (sameDay(messageDate, yesterday)) {
-    return `昨天 ${hourMinute}`
-  }
-  if (now.getTime() - messageDate.getTime() < 7 * 24 * 60 * 60 * 1000) {
-    const weekNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    return `${weekNames[messageDate.getDay()]} ${hourMinute}`
-  }
-  return `${pad(messageDate.getMonth() + 1)}-${pad(messageDate.getDate())} ${hourMinute}`
-}
 
 // ==================== 事件消息（撤回 / 好友 / 群广播） ====================
 // 这三类不走普通气泡，渲染成居中灰色 tip；判断 + 文案配对放一起，新增第四类事件只需在本块改完
@@ -475,67 +284,49 @@ const groupNotificationText = computed(() => resolveGroupNotificationText(props.
 
 // ==================== 消息内容解析 / payload ====================
 
-/** 文本内容 */
-const textContent = computed(() => parseMessage<TextMessage>(props.message.content)?.content ?? '')
-
 /** 引用对象：气泡内嵌入展示；非引用消息返回 null，模板 v-if 不渲染 */
 const quote = computed(() => getQuoteFromMessage(props.message.content))
 
-const imagePayload = computed(() =>
-  isImage.value ? parseMessage<ImageMessage>(props.message.content) : null
-)
-const filePayload = computed(() =>
-  isFile.value ? parseMessage<FileMessage>(props.message.content) : null
-)
-const voicePayload = computed(() =>
-  isVoice.value ? parseMessage<AudioMessage>(props.message.content) : null
-)
-const videoPayload = computed(() =>
-  isVideo.value ? parseMessage<VideoMessage>(props.message.content) : null
-)
-const cardPayload = computed(() =>
-  isCard.value ? parseMessage<CardMessage>(props.message.content) : null
-)
-/** 表情 payload；非法宽高（缺失 / 0 / 负数 / 超出 2048）派生成 undefined，让 <img> 走 CSS max-w / max-h 兜底 */
-const FACE_DIMENSION_MAX = 2048
-const facePayload = computed(() => {
-  if (!isFace.value) {
-    return null
-  }
-  const raw = parseMessage<FaceMessage>(props.message.content)
-  if (!raw) {
-    return null
-  }
-  const sanitize = (v: number | undefined) =>
-    v && v > 0 && v <= FACE_DIMENSION_MAX ? v : undefined
-  return { ...raw, width: sanitize(raw.width), height: sanitize(raw.height) }
-})
+/** MessagePanel 注入的弹窗触发函数 */
+const openForwardDialog = inject(IM_FORWARD_DIALOG_KEY)
+const openMergeDetail = inject(IM_MERGE_DETAIL_DIALOG_KEY)
 
-/** 名片点击：弹被推荐用户的 UserInfoCard；陌生人名片走「名片」加好友来源 */
-function handleCardClick(e: MouseEvent) {
-  const card = cardPayload.value
-  if (!card?.userId) {
-    return
-  }
-  uiStore.openUserInfoCardAtEvent(
-    {
-      id: card.userId,
-      nickname: card.nickname,
-      avatar: card.avatar
-    },
-    e,
-    ImFriendAddSource.CARD
-  )
+/** 多选模式：模块级单例 composable */
+const multiSelect = useMessageMultiSelect()
+
+/** 合并消息气泡点击：打开详情弹窗（嵌套合并由弹窗内部 push 栈） */
+function handleMergeOpen(content: string) {
+  openMergeDetail?.(content)
 }
 
-/** 媒体消息上传中：插入占位时 uploadProgress=0，ack 成功后被清成 undefined */
+/** 名片点击：用户名片弹 UserInfoCard，群名片弹 GroupInfoCard；其它 targetType（含改包脏数据）忽略 */
+function handleCardClick(card: CardMessage, e: MouseEvent) {
+  if (!card?.targetId) {
+    return
+  }
+  if (card.targetType === ImConversationType.PRIVATE) {
+    uiStore.openUserInfoCardAtEvent(
+      { id: card.targetId, nickname: card.name, avatar: card.avatar },
+      e,
+      ImFriendAddSource.CARD
+    )
+    return
+  }
+  if (card.targetType === ImConversationType.GROUP) {
+    uiStore.openGroupInfoCardAtEvent(
+      {
+        id: card.targetId,
+        name: card.name,
+        showImage: card.avatar,
+        memberCount: card.memberCount
+      },
+      e
+    )
+  }
+}
+
+/** 媒体上传中：MessageBubble 自渲染遮罩 / 进度条；外层只用作 showSendingLoading 判定 */
 const isUploading = computed(() => props.message.uploadProgress != null)
-
-/** 上传进度（0-100）；undefined 兜底为 0 避免遮罩文案出现 NaN */
-const uploadProgress = computed(() => props.message.uploadProgress ?? 0)
-
-/** 上传进度文案；图片/视频遮罩、文件进度条尾巴共用 */
-const uploadProgressText = computed(() => `${uploadProgress.value}%`)
 
 /**
  * 是否在气泡尾部显示「发送中」loading 转圈
@@ -547,48 +338,6 @@ const showSendingLoading = computed(
   () => props.message.status === ImMessageStatus.SENDING && (!isUploading.value || isVoice.value)
 )
 
-/** 文件类型图标 + 配色：按扩展名分发，跟 ReplyPreview 共用 getFileIconInfo */
-const fileIconInfo = computed(() => getFileIconInfo(filePayload.value?.name))
-
-/** 文件点击 → 新窗口下载；上传中点击无意义（url 还是 blob），直接跳过 */
-function handleFileClick() {
-  if (isUploading.value || !filePayload.value?.url) {
-    return
-  }
-  window.open(filePayload.value.url, '_blank')
-}
-
-/** 语音点击 → 当前只做简单 Audio() 播放；真实项目可接入全局 Player */
-const voicePlaying = ref(false)
-let currentAudio: HTMLAudioElement | null = null
-function handleVoiceClick() {
-  if (!voicePayload.value?.url) {
-    return
-  }
-  if (voicePlaying.value && currentAudio) {
-    currentAudio.pause()
-    voicePlaying.value = false
-    return
-  }
-  currentAudio = new Audio(voicePayload.value.url)
-  voicePlaying.value = true
-  currentAudio.addEventListener('ended', () => {
-    voicePlaying.value = false
-    currentAudio = null
-  })
-  currentAudio.play().catch(() => {
-    voicePlaying.value = false
-  })
-}
-
-onBeforeUnmount(() => {
-  if (currentAudio) {
-    currentAudio.pause()
-    currentAudio.src = ''
-    currentAudio = null
-  }
-  voicePlaying.value = false
-})
 
 // ==================== 发送人 / 已读 / @ ====================
 
@@ -698,6 +447,8 @@ const isAtMe = computed(() => {
 /** 右键菜单 key 常量；push 端和分发端从同一处取，typo 编译期就能抓 */
 const MENU_KEYS = {
   REPLY: 'REPLY',
+  FORWARD: 'FORWARD',
+  MULTI_SELECT: 'MULTI_SELECT',
   PIN: 'PIN',
   ADD_TO_FACE: 'ADD_TO_FACE',
   MUTE: 'MUTE',
@@ -722,6 +473,13 @@ async function handleContextMenu(e: MouseEvent) {
   if (isFriendChatTipMessage.value) {
     return
   }
+  // 多选模式下不弹菜单：右键点击就当切换勾选，与单击行为一致
+  if (isInMultiSelect.value) {
+    if (canForward.value) {
+      multiSelect.toggle(props.message)
+    }
+    return
+  }
 
   const items: Array<{
     key: MenuKey
@@ -731,12 +489,25 @@ async function handleContextMenu(e: MouseEvent) {
     danger?: boolean
     icon?: string
   }> = []
-  // 「引用」：已落库（id≠0）+ 未撤回；本地占位消息（id=0）不允许引用，避免引用一条还没拿到 id 的消息
-  if (!!props.message.id && !isRecall.value) {
+  // 「引用」：已落库（id≠0）+ 未撤回 + 非合并转发；MERGE 内嵌快照在引用预览里无法降级展示
+  if (!!props.message.id && !isRecall.value && !isMerge.value) {
     items.push({
       key: MENU_KEYS.REPLY,
       name: '引用',
       icon: 'bxs:quote-alt-left'
+    })
+  }
+  // 「转发」「多选」：已落库（id≠0）+ 普通消息 + 未撤回；触发 ForwardDialog / 进入多选模式
+  if (canForward.value) {
+    items.push({
+      key: MENU_KEYS.FORWARD,
+      name: '转发',
+      icon: 'ant-design:share-alt-outlined'
+    })
+    items.push({
+      key: MENU_KEYS.MULTI_SELECT,
+      name: '多选',
+      icon: 'ant-design:check-square-outlined'
     })
   }
   // 「置顶」：仅群聊 + 普通消息 + 已落库 + 未撤回 + 群主或管理员；已置顶不再展示，由置顶面板的「移除」入口承接
@@ -811,25 +582,21 @@ async function handleContextMenu(e: MouseEvent) {
     })
   }
 
-  // 把菜单渲染交给全局 uiStore（单例，避免每条消息都挂一份菜单 DOM）；callback 按 key 分发
+  // 把菜单渲染交给全局 uiStore（单例，避免每条消息都挂一份菜单 DOM）
+  const menuHandlers: Record<MenuKey, () => void | Promise<void>> = {
+    [MENU_KEYS.REPLY]: handleReply,
+    [MENU_KEYS.FORWARD]: handleForward,
+    [MENU_KEYS.MULTI_SELECT]: handleEnterMultiSelect,
+    [MENU_KEYS.PIN]: handlePin,
+    [MENU_KEYS.ADD_TO_FACE]: handleAddToFace,
+    [MENU_KEYS.MUTE]: handleMute,
+    [MENU_KEYS.UNMUTE]: handleUnmute,
+    [MENU_KEYS.KICK]: handleKick,
+    [MENU_KEYS.RECALL]: handleRecall,
+    [MENU_KEYS.DELETE]: handleDelete
+  }
   uiStore.openContextMenu({ x: e.clientX, y: e.clientY }, items, async (item) => {
-    if (item.key === MENU_KEYS.REPLY) {
-      handleReply()
-    } else if (item.key === MENU_KEYS.PIN) {
-      await handlePin()
-    } else if (item.key === MENU_KEYS.ADD_TO_FACE) {
-      await handleAddToFace()
-    } else if (item.key === MENU_KEYS.MUTE) {
-      handleMute()
-    } else if (item.key === MENU_KEYS.UNMUTE) {
-      await handleUnmute()
-    } else if (item.key === MENU_KEYS.KICK) {
-      await handleKick()
-    } else if (item.key === MENU_KEYS.RECALL) {
-      await handleRecall()
-    } else if (item.key === MENU_KEYS.DELETE) {
-      handleDelete()
-    }
+    await menuHandlers[item.key as MenuKey]?.()
   })
 }
 
@@ -882,6 +649,35 @@ const canManageSender = computed(() => {
   return myGroupRole.value < senderMember.role
 })
 
+/** 是否允许转发 / 多选：普通消息 + 已落库（id≠0）+ 未撤回；本地占位 / 撤回 / 事件消息一律不可 */
+const canForward = computed(
+  () => isNormalMessage(props.message.type) && !!props.message.id && !isRecall.value
+)
+
+/** 多选模式是否激活；切换会话由 index.vue 主动 exitMultiSelect */
+const isInMultiSelect = computed(() => multiSelect.state.active)
+
+/** 当前消息是否已勾选 */
+const isMessageChecked = computed(() => {
+  if (!isInMultiSelect.value) {
+    return false
+  }
+  return multiSelect.selectedIdSet.value.has(props.message.clientMessageId)
+})
+
+/** 多选模式下点击气泡：可转发的消息切换勾选；事件 / 撤回 / 占位等不响应（直接吃掉点击避免触发图片预览等） */
+function handleMultiSelectClick(e: MouseEvent) {
+  if (!isInMultiSelect.value) {
+    return
+  }
+  e.preventDefault()
+  e.stopPropagation()
+  if (!canForward.value) {
+    return
+  }
+  multiSelect.toggle(props.message)
+}
+
 /** 是否允许置顶（已置顶消息不再展示菜单项，由置顶面板的「移除」入口承接）：群聊 + 普通消息 + 已落库 + 未撤回 + 群主或管理员 + 未置顶 */
 const canPin = computed(
   () =>
@@ -918,6 +714,24 @@ function handleReply() {
     return
   }
   draftStore.setReply(conversation, buildQuoteFromMessage(props.message))
+}
+
+/** 转发当前消息：打开 ForwardDialog（单条模式；mode=single 即原样转） */
+function handleForward() {
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return
+  }
+  openForwardDialog?.({
+    mode: ImForwardMode.SINGLE,
+    messages: [props.message],
+    sourceConversation: conversation
+  })
+}
+
+/** 进入多选模式，初始勾选当前消息 */
+function handleEnterMultiSelect() {
+  multiSelect.enter(props.message)
 }
 
 /**
