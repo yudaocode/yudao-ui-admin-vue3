@@ -1,11 +1,11 @@
 <template>
-  <!-- 文本 -->
+  <!-- 文本：按 segment 渲染，mention 高亮可点击、URL 自动识别成可点击链接 -->
   <div
     v-if="isText && textPayload"
     class="relative px-3.5 py-2.5 text-sm leading-normal break-words whitespace-pre-wrap rounded-lg"
     :class="bubbleClass('text')"
   >
-    {{ textPayload.content }}
+    <TipSegments :segments="textSegments" />
   </div>
 
   <!-- 图片：el-image 内置预览；上传中半透明遮罩 -->
@@ -167,18 +167,21 @@ import { formatSeconds } from '@/utils/formatTime'
 import { ImMessageType, MERGE_FORWARD_PREVIEW_LINES } from '@/views/im/utils/constants'
 import {
   parseMessage,
+  parseTextSegments,
   getFileIconInfo,
   type AudioMessage,
   type CardMessage,
   type FaceMessage,
   type FileMessage,
   type ImageMessage,
+  type MentionCandidate,
   type MergeMessage,
   type TextMessage,
   type VideoMessage
 } from '@/views/im/utils/message'
 import { summarizeMessageContent } from '@/views/im/utils/conversation'
 import CardBubble from '@/views/im/home/components/card/CardBubble.vue'
+import TipSegments from './TipSegments.vue'
 import { useVoicePlayer } from '@/views/im/home/composables/useVoicePlayer'
 
 defineOptions({ name: 'ImMessageBubble' })
@@ -192,6 +195,8 @@ const props = defineProps<{
   selfSend?: boolean
   /** 媒体上传进度（0-100）；非 null 即视为上传中，渲染遮罩 / 进度条 */
   uploadProgress?: number | null
+  /** TEXT 气泡的 @ mention 候选名字；不传则文本里的 @xxx 退化为普通文本 */
+  mentions?: MentionCandidate[]
 }>()
 
 const emit = defineEmits<{
@@ -224,6 +229,15 @@ const uploadProgressText = computed(() => `${uploadProgress.value}%`)
 const parsedContent = computed<unknown>(() => parseMessage(props.content))
 
 const textPayload = computed(() => (isText.value ? (parsedContent.value as TextMessage | null) : null))
+
+/** 文本气泡 segment 数组：mention 高亮 + URL 自动识别 + 普通文本三段拼接 */
+const textSegments = computed(() => {
+  const content = textPayload.value?.content
+  if (!content) {
+    return []
+  }
+  return parseTextSegments(content, props.mentions || [])
+})
 const imagePayload = computed(() =>
   isImage.value ? (parsedContent.value as ImageMessage | null) : null
 )

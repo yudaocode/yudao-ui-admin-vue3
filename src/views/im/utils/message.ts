@@ -22,19 +22,27 @@ export const generateClientMessageId = (): string => {
   return generateUUID()
 }
 
-// ==================== Tip 片段（灰条文案渲染用） ====================
-// 把"XX 邀请 YY 加入群聊""XX 撤回了一条消息"等 tip 文案拆成 segment 数组，
-// mention 段携带 userId，渲染层据此挂点击事件弹 UserInfoCard。
+// ==================== 文本片段（tip 文案 + TEXT 气泡共用） ====================
+// 既用于灰条 tip（"XX 邀请 YY 加入群聊"），也用于 TEXT 气泡正文（@xxx 高亮 + URL 自动识别）。
+// mention 段携带 userId 用于挂点击弹 UserInfoCard；link 段携带 href 用于 <a> 跳转；
+// text 段是纯文本兜底。渲染层（TipSegments.vue）按 type 分发统一处理。
 
 export type TipSegment =
   | { type: 'text'; text: string }
   | { type: 'mention'; userId: number; text: string }
+  | { type: 'link'; href: string; text: string }
 
 export const tipText = (text: string): TipSegment => ({ type: 'text', text })
 
 export const tipMention = (userId: number, text: string): TipSegment => ({
   type: 'mention',
   userId,
+  text
+})
+
+export const tipLink = (href: string, text: string): TipSegment => ({
+  type: 'link',
+  href,
   text
 })
 
@@ -52,6 +60,101 @@ export function joinMentionSegments(
       ? [tipMention(id, resolveName(id))]
       : [tipText(separator), tipMention(id, resolveName(id))]
   )
+}
+
+/** mention 候选；name 用于匹配文本字面量，displayName 用于覆盖渲染（不传则按 name 渲染） */
+export interface MentionCandidate {
+  userId: number
+  /** 用来在 content 中前缀匹配的字面量（不含 @） */
+  name: string
+  /**
+   * 渲染时强制使用的显示名（不含 @）
+   *
+   * 用于「历史消息 content 里写的是备注名 / 群昵称，但接收端要按真实昵称渲染」的场景；
+   * 候选可以携带多种字面量（match 用），但 displayName 统一指向 nickname，
+   * 让所有历史 / 新消息的 @ 都收敛到一致的展示
+   */
+  displayName?: string
+  /**
+   * 歧义标记：同 name 对应多个 userId 时为 true
+   *
+   * parser 仍会按 name 命中（最长优先），但命中后整段吃成普通文本——
+   * 避免「@张三」被剔除后，短前缀候选「@张」抢匹配错绑
+   */
+  ambiguous?: boolean
+}
+
+/** URL 锚定正则；终止于空白、中文、@（避免吞掉下一个 mention）、< > " '（防 HTML / 引号串入）；y 标志走 sticky 匹配，省 text.slice */
+const URL_STICKY_REGEX = /(https?:\/\/[^\s一-龥@<>"']+|www\.[^\s一-龥@<>"']+)/iy
+
+/** URL 末尾常见标点剔除，避免吞掉句末中英文标点 */
+const URL_TRAILING_PUNCTUATION = /[.,!?;:)\]、，。！？；：）】]+$/
+
+/** 最短 URL：`www.ab` / `http:/` 这种孤段不算链接 */
+const URL_MIN_LENGTH = 6
+
+/**
+ * 文本气泡 content 拆段：mention 段按候选最长前缀匹配，URL 段走锚定正则，剩余归 text
+ *
+ * mentions 不传或匹配不上时，@xxx 退化为普通 text；解析与渲染解耦，工具函数本身不依赖 store
+ */
+export function parseTextSegments(
+  text: string,
+  mentions: MentionCandidate[] = []
+): TipSegment[] {
+  if (!text) {
+    return []
+  }
+  // 「@张三丰」不能被「@张三」截胡，候选按 name 长度倒序
+  const sortedMentions =
+    mentions.length > 1 ? [...mentions].sort((a, b) => b.name.length - a.name.length) : mentions
+  const out: TipSegment[] = []
+  let buffer = ''
+
+  const flush = () => {
+    if (buffer) {
+      out.push(tipText(buffer))
+      buffer = ''
+    }
+  }
+
+  let i = 0
+  while (i < text.length) {
+    if (text[i] === '@' && sortedMentions.length > 0) {
+      const matched = sortedMentions.find((m) => m.name && text.startsWith(m.name, i + 1))
+      if (matched) {
+        if (matched.ambiguous) {
+          // 同字面量对应多 userId，无法判定意图；整段累入 buffer 让短前缀候选没机会再扫这段
+          buffer += '@' + matched.name
+        } else {
+          flush()
+          // 渲染统一走 displayName（即真实昵称），让历史 content 里残留的备注 / 群昵称也收敛到 nickname
+          out.push(tipMention(matched.userId, '@' + (matched.displayName || matched.name)))
+        }
+        i += 1 + matched.name.length
+        continue
+      }
+    }
+    const head = text[i]
+    if (head === 'h' || head === 'H' || head === 'w' || head === 'W') {
+      URL_STICKY_REGEX.lastIndex = i
+      const linkMatch = URL_STICKY_REGEX.exec(text)
+      if (linkMatch) {
+        const urlText = linkMatch[0].replace(URL_TRAILING_PUNCTUATION, '')
+        if (urlText.length >= URL_MIN_LENGTH) {
+          flush()
+          const href = /^https?:\/\//i.test(urlText) ? urlText : `https://${urlText}`
+          out.push(tipLink(href, urlText))
+          i += urlText.length
+          continue
+        }
+      }
+    }
+    buffer += text[i]
+    i += 1
+  }
+  flush()
+  return out
 }
 
 // ==================== 引用消息 ====================

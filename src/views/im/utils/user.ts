@@ -9,20 +9,35 @@
 // 命名约定：显示名相关函数一律使用 displayName，与 friend.displayName / member.displayUserName 字段对齐
 // ====================================================================
 
+import { countBy } from 'lodash-es'
+
 import { useUserStore } from '@/store/modules/user'
 import { SystemUserSexEnum } from '@/utils/constants'
-import { ImConversationType, ImMessageType } from './constants'
+import {
+  ImConversationType,
+  ImFriendAddSource,
+  ImMessageType,
+  IM_AT_ALL_NICKNAME,
+  IM_AT_ALL_USER_ID
+} from './constants'
 import { getCurrentUserId } from './storage'
 import {
   joinMentionSegments,
   segmentsToText,
   tipMention,
   tipText,
+  type MentionCandidate,
   type TipSegment
 } from './message'
+import { useConversationStore } from '../home/store/conversationStore'
 import { useFriendStore } from '../home/store/friendStore'
 import { useGroupStore } from '../home/store/groupStore'
-import type { Friend, Group } from '../home/types'
+import { useImUiStore } from '../home/store/uiStore'
+import type { Conversation, Friend, Group, User } from '../home/types'
+
+// 候选缺失场景的稳定空数组；让 textMentions computed 在非 TEXT / 非群聊 / 无 @ 时返回同一引用，
+// MessageBubble 的 textSegments 才不会跟着无谓重算
+const EMPTY_MENTIONS: MentionCandidate[] = []
 
 /**
  * 私聊好友显示名：备注 > 真实昵称
@@ -161,7 +176,6 @@ export function getSenderRealNickname(
   return String(senderId)
 }
 
-// TODO @AI：这个方法，还需要么？之前是哪个调用的，可能要看看。
 /**
  * 消息发送者头像；按 conversation 上下文实时查 group.members / friend / userStore
  *
@@ -187,6 +201,104 @@ export function getSenderAvatar(
     }
   }
   return useFriendStore().getFriend(senderId)?.avatar || ''
+}
+
+/**
+ * 群消息 @ mention 候选：按 atUserIds 反查群成员，name 收集所有可能字面量（含好友备注 / 群自定义昵称），displayName 统一指向真实昵称
+ *
+ * 同字面量被多 userId 共享时标记 ambiguous，由 parser 整段吃成普通文本；
+ * 直接剔除会让短前缀候选（如「@张」）抢吃「@张三」的前缀，错绑到唯一的「张」用户
+ */
+export function getMentionCandidates(
+  atUserIds: number[] | undefined,
+  conversation: Pick<Conversation, 'type' | 'targetId'> | null | undefined
+): MentionCandidate[] {
+  if (!atUserIds || atUserIds.length === 0) {
+    return EMPTY_MENTIONS
+  }
+  if (!conversation || conversation.type !== ImConversationType.GROUP) {
+    return EMPTY_MENTIONS
+  }
+  // 群成员预建 Map，避免每个 atUserId 走一次 array find（@全体成员场景下成员数 × atUserIds 是 N²）
+  const members = useGroupStore().getGroup(conversation.targetId)?.members || []
+  const memberById = new Map(members.map((m) => [m.userId, m]))
+  const friendStore = useFriendStore()
+  const candidates: MentionCandidate[] = []
+  const seen = new Set<string>()
+  for (const userId of atUserIds) {
+    // @全体成员是虚拟伪成员，userId = -1 在 group.members 里查不到，注入字面量「所有人」候选
+    if (userId === IM_AT_ALL_USER_ID) {
+      const key = `${IM_AT_ALL_USER_ID}#${IM_AT_ALL_NICKNAME}`
+      if (!seen.has(key)) {
+        seen.add(key)
+        candidates.push({
+          userId: IM_AT_ALL_USER_ID,
+          name: IM_AT_ALL_NICKNAME,
+          displayName: IM_AT_ALL_NICKNAME
+        })
+      }
+      continue
+    }
+    const member = memberById.get(userId)
+    const friend = friendStore.getFriend(userId)
+    const nickname = (member?.nickname || friend?.nickname || '').trim()
+    if (!nickname) {
+      continue
+    }
+    for (const literal of [nickname, friend?.displayName, member?.displayUserName]) {
+      const trimmed = (literal || '').trim()
+      if (!trimmed) {
+        continue
+      }
+      const key = `${userId}#${trimmed}`
+      if (seen.has(key)) {
+        continue
+      }
+      seen.add(key)
+      candidates.push({ userId, name: trimmed, displayName: nickname })
+    }
+  }
+  // seen 已保证 (userId, name) 唯一，所以 countBy 出来的同 name 计数 > 1 一定是跨 userId 歧义
+  const nameCount = countBy(candidates, 'name')
+  for (const candidate of candidates) {
+    if (nameCount[candidate.name] > 1) {
+      candidate.ambiguous = true
+    }
+  }
+  return candidates
+}
+
+/**
+ * 文本 / tip 里 mention 段点击的统一入口：派生 User 弹 UserInfoCard
+ *
+ * 头像走 getSenderAvatar；昵称取真实昵称，friend / member 都查不到时用 fallbackName 兜底（如灰条 tip 段的字面量文本）；
+ * addSource 群聊带 GROUP + 群名（用于「加为好友」的来源 + 备注弹文案），私聊降级 SEARCH；
+ * @全体成员 是广播 mention 没有具体用户实体，对齐微信 PC 不弹卡片
+ */
+export function openMentionUserInfoCardAtEvent(
+  userId: number,
+  event: MouseEvent,
+  fallbackName?: string
+): void {
+  if (userId === IM_AT_ALL_USER_ID) {
+    return
+  }
+  const conversation = useConversationStore().activeConversation
+  const isGroup = conversation?.type === ImConversationType.GROUP
+  const group = isGroup ? useGroupStore().getGroup(conversation!.targetId) : undefined
+  const member = group?.members?.find((m) => m.userId === userId)
+  const friend = useFriendStore().getFriend(userId)
+  const user: User = {
+    id: userId,
+    nickname: friend?.nickname || member?.nickname || fallbackName || String(userId),
+    avatar: getSenderAvatar(userId, conversation?.type ?? 0, conversation?.targetId ?? 0)
+  }
+  useImUiStore().openUserInfoCardAtEvent(
+    user,
+    event,
+    isGroup ? ImFriendAddSource.GROUP : ImFriendAddSource.SEARCH,
+    isGroup ? group?.name || '' : ''
+  )
 }
 
 /**

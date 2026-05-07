@@ -739,12 +739,13 @@ function onMentionSelect(member: GroupMemberLite) {
   }
   // 删 @keyword，插入 contenteditable=false 的 token：
   // 删除时整段消除 + 不会被光标拆穿；data-id 是后续 collectFromEditor 收 atUserIds 的钩子
+  // token 文本固定走真实昵称：群里所有成员看到的字面量一致，避免我侧的好友备注 / 群昵称污染发送文本
   mentionRange.deleteContents()
   const span = document.createElement('span')
   span.className = 'mention-token'
   span.dataset.id = String(member.userId)
   span.contentEditable = 'false'
-  span.textContent = `@${member.showName}`
+  span.textContent = `@${member.nickname || member.showName}`
   mentionRange.insertNode(span)
   // token 在 editor 首位时，contenteditable=false 边缘会让光标无法挪到 token 前
   // 补一个零宽空格 ​ 当锚点；DOM walk 时会被滤掉，不进入发送内容

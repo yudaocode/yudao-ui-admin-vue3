@@ -80,6 +80,7 @@
           :content="message.content"
           :self-send="message.selfSend"
           :upload-progress="message.uploadProgress"
+          :mentions="textMentions"
           @click-card="handleCardClick"
           @open-merge="handleMergeOpen"
         />
@@ -176,6 +177,7 @@ import {
   getQuoteFromMessage,
   parseMessage,
   type CardMessage,
+  type MentionCandidate,
   type TextMessage
 } from '@/views/im/utils/message'
 import { buildRecallTipSegments } from '@/views/im/utils/conversation'
@@ -188,6 +190,7 @@ import { useDraftStore } from '../../../../store/draftStore'
 import { useFaceStore } from '../../../../store/faceStore'
 import {
   getMemberDisplayName,
+  getMentionCandidates,
   getSenderDisplayName,
   getSenderRealNickname,
   resolveFriendNotificationSegments,
@@ -304,6 +307,14 @@ const multiSelect = useMessageMultiSelect()
 function handleMergeOpen(content: string) {
   openMergeDetail?.(content)
 }
+
+/** 文本气泡 @ mention 候选名字：仅群消息有效，按 atUserIds 反查群成员真实昵称；非 TEXT 不走 store 读，让 getMentionCandidates 直接返回稳定空数组 */
+const textMentions = computed<MentionCandidate[]>(() => {
+  if (props.message.type !== ImMessageType.TEXT) {
+    return getMentionCandidates(undefined, null)
+  }
+  return getMentionCandidates(props.message.atUserIds, conversationStore.activeConversation)
+})
 
 /** 名片点击：用户名片弹 UserInfoCard，群名片弹 GroupInfoCard；其它 targetType（含改包脏数据）忽略 */
 function handleCardClick(card: CardMessage, e: MouseEvent) {
