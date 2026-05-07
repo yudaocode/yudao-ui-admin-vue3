@@ -228,9 +228,12 @@ provide(IM_MERGE_DETAIL_DIALOG_KEY, (content) => mergeDetailDialogRef.value?.ope
 
 const multiSelect = useMessageMultiSelect()
 
-/** 切会话退出多选；避免上一会话的勾选状态泄漏到新会话 */
+/** 切会话退出多选；避免上一会话的勾选状态泄漏到新会话（type+targetId 一起监听，私聊与群聊 id 同号时也能触发） */
 watch(
-  () => conversationStore.activeConversation?.targetId,
+  () => [
+    conversationStore.activeConversation?.type,
+    conversationStore.activeConversation?.targetId
+  ],
   () => multiSelect.exit()
 )
 

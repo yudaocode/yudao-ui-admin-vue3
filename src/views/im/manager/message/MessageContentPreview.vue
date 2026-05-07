@@ -137,6 +137,7 @@ import {
 import CardLineLabel from '@/views/im/home/components/card/CardLineLabel.vue'
 import {
   parseMessage,
+  getFileIconInfo,
   type ImageMessage,
   type FileMessage,
   type AudioMessage,
@@ -218,39 +219,8 @@ function openVideo() {
   }
 }
 
-/** 文件图标：按扩展名分配 icon + 颜色，对齐 home 端 MessageItem 的观感 */
-const fileIconInfo = computed<{ icon: string; color: string }>(() => {
-  const name = filePayload.value?.name || ''
-  const ext = name.split('.').pop()?.toLowerCase() || ''
-  if (ext === 'pdf') {
-    return { icon: 'ant-design:file-pdf-filled', color: '#ed5757' }
-  }
-  if (['doc', 'docx'].includes(ext)) {
-    return { icon: 'ant-design:file-word-filled', color: '#2b7cd3' }
-  }
-  if (['xls', 'xlsx'].includes(ext)) {
-    return { icon: 'ant-design:file-excel-filled', color: '#1f7244' }
-  }
-  if (['ppt', 'pptx'].includes(ext)) {
-    return { icon: 'ant-design:file-ppt-filled', color: '#d24726' }
-  }
-  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
-    return { icon: 'ant-design:file-zip-filled', color: '#f0ad4e' }
-  }
-  if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(ext)) {
-    return { icon: 'ant-design:file-image-filled', color: '#9c27b0' }
-  }
-  if (['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv'].includes(ext)) {
-    return { icon: 'ant-design:video-camera-filled', color: '#9c27b0' }
-  }
-  if (['mp3', 'wav', 'ogg', 'flac', 'aac'].includes(ext)) {
-    return { icon: 'ant-design:audio-filled', color: '#9c27b0' }
-  }
-  if (['txt', 'md', 'log', 'json', 'xml'].includes(ext)) {
-    return { icon: 'ant-design:file-text-filled', color: '#909399' }
-  }
-  return { icon: 'ant-design:file-filled', color: '#909399' }
-})
+/** 文件图标：按扩展名分配 icon + 颜色 */
+const fileIconInfo = computed(() => getFileIconInfo(filePayload.value?.name))
 
 /** 系统事件 / 未知类型 fallback：取 JSON 首层 content，否则原文 */
 const fallbackText = computed(() => {

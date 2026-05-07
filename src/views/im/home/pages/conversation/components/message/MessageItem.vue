@@ -861,55 +861,7 @@ function handleDelete() {
 </script>
 
 <style scoped>
-/* 气泡尾巴：小三角伪元素，指向对应头像（对方在左、自己在右），对齐微信观感
-   - 用 border 4 边色画三角：透明 3 边 + 实色 1 边，省一张图片
-   - 颜色对应气泡背景，留 1px 视觉吃进去；UnoCSS 写不顺手，索性用 scoped CSS */
-.message-bubble--other::before,
-.message-bubble--self::before {
-  content: '';
-  position: absolute;
-  top: 12px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-}
-.message-bubble--other::before {
-  left: -5px;
-  border-width: 5px 6px 5px 0;
-  border-color: transparent var(--el-fill-color-light) transparent transparent;
-}
-.message-bubble--self::before {
-  right: -5px;
-  border-width: 5px 0 5px 6px;
-  border-color: transparent transparent transparent #95ec69;
-}
-
-/* el-icon 在暗色模式下全局 color 被 .el-icon{color:var(--color)} 干扰；
-   这里把 voice 图标的 fill 锁死，避免字体色跟随主题变白；
-   file 图标已迁到 Iconify 按扩展名走彩色，不在这里强制 */
-.message-bubble__voice-icon :deep(svg) {
-  fill: #606266 !important;
-}
-.message-bubble__voice-icon.im-voice-playing :deep(svg) {
-  fill: #409eff !important;
-}
-
-/* 播放中的脉冲动画：keyframes 用 UnoCSS 不好写，保留 scoped */
-.im-voice-playing {
-  animation: im-voice-icon-pulse 0.8s infinite;
-}
-
-@keyframes im-voice-icon-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.15);
-  }
-}
-
-/* SENDING 状态的转圈动画：el-icon 自带 .is-loading 旋转，迁到 Iconify 后丢了，自己补一份 */
+/* SENDING 状态的转圈动画 */
 .im-loading-spin {
   animation: im-loading-spin 1s linear infinite;
 }
