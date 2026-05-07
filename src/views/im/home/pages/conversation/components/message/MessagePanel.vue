@@ -573,19 +573,22 @@ watch(
 /**
  * 切换会话：清空"在不在底部"相关状态、强制滚到底部、群会话预拉资料
  *
- * immediate:true 让首次进入页面就能正确初始化（无需等到第一次切换）
+ * type+targetId 一起监听：私聊与群聊 id 同号时切换也能触发；immediate:true 让首次进入页面就能初始化
  */
 watch(
-  () => conversationStore.activeConversation?.targetId,
-  (targetId) => {
-    // 切群时上一会话的"未读累计 + 浮窗显示"必须清掉，否则会带到新会话里看起来很突兀
+  () => [
+    conversationStore.activeConversation?.type,
+    conversationStore.activeConversation?.targetId
+  ],
+  ([type, targetId]) => {
+    // 切会话时上一会话的「未读累计 + 浮窗显示」必须清掉，否则会带到新会话里看起来很突兀
     newMessageCount.value = 0
     showJumpToBottom.value = false
     // 抽屉里展示的群信息 / 好友信息属于上一会话，切会话时统一关掉
     sideVisible.value = false
     scrollToBottom()
     // 仅群聊预拉详情 / 成员（私聊对端在首屏 fetchFriends 时就拉了）
-    if (targetId && conversationStore.activeConversation?.type === ImConversationType.GROUP) {
+    if (targetId && type === ImConversationType.GROUP) {
       ensureGroupData(targetId)
     }
   },

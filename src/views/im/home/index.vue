@@ -146,19 +146,22 @@ onUnmounted(() => {
 /**
  * 当前会话切换：本地清零未读 + 上报后端已读 + 私聊补"对方已读到哪条"
  *
- * 只针对当前 active 会话做处理，其它会话已读状态由 WebSocket READ/RECEIPT 事件被动同步。
- * 私聊补一次拉对方已读位置，弥补离线 / 多端漏掉的 RECEIPT 推送
+ * type+targetId 一起监听：私聊与群聊 id 同号时切换也能触发；其它会话已读状态由 WebSocket
+ * READ / RECEIPT 事件被动同步。私聊补一次拉对方已读位置，弥补离线 / 多端漏掉的 RECEIPT 推送
  */
 watch(
-  () => conversationStore.activeConversation?.targetId,
-  async (targetId) => {
+  () => [
+    conversationStore.activeConversation?.type,
+    conversationStore.activeConversation?.targetId
+  ],
+  async ([type, targetId]) => {
     if (!targetId) {
       return
     }
     // 本地清零未读 + 上报后端已读，让其它端 / 对方 UI 同步
     await readActive()
     // 私聊补一次"对方已读到哪条"，弥补离线 / 多端漏掉的 RECEIPT 推送
-    if (conversationStore.activeConversation?.type === ImConversationType.PRIVATE) {
+    if (type === ImConversationType.PRIVATE) {
       void syncPrivateReadStatus(targetId)
     }
   }
