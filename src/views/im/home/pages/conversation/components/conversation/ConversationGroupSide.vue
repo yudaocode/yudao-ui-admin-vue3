@@ -700,7 +700,10 @@ async function handleQuit() {
   }
   const groupId = props.group.id
   await quitGroup(groupId)
-  // 同步清本地：会话列表 + 群 store；不清的话冷启动前还会残留这条群 / 会话
+  // 本地立即响应：先把 self.member 置 DISABLE（让 GroupInfo 等 isMember 收敛），再清会话 + 群 store
+  if (myId.value) {
+    groupStore.updateMemberStatus(groupId, myId.value, CommonStatusEnum.DISABLE)
+  }
   conversationStore.removeConversation(ImConversationType.GROUP, groupId)
   groupStore.removeGroup(groupId)
   message.success('已退出群聊')

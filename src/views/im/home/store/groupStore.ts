@@ -15,6 +15,7 @@ import {
 import { useConversationStore } from './conversationStore'
 import { useGroupRequestStore } from './groupRequestStore'
 import { ImConversationType, ImGroupMemberRole, ImMessageType } from '../../utils/constants'
+import { CommonStatusEnum } from '@/utils/constants'
 import {
   getCurrentUserId,
   imStorage,
@@ -453,6 +454,17 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.saveGroupMembers(groupId)
     },
 
+    /** 本地更新群成员的 status（自己退群 / 被踢的本地预置；让 isMember 立即收敛到 stranger，不依赖 removeGroup 的整群移除） */
+    updateMemberStatus(groupId: number, userId: number, status: number) {
+      const group = this.getGroup(groupId)
+      const member = group?.members?.find((m) => m.userId === userId)
+      if (!member || member.status === status) {
+        return
+      }
+      member.status = status
+      this.saveGroupMembers(groupId)
+    },
+
     /** 本地更新群成员的 displayUserName（GROUP_MEMBER_NICKNAME_UPDATE 事件）；不命中则等 fetchGroupMembers 兜底 */
     updateMemberDisplayUserName(groupId: number, userId: number, displayUserName: string) {
       const group = this.getGroup(groupId)
@@ -574,7 +586,7 @@ export const useGroupStore = defineStore('imGroupStore', {
     },
 
     /** 创建群广播：创建者多端同步 + 初始成员 bootstrap；payload.memberUserIds 含自己 → 拉群详情 / 成员；本端发起者已经 upsert 过本群，跳过避免双拉 */
-    applyGroupCreateNotification(groupId: number, payload: GroupNotificationPayload) {
+    async applyGroupCreateNotification(groupId: number, payload: GroupNotificationPayload) {
       if (!isSelfInPayloadMembers(payload)) {
         return
       }
@@ -583,7 +595,8 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (selfIsOperator && this.getGroup(groupId)) {
         return
       }
-      this.fetchGroupInfo(groupId).catch(() => undefined)
+      // 先 await fetchGroupInfo 把群 upsert 进 state.groups；否则 fetchGroupMembers 的「不是我加入的群」guard 会兜空
+      await this.fetchGroupInfo(groupId)
       this.fetchGroupMembers(groupId, true).catch(() => undefined)
     },
 
@@ -611,36 +624,43 @@ export const useGroupStore = defineStore('imGroupStore', {
     },
 
     /** 成员加入：被邀请者本端 group 未就位先 fetchGroupInfo bootstrap；所有人都刷成员列表（新成员 nickname / avatar 不在 payload） */
-    applyGroupMemberInviteNotification(groupId: number, payload: GroupNotificationPayload) {
+    async applyGroupMemberInviteNotification(groupId: number, payload: GroupNotificationPayload) {
+      // 自己刚被拉进来：必须 await fetchGroupInfo 让群入 state.groups，否则 fetchGroupMembers 的 guard 会兜空
       if (isSelfInPayloadMembers(payload) && !this.getGroup(groupId)) {
-        this.fetchGroupInfo(groupId).catch(() => undefined)
+        await this.fetchGroupInfo(groupId)
       }
       this.fetchGroupMembers(groupId, true).catch(() => undefined)
     },
 
     /** 自由进群：进群者本端 group 未就位先 fetchGroupInfo bootstrap；所有人都刷成员列表 */
-    applyGroupMemberEnterNotification(groupId: number, payload: GroupNotificationPayload) {
+    async applyGroupMemberEnterNotification(groupId: number, payload: GroupNotificationPayload) {
       const selfUserId = getCurrentUserId()
+      // 自己自由进群：必须 await fetchGroupInfo 让群入 state.groups，否则 fetchGroupMembers 的 guard 会兜空
       if (selfUserId && payload.entrantUserId === selfUserId && !this.getGroup(groupId)) {
-        this.fetchGroupInfo(groupId).catch(() => undefined)
+        await this.fetchGroupInfo(groupId)
       }
       this.fetchGroupMembers(groupId, true).catch(() => undefined)
     },
 
-    /** 成员退群：退群者本人多端同步走 removeGroup；其他成员从本地列表移除 quitter */
+    /** 成员退群：退群者本人先把 self.status 置 DISABLE 再 removeGroup（保留状态语义 + 维持 groups 列表干净）；其他成员从本地列表移除 quitter */
     applyGroupMemberQuitNotification(groupId: number, payload: GroupNotificationPayload) {
       const selfUserId = getCurrentUserId()
       if (selfUserId && payload.operatorUserId === selfUserId) {
+        this.updateMemberStatus(groupId, selfUserId, CommonStatusEnum.DISABLE)
         this.removeGroup(groupId)
       } else if (payload.operatorUserId) {
         this.removeMembersLocal(groupId, [payload.operatorUserId])
       }
     },
 
-    /** 成员被移出：被踢者本人 removeGroup；其他成员从本地列表移除被踢者 */
+    /** 成员被移出：被踢者本人先把 self.status 置 DISABLE 再 removeGroup；其他成员从本地列表移除被踢者 */
     applyGroupMemberKickNotification(groupId: number, payload: GroupNotificationPayload) {
       const memberIds = payload.memberUserIds || []
+      const selfUserId = getCurrentUserId()
       if (isSelfInPayloadMembers(payload)) {
+        if (selfUserId) {
+          this.updateMemberStatus(groupId, selfUserId, CommonStatusEnum.DISABLE)
+        }
         this.removeGroup(groupId)
       } else if (memberIds.length) {
         this.removeMembersLocal(groupId, memberIds)
