@@ -107,14 +107,22 @@ const uiStore = useImUiStore()
 const draftStore = useDraftStore()
 const message = useMessage()
 
-/** 当前会话的草稿快照：存在时列表显示 [草稿] 前缀 + plain 文本，盖掉 sender 前缀和 @我 红字 */
-const draft = computed(() => draftStore.getDraft(props.conversation))
-
 const isActive = computed(
   () =>
     conversationStore.activeConversation?.targetId === props.conversation.targetId &&
     conversationStore.activeConversation?.type === props.conversation.type
 )
+
+/**
+ * 当前会话的草稿快照：存在时列表显示 [草稿] 前缀 + plain 文本，盖掉 sender 前缀和 @我 红字
+ * 当前打开的会话不展示草稿；输入内容已经在编辑器里可见，列表再显示 [草稿] 反而冗余
+ */
+const draft = computed(() => {
+  if (isActive.value) {
+    return undefined
+  }
+  return draftStore.getDraft(props.conversation)
+})
 
 const isGroup = computed(() => props.conversation.type === ImConversationType.GROUP)
 
