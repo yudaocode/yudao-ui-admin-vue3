@@ -57,13 +57,8 @@
       </span>
     </template>
 
-    <!-- 名片：人形 icon + 「个人名片：昵称」 -->
-    <template v-else-if="isCard">
-      <Icon icon="ant-design:user-outlined" :size="14" class="flex-shrink-0" />
-      <span class="im-reply-preview__text min-w-0">
-        个人名片：{{ parsedPayload?.nickname || '' }}
-      </span>
-    </template>
+    <!-- 名片 -->
+    <CardLineLabel v-else-if="isCard" :card="parsedPayload" class="im-reply-preview__text min-w-0" />
 
     <!-- 表情贴图：缩略图 + name（无 name 仅显示 [表情]） -->
     <template v-else-if="isFace">
@@ -102,6 +97,7 @@ import { formatFileSize } from '@/utils/file'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { getSenderDisplayName } from '@/views/im/utils/user'
 import { ImMessageType } from '@/views/im/utils/constants'
+import CardLineLabel from '@/views/im/home/components/card/CardLineLabel.vue'
 import {
   parseMessage,
   getFileIconInfo,

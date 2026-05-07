@@ -1,6 +1,6 @@
 <template>
   <!--
-    把他推荐给朋友（个人名片转发弹窗，对齐微信 PC 双栏布局）
+    把名片推荐给朋友（用户 / 群通用，对齐微信 PC 双栏布局）
     - 左栏：搜索 + 最近聊天列表（圆形单/多选指示）
     - 右栏：已选预览（每行可移除）+ 名片预览卡 + 留言 + 取消/发送
     - 选中时按 1 个走「发送」、多个走「分别发送(n)」文案，与微信一致
@@ -8,7 +8,7 @@
   -->
   <el-dialog
     v-model="visible"
-    title="把他推荐给朋友"
+    :title="dialogTitle"
     width="720px"
     :close-on-click-modal="false"
     class="im-recommend-dialog"
@@ -123,30 +123,7 @@
         <div
           class="flex flex-col gap-3 px-4 py-3 flex-shrink-0 border-t border-[var(--el-border-color-lighter)]"
         >
-          <!-- 名片预览：和聊天里的名片气泡同源（浅卡片 + 「个人名片」分隔条） -->
-          <div
-            class="flex flex-col w-full rounded-md overflow-hidden bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
-          >
-            <div class="flex gap-2.5 items-center px-3 py-2.5">
-              <UserAvatar
-                :id="user?.id"
-                :url="user?.avatar"
-                :name="user?.nickname"
-                :size="36"
-                :clickable="false"
-              />
-              <div
-                class="flex-1 min-w-0 text-sm font-medium truncate text-[var(--el-text-color-primary)]"
-              >
-                {{ user?.nickname }}
-              </div>
-            </div>
-            <div
-              class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
-            >
-              个人名片
-            </div>
-          </div>
+          <CardBubble v-if="target" :card="target" />
 
           <!-- 留言（单行）：右侧表情按钮触发 FacePicker(mode=emoji)，所选 emoji 直接拼接到输入末尾 -->
           <div class="relative">
@@ -192,21 +169,22 @@ import { computed, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
+import CardBubble from '@/views/im/home/components/card/CardBubble.vue'
 import UserAvatar from './UserAvatar.vue'
 import FacePicker from '../../pages/conversation/components/input/FacePicker.vue'
 import { useConversationStore } from '../../store/conversationStore'
 import { useMessageSender } from '../../composables/useMessageSender'
-import { ImConversationType, ImMessageType } from '../../../utils/constants'
+import { ImMessageType, isGroupConversation } from '../../../utils/constants'
 import { filterConversationsByKeyword, getConversationKey } from '../../../utils/conversation'
-import { serializeMessage, type CardMessage } from '../../../utils/message'
-import type { Conversation, User } from '../../types'
+import { serializeMessage, type CardMessage, type CardTarget } from '../../../utils/message'
+import type { Conversation } from '../../types'
 
 defineOptions({ name: 'ImRecommendCardDialog' })
 
 const props = defineProps<{
   modelValue: boolean
-  /** 被推荐的用户名片：触发方传入；为 null 时不渲染（弹窗也不应被打开） */
-  user: User | null
+  /** 被推荐的名片对象（用户 / 群通用）；为 null 时不渲染（弹窗也不应被打开） */
+  target: CardTarget | null
 }>()
 
 const emit = defineEmits<{
@@ -222,6 +200,11 @@ const visible = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value)
 })
+
+/** 弹窗标题：群名片走「把这个群推荐给朋友」，否则「把他推荐给朋友」 */
+const dialogTitle = computed(() =>
+  isGroupConversation(props.target?.targetType) ? '把这个群推荐给朋友' : '把他推荐给朋友'
+)
 
 const keyword = ref('')
 const leaveMessage = ref('')
@@ -249,11 +232,14 @@ function handleEmojiSelect(emoji: string) {
   leaveMessage.value = `${leaveMessage.value}${emoji}`
 }
 
-/** 候选会话：私聊「推荐给本人」过滤掉避免无意义自推 */
+/** 候选会话：过滤掉名片对象本身的会话（同 type + 同 id）；用户名片避免自推、群名片避免推回该群 */
 const candidateConversations = computed<Conversation[]>(() => {
-  const recommendId = props.user?.id
+  const target = props.target
+  if (!target) {
+    return conversationStore.getSortedConversations
+  }
   return conversationStore.getSortedConversations.filter(
-    (c) => !(recommendId && c.type === ImConversationType.PRIVATE && c.targetId === recommendId)
+    (c) => !(c.type === target.targetType && c.targetId === target.targetId)
   )
 })
 
@@ -284,13 +270,9 @@ function handleToggle(conversation: Conversation) {
   }
 }
 
-/** 构造名片消息 content（JSON 字符串）；user 由调用方 narrow 后显式传入避免 non-null 断言 */
-function buildCardContent(user: User): string {
-  const payload: CardMessage = {
-    userId: user.id!,
-    nickname: user.nickname || '',
-    avatar: user.avatar
-  }
+/** 构造名片消息 content（JSON 字符串）；CardTarget 字段已与 CardMessage 对齐，spread 即可 */
+function buildCardContent(target: CardTarget): string {
+  const payload: CardMessage = { ...target }
   return serializeMessage(payload)
 }
 
@@ -301,25 +283,25 @@ function buildCardContent(user: User): string {
  * 失败的消息以 FAILED 状态留在对应会话气泡里，可右键重试
  */
 async function handleSend() {
-  const user = props.user
-  if (!user?.id || selectedKeys.value.length === 0) {
+  const target = props.target
+  if (!target?.targetId || selectedKeys.value.length === 0) {
     return
   }
   const targets = selectedConversations.value
-  const cardContent = buildCardContent(user)
+  const cardContent = buildCardContent(target)
   const leaveText = leaveMessage.value.trim()
   sending.value = true
   try {
-    const tasks = targets.map(async (target) => {
-      const cardOk = await sendRaw(ImMessageType.CARD, cardContent, { conversation: target })
+    const tasks = targets.map(async (conversation) => {
+      const cardOk = await sendRaw(ImMessageType.CARD, cardContent, { conversation })
       if (!cardOk) {
-        return { target, ok: false }
+        return { conversation, ok: false }
       }
-      const ok = leaveText ? await send(leaveText, { conversation: target }) : true
-      return { target, ok }
+      const ok = leaveText ? await send(leaveText, { conversation }) : true
+      return { conversation, ok }
     })
     const results = await Promise.all(tasks)
-    const failedNames = results.filter((r) => !r.ok).map((r) => r.target.name || '未命名会话')
+    const failedNames = results.filter((r) => !r.ok).map((r) => r.conversation.name || '未命名会话')
     if (failedNames.length === 0) {
       message.success('已转发')
     } else if (failedNames.length === targets.length) {

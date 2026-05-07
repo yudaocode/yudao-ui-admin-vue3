@@ -253,6 +253,19 @@
               class="im-conversation-group-side__chevron"
             />
           </div>
+          <!-- 分享群名片：弹 RecommendCardDialog，把当前群作为名片消息推荐给其他会话 -->
+          <div
+            v-if="group"
+            class="im-conversation-group-side__row im-conversation-group-side__row--clickable"
+            @click="recommendCardVisible = true"
+          >
+            <span class="im-conversation-group-side__label">分享群名片</span>
+            <Icon
+              icon="ant-design:right-outlined"
+              :size="11"
+              class="im-conversation-group-side__chevron"
+            />
+          </div>
         </div>
 
         <div class="im-conversation-group-side__spacer"></div>
@@ -395,6 +408,9 @@
 
     <!-- 进群申请列表（仅当开启审批 + 当前用户是 owner / admin 时入口可见） -->
     <GroupRequestListDialog v-model="requestListVisible" :group-id="group?.id" />
+
+    <!-- 分享群名片：把当前群作为名片消息推荐给其他会话 -->
+    <RecommendCardDialog v-model="recommendCardVisible" :target="recommendCardTarget" />
   </el-drawer>
 </template>
 
@@ -427,6 +443,8 @@ import GroupMemberSelector, {
   type GroupMemberFlag
 } from '../../../../components/group/GroupMemberSelector.vue'
 import GroupRequestListDialog from '../../../../components/group/GroupRequestListDialog.vue'
+import RecommendCardDialog from '../../../../components/user/RecommendCardDialog.vue'
+import { toGroupCardTarget } from '@/views/im/utils/message'
 import type { Conversation, FriendLite, GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
@@ -471,6 +489,10 @@ const removeVisible = ref(false)
 const adminVisible = ref(false)
 const transferOwnerVisible = ref(false)
 const requestListVisible = ref(false)
+/** 分享群名片弹窗显隐：「分享群名片」入口控制 */
+const recommendCardVisible = ref(false)
+/** 群名片源对象：targetType = GROUP，含成员数快照 */
+const recommendCardTarget = computed(() => toGroupCardTarget(props.group))
 const showAllMembers = ref(false)
 const namePopoverVisible = ref(false)
 const noticePopoverVisible = ref(false)

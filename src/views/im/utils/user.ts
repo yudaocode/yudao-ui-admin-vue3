@@ -148,6 +148,34 @@ export function getSenderRealNickname(
   return String(senderId)
 }
 
+// TODO @AI：这个方法，还需要么？之前是哪个调用的，可能要看看。
+/**
+ * 消息发送者头像；按 conversation 上下文实时查 group.members / friend / userStore
+ *
+ * - 自己：userStore.avatar
+ * - 私聊对方：friend.avatar
+ * - 群聊对方：先 member.avatar，缺则降级 friend.avatar
+ * - 查不到：返回空串，调用方走 UserAvatar 色卡兜底
+ */
+export function getSenderAvatar(
+  senderId: number,
+  conversationType: number,
+  conversationTargetId: number
+): string {
+  const userStore = useUserStore()
+  if (senderId === getCurrentUserId()) {
+    return userStore.getUser?.avatar || ''
+  }
+  if (conversationType === ImConversationType.GROUP) {
+    const group = useGroupStore().getGroup(conversationTargetId)
+    const member = group?.members?.find((m) => m.userId === senderId)
+    if (member?.avatar) {
+      return member.avatar
+    }
+  }
+  return useFriendStore().getFriend(senderId)?.avatar || ''
+}
+
 /**
  * 群广播事件（GROUP_* 系列）的中文文案
  *

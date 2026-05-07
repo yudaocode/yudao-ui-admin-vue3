@@ -252,14 +252,12 @@
                 [视频]
               </div>
 
-              <!-- 名片：人形 icon + 「个人名片：昵称」 -->
-              <div
+              <!-- 名片 -->
+              <CardLineLabel
                 v-else-if="message.type === ImMessageType.CARD"
-                class="inline-flex gap-1.5 items-center text-sm text-[var(--el-text-color-secondary)]"
-              >
-                <Icon icon="ant-design:user-outlined" :size="14" />
-                <span>个人名片：{{ cardOf(message)?.nickname || '' }}</span>
-              </div>
+                :card="cardOf(message)"
+                class="text-sm text-[var(--el-text-color-secondary)]"
+              />
 
               <!-- 表情贴图：直接渲染图片，对照微信观感 -->
               <img
@@ -709,8 +707,10 @@ function textSnippetOf(message: Message): string {
       return '[语音]'
     case ImMessageType.VIDEO:
       return '[视频]'
-    case ImMessageType.CARD:
-      return `[个人名片] ${parseMessage<CardMessage>(message.content)?.nickname ?? ''}`
+    case ImMessageType.CARD: {
+      const card = parseMessage<CardMessage>(message.content)
+      return `[${getCardLabelInfo(card).label}] ${card?.name ?? ''}`
+    }
     case ImMessageType.FACE:
       return buildFacePreviewText(faceOf(message))
     case ImMessageType.RECALL:

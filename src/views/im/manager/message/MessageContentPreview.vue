@@ -56,11 +56,8 @@
     </span>
   </span>
 
-  <!-- 名片：人形 icon + 昵称（管理后台单行预览，不渲染头像图片） -->
-  <span v-else-if="isCard && cardPayload" class="inline-flex gap-1.5 items-center">
-    <Icon icon="ant-design:user-outlined" :size="16" color="#606266" />
-    <span>个人名片：{{ cardPayload.nickname }}</span>
-  </span>
+  <!-- 名片 -->
+  <CardLineLabel v-else-if="isCard && cardPayload" :card="cardPayload" :icon-size="16" />
 
   <!-- 表情贴图：缩略图 + 表情名（无名字时仅 [表情]） -->
   <span v-else-if="isFace && facePayload" class="inline-flex gap-1.5 items-center">
@@ -121,9 +118,11 @@ import { formatFileSize } from '@/utils/file'
 import { formatSeconds } from '@/utils/formatTime'
 import {
   ImMessageType,
+  MERGE_FORWARD_PREVIEW_LINES,
   isFriendChatTip,
   isGroupNotification
 } from '@/views/im/utils/constants'
+import CardLineLabel from '@/views/im/home/components/card/CardLineLabel.vue'
 import {
   parseMessage,
   type ImageMessage,
@@ -132,13 +131,14 @@ import {
   type VideoMessage,
   type TextMessage,
   type CardMessage,
-  type FaceMessage
+  type FaceMessage,
+  type MergeMessage
 } from '@/views/im/utils/message'
 import {
   resolveFriendNotificationText,
   resolveGroupNotificationText
 } from '@/views/im/utils/user'
-import { buildFacePreviewText } from '@/views/im/utils/conversation'
+import { buildFacePreviewText, summarizeMessageContent } from '@/views/im/utils/conversation'
 
 defineOptions({ name: 'ImMessageContentPreview' })
 
@@ -159,6 +159,7 @@ const isVoice = computed(() => props.type === ImMessageType.VOICE)
 const isVideo = computed(() => props.type === ImMessageType.VIDEO)
 const isCard = computed(() => props.type === ImMessageType.CARD)
 const isFace = computed(() => props.type === ImMessageType.FACE)
+const isMerge = computed(() => props.type === ImMessageType.MERGE)
 
 /** 文本内容：从 TextMessage payload 取 .content */
 const textContent = computed(
@@ -183,6 +184,19 @@ const cardPayload = computed(() =>
 const facePayload = computed(() =>
   isFace.value ? parseMessage<FaceMessage>(props.content || '') : null
 )
+const mergePayload = computed(() =>
+  isMerge.value ? parseMessage<MergeMessage>(props.content || '') : null
+)
+
+/** 合并转发预览行：取前 N 条派生「{昵称}：{摘要}」 */
+const mergePreviewLines = computed(() => {
+  if (!mergePayload.value) {
+    return []
+  }
+  return mergePayload.value.messages
+    .slice(0, MERGE_FORWARD_PREVIEW_LINES)
+    .map((item) => `${item.senderNickname}：${summarizeMessageContent(item)}`)
+})
 
 /** 点击视频封面：在新标签打开视频 url（不在管理后台内嵌播放，避免列表里多个 video 同时占资源） */
 function openVideo() {

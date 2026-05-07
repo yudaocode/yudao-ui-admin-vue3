@@ -8,8 +8,8 @@
       :inline="true"
       label-width="80px"
     >
-      <el-form-item label="群编号" prop="groupId">
-        <el-input v-model="queryParams.groupId" placeholder="请输入群编号" clearable class="!w-240px" />
+      <el-form-item label="群" prop="groupId">
+        <GroupSelect v-model="queryParams.groupId" placeholder="请选择群" class="!w-240px" />
       </el-form-item>
       <el-form-item label="申请人" prop="userId">
         <UserSelectV2 v-model="queryParams.userId" placeholder="请选择申请人" class="!w-240px" />
@@ -141,6 +141,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as ManagerGroupRequestApi from '@/api/im/manager/group/request'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
+import GroupSelect from '@/views/im/manager/group/components/GroupSelect.vue'
 
 defineOptions({ name: 'ImGroupRequest' })
 

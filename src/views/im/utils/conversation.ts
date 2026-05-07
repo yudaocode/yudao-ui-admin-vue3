@@ -7,7 +7,14 @@
 // ====================================================================
 
 import { ImMessageType, isFriendChatTip, isGroupNotification } from './constants'
-import { parseMessage, type FaceMessage, type TextMessage } from './message'
+import {
+  getCardLabelInfo,
+  parseMessage,
+  type CardMessage,
+  type FaceMessage,
+  type FileMessage,
+  type TextMessage
+} from './message'
 import {
   getSenderDisplayName,
   resolveFriendNotificationText,
@@ -60,6 +67,43 @@ export function buildRecallTip(
   return `${senderDisplayName || '对方'} 撤回了一条消息`
 }
 
+/**
+ * 单条消息的纯文本摘要；不依赖 conversation 上下文
+ *
+ * - withFileName=true 时文件消息附带文件名（合并转发详情用）
+ * - 不处理 RECALL / 群广播 / 好友通知，由调用方包一层
+ */
+export function summarizeMessageContent(
+  message: Pick<Message, 'type' | 'content'>,
+  opts?: { withFileName?: boolean }
+): string {
+  switch (message.type) {
+    case ImMessageType.TEXT:
+      return parseMessage<TextMessage>(message.content)?.content ?? ''
+    case ImMessageType.IMAGE:
+      return '[图片]'
+    case ImMessageType.VOICE:
+      return '[语音]'
+    case ImMessageType.VIDEO:
+      return '[视频]'
+    case ImMessageType.FILE: {
+      if (opts?.withFileName) {
+        const file = parseMessage<FileMessage>(message.content)
+        return file?.name ? `[文件] ${file.name}` : '[文件]'
+      }
+      return '[文件]'
+    }
+    case ImMessageType.CARD:
+      return `[${getCardLabelInfo(parseMessage<CardMessage>(message.content)).label}]`
+    case ImMessageType.FACE:
+      return buildFacePreviewText(parseMessage<FaceMessage>(message.content))
+    case ImMessageType.MERGE:
+      return '[聊天记录]'
+    default:
+      return ''
+  }
+}
+
 /** 会话列表最后一条摘要：RECALL 走 buildRecallTip + fallbackName；其它按消息类型派生 */
 export function resolveConversationLastContent(
   message: Message,
@@ -67,36 +111,20 @@ export function resolveConversationLastContent(
   conversationTargetId: number,
   fallbackName?: string
 ): string {
-  switch (message.type) {
-    case ImMessageType.IMAGE:
-      return '[图片]'
-    case ImMessageType.FILE:
-      return '[文件]'
-    case ImMessageType.VOICE:
-      return '[语音]'
-    case ImMessageType.VIDEO:
-      return '[视频]'
-    case ImMessageType.CARD:
-      return '[个人名片]'
-    case ImMessageType.FACE:
-      return buildFacePreviewText(parseMessage<FaceMessage>(message.content))
-    case ImMessageType.RECALL:
-      return buildRecallTip(
-        message.senderId,
-        message.selfSend,
-        conversationType,
-        conversationTargetId,
-        fallbackName
-      )
-    case ImMessageType.TEXT:
-      return parseMessage<TextMessage>(message.content)?.content ?? ''
-    default:
-      if (isFriendChatTip(message.type)) {
-        return resolveFriendNotificationText(message)
-      }
-      if (isGroupNotification(message.type)) {
-        return resolveGroupNotificationText(message)
-      }
-      return parseMessage<TextMessage>(message.content)?.content ?? ''
+  if (message.type === ImMessageType.RECALL) {
+    return buildRecallTip(
+      message.senderId,
+      message.selfSend,
+      conversationType,
+      conversationTargetId,
+      fallbackName
+    )
   }
+  if (isFriendChatTip(message.type)) {
+    return resolveFriendNotificationText(message)
+  }
+  if (isGroupNotification(message.type)) {
+    return resolveGroupNotificationText(message)
+  }
+  return summarizeMessageContent(message)
 }

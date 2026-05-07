@@ -179,7 +179,7 @@
     />
 
     <!-- 把他推荐给朋友弹窗：仅 friend 态下出现入口 -->
-    <RecommendCardDialog v-model="recommendVisible" :user="full" />
+    <RecommendCardDialog v-model="recommendVisible" :target="recommendTarget" />
   </div>
 </template>
 
@@ -195,6 +195,7 @@ import RecommendCardDialog from './RecommendCardDialog.vue'
 import { getSimpleUser, type UserVO } from '@/api/system/user'
 import { useFriendStore } from '../../store/friendStore'
 import { ImFriendAddSource } from '../../../utils/constants'
+import { toUserCardTarget } from '../../../utils/message'
 import { getGenderColor, getGenderIcon } from '../../../utils/user'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -353,6 +354,8 @@ const presetUserForAdd = ref<UserVO | null>(null)
 
 /** 把他推荐给朋友：弹 RecommendCardDialog 选目标会话 */
 const recommendVisible = ref(false) // 推荐名片弹窗显隐：「把他推荐给朋友」入口控制
+/** 推荐名片源对象：用户名片（targetType = PRIVATE），从 full 派生 */
+const recommendTarget = computed(() => toUserCardTarget(full.value))
 function handleRecommend() {
   if (!props.user?.id) {
     return
