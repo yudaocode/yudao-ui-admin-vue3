@@ -26,8 +26,10 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, watch } from 'vue'
+import { onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 
+import { useAppStore } from '@/store/modules/app'
 import { useConversationStore } from './store/conversationStore'
 import { useImWebSocketStore } from './store/websocketStore'
 import { useFriendStore } from './store/friendStore'
@@ -48,6 +50,8 @@ import ContextMenu from './components/ContextMenu.vue'
 
 defineOptions({ name: 'ImIndex' })
 
+const route = useRoute()
+const appStore = useAppStore()
 const conversationStore = useConversationStore()
 const webSocketStore = useImWebSocketStore()
 const friendStore = useFriendStore()
@@ -169,5 +173,22 @@ watch(
       void syncPrivateReadStatus(targetId)
     }
   }
+)
+
+/**
+ * 浏览器标签 title 拼上未读数前缀；例：(63条未读)芋道源码
+ *
+ * 路由切换时 router.afterEach 会调 useTitle 重置 title；用 nextTick 排在它之后再覆盖
+ * 一并监听 route.fullPath，IM 子路由切换（消息 / 通讯录）也能重新加上前缀
+ */
+watch(
+  [() => conversationStore.getTotalUnread, () => route.fullPath],
+  ([count]) => {
+    nextTick(() => {
+      const base = appStore.getTitle
+      document.title = count > 0 ? `(${count > 99 ? '99+' : count}条未读)${base}` : base
+    })
+  },
+  { immediate: true }
 )
 </script>
