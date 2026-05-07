@@ -3,7 +3,7 @@
     IM 外层容器：聊天模块的全屏沉浸式壳
     - 左侧 ToolBar：头像 + 三 Tab（消息/好友/群聊）+ 底部设置
     - 右侧 <router-view>：按路由渲染 MessagePage / FriendPage / GroupPage
-    - 挂载全局弹层：UserInfoCard / ContextMenu
+    - 挂载全局弹层：UserInfoCard / GroupInfoCard / ContextMenu
   -->
   <div class="flex w-full h-full overflow-hidden">
     <ToolBar />
@@ -20,6 +20,7 @@
 
     <!-- 全局弹层：由 useImUiStore 统一调度 -->
     <UserInfoCard />
+    <GroupInfoCard />
     <ContextMenu />
   </div>
 </template>
@@ -41,6 +42,7 @@ import { StorageKeys } from '../utils/storage'
 import type { Conversation } from './types'
 import ToolBar from './components/ToolBar.vue'
 import UserInfoCard from './components/user/UserInfoCard.vue'
+import GroupInfoCard from './components/group/GroupInfoCard.vue'
 import ContextMenu from './components/ContextMenu.vue'
 
 defineOptions({ name: 'ImIndex' })

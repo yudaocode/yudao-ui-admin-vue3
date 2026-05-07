@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia'
 import { reactive } from 'vue'
 
 import { ImFriendAddSource } from '../../utils/constants'
-import type { User } from '../types'
+import type { GroupLite, User } from '../types'
 
 /**
  * IM 全局 UI store
@@ -56,6 +56,29 @@ export const useImUiStore = defineStore('imUiStore', () => {
     userInfoCard.show = false
   }
 
+  // ==================== 群名片 GroupInfoCard ====================
+
+  const groupInfoCard = reactive({
+    show: false,
+    group: null as GroupLite | null,
+    position: { x: 0, y: 0 }
+  })
+
+  /** 鼠标点击位置 + 20px 横向偏移打开群名片，对齐 UserInfoCard 的统一观感 */
+  function openGroupInfoCardAtEvent(group: GroupLite, e: MouseEvent) {
+    const viewportWidth = document.documentElement.clientWidth
+    const viewportHeight = document.documentElement.clientHeight
+    groupInfoCard.group = group
+    groupInfoCard.position.x = Math.min(e.clientX + 20, viewportWidth - 350)
+    groupInfoCard.position.y = Math.min(e.clientY, viewportHeight - 220)
+    groupInfoCard.show = true
+  }
+
+  /** 关闭群名片 */
+  function closeGroupInfoCard() {
+    groupInfoCard.show = false
+  }
+
   // ==================== 右键菜单 ContextMenu ====================
   // 右键菜单虽然是一个组件挂在主壳上，但其触发时机分散在各列表
   interface ContextMenuItem {
@@ -98,6 +121,10 @@ export const useImUiStore = defineStore('imUiStore', () => {
     openUserInfoCard,
     openUserInfoCardAtEvent,
     closeUserInfoCard,
+
+    groupInfoCard,
+    openGroupInfoCardAtEvent,
+    closeGroupInfoCard,
 
     contextMenu,
     openContextMenu,
