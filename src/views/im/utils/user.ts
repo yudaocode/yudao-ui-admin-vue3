@@ -10,8 +10,16 @@
 // ====================================================================
 
 import { useUserStore } from '@/store/modules/user'
+import { SystemUserSexEnum } from '@/utils/constants'
 import { ImConversationType, ImMessageType } from './constants'
 import { getCurrentUserId } from './storage'
+import {
+  joinMentionSegments,
+  segmentsToText,
+  tipMention,
+  tipText,
+  type TipSegment
+} from './message'
 import { useFriendStore } from '../home/store/friendStore'
 import { useGroupStore } from '../home/store/groupStore'
 import type { Friend, Group } from '../home/types'
@@ -222,100 +230,148 @@ export type GroupNotificationPayload = {
   }
 }
 
+/**
+ * 群广播事件 segments
+ *
+ * resolveName 默认走 getSenderDisplayName，可注入自定义 resolver；
+ * operatorNameOverride 仅覆盖 operator 段文案，mention userId 仍用 payload.operatorUserId
+ */
+export function resolveGroupNotificationSegments(
+  message: { type?: number; content?: string; targetId?: number },
+  resolveName?: (userId: number) => string,
+  operatorNameOverride?: string
+): TipSegment[] {
+  let payload: GroupNotificationPayload = {}
+  try {
+    payload = JSON.parse(message.content || '{}')
+  } catch {
+    return []
+  }
+  const resolve =
+    resolveName ||
+    ((id: number) => getSenderDisplayName(id, ImConversationType.GROUP, message.targetId ?? 0))
+
+  // ENTER 主语是 entrant 而非 operator，独立处理；其它 case 都以 operatorUserId 为主语
+  if (message.type === ImMessageType.GROUP_MEMBER_ENTER) {
+    const entrantId = payload.entrantUserId ?? payload.operatorUserId
+    return entrantId ? [tipMention(entrantId, resolve(entrantId)), tipText(' 加入了群聊')] : []
+  }
+  if (!payload.operatorUserId) {
+    return []
+  }
+  const operatorSegment = tipMention(
+    payload.operatorUserId,
+    operatorNameOverride ?? resolve(payload.operatorUserId)
+  )
+  const memberSegments = joinMentionSegments(payload.memberUserIds || [], '、', resolve)
+
+  switch (message.type) {
+    case ImMessageType.GROUP_CREATE:
+      return [operatorSegment, tipText(' 创建了群聊')]
+    case ImMessageType.GROUP_NAME_UPDATE:
+      return [operatorSegment, tipText(` 将群名修改为 "${payload.newName ?? ''}"`)]
+    case ImMessageType.GROUP_NOTICE_UPDATE:
+      return [operatorSegment, tipText(' 更新了群公告')]
+    case ImMessageType.GROUP_INFO_UPDATE:
+      return payload.newAvatar
+        ? [operatorSegment, tipText(' 更换了群头像')]
+        : [operatorSegment, tipText(' 更新了群信息')]
+    case ImMessageType.GROUP_DISSOLVE:
+      return [operatorSegment, tipText(' 解散了群聊')]
+    case ImMessageType.GROUP_MEMBER_INVITE:
+      return [operatorSegment, tipText(' 邀请 '), ...memberSegments, tipText(' 加入群聊')]
+    case ImMessageType.GROUP_MEMBER_QUIT:
+      return [operatorSegment, tipText(' 退出了群聊')]
+    case ImMessageType.GROUP_MEMBER_KICK:
+      return [operatorSegment, tipText(' 移出了 '), ...memberSegments]
+    case ImMessageType.GROUP_MEMBER_NICKNAME_UPDATE:
+      return [operatorSegment, tipText(` 修改群昵称为 "${payload.displayUserName ?? ''}"`)]
+    case ImMessageType.GROUP_ADMIN_ADD:
+      return [operatorSegment, tipText(' 将 '), ...memberSegments, tipText(' 设为管理员')]
+    case ImMessageType.GROUP_ADMIN_REMOVE:
+      return [
+        operatorSegment,
+        tipText(' 撤销了 '),
+        ...memberSegments,
+        tipText(' 的管理员身份')
+      ]
+    case ImMessageType.GROUP_OWNER_TRANSFER:
+      return payload.newOwnerUserId
+        ? [
+            operatorSegment,
+            tipText(' 已将群主转让给 '),
+            tipMention(payload.newOwnerUserId, resolve(payload.newOwnerUserId))
+          ]
+        : []
+    case ImMessageType.GROUP_MESSAGE_PIN:
+      return [operatorSegment, tipText(' 置顶了一条消息')]
+    case ImMessageType.GROUP_MESSAGE_UNPIN:
+      return [operatorSegment, tipText(' 取消了一条置顶消息')]
+    case ImMessageType.GROUP_MEMBER_MUTED:
+      return payload.mutedUserId
+        ? [
+            operatorSegment,
+            tipText(' 将 '),
+            tipMention(payload.mutedUserId, resolve(payload.mutedUserId)),
+            tipText(' 禁言')
+          ]
+        : []
+    case ImMessageType.GROUP_MEMBER_CANCEL_MUTED:
+      return payload.mutedUserId
+        ? [
+            operatorSegment,
+            tipText(' 解除了 '),
+            tipMention(payload.mutedUserId, resolve(payload.mutedUserId)),
+            tipText(' 的禁言')
+          ]
+        : []
+    case ImMessageType.GROUP_MUTED:
+      return [operatorSegment, tipText(' 开启了全群禁言')]
+    case ImMessageType.GROUP_CANCEL_MUTED:
+      return [operatorSegment, tipText(' 关闭了全群禁言')]
+    case ImMessageType.GROUP_BANNED:
+      return [operatorSegment, tipText(payload.banned ? ' 封禁了该群' : ' 解封了该群')]
+    default:
+      return []
+  }
+}
+
+/** 群广播事件中文文案 */
 export function resolveGroupNotificationText(
   message: { type?: number; content?: string; targetId?: number },
   resolveName?: (userId: number) => string,
   operatorNameOverride?: string
 ): string {
-  let payload: GroupNotificationPayload = {}
-  try {
-    payload = JSON.parse(message.content || '{}')
-  } catch {
-    return ''
-  }
-  const resolve =
-    resolveName ||
-    ((id: number) => getSenderDisplayName(id, ImConversationType.GROUP, message.targetId ?? 0))
-  const operatorName = payload.operatorUserId
-    ? (operatorNameOverride ?? resolve(payload.operatorUserId))
-    : ''
-  const memberNames = (payload.memberUserIds || []).map(resolve).join('、')
-  const newOwnerName = payload.newOwnerUserId ? resolve(payload.newOwnerUserId) : ''
+  return segmentsToText(
+    resolveGroupNotificationSegments(message, resolveName, operatorNameOverride)
+  )
+}
+
+/** 会话内好友事件 segments */
+export function resolveFriendNotificationSegments(message: {
+  type?: number
+}): TipSegment[] {
   switch (message.type) {
-    case ImMessageType.GROUP_CREATE:
-      return `${operatorName} 创建了群聊`
-    case ImMessageType.GROUP_NAME_UPDATE:
-      return `${operatorName} 将群名修改为 "${payload.newName ?? ''}"`
-    case ImMessageType.GROUP_NOTICE_UPDATE:
-      return `${operatorName} 更新了群公告`
-    case ImMessageType.GROUP_INFO_UPDATE:
-      // 兜底事件：按非 null 字段优先匹配特化文案，全部为空时降级为 "更新了群信息" 通用文案
-      if (payload.newAvatar) {
-        return `${operatorName} 更换了群头像`
-      }
-      return `${operatorName} 更新了群信息`
-    case ImMessageType.GROUP_DISSOLVE:
-      return `${operatorName} 解散了群聊`
-    case ImMessageType.GROUP_MEMBER_INVITE:
-      return `${operatorName} 邀请 ${memberNames} 加入群聊`
-    case ImMessageType.GROUP_MEMBER_ENTER: {
-      // 自由进群 / 主动申请通过：操作人 = 进群者；文案统一展示「XX 加入了群聊」
-      const entrantName = payload.entrantUserId ? resolve(payload.entrantUserId) : operatorName
-      return `${entrantName} 加入了群聊`
-    }
-    case ImMessageType.GROUP_MEMBER_QUIT:
-      return `${operatorName} 退出了群聊`
-    case ImMessageType.GROUP_MEMBER_KICK:
-      return `${operatorName} 移出了 ${memberNames}`
-    case ImMessageType.GROUP_MEMBER_NICKNAME_UPDATE:
-      return `${operatorName} 修改群昵称为 "${payload.displayUserName ?? ''}"`
-    case ImMessageType.GROUP_ADMIN_ADD:
-      return `${operatorName} 将 ${memberNames} 设为管理员`
-    case ImMessageType.GROUP_ADMIN_REMOVE:
-      return `${operatorName} 撤销了 ${memberNames} 的管理员身份`
-    case ImMessageType.GROUP_OWNER_TRANSFER:
-      return `${operatorName} 已将群主转让给 ${newOwnerName}`
-    case ImMessageType.GROUP_MESSAGE_PIN:
-      return `${operatorName} 置顶了一条消息`
-    case ImMessageType.GROUP_MESSAGE_UNPIN:
-      return `${operatorName} 取消了一条置顶消息`
-    case ImMessageType.GROUP_MEMBER_MUTED: {
-      const mutedName = payload.mutedUserId ? resolve(payload.mutedUserId) : ''
-      return `${operatorName} 将 ${mutedName} 禁言`
-    }
-    case ImMessageType.GROUP_MEMBER_CANCEL_MUTED: {
-      const mutedName = payload.mutedUserId ? resolve(payload.mutedUserId) : ''
-      return `${operatorName} 解除了 ${mutedName} 的禁言`
-    }
-    case ImMessageType.GROUP_MUTED:
-      return `${operatorName} 开启了全群禁言`
-    case ImMessageType.GROUP_CANCEL_MUTED:
-      return `${operatorName} 关闭了全群禁言`
-    case ImMessageType.GROUP_BANNED:
-      return payload.banned ? `${operatorName} 封禁了该群` : `${operatorName} 解封了该群`
+    case ImMessageType.FRIEND_ADD:
+      return [tipText('你们已经是好友了，开始聊天吧')]
+    case ImMessageType.FRIEND_DELETE:
+      return [tipText('你已删除好友')]
     default:
-      return ''
+      return []
   }
 }
 
 /** 会话内好友事件文案：FRIEND_ADD / FRIEND_DELETE 渲染成灰色提示气泡，文案固定不依赖 payload */
 export function resolveFriendNotificationText(message: { type?: number }): string {
-  switch (message.type) {
-    case ImMessageType.FRIEND_ADD:
-      return '你们已经是好友了，开始聊天吧'
-    case ImMessageType.FRIEND_DELETE:
-      return '你已删除好友'
-    default:
-      return ''
-  }
+  return segmentsToText(resolveFriendNotificationSegments(message))
 }
 
-/** 性别图标：男 1 / 女 2，0 / null / undefined 一律不展示，对齐微信留白 */
+/** 性别图标；UNKNOWN / null / undefined 一律不展示，对齐微信留白 */
 export function getGenderIcon(sex?: number): string {
-  if (sex === 1) {
+  if (sex === SystemUserSexEnum.MALE) {
     return 'mdi:human-male'
   }
-  if (sex === 2) {
+  if (sex === SystemUserSexEnum.FEMALE) {
     return 'mdi:human-female'
   }
   return ''
@@ -323,10 +379,10 @@ export function getGenderIcon(sex?: number): string {
 
 /** 性别图标主题色：男蓝、女粉 */
 export function getGenderColor(sex?: number): string {
-  if (sex === 1) {
+  if (sex === SystemUserSexEnum.MALE) {
     return '#5b97f5'
   }
-  if (sex === 2) {
+  if (sex === SystemUserSexEnum.FEMALE) {
     return '#f56c92'
   }
   return ''

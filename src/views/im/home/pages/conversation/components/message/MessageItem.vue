@@ -12,23 +12,23 @@
     v-if="isFriendChatTipMessage"
     class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-secondary)]"
   >
-    {{ friendChatTipText }}
+    <TipSegments :segments="friendChatTipSegments" />
   </div>
 
-  <!-- 群广播事件：跟好友事件同灰色样式，文案按 type 拼装 -->
+  <!-- 群广播事件：跟好友事件同灰色样式，mention 段挂点击弹 UserInfoCard -->
   <div
     v-else-if="isGroupNotificationMessage"
     class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-secondary)]"
   >
-    {{ groupNotificationText }}
+    <TipSegments :segments="groupNotificationSegments" />
   </div>
 
-  <!-- 撤回消息：整行展示灰色 tip 文案 -->
+  <!-- 撤回消息：整行灰色 tip，sender 名段可点击 -->
   <div
     v-else-if="isRecall"
     class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-secondary)]"
   >
-    {{ recallTip }}
+    <TipSegments :segments="recallTipSegments" />
   </div>
 
   <!-- 普通消息气泡 -->
@@ -149,6 +149,7 @@
 
 <script lang="ts" setup>
 import { computed, inject } from 'vue'
+import { useClipboard } from '@vueuse/core'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { ElMessageBox } from 'element-plus'
@@ -173,9 +174,11 @@ import {
   buildQuoteFromMessage,
   extractAddableFace,
   getQuoteFromMessage,
-  type CardMessage
+  parseMessage,
+  type CardMessage,
+  type TextMessage
 } from '@/views/im/utils/message'
-import { buildRecallTip } from '@/views/im/utils/conversation'
+import { buildRecallTipSegments } from '@/views/im/utils/conversation'
 import { formatTimeTip } from '@/views/im/utils/time'
 import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../../../../store/conversationStore'
@@ -187,8 +190,8 @@ import {
   getMemberDisplayName,
   getSenderDisplayName,
   getSenderRealNickname,
-  resolveFriendNotificationText,
-  resolveGroupNotificationText
+  resolveFriendNotificationSegments,
+  resolveGroupNotificationSegments
 } from '@/views/im/utils/user'
 import { useImUiStore } from '../../../../store/uiStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
@@ -197,6 +200,7 @@ import { useMuteOverlay } from '../../../../composables/useMuteOverlay'
 import type { Message } from '../../../../types'
 import MessageReadStatus from './MessageReadStatus.vue'
 import ReplyPreview from './ReplyPreview.vue'
+import TipSegments from './TipSegments.vue'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
 import MessageBubble from './MessageBubble.vue'
 import { IM_FORWARD_DIALOG_KEY, IM_MERGE_DETAIL_DIALOG_KEY } from './forward/keys'
@@ -234,6 +238,8 @@ const { uploadAndSendMedia } = useMediaUploader()
 const muteOverlay = useMuteOverlay()
 // 仅用 confirm，避免 message 跟 props.message 同名冲突（vue/no-dupe-keys）
 const { confirm: confirmDialog, success: successMessage } = useMessage()
+// legacy:true 兼容 HTTP 环境，没有 navigator.clipboard 时降级到 execCommand
+const { copy: copyToClipboard } = useClipboard({ legacy: true })
 
 // ==================== 消息类型判断 ====================
 
@@ -259,10 +265,10 @@ const isMerge = computed(() => props.message.type === ImMessageType.MERGE)
 /** 是否已撤回：pull / WS 两路都会调 recallMessage 把原消息更新为 type=RECALL，渲染只需识别 type */
 const isRecall = computed(() => props.message.type === ImMessageType.RECALL)
 
-/** 撤回提示文案：buildRecallTip 实时算 sender 名（按 conversation 上下文走 WeChat 优先级） */
-const recallTip = computed(() => {
+/** 撤回提示 segments：依赖 activeConversation 实时算 sender 名 */
+const recallTipSegments = computed(() => {
   const conversation = conversationStore.activeConversation
-  return buildRecallTip(
+  return buildRecallTipSegments(
     props.message.senderId,
     props.message.selfSend,
     conversation?.type ?? 0,
@@ -273,14 +279,14 @@ const recallTip = computed(() => {
 /** 是否会话内好友事件气泡（FRIEND_ADD / FRIEND_DELETE） */
 const isFriendChatTipMessage = computed(() => isFriendChatTip(props.message.type))
 
-/** 好友事件文案：FRIEND_ADD / FRIEND_DELETE 渲染成灰色提示，文案固定 */
-const friendChatTipText = computed(() => resolveFriendNotificationText(props.message))
+/** 好友事件 segments */
+const friendChatTipSegments = computed(() => resolveFriendNotificationSegments(props.message))
 
 /** 是否群广播事件（GROUP_CREATE..GROUP_BANNED 段位，排除 GROUP_MEMBER_SETTING_UPDATE 个人信号） */
 const isGroupNotificationMessage = computed(() => isGroupNotification(props.message.type))
 
-/** 群广播事件文案：按 type 拼装（成员加入 / 退群 / 公告变更等） */
-const groupNotificationText = computed(() => resolveGroupNotificationText(props.message))
+/** 群广播事件 segments */
+const groupNotificationSegments = computed(() => resolveGroupNotificationSegments(props.message))
 
 // ==================== 消息内容解析 / payload ====================
 
@@ -446,6 +452,7 @@ const isAtMe = computed(() => {
 
 /** 右键菜单 key 常量；push 端和分发端从同一处取，typo 编译期就能抓 */
 const MENU_KEYS = {
+  COPY: 'COPY',
   REPLY: 'REPLY',
   FORWARD: 'FORWARD',
   MULTI_SELECT: 'MULTI_SELECT',
@@ -489,6 +496,14 @@ async function handleContextMenu(e: MouseEvent) {
     danger?: boolean
     icon?: string
   }> = []
+  // 「复制」：仅文本消息支持；放在第一项，对齐微信桌面右键习惯
+  if (props.message.type === ImMessageType.TEXT) {
+    items.push({
+      key: MENU_KEYS.COPY,
+      name: '复制',
+      icon: 'ant-design:copy-outlined'
+    })
+  }
   // 「引用」：已落库（id≠0）+ 未撤回 + 非合并转发；MERGE 内嵌快照在引用预览里无法降级展示
   if (!!props.message.id && !isRecall.value && !isMerge.value) {
     items.push({
@@ -584,6 +599,7 @@ async function handleContextMenu(e: MouseEvent) {
 
   // 把菜单渲染交给全局 uiStore（单例，避免每条消息都挂一份菜单 DOM）
   const menuHandlers: Record<MenuKey, () => void | Promise<void>> = {
+    [MENU_KEYS.COPY]: handleCopy,
     [MENU_KEYS.REPLY]: handleReply,
     [MENU_KEYS.FORWARD]: handleForward,
     [MENU_KEYS.MULTI_SELECT]: handleEnterMultiSelect,
@@ -705,6 +721,16 @@ async function handlePin() {
     await apiPinGroupMessage({ groupId: group.id, messageId: props.message.id })
     successMessage('已置顶')
   } catch {}
+}
+
+/** 复制文本消息：解出 content 字段写入剪贴板，提示「内容已复制到剪贴板」 */
+async function handleCopy() {
+  const text = parseMessage<TextMessage>(props.message.content)?.content
+  if (!text) {
+    return
+  }
+  await copyToClipboard(text)
+  successMessage('内容已复制到剪贴板')
 }
 
 /** 进入引用模式：把当前消息构造成 QuoteMessage 写入 draftStore，MessageInput 顶部引用条响应式出现 */

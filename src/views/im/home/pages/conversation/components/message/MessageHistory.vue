@@ -139,25 +139,22 @@
 
       <!-- 消息列表 -->
       <div class="flex-1 overflow-y-auto">
-        <template
-          v-for="message in currentList"
-          :key="message.id || message.clientMessageId"
-        >
+        <template v-for="message in currentList" :key="message.id || message.clientMessageId">
           <!-- 好友会话事件（FRIEND_ADD / FRIEND_DELETE）：居中灰色，不挂头像 / sender，
                跟主聊天面板里 MessageItem 的渲染语义对齐 -->
           <div
             v-if="isFriendChatTip(message.type)"
             class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
           >
-            {{ resolveFriendNotificationText(message) }}
+            <TipSegments :segments="resolveFriendNotificationSegments(message)" />
           </div>
 
-          <!-- 群广播事件文案：跟好友事件同灰色样式 -->
+          <!-- 群广播事件：跟好友事件同灰色样式，mention 段挂点击弹 UserInfoCard -->
           <div
             v-else-if="isGroupNotification(message.type)"
             class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
           >
-            {{ resolveGroupNotificationText(message) }}
+            <TipSegments :segments="resolveGroupNotificationSegments(message)" />
           </div>
 
           <!-- 普通消息行 -->
@@ -194,12 +191,12 @@
               </div>
 
               <div class="mt-1.5">
-                <!-- 撤回：单独走灰色 tip 文案，不渲染气泡 -->
+                <!-- 撤回：单独走灰色 tip，sender 名段可点击 -->
                 <div
                   v-if="message.type === ImMessageType.RECALL"
                   class="text-sm italic text-[var(--el-text-color-secondary)]"
                 >
-                  {{ recallTipOf(message) }}
+                  <TipSegments :segments="recallTipSegmentsOf(message)" />
                 </div>
                 <!-- 其它类型走 MessageBubble 复用主聊天气泡 -->
                 <MessageBubble
@@ -256,10 +253,15 @@ import {
   getMemberDisplayName,
   getSenderDisplayName,
   getSenderRealNickname,
+  resolveFriendNotificationSegments,
   resolveFriendNotificationText,
-  resolveGroupNotificationText
+  resolveGroupNotificationSegments
 } from '@/views/im/utils/user'
-import { buildFacePreviewText, buildRecallTip } from '@/views/im/utils/conversation'
+import {
+  buildFacePreviewText,
+  buildRecallTip,
+  buildRecallTipSegments
+} from '@/views/im/utils/conversation'
 import { useMessagePuller } from '@/views/im/home/composables/useMessagePuller'
 import { useVoicePlayer } from '@/views/im/home/composables/useVoicePlayer'
 import {
@@ -281,6 +283,7 @@ import type { Message } from '@/views/im/home/types'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
 import MessageBubble from './MessageBubble.vue'
 import GroupMember, { type GroupMemberLite } from '../../../../components/group/GroupMember.vue'
+import TipSegments from './TipSegments.vue'
 
 defineOptions({ name: 'ImMessageHistory' })
 
@@ -332,7 +335,17 @@ function senderRealNicknameOf(message: Message): string {
 function recallTipOf(message: Message): string {
   return buildRecallTip(
     message.senderId,
-    !!message.selfSend,
+    message.selfSend,
+    conversation.value?.type ?? 0,
+    conversation.value?.targetId ?? 0
+  )
+}
+
+/** 单条撤回消息的 tip segments：sender 名段挂可点击 mention */
+function recallTipSegmentsOf(message: Message) {
+  return buildRecallTipSegments(
+    message.senderId,
+    message.selfSend,
     conversation.value?.type ?? 0,
     conversation.value?.targetId ?? 0
   )
@@ -392,7 +405,11 @@ const filterChipLabel = computed(() => {
 
 /** 点 tab 落筛选；同 kind 重复点击 → 当 toggle 关掉（避免迷惑） */
 function setFilter(filter: ActiveFilter) {
-  if (activeFilter.value?.kind === filter.kind && filter.kind !== 'date' && filter.kind !== 'member') {
+  if (
+    activeFilter.value?.kind === filter.kind &&
+    filter.kind !== 'date' &&
+    filter.kind !== 'member'
+  ) {
     activeFilter.value = null
     return
   }
@@ -552,11 +569,7 @@ async function loadEarlier() {
     }
     // 4. 合并到 conversationStore：prependMessages 内部去重 + 升序合并 + 落 IndexedDB；
     //    主聊天面板的 messages 是同一份引用，老消息也会一起出现在主面板里（符合预期）
-    conversationStore.prependMessages(
-      conversation.value.type,
-      conversation.value.targetId,
-      earlier
-    )
+    conversationStore.prependMessages(conversation.value.type, conversation.value.targetId, earlier)
   } finally {
     loadingMore.value = false
   }
@@ -599,9 +612,7 @@ function getAvatar(message: Message): string {
   }
   if (isGroup.value) {
     const group = groupStore.getGroup(conversation.value.targetId)
-    return (
-      group?.members?.find((member) => member.userId === message.senderId)?.avatar || ''
-    )
+    return group?.members?.find((member) => member.userId === message.senderId)?.avatar || ''
   }
   return conversation.value.avatar || ''
 }
@@ -650,7 +661,6 @@ function locateMessage(messageId: number) {
   emit('locate', messageId)
   visible.value = false
 }
-
 </script>
 
 <style scoped>

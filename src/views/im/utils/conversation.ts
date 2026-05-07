@@ -10,10 +10,14 @@ import { ImMessageType, isFriendChatTip, isGroupNotification } from './constants
 import {
   getCardLabelInfo,
   parseMessage,
+  segmentsToText,
+  tipMention,
+  tipText,
   type CardMessage,
   type FaceMessage,
   type FileMessage,
-  type TextMessage
+  type TextMessage,
+  type TipSegment
 } from './message'
 import {
   getSenderDisplayName,
@@ -47,6 +51,36 @@ export function buildFacePreviewText(facePayload: { name?: string } | null | und
   return facePayload?.name ? `[表情] ${facePayload.name}` : '[表情]'
 }
 
+/**
+ * 撤回提示 segments
+ *
+ * senderId 缺失时不挂 mention 段，避免点出错号；算不出真名降级为「对方」纯文本
+ */
+export function buildRecallTipSegments(
+  senderId: number,
+  selfSend: boolean,
+  conversationType: number,
+  conversationTargetId: number,
+  fallbackName?: string
+): TipSegment[] {
+  if (selfSend) {
+    return [tipText('你撤回了一条消息')]
+  }
+  const senderDisplayName = getSenderDisplayName(
+    senderId,
+    conversationType,
+    conversationTargetId,
+    fallbackName
+  )
+  if (!senderId) {
+    return [tipText(`${senderDisplayName || '对方'} 撤回了一条消息`)]
+  }
+  return [
+    tipMention(senderId, senderDisplayName || '对方'),
+    tipText(' 撤回了一条消息')
+  ]
+}
+
 /** 撤回提示文案：自己撤回固定文案，对方撤回带 sender 名（实时算 + fallbackName 兜底） */
 export function buildRecallTip(
   senderId: number,
@@ -55,16 +89,9 @@ export function buildRecallTip(
   conversationTargetId: number,
   fallbackName?: string
 ): string {
-  if (selfSend) {
-    return '你撤回了一条消息'
-  }
-  const senderDisplayName = getSenderDisplayName(
-    senderId,
-    conversationType,
-    conversationTargetId,
-    fallbackName
+  return segmentsToText(
+    buildRecallTipSegments(senderId, selfSend, conversationType, conversationTargetId, fallbackName)
   )
-  return `${senderDisplayName || '对方'} 撤回了一条消息`
 }
 
 /**

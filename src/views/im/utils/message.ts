@@ -22,6 +22,41 @@ export const generateClientMessageId = (): string => {
   return generateUUID()
 }
 
+// ==================== Tip 片段（灰条文案渲染用） ====================
+// 把"XX 邀请 YY 加入群聊""XX 撤回了一条消息"等 tip 文案拆成 segment 数组，
+// mention 段携带 userId，渲染层据此挂点击事件弹 UserInfoCard。
+
+export type TipSegment =
+  | { type: 'text'; text: string }
+  | { type: 'mention'; userId: number; text: string }
+
+export const tipText = (text: string): TipSegment => ({ type: 'text', text })
+
+export const tipMention = (userId: number, text: string): TipSegment => ({
+  type: 'mention',
+  userId,
+  text
+})
+
+export const segmentsToText = (segments: TipSegment[]): string =>
+  segments.map((s) => s.text).join('')
+
+/** 多个 userId 用同一个分隔符插值成 segments，每个 user 单独成 mention 段 */
+export function joinMentionSegments(
+  userIds: number[],
+  separator: string,
+  resolveName: (userId: number) => string
+): TipSegment[] {
+  const out: TipSegment[] = []
+  userIds.forEach((id, index) => {
+    if (index > 0) {
+      out.push(tipText(separator))
+    }
+    out.push(tipMention(id, resolveName(id)))
+  })
+  return out
+}
+
 // ==================== 引用消息 ====================
 
 /** 引用消息 payload(对齐后端 QuoteMessage) */
