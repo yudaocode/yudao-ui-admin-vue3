@@ -45,23 +45,28 @@ export function getGroupDisplayName(group: Pick<Group, 'name' | 'groupRemark'>):
 /**
  * 消息发送者显示名（严格版）：算不出真名返回 undefined
  *
- * 1. 给需要"是否真名"信号的调用方用——比如 conversationStore 决定要不要写 lastSenderDisplayName 快照、要不要触发 fetchGroupMembers 兜底拉成员
- * 2. GROUP 场景 member 缺失时所有 sender（含 self）都返回 undefined：self 在群里的"真名"是 displayUserName，members 没加载时不能拿 userStore.nickname 假装真名，否则 deriveLastSenderDisplayName 不会触发兜底拉成员，会一直显示真实昵称
+ * 给需要"是否真名"信号的调用方用——比如 conversationStore 决定要不要写 lastSenderDisplayName 快照、要不要触发 fetchGroupMembers 兜底拉成员
+ *
+ * GROUP 场景下 member 已就位优先 displayUserName / 好友备注 / 真实昵称；member 缺失时区分两种 sender：
+ * - self → 直接拿 userStore.nickname 兜底（本端永远知道自己的昵称，不需要 fetch；同时避免 self 退群后 GROUP_MEMBER_QUIT 通知触发兜底拉成员 → 403）
+ * - 其他人 → 返回 undefined，让 deriveLastSenderDisplayName 走兜底拉成员
  */
 export function tryGetSenderDisplayName(
   senderId: number,
   conversationType: number,
   conversationTargetId: number
 ): string | undefined {
-  // GROUP 路径完全不查 userStore——member 在不在群直接决定结果
   if (conversationType === ImConversationType.GROUP) {
     const group = useGroupStore().getGroup(conversationTargetId)
     const member = group?.members?.find((m) => m.userId === senderId)
-    if (!member) {
-      return undefined
+    if (member) {
+      const friend = useFriendStore().getFriend(senderId)
+      return getMemberDisplayName(member, friend)
     }
-    const friend = useFriendStore().getFriend(senderId)
-    return getMemberDisplayName(member, friend)
+    if (senderId === getCurrentUserId()) {
+      return useUserStore().getUser?.nickname || undefined
+    }
+    return undefined
   }
 
   // PRIVATE / 未知会话类型：self 走 userStore，对方走 friend
@@ -181,7 +186,7 @@ export function getSenderAvatar(
  *
  * 按 message.type 取 content payload 字段，昵称默认走 getSenderDisplayName（备注 / 群昵称 / 真实昵称兜底）；
  * 管理后台无 store，可传入 resolveName 自定义 id → 名字（如 senderNickname + 用户(id) 兜底）；
- * home 端 MessageItem.vue / ConversationItem.vue / MessageHistory.vue 与 admin 端 MessageContentPreview.vue 共用
+ * MessageItem.vue / ConversationItem.vue / MessageHistory.vue / MessageContentPreview.vue 共用
  */
 export type GroupNotificationPayload = {
   operatorUserId?: number
