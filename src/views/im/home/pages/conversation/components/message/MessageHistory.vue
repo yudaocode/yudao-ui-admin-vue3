@@ -261,6 +261,7 @@ import {
 } from '@/views/im/utils/user'
 import { buildFacePreviewText, buildRecallTip } from '@/views/im/utils/conversation'
 import { useMessagePuller } from '@/views/im/home/composables/useMessagePuller'
+import { useVoicePlayer } from '@/views/im/home/composables/useVoicePlayer'
 import {
   ImConversationType,
   ImMessageType,
@@ -297,6 +298,7 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const openMergeDetail = inject(IM_MERGE_DETAIL_DIALOG_KEY)
+const voicePlayer = useVoicePlayer()
 const { convertPrivateMessage, convertGroupMessage } = useMessagePuller()
 
 const visible = computed({
@@ -573,13 +575,14 @@ function onDialogOpen() {
   datePickerValue.value = new Date()
 }
 
-/** v-model 关闭时也复位（兼容父组件 props 直接置 false 的路径，dialog @open 不一定再触发） */
+/** v-model 关闭时复位 + 停语音（兼容父组件 props 直接置 false 的路径，dialog @open 不一定再触发） */
 watch(
   () => props.modelValue,
   (value) => {
     if (!value) {
       activeFilter.value = null
       keyword.value = ''
+      voicePlayer.stop()
     }
   }
 )

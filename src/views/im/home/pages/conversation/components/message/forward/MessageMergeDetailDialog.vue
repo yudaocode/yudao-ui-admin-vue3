@@ -69,9 +69,11 @@ import UserAvatar from '@/views/im/home/components/user/UserAvatar.vue'
 import MessageBubble from '../MessageBubble.vue'
 import { parseMessage, type MergeMessage } from '@/views/im/utils/message'
 import { formatMergeItemTime } from '@/views/im/utils/time'
+import { useVoicePlayer } from '@/views/im/home/composables/useVoicePlayer'
 
 defineOptions({ name: 'ImMessageMergeDetailDialog' })
 
+const voicePlayer = useVoicePlayer()
 const visible = ref(false)
 
 /** 嵌套层级栈，存 parsed payload 避免切层重 parse */
@@ -106,9 +108,10 @@ function handleBack() {
   }
 }
 
-/** 弹窗关闭：清栈，下次打开从顶层重新开始 */
+/** 弹窗关闭：清栈 + 停语音，下次打开从顶层重新开始 */
 function handleClose() {
   stack.value = []
+  voicePlayer.stop()
 }
 
 </script>

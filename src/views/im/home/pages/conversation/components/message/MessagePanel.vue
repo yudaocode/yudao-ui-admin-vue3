@@ -196,6 +196,7 @@ import MessageForwardDialog from './forward/MessageForwardDialog.vue'
 import MessageMergeDetailDialog from './forward/MessageMergeDetailDialog.vue'
 import { IM_FORWARD_DIALOG_KEY, IM_MERGE_DETAIL_DIALOG_KEY } from './forward/keys'
 import { useMessageMultiSelect } from '../../../../composables/useMessageMultiSelect'
+import { useVoicePlayer } from '../../../../composables/useVoicePlayer'
 import MessageHistory from './MessageHistory.vue'
 import ConversationGroupSide from '../conversation/ConversationGroupSide.vue'
 import GroupPinnedMessage from './GroupPinnedMessage.vue'
@@ -227,14 +228,18 @@ provide(IM_MERGE_DETAIL_DIALOG_KEY, (content) => mergeDetailDialogRef.value?.ope
 // 模块级单例 state（composable）；本组件仅做切会话退出 + template 显隐判定
 
 const multiSelect = useMessageMultiSelect()
+const voicePlayer = useVoicePlayer()
 
-/** 切会话退出多选；避免上一会话的勾选状态泄漏到新会话（type+targetId 一起监听，私聊与群聊 id 同号时也能触发） */
+/** 切会话退出多选 + 停语音；避免上一会话的勾选 / 播放态泄漏到新会话（type+targetId 一起监听，私聊与群聊 id 同号时也能触发） */
 watch(
   () => [
     conversationStore.activeConversation?.type,
     conversationStore.activeConversation?.targetId
   ],
-  () => multiSelect.exit()
+  () => {
+    multiSelect.exit()
+    voicePlayer.stop()
+  }
 )
 
 const messages = computed(() => conversationStore.getActiveMessages)

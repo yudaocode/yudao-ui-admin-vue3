@@ -159,7 +159,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { formatFileSize } from '@/utils/file'
 import { formatSeconds } from '@/utils/formatTime'
@@ -179,6 +179,7 @@ import {
 } from '@/views/im/utils/message'
 import { summarizeMessageContent } from '@/views/im/utils/conversation'
 import CardBubble from '@/views/im/home/components/card/CardBubble.vue'
+import { useVoicePlayer } from '@/views/im/home/composables/useVoicePlayer'
 
 defineOptions({ name: 'ImMessageBubble' })
 
@@ -298,36 +299,27 @@ function handleFileClick() {
   window.open(filePayload.value.url, '_blank')
 }
 
-/** 语音点击 → 简单 Audio() toggle 播放 */
-const voicePlaying = ref(false)
-let currentAudio: HTMLAudioElement | null = null
+/** 语音点击：托管给 useVoicePlayer 全局互斥播放，新点的语音会停掉旧的 */
+const voicePlayer = useVoicePlayer()
+/**
+ * 实例级唯一播放 key：每个 MessageBubble 实例独立一份
+ *
+ * 不用 url 当 key 是为了避免「主面板 / 历史抽屉 / 合并详情同一条语音」共享身份：那样三处气泡会
+ * 同时显示播放态，且任何一处卸载都会 stop 掉别处仍可见的播放
+ */
+const voiceKey = Symbol('im-message-bubble-voice')
+const voicePlaying = computed(() => voicePlayer.isPlaying(voiceKey))
 function handleVoiceClick() {
-  if (!voicePayload.value?.url) {
+  const url = voicePayload.value?.url
+  if (!url) {
     return
   }
-  if (voicePlaying.value && currentAudio) {
-    currentAudio.pause()
-    voicePlaying.value = false
-    return
-  }
-  currentAudio = new Audio(voicePayload.value.url)
-  voicePlaying.value = true
-  currentAudio.addEventListener('ended', () => {
-    voicePlaying.value = false
-    currentAudio = null
-  })
-  currentAudio.play().catch(() => {
-    voicePlaying.value = false
-  })
+  voicePlayer.play(voiceKey, url)
 }
 
+/** 气泡卸载兜底：传 key 让 stop 自己判别「是不是我」，不会误伤别人的播放 */
 onBeforeUnmount(() => {
-  if (currentAudio) {
-    currentAudio.pause()
-    currentAudio.src = ''
-    currentAudio = null
-  }
-  voicePlaying.value = false
+  voicePlayer.stop(voiceKey)
 })
 </script>
 
