@@ -128,11 +128,7 @@ const visible = computed({
   set: (value) => emit('update:modelValue', value)
 })
 
-/**
- * 是否走审批：群开启 joinApproval + 当前用户是普通成员；群主 / 管理员邀请绕过审批（对齐后端）
- *
- * 用于切换提交后的提示文案：审批分支后端只创建待审批记录，没把人拉进群，提示「等待审批」更准确
- */
+/** 是否走审批：群开启 joinApproval + 当前用户是普通成员；群主 / 管理员邀请直进，不落审批记录 */
 const willGoApproval = computed(() => {
   if (!props.groupId) {
     return false
@@ -141,9 +137,20 @@ const willGoApproval = computed(() => {
   if (!group?.joinApproval) {
     return false
   }
-  const myId = Number(userStore.getUser?.id) || 0
-  const myRole = props.members.find((m) => m.userId === myId)?.role
-  return myRole !== ImGroupMemberRole.OWNER && myRole !== ImGroupMemberRole.ADMIN
+  const myId = Number(userStore.getUser?.id)
+  if (!myId) {
+    return false
+  }
+  // 群主直判，避开 members 异步加载的窗口；admin 仍依赖 members
+  if (group.ownerUserId === myId) {
+    return false
+  }
+  // members 未到位时无法判定 admin，保守按非审批处理，宁可漏报「等待审批」也不误报给真实管理员
+  const myRole = props.members.find((member) => member.userId === myId)?.role
+  if (myRole == null) {
+    return false
+  }
+  return myRole !== ImGroupMemberRole.ADMIN
 })
 
 const searchText = ref('')
@@ -219,7 +226,7 @@ async function handleOk() {
   submitting.value = true
   try {
     await inviteGroupMember({ groupId: props.groupId, memberUserIds })
-    // 审批分支后端仅落待审批记录，没把人拉进群；普通入群直接邀请成功
+    // 审批分支：后端仅落审批记录，未入群
     message.success(willGoApproval.value ? '邀请已发起，等待群主 / 管理员审批' : '邀请成功')
     emit('reload', memberUserIds)
     visible.value = false

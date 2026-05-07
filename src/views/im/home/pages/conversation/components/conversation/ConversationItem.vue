@@ -187,7 +187,7 @@ const requestText = computed(() => {
   if (!isGroup.value) {
     return ''
   }
-  const count = groupRequestStore.getUnhandledCountByGroupId(props.conversation.targetId)
+  const count = groupRequestStore.unhandledCountMap.get(props.conversation.targetId) ?? 0
   return count > 0 ? `[${count}条进群申请]` : ''
 })
 

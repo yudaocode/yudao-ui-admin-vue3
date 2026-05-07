@@ -8,6 +8,7 @@ import {
   refuseGroupRequest as apiRefuseGroupRequest,
   type ImGroupRequestRespVO
 } from '@/api/im/group/request'
+import { ImGroupRequestHandleResult } from '@/views/im/utils/constants'
 
 /**
  * IM 加群申请 Store
@@ -31,12 +32,21 @@ export const useGroupRequestStore = defineStore('imGroupRequestStore', {
   }),
 
   getters: {
-    /** 指定群下的未处理申请数；横幅红点 */
-    getUnhandledCountByGroupId:
-      (state) =>
-      (groupId: number): number =>
-        state.unhandledList.filter((r) => r.groupId === groupId).length,
-    /** 指定群下的未处理申请列表；Drawer 内容 */
+    /**
+     * 各群下未处理申请数的 Map；O(N) 扫一次缓存供 ConversationItem 等 N 处复用，避免 N×M 重复 filter
+     */
+    unhandledCountMap(state): Map<number, number> {
+      const map = new Map<number, number>()
+      for (const request of state.unhandledList) {
+        map.set(request.groupId, (map.get(request.groupId) ?? 0) + 1)
+      }
+      return map
+    },
+    /** 指定群下的未处理申请数 */
+    getUnhandledCountByGroupId(): (groupId: number) => number {
+      return (groupId: number) => this.unhandledCountMap.get(groupId) ?? 0
+    },
+    /** 指定群下的未处理申请列表 */
     getUnhandledListByGroupId:
       (state) =>
       (groupId: number): ImGroupRequestRespVO[] =>
@@ -52,14 +62,14 @@ export const useGroupRequestStore = defineStore('imGroupRequestStore', {
     },
 
     /**
-     * WS 收到 1503：按 requestId 单查 + 排到列表头
+     * WS 收到 1503：拉最新内容并置顶
      *
-     * 同一对 group_id, user_id 的申请记录会被复用，再次申请 / 邀请时 requestId 不变但 applyContent / inviterUserId
-     * 等会刷新；不能因 id 已存在就跳过，必须 fetch 最新内容并把它顶到最前面（与后端 update_time 倒序对齐）
+     * 同一对 group_id, user_id 复用记录时 requestId 不变但 applyContent / inviterUserId 会刷新，所以无条件 fetch + 排到头部
+     * 校验 handleResult：HTTP 在途时若已收到 1505 / 1506，returnedRequest 可能已是已处理状态，不能再塞回未处理列表
      */
     async addByRequestId(requestId: number) {
       const request = await apiGetMyGroupRequest(requestId)
-      if (!request) {
+      if (!request || request.handleResult !== ImGroupRequestHandleResult.UNHANDLED) {
         return
       }
       this.unhandledList = [request, ...this.unhandledList.filter((r) => r.id !== requestId)]
