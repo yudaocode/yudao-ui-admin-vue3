@@ -149,7 +149,7 @@ import { computed, reactive, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
-import { createGroup } from '@/api/im/group'
+import { createGroup } from '@/api/im/home/group'
 import ConversationPickerPanel from '@/views/im/home/components/picker/ConversationPickerPanel.vue'
 import FriendPickerPanel from '@/views/im/home/components/picker/FriendPickerPanel.vue'
 import FacePicker from '../../input/FacePicker.vue'

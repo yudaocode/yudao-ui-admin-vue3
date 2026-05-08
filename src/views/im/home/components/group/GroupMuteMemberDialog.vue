@@ -40,7 +40,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
-import { muteMember } from '@/api/im/group'
+import { muteMember } from '@/api/im/home/group'
 
 defineOptions({ name: 'ImGroupMuteMemberDialog' })
 

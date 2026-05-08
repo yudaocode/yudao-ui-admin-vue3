@@ -174,8 +174,8 @@ import {
   MESSAGE_PRIVATE_READ_ENABLED,
   MESSAGE_GROUP_READ_ENABLED
 } from '@/views/im/utils/config'
-import { pinGroupMessage as apiPinGroupMessage, cancelMuteMember } from '@/api/im/group'
-import { removeGroupMember } from '@/api/im/group/member'
+import { pinGroupMessage as apiPinGroupMessage, cancelMuteMember } from '@/api/im/home/group'
+import { removeGroupMember } from '@/api/im/home/group/member'
 import {
   buildQuoteFromMessage,
   extractAddableFace,

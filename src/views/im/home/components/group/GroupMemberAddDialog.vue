@@ -34,7 +34,7 @@ import { computed, ref } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import { CommonStatusEnum } from '@/utils/constants'
-import { inviteGroupMember } from '@/api/im/group/member'
+import { inviteGroupMember } from '@/api/im/home/group/member'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { useUserStore } from '@/store/modules/user'

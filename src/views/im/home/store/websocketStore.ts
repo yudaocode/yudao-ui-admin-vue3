@@ -19,8 +19,8 @@ import { useFriendStore, type FriendNotificationPayload } from './friendStore'
 import { getFriendDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import { useGroupRequestStore } from './groupRequestStore'
-import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/message/private'
-import { readGroupMessages as apiReadGroupMessages } from '@/api/im/message/group'
+import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/home/message/private'
+import { readGroupMessages as apiReadGroupMessages } from '@/api/im/home/message/group'
 import type {
   WebSocketFrame,
   ImPrivateMessageDTO,

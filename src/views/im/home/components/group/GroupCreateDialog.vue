@@ -34,7 +34,7 @@
 import { computed, ref } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
-import { createGroup } from '@/api/im/group'
+import { createGroup } from '@/api/im/home/group'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { buildDefaultGroupName } from '../../../utils/group'

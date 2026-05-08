@@ -55,7 +55,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 
-import { getGroupReadUsers as apiGetGroupReadUsers } from '@/api/im/message/group'
+import { getGroupReadUsers as apiGetGroupReadUsers } from '@/api/im/home/message/group'
 import { CommonStatusEnum } from '@/utils/constants'
 import { ImConversationType, ImGroupReceiptStatus } from '../../../../../utils/constants'
 import type { Message } from '../../../../types'
