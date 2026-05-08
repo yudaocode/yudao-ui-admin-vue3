@@ -36,7 +36,7 @@
             <div
               class="im-conversation-group-side__tile-wrap"
               title="邀请好友入群"
-              @click="inviteVisible = true"
+              @click="handleOpenInvite"
             >
               <div class="im-conversation-group-side__icon-tile">
                 <Icon icon="ant-design:plus-outlined" />
@@ -49,7 +49,7 @@
               v-if="isOwnerOrAdmin"
               class="im-conversation-group-side__tile-wrap"
               title="移出群成员"
-              @click="removeVisible = true"
+              @click="handleOpenRemove"
             >
               <div class="im-conversation-group-side__icon-tile">
                 <Icon icon="ant-design:minus-outlined" />
@@ -257,7 +257,7 @@
           <div
             v-if="group"
             class="im-conversation-group-side__row im-conversation-group-side__row--clickable"
-            @click="recommendCardVisible = true"
+            @click="handleShareGroupCard"
           >
             <span class="im-conversation-group-side__label">分享群名片</span>
             <Icon
@@ -301,7 +301,7 @@
             <div
               v-if="isOwnerOrAdmin && !!group.joinApproval"
               class="im-conversation-group-side__row im-conversation-group-side__row--clickable"
-              @click="requestListVisible = true"
+              @click="handleOpenRequestList"
             >
               <span class="im-conversation-group-side__label">- 进群申请</span>
               <Icon
@@ -320,7 +320,7 @@
           <div class="im-conversation-group-side__section">
             <div
               class="im-conversation-group-side__row im-conversation-group-side__row--clickable"
-              @click="adminVisible = true"
+              @click="handleOpenAdminSet"
             >
               <span class="im-conversation-group-side__label">群管理员</span>
               <Icon
@@ -331,7 +331,7 @@
             </div>
             <div
               class="im-conversation-group-side__row im-conversation-group-side__row--clickable"
-              @click="transferOwnerVisible = true"
+              @click="handleOpenTransferOwner"
             >
               <span class="im-conversation-group-side__label">群主管理权转让</span>
               <Icon
@@ -371,46 +371,18 @@
 
     <!-- ==================== 子对话框 ==================== -->
     <!-- 邀请新成员 / 选成员移除 -->
-    <GroupMemberAddDialog
-      v-model="inviteVisible"
-      :group-id="group?.id"
-      :members="members"
-      :friends="friends"
-      @reload="$emit('reload')"
-    />
-    <GroupMemberSelector
-      v-model="removeVisible"
-      title="选择成员进行移除"
-      :members="members"
-      :hide-ids="removeHideIds"
-      :max-size="50"
-      @complete="handleRemoveComplete"
-    />
+    <GroupMemberAddDialog ref="inviteDialogRef" @reload="$emit('reload')" />
+    <GroupMemberRemoveDialog ref="removeDialogRef" @reload="$emit('reload')" />
 
     <!-- 群主操作：管理员设置（一个弹窗合并增 / 删，提交时 diff）+ 群主管理权转让 -->
-    <GroupMemberSelector
-      v-model="adminVisible"
-      title="设置群管理员"
-      :members="members"
-      :checked-ids="adminCheckedIds"
-      :hide-ids="adminHideIds"
-      :max-size="GROUP_ADMIN_MAX_COUNT"
-      @complete="handleAdminUpdate"
-    />
-    <GroupMemberSelector
-      v-model="transferOwnerVisible"
-      title="选择新群主"
-      :members="members"
-      :hide-ids="transferOwnerHideIds"
-      :max-size="1"
-      @complete="handleTransferOwnerComplete"
-    />
+    <GroupAdminSetDialog ref="adminSetDialogRef" @reload="$emit('reload')" />
+    <GroupOwnerTransferDialog ref="ownerTransferDialogRef" @reload="$emit('reload')" />
 
     <!-- 进群申请列表（仅当开启审批 + 当前用户是 owner / admin 时入口可见） -->
-    <GroupRequestListDialog v-model="requestListVisible" :group-id="group?.id" />
+    <GroupRequestListDialog ref="requestListDialogRef" />
 
     <!-- 分享群名片：把当前群作为名片消息推荐给其他会话 -->
-    <RecommendCardDialog v-model="recommendCardVisible" :target="recommendCardTarget" />
+    <RecommendCardDialog ref="recommendCardDialogRef" />
   </el-drawer>
 </template>
 
@@ -423,29 +395,22 @@ import { useUserStore } from '@/store/modules/user'
 import { CommonStatusEnum } from '@/utils/constants'
 import {
   updateGroup,
-  addGroupAdmin,
-  removeGroupAdmin,
-  transferGroupOwner,
   muteAll,
   dissolveGroup
 } from '@/api/im/group'
-import { quitGroup, removeGroupMember, updateGroupMember } from '@/api/im/group/member'
+import { quitGroup, updateGroupMember } from '@/api/im/group/member'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
-import {
-  GROUP_ADMIN_MAX_COUNT,
-  ImConversationType,
-  ImGroupMemberRole
-} from '@/views/im/utils/constants'
+import { ImConversationType, ImGroupMemberRole } from '@/views/im/utils/constants'
 import GroupMemberGrid from '../../../../components/group/GroupMemberGrid.vue'
 import GroupMemberAddDialog from '../../../../components/group/GroupMemberAddDialog.vue'
-import GroupMemberSelector, {
-  type GroupMemberFlag
-} from '../../../../components/group/GroupMemberSelector.vue'
+import GroupMemberRemoveDialog from '../../../../components/group/GroupMemberRemoveDialog.vue'
+import GroupAdminSetDialog from '../../../../components/group/GroupAdminSetDialog.vue'
+import GroupOwnerTransferDialog from '../../../../components/group/GroupOwnerTransferDialog.vue'
 import GroupRequestListDialog from '../../../../components/group/GroupRequestListDialog.vue'
 import RecommendCardDialog from '../../../../components/user/RecommendCardDialog.vue'
 import { toGroupCardTarget } from '@/views/im/utils/message'
-import type { Conversation, FriendLite, GroupLite } from '../../../../types'
+import type { Conversation, GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
 defineOptions({ name: 'ImConversationGroupSide' })
@@ -458,12 +423,10 @@ const props = withDefaults(
     group?: GroupLite & { notice?: string; remarkNickName?: string; groupRemark?: string } // 当前群信息（可空：无激活群会话时）
     conversation?: Conversation | null // 当前会话：用于读 / 切免打扰、置顶状态
     members?: GroupMemberLite[]
-    friends?: FriendLite[]
   }>(),
   {
     modelValue: false,
-    members: () => [],
-    friends: () => []
+    members: () => []
   }
 )
 
@@ -483,55 +446,20 @@ const visible = computed({
   set: (v) => emit('update:modelValue', v)
 })
 
-const searchText = ref('')
-const inviteVisible = ref(false)
-const removeVisible = ref(false)
-const adminVisible = ref(false)
-const transferOwnerVisible = ref(false)
-const requestListVisible = ref(false)
-/** 分享群名片弹窗显隐：「分享群名片」入口控制 */
-const recommendCardVisible = ref(false)
-/** 群名片源对象：targetType = GROUP，含成员数快照 */
-const recommendCardTarget = computed(() => toGroupCardTarget(props.group))
-const showAllMembers = ref(false)
-const namePopoverVisible = ref(false)
-const noticePopoverVisible = ref(false)
-const remarkPopoverVisible = ref(false)
-const groupRemarkPopoverVisible = ref(false)
-const editName = ref('')
-const editNotice = ref('')
-const editRemark = ref('')
-const editGroupRemark = ref('')
-
-// ==================== 状态同步 watch ====================
-
-// 抽屉关闭时重置临时态：搜索 / 折叠展开 / 还在打开的 popover 都清掉
-watch(visible, (v) => {
-  if (!v) {
-    searchText.value = ''
-    showAllMembers.value = false
-    namePopoverVisible.value = false
-    noticePopoverVisible.value = false
-    remarkPopoverVisible.value = false
-    groupRemarkPopoverVisible.value = false
-  }
-})
-
-// popover 弹出时把当前值灌进编辑态，避免上次未保存的脏值
-watch(namePopoverVisible, (v) => {
-  if (v) editName.value = props.group?.name || ''
-})
-watch(noticePopoverVisible, (v) => {
-  if (v) editNotice.value = props.group?.notice || ''
-})
-watch(remarkPopoverVisible, (v) => {
-  if (v) editRemark.value = props.group?.remarkNickName || ''
-})
-watch(groupRemarkPopoverVisible, (v) => {
-  if (v) editGroupRemark.value = props.group?.groupRemark || ''
-})
-
 // ==================== 角色 / 成员展示 ====================
+
+const searchText = ref('')
+const showAllMembers = ref(false)
+
+/** 邀请好友入群弹窗 ref：handleOpenInvite 调 open({ groupId }) 打开 */
+const inviteDialogRef = ref<InstanceType<typeof GroupMemberAddDialog>>()
+/** 打开邀请好友入群弹窗 */
+function handleOpenInvite() {
+  if (!props.group?.id) {
+    return
+  }
+  inviteDialogRef.value?.open({ groupId: props.group.id })
+}
 
 const myId = computed(() => Number(userStore.getUser?.id) || 0)
 const isOwner = computed(() => props.group != null && props.group.ownerId === myId.value)
@@ -568,7 +496,48 @@ const displayMembers = computed(() =>
     : visibleMembers.value
 )
 
+// 抽屉关闭时清掉成员区临时态（搜索关键字、查看更多展开）
+watch(visible, (v) => {
+  if (!v) {
+    searchText.value = ''
+    showAllMembers.value = false
+  }
+})
+
 // ==================== 群信息编辑 ====================
+
+const namePopoverVisible = ref(false)
+const noticePopoverVisible = ref(false)
+const remarkPopoverVisible = ref(false)
+const groupRemarkPopoverVisible = ref(false)
+const editName = ref('')
+const editNotice = ref('')
+const editRemark = ref('')
+const editGroupRemark = ref('')
+
+// popover 弹出时把当前值灌进编辑态，避免上次未保存的脏值
+watch(namePopoverVisible, (v) => {
+  if (v) editName.value = props.group?.name || ''
+})
+watch(noticePopoverVisible, (v) => {
+  if (v) editNotice.value = props.group?.notice || ''
+})
+watch(remarkPopoverVisible, (v) => {
+  if (v) editRemark.value = props.group?.remarkNickName || ''
+})
+watch(groupRemarkPopoverVisible, (v) => {
+  if (v) editGroupRemark.value = props.group?.groupRemark || ''
+})
+
+// 抽屉关闭时清掉所有 popover，避免下次打开仍弹着
+watch(visible, (v) => {
+  if (!v) {
+    namePopoverVisible.value = false
+    noticePopoverVisible.value = false
+    remarkPopoverVisible.value = false
+    groupRemarkPopoverVisible.value = false
+  }
+})
 
 /** 群主：保存群名（走 /im/group/update） */
 async function saveName() {
@@ -685,6 +654,33 @@ async function onMuteAllChange(value: boolean | string | number) {
   }
 }
 
+// ==================== 进群审批 ====================
+
+/** 进群申请列表弹窗 ref：handleOpenRequestList 调 open({ groupId }) 触发 */
+const requestListDialogRef = ref<InstanceType<typeof GroupRequestListDialog>>()
+
+/** 打开当前群的进群申请列表 */
+function handleOpenRequestList() {
+  if (!props.group?.id) {
+    return
+  }
+  requestListDialogRef.value?.open({ groupId: props.group.id })
+}
+
+// ==================== 分享群名片 ====================
+
+/** 分享群名片弹窗 ref：handleShareGroupCard 调用 open({ target }) 打开 */
+const recommendCardDialogRef = ref<InstanceType<typeof RecommendCardDialog>>()
+
+/** 分享群名片：把当前群作为名片消息推荐给其他会话 */
+function handleShareGroupCard() {
+  const target = toGroupCardTarget(props.group)
+  if (!target) {
+    return
+  }
+  recommendCardDialogRef.value?.open({ target })
+}
+
 // ==================== 退出群聊 ====================
 
 /** 退出群聊（普通成员入口；群主退出走"解散群"是另一条路径，这里不处理） */
@@ -731,12 +727,22 @@ async function handleDissolve() {
 // ==================== 群主操作 ====================
 // 移除群成员（群主 / 管理员可见）+ 设置群管理员（仅群主）+ 群主管理权转让（仅群主）
 
+/** 移除群成员弹窗 ref */
+const removeDialogRef = ref<InstanceType<typeof GroupMemberRemoveDialog>>()
+/** 设置群管理员弹窗 ref */
+const adminSetDialogRef = ref<InstanceType<typeof GroupAdminSetDialog>>()
+/** 转让群主弹窗 ref */
+const ownerTransferDialogRef = ref<InstanceType<typeof GroupOwnerTransferDialog>>()
+
 // ---------- 移除群成员 ----------
 
-/** 移除群成员的 hideIds：始终隐藏群主；管理员视角额外隐藏其它管理员（管理员不能移出管理员） */
-const removeHideIds = computed(() => {
+/** 打开移除群成员弹窗：始终隐藏群主；管理员视角额外隐藏其它管理员（管理员不能移出管理员） */
+function handleOpenRemove() {
+  if (!props.group?.id) {
+    return
+  }
   const hideIds: number[] = []
-  if (props.group?.ownerId) {
+  if (props.group.ownerId) {
     hideIds.push(props.group.ownerId)
   }
   if (myRole.value === ImGroupMemberRole.ADMIN) {
@@ -744,90 +750,48 @@ const removeHideIds = computed(() => {
       .filter((m) => m.role === ImGroupMemberRole.ADMIN)
       .forEach((m) => hideIds.push(m.userId))
   }
-  return hideIds
-})
-
-/** 移除群成员入口（群主可移出任意非群主，管理员只能移出普通成员；具体由后端校验） */
-async function handleRemoveComplete(members: GroupMemberFlag[]) {
-  if (!props.group || members.length === 0) {
-    return
-  }
-  // 一次性批量踢人：把选中成员 userId 数组传给后端，比循环调 N 次接口省往返
-  await removeGroupMember({
+  removeDialogRef.value?.open({
     groupId: props.group.id,
-    memberUserIds: members.map((member) => member.userId)
+    members: props.members,
+    hideIds
   })
-  message.success(`已移除 ${members.length} 位成员`)
-  emit('reload')
 }
 
 // ---------- 设置群管理员 ----------
 
-/** 当前管理员的 userId 列表，作为 Selector 默认勾选；过滤已退群成员，避免 maxSize 名额被隐藏成员占用导致无法新增管理员 */
-const adminCheckedIds = computed(() =>
-  props.members
+/** 打开设置群管理员弹窗：当前管理员默认勾选；群主从候选里隐藏 */
+function handleOpenAdminSet() {
+  if (!props.group?.id) {
+    return
+  }
+  // 过滤已退群成员，避免 maxSize 名额被隐藏成员占用导致无法新增管理员
+  const currentAdminIds = props.members
     .filter(
       (member) =>
         member.role === ImGroupMemberRole.ADMIN && member.status !== CommonStatusEnum.DISABLE
     )
     .map((member) => member.userId)
-)
-
-/** 设置管理员时隐藏：群主（不能设为管理员） */
-const adminHideIds = computed(() => (props.group?.ownerId ? [props.group.ownerId] : []))
-
-/** 群管理员变更：跟当前管理员列表 diff，新增 → addGroupAdmin，撤销 → removeGroupAdmin */
-async function handleAdminUpdate(selected: GroupMemberFlag[]) {
-  if (!props.group) {
-    return
-  }
-  // 跟当前管理员列表做差集：分别拿到要新增 / 撤销的 userId
-  const previousIds = adminCheckedIds.value
-  const previousIdSet = new Set(previousIds)
-  const selectedIds = selected.map((member) => member.userId)
-  const selectedIdSet = new Set(selectedIds)
-  const addedIds = selectedIds.filter((id) => !previousIdSet.has(id))
-  const removedIds = previousIds.filter((id) => !selectedIdSet.has(id))
-  if (addedIds.length === 0 && removedIds.length === 0) {
-    return
-  }
-  if (addedIds.length > 0) {
-    await addGroupAdmin({ groupId: props.group.id, userIds: addedIds })
-  }
-  if (removedIds.length > 0) {
-    await removeGroupAdmin({ groupId: props.group.id, userIds: removedIds })
-  }
-  message.success(`已更新群管理员（新增 ${addedIds.length} 位，撤销 ${removedIds.length} 位）`)
-  emit('reload')
+  const hideIds = props.group.ownerId ? [props.group.ownerId] : []
+  adminSetDialogRef.value?.open({
+    groupId: props.group.id,
+    members: props.members,
+    currentAdminIds,
+    hideIds
+  })
 }
 
 // ---------- 群主管理权转让 ----------
 
-/** 转让群主时隐藏当前用户（不能转让给自己） */
-const transferOwnerHideIds = computed(() => [myId.value])
-
-async function handleTransferOwnerComplete(selected: GroupMemberFlag[]) {
-  if (!props.group || selected.length === 0) {
+/** 打开转让群主弹窗：当前用户从候选里隐藏（不能转给自己） */
+function handleOpenTransferOwner() {
+  if (!props.group?.id) {
     return
   }
-  const newOwner = selected[0]
-  // 二次确认：转让后旧群主降为普通成员
-  try {
-    await message.confirm(
-      `确定将群主转让给 ${newOwner.showName}？转让后你将变为普通成员，无法撤销。`,
-      '确认转让群主'
-    )
-  } catch {
-    return
-  }
-  // 转让群主
-  await transferGroupOwner({
+  ownerTransferDialogRef.value?.open({
     groupId: props.group.id,
-    newOwnerUserId: newOwner.userId
+    members: props.members,
+    hideIds: [myId.value]
   })
-  // 提示结果 + 刷新数据
-  message.success('群主转让成功')
-  emit('reload')
 }
 </script>
 

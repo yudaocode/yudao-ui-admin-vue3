@@ -2,7 +2,7 @@
   <!--
     群成员宫格单元
     - 宫格展示的最小单位：头像在上、名字在下；列宽 = size + 16，自适应 size 留呼吸空间
-    - 被 GroupMemberSelector 右侧已选区、ConversationGroupSide 群成员区循环使用
+    - 被 GroupMemberPickerPanel 右侧已选区（grid 形态）、ConversationGroupSide 群成员区循环使用
   -->
   <div
     class="relative flex flex-col items-center px-0.5 py-1"

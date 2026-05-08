@@ -102,10 +102,9 @@ import { useConversationStore } from '../../store/conversationStore'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { getFriendDisplayName, getGroupDisplayName } from '../../../utils/user'
-import type { Friend, FriendLite, FriendRequest, Group, GroupLite, User } from '../../types'
+import type { FriendLite, FriendRequest, Group, GroupLite, User } from '../../types'
 import { ImConversationType } from '../../../utils/constants'
 import { StorageKeys } from '../../../utils/storage'
-import { CommonStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'ImContactPage' })
 
@@ -137,17 +136,7 @@ const currentRequest = computed<FriendRequest>(() => {
 const friendRequests = computed<FriendRequest[]>(() => friendStore.friendRequests)
 
 /** 好友列表的展示快照：附带后端算好的拼音，给 FriendList 做字母分桶 / 拼音搜索 */
-const friends = computed<FriendLite[]>(() =>
-  friendStore.getActiveFriends.map((friend: Friend) => ({
-    id: friend.friendUserId,
-    nickname: friend.nickname,
-    nicknamePinyin: friend.nicknamePinyin,
-    avatar: friend.avatar,
-    displayName: friend.displayName,
-    displayNamePinyin: friend.displayNamePinyin,
-    deleted: friend.status === CommonStatusEnum.DISABLE
-  }))
-)
+const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendsLite)
 
 const groups = computed<GroupLite[]>(() =>
   groupStore.groups.map((group: Group) => ({

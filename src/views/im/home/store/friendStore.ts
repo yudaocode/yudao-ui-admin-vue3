@@ -28,7 +28,7 @@ import {
 } from '../../utils/constants'
 import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../utils/storage'
 import { getFriendDisplayName } from '../../utils/user'
-import type { Friend, FriendRequest } from '../types'
+import type { Friend, FriendLite, FriendRequest } from '../types'
 
 /** 当前正在进行的好友列表拉取；多 dispatcher 同时触发时复用同一 Promise，避免雪崩重拉 */
 let pendingFetchFriends: Promise<void> | null = null
@@ -86,6 +86,17 @@ export const useFriendStore = defineStore('imFriendStore', {
     /** 当前生效的好友列表（过滤掉 DISABLE 软删记录） */
     getActiveFriends: (state): Friend[] => {
       return state.friends.filter((friend) => friend.status !== CommonStatusEnum.DISABLE)
+    },
+    /** 当前生效好友的 Lite 视图（PickerPanel / 选人弹窗共用，自带拼音字段供分桶 / 搜索） */
+    getActiveFriendsLite(): FriendLite[] {
+      return this.getActiveFriends.map((friend: Friend) => ({
+        id: friend.friendUserId,
+        nickname: friend.nickname,
+        nicknamePinyin: friend.nicknamePinyin,
+        avatar: friend.avatar,
+        displayName: friend.displayName,
+        displayNamePinyin: friend.displayNamePinyin
+      }))
     },
     /** 判断对方是否是当前用户的有效好友（存在 + 非 DISABLE） */
     isFriend() {

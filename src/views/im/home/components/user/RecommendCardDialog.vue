@@ -1,166 +1,107 @@
 <template>
   <!--
-    把名片推荐给朋友（用户 / 群通用，对齐微信 PC 双栏布局）
-    - 左栏：搜索 + 最近聊天列表（圆形单/多选指示）
-    - 右栏：已选预览（每行可移除）+ 名片预览卡 + 留言 + 取消/发送
-    - 选中时按 1 个走「发送」、多个走「分别发送(n)」文案，与微信一致
+    把名片推荐给朋友（用户 / 群通用）
+    - dialog 壳由本组件持有；选择 UI 委托 ConversationPickerPanel / FriendPickerPanel
+    - view='conversation'：选已有会话发名片（默认视图）
+    - view='contact'：从「创建聊天」入口进入，选好友建群再发名片，业务壳层切视图，两个 Panel 互不知道对方
+    - 选 1 走「发送」、多个走「分别发送(n)」文案，与微信一致
     - 失败的消息以 FAILED 状态留在对应会话气泡里，供右键重试
+    - 对外接口：ref + open({ target })，不再走 v-model
   -->
   <el-dialog
     v-model="visible"
-    :title="dialogTitle"
     width="720px"
     :close-on-click-modal="false"
-    class="im-recommend-dialog"
-    @open="resetForm"
+    class="im-picker-dialog im-recommend-dialog"
   >
-    <div class="flex h-[480px]">
-      <!-- ============ 左栏：搜索 + 会话列表 ============ -->
-      <div
-        class="flex flex-col w-[280px] border-r border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]"
+    <template #header>
+      <div class="flex gap-2 items-center">
+        <Icon
+          v-if="view === 'contact'"
+          icon="ant-design:arrow-left-outlined"
+          :size="16"
+          class="cursor-pointer im-recommend-dialog__back"
+          @click="view = 'conversation'"
+        />
+        <span class="text-base text-[var(--el-text-color-primary)]">
+          {{ headerTitle }}
+        </span>
+      </div>
+    </template>
+
+    <div class="h-[480px]">
+      <!-- 会话视图：选已有会话发送 -->
+      <ConversationPickerPanel
+        v-if="view === 'conversation'"
+        v-model:selected-keys="selectedKeys"
+        :conversations="candidateConversations"
+        :recent-forward-conversation-keys="conversationStore.recentForwardConversationKeys"
+        :hide-keys="hideKeys"
+        :show-create-chat="true"
+        @create-chat="handleSwitchToContact"
+        @remove-recent="conversationStore.removeRecentForwardConversationKey"
       >
-        <!-- 搜索框 -->
-        <div class="px-3 py-3 flex-shrink-0">
-          <el-input v-model="keyword" placeholder="搜索" clearable size="small">
-            <template #prefix>
-              <Icon icon="ant-design:search-outlined" />
-            </template>
-          </el-input>
-        </div>
+        <template #footer>
+          <div class="flex flex-col gap-3 px-4 py-3">
+            <!-- 名片预览卡 -->
+            <CardBubble v-if="target" :card="target" />
 
-        <div class="px-3 pb-1.5 text-13px text-[var(--el-text-color-secondary)] flex-shrink-0">
-          最近聊天
-        </div>
-
-        <!-- 会话列表 -->
-        <el-scrollbar class="flex-1">
-          <div
-            v-for="conversation in shownConversations"
-            :key="getConversationKey(conversation)"
-            class="flex gap-2.5 items-center px-3 py-1.5 cursor-pointer hover:bg-[var(--el-fill-color)]"
-            @click="handleToggle(conversation)"
-          >
-            <!-- 圆形单选指示：选中绿底白对勾，未选浅灰圈；纯 div 实现，避开 el-checkbox 方框观感 -->
-            <span
-              class="flex flex-shrink-0 items-center justify-center w-5 h-5 rounded-full transition-colors"
-              :class="
-                isSelected(conversation)
-                  ? 'bg-[#07c160]'
-                  : 'border border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
-              "
-            >
-              <Icon
-                v-if="isSelected(conversation)"
-                icon="ant-design:check-outlined"
-                :size="12"
-                color="#fff"
+            <!-- 留言（单行）：右侧表情按钮触发 FacePicker；选中 emoji 拼到末尾 -->
+            <div class="relative">
+              <el-input v-model="leaveMessage" :maxlength="100" placeholder="给朋友留言">
+                <template #suffix>
+                  <Icon
+                    icon="ant-design:smile-outlined"
+                    :size="18"
+                    class="cursor-pointer text-[var(--el-text-color-secondary)] hover:text-[var(--el-color-primary)]"
+                    @click.stop="emojiVisible = !emojiVisible"
+                  />
+                </template>
+              </el-input>
+              <FacePicker
+                v-model:visible="emojiVisible"
+                mode="emoji"
+                class="bottom-full right-0 mb-2"
+                @select-emoji="handleEmojiSelect"
               />
-            </span>
-            <UserAvatar
-              :url="conversation.avatar"
-              :name="conversation.name"
-              :size="32"
-              :clickable="false"
-            />
-            <span
-              class="flex-1 min-w-0 overflow-hidden text-sm truncate text-[var(--el-text-color-primary)]"
-            >
-              {{ conversation.name }}
-            </span>
-          </div>
-          <div
-            v-if="shownConversations.length === 0"
-            class="py-10 text-13px text-center text-[var(--el-text-color-disabled)]"
-          >
-            {{ keyword ? '没有满足条件的会话' : '暂无会话' }}
-          </div>
-        </el-scrollbar>
-      </div>
+            </div>
 
-      <!-- ============ 右栏：已选 + 名片卡 + 留言 + 按钮 ============ -->
-      <div class="flex flex-col flex-1 min-w-0">
-        <!-- 标题：单选「发送给」/ 多选「分别发送给」，与底部按钮文案保持一致 -->
-        <div
-          class="px-4 py-3 text-13px text-[var(--el-text-color-secondary)] flex-shrink-0 border-b border-[var(--el-border-color-lighter)]"
-        >
-          {{ sendTitle }}
-        </div>
-
-        <!-- 已选预览：每行 头像 + 名字 + × 移除 -->
-        <el-scrollbar class="flex-1">
-          <div
-            v-for="conversation in selectedConversations"
-            :key="getConversationKey(conversation)"
-            class="flex gap-2.5 items-center px-4 py-2"
-          >
-            <UserAvatar
-              :url="conversation.avatar"
-              :name="conversation.name"
-              :size="28"
-              :clickable="false"
-            />
-            <span
-              class="flex-1 min-w-0 overflow-hidden text-13px truncate text-[var(--el-text-color-primary)]"
-            >
-              {{ conversation.name }}
-            </span>
-            <Icon
-              icon="ant-design:close-outlined"
-              :size="14"
-              class="im-recommend__remove flex-shrink-0 cursor-pointer"
-              @click="handleToggle(conversation)"
-            />
+            <!-- 操作按钮：选 0/1 显示「发送」、多个显示「分别发送(n)」 -->
+            <div class="flex gap-2 justify-end">
+              <el-button @click="visible = false">取消</el-button>
+              <el-button
+                type="primary"
+                :loading="sending"
+                :disabled="selectedKeys.length === 0"
+                @click="handleSend"
+              >
+                {{ selectedKeys.length > 1 ? `分别发送（${selectedKeys.length}）` : '发送' }}
+              </el-button>
+            </div>
           </div>
-          <div
-            v-if="selectedConversations.length === 0"
-            class="py-10 text-13px text-center text-[var(--el-text-color-disabled)]"
-          >
-            从左侧选择联系人或群聊
-          </div>
-        </el-scrollbar>
+        </template>
+      </ConversationPickerPanel>
 
-        <!-- 名片预览卡 + 留言 + 按钮 -->
-        <div
-          class="flex flex-col gap-3 px-4 py-3 flex-shrink-0 border-t border-[var(--el-border-color-lighter)]"
-        >
-          <CardBubble v-if="target" :card="target" />
-
-          <!-- 留言（单行）：右侧表情按钮触发 FacePicker(mode=emoji)，所选 emoji 直接拼接到输入末尾 -->
-          <div class="relative">
-            <el-input v-model="leaveMessage" :maxlength="100" placeholder="给朋友留言">
-              <template #suffix>
-                <Icon
-                  icon="ant-design:smile-outlined"
-                  :size="18"
-                  class="cursor-pointer text-[var(--el-text-color-secondary)] hover:text-[var(--el-color-primary)]"
-                  @click.stop="emojiVisible = !emojiVisible"
-                />
-              </template>
-            </el-input>
-            <!-- bottom-full 让 picker 下沿贴 input 顶部，向上弹出；right-0 对齐 input 右侧表情按钮 -->
-            <FacePicker
-              v-model:visible="emojiVisible"
-              mode="emoji"
-              class="bottom-full right-0 mb-2"
-              @select-emoji="handleEmojiSelect"
-            />
-          </div>
-
-          <!-- 操作按钮：选 0/1 显示「发送」、多个显示「分别发送(n)」 -->
-          <div class="flex gap-2 justify-end">
-            <el-button @click="visible = false">取消</el-button>
-            <el-button
-              type="primary"
-              :loading="sending"
-              :disabled="selectedKeys.length === 0"
-              @click="handleSend"
-            >
-              {{ selectedKeys.length > 1 ? `分别发送（${selectedKeys.length}）` : '发送' }}
-            </el-button>
-          </div>
-        </div>
-      </div>
+      <!-- 好友视图：选好友建群后发送 -->
+      <FriendPickerPanel
+        v-else
+        v-model:selected-ids="selectedFriendIds"
+        :friends="friends"
+      />
     </div>
+
+    <!-- 好友视图的 dialog footer：建群并发送 -->
+    <template v-if="view === 'contact'" #footer>
+      <el-button @click="visible = false">取消</el-button>
+      <el-button
+        type="primary"
+        :loading="sending"
+        :disabled="selectedFriendIds.length === 0"
+        @click="handleCreateGroupAndSend"
+      >
+        创建群聊并发送
+      </el-button>
+    </template>
   </el-dialog>
 </template>
 
@@ -169,126 +110,114 @@ import { computed, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
+import { createGroup } from '@/api/im/group'
 import CardBubble from '@/views/im/home/components/card/CardBubble.vue'
-import UserAvatar from './UserAvatar.vue'
+import ConversationPickerPanel from '../picker/ConversationPickerPanel.vue'
+import FriendPickerPanel from '../picker/FriendPickerPanel.vue'
 import FacePicker from '../../pages/conversation/components/input/FacePicker.vue'
 import { useConversationStore } from '../../store/conversationStore'
+import { useFriendStore } from '../../store/friendStore'
+import { useGroupStore } from '../../store/groupStore'
 import { useMessageSender } from '../../composables/useMessageSender'
-import { ImMessageType, isGroupConversation } from '../../../utils/constants'
-import { filterConversationsByKeyword, getConversationKey } from '../../../utils/conversation'
-import { serializeMessage, type CardMessage, type CardTarget } from '../../../utils/message'
-import type { Conversation } from '../../types'
+import {
+  ImConversationType,
+  ImMessageType,
+  isGroupConversation
+} from '../../../utils/constants'
+import { getConversationKey } from '../../../utils/conversation'
+import { buildDefaultGroupName } from '../../../utils/group'
+import { serializeMessage, type CardTarget } from '../../../utils/message'
+import type { Conversation, FriendLite } from '../../types'
 
 defineOptions({ name: 'ImRecommendCardDialog' })
 
-const props = defineProps<{
-  modelValue: boolean
-  /** 被推荐的名片对象（用户 / 群通用）；为 null 时不渲染（弹窗也不应被打开） */
-  target: CardTarget | null
-}>()
-
-const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-}>()
-
 const message = useMessage()
 const conversationStore = useConversationStore()
+const friendStore = useFriendStore()
+const groupStore = useGroupStore()
 const { sendRaw, send } = useMessageSender()
 
-/** 弹窗显隐：把父侧 v-model 转双向计算 */
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
-})
-
-/** 弹窗标题：群名片走「把这个群推荐给朋友」，否则「把他推荐给朋友」 */
-const dialogTitle = computed(() =>
-  isGroupConversation(props.target?.targetType) ? '把这个群推荐给朋友' : '把他推荐给朋友'
-)
-
-const keyword = ref('')
+const visible = ref(false)
+const target = ref<CardTarget | null>(null)
+/** 当前视图：默认会话选择，「创建聊天」入口切到好友选择 */
+const view = ref<'conversation' | 'contact'>('conversation')
+const selectedKeys = ref<string[]>([])
+const selectedFriendIds = ref<number[]>([])
 const leaveMessage = ref('')
 const sending = ref(false)
 /** 表情面板显隐：右侧 smile icon 切换 */
 const emojiVisible = ref(false)
-/** 已勾选的会话 key 列表（type:targetId 组合主键）；selectedSet 派生用于 row 快查 */
-const selectedKeys = ref<string[]>([])
-/** 已选 key 集合：handlerToggle 写数组，row isSelected 走 set 快查避免 O(N) 扫描 */
-const selectedSet = computed(() => new Set(selectedKeys.value))
 
-/** 右栏标题：选中多个时改「分别发送给」与底部按钮文案保持一致 */
-const sendTitle = computed(() => (selectedKeys.value.length > 1 ? '分别发送给' : '发送给'))
+defineExpose({
+  /** 打开推荐弹窗：reset → 灌参 → visible=true */
+  open(opts: { target: CardTarget }) {
+    target.value = opts.target
+    view.value = 'conversation'
+    selectedKeys.value = []
+    selectedFriendIds.value = []
+    leaveMessage.value = ''
+    emojiVisible.value = false
+    sending.value = false
+    visible.value = true
+  }
+})
 
-/** 弹窗打开时复位：el-dialog @open 比 watch 更直观 */
-function resetForm() {
-  keyword.value = ''
-  leaveMessage.value = ''
-  selectedKeys.value = []
-  emojiVisible.value = false
-}
+/** 弹窗标题：会话视图按 target 类型分文案；好友视图固定为「选择好友」 */
+const headerTitle = computed(() => {
+  if (view.value === 'contact') {
+    return '选择好友'
+  }
+  return isGroupConversation(target.value?.targetType) ? '把这个群推荐给朋友' : '把他推荐给朋友'
+})
 
-/** 选中 emoji：直接拼到留言末尾；FacePicker 自身 emit('update:visible', false) 关闭面板 */
+/** 候选会话：从 store 拿排序后的列表（hide 由 Panel 接 hideKeys 过滤） */
+const candidateConversations = computed<Conversation[]>(
+  () => conversationStore.getSortedConversations
+)
+
+/** 隐藏 key：不能把名片推回名片本身的会话（用户名片避免自推、群名片避免推回该群） */
+const hideKeys = computed<string[]>(() => {
+  const t = target.value
+  if (!t) {
+    return []
+  }
+  return [getConversationKey({ type: t.targetType, targetId: t.targetId })]
+})
+
+/** 好友视图候选列表：直接复用 friendStore Lite 视图 */
+const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendsLite)
+
+/** 把选中的 emoji 拼到留言末尾；FacePicker 自身负责关闭面板 */
 function handleEmojiSelect(emoji: string) {
   leaveMessage.value = `${leaveMessage.value}${emoji}`
 }
 
-/** 候选会话：过滤掉名片对象本身的会话（同 type + 同 id）；用户名片避免自推、群名片避免推回该群 */
-const candidateConversations = computed<Conversation[]>(() => {
-  const target = props.target
-  if (!target) {
-    return conversationStore.getSortedConversations
-  }
-  return conversationStore.getSortedConversations.filter(
-    (c) => !(c.type === target.targetType && c.targetId === target.targetId)
-  )
-})
-
-/** 按搜索关键字过滤展示列表（仅按 name 模糊匹配） */
-const shownConversations = computed(() =>
-  filterConversationsByKeyword(candidateConversations.value, keyword.value)
-)
-
-/** 已选会话：右栏预览渲染用，按 selectedKeys 顺序展示 */
-const selectedConversations = computed<Conversation[]>(() => {
-  const keys = selectedSet.value
-  return candidateConversations.value.filter((c) => keys.has(getConversationKey(c)))
-})
-
-/** 是否已选中：圆形指示 + 右栏预览过滤都走它 */
-function isSelected(conversation: Conversation): boolean {
-  return selectedSet.value.has(getConversationKey(conversation))
-}
-
-/** 切换选中态：左栏 row 点击 / 右栏 × 移除都走这里 */
-function handleToggle(conversation: Conversation) {
-  const key = getConversationKey(conversation)
-  const index = selectedKeys.value.indexOf(key)
-  if (index >= 0) {
-    selectedKeys.value.splice(index, 1)
-  } else {
-    selectedKeys.value.push(key)
-  }
-}
-
-/** 构造名片消息 content（JSON 字符串）；CardTarget 字段已与 CardMessage 对齐，spread 即可 */
-function buildCardContent(target: CardTarget): string {
-  const payload: CardMessage = { ...target }
-  return serializeMessage(payload)
+/** 切到好友视图：清掉之前在会话视图输入的留言，避免在不可见输入框里把留言静默发到新群 */
+function handleSwitchToContact() {
+  view.value = 'contact'
+  leaveMessage.value = ''
+  emojiVisible.value = false
 }
 
 /**
- * 确认发送：每个选中会话先发 CARD，CARD 成功后才发留言（保证「先看到名片」的顺序意图，CARD 失败时不发留言避免错序）
+ * 确认发送（会话视图）：每个选中会话先发 CARD，CARD 成功后才发留言（保证「先看到名片」的顺序意图）
  *
- * 文案聚合：全部成功「已转发」、全部失败「转发失败：A、B」、部分失败「已转发，但 X、Y 失败」（具体列出失败会话名方便定位）；
+ * 文案聚合：全部成功「已转发」、全部失败「转发失败：A、B」、部分失败「已转发，但 X、Y 失败」；
  * 失败的消息以 FAILED 状态留在对应会话气泡里，可右键重试
  */
 async function handleSend() {
-  const target = props.target
-  if (!target?.targetId || selectedKeys.value.length === 0) {
+  const card = target.value
+  if (!card?.targetId || selectedKeys.value.length === 0) {
     return
   }
-  const targets = selectedConversations.value
-  const cardContent = buildCardContent(target)
+  const byKey = new Map(candidateConversations.value.map((c) => [getConversationKey(c), c]))
+  const targets = selectedKeys.value
+    .map((key) => byKey.get(key))
+    .filter((c): c is Conversation => c != null)
+  if (targets.length === 0) {
+    return
+  }
+  const cardContent = serializeMessage({ ...card })
   const leaveText = leaveMessage.value.trim()
   sending.value = true
   try {
@@ -302,6 +231,8 @@ async function handleSend() {
     })
     const results = await Promise.all(tasks)
     const failedNames = results.filter((r) => !r.ok).map((r) => r.conversation.name || '未命名会话')
+    // 把命中的目标推到最近转发列表（部分失败也推：用户的"意图"已表达）
+    conversationStore.pushRecentForwardConversationKeys(targets.map((c) => getConversationKey(c)))
     if (failedNames.length === 0) {
       message.success('已转发')
     } else if (failedNames.length === targets.length) {
@@ -314,25 +245,86 @@ async function handleSend() {
     sending.value = false
   }
 }
+
+/**
+ * 好友视图发送：先建群（同时邀请所选好友）→ 给新群发名片 → 发留言 → 关弹窗
+ *
+ * 跟会话视图的差别：先要 createGroup 拿到 groupId，之后构造一个 GROUP 类型的 conversation 对象给 sendRaw 用
+ * （sendRaw 内部会自动 insertMessage 把新群登记进 store，最近转发列表也能正常推）
+ */
+async function handleCreateGroupAndSend() {
+  const card = target.value
+  if (!card?.targetId || selectedFriendIds.value.length === 0) {
+    return
+  }
+  const byId = new Map(friends.value.map((f) => [f.id, f]))
+  const members = selectedFriendIds.value
+    .map((id) => byId.get(id))
+    .filter((f): f is FriendLite => f != null)
+  if (members.length === 0) {
+    return
+  }
+  sending.value = true
+  try {
+    const memberUserIds = members.map((m) => m.id)
+    const name = buildDefaultGroupName(members)
+    const group = await createGroup({ name, memberUserIds, joinApproval: false })
+    if (!group?.id) {
+      throw new Error('创建群失败：未返回群编号')
+    }
+    // upsert 进 groupStore，省一次 fetchGroups
+    groupStore.upsertGroup({
+      id: group.id,
+      name: group.name,
+      avatar: group.avatar,
+      notice: group.notice,
+      ownerUserId: group.ownerUserId
+    })
+    // 给新群构造一个临时 conversation 对象给 sendRaw 用；sendRaw 内部会自动 insertMessage 登记
+    const newConversation: Conversation = {
+      type: ImConversationType.GROUP,
+      targetId: group.id,
+      name: group.name || name,
+      avatar: group.avatar || '',
+      unreadCount: 0,
+      messages: [],
+      lastContent: '',
+      lastSendTime: 0
+    }
+    const cardOk = await sendRaw(ImMessageType.CARD, serializeMessage({ ...card }), {
+      conversation: newConversation
+    })
+    if (!cardOk) {
+      message.warning('群已创建，但名片发送失败，请稍后在群里重试')
+      visible.value = false
+      return
+    }
+    const leaveText = leaveMessage.value.trim()
+    if (leaveText) {
+      await send(leaveText, { conversation: newConversation })
+    }
+    conversationStore.pushRecentForwardConversationKeys([getConversationKey(newConversation)])
+    message.success('已创建群聊并发送')
+    visible.value = false
+  } finally {
+    sending.value = false
+  }
+}
 </script>
 
-<style scoped>
-/* 双栏布局要顶到 dialog 边缘：把 el-dialog body 默认 padding / header 下边距清零，两栏 border 自然分隔 */
-.im-recommend-dialog :deep(.el-dialog__body) {
-  padding: 0;
-  border-top: 1px solid var(--el-border-color-lighter);
-}
-.im-recommend-dialog :deep(.el-dialog__header) {
-  margin-right: 0;
-  padding-bottom: 16px;
+<style scoped lang="scss">
+@use '../picker/picker-dialog' as picker;
+
+.im-picker-dialog {
+  @include picker.styles;
 }
 
-/* 已选行 × 移除：常驻显示，hover 转危险色 */
-.im-recommend__remove {
-  color: var(--el-text-color-placeholder);
+/* 返回箭头 hover 高亮，提示可点击 */
+.im-recommend-dialog__back {
+  color: var(--el-text-color-secondary);
   transition: color 0.15s;
 }
-.im-recommend__remove:hover {
-  color: var(--el-color-danger);
+.im-recommend-dialog__back:hover {
+  color: var(--el-color-primary);
 }
 </style>

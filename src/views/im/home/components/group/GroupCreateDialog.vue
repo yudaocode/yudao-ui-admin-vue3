@@ -1,87 +1,24 @@
 <template>
   <!--
-    新建群聊对话框
-    - 顶部：群名称输入
-    - 左：好友列表（checkbox 前置）
-    - 右：已勾选预览（每行可 x 移除，locked 不渲染 x）
-    - 提交：先 createGroup 再 inviteGroupMember，最后让父页 reload
-    - lockedIds：锁定不可取消的好友 id；私聊侧 "+创建群" 入口用来锁定对方
+    发起群聊：选好友 → 默认按所选成员名生成群名 → createGroup
+    - dialog 壳本组件持有；选择 UI 委托 FriendPickerPanel
+    - lockedIds 由调用方通过 open({ lockedIds }) 传入；私聊侧 +建群锁定对方
+    - 不再要求先输入群名 / 不再展示「进群审批」开关，对齐微信 PC
+    - 对外接口：ref + open({ lockedIds }) + emit created(groupId)
   -->
-  <el-dialog v-model="visible" title="新建群聊" width="620px" :close-on-click-modal="false">
-    <div class="flex flex-col gap-3">
-      <el-input v-model="groupName" placeholder="请输入群名称" maxlength="20" show-word-limit />
-
-      <!-- TODO @AI：暂时不用这个入口；对齐微信； -->
-      <div class="flex items-center gap-2 text-13px text-[var(--el-text-color-secondary)]">
-        <span class="shrink-0">进群需要群主 / 群管理确认</span>
-        <el-switch v-model="joinApproval" />
-      </div>
-
-      <div class="flex gap-2.5">
-        <div
-          class="flex flex-col flex-1 overflow-hidden rounded border border-[var(--el-border-color)]"
-        >
-          <el-input v-model="searchText" placeholder="搜索好友" clearable>
-            <template #prefix>
-              <Icon
-                icon="ant-design:search-outlined"
-                class="text-[var(--el-text-color-placeholder)]"
-              />
-            </template>
-          </el-input>
-          <el-scrollbar class="h-[400px]">
-            <FriendItem
-              v-for="friend in shownFriends"
-              :key="friend.id"
-              :friend="friend"
-              :menu="false"
-              :active="false"
-              @click="handleToggleCheck(friend)"
-            >
-              <template #prefix>
-                <el-checkbox
-                  :model-value="friend.checked"
-                  :disabled="friend.disabled"
-                  @click.stop
-                  @change="(value) => handleCheckChange(friend, !!value)"
-                />
-              </template>
-            </FriendItem>
-          </el-scrollbar>
-        </div>
-
-        <div class="flex items-center text-lg text-[#409eff]">
-          <Icon icon="ant-design:double-right-outlined" />
-        </div>
-
-        <div
-          class="flex flex-col flex-1 overflow-hidden rounded border border-[var(--el-border-color)]"
-        >
-          <!-- 标题高度对齐左侧 el-input default（32px），保证两侧第一项起点在同一水平 -->
-          <div
-            class="h-8 pl-2.5 leading-8 text-13px text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
-          >
-            已勾选 {{ checkedFriends.length }} 位好友
-          </div>
-          <el-scrollbar class="h-[400px]">
-            <FriendItem
-              v-for="friend in checkedFriends"
-              :key="friend.id"
-              :friend="friend"
-              :menu="false"
-              :active="false"
-            >
-              <!-- locked 的好友不渲染 x，避免误以为可移除 -->
-              <Icon
-                v-if="!friend.disabled"
-                icon="ant-design:close-outlined"
-                class="im-group-create-dialog__remove"
-                @click.stop="handleUncheck(friend)"
-              />
-            </FriendItem>
-          </el-scrollbar>
-        </div>
-      </div>
+  <el-dialog
+    v-model="visible"
+    title="发起群聊"
+    width="720px"
+    :close-on-click-modal="false"
+    class="im-picker-dialog"
+  >
+    <div class="h-[480px]">
+      <FriendPickerPanel
+        v-model:selected-ids="selectedIds"
+        :friends="friends"
+        :locked-ids="lockedIds"
+      />
     </div>
 
     <template #footer>
@@ -94,131 +31,91 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import Icon from '@/components/Icon/src/Icon.vue'
+import { computed, ref } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import { createGroup } from '@/api/im/group'
+import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
-import FriendItem from '../friend/FriendItem.vue'
+import { buildDefaultGroupName } from '../../../utils/group'
+import FriendPickerPanel from '../picker/FriendPickerPanel.vue'
 import type { FriendLite } from '../../types'
 
 defineOptions({ name: 'ImGroupCreateDialog' })
 
-interface FriendCheckable extends FriendLite {
-  checked?: boolean
-  disabled?: boolean // locked 的好友：勾选态由 lockedIds 强制为 true，UI 上 checkbox / x 都不响应
-}
-
-const props = withDefaults(
-  defineProps<{
-    modelValue: boolean
-    friends?: FriendLite[] // 全量好友（由调用方从 friendStore 传入）
-    lockedIds?: number[] // 锁定的好友 id：自动勾选 + 不可取消（私聊侧 "+创建群" 用来锁定对方）
-  }>(),
-  {
-    friends: () => [],
-    lockedIds: () => []
-  }
-)
-
 const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-  created: [groupId: number] // 创建成功，携带新群编号
+  /** 创建成功，携带新群编号；父侧通常用来跳转到新群会话 */
+  created: [groupId: number]
 }>()
 
 const message = useMessage()
+const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 
-/** 弹窗显隐：把父侧 v-model 转双向计算 */
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
-})
-
-const groupName = ref('')
-const joinApproval = ref<boolean>(false) // 默认不需审批，自由进群
-const searchText = ref('')
+const visible = ref(false)
 const submitting = ref(false)
-const workingFriends = ref<FriendCheckable[]>([]) // 工作副本（带 checked / disabled 标记），与 prop 隔离
+const lockedIds = ref<number[]>([])
+const selectedIds = ref<number[]>([])
 
-watch(
-  visible,
-  (open) => {
-    if (!open) {
-      return
-    }
-    groupName.value = ''
-    joinApproval.value = false
-    searchText.value = ''
-    workingFriends.value = props.friends
-      .filter((friend) => !friend.deleted)
-      .map((friend) => {
-        const locked = props.lockedIds.some((id) => id === friend.id)
-        return { ...friend, checked: locked, disabled: locked }
-      })
-  },
-  { immediate: true }
-)
-
-/** 左侧展示的好友：按搜索关键字过滤 workingFriends */
-const shownFriends = computed(() =>
-  workingFriends.value.filter((friend) => friend.nickname.includes(searchText.value))
-)
-
-/** 已勾选的好友：右侧预览 + 提交时取 memberUserIds */
-const checkedFriends = computed(() => workingFriends.value.filter((friend) => friend.checked))
-
-/**
- * 完成按钮可点：群名非空 + 至少有 1 个非 locked 勾选
- *
- * locked 是入口侧自动选的（如私聊对方），不算"用户主动选择"——否则用户什么都没勾就能建 2 人群，体验上等于私聊
- */
-const canSubmit = computed(() => {
-  if (!groupName.value.trim()) {
-    return false
+defineExpose({
+  /** 打开发起群聊弹窗：reset → 灌参 → visible=true */
+  open(opts?: { lockedIds?: number[] }) {
+    lockedIds.value = opts?.lockedIds ? [...opts.lockedIds] : []
+    selectedIds.value = []
+    submitting.value = false
+    visible.value = true
   }
-  return checkedFriends.value.some((friend) => !friend.disabled)
 })
 
-/** 行点击：切换勾选态，locked 的不响应 */
-function handleToggleCheck(friend: FriendCheckable) {
-  if (friend.disabled) {
-    return
+/** 全量好友：直接复用 friendStore Lite 视图（带拼音字段供分桶用） */
+const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendsLite)
+
+/** 完成按钮可点：至少有 1 个非 locked 勾选（locked 是入口锁定项，不算"用户主动选择"） */
+const canSubmit = computed(() => selectedIds.value.length > 0)
+
+/** 拿到所有要进群的好友（locked + selected）；建群默认群名按这批人生成 */
+function resolveMembersToInvite(): FriendLite[] {
+  const seen = new Set<number>()
+  const result: FriendLite[] = []
+  const byId = new Map(friends.value.map((f) => [f.id, f]))
+  for (const id of lockedIds.value) {
+    if (seen.has(id)) {
+      continue
+    }
+    const friend = byId.get(id)
+    if (friend) {
+      seen.add(id)
+      result.push(friend)
+    }
   }
-  friend.checked = !friend.checked
-}
-
-/** checkbox change：直接落 value（locked 已由 :disabled 拦截，这里再守一层） */
-function handleCheckChange(friend: FriendCheckable, value: boolean) {
-  if (friend.disabled) {
-    return
+  for (const id of selectedIds.value) {
+    if (seen.has(id)) {
+      continue
+    }
+    const friend = byId.get(id)
+    if (friend) {
+      seen.add(id)
+      result.push(friend)
+    }
   }
-  friend.checked = value
+  return result
 }
 
-/** 右侧 x 点击：取消勾选（locked 不渲染 x，到这里说明非 locked） */
-function handleUncheck(friend: FriendCheckable) {
-  friend.checked = false
-}
-
-/** 创建群聊：建群（同时邀请初始成员）→ upsert groupStore → emit('created') 让父页跳转新会话 */
+/** 创建群聊：建群（同时邀请初始成员）→ upsert groupStore → emit created 让父页跳转新会话 */
 async function handleOk() {
-  const name = groupName.value.trim()
-  const memberUserIds = checkedFriends.value.map((friend) => friend.id)
-  // canSubmit 已挡住空状态，这里再守一道防止 disabled 被外部绕过
-  if (!name || memberUserIds.length === 0) {
+  const members = resolveMembersToInvite()
+  if (members.length === 0) {
     return
   }
   submitting.value = true
   try {
-    // 1. 新建群聊
-    const group = await createGroup({ name, memberUserIds, joinApproval: joinApproval.value })
+    const memberUserIds = members.map((m) => m.id)
+    const name = buildDefaultGroupName(members)
+    const group = await createGroup({ name, memberUserIds, joinApproval: false })
     if (!group?.id) {
       throw new Error('创建群失败：未返回群编号')
     }
-
-    // 2.1 直接 upsert 进 groupStore，省一次 fetchGroups——服务端返回 VO 已经够建会话了
+    // 直接 upsert 进 groupStore，省一次 fetchGroups —— 服务端返回 VO 已经够建会话了
     groupStore.upsertGroup({
       id: group.id,
       name: group.name,
@@ -226,7 +123,6 @@ async function handleOk() {
       notice: group.notice,
       ownerUserId: group.ownerUserId
     })
-    // 2.2 提示成功 + emit 让父页跳转新会话 + 关弹窗
     message.success('群聊创建成功')
     emit('created', group.id)
     visible.value = false
@@ -236,15 +132,10 @@ async function handleOk() {
 }
 </script>
 
-<style scoped>
-/* 右侧已选行的 x：默认浅灰，hover 转危险色，提示"点了就移除" */
-.im-group-create-dialog__remove {
-  font-size: 14px;
-  color: var(--el-text-color-placeholder);
-  cursor: pointer;
-  transition: color 0.15s;
-}
-.im-group-create-dialog__remove:hover {
-  color: var(--el-color-danger);
+<style scoped lang="scss">
+@use '../picker/picker-dialog' as picker;
+
+.im-picker-dialog {
+  @include picker.styles;
 }
 </style>

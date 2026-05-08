@@ -18,11 +18,11 @@
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item @click="createGroupVisible = true">
+              <el-dropdown-item @click="handleOpenCreateGroup">
                 <Icon icon="ant-design:message-outlined" :size="16" />
                 <span>发起群聊</span>
               </el-dropdown-item>
-              <el-dropdown-item @click="addFriendVisible = true">
+              <el-dropdown-item @click="friendAddDialogRef?.open()">
                 <Icon icon="ant-design:user-add-outlined" :size="16" />
                 <span>添加朋友</span>
               </el-dropdown-item>
@@ -90,12 +90,8 @@
     <MessagePanel />
 
     <!-- 添加朋友 / 发起群聊弹窗 -->
-    <FriendAddDialog v-model="addFriendVisible" />
-    <GroupCreateDialog
-      v-model="createGroupVisible"
-      :friends="friends"
-      @created="handleGroupCreated"
-    />
+    <FriendAddDialog ref="friendAddDialogRef" />
+    <GroupCreateDialog ref="createGroupDialogRef" @created="handleGroupCreated" />
   </div>
 </template>
 
@@ -103,13 +99,11 @@
 import { computed, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useConversationStore } from '../../store/conversationStore'
-import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { StorageKeys } from '../../../utils/storage'
 import { ImConversationType } from '../../../utils/constants'
 import { filterConversationsByKeyword, getConversationKey } from '../../../utils/conversation'
-import { CommonStatusEnum } from '@/utils/constants'
-import type { Conversation, Friend, FriendLite } from '../../types'
+import type { Conversation } from '../../types'
 import ResizableAside from '../../components/ResizableAside.vue'
 import ConversationItem from './components/conversation/ConversationItem.vue'
 import MessagePanel from './components/message/MessagePanel.vue'
@@ -119,12 +113,11 @@ import GroupCreateDialog from '../../components/group/GroupCreateDialog.vue'
 defineOptions({ name: 'ImMessagePage' })
 
 const conversationStore = useConversationStore()
-const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 
+// ==================== 会话列表 ====================
+
 const keyword = ref('')
-const addFriendVisible = ref(false)
-const createGroupVisible = ref(false)
 
 const sortedConversations = computed(() => conversationStore.getSortedConversations)
 
@@ -197,17 +190,20 @@ const showPinnedSection = computed(
   () => !keyword.value.trim() && pinnedConversations.value.length >= PINNED_FOLD_THRESHOLD
 )
 
+// ==================== 添加朋友 ====================
+
+/** 添加朋友弹窗 ref：右上角 +-下拉「添加朋友」入口调 open() 触发 */
+const friendAddDialogRef = ref<InstanceType<typeof FriendAddDialog>>()
+
 // ==================== 建群相关 ====================
 
-/** GroupCreateDialog 需要全量好友列表来勾选成员，结构与通讯录里好友/群分组保持一致 */
-const friends = computed<FriendLite[]>(() =>
-  friendStore.getActiveFriends.map((friend: Friend) => ({
-    id: friend.friendUserId,
-    nickname: friend.nickname,
-    avatar: friend.avatar,
-    deleted: friend.status === CommonStatusEnum.DISABLE
-  }))
-)
+/** 发起群聊弹窗 ref：handleOpenCreateGroup 调 open() 打开 */
+const createGroupDialogRef = ref<InstanceType<typeof GroupCreateDialog>>()
+
+/** 打开发起群聊弹窗：无锁定项的全局入口 */
+function handleOpenCreateGroup() {
+  createGroupDialogRef.value?.open()
+}
 
 /** 处理建群成功 */
 function handleGroupCreated(groupId: number) {

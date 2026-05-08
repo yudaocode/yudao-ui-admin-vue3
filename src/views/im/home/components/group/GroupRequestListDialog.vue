@@ -160,29 +160,28 @@ import UserAvatar from '../user/UserAvatar.vue'
 
 defineOptions({ name: 'ImGroupRequestListDialog' })
 
-const props = defineProps<{
-  modelValue: boolean
-  groupId?: number
-}>()
-const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-}>()
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: (v) => emit('update:modelValue', v)
-})
-
 const message = useMessage()
 const groupRequestStore = useGroupRequestStore()
 
+const visible = ref(false)
+/** 当前展示的群编号；undefined 时走全局未处理列表（store.unhandledList） */
+const groupId = ref<number | undefined>()
 const loading = ref(false)
 const groupList = ref<ImGroupRequestRespVO[]>([])
 const actingId = ref<number | null>(null)
 
+defineExpose({
+  /** 打开进群申请弹窗：reset → 灌参 → visible=true；不传 groupId 走全局未处理列表 */
+  open(opts?: { groupId?: number }) {
+    groupId.value = opts?.groupId
+    actingId.value = null
+    visible.value = true
+  }
+})
+
 /** 数据源：单群模式用 fetch 回来的 groupList；全局模式直接读 store.unhandledList，处理后 store 自动 reactive 同步 */
 const list = computed<ImGroupRequestRespVO[]>(() =>
-  props.groupId ? groupList.value : groupRequestStore.unhandledList
+  groupId.value ? groupList.value : groupRequestStore.unhandledList
 )
 
 /** 顶部卡片：最新一条；空数组时为 null */
@@ -192,11 +191,11 @@ const histories = computed(() => list.value.slice(1))
 
 /** 打开 dialog 时拉数据：单群拉 API；全局直接读 store；关闭时清掉单群缓存 */
 watch(
-  () => [visible.value, props.groupId] as const,
-  ([open, groupId]) => {
-    if (open && groupId) {
-      void fetchList(groupId)
-    } else if (!open) {
+  [visible, groupId],
+  ([isVisible, currentGroupId]) => {
+    if (isVisible && currentGroupId) {
+      void fetchList(currentGroupId)
+    } else if (!isVisible) {
       groupList.value = []
     }
   },
@@ -211,9 +210,9 @@ watch(
  */
 watch(
   () =>
-    props.groupId && visible.value
+    groupId.value && visible.value
       ? groupRequestStore.unhandledList
-          .filter((request) => request.groupId === props.groupId)
+          .filter((request) => request.groupId === groupId.value)
           .map((request) => `${request.id}:${request.inviterUserId ?? ''}:${request.applyContent ?? ''}`)
           .join(',')
       : null,
@@ -224,8 +223,8 @@ watch(
     if (actingId.value !== null) {
       return
     }
-    if (props.groupId) {
-      void fetchList(props.groupId)
+    if (groupId.value) {
+      void fetchList(groupId.value)
     }
   }
 )

@@ -237,6 +237,9 @@ export const IM_AT_ALL_NICKNAME = '所有人'
 /** 合并转发气泡内预览的最大行数（对齐微信「聊天记录」气泡） */
 export const MERGE_FORWARD_PREVIEW_LINES = 3
 
+/** 最近转发会话 key 列表的最大保留数量（对齐微信 PC 横向头像区可见容量） */
+export const RECENT_FORWARD_MAX = 12
+
 /** 转发模式：SINGLE 逐条原样转 / MERGE 打包成 MergeMessage */
 export const ImForwardMode = {
   SINGLE: 'single',

@@ -33,7 +33,7 @@
           <div
             class="im-conversation-private-side__tile-wrap im-conversation-private-side__tile-wrap--clickable"
             title="发起群聊"
-            @click="createGroupVisible = true"
+            @click="handleOpenCreateGroup"
           >
             <div class="im-conversation-private-side__icon-tile">
               <Icon icon="ant-design:plus-outlined" />
@@ -119,12 +119,7 @@
     </div>
 
     <!-- 子对话框：发起群聊（锁定对方为已选） -->
-    <GroupCreateDialog
-      v-model="createGroupVisible"
-      :friends="friends"
-      :locked-ids="lockedIds"
-      @created="handleGroupCreated"
-    />
+    <GroupCreateDialog ref="createGroupDialogRef" @created="handleGroupCreated" />
   </el-drawer>
 </template>
 
@@ -140,7 +135,7 @@ import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
 import { getFriendDisplayName } from '@/views/im/utils/user'
 import { ImConversationType } from '@/views/im/utils/constants'
-import type { Conversation, Friend, FriendLite } from '../../../../types'
+import type { Conversation, Friend } from '../../../../types'
 
 defineOptions({ name: 'ImConversationPrivateSide' })
 
@@ -149,11 +144,9 @@ const props = withDefaults(
     modelValue?: boolean // 抽屉开关（v-model）
     conversation?: Conversation | null // 当前会话（取置顶 / 免打扰态）
     friend?: Friend // 对方好友信息（取头像 / 昵称）
-    friends?: FriendLite[] // 全量好友（"+创建群"时给 GroupCreateDialog 选人）
   }>(),
   {
-    modelValue: false,
-    friends: () => []
+    modelValue: false
   }
 )
 
@@ -175,14 +168,17 @@ const message = useMessage()
 /** tile 标签 / 后续聊天界面用的展示名：备注优先 */
 const displayName = computed(() => (props.friend ? getFriendDisplayName(props.friend) : ''))
 
-/** GroupCreateDialog 锁定 id：把对方默认勾上且不可取消，对应微信"基于私聊发起群聊" */
-const lockedIds = computed<number[]>(() =>
-  props.friend ? [props.friend.friendUserId] : []
-)
+/** 发起群聊弹窗 ref：handleOpenCreateGroup 调 open({ lockedIds }) 锁定对方 */
+const createGroupDialogRef = ref<InstanceType<typeof GroupCreateDialog>>()
+
+/** 打开发起群聊弹窗：把对方默认勾上且不可取消，对应微信"基于私聊发起群聊" */
+function handleOpenCreateGroup() {
+  const lockedIds = props.friend ? [props.friend.friendUserId] : []
+  createGroupDialogRef.value?.open({ lockedIds })
+}
 
 const displayNamePopoverVisible = ref(false)
 const editDisplayName = ref('')
-const createGroupVisible = ref(false)
 
 // popover 弹出时把当前备注灌进编辑态，避免上次未保存的脏值
 watch(displayNamePopoverVisible, (open) => {

@@ -6,7 +6,7 @@
     - 点击横幅打开 GroupRequestListDialog（含历史已处理记录），不再就地展开
   -->
   <div v-if="canManage && pendingCount > 0" class="im-group-request-pending">
-    <div class="im-group-request-pending__row" @click="dialogVisible = true">
+    <div class="im-group-request-pending__row" @click="handleOpen">
       <Icon
         icon="ant-design:user-add-outlined"
         :size="14"
@@ -21,7 +21,7 @@
     </div>
 
     <!-- 申请列表 dialog：复用同一组件，避免群管理面板与会话顶部各写一份 -->
-    <GroupRequestListDialog v-model="dialogVisible" :group-id="groupId" />
+    <GroupRequestListDialog ref="requestListDialogRef" />
   </div>
 </template>
 
@@ -45,7 +45,13 @@ const userStore = useUserStore()
 const groupStore = useGroupStore()
 const groupRequestStore = useGroupRequestStore()
 
-const dialogVisible = ref(false)
+/** 申请列表弹窗 ref：handleOpen 调 open({ groupId }) 触发 */
+const requestListDialogRef = ref<InstanceType<typeof GroupRequestListDialog>>()
+
+/** 打开当前群的进群申请列表 */
+function handleOpen() {
+  requestListDialogRef.value?.open({ groupId: props.groupId })
+}
 
 /** 当前群（含 ownerUserId / members） */
 const group = computed(() => groupStore.getGroup(props.groupId))

@@ -33,7 +33,7 @@
                 icon="ep:chat-dot-round"
                 :size="20"
                 class="message-panel__header-icon cursor-pointer"
-                @click="historyVisible = true"
+                @click="historyDialogRef?.open()"
               />
             </el-tooltip>
             <!-- 通话入口：暂未开放，先放占位图标对齐微信 PC -->
@@ -145,21 +145,19 @@
         :group="groupInfo"
         :conversation="conversationStore.activeConversation"
         :members="groupMembers"
-        :friends="friends"
         @reload="reloadGroupData"
-        @open-history="historyVisible = true"
+        @open-history="historyDialogRef?.open()"
       />
       <ConversationPrivateSide
         v-else
         v-model="sideVisible"
         :conversation="conversationStore.activeConversation"
         :friend="privateFriend"
-        :friends="friends"
-        @open-history="historyVisible = true"
+        @open-history="historyDialogRef?.open()"
       />
 
       <!-- 历史消息抽屉 -->
-      <MessageHistory v-model="historyVisible" @locate="handleLocate" />
+      <MessageHistory ref="historyDialogRef" @locate="handleLocate" />
 
       <!-- 转发弹窗 / 合并消息详情：在 MessagePanel 子树内挂载，子组件通过 inject 触发 -->
       <MessageForwardDialog ref="forwardDialogRef" />
@@ -188,7 +186,6 @@ import { useImUiStore } from '../../../../store/uiStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useGroupStore } from '../../../../store/groupStore'
 import { ImConversationType } from '@/views/im/utils/constants'
-import { CommonStatusEnum } from '@/utils/constants'
 import MessageItem from './MessageItem.vue'
 import MessageInput from '../input/MessageInput.vue'
 import MessageMultiSelectBar from '../input/MessageMultiSelectBar.vue'
@@ -202,7 +199,7 @@ import ConversationGroupSide from '../conversation/ConversationGroupSide.vue'
 import GroupPinnedMessage from './GroupPinnedMessage.vue'
 import GroupRequestPending from './GroupRequestPending.vue'
 import ConversationPrivateSide from '../conversation/ConversationPrivateSide.vue'
-import type { FriendLite, GroupLite } from '../../../../types'
+import type { GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 import GroupMuteMemberDialog from '../../../../components/group/GroupMuteMemberDialog.vue'
 
@@ -354,16 +351,6 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
   })
 })
 
-/** 好友列表：群侧用于"邀请入群"，私聊侧用于"+创建群"，统一从 friendStore 映射成 FriendLite 窄接口 */
-const friends = computed<FriendLite[]>(() =>
-  friendStore.getActiveFriends.map((friend) => ({
-    id: friend.friendUserId,
-    nickname: friend.nickname,
-    avatar: friend.avatar,
-    deleted: friend.status === CommonStatusEnum.DISABLE
-  }))
-)
-
 /** 切换到群会话时同步群信息 + 成员；各自 fire-and-forget + catch，任何一项失败不牵连其它 */
 async function ensureGroupData(groupId: number) {
   // 远程异步拉群信息（群名 / 公告 / 群主等元数据）
@@ -392,7 +379,8 @@ function reloadGroupData() {
   groupStore.fetchGroupMembers(conversation.targetId, true)
 }
 
-const historyVisible = ref(false)
+/** 历史消息抽屉 ref：「聊天历史」icon / 抽屉「查找聊天内容」入口都调 open() 触发 */
+const historyDialogRef = ref<InstanceType<typeof MessageHistory>>()
 const sideVisible = ref(false) // 信息抽屉开关：群聊 / 私聊共用一个 ref
 const muteMemberDialogRef = ref<InstanceType<typeof GroupMuteMemberDialog>>()
 

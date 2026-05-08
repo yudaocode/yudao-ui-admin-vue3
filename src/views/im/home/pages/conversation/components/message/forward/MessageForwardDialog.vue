@@ -1,195 +1,105 @@
 <template>
+  <!--
+    转发消息（逐条 / 合并）：选目标会话 + 留言后批量发送
+    - dialog 壳本组件持有；选择 UI 委托 ConversationPickerPanel
+    - footer slot 塞预览卡（合并 / 逐条不同视觉）+ 留言 + 提交按钮
+    - 对外接口沿用：ref + open({ mode, messages, sourceConversation })
+  -->
   <el-dialog
     v-model="visible"
     :title="dialogTitle"
     width="720px"
     :close-on-click-modal="false"
-    class="im-forward-dialog"
-    @open="resetForm"
+    class="im-picker-dialog"
   >
-    <div class="flex h-[480px]">
-      <!-- ============ 左栏：搜索 + 会话列表 ============ -->
-      <div
-        class="flex flex-col w-[280px] border-r border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]"
+    <div class="h-[480px]">
+      <ConversationPickerPanel
+        v-model:selected-keys="selectedKeys"
+        :conversations="candidateConversations"
+        :recent-forward-conversation-keys="conversationStore.recentForwardConversationKeys"
+        @remove-recent="conversationStore.removeRecentForwardConversationKey"
       >
-        <div class="px-3 py-3 flex-shrink-0">
-          <el-input v-model="keyword" placeholder="搜索" clearable size="small">
-            <template #prefix>
-              <Icon icon="ant-design:search-outlined" />
-            </template>
-          </el-input>
-        </div>
-
-        <div class="px-3 pb-1.5 text-13px text-[var(--el-text-color-secondary)] flex-shrink-0">
-          最近聊天
-        </div>
-
-        <el-scrollbar class="flex-1">
-          <div
-            v-for="conversation in shownConversations"
-            :key="getConversationKey(conversation)"
-            class="flex gap-2.5 items-center px-3 py-1.5 cursor-pointer hover:bg-[var(--el-fill-color)]"
-            @click="handleToggle(conversation)"
-          >
-            <span
-              class="flex flex-shrink-0 items-center justify-center w-5 h-5 rounded-full transition-colors"
-              :class="
-                isSelected(conversation)
-                  ? 'bg-[#07c160]'
-                  : 'border border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
-              "
+        <template #footer>
+          <div class="flex flex-col gap-3 px-4 py-3">
+            <!-- 合并模式预览：「[聊天记录] 标题 + 摘要列表」预览卡 -->
+            <div
+              v-if="state.mode === ImForwardMode.MERGE && mergePreview"
+              class="flex flex-col w-full overflow-hidden rounded-md bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
             >
-              <Icon
-                v-if="isSelected(conversation)"
-                icon="ant-design:check-outlined"
-                :size="12"
-                color="#fff"
+              <div class="px-3 py-2 text-sm font-medium truncate text-[var(--el-text-color-primary)]">
+                {{ mergePreview.title }}
+              </div>
+              <div class="flex flex-col px-3 pb-2 gap-0.5">
+                <div
+                  v-for="(line, idx) in mergePreview.lines"
+                  :key="idx"
+                  class="text-12px text-[var(--el-text-color-secondary)] truncate"
+                >
+                  {{ line }}
+                </div>
+              </div>
+              <div
+                class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
+              >
+                聊天记录
+              </div>
+            </div>
+
+            <!-- 逐条模式预览：消息数 + 首条摘要 -->
+            <div
+              v-else-if="state.mode === ImForwardMode.SINGLE && singlePreviewLines.length > 0"
+              class="flex flex-col w-full overflow-hidden rounded-md bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
+            >
+              <div class="flex flex-col px-3 py-2 gap-0.5">
+                <div
+                  v-for="(line, idx) in singlePreviewLines"
+                  :key="idx"
+                  class="text-13px text-[var(--el-text-color-primary)] truncate"
+                >
+                  {{ line }}
+                </div>
+              </div>
+              <div
+                class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
+              >
+                共 {{ state.messages.length }} 条消息
+              </div>
+            </div>
+
+            <!-- 留言（单行）：右侧表情按钮触发 FacePicker；选中 emoji 拼到末尾 -->
+            <div class="relative">
+              <el-input v-model="leaveMessage" :maxlength="100" placeholder="给朋友留言">
+                <template #suffix>
+                  <Icon
+                    icon="ant-design:smile-outlined"
+                    :size="18"
+                    class="cursor-pointer text-[var(--el-text-color-secondary)] hover:text-[var(--el-color-primary)]"
+                    @click.stop="emojiVisible = !emojiVisible"
+                  />
+                </template>
+              </el-input>
+              <FacePicker
+                v-model:visible="emojiVisible"
+                mode="emoji"
+                class="bottom-full right-0 mb-2"
+                @select-emoji="handleEmojiSelect"
               />
-            </span>
-            <UserAvatar
-              :url="conversation.avatar"
-              :name="conversation.name"
-              :size="32"
-              :clickable="false"
-            />
-            <span
-              class="flex-1 min-w-0 overflow-hidden text-sm truncate text-[var(--el-text-color-primary)]"
-            >
-              {{ conversation.name }}
-            </span>
-          </div>
-          <div
-            v-if="shownConversations.length === 0"
-            class="py-10 text-13px text-center text-[var(--el-text-color-disabled)]"
-          >
-            {{ keyword ? '没有满足条件的会话' : '暂无会话' }}
-          </div>
-        </el-scrollbar>
-      </div>
-
-      <!-- ============ 右栏：已选 + 预览卡 + 留言 + 按钮 ============ -->
-      <div class="flex flex-col flex-1 min-w-0">
-        <div
-          class="px-4 py-3 text-13px text-[var(--el-text-color-secondary)] flex-shrink-0 border-b border-[var(--el-border-color-lighter)]"
-        >
-          {{ sendTitle }}
-        </div>
-
-        <!-- 已选预览：每行 头像 + 名字 + × 移除 -->
-        <el-scrollbar class="flex-1">
-          <div
-            v-for="conversation in selectedConversations"
-            :key="getConversationKey(conversation)"
-            class="flex gap-2.5 items-center px-4 py-2"
-          >
-            <UserAvatar
-              :url="conversation.avatar"
-              :name="conversation.name"
-              :size="28"
-              :clickable="false"
-            />
-            <span
-              class="flex-1 min-w-0 overflow-hidden text-13px truncate text-[var(--el-text-color-primary)]"
-            >
-              {{ conversation.name }}
-            </span>
-            <Icon
-              icon="ant-design:close-outlined"
-              :size="14"
-              class="im-forward__remove flex-shrink-0 cursor-pointer"
-              @click="handleToggle(conversation)"
-            />
-          </div>
-          <div
-            v-if="selectedConversations.length === 0"
-            class="py-10 text-13px text-center text-[var(--el-text-color-disabled)]"
-          >
-            从左侧选择联系人或群聊
-          </div>
-        </el-scrollbar>
-
-        <!-- 待转发预览 + 留言 + 按钮 -->
-        <div
-          class="flex flex-col gap-3 px-4 py-3 flex-shrink-0 border-t border-[var(--el-border-color-lighter)]"
-        >
-          <!-- 合并模式：「[聊天记录] 标题 + 摘要列表」预览卡 -->
-          <div
-            v-if="state.mode === ImForwardMode.MERGE && mergePreview"
-            class="flex flex-col w-full rounded-md overflow-hidden bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
-          >
-            <div class="px-3 py-2 text-sm font-medium text-[var(--el-text-color-primary)] truncate">
-              {{ mergePreview.title }}
             </div>
-            <div class="px-3 pb-2 flex flex-col gap-0.5">
-              <div
-                v-for="(line, idx) in mergePreview.lines"
-                :key="idx"
-                class="text-12px text-[var(--el-text-color-secondary)] truncate"
+
+            <div class="flex gap-2 justify-end">
+              <el-button @click="visible = false">取消</el-button>
+              <el-button
+                type="primary"
+                :loading="sending"
+                :disabled="selectedKeys.length === 0"
+                @click="handleSend"
               >
-                {{ line }}
-              </div>
-            </div>
-            <div
-              class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
-            >
-              聊天记录
+                {{ confirmButtonText }}
+              </el-button>
             </div>
           </div>
-
-          <!-- 单条 / 逐条模式：消息数 + 首条摘要预览 -->
-          <div
-            v-else-if="state.mode === ImForwardMode.SINGLE && singlePreviewLines.length > 0"
-            class="flex flex-col w-full rounded-md overflow-hidden bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
-          >
-            <div class="flex flex-col gap-0.5 px-3 py-2">
-              <div
-                v-for="(line, idx) in singlePreviewLines"
-                :key="idx"
-                class="text-13px text-[var(--el-text-color-primary)] truncate"
-              >
-                {{ line }}
-              </div>
-            </div>
-            <div
-              class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
-            >
-              共 {{ state.messages.length }} 条消息
-            </div>
-          </div>
-
-          <!-- 留言：右侧表情按钮触发 FacePicker(mode=emoji)，所选 emoji 拼到末尾 -->
-          <div class="relative">
-            <el-input v-model="leaveMessage" :maxlength="100" placeholder="给朋友留言">
-              <template #suffix>
-                <Icon
-                  icon="ant-design:smile-outlined"
-                  :size="18"
-                  class="cursor-pointer text-[var(--el-text-color-secondary)] hover:text-[var(--el-color-primary)]"
-                  @click.stop="emojiVisible = !emojiVisible"
-                />
-              </template>
-            </el-input>
-            <FacePicker
-              v-model:visible="emojiVisible"
-              mode="emoji"
-              class="bottom-full right-0 mb-2"
-              @select-emoji="handleEmojiSelect"
-            />
-          </div>
-
-          <div class="flex gap-2 justify-end">
-            <el-button @click="visible = false">取消</el-button>
-            <el-button
-              type="primary"
-              :loading="sending"
-              :disabled="selectedKeys.length === 0"
-              @click="handleSend"
-            >
-              {{ confirmButtonText }}
-            </el-button>
-          </div>
-        </div>
-      </div>
+        </template>
+      </ConversationPickerPanel>
     </div>
   </el-dialog>
 </template>
@@ -199,7 +109,7 @@ import { computed, reactive, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
-import UserAvatar from '@/views/im/home/components/user/UserAvatar.vue'
+import ConversationPickerPanel from '@/views/im/home/components/picker/ConversationPickerPanel.vue'
 import FacePicker from '../../input/FacePicker.vue'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
@@ -210,11 +120,7 @@ import {
   MERGE_FORWARD_PREVIEW_LINES,
   type ImForwardModeValue
 } from '@/views/im/utils/constants'
-import {
-  filterConversationsByKeyword,
-  getConversationKey,
-  summarizeMessageContent
-} from '@/views/im/utils/conversation'
+import { getConversationKey, summarizeMessageContent } from '@/views/im/utils/conversation'
 import {
   buildMergeMessagePayload,
   removeQuotePayload,
@@ -224,7 +130,6 @@ import type { Conversation, Message } from '@/views/im/home/types'
 
 defineOptions({ name: 'ImMessageForwardDialog' })
 
-/** 父级 ref 调 open(opts) 触发；不再走 v-model + props */
 const message = useMessage()
 const conversationStore = useConversationStore()
 const { sendRaw, send } = useMessageSender()
@@ -236,23 +141,14 @@ const state = reactive({
   sourceConversation: null as Conversation | null
 })
 const visible = ref(false)
-
-const keyword = ref('')
+const selectedKeys = ref<string[]>([])
 const leaveMessage = ref('')
 const sending = ref(false)
-const selectedKeys = ref<string[]>([])
-const selectedSet = computed(() => new Set(selectedKeys.value))
-
 /** emoji picker 显隐：右侧笑脸按钮切换 */
 const emojiVisible = ref(false)
 
-/** 选中 emoji：拼到留言末尾；FacePicker 自身 emit('update:visible', false) 关闭面板 */
-function handleEmojiSelect(emoji: string) {
-  leaveMessage.value = `${leaveMessage.value}${emoji}`
-}
-
 defineExpose({
-  /** 打开转发弹窗 */
+  /** 打开转发弹窗：reset → 灌参 → visible=true */
   open(opts: {
     mode: ImForwardModeValue
     messages: Message[]
@@ -261,6 +157,9 @@ defineExpose({
     state.mode = opts.mode
     state.messages = opts.messages
     state.sourceConversation = opts.sourceConversation
+    selectedKeys.value = []
+    leaveMessage.value = ''
+    emojiVisible.value = false
     visible.value = true
   }
 })
@@ -268,48 +167,19 @@ defineExpose({
 /** 弹窗标题：按 mode 区分「逐条转发 / 合并转发」 */
 const dialogTitle = computed(() => (state.mode === ImForwardMode.MERGE ? '合并转发' : '逐条转发'))
 
-/** 右栏标题：选中多个时改「分别发送给」与底部按钮文案保持一致 */
-const sendTitle = computed(() => (selectedKeys.value.length > 1 ? '分别发送给' : '发送给'))
-
 /** 确认按钮文案：单选「发送」、多选「分别发送(n)」 */
 const confirmButtonText = computed(() =>
   selectedKeys.value.length > 1 ? `分别发送（${selectedKeys.value.length}）` : '发送'
 )
 
-/** 弹窗打开时复位 */
-function resetForm() {
-  keyword.value = ''
-  leaveMessage.value = ''
-  selectedKeys.value = []
-  emojiVisible.value = false
-}
-
-/** 候选会话：转发回原会话也允许（与微信一致：可以"转发给当前对话"） */
+/** 候选会话：从 store 拿排序后的列表（转发回原会话也允许，与微信一致） */
 const candidateConversations = computed<Conversation[]>(
   () => conversationStore.getSortedConversations
 )
 
-const shownConversations = computed(() =>
-  filterConversationsByKeyword(candidateConversations.value, keyword.value)
-)
-
-const selectedConversations = computed<Conversation[]>(() => {
-  const keys = selectedSet.value
-  return candidateConversations.value.filter((c) => keys.has(getConversationKey(c)))
-})
-
-function isSelected(conversation: Conversation): boolean {
-  return selectedSet.value.has(getConversationKey(conversation))
-}
-
-function handleToggle(conversation: Conversation) {
-  const key = getConversationKey(conversation)
-  const index = selectedKeys.value.indexOf(key)
-  if (index >= 0) {
-    selectedKeys.value.splice(index, 1)
-  } else {
-    selectedKeys.value.push(key)
-  }
+/** 选中 emoji：拼到留言末尾；FacePicker 自身负责关闭面板 */
+function handleEmojiSelect(emoji: string) {
+  leaveMessage.value = `${leaveMessage.value}${emoji}`
 }
 
 /** 合并 payload + 序列化 content；merge 模式下一次构造，预览 / 发送共用 */
@@ -337,7 +207,7 @@ const mergePreview = computed(() => {
   return { title: payload.title, lines }
 })
 
-/** 单条 / 逐条模式预览：取前 N 条 */
+/** 逐条模式预览：取前 N 条摘要 */
 const singlePreviewLines = computed(() =>
   state.messages.slice(0, MERGE_FORWARD_PREVIEW_LINES).map((m) => summarizeMessageContent(m))
 )
@@ -383,7 +253,15 @@ async function handleSend() {
     message.warning('没有可转发的消息')
     return
   }
-  const targets = selectedConversations.value
+  // 反查已选 conversation 对象（按 selectedKeys 数组顺序，即点击顺序）
+  const candidates = candidateConversations.value
+  const byKey = new Map(candidates.map((c) => [getConversationKey(c), c]))
+  const targets = selectedKeys.value
+    .map((key) => byKey.get(key))
+    .filter((c): c is Conversation => c != null)
+  if (targets.length === 0) {
+    return
+  }
   const leaveText = leaveMessage.value.trim()
   sending.value = true
   try {
@@ -397,6 +275,8 @@ async function handleSend() {
     })
     const results = await Promise.all(tasks)
     const failedNames = results.filter((r) => !r.ok).map((r) => r.target.name || '未命名会话')
+    // 命中的目标统一推到最近转发列表（部分失败也推：用户的"意图"已表达）
+    conversationStore.pushRecentForwardConversationKeys(targets.map((c) => getConversationKey(c)))
     if (failedNames.length === 0) {
       message.success('已转发')
     } else if (failedNames.length === targets.length) {
@@ -414,23 +294,11 @@ async function handleSend() {
 }
 </script>
 
-<style scoped>
-/* 双栏布局要顶到 dialog 边缘 */
-.im-forward-dialog :deep(.el-dialog__body) {
-  padding: 0;
-  border-top: 1px solid var(--el-border-color-lighter);
-}
-.im-forward-dialog :deep(.el-dialog__header) {
-  margin-right: 0;
-  padding-bottom: 16px;
-}
+<style scoped lang="scss">
+@use '@/views/im/home/components/picker/picker-dialog' as picker;
 
-/* 已选行 × 移除：常驻显示，hover 转危险色 */
-.im-forward__remove {
-  color: var(--el-text-color-placeholder);
-  transition: color 0.15s;
-}
-.im-forward__remove:hover {
-  color: var(--el-color-danger);
+.im-picker-dialog {
+  @include picker.styles;
 }
 </style>
+

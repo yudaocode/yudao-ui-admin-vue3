@@ -171,15 +171,10 @@
     </template>
 
     <!-- 加好友弹窗：携带预填用户跳过搜索步骤，直接进申请表单（理由按 addSource 区分话术） -->
-    <FriendAddDialog
-      v-model="addFriendVisible"
-      :preset-user="presetUserForAdd"
-      :add-source="addSource"
-      :add-source-extra="addSourceExtra"
-    />
+    <FriendAddDialog ref="friendAddDialogRef" />
 
     <!-- 把他推荐给朋友弹窗：仅 friend 态下出现入口 -->
-    <RecommendCardDialog v-model="recommendVisible" :target="recommendTarget" />
+    <RecommendCardDialog ref="recommendDialogRef" />
   </div>
 </template>
 
@@ -348,19 +343,21 @@ function handleComingSoon(featureName: string) {
 
 // ==================== 添加好友 / 删除好友 ====================
 
-// 加好友弹窗显隐 + 预填用户（点「加为好友」时把 props.user 传给 FriendAddDialog 跳过搜索）
-const addFriendVisible = ref(false)
-const presetUserForAdd = ref<UserVO | null>(null)
+/** 加好友弹窗 ref：handleAddFriend 调 open({ presetUser, addSource, addSourceExtra }) 触发 */
+const friendAddDialogRef = ref<InstanceType<typeof FriendAddDialog>>()
 
+/** 推荐名片弹窗 ref：handleRecommend 调用 open({ target }) 打开 */
+const recommendDialogRef = ref<InstanceType<typeof RecommendCardDialog>>()
 /** 把他推荐给朋友：弹 RecommendCardDialog 选目标会话 */
-const recommendVisible = ref(false) // 推荐名片弹窗显隐：「把他推荐给朋友」入口控制
-/** 推荐名片源对象：用户名片（targetType = PRIVATE），从 full 派生 */
-const recommendTarget = computed(() => toUserCardTarget(full.value))
 function handleRecommend() {
   if (!props.user?.id) {
     return
   }
-  recommendVisible.value = true
+  const target = toUserCardTarget(full.value)
+  if (!target) {
+    return
+  }
+  recommendDialogRef.value?.open({ target })
 }
 
 /** 加为好友：弹 FriendAddDialog（带预填用户），让用户填申请理由 + 备注后再发申请 */
@@ -368,7 +365,7 @@ function handleAddFriend() {
   if (!props.user?.id) {
     return
   }
-  presetUserForAdd.value = {
+  const presetUser: UserVO = {
     id: props.user.id,
     nickname: props.user.nickname,
     avatar: props.user.avatar,
@@ -376,7 +373,11 @@ function handleAddFriend() {
     deptId: props.user.deptId,
     deptName: props.user.deptName
   } as UserVO
-  addFriendVisible.value = true
+  friendAddDialogRef.value?.open({
+    presetUser,
+    addSource: props.addSource,
+    addSourceExtra: props.addSourceExtra
+  })
 }
 
 /** 加入黑名单：confirm → friendStore.blockFriend；后端 FRIEND_BLOCK 推到时由 dispatcher 同步多端 */

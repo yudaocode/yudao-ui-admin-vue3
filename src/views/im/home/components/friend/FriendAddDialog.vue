@@ -127,7 +127,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useUserStore } from '@/store/modules/user'
@@ -141,30 +141,23 @@ import { getSimpleUserListByNickname, type UserVO } from '@/api/system/user'
 
 defineOptions({ name: 'ImFriendAddDialog' })
 
-const props = withDefaults(
-  defineProps<{
-    modelValue: boolean
-    /** 预填目标用户：不为空时跳过搜索步骤，直接进入申请表单（群成员加好友 / 名片加好友等场景） */
-    presetUser?: UserVO | null
-    /** 添加来源；参见 ImFriendAddSourceEnum */
-    addSource?: number
-    /** 来源附带信息：addSource=ImFriendAddSource.GROUP 时传群名，话术拼为「我是 XX 群的 YY」 */
-    addSourceExtra?: string
-  }>(),
-  {
-    presetUser: null,
-    addSource: ImFriendAddSource.SEARCH
+const visible = ref(false)
+/** 预填目标用户：非 null 时跳过搜索步骤，直接进入申请表单（群成员加好友 / 名片加好友等场景） */
+const presetUser = ref<UserVO | null>(null)
+/** 添加来源；参见 ImFriendAddSourceEnum，默认 SEARCH */
+const addSource = ref<number>(ImFriendAddSource.SEARCH)
+/** 来源附带信息：addSource=ImFriendAddSource.GROUP 时传群名，话术拼为「我是 XX 群的 YY」 */
+const addSourceExtra = ref<string>('')
+
+defineExpose({
+  /** 打开加好友弹窗：reset → 灌参 → visible=true；不传 opts 走搜索模式 */
+  open(opts?: { presetUser?: UserVO | null; addSource?: number; addSourceExtra?: string }) {
+    presetUser.value = opts?.presetUser ?? null
+    addSource.value = opts?.addSource ?? ImFriendAddSource.SEARCH
+    addSourceExtra.value = opts?.addSourceExtra ?? ''
+    resetAll()
+    visible.value = true
   }
-)
-
-const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-}>()
-
-/** 弹窗显隐：把父侧 v-model 转双向计算 */
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
 })
 
 const friendStore = useFriendStore()
@@ -197,22 +190,15 @@ const submitting = ref(false)
 const dialogTitle = computed(() => (step.value === 'apply' ? '申请添加朋友' : '添加好友'))
 
 /** 是否预填模式（presetUser 不为空 → 跳过搜索，关闭即销毁，无「取消返回搜索」按钮） */
-const presetMode = computed(() => !!props.presetUser)
-
-/** 每次重新打开都把搜索态 / 申请态清空，避免上次的数据泄漏到下次 */
-watch(visible, (open) => {
-  if (open) {
-    resetAll()
-  }
-})
+const presetMode = computed(() => !!presetUser.value)
 
 function resetAll() {
   keyword.value = ''
   users.value = []
   searched.value = false
   // 预填模式：直接进申请表单，targetUser 取自 presetUser；申请理由按 addSource 区分话术
-  if (props.presetUser) {
-    targetUser.value = props.presetUser
+  if (presetUser.value) {
+    targetUser.value = presetUser.value
     applyContent.value = buildPresetApplyContent()
     displayName.value = ''
     step.value = 'apply'
@@ -232,7 +218,7 @@ function buildPresetApplyContent(): string {
     return ''
   }
   // 群聊场景拼带群名的话术；其它场景默认「我是 YY」
-  const groupExtra = props.addSource === ImFriendAddSource.GROUP ? props.addSourceExtra : ''
+  const groupExtra = addSource.value === ImFriendAddSource.GROUP ? addSourceExtra.value : ''
   return groupExtra ? `我是"${groupExtra}"的${myNickname}` : `我是${myNickname}`
 }
 
@@ -282,7 +268,7 @@ async function handleSubmitApply() {
       toUserId: targetUser.value.id,
       applyContent: applyContent.value.trim() || undefined,
       displayName: displayName.value.trim() || undefined,
-      addSource: props.addSource
+      addSource: addSource.value
     })
     // silent 分支（已是单向好友被静默重启）：主动 loadFriendInfo 入库，不依赖 WS FRIEND_ADD 推送，避免丢推时列表看不到
     if (requestId === null) {

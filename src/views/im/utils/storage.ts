@@ -60,6 +60,10 @@ export const StorageKeys = {
   groupMembers: (userId: number | string, groupId: number) =>
     `groupMembers:${userId}:${groupId}`,
 
+  /** 最近转发会话 key 列表（按 userId 分桶）；ConversationPickerPanel 左栏顶部头像区使用 */
+  recentForwardConversationKeys: (userId: number | string) =>
+    `recentForwardConversationKeys:${userId}`,
+
   /** 侧边栏宽度（localStorage）；三个 Tab 共用一份记忆，对齐微信（拖一次到处一致）。 */
   asideWidth: 'im:aside',
   /** 会话列表置顶折叠展开态（localStorage）；轻量 UI 偏好。 */

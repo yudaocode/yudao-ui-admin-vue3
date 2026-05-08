@@ -287,11 +287,7 @@ import TipSegments from './TipSegments.vue'
 
 defineOptions({ name: 'ImMessageHistory' })
 
-const props = defineProps<{
-  modelValue: boolean
-}>()
 const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
   // 历史消息行上的"定位"按钮：通知父组件 MessagePanel 滚到对应消息位置 + 关掉自己
   locate: [messageId: number]
 }>()
@@ -304,9 +300,13 @@ const openMergeDetail = inject(IM_MERGE_DETAIL_DIALOG_KEY)
 const voicePlayer = useVoicePlayer()
 const { convertPrivateMessage, convertGroupMessage } = useMessagePuller()
 
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+const visible = ref(false)
+
+defineExpose({
+  /** 打开历史消息抽屉 */
+  open() {
+    visible.value = true
+  }
 })
 
 const conversation = computed(() => conversationStore.activeConversation)
@@ -588,17 +588,14 @@ function onDialogOpen() {
   datePickerValue.value = new Date()
 }
 
-/** v-model 关闭时复位 + 停语音（兼容父组件 props 直接置 false 的路径，dialog @open 不一定再触发） */
-watch(
-  () => props.modelValue,
-  (value) => {
-    if (!value) {
-      activeFilter.value = null
-      keyword.value = ''
-      voicePlayer.stop()
-    }
+/** 抽屉关闭时复位 + 停语音 */
+watch(visible, (value) => {
+  if (!value) {
+    activeFilter.value = null
+    keyword.value = ''
+    voicePlayer.stop()
   }
-)
+})
 
 // ==================== helper ====================
 

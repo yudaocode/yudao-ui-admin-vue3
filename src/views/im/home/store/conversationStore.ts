@@ -7,6 +7,7 @@ import {
   ImMessageType,
   ImMessageStatus,
   IM_AT_ALL_USER_ID,
+  RECENT_FORWARD_MAX,
   isGroupNotification,
   isMediaMessageType,
   isNormalMessage
@@ -124,7 +125,8 @@ export const useConversationStore = defineStore('imConversationStore', {
     activeConversation: null as Conversation | null, // 当前激活的会话
     privateMessageMaxId: 0, // 私聊最大消息 id，作为 pull 的游标
     groupMessageMaxId: 0, // 群聊最大消息 id，作为 pull 的游标
-    loading: false // 是否正在批量加载（例如离线消息拉取期间），避免频繁写存储
+    loading: false, // 是否正在批量加载（例如离线消息拉取期间），避免频繁写存储
+    recentForwardConversationKeys: [] as string[] // 最近转发会话 key 列表（按推送顺序倒序，最大 RECENT_FORWARD_MAX 个）
   }),
 
   getters: {
@@ -179,9 +181,15 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
       try {
-        const meta = await imStorage.getItem<ConversationStoreMeta>(
-          StorageKeys.conversationMeta(userId)
-        )
+        // 顺手把最近转发列表也恢复出来；和 meta 并发读
+        const [meta, recent] = await Promise.all([
+          imStorage.getItem<ConversationStoreMeta>(StorageKeys.conversationMeta(userId)),
+          imStorage.getItem<string[]>(StorageKeys.recentForwardConversationKeys(userId))
+        ])
+        // 缺数据时显式赋空，避免切账号后沿用上一个用户的内存列表
+        this.recentForwardConversationKeys = Array.isArray(recent)
+          ? recent.slice(0, RECENT_FORWARD_MAX)
+          : []
         if (!meta) {
           return
         }
@@ -800,6 +808,55 @@ export const useConversationStore = defineStore('imConversationStore', {
       })
       this.saveConversations(this.activeConversation)
     },
+
+    // ==================== 最近转发 ====================
+
+    /**
+     * 推送一批会话 key 到最近转发列表：去重 + 推到队首 + 截断 RECENT_FORWARD_MAX
+     *
+     * 调用点：RecommendCardDialog / MessageForwardDialog 提交后（含部分成功）把目标 keys 推进来
+     */
+    pushRecentForwardConversationKeys(keys: string[]) {
+      if (!keys || keys.length === 0) {
+        return
+      }
+      const merged = [...keys, ...this.recentForwardConversationKeys]
+      this.recentForwardConversationKeys = Array.from(new Set(merged)).slice(
+        0,
+        RECENT_FORWARD_MAX
+      )
+      this.persistRecentForwardConversationKeys()
+    },
+
+    /**
+     * 从最近转发列表移除单条会话 key
+     *
+     * 调用点：ConversationPickerPanel「最近转发」段进入移除模式时点击 × 触发
+     */
+    removeRecentForwardConversationKey(key: string) {
+      const index = this.recentForwardConversationKeys.indexOf(key)
+      if (index < 0) {
+        return
+      }
+      this.recentForwardConversationKeys.splice(index, 1)
+      this.persistRecentForwardConversationKeys()
+    },
+
+    /** 把当前最近转发会话 key 列表落到 IDB；fire-and-forget，按 userId 分桶 */
+    persistRecentForwardConversationKeys() {
+      const userId = getCurrentUserId()
+      if (!userId) {
+        return
+      }
+      void imStorage
+        .setItem(
+          StorageKeys.recentForwardConversationKeys(userId),
+          toRaw(this.recentForwardConversationKeys)
+        )
+        .catch((e) => console.warn('[IM] 最近转发列表持久化失败', e))
+    },
+
+    // ==================== 其它 ====================
 
     /** 更新 privateMessageMaxId / groupMessageMaxId 游标 */
     updateMaxId(conversationType: number, messageId?: number) {

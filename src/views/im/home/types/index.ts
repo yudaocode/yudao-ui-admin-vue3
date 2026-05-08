@@ -206,7 +206,7 @@ export interface User {
 /**
  * 好友列表行：从 Friend 派生的展示快照
  * - id 用 friendUserId（与列表 click / 选中比对一致），不是 Friend.id（关系记录主键）
- * - deleted 派生自 Friend.status === DISABLE（软删保留），调用方按场景过滤
+ * - 软删（status === DISABLE）由上游 friendStore.getActiveFriends / getActiveFriendsLite 统一过滤掉
  */
 export interface FriendLite {
   id: number
@@ -215,7 +215,6 @@ export interface FriendLite {
   avatar?: string
   displayName?: string
   displayNamePinyin?: string // 备注拼音（优先于 nicknamePinyin 参与分桶）
-  deleted?: boolean
 }
 
 /**
