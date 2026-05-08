@@ -108,9 +108,9 @@
           </el-tooltip>
         </div>
 
-        <!-- 群聊：发送按钮 + ▼ 下拉菜单（点主按钮普通发送 / 点 ▼ 选「发送回执消息」），对齐微信 PC -->
+        <!-- 群聊 + 群已读开启：发送按钮 + ▼ 下拉菜单（点主按钮普通发送 / 点 ▼ 选「发送回执消息」），对齐微信 PC -->
         <el-dropdown
-          v-if="isGroup"
+          v-if="isGroup && MESSAGE_GROUP_READ_ENABLED"
           split-button
           type="primary"
           :disabled="!canSend"
@@ -124,7 +124,7 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <!-- 私聊：普通发送按钮（私聊没有群回执概念） -->
+        <!-- 私聊或群已读关闭：普通发送按钮（无群回执入口） -->
         <el-button v-else type="primary" :disabled="!canSend" @click="handleSend()">
           发 送
         </el-button>
@@ -175,6 +175,7 @@ import { useMediaUploader } from '@/views/im/home/composables/useMediaUploader'
 import { useMuteOverlay } from '@/views/im/home/composables/useMuteOverlay'
 import { getConversationKey } from '@/views/im/utils/conversation'
 import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
+import { MESSAGE_GROUP_READ_ENABLED } from '@/views/im/utils/config'
 import {
   serializeMessage,
   type FaceMessage,

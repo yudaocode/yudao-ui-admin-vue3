@@ -19,6 +19,22 @@ export const GROUP_ADMIN_MAX_COUNT = 3
 /** 单群置顶消息条数上限（对齐 yudao.im.group.pin-max-count） */
 export const GROUP_PIN_MAX_COUNT = 5
 
+/**
+ * 是否启用私聊已读功能（对齐 yudao.im.message.private-read-enabled）
+ *
+ * 关闭后：进入私聊会话不再上报已读位置；气泡的「已读 / 未读」标签隐藏；
+ * 管理后台私聊消息列表的「状态」列与详情中的状态字段隐藏
+ */
+export const MESSAGE_PRIVATE_READ_ENABLED = true
+
+/**
+ * 是否启用群聊已读功能（含群消息回执，对齐 yudao.im.message.group-read-enabled）
+ *
+ * 关闭后：进入群会话不再上报已读位置；输入框的「发送回执消息」入口隐藏；
+ * 群消息气泡上的「N 人已读」popover 隐藏；管理后台群消息列表的「状态」「回执」列与详情中对应字段隐藏
+ */
+export const MESSAGE_GROUP_READ_ENABLED = true
+
 /** 消息撤回时间限制（分钟，对齐 yudao.im.message.recall-timeout-minutes） */
 export const MESSAGE_RECALL_TIMEOUT_MINUTES = 5
 

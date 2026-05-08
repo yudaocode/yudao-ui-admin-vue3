@@ -94,7 +94,13 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column
+        v-if="MESSAGE_PRIVATE_READ_ENABLED"
+        label="状态"
+        align="center"
+        prop="status"
+        width="100"
+      >
         <template #default="{ row }">
           <dict-tag :type="DICT_TYPE.IM_PRIVATE_MESSAGE_STATUS" :value="row.status" />
         </template>
@@ -134,6 +140,7 @@
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { MESSAGE_PRIVATE_READ_ENABLED } from '@/views/im/utils/config'
 import * as ManagerPrivateMessageApi from '@/api/im/manager/message/private'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import MessageContentPreview from '../MessageContentPreview.vue'

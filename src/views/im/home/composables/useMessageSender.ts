@@ -18,6 +18,7 @@ import {
   type TextMessage
 } from '../../utils/message'
 import { ImMessageType, ImMessageStatus, ImConversationType } from '../../utils/constants'
+import { MESSAGE_PRIVATE_READ_ENABLED, MESSAGE_GROUP_READ_ENABLED } from '../../utils/config'
 import type { Conversation, Message } from '../types'
 import { useUserStore } from '@/store/modules/user'
 
@@ -229,8 +230,12 @@ export const useMessageSender = () => {
     if (!maxMessageId) {
       return
     }
-    // 接口调用：私聊 / 群聊接口签名一致，按会话类型分发；失败仅记录日志，不回退本地已读状态
+    // 接口调用：按会话类型分发，并按对应已读开关控制；失败仅记录日志，不回退本地已读状态
     const isPrivate = conversation.type === ImConversationType.PRIVATE
+    const readEnabled = isPrivate ? MESSAGE_PRIVATE_READ_ENABLED : MESSAGE_GROUP_READ_ENABLED
+    if (!readEnabled) {
+      return
+    }
     try {
       await (isPrivate
         ? apiReadPrivateMessages(conversation.targetId, maxMessageId)
@@ -253,6 +258,10 @@ export const useMessageSender = () => {
    */
   const syncPrivateReadStatus = async (peerId: number) => {
     if (!peerId) {
+      return
+    }
+    // 私聊已读关闭：跳过对方已读位置同步，避免无谓接口调用
+    if (!MESSAGE_PRIVATE_READ_ENABLED) {
       return
     }
     try {

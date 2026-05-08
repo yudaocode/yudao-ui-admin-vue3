@@ -14,7 +14,7 @@
       <el-descriptions-item label="类型">
         <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="detail.type" />
       </el-descriptions-item>
-      <el-descriptions-item label="状态">
+      <el-descriptions-item v-if="MESSAGE_PRIVATE_READ_ENABLED" label="状态">
         <dict-tag :type="DICT_TYPE.IM_PRIVATE_MESSAGE_STATUS" :value="detail.status" />
       </el-descriptions-item>
       <el-descriptions-item label="发送时间" :span="2">
@@ -38,6 +38,7 @@
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatJson } from '@/views/im/utils/message'
+import { MESSAGE_PRIVATE_READ_ENABLED } from '@/views/im/utils/config'
 import * as ManagerPrivateMessageApi from '@/api/im/manager/message/private'
 import MessageContentPreview from '../MessageContentPreview.vue'
 

@@ -112,12 +112,24 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="回执" align="center" prop="receiptStatus" width="110">
+      <el-table-column
+        v-if="MESSAGE_GROUP_READ_ENABLED"
+        label="回执"
+        align="center"
+        prop="receiptStatus"
+        width="110"
+      >
         <template #default="{ row }">
           <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_RECEIPT_STATUS" :value="row.receiptStatus" />
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column
+        v-if="MESSAGE_GROUP_READ_ENABLED"
+        label="状态"
+        align="center"
+        prop="status"
+        width="100"
+      >
         <template #default="{ row }">
           <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_STATUS" :value="row.status" />
         </template>
@@ -152,6 +164,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
+import { MESSAGE_GROUP_READ_ENABLED } from '@/views/im/utils/config'
 import * as ManagerGroupMessageApi from '@/api/im/manager/message/group'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import GroupSelect from '@/views/im/manager/group/components/GroupSelect.vue'

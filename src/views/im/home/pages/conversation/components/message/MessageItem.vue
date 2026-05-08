@@ -168,7 +168,12 @@ import {
   isMediaMessageType,
   isNormalMessage
 } from '@/views/im/utils/constants'
-import { MESSAGE_TIME_TIP_GAP_MS, MESSAGE_RECALL_WINDOW_MS } from '@/views/im/utils/config'
+import {
+  MESSAGE_TIME_TIP_GAP_MS,
+  MESSAGE_RECALL_WINDOW_MS,
+  MESSAGE_PRIVATE_READ_ENABLED,
+  MESSAGE_GROUP_READ_ENABLED
+} from '@/views/im/utils/config'
 import { pinGroupMessage as apiPinGroupMessage, cancelMuteMember } from '@/api/im/group'
 import { removeGroupMember } from '@/api/im/group/member'
 import {
@@ -399,8 +404,11 @@ const senderDisplayName = computed(() => {
   )
 })
 
-/** 私聊「已读 / 未读」态（仅对自己发送的私聊消息展示） */
+/** 私聊「已读 / 未读」态（仅对自己发送的私聊消息展示；私聊已读全局关闭时不再展示） */
 const privateReadLabel = computed(() => {
+  if (!MESSAGE_PRIVATE_READ_ENABLED) {
+    return ''
+  }
   if (!props.message.selfSend) {
     return ''
   }
@@ -416,8 +424,11 @@ const privateReadLabel = computed(() => {
   return ''
 })
 
-/**是否需要显示群回执 popover：自己发的群消息且后端开启了回执（NO_RECEIPT 表示发送时未要求回执，不渲染） */
+/**是否需要显示群回执 popover：自己发的群消息且后端开启了回执（NO_RECEIPT 表示发送时未要求回执，不渲染；群已读全局关闭时统一不展示） */
 const showGroupReadStatus = computed(() => {
+  if (!MESSAGE_GROUP_READ_ENABLED) {
+    return false
+  }
   if (!props.message.selfSend) {
     return false
   }

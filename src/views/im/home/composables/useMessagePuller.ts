@@ -19,7 +19,11 @@ import {
   isFriendChatTip,
   isFriendNotification
 } from '../../utils/constants'
-import { MESSAGE_PRIVATE_PULL_SIZE, MESSAGE_GROUP_PULL_SIZE } from '../../utils/config'
+import {
+  MESSAGE_PRIVATE_PULL_SIZE,
+  MESSAGE_GROUP_PULL_SIZE,
+  MESSAGE_PRIVATE_READ_ENABLED
+} from '../../utils/config'
 import { useUserStore } from '@/store/modules/user'
 import type { Message } from '../types'
 
@@ -220,8 +224,12 @@ export const useMessagePuller = () => {
 
         // 重连 / 冷启动后补齐当前激活私聊会话的「对方已读位置」
         // 离线期间错过的 RECEIPT 推送会被这里补回；其他私聊会话等用户点开时由 Index.vue 的 watch 触发
+        // 私聊已读关闭时跳过，避免打到已禁用接口触发错误日志
         const active = conversationStore.activeConversation
-        if (active && active.type === ImConversationType.PRIVATE) {
+        if (
+          MESSAGE_PRIVATE_READ_ENABLED
+          && active && active.type === ImConversationType.PRIVATE
+        ) {
           try {
             const maxReadId = await apiGetPrivateMaxReadMessageId(active.targetId)
             if (maxReadId) {

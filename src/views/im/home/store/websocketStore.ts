@@ -13,6 +13,7 @@ import {
   isNormalMessage
 } from '../../utils/constants'
 import { playAudioTip } from '../../utils/message'
+import { MESSAGE_PRIVATE_READ_ENABLED, MESSAGE_GROUP_READ_ENABLED } from '../../utils/config'
 import { useConversationStore } from './conversationStore'
 import { useFriendStore, type FriendNotificationPayload } from './friendStore'
 import { getFriendDisplayName } from '../../utils/user'
@@ -356,12 +357,14 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationStore.activeConversation?.type === ImConversationType.PRIVATE &&
           conversationStore.activeConversation?.targetId === peerId
         if (isActive) {
-          // 聊天窗口打开 = 实际看到了：本端清未读 + 上报后端，让对方 UI 立刻切到"已读"
+          // 聊天窗口打开 = 实际看到了：本端清未读；私聊已读开启时再上报后端，让对方 UI 立刻切到"已读"
           // 已读位置直接用刚到的消息 id（这条就是当前会话最大 id）
           conversationStore.markActiveAsRead()
-          apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
-            console.warn('[IM WS] 自动已读上报失败', e)
-          })
+          if (MESSAGE_PRIVATE_READ_ENABLED) {
+            apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
+              console.warn('[IM WS] 自动已读上报失败', e)
+            })
+          }
         } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
           // 非当前会话且未免打扰：响一下提示音（带节流，详见 playAudioTip）；FRIEND_* 等系统事件不响
           playAudioTip()
@@ -369,8 +372,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       }
     },
 
-    /** 私聊 READ 事件：自己的其它终端在对方会话里标为已读，本端同步清零未读 */
+    /** 私聊 READ 事件：自己的其它终端在对方会话里标为已读，本端同步清零未读；私聊已读关闭时兜底忽略 */
     handlePrivateRead(websocketMessage: ImPrivateMessageDTO) {
+      if (!MESSAGE_PRIVATE_READ_ENABLED) {
+        return
+      }
       const conversationStore = useConversationStore()
       const conversation = conversationStore.getConversation(
         ImConversationType.PRIVATE,
@@ -385,9 +391,12 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     /**
      * 私聊 RECEIPT 事件：对方读了我的消息，把和对方会话里自己发的消息标为已读
      * 后端将 maxReadId 编码在 DTO 的 id 字段（见 ImPrivateMessageDTO.ofReceipt），
-     * 这里据此卡边界，避免把"回执在路上时刚发的消息"误标为已读。
+     * 这里据此卡边界，避免把"回执在路上时刚发的消息"误标为已读；私聊已读关闭时兜底忽略
      */
     handlePrivateReceipt(websocketMessage: ImPrivateMessageDTO) {
+      if (!MESSAGE_PRIVATE_READ_ENABLED) {
+        return
+      }
       if (!websocketMessage.id) {
         return
       }
@@ -463,11 +472,13 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationStore.activeConversation?.type === ImConversationType.GROUP &&
           conversationStore.activeConversation?.targetId === websocketMessage.groupId
         if (isActive) {
-          // 群已读上报需要带 messageId（群消息以"读到第几条"的游标为准，区别于私聊只标 receiverId）
+          // 群已读上报需要带 messageId（群消息以"读到第几条"的游标为准，区别于私聊只标 receiverId）；群已读关闭时仅本地清零
           conversationStore.markActiveAsRead()
-          apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id).catch((e) => {
-            console.warn('[IM WS] 自动已读上报失败', e)
-          })
+          if (MESSAGE_GROUP_READ_ENABLED) {
+            apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id).catch((e) => {
+              console.warn('[IM WS] 自动已读上报失败', e)
+            })
+          }
         } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
           // GROUP_* 群广播事件等系统消息不响提示音
           playAudioTip()
@@ -477,8 +488,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
 
     // ==================== 群聊已读 / 回执 ====================
 
-    /** 群聊 READ：自己其它终端在某群里标为已读，本端同步清零该群未读 */
+    /** 群聊 READ：自己其它终端在某群里标为已读，本端同步清零该群未读；群已读关闭时兜底忽略 */
     handleGroupRead(websocketMessage: ImGroupMessageDTO) {
+      if (!MESSAGE_GROUP_READ_ENABLED) {
+        return
+      }
       const conversationStore = useConversationStore()
       const conversation = conversationStore.getConversation(
         ImConversationType.GROUP,
@@ -490,8 +504,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       conversationStore.saveConversations()
     },
 
-    /** 群聊 RECEIPT：更新某条群消息的 readCount / receiptStatus */
+    /** 群聊 RECEIPT：更新某条群消息的 readCount / receiptStatus；群已读关闭时兜底忽略 */
     handleGroupReceipt(websocketMessage: ImGroupMessageDTO) {
+      if (!MESSAGE_GROUP_READ_ENABLED) {
+        return
+      }
       const conversationStore = useConversationStore()
       conversationStore.applyReadReceipt({
         conversationType: ImConversationType.GROUP,

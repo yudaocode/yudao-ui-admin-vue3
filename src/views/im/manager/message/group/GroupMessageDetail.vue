@@ -12,7 +12,7 @@
       <el-descriptions-item label="类型">
         <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="detail.type" />
       </el-descriptions-item>
-      <el-descriptions-item label="状态">
+      <el-descriptions-item v-if="MESSAGE_GROUP_READ_ENABLED" label="状态">
         <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_STATUS" :value="detail.status" />
       </el-descriptions-item>
       <el-descriptions-item label="@用户" :span="2">
@@ -50,6 +50,7 @@ import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
 import { formatJson } from '@/views/im/utils/message'
+import { MESSAGE_GROUP_READ_ENABLED } from '@/views/im/utils/config'
 import * as ManagerGroupMessageApi from '@/api/im/manager/message/group'
 import MessageContentPreview from '../MessageContentPreview.vue'
 
