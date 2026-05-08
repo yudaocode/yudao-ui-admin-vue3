@@ -162,9 +162,9 @@ import {
   ImConversationType,
   ImForwardMode,
   ImMessageType,
-  MERGE_FORWARD_PREVIEW_LINES,
   type ImForwardModeValue
 } from '@/views/im/utils/constants'
+import { MESSAGE_MERGE_PREVIEW_LINES } from '@/views/im/utils/config'
 import { getConversationKey, summarizeMessageContent } from '@/views/im/utils/conversation'
 import { buildDefaultGroupName } from '@/views/im/utils/group'
 import {
@@ -271,14 +271,14 @@ const mergePreview = computed(() => {
     return null
   }
   const lines = payload.messages
-    .slice(0, MERGE_FORWARD_PREVIEW_LINES)
+    .slice(0, MESSAGE_MERGE_PREVIEW_LINES)
     .map((item) => `${item.senderNickname}：${summarizeMessageContent(item)}`)
   return { title: payload.title, lines }
 })
 
 /** 逐条模式预览：取前 N 条摘要 */
 const singlePreviewLines = computed(() =>
-  state.messages.slice(0, MERGE_FORWARD_PREVIEW_LINES).map((m) => summarizeMessageContent(m))
+  state.messages.slice(0, MESSAGE_MERGE_PREVIEW_LINES).map((m) => summarizeMessageContent(m))
 )
 
 /** 待发送的逐条消息：剥离 quote 一次，发送多目标时复用 */

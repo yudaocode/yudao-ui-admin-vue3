@@ -21,11 +21,8 @@ import {
   type ImFriendRequestRespVO
 } from '@/api/im/friend/request'
 import { useConversationStore } from './conversationStore'
-import {
-  FRIEND_REQUEST_PAGE_SIZE,
-  ImConversationType,
-  ImFriendRequestHandleResult
-} from '../../utils/constants'
+import { ImConversationType, ImFriendRequestHandleResult } from '../../utils/constants'
+import { FRIEND_REQUEST_PAGE_SIZE } from '../../utils/config'
 import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../utils/storage'
 import { getFriendDisplayName } from '../../utils/user'
 import type { Friend, FriendLite, FriendRequest } from '../types'

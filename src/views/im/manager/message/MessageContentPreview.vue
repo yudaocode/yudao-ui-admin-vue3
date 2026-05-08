@@ -128,12 +128,8 @@ import { computed } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { formatFileSize } from '@/utils/file'
 import { formatSeconds } from '@/utils/formatTime'
-import {
-  ImMessageType,
-  MERGE_FORWARD_PREVIEW_LINES,
-  isFriendChatTip,
-  isGroupNotification
-} from '@/views/im/utils/constants'
+import { ImMessageType, isFriendChatTip, isGroupNotification } from '@/views/im/utils/constants'
+import { MESSAGE_MERGE_PREVIEW_LINES } from '@/views/im/utils/config'
 import CardLineLabel from '@/views/im/home/components/card/CardLineLabel.vue'
 import {
   parseMessage,
@@ -207,7 +203,7 @@ const mergePreviewLines = computed(() => {
     return []
   }
   return mergePayload.value.messages
-    .slice(0, MERGE_FORWARD_PREVIEW_LINES)
+    .slice(0, MESSAGE_MERGE_PREVIEW_LINES)
     .map((item) => `${item.senderNickname}：${summarizeMessageContent(item)}`)
 })
 

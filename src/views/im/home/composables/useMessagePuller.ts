@@ -16,11 +16,10 @@ import {
 import {
   ImConversationType,
   ImMessageType,
-  PRIVATE_MESSAGE_PULL_SIZE,
-  GROUP_MESSAGE_PULL_SIZE,
   isFriendChatTip,
   isFriendNotification
 } from '../../utils/constants'
+import { MESSAGE_PRIVATE_PULL_SIZE, MESSAGE_GROUP_PULL_SIZE } from '../../utils/config'
 import { useUserStore } from '@/store/modules/user'
 import type { Message } from '../types'
 
@@ -109,7 +108,7 @@ export const useMessagePuller = () => {
     // 私聊 / 群聊各自一套接口和分页大小，按 isPrivate 在循环内分支调度
     let minId = startMinId || 0
     const isPrivate = conversationType === ImConversationType.PRIVATE
-    const size = isPrivate ? PRIVATE_MESSAGE_PULL_SIZE : GROUP_MESSAGE_PULL_SIZE
+    const size = isPrivate ? MESSAGE_PRIVATE_PULL_SIZE : MESSAGE_GROUP_PULL_SIZE
     while (true) {
       const list = isPrivate
         ? await apiPullPrivateMessages({ minId, size })

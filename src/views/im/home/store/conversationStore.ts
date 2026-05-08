@@ -7,11 +7,11 @@ import {
   ImMessageType,
   ImMessageStatus,
   IM_AT_ALL_USER_ID,
-  RECENT_FORWARD_MAX,
   isGroupNotification,
   isMediaMessageType,
   isNormalMessage
 } from '../../utils/constants'
+import { CONVERSATION_RECENT_FORWARD_MAX } from '../../utils/config'
 import { getCurrentUserId, imStorage, removeQuietly, StorageKeys } from '../../utils/storage'
 import { parseRecallMessageId, revokeBlobUrlsInContent } from '../../utils/message'
 import { resolveConversationLastContent } from '../../utils/conversation'
@@ -126,7 +126,7 @@ export const useConversationStore = defineStore('imConversationStore', {
     privateMessageMaxId: 0, // 私聊最大消息 id，作为 pull 的游标
     groupMessageMaxId: 0, // 群聊最大消息 id，作为 pull 的游标
     loading: false, // 是否正在批量加载（例如离线消息拉取期间），避免频繁写存储
-    recentForwardConversationKeys: [] as string[] // 最近转发会话 key 列表（按推送顺序倒序，最大 RECENT_FORWARD_MAX 个）
+    recentForwardConversationKeys: [] as string[] // 最近转发会话 key 列表（按推送顺序倒序，最大 CONVERSATION_RECENT_FORWARD_MAX 个）
   }),
 
   getters: {
@@ -188,7 +188,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         ])
         // 缺数据时显式赋空，避免切账号后沿用上一个用户的内存列表
         this.recentForwardConversationKeys = Array.isArray(recent)
-          ? recent.slice(0, RECENT_FORWARD_MAX)
+          ? recent.slice(0, CONVERSATION_RECENT_FORWARD_MAX)
           : []
         if (!meta) {
           return
@@ -812,7 +812,7 @@ export const useConversationStore = defineStore('imConversationStore', {
     // ==================== 最近转发 ====================
 
     /**
-     * 推送一批会话 key 到最近转发列表：去重 + 推到队首 + 截断 RECENT_FORWARD_MAX
+     * 推送一批会话 key 到最近转发列表：去重 + 推到队首 + 截断 CONVERSATION_RECENT_FORWARD_MAX
      *
      * 调用点：RecommendCardDialog / MessageForwardDialog 提交后（含部分成功）把目标 keys 推进来
      */
@@ -823,7 +823,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       const merged = [...keys, ...this.recentForwardConversationKeys]
       this.recentForwardConversationKeys = Array.from(new Set(merged)).slice(
         0,
-        RECENT_FORWARD_MAX
+        CONVERSATION_RECENT_FORWARD_MAX
       )
       this.persistRecentForwardConversationKeys()
     },

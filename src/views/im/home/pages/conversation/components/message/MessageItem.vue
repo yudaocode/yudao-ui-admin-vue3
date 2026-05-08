@@ -163,12 +163,12 @@ import {
   ImConversationType,
   ImFriendAddSource,
   ImGroupMemberRole,
-  TIME_TIP_GAP_MS,
   isFriendChatTip,
   isGroupNotification,
   isMediaMessageType,
   isNormalMessage
 } from '@/views/im/utils/constants'
+import { MESSAGE_TIME_TIP_GAP_MS, MESSAGE_RECALL_WINDOW_MS } from '@/views/im/utils/config'
 import { pinGroupMessage as apiPinGroupMessage, cancelMuteMember } from '@/api/im/group'
 import { removeGroupMember } from '@/api/im/group/member'
 import {
@@ -254,7 +254,7 @@ const shouldShowTimeTip = computed(() => {
   if (!props.prevMessage?.sendTime) {
     return true
   }
-  return props.message.sendTime - props.prevMessage.sendTime > TIME_TIP_GAP_MS
+  return props.message.sendTime - props.prevMessage.sendTime > MESSAGE_TIME_TIP_GAP_MS
 })
 
 /** 仅 MessageItem 自身仍要用到的 type 判定（其它分支已下沉到 MessageBubble） */
@@ -477,9 +477,6 @@ const MENU_KEYS = {
 } as const
 type MenuKey = (typeof MENU_KEYS)[keyof typeof MENU_KEYS]
 
-/** 撤回时间窗：自己发送的消息超过这个时长就不能再撤回，菜单回退为「删除」（对齐微信 2 分钟） */
-const RECALL_WINDOW_MS = 2 * 60 * 1000
-
 /**
  * 右键菜单项：
  * - 引用：已落库（id≠0）+ 未撤回的消息可引用，引用块写入 draftStore.reply
@@ -589,7 +586,7 @@ async function handleContextMenu(e: MouseEvent) {
     props.message.selfSend &&
     !!props.message.id &&
     !isRecall.value &&
-    Date.now() - props.message.sendTime <= RECALL_WINDOW_MS
+    Date.now() - props.message.sendTime <= MESSAGE_RECALL_WINDOW_MS
   if (canRecall) {
     items.push({
       key: MENU_KEYS.RECALL,

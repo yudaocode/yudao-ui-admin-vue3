@@ -202,27 +202,6 @@ export const ImFriendRequestHandleResult = {
   REFUSED: 2 // 拒绝
 } as const
 
-/** 群管理员人数上限（对齐后端 GROUP_ADMIN_MAX_COUNT） */
-export const GROUP_ADMIN_MAX_COUNT = 3
-
-/** 群置顶消息条数上限（对齐后端 GROUP_PIN_MAX_COUNT） */
-export const GROUP_PIN_MAX_COUNT = 5
-
-/** 每次拉取私聊消息的最大条数（后端上限 1000，前端取保守值 100） */
-export const PRIVATE_MESSAGE_PULL_SIZE = 100
-
-/** 每次拉取群聊消息的最大条数（后端上限 1000，前端取保守值 100） */
-export const GROUP_MESSAGE_PULL_SIZE = 100
-
-/** 「我相关」好友申请列表的单次拉取条数（游标分页 page size，前端控制） */
-export const FRIEND_REQUEST_PAGE_SIZE = 100
-
-/** 「我相关」加群申请列表的单次拉取条数 */
-export const GROUP_REQUEST_PAGE_SIZE = 100
-
-/** 消息之间渲染「时间分隔条」的阈值：10 分钟 */
-export const TIME_TIP_GAP_MS = 10 * 60 * 1000
-
 /**
  * @全体成员 的特殊 userId 标识：atUserIds 中包含 -1 表示 @ 全体成员
  *
@@ -233,12 +212,6 @@ export const IM_AT_ALL_USER_ID = -1
 
 /** @全体成员 的展示名（对齐微信 PC） */
 export const IM_AT_ALL_NICKNAME = '所有人'
-
-/** 合并转发气泡内预览的最大行数（对齐微信「聊天记录」气泡） */
-export const MERGE_FORWARD_PREVIEW_LINES = 3
-
-/** 最近转发会话 key 列表的最大保留数量（对齐微信 PC 横向头像区可见容量） */
-export const RECENT_FORWARD_MAX = 12
 
 /** 转发模式：SINGLE 逐条原样转 / MERGE 打包成 MergeMessage */
 export const ImForwardMode = {
