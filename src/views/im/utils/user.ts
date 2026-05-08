@@ -499,3 +499,36 @@ export function getGenderColor(sex?: number): string {
   }
   return ''
 }
+
+/** 头像色卡底色调色板（参考微信） */
+const AVATAR_BG_COLORS = ['#07C160', '#1A95FF', '#FA9D3B', '#9163E0', '#F76760', '#1ABC9C']
+
+/** 头像色卡文字：中文取首字、英文取前 2 字母大写、其他取首字大写、空名返回空串 */
+export function getAvatarText(name?: string): string {
+  const trimmed = name?.trim()
+  if (!trimmed) {
+    return ''
+  }
+  const first = trimmed.charAt(0)
+  const code = first.charCodeAt(0)
+  if (code >= 0x4e00 && code <= 0x9fa5) {
+    return first
+  }
+  const letters = trimmed.match(/[A-Za-z]/g)
+  if (!letters || letters.length === 0) {
+    return first.toUpperCase()
+  }
+  return letters.slice(0, 2).join('').toUpperCase()
+}
+
+/** 头像色卡底色：按 name charCode 之和取调色板色，空名走默认灰 */
+export function getAvatarBgColor(name?: string): string {
+  if (!name) {
+    return '#909399'
+  }
+  let hash = 0
+  for (let i = 0; i < name.length; i++) {
+    hash += name.charCodeAt(i)
+  }
+  return AVATAR_BG_COLORS[hash % AVATAR_BG_COLORS.length]
+}

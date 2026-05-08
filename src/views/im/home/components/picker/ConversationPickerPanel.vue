@@ -43,7 +43,15 @@
               @click="handleRecentTileClick(conversation)"
             >
               <div class="relative">
+                <GroupAvatar
+                  v-if="conversation.type === ImConversationType.GROUP"
+                  :group-id="conversation.targetId"
+                  :url="conversation.avatar"
+                  :name="conversation.name"
+                  :size="36"
+                />
                 <UserAvatar
+                  v-else
                   :url="conversation.avatar"
                   :name="conversation.name"
                   :size="36"
@@ -124,7 +132,15 @@
               color="#fff"
             />
           </span>
+          <GroupAvatar
+            v-if="conversation.type === ImConversationType.GROUP"
+            :group-id="conversation.targetId"
+            :url="conversation.avatar"
+            :name="conversation.name"
+            :size="32"
+          />
           <UserAvatar
+            v-else
             :url="conversation.avatar"
             :name="conversation.name"
             :size="32"
@@ -163,7 +179,15 @@
           :key="getConversationKey(conversation)"
           class="flex gap-2.5 items-center px-4 py-2"
         >
+          <GroupAvatar
+            v-if="conversation.type === ImConversationType.GROUP"
+            :group-id="conversation.targetId"
+            :url="conversation.avatar"
+            :name="conversation.name"
+            :size="32"
+          />
           <UserAvatar
+            v-else
             :url="conversation.avatar"
             :name="conversation.name"
             :size="32"
@@ -206,7 +230,9 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import UserAvatar from '../user/UserAvatar.vue'
+import GroupAvatar from '../group/GroupAvatar.vue'
 import { filterConversationsByKeyword, getConversationKey } from '../../../utils/conversation'
+import { ImConversationType } from '../../../utils/constants'
 import type { Conversation } from '../../types'
 
 defineOptions({ name: 'ImConversationPickerPanel' })

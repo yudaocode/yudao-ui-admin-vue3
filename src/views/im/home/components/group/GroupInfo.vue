@@ -7,11 +7,11 @@
   -->
   <div class="flex justify-center">
     <div class="w-full max-w-[320px] flex flex-col gap-3 items-center">
-      <UserAvatar
+      <GroupAvatar
+        :group-id="group.id"
         :url="group.showImage || group.showImageThumb"
         :name="group.showGroupName || group.name"
         :size="72"
-        :clickable="false"
         :previewable="isMember"
       />
       <div
@@ -47,7 +47,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 
-import UserAvatar from '../user/UserAvatar.vue'
+import GroupAvatar from './GroupAvatar.vue'
 import GroupMemberGrid from './GroupMemberGrid.vue'
 import { useUserStore } from '@/store/modules/user'
 import { CommonStatusEnum } from '@/utils/constants'

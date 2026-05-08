@@ -9,11 +9,11 @@
     :class="{ '!bg-[#d9ecff] dark:!bg-[var(--el-color-primary-light-8)]': active }"
     @click="$emit('click', group)"
   >
-    <UserAvatar
+    <GroupAvatar
+      :group-id="group.id"
       :url="group.showImage || group.showImageThumb"
       :name="group.showGroupName || group.name"
       :size="42"
-      :clickable="false"
     />
     <div class="flex flex-1 min-w-0">
       <!-- 单行展示群名；成员数仅在群详情面板展示，列表里不重复 -->
@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import UserAvatar from '../user/UserAvatar.vue'
+import GroupAvatar from './GroupAvatar.vue'
 import type { GroupLite } from '../../types'
 
 defineOptions({ name: 'ImGroupItem' })

@@ -46,6 +46,7 @@ import { computed } from 'vue'
 
 import { useImUiStore } from '../../store/uiStore'
 import { ImFriendAddSource } from '../../../utils/constants'
+import { getAvatarBgColor, getAvatarText } from '../../../utils/user'
 import type { User } from '../../types'
 
 defineOptions({ name: 'ImUserAvatar', inheritAttrs: false })
@@ -90,35 +91,11 @@ const textStyle = computed(() => ({
   borderRadius: props.radius
 }))
 
-/** 色卡首字：中文取 1 个字；英文/拉丁取前 2 个字母（跳过数字、空格、符号） */
-const avatarText = computed(() => {
-  const trimmed = props.name?.trim()
-  if (!trimmed) {
-    return ''
-  }
-  const first = trimmed.charAt(0)
-  const code = first.charCodeAt(0)
-  if (code >= 0x4e00 && code <= 0x9fa5) {
-    return first
-  }
-  const letters = trimmed.match(/[A-Za-z]/g)
-  if (!letters || letters.length === 0) {
-    return first.toUpperCase()
-  }
-  return letters.slice(0, 2).join('').toUpperCase()
-})
+/** 色卡首字：中文取 1 个字、英文 / 拉丁取前 2 个字母 */
+const avatarText = computed(() => getAvatarText(props.name))
 
-const colors = ['#07C160', '#1A95FF', '#FA9D3B', '#9163E0', '#F76760', '#1ABC9C'] // 基于用户名哈希的色卡色，参考微信调色板
-const textColor = computed(() => {
-  if (!props.name) {
-    return '#909399'
-  }
-  let hash = 0
-  for (let i = 0; i < props.name.length; i++) {
-    hash += props.name.charCodeAt(i)
-  }
-  return colors[hash % colors.length]
-})
+/** 色卡底色：按昵称 charCode 哈希取调色板色 */
+const textColor = computed(() => getAvatarBgColor(props.name))
 
 /** 头像点击：previewable 走 el-image 预览不弹名片；否则按 user / id 任一入参打开名片 */
 function handleClick(e: MouseEvent) {

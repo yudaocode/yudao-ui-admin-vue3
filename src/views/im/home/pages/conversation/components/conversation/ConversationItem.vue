@@ -7,7 +7,15 @@
   >
     <!-- 头像 + 未读徽标；免打扰会话不显示徽标 -->
     <div class="relative">
+      <GroupAvatar
+        v-if="isGroup"
+        :group-id="conversation.targetId"
+        :url="conversation.avatar"
+        :name="conversation.name"
+        :size="40"
+      />
       <UserAvatar
+        v-else
         :url="conversation.avatar"
         :name="conversation.name"
         :size="40"
@@ -90,6 +98,7 @@ import { getSenderDisplayName } from '@/views/im/utils/user'
 import { buildRecallTip } from '@/views/im/utils/conversation'
 import type { Conversation } from '../../../../types'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
+import GroupAvatar from '../../../../components/group/GroupAvatar.vue'
 
 defineOptions({ name: 'ImConversationItem' })
 
