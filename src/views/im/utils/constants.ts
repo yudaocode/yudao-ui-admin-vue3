@@ -13,6 +13,15 @@ export const ImMessageType = {
   RECALL: 2101, // 撤回（对应 OpenIM RevokeNotification=2101）
   RECEIPT: 2200, // 回执（对应 OpenIM HasReadReceipt=2200）
   READ: 2201, // 已读（多端同步，OpenIM 无对应；自有扩展）
+  // TODO @AI：是不是要把单聊、群聊的信令融合？
+  // ========== 实时通话信令（2300-2302） ==========
+  RTC_INVITE: 2300, // 通话邀请（推给被叫弹来电）
+  RTC_ACCEPT: 2301, // 通话接通（推给主叫切到通话中 UI）
+  RTC_END: 2302, // 通话结束（拒绝/取消/挂断/超时统一）
+  // ========== 群通话广播（2310-2312）：让所有群成员能看胶囊条 / 主动加入 ==========
+  RTC_GROUP_STARTED: 2310, // 群通话开始（全群广播）
+  RTC_GROUP_ENDED: 2311, // 群通话结束（全群广播；胶囊条移除）
+  RTC_GROUP_UPDATED: 2312, // 群通话成员变更（全群广播；胶囊条人数刷新）
   // ========== 好友通知（1201-1210 直接复用 OpenIM 段位编号） ==========
   FRIEND_REQUEST_APPROVED: 1201, // 好友申请被同意
   FRIEND_REQUEST_REJECTED: 1202, // 好友申请被拒绝
