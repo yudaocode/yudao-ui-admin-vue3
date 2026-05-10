@@ -40,5 +40,10 @@ export const WarehouseApi = {
   // 删除仓库
   deleteWarehouse: async (id: number) => {
     return await request.delete({ url: '/wms/warehouse/delete?id=' + id })
+  },
+
+  // 导出仓库
+  exportWarehouse: async (params) => {
+    return await request.download({ url: '/wms/warehouse/export-excel', params })
   }
 }

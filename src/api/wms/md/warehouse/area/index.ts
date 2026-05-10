@@ -41,5 +41,10 @@ export const WarehouseAreaApi = {
   // 删除库区
   deleteWarehouseArea: async (id: number) => {
     return await request.delete({ url: '/wms/warehouse-area/delete?id=' + id })
+  },
+
+  // 导出库区
+  exportWarehouseArea: async (params) => {
+    return await request.download({ url: '/wms/warehouse-area/export-excel', params })
   }
 }

@@ -45,6 +45,16 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
+        <el-button
+          v-hasPermi="['wms:warehouse:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
+        >
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -108,6 +118,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { WarehouseApi, WarehouseVO } from '@/api/wms/md/warehouse'
 import { AREA_ENABLE } from '@/views/wms/utils/config'
 import WarehouseForm from './WarehouseForm.vue'
+import download from '@/utils/download'
 
 /** WMS 仓库管理 */
 defineOptions({ name: 'WmsWarehouse' })
@@ -125,6 +136,7 @@ const queryParams = reactive({
   name: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
 
 /** 查询仓库列表 */
 const getList = async () => {
@@ -172,6 +184,21 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await handleWarehouseSuccess()
   } catch {}
+}
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await WarehouseApi.exportWarehouse(queryParams)
+    download.excel(data, '仓库.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 /** 初始化 */
