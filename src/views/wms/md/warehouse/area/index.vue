@@ -118,8 +118,8 @@
 
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
-import { WarehouseApi, WarehouseVO } from '@/api/wms/warehouse'
-import { WarehouseAreaApi, WarehouseAreaVO } from '@/api/wms/warehouse/area'
+import { WarehouseApi, WarehouseVO } from '@/api/wms/md/warehouse'
+import { WarehouseAreaApi, WarehouseAreaVO } from '@/api/wms/md/warehouse/area'
 import WarehouseAreaForm from './WarehouseAreaForm.vue'
 
 /** WMS 库区管理 */

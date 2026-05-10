@@ -136,8 +136,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'warehouse/area/:warehouseId',
-        component: () => import('@/views/wms/warehouse/area/index.vue'),
+        path: 'md/warehouse/area/:warehouseId',
+        component: () => import('@/views/wms/md/warehouse/area/index.vue'),
         name: 'WmsWarehouseArea',
         meta: {
           title: '库区管理',
@@ -145,7 +145,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           icon: '',
-          activeMenu: '/wms/basic/warehouse'
+          activeMenu: '/wms/md/warehouse'
         }
       }
     ]

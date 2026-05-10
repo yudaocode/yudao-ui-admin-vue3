@@ -105,7 +105,7 @@
 
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
-import { WarehouseApi, WarehouseVO } from '@/api/wms/warehouse'
+import { WarehouseApi, WarehouseVO } from '@/api/wms/md/warehouse'
 import { AREA_ENABLE } from '@/views/wms/utils/config'
 import WarehouseForm from './WarehouseForm.vue'
 
