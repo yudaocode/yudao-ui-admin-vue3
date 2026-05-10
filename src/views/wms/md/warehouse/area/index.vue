@@ -154,7 +154,9 @@ const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const warehouseList = ref<WarehouseVO[]>([]) // 仓库精简列表
 const selectableWarehouseList = computed(() =>
-  warehouseList.value.filter((warehouse): warehouse is WarehouseVO & { id: number } => !!warehouse.id)
+  warehouseList.value.filter(
+    (warehouse): warehouse is WarehouseVO & { id: number } => !!warehouse.id
+  )
 )
 
 /** 查询库区列表 */

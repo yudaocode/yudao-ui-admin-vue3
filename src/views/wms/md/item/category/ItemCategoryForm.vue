@@ -23,7 +23,12 @@
         <el-input v-model="formData.name" placeholder="请输入分类名称" />
       </el-form-item>
       <el-form-item label="显示排序" prop="sort">
-        <el-input-number v-model="formData.sort" :min="0" class="!w-1/1" controls-position="right" />
+        <el-input-number
+          v-model="formData.sort"
+          :min="0"
+          class="!w-1/1"
+          controls-position="right"
+        />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="formData.status" clearable placeholder="请选择状态">

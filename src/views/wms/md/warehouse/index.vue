@@ -79,7 +79,9 @@
             v-if="AREA_ENABLE"
             :to="{ name: 'WmsWarehouseArea', params: { warehouseId: scope.row.id } }"
           >
-            <el-button v-hasPermi="['wms:warehouse-area:query']" link type="primary">库区</el-button>
+            <el-button v-hasPermi="['wms:warehouse-area:query']" link type="primary">
+              库区
+            </el-button>
           </router-link>
           <el-button
             v-hasPermi="['wms:warehouse:update']"

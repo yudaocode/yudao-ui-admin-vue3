@@ -15,7 +15,12 @@
         <el-input v-model="formData.code" maxlength="20" placeholder="请输入仓库编号" />
       </el-form-item>
       <el-form-item label="排序" prop="sort">
-        <el-input-number v-model="formData.sort" :min="0" class="!w-1/1" controls-position="right" />
+        <el-input-number
+          v-model="formData.sort"
+          :min="0"
+          class="!w-1/1"
+          controls-position="right"
+        />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input

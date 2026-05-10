@@ -56,7 +56,9 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const warehouseList = ref<WarehouseVO[]>([]) // 仓库精简列表
 const selectableWarehouseList = computed(() =>
-  warehouseList.value.filter((warehouse): warehouse is WarehouseVO & { id: number } => !!warehouse.id)
+  warehouseList.value.filter(
+    (warehouse): warehouse is WarehouseVO & { id: number } => !!warehouse.id
+  )
 )
 const formData = ref<WarehouseAreaVO>({
   id: undefined,
