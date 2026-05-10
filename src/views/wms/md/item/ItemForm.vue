@@ -35,7 +35,7 @@
             <ItemBrandSelect v-model="formData.brandId" />
           </el-form-item>
         </el-col>
-        <el-col :span="24">
+        <el-col :span="12">
           <el-form-item label="备注" prop="remark">
             <el-input v-model="formData.remark" maxlength="255" placeholder="请输入备注" />
           </el-form-item>
