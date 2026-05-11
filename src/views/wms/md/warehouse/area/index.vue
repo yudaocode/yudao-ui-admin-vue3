@@ -10,19 +10,12 @@
       label-width="68px"
     >
       <el-form-item label="所属仓库" prop="warehouseId">
-        <el-select
+        <WarehouseSelect
           v-model="queryParams.warehouseId"
           class="!w-240px"
           placeholder="请选择所属仓库"
           @change="warehouseChange"
-        >
-          <el-option
-            v-for="warehouse in selectableWarehouseList"
-            :key="warehouse.id"
-            :label="warehouse.name"
-            :value="warehouse.id"
-          />
-        </el-select>
+        />
       </el-form-item>
       <el-form-item label="库区名称" prop="name">
         <el-input
@@ -131,6 +124,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { WarehouseApi, WarehouseVO } from '@/api/wms/md/warehouse'
 import { WarehouseAreaApi, WarehouseAreaVO } from '@/api/wms/md/warehouse/area'
 import WarehouseAreaForm from './WarehouseAreaForm.vue'
+import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import download from '@/utils/download'
 
 /** WMS 库区管理 */
@@ -153,11 +147,6 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const warehouseList = ref<WarehouseVO[]>([]) // 仓库精简列表
-const selectableWarehouseList = computed(() =>
-  warehouseList.value.filter(
-    (warehouse): warehouse is WarehouseVO & { id: number } => !!warehouse.id
-  )
-)
 
 /** 查询库区列表 */
 const getList = async () => {

@@ -9,14 +9,7 @@
       label-width="100px"
     >
       <el-form-item label="所属仓库" prop="warehouseId">
-        <el-select v-model="formData.warehouseId" class="!w-1/1" placeholder="请选择所属仓库">
-          <el-option
-            v-for="warehouse in selectableWarehouseList"
-            :key="warehouse.id"
-            :label="warehouse.name"
-            :value="warehouse.id"
-          />
-        </el-select>
+        <WarehouseSelect v-model="formData.warehouseId" placeholder="请选择所属仓库" />
       </el-form-item>
       <el-form-item label="库区名称" prop="name">
         <el-input v-model="formData.name" maxlength="60" placeholder="请输入库区名称" />
@@ -41,8 +34,8 @@
 </template>
 
 <script lang="ts" setup>
-import { WarehouseApi, WarehouseVO } from '@/api/wms/md/warehouse'
 import { WarehouseAreaApi, WarehouseAreaVO } from '@/api/wms/md/warehouse/area'
+import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 
 /** WMS 库区表单 */
 defineOptions({ name: 'WmsWarehouseAreaForm' })
@@ -54,12 +47,6 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const warehouseList = ref<WarehouseVO[]>([]) // 仓库精简列表
-const selectableWarehouseList = computed(() =>
-  warehouseList.value.filter(
-    (warehouse): warehouse is WarehouseVO & { id: number } => !!warehouse.id
-  )
-)
 const formData = ref<WarehouseAreaVO>({
   id: undefined,
   code: undefined,
@@ -80,7 +67,6 @@ const open = async (type: string, id?: number, warehouseId?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  await getWarehouseList()
   if (warehouseId) {
     formData.value.warehouseId = warehouseId
   }
@@ -95,11 +81,6 @@ const open = async (type: string, id?: number, warehouseId?: number) => {
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
-
-/** 查询仓库精简列表 */
-const getWarehouseList = async () => {
-  warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
-}
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调

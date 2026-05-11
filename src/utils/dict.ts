@@ -218,6 +218,7 @@ export enum DICT_TYPE {
 
   // ========== WMS - 仓库管理模块 ==========
   WMS_MERCHANT_TYPE = 'merchant_type', // WMS 往来企业类型
+  WMS_INVENTORY_HISTORY_TYPE = 'wms_inventory_history_type', // WMS 库存记录类型
 
   // ========== AI - 人工智能模块  ==========
   AI_PLATFORM = 'ai_platform', // AI 平台
