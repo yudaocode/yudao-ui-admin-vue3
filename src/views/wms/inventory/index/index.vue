@@ -27,7 +27,7 @@
           @change="handleWarehouseChange"
         />
       </el-form-item>
-      <el-form-item v-if="AREA_ENABLE" label="库区" prop="areaId">
+      <el-form-item v-if="isAreaQueryVisible" label="库区" prop="areaId">
         <WarehouseAreaSelect
           v-model="queryParams.areaId"
           :warehouse-id="queryParams.warehouseId"
@@ -245,7 +245,7 @@ const getList = async () => {
   try {
     const data = await InventoryApi.getInventoryPage({
       ...queryParams,
-      areaId: AREA_ENABLE ? queryParams.areaId : undefined,
+      areaId: isAreaQueryVisible.value ? queryParams.areaId : undefined,
       minQuantity: filterZero.value ? 1 : undefined
     })
     list.value = data.list.map((item: InventoryVO) => ({
@@ -294,6 +294,11 @@ const handleFilterZeroChange = () => {
 const handleWarehouseChange = () => {
   queryParams.areaId = undefined
 }
+
+/** 是否展示库区搜索项 */
+const isAreaQueryVisible = computed(() => {
+  return AREA_ENABLE && queryParams.type !== INVENTORY_DIMENSION.WAREHOUSE
+})
 
 /** 合并库存统计的维度单元格 */
 const spanMethod = ({ column, rowIndex }: SpanMethodProps) => {
