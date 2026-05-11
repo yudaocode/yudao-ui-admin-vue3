@@ -79,9 +79,25 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item v-if="BATCH_ENABLE" label="过期日期" prop="expirationDate">
+      <el-form-item v-if="BATCH_ENABLE" label="过期" prop="daysToExpires">
+        <el-select
+          v-model="queryParams.daysToExpires"
+          class="!w-240px"
+          clearable
+          placeholder="请选择过期时间"
+        >
+          <el-option
+            v-for="item in expirationDayOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="入库日期" prop="createTime">
         <el-date-picker
-          v-model="queryParams.expirationDate"
+          v-model="queryParams.createTime"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           :shortcuts="defaultShortcuts"
           class="!w-240px"
           end-placeholder="结束日期"
@@ -187,7 +203,8 @@
       />
       <el-table-column align="right" label="库存" min-width="120">
         <template #default="scope">
-          {{ formatNumber(scope.row.remainQuantity, 2) }}
+          <div>剩余：{{ formatNumber(scope.row.remainQuantity, 2) }}</div>
+          <div class="text-12px text-gray-500">原始：{{ formatNumber(scope.row.quantity, 2) }}</div>
         </template>
       </el-table-column>
       <el-table-column
@@ -245,6 +262,14 @@ const detailDimensionOptions = [
   { label: '仓库库区', value: INVENTORY_DETAIL_DIMENSION.WAREHOUSE },
   { label: '商品', value: INVENTORY_DETAIL_DIMENSION.ITEM }
 ]
+const expirationDayOptions = [
+  { label: '30天内', value: 30 },
+  { label: '60天内', value: 60 },
+  { label: '90天内', value: 90 },
+  { label: '120天内', value: 120 },
+  { label: '180天内', value: 180 },
+  { label: '365天内', value: 365 }
+]
 
 interface InventoryDetailRow extends InventoryDetailVO {
   warehouseItemId?: string
@@ -276,7 +301,8 @@ const queryParams = reactive({
   warehouseId: undefined as number | undefined,
   areaId: undefined as number | undefined,
   batchNo: undefined as string | undefined,
-  expirationDate: undefined as string[] | undefined
+  daysToExpires: undefined as number | undefined,
+  createTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单
 
