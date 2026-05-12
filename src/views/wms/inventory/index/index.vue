@@ -168,7 +168,7 @@
       </template>
       <el-table-column align="right" label="库存" min-width="130" prop="quantity">
         <template #default="scope">
-          {{ formatNumber(scope.row.quantity, 2) }}
+          {{ formatQuantity(scope.row.quantity) }}
         </template>
       </el-table-column>
     </el-table>
@@ -187,7 +187,7 @@ import { InventoryApi, InventoryVO } from '@/api/wms/inventory'
 import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { AREA_ENABLE } from '@/views/wms/utils/config'
-import { formatNumber } from '@/views/wms/utils/format'
+import { formatQuantity } from '@/views/wms/utils/format'
 
 /** WMS 库存统计 */
 defineOptions({ name: 'WmsInventory' })

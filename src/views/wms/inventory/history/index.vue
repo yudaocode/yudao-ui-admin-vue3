@@ -153,19 +153,19 @@
       </el-table-column>
       <el-table-column v-if="!BATCH_ENABLE" align="right" label="操作前" min-width="110">
         <template #default="scope">
-          {{ formatNumber(scope.row.beforeQuantity, 2) || '-' }}
+          {{ formatQuantity(scope.row.beforeQuantity) || '-' }}
         </template>
       </el-table-column>
       <el-table-column v-if="!BATCH_ENABLE" align="right" label="操作后" min-width="110">
         <template #default="scope">
-          {{ formatNumber(scope.row.afterQuantity, 2) || '-' }}
+          {{ formatQuantity(scope.row.afterQuantity) || '-' }}
         </template>
       </el-table-column>
       <el-table-column label="数量/金额(元)" min-width="150">
         <template #default="scope">
           <div class="flex justify-between">
             <span>数量：</span>
-            <span>{{ formatNumber(scope.row.quantity, 2) }}</span>
+            <span>{{ formatQuantity(scope.row.quantity) }}</span>
           </div>
           <div v-if="scope.row.amount || scope.row.amount === 0" class="flex justify-between">
             <span>金额：</span>
@@ -216,7 +216,7 @@ import { InventoryHistoryApi, InventoryHistoryVO } from '@/api/wms/inventory/his
 import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
-import { formatNumber, formatPrice } from '@/views/wms/utils/format'
+import { formatPrice, formatQuantity } from '@/views/wms/utils/format'
 
 /** WMS 库存流水 */
 defineOptions({ name: 'WmsInventoryHistory' })

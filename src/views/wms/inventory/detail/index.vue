@@ -203,8 +203,8 @@
       />
       <el-table-column align="right" label="库存" min-width="120">
         <template #default="scope">
-          <div>剩余：{{ formatNumber(scope.row.remainQuantity, 2) }}</div>
-          <div class="text-12px text-gray-500">原始：{{ formatNumber(scope.row.quantity, 2) }}</div>
+          <div>剩余：{{ formatQuantity(scope.row.remainQuantity) }}</div>
+          <div class="text-12px text-gray-500">原始：{{ formatQuantity(scope.row.quantity) }}</div>
         </template>
       </el-table-column>
       <el-table-column
@@ -246,7 +246,7 @@ import { InventoryDetailApi, InventoryDetailVO } from '@/api/wms/inventory/detai
 import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
-import { formatNumber } from '@/views/wms/utils/format'
+import { formatQuantity } from '@/views/wms/utils/format'
 
 /** WMS 库存明细 */
 defineOptions({ name: 'WmsInventoryDetail' })

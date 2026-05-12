@@ -20,8 +20,10 @@ export interface ReceiptOrderVO {
   details?: ReceiptOrderDetailVO[]
   createTime?: Date
   creator?: string
+  creatorName?: string
   updateTime?: Date
   updater?: string
+  updaterName?: string
 }
 
 // WMS 入库单 API
@@ -54,8 +56,13 @@ export const ReceiptOrderApi = {
   },
 
   // 完成入库
-  completeReceiptOrder: async (data: ReceiptOrderVO) => {
-    return await request.put({ url: '/wms/receipt-order/complete', data })
+  completeReceiptOrder: async (id: number) => {
+    return await request.put({ url: '/wms/receipt-order/complete?id=' + id })
+  },
+
+  // 作废入库单
+  cancelReceiptOrder: async (id: number) => {
+    return await request.put({ url: '/wms/receipt-order/cancel?id=' + id })
   },
 
   // 删除入库单
