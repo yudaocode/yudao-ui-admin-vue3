@@ -40,13 +40,13 @@
           {{ formatPrice(detailData.totalAmount) || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">
-          {{ formatNullableDate(detailData.createTime) || '-' }}
+          {{ formatNullableDate(detailData.createTime) }}
         </el-descriptions-item>
         <el-descriptions-item label="创建人">
           {{ detailData.creatorName || detailData.creator || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="更新时间">
-          {{ formatNullableDate(detailData.updateTime) || '-' }}
+          {{ formatNullableDate(detailData.updateTime) }}
         </el-descriptions-item>
         <el-descriptions-item label="更新人">
           {{ detailData.updaterName || detailData.updater || '-' }}
@@ -78,12 +78,12 @@
         <el-table-column v-if="BATCH_ENABLE" label="批号" min-width="140" prop="batchNo" />
         <el-table-column v-if="BATCH_ENABLE" label="生产日期" width="140">
           <template #default="scope">
-            {{ formatNullableDate(scope.row.productionDate, 'YYYY-MM-DD') || '-' }}
+            {{ formatNullableDate(scope.row.productionDate, 'YYYY-MM-DD') }}
           </template>
         </el-table-column>
         <el-table-column v-if="BATCH_ENABLE" label="过期日期" width="140">
           <template #default="scope">
-            {{ formatNullableDate(scope.row.expirationDate, 'YYYY-MM-DD') || '-' }}
+            {{ formatNullableDate(scope.row.expirationDate, 'YYYY-MM-DD') }}
           </template>
         </el-table-column>
         <el-table-column align="right" label="数量" prop="quantity" width="120">
@@ -108,7 +108,7 @@
 </template>
 
 <script lang="ts" setup>
-import { formatDate } from '@/utils/formatTime'
+import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
 import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
@@ -139,11 +139,6 @@ const detailRows = computed<DetailRow[]>(() =>
         : undefined
   }))
 )
-
-// TODO @AI：抽到 date 或者 time ts 全局的工具里。
-const formatNullableDate = (value?: Date | string, format?: string) => {
-  return value ? formatDate(value as Date, format) : ''
-}
 
 const getSummaries = ({ columns, data }: { columns: any[]; data: DetailRow[] }) =>
   columns.map((column, index) => {

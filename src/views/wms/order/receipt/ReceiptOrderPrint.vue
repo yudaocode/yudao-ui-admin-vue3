@@ -16,7 +16,7 @@
         <div v-if="AREA_ENABLE">库区：{{ printData.areaName || '-' }}</div>
         <div>总数量：{{ formatQuantity(printData.totalQuantity) || '-' }}</div>
         <div>总金额：{{ formatPrice(printData.totalAmount) || '-' }}</div>
-        <div>创建时间：{{ formatNullableDate(printData.createTime) || '-' }}</div>
+        <div>创建时间：{{ formatNullableDate(printData.createTime) }}</div>
         <div class="col-span-3">备注：{{ printData.remark || '-' }}</div>
       </div>
       <table class="w-full border-collapse text-13px">
@@ -70,10 +70,10 @@
               {{ detail.batchNo || '-' }}
             </td>
             <td v-if="BATCH_ENABLE" class="border border-solid border-#dcdfe6 p-8px">
-              {{ formatNullableDate(detail.productionDate, 'YYYY-MM-DD') || '-' }}
+              {{ formatNullableDate(detail.productionDate, 'YYYY-MM-DD') }}
             </td>
             <td v-if="BATCH_ENABLE" class="border border-solid border-#dcdfe6 p-8px">
-              {{ formatNullableDate(detail.expirationDate, 'YYYY-MM-DD') || '-' }}
+              {{ formatNullableDate(detail.expirationDate, 'YYYY-MM-DD') }}
             </td>
             <td class="border border-solid border-#dcdfe6 p-8px text-right">
               {{ formatQuantity(detail.quantity) || '-' }}
@@ -98,7 +98,7 @@
 </template>
 
 <script lang="ts" setup>
-import { formatDate } from '@/utils/formatTime'
+import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
 import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
@@ -117,11 +117,6 @@ const printObj = ref({
   extraHead: '',
   zIndex: 20003
 })
-
-// TODO @AI：抽到 date 或者 time ts 全局的工具里。
-const formatNullableDate = (value?: Date | string, format?: string) => {
-  return value ? formatDate(value as Date, format) : ''
-}
 
 /** 打印入库单 */
 const print = async (id: number) => {

@@ -254,10 +254,10 @@
             <el-table-column v-if="BATCH_ENABLE" label="生产日期/过期日期" min-width="180">
               <template #default="detailScope">
                 <div v-if="detailScope.row.productionDate">
-                  生产日期：{{ formatDate(detailScope.row.productionDate, 'YYYY-MM-DD') }}
+                  生产日期：{{ formatNullableDate(detailScope.row.productionDate, 'YYYY-MM-DD') }}
                 </div>
                 <div v-if="detailScope.row.expirationDate">
-                  过期日期：{{ formatDate(detailScope.row.expirationDate, 'YYYY-MM-DD') }}
+                  过期日期：{{ formatNullableDate(detailScope.row.expirationDate, 'YYYY-MM-DD') }}
                 </div>
               </template>
             </el-table-column>
@@ -352,8 +352,8 @@
         min-width="160"
       >
         <template #default="scope">
-          <div>创建：{{ formatNullableTime(scope.row.createTime) }}</div>
-          <div>更新：{{ formatNullableTime(scope.row.updateTime) }}</div>
+          <div>创建：{{ formatNullableDate(scope.row.createTime, 'MM-DD HH:mm') }}</div>
+          <div>更新：{{ formatNullableDate(scope.row.updateTime, 'MM-DD HH:mm') }}</div>
         </template>
       </el-table-column>
       <el-table-column v-if="isTableColumnVisible('operator')" label="操作人" min-width="120">
@@ -375,7 +375,7 @@
             修改
           </el-button>
           <el-button
-            v-hasPermi="['wms:receipt-order:print']"
+            v-hasPermi="['wms:receipt-order:query']"
             link
             type="primary"
             @click="handlePrint(scope.row.id)"
@@ -383,7 +383,7 @@
             打印
           </el-button>
           <el-button
-            v-if="scope.row.status === OrderStatusEnum.PREPARE"
+            v-if="canDeleteReceiptOrder(scope.row.status)"
             v-hasPermi="['wms:receipt-order:delete']"
             link
             type="danger"
@@ -410,7 +410,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defaultShortcuts, formatDate } from '@/utils/formatTime'
+import { defaultShortcuts, formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
 import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
@@ -493,10 +493,9 @@ const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const detailMap = reactive<Record<number, ReceiptOrderDetailVO[]>>({}) // 入库单明细缓存
 
-/** 格式化列表时间 */
-// TODO @AI：抽到 date 或者 time ts 全局的工具里。
-const formatNullableTime = (value?: Date | string) => {
-  return value ? formatDate(value as Date, 'MM-DD HH:mm') : '-'
+/** 是否允许删除入库单 */
+const canDeleteReceiptOrder = (status?: number) => {
+  return status !== undefined && [OrderStatusEnum.PREPARE, OrderStatusEnum.CANCELED].includes(status)
 }
 
 /** 查询入库单列表 */
