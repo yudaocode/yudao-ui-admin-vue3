@@ -277,6 +277,9 @@ const importXML = async (xml: string) => {
       isLoading.value = false
       // 高亮流程
       setProcessStatus(props.view)
+      // 启动 ResizeObserver，等待容器可见且有尺寸时自动居中
+      await nextTick()
+      startResizeObserver()
     }
   }
 }
@@ -376,4 +379,31 @@ onMounted(() => {
 onBeforeUnmount(() => {
   clearViewer()
 })
+
+let resizeObserver: ResizeObserver | null = null
+
+/** 启动 ResizeObserver 监听容器尺寸变化 */
+const startResizeObserver = () => {
+  stopResizeObserver()
+  if (!processCanvas.value) return
+
+  resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const { width, height } = entry.contentRect
+      if (width > 0 && height > 0 && bpmnViewer.value) {
+        processReZoom()
+        stopResizeObserver()
+      }
+    }
+  })
+  resizeObserver.observe(processCanvas.value)
+}
+
+/** 停止 ResizeObserver */
+const stopResizeObserver = () => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+}
 </script>
