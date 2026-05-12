@@ -1,0 +1,173 @@
+<!-- WMS 入库单详情 -->
+<template>
+  <Dialog v-model="dialogVisible" title="入库单详情" width="1200px">
+    <div v-loading="loading">
+      <div class="mb-16px text-18px font-bold">单据信息</div>
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="入库单号">{{ detailData.no || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="单据状态">
+          <dict-tag
+            v-if="detailData.status !== undefined"
+            :type="DICT_TYPE.WMS_ORDER_STATUS"
+            :value="detailData.status"
+          />
+          <span v-else>-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="入库类型">
+          <dict-tag
+            v-if="detailData.type !== undefined"
+            :type="DICT_TYPE.WMS_RECEIPT_ORDER_TYPE"
+            :value="detailData.type"
+          />
+          <span v-else>-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="仓库">
+          {{ detailData.warehouseName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="供应商">
+          {{ detailData.merchantName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="业务单号">
+          {{ detailData.bizOrderNo || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item v-if="AREA_ENABLE" label="库区">
+          {{ detailData.areaName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="总数量">
+          {{ formatQuantity(detailData.totalQuantity) || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="总金额">
+          {{ formatPrice(detailData.totalAmount) || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间">
+          {{ formatNullableDate(detailData.createTime) || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="创建人">
+          {{ detailData.creatorName || detailData.creator || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="更新时间">
+          {{ formatNullableDate(detailData.updateTime) || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="更新人">
+          {{ detailData.updaterName || detailData.updater || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item :span="2" label="备注">
+          {{ detailData.remark || '-' }}
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <div class="mb-16px mt-24px text-18px font-bold">商品明细</div>
+      <el-table :data="detailRows" :summary-method="getSummaries" border show-summary>
+        <el-table-column label="商品名称" min-width="180" prop="itemName">
+          <template #default="scope">
+            <div>{{ scope.row.itemName || '-' }}</div>
+            <div v-if="scope.row.itemCode" class="text-12px text-gray-500">
+              商品编号：{{ scope.row.itemCode }}
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="规格名称" min-width="180" prop="skuName">
+          <template #default="scope">
+            <div>{{ scope.row.skuName || '-' }}</div>
+            <div v-if="scope.row.skuCode" class="text-12px text-gray-500">
+              规格编号：{{ scope.row.skuCode }}
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column v-if="AREA_ENABLE" label="库区" min-width="140" prop="areaName" />
+        <el-table-column v-if="BATCH_ENABLE" label="批号" min-width="140" prop="batchNo" />
+        <el-table-column v-if="BATCH_ENABLE" label="生产日期" width="140">
+          <template #default="scope">
+            {{ formatNullableDate(scope.row.productionDate, 'YYYY-MM-DD') || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column v-if="BATCH_ENABLE" label="过期日期" width="140">
+          <template #default="scope">
+            {{ formatNullableDate(scope.row.expirationDate, 'YYYY-MM-DD') || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column align="right" label="数量" prop="quantity" width="120">
+          <template #default="scope">
+            {{ formatQuantity(scope.row.quantity) || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="单位" prop="unit" width="100" />
+        <el-table-column align="right" label="单价" prop="unitPrice" width="140">
+          <template #default="scope">
+            {{ formatPrice(scope.row.unitPrice) || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column align="right" label="总价" prop="amount" width="140">
+          <template #default="scope">
+            {{ formatPrice(scope.row.amount) || '-' }}
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </Dialog>
+</template>
+
+<script lang="ts" setup>
+import { formatDate } from '@/utils/formatTime'
+import { DICT_TYPE } from '@/utils/dict'
+import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
+import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
+import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import {
+  formatPrice,
+  formatQuantity,
+  formatSumPrice,
+  formatSumQuantity
+} from '@/views/wms/utils/format'
+
+/** WMS 入库单详情 */
+defineOptions({ name: 'WmsReceiptOrderDetail' })
+
+interface DetailRow extends ReceiptOrderDetailVO {
+  unitPrice?: number
+}
+
+const loading = ref(false) // 加载中
+const dialogVisible = ref(false) // 弹窗的是否展示
+const detailData = ref<ReceiptOrderVO>({}) // 详情数据
+const detailRows = computed<DetailRow[]>(() =>
+  (detailData.value.details || []).map((detail) => ({
+    ...detail,
+    unitPrice:
+      detail.amount != null && detail.quantity
+        ? Number(detail.amount) / Number(detail.quantity)
+        : undefined
+  }))
+)
+
+// TODO @AI：抽到 date 或者 time ts 全局的工具里。
+const formatNullableDate = (value?: Date | string, format?: string) => {
+  return value ? formatDate(value as Date, format) : ''
+}
+
+const getSummaries = ({ columns, data }: { columns: any[]; data: DetailRow[] }) =>
+  columns.map((column, index) => {
+    if (index === 0) {
+      return '合计'
+    }
+    if (column.property === 'quantity') {
+      return formatSumQuantity(data, (detail) => detail.quantity)
+    }
+    if (column.property === 'amount') {
+      return formatSumPrice(data, (detail) => detail.amount)
+    }
+    return ''
+  })
+
+/** 打开弹窗 */
+const open = async (id: number) => {
+  dialogVisible.value = true
+  loading.value = true
+  try {
+    detailData.value = await ReceiptOrderApi.getReceiptOrder(id)
+  } finally {
+    loading.value = false
+  }
+}
+defineExpose({ open })
+</script>

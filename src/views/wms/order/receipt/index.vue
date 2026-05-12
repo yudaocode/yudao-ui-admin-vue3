@@ -1,0 +1,613 @@
+<!-- WMS 入库单 -->
+<template>
+  <ContentWrap>
+    <!-- 搜索工作栏 -->
+    <el-form
+      ref="queryFormRef"
+      :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
+      label-width="80px"
+    >
+      <el-form-item label="入库单号" prop="no">
+        <el-input
+          v-model="queryParams.no"
+          class="!w-240px"
+          clearable
+          placeholder="请输入入库单号"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="单据状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          class="!w-240px"
+          clearable
+          placeholder="请选择单据状态"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.WMS_ORDER_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="仓库" prop="warehouseId">
+        <WarehouseSelect
+          v-model="queryParams.warehouseId"
+          class="!w-240px"
+          @change="handleWarehouseChange"
+        />
+      </el-form-item>
+      <el-form-item label="供应商" prop="merchantId">
+        <MerchantSelect
+          v-model="queryParams.merchantId"
+          class="!w-240px"
+          placeholder="请选择供应商"
+          supplier
+        />
+      </el-form-item>
+      <el-form-item label="单据日期" prop="orderDate">
+        <el-date-picker
+          v-model="queryParams.orderDate"
+          :shortcuts="defaultShortcuts"
+          class="!w-240px"
+          end-placeholder="结束时间"
+          start-placeholder="开始时间"
+          type="datetimerange"
+          value-format="YYYY-MM-DD HH:mm:ss"
+        />
+      </el-form-item>
+      <el-form-item label="数量" prop="totalQuantityMin">
+        <div class="flex w-240px items-center gap-8px">
+          <el-input-number
+            v-model="queryParams.totalQuantityMin"
+            :controls="false"
+            :min="0"
+            :precision="QUANTITY_PRECISION"
+            class="!w-105px"
+            placeholder="最小值"
+          />
+          <span>至</span>
+          <el-input-number
+            v-model="queryParams.totalQuantityMax"
+            :controls="false"
+            :min="0"
+            :precision="QUANTITY_PRECISION"
+            class="!w-105px"
+            placeholder="最大值"
+          />
+        </div>
+      </el-form-item>
+      <el-form-item label="总金额" prop="totalAmountMin">
+        <div class="flex w-240px items-center gap-8px">
+          <el-input-number
+            v-model="queryParams.totalAmountMin"
+            :controls="false"
+            :min="0"
+            :precision="PRICE_PRECISION"
+            class="!w-105px"
+            placeholder="最小值"
+          />
+          <span>至</span>
+          <el-input-number
+            v-model="queryParams.totalAmountMax"
+            :controls="false"
+            :min="0"
+            :precision="PRICE_PRECISION"
+            class="!w-105px"
+            placeholder="最大值"
+          />
+        </div>
+      </el-form-item>
+      <el-form-item label="入库类型" prop="type">
+        <el-select
+          v-model="queryParams.type"
+          class="!w-240px"
+          clearable
+          placeholder="请选择入库类型"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.WMS_RECEIPT_ORDER_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="创建用户" prop="creator">
+        <UserSelectV2
+          v-model="queryParams.creator"
+          class="!w-240px"
+          placeholder="请选择创建用户"
+        />
+      </el-form-item>
+      <el-form-item label="更新用户" prop="updater">
+        <UserSelectV2
+          v-model="queryParams.updater"
+          class="!w-240px"
+          placeholder="请选择更新用户"
+        />
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          :shortcuts="defaultShortcuts"
+          class="!w-240px"
+          end-placeholder="结束时间"
+          start-placeholder="开始时间"
+          type="datetimerange"
+          value-format="YYYY-MM-DD HH:mm:ss"
+        />
+      </el-form-item>
+      <el-form-item label="更新时间" prop="updateTime">
+        <el-date-picker
+          v-model="queryParams.updateTime"
+          :shortcuts="defaultShortcuts"
+          class="!w-240px"
+          end-placeholder="结束时间"
+          start-placeholder="开始时间"
+          type="datetimerange"
+          value-format="YYYY-MM-DD HH:mm:ss"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-popover
+          popper-class="wms-receipt-order-table-setting-popover"
+          trigger="click"
+          width="520"
+        >
+          <template #reference>
+            <el-button>
+              <Icon class="mr-5px" icon="ep:setting" />
+              表格设置
+            </el-button>
+          </template>
+          <el-checkbox-group
+            v-model="checkedTableColumns"
+            class="wms-receipt-order-table-setting grid grid-cols-3 gap-y-14px rounded p-16px"
+          >
+            <el-checkbox
+              v-for="column in tableColumnOptions"
+              :key="column.value"
+              :label="column.value"
+            >
+              {{ column.label }}
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-popover>
+        <el-button
+          v-hasPermi="['wms:receipt-order:create']"
+          plain
+          type="primary"
+          @click="openForm('create')"
+        >
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
+        </el-button>
+        <el-button
+          v-hasPermi="['wms:receipt-order:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
+        >
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </ContentWrap>
+
+  <!-- 入库单列表 -->
+  <ContentWrap>
+    <el-table
+      v-loading="loading"
+      :cell-class-name="'wms-receipt-order-cell'"
+      :data="list"
+      :show-overflow-tooltip="true"
+      border
+      @expand-change="handleExpandChange"
+    >
+      <el-table-column type="expand" width="48">
+        <template #default="scope">
+          <el-table :data="detailMap[scope.row.id] || []" border>
+            <el-table-column label="商品信息" min-width="220">
+              <template #default="detailScope">
+                <div>{{ detailScope.row.itemName || '-' }}</div>
+                <div v-if="detailScope.row.itemCode" class="text-12px text-gray-500">
+                  商品编号：{{ detailScope.row.itemCode }}
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="规格信息" min-width="220">
+              <template #default="detailScope">
+                <div>{{ detailScope.row.skuName || '-' }}</div>
+                <div v-if="detailScope.row.skuCode" class="text-12px text-gray-500">
+                  规格编号：{{ detailScope.row.skuCode }}
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column
+              v-if="AREA_ENABLE"
+              align="center"
+              label="库区"
+              min-width="140"
+              prop="areaName"
+            />
+            <el-table-column
+              v-if="BATCH_ENABLE"
+              align="center"
+              label="批号"
+              min-width="140"
+              prop="batchNo"
+            />
+            <el-table-column v-if="BATCH_ENABLE" label="生产日期/过期日期" min-width="180">
+              <template #default="detailScope">
+                <div v-if="detailScope.row.productionDate">
+                  生产日期：{{ formatDate(detailScope.row.productionDate, 'YYYY-MM-DD') }}
+                </div>
+                <div v-if="detailScope.row.expirationDate">
+                  过期日期：{{ formatDate(detailScope.row.expirationDate, 'YYYY-MM-DD') }}
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="right" label="入库数量" width="120">
+              <template #default="detailScope">
+                {{ formatQuantity(detailScope.row.quantity) }}
+              </template>
+            </el-table-column>
+            <el-table-column align="right" label="金额(元)" width="120">
+              <template #default="detailScope">
+                {{ formatPrice(detailScope.row.amount) || '-' }}
+              </template>
+            </el-table-column>
+            <el-table-column label="备注" min-width="160" prop="remark" />
+          </el-table>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="isTableColumnVisible('no')" fixed="left" label="单号/业务单号" width="210">
+        <template #default="scope">
+          <div>
+            单号：
+            <el-button link type="primary" @click="openDetail(scope.row.id)">
+              {{ scope.row.no }}
+            </el-button>
+          </div>
+          <div v-if="scope.row.bizOrderNo" class="text-12px text-gray-500">
+            业务：{{ scope.row.bizOrderNo }}
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
+        v-if="isTableColumnVisible('status')"
+        align="center"
+        fixed="left"
+        label="入库状态"
+        width="110"
+      >
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.WMS_ORDER_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        v-if="isTableColumnVisible('type')"
+        align="center"
+        label="入库类型"
+        width="120"
+      >
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.WMS_RECEIPT_ORDER_TYPE" :value="scope.row.type" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        v-if="isTableColumnVisible('warehouse')"
+        :label="AREA_ENABLE ? '仓库/库区' : '仓库'"
+        min-width="160"
+      >
+        <template #default="scope">
+          <template v-if="AREA_ENABLE">
+            <div>仓库：{{ scope.row.warehouseName || '-' }}</div>
+            <div>库区：{{ scope.row.areaName || '-' }}</div>
+          </template>
+          <template v-else>
+            {{ scope.row.warehouseName || '-' }}
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column
+        v-if="isTableColumnVisible('quantityAmount')"
+        label="总数量/总金额(元)"
+        min-width="180"
+      >
+        <template #default="scope">
+          <div class="flex items-center justify-between">
+            <span>数量：</span>
+            <span>{{ formatQuantity(scope.row.totalQuantity) }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>金额：</span>
+            <span>{{ formatPrice(scope.row.totalAmount) }}</span>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
+        v-if="isTableColumnVisible('merchant')"
+        label="供应商"
+        min-width="160"
+        prop="merchantName"
+      />
+      <el-table-column
+        v-if="isTableColumnVisible('operateTime')"
+        label="操作时间"
+        min-width="160"
+      >
+        <template #default="scope">
+          <div>创建：{{ formatNullableTime(scope.row.createTime) }}</div>
+          <div>更新：{{ formatNullableTime(scope.row.updateTime) }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="isTableColumnVisible('operator')" label="操作人" min-width="120">
+        <template #default="scope">
+          <div>创建：{{ scope.row.creatorName || scope.row.creator || '-' }}</div>
+          <div>更新：{{ scope.row.updaterName || scope.row.updater || '-' }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="isTableColumnVisible('remark')" label="备注" min-width="160" prop="remark" />
+      <el-table-column align="center" fixed="right" label="操作" width="180">
+        <template #default="scope">
+          <el-button
+            v-if="scope.row.status === OrderStatusEnum.PREPARE"
+            v-hasPermi="['wms:receipt-order:update']"
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+          >
+            修改
+          </el-button>
+          <el-button
+            v-hasPermi="['wms:receipt-order:print']"
+            link
+            type="primary"
+            @click="handlePrint(scope.row.id)"
+          >
+            打印
+          </el-button>
+          <el-button
+            v-if="scope.row.status === OrderStatusEnum.PREPARE"
+            v-hasPermi="['wms:receipt-order:delete']"
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
+      @pagination="getList"
+    />
+  </ContentWrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <ReceiptOrderForm ref="formRef" @success="getList" />
+  <ReceiptOrderDetail ref="detailRef" />
+  <ReceiptOrderPrint ref="printRef" />
+</template>
+
+<script lang="ts" setup>
+import { defaultShortcuts, formatDate } from '@/utils/formatTime'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
+import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
+import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vue'
+import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
+import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { OrderStatusEnum } from '@/views/wms/utils/constants'
+import { formatPrice, formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION } from '@/views/wms/utils/format'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
+import ReceiptOrderDetail from './ReceiptOrderDetail.vue'
+import ReceiptOrderForm from './ReceiptOrderForm.vue'
+import ReceiptOrderPrint from './ReceiptOrderPrint.vue'
+import download from '@/utils/download'
+
+/** WMS 入库单 */
+defineOptions({ name: 'WmsReceiptOrder' })
+
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
+
+type TableColumnKey =
+  | 'no'
+  | 'status'
+  | 'type'
+  | 'warehouse'
+  | 'quantityAmount'
+  | 'merchant'
+  | 'operateTime'
+  | 'operator'
+  | 'remark'
+
+const tableColumnOptions: Array<{ label: string; value: TableColumnKey }> = [
+  { label: '单号/业务单号', value: 'no' },
+  { label: '入库状态', value: 'status' },
+  { label: '入库类型', value: 'type' },
+  { label: '仓库', value: 'warehouse' },
+  { label: '数量/金额(元)', value: 'quantityAmount' },
+  { label: '供应商', value: 'merchant' },
+  { label: '操作时间', value: 'operateTime' },
+  { label: '操作人', value: 'operator' },
+  { label: '备注', value: 'remark' }
+]
+const checkedTableColumns = ref<TableColumnKey[]>([
+  'no',
+  'status',
+  'type',
+  'warehouse',
+  'quantityAmount',
+  'merchant',
+  'operateTime',
+  'operator',
+  'remark'
+])
+const isTableColumnVisible = (column: TableColumnKey) => checkedTableColumns.value.includes(column)
+
+const loading = ref(true) // 列表的加载中
+const list = ref<ReceiptOrderVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const getDefaultQueryParams = () => ({
+  pageNo: 1,
+  pageSize: 10,
+  no: undefined as string | undefined,
+  status: undefined as number | undefined,
+  warehouseId: undefined as number | undefined,
+  merchantId: undefined as number | undefined,
+  orderDate: undefined as string[] | undefined,
+  totalQuantityMin: undefined as number | undefined,
+  totalQuantityMax: undefined as number | undefined,
+  totalAmountMin: undefined as number | undefined,
+  totalAmountMax: undefined as number | undefined,
+  type: undefined as number | undefined,
+  bizOrderNo: undefined as string | undefined,
+  creator: undefined as number | undefined,
+  updater: undefined as number | undefined,
+  createTime: undefined as string[] | undefined,
+  updateTime: undefined as string[] | undefined
+})
+const queryParams = reactive(getDefaultQueryParams())
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
+const detailMap = reactive<Record<number, ReceiptOrderDetailVO[]>>({}) // 入库单明细缓存
+
+/** 格式化列表时间 */
+// TODO @AI：抽到 date 或者 time ts 全局的工具里。
+const formatNullableTime = (value?: Date | string) => {
+  return value ? formatDate(value as Date, 'MM-DD HH:mm') : '-'
+}
+
+/** 查询入库单列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await ReceiptOrderApi.getReceiptOrderPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  Object.assign(queryParams, getDefaultQueryParams())
+  handleQuery()
+}
+
+/** 仓库变化 */
+const handleWarehouseChange = () => {
+  handleQuery()
+}
+
+/** 展开明细 */
+const handleExpandChange = async (row: ReceiptOrderVO) => {
+  if (!row.id || detailMap[row.id]) {
+    return
+  }
+  detailMap[row.id] = await ReceiptOrderApi.getReceiptOrderDetailListByOrderId(row.id)
+}
+
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+/** 查看入库单详情 */
+const detailRef = ref()
+const openDetail = (id: number) => {
+  detailRef.value.open(id)
+}
+
+/** 打印入库单 */
+const printRef = ref()
+const handlePrint = (id: number) => {
+  printRef.value.print(id)
+}
+
+/** 删除入库单 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await ReceiptOrderApi.deleteReceiptOrder(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await ReceiptOrderApi.exportReceiptOrder(queryParams)
+    download.excel(data, '入库单.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+/** 初始化 */
+onMounted(async () => {
+  await getList()
+})
+</script>
+
+<style scoped>
+:deep(.wms-receipt-order-cell) {
+  vertical-align: top;
+}
+
+:global(.wms-receipt-order-table-setting-popover) {
+  padding: 12px;
+}
+
+:global(.wms-receipt-order-table-setting) {
+  background-color: var(--el-fill-color-light);
+}
+
+:global(.wms-receipt-order-table-setting .el-checkbox) {
+  height: 28px;
+  margin-right: 0;
+}
+
+:global(.wms-receipt-order-table-setting .el-checkbox__label) {
+  font-size: 16px;
+  font-weight: 600;
+}
+</style>
