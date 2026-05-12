@@ -18,6 +18,10 @@ export interface MerchantVO {
   createTime?: Date
 }
 
+export interface MerchantSimpleListReqVO {
+  types?: number[]
+}
+
 // WMS 往来企业 API
 export const MerchantApi = {
   // 查询往来企业分页
@@ -26,7 +30,7 @@ export const MerchantApi = {
   },
 
   // 查询往来企业精简列表
-  getMerchantSimpleList: async (params?: any) => {
+  getMerchantSimpleList: async (params?: MerchantSimpleListReqVO) => {
     return await request.get({ url: '/wms/merchant/simple-list', params })
   },
 
