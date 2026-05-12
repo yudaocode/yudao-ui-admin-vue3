@@ -183,7 +183,7 @@ export const useMessagePuller = () => {
    * 首次 pull 是否已完成。仅在置 true 后，isConnected watch 才会触发 pull。
    * 防止 socket onopen 比 friendStore/groupStore 预拉先到达时，watcher 抢跑造成消息插入早于会话元数据可见
    */
-  let bootstrapped = false
+  let initialPulled = false
 
   /** 执行一次全量增量拉取（重入安全：进行中再次调用复用同一个 promise） */
   const pullOnce = (): Promise<void> => {
@@ -246,7 +246,7 @@ export const useMessagePuller = () => {
       } finally {
         // 整个 IIFE 全部完成（含已读位置补齐）后才允许下一次 pullOnce 重入
         pullPromise = null
-        bootstrapped = true
+        initialPulled = true
       }
     })()
     return pullPromise
@@ -254,12 +254,12 @@ export const useMessagePuller = () => {
 
   /**
    * 断网期间 WS 收不到推送，期间产生的消息只能靠拉取接口按 minId 游标补齐；
-   * 首次连接由 Index.vue 显式调 pullOnce 完成 bootstrap，这里仅覆盖之后的重连
+   * 首次连接由 Index.vue 显式调 pullOnce 完成首拉，这里仅覆盖之后的重连
    */
   watch(
     () => wsStore.isConnected,
     (isConnected) => {
-      if (isConnected && bootstrapped) {
+      if (isConnected && initialPulled) {
         void pullOnce()
       }
     }

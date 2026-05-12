@@ -13,15 +13,13 @@ export const ImMessageType = {
   RECALL: 2101, // 撤回（对应 OpenIM RevokeNotification=2101）
   RECEIPT: 2200, // 回执（对应 OpenIM HasReadReceipt=2200）
   READ: 2201, // 已读（多端同步，OpenIM 无对应；自有扩展）
-  // TODO @AI：是不是要把单聊、群聊的信令融合？
-  // ========== 实时通话信令（2300-2302） ==========
-  RTC_INVITE: 2300, // 通话邀请（推给被叫弹来电）
-  RTC_ACCEPT: 2301, // 通话接通（推给主叫切到通话中 UI）
-  RTC_END: 2302, // 通话结束（拒绝/取消/挂断/超时统一）
-  // ========== 群通话广播（2310-2312）：让所有群成员能看胶囊条 / 主动加入 ==========
-  RTC_GROUP_STARTED: 2310, // 群通话开始（全群广播）
-  RTC_GROUP_ENDED: 2311, // 群通话结束（全群广播；胶囊条移除）
-  RTC_GROUP_UPDATED: 2312, // 群通话成员变更（全群广播；胶囊条人数刷新）
+  // ========== 实时通话信令（1601-1605 段位与 OpenIM 对齐；1610+ 自有扩展） ==========
+  RTC_CALL: 1601, // 通话信令统一入口（对应 OpenIM SignalingNotification=1601）
+  RTC_PARTICIPANT_CONNECTED: 1602, // 通话参与者加入（对应 OpenIM RoomParticipantsConnectedNotification=1602）
+  RTC_PARTICIPANT_DISCONNECTED: 1603, // 通话参与者离开（对应 OpenIM RoomParticipantsDisconnectedNotification=1603）
+  // 1604-1609 OpenIM 已用 / 留作扩展，本系统暂不使用
+  RTC_CALL_START: 1610, // 通话开始（自有扩展，OpenIM 无；仅群聊；与 END 两段式配对）
+  RTC_CALL_END: 1611, // 通话结束（自有扩展，OpenIM 无；私聊 / 群聊）
   // ========== 好友通知（1201-1210 直接复用 OpenIM 段位编号） ==========
   FRIEND_REQUEST_APPROVED: 1201, // 好友申请被同意
   FRIEND_REQUEST_REJECTED: 1202, // 好友申请被拒绝
@@ -87,6 +85,11 @@ export function isGroupRequestNotification(type: number): boolean {
 /** 判断是否「会话内的好友事件气泡」：FRIEND_ADD / FRIEND_DELETE 直接渲染成灰色提示，与群事件同处理 */
 export function isFriendChatTip(type: number): boolean {
   return type === ImMessageType.FRIEND_ADD || type === ImMessageType.FRIEND_DELETE
+}
+
+/** 判断是否「会话内的通话事件气泡」：RTC_CALL_START / RTC_CALL_END 渲染成灰色提示 */
+export function isRtcCallTip(type: number): boolean {
+  return type === ImMessageType.RTC_CALL_START || type === ImMessageType.RTC_CALL_END
 }
 
 /**
@@ -160,6 +163,44 @@ export function isPrivateConversation(type: number | undefined): boolean {
 export function isGroupConversation(type: number | undefined): boolean {
   return type === ImConversationType.GROUP
 }
+
+/** IM 通话媒体类型（对齐后端 ImRtcCallMediaTypeEnum） */
+export const ImCallMediaType = {
+  VOICE: 1,
+  VIDEO: 2
+} as const
+
+/** IM 通话状态（对齐后端 ImRtcCallStatusEnum） */
+export const ImCallStatus = {
+  CREATED: 10, // 创建：私聊等被叫接听；群聊发起人已进房等其他人加入
+  RUNNING: 20, // 进行中：第一个非发起人接通后进入
+  ENDED: 30 // 已结束
+} as const
+
+/** IM 通话结束原因（对齐后端 ImRtcCallEndReasonEnum） */
+export const ImCallEndReason = {
+  HANGUP: 1, // 接通后任一方主动挂断
+  REJECT: 2, // 被叫接通前点拒接
+  CANCEL: 3, // 主叫接通前主动取消
+  BUSY: 5, // 私聊呼叫时对方正忙
+  ERROR: 9 // 网络中断 / 设备失败
+} as const
+
+/** ImCallEndReason 取值类型 */
+export type ImCallEndReasonValue = (typeof ImCallEndReason)[keyof typeof ImCallEndReason]
+
+/** IM 通话参与者状态（对齐后端 ImRtcParticipantStatusEnum）；同时作为 RTC_CALL 信令 status 字段取值 */
+export const ImCallParticipantStatus = {
+  INVITING: 10, // 来电邀请
+  JOINED: 20, // 接听 / 已加入
+  REJECTED: 30, // 拒接
+  NO_ANSWER: 40, // 主叫取消，被邀请方未应答
+  LEFT: 50 // 挂断离开
+} as const
+
+/** ImCallParticipantStatus 取值类型 */
+export type ImCallParticipantStatusValue =
+  (typeof ImCallParticipantStatus)[keyof typeof ImCallParticipantStatus]
 
 /** IM WebSocket 外层帧类型（对齐后端 ImPrivateMessageDTO.TYPE / ImGroupMessageDTO.TYPE） */
 export const ImWebSocketMessageType = {

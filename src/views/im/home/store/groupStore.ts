@@ -585,7 +585,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
     },
 
-    /** 创建群广播：创建者多端同步 + 初始成员 bootstrap；payload.memberUserIds 含自己 → 拉群详情 / 成员；本端发起者已经 upsert 过本群，跳过避免双拉 */
+    /** 创建群广播：创建者多端同步 + 初始成员首次拉取；payload.memberUserIds 含自己 → 拉群详情 / 成员；本端发起者已经 upsert 过本群，跳过避免双拉 */
     async applyGroupCreateNotification(groupId: number, payload: GroupNotificationPayload) {
       if (!isSelfInPayloadMembers(payload)) {
         return
@@ -623,7 +623,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
     },
 
-    /** 成员加入：被邀请者本端 group 未就位先 fetchGroupInfo bootstrap；所有人都刷成员列表（新成员 nickname / avatar 不在 payload） */
+    /** 成员加入：被邀请者本端 group 未就位先 fetchGroupInfo 初次拉取；所有人都刷成员列表（新成员 nickname / avatar 不在 payload） */
     async applyGroupMemberInviteNotification(groupId: number, payload: GroupNotificationPayload) {
       // 自己刚被拉进来：必须 await fetchGroupInfo 让群入 state.groups，否则 fetchGroupMembers 的 guard 会兜空
       if (isSelfInPayloadMembers(payload) && !this.getGroup(groupId)) {
@@ -632,7 +632,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.fetchGroupMembers(groupId, true).catch(() => undefined)
     },
 
-    /** 自由进群：进群者本端 group 未就位先 fetchGroupInfo bootstrap；所有人都刷成员列表 */
+    /** 自由进群：进群者本端 group 未就位先 fetchGroupInfo 初次拉取；所有人都刷成员列表 */
     async applyGroupMemberEnterNotification(groupId: number, payload: GroupNotificationPayload) {
       const selfUserId = getCurrentUserId()
       // 自己自由进群：必须 await fetchGroupInfo 让群入 state.groups，否则 fetchGroupMembers 的 guard 会兜空
