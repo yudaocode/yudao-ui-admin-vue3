@@ -1,4 +1,4 @@
-<!-- WMS 入库单 -->
+<!-- WMS 出库单 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -9,12 +9,12 @@
       class="-mb-15px"
       label-width="80px"
     >
-      <el-form-item label="入库单号" prop="no">
+      <el-form-item label="出库单号" prop="no">
         <el-input
           v-model="queryParams.no"
           class="!w-240px"
           clearable
-          placeholder="请输入入库单号"
+          placeholder="请输入出库单号"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
@@ -40,12 +40,12 @@
           @change="handleWarehouseChange"
         />
       </el-form-item>
-      <el-form-item label="供应商" prop="merchantId">
+      <el-form-item label="客户" prop="merchantId">
         <MerchantSelect
           v-model="queryParams.merchantId"
           class="!w-240px"
-          placeholder="请选择供应商"
-          supplier
+          placeholder="请选择客户"
+          customer
         />
       </el-form-item>
       <el-form-item label="单据日期" prop="orderDate">
@@ -101,15 +101,15 @@
           />
         </div>
       </el-form-item>
-      <el-form-item label="入库类型" prop="type">
+      <el-form-item label="出库类型" prop="type">
         <el-select
           v-model="queryParams.type"
           class="!w-240px"
           clearable
-          placeholder="请选择入库类型"
+          placeholder="请选择出库类型"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.WMS_RECEIPT_ORDER_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.WMS_SHIPMENT_ORDER_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -162,7 +162,7 @@
           重置
         </el-button>
         <el-popover
-          popper-class="wms-receipt-order-table-setting-popover"
+          popper-class="wms-shipment-order-table-setting-popover"
           trigger="click"
           width="520"
         >
@@ -174,7 +174,7 @@
           </template>
           <el-checkbox-group
             v-model="checkedTableColumns"
-            class="wms-receipt-order-table-setting grid grid-cols-3 gap-y-14px rounded p-16px"
+            class="wms-shipment-order-table-setting grid grid-cols-3 gap-y-14px rounded p-16px"
           >
             <el-checkbox
               v-for="column in tableColumnOptions"
@@ -186,7 +186,7 @@
           </el-checkbox-group>
         </el-popover>
         <el-button
-          v-hasPermi="['wms:receipt-order:create']"
+          v-hasPermi="['wms:shipment-order:create']"
           plain
           type="primary"
           @click="openForm('create')"
@@ -195,7 +195,7 @@
           新增
         </el-button>
         <el-button
-          v-hasPermi="['wms:receipt-order:export']"
+          v-hasPermi="['wms:shipment-order:export']"
           :loading="exportLoading"
           plain
           type="success"
@@ -208,11 +208,11 @@
     </el-form>
   </ContentWrap>
 
-  <!-- 入库单列表 -->
+  <!-- 出库单列表 -->
   <ContentWrap>
     <el-table
       v-loading="loading"
-      :cell-class-name="'wms-receipt-order-cell'"
+      :cell-class-name="'wms-shipment-order-cell'"
       :data="list"
       :show-overflow-tooltip="true"
       border
@@ -261,7 +261,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column align="right" label="入库数量" width="120">
+            <el-table-column align="right" label="出库数量" width="120">
               <template #default="detailScope">
                 {{ formatQuantity(detailScope.row.quantity) }}
               </template>
@@ -292,7 +292,7 @@
         v-if="isTableColumnVisible('status')"
         align="center"
         fixed="left"
-        label="入库状态"
+        label="出库状态"
         width="110"
       >
         <template #default="scope">
@@ -302,11 +302,11 @@
       <el-table-column
         v-if="isTableColumnVisible('type')"
         align="center"
-        label="入库类型"
+        label="出库类型"
         width="120"
       >
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.WMS_RECEIPT_ORDER_TYPE" :value="scope.row.type" />
+          <dict-tag :type="DICT_TYPE.WMS_SHIPMENT_ORDER_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
       <el-table-column
@@ -342,7 +342,7 @@
       </el-table-column>
       <el-table-column
         v-if="isTableColumnVisible('merchant')"
-        label="供应商"
+        label="客户"
         min-width="160"
         prop="merchantName"
       />
@@ -362,14 +362,14 @@
       <el-table-column align="center" fixed="right" label="操作" width="180">
         <template #default="scope">
           <el-tooltip
-            :content="getReceiptOrderUpdateTip(scope.row.status)"
-            :disabled="canUpdateReceiptOrder(scope.row.status)"
+            :content="getShipmentOrderUpdateTip(scope.row.status)"
+            :disabled="canUpdateShipmentOrder(scope.row.status)"
             placement="top"
           >
             <span>
               <el-button
-                v-hasPermi="['wms:receipt-order:update']"
-                :disabled="!canUpdateReceiptOrder(scope.row.status)"
+                v-hasPermi="['wms:shipment-order:update']"
+                :disabled="!canUpdateShipmentOrder(scope.row.status)"
                 link
                 type="primary"
                 @click="openForm('update', scope.row.id)"
@@ -379,14 +379,14 @@
             </span>
           </el-tooltip>
           <el-tooltip
-            :content="getReceiptOrderDeleteTip(scope.row.status)"
-            :disabled="canDeleteReceiptOrder(scope.row.status)"
+            :content="getShipmentOrderDeleteTip(scope.row.status)"
+            :disabled="canDeleteShipmentOrder(scope.row.status)"
             placement="top"
           >
             <span>
               <el-button
-                v-hasPermi="['wms:receipt-order:delete']"
-                :disabled="!canDeleteReceiptOrder(scope.row.status)"
+                v-hasPermi="['wms:shipment-order:delete']"
+                :disabled="!canDeleteShipmentOrder(scope.row.status)"
                 link
                 type="danger"
                 @click="handleDelete(scope.row.id)"
@@ -396,7 +396,7 @@
             </span>
           </el-tooltip>
           <el-button
-            v-hasPermi="['wms:receipt-order:query']"
+            v-hasPermi="['wms:shipment-order:query']"
             link
             type="primary"
             @click="handlePrint(scope.row.id)"
@@ -416,16 +416,16 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ReceiptOrderForm ref="formRef" @success="getList" />
-  <ReceiptOrderDetail ref="detailRef" />
-  <ReceiptOrderPrint ref="printRef" />
+  <ShipmentOrderForm ref="formRef" @success="getList" />
+  <ShipmentOrderDetail ref="detailRef" />
+  <ShipmentOrderPrint ref="printRef" />
 </template>
 
 <script lang="ts" setup>
 import { defaultShortcuts, formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
-import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
+import { ShipmentOrderApi, ShipmentOrderVO } from '@/api/wms/order/shipment'
+import { ShipmentOrderDetailVO } from '@/api/wms/order/shipment/detail'
 import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
@@ -436,13 +436,13 @@ import {
 } from '@/views/wms/utils/constants'
 import { formatPrice, formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION } from '@/views/wms/utils/format'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
-import ReceiptOrderDetail from './ReceiptOrderDetail.vue'
-import ReceiptOrderForm from './ReceiptOrderForm.vue'
-import ReceiptOrderPrint from './ReceiptOrderPrint.vue'
+import ShipmentOrderDetail from './ShipmentOrderDetail.vue'
+import ShipmentOrderForm from './ShipmentOrderForm.vue'
+import ShipmentOrderPrint from './ShipmentOrderPrint.vue'
 import download from '@/utils/download'
 
-/** WMS 入库单 */
-defineOptions({ name: 'WmsReceiptOrder' })
+/** WMS 出库单 */
+defineOptions({ name: 'WmsShipmentOrder' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -459,11 +459,11 @@ type TableColumnKey =
 
 const tableColumnOptions: Array<{ label: string; value: TableColumnKey }> = [
   { label: '单号/业务单号', value: 'no' },
-  { label: '入库状态', value: 'status' },
-  { label: '入库类型', value: 'type' },
+  { label: '出库状态', value: 'status' },
+  { label: '出库类型', value: 'type' },
   { label: '仓库', value: 'warehouse' },
   { label: '数量/金额(元)', value: 'quantityAmount' },
-  { label: '供应商', value: 'merchant' },
+  { label: '客户', value: 'merchant' },
   { label: '操作信息', value: 'operateInfo' },
   { label: '备注', value: 'remark' }
 ]
@@ -480,7 +480,7 @@ const checkedTableColumns = ref<TableColumnKey[]>([
 const isTableColumnVisible = (column: TableColumnKey) => checkedTableColumns.value.includes(column)
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ReceiptOrderVO[]>([]) // 列表的数据
+const list = ref<ShipmentOrderVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const getDefaultQueryParams = () => ({
   pageNo: 1,
@@ -504,22 +504,22 @@ const getDefaultQueryParams = () => ({
 const queryParams = reactive(getDefaultQueryParams())
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const detailMap = reactive<Record<number, ReceiptOrderDetailVO[]>>({}) // 入库单明细缓存
+const detailMap = reactive<Record<number, ShipmentOrderDetailVO[]>>({}) // 出库单明细缓存
 
-/** 是否允许修改入库单 */
-const canUpdateReceiptOrder = (status?: number) => {
+/** 是否允许修改出库单 */
+const canUpdateShipmentOrder = (status?: number) => {
   return status !== undefined && OrderUpdateStatusList.includes(status)
 }
 
-/** 是否允许删除入库单 */
-const canDeleteReceiptOrder = (status?: number) => {
+/** 是否允许删除出库单 */
+const canDeleteShipmentOrder = (status?: number) => {
   return status !== undefined && OrderDeleteStatusList.includes(status)
 }
 
-/** 获得入库单修改禁用提示 */
-const getReceiptOrderUpdateTip = (status?: number) => {
+/** 获得出库单修改禁用提示 */
+const getShipmentOrderUpdateTip = (status?: number) => {
   if (status === OrderStatusEnum.FINISHED) {
-    return '已入库，无法修改'
+    return '已出库，无法修改'
   }
   if (status === OrderStatusEnum.CANCELED) {
     return '已作废，无法修改'
@@ -527,19 +527,19 @@ const getReceiptOrderUpdateTip = (status?: number) => {
   return '当前状态无法修改'
 }
 
-/** 获得入库单删除禁用提示 */
-const getReceiptOrderDeleteTip = (status?: number) => {
+/** 获得出库单删除禁用提示 */
+const getShipmentOrderDeleteTip = (status?: number) => {
   if (status === OrderStatusEnum.FINISHED) {
-    return '已入库，无法删除'
+    return '已出库，无法删除'
   }
   return '当前状态无法删除'
 }
 
-/** 查询入库单列表 */
+/** 查询出库单列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ReceiptOrderApi.getReceiptOrderPage(queryParams)
+    const data = await ShipmentOrderApi.getShipmentOrderPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -565,11 +565,11 @@ const handleWarehouseChange = () => {
 }
 
 /** 展开明细 */
-const handleExpandChange = async (row: ReceiptOrderVO) => {
+const handleExpandChange = async (row: ShipmentOrderVO) => {
   if (!row.id || detailMap[row.id]) {
     return
   }
-  detailMap[row.id] = await ReceiptOrderApi.getReceiptOrderDetailListByOrderId(row.id)
+  detailMap[row.id] = await ShipmentOrderApi.getShipmentOrderDetailListByOrderId(row.id)
 }
 
 /** 添加/修改操作 */
@@ -578,25 +578,25 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 查看入库单详情 */
+/** 查看出库单详情 */
 const detailRef = ref()
 const openDetail = (id: number) => {
   detailRef.value.open(id)
 }
 
-/** 打印入库单 */
+/** 打印出库单 */
 const printRef = ref()
 const handlePrint = (id: number) => {
   printRef.value.print(id)
 }
 
-/** 删除入库单 */
+/** 删除出库单 */
 const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ReceiptOrderApi.deleteReceiptOrder(id)
+    await ShipmentOrderApi.deleteShipmentOrder(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -610,8 +610,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await ReceiptOrderApi.exportReceiptOrder(queryParams)
-    download.excel(data, '入库单.xls')
+    const data = await ShipmentOrderApi.exportShipmentOrder(queryParams)
+    download.excel(data, '出库单.xls')
   } catch {
   } finally {
     exportLoading.value = false
@@ -625,24 +625,24 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-:deep(.wms-receipt-order-cell) {
+:deep(.wms-shipment-order-cell) {
   vertical-align: top;
 }
 
-:global(.wms-receipt-order-table-setting-popover) {
+:global(.wms-shipment-order-table-setting-popover) {
   padding: 12px;
 }
 
-:global(.wms-receipt-order-table-setting) {
+:global(.wms-shipment-order-table-setting) {
   background-color: var(--el-fill-color-light);
 }
 
-:global(.wms-receipt-order-table-setting .el-checkbox) {
+:global(.wms-shipment-order-table-setting .el-checkbox) {
   height: 28px;
   margin-right: 0;
 }
 
-:global(.wms-receipt-order-table-setting .el-checkbox__label) {
+:global(.wms-shipment-order-table-setting .el-checkbox__label) {
   font-size: 16px;
   font-weight: 600;
 }

@@ -221,6 +221,7 @@ export enum DICT_TYPE {
   WMS_INVENTORY_HISTORY_TYPE = 'wms_inventory_history_type', // WMS 库存记录类型
   WMS_ORDER_STATUS = 'wms_order_status', // WMS 单据状态
   WMS_RECEIPT_ORDER_TYPE = 'wms_receipt_order_type', // WMS 入库单类型
+  WMS_SHIPMENT_ORDER_TYPE = 'wms_shipment_order_type', // WMS 出库单类型
 
   // ========== AI - 人工智能模块  ==========
   AI_PLATFORM = 'ai_platform', // AI 平台

@@ -1,4 +1,4 @@
-<!-- WMS 入库单表单 -->
+<!-- WMS 出库单表单 -->
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle" width="1280px">
     <el-form
@@ -10,15 +10,15 @@
     >
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="入库单号" prop="no">
-            <el-input v-model="formData.no" maxlength="64" placeholder="请输入入库单号" />
+          <el-form-item label="出库单号" prop="no">
+            <el-input v-model="formData.no" maxlength="64" placeholder="请输入出库单号" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="入库类型" prop="type">
-            <el-select v-model="formData.type" class="w-1/1" placeholder="请选择入库类型">
+          <el-form-item label="出库类型" prop="type">
+            <el-select v-model="formData.type" class="w-1/1" placeholder="请选择出库类型">
               <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.WMS_RECEIPT_ORDER_TYPE)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.WMS_SHIPMENT_ORDER_TYPE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -27,11 +27,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="供应商" prop="merchantId">
+          <el-form-item label="客户" prop="merchantId">
             <MerchantSelect
               v-model="formData.merchantId"
-              placeholder="请选择供应商"
-              supplier
+              placeholder="请选择客户"
+              customer
             />
           </el-form-item>
         </el-col>
@@ -85,7 +85,7 @@
       </el-row>
 
       <div class="mb-12px flex items-center justify-between">
-        <span class="text-14px font-bold">入库明细</span>
+        <span class="text-14px font-bold">出库明细</span>
         <el-tooltip
           content="请先选择仓库"
           :disabled="!!formData.warehouseId"
@@ -116,44 +116,32 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column v-if="AREA_ENABLE" label="库区" min-width="180">
+        <el-table-column v-if="AREA_ENABLE" label="库区" min-width="140">
           <template #default="scope">
-            <WarehouseAreaSelect
-              v-model="scope.row.areaId"
-              :disabled="!formData.warehouseId || !!formData.areaId"
-              :warehouse-id="formData.warehouseId"
-              placeholder="请选择库区"
-            />
+            {{ scope.row.areaName || '-' }}
           </template>
         </el-table-column>
         <el-table-column v-if="BATCH_ENABLE" label="批号" min-width="160">
           <template #default="scope">
-            <el-input v-model="scope.row.batchNo" maxlength="64" placeholder="请输入批号" />
+            {{ scope.row.batchNo || '-' }}
           </template>
         </el-table-column>
         <el-table-column v-if="BATCH_ENABLE" label="生产日期" width="180">
           <template #default="scope">
-            <el-date-picker
-              v-model="scope.row.productionDate"
-              class="!w-1/1"
-              placeholder="请选择生产日期"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-            />
+            {{ formatNullableDate(scope.row.productionDate, 'YYYY-MM-DD') }}
           </template>
         </el-table-column>
         <el-table-column v-if="BATCH_ENABLE" label="过期日期" width="180">
           <template #default="scope">
-            <el-date-picker
-              v-model="scope.row.expirationDate"
-              class="!w-1/1"
-              placeholder="请选择过期日期"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-            />
+            {{ formatNullableDate(scope.row.expirationDate, 'YYYY-MM-DD') }}
           </template>
         </el-table-column>
-        <el-table-column label="入库数量" width="160">
+        <el-table-column align="right" label="可用库存" width="120">
+          <template #default="scope">
+            {{ formatQuantity(scope.row.availableQuantity) || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="出库数量" width="160">
           <template #default="scope">
             <el-input-number
               v-model="scope.row.quantity"
@@ -189,23 +177,28 @@
           </template>
         </el-table-column>
       </el-table>
-      <ItemSkuSelect ref="skuSelectRef" @change="handleSelectSku" />
+      <InventorySelect
+        ref="inventorySelectRef"
+        :area-id="formData.areaId"
+        :warehouse-id="formData.warehouseId"
+        @change="handleSelectInventory"
+      />
     </el-form>
     <template #footer>
       <div class="flex items-center justify-between">
         <div>
           <el-button
             v-if="isSavedPrepareOrder"
-            v-hasPermi="['wms:receipt-order:complete']"
+            v-hasPermi="['wms:shipment-order:complete']"
             :disabled="formLoading"
             type="success"
             @click="handleComplete"
           >
-            完成入库
+            完成出库
           </el-button>
           <el-button
             v-if="isSavedPrepareOrder"
-            v-hasPermi="['wms:receipt-order:cancel']"
+            v-hasPermi="['wms:shipment-order:cancel']"
             :disabled="formLoading"
             type="danger"
             @click="handleCancel"
@@ -227,13 +220,15 @@
 <script lang="ts" setup>
 import { FormRules } from 'element-plus'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
-import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
-import { ItemSkuVO } from '@/api/wms/md/item/sku'
-import ItemSkuSelect from '@/views/wms/md/item/sku/components/ItemSkuSelect.vue'
+import { ShipmentOrderApi, ShipmentOrderVO } from '@/api/wms/order/shipment'
+import { ShipmentOrderDetailVO } from '@/api/wms/order/shipment/detail'
+import InventorySelect, {
+  InventorySelectRow
+} from '@/views/wms/inventory/components/InventorySelect.vue'
 import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vue'
 import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
+import { formatNullableDate } from '@/utils/formatTime'
 import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
@@ -245,8 +240,8 @@ import {
 } from '@/views/wms/utils/format'
 import { generateOrderNo } from '@/views/wms/utils/order'
 
-/** WMS 入库单表单 */
-defineOptions({ name: 'WmsReceiptOrderForm' })
+/** WMS 出库单表单 */
+defineOptions({ name: 'WmsShipmentOrderForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -256,7 +251,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const originalFormData = ref('') // 表单原始数据快照
-const formData = ref<ReceiptOrderVO>({
+const formData = ref<ShipmentOrderVO>({
   id: undefined,
   no: undefined,
   type: undefined,
@@ -271,12 +266,12 @@ const formData = ref<ReceiptOrderVO>({
   details: []
 })
 const formRules = reactive<FormRules>({
-  no: [{ required: true, message: '入库单号不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '入库类型不能为空', trigger: 'change' }],
+  no: [{ required: true, message: '出库单号不能为空', trigger: 'blur' }],
+  type: [{ required: true, message: '出库类型不能为空', trigger: 'change' }],
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-const skuSelectRef = ref() // 商品 SKU 选择弹窗 Ref
+const inventorySelectRef = ref() // 库存选择弹窗 Ref
 
 const totalQuantity = computed(() => sumQuantity(formData.value.details || [], (detail) => detail.quantity))
 const detailTotalAmount = computed(() => sumPrice(formData.value.details || [], (detail) => detail.amount))
@@ -302,7 +297,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const order = await ReceiptOrderApi.getReceiptOrder(id)
+      const order = await ShipmentOrderApi.getShipmentOrder(id)
       formData.value = {
         ...order,
         details: order.details || []
@@ -315,38 +310,62 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 构建入库明细 */
-const buildDetail = (sku: ItemSkuVO): ReceiptOrderDetailVO => ({
+/** 构建出库明细 */
+const buildDetail = (inventory: InventorySelectRow): ShipmentOrderDetailVO => ({
   id: undefined,
-  itemId: sku.itemId,
-  itemCode: sku.itemCode,
-  itemName: sku.itemName,
-  unit: sku.unit,
-  skuId: sku.id,
-  skuCode: sku.code,
-  skuName: sku.name,
-  areaId: formData.value.areaId,
-  batchNo: undefined,
-  productionDate: undefined,
-  expirationDate: undefined,
+  itemId: inventory.itemId,
+  itemCode: inventory.itemCode,
+  itemName: inventory.itemName,
+  unit: inventory.unit,
+  skuId: inventory.skuId,
+  skuCode: inventory.skuCode,
+  skuName: inventory.skuName,
+  inventoryDetailId: inventory.inventoryDetailId,
+  warehouseId: inventory.warehouseId,
+  warehouseName: inventory.warehouseName,
+  areaId: inventory.areaId,
+  areaName: inventory.areaName,
+  batchNo: inventory.batchNo,
+  productionDate: inventory.productionDate,
+  expirationDate: inventory.expirationDate,
   quantity: undefined,
+  availableQuantity: inventory.availableQuantity,
   amount: undefined,
   remark: undefined
 })
 
 /** 添加商品 */
 const handleAddDetail = () => {
-  skuSelectRef.value?.open()
+  inventorySelectRef.value?.open()
 }
 
-/** 选择商品 SKU */
-const handleSelectSku = (skus: ItemSkuVO[]) => {
-  if (!skus.length) {
+/** 选择库存 */
+const handleSelectInventory = (inventories: InventorySelectRow[]) => {
+  if (!inventories.length) {
     return
   }
   formData.value.details = formData.value.details || []
-  skus.forEach((sku) => formData.value.details!.push(buildDetail(sku)))
+  inventories.forEach((inventory) => {
+    if (isInventorySelected(inventory)) {
+      return
+    }
+    formData.value.details!.push(buildDetail(inventory))
+  })
   refreshTotalAmount()
+}
+
+/** 判断库存是否已选择 */
+const isInventorySelected = (inventory: InventorySelectRow) => {
+  return (formData.value.details || []).some((detail) => {
+    if (BATCH_ENABLE) {
+      return detail.inventoryDetailId === inventory.inventoryDetailId
+    }
+    return (
+      detail.skuId === inventory.skuId &&
+      detail.warehouseId === inventory.warehouseId &&
+      detail.areaId === inventory.areaId
+    )
+  })
 }
 
 /** 删除明细 */
@@ -358,12 +377,14 @@ const handleDeleteDetail = (index: number) => {
 /** 仓库变化 */
 const handleWarehouseChange = () => {
   formData.value.areaId = undefined
-  formData.value.details?.forEach((detail) => (detail.areaId = undefined))
+  formData.value.details = []
+  refreshTotalAmount()
 }
 
 /** 库区变化 */
 const handleAreaChange = () => {
-  formData.value.details?.forEach((detail) => (detail.areaId = formData.value.areaId))
+  formData.value.details = []
+  refreshTotalAmount()
 }
 
 /** 明细金额变化 */
@@ -380,7 +401,7 @@ const refreshTotalAmount = () => {
 const validateDetails = (required: boolean) => {
   if (!formData.value.details?.length) {
     if (required) {
-      message.error('至少包含一条入库明细')
+      message.error('至少包含一条出库明细')
       return false
     }
     return true
@@ -396,7 +417,11 @@ const validateDetails = (required: boolean) => {
       return false
     }
     if (!detail.quantity || detail.quantity <= 0) {
-      message.error(`第 ${i + 1} 行明细入库数量必须大于 0`)
+      message.error(`第 ${i + 1} 行明细出库数量必须大于 0`)
+      return false
+    }
+    if (detail.availableQuantity !== undefined && detail.quantity > detail.availableQuantity) {
+      message.error(`第 ${i + 1} 行明细出库数量不能大于可用库存`)
       return false
     }
   }
@@ -410,7 +435,7 @@ const buildSubmitData = () =>
     totalQuantity: totalQuantity.value,
     totalAmount: formData.value.totalAmount,
     details: formData.value.details || []
-  }) as ReceiptOrderVO
+  }) as ShipmentOrderVO
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -425,10 +450,10 @@ const submitForm = async () => {
   try {
     const data = buildSubmitData()
     if (formType.value === 'create') {
-      await ReceiptOrderApi.createReceiptOrder(data)
+      await ShipmentOrderApi.createShipmentOrder(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ReceiptOrderApi.updateReceiptOrder(data)
+      await ShipmentOrderApi.updateShipmentOrder(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -439,21 +464,21 @@ const submitForm = async () => {
   }
 }
 
-/** 完成入库：表单修改过则先保存，再完成 */
+/** 完成出库：表单修改过则先保存，再完成 */
 const handleComplete = async () => {
   await formRef.value.validate()
   if (!validateDetails(true)) {
     return
   }
   try {
-    await message.confirm('确认完成入库？完成后将更新库存。')
+    await message.confirm('确认完成出库？完成后将更新库存。')
     formLoading.value = true
     const data = buildSubmitData()
     if (JSON.stringify(data) !== originalFormData.value) {
-      await ReceiptOrderApi.updateReceiptOrder(data)
+      await ShipmentOrderApi.updateShipmentOrder(data)
     }
-    await ReceiptOrderApi.completeReceiptOrder(formData.value.id!)
-    message.success('入库成功')
+    await ShipmentOrderApi.completeShipmentOrder(formData.value.id!)
+    message.success('出库成功')
     dialogVisible.value = false
     emit('success')
   } catch {
@@ -462,12 +487,12 @@ const handleComplete = async () => {
   }
 }
 
-/** 作废入库单 */
+/** 作废出库单 */
 const handleCancel = async () => {
   try {
-    await message.confirm('确认作废该入库单？作废后不可恢复。')
+    await message.confirm('确认作废该出库单？作废后不可恢复。')
     formLoading.value = true
-    await ReceiptOrderApi.cancelReceiptOrder(formData.value.id!)
+    await ShipmentOrderApi.cancelShipmentOrder(formData.value.id!)
     message.success('作废成功')
     dialogVisible.value = false
     emit('success')
@@ -481,7 +506,7 @@ const handleCancel = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    no: generateOrderNo('RK'),
+    no: generateOrderNo('CK'),
     type: undefined,
     status: OrderStatusEnum.PREPARE,
     bizOrderNo: undefined,

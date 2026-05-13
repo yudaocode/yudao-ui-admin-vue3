@@ -22,7 +22,7 @@
 
 <script lang="ts" setup>
 import { MerchantApi, MerchantVO } from '@/api/wms/md/merchant'
-import { SupplierMerchantTypeList } from '@/views/wms/utils/constants'
+import { CustomerMerchantTypeList, SupplierMerchantTypeList } from '@/views/wms/utils/constants'
 
 /** WMS 往来企业选择器 */
 defineOptions({ name: 'WmsMerchantSelect', inheritAttrs: false })
@@ -31,6 +31,7 @@ const props = withDefaults(
   defineProps<{
     modelValue?: number
     supplier?: boolean
+    customer?: boolean
     disabled?: boolean
     clearable?: boolean
     placeholder?: string
@@ -57,9 +58,12 @@ const selectValue = computed({
 
 /** 获得可选往来企业列表 */
 const loadSelectableList = async () => {
-  merchantList.value = await MerchantApi.getMerchantSimpleList(
-    props.supplier ? { types: SupplierMerchantTypeList } : undefined
-  )
+  const types = props.supplier
+    ? SupplierMerchantTypeList
+    : props.customer
+      ? CustomerMerchantTypeList
+      : undefined
+  merchantList.value = await MerchantApi.getMerchantSimpleList(types ? { types } : undefined)
   handleFilter('')
 }
 
@@ -85,7 +89,7 @@ const handleChange = (value: number | undefined) => {
 
 /** 供应商开关变化时，重新加载可选列表 */
 watch(
-  () => props.supplier,
+  () => [props.supplier, props.customer],
   () => loadSelectableList()
 )
 
