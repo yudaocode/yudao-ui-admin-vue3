@@ -13,6 +13,5 @@ export interface ReceiptOrderDetailVO {
   warehouseName?: string
   quantity?: number
   amount?: number
-  remark?: string
   createTime?: Date
 }

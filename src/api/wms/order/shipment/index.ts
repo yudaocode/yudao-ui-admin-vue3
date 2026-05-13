@@ -6,6 +6,7 @@ export interface ShipmentOrderVO {
   id?: number
   no?: string
   type?: number
+  orderTime?: string
   status?: number
   bizOrderNo?: string
   merchantId?: number

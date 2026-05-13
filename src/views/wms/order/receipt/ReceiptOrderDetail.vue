@@ -5,14 +5,6 @@
       <div class="mb-16px text-18px font-bold">单据信息</div>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="入库单号">{{ detailData.no || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="单据状态">
-          <dict-tag
-            v-if="detailData.status !== undefined"
-            :type="DICT_TYPE.WMS_ORDER_STATUS"
-            :value="detailData.status"
-          />
-          <span v-else>-</span>
-        </el-descriptions-item>
         <el-descriptions-item label="入库类型">
           <dict-tag
             v-if="detailData.type !== undefined"
@@ -23,6 +15,17 @@
         </el-descriptions-item>
         <el-descriptions-item label="仓库">
           {{ detailData.warehouseName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="单据日期">
+          {{ formatNullableDate(detailData.orderTime, 'YYYY-MM-DD') }}
+        </el-descriptions-item>
+        <el-descriptions-item label="单据状态">
+          <dict-tag
+            v-if="detailData.status !== undefined"
+            :type="DICT_TYPE.WMS_ORDER_STATUS"
+            :value="detailData.status"
+          />
+          <span v-else>-</span>
         </el-descriptions-item>
         <el-descriptions-item label="供应商">
           {{ detailData.merchantName || '-' }}

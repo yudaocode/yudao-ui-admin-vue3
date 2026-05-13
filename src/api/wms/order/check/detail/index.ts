@@ -18,6 +18,5 @@ export interface CheckOrderDetailVO {
   differenceQuantity?: number
   availableQuantity?: number
   amount?: number
-  remark?: string
   createTime?: Date
 }

@@ -19,12 +19,23 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="总数量">
+          <el-form-item label="单据日期" prop="orderTime">
+            <el-date-picker
+              v-model="formData.orderTime"
+              class="!w-1/1"
+              placeholder="请选择单据日期"
+              type="date"
+              value-format="x"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="总数量" prop="totalQuantity">
             <el-input :model-value="formatQuantity(totalQuantity)" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="总金额">
+          <el-form-item label="总金额" prop="totalAmount">
             <el-input-number
               v-model="formData.totalAmount"
               :controls="false"
@@ -94,11 +105,6 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="备注" min-width="160">
-          <template #default="{ row }">
-            <el-input v-model="row.remark" maxlength="255" placeholder="请输入备注" />
-          </template>
-        </el-table-column>
         <el-table-column align="center" label="操作" width="80">
           <template #default="{ $index }">
             <el-button link type="danger" @click="handleDeleteDetail($index)">删除</el-button>
@@ -166,6 +172,7 @@ const originalFormData = ref('')
 const formData = ref<MovementOrderVO>({
   id: undefined,
   no: undefined,
+  orderTime: undefined,
   status: OrderStatusEnum.PREPARE,
   sourceWarehouseId: undefined,
   targetWarehouseId: undefined,
@@ -176,8 +183,11 @@ const formData = ref<MovementOrderVO>({
 })
 const formRules = reactive<FormRules>({
   no: [{ required: true, message: '移库单号不能为空', trigger: 'blur' }],
+  orderTime: [{ required: true, message: '单据日期不能为空', trigger: 'change' }],
   sourceWarehouseId: [{ required: true, message: '来源仓库不能为空', trigger: 'change' }],
-  targetWarehouseId: [{ required: true, message: '目标仓库不能为空', trigger: 'change' }]
+  targetWarehouseId: [{ required: true, message: '目标仓库不能为空', trigger: 'change' }],
+  totalQuantity: [{ required: true, message: '移库数量不能为空', trigger: 'change' }],
+  totalAmount: [{ required: true, message: '总金额不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 const inventorySelectRef = ref()
@@ -230,8 +240,7 @@ const buildDetail = (inventory: InventorySelectRow): MovementOrderDetailVO => ({
   targetWarehouseId: formData.value.targetWarehouseId,
   quantity: undefined,
   availableQuantity: inventory.availableQuantity,
-  amount: undefined,
-  remark: undefined
+  amount: undefined
 })
 
 const handleAddDetail = () => inventorySelectRef.value?.open()
@@ -374,6 +383,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     no: generateOrderNo('YK'),
+    orderTime: undefined,
     status: OrderStatusEnum.PREPARE,
     sourceWarehouseId: undefined,
     targetWarehouseId: undefined,

@@ -5,6 +5,7 @@ import { MovementOrderDetailVO } from './detail'
 export interface MovementOrderVO {
   id?: number
   no?: string
+  orderTime?: string
   status?: number
   remark?: string
   sourceWarehouseId?: number

@@ -27,6 +27,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <el-form-item label="仓库" prop="warehouseId">
+            <WarehouseSelect v-model="formData.warehouseId" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="供应商" prop="merchantId">
             <MerchantSelect
               v-model="formData.merchantId"
@@ -41,28 +46,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="仓库" prop="warehouseId">
-            <WarehouseSelect v-model="formData.warehouseId" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="总数量">
-            <el-input :model-value="formatQuantity(totalQuantity)" disabled />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="总金额">
-            <el-input-number
-              v-model="formData.totalAmount"
-              :controls="false"
-              :min="0"
-              :precision="PRICE_PRECISION"
-              class="!w-1/1"
-              placeholder="请输入总金额"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="16">
           <el-form-item label="备注" prop="remark">
             <el-input
               v-model="formData.remark"
@@ -70,6 +53,34 @@
               placeholder="请输入备注"
               :rows="3"
               type="textarea"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="单据日期" prop="orderTime">
+            <el-date-picker
+              v-model="formData.orderTime"
+              class="!w-1/1"
+              placeholder="请选择单据日期"
+              type="date"
+              value-format="x"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="总数量" prop="totalQuantity">
+            <el-input :model-value="formatQuantity(totalQuantity)" disabled />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="总金额" prop="totalAmount">
+            <el-input-number
+              v-model="formData.totalAmount"
+              :controls="false"
+              :min="0"
+              :precision="PRICE_PRECISION"
+              class="!w-1/1"
+              placeholder="请输入总金额"
             />
           </el-form-item>
         </el-col>
@@ -130,11 +141,6 @@
               placeholder="金额"
               @change="handleDetailAmountChange"
             />
-          </template>
-        </el-table-column>
-        <el-table-column label="备注" min-width="180">
-          <template #default="scope">
-            <el-input v-model="scope.row.remark" maxlength="255" placeholder="请输入备注" />
           </template>
         </el-table-column>
         <el-table-column align="center" label="操作" width="80">
@@ -212,6 +218,7 @@ const formData = ref<ReceiptOrderVO>({
   id: undefined,
   no: undefined,
   type: undefined,
+  orderTime: undefined,
   status: OrderStatusEnum.PREPARE,
   bizOrderNo: undefined,
   merchantId: undefined,
@@ -224,7 +231,10 @@ const formData = ref<ReceiptOrderVO>({
 const formRules = reactive<FormRules>({
   no: [{ required: true, message: '入库单号不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '入库类型不能为空', trigger: 'change' }],
-  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
+  orderTime: [{ required: true, message: '单据日期不能为空', trigger: 'change' }],
+  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }],
+  totalQuantity: [{ required: true, message: '入库数量不能为空', trigger: 'change' }],
+  totalAmount: [{ required: true, message: '总金额不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const skuSelectRef = ref() // 商品 SKU 选择弹窗 Ref
@@ -277,8 +287,7 @@ const buildDetail = (sku: ItemSkuVO): ReceiptOrderDetailVO => ({
   skuCode: sku.code,
   skuName: sku.name,
   quantity: undefined,
-  amount: undefined,
-  remark: undefined
+  amount: undefined
 })
 
 /** 添加商品 */
@@ -429,6 +438,7 @@ const resetForm = () => {
     id: undefined,
     no: generateOrderNo('RK'),
     type: undefined,
+    orderTime: undefined,
     status: OrderStatusEnum.PREPARE,
     bizOrderNo: undefined,
     merchantId: undefined,

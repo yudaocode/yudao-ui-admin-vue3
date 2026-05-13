@@ -5,6 +5,7 @@ import { CheckOrderDetailVO } from './detail'
 export interface CheckOrderVO {
   id?: number
   no?: string
+  orderTime?: string
   status?: number
   remark?: string
   warehouseId?: number

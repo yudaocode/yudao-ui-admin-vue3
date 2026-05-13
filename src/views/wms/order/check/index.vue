@@ -18,14 +18,14 @@
       <el-form-item label="仓库" prop="warehouseId">
         <WarehouseSelect v-model="queryParams.warehouseId" class="!w-240px" />
       </el-form-item>
-      <el-form-item label="单据日期" prop="orderDate">
+      <el-form-item label="单据日期" prop="orderTime">
         <el-date-picker
-          v-model="queryParams.orderDate"
-          :shortcuts="defaultShortcuts"
+          v-model="queryParams.orderTime"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
-          end-placeholder="结束时间"
-          start-placeholder="开始时间"
-          type="datetimerange"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
           value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
@@ -307,7 +307,7 @@ const getDefaultQueryParams = () => ({
   no: undefined as string | undefined,
   status: undefined as number | undefined,
   warehouseId: undefined as number | undefined,
-  orderDate: undefined as string[] | undefined,
+  orderTime: undefined as string[] | undefined,
   totalQuantityMin: undefined as number | undefined,
   totalQuantityMax: undefined as number | undefined,
   totalAmountMin: undefined as number | undefined,

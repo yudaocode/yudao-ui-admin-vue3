@@ -5,6 +5,15 @@
       <div class="mb-16px text-18px font-bold">单据信息</div>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="移库单号">{{ detailData.no || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="来源仓库">
+          {{ detailData.sourceWarehouseName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="目标仓库">
+          {{ detailData.targetWarehouseName || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="单据日期">
+          {{ formatNullableDate(detailData.orderTime, 'YYYY-MM-DD') }}
+        </el-descriptions-item>
         <el-descriptions-item label="单据状态">
           <dict-tag
             v-if="detailData.status !== undefined"
@@ -12,12 +21,6 @@
             :value="detailData.status"
           />
           <span v-else>-</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="来源仓库">
-          {{ detailData.sourceWarehouseName || '-' }}
-        </el-descriptions-item>
-        <el-descriptions-item label="目标仓库">
-          {{ detailData.targetWarehouseName || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="总数量">
           {{ formatQuantity(detailData.totalQuantity) || '-' }}
@@ -62,7 +65,6 @@
         <el-table-column align="right" label="金额(元)" prop="amount" width="140">
           <template #default="{ row }">{{ formatPrice(row.amount) || '-' }}</template>
         </el-table-column>
-        <el-table-column label="备注" min-width="160" prop="remark" />
       </el-table>
     </div>
   </Dialog>

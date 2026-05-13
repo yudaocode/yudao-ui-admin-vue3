@@ -9,10 +9,11 @@
         <div>
           入库类型：{{ getDictLabel(DICT_TYPE.WMS_RECEIPT_ORDER_TYPE, printData.type) || '-' }}
         </div>
+        <div>仓库：{{ printData.warehouseName || '-' }}</div>
+        <div>单据日期：{{ formatNullableDate(printData.orderTime, 'YYYY-MM-DD') }}</div>
         <div>入库状态：{{ getDictLabel(DICT_TYPE.WMS_ORDER_STATUS, printData.status) || '-' }}</div>
         <div>供应商：{{ printData.merchantName || '-' }}</div>
         <div>业务单号：{{ printData.bizOrderNo || '-' }}</div>
-        <div>仓库：{{ printData.warehouseName || '-' }}</div>
         <div>总数量：{{ formatQuantity(printData.totalQuantity) || '-' }}</div>
         <div>总金额：{{ formatPrice(printData.totalAmount) || '-' }}</div>
         <div>创建时间：{{ formatNullableDate(printData.createTime) }}</div>
@@ -25,7 +26,6 @@
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">规格信息</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">数量</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">金额(元)</th>
-            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">备注</th>
           </tr>
         </thead>
         <tbody>
@@ -44,7 +44,6 @@
             <td class="border border-solid border-#dcdfe6 p-8px text-right">
               {{ formatPrice(detail.amount) || '-' }}
             </td>
-            <td class="border border-solid border-#dcdfe6 p-8px">{{ detail.remark || '-' }}</td>
           </tr>
           <tr v-if="!printData.details?.length">
             <td
@@ -71,7 +70,7 @@ defineOptions({ name: 'WmsReceiptOrderPrint' })
 
 const printData = ref<ReceiptOrderVO>({}) // 打印数据
 const printButtonRef = ref<HTMLButtonElement>() // 打印按钮
-const tableColumnCount = 5
+const tableColumnCount = 4
 const printObj = ref({
   id: 'wmsReceiptOrderPrint',
   popTitle: '&nbsp',

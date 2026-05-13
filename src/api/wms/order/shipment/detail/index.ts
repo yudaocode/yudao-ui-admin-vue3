@@ -14,6 +14,5 @@ export interface ShipmentOrderDetailVO {
   quantity?: number
   availableQuantity?: number
   amount?: number
-  remark?: string
   createTime?: Date
 }

@@ -14,12 +14,23 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="盈亏数量">
+          <el-form-item label="单据日期" prop="orderTime">
+            <el-date-picker
+              v-model="formData.orderTime"
+              class="!w-1/1"
+              placeholder="请选择单据日期"
+              type="date"
+              value-format="x"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="盈亏数量" prop="totalQuantity">
             <el-input :model-value="formatQuantity(totalQuantity)" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="总金额">
+          <el-form-item label="总金额" prop="totalAmount">
             <el-input-number
               v-model="formData.totalAmount"
               :controls="false"
@@ -92,11 +103,6 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="备注" min-width="160">
-          <template #default="{ row }">
-            <el-input v-model="row.remark" maxlength="255" placeholder="请输入备注" />
-          </template>
-        </el-table-column>
         <el-table-column align="center" label="操作" width="80">
           <template #default="{ $index }">
             <el-button link type="danger" @click="handleDeleteDetail($index)">删除</el-button>
@@ -164,6 +170,7 @@ const originalFormData = ref('')
 const formData = ref<CheckOrderVO>({
   id: undefined,
   no: undefined,
+  orderTime: undefined,
   status: OrderStatusEnum.PREPARE,
   warehouseId: undefined,
   totalQuantity: 0,
@@ -173,7 +180,10 @@ const formData = ref<CheckOrderVO>({
 })
 const formRules = reactive<FormRules>({
   no: [{ required: true, message: '盘库单号不能为空', trigger: 'blur' }],
-  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
+  orderTime: [{ required: true, message: '单据日期不能为空', trigger: 'change' }],
+  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }],
+  totalQuantity: [{ required: true, message: '盈亏数量不能为空', trigger: 'change' }],
+  totalAmount: [{ required: true, message: '总金额不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 const inventorySelectRef = ref()
@@ -230,8 +240,7 @@ const buildDetail = (inventory: InventorySelectRow): CheckOrderDetailVO => ({
   quantity: inventory.availableQuantity,
   checkQuantity: inventory.availableQuantity,
   availableQuantity: inventory.availableQuantity,
-  amount: inventory.amount,
-  remark: undefined
+  amount: inventory.amount
 })
 
 const handleAddDetail = () => inventorySelectRef.value?.open()
@@ -348,6 +357,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     no: generateOrderNo('PK'),
+    orderTime: undefined,
     status: OrderStatusEnum.PREPARE,
     warehouseId: undefined,
     totalQuantity: 0,

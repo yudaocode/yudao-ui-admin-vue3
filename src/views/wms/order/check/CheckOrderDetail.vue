@@ -5,6 +5,10 @@
       <div class="mb-16px text-18px font-bold">单据信息</div>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="盘库单号">{{ detailData.no || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="仓库">{{ detailData.warehouseName || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="单据日期">
+          {{ formatNullableDate(detailData.orderTime, 'YYYY-MM-DD') }}
+        </el-descriptions-item>
         <el-descriptions-item label="单据状态">
           <dict-tag
             v-if="detailData.status !== undefined"
@@ -13,7 +17,6 @@
           />
           <span v-else>-</span>
         </el-descriptions-item>
-        <el-descriptions-item label="仓库">{{ detailData.warehouseName || '-' }}</el-descriptions-item>
         <el-descriptions-item label="盈亏数量">
           {{ formatQuantity(detailData.totalQuantity) || '-' }}
         </el-descriptions-item>
