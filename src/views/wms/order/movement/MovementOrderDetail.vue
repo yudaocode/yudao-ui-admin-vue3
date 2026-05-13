@@ -13,17 +13,11 @@
           />
           <span v-else>-</span>
         </el-descriptions-item>
-        <el-descriptions-item :label="AREA_ENABLE ? '来源仓库/库区' : '来源仓库'">
-          <template v-if="AREA_ENABLE">
-            {{ detailData.sourceWarehouseName || '-' }} / {{ detailData.sourceAreaName || '-' }}
-          </template>
-          <template v-else>{{ detailData.sourceWarehouseName || '-' }}</template>
+        <el-descriptions-item label="来源仓库">
+          {{ detailData.sourceWarehouseName || '-' }}
         </el-descriptions-item>
-        <el-descriptions-item :label="AREA_ENABLE ? '目标仓库/库区' : '目标仓库'">
-          <template v-if="AREA_ENABLE">
-            {{ detailData.targetWarehouseName || '-' }} / {{ detailData.targetAreaName || '-' }}
-          </template>
-          <template v-else>{{ detailData.targetWarehouseName || '-' }}</template>
+        <el-descriptions-item label="目标仓库">
+          {{ detailData.targetWarehouseName || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="总数量">
           {{ formatQuantity(detailData.totalQuantity) || '-' }}
@@ -80,7 +74,6 @@ import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { MovementOrderApi, MovementOrderVO } from '@/api/wms/order/movement'
 import { MovementOrderDetailVO } from '@/api/wms/order/movement/detail'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { formatPrice, formatQuantity, formatSumPrice, formatSumQuantity } from '@/views/wms/utils/format'
 
 /** WMS 移库单详情 */

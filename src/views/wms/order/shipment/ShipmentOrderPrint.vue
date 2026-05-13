@@ -13,7 +13,6 @@
         <div>客户：{{ printData.merchantName || '-' }}</div>
         <div>业务单号：{{ printData.bizOrderNo || '-' }}</div>
         <div>仓库：{{ printData.warehouseName || '-' }}</div>
-        <div v-if="AREA_ENABLE">库区：{{ printData.areaName || '-' }}</div>
         <div>总数量：{{ formatQuantity(printData.totalQuantity) || '-' }}</div>
         <div>总金额：{{ formatPrice(printData.totalAmount) || '-' }}</div>
         <div>创建时间：{{ formatNullableDate(printData.createTime) }}</div>
@@ -24,12 +23,6 @@
           <tr>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">商品信息</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">规格信息</th>
-            <th
-              v-if="AREA_ENABLE"
-              class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
-            >
-              库区
-            </th>
             <th
               class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
             >
@@ -59,9 +52,6 @@
             <td class="border border-solid border-#dcdfe6 p-8px">
               <div>{{ detail.skuName || '-' }}</div>
               <div v-if="detail.skuCode" class="text-12px">编号：{{ detail.skuCode }}</div>
-            </td>
-            <td v-if="AREA_ENABLE" class="border border-solid border-#dcdfe6 p-8px">
-              {{ detail.areaName || '-' }}
             </td>
             <td class="border border-solid border-#dcdfe6 p-8px">
               {{ detail.batchNo || '-' }}
@@ -98,7 +88,6 @@
 import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { ShipmentOrderApi, ShipmentOrderVO } from '@/api/wms/order/shipment'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { formatPrice, formatQuantity } from '@/views/wms/utils/format'
 
 /** WMS 出库单打印 */
@@ -106,7 +95,7 @@ defineOptions({ name: 'WmsShipmentOrderPrint' })
 
 const printData = ref<ShipmentOrderVO>({}) // 打印数据
 const printButtonRef = ref<HTMLButtonElement>() // 打印按钮
-const tableColumnCount = computed(() => 8 + (AREA_ENABLE ? 1 : 0))
+const tableColumnCount = 8
 const printObj = ref({
   id: 'wmsShipmentOrderPrint',
   popTitle: '&nbsp',

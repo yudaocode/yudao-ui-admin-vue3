@@ -13,11 +13,6 @@
             <WarehouseSelect v-model="formData.warehouseId" @change="handleWarehouseChange" />
           </el-form-item>
         </el-col>
-        <el-col v-if="AREA_ENABLE" :span="8">
-          <el-form-item label="库区" prop="areaId">
-            <WarehouseAreaSelect v-model="formData.areaId" :warehouse-id="formData.warehouseId" @change="handleAreaChange" />
-          </el-form-item>
-        </el-col>
         <el-col :span="8">
           <el-form-item label="盈亏数量">
             <el-input :model-value="formatQuantity(totalQuantity)" disabled />
@@ -111,7 +106,6 @@
       </el-table>
       <InventorySelect
         ref="inventorySelectRef"
-        :area-id="formData.areaId"
         :warehouse-id="formData.warehouseId"
         @change="handleSelectInventory"
       />
@@ -152,9 +146,7 @@ import { FormRules } from 'element-plus'
 import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
 import InventorySelect, { InventorySelectRow } from '@/views/wms/inventory/components/InventorySelect.vue'
-import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import { formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION, sumPrice } from '@/views/wms/utils/format'
 import { generateOrderNo } from '@/views/wms/utils/order'
@@ -175,7 +167,6 @@ const formData = ref<CheckOrderVO>({
   no: undefined,
   status: OrderStatusEnum.PREPARE,
   warehouseId: undefined,
-  areaId: undefined,
   totalQuantity: 0,
   totalAmount: 0,
   remark: undefined,
@@ -237,8 +228,6 @@ const buildDetail = (inventory: InventorySelectRow): CheckOrderDetailVO => ({
   inventoryId: inventory.id,
   warehouseId: inventory.warehouseId,
   warehouseName: inventory.warehouseName,
-  areaId: inventory.areaId,
-  areaName: inventory.areaName,
   batchNo: inventory.batchNo,
   productionDate: inventory.productionDate,
   expirationDate: inventory.expirationDate,
@@ -268,11 +257,6 @@ const handleDeleteDetail = (index: number) => {
   refreshTotalAmount()
 }
 const handleWarehouseChange = () => {
-  formData.value.areaId = undefined
-  formData.value.details = []
-  refreshTotalAmount()
-}
-const handleAreaChange = () => {
   formData.value.details = []
   refreshTotalAmount()
 }
@@ -291,10 +275,6 @@ const validateDetails = (required: boolean) => {
   }
   for (let i = 0; i < formData.value.details.length; i++) {
     const detail = formData.value.details[i]
-    if (AREA_ENABLE && !detail.areaId) {
-      message.error(`第 ${i + 1} 行明细请选择库区`)
-      return false
-    }
     if (detail.checkQuantity === undefined || detail.checkQuantity < 0) {
       message.error(`第 ${i + 1} 行明细实盘数量不能小于 0`)
       return false
@@ -374,7 +354,6 @@ const resetForm = () => {
     no: generateOrderNo('PK'),
     status: OrderStatusEnum.PREPARE,
     warehouseId: undefined,
-    areaId: undefined,
     totalQuantity: 0,
     totalAmount: 0,
     remark: undefined,

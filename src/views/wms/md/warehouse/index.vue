@@ -75,14 +75,6 @@
       />
       <el-table-column align="center" label="操作" width="210">
         <template #default="scope">
-          <router-link
-            v-if="AREA_ENABLE"
-            :to="{ name: 'WmsWarehouseArea', params: { warehouseId: scope.row.id } }"
-          >
-            <el-button v-hasPermi="['wms:warehouse-area:query']" link type="primary">
-              库区
-            </el-button>
-          </router-link>
           <el-button
             v-hasPermi="['wms:warehouse:update']"
             link
@@ -118,7 +110,6 @@
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import { WarehouseApi, WarehouseVO } from '@/api/wms/md/warehouse'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import WarehouseForm from './WarehouseForm.vue'
 import download from '@/utils/download'
 

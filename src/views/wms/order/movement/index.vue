@@ -199,28 +199,20 @@
       </el-table-column>
       <el-table-column
         v-if="isTableColumnVisible('sourceWarehouse')"
-        :label="AREA_ENABLE ? '来源仓库/库区' : '来源仓库'"
+        label="来源仓库"
         min-width="180"
       >
         <template #default="{ row }">
-          <template v-if="AREA_ENABLE">
-            <div>仓库：{{ row.sourceWarehouseName || '-' }}</div>
-            <div>库区：{{ row.sourceAreaName || '-' }}</div>
-          </template>
-          <template v-else>{{ row.sourceWarehouseName || '-' }}</template>
+          {{ row.sourceWarehouseName || '-' }}
         </template>
       </el-table-column>
       <el-table-column
         v-if="isTableColumnVisible('targetWarehouse')"
-        :label="AREA_ENABLE ? '目标仓库/库区' : '目标仓库'"
+        label="目标仓库"
         min-width="180"
       >
         <template #default="{ row }">
-          <template v-if="AREA_ENABLE">
-            <div>仓库：{{ row.targetWarehouseName || '-' }}</div>
-            <div>库区：{{ row.targetAreaName || '-' }}</div>
-          </template>
-          <template v-else>{{ row.targetWarehouseName || '-' }}</template>
+          {{ row.targetWarehouseName || '-' }}
         </template>
       </el-table-column>
       <el-table-column v-if="isTableColumnVisible('quantityAmount')" label="总数量/总金额(元)" min-width="180">
@@ -286,7 +278,6 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MovementOrderApi, MovementOrderVO } from '@/api/wms/order/movement'
 import { MovementOrderDetailVO } from '@/api/wms/order/movement/detail'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderDeleteStatusList, OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import { formatPrice, formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION } from '@/views/wms/utils/format'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'

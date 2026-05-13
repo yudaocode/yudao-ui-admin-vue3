@@ -14,7 +14,6 @@
           <span v-else>-</span>
         </el-descriptions-item>
         <el-descriptions-item label="仓库">{{ detailData.warehouseName || '-' }}</el-descriptions-item>
-        <el-descriptions-item v-if="AREA_ENABLE" label="库区">{{ detailData.areaName || '-' }}</el-descriptions-item>
         <el-descriptions-item label="盈亏数量">
           {{ formatQuantity(detailData.totalQuantity) || '-' }}
         </el-descriptions-item>
@@ -73,7 +72,6 @@ import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { formatPrice, formatQuantity, formatSumPrice, formatSumQuantity } from '@/views/wms/utils/format'
 
 /** WMS 盘库单详情 */

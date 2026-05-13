@@ -21,18 +21,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="仓库" prop="warehouseId">
-        <WarehouseSelect
-          v-model="queryParams.warehouseId"
-          class="!w-240px"
-          @change="handleWarehouseChange"
-        />
-      </el-form-item>
-      <el-form-item v-if="isAreaQueryVisible" label="库区" prop="areaId">
-        <WarehouseAreaSelect
-          v-model="queryParams.areaId"
-          :warehouse-id="queryParams.warehouseId"
-          class="!w-240px"
-        />
+        <WarehouseSelect v-model="queryParams.warehouseId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="商品名称" prop="itemName">
         <el-input
@@ -105,23 +94,7 @@
             {{ scope.row.warehouseName || '-' }}
           </template>
         </el-table-column>
-        <el-table-column
-          v-if="queryParams.type === INVENTORY_DIMENSION.AREA"
-          label="库区"
-          min-width="160"
-          prop="areaId"
-        >
-          <template #default="scope">
-            {{ scope.row.areaName || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="商品信息"
-          min-width="240"
-          :prop="
-            queryParams.type === INVENTORY_DIMENSION.WAREHOUSE ? 'warehouseItemId' : 'areaItemId'
-          "
-        >
+        <el-table-column label="商品信息" min-width="240" prop="warehouseItemId">
           <template #default="scope">
             <div>{{ scope.row.itemName || '-' }}</div>
             <div v-if="scope.row.itemCode" class="text-12px text-gray-500">
@@ -160,11 +133,6 @@
             {{ scope.row.warehouseName || '-' }}
           </template>
         </el-table-column>
-        <el-table-column v-if="AREA_ENABLE" label="所属库区" min-width="160" prop="areaId">
-          <template #default="scope">
-            {{ scope.row.areaName || '-' }}
-          </template>
-        </el-table-column>
       </template>
       <el-table-column align="right" label="库存" min-width="130" prop="quantity">
         <template #default="scope">
@@ -184,9 +152,7 @@
 
 <script lang="ts" setup>
 import { InventoryApi, InventoryVO } from '@/api/wms/inventory'
-import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { formatQuantity } from '@/views/wms/utils/format'
 
 /** WMS 库存统计 */
@@ -194,24 +160,18 @@ defineOptions({ name: 'WmsInventory' })
 
 const INVENTORY_DIMENSION = {
   WAREHOUSE: 'warehouse',
-  AREA: 'area',
   ITEM: 'item'
 } as const
 type InventoryDimension = (typeof INVENTORY_DIMENSION)[keyof typeof INVENTORY_DIMENSION]
 
 const dimensionOptions = computed(() => [
   { label: '仓库', value: INVENTORY_DIMENSION.WAREHOUSE },
-  ...(AREA_ENABLE ? [{ label: '库区', value: INVENTORY_DIMENSION.AREA }] : []),
   { label: '商品', value: INVENTORY_DIMENSION.ITEM }
 ])
-const warehouseDimensionList: InventoryDimension[] = [
-  INVENTORY_DIMENSION.WAREHOUSE,
-  INVENTORY_DIMENSION.AREA
-]
+const warehouseDimensionList: InventoryDimension[] = [INVENTORY_DIMENSION.WAREHOUSE]
 
 interface InventoryRow extends InventoryVO {
   warehouseItemId?: string
-  areaItemId?: string
   skuWarehouseId?: string
 }
 
@@ -234,8 +194,7 @@ const queryParams = reactive({
   itemName: undefined as string | undefined,
   skuCode: undefined as string | undefined,
   skuName: undefined as string | undefined,
-  warehouseId: undefined as number | undefined,
-  areaId: undefined as number | undefined
+  warehouseId: undefined as number | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -245,14 +204,12 @@ const getList = async () => {
   try {
     const data = await InventoryApi.getInventoryPage({
       ...queryParams,
-      areaId: isAreaQueryVisible.value ? queryParams.areaId : undefined,
       minQuantity: filterZero.value ? 1 : undefined
     })
     list.value = data.list.map((item: InventoryVO) => ({
       ...item,
       // 展示字段
       warehouseItemId: `${item.warehouseId || 0}-${item.itemId || 0}`,
-      areaItemId: `${item.areaId || 0}-${item.itemId || 0}`,
       skuWarehouseId: `${item.skuId || 0}-${item.warehouseId || 0}`
     }))
     total.value = data.total
@@ -278,9 +235,6 @@ const resetQuery = () => {
 /** 统计维度变化 */
 const handleTypeChange = () => {
   queryParams.pageNo = 1
-  if (queryParams.type === INVENTORY_DIMENSION.WAREHOUSE) {
-    queryParams.areaId = undefined
-  }
   getList()
 }
 
@@ -289,16 +243,6 @@ const handleFilterZeroChange = () => {
   queryParams.pageNo = 1
   getList()
 }
-
-/** 仓库变化 */
-const handleWarehouseChange = () => {
-  queryParams.areaId = undefined
-}
-
-/** 是否展示库区搜索项 */
-const isAreaQueryVisible = computed(() => {
-  return AREA_ENABLE && queryParams.type !== INVENTORY_DIMENSION.WAREHOUSE
-})
 
 /** 合并库存统计的维度单元格 */
 const spanMethod = ({ column, rowIndex }: SpanMethodProps) => {
@@ -330,9 +274,6 @@ const getRowPropertyValue = (row: InventoryRow | undefined, property: string) =>
 const getRowSpanProperties = () => {
   if (queryParams.type === INVENTORY_DIMENSION.ITEM) {
     return ['itemId', 'skuId', 'skuWarehouseId']
-  }
-  if (queryParams.type === INVENTORY_DIMENSION.AREA) {
-    return ['warehouseId', 'areaId', 'areaItemId']
   }
   return ['warehouseId', 'warehouseItemId']
 }

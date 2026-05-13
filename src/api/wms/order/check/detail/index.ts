@@ -12,8 +12,6 @@ export interface CheckOrderDetailVO {
   inventoryId?: number
   warehouseId?: number
   warehouseName?: string
-  areaId?: number
-  areaName?: string
   batchNo?: string
   productionDate?: Date
   expirationDate?: Date

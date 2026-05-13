@@ -35,18 +35,7 @@
         />
       </el-form-item>
       <el-form-item label="仓库" prop="warehouseId">
-        <WarehouseSelect
-          v-model="queryParams.warehouseId"
-          class="!w-240px"
-          @change="handleWarehouseChange"
-        />
-      </el-form-item>
-      <el-form-item v-if="AREA_ENABLE" label="库区" prop="areaId">
-        <WarehouseAreaSelect
-          v-model="queryParams.areaId"
-          :warehouse-id="queryParams.warehouseId"
-          class="!w-240px"
-        />
+        <WarehouseSelect v-model="queryParams.warehouseId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="商品编号" prop="itemCode">
         <el-input
@@ -140,15 +129,9 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column :label="AREA_ENABLE ? '仓库/库区' : '仓库'" min-width="160">
+      <el-table-column label="仓库" min-width="160">
         <template #default="scope">
-          <template v-if="AREA_ENABLE">
-            <div>仓库：{{ scope.row.warehouseName || '-' }}</div>
-            <div>库区：{{ scope.row.areaName || '-' }}</div>
-          </template>
-          <template v-else>
-            {{ scope.row.warehouseName || '-' }}
-          </template>
+          {{ scope.row.warehouseName || '-' }}
         </template>
       </el-table-column>
       <el-table-column align="right" label="操作前" min-width="110">
@@ -207,9 +190,7 @@
 import { dateFormatter, defaultShortcuts, formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { InventoryHistoryApi, InventoryHistoryVO } from '@/api/wms/inventory/history'
-import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { formatPrice, formatQuantity } from '@/views/wms/utils/format'
 
 /** WMS 库存流水 */
@@ -228,7 +209,6 @@ const queryParams = reactive({
   skuCode: undefined as string | undefined,
   skuName: undefined as string | undefined,
   warehouseId: undefined as number | undefined,
-  areaId: undefined as number | undefined,
   createTime: undefined as string[] | undefined
 })
 const queryFormRef = ref() // 搜索的表单
@@ -255,11 +235,6 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
-}
-
-/** 仓库变化 */
-const handleWarehouseChange = () => {
-  queryParams.areaId = undefined
 }
 
 /** 初始化 */

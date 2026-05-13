@@ -128,29 +128,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/wms',
-    component: Layout,
-    name: 'Wms',
-    meta: {
-      hidden: true
-    },
-    children: [
-      {
-        path: 'md/warehouse/area/:warehouseId',
-        component: () => import('@/views/wms/md/warehouse/area/index.vue'),
-        name: 'WmsWarehouseArea',
-        meta: {
-          title: '库区管理',
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          icon: '',
-          activeMenu: '/wms/md/warehouse'
-        }
-      }
-    ]
-  },
-  {
     path: '/codegen',
     component: Layout,
     name: 'CodegenEdit',

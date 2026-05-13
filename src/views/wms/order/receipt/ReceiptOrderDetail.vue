@@ -30,9 +30,6 @@
         <el-descriptions-item label="业务单号">
           {{ detailData.bizOrderNo || '-' }}
         </el-descriptions-item>
-        <el-descriptions-item v-if="AREA_ENABLE" label="库区">
-          {{ detailData.areaName || '-' }}
-        </el-descriptions-item>
         <el-descriptions-item label="总数量">
           {{ formatQuantity(detailData.totalQuantity) || '-' }}
         </el-descriptions-item>
@@ -74,7 +71,6 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column v-if="AREA_ENABLE" label="库区" min-width="140" prop="areaName" />
         <el-table-column label="批号" min-width="140" prop="batchNo" />
         <el-table-column label="生产日期" width="140">
           <template #default="scope">
@@ -112,7 +108,6 @@ import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
 import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import {
   formatPrice,
   formatQuantity,

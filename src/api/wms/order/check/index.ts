@@ -9,8 +9,6 @@ export interface CheckOrderVO {
   remark?: string
   warehouseId?: number
   warehouseName?: string
-  areaId?: number
-  areaName?: string
   totalQuantity?: number
   totalAmount?: number
   details?: CheckOrderDetailVO[]

@@ -42,16 +42,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="仓库" prop="warehouseId">
-            <WarehouseSelect v-model="formData.warehouseId" @change="handleWarehouseChange" />
-          </el-form-item>
-        </el-col>
-        <el-col v-if="AREA_ENABLE" :span="8">
-          <el-form-item label="库区" prop="areaId">
-            <WarehouseAreaSelect
-              v-model="formData.areaId"
-              :warehouse-id="formData.warehouseId"
-              @change="handleAreaChange"
-            />
+            <WarehouseSelect v-model="formData.warehouseId" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -71,7 +62,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="AREA_ENABLE ? 8 : 16">
+        <el-col :span="16">
           <el-form-item label="备注" prop="remark">
             <el-input
               v-model="formData.remark"
@@ -114,16 +105,6 @@
             <div v-if="scope.row.skuCode" class="text-12px text-gray-500">
               规格编号：{{ scope.row.skuCode }}
             </div>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="AREA_ENABLE" label="库区" min-width="180">
-          <template #default="scope">
-            <WarehouseAreaSelect
-              v-model="scope.row.areaId"
-              :disabled="!formData.warehouseId || !!formData.areaId"
-              :warehouse-id="formData.warehouseId"
-              placeholder="请选择库区"
-            />
           </template>
         </el-table-column>
         <el-table-column label="批号" min-width="160">
@@ -232,9 +213,7 @@ import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
 import { ItemSkuVO } from '@/api/wms/md/item/sku'
 import ItemSkuSelect from '@/views/wms/md/item/sku/components/ItemSkuSelect.vue'
 import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vue'
-import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
   formatQuantity,
@@ -264,7 +243,6 @@ const formData = ref<ReceiptOrderVO>({
   bizOrderNo: undefined,
   merchantId: undefined,
   warehouseId: undefined,
-  areaId: undefined,
   totalQuantity: 0,
   totalAmount: 0,
   remark: undefined,
@@ -325,7 +303,6 @@ const buildDetail = (sku: ItemSkuVO): ReceiptOrderDetailVO => ({
   skuId: sku.id,
   skuCode: sku.code,
   skuName: sku.name,
-  areaId: formData.value.areaId,
   batchNo: undefined,
   productionDate: undefined,
   expirationDate: undefined,
@@ -355,17 +332,6 @@ const handleDeleteDetail = (index: number) => {
   refreshTotalAmount()
 }
 
-/** 仓库变化 */
-const handleWarehouseChange = () => {
-  formData.value.areaId = undefined
-  formData.value.details?.forEach((detail) => (detail.areaId = undefined))
-}
-
-/** 库区变化 */
-const handleAreaChange = () => {
-  formData.value.details?.forEach((detail) => (detail.areaId = formData.value.areaId))
-}
-
 /** 明细金额变化 */
 const handleDetailAmountChange = () => {
   refreshTotalAmount()
@@ -389,10 +355,6 @@ const validateDetails = (required: boolean) => {
     const detail = formData.value.details[i]
     if (!detail.skuId) {
       message.error(`第 ${i + 1} 行明细请选择商品规格`)
-      return false
-    }
-    if (AREA_ENABLE && !detail.areaId) {
-      message.error(`第 ${i + 1} 行明细请选择库区`)
       return false
     }
     if (!detail.quantity || detail.quantity <= 0) {
@@ -487,7 +449,6 @@ const resetForm = () => {
     bizOrderNo: undefined,
     merchantId: undefined,
     warehouseId: undefined,
-    areaId: undefined,
     totalQuantity: 0,
     totalAmount: 0,
     remark: undefined,

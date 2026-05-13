@@ -12,8 +12,6 @@ export interface InventoryVO {
   skuName?: string
   warehouseId?: number
   warehouseName?: string
-  areaId?: number
-  areaName?: string
   quantity?: number
   remark?: string
   createTime?: Date

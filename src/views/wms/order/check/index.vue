@@ -16,10 +16,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="仓库" prop="warehouseId">
-        <WarehouseSelect v-model="queryParams.warehouseId" class="!w-240px" @change="handleWarehouseChange" />
-      </el-form-item>
-      <el-form-item v-if="AREA_ENABLE" label="库区" prop="areaId">
-        <WarehouseAreaSelect v-model="queryParams.areaId" :warehouse-id="queryParams.warehouseId" class="!w-240px" />
+        <WarehouseSelect v-model="queryParams.warehouseId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="单据日期" prop="orderDate">
         <el-date-picker
@@ -199,15 +196,11 @@
       </el-table-column>
       <el-table-column
         v-if="isTableColumnVisible('warehouse')"
-        :label="AREA_ENABLE ? '仓库/库区' : '仓库'"
+        label="仓库"
         min-width="180"
       >
         <template #default="{ row }">
-          <template v-if="AREA_ENABLE">
-            <div>仓库：{{ row.warehouseName || '-' }}</div>
-            <div>库区：{{ row.areaName || '-' }}</div>
-          </template>
-          <template v-else>{{ row.warehouseName || '-' }}</template>
+          {{ row.warehouseName || '-' }}
         </template>
       </el-table-column>
       <el-table-column v-if="isTableColumnVisible('quantityAmount')" label="盈亏数量/总金额(元)" min-width="180">
@@ -272,9 +265,7 @@ import { defaultShortcuts, formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
-import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderDeleteStatusList, OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import { formatPrice, formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION } from '@/views/wms/utils/format'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
@@ -317,7 +308,6 @@ const getDefaultQueryParams = () => ({
   no: undefined as string | undefined,
   status: undefined as number | undefined,
   warehouseId: undefined as number | undefined,
-  areaId: undefined as number | undefined,
   orderDate: undefined as string[] | undefined,
   totalQuantityMin: undefined as number | undefined,
   totalQuantityMax: undefined as number | undefined,
@@ -362,9 +352,6 @@ const handleQuery = () => {
 const resetQuery = () => {
   Object.assign(queryParams, getDefaultQueryParams())
   handleQuery()
-}
-const handleWarehouseChange = () => {
-  queryParams.areaId = undefined
 }
 const handleExpandChange = async (row: CheckOrderVO) => {
   if (!row.id || detailMap[row.id]) return

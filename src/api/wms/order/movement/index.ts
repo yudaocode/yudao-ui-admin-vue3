@@ -9,12 +9,8 @@ export interface MovementOrderVO {
   remark?: string
   sourceWarehouseId?: number
   sourceWarehouseName?: string
-  sourceAreaId?: number
-  sourceAreaName?: string
   targetWarehouseId?: number
   targetWarehouseName?: string
-  targetAreaId?: number
-  targetAreaName?: string
   totalQuantity?: number
   totalAmount?: number
   details?: MovementOrderDetailVO[]

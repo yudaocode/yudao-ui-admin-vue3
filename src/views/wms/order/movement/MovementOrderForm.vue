@@ -13,27 +13,9 @@
             <WarehouseSelect v-model="formData.sourceWarehouseId" @change="handleSourceWarehouseChange" />
           </el-form-item>
         </el-col>
-        <el-col v-if="AREA_ENABLE" :span="8">
-          <el-form-item label="来源库区" prop="sourceAreaId">
-            <WarehouseAreaSelect
-              v-model="formData.sourceAreaId"
-              :warehouse-id="formData.sourceWarehouseId"
-              @change="handleSourceAreaChange"
-            />
-          </el-form-item>
-        </el-col>
         <el-col :span="8">
           <el-form-item label="目标仓库" prop="targetWarehouseId">
             <WarehouseSelect v-model="formData.targetWarehouseId" @change="handleTargetWarehouseChange" />
-          </el-form-item>
-        </el-col>
-        <el-col v-if="AREA_ENABLE" :span="8">
-          <el-form-item label="目标库区" prop="targetAreaId">
-            <WarehouseAreaSelect
-              v-model="formData.targetAreaId"
-              :warehouse-id="formData.targetWarehouseId"
-              @change="handleTargetAreaChange"
-            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -84,7 +66,6 @@
             <div v-if="row.skuCode" class="text-12px text-gray-500">规格编号：{{ row.skuCode }}</div>
           </template>
         </el-table-column>
-        <el-table-column v-if="AREA_ENABLE" label="来源库区" min-width="140" prop="sourceAreaName" />
         <el-table-column label="批号" min-width="140" prop="batchNo" />
         <el-table-column align="right" label="可用库存" width="120">
           <template #default="{ row }">{{ formatQuantity(row.availableQuantity) || '-' }}</template>
@@ -127,7 +108,6 @@
       </el-table>
       <InventorySelect
         ref="inventorySelectRef"
-        :area-id="formData.sourceAreaId"
         :warehouse-id="formData.sourceWarehouseId"
         @change="handleSelectInventory"
       />
@@ -168,9 +148,7 @@ import { FormRules } from 'element-plus'
 import { MovementOrderApi, MovementOrderVO } from '@/api/wms/order/movement'
 import { MovementOrderDetailVO } from '@/api/wms/order/movement/detail'
 import InventorySelect, { InventorySelectRow } from '@/views/wms/inventory/components/InventorySelect.vue'
-import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import { formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION, sumPrice, sumQuantity } from '@/views/wms/utils/format'
 import { generateOrderNo } from '@/views/wms/utils/order'
@@ -191,9 +169,7 @@ const formData = ref<MovementOrderVO>({
   no: undefined,
   status: OrderStatusEnum.PREPARE,
   sourceWarehouseId: undefined,
-  sourceAreaId: undefined,
   targetWarehouseId: undefined,
-  targetAreaId: undefined,
   totalQuantity: 0,
   totalAmount: 0,
   remark: undefined,
@@ -252,10 +228,7 @@ const buildDetail = (inventory: InventorySelectRow): MovementOrderDetailVO => ({
   skuName: inventory.skuName,
   sourceWarehouseId: inventory.warehouseId,
   sourceWarehouseName: inventory.warehouseName,
-  sourceAreaId: inventory.areaId,
-  sourceAreaName: inventory.areaName,
   targetWarehouseId: formData.value.targetWarehouseId,
-  targetAreaId: formData.value.targetAreaId,
   batchNo: inventory.batchNo,
   productionDate: inventory.productionDate,
   expirationDate: inventory.expirationDate,
@@ -283,8 +256,7 @@ const isInventorySelected = (inventory: InventorySelectRow) =>
   (formData.value.details || []).some((detail) => {
     return (
       detail.skuId === inventory.skuId &&
-      detail.sourceWarehouseId === inventory.warehouseId &&
-      detail.sourceAreaId === inventory.areaId
+      detail.sourceWarehouseId === inventory.warehouseId
     )
   })
 
@@ -294,24 +266,16 @@ const handleDeleteDetail = (index: number) => {
 }
 
 const handleSourceWarehouseChange = () => {
-  formData.value.sourceAreaId = undefined
-  formData.value.details = []
-  refreshTotalAmount()
-}
-const handleSourceAreaChange = () => {
   formData.value.details = []
   refreshTotalAmount()
 }
 const handleTargetWarehouseChange = () => {
-  formData.value.targetAreaId = undefined
   refreshTargetToDetails()
 }
-const handleTargetAreaChange = () => refreshTargetToDetails()
 const refreshTargetToDetails = () => {
   const details = formData.value.details || []
   details.forEach((detail) => {
     detail.targetWarehouseId = formData.value.targetWarehouseId
-    detail.targetAreaId = formData.value.targetAreaId
   })
 }
 const refreshTotalAmount = () => {
@@ -320,6 +284,10 @@ const refreshTotalAmount = () => {
 
 /** 校验明细 */
 const validateDetails = (required: boolean) => {
+  if (formData.value.sourceWarehouseId === formData.value.targetWarehouseId) {
+    message.error('来源仓库和目标仓库不能相同')
+    return false
+  }
   if (!formData.value.details?.length) {
     if (required) {
       message.error('至少包含一条移库明细')
@@ -327,19 +295,8 @@ const validateDetails = (required: boolean) => {
     }
     return true
   }
-  if (
-    formData.value.sourceWarehouseId === formData.value.targetWarehouseId &&
-    formData.value.sourceAreaId === formData.value.targetAreaId
-  ) {
-    message.error('来源仓库库区和目标仓库库区不能相同')
-    return false
-  }
   for (let i = 0; i < formData.value.details.length; i++) {
     const detail = formData.value.details[i]
-    if (AREA_ENABLE && (!detail.sourceAreaId || !detail.targetAreaId)) {
-      message.error(`第 ${i + 1} 行明细请选择来源和目标库区`)
-      return false
-    }
     if (!detail.quantity || detail.quantity <= 0) {
       message.error(`第 ${i + 1} 行明细移库数量必须大于 0`)
       return false
@@ -423,9 +380,7 @@ const resetForm = () => {
     no: generateOrderNo('YK'),
     status: OrderStatusEnum.PREPARE,
     sourceWarehouseId: undefined,
-    sourceAreaId: undefined,
     targetWarehouseId: undefined,
-    targetAreaId: undefined,
     totalQuantity: 0,
     totalAmount: 0,
     remark: undefined,

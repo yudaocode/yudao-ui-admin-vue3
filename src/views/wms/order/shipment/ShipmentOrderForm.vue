@@ -45,15 +45,6 @@
             <WarehouseSelect v-model="formData.warehouseId" @change="handleWarehouseChange" />
           </el-form-item>
         </el-col>
-        <el-col v-if="AREA_ENABLE" :span="8">
-          <el-form-item label="库区" prop="areaId">
-            <WarehouseAreaSelect
-              v-model="formData.areaId"
-              :warehouse-id="formData.warehouseId"
-              @change="handleAreaChange"
-            />
-          </el-form-item>
-        </el-col>
         <el-col :span="8">
           <el-form-item label="总数量">
             <el-input :model-value="formatQuantity(totalQuantity)" disabled />
@@ -71,7 +62,7 @@
             />
           </el-form-item>
         </el-col>
-        <el-col :span="AREA_ENABLE ? 8 : 16">
+        <el-col :span="16">
           <el-form-item label="备注" prop="remark">
             <el-input
               v-model="formData.remark"
@@ -114,11 +105,6 @@
             <div v-if="scope.row.skuCode" class="text-12px text-gray-500">
               规格编号：{{ scope.row.skuCode }}
             </div>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="AREA_ENABLE" label="库区" min-width="140">
-          <template #default="scope">
-            {{ scope.row.areaName || '-' }}
           </template>
         </el-table-column>
         <el-table-column label="批号" min-width="160">
@@ -179,7 +165,6 @@
       </el-table>
       <InventorySelect
         ref="inventorySelectRef"
-        :area-id="formData.areaId"
         :warehouse-id="formData.warehouseId"
         @change="handleSelectInventory"
       />
@@ -226,10 +211,8 @@ import InventorySelect, {
   InventorySelectRow
 } from '@/views/wms/inventory/components/InventorySelect.vue'
 import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vue'
-import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { formatNullableDate } from '@/utils/formatTime'
-import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
   formatQuantity,
@@ -259,7 +242,6 @@ const formData = ref<ShipmentOrderVO>({
   bizOrderNo: undefined,
   merchantId: undefined,
   warehouseId: undefined,
-  areaId: undefined,
   totalQuantity: 0,
   totalAmount: 0,
   remark: undefined,
@@ -322,8 +304,6 @@ const buildDetail = (inventory: InventorySelectRow): ShipmentOrderDetailVO => ({
   skuName: inventory.skuName,
   warehouseId: inventory.warehouseId,
   warehouseName: inventory.warehouseName,
-  areaId: inventory.areaId,
-  areaName: inventory.areaName,
   batchNo: inventory.batchNo,
   productionDate: inventory.productionDate,
   expirationDate: inventory.expirationDate,
@@ -358,8 +338,7 @@ const isInventorySelected = (inventory: InventorySelectRow) => {
   return (formData.value.details || []).some((detail) => {
     return (
       detail.skuId === inventory.skuId &&
-      detail.warehouseId === inventory.warehouseId &&
-      detail.areaId === inventory.areaId
+      detail.warehouseId === inventory.warehouseId
     )
   })
 }
@@ -372,13 +351,6 @@ const handleDeleteDetail = (index: number) => {
 
 /** 仓库变化 */
 const handleWarehouseChange = () => {
-  formData.value.areaId = undefined
-  formData.value.details = []
-  refreshTotalAmount()
-}
-
-/** 库区变化 */
-const handleAreaChange = () => {
   formData.value.details = []
   refreshTotalAmount()
 }
@@ -406,10 +378,6 @@ const validateDetails = (required: boolean) => {
     const detail = formData.value.details[i]
     if (!detail.skuId) {
       message.error(`第 ${i + 1} 行明细请选择商品规格`)
-      return false
-    }
-    if (AREA_ENABLE && !detail.areaId) {
-      message.error(`第 ${i + 1} 行明细请选择库区`)
       return false
     }
     if (!detail.quantity || detail.quantity <= 0) {
@@ -508,7 +476,6 @@ const resetForm = () => {
     bizOrderNo: undefined,
     merchantId: undefined,
     warehouseId: undefined,
-    areaId: undefined,
     totalQuantity: 0,
     totalAmount: 0,
     remark: undefined,
