@@ -31,19 +31,16 @@
               库区
             </th>
             <th
-              v-if="BATCH_ENABLE"
               class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
             >
               批号
             </th>
             <th
-              v-if="BATCH_ENABLE"
               class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
             >
               生产日期
             </th>
             <th
-              v-if="BATCH_ENABLE"
               class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
             >
               过期日期
@@ -66,13 +63,13 @@
             <td v-if="AREA_ENABLE" class="border border-solid border-#dcdfe6 p-8px">
               {{ detail.areaName || '-' }}
             </td>
-            <td v-if="BATCH_ENABLE" class="border border-solid border-#dcdfe6 p-8px">
+            <td class="border border-solid border-#dcdfe6 p-8px">
               {{ detail.batchNo || '-' }}
             </td>
-            <td v-if="BATCH_ENABLE" class="border border-solid border-#dcdfe6 p-8px">
+            <td class="border border-solid border-#dcdfe6 p-8px">
               {{ formatNullableDate(detail.productionDate, 'YYYY-MM-DD') }}
             </td>
-            <td v-if="BATCH_ENABLE" class="border border-solid border-#dcdfe6 p-8px">
+            <td class="border border-solid border-#dcdfe6 p-8px">
               {{ formatNullableDate(detail.expirationDate, 'YYYY-MM-DD') }}
             </td>
             <td class="border border-solid border-#dcdfe6 p-8px text-right">
@@ -101,7 +98,7 @@
 import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { ShipmentOrderApi, ShipmentOrderVO } from '@/api/wms/order/shipment'
-import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { formatPrice, formatQuantity } from '@/views/wms/utils/format'
 
 /** WMS 出库单打印 */
@@ -109,7 +106,7 @@ defineOptions({ name: 'WmsShipmentOrderPrint' })
 
 const printData = ref<ShipmentOrderVO>({}) // 打印数据
 const printButtonRef = ref<HTMLButtonElement>() // 打印按钮
-const tableColumnCount = computed(() => 5 + (AREA_ENABLE ? 1 : 0) + (BATCH_ENABLE ? 3 : 0))
+const tableColumnCount = computed(() => 8 + (AREA_ENABLE ? 1 : 0))
 const printObj = ref({
   id: 'wmsShipmentOrderPrint',
   popTitle: '&nbsp',

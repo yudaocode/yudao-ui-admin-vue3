@@ -121,17 +121,17 @@
             {{ scope.row.areaName || '-' }}
           </template>
         </el-table-column>
-        <el-table-column v-if="BATCH_ENABLE" label="批号" min-width="160">
+        <el-table-column label="批号" min-width="160">
           <template #default="scope">
             {{ scope.row.batchNo || '-' }}
           </template>
         </el-table-column>
-        <el-table-column v-if="BATCH_ENABLE" label="生产日期" width="180">
+        <el-table-column label="生产日期" width="180">
           <template #default="scope">
             {{ formatNullableDate(scope.row.productionDate, 'YYYY-MM-DD') }}
           </template>
         </el-table-column>
-        <el-table-column v-if="BATCH_ENABLE" label="过期日期" width="180">
+        <el-table-column label="过期日期" width="180">
           <template #default="scope">
             {{ formatNullableDate(scope.row.expirationDate, 'YYYY-MM-DD') }}
           </template>
@@ -229,7 +229,7 @@ import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vu
 import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { formatNullableDate } from '@/utils/formatTime'
-import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
   formatQuantity,
@@ -320,7 +320,6 @@ const buildDetail = (inventory: InventorySelectRow): ShipmentOrderDetailVO => ({
   skuId: inventory.skuId,
   skuCode: inventory.skuCode,
   skuName: inventory.skuName,
-  inventoryDetailId: inventory.inventoryDetailId,
   warehouseId: inventory.warehouseId,
   warehouseName: inventory.warehouseName,
   areaId: inventory.areaId,
@@ -357,9 +356,6 @@ const handleSelectInventory = (inventories: InventorySelectRow[]) => {
 /** 判断库存是否已选择 */
 const isInventorySelected = (inventory: InventorySelectRow) => {
   return (formData.value.details || []).some((detail) => {
-    if (BATCH_ENABLE) {
-      return detail.inventoryDetailId === inventory.inventoryDetailId
-    }
     return (
       detail.skuId === inventory.skuId &&
       detail.warehouseId === inventory.warehouseId &&

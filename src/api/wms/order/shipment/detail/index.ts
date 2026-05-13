@@ -9,7 +9,6 @@ export interface ShipmentOrderDetailVO {
   skuId?: number
   skuCode?: string
   skuName?: string
-  inventoryDetailId?: number
   warehouseId?: number
   warehouseName?: string
   areaId?: number

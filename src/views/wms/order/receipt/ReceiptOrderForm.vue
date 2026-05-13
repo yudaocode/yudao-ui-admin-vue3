@@ -126,12 +126,12 @@
             />
           </template>
         </el-table-column>
-        <el-table-column v-if="BATCH_ENABLE" label="批号" min-width="160">
+        <el-table-column label="批号" min-width="160">
           <template #default="scope">
             <el-input v-model="scope.row.batchNo" maxlength="64" placeholder="请输入批号" />
           </template>
         </el-table-column>
-        <el-table-column v-if="BATCH_ENABLE" label="生产日期" width="180">
+        <el-table-column label="生产日期" width="180">
           <template #default="scope">
             <el-date-picker
               v-model="scope.row.productionDate"
@@ -142,7 +142,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column v-if="BATCH_ENABLE" label="过期日期" width="180">
+        <el-table-column label="过期日期" width="180">
           <template #default="scope">
             <el-date-picker
               v-model="scope.row.expirationDate"
@@ -234,7 +234,7 @@ import ItemSkuSelect from '@/views/wms/md/item/sku/components/ItemSkuSelect.vue'
 import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vue'
 import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
   formatQuantity,

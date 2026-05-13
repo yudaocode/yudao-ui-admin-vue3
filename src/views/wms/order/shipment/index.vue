@@ -244,14 +244,8 @@
               min-width="140"
               prop="areaName"
             />
-            <el-table-column
-              v-if="BATCH_ENABLE"
-              align="center"
-              label="批号"
-              min-width="140"
-              prop="batchNo"
-            />
-            <el-table-column v-if="BATCH_ENABLE" label="生产日期/过期日期" min-width="180">
+            <el-table-column align="center" label="批号" min-width="140" prop="batchNo" />
+            <el-table-column label="生产日期/过期日期" min-width="180">
               <template #default="detailScope">
                 <div v-if="detailScope.row.productionDate">
                   生产日期：{{ formatNullableDate(detailScope.row.productionDate, 'YYYY-MM-DD') }}
@@ -428,7 +422,7 @@ import { ShipmentOrderApi, ShipmentOrderVO } from '@/api/wms/order/shipment'
 import { ShipmentOrderDetailVO } from '@/api/wms/order/shipment/detail'
 import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { AREA_ENABLE } from '@/views/wms/utils/config'
 import {
   OrderDeleteStatusList,
   OrderStatusEnum,

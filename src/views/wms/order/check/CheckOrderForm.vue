@@ -66,7 +66,7 @@
             <div v-if="row.skuCode" class="text-12px text-gray-500">规格编号：{{ row.skuCode }}</div>
           </template>
         </el-table-column>
-        <el-table-column v-if="BATCH_ENABLE" label="批号" min-width="140" prop="batchNo" />
+        <el-table-column label="批号" min-width="140" prop="batchNo" />
         <el-table-column align="right" label="账面数量" width="120">
           <template #default="{ row }">{{ formatQuantity(row.quantity) || '-' }}</template>
         </el-table-column>
@@ -154,7 +154,7 @@ import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
 import InventorySelect, { InventorySelectRow } from '@/views/wms/inventory/components/InventorySelect.vue'
 import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import { formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION, sumPrice } from '@/views/wms/utils/format'
 import { generateOrderNo } from '@/views/wms/utils/order'
@@ -235,7 +235,6 @@ const buildDetail = (inventory: InventorySelectRow): CheckOrderDetailVO => ({
   skuCode: inventory.skuCode,
   skuName: inventory.skuName,
   inventoryId: inventory.id,
-  inventoryDetailId: inventory.inventoryDetailId,
   warehouseId: inventory.warehouseId,
   warehouseName: inventory.warehouseName,
   areaId: inventory.areaId,
@@ -262,7 +261,6 @@ const handleSelectInventory = (inventories: InventorySelectRow[]) => {
 }
 const isInventorySelected = (inventory: InventorySelectRow) =>
   (formData.value.details || []).some((detail) => {
-    if (BATCH_ENABLE) return detail.inventoryDetailId === inventory.inventoryDetailId
     return detail.inventoryId === inventory.id
   })
 const handleDeleteDetail = (index: number) => {

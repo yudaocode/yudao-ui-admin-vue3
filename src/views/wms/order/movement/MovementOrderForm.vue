@@ -85,7 +85,7 @@
           </template>
         </el-table-column>
         <el-table-column v-if="AREA_ENABLE" label="来源库区" min-width="140" prop="sourceAreaName" />
-        <el-table-column v-if="BATCH_ENABLE" label="批号" min-width="140" prop="batchNo" />
+        <el-table-column label="批号" min-width="140" prop="batchNo" />
         <el-table-column align="right" label="可用库存" width="120">
           <template #default="{ row }">{{ formatQuantity(row.availableQuantity) || '-' }}</template>
         </el-table-column>
@@ -170,7 +170,7 @@ import { MovementOrderDetailVO } from '@/api/wms/order/movement/detail'
 import InventorySelect, { InventorySelectRow } from '@/views/wms/inventory/components/InventorySelect.vue'
 import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import { formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION, sumPrice, sumQuantity } from '@/views/wms/utils/format'
 import { generateOrderNo } from '@/views/wms/utils/order'
@@ -250,7 +250,6 @@ const buildDetail = (inventory: InventorySelectRow): MovementOrderDetailVO => ({
   skuId: inventory.skuId,
   skuCode: inventory.skuCode,
   skuName: inventory.skuName,
-  inventoryDetailId: inventory.inventoryDetailId,
   sourceWarehouseId: inventory.warehouseId,
   sourceWarehouseName: inventory.warehouseName,
   sourceAreaId: inventory.areaId,
@@ -282,7 +281,6 @@ const handleSelectInventory = (inventories: InventorySelectRow[]) => {
 /** 判断库存是否已选择 */
 const isInventorySelected = (inventory: InventorySelectRow) =>
   (formData.value.details || []).some((detail) => {
-    if (BATCH_ENABLE) return detail.inventoryDetailId === inventory.inventoryDetailId
     return (
       detail.skuId === inventory.skuId &&
       detail.sourceWarehouseId === inventory.warehouseId &&

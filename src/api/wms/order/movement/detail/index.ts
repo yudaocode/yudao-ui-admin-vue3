@@ -9,7 +9,6 @@ export interface MovementOrderDetailVO {
   skuId?: number
   skuCode?: string
   skuName?: string
-  inventoryDetailId?: number
   sourceWarehouseId?: number
   sourceWarehouseName?: string
   sourceAreaId?: number

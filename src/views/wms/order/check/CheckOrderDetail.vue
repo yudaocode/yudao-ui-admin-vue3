@@ -50,7 +50,7 @@
             <div v-if="row.skuCode" class="text-12px text-gray-500">规格编号：{{ row.skuCode }}</div>
           </template>
         </el-table-column>
-        <el-table-column v-if="BATCH_ENABLE" label="批号" min-width="140" prop="batchNo" />
+        <el-table-column label="批号" min-width="140" prop="batchNo" />
         <el-table-column align="right" label="账面数量" prop="quantity" width="120">
           <template #default="{ row }">{{ formatQuantity(row.quantity) || '-' }}</template>
         </el-table-column>
@@ -73,7 +73,7 @@ import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
-import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { formatPrice, formatQuantity, formatSumPrice, formatSumQuantity } from '@/views/wms/utils/format'
 
 /** WMS 盘库单详情 */

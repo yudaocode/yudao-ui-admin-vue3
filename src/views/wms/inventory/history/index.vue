@@ -151,12 +151,12 @@
           </template>
         </template>
       </el-table-column>
-      <el-table-column v-if="!BATCH_ENABLE" align="right" label="操作前" min-width="110">
+      <el-table-column align="right" label="操作前" min-width="110">
         <template #default="scope">
           {{ formatQuantity(scope.row.beforeQuantity) || '-' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="!BATCH_ENABLE" align="right" label="操作后" min-width="110">
+      <el-table-column align="right" label="操作后" min-width="110">
         <template #default="scope">
           {{ formatQuantity(scope.row.afterQuantity) || '-' }}
         </template>
@@ -173,14 +173,8 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column
-        v-if="BATCH_ENABLE"
-        align="center"
-        label="批号"
-        min-width="140"
-        prop="batchNo"
-      />
-      <el-table-column v-if="BATCH_ENABLE" label="生产日期/过期日期" min-width="180">
+      <el-table-column align="center" label="批号" min-width="140" prop="batchNo" />
+      <el-table-column label="生产日期/过期日期" min-width="180">
         <template #default="scope">
           <div v-if="scope.row.productionDate">
             生产日期：{{ formatDate(scope.row.productionDate, 'YYYY-MM-DD') }}
@@ -215,7 +209,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { InventoryHistoryApi, InventoryHistoryVO } from '@/api/wms/inventory/history'
 import WarehouseAreaSelect from '@/views/wms/md/warehouse/components/WarehouseAreaSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { AREA_ENABLE } from '@/views/wms/utils/config'
 import { formatPrice, formatQuantity } from '@/views/wms/utils/format'
 
 /** WMS 库存流水 */

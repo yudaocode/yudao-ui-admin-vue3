@@ -8,10 +8,3 @@
 
 /** 是否启用库区模式（对齐 yudao.wms.area-enable） */
 export const AREA_ENABLE = true
-
-/**
- * 是否启用批次/效期/库存明细模式（对齐 yudao.wms.batch-enable）
- *
- * 依赖 AREA_ENABLE = true
- */
-export const BATCH_ENABLE = true

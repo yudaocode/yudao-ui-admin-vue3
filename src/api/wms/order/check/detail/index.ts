@@ -10,7 +10,6 @@ export interface CheckOrderDetailVO {
   skuCode?: string
   skuName?: string
   inventoryId?: number
-  inventoryDetailId?: number
   warehouseId?: number
   warehouseName?: string
   areaId?: number

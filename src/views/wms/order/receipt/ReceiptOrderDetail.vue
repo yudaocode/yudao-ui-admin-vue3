@@ -75,13 +75,13 @@
           </template>
         </el-table-column>
         <el-table-column v-if="AREA_ENABLE" label="库区" min-width="140" prop="areaName" />
-        <el-table-column v-if="BATCH_ENABLE" label="批号" min-width="140" prop="batchNo" />
-        <el-table-column v-if="BATCH_ENABLE" label="生产日期" width="140">
+        <el-table-column label="批号" min-width="140" prop="batchNo" />
+        <el-table-column label="生产日期" width="140">
           <template #default="scope">
             {{ formatNullableDate(scope.row.productionDate, 'YYYY-MM-DD') }}
           </template>
         </el-table-column>
-        <el-table-column v-if="BATCH_ENABLE" label="过期日期" width="140">
+        <el-table-column label="过期日期" width="140">
           <template #default="scope">
             {{ formatNullableDate(scope.row.expirationDate, 'YYYY-MM-DD') }}
           </template>
@@ -112,7 +112,7 @@ import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
 import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
-import { AREA_ENABLE, BATCH_ENABLE } from '@/views/wms/utils/config'
+import { AREA_ENABLE } from '@/views/wms/utils/config'
 import {
   formatPrice,
   formatQuantity,
