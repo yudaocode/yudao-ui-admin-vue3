@@ -237,17 +237,6 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column align="center" label="批号" min-width="140" prop="batchNo" />
-            <el-table-column label="生产日期/过期日期" min-width="180">
-              <template #default="detailScope">
-                <div v-if="detailScope.row.productionDate">
-                  生产日期：{{ formatNullableDate(detailScope.row.productionDate, 'YYYY-MM-DD') }}
-                </div>
-                <div v-if="detailScope.row.expirationDate">
-                  过期日期：{{ formatNullableDate(detailScope.row.expirationDate, 'YYYY-MM-DD') }}
-                </div>
-              </template>
-            </el-table-column>
             <el-table-column align="right" label="入库数量" width="120">
               <template #default="detailScope">
                 {{ formatQuantity(detailScope.row.quantity) }}

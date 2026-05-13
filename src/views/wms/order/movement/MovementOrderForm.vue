@@ -66,7 +66,6 @@
             <div v-if="row.skuCode" class="text-12px text-gray-500">规格编号：{{ row.skuCode }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="批号" min-width="140" prop="batchNo" />
         <el-table-column align="right" label="可用库存" width="120">
           <template #default="{ row }">{{ formatQuantity(row.availableQuantity) || '-' }}</template>
         </el-table-column>
@@ -229,9 +228,6 @@ const buildDetail = (inventory: InventorySelectRow): MovementOrderDetailVO => ({
   sourceWarehouseId: inventory.warehouseId,
   sourceWarehouseName: inventory.warehouseName,
   targetWarehouseId: formData.value.targetWarehouseId,
-  batchNo: inventory.batchNo,
-  productionDate: inventory.productionDate,
-  expirationDate: inventory.expirationDate,
   quantity: undefined,
   availableQuantity: inventory.availableQuantity,
   amount: undefined,

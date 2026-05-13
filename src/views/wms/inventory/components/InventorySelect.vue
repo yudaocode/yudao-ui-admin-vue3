@@ -129,9 +129,6 @@ import { InventoryApi, InventoryVO } from '@/api/wms/inventory'
 import { formatQuantity } from '@/views/wms/utils/format'
 
 export interface InventorySelectRow extends InventoryVO {
-  batchNo?: string
-  productionDate?: Date
-  expirationDate?: Date
   amount?: number
   availableQuantity?: number
 }

@@ -11,9 +11,6 @@ export interface ShipmentOrderDetailVO {
   skuName?: string
   warehouseId?: number
   warehouseName?: string
-  batchNo?: string
-  productionDate?: Date
-  expirationDate?: Date
   quantity?: number
   availableQuantity?: number
   amount?: number

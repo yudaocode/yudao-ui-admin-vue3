@@ -23,21 +23,6 @@
           <tr>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">商品信息</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">规格信息</th>
-            <th
-              class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
-            >
-              批号
-            </th>
-            <th
-              class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
-            >
-              生产日期
-            </th>
-            <th
-              class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
-            >
-              过期日期
-            </th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">数量</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">金额(元)</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">备注</th>
@@ -52,15 +37,6 @@
             <td class="border border-solid border-#dcdfe6 p-8px">
               <div>{{ detail.skuName || '-' }}</div>
               <div v-if="detail.skuCode" class="text-12px">编号：{{ detail.skuCode }}</div>
-            </td>
-            <td class="border border-solid border-#dcdfe6 p-8px">
-              {{ detail.batchNo || '-' }}
-            </td>
-            <td class="border border-solid border-#dcdfe6 p-8px">
-              {{ formatNullableDate(detail.productionDate, 'YYYY-MM-DD') }}
-            </td>
-            <td class="border border-solid border-#dcdfe6 p-8px">
-              {{ formatNullableDate(detail.expirationDate, 'YYYY-MM-DD') }}
             </td>
             <td class="border border-solid border-#dcdfe6 p-8px text-right">
               {{ formatQuantity(detail.quantity) || '-' }}
@@ -95,7 +71,7 @@ defineOptions({ name: 'WmsReceiptOrderPrint' })
 
 const printData = ref<ReceiptOrderVO>({}) // 打印数据
 const printButtonRef = ref<HTMLButtonElement>() // 打印按钮
-const tableColumnCount = 8
+const tableColumnCount = 5
 const printObj = ref({
   id: 'wmsReceiptOrderPrint',
   popTitle: '&nbsp',

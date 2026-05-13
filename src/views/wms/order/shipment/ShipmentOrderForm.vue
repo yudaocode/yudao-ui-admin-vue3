@@ -107,21 +107,6 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="批号" min-width="160">
-          <template #default="scope">
-            {{ scope.row.batchNo || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="生产日期" width="180">
-          <template #default="scope">
-            {{ formatNullableDate(scope.row.productionDate, 'YYYY-MM-DD') }}
-          </template>
-        </el-table-column>
-        <el-table-column label="过期日期" width="180">
-          <template #default="scope">
-            {{ formatNullableDate(scope.row.expirationDate, 'YYYY-MM-DD') }}
-          </template>
-        </el-table-column>
         <el-table-column align="right" label="可用库存" width="120">
           <template #default="scope">
             {{ formatQuantity(scope.row.availableQuantity) || '-' }}
@@ -304,9 +289,6 @@ const buildDetail = (inventory: InventorySelectRow): ShipmentOrderDetailVO => ({
   skuName: inventory.skuName,
   warehouseId: inventory.warehouseId,
   warehouseName: inventory.warehouseName,
-  batchNo: inventory.batchNo,
-  productionDate: inventory.productionDate,
-  expirationDate: inventory.expirationDate,
   quantity: undefined,
   availableQuantity: inventory.availableQuantity,
   amount: undefined,

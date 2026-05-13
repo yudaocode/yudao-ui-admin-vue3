@@ -164,7 +164,6 @@
                 <div v-if="detail.skuCode" class="text-12px text-gray-500">规格编号：{{ detail.skuCode }}</div>
               </template>
             </el-table-column>
-            <el-table-column label="批号" min-width="140" prop="batchNo" />
             <el-table-column align="right" label="账面数量" width="120">
               <template #default="{ row: detail }">{{ formatQuantity(detail.quantity) }}</template>
             </el-table-column>

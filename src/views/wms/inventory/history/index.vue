@@ -156,17 +156,6 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="批号" min-width="140" prop="batchNo" />
-      <el-table-column label="生产日期/过期日期" min-width="180">
-        <template #default="scope">
-          <div v-if="scope.row.productionDate">
-            生产日期：{{ formatDate(scope.row.productionDate, 'YYYY-MM-DD') }}
-          </div>
-          <div v-if="scope.row.expirationDate">
-            过期日期：{{ formatDate(scope.row.expirationDate, 'YYYY-MM-DD') }}
-          </div>
-        </template>
-      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -187,7 +176,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dateFormatter, defaultShortcuts, formatDate } from '@/utils/formatTime'
+import { dateFormatter, defaultShortcuts } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { InventoryHistoryApi, InventoryHistoryVO } from '@/api/wms/inventory/history'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'

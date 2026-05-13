@@ -13,9 +13,6 @@ export interface MovementOrderDetailVO {
   sourceWarehouseName?: string
   targetWarehouseId?: number
   targetWarehouseName?: string
-  batchNo?: string
-  productionDate?: Date
-  expirationDate?: Date
   quantity?: number
   availableQuantity?: number
   amount?: number

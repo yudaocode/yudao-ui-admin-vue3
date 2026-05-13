@@ -107,33 +107,6 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="批号" min-width="160">
-          <template #default="scope">
-            <el-input v-model="scope.row.batchNo" maxlength="64" placeholder="请输入批号" />
-          </template>
-        </el-table-column>
-        <el-table-column label="生产日期" width="180">
-          <template #default="scope">
-            <el-date-picker
-              v-model="scope.row.productionDate"
-              class="!w-1/1"
-              placeholder="请选择生产日期"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="过期日期" width="180">
-          <template #default="scope">
-            <el-date-picker
-              v-model="scope.row.expirationDate"
-              class="!w-1/1"
-              placeholder="请选择过期日期"
-              type="datetime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-            />
-          </template>
-        </el-table-column>
         <el-table-column label="入库数量" width="160">
           <template #default="scope">
             <el-input-number
@@ -303,9 +276,6 @@ const buildDetail = (sku: ItemSkuVO): ReceiptOrderDetailVO => ({
   skuId: sku.id,
   skuCode: sku.code,
   skuName: sku.name,
-  batchNo: undefined,
-  productionDate: undefined,
-  expirationDate: undefined,
   quantity: undefined,
   amount: undefined,
   remark: undefined
@@ -313,7 +283,7 @@ const buildDetail = (sku: ItemSkuVO): ReceiptOrderDetailVO => ({
 
 /** 添加商品 */
 const handleAddDetail = () => {
-  skuSelectRef.value?.open()
+  skuSelectRef.value?.open(getSelectedSkuIds())
 }
 
 /** 选择商品 SKU */
@@ -322,8 +292,22 @@ const handleSelectSku = (skus: ItemSkuVO[]) => {
     return
   }
   formData.value.details = formData.value.details || []
-  skus.forEach((sku) => formData.value.details!.push(buildDetail(sku)))
+  const selectedSkuIds = new Set(getSelectedSkuIds())
+  skus.forEach((sku) => {
+    if (!sku.id || selectedSkuIds.has(sku.id)) {
+      return
+    }
+    formData.value.details!.push(buildDetail(sku))
+    selectedSkuIds.add(sku.id)
+  })
   refreshTotalAmount()
+}
+
+/** 获得已选 SKU 编号 */
+const getSelectedSkuIds = () => {
+  return (formData.value.details || [])
+    .map((detail) => detail.skuId)
+    .filter((id): id is number => !!id)
 }
 
 /** 删除明细 */

@@ -11,9 +11,6 @@ export interface ReceiptOrderDetailVO {
   skuName?: string
   warehouseId?: number
   warehouseName?: string
-  batchNo?: string
-  productionDate?: Date
-  expirationDate?: Date
   quantity?: number
   amount?: number
   remark?: string

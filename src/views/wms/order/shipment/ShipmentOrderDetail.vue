@@ -71,17 +71,6 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="批号" min-width="140" prop="batchNo" />
-        <el-table-column label="生产日期" width="140">
-          <template #default="scope">
-            {{ formatNullableDate(scope.row.productionDate, 'YYYY-MM-DD') }}
-          </template>
-        </el-table-column>
-        <el-table-column label="过期日期" width="140">
-          <template #default="scope">
-            {{ formatNullableDate(scope.row.expirationDate, 'YYYY-MM-DD') }}
-          </template>
-        </el-table-column>
         <el-table-column align="right" label="数量" prop="quantity" width="120">
           <template #default="scope">
             {{ formatQuantity(scope.row.quantity) || '-' }}

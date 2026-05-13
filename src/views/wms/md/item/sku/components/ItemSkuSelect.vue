@@ -78,7 +78,13 @@
         @selection-change="handleSelectionChange"
         @row-dblclick="handleRowDblClick"
       >
-        <el-table-column :reserve-selection="true" align="center" type="selection" width="50" />
+        <el-table-column
+          :reserve-selection="true"
+          :selectable="isRowSelectable"
+          align="center"
+          type="selection"
+          width="50"
+        />
         <el-table-column label="商品信息" min-width="220">
           <template #default="{ row }">
             <div>{{ row.itemName || '-' }}</div>
@@ -149,6 +155,7 @@ const total = ref(0) // 列表的总条数
 const selectedList = ref<ItemSkuVO[]>([]) // 已选择 SKU 列表
 const selectedMap = ref<Map<number, ItemSkuVO>>(new Map()) // 跨页已选择 SKU
 const preSelectedIds = ref<number[]>([]) // 打开弹窗时传入的已选 SKU 编号
+const disabledSelectedIds = ref<Set<number>>(new Set()) // 已在业务明细中使用的 SKU 编号
 const tableRef = ref<InstanceType<typeof ElTable>>() // 表格 Ref
 const queryFormRef = ref() // 搜索的表单
 const getDefaultQueryParams = () => ({
@@ -172,6 +179,7 @@ const open = async (selectedIds?: number[]) => {
   selectedList.value = []
   selectedMap.value = new Map()
   preSelectedIds.value = selectedIds || []
+  disabledSelectedIds.value = new Set(preSelectedIds.value)
   await nextTick()
   tableRef.value?.clearSelection()
   await loadSkuList()
@@ -261,15 +269,24 @@ const applyPreSelection = () => {
   }
   list.value.forEach((row) => {
     if (row.id && selectedMap.value.has(row.id)) {
-      table.toggleRowSelection(row, true)
+      table.toggleRowSelection(row, true, true)
     }
   })
+}
+
+/** 是否允许勾选 SKU */
+const isRowSelectable = (row: ItemSkuVO) => {
+  return row.id === undefined || !disabledSelectedIds.value.has(row.id)
 }
 
 /** 选择变化 */
 const handleSelectionChange = (rows: ItemSkuVO[]) => {
   const currentPageIds = list.value.map((row) => row.id).filter((id): id is number => !!id)
-  currentPageIds.forEach((id) => selectedMap.value.delete(id))
+  currentPageIds.forEach((id) => {
+    if (!disabledSelectedIds.value.has(id)) {
+      selectedMap.value.delete(id)
+    }
+  })
   rows.forEach((row) => {
     if (row.id) {
       selectedMap.value.set(row.id, row)
@@ -280,16 +297,22 @@ const handleSelectionChange = (rows: ItemSkuVO[]) => {
 
 /** 双击行：切换勾选 */
 const handleRowDblClick = (row: ItemSkuVO) => {
+  if (row.id && disabledSelectedIds.value.has(row.id)) {
+    return
+  }
   tableRef.value?.toggleRowSelection(row)
 }
 
 /** 确认选择 */
 const handleConfirm = () => {
-  if (selectedList.value.length === 0) {
+  const newSelectedList = selectedList.value.filter(
+    (sku) => sku.id !== undefined && !disabledSelectedIds.value.has(sku.id)
+  )
+  if (newSelectedList.length === 0) {
     message.warning('请至少选择一条数据')
     return
   }
-  emit('change', selectedList.value)
+  emit('change', newSelectedList)
   dialogVisible.value = false
 }
 </script>

@@ -15,9 +15,6 @@ export interface InventoryHistoryVO {
   quantity?: number
   beforeQuantity?: number
   afterQuantity?: number
-  batchNo?: string
-  productionDate?: Date
-  expirationDate?: Date
   amount?: number
   remark?: string
   orderId?: number
