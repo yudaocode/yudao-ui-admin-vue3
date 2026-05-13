@@ -1,0 +1,29 @@
+// WMS 盘库单明细 VO
+export interface CheckOrderDetailVO {
+  id?: number
+  orderId?: number
+  itemId?: number
+  itemCode?: string
+  itemName?: string
+  unit?: string
+  skuId?: number
+  skuCode?: string
+  skuName?: string
+  inventoryId?: number
+  inventoryDetailId?: number
+  warehouseId?: number
+  warehouseName?: string
+  areaId?: number
+  areaName?: string
+  batchNo?: string
+  productionDate?: Date
+  expirationDate?: Date
+  receiptTime?: Date
+  quantity?: number
+  checkQuantity?: number
+  differenceQuantity?: number
+  availableQuantity?: number
+  amount?: number
+  remark?: string
+  createTime?: Date
+}
