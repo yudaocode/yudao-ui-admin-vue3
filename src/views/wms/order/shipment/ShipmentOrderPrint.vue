@@ -10,8 +10,8 @@
           出库类型：{{ getDictLabel(DICT_TYPE.WMS_SHIPMENT_ORDER_TYPE, printData.type) || '-' }}
         </div>
         <div>仓库：{{ printData.warehouseName || '-' }}</div>
-        <div>单据日期：{{ formatNullableDate(printData.orderTime, 'YYYY-MM-DD') }}</div>
         <div>出库状态：{{ getDictLabel(DICT_TYPE.WMS_ORDER_STATUS, printData.status) || '-' }}</div>
+        <div>单据日期：{{ formatNullableDate(printData.orderTime, 'YYYY-MM-DD') }}</div>
         <div>客户：{{ printData.merchantName || '-' }}</div>
         <div>业务单号：{{ printData.bizOrderNo || '-' }}</div>
         <div>总数量：{{ formatQuantity(printData.totalQuantity) || '-' }}</div>

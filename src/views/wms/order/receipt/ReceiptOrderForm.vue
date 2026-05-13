@@ -32,6 +32,17 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <el-form-item label="单据日期" prop="orderTime">
+            <el-date-picker
+              v-model="formData.orderTime"
+              class="!w-1/1"
+              placeholder="请选择单据日期"
+              type="date"
+              value-format="x"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="供应商" prop="merchantId">
             <MerchantSelect
               v-model="formData.merchantId"
@@ -53,17 +64,6 @@
               placeholder="请输入备注"
               :rows="3"
               type="textarea"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="单据日期" prop="orderTime">
-            <el-date-picker
-              v-model="formData.orderTime"
-              class="!w-1/1"
-              placeholder="请选择单据日期"
-              type="date"
-              value-format="x"
             />
           </el-form-item>
         </el-col>

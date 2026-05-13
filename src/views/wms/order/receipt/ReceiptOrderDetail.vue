@@ -16,9 +16,6 @@
         <el-descriptions-item label="仓库">
           {{ detailData.warehouseName || '-' }}
         </el-descriptions-item>
-        <el-descriptions-item label="单据日期">
-          {{ formatNullableDate(detailData.orderTime, 'YYYY-MM-DD') }}
-        </el-descriptions-item>
         <el-descriptions-item label="单据状态">
           <dict-tag
             v-if="detailData.status !== undefined"
@@ -26,6 +23,9 @@
             :value="detailData.status"
           />
           <span v-else>-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="单据日期">
+          {{ formatNullableDate(detailData.orderTime, 'YYYY-MM-DD') }}
         </el-descriptions-item>
         <el-descriptions-item label="供应商">
           {{ detailData.merchantName || '-' }}
