@@ -88,3 +88,13 @@ export function formatMergeItemTime(timestamp: number): string {
   }
   return dayjs(timestamp).format('MM-DD HH:mm')
 }
+
+/** RTC 通话时长（秒）→ "00:06" / "1:23:45" */
+export function formatCallDuration(seconds: number | undefined): string {
+  const total = Math.max(0, Math.floor(seconds || 0))
+  const h = Math.floor(total / 3600)
+  const m = Math.floor((total % 3600) / 60)
+  const s = total % 60
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`
+}

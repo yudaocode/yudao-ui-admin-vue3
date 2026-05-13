@@ -23,7 +23,8 @@ import {
   setQuietly,
   StorageKeys
 } from '../../utils/storage'
-import { getGroupDisplayName, type GroupNotificationPayload } from '../../utils/user'
+import { getGroupDisplayName } from '../../utils/user'
+import { type GroupNotificationPayload } from '../../utils/message'
 import type { Group, GroupMember, Message } from '../types'
 
 /**

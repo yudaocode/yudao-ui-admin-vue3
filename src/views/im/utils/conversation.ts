@@ -6,7 +6,7 @@
 // 2. fallbackName 由调用方传入（典型来源：Conversation.lastSenderDisplayName 快照），透传到 getSenderDisplayName 内部，算不出真名时兜底
 // ====================================================================
 
-import { ImMessageType, isFriendChatTip, isGroupNotification } from './constants'
+import { ImConversationType, ImMessageType, isFriendChatTip, isGroupNotification } from './constants'
 import {
   getCardLabelInfo,
   parseMessage,
@@ -19,11 +19,8 @@ import {
   type TextMessage,
   type TipSegment
 } from './message'
-import {
-  getSenderDisplayName,
-  resolveFriendNotificationText,
-  resolveGroupNotificationText
-} from './user'
+import { getSenderDisplayName } from './user'
+import { resolveFriendNotificationText, resolveGroupNotificationText } from './message'
 import type { Message } from '../home/types'
 
 /** 会话主键：`type-targetId` 拼成稳定字符串，给 v-for :key、active 比对、map key 等场景共用 */
@@ -151,7 +148,9 @@ export function resolveConversationLastContent(
     return resolveFriendNotificationText(message)
   }
   if (isGroupNotification(message.type)) {
-    return resolveGroupNotificationText(message)
+    return resolveGroupNotificationText(message, (id) =>
+      getSenderDisplayName(id, ImConversationType.GROUP, message.targetId ?? 0)
+    )
   }
   return summarizeMessageContent(message)
 }

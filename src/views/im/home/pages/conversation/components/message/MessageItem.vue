@@ -23,6 +23,40 @@
     <TipSegments :segments="groupNotificationSegments" />
   </div>
 
+  <!-- 群通话事件（RTC_CALL_START / RTC_CALL_END）：居中灰色 tip 两段式 -->
+  <div
+    v-else-if="isRtcCallTipMessage"
+    class="flex items-center justify-center px-4 py-2 text-12px text-[var(--el-text-color-secondary)]"
+  >
+    <TipSegments :segments="rtcCallTipSegments" />
+  </div>
+
+  <!-- 私聊通话结束（RTC_CALL_END）：仿微信「准气泡」；按 selfSend 左右分布；电话图标 + 文案 -->
+  <div v-else-if="isRtcCallPrivateBubbleMessage" class="flex gap-2 items-start px-4 py-2">
+    <div
+      class="flex flex-1 min-w-0 gap-2 items-start"
+      :class="{ 'flex-row-reverse': message.selfSend }"
+    >
+      <UserAvatar
+        :id="message.selfSend ? userStore.getUser?.id : message.senderId"
+        :name="senderRealNickname"
+        :url="message.selfSend ? userStore.getUser?.avatar : senderAvatar"
+        :size="36"
+      />
+      <div
+        class="flex gap-2 items-center px-3.5 py-2 text-sm rounded-lg"
+        :class="
+          message.selfSend
+            ? 'text-black bg-[#95ec69]'
+            : 'text-[var(--el-text-color-primary)] bg-[var(--el-fill-color-light)]'
+        "
+      >
+        <Icon icon="ant-design:phone-outlined" :size="16" class="rotate-[135deg] flex-shrink-0" />
+        <span class="whitespace-nowrap">{{ rtcCallPrivateBubbleText }}</span>
+      </div>
+    </div>
+  </div>
+
   <!-- 撤回消息：整行灰色 tip，sender 名段可点击 -->
   <div
     v-else-if="isRecall"
@@ -166,7 +200,8 @@ import {
   isFriendChatTip,
   isGroupNotification,
   isMediaMessageType,
-  isNormalMessage
+  isNormalMessage,
+  isRtcCallTip
 } from '@/views/im/utils/constants'
 import {
   MESSAGE_TIME_TIP_GAP_MS,
@@ -197,10 +232,15 @@ import {
   getMemberDisplayName,
   getMentionCandidates,
   getSenderDisplayName,
-  getSenderRealNickname,
-  resolveFriendNotificationSegments,
-  resolveGroupNotificationSegments
+  getSenderRealNickname
 } from '@/views/im/utils/user'
+import {
+  resolveFriendNotificationSegments,
+  resolveGroupNotificationSegments,
+  resolveRtcCallTipSegments,
+  resolveRtcCallPrivateBubbleText,
+  parseRtcCallPayload
+} from '@/views/im/utils/message'
 import { useImUiStore } from '../../../../store/uiStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
 import { mediaTypeHandlers, useMediaUploader } from '../../../../composables/useMediaUploader'
@@ -294,7 +334,39 @@ const friendChatTipSegments = computed(() => resolveFriendNotificationSegments(p
 const isGroupNotificationMessage = computed(() => isGroupNotification(props.message.type))
 
 /** 群广播事件 segments */
-const groupNotificationSegments = computed(() => resolveGroupNotificationSegments(props.message))
+const groupNotificationSegments = computed(() =>
+  resolveGroupNotificationSegments(props.message, (id: number) =>
+    getSenderDisplayName(id, ImConversationType.GROUP, props.message.targetId ?? 0)
+  )
+)
+
+/** 私聊 RTC_CALL_END 走「准气泡」（左右分布 + 电话图标 + 文案）；非私聊场景为 null */
+const rtcCallEndPrivatePayload = computed(() => {
+  if (props.message.type !== ImMessageType.RTC_CALL_END) {
+    return null
+  }
+  const payload = parseRtcCallPayload(props.message.content)
+  return payload?.conversationType === ImConversationType.PRIVATE ? payload : null
+})
+
+/** 是否私聊通话气泡 */
+const isRtcCallPrivateBubbleMessage = computed(() => rtcCallEndPrivatePayload.value !== null)
+
+/** 私聊通话气泡文案（按 operatorUserId 是否当前用户区分；对齐微信两端不同视角） */
+const rtcCallPrivateBubbleText = computed(() =>
+  resolveRtcCallPrivateBubbleText(rtcCallEndPrivatePayload.value)
+)
+
+/** 是否会话内通话事件居中 tip：仅群聊场景（START 总是群聊；END 私聊走气泡分支，群聊走 tip） */
+const isRtcCallTipMessage = computed(() => {
+  if (!isRtcCallTip(props.message.type)) {
+    return false
+  }
+  return !isRtcCallPrivateBubbleMessage.value
+})
+
+/** 通话事件 segments；仅群聊 tip 用 */
+const rtcCallTipSegments = computed(() => resolveRtcCallTipSegments(props.message))
 
 // ==================== 消息内容解析 / payload ====================
 

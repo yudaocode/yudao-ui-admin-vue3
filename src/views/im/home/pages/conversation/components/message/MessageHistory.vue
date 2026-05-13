@@ -154,7 +154,7 @@
             v-else-if="isGroupNotification(message.type)"
             class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
           >
-            <TipSegments :segments="resolveGroupNotificationSegments(message)" />
+            <TipSegments :segments="resolveGroupNotificationSegments(message, resolveGroupMemberName(message))" />
           </div>
 
           <!-- 普通消息行 -->
@@ -252,11 +252,13 @@ import { IM_MERGE_DETAIL_DIALOG_KEY } from './forward/keys'
 import {
   getMemberDisplayName,
   getSenderDisplayName,
-  getSenderRealNickname,
+  getSenderRealNickname
+} from '@/views/im/utils/user'
+import {
   resolveFriendNotificationSegments,
   resolveFriendNotificationText,
   resolveGroupNotificationSegments
-} from '@/views/im/utils/user'
+} from '@/views/im/utils/message'
 import {
   buildFacePreviewText,
   buildRecallTip,
@@ -320,6 +322,12 @@ function senderDisplayNameOf(message: Message): string {
     conversation.value?.type ?? 0,
     conversation.value?.targetId ?? 0
   )
+}
+
+/** 群广播事件 segments 的成员名解析器；按当前会话 targetId 走 getSenderDisplayName */
+function resolveGroupMemberName(message: Message): (userId: number) => string {
+  return (id: number) =>
+    getSenderDisplayName(id, ImConversationType.GROUP, message.targetId ?? 0)
 }
 
 /** 单条消息的发送人真实昵称：给 UserAvatar 色卡 / alt 用，永远是 nickname 不掺备注 */

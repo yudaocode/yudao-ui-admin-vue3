@@ -1,7 +1,13 @@
 import { generateUUID } from '@/utils'
 import { useUserStore } from '@/store/modules/user'
-import { ImConversationType, ImMessageType, type ImConversationTypeValue } from './constants'
+import {
+  ImCallEndReason,
+  ImConversationType,
+  ImMessageType,
+  type ImConversationTypeValue
+} from './constants'
 import { getCurrentUserId } from './storage'
+import { formatCallDuration } from './time'
 import { useFriendStore } from '../home/store/friendStore'
 import { useGroupStore } from '../home/store/groupStore'
 import type { Conversation, Message, User, GroupLite } from '../home/types'
@@ -642,5 +648,305 @@ export const formatJson = (content?: string): string => {
     return JSON.stringify(JSON.parse(content), null, 2)
   } catch {
     return content
+  }
+}
+
+// ==================== 群广播事件 payload + 文案 ====================
+
+// 群广播事件 payload；对齐后端 GroupNotificationMessage 子类聚合字段
+export type GroupNotificationPayload = {
+  operatorUserId?: number
+  memberUserIds?: number[]
+  newOwnerUserId?: number
+  oldName?: string
+  newName?: string
+  oldNotice?: string
+  newNotice?: string
+  oldAvatar?: string
+  newAvatar?: string
+  displayUserName?: string
+  messageId?: number
+  // 禁言事件
+  mutedUserId?: number
+  muteEndTime?: string
+  // 全群封禁
+  banned?: boolean
+  // 自由进群事件
+  entrantUserId?: number
+  addSource?: number
+  // PIN 事件携带的完整被置顶消息对象
+  message?: {
+    id: number
+    clientMessageId?: string
+    senderId: number
+    groupId: number
+    type: number
+    content: string
+    status: number
+    sendTime: string
+    atUserIds?: number[]
+    receiverUserIds?: number[]
+    receiptStatus?: number
+    readCount?: number
+  }
+}
+
+/**
+ * 群广播事件 segments
+ *
+ * resolveName 由调用方注入（默认场景传 getSenderDisplayName）；
+ * operatorNameOverride 仅覆盖 operator 段文案，mention userId 仍用 payload.operatorUserId
+ */
+export function resolveGroupNotificationSegments(
+  message: { type?: number; content?: string; targetId?: number },
+  resolveName: (userId: number) => string,
+  operatorNameOverride?: string
+): TipSegment[] {
+  let payload: GroupNotificationPayload = {}
+  try {
+    payload = JSON.parse(message.content || '{}')
+  } catch {
+    return []
+  }
+  // ENTER 主语是 entrant 而非 operator，独立处理；其它 case 都以 operatorUserId 为主语
+  if (message.type === ImMessageType.GROUP_MEMBER_ENTER) {
+    const entrantId = payload.entrantUserId ?? payload.operatorUserId
+    return entrantId
+      ? [tipMention(entrantId, resolveName(entrantId)), tipText(' 加入了群聊')]
+      : []
+  }
+  if (!payload.operatorUserId) {
+    return []
+  }
+  const operatorSegment = tipMention(
+    payload.operatorUserId,
+    operatorNameOverride ?? resolveName(payload.operatorUserId)
+  )
+  const memberSegments = joinMentionSegments(payload.memberUserIds || [], '、', resolveName)
+
+  switch (message.type) {
+    case ImMessageType.GROUP_CREATE:
+      return [operatorSegment, tipText(' 创建了群聊')]
+    case ImMessageType.GROUP_NAME_UPDATE:
+      return [operatorSegment, tipText(` 将群名修改为 "${payload.newName ?? ''}"`)]
+    case ImMessageType.GROUP_NOTICE_UPDATE:
+      return [operatorSegment, tipText(' 更新了群公告')]
+    case ImMessageType.GROUP_INFO_UPDATE:
+      return payload.newAvatar
+        ? [operatorSegment, tipText(' 更换了群头像')]
+        : [operatorSegment, tipText(' 更新了群信息')]
+    case ImMessageType.GROUP_DISSOLVE:
+      return [operatorSegment, tipText(' 解散了群聊')]
+    case ImMessageType.GROUP_MEMBER_INVITE:
+      return [operatorSegment, tipText(' 邀请 '), ...memberSegments, tipText(' 加入群聊')]
+    case ImMessageType.GROUP_MEMBER_QUIT:
+      return [operatorSegment, tipText(' 退出了群聊')]
+    case ImMessageType.GROUP_MEMBER_KICK:
+      return [operatorSegment, tipText(' 移出了 '), ...memberSegments]
+    case ImMessageType.GROUP_MEMBER_NICKNAME_UPDATE:
+      return [operatorSegment, tipText(` 修改群昵称为 "${payload.displayUserName ?? ''}"`)]
+    case ImMessageType.GROUP_ADMIN_ADD:
+      return [operatorSegment, tipText(' 将 '), ...memberSegments, tipText(' 设为管理员')]
+    case ImMessageType.GROUP_ADMIN_REMOVE:
+      return [operatorSegment, tipText(' 撤销了 '), ...memberSegments, tipText(' 的管理员身份')]
+    case ImMessageType.GROUP_OWNER_TRANSFER:
+      return payload.newOwnerUserId
+        ? [
+            operatorSegment,
+            tipText(' 已将群主转让给 '),
+            tipMention(payload.newOwnerUserId, resolveName(payload.newOwnerUserId))
+          ]
+        : []
+    case ImMessageType.GROUP_MESSAGE_PIN:
+      return [operatorSegment, tipText(' 置顶了一条消息')]
+    case ImMessageType.GROUP_MESSAGE_UNPIN:
+      return [operatorSegment, tipText(' 取消了一条置顶消息')]
+    case ImMessageType.GROUP_MEMBER_MUTED:
+      return payload.mutedUserId
+        ? [
+            operatorSegment,
+            tipText(' 将 '),
+            tipMention(payload.mutedUserId, resolveName(payload.mutedUserId)),
+            tipText(' 禁言')
+          ]
+        : []
+    case ImMessageType.GROUP_MEMBER_CANCEL_MUTED:
+      return payload.mutedUserId
+        ? [
+            operatorSegment,
+            tipText(' 解除了 '),
+            tipMention(payload.mutedUserId, resolveName(payload.mutedUserId)),
+            tipText(' 的禁言')
+          ]
+        : []
+    case ImMessageType.GROUP_MUTED:
+      return [operatorSegment, tipText(' 开启了全群禁言')]
+    case ImMessageType.GROUP_CANCEL_MUTED:
+      return [operatorSegment, tipText(' 关闭了全群禁言')]
+    case ImMessageType.GROUP_BANNED:
+      return [operatorSegment, tipText(payload.banned ? ' 封禁了该群' : ' 解封了该群')]
+    default:
+      return []
+  }
+}
+
+/** 群广播事件中文文案 */
+export function resolveGroupNotificationText(
+  message: { type?: number; content?: string; targetId?: number },
+  resolveName: (userId: number) => string,
+  operatorNameOverride?: string
+): string {
+  return segmentsToText(
+    resolveGroupNotificationSegments(message, resolveName, operatorNameOverride)
+  )
+}
+
+// ==================== 好友事件 ====================
+
+/** 会话内好友事件 segments */
+export function resolveFriendNotificationSegments(message: { type?: number }): TipSegment[] {
+  switch (message.type) {
+    case ImMessageType.FRIEND_ADD:
+      return [tipText('你们已经是好友了，开始聊天吧')]
+    case ImMessageType.FRIEND_DELETE:
+      return [tipText('你已删除好友')]
+    default:
+      return []
+  }
+}
+
+/** 会话内好友事件文案：FRIEND_ADD / FRIEND_DELETE 渲染成灰色提示气泡，文案固定不依赖 payload */
+export function resolveFriendNotificationText(message: { type?: number }): string {
+  return segmentsToText(resolveFriendNotificationSegments(message))
+}
+
+// ==================== RTC 通话事件 ====================
+
+// RTC_CALL_START payload；仅群聊；用于聊天 tip 文案「{inviter} 发起了{voice/video}通话」
+export type RtcCallStartPayload = {
+  room?: string
+  conversationType?: number
+  mediaType?: number
+  inviterUserId?: number
+  inviterNickname?: string
+  inviterAvatar?: string
+}
+
+// RTC_CALL_END payload；私聊准气泡 + 群聊「通话已结束 [时长 X]」共用
+export type RtcCallEndPayload = {
+  room?: string
+  conversationType?: number
+  mediaType?: number
+  endReason?: number
+  durationSeconds?: number
+  operatorUserId?: number
+  operatorNickname?: string
+  operatorAvatar?: string
+}
+
+/** 解析 RTC_CALL_START / RTC_CALL_END 消息 content；解析失败返回 null */
+export function parseRtcCallPayload(
+  content?: string
+): (RtcCallStartPayload & RtcCallEndPayload) | null {
+  return content ? parseMessage<RtcCallStartPayload & RtcCallEndPayload>(content) : null
+}
+
+/** 媒体类型文案；TODO 字典化 */
+function callMediaText(mediaType: number | undefined): string {
+  return mediaType === 2 ? '视频' : '语音'
+}
+
+/**
+ * 会话内通话事件 segments（RTC_CALL_START / RTC_CALL_END）
+ * <p>
+ * 群聊两段式：START「{inviter} 发起了{voice/video}通话」+ END「{voice/video}通话已结束 [时长 X]」
+ * <p>
+ * 私聊气泡走 {@link resolveRtcCallPrivateBubbleText}
+ */
+export function resolveRtcCallTipSegments(message: {
+  type?: number
+  content?: string
+  selfSend?: boolean
+}): TipSegment[] {
+  const payload = parseRtcCallPayload(message.content)
+  if (!payload) {
+    return []
+  }
+  const media = callMediaText(payload.mediaType)
+  if (message.type === ImMessageType.RTC_CALL_START) {
+    const inviter = payload.inviterNickname?.trim() || `用户 ${payload.inviterUserId ?? ''}`
+    return [tipText(`${inviter} 发起了${media}通话`)]
+  }
+  if (message.type === ImMessageType.RTC_CALL_END) {
+    if (payload.durationSeconds && payload.durationSeconds > 0) {
+      return [tipText(`${media}通话已结束（时长 ${formatCallDuration(payload.durationSeconds)}）`)]
+    }
+    return [tipText(`${media}通话已结束`)]
+  }
+  return []
+}
+
+/**
+ * 私聊 RTC_CALL_END 气泡内文案；按 operatorUserId 是不是自己渲染两端不同文案（对齐微信）
+ * <p>
+ * 文案规则：
+ *   HANGUP duration > 0 → 「通话时长 N」（双方一致）
+ *   HANGUP duration ≤ 0 → 「通话中断」（未接通的兜底）
+ *   CANCEL → 操作者「已取消」/ 另一方「对方已取消」
+ *   REJECT → 操作者「已拒绝」/ 另一方「对方已拒绝」
+ *   BUSY → 操作者「忙线未接听」/ 另一方「对方忙线中」
+ *   ERROR → 「通话中断 [N]」（接通后异常断开；duration > 0 时带时长）
+ */
+export function resolveRtcCallPrivateBubbleText(payload: RtcCallEndPayload | null): string {
+  if (!payload) {
+    return '通话已结束'
+  }
+  const duration = payload.durationSeconds ?? 0
+  const hasDuration = duration > 0
+  const isOperator = payload.operatorUserId === getCurrentUserId()
+  switch (payload.endReason) {
+    case ImCallEndReason.HANGUP:
+      return hasDuration ? `通话时长 ${formatCallDuration(duration)}` : '通话中断'
+    case ImCallEndReason.CANCEL:
+      return isOperator ? '已取消' : '对方已取消'
+    case ImCallEndReason.REJECT:
+      return isOperator ? '已拒绝' : '对方已拒绝'
+    case ImCallEndReason.BUSY:
+      return isOperator ? '忙线未接听' : '对方忙线中'
+    case ImCallEndReason.ERROR:
+      return hasDuration ? `通话中断 ${formatCallDuration(duration)}` : '通话中断'
+    default:
+      return hasDuration ? `通话时长 ${formatCallDuration(duration)}` : '通话已结束'
+  }
+}
+
+/** 会话内通话事件文案 */
+export function resolveRtcCallTipText(message: {
+  type?: number
+  content?: string
+  selfSend?: boolean
+}): string {
+  return segmentsToText(resolveRtcCallTipSegments(message))
+}
+
+/**
+ * RTC_CALL_END 结束原因兜底文案；前端 toast / console 兜底用
+ * <p>
+ * 缺 operator 信息（同步响应 + WS push 兜底场景）时的通用文案；细分文案（按发送方视角）走 {@link resolveRtcCallPrivateBubbleText}
+ */
+export function resolveCallEndReasonText(reason: number | undefined): string {
+  switch (reason) {
+    case ImCallEndReason.REJECT:
+      return '对方已拒绝'
+    case ImCallEndReason.CANCEL:
+      return '对方已取消'
+    case ImCallEndReason.BUSY:
+      return '对方忙线中'
+    case ImCallEndReason.HANGUP:
+      return '通话已结束'
+    case ImCallEndReason.ERROR:
+      return '通话异常'
+    default:
+      return '通话已断开'
   }
 }

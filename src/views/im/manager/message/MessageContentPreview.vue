@@ -134,6 +134,8 @@ import CardLineLabel from '@/views/im/home/components/card/CardLineLabel.vue'
 import {
   parseMessage,
   getFileIconInfo,
+  resolveFriendNotificationText,
+  resolveGroupNotificationText,
   type ImageMessage,
   type FileMessage,
   type AudioMessage,
@@ -143,10 +145,6 @@ import {
   type FaceMessage,
   type MergeMessage
 } from '@/views/im/utils/message'
-import {
-  resolveFriendNotificationText,
-  resolveGroupNotificationText
-} from '@/views/im/utils/user'
 import { buildFacePreviewText, summarizeMessageContent } from '@/views/im/utils/conversation'
 
 defineOptions({ name: 'ImMessageContentPreview' })
@@ -242,7 +240,7 @@ const friendChatTipText = computed(() => resolveFriendNotificationText({ type: p
 /** 是否群广播事件 */
 const isGroupNotificationType = computed(() => isGroupNotification(props.type ?? -1))
 
-/** 群广播事件文案：复用 utils/user.resolveGroupNotificationText；admin 端 operator 用 senderNickname 直接覆盖，其它 id 退化为 用户(id) */
+/** 群广播事件文案：admin 端 operator 用 senderNickname 直接覆盖，其它 id 退化为 用户(id) */
 const groupNotificationText = computed(() =>
   resolveGroupNotificationText(
     { type: props.type, content: props.content },
