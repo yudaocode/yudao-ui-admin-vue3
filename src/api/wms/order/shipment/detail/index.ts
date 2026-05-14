@@ -13,6 +13,7 @@ export interface ShipmentOrderDetailVO {
   warehouseName?: string
   quantity?: number
   availableQuantity?: number
-  amount?: number
+  price?: number
+  totalPrice?: number
   createTime?: Date
 }

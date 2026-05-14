@@ -15,7 +15,7 @@
         <div>客户：{{ printData.merchantName || '-' }}</div>
         <div>业务单号：{{ printData.bizOrderNo || '-' }}</div>
         <div>总数量：{{ formatQuantity(printData.totalQuantity) || '-' }}</div>
-        <div>总金额：{{ formatPrice(printData.totalAmount) || '-' }}</div>
+        <div>总金额：{{ formatPrice(printData.totalPrice) || '-' }}</div>
         <div>创建时间：{{ formatNullableDate(printData.createTime) }}</div>
         <div class="col-span-3">备注：{{ printData.remark || '-' }}</div>
       </div>
@@ -25,11 +25,12 @@
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">商品信息</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">规格信息</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">数量</th>
+            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">单价(元)</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">金额(元)</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="detail in printData.details || []" :key="detail.id">
+          <tr v-for="detail in printRows" :key="detail.id">
             <td class="border border-solid border-#dcdfe6 p-8px">
               <div>{{ detail.itemName || '-' }}</div>
               <div v-if="detail.itemCode" class="text-12px">编号：{{ detail.itemCode }}</div>
@@ -42,10 +43,25 @@
               {{ formatQuantity(detail.quantity) || '-' }}
             </td>
             <td class="border border-solid border-#dcdfe6 p-8px text-right">
-              {{ formatPrice(detail.amount) || '-' }}
+              {{ formatPrice(detail.price) || '-' }}
+            </td>
+            <td class="border border-solid border-#dcdfe6 p-8px text-right">
+              {{ formatPrice(detail.totalPrice) || '-' }}
             </td>
           </tr>
-          <tr v-if="!printData.details?.length">
+          <tr v-if="printRows.length">
+            <td class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px" colspan="2">合计</td>
+            <td class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-right">
+              {{ formatSumQuantity(printRows, (detail) => detail.quantity) }}
+            </td>
+            <td class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-right">
+              {{ formatSumPrice(printRows, (detail) => detail.price) }}
+            </td>
+            <td class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-right">
+              {{ formatSumPrice(printRows, (detail) => detail.totalPrice) }}
+            </td>
+          </tr>
+          <tr v-if="!printRows.length">
             <td
               class="border border-solid border-#dcdfe6 p-8px text-center"
               :colspan="tableColumnCount"
@@ -63,14 +79,15 @@
 import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { ShipmentOrderApi, ShipmentOrderVO } from '@/api/wms/order/shipment'
-import { formatPrice, formatQuantity } from '@/views/wms/utils/format'
+import { ShipmentOrderDetailVO } from '@/api/wms/order/shipment/detail'
+import { formatPrice, formatQuantity, formatSumPrice, formatSumQuantity } from '@/views/wms/utils/format'
 
 /** WMS 出库单打印 */
 defineOptions({ name: 'WmsShipmentOrderPrint' })
 
 const printData = ref<ShipmentOrderVO>({}) // 打印数据
 const printButtonRef = ref<HTMLButtonElement>() // 打印按钮
-const tableColumnCount = 4
+const tableColumnCount = 5
 const printObj = ref({
   id: 'wmsShipmentOrderPrint',
   popTitle: '&nbsp',
@@ -78,6 +95,20 @@ const printObj = ref({
   extraHead: '',
   zIndex: 20003
 })
+
+interface PrintRow extends ShipmentOrderDetailVO {
+  totalPrice?: number
+}
+
+const printRows = computed<PrintRow[]>(() =>
+  (printData.value.details || []).map((detail) => ({
+    ...detail,
+    totalPrice:
+      detail.price != null && detail.quantity
+        ? Number((Number(detail.price) * Number(detail.quantity)).toFixed(2))
+        : undefined
+  }))
+)
 
 /** 打印出库单 */
 const print = async (id: number) => {

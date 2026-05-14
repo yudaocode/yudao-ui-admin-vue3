@@ -56,7 +56,7 @@
             <el-input v-model="formData.bizOrderNo" maxlength="64" placeholder="请输入业务单号" />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="16">
           <el-form-item label="备注" prop="remark">
             <el-input
               v-model="formData.remark"
@@ -64,23 +64,6 @@
               placeholder="请输入备注"
               :rows="3"
               type="textarea"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="总数量" prop="totalQuantity">
-            <el-input :model-value="formatQuantity(totalQuantity)" disabled />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="总金额" prop="totalAmount">
-            <el-input-number
-              v-model="formData.totalAmount"
-              :controls="false"
-              :min="0"
-              :precision="PRICE_PRECISION"
-              class="!w-1/1"
-              placeholder="请输入总金额"
             />
           </el-form-item>
         </el-col>
@@ -101,7 +84,13 @@
           </span>
         </el-tooltip>
       </div>
-      <el-table :data="formData.details" border empty-text="暂无商品明细">
+      <el-table
+        :data="formData.details"
+        :summary-method="getDetailSummaries"
+        border
+        empty-text="暂无商品明细"
+        show-summary
+      >
         <el-table-column label="商品信息" min-width="220">
           <template #default="scope">
             <div>{{ scope.row.itemName || '-' }}</div>
@@ -123,7 +112,7 @@
             {{ formatQuantity(scope.row.availableQuantity) || '-' }}
           </template>
         </el-table-column>
-        <el-table-column label="出库数量" width="160">
+        <el-table-column label="出库数量" prop="quantity" width="160">
           <template #default="scope">
             <el-input-number
               v-model="scope.row.quantity"
@@ -132,19 +121,33 @@
               :precision="QUANTITY_PRECISION"
               class="!w-1/1"
               placeholder="数量"
+              @change="handleDetailQuantityChange(scope.row)"
             />
           </template>
         </el-table-column>
-        <el-table-column label="金额(元)" width="160">
+        <el-table-column label="单价(元)" prop="price" width="160">
           <template #default="scope">
             <el-input-number
-              v-model="scope.row.amount"
+              v-model="scope.row.price"
+              :controls="false"
+              :min="0"
+              :precision="PRICE_PRECISION"
+              class="!w-1/1"
+              placeholder="单价"
+              @change="handleDetailPriceChange(scope.row)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="金额(元)" prop="totalPrice" width="160">
+          <template #default="scope">
+            <el-input-number
+              v-model="scope.row.totalPrice"
               :controls="false"
               :min="0"
               :precision="PRICE_PRECISION"
               class="!w-1/1"
               placeholder="金额"
-              @change="handleDetailAmountChange"
+              @change="handleDetailTotalPriceChange(scope.row)"
             />
           </template>
         </el-table-column>
@@ -205,11 +208,15 @@ import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vu
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
+  dividePrice,
+  formatPrice,
   formatQuantity,
+  formatSumPrice,
+  formatSumQuantity,
+  multiplyPrice,
   PRICE_PRECISION,
   QUANTITY_PRECISION,
-  sumPrice,
-  sumQuantity
+  sumPrice
 } from '@/views/wms/utils/format'
 import { generateOrderNo } from '@/views/wms/utils/order'
 
@@ -233,8 +240,6 @@ const formData = ref<ShipmentOrderVO>({
   bizOrderNo: undefined,
   merchantId: undefined,
   warehouseId: undefined,
-  totalQuantity: 0,
-  totalAmount: 0,
   remark: undefined,
   details: []
 })
@@ -242,15 +247,12 @@ const formRules = reactive<FormRules>({
   no: [{ required: true, message: '出库单号不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '出库类型不能为空', trigger: 'change' }],
   orderTime: [{ required: true, message: '单据日期不能为空', trigger: 'change' }],
-  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }],
-  totalQuantity: [{ required: true, message: '出库数量不能为空', trigger: 'change' }],
-  totalAmount: [{ required: true, message: '总金额不能为空', trigger: 'blur' }]
+  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 const inventorySelectRef = ref() // 库存选择弹窗 Ref
 
-const totalQuantity = computed(() => sumQuantity(formData.value.details || [], (detail) => detail.quantity))
-const detailTotalAmount = computed(() => sumPrice(formData.value.details || [], (detail) => detail.amount))
+const detailPriceSum = computed(() => sumPrice(formData.value.details || [], (detail) => detail.price))
 const isPrepareOrder = computed(
   () =>
     !formData.value.id ||
@@ -276,7 +278,7 @@ const open = async (type: string, id?: number) => {
       const order = await ShipmentOrderApi.getShipmentOrder(id)
       formData.value = {
         ...order,
-        details: order.details || []
+        details: normalizeDetails(order.details || [])
       }
     } finally {
       formLoading.value = false
@@ -300,8 +302,15 @@ const buildDetail = (inventory: InventorySelectRow): ShipmentOrderDetailVO => ({
   warehouseName: inventory.warehouseName,
   quantity: undefined,
   availableQuantity: inventory.availableQuantity,
-  amount: undefined
+  price: undefined,
+  totalPrice: undefined
 })
+
+const normalizeDetails = (details: ShipmentOrderDetailVO[]) =>
+  details.map((detail) => ({
+    ...detail,
+    totalPrice: detail.totalPrice ?? multiplyPrice(detail.quantity, detail.price)
+  }))
 
 /** 添加商品 */
 const handleAddDetail = () => {
@@ -320,7 +329,6 @@ const handleSelectInventory = (inventories: InventorySelectRow[]) => {
     }
     formData.value.details!.push(buildDetail(inventory))
   })
-  refreshTotalAmount()
 }
 
 /** 判断库存是否已选择 */
@@ -336,24 +344,49 @@ const isInventorySelected = (inventory: InventorySelectRow) => {
 /** 删除明细 */
 const handleDeleteDetail = (index: number) => {
   formData.value.details?.splice(index, 1)
-  refreshTotalAmount()
 }
 
 /** 仓库变化 */
 const handleWarehouseChange = () => {
   formData.value.details = []
-  refreshTotalAmount()
+}
+
+/** 明细数量变化 */
+const handleDetailQuantityChange = (detail: ShipmentOrderDetailVO) => {
+  if (detail.price !== undefined && detail.price !== null) {
+    detail.totalPrice = multiplyPrice(detail.quantity, detail.price)
+    return
+  }
+  detail.price = dividePrice(detail.totalPrice, detail.quantity)
+}
+
+/** 明细单价变化 */
+const handleDetailPriceChange = (detail: ShipmentOrderDetailVO) => {
+  detail.totalPrice = multiplyPrice(detail.quantity, detail.price)
 }
 
 /** 明细金额变化 */
-const handleDetailAmountChange = () => {
-  refreshTotalAmount()
+const handleDetailTotalPriceChange = (detail: ShipmentOrderDetailVO) => {
+  detail.price = dividePrice(detail.totalPrice, detail.quantity)
 }
 
-/** 汇总明细金额 */
-const refreshTotalAmount = () => {
-  formData.value.totalAmount = detailTotalAmount.value
-}
+/** 明细合计 */
+const getDetailSummaries = ({ columns, data }: { columns: any[]; data: ShipmentOrderDetailVO[] }) =>
+  columns.map((column, index) => {
+    if (index === 0) {
+      return '合计'
+    }
+    if (column.property === 'quantity') {
+      return formatSumQuantity(data, (detail) => detail.quantity)
+    }
+    if (column.property === 'price') {
+      return formatPrice(detailPriceSum.value)
+    }
+    if (column.property === 'totalPrice') {
+      return formatSumPrice(data, (detail) => detail.totalPrice)
+    }
+    return ''
+  })
 
 /** 校验明细 */
 const validateDetails = (required: boolean) => {
@@ -383,13 +416,13 @@ const validateDetails = (required: boolean) => {
 }
 
 /** 构建提交数据 */
-const buildSubmitData = () =>
-  ({
-    ...formData.value,
-    totalQuantity: totalQuantity.value,
-    totalAmount: formData.value.totalAmount,
-    details: formData.value.details || []
-  }) as ShipmentOrderVO
+const buildSubmitData = () => {
+  const { totalQuantity: _totalQuantity, totalPrice: _totalPrice, details, ...order } = formData.value
+  return {
+    ...order,
+    details: (details || []).map(({ totalPrice: _rowTotalPrice, ...detail }) => detail)
+  } as ShipmentOrderVO
+}
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -467,8 +500,6 @@ const resetForm = () => {
     bizOrderNo: undefined,
     merchantId: undefined,
     warehouseId: undefined,
-    totalQuantity: 0,
-    totalAmount: 0,
     remark: undefined,
     details: []
   }

@@ -80,10 +80,10 @@
           />
         </div>
       </el-form-item>
-      <el-form-item label="总金额" prop="totalAmountMin">
+      <el-form-item label="总金额" prop="totalPriceMin">
         <div class="flex w-240px items-center gap-8px">
           <el-input-number
-            v-model="queryParams.totalAmountMin"
+            v-model="queryParams.totalPriceMin"
             :controls="false"
             :min="0"
             :precision="PRICE_PRECISION"
@@ -92,7 +92,7 @@
           />
           <span>至</span>
           <el-input-number
-            v-model="queryParams.totalAmountMax"
+            v-model="queryParams.totalPriceMax"
             :controls="false"
             :min="0"
             :precision="PRICE_PRECISION"
@@ -242,9 +242,14 @@
                 {{ formatQuantity(detailScope.row.quantity) }}
               </template>
             </el-table-column>
+            <el-table-column align="right" label="单价(元)" width="120">
+              <template #default="detailScope">
+                {{ formatPrice(detailScope.row.price) || '-' }}
+              </template>
+            </el-table-column>
             <el-table-column align="right" label="金额(元)" width="120">
               <template #default="detailScope">
-                {{ formatPrice(detailScope.row.amount) || '-' }}
+                {{ formatPrice(getDetailTotalPrice(detailScope.row)) || '-' }}
               </template>
             </el-table-column>
           </el-table>
@@ -305,7 +310,7 @@
           </div>
           <div class="flex items-center justify-between">
             <span>金额：</span>
-            <span>{{ formatPrice(scope.row.totalAmount) }}</span>
+            <span>{{ formatPrice(scope.row.totalPrice) }}</span>
           </div>
         </template>
       </el-table-column>
@@ -460,8 +465,8 @@ const getDefaultQueryParams = () => ({
   orderTime: undefined as string[] | undefined,
   totalQuantityMin: undefined as number | undefined,
   totalQuantityMax: undefined as number | undefined,
-  totalAmountMin: undefined as number | undefined,
-  totalAmountMax: undefined as number | undefined,
+  totalPriceMin: undefined as number | undefined,
+  totalPriceMax: undefined as number | undefined,
   type: undefined as number | undefined,
   bizOrderNo: undefined as string | undefined,
   creator: undefined as number | undefined,
@@ -530,6 +535,14 @@ const resetQuery = () => {
 /** 仓库变化 */
 const handleWarehouseChange = () => {
   handleQuery()
+}
+
+/** 计算明细金额 */
+const getDetailTotalPrice = (detail: ShipmentOrderDetailVO) => {
+  if (!detail.quantity || detail.price === undefined || detail.price === null) {
+    return undefined
+  }
+  return Number(detail.quantity) * Number(detail.price)
 }
 
 /** 展开明细 */

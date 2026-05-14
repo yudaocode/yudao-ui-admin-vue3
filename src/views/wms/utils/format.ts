@@ -48,6 +48,27 @@ export const formatPrice = (value?: number | string | null) => {
   return decimalValue === undefined ? '' : decimalValue.toFixed(PRICE_PRECISION)
 }
 
+/** 金额四舍五入 */
+export const roundPrice = (value: number) => {
+  return Number.isFinite(value) ? Number(value.toFixed(PRICE_PRECISION)) : undefined
+}
+
+/** 数量 * 单价，计算金额 */
+export const multiplyPrice = (quantity?: number, price?: number) => {
+  if (!quantity || price === undefined || price === null) {
+    return undefined
+  }
+  return roundPrice(Number(quantity) * Number(price))
+}
+
+/** 金额 / 数量，反算单价 */
+export const dividePrice = (totalPrice?: number, quantity?: number) => {
+  if (totalPrice === undefined || totalPrice === null || !quantity) {
+    return undefined
+  }
+  return roundPrice(Number(totalPrice) / Number(quantity))
+}
+
 /** 汇总数量 */
 export const sumQuantity = <T>(list: T[], getter: (item: T) => DecimalValue) => {
   return sumDecimal(list, getter)

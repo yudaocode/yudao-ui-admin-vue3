@@ -15,7 +15,7 @@ export interface ShipmentOrderVO {
   warehouseId?: number
   warehouseName?: string
   totalQuantity?: number
-  totalAmount?: number
+  totalPrice?: number
   details?: ShipmentOrderDetailVO[]
   createTime?: Date
   creator?: string

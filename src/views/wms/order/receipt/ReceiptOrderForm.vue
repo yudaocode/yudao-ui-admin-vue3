@@ -198,9 +198,11 @@ import MerchantSelect from '@/views/wms/md/merchant/components/MerchantSelect.vu
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
+  dividePrice,
   formatPrice,
   formatSumPrice,
   formatSumQuantity,
+  multiplyPrice,
   PRICE_PRECISION,
   QUANTITY_PRECISION,
   sumPrice
@@ -295,24 +297,6 @@ const normalizeDetails = (details: ReceiptOrderDetailVO[]) =>
     ...detail,
     totalPrice: detail.totalPrice ?? multiplyPrice(detail.quantity, detail.price)
   }))
-
-const roundPrice = (value: number) => {
-  return Number.isFinite(value) ? Number(value.toFixed(PRICE_PRECISION)) : undefined
-}
-
-const multiplyPrice = (quantity?: number, price?: number) => {
-  if (!quantity || price === undefined || price === null) {
-    return undefined
-  }
-  return roundPrice(Number(quantity) * Number(price))
-}
-
-const dividePrice = (totalPrice?: number, quantity?: number) => {
-  if (totalPrice === undefined || totalPrice === null || !quantity) {
-    return undefined
-  }
-  return roundPrice(Number(totalPrice) / Number(quantity))
-}
 
 /** 添加商品 */
 const handleAddDetail = () => {
