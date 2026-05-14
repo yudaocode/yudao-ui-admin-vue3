@@ -94,9 +94,9 @@
           <el-table-column label="规格信息" min-width="180">
             <template #default="scope">
               <div class="text-14px">{{ scope.row.name }}</div>
-              <div v-if="scope.row.code" class="text-12px text-gray-500"
-                >编号：{{ scope.row.code }}</div
-              >
+              <div v-if="scope.row.code" class="text-12px text-gray-500">
+                编号：{{ scope.row.code }}
+              </div>
               <div v-if="scope.row.barCode" class="text-12px text-gray-500">
                 条码：{{ scope.row.barCode }}
               </div>
