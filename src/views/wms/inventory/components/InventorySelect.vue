@@ -129,7 +129,7 @@ import { InventoryApi, InventoryVO } from '@/api/wms/inventory'
 import { formatQuantity } from '@/views/wms/utils/format'
 
 export interface InventorySelectRow extends InventoryVO {
-  amount?: number
+  price?: number
   availableQuantity?: number
 }
 

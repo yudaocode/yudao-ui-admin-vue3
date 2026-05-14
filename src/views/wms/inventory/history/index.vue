@@ -9,28 +9,28 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="操作类型" prop="orderType">
+      <el-form-item label="单据类型" prop="orderType">
         <el-select
           v-model="queryParams.orderType"
           class="!w-240px"
           clearable
-          placeholder="请选择操作类型"
+          placeholder="请选择单据类型"
           @change="handleQuery"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.WMS_INVENTORY_HISTORY_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.WMS_ORDER_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="操作单号" prop="orderNo">
+      <el-form-item label="单据号" prop="orderNo">
         <el-input
           v-model="queryParams.orderNo"
           class="!w-240px"
           clearable
-          placeholder="请输入操作单号"
+          placeholder="请输入单据号"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
@@ -107,10 +107,10 @@
       :show-overflow-tooltip="true"
       border
     >
-      <el-table-column fixed="left" label="操作单号" prop="orderNo" width="180" />
-      <el-table-column align="center" fixed="left" label="操作类型" width="110">
+      <el-table-column fixed="left" label="单据号" prop="orderNo" width="180" />
+      <el-table-column align="center" fixed="left" label="单据类型" width="110">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.WMS_INVENTORY_HISTORY_TYPE" :value="scope.row.orderType" />
+          <dict-tag :type="DICT_TYPE.WMS_ORDER_TYPE" :value="scope.row.orderType" />
         </template>
       </el-table-column>
       <el-table-column label="商品信息" min-width="220">

@@ -218,7 +218,7 @@ export enum DICT_TYPE {
 
   // ========== WMS - 仓库管理模块 ==========
   WMS_MERCHANT_TYPE = 'merchant_type', // WMS 往来企业类型
-  WMS_INVENTORY_HISTORY_TYPE = 'wms_inventory_history_type', // WMS 库存记录类型
+  WMS_ORDER_TYPE = 'wms_order_type', // WMS 单据类型
   WMS_ORDER_STATUS = 'wms_order_status', // WMS 单据状态
   WMS_RECEIPT_ORDER_TYPE = 'wms_receipt_order_type', // WMS 入库单类型
   WMS_SHIPMENT_ORDER_TYPE = 'wms_shipment_order_type', // WMS 出库单类型

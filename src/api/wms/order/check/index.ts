@@ -11,7 +11,8 @@ export interface CheckOrderVO {
   warehouseId?: number
   warehouseName?: string
   totalQuantity?: number
-  totalAmount?: number
+  totalPrice?: number
+  actualPrice?: number
   details?: CheckOrderDetailVO[]
   createTime?: Date
   creator?: string

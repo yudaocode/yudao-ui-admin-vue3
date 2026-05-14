@@ -18,10 +18,20 @@
           <span v-else>-</span>
         </el-descriptions-item>
         <el-descriptions-item label="盈亏数量">
-          {{ formatQuantity(detailData.totalQuantity) || '-' }}
+          <span :class="getLossClass(detailData.totalQuantity)">
+            {{ formatQuantity(detailData.totalQuantity) || '-' }}
+          </span>
         </el-descriptions-item>
         <el-descriptions-item label="总金额">
-          {{ formatPrice(detailData.totalAmount) || '-' }}
+          {{ formatPrice(detailData.totalPrice) || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="实际金额">
+          {{ formatPrice(detailData.actualPrice) || '-' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="实际盈亏金额">
+          <span :class="getLossClass(getOrderDifferencePrice(detailData))">
+            {{ formatPrice(getOrderDifferencePrice(detailData)) || '-' }}
+          </span>
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">
           {{ formatNullableDate(detailData.createTime) }}
@@ -55,14 +65,26 @@
         <el-table-column align="right" label="账面数量" prop="quantity" width="120">
           <template #default="{ row }">{{ formatQuantity(row.quantity) || '-' }}</template>
         </el-table-column>
+        <el-table-column align="right" label="单价(元)" prop="price" width="120">
+          <template #default="{ row }">{{ formatPrice(row.price) || '-' }}</template>
+        </el-table-column>
         <el-table-column align="right" label="实盘数量" prop="checkQuantity" width="120">
           <template #default="{ row }">{{ formatQuantity(row.checkQuantity) || '-' }}</template>
         </el-table-column>
-        <el-table-column align="right" label="盈亏数量" prop="differenceQuantity" width="120">
-          <template #default="{ row }">{{ formatQuantity(row.differenceQuantity) || '-' }}</template>
+        <el-table-column align="right" label="实际金额(元)" prop="actualPrice" width="140">
+          <template #default="{ row }">{{ formatPrice(getActualPrice(row)) || '-' }}</template>
         </el-table-column>
-        <el-table-column align="right" label="金额(元)" prop="amount" width="140">
-          <template #default="{ row }">{{ formatPrice(row.amount) || '-' }}</template>
+        <el-table-column align="right" label="盈亏数量" prop="differenceQuantity" width="120">
+          <template #default="{ row }">
+            <span :class="getLossClass(getDifferenceQuantity(row))">
+              {{ formatQuantity(getDifferenceQuantity(row)) || '-' }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column align="right" label="实际盈亏金额(元)" prop="differencePrice" width="160">
+          <template #default="{ row }">
+            <span :class="getLossClass(getDifferencePrice(row))">{{ formatPrice(getDifferencePrice(row)) || '-' }}</span>
+          </template>
         </el-table-column>
       </el-table>
     </div>
@@ -70,11 +92,21 @@
 </template>
 
 <script lang="ts" setup>
+import { h } from 'vue'
 import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
-import { formatPrice, formatQuantity, formatSumPrice, formatSumQuantity } from '@/views/wms/utils/format'
+import {
+  formatPrice,
+  formatQuantity,
+  formatSumPrice,
+  formatSumQuantity,
+  getLossClass,
+  roundPrice,
+  sumPrice,
+  sumQuantity
+} from '@/views/wms/utils/format'
 
 /** WMS 盘库单详情 */
 defineOptions({ name: 'WmsCheckOrderDetail' })
@@ -82,14 +114,36 @@ defineOptions({ name: 'WmsCheckOrderDetail' })
 const loading = ref(false)
 const dialogVisible = ref(false)
 const detailData = ref<CheckOrderVO>({})
+const getOrderDifferencePrice = (order: CheckOrderVO) =>
+  roundPrice(Number(order.actualPrice || 0) - Number(order.totalPrice || 0))
+const getDifferenceQuantity = (detail: CheckOrderDetailVO) => Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
+const getActualPrice = (detail: CheckOrderDetailVO) => {
+  if (detail.checkQuantity === undefined || detail.checkQuantity === null || detail.price === undefined || detail.price === null) {
+    return undefined
+  }
+  return roundPrice(Number(detail.checkQuantity) * Number(detail.price))
+}
+const getDifferencePrice = (detail: CheckOrderDetailVO) => {
+  if (detail.price === undefined || detail.price === null) {
+    return undefined
+  }
+  return roundPrice(getDifferenceQuantity(detail) * Number(detail.price))
+}
+const renderLossText = (value: number | string | null | undefined, formatter: (value?: number | string | null) => string) =>
+  h('span', { class: getLossClass(value) }, formatter(value))
 
 const getSummaries = ({ columns, data }: { columns: any[]; data: CheckOrderDetailVO[] }) =>
   columns.map((column, index) => {
     if (index === 0) return '合计'
     if (column.property === 'quantity') return formatSumQuantity(data, (detail) => detail.quantity)
     if (column.property === 'checkQuantity') return formatSumQuantity(data, (detail) => detail.checkQuantity)
-    if (column.property === 'differenceQuantity') return formatSumQuantity(data, (detail) => detail.differenceQuantity)
-    if (column.property === 'amount') return formatSumPrice(data, (detail) => detail.amount)
+    if (column.property === 'actualPrice') return formatSumPrice(data, (detail) => getActualPrice(detail))
+    if (column.property === 'differenceQuantity') {
+      return renderLossText(sumQuantity(data, (detail) => getDifferenceQuantity(detail)), formatQuantity)
+    }
+    if (column.property === 'differencePrice') {
+      return renderLossText(sumPrice(data, (detail) => getDifferencePrice(detail)), formatPrice)
+    }
     return ''
   })
 

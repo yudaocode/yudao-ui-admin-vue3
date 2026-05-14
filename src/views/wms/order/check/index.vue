@@ -48,10 +48,10 @@
           />
         </div>
       </el-form-item>
-      <el-form-item label="总金额" prop="totalAmountMin">
+      <el-form-item label="总金额" prop="totalPriceMin">
         <div class="flex w-240px items-center gap-8px">
           <el-input-number
-            v-model="queryParams.totalAmountMin"
+            v-model="queryParams.totalPriceMin"
             :controls="false"
             :min="0"
             :precision="PRICE_PRECISION"
@@ -60,7 +60,28 @@
           />
           <span>至</span>
           <el-input-number
-            v-model="queryParams.totalAmountMax"
+            v-model="queryParams.totalPriceMax"
+            :controls="false"
+            :min="0"
+            :precision="PRICE_PRECISION"
+            class="!w-105px"
+            placeholder="最大值"
+          />
+        </div>
+      </el-form-item>
+      <el-form-item label="实际金额" prop="actualPriceMin">
+        <div class="flex w-240px items-center gap-8px">
+          <el-input-number
+            v-model="queryParams.actualPriceMin"
+            :controls="false"
+            :min="0"
+            :precision="PRICE_PRECISION"
+            class="!w-105px"
+            placeholder="最小值"
+          />
+          <span>至</span>
+          <el-input-number
+            v-model="queryParams.actualPriceMax"
             :controls="false"
             :min="0"
             :precision="PRICE_PRECISION"
@@ -170,8 +191,25 @@
             <el-table-column align="right" label="实盘数量" width="120">
               <template #default="{ row: detail }">{{ formatQuantity(detail.checkQuantity) }}</template>
             </el-table-column>
+            <el-table-column align="right" label="单价(元)" width="120">
+              <template #default="{ row: detail }">{{ formatPrice(detail.price) }}</template>
+            </el-table-column>
+            <el-table-column align="right" label="实际金额(元)" width="140">
+              <template #default="{ row: detail }">{{ formatPrice(getDetailActualPrice(detail)) }}</template>
+            </el-table-column>
             <el-table-column align="right" label="盈亏数量" width="120">
-              <template #default="{ row: detail }">{{ formatQuantity(detail.differenceQuantity) }}</template>
+              <template #default="{ row: detail }">
+                <span :class="getLossClass(getDetailDifferenceQuantity(detail))">
+                  {{ formatQuantity(getDetailDifferenceQuantity(detail)) }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column align="right" label="实际盈亏金额(元)" width="160">
+              <template #default="{ row: detail }">
+                <span :class="getLossClass(getDetailDifferencePrice(detail))">
+                  {{ formatPrice(getDetailDifferencePrice(detail)) }}
+                </span>
+              </template>
             </el-table-column>
           </el-table>
         </template>
@@ -202,15 +240,23 @@
           {{ row.warehouseName || '-' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="isTableColumnVisible('quantityAmount')" label="盈亏数量/总金额(元)" min-width="180">
+      <el-table-column v-if="isTableColumnVisible('quantityAmount')" label="盈亏/金额(元)" min-width="200">
         <template #default="{ row }">
           <div class="flex items-center justify-between">
-            <span>盈亏：</span>
-            <span>{{ formatQuantity(row.totalQuantity) }}</span>
+            <span>盈亏数：</span>
+            <span :class="getLossClass(row.totalQuantity)">{{ formatQuantity(row.totalQuantity) }}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span>金额：</span>
-            <span>{{ formatPrice(row.totalAmount) }}</span>
+            <span>总金额：</span>
+            <span>{{ formatPrice(row.totalPrice) }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>实际金额：</span>
+            <span>{{ formatPrice(row.actualPrice) }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span>盈亏金额：</span>
+            <span :class="getLossClass(getDifferencePrice(row))">{{ formatPrice(getDifferencePrice(row)) }}</span>
           </div>
         </template>
       </el-table-column>
@@ -249,6 +295,14 @@
               </el-button>
             </span>
           </el-tooltip>
+          <el-button
+            v-hasPermi="['wms:check-order:query']"
+            link
+            type="primary"
+            @click="handlePrint(row.id)"
+          >
+            打印
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -257,6 +311,7 @@
 
   <CheckOrderForm ref="formRef" @success="getList" />
   <CheckOrderDetail ref="detailRef" />
+  <CheckOrderPrint ref="printRef" />
 </template>
 
 <script lang="ts" setup>
@@ -266,10 +321,18 @@ import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { OrderDeleteStatusList, OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
-import { formatPrice, formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION } from '@/views/wms/utils/format'
+import {
+  formatPrice,
+  formatQuantity,
+  getLossClass,
+  PRICE_PRECISION,
+  QUANTITY_PRECISION,
+  roundPrice
+} from '@/views/wms/utils/format'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import CheckOrderDetail from './CheckOrderDetail.vue'
 import CheckOrderForm from './CheckOrderForm.vue'
+import CheckOrderPrint from './CheckOrderPrint.vue'
 import download from '@/utils/download'
 
 /** WMS 盘库单 */
@@ -284,7 +347,7 @@ const tableColumnOptions: Array<{ label: string; value: TableColumnKey }> = [
   { label: '单号', value: 'no' },
   { label: '盘库状态', value: 'status' },
   { label: '仓库', value: 'warehouse' },
-  { label: '盈亏/金额(元)', value: 'quantityAmount' },
+  { label: '盈亏/金额', value: 'quantityAmount' },
   { label: '操作信息', value: 'operateInfo' },
   { label: '备注', value: 'remark' }
 ]
@@ -310,8 +373,10 @@ const getDefaultQueryParams = () => ({
   orderTime: undefined as string[] | undefined,
   totalQuantityMin: undefined as number | undefined,
   totalQuantityMax: undefined as number | undefined,
-  totalAmountMin: undefined as number | undefined,
-  totalAmountMax: undefined as number | undefined,
+  totalPriceMin: undefined as number | undefined,
+  totalPriceMax: undefined as number | undefined,
+  actualPriceMin: undefined as number | undefined,
+  actualPriceMax: undefined as number | undefined,
   creator: undefined as number | undefined,
   updater: undefined as number | undefined,
   createTime: undefined as string[] | undefined,
@@ -332,6 +397,21 @@ const getUpdateTip = (status?: number) => {
 const getDeleteTip = (status?: number) => {
   if (status === OrderStatusEnum.FINISHED) return '已盘库，无法删除'
   return '当前状态无法删除'
+}
+const getDifferencePrice = (row: CheckOrderVO) => roundPrice(Number(row.actualPrice || 0) - Number(row.totalPrice || 0))
+const getDetailDifferenceQuantity = (detail: CheckOrderDetailVO) =>
+  Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
+const getDetailActualPrice = (detail: CheckOrderDetailVO) => {
+  if (detail.checkQuantity === undefined || detail.checkQuantity === null || detail.price === undefined || detail.price === null) {
+    return undefined
+  }
+  return roundPrice(Number(detail.checkQuantity) * Number(detail.price))
+}
+const getDetailDifferencePrice = (detail: CheckOrderDetailVO) => {
+  if (detail.price === undefined || detail.price === null) {
+    return undefined
+  }
+  return roundPrice(getDetailDifferenceQuantity(detail) * Number(detail.price))
 }
 
 const getList = async () => {
@@ -361,6 +441,8 @@ const formRef = ref()
 const openForm = (type: string, id?: number) => formRef.value.open(type, id)
 const detailRef = ref()
 const openDetail = (id: number) => detailRef.value.open(id)
+const printRef = ref()
+const handlePrint = (id: number) => printRef.value.print(id)
 
 const handleDelete = async (id: number) => {
   try {

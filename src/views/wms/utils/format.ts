@@ -53,9 +53,15 @@ export const roundPrice = (value: number) => {
   return Number.isFinite(value) ? Number(value.toFixed(PRICE_PRECISION)) : undefined
 }
 
+/** 亏损数字样式 */
+export const getLossClass = (value?: number | string | null) => {
+  const decimalValue = toFiniteDecimal(value)
+  return decimalValue !== undefined && decimalValue < 0 ? 'text-red-500' : ''
+}
+
 /** 数量 * 单价，计算金额 */
 export const multiplyPrice = (quantity?: number, price?: number) => {
-  if (!quantity || price === undefined || price === null) {
+  if (quantity === undefined || quantity === null || price === undefined || price === null) {
     return undefined
   }
   return roundPrice(Number(quantity) * Number(price))

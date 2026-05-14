@@ -15,8 +15,7 @@ export interface CheckOrderDetailVO {
   receiptTime?: Date
   quantity?: number
   checkQuantity?: number
-  differenceQuantity?: number
   availableQuantity?: number
-  amount?: number
+  price?: number
   createTime?: Date
 }
