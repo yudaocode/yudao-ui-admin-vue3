@@ -26,7 +26,7 @@
           {{ formatQuantity(detailData.totalQuantity) || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="总金额">
-          {{ formatPrice(detailData.totalAmount) || '-' }}
+          {{ formatPrice(detailData.totalPrice) || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">
           {{ formatNullableDate(detailData.createTime) }}
@@ -46,7 +46,7 @@
       </el-descriptions>
 
       <div class="mb-16px mt-24px text-18px font-bold">商品明细</div>
-      <el-table :data="detailData.details || []" :summary-method="getSummaries" border show-summary>
+      <el-table :data="detailRows" :summary-method="getSummaries" border show-summary>
         <el-table-column label="商品信息" min-width="200">
           <template #default="{ row }">
             <div>{{ row.itemName || '-' }}</div>
@@ -62,8 +62,11 @@
         <el-table-column align="right" label="数量" prop="quantity" width="120">
           <template #default="{ row }">{{ formatQuantity(row.quantity) || '-' }}</template>
         </el-table-column>
-        <el-table-column align="right" label="金额(元)" prop="amount" width="140">
-          <template #default="{ row }">{{ formatPrice(row.amount) || '-' }}</template>
+        <el-table-column align="right" label="单价(元)" prop="price" width="140">
+          <template #default="{ row }">{{ formatPrice(row.price) || '-' }}</template>
+        </el-table-column>
+        <el-table-column align="right" label="金额(元)" prop="totalPrice" width="140">
+          <template #default="{ row }">{{ formatPrice(row.totalPrice) || '-' }}</template>
         </el-table-column>
       </el-table>
     </div>
@@ -84,11 +87,26 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const detailData = ref<MovementOrderVO>({})
 
-const getSummaries = ({ columns, data }: { columns: any[]; data: MovementOrderDetailVO[] }) =>
+interface DetailRow extends MovementOrderDetailVO {
+  totalPrice?: number
+}
+
+const detailRows = computed<DetailRow[]>(() =>
+  (detailData.value.details || []).map((detail) => ({
+    ...detail,
+    totalPrice:
+      detail.price != null && detail.quantity
+        ? Number(detail.price) * Number(detail.quantity)
+        : undefined
+  }))
+)
+
+const getSummaries = ({ columns, data }: { columns: any[]; data: DetailRow[] }) =>
   columns.map((column, index) => {
     if (index === 0) return '合计'
     if (column.property === 'quantity') return formatSumQuantity(data, (detail) => detail.quantity)
-    if (column.property === 'amount') return formatSumPrice(data, (detail) => detail.amount)
+    if (column.property === 'price') return formatSumPrice(data, (detail) => detail.price)
+    if (column.property === 'totalPrice') return formatSumPrice(data, (detail) => detail.totalPrice)
     return ''
   })
 

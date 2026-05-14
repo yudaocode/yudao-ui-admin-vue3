@@ -53,10 +53,10 @@
           />
         </div>
       </el-form-item>
-      <el-form-item label="总金额" prop="totalAmountMin">
+      <el-form-item label="总金额" prop="totalPriceMin">
         <div class="flex w-240px items-center gap-8px">
           <el-input-number
-            v-model="queryParams.totalAmountMin"
+            v-model="queryParams.totalPriceMin"
             :controls="false"
             :min="0"
             :precision="PRICE_PRECISION"
@@ -65,7 +65,7 @@
           />
           <span>至</span>
           <el-input-number
-            v-model="queryParams.totalAmountMax"
+            v-model="queryParams.totalPriceMax"
             :controls="false"
             :min="0"
             :precision="PRICE_PRECISION"
@@ -172,8 +172,11 @@
             <el-table-column align="right" label="移库数量" width="120">
               <template #default="{ row: detail }">{{ formatQuantity(detail.quantity) }}</template>
             </el-table-column>
+            <el-table-column align="right" label="单价(元)" width="120">
+              <template #default="{ row: detail }">{{ formatPrice(detail.price) || '-' }}</template>
+            </el-table-column>
             <el-table-column align="right" label="金额(元)" width="120">
-              <template #default="{ row: detail }">{{ formatPrice(detail.amount) || '-' }}</template>
+              <template #default="{ row: detail }">{{ formatPrice(getDetailTotalPrice(detail)) || '-' }}</template>
             </el-table-column>
           </el-table>
         </template>
@@ -221,7 +224,7 @@
           </div>
           <div class="flex items-center justify-between">
             <span>金额：</span>
-            <span>{{ formatPrice(row.totalAmount) }}</span>
+            <span>{{ formatPrice(row.totalPrice) }}</span>
           </div>
         </template>
       </el-table-column>
@@ -331,8 +334,8 @@ const getDefaultQueryParams = () => ({
   orderTime: undefined as string[] | undefined,
   totalQuantityMin: undefined as number | undefined,
   totalQuantityMax: undefined as number | undefined,
-  totalAmountMin: undefined as number | undefined,
-  totalAmountMax: undefined as number | undefined,
+  totalPriceMin: undefined as number | undefined,
+  totalPriceMax: undefined as number | undefined,
   creator: undefined as number | undefined,
   updater: undefined as number | undefined,
   createTime: undefined as string[] | undefined,
@@ -372,6 +375,12 @@ const handleQuery = () => {
 const resetQuery = () => {
   Object.assign(queryParams, getDefaultQueryParams())
   handleQuery()
+}
+const getDetailTotalPrice = (detail: MovementOrderDetailVO) => {
+  if (!detail.quantity || detail.price === undefined || detail.price === null) {
+    return undefined
+  }
+  return Number(detail.quantity) * Number(detail.price)
 }
 const handleExpandChange = async (row: MovementOrderVO) => {
   if (!row.id || detailMap[row.id]) return

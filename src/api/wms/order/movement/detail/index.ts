@@ -15,6 +15,7 @@ export interface MovementOrderDetailVO {
   targetWarehouseName?: string
   quantity?: number
   availableQuantity?: number
-  amount?: number
+  price?: number
+  totalPrice?: number
   createTime?: Date
 }
