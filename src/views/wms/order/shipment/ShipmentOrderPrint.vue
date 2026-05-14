@@ -80,7 +80,12 @@ import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { ShipmentOrderApi, ShipmentOrderVO } from '@/api/wms/order/shipment'
 import { ShipmentOrderDetailVO } from '@/api/wms/order/shipment/detail'
-import { formatPrice, formatQuantity, formatSumPrice, formatSumQuantity } from '@/views/wms/utils/format'
+import {
+  formatPrice,
+  formatQuantity,
+  formatSumPrice,
+  formatSumQuantity
+} from '@/views/wms/utils/format'
 
 /** WMS 出库单打印 */
 defineOptions({ name: 'WmsShipmentOrderPrint' })

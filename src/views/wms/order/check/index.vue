@@ -1,12 +1,29 @@
 <!-- WMS 盘库单 -->
 <template>
   <ContentWrap>
-    <el-form ref="queryFormRef" :inline="true" :model="queryParams" class="-mb-15px" label-width="90px">
+    <el-form
+      ref="queryFormRef"
+      :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
+      label-width="90px"
+    >
       <el-form-item label="盘库单号" prop="no">
-        <el-input v-model="queryParams.no" class="!w-240px" clearable placeholder="请输入盘库单号" @keyup.enter="handleQuery" />
+        <el-input
+          v-model="queryParams.no"
+          class="!w-240px"
+          clearable
+          placeholder="请输入盘库单号"
+          @keyup.enter="handleQuery"
+        />
       </el-form-item>
       <el-form-item label="单据状态" prop="status">
-        <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择单据状态">
+        <el-select
+          v-model="queryParams.status"
+          class="!w-240px"
+          clearable
+          placeholder="请选择单据状态"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.WMS_ORDER_STATUS)"
             :key="dict.value"
@@ -127,7 +144,7 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-popover popper-class="wms-check-order-table-setting-popover" trigger="click" width="520">
+        <el-popover popper-class="!p-12px" trigger="click" width="520">
           <template #reference>
             <el-button>
               <Icon class="mr-5px" icon="ep:setting" />
@@ -136,14 +153,24 @@
           </template>
           <el-checkbox-group
             v-model="checkedTableColumns"
-            class="wms-check-order-table-setting grid grid-cols-3 gap-y-14px rounded p-16px"
+            class="grid grid-cols-3 gap-y-14px rounded bg-[var(--el-fill-color-light)] p-16px"
           >
-            <el-checkbox v-for="column in tableColumnOptions" :key="column.value" :label="column.value">
+            <el-checkbox
+              v-for="column in tableColumnOptions"
+              :key="column.value"
+              class="!h-28px !mr-0 [&_.el-checkbox__label]:font-600 [&_.el-checkbox__label]:text-16px"
+              :label="column.value"
+            >
               {{ column.label }}
             </el-checkbox>
           </el-checkbox-group>
         </el-popover>
-        <el-button v-hasPermi="['wms:check-order:create']" plain type="primary" @click="openForm('create')">
+        <el-button
+          v-hasPermi="['wms:check-order:create']"
+          plain
+          type="primary"
+          @click="openForm('create')"
+        >
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
@@ -164,7 +191,7 @@
   <ContentWrap>
     <el-table
       v-loading="loading"
-      :cell-class-name="'wms-check-order-cell'"
+      cell-class-name="!align-top"
       :data="list"
       :show-overflow-tooltip="true"
       border
@@ -176,26 +203,34 @@
             <el-table-column label="商品信息" min-width="220">
               <template #default="{ row: detail }">
                 <div>{{ detail.itemName || '-' }}</div>
-                <div v-if="detail.itemCode" class="text-12px text-gray-500">商品编号：{{ detail.itemCode }}</div>
+                <div v-if="detail.itemCode" class="text-12px text-gray-500"
+                  >商品编号：{{ detail.itemCode }}</div
+                >
               </template>
             </el-table-column>
             <el-table-column label="规格信息" min-width="220">
               <template #default="{ row: detail }">
                 <div>{{ detail.skuName || '-' }}</div>
-                <div v-if="detail.skuCode" class="text-12px text-gray-500">规格编号：{{ detail.skuCode }}</div>
+                <div v-if="detail.skuCode" class="text-12px text-gray-500"
+                  >规格编号：{{ detail.skuCode }}</div
+                >
               </template>
             </el-table-column>
             <el-table-column align="right" label="账面数量" width="120">
               <template #default="{ row: detail }">{{ formatQuantity(detail.quantity) }}</template>
             </el-table-column>
             <el-table-column align="right" label="实盘数量" width="120">
-              <template #default="{ row: detail }">{{ formatQuantity(detail.checkQuantity) }}</template>
+              <template #default="{ row: detail }">{{
+                formatQuantity(detail.checkQuantity)
+              }}</template>
             </el-table-column>
             <el-table-column align="right" label="单价(元)" width="120">
               <template #default="{ row: detail }">{{ formatPrice(detail.price) }}</template>
             </el-table-column>
             <el-table-column align="right" label="实际金额(元)" width="140">
-              <template #default="{ row: detail }">{{ formatPrice(getDetailActualPrice(detail)) }}</template>
+              <template #default="{ row: detail }">{{
+                formatPrice(getDetailActualPrice(detail))
+              }}</template>
             </el-table-column>
             <el-table-column align="right" label="盈亏数量" width="120">
               <template #default="{ row: detail }">
@@ -231,20 +266,22 @@
           <dict-tag :type="DICT_TYPE.WMS_ORDER_STATUS" :value="row.status" />
         </template>
       </el-table-column>
-      <el-table-column
-        v-if="isTableColumnVisible('warehouse')"
-        label="仓库"
-        min-width="180"
-      >
+      <el-table-column v-if="isTableColumnVisible('warehouse')" label="仓库" min-width="180">
         <template #default="{ row }">
           {{ row.warehouseName || '-' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="isTableColumnVisible('quantityAmount')" label="盈亏/金额(元)" min-width="200">
+      <el-table-column
+        v-if="isTableColumnVisible('quantityAmount')"
+        label="盈亏/金额(元)"
+        min-width="200"
+      >
         <template #default="{ row }">
           <div class="flex items-center justify-between">
             <span>盈亏数：</span>
-            <span :class="getLossClass(row.totalQuantity)">{{ formatQuantity(row.totalQuantity) }}</span>
+            <span :class="getLossClass(row.totalQuantity)">{{
+              formatQuantity(row.totalQuantity)
+            }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span>总金额：</span>
@@ -256,20 +293,37 @@
           </div>
           <div class="flex items-center justify-between">
             <span>盈亏金额：</span>
-            <span :class="getLossClass(getDifferencePrice(row))">{{ formatPrice(getDifferencePrice(row)) }}</span>
+            <span :class="getLossClass(getDifferencePrice(row))">{{
+              formatPrice(getDifferencePrice(row))
+            }}</span>
           </div>
         </template>
       </el-table-column>
       <el-table-column v-if="isTableColumnVisible('operateInfo')" label="操作信息" min-width="280">
         <template #default="{ row }">
-          <div>创建：{{ formatNullableDate(row.createTime) }} / {{ row.creatorName || row.creator || '-' }}</div>
-          <div>更新：{{ formatNullableDate(row.updateTime) }} / {{ row.updaterName || row.updater || '-' }}</div>
+          <div
+            >创建：{{ formatNullableDate(row.createTime) }} /
+            {{ row.creatorName || row.creator || '-' }}</div
+          >
+          <div
+            >更新：{{ formatNullableDate(row.updateTime) }} /
+            {{ row.updaterName || row.updater || '-' }}</div
+          >
         </template>
       </el-table-column>
-      <el-table-column v-if="isTableColumnVisible('remark')" label="备注" min-width="160" prop="remark" />
+      <el-table-column
+        v-if="isTableColumnVisible('remark')"
+        label="备注"
+        min-width="160"
+        prop="remark"
+      />
       <el-table-column align="center" fixed="right" label="操作" width="150">
         <template #default="{ row }">
-          <el-tooltip :content="getUpdateTip(row.status)" :disabled="canUpdate(row.status)" placement="top">
+          <el-tooltip
+            :content="getUpdateTip(row.status)"
+            :disabled="canUpdate(row.status)"
+            placement="top"
+          >
             <span>
               <el-button
                 v-hasPermi="['wms:check-order:update']"
@@ -282,7 +336,11 @@
               </el-button>
             </span>
           </el-tooltip>
-          <el-tooltip :content="getDeleteTip(row.status)" :disabled="canDelete(row.status)" placement="top">
+          <el-tooltip
+            :content="getDeleteTip(row.status)"
+            :disabled="canDelete(row.status)"
+            placement="top"
+          >
             <span>
               <el-button
                 v-hasPermi="['wms:check-order:delete']"
@@ -306,7 +364,12 @@
         </template>
       </el-table-column>
     </el-table>
-    <Pagination v-model:limit="queryParams.pageSize" v-model:page="queryParams.pageNo" :total="total" @pagination="getList" />
+    <Pagination
+      v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
+      @pagination="getList"
+    />
   </ContentWrap>
 
   <CheckOrderForm ref="formRef" @success="getList" />
@@ -320,7 +383,11 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { OrderDeleteStatusList, OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
+import {
+  OrderDeleteStatusList,
+  OrderStatusEnum,
+  OrderUpdateStatusList
+} from '@/views/wms/utils/constants'
 import {
   formatPrice,
   formatQuantity,
@@ -387,8 +454,10 @@ const queryFormRef = ref()
 const exportLoading = ref(false)
 const detailMap = reactive<Record<number, CheckOrderDetailVO[]>>({})
 
-const canUpdate = (status?: number) => status !== undefined && OrderUpdateStatusList.includes(status)
-const canDelete = (status?: number) => status !== undefined && OrderDeleteStatusList.includes(status)
+const canUpdate = (status?: number) =>
+  status !== undefined && OrderUpdateStatusList.includes(status)
+const canDelete = (status?: number) =>
+  status !== undefined && OrderDeleteStatusList.includes(status)
 const getUpdateTip = (status?: number) => {
   if (status === OrderStatusEnum.FINISHED) return '已盘库，无法修改'
   if (status === OrderStatusEnum.CANCELED) return '已作废，无法修改'
@@ -398,11 +467,17 @@ const getDeleteTip = (status?: number) => {
   if (status === OrderStatusEnum.FINISHED) return '已盘库，无法删除'
   return '当前状态无法删除'
 }
-const getDifferencePrice = (row: CheckOrderVO) => roundPrice(Number(row.actualPrice || 0) - Number(row.totalPrice || 0))
+const getDifferencePrice = (row: CheckOrderVO) =>
+  roundPrice(Number(row.actualPrice || 0) - Number(row.totalPrice || 0))
 const getDetailDifferenceQuantity = (detail: CheckOrderDetailVO) =>
   Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
 const getDetailActualPrice = (detail: CheckOrderDetailVO) => {
-  if (detail.checkQuantity === undefined || detail.checkQuantity === null || detail.price === undefined || detail.price === null) {
+  if (
+    detail.checkQuantity === undefined ||
+    detail.checkQuantity === null ||
+    detail.price === undefined ||
+    detail.price === null
+  ) {
     return undefined
   }
   return roundPrice(Number(detail.checkQuantity) * Number(detail.price))
@@ -465,27 +540,3 @@ const handleExport = async () => {
 
 onMounted(() => getList())
 </script>
-
-<style scoped>
-:deep(.wms-check-order-cell) {
-  vertical-align: top;
-}
-
-:global(.wms-check-order-table-setting-popover) {
-  padding: 12px;
-}
-
-:global(.wms-check-order-table-setting) {
-  background-color: var(--el-fill-color-light);
-}
-
-:global(.wms-check-order-table-setting .el-checkbox) {
-  height: 28px;
-  margin-right: 0;
-}
-
-:global(.wms-check-order-table-setting .el-checkbox__label) {
-  font-size: 16px;
-  font-weight: 600;
-}
-</style>

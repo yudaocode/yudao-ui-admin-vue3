@@ -102,7 +102,7 @@
     <div class="mb-12px text-16px font-500">库存流水</div>
     <el-table
       v-loading="loading"
-      :cell-class-name="'wms-inventory-history-cell'"
+      cell-class-name="!align-top"
       :data="list"
       :show-overflow-tooltip="true"
       border
@@ -231,9 +231,3 @@ onMounted(async () => {
   await getList()
 })
 </script>
-
-<style scoped>
-:deep(.wms-inventory-history-cell) {
-  vertical-align: top;
-}
-</style>

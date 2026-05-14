@@ -91,7 +91,9 @@
             <div v-if="row.itemCode" class="text-12px text-gray-500">
               商品编号：{{ row.itemCode }}
             </div>
-            <div v-if="row.brandName" class="text-12px text-gray-500">品牌：{{ row.brandName }}</div>
+            <div v-if="row.brandName" class="text-12px text-gray-500">
+              品牌：{{ row.brandName }}
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="规格信息" min-width="220">
@@ -104,13 +106,17 @@
         <el-table-column label="金额(元)" min-width="160">
           <template #default="{ row }">
             <div v-if="row.costPrice !== undefined">成本价：{{ formatPrice(row.costPrice) }}</div>
-            <div v-if="row.sellingPrice !== undefined">销售价：{{ formatPrice(row.sellingPrice) }}</div>
+            <div v-if="row.sellingPrice !== undefined">
+              销售价：{{ formatPrice(row.sellingPrice) }}
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="重量(kg)" min-width="160">
           <template #default="{ row }">
             <div v-if="row.netWeight !== undefined">净重：{{ formatWeight(row.netWeight) }}</div>
-            <div v-if="row.grossWeight !== undefined">毛重：{{ formatWeight(row.grossWeight) }}</div>
+            <div v-if="row.grossWeight !== undefined">
+              毛重：{{ formatWeight(row.grossWeight) }}
+            </div>
           </template>
         </el-table-column>
         <el-table-column align="right" label="长宽高(cm)" min-width="180">

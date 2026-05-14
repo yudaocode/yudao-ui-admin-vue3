@@ -1,12 +1,29 @@
 <!-- WMS 移库单 -->
 <template>
   <ContentWrap>
-    <el-form ref="queryFormRef" :inline="true" :model="queryParams" class="-mb-15px" label-width="90px">
+    <el-form
+      ref="queryFormRef"
+      :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
+      label-width="90px"
+    >
       <el-form-item label="移库单号" prop="no">
-        <el-input v-model="queryParams.no" class="!w-240px" clearable placeholder="请输入移库单号" @keyup.enter="handleQuery" />
+        <el-input
+          v-model="queryParams.no"
+          class="!w-240px"
+          clearable
+          placeholder="请输入移库单号"
+          @keyup.enter="handleQuery"
+        />
       </el-form-item>
       <el-form-item label="单据状态" prop="status">
-        <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择单据状态">
+        <el-select
+          v-model="queryParams.status"
+          class="!w-240px"
+          clearable
+          placeholder="请选择单据状态"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.WMS_ORDER_STATUS)"
             :key="dict.value"
@@ -111,7 +128,7 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-popover popper-class="wms-movement-order-table-setting-popover" trigger="click" width="520">
+        <el-popover popper-class="!p-12px" trigger="click" width="520">
           <template #reference>
             <el-button>
               <Icon class="mr-5px" icon="ep:setting" />
@@ -120,14 +137,24 @@
           </template>
           <el-checkbox-group
             v-model="checkedTableColumns"
-            class="wms-movement-order-table-setting grid grid-cols-3 gap-y-14px rounded p-16px"
+            class="grid grid-cols-3 gap-y-14px rounded bg-[var(--el-fill-color-light)] p-16px"
           >
-            <el-checkbox v-for="column in tableColumnOptions" :key="column.value" :label="column.value">
+            <el-checkbox
+              v-for="column in tableColumnOptions"
+              :key="column.value"
+              class="!h-28px !mr-0 [&_.el-checkbox__label]:font-600 [&_.el-checkbox__label]:text-16px"
+              :label="column.value"
+            >
               {{ column.label }}
             </el-checkbox>
           </el-checkbox-group>
         </el-popover>
-        <el-button v-hasPermi="['wms:movement-order:create']" plain type="primary" @click="openForm('create')">
+        <el-button
+          v-hasPermi="['wms:movement-order:create']"
+          plain
+          type="primary"
+          @click="openForm('create')"
+        >
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
@@ -148,7 +175,7 @@
   <ContentWrap>
     <el-table
       v-loading="loading"
-      :cell-class-name="'wms-movement-order-cell'"
+      cell-class-name="!align-top"
       :data="list"
       :show-overflow-tooltip="true"
       border
@@ -160,13 +187,17 @@
             <el-table-column label="商品信息" min-width="220">
               <template #default="{ row: detail }">
                 <div>{{ detail.itemName || '-' }}</div>
-                <div v-if="detail.itemCode" class="text-12px text-gray-500">商品编号：{{ detail.itemCode }}</div>
+                <div v-if="detail.itemCode" class="text-12px text-gray-500"
+                  >商品编号：{{ detail.itemCode }}</div
+                >
               </template>
             </el-table-column>
             <el-table-column label="规格信息" min-width="220">
               <template #default="{ row: detail }">
                 <div>{{ detail.skuName || '-' }}</div>
-                <div v-if="detail.skuCode" class="text-12px text-gray-500">规格编号：{{ detail.skuCode }}</div>
+                <div v-if="detail.skuCode" class="text-12px text-gray-500"
+                  >规格编号：{{ detail.skuCode }}</div
+                >
               </template>
             </el-table-column>
             <el-table-column align="right" label="移库数量" width="120">
@@ -176,7 +207,9 @@
               <template #default="{ row: detail }">{{ formatPrice(detail.price) || '-' }}</template>
             </el-table-column>
             <el-table-column align="right" label="金额(元)" width="120">
-              <template #default="{ row: detail }">{{ formatPrice(getDetailTotalPrice(detail)) || '-' }}</template>
+              <template #default="{ row: detail }">{{
+                formatPrice(getDetailTotalPrice(detail)) || '-'
+              }}</template>
             </el-table-column>
           </el-table>
         </template>
@@ -216,7 +249,11 @@
           {{ row.targetWarehouseName || '-' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="isTableColumnVisible('quantityAmount')" label="总数量/总金额(元)" min-width="180">
+      <el-table-column
+        v-if="isTableColumnVisible('quantityAmount')"
+        label="总数量/总金额(元)"
+        min-width="180"
+      >
         <template #default="{ row }">
           <div class="flex items-center justify-between">
             <span>数量：</span>
@@ -230,14 +267,29 @@
       </el-table-column>
       <el-table-column v-if="isTableColumnVisible('operateInfo')" label="操作信息" min-width="280">
         <template #default="{ row }">
-          <div>创建：{{ formatNullableDate(row.createTime) }} / {{ row.creatorName || row.creator || '-' }}</div>
-          <div>更新：{{ formatNullableDate(row.updateTime) }} / {{ row.updaterName || row.updater || '-' }}</div>
+          <div
+            >创建：{{ formatNullableDate(row.createTime) }} /
+            {{ row.creatorName || row.creator || '-' }}</div
+          >
+          <div
+            >更新：{{ formatNullableDate(row.updateTime) }} /
+            {{ row.updaterName || row.updater || '-' }}</div
+          >
         </template>
       </el-table-column>
-      <el-table-column v-if="isTableColumnVisible('remark')" label="备注" min-width="160" prop="remark" />
+      <el-table-column
+        v-if="isTableColumnVisible('remark')"
+        label="备注"
+        min-width="160"
+        prop="remark"
+      />
       <el-table-column align="center" fixed="right" label="操作" width="150">
         <template #default="{ row }">
-          <el-tooltip :content="getUpdateTip(row.status)" :disabled="canUpdate(row.status)" placement="top">
+          <el-tooltip
+            :content="getUpdateTip(row.status)"
+            :disabled="canUpdate(row.status)"
+            placement="top"
+          >
             <span>
               <el-button
                 v-hasPermi="['wms:movement-order:update']"
@@ -250,7 +302,11 @@
               </el-button>
             </span>
           </el-tooltip>
-          <el-tooltip :content="getDeleteTip(row.status)" :disabled="canDelete(row.status)" placement="top">
+          <el-tooltip
+            :content="getDeleteTip(row.status)"
+            :disabled="canDelete(row.status)"
+            placement="top"
+          >
             <span>
               <el-button
                 v-hasPermi="['wms:movement-order:delete']"
@@ -266,7 +322,12 @@
         </template>
       </el-table-column>
     </el-table>
-    <Pagination v-model:limit="queryParams.pageSize" v-model:page="queryParams.pageNo" :total="total" @pagination="getList" />
+    <Pagination
+      v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
+      @pagination="getList"
+    />
   </ContentWrap>
 
   <MovementOrderForm ref="formRef" @success="getList" />
@@ -279,8 +340,17 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MovementOrderApi, MovementOrderVO } from '@/api/wms/order/movement'
 import { MovementOrderDetailVO } from '@/api/wms/order/movement/detail'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
-import { OrderDeleteStatusList, OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
-import { formatPrice, formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION } from '@/views/wms/utils/format'
+import {
+  OrderDeleteStatusList,
+  OrderStatusEnum,
+  OrderUpdateStatusList
+} from '@/views/wms/utils/constants'
+import {
+  formatPrice,
+  formatQuantity,
+  PRICE_PRECISION,
+  QUANTITY_PRECISION
+} from '@/views/wms/utils/format'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import MovementOrderDetail from './MovementOrderDetail.vue'
 import MovementOrderForm from './MovementOrderForm.vue'
@@ -346,8 +416,10 @@ const queryFormRef = ref()
 const exportLoading = ref(false)
 const detailMap = reactive<Record<number, MovementOrderDetailVO[]>>({})
 
-const canUpdate = (status?: number) => status !== undefined && OrderUpdateStatusList.includes(status)
-const canDelete = (status?: number) => status !== undefined && OrderDeleteStatusList.includes(status)
+const canUpdate = (status?: number) =>
+  status !== undefined && OrderUpdateStatusList.includes(status)
+const canDelete = (status?: number) =>
+  status !== undefined && OrderDeleteStatusList.includes(status)
 const getUpdateTip = (status?: number) => {
   if (status === OrderStatusEnum.FINISHED) return '已移库，无法修改'
   if (status === OrderStatusEnum.CANCELED) return '已作废，无法修改'
@@ -413,27 +485,3 @@ const handleExport = async () => {
 
 onMounted(() => getList())
 </script>
-
-<style scoped>
-:deep(.wms-movement-order-cell) {
-  vertical-align: top;
-}
-
-:global(.wms-movement-order-table-setting-popover) {
-  padding: 12px;
-}
-
-:global(.wms-movement-order-table-setting) {
-  background-color: var(--el-fill-color-light);
-}
-
-:global(.wms-movement-order-table-setting .el-checkbox) {
-  height: 28px;
-  margin-right: 0;
-}
-
-:global(.wms-movement-order-table-setting .el-checkbox__label) {
-  font-size: 16px;
-  font-weight: 600;
-}
-</style>

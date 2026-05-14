@@ -80,7 +80,12 @@ import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { ReceiptOrderApi, ReceiptOrderVO } from '@/api/wms/order/receipt'
 import { ReceiptOrderDetailVO } from '@/api/wms/order/receipt/detail'
-import { formatPrice, formatQuantity, formatSumPrice, formatSumQuantity } from '@/views/wms/utils/format'
+import {
+  formatPrice,
+  formatQuantity,
+  formatSumPrice,
+  formatSumQuantity
+} from '@/views/wms/utils/format'
 
 /** WMS 入库单打印 */
 defineOptions({ name: 'WmsReceiptOrderPrint' })

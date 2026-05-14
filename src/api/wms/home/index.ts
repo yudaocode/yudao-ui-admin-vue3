@@ -3,26 +3,26 @@ import request from '@/config/axios'
 // WMS 首页统计查询参数
 export interface WmsHomeStatisticsReqVO {
   warehouseId?: number
+  goodsLimit?: number
+  warehouseLimit?: number
 }
 
 // WMS 首页单据状态统计 VO
 export interface WmsHomeOrderStatusVO {
   status: number
-  statusName: string
   count: number
 }
 
 // WMS 首页单据汇总统计 VO
 export interface WmsHomeOrderSummaryVO {
-  orderType: number
-  orderTypeName: string
+  type: number
   total: number
-  statusList: WmsHomeOrderStatusVO[]
+  statuses: WmsHomeOrderStatusVO[]
 }
 
 // WMS 首页单据趋势 VO
 export interface WmsHomeOrderTrendVO {
-  date: string
+  time: string | number
   receiptCount: number
   shipmentCount: number
   movementCount: number
@@ -31,15 +31,15 @@ export interface WmsHomeOrderTrendVO {
 
 // WMS 首页商品库存排行 VO
 export interface WmsHomeInventoryItemRankVO {
-  itemId: number
-  itemName: string
+  id: number
+  name: string
   quantity: number
 }
 
 // WMS 首页仓库库存排行 VO
 export interface WmsHomeInventoryWarehouseRankVO {
-  warehouseId: number
-  warehouseName: string
+  id: number
+  name: string
   quantity: number
 }
 

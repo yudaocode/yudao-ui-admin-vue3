@@ -11,11 +11,7 @@
     >
       <el-form-item label="统计维度" prop="type">
         <el-radio-group v-model="queryParams.type" class="!w-240px" @change="handleTypeChange">
-          <el-radio-button
-            v-for="item in dimensionOptions"
-            :key="item.value"
-            :label="item.value"
-          >
+          <el-radio-button v-for="item in dimensionOptions" :key="item.value" :label="item.value">
             {{ item.label }}
           </el-radio-button>
         </el-radio-group>
@@ -82,7 +78,7 @@
     </div>
     <el-table
       v-loading="loading"
-      :cell-class-name="'wms-inventory-cell'"
+      cell-class-name="!align-top"
       :data="list"
       :show-overflow-tooltip="true"
       :span-method="spanMethod"
@@ -283,9 +279,3 @@ onMounted(async () => {
   await getList()
 })
 </script>
-
-<style scoped>
-:deep(.wms-inventory-cell) {
-  vertical-align: top;
-}
-</style>

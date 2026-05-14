@@ -117,18 +117,10 @@
         </el-select>
       </el-form-item>
       <el-form-item label="创建用户" prop="creator">
-        <UserSelectV2
-          v-model="queryParams.creator"
-          class="!w-240px"
-          placeholder="请选择创建用户"
-        />
+        <UserSelectV2 v-model="queryParams.creator" class="!w-240px" placeholder="请选择创建用户" />
       </el-form-item>
       <el-form-item label="更新用户" prop="updater">
-        <UserSelectV2
-          v-model="queryParams.updater"
-          class="!w-240px"
-          placeholder="请选择更新用户"
-        />
+        <UserSelectV2 v-model="queryParams.updater" class="!w-240px" placeholder="请选择更新用户" />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
@@ -161,11 +153,7 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-popover
-          popper-class="wms-receipt-order-table-setting-popover"
-          trigger="click"
-          width="520"
-        >
+        <el-popover popper-class="!p-12px" trigger="click" width="520">
           <template #reference>
             <el-button>
               <Icon class="mr-5px" icon="ep:setting" />
@@ -174,11 +162,12 @@
           </template>
           <el-checkbox-group
             v-model="checkedTableColumns"
-            class="wms-receipt-order-table-setting grid grid-cols-3 gap-y-14px rounded p-16px"
+            class="grid grid-cols-3 gap-y-14px rounded bg-[var(--el-fill-color-light)] p-16px"
           >
             <el-checkbox
               v-for="column in tableColumnOptions"
               :key="column.value"
+              class="!h-28px !mr-0 [&_.el-checkbox__label]:font-600 [&_.el-checkbox__label]:text-16px"
               :label="column.value"
             >
               {{ column.label }}
@@ -212,7 +201,7 @@
   <ContentWrap>
     <el-table
       v-loading="loading"
-      :cell-class-name="'wms-receipt-order-cell'"
+      cell-class-name="!align-top"
       :data="list"
       :show-overflow-tooltip="true"
       border
@@ -255,7 +244,12 @@
           </el-table>
         </template>
       </el-table-column>
-      <el-table-column v-if="isTableColumnVisible('no')" fixed="left" label="单号/业务单号" width="290">
+      <el-table-column
+        v-if="isTableColumnVisible('no')"
+        fixed="left"
+        label="单号/业务单号"
+        width="290"
+      >
         <template #default="scope">
           <div>
             单号：
@@ -289,11 +283,7 @@
           <dict-tag :type="DICT_TYPE.WMS_RECEIPT_ORDER_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-      <el-table-column
-        v-if="isTableColumnVisible('warehouse')"
-        label="仓库"
-        min-width="160"
-      >
+      <el-table-column v-if="isTableColumnVisible('warehouse')" label="仓库" min-width="160">
         <template #default="scope">
           {{ scope.row.warehouseName || '-' }}
         </template>
@@ -332,7 +322,12 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column v-if="isTableColumnVisible('remark')" label="备注" min-width="160" prop="remark" />
+      <el-table-column
+        v-if="isTableColumnVisible('remark')"
+        label="备注"
+        min-width="160"
+        prop="remark"
+      />
       <el-table-column align="center" fixed="right" label="操作" width="180">
         <template #default="scope">
           <el-tooltip
@@ -407,7 +402,12 @@ import {
   OrderStatusEnum,
   OrderUpdateStatusList
 } from '@/views/wms/utils/constants'
-import { formatPrice, formatQuantity, PRICE_PRECISION, QUANTITY_PRECISION } from '@/views/wms/utils/format'
+import {
+  formatPrice,
+  formatQuantity,
+  PRICE_PRECISION,
+  QUANTITY_PRECISION
+} from '@/views/wms/utils/format'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import ReceiptOrderDetail from './ReceiptOrderDetail.vue'
 import ReceiptOrderForm from './ReceiptOrderForm.vue'
@@ -604,27 +604,3 @@ onMounted(async () => {
   await getList()
 })
 </script>
-
-<style scoped>
-:deep(.wms-receipt-order-cell) {
-  vertical-align: top;
-}
-
-:global(.wms-receipt-order-table-setting-popover) {
-  padding: 12px;
-}
-
-:global(.wms-receipt-order-table-setting) {
-  background-color: var(--el-fill-color-light);
-}
-
-:global(.wms-receipt-order-table-setting .el-checkbox) {
-  height: 28px;
-  margin-right: 0;
-}
-
-:global(.wms-receipt-order-table-setting .el-checkbox__label) {
-  font-size: 16px;
-  font-weight: 600;
-}
-</style>

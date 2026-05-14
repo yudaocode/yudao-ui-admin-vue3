@@ -50,13 +50,17 @@
         <el-table-column label="商品信息" min-width="200">
           <template #default="{ row }">
             <div>{{ row.itemName || '-' }}</div>
-            <div v-if="row.itemCode" class="text-12px text-gray-500">商品编号：{{ row.itemCode }}</div>
+            <div v-if="row.itemCode" class="text-12px text-gray-500"
+              >商品编号：{{ row.itemCode }}</div
+            >
           </template>
         </el-table-column>
         <el-table-column label="规格信息" min-width="200">
           <template #default="{ row }">
             <div>{{ row.skuName || '-' }}</div>
-            <div v-if="row.skuCode" class="text-12px text-gray-500">规格编号：{{ row.skuCode }}</div>
+            <div v-if="row.skuCode" class="text-12px text-gray-500"
+              >规格编号：{{ row.skuCode }}</div
+            >
           </template>
         </el-table-column>
         <el-table-column align="right" label="数量" prop="quantity" width="120">
@@ -78,7 +82,12 @@ import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { MovementOrderApi, MovementOrderVO } from '@/api/wms/order/movement'
 import { MovementOrderDetailVO } from '@/api/wms/order/movement/detail'
-import { formatPrice, formatQuantity, formatSumPrice, formatSumQuantity } from '@/views/wms/utils/format'
+import {
+  formatPrice,
+  formatQuantity,
+  formatSumPrice,
+  formatSumQuantity
+} from '@/views/wms/utils/format'
 
 /** WMS 移库单详情 */
 defineOptions({ name: 'WmsMovementOrderDetail' })

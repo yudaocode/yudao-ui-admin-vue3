@@ -44,11 +44,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="供应商" prop="merchantId">
-            <MerchantSelect
-              v-model="formData.merchantId"
-              placeholder="请选择供应商"
-              supplier
-            />
+            <MerchantSelect v-model="formData.merchantId" placeholder="请选择供应商" supplier />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -71,13 +67,14 @@
 
       <div class="mb-12px flex items-center justify-between">
         <span class="text-14px font-bold">入库明细</span>
-        <el-tooltip
-          content="请先选择仓库"
-          :disabled="!!formData.warehouseId"
-          placement="top"
-        >
+        <el-tooltip content="请先选择仓库" :disabled="!!formData.warehouseId" placement="top">
           <span>
-            <el-button :disabled="!formData.warehouseId" plain type="primary" @click="handleAddDetail">
+            <el-button
+              :disabled="!formData.warehouseId"
+              plain
+              type="primary"
+              @click="handleAddDetail"
+            >
               <Icon class="mr-5px" icon="ep:plus" />
               添加商品
             </el-button>
@@ -177,7 +174,12 @@
           </el-button>
         </div>
         <div>
-          <el-button v-if="isPrepareOrder" :disabled="formLoading" type="primary" @click="submitForm">
+          <el-button
+            v-if="isPrepareOrder"
+            :disabled="formLoading"
+            type="primary"
+            @click="submitForm"
+          >
             保存
           </el-button>
           <el-button @click="dialogVisible = false">取 消</el-button>
@@ -241,7 +243,9 @@ const formRules = reactive<FormRules>({
 const formRef = ref() // 表单 Ref
 const skuSelectRef = ref() // 商品 SKU 选择弹窗 Ref
 
-const detailPriceSum = computed(() => sumPrice(formData.value.details || [], (detail) => detail.price))
+const detailPriceSum = computed(() =>
+  sumPrice(formData.value.details || [], (detail) => detail.price)
+)
 const isPrepareOrder = computed(
   () =>
     !formData.value.id ||
@@ -393,7 +397,12 @@ const validateDetails = (required: boolean) => {
 
 /** 构建提交数据 */
 const buildSubmitData = () => {
-  const { totalQuantity: _totalQuantity, totalPrice: _totalPrice, details, ...order } = formData.value
+  const {
+    totalQuantity: _totalQuantity,
+    totalPrice: _totalPrice,
+    details,
+    ...order
+  } = formData.value
   return {
     ...order,
     details: (details || []).map(({ totalPrice: _rowTotalPrice, ...detail }) => detail)

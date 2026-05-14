@@ -1,7 +1,13 @@
 <!-- WMS 盘库单表单 -->
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle" width="1280px">
-    <el-form ref="formRef" v-loading="formLoading" :model="formData" :rules="formRules" label-width="92px">
+    <el-form
+      ref="formRef"
+      v-loading="formLoading"
+      :model="formData"
+      :rules="formRules"
+      label-width="92px"
+    >
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="盘库单号" prop="no">
@@ -31,7 +37,13 @@
         </el-col>
         <el-col :span="16">
           <el-form-item label="备注" prop="remark">
-            <el-input v-model="formData.remark" maxlength="255" placeholder="请输入备注" :rows="3" type="textarea" />
+            <el-input
+              v-model="formData.remark"
+              maxlength="255"
+              placeholder="请输入备注"
+              :rows="3"
+              type="textarea"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -40,7 +52,12 @@
         <span class="text-14px font-bold">盘库明细</span>
         <el-tooltip content="请先选择仓库" :disabled="!!formData.warehouseId" placement="top">
           <span>
-            <el-button :disabled="!formData.warehouseId" plain type="primary" @click="handleAddDetail">
+            <el-button
+              :disabled="!formData.warehouseId"
+              plain
+              type="primary"
+              @click="handleAddDetail"
+            >
               <Icon class="mr-5px" icon="ep:plus" />
               添加商品
             </el-button>
@@ -57,13 +74,17 @@
         <el-table-column label="商品信息" min-width="210">
           <template #default="{ row }">
             <div>{{ row.itemName || '-' }}</div>
-            <div v-if="row.itemCode" class="text-12px text-gray-500">商品编号：{{ row.itemCode }}</div>
+            <div v-if="row.itemCode" class="text-12px text-gray-500"
+              >商品编号：{{ row.itemCode }}</div
+            >
           </template>
         </el-table-column>
         <el-table-column label="规格信息" min-width="210">
           <template #default="{ row }">
             <div>{{ row.skuName || '-' }}</div>
-            <div v-if="row.skuCode" class="text-12px text-gray-500">规格编号：{{ row.skuCode }}</div>
+            <div v-if="row.skuCode" class="text-12px text-gray-500"
+              >规格编号：{{ row.skuCode }}</div
+            >
           </template>
         </el-table-column>
         <el-table-column align="right" label="账面库存" prop="quantity" width="120">
@@ -110,12 +131,16 @@
         </el-table-column>
         <el-table-column align="right" label="盈亏数" prop="differenceQuantity" width="120">
           <template #default="{ row }">
-            <span :class="getLossClass(getDifferenceQuantity(row))">{{ formatQuantity(getDifferenceQuantity(row)) }}</span>
+            <span :class="getLossClass(getDifferenceQuantity(row))">{{
+              formatQuantity(getDifferenceQuantity(row))
+            }}</span>
           </template>
         </el-table-column>
         <el-table-column align="right" label="实际盈亏金额(元)" prop="differencePrice" width="160">
           <template #default="{ row }">
-            <span :class="getLossClass(getDifferencePrice(row))">{{ formatPrice(getDifferencePrice(row)) }}</span>
+            <span :class="getLossClass(getDifferencePrice(row))">{{
+              formatPrice(getDifferencePrice(row))
+            }}</span>
           </template>
         </el-table-column>
         <el-table-column align="center" label="操作" width="80">
@@ -153,7 +178,13 @@
           </el-button>
         </div>
         <div>
-          <el-button v-if="isPrepareOrder" :disabled="formLoading" type="primary" @click="submitForm">保存</el-button>
+          <el-button
+            v-if="isPrepareOrder"
+            :disabled="formLoading"
+            type="primary"
+            @click="submitForm"
+            >保存</el-button
+          >
           <el-button @click="dialogVisible = false">取 消</el-button>
         </div>
       </div>
@@ -166,7 +197,9 @@ import { FormRules } from 'element-plus'
 import { h } from 'vue'
 import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
-import InventorySelect, { InventorySelectRow } from '@/views/wms/inventory/components/InventorySelect.vue'
+import InventorySelect, {
+  InventorySelectRow
+} from '@/views/wms/inventory/components/InventorySelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
@@ -217,20 +250,30 @@ const formRules = reactive<FormRules>({
 const formRef = ref()
 const inventorySelectRef = ref()
 
-const getDifferenceQuantity = (detail: CheckOrderFormDetail) => Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
+const getDifferenceQuantity = (detail: CheckOrderFormDetail) =>
+  Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
 const getBookPrice = (detail: CheckOrderFormDetail) => multiplyPrice(detail.quantity, detail.price)
-const getActualPrice = (detail: CheckOrderFormDetail) => detail.actualPrice ?? multiplyPrice(detail.checkQuantity, detail.price)
+const getActualPrice = (detail: CheckOrderFormDetail) =>
+  detail.actualPrice ?? multiplyPrice(detail.checkQuantity, detail.price)
 const getDifferencePrice = (detail: CheckOrderFormDetail) => {
   if (detail.price === undefined || detail.price === null) {
     return undefined
   }
   return roundPrice(getDifferenceQuantity(detail) * Number(detail.price))
 }
-const renderLossText = (value: number | string | null | undefined, formatter: (value?: number | string | null) => string) =>
-  h('span', { class: getLossClass(value) }, formatter(value))
-const totalQuantity = computed(() => sumQuantity(formData.value.details || [], (detail) => getDifferenceQuantity(detail)))
-const totalPrice = computed(() => sumPrice(formData.value.details || [], (detail) => getBookPrice(detail)))
-const actualPrice = computed(() => sumPrice(formData.value.details || [], (detail) => getActualPrice(detail)))
+const renderLossText = (
+  value: number | string | null | undefined,
+  formatter: (value?: number | string | null) => string
+) => h('span', { class: getLossClass(value) }, formatter(value))
+const totalQuantity = computed(() =>
+  sumQuantity(formData.value.details || [], (detail) => getDifferenceQuantity(detail))
+)
+const totalPrice = computed(() =>
+  sumPrice(formData.value.details || [], (detail) => getBookPrice(detail))
+)
+const actualPrice = computed(() =>
+  sumPrice(formData.value.details || [], (detail) => getActualPrice(detail))
+)
 const differencePrice = computed(() => roundPrice(actualPrice.value - totalPrice.value) || 0)
 const isPrepareOrder = computed(
   () =>
@@ -329,10 +372,14 @@ const getDetailSummaries = ({ columns, data }: { columns: any[]; data: CheckOrde
   columns.map((column, index) => {
     if (index === 0) return '合计'
     if (column.property === 'quantity') return formatSumQuantity(data, (detail) => detail.quantity)
-    if (column.property === 'checkQuantity') return formatSumQuantity(data, (detail) => detail.checkQuantity)
-    if (column.property === 'actualPrice') return formatSumPrice(data, (detail) => getActualPrice(detail))
-    if (column.property === 'differenceQuantity') return renderLossText(totalQuantity.value, formatQuantity)
-    if (column.property === 'differencePrice') return renderLossText(differencePrice.value, formatPrice)
+    if (column.property === 'checkQuantity')
+      return formatSumQuantity(data, (detail) => detail.checkQuantity)
+    if (column.property === 'actualPrice')
+      return formatSumPrice(data, (detail) => getActualPrice(detail))
+    if (column.property === 'differenceQuantity')
+      return renderLossText(totalQuantity.value, formatQuantity)
+    if (column.property === 'differencePrice')
+      return renderLossText(differencePrice.value, formatPrice)
     return ''
   })
 
@@ -357,14 +404,18 @@ const validateDetails = (required: boolean) => {
 
 /** 构建提交数据 */
 const buildSubmitData = () => {
-  const { totalQuantity: _totalQuantity, totalPrice: _totalPrice, actualPrice: _actualPrice, details, ...order } = formData.value
+  const {
+    totalQuantity: _totalQuantity,
+    totalPrice: _totalPrice,
+    actualPrice: _actualPrice,
+    details,
+    ...order
+  } = formData.value
   return {
     ...order,
-    details: (details || []).map(({
-      actualPrice: _rowActualPrice,
-      availableQuantity: _availableQuantity,
-      ...detail
-    }) => detail)
+    details: (details || []).map(
+      ({ actualPrice: _rowActualPrice, availableQuantity: _availableQuantity, ...detail }) => detail
+    )
   } as CheckOrderVO
 }
 

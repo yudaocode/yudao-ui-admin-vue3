@@ -32,9 +32,13 @@
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">账面库存</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">单价(元)</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">实际库存</th>
-            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">实际金额(元)</th>
+            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
+              >实际金额(元)</th
+            >
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">盈亏数</th>
-            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">实际盈亏金额(元)</th>
+            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
+              >实际盈亏金额(元)</th
+            >
           </tr>
         </thead>
         <tbody>
@@ -145,9 +149,15 @@ interface PrintRow extends CheckOrderDetailVO {
   differencePrice?: number
 }
 
-const getDifferenceQuantity = (detail: CheckOrderDetailVO) => Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
+const getDifferenceQuantity = (detail: CheckOrderDetailVO) =>
+  Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
 const getActualPrice = (detail: CheckOrderDetailVO) => {
-  if (detail.checkQuantity === undefined || detail.checkQuantity === null || detail.price === undefined || detail.price === null) {
+  if (
+    detail.checkQuantity === undefined ||
+    detail.checkQuantity === null ||
+    detail.price === undefined ||
+    detail.price === null
+  ) {
     return undefined
   }
   return roundPrice(Number(detail.checkQuantity) * Number(detail.price))
@@ -171,8 +181,12 @@ const printRows = computed<PrintRow[]>(() =>
     }
   })
 )
-const totalDifferenceQuantity = computed(() => sumQuantity(printRows.value, (detail) => detail.differenceQuantity))
-const totalDifferencePrice = computed(() => sumPrice(printRows.value, (detail) => detail.differencePrice))
+const totalDifferenceQuantity = computed(() =>
+  sumQuantity(printRows.value, (detail) => detail.differenceQuantity)
+)
+const totalDifferencePrice = computed(() =>
+  sumPrice(printRows.value, (detail) => detail.differencePrice)
+)
 
 /** 打印盘库单 */
 const print = async (id: number) => {

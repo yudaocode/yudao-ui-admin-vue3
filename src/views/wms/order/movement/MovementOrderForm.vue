@@ -1,7 +1,13 @@
 <!-- WMS 移库单表单 -->
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle" width="1280px">
-    <el-form ref="formRef" v-loading="formLoading" :model="formData" :rules="formRules" label-width="98px">
+    <el-form
+      ref="formRef"
+      v-loading="formLoading"
+      :model="formData"
+      :rules="formRules"
+      label-width="98px"
+    >
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="移库单号" prop="no">
@@ -10,12 +16,18 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="来源仓库" prop="sourceWarehouseId">
-            <WarehouseSelect v-model="formData.sourceWarehouseId" @change="handleSourceWarehouseChange" />
+            <WarehouseSelect
+              v-model="formData.sourceWarehouseId"
+              @change="handleSourceWarehouseChange"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="目标仓库" prop="targetWarehouseId">
-            <WarehouseSelect v-model="formData.targetWarehouseId" @change="handleTargetWarehouseChange" />
+            <WarehouseSelect
+              v-model="formData.targetWarehouseId"
+              @change="handleTargetWarehouseChange"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -31,16 +43,31 @@
         </el-col>
         <el-col :span="16">
           <el-form-item label="备注" prop="remark">
-            <el-input v-model="formData.remark" maxlength="255" placeholder="请输入备注" :rows="3" type="textarea" />
+            <el-input
+              v-model="formData.remark"
+              maxlength="255"
+              placeholder="请输入备注"
+              :rows="3"
+              type="textarea"
+            />
           </el-form-item>
         </el-col>
       </el-row>
 
       <div class="mb-12px flex items-center justify-between">
         <span class="text-14px font-bold">移库明细</span>
-        <el-tooltip content="请先选择来源仓库" :disabled="!!formData.sourceWarehouseId" placement="top">
+        <el-tooltip
+          content="请先选择来源仓库"
+          :disabled="!!formData.sourceWarehouseId"
+          placement="top"
+        >
           <span>
-            <el-button :disabled="!formData.sourceWarehouseId" plain type="primary" @click="handleAddDetail">
+            <el-button
+              :disabled="!formData.sourceWarehouseId"
+              plain
+              type="primary"
+              @click="handleAddDetail"
+            >
               <Icon class="mr-5px" icon="ep:plus" />
               添加商品
             </el-button>
@@ -57,13 +84,17 @@
         <el-table-column label="商品信息" min-width="210">
           <template #default="{ row }">
             <div>{{ row.itemName || '-' }}</div>
-            <div v-if="row.itemCode" class="text-12px text-gray-500">商品编号：{{ row.itemCode }}</div>
+            <div v-if="row.itemCode" class="text-12px text-gray-500"
+              >商品编号：{{ row.itemCode }}</div
+            >
           </template>
         </el-table-column>
         <el-table-column label="规格信息" min-width="210">
           <template #default="{ row }">
             <div>{{ row.skuName || '-' }}</div>
-            <div v-if="row.skuCode" class="text-12px text-gray-500">规格编号：{{ row.skuCode }}</div>
+            <div v-if="row.skuCode" class="text-12px text-gray-500"
+              >规格编号：{{ row.skuCode }}</div
+            >
           </template>
         </el-table-column>
         <el-table-column align="right" label="可用库存" width="120">
@@ -143,7 +174,13 @@
           </el-button>
         </div>
         <div>
-          <el-button v-if="isPrepareOrder" :disabled="formLoading" type="primary" @click="submitForm">保存</el-button>
+          <el-button
+            v-if="isPrepareOrder"
+            :disabled="formLoading"
+            type="primary"
+            @click="submitForm"
+            >保存</el-button
+          >
           <el-button @click="dialogVisible = false">取 消</el-button>
         </div>
       </div>
@@ -155,7 +192,9 @@
 import { FormRules } from 'element-plus'
 import { MovementOrderApi, MovementOrderVO } from '@/api/wms/order/movement'
 import { MovementOrderDetailVO } from '@/api/wms/order/movement/detail'
-import InventorySelect, { InventorySelectRow } from '@/views/wms/inventory/components/InventorySelect.vue'
+import InventorySelect, {
+  InventorySelectRow
+} from '@/views/wms/inventory/components/InventorySelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
@@ -201,7 +240,9 @@ const formRules = reactive<FormRules>({
 const formRef = ref()
 const inventorySelectRef = ref()
 
-const detailPriceSum = computed(() => sumPrice(formData.value.details || [], (detail) => detail.price))
+const detailPriceSum = computed(() =>
+  sumPrice(formData.value.details || [], (detail) => detail.price)
+)
 const isPrepareOrder = computed(
   () =>
     !formData.value.id ||
@@ -273,10 +314,7 @@ const handleSelectInventory = (inventories: InventorySelectRow[]) => {
 /** 判断库存是否已选择 */
 const isInventorySelected = (inventory: InventorySelectRow) =>
   (formData.value.details || []).some((detail) => {
-    return (
-      detail.skuId === inventory.skuId &&
-      detail.sourceWarehouseId === inventory.warehouseId
-    )
+    return detail.skuId === inventory.skuId && detail.sourceWarehouseId === inventory.warehouseId
   })
 
 const handleDeleteDetail = (index: number) => {
@@ -358,7 +396,12 @@ const validateDetails = (required: boolean) => {
 
 /** 构建提交数据 */
 const buildSubmitData = () => {
-  const { totalQuantity: _totalQuantity, totalPrice: _totalPrice, details, ...order } = formData.value
+  const {
+    totalQuantity: _totalQuantity,
+    totalPrice: _totalPrice,
+    details,
+    ...order
+  } = formData.value
   return {
     ...order,
     details: (details || []).map(({ totalPrice: _rowTotalPrice, ...detail }) => detail)
