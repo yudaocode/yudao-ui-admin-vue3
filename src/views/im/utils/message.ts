@@ -1,5 +1,6 @@
 import { generateUUID } from '@/utils'
 import { useUserStore } from '@/store/modules/user'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import {
   ImRtcCallEndReason,
   ImConversationType,
@@ -851,11 +852,6 @@ export function parseRtcCallPayload(
   return content ? parseMessage<RtcCallStartPayload & RtcCallEndPayload>(content) : null
 }
 
-/** 媒体类型文案；TODO 字典化 */
-function callMediaText(mediaType: number | undefined): string {
-  return mediaType === 2 ? '视频' : '语音'
-}
-
 /**
  * 会话内通话事件 segments（RTC_CALL_START / RTC_CALL_END）
  * <p>
@@ -872,7 +868,7 @@ export function resolveRtcCallTipSegments(message: {
   if (!payload) {
     return []
   }
-  const media = callMediaText(payload.mediaType)
+  const media = getDictLabel(DICT_TYPE.IM_RTC_CALL_MEDIA_TYPE, payload.mediaType)
   if (message.type === ImMessageType.RTC_CALL_START) {
     const inviter = payload.inviterNickname?.trim() || `用户 ${payload.inviterUserId ?? ''}`
     return [tipText(`${inviter} 发起了${media}通话`)]

@@ -24,7 +24,7 @@
     <ContextMenu />
 
     <!-- 实时通话浮层；监听 rtcStore 全局状态，可在任意 IM 子页弹出 -->
-    <CallContainer />
+    <RtcCallContainer />
   </div>
 </template>
 
@@ -50,7 +50,7 @@ import ToolBar from './components/ToolBar.vue'
 import UserInfoCard from './components/user/UserInfoCard.vue'
 import GroupInfoCard from './components/group/GroupInfoCard.vue'
 import ContextMenu from './components/ContextMenu.vue'
-import CallContainer from './components/rtc/CallContainer.vue'
+import RtcCallContainer from './components/rtc/RtcCallContainer.vue'
 
 defineOptions({ name: 'ImIndex' })
 

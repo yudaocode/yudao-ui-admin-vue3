@@ -90,7 +90,7 @@
         </div>
 
         <!-- 群通话胶囊条：仅群聊 + 该群有活跃通话时显示；点击展开看成员 + 加入按钮 -->
-        <GroupCallBanner
+        <RtcGroupCallBanner
           v-if="isGroup && conversationStore.activeConversation"
           :group-id="conversationStore.activeConversation.targetId"
         />
@@ -198,7 +198,7 @@
       <GroupMuteMemberDialog ref="muteMemberDialogRef" @success="reloadGroupData" />
 
       <!-- 群通话成员选择弹窗 -->
-      <CallMemberPickerDialog ref="callMemberPickerRef" @success="onCallMemberPicked" />
+      <RtcCallMemberPickerDialog ref="callMemberPickerRef" @success="onCallMemberPicked" />
     </template>
     <div
       v-else
@@ -239,8 +239,8 @@ import ConversationPrivateSide from '../conversation/ConversationPrivateSide.vue
 import type { GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 import GroupMuteMemberDialog from '../../../../components/group/GroupMuteMemberDialog.vue'
-import CallMemberPickerDialog from '../../../../components/rtc/CallMemberPickerDialog.vue'
-import GroupCallBanner from '../../../../components/rtc/GroupCallBanner.vue'
+import RtcCallMemberPickerDialog from '../../../../components/rtc/RtcCallMemberPickerDialog.vue'
+import RtcGroupCallBanner from '../../../../components/rtc/RtcGroupCallBanner.vue'
 import { createCall } from '@/api/im/home/rtc'
 import { ImRtcCallMediaType, ImRtcCallStatus, ImConversationType } from '@/views/im/utils/constants'
 import { resolveCallEndReasonText } from '@/views/im/utils/message'
@@ -435,7 +435,7 @@ function reloadGroupData() {
 const historyDialogRef = ref<InstanceType<typeof MessageHistory>>()
 const sideVisible = ref(false) // 信息抽屉开关：群聊 / 私聊共用一个 ref
 const muteMemberDialogRef = ref<InstanceType<typeof GroupMuteMemberDialog>>()
-const callMemberPickerRef = ref<InstanceType<typeof CallMemberPickerDialog>>()
+const callMemberPickerRef = ref<InstanceType<typeof RtcCallMemberPickerDialog>>()
 /** 群通话发起：成员选择弹窗打开期间临时持有的 mediaType */
 const pendingMediaType = ref<number | null>(null)
 
@@ -457,14 +457,11 @@ async function startPrivateCall(mediaType: number) {
   if (!conversation) {
     return
   }
-  await doInvite(
-    {
-      conversationType: ImConversationType.PRIVATE,
-      mediaType,
-      inviteeIds: [conversation.targetId]
-    },
-    { nickname: conversation.name, avatar: conversation.avatar }
-  )
+  await doInvite({
+    conversationType: ImConversationType.PRIVATE,
+    mediaType,
+    inviteeIds: [conversation.targetId]
+  })
 }
 
 /** 群通话入口：默认语音直接弹选人；与微信群通话一致，进通话后用户按需开摄像头 */
@@ -485,36 +482,30 @@ async function onCallMemberPicked(selectedIds: number[]) {
   if (!conversation || mediaType == null || selectedIds.length === 0) {
     return
   }
-  await doInvite(
-    {
-      conversationType: ImConversationType.GROUP,
-      mediaType,
-      groupId: conversation.targetId,
-      inviteeIds: selectedIds
-    },
-    { nickname: conversation.name, avatar: conversation.avatar }
-  )
+  await doInvite({
+    conversationType: ImConversationType.GROUP,
+    mediaType,
+    groupId: conversation.targetId,
+    inviteeIds: selectedIds
+  })
 }
 
 /** 实际调 create 接口；统一处理成功 / ENDED（如忙线立即结束）/ 异常三种返回 */
-async function doInvite(
-  reqVO: {
-    conversationType: number
-    mediaType: number
-    groupId?: number
-    inviteeIds: number[]
-  },
-  peer: { nickname?: string; avatar?: string }
-) {
+async function doInvite(reqVO: {
+  conversationType: number
+  mediaType: number
+  groupId?: number
+  inviteeIds: number[]
+}) {
   try {
-    const resp = await createCall(reqVO)
+    const data = await createCall(reqVO)
     // 后端已 INSERT + 立即 end（如忙线）：toast 提示，不进 INVITING 阶段；chat tip 由 RTC_CALL_END 推送写入消息流
-    if (resp.status === ImRtcCallStatus.ENDED) {
-      message.warning(resolveCallEndReasonText(resp.endReason))
+    if (data.status === ImRtcCallStatus.ENDED) {
+      message.warning(resolveCallEndReasonText(data.endReason))
       return
     }
     // 正常进入 INVITING 阶段：走 store 逻辑发起通话，后续状态更新 / 消息流更新由 RTC 模块监听推送处理
-    rtcStore.startInviting(resp, peer)
+    rtcStore.startInviting(data)
   } catch (e: any) {
     message.error(e?.msg || '发起通话失败')
   }

@@ -207,7 +207,7 @@ export type ImRtcParticipantStatusValue =
  * 跟后端 ImRtcCallStatus 不是 1:1 映射，stage 多了「自己是主叫还是被叫」的角色维度
  */
 export const ImRtcCallStage = {
-  IDLE: 'idle', // 空闲；后端无对应（本端无 session）
+  IDLE: 'idle', // 空闲；后端无对应（本端无活跃通话）
   INVITING: 'inviting', // 主叫等待对方接受；对应后端 ImRtcCallStatus.CREATED（自己是主叫）
   INCOMING: 'incoming', // 被叫来电响铃；对应后端 ImRtcCallStatus.CREATED（自己是被叫）
   RUNNING: 'running' // 通话中；对应后端 ImRtcCallStatus.RUNNING

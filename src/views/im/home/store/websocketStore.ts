@@ -795,10 +795,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         rtcStore.removeGroupCall(groupId)
       }
       // 通话窗 / 来电窗指向同一 room 时关闭：
-      //   RUNNING / INVITING 阶段对比 session.room；INCOMING 阶段对比 incomingPayload.room
-      const matchSession = rtcStore.session?.room === payload.room
+      //   RUNNING / INVITING 阶段对比 call.room；INCOMING 阶段对比 incomingPayload.room
+      const matchCall = rtcStore.call?.room === payload.room
       const matchIncoming = rtcStore.incomingPayload?.room === payload.room
-      if (rtcStore.isActive && (matchSession || matchIncoming)) {
+      if (rtcStore.isActive && (matchCall || matchIncoming)) {
         const reasonText = resolveCallEndReasonText(payload.endReason)
         console.info('[Call] end:', reasonText)
         rtcStore.reset()

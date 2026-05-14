@@ -71,6 +71,13 @@ export const useGroupStore = defineStore('imGroupStore', {
       (state) =>
       (id: number): Group | undefined => {
         return state.groups.find((g) => g.id === id)
+      },
+    /** 群成员 userId → GroupMember 索引；调用方按 userId 反查昵称 / 头像等元信息 */
+    getGroupMemberMap:
+      (state) =>
+      (id: number): Map<number, GroupMember> => {
+        const group = state.groups.find((g) => g.id === id)
+        return new Map((group?.members || []).map((m) => [m.userId, m]))
       }
   },
 

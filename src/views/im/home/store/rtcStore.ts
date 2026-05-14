@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { isEqual } from 'lodash-es'
 import type { ImRtcCallRespVO, ImRtcGroupCallRespVO } from '@/api/im/home/rtc'
 import {
   ImRtcCallStage,
@@ -9,6 +10,9 @@ import {
   type ImRtcParticipantStatusValue,
   type ImRtcCallStageValue
 } from '../../utils/constants'
+import { getCurrentUserId } from '../../utils/storage'
+import { useFriendStore } from './friendStore'
+import { useGroupStore } from './groupStore'
 
 // RTC_CALL 通话信令载荷；按 status 区分子类型语义
 export interface ImRtcCallNotification {
@@ -48,7 +52,7 @@ export interface ImRtcParticipantDisconnectedNotification {
   groupId?: number
 }
 
-// RTC_CALL_END 通话结束载荷（入消息流；私聊渲染准气泡，群聊渲染 tip）
+// RTC_CALL_END 通话结束载荷（入消息流；私聊渲染消息气泡，群聊渲染系统提示行）
 export interface ImRtcCallEndNotification {
   room: string
   conversationType: number
@@ -64,16 +68,52 @@ export interface ImRtcCallEndNotification {
 export const useRtcStore = defineStore('imRtc', () => {
   /** 当前阶段 */
   const stage = ref<ImRtcCallStageValue>(ImRtcCallStage.IDLE)
-  /** 当前会话；invite / accept / refreshToken 拿到的完整信息 */
-  const session = ref<ImRtcCallRespVO | null>(null)
+  /** 当前通话；invite / accept / refreshToken 拿到的完整信息 */
+  const call = ref<ImRtcCallRespVO | null>(null)
   /** 来电载荷；仅 INCOMING 阶段使用；status 固定 INVITING，其它字段 INVITE 专属 */
   const incomingPayload = ref<ImRtcCallNotification | null>(null)
-  /** 显示给对端的展示名（被叫端给主叫端用 / 主叫端给被叫端用） */
-  const peerNickname = ref<string>('')
-  const peerAvatar = ref<string>('')
+  /** 进入 RUNNING 的时间戳；用于通话时长展示；reset 时清零 */
+  const startedAt = ref(0)
 
   /** 是否处于通话相关阶段 */
   const isActive = computed(() => stage.value !== ImRtcCallStage.IDLE)
+
+  /**
+   * 对端展示名；按阶段 + 会话类型分支：
+   * INCOMING 取来电载荷的 inviterNickname；群通话取群名；私聊查 friendStore 反查对端 userId
+   */
+  const peerNickname = computed<string>(() => {
+    if (stage.value === ImRtcCallStage.INCOMING) {
+      return incomingPayload.value?.inviterNickname || ''
+    }
+    const c = call.value
+    if (!c) return ''
+    if (c.conversationType === ImConversationType.GROUP) {
+      return useGroupStore().getGroup(c.groupId ?? 0)?.name || ''
+    }
+    const peerUserId = resolvePrivatePeerUserId(c)
+    return (peerUserId && useFriendStore().getFriend(peerUserId)?.nickname) || ''
+  })
+
+  /** 对端头像；策略同 peerNickname */
+  const peerAvatar = computed<string>(() => {
+    if (stage.value === ImRtcCallStage.INCOMING) {
+      return incomingPayload.value?.inviterAvatar || ''
+    }
+    const c = call.value
+    if (!c) return ''
+    if (c.conversationType === ImConversationType.GROUP) {
+      return useGroupStore().getGroup(c.groupId ?? 0)?.avatar || ''
+    }
+    const peerUserId = resolvePrivatePeerUserId(c)
+    return (peerUserId && useFriendStore().getFriend(peerUserId)?.avatar) || ''
+  })
+
+  /** 私聊场景对端 userId：自己是主叫则取首个 invitee，否则取 inviter */
+  function resolvePrivatePeerUserId(c: ImRtcCallRespVO): number | undefined {
+    const myId = getCurrentUserId()
+    return c.inviterId === myId ? c.inviteeIds?.[0] : c.inviterId
+  }
 
   /** 群活跃通话索引；groupId -> 群通话摘要；用于群聊顶部胶囊条 */
   const groupActiveCalls = ref<Map<number, ImRtcGroupCallRespVO>>(new Map())
@@ -89,58 +129,55 @@ export const useRtcStore = defineStore('imRtc', () => {
     return leftUserIds.value.has(userId)
   }
 
+  /** 标记某个 userId 已退出 / 拒绝；用于 pending 占位渲染时排除 */
+  function markUserLeft(userId: number) {
+    if (!userId || leftUserIds.value.has(userId)) {
+      return
+    }
+    leftUserIds.value = new Set([...leftUserIds.value, userId])
+  }
+
   /**
    * 主叫发起通话；按会话类型 + status 决定 stage；
    * 群通话：发起人直接进 RUNNING 多人卡片视图，房内可能只有自己，等其他人陆续加入；
    * 私聊：按 status 走；RUNNING（已加入已有通话场景）→ RUNNING；CREATED → INVITING 等被叫接通
    */
-  function startInviting(s: ImRtcCallRespVO, peer: { nickname?: string; avatar?: string }) {
-    // TODO @AI：是不是不叫 session，还是叫 call？然后 s 这个变量，是不是也改下，这个缩写有点怪；
-    session.value = s
-    peerNickname.value = peer.nickname || ''
-    peerAvatar.value = peer.avatar || ''
+  function startInviting(data: ImRtcCallRespVO) {
+    call.value = data
     // 更新 stage 状态
-    if (s.conversationType === ImConversationType.GROUP) {
+    if (data.conversationType === ImConversationType.GROUP) {
       stage.value = ImRtcCallStage.RUNNING
+      startedAt.value = Date.now()
       return
     }
-    stage.value =
-      s.status === ImRtcCallStatus.RUNNING ? ImRtcCallStage.RUNNING : ImRtcCallStage.INVITING
+    const running = data.status === ImRtcCallStatus.RUNNING
+    stage.value = running ? ImRtcCallStage.RUNNING : ImRtcCallStage.INVITING
+    if (running) {
+      startedAt.value = Date.now()
+    }
   }
 
   /** 被叫收到来电；切到 INCOMING；接收 RTC_CALL(INVITE) payload */
   function showIncoming(payload: ImRtcCallNotification) {
     incomingPayload.value = payload
     stage.value = ImRtcCallStage.INCOMING
-    peerNickname.value = payload.inviterNickname || ''
-    peerAvatar.value = payload.inviterAvatar || ''
   }
 
   /** 进入通话中阶段 */
-  // TODO @AI：s 这个变量名。
-  function enterRunning(s: ImRtcCallRespVO) {
-    session.value = s
+  function enterRunning(data: ImRtcCallRespVO) {
+    call.value = data
     incomingPayload.value = null
     stage.value = ImRtcCallStage.RUNNING
+    startedAt.value = Date.now()
   }
 
   /** 重置；通话结束统一调用 */
   function reset() {
     stage.value = ImRtcCallStage.IDLE
-    session.value = null
+    call.value = null
     incomingPayload.value = null
-    peerNickname.value = ''
-    peerAvatar.value = ''
+    startedAt.value = 0
     leftUserIds.value = new Set()
-  }
-
-  /** 标记某个 userId 已退出 / 拒绝；用于 pending 占位渲染时排除 */
-  // TODO @AI：是不是和 isUserLeft 放在一块？
-  function markUserLeft(userId: number) {
-    if (!userId || leftUserIds.value.has(userId)) {
-      return
-    }
-    leftUserIds.value = new Set([...leftUserIds.value, userId])
   }
 
   // ==================== 群通话胶囊条状态 ====================
@@ -154,10 +191,23 @@ export const useRtcStore = defineStore('imRtc', () => {
     if (!payload?.groupId) {
       return
     }
-    // TODO @AI：最好叫做 newXXX 之类的；
-    const next = new Map(groupActiveCalls.value)
-    next.set(payload.groupId, payload)
-    groupActiveCalls.value = next
+    // 浅比较：room / mediaType / joinedUserIds / inviteeIds 都没变就跳过，避免下游 watcher 无意义重算
+    const existing = groupActiveCalls.value.get(payload.groupId)
+    if (existing && isSameGroupCall(existing, payload)) {
+      return
+    }
+    const newGroupActiveCalls = new Map(groupActiveCalls.value)
+    newGroupActiveCalls.set(payload.groupId, payload)
+    groupActiveCalls.value = newGroupActiveCalls
+  }
+
+  /** 两条群通话摘要内容相等（room / mediaType / inviterId / 两个 userId 数组逐项相等） */
+  function isSameGroupCall(a: ImRtcGroupCallRespVO, b: ImRtcGroupCallRespVO): boolean {
+    if (a.room !== b.room || a.mediaType !== b.mediaType || a.inviterId !== b.inviterId) {
+      return false
+    }
+    return isEqual(a.joinedUserIds ?? [], b.joinedUserIds ?? []) &&
+      isEqual(a.inviteeIds ?? [], b.inviteeIds ?? [])
   }
 
   /** 群通话结束：从 groupActiveCalls 移除；胶囊条消失 */
@@ -165,10 +215,9 @@ export const useRtcStore = defineStore('imRtc', () => {
     if (!groupId || !groupActiveCalls.value.has(groupId)) {
       return
     }
-    // TODO @AI：最好叫做 newXXX 之类的；
-    const next = new Map(groupActiveCalls.value)
-    next.delete(groupId)
-    groupActiveCalls.value = next
+    const newGroupActiveCalls = new Map(groupActiveCalls.value)
+    newGroupActiveCalls.delete(groupId)
+    groupActiveCalls.value = newGroupActiveCalls
   }
 
   /** 获取群当前活跃通话；用于胶囊条按 groupId 查询 */
@@ -182,7 +231,8 @@ export const useRtcStore = defineStore('imRtc', () => {
     if (!isGroup || !payload.groupId) {
       return
     }
-    // TODO @AI：写下注释
+    // 胶囊条懒填充：本端可能在通话开始后才打开该群会话，没收到过 setGroupCall；
+    // 此处用加入通知建一条最小记录，inviteeIds 留空，展开 popover / 加入时再走 getActiveCall 补
     const existing = groupActiveCalls.value.get(payload.groupId)
     if (!existing) {
       setGroupCall({
@@ -198,7 +248,6 @@ export const useRtcStore = defineStore('imRtc', () => {
     if (existing.room !== payload.room) {
       return
     }
-    // TODO @AI：写下注释
     const joined = existing.joinedUserIds ?? []
     if (joined.includes(payload.userId)) {
       return
@@ -229,10 +278,11 @@ export const useRtcStore = defineStore('imRtc', () => {
 
   return {
     stage,
-    session,
+    call,
     incomingPayload,
     peerNickname,
     peerAvatar,
+    startedAt,
     isActive,
     startInviting,
     showIncoming,
