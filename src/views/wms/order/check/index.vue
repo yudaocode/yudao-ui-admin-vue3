@@ -203,17 +203,17 @@
             <el-table-column label="商品信息" min-width="220">
               <template #default="{ row: detail }">
                 <div>{{ detail.itemName || '-' }}</div>
-                <div v-if="detail.itemCode" class="text-12px text-gray-500"
-                  >商品编号：{{ detail.itemCode }}</div
-                >
+                <div v-if="detail.itemCode" class="text-12px text-gray-500">
+                  商品编号：{{ detail.itemCode }}
+                </div>
               </template>
             </el-table-column>
             <el-table-column label="规格信息" min-width="220">
               <template #default="{ row: detail }">
                 <div>{{ detail.skuName || '-' }}</div>
-                <div v-if="detail.skuCode" class="text-12px text-gray-500"
-                  >规格编号：{{ detail.skuCode }}</div
-                >
+                <div v-if="detail.skuCode" class="text-12px text-gray-500">
+                  规格编号：{{ detail.skuCode }}
+                </div>
               </template>
             </el-table-column>
             <el-table-column align="right" label="账面数量" width="120">
@@ -301,14 +301,14 @@
       </el-table-column>
       <el-table-column v-if="isTableColumnVisible('operateInfo')" label="操作信息" min-width="280">
         <template #default="{ row }">
-          <div
-            >创建：{{ formatNullableDate(row.createTime) }} /
-            {{ row.creatorName || row.creator || '-' }}</div
-          >
-          <div
-            >更新：{{ formatNullableDate(row.updateTime) }} /
-            {{ row.updaterName || row.updater || '-' }}</div
-          >
+          <div>
+            创建：{{ formatNullableDate(row.createTime) }} /
+            {{ row.creatorName || row.creator || '-' }}
+          </div>
+          <div>
+            更新：{{ formatNullableDate(row.updateTime) }} /
+            {{ row.updaterName || row.updater || '-' }}
+          </div>
         </template>
       </el-table-column>
       <el-table-column

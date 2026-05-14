@@ -32,13 +32,13 @@
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">账面库存</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">单价(元)</th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">实际库存</th>
-            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
-              >实际金额(元)</th
-            >
+            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">
+              实际金额(元)
+            </th>
             <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">盈亏数</th>
-            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left"
-              >实际盈亏金额(元)</th
-            >
+            <th class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-left">
+              实际盈亏金额(元)
+            </th>
           </tr>
         </thead>
         <tbody>
