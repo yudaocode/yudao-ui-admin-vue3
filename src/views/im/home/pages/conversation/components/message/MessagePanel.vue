@@ -36,13 +36,45 @@
                 @click="historyDialogRef?.open()"
               />
             </el-tooltip>
-            <!-- 通话入口：暂未开放，先放占位图标对齐微信 PC -->
-            <el-tooltip content="通话" placement="bottom">
+            <!-- 通话入口：私聊弹「语音 / 视频」popover；群聊直接进选人弹窗 -->
+            <el-popover
+              v-if="isPrivate"
+              v-model:visible="callPopoverVisible"
+              placement="bottom-end"
+              :width="140"
+              trigger="click"
+              popper-class="message-panel__call-popover"
+            >
+              <template #reference>
+                <Icon
+                  icon="ant-design:phone-outlined"
+                  :size="20"
+                  class="message-panel__header-icon cursor-pointer"
+                />
+              </template>
+              <div class="message-panel__call-menu">
+                <div
+                  class="message-panel__call-menu-item"
+                  @click="startPrivateCall(ImRtcCallMediaType.VOICE)"
+                >
+                  <Icon icon="ant-design:phone-outlined" :size="16" />
+                  <span>语音通话</span>
+                </div>
+                <div
+                  class="message-panel__call-menu-item"
+                  @click="startPrivateCall(ImRtcCallMediaType.VIDEO)"
+                >
+                  <Icon icon="ant-design:video-camera-outlined" :size="16" />
+                  <span>视频通话</span>
+                </div>
+              </div>
+            </el-popover>
+            <el-tooltip v-else content="通话" placement="bottom">
               <Icon
                 icon="ant-design:phone-outlined"
                 :size="20"
                 class="message-panel__header-icon cursor-pointer"
-                @click="handleCall"
+                @click="handleGroupCall"
               />
             </el-tooltip>
             <!-- 信息抽屉入口 -->
@@ -56,6 +88,12 @@
             </el-tooltip>
           </div>
         </div>
+
+        <!-- 群通话胶囊条：仅群聊 + 该群有活跃通话时显示；点击展开看成员 + 加入按钮 -->
+        <GroupCallBanner
+          v-if="isGroup && conversationStore.activeConversation"
+          :group-id="conversationStore.activeConversation.targetId"
+        />
 
         <!-- 群置顶消息：第二行嵌入 header；仅群聊 + 有置顶时显示 -->
         <GroupPinnedMessage
@@ -75,11 +113,7 @@
               <Icon icon="ant-design:user-outlined" :size="11" />
             </span>
             <span>对方还不是你的朋友</span>
-            <Icon
-              icon="ep:arrow-right"
-              :size="12"
-              class="text-[var(--el-text-color-secondary)]"
-            />
+            <Icon icon="ep:arrow-right" :size="12" class="text-[var(--el-text-color-secondary)]" />
           </div>
         </div>
       </div>
@@ -132,10 +166,7 @@
       <!-- 底部：输入框常驻；多选模式底栏作为浮层盖在上面，保持下方输入框尺寸不变 -->
       <div class="relative">
         <MessageInput />
-        <MessageMultiSelectBar
-          v-if="multiSelect.state.active"
-          class="absolute inset-0 z-10"
-        />
+        <MessageMultiSelectBar v-if="multiSelect.state.active" class="absolute inset-0 z-10" />
       </div>
 
       <!-- 右侧信息抽屉：群聊 / 私聊各自一份 -->
@@ -165,6 +196,9 @@
 
       <!-- 禁言时长选择弹窗 -->
       <GroupMuteMemberDialog ref="muteMemberDialogRef" @success="reloadGroupData" />
+
+      <!-- 群通话成员选择弹窗 -->
+      <CallMemberPickerDialog ref="callMemberPickerRef" @success="onCallMemberPicked" />
     </template>
     <div
       v-else
@@ -185,13 +219,16 @@ import { useFriendStore } from '../../../../store/friendStore'
 import { useImUiStore } from '../../../../store/uiStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useGroupStore } from '../../../../store/groupStore'
-import { ImConversationType } from '@/views/im/utils/constants'
 import MessageItem from './MessageItem.vue'
 import MessageInput from '../input/MessageInput.vue'
 import MessageMultiSelectBar from '../input/MessageMultiSelectBar.vue'
 import MessageForwardDialog from './forward/MessageForwardDialog.vue'
 import MessageMergeDetailDialog from './forward/MessageMergeDetailDialog.vue'
-import { IM_FORWARD_DIALOG_KEY, IM_MERGE_DETAIL_DIALOG_KEY } from './forward/keys'
+import {
+  IM_FORWARD_DIALOG_KEY,
+  IM_MERGE_DETAIL_DIALOG_KEY,
+  IM_RTC_REDIAL_KEY
+} from './forward/keys'
 import { useMessageMultiSelect } from '../../../../composables/useMessageMultiSelect'
 import { useVoicePlayer } from '../../../../composables/useVoicePlayer'
 import MessageHistory from './MessageHistory.vue'
@@ -202,6 +239,12 @@ import ConversationPrivateSide from '../conversation/ConversationPrivateSide.vue
 import type { GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 import GroupMuteMemberDialog from '../../../../components/group/GroupMuteMemberDialog.vue'
+import CallMemberPickerDialog from '../../../../components/rtc/CallMemberPickerDialog.vue'
+import GroupCallBanner from '../../../../components/rtc/GroupCallBanner.vue'
+import { createCall } from '@/api/im/home/rtc'
+import { ImRtcCallMediaType, ImRtcCallStatus, ImConversationType } from '@/views/im/utils/constants'
+import { resolveCallEndReasonText } from '@/views/im/utils/message'
+import { useRtcStore } from '../../../../store/rtcStore'
 
 defineOptions({ name: 'ImMessagePanel' })
 
@@ -210,6 +253,7 @@ const friendStore = useFriendStore()
 const uiStore = useImUiStore()
 const groupStore = useGroupStore()
 const message = useMessage()
+const rtcStore = useRtcStore()
 const listRef = ref<HTMLElement>()
 
 // ==================== 转发 / 合并消息详情：本地 dialog 浮层 ====================
@@ -220,6 +264,11 @@ const mergeDetailDialogRef = ref<InstanceType<typeof MessageMergeDetailDialog>>(
 
 provide(IM_FORWARD_DIALOG_KEY, (opts) => forwardDialogRef.value?.open(opts))
 provide(IM_MERGE_DETAIL_DIALOG_KEY, (content) => mergeDetailDialogRef.value?.open(content))
+provide(IM_RTC_REDIAL_KEY, (mediaType: number) => {
+  if (isPrivate.value) {
+    void startPrivateCall(mediaType)
+  }
+}) // 私聊 RTC_CALL_END 气泡点击重拨；MessageItem 注入后调用
 
 // ==================== 多选模式 ====================
 // 模块级单例 state（composable）；本组件仅做切会话退出 + template 显隐判定
@@ -242,6 +291,9 @@ watch(
 const messages = computed(() => conversationStore.getActiveMessages)
 const isGroup = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.GROUP
+)
+const isPrivate = computed(
+  () => conversationStore.activeConversation?.type === ImConversationType.PRIVATE
 )
 
 /** 私聊会话且对端不是有效好友（本端 friend 记录缺失或 DISABLE）；单边删除语义下「被对方删除」不触发本端横幅 */
@@ -383,6 +435,9 @@ function reloadGroupData() {
 const historyDialogRef = ref<InstanceType<typeof MessageHistory>>()
 const sideVisible = ref(false) // 信息抽屉开关：群聊 / 私聊共用一个 ref
 const muteMemberDialogRef = ref<InstanceType<typeof GroupMuteMemberDialog>>()
+const callMemberPickerRef = ref<InstanceType<typeof CallMemberPickerDialog>>()
+/** 群通话发起：成员选择弹窗打开期间临时持有的 mediaType */
+const pendingMediaType = ref<number | null>(null)
 
 /** 消息右键菜单「禁言」→ 打开时长选择弹窗 */
 function handleMuteMember(groupId: number, userId: number, displayName: string) {
@@ -394,9 +449,75 @@ function toggleSide() {
   sideVisible.value = !sideVisible.value
 }
 
-/** 通话入口：功能未开放，先弹提示占位 */
-function handleCall() {
-  message.warning('通话功能暂未开放')
+/** 私聊通话入口：popover 触发；点 语音 / 视频 直接发起 */
+const callPopoverVisible = ref(false)
+async function startPrivateCall(mediaType: number) {
+  callPopoverVisible.value = false
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return
+  }
+  await doInvite(
+    {
+      conversationType: ImConversationType.PRIVATE,
+      mediaType,
+      inviteeIds: [conversation.targetId]
+    },
+    { nickname: conversation.name, avatar: conversation.avatar }
+  )
+}
+
+/** 群通话入口：默认语音直接弹选人；与微信群通话一致，进通话后用户按需开摄像头 */
+function handleGroupCall() {
+  const conversation = conversationStore.activeConversation
+  if (!conversation) {
+    return
+  }
+  pendingMediaType.value = ImRtcCallMediaType.VOICE
+  callMemberPickerRef.value?.open({ groupId: conversation.targetId, mode: 'invite' })
+}
+
+/** 选人弹窗确认；带选中 ID 发起群通话 */
+async function onCallMemberPicked(selectedIds: number[]) {
+  const conversation = conversationStore.activeConversation
+  const mediaType = pendingMediaType.value
+  pendingMediaType.value = null
+  if (!conversation || mediaType == null || selectedIds.length === 0) {
+    return
+  }
+  await doInvite(
+    {
+      conversationType: ImConversationType.GROUP,
+      mediaType,
+      groupId: conversation.targetId,
+      inviteeIds: selectedIds
+    },
+    { nickname: conversation.name, avatar: conversation.avatar }
+  )
+}
+
+/** 实际调 create 接口；统一处理成功 / ENDED（如忙线立即结束）/ 异常三种返回 */
+async function doInvite(
+  reqVO: {
+    conversationType: number
+    mediaType: number
+    groupId?: number
+    inviteeIds: number[]
+  },
+  peer: { nickname?: string; avatar?: string }
+) {
+  try {
+    const resp = await createCall(reqVO)
+    // 后端已 INSERT + 立即 end（如忙线）：toast 提示，不进 INVITING 阶段；chat tip 由 RTC_CALL_END 推送写入消息流
+    if (resp.status === ImRtcCallStatus.ENDED) {
+      message.warning(resolveCallEndReasonText(resp.endReason))
+      return
+    }
+    // 正常进入 INVITING 阶段：走 store 逻辑发起通话，后续状态更新 / 消息流更新由 RTC 模块监听推送处理
+    rtcStore.startInviting(resp, peer)
+  } catch (e: any) {
+    message.error(e?.msg || '发起通话失败')
+  }
 }
 
 /** 当前私聊对应的好友（抽屉头部展示用） */
@@ -669,5 +790,34 @@ watch(
 .message-panel__jump-fade-leave-to {
   opacity: 0;
   transform: translate(-50%, 20px);
+}
+
+.message-panel__call-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.message-panel__call-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--el-text-color-primary);
+}
+
+.message-panel__call-menu-item:hover {
+  background-color: var(--el-fill-color-light);
+}
+</style>
+
+<style>
+/* el-popover 全局样式：紧贴菜单的小 padding；非 scoped 才能命中 popper-class */
+.message-panel__call-popover.el-popover.el-popper {
+  min-width: auto;
+  padding: 6px;
 }
 </style>

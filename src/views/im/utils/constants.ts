@@ -165,20 +165,20 @@ export function isGroupConversation(type: number | undefined): boolean {
 }
 
 /** IM 通话媒体类型（对齐后端 ImRtcCallMediaTypeEnum） */
-export const ImCallMediaType = {
+export const ImRtcCallMediaType = {
   VOICE: 1,
   VIDEO: 2
 } as const
 
 /** IM 通话状态（对齐后端 ImRtcCallStatusEnum） */
-export const ImCallStatus = {
+export const ImRtcCallStatus = {
   CREATED: 10, // 创建：私聊等被叫接听；群聊发起人已进房等其他人加入
   RUNNING: 20, // 进行中：第一个非发起人接通后进入
   ENDED: 30 // 已结束
 } as const
 
 /** IM 通话结束原因（对齐后端 ImRtcCallEndReasonEnum） */
-export const ImCallEndReason = {
+export const ImRtcCallEndReason = {
   HANGUP: 1, // 接通后任一方主动挂断
   REJECT: 2, // 被叫接通前点拒接
   CANCEL: 3, // 主叫接通前主动取消
@@ -186,11 +186,11 @@ export const ImCallEndReason = {
   ERROR: 9 // 网络中断 / 设备失败
 } as const
 
-/** ImCallEndReason 取值类型 */
-export type ImCallEndReasonValue = (typeof ImCallEndReason)[keyof typeof ImCallEndReason]
+/** ImRtcCallEndReason 取值类型 */
+export type ImRtcCallEndReasonValue = (typeof ImRtcCallEndReason)[keyof typeof ImRtcCallEndReason]
 
 /** IM 通话参与者状态（对齐后端 ImRtcParticipantStatusEnum）；同时作为 RTC_CALL 信令 status 字段取值 */
-export const ImCallParticipantStatus = {
+export const ImRtcParticipantStatus = {
   INVITING: 10, // 来电邀请
   JOINED: 20, // 接听 / 已加入
   REJECTED: 30, // 拒接
@@ -198,9 +198,23 @@ export const ImCallParticipantStatus = {
   LEFT: 50 // 挂断离开
 } as const
 
-/** ImCallParticipantStatus 取值类型 */
-export type ImCallParticipantStatusValue =
-  (typeof ImCallParticipantStatus)[keyof typeof ImCallParticipantStatus]
+/** ImRtcParticipantStatus 取值类型 */
+export type ImRtcParticipantStatusValue =
+  (typeof ImRtcParticipantStatus)[keyof typeof ImRtcParticipantStatus]
+
+/**
+ * IM 通话 UI 阶段；前端独有，用于驱动 inviting / incoming / running 三种弹窗切换；
+ * 跟后端 ImRtcCallStatus 不是 1:1 映射，stage 多了「自己是主叫还是被叫」的角色维度
+ */
+export const ImRtcCallStage = {
+  IDLE: 'idle', // 空闲；后端无对应（本端无 session）
+  INVITING: 'inviting', // 主叫等待对方接受；对应后端 ImRtcCallStatus.CREATED（自己是主叫）
+  INCOMING: 'incoming', // 被叫来电响铃；对应后端 ImRtcCallStatus.CREATED（自己是被叫）
+  RUNNING: 'running' // 通话中；对应后端 ImRtcCallStatus.RUNNING
+} as const
+
+/** ImRtcCallStage 取值类型 */
+export type ImRtcCallStageValue = (typeof ImRtcCallStage)[keyof typeof ImRtcCallStage]
 
 /** IM WebSocket 外层帧类型（对齐后端 ImPrivateMessageDTO.TYPE / ImGroupMessageDTO.TYPE） */
 export const ImWebSocketMessageType = {

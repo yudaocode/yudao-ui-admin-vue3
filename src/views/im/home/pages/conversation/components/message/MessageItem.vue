@@ -44,12 +44,13 @@
         :size="36"
       />
       <div
-        class="flex gap-2 items-center px-3.5 py-2 text-sm rounded-lg"
+        class="flex gap-2 items-center px-3.5 py-2 text-sm rounded-lg cursor-pointer"
         :class="
           message.selfSend
             ? 'text-black bg-[#95ec69]'
             : 'text-[var(--el-text-color-primary)] bg-[var(--el-fill-color-light)]'
         "
+        @click="handleRtcCallBubbleClick"
       >
         <Icon icon="ant-design:phone-outlined" :size="16" class="rotate-[135deg] flex-shrink-0" />
         <span class="whitespace-nowrap">{{ rtcCallPrivateBubbleText }}</span>
@@ -251,7 +252,7 @@ import ReplyPreview from './ReplyPreview.vue'
 import TipSegments from './TipSegments.vue'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
 import MessageBubble from './MessageBubble.vue'
-import { IM_FORWARD_DIALOG_KEY, IM_MERGE_DETAIL_DIALOG_KEY } from './forward/keys'
+import { IM_FORWARD_DIALOG_KEY, IM_MERGE_DETAIL_DIALOG_KEY, IM_RTC_REDIAL_KEY } from './forward/keys'
 import { useMessageMultiSelect } from '../../../../composables/useMessageMultiSelect'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
@@ -376,6 +377,16 @@ const quote = computed(() => getQuoteFromMessage(props.message.content))
 /** MessagePanel 注入的弹窗触发函数 */
 const openForwardDialog = inject(IM_FORWARD_DIALOG_KEY)
 const openMergeDetail = inject(IM_MERGE_DETAIL_DIALOG_KEY)
+const redialRtcCall = inject(IM_RTC_REDIAL_KEY)
+
+/** 私聊 RTC_CALL_END 气泡点击：用同款 mediaType 重拨 */
+function handleRtcCallBubbleClick() {
+  const mediaType = rtcCallEndPrivatePayload.value?.mediaType
+  if (mediaType == null) {
+    return
+  }
+  redialRtcCall?.(mediaType)
+}
 
 /** 多选模式：模块级单例 composable */
 const multiSelect = useMessageMultiSelect()

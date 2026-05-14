@@ -1,7 +1,7 @@
 import { generateUUID } from '@/utils'
 import { useUserStore } from '@/store/modules/user'
 import {
-  ImCallEndReason,
+  ImRtcCallEndReason,
   ImConversationType,
   ImMessageType,
   type ImConversationTypeValue
@@ -905,15 +905,15 @@ export function resolveRtcCallPrivateBubbleText(payload: RtcCallEndPayload | nul
   const hasDuration = duration > 0
   const isOperator = payload.operatorUserId === getCurrentUserId()
   switch (payload.endReason) {
-    case ImCallEndReason.HANGUP:
+    case ImRtcCallEndReason.HANGUP:
       return hasDuration ? `通话时长 ${formatCallDuration(duration)}` : '通话中断'
-    case ImCallEndReason.CANCEL:
+    case ImRtcCallEndReason.CANCEL:
       return isOperator ? '已取消' : '对方已取消'
-    case ImCallEndReason.REJECT:
+    case ImRtcCallEndReason.REJECT:
       return isOperator ? '已拒绝' : '对方已拒绝'
-    case ImCallEndReason.BUSY:
+    case ImRtcCallEndReason.BUSY:
       return isOperator ? '忙线未接听' : '对方忙线中'
-    case ImCallEndReason.ERROR:
+    case ImRtcCallEndReason.ERROR:
       return hasDuration ? `通话中断 ${formatCallDuration(duration)}` : '通话中断'
     default:
       return hasDuration ? `通话时长 ${formatCallDuration(duration)}` : '通话已结束'
@@ -936,15 +936,15 @@ export function resolveRtcCallTipText(message: {
  */
 export function resolveCallEndReasonText(reason: number | undefined): string {
   switch (reason) {
-    case ImCallEndReason.REJECT:
+    case ImRtcCallEndReason.REJECT:
       return '对方已拒绝'
-    case ImCallEndReason.CANCEL:
+    case ImRtcCallEndReason.CANCEL:
       return '对方已取消'
-    case ImCallEndReason.BUSY:
+    case ImRtcCallEndReason.BUSY:
       return '对方忙线中'
-    case ImCallEndReason.HANGUP:
+    case ImRtcCallEndReason.HANGUP:
       return '通话已结束'
-    case ImCallEndReason.ERROR:
+    case ImRtcCallEndReason.ERROR:
       return '通话异常'
     default:
       return '通话已断开'

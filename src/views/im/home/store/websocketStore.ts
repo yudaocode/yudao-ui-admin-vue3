@@ -7,18 +7,26 @@ import {
   ImWebSocketMessageType,
   ImMessageType,
   ImConversationType,
+  ImRtcParticipantStatus,
   isFriendChatTip,
   isFriendNotification,
   isGroupRequestNotification,
   isNormalMessage
 } from '../../utils/constants'
-import { playAudioTip } from '../../utils/message'
+import { playAudioTip, resolveCallEndReasonText } from '../../utils/message'
 import { MESSAGE_PRIVATE_READ_ENABLED, MESSAGE_GROUP_READ_ENABLED } from '../../utils/config'
 import { useConversationStore } from './conversationStore'
 import { useFriendStore, type FriendNotificationPayload } from './friendStore'
 import { getFriendDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import { useGroupRequestStore } from './groupRequestStore'
+import {
+  useRtcStore,
+  type ImRtcCallNotification,
+  type ImRtcParticipantConnectedNotification,
+  type ImRtcParticipantDisconnectedNotification,
+  type ImRtcCallEndNotification
+} from './rtcStore'
 import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/home/message/private'
 import { readGroupMessages as apiReadGroupMessages } from '@/api/im/home/message/group'
 import type {
@@ -238,6 +246,16 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           case ImMessageType.RECEIPT:
             this.handlePrivateReceipt(websocketMessage)
             break
+          case ImMessageType.RTC_CALL:
+          case ImMessageType.RTC_PARTICIPANT_CONNECTED:
+          case ImMessageType.RTC_PARTICIPANT_DISCONNECTED:
+            this.handleRtcSignaling(websocketMessage)
+            break
+          case ImMessageType.RTC_CALL_END:
+            // 入库 + 关闭通话窗 + 渲染聊天 tip（私聊场景）
+            this.handleRtcCallEnd(websocketMessage)
+            this.handlePrivateMessage(websocketMessage)
+            break
           default:
             if (isFriendNotification(websocketMessage.type)) {
               this.handleFriendNotification(websocketMessage)
@@ -281,6 +299,15 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
             break
           case ImMessageType.GROUP_MEMBER_SETTING_UPDATE:
             this.handleGroupMemberSettingUpdate(websocketMessage)
+            break
+          case ImMessageType.RTC_CALL_START:
+            // 入库 + 渲染聊天 tip；胶囊条状态走 1602/1603，本帧不动 rtcStore，避免与首次填充竞争
+            this.handleGroupMessage(websocketMessage)
+            break
+          case ImMessageType.RTC_CALL_END:
+            // 入库 + 移除胶囊条 + 关闭通话窗（如果当前在该群通话内）
+            this.handleRtcCallEnd(websocketMessage)
+            this.handleGroupMessage(websocketMessage)
             break
           default:
             // TEXT / IMAGE / FILE / VOICE / VIDEO + GROUP_* 群广播事件
@@ -688,6 +715,93 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (this.heartbeatTimer) {
         clearInterval(this.heartbeatTimer)
         this.heartbeatTimer = null
+      }
+    },
+
+    // ==================== 实时通话信令分发 ====================
+
+    /**
+     * 通话信令分发：1601 RTC_CALL（按 status 区分 INVITING / JOINED / REJECTED / NO_ANSWER / LEFT）+ 1602 / 1603 参与者加入 / 离开
+     * <p>
+     * 单一 dispatcher，单次 JSON 解析，mirror handleFriendNotification 的结构
+     */
+    handleRtcSignaling(websocketMessage: ImPrivateMessageDTO) {
+      const rtcStore = useRtcStore()
+      switch (websocketMessage.type) {
+        case ImMessageType.RTC_CALL: {
+          const payload = this.safeParse(websocketMessage.content) as ImRtcCallNotification | null
+          if (!payload) {
+            return
+          }
+          switch (payload.status) {
+            case ImRtcParticipantStatus.INVITING:
+              // 当前已在通话中：忽略新来电；后端层面也会拒绝，这里是兜底
+              if (!rtcStore.isActive) {
+                rtcStore.showIncoming(payload)
+              }
+              break
+            case ImRtcParticipantStatus.REJECTED:
+              // 群通话单人拒绝；把拒绝者从 pending 占位移除（私聊拒绝走 RTC_CALL_END 入消息流，不走本通道）
+              if (payload.operatorUserId) {
+                rtcStore.markUserLeft(payload.operatorUserId)
+              }
+              break
+            case ImRtcParticipantStatus.JOINED:
+            case ImRtcParticipantStatus.NO_ANSWER:
+            case ImRtcParticipantStatus.LEFT:
+              // ACCEPT / CANCEL / HUNGUP 暂不需要本端额外响应；rtcStore 状态由 1602/1603 + END 维护
+              break
+            default:
+              console.warn('[IM WS] 未识别的 RTC_CALL status', payload)
+          }
+          return
+        }
+        case ImMessageType.RTC_PARTICIPANT_CONNECTED: {
+          const payload = this.safeParse(
+            websocketMessage.content
+          ) as ImRtcParticipantConnectedNotification | null
+          if (payload?.room && payload.userId) {
+            rtcStore.applyParticipantConnected(payload)
+          }
+          return
+        }
+        case ImMessageType.RTC_PARTICIPANT_DISCONNECTED: {
+          const payload = this.safeParse(
+            websocketMessage.content
+          ) as ImRtcParticipantDisconnectedNotification | null
+          if (payload?.room && payload.userId) {
+            rtcStore.applyParticipantDisconnected(payload)
+          }
+        }
+      }
+    },
+
+    /**
+     * RTC_CALL_END 通话结束；私聊 + 群聊都走这一条；payload 携带 conversationType 区分
+     * <p>
+     * 私聊：关闭当前通话窗
+     * 群聊：移除胶囊条；如本端在该群通话内则关闭通话窗
+     */
+    handleRtcCallEnd(websocketMessage: ImPrivateMessageDTO | ImGroupMessageDTO) {
+      const payload = this.safeParse(websocketMessage.content) as ImRtcCallEndNotification | null
+      if (!payload?.room) {
+        return
+      }
+      const rtcStore = useRtcStore()
+      const isGroup = payload.conversationType === ImConversationType.GROUP
+      // 群通话：移除胶囊条（按外层 groupId 取，不依赖 payload）
+      const groupId = (websocketMessage as ImGroupMessageDTO).groupId
+      if (isGroup && groupId) {
+        rtcStore.removeGroupCall(groupId)
+      }
+      // 通话窗 / 来电窗指向同一 room 时关闭：
+      //   RUNNING / INVITING 阶段对比 session.room；INCOMING 阶段对比 incomingPayload.room
+      const matchSession = rtcStore.session?.room === payload.room
+      const matchIncoming = rtcStore.incomingPayload?.room === payload.room
+      if (rtcStore.isActive && (matchSession || matchIncoming)) {
+        const reasonText = resolveCallEndReasonText(payload.endReason)
+        console.info('[Call] end:', reasonText)
+        rtcStore.reset()
       }
     }
   }
