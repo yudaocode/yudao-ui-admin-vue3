@@ -15,7 +15,7 @@ export interface ReceiptOrderVO {
   warehouseId?: number
   warehouseName?: string
   totalQuantity?: number
-  totalAmount?: number
+  totalPrice?: number
   details?: ReceiptOrderDetailVO[]
   createTime?: Date
   creator?: string

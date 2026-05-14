@@ -37,7 +37,7 @@
           {{ formatQuantity(detailData.totalQuantity) || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="总金额">
-          {{ formatPrice(detailData.totalAmount) || '-' }}
+          {{ formatPrice(detailData.totalPrice) || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">
           {{ formatNullableDate(detailData.createTime) }}
@@ -80,14 +80,14 @@
           </template>
         </el-table-column>
         <el-table-column align="center" label="单位" prop="unit" width="100" />
-        <el-table-column align="right" label="单价" prop="unitPrice" width="140">
+        <el-table-column align="right" label="单价" prop="price" width="140">
           <template #default="scope">
-            {{ formatPrice(scope.row.unitPrice) || '-' }}
+            {{ formatPrice(scope.row.price) || '-' }}
           </template>
         </el-table-column>
-        <el-table-column align="right" label="总价" prop="amount" width="140">
+        <el-table-column align="right" label="总价" prop="totalPrice" width="140">
           <template #default="scope">
-            {{ formatPrice(scope.row.amount) || '-' }}
+            {{ formatPrice(scope.row.totalPrice) || '-' }}
           </template>
         </el-table-column>
       </el-table>
@@ -111,7 +111,7 @@ import {
 defineOptions({ name: 'WmsReceiptOrderDetail' })
 
 interface DetailRow extends ReceiptOrderDetailVO {
-  unitPrice?: number
+  totalPrice?: number
 }
 
 const loading = ref(false) // 加载中
@@ -120,9 +120,9 @@ const detailData = ref<ReceiptOrderVO>({}) // 详情数据
 const detailRows = computed<DetailRow[]>(() =>
   (detailData.value.details || []).map((detail) => ({
     ...detail,
-    unitPrice:
-      detail.amount != null && detail.quantity
-        ? Number(detail.amount) / Number(detail.quantity)
+    totalPrice:
+      detail.price != null && detail.quantity
+        ? Number(detail.price) * Number(detail.quantity)
         : undefined
   }))
 )
@@ -135,8 +135,11 @@ const getSummaries = ({ columns, data }: { columns: any[]; data: DetailRow[] }) 
     if (column.property === 'quantity') {
       return formatSumQuantity(data, (detail) => detail.quantity)
     }
-    if (column.property === 'amount') {
-      return formatSumPrice(data, (detail) => detail.amount)
+    if (column.property === 'price') {
+      return formatSumPrice(data, (detail) => detail.price)
+    }
+    if (column.property === 'totalPrice') {
+      return formatSumPrice(data, (detail) => detail.totalPrice)
     }
     return ''
   })

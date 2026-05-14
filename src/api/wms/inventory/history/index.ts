@@ -15,7 +15,7 @@ export interface InventoryHistoryVO {
   quantity?: number
   beforeQuantity?: number
   afterQuantity?: number
-  amount?: number
+  price?: number
   remark?: string
   orderId?: number
   orderNo?: string
