@@ -57,13 +57,13 @@
       <div class="mb-12px flex items-center justify-between">
         <span class="text-14px font-bold">移库明细</span>
         <el-tooltip
-          content="请先选择来源仓库"
-          :disabled="!!formData.sourceWarehouseId"
+          content="请先选择来源仓库和目标仓库"
+          :disabled="canAddDetail"
           placement="top"
         >
           <span>
             <el-button
-              :disabled="!formData.sourceWarehouseId"
+              :disabled="!canAddDetail"
               plain
               type="primary"
               @click="handleAddDetail"
@@ -255,6 +255,9 @@ const isSavedPrepareOrder = computed(
     formData.value.status !== undefined &&
     OrderUpdateStatusList.includes(formData.value.status)
 )
+const canAddDetail = computed(
+  () => !!formData.value.sourceWarehouseId && !!formData.value.targetWarehouseId
+)
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -300,7 +303,13 @@ const normalizeDetails = (details: MovementOrderDetailVO[]) =>
     totalPrice: detail.totalPrice ?? multiplyPrice(detail.quantity, detail.price)
   }))
 
-const handleAddDetail = () => inventorySelectRef.value?.open()
+/** 打开库存选择弹窗 */
+const handleAddDetail = () => {
+  if (!canAddDetail.value) {
+    return
+  }
+  inventorySelectRef.value?.open()
+}
 
 /** 选择库存 */
 const handleSelectInventory = (inventories: InventorySelectRow[]) => {
