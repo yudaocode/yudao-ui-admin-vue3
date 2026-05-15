@@ -104,9 +104,10 @@ const detailRows = computed<DetailRow[]>(() =>
   (detailData.value.details || []).map((detail) => ({
     ...detail,
     totalPrice:
-      detail.price != null && detail.quantity
+      detail.totalPrice ??
+      (detail.price != null && detail.quantity
         ? Number(detail.price) * Number(detail.quantity)
-        : undefined
+        : undefined)
   }))
 )
 

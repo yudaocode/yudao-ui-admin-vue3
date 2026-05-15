@@ -547,6 +547,9 @@ const handleWarehouseChange = () => {
 
 /** 计算明细金额 */
 const getDetailTotalPrice = (detail: ReceiptOrderDetailVO) => {
+  if (detail.totalPrice !== undefined && detail.totalPrice !== null) {
+    return detail.totalPrice
+  }
   if (!detail.quantity || detail.price === undefined || detail.price === null) {
     return undefined
   }

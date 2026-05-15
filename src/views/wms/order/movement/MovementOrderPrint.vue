@@ -1,10 +1,10 @@
-<!-- WMS 出库单打印 -->
+<!-- WMS 移库单打印 -->
 <template>
   <div class="hidden">
     <button ref="printButtonRef" v-print="printObj" type="button"></button>
-    <div id="wmsShipmentOrderPrint" class="color-#303133">
+    <div id="wmsMovementOrderPrint" class="color-#303133">
       <div class="relative mb-8px">
-        <h2 class="text-center">出库单</h2>
+        <h2 class="text-center">移库单</h2>
         <div v-if="printData.no" class="absolute right-0 top-0">
           <Barcode
             :content="printData.no"
@@ -16,15 +16,11 @@
         </div>
       </div>
       <div class="mb-12px grid grid-cols-3 gap-x-24px gap-y-8px text-14px">
-        <div>出库单号：{{ printData.no || '-' }}</div>
-        <div>
-          出库类型：{{ getDictLabel(DICT_TYPE.WMS_SHIPMENT_ORDER_TYPE, printData.type) || '-' }}
-        </div>
-        <div>仓库：{{ printData.warehouseName || '-' }}</div>
-        <div>出库状态：{{ getDictLabel(DICT_TYPE.WMS_ORDER_STATUS, printData.status) || '-' }}</div>
+        <div>移库单号：{{ printData.no || '-' }}</div>
+        <div>来源仓库：{{ printData.sourceWarehouseName || '-' }}</div>
+        <div>目标仓库:{{ printData.targetWarehouseName || '-' }}</div>
+        <div>移库状态：{{ getDictLabel(DICT_TYPE.WMS_ORDER_STATUS, printData.status) || '-' }}</div>
         <div>单据日期：{{ formatNullableDate(printData.orderTime, 'YYYY-MM-DD') }}</div>
-        <div>客户：{{ printData.merchantName || '-' }}</div>
-        <div>业务单号：{{ printData.bizOrderNo || '-' }}</div>
         <div>总数量：{{ formatQuantity(printData.totalQuantity) || '-' }}</div>
         <div>总金额：{{ formatPrice(printData.totalPrice) || '-' }}</div>
         <div class="col-span-3 grid grid-cols-2 gap-x-24px">
@@ -98,8 +94,8 @@
 <script lang="ts" setup>
 import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
-import { ShipmentOrderApi, ShipmentOrderVO } from '@/api/wms/order/shipment'
-import { ShipmentOrderDetailVO } from '@/api/wms/order/shipment/detail'
+import { MovementOrderApi, MovementOrderVO } from '@/api/wms/order/movement'
+import { MovementOrderDetailVO } from '@/api/wms/order/movement/detail'
 import {
   formatPrice,
   formatQuantity,
@@ -109,21 +105,21 @@ import {
 import Barcode from '@/views/mes/wm/barcode/components/Barcode.vue'
 import { BarcodeFormatEnum } from '@/views/mes/utils/constants'
 
-/** WMS 出库单打印 */
-defineOptions({ name: 'WmsShipmentOrderPrint' })
+/** WMS 移库单打印 */
+defineOptions({ name: 'WmsMovementOrderPrint' })
 
-const printData = ref<ShipmentOrderVO>({}) // 打印数据
+const printData = ref<MovementOrderVO>({}) // 打印数据
 const printButtonRef = ref<HTMLButtonElement>() // 打印按钮
 const tableColumnCount = 5
 const printObj = ref({
-  id: 'wmsShipmentOrderPrint',
+  id: 'wmsMovementOrderPrint',
   popTitle: '&nbsp',
   extraCss: '/print.css',
   extraHead: '',
   zIndex: 20003
 })
 
-interface PrintRow extends ShipmentOrderDetailVO {
+interface PrintRow extends MovementOrderDetailVO {
   totalPrice?: number
 }
 
@@ -138,9 +134,9 @@ const printRows = computed<PrintRow[]>(() =>
   }))
 )
 
-/** 打印出库单 */
+/** 打印移库单 */
 const print = async (id: number) => {
-  printData.value = await ShipmentOrderApi.getShipmentOrder(id)
+  printData.value = await MovementOrderApi.getMovementOrder(id)
   await nextTick()
   printButtonRef.value?.click()
 }

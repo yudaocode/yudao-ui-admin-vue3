@@ -409,7 +409,7 @@ const buildSubmitData = () => {
   } = formData.value
   return {
     ...order,
-    details: (details || []).map(({ totalPrice: _rowTotalPrice, ...detail }) => detail)
+    details: details || []
   } as ReceiptOrderVO
 }
 

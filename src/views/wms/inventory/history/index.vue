@@ -144,7 +144,7 @@
           {{ formatQuantity(scope.row.afterQuantity) || '-' }}
         </template>
       </el-table-column>
-      <el-table-column label="数量/单价(元)" min-width="150">
+      <el-table-column label="数量/金额(元)" min-width="150">
         <template #default="scope">
           <div class="flex justify-between">
             <span>数量：</span>
@@ -153,6 +153,10 @@
           <div v-if="scope.row.price || scope.row.price === 0" class="flex justify-between">
             <span>单价：</span>
             <span>{{ formatPrice(scope.row.price) }}</span>
+          </div>
+          <div v-if="scope.row.totalPrice || scope.row.totalPrice === 0" class="flex justify-between">
+            <span>金额：</span>
+            <span>{{ formatPrice(scope.row.totalPrice) }}</span>
           </div>
         </template>
       </el-table-column>

@@ -499,6 +499,9 @@ const resetQuery = () => {
 
 /** 计算明细金额 */
 const getDetailTotalPrice = (detail: MovementOrderDetailVO) => {
+  if (detail.totalPrice !== undefined && detail.totalPrice !== null) {
+    return detail.totalPrice
+  }
   if (!detail.quantity || detail.price === undefined || detail.price === null) {
     return undefined
   }

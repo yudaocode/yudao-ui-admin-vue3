@@ -131,9 +131,10 @@ const printRows = computed<PrintRow[]>(() =>
   (printData.value.details || []).map((detail) => ({
     ...detail,
     totalPrice:
-      detail.price != null && detail.quantity
+      detail.totalPrice ??
+      (detail.price != null && detail.quantity
         ? Number((Number(detail.price) * Number(detail.quantity)).toFixed(2))
-        : undefined
+        : undefined)
   }))
 )
 
