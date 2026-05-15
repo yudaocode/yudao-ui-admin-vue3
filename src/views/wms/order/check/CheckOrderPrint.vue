@@ -32,7 +32,16 @@
             {{ formatPrice(getOrderDifferencePrice(printData)) || '-' }}
           </span>
         </div>
-        <div>创建时间：{{ formatNullableDate(printData.createTime) }}</div>
+        <div class="col-span-3 grid grid-cols-2 gap-x-24px">
+          <div>
+            创建：{{ formatNullableDate(printData.createTime) }} /
+            {{ printData.creatorName || printData.creator || '-' }}
+          </div>
+          <div>
+            更新：{{ formatNullableDate(printData.updateTime) }} /
+            {{ printData.updaterName || printData.updater || '-' }}
+          </div>
+        </div>
         <div class="col-span-3">备注：{{ printData.remark || '-' }}</div>
       </div>
       <table class="w-full border-collapse text-13px">

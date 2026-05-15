@@ -27,7 +27,16 @@
         <div>业务单号：{{ printData.bizOrderNo || '-' }}</div>
         <div>总数量：{{ formatQuantity(printData.totalQuantity) || '-' }}</div>
         <div>总金额：{{ formatPrice(printData.totalPrice) || '-' }}</div>
-        <div>创建时间：{{ formatNullableDate(printData.createTime) }}</div>
+        <div class="col-span-3 grid grid-cols-2 gap-x-24px">
+          <div>
+            创建：{{ formatNullableDate(printData.createTime) }} /
+            {{ printData.creatorName || printData.creator || '-' }}
+          </div>
+          <div>
+            更新：{{ formatNullableDate(printData.updateTime) }} /
+            {{ printData.updaterName || printData.updater || '-' }}
+          </div>
+        </div>
         <div class="col-span-3">备注：{{ printData.remark || '-' }}</div>
       </div>
       <table class="w-full border-collapse text-13px">
