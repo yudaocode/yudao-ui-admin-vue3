@@ -414,6 +414,7 @@ import {
 import {
   formatPrice,
   formatQuantity,
+  multiplyPrice,
   PRICE_PRECISION,
   QUANTITY_PRECISION
 } from '@/views/wms/utils/format'
@@ -559,10 +560,7 @@ const getDetailTotalPrice = (detail: ShipmentOrderDetailVO) => {
   if (detail.totalPrice !== undefined && detail.totalPrice !== null) {
     return detail.totalPrice
   }
-  if (!detail.quantity || detail.price === undefined || detail.price === null) {
-    return undefined
-  }
-  return Number(detail.quantity) * Number(detail.price)
+  return multiplyPrice(detail.quantity, detail.price)
 }
 
 /** 展开明细 */

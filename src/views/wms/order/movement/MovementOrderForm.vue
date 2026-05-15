@@ -466,6 +466,8 @@ const handleComplete = async () => {
     message.success('移库成功')
     dialogVisible.value = false
     emit('success')
+  } catch {
+    // 用户点击确认框取消按钮、或网络异常时跳过
   } finally {
     formLoading.value = false
   }
@@ -480,6 +482,8 @@ const handleCancel = async () => {
     message.success('作废成功')
     dialogVisible.value = false
     emit('success')
+  } catch {
+    // 用户点击确认框取消按钮、或网络异常时跳过
   } finally {
     formLoading.value = false
   }

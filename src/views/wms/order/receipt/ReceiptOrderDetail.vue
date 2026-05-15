@@ -104,7 +104,8 @@ import {
   formatPrice,
   formatQuantity,
   formatSumPrice,
-  formatSumQuantity
+  formatSumQuantity,
+  multiplyPrice
 } from '@/views/wms/utils/format'
 
 /** WMS 入库单详情 */
@@ -120,11 +121,7 @@ const detailData = ref<ReceiptOrderVO>({}) // 详情数据
 const detailRows = computed<DetailRow[]>(() =>
   (detailData.value.details || []).map((detail) => ({
     ...detail,
-    totalPrice:
-      detail.totalPrice ??
-      (detail.price != null && detail.quantity
-        ? Number(detail.price) * Number(detail.quantity)
-        : undefined)
+    totalPrice: detail.totalPrice ?? multiplyPrice(detail.quantity, detail.price)
   }))
 )
 
