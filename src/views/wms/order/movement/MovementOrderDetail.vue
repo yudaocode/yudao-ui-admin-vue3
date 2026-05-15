@@ -120,9 +120,6 @@ function getSummaries({ columns, data }: { columns: any[]; data: DetailRow[] }) 
     if (column.property === 'quantity') {
       return formatSumQuantity(data, (detail) => detail.quantity)
     }
-    if (column.property === 'price') {
-      return formatSumPrice(data, (detail) => detail.price)
-    }
     if (column.property === 'totalPrice') {
       return formatSumPrice(data, (detail) => detail.totalPrice)
     }

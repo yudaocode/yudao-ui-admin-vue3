@@ -211,14 +211,12 @@ import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
   dividePrice,
-  formatPrice,
   formatQuantity,
   formatSumPrice,
   formatSumQuantity,
   multiplyPrice,
   PRICE_PRECISION,
-  QUANTITY_PRECISION,
-  sumPrice
+  QUANTITY_PRECISION
 } from '@/views/wms/utils/format'
 import { generateOrderNo } from '@/views/wms/utils/order'
 
@@ -254,9 +252,6 @@ const formRules = reactive<FormRules>({
 const formRef = ref() // 表单 Ref
 const inventorySelectRef = ref() // 库存选择弹窗 Ref
 
-const detailPriceSum = computed(() =>
-  sumPrice(formData.value.details || [], (detail) => detail.price)
-)
 const isPrepareOrder = computed(
   () =>
     !formData.value.id ||
@@ -382,9 +377,6 @@ function getDetailSummaries({ columns, data }: { columns: any[]; data: ShipmentO
     }
     if (column.property === 'quantity') {
       return formatSumQuantity(data, (detail) => detail.quantity)
-    }
-    if (column.property === 'price') {
-      return formatPrice(detailPriceSum.value)
     }
     if (column.property === 'totalPrice') {
       return formatSumPrice(data, (detail) => detail.totalPrice)
