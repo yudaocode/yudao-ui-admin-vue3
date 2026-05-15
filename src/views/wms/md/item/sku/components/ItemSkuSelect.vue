@@ -34,21 +34,30 @@
             @keyup.enter="handleQuery"
           />
         </el-form-item>
-        <el-form-item label="规格名称" prop="skuName">
+        <el-form-item label="规格名称" prop="name">
           <el-input
-            v-model="queryParams.skuName"
+            v-model="queryParams.name"
             class="!w-240px"
             clearable
             placeholder="请输入规格名称"
             @keyup.enter="handleQuery"
           />
         </el-form-item>
-        <el-form-item label="规格编号" prop="skuCode">
+        <el-form-item label="规格编号" prop="code">
           <el-input
-            v-model="queryParams.skuCode"
+            v-model="queryParams.code"
             class="!w-240px"
             clearable
             placeholder="请输入规格编号"
+            @keyup.enter="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="条码" prop="barCode">
+          <el-input
+            v-model="queryParams.barCode"
+            class="!w-240px"
+            clearable
+            placeholder="请输入条码"
             @keyup.enter="handleQuery"
           />
         </el-form-item>
@@ -144,8 +153,7 @@
 
 <script lang="ts" setup>
 import { ElTable } from 'element-plus'
-import { ItemApi, ItemVO } from '@/api/wms/md/item'
-import { ItemSkuVO } from '@/api/wms/md/item/sku'
+import { ItemSkuApi, ItemSkuVO } from '@/api/wms/md/item/sku'
 import { formatDimensionText, formatPrice, formatWeight } from '@/views/wms/utils/format'
 
 /** WMS 商品 SKU 选择器 */
@@ -154,8 +162,6 @@ defineOptions({ name: 'WmsItemSkuSelect' })
 const message = useMessage() // 消息弹窗
 const loading = ref(false) // 列表的加载中
 const dialogVisible = ref(false) // 弹窗的是否展示
-const allList = ref<ItemSkuVO[]>([]) // 全部 SKU 列表
-const filteredList = ref<ItemSkuVO[]>([]) // 过滤后的 SKU 列表
 const list = ref<ItemSkuVO[]>([]) // 当前页 SKU 列表
 const total = ref(0) // 列表的总条数
 const selectedList = ref<ItemSkuVO[]>([]) // 已选择 SKU 列表
@@ -172,8 +178,9 @@ const getDefaultQueryParams = () => ({
   pageSize: 10,
   itemName: undefined as string | undefined,
   itemCode: undefined as string | undefined,
-  skuName: undefined as string | undefined,
-  skuCode: undefined as string | undefined
+  name: undefined as string | undefined,
+  code: undefined as string | undefined,
+  barCode: undefined as string | undefined
 })
 const queryParams = reactive(getDefaultQueryParams())
 
@@ -196,70 +203,22 @@ const open = async (
   disabledSelectedIds.value = new Set(preSelectedIds.value)
   await nextTick()
   tableRef.value?.clearSelection()
-  await loadSkuList()
+  await getList()
 }
 defineExpose({ open })
 
-/** 获得 SKU 列表 */
-const loadSkuList = async () => {
+/** 查询 SKU 列表（服务端分页 + 服务端筛选） */
+const getList = async () => {
   loading.value = true
   try {
-    const items = await ItemApi.getItemSimpleList()
-    allList.value = items.flatMap((item: ItemVO) =>
-      (item.skus || []).map((sku) => ({
-        ...sku,
-        itemId: item.id,
-        itemCode: item.code,
-        itemName: item.name,
-        categoryId: item.categoryId,
-        categoryName: item.categoryName,
-        unit: item.unit,
-        brandId: item.brandId,
-        brandName: item.brandName
-      }))
-    )
-    initSelectedList()
-    getList()
+    const data = await ItemSkuApi.getItemSkuPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+    await nextTick()
+    applyPreSelection()
   } finally {
     loading.value = false
   }
-}
-
-/** 初始化已选 SKU */
-const initSelectedList = () => {
-  if (!preselectDisabled.value || preSelectedIds.value.length === 0) {
-    return
-  }
-  allList.value.forEach((sku) => {
-    if (sku.id && preSelectedIds.value.includes(sku.id)) {
-      selectedMap.value.set(sku.id, sku)
-    }
-  })
-  selectedList.value = Array.from(selectedMap.value.values())
-}
-
-/** 查询 SKU 列表 */
-const getList = async () => {
-  filteredList.value = allList.value.filter((sku) => {
-    return (
-      includes(sku.itemName, queryParams.itemName) &&
-      includes(sku.itemCode, queryParams.itemCode) &&
-      includes(sku.name, queryParams.skuName) &&
-      includes(sku.code, queryParams.skuCode)
-    )
-  })
-  total.value = filteredList.value.length
-  const start = (queryParams.pageNo - 1) * queryParams.pageSize
-  list.value = filteredList.value.slice(start, start + queryParams.pageSize)
-  await nextTick()
-  applyPreSelection()
-}
-
-const includes = (value?: string, keyword?: string) => {
-  if (!keyword) {
-    return true
-  }
-  return (value || '').toLowerCase().includes(keyword.toLowerCase())
 }
 
 /** 搜索按钮操作 */

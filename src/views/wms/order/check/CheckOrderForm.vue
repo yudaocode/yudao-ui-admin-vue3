@@ -1,5 +1,22 @@
 <!-- WMS 盘库单表单 -->
 <template>
+  <Dialog v-model="warehouseDialogVisible" title="选择盘库仓库" width="420px">
+    <el-form
+      ref="warehouseFormRef"
+      :model="warehouseFormData"
+      :rules="warehouseFormRules"
+      label-width="80px"
+    >
+      <el-form-item label="仓库" prop="warehouseId">
+        <WarehouseSelect v-model="warehouseFormData.warehouseId" @change="handleWarehouseSelect" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button type="primary" @click="handleStartCheck">开始盘库</el-button>
+      <el-button @click="warehouseDialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
+
   <Dialog v-model="dialogVisible" :title="dialogTitle" width="1280px">
     <el-form
       ref="formRef"
@@ -16,7 +33,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="仓库" prop="warehouseId">
-            <WarehouseSelect v-model="formData.warehouseId" @change="handleWarehouseChange" />
+            <WarehouseSelect v-model="formData.warehouseId" disabled />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -56,10 +73,19 @@
               :disabled="!formData.warehouseId"
               plain
               type="primary"
-              @click="handleAddDetail"
+              @click="handleImportAllInventory"
+            >
+              <Icon class="mr-5px" icon="ep:download" />
+              导入仓库库存
+            </el-button>
+            <el-button
+              :disabled="!formData.warehouseId"
+              plain
+              type="primary"
+              @click="handleAddSkuInventory"
             >
               <Icon class="mr-5px" icon="ep:plus" />
-              添加商品
+              添加盘点商品
             </el-button>
           </span>
         </el-tooltip>
@@ -149,11 +175,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <InventorySelect
-        ref="inventorySelectRef"
-        :warehouse-id="formData.warehouseId"
-        @change="handleSelectInventory"
-      />
+      <ItemSkuSelect ref="skuSelectRef" @change="handleSelectSku" />
     </el-form>
     <template #footer>
       <div class="flex items-center justify-between">
@@ -198,9 +220,10 @@ import { FormRules } from 'element-plus'
 import { h } from 'vue'
 import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
-import InventorySelect, {
-  InventorySelectRow
-} from '@/views/wms/inventory/components/InventorySelect.vue'
+import { InventoryApi, InventoryVO } from '@/api/wms/inventory'
+import { ItemSkuVO } from '@/api/wms/md/item/sku'
+import { WarehouseVO } from '@/api/wms/md/warehouse'
+import ItemSkuSelect from '@/views/wms/md/item/sku/components/ItemSkuSelect.vue'
 import WarehouseSelect from '@/views/wms/md/warehouse/components/WarehouseSelect.vue'
 import { OrderStatusEnum, OrderUpdateStatusList } from '@/views/wms/utils/constants'
 import {
@@ -230,9 +253,11 @@ const dialogTitle = ref('')
 const formLoading = ref(false)
 const formType = ref('')
 const originalFormData = ref('')
+const warehouseDialogVisible = ref(false)
 
 type CheckOrderFormDetail = CheckOrderDetailVO & { actualPrice?: number }
 type CheckOrderFormData = Omit<CheckOrderVO, 'details'> & { details?: CheckOrderFormDetail[] }
+type CheckInventoryRow = InventoryVO & { price?: number; availableQuantity?: number }
 
 const formData = ref<CheckOrderFormData>({
   id: undefined,
@@ -249,7 +274,15 @@ const formRules = reactive<FormRules>({
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
 })
 const formRef = ref()
-const inventorySelectRef = ref()
+const skuSelectRef = ref()
+const warehouseFormRef = ref()
+const warehouseFormData = reactive({
+  warehouseId: undefined as number | undefined,
+  warehouseName: undefined as string | undefined
+})
+const warehouseFormRules = reactive<FormRules>({
+  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
+})
 
 const getDifferenceQuantity = (detail: CheckOrderFormDetail) =>
   Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
@@ -290,9 +323,19 @@ const isSavedPrepareOrder = computed(
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
+  formType.value = type
+  if (type === 'create') {
+    dialogVisible.value = false
+    resetForm()
+    warehouseDialogVisible.value = true
+    warehouseFormData.warehouseId = undefined
+    warehouseFormData.warehouseName = undefined
+    await nextTick()
+    warehouseFormRef.value?.clearValidate()
+    return
+  }
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
-  formType.value = type
   resetForm()
   if (id) {
     formLoading.value = true
@@ -307,8 +350,26 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open })
 
+/** 选择仓库后开始盘库 */
+const handleStartCheck = async () => {
+  await warehouseFormRef.value.validate()
+  warehouseDialogVisible.value = false
+  dialogVisible.value = true
+  dialogTitle.value = t('action.create')
+  resetForm()
+  formData.value.warehouseId = warehouseFormData.warehouseId
+  formData.value.warehouseName = warehouseFormData.warehouseName
+  await nextTick()
+  originalFormData.value = JSON.stringify(buildSubmitData())
+}
+
+/** 记录选中的盘库仓库 */
+const handleWarehouseSelect = (warehouse: WarehouseVO | undefined) => {
+  warehouseFormData.warehouseName = warehouse?.name
+}
+
 /** 构建盘库明细 */
-const buildDetail = (inventory: InventorySelectRow): CheckOrderFormDetail => ({
+const buildDetail = (inventory: CheckInventoryRow): CheckOrderFormDetail => ({
   id: undefined,
   itemId: inventory.itemId,
   itemCode: inventory.itemCode,
@@ -333,24 +394,106 @@ const normalizeDetails = (details: CheckOrderDetailVO[]) =>
     actualPrice: multiplyPrice(detail.checkQuantity, detail.price)
   }))
 
-const handleAddDetail = () => inventorySelectRef.value?.open()
-const handleSelectInventory = (inventories: InventorySelectRow[]) => {
-  if (!inventories.length) return
-  formData.value.details = formData.value.details || []
-  inventories.forEach((inventory) => {
-    if (isInventorySelected(inventory)) return
-    formData.value.details!.push(buildDetail(inventory))
-  })
+/** 导入当前仓库的全部库存余额 */
+const handleImportAllInventory = async () => {
+  if (!formData.value.warehouseId) {
+    message.warning('请先选择仓库')
+    return
+  }
+  if (formData.value.details?.length) {
+    await message.confirm('导入仓库库存会覆盖当前盘库明细，是否继续？')
+  }
+  formLoading.value = true
+  try {
+    const inventories = await loadWarehouseInventoryList()
+    formData.value.details = inventories.map((inventory) =>
+      buildDetail({ ...inventory, availableQuantity: inventory.quantity })
+    )
+  } finally {
+    formLoading.value = false
+  }
 }
-const isInventorySelected = (inventory: InventorySelectRow) =>
-  (formData.value.details || []).some((detail) => {
-    return detail.inventoryId === inventory.id
-  })
+
+/** 打开盘点商品添加弹窗 */
+const handleAddSkuInventory = () => {
+  if (!formData.value.warehouseId) {
+    message.warning('请先选择仓库')
+    return
+  }
+  skuSelectRef.value?.open(getSelectedSkuIds(), { multiple: false, preselectDisabled: false })
+}
+
+/** 选择商品 SKU */
+const handleSelectSku = async (skus: ItemSkuVO[]) => {
+  if (!skus.length) {
+    return
+  }
+  formLoading.value = true
+  try {
+    const warehouseInventoryMap = await getWarehouseInventoryMap()
+    formData.value.details = formData.value.details || []
+    const selectedSkuIds = new Set(getSelectedSkuIds())
+    skus.forEach((sku) => {
+      if (!sku.id || selectedSkuIds.has(sku.id)) {
+        return
+      }
+      const inventory = warehouseInventoryMap.get(sku.id)
+      formData.value.details!.push(
+        inventory
+          ? buildDetail({ ...inventory, availableQuantity: inventory.quantity })
+          : buildZeroInventoryDetail(sku)
+      )
+      selectedSkuIds.add(sku.id)
+    })
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 获得已选 SKU 编号 */
+const getSelectedSkuIds = () => {
+  return (formData.value.details || [])
+    .map((detail) => detail.skuId)
+    .filter((id): id is number => !!id)
+}
+
+/** 查询当前仓库全部库存余额 */
+const loadWarehouseInventoryList = async (): Promise<InventoryVO[]> => {
+  return await InventoryApi.getInventoryList({ warehouseId: formData.value.warehouseId! })
+}
+
+/** 获得当前仓库 SKU 对应库存余额 */
+const getWarehouseInventoryMap = async (): Promise<Map<number, InventoryVO>> => {
+  const inventories = await loadWarehouseInventoryList()
+  return new Map(
+    inventories
+      .filter((inventory) => !!inventory.skuId)
+      .map((inventory) => [inventory.skuId!, inventory] as const)
+  )
+}
+
+/** 构建零库存盘库明细 */
+const buildZeroInventoryDetail = (sku: ItemSkuVO): CheckOrderFormDetail => ({
+  id: undefined,
+  itemId: sku.itemId,
+  itemCode: sku.itemCode,
+  itemName: sku.itemName,
+  unit: sku.unit,
+  skuId: sku.id,
+  skuCode: sku.code,
+  skuName: sku.name,
+  inventoryId: undefined,
+  warehouseId: formData.value.warehouseId,
+  warehouseName: formData.value.warehouseName,
+  quantity: 0,
+  checkQuantity: 0,
+  availableQuantity: 0,
+  price: sku.costPrice,
+  actualPrice: 0
+})
+
 const handleDeleteDetail = (index: number) => {
   formData.value.details?.splice(index, 1)
-}
-const handleWarehouseChange = () => {
-  formData.value.details = []
 }
 
 const handleDetailCheckQuantityChange = (detail: CheckOrderFormDetail) => {
