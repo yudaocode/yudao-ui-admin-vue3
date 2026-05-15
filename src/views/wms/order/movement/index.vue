@@ -327,6 +327,14 @@
               </el-button>
             </span>
           </el-tooltip>
+          <el-button
+            v-hasPermi="['wms:movement-order:query']"
+            link
+            type="primary"
+            @click="handlePrint(scope.row.id)"
+          >
+            打印
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -342,6 +350,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <MovementOrderForm ref="formRef" @success="getList" />
   <MovementOrderDetail ref="detailRef" />
+  <MovementOrderPrint ref="printRef" />
 </template>
 
 <script lang="ts" setup>
@@ -364,6 +373,7 @@ import {
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import MovementOrderDetail from './MovementOrderDetail.vue'
 import MovementOrderForm from './MovementOrderForm.vue'
+import MovementOrderPrint from './MovementOrderPrint.vue'
 import download from '@/utils/download'
 
 /** WMS 移库单 */
@@ -514,6 +524,12 @@ const openForm = (type: string, id?: number) => {
 const detailRef = ref()
 const openDetail = (id: number) => {
   detailRef.value.open(id)
+}
+
+/** 打印移库单 */
+const printRef = ref()
+const handlePrint = (id: number) => {
+  printRef.value.print(id)
 }
 
 /** 删除移库单 */

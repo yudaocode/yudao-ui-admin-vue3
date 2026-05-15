@@ -3,7 +3,18 @@
   <div class="hidden">
     <button ref="printButtonRef" v-print="printObj" type="button"></button>
     <div id="wmsCheckOrderPrint" class="color-#303133">
-      <h2 class="text-center">盘库单</h2>
+      <div class="relative mb-8px">
+        <h2 class="text-center">盘库单</h2>
+        <div v-if="printData.no" class="absolute right-0 top-0">
+          <Barcode
+            :content="printData.no"
+            :display-value="false"
+            :format="BarcodeFormatEnum.CODE39"
+            :height="40"
+            :width="180"
+          />
+        </div>
+      </div>
       <div class="mb-12px grid grid-cols-3 gap-x-24px gap-y-8px text-14px">
         <div>盘库单号：{{ printData.no || '-' }}</div>
         <div>仓库：{{ printData.warehouseName || '-' }}</div>
@@ -118,6 +129,8 @@ import { formatNullableDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { CheckOrderApi, CheckOrderVO } from '@/api/wms/order/check'
 import { CheckOrderDetailVO } from '@/api/wms/order/check/detail'
+import Barcode from '@/views/mes/wm/barcode/components/Barcode.vue'
+import { BarcodeFormatEnum } from '@/views/mes/utils/constants'
 import {
   formatPrice,
   formatQuantity,
