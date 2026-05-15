@@ -17,6 +17,11 @@ export interface InventoryVO {
   createTime?: Date
 }
 
+// WMS 库存统计列表 Request VO
+export interface InventoryListReqVO {
+  warehouseId: number
+}
+
 // WMS 库存统计 API
 export const InventoryApi = {
   // 查询库存统计分页
@@ -24,8 +29,8 @@ export const InventoryApi = {
     return await request.get({ url: '/wms/inventory/page', params })
   },
 
-  // 查询指定仓库的库存统计列表
-  getInventoryListByWarehouseId: async (warehouseId: number) => {
-    return await request.get({ url: '/wms/inventory/list-by-warehouse-id', params: { warehouseId } })
+  // 查询库存统计列表
+  getInventoryList: async (params: InventoryListReqVO) => {
+    return await request.get({ url: '/wms/inventory/list', params })
   }
 }
