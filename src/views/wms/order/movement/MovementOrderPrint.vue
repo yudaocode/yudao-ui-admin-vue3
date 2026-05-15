@@ -99,7 +99,8 @@ import {
   formatPrice,
   formatQuantity,
   formatSumPrice,
-  formatSumQuantity
+  formatSumQuantity,
+  multiplyPrice
 } from '@/views/wms/utils/format'
 import Barcode from '@/views/mes/wm/barcode/components/Barcode.vue'
 import { BarcodeFormatEnum } from '@/views/mes/utils/constants'
@@ -125,11 +126,7 @@ interface PrintRow extends MovementOrderDetailVO {
 const printRows = computed<PrintRow[]>(() =>
   (printData.value.details || []).map((detail) => ({
     ...detail,
-    totalPrice:
-      detail.totalPrice ??
-      (detail.price != null && detail.quantity
-        ? Number((Number(detail.price) * Number(detail.quantity)).toFixed(2))
-        : undefined)
+    totalPrice: detail.totalPrice ?? multiplyPrice(detail.quantity, detail.price)
   }))
 )
 
