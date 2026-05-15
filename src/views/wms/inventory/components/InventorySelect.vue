@@ -185,7 +185,7 @@ const getList = async () => {
       ...queryParams,
       type: 'warehouse',
       warehouseId: props.warehouseId,
-      minQuantity: 0.01
+      onlyPositiveQuantity: true
     }
     const data = await InventoryApi.getInventoryPage(params)
     list.value = data.list.map((inventory: InventoryVO) => ({

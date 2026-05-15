@@ -200,7 +200,7 @@ const getList = async () => {
   try {
     const data = await InventoryApi.getInventoryPage({
       ...queryParams,
-      minQuantity: filterZero.value ? 1 : undefined
+      onlyPositiveQuantity: filterZero.value ? true : undefined
     })
     list.value = data.list.map((item: InventoryVO) => ({
       ...item,
