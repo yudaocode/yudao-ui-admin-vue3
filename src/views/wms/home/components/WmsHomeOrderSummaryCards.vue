@@ -204,12 +204,12 @@ const handleNavigate = async (name: string) => {
 }
 
 /** 计算状态进度条占比 */
-const getStatusPercent = (item: OrderSummaryItem, status: number) => {
+function getStatusPercent(item: OrderSummaryItem, status: number) {
   const count = item.statusCounts[status] || 0
   if (!item.total || !count) {
     return '0%'
   }
-  return `${Math.max((count / item.total) * 100, 4)}%`
+  return `${(count / item.total) * 100}%`
 }
 
 /** 格式化单据数量 */

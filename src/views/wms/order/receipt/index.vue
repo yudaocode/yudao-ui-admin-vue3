@@ -18,6 +18,15 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="业务单号" prop="bizOrderNo">
+        <el-input
+          v-model="queryParams.bizOrderNo"
+          class="!w-240px"
+          clearable
+          placeholder="请输入业务单号"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="单据状态" prop="status">
         <el-select
           v-model="queryParams.status"
