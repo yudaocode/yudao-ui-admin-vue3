@@ -477,7 +477,7 @@ const getDefaultQueryParams = () => ({
 const queryParams = reactive(getDefaultQueryParams())
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const detailMap = reactive<Record<number, ReceiptOrderDetailVO[]>>({}) // 入库单明细缓存
+const detailMap = reactive<Record<number, ReceiptOrderDetailVO[]>>({}) // 入库单明细数据
 
 /** 是否允许修改入库单 */
 const canUpdateReceiptOrder = (status?: number) => {
@@ -546,10 +546,11 @@ const getDetailTotalPrice = (detail: ReceiptOrderDetailVO) => {
 }
 
 /** 展开明细 */
-const handleExpandChange = async (row: ReceiptOrderVO) => {
-  if (!row.id || detailMap[row.id]) {
+const handleExpandChange = async (row: ReceiptOrderVO, expandedRows: ReceiptOrderVO[]) => {
+  if (!row.id || !expandedRows.some((item) => item.id === row.id)) {
     return
   }
+  delete detailMap[row.id]
   detailMap[row.id] = await ReceiptOrderApi.getReceiptOrderDetailListByOrderId(row.id)
 }
 
