@@ -104,20 +104,20 @@
           </el-table-column>
           <el-table-column label="金额(元)" min-width="140">
             <template #default="scope">
-              <div v-if="hasValue(scope.row.costPrice)">
+              <div v-if="!isNullOrUnDef(scope.row.costPrice)">
                 成本价：{{ formatPrice(scope.row.costPrice) }}
               </div>
-              <div v-if="hasValue(scope.row.sellingPrice)">
+              <div v-if="!isNullOrUnDef(scope.row.sellingPrice)">
                 销售价：{{ formatPrice(scope.row.sellingPrice) }}
               </div>
             </template>
           </el-table-column>
           <el-table-column label="重量(kg)" min-width="140">
             <template #default="scope">
-              <div v-if="hasValue(scope.row.netWeight)">
+              <div v-if="!isNullOrUnDef(scope.row.netWeight)">
                 净重：{{ formatWeight(scope.row.netWeight) }}
               </div>
-              <div v-if="hasValue(scope.row.grossWeight)">
+              <div v-if="!isNullOrUnDef(scope.row.grossWeight)">
                 毛重：{{ formatWeight(scope.row.grossWeight) }}
               </div>
             </template>
@@ -200,7 +200,6 @@ const queryParams = reactive<{
 const queryFormRef = ref() // 搜索的表单
 const categoryTreeRef = ref() // 分类树
 const exportLoading = ref(false) // 导出的加载中
-const hasValue = (value?: number | string | null) => !isNullOrUnDef(value)
 
 /** 查询商品列表 */
 const getList = async () => {

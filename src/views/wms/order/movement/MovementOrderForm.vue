@@ -279,29 +279,32 @@ const open = async (type: string, id?: number) => {
 defineExpose({ open })
 
 /** 构建移库明细 */
-const buildDetail = (inventory: InventorySelectRow): MovementOrderDetailVO => ({
-  id: undefined,
-  itemId: inventory.itemId,
-  itemCode: inventory.itemCode,
-  itemName: inventory.itemName,
-  unit: inventory.unit,
-  skuId: inventory.skuId,
-  skuCode: inventory.skuCode,
-  skuName: inventory.skuName,
-  sourceWarehouseId: inventory.warehouseId,
-  sourceWarehouseName: inventory.warehouseName,
-  targetWarehouseId: formData.value.targetWarehouseId,
-  quantity: undefined,
-  availableQuantity: inventory.availableQuantity,
-  price: undefined,
-  totalPrice: undefined
-})
+function buildDetail(inventory: InventorySelectRow): MovementOrderDetailVO {
+  return {
+    id: undefined,
+    itemId: inventory.itemId,
+    itemCode: inventory.itemCode,
+    itemName: inventory.itemName,
+    unit: inventory.unit,
+    skuId: inventory.skuId,
+    skuCode: inventory.skuCode,
+    skuName: inventory.skuName,
+    sourceWarehouseId: inventory.warehouseId,
+    sourceWarehouseName: inventory.warehouseName,
+    targetWarehouseId: formData.value.targetWarehouseId,
+    quantity: undefined,
+    availableQuantity: inventory.availableQuantity,
+    price: undefined,
+    totalPrice: undefined
+  }
+}
 
-const normalizeDetails = (details: MovementOrderDetailVO[]) =>
-  details.map((detail) => ({
+function normalizeDetails(details: MovementOrderDetailVO[]) {
+  return details.map((detail) => ({
     ...detail,
     totalPrice: detail.totalPrice ?? multiplyPrice(detail.quantity, detail.price)
   }))
+}
 
 /** 打开库存选择弹窗 */
 const handleAddDetail = () => {
@@ -313,19 +316,24 @@ const handleAddDetail = () => {
 
 /** 选择库存 */
 const handleSelectInventory = (inventories: InventorySelectRow[]) => {
-  if (!inventories.length) return
+  if (!inventories.length) {
+    return
+  }
   formData.value.details = formData.value.details || []
   inventories.forEach((inventory) => {
-    if (isInventorySelected(inventory)) return
+    if (isInventorySelected(inventory)) {
+      return
+    }
     formData.value.details!.push(buildDetail(inventory))
   })
 }
 
 /** 判断库存是否已选择 */
-const isInventorySelected = (inventory: InventorySelectRow) =>
-  (formData.value.details || []).some((detail) => {
+function isInventorySelected(inventory: InventorySelectRow) {
+  return (formData.value.details || []).some((detail) => {
     return detail.skuId === inventory.skuId && detail.sourceWarehouseId === inventory.warehouseId
   })
+}
 
 const handleDeleteDetail = (index: number) => {
   formData.value.details?.splice(index, 1)
@@ -360,8 +368,15 @@ const handleDetailTotalPriceChange = (detail: MovementOrderDetailVO) => {
   detail.price = dividePrice(detail.totalPrice, detail.quantity)
 }
 
-const getDetailSummaries = ({ columns, data }: { columns: any[]; data: MovementOrderDetailVO[] }) =>
-  columns.map((column, index) => {
+/** 计算表格的合计行数据 */
+function getDetailSummaries({
+  columns,
+  data
+}: {
+  columns: any[]
+  data: MovementOrderDetailVO[]
+}) {
+  return columns.map((column, index) => {
     if (index === 0) {
       return '合计'
     }
@@ -376,6 +391,7 @@ const getDetailSummaries = ({ columns, data }: { columns: any[]; data: MovementO
     }
     return ''
   })
+}
 
 /** 校验明细 */
 const validateDetails = (required: boolean) => {
@@ -421,7 +437,9 @@ const buildSubmitData = () => {
 const emit = defineEmits(['success'])
 const submitForm = async () => {
   await formRef.value.validate()
-  if (!validateDetails(false)) return
+  if (!validateDetails(false)) {
+    return
+  }
   formLoading.value = true
   try {
     const data = buildSubmitData()
@@ -442,7 +460,9 @@ const submitForm = async () => {
 /** 完成移库：表单修改过则先保存，再完成 */
 const handleComplete = async () => {
   await formRef.value.validate()
-  if (!validateDetails(true)) return
+  if (!validateDetails(true)) {
+    return
+  }
   try {
     await message.confirm('确认完成移库？完成后将更新库存。')
     formLoading.value = true

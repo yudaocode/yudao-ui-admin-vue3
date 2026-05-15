@@ -148,14 +148,18 @@ const total = ref(0) // 列表的总条数
 const selectedMap = ref<Map<string, InventorySelectRow>>(new Map()) // 跨页已选择库存
 const tableRef = ref<InstanceType<typeof ElTable>>() // 表格 Ref
 const queryFormRef = ref() // 搜索的表单
-const getDefaultQueryParams = () => ({
-  pageNo: 1,
-  pageSize: 10,
-  itemName: undefined as string | undefined,
-  itemCode: undefined as string | undefined,
-  skuName: undefined as string | undefined,
-  skuCode: undefined as string | undefined
-})
+
+/** 获得默认的查询参数 */
+function getDefaultQueryParams() {
+  return {
+    pageNo: 1,
+    pageSize: 10,
+    itemName: undefined as string | undefined,
+    itemCode: undefined as string | undefined,
+    skuName: undefined as string | undefined,
+    skuCode: undefined as string | undefined
+  }
+}
 const queryParams = reactive(getDefaultQueryParams())
 
 const emit = defineEmits<{

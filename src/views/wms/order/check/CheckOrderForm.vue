@@ -284,21 +284,31 @@ const warehouseFormRules = reactive<FormRules>({
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'change' }]
 })
 
-const getDifferenceQuantity = (detail: CheckOrderFormDetail) =>
-  Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
-const getBookPrice = (detail: CheckOrderFormDetail) => multiplyPrice(detail.quantity, detail.price)
-const getActualPrice = (detail: CheckOrderFormDetail) =>
-  detail.actualPrice ?? multiplyPrice(detail.checkQuantity, detail.price)
-const getDifferencePrice = (detail: CheckOrderFormDetail) => {
+function getDifferenceQuantity(detail: CheckOrderFormDetail) {
+  return Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
+}
+
+function getBookPrice(detail: CheckOrderFormDetail) {
+  return multiplyPrice(detail.quantity, detail.price)
+}
+
+function getActualPrice(detail: CheckOrderFormDetail) {
+  return detail.actualPrice ?? multiplyPrice(detail.checkQuantity, detail.price)
+}
+
+function getDifferencePrice(detail: CheckOrderFormDetail) {
   if (detail.price === undefined || detail.price === null) {
     return undefined
   }
   return roundPrice(getDifferenceQuantity(detail) * Number(detail.price))
 }
-const renderLossText = (
+
+function renderLossText(
   value: number | string | null | undefined,
   formatter: (value?: number | string | null) => string
-) => h('span', { class: getLossClass(value) }, formatter(value))
+) {
+  return h('span', { class: getLossClass(value) }, formatter(value))
+}
 const totalQuantity = computed(() =>
   sumQuantity(formData.value.details || [], (detail) => getDifferenceQuantity(detail))
 )
@@ -369,30 +379,33 @@ const handleWarehouseSelect = (warehouse: WarehouseVO | undefined) => {
 }
 
 /** 构建盘库明细 */
-const buildDetail = (inventory: CheckInventoryRow): CheckOrderFormDetail => ({
-  id: undefined,
-  itemId: inventory.itemId,
-  itemCode: inventory.itemCode,
-  itemName: inventory.itemName,
-  unit: inventory.unit,
-  skuId: inventory.skuId,
-  skuCode: inventory.skuCode,
-  skuName: inventory.skuName,
-  inventoryId: inventory.id,
-  warehouseId: inventory.warehouseId,
-  warehouseName: inventory.warehouseName,
-  quantity: inventory.availableQuantity,
-  checkQuantity: inventory.availableQuantity,
-  availableQuantity: inventory.availableQuantity,
-  price: inventory.price,
-  actualPrice: multiplyPrice(inventory.availableQuantity, inventory.price)
-})
+function buildDetail(inventory: CheckInventoryRow): CheckOrderFormDetail {
+  return {
+    id: undefined,
+    itemId: inventory.itemId,
+    itemCode: inventory.itemCode,
+    itemName: inventory.itemName,
+    unit: inventory.unit,
+    skuId: inventory.skuId,
+    skuCode: inventory.skuCode,
+    skuName: inventory.skuName,
+    inventoryId: inventory.id,
+    warehouseId: inventory.warehouseId,
+    warehouseName: inventory.warehouseName,
+    quantity: inventory.availableQuantity,
+    checkQuantity: inventory.availableQuantity,
+    availableQuantity: inventory.availableQuantity,
+    price: inventory.price,
+    actualPrice: multiplyPrice(inventory.availableQuantity, inventory.price)
+  }
+}
 
-const normalizeDetails = (details: CheckOrderDetailVO[]) =>
-  details.map((detail) => ({
+function normalizeDetails(details: CheckOrderDetailVO[]) {
+  return details.map((detail) => ({
     ...detail,
     actualPrice: multiplyPrice(detail.checkQuantity, detail.price)
   }))
+}
 
 /** 导入当前仓库的全部库存余额 */
 const handleImportAllInventory = async () => {
@@ -473,24 +486,26 @@ const getWarehouseInventoryMap = async (): Promise<Map<number, InventoryVO>> => 
 }
 
 /** 构建零库存盘库明细 */
-const buildZeroInventoryDetail = (sku: ItemSkuVO): CheckOrderFormDetail => ({
-  id: undefined,
-  itemId: sku.itemId,
-  itemCode: sku.itemCode,
-  itemName: sku.itemName,
-  unit: sku.unit,
-  skuId: sku.id,
-  skuCode: sku.code,
-  skuName: sku.name,
-  inventoryId: undefined,
-  warehouseId: formData.value.warehouseId,
-  warehouseName: formData.value.warehouseName,
-  quantity: 0,
-  checkQuantity: 0,
-  availableQuantity: 0,
-  price: sku.costPrice,
-  actualPrice: 0
-})
+function buildZeroInventoryDetail(sku: ItemSkuVO): CheckOrderFormDetail {
+  return {
+    id: undefined,
+    itemId: sku.itemId,
+    itemCode: sku.itemCode,
+    itemName: sku.itemName,
+    unit: sku.unit,
+    skuId: sku.id,
+    skuCode: sku.code,
+    skuName: sku.name,
+    inventoryId: undefined,
+    warehouseId: formData.value.warehouseId,
+    warehouseName: formData.value.warehouseName,
+    quantity: 0,
+    checkQuantity: 0,
+    availableQuantity: 0,
+    price: sku.costPrice,
+    actualPrice: 0
+  }
+}
 
 const handleDeleteDetail = (index: number) => {
   formData.value.details?.splice(index, 1)
@@ -512,20 +527,30 @@ const handleDetailActualPriceChange = (detail: CheckOrderFormDetail) => {
   detail.price = dividePrice(detail.actualPrice, detail.checkQuantity)
 }
 
-const getDetailSummaries = ({ columns, data }: { columns: any[]; data: CheckOrderFormDetail[] }) =>
-  columns.map((column, index) => {
-    if (index === 0) return '合计'
-    if (column.property === 'quantity') return formatSumQuantity(data, (detail) => detail.quantity)
-    if (column.property === 'checkQuantity')
+/** 计算表格的合计行数据 */
+function getDetailSummaries({ columns, data }: { columns: any[]; data: CheckOrderFormDetail[] }) {
+  return columns.map((column, index) => {
+    if (index === 0) {
+      return '合计'
+    }
+    if (column.property === 'quantity') {
+      return formatSumQuantity(data, (detail) => detail.quantity)
+    }
+    if (column.property === 'checkQuantity') {
       return formatSumQuantity(data, (detail) => detail.checkQuantity)
-    if (column.property === 'actualPrice')
+    }
+    if (column.property === 'actualPrice') {
       return formatSumPrice(data, (detail) => getActualPrice(detail))
-    if (column.property === 'differenceQuantity')
+    }
+    if (column.property === 'differenceQuantity') {
       return renderLossText(totalQuantity.value, formatQuantity)
-    if (column.property === 'differencePrice')
+    }
+    if (column.property === 'differencePrice') {
       return renderLossText(differencePrice.value, formatPrice)
+    }
     return ''
   })
+}
 
 /** 校验明细 */
 const validateDetails = (required: boolean) => {
@@ -566,7 +591,9 @@ const buildSubmitData = () => {
 const emit = defineEmits(['success'])
 const submitForm = async () => {
   await formRef.value.validate()
-  if (!validateDetails(false)) return
+  if (!validateDetails(false)) {
+    return
+  }
   formLoading.value = true
   try {
     const data = buildSubmitData()
@@ -587,7 +614,9 @@ const submitForm = async () => {
 /** 完成盘库：表单修改过则先保存，再完成 */
 const handleComplete = async () => {
   await formRef.value.validate()
-  if (!validateDetails(true)) return
+  if (!validateDetails(true)) {
+    return
+  }
   try {
     await message.confirm('确认完成盘库？完成后将更新库存。')
     formLoading.value = true

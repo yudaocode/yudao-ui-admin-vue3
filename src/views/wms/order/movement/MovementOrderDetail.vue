@@ -110,14 +110,24 @@ const detailRows = computed<DetailRow[]>(() =>
   }))
 )
 
-const getSummaries = ({ columns, data }: { columns: any[]; data: DetailRow[] }) =>
-  columns.map((column, index) => {
-    if (index === 0) return '合计'
-    if (column.property === 'quantity') return formatSumQuantity(data, (detail) => detail.quantity)
-    if (column.property === 'price') return formatSumPrice(data, (detail) => detail.price)
-    if (column.property === 'totalPrice') return formatSumPrice(data, (detail) => detail.totalPrice)
+/** 计算表格的合计行数据 */
+function getSummaries({ columns, data }: { columns: any[]; data: DetailRow[] }) {
+  return columns.map((column, index) => {
+    if (index === 0) {
+      return '合计'
+    }
+    if (column.property === 'quantity') {
+      return formatSumQuantity(data, (detail) => detail.quantity)
+    }
+    if (column.property === 'price') {
+      return formatSumPrice(data, (detail) => detail.price)
+    }
+    if (column.property === 'totalPrice') {
+      return formatSumPrice(data, (detail) => detail.totalPrice)
+    }
     return ''
   })
+}
 
 /** 打开弹窗 */
 const open = async (id: number) => {

@@ -149,9 +149,11 @@ interface PrintRow extends CheckOrderDetailVO {
   differencePrice?: number
 }
 
-const getDifferenceQuantity = (detail: CheckOrderDetailVO) =>
-  Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
-const getActualPrice = (detail: CheckOrderDetailVO) => {
+function getDifferenceQuantity(detail: CheckOrderDetailVO) {
+  return Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
+}
+
+function getActualPrice(detail: CheckOrderDetailVO) {
   if (
     detail.checkQuantity === undefined ||
     detail.checkQuantity === null ||
@@ -162,14 +164,15 @@ const getActualPrice = (detail: CheckOrderDetailVO) => {
   }
   return roundPrice(Number(detail.checkQuantity) * Number(detail.price))
 }
-const getDifferencePrice = (detail: CheckOrderDetailVO, differenceQuantity: number) => {
+function getDifferencePrice(detail: CheckOrderDetailVO, differenceQuantity: number) {
   if (detail.price === undefined || detail.price === null) {
     return undefined
   }
   return roundPrice(differenceQuantity * Number(detail.price))
 }
-const getOrderDifferencePrice = (order: CheckOrderVO) =>
-  roundPrice(Number(order.actualPrice || 0) - Number(order.totalPrice || 0))
+function getOrderDifferencePrice(order: CheckOrderVO) {
+  return roundPrice(Number(order.actualPrice || 0) - Number(order.totalPrice || 0))
+}
 const printRows = computed<PrintRow[]>(() =>
   (printData.value.details || []).map((detail) => {
     const differenceQuantity = getDifferenceQuantity(detail)

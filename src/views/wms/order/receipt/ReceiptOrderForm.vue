@@ -282,25 +282,28 @@ const open = async (type: string, id?: number) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 构建入库明细 */
-const buildDetail = (sku: ItemSkuVO): ReceiptOrderDetailVO => ({
-  id: undefined,
-  itemId: sku.itemId,
-  itemCode: sku.itemCode,
-  itemName: sku.itemName,
-  unit: sku.unit,
-  skuId: sku.id,
-  skuCode: sku.code,
-  skuName: sku.name,
-  quantity: undefined,
-  price: undefined,
-  totalPrice: undefined
-})
+function buildDetail(sku: ItemSkuVO): ReceiptOrderDetailVO {
+  return {
+    id: undefined,
+    itemId: sku.itemId,
+    itemCode: sku.itemCode,
+    itemName: sku.itemName,
+    unit: sku.unit,
+    skuId: sku.id,
+    skuCode: sku.code,
+    skuName: sku.name,
+    quantity: undefined,
+    price: undefined,
+    totalPrice: undefined
+  }
+}
 
-const normalizeDetails = (details: ReceiptOrderDetailVO[]) =>
-  details.map((detail) => ({
+function normalizeDetails(details: ReceiptOrderDetailVO[]) {
+  return details.map((detail) => ({
     ...detail,
     totalPrice: detail.totalPrice ?? multiplyPrice(detail.quantity, detail.price)
   }))
+}
 
 /** 添加商品 */
 const handleAddDetail = () => {
@@ -354,9 +357,9 @@ const handleDetailTotalPriceChange = (detail: ReceiptOrderDetailVO) => {
   detail.price = dividePrice(detail.totalPrice, detail.quantity)
 }
 
-/** 明细合计 */
-const getDetailSummaries = ({ columns, data }: { columns: any[]; data: ReceiptOrderDetailVO[] }) =>
-  columns.map((column, index) => {
+/** 计算表格的合计行数据 */
+function getDetailSummaries({ columns, data }: { columns: any[]; data: ReceiptOrderDetailVO[] }) {
+  return columns.map((column, index) => {
     if (index === 0) {
       return '合计'
     }
@@ -371,6 +374,7 @@ const getDetailSummaries = ({ columns, data }: { columns: any[]; data: ReceiptOr
     }
     return ''
   })
+}
 
 /** 校验明细 */
 const validateDetails = (required: boolean) => {

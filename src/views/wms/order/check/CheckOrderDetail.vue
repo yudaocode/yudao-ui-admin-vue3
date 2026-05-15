@@ -124,11 +124,16 @@ defineOptions({ name: 'WmsCheckOrderDetail' })
 const loading = ref(false)
 const dialogVisible = ref(false)
 const detailData = ref<CheckOrderVO>({})
-const getOrderDifferencePrice = (order: CheckOrderVO) =>
-  roundPrice(Number(order.actualPrice || 0) - Number(order.totalPrice || 0))
-const getDifferenceQuantity = (detail: CheckOrderDetailVO) =>
-  Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
-const getActualPrice = (detail: CheckOrderDetailVO) => {
+
+function getOrderDifferencePrice(order: CheckOrderVO) {
+  return roundPrice(Number(order.actualPrice || 0) - Number(order.totalPrice || 0))
+}
+
+function getDifferenceQuantity(detail: CheckOrderDetailVO) {
+  return Number(detail.checkQuantity || 0) - Number(detail.quantity || 0)
+}
+
+function getActualPrice(detail: CheckOrderDetailVO) {
   if (
     detail.checkQuantity === undefined ||
     detail.checkQuantity === null ||
@@ -139,19 +144,22 @@ const getActualPrice = (detail: CheckOrderDetailVO) => {
   }
   return roundPrice(Number(detail.checkQuantity) * Number(detail.price))
 }
-const getDifferencePrice = (detail: CheckOrderDetailVO) => {
+function getDifferencePrice(detail: CheckOrderDetailVO) {
   if (detail.price === undefined || detail.price === null) {
     return undefined
   }
   return roundPrice(getDifferenceQuantity(detail) * Number(detail.price))
 }
-const renderLossText = (
+function renderLossText(
   value: number | string | null | undefined,
   formatter: (value?: number | string | null) => string
-) => h('span', { class: getLossClass(value) }, formatter(value))
+) {
+  return h('span', { class: getLossClass(value) }, formatter(value))
+}
 
-const getSummaries = ({ columns, data }: { columns: any[]; data: CheckOrderDetailVO[] }) =>
-  columns.map((column, index) => {
+/** 计算表格的合计行数据 */
+function getSummaries({ columns, data }: { columns: any[]; data: CheckOrderDetailVO[] }) {
+  return columns.map((column, index) => {
     if (index === 0) {
       return '合计'
     }
@@ -178,6 +186,7 @@ const getSummaries = ({ columns, data }: { columns: any[]; data: CheckOrderDetai
     }
     return ''
   })
+}
 
 /** 打开弹窗 */
 const open = async (id: number) => {

@@ -236,19 +236,21 @@ const open = async (type: string, id?: number) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 构建空规格 */
-const buildEmptySku = (): ItemSkuVO => ({
-  id: undefined,
-  name: undefined,
-  barCode: undefined,
-  code: undefined,
-  length: undefined,
-  width: undefined,
-  height: undefined,
-  grossWeight: undefined,
-  netWeight: undefined,
-  costPrice: undefined,
-  sellingPrice: undefined
-})
+function buildEmptySku(): ItemSkuVO {
+  return {
+    id: undefined,
+    name: undefined,
+    barCode: undefined,
+    code: undefined,
+    length: undefined,
+    width: undefined,
+    height: undefined,
+    grossWeight: undefined,
+    netWeight: undefined,
+    costPrice: undefined,
+    sellingPrice: undefined
+  }
+}
 
 /** 添加规格 */
 const handleAddSku = () => {

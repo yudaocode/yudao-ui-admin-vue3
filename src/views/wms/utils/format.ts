@@ -15,7 +15,7 @@ export const WEIGHT_PRECISION = 3
 /** 长宽高小数位 */
 export const DIMENSION_PRECISION = 1
 
-const toFiniteDecimal = (value: DecimalValue) => {
+function toFiniteDecimal(value: DecimalValue) {
   if (isNullOrUnDef(value)) {
     return undefined
   }
@@ -29,7 +29,7 @@ const toFiniteDecimal = (value: DecimalValue) => {
   return decimalValue
 }
 
-const sumDecimal = <T>(list: T[], getter: (item: T) => DecimalValue) => {
+function sumDecimal<T>(list: T[], getter: (item: T) => DecimalValue) {
   return list.reduce((sum, item) => {
     const decimalValue = toFiniteDecimal(getter(item))
     return decimalValue === undefined ? sum : sum + decimalValue
@@ -37,30 +37,30 @@ const sumDecimal = <T>(list: T[], getter: (item: T) => DecimalValue) => {
 }
 
 /** 格式化数量 */
-export const formatQuantity = (value?: number | string | null) => {
+export function formatQuantity(value?: number | string | null) {
   const decimalValue = toFiniteDecimal(value)
   return decimalValue === undefined ? '' : decimalValue.toFixed(QUANTITY_PRECISION)
 }
 
 /** 格式化金额 */
-export const formatPrice = (value?: number | string | null) => {
+export function formatPrice(value?: number | string | null) {
   const decimalValue = toFiniteDecimal(value)
   return decimalValue === undefined ? '' : decimalValue.toFixed(PRICE_PRECISION)
 }
 
 /** 金额四舍五入 */
-export const roundPrice = (value: number) => {
+export function roundPrice(value: number) {
   return Number.isFinite(value) ? Number(value.toFixed(PRICE_PRECISION)) : undefined
 }
 
 /** 亏损数字样式 */
-export const getLossClass = (value?: number | string | null) => {
+export function getLossClass(value?: number | string | null) {
   const decimalValue = toFiniteDecimal(value)
   return decimalValue !== undefined && decimalValue < 0 ? 'text-red-500' : ''
 }
 
 /** 数量 * 单价，计算金额 */
-export const multiplyPrice = (quantity?: number, price?: number) => {
+export function multiplyPrice(quantity?: number, price?: number) {
   if (quantity === undefined || quantity === null || price === undefined || price === null) {
     return undefined
   }
@@ -68,7 +68,7 @@ export const multiplyPrice = (quantity?: number, price?: number) => {
 }
 
 /** 金额 / 数量，反算单价 */
-export const dividePrice = (totalPrice?: number, quantity?: number) => {
+export function dividePrice(totalPrice?: number, quantity?: number) {
   if (totalPrice === undefined || totalPrice === null || !quantity) {
     return undefined
   }
@@ -76,43 +76,43 @@ export const dividePrice = (totalPrice?: number, quantity?: number) => {
 }
 
 /** 汇总数量 */
-export const sumQuantity = <T>(list: T[], getter: (item: T) => DecimalValue) => {
+export function sumQuantity<T>(list: T[], getter: (item: T) => DecimalValue) {
   return sumDecimal(list, getter)
 }
 
 /** 汇总金额 */
-export const sumPrice = <T>(list: T[], getter: (item: T) => DecimalValue) => {
+export function sumPrice<T>(list: T[], getter: (item: T) => DecimalValue) {
   return sumDecimal(list, getter)
 }
 
 /** 格式化汇总数量 */
-export const formatSumQuantity = <T>(list: T[], getter: (item: T) => DecimalValue) => {
+export function formatSumQuantity<T>(list: T[], getter: (item: T) => DecimalValue) {
   return formatQuantity(sumQuantity(list, getter))
 }
 
 /** 格式化汇总金额 */
-export const formatSumPrice = <T>(list: T[], getter: (item: T) => DecimalValue) => {
+export function formatSumPrice<T>(list: T[], getter: (item: T) => DecimalValue) {
   return formatPrice(sumPrice(list, getter))
 }
 
 /** 格式化重量 */
-export const formatWeight = (value?: number | string | null) => {
+export function formatWeight(value?: number | string | null) {
   const decimalValue = toFiniteDecimal(value)
   return decimalValue === undefined ? '' : decimalValue.toFixed(WEIGHT_PRECISION)
 }
 
 /** 格式化长宽高 */
-export const formatDimension = (value?: number | string | null) => {
+export function formatDimension(value?: number | string | null) {
   const decimalValue = toFiniteDecimal(value)
   return decimalValue === undefined ? '' : decimalValue.toFixed(DIMENSION_PRECISION)
 }
 
 /** 格式化长宽高组合 */
-export const formatDimensionText = (
+export function formatDimensionText(
   length?: number | string | null,
   width?: number | string | null,
   height?: number | string | null
-) => {
+) {
   if (!isNullOrUnDef(length) && !isNullOrUnDef(width) && !isNullOrUnDef(height)) {
     return [formatDimension(length), formatDimension(width), formatDimension(height)].join(' * ')
   }

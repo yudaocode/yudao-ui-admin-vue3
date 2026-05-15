@@ -173,15 +173,19 @@ const preselectDisabled = ref(true) // 是否回显已禁用的 SKU
 const syncingSingleSelection = ref(false) // 单选模式同步表格勾选状态中
 const tableRef = ref<InstanceType<typeof ElTable>>() // 表格 Ref
 const queryFormRef = ref() // 搜索的表单
-const getDefaultQueryParams = () => ({
-  pageNo: 1,
-  pageSize: 10,
-  itemName: undefined as string | undefined,
-  itemCode: undefined as string | undefined,
-  name: undefined as string | undefined,
-  code: undefined as string | undefined,
-  barCode: undefined as string | undefined
-})
+
+/** 获得默认的查询参数 */
+function getDefaultQueryParams() {
+  return {
+    pageNo: 1,
+    pageSize: 10,
+    itemName: undefined as string | undefined,
+    itemCode: undefined as string | undefined,
+    name: undefined as string | undefined,
+    code: undefined as string | undefined,
+    barCode: undefined as string | undefined
+  }
+}
 const queryParams = reactive(getDefaultQueryParams())
 
 const emit = defineEmits<{

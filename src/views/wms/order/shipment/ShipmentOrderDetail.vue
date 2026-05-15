@@ -127,8 +127,9 @@ const detailRows = computed<DetailRow[]>(() =>
   }))
 )
 
-const getSummaries = ({ columns, data }: { columns: any[]; data: DetailRow[] }) =>
-  columns.map((column, index) => {
+/** 计算表格的合计行数据 */
+function getSummaries({ columns, data }: { columns: any[]; data: DetailRow[] }) {
+  return columns.map((column, index) => {
     if (index === 0) {
       return '合计'
     }
@@ -143,6 +144,7 @@ const getSummaries = ({ columns, data }: { columns: any[]; data: DetailRow[] }) 
     }
     return ''
   })
+}
 
 /** 打开弹窗 */
 const open = async (id: number) => {

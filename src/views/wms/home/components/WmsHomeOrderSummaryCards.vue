@@ -213,7 +213,9 @@ const getStatusPercent = (item: OrderSummaryItem, status: number) => {
 }
 
 /** 格式化单据数量 */
-const formatCount = (value: number) => value.toLocaleString()
+function formatCount(value: number) {
+  return value.toLocaleString()
+}
 
 defineExpose({ load })
 </script>

@@ -43,7 +43,7 @@ export const CustomerMerchantTypeList = [
  *
  * 由前端在表单【生成】按钮上调用，避免后端兜底生成造成编号不可控。
  */
-export const generateWmsCode = (prefix: string = ''): string => {
+export function generateWmsCode(prefix: string = ''): string {
   let result = ''
   for (let i = 0; i < 8; i++) {
     result += Math.floor(Math.random() * 10).toString()

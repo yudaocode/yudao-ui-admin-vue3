@@ -293,28 +293,31 @@ const open = async (type: string, id?: number) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 构建出库明细 */
-const buildDetail = (inventory: InventorySelectRow): ShipmentOrderDetailVO => ({
-  id: undefined,
-  itemId: inventory.itemId,
-  itemCode: inventory.itemCode,
-  itemName: inventory.itemName,
-  unit: inventory.unit,
-  skuId: inventory.skuId,
-  skuCode: inventory.skuCode,
-  skuName: inventory.skuName,
-  warehouseId: inventory.warehouseId,
-  warehouseName: inventory.warehouseName,
-  quantity: undefined,
-  availableQuantity: inventory.availableQuantity,
-  price: undefined,
-  totalPrice: undefined
-})
+function buildDetail(inventory: InventorySelectRow): ShipmentOrderDetailVO {
+  return {
+    id: undefined,
+    itemId: inventory.itemId,
+    itemCode: inventory.itemCode,
+    itemName: inventory.itemName,
+    unit: inventory.unit,
+    skuId: inventory.skuId,
+    skuCode: inventory.skuCode,
+    skuName: inventory.skuName,
+    warehouseId: inventory.warehouseId,
+    warehouseName: inventory.warehouseName,
+    quantity: undefined,
+    availableQuantity: inventory.availableQuantity,
+    price: undefined,
+    totalPrice: undefined
+  }
+}
 
-const normalizeDetails = (details: ShipmentOrderDetailVO[]) =>
-  details.map((detail) => ({
+function normalizeDetails(details: ShipmentOrderDetailVO[]) {
+  return details.map((detail) => ({
     ...detail,
     totalPrice: detail.totalPrice ?? multiplyPrice(detail.quantity, detail.price)
   }))
+}
 
 /** 添加商品 */
 const handleAddDetail = () => {
@@ -371,9 +374,9 @@ const handleDetailTotalPriceChange = (detail: ShipmentOrderDetailVO) => {
   detail.price = dividePrice(detail.totalPrice, detail.quantity)
 }
 
-/** 明细合计 */
-const getDetailSummaries = ({ columns, data }: { columns: any[]; data: ShipmentOrderDetailVO[] }) =>
-  columns.map((column, index) => {
+/** 计算表格的合计行数据 */
+function getDetailSummaries({ columns, data }: { columns: any[]; data: ShipmentOrderDetailVO[] }) {
+  return columns.map((column, index) => {
     if (index === 0) {
       return '合计'
     }
@@ -388,6 +391,7 @@ const getDetailSummaries = ({ columns, data }: { columns: any[]; data: ShipmentO
     }
     return ''
   })
+}
 
 /** 校验明细 */
 const validateDetails = (required: boolean) => {

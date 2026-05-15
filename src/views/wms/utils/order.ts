@@ -3,7 +3,7 @@
  */
 
 /** 生成业务单号：前缀 + 月日 + 4 位随机数 */
-export const generateOrderNo = (prefix: string) => {
+export function generateOrderNo(prefix: string) {
   const now = new Date()
   const month = String(now.getMonth() + 1).padStart(2, '0')
   const day = String(now.getDate()).padStart(2, '0')

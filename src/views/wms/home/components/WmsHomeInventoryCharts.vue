@@ -63,7 +63,9 @@ const goodsShareList = ref<ChartItem[]>([])
 const inventoryDistributionList = ref<ChartItem[]>([])
 
 /** 格式化库存数量展示 */
-const formatQuantityText = (value: number) => formatQuantity(value) || '0.00'
+function formatQuantityText(value: number) {
+  return formatQuantity(value) || '0.00'
+}
 
 const chartFontFamily =
   "Inter, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif"

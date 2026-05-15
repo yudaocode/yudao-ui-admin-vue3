@@ -436,33 +436,41 @@ const checkedTableColumns = ref<TableColumnKey[]>([
   'operateInfo',
   'remark'
 ])
-const isTableColumnVisible = (column: TableColumnKey) => checkedTableColumns.value.includes(column)
 
 const loading = ref(true) // 列表的加载中
 const list = ref<CheckOrderVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
-const getDefaultQueryParams = () => ({
-  pageNo: 1,
-  pageSize: 10,
-  no: undefined as string | undefined,
-  status: undefined as number | undefined,
-  warehouseId: undefined as number | undefined,
-  orderTime: undefined as string[] | undefined,
-  totalQuantityMin: undefined as number | undefined,
-  totalQuantityMax: undefined as number | undefined,
-  totalPriceMin: undefined as number | undefined,
-  totalPriceMax: undefined as number | undefined,
-  actualPriceMin: undefined as number | undefined,
-  actualPriceMax: undefined as number | undefined,
-  creator: undefined as number | undefined,
-  updater: undefined as number | undefined,
-  createTime: undefined as string[] | undefined,
-  updateTime: undefined as string[] | undefined
-})
+
+/** 获得默认的查询参数 */
+function getDefaultQueryParams() {
+  return {
+    pageNo: 1,
+    pageSize: 10,
+    no: undefined as string | undefined,
+    status: undefined as number | undefined,
+    warehouseId: undefined as number | undefined,
+    orderTime: undefined as string[] | undefined,
+    totalQuantityMin: undefined as number | undefined,
+    totalQuantityMax: undefined as number | undefined,
+    totalPriceMin: undefined as number | undefined,
+    totalPriceMax: undefined as number | undefined,
+    actualPriceMin: undefined as number | undefined,
+    actualPriceMax: undefined as number | undefined,
+    creator: undefined as number | undefined,
+    updater: undefined as number | undefined,
+    createTime: undefined as string[] | undefined,
+    updateTime: undefined as string[] | undefined
+  }
+}
 const queryParams = reactive(getDefaultQueryParams())
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const detailMap = reactive<Record<number, CheckOrderDetailVO[]>>({}) // 盘库单明细数据
+
+/** 判断表格列是否可见 */
+function isTableColumnVisible(column: TableColumnKey) {
+  return checkedTableColumns.value.includes(column)
+}
 
 /** 是否允许修改盘库单 */
 const canUpdateCheckOrder = (status?: number) => {
