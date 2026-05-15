@@ -12,7 +12,11 @@
         <el-input v-model="formData.name" maxlength="50" placeholder="请输入仓库名称" />
       </el-form-item>
       <el-form-item label="仓库编号" prop="code">
-        <el-input v-model="formData.code" maxlength="20" placeholder="请输入仓库编号" />
+        <el-input v-model="formData.code" maxlength="20" placeholder="请输入仓库编号">
+          <template #append>
+            <el-button @click="formData.code = generateWmsCode('W')">生成</el-button>
+          </template>
+        </el-input>
       </el-form-item>
       <el-form-item label="排序" prop="sort">
         <el-input-number
@@ -40,6 +44,7 @@
 
 <script lang="ts" setup>
 import { WarehouseApi, WarehouseVO } from '@/api/wms/md/warehouse'
+import { generateWmsCode } from '@/views/wms/utils/constants'
 
 /** WMS 仓库表单 */
 defineOptions({ name: 'WmsWarehouseForm' })

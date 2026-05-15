@@ -162,6 +162,9 @@ const selectedList = ref<ItemSkuVO[]>([]) // 已选择 SKU 列表
 const selectedMap = ref<Map<number, ItemSkuVO>>(new Map()) // 跨页已选择 SKU
 const preSelectedIds = ref<number[]>([]) // 打开弹窗时传入的已选 SKU 编号
 const disabledSelectedIds = ref<Set<number>>(new Set()) // 已在业务明细中使用的 SKU 编号
+const multiple = ref(true) // 是否允许多选
+const preselectDisabled = ref(true) // 是否回显已禁用的 SKU
+const syncingSingleSelection = ref(false) // 单选模式同步表格勾选状态中
 const tableRef = ref<InstanceType<typeof ElTable>>() // 表格 Ref
 const queryFormRef = ref() // 搜索的表单
 const getDefaultQueryParams = () => ({
@@ -179,8 +182,13 @@ const emit = defineEmits<{
 }>()
 
 /** 打开弹窗 */
-const open = async (selectedIds?: number[]) => {
+const open = async (
+  selectedIds?: number[],
+  options?: { multiple?: boolean; preselectDisabled?: boolean }
+) => {
   dialogVisible.value = true
+  multiple.value = options?.multiple ?? true
+  preselectDisabled.value = options?.preselectDisabled ?? true
   Object.assign(queryParams, getDefaultQueryParams())
   selectedList.value = []
   selectedMap.value = new Map()
@@ -219,7 +227,7 @@ const loadSkuList = async () => {
 
 /** 初始化已选 SKU */
 const initSelectedList = () => {
-  if (preSelectedIds.value.length === 0) {
+  if (!preselectDisabled.value || preSelectedIds.value.length === 0) {
     return
   }
   allList.value.forEach((sku) => {
@@ -286,7 +294,34 @@ const isRowSelectable = (row: ItemSkuVO) => {
 }
 
 /** 选择变化 */
-const handleSelectionChange = (rows: ItemSkuVO[]) => {
+const handleSelectionChange = async (rows: ItemSkuVO[]) => {
+  if (syncingSingleSelection.value) {
+    return
+  }
+  if (!multiple.value) {
+    let row: ItemSkuVO | undefined
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const item = rows[i]
+      if (item.id && !disabledSelectedIds.value.has(item.id)) {
+        row = item
+        break
+      }
+    }
+    selectedMap.value = new Map()
+    if (row?.id) {
+      selectedMap.value.set(row.id, row)
+    }
+    selectedList.value = Array.from(selectedMap.value.values())
+    syncingSingleSelection.value = true
+    await nextTick()
+    tableRef.value?.clearSelection()
+    if (row) {
+      tableRef.value?.toggleRowSelection(row, true)
+    }
+    await nextTick()
+    syncingSingleSelection.value = false
+    return
+  }
   const currentPageIds = list.value.map((row) => row.id).filter((id): id is number => !!id)
   currentPageIds.forEach((id) => {
     if (!disabledSelectedIds.value.has(id)) {
@@ -304,6 +339,11 @@ const handleSelectionChange = (rows: ItemSkuVO[]) => {
 /** 双击行：切换勾选 */
 const handleRowDblClick = (row: ItemSkuVO) => {
   if (row.id && disabledSelectedIds.value.has(row.id)) {
+    return
+  }
+  if (!multiple.value) {
+    emit('change', [row])
+    dialogVisible.value = false
     return
   }
   tableRef.value?.toggleRowSelection(row)

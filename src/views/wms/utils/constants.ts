@@ -29,3 +29,24 @@ export const CustomerMerchantTypeList = [
   MerchantTypeEnum.CUSTOMER,
   MerchantTypeEnum.CUSTOMER_SUPPLIER
 ]
+
+/**
+ * 生成 WMS 编号 / 条码。
+ *
+ * @param prefix 可选前缀，按业务域区分编号种类：
+ *   - `I` 商品编号
+ *   - `S` SKU 编号
+ *   - `W` 仓库编号
+ *   - `M` 往来企业编号
+ *   - 不传 / 空串 用于 SKU 条码（条码业务习惯纯数字）
+ * @returns 前缀 + 8 位随机数字串。
+ *
+ * 由前端在表单【生成】按钮上调用，避免后端兜底生成造成编号不可控。
+ */
+export const generateWmsCode = (prefix: string = ''): string => {
+  let result = ''
+  for (let i = 0; i < 8; i++) {
+    result += Math.floor(Math.random() * 10).toString()
+  }
+  return prefix + result
+}

@@ -11,7 +11,11 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="往来企业编号" prop="code">
-            <el-input v-model="formData.code" maxlength="20" placeholder="请输入往来企业编号" />
+            <el-input v-model="formData.code" maxlength="20" placeholder="请输入往来企业编号">
+              <template #append>
+                <el-button @click="formData.code = generateWmsCode('M')">生成</el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -88,6 +92,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MerchantApi, MerchantVO } from '@/api/wms/md/merchant'
+import { generateWmsCode } from '@/views/wms/utils/constants'
 
 /** WMS 往来企业表单 */
 defineOptions({ name: 'WmsMerchantForm' })

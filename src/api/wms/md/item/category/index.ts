@@ -4,6 +4,7 @@ import request from '@/config/axios'
 export interface ItemCategoryVO {
   id?: number
   parentId?: number
+  code?: string
   name?: string
   sort?: number
   status?: number

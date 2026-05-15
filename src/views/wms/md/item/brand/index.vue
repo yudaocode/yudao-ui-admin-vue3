@@ -9,6 +9,15 @@
       class="-mb-15px"
       label-width="68px"
     >
+      <el-form-item label="品牌编号" prop="code">
+        <el-input
+          v-model="queryParams.code"
+          class="!w-240px"
+          clearable
+          placeholder="请输入品牌编号"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="品牌名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -53,6 +62,7 @@
   <!-- 品牌列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" label="品牌编号" prop="code" width="160" />
       <el-table-column align="center" label="品牌名称" prop="name" />
       <el-table-column
         :formatter="dateFormatter"
@@ -113,6 +123,7 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  code: undefined,
   name: undefined
 })
 const queryFormRef = ref() // 搜索的表单

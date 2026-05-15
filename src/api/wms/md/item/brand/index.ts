@@ -3,6 +3,7 @@ import request from '@/config/axios'
 // WMS 商品品牌 VO
 export interface ItemBrandVO {
   id?: number
+  code?: string
   name?: string
   createTime?: Date
 }

@@ -8,6 +8,13 @@
       :rules="formRules"
       label-width="100px"
     >
+      <el-form-item label="品牌编号" prop="code">
+        <el-input v-model="formData.code" maxlength="20" placeholder="请输入品牌编号">
+          <template #append>
+            <el-button @click="formData.code = generateWmsCode('B')">生成</el-button>
+          </template>
+        </el-input>
+      </el-form-item>
       <el-form-item label="品牌名称" prop="name">
         <el-input v-model="formData.name" maxlength="30" placeholder="请输入品牌名称" />
       </el-form-item>
@@ -21,6 +28,7 @@
 
 <script lang="ts" setup>
 import { ItemBrandApi, ItemBrandVO } from '@/api/wms/md/item/brand'
+import { generateWmsCode } from '@/views/wms/utils/constants'
 
 /** WMS 商品品牌表单 */
 defineOptions({ name: 'WmsItemBrandForm' })
@@ -34,9 +42,11 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<ItemBrandVO>({
   id: undefined,
+  code: undefined,
   name: undefined
 })
 const formRules = reactive({
+  code: [{ required: true, message: '品牌编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '品牌名称不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
@@ -87,6 +97,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
+    code: undefined,
     name: undefined
   }
   formRef.value?.resetFields()

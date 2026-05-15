@@ -22,7 +22,11 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="商品编号" prop="code">
-            <el-input v-model="formData.code" maxlength="20" placeholder="请输入商品编号" />
+            <el-input v-model="formData.code" maxlength="20" placeholder="请输入商品编号">
+              <template #append>
+                <el-button @click="formData.code = generateWmsCode('I')">生成</el-button>
+              </template>
+            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -68,15 +72,23 @@
             </el-form-item>
           </template>
         </el-table-column>
-        <el-table-column label="编号/条码" width="220">
+        <el-table-column label="编号/条码" width="260">
           <template #default="scope">
-            <el-input v-model="scope.row.code" maxlength="64" class="!w-1/1" placeholder="编号" />
+            <el-input v-model="scope.row.code" maxlength="64" class="!w-1/1" placeholder="编号">
+              <template #append>
+                <el-button @click="scope.row.code = generateWmsCode('S')">生成</el-button>
+              </template>
+            </el-input>
             <el-input
               v-model="scope.row.barCode"
               maxlength="64"
               class="!w-1/1 mt-5px"
-              placeholder="条码为空时，提交后自动生成"
-            />
+              placeholder="条码"
+            >
+              <template #append>
+                <el-button @click="scope.row.barCode = generateWmsCode()">生成</el-button>
+              </template>
+            </el-input>
           </template>
         </el-table-column>
         <el-table-column label="长/宽/高(cm)" width="210">
@@ -168,6 +180,7 @@ import { FormRules } from 'element-plus'
 import { ItemApi, ItemVO } from '@/api/wms/md/item'
 import { ItemSkuVO } from '@/api/wms/md/item/sku'
 import { DIMENSION_PRECISION, PRICE_PRECISION, WEIGHT_PRECISION } from '@/views/wms/utils/format'
+import { generateWmsCode } from '@/views/wms/utils/constants'
 import ItemBrandSelect from './brand/components/ItemBrandSelect.vue'
 import ItemCategorySelect from './category/components/ItemCategorySelect.vue'
 
@@ -192,6 +205,7 @@ const formData = ref<ItemVO>({
   skus: []
 })
 const formRules = reactive<FormRules>({
+  code: [{ required: true, message: '商品编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '商品名称不能为空', trigger: 'blur' }],
   categoryId: [{ required: true, message: '商品分类不能为空', trigger: 'change' }],
   skus: [{ required: true, message: '至少包含一个商品规格', trigger: 'change' }]

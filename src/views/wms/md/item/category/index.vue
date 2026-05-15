@@ -9,6 +9,15 @@
       class="-mb-15px"
       label-width="68px"
     >
+      <el-form-item label="分类编号" prop="code">
+        <el-input
+          v-model="queryParams.code"
+          class="!w-240px"
+          clearable
+          placeholder="请输入分类编号"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="分类名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -71,6 +80,7 @@
       row-key="id"
     >
       <el-table-column label="分类名称" prop="name" />
+      <el-table-column align="center" label="分类编号" prop="code" width="160" />
       <el-table-column align="center" label="排序" prop="sort" width="120" />
       <el-table-column align="center" label="状态" prop="status" width="120">
         <template #default="scope">
@@ -137,6 +147,7 @@ const list = ref<ItemCategoryVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 100,
+  code: undefined,
   name: undefined,
   status: undefined
 })
