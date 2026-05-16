@@ -337,7 +337,6 @@ export enum DICT_TYPE {
   IM_FRIEND_REQUEST_HANDLE_RESULT = 'im_friend_request_handle_result', // IM 好友申请处理结果
   IM_GROUP_STATUS = 'im_group_status', // IM 群状态
   IM_GROUP_MEMBER_ROLE = 'im_group_member_role', // IM 群成员角色
-  IM_GROUP_JOIN_TYPE = 'im_group_join_type', // IM 群加群方式
   IM_GROUP_ADD_SOURCE = 'im_group_add_source', // IM 加群来源
   IM_GROUP_REQUEST_HANDLE_RESULT = 'im_group_request_handle_result', // IM 加群申请处理结果
   IM_RTC_CALL_MEDIA_TYPE = 'im_rtc_call_media_type' // IM 通话媒体类型：1=语音 / 2=视频
