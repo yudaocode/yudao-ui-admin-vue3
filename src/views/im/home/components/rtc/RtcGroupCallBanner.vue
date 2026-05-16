@@ -1,0 +1,167 @@
+<template>
+  <!-- 仅当该群有活跃通话时显示；点击胶囊条展开 popover 看在通话成员 + 加入 -->
+  <div v-if="activeCall" class="flex-shrink-0 px-4 pb-2 bg-[var(--el-fill-color-light)]">
+    <el-popover
+      v-model:visible="popoverVisible"
+      placement="bottom-start"
+      :width="280"
+      trigger="click"
+    >
+      <!-- 胶囊条本体：电话图标 + 文案（含人数）+ 右箭头 -->
+      <template #reference>
+        <div
+          class="inline-flex gap-2 items-center px-2.5 py-1 text-13px rounded-full cursor-pointer select-none transition-colors duration-150 bg-[var(--el-color-success-light-9)] text-[var(--el-text-color-primary)] hover:bg-[var(--el-color-success-light-8)]"
+        >
+          <span
+            class="inline-flex flex-shrink-0 justify-center items-center w-[18px] h-[18px] text-white rounded-full bg-[#07c160]"
+          >
+            <Icon icon="ant-design:phone-filled" :size="14" />
+          </span>
+          <span class="font-medium">{{ pillText }}</span>
+          <Icon
+            icon="ant-design:right-outlined"
+            :size="12"
+            class="text-[var(--el-text-color-secondary)]"
+          />
+        </div>
+      </template>
+
+      <!-- 展开面板：在通话成员头像横排 + 加入按钮 -->
+      <div class="flex flex-col gap-4 items-center pt-2 pb-1">
+        <div class="flex flex-wrap gap-1.5 justify-center max-w-[240px]">
+          <div v-for="m in joinedMembers" :key="m.userId" class="inline-flex" :title="m.nickname">
+            <UserAvatar
+              :url="m.avatar"
+              :name="m.nickname"
+              :size="40"
+              radius="6px"
+              :clickable="false"
+            />
+          </div>
+          <!-- 首次填充时房内可能暂时 0 人；加入后由 ParticipantConnected 事件追加 -->
+          <div v-if="joinedCount === 0" class="p-3 text-13px text-[var(--el-text-color-secondary)]">
+            暂无成员在通话
+          </div>
+        </div>
+        <!-- 自己已在通话内时置灰显示「已在通话中」，避免重复 join -->
+        <button
+          class="w-[200px] h-9 text-sm font-medium rounded-lg cursor-pointer border-none bg-[#f1f1f3] text-[var(--el-text-color-primary)] transition-colors duration-150 disabled:cursor-not-allowed disabled:text-[var(--el-text-color-secondary)] hover:[&:not(:disabled)]:bg-[#e7e7ea]"
+          :disabled="joinDisabled"
+          @click="handleJoin"
+        >
+          {{ joinDisabled ? '已在通话中' : '加入' }}
+        </button>
+      </div>
+    </el-popover>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { computed, ref, watch } from 'vue'
+import Icon from '@/components/Icon/src/Icon.vue'
+import UserAvatar from '../user/UserAvatar.vue'
+import { useMessage } from '@/hooks/web/useMessage'
+import { useRtcStore } from '../../store/rtcStore'
+import { joinCall, getActiveCall } from '@/api/im/home/rtc'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
+import { ImConversationType } from '@/views/im/utils/constants'
+import { getCurrentUserId } from '@/views/im/utils/storage'
+import { getSenderAvatar, getSenderDisplayName } from '@/views/im/utils/user'
+
+const props = defineProps<{
+  groupId: number
+}>()
+
+defineOptions({ name: 'ImRtcGroupCallBanner' })
+
+const rtcStore = useRtcStore()
+const message = useMessage()
+
+const popoverVisible = ref(false)
+
+/** 当前群的活跃通话；rtcStore 维护，参与者加入 / 离开通知增删 joinedUserIds，通话结束移除 */
+const activeCall = computed(() => rtcStore.getGroupCall(props.groupId))
+
+/** 胶囊条文案；有人在通话则带人数，初始 0 人时只显示媒体类型 */
+const pillText = computed(() => {
+  const media = getDictLabel(DICT_TYPE.IM_RTC_CALL_MEDIA_TYPE, activeCall.value?.mediaType)
+  const count = joinedCount.value
+  return count > 0 ? `正在${media}通话（${count} 人）` : `正在${media}通话`
+})
+
+/**
+ * 切到群 / 通话 room 变化时拉一次最新参与者列表；
+ * 两个触发场景：1）用户切群，本端可能没有该群通话的最新缓存；2）参与者通知首次填充后只含本次加入者，缺历史加入者；
+ * 用 [groupId, room] 双源监听 + 已填充守卫，避免切群 / 首次填充触发的双次重复拉取
+ */
+watch(
+  () => [props.groupId, activeCall.value?.room] as const,
+  async ([groupId, room], oldValues) => {
+    if (!groupId) {
+      return
+    }
+
+    // 决策是否需要拉取：切群 / room 切换必拉；同群同 room 且已加载 >= 2 人则跳过，避免参与者通知触发后重复请求
+    const groupChanged = !oldValues || oldValues[0] !== groupId
+    const roomChanged = oldValues && oldValues[1] !== room
+    const hydrated = (activeCall.value?.joinedUserIds?.length ?? 0) > 1
+    if (!groupChanged && !roomChanged && hydrated) {
+      return
+    }
+
+    // 拉最新参与者写回 store；接口返回空 → 该群已无活跃通话，移除本地缓存
+    try {
+      const data = await getActiveCall(groupId)
+      if (data) {
+        rtcStore.setGroupCall(data)
+      } else {
+        rtcStore.removeGroupCall(groupId)
+      }
+    } catch (e) {
+      console.warn('[GroupCallBanner] getActiveCall 失败', { groupId }, e)
+    }
+  },
+  { immediate: true }
+)
+
+/** 在通话中的成员视图模型；昵称 / 头像走 user.ts 的 helper，自动处理 self / 群成员 / 好友 / 兜底 */
+const joinedMembers = computed(() => {
+  const ids = activeCall.value?.joinedUserIds || []
+  return ids.map((userId) => ({
+    userId,
+    nickname: getSenderDisplayName(userId, ImConversationType.GROUP, props.groupId),
+    avatar: getSenderAvatar(userId, ImConversationType.GROUP, props.groupId) || undefined
+  }))
+})
+
+const joinedCount = computed(() => joinedMembers.value.length)
+
+/** 加入按钮禁用：自己已经在该房间内（含本端正在 INVITING / RUNNING） */
+const joinDisabled = computed(() => {
+  const myId = getCurrentUserId()
+  if (rtcStore.isActive && rtcStore.call?.room === activeCall.value?.room) {
+    return true
+  }
+  return activeCall.value?.joinedUserIds?.includes(myId) ?? false
+})
+
+/** 主动加入：调 invite 命中已有 call 拿 token；rtcStore 按 status 自动进 RUNNING */
+async function handleJoin() {
+  const call = activeCall.value
+  if (!call || joinDisabled.value) {
+    return
+  }
+  if (rtcStore.isActive) {
+    message.warning('您正在通话中')
+    return
+  }
+  popoverVisible.value = false
+  try {
+    const data = await joinCall(call.room)
+    rtcStore.startInviting(data)
+  } catch (e: any) {
+    console.error('[GroupCallBanner] join 失败', { room: call.room }, e)
+    message.error(e?.msg || '加入失败')
+  }
+}
+</script>
