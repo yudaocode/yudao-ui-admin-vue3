@@ -238,6 +238,14 @@
 
 ![功能图](/.image/common/erp-feature.png)
 
+### WMS 系统
+
+演示地址：<https://doc.iocoder.cn/wms-preview/>
+
+![功能图](/.image/common/wms-feature.png)
+
+![预览图](/.image/common/wms-preview.png)
+
 ### CRM 系统
 
 演示地址：<https://doc.iocoder.cn/crm-preview/>
