@@ -1,5 +1,7 @@
 <!-- WMS 库存统计 -->
 <template>
+  <doc-alert title="【库存】库存记录、流水、统计" url="https://doc.iocoder.cn/wms/inventory/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

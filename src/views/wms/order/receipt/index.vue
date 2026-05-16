@@ -1,5 +1,7 @@
 <!-- WMS 入库单 -->
 <template>
+  <doc-alert title="【单据】入库" url="https://doc.iocoder.cn/wms/order/receipt/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

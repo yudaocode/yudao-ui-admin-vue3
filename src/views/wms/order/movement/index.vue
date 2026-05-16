@@ -1,5 +1,7 @@
 <!-- WMS 移库单 -->
 <template>
+  <doc-alert title="【单据】移库" url="https://doc.iocoder.cn/wms/order/movement/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

@@ -1,5 +1,7 @@
 <!-- WMS 商品管理 -->
 <template>
+  <doc-alert title="【基础】商品、SKU、分类、品牌" url="https://doc.iocoder.cn/wms/md/item/" />
+
   <el-row :gutter="20">
     <el-col :span="4" :xs="24">
       <ContentWrap class="h-1/1">

@@ -91,7 +91,7 @@ const include = [
   'element-plus/es/components/dropdown-menu/style/css',
   'element-plus/es/components/dropdown-item/style/css',
   'element-plus/es/components/skeleton/style/css',
-  'element-plus/es/components/skeleton/style/css',
+  'element-plus/es/components/skeleton-item/style/css',
   'element-plus/es/components/backtop/style/css',
   'element-plus/es/components/menu/style/css',
   'element-plus/es/components/sub-menu/style/css',

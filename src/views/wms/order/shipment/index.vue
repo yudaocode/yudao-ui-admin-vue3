@@ -1,5 +1,7 @@
 <!-- WMS 出库单 -->
 <template>
+  <doc-alert title="【单据】出库" url="https://doc.iocoder.cn/wms/order/shipment/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

@@ -8,7 +8,7 @@
     "i": "pnpm install",
     "dev": "vite --mode env.local",
     "dev-server": "vite --mode dev",
-    "ts:check": "vue-tsc --noEmit",
+    "ts:check": "cross-env NODE_OPTIONS=--max-old-space-size=8192 vue-tsc --noEmit",
     "build:local": "cross-env NODE_OPTIONS=--max-old-space-size=8192 vite build --mode env.local",
     "build:dev": "cross-env NODE_OPTIONS=--max-old-space-size=8192 vite build --mode dev",
     "build:test": "cross-env NODE_OPTIONS=--max-old-space-size=8192 vite build --mode test",

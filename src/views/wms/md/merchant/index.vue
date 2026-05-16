@@ -1,5 +1,10 @@
 <!-- WMS 往来企业 -->
 <template>
+  <doc-alert
+    title="【基础】往来企业（供应商、客户）"
+    url="https://doc.iocoder.cn/wms/md/merchant/"
+  />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

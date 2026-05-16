@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="WMS 手册（功能开启）" url="https://doc.iocoder.cn/wms/build/" />
+
   <div class="[--wms-card-radius:8px]">
     <div
       class="mb-16px flex flex-wrap justify-between gap-16px rounded-[var(--wms-card-radius)] border border-[var(--el-border-color-light)] border-solid bg-[var(--el-bg-color)] p-16px"

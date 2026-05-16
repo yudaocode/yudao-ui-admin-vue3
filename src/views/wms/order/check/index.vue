@@ -1,5 +1,7 @@
 <!-- WMS 盘库单 -->
 <template>
+  <doc-alert title="【单据】盘库" url="https://doc.iocoder.cn/wms/order/check/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

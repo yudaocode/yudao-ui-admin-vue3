@@ -1,5 +1,7 @@
 <!-- WMS 库存流水 -->
 <template>
+  <doc-alert title="【库存】库存记录、流水、统计" url="https://doc.iocoder.cn/wms/inventory/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -154,7 +156,10 @@
             <span>单价：</span>
             <span>{{ formatPrice(scope.row.price) }}</span>
           </div>
-          <div v-if="scope.row.totalPrice || scope.row.totalPrice === 0" class="flex justify-between">
+          <div
+            v-if="scope.row.totalPrice || scope.row.totalPrice === 0"
+            class="flex justify-between"
+          >
             <span>金额：</span>
             <span>{{ formatPrice(scope.row.totalPrice) }}</span>
           </div>
