@@ -174,19 +174,19 @@ import {
 import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
 
 const props = defineProps<{
-  items: undefined
-  disabled: false
+  items: any[]
+  disabled?: boolean
 }>()
 const formLoading = ref(false) // 表单的加载中
-const formData = ref([])
+const formData = ref<any[]>([])
 const formRules = reactive({
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'blur' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })
-const formRef = ref([]) // 表单 Ref
+const formRef = ref() // 表单 Ref
 const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
-const defaultWarehouse = ref<WarehouseVO>(undefined) // 默认仓库
+const defaultWarehouse = ref<WarehouseVO>() // 默认仓库
 
 /** 初始化设置入库项 */
 watch(
@@ -245,25 +245,6 @@ const getSummaries = (param: SummaryMethodProps) => {
   })
 
   return sums
-}
-
-/** 新增按钮操作 */
-const handleAdd = () => {
-  const row = {
-    id: undefined,
-    productId: undefined,
-    productUnitName: undefined, // 产品单位
-    productBarCode: undefined, // 产品条码
-    productPrice: undefined,
-    stockCount: undefined,
-    count: 1,
-    totalProductPrice: undefined,
-    taxPercent: undefined,
-    taxPrice: undefined,
-    totalPrice: undefined,
-    remark: undefined
-  }
-  formData.value.push(row)
 }
 
 /** 删除按钮操作 */

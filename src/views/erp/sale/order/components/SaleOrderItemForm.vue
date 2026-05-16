@@ -146,16 +146,16 @@ import {
 } from '@/utils'
 
 const props = defineProps<{
-  items: undefined
-  disabled: false
+  items: any[]
+  disabled?: boolean
 }>()
 const formLoading = ref(false) // 表单的加载中
-const formData = ref([])
+const formData = ref<any[]>([])
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })
-const formRef = ref([]) // 表单 Ref
+const formRef = ref() // 表单 Ref
 const productList = ref<ProductVO[]>([]) // 产品列表
 
 /** 初始化设置出库项 */

@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
@@ -198,7 +198,7 @@ const handleDelete = async (id: number) => {
 }
 
 /** 修改默认状态 */
-const handleDefaultStatusChange = async (row: WarehouseVO) => {
+const handleDefaultStatusChange = async (row: AccountVO) => {
   try {
     // 修改状态的二次确认
     const text = row.defaultStatus ? '设置' : '取消'
@@ -207,7 +207,7 @@ const handleDefaultStatusChange = async (row: WarehouseVO) => {
     await AccountApi.updateAccountDefaultStatus(row.id, row.defaultStatus)
     // 刷新列表
     await getList()
-  } catch (e) {
+  } catch {
     // 取消后，进行恢复按钮
     row.defaultStatus = !row.defaultStatus
   }

@@ -68,7 +68,6 @@
   <SaleReturnRefundEnableList ref="saleReturnRefundEnableListRef" @success="handleAddSaleReturn" />
 </template>
 <script setup lang="ts">
-import { ProductVO } from '@/api/erp/product/product'
 import { erpPriceInputFormatter, getSumValue } from '@/utils'
 import SaleOutReceiptEnableList from '@/views/erp/sale/out/components/SaleOutReceiptEnableList.vue'
 import SaleReturnRefundEnableList from '@/views/erp/sale/return/components/SaleReturnRefundEnableList.vue'
@@ -77,19 +76,18 @@ import { ErpBizType } from '@/utils/constants'
 import { SaleReturnVO } from '@/api/erp/sale/return'
 
 const props = defineProps<{
-  items: undefined
-  customerId: undefined
-  disabled: false
+  items: any[]
+  customerId?: number
+  disabled?: boolean
 }>()
 const message = useMessage()
 
 const formLoading = ref(false) // 表单的加载中
-const formData = ref([])
+const formData = ref<any[]>([])
 const formRules = reactive({
   receiptPrice: [{ required: true, message: '本次收款不能为空', trigger: 'blur' }]
 })
-const formRef = ref([]) // 表单 Ref
-const productList = ref<ProductVO[]>([]) // 产品列表
+const formRef = ref() // 表单 Ref
 
 /** 初始化设置出库项 */
 watch(
@@ -130,13 +128,14 @@ const handleOpenSaleOut = () => {
 }
 const handleAddSaleOut = (rows: SaleOutVO[]) => {
   rows.forEach((row) => {
+    const receiptPrice = (row as SaleOutVO & { receiptPrice: number }).receiptPrice
     formData.value.push({
       bizId: row.id,
       bizType: ErpBizType.SALE_OUT,
       bizNo: row.no,
       totalPrice: row.totalPrice,
-      receiptedPrice: row.receiptPrice,
-      receiptPrice: row.totalPrice - row.receiptPrice
+      receiptedPrice: receiptPrice,
+      receiptPrice: row.totalPrice - receiptPrice
     })
   })
 }
@@ -152,13 +151,14 @@ const handleOpenSaleReturn = () => {
 }
 const handleAddSaleReturn = (rows: SaleReturnVO[]) => {
   rows.forEach((row) => {
+    const refundPrice = (row as SaleReturnVO & { refundPrice: number }).refundPrice
     formData.value.push({
       bizId: row.id,
       bizType: ErpBizType.SALE_RETURN,
       bizNo: row.no,
       totalPrice: -row.totalPrice,
-      receiptedPrice: -row.refundPrice,
-      receiptPrice: -row.totalPrice + row.refundPrice
+      receiptedPrice: -refundPrice,
+      receiptPrice: -row.totalPrice + refundPrice
     })
   })
 }
