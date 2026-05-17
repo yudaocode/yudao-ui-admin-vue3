@@ -308,13 +308,18 @@ async function handleCancel() {
 
 /** 被叫拒绝来电 */
 async function handleReject() {
-  const room = rtcStore.incomingPayload?.room
+  const payload = rtcStore.incomingPayload
+  const room = payload?.room
   if (room) {
     try {
       await rejectCall(room)
     } catch (e) {
       console.warn('[Call] reject 失败', { room }, e)
     }
+  }
+  // 本端先行把自己从胶囊条移除，避免等后端 RTC_CALL(REJECTED) 推回的延迟
+  if (payload?.conversationType === ImConversationType.GROUP && payload.groupId) {
+    rtcStore.applyParticipantRejected({ ...payload, operatorUserId: getCurrentUserId() })
   }
   rtcStore.reset()
 }
@@ -335,13 +340,23 @@ async function handleAccept() {
 
 /** 通话中挂断 */
 async function handleHangup() {
-  const room = rtcStore.call?.room
+  const call = rtcStore.call
+  const room = call?.room
   if (room) {
     try {
       await leaveCall(room)
     } catch (e) {
       console.warn('[Call] leave 失败', { room }, e)
     }
+  }
+  // 群聊：本端先行把自己从胶囊条移除，避免等后端 1603 推回的延迟（私聊场景整通话结束走 END 移除整条）
+  if (call?.conversationType === ImConversationType.GROUP && call.groupId && room) {
+    rtcStore.applyParticipantDisconnected({
+      room,
+      userId: getCurrentUserId(),
+      conversationType: call.conversationType,
+      groupId: call.groupId
+    })
   }
   await lk.disconnect()
   rtcStore.reset()
@@ -402,6 +417,8 @@ async function handleAddMemberSuccess(userIds: number[]) {
   }
   try {
     await inviteCall({ room: call.room, inviteeIds: userIds })
+    // 同步本地 inviteeIds，让新成员立即作为 pending 占位出现在网格里
+    rtcStore.appendInvitees(userIds)
     message.success('已发送邀请')
   } catch (e: any) {
     console.error('[Call] invite 追加失败', { room: call.room, inviteeIds: userIds }, e)

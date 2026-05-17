@@ -741,10 +741,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
               }
               break
             case ImRtcParticipantStatus.REJECTED:
-              // 群通话单人拒绝；把拒绝者从 pending 占位移除（私聊拒绝走 RTC_CALL_END 入消息流，不走本通道）
-              if (payload.operatorUserId) {
-                rtcStore.markUserLeft(payload.operatorUserId)
-              }
+              rtcStore.applyParticipantRejected(payload)
               break
             case ImRtcParticipantStatus.JOINED:
             case ImRtcParticipantStatus.NO_ANSWER:

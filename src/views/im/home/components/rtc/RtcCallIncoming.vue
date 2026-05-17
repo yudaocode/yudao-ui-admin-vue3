@@ -30,7 +30,7 @@
         <div class="text-13px text-white/60 truncate">{{ tipText }}</div>
       </template>
 
-      <!-- 群通话成员行；私聊无 -->
+      <!-- 群通话成员行；私聊无；接入中的人半透明展示 -->
       <template v-if="isGroup && callMembers.length > 0">
         <div class="mt-1 text-xs text-white/45">通话成员</div>
         <div class="flex flex-wrap gap-1">
@@ -42,6 +42,8 @@
             :size="22"
             radius="4px"
             :clickable="false"
+            :class="{ 'opacity-50': member.pending }"
+            :title="member.pending ? `${member.nickname}（接入中）` : member.nickname"
           />
         </div>
       </template>
@@ -69,12 +71,9 @@
 import { computed } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import UserAvatar from '../user/UserAvatar.vue'
-import { useRtcStore } from '../../store/rtcStore'
 import type { ImRtcCallNotification } from '../../store/rtcStore'
+import { useGroupCallMembers } from '../../composables/useGroupCallMembers'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
-import { ImConversationType } from '@/views/im/utils/constants'
-import { getCurrentUserId } from '@/views/im/utils/storage'
-import { getSenderAvatar, getSenderDisplayName } from '@/views/im/utils/user'
 
 const props = defineProps<{
   payload: ImRtcCallNotification | null
@@ -83,34 +82,15 @@ const props = defineProps<{
 
 defineEmits<{ accept: []; reject: [] }>()
 
-const rtcStore = useRtcStore()
-
 /** 来电提示文案；区分语音 / 视频 */
 const tipText = computed(() => {
   if (!props.payload) return ''
   return `邀请你${getDictLabel(DICT_TYPE.IM_RTC_CALL_MEDIA_TYPE, props.payload.mediaType)}通话`
 })
 
-/** 群聊：已加入通话的成员（自己除外）；缓存里 joinedUserIds 为空时降级到主叫，保证至少一头像 */
-const callMembers = computed(() => {
-  if (!props.isGroup) {
-    return []
-  }
-  const groupId = props.payload?.groupId
-  if (!groupId) {
-    return []
-  }
-  const myId = getCurrentUserId()
-  const joined = rtcStore.getGroupCall(groupId)?.joinedUserIds ?? []
-  const ids = joined.length > 0
-    ? joined.filter((id) => id !== myId)
-    : props.payload?.inviterUserId
-      ? [props.payload.inviterUserId]
-      : []
-  return ids.map((userId) => ({
-    userId,
-    nickname: getSenderDisplayName(userId, ImConversationType.GROUP, groupId),
-    avatar: getSenderAvatar(userId, ImConversationType.GROUP, groupId) || undefined
-  }))
-})
+/** 群通话成员；缓存为空时用 INVITE 载荷里的主叫兜底，避免空白 */
+const callMembers = useGroupCallMembers(
+  computed(() => (props.isGroup ? props.payload?.groupId : undefined)),
+  computed(() => props.payload?.inviterUserId)
+)
 </script>

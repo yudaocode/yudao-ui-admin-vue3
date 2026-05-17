@@ -26,25 +26,25 @@
         </div>
       </template>
 
-      <!-- 展开面板：在通话成员头像横排 + 加入按钮 -->
+      <!-- 展开面板：通话成员（含接入中）头像横排 + 加入按钮 -->
       <div class="flex flex-col gap-4 items-center pt-2 pb-1">
         <div class="flex flex-wrap gap-1.5 justify-center max-w-[240px]">
-          <div
-            v-for="member in joinedMembers"
+          <UserAvatar
+            v-for="member in memberList"
             :key="member.userId"
-            class="inline-flex"
-            :title="member.nickname"
-          >
-            <UserAvatar
-              :url="member.avatar"
-              :name="member.nickname"
-              :size="40"
-              radius="6px"
-              :clickable="false"
-            />
-          </div>
+            :url="member.avatar"
+            :name="member.nickname"
+            :size="40"
+            radius="6px"
+            :clickable="false"
+            :class="{ 'opacity-50': member.pending }"
+            :title="member.pending ? `${member.nickname}（接入中）` : member.nickname"
+          />
           <!-- 首次填充时房内可能暂时 0 人；加入后由 ParticipantConnected 事件追加 -->
-          <div v-if="joinedCount === 0" class="p-3 text-13px text-[var(--el-text-color-secondary)]">
+          <div
+            v-if="memberList.length === 0"
+            class="p-3 text-13px text-[var(--el-text-color-secondary)]"
+          >
             暂无成员在通话
           </div>
         </div>
@@ -67,11 +67,10 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import UserAvatar from '../user/UserAvatar.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useRtcStore } from '../../store/rtcStore'
+import { useGroupCallMembers } from '../../composables/useGroupCallMembers'
 import { joinCall, getActiveCall } from '@/api/im/home/rtc'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
-import { ImConversationType } from '@/views/im/utils/constants'
 import { getCurrentUserId } from '@/views/im/utils/storage'
-import { getSenderAvatar, getSenderDisplayName } from '@/views/im/utils/user'
 
 const props = defineProps<{
   groupId: number
@@ -87,10 +86,10 @@ const popoverVisible = ref(false)
 /** 当前群的活跃通话；rtcStore 维护，参与者加入 / 离开通知增删 joinedUserIds，通话结束移除 */
 const activeCall = computed(() => rtcStore.getGroupCall(props.groupId))
 
-/** 胶囊条文案；有人在通话则带人数，初始 0 人时只显示媒体类型 */
+/** 胶囊条文案；有成员（已加入 + 接入中）则带人数，初始 0 人时只显示媒体类型 */
 const pillText = computed(() => {
   const media = getDictLabel(DICT_TYPE.IM_RTC_CALL_MEDIA_TYPE, activeCall.value?.mediaType)
-  const count = joinedCount.value
+  const count = memberList.value.length
   return count > 0 ? `正在${media}通话（${count} 人）` : `正在${media}通话`
 })
 
@@ -129,17 +128,8 @@ watch(
   { immediate: true }
 )
 
-/** 在通话中的成员视图模型；昵称 / 头像走 user.ts 的 helper，自动处理 self / 群成员 / 好友 / 兜底 */
-const joinedMembers = computed(() => {
-  const ids = activeCall.value?.joinedUserIds || []
-  return ids.map((userId) => ({
-    userId,
-    nickname: getSenderDisplayName(userId, ImConversationType.GROUP, props.groupId),
-    avatar: getSenderAvatar(userId, ImConversationType.GROUP, props.groupId) || undefined
-  }))
-})
-
-const joinedCount = computed(() => joinedMembers.value.length)
+/** 在通话中的成员（已加入）+ 接入中的成员（已邀请未接通） */
+const memberList = useGroupCallMembers(computed(() => props.groupId))
 
 /** 本端是否正在该房间通话（处于 INVITING / RUNNING） */
 const isInThisCall = computed(

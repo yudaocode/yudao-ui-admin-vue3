@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { isEqual } from 'lodash-es'
+import { isEqual, union } from 'lodash-es'
 import type { ImRtcCallRespVO, ImRtcGroupCallRespVO } from '@/api/im/home/rtc'
 import {
   ImRtcCallStage,
@@ -225,6 +225,20 @@ export const useRtcStore = defineStore('imRtc', () => {
     leftUserIds.value = new Set()
   }
 
+  /** 通话中追加被邀请人；让 participants 网格出现 pending 占位、胶囊条同步更新 */
+  function appendInvitees(userIds: number[]) {
+    if (!call.value || userIds.length === 0) {
+      return
+    }
+    const existing = call.value.inviteeIds ?? []
+    const merged = union(existing, userIds)
+    if (merged.length === existing.length) {
+      return
+    }
+    call.value = { ...call.value, inviteeIds: merged }
+    syncGroupActiveCall(call.value)
+  }
+
   // ==================== 群通话胶囊条状态 ====================
 
   /**
@@ -307,17 +321,37 @@ export const useRtcStore = defineStore('imRtc', () => {
     if (!isGroup || !payload.groupId) {
       return
     }
-    const existing = groupActiveCalls.value.get(payload.groupId)
-    if (!existing || existing.room !== payload.room) {
+    dropFromGroupActiveCall(payload.groupId, payload.room, payload.userId)
+  }
+
+  /** 群通话单人拒绝邀请：标记 leftUserIds + 从胶囊条 inviteeIds 移除（私聊拒绝走 RTC_CALL_END，不入本通道） */
+  function applyParticipantRejected(payload: ImRtcCallNotification) {
+    if (!payload.operatorUserId) {
+      return
+    }
+    markUserLeft(payload.operatorUserId)
+    if (payload.conversationType === ImConversationType.GROUP && payload.groupId) {
+      dropFromGroupActiveCall(payload.groupId, payload.room, payload.operatorUserId)
+    }
+  }
+
+  /** 从指定群活跃通话的 joined / pending 列表里同步移除某用户；用于 disconnect / reject 让胶囊条不再展示 */
+  function dropFromGroupActiveCall(groupId: number, room: string, userId: number) {
+    const existing = groupActiveCalls.value.get(groupId)
+    if (!existing || existing.room !== room) {
       return
     }
     const joined = existing.joinedUserIds ?? []
-    if (!joined.includes(payload.userId)) {
+    const invitee = existing.inviteeIds ?? []
+    const nextJoined = joined.filter((id) => id !== userId)
+    const nextInvitee = invitee.filter((id) => id !== userId)
+    if (nextJoined.length === joined.length && nextInvitee.length === invitee.length) {
       return
     }
     setGroupCall({
       ...existing,
-      joinedUserIds: joined.filter((id) => id !== payload.userId)
+      joinedUserIds: nextJoined,
+      inviteeIds: nextInvitee
     })
   }
 
@@ -333,12 +367,14 @@ export const useRtcStore = defineStore('imRtc', () => {
     showIncoming,
     enterRunning,
     reset,
+    appendInvitees,
     markUserLeft,
     isUserLeft,
     setGroupCall,
     removeGroupCall,
     getGroupCall,
     applyParticipantConnected,
-    applyParticipantDisconnected
+    applyParticipantDisconnected,
+    applyParticipantRejected
   }
 })
