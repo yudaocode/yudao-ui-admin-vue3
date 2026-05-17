@@ -325,7 +325,9 @@ export const useRtcStore = defineStore('imRtc', () => {
   }
 
   /** 群通话单人拒绝邀请：标记 leftUserIds + 从胶囊条 inviteeIds 移除（私聊拒绝走 RTC_CALL_END，不入本通道） */
-  function applyParticipantRejected(payload: ImRtcCallNotification) {
+  function applyParticipantRejected(
+    payload: Pick<ImRtcCallNotification, 'room' | 'conversationType' | 'groupId' | 'operatorUserId'>
+  ) {
     if (!payload.operatorUserId) {
       return
     }

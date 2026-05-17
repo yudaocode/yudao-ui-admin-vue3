@@ -309,17 +309,19 @@ async function handleCancel() {
 /** 被叫拒绝来电 */
 async function handleReject() {
   const payload = rtcStore.incomingPayload
-  const room = payload?.room
-  if (room) {
+  if (payload?.room) {
     try {
-      await rejectCall(room)
+      await rejectCall(payload.room)
     } catch (e) {
-      console.warn('[Call] reject 失败', { room }, e)
+      console.warn('[Call] reject 失败', { room: payload.room }, e)
     }
-  }
-  // 本端先行把自己从胶囊条移除，避免等后端 RTC_CALL(REJECTED) 推回的延迟
-  if (payload?.conversationType === ImConversationType.GROUP && payload.groupId) {
-    rtcStore.applyParticipantRejected({ ...payload, operatorUserId: getCurrentUserId() })
+    // 本端先行从胶囊条移除自己，免等后端 RTC_CALL(REJECTED) 推回；私聊场景 store 内部 no-op
+    rtcStore.applyParticipantRejected({
+      room: payload.room,
+      conversationType: payload.conversationType,
+      groupId: payload.groupId,
+      operatorUserId: getCurrentUserId()
+    })
   }
   rtcStore.reset()
 }
@@ -341,18 +343,15 @@ async function handleAccept() {
 /** 通话中挂断 */
 async function handleHangup() {
   const call = rtcStore.call
-  const room = call?.room
-  if (room) {
+  if (call?.room) {
     try {
-      await leaveCall(room)
+      await leaveCall(call.room)
     } catch (e) {
-      console.warn('[Call] leave 失败', { room }, e)
+      console.warn('[Call] leave 失败', { room: call.room }, e)
     }
-  }
-  // 群聊：本端先行把自己从胶囊条移除，避免等后端 1603 推回的延迟（私聊场景整通话结束走 END 移除整条）
-  if (call?.conversationType === ImConversationType.GROUP && call.groupId && room) {
+    // 本端先行从胶囊条移除自己，免等后端 RTC_PARTICIPANT_DISCONNECTED 推回；私聊场景 store 内部 no-op，整通话由 END 关掉
     rtcStore.applyParticipantDisconnected({
-      room,
+      room: call.room,
       userId: getCurrentUserId(),
       conversationType: call.conversationType,
       groupId: call.groupId
