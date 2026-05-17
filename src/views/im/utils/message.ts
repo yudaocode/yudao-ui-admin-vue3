@@ -1,6 +1,5 @@
 import { generateUUID } from '@/utils'
 import { useUserStore } from '@/store/modules/user'
-import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import {
   ImRtcCallEndReason,
   ImConversationType,
@@ -105,10 +104,7 @@ const URL_MIN_LENGTH = 6
  *
  * mentions 不传或匹配不上时，@xxx 退化为普通 text；解析与渲染解耦，工具函数本身不依赖 store
  */
-export function parseTextSegments(
-  text: string,
-  mentions: MentionCandidate[] = []
-): TipSegment[] {
+export function parseTextSegments(text: string, mentions: MentionCandidate[] = []): TipSegment[] {
   if (!text) {
     return []
   }
@@ -712,9 +708,7 @@ export function resolveGroupNotificationSegments(
   // ENTER 主语是 entrant 而非 operator，独立处理；其它 case 都以 operatorUserId 为主语
   if (message.type === ImMessageType.GROUP_MEMBER_ENTER) {
     const entrantId = payload.entrantUserId ?? payload.operatorUserId
-    return entrantId
-      ? [tipMention(entrantId, resolveName(entrantId)), tipText(' 加入了群聊')]
-      : []
+    return entrantId ? [tipMention(entrantId, resolveName(entrantId)), tipText(' 加入了群聊')] : []
   }
   if (!payload.operatorUserId) {
     return []
@@ -855,7 +849,7 @@ export function parseRtcCallPayload(
 /**
  * 会话内通话事件 segments（RTC_CALL_START / RTC_CALL_END）
  * <p>
- * 群聊两段式：START「{inviter} 发起了{voice/video}通话」+ END「{voice/video}通话已结束 [时长 X]」
+ * 群聊两段式：START「{inviter} 发起了语音通话」+ END「语音通话已经结束」
  * <p>
  * 私聊气泡走 {@link resolveRtcCallPrivateBubbleText}
  */
@@ -868,18 +862,46 @@ export function resolveRtcCallTipSegments(message: {
   if (!payload) {
     return []
   }
-  const media = getDictLabel(DICT_TYPE.IM_RTC_CALL_MEDIA_TYPE, payload.mediaType)
   if (message.type === ImMessageType.RTC_CALL_START) {
-    const inviter = payload.inviterNickname?.trim() || `用户 ${payload.inviterUserId ?? ''}`
-    return [tipText(`${inviter} 发起了${media}通话`)]
+    return payload.inviterUserId
+      ? [tipMention(payload.inviterUserId, resolveRtcInviterLabel(payload)), tipText(' 发起了语音通话')]
+      : []
   }
   if (message.type === ImMessageType.RTC_CALL_END) {
-    if (payload.durationSeconds && payload.durationSeconds > 0) {
-      return [tipText(`${media}通话已结束（时长 ${formatCallDuration(payload.durationSeconds)}）`)]
-    }
-    return [tipText(`${media}通话已结束`)]
+    return [tipText('语音通话已经结束')]
   }
   return []
+}
+
+/** 取 RTC 通话发起人展示名；昵称为空时回退「用户 {id}」 */
+function resolveRtcInviterLabel(payload: RtcCallStartPayload): string {
+  return payload.inviterNickname?.trim() || `用户 ${payload.inviterUserId ?? ''}`
+}
+
+/**
+ * 会话列表最后一条预览文案（RTC_CALL_START / RTC_CALL_END）
+ * <p>
+ * 私聊：START / END 都展示「[语音通话]」，对齐 [图片] / [语音] 风格
+ * <p>
+ * 群聊：START「{inviter} 发起了语音通话」、END「语音通话已经结束」，与聊天 tip 同源
+ */
+export function resolveRtcCallLastContent(
+  message: { type?: number; content?: string },
+  conversationType: number
+): string {
+  if (conversationType === ImConversationType.PRIVATE) {
+    return '[语音通话]'
+  }
+  if (message.type === ImMessageType.RTC_CALL_END) {
+    return '语音通话已经结束'
+  }
+  if (message.type === ImMessageType.RTC_CALL_START) {
+    const payload = parseRtcCallPayload(message.content)
+    if (payload) {
+      return `${resolveRtcInviterLabel(payload)} 发起了语音通话`
+    }
+  }
+  return ''
 }
 
 /**
