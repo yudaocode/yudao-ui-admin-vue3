@@ -382,10 +382,10 @@ watch(
                   <Icon
                     v-if="
                       tagsViewIcon &&
-                      (item?.meta?.icon ||
-                        (item?.matched &&
-                          item.matched[0] &&
-                          item.matched[item.matched.length - 1].meta?.icon))
+                        (item?.meta?.icon ||
+                          (item?.matched &&
+                            item.matched[0] &&
+                            item.matched[item.matched.length - 1].meta?.icon))
                     "
                     :icon="item?.meta?.icon || item.matched[item.matched.length - 1].meta.icon"
                     :size="12"
@@ -393,7 +393,7 @@ watch(
                   />
                   {{
                     t(item?.meta?.title as string) +
-                    (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
+                      (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
                   }}
                   <Icon
                     :class="`${prefixCls}__item--close`"

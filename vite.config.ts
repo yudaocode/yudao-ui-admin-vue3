@@ -1,6 +1,6 @@
 import {resolve} from 'path'
 import type {ConfigEnv, UserConfig} from 'vite'
-import {loadEnv} from 'vite'
+import {loadEnv, normalizePath} from 'vite'
 import {createVitePlugins} from './build/vite'
 import {exclude, include} from "./build/vite/optimize"
 // 当前执行node命令时文件夹的地址(工作目录)
@@ -20,6 +20,7 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
     } else {
         env = loadEnv(mode, root)
     }
+    const variablesScssPath = normalizePath(pathResolve('src/styles/variables.scss'))
     return {
         base: env.VITE_BASE_PATH,
         root: root,
@@ -47,7 +48,18 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             },
             preprocessorOptions: {
                 scss: {
-                    additionalData: `@use "${pathResolve('src/styles/variables.scss')}" as *;`,
+                    additionalData: (source: string, filename: string) => {
+                        const normalizedFilename = normalizePath(filename)
+                        // Windows 下更容易触发重复注入：定义或显式转导变量的文件，不能再次注入同一个
+                        // `@use ... as *`，否则 Sass 会报 duplicate global variables。
+                        if (
+                            normalizedFilename.endsWith('/src/styles/variables.scss') ||
+                            normalizedFilename.endsWith('/src/styles/global.module.scss')
+                        ) {
+                            return source
+                        }
+                        return `@use "${variablesScssPath}" as *;\n${source}`
+                    },
                     api: 'modern-compiler'
                 }
             }

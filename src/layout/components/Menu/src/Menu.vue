@@ -13,7 +13,6 @@ const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('menu')
 
 export default defineComponent({
-  // eslint-disable-next-line vue/no-reserved-component-names
   name: 'Menu',
   props: {
     menuSelect: {

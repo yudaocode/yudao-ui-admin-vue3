@@ -9,26 +9,26 @@
     >
       <Icon icon="ep:plus" class="mr-5px" /> 新增
     </el-button>
-      <el-button
-          type="danger"
-          plain
-          :disabled="isEmpty(checkedIds)"
-          @click="handleDeleteBatch"
-          v-hasPermi="['infra:demo03-student:delete']"
-      >
-        <Icon icon="ep:delete" class="mr-5px" /> 批量删除
-      </el-button>
-    <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
-        @selection-change="handleRowCheckboxChange"
+    <el-button
+      type="danger"
+      plain
+      :disabled="isEmpty(checkedIds)"
+      @click="handleDeleteBatch"
+      v-hasPermi="['infra:demo03-student:delete']"
     >
-          <el-table-column type="selection" width="55" />
+      <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+    </el-button>
+    <el-table
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleRowCheckboxChange"
+    >
+      <el-table-column type="selection" width="55" />
       <el-table-column label="编号" align="center" prop="id" />
-       <el-table-column label="名字" align="center" prop="name" />
+      <el-table-column label="名字" align="center" prop="name" />
       <el-table-column label="班主任" align="center" prop="teacher" />
       <el-table-column
         label="创建时间"
@@ -66,8 +66,8 @@
       @pagination="getList"
     />
   </ContentWrap>
-    <!-- 表单弹窗：添加/修改 -->
-    <Demo03GradeForm ref="formRef" @success="getList" />
+  <!-- 表单弹窗：添加/修改 -->
+  <Demo03GradeForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
