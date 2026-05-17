@@ -29,10 +29,15 @@
       <!-- 展开面板：在通话成员头像横排 + 加入按钮 -->
       <div class="flex flex-col gap-4 items-center pt-2 pb-1">
         <div class="flex flex-wrap gap-1.5 justify-center max-w-[240px]">
-          <div v-for="m in joinedMembers" :key="m.userId" class="inline-flex" :title="m.nickname">
+          <div
+            v-for="member in joinedMembers"
+            :key="member.userId"
+            class="inline-flex"
+            :title="member.nickname"
+          >
             <UserAvatar
-              :url="m.avatar"
-              :name="m.nickname"
+              :url="member.avatar"
+              :name="member.nickname"
               :size="40"
               radius="6px"
               :clickable="false"
@@ -43,13 +48,13 @@
             暂无成员在通话
           </div>
         </div>
-        <!-- 自己已在通话内时置灰显示「已在通话中」，避免重复 join -->
+        <!-- 本端在通话内时置灰「已在通话中」；服务端残留我但本端连接断了显示「重新加入」（刷新页面后场景） -->
         <button
-          class="w-[200px] h-9 text-sm font-medium rounded-lg cursor-pointer border-none bg-[#f1f1f3] text-[var(--el-text-color-primary)] transition-colors duration-150 disabled:cursor-not-allowed disabled:text-[var(--el-text-color-secondary)] hover:[&:not(:disabled)]:bg-[#e7e7ea]"
+          class="w-[200px] h-9 text-sm font-medium rounded-lg cursor-pointer border-none bg-[#f1f1f3] text-[#1a1a1c] transition-colors duration-150 disabled:cursor-not-allowed disabled:text-[#999] hover:[&:not(:disabled)]:bg-[#e7e7ea]"
           :disabled="joinDisabled"
           @click="handleJoin"
         >
-          {{ joinDisabled ? '已在通话中' : '加入' }}
+          {{ joinLabel }}
         </button>
       </div>
     </el-popover>
@@ -136,13 +141,28 @@ const joinedMembers = computed(() => {
 
 const joinedCount = computed(() => joinedMembers.value.length)
 
-/** 加入按钮禁用：自己已经在该房间内（含本端正在 INVITING / RUNNING） */
-const joinDisabled = computed(() => {
+/** 本端是否正在该房间通话（处于 INVITING / RUNNING） */
+const isInThisCall = computed(
+  () => rtcStore.isActive && rtcStore.call?.room === activeCall.value?.room
+)
+
+/**
+ * 服务端是否记录我已加入；刷新后 LiveKit 连接已断但 webhook 还没把 status 标为 LEFT 时仍为 true；
+ * 用于把按钮文案切到「重新加入」，但不 disable 按钮
+ */
+const serverSaysJoined = computed(() => {
   const myId = getCurrentUserId()
-  if (rtcStore.isActive && rtcStore.call?.room === activeCall.value?.room) {
-    return true
-  }
   return activeCall.value?.joinedUserIds?.includes(myId) ?? false
+})
+
+/** 加入按钮禁用：仅在本端实际持有 LiveKit 连接时禁用 */
+const joinDisabled = computed(() => isInThisCall.value)
+
+/** 加入按钮文案；本端连着 → 已在通话中；服务端还残留我但本端断了 → 重新加入；其它 → 加入 */
+const joinLabel = computed(() => {
+  if (isInThisCall.value) return '已在通话中'
+  if (serverSaysJoined.value) return '重新加入'
+  return '加入'
 })
 
 /** 主动加入：调 invite 命中已有 call 拿 token；rtcStore 按 status 自动进 RUNNING */

@@ -1,7 +1,7 @@
 <template>
   <!-- 主叫等待对方接听的悬浮窗；1v1 私聊 320×540；群通话切大窗 720×560 -->
   <div
-    class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl overflow-hidden shadow-[0_12px_36px_rgba(0,0,0,0.35)] z-[9999] flex flex-col text-white bg-gradient-to-b from-[#2a2a2c] to-[#1a1a1c]"
+    class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl overflow-hidden shadow-[0_12px_36px_rgba(0,0,0,0.35)] z-[1000] flex flex-col text-white bg-gradient-to-b from-[#2a2a2c] to-[#1a1a1c]"
     :class="isGroup ? 'w-[720px] h-[560px]' : 'w-[320px] h-[540px]'"
   >
     <div class="flex relative flex-1 justify-center items-center">
@@ -26,7 +26,7 @@
           :clickable="false"
         />
         <div class="text-[17px] font-medium">{{ peerNickname || '对方' }}</div>
-        <div class="text-13px text-white/60">等待对方接受邀请...</div>
+        <div class="text-13px text-white/60">等待对方接受邀请……</div>
       </div>
     </div>
 
@@ -36,8 +36,10 @@
         class="flex flex-col gap-2 items-center cursor-pointer select-none"
         @click="$emit('toggle-mic')"
       >
+        <!-- ant-design 系列里 mic 有 audio-muted-outlined 变体；speaker / camera 没有 muted 变体，off 态借 tabler:*-off 表达斜线 -->
         <span
-          class="flex justify-center items-center w-12 h-12 bg-white rounded-full text-[#1a1a1c]"
+          class="flex justify-center items-center w-12 h-12 rounded-full"
+          :class="micEnabled ? 'bg-white text-[#1a1a1c]' : 'bg-white/15 text-white'"
         >
           <Icon
             :icon="micEnabled ? 'ant-design:audio-outlined' : 'ant-design:audio-muted-outlined'"
@@ -65,14 +67,11 @@
         @click="$emit('toggle-camera')"
       >
         <span
-          class="flex justify-center items-center w-12 h-12 bg-white rounded-full text-[#1a1a1c]"
+          class="flex justify-center items-center w-12 h-12 rounded-full"
+          :class="cameraEnabled ? 'bg-white text-[#1a1a1c]' : 'bg-white/15 text-white'"
         >
           <Icon
-            :icon="
-              cameraEnabled
-                ? 'ant-design:video-camera-outlined'
-                : 'ant-design:video-camera-add-outlined'
-            "
+            :icon="cameraEnabled ? 'ant-design:video-camera-outlined' : 'tabler:video-off'"
             :size="22"
           />
         </span>
@@ -86,11 +85,17 @@
         @click="$emit('toggle-speaker')"
       >
         <span
-          class="flex justify-center items-center w-12 h-12 bg-white rounded-full text-[#1a1a1c]"
+          class="flex justify-center items-center w-12 h-12 rounded-full"
+          :class="speakerEnabled ? 'bg-white text-[#1a1a1c]' : 'bg-white/15 text-white'"
         >
-          <Icon icon="ant-design:sound-outlined" :size="22" />
+          <Icon
+            :icon="speakerEnabled ? 'ant-design:sound-outlined' : 'tabler:volume-off'"
+            :size="22"
+          />
         </span>
-        <span class="text-xs text-white/70 whitespace-nowrap">扬声器已开</span>
+        <span class="text-xs text-white/70 whitespace-nowrap">
+          {{ speakerEnabled ? '扬声器已开' : '扬声器已关' }}
+        </span>
       </div>
     </div>
   </div>
@@ -108,6 +113,7 @@ const props = defineProps<{
   isVideo: boolean
   micEnabled: boolean
   cameraEnabled: boolean
+  speakerEnabled: boolean
   localStream?: MediaStream | null // 本地视频流；视频呼叫预览铺底
 }>()
 

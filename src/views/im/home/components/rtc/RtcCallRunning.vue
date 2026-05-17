@@ -10,7 +10,7 @@
       class="inline-flex absolute top-3 left-1/2 z-10 gap-2 items-center px-3.5 py-1.5 text-13px text-[#ffd45e] rounded-full -translate-x-1/2 bg-[rgba(255,196,0,0.18)]"
     >
       <span class="reconnect-dot w-2 h-2 rounded-full bg-[#ffd45e]"></span>
-      网络不佳，正在重连...
+      网络不佳，正在重连……
     </div>
     <div class="flex relative flex-1 justify-center items-center">
       <!-- 群通话：网格布局，列数随人数自适应 -->
@@ -20,9 +20,9 @@
         :class="gridColsClass"
       >
         <RtcCallParticipantTile
-          v-for="p in participants"
-          :key="p.userId"
-          :participant="p"
+          v-for="participant in participants"
+          :key="participant.userId"
+          :participant="participant"
           :speaker-enabled="speakerEnabled"
         />
       </div>
@@ -46,7 +46,7 @@
             :clickable="false"
           />
           <div class="text-[17px] font-medium">{{ peerNickname }}</div>
-          <div class="text-13px text-white/60">等待对方开启摄像头...</div>
+          <div class="text-13px text-white/60">等待对方开启摄像头……</div>
         </div>
         <div
           v-if="localStream"
@@ -146,7 +146,10 @@
             class="flex justify-center items-center w-[52px] h-[52px] rounded-full"
             :class="screenShareEnabled ? 'bg-[#07c160] text-white' : 'bg-white/15 text-white'"
           >
-            <Icon icon="ant-design:laptop-outlined" :size="22" />
+            <Icon
+              :icon="screenShareEnabled ? 'ant-design:laptop-outlined' : 'tabler:device-laptop-off'"
+              :size="22"
+            />
           </span>
           <span class="text-xs text-white/70 whitespace-nowrap">
             {{ screenShareEnabled ? '停止共享' : '共享屏幕' }}
@@ -235,8 +238,8 @@ const now = ref(Date.now())
 let tick = 0
 watch(
   () => props.isGroup || props.isVideo,
-  (hidden) => {
-    if (hidden) {
+  (suppressTick) => {
+    if (suppressTick) {
       if (tick) {
         clearInterval(tick)
         tick = 0

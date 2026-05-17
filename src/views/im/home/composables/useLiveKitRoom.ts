@@ -30,6 +30,8 @@ export function useLiveKitRoom() {
   const micEnabled = ref(true)
   /** 摄像头开关 */
   const cameraEnabled = ref(false)
+  /** 扬声器开关；浏览器无系统级 API，通过 audio 元素 muted 属性实现远端音频静音 */
+  const speakerEnabled = ref(true)
   /** 屏幕共享开关 */
   const screenShareEnabled = ref(false)
   /** 当前是否处于「重连中」；瞬断时 UI 显示提示而不强制结束通话 */
@@ -99,7 +101,7 @@ export function useLiveKitRoom() {
       .on(RoomEvent.ConnectionQualityChanged, (quality) => {
         connectionQuality.value = quality
       })
-      // 瞬断 → 显示「重连中」；不关通话窗，由 ICE restart 机制恢复
+      // 瞬断 → 显示「重连中」；不关通话窗，由 SDK 内部重连机制恢复
       .on(RoomEvent.Reconnecting, () => {
         reconnecting.value = true
       })
@@ -113,7 +115,7 @@ export function useLiveKitRoom() {
         disconnectedHandlers.forEach((cb) => cb())
       })
 
-    // 预热 getUserMedia 与 WebSocket 握手并行，省 100~300ms 串行延迟；
+    // 预热 getUserMedia 与 WebSocket 握手并行，省 100～300ms 串行延迟；
     // 拿到的 stream 仅用于触发权限弹窗 + 设备就绪，握手完成后由 LiveKit 内部重新请求设备发布轨
     const warmup = prewarmMedia(opts)
     // 建立 WebSocket 信令 + WebRTC 媒体通道；完成后 localParticipant 可用，已在房参与者会通过 ParticipantConnected 事件批量推送
@@ -174,6 +176,11 @@ export function useLiveKitRoom() {
     }
     await _room.value.localParticipant.setCameraEnabled(enabled)
     cameraEnabled.value = enabled
+  }
+
+  /** 切扬声器；仅切响应式状态，实际静音由模板上 audio 元素 :muted 绑定生效 */
+  function setSpeakerEnabled(enabled: boolean) {
+    speakerEnabled.value = enabled
   }
 
   /**
@@ -264,6 +271,7 @@ export function useLiveKitRoom() {
     reconnecting.value = false
     micEnabled.value = true
     cameraEnabled.value = false
+    speakerEnabled.value = true
     screenShareEnabled.value = false
   }
 
@@ -275,12 +283,14 @@ export function useLiveKitRoom() {
     connectionQuality,
     micEnabled,
     cameraEnabled,
+    speakerEnabled,
     screenShareEnabled,
     reconnecting,
     connect,
     disconnect,
     setMicEnabled,
     setCameraEnabled,
+    setSpeakerEnabled,
     setScreenShareEnabled,
     pickStream,
     onDisconnected,

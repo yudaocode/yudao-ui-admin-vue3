@@ -18,31 +18,32 @@
       class="self-start"
     />
 
-    <!-- 中：群聊单行（邀请人 + 文案）+ 通话成员；私聊两行 -->
+    <!-- 中：群聊单行（邀请人 + 文案）+ 通话成员；私聊两行（名 / 文案） -->
     <div class="flex flex-col flex-1 gap-1 self-start min-w-0">
-      <template v-if="isGroup">
-        <div class="text-sm truncate">
-          <span class="font-medium">{{ payload?.inviterNickname || '对方' }}</span>
-          <span class="ml-1 text-white/60">{{ tipText }}</span>
-        </div>
-        <template v-if="callMembers.length > 0">
-          <div class="mt-1 text-xs text-white/45">通话成员</div>
-          <div class="flex flex-wrap gap-1">
-            <UserAvatar
-              v-for="m in callMembers"
-              :key="m.userId"
-              :url="m.avatar"
-              :name="m.nickname"
-              :size="22"
-              radius="4px"
-              :clickable="false"
-            />
-          </div>
-        </template>
-      </template>
+      <!-- 名 + 文案：群单行内联，私聊上下两行 -->
+      <div v-if="isGroup" class="text-sm truncate">
+        <span class="font-medium">{{ payload?.inviterNickname || '对方' }}</span>
+        <span class="ml-1 text-white/60">{{ tipText }}</span>
+      </div>
       <template v-else>
         <div class="text-sm font-medium truncate">{{ payload?.inviterNickname || '对方' }}</div>
         <div class="text-13px text-white/60 truncate">{{ tipText }}</div>
+      </template>
+
+      <!-- 群通话成员行；私聊无 -->
+      <template v-if="isGroup && callMembers.length > 0">
+        <div class="mt-1 text-xs text-white/45">通话成员</div>
+        <div class="flex flex-wrap gap-1">
+          <UserAvatar
+            v-for="member in callMembers"
+            :key="member.userId"
+            :url="member.avatar"
+            :name="member.nickname"
+            :size="22"
+            radius="4px"
+            :clickable="false"
+          />
+        </div>
       </template>
     </div>
 
