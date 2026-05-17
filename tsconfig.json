@@ -4,6 +4,7 @@
     "useDefineForClassFields": true,
     "module": "esnext",
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "strict": true,
     "jsx": "preserve",
     "sourceMap": true,

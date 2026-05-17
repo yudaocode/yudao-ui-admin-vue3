@@ -2,8 +2,7 @@ import { resolve } from 'path'
 import Vue from '@vitejs/plugin-vue'
 import VueJsx from '@vitejs/plugin-vue-jsx'
 import progress from 'vite-plugin-progress'
-import EslintPlugin from 'vite-plugin-eslint'
-import PurgeIcons from 'vite-plugin-purge-icons'
+import EslintPlugin from 'vite-plugin-eslint2'
 import { ViteEjsPlugin } from 'vite-plugin-ejs'
 // @ts-ignore
 import ElementPlus from 'unplugin-element-plus/vite'
@@ -29,7 +28,6 @@ export function createVitePlugins() {
     VueJsx(),
     UnoCSS(),
     progress(),
-    PurgeIcons(),
     ElementPlus({}),
     AutoImport({
       include: [
@@ -64,7 +62,7 @@ export function createVitePlugins() {
       dts: 'src/types/auto-components.d.ts',
       // 自定义组件的解析器
       resolvers: [ElementPlusResolver()],
-      globs: ["src/components/**/**.{vue, md}", '!src/components/DiyEditor/components/mobile/**']
+      globs: ['src/components/**/**.{vue, md}', '!src/components/DiyEditor/components/mobile/**']
     }),
     EslintPlugin({
       cache: false,
@@ -77,7 +75,7 @@ export function createVitePlugins() {
     }),
     createSvgIconsPlugin({
       iconDirs: [pathResolve('src/assets/svgs')],
-      symbolId: 'icon-[dir]-[name]',
+      symbolId: 'icon-[dir]-[name]'
     }),
     viteCompression({
       verbose: true, // 是否在控制台输出压缩结果
