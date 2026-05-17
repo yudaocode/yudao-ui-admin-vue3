@@ -146,6 +146,8 @@ export const useRtcStore = defineStore('imRtc', () => {
    */
   function startInviting(data: ImRtcCallRespVO) {
     call.value = data
+    // 群通话场景写入本地胶囊条缓存
+    syncGroupActiveCall(data)
     // 更新 stage 状态
     if (data.conversationType === ImConversationType.GROUP) {
       stage.value = ImRtcCallStage.RUNNING
@@ -163,14 +165,55 @@ export const useRtcStore = defineStore('imRtc', () => {
   function showIncoming(payload: ImRtcCallNotification) {
     incomingPayload.value = payload
     stage.value = ImRtcCallStage.INCOMING
+    // 按 inviter 兜底首次填充胶囊条
+    syncGroupActiveCall({
+      conversationType: payload.conversationType,
+      room: payload.room,
+      groupId: payload.groupId,
+      mediaType: payload.mediaType,
+      inviterId: payload.inviterUserId ?? 0,
+      joinedUserIds: payload.inviterUserId ? [payload.inviterUserId] : [],
+      inviteeIds: payload.inviteeIds
+    })
   }
 
   /** 进入通话中阶段 */
   function enterRunning(data: ImRtcCallRespVO) {
     call.value = data
+    // 离开 INCOMING 阶段；清空来电载荷
     incomingPayload.value = null
     stage.value = ImRtcCallStage.RUNNING
     startedAt.value = Date.now()
+    // 接通后用 RespVO 完整覆盖胶囊条
+    syncGroupActiveCall(data)
+  }
+
+  /**
+   * 群通话场景同步本地 groupActiveCalls 缓存；非群通话或缺 groupId 直接返回；
+   * 不依赖后端 webhook 推送的 RTC_PARTICIPANT_CONNECTED 首次填充，避免胶囊条出现延迟；
+   * 被叫场景通知载荷无 joinedUserIds，调用方按主叫人兜底，后续 getActiveCall / 参与者事件刷新成完整列表
+   */
+  function syncGroupActiveCall(input: {
+    conversationType: number
+    room: string
+    groupId?: number
+    mediaType: number
+    inviterId: number
+    joinedUserIds?: number[]
+    inviteeIds?: number[]
+  }) {
+    if (input.conversationType !== ImConversationType.GROUP || !input.groupId) {
+      return
+    }
+    // 写入或更新群活跃通话缓存
+    setGroupCall({
+      room: input.room,
+      groupId: input.groupId,
+      mediaType: input.mediaType,
+      inviterId: input.inviterId,
+      joinedUserIds: input.joinedUserIds ?? [],
+      inviteeIds: input.inviteeIds ?? []
+    })
   }
 
   /** 重置；通话结束统一调用 */
