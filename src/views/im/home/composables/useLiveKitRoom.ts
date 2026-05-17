@@ -98,6 +98,9 @@ export function useLiveKitRoom() {
       })
       .on(RoomEvent.TrackSubscribed, () => syncRemotes(r))
       .on(RoomEvent.TrackUnsubscribed, () => syncRemotes(r))
+      // mute / unmute 让 pickStream 的 isMuted 短路重算，video 元素能解绑 srcObject 而不是卡最后一帧
+      .on(RoomEvent.TrackMuted, () => syncRemotes(r))
+      .on(RoomEvent.TrackUnmuted, () => syncRemotes(r))
       .on(RoomEvent.ConnectionQualityChanged, (quality) => {
         connectionQuality.value = quality
       })
@@ -241,12 +244,16 @@ export function useLiveKitRoom() {
   /**
    * 取参与者指定来源的轨道并打包为 MediaStream；
    * 参与者走 unknown 是因为响应式系统会丢失 livekit-client 的类签名，函数内手动 cast 回参与者类型；
-   * 命中缓存返回同一 MediaStream 引用，下游 watch / srcObject 无需重挂
+   * 命中缓存返回同一 MediaStream 引用，下游 watch / srcObject 无需重挂；
+   * 轨道被 mute（本端关摄像头 / 远端关摄像头）时返回 null，让 video 元素解绑 srcObject 而不是卡在最后一帧
    */
   function pickStream(participant: unknown, source: Track.Source): MediaStream | null {
     const p = participant as Participant
     const pub = p.getTrackPublication(source)
-    const track = pub?.track?.mediaStreamTrack
+    if (!pub || pub.isMuted) {
+      return null
+    }
+    const track = pub.track?.mediaStreamTrack
     if (!track) {
       return null
     }
