@@ -64,11 +64,11 @@
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
         <el-button
-            type="danger"
-            plain
-            :disabled="isEmpty(checkedIds)"
-            @click="handleDeleteBatch"
-            v-hasPermi="['infra:demo03-student:delete']"
+          type="danger"
+          plain
+          :disabled="isEmpty(checkedIds)"
+          @click="handleDeleteBatch"
+          v-hasPermi="['infra:demo03-student:delete']"
         >
           <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
@@ -79,14 +79,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
-        @selection-change="handleRowCheckboxChange"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleRowCheckboxChange"
     >
-    <el-table-column type="selection" width="55" />
+      <el-table-column type="selection" width="55" />
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="名字" align="center" prop="name" />
       <el-table-column label="性别" align="center" prop="sex">

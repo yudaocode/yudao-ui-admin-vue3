@@ -18,7 +18,7 @@
     </el-select>
   </ElDialog>
   <div v-else class="custom-hover" @click.stop="showTopSearch = !showTopSearch">
-    <Icon icon="ep:search" :color="color"/>
+    <Icon icon="ep:search" :color="color" />
     <el-select
       @click.stop
       filterable
