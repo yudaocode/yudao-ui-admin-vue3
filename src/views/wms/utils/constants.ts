@@ -5,6 +5,14 @@ export const OrderStatusEnum = {
   CANCELED: 5 // 已作废
 } as const
 
+/** 单据类型枚举 */
+export const OrderTypeEnum = {
+  RECEIPT: 1, // 入库
+  SHIPMENT: 2, // 出库
+  MOVEMENT: 3, // 移库
+  CHECK: 4 // 盘库
+} as const
+
 /** 可修改的单据状态 */
 export const OrderUpdateStatusList: number[] = [OrderStatusEnum.PREPARE]
 

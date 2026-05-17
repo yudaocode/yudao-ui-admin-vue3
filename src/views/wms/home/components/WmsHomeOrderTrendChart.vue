@@ -28,6 +28,7 @@ import type { EChartsOption } from 'echarts'
 import { WmsHomeStatisticsApi, type WmsHomeOrderTrendVO } from '@/api/wms/home'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
+import { OrderTypeEnum } from '@/views/wms/utils/constants'
 
 defineOptions({ name: 'WmsHomeOrderTrendChart' })
 
@@ -41,41 +42,28 @@ interface OrderDefinition {
   >
 }
 
-const OrderTypeEnum = {
-  RECEIPT: 1,
-  SHIPMENT: 2,
-  MOVEMENT: 3,
-  CHECK: 4
-} as const
-
-/** 获取单据类型名称 */
-const getOrderTypeTitle = (type: number, defaultTitle: string) => {
-  const label = getDictLabel(DICT_TYPE.WMS_ORDER_TYPE, type) || defaultTitle
-  return label.endsWith('单') ? label.slice(0, -1) : label
-}
-
 const orderDefinitions: OrderDefinition[] = [
   {
     orderType: OrderTypeEnum.RECEIPT,
-    title: getOrderTypeTitle(OrderTypeEnum.RECEIPT, '入库'),
+    title: getDictLabel(DICT_TYPE.WMS_ORDER_TYPE, OrderTypeEnum.RECEIPT).replace(/单$/, ''),
     color: '#2f7df6',
     trendField: 'receiptCount'
   },
   {
     orderType: OrderTypeEnum.SHIPMENT,
-    title: getOrderTypeTitle(OrderTypeEnum.SHIPMENT, '出库'),
+    title: getDictLabel(DICT_TYPE.WMS_ORDER_TYPE, OrderTypeEnum.SHIPMENT).replace(/单$/, ''),
     color: '#18a058',
     trendField: 'shipmentCount'
   },
   {
     orderType: OrderTypeEnum.MOVEMENT,
-    title: getOrderTypeTitle(OrderTypeEnum.MOVEMENT, '移库'),
+    title: getDictLabel(DICT_TYPE.WMS_ORDER_TYPE, OrderTypeEnum.MOVEMENT).replace(/单$/, ''),
     color: '#f59e0b',
     trendField: 'movementCount'
   },
   {
     orderType: OrderTypeEnum.CHECK,
-    title: getOrderTypeTitle(OrderTypeEnum.CHECK, '盘库'),
+    title: getDictLabel(DICT_TYPE.WMS_ORDER_TYPE, OrderTypeEnum.CHECK).replace(/单$/, ''),
     color: '#7c3aed',
     trendField: 'checkCount'
   }
