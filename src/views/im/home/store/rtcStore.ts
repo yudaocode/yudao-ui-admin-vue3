@@ -27,6 +27,8 @@ export interface ImRtcCallNotification {
   inviterUserId?: number
   inviterNickname?: string
   inviterAvatar?: string
+  // INVITE 专属：本次被邀请人列表；包含收件人自身，前端来电小条按需过滤展示「邀请的其他人」
+  inviteeIds?: number[]
   // REJECT 专属：操作者展示信息（其它子类型走 RTC_CALL_END）
   operatorUserId?: number
   operatorNickname?: string
