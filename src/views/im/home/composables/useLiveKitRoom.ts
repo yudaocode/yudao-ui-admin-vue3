@@ -120,11 +120,18 @@ export function useLiveKitRoom() {
     const warmup = prewarmMedia(opts)
     // 建立 WebSocket 信令 + WebRTC 媒体通道；完成后 localParticipant 可用，已在房参与者会通过 ParticipantConnected 事件批量推送
     await r.connect(url, token)
+    // 期间被外部 disconnect 替换；中止后续 publish，避免摄像头被重新启用
+    if (_room.value !== r) {
+      return
+    }
     localParticipant.value = r.localParticipant
     isConnected.value = true
 
     // 预热结果不直接发布（避免 SDK 与外部 track 生命周期纠缠），仅等待权限就绪后再走标准 setXxxEnabled
     await warmup
+    if (_room.value !== r) {
+      return
+    }
     // 麦克风与摄像头权限相互独立，并行启用发布
     const inits: Promise<unknown>[] = []
     if (opts.audio) {
