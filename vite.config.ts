@@ -1,6 +1,6 @@
 import {resolve} from 'path'
 import type {ConfigEnv, UserConfig} from 'vite'
-import {loadEnv} from 'vite'
+import {loadEnv, normalizePath} from 'vite'
 import {createVitePlugins} from './build/vite'
 import {exclude, include} from "./build/vite/optimize"
 // 当前执行node命令时文件夹的地址(工作目录)
@@ -47,7 +47,7 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             },
             preprocessorOptions: {
                 scss: {
-                    additionalData: `@use "${pathResolve('src/styles/variables.scss')}" as *;`,
+                    additionalData: `@use "${normalizePath(pathResolve('src/styles/variables.scss'))}" as *;`,
                     api: 'modern-compiler'
                 }
             }
