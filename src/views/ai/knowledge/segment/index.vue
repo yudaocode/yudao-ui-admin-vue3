@@ -57,16 +57,16 @@
             class="content-expand"
             style="
               padding: 10px 20px;
-              white-space: pre-wrap;
               line-height: 1.5;
+              white-space: pre-wrap;
               background-color: #f9f9f9;
-              border-radius: 4px;
               border-left: 3px solid #409eff;
+              border-radius: 4px;
             "
           >
             <div
               class="content-title"
-              style="margin-bottom: 8px; color: #606266; font-size: 14px; font-weight: bold"
+              style="margin-bottom: 8px; font-size: 14px; font-weight: bold; color: #606266"
             >
               完整内容：
             </div>

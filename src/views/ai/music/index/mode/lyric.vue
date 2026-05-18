@@ -14,7 +14,7 @@
 
     <Title title="音乐风格">
       <el-space class="flex-wrap">
-        <el-tag v-for="tag in tags" :key="tag" round class="mb-8px">{{tag}}</el-tag>
+        <el-tag v-for="tag in tags" :key="tag" round class="mb-8px">{{ tag }}</el-tag>
       </el-space>
 
       <el-button
@@ -40,7 +40,7 @@
     </Title>
 
     <Title title="音乐/歌曲名称">
-      <el-input v-model="formData.name" placeholder="请输入音乐/歌曲名称"/>
+      <el-input v-model="formData.name" placeholder="请输入音乐/歌曲名称" />
     </Title>
 
     <Title title="版本">

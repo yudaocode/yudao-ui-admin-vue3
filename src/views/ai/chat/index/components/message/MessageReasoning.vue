@@ -79,11 +79,11 @@ const toggleExpanded = () => {
 }
 
 .max-h-300px::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.4);
+  background: rgb(156 163 175 / 40%);
   border-radius: 2px;
 }
 
 .max-h-300px::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.6);
+  background: rgb(156 163 175 / 60%);
 }
 </style>

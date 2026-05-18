@@ -36,7 +36,7 @@
                 {{ conditionIndex + 1 }}
               </div>
               <span class="text-12px font-500 text-[var(--el-text-color-primary)]"
-                >条件 {{ conditionIndex + 1 }}</span
+              >条件 {{ conditionIndex + 1 }}</span
               >
             </div>
             <el-button

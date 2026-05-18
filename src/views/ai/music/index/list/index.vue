@@ -6,26 +6,26 @@
         <el-tab-pane v-loading="loading" label="我的创作" name="mine">
           <el-row v-if="mySongList.length" :gutter="12">
             <el-col v-for="song in mySongList" :key="song.id" :span="24">
-              <songCard :songInfo="song" @play="setCurrentSong(song)"/>
+              <songCard :songInfo="song" @play="setCurrentSong(song)" />
             </el-col>
           </el-row>
-          <el-empty v-else description="暂无音乐"/>
+          <el-empty v-else description="暂无音乐" />
         </el-tab-pane>
 
         <!-- 试听广场 -->
         <el-tab-pane v-loading="loading" label="试听广场" name="square">
           <el-row v-if="squareSongList.length" v-loading="loading" :gutter="12">
             <el-col v-for="song in squareSongList" :key="song.id" :span="24">
-              <songCard :songInfo="song" @play="setCurrentSong(song)"/>
+              <songCard :songInfo="song" @play="setCurrentSong(song)" />
             </el-col>
           </el-row>
-          <el-empty v-else description="暂无音乐"/>
+          <el-empty v-else description="暂无音乐" />
         </el-tab-pane>
       </el-tabs>
       <!-- songInfo -->
-      <songInfo class="flex-none"/>
+      <songInfo class="flex-none" />
     </div>
-    <audioBar class="flex-none"/>
+    <audioBar class="flex-none" />
   </div>
 </template>
 
@@ -100,6 +100,7 @@ defineExpose({
 :deep(.el-tabs) {
   display: flex;
   flex-direction: column;
+
   .el-tabs__content {
     padding: 0 7px;
     overflow: auto;

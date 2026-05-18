@@ -110,11 +110,12 @@ watch(copied, (val) => {
   flex-direction: column;
 
   :deep(.el-card__body) {
+    @extend .hide-scroll-bar;
+
+    padding: 0;
+    overflow-y: auto;
     box-sizing: border-box;
     flex-grow: 1;
-    overflow-y: auto;
-    padding: 0;
-    @extend .hide-scroll-bar;
   }
 }
 </style>

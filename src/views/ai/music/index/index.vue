@@ -1,9 +1,9 @@
 <template>
-<div class="flex h-full items-stretch">
+  <div class="flex h-full items-stretch">
     <!-- 模式 -->
-    <Mode class="flex-none" @generate-music="generateMusic"/>
+    <Mode class="flex-none" @generate-music="generateMusic" />
     <!-- 音频列表 -->
-    <List ref="listRef" class="flex-auto"/>
+    <List ref="listRef" class="flex-auto" />
   </div>
 </template>
 

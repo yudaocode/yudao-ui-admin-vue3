@@ -16,7 +16,7 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    tags: { label: string; value: string }[]
+    tags?: { label: string; value: string }[]
     modelValue: string
     [k: string]: any
   }>(),

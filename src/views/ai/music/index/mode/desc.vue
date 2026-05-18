@@ -14,7 +14,7 @@
 
     <Title title="纯音乐" desc="创建一首没有歌词的歌曲">
       <template #extra>
-        <el-switch v-model="formData.pure" size="small"/>
+        <el-switch v-model="formData.pure" size="small" />
       </template>
     </Title>
 
