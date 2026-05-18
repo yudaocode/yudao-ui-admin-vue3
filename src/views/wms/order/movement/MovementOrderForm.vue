@@ -306,7 +306,7 @@ const handleAddDetail = () => {
   if (!canAddDetail.value) {
     return
   }
-  inventorySelectRef.value?.open()
+  inventorySelectRef.value?.open(getSelectedInventoryKeys())
 }
 
 /** 选择库存 */
@@ -328,6 +328,17 @@ function isInventorySelected(inventory: InventorySelectRow) {
   return (formData.value.details || []).some((detail) => {
     return detail.skuId === inventory.skuId && detail.sourceWarehouseId === inventory.warehouseId
   })
+}
+
+/** 获得已选择的库存标识 */
+function getSelectedInventoryKeys() {
+  return (formData.value.details || [])
+    .map((detail) =>
+      detail.skuId && detail.sourceWarehouseId
+        ? `${detail.skuId}-${detail.sourceWarehouseId}`
+        : undefined
+    )
+    .filter((key): key is string => !!key)
 }
 
 const handleDeleteDetail = (index: number) => {

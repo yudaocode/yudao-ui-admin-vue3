@@ -11,7 +11,12 @@
         <el-input v-model="formData.name" placeholder="请输入配置名称" />
       </el-form-item>
       <el-form-item label="配置描述" prop="description">
-        <el-input v-model="formData.description" placeholder="请输入配置描述" />
+        <el-input
+          v-model="formData.description"
+          type="textarea"
+          :rows="3"
+          placeholder="请输入配置描述"
+        />
       </el-form-item>
       <el-form-item label="告警级别" prop="level">
         <el-select v-model="formData.level" placeholder="请选择告警级别">
