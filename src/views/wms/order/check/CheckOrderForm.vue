@@ -433,7 +433,7 @@ const handleAddSkuInventory = () => {
     message.warning('请先选择仓库')
     return
   }
-  skuSelectRef.value?.open(getSelectedSkuIds(), { multiple: false, preselectDisabled: false })
+  skuSelectRef.value?.open(getSelectedSkuIds(), { multiple: false })
 }
 
 /** 选择商品 SKU */
