@@ -74,9 +74,9 @@ export const leaveCall = (room: string) => {
   return request.post<boolean>({ url: '/im/rtc/leave', params: { room } })
 }
 
-// 重新签发 Token；客户端重连或 Token 过期续期
-export const refreshCallToken = (room: string) => {
-  return request.get<ImRtcCallRespVO>({ url: '/im/rtc/refresh-token', params: { room } })
+// 振铃超时检查；RUNNING 端 timer 兜底，触发后端立即扫描该 room 的超时 INVITING（接口静默）
+export const noAnswerCallCheck = (room: string) => {
+  return request.post<boolean>({ url: '/im/rtc/no-answer-call-check', params: { room } })
 }
 
 // 查询当前进行中的通话；目前仅群聊场景（胶囊条），返回 null 表示无活跃通话

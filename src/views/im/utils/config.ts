@@ -75,3 +75,11 @@ export const MESSAGE_MERGE_PREVIEW_LINES = 3
 
 /** 最近转发会话 key 列表的最大保留数量（对齐微信 PC 横向头像区可见容量） */
 export const CONVERSATION_RECENT_FORWARD_MAX = 12
+
+// ==================== 前端独有：RTC 通话兜底 ====================
+
+/**
+ * 振铃超时兜底；通话存活期间 timer 调用 noAnswerCallCheck 接口的间隔；
+ * 实际超时阈值由后端 yudao.im.rtc.invite-timeout-minutes 决定，前端仅决定触发频率
+ */
+export const RTC_NO_ANSWER_CALL_CHECK_INTERVAL_MS = 60 * 1000

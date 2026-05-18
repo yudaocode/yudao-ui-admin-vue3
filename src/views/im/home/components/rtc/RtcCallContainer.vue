@@ -56,6 +56,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
+import { useIntervalFn } from '@vueuse/core'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useRtcStore } from '../../store/rtcStore'
 import { useLiveKitRoom } from '../../composables/useLiveKitRoom'
@@ -64,13 +65,15 @@ import {
   rejectCall,
   acceptCall,
   leaveCall,
-  inviteCall
+  inviteCall,
+  noAnswerCallCheck
 } from '@/api/im/home/rtc'
 import {
   ImRtcCallMediaType,
   ImRtcCallStage,
   ImConversationType
 } from '@/views/im/utils/constants'
+import { RTC_NO_ANSWER_CALL_CHECK_INTERVAL_MS } from '@/views/im/utils/config'
 import { getCurrentUserId } from '@/views/im/utils/storage'
 import { getSenderAvatar, getSenderDisplayName } from '@/views/im/utils/user'
 import { Track } from 'livekit-client'
@@ -363,9 +366,39 @@ async function handleHangup() {
 
 /** LiveKit Room 异常断开；多见于网络中断 */
 function handlePeerDisconnected() {
-  if (!rtcStore.isActive) return
-  message.warning('通话已断开')
-  rtcStore.reset()
+  if (!rtcStore.isActive) {
+    return
+  }
+  // 给 RTC_CALL_END WebSocket 推送一个小窗口；私聊超时 / 主动挂断等场景下，后端 endSession 会先推 RTC_CALL_END，
+  // 让前端按业务语义（"对方未接听" / "已取消" 等）reset，避免错把业务断开 toast 成「通话已断开」
+  setTimeout(() => {
+    if (!rtcStore.isActive) {
+      return
+    }
+    message.warning('通话已断开')
+    rtcStore.reset()
+  }, 100)
+}
+
+// ==================== 振铃超时兜底 ====================
+
+/** 通话存活期间（INVITING / INCOMING / RUNNING）周期性触发后端扫该 room 的超时 INVITING；保持 timer 是为了 inviteCall 追加新人后也能覆盖；阈值由后端配置决定，前端只负责 trigger */
+const { resume: resumeNoAnswerTimer, pause: pauseNoAnswerTimer } = useIntervalFn(
+  triggerNoAnswerCallCheck, RTC_NO_ANSWER_CALL_CHECK_INTERVAL_MS, { immediate: false }
+)
+watch(
+  () => rtcStore.isActive,
+  (active) => (active ? resumeNoAnswerTimer() : pauseNoAnswerTimer()),
+  { immediate: true }
+)
+
+/** 本地仍有 pending 才调；INVITING / RUNNING 取 call、INCOMING 取 incomingPayload；接口静默错误 fire-and-forget */
+function triggerNoAnswerCallCheck() {
+  const source = rtcStore.call ?? rtcStore.incomingPayload
+  if (!source?.room || !source.inviteeIds?.length) {
+    return
+  }
+  noAnswerCallCheck(source.room).catch(() => undefined)
 }
 
 // ==================== 设备控制 ====================
