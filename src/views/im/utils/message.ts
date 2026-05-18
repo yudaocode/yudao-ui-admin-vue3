@@ -913,6 +913,7 @@ export function resolveRtcCallLastContent(
  *   CANCEL → 操作者「已取消」/ 另一方「对方已取消」
  *   REJECT → 操作者「已拒绝」/ 另一方「对方已拒绝」
  *   BUSY → 操作者「忙线未接听」/ 另一方「对方忙线中」
+ *   NO_ANSWER → 操作者「未接听」/ 另一方「对方未接听」（振铃超时 Job 触发）
  *   ERROR → 「通话中断 [N]」（接通后异常断开；duration > 0 时带时长）
  */
 export function resolveRtcCallPrivateBubbleText(payload: RtcCallEndPayload | null): string {
@@ -929,6 +930,8 @@ export function resolveRtcCallPrivateBubbleText(payload: RtcCallEndPayload | nul
       return isOperator ? '已取消' : '对方已取消'
     case ImRtcCallEndReason.REJECT:
       return isOperator ? '已拒绝' : '对方已拒绝'
+    case ImRtcCallEndReason.NO_ANSWER:
+      return isOperator ? '未接听' : '对方未接听'
     case ImRtcCallEndReason.BUSY:
       return isOperator ? '忙线未接听' : '对方忙线中'
     case ImRtcCallEndReason.ERROR:

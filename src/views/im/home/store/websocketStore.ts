@@ -743,10 +743,13 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
             case ImRtcParticipantStatus.REJECTED:
               rtcStore.applyParticipantRejected(payload)
               break
-            case ImRtcParticipantStatus.JOINED:
             case ImRtcParticipantStatus.NO_ANSWER:
+              // 群通话单人振铃超时；信令独立保留语义，处理与 REJECTED 一致
+              rtcStore.applyParticipantNoAnswer(payload)
+              break
+            case ImRtcParticipantStatus.JOINED:
             case ImRtcParticipantStatus.LEFT:
-              // ACCEPT / CANCEL / HUNGUP 暂不需要本端额外响应；rtcStore 状态由 1602/1603 + END 维护
+              // ACCEPT / HUNGUP 暂不需要本端额外响应；rtcStore 状态由 1602/1603 + END 维护
               break
             default:
               console.warn('[IM WS] 未识别的 RTC_CALL status', payload)

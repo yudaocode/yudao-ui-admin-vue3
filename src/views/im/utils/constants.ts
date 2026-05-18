@@ -182,6 +182,7 @@ export const ImRtcCallEndReason = {
   HANGUP: 1, // 接通后任一方主动挂断
   REJECT: 2, // 被叫接通前点拒接
   CANCEL: 3, // 主叫接通前主动取消
+  NO_ANSWER: 4, // 振铃超时未接通
   BUSY: 5, // 私聊呼叫时对方正忙
   ERROR: 9 // 网络中断 / 设备失败
 } as const

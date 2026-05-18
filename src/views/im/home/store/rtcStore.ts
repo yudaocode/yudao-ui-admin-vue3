@@ -337,6 +337,13 @@ export const useRtcStore = defineStore('imRtc', () => {
     }
   }
 
+  /** 群通话单人振铃超时；对 banner 的处理与拒接一致（语义独立、实现共享） */
+  function applyParticipantNoAnswer(
+    payload: Pick<ImRtcCallNotification, 'room' | 'conversationType' | 'groupId' | 'operatorUserId'>
+  ) {
+    applyParticipantRejected(payload)
+  }
+
   /** 从指定群活跃通话的 joined / pending 列表里同步移除某用户；用于 disconnect / reject 让胶囊条不再展示 */
   function dropFromGroupActiveCall(groupId: number, room: string, userId: number) {
     const existing = groupActiveCalls.value.get(groupId)
@@ -377,6 +384,7 @@ export const useRtcStore = defineStore('imRtc', () => {
     getGroupCall,
     applyParticipantConnected,
     applyParticipantDisconnected,
-    applyParticipantRejected
+    applyParticipantRejected,
+    applyParticipantNoAnswer
   }
 })
