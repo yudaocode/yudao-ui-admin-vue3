@@ -339,5 +339,10 @@ export enum DICT_TYPE {
   IM_GROUP_MEMBER_ROLE = 'im_group_member_role', // IM 群成员角色
   IM_GROUP_ADD_SOURCE = 'im_group_add_source', // IM 加群来源
   IM_GROUP_REQUEST_HANDLE_RESULT = 'im_group_request_handle_result', // IM 加群申请处理结果
-  IM_RTC_CALL_MEDIA_TYPE = 'im_rtc_call_media_type' // IM 通话媒体类型：1=语音 / 2=视频
+  IM_RTC_CALL_MEDIA_TYPE = 'im_rtc_call_media_type', // IM 通话媒体类型：1=语音 / 2=视频
+  IM_RTC_CALL_CONVERSATION_TYPE = 'im_rtc_call_conversation_type', // IM 通话会话类型：1=私聊 / 2=群聊
+  IM_RTC_CALL_STATUS = 'im_rtc_call_status', // IM 通话状态：10=创建 / 20=进行中 / 30=已结束
+  IM_RTC_CALL_END_REASON = 'im_rtc_call_end_reason', // IM 通话结束原因：1=通话结束 / 2=已拒绝 / 3=已取消 / 4=无人接听 / 5=对方正忙 / 9=通话异常
+  IM_RTC_PARTICIPANT_ROLE = 'im_rtc_participant_role', // IM 通话参与角色：1=发起人 / 2=被邀请者 / 3=主动加入者
+  IM_RTC_PARTICIPANT_STATUS = 'im_rtc_participant_status' // IM 通话参与状态：10=邀请中 / 20=已加入 / 30=已拒绝 / 40=未应答 / 50=已离开
 }

@@ -119,6 +119,15 @@
     {{ friendChatTipText }}
   </span>
 
+  <!-- 通话事件（RTC_CALL_START / RTC_CALL_END）：中文文案 + 媒体类型 / 结束原因 / 时长 -->
+  <span
+    v-else-if="isRtcCallTipType"
+    class="inline-flex gap-1.5 items-center text-12px text-[var(--el-text-color-secondary)]"
+  >
+    <Icon icon="ant-design:phone-outlined" :size="14" class="rotate-[135deg]" />
+    <span>{{ rtcCallTipText }}</span>
+  </span>
+
   <!-- 其它系统事件 / 未知类型：content 通常是结构化 JSON，回退原始预览 -->
   <span v-else class="whitespace-pre-wrap break-all">{{ fallbackText }}</span>
 </template>
@@ -128,11 +137,20 @@ import { computed } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { formatFileSize } from '@/utils/file'
 import { formatSeconds } from '@/utils/formatTime'
-import { ImMessageType, isFriendChatTip, isGroupNotification } from '@/views/im/utils/constants'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
+import {
+  ImMessageType,
+  ImRtcCallEndReason,
+  ImRtcCallMediaType,
+  isFriendChatTip,
+  isGroupNotification,
+  isRtcCallTip
+} from '@/views/im/utils/constants'
 import { MESSAGE_MERGE_PREVIEW_LINES } from '@/views/im/utils/config'
 import CardLineLabel from '@/views/im/home/components/card/CardLineLabel.vue'
 import {
   parseMessage,
+  parseRtcCallPayload,
   getFileIconInfo,
   resolveFriendNotificationText,
   resolveGroupNotificationText,
@@ -248,4 +266,34 @@ const groupNotificationText = computed(() =>
     props.senderNickname
   )
 )
+
+/** 是否通话事件气泡（RTC_CALL_START / RTC_CALL_END） */
+const isRtcCallTipType = computed(() => isRtcCallTip(props.type ?? -1))
+
+/** 通话事件文案：START 显示「{发起人} 发起了{媒体}通话」；END 显示「{媒体}通话已结束 [原因] [时长]」 */
+const rtcCallTipText = computed(() => {
+  const payload = parseRtcCallPayload(props.content)
+  if (!payload) {
+    return ''
+  }
+  const mediaLabel = payload.mediaType === ImRtcCallMediaType.VIDEO ? '视频' : '语音'
+  if (props.type === ImMessageType.RTC_CALL_START) {
+    const inviter = payload.inviterNickname?.trim() || `用户(${payload.inviterUserId ?? ''})`
+    return `${inviter} 发起了${mediaLabel}通话`
+  }
+  // RTC_CALL_END
+  const segments = [`${mediaLabel}通话已结束`]
+  // HANGUP 字典 label 是「通话结束」，会和前缀重复；跳过
+  if (payload.endReason && payload.endReason !== ImRtcCallEndReason.HANGUP) {
+    const reason = getDictLabel(DICT_TYPE.IM_RTC_CALL_END_REASON, payload.endReason)
+    if (reason) {
+      segments.push(reason)
+    }
+  }
+  const duration = payload.durationSeconds ?? 0
+  if (duration > 0) {
+    segments.push(`时长 ${formatSeconds(duration)}`)
+  }
+  return segments.join('，')
+})
 </script>

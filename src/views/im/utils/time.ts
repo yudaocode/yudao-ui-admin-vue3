@@ -98,3 +98,15 @@ export function formatCallDuration(seconds: number | undefined): string {
   const pad = (n: number) => String(n).padStart(2, '0')
   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`
 }
+
+/** 接通到结束的通话时长；任一时间缺失返回 '-' */
+export function resolveCallDuration(
+  acceptTime: Date | string | undefined,
+  endTime: Date | string | undefined
+): string {
+  if (!acceptTime || !endTime) {
+    return '-'
+  }
+  const seconds = Math.floor((new Date(endTime).getTime() - new Date(acceptTime).getTime()) / 1000)
+  return seconds > 0 ? formatCallDuration(seconds) : '-'
+}

@@ -123,6 +123,9 @@ export function summarizeMessageContent(
       return buildFacePreviewText(parseMessage<FaceMessage>(message.content))
     case ImMessageType.MERGE:
       return '[聊天记录]'
+    case ImMessageType.RTC_CALL_START:
+    case ImMessageType.RTC_CALL_END:
+      return '[语音通话]'
     default:
       return ''
   }
