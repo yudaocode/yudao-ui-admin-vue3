@@ -316,7 +316,7 @@ function normalizeDetails(details: ShipmentOrderDetailVO[]) {
 
 /** 添加商品 */
 const handleAddDetail = () => {
-  inventorySelectRef.value?.open()
+  inventorySelectRef.value?.open(getSelectedInventoryKeys())
 }
 
 /** 选择库存 */
@@ -338,6 +338,15 @@ const isInventorySelected = (inventory: InventorySelectRow) => {
   return (formData.value.details || []).some((detail) => {
     return detail.skuId === inventory.skuId && detail.warehouseId === inventory.warehouseId
   })
+}
+
+/** 获得已选择的库存标识 */
+const getSelectedInventoryKeys = () => {
+  return (formData.value.details || [])
+    .map((detail) =>
+      detail.skuId && detail.warehouseId ? `${detail.skuId}-${detail.warehouseId}` : undefined
+    )
+    .filter((key): key is string => !!key)
 }
 
 /** 删除明细 */

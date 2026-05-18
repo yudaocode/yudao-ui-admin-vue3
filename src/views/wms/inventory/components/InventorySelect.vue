@@ -78,7 +78,13 @@
         @row-dblclick="handleRowDblClick"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column :reserve-selection="true" align="center" type="selection" width="50" />
+        <el-table-column
+          :reserve-selection="true"
+          :selectable="isRowSelectable"
+          align="center"
+          type="selection"
+          width="50"
+        />
         <el-table-column label="商品信息" min-width="220">
           <template #default="{ row }">
             <div>{{ row.itemName || '-' }}</div>
@@ -146,6 +152,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const list = ref<InventorySelectRow[]>([]) // 库存列表
 const total = ref(0) // 列表的总条数
 const selectedMap = ref<Map<string, InventorySelectRow>>(new Map()) // 跨页已选择库存
+const disabledInventoryKeys = ref<Set<string>>(new Set()) // 已在业务明细中使用的库存
 const tableRef = ref<InstanceType<typeof ElTable>>() // 表格 Ref
 const queryFormRef = ref() // 搜索的表单
 
@@ -167,7 +174,7 @@ const emit = defineEmits<{
 }>()
 
 /** 打开弹窗 */
-const open = async () => {
+const open = async (selectedInventoryKeys: string[] = []) => {
   if (!props.warehouseId) {
     message.warning('请先选择仓库')
     return
@@ -175,6 +182,7 @@ const open = async () => {
   dialogVisible.value = true
   Object.assign(queryParams, getDefaultQueryParams())
   selectedMap.value = new Map()
+  disabledInventoryKeys.value = new Set(selectedInventoryKeys)
   await nextTick()
   tableRef.value?.clearSelection()
   await getList()
@@ -222,6 +230,17 @@ const getRowKey = (row: InventorySelectRow) => {
   return `inventory-${row.id || `${row.skuId}-${row.warehouseId}`}`
 }
 
+/** 获得业务库存标识 */
+const getInventoryKey = (row: Pick<InventorySelectRow, 'skuId' | 'warehouseId'>) => {
+  return row.skuId && row.warehouseId ? `${row.skuId}-${row.warehouseId}` : undefined
+}
+
+/** 判断库存是否可选 */
+const isRowSelectable = (row: InventorySelectRow) => {
+  const key = getInventoryKey(row)
+  return !key || !disabledInventoryKeys.value.has(key)
+}
+
 /** 恢复当前页选择状态 */
 const applySelection = () => {
   const table = tableRef.value
@@ -239,18 +258,24 @@ const applySelection = () => {
 const handleSelectionChange = (rows: InventorySelectRow[]) => {
   const currentKeys = new Set(list.value.map((row) => getRowKey(row)))
   currentKeys.forEach((key) => selectedMap.value.delete(key))
-  rows.forEach((row) => selectedMap.value.set(getRowKey(row), row))
+  rows
+    .filter((row) => isRowSelectable(row))
+    .forEach((row) => selectedMap.value.set(getRowKey(row), row))
 }
 
 /** 双击行直接选择 */
 const handleRowDblClick = (row: InventorySelectRow) => {
+  if (!isRowSelectable(row)) {
+    message.warning('该库存已添加')
+    return
+  }
   selectedMap.value.set(getRowKey(row), row)
   handleConfirm()
 }
 
 /** 确认选择 */
 const handleConfirm = () => {
-  const selectedList = Array.from(selectedMap.value.values())
+  const selectedList = Array.from(selectedMap.value.values()).filter((row) => isRowSelectable(row))
   if (selectedList.length === 0) {
     message.warning('请选择库存')
     return
