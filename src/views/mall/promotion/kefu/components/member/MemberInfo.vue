@@ -173,31 +173,31 @@ const getUserData = async () => {
   background-color: var(--app-content-bg-color);
 
   &::after {
-    content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 1px; /* 实际宽度 */
     height: 100%;
     background-color: var(--el-border-color);
+    content: '';
     transform: scaleX(0.3); /* 缩小宽度 */
   }
 
   &-header {
-    background-color: var(--app-content-bg-color);
     position: relative;
     display: flex;
+    background-color: var(--app-content-bg-color);
     align-items: center;
     justify-content: space-around;
 
     &::before {
-      content: '';
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
       height: 1px; /* 初始宽度 */
       background-color: var(--el-border-color);
+      content: '';
       transform: scaleY(0.3); /* 缩小视觉高度 */
     }
 
@@ -207,45 +207,39 @@ const getUserData = async () => {
     }
 
     &-item {
-      height: 100%;
-      width: 100%;
       position: relative;
+      width: 100%;
+      height: 100%;
 
       &-activation::before {
-        content: '';
         position: absolute; /* 绝对定位 */
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0; /* 覆盖整个元素 */
-        border-bottom: 2px solid rgba(128, 128, 128, 0.5); /* 边框样式 */
+        inset: 0; /* 覆盖整个元素 */
         pointer-events: none; /* 确保点击事件不会被伪元素拦截 */
+        border-bottom: 2px solid rgb(128 128 128 / 50%); /* 边框样式 */
+        content: '';
       }
 
       &:hover::before {
-        content: '';
         position: absolute; /* 绝对定位 */
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0; /* 覆盖整个元素 */
-        border-bottom: 2px solid rgba(128, 128, 128, 0.5); /* 边框样式 */
+        inset: 0; /* 覆盖整个元素 */
         pointer-events: none; /* 确保点击事件不会被伪元素拦截 */
+        border-bottom: 2px solid rgb(128 128 128 / 50%); /* 边框样式 */
+        content: '';
       }
     }
   }
 
   &-content {
-    margin: 0;
-    padding: 0;
     position: relative;
-    height: 100%;
     width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
   }
 
   &-tabs {
-    height: 100%;
     width: 100%;
+    height: 100%;
   }
 }
 

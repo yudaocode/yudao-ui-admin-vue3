@@ -394,11 +394,11 @@ onMounted(async () => {
 
   .el-timeline-right-content {
     display: flex;
-    align-items: center;
     min-height: 30px;
     padding: 10px;
-    border-radius: var(--el-card-border-radius);
     background-color: var(--app-content-bg-color);
+    border-radius: var(--el-card-border-radius);
+    align-items: center;
 
     &::before {
       position: absolute;

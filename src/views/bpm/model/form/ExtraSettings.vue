@@ -91,7 +91,7 @@
         <el-radio-group v-model="modelData.titleSetting.enable">
           <div class="flex flex-col">
             <el-radio :value="false"
-              >系统默认 <el-text type="info"> 展示流程名称 </el-text></el-radio
+            >系统默认 <el-text type="info"> 展示流程名称 </el-text></el-radio
             >
             <el-radio :value="true">
               自定义标题

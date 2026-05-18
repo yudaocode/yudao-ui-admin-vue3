@@ -104,7 +104,7 @@
                 placement="top-start"
               >
                 <template #reference>
-                  <el-button :icon="Refresh" size="small" circle @click="getDictOptions" class=""/>
+                  <el-button :icon="Refresh" size="small" circle @click="getDictOptions" class="" />
                 </template>
               </el-popover>
             </div>

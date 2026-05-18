@@ -578,8 +578,10 @@ const getSkuTableRef = () => {
 defineExpose({ generateTableData, validateSku, getSkuTableRef })
 </script>
 <style>
-// 避免滚动条遮挡最后一行数据
-/*noinspection CssUnusedSymbol*/
+/*
+ * 避免滚动条遮挡最后一行数据
+ * noinspection CssUnusedSymbol
+ */
 .el-table.tabNumWidth .el-scrollbar {
   padding-bottom: 10px;
 }

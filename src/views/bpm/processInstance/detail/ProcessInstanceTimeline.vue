@@ -55,10 +55,10 @@
           class="flex flex-wrap gap2 items-center"
           v-if="
             isEmpty(activity.tasks) &&
-            ((CandidateStrategy.START_USER_SELECT === activity.candidateStrategy &&
-              isEmpty(activity.candidateUsers)) ||
-              (props.enableApproveUserSelect &&
-                CandidateStrategy.APPROVE_USER_SELECT === activity.candidateStrategy))
+              ((CandidateStrategy.START_USER_SELECT === activity.candidateStrategy &&
+                isEmpty(activity.candidateUsers)) ||
+                (props.enableApproveUserSelect &&
+                  CandidateStrategy.APPROVE_USER_SELECT === activity.candidateStrategy))
           "
         >
           <!--  && activity.nodeType === NodeType.USER_TASK_NODE -->
@@ -131,7 +131,7 @@
               <div
                 v-if="
                   task.reason &&
-                  [NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(activity.nodeType)
+                    [NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(activity.nodeType)
                 "
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >

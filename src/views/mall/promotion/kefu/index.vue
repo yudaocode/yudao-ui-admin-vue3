@@ -107,11 +107,11 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .kefu-layout {
   position: absolute;
-  flex: 1;
   top: 0;
   left: 0;
-  height: 100%;
   width: 100%;
+  height: 100%;
+  flex: 1;
 }
 
 /* 定义滚动条样式 */
@@ -122,15 +122,15 @@ onBeforeUnmount(() => {
 
 /* 定义滚动条轨道 内阴影+圆角 */
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 0 rgba(240, 240, 240, 0.5);
-  border-radius: 10px;
   background-color: #fff;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 rgb(240 240 240 / 50%);
 }
 
 /* 定义滑块 内阴影+圆角 */
 ::-webkit-scrollbar-thumb {
+  background-color: rgb(240 240 240 / 50%);
   border-radius: 10px;
-  box-shadow: inset 0 0 0 rgba(240, 240, 240, 0.5);
-  background-color: rgba(240, 240, 240, 0.5);
+  box-shadow: inset 0 0 0 rgb(240 240 240 / 50%);
 }
 </style>
