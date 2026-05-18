@@ -111,14 +111,14 @@ const hasFestivalDay = computed(() => {
 <style scoped>
 /* 紧凑的班次标签：替代 el-button，减少纵向占用 */
 .shift-tag {
+  width: 100%;
   padding: 1px 4px;
+  overflow: hidden;
   font-size: 11px;
   line-height: 1.5;
-  border-radius: 3px;
   color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
-  width: 100%;
+  white-space: nowrap;
+  border-radius: 3px;
 }
 </style>

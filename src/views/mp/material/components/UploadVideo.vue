@@ -19,7 +19,7 @@
       </template>
       <template #tip>
         <span class="el-upload__tip" style="margin-left: 10px"
-          >格式支持 MP4，文件大小不超过 10MB</span
+        >格式支持 MP4，文件大小不超过 10MB</span
         >
       </template>
     </el-upload>

@@ -31,7 +31,7 @@
           v-model="formData.data"
           type="textarea"
           :rows="4"
-          placeholder='请输入模板数据（JSON 格式），例如：{"keyword1": {"value": "测试内容"}}'
+          placeholder="请输入模板数据（JSON 格式），例如：{&quot;keyword1&quot;: {&quot;value&quot;: &quot;测试内容&quot;}}"
         />
       </el-form-item>
       <el-form-item label="跳转链接" prop="url">

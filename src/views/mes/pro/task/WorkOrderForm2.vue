@@ -85,7 +85,7 @@
           :span="8"
           v-if="
             formData.type === MesProWorkOrderTypeEnum.OUTSOURCE ||
-            formData.type === MesProWorkOrderTypeEnum.PURCHASE
+              formData.type === MesProWorkOrderTypeEnum.PURCHASE
           "
         >
           <el-form-item label="供应商" prop="vendorId">
