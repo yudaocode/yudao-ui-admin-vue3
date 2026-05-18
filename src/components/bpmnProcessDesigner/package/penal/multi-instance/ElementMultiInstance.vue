@@ -19,7 +19,7 @@
               size="small"
               v-if="
                 item.value === ApproveMethodType.APPROVE_BY_RATIO &&
-                approveMethod === ApproveMethodType.APPROVE_BY_RATIO
+                  approveMethod === ApproveMethodType.APPROVE_BY_RATIO
               "
               @change="onApproveRatioChange"
             />
@@ -47,7 +47,7 @@
       <template
         v-if="
           loopCharacteristics === 'ParallelMultiInstance' ||
-          loopCharacteristics === 'SequentialMultiInstance'
+            loopCharacteristics === 'SequentialMultiInstance'
         "
       >
         <el-form-item label="循环数量" key="loopCardinality">

@@ -33,8 +33,8 @@ import { ElTable } from 'element-plus'
 defineOptions({ name: 'TableSelectForm' })
 withDefaults(
   defineProps<{
-    modelValue: any[]
-    title: string
+    modelValue?: any[]
+    title?: string
   }>(),
   { modelValue: () => [], title: '选择' }
 )

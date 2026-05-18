@@ -14,7 +14,6 @@ defineProps({
   title: propTypes.string.def(''),
   schema: {
     type: Array as PropType<Array<string | TipSchema>>,
-    required: true,
     default: () => []
   },
   showIndex: propTypes.bool.def(true),

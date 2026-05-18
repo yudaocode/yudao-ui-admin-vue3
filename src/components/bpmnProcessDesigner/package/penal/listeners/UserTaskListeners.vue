@@ -18,7 +18,7 @@
       <el-table-column label="操作" width="90px">
         <template #default="scope">
           <el-button size="small" link @click="openListenerForm(scope.row, scope.$index)"
-            >编辑</el-button
+          >编辑</el-button
           >
           <el-divider direction="vertical" />
           <el-button
@@ -26,7 +26,7 @@
             link
             style="color: #ff4d4f"
             @click="removeListener(scope.row, scope.$index)"
-            >移除</el-button
+          >移除</el-button
           >
         </template>
       </el-table-column>
@@ -184,7 +184,7 @@
       <p class="listener-filed__title">
         <span><Icon icon="ep:menu" />注入字段：</span>
         <el-button size="small" type="primary" @click="openListenerFieldForm(null)"
-          >添加字段</el-button
+        >添加字段</el-button
         >
       </p>
       <el-table
@@ -212,7 +212,7 @@
         <el-table-column label="操作" width="100px">
           <template #default="scope">
             <el-button size="small" link @click="openListenerFieldForm(scope.row, scope.$index)"
-              >编辑</el-button
+            >编辑</el-button
             >
             <el-divider direction="vertical" />
             <el-button
@@ -220,7 +220,7 @@
               link
               style="color: #ff4d4f"
               @click="removeListenerField(scope.row, scope.$index)"
-              >移除</el-button
+            >移除</el-button
             >
           </template>
         </el-table-column>

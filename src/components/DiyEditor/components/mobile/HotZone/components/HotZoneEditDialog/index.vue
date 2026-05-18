@@ -192,39 +192,39 @@ const handleAppLinkChange = (appLink: AppLink) => {
 <style scoped lang="scss">
 .hot-zone {
   position: absolute;
-  background: var(--el-color-primary-light-7);
-  opacity: 0.8;
-  border: 1px solid var(--el-color-primary);
-  color: var(--el-color-primary);
-  font-size: 16px;
+  z-index: 10;
   display: flex;
+  font-size: 16px;
+  color: var(--el-color-primary);
+  cursor: move;
+  background: var(--el-color-primary-light-7);
+  border: 1px solid var(--el-color-primary);
+  opacity: 0.8;
   align-items: center;
   justify-content: center;
-  cursor: move;
-  z-index: 10;
 
   /* 控制点 */
   .ctrl-dot {
     position: absolute;
+    z-index: 11;
     width: 8px;
     height: 8px;
-    border-radius: 50%;
-    border: inherit;
     background-color: #fff;
-    z-index: 11;
+    border: inherit;
+    border-radius: 50%;
   }
 
   .delete {
-    display: none;
     position: absolute;
     top: 0;
     right: 0;
+    display: none;
     padding: 2px 2px 6px 6px;
-    background-color: var(--el-color-primary);
-    border-radius: 0 0 0 80%;
-    cursor: pointer;
     color: #fff;
     text-align: right;
+    cursor: pointer;
+    background-color: var(--el-color-primary);
+    border-radius: 0 0 0 80%;
   }
 
   &:hover {

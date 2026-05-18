@@ -583,12 +583,12 @@ $toolbar-height: 42px;
         gap: 8px;
 
         :deep(.el-tag) {
-          box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
           border: none;
+          box-shadow: 0 2px 8px 0 rgb(0 0 0 / 10%);
 
           .el-tag__content {
-            width: 100%;
             display: flex;
+            width: 100%;
             align-items: center;
             justify-content: flex-start;
 

@@ -28,7 +28,7 @@
         <el-text
           v-if="
             (!startUserIds || startUserIds.length === 0) &&
-            (!startDeptIds || startDeptIds.length === 0)
+              (!startDeptIds || startDeptIds.length === 0)
           "
         >
           全部成员可以发起流程
@@ -95,7 +95,7 @@
                   :value="FieldPermissionType.READ"
                   size="large"
                   :label="FieldPermissionType.READ"
-                  ><span></span
+                ><span></span
                 ></el-radio>
               </div>
               <div class="item-radio-wrap">
@@ -103,7 +103,7 @@
                   :value="FieldPermissionType.WRITE"
                   size="large"
                   :label="FieldPermissionType.WRITE"
-                  ><span></span
+                ><span></span
                 ></el-radio>
               </div>
               <div class="item-radio-wrap">
@@ -111,7 +111,7 @@
                   :value="FieldPermissionType.NONE"
                   size="large"
                   :label="FieldPermissionType.NONE"
-                  ><span></span
+                ><span></span
                 ></el-radio>
               </div>
             </el-radio-group>

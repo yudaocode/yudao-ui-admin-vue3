@@ -60,8 +60,8 @@
             <el-form-item
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
-                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
+                  configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
+                  configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
               "
               label="指定部门"
               prop="deptIds"
@@ -156,10 +156,10 @@
             <el-form-item
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
-                configForm.candidateStrategy ==
+                  configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+                  configForm.candidateStrategy ==
                   CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
+                  configForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
               "
               :label="deptLevelLabel!"
               prop="deptLevel"
@@ -218,7 +218,7 @@
                   :value="FieldPermissionType.READ"
                   size="large"
                   :label="FieldPermissionType.WRITE"
-                  ><span></span
+                ><span></span
                 ></el-radio>
               </div>
               <div class="item-radio-wrap">
@@ -227,7 +227,7 @@
                   size="large"
                   :label="FieldPermissionType.WRITE"
                   disabled
-                  ><span></span
+                ><span></span
                 ></el-radio>
               </div>
               <div class="item-radio-wrap">
@@ -235,7 +235,7 @@
                   :value="FieldPermissionType.NONE"
                   size="large"
                   :label="FieldPermissionType.NONE"
-                  ><span></span
+                ><span></span
                 ></el-radio>
               </div>
             </el-radio-group>

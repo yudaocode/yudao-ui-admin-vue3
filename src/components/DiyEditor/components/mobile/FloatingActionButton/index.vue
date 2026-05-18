@@ -55,12 +55,12 @@ const handleToggleFab = () => {
 /* 模态背景 */
 .modal-bg {
   position: absolute;
-  left: calc(50% - 375px / 2);
   top: 0;
+  left: calc(50% - 375px / 2);
   z-index: 11;
   width: 375px;
   height: 100%;
-  background-color: rgba(#000000, 0.4);
+  background-color: rgb(0 0 0 / 40%);
 }
 
 .fab-icon {

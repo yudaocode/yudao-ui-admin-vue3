@@ -36,7 +36,7 @@
         </div>
         <div v-if="!readonly" class="node-toolbar">
           <div class="toolbar-icon"
-            ><Icon color="#0089ff" icon="ep:circle-close-filled" :size="18" @click="deleteNode"
+          ><Icon color="#0089ff" icon="ep:circle-close-filled" :size="18" @click="deleteNode"
           /></div>
         </div>
       </div>

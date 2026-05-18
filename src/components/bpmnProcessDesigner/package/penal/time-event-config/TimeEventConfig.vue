@@ -4,21 +4,21 @@
       <span>类型：</span>
       <el-button-group>
         <el-button size="mini" :type="type === 'time' ? 'primary' : ''" @click="setType('time')"
-          >时间</el-button
+        >时间</el-button
         >
         <el-button
           size="mini"
           :type="type === 'duration' ? 'primary' : ''"
           @click="setType('duration')"
-          >持续</el-button
+        >持续</el-button
         >
         <el-button size="mini" :type="type === 'cycle' ? 'primary' : ''" @click="setType('cycle')"
-          >循环</el-button
+        >循环</el-button
         >
       </el-button-group>
       <el-icon v-if="valid" color="green" style="margin-left: 8px"><CircleCheckFilled /></el-icon>
     </div>
-    <div style="margin-top: 10px; display: flex; align-items: center">
+    <div style=" display: flex;margin-top: 10px; align-items: center">
       <span>条件：</span>
       <el-input
         v-model="condition"
@@ -34,7 +34,7 @@
           </el-tooltip>
           <el-tooltip :content="helpText" placement="top">
             <el-icon color="#409EFF" style="cursor: pointer" @click="showHelp = true"
-              ><QuestionFilled
+            ><QuestionFilled
             /></el-icon>
           </el-tooltip>
           <el-button
