@@ -397,8 +397,8 @@ import {
   updateGroup,
   muteAll,
   dissolveGroup
-} from '@/api/im/home/group'
-import { quitGroup, updateGroupMember } from '@/api/im/home/group/member'
+} from '@/api/im/group'
+import { quitGroup, updateGroupMember } from '@/api/im/group/member'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { ImConversationType, ImGroupMemberRole } from '@/views/im/utils/constants'

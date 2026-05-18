@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { isEqual, union } from 'lodash-es'
-import type { ImRtcCallRespVO, ImRtcGroupCallRespVO } from '@/api/im/home/rtc'
+import type { ImRtcCallRespVO, ImRtcGroupCallRespVO } from '@/api/im/rtc'
 import {
   ImRtcCallStage,
   ImRtcCallStatus,

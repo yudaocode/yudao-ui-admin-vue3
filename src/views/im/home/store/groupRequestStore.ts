@@ -7,7 +7,7 @@ import {
   getUnhandledRequestList as apiGetUnhandledRequestList,
   refuseGroupRequest as apiRefuseGroupRequest,
   type ImGroupRequestRespVO
-} from '@/api/im/home/group/request'
+} from '@/api/im/group/request'
 import { ImGroupRequestHandleResult } from '@/views/im/utils/constants'
 
 /**

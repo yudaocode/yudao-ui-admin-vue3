@@ -110,7 +110,7 @@ import { computed, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
-import { createGroup } from '@/api/im/home/group'
+import { createGroup } from '@/api/im/group'
 import CardBubble from '@/views/im/home/components/card/CardBubble.vue'
 import ConversationPickerPanel from '../picker/ConversationPickerPanel.vue'
 import FriendPickerPanel from '../picker/FriendPickerPanel.vue'

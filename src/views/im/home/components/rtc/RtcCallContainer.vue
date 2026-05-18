@@ -67,7 +67,7 @@ import {
   leaveCall,
   inviteCall,
   noAnswerCallCheck
-} from '@/api/im/home/rtc'
+} from '@/api/im/rtc'
 import {
   ImRtcCallMediaType,
   ImRtcCallStage,

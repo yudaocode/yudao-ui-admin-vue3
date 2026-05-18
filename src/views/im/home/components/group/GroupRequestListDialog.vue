@@ -153,7 +153,7 @@
 import { computed, ref, watch } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
-import { getGroupRequestListByGroupId, type ImGroupRequestRespVO } from '@/api/im/home/group/request'
+import { getGroupRequestListByGroupId, type ImGroupRequestRespVO } from '@/api/im/group/request'
 import { ImGroupRequestHandleResult } from '@/views/im/utils/constants'
 import { useGroupRequestStore } from '../../store/groupRequestStore'
 import UserAvatar from '../user/UserAvatar.vue'

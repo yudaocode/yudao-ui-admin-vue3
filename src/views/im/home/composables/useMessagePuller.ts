@@ -8,11 +8,11 @@ import {
   pullPrivateMessages as apiPullPrivateMessages,
   getPrivateMaxReadMessageId as apiGetPrivateMaxReadMessageId,
   type ImPrivateMessageRespVO
-} from '@/api/im/home/message/private'
+} from '@/api/im/message/private'
 import {
   pullGroupMessages as apiPullGroupMessages,
   type ImGroupMessageRespVO
-} from '@/api/im/home/message/group'
+} from '@/api/im/message/group'
 import {
   ImConversationType,
   ImMessageType,

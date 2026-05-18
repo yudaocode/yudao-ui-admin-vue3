@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-// TODO DONE @AI：路径迁移到 api/im/home/friend/request/index.ts，与 api/im/home/group/member 这种嵌套结构对齐
 // IM 好友申请 Response VO
 export interface ImFriendRequestRespVO {
   id: number // 申请编号

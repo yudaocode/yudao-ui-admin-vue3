@@ -4,12 +4,12 @@ import {
   readPrivateMessages as apiReadPrivateMessages,
   getPrivateMaxReadMessageId as apiGetPrivateMaxReadMessageId,
   recallPrivateMessage as apiRecallPrivateMessage
-} from '@/api/im/home/message/private'
+} from '@/api/im/message/private'
 import {
   sendGroupMessage as apiSendGroupMessage,
   readGroupMessages as apiReadGroupMessages,
   recallGroupMessage as apiRecallGroupMessage
-} from '@/api/im/home/message/group'
+} from '@/api/im/message/group'
 import {
   generateClientMessageId,
   serializeMessage,

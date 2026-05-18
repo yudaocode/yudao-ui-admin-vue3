@@ -241,7 +241,7 @@ import type { GroupMemberLite } from '../../../../components/group/GroupMember.v
 import GroupMuteMemberDialog from '../../../../components/group/GroupMuteMemberDialog.vue'
 import RtcCallMemberPickerDialog from '../../../../components/rtc/RtcCallMemberPickerDialog.vue'
 import RtcGroupCallBanner from '../../../../components/rtc/RtcGroupCallBanner.vue'
-import { createCall } from '@/api/im/home/rtc'
+import { createCall } from '@/api/im/rtc'
 import { ImRtcCallMediaType, ImRtcCallStatus, ImConversationType } from '@/views/im/utils/constants'
 import { resolveCallEndReasonText } from '@/views/im/utils/message'
 import { useRtcStore } from '../../../../store/rtcStore'

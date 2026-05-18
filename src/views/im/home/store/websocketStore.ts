@@ -27,8 +27,8 @@ import {
   type ImRtcParticipantDisconnectedNotification,
   type ImRtcCallEndNotification
 } from './rtcStore'
-import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/home/message/private'
-import { readGroupMessages as apiReadGroupMessages } from '@/api/im/home/message/group'
+import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/message/private'
+import { readGroupMessages as apiReadGroupMessages } from '@/api/im/message/group'
 import type {
   WebSocketFrame,
   ImPrivateMessageDTO,

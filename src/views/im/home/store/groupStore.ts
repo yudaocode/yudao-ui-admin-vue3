@@ -5,13 +5,13 @@ import {
   getMyGroupList as apiGetMyGroupList,
   getGroup as apiGetGroup,
   type ImGroupRespVO
-} from '@/api/im/home/group'
+} from '@/api/im/group'
 import {
   getGroupMember as apiGetGroupMember,
   getGroupMemberList as apiGetGroupMemberList,
   updateGroupMember as apiUpdateGroupMember,
   type ImGroupMemberRespVO
-} from '@/api/im/home/group/member'
+} from '@/api/im/group/member'
 import { useConversationStore } from './conversationStore'
 import { useGroupRequestStore } from './groupRequestStore'
 import { ImConversationType, ImGroupMemberRole, ImMessageType } from '../../utils/constants'

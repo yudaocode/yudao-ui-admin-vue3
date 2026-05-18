@@ -183,8 +183,8 @@ import { updateFile } from '@/api/infra/file'
 import { useFaceStore } from '@/views/im/home/store/faceStore'
 import { IM_EMOJI_LIST } from '@/views/im/utils/emoji'
 import { probeImageSize } from '@/views/im/utils/image'
-import type { ImFacePackUserItemVO } from '@/api/im/home/face/pack'
-import type { ImFaceUserItemVO } from '@/api/im/home/face/useritem'
+import type { ImFacePackUserItemVO } from '@/api/im/face/pack'
+import type { ImFaceUserItemVO } from '@/api/im/face/useritem'
 
 defineOptions({ name: 'ImFacePicker' })
 

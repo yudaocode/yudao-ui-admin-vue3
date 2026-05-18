@@ -40,7 +40,7 @@
 import { computed, ref } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
-import { transferGroupOwner } from '@/api/im/home/group'
+import { transferGroupOwner } from '@/api/im/group'
 import GroupMemberPickerPanel from '../picker/GroupMemberPickerPanel.vue'
 import type { GroupMemberLite } from './GroupMember.vue'
 

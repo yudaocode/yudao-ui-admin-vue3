@@ -39,7 +39,7 @@
 import { ref } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
-import { removeGroupMember } from '@/api/im/home/group/member'
+import { removeGroupMember } from '@/api/im/group/member'
 import GroupMemberPickerPanel from '../picker/GroupMemberPickerPanel.vue'
 import type { GroupMemberLite } from './GroupMember.vue'
 

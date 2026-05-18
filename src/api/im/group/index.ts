@@ -1,5 +1,5 @@
 import request from '@/config/axios'
-import type { ImGroupMessageRespVO } from '@/api/im/home/message/group'
+import type { ImGroupMessageRespVO } from '@/api/im/message/group'
 
 // 群 Response VO
 export interface ImGroupRespVO {

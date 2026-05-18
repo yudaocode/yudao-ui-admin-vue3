@@ -27,7 +27,7 @@ import GroupInfo from './GroupInfo.vue'
 import { useImUiStore } from '../../store/uiStore'
 import { useConversationStore } from '../../store/conversationStore'
 import { useGroupStore } from '../../store/groupStore'
-import { applyJoinGroup } from '@/api/im/home/group/request'
+import { applyJoinGroup } from '@/api/im/group/request'
 import { ImConversationType, ImGroupAddSource } from '../../../utils/constants'
 import type { GroupLite } from '../../types'
 

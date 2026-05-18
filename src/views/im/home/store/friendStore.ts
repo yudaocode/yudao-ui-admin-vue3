@@ -10,7 +10,7 @@ import {
   blockFriend as apiBlockFriend,
   unblockFriend as apiUnblockFriend,
   type ImFriendRespVO
-} from '@/api/im/home/friend'
+} from '@/api/im/friend'
 import {
   applyFriendRequest as apiApplyFriendRequest,
   agreeFriendRequest as apiAgreeFriendRequest,
@@ -19,7 +19,7 @@ import {
   getMyFriendRequest as apiGetMyFriendRequest,
   type ImFriendRequestApplyReqVO,
   type ImFriendRequestRespVO
-} from '@/api/im/home/friend/request'
+} from '@/api/im/friend/request'
 import { useConversationStore } from './conversationStore'
 import { ImConversationType, ImFriendRequestHandleResult } from '../../utils/constants'
 import { FRIEND_REQUEST_PAGE_SIZE } from '../../utils/config'

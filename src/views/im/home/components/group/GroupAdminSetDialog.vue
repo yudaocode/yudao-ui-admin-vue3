@@ -33,7 +33,7 @@
 import { ref } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
-import { addGroupAdmin, removeGroupAdmin } from '@/api/im/home/group'
+import { addGroupAdmin, removeGroupAdmin } from '@/api/im/group'
 import { GROUP_ADMIN_MAX_COUNT } from '@/views/im/utils/config'
 import GroupMemberPickerPanel from '../picker/GroupMemberPickerPanel.vue'
 import type { GroupMemberLite } from './GroupMember.vue'
