@@ -56,6 +56,8 @@ export const StorageKeys = {
   friends: (userId: number | string) => `friends:${userId}`,
   /** 群列表整桶（不含 members，剥离到独立 key），保证整桶写不带成员爆量 */
   groups: (userId: number | string) => `groups:${userId}`,
+  /** 频道列表整桶；频道量级很小，整桶整写够用 */
+  channels: (userId: number | string) => `channels:${userId}`,
   /** 单群成员，按 groupId 分桶——单群可上百-千级，跟懒加载粒度对齐；群解散时物理删 */
   groupMembers: (userId: number | string, groupId: number) =>
     `groupMembers:${userId}:${groupId}`,

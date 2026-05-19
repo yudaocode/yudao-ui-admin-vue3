@@ -81,12 +81,13 @@ onMounted(async () => {
   // 1.1 整段 loading=true 阻断 saveConversations 抖动写盘 + WebSocket 普通消息进缓冲，避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
   conversationStore.loading = true
   try {
-    // 1.2 四个 store 并发从 IDB 读取本地缓存（loadConversations / loadDrafts 返回 void；load{Friends,Groups} 返回是否命中缓存）
-    const [, hasCachedFriends, hasCachedGroups] = await Promise.all([
+    // 1.2 五个 store 并发从 IDB 读取本地缓存（loadConversations / loadDrafts 返回 void；load{Friends,Groups,Channels} 返回是否命中缓存）
+    const [, hasCachedFriends, hasCachedGroups, , hasCachedChannels] = await Promise.all([
       conversationStore.loadConversations(),
       friendStore.loadFriends(),
       groupStore.loadGroups(),
-      draftStore.loadDrafts()
+      draftStore.loadDrafts(),
+      channelStore.loadChannels()
     ])
 
     // 2.1 有缓存：异步背景刷新，失败仅记日志（IDB 数据已经够撑首屏，pullOnce 也能正常入库）
@@ -103,10 +104,11 @@ onMounted(async () => {
     } else {
       requiredFetches.push(groupStore.fetchGroups())
     }
-    // TODO @AI：这里的“// 频道列表无 IDB 缓存；首屏后台异步拉一次，失败不阻塞 pull”；是不是要和上面的 2.1 2.2 综合起来？不然孤独的，有点奇怪？
-    // 频道列表无 IDB 缓存；首屏后台异步拉一次，失败不阻塞 pull
-    void channelStore.fetchChannels().catch((e) => console.warn('[IM] 拉取频道列表失败', e))
-    // 2.3 TODO @AI：这里加个注释，会不会有间隔感一点？
+    if (hasCachedChannels) {
+      void channelStore.fetchChannels().catch((e) => console.warn('[IM] 后台刷频道列表失败', e))
+    } else {
+      requiredFetches.push(channelStore.fetchChannels())
+    }
     if (requiredFetches.length > 0) {
       await Promise.all(requiredFetches)
     }
