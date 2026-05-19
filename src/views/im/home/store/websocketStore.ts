@@ -30,7 +30,7 @@ import {
 import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/message/private'
 import { readGroupMessages as apiReadGroupMessages } from '@/api/im/message/group'
 import type { ImChannelMessageRespVO } from '@/api/im/message/channel'
-import { buildChannelConversationStub } from '../composables/useMessagePuller'
+import { buildChannelConversationStub } from '../../utils/channel'
 import type {
   WebSocketFrame,
   ImPrivateMessageDTO,

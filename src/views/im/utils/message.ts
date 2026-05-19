@@ -307,7 +307,6 @@ export interface FaceMessage extends Quotable {
 
 /** 合并转发的单条内嵌消息快照（对齐后端 MergeMessage.Item） */
 export interface MergeMessageItem {
-  // TODO @AI：是不是把 messageId 改成 id，和原本的更统一一点？
   /** 原消息编号；仅做溯源标识 */
   messageId: number
   /** 发送人编号 */

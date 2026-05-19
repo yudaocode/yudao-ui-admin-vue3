@@ -29,20 +29,8 @@ import {
   MESSAGE_PRIVATE_READ_ENABLED
 } from '../../utils/config'
 import { useUserStore } from '@/store/modules/user'
-import { useChannelStore } from '../store/channelStore'
+import { buildChannelConversationStub } from '../../utils/channel'
 import type { Message } from '../types'
-
-/** 构建频道会话描述；优先从 channelStore 取真实 name / avatar，缺失时退化为占位 */
-// TODO @AI：这个可以抽到 channel.ts 搞个工具类么？类似 user.ts 获取名字这种。
-export const buildChannelConversationStub = (channelId: number) => {
-  const channel = useChannelStore().getChannel(channelId)
-  return {
-    type: ImConversationType.CHANNEL,
-    targetId: channelId,
-    name: channel?.name || `频道 ${channelId}`,
-    avatar: channel?.avatar || ''
-  }
-}
 
 /**
  * 消息增量拉取：登录后分页拉取离线期间的新消息

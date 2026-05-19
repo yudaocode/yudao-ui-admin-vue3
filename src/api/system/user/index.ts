@@ -51,8 +51,8 @@ export const getAllUser = () => {
  * @param id
  * @returns
  */
-export const getDeptUser = (id: number): Promise<UserVO[]> => {
-  return request.get({ url: '/system/user/simple-list?id=' + id })
+export const getDeptUser = (deptId: number): Promise<UserVO[]> => {
+  return request.get({ url: '/system/user/simple-list?deptId=' + deptId })
 }
 
 // 查询用户详情
