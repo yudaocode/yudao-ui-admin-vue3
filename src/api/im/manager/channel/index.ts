@@ -36,7 +36,6 @@ export const deleteManagerChannel = (id: number) => {
 }
 
 // 获得启用的频道精简列表（表单选择用）
-// TODO @AI：改成 simplelist 命名上？
-export const getEnabledChannelList = () => {
+export const getSimpleChannelList = () => {
   return request.get<ImManagerChannelVO[]>({ url: '/im/manager/channel/simple-list' })
 }

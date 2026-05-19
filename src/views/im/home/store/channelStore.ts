@@ -1,6 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { store } from '@/store'
-import { getEnabledChannelList, type ImManagerChannelVO } from '@/api/im/manager/channel'
+import { getSimpleChannelList, type ImManagerChannelVO } from '@/api/im/manager/channel'
 import { useConversationStore } from './conversationStore'
 import { ImConversationType } from '../../utils/constants'
 import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../utils/storage'
@@ -62,7 +62,7 @@ export const useChannelStore = defineStore('imChannelStore', {
         return
       }
       try {
-        this.channels = (await getEnabledChannelList()) || []
+        this.channels = (await getSimpleChannelList()) || []
         this.loaded = true
         this.syncConversationMetadata()
         this.saveChannels()
