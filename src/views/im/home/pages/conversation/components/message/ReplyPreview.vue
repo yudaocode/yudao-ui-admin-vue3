@@ -68,7 +68,15 @@
       </span>
     </template>
 
-    <!-- 图片 / 视频 / 表情贴图缩略图 -->
+    <!-- 频道素材：[频道] + 标题 + 封面缩略图 -->
+    <template v-else-if="isMaterial">
+      <span class="flex-shrink-0">[频道]</span>
+      <span v-if="parsedPayload?.title" class="im-reply-preview__text min-w-0">
+        {{ parsedPayload.title }}
+      </span>
+    </template>
+
+    <!-- 图片 / 视频 / 表情贴图 / 频道素材缩略图 -->
     <img
       v-if="thumbnailUrl"
       :src="thumbnailUrl"
@@ -106,6 +114,7 @@ import {
   type FaceMessage,
   type FileMessage,
   type ImageMessage,
+  type MaterialMessage,
   type TextMessage,
   type VideoMessage,
   type QuoteMessage
@@ -163,7 +172,14 @@ const senderName = computed(() => {
 
 /** quote.content 解析一次缓存，让多个 computed 复用，长会话每条引用气泡少一次 JSON.parse */
 type AnyQuotePayload = Partial<
-  TextMessage & ImageMessage & FileMessage & AudioMessage & VideoMessage & CardMessage & FaceMessage
+  TextMessage &
+    ImageMessage &
+    FileMessage &
+    AudioMessage &
+    VideoMessage &
+    CardMessage &
+    FaceMessage &
+    MaterialMessage
 >
 const parsedPayload = computed(() => parseMessage<AnyQuotePayload>(props.quote.content))
 
@@ -172,6 +188,7 @@ const isFile = computed(() => props.quote.type === ImMessageType.FILE)
 const isVoice = computed(() => props.quote.type === ImMessageType.VOICE)
 const isCard = computed(() => props.quote.type === ImMessageType.CARD)
 const isFace = computed(() => props.quote.type === ImMessageType.FACE)
+const isMaterial = computed(() => props.quote.type === ImMessageType.MATERIAL)
 
 /** 文本超过 MAX_TEXT_PREVIEW_LEN 截断，长内容不撑爆引用块 */
 const textPreview = computed(() => {
@@ -184,7 +201,7 @@ const textPreview = computed(() => {
 /** 文件 icon：按扩展名挑色，跟主气泡渲染同源 */
 const fileIcon = computed(() => getFileIconInfo(parsedPayload.value?.name))
 
-/** 缩略图 URL：图片 / 视频 / 表情贴图从 quote.content 直接取，不依赖本地缓存 */
+/** 缩略图 URL：图片 / 视频 / 表情贴图 / 频道素材封面从 quote.content 直接取，不依赖本地缓存 */
 const thumbnailUrl = computed<string | undefined>(() => {
   if (isRecalled.value) {
     return undefined
@@ -193,7 +210,7 @@ const thumbnailUrl = computed<string | undefined>(() => {
   if (type === ImMessageType.IMAGE) {
     return parsedPayload.value?.thumbnailUrl || parsedPayload.value?.url
   }
-  if (type === ImMessageType.VIDEO) {
+  if (type === ImMessageType.VIDEO || type === ImMessageType.MATERIAL) {
     return parsedPayload.value?.coverUrl
   }
   if (type === ImMessageType.FACE) {

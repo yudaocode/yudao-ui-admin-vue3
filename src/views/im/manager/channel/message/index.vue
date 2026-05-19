@@ -38,6 +38,16 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" width="80" />
+      <el-table-column label="封面" align="center" prop="materialCoverUrl" width="80">
+        <template #default="scope">
+          <el-image
+            v-if="scope.row.materialCoverUrl"
+            :src="scope.row.materialCoverUrl"
+            class="w-40px h-40px rounded"
+            fit="cover"
+          />
+        </template>
+      </el-table-column>
       <el-table-column label="频道" align="center" prop="channelName" width="120" />
       <el-table-column
         label="素材标题"
