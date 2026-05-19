@@ -8,9 +8,7 @@
       label-width="68px"
     >
       <el-form-item label="频道" prop="channelId">
-        <el-select v-model="queryParams.channelId" placeholder="全部" clearable class="!w-200px">
-          <el-option v-for="c in channelList" :key="c.id" :label="c.name" :value="c.id" />
-        </el-select>
+        <ChannelSelect v-model="queryParams.channelId" placeholder="全部" clearable class="!w-200px" />
       </el-form-item>
       <el-form-item label="标题" prop="title">
         <el-input
@@ -108,33 +106,32 @@
     />
   </ContentWrap>
 
-  <ChannelMaterialForm ref="formRef" :channel-list="channelList" @success="getList" />
+  <ChannelMaterialForm ref="formRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
-// TOOD @AI：注释风格，对齐 system user index
 import { dateFormatter } from '@/utils/formatTime'
 import * as MaterialApi from '@/api/im/manager/channel/material'
-import * as ChannelApi from '@/api/im/manager/channel'
+import ChannelSelect from '../list/components/ChannelSelect.vue'
 import ChannelMaterialForm from './ChannelMaterialForm.vue'
 
 defineOptions({ name: 'ImChannelMaterial' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const total = ref(0)
-const list = ref<MaterialApi.ImManagerChannelMaterialVO[]>([])
-const channelList = ref<ChannelApi.ImManagerChannelVO[]>([])
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref<MaterialApi.ImManagerChannelMaterialVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   channelId: undefined as number | undefined,
   title: undefined as string | undefined
 })
-const queryFormRef = ref()
+const queryFormRef = ref() // 搜索的表单
 
+/** 查询素材分页 */
 const getList = async () => {
   loading.value = true
   try {
@@ -146,21 +143,25 @@ const getList = async () => {
   }
 }
 
+/** 搜索 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
+/** 重置 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
-const formRef = ref()
+/** 打开新增 / 编辑弹窗 */
+const formRef = ref() // 表单 Ref
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
+/** 删除 */
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
@@ -172,9 +173,8 @@ const handleDelete = async (id: number) => {
   await getList()
 }
 
-onMounted(async () => {
-  // TOOD @AI：注释风格，ChannelApi 列表，让 channel/components 抽个组件，复用一下；
-  channelList.value = await ChannelApi.getEnabledChannelList()
+/** 初始化 */
+onMounted(() => {
   getList()
 })
 </script>

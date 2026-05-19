@@ -8,10 +8,14 @@
       v-loading="formLoading"
     >
       <el-form-item label="所属频道" prop="channelId">
-        <!-- TODO @AI：使用 channelselect 组件 -->
-        <el-select v-model="formData.channelId" placeholder="请选择频道" class="!w-full">
-          <el-option v-for="c in props.channelList" :key="c.id" :label="c.name" :value="c.id" />
-        </el-select>
+        <ChannelSelect v-model="formData.channelId" placeholder="请选择频道" />
+      </el-form-item>
+      <!-- TODO @AI：是不是内容类型，在考虑优化下。1）富文本；2）外链；更简介；注意，需要插入到字典里； -->
+      <el-form-item label="内容类型" prop="type">
+        <el-radio-group v-model="formData.type">
+          <el-radio :value="1">站内富文本</el-radio>
+          <el-radio :value="2">外链</el-radio>
+        </el-radio-group>
       </el-form-item>
       <el-form-item label="标题" prop="title">
         <el-input v-model="formData.title" placeholder="图文标题" maxlength="128" show-word-limit />
@@ -29,20 +33,17 @@
           show-word-limit
         />
       </el-form-item>
-      <!-- TODO @AI：需要增加 type； -->
-      <el-form-item label="跳转链接" prop="url">
-        <el-input
-          v-model="formData.url"
-          placeholder="为空走站内详情页渲染 content；非空则跳此链接"
-        />
-      </el-form-item>
-      <el-form-item label="正文" prop="content">
+      <!-- 内容类型为「站内富文本」时展示 content 富文本输入；「外链」时展示 url 输入 -->
+      <el-form-item v-if="formData.type === 1" label="正文" prop="content">
         <el-input
           v-model="formData.content"
           placeholder="富文本 HTML"
           type="textarea"
           :rows="8"
         />
+      </el-form-item>
+      <el-form-item v-else label="跳转链接" prop="url">
+        <el-input v-model="formData.url" placeholder="https://example.com/..." />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -53,26 +54,22 @@
 </template>
 
 <script lang="ts" setup>
-// TODO @AI：补充一些注释，对齐 system user form；
 import * as MaterialApi from '@/api/im/manager/channel/material'
-import type { ImManagerChannelVO } from '@/api/im/manager/channel'
+import ChannelSelect from '../list/components/ChannelSelect.vue'
 
 defineOptions({ name: 'ImChannelMaterialForm' })
 
-const props = defineProps<{ channelList: ImManagerChannelVO[] }>()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const { t } = useI18n()
-const message = useMessage()
-
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined as number | undefined,
   channelId: undefined as number | undefined,
-  // TODO @AI：不是这种 type；是 1 为外链；2 为图文；
-  type: 125, // MATERIAL
+  type: 1, // 内容类型；1 站内富文本 2 外链；参见 ImChannelMaterialTypeEnum
   title: '',
   coverUrl: '',
   summary: '',
@@ -81,15 +78,18 @@ const formData = ref({
 })
 const formRules = reactive({
   channelId: [{ required: true, message: '所属频道不能为空', trigger: 'change' }],
+  type: [{ required: true, message: '内容类型不能为空', trigger: 'change' }],
   title: [{ required: true, message: '标题不能为空', trigger: 'blur' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
+/** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
+  // 修改时回填数据
   if (id) {
     formLoading.value = true
     try {
@@ -99,10 +99,11 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ open })
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 
+/** 提交表单 */
 const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
@@ -122,11 +123,12 @@ const submitForm = async () => {
   }
 }
 
+/** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,
     channelId: undefined,
-    type: 125,
+    type: 1,
     title: '',
     coverUrl: '',
     summary: '',

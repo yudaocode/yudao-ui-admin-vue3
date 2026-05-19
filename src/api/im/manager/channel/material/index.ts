@@ -18,6 +18,13 @@ export const getManagerChannelMaterialPage = (params: PageParam) => {
   return request.get({ url: '/im/manager/channel-material/page', params })
 }
 
+// 获得指定频道下的素材精简列表
+export const getSimpleManagerChannelMaterialList = (channelId: number) => {
+  return request.get({
+    url: '/im/manager/channel-material/simple-list?channelId=' + channelId
+  })
+}
+
 // 获得素材详情
 export const getManagerChannelMaterial = (id: number) => {
   return request.get({ url: '/im/manager/channel-material/get?id=' + id })

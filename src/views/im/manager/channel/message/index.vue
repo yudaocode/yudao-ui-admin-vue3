@@ -8,9 +8,7 @@
       label-width="68px"
     >
       <el-form-item label="频道" prop="channelId">
-        <el-select v-model="queryParams.channelId" placeholder="全部" clearable class="!w-200px">
-          <el-option v-for="c in channelList" :key="c.id" :label="c.name" :value="c.id" />
-        </el-select>
+        <ChannelSelect v-model="queryParams.channelId" placeholder="全部" clearable class="!w-200px" />
       </el-form-item>
       <el-form-item label="发送时间" prop="sendTime">
         <el-date-picker
@@ -88,33 +86,32 @@
     />
   </ContentWrap>
 
-  <ChannelMessageSendForm ref="sendFormRef" :channel-list="channelList" @success="getList" />
+  <ChannelMessageSendForm ref="sendFormRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
-// TODO @AI：补充一些注释，对齐 system user index；
 import { dateFormatter } from '@/utils/formatTime'
 import * as MessageApi from '@/api/im/manager/channel/message'
-import * as ChannelApi from '@/api/im/manager/channel'
+import ChannelSelect from '../list/components/ChannelSelect.vue'
 import ChannelMessageSendForm from './ChannelMessageSendForm.vue'
 
 defineOptions({ name: 'ImChannelMessage' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const total = ref(0)
-const list = ref<MessageApi.ImManagerChannelMessageVO[]>([])
-const channelList = ref<ChannelApi.ImManagerChannelVO[]>([])
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref<MessageApi.ImManagerChannelMessageVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   channelId: undefined as number | undefined,
   sendTime: [] as string[]
 })
-const queryFormRef = ref()
+const queryFormRef = ref() // 搜索的表单
 
+/** 查询消息分页 */
 const getList = async () => {
   loading.value = true
   try {
@@ -126,21 +123,25 @@ const getList = async () => {
   }
 }
 
+/** 搜索 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
+/** 重置 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
-const sendFormRef = ref()
+/** 打开「立即推送」弹窗 */
+const sendFormRef = ref() // 推送弹窗 Ref
 const openSendForm = () => {
   sendFormRef.value.open()
 }
 
+/** 删除 */
 const handleDelete = async (id: number) => {
   try {
     await message.delConfirm()
@@ -152,8 +153,7 @@ const handleDelete = async (id: number) => {
   await getList()
 }
 
-onMounted(async () => {
-  channelList.value = await ChannelApi.getEnabledChannelList()
+onMounted(() => {
   getList()
 })
 </script>

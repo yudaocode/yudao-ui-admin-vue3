@@ -64,7 +64,13 @@
         </template>
       </el-table-column>
       <el-table-column label="编码" align="center" prop="code" width="160" show-overflow-tooltip />
-      <el-table-column label="名称" align="center" prop="name" min-width="120" show-overflow-tooltip />
+      <el-table-column
+        label="名称"
+        align="center"
+        prop="name"
+        min-width="120"
+        show-overflow-tooltip
+      />
       <el-table-column label="排序" align="center" prop="sort" width="80" />
       <el-table-column label="状态" align="center" prop="status" width="80">
         <template #default="scope">
@@ -111,7 +117,6 @@
 </template>
 
 <script lang="ts" setup>
-// TOOD @AI：注释风格，对齐 system user index
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as ChannelApi from '@/api/im/manager/channel'
@@ -119,12 +124,12 @@ import ChannelForm from './ChannelForm.vue'
 
 defineOptions({ name: 'ImChannel' })
 
-const message = useMessage()
-const { t } = useI18n()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const loading = ref(true)
-const total = ref(0)
-const list = ref<ChannelApi.ImManagerChannelVO[]>([])
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref<ChannelApi.ImManagerChannelVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -132,7 +137,7 @@ const queryParams = reactive({
   name: undefined as string | undefined,
   status: undefined as number | undefined
 })
-const queryFormRef = ref()
+const queryFormRef = ref() // 搜索的表单
 
 /** 查询频道分页 */
 const getList = async () => {
@@ -176,6 +181,7 @@ const handleDelete = async (id: number) => {
   await getList()
 }
 
+/** 初始化 **/
 onMounted(() => {
   getList()
 })

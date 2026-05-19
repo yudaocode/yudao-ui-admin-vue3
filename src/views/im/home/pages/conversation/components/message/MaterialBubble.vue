@@ -1,11 +1,26 @@
 <template>
-  <div class="material-card" @click="onClick">
+  <!-- 公众号会话内（大卡片：封面 + 标题 + 摘要） -->
+  <div v-if="isChannelView" class="material-card" @click="onClick">
     <div class="title">{{ payload.title || '(无标题)' }}</div>
     <img v-if="payload.coverUrl" class="cover" :src="payload.coverUrl" />
     <div v-if="payload.summary" class="summary">{{ payload.summary }}</div>
     <span class="link">{{ payload.url ? '外链' : '查看详情' }}</span>
   </div>
 
+  <!-- 私聊 / 群聊里被转发的素材（紧凑卡片：标题左 + 小封面右 + 底部频道标识） -->
+  <!-- TODO @AI：转发后的消息，无法点击打开； -->
+  <div v-else class="material-card-forward" @click="onClick">
+    <div class="forward-body">
+      <div class="forward-title">{{ payload.title || '(无标题)' }}</div>
+      <img v-if="payload.coverUrl" class="forward-cover" :src="payload.coverUrl" />
+    </div>
+    <div class="forward-footer">
+      <Icon icon="ep:promotion" :size="12" />
+      <span>频道消息</span>
+    </div>
+  </div>
+
+  <!-- TODO @ai：需要注释下； -->
   <Dialog
     v-model="detailVisible"
     :title="payload.title || '详情'"
@@ -23,8 +38,11 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import type { PropType } from 'vue'
+import Icon from '@/components/Icon/src/Icon.vue'
 import { getChannelMaterial } from '@/api/im/channel/material'
 import { parseMessage, type MaterialMessage } from '@/views/im/utils/message'
+import { useConversationStore } from '@/views/im/home/store/conversationStore'
+import { ImConversationType } from '@/views/im/utils/constants'
 
 interface MessageInfo {
   materialId?: number
@@ -34,6 +52,13 @@ interface MessageInfo {
 const props = defineProps({
   message: { type: Object as PropType<MessageInfo>, required: true }
 })
+
+const conversationStore = useConversationStore()
+
+/** 当前是否在公众号 / 频道会话里：决定走大卡片还是紧凑转发卡片 */
+const isChannelView = computed(
+  () => conversationStore.activeConversation?.type === ImConversationType.CHANNEL
+)
 
 /** 反序列化 content JSON 为 payload 对象 */
 const payload = computed<MaterialMessage>(
@@ -69,6 +94,8 @@ const onClick = async () => {
 </script>
 
 <style scoped lang="scss">
+/* 公众号会话内大卡片：占父容器全宽，封面 + 标题 + 摘要纵向铺开 */
+/** TODO @AI：有没可能 unocss 尽量替代掉； */
 .material-card {
   display: flex;
   flex-direction: column;
@@ -121,6 +148,62 @@ const onClick = async () => {
     border-top: 1px solid var(--el-border-color-lighter);
     font-size: 12px;
     color: var(--el-color-primary);
+  }
+}
+
+/* 私聊 / 群聊转发紧凑卡片：标题左 + 小封面右 + 底部频道标识 */
+.material-card-forward {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  padding: 10px 12px 8px;
+  background: var(--el-bg-color);
+  border-radius: 8px;
+  border: 1px solid var(--el-border-color-lighter);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .forward-body {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+
+    .forward-title {
+      flex: 1;
+      min-width: 0;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.4;
+      color: var(--el-text-color-primary);
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .forward-cover {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: var(--el-fill-color-light);
+      flex-shrink: 0;
+    }
+  }
+
+  .forward-footer {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid var(--el-border-color-lighter);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--el-text-color-secondary);
   }
 }
 
