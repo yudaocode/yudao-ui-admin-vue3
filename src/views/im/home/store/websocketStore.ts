@@ -29,6 +29,8 @@ import {
 } from './rtcStore'
 import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/message/private'
 import { readGroupMessages as apiReadGroupMessages } from '@/api/im/message/group'
+import type { ImChannelMessageRespVO } from '@/api/im/message/channel'
+import { buildChannelConversationStub } from '../composables/useMessagePuller'
 import type {
   WebSocketFrame,
   ImPrivateMessageDTO,
@@ -117,6 +119,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     messageBuffer: [] as Array<
       | { conversationType: typeof ImConversationType.PRIVATE; payload: ImPrivateMessageDTO }
       | { conversationType: typeof ImConversationType.GROUP; payload: ImGroupMessageDTO }
+      | { conversationType: typeof ImConversationType.CHANNEL; payload: ImChannelMessageRespVO }
     > // 初始化加载期内，先把普通消息丢进缓冲区，pull 完成后再一次性回放
   }),
 
@@ -209,8 +212,57 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         case ImWebSocketMessageType.GROUP_MESSAGE:
           this.dispatchGroupFrame(content as ImGroupMessageDTO)
           break
+        case ImWebSocketMessageType.CHANNEL_MESSAGE:
+          this.handleChannelMessage(content as ImChannelMessageRespVO)
+          break
         default:
           console.debug('[IM WS] 未识别事件', frame)
+      }
+    },
+
+    /**
+     * 频道消息实时入会话；频道消息单向 + 无状态机，直接 insertMessage 即可
+     * pull 与 WS 拿到同一条 id 时，conversationStore.insertMessage 内部按 id 去重，不会重复
+     */
+    handleChannelMessage(websocketMessage: ImChannelMessageRespVO) {
+      const conversationStore = useConversationStore()
+      // 离线加载期间先缓冲，等 pull 完成后再统一回放，避免重复或顺序错乱
+      if (conversationStore.loading) {
+        this.messageBuffer.push({
+          conversationType: ImConversationType.CHANNEL,
+          payload: websocketMessage
+        })
+        return
+      }
+      const sendTimeMs =
+        typeof websocketMessage.sendTime === 'number'
+          ? websocketMessage.sendTime
+          : new Date(websocketMessage.sendTime).getTime()
+      conversationStore.insertMessage(
+        buildChannelConversationStub(websocketMessage.channelId),
+        {
+          id: websocketMessage.id,
+          clientMessageId: '',
+          type: websocketMessage.type,
+          content: websocketMessage.content,
+          status: 0,
+          sendTime: sendTimeMs,
+          senderId: 0,
+          targetId: websocketMessage.channelId,
+          selfSend: false,
+          materialId: websocketMessage.materialId
+        }
+      )
+      // 非当前会话 + 未免打扰：响一下提示音
+      const conversation = conversationStore.getConversation(
+        ImConversationType.CHANNEL,
+        websocketMessage.channelId
+      )
+      const isActive =
+        conversationStore.activeConversation?.type === ImConversationType.CHANNEL
+        && conversationStore.activeConversation?.targetId === websocketMessage.channelId
+      if (!isActive && !conversation?.silent && isNormalMessage(websocketMessage.type)) {
+        playAudioTip()
       }
     },
 

@@ -163,8 +163,10 @@
         </transition>
       </div>
 
-      <!-- 底部：输入框常驻；多选模式底栏作为浮层盖在上面，保持下方输入框尺寸不变 -->
-      <div class="relative">
+      <!-- 底部：输入框（频道单向消息无需输入框）；多选模式底栏作为浮层盖在上面，保持下方输入框尺寸不变 -->
+      <!-- TODO @AI：暂时去掉频道的右键：引用、多选； -->
+      <!-- TODO @AI：转发时，不允许选择【频道】。这块要屏蔽下； -->
+      <div v-if="!isChannel" class="relative">
         <MessageInput />
         <MessageMultiSelectBar v-if="multiSelect.state.active" class="absolute inset-0 z-10" />
       </div>
@@ -294,6 +296,9 @@ const isGroup = computed(
 )
 const isPrivate = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.PRIVATE
+)
+const isChannel = computed(
+  () => conversationStore.activeConversation?.type === ImConversationType.CHANNEL
 )
 
 /** 私聊会话且对端不是有效好友（本端 friend 记录缺失或 DISABLE）；单边删除语义下「被对方删除」不触发本端横幅 */

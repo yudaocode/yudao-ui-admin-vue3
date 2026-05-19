@@ -332,6 +332,15 @@ export interface MergeMessage {
   messages: MergeMessageItem[]
 }
 
+/** 频道素材消息 payload（对齐后端 MaterialMessage） */
+export interface MaterialMessage {
+  title?: string
+  coverUrl?: string
+  summary?: string
+  /** 跳转链接；为空时点击在客户端内置详情页按 materialId 拉 content 渲染；非空则跳 url */
+  url?: string
+}
+
 // ==================== 合并转发 payload 构造 ====================
 
 /** 单个发送人的快照昵称 / 头像 */

@@ -16,6 +16,7 @@ import {
   type CardMessage,
   type FaceMessage,
   type FileMessage,
+  type MaterialMessage,
   type TextMessage,
   type TipSegment
 } from './message'
@@ -123,6 +124,10 @@ export function summarizeMessageContent(
       return buildFacePreviewText(parseMessage<FaceMessage>(message.content))
     case ImMessageType.MERGE:
       return '[聊天记录]'
+    case ImMessageType.MATERIAL: {
+      const material = parseMessage<MaterialMessage>(message.content)
+      return material?.title ? `[频道] ${material.title}` : '[频道]'
+    }
     case ImMessageType.RTC_CALL_START:
     case ImMessageType.RTC_CALL_END:
       return '[语音通话]'

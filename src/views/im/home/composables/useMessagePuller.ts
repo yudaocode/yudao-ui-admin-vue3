@@ -14,6 +14,10 @@ import {
   type ImGroupMessageRespVO
 } from '@/api/im/message/group'
 import {
+  pullChannelMessages as apiPullChannelMessages,
+  type ImChannelMessageRespVO
+} from '@/api/im/message/channel'
+import {
   ImConversationType,
   ImMessageType,
   isFriendChatTip,
@@ -25,7 +29,20 @@ import {
   MESSAGE_PRIVATE_READ_ENABLED
 } from '../../utils/config'
 import { useUserStore } from '@/store/modules/user'
+import { useChannelStore } from '../store/channelStore'
 import type { Message } from '../types'
+
+/** 构建频道会话描述；优先从 channelStore 取真实 name / avatar，缺失时退化为占位 */
+// TODO @AI：这个可以抽到 channel.ts 搞个工具类么？类似 user.ts 获取名字这种。
+export const buildChannelConversationStub = (channelId: number) => {
+  const channel = useChannelStore().getChannel(channelId)
+  return {
+    type: ImConversationType.CHANNEL,
+    targetId: channelId,
+    name: channel?.name || `频道 ${channelId}`,
+    avatar: channel?.avatar || ''
+  }
+}
 
 /**
  * 消息增量拉取：登录后分页拉取离线期间的新消息
@@ -84,6 +101,26 @@ export const useMessagePuller = () => {
     }
   }
 
+  /** 服务端频道消息 -> 本地 Message */
+  const convertChannelMessage = (message: ImChannelMessageRespVO): Message => {
+    return {
+      id: message.id,
+      clientMessageId: '',
+      type: message.type,
+      content: message.content,
+      status: 0, // 频道消息无状态机；占位 UNREAD
+      sendTime: new Date(message.sendTime).getTime(),
+      senderId: 0, // 系统下发，无发送人
+      targetId: message.channelId, // 会话归属到频道编号
+      selfSend: false,
+      materialId: message.materialId // 详情页拉富文本用
+    }
+  }
+
+  /** 频道：会话归属到 channelId；name / avatar 暂用占位，将来接入 channelStore 后再填真值 */
+  const convertChannelConversation = (message: ImChannelMessageRespVO) =>
+    buildChannelConversationStub(message.channelId)
+
   /** 私聊：会话归属到对端 userId */
   const convertPrivateConversation = (message: ImPrivateMessageRespVO) => {
     const targetId = getPrivatePeerId(message)
@@ -109,14 +146,20 @@ export const useMessagePuller = () => {
 
   /** 循环拉取指定会话类型的消息：以列表最后一条 id 作为下次 minId，直到接口返回空列表 */
   const pullByType = async (conversationType: number, startMinId: number) => {
-    // 私聊 / 群聊各自一套接口和分页大小，按 isPrivate 在循环内分支调度
+    // 私聊 / 群聊 / 频道各自一套接口；按 conversationType 在循环内分支调度
     let minId = startMinId || 0
     const isPrivate = conversationType === ImConversationType.PRIVATE
+    const isChannel = conversationType === ImConversationType.CHANNEL
     const size = isPrivate ? MESSAGE_PRIVATE_PULL_SIZE : MESSAGE_GROUP_PULL_SIZE
     while (true) {
-      const list = isPrivate
-        ? await apiPullPrivateMessages({ minId, size })
-        : await apiPullGroupMessages({ minId, size })
+      let list: any[] | undefined
+      if (isPrivate) {
+        list = await apiPullPrivateMessages({ minId, size })
+      } else if (isChannel) {
+        list = await apiPullChannelMessages({ minId, size })
+      } else {
+        list = await apiPullGroupMessages({ minId, size })
+      }
       if (!list || list.length === 0) {
         break
       }
@@ -124,6 +167,14 @@ export const useMessagePuller = () => {
       // 逐条 dispatch：原消息走 insertMessage；RECALL 信号走 recallMessage 把同批内已 insert 的原消息更新为撤回提示。
       // 后端按 id 升序返回，且信号 id 一定 > 原消息 id（先更新 status 再插信号），所以原消息一定先到、recallMessage 找得到
       for (const raw of list) {
+        if (isChannel) {
+          const message = raw as ImChannelMessageRespVO
+          conversationStore.insertMessage(
+            convertChannelConversation(message),
+            convertChannelMessage(message)
+          )
+          continue
+        }
         if (isPrivate) {
           const message = raw as ImPrivateMessageRespVO
           // 特殊：撤回消息的处理
@@ -197,10 +248,11 @@ export const useMessagePuller = () => {
       try {
         conversationStore.loading = true
         try {
-          // 并发拉取私聊 + 群聊，降低初始加载耗时
+          // 并发拉取私聊 + 群聊 + 频道，降低初始加载耗时
           await Promise.all([
             pullByType(ImConversationType.PRIVATE, conversationStore.privateMessageMaxId),
-            pullByType(ImConversationType.GROUP, conversationStore.groupMessageMaxId)
+            pullByType(ImConversationType.GROUP, conversationStore.groupMessageMaxId),
+            pullByType(ImConversationType.CHANNEL, conversationStore.channelMessageMaxId)
           ])
         } catch (e) {
           console.error('[IM] 拉取离线消息失败:', e)
@@ -214,6 +266,8 @@ export const useMessagePuller = () => {
         for (const item of buffered) {
           if (item.conversationType === ImConversationType.PRIVATE) {
             wsStore.handlePrivateMessage(item.payload)
+          } else if (item.conversationType === ImConversationType.CHANNEL) {
+            wsStore.handleChannelMessage(item.payload)
           } else {
             wsStore.handleGroupMessage(item.payload)
           }

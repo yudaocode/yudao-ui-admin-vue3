@@ -9,6 +9,8 @@ export const ImMessageType = {
   MERGE: 107, // 合并转发（对应 OpenIM Merger=107；payload 内嵌完整快照）
   CARD: 108, // 名片（对应 OpenIM Card=108）
   FACE: 115, // 表情贴图（对应 OpenIM Face=115；Unicode emoji 仍走 TEXT）
+  // ========== 频道消息扩展段（125+；OpenIM 122 之后未占用，作为频道 / 公众号类消息扩展） ==========
+  MATERIAL: 125, // 频道素材（图文卡片：title + coverUrl + summary + url；详情拉 get-content）
   // ========== 信号类（2101 / 2200 直接复用 OpenIM 段位编号；2201 自有扩展） ==========
   RECALL: 2101, // 撤回（对应 OpenIM RevokeNotification=2101）
   RECEIPT: 2200, // 回执（对应 OpenIM HasReadReceipt=2200）
@@ -111,7 +113,8 @@ const ImMessageTypeNormals: number[] = [
   ImMessageType.VIDEO,
   ImMessageType.CARD,
   ImMessageType.FACE,
-  ImMessageType.MERGE
+  ImMessageType.MERGE,
+  ImMessageType.MATERIAL // 频道素材计入未读数 + 进会话列表
 ]
 
 /** 判断是否"普通消息" */
@@ -148,7 +151,8 @@ export const ImMessageStatus = {
 /** IM 会话类型枚举 */
 export const ImConversationType = {
   PRIVATE: 1, // 私聊
-  GROUP: 2 // 群聊
+  GROUP: 2, // 群聊
+  CHANNEL: 3 // 频道 / 公众号
 } as const
 
 /** ImConversationType 取值（用于消息 payload 字段类型收窄） */
@@ -162,6 +166,11 @@ export function isPrivateConversation(type: number | undefined): boolean {
 /** 是否群聊会话；同时收窄类型 */
 export function isGroupConversation(type: number | undefined): boolean {
   return type === ImConversationType.GROUP
+}
+
+/** 是否频道会话；同时收窄类型 */
+export function isChannelConversation(type: number | undefined): boolean {
+  return type === ImConversationType.CHANNEL
 }
 
 /** IM 通话媒体类型（对齐后端 ImRtcCallMediaTypeEnum） */
@@ -217,10 +226,11 @@ export const ImRtcCallStage = {
 /** ImRtcCallStage 取值类型 */
 export type ImRtcCallStageValue = (typeof ImRtcCallStage)[keyof typeof ImRtcCallStage]
 
-/** IM WebSocket 外层帧类型（对齐后端 ImPrivateMessageDTO.TYPE / ImGroupMessageDTO.TYPE） */
+/** IM WebSocket 外层帧类型（对齐后端 ImPrivateMessageDTO.TYPE / ImGroupMessageDTO.TYPE / ImChannelMessageDTO.TYPE） */
 export const ImWebSocketMessageType = {
   PRIVATE_MESSAGE: 'im-private-message', // 私聊通道
-  GROUP_MESSAGE: 'im-group-message' // 群聊通道
+  GROUP_MESSAGE: 'im-group-message', // 群聊通道
+  CHANNEL_MESSAGE: 'im-channel-message' // 频道通道
 } as const
 
 /** IM 群回执状态枚举（对齐后端 ImGroupMessageReceiptStatusEnum） */

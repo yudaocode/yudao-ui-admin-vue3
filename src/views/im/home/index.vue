@@ -40,6 +40,7 @@ import { useGroupStore } from './store/groupStore'
 import { useGroupRequestStore } from './store/groupRequestStore'
 import { useDraftStore } from './store/draftStore'
 import { useFaceStore } from './store/faceStore'
+import { useChannelStore } from './store/channelStore'
 import { useMessagePuller } from './composables/useMessagePuller'
 import { useMessageSender } from './composables/useMessageSender'
 import { useVoicePlayer } from './composables/useVoicePlayer'
@@ -63,6 +64,7 @@ const groupStore = useGroupStore()
 const groupRequestStore = useGroupRequestStore()
 const draftStore = useDraftStore()
 const faceStore = useFaceStore()
+const channelStore = useChannelStore()
 const { pullOnce } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
 const voicePlayer = useVoicePlayer()
@@ -72,9 +74,9 @@ onMounted(async () => {
   // 0.1 系统表情包后台预拉：独立链路与首屏 IDB / 远端拉取并发，消除表情面板首次展开白屏；失败仅记日志，不阻塞主流程
   void faceStore.ensureFacePacks().catch((e) => console.warn('[IM] 后台预拉表情包失败', e))
   // 0.2 我管理的群下未处理加群申请：会话列表全局入口 / 群顶部横幅都从这份 store 派生；后台拉，不阻断
-  void groupRequestStore.fetchUnhandledList().catch((e) =>
-    console.warn('[IM] 拉取未处理加群申请失败', e)
-  )
+  void groupRequestStore
+    .fetchUnhandledList()
+    .catch((e) => console.warn('[IM] 拉取未处理加群申请失败', e))
 
   // 1.1 整段 loading=true 阻断 saveConversations 抖动写盘 + WebSocket 普通消息进缓冲，避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
   conversationStore.loading = true
@@ -101,6 +103,10 @@ onMounted(async () => {
     } else {
       requiredFetches.push(groupStore.fetchGroups())
     }
+    // TODO @AI：这里的“// 频道列表无 IDB 缓存；首屏后台异步拉一次，失败不阻塞 pull”；是不是要和上面的 2.1 2.2 综合起来？不然孤独的，有点奇怪？
+    // 频道列表无 IDB 缓存；首屏后台异步拉一次，失败不阻塞 pull
+    void channelStore.fetchChannels().catch((e) => console.warn('[IM] 拉取频道列表失败', e))
+    // 2.3 TODO @AI：这里加个注释，会不会有间隔感一点？
     if (requiredFetches.length > 0) {
       await Promise.all(requiredFetches)
     }

@@ -87,20 +87,27 @@
       <Icon v-if="isMessageChecked" icon="ant-design:check-outlined" :size="12" color="#fff" />
     </span>
 
-    <!-- 消息行：头像 + 气泡内部按 selfSend reverse -->
+    <!-- 消息行：头像 + 气泡内部按 selfSend reverse；频道素材仿公众号样式居中且不显示头像 -->
     <div
       class="flex flex-1 min-w-0 gap-2 items-start"
-      :class="{ 'flex-row-reverse': message.selfSend }"
+      :class="{ 'flex-row-reverse': message.selfSend, 'justify-center': isMaterial }"
     >
-      <!-- 头像：点击弹 UserInfoCard 由 UserAvatar 内部承接 -->
+      <!-- 头像：点击弹 UserInfoCard 由 UserAvatar 内部承接；频道素材消息不显示头像 -->
       <UserAvatar
+        v-if="!isMaterial"
         :id="message.selfSend ? userStore.getUser?.id : message.senderId"
         :name="senderRealNickname"
         :url="message.selfSend ? userStore.getUser?.avatar : senderAvatar"
         :size="36"
       />
 
-    <div class="flex flex-col gap-0.5 max-w-[70%]" :class="{ 'items-end': message.selfSend }">
+    <div
+      class="flex flex-col gap-0.5"
+      :class="[
+        message.selfSend ? 'items-end' : '',
+        isMaterial ? 'w-[80%] min-w-[320px] max-w-[720px]' : 'max-w-[70%]'
+      ]"
+    >
       <!-- 群聊对方消息：气泡上方显示发送者昵称 -->
       <div
         v-if="showSenderName"
@@ -116,6 +123,7 @@
           :self-send="message.selfSend"
           :upload-progress="message.uploadProgress"
           :mentions="textMentions"
+          :material-id="message.materialId"
           @click-card="handleCardClick"
           @open-merge="handleMergeOpen"
         />
@@ -292,10 +300,13 @@ const { copy: copyToClipboard } = useClipboard({ legacy: true })
 
 // ==================== 消息类型判断 ====================
 
-/** 是否在当前消息上方渲染时间分隔条：列表第一条 / 距上一条超过阈值；缺 sendTime 不渲染 */
+/** 是否在当前消息上方渲染时间分隔条：列表第一条 / 距上一条超过阈值；缺 sendTime 不渲染；频道素材每条都显示 */
 const shouldShowTimeTip = computed(() => {
   if (!props.message.sendTime) {
     return false
+  }
+  if (props.message.type === ImMessageType.MATERIAL) {
+    return true
   }
   if (!props.prevMessage?.sendTime) {
     return true
@@ -306,6 +317,8 @@ const shouldShowTimeTip = computed(() => {
 /** 仅 MessageItem 自身仍要用到的 type 判定（其它分支已下沉到 MessageBubble） */
 const isVoice = computed(() => props.message.type === ImMessageType.VOICE)
 const isMerge = computed(() => props.message.type === ImMessageType.MERGE)
+/** 频道素材消息：仿微信公众号样式 —— 卡片靠右、不显示左侧头像 */
+const isMaterial = computed(() => props.message.type === ImMessageType.MATERIAL)
 
 
 // ==================== 事件消息（撤回 / 好友 / 群广播） ====================

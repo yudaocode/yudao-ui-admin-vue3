@@ -125,6 +125,7 @@ export const useConversationStore = defineStore('imConversationStore', {
     activeConversation: null as Conversation | null, // 当前激活的会话
     privateMessageMaxId: 0, // 私聊最大消息 id，作为 pull 的游标
     groupMessageMaxId: 0, // 群聊最大消息 id，作为 pull 的游标
+    channelMessageMaxId: 0, // 频道最大消息 id，作为 pull 的游标
     loading: false, // 是否正在批量加载（例如离线消息拉取期间），避免频繁写存储
     recentForwardConversationKeys: [] as string[] // 最近转发会话 key 列表（按推送顺序倒序，最大 CONVERSATION_RECENT_FORWARD_MAX 个）
   }),
@@ -195,6 +196,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         }
         this.privateMessageMaxId = Number(meta.privateMessageMaxId) || 0
         this.groupMessageMaxId = Number(meta.groupMessageMaxId) || 0
+        this.channelMessageMaxId = Number((meta as any).channelMessageMaxId) || 0
         if (!meta.conversations || meta.conversations.length === 0) {
           return
         }
@@ -265,10 +267,11 @@ export const useConversationStore = defineStore('imConversationStore', {
       const meta: ConversationStoreMeta = {
         privateMessageMaxId: this.privateMessageMaxId,
         groupMessageMaxId: this.groupMessageMaxId,
+        channelMessageMaxId: this.channelMessageMaxId,
         conversations: this.conversations
           .filter((c) => !c.deleted)
           .map(({ messages, ...rest }) => rest)
-      }
+      } as ConversationStoreMeta
       const tasks: Promise<unknown>[] = [
         imStorage.setItem(StorageKeys.conversationMeta(userId), meta)
       ]
@@ -870,6 +873,10 @@ export const useConversationStore = defineStore('imConversationStore', {
       } else if (conversationType === ImConversationType.GROUP) {
         if (messageId > this.groupMessageMaxId) {
           this.groupMessageMaxId = messageId
+        }
+      } else if (conversationType === ImConversationType.CHANNEL) {
+        if (messageId > this.channelMessageMaxId) {
+          this.channelMessageMaxId = messageId
         }
       }
     },

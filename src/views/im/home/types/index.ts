@@ -78,6 +78,7 @@ export interface Message {
   receiverUserIds?: number[] // 群定向接收用户列表
   receiptStatus?: number // 群回执状态，对齐 ImGroupReceiptStatus（仅群消息）
   readCount?: number // 群回执已读人数（仅群消息）
+  materialId?: number // 关联频道素材编号（仅频道消息 type=MATERIAL）
 
   // ========== 前端扩展字段 ==========
   // 发送人显示名一律渲染时实时算：utils/user.getSenderDisplayName / getSenderRealNickname
@@ -103,6 +104,7 @@ export type ConversationMeta = Omit<Conversation, 'messages'>
 export interface ConversationStoreMeta {
   privateMessageMaxId: number // 私聊消息最大编号
   groupMessageMaxId: number // 群聊消息最大编号
+  channelMessageMaxId?: number // 频道消息最大编号
   conversations: ConversationMeta[] // 会话索引（不含 messages）
 }
 

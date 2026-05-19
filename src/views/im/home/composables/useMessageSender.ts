@@ -232,6 +232,12 @@ export const useMessageSender = () => {
     }
     // 接口调用：按会话类型分发，并按对应已读开关控制；失败仅记录日志，不回退本地已读状态
     const isPrivate = conversation.type === ImConversationType.PRIVATE
+    const isGroup = conversation.type === ImConversationType.GROUP
+    // 频道目前不上报已读
+    // TODO @AI：频道已读，应该还是要上报的，同步到别的端。但是不用记录 status 字段。
+    if (!isPrivate && !isGroup) {
+      return
+    }
     const readEnabled = isPrivate ? MESSAGE_PRIVATE_READ_ENABLED : MESSAGE_GROUP_READ_ENABLED
     if (!readEnabled) {
       return

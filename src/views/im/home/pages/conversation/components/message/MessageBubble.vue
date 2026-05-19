@@ -149,6 +149,13 @@
     [聊天记录]
   </div>
 
+  <!-- 频道素材：图文卡片，点击拉富文本 / 跳外链 -->
+  <!-- TODO @AI：在对话界面里时，目前碰到消息无法跳转的情况。。。ps：考虑到可以兼容到私聊、群聊消息，是不是把 materialId 也在 content 里存储一份！说白了，materialId 只是为了管理后台的检索，其它地方尽量使用 content 里的 materialId 字段。 -->
+  <MaterialBubble
+    v-else-if="isMaterial"
+    :message="{ content: props.content, materialId: props.materialId }"
+  />
+
   <!-- 未知类型降级 -->
   <div
     v-else
@@ -184,6 +191,7 @@ import { summarizeMessageContent } from '@/views/im/utils/conversation'
 import CardBubble from '@/views/im/home/components/card/CardBubble.vue'
 import TipSegments from './TipSegments.vue'
 import { useVoicePlayer } from '@/views/im/home/composables/useVoicePlayer'
+import MaterialBubble from './MaterialBubble.vue'
 
 defineOptions({ name: 'ImMessageBubble' })
 
@@ -198,6 +206,8 @@ const props = defineProps<{
   uploadProgress?: number | null
   /** TEXT 气泡的 @ mention 候选名字；不传则文本里的 @xxx 退化为普通文本 */
   mentions?: MentionCandidate[]
+  /** MATERIAL 气泡的素材编号；点击「查看详情」时拉富文本正文 */
+  materialId?: number
 }>()
 
 const emit = defineEmits<{
@@ -216,6 +226,7 @@ const isVideo = computed(() => props.type === ImMessageType.VIDEO)
 const isFace = computed(() => props.type === ImMessageType.FACE)
 const isCard = computed(() => props.type === ImMessageType.CARD)
 const isMerge = computed(() => props.type === ImMessageType.MERGE)
+const isMaterial = computed(() => props.type === ImMessageType.MATERIAL)
 
 /** 媒体上传中：uploadProgress 非 null 即视为上传中 */
 const isUploading = computed(() => props.uploadProgress != null)
@@ -229,7 +240,9 @@ const uploadProgressText = computed(() => `${uploadProgress.value}%`)
  */
 const parsedContent = computed<unknown>(() => parseMessage(props.content))
 
-const textPayload = computed(() => (isText.value ? (parsedContent.value as TextMessage | null) : null))
+const textPayload = computed(() =>
+  isText.value ? (parsedContent.value as TextMessage | null) : null
+)
 
 /** 文本气泡 segment 数组：mention 高亮 + URL 自动识别 + 普通文本三段拼接 */
 const textSegments = computed(() => {
@@ -242,14 +255,18 @@ const textSegments = computed(() => {
 const imagePayload = computed(() =>
   isImage.value ? (parsedContent.value as ImageMessage | null) : null
 )
-const filePayload = computed(() => (isFile.value ? (parsedContent.value as FileMessage | null) : null))
+const filePayload = computed(() =>
+  isFile.value ? (parsedContent.value as FileMessage | null) : null
+)
 const voicePayload = computed(() =>
   isVoice.value ? (parsedContent.value as AudioMessage | null) : null
 )
 const videoPayload = computed(() =>
   isVideo.value ? (parsedContent.value as VideoMessage | null) : null
 )
-const cardPayload = computed(() => (isCard.value ? (parsedContent.value as CardMessage | null) : null))
+const cardPayload = computed(() =>
+  isCard.value ? (parsedContent.value as CardMessage | null) : null
+)
 const mergePayload = computed(() =>
   isMerge.value ? (parsedContent.value as MergeMessage | null) : null
 )
