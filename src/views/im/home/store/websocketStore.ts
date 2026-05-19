@@ -5,6 +5,7 @@ import { useUserStore } from '@/store/modules/user'
 
 import {
   ImWebSocketMessageType,
+  ImMessageStatus,
   ImMessageType,
   ImConversationType,
   ImRtcParticipantStatus,
@@ -213,11 +214,35 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           this.dispatchGroupFrame(content as ImGroupMessageDTO)
           break
         case ImWebSocketMessageType.CHANNEL_MESSAGE:
-          this.handleChannelMessage(content as ImChannelMessageRespVO)
+          this.dispatchChannelFrame(content as ImChannelMessageRespVO)
           break
         default:
           console.debug('[IM WS] 未识别事件', frame)
       }
+    },
+
+    /**
+     * 频道帧分发：按 payload.type 分到 READ（多端已读同步）或普通素材推送
+     */
+    dispatchChannelFrame(websocketMessage: ImChannelMessageRespVO) {
+      if (websocketMessage.type === ImMessageType.READ) {
+        this.handleChannelRead(websocketMessage)
+        return
+      }
+      this.handleChannelMessage(websocketMessage)
+    },
+
+    /** 频道 READ：自己其它终端在某频道里标为已读，本端同步清零该频道未读 */
+    handleChannelRead(websocketMessage: ImChannelMessageRespVO) {
+      const conversationStore = useConversationStore()
+      const conversation = conversationStore.getConversation(
+        ImConversationType.CHANNEL,
+        websocketMessage.channelId
+      )
+      if (conversation) {
+        conversation.unreadCount = 0
+      }
+      conversationStore.saveConversations()
     },
 
     /**
@@ -245,7 +270,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           clientMessageId: '',
           type: websocketMessage.type,
           content: websocketMessage.content,
-          status: 0,
+          status: ImMessageStatus.UNREAD,
           sendTime: sendTimeMs,
           senderId: 0,
           targetId: websocketMessage.channelId,

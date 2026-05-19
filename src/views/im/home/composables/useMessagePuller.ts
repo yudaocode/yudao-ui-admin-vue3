@@ -19,6 +19,7 @@ import {
 } from '@/api/im/message/channel'
 import {
   ImConversationType,
+  ImMessageStatus,
   ImMessageType,
   isFriendChatTip,
   isFriendNotification
@@ -96,7 +97,7 @@ export const useMessagePuller = () => {
       clientMessageId: '',
       type: message.type,
       content: message.content,
-      status: 0, // 频道消息无状态机；占位 UNREAD
+      status: message.status ?? ImMessageStatus.UNREAD,
       sendTime: new Date(message.sendTime).getTime(),
       senderId: 0, // 系统下发，无发送人
       targetId: message.channelId, // 会话归属到频道编号

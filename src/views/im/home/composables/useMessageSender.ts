@@ -10,6 +10,7 @@ import {
   readGroupMessages as apiReadGroupMessages,
   recallGroupMessage as apiRecallGroupMessage
 } from '@/api/im/message/group'
+import { readChannelMessages as apiReadChannelMessages } from '@/api/im/message/channel'
 import {
   generateClientMessageId,
   serializeMessage,
@@ -233,19 +234,24 @@ export const useMessageSender = () => {
     // 接口调用：按会话类型分发，并按对应已读开关控制；失败仅记录日志，不回退本地已读状态
     const isPrivate = conversation.type === ImConversationType.PRIVATE
     const isGroup = conversation.type === ImConversationType.GROUP
-    // 频道目前不上报已读
-    // TODO @AI：频道已读，应该还是要上报的，同步到别的端。但是不用记录 status 字段。
-    if (!isPrivate && !isGroup) {
+    const isChannel = conversation.type === ImConversationType.CHANNEL
+    if (!isPrivate && !isGroup && !isChannel) {
       return
     }
-    const readEnabled = isPrivate ? MESSAGE_PRIVATE_READ_ENABLED : MESSAGE_GROUP_READ_ENABLED
-    if (!readEnabled) {
+    if (isPrivate && !MESSAGE_PRIVATE_READ_ENABLED) {
+      return
+    }
+    if (isGroup && !MESSAGE_GROUP_READ_ENABLED) {
       return
     }
     try {
-      await (isPrivate
-        ? apiReadPrivateMessages(conversation.targetId, maxMessageId)
-        : apiReadGroupMessages(conversation.targetId, maxMessageId))
+      if (isPrivate) {
+        await apiReadPrivateMessages(conversation.targetId, maxMessageId)
+      } else if (isGroup) {
+        await apiReadGroupMessages(conversation.targetId, maxMessageId)
+      } else {
+        await apiReadChannelMessages(conversation.targetId, maxMessageId)
+      }
     } catch (e) {
       console.error(
         '[IM] 标记已读失败',

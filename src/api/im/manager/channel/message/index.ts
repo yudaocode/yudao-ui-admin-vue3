@@ -6,6 +6,7 @@ export interface ImManagerChannelMessageVO {
   channelName?: string
   materialId: number
   materialTitle?: string
+  materialCoverUrl?: string
   type: number
   content?: string
   receiverUserIds?: number[]

@@ -6,6 +6,8 @@ export interface ImChannelMessageRespVO {
   materialId: number
   type: number
   content: string
+  /** 当前用户已读态；pull 时按 Redis 游标计算填充，多端同步使用 */
+  status?: number
   sendTime: string
 }
 
@@ -14,5 +16,13 @@ export const pullChannelMessages = (params: { minId: number; size?: number }) =>
   return request.get<ImChannelMessageRespVO[]>({
     url: '/im/channel/message/pull',
     params
+  })
+}
+
+// 上报频道消息已读位置；切到频道会话或拉到新消息后调
+export const readChannelMessages = (channelId: number, messageId: number) => {
+  return request.put({
+    url: '/im/channel/message/read',
+    params: { channelId, messageId }
   })
 }
