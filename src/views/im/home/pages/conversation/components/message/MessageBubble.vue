@@ -150,11 +150,7 @@
   </div>
 
   <!-- 频道素材：图文卡片，点击拉富文本 / 跳外链 -->
-  <!-- TODO @AI：在对话界面里时，目前碰到消息无法跳转的情况。。。ps：考虑到可以兼容到私聊、群聊消息，是不是把 materialId 也在 content 里存储一份！说白了，materialId 只是为了管理后台的检索，其它地方尽量使用 content 里的 materialId 字段。 -->
-  <MaterialBubble
-    v-else-if="isMaterial"
-    :message="{ content: props.content, materialId: props.materialId }"
-  />
+  <MaterialBubble v-else-if="isMaterial" :content="props.content" />
 
   <!-- 未知类型降级 -->
   <div
@@ -206,8 +202,6 @@ const props = defineProps<{
   uploadProgress?: number | null
   /** TEXT 气泡的 @ mention 候选名字；不传则文本里的 @xxx 退化为普通文本 */
   mentions?: MentionCandidate[]
-  /** MATERIAL 气泡的素材编号；点击「查看详情」时拉富文本正文 */
-  materialId?: number
 }>()
 
 const emit = defineEmits<{

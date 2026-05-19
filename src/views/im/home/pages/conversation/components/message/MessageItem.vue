@@ -101,92 +101,92 @@
         :size="36"
       />
 
-    <div
-      class="flex flex-col gap-0.5"
-      :class="[
-        message.selfSend ? 'items-end' : '',
-        isMaterial ? 'w-[80%] min-w-[320px] max-w-[720px]' : 'max-w-[70%]'
-      ]"
-    >
-      <!-- 群聊对方消息：气泡上方显示发送者昵称 -->
       <div
-        v-if="showSenderName"
-        class="mb-0.5 text-12px text-[var(--el-text-color-secondary)] leading-tight"
+        class="flex flex-col gap-0.5"
+        :class="[
+          message.selfSend ? 'items-end' : '',
+          // 公众号会话内素材：固定 360 宽（对齐微信公众号卡片）；其它（含私聊 / 群聊转发的素材）：70% 上限，气泡自己撑宽度
+          isMaterial ? 'w-[360px]' : 'max-w-[70%]'
+        ]"
       >
-        {{ senderDisplayName }}
-      </div>
-      <div class="flex gap-1.5 items-center" :class="{ 'flex-row-reverse': message.selfSend }">
-        <!-- 消息内容：按 type 走 9 类气泡，统一由 MessageBubble 渲染 -->
-        <MessageBubble
-          :type="message.type"
-          :content="message.content"
-          :self-send="message.selfSend"
-          :upload-progress="message.uploadProgress"
-          :mentions="textMentions"
-          :material-id="message.materialId"
-          @click-card="handleCardClick"
-          @open-merge="handleMergeOpen"
-        />
-
-        <!-- 状态区：自己消息展示发送状态 + 已读/群回执；对方消息 + @自己时展示 @徽标 -->
-        <div class="flex gap-1.5 items-center text-base">
-          <template v-if="message.selfSend">
-            <Icon
-              v-if="showSendingLoading"
-              icon="ant-design:loading-outlined"
-              class="im-loading-spin"
-            />
-            <Icon
-              v-else-if="message.status === ImMessageStatus.FAILED"
-              icon="ant-design:warning-filled"
-              color="#f56c6c"
-              class="cursor-pointer"
-              title="发送失败，点击重试"
-              @click="handleResend"
-            />
-            <!-- 已读态（私聊） -->
-            <span
-              v-else-if="privateReadLabel"
-              class="text-12px whitespace-nowrap"
-              :class="
-                message.status === ImMessageStatus.READ
-                  ? 'text-[#409eff]'
-                  : 'text-[var(--el-text-color-secondary)]'
-              "
-            >
-              {{ privateReadLabel }}
-            </span>
-            <!-- 群回执：点击弹 popover 展示已读 / 未读成员列表 -->
-            <MessageReadStatus
-              v-else-if="showGroupReadStatus"
-              :message="message"
-              :group-id="conversationStore.activeConversation?.targetId || 0"
-              :group-members="groupMembersForReadStatus"
-              class="text-12px whitespace-nowrap text-[var(--el-text-color-secondary)]"
-            />
-          </template>
-          <!-- 群 @ 我提示 -->
-          <el-tag
-            v-if="!message.selfSend && isAtMe"
-            type="danger"
-            size="small"
-            effect="plain"
-            class="ml-1"
-          >
-            @我
-          </el-tag>
+        <!-- 群聊对方消息：气泡上方显示发送者昵称 -->
+        <div
+          v-if="showSenderName"
+          class="mb-0.5 text-12px text-[var(--el-text-color-secondary)] leading-tight"
+        >
+          {{ senderDisplayName }}
         </div>
+        <div class="flex gap-1.5 items-center" :class="{ 'flex-row-reverse': message.selfSend }">
+          <!-- 消息内容：按 type 走 9 类气泡，统一由 MessageBubble 渲染 -->
+          <MessageBubble
+            :type="message.type"
+            :content="message.content"
+            :self-send="message.selfSend"
+            :upload-progress="message.uploadProgress"
+            :mentions="textMentions"
+            @click-card="handleCardClick"
+            @open-merge="handleMergeOpen"
+          />
+
+          <!-- 状态区：自己消息展示发送状态 + 已读/群回执；对方消息 + @自己时展示 @徽标 -->
+          <div class="flex gap-1.5 items-center text-base">
+            <template v-if="message.selfSend">
+              <Icon
+                v-if="showSendingLoading"
+                icon="ant-design:loading-outlined"
+                class="im-loading-spin"
+              />
+              <Icon
+                v-else-if="message.status === ImMessageStatus.FAILED"
+                icon="ant-design:warning-filled"
+                color="#f56c6c"
+                class="cursor-pointer"
+                title="发送失败，点击重试"
+                @click="handleResend"
+              />
+              <!-- 已读态（私聊） -->
+              <span
+                v-else-if="privateReadLabel"
+                class="text-12px whitespace-nowrap"
+                :class="
+                  message.status === ImMessageStatus.READ
+                    ? 'text-[#409eff]'
+                    : 'text-[var(--el-text-color-secondary)]'
+                "
+              >
+                {{ privateReadLabel }}
+              </span>
+              <!-- 群回执：点击弹 popover 展示已读 / 未读成员列表 -->
+              <MessageReadStatus
+                v-else-if="showGroupReadStatus"
+                :message="message"
+                :group-id="conversationStore.activeConversation?.targetId || 0"
+                :group-members="groupMembersForReadStatus"
+                class="text-12px whitespace-nowrap text-[var(--el-text-color-secondary)]"
+              />
+            </template>
+            <!-- 群 @ 我提示 -->
+            <el-tag
+              v-if="!message.selfSend && isAtMe"
+              type="danger"
+              size="small"
+              effect="plain"
+              class="ml-1"
+            >
+              @我
+            </el-tag>
+          </div>
+        </div>
+        <!-- 引用块：气泡下方，selfSend 时竖线在右侧 -->
+        <ReplyPreview
+          v-if="quote"
+          :quote="quote"
+          clickable
+          :mirrored="message.selfSend"
+          class="max-w-[280px]"
+          @locate="emit('locate', $event)"
+        />
       </div>
-      <!-- 引用块：气泡下方，selfSend 时竖线在右侧 -->
-      <ReplyPreview
-        v-if="quote"
-        :quote="quote"
-        clickable
-        :mirrored="message.selfSend"
-        class="max-w-[280px]"
-        @locate="emit('locate', $event)"
-      />
-    </div>
     </div>
   </div>
 </template>
@@ -260,7 +260,11 @@ import ReplyPreview from './ReplyPreview.vue'
 import TipSegments from './TipSegments.vue'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
 import MessageBubble from './MessageBubble.vue'
-import { IM_FORWARD_DIALOG_KEY, IM_MERGE_DETAIL_DIALOG_KEY, IM_RTC_REDIAL_KEY } from './forward/keys'
+import {
+  IM_FORWARD_DIALOG_KEY,
+  IM_MERGE_DETAIL_DIALOG_KEY,
+  IM_RTC_REDIAL_KEY
+} from './forward/keys'
 import { useMessageMultiSelect } from '../../../../composables/useMessageMultiSelect'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
@@ -305,7 +309,7 @@ const shouldShowTimeTip = computed(() => {
   if (!props.message.sendTime) {
     return false
   }
-  if (props.message.type === ImMessageType.MATERIAL) {
+  if (isMaterial.value) {
     return true
   }
   if (!props.prevMessage?.sendTime) {
@@ -317,9 +321,25 @@ const shouldShowTimeTip = computed(() => {
 /** 仅 MessageItem 自身仍要用到的 type 判定（其它分支已下沉到 MessageBubble） */
 const isVoice = computed(() => props.message.type === ImMessageType.VOICE)
 const isMerge = computed(() => props.message.type === ImMessageType.MERGE)
-/** 频道素材消息：仿微信公众号样式 —— 卡片靠右、不显示左侧头像 */
-const isMaterial = computed(() => props.message.type === ImMessageType.MATERIAL)
+/**
+ * 频道素材在「频道会话」内仿微信公众号样式（居中 + 无头像）；
+ * 私聊 / 群聊里被转发过来的素材按 selfSend 走标准气泡布局（自己右、对方左、带头像）
+ */
+const isMaterial = computed(
+  () =>
+    props.message.type === ImMessageType.MATERIAL &&
+    conversationStore.activeConversation?.type === ImConversationType.CHANNEL
+)
 
+/** 私聊 / 群聊里被转发过来的素材：用紧凑卡片宽度（标题左 + 小封面右） */
+const isForwardedMaterial = computed(
+  () => props.message.type === ImMessageType.MATERIAL && !isMaterial.value
+)
+
+/** 当前是否在公众号 / 频道会话内：限制右键菜单只展示转发 / 删除 */
+const isChannelConversation = computed(
+  () => conversationStore.activeConversation?.type === ImConversationType.CHANNEL
+)
 
 // ==================== 事件消息（撤回 / 好友 / 群广播） ====================
 // 这三类不走普通气泡，渲染成居中灰色 tip；判断 + 文案配对放一起，新增第四类事件只需在本块改完
@@ -455,7 +475,6 @@ const isUploading = computed(() => props.message.uploadProgress != null)
 const showSendingLoading = computed(
   () => props.message.status === ImMessageStatus.SENDING && (!isUploading.value || isVoice.value)
 )
-
 
 // ==================== 发送人 / 已读 / @ ====================
 
@@ -603,14 +622,42 @@ async function handleContextMenu(e: MouseEvent) {
     return
   }
 
-  const items: Array<{
+  type MenuItem = {
     key: MenuKey
     name: string
     disabled?: boolean
     divided?: boolean
     danger?: boolean
     icon?: string
-  }> = []
+  }
+  // 频道（公众号）会话单向消息：只保留转发 + 本地删除；不支持复制 / 引用 / 多选 / 撤回 / 群管理操作
+  if (isChannelConversation.value) {
+    const channelItems: MenuItem[] = []
+    if (canForward.value) {
+      channelItems.push({
+        key: MENU_KEYS.FORWARD,
+        name: '转发',
+        icon: 'ant-design:share-alt-outlined'
+      })
+    }
+    channelItems.push({
+      key: MENU_KEYS.DELETE,
+      name: '删除',
+      icon: 'ant-design:delete-outlined',
+      divided: true,
+      danger: true
+    })
+    uiStore.openContextMenu({ x: e.clientX, y: e.clientY }, channelItems, async (item) => {
+      if (item.key === MENU_KEYS.FORWARD) {
+        handleForward()
+      } else if (item.key === MENU_KEYS.DELETE) {
+        handleDelete()
+      }
+    })
+    return
+  }
+
+  const items: MenuItem[] = []
   // 「复制」：仅文本消息支持；放在第一项，对齐微信桌面右键习惯
   if (props.message.type === ImMessageType.TEXT) {
     items.push({

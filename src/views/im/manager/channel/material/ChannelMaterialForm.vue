@@ -10,18 +10,22 @@
       <el-form-item label="所属频道" prop="channelId">
         <ChannelSelect v-model="formData.channelId" placeholder="请选择频道" />
       </el-form-item>
-      <!-- TODO @AI：是不是内容类型，在考虑优化下。1）富文本；2）外链；更简介；注意，需要插入到字典里； -->
       <el-form-item label="内容类型" prop="type">
         <el-radio-group v-model="formData.type">
-          <el-radio :value="1">站内富文本</el-radio>
-          <el-radio :value="2">外链</el-radio>
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.IM_CHANNEL_MATERIAL_TYPE)"
+            :key="dict.value"
+            :value="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="标题" prop="title">
         <el-input v-model="formData.title" placeholder="图文标题" maxlength="128" show-word-limit />
       </el-form-item>
       <el-form-item label="封面图" prop="coverUrl">
-        <el-input v-model="formData.coverUrl" placeholder="封面图 URL" />
+        <UploadImg v-model="formData.coverUrl" :limit="1" />
       </el-form-item>
       <el-form-item label="摘要" prop="summary">
         <el-input
@@ -33,14 +37,9 @@
           show-word-limit
         />
       </el-form-item>
-      <!-- 内容类型为「站内富文本」时展示 content 富文本输入；「外链」时展示 url 输入 -->
+      <!-- 内容类型为「站内富文本」时展示 content 富文本编辑器；「外链」时展示 url 输入 -->
       <el-form-item v-if="formData.type === 1" label="正文" prop="content">
-        <el-input
-          v-model="formData.content"
-          placeholder="富文本 HTML"
-          type="textarea"
-          :rows="8"
-        />
+        <Editor v-model="formData.content" height="320px" />
       </el-form-item>
       <el-form-item v-else label="跳转链接" prop="url">
         <el-input v-model="formData.url" placeholder="https://example.com/..." />
@@ -54,6 +53,7 @@
 </template>
 
 <script lang="ts" setup>
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as MaterialApi from '@/api/im/manager/channel/material'
 import ChannelSelect from '../list/components/ChannelSelect.vue'
 

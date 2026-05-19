@@ -46,7 +46,9 @@
               v-if="state.mode === ImForwardMode.MERGE && mergePreview"
               class="flex flex-col w-full overflow-hidden rounded-md bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
             >
-              <div class="px-3 py-2 text-sm font-medium truncate text-[var(--el-text-color-primary)]">
+              <div
+                class="px-3 py-2 text-sm font-medium truncate text-[var(--el-text-color-primary)]"
+              >
                 {{ mergePreview.title }}
               </div>
               <div class="flex flex-col px-3 pb-2 gap-0.5">
@@ -122,11 +124,7 @@
       </ConversationPickerPanel>
 
       <!-- 好友视图：选好友建群后转发 -->
-      <FriendPickerPanel
-        v-else
-        v-model:selected-ids="selectedFriendIds"
-        :friends="friends"
-      />
+      <FriendPickerPanel v-else v-model:selected-ids="selectedFriendIds" :friends="friends" />
     </div>
 
     <!-- 好友视图的 dialog footer：建群并转发 -->
@@ -200,11 +198,7 @@ const emojiVisible = ref(false)
 
 defineExpose({
   /** 打开转发弹窗：reset → 灌参 → visible=true */
-  open(opts: {
-    mode: ImForwardModeValue
-    messages: Message[]
-    sourceConversation: Conversation
-  }) {
+  open(opts: { mode: ImForwardModeValue; messages: Message[]; sourceConversation: Conversation }) {
     state.mode = opts.mode
     state.messages = opts.messages
     state.sourceConversation = opts.sourceConversation
@@ -231,9 +225,11 @@ const confirmButtonText = computed(() =>
   selectedKeys.value.length > 1 ? `分别发送（${selectedKeys.value.length}）` : '发送'
 )
 
-/** 候选会话：从 store 拿排序后的列表（转发回原会话也允许，与微信一致） */
-const candidateConversations = computed<Conversation[]>(
-  () => conversationStore.getSortedConversations
+/** 候选会话：从 store 拿排序后的列表（转发回原会话也允许，与微信一致）；公众号 / 频道单向消息不接受转发，从候选里剔除 */
+const candidateConversations = computed<Conversation[]>(() =>
+  conversationStore.getSortedConversations.filter(
+    (conversation) => conversation.type !== ImConversationType.CHANNEL
+  )
 )
 
 /** 好友视图候选列表：直接复用 friendStore Lite 视图 */

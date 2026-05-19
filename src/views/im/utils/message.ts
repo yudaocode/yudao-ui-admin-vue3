@@ -325,19 +325,18 @@ export interface MergeMessageItem {
 
 /** 合并转发消息 payload（对齐后端 MergeMessage） */
 export interface MergeMessage {
-  /** 合并标题；例：「张三和李四的聊天记录」「群聊的聊天记录」 */
-  title: string
-  /** 内嵌的完整消息快照 */
-  messages: MergeMessageItem[]
+  title: string // 合并标题；例：「张三和李四的聊天记录」「群聊的聊天记录」
+  messages: MergeMessageItem[] // 内嵌的完整消息快照
 }
 
 /** 频道素材消息 payload（对齐后端 MaterialMessage） */
 export interface MaterialMessage {
+  materialId?: number
+  channelId?: number // 频道编号；转发后渲染卡片底部的频道头像 + 名称
   title?: string
   coverUrl?: string
   summary?: string
-  /** 跳转链接；为空时点击在客户端内置详情页按 materialId 拉 content 渲染；非空则跳 url */
-  url?: string
+  url?: string // 跳转链接；为空时点击在客户端内置详情页按 materialId 拉 content 渲染；非空则跳 url
 }
 
 // ==================== 合并转发 payload 构造 ====================

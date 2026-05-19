@@ -48,6 +48,11 @@
         </template>
       </el-table-column>
       <el-table-column label="频道" align="center" prop="channelName" width="120" />
+      <el-table-column label="内容类型" align="center" prop="type" width="100">
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.IM_CHANNEL_MATERIAL_TYPE" :value="row.type" />
+        </template>
+      </el-table-column>
       <el-table-column
         label="标题"
         align="left"
@@ -62,14 +67,6 @@
         min-width="180"
         show-overflow-tooltip
       />
-      <el-table-column label="跳转" align="center" prop="url" width="80">
-        <template #default="scope">
-          <el-link v-if="scope.row.url" type="primary" :href="scope.row.url" target="_blank"
-            >外链</el-link
-          >
-          <el-tag v-else type="info" size="small">站内</el-tag>
-        </template>
-      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
@@ -110,6 +107,7 @@
 </template>
 
 <script lang="ts" setup>
+import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as MaterialApi from '@/api/im/manager/channel/material'
 import ChannelSelect from '../list/components/ChannelSelect.vue'
@@ -143,34 +141,35 @@ const getList = async () => {
   }
 }
 
-/** 搜索 */
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
-/** 重置 */
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
-/** 打开新增 / 编辑弹窗 */
-const formRef = ref() // 表单 Ref
+/** 添加/修改操作 */
+const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 删除 */
+/** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
+    // 删除的二次确认
     await message.delConfirm()
-  } catch {
-    return
-  }
-  await MaterialApi.deleteManagerChannelMaterial(id)
-  message.success(t('common.delSuccess'))
-  await getList()
+    // 发起删除
+    await MaterialApi.deleteManagerChannelMaterial(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
 /** 初始化 */

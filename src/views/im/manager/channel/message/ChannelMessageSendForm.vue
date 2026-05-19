@@ -8,44 +8,41 @@
       v-loading="formLoading"
     >
       <el-form-item label="所属频道" prop="channelId">
-        <el-select
-          v-model="formData.channelId"
-          placeholder="请选择频道（用于加载素材）"
-          class="!w-full"
-          @change="onChannelChange"
-        >
-          <el-option v-for="c in props.channelList" :key="c.id" :label="c.name" :value="c.id" />
-        </el-select>
+        <ChannelSelect v-model="formData.channelId" placeholder="请选择频道（用于加载素材）" />
       </el-form-item>
       <el-form-item label="素材" prop="materialId">
-        <el-select
+        <MaterialSelect
           v-model="formData.materialId"
+          :channel-id="formData.channelId"
           placeholder="请选择素材"
-          class="!w-full"
-          :disabled="!formData.channelId"
-        >
-          <el-option
-            v-for="m in materialList"
-            :key="m.id"
-            :label="m.title"
-            :value="m.id"
-          />
-        </el-select>
+        />
       </el-form-item>
       <el-form-item label="受众">
-        <el-radio-group v-model="targetType">
+        <el-radio-group v-model="formData.receiverUserType">
           <el-radio value="all">全员</el-radio>
           <el-radio value="users">指定用户</el-radio>
         </el-radio-group>
       </el-form-item>
-      <!-- TODO @AI：userselect 组件 -->
-      <el-form-item v-if="targetType === 'users'" label="接收用户" prop="receiverUserIds">
-        <el-input
-          v-model="receiverInput"
-          placeholder="多个用户编号用英文逗号分隔，如 1,1024,2048"
-          type="textarea"
-          :rows="2"
-        />
+      <el-form-item
+        v-if="formData.receiverUserType === 'users'"
+        label="接收用户"
+        prop="receiverUserIds"
+      >
+        <!-- TODO @芋艿：后续换成 userselect 组件 -->
+        <el-select
+          v-model="formData.receiverUserIds"
+          multiple
+          filterable
+          placeholder="选择接收用户"
+          class="!w-full"
+        >
+          <el-option
+            v-for="user in userList"
+            :key="user.id"
+            :label="user.nickname"
+            :value="user.id"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -56,75 +53,51 @@
 </template>
 
 <script lang="ts" setup>
-// TODO @AI：注释风格，对齐 user form；
 import * as MessageApi from '@/api/im/manager/channel/message'
-import * as MaterialApi from '@/api/im/manager/channel/material'
-import type { ImManagerChannelVO } from '@/api/im/manager/channel'
+import * as UserApi from '@/api/system/user'
+import ChannelSelect from '../list/components/ChannelSelect.vue'
+import MaterialSelect from '../material/components/MaterialSelect.vue'
 
 defineOptions({ name: 'ImChannelMessageSendForm' })
 
-const props = defineProps<{ channelList: ImManagerChannelVO[] }>()
-
-const { t } = useI18n()
-const message = useMessage()
-
-const dialogVisible = ref(false)
-const formLoading = ref(false)
+const message = useMessage() // 消息弹窗
+const dialogVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   channelId: undefined as number | undefined,
-  materialId: undefined as number | undefined
+  materialId: undefined as number | undefined,
+  receiverUserType: 'all' as 'all' | 'users', // 接收用户类型：全员 / 指定用户
+  receiverUserIds: [] as number[]
 })
-const targetType = ref<'all' | 'users'>('all')
-const receiverInput = ref('')
-const materialList = ref<MaterialApi.ImManagerChannelMaterialVO[]>([])
+const userList = ref<UserApi.UserVO[]>([]) // 全部启用用户（首次打开预拉）
 
 const formRules = reactive({
   channelId: [{ required: true, message: '请选择频道', trigger: 'change' }],
-  materialId: [{ required: true, message: '请选择素材', trigger: 'change' }]
+  materialId: [{ required: true, message: '请选择素材', trigger: 'change' }],
+  receiverUserIds: [{ required: true, message: '请至少选择一个接收用户', trigger: 'change' }]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
-const open = () => {
+/** 打开弹窗 */
+const open = async () => {
   dialogVisible.value = true
   resetForm()
+  // 加载用户列表
+  userList.value = await UserApi.getSimpleUserList()
 }
-defineExpose({ open })
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 
-/** 切换频道时加载该频道下的素材列表 */
-const onChannelChange = async (channelId: number | undefined) => {
-  formData.value.materialId = undefined
-  materialList.value = []
-  if (!channelId) return
-  const page = await MaterialApi.getManagerChannelMaterialPage({
-    pageNo: 1,
-    pageSize: 100,
-    channelId
-  } as any)
-  materialList.value = page.list
-}
-
+/** 提交表单 */
 const submitForm = async () => {
   await formRef.value.validate()
-  let receiverUserIds: number[] | undefined
-  if (targetType.value === 'users') {
-    receiverUserIds = receiverInput.value
-      .split(',')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-      .map((s) => Number(s))
-      .filter((n) => Number.isFinite(n))
-    if (!receiverUserIds || receiverUserIds.length === 0) {
-      message.error('请输入至少一个接收用户编号')
-      return
-    }
-  }
   formLoading.value = true
   try {
     await MessageApi.sendManagerChannelMessage({
       materialId: formData.value.materialId!,
-      receiverUserIds
+      receiverUserIds:
+        formData.value.receiverUserType === 'users' ? formData.value.receiverUserIds : undefined
     })
     message.success('推送成功')
     dialogVisible.value = false
@@ -134,11 +107,14 @@ const submitForm = async () => {
   }
 }
 
+/** 重置表单 */
 const resetForm = () => {
-  formData.value = { channelId: undefined, materialId: undefined }
-  targetType.value = 'all'
-  receiverInput.value = ''
-  materialList.value = []
+  formData.value = {
+    channelId: undefined,
+    materialId: undefined,
+    receiverUserType: 'all',
+    receiverUserIds: []
+  }
   formRef.value?.resetFields()
 }
 </script>

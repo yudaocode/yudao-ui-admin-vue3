@@ -17,9 +17,8 @@
       <el-form-item label="频道名称" prop="name">
         <el-input v-model="formData.name" placeholder="如 系统公告" />
       </el-form-item>
-      <!-- TODO @AI：使用上传组件，必须传递； -->
       <el-form-item label="频道头像" prop="avatar">
-        <el-input v-model="formData.avatar" placeholder="头像 URL" />
+        <UploadImg v-model="formData.avatar" :limit="1" />
       </el-form-item>
       <el-form-item label="排序" prop="sort">
         <el-input-number v-model="formData.sort" :min="0" controls-position="right" />
@@ -71,6 +70,7 @@ const formRules = reactive({
     { pattern: /^[a-z][a-z0-9_]*$/, message: '只能由小写字母 / 数字 / 下划线组成，且以字母开头', trigger: 'blur' }
   ],
   name: [{ required: true, message: '频道名称不能为空', trigger: 'blur' }],
+  avatar: [{ required: true, message: '频道头像不能为空', trigger: 'change' }],
   sort: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })

@@ -123,36 +123,38 @@ const getList = async () => {
   }
 }
 
-/** 搜索 */
+/** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
-/** 重置 */
+/** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
 
 /** 打开「立即推送」弹窗 */
-const sendFormRef = ref() // 推送弹窗 Ref
+const sendFormRef = ref()
 const openSendForm = () => {
   sendFormRef.value.open()
 }
 
-/** 删除 */
+/** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
+    // 删除的二次确认
     await message.delConfirm()
-  } catch {
-    return
-  }
-  await MessageApi.deleteManagerChannelMessage(id)
-  message.success(t('common.delSuccess'))
-  await getList()
+    // 发起删除
+    await MessageApi.deleteManagerChannelMessage(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
+/** 初始化 */
 onMounted(() => {
   getList()
 })
