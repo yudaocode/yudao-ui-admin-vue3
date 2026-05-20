@@ -371,7 +371,7 @@
 
     <!-- ==================== 子对话框 ==================== -->
     <!-- 邀请新成员 / 选成员移除 -->
-    <GroupMemberAddDialog ref="inviteDialogRef" @reload="$emit('reload')" />
+    <GroupMemberAddDialog ref="inviteDialogRef" @reload="(ids) => $emit('reload', ids)" />
     <GroupMemberRemoveDialog ref="removeDialogRef" @reload="$emit('reload')" />
 
     <!-- 群主操作：管理员设置（一个弹窗合并增 / 删，提交时 diff）+ 群主管理权转让 -->
@@ -432,7 +432,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  reload: [] // 邀请 / 移除 / 修改群资料后，父组件重新拉群数据
+  reload: [friendIds?: number[]] // 邀请 / 移除 / 修改群资料后，父组件重新拉群数据；邀请新成员场景透出 friendIds 让上层可选精准刷新
   'open-history': [] // 点击 "查找聊天内容" 行 → 父组件打开 MessageHistory 弹窗
 }>()
 

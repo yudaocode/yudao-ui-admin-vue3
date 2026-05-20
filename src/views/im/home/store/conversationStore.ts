@@ -98,6 +98,31 @@ function recomputeConversationLast(conversation: Conversation): void {
 }
 
 /**
+ * 群聊未读消息把 @ 标记同步到会话；非群聊 / 自己发的 / 已读 / 没 @ 全跳过
+ *
+ * 同时被新消息插入路径和合并末尾消息路径调用，让 pull 拿到不完整 atUserIds 后 WS 补齐的场景，
+ * 也能正确点亮 conversation.atMe / atAll 红字徽标
+ */
+function syncConversationAtFlags(conversation: Conversation, message: Message): void {
+  if (
+    message.selfSend ||
+    conversation.type !== ImConversationType.GROUP ||
+    !message.atUserIds ||
+    message.atUserIds.length === 0 ||
+    message.status === ImMessageStatus.READ
+  ) {
+    return
+  }
+  const currentUserId = getCurrentUserId()
+  if (currentUserId && message.atUserIds.includes(currentUserId)) {
+    conversation.atMe = true
+  }
+  if (message.atUserIds.includes(IM_AT_ALL_USER_ID)) {
+    conversation.atAll = true
+  }
+}
+
+/**
  * 把服务端字段（REST ack / WS 推送 / pull 回填）合并到本地消息
  *
  * - content 被替换时 revoke 旧 blob URL（媒体占位转真实 url 释放 File 内存）
@@ -369,12 +394,13 @@ export const useConversationStore = defineStore('imConversationStore', {
       }
     },
 
-    /** 创建空会话（抽取公共逻辑，供 insertMessage / openConversation 复用） */
+    /** 创建空会话（抽取公共逻辑，供 insertMessage / openConversation 复用）；调用方传 silent 时按 friend / group store 的值落地，未传保持默认 false */
     createEmptyConversation(
       type: number,
       targetId: number,
       name: string,
-      avatar: string
+      avatar: string,
+      silent: boolean = false
     ): Conversation {
       return {
         targetId,
@@ -387,7 +413,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         messages: [],
         deleted: false,
         top: false,
-        silent: false,
+        silent,
         atMe: false,
         atAll: false
       }
@@ -461,7 +487,13 @@ export const useConversationStore = defineStore('imConversationStore', {
      * 4. 收尾：更新游标 + 持久化
      */
     insertMessage(
-      conversationInfo: { type: number; targetId: number; name: string; avatar: string },
+      conversationInfo: {
+        type: number
+        targetId: number
+        name: string
+        avatar: string
+        silent?: boolean // 调用方按 friend / group store 当前 silent 传入；未传不动会话已有值
+      },
       messageInfo: Message
     ) {
       // 0. 群广播事件旁路：按 type 局部更新 groupStore 的 role / ownerUserId / 成员列表等状态
@@ -477,19 +509,26 @@ export const useConversationStore = defineStore('imConversationStore', {
       }
 
       // 1.1 查找或自动创建会话；命中软删会话需要复活（场景：A 退群后被重新拉入、用户主动删了对话又收到新消息）
+      //     silent 跟随调用方：新建写入；复活 / 已有会话仅在调用方明确传值时覆盖，避免本地 silent 与 friend / group store 漂移
       let conversation = this.getConversation(conversationInfo.type, conversationInfo.targetId)
       if (!conversation) {
         conversation = this.createEmptyConversation(
           conversationInfo.type,
           conversationInfo.targetId,
           conversationInfo.name,
-          conversationInfo.avatar
+          conversationInfo.avatar,
+          conversationInfo.silent
         )
         this.conversations.unshift(conversation)
       } else if (conversation.deleted) {
         conversation.deleted = false
         conversation.name = conversationInfo.name || conversation.name
         conversation.avatar = conversationInfo.avatar || conversation.avatar
+        if (conversationInfo.silent !== undefined) {
+          conversation.silent = conversationInfo.silent
+        }
+      } else if (conversationInfo.silent !== undefined) {
+        conversation.silent = conversationInfo.silent
       }
 
       // 1.2 去重合并：优先按 id，其次按 clientMessageId。命中则覆盖更新并返回
@@ -507,7 +546,11 @@ export const useConversationStore = defineStore('imConversationStore', {
         // 覆盖更新：与 ackMessage 走同一份 applyServerMessageUpdate；
         //         WebSocket / pull 比 REST ack 先到的场景下，blob revoke 和 uploadProgress / _localFile 清理在这里完成
         applyServerMessageUpdate(conversation.messages[existingIndex], messageInfo)
-        conversation.lastSendTime = messageInfo.sendTime || conversation.lastSendTime
+        // 仅合并到末尾那条时刷会话摘要 + 群 @ 标记；中间位置合并不动会话级 last*，避免后到的早消息把排序时间倒着拉回去
+        if (existingIndex === conversation.messages.length - 1) {
+          recomputeConversationLast(conversation)
+          syncConversationAtFlags(conversation, messageInfo)
+        }
         this.updateMaxId(conversationInfo.type, messageInfo.id)
         this.saveConversations(conversation)
         return
@@ -529,21 +572,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       conversation.lastSenderDisplayName = senderDisplayName
 
       // 2.2 群聊 @ 标记（仅对方消息 + 未读态有效）
-      if (
-        !messageInfo.selfSend &&
-        conversation.type === ImConversationType.GROUP &&
-        messageInfo.atUserIds &&
-        messageInfo.atUserIds.length > 0 &&
-        messageInfo.status !== ImMessageStatus.READ
-      ) {
-        const currentUserId = getCurrentUserId()
-        if (currentUserId && messageInfo.atUserIds.includes(currentUserId)) {
-          conversation.atMe = true
-        }
-        if (messageInfo.atUserIds.includes(IM_AT_ALL_USER_ID)) {
-          conversation.atAll = true
-        }
-      }
+      syncConversationAtFlags(conversation, messageInfo)
 
       // 2.3 未读数：非当前会话 + 非自己发送 + 普通消息 + 非已读 => +1
       const isActive =
@@ -632,8 +661,9 @@ export const useConversationStore = defineStore('imConversationStore', {
       let changed = false
       for (const key in patch) {
         if (
-          Object.prototype.hasOwnProperty.call(patch, key)
-          && (patch as Record<string, unknown>)[key] !== (message as unknown as Record<string, unknown>)[key]
+          Object.prototype.hasOwnProperty.call(patch, key) &&
+          (patch as Record<string, unknown>)[key] !==
+            (message as unknown as Record<string, unknown>)[key]
         ) {
           changed = true
           break

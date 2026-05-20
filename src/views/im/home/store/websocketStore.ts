@@ -449,7 +449,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           type: ImConversationType.PRIVATE,
           targetId: peerId,
           name: peerDisplayName || String(peerId),
-          avatar: friend?.avatar || ''
+          avatar: friend?.avatar || '',
+          silent: friend?.silent
         },
         message
       )
@@ -561,7 +562,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           type: ImConversationType.GROUP,
           targetId: websocketMessage.groupId,
           name: group?.name || String(websocketMessage.groupId),
-          avatar: group?.avatar || ''
+          avatar: group?.avatar || '',
+          silent: group?.silent
         },
         message
       )

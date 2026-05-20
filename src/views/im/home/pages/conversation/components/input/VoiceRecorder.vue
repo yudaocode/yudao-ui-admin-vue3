@@ -173,8 +173,13 @@ async function startRecord() {
   }, 1000)
 }
 
-/** 停止录制：进入 preview 阶段，由用户决定重录或发送 */
+/** 停止录制：进入 preview 阶段，由用户决定重录或发送；< 1s 视为误触，直接 warning + 回 idle 不进 preview */
 function stopRecord() {
+  if (duration.value < 1) {
+    message.warning('录音时间太短')
+    resetAll()
+    return
+  }
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
     mediaRecorder.stop()
   }

@@ -118,7 +118,8 @@ export const useMessagePuller = () => {
       type: ImConversationType.PRIVATE,
       targetId,
       name: friend ? getFriendDisplayName(friend) : String(targetId), // 会话列表 / 顶部标题展示：好友备注 > 真实昵称
-      avatar: friend?.avatar || ''
+      avatar: friend?.avatar || '',
+      silent: friend?.silent
     }
   }
 
@@ -129,11 +130,12 @@ export const useMessagePuller = () => {
       type: ImConversationType.GROUP,
       targetId: message.groupId,
       name: group?.name || String(message.groupId),
-      avatar: group?.avatar || ''
+      avatar: group?.avatar || '',
+      silent: group?.silent
     }
   }
 
-  /** 循环拉取指定会话类型的消息：以列表最后一条 id 作为下次 minId，直到接口返回空列表 */
+  /** 循环拉取指定会话类型的消息：以本批最大 id 作为下次 minId，直到接口返回空列表或游标不再前进 */
   const pullByType = async (conversationType: number, startMinId: number) => {
     // 私聊 / 群聊 / 频道各自一套接口；按 conversationType 在循环内分支调度
     let minId = startMinId || 0
@@ -208,11 +210,17 @@ export const useMessagePuller = () => {
         }
       }
 
-      // 游标推进到本批最后一条 id，下一轮从此处续翻
-      const lastId = list[list.length - 1].id
-      if (lastId != null) {
-        minId = lastId
+      // 游标推进到本批最大 id，与后端返回顺序无关；无有效 id 直接 break 避免死翻同一批
+      const validIds = list.map((message) => message.id).filter((id): id is number => id != null)
+      if (validIds.length === 0) {
+        break
       }
+      const nextMinId = Math.max(...validIds)
+      // 游标没前进就停：当前后端契约是 id > minId，理论不会出现；防御后端契约变更或边界数据死翻
+      if (nextMinId <= minId) {
+        break
+      }
+      minId = nextMinId
     }
   }
 
