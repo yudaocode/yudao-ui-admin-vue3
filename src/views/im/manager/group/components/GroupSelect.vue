@@ -154,7 +154,7 @@ const handleSelected = (rows: ManagerGroupApi.ImManagerGroupVO[]) => {
 </script>
 
 <style lang="scss" scoped>
-/* :deep 用于穿透 el-input 内部元素的 cursor 样式，UnoCSS 无法直接处理组件内部 DOM */
+/* :deep 穿透 el-input 内部 wrapper / inner 元素改 cursor */
 .is-select-clickable {
   :deep(.el-input__wrapper),
   :deep(.el-input__inner) {

@@ -23,7 +23,7 @@
       />
       <span
         v-show="!conversation.silent && conversation.unreadCount > 0"
-        class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1.5 text-11px leading-[18px] text-white text-center bg-[#f56c6c] border border-white dark:border-[var(--el-bg-color)] rounded-full box-border whitespace-nowrap"
+        class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1.5 text-11px leading-[18px] text-white text-center bg-[#f56c6c] border border-solid border-white dark:border-[var(--el-bg-color)] rounded-full box-border whitespace-nowrap"
       >
         {{ conversation.unreadCount > 99 ? '99+' : conversation.unreadCount }}
       </span>
@@ -40,7 +40,7 @@
             type="primary"
             size="small"
             effect="plain"
-            class="conversation-item__tag"
+            class="conversation-item__tag flex-shrink-0 !h-[18px] !px-1 !leading-4"
           >
             群
           </el-tag>
@@ -269,13 +269,8 @@ function handleContextMenu(e: MouseEvent) {
 </script>
 
 <style scoped>
-/* el-tag 内部尺寸走 CSS 变量，UnoCSS 的高度/内边距会被 el-tag 自身的样式覆盖，用 :deep 微调 */
-/* transition:none 是为了消掉 el-tag 切会话时 active 底色变化的渐变（看起来像闪烁） */
+/* 消掉 el-tag 切会话时 active 底色变化的渐变（看起来像闪烁）； :deep 穿透 el-tag 自身样式 */
 .conversation-item__tag {
-  flex-shrink: 0;
-  height: 18px;
-  padding: 0 4px;
-  line-height: 16px;
   transition: none !important;
 }
 

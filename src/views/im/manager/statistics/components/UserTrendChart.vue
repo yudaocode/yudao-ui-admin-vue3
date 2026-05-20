@@ -1,7 +1,7 @@
 <template>
-  <el-card shadow="never" class="chart-card">
+  <el-card shadow="never" class="!rounded-8px mb-16px">
     <template #header>
-      <div class="chart-header">
+      <div class="flex justify-between items-center">
         <span>用户趋势（新增注册 + 日活）</span>
         <el-select v-model="days" @change="loadData" style="width: 100px" size="small">
           <el-option label="近 7 天" :value="7" />
@@ -63,8 +63,3 @@ onMounted(async () => {
 })
 onUnmounted(() => chart?.dispose())
 </script>
-
-<style scoped>
-.chart-card { border-radius: 8px; margin-bottom: 16px; }
-.chart-header { display: flex; justify-content: space-between; align-items: center; }
-</style>

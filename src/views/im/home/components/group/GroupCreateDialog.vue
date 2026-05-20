@@ -135,6 +135,7 @@ async function handleOk() {
 <style scoped lang="scss">
 @use '../picker/picker-dialog' as picker;
 
+/* :deep 穿透 el-dialog 内部类；复用 picker 公共 mixin */
 .im-picker-dialog {
   @include picker.styles;
 }

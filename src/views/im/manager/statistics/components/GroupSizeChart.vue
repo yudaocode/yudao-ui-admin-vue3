@@ -1,5 +1,5 @@
 <template>
-  <el-card shadow="never" class="chart-card">
+  <el-card shadow="never" class="!rounded-8px mb-16px">
     <template #header>群规模分布</template>
     <div ref="chartRef" v-loading="loading" style="width: 100%; height: 320px"></div>
   </el-card>
@@ -53,10 +53,3 @@ onMounted(async () => {
 })
 onUnmounted(() => chart?.dispose())
 </script>
-
-<style scoped>
-.chart-card {
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-</style>

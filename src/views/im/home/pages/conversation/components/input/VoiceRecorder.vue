@@ -265,7 +265,7 @@ onUnmounted(() => {
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
 }
 
-/* 脉冲呼吸动画：keyframes 在 UnoCSS 原子类里不好表达，保留 scoped */
+/* 录音中的脉冲呼吸动画；@keyframes 必须 CSS 定义 */
 .im-voice-recorder__pulse {
   animation: im-voice-pulse 1s infinite;
 }

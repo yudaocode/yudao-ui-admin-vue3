@@ -98,7 +98,7 @@ const goProfile = () => router.push({ name: 'Profile' })
 </script>
 
 <style scoped>
-/* el-badge 子组件内部类 UnoCSS 够不到，单独贴一条 :deep 覆盖 */
+/* :deep 穿透 el-badge 子组件内部 .el-badge__content；右上角红点位置 + 去掉描边 */
 .tool-bar__badge :deep(.el-badge__content) {
   top: 4px;
   right: 8px;

@@ -28,7 +28,7 @@
         <div
           v-for="user in visibleUsers"
           :key="user.id"
-          class="flex gap-3 items-center px-2 py-2.5 border-b border-[var(--el-border-color-lighter)]"
+          class="flex gap-3 items-center px-2 py-2.5 border-b border-b-solid border-[var(--el-border-color-lighter)]"
         >
           <UserAvatar
             :id="user.id"

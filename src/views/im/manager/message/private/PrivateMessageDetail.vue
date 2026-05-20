@@ -28,7 +28,7 @@
         />
       </el-descriptions-item>
       <el-descriptions-item label="原始 JSON" :span="2">
-        <pre class="content-pre">{{ formatJson(detail.content) }}</pre>
+        <pre class="m-0 whitespace-pre-wrap break-all font-mono text-12px bg-[#f5f5f5] p-8px rounded-4px">{{ formatJson(detail.content) }}</pre>
       </el-descriptions-item>
     </el-descriptions>
   </el-dialog>
@@ -56,16 +56,3 @@ const open = (row: ManagerPrivateMessageApi.ImManagerPrivateMessageVO) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>
-
-<style scoped>
-.content-pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-  font-family: 'Menlo', 'Consolas', monospace;
-  font-size: 12px;
-  background: #f5f5f5;
-  padding: 8px;
-  border-radius: 4px;
-}
-</style>

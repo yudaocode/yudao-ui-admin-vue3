@@ -6,10 +6,10 @@
     - Panel 不带 el-dialog 壳；dialog 由业务壳持有
     - 三态语义：hide > locked > disabled
   -->
-  <div class="flex h-full im-group-member-picker">
+  <div class="flex h-full">
     <!-- 左栏 -->
     <div
-      class="flex flex-col flex-1 min-w-0 border-r border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]"
+      class="flex flex-col flex-1 min-w-0 border-r border-r-solid border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]"
     >
       <!-- 搜索框 -->
       <div class="flex-shrink-0 px-3 py-2">
@@ -49,7 +49,7 @@
     <div class="flex flex-col flex-1 min-w-0">
       <!-- 标题：已选数；高度对齐左侧 input default（32px） -->
       <div
-        class="flex-shrink-0 h-12 px-4 leading-[3rem] border-b text-13px text-[var(--el-text-color-secondary)] border-[var(--el-border-color-lighter)]"
+        class="flex-shrink-0 h-12 px-4 leading-[3rem] border-b border-b-solid text-13px text-[var(--el-text-color-secondary)] border-[var(--el-border-color-lighter)]"
       >
         已选择 {{ selectedCount }} 位成员
       </div>
@@ -78,7 +78,7 @@
               v-if="!isLocked(member)"
               icon="ant-design:close-outlined"
               :size="14"
-              class="flex-shrink-0 cursor-pointer im-group-member-picker__remove"
+              class="flex-shrink-0 cursor-pointer transition-colors text-[var(--el-text-color-placeholder)] hover:text-[var(--el-color-danger)]"
               @click="handleToggle(member)"
             />
           </div>
@@ -205,12 +205,12 @@ function isSelected(member: GroupMemberLite): boolean {
 /** 圆形勾选指示器的 class */
 function getCheckClass(member: GroupMemberLite): string {
   if (isLocked(member) || isSelected(member)) {
-    return 'im-group-member-picker__check--checked'
+    return 'bg-[#07c160] border border-solid border-[#07c160]'
   }
   if (isDisabled(member)) {
-    return 'im-group-member-picker__check--disabled'
+    return 'bg-[var(--el-fill-color)] border border-solid border-[var(--el-border-color)]'
   }
-  return 'border border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
+  return 'border border-solid border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
 }
 
 /** 切换选中态：locked / disabled 不响应；右栏 × / 行 click 都走这里 */
@@ -233,22 +233,3 @@ function handleToggle(member: GroupMemberLite) {
 }
 </script>
 
-<style scoped>
-.im-group-member-picker__check--checked {
-  background-color: #07c160;
-  border: 1px solid #07c160;
-}
-
-.im-group-member-picker__check--disabled {
-  background-color: var(--el-fill-color);
-  border: 1px solid var(--el-border-color);
-}
-
-.im-group-member-picker__remove {
-  color: var(--el-text-color-placeholder);
-  transition: color 0.15s;
-}
-.im-group-member-picker__remove:hover {
-  color: var(--el-color-danger);
-}
-</style>

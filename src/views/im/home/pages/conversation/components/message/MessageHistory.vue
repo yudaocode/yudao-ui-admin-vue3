@@ -42,10 +42,9 @@
         />
       </div>
 
-      <!-- Tab 行：文件 / 图片 / 语音 / 日期(popover) / 群成员(popover, 仅群聊)
-           底部一条分割线把 tab 区跟消息列表分开，对齐微信观感（border 走 scoped CSS 走主题变量） -->
+      <!-- Tab 行：文件 / 图片 / 语音 / 日期(popover) / 群成员(popover, 仅群聊)；底部一条分割线把 tab 区跟消息列表分开，对齐微信观感 -->
       <div
-        class="im-message-history__tabs flex gap-5 px-2 pb-2 text-sm flex-shrink-0 text-[#1989fa]"
+        class="flex gap-5 px-2 pb-2 text-sm flex-shrink-0 text-[#1989fa] border-b border-b-solid border-[var(--el-border-color-lighter)]"
       >
         <span
           class="im-message-history__tab cursor-pointer"
@@ -144,7 +143,7 @@
                跟主聊天面板里 MessageItem 的渲染语义对齐 -->
           <div
             v-if="isFriendChatTip(message.type)"
-            class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
+            class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-b-solid border-[var(--el-border-color-lighter)]"
           >
             <TipSegments :segments="resolveFriendNotificationSegments(message)" />
           </div>
@@ -152,7 +151,7 @@
           <!-- 群广播事件：跟好友事件同灰色样式，mention 段挂点击弹 UserInfoCard -->
           <div
             v-else-if="isGroupNotification(message.type)"
-            class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
+            class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-b-solid border-[var(--el-border-color-lighter)]"
           >
             <TipSegments :segments="resolveGroupNotificationSegments(message, resolveGroupMemberName(message))" />
           </div>
@@ -160,7 +159,7 @@
           <!-- 普通消息行 -->
           <div
             v-else
-            class="im-message-history__row flex gap-3 items-start px-1 py-3 border-b border-[var(--el-border-color-lighter)]"
+            class="im-message-history__row flex gap-3 items-start px-1 py-3 border-b border-b-solid border-[var(--el-border-color-lighter)]"
           >
             <UserAvatar
               :url="getAvatar(message)"
@@ -210,7 +209,10 @@
           </div>
         </template>
 
-        <div v-if="currentList.length === 0" class="im-message-history__empty">
+        <div
+          v-if="currentList.length === 0"
+          class="py-10 text-center text-13px text-[var(--el-text-color-disabled)]"
+        >
           {{ keyword || activeFilter ? '没有匹配的消息' : '暂无消息' }}
         </div>
 
@@ -218,7 +220,7 @@
              filter 命中 0 条时仍保留 —— 加载更早可能带回匹配内容 -->
         <div
           v-if="hasMore && allMessages.length > 0"
-          class="py-3 text-center border-t border-[var(--el-border-color-lighter)]"
+          class="py-3 text-center border-t border-t-solid border-[var(--el-border-color-lighter)]"
         >
           <el-button :loading="loadingMore" link type="primary" @click="loadEarlier">
             加载更早消息
@@ -669,24 +671,14 @@ function locateMessage(messageId: number) {
 </script>
 
 <style scoped>
-/* 空态文案 */
-.im-message-history__empty {
-  padding: 40px 0;
-  text-align: center;
-  font-size: 13px;
-  color: var(--el-text-color-disabled);
-}
-
-/* 搜索区 chip：禁掉 el-tag 默认的 hover 颜色过渡 / × 图标动效，避免在搜索区里有抖动感 */
+/* :deep 穿透 el-tag 子组件 DOM；搜索区 chip 禁掉 hover 颜色过渡 / × 图标动效，避免在搜索区里有抖动感 */
 .im-message-history__chip,
 .im-message-history__chip :deep(.el-tag__close) {
   transition: none !important;
   animation: none !important;
 }
 
-/* "定位到聊天位置" 链接：
-   - absolute 定位浮在时间下方，不参与右侧栏 flex 排版（隐藏时不占位 → "我"和内容之间不留空隙）
-   - 默认 display:none，行 hover 才 block；颜色对齐 tab 同款蓝，按钮自身 hover 再深一档 */
+/* 「定位到聊天位置」按钮：父行 hover 才显示，走 .parent:hover .child 跨元素状态联动 */
 .im-message-history__locate {
   position: absolute;
   top: 100%;
@@ -705,13 +697,7 @@ function locateMessage(messageId: number) {
   color: #146fc7;
 }
 
-/* tab 行：底部一条灰线把 tab 区跟消息列表分开（UnoCSS 的 border-[var(--*)] 在这里偶发不生效，
-   直接用 scoped CSS 引主题变量更稳） */
-.im-message-history__tabs {
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-/* tab 默认 -> 蓝色行内文字；激活态加下划线 */
+/* ::after 伪元素画激活下划线；tab 默认蓝色行内文字，激活态加下划线 */
 .im-message-history__tab {
   position: relative;
   padding: 4px 2px;
@@ -732,7 +718,7 @@ function locateMessage(messageId: number) {
   border-radius: 1px;
 }
 
-/* el-calendar 默认偏大，压一压让它能塞进 320 popover */
+/* :deep 穿透 el-calendar 子组件 DOM；默认偏大压一压让它能塞进 320 popover */
 .im-message-history__calendar :deep(.el-calendar) {
   --el-calendar-cell-width: 36px;
 }

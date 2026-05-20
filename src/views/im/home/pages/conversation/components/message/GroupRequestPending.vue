@@ -5,18 +5,24 @@
     - count 从 groupRequestStore 派生（全局存）；本端处理 / WS 通知到达后 store 自动更新
     - 点击横幅打开 GroupRequestListDialog（含历史已处理记录），不再就地展开
   -->
-  <div v-if="canManage && pendingCount > 0" class="im-group-request-pending">
-    <div class="im-group-request-pending__row" @click="handleOpen">
+  <div
+    v-if="canManage && pendingCount > 0"
+    class="flex flex-shrink-0 flex-col items-start px-4 pt-1.5 pb-2 bg-[var(--el-fill-color-light)]"
+  >
+    <div
+      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-13px text-[var(--el-text-color-primary)] bg-[var(--el-bg-color)] cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:bg-[var(--el-fill-color-lighter)]"
+      @click="handleOpen"
+    >
       <Icon
         icon="ant-design:user-add-outlined"
         :size="14"
-        class="im-group-request-pending__icon"
+        class="im-group-request-pending__icon flex-shrink-0 text-[var(--el-color-success)]"
       />
-      <span class="im-group-request-pending__text"> 新进群申请（{{ pendingCount }}） </span>
+      <span class="flex-1 min-w-0 truncate"> 新进群申请（{{ pendingCount }}） </span>
       <Icon
         icon="ant-design:right-outlined"
         :size="11"
-        class="im-group-request-pending__chevron"
+        class="flex-shrink-0 text-[var(--el-text-color-placeholder)]"
       />
     </div>
 
@@ -75,53 +81,8 @@ const pendingCount = computed(() => groupRequestStore.getUnhandledCountByGroupId
 </script>
 
 <style scoped>
-/* 容器：align-items flex-start 让胶囊靠左、不占整行；高度由内容撑开，与置顶消息横幅节奏对齐 */
-.im-group-request-pending {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 6px 16px 8px;
-  background-color: var(--el-fill-color-light);
-}
-
-/* 胶囊本体：内容自适应宽度，padding / 圆角 / 阴影对齐 GroupPinnedMessage 的 __row */
-.im-group-request-pending__row {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background-color: var(--el-bg-color);
-  border-radius: 10px;
-  font-size: 13px;
-  color: var(--el-text-color-primary);
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: background-color 0.15s;
-}
-.im-group-request-pending__row:hover {
-  background-color: var(--el-fill-color-lighter);
-}
-
-/* 绿色「加好友」icon：与置顶消息黄色 pushpin 同节奏，仅换色调；svg 强制 currentColor 应对暗色覆盖 */
-.im-group-request-pending__icon {
-  flex-shrink: 0;
-  color: var(--el-color-success);
-}
+/* :deep 穿透 Icon 子组件 DOM；强制 svg 走 currentColor 应对暗色模式 el-icon 全局色覆盖 */
 .im-group-request-pending__icon :deep(svg) {
   fill: currentColor !important;
-}
-
-.im-group-request-pending__text {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.im-group-request-pending__chevron {
-  flex-shrink: 0;
-  color: var(--el-text-color-placeholder);
 }
 </style>

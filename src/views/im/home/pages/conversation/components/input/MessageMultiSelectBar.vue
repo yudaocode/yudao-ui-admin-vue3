@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="multiSelect.state.active"
-    class="im-multi-select-bar flex items-center justify-center gap-12 px-5 w-full h-full border-t bg-[var(--el-bg-color)] border-[var(--el-border-color-lighter)]"
+    class="flex items-center justify-center gap-12 px-5 w-full h-full border-t border-t-solid bg-[var(--el-bg-color)] border-[var(--el-border-color-lighter)]"
   >
     <span
       class="absolute left-5 top-1/2 -translate-y-1/2 text-12px text-[var(--el-text-color-secondary)]"
@@ -10,7 +10,7 @@
     </span>
 
     <button
-      class="im-multi-select-bar__action"
+      class="inline-flex flex-col items-center gap-1 px-3 py-1 text-12px rounded-md border-0 bg-transparent cursor-pointer transition-colors text-[var(--el-text-color-primary)] hover:text-[var(--el-color-primary)] hover:bg-[var(--el-fill-color)] disabled:text-[var(--el-text-color-disabled)] disabled:cursor-not-allowed disabled:bg-transparent"
       :disabled="selectedCount === 0"
       @click="handleForwardOneByOne"
     >
@@ -19,7 +19,7 @@
     </button>
 
     <button
-      class="im-multi-select-bar__action"
+      class="inline-flex flex-col items-center gap-1 px-3 py-1 text-12px rounded-md border-0 bg-transparent cursor-pointer transition-colors text-[var(--el-text-color-primary)] hover:text-[var(--el-color-primary)] hover:bg-[var(--el-fill-color)] disabled:text-[var(--el-text-color-disabled)] disabled:cursor-not-allowed disabled:bg-transparent"
       :disabled="selectedCount === 0"
       @click="handleForwardMerged"
     >
@@ -28,7 +28,7 @@
     </button>
 
     <button
-      class="im-multi-select-bar__action im-multi-select-bar__action--danger"
+      class="inline-flex flex-col items-center gap-1 px-3 py-1 text-12px rounded-md border-0 bg-transparent cursor-pointer transition-colors text-[var(--el-text-color-primary)] hover:bg-[var(--el-fill-color)] hover:text-[var(--el-color-danger)] disabled:text-[var(--el-text-color-disabled)] disabled:cursor-not-allowed disabled:bg-transparent"
       :disabled="selectedCount === 0"
       @click="handleDelete"
     >
@@ -37,7 +37,7 @@
     </button>
 
     <button
-      class="im-multi-select-bar__close absolute right-5 top-1/2 -translate-y-1/2"
+      class="absolute right-5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-7 h-7 rounded-full border-0 bg-transparent cursor-pointer transition-colors text-[var(--el-text-color-secondary)] hover:text-[var(--el-text-color-primary)] hover:bg-[var(--el-fill-color)]"
       @click="handleCancel"
     >
       <Icon icon="ant-design:close-outlined" :size="20" />
@@ -140,56 +140,3 @@ function handleCancel() {
 }
 </script>
 
-<style scoped>
-.im-multi-select-bar__action {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: center;
-  padding: 4px 12px;
-  font-size: 12px;
-  color: var(--el-text-color-primary);
-  background: transparent;
-  border: 0;
-  border-radius: 6px;
-  cursor: pointer;
-  transition:
-    color 0.15s,
-    background 0.15s;
-}
-
-.im-multi-select-bar__action:hover:not(:disabled) {
-  color: var(--el-color-primary);
-  background: var(--el-fill-color);
-}
-
-.im-multi-select-bar__action:disabled {
-  color: var(--el-text-color-disabled);
-  cursor: not-allowed;
-}
-
-.im-multi-select-bar__action--danger:hover:not(:disabled) {
-  color: var(--el-color-danger);
-}
-
-.im-multi-select-bar__close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  color: var(--el-text-color-secondary);
-  background: transparent;
-  border: 0;
-  border-radius: 50%;
-  cursor: pointer;
-  transition:
-    color 0.15s,
-    background 0.15s;
-}
-
-.im-multi-select-bar__close:hover {
-  color: var(--el-text-color-primary);
-  background: var(--el-fill-color);
-}
-</style>

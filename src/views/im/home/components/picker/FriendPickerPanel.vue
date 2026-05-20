@@ -6,10 +6,10 @@
     - Panel 不带 el-dialog 壳；dialog 由业务壳持有
     - 三态语义：hide > locked > disabled（详见 contract）
   -->
-  <div class="flex h-full im-friend-picker">
+  <div class="flex h-full">
     <!-- 左栏 -->
     <div
-      class="flex flex-col flex-1 min-w-0 border-r border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]"
+      class="flex flex-col flex-1 min-w-0 border-r border-r-solid border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]"
     >
       <!-- 搜索框 -->
       <div class="flex-shrink-0 px-3 py-2">
@@ -79,7 +79,7 @@
     <div class="flex flex-col flex-1 min-w-0">
       <!-- 标题：已选数；高度对齐左侧 input default（32px），保证两侧第一项起点同水平 -->
       <div
-        class="flex-shrink-0 h-12 px-4 leading-[3rem] border-b text-13px text-[var(--el-text-color-secondary)] border-[var(--el-border-color-lighter)]"
+        class="flex-shrink-0 h-12 px-4 leading-[3rem] border-b border-b-solid text-13px text-[var(--el-text-color-secondary)] border-[var(--el-border-color-lighter)]"
       >
         已选择 {{ selectedCount }} 个好友
       </div>
@@ -108,7 +108,7 @@
             v-if="!isLocked(friend)"
             icon="ant-design:close-outlined"
             :size="14"
-            class="flex-shrink-0 cursor-pointer im-friend-picker__remove"
+            class="flex-shrink-0 cursor-pointer transition-colors text-[var(--el-text-color-placeholder)] hover:text-[var(--el-color-danger)]"
             @click="handleToggle(friend)"
           />
         </div>
@@ -123,7 +123,7 @@
       <!-- 业务壳塞额外内容的位置；FriendPickerPanel 主流场景不需要 footer -->
       <div
         v-if="$slots.footer"
-        class="flex-shrink-0 border-t border-[var(--el-border-color-lighter)]"
+        class="flex-shrink-0 border-t border-t-solid border-[var(--el-border-color-lighter)]"
       >
         <slot name="footer"></slot>
       </div>
@@ -224,12 +224,12 @@ function isSelected(friend: FriendLite): boolean {
 /** 圆形勾选指示器的 class：选中 / 锁定走绿底，禁用灰底，未选空心圆 */
 function getCheckClass(friend: FriendLite): string {
   if (isLocked(friend) || isSelected(friend)) {
-    return 'im-friend-picker__check--checked'
+    return 'bg-[#07c160] border border-solid border-[#07c160]'
   }
   if (isDisabled(friend)) {
-    return 'im-friend-picker__check--disabled'
+    return 'bg-[var(--el-fill-color)] border border-solid border-[var(--el-border-color)]'
   }
-  return 'border border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
+  return 'border border-solid border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
 }
 
 /** 切换选中态：locked / disabled 不响应；右栏 × 移除 / 行 click 都走这里 */
@@ -252,25 +252,3 @@ function handleToggle(friend: FriendLite) {
 }
 </script>
 
-<style scoped>
-/* 选中 / 锁定圆形指示器：微信绿底 + 白对勾，不污染主题色 */
-.im-friend-picker__check--checked {
-  background-color: #07c160;
-  border: 1px solid #07c160;
-}
-
-/* 禁用项：浅灰底 + 浅灰边，提示「不可选」 */
-.im-friend-picker__check--disabled {
-  background-color: var(--el-fill-color);
-  border: 1px solid var(--el-border-color);
-}
-
-/* 已选行 × 移除：常驻浅灰，hover 转危险色 */
-.im-friend-picker__remove {
-  color: var(--el-text-color-placeholder);
-  transition: color 0.15s;
-}
-.im-friend-picker__remove:hover {
-  color: var(--el-color-danger);
-}
-</style>

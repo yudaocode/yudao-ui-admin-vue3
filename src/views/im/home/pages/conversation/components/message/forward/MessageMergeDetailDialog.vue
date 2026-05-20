@@ -21,7 +21,7 @@
 
     <div v-if="currentPayload" class="flex flex-col h-[480px]">
       <div
-        class="px-4 py-2 text-12px text-[var(--el-text-color-secondary)] border-b border-[var(--el-border-color-lighter)]"
+        class="px-4 py-2 text-12px text-[var(--el-text-color-secondary)] border-b border-b-solid border-[var(--el-border-color-lighter)]"
       >
         以下是 {{ currentPayload.messages.length }} 条消息
       </div>
@@ -29,7 +29,7 @@
         <div
           v-for="(item, idx) in currentPayload.messages"
           :key="idx"
-          class="flex gap-3 items-start px-4 py-3 border-b border-[var(--el-border-color-lighter)]"
+          class="flex gap-3 items-start px-4 py-3 border-b border-b-solid border-[var(--el-border-color-lighter)]"
         >
           <UserAvatar
             :url="item.senderAvatar"
@@ -117,6 +117,7 @@ function handleClose() {
 </script>
 
 <style scoped>
+/* :deep 穿透 el-dialog 内部 body，去掉默认内边距，让滚动区贴边 */
 .im-merge-detail-dialog :deep(.el-dialog__body) {
   padding: 0;
 }

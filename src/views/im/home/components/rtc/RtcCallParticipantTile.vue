@@ -93,7 +93,7 @@ const audioRef = useMediaStreamElement<HTMLAudioElement>(() => props.participant
 </script>
 
 <style scoped>
-/* 三点淡入淡出动画；@keyframes 必须 CSS 定义，再由 UnoCSS 之外的类名引用 */
+/* 三点淡入淡出动画；@keyframes 必须 CSS 定义 */
 .tile-dot {
   animation: tile-dot 1.4s infinite ease-in-out both;
 }

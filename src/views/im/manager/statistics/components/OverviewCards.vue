@@ -1,18 +1,21 @@
 <template>
   <el-row :gutter="16">
     <el-col v-for="card in cards" :key="card.title" :xl="6" :lg="6" :md="12" :sm="24" :xs="24">
-      <el-card shadow="never" class="kpi-card">
-        <div class="kpi-row">
-          <div class="kpi-icon" :style="{ backgroundColor: card.color }">
+      <el-card shadow="never" class="!rounded-8px mb-16px">
+        <div class="flex items-center">
+          <div
+            class="w-48px h-48px rounded-8px flex items-center justify-center mr-12px flex-shrink-0"
+            :style="{ backgroundColor: card.color }"
+          >
             <Icon :icon="card.icon" :size="24" color="#fff" />
           </div>
-          <div class="kpi-body">
-            <div class="kpi-title">{{ card.title }}</div>
-            <div class="kpi-value">
+          <div class="flex-1 min-w-0">
+            <div class="text-13px text-[var(--el-text-color-secondary)] mb-4px">{{ card.title }}</div>
+            <div class="text-22px font-600 text-[var(--el-text-color-primary)] leading-none">
               <CountTo :start-val="0" :end-val="card.value" :duration="1500" />
-              <span v-if="card.suffix" class="kpi-suffix">{{ card.suffix }}</span>
+              <span v-if="card.suffix" class="text-12px text-[var(--el-text-color-placeholder)] ml-6px font-normal">{{ card.suffix }}</span>
             </div>
-            <div class="kpi-meta">{{ card.metaLabel }}：
+            <div class="text-12px text-[var(--el-text-color-placeholder)] mt-6px">{{ card.metaLabel }}：
               <span :class="card.metaClass">{{ card.metaValue }}</span>
             </div>
           </div>
@@ -85,50 +88,3 @@ const cards = computed(() => {
   ]
 })
 </script>
-
-<style scoped>
-.kpi-card {
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-.kpi-row {
-  display: flex;
-  align-items: center;
-}
-.kpi-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-  flex-shrink: 0;
-}
-.kpi-body {
-  flex: 1;
-  min-width: 0;
-}
-.kpi-title {
-  font-size: 13px;
-  color: #8c8c8c;
-  margin-bottom: 4px;
-}
-.kpi-value {
-  font-size: 22px;
-  font-weight: 600;
-  color: #262626;
-  line-height: 1;
-}
-.kpi-suffix {
-  font-size: 12px;
-  color: #909399;
-  margin-left: 6px;
-  font-weight: normal;
-}
-.kpi-meta {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 6px;
-}
-</style>

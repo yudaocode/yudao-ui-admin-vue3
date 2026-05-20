@@ -34,7 +34,7 @@
         <div class="grid grid-cols-5 gap-2 p-3">
           <!-- 上传入口固定放第一格；dashed border 与表情格子区分视觉语义，对齐 el-upload 观感 -->
           <button
-            class="im-face-upload-btn aspect-square flex items-center justify-center rounded-md cursor-pointer transition-colors"
+            class="aspect-square flex items-center justify-center rounded-md cursor-pointer transition-colors border border-dashed border-[var(--el-border-color)] bg-transparent text-[var(--el-text-color-placeholder)] hover:border-[var(--el-color-primary)] hover:text-[var(--el-color-primary)] disabled:cursor-not-allowed disabled:text-[var(--el-text-color-disabled)]"
             type="button"
             :disabled="uploading"
             :title="uploading ? '上传中…' : '上传图片到个人表情'"
@@ -115,12 +115,16 @@
     <!-- 底部 tab 栏：[ emoji / 个人 / 系统包 1..N ]；mode='emoji' 时隐藏 -->
     <div
       v-if="isFullMode"
-      class="flex flex-shrink-0 items-center gap-1 px-2 py-1.5 border-t border-[var(--el-border-color-lighter)]"
+      class="flex flex-shrink-0 items-center gap-1 px-2 py-1.5 border-t border-t-solid border-[var(--el-border-color-lighter)]"
     >
       <el-tooltip content="Emoji 表情" placement="top" :show-after="300">
         <button
-          class="im-face-tab"
-          :class="{ 'im-face-tab--active': activeTab === FACE_TAB.EMOJI }"
+          class="inline-flex items-center justify-center w-[30px] h-[30px] border-none rounded bg-transparent cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
+          :class="
+            activeTab === FACE_TAB.EMOJI
+              ? 'bg-[var(--el-fill-color)] text-[var(--el-color-primary)]'
+              : 'text-[var(--el-text-color-regular)]'
+          "
           type="button"
           @click="activeTab = FACE_TAB.EMOJI"
         >
@@ -129,8 +133,12 @@
       </el-tooltip>
       <el-tooltip content="个人表情" placement="top" :show-after="300">
         <button
-          class="im-face-tab"
-          :class="{ 'im-face-tab--active': activeTab === FACE_TAB.MINE }"
+          class="inline-flex items-center justify-center w-[30px] h-[30px] border-none rounded bg-transparent cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
+          :class="
+            activeTab === FACE_TAB.MINE
+              ? 'bg-[var(--el-fill-color)] text-[var(--el-color-primary)]'
+              : 'text-[var(--el-text-color-regular)]'
+          "
           type="button"
           @click="activeTab = FACE_TAB.MINE"
         >
@@ -145,8 +153,12 @@
         :show-after="300"
       >
         <button
-          class="im-face-tab"
-          :class="{ 'im-face-tab--active': activeTab === packTabKey(pack.id) }"
+          class="inline-flex items-center justify-center w-[30px] h-[30px] border-none rounded bg-transparent cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
+          :class="
+            activeTab === packTabKey(pack.id)
+              ? 'bg-[var(--el-fill-color)] text-[var(--el-color-primary)]'
+              : 'text-[var(--el-text-color-regular)]'
+          "
           type="button"
           @click="activeTab = packTabKey(pack.id)"
         >
@@ -339,42 +351,4 @@ onUnmounted(() => {
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
 }
 
-/* tab 按钮样式：被选中走主色高亮，鼠标悬停浅底 */
-.im-face-tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border: none;
-  border-radius: 4px;
-  background-color: transparent;
-  color: var(--el-text-color-regular);
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    color 0.15s;
-}
-.im-face-tab:hover {
-  background-color: var(--el-fill-color);
-}
-.im-face-tab--active {
-  background-color: var(--el-fill-color);
-  color: var(--el-color-primary);
-}
-
-/* 个人表情上传按钮：dashed border 区分视觉语义，对齐 el-upload */
-.im-face-upload-btn {
-  border: 1px dashed var(--el-border-color);
-  background-color: transparent;
-  color: var(--el-text-color-placeholder);
-}
-.im-face-upload-btn:hover {
-  border-color: var(--el-color-primary);
-  color: var(--el-color-primary);
-}
-.im-face-upload-btn:disabled {
-  cursor: not-allowed;
-  color: var(--el-text-color-disabled);
-}
 </style>

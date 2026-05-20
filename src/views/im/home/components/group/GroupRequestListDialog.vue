@@ -12,27 +12,33 @@
     :close-on-click-modal="false"
     class="im-group-request-list__dialog"
   >
-    <div v-loading="loading" class="im-group-request-list__body">
+    <div
+      v-loading="loading"
+      class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1"
+    >
       <!-- 空态 -->
       <el-empty v-if="!loading && list.length === 0" description="暂无进群申请" />
 
       <!-- 顶部卡片：最新一条 -->
-      <div v-if="latest" class="im-group-request-list__card">
-        <div class="im-group-request-list__row">
+      <div
+        v-if="latest"
+        class="flex flex-col gap-2.5 p-3.5 rounded-[10px] border border-solid border-[var(--el-border-color-lighter)] bg-[var(--el-bg-color)] shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+      >
+        <div class="flex items-center gap-3">
           <UserAvatar
             :url="latest.userAvatar"
             :name="latest.userNickname"
             :size="44"
             :clickable="false"
           />
-          <div class="im-group-request-list__main">
-            <div class="im-group-request-list__name truncate">
+          <div class="flex-1 min-w-0">
+            <div class="truncate text-sm font-medium leading-[1.4] text-[var(--el-text-color-primary)]">
               {{ latest.userNickname || `用户 ${latest.userId}` }}
             </div>
-            <div class="im-group-request-list__source truncate">
+            <div class="truncate mt-[2px] text-xs leading-[1.5] text-[var(--el-text-color-secondary)]">
               <template v-if="latest.inviterUserId">
                 通过
-                <span class="im-group-request-list__inviter">
+                <span class="text-[var(--el-color-primary)]">
                   {{ latest.inviterNickname || `用户 ${latest.inviterUserId}` }}
                 </span>
                 的邀请进群
@@ -42,17 +48,17 @@
           </div>
           <span
             v-if="latest.handleResult === ImGroupRequestHandleResult.AGREED"
-            class="im-group-request-list__done"
+            class="flex-shrink-0 text-[13px] text-[var(--el-text-color-placeholder)]"
           >
             已同意
           </span>
           <span
             v-else-if="latest.handleResult === ImGroupRequestHandleResult.REFUSED"
-            class="im-group-request-list__done"
+            class="flex-shrink-0 text-[13px] text-[var(--el-text-color-placeholder)]"
           >
             已拒绝
           </span>
-          <div v-else class="im-group-request-list__actions">
+          <div v-else class="flex gap-1.5 flex-shrink-0">
             <button
               class="im-group-request-list__btn im-group-request-list__btn--primary"
               :disabled="actingId === latest.id"
@@ -70,8 +76,11 @@
           </div>
         </div>
         <!-- 申请理由：邀请场景显示邀请人 + 留言；主动申请显示申请人 + 留言 -->
-        <div v-if="latest.applyContent" class="im-group-request-list__quote">
-          <span class="im-group-request-list__quote-name">
+        <div
+          v-if="latest.applyContent"
+          class="px-3 py-2 rounded-md text-[13px] leading-[1.5] break-all bg-[var(--el-fill-color-light)] text-[var(--el-text-color-regular)]"
+        >
+          <span class="text-[var(--el-color-primary)]">
             {{
               latest.inviterUserId
                 ? latest.inviterNickname || `用户 ${latest.inviterUserId}`
@@ -83,7 +92,10 @@
       </div>
 
       <!-- 分割线：仅在有更早申请时出现 -->
-      <div v-if="histories.length > 0" class="im-group-request-list__divider">
+      <div
+        v-if="histories.length > 0"
+        class="flex items-center justify-center mt-1.5 -mb-0.5 text-xs text-[var(--el-text-color-placeholder)]"
+      >
         <span>以下为更早的申请</span>
       </div>
 
@@ -91,23 +103,23 @@
       <div
         v-for="item in histories"
         :key="item.id"
-        class="im-group-request-list__card im-group-request-list__card--compact"
+        class="flex flex-col gap-2.5 px-3.5 py-2.5 rounded-[10px] border border-solid border-[var(--el-border-color-lighter)] bg-[var(--el-bg-color)] shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
       >
-        <div class="im-group-request-list__row">
+        <div class="flex items-center gap-3">
           <UserAvatar
             :url="item.userAvatar"
             :name="item.userNickname"
             :size="40"
             :clickable="false"
           />
-          <div class="im-group-request-list__main">
-            <div class="im-group-request-list__name truncate">
+          <div class="flex-1 min-w-0">
+            <div class="truncate text-sm font-medium leading-[1.4] text-[var(--el-text-color-primary)]">
               {{ item.userNickname || `用户 ${item.userId}` }}
             </div>
-            <div class="im-group-request-list__source truncate">
+            <div class="truncate mt-[2px] text-xs leading-[1.5] text-[var(--el-text-color-secondary)]">
               <template v-if="item.inviterUserId">
                 通过
-                <span class="im-group-request-list__inviter">
+                <span class="text-[var(--el-color-primary)]">
                   {{ item.inviterNickname || `用户 ${item.inviterUserId}` }}
                 </span>
                 的邀请进群
@@ -117,17 +129,17 @@
           </div>
           <span
             v-if="item.handleResult === ImGroupRequestHandleResult.AGREED"
-            class="im-group-request-list__done"
+            class="flex-shrink-0 text-[13px] text-[var(--el-text-color-placeholder)]"
           >
             已同意
           </span>
           <span
             v-else-if="item.handleResult === ImGroupRequestHandleResult.REFUSED"
-            class="im-group-request-list__done"
+            class="flex-shrink-0 text-[13px] text-[var(--el-text-color-placeholder)]"
           >
             已拒绝
           </span>
-          <div v-else class="im-group-request-list__actions">
+          <div v-else class="flex gap-1.5 flex-shrink-0">
             <button
               class="im-group-request-list__btn im-group-request-list__btn--primary"
               :disabled="actingId === item.id"
@@ -281,88 +293,7 @@ function updateLocalResult(id: number, handleResult: number) {
 </script>
 
 <style scoped>
-.im-group-request-list__body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: 60vh;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.im-group-request-list__card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px;
-  background-color: var(--el-bg-color);
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  border: 1px solid var(--el-border-color-lighter);
-}
-.im-group-request-list__card--compact {
-  padding: 10px 14px;
-}
-
-.im-group-request-list__row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.im-group-request-list__main {
-  flex: 1;
-  min-width: 0;
-}
-
-.im-group-request-list__name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-  line-height: 1.4;
-}
-
-.im-group-request-list__source {
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.5;
-}
-
-.im-group-request-list__inviter {
-  color: var(--el-color-primary);
-}
-
-.im-group-request-list__quote {
-  padding: 8px 12px;
-  background-color: var(--el-fill-color-light);
-  border-radius: 6px;
-  font-size: 13px;
-  color: var(--el-text-color-regular);
-  line-height: 1.5;
-  word-break: break-all;
-}
-
-.im-group-request-list__quote-name {
-  color: var(--el-color-primary);
-}
-
-.im-group-request-list__divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 6px 0 -2px;
-  font-size: 12px;
-  color: var(--el-text-color-placeholder);
-}
-
-.im-group-request-list__actions {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-/* 自绘按钮：贴近微信小药丸样式；el-button 默认尺寸偏大、圆角偏方 */
+/* 自绘按钮：贴近微信小药丸样式；与 :disabled、:hover:not(:disabled) 等伪类叠加 modifier 类的组合选择器写在 class 里成本高，留 SCSS */
 .im-group-request-list__btn {
   flex-shrink: 0;
   min-width: 56px;
@@ -401,15 +332,10 @@ function updateLocalResult(id: number, handleResult: number) {
   color: var(--el-color-primary);
   border-color: var(--el-color-primary);
 }
-
-.im-group-request-list__done {
-  flex-shrink: 0;
-  font-size: 13px;
-  color: var(--el-text-color-placeholder);
-}
 </style>
 
 <style>
+/* el-dialog 内部 body 通过 teleport 渲染到 body，scoped 选不到，留非 scoped 全局覆盖 */
 .im-group-request-list__dialog .el-dialog__body {
   padding: 12px 20px 8px;
   background-color: var(--el-fill-color-light);

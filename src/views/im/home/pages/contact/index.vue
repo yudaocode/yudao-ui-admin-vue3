@@ -9,7 +9,7 @@
     <ResizableAside :default-width="260" :storage-key="StorageKeys.asideWidth">
       <!-- 顶部：仅搜索框；h-14 与消息 Tab 顶部对齐，避免切换时搜索框上下抖动 -->
       <div
-        class="flex flex-shrink-0 items-center h-14 px-4 border-b border-[var(--el-border-color-lighter)]"
+        class="flex flex-shrink-0 items-center h-14 px-4 border-b border-b-solid border-[var(--el-border-color-lighter)]"
       >
         <el-input v-model="keyword" placeholder="搜索" clearable class="flex-1">
           <template #prefix>

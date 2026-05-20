@@ -2,30 +2,47 @@
   <!-- 公众号会话内大卡片：对齐微信公众号单图文卡（封面 9:5 + 下方白底加粗标题条） -->
   <div
     v-if="isChannelView"
-    class="material-card channel-card cursor-pointer"
+    class="material-card cursor-pointer w-full overflow-hidden rounded-lg bg-[var(--el-bg-color)] border border-solid border-[var(--el-border-color-lighter)]"
     @click="onClick"
   >
-    <img v-if="payload.coverUrl" class="channel-cover" :src="payload.coverUrl" />
-    <div class="channel-title">{{ payload.title || '(无标题)' }}</div>
+    <img v-if="payload.coverUrl" class="block w-full h-[200px] object-cover" :src="payload.coverUrl" />
+    <div class="px-3.5 py-3 text-15px font-600 leading-[1.4] text-[var(--el-text-color-primary)] line-clamp-2">
+      {{ payload.title || '(无标题)' }}
+    </div>
   </div>
 
   <!-- 私聊 / 群聊里被转发的素材紧凑卡片：标题 + 摘要在左、小封面在右、底部频道头像 + 名称（对齐微信公众号转发卡） -->
-  <div v-else class="material-card forward-card cursor-pointer" @click="onClick">
-    <div class="forward-body">
-      <div class="forward-text">
-        <div class="forward-title">{{ payload.title || '(无标题)' }}</div>
-        <div v-if="payload.summary" class="forward-summary">{{ payload.summary }}</div>
+  <div
+    v-else
+    class="material-card cursor-pointer flex flex-col w-[260px] px-3.5 pt-3 pb-2.5 rounded-lg bg-[var(--el-bg-color)] border border-solid border-[var(--el-border-color-lighter)]"
+    @click="onClick"
+  >
+    <div class="flex gap-2.5 items-start">
+      <div class="flex flex-1 flex-col gap-1.5 min-w-0">
+        <div class="text-15px font-600 leading-[1.4] text-[var(--el-text-color-primary)] line-clamp-2 break-all">
+          {{ payload.title || '(无标题)' }}
+        </div>
+        <div
+          v-if="payload.summary"
+          class="text-12px leading-[1.5] text-[var(--el-text-color-secondary)] line-clamp-2 break-all"
+        >
+          {{ payload.summary }}
+        </div>
       </div>
-      <img v-if="payload.coverUrl" class="forward-cover" :src="payload.coverUrl" />
+      <img
+        v-if="payload.coverUrl"
+        class="flex-shrink-0 w-[60px] h-[60px] object-cover rounded bg-[var(--el-fill-color-light)]"
+        :src="payload.coverUrl"
+      />
     </div>
-    <div class="forward-footer">
+    <div class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-t-solid border-[var(--el-border-color-lighter)] text-12px text-[var(--el-text-color-secondary)]">
       <img
         v-if="sourceChannel?.avatar"
-        class="forward-channel-avatar"
+        class="w-4 h-4 rounded-full object-cover flex-shrink-0"
         :src="sourceChannel.avatar"
       />
       <Icon v-else icon="ep:promotion" :size="14" />
-      <span class="forward-channel-name">{{ sourceChannel?.name || '频道消息' }}</span>
+      <span class="truncate">{{ sourceChannel?.name || '频道消息' }}</span>
     </div>
   </div>
 
@@ -36,10 +53,21 @@
     fullscreen
     destroy-on-close
   >
-    <div v-loading="detailLoading" class="material-detail-body">
-      <div class="article-title">{{ payload.title || '' }}</div>
-      <div v-if="detailHtml" class="article-content" v-dompurify-html="detailHtml"></div>
-      <div v-else-if="!detailLoading" class="article-empty">暂无正文</div>
+    <div v-loading="detailLoading" class="material-detail-body max-w-[720px] mx-auto px-5 pt-6 pb-20">
+      <div class="text-[22px] font-600 leading-[1.4] text-[var(--el-text-color-primary)] mb-5">
+        {{ payload.title || '' }}
+      </div>
+      <div
+        v-if="detailHtml"
+        class="article-content text-15px leading-[1.75] text-[var(--el-text-color-primary)]"
+        v-dompurify-html="detailHtml"
+      ></div>
+      <div
+        v-else-if="!detailLoading"
+        class="text-center text-[var(--el-text-color-secondary)] mt-20"
+      >
+        暂无正文
+      </div>
     </div>
   </Dialog>
 </template>
@@ -104,7 +132,7 @@ const onClick = async () => {
 </script>
 
 <style scoped lang="scss">
-/* hover 阴影 + transition 用 SCSS 写更紧凑；unocss 写成 hover: 一行还行，但 transition 缓动还得带类，反而散 */
+/* hover 阴影 + transition：合写一处，写法更紧凑 */
 .material-card {
   transition: box-shadow 0.15s ease;
 
@@ -113,156 +141,22 @@ const onClick = async () => {
   }
 }
 
-/* 公众号大卡片：封面 9:5 + 下方加粗标题条；纯 SCSS 写避免 unocss 偶发 arbitrary value 漏生成 */
-.channel-card {
-  width: 100%;
-  background: var(--el-bg-color);
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 8px;
-  overflow: hidden;
-
-  .channel-cover {
-    display: block;
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
+/* :deep 穿透 v-dompurify-html 渲染的内嵌 DOM；统一控制富文本里的 img / p / hN 排版 */
+.article-content {
+  :deep(img) {
+    max-width: 100%;
+    height: auto;
   }
 
-  .channel-title {
-    padding: 12px 14px;
-    font-size: 15px;
+  :deep(p) {
+    margin: 12px 0;
+  }
+
+  :deep(h1),
+  :deep(h2),
+  :deep(h3) {
+    margin: 20px 0 12px;
     font-weight: 600;
-    line-height: 1.4;
-    color: var(--el-text-color-primary);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-}
-
-/* 私聊 / 群聊转发卡片：标题 + 摘要左、封面右、底部频道头像 + 名称 */
-.forward-card {
-  display: flex;
-  flex-direction: column;
-  width: 260px;
-  padding: 12px 14px 10px;
-  background: var(--el-bg-color);
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 8px;
-
-  .forward-body {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-
-    .forward-text {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .forward-title {
-      font-size: 15px;
-      font-weight: 600;
-      line-height: 1.4;
-      color: var(--el-text-color-primary);
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      word-break: break-all;
-    }
-
-    .forward-summary {
-      font-size: 12px;
-      line-height: 1.5;
-      color: var(--el-text-color-secondary);
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      word-break: break-all;
-    }
-
-    .forward-cover {
-      flex-shrink: 0;
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 4px;
-      background: var(--el-fill-color-light);
-    }
-  }
-
-  .forward-footer {
-    margin-top: 10px;
-    padding-top: 8px;
-    border-top: 1px solid var(--el-border-color-lighter);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-
-    .forward-channel-avatar {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-
-    .forward-channel-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-}
-
-/* 富文本详情：article-content 内置 img / p / hN 用 :deep 全局生效；unocss 无法穿透 scoped 边界 */
-.material-detail-body {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 24px 20px 80px;
-
-  .article-title {
-    font-size: 22px;
-    font-weight: 600;
-    line-height: 1.4;
-    color: var(--el-text-color-primary);
-    margin-bottom: 20px;
-  }
-
-  .article-content {
-    font-size: 15px;
-    line-height: 1.75;
-    color: var(--el-text-color-primary);
-
-    :deep(img) {
-      max-width: 100%;
-      height: auto;
-    }
-
-    :deep(p) {
-      margin: 12px 0;
-    }
-
-    :deep(h1),
-    :deep(h2),
-    :deep(h3) {
-      margin: 20px 0 12px;
-      font-weight: 600;
-    }
-  }
-
-  .article-empty {
-    text-align: center;
-    color: var(--el-text-color-secondary);
-    margin-top: 80px;
   }
 }
 </style>

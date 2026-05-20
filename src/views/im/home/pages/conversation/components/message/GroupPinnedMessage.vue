@@ -1,48 +1,55 @@
 <template>
   <!-- 群聊置顶消息：仅群聊 + 有置顶时显示，悬挂在群聊头部下方左上角；不占整行（对齐微信 PC） -->
-  <div v-if="pinnedMessages.length > 0" class="im-group-pinned-message">
+  <div
+    v-if="pinnedMessages.length > 0"
+    class="im-group-pinned-message relative flex flex-shrink-0 flex-col items-start px-4 pt-1.5 pb-2 bg-[var(--el-fill-color-light)]"
+  >
     <!-- 顶部胶囊：单条点击跳转；多条折叠点击展开；多条展开点击折叠 -->
     <div
-      class="im-group-pinned-message__row im-group-pinned-message__row--clickable"
+      class="flex items-center gap-1.5 w-[360px] px-3 py-1.5 rounded-[10px] text-13px text-[var(--el-text-color-primary)] bg-[var(--el-bg-color)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
       @click="handleTopClick"
     >
-      <Icon icon="ant-design:pushpin-outlined" :size="14" class="im-group-pinned-message__icon" />
-      <span class="im-group-pinned-message__sender">{{ getSenderName(latest) }}：</span>
-      <span class="im-group-pinned-message__text">{{ getPreview(latest) }}</span>
+      <Icon icon="ant-design:pushpin-outlined" :size="14" class="flex-shrink-0 text-[var(--el-color-warning)]" />
+      <span class="flex-shrink-0 text-[var(--el-text-color-secondary)]">{{ getSenderName(latest) }}：</span>
+      <span class="flex-1 min-w-0 truncate">{{ getPreview(latest) }}</span>
       <!-- 单条：移除按钮；多条折叠：共 N 条；多条展开：收起箭头 -->
       <span
         v-if="pinnedMessages.length === 1 && canManage"
         v-loading="removingId === latest.id"
-        class="im-group-pinned-message__remove"
+        class="flex-shrink-0 text-[var(--el-color-primary)] cursor-pointer text-13px hover:text-[var(--el-color-primary-light-3)]"
         @click.stop="handleRemove(latest)"
       >
         移除
       </span>
       <template v-else-if="pinnedMessages.length > 1">
-        <span class="im-group-pinned-message__count">共 {{ pinnedMessages.length }} 条</span>
+        <span class="flex-shrink-0 text-[var(--el-text-color-secondary)] text-12px">共 {{ pinnedMessages.length }} 条</span>
         <Icon
           :icon="expanded ? 'ant-design:up-outlined' : 'ant-design:down-outlined'"
           :size="11"
-          class="im-group-pinned-message__chevron"
+          class="flex-shrink-0 text-[var(--el-text-color-placeholder)]"
         />
       </template>
     </div>
 
     <!-- 多条展开：浅色面板包裹完整列表，每条独立胶囊；点击跳转到对应消息位置 -->
-    <div v-if="pinnedMessages.length > 1 && expanded" class="im-group-pinned-message__list">
+    <div
+      v-if="pinnedMessages.length > 1 && expanded"
+      class="im-group-pinned-message__list absolute top-full left-1.5 z-10 flex flex-col gap-2.5 w-[380px] p-3 rounded-xl bg-[var(--el-bg-color)] shadow-[0_6px_16px_rgba(0,0,0,0.12)]"
+      style="margin-top: -1px;"
+    >
       <div
         v-for="msg in pinnedMessages"
         :key="msg.id"
-        class="im-group-pinned-message__row im-group-pinned-message__row--list im-group-pinned-message__row--clickable"
+        class="flex items-center gap-1.5 w-full px-3 py-1.5 rounded-[10px] text-13px text-[var(--el-text-color-primary)] bg-[var(--el-fill-color-light)] cursor-pointer hover:bg-[var(--el-bg-color)]"
         @click="handleLocate(msg)"
       >
-        <Icon icon="ant-design:pushpin-outlined" :size="14" class="im-group-pinned-message__icon" />
-        <span class="im-group-pinned-message__sender">{{ getSenderName(msg) }}：</span>
-        <span class="im-group-pinned-message__text">{{ getPreview(msg) }}</span>
+        <Icon icon="ant-design:pushpin-outlined" :size="14" class="flex-shrink-0 text-[var(--el-color-warning)]" />
+        <span class="flex-shrink-0 text-[var(--el-text-color-secondary)]">{{ getSenderName(msg) }}：</span>
+        <span class="flex-1 min-w-0 truncate">{{ getPreview(msg) }}</span>
         <span
           v-if="canManage"
           v-loading="removingId === msg.id"
-          class="im-group-pinned-message__remove"
+          class="flex-shrink-0 text-[var(--el-color-primary)] cursor-pointer text-13px hover:text-[var(--el-color-primary-light-3)]"
           @click.stop="handleRemove(msg)"
         >
           移除
@@ -140,35 +147,7 @@ async function handleRemove(msg: Message) {
 </script>
 
 <style scoped>
-/* 容器：左对齐悬浮在 header 下方；不占整行；relative 让展开列表绝对定位贴顶部胶囊下方 */
-.im-group-pinned-message {
-  position: relative;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 6px 16px 8px;
-  background-color: var(--el-fill-color-light);
-}
-
-/* 列表面板：绝对定位悬浮在顶部胶囊正下方；白色背景 + 强阴影跟 header 浅灰对比，呈现卡片层级感
-   margin-top: -1px 让弹出层往上盖住 header bottom 那 1px 分隔线，避免视觉上有横向空隙 */
-.im-group-pinned-message__list {
-  position: absolute;
-  top: 100%;
-  margin-top: -1px;
-  left: 6px;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 380px;
-  padding: 12px;
-  border-radius: 12px;
-  background-color: var(--el-bg-color);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-/* 弹出层箭头：朝上的三角，颜色跟弹出层 background 一致（白色），跟 header 浅灰强对比 */
+/* 弹出层朝上的三角箭头；走 ::before + 4 边 border 配色画，颜色跟弹出层 background 一致 */
 .im-group-pinned-message__list::before {
   content: '';
   position: absolute;
@@ -180,72 +159,5 @@ async function handleRemove(msg: Message) {
   border-right: 8px solid transparent;
   border-bottom: 8px solid var(--el-bg-color);
   filter: drop-shadow(0 -2px 1px rgba(0, 0, 0, 0.04));
-}
-
-/* 胶囊基础样式：顶部固定 width；弹出层里的胶囊撑满外框宽度 */
-.im-group-pinned-message__row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 360px;
-  padding: 6px 12px;
-  background-color: var(--el-bg-color);
-  border-radius: 10px;
-  font-size: 13px;
-  color: var(--el-text-color-primary);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-.im-group-pinned-message__row--clickable {
-  cursor: pointer;
-}
-.im-group-pinned-message__row--clickable:hover {
-  background-color: var(--el-fill-color-lighter);
-}
-/* 列表里的胶囊：撑满弹出层宽度；浅灰背景跟弹出层白色区分，hover 反相白色 */
-.im-group-pinned-message__row--list {
-  width: 100%;
-  background-color: var(--el-fill-color-light);
-  box-shadow: none;
-}
-.im-group-pinned-message__row--list:hover {
-  background-color: var(--el-bg-color);
-}
-
-.im-group-pinned-message__icon {
-  flex-shrink: 0;
-  color: var(--el-color-warning);
-}
-
-.im-group-pinned-message__sender {
-  flex-shrink: 0;
-  color: var(--el-text-color-secondary);
-}
-.im-group-pinned-message__text {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.im-group-pinned-message__count {
-  flex-shrink: 0;
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
-}
-
-.im-group-pinned-message__chevron {
-  flex-shrink: 0;
-  color: var(--el-text-color-placeholder);
-}
-
-.im-group-pinned-message__remove {
-  flex-shrink: 0;
-  color: var(--el-color-primary);
-  cursor: pointer;
-  font-size: 13px;
-}
-.im-group-pinned-message__remove:hover {
-  color: var(--el-color-primary-light-3);
 }
 </style>

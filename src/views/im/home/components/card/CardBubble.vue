@@ -6,7 +6,7 @@
     - 整卡 click 由调用方监听（@click），组件不内嵌业务逻辑
   -->
   <div
-    class="flex flex-col w-[240px] rounded-md overflow-hidden bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
+    class="flex flex-col w-[240px] rounded-md overflow-hidden bg-[var(--el-bg-color)] border border-solid border-[var(--el-border-color-lighter)]"
     :class="{ 'cursor-pointer': clickable }"
   >
     <div class="flex gap-2.5 items-center px-3 py-2.5">
@@ -30,7 +30,7 @@
       </div>
     </div>
     <div
-      class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
+      class="px-3 py-1 text-12px border-t border-t-solid text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
     >
       {{ labelInfo.label }}
     </div>

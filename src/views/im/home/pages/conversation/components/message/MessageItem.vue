@@ -81,7 +81,7 @@
       :class="
         isMessageChecked
           ? 'bg-[#07c160]'
-          : 'border border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
+          : 'border border-solid border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
       "
     >
       <Icon v-if="isMessageChecked" icon="ant-design:check-outlined" :size="12" color="#fff" />
@@ -1049,7 +1049,7 @@ function handleDelete() {
 </script>
 
 <style scoped>
-/* SENDING 状态的转圈动画 */
+/* @keyframes 需要 SCSS 声明；SENDING 状态的转圈动画 */
 .im-loading-spin {
   animation: im-loading-spin 1s linear infinite;
 }

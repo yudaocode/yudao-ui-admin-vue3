@@ -266,7 +266,7 @@ const formattedDuration = computed(() =>
 </script>
 
 <style scoped>
-/* 重连小点淡入淡出；@keyframes 必须 CSS 定义，再由非 UnoCSS 类名引用 */
+/* 重连小点淡入淡出；@keyframes 必须 CSS 定义 */
 .reconnect-dot {
   animation: reconnect-pulse 1s ease-in-out infinite;
 }

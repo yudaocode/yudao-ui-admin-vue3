@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard">
+  <div class="p-16px">
     <!-- 概览卡片 -->
     <OverviewCards v-if="overview" :overview="overview" />
 
@@ -46,9 +46,3 @@ onMounted(async () => {
   overview.value = await StatisticsApi.getStatisticsOverview()
 })
 </script>
-
-<style scoped>
-.dashboard {
-  padding: 16px;
-}
-</style>

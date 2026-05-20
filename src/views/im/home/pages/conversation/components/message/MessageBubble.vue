@@ -28,7 +28,7 @@
   <!-- 文件：文件名 + 大小靠左、彩色大图标贴右；上传中插一条进度条 -->
   <div
     v-else-if="isFile && filePayload"
-    class="relative flex gap-3 items-center min-w-[260px] max-w-[340px] px-3.5 py-3 border rounded transition-colors"
+    class="relative flex gap-3 items-center min-w-[260px] max-w-[340px] px-3.5 py-3 border border-solid rounded transition-colors"
     :class="[bubbleClass('file'), isUploading ? 'cursor-default' : 'cursor-pointer']"
     @click="handleFileClick"
   >
@@ -120,7 +120,7 @@
   <!-- 合并转发气泡：title + 摘要预览 + 底部「聊天记录」标签 -->
   <div
     v-else-if="isMerge && mergePayload"
-    class="flex flex-col w-[260px] rounded-md overflow-hidden cursor-pointer bg-[var(--el-bg-color)] border border-[var(--el-border-color)] hover:border-[#409eff]"
+    class="flex flex-col w-[260px] rounded-md overflow-hidden cursor-pointer bg-[var(--el-bg-color)] border border-solid border-[var(--el-border-color)] hover:border-[#409eff]"
     @click="emit('open-merge', content)"
   >
     <div class="px-3 py-2 text-sm font-medium text-[var(--el-text-color-primary)] truncate">
@@ -136,7 +136,7 @@
       </div>
     </div>
     <div
-      class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
+      class="px-3 py-1 text-12px border-t border-t-solid text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
     >
       聊天记录
     </div>
@@ -350,8 +350,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* 气泡尾巴：小三角伪元素，指向对应头像（对方在左、自己在右）
-   border 4 边色画三角：透明 3 边 + 实色 1 边，省一张图片；颜色与气泡背景对应，留 1px 视觉吃进去 */
+/* 气泡尾巴小三角指向对应头像（对方在左、自己在右）；走 ::before + 4 边 border 配色画：透明 3 边 + 实色 1 边，
+   颜色与气泡背景对应，留 1px 视觉吃进去，省一张图片 */
 .message-bubble--other::before,
 .message-bubble--self::before {
   content: '';
@@ -372,7 +372,7 @@ onBeforeUnmount(() => {
   border-color: transparent transparent transparent #95ec69;
 }
 
-/* el-icon 在暗色模式下全局 color 被 .el-icon{color:var(--color)} 干扰，把 voice 图标 fill 锁死 */
+/* :deep 穿透 scoped 子组件 DOM；el-icon 在暗色模式下全局 color 被 .el-icon{color:var(--color)} 干扰，把 voice 图标 fill 锁死 */
 .message-bubble__voice-icon :deep(svg) {
   fill: #606266 !important;
 }
@@ -380,7 +380,7 @@ onBeforeUnmount(() => {
   fill: #409eff !important;
 }
 
-/* 播放中的脉冲动画 */
+/* @keyframes 需要 SCSS 声明；播放中的脉冲动画 */
 .im-voice-playing {
   animation: im-voice-icon-pulse 0.8s infinite;
 }

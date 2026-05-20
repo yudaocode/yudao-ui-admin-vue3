@@ -6,10 +6,10 @@
     - Panel 不带 el-dialog 壳；dialog 由业务壳持有
     - footer slot 渲染在右栏已选列表下方，业务壳放预览卡 / 留言 / 提交按钮
   -->
-  <div class="flex h-full im-conversation-picker">
+  <div class="flex h-full">
     <!-- 左栏 -->
     <div
-      class="flex flex-col w-[280px] border-r border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]"
+      class="flex flex-col w-[280px] border-r border-r-solid border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-light)]"
     >
       <!-- 搜索框 -->
       <div class="flex-shrink-0 px-3 py-2">
@@ -60,7 +60,7 @@
                 <!-- 移除模式：右上角 × 圆角标，点击把这条 key 从 recentForwardConversationKeys 删掉 -->
                 <span
                   v-if="recentRemoveMode"
-                  class="flex absolute -top-1 -right-1 justify-center items-center w-4 h-4 rounded-full cursor-pointer im-conversation-picker__recent-remove"
+                  class="flex absolute -top-1 -right-1 justify-center items-center w-4 h-4 rounded-full cursor-pointer bg-[var(--el-fill-color-dark)] text-[var(--el-text-color-primary)]"
                   @click.stop="emit('remove-recent', getConversationKey(conversation))"
                 >
                   <Icon icon="ant-design:close-outlined" :size="10" />
@@ -71,8 +71,8 @@
                   class="flex absolute -top-1 -right-1 justify-center items-center w-4 h-4 rounded-full transition-colors"
                   :class="
                     isSelected(conversation)
-                      ? 'im-conversation-picker__recent-badge'
-                      : 'border border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
+                      ? 'bg-[#07c160] border border-solid border-[#07c160]'
+                      : 'border border-solid border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
                   "
                 >
                   <Icon
@@ -121,8 +121,8 @@
             class="flex flex-shrink-0 justify-center items-center w-5 h-5 rounded-full transition-colors"
             :class="
               isSelected(conversation)
-                ? 'im-conversation-picker__check--checked'
-                : 'border border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
+                ? 'bg-[#07c160] border border-solid border-[#07c160]'
+                : 'border border-solid border-[var(--el-border-color)] bg-[var(--el-bg-color)]'
             "
           >
             <Icon
@@ -167,7 +167,7 @@
     <div class="flex flex-col flex-1 min-w-0">
       <!-- 标题：选 0/1「发送给」、多个「分别发送给」（与微信文案一致） -->
       <div
-        class="flex-shrink-0 px-4 py-3 border-b text-13px text-[var(--el-text-color-secondary)] border-[var(--el-border-color-lighter)]"
+        class="flex-shrink-0 px-4 py-3 border-b border-b-solid text-13px text-[var(--el-text-color-secondary)] border-[var(--el-border-color-lighter)]"
       >
         {{ sendTitle }}
       </div>
@@ -201,7 +201,7 @@
           <Icon
             icon="ant-design:close-outlined"
             :size="14"
-            class="flex-shrink-0 cursor-pointer im-conversation-picker__remove"
+            class="flex-shrink-0 cursor-pointer transition-colors text-[var(--el-text-color-placeholder)] hover:text-[var(--el-color-danger)]"
             @click="handleToggle(conversation)"
           />
         </div>
@@ -216,7 +216,7 @@
       <!-- 业务壳塞预览卡 / 留言 / 提交按钮的位置 -->
       <div
         v-if="$slots.footer"
-        class="flex-shrink-0 border-t border-[var(--el-border-color-lighter)]"
+        class="flex-shrink-0 border-t border-t-solid border-[var(--el-border-color-lighter)]"
       >
         <slot name="footer"></slot>
       </div>
@@ -352,34 +352,12 @@ function handleToggle(conversation: Conversation) {
 </script>
 
 <style scoped>
-/* 选中态圆形指示器：微信绿底色 + 白对勾，不污染主题色 */
-.im-conversation-picker__check--checked,
-.im-conversation-picker__recent-badge {
-  background-color: #07c160;
-  border: 1px solid #07c160;
-}
-
-/* 最近转发移除模式的 × 角标：浅灰底 + 次要字色 */
-.im-conversation-picker__recent-remove {
-  background-color: var(--el-fill-color-dark);
-  color: var(--el-text-color-primary);
-}
-
-/* 最近转发头像横向滚动条做窄一点，避免占视觉 */
+/* 横向滚动条做窄一点避免占视觉；走 ::-webkit-scrollbar 浏览器伪元素 */
 .im-conversation-picker__recent::-webkit-scrollbar {
   height: 4px;
 }
 .im-conversation-picker__recent::-webkit-scrollbar-thumb {
   background-color: var(--el-border-color);
   border-radius: 2px;
-}
-
-/* 已选行 × 移除：常驻浅灰，hover 转危险色 */
-.im-conversation-picker__remove {
-  color: var(--el-text-color-placeholder);
-  transition: color 0.15s;
-}
-.im-conversation-picker__remove:hover {
-  color: var(--el-color-danger);
 }
 </style>

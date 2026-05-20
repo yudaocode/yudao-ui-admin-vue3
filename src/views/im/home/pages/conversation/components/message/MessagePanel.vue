@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-1 flex-col min-w-0 bg-[var(--el-fill-color-light)]">
     <template v-if="conversationStore.activeConversation">
-      <!-- 顶部 header：第一行群名 + 右侧图标，第二行嵌入置顶气泡（仅群聊 + 有置顶）；border 走 scoped CSS -->
-      <div class="message-panel__header flex flex-col bg-[var(--el-fill-color-light)]">
+      <!-- 顶部 header：第一行群名 + 右侧图标，第二行嵌入置顶气泡（仅群聊 + 有置顶） -->
+      <div class="flex flex-shrink-0 flex-col bg-[var(--el-fill-color-light)] border-b border-b-solid border-[var(--el-border-color-light)]">
         <div class="flex items-center justify-between h-14 px-5">
           <span class="flex flex-col min-w-0">
             <span class="flex items-baseline gap-1.5 min-w-0">
@@ -52,16 +52,16 @@
                   class="message-panel__header-icon cursor-pointer"
                 />
               </template>
-              <div class="message-panel__call-menu">
+              <div class="flex flex-col gap-0.5">
                 <div
-                  class="message-panel__call-menu-item"
+                  class="flex items-center gap-2.5 px-3 py-2 rounded cursor-pointer text-sm text-[var(--el-text-color-primary)] hover:bg-[var(--el-fill-color-light)]"
                   @click="startPrivateCall(ImRtcCallMediaType.VOICE)"
                 >
                   <Icon icon="ant-design:phone-outlined" :size="16" />
                   <span>语音通话</span>
                 </div>
                 <div
-                  class="message-panel__call-menu-item"
+                  class="flex items-center gap-2.5 px-3 py-2 rounded cursor-pointer text-sm text-[var(--el-text-color-primary)] hover:bg-[var(--el-fill-color-light)]"
                   @click="startPrivateCall(ImRtcCallMediaType.VIDEO)"
                 >
                   <Icon icon="ant-design:video-camera-outlined" :size="16" />
@@ -107,9 +107,15 @@
           :group-id="conversationStore.activeConversation.targetId"
         />
         <!-- 私聊：对方不再是有效好友（我删了对方 / 从未加过；单边设计下「被对方删除」本端 friendStore 不更新故不会触发）；胶囊嵌在 header 内（跟群置顶同级），点击弹 UserInfoCard -->
-        <div v-if="showNotFriendBanner" class="message-panel__not-friend-container">
-          <div class="message-panel__not-friend" @click="handleNotFriendClick">
-            <span class="message-panel__not-friend-icon">
+        <div
+          v-if="showNotFriendBanner"
+          class="flex flex-shrink-0 items-start px-4 pb-2 bg-[var(--el-fill-color-light)]"
+        >
+          <div
+            class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-13px cursor-pointer text-[var(--el-text-color-primary)] bg-[var(--el-color-warning-light-9)] transition-colors hover:bg-[var(--el-color-warning-light-8)]"
+            @click="handleNotFriendClick"
+          >
+            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full text-white bg-[var(--el-color-warning)] flex-shrink-0">
               <Icon icon="ant-design:user-outlined" :size="11" />
             </span>
             <span>对方还不是你的朋友</span>
@@ -700,14 +706,8 @@ watch(
 </script>
 
 <style scoped>
-/* 顶部分隔线：UnoCSS 不带 border-style preflight，class 写法只设色 / 宽不出线，走 scoped 显式 shorthand */
-.message-panel__header {
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--el-border-color-light);
-}
-
-/* el-icon 全局规则 .el-icon{color:var(--color,inherit)} 优先级胜过 UnoCSS，这里用 :deep + !important 兜底；
-   颜色直接引用 Element Plus 主题变量，暗色模式自动切到更亮的灰 */
+/* :deep 穿透 el-icon 子组件 svg；el-icon 全局规则 .el-icon{color:var(--color,inherit)} 优先级更高，
+   用 :deep + !important 锁色；颜色取 Element Plus 主题变量，暗色模式自动切到更亮的灰 */
 .message-panel__header-icon,
 .message-panel__header-icon :deep(svg) {
   color: var(--el-text-color-regular) !important;
@@ -719,44 +719,7 @@ watch(
   color: var(--el-color-primary) !important;
 }
 
-/* 「对方还不是你的朋友」胶囊：嵌在 header 内（跟群置顶同级），不占整行；padding 跟群置顶 padding 对齐 */
-.message-panel__not-friend-container {
-  flex-shrink: 0;
-  display: flex;
-  align-items: flex-start;
-  padding: 0 16px 8px;
-  background-color: var(--el-fill-color-light);
-}
-.message-panel__not-friend {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 13px;
-  cursor: pointer;
-  color: var(--el-text-color-primary);
-  background-color: var(--el-color-warning-light-9);
-  transition: background-color 0.15s;
-}
-.message-panel__not-friend:hover {
-  background-color: var(--el-color-warning-light-8);
-}
-/* 圆形小图标，深黄底色配白色 icon —— 跟微信一致的视觉锤 */
-.message-panel__not-friend-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  color: #fff;
-  background-color: var(--el-color-warning);
-  flex-shrink: 0;
-}
-
-/* sticky + translate 居中：fit-content 宽度不会撑满，transform 做水平 -50% 偏移；
-   UnoCSS 表达 transform+transition 多 value 不太方便，这里用最小的 scoped CSS 承接 */
+/* sticky + translate 居中：fit-content 宽度不会撑满，transform 水平 -50% 偏移；同时 transition opacity 和 transform 两个属性 */
 .message-panel__jump-bottom {
   transform: translateX(-50%);
   transition:
@@ -764,7 +727,7 @@ watch(
     transform 0.2s;
 }
 
-/* MessageHistory "定位" 跳过来时短暂高亮：1.6s 后由 JS 移除 class，配合 transition 缓出黄底 */
+/* JS 切换 highlight class + background-color transition 联动；MessageHistory「定位」跳过来时短暂高亮 1.6s */
 .message-panel__message-anchor {
   transition: background-color 0.6s ease;
 }
@@ -772,7 +735,7 @@ watch(
   background-color: var(--el-color-warning-light-9);
 }
 
-/* 回到底部按钮的 Vue transition 钩子类名 */
+/* Vue <transition> 钩子类名固定，必须 SCSS 声明；回到底部按钮淡入淡出 */
 .message-panel__jump-fade-enter-active,
 .message-panel__jump-fade-leave-active {
   transition:
@@ -784,27 +747,6 @@ watch(
 .message-panel__jump-fade-leave-to {
   opacity: 0;
   transform: translate(-50%, 20px);
-}
-
-.message-panel__call-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.message-panel__call-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--el-text-color-primary);
-}
-
-.message-panel__call-menu-item:hover {
-  background-color: var(--el-fill-color-light);
 }
 </style>
 

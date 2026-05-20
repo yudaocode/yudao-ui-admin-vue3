@@ -16,7 +16,7 @@
         :style="{ left: adjustedPosition.x + 'px', top: adjustedPosition.y + 'px' }"
       >
         <template v-for="(item, index) in contextMenu.items" :key="item.key">
-          <!-- divided 项上方插一条分割线（首项跳过，避免空白）；用 bg+h-[1px] 而非 border，UnoCSS 不带 border-style preflight -->
+          <!-- divided 项上方插一条分割线（首项跳过，避免空白） -->
           <div
             v-if="item.divided && index > 0"
             class="my-1 mx-2 h-[1px] bg-[var(--el-border-color-lighter)]"

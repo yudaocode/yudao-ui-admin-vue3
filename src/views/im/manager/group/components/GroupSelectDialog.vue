@@ -281,7 +281,7 @@ defineExpose({ open })
 </script>
 
 <style lang="scss" scoped>
-/* 隐藏 radio 的 label 文字，只保留圆圈 */
+/* :deep 穿透 el-radio 内部 label 元素，让单选只渲染圆圈不渲染文字 */
 .radio-no-label {
   :deep(.el-radio__label) {
     display: none;

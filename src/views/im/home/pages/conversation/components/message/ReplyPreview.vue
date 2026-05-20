@@ -12,9 +12,9 @@
       - 撤回（命中本地缓存且 type === RECALL）：「原消息已撤回」斜体灰字
   -->
   <div
-    class="im-reply-preview flex w-fit gap-1.5 items-center min-w-0 py-0.5 text-12px text-[var(--el-text-color-secondary)] rounded transition-colors"
+    class="flex w-fit gap-1.5 items-center min-w-0 py-0.5 text-12px text-[var(--el-text-color-secondary)] rounded transition-colors"
     :class="[
-      mirrored ? 'im-reply-preview--end pl-1 pr-2' : 'pl-2 pr-1',
+      mirrored ? 'pl-1 pr-2 border-r-2 border-r-solid border-r-[var(--el-border-color)]' : 'pl-2 pr-1 border-l-2 border-l-solid border-l-[var(--el-border-color)]',
       {
         'cursor-pointer hover:text-[var(--el-text-color-primary)]': clickable && !isRecalled,
         'hover:bg-[var(--el-fill-color-light)]': (clickable && !isRecalled) || closable
@@ -28,7 +28,7 @@
     <span v-if="isRecalled" class="italic">原消息已撤回</span>
 
     <!-- 文本 -->
-    <span v-else-if="isText" class="im-reply-preview__text min-w-0">{{ textPreview }}</span>
+    <span v-else-if="isText" class="min-w-0 line-clamp-2 break-words">{{ textPreview }}</span>
 
     <!-- 文件：icon + 文件名 + 大小 -->
     <template v-else-if="isFile">
@@ -38,7 +38,7 @@
         :size="14"
         class="flex-shrink-0"
       />
-      <span v-if="parsedPayload?.name" class="im-reply-preview__text min-w-0">
+      <span v-if="parsedPayload?.name" class="min-w-0 line-clamp-2 break-words">
         {{ parsedPayload.name }}
       </span>
       <span
@@ -58,12 +58,12 @@
     </template>
 
     <!-- 名片 -->
-    <CardLineLabel v-else-if="isCard" :card="parsedPayload" class="im-reply-preview__text min-w-0" />
+    <CardLineLabel v-else-if="isCard" :card="parsedPayload" class="min-w-0 line-clamp-2 break-words" />
 
     <!-- 表情贴图：缩略图 + name（无 name 仅显示 [表情]） -->
     <template v-else-if="isFace">
       <span class="flex-shrink-0">[表情]</span>
-      <span v-if="parsedPayload?.name" class="im-reply-preview__text min-w-0">
+      <span v-if="parsedPayload?.name" class="min-w-0 line-clamp-2 break-words">
         {{ parsedPayload.name }}
       </span>
     </template>
@@ -71,7 +71,7 @@
     <!-- 频道素材：[频道] + 标题 + 封面缩略图 -->
     <template v-else-if="isMaterial">
       <span class="flex-shrink-0">[频道]</span>
-      <span v-if="parsedPayload?.title" class="im-reply-preview__text min-w-0">
+      <span v-if="parsedPayload?.title" class="min-w-0 line-clamp-2 break-words">
         {{ parsedPayload.title }}
       </span>
     </template>
@@ -88,7 +88,7 @@
     <button
       v-if="closable"
       type="button"
-      class="im-reply-preview__close flex-shrink-0 inline-flex items-center justify-center w-4 h-4 cursor-pointer rounded-full bg-transparent border-none text-[var(--el-text-color-secondary)] hover:bg-[var(--el-fill-color)] hover:text-[var(--el-text-color-primary)]"
+      class="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 cursor-pointer rounded-full bg-transparent border-none text-[var(--el-text-color-secondary)] hover:bg-[var(--el-fill-color)] hover:text-[var(--el-text-color-primary)]"
       @click.stop="emit('close')"
     >
       <Icon icon="ant-design:close-outlined" :size="10" />
@@ -228,22 +228,3 @@ function onClick() {
 }
 </script>
 
-<style scoped>
-/* 默认左侧 2px 竖线作为「引用」视觉标识；mirrored 时镜像到右侧 */
-.im-reply-preview {
-  border-left: 2px solid var(--el-border-color);
-}
-.im-reply-preview--end {
-  border-left: 0;
-  border-right: 2px solid var(--el-border-color);
-}
-
-/* 文字超过 2 行截断，避免长引用把输入条 / 气泡撑高；UnoCSS 的 line-clamp 工具类在本项目未启用，走 scoped CSS */
-.im-reply-preview__text {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-}
-</style>

@@ -5,7 +5,7 @@
     <ResizableAside :default-width="260" :storage-key="StorageKeys.asideWidth">
       <!-- 顶部：搜索框 + "+" 号下拉（对齐微信 PC：发起群聊 / 添加朋友）；h-14 与右侧 MessagePanel 头部对齐 -->
       <div
-        class="flex flex-shrink-0 gap-2 items-center h-14 px-4 border-b border-[var(--el-border-color-lighter)]"
+        class="flex flex-shrink-0 gap-2 items-center h-14 px-4 border-b border-b-solid border-[var(--el-border-color-lighter)]"
       >
         <el-input v-model="keyword" placeholder="搜索" clearable class="flex-1">
           <template #prefix>
@@ -51,7 +51,7 @@
           <!-- 折叠头：放在置顶区底部对齐 WeChat mac；展开 / 折叠态共用，仅在还有"可折叠"内容、或当前已展开时出现 -->
           <div
             v-if="pinnedGroups.foldable.length > 0 || pinnedExpanded"
-            class="flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors text-13px text-[var(--el-text-color-regular)] border-y border-[var(--el-border-color-lighter)] hover:bg-[var(--el-fill-color)]"
+            class="flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors text-13px text-[var(--el-text-color-regular)] border-y border-y-solid border-[var(--el-border-color-lighter)] hover:bg-[var(--el-fill-color)]"
             @click="togglePinnedExpanded"
           >
             <span class="flex items-center gap-1.5">

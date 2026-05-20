@@ -13,39 +13,39 @@
     append-to-body
     modal-class="im-conversation-private-side__modal"
   >
-    <div v-if="friend" class="im-conversation-private-side flex flex-col h-full">
-      <div class="im-conversation-private-side__scroll flex-1 overflow-y-auto">
+    <div v-if="friend" class="flex flex-col h-full bg-[var(--el-bg-color)]">
+      <div class="flex-1 overflow-y-auto bg-[var(--el-fill-color-light)]">
         <!-- 好友宫格：原 tile + "+" tile，对齐 GroupSide 视觉，让两种抽屉看起来是一家的 -->
-        <div class="im-conversation-private-side__section im-conversation-private-side__friend">
-          <div class="im-conversation-private-side__tile-wrap">
+        <div class="flex flex-wrap gap-1 px-4 pt-4 pb-[14px] bg-[var(--el-bg-color)]">
+          <div class="flex flex-col items-center w-[66px]">
             <UserAvatar
               :id="friend.friendUserId"
               :url="friend.avatar"
               :name="friend.nickname"
               :size="50"
             />
-            <div class="im-conversation-private-side__tile-label">
+            <div class="w-full mt-1.5 overflow-hidden text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center truncate">
               {{ displayName }}
             </div>
           </div>
 
           <!-- + tile：点击调起 GroupCreateDialog，把对方 id 作为 lockedIds 传入 -->
           <div
-            class="im-conversation-private-side__tile-wrap im-conversation-private-side__tile-wrap--clickable"
+            class="im-conversation-private-side__tile-wrap-clickable flex flex-col items-center w-[66px] cursor-pointer"
             title="发起群聊"
             @click="handleOpenCreateGroup"
           >
-            <div class="im-conversation-private-side__icon-tile">
+            <div class="im-conversation-private-side__icon-tile flex items-center justify-center w-[50px] h-[50px] text-20px text-[var(--el-text-color-regular)] bg-[var(--el-fill-color-lighter)] border border-dashed border-[var(--el-border-color)] rounded-md transition-colors duration-200">
               <Icon icon="ant-design:plus-outlined" />
             </div>
-            <div class="im-conversation-private-side__tile-label">添加</div>
+            <div class="w-full mt-1.5 overflow-hidden text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center truncate">添加</div>
           </div>
         </div>
 
-        <div class="im-conversation-private-side__spacer"></div>
+        <div class="flex-shrink-0 h-[10px]"></div>
 
         <!-- 备注（仅自己可见）：点击弹 popover 编辑，保存后立即刷新本抽屉 + 会话列表展示名 -->
-        <div class="im-conversation-private-side__section">
+        <div class="bg-[var(--el-bg-color)]">
           <el-popover
             v-model:visible="displayNamePopoverVisible"
             trigger="click"
@@ -54,16 +54,16 @@
           >
             <template #reference>
               <div
-                class="im-conversation-private-side__row im-conversation-private-side__row--vertical im-conversation-private-side__row--clickable"
+                class="im-conversation-private-side__row flex flex-col items-stretch gap-1.5 px-4 py-[14px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
               >
-                <span class="im-conversation-private-side__label">备注</span>
+                <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">备注</span>
                 <span
                   v-if="friend.displayName"
-                  class="im-conversation-private-side__value im-conversation-private-side__value--clamp"
+                  class="text-13px leading-[1.6] text-[var(--el-text-color-regular)] break-all line-clamp-2"
                 >
                   {{ friend.displayName }}
                 </span>
-                <span v-else class="im-conversation-private-side__value-placeholder">
+                <span v-else class="text-13px leading-[1.6] text-[var(--el-text-color-placeholder)]">
                   好友备注仅自己可见
                 </span>
               </div>
@@ -85,33 +85,33 @@
           </el-popover>
         </div>
 
-        <div class="im-conversation-private-side__spacer"></div>
+        <div class="flex-shrink-0 h-[10px]"></div>
 
         <!-- 查找聊天内容 -->
-        <div class="im-conversation-private-side__section">
+        <div class="bg-[var(--el-bg-color)]">
           <div
-            class="im-conversation-private-side__row im-conversation-private-side__row--clickable"
+            class="im-conversation-private-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
             @click="emit('open-history')"
           >
-            <span class="im-conversation-private-side__label">查找聊天内容</span>
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">查找聊天内容</span>
             <Icon
               icon="ant-design:right-outlined"
               :size="11"
-              class="im-conversation-private-side__chevron"
+              class="text-[var(--el-text-color-placeholder)]"
             />
           </div>
         </div>
 
-        <div class="im-conversation-private-side__spacer"></div>
+        <div class="flex-shrink-0 h-[10px]"></div>
 
         <!-- 开关项 -->
-        <div class="im-conversation-private-side__section">
-          <div class="im-conversation-private-side__row">
-            <span class="im-conversation-private-side__label">消息免打扰</span>
+        <div class="bg-[var(--el-bg-color)]">
+          <div class="im-conversation-private-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150">
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">消息免打扰</span>
             <el-switch :model-value="!!conversation?.silent" @change="handleMutedChange" />
           </div>
-          <div class="im-conversation-private-side__row">
-            <span class="im-conversation-private-side__label">置顶聊天</span>
+          <div class="im-conversation-private-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150">
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">置顶聊天</span>
             <el-switch :model-value="!!conversation?.top" @change="handleTopChange" />
           </div>
         </div>
@@ -250,136 +250,21 @@ function handleGroupCreated(groupId: number) {
 </script>
 
 <style scoped>
-.im-conversation-private-side {
-  background-color: var(--el-bg-color);
-}
-
-/* 滚动区底色用浅灰，配合 section 的白色形成 “块” 视觉，spacer 自动透出来当分隔条 */
-.im-conversation-private-side__scroll {
-  background-color: var(--el-fill-color-light);
-}
-
-.im-conversation-private-side__section {
-  background-color: var(--el-bg-color);
-}
-
-/* 好友宫格区：留白和 GroupSide__members 对齐，friend tile + "+" tile 横排 */
-.im-conversation-private-side__friend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 16px 16px 14px;
-}
-
-.im-conversation-private-side__tile-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 66px;
-}
-.im-conversation-private-side__tile-wrap--clickable {
-  cursor: pointer;
-}
-
-.im-conversation-private-side__tile-label {
-  width: 100%;
-  margin-top: 6px;
-  overflow: hidden;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--el-text-color-regular);
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* "+" 加号 tile：浅底 + 虚线边，hover 走主色让交互可读，与 GroupSide 一致 */
-.im-conversation-private-side__icon-tile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 50px;
-  font-size: 20px;
-  color: var(--el-text-color-regular);
-  background-color: var(--el-fill-color-lighter);
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  transition:
-    color 0.18s,
-    border-color 0.18s,
-    background-color 0.18s;
-}
-.im-conversation-private-side__tile-wrap--clickable:hover .im-conversation-private-side__icon-tile {
+/* 「+」 tile： hover 时联动内部 icon-tile 走主色； 跨子元素的 hover 联动无法用单元素工具类表达 */
+.im-conversation-private-side__tile-wrap-clickable:hover .im-conversation-private-side__icon-tile {
   color: var(--el-color-primary);
   border-color: var(--el-color-primary);
   background-color: var(--el-color-primary-light-9);
 }
-/* el-icon 全局 color 在暗色模式下被主题盖过；:deep(svg) 锁 fill 到当前色 */
+
+/* :deep 穿透 Icon 内部 svg； el-icon 全局 color 在暗色模式下被主题盖过，锁 fill 到当前色 */
 .im-conversation-private-side__icon-tile :deep(svg) {
   fill: currentColor !important;
 }
 
-/* section 间隔条 */
-.im-conversation-private-side__spacer {
-  flex-shrink: 0;
-  height: 10px;
-}
-
-/* 信息行：和 GroupSide 完全一致的尺寸 / hover，避免两个抽屉切换时 jitter */
-.im-conversation-private-side__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 16px;
-  font-size: 14px;
-  min-height: 24px;
-  transition: background-color 0.15s;
-}
+/* 相邻信息行加分隔线； 相邻兄弟选择器无法用工具类表达 */
 .im-conversation-private-side__row + .im-conversation-private-side__row {
   border-top: 1px solid var(--el-border-color-lighter);
-}
-.im-conversation-private-side__row--clickable {
-  cursor: pointer;
-}
-.im-conversation-private-side__row--clickable:hover {
-  background-color: var(--el-fill-color-lighter);
-}
-/* 备注行：label 在上、value 在下，编辑场景才用 */
-.im-conversation-private-side__row--vertical {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 6px;
-  padding: 14px 16px;
-}
-
-.im-conversation-private-side__label {
-  flex-shrink: 0;
-  font-size: 14px;
-  color: var(--el-text-color-primary);
-}
-
-.im-conversation-private-side__value {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--el-text-color-regular);
-  word-break: break-all;
-}
-.im-conversation-private-side__value--clamp {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-.im-conversation-private-side__value-placeholder {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--el-text-color-placeholder);
-}
-
-.im-conversation-private-side__chevron {
-  color: var(--el-text-color-placeholder);
 }
 </style>
 

@@ -5,7 +5,7 @@
     - 拖拽区在右边缘，鼠标变 col-resize
   -->
   <aside
-    class="relative flex flex-col shrink-0 bg-[var(--el-fill-color-light)] border-r border-[var(--el-border-color-lighter)] shadow-[2px_0_8px_rgba(0,0,0,0.05)]"
+    class="relative flex flex-col shrink-0 bg-[var(--el-fill-color-light)] border-r border-r-solid border-[var(--el-border-color-lighter)] shadow-[2px_0_8px_rgba(0,0,0,0.05)]"
     :style="{ width: asideWidth + 'px' }"
   >
     <slot></slot>
@@ -102,8 +102,7 @@ function stopResize() {
 </script>
 
 <style scoped>
-/* 拖拽手柄的 hover / 拖拽中变色：UnoCSS 同时控制"handle 状态 → 子 line 样式"的选择器链比较绕，
-   用 scoped CSS 直接描述更清晰 */
+/* hover / 拖拽中 把内部 line 加粗变深，提示手柄可拖；状态在父 handle 上 → 通过后代选择器联动子 line */
 .im-resizable-aside__handle:hover .im-resizable-aside__line,
 .im-resizable-aside__handle.is-resizing .im-resizable-aside__line {
   width: 3px;

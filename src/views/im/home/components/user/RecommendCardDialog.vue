@@ -20,7 +20,7 @@
           v-if="view === 'contact'"
           icon="ant-design:arrow-left-outlined"
           :size="16"
-          class="cursor-pointer im-recommend-dialog__back"
+          class="cursor-pointer text-[var(--el-text-color-secondary)] transition-colors duration-150 hover:text-[var(--el-color-primary)]"
           @click="view = 'conversation'"
         />
         <span class="text-base text-[var(--el-text-color-primary)]">
@@ -315,16 +315,8 @@ async function handleCreateGroupAndSend() {
 <style scoped lang="scss">
 @use '../picker/picker-dialog' as picker;
 
+/* :deep 穿透 el-dialog 内部类；复用 picker 公共 mixin */
 .im-picker-dialog {
   @include picker.styles;
-}
-
-/* 返回箭头 hover 高亮，提示可点击 */
-.im-recommend-dialog__back {
-  color: var(--el-text-color-secondary);
-  transition: color 0.15s;
-}
-.im-recommend-dialog__back:hover {
-  color: var(--el-color-primary);
 }
 </style>

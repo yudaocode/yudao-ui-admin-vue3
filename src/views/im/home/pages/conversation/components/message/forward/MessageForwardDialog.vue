@@ -44,7 +44,7 @@
             <!-- 合并模式预览：「[聊天记录] 标题 + 摘要列表」预览卡 -->
             <div
               v-if="state.mode === ImForwardMode.MERGE && mergePreview"
-              class="flex flex-col w-full overflow-hidden rounded-md bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
+              class="flex flex-col w-full overflow-hidden rounded-md bg-[var(--el-bg-color)] border border-solid border-[var(--el-border-color-lighter)]"
             >
               <div
                 class="px-3 py-2 text-sm font-medium truncate text-[var(--el-text-color-primary)]"
@@ -61,7 +61,7 @@
                 </div>
               </div>
               <div
-                class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
+                class="px-3 py-1 text-12px border-t border-t-solid text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
               >
                 聊天记录
               </div>
@@ -70,7 +70,7 @@
             <!-- 逐条模式预览：消息数 + 首条摘要 -->
             <div
               v-else-if="state.mode === ImForwardMode.SINGLE && singlePreviewLines.length > 0"
-              class="flex flex-col w-full overflow-hidden rounded-md bg-[var(--el-bg-color)] border border-[var(--el-border-color-lighter)]"
+              class="flex flex-col w-full overflow-hidden rounded-md bg-[var(--el-bg-color)] border border-solid border-[var(--el-border-color-lighter)]"
             >
               <div class="flex flex-col px-3 py-2 gap-0.5">
                 <div
@@ -82,7 +82,7 @@
                 </div>
               </div>
               <div
-                class="px-3 py-1 text-12px border-t text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
+                class="px-3 py-1 text-12px border-t border-t-solid text-[var(--el-text-color-placeholder)] border-[var(--el-border-color-lighter)] bg-[var(--el-fill-color-lighter)]"
               >
                 共 {{ state.messages.length }} 条消息
               </div>
@@ -429,6 +429,7 @@ async function handleCreateGroupAndSend() {
 </script>
 
 <style scoped lang="scss">
+/* 复用选择类弹窗的公共 mixin； 内部是 :deep 穿透 el-dialog 内部 header / body 的样式，无法替换为工具类 */
 @use '@/views/im/home/components/picker/picker-dialog' as picker;
 
 .im-picker-dialog {

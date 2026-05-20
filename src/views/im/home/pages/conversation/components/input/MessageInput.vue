@@ -7,20 +7,19 @@
     <!-- 禁言 / 封禁覆盖层：优先级 封禁 > 全群禁言 > 成员禁言 -->
     <div
       v-if="muteOverlay"
-      class="message-input__mute-overlay"
-      :class="{
-        'message-input__mute-overlay--banned': muteOverlay.icon === 'ant-design:stop-outlined'
-      }"
+      class="absolute top-2 right-3 bottom-3 left-3 z-10 flex items-center justify-center gap-2 rounded-lg border border-solid text-sm"
+      :class="
+        muteOverlay.icon === 'ant-design:stop-outlined'
+          ? 'text-[var(--el-color-danger-dark-2)] bg-[var(--el-color-danger-light-9)] border-[var(--el-color-danger-light-5)]'
+          : 'text-[var(--el-color-warning-dark-2)] bg-[var(--el-color-warning-light-9)] border-[var(--el-color-warning-light-5)]'
+      "
     >
       <Icon :icon="muteOverlay.icon" :size="18" />
       <span>{{ muteOverlay.text }}</span>
     </div>
-    <!--
-      内层白色圆角卡片 = editor + 工具栏；border + rounded 模拟微信"输入框"边界，
-      避免之前"无框 Web 输入"的散开感；border 走 scoped CSS（UnoCSS 不带 border-style preflight）
-    -->
+    <!-- 内层白色圆角卡片 = editor + 工具栏；border + rounded 模拟微信「输入框」边界 -->
     <div
-      class="relative flex flex-col bg-[var(--el-bg-color)] rounded-lg border border-[var(--el-border-color-lighter)]"
+      class="relative flex flex-col bg-[var(--el-bg-color)] rounded-lg border border-solid border-[var(--el-border-color-lighter)]"
     >
       <!--
         输入区在上：contenteditable div（取代 textarea，对齐微信 PC：输入区在上，操作在下）
@@ -54,10 +53,10 @@
         底部工具栏：左侧操作图标 + 右侧发送按钮（对齐微信 PC：操作图标统一放底部）
         - relative 给 FacePicker 提供 absolute 锚点，picker 用 bottom-full 向上弹出
         - 图标统一 30×30 点击区（18px icon + p-1.5），gap-1 让间距贴合微信观感
-        - border-t 在编辑区与工具栏之间画一条与 card 边框同色的细线（scoped CSS 避绕 UnoCSS preflight 缺失）
+        - border-t 在编辑区与工具栏之间画一条与 card 边框同色的细线
       -->
       <div
-        class="relative flex items-center justify-between gap-2 px-3 py-2 border-t border-[var(--el-border-color-lighter)]"
+        class="relative flex items-center justify-between gap-2 px-3 py-2 border-t border-t-solid border-[var(--el-border-color-lighter)]"
       >
         <div class="flex items-center gap-1">
           <!--
@@ -1117,9 +1116,8 @@ async function onVideoPicked(e: Event) {
 </script>
 
 <style scoped>
-/* el-icon 全局规则 .el-icon{color:var(--color,inherit); font-size:inherit; width:1em; height:1em}
-   会盖过 UnoCSS 原子类；用字面选择器 + !important 兜底。
-   颜色取 Element Plus 主题变量，暗色自动切到浅灰 */
+/* el-icon 全局规则 .el-icon{color:var(--color,inherit); font-size:inherit; width:1em; height:1em} 优先级更高，
+   用字面选择器 + !important 锁死；颜色取 Element Plus 主题变量，暗色自动切到浅灰 */
 .message-input__tool,
 .message-input__tool:deep(svg) {
   font-size: 18px !important;
@@ -1142,27 +1140,5 @@ async function onVideoPicked(e: Event) {
 /* @ token 走主色高亮；contenteditable=false 让 backspace 整段删而不是逐字符 */
 .message-input__editor :deep(.mention-token) {
   color: var(--el-color-primary);
-}
-
-/* 禁言 / 封禁覆盖层：绝对定位在外层容器上，遮挡整个输入卡片 */
-.message-input__mute-overlay {
-  position: absolute;
-  inset: 8px 12px 12px;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: var(--el-color-warning-dark-2);
-  background-color: var(--el-color-warning-light-9);
-  border: 1px solid var(--el-color-warning-light-5);
-}
-/* 封禁态：红底，区别于禁言的橙底 */
-.message-input__mute-overlay--banned {
-  color: var(--el-color-danger-dark-2);
-  background-color: var(--el-color-danger-light-9);
-  border-color: var(--el-color-danger-light-5);
 }
 </style>
