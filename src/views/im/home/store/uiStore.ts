@@ -1,5 +1,5 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 
 import { ImFriendAddSource } from '../../utils/constants'
 import type { GroupLite, User } from '../types'
@@ -116,6 +116,17 @@ export const useImUiStore = defineStore('imUiStore', () => {
     contextMenu.onSelect = null
   }
 
+  // ==================== 消息 Tab 跳转下一未读 ====================
+  // 在 ImHomeConversation 页面再次点击工具栏「消息」时触发；
+  // 通过递增 nonce 让 conversation/index.vue 的 watch 感知后执行滚动 + 高亮
+
+  const nextUnreadJumpNonce = ref(0)
+
+  /** 请求滚动到下一个未读会话（含免打扰） */
+  function requestNextUnreadJump() {
+    nextUnreadJumpNonce.value++
+  }
+
   return {
     userInfoCard,
     openUserInfoCard,
@@ -128,7 +139,10 @@ export const useImUiStore = defineStore('imUiStore', () => {
 
     contextMenu,
     openContextMenu,
-    closeContextMenu
+    closeContextMenu,
+
+    nextUnreadJumpNonce,
+    requestNextUnreadJump
   }
 })
 

@@ -96,10 +96,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useConversationStore } from '../../store/conversationStore'
 import { useGroupStore } from '../../store/groupStore'
+import { useImUiStore } from '../../store/uiStore'
 import { StorageKeys } from '../../../utils/storage'
 import { ImConversationType } from '../../../utils/constants'
 import { filterConversationsByKeyword, getConversationKey } from '../../../utils/conversation'
@@ -114,6 +115,7 @@ defineOptions({ name: 'ImMessagePage' })
 
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
+const uiStore = useImUiStore()
 
 // ==================== 会话列表 ====================
 
@@ -171,7 +173,7 @@ const renderedPinnedConversations = computed(() =>
   pinnedExpanded.value ? pinnedConversations.value : pinnedGroups.value.visible
 )
 
-/** 与会话项右上角红点的可见条件保持一致：免打扰不亮，无未读不亮 */
+/** 置顶折叠时是否上浮到折叠头之上：仅以数字徽标为准；免打扰即便有未读也只展示小红点，不参与上浮 */
 function hasUnreadBadge(conversation: Conversation): boolean {
   return !conversation.silent && (conversation.unreadCount || 0) > 0
 }
@@ -220,4 +222,48 @@ function handleGroupCreated(groupId: number) {
     { silent: !!group.silent }
   )
 }
+
+// ==================== 滚动到下一个未读 ====================
+// 工具栏「消息」Tab 二次点击 → uiStore.nextUnreadJumpNonce 递增 → 本页 watch 滚动到下一条未读
+// 含免打扰会话（小红点也算未读）；通过维护 lastJumpedConversationKey 让连续点击顺序穿过整个未读列表
+
+/** 上次命中的未读会话 key；为空时从未读列表头开始 */
+let lastJumpedConversationKey: string | null = null
+
+/** 滚动到下一个未读会话（含免打扰）；目标被搜索框过滤或藏在置顶折叠区时先解除拦截再滚 */
+async function jumpToNextUnread() {
+  // 含免打扰的全量未读会话；空则直接返回
+  const unreadList = sortedConversations.value.filter((c) => (c.unreadCount || 0) > 0)
+  if (unreadList.length === 0) {
+    return
+  }
+  // 从上次命中那条往后推一位；首次或上次目标已读完不在列表里时，refIndex=-1，从头开始
+  const refIndex = lastJumpedConversationKey
+    ? unreadList.findIndex((c) => getConversationKey(c) === lastJumpedConversationKey)
+    : -1
+  const target = unreadList[(refIndex + 1) % unreadList.length]
+  const key = getConversationKey(target)
+  lastJumpedConversationKey = key
+
+  // 目标被搜索关键字过滤掉：清空 keyword 让它重新进入可见列表
+  if (keyword.value && !filteredConversations.value.some((c) => getConversationKey(c) === key)) {
+    keyword.value = ''
+  }
+  // 目标藏在置顶折叠区：临时展开；不写 localStorage，刷新后还原折叠态
+  const inFoldable = pinnedGroups.value.foldable.some((c) => getConversationKey(c) === key)
+  if (inFoldable && !pinnedExpanded.value) {
+    pinnedExpanded.value = true
+  }
+
+  // 等 keyword / pinnedExpanded 变化反应到 DOM 后再去取目标元素
+  await nextTick()
+  const el = document.querySelector(`[data-conversation-key="${key}"]`) as HTMLElement | null
+  if (!el) {
+    return
+  }
+  // block: 'start' 把目标会话顶到列表可视区第一行；对齐微信"切到下一个未读=列表的第一条"
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+watch(() => uiStore.nextUnreadJumpNonce, jumpToNextUnread)
 </script>

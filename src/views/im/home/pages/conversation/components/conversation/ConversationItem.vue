@@ -2,10 +2,11 @@
   <div
     class="relative flex items-center gap-2.5 px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--el-fill-color)]"
     :class="{ '!bg-[#d9ecff] dark:!bg-[var(--el-color-primary-light-8)]': isActive }"
+    :data-conversation-key="`${conversation.type}-${conversation.targetId}`"
     @click="handleClick"
     @contextmenu.prevent="handleContextMenu"
   >
-    <!-- 头像 + 未读徽标；免打扰会话不显示徽标 -->
+    <!-- 头像 + 未读提示；普通会话显示红色数字徽标，免打扰会话仅显示纯小红点（对齐微信，不暴露具体条数） -->
     <div class="relative">
       <GroupAvatar
         v-if="isGroup"
@@ -21,12 +22,18 @@
         :size="40"
         :clickable="false"
       />
+      <!-- 数字徽标：非免打扰且有未读时显示具体条数 -->
       <span
         v-show="!conversation.silent && conversation.unreadCount > 0"
         class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1.5 text-11px leading-[18px] text-white text-center bg-[#f56c6c] border border-solid border-white dark:border-[var(--el-bg-color)] rounded-full box-border whitespace-nowrap"
       >
         {{ conversation.unreadCount > 99 ? '99+' : conversation.unreadCount }}
       </span>
+      <!-- 小红点：免打扰且有未读时仅提示存在新消息；切回非免打扰后用上面的数字徽标暴露累计未读 -->
+      <span
+        v-show="conversation.silent && conversation.unreadCount > 0"
+        class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#f56c6c] border border-solid border-white dark:border-[var(--el-bg-color)] rounded-full box-border"
+      ></span>
     </div>
 
     <div class="flex-1 min-w-0">
