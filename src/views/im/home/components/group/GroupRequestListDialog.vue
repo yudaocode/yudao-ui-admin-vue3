@@ -35,7 +35,7 @@
             <div class="truncate text-sm font-medium leading-[1.4] text-[var(--el-text-color-primary)]">
               {{ latest.userNickname || `用户 ${latest.userId}` }}
             </div>
-            <div class="truncate mt-[2px] text-xs leading-[1.5] text-[var(--el-text-color-secondary)]">
+            <div class="truncate mt-[2px] text-12px leading-[1.5] text-[var(--el-text-color-secondary)]">
               <template v-if="latest.inviterUserId">
                 通过
                 <span class="text-[var(--el-color-primary)]">
@@ -94,7 +94,7 @@
       <!-- 分割线：仅在有更早申请时出现 -->
       <div
         v-if="histories.length > 0"
-        class="flex items-center justify-center mt-1.5 -mb-0.5 text-xs text-[var(--el-text-color-placeholder)]"
+        class="flex items-center justify-center mt-1.5 -mb-0.5 text-12px text-[var(--el-text-color-placeholder)]"
       >
         <span>以下为更早的申请</span>
       </div>
@@ -116,7 +116,7 @@
             <div class="truncate text-sm font-medium leading-[1.4] text-[var(--el-text-color-primary)]">
               {{ item.userNickname || `用户 ${item.userId}` }}
             </div>
-            <div class="truncate mt-[2px] text-xs leading-[1.5] text-[var(--el-text-color-secondary)]">
+            <div class="truncate mt-[2px] text-12px leading-[1.5] text-[var(--el-text-color-secondary)]">
               <template v-if="item.inviterUserId">
                 通过
                 <span class="text-[var(--el-color-primary)]">
