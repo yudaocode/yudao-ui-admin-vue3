@@ -12,6 +12,12 @@ export enum DeviceStateEnum {
   OFFLINE = 2 // 离线
 }
 
+/** IoT 产品状态枚举 */
+export enum ProductStatusEnum {
+  UNPUBLISHED = 0, // 未发布
+  PUBLISHED = 1 // 已发布
+}
+
 /** IoT 产品物模型类型枚举类 */
 export const IoTThingModelTypeEnum = {
   PROPERTY: 1, // 属性

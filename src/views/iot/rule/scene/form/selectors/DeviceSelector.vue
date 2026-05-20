@@ -72,13 +72,12 @@ const getDeviceList = async () => {
 
   try {
     deviceLoading.value = true
-    const res = await DeviceApi.getDeviceListByProductId(props.productId)
-    deviceList.value = res || []
+    const data = await DeviceApi.getDeviceListByProductId(props.productId)
+    deviceList.value = [DEVICE_SELECTOR_OPTIONS.ALL_DEVICES, ...(data || [])]
   } catch (error) {
     console.error('获取设备列表失败:', error)
-    deviceList.value = []
+    deviceList.value = [DEVICE_SELECTOR_OPTIONS.ALL_DEVICES]
   } finally {
-    deviceList.value.unshift(DEVICE_SELECTOR_OPTIONS.ALL_DEVICES)
     deviceLoading.value = false
   }
 }
