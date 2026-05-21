@@ -65,7 +65,7 @@ const groupRequestStore = useGroupRequestStore()
 const draftStore = useDraftStore()
 const faceStore = useFaceStore()
 const channelStore = useChannelStore()
-const { pullOnce } = useMessagePuller()
+const { pullOnce, cancelPull } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
 const voicePlayer = useVoicePlayer()
 
@@ -153,8 +153,9 @@ function onBeforeUnload() {
 }
 window.addEventListener('beforeunload', onBeforeUnload)
 
-/** 离开 IM 主壳：主动断 WebSocket（disconnect 内部已清掉 onclose 防自动重连）+ flush 草稿 + 表情缓存 reset + 解绑 unload + 停语音 */
+/** 离开 IM 主壳：取消在飞的 pull（防止旧响应写新 session）+ 主动断 WebSocket + flush 草稿 + 表情缓存 reset + 解绑 unload + 停语音 */
 onUnmounted(() => {
+  cancelPull()
   webSocketStore.disconnect()
   draftStore.flushPersist()
   faceStore.reset()

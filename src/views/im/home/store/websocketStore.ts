@@ -19,7 +19,13 @@ import {
   playAudioTip,
   resolveCallEndReasonText
 } from '../../utils/message'
-import { MESSAGE_PRIVATE_READ_ENABLED, MESSAGE_GROUP_READ_ENABLED } from '../../utils/config'
+import {
+  MESSAGE_PRIVATE_READ_ENABLED,
+  MESSAGE_GROUP_READ_ENABLED,
+  WS_RECONNECT_BASE_MS,
+  WS_RECONNECT_MAX_MS,
+  WS_RECONNECT_JITTER_MS
+} from '../../utils/config'
 import { useConversationStore } from './conversationStore'
 import { useFriendStore, type FriendNotificationPayload } from './friendStore'
 import { getFriendDisplayName } from '../../utils/user'
@@ -120,6 +126,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     socket: null as WebSocket | null,
     isConnected: false,
     reconnectTimer: null as ReturnType<typeof setTimeout> | null,
+    /** 连续重连失败次数；onopen 成功 / disconnect 主动断开后清零，用于指数退避 */
+    reconnectAttempts: 0,
     heartbeatTimer: null as ReturnType<typeof setInterval> | null,
     messageBuffer: [] as Array<
       | { conversationType: typeof ImConversationType.PRIVATE; payload: ImPrivateMessageDTO }
@@ -137,6 +145,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const msgs = [...this.messageBuffer]
       this.messageBuffer = []
       return msgs
+    },
+
+    /** 直接丢弃缓冲帧不回放（cancelPull / 离开 IM 调用，防止下次进 IM 把旧 session 帧回放进新 store） */
+    discardBuffer() {
+      this.messageBuffer = []
     },
 
     /**
@@ -173,9 +186,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const url = `${this.buildWsUrl()}/infra/ws?token=${refreshToken}`
       this.socket = new WebSocket(url)
 
-      // 连接建立：标记上线 + 启动心跳保活
+      // 连接建立：标记上线 + 启动心跳保活；重连退避计数归零
       this.socket.onopen = () => {
         this.isConnected = true
+        this.reconnectAttempts = 0
         console.log('[IM WS] connected')
         this.startHeartbeat()
       }
@@ -193,18 +207,20 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         }
       }
 
-      // 服务端关闭 / 网络断：标记下线，3 秒后自动重连
+      // 服务端关闭 / 网络断：标记下线，按指数退避自动重连
       this.socket.onclose = () => {
         this.isConnected = false
         console.log('[IM WS] disconnected')
         this.reconnect()
       }
 
-      // 异常同样走重连（onerror 后通常 onclose 也会触发，reconnect 内部已防重）
+      // 异常时不主动 reconnect，主动 close() 让 onclose 成为唯一重连入口：
+      // 1）避免 onerror / onclose 双触把 reconnectAttempts 一次断连 +2
+      // 2）兜底某些平台 onerror 后 onclose 延迟 / 丢失导致重连卡住
       this.socket.onerror = (error) => {
         console.error('[IM WS] error:', error)
         this.isConnected = false
-        this.reconnect()
+        this.socket?.close()
       }
     },
 
@@ -287,29 +303,26 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         typeof websocketMessage.sendTime === 'number'
           ? websocketMessage.sendTime
           : new Date(websocketMessage.sendTime).getTime()
-      conversationStore.insertMessage(
-        buildChannelConversationStub(websocketMessage.channelId),
-        {
-          id: websocketMessage.id,
-          clientMessageId: '',
-          type: websocketMessage.type,
-          content: websocketMessage.content,
-          status: ImMessageStatus.UNREAD,
-          sendTime: sendTimeMs,
-          senderId: 0,
-          targetId: websocketMessage.channelId,
-          selfSend: false,
-          materialId: websocketMessage.materialId
-        }
-      )
+      conversationStore.insertMessage(buildChannelConversationStub(websocketMessage.channelId), {
+        id: websocketMessage.id,
+        clientMessageId: '',
+        type: websocketMessage.type,
+        content: websocketMessage.content,
+        status: ImMessageStatus.UNREAD,
+        sendTime: sendTimeMs,
+        senderId: 0,
+        targetId: websocketMessage.channelId,
+        selfSend: false,
+        materialId: websocketMessage.materialId
+      })
       // 非当前会话 + 未免打扰：响一下提示音
       const conversation = conversationStore.getConversation(
         ImConversationType.CHANNEL,
         websocketMessage.channelId
       )
       const isActive =
-        conversationStore.activeConversation?.type === ImConversationType.CHANNEL
-        && conversationStore.activeConversation?.targetId === websocketMessage.channelId
+        conversationStore.activeConversation?.type === ImConversationType.CHANNEL &&
+        conversationStore.activeConversation?.targetId === websocketMessage.channelId
       if (!isActive && !conversation?.silent && isNormalMessage(websocketMessage.type)) {
         playAudioTip()
       }
@@ -432,6 +445,21 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      */
     handlePrivateMessage(websocketMessage: ImPrivateMessageDTO) {
       const conversationStore = useConversationStore()
+      const userStore = useUserStore()
+      const friendStore = useFriendStore()
+      const currentUserId = Number(userStore.getUser?.id) || 0
+
+      // 0. 防御层：senderId / receiverId 均不含当前用户的私聊帧直接丢弃，避免后端路由 / 多端串号污染会话
+      //    （FRIEND_* 等系统通知也走这条通道，但 fromUserId=senderId、toUserId=receiverId 仍是当前用户视角）
+      if (
+        currentUserId &&
+        websocketMessage.senderId !== currentUserId &&
+        websocketMessage.receiverId !== currentUserId
+      ) {
+        console.warn('[IM WS] 丢弃不属于当前用户的私聊帧', websocketMessage)
+        return
+      }
+
       // 1. 离线加载期间先缓冲，等 pull 完成后再统一回放，避免重复或顺序错乱
       if (conversationStore.loading) {
         this.messageBuffer.push({
@@ -442,9 +470,6 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       }
 
       // 2. selfSend / peerId：自己发的消息属于「发给 receiverId 的会话」，别人发的属于「发送者的会话」
-      const userStore = useUserStore()
-      const friendStore = useFriendStore()
-      const currentUserId = Number(userStore.getUser?.id) || 0
       const selfSend = websocketMessage.senderId === currentUserId
       const peerId = getPrivateMessagePeerId(websocketMessage, currentUserId)
       // 未知对端（陌生人加好友前先收到消息等场景）：异步补拉一次，下次再渲染就有 name/avatar
@@ -507,7 +532,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         return
       }
       const conversationStore = useConversationStore()
-      conversationStore.markConversationAsRead(ImConversationType.PRIVATE, websocketMessage.receiverId)
+      conversationStore.markConversationAsRead(
+        ImConversationType.PRIVATE,
+        websocketMessage.receiverId
+      )
     },
 
     /**
@@ -542,6 +570,25 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      */
     handleGroupMessage(websocketMessage: ImGroupMessageDTO) {
       const conversationStore = useConversationStore()
+      const userStore = useUserStore()
+      const groupStore = useGroupStore()
+      const currentUserId = Number(userStore.getUser?.id) || 0
+      const selfSend = websocketMessage.senderId === currentUserId
+
+      // 0. 防御层：定向群消息 receiverUserIds 非空且未包含当前用户时丢弃
+      //    自己发的（selfSend）始终通过；全员可见（receiverUserIds 为空 / 缺失）也通过
+      const receiverUserIds = websocketMessage.receiverUserIds
+      if (
+        currentUserId &&
+        !selfSend &&
+        Array.isArray(receiverUserIds) &&
+        receiverUserIds.length > 0 &&
+        !receiverUserIds.includes(currentUserId)
+      ) {
+        console.warn('[IM WS] 丢弃不属于当前用户的定向群消息', websocketMessage)
+        return
+      }
+
       // 1. 离线加载期缓冲（与私聊对称）
       if (conversationStore.loading) {
         this.messageBuffer.push({
@@ -550,10 +597,6 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         })
         return
       }
-      const userStore = useUserStore()
-      const groupStore = useGroupStore()
-      const currentUserId = Number(userStore.getUser?.id) || 0
-      const selfSend = websocketMessage.senderId === currentUserId
 
       // 2. 未知群时自动拉群详情 + 成员（被拉入群但还没收到 GROUP_CREATE 时的兜底）
       const group = groupStore.getGroup(websocketMessage.groupId)
@@ -668,10 +711,16 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           friendStore.applyFriendRequestRejectedNotification(payload)
           break
         case ImMessageType.FRIEND_ADD:
-          friendStore.applyFriendAddNotification(payload, this.computeFriendPeerId(websocketMessage))
+          friendStore.applyFriendAddNotification(
+            payload,
+            this.computeFriendPeerId(websocketMessage)
+          )
           break
         case ImMessageType.FRIEND_DELETE:
-          friendStore.applyFriendDeleteNotification(payload, this.computeFriendPeerId(websocketMessage))
+          friendStore.applyFriendDeleteNotification(
+            payload,
+            this.computeFriendPeerId(websocketMessage)
+          )
           break
         case ImMessageType.FRIEND_BLOCK:
           friendStore.applyFriendBlockNotification(payload)
@@ -777,18 +826,32 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         clearTimeout(this.reconnectTimer)
         this.reconnectTimer = null
       }
+      // 主动断开（切账号 / 退出）：清零退避计数，下次 connect 重新从最短间隔起算
+      this.reconnectAttempts = 0
     },
 
-    /** 自动重连，3 秒后再试（onclose / onerror 都会进来，靠 reconnectTimer 自身防重） */
+    /**
+     * 自动重连：指数退避 base * 2^attempt（封顶 max）+ 0~jitter ms 随机偏移
+     *
+     * onclose 是唯一入口；onerror 不再调本方法（浏览器规范两者必同时触发，避免计数 +2）
+     * 不设次数上限，频率封顶在 WS_RECONNECT_MAX_MS（约 30s）持续重试，直到链路恢复或主动 disconnect
+     */
     reconnect() {
       this.stopHeartbeat()
       if (this.reconnectTimer) {
         clearTimeout(this.reconnectTimer)
+        this.reconnectTimer = null
       }
+      const backoff = Math.min(
+        WS_RECONNECT_BASE_MS * 2 ** this.reconnectAttempts,
+        WS_RECONNECT_MAX_MS
+      )
+      const delay = backoff + Math.floor(Math.random() * WS_RECONNECT_JITTER_MS)
+      this.reconnectAttempts++
+      console.log(`[IM WS] reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`)
       this.reconnectTimer = setTimeout(() => {
-        console.log('[IM WS] reconnecting...')
         this.connect()
-      }, 3000)
+      }, delay)
     },
 
     /** 心跳 5 秒一次，保活 + 探活（链路断了 onclose 会触发，由 reconnect 兜底） */

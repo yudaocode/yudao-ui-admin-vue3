@@ -71,8 +71,26 @@ export const MESSAGE_VOICE_MAX_MB = 5
 
 /** 可执行 / 脚本类扩展名黑名单；接收端点击下载后本地双击就跑，html 本地打开还能执行脚本 */
 export const DANGEROUS_FILE_EXTENSIONS = [
-  'exe', 'bat', 'cmd', 'com', 'msi', 'scr', 'pif', 'vbs', 'vbe', 'wsf', 'ws',
-  'js', 'jse', 'jar', 'sh', 'app', 'ps1', 'reg', 'html', 'htm'
+  'exe',
+  'bat',
+  'cmd',
+  'com',
+  'msi',
+  'scr',
+  'pif',
+  'vbs',
+  'vbe',
+  'wsf',
+  'ws',
+  'js',
+  'jse',
+  'jar',
+  'sh',
+  'app',
+  'ps1',
+  'reg',
+  'html',
+  'htm'
 ]
 
 // ==================== 前端独有：UI 阈值 ====================
@@ -100,3 +118,16 @@ export const CONVERSATION_RECENT_FORWARD_MAX = 12
  * 实际超时阈值由后端 yudao.im.rtc.invite-timeout-minutes 决定，前端仅决定触发频率
  */
 export const RTC_NO_ANSWER_CALL_CHECK_INTERVAL_MS = 60 * 1000
+
+// ==================== 前端独有：WebSocket 自动重连 ====================
+// 指数退避：base * 2^attempt，上限封顶；每次再叠加 0~jitter ms 随机偏移
+// 避免服务端重启时全量客户端在同一秒打过来形成「惊群」；不设次数上限，持续重连直到链路恢复
+
+/** 首次重连等待，单位 ms */
+export const WS_RECONNECT_BASE_MS = 1000
+
+/** 退避上限，单位 ms；连续失败 5 次后稳定在 30s 不再增长 */
+export const WS_RECONNECT_MAX_MS = 30 * 1000
+
+/** 退避叠加的随机抖动上限，单位 ms */
+export const WS_RECONNECT_JITTER_MS = 1000

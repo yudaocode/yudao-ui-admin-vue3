@@ -29,9 +29,9 @@ import {
   MESSAGE_GROUP_PULL_SIZE,
   MESSAGE_PRIVATE_READ_ENABLED
 } from '../../utils/config'
-import { useUserStore } from '@/store/modules/user'
 import { buildChannelConversationStub } from '../../utils/channel'
 import { getPrivateMessagePeerId } from '../../utils/message'
+import { getCurrentUserId } from '../../utils/storage'
 import type { Message } from '../types'
 
 /**
@@ -48,10 +48,9 @@ import type { Message } from '../types'
 export const useMessagePuller = () => {
   const conversationStore = useConversationStore()
   const wsStore = useImWebSocketStore()
-  const userStore = useUserStore()
   const friendStore = useFriendStore()
   const groupStore = useGroupStore()
-  const currentUserId = Number(userStore.getUser?.id) || 0
+  const currentUserId = getCurrentUserId()
 
   /** 私聊会话归属：自己发的算"发给 receiverId 的会话"，否则算"发送方的会话"；curry currentUserId 进闭包减少 3 处调用方的样板 */
   const getPrivatePeerId = (message: ImPrivateMessageRespVO) =>
@@ -136,14 +135,30 @@ export const useMessagePuller = () => {
     }
   }
 
-  /** 循环拉取指定会话类型的消息：以本批最大 id 作为下次 minId，直到接口返回空列表或游标不再前进 */
-  const pullByType = async (conversationType: number, startMinId: number) => {
+  /**
+   * 循环拉取指定会话类型的消息：以本批最大 id 作为下次 minId，直到接口返回空列表或游标不再前进
+   *
+   * 取消语义两层守卫：
+   * 1. startEpoch：cancelPull() 递增 pullEpoch；离开 IM / 切账号时旧循环检测到漂移即跳出
+   * 2. startUserId：每批 await 后比对当前登录 userId；防御 logout / 多 tab 异常下用户已切但 cancelPull 未触发
+   * 两者任一不等都丢弃本批不入库，避免旧 session 的接口响应在新 store 落地
+   */
+  const pullByType = async (
+    conversationType: number,
+    startMinId: number,
+    startEpoch: number,
+    startUserId: number
+  ) => {
     // 私聊 / 群聊 / 频道各自一套接口；按 conversationType 在循环内分支调度
     let minId = startMinId || 0
     const isPrivate = conversationType === ImConversationType.PRIVATE
     const isChannel = conversationType === ImConversationType.CHANNEL
     const size = isPrivate ? MESSAGE_PRIVATE_PULL_SIZE : MESSAGE_GROUP_PULL_SIZE
+    const isStillValid = () => pullEpoch === startEpoch && getCurrentUserId() === startUserId
     while (true) {
+      if (!isStillValid()) {
+        return
+      }
       let list: any[] | undefined
       if (isPrivate) {
         list = await apiPullPrivateMessages({ minId, size })
@@ -151,6 +166,10 @@ export const useMessagePuller = () => {
         list = await apiPullChannelMessages({ minId, size })
       } else {
         list = await apiPullGroupMessages({ minId, size })
+      }
+      // 接口返回期间发生 cancel / 切账号：丢弃本批不入库，也不再翻页
+      if (!isStillValid()) {
+        return
       }
       if (!list || list.length === 0) {
         break
@@ -234,6 +253,24 @@ export const useMessagePuller = () => {
    */
   let initialPulled = false
 
+  /**
+   * pull 轮次计数；切账号 / 离开 IM 时 cancelPull() 递增，旧 pullByType 循环按 epoch 自检后跳出
+   * 避免旧 session 的接口响应在新 session 落地，造成跨账号消息泄漏
+   *
+   * 注意：普通断连（WS 短断）不取消 pull——网络抖动 / 服务端重启都属于本账号正常生命周期，
+   * 取消会导致首拉被中断后 initialPulled 永远停在 false，后续重连 watcher 不再补拉
+   */
+  let pullEpoch = 0
+
+  /** 显式取消：仅由 Index.vue onUnmounted（离开 IM / 切账号 / 路由跳出）调用 */
+  const cancelPull = () => {
+    pullEpoch++
+    // 旧 promise 仍在 finally 阶段跑，但 epoch 守卫已阻断后续副作用；这里立刻让 pullPromise = null 让新一轮可重入
+    pullPromise = null
+    // 同步丢弃 WS 缓冲帧；旧 pull 已不会 flushBuffer，若不清下次进 IM 第一次 pullOnce 会把旧 session 的帧回放进新 store
+    wsStore.discardBuffer()
+  }
+
   /** 执行一次全量增量拉取（重入安全：进行中再次调用复用同一个 promise） */
   const pullOnce = (): Promise<void> => {
     if (!currentUserId) {
@@ -242,21 +279,52 @@ export const useMessagePuller = () => {
     if (pullPromise) {
       return pullPromise
     }
+    const startEpoch = pullEpoch
+    // 启动时的用户快照；pullByType 每批 await 后比对当前登录用户，账号变了立刻丢弃
+    const startUserId = currentUserId
+    // 本轮 pull 仍属于当前 session：epoch 未漂 + 用户未切；任何动新 store 状态的副作用都要先过这道关
+    const isCurrentPull = () => pullEpoch === startEpoch && getCurrentUserId() === startUserId
     pullPromise = (async () => {
       try {
+        // 旧 puller 在 cancelPull 未触发的异常路径上再进来时，先于任何副作用退出，避免污染新 session 的 loading
+        if (!isCurrentPull()) {
+          return
+        }
         conversationStore.loading = true
         try {
           // 并发拉取私聊 + 群聊 + 频道，降低初始加载耗时
           await Promise.all([
-            pullByType(ImConversationType.PRIVATE, conversationStore.privateMessageMaxId),
-            pullByType(ImConversationType.GROUP, conversationStore.groupMessageMaxId),
-            pullByType(ImConversationType.CHANNEL, conversationStore.channelMessageMaxId)
+            pullByType(
+              ImConversationType.PRIVATE,
+              conversationStore.privateMessageMaxId,
+              startEpoch,
+              startUserId
+            ),
+            pullByType(
+              ImConversationType.GROUP,
+              conversationStore.groupMessageMaxId,
+              startEpoch,
+              startUserId
+            ),
+            pullByType(
+              ImConversationType.CHANNEL,
+              conversationStore.channelMessageMaxId,
+              startEpoch,
+              startUserId
+            )
           ])
         } catch (e) {
           console.error('[IM] 拉取离线消息失败:', e)
         } finally {
-          // 关闭 buffer 模式必须早于 flushBuffer，否则 handler 看到 loading=true 会把消息又 push 回 buffer
-          conversationStore.loading = false
+          // 仍属本轮才复位 loading；旧轮被 cancel / 切账号时由新一轮自管，避免覆盖新 session 的 true
+          if (isCurrentPull()) {
+            conversationStore.loading = false
+          }
+        }
+
+        // 取消 / 切账号后跳过 flushBuffer / 排序 / 已读位置补齐
+        if (!isCurrentPull()) {
+          return
         }
 
         // 回放 WebSocket 在 loading 期间收到的缓冲消息（此刻走正常 insertMessage 路径）
@@ -278,12 +346,12 @@ export const useMessagePuller = () => {
         // 离线期间错过的 RECEIPT 推送会被这里补回；其他私聊会话等用户点开时由 Index.vue 的 watch 触发
         // 私聊已读关闭时跳过，避免打到已禁用接口触发错误日志
         const active = conversationStore.activeConversation
-        if (
-          MESSAGE_PRIVATE_READ_ENABLED
-          && active && active.type === ImConversationType.PRIVATE
-        ) {
+        if (MESSAGE_PRIVATE_READ_ENABLED && active && active.type === ImConversationType.PRIVATE) {
           try {
             const maxReadId = await apiGetPrivateMaxReadMessageId(active.targetId)
+            if (!isCurrentPull()) {
+              return
+            }
             if (maxReadId) {
               conversationStore.applyReadReceipt({
                 conversationType: ImConversationType.PRIVATE,
@@ -296,9 +364,13 @@ export const useMessagePuller = () => {
           }
         }
       } finally {
-        // 整个 IIFE 全部完成（含已读位置补齐）后才允许下一次 pullOnce 重入
-        pullPromise = null
-        initialPulled = true
+        // 仍属本轮：正常完成首拉；epoch 等但 userId 切了：清 pullPromise 防卡死、不标首拉；epoch 漂：cancelPull 已清，no-op
+        if (isCurrentPull()) {
+          pullPromise = null
+          initialPulled = true
+        } else if (pullEpoch === startEpoch) {
+          pullPromise = null
+        }
       }
     })()
     return pullPromise
@@ -317,5 +389,5 @@ export const useMessagePuller = () => {
     }
   )
 
-  return { pullOnce, convertPrivateMessage, convertGroupMessage }
+  return { pullOnce, cancelPull, convertPrivateMessage, convertGroupMessage }
 }
