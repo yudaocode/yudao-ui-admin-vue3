@@ -264,7 +264,8 @@ import {
 import {
   buildFacePreviewText,
   buildRecallTip,
-  buildRecallTipSegments
+  buildRecallTipSegments,
+  getConversationKey
 } from '@/views/im/utils/conversation'
 import { useMessagePuller } from '@/views/im/home/composables/useMessagePuller'
 import { useVoicePlayer } from '@/views/im/home/composables/useVoicePlayer'
@@ -538,48 +539,60 @@ const hasMore = ref(true)
  * - 返回数量 < limit 视为到顶
  */
 async function loadEarlier() {
-  // 1. 重入 / 到顶 / 无会话 早退：避免重复请求或在 conversation 切换间隙触发
+  // 重入 / 到顶 / 无会话 早退：避免重复请求或在 conversation 切换间隙触发
   if (loadingMore.value || !hasMore.value || !conversation.value) {
     return
   }
+  // 快照当前会话主键：await 期间用户切走 / 关闭面板时丢弃响应，避免旧会话历史被 prepend 到新会话造成串号
+  const requestedKey = getConversationKey(conversation.value)
+  const requestedType = conversation.value.type
+  const requestedTargetId = conversation.value.targetId
+  const requestedIsGroup = requestedType === ImConversationType.GROUP
+
   loadingMore.value = true
   try {
-    // 2. 算 maxId（不含，作为后端游标）：取当前会话本地缓存里最早一条服务端 id；
-    //    id=0 是本地乐观占位消息，没有服务端 id，要剔除
-    //    全是占位 / 列表为空时 reduce 不更新初值（POSITIVE_INFINITY），转成 undefined → 后端从最新拉
+    // 算 maxId（不含，作为后端游标）：取当前会话本地缓存里最早一条服务端 id；
+    // id=0 是本地乐观占位消息，没有服务端 id，要剔除
+    // 全是占位 / 列表为空时 reduce 不更新初值（POSITIVE_INFINITY），转成 undefined → 后端从最新拉
     const earliestId = allMessages.value
       .filter((message) => message.id > 0)
       .reduce((min, message) => Math.min(min, message.id), Number.POSITIVE_INFINITY)
     const maxId = Number.isFinite(earliestId) ? earliestId : undefined
 
-    // 3. 调后端 list 接口：私聊 / 群聊接口签名不同，分支调度；返回结果用 useMessagePuller
-    //    暴露的 convert 函数转成本地 Message（与 puller 同一份字段映射，避免分歧）
+    // 调后端 list 接口：私聊 / 群聊接口签名不同，分支调度；返回结果用 useMessagePuller
+    // 暴露的 convert 函数转成本地 Message（与 puller 同一份字段映射，避免分歧）
     let earlier: Message[] = []
-    if (isGroup.value) {
+    let pageLength = 0
+    if (requestedIsGroup) {
       const list = await apiGetGroupMessageList({
-        groupId: conversation.value.targetId,
+        groupId: requestedTargetId,
         maxId,
         limit: HISTORY_PAGE_SIZE
       })
       earlier = (list || []).map(convertGroupMessage)
-      // 返回数量 < limit 视为到顶 —— 关闭"加载更早"按钮，避免后续点击空跑接口
-      if (!list || list.length < HISTORY_PAGE_SIZE) {
-        hasMore.value = false
-      }
+      pageLength = list?.length ?? 0
     } else {
       const list = await apiGetPrivateMessageList({
-        receiverId: conversation.value.targetId,
+        receiverId: requestedTargetId,
         maxId,
         limit: HISTORY_PAGE_SIZE
       })
       earlier = (list || []).map(convertPrivateMessage)
-      if (!list || list.length < HISTORY_PAGE_SIZE) {
-        hasMore.value = false
-      }
+      pageLength = list?.length ?? 0
     }
-    // 4. 合并到 conversationStore：prependMessages 内部去重 + 升序合并 + 落 IndexedDB；
-    //    主聊天面板的 messages 是同一份引用，老消息也会一起出现在主面板里（符合预期）
-    conversationStore.prependMessages(conversation.value.type, conversation.value.targetId, earlier)
+
+    // await 期间 active 可能被外部置 null / 换主键：直接丢弃响应；不更新 hasMore（旧会话到顶不代表新会话到顶）也不 prepend
+    if (!conversation.value || getConversationKey(conversation.value) !== requestedKey) {
+      return
+    }
+
+    // 返回数量 < limit 视为到顶 —— 关闭"加载更早"按钮，避免后续点击空跑接口
+    if (pageLength < HISTORY_PAGE_SIZE) {
+      hasMore.value = false
+    }
+    // 合并到 conversationStore：prependMessages 内部去重 + 升序合并 + 落 IndexedDB；
+    // 主聊天面板的 messages 是同一份引用，老消息也会一起出现在主面板里（符合预期）
+    conversationStore.prependMessages(requestedType, requestedTargetId, earlier)
   } finally {
     loadingMore.value = false
   }
@@ -605,6 +618,15 @@ watch(visible, (value) => {
     keyword.value = ''
     voicePlayer.stop()
   }
+})
+
+/**
+ * 抽屉开着时外部切了 active conversation：dialog 的 title / 列表 / isGroup 全部跟着新 conversation 走，
+ * 这里把分页态一并重置；否则旧会话残留的 loadingMore=true / hasMore=false 会让新会话"加载更早"按钮失效
+ */
+watch(conversation, () => {
+  loadingMore.value = false
+  hasMore.value = true
 })
 
 // ==================== helper ====================
