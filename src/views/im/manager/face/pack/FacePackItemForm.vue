@@ -19,17 +19,10 @@
           class="w-1/1"
         />
       </el-form-item>
-      <el-form-item label="尺寸">
+      <!-- 尺寸：拆两个 form-item 让 prop / rules 各自绑定，避免单 form-item 时 rules 不生效 -->
+      <el-form-item label="宽度" prop="width">
         <el-input-number
           v-model="formData.width"
-          :min="1"
-          :max="2048"
-          controls-position="right"
-          class="!w-1/3"
-        />
-        <span class="mx-2 text-[var(--el-text-color-secondary)]">×</span>
-        <el-input-number
-          v-model="formData.height"
           :min="1"
           :max="2048"
           controls-position="right"
@@ -38,6 +31,15 @@
         <span class="ml-2 text-12px text-[var(--el-text-color-placeholder)]">
           上传后自动探测；可手动调整（1 ~ 2048 像素）
         </span>
+      </el-form-item>
+      <el-form-item label="高度" prop="height">
+        <el-input-number
+          v-model="formData.height"
+          :min="1"
+          :max="2048"
+          controls-position="right"
+          class="!w-1/3"
+        />
       </el-form-item>
       <el-form-item label="排序" prop="sort">
         <el-input-number
@@ -99,7 +101,31 @@ const formData = ref({
 })
 const formRules = reactive({
   url: [{ required: true, message: '表情图不能为空', trigger: 'change' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
+  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }],
+  // 宽高自动探测后允许手改，但提交前必须落 1-2048 范围；防止用户清空后 submit 让后端报错
+  // 范围 rule 加 transform 把 null/undefined 透传给 async-validator，让空值只触发上面的 required 文案
+  width: [
+    { required: true, message: '宽度不能为空', trigger: 'change' },
+    {
+      type: 'integer',
+      min: 1,
+      max: 2048,
+      message: '宽度需在 1 - 2048 像素之间',
+      trigger: 'change',
+      transform: (value) => (value == null ? value : Number(value))
+    }
+  ],
+  height: [
+    { required: true, message: '高度不能为空', trigger: 'change' },
+    {
+      type: 'integer',
+      min: 1,
+      max: 2048,
+      message: '高度需在 1 - 2048 像素之间',
+      trigger: 'change',
+      transform: (value) => (value == null ? value : Number(value))
+    }
+  ]
 })
 const formRef = ref() // 表单 Ref
 
