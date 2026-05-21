@@ -76,7 +76,8 @@ const adjustedPosition = computed(() => {
       x = window.innerWidth - menuWidth
     }
   }
-  return { x, y }
+  // 视口很小 / 菜单项很多时上面减法会算出负值，把菜单顶 / 左边推到 0 兜底
+  return { x: Math.max(0, x), y: Math.max(0, y) }
 })
 
 type MenuItem = (typeof contextMenu.value.items)[number]

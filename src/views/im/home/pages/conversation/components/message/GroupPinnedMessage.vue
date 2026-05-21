@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { ImConversationType, ImGroupMemberRole } from '@/views/im/utils/constants'
@@ -92,6 +92,15 @@ const group = computed(() => groupStore.getGroup(props.groupId))
 
 const expanded = ref(false)
 const removingId = ref<number | null>(null)
+
+// 切群时重置展开 / 移除中状态：本地 ref 不跟随 groupId，否则上一群"展开"或"移除中"会带到新群
+watch(
+  () => props.groupId,
+  () => {
+    expanded.value = false
+    removingId.value = null
+  }
+)
 
 /** 当前群置顶消息列表（直接走 group.value，跟随响应式） */
 const pinnedMessages = computed<Message[]>(() => group.value?.pinnedMessages ?? [])

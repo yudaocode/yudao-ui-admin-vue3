@@ -386,7 +386,11 @@ async function handleBlock() {
     return
   }
   const target = props.user
-  await message.confirm(`确定将「${target.nickname || ''}」加入黑名单吗？`, '加入黑名单')
+  try {
+    await message.confirm(`确定将「${target.nickname || ''}」加入黑名单吗？`, '加入黑名单')
+  } catch {
+    return
+  }
   await friendStore.blockFriend(target.id)
   message.success('已加入黑名单')
 }

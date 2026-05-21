@@ -198,14 +198,14 @@ const getList = async () => {
     list.value = data.list
     total.value = data.total
     await nextTick()
-    applyPreSelection()
+    await applyPreSelection()
   } finally {
     loading.value = false
   }
 }
 
-/** 恢复预选状态（当前页可见范围内） */
-const applyPreSelection = () => {
+/** 恢复预选状态：当前页命中直接复用 row，否则单选时调单条详情接口补齐（防已选群不在第一页时确认报"请选择"） */
+const applyPreSelection = async () => {
   if (preSelectedIds.value.length === 0) {
     return
   }
@@ -219,12 +219,24 @@ const applyPreSelection = () => {
         table.toggleRowSelection(row, true)
       }
     })
-  } else {
-    const match = list.value.find((row) => preSelectedIds.value.includes(row.id))
-    if (match) {
-      selectedRadioId.value = match.id
-      currentRadioRow.value = match
+    return
+  }
+  const targetId = preSelectedIds.value[0]
+  const match = list.value.find((row) => row.id === targetId)
+  if (match) {
+    selectedRadioId.value = match.id
+    currentRadioRow.value = match
+    return
+  }
+  // 已选群不在当前页可见范围 → 走详情接口补齐，让 currentRadioRow 至少有 id + 名字给 confirmSelect 用
+  try {
+    const detail = await ManagerGroupApi.getManagerGroup(targetId)
+    if (detail) {
+      selectedRadioId.value = detail.id
+      currentRadioRow.value = detail
     }
+  } catch (e) {
+    console.warn('[GroupSelectDialog] 预选群详情拉取失败', { targetId }, e)
   }
 }
 

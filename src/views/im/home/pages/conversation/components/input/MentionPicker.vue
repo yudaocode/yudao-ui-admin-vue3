@@ -52,8 +52,11 @@
       />
     </el-scrollbar>
 
-    <!-- 底部三角指针：旋转 45° 的方块半露出底边，指向输入区里的 @ 字符 -->
-    <div class="absolute left-4 -bottom-1.5 w-3 h-3 rotate-45 bg-[var(--el-bg-color)]"></div>
+    <!-- 三角指针：picker 在 @ 下方（position.top 锚定）→ 箭头朝上贴顶；picker 在 @ 上方（position.bottom 锚定）→ 箭头朝下贴底 -->
+    <div
+      class="absolute left-4 w-3 h-3 rotate-45 bg-[var(--el-bg-color)]"
+      :class="position.top != null ? '-top-1.5' : '-bottom-1.5'"
+    ></div>
   </div>
 </template>
 

@@ -227,7 +227,8 @@ const mergePreviewLines = computed(() => {
 function openVideo() {
   const url = videoPayload.value?.url
   if (url) {
-    window.open(url, '_blank')
+    // noopener,noreferrer 切断新窗口对原页面的 window.opener 引用，防 Tabnabbing
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 }
 
