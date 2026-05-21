@@ -310,11 +310,14 @@ const showRecentSection = computed(
   () => !keyword.value.trim() && recentForwardConversations.value.length > 0
 )
 
-/** 已选会话列表：按 selectedKeys 数组顺序（即点击顺序）反查 */
+/** 已选会话列表：按 selectedKeys 数组顺序（即点击顺序）反查；过滤 hideSet 避免父组件动态隐藏的会话仍在右侧渲染 / 提交 */
 const selectedConversations = computed(() =>
   props.selectedKeys
     .map((key) => byKey.value.get(key))
-    .filter((c): c is Conversation => c != null)
+    .filter(
+      (conversation): conversation is Conversation =>
+        conversation != null && !hideSet.value.has(getConversationKey(conversation))
+    )
 )
 
 /** 右栏标题文案：单选「发送给」、多选「分别发送给」 */
@@ -341,6 +344,10 @@ function handleToggle(conversation: Conversation) {
   if (index >= 0) {
     next.splice(index, 1)
   } else {
+    // 父组件标记隐藏的会话即便有路径触达也不应入选
+    if (hideSet.value.has(key)) {
+      return
+    }
     if (props.maxSize > 0 && next.length >= props.maxSize) {
       message.error(`最多选择 ${props.maxSize} 个会话`)
       return

@@ -77,8 +77,12 @@
                 @click="handleGroupCall"
               />
             </el-tooltip>
-            <!-- 信息抽屉入口 -->
-            <el-tooltip :content="isGroup ? '群聊信息' : '聊天信息'" placement="bottom">
+            <!-- 信息抽屉入口：群聊有，私聊仅在对方是好友时显示（非好友会话抽屉内容为空，没意义） -->
+            <el-tooltip
+              v-if="isGroup || (isPrivate && !showNotFriendBanner)"
+              :content="isGroup ? '群聊信息' : '聊天信息'"
+              placement="bottom"
+            >
               <Icon
                 icon="ant-design:ellipsis-outlined"
                 :size="20"

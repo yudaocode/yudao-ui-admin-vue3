@@ -32,7 +32,7 @@
           v-if="readMembers.length === 0"
           class="py-5 text-12px text-center text-[var(--el-text-color-disabled)]"
         >
-          暂无已读
+          {{ groupMembers.length === 0 ? '群成员未加载' : '暂无已读' }}
         </div>
       </el-tab-pane>
       <el-tab-pane :label="`未读(${unreadMembers.length})`" name="unread">
@@ -45,7 +45,7 @@
           v-if="unreadMembers.length === 0"
           class="py-5 text-12px text-center text-[var(--el-text-color-disabled)]"
         >
-          全部已读
+          {{ groupMembers.length === 0 ? '群成员未加载' : '全部已读' }}
         </div>
       </el-tab-pane>
     </el-tabs>

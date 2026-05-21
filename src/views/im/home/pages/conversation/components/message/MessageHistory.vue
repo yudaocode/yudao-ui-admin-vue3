@@ -543,9 +543,16 @@ async function loadEarlier() {
   if (loadingMore.value || !hasMore.value || !conversation.value) {
     return
   }
+  // 仅 PRIVATE / GROUP 走分页接口；CHANNEL 单向广播、没有 list 接口，落到 else 会误调私聊接口（receiverId 传 channelId）
+  const requestedType = conversation.value.type
+  if (
+    requestedType !== ImConversationType.PRIVATE &&
+    requestedType !== ImConversationType.GROUP
+  ) {
+    return
+  }
   // 快照当前会话主键：await 期间用户切走 / 关闭面板时丢弃响应，避免旧会话历史被 prepend 到新会话造成串号
   const requestedKey = getConversationKey(conversation.value)
-  const requestedType = conversation.value.type
   const requestedTargetId = conversation.value.targetId
   const requestedIsGroup = requestedType === ImConversationType.GROUP
 
@@ -609,6 +616,10 @@ function onDialogOpen() {
   memberPopoverVisible.value = false
   memberSearchKeyword.value = ''
   datePickerValue.value = new Date()
+  // 本地无消息时立即拉一次（maxId=undefined 从最新开始），避免新设备 / 缓存清后弹窗只显示"暂无消息"
+  if (allMessages.value.length === 0 && hasMore.value && conversation.value) {
+    void loadEarlier()
+  }
 }
 
 /** 抽屉关闭时复位 + 停语音 */

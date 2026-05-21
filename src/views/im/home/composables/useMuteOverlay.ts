@@ -1,4 +1,4 @@
-import { computed, type ComputedRef } from 'vue'
+import { computed, onScopeDispose, ref, type ComputedRef } from 'vue'
 
 import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../store/conversationStore'
@@ -6,6 +6,35 @@ import { useGroupStore } from '../store/groupStore'
 import { ImConversationType, ImGroupMemberRole } from '../../utils/constants'
 
 export type MuteOverlayInfo = { text: string; icon: string }
+
+/**
+ * 模块级共享 now tick + 订阅计数：
+ * MessageItem v-for 时每条消息都会 useMuteOverlay()，单实例自起 timer 会变成几百个 30s 定时器；
+ * 改成模块级共享后所有订阅者共用一份 setInterval，订阅数清零时也清掉 timer，避免内存与时钟漂移
+ */
+const sharedNow = ref(Date.now())
+let sharedTickTimer: ReturnType<typeof setInterval> | null = null
+let subscriberCount = 0
+
+function subscribeNowTick(): void {
+  subscriberCount++
+  if (!sharedTickTimer) {
+    sharedTickTimer = window.setInterval(() => {
+      sharedNow.value = Date.now()
+    }, 30_000)
+  }
+}
+
+function unsubscribeNowTick(): void {
+  subscriberCount--
+  if (subscriberCount <= 0) {
+    subscriberCount = 0
+    if (sharedTickTimer) {
+      window.clearInterval(sharedTickTimer)
+      sharedTickTimer = null
+    }
+  }
+}
 
 /**
  * 当前激活会话的禁言 / 封禁状态；非群聊或无禁言时返回 null
@@ -19,6 +48,11 @@ export function useMuteOverlay(): ComputedRef<MuteOverlayInfo | null> {
   const conversationStore = useConversationStore()
   const groupStore = useGroupStore()
   const userStore = useUserStore()
+
+  // 订阅模块级 tick；scope 销毁时反订阅，最后一个订阅者退场后 timer 也跟着清
+  subscribeNowTick()
+  onScopeDispose(unsubscribeNowTick)
+
   return computed(() => {
     const conversation = conversationStore.activeConversation
     if (!conversation || conversation.type !== ImConversationType.GROUP) {
@@ -43,11 +77,11 @@ export function useMuteOverlay(): ComputedRef<MuteOverlayInfo | null> {
         return { text: '全群禁言中，暂时无法发送消息', icon: 'ant-design:audio-muted-outlined' }
       }
     }
-    // 成员禁言：muteEndTime 在未来才算
+    // 成员禁言：muteEndTime 在未来才算；用响应式 sharedNow 比对，到期后下一个 tick 就让 overlay 消失
     const myMember = group.members?.find((m) => m.userId === myId)
     if (myMember?.muteEndTime) {
       const endTime = new Date(myMember.muteEndTime)
-      if (endTime > new Date()) {
+      if (endTime.getTime() > sharedNow.value) {
         const pad = (n: number) => n.toString().padStart(2, '0')
         const timeStr =
           `${pad(endTime.getMonth() + 1)}-${pad(endTime.getDate())} ` +
