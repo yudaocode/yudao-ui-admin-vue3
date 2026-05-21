@@ -138,6 +138,9 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     /**
      * 连接 WebSocket
      * 复用 yudao 内置 /infra/ws 通道，后端通过 sendObject(type, content) 下发
+     *
+     * 调用契约：切账号 / token 刷新前必须先 `disconnect()` 再 `connect()`；
+     * 本方法不感知 token 变化，旧 socket 在 CONNECTING / OPEN 状态会直接复用旧 token，可能拿到错误身份
      */
     connect() {
       // 鉴权用 refreshToken（生命周期更长；access token 过期后服务端会通过 frame 通知重登）
@@ -145,6 +148,23 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!refreshToken) {
         console.warn('[IM WS] refreshToken 为空，跳过连接')
         return
+      }
+      // 旧 socket 还在 CONNECTING / OPEN 直接复用，避免叠加多份 onmessage 监听导致重复消息 / 提示音 / 已读上报
+      const existingSocket = this.socket
+      if (
+        existingSocket &&
+        (existingSocket.readyState === WebSocket.OPEN ||
+          existingSocket.readyState === WebSocket.CONNECTING)
+      ) {
+        return
+      }
+      // 旧 socket 已 CLOSING / CLOSED：解绑回调 + 清引用再 new，避免老 handler 仍持有 store 引用阻碍 GC
+      if (existingSocket) {
+        existingSocket.onopen = null
+        existingSocket.onmessage = null
+        existingSocket.onerror = null
+        existingSocket.onclose = null
+        this.socket = null
       }
       const url = `${this.buildWsUrl()}/infra/ws?token=${refreshToken}`
       this.socket = new WebSocket(url)
@@ -752,7 +772,9 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     disconnect() {
       if (this.socket) {
         // close() 异步触发 onclose / onerror，回调里会无条件 reconnect；
-        // 主动关闭路径必须先解绑这两个 handler，否则 3 秒后会自动连回去
+        // 主动关闭路径必须先全部解绑，否则 onclose 会引发自动重连，CONNECTING 期间的 in-flight message 也可能被老 onmessage 投递到 stale 上下文
+        this.socket.onopen = null
+        this.socket.onmessage = null
         this.socket.onclose = null
         this.socket.onerror = null
         this.socket.close()
