@@ -34,7 +34,7 @@ const formLoading = ref(false) // 提交的加载中
 const formData = reactive({ id: 0, groupName: '', reason: '' }) // 封禁表单
 const formRef = ref() // 表单 Ref
 const formRules = {
-  reason: [{ required: true, message: '封禁原因不能为空', trigger: 'blur' }]
+  reason: [{ required: true, whitespace: true, message: '封禁原因不能为空', trigger: 'blur' }]
 }
 
 /** 打开弹窗 */

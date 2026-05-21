@@ -939,9 +939,9 @@ async function handleRecall() {
  * 失败消息点击重试
  *
  * - 媒体消息（image / file / voice / video）：_localFile 在内存就重走 uploadAndSendMedia（重新上传 + 占位 + 进度）
- * - 文本消息：移除 FAILED 占位 + 用原 content 走一遍 sendRaw 新建占位
+ * - 文本消息：复用原 clientMessageId + status 回滚到 SENDING，走 existingClientMessageId 路径让服务端按 cmid 幂等
  *
- * 媒体类型若 _localFile 已丢（理论上 IDB 恢复阶段就被 drop，进不到这里；保险起见仍走文本兜底）则按 sendRaw 重发，
+ * 媒体类型若 _localFile 已丢（理论上 IDB 恢复阶段就被 drop，进不到这里；保险起见仍走文本兜底）则按文本路径重发，
  * 后端拒绝失效 blob URL 时再次 FAILED，用户可右键删除
  *
  * 不还原原 receipt：群回执是发送时的扩展选项、不会持久化到 message，强行猜测可能与原意不符；
@@ -983,13 +983,13 @@ async function handleResend() {
     }
   }
 
-  // 文本类型 / 媒体类型但 _localFile 已丢：原 content 走 sendRaw 重发
-  conversationStore.removeMessage(conversation.type, conversation.targetId, {
-    id: message.id,
-    clientMessageId: message.clientMessageId
+  // 文本类型 / 媒体类型但 _localFile 已丢：把 FAILED 占位回滚到 SENDING，复用 clientMessageId 让服务端按 cmid 幂等去重
+  conversationStore.patchMessage(conversation.type, conversation.targetId, message.clientMessageId, {
+    status: ImMessageStatus.SENDING
   })
   await sendRaw(message.type, message.content, {
-    atUserIds: message.atUserIds
+    atUserIds: message.atUserIds,
+    existingClientMessageId: message.clientMessageId
   })
 }
 

@@ -54,7 +54,7 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({
-  word: [{ required: true, message: '敏感词不能为空', trigger: 'blur' }],
+  word: [{ required: true, whitespace: true, message: '敏感词不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref

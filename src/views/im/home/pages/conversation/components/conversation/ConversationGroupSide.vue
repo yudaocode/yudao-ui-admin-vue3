@@ -539,12 +539,17 @@ watch(visible, (v) => {
   }
 })
 
-/** 群主：保存群名（走 /im/group/update） */
+/** 群主：保存群名（走 /im/group/update）；trim 后空字符串拒提交，与 saveGroupRemark 行为对齐 */
 async function saveName() {
   if (!props.group) {
     return
   }
-  await updateGroup({ id: props.group.id, name: editName.value })
+  const trimmed = editName.value.trim()
+  if (!trimmed) {
+    message.warning('群名称不能为空')
+    return
+  }
+  await updateGroup({ id: props.group.id, name: trimmed })
   namePopoverVisible.value = false
   message.success('保存成功')
   emit('reload')

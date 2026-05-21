@@ -657,11 +657,17 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (!conversation) {
         return
       }
-      const message = conversation.messages.find((item) => item.clientMessageId === clientMessageId)
-      if (!message) {
+      const messageIndex = conversation.messages.findIndex(
+        (item) => item.clientMessageId === clientMessageId
+      )
+      if (messageIndex < 0) {
         return
       }
-      applyServerMessageUpdate(message, updates)
+      applyServerMessageUpdate(conversation.messages[messageIndex], updates)
+      // ack 命中末尾消息时按服务端 sendTime / content 重算会话摘要，让会话列表跟着权威值排序
+      if (messageIndex === conversation.messages.length - 1) {
+        recomputeConversationLast(conversation)
+      }
       if (updates.id) {
         this.updateMaxId(conversationType, updates.id)
       }

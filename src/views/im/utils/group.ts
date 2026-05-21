@@ -10,7 +10,8 @@ export function buildDefaultGroupName(members: FriendLite[]): string {
   const names = members.slice(0, 4).map((m) => m.displayName || m.nickname || '')
   const head = names.filter(Boolean).join('、')
   if (members.length > 4) {
-    return `${head}等${members.length}人`
+    // members 只含被选好友，+1 把创建者也计入实际成员数
+    return `${head}等${members.length + 1}人`
   }
   return head || '群聊'
 }
