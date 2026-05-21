@@ -58,6 +58,23 @@ export const FRIEND_REQUEST_PAGE_SIZE = 100
 /** 「我相关」加群申请列表的单次拉取条数 */
 export const GROUP_REQUEST_PAGE_SIZE = 100
 
+// ==================== 上传安全策略 ====================
+// 数值与后端 Spring multipart 配置对齐（`spring.servlet.multipart.max-file-size = 16MB`）
+// 后端调大后这里同步调；不要单边放宽，否则用户上传完到后端 413
+
+/** 图片 / 视频 / 普通文件单文件上限（MB），对齐后端 max-file-size */
+export const MESSAGE_IMAGE_MAX_MB = 16
+export const MESSAGE_VIDEO_MAX_MB = 16
+export const MESSAGE_FILE_MAX_MB = 16
+/** 语音单文件上限（MB）：60s @ 64kbps 约 0.5MB，5MB 已远超录制可能产出的大小 */
+export const MESSAGE_VOICE_MAX_MB = 5
+
+/** 可执行 / 脚本类扩展名黑名单；接收端点击下载后本地双击就跑，html 本地打开还能执行脚本 */
+export const DANGEROUS_FILE_EXTENSIONS = [
+  'exe', 'bat', 'cmd', 'com', 'msi', 'scr', 'pif', 'vbs', 'vbe', 'wsf', 'ws',
+  'js', 'jse', 'jar', 'sh', 'app', 'ps1', 'reg', 'html', 'htm'
+]
+
 // ==================== 前端独有：UI 阈值 ====================
 
 /** 消息之间渲染「时间分隔条」的阈值：10 分钟 */

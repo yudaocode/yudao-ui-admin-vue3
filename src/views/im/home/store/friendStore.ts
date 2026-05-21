@@ -34,6 +34,9 @@ let pendingFetchRequests: Promise<void> | null = null
 /** 当前正在进行的「加载更多申请」请求 */
 let pendingLoadMoreRequests: Promise<void> | null = null
 
+/** clear() 时递增；旧账号那次还没返回的请求 resolve 后比对一致才写 store，防跨账号数据泄漏 */
+let storeEpoch = 0
+
 /** 好友通知 payload（对齐后端 BaseFriendNotification + 子类裁减后的字段） */
 export interface FriendNotificationPayload {
   operatorUserId: number
@@ -160,8 +163,13 @@ export const useFriendStore = defineStore('imFriendStore', {
       if (pendingFetchFriends) {
         return pendingFetchFriends
       }
+      // 快照 epoch；clear() 之后到 .then 之间触发的 epoch++ 表示账号已切，旧结果不能写入新 store
+      const requestEpoch = storeEpoch
       pendingFetchFriends = apiGetMyFriendList()
         .then((list) => {
+          if (requestEpoch !== storeEpoch) {
+            return
+          }
           this.friends = (list || []).map(convertFriend)
           this.loaded = true
           const conversationStore = useConversationStore()
@@ -178,7 +186,9 @@ export const useFriendStore = defineStore('imFriendStore', {
           this.saveFriends()
         })
         .finally(() => {
-          pendingFetchFriends = null
+          if (requestEpoch === storeEpoch) {
+            pendingFetchFriends = null
+          }
         })
       return pendingFetchFriends
     },
@@ -238,15 +248,21 @@ export const useFriendStore = defineStore('imFriendStore', {
       if (pendingFetchRequests) {
         return pendingFetchRequests
       }
+      const requestEpoch = storeEpoch
       pendingFetchRequests = apiGetMyFriendRequestList(FRIEND_REQUEST_PAGE_SIZE)
         .then((list) => {
+          if (requestEpoch !== storeEpoch) {
+            return
+          }
           const items = (list || []).map(convertFriendRequest)
           this.friendRequests = items
           // 不足一页即没有更多；满页可能还有，等 loadMore 拉到 0 条再确定
           this.hasMoreFriendRequests = items.length >= FRIEND_REQUEST_PAGE_SIZE
         })
         .finally(() => {
-          pendingFetchRequests = null
+          if (requestEpoch === storeEpoch) {
+            pendingFetchRequests = null
+          }
         })
       return pendingFetchRequests
     },
@@ -260,14 +276,20 @@ export const useFriendStore = defineStore('imFriendStore', {
       if (!oldest) {
         return this.fetchFriendRequests()
       }
+      const requestEpoch = storeEpoch
       pendingLoadMoreRequests = apiGetMyFriendRequestList(FRIEND_REQUEST_PAGE_SIZE, oldest.id)
         .then((list) => {
+          if (requestEpoch !== storeEpoch) {
+            return
+          }
           const items = (list || []).map(convertFriendRequest)
           this.friendRequests.push(...items)
           this.hasMoreFriendRequests = items.length >= FRIEND_REQUEST_PAGE_SIZE
         })
         .finally(() => {
-          pendingLoadMoreRequests = null
+          if (requestEpoch === storeEpoch) {
+            pendingLoadMoreRequests = null
+          }
         })
       return pendingLoadMoreRequests
     },
@@ -508,12 +530,16 @@ export const useFriendStore = defineStore('imFriendStore', {
       this.saveFriends()
     },
 
-    /** 切账号时仅清 in-memory，IDB 按 userId 分桶天然隔离，回切秒开 */
+    /** 清空好友内存状态，并废弃未返回请求（pending Promise 置空 + storeEpoch++） */
     clear() {
       this.friends = []
       this.friendRequests = []
       this.loaded = false
       this.hasMoreFriendRequests = true
+      pendingFetchFriends = null
+      pendingFetchRequests = null
+      pendingLoadMoreRequests = null
+      storeEpoch++
     }
   }
 })

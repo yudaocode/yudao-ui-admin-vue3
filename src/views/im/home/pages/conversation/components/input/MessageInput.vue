@@ -148,7 +148,7 @@
       :position="mentionPosition"
       :members="groupMembers"
       :search-text="mentionSearchText"
-      :owner-id="groupOwnerId"
+      :can-at-all="canAtAll"
       @select="onMentionSelect"
     />
 
@@ -169,12 +169,14 @@ import { useGroupStore } from '@/views/im/home/store/groupStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useDraftStore } from '@/views/im/home/store/draftStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
+import { useMessage } from '@/hooks/web/useMessage'
+import { useUserStore } from '@/store/modules/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
-import { useMediaUploader } from '@/views/im/home/composables/useMediaUploader'
+import { ensureMediaSizeWithinLimit, useMediaUploader } from '@/views/im/home/composables/useMediaUploader'
 import { useMuteOverlay } from '@/views/im/home/composables/useMuteOverlay'
 import { getConversationKey } from '@/views/im/utils/conversation'
-import { ImConversationType, ImMessageType } from '@/views/im/utils/constants'
-import { MESSAGE_GROUP_READ_ENABLED } from '@/views/im/utils/config'
+import { ImConversationType, ImGroupMemberRole, ImMessageType } from '@/views/im/utils/constants'
+import { DANGEROUS_FILE_EXTENSIONS, MESSAGE_GROUP_READ_ENABLED } from '@/views/im/utils/config'
 import {
   serializeMessage,
   type FaceMessage,
@@ -195,6 +197,8 @@ const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const draftStore = useDraftStore()
+const userStore = useUserStore()
+const message = useMessage()
 const { send, sendRaw } = useMessageSender()
 const {
   uploadAndSendMedia,
@@ -634,12 +638,24 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
   })
 })
 
-const groupOwnerId = computed<number | undefined>(() => {
+/** 当前用户是否能 @ 全员；群主 + 管理员都允许（对齐微信 PC：admin 也能 @ 所有人） */
+const canAtAll = computed<boolean>(() => {
   const conversation = conversationStore.activeConversation
   if (!conversation || conversation.type !== ImConversationType.GROUP) {
-    return undefined
+    return false
   }
-  return groupStore.getGroup(conversation.targetId)?.ownerUserId
+  const group = groupStore.getGroup(conversation.targetId)
+  if (!group) {
+    return false
+  }
+  const myId = Number(userStore.getUser?.id) || 0
+  if (!myId) {
+    return false
+  }
+  if (group.ownerUserId === myId) {
+    return true
+  }
+  return group.members?.find((member) => member.userId === myId)?.role === ImGroupMemberRole.ADMIN
 })
 
 const mentionVisible = ref(false)
@@ -849,6 +865,12 @@ async function uploadAndSendImage(file: File) {
 
 /** 上传并发送 FILE 消息；payload 由 mediaTypeHandlers[FILE] 自动拼 url + name + size */
 async function uploadAndSendFile(file: File) {
+  // 文件名取最后一个 "." 之后的部分；无后缀 / 空字符串都按"未知"放行
+  const extension = file.name.split('.').pop()?.toLowerCase() ?? ''
+  if (extension && DANGEROUS_FILE_EXTENSIONS.includes(extension)) {
+    message.warning(`不允许发送 .${extension} 类型文件`)
+    return
+  }
   const context = prepareMediaUpload()
   if (!context) {
     return
@@ -1007,6 +1029,9 @@ async function probeVideoFile(file: File): Promise<VideoProbe> {
  * 4. 视频链路耗时长，上传期间用户切会话则放弃发送（避免落到错误会话里）；切走再切回来不算变化（key 仍相等）
  */
 async function uploadAndSendVideo(file: File) {
+  if (!ensureMediaSizeWithinLimit(file, ImMessageType.VIDEO, message.warning)) {
+    return
+  }
   const context = prepareMediaUpload()
   if (!context) {
     return

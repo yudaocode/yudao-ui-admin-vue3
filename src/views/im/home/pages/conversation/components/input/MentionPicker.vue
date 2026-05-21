@@ -79,7 +79,7 @@ const props = withDefaults(
     position: { x: number; top?: number; bottom?: number }
     members: GroupMemberLite[] // 当前群的成员列表
     searchText?: string // @ 后输入的过滤文本
-    ownerId?: number // 群主 id，判断是否能展示"所有人"
+    canAtAll?: boolean // 当前用户是否能 @ 全员（群主 / 管理员），父组件按角色算好传入
   }>(),
   {
     searchText: '',
@@ -99,19 +99,14 @@ const activeIdx = ref(0)
 /** 当前登录用户 id（成员列表过滤掉自己） */
 const selfUserId = computed(() => Number(userStore.getUser?.id) || 0)
 
-/** 是否群主（只有群主能 @ 所有人，对齐微信） */
-const isOwner = computed(() => {
-  return props.ownerId != null && props.ownerId === selfUserId.value
-})
-
 /**
- * 虚拟"所有人"项：群主 + 关键字命中"所有人"前缀时存在
+ * 虚拟"所有人"项：群主 / 管理员（canAtAll=true）+ 关键字命中"所有人"前缀时存在
  *
  * MessageInput 走 token data-id 收集 atUserIds，不依赖文案字符串；
  * 这里的 userId / 文案都从 im/utils/constants 取，避免散落
  */
 const allItem = computed<GroupMemberLite | null>(() => {
-  if (!isOwner.value) {
+  if (!props.canAtAll) {
     return null
   }
   if (!IM_AT_ALL_NICKNAME.startsWith(props.searchText)) {

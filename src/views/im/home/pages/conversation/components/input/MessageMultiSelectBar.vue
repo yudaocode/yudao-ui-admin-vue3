@@ -52,7 +52,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useMessageMultiSelect } from '@/views/im/home/composables/useMessageMultiSelect'
-import { ImForwardMode } from '@/views/im/utils/constants'
+import { ImForwardMode, isNormalMessage } from '@/views/im/utils/constants'
 import type { Message } from '@/views/im/home/types'
 import { IM_FORWARD_DIALOG_KEY } from '../message/forward/keys'
 
@@ -66,14 +66,16 @@ const multiSelect = useMessageMultiSelect()
 /** 选中条数 */
 const selectedCount = computed(() => multiSelect.state.selectedClientMessageIds.length)
 
-/** 当前会话内已选消息；conversation.messages 已按 sendTime 升序，filter 保序无需再 sort */
+/** 当前会话内已选消息；conversation.messages 已按 sendTime 升序，filter 保序无需再 sort；isNormalMessage 过滤掉 RECALL / 系统事件，与 MessageItem.canForward 对齐 */
 function getSelectedMessages(): Message[] {
   const conversation = conversationStore.activeConversation
   if (!conversation) {
     return []
   }
   const ids = multiSelect.selectedIdSet.value
-  return conversation.messages.filter((m) => ids.has(m.clientMessageId))
+  return conversation.messages.filter(
+    (message) => ids.has(message.clientMessageId) && isNormalMessage(message.type)
+  )
 }
 
 /** 逐条转发：开 ForwardDialog 单条模式 */

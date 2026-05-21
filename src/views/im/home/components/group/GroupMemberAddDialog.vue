@@ -39,6 +39,7 @@ import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { useUserStore } from '@/store/modules/user'
 import { ImGroupMemberRole } from '@/views/im/utils/constants'
+import { GROUP_MAX_MEMBER } from '@/views/im/utils/config'
 import FriendPickerPanel from '../picker/FriendPickerPanel.vue'
 import type { GroupMemberLite } from './GroupMember.vue'
 
@@ -114,8 +115,18 @@ const willGoApproval = computed(() => {
   return myRole !== ImGroupMemberRole.ADMIN
 })
 
-/** 添加按钮可点：至少有 1 个新邀请的好友 */
-const canSubmit = computed(() => selectedIds.value.length > 0)
+/** 当前群已启用成员数（DISABLE 即退群 / 被踢不计入），用于上限判定 */
+const activeMemberCount = computed(
+  () => members.value.filter((member) => member.status !== CommonStatusEnum.DISABLE).length
+)
+
+/** 邀请后群总人数若超 GROUP_MAX_MEMBER，前端先拦；activeMemberCount + selectedIds.length 即邀请后的成员数 */
+const willExceedLimit = computed(
+  () => activeMemberCount.value + selectedIds.value.length > GROUP_MAX_MEMBER
+)
+
+/** 添加按钮可点：至少有 1 个新邀请的好友 + 不超群人数上限 */
+const canSubmit = computed(() => selectedIds.value.length > 0 && !willExceedLimit.value)
 
 /** 邀请入群：调 /im/group/invite，成功后 emit reload 让父侧刷新群成员 */
 async function handleOk() {
@@ -124,6 +135,11 @@ async function handleOk() {
   }
   const memberUserIds = [...selectedIds.value]
   if (memberUserIds.length === 0) {
+    return
+  }
+  // 群人数上限冗余防御：与 canSubmit 重复判一次，防止状态在 await 间隙变化或调用方绕过按钮直接调
+  if (activeMemberCount.value + memberUserIds.length > GROUP_MAX_MEMBER) {
+    message.warning(`群成员上限为 ${GROUP_MAX_MEMBER} 人`)
     return
   }
   submitting.value = true
