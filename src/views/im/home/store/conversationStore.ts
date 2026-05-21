@@ -14,7 +14,7 @@ import {
 import { CONVERSATION_RECENT_FORWARD_MAX } from '../../utils/config'
 import { getCurrentUserId, imStorage, removeQuietly, StorageKeys } from '../../utils/storage'
 import { parseRecallMessageId, revokeBlobUrlsInContent } from '../../utils/message'
-import { resolveConversationLastContent } from '../../utils/conversation'
+import { getConversationKey, resolveConversationLastContent } from '../../utils/conversation'
 import { tryGetSenderDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import { useDraftStore } from './draftStore'
@@ -148,6 +148,7 @@ export const useConversationStore = defineStore('imConversationStore', {
   state: () => ({
     conversations: [] as Conversation[], // 全量会话列表（私聊 + 群聊）
     activeConversation: null as Conversation | null, // 当前激活的会话
+    loadedUserId: null as number | null, // 当前内存里这份 conversations 属于哪个用户；切账号时同 key 的 active 不再被误恢复
     privateMessageMaxId: 0, // 私聊最大消息 id，作为 pull 的游标
     groupMessageMaxId: 0, // 群聊最大消息 id，作为 pull 的游标
     channelMessageMaxId: 0, // 频道最大消息 id，作为 pull 的游标
@@ -204,18 +205,29 @@ export const useConversationStore = defineStore('imConversationStore', {
     async loadConversations() {
       const userId = getCurrentUserId()
       if (!userId) {
+        // 未登录场景也清一下，避免上次登录残留的 conversations / 游标继续在内存中生效
+        this.clear()
         return
       }
+      // 加载前快照旧账号身份 + 旧 active 主键：仅同账号才恢复 active，跨账号即便新列表有同 key 也不误激活
+      const previousLoadedUserId = this.loadedUserId
+      const previousActiveKey = this.activeConversation
+        ? getConversationKey(this.activeConversation)
+        : null
+      // 立刻清空内存：无 meta / 空会话列表 / 异常分支都会沿用清空后的干净状态，避免旧账号 conversations + 游标继续生效
+      this.clear()
       try {
         // 顺手把最近转发列表也恢复出来；和 meta 并发读
         const [meta, recent] = await Promise.all([
           imStorage.getItem<ConversationStoreMeta>(StorageKeys.conversationMeta(userId)),
           imStorage.getItem<string[]>(StorageKeys.recentForwardConversationKeys(userId))
         ])
-        // 缺数据时显式赋空，避免切账号后沿用上一个用户的内存列表
-        this.recentForwardConversationKeys = Array.isArray(recent)
-          ? recent.slice(0, CONVERSATION_RECENT_FORWARD_MAX)
-          : []
+        // recent 失效保持开头 reset 给的 []；有值才覆盖
+        if (Array.isArray(recent)) {
+          this.recentForwardConversationKeys = recent.slice(0, CONVERSATION_RECENT_FORWARD_MAX)
+        }
+        // 标记本次加载到内存里的是哪个用户的数据；放在所有早返回路径之前，让 "无 meta / 空会话" 也能在同账号 re-enter 时识别
+        this.loadedUserId = userId
         if (!meta) {
           return
         }
@@ -265,9 +277,29 @@ export const useConversationStore = defineStore('imConversationStore', {
           }
         })
         this.conversations = await Promise.all(tasks)
+        // 重绑 active：同账号 + 旧 key 仍存在才恢复；跨账号即便有同 key 也不误激活。显式 ?? null 避免依赖 clear() 的隐式链
+        if (previousLoadedUserId === userId && previousActiveKey) {
+          this.activeConversation =
+            this.conversations.find(
+              (c) => !c.deleted && getConversationKey(c) === previousActiveKey
+            ) ?? null
+        }
       } catch (e) {
         console.error('[IM] 本地消息缓存读取失败', e)
+        // 加载中途异常：避免半成品（maxId 已写但 conversations 未填）让 pullOnce 用错游标漏拉
+        this.clear()
       }
+    },
+
+    /** loadConversations 开头 + 中途失败统一兜底；切账号 / 异常时让旧会话 + 游标不残留。命名与 friendStore.clear / groupStore.clear 对齐 */
+    clear() {
+      this.conversations = []
+      this.activeConversation = null
+      this.loadedUserId = null
+      this.privateMessageMaxId = 0
+      this.groupMessageMaxId = 0
+      this.channelMessageMaxId = 0
+      this.recentForwardConversationKeys = []
     },
 
     /**
