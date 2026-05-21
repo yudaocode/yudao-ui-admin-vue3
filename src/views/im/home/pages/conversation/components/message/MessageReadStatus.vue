@@ -23,7 +23,7 @@
 
     <el-tabs v-model="activeTab" stretch>
       <el-tab-pane :label="`已读(${readMembers.length})`" name="read">
-        <PagedScroller :items="readMembers" :page-size="20" class="h-75">
+        <PagedScroller :items="readMembers" :page-size="20" item-key="userId" class="h-75">
           <template #default="{ item }">
             <GroupMember :member="item as GroupMemberLite" :height="40" :clickable="false" />
           </template>
@@ -36,7 +36,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane :label="`未读(${unreadMembers.length})`" name="unread">
-        <PagedScroller :items="unreadMembers" :page-size="20" class="h-75">
+        <PagedScroller :items="unreadMembers" :page-size="20" item-key="userId" class="h-75">
           <template #default="{ item }">
             <GroupMember :member="item as GroupMemberLite" :height="40" :clickable="false" />
           </template>

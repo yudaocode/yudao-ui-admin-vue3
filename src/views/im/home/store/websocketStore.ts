@@ -14,7 +14,11 @@ import {
   isGroupRequestNotification,
   isNormalMessage
 } from '../../utils/constants'
-import { playAudioTip, resolveCallEndReasonText } from '../../utils/message'
+import {
+  getPrivateMessagePeerId,
+  playAudioTip,
+  resolveCallEndReasonText
+} from '../../utils/message'
 import { MESSAGE_PRIVATE_READ_ENABLED, MESSAGE_GROUP_READ_ENABLED } from '../../utils/config'
 import { useConversationStore } from './conversationStore'
 import { useFriendStore, type FriendNotificationPayload } from './friendStore'
@@ -54,7 +58,7 @@ const isFriendDeleteWithClear = (frame: ImPrivateMessageDTO): boolean => {
 }
 
 /**
- * WebSocket 私聊 DTO -> 前端 Message
+ * WebSocket 私聊 DTO -> 前端 Message；targetId 是会话主键（对端 userId）
  * 不写发送人名字段：渲染层走 utils/user 实时算（备注 / 群昵称变更后历史消息自动刷新）
  */
 const convertPrivateMessage = (
@@ -68,7 +72,7 @@ const convertPrivateMessage = (
   status: websocketMessage.status,
   sendTime: new Date(websocketMessage.sendTime).getTime(),
   senderId: websocketMessage.senderId,
-  targetId: websocketMessage.receiverId,
+  targetId: getPrivateMessagePeerId(websocketMessage, currentUserId),
   selfSend: websocketMessage.senderId === currentUserId
 })
 
@@ -442,7 +446,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const friendStore = useFriendStore()
       const currentUserId = Number(userStore.getUser?.id) || 0
       const selfSend = websocketMessage.senderId === currentUserId
-      const peerId = selfSend ? websocketMessage.receiverId : websocketMessage.senderId
+      const peerId = getPrivateMessagePeerId(websocketMessage, currentUserId)
       // 未知对端（陌生人加好友前先收到消息等场景）：异步补拉一次，下次再渲染就有 name/avatar
       const friend = friendStore.getFriend(peerId)
       if (!friend) {
@@ -640,7 +644,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     computeFriendPeerId(frame: ImPrivateMessageDTO): number {
       const userStore = useUserStore()
       const currentUserId = Number(userStore.getUser?.id) || 0
-      return frame.senderId === currentUserId ? frame.receiverId : frame.senderId
+      return getPrivateMessagePeerId(frame, currentUserId)
     },
 
     /**

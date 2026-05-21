@@ -83,7 +83,7 @@ export interface Message {
   // ========== 前端扩展字段 ==========
   // 发送人显示名一律渲染时实时算：utils/user.getSenderDisplayName / getSenderRealNickname
   // 不在 Message 上存任何名字快照，避免备注 / 群昵称变更后历史消息显示陈旧
-  targetId: number // 会话目标编号（私聊=receiverId / 群聊=groupId），与 Conversation.targetId 一致
+  targetId: number // 会话目标编号（私聊=对端 userId / 群聊=groupId），与 Conversation.targetId 一致
   selfSend: boolean // 是否自己发送（前端按 senderId 计算）
   uploadProgress?: number // 媒体消息上传进度（0-100）；status=SENDING 期间持续更新；ack 后置 undefined
   // 媒体消息内存中保留的原始 File；下划线前缀表示不进 JSON / 不持久化（IDB 恢复后必为 undefined）

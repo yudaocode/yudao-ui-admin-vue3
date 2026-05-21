@@ -5,7 +5,12 @@
     - 通过 slot 暴露每一项，让调用方自己决定渲染
   -->
   <el-scrollbar ref="scrollbarRef" class="w-full h-full">
-    <slot v-for="(item, idx) in displayItems" :item="item" :index="idx" :key="idx"></slot>
+    <slot
+      v-for="(item, idx) in displayItems"
+      :item="item"
+      :index="idx"
+      :key="resolveItemKey(item, idx)"
+    ></slot>
     <div
       v-if="showFooter"
       class="py-3 text-xs text-center text-[var(--el-text-color-secondary)]"
@@ -26,12 +31,22 @@ const props = withDefaults(
     items: T[] // 全量数据
     pageSize?: number // 每页渲染条数
     threshold?: number // 距底多少 px 触发下一页
+    itemKey?: string // 业务 id 字段名（如 'userId' / 'id'）；不传 / 字段值非 string|number 时回退 idx
   }>(),
   {
     pageSize: 30,
     threshold: 30
   }
 )
+
+/** 解析每条 item 的 :key：caller 传 itemKey 则按字段取，无效 / 缺失回退索引，避免传错字段时全表 undefined key */
+function resolveItemKey(item: T, idx: number): string | number {
+  if (!props.itemKey || item == null || typeof item !== 'object') {
+    return idx
+  }
+  const value = (item as Record<string, unknown>)[props.itemKey]
+  return typeof value === 'string' || typeof value === 'number' ? value : idx
+}
 
 const scrollbarRef = useTemplateRef<InstanceType<typeof ElScrollbar>>('scrollbarRef')
 const page = ref(1)

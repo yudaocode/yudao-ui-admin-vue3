@@ -21,7 +21,7 @@
       </div>
 
       <div class="flex-1 min-h-0">
-        <PagedScroller :items="shownMembers" :page-size="30">
+        <PagedScroller :items="shownMembers" :page-size="30" item-key="userId">
           <template #default="{ item }">
             <GroupMemberItem
               :member="(item as GroupMemberLite)"

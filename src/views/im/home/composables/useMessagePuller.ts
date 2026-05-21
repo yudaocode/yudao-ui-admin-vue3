@@ -31,6 +31,7 @@ import {
 } from '../../utils/config'
 import { useUserStore } from '@/store/modules/user'
 import { buildChannelConversationStub } from '../../utils/channel'
+import { getPrivateMessagePeerId } from '../../utils/message'
 import type { Message } from '../types'
 
 /**
@@ -52,11 +53,11 @@ export const useMessagePuller = () => {
   const groupStore = useGroupStore()
   const currentUserId = Number(userStore.getUser?.id) || 0
 
-  /** 私聊会话归属：自己发的算"发给 receiverId 的会话"，否则算"发送方的会话" */
+  /** 私聊会话归属：自己发的算"发给 receiverId 的会话"，否则算"发送方的会话"；curry currentUserId 进闭包减少 3 处调用方的样板 */
   const getPrivatePeerId = (message: ImPrivateMessageRespVO) =>
-    message.senderId === currentUserId ? message.receiverId : message.senderId
+    getPrivateMessagePeerId(message, currentUserId)
 
-  /** 服务端私聊消息 -> 本地 Message */
+  /** 服务端私聊消息 -> 本地 Message：targetId 是会话主键（对端 userId） */
   const convertPrivateMessage = (message: ImPrivateMessageRespVO): Message => {
     return {
       id: message.id,
@@ -66,7 +67,7 @@ export const useMessagePuller = () => {
       status: message.status,
       sendTime: new Date(message.sendTime).getTime(),
       senderId: message.senderId,
-      targetId: message.receiverId,
+      targetId: getPrivatePeerId(message),
       selfSend: message.senderId === currentUserId
     }
   }

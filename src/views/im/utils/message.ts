@@ -28,6 +28,21 @@ export const generateClientMessageId = (): string => {
   return generateUUID()
 }
 
+// ==================== 私聊对端 userId ====================
+
+/**
+ * 私聊消息 / DTO 的对端 userId：自己发的对端是 receiver，别人发的对端是 sender
+ *
+ * 收口 4 处旧 inline（websocketStore.convertPrivateMessage / handlePrivateMessage / computeFriendPeerId
+ * 和 useMessagePuller.getPrivatePeerId），结构类型只要 senderId / receiverId 两个字段，REST 与 WS DTO 都满足
+ */
+export function getPrivateMessagePeerId(
+  message: { senderId: number; receiverId: number },
+  currentUserId: number
+): number {
+  return message.senderId === currentUserId ? message.receiverId : message.senderId
+}
+
 // ==================== 文本片段（tip 文案 + TEXT 气泡共用） ====================
 // 既用于灰条 tip（"XX 邀请 YY 加入群聊"），也用于 TEXT 气泡正文（@xxx 高亮 + URL 自动识别）。
 // mention 段携带 userId 用于挂点击弹 UserInfoCard；link 段携带 href 用于 <a> 跳转；
