@@ -503,14 +503,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         return
       }
       const conversationStore = useConversationStore()
-      const conversation = conversationStore.getConversation(
-        ImConversationType.PRIVATE,
-        websocketMessage.receiverId
-      )
-      if (conversation) {
-        conversation.unreadCount = 0
-      }
-      conversationStore.saveConversations()
+      conversationStore.markConversationAsRead(ImConversationType.PRIVATE, websocketMessage.receiverId)
     },
 
     /**
@@ -614,20 +607,13 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
 
     // ==================== 群聊已读 / 回执 ====================
 
-    /** 群聊 READ：自己其它终端在某群里标为已读，本端同步清零该群未读；群已读关闭时兜底忽略 */
+    /** 群聊 READ：自己其它终端在某群里标为已读，本端同步清零该群未读 + @ 红字；群已读关闭时兜底忽略 */
     handleGroupRead(websocketMessage: ImGroupMessageDTO) {
       if (!MESSAGE_GROUP_READ_ENABLED) {
         return
       }
       const conversationStore = useConversationStore()
-      const conversation = conversationStore.getConversation(
-        ImConversationType.GROUP,
-        websocketMessage.groupId
-      )
-      if (conversation) {
-        conversation.unreadCount = 0
-      }
-      conversationStore.saveConversations()
+      conversationStore.markConversationAsRead(ImConversationType.GROUP, websocketMessage.groupId)
     },
 
     /** 群聊 RECEIPT：更新某条群消息的 readCount / receiptStatus；群已读关闭时兜底忽略 */

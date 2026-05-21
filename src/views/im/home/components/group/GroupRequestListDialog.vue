@@ -12,10 +12,7 @@
     :close-on-click-modal="false"
     class="im-group-request-list__dialog"
   >
-    <div
-      v-loading="loading"
-      class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1"
-    >
+    <div v-loading="loading" class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1">
       <!-- 空态 -->
       <el-empty v-if="!loading && list.length === 0" description="暂无进群申请" />
 
@@ -32,10 +29,14 @@
             :clickable="false"
           />
           <div class="flex-1 min-w-0">
-            <div class="truncate text-sm font-medium leading-[1.4] text-[var(--el-text-color-primary)]">
+            <div
+              class="truncate text-sm font-medium leading-[1.4] text-[var(--el-text-color-primary)]"
+            >
               {{ latest.userNickname || `用户 ${latest.userId}` }}
             </div>
-            <div class="truncate mt-[2px] text-12px leading-[1.5] text-[var(--el-text-color-secondary)]">
+            <div
+              class="truncate mt-[2px] text-12px leading-[1.5] text-[var(--el-text-color-secondary)]"
+            >
               <template v-if="latest.inviterUserId">
                 通过
                 <span class="text-[var(--el-color-primary)]">
@@ -113,10 +114,14 @@
             :clickable="false"
           />
           <div class="flex-1 min-w-0">
-            <div class="truncate text-sm font-medium leading-[1.4] text-[var(--el-text-color-primary)]">
+            <div
+              class="truncate text-sm font-medium leading-[1.4] text-[var(--el-text-color-primary)]"
+            >
               {{ item.userNickname || `用户 ${item.userId}` }}
             </div>
-            <div class="truncate mt-[2px] text-12px leading-[1.5] text-[var(--el-text-color-secondary)]">
+            <div
+              class="truncate mt-[2px] text-12px leading-[1.5] text-[var(--el-text-color-secondary)]"
+            >
               <template v-if="item.inviterUserId">
                 通过
                 <span class="text-[var(--el-color-primary)]">
@@ -225,7 +230,10 @@ watch(
     groupId.value && visible.value
       ? groupRequestStore.unhandledList
           .filter((request) => request.groupId === groupId.value)
-          .map((request) => `${request.id}:${request.inviterUserId ?? ''}:${request.applyContent ?? ''}`)
+          .map(
+            (request) =>
+              `${request.id}:${request.inviterUserId ?? ''}:${request.applyContent ?? ''}`
+          )
           .join(',')
       : null,
   (current, previous) => {
@@ -241,12 +249,22 @@ watch(
   }
 )
 
-async function fetchList(groupId: number) {
+let fetchSeq = 0 // 单调递增请求序号；同群也会因为 WS 1503 推送触发额外 fetch，乱序返回时旧响应不能覆盖新数据
+async function fetchList(targetGroupId: number) {
+  const seq = ++fetchSeq
   loading.value = true
   try {
-    groupList.value = (await getGroupRequestListByGroupId(groupId)) || []
+    const data = (await getGroupRequestListByGroupId(targetGroupId)) || []
+    // 期间切群 / 关弹窗 / 又触发更新 fetch：丢响应
+    if (seq !== fetchSeq || !visible.value || groupId.value !== targetGroupId) {
+      return
+    }
+    groupList.value = data
   } finally {
-    loading.value = false
+    // 旧请求 finally 命中时新请求仍在跑，跳过避免提前关 loading
+    if (seq === fetchSeq) {
+      loading.value = false
+    }
   }
 }
 

@@ -140,22 +140,38 @@ const peerUser = computed<User>(() => ({
   avatar: peerAvatar.value
 }))
 
+// 各自的 loading 用于按钮 spinner 显示；processing 是跨按钮互斥锁，避免同意 / 拒绝并发提交同一申请
 const agreeing = ref(false)
 const refusing = ref(false)
+const processing = ref(false)
 
-/** 同意申请 */
+/** 同意申请：互斥锁 + 状态二次校验，避免并发 / 服务端已处理后再次提交 */
 async function handleAgree() {
+  if (processing.value) {
+    return
+  }
+  if (props.request.handleResult !== ImFriendRequestHandleResult.UNHANDLED) {
+    return
+  }
+  processing.value = true
   agreeing.value = true
   try {
     await friendStore.agreeFriendRequest(props.request.id)
     message.success('已同意好友申请')
   } finally {
     agreeing.value = false
+    processing.value = false
   }
 }
 
 /** 拒绝申请：弹 prompt 收集可选拒绝理由（点取消则中止），随后调 store 落库 + 提示 */
 async function handleRefuse() {
+  if (processing.value) {
+    return
+  }
+  if (props.request.handleResult !== ImFriendRequestHandleResult.UNHANDLED) {
+    return
+  }
   // 1. 弹 prompt 收集拒绝理由（最多 255 字）；用户点「取消」会 reject，中止后续流程
   let handleContent: string | undefined
   try {
@@ -171,13 +187,21 @@ async function handleRefuse() {
   } catch {
     return
   }
-  // 2. 调 store 拒绝申请；按钮 loading 期间不允许重复点击
+  // 2. prompt 期间状态可能被跨端改成 AGREED / REFUSED，再校验一次避免重复提交
+  if (processing.value) {
+    return
+  }
+  if (props.request.handleResult !== ImFriendRequestHandleResult.UNHANDLED) {
+    return
+  }
+  processing.value = true
   refusing.value = true
   try {
     await friendStore.refuseFriendRequest(props.request.id, handleContent)
     message.success('已拒绝好友申请')
   } finally {
     refusing.value = false
+    processing.value = false
   }
 }
 </script>

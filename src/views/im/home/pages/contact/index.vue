@@ -86,7 +86,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useRouter } from 'vue-router'
@@ -147,6 +147,57 @@ const groups = computed<GroupLite[]>(() =>
     showImageThumb: group.avatar,
     memberCount: group.memberCount
   }))
+)
+
+/**
+ * store 列表变化时同步 selection 持的对象副本：对端推送 / 跨端动作改 store 后，右侧详情能跟上：
+ * - 命中则替换为最新引用，资料 / 备注 / 申请状态变更立刻反映
+ * - 找不到（删除 / 拒绝 / 已通过等让记录消失）则置 null 收起详情
+ */
+watch(
+  friends,
+  (list) => {
+    if (selection.value?.type !== 'friend') {
+      return
+    }
+    const fresh = list.find((friend) => friend.id === selection.value!.friend.id)
+    if (!fresh) {
+      selection.value = null
+    } else if (fresh !== selection.value.friend) {
+      selection.value = { type: 'friend', friend: fresh }
+    }
+  },
+  { deep: true }
+)
+watch(
+  groups,
+  (list) => {
+    if (selection.value?.type !== 'group') {
+      return
+    }
+    const fresh = list.find((group) => group.id === selection.value!.group.id)
+    if (!fresh) {
+      selection.value = null
+    } else if (fresh !== selection.value.group) {
+      selection.value = { type: 'group', group: fresh }
+    }
+  },
+  { deep: true }
+)
+watch(
+  friendRequests,
+  (list) => {
+    if (selection.value?.type !== 'request') {
+      return
+    }
+    const fresh = list.find((request) => request.id === selection.value!.request.id)
+    if (!fresh) {
+      selection.value = null
+    } else if (fresh !== selection.value.request) {
+      selection.value = { type: 'request', request: fresh }
+    }
+  },
+  { deep: true }
 )
 
 const friendUser = computed<User | null>(() => {

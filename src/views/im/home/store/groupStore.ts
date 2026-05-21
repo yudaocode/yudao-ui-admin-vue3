@@ -399,7 +399,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
     },
 
-    /** 切换免打扰：推后端 + 落本地 */
+    /** 切换免打扰：推后端 + 落本地 + 同步会话列表的 silent，避免 silent 图标 / 总未读 / 提示音判断与设置漂移；和 friendStore.setSilent 对齐 */
     async setSilent(id: number, silent: boolean) {
       await apiUpdateGroupMember({ groupId: id, silent })
       const group = this.getGroup(id)
@@ -407,6 +407,8 @@ export const useGroupStore = defineStore('imGroupStore', {
         return
       }
       group.silent = silent
+      const conversationStore = useConversationStore()
+      conversationStore.updateConversation(ImConversationType.GROUP, id, { silent })
       this.saveGroups()
     },
 

@@ -856,6 +856,26 @@ export const useConversationStore = defineStore('imConversationStore', {
     },
 
     /**
+     * 跨端 READ 推送收到时把指定会话清成"全已读"：unread + atMe + atAll 一起清；避免群里跨端读完但本端 @ 红字残留
+     *
+     * 与 markActiveAsRead 的区别：本方法不更新 messages 单条 status（跨端推送只携带 conversation 级游标），
+     * 仅刷会话级未读 / @ 状态；如果未读和 @ 都已经是 false，直接 noop 避免无效 saveConversations
+     */
+    markConversationAsRead(type: number, targetId: number) {
+      const conversation = this.getConversation(type, targetId)
+      if (!conversation) {
+        return
+      }
+      if (conversation.unreadCount === 0 && !conversation.atMe && !conversation.atAll) {
+        return
+      }
+      conversation.unreadCount = 0
+      conversation.atMe = false
+      conversation.atAll = false
+      this.saveConversations(conversation)
+    },
+
+    /**
      * 当前会话全部标记为已读（切换会话 / 手动触发）
      * 只处理「对方发来的、尚未读」的消息
      */
