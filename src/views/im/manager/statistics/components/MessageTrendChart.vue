@@ -10,7 +10,7 @@
         </el-select>
       </div>
     </template>
-    <div ref="chartRef" style="width: 100%; height: 320px"></div>
+    <div ref="chartRef" v-loading="loading" style="width: 100%; height: 320px"></div>
   </el-card>
 </template>
 
@@ -22,6 +22,7 @@ defineOptions({ name: 'ImStatisticsMessageTrendChart' })
 
 const chartRef = ref<HTMLElement>()
 const days = ref(7)
+const loading = ref(false)
 let chart: echarts.ECharts | null = null
 
 const buildOption = (dates: string[], priv: number[], grp: number[]): echarts.EChartsCoreOption => ({
@@ -71,8 +72,13 @@ const buildOption = (dates: string[], priv: number[], grp: number[]): echarts.EC
 })
 
 const loadData = async () => {
-  const data = await StatisticsApi.getMessageTrend(days.value)
-  chart?.setOption(buildOption(data.dates, data.series.private || [], data.series.group || []))
+  loading.value = true
+  try {
+    const data = await StatisticsApi.getMessageTrend(days.value)
+    chart?.setOption(buildOption(data.dates, data.series.private || [], data.series.group || []))
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(async () => {

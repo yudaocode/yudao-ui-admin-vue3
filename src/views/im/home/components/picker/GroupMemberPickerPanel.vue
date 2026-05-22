@@ -84,13 +84,21 @@
           </div>
         </template>
 
-        <!-- grid 形态：宫格预览（管理员设置等场景沿用） -->
+        <!-- grid 形态：宫格预览；非 locked 成员右上角叠加 × 移除（locked 不渲染） -->
         <div v-else class="flex flex-wrap p-2.5">
           <GroupMemberGrid
             v-for="member in selectedMembers"
             :key="member.userId"
             :member="member"
-          />
+          >
+            <Icon
+              v-if="!isLocked(member)"
+              icon="ant-design:close-circle-filled"
+              :size="16"
+              class="absolute top-0 right-0 cursor-pointer transition-colors text-[var(--el-text-color-placeholder)] hover:text-[var(--el-color-danger)]"
+              @click="handleToggle(member)"
+            />
+          </GroupMemberGrid>
         </div>
 
         <div
