@@ -18,6 +18,17 @@ export interface NotifySendReqVO {
   templateParams: Map<String, Object>
 }
 
+export interface NotifyTemplateSimpleVO {
+  id: number
+  name: string
+  code: string
+}
+
+// 查询站内信模板精简列表
+export const getSimpleNotifyTemplateList = async () => {
+  return await request.get({ url: '/system/notify-template/simple-list' })
+}
+
 // 查询站内信模板列表
 export const getNotifyTemplatePage = async (params: PageParam) => {
   return await request.get({ url: '/system/notify-template/page', params })
@@ -45,7 +56,10 @@ export const deleteNotifyTemplate = async (id: number) => {
 
 // 批量删除站内信模板
 export const deleteNotifyTemplateList = async (ids: number[]) => {
-  return await request.delete({ url: '/system/notify-template/delete-list', params: { ids: ids.join(',') } })
+  return await request.delete({
+    url: '/system/notify-template/delete-list',
+    params: { ids: ids.join(',') }
+  })
 }
 
 // 发送站内信
