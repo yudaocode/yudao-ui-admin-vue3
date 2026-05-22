@@ -13,7 +13,15 @@
     append-to-body
     modal-class="im-conversation-private-side__modal"
   >
-    <div v-if="friend" class="flex flex-col h-full bg-[var(--el-bg-color)]">
+    <!-- friend 缺失场景：陌生人会话刚打开 / 好友数据还没补拉到；空白会让用户以为抽屉坏了，给个加载占位 -->
+    <div
+      v-if="!friend"
+      v-loading="true"
+      class="flex flex-col items-center justify-center h-full text-13px text-[var(--el-text-color-placeholder)] bg-[var(--el-bg-color)]"
+    >
+      加载中…
+    </div>
+    <div v-else class="flex flex-col h-full bg-[var(--el-bg-color)]">
       <div class="flex-1 overflow-y-auto bg-[var(--el-fill-color-light)]">
         <!-- 好友宫格：原 tile + "+" tile，对齐 GroupSide 视觉，让两种抽屉看起来是一家的 -->
         <div class="flex flex-wrap gap-1 px-4 pt-4 pb-[14px] bg-[var(--el-bg-color)]">
@@ -194,7 +202,7 @@ watch(visible, (open) => {
   }
 })
 
-/** 备注 popover 点击保存：先走 store API 同步后端，成功后再关 popover + 提示 */
+/** 备注 popover 点击保存：先走 store API 同步后端，成功后再关 popover + 提示（接口错误由全局拦截器统一 toast，不重复 catch） */
 async function handleSaveDisplayName() {
   if (!props.friend) {
     return

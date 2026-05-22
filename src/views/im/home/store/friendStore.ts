@@ -77,12 +77,23 @@ export const useFriendStore = defineStore('imFriendStore', {
   }),
 
   getters: {
+    /**
+     * friendUserId → Friend 的 O(1) 索引；从 friends 数组派生，Pinia 在 friends 变化时自动重算
+     *
+     * 消息渲染需要按 senderId 反查发送人头像 / 备注，每条消息渲染都会 getFriend；
+     * 直接 find 时 N 条消息 × M 好友 = O(N×M)；建索引后单次读 O(1)，重建只在写好友（fetchFriends / upsertFriend 等）时发生
+     */
+    friendMap: (state): Map<number, Friend> => {
+      const map = new Map<number, Friend>()
+      for (const friend of state.friends) {
+        map.set(friend.friendUserId, friend)
+      }
+      return map
+    },
     /** 按 friendUserId 找好友（含已软删的 DISABLE 记录，调用方自行判定） */
-    getFriend:
-      (state) =>
-      (friendUserId: number): Friend | undefined => {
-        return state.friends.find((friend) => friend.friendUserId === friendUserId)
-      },
+    getFriend(): (friendUserId: number) => Friend | undefined {
+      return (friendUserId: number) => this.friendMap.get(friendUserId)
+    },
     /** 当前生效的好友列表（过滤掉 DISABLE 软删记录） */
     getActiveFriends: (state): Friend[] => {
       return state.friends.filter((friend) => friend.status !== CommonStatusEnum.DISABLE)
@@ -195,9 +206,14 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 按 friendUserId 获取详情并合并到本地（保证 nickname / avatar 最新） */
     async loadFriendInfo(friendUserId: number) {
+      const requestEpoch = storeEpoch
       try {
         const data = await apiGetFriend(friendUserId)
         if (!data) {
+          return
+        }
+        // clear() 已切账号：旧请求的好友详情不能再 upsert 进新账号的 friends
+        if (requestEpoch !== storeEpoch) {
           return
         }
         this.upsertFriend(convertFriend(data))
@@ -301,8 +317,13 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 按 id 从后端单查并 upsert 到本地（dispatcher 兜底用，避免全量重拉）；后端带越权过滤 */
     async loadFriendRequest(requestId: number) {
+      const requestEpoch = storeEpoch
       const data = await apiGetMyFriendRequest(requestId)
       if (!data) {
+        return
+      }
+      // clear() 已切账号：旧请求的申请记录不能再写进新账号的 friendRequests
+      if (requestEpoch !== storeEpoch) {
         return
       }
       const next = convertFriendRequest(data)
@@ -329,13 +350,21 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 删除好友（单向软删，本端置 DISABLE）；clear=true 时级联清理本地相关数据（如私聊会话），并透传后端给多端同步 */
     async deleteFriend(friendUserId: number, clear: boolean = true) {
+      const requestEpoch = storeEpoch
       await apiDeleteFriend(friendUserId, clear)
+      if (requestEpoch !== storeEpoch) {
+        return
+      }
       this.removeFriend(friendUserId, clear)
     },
 
     /** 切换免打扰：同步会话的 silent 字段，避免会话列表 silent 图标等 1210 推到才更新 */
     async setSilent(friendUserId: number, silent: boolean) {
+      const requestEpoch = storeEpoch
       await apiUpdateFriend({ friendUserId, silent })
+      if (requestEpoch !== storeEpoch) {
+        return
+      }
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.silent = silent
@@ -347,7 +376,11 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 切换联系人置顶 */
     async setPinned(friendUserId: number, pinned: boolean) {
+      const requestEpoch = storeEpoch
       await apiUpdateFriend({ friendUserId, pinned })
+      if (requestEpoch !== storeEpoch) {
+        return
+      }
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.pinned = pinned
@@ -357,7 +390,11 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 拉黑好友：本端乐观更新 + 调接口；后端 FRIEND_BLOCK 推到时由 dispatcher 兜底同步多端 */
     async blockFriend(friendUserId: number) {
+      const requestEpoch = storeEpoch
       await apiBlockFriend(friendUserId)
+      if (requestEpoch !== storeEpoch) {
+        return
+      }
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.blocked = true
@@ -367,7 +404,11 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 移出黑名单：本端乐观更新 + 调接口；后端 FRIEND_UNBLOCK 推到时由 dispatcher 兜底同步多端 */
     async unblockFriend(friendUserId: number) {
+      const requestEpoch = storeEpoch
       await apiUnblockFriend(friendUserId)
+      if (requestEpoch !== storeEpoch) {
+        return
+      }
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.blocked = false
@@ -377,9 +418,13 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** 修改好友展示备注（仅自己可见） */
     async setDisplayName(friendUserId: number, displayName: string) {
+      const requestEpoch = storeEpoch
       const value = displayName.trim()
       // 后端 displayName 语义：null/undefined = 不改，"" = 清空，所以这里直接传 value（可能是空串）
       await apiUpdateFriend({ friendUserId, displayName: value })
+      if (requestEpoch !== storeEpoch) {
+        return
+      }
       const friend = this.getFriend(friendUserId)
       if (friend) {
         friend.displayName = value

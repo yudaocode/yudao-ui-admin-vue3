@@ -28,6 +28,9 @@ export const useFaceStore = defineStore('imFace', () => {
   /** 个人表情包列表（用户长按「添加到表情」/ 上传产生） */
   const faceUserItems = ref<ImFaceUserItemVO[]>([])
 
+  /** reset() 时递增；旧账号那次还没返回的请求 resolve 后比对一致才写 store，防跨账号数据泄漏 */
+  let storeEpoch = 0
+
   /**
    * 系统表情包拉取 promise；ensureFacePacks 内 cache：
    * - null = 还没拉过，下次调用真发请求
@@ -38,13 +41,19 @@ export const useFaceStore = defineStore('imFace', () => {
   /** 按需拉取系统表情包（已拉过则直接复用 cached promise） */
   async function ensureFacePacks(): Promise<void> {
     if (!facePacksPromise) {
+      const requestEpoch = storeEpoch
       facePacksPromise = apiGetFacePackList()
         .then((data) => {
+          if (requestEpoch !== storeEpoch) {
+            return
+          }
           facePacks.value = data || []
         })
         .catch((e) => {
           console.warn('[IM] 拉取表情包失败', e)
-          facePacksPromise = null
+          if (requestEpoch === storeEpoch) {
+            facePacksPromise = null
+          }
           throw e
         })
     }
@@ -56,13 +65,19 @@ export const useFaceStore = defineStore('imFace', () => {
   /** 按需拉取个人表情（已拉过则直接复用 cached promise） */
   async function ensureFaceUserItems(): Promise<void> {
     if (!faceUserItemsPromise) {
+      const requestEpoch = storeEpoch
       faceUserItemsPromise = apiGetFaceUserItemList()
         .then((data) => {
+          if (requestEpoch !== storeEpoch) {
+            return
+          }
           faceUserItems.value = data || []
         })
         .catch((e) => {
           console.warn('[IM] 拉取个人表情失败', e)
-          faceUserItemsPromise = null
+          if (requestEpoch === storeEpoch) {
+            faceUserItemsPromise = null
+          }
           throw e
         })
     }
@@ -76,9 +91,14 @@ export const useFaceStore = defineStore('imFace', () => {
    * 返回 true / false 与 removeFaceUserItem 风格对齐；调用方按 boolean 决定是否提示
    */
   async function addFaceUserItem(reqVO: ImFaceUserItemSaveReqVO): Promise<boolean> {
+    const requestEpoch = storeEpoch
     try {
       const id = await apiCreateFaceUserItem(reqVO)
       if (!id) {
+        return false
+      }
+      // reset 已切账号：旧请求拿到的 id 不能再 unshift 进新账号内存
+      if (requestEpoch !== storeEpoch) {
         return false
       }
       // id 不在缓存里才插入；服务端唯一约束兜底了 race，本地理论上不会拿到重复 id
@@ -100,8 +120,13 @@ export const useFaceStore = defineStore('imFace', () => {
 
   /** 删除个人表情；本地立即移除 */
   async function removeFaceUserItem(id: number): Promise<boolean> {
+    const requestEpoch = storeEpoch
     try {
       await apiDeleteFaceUserItem(id)
+      // reset 已切账号：不要再 filter 新账号列表
+      if (requestEpoch !== storeEpoch) {
+        return false
+      }
       faceUserItems.value = faceUserItems.value.filter((item) => item.id !== id)
       return true
     } catch (e) {
@@ -116,6 +141,7 @@ export const useFaceStore = defineStore('imFace', () => {
     faceUserItems.value = []
     facePacksPromise = null
     faceUserItemsPromise = null
+    storeEpoch++
   }
 
   return {
