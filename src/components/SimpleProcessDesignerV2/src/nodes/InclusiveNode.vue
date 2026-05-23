@@ -9,7 +9,7 @@
         <span class="iconfont icon-inclusive icon-size inclusive"></span>
       </div>
       <el-button v-else class="branch-node-add" color="#345da2" @click="addCondition" plain
-        >添加条件</el-button
+      >添加条件</el-button
       >
       <div
         class="branch-node-item"
@@ -78,8 +78,8 @@
                 class="branch-node-move move-node-right"
                 v-if="
                   !readonly &&
-                  currentNode.conditionNodes &&
-                  index < currentNode.conditionNodes.length - 2
+                    currentNode.conditionNodes &&
+                    index < currentNode.conditionNodes.length - 2
                 "
                 @click="moveNode(index, 1)"
               >

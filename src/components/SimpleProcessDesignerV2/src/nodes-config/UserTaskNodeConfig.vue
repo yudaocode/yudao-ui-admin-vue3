@@ -79,8 +79,8 @@
             <el-form-item
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
-                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
+                  configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
+                  configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
               "
               label="指定部门"
               prop="deptIds"
@@ -194,10 +194,10 @@
             <el-form-item
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
-                configForm.candidateStrategy ==
+                  configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+                  configForm.candidateStrategy ==
                   CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
+                  configForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
               "
               :label="deptLevelLabel!"
               prop="deptLevel"
@@ -245,7 +245,7 @@
                         size="small"
                         v-if="
                           item.value === ApproveMethodType.APPROVE_BY_RATIO &&
-                          configForm.approveMethod === ApproveMethodType.APPROVE_BY_RATIO
+                            configForm.approveMethod === ApproveMethodType.APPROVE_BY_RATIO
                         "
                       />
                     </el-form-item>
@@ -414,7 +414,7 @@
             <div>
               <el-divider content-position="left">跳过表达式</el-divider>
               <el-form-item prop="skipExpression">
-                <el-input v-model="configForm.skipExpression" type="textarea"  />
+                <el-input v-model="configForm.skipExpression" type="textarea" />
               </el-form-item>
             </div>
           </el-form>
@@ -445,7 +445,7 @@
                 v-if="btnDisplayNameEdit[index]"
               />
               <el-button v-else text @click="changeBtnDisplayName(index)"
-                >{{ item.displayName }} &nbsp;<Icon icon="ep:edit"
+              >{{ item.displayName }} &nbsp;<Icon icon="ep:edit"
               /></el-button>
             </div>
             <div class="button-setting-item-label">
@@ -483,7 +483,7 @@
                   :value="FieldPermissionType.READ"
                   size="large"
                   :label="FieldPermissionType.READ"
-                  ><span></span
+                ><span></span
                 ></el-radio>
               </div>
               <div class="item-radio-wrap">
@@ -491,7 +491,7 @@
                   :value="FieldPermissionType.WRITE"
                   size="large"
                   :label="FieldPermissionType.WRITE"
-                  ><span></span
+                ><span></span
                 ></el-radio>
               </div>
               <div class="item-radio-wrap">
@@ -499,7 +499,7 @@
                   :value="FieldPermissionType.NONE"
                   size="large"
                   :label="FieldPermissionType.NONE"
-                  ><span></span
+                ><span></span
                 ></el-radio>
               </div>
             </el-radio-group>

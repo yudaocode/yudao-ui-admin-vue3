@@ -67,10 +67,10 @@ const getSearchProp = computed(() => (cell: NavigationBarCellProperty) => {
 .navigation-bar {
   display: flex;
   height: 50px;
+  padding: 0 6px;
   background: #fff;
   justify-content: space-between;
   align-items: center;
-  padding: 0 6px;
 
   /* 左边 */
   .left {

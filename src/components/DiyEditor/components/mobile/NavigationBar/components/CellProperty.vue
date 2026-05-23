@@ -93,8 +93,8 @@ defineOptions({ name: 'NavigationBarCellProperty' })
 
 const props = withDefaults(
   defineProps<{
-    modelValue: NavigationBarCellProperty[]
-    isMp: boolean
+    modelValue?: NavigationBarCellProperty[]
+    isMp?: boolean
   }>(),
   {
     modelValue: () => [],

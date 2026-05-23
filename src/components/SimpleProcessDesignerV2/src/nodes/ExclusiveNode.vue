@@ -9,7 +9,7 @@
         <span class="iconfont icon-exclusive icon-size condition"></span>
       </div>
       <el-button v-else class="branch-node-add" color="#67c23a" @click="addCondition" plain
-        >添加条件</el-button
+      >添加条件</el-button
       >
 
       <div

@@ -10,7 +10,7 @@
       >
         <div class="node-title-container">
           <div class="node-title-icon start-user"
-            ><span class="iconfont icon-start-user"></span
+          ><span class="iconfont icon-start-user"></span
           ></div>
           <input
             v-if="!readonly && showInput"

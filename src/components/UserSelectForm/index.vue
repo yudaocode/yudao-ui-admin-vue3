@@ -158,11 +158,13 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
   .el-transfer {
     display: flex;
   }
+
   .el-transfer__buttons {
     display: flex !important;
     flex-direction: column-reverse;
     justify-content: center;
     gap: 20px;
+
     .el-transfer__button:nth-child(2) {
       margin: 0;
     }

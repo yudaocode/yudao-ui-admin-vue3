@@ -113,7 +113,7 @@
             v-if="btnDisplayNameEdit[index]"
           />
           <el-button v-else text @click="changeBtnDisplayName(index)"
-            >{{ item.displayName }} &nbsp;<Icon icon="ep:edit"
+          >{{ item.displayName }} &nbsp;<Icon icon="ep:edit"
           /></el-button>
         </div>
         <div class="button-setting-item-label">
@@ -128,13 +128,13 @@
         <div class="setting-title-label first-title"> 字段名称 </div>
         <div class="other-titles">
           <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')"
-            >只读</span
+          >只读</span
           >
           <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')"
-            >可编辑</span
+          >可编辑</span
           >
           <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')"
-            >隐藏</span
+          >隐藏</span
           >
         </div>
       </div>

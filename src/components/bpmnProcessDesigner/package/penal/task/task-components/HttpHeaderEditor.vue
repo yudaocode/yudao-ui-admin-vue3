@@ -141,8 +141,8 @@ watch(
 .header-editor {
   .header-list {
     max-height: 400px;
-    overflow-y: auto;
     margin-bottom: 16px;
+    overflow-y: auto;
   }
 
   .header-item {
@@ -156,8 +156,8 @@ watch(
     }
 
     .separator {
-      color: #606266;
       font-weight: 500;
+      color: #606266;
     }
 
     .header-value {
