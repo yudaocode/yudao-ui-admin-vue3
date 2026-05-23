@@ -181,7 +181,7 @@
             v-hasPermi="['mes:pro-feedback:approve']"
             v-if="
               scope.row.status === MesProFeedbackStatusEnum.APPROVING &&
-                scope.row.approveUserId === currentUserId
+              scope.row.approveUserId === currentUserId
             "
           >
             审批

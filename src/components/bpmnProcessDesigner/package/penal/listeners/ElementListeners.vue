@@ -11,13 +11,13 @@
       />
       <el-table-column label="操作" width="100px">
         <template #default="scope">
-          <el-button size="small" link @click="openListenerForm(scope.row, scope.$index)"
-          >编辑</el-button
-          >
+          <el-button size="small" link @click="openListenerForm(scope.row, scope.$index)">
+            编辑
+          </el-button>
           <el-divider direction="vertical" />
-          <el-button size="small" link style="color: #ff4d4f" @click="removeListener(scope.$index)"
-          >移除</el-button
-          >
+          <el-button size="small" link style="color: #ff4d4f" @click="removeListener(scope.$index)">
+            移除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -167,17 +167,18 @@
         />
         <el-table-column label="操作" width="130px">
           <template #default="scope">
-            <el-button size="small" link @click="openListenerFieldForm(scope.row, scope.$index)"
-            >编辑</el-button
-            >
+            <el-button size="small" link @click="openListenerFieldForm(scope.row, scope.$index)">
+              编辑
+            </el-button>
             <el-divider direction="vertical" />
             <el-button
               size="small"
               link
               style="color: #ff4d4f"
               @click="removeListenerField(scope.$index)"
-            >移除</el-button
             >
+              移除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -419,10 +420,7 @@ const saveListenerConfig = async () => {
     bpmnElement.businessObject?.extensionElements?.values?.filter(
       (ex) => ex.$type !== `${prefix}:ExecutionListener`
     ) ?? []
-  updateElementExtensions(
-    bpmnElement,
-    otherExtensionList.value.concat(bpmnElementListeners.value)
-  )
+  updateElementExtensions(bpmnElement, otherExtensionList.value.concat(bpmnElementListeners.value))
   // 4. 隐藏侧边栏
   listenerFormModelVisible.value = false
   listenerForm.value = {}
@@ -448,10 +446,7 @@ const selectProcessListener = (listener) => {
     bpmnElement.businessObject?.extensionElements?.values?.filter(
       (ex) => ex.$type !== `${prefix}:ExecutionListener`
     ) ?? []
-  updateElementExtensions(
-    bpmnElement,
-    otherExtensionList.value.concat(bpmnElementListeners.value)
-  )
+  updateElementExtensions(bpmnElement, otherExtensionList.value.concat(bpmnElementListeners.value))
 }
 
 watch(

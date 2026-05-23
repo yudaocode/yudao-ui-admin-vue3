@@ -339,7 +339,9 @@ onMounted(async () => {
     }
   } else if (formData.value.deliveryType === DeliveryTypeEnum.PICK_UP.type) {
     if (formData.value.pickUpStoreId) {
-      pickUpStore.value = await DeliveryPickUpStoreApi.getDeliveryPickUpStore(formData.value.pickUpStoreId)
+      pickUpStore.value = await DeliveryPickUpStoreApi.getDeliveryPickUpStore(
+        formData.value.pickUpStoreId
+      )
     }
   }
 })

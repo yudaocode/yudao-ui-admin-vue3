@@ -33,7 +33,7 @@
         <!-- 右上角的主题、语言选择 -->
         <div
           class="flex items-center justify-between at-2xl:justify-end at-xl:justify-end"
-          style="color: var(--el-text-color-primary);"
+          style="color: var(--el-text-color-primary)"
         >
           <div class="flex items-center at-2xl:hidden at-xl:hidden">
             <img alt="" class="mr-10px h-48px w-48px" src="@/assets/imgs/logo.png" />
@@ -75,7 +75,14 @@ import { useAppStore } from '@/store/modules/app'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
 
-import { LoginForm, MobileForm, QrCodeForm, RegisterForm, SSOLoginVue, ForgetPasswordForm } from './components'
+import {
+  LoginForm,
+  MobileForm,
+  QrCodeForm,
+  RegisterForm,
+  SSOLoginVue,
+  ForgetPasswordForm
+} from './components'
 
 defineOptions({ name: 'Login' })
 

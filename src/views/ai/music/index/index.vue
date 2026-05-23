@@ -13,14 +13,14 @@ import List from './list/index.vue'
 
 defineOptions({ name: 'Index' })
 
-const listRef = ref<Nullable<{generateMusic: (...args) => void}>>(null)
+const listRef = ref<Nullable<{ generateMusic: (...args) => void }>>(null)
 
 /*
  *@Description: 拿到左侧配置信息调用右侧音乐生成的方法
  *@MethodAuthor: xiaohong
  *@Date: 2024-07-19 11:13:38
-*/
-function generateMusic (args: {formData: Recordable}) {
- unref(listRef)?.generateMusic(args.formData)
+ */
+function generateMusic(args: { formData: Recordable }) {
+  unref(listRef)?.generateMusic(args.formData)
 }
 </script>

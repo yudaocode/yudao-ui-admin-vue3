@@ -40,9 +40,9 @@
           <Icon icon="ep:arrow-right-bold" v-if="!readonly" />
         </div>
         <div v-if="!readonly" class="node-toolbar">
-          <div class="toolbar-icon"
-          ><Icon color="#0089ff" icon="ep:circle-close-filled" :size="18" @click="deleteNode"
-          /></div>
+          <div class="toolbar-icon">
+            <Icon color="#0089ff" icon="ep:circle-close-filled" :size="18" @click="deleteNode" />
+          </div>
         </div>
       </div>
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->

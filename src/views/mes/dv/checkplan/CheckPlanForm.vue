@@ -107,9 +107,9 @@
       </el-tab-pane>
     </el-tabs>
     <template #footer>
-      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading"
-      >确 定</el-button
-      >
+      <el-button v-if="!isDetail" @click="submitForm" type="primary" :disabled="formLoading">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">{{ isDetail ? '关 闭' : '取 消' }}</el-button>
     </template>
   </Dialog>

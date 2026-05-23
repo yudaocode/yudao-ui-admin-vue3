@@ -106,13 +106,13 @@
   <UserForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
-import {dateFormatter} from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import * as MpUserApi from '@/api/mp/user'
 import * as MpTagApi from '@/api/mp/tag'
 import WxAccountSelect from '@/views/mp/components/wx-account-select'
-import type {FormInstance} from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import UserForm from './UserForm.vue'
-import {ref} from "vue";
+import { ref } from 'vue'
 
 defineOptions({ name: 'MpUser' })
 
@@ -159,7 +159,7 @@ const getList = async () => {
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
-  if(isDialog.value){
+  if (isDialog.value) {
     emitChange()
   }
 }
@@ -194,21 +194,24 @@ defineExpose({
     onAccountChanged(accountId)
     isDialog.value = true
   }
-});
+})
 
 /** Emits*/
 interface Emits {
-  (e: 'change', data: {
-    multipleSelection: any[]
-    total: number
-    queryParams: object
-  }): void
+  (
+    e: 'change',
+    data: {
+      multipleSelection: any[]
+      total: number
+      queryParams: object
+    }
+  ): void
   // (e: 'select', user: any): void
   // (e: 'cancel'): void
 }
 const emit = defineEmits<Emits>()
 const emitChange = () => {
-  emit('change', {multipleSelection: multipleSelection.value, total: total.value, queryParams})
+  emit('change', { multipleSelection: multipleSelection.value, total: total.value, queryParams })
 }
 
 const handleSelectionChange = (val: any[]) => {

@@ -127,9 +127,9 @@
                 :duration="1500"
                 class="text-28px font-700 leading-[1.2] color-[#7c3aed]"
               />
-              <span class="text-13px color-[var(--el-text-color-secondary)]"
-              >/ {{ summary.machineryTotal }} 运行中</span
-              >
+              <span class="text-13px color-[var(--el-text-color-secondary)]">
+                / {{ summary.machineryTotal }} 运行中
+              </span>
             </div>
             <div class="text-12px color-[var(--el-text-color-placeholder)] mt-4px">
               <span class="text-red-400">停机 {{ summary.machineryStop }}</span>

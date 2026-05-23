@@ -14,9 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-
 defineOptions({ name: 'Index' })
 
 const currentSong = inject('currentSong', {})
-
 </script>

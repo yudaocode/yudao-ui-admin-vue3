@@ -1,6 +1,10 @@
 <template>
   <div class="end-node-wrapper">
-    <div class="end-node-box cursor-pointer" :class="`${useTaskStatusClass(currentNode?.activityStatus)}`" @click="nodeClick">
+    <div
+      class="end-node-box cursor-pointer"
+      :class="`${useTaskStatusClass(currentNode?.activityStatus)}`"
+      @click="nodeClick"
+    >
       <span class="node-fixed-name" title="结束">结束</span>
     </div>
   </div>
@@ -49,7 +53,7 @@
             <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
           </template>
         </el-table-column>
-         
+
         <el-table-column align="center" label="耗时" prop="durationInMillis" width="100">
           <template #default="scope">
             {{ formatPast2(scope.row.durationInMillis) }}
@@ -83,17 +87,17 @@ const dialogVisible = ref(false) // 弹窗可见性
 const processInstanceInfos = ref<any[]>([]) // 流程的审批信息
 
 const nodeClick = () => {
-  if (readonly) { 
-    if(processInstance && processInstance.value){
+  if (readonly) {
+    if (processInstance && processInstance.value) {
       processInstanceInfos.value = [
-      {
-        assigneeUser: processInstance.value.startUser,
-        createTime: processInstance.value.startTime,
-        endTime: processInstance.value.endTime,
-        status: processInstance.value.status,
-        durationInMillis: processInstance.value.durationInMillis
-      }
-    ]
+        {
+          assigneeUser: processInstance.value.startUser,
+          createTime: processInstance.value.startTime,
+          endTime: processInstance.value.endTime,
+          status: processInstance.value.status,
+          durationInMillis: processInstance.value.durationInMillis
+        }
+      ]
       dialogVisible.value = true
     }
   }

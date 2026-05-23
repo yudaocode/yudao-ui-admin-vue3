@@ -33,8 +33,8 @@
     <el-form-item
       v-if="
         userTaskForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
-          userTaskForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
-          userTaskForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
+        userTaskForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
       "
       label="指定部门"
       prop="candidateParam"
@@ -152,9 +152,9 @@
     <el-form-item
       v-if="
         userTaskForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
-          userTaskForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
-          userTaskForm.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
-          userTaskForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
+        userTaskForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
       "
       :label="deptLevelLabel!"
       prop="deptLevel"

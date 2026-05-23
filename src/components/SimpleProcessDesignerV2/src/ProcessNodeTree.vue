@@ -8,8 +8,8 @@
   <UserTaskNode
     v-if="
       currentNode &&
-        (currentNode.type === NodeType.USER_TASK_NODE ||
-          currentNode.type === NodeType.TRANSACTOR_NODE)
+      (currentNode.type === NodeType.USER_TASK_NODE ||
+        currentNode.type === NodeType.TRANSACTOR_NODE)
     "
     :flow-node="currentNode"
     @update:flow-node="handleModelValueUpdate"

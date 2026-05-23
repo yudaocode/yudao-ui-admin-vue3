@@ -19,7 +19,6 @@ const view = ref({
   bpmnXml: ''
 }) // BPMN 流程图数据
 
-
 /** 只有 loading 完成时，才去加载流程列表 */
 watch(
   () => props.modelView,

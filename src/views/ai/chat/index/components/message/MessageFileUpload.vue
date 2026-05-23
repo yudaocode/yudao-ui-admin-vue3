@@ -53,11 +53,12 @@
             <Icon :icon="getFileIcon(file.name)" class="text-blue-500 mr-2 flex-shrink-0" />
             <span
               class="font-medium text-gray-900 mr-1 overflow-hidden text-ellipsis whitespace-nowrap flex-1"
-            >{{ file.name }}</span
             >
-            <span class="text-gray-500 flex-shrink-0 text-11px"
-            >({{ formatFileSize(file.size) }})</span
-            >
+              {{ file.name }}
+            </span>
+            <span class="text-gray-500 flex-shrink-0 text-11px">
+              ({{ formatFileSize(file.size) }})
+            </span>
           </div>
           <div class="flex items-center gap-1 flex-shrink-0 ml-2">
             <el-progress

@@ -55,7 +55,6 @@ const displayUrl = computed(() => props.url || props.modelValue || '') // 显示
 const showPreview = computed(() => {
   return displayUrl.value && isUrl(displayUrl.value)
 }) // 是否显示预览
-
 </script>
 
 <style scoped>

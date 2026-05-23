@@ -27,12 +27,17 @@
           />
         </div>
         <div class="save_div">
-          <el-button class="save_btn" type="success" @click="onSave" v-hasPermi="['mp:menu:save']"
-          >保存并发布菜单</el-button
+          <el-button class="save_btn" type="success" @click="onSave" v-hasPermi="['mp:menu:save']">
+            保存并发布菜单
+          </el-button>
+          <el-button
+            class="save_btn"
+            type="danger"
+            @click="onClear"
+            v-hasPermi="['mp:menu:delete']"
           >
-          <el-button class="save_btn" type="danger" @click="onClear" v-hasPermi="['mp:menu:delete']"
-          >清空菜单</el-button
-          >
+            清空菜单
+          </el-button>
         </div>
       </div>
       <!--右边配置-->

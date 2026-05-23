@@ -12,7 +12,6 @@ import { isFunction, isObject, some } from 'min-dash'
 const WILDCARD = '*'
 
 function CamundaModdleExtension(eventBus) {
-
   const self = this
 
   eventBus.on('moddleCopy.canCopyProperty', function (context) {

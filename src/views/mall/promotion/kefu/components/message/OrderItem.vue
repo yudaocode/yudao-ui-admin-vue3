@@ -24,8 +24,8 @@
       </div>
       <div class="pay-box flex justify-end pr-5px">
         <div class="flex items-center">
-          <div class="discounts-title pay-color"
-          >共 {{ getMessageContent?.productCount }} 件商品,总金额:
+          <div class="discounts-title pay-color">
+            共 {{ getMessageContent?.productCount }} 件商品,总金额:
           </div>
           <div class="discounts-money pay-color">
             ￥{{ fenToYuan(getMessageContent?.payPrice) }}

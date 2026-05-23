@@ -39,7 +39,7 @@
           </span>
         </div>
       </div>
-    </el-carousel-item> 
+    </el-carousel-item>
   </el-carousel>
 </template>
 

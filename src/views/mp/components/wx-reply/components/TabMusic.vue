@@ -23,8 +23,13 @@
                   <template #trigger>
                     <el-button type="primary" link>本地上传</el-button>
                   </template>
-                  <el-button type="primary" link @click="showDialog = true" style="margin-left: 5px"
-                  >素材库选择
+                  <el-button
+                    type="primary"
+                    link
+                    @click="showDialog = true"
+                    style="margin-left: 5px"
+                  >
+                    素材库选择
                   </el-button>
                 </el-upload>
               </div>

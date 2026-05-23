@@ -61,9 +61,7 @@
               v-model="formData.taskId"
               :workOrderId="formData.workOrderId"
               :workstationId="formData.workstationId"
-              :statuses="[
-                MesProTaskStatusEnum.PREPARE
-              ]"
+              :statuses="[MesProTaskStatusEnum.PREPARE]"
               :disabled="isHeaderReadonly || !formData.workOrderId"
               placeholder="请选择任务"
               @change="handleTaskChange"
@@ -241,8 +239,8 @@
     <el-tabs
       v-if="
         formData.id &&
-          formData.status !== MesProFeedbackStatusEnum.PREPARE &&
-          formData.status !== MesProFeedbackStatusEnum.APPROVING
+        formData.status !== MesProFeedbackStatusEnum.PREPARE &&
+        formData.status !== MesProFeedbackStatusEnum.APPROVING
       "
       type="border-card"
       class="mt-10px"

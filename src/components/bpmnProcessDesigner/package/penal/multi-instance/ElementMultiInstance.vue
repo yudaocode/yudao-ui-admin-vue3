@@ -19,7 +19,7 @@
               size="small"
               v-if="
                 item.value === ApproveMethodType.APPROVE_BY_RATIO &&
-                  approveMethod === ApproveMethodType.APPROVE_BY_RATIO
+                approveMethod === ApproveMethodType.APPROVE_BY_RATIO
               "
               @change="onApproveRatioChange"
             />
@@ -27,9 +27,7 @@
         </div>
       </div>
     </el-radio-group>
-    <div v-else>
-      除了UserTask以外节点的多实例待实现
-    </div>
+    <div v-else> 除了UserTask以外节点的多实例待实现 </div>
     <!-- 与Simple设计器配置合并，保留以前的代码 -->
     <el-form label-width="90px" style="display: none">
       <el-form-item label="快捷配置">
@@ -47,7 +45,7 @@
       <template
         v-if="
           loopCharacteristics === 'ParallelMultiInstance' ||
-            loopCharacteristics === 'SequentialMultiInstance'
+          loopCharacteristics === 'SequentialMultiInstance'
         "
       >
         <el-form-item label="循环数量" key="loopCardinality">

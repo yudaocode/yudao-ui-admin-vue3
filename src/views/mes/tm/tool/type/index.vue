@@ -99,7 +99,7 @@
           <span
             v-if="
               scope.row.maintenPeriod != null &&
-                scope.row.maintenType === MesMaintenTypeEnum.REGULAR
+              scope.row.maintenType === MesMaintenTypeEnum.REGULAR
             "
           >
             {{ scope.row.maintenPeriod }} 天

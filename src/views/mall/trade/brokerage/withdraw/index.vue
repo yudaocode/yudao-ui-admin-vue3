@@ -169,7 +169,7 @@
           <template
             v-if="
               scope.row.status === BrokerageWithdrawStatusEnum.AUDITING.status &&
-                !scope.row.payTransferId
+              !scope.row.payTransferId
             "
           >
             <el-button

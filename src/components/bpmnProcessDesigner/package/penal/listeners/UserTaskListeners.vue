@@ -17,17 +17,18 @@
       />
       <el-table-column label="操作" width="90px">
         <template #default="scope">
-          <el-button size="small" link @click="openListenerForm(scope.row, scope.$index)"
-          >编辑</el-button
-          >
+          <el-button size="small" link @click="openListenerForm(scope.row, scope.$index)">
+            编辑
+          </el-button>
           <el-divider direction="vertical" />
           <el-button
             size="small"
             link
             style="color: #ff4d4f"
             @click="removeListener(scope.row, scope.$index)"
-          >移除</el-button
           >
+            移除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -183,9 +184,9 @@
       <el-divider />
       <p class="listener-filed__title">
         <span><Icon icon="ep:menu" />注入字段：</span>
-        <el-button size="small" type="primary" @click="openListenerFieldForm(null)"
-        >添加字段</el-button
-        >
+        <el-button size="small" type="primary" @click="openListenerFieldForm(null)">
+          添加字段
+        </el-button>
       </p>
       <el-table
         :data="fieldsListOfListener"
@@ -211,17 +212,18 @@
         />
         <el-table-column label="操作" width="100px">
           <template #default="scope">
-            <el-button size="small" link @click="openListenerFieldForm(scope.row, scope.$index)"
-            >编辑</el-button
-            >
+            <el-button size="small" link @click="openListenerFieldForm(scope.row, scope.$index)">
+              编辑
+            </el-button>
             <el-divider direction="vertical" />
             <el-button
               size="small"
               link
               style="color: #ff4d4f"
               @click="removeListenerField(scope.row, scope.$index)"
-            >移除</el-button
             >
+              移除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -423,10 +425,7 @@ const saveListenerConfig = async () => {
     bpmnElement.businessObject?.extensionElements?.values?.filter(
       (ex) => ex.$type !== `${prefix}:TaskListener`
     ) ?? []
-  updateElementExtensions(
-    bpmnElement,
-    otherExtensionList.value.concat(bpmnElementListeners.value)
-  )
+  updateElementExtensions(bpmnElement, otherExtensionList.value.concat(bpmnElementListeners.value))
   // 4. 隐藏侧边栏
   listenerFormModelVisible.value = false
   listenerForm.value = {}
@@ -490,10 +489,7 @@ const selectProcessListener = (listener) => {
     bpmnElement.businessObject?.extensionElements?.values?.filter(
       (ex) => ex.$type !== `${prefix}:TaskListener`
     ) ?? []
-  updateElementExtensions(
-    bpmnElement,
-    otherExtensionList.value.concat(bpmnElementListeners.value)
-  )
+  updateElementExtensions(bpmnElement, otherExtensionList.value.concat(bpmnElementListeners.value))
 }
 
 watch(

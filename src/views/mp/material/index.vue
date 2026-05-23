@@ -67,8 +67,9 @@
           type="primary"
           plain
           @click="showCreateVideo = true"
-        >新建视频</el-button
         >
+          新建视频
+        </el-button>
         <!-- 新建视频的弹窗 -->
         <UploadVideo v-model="showCreateVideo" />
         <!-- 列表 -->

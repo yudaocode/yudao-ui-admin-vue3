@@ -9,9 +9,9 @@
         ]"
       >
         <div class="node-title-container">
-          <div class="node-title-icon start-user"
-          ><span class="iconfont icon-start-user"></span
-          ></div>
+          <div class="node-title-icon start-user">
+            <span class="iconfont icon-start-user"></span>
+          </div>
           <input
             v-if="!readonly && showInput"
             type="text"

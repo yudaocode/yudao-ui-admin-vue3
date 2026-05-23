@@ -9,7 +9,6 @@ import { set } from 'lodash-es'
 import { Pagination, TableColumn, TableSetPropsType, TableSlotDefault } from '@/types/table'
 
 export default defineComponent({
-
   name: 'Table',
   props: {
     pageSize: propTypes.number.def(10),

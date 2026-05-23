@@ -8,12 +8,12 @@
       target="_blank"
       :href="
         'https://map.qq.com/?type=marker&isopeninfowin=1&markertype=1&pointx=' +
-          locationY +
-          '&pointy=' +
-          locationX +
-          '&name=' +
-          label +
-          '&ref=yudao'
+        locationY +
+        '&pointy=' +
+        locationX +
+        '&name=' +
+        label +
+        '&ref=yudao'
       "
     >
       <el-col>
@@ -21,12 +21,12 @@
           <img
             :src="
               'https://apis.map.qq.com/ws/staticmap/v2/?zoom=10&markers=color:blue|label:A|' +
-                locationX +
-                ',' +
-                locationY +
-                '&key=' +
-                qqMapKey +
-                '&size=250*180'
+              locationX +
+              ',' +
+              locationY +
+              '&key=' +
+              qqMapKey +
+              '&size=250*180'
             "
           />
         </el-row>

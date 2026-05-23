@@ -27,7 +27,6 @@ const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('form')
 
 export default defineComponent({
-
   name: 'Form',
   props: {
     // 生成Form的布局结构数组

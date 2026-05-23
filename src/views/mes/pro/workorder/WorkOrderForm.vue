@@ -106,7 +106,7 @@
           :span="8"
           v-if="
             formData.type === MesProWorkOrderTypeEnum.OUTSOURCE ||
-              formData.type === MesProWorkOrderTypeEnum.PURCHASE
+            formData.type === MesProWorkOrderTypeEnum.PURCHASE
           "
         >
           <el-form-item label="供应商" prop="vendorId">
@@ -187,7 +187,12 @@
       <el-button v-if="isFinish" @click="handleFinish" type="success" :disabled="formLoading">
         完 成
       </el-button>
-      <el-button v-if="formType === 'detail' && formData.id" type="primary" plain @click="handleBarcode">
+      <el-button
+        v-if="formType === 'detail' && formData.id"
+        type="primary"
+        plain
+        @click="handleBarcode"
+      >
         查看条码
       </el-button>
       <el-button @click="dialogVisible = false">关 闭</el-button>
@@ -275,7 +280,10 @@ const originalFormData = ref<string>('') // 原始表单数据快照，用于脏
 /** 查看条码 */
 const handleBarcode = () => {
   barcodeDetailRef.value?.openByBusiness(
-    formData.value.id!, BarcodeBizTypeEnum.WORKORDER, formData.value.code, formData.value.name
+    formData.value.id!,
+    BarcodeBizTypeEnum.WORKORDER,
+    formData.value.code,
+    formData.value.name
   )
 }
 

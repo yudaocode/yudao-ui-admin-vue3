@@ -112,9 +112,9 @@
             :placeholder="item.displayName"
             v-if="btnDisplayNameEdit[index]"
           />
-          <el-button v-else text @click="changeBtnDisplayName(index)"
-          >{{ item.displayName }} &nbsp;<Icon icon="ep:edit"
-          /></el-button>
+          <el-button v-else text @click="changeBtnDisplayName(index)">
+            {{ item.displayName }} &nbsp;<Icon icon="ep:edit" />
+          </el-button>
         </div>
         <div class="button-setting-item-label">
           <el-switch v-model="item.enable" @change="updateElementExtensions" />
@@ -127,15 +127,15 @@
       <div class="field-permit-title">
         <div class="setting-title-label first-title"> 字段名称 </div>
         <div class="other-titles">
-          <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')"
-          >只读</span
-          >
-          <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')"
-          >可编辑</span
-          >
-          <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')"
-          >隐藏</span
-          >
+          <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')">
+            只读
+          </span>
+          <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')">
+            可编辑
+          </span>
+          <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')">
+            隐藏
+          </span>
         </div>
       </div>
       <div class="field-setting-item" v-for="(item, index) in fieldsPermissionEl" :key="index">

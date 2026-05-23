@@ -107,7 +107,7 @@
           <div
             v-if="
               selectedProperty.type === IoTThingModelTypeEnum.PROPERTY &&
-                selectedProperty.accessMode
+              selectedProperty.accessMode
             "
             class="flex items-start gap-8px"
           >

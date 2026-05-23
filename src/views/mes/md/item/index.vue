@@ -1,6 +1,9 @@
 <!-- MES 物料产品列表 -->
 <template>
-  <doc-alert title="【基础】物料产品、分类、计量单位" url="https://doc.iocoder.cn/mes/md/product/" />
+  <doc-alert
+    title="【基础】物料产品、分类、计量单位"
+    url="https://doc.iocoder.cn/mes/md/product/"
+  />
 
   <el-row :gutter="20">
     <!-- 左侧分类树 -->
@@ -54,10 +57,10 @@
           </el-form-item>
           <el-form-item>
             <el-button @click="handleQuery"
-            ><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button
+              ><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button
             >
             <el-button @click="resetQuery"
-            ><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button
+              ><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button
             >
             <el-button
               type="primary"

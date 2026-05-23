@@ -116,7 +116,8 @@ const toggleClick = () => {
                 :row="{
                   label: item.label
                 }"
-              >{{ item.label }}
+              >
+                {{ item.label }}
               </slot>
             </template>
 
@@ -130,9 +131,7 @@ const toggleClick = () => {
                 <DictTag :type="item.dictType" :value="data[item.field] + ''" />
               </slot>
               <slot v-else :name="item.field" :row="data">
-                {{
-                  item.mappedField ? data[item.mappedField] : data[item.field]
-                }}
+                {{ item.mappedField ? data[item.mappedField] : data[item.field] }}
               </slot>
             </template>
           </ElDescriptionsItem>

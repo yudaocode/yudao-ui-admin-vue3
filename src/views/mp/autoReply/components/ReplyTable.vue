@@ -41,7 +41,7 @@
         <div
           v-else-if="
             scope.row.responseMessageType === 'video' ||
-              scope.row.responseMessageType === 'shortvideo'
+            scope.row.responseMessageType === 'shortvideo'
           "
         >
           <WxVideoPlayer

@@ -47,8 +47,8 @@
           <div v-else-if="error">
             <el-text type="danger">{{ error }}</el-text>
           </div>
-          <pre v-else-if="testResult" class="result-content"
-          >{{ JSON.stringify(testResult, null, 2) }}
+          <pre v-else-if="testResult" class="result-content">
+            {{ JSON.stringify(testResult, null, 2) }}
           </pre>
           <div v-else> <el-text type="info">点击运行查看结果</el-text> </div>
         </div>
