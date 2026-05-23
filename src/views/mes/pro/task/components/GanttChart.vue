@@ -22,7 +22,7 @@ defineOptions({ name: 'GanttChart' })
 
 const props = withDefaults(
   defineProps<{
-    tasks: any[] // 甘特图任务数据
+    tasks?: any[] // 甘特图任务数据
     readonly?: boolean // 是否只读
     height?: number // 甘特图高度
   }>(),
@@ -223,30 +223,36 @@ defineExpose({ loadData })
 <style>
 /* 今天标记线 */
 .gantt_marker.today {
-  background-color: #ff4444;
+  background-color: #f44;
   opacity: 0.4;
 }
+
 .gantt_marker.today .gantt_marker_content {
-  color: #ff4444;
   font-size: 12px;
+  color: #f44;
 }
+
 /* 工单（project）行样式 */
 .gantt-project-bar .gantt_task_progress {
   background: #7b68ee;
 }
+
 /* 甘特条圆角 */
 .gantt_task_line {
   border-radius: 8px;
 }
+
 /* 周末背景色 */
 .weekend {
   background: #f0f0f0 !important;
 }
+
 /* 行悬浮高亮 */
 .gantt_grid_data .gantt_row:hover,
 .gantt_grid_data .gantt_row.odd:hover {
   background-color: #f3f1fe !important;
 }
+
 /* 选中行高亮 */
 .gantt_grid_data .gantt_row.gantt_selected,
 .gantt_grid_data .gantt_row.odd.gantt_selected,

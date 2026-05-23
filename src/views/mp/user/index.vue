@@ -50,12 +50,12 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" v-if="isDialog"/>
+      <el-table-column type="selection" width="55" v-if="isDialog" />
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="用户标识" align="center" prop="openid" width="260" />
       <el-table-column label="用户头像" min-width="80px" prop="headImageUrl">
         <template #default="scope">
-          <el-avatar :src="scope.row.headImageUrl"/>
+          <el-avatar :src="scope.row.headImageUrl" />
         </template>
       </el-table-column>
       <el-table-column label="昵称" align="center" prop="nickname" />

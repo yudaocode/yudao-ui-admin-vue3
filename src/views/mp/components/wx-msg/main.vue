@@ -12,10 +12,10 @@
       <div v-loading="loading"></div>
       <div v-if="!loading">
         <div class="el-table__empty-block" v-if="hasMore" @click="loadMore"
-          ><span class="el-table__empty-text">点击加载更多</span></div
+        ><span class="el-table__empty-text">点击加载更多</span></div
         >
         <div class="el-table__empty-block" v-if="!hasMore"
-          ><span class="el-table__empty-text">没有更多了</span></div
+        ><span class="el-table__empty-text">没有更多了</span></div
         >
       </div>
 

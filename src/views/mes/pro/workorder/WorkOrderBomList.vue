@@ -37,8 +37,8 @@
           <el-button
             v-if="
               isConfirmed &&
-              workOrder.type === MesProWorkOrderTypeEnum.SELF &&
-              scope.row.itemOrProduct === 'PRODUCT'
+                workOrder.type === MesProWorkOrderTypeEnum.SELF &&
+                scope.row.itemOrProduct === 'PRODUCT'
             "
             link
             type="success"

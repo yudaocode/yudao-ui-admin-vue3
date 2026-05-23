@@ -241,8 +241,8 @@
     <el-tabs
       v-if="
         formData.id &&
-        formData.status !== MesProFeedbackStatusEnum.PREPARE &&
-        formData.status !== MesProFeedbackStatusEnum.APPROVING
+          formData.status !== MesProFeedbackStatusEnum.PREPARE &&
+          formData.status !== MesProFeedbackStatusEnum.APPROVING
       "
       type="border-card"
       class="mt-10px"

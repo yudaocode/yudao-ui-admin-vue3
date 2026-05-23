@@ -185,7 +185,7 @@
             v-hasPermi="['mes:pro-work-order:create']"
             v-if="
               scope.row.status === MesProWorkOrderStatusEnum.CONFIRMED &&
-              scope.row.type === MesProWorkOrderTypeEnum.SELF
+                scope.row.type === MesProWorkOrderTypeEnum.SELF
             "
           >
             新增
