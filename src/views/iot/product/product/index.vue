@@ -143,7 +143,7 @@
               <div class="mx-[10px] h-[20px] w-[1px] bg-[#dcdfe6]"></div>
               <el-button
                 v-hasPermi="['iot:product:delete']"
-                :disabled="item.status === 1"
+                :disabled="item.status === ProductStatusEnum.PUBLISHED"
                 class="!px-2 !h-[32px] text-[13px]"
                 plain
                 type="danger"
@@ -216,7 +216,7 @@
           </el-button>
           <el-button
             v-hasPermi="['iot:product:delete']"
-            :disabled="scope.row.status === 1"
+            :disabled="scope.row.status === ProductStatusEnum.PUBLISHED"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
@@ -248,6 +248,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import defaultPicUrl from '@/assets/imgs/iot/device.png'
 import defaultIconUrl from '@/assets/svgs/iot/cube.svg'
+import { ProductStatusEnum } from '@/views/iot/utils/constants'
 
 /** iot 产品列表 */
 defineOptions({ name: 'IoTProduct' })

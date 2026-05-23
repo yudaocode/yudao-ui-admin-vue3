@@ -222,8 +222,9 @@ const removeAction = (index: number) => {
  * @param type 执行器类型
  */
 const updateActionType = (index: number, type: number) => {
-  actions.value[index].type = type
-  onActionTypeChange(actions.value[index], type)
+  const action = actions.value[index]
+  onActionTypeChange(action, type) // 须在赋新值前调用 ，内部依赖 action.type 旧值
+  action.type = type
 }
 
 /**
@@ -258,7 +259,7 @@ const onActionTypeChange = (action: Action, type: number) => {
       action.params = ''
     }
     // 如果从其他类型切换到设备控制类型，清空identifier（让用户重新选择）
-    if (action.identifier && type !== action.type) {
+    if (action.identifier) {
       action.identifier = undefined
     }
   } else if (isAlertAction(type)) {
