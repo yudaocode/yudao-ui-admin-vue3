@@ -14,7 +14,7 @@
               </div>
               <div class="flex flex-col justify-between">
                 <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`"
-                  >{{ t('analysis.newUser') }}
+                >{{ t('analysis.newUser') }}
                 </div>
                 <CountTo
                   :duration="2600"
@@ -43,7 +43,7 @@
               </div>
               <div class="flex flex-col justify-between">
                 <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`"
-                  >{{ t('analysis.unreadInformation') }}
+                >{{ t('analysis.unreadInformation') }}
                 </div>
                 <CountTo
                   :duration="2600"
@@ -72,7 +72,7 @@
               </div>
               <div class="flex flex-col justify-between">
                 <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`"
-                  >{{ t('analysis.transactionAmount') }}
+                >{{ t('analysis.transactionAmount') }}
                 </div>
                 <CountTo
                   :duration="2600"
@@ -101,7 +101,7 @@
               </div>
               <div class="flex flex-col justify-between">
                 <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`"
-                  >{{ t('analysis.totalShopping') }}
+                >{{ t('analysis.totalShopping') }}
                 </div>
                 <CountTo
                   :duration="2600"

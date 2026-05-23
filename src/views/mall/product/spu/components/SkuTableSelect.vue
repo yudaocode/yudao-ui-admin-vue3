@@ -4,7 +4,7 @@
       <el-table-column label="#" width="55">
         <template #default="{ row }">
           <el-radio :value="row.id" v-model="selectedSkuId" @change="handleSelected(row)"
-            >&nbsp;
+          >&nbsp;
           </el-radio>
         </template>
       </el-table-column>

@@ -42,8 +42,8 @@ watch(
 </script>
 <style lang="scss" scoped>
 .box-card {
-  height: 100%;
   width: 100%;
+  height: 100%;
   margin-bottom: 0;
 
   :deep(.el-card__body) {
@@ -52,9 +52,9 @@ watch(
   }
 
   :deep(.process-viewer) {
+    width: 100%;
     height: 100% !important;
     min-height: 100%;
-    width: 100%;
     overflow: auto;
   }
 }

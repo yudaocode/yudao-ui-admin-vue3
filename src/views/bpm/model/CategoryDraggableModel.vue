@@ -214,7 +214,7 @@
                     command="handleReport"
                     v-if="
                       checkPermi(['bpm:process-instance:manager-query']) &&
-                      scope.row.processDefinition
+                        scope.row.processDefinition
                     "
                     :disabled="!isManagerUser(scope.row)"
                   >

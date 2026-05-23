@@ -501,8 +501,8 @@
       class="hover-bg-gray-100 rounded-xl p-6px"
       v-if="
         userId === processInstance?.startUser?.id &&
-        isEndProcessStatus(processInstance?.status) &&
-        processDefinition?.formType === 10
+          isEndProcessStatus(processInstance?.status) &&
+          processDefinition?.formType === 10
       "
     >
       <Icon :size="14" icon="ep:refresh" />&nbsp; 再次提交

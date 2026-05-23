@@ -194,7 +194,7 @@
                   <el-dropdown-item
                     v-if="
                       row.deliveryType === DeliveryTypeEnum.EXPRESS.type &&
-                      row.status === TradeOrderStatusEnum.UNDELIVERED.status
+                        row.status === TradeOrderStatusEnum.UNDELIVERED.status
                     "
                     command="delivery"
                   >
