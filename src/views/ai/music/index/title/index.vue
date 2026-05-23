@@ -1,11 +1,11 @@
 <template>
   <div class="mb-12px">
     <div class="flex text-[var(--el-text-color-primary)] justify-between items-center">
-      <span>{{title}}</span>
+      <span>{{ title }}</span>
       <slot name="extra"></slot>
     </div>
     <div class="text-[var(--el-text-color-secondary)] text-12px my-8px">
-      {{desc}}
+      {{ desc }}
     </div>
     <slot></slot>
   </div>

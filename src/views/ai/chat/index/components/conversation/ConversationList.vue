@@ -60,12 +60,12 @@
                   class="py-0.5 px-2.5"
                   style="
                     max-width: 220px;
+                    overflow: hidden;
                     font-size: 14px;
                     font-weight: 400;
                     color: var(--el-text-color-regular);
-                    overflow: hidden;
-                    white-space: nowrap;
                     text-overflow: ellipsis;
+                    white-space: nowrap;
                   "
                 >
                   {{ conversation.title }}
@@ -103,9 +103,9 @@
     <div
       class="absolute bottom-0 left-0 right-0 px-5 leading-8.75 flex justify-between items-center"
       style="
+        color: var(--el-text-color);
         background-color: var(--el-fill-color-extra-light);
         box-shadow: 0 0 1px 1px var(--el-border-color-lighter);
-        color: var(--el-text-color);
       "
     >
       <div

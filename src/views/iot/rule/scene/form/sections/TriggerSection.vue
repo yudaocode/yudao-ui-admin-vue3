@@ -75,7 +75,7 @@
               >
                 <Icon icon="ep:timer" class="text-[var(--el-color-danger)] text-18px" />
                 <span class="text-14px font-500 text-[var(--el-text-color-primary)]"
-                  >定时触发配置</span
+                >定时触发配置</span
                 >
               </div>
 

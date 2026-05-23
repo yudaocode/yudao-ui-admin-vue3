@@ -36,7 +36,9 @@
           inline-prompt
           active-text="定时刷新"
           inactive-text="定时刷新"
-          style="--el-switch-on-color: #13ce66"
+          style="
+
+--el-switch-on-color: #13ce66"
         />
       </el-form-item>
     </el-form>
