@@ -14,7 +14,12 @@ import {
 } from '@/api/im/group/member'
 import { useConversationStore } from './conversationStore'
 import { useGroupRequestStore } from './groupRequestStore'
-import { ImConversationType, ImGroupMemberRole, ImMessageType } from '../../utils/constants'
+import {
+  ImConversationType,
+  ImGroupMemberRole,
+  ImMessageStatus,
+  ImMessageType
+} from '../../utils/constants'
 import { CommonStatusEnum } from '@/utils/constants'
 import {
   getCurrentUserId,
@@ -700,7 +705,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
     },
 
-    /** 群消息置顶：从 payload 直接拿完整消息对象 push 到 pinnedMessages */
+    /** 群消息置顶：从 payload 取消息展示数据加入置顶列表 */
     applyGroupMessagePinNotification(groupId: number, payload: GroupNotificationPayload) {
       const message = payload.message
       if (!message) {
@@ -715,17 +720,22 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (existing.some((msg) => msg.id === message.id)) {
         return
       }
-      // message 字段名跟 Message 一致（仅 sendTime 需要从 ISO 串转毫秒戳，selfSend 按当前用户算）
-      const newMessage: Message = {
-        ...message,
-        clientMessageId: message.clientMessageId || '',
-        sendTime: new Date(message.sendTime).getTime(),
-        targetId: message.groupId,
-        selfSend: message.senderId === getCurrentUserId(),
-        atUserIds: message.atUserIds || [],
-        receiverUserIds: message.receiverUserIds || []
-      }
-      group.pinnedMessages = [...existing, newMessage]
+      group.pinnedMessages = [
+        ...existing,
+        {
+          id: message.id,
+          clientMessageId: '',
+          senderId: message.senderId,
+          type: message.type,
+          content: message.content,
+          status: ImMessageStatus.UNREAD,
+          sendTime: new Date(message.sendTime).getTime(),
+          targetId: message.groupId || groupId,
+          selfSend: message.senderId === getCurrentUserId(),
+          atUserIds: message.atUserIds ? [...message.atUserIds] : [],
+          receiverUserIds: message.receiverUserIds ? [...message.receiverUserIds] : []
+        }
+      ]
       this.saveGroups()
     },
 

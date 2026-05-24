@@ -693,20 +693,16 @@ export type GroupNotificationPayload = {
   // 自由进群事件
   entrantUserId?: number
   addSource?: number
-  // PIN 事件携带的完整被置顶消息对象
+  // PIN 事件携带的被置顶消息展示数据
   message?: {
     id: number
-    clientMessageId?: string
     senderId: number
     groupId: number
     type: number
     content: string
-    status: number
     sendTime: string
     atUserIds?: number[]
     receiverUserIds?: number[]
-    receiptStatus?: number
-    readCount?: number
   }
 }
 
