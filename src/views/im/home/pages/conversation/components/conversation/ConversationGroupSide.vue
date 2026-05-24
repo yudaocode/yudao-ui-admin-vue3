@@ -622,7 +622,6 @@ function onMutedChange(value: boolean | string | number) {
   groupStore.setSilent(targetId, next).catch((error) => {
     console.error('[IM ConversationGroupSide] setSilent 失败', { targetId }, error)
     conversationStore.setSilent(type, targetId, !next)
-    message.error('操作失败')
   })
 }
 
@@ -650,13 +649,9 @@ async function onMuteAllChange(value: boolean | string | number) {
     return
   }
   const newValue = !!value
-  try {
-    await muteAll({ groupId: props.group.id, mutedAll: newValue })
-    message.success(newValue ? '已开启全群禁言' : '已关闭全群禁言')
-    emit('reload')
-  } catch {
-    message.error('操作失败')
-  }
+  await muteAll({ groupId: props.group.id, mutedAll: newValue })
+  message.success(newValue ? '已开启全群禁言' : '已关闭全群禁言')
+  emit('reload')
 }
 
 // ==================== 进群审批 ====================

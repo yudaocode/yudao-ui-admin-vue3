@@ -202,7 +202,7 @@ watch(visible, (open) => {
   }
 })
 
-/** 备注 popover 点击保存：先走 store API 同步后端，成功后再关 popover + 提示（接口错误由全局拦截器统一 toast，不重复 catch） */
+/** 备注 popover 点击保存 */
 async function handleSaveDisplayName() {
   if (!props.friend) {
     return
@@ -227,7 +227,6 @@ function handleMutedChange(value: boolean | string | number) {
   }
   friendStore.setSilent(targetId, next).catch((error) => {
     console.error('[IM ConversationPrivateSide] 切换免打扰失败', { targetId }, error)
-    message.error('切换免打扰失败')
     conversationStore.setSilent(type, targetId, !next)
   })
 }

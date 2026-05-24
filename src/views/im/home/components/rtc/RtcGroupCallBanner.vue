@@ -166,12 +166,7 @@ async function handleJoin() {
     return
   }
   popoverVisible.value = false
-  try {
-    const data = await joinCall(call.room)
-    rtcStore.startInviting(data)
-  } catch (e: any) {
-    console.error('[GroupCallBanner] join 失败', { room: call.room }, e)
-    message.error(e?.msg || '加入失败')
-  }
+  const data = await joinCall(call.room)
+  rtcStore.startInviting(data)
 }
 </script>

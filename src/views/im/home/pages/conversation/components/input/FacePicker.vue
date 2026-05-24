@@ -280,28 +280,26 @@ async function onUploadPicked(e: Event) {
     return
   }
   uploading.value = true
-  let payload: { url: string; width: number; height: number }
+  let size: { width: number; height: number }
   try {
-    // probe 本地图片宽高 + 上传到 OSS 并行起跑（probe 通常远快于上传，几乎完全被遮蔽）
+    size = await probeImageSize(file)
+  } catch (err) {
+    console.warn('[IM] 解析个人表情失败', err)
+    ElMessage.error('图片解析失败')
+    uploading.value = false
+    return
+  }
+
+  try {
     const form = new FormData()
     form.append('file', file)
-    const [size, uploadRes] = await Promise.all([
-      probeImageSize(file),
-      updateFile(form) as Promise<{ data?: string }>
-    ])
+    const uploadRes = (await updateFile(form)) as { data?: string }
     const url = uploadRes?.data
     if (!url) {
       ElMessage.error('上传失败')
       return
     }
-    payload = { url, width: size.width, height: size.height }
-  } catch (err) {
-    console.warn('[IM] 上传个人表情失败', err)
-    ElMessage.error('上传失败')
-    uploading.value = false
-    return
-  }
-  try {
+    const payload = { url, width: size.width, height: size.height }
     await faceStore.addFaceUserItem(payload)
   } finally {
     uploading.value = false

@@ -58,20 +58,28 @@
       </div>
       <div class="flex items-center mt-1 leading-5">
         <!-- 进群申请红字前缀：群主 / 管理员看到自己管理的群下还有未处理申请时显示 -->
-        <span v-if="requestText" class="flex-shrink-0 text-12px text-[#c70b0b]">
+        <span
+          v-if="requestText"
+          class="conversation-item__prefix flex-shrink overflow-hidden text-12px text-[#c70b0b] truncate whitespace-nowrap"
+        >
           {{ requestText }}
         </span>
         <!-- @红字提示：atMe 优先于 atAll -->
-        <span v-if="atText" class="flex-shrink-0 text-12px text-[#c70b0b]">{{ atText }}</span>
+        <span
+          v-if="atText"
+          class="conversation-item__prefix flex-shrink overflow-hidden text-12px text-[#c70b0b] truncate whitespace-nowrap"
+        >
+          {{ atText }}
+        </span>
         <!-- 群聊最后一条发送者前缀：按 lastSenderId + 当前会话上下文实时算名字 -->
         <span
           v-if="showSendName"
-          class="flex-shrink-0 text-12px text-[var(--el-text-color-secondary)] whitespace-nowrap"
+          class="conversation-item__sender flex-shrink overflow-hidden text-12px text-[var(--el-text-color-secondary)] truncate whitespace-nowrap"
         >
           {{ lastSenderDisplayName }}:&nbsp;
         </span>
         <span
-          class="flex-1 overflow-hidden text-12px truncate text-[var(--el-text-color-secondary)]"
+          class="flex-1 min-w-0 overflow-hidden text-12px truncate text-[var(--el-text-color-secondary)]"
         >
           {{ lastContentDisplay }}
         </span>
@@ -239,7 +247,6 @@ function handleMuted() {
       : groupStore.setSilent(targetId, next)
   sync.catch((e) => {
     console.error('[IM] 切换免打扰失败', e)
-    message.error('切换免打扰失败')
     conversationStore.setSilent(type, targetId, !next)
   })
 }
@@ -284,5 +291,13 @@ function handleContextMenu(e: MouseEvent) {
 /* el-icon 的全局 color:var(--color) 在暗色模式下会渲染成白色，这里用 :deep + !important 锁定 */
 .conversation-item__silent :deep(svg) {
   fill: currentColor !important;
+}
+
+.conversation-item__prefix {
+  max-width: 45%;
+}
+
+.conversation-item__sender {
+  max-width: 50%;
 }
 </style>

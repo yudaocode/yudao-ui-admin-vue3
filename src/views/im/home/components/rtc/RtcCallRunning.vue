@@ -172,6 +172,7 @@
       </template>
       <div
         class="flex flex-col gap-2 items-center cursor-pointer select-none min-w-[64px]"
+        :class="{ 'opacity-60 pointer-events-none': hangingUp }"
         @click="$emit('hangup')"
       >
         <span class="flex justify-center items-center w-[52px] h-[52px] text-white rounded-full bg-[#f04a4a]">
@@ -212,6 +213,7 @@ const props = defineProps<{
   localStream?: MediaStream | null
   remoteVideoStream?: MediaStream | null
   remoteAudioStream?: MediaStream | null
+  hangingUp?: boolean
 }>()
 
 defineEmits<{

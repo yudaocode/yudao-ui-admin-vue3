@@ -37,7 +37,15 @@
           />
         </el-select>
       </el-form-item>
-      <!-- 「消息内容」搜索入口暂时移除：后端 page 接口没有 content 字段，留着会误导管理员；后端补上后再恢复 -->
+      <el-form-item label="消息内容" prop="content">
+        <el-input
+          v-model="queryParams.content"
+          placeholder="请输入消息内容"
+          clearable
+          class="!w-240px"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="发送时间" prop="sendTime">
         <el-date-picker
           v-model="queryParams.sendTime"
@@ -151,6 +159,7 @@ const queryParams = reactive({
   senderId: undefined as number | undefined,
   receiverId: undefined as number | undefined,
   type: undefined as number | undefined,
+  content: undefined as string | undefined,
   sendTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单

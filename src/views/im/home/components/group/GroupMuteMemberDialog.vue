@@ -63,7 +63,8 @@ const presets = [
   { label: '12 小时', value: 43200 },
   { label: '1 天', value: 86400 },
   { label: '7 天', value: 604800 },
-  { label: '30 天', value: 2592000 }
+  { label: '30 天', value: 2592000 },
+  { label: '永久', value: 0 }
 ]
 
 /** 打开弹窗 */

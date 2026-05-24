@@ -22,6 +22,8 @@
       v-else-if="rtcStore.stage === ImRtcCallStage.INCOMING"
       :payload="rtcStore.incomingPayload"
       :is-group="isGroup"
+      :accepting="accepting"
+      :rejecting="rejecting"
       @accept="handleAccept"
       @reject="handleReject"
     />
@@ -42,6 +44,7 @@
       :local-stream="localStream"
       :remote-video-stream="remoteVideoStream"
       :remote-audio-stream="remoteAudioStream"
+      :hanging-up="hangingUp"
       @hangup="handleHangup"
       @toggle-mic="toggleMic"
       @toggle-camera="toggleCamera"
@@ -90,6 +93,11 @@ const message = useMessage()
 const lk = useLiveKitRoom()
 
 const memberPickerRef = ref<InstanceType<typeof RtcCallMemberPickerDialog>>()
+const connecting = ref(false)
+const accepting = ref(false)
+const rejecting = ref(false)
+const cancelling = ref(false)
+const hangingUp = ref(false)
 
 // ==================== 视图模型 ====================
 
@@ -224,17 +232,22 @@ const participants = computed<CallParticipantVM[]>(() => {
 /** 连入 LiveKit 房间并注册离开回调；INVITING 主叫预连和被叫 accept 后连入共用 */
 async function connectLiveKit(livekitUrl: string, token: string) {
   // 幂等：lk.connect 内部进入后就把 room.value 赋值；非空表示已经在连接或已连接；stage 多次切换时重复触发也跳过
-  if (lk.room.value) {
+  if (lk.room.value || connecting.value) {
     return
   }
-  // 先注册回调，再 connect；信令握手过程会即时推送已在房参与者，业务 handler 必须先就绪
-  lk.onDisconnected(() => handlePeerDisconnected())
-  lk.onParticipantConnected(maybeEnterRunning)
-  lk.onParticipantDisconnected((userId) => rtcStore.markUserLeft(userId))
-  await lk.connect(livekitUrl, token, { audio: true, video: initialCamera.value })
-  // 兜底：connect 期间若已有远端在房，事件可能在 handler 注册前已触发，主动切到 RUNNING
-  if (lk.remoteParticipants.value.length > 0) {
-    maybeEnterRunning()
+  connecting.value = true
+  try {
+    // 先注册回调，再 connect；信令握手过程会即时推送已在房参与者，业务 handler 必须先就绪
+    lk.onDisconnected(() => handlePeerDisconnected())
+    lk.onParticipantConnected(maybeEnterRunning)
+    lk.onParticipantDisconnected((userId) => rtcStore.markUserLeft(userId))
+    await lk.connect(livekitUrl, token, { audio: true, video: initialCamera.value })
+    // 兜底：connect 期间若已有远端在房，事件可能在 handler 注册前已触发，主动切到 RUNNING
+    if (lk.remoteParticipants.value.length > 0) {
+      maybeEnterRunning()
+    }
+  } finally {
+    connecting.value = false
   }
 }
 
@@ -297,71 +310,85 @@ watch(
 
 /** 主叫取消邀请 */
 async function handleCancel() {
-  const room = rtcStore.call?.room
-  if (room) {
-    try {
-      await cancelCall(room)
-    } catch (e) {
-      console.warn('[Call] cancel 失败', { room }, e)
-    }
+  if (cancelling.value) {
+    return
   }
-  await lk.disconnect()
-  rtcStore.reset()
+  cancelling.value = true
+  const room = rtcStore.call?.room
+  try {
+    if (room) {
+      await cancelCall(room)
+    }
+    await lk.disconnect()
+    rtcStore.reset()
+  } finally {
+    cancelling.value = false
+  }
 }
 
 /** 被叫拒绝来电 */
 async function handleReject() {
-  const payload = rtcStore.incomingPayload
-  if (payload?.room) {
-    try {
-      await rejectCall(payload.room)
-    } catch (e) {
-      console.warn('[Call] reject 失败', { room: payload.room }, e)
-    }
-    // 本端先行从胶囊条移除自己，免等后端 RTC_CALL(REJECTED) 推回；私聊场景 store 内部 no-op
-    rtcStore.applyParticipantRejected({
-      room: payload.room,
-      conversationType: payload.conversationType,
-      groupId: payload.groupId,
-      operatorUserId: getCurrentUserId()
-    })
+  if (rejecting.value) {
+    return
   }
-  rtcStore.reset()
+  rejecting.value = true
+  const payload = rtcStore.incomingPayload
+  try {
+    if (payload?.room) {
+      await rejectCall(payload.room)
+      // 本端先行从胶囊条移除自己，免等后端 RTC_CALL(REJECTED) 推回；私聊场景 store 内部 no-op
+      rtcStore.applyParticipantRejected({
+        room: payload.room,
+        conversationType: payload.conversationType,
+        groupId: payload.groupId,
+        operatorUserId: getCurrentUserId()
+      })
+    }
+    rtcStore.reset()
+  } finally {
+    rejecting.value = false
+  }
 }
 
 /** 被叫接听来电 */
 async function handleAccept() {
+  if (accepting.value) {
+    return
+  }
   const payload = rtcStore.incomingPayload
   if (!payload) return
+  accepting.value = true
   try {
     const data = await acceptCall(payload.room)
     rtcStore.enterRunning(data)
-  } catch (e: any) {
-    console.error('[Call] accept 失败', { room: payload.room }, e)
-    message.error(e?.msg || '接听失败')
-    rtcStore.reset()
+  } finally {
+    accepting.value = false
   }
 }
 
 /** 通话中挂断 */
 async function handleHangup() {
-  const call = rtcStore.call
-  if (call?.room) {
-    try {
-      await leaveCall(call.room)
-    } catch (e) {
-      console.warn('[Call] leave 失败', { room: call.room }, e)
-    }
-    // 本端先行从胶囊条移除自己，免等后端 RTC_PARTICIPANT_DISCONNECTED 推回；私聊场景 store 内部 no-op，整通话由 END 关掉
-    rtcStore.applyParticipantDisconnected({
-      room: call.room,
-      userId: getCurrentUserId(),
-      conversationType: call.conversationType,
-      groupId: call.groupId
-    })
+  if (hangingUp.value) {
+    return
   }
-  await lk.disconnect()
-  rtcStore.reset()
+  hangingUp.value = true
+  const call = rtcStore.call
+  try {
+    if (call?.room) {
+      await leaveCall(call.room)
+      // 本端先行从胶囊条移除自己，免等后端 RTC_PARTICIPANT_DISCONNECTED 推回；私聊场景 store 内部 no-op，整通话由 END 关掉
+      rtcStore.applyParticipantDisconnected({
+        room: call.room,
+        userId: getCurrentUserId(),
+        conversationType: call.conversationType,
+        groupId: call.groupId
+      })
+    }
+    await lk.disconnect()
+    rtcStore.reset()
+  } finally {
+    hangingUp.value = false
+  }
 }
 
 /** LiveKit Room 异常断开；多见于网络中断 */
@@ -453,14 +480,9 @@ async function handleAddMemberSuccess(userIds: number[]) {
   if (!call?.room || userIds.length === 0) {
     return
   }
-  try {
-    await inviteCall({ room: call.room, inviteeIds: userIds })
-    // 同步本地 inviteeIds，让新成员立即作为 pending 占位出现在网格里
-    rtcStore.appendInvitees(userIds)
-    message.success('已发送邀请')
-  } catch (e: any) {
-    console.error('[Call] invite 追加失败', { room: call.room, inviteeIds: userIds }, e)
-    message.error(e?.msg || '添加成员失败')
-  }
+  await inviteCall({ room: call.room, inviteeIds: userIds })
+  // 同步本地 inviteeIds，让新成员立即作为 pending 占位出现在网格里
+  rtcStore.appendInvitees(userIds)
+  message.success('已发送邀请')
 }
 </script>

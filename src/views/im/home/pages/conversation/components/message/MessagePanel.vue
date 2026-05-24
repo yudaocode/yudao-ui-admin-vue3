@@ -464,6 +464,7 @@ function toggleSide() {
 
 /** 私聊通话入口：popover 触发；点 语音 / 视频 直接发起 */
 const callPopoverVisible = ref(false)
+const callInviting = ref(false) // 通话发起中
 async function startPrivateCall(mediaType: number) {
   callPopoverVisible.value = false
   const conversation = conversationStore.activeConversation
@@ -503,13 +504,21 @@ async function onCallMemberPicked(selectedIds: number[]) {
   })
 }
 
-/** 实际调 create 接口；统一处理成功 / ENDED（如忙线立即结束）/ 异常三种返回 */
+/** 实际调 create 接口；统一处理成功 / ENDED（如忙线立即结束） */
 async function doInvite(reqVO: {
   conversationType: number
   mediaType: number
   groupId?: number
   inviteeIds: number[]
 }) {
+  if (callInviting.value) {
+    return
+  }
+  if (rtcStore.isActive) {
+    message.warning('当前已有通话')
+    return
+  }
+  callInviting.value = true
   try {
     const data = await createCall(reqVO)
     // 后端已 INSERT + 立即 end（如忙线）：toast 提示，不进 INVITING 阶段；chat tip 由 RTC_CALL_END 推送写入消息流
@@ -519,8 +528,8 @@ async function doInvite(reqVO: {
     }
     // 正常进入 INVITING 阶段：走 store 逻辑发起通话，后续状态更新 / 消息流更新由 RTC 模块监听推送处理
     rtcStore.startInviting(data)
-  } catch (e: any) {
-    message.error(e?.msg || '发起通话失败')
+  } finally {
+    callInviting.value = false
   }
 }
 

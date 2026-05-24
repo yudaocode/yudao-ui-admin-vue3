@@ -53,12 +53,16 @@
     <div class="flex flex-shrink-0 gap-2 items-center">
       <button
         class="flex flex-shrink-0 justify-center items-center w-10 h-10 text-white rounded-full transition-opacity bg-[#f04a4a] hover:opacity-90"
+        :class="{ 'opacity-60 cursor-not-allowed': rejectDisabled }"
+        :disabled="rejectDisabled"
         @click="$emit('reject')"
       >
         <Icon icon="ant-design:phone-outlined" :size="18" class="rotate-[135deg]" />
       </button>
       <button
         class="flex flex-shrink-0 justify-center items-center w-10 h-10 text-white rounded-full transition-opacity bg-[#2ec27e] hover:opacity-90"
+        :class="{ 'opacity-60 cursor-not-allowed': acceptDisabled }"
+        :disabled="acceptDisabled"
         @click="$emit('accept')"
       >
         <Icon icon="ant-design:phone-outlined" :size="18" />
@@ -78,6 +82,8 @@ import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 const props = defineProps<{
   payload: ImRtcCallNotification | null
   isGroup?: boolean
+  accepting?: boolean
+  rejecting?: boolean
 }>()
 
 defineEmits<{ accept: []; reject: [] }>()
@@ -87,6 +93,12 @@ const tipText = computed(() => {
   if (!props.payload) return ''
   return `邀请你${getDictLabel(DICT_TYPE.IM_RTC_CALL_MEDIA_TYPE, props.payload.mediaType)}通话`
 })
+
+/** 接听按钮禁用态 */
+const acceptDisabled = computed(() => !!props.accepting || !!props.rejecting)
+
+/** 拒绝按钮禁用态 */
+const rejectDisabled = computed(() => !!props.rejecting || !!props.accepting)
 
 /** 群通话成员；缓存为空时用 INVITE 载荷里的主叫兜底，避免空白 */
 const callMembers = useGroupCallMembers(
