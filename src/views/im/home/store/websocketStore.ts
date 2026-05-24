@@ -8,6 +8,7 @@ import {
   ImMessageStatus,
   ImMessageType,
   ImConversationType,
+  ImRtcCallMediaType,
   ImRtcParticipantStatus,
   isFriendChatTip,
   isFriendNotification,
@@ -61,6 +62,35 @@ const isFriendDeleteWithClear = (frame: ImPrivateMessageDTO): boolean => {
   } catch {
     return false
   }
+}
+
+const RTC_LIVEKIT_PROTOCOLS = new Set(['ws:', 'wss:', 'http:', 'https:'])
+const RTC_MEDIA_TYPES = new Set<number>(Object.values(ImRtcCallMediaType))
+
+/** 校验 LiveKit 连接地址 */
+function isValidLiveKitUrl(url?: string): boolean {
+  if (!url) {
+    return false
+  }
+  try {
+    return RTC_LIVEKIT_PROTOCOLS.has(new URL(url).protocol)
+  } catch {
+    return false
+  }
+}
+
+/** 校验来电信令载荷 */
+function isValidRtcInvitePayload(payload: ImRtcCallNotification): boolean {
+  if (!payload.room || !payload.token || !isValidLiveKitUrl(payload.livekitUrl)) {
+    return false
+  }
+  if (!RTC_MEDIA_TYPES.has(payload.mediaType) || !payload.inviterUserId) {
+    return false
+  }
+  if (payload.conversationType === ImConversationType.PRIVATE) {
+    return true
+  }
+  return payload.conversationType === ImConversationType.GROUP && !!payload.groupId
 }
 
 /**
@@ -889,6 +919,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           }
           switch (payload.status) {
             case ImRtcParticipantStatus.INVITING:
+              if (!isValidRtcInvitePayload(payload)) {
+                console.warn('[IM WS] RTC_CALL invite payload 不合法', payload)
+                return
+              }
               // 当前已在通话中：忽略新来电；后端层面也会拒绝，这里是兜底
               if (!rtcStore.isActive) {
                 rtcStore.showIncoming(payload)

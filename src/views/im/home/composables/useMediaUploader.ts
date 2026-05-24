@@ -1,6 +1,7 @@
 import { updateFile } from '@/api/infra/file'
 import { useUserStore } from '@/store/modules/user'
 import { useMessage } from '@/hooks/web/useMessage'
+import { isOpenableUrl } from '@/utils/url'
 
 import { useConversationStore } from '../store/conversationStore'
 import { useMessageSender } from './useMessageSender'
@@ -348,6 +349,12 @@ export const useMediaUploader = () => {
       console.error(`[IM] ${handler.kind}上传失败`, e)
     }
     if (!url) {
+      markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
+      return clientMessageId
+    }
+    if (!isOpenableUrl(url)) {
+      console.warn(`[IM] ${handler.kind}上传返回了不支持打开的 URL`, { url })
+      message.warning('上传返回的文件地址不支持打开')
       markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
       return clientMessageId
     }

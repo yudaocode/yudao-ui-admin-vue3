@@ -172,8 +172,12 @@ import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useUserStore } from '@/store/modules/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
-import { ensureMediaSizeWithinLimit, useMediaUploader } from '@/views/im/home/composables/useMediaUploader'
+import {
+  ensureMediaSizeWithinLimit,
+  useMediaUploader
+} from '@/views/im/home/composables/useMediaUploader'
 import { useMuteOverlay } from '@/views/im/home/composables/useMuteOverlay'
+import { isOpenableUrl } from '@/utils/url'
 import { getConversationKey } from '@/views/im/utils/conversation'
 import { ImConversationType, ImGroupMemberRole, ImMessageType } from '@/views/im/utils/constants'
 import { DANGEROUS_FILE_EXTENSIONS, MESSAGE_GROUP_READ_ENABLED } from '@/views/im/utils/config'
@@ -209,6 +213,7 @@ const {
   verifyMediaUploadStillAllowed,
   requireMediaHandler
 } = useMediaUploader()
+const muteOverlay = useMuteOverlay() // 禁言 / 封禁覆盖层
 
 const editorRef = useTemplateRef<HTMLDivElement>('editorRef')
 const imageInputRef = useTemplateRef<HTMLInputElement>('imageInputRef')
@@ -243,6 +248,14 @@ function syncEditorState() {
   applyEditorUiState(editor)
   syncDraftToStore(editor)
 }
+
+/** 禁言状态变化时同步发送按钮 */
+watch(muteOverlay, () => {
+  const editor = editorRef.value
+  if (editor) {
+    applyEditorUiState(editor)
+  }
+})
 
 /** 把 editor 当前内容写到 draftStore；plain 由 collectFromEditor 拿，与发送时同源避免列表与实发不一致 */
 function syncDraftToStore(editor: HTMLDivElement) {
@@ -613,11 +626,6 @@ async function onSelectFace(face: { url: string; width: number; height: number; 
 const isGroup = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.GROUP
 )
-
-// ==================== 禁言 / 封禁状态 ====================
-
-/** 禁言 / 封禁覆盖层；handleResend 重试 / uploadAndSendMedia 上传完后也共用同一份，避免绕过 overlay */
-const muteOverlay = useMuteOverlay()
 
 /** 从 groupStore 读当前激活群的成员（切会话时由 MessagePanel 预拉） */
 const groupMembers = computed<GroupMemberLite[]>(() => {
@@ -1106,8 +1114,20 @@ async function uploadAndSendVideo(file: File) {
     markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
     return
   }
+  if (!isOpenableUrl(url)) {
+    console.warn('[IM] 视频上传返回了不支持打开的 URL', { url })
+    message.warning('上传返回的视频地址不支持打开')
+    markMediaFailed(conversation.type, conversation.targetId, clientMessageId)
+    return
+  }
+  const safeCoverUrl = coverUrl && isOpenableUrl(coverUrl) ? coverUrl : undefined
+  if (coverUrl && !safeCoverUrl) {
+    console.warn('[IM] 视频封面上传返回了不支持打开的 URL', { coverUrl })
+  }
   // 3.3 上传后会话校验 + muteOverlay 复查（与 useMediaUploader.uploadAndSendMedia 同一道）
-  if (!verifyMediaUploadStillAllowed(conversation, startKey, ImMessageType.VIDEO, clientMessageId)) {
+  if (
+    !verifyMediaUploadStillAllowed(conversation, startKey, ImMessageType.VIDEO, clientMessageId)
+  ) {
     return
   }
 
@@ -1116,7 +1136,7 @@ async function uploadAndSendVideo(file: File) {
     withQuotePayload(
       videoHandler.build(file, url, {
         videoProbe: { duration: probe.duration, width: probe.width, height: probe.height },
-        videoCoverUrl: coverUrl
+        videoCoverUrl: safeCoverUrl
       }),
       replyQuote
     )
