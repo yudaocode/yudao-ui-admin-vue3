@@ -141,6 +141,7 @@
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
 import { InfoFilled } from '@element-plus/icons-vue'
+import { isEmptyVal } from '@/utils/is'
 import {
   IoTDataSpecsDataTypeEnum,
   JSON_PARAMS_INPUT_CONSTANTS,
@@ -329,7 +330,8 @@ const handleParamsChange = () => {
 
       // 验证必填参数
       for (const param of paramsList.value) {
-        if (param.required && (!parsed[param.identifier] || parsed[param.identifier] === '')) {
+        const value = parsed[param.identifier]
+        if (param.required && isEmptyVal(value)) {
           jsonError.value = JSON_PARAMS_INPUT_CONSTANTS.PARAM_REQUIRED_ERROR(param.name)
           return
         }
