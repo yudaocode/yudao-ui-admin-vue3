@@ -369,12 +369,18 @@ function handlePeerDisconnected() {
   if (!rtcStore.isActive) {
     return
   }
+  const room = rtcStore.call?.room
   // 给 RTC_CALL_END WebSocket 推送一个小窗口；私聊超时 / 主动挂断等场景下，后端 endSession 会先推 RTC_CALL_END，
   // 让前端按业务语义（"对方未接听" / "已取消" 等）reset，避免错把业务断开 toast 成「通话已断开」
   setTimeout(() => {
     if (!rtcStore.isActive) {
       return
     }
+    // 上报离开房间
+    if (room) {
+      leaveCall(room).catch(() => undefined)
+    }
+    // 清理本地通话状态
     message.warning('通话已断开')
     rtcStore.reset()
   }, 100)

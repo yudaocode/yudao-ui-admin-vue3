@@ -124,7 +124,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center" width="280" fixed="right">
+      <el-table-column label="操作" align="center" width="340" fixed="right">
         <template #default="{ row }">
           <el-button
             link
@@ -159,6 +159,15 @@
           >
             解封
           </el-button>
+          <el-button
+            v-if="row.status === CommonStatusEnum.ENABLE"
+            link
+            type="danger"
+            @click="handleDissolve(row)"
+            v-hasPermi="['im:manager:group:dissolve']"
+          >
+            解散
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -179,6 +188,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions, getBoolDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
+import { CommonStatusEnum } from '@/utils/constants'
 import * as ManagerGroupApi from '@/api/im/manager/group'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import GroupDetail from './GroupDetail.vue'
@@ -247,6 +257,19 @@ const handleUnban = async (row: ManagerGroupApi.ImManagerGroupVO) => {
     // 发起解封
     await ManagerGroupApi.unbanManagerGroup(row.id)
     message.success('解封成功')
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 解散按钮操作 */
+const handleDissolve = async (row: ManagerGroupApi.ImManagerGroupVO) => {
+  try {
+    // 解散的二次确认
+    await message.confirm(`确认解散群「${row.name}」吗？`)
+    // 发起解散
+    await ManagerGroupApi.dissolveManagerGroup(row.id)
+    message.success('解散成功')
     // 刷新列表
     await getList()
   } catch {}

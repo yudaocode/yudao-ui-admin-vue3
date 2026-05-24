@@ -88,34 +88,28 @@ export const useFaceStore = defineStore('imFace', () => {
    * 添加个人表情；服务端对同 URL 抛 FACE_USER_ITEM_DUPLICATED 错误
    *
    * 来源：1. 用户在表情面板「+」上传图片  2. 长按消息「添加到表情」
-   * 返回 true / false 与 removeFaceUserItem 风格对齐；调用方按 boolean 决定是否提示
    */
   async function addFaceUserItem(reqVO: ImFaceUserItemSaveReqVO): Promise<boolean> {
     const requestEpoch = storeEpoch
-    try {
-      const id = await apiCreateFaceUserItem(reqVO)
-      if (!id) {
-        return false
-      }
-      // reset 已切账号：旧请求拿到的 id 不能再 unshift 进新账号内存
-      if (requestEpoch !== storeEpoch) {
-        return false
-      }
-      // id 不在缓存里才插入；服务端唯一约束兜底了 race，本地理论上不会拿到重复 id
-      if (!faceUserItems.value.some((item) => item.id === id)) {
-        faceUserItems.value.unshift({
-          id,
-          url: reqVO.url,
-          name: reqVO.name,
-          width: reqVO.width,
-          height: reqVO.height
-        })
-      }
-      return true
-    } catch (e) {
-      console.warn('[IM] 添加个人表情失败', { reqVO }, e)
+    const id = await apiCreateFaceUserItem(reqVO)
+    if (!id) {
       return false
     }
+    // reset 已切账号：旧请求拿到的 id 不能再 unshift 进新账号内存
+    if (requestEpoch !== storeEpoch) {
+      return false
+    }
+    // id 不在缓存里才插入；服务端唯一约束兜底了 race，本地理论上不会拿到重复 id
+    if (!faceUserItems.value.some((item) => item.id === id)) {
+      faceUserItems.value.unshift({
+        id,
+        url: reqVO.url,
+        name: reqVO.name,
+        width: reqVO.width,
+        height: reqVO.height
+      })
+    }
+    return true
   }
 
   /** 删除个人表情；本地立即移除 */

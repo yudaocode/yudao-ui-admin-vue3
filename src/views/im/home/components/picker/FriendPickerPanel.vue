@@ -1,7 +1,7 @@
 <template>
   <!--
     好友选择面板：用于「新建群聊 / 邀请好友 / 推荐时创建聊天」等好友选择场景
-    - 左：搜索 + 字母分桶好友列表（圆形勾选）
+    - 左：搜索 + 好友列表（圆形勾选）
     - 右：已选数标题 + 已选好友列表（按点击顺序）
     - Panel 不带 el-dialog 壳；dialog 由业务壳持有
     - 三态语义：hide > locked > disabled（详见 contract）
@@ -20,59 +20,49 @@
         </el-input>
       </div>
 
-      <el-scrollbar class="flex-1">
-        <template v-for="bucket in buckets" :key="bucket.letter">
-          <!-- 字母分桶 header：浅底 + 小字号 -->
-          <div
-            class="pt-1 pb-0.5 px-3.5 text-12px text-[var(--el-text-color-secondary)] bg-[var(--el-fill-color-lighter)]"
-          >
-            {{ bucket.letter }}
-          </div>
-          <div
-            v-for="friend in bucket.list"
-            :key="friend.id"
-            class="flex gap-2.5 items-center px-3 py-2 cursor-pointer hover:bg-[var(--el-fill-color)]"
-            :class="{
-              'opacity-60 cursor-not-allowed hover:bg-transparent': isDisabled(friend)
-            }"
-            @click="handleToggle(friend)"
-          >
-            <!-- 圆形勾选指示器：未选灰色空心圆，选中实心微信绿 + 白对勾；锁定 / 禁用走灰底 -->
-            <span
-              class="flex flex-shrink-0 justify-center items-center w-5 h-5 rounded-full transition-colors"
-              :class="getCheckClass(friend)"
+      <div class="flex-1 min-h-0">
+        <PagedScroller v-if="filtered.length > 0" :items="filtered" :page-size="30" item-key="id">
+          <template #default="{ item }">
+            <div
+              :key="(item as FriendLite).id"
+              class="flex gap-2.5 items-center px-3 py-2 cursor-pointer hover:bg-[var(--el-fill-color)]"
+              :class="{
+                'opacity-60 cursor-not-allowed hover:bg-transparent': isDisabled(item as FriendLite)
+              }"
+              @click="handleToggle(item as FriendLite)"
             >
-              <Icon
-                v-if="isSelected(friend) || isLocked(friend)"
-                icon="ant-design:check-outlined"
-                :size="12"
-                color="#fff"
+              <!-- 圆形勾选指示器：未选灰色空心圆，选中实心微信绿 + 白对勾；锁定 / 禁用走灰底 -->
+              <span
+                class="flex flex-shrink-0 justify-center items-center w-5 h-5 rounded-full transition-colors"
+                :class="getCheckClass(item as FriendLite)"
+              >
+                <Icon
+                  v-if="isSelected(item as FriendLite) || isLocked(item as FriendLite)"
+                  icon="ant-design:check-outlined"
+                  :size="12"
+                  color="#fff"
+                />
+              </span>
+              <UserAvatar
+                :id="(item as FriendLite).id"
+                :url="(item as FriendLite).avatar"
+                :name="(item as FriendLite).nickname"
+                :size="36"
+                :clickable="false"
               />
-            </span>
-            <UserAvatar
-              :id="friend.id"
-              :url="friend.avatar"
-              :name="friend.nickname"
-              :size="36"
-              :clickable="false"
-            />
-            <!-- 行内名字：备注优先，列表里不重复展示昵称 -->
-            <span
-              class="flex-1 min-w-0 overflow-hidden text-sm truncate text-[var(--el-text-color-primary)]"
-            >
-              {{ friend.displayName || friend.nickname }}
-            </span>
-          </div>
-        </template>
-
-        <!-- 空态 -->
-        <div
-          v-if="filtered.length === 0"
-          class="py-10 text-13px text-center text-[var(--el-text-color-disabled)]"
-        >
+              <!-- 行内名字：备注优先，列表里不重复展示昵称 -->
+              <span
+                class="flex-1 min-w-0 overflow-hidden text-sm truncate text-[var(--el-text-color-primary)]"
+              >
+                {{ (item as FriendLite).displayName || (item as FriendLite).nickname }}
+              </span>
+            </div>
+          </template>
+        </PagedScroller>
+        <div v-else class="py-10 text-13px text-center text-[var(--el-text-color-disabled)]">
           {{ keyword ? '没有匹配的好友' : '暂无好友' }}
         </div>
-      </el-scrollbar>
+      </div>
     </div>
 
     <!-- 右栏 -->
@@ -137,6 +127,7 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
 import UserAvatar from '../user/UserAvatar.vue'
+import PagedScroller from '../PagedScroller.vue'
 import { useFriendBuckets } from '../../composables/useFriendBuckets'
 import { useSelectedItems } from '../../composables/useSelectedItems'
 import type { FriendLite } from '../../types'
@@ -194,8 +185,8 @@ const candidates = computed(() =>
   props.friends.filter((friend) => !hideSet.value.has(friend.id))
 )
 
-/** 委托 useFriendBuckets：搜索 + 字母分桶共用一套规则 */
-const { filtered, buckets } = useFriendBuckets(candidates, keyword)
+/** 委托 useFriendBuckets：搜索规则复用，左侧列表按滚动分页渲染 */
+const { filtered } = useFriendBuckets(candidates, keyword)
 
 /** 已选数 + 已选好友列表：三态优先级 + 顺序拼接由 useSelectedItems 统一承担 */
 const { selectedCount, selectedItems: selectedFriends } = useSelectedItems<FriendLite>(
@@ -251,4 +242,3 @@ function handleToggle(friend: FriendLite) {
   emit('update:selectedIds', next)
 }
 </script>
-

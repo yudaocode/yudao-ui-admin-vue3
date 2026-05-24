@@ -75,8 +75,13 @@
           <div class="text-[17px] font-medium">{{ peerNickname }}</div>
           <div class="text-13px text-white/60">{{ formattedDuration }}</div>
         </div>
-        <audio v-if="remoteAudioStream" ref="remoteAudioRef" autoplay :muted="!speakerEnabled"></audio>
       </template>
+      <audio
+        v-if="!isGroup && remoteAudioStream"
+        ref="remoteAudioRef"
+        autoplay
+        :muted="!speakerEnabled"
+      ></audio>
     </div>
 
     <!-- 底部操作区：麦克风 / 扬声器 / 摄像头 / (群聊：共享屏幕 / 添加成员) / 挂断 -->

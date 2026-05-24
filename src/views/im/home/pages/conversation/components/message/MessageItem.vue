@@ -786,7 +786,7 @@ const canAddToFace = computed(() => {
   return extractAddableFace(props.message) !== null
 })
 
-/** 添加到个人表情：从 message 抽 url + 尺寸 + name 写入个人表情库；幂等失败时返回 false 走 toast 兜底 */
+/** 添加到个人表情：从 message 抽 url + 尺寸 + name 写入个人表情库 */
 async function handleAddToFace() {
   const payload = extractAddableFace(props.message)
   if (!payload) {

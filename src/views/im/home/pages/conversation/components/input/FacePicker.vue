@@ -280,6 +280,7 @@ async function onUploadPicked(e: Event) {
     return
   }
   uploading.value = true
+  let payload: { url: string; width: number; height: number }
   try {
     // probe 本地图片宽高 + 上传到 OSS 并行起跑（probe 通常远快于上传，几乎完全被遮蔽）
     const form = new FormData()
@@ -293,13 +294,15 @@ async function onUploadPicked(e: Event) {
       ElMessage.error('上传失败')
       return
     }
-    const ok = await faceStore.addFaceUserItem({ url, width: size.width, height: size.height })
-    if (!ok) {
-      ElMessage.error('添加失败，可能已添加过')
-    }
+    payload = { url, width: size.width, height: size.height }
   } catch (err) {
     console.warn('[IM] 上传个人表情失败', err)
     ElMessage.error('上传失败')
+    uploading.value = false
+    return
+  }
+  try {
+    await faceStore.addFaceUserItem(payload)
   } finally {
     uploading.value = false
   }
