@@ -36,5 +36,5 @@ export const getManagerRtcCallPage = (params: PageParam) => {
 
 // 获得通话参与者列表
 export const getManagerRtcCallParticipantList = (id: number) => {
-  return request.get({ url: '/im/manager/rtc/participant-list?id=' + id })
+  return request.get({ url: '/im/manager/rtc/participant-list', params: { id } })
 }

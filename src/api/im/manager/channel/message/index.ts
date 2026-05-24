@@ -25,7 +25,7 @@ export const sendManagerChannelMessage = (data: ImManagerChannelMessageSendReqVO
 
 // 删除频道消息
 export const deleteManagerChannelMessage = (id: number) => {
-  return request.delete({ url: '/im/manager/channel-message/delete?id=' + id })
+  return request.delete({ url: '/im/manager/channel-message/delete', params: { id } })
 }
 
 // 获得频道消息分页

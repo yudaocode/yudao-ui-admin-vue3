@@ -184,6 +184,7 @@ import {
   type VideoMessage
 } from '@/views/im/utils/message'
 import { summarizeMessageContent } from '@/views/im/utils/conversation'
+import { openSafeUrl } from '@/utils/url'
 import CardBubble from '@/views/im/home/components/card/CardBubble.vue'
 import TipSegments from './TipSegments.vue'
 import { useVoicePlayer } from '@/views/im/home/composables/useVoicePlayer'
@@ -322,8 +323,7 @@ function handleFileClick() {
   if (isUploading.value || !filePayload.value?.url) {
     return
   }
-  // noopener,noreferrer 切断新窗口对原页面的 window.opener 引用，防 Tabnabbing
-  window.open(filePayload.value.url, '_blank', 'noopener,noreferrer')
+  openSafeUrl(filePayload.value.url)
 }
 
 /** 语音点击：托管给 useVoicePlayer 全局互斥播放，新点的语音会停掉旧的 */

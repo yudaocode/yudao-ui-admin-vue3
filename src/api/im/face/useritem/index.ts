@@ -29,5 +29,5 @@ export const createFaceUserItem = (data: ImFaceUserItemSaveReqVO) => {
 
 // 删除个人表情
 export const deleteFaceUserItem = (id: number) => {
-  return request.delete({ url: '/im/face-user-item/delete?id=' + id })
+  return request.delete({ url: '/im/face-user-item/delete', params: { id } })
 }

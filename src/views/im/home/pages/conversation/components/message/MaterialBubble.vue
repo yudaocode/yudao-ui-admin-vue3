@@ -80,6 +80,7 @@ import { parseMessage, type MaterialMessage } from '@/views/im/utils/message'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useChannelStore } from '@/views/im/home/store/channelStore'
 import { ImConversationType } from '@/views/im/utils/constants'
+import { openSafeUrl } from '@/utils/url'
 
 const props = defineProps<{
   content: string
@@ -110,8 +111,7 @@ const detailHtml = ref('')
 /** 点击行为：url 非空跳外链；为空则按 payload.materialId 拉富文本正文，全屏 dialog 渲染 */
 const onClick = async () => {
   if (payload.value.url) {
-    // 外链强制 noopener,noreferrer，阻断目标页面 window.opener 篡改 / referrer 泄露
-    window.open(payload.value.url, '_blank', 'noopener,noreferrer')
+    openSafeUrl(payload.value.url)
     return
   }
   if (!payload.value.materialId) {

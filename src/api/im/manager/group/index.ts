@@ -38,7 +38,7 @@ export const getManagerGroupPage = (params: PageParam) => {
 
 // 获得群详情
 export const getManagerGroup = (id: number) => {
-  return request.get({ url: '/im/manager/group/get?id=' + id })
+  return request.get({ url: '/im/manager/group/get', params: { id } })
 }
 
 // 封禁群
@@ -48,15 +48,15 @@ export const banManagerGroup = (data: { id: number; reason: string }) => {
 
 // 解封群
 export const unbanManagerGroup = (id: number) => {
-  return request.put({ url: '/im/manager/group/unban?id=' + id })
+  return request.put({ url: '/im/manager/group/unban', params: { id } })
 }
 
 // 解散群
 export const dissolveManagerGroup = (id: number) => {
-  return request.delete({ url: '/im/manager/group/dissolve?id=' + id })
+  return request.delete({ url: '/im/manager/group/dissolve', params: { id } })
 }
 
 // 获得群成员列表（含已退群成员，由前端按需过滤）
 export const getManagerGroupMemberList = (groupId: number) => {
-  return request.get({ url: '/im/manager/group/member/list?groupId=' + groupId })
+  return request.get({ url: '/im/manager/group/member/list', params: { groupId } })
 }

@@ -164,6 +164,7 @@ import {
   type MergeMessage
 } from '@/views/im/utils/message'
 import { buildFacePreviewText, summarizeMessageContent } from '@/views/im/utils/conversation'
+import { openSafeUrl } from '@/utils/url'
 
 defineOptions({ name: 'ImMessageContentPreview' })
 
@@ -227,8 +228,7 @@ const mergePreviewLines = computed(() => {
 function openVideo() {
   const url = videoPayload.value?.url
   if (url) {
-    // noopener,noreferrer 切断新窗口对原页面的 window.opener 引用，防 Tabnabbing
-    window.open(url, '_blank', 'noopener,noreferrer')
+    openSafeUrl(url)
   }
 }
 

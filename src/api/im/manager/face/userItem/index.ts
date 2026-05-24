@@ -18,5 +18,5 @@ export const getManagerFaceUserItemPage = (params: PageParam) => {
 
 // 删除用户表情
 export const deleteManagerFaceUserItem = (id: number) => {
-  return request.delete({ url: '/im/manager/face-user-item/delete?id=' + id })
+  return request.delete({ url: '/im/manager/face-user-item/delete', params: { id } })
 }

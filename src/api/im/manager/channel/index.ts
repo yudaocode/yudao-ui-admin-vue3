@@ -17,7 +17,7 @@ export const getManagerChannelPage = (params: PageParam) => {
 
 // 获得频道详情
 export const getManagerChannel = (id: number) => {
-  return request.get({ url: '/im/manager/channel/get?id=' + id })
+  return request.get({ url: '/im/manager/channel/get', params: { id } })
 }
 
 // 新增频道
@@ -32,7 +32,7 @@ export const updateManagerChannel = (data: ImManagerChannelVO) => {
 
 // 删除频道
 export const deleteManagerChannel = (id: number) => {
-  return request.delete({ url: '/im/manager/channel/delete?id=' + id })
+  return request.delete({ url: '/im/manager/channel/delete', params: { id } })
 }
 
 // 获得启用的频道精简列表（表单选择用）

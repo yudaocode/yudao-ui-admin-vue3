@@ -21,5 +21,5 @@ export const getManagerPrivateMessagePage = (params: PageParam) => {
 
 // 获得私聊消息详情
 export const getManagerPrivateMessage = (id: number) => {
-  return request.get({ url: '/im/manager/message/private/get?id=' + id })
+  return request.get({ url: '/im/manager/message/private/get', params: { id } })
 }

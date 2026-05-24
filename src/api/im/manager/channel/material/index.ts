@@ -21,13 +21,14 @@ export const getManagerChannelMaterialPage = (params: PageParam) => {
 // 获得指定频道下的素材精简列表
 export const getSimpleManagerChannelMaterialList = (channelId: number) => {
   return request.get({
-    url: '/im/manager/channel-material/simple-list?channelId=' + channelId
+    url: '/im/manager/channel-material/simple-list',
+    params: { channelId }
   })
 }
 
 // 获得素材详情
 export const getManagerChannelMaterial = (id: number) => {
-  return request.get({ url: '/im/manager/channel-material/get?id=' + id })
+  return request.get({ url: '/im/manager/channel-material/get', params: { id } })
 }
 
 // 新增素材
@@ -42,5 +43,5 @@ export const updateManagerChannelMaterial = (data: ImManagerChannelMaterialVO) =
 
 // 删除素材
 export const deleteManagerChannelMaterial = (id: number) => {
-  return request.delete({ url: '/im/manager/channel-material/delete?id=' + id })
+  return request.delete({ url: '/im/manager/channel-material/delete', params: { id } })
 }

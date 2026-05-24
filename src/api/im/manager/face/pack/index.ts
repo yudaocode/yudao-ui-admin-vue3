@@ -16,7 +16,7 @@ export const getManagerFacePackPage = (params: PageParam) => {
 
 // 获得表情包详情
 export const getManagerFacePack = (id: number) => {
-  return request.get({ url: '/im/manager/face-pack/get?id=' + id })
+  return request.get({ url: '/im/manager/face-pack/get', params: { id } })
 }
 
 // 新增表情包
@@ -31,7 +31,7 @@ export const updateManagerFacePack = (data: ImManagerFacePackVO) => {
 
 // 删除表情包
 export const deleteManagerFacePack = (id: number) => {
-  return request.delete({ url: '/im/manager/face-pack/delete?id=' + id })
+  return request.delete({ url: '/im/manager/face-pack/delete', params: { id } })
 }
 
 // 批量删除表情包

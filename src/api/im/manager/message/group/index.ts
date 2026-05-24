@@ -25,5 +25,5 @@ export const getManagerGroupMessagePage = (params: PageParam) => {
 
 // 获得群聊消息详情
 export const getManagerGroupMessage = (id: number) => {
-  return request.get({ url: '/im/manager/message/group/get?id=' + id })
+  return request.get({ url: '/im/manager/message/group/get', params: { id } })
 }

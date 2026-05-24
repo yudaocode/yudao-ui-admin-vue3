@@ -14,5 +14,5 @@ export interface ImChannelMaterialRespVO {
 
 // 获取频道素材详情；用于客户端点击图文卡片渲染详情页
 export const getChannelMaterial = (id: number) => {
-  return request.get<ImChannelMaterialRespVO>({ url: '/im/channel/material/get?id=' + id })
+  return request.get<ImChannelMaterialRespVO>({ url: '/im/channel/material/get', params: { id } })
 }

@@ -69,8 +69,10 @@
       </el-button>
       <!-- 别人加我 + 等待中：同意 / 拒绝 -->
       <template v-if="!iSentIt && request.handleResult === ImFriendRequestHandleResult.UNHANDLED">
-        <el-button @click="handleRefuse" :loading="refusing">拒绝</el-button>
-        <el-button type="primary" @click="handleAgree" :loading="agreeing"> 同意 </el-button>
+        <el-button @click="handleRefuse" :loading="refusing" :disabled="processing">拒绝</el-button>
+        <el-button type="primary" @click="handleAgree" :loading="agreeing" :disabled="processing">
+          同意
+        </el-button>
       </template>
       <!-- 已拒绝：占位禁用按钮 -->
       <el-button v-if="refused" disabled>已拒绝</el-button>

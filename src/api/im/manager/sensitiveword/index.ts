@@ -16,7 +16,7 @@ export const getManagerSensitiveWordPage = (params: PageParam) => {
 
 // 获得敏感词详情
 export const getManagerSensitiveWord = (id: number) => {
-  return request.get({ url: '/im/manager/sensitive-word/get?id=' + id })
+  return request.get({ url: '/im/manager/sensitive-word/get', params: { id } })
 }
 
 // 新增敏感词
@@ -31,7 +31,7 @@ export const updateManagerSensitiveWord = (data: ImManagerSensitiveWordVO) => {
 
 // 删除敏感词
 export const deleteManagerSensitiveWord = (id: number) => {
-  return request.delete({ url: '/im/manager/sensitive-word/delete?id=' + id })
+  return request.delete({ url: '/im/manager/sensitive-word/delete', params: { id } })
 }
 
 // 批量删除敏感词
