@@ -124,7 +124,8 @@ const validateTriggers = (_rule: any, value: any, callback: any) => {
         callback(new Error(`触发器 ${i + 1}: 设备不能为空`))
         return
       }
-      if (!trigger.identifier) {
+      const isStateUpdate = trigger.type === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE
+      if (!isStateUpdate && !trigger.identifier) {
         callback(new Error(`触发器 ${i + 1}: 物模型标识符不能为空`))
         return
       }

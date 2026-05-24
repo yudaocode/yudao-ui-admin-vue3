@@ -215,8 +215,8 @@ export const ThingModelFormRules = {
   identifier: [
     { required: true, message: '标识符不能为空', trigger: 'blur' },
     {
-      pattern: /^[a-zA-Z0-9_]{1,50}$/,
-      message: '支持大小写字母、数字和下划线，不超过 50 个字符',
+      pattern: /^[a-zA-Z][a-zA-Z0-9_]{0,31}$/,
+      message: '支持大小写字母、数字和下划线，必须以字母开头，不超过 32 个字符',
       trigger: 'blur'
     },
     {
