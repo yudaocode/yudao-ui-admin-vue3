@@ -108,6 +108,8 @@ export interface UploadAndSendMediaOptions {
   quote?: QuoteMessage
   /** 锁定起始会话，上传期间会话切走则放弃发送 */
   conversation: Conversation
+  /** 重试已有占位消息时复用的客户端消息编号 */
+  existingClientMessageId?: string
 }
 
 /**
@@ -169,10 +171,20 @@ export const useMediaUploader = () => {
     type: number
     conversation: Conversation
     buildContent: (blobUrl: string) => string
+    existingClientMessageId?: string
   }): { clientMessageId: string; blobUrl: string } => {
     const { conversation } = opts
     const blobUrl = URL.createObjectURL(opts.file)
-    const clientMessageId = generateClientMessageId()
+    const clientMessageId = opts.existingClientMessageId || generateClientMessageId()
+    if (opts.existingClientMessageId) {
+      conversationStore.patchMessage(conversation.type, conversation.targetId, clientMessageId, {
+        content: opts.buildContent(blobUrl),
+        status: ImMessageStatus.SENDING,
+        uploadProgress: 0,
+        _localFile: opts.file
+      })
+      return { clientMessageId, blobUrl }
+    }
     const placeholder: Message = {
       id: 0,
       clientMessageId,
@@ -332,7 +344,8 @@ export const useMediaUploader = () => {
       file: opts.file,
       type: opts.type,
       conversation,
-      buildContent
+      buildContent,
+      existingClientMessageId: opts.existingClientMessageId
     })
 
     // 2. 上传：进度回调 patch uploadProgress；失败保留 _localFile 供重试

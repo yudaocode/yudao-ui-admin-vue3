@@ -44,11 +44,11 @@ export const refuseFriendRequest = (id: number | string, handleContent?: string)
   })
 }
 
-// 查询「我相关」的好友申请列表（游标分页：传 lastRequestId 加载更多）
-export const getMyFriendRequestList = (limit: number, lastRequestId?: number) => {
+// 查询「我相关」的好友申请列表（游标分页：传 maxId 加载更多）
+export const getMyFriendRequestList = (limit: number, maxId?: number) => {
   const params: Record<string, number> = { limit }
-  if (lastRequestId != null) {
-    params.lastRequestId = lastRequestId
+  if (maxId != null) {
+    params.maxId = maxId
   }
   return request.get<ImFriendRequestRespVO[]>({
     url: '/im/friend-request/list',

@@ -39,8 +39,11 @@ export const sendGroupMessage = (data: ImGroupMessageSendReqVO) => {
 }
 
 // 拉取群聊消息（增量）
-export const pullGroupMessages = (params: { minId: number | string; size: number }) => {
-  return request.get<ImGroupMessageRespVO[]>({ url: '/im/message/group/pull', params })
+export const pullGroupMessages = (
+  params: { minId: number | string; size: number },
+  signal?: AbortSignal
+) => {
+  return request.get<ImGroupMessageRespVO[]>({ url: '/im/message/group/pull', params, signal })
 }
 
 // 查询群聊历史消息

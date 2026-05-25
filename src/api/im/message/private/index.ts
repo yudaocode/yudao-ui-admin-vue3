@@ -33,8 +33,11 @@ export const sendPrivateMessage = (data: ImPrivateMessageSendReqVO) => {
 }
 
 // 拉取私聊消息（增量）
-export const pullPrivateMessages = (params: { minId: number | string; size: number }) => {
-  return request.get<ImPrivateMessageRespVO[]>({ url: '/im/message/private/pull', params })
+export const pullPrivateMessages = (
+  params: { minId: number | string; size: number },
+  signal?: AbortSignal
+) => {
+  return request.get<ImPrivateMessageRespVO[]>({ url: '/im/message/private/pull', params, signal })
 }
 
 // 查询私聊历史消息
@@ -51,10 +54,11 @@ export const readPrivateMessages = (receiverId: number | string, messageId: numb
 }
 
 // 查询对方已读到我发的最大消息 id（多端 / 离线后用于补齐已读状态）
-export const getPrivateMaxReadMessageId = (peerId: number | string) => {
+export const getPrivateMaxReadMessageId = (peerId: number | string, signal?: AbortSignal) => {
   return request.get<number | null>({
     url: '/im/message/private/max-read-message-id',
-    params: { peerId }
+    params: { peerId },
+    signal
   })
 }
 

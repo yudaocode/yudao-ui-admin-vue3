@@ -32,6 +32,7 @@ export interface ImGroupMessageDTO {
   receiverUserIds?: number[] // 群定向接收用户列表
   readCount?: number // 群回执已读人数（type = RECEIPT 时使用）
   receiptStatus?: number // 群回执状态（type = RECEIPT 时使用）
+  readId?: number // 已读位置
 }
 
 // ==================== 本地会话 / 消息结构 ====================

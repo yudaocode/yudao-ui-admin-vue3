@@ -52,6 +52,12 @@ export const useMessagePuller = () => {
   const groupStore = useGroupStore()
   const currentUserId = getCurrentUserId()
 
+  /** 判断请求是否被主动取消 */
+  const isAbortError = (e: unknown): boolean => {
+    const error = e as { name?: string; code?: string; message?: string }
+    return error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED' || error?.message === 'canceled'
+  }
+
   /** 私聊会话归属：自己发的算"发给 receiverId 的会话"，否则算"发送方的会话"；curry currentUserId 进闭包减少 3 处调用方的样板 */
   const getPrivatePeerId = (message: ImPrivateMessageRespVO) =>
     getPrivateMessagePeerId(message, currentUserId)
@@ -147,25 +153,26 @@ export const useMessagePuller = () => {
     conversationType: number,
     startMinId: number,
     startEpoch: number,
-    startUserId: number
+    startUserId: number,
+    signal: AbortSignal
   ) => {
     // 私聊 / 群聊 / 频道各自一套接口；按 conversationType 在循环内分支调度
     let minId = startMinId || 0
     const isPrivate = conversationType === ImConversationType.PRIVATE
     const isChannel = conversationType === ImConversationType.CHANNEL
     const size = isPrivate ? MESSAGE_PRIVATE_PULL_SIZE : MESSAGE_GROUP_PULL_SIZE
-    const isStillValid = () => pullEpoch === startEpoch && getCurrentUserId() === startUserId
+    const isStillValid = () => !signal.aborted && pullEpoch === startEpoch && getCurrentUserId() === startUserId
     while (true) {
       if (!isStillValid()) {
         return
       }
       let list: any[] | undefined
       if (isPrivate) {
-        list = await apiPullPrivateMessages({ minId, size })
+        list = await apiPullPrivateMessages({ minId, size }, signal)
       } else if (isChannel) {
-        list = await apiPullChannelMessages({ minId, size })
+        list = await apiPullChannelMessages({ minId, size }, signal)
       } else {
-        list = await apiPullGroupMessages({ minId, size })
+        list = await apiPullGroupMessages({ minId, size }, signal)
       }
       // 接口返回期间发生 cancel / 切账号：丢弃本批不入库，也不再翻页
       if (!isStillValid()) {
@@ -246,6 +253,7 @@ export const useMessagePuller = () => {
 
   /** 同一时刻只允许一次 pull：Index.vue 的手动调用与重连 watch 触发可能并发，共用同一个 promise 即可去重 */
   let pullPromise: Promise<void> | null = null
+  let pullAbortController: AbortController | null = null
 
   /**
    * 首次 pull 是否已完成。仅在置 true 后，isConnected watch 才会触发 pull。
@@ -265,6 +273,8 @@ export const useMessagePuller = () => {
   /** 显式取消：仅由 Index.vue onUnmounted（离开 IM / 切账号 / 路由跳出）调用 */
   const cancelPull = () => {
     pullEpoch++
+    pullAbortController?.abort()
+    pullAbortController = null
     // 旧 promise 仍在 finally 阶段跑，但 epoch 守卫已阻断后续副作用；这里立刻让 pullPromise = null 让新一轮可重入
     pullPromise = null
     // 同步丢弃 WS 缓冲帧；旧 pull 已不会 flushBuffer，若不清下次进 IM 第一次 pullOnce 会把旧 session 的帧回放进新 store
@@ -282,8 +292,13 @@ export const useMessagePuller = () => {
     const startEpoch = pullEpoch
     // 启动时的用户快照；pullByType 每批 await 后比对当前登录用户，账号变了立刻丢弃
     const startUserId = currentUserId
+    const abortController = new AbortController()
+    pullAbortController = abortController
     // 本轮 pull 仍属于当前 session：epoch 未漂 + 用户未切；任何动新 store 状态的副作用都要先过这道关
-    const isCurrentPull = () => pullEpoch === startEpoch && getCurrentUserId() === startUserId
+    const isCurrentPull = () =>
+      !abortController.signal.aborted &&
+      pullEpoch === startEpoch &&
+      getCurrentUserId() === startUserId
     pullPromise = (async () => {
       try {
         // 旧 puller 在 cancelPull 未触发的异常路径上再进来时，先于任何副作用退出，避免污染新 session 的 loading
@@ -298,22 +313,28 @@ export const useMessagePuller = () => {
               ImConversationType.PRIVATE,
               conversationStore.privateMessageMaxId,
               startEpoch,
-              startUserId
+              startUserId,
+              abortController.signal
             ),
             pullByType(
               ImConversationType.GROUP,
               conversationStore.groupMessageMaxId,
               startEpoch,
-              startUserId
+              startUserId,
+              abortController.signal
             ),
             pullByType(
               ImConversationType.CHANNEL,
               conversationStore.channelMessageMaxId,
               startEpoch,
-              startUserId
+              startUserId,
+              abortController.signal
             )
           ])
         } catch (e) {
+          if (isAbortError(e)) {
+            return
+          }
           console.error('[IM] 拉取离线消息失败:', e)
         } finally {
           // 仍属本轮才复位 loading；旧轮被 cancel / 切账号时由新一轮自管，避免覆盖新 session 的 true
@@ -348,7 +369,7 @@ export const useMessagePuller = () => {
         const active = conversationStore.activeConversation
         if (MESSAGE_PRIVATE_READ_ENABLED && active && active.type === ImConversationType.PRIVATE) {
           try {
-            const maxReadId = await apiGetPrivateMaxReadMessageId(active.targetId)
+            const maxReadId = await apiGetPrivateMaxReadMessageId(active.targetId, abortController.signal)
             if (!isCurrentPull()) {
               return
             }
@@ -360,6 +381,9 @@ export const useMessagePuller = () => {
               })
             }
           } catch (e) {
+            if (isAbortError(e)) {
+              return
+            }
             console.warn('[IM] 拉取对方已读位置失败', e)
           }
         }
@@ -368,8 +392,14 @@ export const useMessagePuller = () => {
         if (isCurrentPull()) {
           pullPromise = null
           initialPulled = true
+          if (pullAbortController === abortController) {
+            pullAbortController = null
+          }
         } else if (pullEpoch === startEpoch) {
           pullPromise = null
+          if (pullAbortController === abortController) {
+            pullAbortController = null
+          }
         }
       }
     })()

@@ -331,11 +331,6 @@ const isMaterial = computed(
     conversationStore.activeConversation?.type === ImConversationType.CHANNEL
 )
 
-/** 私聊 / 群聊里被转发过来的素材：用紧凑卡片宽度（标题左 + 小封面右） */
-const isForwardedMaterial = computed(
-  () => props.message.type === ImMessageType.MATERIAL && !isMaterial.value
-)
-
 /** 当前是否在公众号 / 频道会话内：限制右键菜单只展示转发 / 删除 */
 const isChannelConversation = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.CHANNEL
@@ -968,16 +963,13 @@ async function handleResend() {
     if (handler) {
       const oldQuote = getQuoteFromMessage(message.content) ?? undefined
       const context = handler.extractResendContext(message.content)
-      conversationStore.removeMessage(conversation.type, conversation.targetId, {
-        id: message.id,
-        clientMessageId: message.clientMessageId
-      })
       await uploadAndSendMedia({
         file,
         type: message.type,
         quote: oldQuote,
         conversation,
-        context
+        context,
+        existingClientMessageId: message.clientMessageId
       })
       return
     }

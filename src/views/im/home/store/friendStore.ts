@@ -124,7 +124,7 @@ export const useFriendStore = defineStore('imFriendStore', {
     },
     /** 未处理申请数（接收方=我）—— 实时派生，「新的朋友」红点用 */
     getUnhandledRequestCount: (state): number => {
-      const currentUserId = Number(getCurrentUserId() || 0)
+      const currentUserId = getCurrentUserId()
       return state.friendRequests.filter(
         (request) =>
           request.handleResult === ImFriendRequestHandleResult.UNHANDLED &&
@@ -480,11 +480,23 @@ export const useFriendStore = defineStore('imFriendStore', {
 
     /** FRIEND_REQUEST_RECEIVED(1203)：收到新申请；payload 已带申请方昵称 / 头像，按 requestId 直推 push 进列表 */
     applyFriendRequestReceivedNotification(payload: FriendNotificationPayload) {
-      // 多端可能重复推同一 requestId，已存在则跳过
-      if (this.findFriendRequest(payload.requestId!)) {
+      const currentUserId = getCurrentUserId()
+      const existingIndex = this.friendRequests.findIndex((item) => item.id === payload.requestId)
+      if (existingIndex >= 0) {
+        const existing = this.friendRequests.splice(existingIndex, 1)[0]
+        this.friendRequests.unshift({
+          ...existing,
+          fromUserId: payload.operatorUserId,
+          toUserId: currentUserId,
+          handleResult: ImFriendRequestHandleResult.UNHANDLED,
+          applyContent: payload.applyContent,
+          addSource: payload.addSource,
+          createTime: Date.now(),
+          fromNickname: payload.fromNickname,
+          fromAvatar: payload.fromAvatar
+        })
         return
       }
-      const currentUserId = Number(getCurrentUserId() || 0)
       this.friendRequests.unshift({
         id: payload.requestId!,
         fromUserId: payload.operatorUserId,
