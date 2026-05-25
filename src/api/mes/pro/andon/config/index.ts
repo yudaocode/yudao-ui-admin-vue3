@@ -6,6 +6,7 @@ export interface ProAndonConfigVO {
   reason: string // 呼叫原因
   level: number // 级别
   handlerRoleId: number // 处置人角色编号
+  handlerRoleName: string // 处置人角色名称
   handlerUserId: number // 处置人编号
   handlerUserNickname: string // 处置人昵称
   remark: string // 备注
