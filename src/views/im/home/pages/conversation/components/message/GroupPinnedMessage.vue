@@ -147,7 +147,7 @@ async function handleRemove(msg: Message) {
   }
   removingId.value = msg.id
   try {
-    await apiUnpinGroupMessage({ groupId: group.value.id, messageId: msg.id })
+    await apiUnpinGroupMessage({ id: group.value.id, messageId: msg.id })
     message.success('已取消置顶')
   } finally {
     removingId.value = null

@@ -20,7 +20,7 @@ export interface ImGroupRespVO {
 
 // 群消息置顶 / 取消置顶 Request VO
 export interface ImGroupMessagePinReqVO {
-  groupId: number // 群编号
+  id: number // 群编号
   messageId: number // 消息编号
 }
 
@@ -42,14 +42,33 @@ export interface ImGroupUpdateReqVO {
 
 // 添加 / 撤销群管理员 Request VO
 export interface ImGroupAdminReqVO {
-  groupId: number // 群编号
+  id: number // 群编号
   userIds: number[] // 目标用户编号列表
 }
 
 // 群主转让 Request VO
 export interface ImGroupTransferOwnerReqVO {
-  groupId: number // 群编号
+  id: number // 群编号
   newOwnerUserId: number // 新群主用户编号
+}
+
+// 全群禁言 / 取消 Request VO
+export interface ImGroupMuteAllReqVO {
+  id: number // 群编号
+  mutedAll: boolean // 是否全群禁言
+}
+
+// 成员禁言 Request VO
+export interface ImGroupMuteMemberReqVO {
+  id: number // 群编号
+  userId: number // 被禁言的用户编号
+  mutedSeconds: number // 禁言时长（秒），0 表示永久禁言
+}
+
+// 取消成员禁言 Request VO
+export interface ImGroupCancelMuteMemberReqVO {
+  id: number // 群编号
+  userId: number // 被取消禁言的用户编号
 }
 
 // 获得当前登录用户的群列表
@@ -103,16 +122,16 @@ export const unpinGroupMessage = (data: ImGroupMessagePinReqVO) => {
 }
 
 // 全群禁言 / 取消（仅群主 / 管理员可调）
-export const muteAll = (data: { groupId: number; mutedAll: boolean }) => {
+export const muteAll = (data: ImGroupMuteAllReqVO) => {
   return request.put<boolean>({ url: '/im/group/mute-all', data })
 }
 
 // 禁言成员
-export const muteMember = (data: { groupId: number; userId: number; mutedSeconds: number }) => {
+export const muteMember = (data: ImGroupMuteMemberReqVO) => {
   return request.put<boolean>({ url: '/im/group/mute-member', data })
 }
 
 // 取消成员禁言
-export const cancelMuteMember = (data: { groupId: number; userId: number }) => {
+export const cancelMuteMember = (data: ImGroupCancelMuteMemberReqVO) => {
   return request.put<boolean>({ url: '/im/group/cancel-mute-member', data })
 }

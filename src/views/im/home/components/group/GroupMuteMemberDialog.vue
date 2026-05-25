@@ -81,7 +81,7 @@ async function handleConfirm() {
   loading.value = true
   try {
     await muteMember({
-      groupId: groupId.value,
+      id: groupId.value,
       userId: userId.value,
       mutedSeconds: selected.value
     })

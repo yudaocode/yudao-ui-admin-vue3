@@ -875,7 +875,7 @@ async function handlePin() {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    await apiPinGroupMessage({ groupId: group.id, messageId: props.message.id })
+    await apiPinGroupMessage({ id: group.id, messageId: props.message.id })
     successMessage('已置顶')
   } catch {}
 }
@@ -1007,7 +1007,7 @@ async function handleUnmute() {
   }
   try {
     await confirmDialog('确定解除该成员的禁言吗？', '解除禁言')
-    await cancelMuteMember({ groupId: group.id, userId: props.message.senderId })
+    await cancelMuteMember({ id: group.id, userId: props.message.senderId })
     successMessage('已解除禁言')
     emit('reload')
   } catch {}

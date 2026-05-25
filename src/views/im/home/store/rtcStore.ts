@@ -163,6 +163,9 @@ export const useRtcStore = defineStore('imRtc', () => {
 
   /** 被叫收到来电；切到 INCOMING；接收 RTC_CALL(INVITE) payload */
   function showIncoming(payload: ImRtcCallNotification) {
+    if (isActive.value) {
+      return
+    }
     incomingPayload.value = payload
     stage.value = ImRtcCallStage.INCOMING
     // 按 inviter 兜底首次填充胶囊条

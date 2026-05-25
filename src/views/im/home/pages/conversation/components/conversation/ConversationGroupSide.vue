@@ -649,7 +649,7 @@ async function onMuteAllChange(value: boolean | string | number) {
     return
   }
   const newValue = !!value
-  await muteAll({ groupId: props.group.id, mutedAll: newValue })
+  await muteAll({ id: props.group.id, mutedAll: newValue })
   message.success(newValue ? '已开启全群禁言' : '已关闭全群禁言')
   emit('reload')
 }

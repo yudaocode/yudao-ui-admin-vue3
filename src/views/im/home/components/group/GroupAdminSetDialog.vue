@@ -98,10 +98,10 @@ async function handleOk() {
   submitting.value = true
   try {
     if (addedIds.length > 0) {
-      await addGroupAdmin({ groupId: groupId.value, userIds: addedIds })
+      await addGroupAdmin({ id: groupId.value, userIds: addedIds })
     }
     if (removedIds.length > 0) {
-      await removeGroupAdmin({ groupId: groupId.value, userIds: removedIds })
+      await removeGroupAdmin({ id: groupId.value, userIds: removedIds })
     }
     message.success(`已更新群管理员（新增 ${addedIds.length} 位，撤销 ${removedIds.length} 位）`)
     emit('reload')

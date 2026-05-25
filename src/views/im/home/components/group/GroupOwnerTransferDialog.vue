@@ -101,7 +101,7 @@ async function handleOk() {
   submitting.value = true
   try {
     await transferGroupOwner({
-      groupId: groupId.value,
+      id: groupId.value,
       newOwnerUserId: newOwner.value.userId
     })
     message.success('群主转让成功')
@@ -121,4 +121,3 @@ async function handleOk() {
   @include picker.styles;
 }
 </style>
-

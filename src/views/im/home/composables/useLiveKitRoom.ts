@@ -50,6 +50,10 @@ export function useLiveKitRoom() {
 
   /** 连接 LiveKit Server；audio / video 控制初始默认开关 */
   async function connect(url: string, token: string, opts: { audio?: boolean; video?: boolean }) {
+    // 新连接前先断开旧 Room；保留本次注册的事件回调
+    if (_room.value) {
+      await disconnectRoom(false)
+    }
     const r = new Room({
       // 按格子尺寸自动选 simulcast 层
       adaptiveStream: true,
@@ -267,18 +271,23 @@ export function useLiveKitRoom() {
     return stream
   }
 
-  /** 主动断开；通话结束统一调 */
-  async function disconnect() {
-    disconnectedHandlers.clear()
-    participantConnectedHandlers.clear()
-    participantDisconnectedHandlers.clear()
+  /** 断开当前 Room；clearHandlers 为 true 时同步清理外部注册的事件回调 */
+  async function disconnectRoom(clearHandlers: boolean) {
+    // 清理通话结束后不再复用的订阅回调
+    if (clearHandlers) {
+      disconnectedHandlers.clear()
+      participantConnectedHandlers.clear()
+      participantDisconnectedHandlers.clear()
+    }
+    // 清理音视频轨道缓存
     streamCache.clear()
     if (_room.value) {
-      // 断开前先卸事件，避免 disconnect 期间 ParticipantDisconnected / TrackUnsubscribed 仍触发 syncRemotes
+      // 卸载 Room 事件并断开连接
       _room.value.removeAllListeners()
       await _room.value.disconnect()
       _room.value = null
     }
+    // 重置连接和设备状态
     localParticipant.value = null
     remoteParticipants.value = []
     isConnected.value = false
@@ -287,6 +296,11 @@ export function useLiveKitRoom() {
     cameraEnabled.value = false
     speakerEnabled.value = true
     screenShareEnabled.value = false
+  }
+
+  /** 主动断开；通话结束统一调 */
+  async function disconnect() {
+    await disconnectRoom(true)
   }
 
   return {
