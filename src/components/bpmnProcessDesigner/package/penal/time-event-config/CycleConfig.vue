@@ -23,8 +23,8 @@
           <div style="margin-bottom: 8px">
             <el-radio-group v-model="cronMode[f.key]" :key="'radio-' + f.key">
               <el-radio label="every" :key="'every-' + f.key">每{{ f.label }}</el-radio>
-              <el-radio label="range" :key="'range-' + f.key"
-                >从
+              <el-radio label="range" :key="'range-' + f.key">
+                从
                 <el-input-number
                   v-model="cronRange[f.key][0]"
                   :min="f.min"
@@ -42,10 +42,10 @@
                   style="width: 60px"
                   :key="'range1-' + f.key"
                 />
-                之间每{{ f.label }}</el-radio
-              >
-              <el-radio label="step" :key="'step-' + f.key"
-                >从第
+                之间每{{ f.label }}
+              </el-radio>
+              <el-radio label="step" :key="'step-' + f.key">
+                从第
                 <el-input-number
                   v-model="cronStep[f.key][0]"
                   :min="f.min"
@@ -63,8 +63,8 @@
                   style="width: 60px"
                   :key="'step1-' + f.key"
                 />
-                {{ f.label }}</el-radio
-              >
+                {{ f.label }}
+              </el-radio>
               <el-radio label="appoint" :key="'appoint-' + f.key">指定</el-radio>
             </el-radio-group>
           </div>
@@ -74,8 +74,9 @@
                 v-for="n in f.max + 1"
                 :label="pad(n - 1)"
                 :key="'cb-' + f.key + '-' + (n - 1)"
-                >{{ pad(n - 1) }}</el-checkbox
               >
+                {{ pad(n - 1) }}
+              </el-checkbox>
             </el-checkbox-group>
           </div>
         </el-tab-pane>
@@ -90,73 +91,79 @@
           :key="'isoStr'"
         />
       </div>
-      <div style="margin-bottom: 10px"
-        >循环次数：<el-input-number v-model="repeat" :min="1" style="width: 100px" :key="'repeat'"
-      /></div>
-      <div style="margin-bottom: 10px"
-        >日期时间：<el-date-picker
+      <div style="margin-bottom: 10px">
+        循环次数：<el-input-number v-model="repeat" :min="1" style="width: 100px" :key="'repeat'" />
+      </div>
+      <div style="margin-bottom: 10px">
+        日期时间：<el-date-picker
           v-model="isoDate"
           type="datetime"
           placeholder="选择日期时间"
           style="width: 200px"
           :key="'isoDate'"
-      /></div>
-      <div style="margin-bottom: 10px"
-        >当前时长：<el-input
+        />
+      </div>
+      <div style="margin-bottom: 10px">
+        当前时长：<el-input
           v-model="isoDuration"
           placeholder="如P3DT30M30S"
           style="width: 200px"
           :key="'isoDuration'"
-      /></div>
+        />
+      </div>
       <div>
-        <div
-          >秒：<el-button
+        <div>
+          秒：<el-button
             v-for="s in [5, 10, 30, 50]"
             @click="setDuration('S', s)"
             :key="'sec-' + s"
-            >{{ s }}</el-button
-          >自定义</div
-        >
-        <div
-          >分：<el-button
+          >
+            {{ s }}
+          </el-button>
+          自定义
+        </div>
+        <div>
+          分：<el-button
             v-for="m in [5, 10, 30, 50]"
             @click="setDuration('M', m)"
             :key="'min-' + m"
-            >{{ m }}</el-button
-          >自定义</div
-        >
-        <div
-          >小时：<el-button
+          >
+            {{ m }}
+          </el-button>
+          自定义
+        </div>
+        <div>
+          小时：<el-button
             v-for="h in [4, 8, 12, 24]"
             @click="setDuration('H', h)"
             :key="'hour-' + h"
-            >{{ h }}</el-button
-          >自定义</div
-        >
-        <div
-          >天：<el-button
-            v-for="d in [1, 2, 3, 4]"
-            @click="setDuration('D', d)"
-            :key="'day-' + d"
-            >{{ d }}</el-button
-          >自定义</div
-        >
-        <div
-          >月：<el-button
+          >
+            {{ h }}
+          </el-button>
+          自定义
+        </div>
+        <div>
+          天：<el-button v-for="d in [1, 2, 3, 4]" @click="setDuration('D', d)" :key="'day-' + d">
+            {{ d }}
+          </el-button>
+          自定义
+        </div>
+        <div>
+          月：<el-button
             v-for="mo in [1, 2, 3, 4]"
             @click="setDuration('M', mo)"
             :key="'mon-' + mo"
-            >{{ mo }}</el-button
-          >自定义</div
-        >
-        <div
-          >年：<el-button
-            v-for="y in [1, 2, 3, 4]"
-            @click="setDuration('Y', y)"
-            :key="'year-' + y"
-            >{{ y }}</el-button
-          >自定义</div
-        >
+          >
+            {{ mo }}
+          </el-button>
+          自定义
+        </div>
+        <div>
+          年：<el-button v-for="y in [1, 2, 3, 4]" @click="setDuration('Y', y)" :key="'year-' + y">
+            {{ y }}
+          </el-button>
+          自定义
+        </div>
       </div>
     </el-tab-pane>
   </el-tabs>

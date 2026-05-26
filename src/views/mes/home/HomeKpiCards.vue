@@ -127,9 +127,9 @@
                 :duration="1500"
                 class="text-28px font-700 leading-[1.2] color-[#7c3aed]"
               />
-              <span class="text-13px color-[var(--el-text-color-secondary)]"
-                >/ {{ summary.machineryTotal }} 运行中</span
-              >
+              <span class="text-13px color-[var(--el-text-color-secondary)]">
+                / {{ summary.machineryTotal }} 运行中
+              </span>
             </div>
             <div class="text-12px color-[var(--el-text-color-placeholder)] mt-4px">
               <span class="text-red-400">停机 {{ summary.machineryStop }}</span>
@@ -177,12 +177,12 @@ const handleNavigate = (name: string) => {
 <style lang="scss" scoped>
 .kpi-card {
   cursor: pointer;
-  transition: all 0.3s ease;
   border: 1px solid var(--el-border-color);
+  transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
   }
 
   :deep(.el-card__body) {

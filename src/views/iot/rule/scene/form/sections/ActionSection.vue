@@ -320,7 +320,7 @@ const onActionTypeChange = (action: Action, type: number, index: number) => {
       action.params = ''
     }
     // 如果从其他类型切换到设备控制类型，清空identifier（让用户重新选择）
-    if (action.identifier && type !== action.type) {
+    if (action.identifier) {
       action.identifier = undefined
     }
   } else if (isAlertAction(type)) {

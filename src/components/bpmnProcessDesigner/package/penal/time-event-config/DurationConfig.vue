@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div style="margin-bottom: 10px"
-      >当前选择：<el-input v-model="isoString" readonly style="width: 300px"
-    /></div>
+    <div style="margin-bottom: 10px">
+      当前选择：<el-input v-model="isoString" readonly style="width: 300px" />
+    </div>
     <div v-for="unit in units" :key="unit.key" style="margin-bottom: 8px">
       <span>{{ unit.label }}：</span>
       <el-button-group>
@@ -11,8 +11,9 @@
           :key="val"
           size="mini"
           @click="setUnit(unit.key, val)"
-          >{{ val }}</el-button
         >
+          {{ val }}
+        </el-button>
         <el-input
           v-model.number="custom[unit.key]"
           size="mini"

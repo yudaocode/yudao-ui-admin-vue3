@@ -3,44 +3,44 @@
   <div>
     <ContentWrap>
       <el-descriptions :column="3" border>
-          <el-descriptions-item label="产品名称">{{ product.name }}</el-descriptions-item>
-          <el-descriptions-item label="ProductKey">{{ product.productKey }}</el-descriptions-item>
-          <el-descriptions-item label="设备类型">
-            <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
-          </el-descriptions-item>
-          <el-descriptions-item label="DeviceName">{{ device.deviceName }}</el-descriptions-item>
-          <el-descriptions-item label="备注名称">{{ device.nickname }}</el-descriptions-item>
-          <el-descriptions-item label="当前状态">
-            <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="device.state" />
-          </el-descriptions-item>
-          <el-descriptions-item label="创建时间">
-            {{ formatDate(device.createTime) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="激活时间">
-            {{ formatDate(device.activeTime) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="最后上线时间">
-            {{ formatDate(device.onlineTime) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="最后离线时间">
-            {{ formatDate(device.offlineTime) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="设备位置">
-            <template v-if="hasLocation">
-              <span class="mr-2">{{ device.longitude }}, {{ device.latitude }}</span>
-              <el-button type="primary" link @click="openMapDialog">
-                <Icon icon="ep:location" class="mr-1" />
-                查看地图
-              </el-button>
-            </template>
-            <span v-else class="text-[var(--el-text-color-secondary)]">暂无位置信息</span>
-          </el-descriptions-item>
-          <el-descriptions-item label="认证信息">
-            <el-button type="primary" @click="handleAuthInfoDialogOpen" plain size="small">
-              查看
+        <el-descriptions-item label="产品名称">{{ product.name }}</el-descriptions-item>
+        <el-descriptions-item label="ProductKey">{{ product.productKey }}</el-descriptions-item>
+        <el-descriptions-item label="设备类型">
+          <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
+        </el-descriptions-item>
+        <el-descriptions-item label="DeviceName">{{ device.deviceName }}</el-descriptions-item>
+        <el-descriptions-item label="备注名称">{{ device.nickname }}</el-descriptions-item>
+        <el-descriptions-item label="当前状态">
+          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="device.state" />
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间">
+          {{ formatDate(device.createTime) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="激活时间">
+          {{ formatDate(device.activeTime) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="最后上线时间">
+          {{ formatDate(device.onlineTime) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="最后离线时间">
+          {{ formatDate(device.offlineTime) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="设备位置">
+          <template v-if="hasLocation">
+            <span class="mr-2">{{ device.longitude }}, {{ device.latitude }}</span>
+            <el-button type="primary" link @click="openMapDialog">
+              <Icon icon="ep:location" class="mr-1" />
+              查看地图
             </el-button>
-          </el-descriptions-item>
-        </el-descriptions>
+          </template>
+          <span v-else class="text-[var(--el-text-color-secondary)]">暂无位置信息</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="认证信息">
+          <el-button type="primary" @click="handleAuthInfoDialogOpen" plain size="small">
+            查看
+          </el-button>
+        </el-descriptions-item>
+      </el-descriptions>
     </ContentWrap>
 
     <!-- 认证信息弹框 -->

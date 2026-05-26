@@ -61,9 +61,7 @@
               v-model="formData.taskId"
               :workOrderId="formData.workOrderId"
               :workstationId="formData.workstationId"
-              :statuses="[
-                MesProTaskStatusEnum.PREPARE
-              ]"
+              :statuses="[MesProTaskStatusEnum.PREPARE]"
               :disabled="isHeaderReadonly || !formData.workOrderId"
               placeholder="请选择任务"
               @change="handleTaskChange"

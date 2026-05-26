@@ -438,12 +438,12 @@ export const IoTDeviceStatusEnum = {
   // 在线状态
   ONLINE: {
     label: '在线',
-    value: 'online',
+    value: '1',
     tagType: 'success'
   },
   OFFLINE: {
     label: '离线',
-    value: 'offline',
+    value: '2',
     tagType: 'danger'
   },
   // 启用状态

@@ -51,14 +51,14 @@ onMounted(async () => {
 
 <style lang="scss">
 .markdown-view {
-  font-family: PingFang SC;
+  max-width: 100%;
+  font-family: 'PingFang SC';
   font-size: 0.95rem;
   font-weight: 400;
   line-height: 1.6rem;
-  letter-spacing: 0em;
-  text-align: left;
+  letter-spacing: 0;
   color: #3b3e55;
-  max-width: 100%;
+  text-align: left;
 
   pre {
     position: relative;
@@ -69,22 +69,23 @@ onMounted(async () => {
   }
 
   code.hljs {
-    border-radius: 6px;
-    padding-top: 20px;
     width: auto;
-    @media screen and (min-width: 1536px) {
+    padding-top: 20px;
+    border-radius: 6px;
+
+    @media screen and (width >= 1536px) {
       width: 960px;
     }
 
-    @media screen and (max-width: 1536px) and (min-width: 1024px) {
+    @media screen and (width <= 1536px) and (width >= 1024px) {
       width: calc(100vw - 400px - 64px - 32px * 2);
     }
 
-    @media screen and (max-width: 1024px) and (min-width: 768px) {
+    @media screen and (width <= 1024px) and (width >= 768px) {
       width: calc(100vw - 32px * 2);
     }
 
-    @media screen and (max-width: 768px) {
+    @media screen and (width <= 768px) {
       width: calc(100vw - 16px * 2);
     }
   }
@@ -107,9 +108,9 @@ onMounted(async () => {
   h4,
   h5,
   h6 {
-    color: var(--color-G900);
     margin: 24px 0 8px;
     font-weight: 600;
+    color: #3b3e55;
   }
 
   h1 {
@@ -145,8 +146,8 @@ onMounted(async () => {
   /* 列表（有序，无序） */
   ul,
   ol {
-    margin: 0 0 8px 0;
     padding: 0;
+    margin: 0 0 8px;
     font-size: 16px;
     line-height: 24px;
     color: #3b3e55; // var(--color-CG600);
@@ -158,8 +159,8 @@ onMounted(async () => {
   }
 
   ol > li {
-    list-style-type: decimal;
     margin-bottom: 1rem;
+    list-style-type: decimal;
     // 表达式,修复有序列表序号展示不全的问题
     // &:nth-child(n + 10) {
     //     margin-left: 30px;
@@ -171,23 +172,23 @@ onMounted(async () => {
   }
 
   ul > li {
-    list-style-type: disc;
-    font-size: 16px;
-    line-height: 24px;
     margin-right: 11px;
     margin-bottom: 1rem;
+    font-size: 16px;
+    line-height: 24px;
     color: #3b3e55; // var(--color-G900);
+    list-style-type: disc;
   }
 
   ol ul,
   ol ul > li,
   ul ul,
   ul ul li {
+    margin-bottom: 1rem;
+    margin-left: 6px;
     // list-style: circle;
     font-size: 16px;
     list-style: none;
-    margin-left: 6px;
-    margin-bottom: 1rem;
   }
 
   ul ul ul,

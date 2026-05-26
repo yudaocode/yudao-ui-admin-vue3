@@ -12,7 +12,6 @@ import { isFunction, isObject, some } from 'min-dash'
 const WILDCARD = '*'
 
 function CamundaModdleExtension(eventBus) {
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
   const self = this
 
   eventBus.on('moddleCopy.canCopyProperty', function (context) {

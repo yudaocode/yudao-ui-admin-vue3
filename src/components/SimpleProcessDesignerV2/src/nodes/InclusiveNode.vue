@@ -8,9 +8,9 @@
       >
         <span class="iconfont icon-inclusive icon-size inclusive"></span>
       </div>
-      <el-button v-else class="branch-node-add" color="#345da2" @click="addCondition" plain
-        >添加条件</el-button
-      >
+      <el-button v-else class="branch-node-add" color="#345da2" @click="addCondition" plain>
+        添加条件
+      </el-button>
       <div
         class="branch-node-item"
         v-for="(item, index) in currentNode.conditionNodes"

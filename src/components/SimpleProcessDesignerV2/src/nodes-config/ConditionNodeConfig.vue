@@ -17,18 +17,18 @@
           v-model="currentNode.name"
           :placeholder="currentNode.name"
         />
-        <div v-else class="node-name"
-          >{{ currentNode.name }}
-          <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()"
-        /></div>
+        <div v-else class="node-name">
+          {{ currentNode.name }}
+          <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()" />
+        </div>
 
         <div class="divide-line"></div>
       </div>
     </template>
     <div>
-      <div class="mb-3 font-size-16px" v-if="currentNode.conditionSetting?.defaultFlow"
-        >未满足其它条件时，将进入此分支（该分支不可编辑和删除）</div
-      >
+      <div class="mb-3 font-size-16px" v-if="currentNode.conditionSetting?.defaultFlow">
+        未满足其它条件时，将进入此分支（该分支不可编辑和删除）
+      </div>
       <div v-else>
         <Condition ref="conditionRef" v-model="condition" />
       </div>

@@ -3,8 +3,8 @@
     <el-table v-loading="loading" :data="list" show-overflow-tooltip>
       <el-table-column label="#" width="55">
         <template #default="{ row }">
-          <el-radio :value="row.id" v-model="selectedSkuId" @change="handleSelected(row)"
-            >&nbsp;
+          <el-radio :value="row.id" v-model="selectedSkuId" @change="handleSelected(row)">
+            &nbsp;
           </el-radio>
         </template>
       </el-table-column>

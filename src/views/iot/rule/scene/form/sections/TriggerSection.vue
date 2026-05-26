@@ -75,9 +75,9 @@
                 class="flex items-center gap-8px p-12px px-16px bg-[var(--el-fill-color-light)] rounded-6px border border-[var(--el-border-color-lighter)]"
               >
                 <Icon icon="ep:timer" class="text-[var(--el-color-danger)] text-18px" />
-                <span class="text-14px font-500 text-[var(--el-text-color-primary)]"
-                  >定时触发配置</span
-                >
+                <span class="text-14px font-500 text-[var(--el-text-color-primary)]">
+                  定时触发配置
+                </span>
               </div>
 
               <!-- CRON 表达式配置 -->

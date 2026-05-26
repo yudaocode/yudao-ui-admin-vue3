@@ -19,7 +19,6 @@ const view = ref({
   bpmnXml: ''
 }) // BPMN 流程图数据
 
-
 /** 只有 loading 完成时，才去加载流程列表 */
 watch(
   () => props.modelView,
@@ -42,8 +41,8 @@ watch(
 </script>
 <style lang="scss" scoped>
 .box-card {
-  height: 100%;
   width: 100%;
+  height: 100%;
   margin-bottom: 0;
 
   :deep(.el-card__body) {
@@ -52,9 +51,9 @@ watch(
   }
 
   :deep(.process-viewer) {
+    width: 100%;
     height: 100% !important;
     min-height: 100%;
-    width: 100%;
     overflow: auto;
   }
 }

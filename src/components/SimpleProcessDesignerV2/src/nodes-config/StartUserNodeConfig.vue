@@ -95,24 +95,27 @@
                   :value="FieldPermissionType.READ"
                   size="large"
                   :label="FieldPermissionType.READ"
-                  ><span></span
-                ></el-radio>
+                >
+                  <span></span>
+                </el-radio>
               </div>
               <div class="item-radio-wrap">
                 <el-radio
                   :value="FieldPermissionType.WRITE"
                   size="large"
                   :label="FieldPermissionType.WRITE"
-                  ><span></span
-                ></el-radio>
+                >
+                  <span></span>
+                </el-radio>
               </div>
               <div class="item-radio-wrap">
                 <el-radio
                   :value="FieldPermissionType.NONE"
                   size="large"
                   :label="FieldPermissionType.NONE"
-                  ><span></span
-                ></el-radio>
+                >
+                  <span></span>
+                </el-radio>
               </div>
             </el-radio-group>
           </div>

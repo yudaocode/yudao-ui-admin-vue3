@@ -414,7 +414,7 @@
             <div>
               <el-divider content-position="left">跳过表达式</el-divider>
               <el-form-item prop="skipExpression">
-                <el-input v-model="configForm.skipExpression" type="textarea"  />
+                <el-input v-model="configForm.skipExpression" type="textarea" />
               </el-form-item>
             </div>
           </el-form>
@@ -444,9 +444,9 @@
                 :placeholder="item.displayName"
                 v-if="btnDisplayNameEdit[index]"
               />
-              <el-button v-else text @click="changeBtnDisplayName(index)"
-                >{{ item.displayName }} &nbsp;<Icon icon="ep:edit"
-              /></el-button>
+              <el-button v-else text @click="changeBtnDisplayName(index)">
+                {{ item.displayName }} &nbsp;<Icon icon="ep:edit" />
+              </el-button>
             </div>
             <div class="button-setting-item-label">
               <el-switch v-model="item.enable" />
@@ -483,24 +483,27 @@
                   :value="FieldPermissionType.READ"
                   size="large"
                   :label="FieldPermissionType.READ"
-                  ><span></span
-                ></el-radio>
+                >
+                  <span></span>
+                </el-radio>
               </div>
               <div class="item-radio-wrap">
                 <el-radio
                   :value="FieldPermissionType.WRITE"
                   size="large"
                   :label="FieldPermissionType.WRITE"
-                  ><span></span
-                ></el-radio>
+                >
+                  <span></span>
+                </el-radio>
               </div>
               <div class="item-radio-wrap">
                 <el-radio
                   :value="FieldPermissionType.NONE"
                   size="large"
                   :label="FieldPermissionType.NONE"
-                  ><span></span
-                ></el-radio>
+                >
+                  <span></span>
+                </el-radio>
               </div>
             </el-radio-group>
           </div>

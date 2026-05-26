@@ -6,26 +6,26 @@
         <el-tab-pane v-loading="loading" label="我的创作" name="mine">
           <el-row v-if="mySongList.length" :gutter="12">
             <el-col v-for="song in mySongList" :key="song.id" :span="24">
-              <songCard :songInfo="song" @play="setCurrentSong(song)"/>
+              <songCard :songInfo="song" @play="setCurrentSong(song)" />
             </el-col>
           </el-row>
-          <el-empty v-else description="暂无音乐"/>
+          <el-empty v-else description="暂无音乐" />
         </el-tab-pane>
 
         <!-- 试听广场 -->
         <el-tab-pane v-loading="loading" label="试听广场" name="square">
           <el-row v-if="squareSongList.length" v-loading="loading" :gutter="12">
             <el-col v-for="song in squareSongList" :key="song.id" :span="24">
-              <songCard :songInfo="song" @play="setCurrentSong(song)"/>
+              <songCard :songInfo="song" @play="setCurrentSong(song)" />
             </el-col>
           </el-row>
-          <el-empty v-else description="暂无音乐"/>
+          <el-empty v-else description="暂无音乐" />
         </el-tab-pane>
       </el-tabs>
       <!-- songInfo -->
-      <songInfo class="flex-none"/>
+      <songInfo class="flex-none" />
     </div>
-    <audioBar class="flex-none"/>
+    <audioBar class="flex-none" />
   </div>
 </template>
 
@@ -35,7 +35,6 @@ import songInfo from './songInfo/index.vue'
 import audioBar from './audioBar/index.vue'
 
 defineOptions({ name: 'Index' })
-
 
 const currentType = ref('mine')
 // loading 状态
@@ -52,9 +51,9 @@ provide('currentSong', currentSong)
  *@Description: 调接口生成音乐列表
  *@MethodAuthor: xiaohong
  *@Date: 2024-06-27 17:06:44
-*/
-function generateMusic (formData: Recordable) {
-  console.log(formData);
+ */
+function generateMusic(formData: Recordable) {
+  console.log(formData)
   loading.value = true
   setTimeout(() => {
     mySongList.value = Array.from({ length: 20 }, (_, index) => {
@@ -63,7 +62,8 @@ function generateMusic (formData: Recordable) {
         audioUrl: '',
         videoUrl: '',
         title: '我走后' + index,
-        imageUrl: 'https://www.carsmp3.com/data/attachment/forum/201909/19/091020q5kgre20fidreqyt.jpg',
+        imageUrl:
+          'https://www.carsmp3.com/data/attachment/forum/201909/19/091020q5kgre20fidreqyt.jpg',
         desc: 'Metal, symphony, film soundtrack, grand, majesticMetal, dtrack, grand, majestic',
         date: '2024年04月30日 14:02:57',
         lyric: `<div class="_words_17xen_66"><div>大江东去，浪淘尽，千古风流人物。
@@ -85,8 +85,8 @@ function generateMusic (formData: Recordable) {
  *@Description: 设置当前播放的音乐
  *@MethodAuthor: xiaohong
  *@Date: 2024-07-19 11:22:33
-*/
-function setCurrentSong (music: Recordable) {
+ */
+function setCurrentSong(music: Recordable) {
   currentSong.value = music
 }
 
@@ -95,11 +95,11 @@ defineExpose({
 })
 </script>
 
-
 <style lang="scss" scoped>
 :deep(.el-tabs) {
   display: flex;
   flex-direction: column;
+
   .el-tabs__content {
     padding: 0 7px;
     overflow: auto;

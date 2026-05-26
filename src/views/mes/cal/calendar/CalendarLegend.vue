@@ -22,9 +22,9 @@
       = 周末
     </span>
     <span class="flex items-center gap-4px">
-      <el-tag size="small" effect="dark" type="success" class="!text-11px !h-18px !px-4px"
-        >休</el-tag
-      >
+      <el-tag size="small" effect="dark" type="success" class="!text-11px !h-18px !px-4px">
+        休
+      </el-tag>
       = 节假日（不显示排班）
     </span>
   </div>

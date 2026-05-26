@@ -95,16 +95,18 @@
     </el-table-column>
     <el-table-column label="字典类型" min-width="12%">
       <template #default="scope">
-        <el-select v-model="scope.row.dictType" :value-on-clear="''" clearable filterable placeholder="请选择">
+        <el-select
+          v-model="scope.row.dictType"
+          :value-on-clear="''"
+          clearable
+          filterable
+          placeholder="请选择"
+        >
           <template #header>
             <div class="flex justify-end">
-              <el-popover
-                class="box-item"
-                content="加载最新字典"
-                placement="top-start"
-              >
+              <el-popover class="box-item" content="加载最新字典" placement="top-start">
                 <template #reference>
-                  <el-button :icon="Refresh" size="small" circle @click="getDictOptions" class=""/>
+                  <el-button :icon="Refresh" size="small" circle @click="getDictOptions" class="" />
                 </template>
               </el-popover>
             </div>

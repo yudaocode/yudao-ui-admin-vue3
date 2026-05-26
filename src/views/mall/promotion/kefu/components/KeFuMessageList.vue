@@ -373,36 +373,36 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
 <style lang="scss" scoped>
 .kefu {
-  background-color: var(--app-content-bg-color);
   position: relative;
   width: calc(100% - 300px - 260px);
+  background-color: var(--app-content-bg-color);
 
   &::after {
-    content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 1px; /* 实际宽度 */
     height: 100%;
     background-color: var(--el-border-color);
+    content: '';
     transform: scaleX(0.3); /* 缩小宽度 */
   }
 
   .kefu-header {
-    background-color: var(--app-content-bg-color);
     position: relative;
     display: flex;
+    background-color: var(--app-content-bg-color);
     align-items: center;
     justify-content: space-between;
 
     &::before {
-      content: '';
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
       height: 1px; /* 初始宽度 */
       background-color: var(--el-border-color);
+      content: '';
       transform: scaleY(0.3); /* 缩小视觉高度 */
     }
 
@@ -413,30 +413,30 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
   }
 
   &-content {
-    margin: 0;
-    padding: 10px;
     position: relative;
-    height: 100%;
     width: 100%;
+    height: 100%;
+    padding: 10px;
+    margin: 0;
 
     .newMessageTip {
       position: absolute;
-      bottom: 35px;
       right: 35px;
-      background-color: var(--app-content-bg-color);
+      bottom: 35px;
       padding: 10px;
-      border-radius: 30px;
       font-size: 12px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+      background-color: var(--app-content-bg-color);
+      border-radius: 30px;
+      box-shadow: 0 2px 4px rgb(0 0 0 / 10%); /* 阴影效果 */
     }
 
     .ss-row-left {
       justify-content: flex-start;
 
       .kefu-message {
-        background-color: #fff;
-        margin-left: 10px;
         margin-top: 3px;
+        margin-left: 10px;
+        background-color: #fff;
         border-top-right-radius: 10px;
         border-bottom-right-radius: 10px;
         border-bottom-left-radius: 10px;
@@ -447,22 +447,22 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       justify-content: flex-end;
 
       .kefu-message {
-        background-color: rgb(206, 223, 255);
-        margin-right: 10px;
         margin-top: 3px;
-        border-top-left-radius: 10px;
+        margin-right: 10px;
+        background-color: rgb(206 223 255);
         border-bottom-right-radius: 10px;
         border-bottom-left-radius: 10px;
+        border-top-left-radius: 10px;
       }
     }
 
     // 消息气泡
     .kefu-message {
-      color: #414141;
-      font-weight: 500;
-      padding: 5px 10px;
       width: auto;
       max-width: 50%;
+      padding: 5px 10px;
+      font-weight: 500;
+      color: #414141;
       //text-align: left;
       //display: inline-block !important;
       //word-break: break-all;
@@ -476,30 +476,30 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
     .date-message,
     .system-message {
       width: fit-content;
-      background-color: rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
       padding: 0 5px;
-      color: #fff;
       font-size: 10px;
+      color: #fff;
+      background-color: rgb(0 0 0 / 10%);
+      border-radius: 8px;
     }
   }
 
   .kefu-footer {
     position: relative;
     display: flex;
-    flex-direction: column;
     height: auto;
-    margin: 0;
     padding: 0;
+    margin: 0;
+    flex-direction: column;
 
     &::before {
-      content: '';
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 1px; /* 初始宽度 */
       background-color: var(--el-border-color);
+      content: '';
       transform: scaleY(0.3); /* 缩小视觉高度 */
     }
 
@@ -510,13 +510,13 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
   }
 
   ::v-deep(textarea) {
-    resize: none;
     background-color: var(--app-content-bg-color);
+    resize: none;
   }
 
   :deep(.el-input__wrapper) {
-    box-shadow: none !important;
     border-radius: 0;
+    box-shadow: none !important;
   }
 
   ::v-deep(.el-textarea__inner) {
