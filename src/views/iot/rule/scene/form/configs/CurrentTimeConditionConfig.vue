@@ -4,7 +4,7 @@
     <el-row :gutter="16">
       <!-- 时间操作符选择 -->
       <el-col :span="8">
-        <el-form-item label="时间条件" required>
+        <el-form-item label="时间条件" prop="operator" required>
           <el-select
             :model-value="condition.operator"
             @update:model-value="(value) => updateConditionField('operator', value)"
@@ -31,7 +31,7 @@
 
       <!-- 时间值输入 -->
       <el-col :span="8">
-        <el-form-item label="时间值" required>
+        <el-form-item label="时间值" prop="param" required>
           <el-time-picker
             v-if="needsTimeInput"
             :model-value="timeValue"
@@ -59,7 +59,7 @@
 
       <!-- 第二个时间值（范围条件） -->
       <el-col :span="8" v-if="needsSecondTimeInput">
-        <el-form-item label="结束时间" required>
+        <el-form-item label="结束时间" prop="param" required>
           <el-time-picker
             v-if="needsTimeInput"
             :model-value="timeValue2"
@@ -99,6 +99,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: TriggerCondition): void
+  (e: 'field-change', field: string): void
 }>()
 
 const condition = useVModel(props, 'modelValue', emit)
@@ -187,8 +188,9 @@ const timeValue2 = computed(() => {
  * @param field 字段名
  * @param value 字段值
  */
-const updateConditionField = (field: any, value: any) => {
+const updateConditionField = (field: keyof TriggerCondition, value: any) => {
   condition.value[field] = value
+  emit('field-change', field)
 }
 
 /**
@@ -199,12 +201,12 @@ const handleTimeValueChange = (value: string) => {
   const currentParams = condition.value.param ? condition.value.param.split(',') : []
   currentParams[0] = value || ''
 
-  // 如果是范围条件，保留第二个值；否则只保留第一个值
   if (needsSecondTimeInput.value) {
     condition.value.param = currentParams.slice(0, 2).join(',')
   } else {
     condition.value.param = currentParams[0]
   }
+  emit('field-change', 'param')
 }
 
 /**
@@ -215,6 +217,7 @@ const handleTimeValue2Change = (value: string) => {
   const currentParams = condition.value.param ? condition.value.param.split(',') : ['']
   currentParams[1] = value || ''
   condition.value.param = currentParams.slice(0, 2).join(',')
+  emit('field-change', 'param')
 }
 
 /** 监听操作符变化，清理不相关的时间值 */
@@ -222,13 +225,12 @@ watch(
   () => condition.value.operator,
   (newOperator) => {
     if (newOperator === IotRuleSceneTriggerTimeOperatorEnum.TODAY.value) {
-      // 今日条件不需要时间参数
       condition.value.param = ''
     } else if (!needsSecondTimeInput.value) {
-      // 非范围条件只保留第一个时间值
       const currentParams = condition.value.param ? condition.value.param.split(',') : []
       condition.value.param = currentParams[0] || ''
     }
+    emit('field-change', 'param')
   }
 )
 </script>

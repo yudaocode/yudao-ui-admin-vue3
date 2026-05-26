@@ -4,7 +4,7 @@
     :title="drawerTitle"
     size="80%"
     direction="rtl"
-    :close-on-click-modal="false"
+    :close-on-click-modal="true"
     :close-on-press-escape="false"
     @close="handleClose"
   >
@@ -12,9 +12,9 @@
       <!-- 基础信息配置 -->
       <BasicInfoSection v-model="formData" :rules="formRules" />
       <!-- 触发器配置 -->
-      <TriggerSection v-model:triggers="formData.triggers" />
+      <TriggerSection ref="triggerSectionRef" v-model:triggers="formData.triggers" />
       <!-- 执行器配置 -->
-      <ActionSection v-model:actions="formData.actions" />
+      <ActionSection ref="actionSectionRef" v-model:actions="formData.actions" />
     </el-form>
     <template #footer>
       <div class="drawer-footer">
@@ -38,11 +38,10 @@ import TriggerSection from './sections/TriggerSection.vue'
 import ActionSection from './sections/ActionSection.vue'
 import { IotSceneRule } from '@/api/iot/rule/scene'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
-import {
-  IotRuleSceneTriggerTypeEnum,
-  IotRuleSceneActionTypeEnum,
-  isDeviceTrigger
-} from '@/views/iot/utils/constants'
+import { IotRuleSceneTriggerTypeEnum } from '@/views/iot/utils/constants'
+import { validateTriggerItem } from './utils/triggerConditionRules'
+import { validateActionItem } from './utils/actionRules'
+import type { Trigger, Action } from '@/api/iot/rule/scene'
 import { ElMessage } from 'element-plus'
 import { CommonStatusEnum } from '@/utils/constants'
 
@@ -91,65 +90,33 @@ const createDefaultFormData = (): IotSceneRule => {
 }
 
 const formRef = ref() // 表单引用
+const triggerSectionRef = ref<{
+  validateAllTriggers: () => Promise<boolean>
+  clearAllTriggerValidate: () => void
+}>()
+const actionSectionRef = ref<{
+  validateAllActions: () => Promise<boolean>
+  clearAllActionValidate: () => void
+}>()
 const formData = ref<IotSceneRule>(createDefaultFormData()) // 表单数据
 
 /**
- * 触发器校验器
+ * 触发器校验器（兜底，与主条件 UI 规则一致）
  * @param _rule 校验规则（未使用）
  * @param value 校验值
  * @param callback 回调函数
  */
-const validateTriggers = (_rule: any, value: any, callback: any) => {
+const validateTriggers = (_rule: any, value: Trigger[], callback: any) => {
   if (!value || !Array.isArray(value) || value.length === 0) {
     callback(new Error('至少需要一个触发器'))
     return
   }
 
   for (let i = 0; i < value.length; i++) {
-    const trigger = value[i]
-
-    // 校验触发器类型
-    if (!trigger.type) {
-      callback(new Error(`触发器 ${i + 1}: 触发器类型不能为空`))
+    const error = validateTriggerItem(value[i], i)
+    if (error) {
+      callback(new Error(error))
       return
-    }
-
-    // 校验设备触发器
-    if (isDeviceTrigger(trigger.type)) {
-      if (!trigger.productId) {
-        callback(new Error(`触发器 ${i + 1}: 产品不能为空`))
-        return
-      }
-      if (!trigger.deviceId) {
-        callback(new Error(`触发器 ${i + 1}: 设备不能为空`))
-        return
-      }
-      if (!trigger.identifier) {
-        callback(new Error(`触发器 ${i + 1}: 物模型标识符不能为空`))
-        return
-      }
-      // 事件上报 / 服务调用：operator 由前端自动设为 '='，参数值留空表示"事件 / 调用发生即匹配"
-      const isEventOrService =
-        trigger.type === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST ||
-        trigger.type === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
-      if (!isEventOrService) {
-        if (!trigger.operator) {
-          callback(new Error(`触发器 ${i + 1}: 操作符不能为空`))
-          return
-        }
-        if (trigger.value === undefined || trigger.value === null || trigger.value === '') {
-          callback(new Error(`触发器 ${i + 1}: 参数值不能为空`))
-          return
-        }
-      }
-    }
-
-    // 校验定时触发器
-    if (trigger.type === IotRuleSceneTriggerTypeEnum.TIMER) {
-      if (!trigger.cronExpression) {
-        callback(new Error(`触发器 ${i + 1}: CRON表达式不能为空`))
-        return
-      }
     }
   }
 
@@ -162,58 +129,17 @@ const validateTriggers = (_rule: any, value: any, callback: any) => {
  * @param value 校验值
  * @param callback 回调函数
  */
-const validateActions = (_rule: any, value: any, callback: any) => {
+const validateActions = (_rule: any, value: Action[], callback: any) => {
   if (!value || !Array.isArray(value) || value.length === 0) {
     callback(new Error('至少需要一个执行器'))
     return
   }
 
   for (let i = 0; i < value.length; i++) {
-    const action = value[i]
-
-    // 校验执行器类型
-    if (!action.type) {
-      callback(new Error(`执行器 ${i + 1}: 执行器类型不能为空`))
+    const error = validateActionItem(value[i], i)
+    if (error) {
+      callback(new Error(error))
       return
-    }
-
-    // 校验设备控制执行器
-    if (
-      action.type === IotRuleSceneActionTypeEnum.DEVICE_PROPERTY_SET ||
-      action.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE
-    ) {
-      if (!action.productId) {
-        callback(new Error(`执行器 ${i + 1}: 产品不能为空`))
-        return
-      }
-      if (!action.deviceId) {
-        callback(new Error(`执行器 ${i + 1}: 设备不能为空`))
-        return
-      }
-
-      // 服务调用需要验证服务标识符
-      if (action.type === IotRuleSceneActionTypeEnum.DEVICE_SERVICE_INVOKE) {
-        if (!action.identifier) {
-          callback(new Error(`执行器 ${i + 1}: 服务不能为空`))
-          return
-        }
-      }
-
-      if (!action.params || Object.keys(action.params).length === 0) {
-        callback(new Error(`执行器 ${i + 1}: 参数配置不能为空`))
-        return
-      }
-    }
-
-    // 校验告警执行器
-    if (
-      action.type === IotRuleSceneActionTypeEnum.ALERT_TRIGGER ||
-      action.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER
-    ) {
-      if (!action.alertConfigId) {
-        callback(new Error(`执行器 ${i + 1}: 告警配置不能为空`))
-        return
-      }
     }
   }
 
@@ -247,10 +173,22 @@ const drawerTitle = computed(() => (isEdit.value ? '编辑场景联动规则' : 
 
 /** 提交表单 */
 const handleSubmit = async () => {
-  // 校验表单
   if (!formRef.value) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
+  try {
+    await formRef.value.validate()
+  } catch {
+    return
+  }
+
+  const mainConditionValid = await triggerSectionRef.value?.validateAllTriggers?.()
+  if (mainConditionValid === false) {
+    return
+  }
+
+  const actionValid = await actionSectionRef.value?.validateAllActions?.()
+  if (actionValid === false) {
+    return
+  }
 
   // 提交请求
   submitLoading.value = true
@@ -320,6 +258,8 @@ watch(drawerVisible, async (visible) => {
     // 重置表单验证状态
     await nextTick()
     formRef.value?.clearValidate()
+    triggerSectionRef.value?.clearAllTriggerValidate?.()
+    actionSectionRef.value?.clearAllActionValidate?.()
   }
 })
 
