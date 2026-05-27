@@ -157,13 +157,14 @@ const groups = computed<GroupLite[]>(() =>
 watch(
   friends,
   (list) => {
-    if (selection.value?.type !== 'friend') {
+    const selected = selection.value
+    if (selected?.type !== 'friend') {
       return
     }
-    const fresh = list.find((friend) => friend.id === selection.value!.friend.id)
+    const fresh = list.find((friend) => friend.id === selected.friend.id)
     if (!fresh) {
       selection.value = null
-    } else if (fresh !== selection.value.friend) {
+    } else if (fresh !== selected.friend) {
       selection.value = { type: 'friend', friend: fresh }
     }
   },
@@ -172,13 +173,14 @@ watch(
 watch(
   groups,
   (list) => {
-    if (selection.value?.type !== 'group') {
+    const selected = selection.value
+    if (selected?.type !== 'group') {
       return
     }
-    const fresh = list.find((group) => group.id === selection.value!.group.id)
+    const fresh = list.find((group) => group.id === selected.group.id)
     if (!fresh) {
       selection.value = null
-    } else if (fresh !== selection.value.group) {
+    } else if (fresh !== selected.group) {
       selection.value = { type: 'group', group: fresh }
     }
   },
@@ -187,13 +189,14 @@ watch(
 watch(
   friendRequests,
   (list) => {
-    if (selection.value?.type !== 'request') {
+    const selected = selection.value
+    if (selected?.type !== 'request') {
       return
     }
-    const fresh = list.find((request) => request.id === selection.value!.request.id)
+    const fresh = list.find((request) => request.id === selected.request.id)
     if (!fresh) {
       selection.value = null
-    } else if (fresh !== selection.value.request) {
+    } else if (fresh !== selected.request) {
       selection.value = { type: 'request', request: fresh }
     }
   },

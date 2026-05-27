@@ -1,5 +1,6 @@
 import { watch } from 'vue'
 import { useConversationStore } from '../store/conversationStore'
+import { useMessageStore, type PulledMessageBatchItem } from '../store/messageStore'
 import { useImWebSocketStore } from '../store/websocketStore'
 import { useFriendStore } from '../store/friendStore'
 import { getFriendDisplayName } from '../../utils/user'
@@ -30,7 +31,7 @@ import {
   MESSAGE_PRIVATE_READ_ENABLED
 } from '../../utils/config'
 import { buildChannelConversationStub } from '../../utils/channel'
-import { getPrivateMessagePeerId } from '../../utils/message'
+import { generateClientMessageId, getPrivateMessagePeerId } from '../../utils/message'
 import { getCurrentUserId } from '../../utils/storage'
 import type { Message } from '../types'
 
@@ -47,6 +48,7 @@ import type { Message } from '../types'
  */
 export const useMessagePuller = () => {
   const conversationStore = useConversationStore()
+  const messageStore = useMessageStore()
   const wsStore = useImWebSocketStore()
   const friendStore = useFriendStore()
   const groupStore = useGroupStore()
@@ -55,7 +57,11 @@ export const useMessagePuller = () => {
   /** 判断请求是否被主动取消 */
   const isAbortError = (e: unknown): boolean => {
     const error = e as { name?: string; code?: string; message?: string }
-    return error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED' || error?.message === 'canceled'
+    return (
+      error?.name === 'CanceledError' ||
+      error?.code === 'ERR_CANCELED' ||
+      error?.message === 'canceled'
+    )
   }
 
   /** 私聊会话归属：自己发的算"发给 receiverId 的会话"，否则算"发送方的会话"；curry currentUserId 进闭包减少 3 处调用方的样板 */
@@ -66,7 +72,7 @@ export const useMessagePuller = () => {
   const convertPrivateMessage = (message: ImPrivateMessageRespVO): Message => {
     return {
       id: message.id,
-      clientMessageId: message.clientMessageId || '',
+      clientMessageId: message.clientMessageId || generateClientMessageId(),
       type: message.type,
       content: message.content,
       status: message.status,
@@ -81,7 +87,7 @@ export const useMessagePuller = () => {
   const convertGroupMessage = (message: ImGroupMessageRespVO): Message => {
     return {
       id: message.id,
-      clientMessageId: message.clientMessageId || '',
+      clientMessageId: message.clientMessageId || generateClientMessageId(),
       type: message.type,
       content: message.content,
       status: message.status,
@@ -100,7 +106,8 @@ export const useMessagePuller = () => {
   const convertChannelMessage = (message: ImChannelMessageRespVO): Message => {
     return {
       id: message.id,
-      clientMessageId: '',
+      // TODO @AI：是不是都需要使用 message 的 clientMessageId；注意，后端也需要有 clientMessageId；
+      clientMessageId: generateClientMessageId(),
       type: message.type,
       content: message.content,
       status: message.status ?? ImMessageStatus.UNREAD,
@@ -161,7 +168,8 @@ export const useMessagePuller = () => {
     const isPrivate = conversationType === ImConversationType.PRIVATE
     const isChannel = conversationType === ImConversationType.CHANNEL
     const size = isPrivate ? MESSAGE_PRIVATE_PULL_SIZE : MESSAGE_GROUP_PULL_SIZE
-    const isStillValid = () => !signal.aborted && pullEpoch === startEpoch && getCurrentUserId() === startUserId
+    const isStillValid = () =>
+      !signal.aborted && pullEpoch === startEpoch && getCurrentUserId() === startUserId
     while (true) {
       if (!isStillValid()) {
         return
@@ -182,26 +190,30 @@ export const useMessagePuller = () => {
         break
       }
 
-      // 逐条 dispatch：原消息走 insertMessage；RECALL 信号走 recallMessage 把同批内已 insert 的原消息更新为撤回提示。
+      // TODO @AI：感觉这个 PulledMessageBatchItem 类名，batchItems 变量名，insertPulledBatch 方法名，不够能体现出 message；
+      const batchItems: PulledMessageBatchItem[] = []
+      // 逐条 dispatch：原消息走批量 insert；RECALL 信号走批量 recall 把同批内已 insert 的原消息更新为撤回提示。
       // 后端按 id 升序返回，且信号 id 一定 > 原消息 id（先更新 status 再插信号），所以原消息一定先到、recallMessage 找得到
       for (const raw of list) {
         if (isChannel) {
           const message = raw as ImChannelMessageRespVO
-          conversationStore.insertMessage(
-            convertChannelConversation(message),
-            convertChannelMessage(message)
-          )
+          batchItems.push({
+            kind: 'insert',
+            conversationInfo: convertChannelConversation(message),
+            message: convertChannelMessage(message)
+          })
           continue
         }
         if (isPrivate) {
           const message = raw as ImPrivateMessageRespVO
           // 特殊：撤回消息的处理
           if (message.type === ImMessageType.RECALL) {
-            conversationStore.recallMessage(
-              ImConversationType.PRIVATE,
-              getPrivatePeerId(message),
-              message.content
-            )
+            batchItems.push({
+              kind: 'recall',
+              conversationType: ImConversationType.PRIVATE,
+              targetId: getPrivatePeerId(message),
+              recallSignalContent: message.content
+            })
             continue
           }
           // 特殊：离线 pull 期间入库的 FRIEND_* 帧（目前仅 FRIEND_ADD persistent=true）也要走好友数据分发，
@@ -214,35 +226,40 @@ export const useMessagePuller = () => {
             }
           }
           // 其它消息正常入会话消息列表
-          conversationStore.insertMessage(
-            convertPrivateConversation(message),
-            convertPrivateMessage(message)
-          )
+          batchItems.push({
+            kind: 'insert',
+            conversationInfo: convertPrivateConversation(message),
+            message: convertPrivateMessage(message)
+          })
         } else {
           const message = raw as ImGroupMessageRespVO
           // 特殊：撤回消息的处理
           if (message.type === ImMessageType.RECALL) {
-            conversationStore.recallMessage(
-              ImConversationType.GROUP,
-              message.groupId,
-              message.content
-            )
+            batchItems.push({
+              kind: 'recall',
+              conversationType: ImConversationType.GROUP,
+              targetId: message.groupId,
+              recallSignalContent: message.content
+            })
             continue
           }
           // 其它消息正常入会话消息列表
-          conversationStore.insertMessage(
-            convertGroupConversation(message),
-            convertGroupMessage(message)
-          )
+          batchItems.push({
+            kind: 'insert',
+            conversationInfo: convertGroupConversation(message),
+            message: convertGroupMessage(message)
+          })
         }
       }
 
       // 游标推进到本批最大 id，与后端返回顺序无关；无有效 id 直接 break 避免死翻同一批
       const validIds = list.map((message) => message.id).filter((id): id is number => id != null)
       if (validIds.length === 0) {
+        await messageStore.insertPulledBatch(batchItems, conversationType)
         break
       }
       const nextMinId = Math.max(...validIds)
+      await messageStore.insertPulledBatch(batchItems, conversationType, nextMinId)
       // 游标没前进就停：当前后端契约是 id > minId，理论不会出现；防御后端契约变更或边界数据死翻
       if (nextMinId <= minId) {
         break
@@ -311,21 +328,21 @@ export const useMessagePuller = () => {
           await Promise.all([
             pullByType(
               ImConversationType.PRIVATE,
-              conversationStore.privateMessageMaxId,
+              messageStore.privateMessageMaxId,
               startEpoch,
               startUserId,
               abortController.signal
             ),
             pullByType(
               ImConversationType.GROUP,
-              conversationStore.groupMessageMaxId,
+              messageStore.groupMessageMaxId,
               startEpoch,
               startUserId,
               abortController.signal
             ),
             pullByType(
               ImConversationType.CHANNEL,
-              conversationStore.channelMessageMaxId,
+              messageStore.channelMessageMaxId,
               startEpoch,
               startUserId,
               abortController.signal
@@ -369,12 +386,15 @@ export const useMessagePuller = () => {
         const active = conversationStore.activeConversation
         if (MESSAGE_PRIVATE_READ_ENABLED && active && active.type === ImConversationType.PRIVATE) {
           try {
-            const maxReadId = await apiGetPrivateMaxReadMessageId(active.targetId, abortController.signal)
+            const maxReadId = await apiGetPrivateMaxReadMessageId(
+              active.targetId,
+              abortController.signal
+            )
             if (!isCurrentPull()) {
               return
             }
             if (maxReadId) {
-              conversationStore.applyReadReceipt({
+              messageStore.applyReadReceipt({
                 conversationType: ImConversationType.PRIVATE,
                 targetId: active.targetId,
                 privateReadMaxId: maxReadId

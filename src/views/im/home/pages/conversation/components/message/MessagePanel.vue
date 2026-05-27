@@ -2,7 +2,9 @@
   <div class="flex flex-1 flex-col min-w-0 bg-[var(--el-fill-color-light)]">
     <template v-if="conversationStore.activeConversation">
       <!-- 顶部 header：第一行群名 + 右侧图标，第二行嵌入置顶气泡（仅群聊 + 有置顶） -->
-      <div class="flex flex-shrink-0 flex-col bg-[var(--el-fill-color-light)] border-b border-b-solid border-[var(--el-border-color-light)]">
+      <div
+        class="flex flex-shrink-0 flex-col bg-[var(--el-fill-color-light)] border-b border-b-solid border-[var(--el-border-color-light)]"
+      >
         <div class="flex items-center justify-between h-14 px-5">
           <span class="flex flex-col min-w-0">
             <span class="flex items-baseline gap-1.5 min-w-0">
@@ -119,7 +121,9 @@
             class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-13px cursor-pointer text-[var(--el-text-color-primary)] bg-[var(--el-color-warning-light-9)] transition-colors hover:bg-[var(--el-color-warning-light-8)]"
             @click="handleNotFriendClick"
           >
-            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full text-white bg-[var(--el-color-warning)] flex-shrink-0">
+            <span
+              class="inline-flex items-center justify-center w-4 h-4 rounded-full text-white bg-[var(--el-color-warning)] flex-shrink-0"
+            >
               <Icon icon="ant-design:user-outlined" :size="11" />
             </span>
             <span>对方还不是你的朋友</span>
@@ -141,7 +145,7 @@
           暂无消息
         </div>
         <!-- data-message-id 给 MessageHistory "定位到聊天位置" 用：父级通过 querySelector
-             找到这层 wrapper，scrollIntoView + 加高亮 class；id=0 的本地占位消息跳过 -->
+             找到这层 wrapper，scrollIntoView + 加高亮 class；本地占位消息跳过 -->
         <div
           v-for="(msg, index) in messages"
           :key="msg.id || msg.clientMessageId"
@@ -254,11 +258,14 @@ import RtcGroupCallBanner from '../../../../components/rtc/RtcGroupCallBanner.vu
 import { createCall } from '@/api/im/rtc'
 import { ImRtcCallMediaType, ImRtcCallStatus, ImConversationType } from '@/views/im/utils/constants'
 import { resolveCallEndReasonText } from '@/views/im/utils/message'
+import { getClientConversationId } from '@/views/im/utils/db'
 import { useRtcStore } from '../../../../store/rtcStore'
+import { useMessageStore } from '../../../../store/messageStore'
 
 defineOptions({ name: 'ImMessagePanel' })
 
 const conversationStore = useConversationStore()
+const messageStore = useMessageStore()
 const friendStore = useFriendStore()
 const uiStore = useImUiStore()
 const groupStore = useGroupStore()
@@ -298,7 +305,12 @@ watch(
   }
 )
 
-const messages = computed(() => conversationStore.getActiveMessages)
+const messages = computed(() => {
+  const conversation = conversationStore.activeConversation
+  return conversation
+    ? messageStore.getMessages(getClientConversationId(conversation.type, conversation.targetId))
+    : []
+})
 const isGroup = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.GROUP
 )

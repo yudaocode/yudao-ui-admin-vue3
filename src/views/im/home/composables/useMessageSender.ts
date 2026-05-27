@@ -1,4 +1,5 @@
 import { useConversationStore } from '../store/conversationStore'
+import { useMessageStore } from '../store/messageStore'
 import {
   sendPrivateMessage as apiSendPrivateMessage,
   readPrivateMessages as apiReadPrivateMessages,
@@ -20,6 +21,7 @@ import {
 } from '../../utils/message'
 import { ImMessageType, ImMessageStatus, ImConversationType } from '../../utils/constants'
 import { MESSAGE_PRIVATE_READ_ENABLED, MESSAGE_GROUP_READ_ENABLED } from '../../utils/config'
+import { getClientConversationId } from '../../utils/db'
 import type { Conversation, Message } from '../types'
 import { useUserStore } from '@/store/modules/user'
 
@@ -57,9 +59,10 @@ interface SendExtOptions {
  */
 export const useMessageSender = () => {
   const conversationStore = useConversationStore()
+  const messageStore = useMessageStore()
   const userStore = useUserStore()
 
-  /**构造本地乐观消息对象（id=0 表示尚未拿到服务端消息 id） */
+  /** 构造本地乐观消息对象 */
   const buildLocalMessage = (opts: {
     clientMessageId: string
     content: string
@@ -68,7 +71,6 @@ export const useMessageSender = () => {
     atUserIds?: number[]
   }): Message => {
     return {
-      id: 0,
       clientMessageId: opts.clientMessageId,
       type: opts.type,
       content: opts.content,
@@ -109,10 +111,10 @@ export const useMessageSender = () => {
       clientMessageId = options.existingClientMessageId
       // 占位若已被删除（上传期间用户右键删除 / 撤回 / removeMessage 等）则放弃发送，
       // 否则 sendRaw 仍会把消息推到服务端，导致"本地无气泡 / 对方却收到一条"
-      const targetConversation = conversationStore.getConversation(conversation.type, realTarget)
-      const stillExists = targetConversation?.messages.some(
-        (m) => m.clientMessageId === clientMessageId
-      )
+      // TODO @AI：尽量不要 m 缩写，全称
+      const stillExists = messageStore
+        .getMessageList(conversation.type, realTarget)
+        .some((m) => m.clientMessageId === clientMessageId && !m._ackMerging)
       if (!stillExists) {
         return false
       }
@@ -131,7 +133,7 @@ export const useMessageSender = () => {
         name: conversation.name || String(realTarget),
         avatar: conversation.avatar || ''
       }
-      conversationStore.insertMessage(conversationInfo, message)
+      messageStore.insertMessage(conversationInfo, message)
     }
 
     // 3. 发送请求：按会话类型分发到不同接口；成功后 ackMessage 更新为 UNREAD，失败更新为 FAILED
@@ -143,7 +145,7 @@ export const useMessageSender = () => {
           type,
           content
         })
-        conversationStore.ackMessage(conversation.type, realTarget, clientMessageId, {
+        void messageStore.ackMessage(conversation.type, realTarget, clientMessageId, {
           id: data.id,
           sendTime: new Date(data.sendTime).getTime(),
           status: data.status,
@@ -158,7 +160,7 @@ export const useMessageSender = () => {
           atUserIds: options?.atUserIds,
           receipt: options?.receipt
         })
-        conversationStore.ackMessage(conversation.type, realTarget, clientMessageId, {
+        void messageStore.ackMessage(conversation.type, realTarget, clientMessageId, {
           id: data.id,
           sendTime: new Date(data.sendTime).getTime(),
           status: data.status,
@@ -170,7 +172,7 @@ export const useMessageSender = () => {
       return true
     } catch (e) {
       console.error('[IM] 消息发送失败', { type, realTarget, clientMessageId }, e)
-      conversationStore.ackMessage(conversation.type, realTarget, clientMessageId, {
+      void messageStore.ackMessage(conversation.type, realTarget, clientMessageId, {
         status: ImMessageStatus.FAILED
       })
       return false
@@ -195,7 +197,7 @@ export const useMessageSender = () => {
    * 2. 此处不做乐观撤回，避免网络失败后状态不可回退
    */
   const recall = async (message: Message) => {
-    // 参数校验：本地占位消息（id=0）不能撤回
+    // 参数校验：本地占位消息不能撤回
     if (!message.id) {
       return
     }
@@ -215,7 +217,7 @@ export const useMessageSender = () => {
   /**
    * 触发当前会话的已读上报（切会话 / 进入页面时调用）
    * 1. 本端立刻清未读数；服务端回包成功后再做持久化
-   * 2. 已读位置取会话内最大真实消息 id（id=0 的本地发送中消息跳过）
+   * 2. 已读位置取会话内最大真实消息 id（本地发送中消息跳过）
    */
   const readActive = async () => {
     const conversation = conversationStore.activeConversation
@@ -223,11 +225,12 @@ export const useMessageSender = () => {
       return
     }
     // 本地标记已读：未读数清零 + 消息状态更新为 READ（UI 立刻响应）
-    conversationStore.markActiveAsRead()
-    const maxMessageId = conversationStore.getActiveMessages.reduce<number>(
-      (max, m) => (m.id > max ? m.id : max),
-      0
-    )
+    conversationStore.markConversationAsRead(conversation.type, conversation.targetId)
+    messageStore.markConversationMessagesRead(conversation)
+    // TODO @AI：message；不要用 m；
+    const maxMessageId = messageStore
+      .getMessages(getClientConversationId(conversation.type, conversation.targetId))
+      .reduce<number>((max, m) => (m.id && m.id > max ? m.id : max), 0)
     if (!maxMessageId) {
       return
     }
@@ -283,7 +286,7 @@ export const useMessageSender = () => {
         return
       }
       // applyReadReceipt 内部把 ≤ maxReadId 的本端消息更新为 READ
-      conversationStore.applyReadReceipt({
+      messageStore.applyReadReceipt({
         conversationType: ImConversationType.PRIVATE,
         targetId: peerId,
         privateReadMaxId: maxReadId

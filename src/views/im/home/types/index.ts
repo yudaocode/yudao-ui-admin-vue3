@@ -47,13 +47,16 @@ export interface Conversation {
   name: string // 展示名称（私聊=好友昵称；群聊=群名）
   avatar: string // 头像
   unreadCount: number // 未读数
-  messages: Message[] // 消息列表
 
   // ========== 最后一条消息事实索引 ==========
   lastContent: string // 会话列表展示的最后一条消息摘要
   lastSendTime: number // 最后一条消息时间，用于排序
   lastSenderId?: number // 发送人编号
   lastMessageType?: number // 消息类型，对齐 ImMessageType
+  lastMessageId?: number // 最后一条服务端消息编号
+  lastClientMessageId?: string // 最后一条客户端消息编号
+  lastMessageStatus?: number // 最后一条消息状态
+  lastReceiptStatus?: number // 最后一条群回执状态
   lastSelfSend?: boolean // 是否自己发的
   lastSenderDisplayName?: string // 发送人显示名快照——仅作 utils/user.getSenderDisplayName 实时算不出真名时的 fallback
 
@@ -68,7 +71,8 @@ export interface Conversation {
 // 消息数据结构
 export interface Message {
   // ========== 后端字段（对齐 ImPrivateMessageDTO / ImGroupMessageDTO） ==========
-  id: number // 服务端消息编号，发送中为 0
+  // TODO @AI：全局的 id 占位 0，是不是枚举下！！！
+  id?: number // 服务端消息编号，发送中为空
   clientMessageId: string // 客户端消息编号，本地生成用于合并去重
   type: number // 消息类型，对齐 ImMessageType
   content: string // 消息内容，JSON 字符串
@@ -90,23 +94,25 @@ export interface Message {
   // 媒体消息内存中保留的原始 File；下划线前缀表示不进 JSON / 不持久化（IDB 恢复后必为 undefined）
   // 失败重试时按它重走上传；页面刷新后该字段丢失，恢复阶段直接 drop 整条消息
   _localFile?: File
+  _ackMerging?: boolean // ack 合并中标记，不持久化
 }
 
-/**
- * 会话索引项：基于 Conversation 派生，但剥离 messages 字段（消息按会话独立存到 messages key）
- *
- * Omit<T, K> 是 TS 内置工具类型：从类型 T 中剔除 K 指定的字段，得到剩余字段组成的新类型。
- * 这里 `Omit<Conversation, 'messages'>` 等价于"Conversation 去掉 messages 字段后的版本"，
- * 与"Conversation 派生但少一个 messages 字段"的语义一致，不需要再手写一份重复结构。
- */
-export type ConversationMeta = Omit<Conversation, 'messages'>
+// ==================== IndexedDB 本地存储结构 ====================
 
-// 持久化的会话索引：游标 + 会话元数据列表，按用户 ID 分桶
-export interface ConversationStoreMeta {
-  privateMessageMaxId: number // 私聊消息最大编号
-  groupMessageMaxId: number // 群聊消息最大编号
-  channelMessageMaxId?: number // 频道消息最大编号
-  conversations: ConversationMeta[] // 会话索引（不含 messages）
+export interface ConversationDO extends Conversation {
+  clientConversationId: string // `${type}:${targetId}`
+}
+
+export interface MessageDO extends Omit<Message, 'uploadProgress' | '_localFile' | '_ackMerging'> {
+  messageKey: string // `${conversationType}:${id}` 或 `client:${clientMessageId}`
+  conversationType: number // 会话类型，对齐 ImConversationType
+  clientConversationId: string // ConversationDO.clientConversationId
+}
+
+export interface SettingDO<T = unknown> {
+  key: string
+  value: T
+  updateTime?: number
 }
 
 // ==================== 群 / 群成员 ====================

@@ -251,6 +251,7 @@ import {
   parseRtcCallPayload
 } from '@/views/im/utils/message'
 import { useImUiStore } from '../../../../store/uiStore'
+import { useMessageStore } from '../../../../store/messageStore'
 import { useMessageSender } from '../../../../composables/useMessageSender'
 import { mediaTypeHandlers, useMediaUploader } from '../../../../composables/useMediaUploader'
 import { useMuteOverlay } from '../../../../composables/useMuteOverlay'
@@ -289,6 +290,7 @@ const emit = defineEmits<{
 
 const userStore = useUserStore()
 const conversationStore = useConversationStore()
+const messageStore = useMessageStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const draftStore = useDraftStore()
@@ -600,7 +602,7 @@ type MenuKey = (typeof MENU_KEYS)[keyof typeof MENU_KEYS]
 
 /**
  * 右键菜单项：
- * - 引用：已落库（id≠0）+ 未撤回的消息可引用，引用块写入 draftStore.reply
+ * - 引用：已落库 + 未撤回的消息可引用，引用块写入 draftStore.reply
  * - 撤回 / 删除：互斥；自己发送 + 已落库 + 未撤回 + 2 分钟内显示「撤回」（推服务器），其它显示「删除」（仅本地清）
  *
  * 好友事件气泡态不弹菜单
@@ -661,7 +663,7 @@ async function handleContextMenu(e: MouseEvent) {
       icon: 'ant-design:copy-outlined'
     })
   }
-  // 「引用」：已落库（id≠0）+ 未撤回 + 非合并转发；MERGE 内嵌快照在引用预览里无法降级展示
+  // 「引用」：已落库 + 未撤回 + 非合并转发；MERGE 内嵌快照在引用预览里无法降级展示
   if (!!props.message.id && !isRecall.value && !isMerge.value) {
     items.push({
       key: MENU_KEYS.REPLY,
@@ -669,7 +671,7 @@ async function handleContextMenu(e: MouseEvent) {
       icon: 'bxs:quote-alt-left'
     })
   }
-  // 「转发」「多选」：已落库（id≠0）+ 普通消息 + 未撤回；触发 ForwardDialog / 进入多选模式
+  // 「转发」「多选」：已落库 + 普通消息 + 未撤回；触发 ForwardDialog / 进入多选模式
   if (canForward.value) {
     items.push({
       key: MENU_KEYS.FORWARD,
@@ -728,7 +730,7 @@ async function handleContextMenu(e: MouseEvent) {
     })
   }
   // 「撤回 / 删除」二选一：
-  // - 自己发送 + 已落库（id≠0）+ 未撤回 + 在撤回窗口内 → 撤回（推服务器把消息态置 RECALL）
+  // - 自己发送 + 已落库 + 未撤回 + 在撤回窗口内 → 撤回（推服务器把消息态置 RECALL）
   // - 其它（对方消息 / 已撤回 / 超出撤回窗口）→ 删除（仅本地清，不动后端）
   // divided 把这一项和上面的「引用」隔开，danger 显红对齐微信
   const canRecall =
@@ -822,7 +824,7 @@ const canManageSender = computed(() => {
   return myGroupRole.value < senderMember.role
 })
 
-/** 是否允许转发 / 多选：普通消息 + 已落库（id≠0）+ 未撤回；本地占位 / 撤回 / 事件消息一律不可 */
+/** 是否允许转发 / 多选：普通消息 + 已落库 + 未撤回；本地占位 / 撤回 / 事件消息一律不可 */
 const canForward = computed(
   () => isNormalMessage(props.message.type) && !!props.message.id && !isRecall.value
 )
@@ -866,7 +868,7 @@ const canPin = computed(
 /** 置顶消息：二次确认 → 调后端 pin-message；后端广播 GROUP_MESSAGE_PIN，本端 dispatcher 拉最新 pinnedMessages */
 async function handlePin() {
   const group = currentGroup.value
-  if (!group) {
+  if (!group || !props.message.id) {
     return
   }
   try {
@@ -976,7 +978,7 @@ async function handleResend() {
   }
 
   // 文本类型 / 媒体类型但 _localFile 已丢：把 FAILED 占位回滚到 SENDING，复用 clientMessageId 让服务端按 cmid 幂等去重
-  conversationStore.patchMessage(conversation.type, conversation.targetId, message.clientMessageId, {
+  messageStore.patchMessage(conversation.type, conversation.targetId, message.clientMessageId, {
     status: ImMessageStatus.SENDING
   })
   await sendRaw(message.type, message.content, {
@@ -986,7 +988,7 @@ async function handleResend() {
 }
 
 /**
- * 删除消息：本地软删，仅从 conversationStore.messages 移除，不调后端
+ * 删除消息：本地软删，仅从 messageStore 移除，不调后端
  * 区别于"撤回"：服务端没动，多端登录时其它客户端 / 群里其他人依然能看到这条
  */
 /** 禁言：emit 给父组件打开时长选择弹窗（避免 MessageItem 过重） */
@@ -1033,7 +1035,7 @@ function handleDelete() {
   if (!conversation) {
     return
   }
-  conversationStore.removeMessage(conversation.type, conversation.targetId, {
+  messageStore.removeMessage(conversation.type, conversation.targetId, {
     id: props.message.id,
     clientMessageId: props.message.clientMessageId
   })

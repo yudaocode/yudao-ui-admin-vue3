@@ -514,7 +514,7 @@ export const useGroupStore = defineStore('imGroupStore', {
     /**
      * 接收 GROUP_* 群广播事件，按 type 分发到对应私有 action
      *
-     * WebSocket 实时收 + useMessagePuller 离线 pull 都走 conversationStore.insertMessage 旁路调用
+     * WebSocket 实时收 + useMessagePuller 离线 pull 都走 messageStore.insertMessage 旁路调用
      * store 里没缓存的群静默忽略，等 fetchGroups 兜底
      */
     applyGroupNotification(groupId: number, type: number, content?: string) {
@@ -567,7 +567,9 @@ export const useGroupStore = defineStore('imGroupStore', {
           this.updateMembersRole(groupId, payload.memberUserIds || [], ImGroupMemberRole.ADMIN)
           // 自己被加为管理员，原本看不到的群下未处理申请现在变可见，重新拉一次 unhandledList
           if (isSelfInPayloadMembers(payload)) {
-            useGroupRequestStore().fetchUnhandledList().catch(() => undefined)
+            useGroupRequestStore()
+              .fetchUnhandledList()
+              .catch(() => undefined)
           }
           break
         case ImMessageType.GROUP_ADMIN_REMOVE:
@@ -701,7 +703,9 @@ export const useGroupStore = defineStore('imGroupStore', {
       // 自己接管群主：原本看不到的群下未处理申请现在变可见，重新拉一次 unhandledList
       const selfUserId = getCurrentUserId()
       if (selfUserId && payload.newOwnerUserId === selfUserId) {
-        useGroupRequestStore().fetchUnhandledList().catch(() => undefined)
+        useGroupRequestStore()
+          .fetchUnhandledList()
+          .catch(() => undefined)
       }
     },
 
@@ -802,7 +806,9 @@ function convertGroup(group: ImGroupRespVO): Group {
 }
 
 /** 后端 ImGroupMessageRespVO -> 前端 Message：补 targetId / selfSend / sendTime 等派生字段 */
-function convertGroupMessageVO(message: NonNullable<ImGroupRespVO['pinnedMessages']>[number]): Message {
+function convertGroupMessageVO(
+  message: NonNullable<ImGroupRespVO['pinnedMessages']>[number]
+): Message {
   const currentUserId = getCurrentUserId()
   return {
     id: message.id,

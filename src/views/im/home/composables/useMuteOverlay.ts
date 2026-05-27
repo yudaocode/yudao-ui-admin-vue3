@@ -13,7 +13,7 @@ export type MuteOverlayInfo = { text: string; icon: string }
  * 改成模块级共享后所有订阅者共用一份 setInterval，订阅数清零时也清掉 timer，避免内存与时钟漂移
  */
 const sharedNow = ref(Date.now())
-let sharedTickTimer: ReturnType<typeof setInterval> | null = null
+let sharedTickTimer: number | null = null
 let subscriberCount = 0
 
 function subscribeNowTick(): void {

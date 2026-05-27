@@ -4,6 +4,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 import { isOpenableUrl } from '@/utils/url'
 
 import { useConversationStore } from '../store/conversationStore'
+import { useMessageStore } from '../store/messageStore'
 import { useMessageSender } from './useMessageSender'
 import { useMuteOverlay } from './useMuteOverlay'
 import { ImMessageStatus, ImMessageType } from '../../utils/constants'
@@ -67,8 +68,7 @@ export const mediaTypeHandlers: Partial<Record<number, MediaTypeHandler>> = {
   },
   [ImMessageType.VOICE]: {
     kind: '语音',
-    build: (_file, url, context) =>
-      ({ url, duration: context.voiceDuration ?? 0 }) as AudioMessage,
+    build: (_file, url, context) => ({ url, duration: context.voiceDuration ?? 0 }) as AudioMessage,
     extractResendContext: (oldContent) => {
       const old = parseMessage<AudioMessage>(oldContent)
       return { voiceDuration: old?.duration ?? 0 }
@@ -88,7 +88,8 @@ export const mediaTypeHandlers: Partial<Record<number, MediaTypeHandler>> = {
     extractResendContext: (oldContent) => {
       const old = parseMessage<VideoMessage>(oldContent)
       // 旧 coverUrl 是 blob 说明上传期失败（cover 没传成功），不复用；真实 URL 直接复用，省一次封面上传
-      const reuseCover = old?.coverUrl && !old.coverUrl.startsWith(BLOB_URL_PREFIX) ? old.coverUrl : undefined
+      const reuseCover =
+        old?.coverUrl && !old.coverUrl.startsWith(BLOB_URL_PREFIX) ? old.coverUrl : undefined
       return {
         videoProbe: { duration: old?.duration, width: old?.width, height: old?.height },
         videoCoverUrl: reuseCover
@@ -155,6 +156,7 @@ export function ensureMediaSizeWithinLimit(
 
 export const useMediaUploader = () => {
   const conversationStore = useConversationStore()
+  const messageStore = useMessageStore()
   const userStore = useUserStore()
   const muteOverlay = useMuteOverlay()
   const message = useMessage()
@@ -177,7 +179,7 @@ export const useMediaUploader = () => {
     const blobUrl = URL.createObjectURL(opts.file)
     const clientMessageId = opts.existingClientMessageId || generateClientMessageId()
     if (opts.existingClientMessageId) {
-      conversationStore.patchMessage(conversation.type, conversation.targetId, clientMessageId, {
+      messageStore.patchMessage(conversation.type, conversation.targetId, clientMessageId, {
         content: opts.buildContent(blobUrl),
         status: ImMessageStatus.SENDING,
         uploadProgress: 0,
@@ -186,7 +188,6 @@ export const useMediaUploader = () => {
       return { clientMessageId, blobUrl }
     }
     const placeholder: Message = {
-      id: 0,
       clientMessageId,
       type: opts.type,
       content: opts.buildContent(blobUrl),
@@ -198,7 +199,7 @@ export const useMediaUploader = () => {
       uploadProgress: 0,
       _localFile: opts.file
     }
-    conversationStore.insertMessage(
+    messageStore.insertMessage(
       {
         type: conversation.type,
         targetId: conversation.targetId,
@@ -221,7 +222,7 @@ export const useMediaUploader = () => {
     targetId: number,
     clientMessageId: string
   ): void => {
-    conversationStore.patchMessage(conversationType, targetId, clientMessageId, {
+    messageStore.patchMessage(conversationType, targetId, clientMessageId, {
       status: ImMessageStatus.FAILED,
       uploadProgress: undefined
     })
@@ -244,7 +245,7 @@ export const useMediaUploader = () => {
         return
       }
       lastPercent = percent
-      conversationStore.patchMessage(conversation.type, conversation.targetId, clientMessageId, {
+      messageStore.patchMessage(conversation.type, conversation.targetId, clientMessageId, {
         uploadProgress: percent
       })
     }
@@ -303,7 +304,7 @@ export const useMediaUploader = () => {
     clientMessageId: string
     realContent: string
   }): Promise<void> => {
-    conversationStore.patchMessage(
+    messageStore.patchMessage(
       opts.conversation.type,
       opts.conversation.targetId,
       opts.clientMessageId,

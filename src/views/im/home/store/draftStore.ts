@@ -124,6 +124,13 @@ export const useDraftStore = defineStore('imDraft', {
     /** 立即落盘待写的草稿；beforeunload 时调，避免最后一次输入卡在 debounce 队列里丢失 */
     flushPersist(): void {
       persistBucket.flush()
+    },
+
+    /** 清空草稿内存 */
+    // TODO @AI：写草稿，是不是融合到 conversationStore 里。
+    clear(): void {
+      persistBucket.cancel()
+      this.drafts = {}
     }
   }
 })

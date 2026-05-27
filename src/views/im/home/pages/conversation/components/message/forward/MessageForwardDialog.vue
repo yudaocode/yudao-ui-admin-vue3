@@ -402,7 +402,6 @@ async function handleCreateGroupAndSend() {
       name: group.name || name,
       avatar: group.avatar || '',
       unreadCount: 0,
-      messages: [],
       lastContent: '',
       lastSendTime: 0
     }

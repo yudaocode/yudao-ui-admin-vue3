@@ -14,7 +14,9 @@
   <div
     class="flex w-fit gap-1.5 items-center min-w-0 py-0.5 text-12px text-[var(--el-text-color-secondary)] rounded transition-colors"
     :class="[
-      mirrored ? 'pl-1 pr-2 border-r-2 border-r-solid border-r-[var(--el-border-color)]' : 'pl-2 pr-1 border-l-2 border-l-solid border-l-[var(--el-border-color)]',
+      mirrored
+        ? 'pl-1 pr-2 border-r-2 border-r-solid border-r-[var(--el-border-color)]'
+        : 'pl-2 pr-1 border-l-2 border-l-solid border-l-[var(--el-border-color)]',
       {
         'cursor-pointer hover:text-[var(--el-text-color-primary)]': clickable && !isRecalled,
         'hover:bg-[var(--el-fill-color-light)]': (clickable && !isRecalled) || closable
@@ -32,12 +34,7 @@
 
     <!-- 文件：icon + 文件名 + 大小 -->
     <template v-else-if="isFile">
-      <Icon
-        :icon="fileIcon.icon"
-        :color="fileIcon.color"
-        :size="14"
-        class="flex-shrink-0"
-      />
+      <Icon :icon="fileIcon.icon" :color="fileIcon.color" :size="14" class="flex-shrink-0" />
       <span v-if="parsedPayload?.name" class="min-w-0 line-clamp-2 break-words">
         {{ parsedPayload.name }}
       </span>
@@ -58,7 +55,11 @@
     </template>
 
     <!-- 名片 -->
-    <CardLineLabel v-else-if="isCard" :card="parsedPayload" class="min-w-0 line-clamp-2 break-words" />
+    <CardLineLabel
+      v-else-if="isCard"
+      :card="parsedPayload"
+      class="min-w-0 line-clamp-2 break-words"
+    />
 
     <!-- 表情贴图：缩略图 + name（无 name 仅显示 [表情]） -->
     <template v-else-if="isFace">
@@ -103,8 +104,10 @@ import { formatSeconds } from '@/utils/formatTime'
 import { formatFileSize } from '@/utils/file'
 
 import { useConversationStore } from '../../../../store/conversationStore'
+import { useMessageStore } from '../../../../store/messageStore'
 import { getSenderDisplayName } from '@/views/im/utils/user'
 import { ImMessageType } from '@/views/im/utils/constants'
+import { getClientConversationId } from '@/views/im/utils/db'
 import CardLineLabel from '@/views/im/home/components/card/CardLineLabel.vue'
 import {
   parseMessage,
@@ -148,6 +151,7 @@ const emit = defineEmits<{
 }>()
 
 const conversationStore = useConversationStore()
+const messageStore = useMessageStore()
 
 /** 在当前会话消息列表里查找原消息,仅用于实时判断是否已撤回;摘要 / 缩略图都从 quote.content 直接派生 */
 const liveMessage = computed(() => {
@@ -155,7 +159,9 @@ const liveMessage = computed(() => {
   if (!conversation || !props.quote.messageId) {
     return undefined
   }
-  return conversation.messages.find((message) => message.id === props.quote.messageId)
+  return messageStore
+    .getMessages(getClientConversationId(conversation.type, conversation.targetId))
+    .find((message) => message.id === props.quote.messageId)
 })
 
 /** 命中本地缓存且 type === RECALL 才判定为已撤回;不在缓存的当快照仍有效 */
@@ -193,9 +199,7 @@ const isMaterial = computed(() => props.quote.type === ImMessageType.MATERIAL)
 /** 文本超过 MAX_TEXT_PREVIEW_LEN 截断，长内容不撑爆引用块 */
 const textPreview = computed(() => {
   const text = parsedPayload.value?.content ?? ''
-  return text.length <= MAX_TEXT_PREVIEW_LEN
-    ? text
-    : `${text.substring(0, MAX_TEXT_PREVIEW_LEN)}…`
+  return text.length <= MAX_TEXT_PREVIEW_LEN ? text : `${text.substring(0, MAX_TEXT_PREVIEW_LEN)}…`
 })
 
 /** 文件 icon：按扩展名挑色，跟主气泡渲染同源 */
@@ -227,4 +231,3 @@ function onClick() {
   emit('locate', props.quote.messageId)
 }
 </script>
-

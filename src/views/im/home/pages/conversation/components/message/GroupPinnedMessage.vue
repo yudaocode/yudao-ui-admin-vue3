@@ -9,8 +9,14 @@
       class="flex items-center gap-1.5 w-[360px] px-3 py-1.5 rounded-[10px] text-13px text-[var(--el-text-color-primary)] bg-[var(--el-bg-color)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] cursor-pointer hover:bg-[var(--el-fill-color-lighter)]"
       @click="handleTopClick"
     >
-      <Icon icon="ant-design:pushpin-outlined" :size="14" class="flex-shrink-0 text-[var(--el-color-warning)]" />
-      <span class="flex-shrink-0 text-[var(--el-text-color-secondary)]">{{ getSenderName(latest) }}：</span>
+      <Icon
+        icon="ant-design:pushpin-outlined"
+        :size="14"
+        class="flex-shrink-0 text-[var(--el-color-warning)]"
+      />
+      <span class="flex-shrink-0 text-[var(--el-text-color-secondary)]"
+        >{{ getSenderName(latest) }}：</span
+      >
       <span class="flex-1 min-w-0 truncate">{{ getPreview(latest) }}</span>
       <!-- 单条：移除按钮；多条折叠：共 N 条；多条展开：收起箭头 -->
       <span
@@ -22,7 +28,9 @@
         移除
       </span>
       <template v-else-if="pinnedMessages.length > 1">
-        <span class="flex-shrink-0 text-[var(--el-text-color-secondary)] text-12px">共 {{ pinnedMessages.length }} 条</span>
+        <span class="flex-shrink-0 text-[var(--el-text-color-secondary)] text-12px">
+          共 {{ pinnedMessages.length }} 条
+        </span>
         <Icon
           :icon="expanded ? 'ant-design:up-outlined' : 'ant-design:down-outlined'"
           :size="11"
@@ -35,7 +43,7 @@
     <div
       v-if="pinnedMessages.length > 1 && expanded"
       class="im-group-pinned-message__list absolute top-full left-1.5 z-10 flex flex-col gap-2.5 w-[380px] p-3 rounded-xl bg-[var(--el-bg-color)] shadow-[0_6px_16px_rgba(0,0,0,0.12)]"
-      style="margin-top: -1px;"
+      style="margin-top: -1px"
     >
       <div
         v-for="msg in pinnedMessages"
@@ -43,8 +51,14 @@
         class="flex items-center gap-1.5 w-full px-3 py-1.5 rounded-[10px] text-13px text-[var(--el-text-color-primary)] bg-[var(--el-fill-color-light)] cursor-pointer hover:bg-[var(--el-bg-color)]"
         @click="handleLocate(msg)"
       >
-        <Icon icon="ant-design:pushpin-outlined" :size="14" class="flex-shrink-0 text-[var(--el-color-warning)]" />
-        <span class="flex-shrink-0 text-[var(--el-text-color-secondary)]">{{ getSenderName(msg) }}：</span>
+        <Icon
+          icon="ant-design:pushpin-outlined"
+          :size="14"
+          class="flex-shrink-0 text-[var(--el-color-warning)]"
+        />
+        <span class="flex-shrink-0 text-[var(--el-text-color-secondary)]">
+          {{ getSenderName(msg) }}：
+        </span>
         <span class="flex-1 min-w-0 truncate">{{ getPreview(msg) }}</span>
         <span
           v-if="canManage"
@@ -126,23 +140,31 @@ function handleTopClick() {
 
 /** 点击置顶消息行 → 触发跳转 + 收起弹出层 */
 function handleLocate(msg: Message) {
+  if (!msg.id) {
+    return
+  }
   emit('locate', msg.id)
   expanded.value = false
 }
 
+// TODO @AI：变量是不是都改成 message，不要 msg？！
 /** 置顶消息发送人显示名 */
 function getSenderName(msg: Message): string {
-  return group.value ? getSenderDisplayName(msg.senderId, ImConversationType.GROUP, group.value.id) : ''
+  return group.value
+    ? getSenderDisplayName(msg.senderId, ImConversationType.GROUP, group.value.id)
+    : ''
 }
 
 /** 置顶消息预览文本：复用会话最后一条摘要逻辑（[图片] / [文件] / 文本等） */
 function getPreview(msg: Message): string {
-  return group.value ? resolveConversationLastContent(msg, ImConversationType.GROUP, group.value.id) : ''
+  return group.value
+    ? resolveConversationLastContent(msg, ImConversationType.GROUP, group.value.id)
+    : ''
 }
 
 /** 移除置顶：调后端 API，loading 期间禁止重复点；后端广播 GROUP_MESSAGE_UNPIN 由 dispatcher 自动同步本地 */
 async function handleRemove(msg: Message) {
-  if (!group.value || removingId.value !== null) {
+  if (!group.value || !msg.id || removingId.value !== null) {
     return
   }
   removingId.value = msg.id

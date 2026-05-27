@@ -153,7 +153,9 @@
             v-else-if="isGroupNotification(message.type)"
             class="px-4 py-3 text-12px text-center italic text-[var(--el-text-color-secondary)] border-b border-b-solid border-[var(--el-border-color-lighter)]"
           >
-            <TipSegments :segments="resolveGroupNotificationSegments(message, resolveGroupMemberName(message))" />
+            <TipSegments
+              :segments="resolveGroupNotificationSegments(message, resolveGroupMemberName(message))"
+            />
           </div>
 
           <!-- 普通消息行 -->
@@ -178,11 +180,11 @@
                   <span class="block text-right">{{ formatHistoryTime(message.sendTime) }}</span>
                   <!-- 定位到聊天位置：absolute 浮在时间下方，行 hover 才显示，
                        不参与右侧栏 flex 排版（避免隐藏时占位让"我"和内容之间留空）；
-                       仅有真实 id 的消息才支持（本地占位消息 id=0 不行） -->
+                       仅有真实 id 的消息才支持（本地占位消息不行） -->
                   <span
-                    v-if="message.id > 0"
+                    v-if="message.id && message.id > 0"
                     class="im-message-history__locate"
-                    @click="locateMessage(message.id)"
+                    @click="locateMessage(message.id!)"
                   >
                     定位到聊天位置
                   </span>
@@ -248,6 +250,7 @@ import { useUserStore } from '@/store/modules/user'
 import { getPrivateMessageList as apiGetPrivateMessageList } from '@/api/im/message/private'
 import { getGroupMessageList as apiGetGroupMessageList } from '@/api/im/message/group'
 import { useConversationStore } from '../../../../store/conversationStore'
+import { useMessageStore } from '../../../../store/messageStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useFriendStore } from '../../../../store/friendStore'
 import { IM_MERGE_DETAIL_DIALOG_KEY } from './forward/keys'
@@ -285,6 +288,7 @@ import {
   type MergeMessage
 } from '@/views/im/utils/message'
 import type { Message } from '@/views/im/home/types'
+import { getClientConversationId } from '@/views/im/utils/db'
 import UserAvatar from '../../../../components/user/UserAvatar.vue'
 import MessageBubble from './MessageBubble.vue'
 import GroupMember, { type GroupMemberLite } from '../../../../components/group/GroupMember.vue'
@@ -299,6 +303,7 @@ const emit = defineEmits<{
 
 const userStore = useUserStore()
 const conversationStore = useConversationStore()
+const messageStore = useMessageStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 const openMergeDetail = inject(IM_MERGE_DETAIL_DIALOG_KEY)
@@ -316,7 +321,13 @@ defineExpose({
 
 const conversation = computed(() => conversationStore.activeConversation)
 const isGroup = computed(() => conversation.value?.type === ImConversationType.GROUP)
-const allMessages = computed<Message[]>(() => conversation.value?.messages || [])
+const allMessages = computed<Message[]>(() =>
+  conversation.value
+    ? messageStore.getMessages(
+        getClientConversationId(conversation.value.type, conversation.value.targetId)
+      )
+    : []
+)
 
 /** 单条消息的发送人显示名：渲染时按 conversation 上下文走 WeChat 优先级实时算 */
 function senderDisplayNameOf(message: Message): string {
@@ -329,8 +340,7 @@ function senderDisplayNameOf(message: Message): string {
 
 /** 群广播事件 segments 的成员名解析器；按当前会话 targetId 走 getSenderDisplayName */
 function resolveGroupMemberName(message: Message): (userId: number) => string {
-  return (id: number) =>
-    getSenderDisplayName(id, ImConversationType.GROUP, message.targetId ?? 0)
+  return (id: number) => getSenderDisplayName(id, ImConversationType.GROUP, message.targetId ?? 0)
 }
 
 /** 单条消息的发送人真实昵称：给 UserAvatar 色卡 / alt 用，永远是 nickname 不掺备注 */
@@ -535,7 +545,7 @@ const hasMore = ref(true)
  *
  * - 未对接 list 接口的 type / keyword / sender 过滤参数：后端只支持 maxId + limit 游标分页，
  *   tab 筛选在前端做（数据来回到本地后过滤）
- * - id=0（本地占位）跳过：后端没法按 messageId 查
+ * - 本地占位跳过：后端没法按 messageId 查
  * - 返回数量 < limit 视为到顶
  */
 async function loadEarlier() {
@@ -545,10 +555,7 @@ async function loadEarlier() {
   }
   // 仅 PRIVATE / GROUP 走分页接口；CHANNEL 单向广播、没有 list 接口，落到 else 会误调私聊接口（receiverId 传 channelId）
   const requestedType = conversation.value.type
-  if (
-    requestedType !== ImConversationType.PRIVATE &&
-    requestedType !== ImConversationType.GROUP
-  ) {
+  if (requestedType !== ImConversationType.PRIVATE && requestedType !== ImConversationType.GROUP) {
     return
   }
   // 快照当前会话主键：await 期间用户切走 / 关闭面板时丢弃响应，避免旧会话历史被 prepend 到新会话造成串号
@@ -559,11 +566,11 @@ async function loadEarlier() {
   loadingMore.value = true
   try {
     // 算 maxId（不含，作为后端游标）：取当前会话本地缓存里最早一条服务端 id；
-    // id=0 是本地乐观占位消息，没有服务端 id，要剔除
+    // 本地乐观占位消息没有服务端 id，要剔除
     // 全是占位 / 列表为空时 reduce 不更新初值（POSITIVE_INFINITY），转成 undefined → 后端从最新拉
     const earliestId = allMessages.value
-      .filter((message) => message.id > 0)
-      .reduce((min, message) => Math.min(min, message.id), Number.POSITIVE_INFINITY)
+      .filter((message) => !!message.id && message.id > 0)
+      .reduce((min, message) => Math.min(min, message.id || min), Number.POSITIVE_INFINITY)
     const maxId = Number.isFinite(earliestId) ? earliestId : undefined
 
     // 调后端 list 接口：私聊 / 群聊接口签名不同，分支调度；返回结果用 useMessagePuller
@@ -597,9 +604,9 @@ async function loadEarlier() {
     if (pageLength < HISTORY_PAGE_SIZE) {
       hasMore.value = false
     }
-    // 合并到 conversationStore：prependMessages 内部去重 + 升序合并 + 落 IndexedDB；
+    // 合并到 messageStore：prependMessages 内部去重 + 升序合并 + 落 IndexedDB；
     // 主聊天面板的 messages 是同一份引用，老消息也会一起出现在主面板里（符合预期）
-    conversationStore.prependMessages(requestedType, requestedTargetId, earlier)
+    messageStore.prependMessages(requestedType, requestedTargetId, earlier)
   } finally {
     loadingMore.value = false
   }

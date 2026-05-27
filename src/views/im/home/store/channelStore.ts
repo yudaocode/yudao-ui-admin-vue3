@@ -90,6 +90,12 @@ export const useChannelStore = defineStore('imChannelStore', {
           conversation.avatar = channel.avatar
         }
       })
+    },
+
+    /** 清空频道内存 */
+    clear() {
+      this.channels = []
+      this.loaded = false
     }
   }
 })
@@ -98,4 +104,6 @@ if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useChannelStore, import.meta.hot))
 }
 
-export const useImChannelStore = () => useChannelStore(store)
+export const useChannelStoreWithOut = () => useChannelStore(store)
+// TODO @AI：这里，重名名，是不是没必要？？？（问问。）
+export const useImChannelStore = useChannelStoreWithOut

@@ -28,6 +28,7 @@ import {
   WS_RECONNECT_JITTER_MS
 } from '../../utils/config'
 import { useConversationStore } from './conversationStore'
+import { useMessageStore } from './messageStore'
 import { useFriendStore, type FriendNotificationPayload } from './friendStore'
 import { getFriendDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
@@ -317,10 +318,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
 
     /**
      * 频道消息实时入会话；频道消息单向 + 无状态机，直接 insertMessage 即可
-     * pull 与 WS 拿到同一条 id 时，conversationStore.insertMessage 内部按 id 去重，不会重复
+     * pull 与 WS 拿到同一条 id 时，messageStore.insertMessage 内部按 id 去重，不会重复
      */
     handleChannelMessage(websocketMessage: ImChannelMessageRespVO) {
       const conversationStore = useConversationStore()
+      const messageStore = useMessageStore()
       // 离线加载期间先缓冲，等 pull 完成后再统一回放，避免重复或顺序错乱
       if (conversationStore.loading) {
         this.messageBuffer.push({
@@ -333,7 +335,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         typeof websocketMessage.sendTime === 'number'
           ? websocketMessage.sendTime
           : new Date(websocketMessage.sendTime).getTime()
-      conversationStore.insertMessage(buildChannelConversationStub(websocketMessage.channelId), {
+      messageStore.insertMessage(buildChannelConversationStub(websocketMessage.channelId), {
         id: websocketMessage.id,
         clientMessageId: '',
         type: websocketMessage.type,
@@ -513,7 +515,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`（对齐 ImMessageTypeEnum.RECALL → RecallMessage）
       // 这里拦截下来改走 recallMessage（把原消息更新为 RECALL 态），不让它作为新消息进列表
       if (websocketMessage.type === ImMessageType.RECALL) {
-        conversationStore.recallMessage(
+        useMessageStore().recallMessage(
           ImConversationType.PRIVATE,
           peerId,
           websocketMessage.content
@@ -523,7 +525,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
 
       // 4. 后端 DTO → 前端 Message：发送人名渲染时实时算，不写入消息字段
       const message = convertPrivateMessage(websocketMessage, currentUserId)
-      conversationStore.insertMessage(
+      useMessageStore().insertMessage(
         {
           type: ImConversationType.PRIVATE,
           targetId: peerId,
@@ -543,7 +545,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         if (isActive) {
           // 聊天窗口打开 = 实际看到了：本端清未读；私聊已读开启时再上报后端，让对方 UI 立刻切到"已读"
           // 已读位置直接用刚到的消息 id（这条就是当前会话最大 id）
-          conversationStore.markActiveAsRead()
+          conversationStore.markConversationAsRead(ImConversationType.PRIVATE, peerId)
+          if (conversation) {
+            useMessageStore().markConversationMessagesRead(conversation)
+          }
           if (MESSAGE_PRIVATE_READ_ENABLED) {
             apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
               console.warn('[IM WS] 自动已读上报失败', e)
@@ -580,8 +585,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!websocketMessage.id) {
         return
       }
-      const conversationStore = useConversationStore()
-      conversationStore.applyReadReceipt({
+      useMessageStore().applyReadReceipt({
         conversationType: ImConversationType.PRIVATE,
         targetId: websocketMessage.senderId,
         privateReadMaxId: websocketMessage.id
@@ -637,7 +641,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`
       // 这里拦截下来改走 recallMessage（把原消息更新为 RECALL 态）
       if (websocketMessage.type === ImMessageType.RECALL) {
-        conversationStore.recallMessage(
+        useMessageStore().recallMessage(
           ImConversationType.GROUP,
           websocketMessage.groupId,
           websocketMessage.content
@@ -647,7 +651,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
 
       // 4. 后端 DTO → 前端 Message：发送人名渲染时实时算，不写入消息字段
       const message = convertGroupMessage(websocketMessage, currentUserId)
-      conversationStore.insertMessage(
+      useMessageStore().insertMessage(
         {
           type: ImConversationType.GROUP,
           targetId: websocketMessage.groupId,
@@ -669,7 +673,13 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationStore.activeConversation?.targetId === websocketMessage.groupId
         if (isActive) {
           // 群已读上报需要带 messageId（群消息以"读到第几条"的游标为准，区别于私聊只标 receiverId）；群已读关闭时仅本地清零
-          conversationStore.markActiveAsRead()
+          conversationStore.markConversationAsRead(
+            ImConversationType.GROUP,
+            websocketMessage.groupId
+          )
+          if (conversation) {
+            useMessageStore().markConversationMessagesRead(conversation)
+          }
           if (MESSAGE_GROUP_READ_ENABLED) {
             apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id).catch((e) => {
               console.warn('[IM WS] 自动已读上报失败', e)
@@ -698,8 +708,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!MESSAGE_GROUP_READ_ENABLED) {
         return
       }
-      const conversationStore = useConversationStore()
-      conversationStore.applyReadReceipt({
+      useMessageStore().applyReadReceipt({
         conversationType: ImConversationType.GROUP,
         targetId: websocketMessage.groupId,
         groupMessageId: websocketMessage.id,

@@ -4,47 +4,23 @@ import { toRaw } from 'vue'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 
 /**
- * IM 模块的 IndexedDB 实例（localforage 优先 IndexedDB，自动降级到 WebSQL / localStorage）
- *
- * 为什么不用 localStorage 直接存：
- * 1. 配额：localStorage 整体上限 5~10MB，多会话长历史很容易撑爆
- * 2. 写放大：localStorage 必须按 key 整体写入，单次写就是 MB 级序列化阻塞主线程
- *
- * 配套策略：会话与消息按 key 分桶（见 StorageKeys），让单次变更只重写最小粒度的 key；
- *         IndexedDB 默认配额一般是浏览器可用空间的 ~50%，远大于 localStorage，配合分桶才发挥效果
+ * IM 模块本地缓存实例（localforage 优先 IndexedDB，自动降级到 WebSQL / localStorage）
  */
 export const imStorage = localforage.createInstance({
   name: 'im',
   storeName: 'conversation',
-  description: 'IM 会话索引与消息缓存'
+  description: 'IM 本地缓存'
 })
 
 /**
  * 存储 key 统一在此生成
  *
- * - 会话 / 好友 / 群相关业务数据走 imStorage（IndexedDB），key 都按 userId 分桶
+ * - 好友 / 群相关业务数据走 imStorage（IndexedDB），key 都按 userId 分桶
  * - 轻量 UI 状态（侧边栏宽度）仍走 localStorage：体积小、跨 Tab 同步天然，没必要走 IndexedDB
  *
  * 所有业务 key 都注入 userId：多账号切换按用户隔离避免数据互串；账号切换时只清 in-memory、IDB 数据保留——回切旧账号能秒开，不浪费已下载好友 / 群 / 成员快照
  */
 export const StorageKeys = {
-  /**
-   * 会话索引：游标 + 会话元数据（不含 messages），对应 ConversationStoreMeta
-   *
-   * 任何会话级元数据变更（top / silent / unread / 列表增删 / 排序）都会重写这一个 key；由于 messages 已剥离到独立 key，单次写体积稳定（仅元数据，量级 KB 级）
-   */
-  conversationMeta: (userId: number | string) => `conversation:meta:${userId}`,
-  /**
-   * 单会话消息：按 (type, targetId) 分桶，存 Message[]
-   *
-   * - type：私聊 / 群聊（对齐 ImConversationType）
-   * - targetId：私聊的对方 userId / 群聊的 groupId
-   *
-   * 每条消息变更只重写当前会话这一个 key，避免老方案"全量写所有会话所有消息"的写放大；软删除会话时由 conversationStore.removeConversationMessages 物理删除该 key，避免 orphan 残留
-   */
-  conversationMessages: (userId: number | string, type: number, targetId: number) =>
-    `conversation:messages:${userId}:${type}:${targetId}`,
-
   /**
    * 输入框草稿整桶：Record<`${type}:${targetId}`, DraftSnapshot>
    *
@@ -59,8 +35,7 @@ export const StorageKeys = {
   /** 频道列表整桶；频道量级很小，整桶整写够用 */
   channels: (userId: number | string) => `channels:${userId}`,
   /** 单群成员，按 groupId 分桶——单群可上百-千级，跟懒加载粒度对齐；群解散时物理删 */
-  groupMembers: (userId: number | string, groupId: number) =>
-    `groupMembers:${userId}:${groupId}`,
+  groupMembers: (userId: number | string, groupId: number) => `groupMembers:${userId}:${groupId}`,
 
   /** 最近转发会话 key 列表（按 userId 分桶）；ConversationPickerPanel 左栏顶部头像区使用 */
   recentForwardConversationKeys: (userId: number | string) =>
@@ -81,11 +56,40 @@ export function getCurrentUserId(): number {
 
 /** IDB 写入：fire-and-forget */
 export function setQuietly(key: string, value: unknown, errorLabel: string): void {
-  // toRaw 拆 Vue / Pinia reactive Proxy——structuredClone 不接 Proxy 会抛 DataCloneError 静默丢盘
-  const raw = value && typeof value === 'object' ? toRaw(value) : value
+  const raw = toStorageValue(value)
   void imStorage.setItem(key, raw).catch((e) => console.warn(errorLabel, e))
 }
 
 export function removeQuietly(key: string, errorLabel: string): void {
   void imStorage.removeItem(key).catch((e) => console.warn(errorLabel, e))
+}
+
+/** 转换为 IndexedDB 可存储的数据 */
+// TODO @AI：后续，是不是可以删除掉？尽量使用 db.ts 对不对哈？
+function toStorageValue<T>(value: T, seen = new WeakMap<object, unknown>()): T {
+  const raw = value && typeof value === 'object' ? toRaw(value) : value
+  if (!raw || typeof raw !== 'object') {
+    return raw
+  }
+  if (raw instanceof Date || raw instanceof Blob || raw instanceof ArrayBuffer) {
+    return raw
+  }
+  if (seen.has(raw)) {
+    return seen.get(raw) as T
+  }
+  if (Array.isArray(raw)) {
+    const array: unknown[] = []
+    seen.set(raw, array)
+    raw.forEach((item) => array.push(toStorageValue(item, seen)))
+    return array as T
+  }
+  const out: Record<string, unknown> = {}
+  seen.set(raw, out)
+  Object.entries(raw).forEach(([key, item]) => {
+    if (typeof item === 'function' || typeof item === 'symbol') {
+      return
+    }
+    out[key] = toStorageValue(item, seen)
+  })
+  return out as T
 }

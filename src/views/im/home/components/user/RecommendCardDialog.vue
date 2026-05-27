@@ -83,11 +83,7 @@
       </ConversationPickerPanel>
 
       <!-- 好友视图：选好友建群后发送 -->
-      <FriendPickerPanel
-        v-else
-        v-model:selected-ids="selectedFriendIds"
-        :friends="friends"
-      />
+      <FriendPickerPanel v-else v-model:selected-ids="selectedFriendIds" :friends="friends" />
     </div>
 
     <!-- 好友视图的 dialog footer：建群并发送 -->
@@ -119,11 +115,7 @@ import { useConversationStore } from '../../store/conversationStore'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { useMessageSender } from '../../composables/useMessageSender'
-import {
-  ImConversationType,
-  ImMessageType,
-  isGroupConversation
-} from '../../../utils/constants'
+import { ImConversationType, ImMessageType, isGroupConversation } from '../../../utils/constants'
 import { getConversationKey } from '../../../utils/conversation'
 import { buildDefaultGroupName } from '../../../utils/group'
 import { serializeMessage, type CardTarget } from '../../../utils/message'
@@ -287,7 +279,6 @@ async function handleCreateGroupAndSend() {
       name: group.name || name,
       avatar: group.avatar || '',
       unreadCount: 0,
-      messages: [],
       lastContent: '',
       lastSendTime: 0
     }

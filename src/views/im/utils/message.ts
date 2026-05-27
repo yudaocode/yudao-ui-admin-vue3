@@ -414,7 +414,7 @@ function mapMessageToMergeItem(
 ): MergeMessageItem {
   const snapshot = senderSnapshots.get(message.senderId)
   return {
-    messageId: message.id,
+    messageId: message.id || 0,
     senderId: message.senderId,
     senderNickname: snapshot?.nickname ?? String(message.senderId),
     senderAvatar: snapshot?.avatar ?? '',
@@ -555,7 +555,7 @@ export const removeQuotePayload = (content: string): string => {
 /** 由 Message 派生 QuoteMessage 用于乐观渲染;ack 后会被服务端权威版本覆盖 */
 export const buildQuoteFromMessage = (message: Message): QuoteMessage => {
   return {
-    messageId: message.id,
+    messageId: message.id || 0,
     senderId: message.senderId,
     type: message.type,
     content: removeQuotePayload(message.content)
@@ -882,7 +882,10 @@ export function resolveRtcCallTipSegments(message: {
   }
   if (message.type === ImMessageType.RTC_CALL_START) {
     return payload.inviterUserId
-      ? [tipMention(payload.inviterUserId, resolveRtcInviterLabel(payload)), tipText(' 发起了语音通话')]
+      ? [
+          tipMention(payload.inviterUserId, resolveRtcInviterLabel(payload)),
+          tipText(' 发起了语音通话')
+        ]
       : []
   }
   if (message.type === ImMessageType.RTC_CALL_END) {

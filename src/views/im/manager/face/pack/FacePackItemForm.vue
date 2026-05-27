@@ -74,6 +74,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as ManagerFacePackItemApi from '@/api/im/manager/face/item'
 import { probeImageSize } from '@/views/im/utils/image'
+import type { FormRules } from 'element-plus'
 
 defineOptions({ name: 'ImManagerFacePackItemForm' })
 
@@ -99,7 +100,7 @@ const formData = ref({
   sort: 0,
   status: CommonStatusEnum.ENABLE
 })
-const formRules = reactive({
+const formRules = reactive<FormRules>({
   url: [{ required: true, message: '表情图不能为空', trigger: 'change' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }],
   // 宽高自动探测后允许手改，但提交前必须落 1-2048 范围；防止用户清空后 submit 让后端报错

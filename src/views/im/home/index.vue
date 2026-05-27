@@ -34,6 +34,7 @@ import { useRoute } from 'vue-router'
 
 import { useAppStore } from '@/store/modules/app'
 import { useConversationStore } from './store/conversationStore'
+import { useMessageStore } from './store/messageStore'
 import { useImWebSocketStore } from './store/websocketStore'
 import { useFriendStore } from './store/friendStore'
 import { useGroupStore } from './store/groupStore'
@@ -46,6 +47,7 @@ import { useMessageSender } from './composables/useMessageSender'
 import { useVoicePlayer } from './composables/useVoicePlayer'
 import { ImConversationType } from '../utils/constants'
 import { StorageKeys } from '../utils/storage'
+import { initDb, stopRequests } from '../utils/db'
 import type { Conversation } from './types'
 import ToolBar from './components/ToolBar.vue'
 import UserInfoCard from './components/user/UserInfoCard.vue'
@@ -58,6 +60,7 @@ defineOptions({ name: 'ImIndex' })
 const route = useRoute()
 const appStore = useAppStore()
 const conversationStore = useConversationStore()
+const messageStore = useMessageStore()
 const webSocketStore = useImWebSocketStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
@@ -81,9 +84,12 @@ onMounted(async () => {
   // 1.1 整段 loading=true 阻断 saveConversations 抖动写盘 + WebSocket 普通消息进缓冲，避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
   conversationStore.loading = true
   try {
+    // TODO @AI：这里要写个注释？？？！！！
+    await initDb()
     // 1.2 五个 store 并发从 IDB 读取本地缓存（loadConversations / loadDrafts 返回 void；load{Friends,Groups,Channels} 返回是否命中缓存）
-    const [, hasCachedFriends, hasCachedGroups, , hasCachedChannels] = await Promise.all([
+    const [, , hasCachedFriends, hasCachedGroups, , hasCachedChannels] = await Promise.all([
       conversationStore.loadConversations(),
+      messageStore.loadCursors(),
       friendStore.loadFriends(),
       groupStore.loadGroups(),
       draftStore.loadDrafts(),
@@ -162,6 +168,8 @@ onUnmounted(() => {
   // 模块级单例 audio 不会随视图卸载自动停，主动停掉避免切路由后语音继续响
   voicePlayer.stop()
   window.removeEventListener('beforeunload', onBeforeUnload)
+  // TODO @AI：写个注释？！
+  void stopRequests()
 })
 
 /**

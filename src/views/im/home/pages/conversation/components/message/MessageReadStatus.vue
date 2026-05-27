@@ -59,7 +59,7 @@ import { getGroupReadUsers as apiGetGroupReadUsers } from '@/api/im/message/grou
 import { CommonStatusEnum } from '@/utils/constants'
 import { ImConversationType, ImGroupReceiptStatus } from '../../../../../utils/constants'
 import type { Message } from '../../../../types'
-import { useConversationStore } from '../../../../store/conversationStore'
+import { useMessageStore } from '../../../../store/messageStore'
 import GroupMember, { type GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 import PagedScroller from '../../../../components/PagedScroller.vue'
 
@@ -73,7 +73,7 @@ const props = defineProps<{
   groupId: number
 }>()
 
-const conversationStore = useConversationStore()
+const messageStore = useMessageStore()
 
 // popover 开关：show 时拉已读名单，关闭后保留 readUserIds 缓存（重开同一条消息不再请求）
 const popVisible = ref(false)
@@ -132,7 +132,7 @@ const unreadMembers = computed(() =>
  * 跳过：本地占位消息（id = 0，还没拿到服务端 id），后端没法按 messageId 查
  * 失败：仅控制台告警，readUserIds 保持空数组 → label 走 readCount 兜底，不阻塞 UI
  *
- * 拉到名单后顺手把 readCount / receiptStatus 回写到 conversationStore，让 popover 外面的
+ * 拉到名单后顺手把 readCount / receiptStatus 回写到 messageStore，让 popover 外面的
  * label 也跟着走最新数：离线 / 漏收 RECEIPT 事件时本地 readCount 会偏旧，弹层里看到"已读 5"
  * 但外面仍是"未读"或旧人数；这里以服务端返回为准矫正回去
  */
@@ -150,7 +150,7 @@ async function loadReadUsers() {
     // 全可见成员都已读 → flip 到 DONE，让外面 label 直接命中"全部已读"分支；
     // 否则只更新 readCount，receiptStatus 维持不变（PENDING / READING）
     const allRead = readCount > 0 && readCount >= visibleMembers.value.length
-    conversationStore.applyReadReceipt({
+    messageStore.applyReadReceipt({
       conversationType: ImConversationType.GROUP,
       targetId: props.groupId,
       groupMessageId: props.message.id,
