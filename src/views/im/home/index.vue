@@ -39,7 +39,6 @@ import { useImWebSocketStore } from './store/websocketStore'
 import { useFriendStore } from './store/friendStore'
 import { useGroupStore } from './store/groupStore'
 import { useGroupRequestStore } from './store/groupRequestStore'
-import { useDraftStore } from './store/draftStore'
 import { useFaceStore } from './store/faceStore'
 import { useChannelStore } from './store/channelStore'
 import { useMessagePuller } from './composables/useMessagePuller'
@@ -65,7 +64,6 @@ const webSocketStore = useImWebSocketStore()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 const groupRequestStore = useGroupRequestStore()
-const draftStore = useDraftStore()
 const faceStore = useFaceStore()
 const channelStore = useChannelStore()
 const { pullOnce, cancelPull } = useMessagePuller()
@@ -81,18 +79,17 @@ onMounted(async () => {
     .fetchUnhandledList()
     .catch((e) => console.warn('[IM] 拉取未处理加群申请失败', e))
 
-  // 1.1 整段 loading=true 阻断 saveConversations 抖动写盘 + WebSocket 普通消息进缓冲，避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
+  // 1.1 整段 loading=true 阻断会话列表抖动写盘 + WebSocket 普通消息进缓冲，避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
   conversationStore.loading = true
   try {
-    // TODO @AI：这里要写个注释？？？！！！
+    // 1.2 打开当前用户 IM DB
     await initDb()
-    // 1.2 五个 store 并发从 IDB 读取本地缓存（loadConversations / loadDrafts 返回 void；load{Friends,Groups,Channels} 返回是否命中缓存）
-    const [, , hasCachedFriends, hasCachedGroups, , hasCachedChannels] = await Promise.all([
+    // 1.3 五个 store 并发从 IDB 读取本地缓存（loadConversations / loadMessageCursors 返回 void；load{Friends,Groups,Channels} 返回是否命中缓存）
+    const [, , hasCachedFriends, hasCachedGroups, hasCachedChannels] = await Promise.all([
       conversationStore.loadConversations(),
-      messageStore.loadCursors(),
+      messageStore.loadMessageCursors(),
       friendStore.loadFriends(),
       groupStore.loadGroups(),
-      draftStore.loadDrafts(),
       channelStore.loadChannels()
     ])
 
@@ -130,7 +127,7 @@ onMounted(async () => {
       conversationStore.setActiveConversation(firstVisible)
     }
   } catch (e) {
-    // 1. 首拉失败：手动复位 loading（pullOnce 没跑到，它的 finally 兜不到这里），否则后续 saveConversations 全被早 return 阻断
+    // 1. 首拉失败：手动复位 loading（pullOnce 没跑到，它的 finally 兜不到这里），否则后续会话列表写入全被早 return 阻断
     // 2. WebSocket 不在这里 disconnect——路由离开会走 onUnmounted 自然清理，用户也可以刷新重试
     conversationStore.loading = false
     console.error('[IM] 初始化失败', e)
@@ -155,7 +152,7 @@ function pickFirstVisibleConversation(sorted: Conversation[]): Conversation | un
 
 /** 标签关闭前 flush 草稿队列；debounce 默认 trail-edge 触发，最后一次输入可能还压在队列里 */
 function onBeforeUnload() {
-  draftStore.flushPersist()
+  conversationStore.flushDraftSave()
 }
 window.addEventListener('beforeunload', onBeforeUnload)
 
@@ -163,12 +160,12 @@ window.addEventListener('beforeunload', onBeforeUnload)
 onUnmounted(() => {
   cancelPull()
   webSocketStore.disconnect()
-  draftStore.flushPersist()
+  conversationStore.flushDraftSave()
   faceStore.reset()
   // 模块级单例 audio 不会随视图卸载自动停，主动停掉避免切路由后语音继续响
   voicePlayer.stop()
   window.removeEventListener('beforeunload', onBeforeUnload)
-  // TODO @AI：写个注释？！
+  // 停止当前 IM session 并清理各 store 内存
   void stopRequests()
 })
 

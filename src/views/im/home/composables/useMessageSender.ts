@@ -111,10 +111,9 @@ export const useMessageSender = () => {
       clientMessageId = options.existingClientMessageId
       // 占位若已被删除（上传期间用户右键删除 / 撤回 / removeMessage 等）则放弃发送，
       // 否则 sendRaw 仍会把消息推到服务端，导致"本地无气泡 / 对方却收到一条"
-      // TODO @AI：尽量不要 m 缩写，全称
       const stillExists = messageStore
         .getMessageList(conversation.type, realTarget)
-        .some((m) => m.clientMessageId === clientMessageId && !m._ackMerging)
+        .some((message) => message.clientMessageId === clientMessageId && !message._ackMerging)
       if (!stillExists) {
         return false
       }
@@ -227,10 +226,13 @@ export const useMessageSender = () => {
     // 本地标记已读：未读数清零 + 消息状态更新为 READ（UI 立刻响应）
     conversationStore.markConversationAsRead(conversation.type, conversation.targetId)
     messageStore.markConversationMessagesRead(conversation)
-    // TODO @AI：message；不要用 m；
     const maxMessageId = messageStore
       .getMessages(getClientConversationId(conversation.type, conversation.targetId))
-      .reduce<number>((max, m) => (m.id && m.id > max ? m.id : max), 0)
+      .reduce<number>(
+        (maxMessageId, message) =>
+          message.id && message.id > maxMessageId ? message.id : maxMessageId,
+        0
+      )
     if (!maxMessageId) {
       return
     }
@@ -285,8 +287,8 @@ export const useMessageSender = () => {
       if (!maxReadId) {
         return
       }
-      // applyReadReceipt 内部把 ≤ maxReadId 的本端消息更新为 READ
-      messageStore.applyReadReceipt({
+      // applyMessageReadReceipt 内部把 ≤ maxReadId 的本端消息更新为 READ
+      messageStore.applyMessageReadReceipt({
         conversationType: ImConversationType.PRIVATE,
         targetId: peerId,
         privateReadMaxId: maxReadId

@@ -604,9 +604,9 @@ async function loadEarlier() {
     if (pageLength < HISTORY_PAGE_SIZE) {
       hasMore.value = false
     }
-    // 合并到 messageStore：prependMessages 内部去重 + 升序合并 + 落 IndexedDB；
+    // 合并到 messageStore：prependMessageList 内部去重 + 升序合并 + 落 IndexedDB；
     // 主聊天面板的 messages 是同一份引用，老消息也会一起出现在主面板里（符合预期）
-    messageStore.prependMessages(requestedType, requestedTargetId, earlier)
+    messageStore.prependMessageList(requestedType, requestedTargetId, earlier)
   } finally {
     loadingMore.value = false
   }

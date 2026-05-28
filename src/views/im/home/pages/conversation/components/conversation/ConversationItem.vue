@@ -107,7 +107,6 @@ import { useFriendStore } from '../../../../store/friendStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useGroupRequestStore } from '../../../../store/groupRequestStore'
 import { useImUiStore } from '../../../../store/uiStore'
-import { useDraftStore } from '../../../../store/draftStore'
 import { ImConversationType, ImMessageType, isNormalMessage } from '../../../../../utils/constants'
 import { getSenderDisplayName } from '@/views/im/utils/user'
 import { buildRecallTip } from '@/views/im/utils/conversation'
@@ -128,7 +127,6 @@ const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 const groupRequestStore = useGroupRequestStore()
 const uiStore = useImUiStore()
-const draftStore = useDraftStore()
 const message = useMessage()
 
 const isActive = computed(
@@ -145,7 +143,7 @@ const draft = computed(() => {
   if (isActive.value) {
     return undefined
   }
-  return draftStore.getDraft(props.conversation)
+  return conversationStore.getDraft(props.conversation)
 })
 
 const isGroup = computed(() => props.conversation.type === ImConversationType.GROUP)

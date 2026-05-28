@@ -2,6 +2,7 @@ import request from '@/config/axios'
 
 export interface ImChannelMessageRespVO {
   id: number
+  clientMessageId?: string
   channelId: number
   materialId: number
   type: number

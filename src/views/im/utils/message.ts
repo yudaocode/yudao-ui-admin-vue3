@@ -10,7 +10,9 @@ import { getCurrentUserId } from './storage'
 import { formatCallDuration } from './time'
 import { useFriendStore } from '../home/store/friendStore'
 import { useGroupStore } from '../home/store/groupStore'
-import type { Conversation, Message, User, GroupLite } from '../home/types'
+import type { Conversation, Message, User, GroupLite, QuoteMessage } from '../home/types'
+
+export type { QuoteMessage } from '../home/types'
 
 // ====================================================================
 // IM 消息 content 编解码 & 展示工具
@@ -176,14 +178,6 @@ export function parseTextSegments(text: string, mentions: MentionCandidate[] = [
 }
 
 // ==================== 引用消息 ====================
-
-/** 引用消息 payload(对齐后端 QuoteMessage) */
-export interface QuoteMessage {
-  messageId: number
-  senderId: number
-  type: number
-  content: string
-}
 
 /** 引用容器：5 种普通消息(TEXT / IMAGE / FILE / VOICE / VIDEO)都可携带 quote */
 interface Quotable {

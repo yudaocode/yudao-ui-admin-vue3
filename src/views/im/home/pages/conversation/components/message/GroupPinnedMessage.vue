@@ -139,37 +139,36 @@ function handleTopClick() {
 }
 
 /** 点击置顶消息行 → 触发跳转 + 收起弹出层 */
-function handleLocate(msg: Message) {
-  if (!msg.id) {
+function handleLocate(message: Message) {
+  if (!message.id) {
     return
   }
-  emit('locate', msg.id)
+  emit('locate', message.id)
   expanded.value = false
 }
 
-// TODO @AI：变量是不是都改成 message，不要 msg？！
 /** 置顶消息发送人显示名 */
-function getSenderName(msg: Message): string {
+function getSenderName(message: Message): string {
   return group.value
-    ? getSenderDisplayName(msg.senderId, ImConversationType.GROUP, group.value.id)
+    ? getSenderDisplayName(message.senderId, ImConversationType.GROUP, group.value.id)
     : ''
 }
 
 /** 置顶消息预览文本：复用会话最后一条摘要逻辑（[图片] / [文件] / 文本等） */
-function getPreview(msg: Message): string {
+function getPreview(message: Message): string {
   return group.value
-    ? resolveConversationLastContent(msg, ImConversationType.GROUP, group.value.id)
+    ? resolveConversationLastContent(message, ImConversationType.GROUP, group.value.id)
     : ''
 }
 
 /** 移除置顶：调后端 API，loading 期间禁止重复点；后端广播 GROUP_MESSAGE_UNPIN 由 dispatcher 自动同步本地 */
-async function handleRemove(msg: Message) {
-  if (!group.value || !msg.id || removingId.value !== null) {
+async function handleRemove(pinnedMessage: Message) {
+  if (!group.value || !pinnedMessage.id || removingId.value !== null) {
     return
   }
-  removingId.value = msg.id
+  removingId.value = pinnedMessage.id
   try {
-    await apiUnpinGroupMessage({ id: group.value.id, messageId: msg.id })
+    await apiUnpinGroupMessage({ id: group.value.id, messageId: pinnedMessage.id })
     message.success('已取消置顶')
   } finally {
     removingId.value = null

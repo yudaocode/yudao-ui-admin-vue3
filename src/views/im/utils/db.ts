@@ -17,8 +17,7 @@ export type DbStoreName =
   | 'channels'
   | 'settings'
 
-// TODO @AI：是不是继续使用 IDBTransaction，不用新的类型定义；
-export type DbTx = IDBTransaction
+export type DbTransaction = IDBTransaction
 
 let currentDb: IDBDatabase | null = null
 let currentUserId: number | null = null
@@ -116,18 +115,18 @@ function upgradeSchema(db: IDBDatabase) {
 }
 
 /** 打开 IM IndexedDB */
-// TODO @AI：是不是方法里，代码段的注释，是不是要增加下？
 function openDb(name: string): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(name, DB_SCHEMA_VERSION)
+    // 创建或升级对象仓库
     request.onupgradeneeded = () => upgradeSchema(request.result)
+    // 返回可复用连接
     request.onsuccess = () => resolve(request.result)
     request.onerror = () => reject(request.error)
   })
 }
 
 /** 初始化当前用户 IM DB */
-// TODO @AI：是不是方法里，代码段的注释，是不是要增加下？
 export async function initDb(): Promise<void> {
   const userId = getCurrentUserId()
   if (!Number.isFinite(userId) || userId <= 0) {
@@ -142,10 +141,8 @@ export async function initDb(): Promise<void> {
   currentDb = await openDb(getDbName(userId))
 }
 
-/** 关闭当前 IM DB session */
-// TODO @AI：是不是需要被调用下？？？
-export function closeDbSession() {
-  currentSession++
+/** 关闭当前 IM DB 连接 */
+function closeDbConnection() {
   currentDb?.close()
   currentDb = null
   currentUserId = null
@@ -171,27 +168,28 @@ function toDbValue<T>(value: T): T {
   return toRaw(value) as T
 }
 
-// TODO @AI：我们讨论下，DbWrapper 会不会有点怪？
-// TODO @AI：是不是改成 selectOne、selectAll、selectList、insert、update、delete、save 这种。
-class DbWrapper {
+class DbClient {
   /** 获取单条记录 */
-  // TODO @AI：是不是不用缩写，tx 改成 transaction 更好理解；
-  async get<T>(storeName: DbStoreName, key: IDBValidKey, tx?: DbTx): Promise<T | undefined> {
+  async get<T>(
+    storeName: DbStoreName,
+    key: IDBValidKey,
+    tx?: DbTransaction
+  ): Promise<T | undefined> {
     if (tx) {
       return requestToPromise<T | undefined>(tx.objectStore(storeName).get(key))
     }
-    return this.transaction<T | undefined>([storeName], 'readonly', (innerTx) =>
-      this.get<T>(storeName, key, innerTx)
+    return this.transaction<T | undefined>([storeName], 'readonly', (tx) =>
+      this.get<T>(storeName, key, tx)
     )
   }
 
   /** 获取 store 全量记录 */
-  async getAll<T>(storeName: DbStoreName, tx?: DbTx): Promise<T[]> {
+  async getAll<T>(storeName: DbStoreName, tx?: DbTransaction): Promise<T[]> {
     if (tx) {
       return requestToPromise<T[]>(tx.objectStore(storeName).getAll())
     }
-    return this.transaction<T[]>([storeName], 'readonly', (innerTx) =>
-      this.getAll<T>(storeName, innerTx)
+    return this.transaction<T[]>([storeName], 'readonly', (tx) =>
+      this.getAll<T>(storeName, tx)
     )
   }
 
@@ -200,13 +198,13 @@ class DbWrapper {
     storeName: DbStoreName,
     indexName: string,
     query: IDBValidKey | IDBKeyRange,
-    tx?: DbTx
+    tx?: DbTransaction
   ): Promise<T | undefined> {
     if (tx) {
       return requestToPromise<T | undefined>(tx.objectStore(storeName).index(indexName).get(query))
     }
-    return this.transaction<T | undefined>([storeName], 'readonly', (innerTx) =>
-      this.getByIndex<T>(storeName, indexName, query, innerTx)
+    return this.transaction<T | undefined>([storeName], 'readonly', (tx) =>
+      this.getByIndex<T>(storeName, indexName, query, tx)
     )
   }
 
@@ -215,35 +213,33 @@ class DbWrapper {
     storeName: DbStoreName,
     indexName: string,
     query?: IDBValidKey | IDBKeyRange,
-    tx?: DbTx
+    tx?: DbTransaction
   ): Promise<T[]> {
     if (tx) {
       return requestToPromise<T[]>(tx.objectStore(storeName).index(indexName).getAll(query))
     }
-    return this.transaction<T[]>([storeName], 'readonly', (innerTx) =>
-      this.getAllByIndex<T>(storeName, indexName, query, innerTx)
+    return this.transaction<T[]>([storeName], 'readonly', (tx) =>
+      this.getAllByIndex<T>(storeName, indexName, query, tx)
     )
   }
 
   /** 写入记录 */
-  async put<T>(storeName: DbStoreName, value: T, tx?: DbTx): Promise<void> {
+  async put<T>(storeName: DbStoreName, value: T, tx?: DbTransaction): Promise<void> {
     if (tx) {
       await requestToPromise(tx.objectStore(storeName).put(toDbValue(value)))
       return
     }
-    await this.transaction([storeName], 'readwrite', (innerTx) =>
-      this.put(storeName, value, innerTx)
-    )
+    await this.transaction([storeName], 'readwrite', (tx) => this.put(storeName, value, tx))
   }
 
   /** 删除记录 */
-  async delete(storeName: DbStoreName, key: IDBValidKey, tx?: DbTx): Promise<void> {
+  async delete(storeName: DbStoreName, key: IDBValidKey, tx?: DbTransaction): Promise<void> {
     if (tx) {
       await requestToPromise(tx.objectStore(storeName).delete(key))
       return
     }
-    await this.transaction([storeName], 'readwrite', (innerTx) =>
-      this.delete(storeName, key, innerTx)
+    await this.transaction([storeName], 'readwrite', (tx) =>
+      this.delete(storeName, key, tx)
     )
   }
 
@@ -252,11 +248,11 @@ class DbWrapper {
     storeName: DbStoreName,
     indexName: string,
     query: IDBValidKey | IDBKeyRange,
-    tx?: DbTx
+    tx?: DbTransaction
   ): Promise<void> {
     if (!tx) {
-      await this.transaction([storeName], 'readwrite', (innerTx) =>
-        this.deleteByIndex(storeName, indexName, query, innerTx)
+      await this.transaction([storeName], 'readwrite', (tx) =>
+        this.deleteByIndex(storeName, indexName, query, tx)
       )
       return
     }
@@ -277,39 +273,38 @@ class DbWrapper {
   }
 
   /** 执行事务 */
-  // TODO @AI：方法里的方法段的注释，需要写么？
   async transaction<T>(
     storeNames: DbStoreName[],
     mode: IDBTransactionMode,
-    runner: (tx: DbTx) => Promise<T>
+    runner: (tx: DbTransaction) => Promise<T>
   ): Promise<T> {
+    // 开启事务前校验 session
     const session = getDbSession()
     guardSession(session)
     const tx = getRawDb().transaction(storeNames, mode)
     const done = transactionDone(tx)
     let result: T
     try {
+      // 事务内只执行 IndexedDB request 链
       result = await runner(tx)
     } catch (e) {
-      // TODO @AI：这种 logger error 要打印么？
       try {
         tx.abort()
       } catch {}
       await done.catch(() => undefined)
       throw e
     }
+    // commit 后再次校验 session
     await done
     guardSession(session)
     return result
   }
 
   /** 按会话分页获取消息 */
-  // TODO @AI：这个方法里，代码段的注释，是不是要增加下？比如说，分页的逻辑，游标的逻辑，等等；
-  // TODO @AI：项目里，一般方法名，是使用 getListByXXXX；
-  async getMessagesByConversation(
+  async getMessageListByConversation(
     clientConversationId: string,
     options?: { beforeSendTime?: number; limit?: number },
-    tx?: DbTx
+    tx?: DbTransaction
   ): Promise<MessageDO[]> {
     const limit = options?.limit ?? 50
     const upper = options?.beforeSendTime ?? Number.MAX_SAFE_INTEGER
@@ -319,10 +314,11 @@ class DbWrapper {
       false,
       true
     )
-    const read = async (innerTx: DbTx): Promise<MessageDO[]> => {
-      const index = innerTx.objectStore('messages').index('clientConversationId+sendTime')
+    const read = async (tx: DbTransaction): Promise<MessageDO[]> => {
+      const index = tx.objectStore('messages').index('clientConversationId+sendTime')
       const out: MessageDO[] = []
       await new Promise<void>((resolve, reject) => {
+        // 从新到旧读取一页
         const request = index.openCursor(range, 'prev')
         request.onerror = () => reject(request.error)
         request.onsuccess = () => {
@@ -335,6 +331,7 @@ class DbWrapper {
           cursor.continue()
         }
       })
+      // 气泡渲染需要按时间升序
       return out.reverse()
     }
     if (tx) {
@@ -344,22 +341,22 @@ class DbWrapper {
   }
 
   /** 读取设置 */
-  async getSetting<T>(key: string, tx?: DbTx): Promise<T | undefined> {
+  async getSetting<T>(key: string, tx?: DbTransaction): Promise<T | undefined> {
     const item = await this.get<SettingDO<T>>('settings', key, tx)
     return item?.value
   }
 
   /** 写入设置 */
-  async setSetting<T>(key: string, value: T, tx?: DbTx): Promise<void> {
+  async setSetting<T>(key: string, value: T, tx?: DbTransaction): Promise<void> {
     await this.put<SettingDO<T>>('settings', { key, value, updateTime: Date.now() }, tx)
   }
 }
 
-const dbWrapper = new DbWrapper()
+const dbClient = new DbClient()
 
-/** 获取当前 IM DB wrapper */
-export function getDb(): DbWrapper {
-  return dbWrapper
+/** 获取当前 IM DB client */
+export function getDb(): DbClient {
+  return dbClient
 }
 
 /** 当前用户会话主键 */
@@ -375,7 +372,6 @@ export function parseClientConversationId(
   const type = Number(typeText)
   const targetId = Number(targetIdText)
   if (!Number.isFinite(type) || !Number.isFinite(targetId) || targetId <= 0) {
-    // TODO @AI：logger info？
     return null
   }
   return { type, targetId }
@@ -392,7 +388,6 @@ export function getClientMessageKey(clientMessageId: string): string {
 }
 
 /** 解析本地消息主键 */
-// TODO @AI：这个方法，貌似没调用；
 export function parseMessageKey(
   messageKey: string
 ):
@@ -419,7 +414,7 @@ export function parseMessageKey(
 export async function setMessageMaxId(
   conversationType: number,
   maxId: number | undefined,
-  tx?: DbTx
+  tx?: DbTransaction
 ): Promise<void> {
   if (!maxId) {
     return
@@ -446,7 +441,6 @@ export async function setMessageMaxId(
 }
 
 /** 停止当前 IM DB session */
-// TODO @AI：这里的注释，要写下；方法注释；
 export async function stopRequests(): Promise<void> {
   const [
     { useMessageStoreWithOut },
@@ -455,7 +449,6 @@ export async function stopRequests(): Promise<void> {
     { useGroupStoreWithOut },
     { useChannelStoreWithOut },
     { useGroupRequestStoreWithOut },
-    { useDraftStoreWithOut },
     { useFaceStoreWithOut }
   ] = await Promise.all([
     import('../home/store/messageStore'),
@@ -464,7 +457,6 @@ export async function stopRequests(): Promise<void> {
     import('../home/store/groupStore'),
     import('../home/store/channelStore'),
     import('../home/store/groupRequestStore'),
-    import('../home/store/draftStore'),
     import('../home/store/faceStore')
   ])
   currentSession++
@@ -474,9 +466,6 @@ export async function stopRequests(): Promise<void> {
   useGroupStoreWithOut().clear()
   useChannelStoreWithOut().clear()
   useGroupRequestStoreWithOut().reset()
-  useDraftStoreWithOut().clear()
   useFaceStoreWithOut().reset()
-  currentDb?.close()
-  currentDb = null
-  currentUserId = null
+  closeDbConnection()
 }

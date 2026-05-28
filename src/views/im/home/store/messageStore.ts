@@ -16,7 +16,7 @@ import {
   getServerMessageKey,
   parseClientConversationId,
   setMessageMaxId,
-  type DbTx
+  type DbTransaction
 } from '../../utils/db'
 import {
   generateClientMessageId,
@@ -30,7 +30,8 @@ import { useGroupStore } from './groupStore'
 import { useConversationStore } from './conversationStore'
 import type { Conversation, Message, MessageDO } from '../types'
 
-const MESSAGE_CACHE_CONVERSATION_LIMIT = 5
+const MESSAGE_CACHE_RECENT_CONVERSATION_LIMIT = 5
+const MESSAGE_CACHE_RETAIN_CONVERSATION_LIMIT = MESSAGE_CACHE_RECENT_CONVERSATION_LIMIT + 1
 const ackMergingPromises = new Map<string, Promise<void>>()
 
 interface MessageConversationInfo {
@@ -41,8 +42,8 @@ interface MessageConversationInfo {
   silent?: boolean
 }
 
-// TODO @AI：叫这个 type 有点奇怪，可能需要再考虑下。
-export type PulledMessageBatchItem =
+/** 拉取消息批量处理项 */
+export type PulledMessage =
   | {
       kind: 'insert'
       conversationInfo: MessageConversationInfo
@@ -82,16 +83,22 @@ function ensureClientMessageId(message: Message): Message {
 }
 
 /** 转换为 IndexedDB 消息记录 */
-// TODO @AI：buildXXX 更合理。
-function toMessageDO(message: Message, conversationType: number): MessageDO {
-  const {
-    uploadProgress: _uploadProgress,
-    _localFile: _localFile,
-    _ackMerging: _ackMerging,
-    ...rest
-  } = message
+function buildMessageDO(message: Message, conversationType: number): MessageDO {
   return {
-    ...rest,
+    id: message.id,
+    clientMessageId: message.clientMessageId,
+    type: message.type,
+    content: message.content,
+    status: message.status,
+    sendTime: message.sendTime,
+    senderId: message.senderId,
+    atUserIds: message.atUserIds ? [...message.atUserIds] : undefined,
+    receiverUserIds: message.receiverUserIds ? [...message.receiverUserIds] : undefined,
+    receiptStatus: message.receiptStatus,
+    readCount: message.readCount,
+    materialId: message.materialId,
+    targetId: message.targetId,
+    selfSend: message.selfSend,
     messageKey: getMessageKey(message, conversationType),
     conversationType,
     clientConversationId: getClientConversationId(conversationType, message.targetId)
@@ -99,8 +106,7 @@ function toMessageDO(message: Message, conversationType: number): MessageDO {
 }
 
 /** IndexedDB 消息记录转前端消息 */
-// TODO @AI：buildXXX 更合理。
-function fromMessageDO(message: MessageDO): Message {
+function buildMessageFromDO(message: MessageDO): Message {
   const {
     messageKey: _messageKey,
     conversationType: _conversationType,
@@ -111,15 +117,16 @@ function fromMessageDO(message: MessageDO): Message {
 }
 
 /** 算出末条消息的发送人快照 */
-// TODO @AI：里面的代码注释；最好写下；
 function deriveLastSenderDisplayName(
   conversation: Conversation,
   senderId: number
 ): string | undefined {
+  // 1. 优先使用当前内存中的好友 / 群成员信息
   const liveSenderName = tryGetSenderDisplayName(senderId, conversation.type, conversation.targetId)
   if (liveSenderName) {
     return liveSenderName
   }
+  // 2. 群成员缓存缺失时异步补齐
   if (conversation.type === ImConversationType.GROUP) {
     const groupStore = useGroupStore()
     const group = groupStore.getGroup(conversation.targetId)
@@ -256,9 +263,8 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 从 settings 加载消息游标 */
-    async loadCursors() {
+    async loadMessageCursors() {
       const db = getDb()
-      // TODO @AI：可以通过 message 表去算么？不通过这个。
       const [privateMaxId, groupMaxId, channelMaxId] = await Promise.all([
         db.getSetting<number>('privateMessageMaxId'),
         db.getSetting<number>('groupMessageMaxId'),
@@ -270,7 +276,7 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 更新内存游标 */
-    updateMaxId(conversationType: number, messageId?: number) {
+    updateMessageMaxId(conversationType: number, messageId?: number) {
       if (!messageId) {
         return
       }
@@ -290,14 +296,14 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 标记会话近期使用 */
-    touchConversation(clientConversationId: string) {
+    touchConversationMessageCache(clientConversationId: string) {
       this.loadedConversationKeys = [
         clientConversationId,
         ...this.loadedConversationKeys.filter((key) => key !== clientConversationId)
       ]
-      // 保留当前活跃会话 + 最近打开过的 5 个会话。
-      const retained = this.loadedConversationKeys.slice(0, MESSAGE_CACHE_CONVERSATION_LIMIT + 1)
-      const removed = this.loadedConversationKeys.slice(MESSAGE_CACHE_CONVERSATION_LIMIT + 1)
+      // 保留当前活跃会话 + 最近打开过的会话
+      const retained = this.loadedConversationKeys.slice(0, MESSAGE_CACHE_RETAIN_CONVERSATION_LIMIT)
+      const removed = this.loadedConversationKeys.slice(MESSAGE_CACHE_RETAIN_CONVERSATION_LIMIT)
       this.loadedConversationKeys = retained
       removed.forEach((key) => {
         delete this.messagesByConversation[key]
@@ -305,61 +311,59 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 加载当前会话最近消息 */
-    async loadMore(
+    async loadMoreMessages(
       clientConversationId: string,
       beforeSendTime?: number,
       limit = 50
     ): Promise<Message[]> {
-      // TODO @AI：代码段的注释；
-      const list = await getDb().getMessagesByConversation(clientConversationId, {
+      // 1. 从 IndexedDB 倒序读取一页，返回前已按时间升序排列
+      const list = await getDb().getMessageListByConversation(clientConversationId, {
         beforeSendTime,
         limit
       })
+      // 2. 合并到内存缓存，过滤已存在的消息
       const parsed = parseClientConversationId(clientConversationId)
       if (!parsed) {
         return []
       }
-      const messages = list.map(fromMessageDO)
+      const messages = list.map(buildMessageFromDO)
       const existing = this.messagesByConversation[clientConversationId] || []
       const existingKeys = new Set(existing.map((message) => getMessageKey(message, parsed.type)))
       const fresh = messages.filter(
         (message) => !existingKeys.has(getMessageKey(message, parsed.type))
       )
-      // TODO @AI：messageA、messageB；
       this.messagesByConversation[clientConversationId] = [...fresh, ...existing].sort(
-        (a, b) => (a.sendTime || 0) - (b.sendTime || 0)
+        (messageA, messageB) => (messageA.sendTime || 0) - (messageB.sendTime || 0)
       )
-      this.touchConversation(clientConversationId)
+      this.touchConversationMessageCache(clientConversationId)
       return fresh
     },
 
     /** 确保会话消息已加载 */
-    async ensureLoaded(conversation: Conversation) {
-      // TODO @AI：代码段的注释；
+    async ensureConversationMessagesLoaded(conversation: Conversation) {
       const key = getMessageCacheKey(conversation.type, conversation.targetId)
       if (this.messagesByConversation[key]) {
-        this.touchConversation(key)
+        this.touchConversationMessageCache(key)
         return
       }
-      await this.loadMore(key)
+      await this.loadMoreMessages(key)
     },
 
     /** 获取内存消息数组 */
     getMessageList(conversationType: number, targetId: number): Message[] {
-      // TODO @AI：代码段的注释；
       const key = getMessageCacheKey(conversationType, targetId)
       if (!this.messagesByConversation[key]) {
         this.messagesByConversation[key] = []
       }
-      this.touchConversation(key)
+      this.touchConversationMessageCache(key)
       return this.messagesByConversation[key]
     },
 
-    /** 持久化单条消息 */
-    async persistMessage(message: Message, conversationType: number, tx?: DbTx) {
-      // TODO @AI：代码段的注释；
+    /** 持久化消息记录 */
+    async persistMessageRecord(message: Message, conversationType: number, tx?: DbTransaction) {
       const db = getDb()
-      const next = toMessageDO(message, conversationType)
+      const next = buildMessageDO(message, conversationType)
+      // ack 后服务端 key 替换 client key
       if (message.id && message.clientMessageId) {
         const existing = await db.getByIndex<MessageDO>(
           'messages',
@@ -374,15 +378,19 @@ export const useMessageStore = defineStore('imMessageStore', {
       await db.put('messages', next, tx)
     },
 
-    /** 持久化消息游标 */
-    async persistMaxId(conversationType: number, messageId?: number, tx?: DbTx) {
-      this.updateMaxId(conversationType, messageId)
+    /** 保存消息游标 */
+    async saveMessageMaxId(conversationType: number, messageId?: number, tx?: DbTransaction) {
+      this.updateMessageMaxId(conversationType, messageId)
       await setMessageMaxId(conversationType, messageId, tx)
     },
 
     /** 应用撤回到内存 */
-    applyRecallInMemory(conversationType: number, targetId: number, recallSignalContent: string) {
-      // TODO @AI：代码段的注释；
+    applyRecallMessageInMemory(
+      conversationType: number,
+      targetId: number,
+      recallSignalContent: string
+    ) {
+      // 1. 定位被撤回的原消息
       const messageId = parseRecallMessageId(recallSignalContent)
       if (!messageId) {
         return null
@@ -397,6 +405,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       if (!message) {
         return null
       }
+      // 2. 更新消息和会话摘要
       message.type = ImMessageType.RECALL
       message.status = ImMessageStatus.RECALL
       message.content = ''
@@ -407,14 +416,14 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 批量写入拉取消息 */
-    async insertPulledBatch(
-      items: PulledMessageBatchItem[],
+    async applyPulledMessageList(
+      pulledMessages: PulledMessage[],
       conversationType: number,
       maxMessageId?: number
     ) {
-      // TODO @AI：代码段的注释；
-      if (items.length === 0) {
-        await this.persistMaxId(conversationType, maxMessageId)
+      if (pulledMessages.length === 0) {
+        // 1. 空批次只推进游标
+        await this.saveMessageMaxId(conversationType, maxMessageId)
         return
       }
       const conversationStore = useConversationStore()
@@ -433,13 +442,14 @@ export const useMessageStore = defineStore('imMessageStore', {
         })
       }
 
-      // TODO @AI：是不是最好 mesages？
-      for (const item of items) {
-        if (item.kind === 'recall') {
-          const changed = this.applyRecallInMemory(
-            item.conversationType,
-            item.targetId,
-            item.recallSignalContent
+      // 1. 先更新内存，收集需要持久化的消息和会话
+      for (const pulledMessage of pulledMessages) {
+        if (pulledMessage.kind === 'recall') {
+          // 1.1 撤回信号更新原消息
+          const changed = this.applyRecallMessageInMemory(
+            pulledMessage.conversationType,
+            pulledMessage.targetId,
+            pulledMessage.recallSignalContent
           )
           if (changed) {
             addChanged(changed.conversation, changed.message)
@@ -447,8 +457,9 @@ export const useMessageStore = defineStore('imMessageStore', {
           continue
         }
 
-        const { conversationInfo } = item
-        const message = ensureClientMessageId(item.message)
+        const { conversationInfo } = pulledMessage
+        const message = ensureClientMessageId(pulledMessage.message)
+        // 1.2 群通知先同步群资料
         if (
           conversationInfo.type === ImConversationType.GROUP &&
           isGroupNotification(message.type)
@@ -460,21 +471,23 @@ export const useMessageStore = defineStore('imMessageStore', {
           )
         }
 
+        // 1.3 确保会话和消息缓存存在
         const conversation = conversationStore.ensureConversation(conversationInfo)
         const messages = this.getMessageList(conversationInfo.type, conversationInfo.targetId)
         const existingIndex = messages.findIndex((existing) => isSameMessage(existing, message))
         if (existingIndex >= 0) {
+          // 1.4 已存在消息合并服务端状态
           applyServerMessageUpdate(messages[existingIndex], message)
           if (existingIndex === messages.length - 1) {
             recomputeConversationLast(conversation, messages)
             syncConversationAtFlags(conversation, message)
           }
-          this.updateMaxId(conversationInfo.type, message.id)
+          this.updateMessageMaxId(conversationInfo.type, message.id)
           addChanged(conversation, messages[existingIndex])
           continue
         }
 
-        // TODO @AI：applyConversationSummary 要 await 么？不然会有报错；
+        // 1.5 新消息更新会话摘要和未读状态
         applyConversationSummary(conversation, message)
         syncConversationAtFlags(conversation, message)
         const isActive =
@@ -490,6 +503,7 @@ export const useMessageStore = defineStore('imMessageStore', {
           conversation.unreadCount++
         }
 
+        // 1.6 新消息按服务端 id 插入内存列表
         let insertIndex = messages.length
         if (message.id) {
           for (let index = 0; index < messages.length; index++) {
@@ -501,17 +515,22 @@ export const useMessageStore = defineStore('imMessageStore', {
           }
         }
         messages.splice(insertIndex, 0, message)
-        this.updateMaxId(conversationInfo.type, message.id)
+        this.updateMessageMaxId(conversationInfo.type, message.id)
         addChanged(conversation, message)
       }
 
-      this.updateMaxId(conversationType, maxMessageId)
+      // 2. 更新内存游标
+      this.updateMessageMaxId(conversationType, maxMessageId)
+      // 3. 单事务写入消息、会话摘要和游标
       await getDb()
         .transaction(['messages', 'conversations', 'settings'], 'readwrite', async (tx) => {
+          // 3.1 写入本批变更消息
           for (const item of persistedMessages.values()) {
-            await this.persistMessage(item.message, item.conversationType, tx)
+            await this.persistMessageRecord(item.message, item.conversationType, tx)
           }
-          await conversationStore.persistConversations([...changedConversations.values()], tx)
+          // 3.2 写入本批变更会话
+          await conversationStore.persistConversationRecords([...changedConversations.values()], tx)
+          // 3.3 写入本批游标
           await setMessageMaxId(conversationType, maxMessageId, tx)
         })
         .catch((e) => console.error('[IM messageStore] 批量消息写入失败', e))
@@ -521,11 +540,11 @@ export const useMessageStore = defineStore('imMessageStore', {
     insertMessage(
       conversationInfo: MessageConversationInfo,
       messageInfo: Message,
-      options?: { persistMaxId?: boolean }
+      options?: { saveMaxId?: boolean }
     ) {
-      // TODO @AI：代码段的注释；类似上面的问题；；；
       const conversationStore = useConversationStore()
       const message = ensureClientMessageId(messageInfo)
+      // 1. 先处理消息带来的群资料变更
       if (conversationInfo.type === ImConversationType.GROUP && isGroupNotification(message.type)) {
         useGroupStore().applyGroupNotification(
           conversationInfo.targetId,
@@ -534,21 +553,23 @@ export const useMessageStore = defineStore('imMessageStore', {
         )
       }
 
+      // 2. 确保会话和消息缓存存在
       const conversation = conversationStore.ensureConversation(conversationInfo)
       const messages = this.getMessageList(conversationInfo.type, conversationInfo.targetId)
       const existingIndex = messages.findIndex((item) => isSameMessage(item, message))
+      // 3. 已存在消息走覆盖更新
       if (existingIndex >= 0) {
         applyServerMessageUpdate(messages[existingIndex], message)
         if (existingIndex === messages.length - 1) {
           recomputeConversationLast(conversation, messages)
           syncConversationAtFlags(conversation, message)
         }
-        this.updateMaxId(conversationInfo.type, message.id)
+        this.updateMessageMaxId(conversationInfo.type, message.id)
         void getDb()
           .transaction(['messages', 'conversations', 'settings'], 'readwrite', async (tx) => {
-            await this.persistMessage(messages[existingIndex], conversationInfo.type, tx)
-            await conversationStore.persistConversations(conversation, tx)
-            if (options?.persistMaxId !== false) {
+            await this.persistMessageRecord(messages[existingIndex], conversationInfo.type, tx)
+            await conversationStore.persistConversationRecords(conversation, tx)
+            if (options?.saveMaxId !== false) {
               await setMessageMaxId(conversationInfo.type, message.id, tx)
             }
           })
@@ -556,6 +577,7 @@ export const useMessageStore = defineStore('imMessageStore', {
         return
       }
 
+      // 4. 新消息更新会话摘要和未读状态
       applyConversationSummary(conversation, message)
       syncConversationAtFlags(conversation, message)
 
@@ -572,6 +594,7 @@ export const useMessageStore = defineStore('imMessageStore', {
         conversation.unreadCount++
       }
 
+      // 5. 新消息按 id 插入到内存数组
       let insertIndex = messages.length
       if (message.id) {
         for (let index = 0; index < messages.length; index++) {
@@ -583,12 +606,13 @@ export const useMessageStore = defineStore('imMessageStore', {
         }
       }
       messages.splice(insertIndex, 0, message)
-      this.updateMaxId(conversationInfo.type, message.id)
+      this.updateMessageMaxId(conversationInfo.type, message.id)
+      // 6. 单事务写入消息、会话摘要和游标
       void getDb()
         .transaction(['messages', 'conversations', 'settings'], 'readwrite', async (tx) => {
-          await this.persistMessage(message, conversationInfo.type, tx)
-          await conversationStore.persistConversations(conversation, tx)
-          if (options?.persistMaxId !== false) {
+          await this.persistMessageRecord(message, conversationInfo.type, tx)
+          await conversationStore.persistConversationRecords(conversation, tx)
+          if (options?.saveMaxId !== false) {
             await setMessageMaxId(conversationInfo.type, message.id, tx)
           }
         })
@@ -626,6 +650,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       clientMessageId: string,
       updates: Partial<Message>
     ) {
+      // 1. 定位待合并消息
       const conversationStore = useConversationStore()
       const conversation = conversationStore.getConversation(conversationType, targetId)
       if (!conversation) {
@@ -638,19 +663,22 @@ export const useMessageStore = defineStore('imMessageStore', {
       }
       message._ackMerging = true
       try {
+        // 2. 合并服务端 ack 到内存
         applyServerMessageUpdate(message, updates)
         if (messages[messages.length - 1] === message) {
           recomputeConversationLast(conversation, messages)
         }
-        this.updateMaxId(conversationType, message.id)
+        this.updateMessageMaxId(conversationType, message.id)
+        // 3. 单事务写入消息、会话摘要和游标
         await getDb()
           .transaction(['messages', 'conversations', 'settings'], 'readwrite', async (tx) => {
-            await this.persistMessage(message, conversationType, tx)
-            await conversationStore.persistConversations(conversation, tx)
+            await this.persistMessageRecord(message, conversationType, tx)
+            await conversationStore.persistConversationRecords(conversation, tx)
             await setMessageMaxId(conversationType, message.id, tx)
           })
           .catch((e) => console.error('[IM messageStore] ack 写入失败', e))
       } finally {
+        // 4. 清理合并标记
         message._ackMerging = false
       }
     },
@@ -662,7 +690,6 @@ export const useMessageStore = defineStore('imMessageStore', {
       clientMessageId: string,
       patch: Partial<Message>
     ) {
-      // TODO @AI：代码段的注释；
       const message = this.getMessageList(conversationType, targetId).find(
         (item) => item.clientMessageId === clientMessageId
       )
@@ -688,18 +715,22 @@ export const useMessageStore = defineStore('imMessageStore', {
     /** 撤回消息 */
     recallMessage(conversationType: number, targetId: number, recallSignalContent: string) {
       const conversationStore = useConversationStore()
-      const changed = this.applyRecallInMemory(conversationType, targetId, recallSignalContent)
+      const changed = this.applyRecallMessageInMemory(
+        conversationType,
+        targetId,
+        recallSignalContent
+      )
       if (!changed) {
         return
       }
-      this.persistMessage(changed.message, conversationType).catch((e) =>
+      this.persistMessageRecord(changed.message, conversationType).catch((e) =>
         console.error('[IM messageStore] 撤回消息写入失败', e)
       )
-      conversationStore.saveConversations(changed.conversation)
+      conversationStore.saveConversation(changed.conversation)
     },
 
     /** 应用已读回执 */
-    applyReadReceipt(options: {
+    applyMessageReadReceipt(options: {
       conversationType: number
       targetId: number
       privateReadMaxId?: number
@@ -707,9 +738,9 @@ export const useMessageStore = defineStore('imMessageStore', {
       readCount?: number
       receiptStatus?: number
     }) {
-      // TODO @AI：代码段的注释；
       const messages = this.getMessageList(options.conversationType, options.targetId)
       const changed: Message[] = []
+      // 1. 私聊回执批量更新自己发送的消息
       if (options.conversationType === ImConversationType.PRIVATE && options.privateReadMaxId) {
         messages.forEach((message) => {
           if (
@@ -723,6 +754,7 @@ export const useMessageStore = defineStore('imMessageStore', {
           }
         })
       } else if (options.conversationType === ImConversationType.GROUP && options.groupMessageId) {
+        // 2. 群聊回执更新单条消息
         const message = messages.find((item) => item.id === options.groupMessageId)
         if (message) {
           if (options.readCount !== undefined) {
@@ -734,16 +766,21 @@ export const useMessageStore = defineStore('imMessageStore', {
           changed.push(message)
         }
       }
-      changed.forEach((message) => {
-        this.persistMessage(message, options.conversationType).catch((e) =>
-          console.warn('[IM messageStore] 回执写入失败', e)
-        )
-      })
+      if (changed.length === 0) {
+        return
+      }
+      // 3. 单事务写入变更消息
+      void getDb()
+        .transaction(['messages'], 'readwrite', async (tx) => {
+          for (const message of changed) {
+            await this.persistMessageRecord(message, options.conversationType, tx)
+          }
+        })
+        .catch((e) => console.warn('[IM messageStore] 回执写入失败', e))
     },
 
     /** 前置历史消息 */
-    prependMessages(conversationType: number, targetId: number, earlierMessages: Message[]) {
-      // TODO @AI：代码段的注释；
+    prependMessageList(conversationType: number, targetId: number, earlierMessages: Message[]) {
       if (earlierMessages.length === 0) {
         return
       }
@@ -758,11 +795,13 @@ export const useMessageStore = defineStore('imMessageStore', {
       }
       const key = getMessageCacheKey(conversationType, targetId)
       this.messagesByConversation[key] = [...fresh, ...messages]
-      fresh.forEach((message) => {
-        this.persistMessage(message, conversationType).catch((e) =>
-          console.warn('[IM messageStore] 历史消息写入失败', e)
-        )
-      })
+      void getDb()
+        .transaction(['messages'], 'readwrite', async (tx) => {
+          for (const message of fresh) {
+            await this.persistMessageRecord(message, conversationType, tx)
+          }
+        })
+        .catch((e) => console.warn('[IM messageStore] 历史消息写入失败', e))
     },
 
     /** 删除单条消息 */
@@ -771,7 +810,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       targetId: number,
       key: { id?: number; clientMessageId?: string }
     ) {
-      // TODO @AI：代码段的注释；
+      // 1. 定位会话和消息
       const conversationStore = useConversationStore()
       const conversation = conversationStore.getConversation(conversationType, targetId)
       if (!conversation) {
@@ -787,25 +826,26 @@ export const useMessageStore = defineStore('imMessageStore', {
       if (index < 0) {
         return
       }
+      // 2. 从内存移除消息
       const [removed] = messages.splice(index, 1)
       revokeBlobUrlsInContent(removed.content)
       if (index === messages.length) {
         recomputeConversationLast(conversation, messages)
       }
+      // 3. 删除本地记录并保存会话摘要
       getDb()
         .delete('messages', getMessageKey(removed, conversationType))
         .catch((e) => console.warn('[IM messageStore] 消息删除失败', e))
-      conversationStore.saveConversations()
+      conversationStore.saveConversation(conversation)
     },
 
     /** 当前会话标记已读 */
     markConversationMessagesRead(conversation: Conversation) {
-      // TODO @AI：代码段的注释；
       const messages = this.getMessageList(conversation.type, conversation.targetId)
       messages.forEach((message) => {
         if (!message.selfSend && message.status === ImMessageStatus.UNREAD) {
           message.status = ImMessageStatus.READ
-          this.persistMessage(message, conversation.type).catch((e) =>
+          this.persistMessageRecord(message, conversation.type).catch((e) =>
             console.warn('[IM messageStore] 已读状态写入失败', e)
           )
         }
@@ -814,7 +854,7 @@ export const useMessageStore = defineStore('imMessageStore', {
 
     /** 删除会话全部消息 */
     deleteConversationMessages(conversationType: number, targetId: number) {
-      // TODO @AI：代码段的注释；
+      // 1. 清理内存消息和媒体资源
       const clientConversationId = getClientConversationId(conversationType, targetId)
       const messages = this.messagesByConversation[clientConversationId] || []
       messages.forEach((message) => {
@@ -825,6 +865,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       this.loadedConversationKeys = this.loadedConversationKeys.filter(
         (key) => key !== clientConversationId
       )
+      // 2. 删除 IndexedDB 消息
       getDb()
         .deleteByIndex('messages', 'clientConversationId', clientConversationId)
         .catch((e) => console.warn('[IM messageStore] 会话消息删除失败', e))

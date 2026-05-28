@@ -312,8 +312,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       )
       if (conversation) {
         conversation.unreadCount = 0
+        conversationStore.saveConversation(conversation)
       }
-      conversationStore.saveConversations()
     },
 
     /**
@@ -416,7 +416,6 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
               }
             } else if (isGroupRequestNotification(websocketMessage.type)) {
               // 加群申请通知（1503 / 1505 / 1506）走私聊通道，与好友通知同段位但分开 dispatcher
-              // TODO @AI：改成走群聊通道。不然消息不好拉到！！！
               this.handleGroupRequestNotification(websocketMessage)
             } else {
               // TEXT / IMAGE / FILE / VOICE / VIDEO 等普通消息
@@ -585,7 +584,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!websocketMessage.id) {
         return
       }
-      useMessageStore().applyReadReceipt({
+      useMessageStore().applyMessageReadReceipt({
         conversationType: ImConversationType.PRIVATE,
         targetId: websocketMessage.senderId,
         privateReadMaxId: websocketMessage.id
@@ -708,7 +707,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!MESSAGE_GROUP_READ_ENABLED) {
         return
       }
-      useMessageStore().applyReadReceipt({
+      useMessageStore().applyMessageReadReceipt({
         conversationType: ImConversationType.GROUP,
         targetId: websocketMessage.groupId,
         groupMessageId: websocketMessage.id,

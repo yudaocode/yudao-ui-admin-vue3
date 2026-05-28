@@ -295,7 +295,7 @@
             <!-- 进群审批：仅群主可操作；开启后普通成员的「申请」「邀请」路径都需群主 / 管理员同意；群主 / 管理员邀请直进 -->
             <div v-if="isOwner" class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150">
               <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">进群需要群主 / 群管理确认</span>
-              <el-switch :model-value="!!group.joinApproval" @change="onJoinApprovalChange" />
+              <el-switch :model-value="!!group.joinApproval" @change="handleJoinApprovalChange" />
             </div>
             <!-- 进群申请子项：仅当开启审批 + 当前用户是 owner / admin 时出现；点击进列表 dialog -->
             <div
@@ -567,8 +567,7 @@ async function saveNotice() {
 }
 
 /** 群主：切换「进群审批」开关；开启后所有「申请」「邀请」路径都需群主 / 管理员同意 */
-// TODO @AI：应该是 handleXXX；别的方法也看看，是不是统一调整过来。
-async function onJoinApprovalChange(value: boolean | string | number) {
+async function handleJoinApprovalChange(value: boolean | string | number) {
   if (!props.group) {
     return
   }

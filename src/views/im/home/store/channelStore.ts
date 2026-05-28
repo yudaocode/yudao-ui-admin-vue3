@@ -45,8 +45,8 @@ export const useChannelStore = defineStore('imChannelStore', {
       }
     },
 
-    /** 整桶持久化频道列表（量级小，不维护增量） */
-    saveChannels(): void {
+    /** 保存频道列表 */
+    saveChannelList(): void {
       const userId = getCurrentUserId()
       if (!userId) {
         return
@@ -64,15 +64,15 @@ export const useChannelStore = defineStore('imChannelStore', {
       try {
         this.channels = (await getSimpleChannelList()) || []
         this.loaded = true
-        this.syncConversationMetadata()
-        this.saveChannels()
+        this.syncChannelConversationMetadata()
+        this.saveChannelList()
       } catch (e) {
         console.warn('[IM channelStore] fetchChannels 失败', e)
       }
     },
 
     /** 用最新的频道信息覆盖已有 CHANNEL 会话的 name / avatar；conversationStore 持久化的旧占位被刷掉 */
-    syncConversationMetadata() {
+    syncChannelConversationMetadata() {
       const conversationStore = useConversationStore()
       const indexed = new Map(this.channels.map((c) => [c.id, c]))
       conversationStore.conversations.forEach((conversation) => {
@@ -105,5 +105,3 @@ if (import.meta.hot) {
 }
 
 export const useChannelStoreWithOut = () => useChannelStore(store)
-// TODO @AI：这里，重名名，是不是没必要？？？（问问。）
-export const useImChannelStore = useChannelStoreWithOut

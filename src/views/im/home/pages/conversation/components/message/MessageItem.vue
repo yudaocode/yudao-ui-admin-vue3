@@ -235,7 +235,6 @@ import { useUserStore } from '@/store/modules/user'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useFriendStore } from '../../../../store/friendStore'
-import { useDraftStore } from '../../../../store/draftStore'
 import { useFaceStore } from '../../../../store/faceStore'
 import {
   getMemberDisplayName,
@@ -293,7 +292,6 @@ const conversationStore = useConversationStore()
 const messageStore = useMessageStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
-const draftStore = useDraftStore()
 const faceStore = useFaceStore()
 const uiStore = useImUiStore()
 const { recall, sendRaw } = useMessageSender()
@@ -602,7 +600,7 @@ type MenuKey = (typeof MENU_KEYS)[keyof typeof MENU_KEYS]
 
 /**
  * 右键菜单项：
- * - 引用：已落库 + 未撤回的消息可引用，引用块写入 draftStore.reply
+ * - 引用：已落库 + 未撤回的消息可引用，引用块写入会话草稿
  * - 撤回 / 删除：互斥；自己发送 + 已落库 + 未撤回 + 2 分钟内显示「撤回」（推服务器），其它显示「删除」（仅本地清）
  *
  * 好友事件气泡态不弹菜单
@@ -892,13 +890,13 @@ async function handleCopy() {
   successMessage('内容已复制到剪贴板')
 }
 
-/** 进入引用模式：把当前消息构造成 QuoteMessage 写入 draftStore，MessageInput 顶部引用条响应式出现 */
+/** 进入引用模式：把当前消息构造成 QuoteMessage 写入会话草稿 */
 function handleReply() {
   const conversation = conversationStore.activeConversation
   if (!conversation) {
     return
   }
-  draftStore.setReply(conversation, buildQuoteFromMessage(props.message))
+  conversationStore.setReplyDraft(conversation, buildQuoteFromMessage(props.message))
 }
 
 /** 转发当前消息：打开 ForwardDialog（单条模式；mode=single 即原样转） */

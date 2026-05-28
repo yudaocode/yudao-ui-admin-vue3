@@ -1,6 +1,6 @@
 import { watch } from 'vue'
 import { useConversationStore } from '../store/conversationStore'
-import { useMessageStore, type PulledMessageBatchItem } from '../store/messageStore'
+import { useMessageStore, type PulledMessage } from '../store/messageStore'
 import { useImWebSocketStore } from '../store/websocketStore'
 import { useFriendStore } from '../store/friendStore'
 import { getFriendDisplayName } from '../../utils/user'
@@ -106,8 +106,7 @@ export const useMessagePuller = () => {
   const convertChannelMessage = (message: ImChannelMessageRespVO): Message => {
     return {
       id: message.id,
-      // TODO @AI：是不是都需要使用 message 的 clientMessageId；注意，后端也需要有 clientMessageId；
-      clientMessageId: generateClientMessageId(),
+      clientMessageId: message.clientMessageId || generateClientMessageId(),
       type: message.type,
       content: message.content,
       status: message.status ?? ImMessageStatus.UNREAD,
@@ -190,14 +189,13 @@ export const useMessagePuller = () => {
         break
       }
 
-      // TODO @AI：感觉这个 PulledMessageBatchItem 类名，batchItems 变量名，insertPulledBatch 方法名，不够能体现出 message；
-      const batchItems: PulledMessageBatchItem[] = []
+      const pulledMessages: PulledMessage[] = []
       // 逐条 dispatch：原消息走批量 insert；RECALL 信号走批量 recall 把同批内已 insert 的原消息更新为撤回提示。
       // 后端按 id 升序返回，且信号 id 一定 > 原消息 id（先更新 status 再插信号），所以原消息一定先到、recallMessage 找得到
       for (const raw of list) {
         if (isChannel) {
           const message = raw as ImChannelMessageRespVO
-          batchItems.push({
+          pulledMessages.push({
             kind: 'insert',
             conversationInfo: convertChannelConversation(message),
             message: convertChannelMessage(message)
@@ -208,7 +206,7 @@ export const useMessagePuller = () => {
           const message = raw as ImPrivateMessageRespVO
           // 特殊：撤回消息的处理
           if (message.type === ImMessageType.RECALL) {
-            batchItems.push({
+            pulledMessages.push({
               kind: 'recall',
               conversationType: ImConversationType.PRIVATE,
               targetId: getPrivatePeerId(message),
@@ -226,7 +224,7 @@ export const useMessagePuller = () => {
             }
           }
           // 其它消息正常入会话消息列表
-          batchItems.push({
+          pulledMessages.push({
             kind: 'insert',
             conversationInfo: convertPrivateConversation(message),
             message: convertPrivateMessage(message)
@@ -235,7 +233,7 @@ export const useMessagePuller = () => {
           const message = raw as ImGroupMessageRespVO
           // 特殊：撤回消息的处理
           if (message.type === ImMessageType.RECALL) {
-            batchItems.push({
+            pulledMessages.push({
               kind: 'recall',
               conversationType: ImConversationType.GROUP,
               targetId: message.groupId,
@@ -244,7 +242,7 @@ export const useMessagePuller = () => {
             continue
           }
           // 其它消息正常入会话消息列表
-          batchItems.push({
+          pulledMessages.push({
             kind: 'insert',
             conversationInfo: convertGroupConversation(message),
             message: convertGroupMessage(message)
@@ -255,11 +253,11 @@ export const useMessagePuller = () => {
       // 游标推进到本批最大 id，与后端返回顺序无关；无有效 id 直接 break 避免死翻同一批
       const validIds = list.map((message) => message.id).filter((id): id is number => id != null)
       if (validIds.length === 0) {
-        await messageStore.insertPulledBatch(batchItems, conversationType)
+        await messageStore.applyPulledMessageList(pulledMessages, conversationType)
         break
       }
       const nextMinId = Math.max(...validIds)
-      await messageStore.insertPulledBatch(batchItems, conversationType, nextMinId)
+      await messageStore.applyPulledMessageList(pulledMessages, conversationType, nextMinId)
       // 游标没前进就停：当前后端契约是 id > minId，理论不会出现；防御后端契约变更或边界数据死翻
       if (nextMinId <= minId) {
         break
@@ -378,7 +376,7 @@ export const useMessagePuller = () => {
         }
 
         // pull + replay 都完成后再排序，避免回放消息打乱顺序
-        conversationStore.sortConversations()
+        conversationStore.sortConversationList()
 
         // 重连 / 冷启动后补齐当前激活私聊会话的「对方已读位置」
         // 离线期间错过的 RECEIPT 推送会被这里补回；其他私聊会话等用户点开时由 Index.vue 的 watch 触发
@@ -394,7 +392,7 @@ export const useMessagePuller = () => {
               return
             }
             if (maxReadId) {
-              messageStore.applyReadReceipt({
+              messageStore.applyMessageReadReceipt({
                 conversationType: ImConversationType.PRIVATE,
                 targetId: active.targetId,
                 privateReadMaxId: maxReadId

@@ -46,7 +46,7 @@
         :quote="replyTarget"
         closable
         class="mx-3 mb-1.5"
-        @close="clearReply"
+        @close="clearReplyDraft"
       />
 
       <!--
@@ -167,7 +167,6 @@ import { updateFile } from '@/api/infra/file'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
-import { useDraftStore } from '@/views/im/home/store/draftStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useUserStore } from '@/store/modules/user'
@@ -200,7 +199,6 @@ defineOptions({ name: 'ImMessageInput' })
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
-const draftStore = useDraftStore()
 const userStore = useUserStore()
 const message = useMessage()
 const { send, sendRaw } = useMessageSender()
@@ -257,7 +255,7 @@ watch(muteOverlay, () => {
   }
 })
 
-/** 把 editor 当前内容写到 draftStore；plain 由 collectFromEditor 拿，与发送时同源避免列表与实发不一致 */
+/** 把 editor 当前内容写到会话草稿；plain 由 collectFromEditor 拿，与发送时同源避免列表与实发不一致 */
 function syncDraftToStore(editor: HTMLDivElement) {
   const conversation = conversationStore.activeConversation
   if (!conversation) {
@@ -266,8 +264,8 @@ function syncDraftToStore(editor: HTMLDivElement) {
   // collectFromEditor 已 trim，plain 为空时 store 内部按 clearDraft 处理
   // reply 透传当前快照：setDraft 是整对象替换，不读旧 reply 会让用户每敲一个键就把引用条擦掉
   const { text } = collectFromEditor(editor)
-  const existing = draftStore.getDraft(conversation)
-  draftStore.setDraft(conversation, {
+  const existing = conversationStore.getDraft(conversation)
+  conversationStore.setDraft(conversation, {
     html: editor.innerHTML,
     plain: text,
     reply: existing?.reply
@@ -281,7 +279,7 @@ function restoreDraftToEditor() {
     return
   }
   const conversation = conversationStore.activeConversation
-  const draft = conversation ? draftStore.getDraft(conversation) : undefined
+  const draft = conversation ? conversationStore.getDraft(conversation) : undefined
   editor.innerHTML = draft?.html || ''
   applyEditorUiState(editor)
   // 把光标移到末尾，让用户接着输入；空内容直接 focus 即可
@@ -383,7 +381,7 @@ async function handleSend(options?: { receipt?: boolean }) {
   const replyQuote = replyTarget.value
   editor.innerHTML = ''
   if (conversationStore.activeConversation) {
-    draftStore.clearDraft(conversationStore.activeConversation)
+    conversationStore.clearDraft(conversationStore.activeConversation)
   }
   syncEditorState()
   // 2. 发送
@@ -568,29 +566,29 @@ function onInput() {
 
 // ==================== 引用 / 回复 ====================
 
-/** 当前会话的「正在回复」对象，从 draftStore 派生(MessageItem 写、MessageInput 读) */
+/** 当前会话的「正在回复」对象，从会话草稿派生 */
 const replyTarget = computed<QuoteMessage | undefined>(() => {
   const conversation = conversationStore.activeConversation
   if (!conversation) {
     return undefined
   }
-  return draftStore.getDraft(conversation)?.reply
+  return conversationStore.getDraft(conversation)?.reply
 })
 
 /** 清掉当前 reply 但保留正文草稿：点 × 关闭 / 发送即将进行时调 */
-function clearReply() {
+function clearReplyDraft() {
   const conversation = conversationStore.activeConversation
   if (!conversation) {
     return
   }
-  draftStore.clearReply(conversation)
+  conversationStore.clearReplyDraft(conversation)
 }
 
 /** 取走当前 reply 快照（抓一次清一次），媒体上传链路在动手前统一调它拿 quote */
 function consumeReply(): QuoteMessage | undefined {
   const quote = replyTarget.value
   if (quote) {
-    clearReply()
+    clearReplyDraft()
   }
   return quote
 }

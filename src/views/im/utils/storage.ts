@@ -21,13 +21,6 @@ export const imStorage = localforage.createInstance({
  * 所有业务 key 都注入 userId：多账号切换按用户隔离避免数据互串；账号切换时只清 in-memory、IDB 数据保留——回切旧账号能秒开，不浪费已下载好友 / 群 / 成员快照
  */
 export const StorageKeys = {
-  /**
-   * 输入框草稿整桶：Record<`${type}:${targetId}`, DraftSnapshot>
-   *
-   * 草稿端本地、量级小（每会话至多几百字节），整桶整写够用；持久化按 userId 分桶与其它业务一致
-   */
-  drafts: (userId: number | string) => `drafts:${userId}`,
-
   /** 好友列表整桶（含 DISABLE 软删记录）；好友量级有限，不维护增量 */
   friends: (userId: number | string) => `friends:${userId}`,
   /** 群列表整桶（不含 members，剥离到独立 key），保证整桶写不带成员爆量 */
@@ -36,10 +29,6 @@ export const StorageKeys = {
   channels: (userId: number | string) => `channels:${userId}`,
   /** 单群成员，按 groupId 分桶——单群可上百-千级，跟懒加载粒度对齐；群解散时物理删 */
   groupMembers: (userId: number | string, groupId: number) => `groupMembers:${userId}:${groupId}`,
-
-  /** 最近转发会话 key 列表（按 userId 分桶）；ConversationPickerPanel 左栏顶部头像区使用 */
-  recentForwardConversationKeys: (userId: number | string) =>
-    `recentForwardConversationKeys:${userId}`,
 
   /** 侧边栏宽度（localStorage）；三个 Tab 共用一份记忆，对齐微信（拖一次到处一致）。 */
   asideWidth: 'im:aside',
@@ -65,7 +54,6 @@ export function removeQuietly(key: string, errorLabel: string): void {
 }
 
 /** 转换为 IndexedDB 可存储的数据 */
-// TODO @AI：后续，是不是可以删除掉？尽量使用 db.ts 对不对哈？
 function toStorageValue<T>(value: T, seen = new WeakMap<object, unknown>()): T {
   const raw = value && typeof value === 'object' ? toRaw(value) : value
   if (!raw || typeof raw !== 'object') {

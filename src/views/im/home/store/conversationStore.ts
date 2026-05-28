@@ -1,18 +1,55 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
+import { debounce } from 'lodash-es'
 import { store } from '@/store'
 
 import { CONVERSATION_RECENT_FORWARD_MAX } from '../../utils/config'
 import { ImConversationType } from '../../utils/constants'
-import { getClientConversationId, getDb, type DbTx } from '../../utils/db'
+import { getClientConversationId, getDb, type DbTransaction } from '../../utils/db'
 import { getCurrentUserId } from '../../utils/storage'
-import { useDraftStore } from './draftStore'
 import { useMessageStore } from './messageStore'
 import type { Conversation, ConversationDO } from '../types'
 
+const PERSIST_DRAFT_DEBOUNCE_MS = 500
+const pendingDraftConversations = new Set<Conversation>()
+
 /** 会话转 IndexedDB 记录 */
 function toConversationDO(conversation: Conversation): ConversationDO {
+  const draft = conversation.draft
   return {
-    ...conversation,
+    targetId: conversation.targetId,
+    type: conversation.type,
+    name: conversation.name,
+    avatar: conversation.avatar,
+    unreadCount: conversation.unreadCount,
+    lastContent: conversation.lastContent,
+    lastSendTime: conversation.lastSendTime,
+    lastSenderId: conversation.lastSenderId,
+    lastMessageType: conversation.lastMessageType,
+    lastMessageId: conversation.lastMessageId,
+    lastClientMessageId: conversation.lastClientMessageId,
+    lastMessageStatus: conversation.lastMessageStatus,
+    lastReceiptStatus: conversation.lastReceiptStatus,
+    lastSelfSend: conversation.lastSelfSend,
+    lastSenderDisplayName: conversation.lastSenderDisplayName,
+    deleted: conversation.deleted,
+    top: conversation.top,
+    silent: conversation.silent,
+    atMe: conversation.atMe,
+    atAll: conversation.atAll,
+    draft: draft
+      ? {
+          html: draft.html,
+          plain: draft.plain,
+          reply: draft.reply
+            ? {
+                messageId: draft.reply.messageId,
+                senderId: draft.reply.senderId,
+                type: draft.reply.type,
+                content: draft.reply.content
+              }
+            : undefined
+        }
+      : undefined,
     clientConversationId: getClientConversationId(conversation.type, conversation.targetId)
   }
 }
@@ -64,8 +101,8 @@ export const useConversationStore = defineStore('imConversationStore', {
 
   actions: {
     /** 加载会话 */
-    // TODO @AI：方法里的代码段注释，写一下。
     async loadConversations() {
+      // 1. 清理旧账号内存
       const userId = getCurrentUserId()
       if (!userId) {
         this.clear()
@@ -75,6 +112,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         ? getClientConversationId(this.activeConversation.type, this.activeConversation.targetId)
         : null
       this.clear()
+      // 2. 从 IndexedDB 读取会话和轻量设置
       const db = getDb()
       const [conversations, recent] = await Promise.all([
         db.getAll<ConversationDO>('conversations'),
@@ -84,6 +122,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       if (Array.isArray(recent)) {
         this.recentForwardConversationKeys = recent.slice(0, CONVERSATION_RECENT_FORWARD_MAX)
       }
+      // 3. 恢复当前激活会话
       if (previousActiveKey) {
         this.activeConversation =
           this.conversations.find(
@@ -97,47 +136,59 @@ export const useConversationStore = defineStore('imConversationStore', {
 
     /** 清空会话内存 */
     clear() {
+      saveDraftConversationsDebounced.cancel()
+      pendingDraftConversations.clear()
       this.conversations = []
       this.activeConversation = null
       this.recentForwardConversationKeys = []
     },
 
-    /** 执行会话持久化 */
-    // TODO @AI：想了下，DbTx 改成 DbTransaction 吧，变量可以叫 tx；
-    // TODO @AI：方法里的代码段注释，写一下。
-    async persistConversations(
-      target?: Conversation | Conversation[] | null,
-      tx?: DbTx
+    /** 执行会话记录持久化 */
+    async persistConversationRecords(
+      target: Conversation | Conversation[] | null | undefined,
+      tx?: DbTransaction
     ): Promise<void> {
       const db = getDb()
-      const conversations = (
-        Array.isArray(target) ? target : target ? [target] : this.conversations
-      ).map(toConversationDO)
+      const conversations = (Array.isArray(target) ? target : target ? [target] : []).map(
+        toConversationDO
+      )
+      if (conversations.length === 0) {
+        return
+      }
       if (tx) {
         for (const conversation of conversations) {
           await db.put('conversations', conversation, tx)
         }
         return
       }
-      await db.transaction(['conversations'], 'readwrite', async (innerTx) => {
+      await db.transaction(['conversations'], 'readwrite', async (tx) => {
         for (const conversation of conversations) {
-          await db.put('conversations', conversation, innerTx)
+          await db.put('conversations', conversation, tx)
         }
       })
     },
 
-    /** 持久化会话 */
-    saveConversations(target?: Conversation | Conversation[] | null, tx?: DbTx): void {
+    /** 持久化单个会话 */
+    saveConversation(conversation: Conversation | null | undefined, tx?: DbTransaction): void {
+      if (!conversation) {
+        return
+      }
+      void this.persistConversationRecords(conversation, tx).catch((e) =>
+        console.warn('[IM conversationStore] 会话写入失败', e)
+      )
+    },
+
+    /** 持久化会话列表 */
+    saveConversationList(conversations?: Conversation[] | null, tx?: DbTransaction): void {
       if (this.loading && !tx) {
         return
       }
-      void this.persistConversations(target, tx).catch((e) =>
+      void this.persistConversationRecords(conversations || this.conversations, tx).catch((e) =>
         console.warn('[IM conversationStore] 会话写入失败', e)
       )
     },
 
     /** 确保会话存在 */
-    // TODO @AI：方法里的代码段注释，写一下。
     ensureConversation(info: {
       type: number
       targetId: number
@@ -145,6 +196,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       avatar: string
       silent?: boolean
     }): Conversation {
+      // 1. 创建不存在的会话
       let conversation = this.getConversation(info.type, info.targetId)
       if (!conversation) {
         conversation = this.createEmptyConversation(
@@ -156,6 +208,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         )
         this.conversations.unshift(conversation)
       } else if (conversation.deleted) {
+        // 2. 恢复软删除会话
         conversation.deleted = false
         conversation.name = info.name || conversation.name
         conversation.avatar = info.avatar || conversation.avatar
@@ -163,6 +216,7 @@ export const useConversationStore = defineStore('imConversationStore', {
           conversation.silent = info.silent
         }
       } else {
+        // 3. 同步会话展示元数据
         if (info.name) {
           conversation.name = info.name
         }
@@ -177,7 +231,6 @@ export const useConversationStore = defineStore('imConversationStore', {
     },
 
     /** 打开或创建会话 */
-    // TODO @AI：方法里的代码段注释，写一下。
     openConversation(
       targetId: number,
       type: number,
@@ -185,6 +238,7 @@ export const useConversationStore = defineStore('imConversationStore', {
       avatar: string,
       options?: { silent?: boolean }
     ): Conversation {
+      // 1. 确保会话在列表中
       const conversation = this.ensureConversation({
         type,
         targetId,
@@ -192,23 +246,25 @@ export const useConversationStore = defineStore('imConversationStore', {
         avatar,
         silent: options?.silent
       })
+      // 2. 激活会话并保存
       this.setActiveConversation(conversation)
-      this.saveConversations(conversation)
+      this.saveConversation(conversation)
       return conversation
     },
 
     /** 设置当前会话 */
-    // TODO @AI：方法里的代码段注释，写一下。
     setActiveConversation(conversation: Conversation | null) {
       this.activeConversation = conversation
       if (!conversation) {
         return
       }
+      // 1. 清理会话级未读状态
       conversation.unreadCount = 0
       conversation.atMe = false
       conversation.atAll = false
-      void useMessageStore().ensureLoaded(conversation)
-      this.saveConversations(conversation)
+      // 2. 懒加载消息并保存会话摘要
+      void useMessageStore().ensureConversationMessagesLoaded(conversation)
+      this.saveConversation(conversation)
     },
 
     /** 创建空会话 */
@@ -242,7 +298,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
       conversation.top = top
-      this.saveConversations(conversation)
+      this.saveConversation(conversation)
     },
 
     /** 设置免打扰 */
@@ -252,13 +308,12 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
       conversation.silent = silent
-      // TODO @AI：saveConversations 拆成 saveConversationList、saveConversation 两个方法；
-      this.saveConversations(conversation)
+      this.saveConversation(conversation)
     },
 
     /** 删除会话 */
-    // TODO @AI：方法里的代码段注释，写一下。
     removeConversation(type: number, targetId: number) {
+      // 1. 标记会话删除
       const conversation = this.getConversation(type, targetId)
       if (!conversation) {
         return
@@ -267,9 +322,10 @@ export const useConversationStore = defineStore('imConversationStore', {
         this.activeConversation = null
       }
       conversation.deleted = true
+      // 2. 删除会话关联的消息和草稿
       useMessageStore().deleteConversationMessages(type, targetId)
-      useDraftStore().clearDraft({ type, targetId })
-      this.saveConversations(conversation)
+      this.clearDraft(conversation)
+      this.saveConversation(conversation)
     },
 
     /** 删除私聊会话 */
@@ -294,10 +350,10 @@ export const useConversationStore = defineStore('imConversationStore', {
       conversation.unreadCount = 0
       conversation.atMe = false
       conversation.atAll = false
-      this.saveConversations(conversation)
+      this.saveConversation(conversation)
     },
 
-    // TODO @AI：把最近转发 ==== 拆分下？？？
+    // ==================== 最近转发 ====================
 
     /** 推送最近转发会话 */
     pushRecentForwardConversationKeys(keys: string[]) {
@@ -309,7 +365,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         0,
         CONVERSATION_RECENT_FORWARD_MAX
       )
-      this.persistRecentForwardConversationKeys()
+      this.saveRecentForwardConversationKeys()
     },
 
     /** 移除最近转发会话 */
@@ -319,11 +375,11 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
       this.recentForwardConversationKeys.splice(index, 1)
-      this.persistRecentForwardConversationKeys()
+      this.saveRecentForwardConversationKeys()
     },
 
-    /** 持久化最近转发会话 */
-    persistRecentForwardConversationKeys() {
+    /** 保存最近转发会话 */
+    saveRecentForwardConversationKeys() {
       void getDb()
         .setSetting(
           'recentForwardConversationKeys',
@@ -332,10 +388,12 @@ export const useConversationStore = defineStore('imConversationStore', {
         .catch((e) => console.warn('[IM conversationStore] 最近转发列表写入失败', e))
     },
 
+    // ==================== 会话维护 ====================
+
     /** 重排会话 */
-    sortConversations() {
+    sortConversationList() {
       this.conversations.sort((a, b) => (b.lastSendTime || 0) - (a.lastSendTime || 0))
-      this.saveConversations(this.conversations)
+      this.saveConversationList(this.conversations)
     },
 
     /** 同步会话展示元数据 */
@@ -362,13 +420,95 @@ export const useConversationStore = defineStore('imConversationStore', {
         changed = true
       }
       if (changed) {
-        this.saveConversations(conversation)
+        this.saveConversation(conversation)
       }
+    },
+
+    // ==================== 草稿 ====================
+
+    /** 获取草稿 */
+    getDraft(conversation: { type: number; targetId: number }): Conversation['draft'] | undefined {
+      return this.getConversation(conversation.type, conversation.targetId)?.draft
+    },
+
+    /** 设置草稿 */
+    setDraft(
+      conversation: { type: number; targetId: number },
+      snapshot: NonNullable<Conversation['draft']>
+    ): void {
+      if (!snapshot.plain.trim() && !snapshot.reply) {
+        this.clearDraft(conversation)
+        return
+      }
+      const target = this.getConversation(conversation.type, conversation.targetId)
+      if (!target) {
+        return
+      }
+      target.draft = snapshot
+      this.scheduleDraftSave(target)
+    },
+
+    /** 清除草稿 */
+    clearDraft(conversation: { type: number; targetId: number }): void {
+      const target = this.getConversation(conversation.type, conversation.targetId)
+      if (!target?.draft) {
+        return
+      }
+      target.draft = undefined
+      this.scheduleDraftSave(target)
+    },
+
+    /** 设置回复草稿 */
+    setReplyDraft(
+      conversation: { type: number; targetId: number },
+      quote: NonNullable<Conversation['draft']>['reply']
+    ) {
+      if (!quote) {
+        return
+      }
+      const existing = this.getDraft(conversation)
+      this.setDraft(conversation, {
+        html: existing?.html ?? '',
+        plain: existing?.plain ?? '',
+        reply: quote
+      })
+    },
+
+    /** 清除回复草稿 */
+    clearReplyDraft(conversation: { type: number; targetId: number }): void {
+      const existing = this.getDraft(conversation)
+      if (!existing?.reply) {
+        return
+      }
+      this.setDraft(conversation, { ...existing, reply: undefined })
+    },
+
+    /** 调度草稿保存 */
+    scheduleDraftSave(conversation: Conversation): void {
+      pendingDraftConversations.add(conversation)
+      saveDraftConversationsDebounced()
+    },
+
+    /** 立即保存草稿 */
+    flushDraftSave(): void {
+      saveDraftConversationsDebounced.flush()
     }
   }
 })
 
 export const useConversationStoreWithOut = () => useConversationStore(store)
+
+/** 合并草稿写入 */
+const saveDraftConversationsDebounced = debounce(() => {
+  const conversations = Array.from(pendingDraftConversations)
+  pendingDraftConversations.clear()
+  if (conversations.length === 0) {
+    return
+  }
+  void useConversationStoreWithOut()
+    .persistConversationRecords(conversations)
+    .catch((e) => console.warn('[IM conversationStore] 草稿写入失败', e))
+}, PERSIST_DRAFT_DEBOUNCE_MS)
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useConversationStore, import.meta.hot))

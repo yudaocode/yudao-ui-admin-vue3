@@ -37,6 +37,14 @@ export interface ImGroupMessageDTO {
 
 // ==================== 本地会话 / 消息结构 ====================
 
+/** 引用消息 */
+export interface QuoteMessage {
+  messageId: number // 引用消息编号
+  senderId: number // 引用消息发送人编号
+  type: number // 引用消息类型
+  content: string // 引用消息内容
+}
+
 // 会话数据结构（前端自有结构，后端无对应实体）
 export interface Conversation {
   // ========== 核心标识 ==========
@@ -66,12 +74,16 @@ export interface Conversation {
   silent?: boolean // 是否免打扰（不展示未读徽标 + 不响提示音）
   atMe?: boolean // 群聊：是否有人 @我
   atAll?: boolean // 群聊：是否有人 @全体成员
+  draft?: {
+    html: string // 输入框 HTML
+    plain: string // 输入框纯文本
+    reply?: QuoteMessage // 引用消息
+  } // 输入框草稿
 }
 
 // 消息数据结构
 export interface Message {
   // ========== 后端字段（对齐 ImPrivateMessageDTO / ImGroupMessageDTO） ==========
-  // TODO @AI：全局的 id 占位 0，是不是枚举下！！！
   id?: number // 服务端消息编号，发送中为空
   clientMessageId: string // 客户端消息编号，本地生成用于合并去重
   type: number // 消息类型，对齐 ImMessageType
