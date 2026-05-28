@@ -1,6 +1,6 @@
 import { computed, onScopeDispose, ref, type ComputedRef } from 'vue'
 
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { useConversationStore } from '../store/conversationStore'
 import { useGroupStore } from '../store/groupStore'
 import { ImConversationType, ImGroupMemberRole } from '../../utils/constants'
@@ -47,7 +47,6 @@ function unsubscribeNowTick(): void {
 export function useMuteOverlay(): ComputedRef<MuteOverlayInfo | null> {
   const conversationStore = useConversationStore()
   const groupStore = useGroupStore()
-  const userStore = useUserStore()
 
   // 订阅模块级 tick；scope 销毁时反订阅，最后一个订阅者退场后 timer 也跟着清
   subscribeNowTick()
@@ -62,7 +61,7 @@ export function useMuteOverlay(): ComputedRef<MuteOverlayInfo | null> {
     if (!group) {
       return null
     }
-    const myId = Number(userStore.getUser?.id) || 0
+    const myId = getCurrentUserId()
     // 群封禁：管理后台操作，所有人不可发送
     if (group.banned) {
       return { text: '该群已被管理员封禁，无法发送消息', icon: 'ant-design:stop-outlined' }

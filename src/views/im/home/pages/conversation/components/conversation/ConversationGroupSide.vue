@@ -391,7 +391,7 @@ import { computed, ref, watch } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { CommonStatusEnum } from '@/utils/constants'
 import {
   updateGroup,
@@ -436,7 +436,6 @@ const emit = defineEmits<{
   'open-history': [] // 点击 "查找聊天内容" 行 → 父组件打开 MessageHistory 弹窗
 }>()
 
-const userStore = useUserStore()
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const message = useMessage()
@@ -461,7 +460,7 @@ function handleOpenInvite() {
   inviteDialogRef.value?.open({ groupId: props.group.id })
 }
 
-const myId = computed(() => Number(userStore.getUser?.id) || 0)
+const myId = computed(() => getCurrentUserId())
 const isOwner = computed(() => props.group != null && props.group.ownerId === myId.value)
 /** 当前用户在群里的角色（来自 props.members 的 me 行）；用于判定是否可移出他人 */
 const myRole = computed(() => props.members.find((m) => m.userId === myId.value)?.role)

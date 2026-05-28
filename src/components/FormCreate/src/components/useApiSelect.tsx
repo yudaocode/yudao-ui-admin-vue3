@@ -2,7 +2,7 @@ import request from '@/config/axios'
 import { isEmpty } from '@/utils/is'
 import { ApiSelectProps } from '@/components/FormCreate/src/type'
 import { jsonParse } from '@/utils'
-import { useUserStoreWithOut } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 
 export const useApiSelect = (option: ApiSelectProps) => {
   return defineComponent({
@@ -99,9 +99,7 @@ export const useApiSelect = (option: ApiSelectProps) => {
         }
 
         // 获取当前用户 ID
-        const userStore = useUserStoreWithOut()
-        const user = userStore.getUser
-        const currentUserId = user?.id
+        const currentUserId = getCurrentUserId()
         if (currentUserId) {
           // 根据多选/单选模式设置默认值
           const defaultValue = props.multiple ? [currentUserId] : currentUserId

@@ -11,7 +11,6 @@
 
 import { countBy } from 'lodash-es'
 
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 import { useUserStore } from '@/store/modules/user'
 import { SystemUserSexEnum } from '@/utils/constants'
 import {
@@ -20,6 +19,7 @@ import {
   IM_AT_ALL_NICKNAME,
   IM_AT_ALL_USER_ID
 } from './constants'
+import { getCurrentUserId } from '@/utils/auth'
 import { type MentionCandidate } from './message'
 import { useConversationStore } from '../home/store/conversationStore'
 import { useFriendStore } from '../home/store/friendStore'
@@ -30,13 +30,6 @@ import type { Conversation, Friend, Group, User } from '../home/types'
 // 候选缺失场景的稳定空数组；让 textMentions computed 在非 TEXT / 非群聊 / 无 @ 时返回同一引用，
 // MessageBubble 的 textSegments 才不会跟着无谓重算
 const EMPTY_MENTIONS: MentionCandidate[] = []
-
-/** 取当前登录用户编号 */
-export function getCurrentUserId(): number {
-  const { wsCache } = useCache()
-  const user = wsCache.get(CACHE_KEY.USER)?.user
-  return Number(user?.id) || 0
-}
 
 /**
  * 私聊好友显示名：备注 > 真实昵称

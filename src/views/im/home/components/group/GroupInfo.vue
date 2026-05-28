@@ -49,7 +49,7 @@ import { computed, ref, watch } from 'vue'
 
 import GroupAvatar from './GroupAvatar.vue'
 import GroupMemberGrid from './GroupMemberGrid.vue'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { CommonStatusEnum } from '@/utils/constants'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
@@ -70,7 +70,6 @@ const emit = defineEmits<{
   apply: [group: GroupLite]
 }>()
 
-const userStore = useUserStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
 
@@ -91,7 +90,7 @@ const isMember = computed(() => {
     return false
   }
   if (cached.membersLoaded && cached.members) {
-    const myId = Number(userStore.getUser?.id) || 0
+    const myId = getCurrentUserId()
     return cached.members.some(
       (m) => m.userId === myId && m.status === CommonStatusEnum.ENABLE
     )

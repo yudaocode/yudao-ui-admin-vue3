@@ -1,6 +1,6 @@
 import { toRaw } from 'vue'
 
-import { getCurrentUserId } from './user'
+import { getCurrentUserId } from '@/utils/auth'
 import { ImConversationType } from './constants'
 import type { MessageDO, SettingDO } from '../home/types'
 

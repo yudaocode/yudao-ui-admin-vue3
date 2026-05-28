@@ -65,7 +65,7 @@ import { computed, ref, useTemplateRef, watch } from 'vue'
 import { ElScrollbar } from 'element-plus'
 
 import Icon from '@/components/Icon/src/Icon.vue'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { CommonStatusEnum } from '@/utils/constants'
 import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
 import GroupMember, { type GroupMemberLite } from '../../../../components/group/GroupMember.vue'
@@ -92,12 +92,11 @@ const emit = defineEmits<{
   select: [member: GroupMemberLite]
 }>()
 
-const userStore = useUserStore()
 const scrollRef = useTemplateRef<InstanceType<typeof ElScrollbar>>('scrollRef')
 const activeIdx = ref(0)
 
 /** 当前登录用户 id（成员列表过滤掉自己） */
-const selfUserId = computed(() => Number(userStore.getUser?.id) || 0)
+const selfUserId = computed(() => getCurrentUserId())
 
 /**
  * 虚拟"所有人"项：群主 / 管理员（canAtAll=true）+ 关键字命中"所有人"前缀时存在

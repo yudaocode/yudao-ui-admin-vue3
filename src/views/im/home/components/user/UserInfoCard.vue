@@ -31,7 +31,7 @@
 import { computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { useImUiStore } from '../../store/uiStore'
 import { useConversationStore } from '../../store/conversationStore'
 import { useFriendStore } from '../../store/friendStore'
@@ -44,14 +44,13 @@ defineOptions({ name: 'ImUserInfoCard' })
 const uiStore = useImUiStore()
 const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
-const userStore = useUserStore()
 const router = useRouter()
 
 const card = computed(() => uiStore.userInfoCard)
 const user = computed(() => card.value.user)
 
 const isSelf = computed(() => {
-  const myId = Number(userStore.getUser?.id) || 0
+  const myId = getCurrentUserId()
   return !!user.value?.id && user.value.id === myId
 })
 const isActiveFriend = computed(() => {

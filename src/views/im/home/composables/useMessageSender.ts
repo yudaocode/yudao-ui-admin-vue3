@@ -23,7 +23,7 @@ import { ImMessageType, ImMessageStatus, ImConversationType } from '../../utils/
 import { MESSAGE_PRIVATE_READ_ENABLED, MESSAGE_GROUP_READ_ENABLED } from '../../utils/config'
 import { getClientConversationId } from '../../utils/db'
 import type { Conversation, Message } from '../types'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 
 /** 非文本消息的扩展选项（通用） */
 interface SendExtOptions {
@@ -60,7 +60,6 @@ interface SendExtOptions {
 export const useMessageSender = () => {
   const conversationStore = useConversationStore()
   const messageStore = useMessageStore()
-  const userStore = useUserStore()
 
   /** 构造本地乐观消息对象 */
   const buildLocalMessage = (opts: {
@@ -76,7 +75,7 @@ export const useMessageSender = () => {
       content: opts.content,
       status: ImMessageStatus.SENDING,
       sendTime: Date.now(),
-      senderId: Number(userStore.getUser?.id) || 0,
+      senderId: getCurrentUserId(),
       targetId: opts.targetId,
       selfSend: true,
       atUserIds: opts.atUserIds

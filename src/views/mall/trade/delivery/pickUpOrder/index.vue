@@ -228,7 +228,7 @@ import { TradeOrderSummaryRespVO } from '@/api/mall/trade/order'
 import { DeliveryPickUpStoreVO } from '@/api/mall/trade/delivery/pickUpStore'
 import OrderPickUpForm from '@/views/mall/trade/order/form/OrderPickUpForm.vue'
 import { ref, onMounted } from 'vue'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 const message = useMessage() // 消息弹窗
 
 const port = ref('')
@@ -319,7 +319,7 @@ const pickUpStoreList = ref<DeliveryPickUpStoreVO[]>([])
 const getPickUpStoreList = async () => {
   pickUpStoreList.value = await PickUpStoreApi.getSimpleDeliveryPickUpStoreList()
   // 移除自己无法核销的门店
-  const userId = useUserStore().getUser.id
+  const userId = getCurrentUserId()
   pickUpStoreList.value = pickUpStoreList.value.filter((item) =>
     item.verifyUserIds?.includes(userId)
   )

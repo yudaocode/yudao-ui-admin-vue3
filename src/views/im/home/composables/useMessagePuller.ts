@@ -32,7 +32,7 @@ import {
 } from '../../utils/config'
 import { buildChannelConversationStub } from '../../utils/channel'
 import { generateClientMessageId, getPrivateMessagePeerId } from '../../utils/message'
-import { getCurrentUserId } from '../../utils/user'
+import { getCurrentUserId } from '@/utils/auth'
 import type { Message } from '../types'
 
 /**

@@ -22,7 +22,7 @@ import {
 } from '../../utils/constants'
 import { CommonStatusEnum } from '@/utils/constants'
 import { getDb } from '../../utils/db'
-import { getCurrentUserId } from '../../utils/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { getGroupDisplayName } from '../../utils/user'
 import { type GroupNotificationPayload } from '../../utils/message'
 import type { Group, GroupDO, GroupMember, GroupMemberDO, Message } from '../types'

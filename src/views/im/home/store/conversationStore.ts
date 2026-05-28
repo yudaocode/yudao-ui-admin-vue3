@@ -5,7 +5,7 @@ import { store } from '@/store'
 import { CONVERSATION_RECENT_FORWARD_MAX } from '../../utils/config'
 import { ImConversationType } from '../../utils/constants'
 import { getClientConversationId, getDb, StorageKeys, type DbTransaction } from '../../utils/db'
-import { getCurrentUserId } from '../../utils/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { useMessageStore } from './messageStore'
 import type { Conversation, ConversationDO } from '../types'
 

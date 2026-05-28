@@ -24,7 +24,7 @@ import { useConversationStore } from './conversationStore'
 import { ImConversationType, ImFriendRequestHandleResult } from '../../utils/constants'
 import { FRIEND_REQUEST_PAGE_SIZE } from '../../utils/config'
 import { getDb } from '../../utils/db'
-import { getCurrentUserId } from '../../utils/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { getFriendDisplayName } from '../../utils/user'
 import type { Friend, FriendDO, FriendLite, FriendRequest, FriendRequestDO } from '../types'
 

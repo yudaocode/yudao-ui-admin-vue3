@@ -37,7 +37,7 @@ import { CommonStatusEnum } from '@/utils/constants'
 import { inviteGroupMember } from '@/api/im/group/member'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { ImGroupMemberRole } from '@/views/im/utils/constants'
 import { GROUP_MAX_MEMBER } from '@/views/im/utils/config'
 import FriendPickerPanel from '../picker/FriendPickerPanel.vue'
@@ -53,7 +53,6 @@ const emit = defineEmits<{
 const message = useMessage()
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
-const userStore = useUserStore()
 
 const visible = ref(false)
 const submitting = ref(false)
@@ -99,7 +98,7 @@ const willGoApproval = computed(() => {
   if (!group?.joinApproval) {
     return false
   }
-  const myId = Number(userStore.getUser?.id) || 0
+  const myId = getCurrentUserId()
   if (!myId) {
     return false
   }

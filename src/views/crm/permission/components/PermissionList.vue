@@ -46,7 +46,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import { ElTable } from 'element-plus'
 import * as PermissionApi from '@/api/crm/permission'
-import { useUserStoreWithOut } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import CrmPermissionForm from './PermissionForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 
@@ -64,7 +64,6 @@ const list = ref<PermissionApi.PermissionVO[]>([]) // 列表的数据
 const formData = ref({
   ownerUserId: 0
 })
-const userStore = useUserStoreWithOut() // 用户信息缓存
 
 /** 查询列表 */
 const getList = async () => {
@@ -75,13 +74,14 @@ const getList = async () => {
       bizId: props.bizId
     })
     list.value = data
+    const currentUserId = getCurrentUserId()
     const permission = list.value.find(
       (item) =>
-        item.userId === userStore.getUser.id &&
+        item.userId === currentUserId &&
         item.level === PermissionApi.PermissionLevelEnum.OWNER
     )
     if (permission) {
-      formData.value.ownerUserId = userStore.getUser.id
+      formData.value.ownerUserId = currentUserId
     }
   } finally {
     loading.value = false
@@ -150,7 +150,7 @@ watch(
       )
       validateOwnerUser.value = false
       validateWrite.value = false
-      const userId = userStore.getUser?.id
+      const userId = getCurrentUserId()
       list.value
         .filter((item) => item.userId === userId)
         .forEach((item) => {
@@ -176,15 +176,16 @@ const emits = defineEmits<{
 }>()
 /** 退出团队 */
 const handleQuit = async () => {
+  const currentUserId = getCurrentUserId()
   const permission = list.value.find(
     (item) =>
-      item.userId === userStore.getUser.id && item.level === PermissionApi.PermissionLevelEnum.OWNER
+      item.userId === currentUserId && item.level === PermissionApi.PermissionLevelEnum.OWNER
   )
   if (permission) {
     message.warning('负责人不能退出团队！')
     return
   }
-  const userPermission = list.value.find((item) => item.userId === userStore.getUser.id)
+  const userPermission = list.value.find((item) => item.userId === currentUserId)
   if (!userPermission) {
     return
   }

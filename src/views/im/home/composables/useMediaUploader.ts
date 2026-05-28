@@ -1,5 +1,5 @@
 import { updateFile } from '@/api/infra/file'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { useMessage } from '@/hooks/web/useMessage'
 import { isOpenableUrl } from '@/utils/url'
 
@@ -157,7 +157,6 @@ export function ensureMediaSizeWithinLimit(
 export const useMediaUploader = () => {
   const conversationStore = useConversationStore()
   const messageStore = useMessageStore()
-  const userStore = useUserStore()
   const muteOverlay = useMuteOverlay()
   const message = useMessage()
   const { sendRaw } = useMessageSender()
@@ -193,7 +192,7 @@ export const useMediaUploader = () => {
       content: opts.buildContent(blobUrl),
       status: ImMessageStatus.SENDING,
       sendTime: Date.now(),
-      senderId: Number(userStore.getUser?.id) || 0,
+      senderId: getCurrentUserId(),
       targetId: conversation.targetId,
       selfSend: true,
       uploadProgress: 0,

@@ -1,7 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { store } from '@/store'
-import { getRefreshToken } from '@/utils/auth'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId, getRefreshToken } from '@/utils/auth'
 
 import {
   ImWebSocketMessageType,
@@ -476,9 +475,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      */
     handlePrivateMessage(websocketMessage: ImPrivateMessageDTO) {
       const conversationStore = useConversationStore()
-      const userStore = useUserStore()
       const friendStore = useFriendStore()
-      const currentUserId = Number(userStore.getUser?.id) || 0
+      const currentUserId = getCurrentUserId()
 
       // 0. 防御层：senderId / receiverId 均不含当前用户的私聊帧直接丢弃，避免后端路由 / 多端串号污染会话
       //    （FRIEND_* 等系统通知也走这条通道，但 fromUserId=senderId、toUserId=receiverId 仍是当前用户视角）
@@ -603,9 +601,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      */
     handleGroupMessage(websocketMessage: ImGroupMessageDTO) {
       const conversationStore = useConversationStore()
-      const userStore = useUserStore()
       const groupStore = useGroupStore()
-      const currentUserId = Number(userStore.getUser?.id) || 0
+      const currentUserId = getCurrentUserId()
       const selfSend = websocketMessage.senderId === currentUserId
 
       // 0. 防御层：定向群消息 receiverUserIds 非空且未包含当前用户时丢弃
@@ -723,8 +720,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      *    becomeFriends 单条入库后双方收到同一份 payload，payload.friendUserId 固定是 toUserId，本端真正的对端要从帧 sender / receiver 反推
      */
     computeFriendPeerId(frame: ImPrivateMessageDTO): number {
-      const userStore = useUserStore()
-      const currentUserId = Number(userStore.getUser?.id) || 0
+      const currentUserId = getCurrentUserId()
       return getPrivateMessagePeerId(frame, currentUserId)
     },
 

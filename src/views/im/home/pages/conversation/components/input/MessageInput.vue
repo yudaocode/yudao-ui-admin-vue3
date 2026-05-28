@@ -169,7 +169,7 @@ import { useGroupStore } from '@/views/im/home/store/groupStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { getMemberDisplayName } from '@/views/im/utils/user'
 import { useMessage } from '@/hooks/web/useMessage'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
 import {
   ensureMediaSizeWithinLimit,
@@ -199,7 +199,6 @@ defineOptions({ name: 'ImMessageInput' })
 const conversationStore = useConversationStore()
 const groupStore = useGroupStore()
 const friendStore = useFriendStore()
-const userStore = useUserStore()
 const message = useMessage()
 const { send, sendRaw } = useMessageSender()
 const {
@@ -654,7 +653,7 @@ const canAtAll = computed<boolean>(() => {
   if (!group) {
     return false
   }
-  const myId = Number(userStore.getUser?.id) || 0
+  const myId = getCurrentUserId()
   if (!myId) {
     return false
   }

@@ -25,7 +25,7 @@ import {
   revokeBlobUrlsInContent
 } from '../../utils/message'
 import { resolveConversationLastContent } from '../../utils/conversation'
-import { getCurrentUserId } from '../../utils/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { tryGetSenderDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import { useConversationStore } from './conversationStore'

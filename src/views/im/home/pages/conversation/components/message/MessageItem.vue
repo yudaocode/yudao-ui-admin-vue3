@@ -38,7 +38,7 @@
       :class="{ 'flex-row-reverse': message.selfSend }"
     >
       <UserAvatar
-        :id="message.selfSend ? userStore.getUser?.id : message.senderId"
+        :id="message.selfSend ? getCurrentUserId() : message.senderId"
         :name="senderRealNickname"
         :url="message.selfSend ? userStore.getUser?.avatar : senderAvatar"
         :size="36"
@@ -95,7 +95,7 @@
       <!-- 头像：点击弹 UserInfoCard 由 UserAvatar 内部承接；频道素材消息不显示头像 -->
       <UserAvatar
         v-if="!isMaterial"
-        :id="message.selfSend ? userStore.getUser?.id : message.senderId"
+        :id="message.selfSend ? getCurrentUserId() : message.senderId"
         :name="senderRealNickname"
         :url="message.selfSend ? userStore.getUser?.avatar : senderAvatar"
         :size="36"
@@ -232,6 +232,7 @@ import {
 import { buildRecallTipSegments } from '@/views/im/utils/conversation'
 import { formatTimeTip } from '@/views/im/utils/time'
 import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useFriendStore } from '../../../../store/friendStore'
@@ -573,7 +574,7 @@ const groupMembersForReadStatus = computed<GroupMemberLite[]>(() => {
 
 /** 是否 @我（群消息展示小徽标） */
 const isAtMe = computed(() => {
-  const myId = Number(userStore.getUser?.id) || 0
+  const myId = getCurrentUserId()
   if (!myId) {
     return false
   }
@@ -804,7 +805,7 @@ const currentGroup = computed(() => {
 
 /** 当前用户在该群里的角色；私聊或非群成员 → undefined */
 const myGroupRole = computed(() => {
-  const myId = Number(userStore.getUser?.id) || 0
+  const myId = getCurrentUserId()
   return currentGroup.value?.members?.find((m) => m.userId === myId)?.role
 })
 

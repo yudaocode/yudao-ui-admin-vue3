@@ -79,7 +79,7 @@ import { computed, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import UserAvatar from '../../components/user/UserAvatar.vue'
 import { useFriendStore } from '../../store/friendStore'
-import { getCurrentUserId } from '../../../utils/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import type { FriendRequest } from '../../types'
 

@@ -72,7 +72,7 @@ export const useChannelStore = defineStore('imChannelStore', {
       }
     },
 
-    /** 用最新的频道信息覆盖已有 CHANNEL 会话的 name / avatar；conversationStore 持久化的旧占位被刷掉 */
+    /** 用最新的频道信息覆盖已有 CHANNEL 会话的 name / avatar */
     syncChannelConversationMetadata() {
       const conversationStore = useConversationStore()
       const indexed = new Map(this.channels.map((c) => [c.id, c]))
@@ -84,12 +84,10 @@ export const useChannelStore = defineStore('imChannelStore', {
         if (!channel) {
           return
         }
-        if (channel.name) {
-          conversation.name = channel.name
-        }
-        if (channel.avatar) {
-          conversation.avatar = channel.avatar
-        }
+        conversationStore.updateConversation(ImConversationType.CHANNEL, conversation.targetId, {
+          name: channel.name,
+          avatar: channel.avatar
+        })
       })
     },
 

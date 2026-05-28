@@ -34,7 +34,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 
 import { ImGroupMemberRole } from '@/views/im/utils/constants'
 import { useGroupStore } from '../../../../store/groupStore'
@@ -47,7 +47,6 @@ const props = defineProps<{
   groupId: number
 }>()
 
-const userStore = useUserStore()
 const groupStore = useGroupStore()
 const groupRequestStore = useGroupRequestStore()
 
@@ -64,7 +63,7 @@ const group = computed(() => groupStore.getGroup(props.groupId))
 
 /** 当前用户在群里的角色；优先用 group.members，懒加载未到时回退到 ownerUserId 直判 */
 const myRole = computed(() => {
-  const myId = Number(userStore.getUser?.id) || 0
+  const myId = getCurrentUserId()
   if (group.value?.ownerUserId === myId) {
     return ImGroupMemberRole.OWNER
   }

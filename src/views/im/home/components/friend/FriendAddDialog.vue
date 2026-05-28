@@ -134,7 +134,7 @@ import { useUserStore } from '@/store/modules/user'
 
 import UserAvatar from '../user/UserAvatar.vue'
 import { useFriendStore } from '../../store/friendStore'
-import { getCurrentUserId } from '../../../utils/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { ImFriendAddSource } from '../../../utils/constants'
 import { getGenderColor, getGenderIcon } from '../../../utils/user'
 import { getSimpleUserListByNickname, type UserVO } from '@/api/system/user'

@@ -81,7 +81,7 @@ import { ImConversationType, ImGroupMemberRole } from '@/views/im/utils/constant
 import { unpinGroupMessage as apiUnpinGroupMessage } from '@/api/im/group'
 import { getSenderDisplayName } from '@/views/im/utils/user'
 import { resolveConversationLastContent } from '@/views/im/utils/conversation'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { useGroupStore } from '../../../../store/groupStore'
 import type { Message } from '../../../../types'
 
@@ -97,7 +97,6 @@ const emit = defineEmits<{
   locate: [messageId: number]
 }>()
 
-const userStore = useUserStore()
 const groupStore = useGroupStore()
 const message = useMessage()
 
@@ -124,7 +123,7 @@ const latest = computed(() => pinnedMessages.value[pinnedMessages.value.length -
 
 /** 当前用户是否群主 / 管理员（决定是否显示「移除」入口） */
 const canManage = computed(() => {
-  const myId = Number(userStore.getUser?.id) || 0
+  const myId = getCurrentUserId()
   const role = group.value?.members?.find((m) => m.userId === myId)?.role
   return role === ImGroupMemberRole.OWNER || role === ImGroupMemberRole.ADMIN
 })

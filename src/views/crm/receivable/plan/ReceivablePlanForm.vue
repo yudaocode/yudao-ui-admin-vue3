@@ -135,7 +135,7 @@ import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
 import * as UserApi from '@/api/system/user'
 import * as CustomerApi from '@/api/crm/customer'
 import * as ContractApi from '@/api/crm/contract'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { cloneDeep } from 'lodash-es'
 
@@ -182,7 +182,7 @@ const open = async (type: string, id?: number, customerId?: number, contractId?:
   customerList.value = await CustomerApi.getCustomerSimpleList()
   // 默认新建时选中自己
   if (formType.value === 'create') {
-    formData.value.ownerUserId = useUserStore().getUser.id
+    formData.value.ownerUserId = getCurrentUserId()
   }
   // 设置 customerId 和 contractId 默认值
   if (customerId) {

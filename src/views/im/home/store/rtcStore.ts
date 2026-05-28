@@ -10,7 +10,7 @@ import {
   type ImRtcParticipantStatusValue,
   type ImRtcCallStageValue
 } from '../../utils/constants'
-import { getCurrentUserId } from '../../utils/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { useFriendStore } from './friendStore'
 import { useGroupStore } from './groupStore'
 
