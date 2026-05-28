@@ -143,7 +143,7 @@ const draft = computed(() => {
   if (isActive.value) {
     return undefined
   }
-  return conversationStore.getDraft(props.conversation)
+  return conversationStore.getConversationDraft(props.conversation)
 })
 
 const isGroup = computed(() => props.conversation.type === ImConversationType.GROUP)
@@ -216,7 +216,7 @@ const requestText = computed(() => {
   if (!isGroup.value) {
     return ''
   }
-  const count = groupRequestStore.unhandledCountMap.get(props.conversation.targetId) ?? 0
+  const count = groupRequestStore.getUnhandledGroupRequestCountMap.get(props.conversation.targetId) ?? 0
   return count > 0 ? `[${count}条进群申请]` : ''
 })
 
@@ -227,7 +227,7 @@ function handleClick() {
 
 /** 切换置顶 */
 function handleTop() {
-  conversationStore.setTop(
+  conversationStore.setConversationTop(
     props.conversation.type,
     props.conversation.targetId,
     !props.conversation.top
@@ -238,14 +238,14 @@ function handleTop() {
 function handleMuted() {
   const next = !props.conversation.silent
   const { type, targetId } = props.conversation
-  conversationStore.setSilent(type, targetId, next)
+  conversationStore.setConversationSilent(type, targetId, next)
   const sync =
     type === ImConversationType.PRIVATE
-      ? friendStore.setSilent(targetId, next)
-      : groupStore.setSilent(targetId, next)
+      ? friendStore.setFriendSilent(targetId, next)
+      : groupStore.setGroupSilent(targetId, next)
   sync.catch((e) => {
     console.error('[IM] 切换免打扰失败', e)
-    conversationStore.setSilent(type, targetId, !next)
+    conversationStore.setConversationSilent(type, targetId, !next)
   })
 }
 

@@ -146,9 +146,11 @@ export interface Group {
   silent?: boolean // 是否免打扰。从当前用户的 GroupMember 回填
   groupRemark?: string // 群备注。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
   members?: GroupMember[] // 群成员缓存（按需懒加载）
-  membersLoaded?: boolean // members 是否"完整加载"——只有整群 loadGroupMembers / fetchGroupMembers 命中时为 true；fetchGroupMember 单成员补齐不置位，避免 fetchGroupMembers(force=false) 命中缓存时误判整群已加载
+  membersLoaded?: boolean // members 是否"完整加载"——只有整群 loadGroupMemberList / fetchGroupMemberList 命中时为 true；fetchGroupMember 单成员补齐不置位，避免 fetchGroupMemberList(force=false) 命中缓存时误判整群已加载
   memberCount?: number // 成员总数
 }
+
+export type GroupDO = Omit<Group, 'members' | 'membersLoaded'>
 
 // 群成员实体（前端内部结构）
 export interface GroupMember {
@@ -166,6 +168,8 @@ export interface GroupMember {
   // ========== 前端扩展字段 ==========
   isOwner?: boolean // 是否群主（前端从 Group.ownerUserId 计算）
 }
+
+export type GroupMemberDO = GroupMember
 
 // ==================== 好友 ====================
 
@@ -187,6 +191,8 @@ export interface Friend {
   addTime?: number // 添加好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
   deleteTime?: number // 删除好友时间（毫秒时间戳；后端为 LocalDateTime 字符串，在 convertFriend 转换）
 }
+
+export type FriendDO = Friend
 
 /**
  * 好友申请记录（前端内部结构，对齐后端 ImFriendRequestRespVO）
@@ -210,6 +216,12 @@ export interface FriendRequest {
   toAvatar?: string // 接收方头像
 }
 
+export type FriendRequestDO = FriendRequest
+
+export type GroupRequestDO = import('@/api/im/group/request').ImGroupRequestRespVO
+
+export type ChannelDO = import('@/api/im/manager/channel').ImManagerChannelVO
+
 // ==================== 用户名片 ====================
 
 // 用户精简信息（对齐后端 UserSimpleRespVO，名片 / 头像 hover 等场景共用）
@@ -227,7 +239,7 @@ export interface User {
 /**
  * 好友列表行：从 Friend 派生的展示快照
  * - id 用 friendUserId（与列表 click / 选中比对一致），不是 Friend.id（关系记录主键）
- * - 软删（status === DISABLE）由上游 friendStore.getActiveFriends / getActiveFriendsLite 统一过滤掉
+ * - 软删（status === DISABLE）由上游 friendStore.getActiveFriendList / getActiveFriendLiteList 统一过滤掉
  */
 export interface FriendLite {
   id: number

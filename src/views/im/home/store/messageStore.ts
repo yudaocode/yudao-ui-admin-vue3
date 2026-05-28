@@ -16,6 +16,7 @@ import {
   getServerMessageKey,
   parseClientConversationId,
   setMessageMaxId,
+  StorageKeys,
   type DbTransaction
 } from '../../utils/db'
 import {
@@ -24,7 +25,7 @@ import {
   revokeBlobUrlsInContent
 } from '../../utils/message'
 import { resolveConversationLastContent } from '../../utils/conversation'
-import { getCurrentUserId } from '../../utils/storage'
+import { getCurrentUserId } from '../../utils/user'
 import { tryGetSenderDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import { useConversationStore } from './conversationStore'
@@ -40,6 +41,10 @@ interface MessageConversationInfo {
   name: string
   avatar: string
   silent?: boolean
+}
+
+interface PersistMessageRecordOptions {
+  mergeClientRecord?: boolean
 }
 
 /** 拉取消息批量处理项 */
@@ -132,7 +137,7 @@ function deriveLastSenderDisplayName(
     const group = groupStore.getGroup(conversation.targetId)
     const fetchPromise = group?.membersLoaded
       ? groupStore.fetchGroupMember(conversation.targetId, senderId)
-      : groupStore.fetchGroupMembers(conversation.targetId)
+      : groupStore.fetchGroupMemberList(conversation.targetId)
     fetchPromise.catch((e) =>
       console.warn(
         '[IM messageStore] 兜底拉群成员失败',
@@ -263,12 +268,12 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 从 settings 加载消息游标 */
-    async loadMessageCursors() {
+    async loadMessageCursorList() {
       const db = getDb()
       const [privateMaxId, groupMaxId, channelMaxId] = await Promise.all([
-        db.getSetting<number>('privateMessageMaxId'),
-        db.getSetting<number>('groupMessageMaxId'),
-        db.getSetting<number>('channelMessageMaxId')
+        db.getSetting<number>(StorageKeys.settings.privateMessageMaxId),
+        db.getSetting<number>(StorageKeys.settings.groupMessageMaxId),
+        db.getSetting<number>(StorageKeys.settings.channelMessageMaxId)
       ])
       this.privateMessageMaxId = privateMaxId || 0
       this.groupMessageMaxId = groupMaxId || 0
@@ -276,7 +281,7 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 更新内存游标 */
-    updateMessageMaxId(conversationType: number, messageId?: number) {
+    updateMessageCursor(conversationType: number, messageId?: number) {
       if (!messageId) {
         return
       }
@@ -311,7 +316,7 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 加载当前会话最近消息 */
-    async loadMoreMessages(
+    async loadMoreMessageList(
       clientConversationId: string,
       beforeSendTime?: number,
       limit = 50
@@ -340,13 +345,13 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 确保会话消息已加载 */
-    async ensureConversationMessagesLoaded(conversation: Conversation) {
+    async ensureConversationMessageListLoaded(conversation: Conversation) {
       const key = getMessageCacheKey(conversation.type, conversation.targetId)
       if (this.messagesByConversation[key]) {
         this.touchConversationMessageCache(key)
         return
       }
-      await this.loadMoreMessages(key)
+      await this.loadMoreMessageList(key)
     },
 
     /** 获取内存消息数组 */
@@ -360,11 +365,16 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 持久化消息记录 */
-    async persistMessageRecord(message: Message, conversationType: number, tx?: DbTransaction) {
+    async saveMessageRecord(
+      message: Message,
+      conversationType: number,
+      tx?: DbTransaction,
+      options?: PersistMessageRecordOptions
+    ) {
       const db = getDb()
       const next = buildMessageDO(message, conversationType)
-      // ack 后服务端 key 替换 client key
-      if (message.id && message.clientMessageId) {
+      // 服务端 key 替换 client key
+      if (options?.mergeClientRecord && message.id && message.clientMessageId) {
         const existing = await db.getByIndex<MessageDO>(
           'messages',
           'clientMessageId',
@@ -379,8 +389,8 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 保存消息游标 */
-    async saveMessageMaxId(conversationType: number, messageId?: number, tx?: DbTransaction) {
-      this.updateMessageMaxId(conversationType, messageId)
+    async saveMessageCursor(conversationType: number, messageId?: number, tx?: DbTransaction) {
+      this.updateMessageCursor(conversationType, messageId)
       await setMessageMaxId(conversationType, messageId, tx)
     },
 
@@ -423,14 +433,21 @@ export const useMessageStore = defineStore('imMessageStore', {
     ) {
       if (pulledMessages.length === 0) {
         // 1. 空批次只推进游标
-        await this.saveMessageMaxId(conversationType, maxMessageId)
+        await this.saveMessageCursor(conversationType, maxMessageId)
         return
       }
       const conversationStore = useConversationStore()
-      const persistedMessages = new Map<string, { message: Message; conversationType: number }>()
+      const persistedMessages = new Map<
+        string,
+        { message: Message; conversationType: number; mergeClientRecord?: boolean }
+      >()
       const changedConversations = new Map<string, Conversation>()
 
-      const addChanged = (conversation: Conversation, message: Message) => {
+      const addChanged = (
+        conversation: Conversation,
+        message: Message,
+        options?: PersistMessageRecordOptions
+      ) => {
         const clientConversationId = getClientConversationId(
           conversation.type,
           conversation.targetId
@@ -438,7 +455,8 @@ export const useMessageStore = defineStore('imMessageStore', {
         changedConversations.set(clientConversationId, conversation)
         persistedMessages.set(getMessageKey(message, conversation.type), {
           message,
-          conversationType: conversation.type
+          conversationType: conversation.type,
+          mergeClientRecord: options?.mergeClientRecord
         })
       }
 
@@ -458,6 +476,7 @@ export const useMessageStore = defineStore('imMessageStore', {
         }
 
         const { conversationInfo } = pulledMessage
+        const hasServerClientMessageId = !!pulledMessage.message.clientMessageId
         const message = ensureClientMessageId(pulledMessage.message)
         // 1.2 群通知先同步群资料
         if (
@@ -482,8 +501,10 @@ export const useMessageStore = defineStore('imMessageStore', {
             recomputeConversationLast(conversation, messages)
             syncConversationAtFlags(conversation, message)
           }
-          this.updateMessageMaxId(conversationInfo.type, message.id)
-          addChanged(conversation, messages[existingIndex])
+          this.updateMessageCursor(conversationInfo.type, message.id)
+          addChanged(conversation, messages[existingIndex], {
+            mergeClientRecord: hasServerClientMessageId
+          })
           continue
         }
 
@@ -515,21 +536,25 @@ export const useMessageStore = defineStore('imMessageStore', {
           }
         }
         messages.splice(insertIndex, 0, message)
-        this.updateMessageMaxId(conversationInfo.type, message.id)
-        addChanged(conversation, message)
+        this.updateMessageCursor(conversationInfo.type, message.id)
+        addChanged(conversation, message, {
+          mergeClientRecord: hasServerClientMessageId && !!message.id
+        })
       }
 
       // 2. 更新内存游标
-      this.updateMessageMaxId(conversationType, maxMessageId)
+      this.updateMessageCursor(conversationType, maxMessageId)
       // 3. 单事务写入消息、会话摘要和游标
       await getDb()
         .transaction(['messages', 'conversations', 'settings'], 'readwrite', async (tx) => {
           // 3.1 写入本批变更消息
           for (const item of persistedMessages.values()) {
-            await this.persistMessageRecord(item.message, item.conversationType, tx)
+            await this.saveMessageRecord(item.message, item.conversationType, tx, {
+              mergeClientRecord: item.mergeClientRecord
+            })
           }
           // 3.2 写入本批变更会话
-          await conversationStore.persistConversationRecords([...changedConversations.values()], tx)
+          await conversationStore.saveConversationRecord([...changedConversations.values()], tx)
           // 3.3 写入本批游标
           await setMessageMaxId(conversationType, maxMessageId, tx)
         })
@@ -543,6 +568,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       options?: { saveMaxId?: boolean }
     ) {
       const conversationStore = useConversationStore()
+      const hasIncomingClientMessageId = !!messageInfo.clientMessageId
       const message = ensureClientMessageId(messageInfo)
       // 1. 先处理消息带来的群资料变更
       if (conversationInfo.type === ImConversationType.GROUP && isGroupNotification(message.type)) {
@@ -564,11 +590,13 @@ export const useMessageStore = defineStore('imMessageStore', {
           recomputeConversationLast(conversation, messages)
           syncConversationAtFlags(conversation, message)
         }
-        this.updateMessageMaxId(conversationInfo.type, message.id)
+        this.updateMessageCursor(conversationInfo.type, message.id)
         void getDb()
           .transaction(['messages', 'conversations', 'settings'], 'readwrite', async (tx) => {
-            await this.persistMessageRecord(messages[existingIndex], conversationInfo.type, tx)
-            await conversationStore.persistConversationRecords(conversation, tx)
+            await this.saveMessageRecord(messages[existingIndex], conversationInfo.type, tx, {
+              mergeClientRecord: hasIncomingClientMessageId
+            })
+            await conversationStore.saveConversationRecord(conversation, tx)
             if (options?.saveMaxId !== false) {
               await setMessageMaxId(conversationInfo.type, message.id, tx)
             }
@@ -606,12 +634,14 @@ export const useMessageStore = defineStore('imMessageStore', {
         }
       }
       messages.splice(insertIndex, 0, message)
-      this.updateMessageMaxId(conversationInfo.type, message.id)
+      this.updateMessageCursor(conversationInfo.type, message.id)
       // 6. 单事务写入消息、会话摘要和游标
       void getDb()
         .transaction(['messages', 'conversations', 'settings'], 'readwrite', async (tx) => {
-          await this.persistMessageRecord(message, conversationInfo.type, tx)
-          await conversationStore.persistConversationRecords(conversation, tx)
+          await this.saveMessageRecord(message, conversationInfo.type, tx, {
+            mergeClientRecord: hasIncomingClientMessageId && !!message.id
+          })
+          await conversationStore.saveConversationRecord(conversation, tx)
           if (options?.saveMaxId !== false) {
             await setMessageMaxId(conversationInfo.type, message.id, tx)
           }
@@ -668,12 +698,14 @@ export const useMessageStore = defineStore('imMessageStore', {
         if (messages[messages.length - 1] === message) {
           recomputeConversationLast(conversation, messages)
         }
-        this.updateMessageMaxId(conversationType, message.id)
+        this.updateMessageCursor(conversationType, message.id)
         // 3. 单事务写入消息、会话摘要和游标
         await getDb()
           .transaction(['messages', 'conversations', 'settings'], 'readwrite', async (tx) => {
-            await this.persistMessageRecord(message, conversationType, tx)
-            await conversationStore.persistConversationRecords(conversation, tx)
+            await this.saveMessageRecord(message, conversationType, tx, {
+              mergeClientRecord: true
+            })
+            await conversationStore.saveConversationRecord(conversation, tx)
             await setMessageMaxId(conversationType, message.id, tx)
           })
           .catch((e) => console.error('[IM messageStore] ack 写入失败', e))
@@ -723,7 +755,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       if (!changed) {
         return
       }
-      this.persistMessageRecord(changed.message, conversationType).catch((e) =>
+      this.saveMessageRecord(changed.message, conversationType).catch((e) =>
         console.error('[IM messageStore] 撤回消息写入失败', e)
       )
       conversationStore.saveConversation(changed.conversation)
@@ -773,7 +805,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       void getDb()
         .transaction(['messages'], 'readwrite', async (tx) => {
           for (const message of changed) {
-            await this.persistMessageRecord(message, options.conversationType, tx)
+            await this.saveMessageRecord(message, options.conversationType, tx)
           }
         })
         .catch((e) => console.warn('[IM messageStore] 回执写入失败', e))
@@ -789,7 +821,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       const fresh = earlierMessages
         .map(ensureClientMessageId)
         .filter((message) => message.id && !existingIds.has(message.id))
-        .sort((a, b) => (a.id || 0) - (b.id || 0))
+        .sort((messageA, messageB) => (messageA.id || 0) - (messageB.id || 0))
       if (fresh.length === 0) {
         return
       }
@@ -798,7 +830,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       void getDb()
         .transaction(['messages'], 'readwrite', async (tx) => {
           for (const message of fresh) {
-            await this.persistMessageRecord(message, conversationType, tx)
+            await this.saveMessageRecord(message, conversationType, tx)
           }
         })
         .catch((e) => console.warn('[IM messageStore] 历史消息写入失败', e))
@@ -840,20 +872,29 @@ export const useMessageStore = defineStore('imMessageStore', {
     },
 
     /** 当前会话标记已读 */
-    markConversationMessagesRead(conversation: Conversation) {
+    markConversationMessageListRead(conversation: Conversation) {
       const messages = this.getMessageList(conversation.type, conversation.targetId)
+      const changed: Message[] = []
       messages.forEach((message) => {
         if (!message.selfSend && message.status === ImMessageStatus.UNREAD) {
           message.status = ImMessageStatus.READ
-          this.persistMessageRecord(message, conversation.type).catch((e) =>
-            console.warn('[IM messageStore] 已读状态写入失败', e)
-          )
+          changed.push(message)
         }
       })
+      if (changed.length === 0) {
+        return
+      }
+      void getDb()
+        .transaction(['messages'], 'readwrite', async (tx) => {
+          for (const message of changed) {
+            await this.saveMessageRecord(message, conversation.type, tx)
+          }
+        })
+        .catch((e) => console.warn('[IM messageStore] 已读状态写入失败', e))
     },
 
     /** 删除会话全部消息 */
-    deleteConversationMessages(conversationType: number, targetId: number) {
+    deleteConversationMessageList(conversationType: number, targetId: number) {
       // 1. 清理内存消息和媒体资源
       const clientConversationId = getClientConversationId(conversationType, targetId)
       const messages = this.messagesByConversation[clientConversationId] || []

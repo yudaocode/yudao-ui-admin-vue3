@@ -164,7 +164,7 @@ const headerTitle = computed(() => {
 
 /** 候选会话：从 store 拿排序后的列表（hide 由 Panel 接 hideKeys 过滤） */
 const candidateConversations = computed<Conversation[]>(
-  () => conversationStore.getSortedConversations
+  () => conversationStore.getSortedConversationList
 )
 
 /** 隐藏 key：不能把名片推回名片本身的会话（用户名片避免自推、群名片避免推回该群） */
@@ -177,7 +177,7 @@ const hideKeys = computed<string[]>(() => {
 })
 
 /** 好友视图候选列表：直接复用 friendStore Lite 视图 */
-const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendsLite)
+const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendLiteList)
 
 /** 把选中的 emoji 拼到留言末尾；FacePicker 自身负责关闭面板 */
 function handleEmojiSelect(emoji: string) {
@@ -224,7 +224,7 @@ async function handleSend() {
     const results = await Promise.all(tasks)
     const failedNames = results.filter((r) => !r.ok).map((r) => r.conversation.name || '未命名会话')
     // 把命中的目标推到最近转发列表（部分失败也推：用户的"意图"已表达）
-    conversationStore.pushRecentForwardConversationKeys(targets.map((c) => getConversationKey(c)))
+    conversationStore.pushRecentForwardConversationKeyList(targets.map((c) => getConversationKey(c)))
     if (failedNames.length === 0) {
       message.success('已转发')
     } else if (failedNames.length === targets.length) {
@@ -264,7 +264,7 @@ async function handleCreateGroupAndSend() {
     if (!group?.id) {
       throw new Error('创建群失败：未返回群编号')
     }
-    // upsert 进 groupStore，省一次 fetchGroups
+    // upsert 进 groupStore，省一次 fetchGroupList
     groupStore.upsertGroup({
       id: group.id,
       name: group.name,
@@ -294,7 +294,7 @@ async function handleCreateGroupAndSend() {
     if (leaveText) {
       await send(leaveText, { conversation: newConversation })
     }
-    conversationStore.pushRecentForwardConversationKeys([getConversationKey(newConversation)])
+    conversationStore.pushRecentForwardConversationKeyList([getConversationKey(newConversation)])
     message.success('已创建群聊并发送')
     visible.value = false
   } finally {

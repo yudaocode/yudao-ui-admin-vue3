@@ -61,7 +61,7 @@
           </div>
           <!-- 已是好友显示「已添加」；否则显示「添加」（点击进入 apply 步骤） -->
           <el-button
-            v-if="!friendStore.isFriend(user.id)"
+            v-if="!friendStore.isActiveFriend(user.id)"
             type="primary"
             size="small"
             @click="enterApply(user)"
@@ -134,7 +134,7 @@ import { useUserStore } from '@/store/modules/user'
 
 import UserAvatar from '../user/UserAvatar.vue'
 import { useFriendStore } from '../../store/friendStore'
-import { getCurrentUserId } from '../../../utils/storage'
+import { getCurrentUserId } from '../../../utils/user'
 import { ImFriendAddSource } from '../../../utils/constants'
 import { getGenderColor, getGenderIcon } from '../../../utils/user'
 import { getSimpleUserListByNickname, type UserVO } from '@/api/system/user'
@@ -264,15 +264,15 @@ async function handleSubmitApply() {
   }
   submitting.value = true
   try {
-    const requestId = await friendStore.applyFriend({
+    const requestId = await friendStore.applyFriendRequest({
       toUserId: targetUser.value.id,
       applyContent: applyContent.value.trim() || undefined,
       displayName: displayName.value.trim() || undefined,
       addSource: addSource.value
     })
-    // silent 分支（已是单向好友被静默重启）：主动 loadFriendInfo 入库，不依赖 WS FRIEND_ADD 推送，避免丢推时列表看不到
+    // silent 分支（已是单向好友被静默重启）：主动 fetchFriendInfo 入库，不依赖 WS FRIEND_ADD 推送，避免丢推时列表看不到
     if (requestId === null) {
-      await friendStore.loadFriendInfo(targetUser.value.id)
+      await friendStore.fetchFriendInfo(targetUser.value.id)
     }
     message.success(requestId ? '申请已发送，等待对方验证' : '已添加为好友')
     visible.value = false

@@ -6,7 +6,7 @@ import {
   ImMessageType,
   type ImConversationTypeValue
 } from './constants'
-import { getCurrentUserId } from './storage'
+import { getCurrentUserId } from './user'
 import { formatCallDuration } from './time'
 import { useFriendStore } from '../home/store/friendStore'
 import { useGroupStore } from '../home/store/groupStore'

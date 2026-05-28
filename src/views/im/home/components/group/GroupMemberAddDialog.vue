@@ -84,7 +84,7 @@ const members = computed<GroupMemberLite[]>(() => {
 })
 
 /** 全量好友：直接复用 friendStore Lite 视图 */
-const friends = computed(() => friendStore.getActiveFriendsLite)
+const friends = computed(() => friendStore.getActiveFriendLiteList)
 
 /** 已在群里的好友 id：传给 Panel 的 disabledIds 置灰 + 不计入已选 */
 const disabledIds = computed<number[]>(() =>

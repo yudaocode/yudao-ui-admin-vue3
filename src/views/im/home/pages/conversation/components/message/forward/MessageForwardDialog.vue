@@ -227,13 +227,13 @@ const confirmButtonText = computed(() =>
 
 /** 候选会话：从 store 拿排序后的列表（转发回原会话也允许，与微信一致）；公众号 / 频道单向消息不接受转发，从候选里剔除 */
 const candidateConversations = computed<Conversation[]>(() =>
-  conversationStore.getSortedConversations.filter(
+  conversationStore.getSortedConversationList.filter(
     (conversation) => conversation.type !== ImConversationType.CHANNEL
   )
 )
 
 /** 好友视图候选列表：直接复用 friendStore Lite 视图 */
-const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendsLite)
+const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendLiteList)
 
 /** 切到好友视图：清掉之前在会话视图输入的留言，避免在不可见输入框里把留言静默发到新群 */
 function handleSwitchToContact() {
@@ -341,7 +341,7 @@ async function handleSend() {
     const results = await Promise.all(tasks)
     const failedNames = results.filter((r) => !r.ok).map((r) => r.target.name || '未命名会话')
     // 命中的目标统一推到最近转发列表（部分失败也推：用户的"意图"已表达）
-    conversationStore.pushRecentForwardConversationKeys(targets.map((c) => getConversationKey(c)))
+    conversationStore.pushRecentForwardConversationKeyList(targets.map((c) => getConversationKey(c)))
     if (failedNames.length === 0) {
       message.success('已转发')
     } else if (failedNames.length === targets.length) {
@@ -387,7 +387,7 @@ async function handleCreateGroupAndSend() {
     if (!group?.id) {
       throw new Error('创建群失败：未返回群编号')
     }
-    // upsert 进 groupStore，省一次 fetchGroups
+    // upsert 进 groupStore，省一次 fetchGroupList
     groupStore.upsertGroup({
       id: group.id,
       name: group.name,
@@ -411,7 +411,7 @@ async function handleCreateGroupAndSend() {
       if (leaveText) {
         await send(leaveText, { conversation: newConversation })
       }
-      conversationStore.pushRecentForwardConversationKeys([getConversationKey(newConversation)])
+      conversationStore.pushRecentForwardConversationKeyList([getConversationKey(newConversation)])
       message.success('已创建群聊并转发')
     } else {
       message.warning('群已创建，但消息转发失败，请稍后在群里重试')

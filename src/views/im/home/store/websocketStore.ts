@@ -506,7 +506,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       // 未知对端（陌生人加好友前先收到消息等场景）：异步补拉一次，下次再渲染就有 name/avatar
       const friend = friendStore.getFriend(peerId)
       if (!friend) {
-        friendStore.loadFriendInfo(peerId).catch(() => undefined)
+        friendStore.fetchFriendInfo(peerId).catch(() => undefined)
       }
       // 会话标题永远跟「对端」走（不管谁发的消息）；这里只算一次给 insertMessage 用
       const peerDisplayName = friend ? getFriendDisplayName(friend) : ''
@@ -544,9 +544,9 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         if (isActive) {
           // 聊天窗口打开 = 实际看到了：本端清未读；私聊已读开启时再上报后端，让对方 UI 立刻切到"已读"
           // 已读位置直接用刚到的消息 id（这条就是当前会话最大 id）
-          conversationStore.markConversationAsRead(ImConversationType.PRIVATE, peerId)
+          conversationStore.markConversationRead(ImConversationType.PRIVATE, peerId)
           if (conversation) {
-            useMessageStore().markConversationMessagesRead(conversation)
+            useMessageStore().markConversationMessageListRead(conversation)
           }
           if (MESSAGE_PRIVATE_READ_ENABLED) {
             apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
@@ -566,7 +566,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         return
       }
       const conversationStore = useConversationStore()
-      conversationStore.markConversationAsRead(
+      conversationStore.markConversationRead(
         ImConversationType.PRIVATE,
         websocketMessage.receiverId
       )
@@ -672,12 +672,12 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationStore.activeConversation?.targetId === websocketMessage.groupId
         if (isActive) {
           // 群已读上报需要带 messageId（群消息以"读到第几条"的游标为准，区别于私聊只标 receiverId）；群已读关闭时仅本地清零
-          conversationStore.markConversationAsRead(
+          conversationStore.markConversationRead(
             ImConversationType.GROUP,
             websocketMessage.groupId
           )
           if (conversation) {
-            useMessageStore().markConversationMessagesRead(conversation)
+            useMessageStore().markConversationMessageListRead(conversation)
           }
           if (MESSAGE_GROUP_READ_ENABLED) {
             apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id).catch((e) => {
@@ -699,7 +699,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         return
       }
       const conversationStore = useConversationStore()
-      conversationStore.markConversationAsRead(ImConversationType.GROUP, websocketMessage.groupId)
+      conversationStore.markConversationRead(ImConversationType.GROUP, websocketMessage.groupId)
     },
 
     /** 群聊 RECEIPT：更新某条群消息的 readCount / receiptStatus；群已读关闭时兜底忽略 */
@@ -796,11 +796,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const groupRequestStore = useGroupRequestStore()
       switch (websocketMessage.type) {
         case ImMessageType.GROUP_REQUEST_RECEIVED:
-          groupRequestStore.addByRequestId(payload.requestId).catch(() => undefined)
+          groupRequestStore.addGroupRequestById(payload.requestId).catch(() => undefined)
           break
         case ImMessageType.GROUP_REQUEST_APPROVED:
         case ImMessageType.GROUP_REQUEST_REJECTED:
-          groupRequestStore.removeByRequestId(payload.requestId)
+          groupRequestStore.removeGroupRequestById(payload.requestId)
           break
         default:
           break
@@ -812,7 +812,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
     /**
      * GROUP_MEMBER_SETTING_UPDATE：多端同步成员个人设置变更（silent / groupRemark）
      *
-     * payload 携带变更字段，按非 null 字段直接局部更新；省一次 fetchGroupMembers 接口
+     * payload 携带变更字段，按非 null 字段直接局部更新；省一次 fetchGroupMemberList 接口
      */
     handleGroupMemberSettingUpdate(websocketMessage: ImGroupMessageDTO) {
       // content 解析失败由外层 dispatchGroupFrame 的 try-catch 兜底（含 websocketMessage 打印），不重复 catch

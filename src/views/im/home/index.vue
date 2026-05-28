@@ -45,8 +45,7 @@ import { useMessagePuller } from './composables/useMessagePuller'
 import { useMessageSender } from './composables/useMessageSender'
 import { useVoicePlayer } from './composables/useVoicePlayer'
 import { ImConversationType } from '../utils/constants'
-import { StorageKeys } from '../utils/storage'
-import { initDb, stopRequests } from '../utils/db'
+import { initDb, stopRequests, StorageKeys } from '../utils/db'
 import type { Conversation } from './types'
 import ToolBar from './components/ToolBar.vue'
 import UserInfoCard from './components/user/UserInfoCard.vue'
@@ -73,44 +72,44 @@ const voicePlayer = useVoicePlayer()
 /** 初始化：先吃本地缓存让首屏立即渲染，再远端刷新最新数据，最后建实时通信拉离线消息 */
 onMounted(async () => {
   // 0.1 系统表情包后台预拉：独立链路与首屏 IDB / 远端拉取并发，消除表情面板首次展开白屏；失败仅记日志，不阻塞主流程
-  void faceStore.ensureFacePacks().catch((e) => console.warn('[IM] 后台预拉表情包失败', e))
-  // 0.2 我管理的群下未处理加群申请：会话列表全局入口 / 群顶部横幅都从这份 store 派生；后台拉，不阻断
-  void groupRequestStore
-    .fetchUnhandledList()
-    .catch((e) => console.warn('[IM] 拉取未处理加群申请失败', e))
-
+  void faceStore.ensureFacePackList().catch((e) => console.warn('[IM] 后台预拉表情包失败', e))
   // 1.1 整段 loading=true 阻断会话列表抖动写盘 + WebSocket 普通消息进缓冲，避免 connect 到 pullOnce 之间收到的实时消息推进 maxId 导致 pull 跳过断线积压消息
   conversationStore.loading = true
   try {
     // 1.2 打开当前用户 IM DB
     await initDb()
-    // 1.3 五个 store 并发从 IDB 读取本地缓存（loadConversations / loadMessageCursors 返回 void；load{Friends,Groups,Channels} 返回是否命中缓存）
+    // 1.3 多个 store 并发从 IDB 读取本地缓存
     const [, , hasCachedFriends, hasCachedGroups, hasCachedChannels] = await Promise.all([
-      conversationStore.loadConversations(),
-      messageStore.loadMessageCursors(),
-      friendStore.loadFriends(),
-      groupStore.loadGroups(),
-      channelStore.loadChannels()
+      conversationStore.loadConversationList(),
+      messageStore.loadMessageCursorList(),
+      friendStore.loadFriendData(),
+      groupStore.loadGroupList(),
+      channelStore.loadChannelList(),
+      groupRequestStore.loadGroupRequestList()
     ])
+    // 1.4 我管理的群下未处理加群申请后台刷新
+    void groupRequestStore
+      .fetchUnhandledGroupRequestList()
+      .catch((e) => console.warn('[IM] 拉取未处理加群申请失败', e))
 
     // 2.1 有缓存：异步背景刷新，失败仅记日志（IDB 数据已经够撑首屏，pullOnce 也能正常入库）
     // 2.2 无缓存（首登 / 切账号回切）：必须 await + 失败抛出中断本轮 onMounted，
     //     否则 pullOnce 会用 senderId 数字给会话起名落到 IDB 后续基本无法自愈；无缓存分支两个 fetch 并发 Promise.all 省一个 RTT
     const requiredFetches: Promise<unknown>[] = []
     if (hasCachedFriends) {
-      void friendStore.fetchFriends().catch((e) => console.warn('[IM] 后台刷好友失败', e))
+      void friendStore.fetchFriendList().catch((e) => console.warn('[IM] 后台刷好友失败', e))
     } else {
-      requiredFetches.push(friendStore.fetchFriends())
+      requiredFetches.push(friendStore.fetchFriendList())
     }
     if (hasCachedGroups) {
-      void groupStore.fetchGroups().catch((e) => console.warn('[IM] 后台刷群列表失败', e))
+      void groupStore.fetchGroupList().catch((e) => console.warn('[IM] 后台刷群列表失败', e))
     } else {
-      requiredFetches.push(groupStore.fetchGroups())
+      requiredFetches.push(groupStore.fetchGroupList())
     }
     if (hasCachedChannels) {
-      void channelStore.fetchChannels().catch((e) => console.warn('[IM] 后台刷频道列表失败', e))
+      void channelStore.fetchChannelList().catch((e) => console.warn('[IM] 后台刷频道列表失败', e))
     } else {
-      requiredFetches.push(channelStore.fetchChannels())
+      requiredFetches.push(channelStore.fetchChannelList())
     }
     if (requiredFetches.length > 0) {
       await Promise.all(requiredFetches)
@@ -121,7 +120,7 @@ onMounted(async () => {
     await pullOnce()
 
     // 4. 默认选中第一个会话；若置顶分组处于折叠态，需跳过被折叠隐藏的置顶项，避免自动展开折叠
-    const sorted = conversationStore.getSortedConversations
+    const sorted = conversationStore.getSortedConversationList
     const firstVisible = pickFirstVisibleConversation(sorted)
     if (firstVisible && !conversationStore.activeConversation) {
       conversationStore.setActiveConversation(firstVisible)
@@ -143,7 +142,8 @@ function pickFirstVisibleConversation(sorted: Conversation[]): Conversation | un
   if (sorted.length === 0) {
     return undefined
   }
-  const pinnedExpanded = localStorage.getItem(StorageKeys.conversationPinnedExpanded) === 'true'
+  const pinnedExpanded =
+    localStorage.getItem(StorageKeys.localStorage.conversationPinnedExpanded) === 'true'
   if (pinnedExpanded) {
     return sorted[0]
   }
@@ -152,16 +152,16 @@ function pickFirstVisibleConversation(sorted: Conversation[]): Conversation | un
 
 /** 标签关闭前 flush 草稿队列；debounce 默认 trail-edge 触发，最后一次输入可能还压在队列里 */
 function onBeforeUnload() {
-  conversationStore.flushDraftSave()
+  conversationStore.flushConversationDraftSave()
 }
 window.addEventListener('beforeunload', onBeforeUnload)
 
-/** 离开 IM 主壳：取消在飞的 pull（防止旧响应写新 session）+ 主动断 WebSocket + flush 草稿 + 表情缓存 reset + 解绑 unload + 停语音 */
+/** 离开 IM 主壳：取消在飞的 pull + 主动断 WebSocket + flush 草稿 + 清空表情缓存 + 解绑 unload + 停语音 */
 onUnmounted(() => {
   cancelPull()
   webSocketStore.disconnect()
-  conversationStore.flushDraftSave()
-  faceStore.reset()
+  conversationStore.flushConversationDraftSave()
+  faceStore.clear()
   // 模块级单例 audio 不会随视图卸载自动停，主动停掉避免切路由后语音继续响
   voicePlayer.stop()
   window.removeEventListener('beforeunload', onBeforeUnload)
@@ -200,7 +200,7 @@ watch(
  * 一并监听 route.fullPath，IM 子路由切换（消息 / 通讯录）也能重新加上前缀
  */
 watch(
-  [() => conversationStore.getTotalUnread, () => route.fullPath],
+  [() => conversationStore.getTotalUnreadCount, () => route.fullPath],
   ([count]) => {
     nextTick(() => {
       const base = appStore.getTitle

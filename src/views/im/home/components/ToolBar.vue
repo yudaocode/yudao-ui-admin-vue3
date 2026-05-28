@@ -76,7 +76,7 @@ const conversationStore = useConversationStore()
 const friendStore = useFriendStore()
 const uiStore = useImUiStore()
 
-const totalUnread = computed(() => conversationStore.getTotalUnread) // 消息 Tab 的红点：所有非免打扰会话的未读总和
+const totalUnread = computed(() => conversationStore.getTotalUnreadCount) // 消息 Tab 的红点：所有非免打扰会话的未读总和
 const unhandledRequestCount = computed(() => friendStore.getUnhandledRequestCount) // 通讯录 Tab 的红点：未处理好友申请数（接收方=我）
 
 const tabs = [

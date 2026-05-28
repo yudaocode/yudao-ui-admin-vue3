@@ -28,7 +28,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { useGroupStore } from '../../store/groupStore'
-import { getCurrentUserId } from '@/views/im/utils/storage'
+import { getCurrentUserId } from '@/views/im/utils/user'
 import GroupMemberPickerPanel from '../picker/GroupMemberPickerPanel.vue'
 import type { GroupMemberLite } from '../group/GroupMember.vue'
 

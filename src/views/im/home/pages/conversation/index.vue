@@ -2,7 +2,7 @@
   <!-- 消息 Tab：左侧会话列表 + 右侧聊天面板 -->
   <div class="flex flex-1 min-w-0 h-full">
     <!-- 左侧会话列表（可拖拽宽度） -->
-    <ResizableAside :default-width="260" :storage-key="StorageKeys.asideWidth">
+    <ResizableAside :default-width="260" :storage-key="StorageKeys.localStorage.asideWidth">
       <!-- 顶部：搜索框 + "+" 号下拉（对齐微信 PC：发起群聊 / 添加朋友）；h-14 与右侧 MessagePanel 头部对齐 -->
       <div
         class="flex flex-shrink-0 gap-2 items-center h-14 px-4 border-b border-b-solid border-[var(--el-border-color-lighter)]"
@@ -101,8 +101,8 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useConversationStore } from '../../store/conversationStore'
 import { useGroupStore } from '../../store/groupStore'
 import { useImUiStore } from '../../store/uiStore'
-import { StorageKeys } from '../../../utils/storage'
 import { ImConversationType } from '../../../utils/constants'
+import { StorageKeys } from '../../../utils/db'
 import { filterConversationsByKeyword, getConversationKey } from '../../../utils/conversation'
 import type { Conversation } from '../../types'
 import ResizableAside from '../../components/ResizableAside.vue'
@@ -121,7 +121,7 @@ const uiStore = useImUiStore()
 
 const keyword = ref('')
 
-const sortedConversations = computed(() => conversationStore.getSortedConversations)
+const sortedConversations = computed(() => conversationStore.getSortedConversationList)
 
 /** 顶部搜索框过滤会话：只按 name 模糊匹配，避免命中 lastContent 等次要字段干扰 */
 const filteredConversations = computed(() =>
@@ -135,13 +135,16 @@ const PINNED_FOLD_THRESHOLD = 3
 
 /** 置顶折叠展开态：localStorage 持久化，刷新后保留用户上次的选择，对齐微信 */
 const pinnedExpanded = ref(
-  localStorage.getItem(StorageKeys.conversationPinnedExpanded) === 'true'
+  localStorage.getItem(StorageKeys.localStorage.conversationPinnedExpanded) === 'true'
 )
 
 /** toggle + 写盘 */
 function togglePinnedExpanded() {
   pinnedExpanded.value = !pinnedExpanded.value
-  localStorage.setItem(StorageKeys.conversationPinnedExpanded, String(pinnedExpanded.value))
+  localStorage.setItem(
+    StorageKeys.localStorage.conversationPinnedExpanded,
+    String(pinnedExpanded.value)
+  )
 }
 
 /** 置顶会话：单独切片，给折叠头计数 + 折叠区渲染用 */

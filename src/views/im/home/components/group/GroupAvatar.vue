@@ -113,7 +113,7 @@ watch(
     if (!signature) {
       mergeToken++
       mergedUrl.value = ''
-      groupStore.loadGroupMembers(groupId)
+      groupStore.loadGroupMemberList(groupId)
       return
     }
     const targetSize = getTargetSize(size)

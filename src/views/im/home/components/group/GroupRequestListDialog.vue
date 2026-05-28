@@ -273,7 +273,7 @@ async function handleAgree(item: ImGroupRequestRespVO) {
   if (actingId.value !== null) return
   actingId.value = item.id
   try {
-    await groupRequestStore.agreeRequest(item.id)
+    await groupRequestStore.agreeGroupRequest(item.id)
     updateLocalResult(item.id, ImGroupRequestHandleResult.AGREED)
     message.success('已同意')
   } finally {
@@ -293,7 +293,7 @@ async function handleRefuse(item: ImGroupRequestRespVO) {
   }
   actingId.value = item.id
   try {
-    await groupRequestStore.refuseRequest(item.id, handleContent || undefined)
+    await groupRequestStore.refuseGroupRequest(item.id, handleContent || undefined)
     updateLocalResult(item.id, ImGroupRequestHandleResult.REFUSED)
     message.success('已拒绝')
   } finally {

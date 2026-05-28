@@ -104,9 +104,6 @@ importers:
       livekit-client:
         specifier: ^2.18.9
         version: 2.18.9(@types/dom-mediacapture-record@1.0.22)
-      localforage:
-        specifier: ^1.10.0
-        version: 1.10.0
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -3552,9 +3549,6 @@ packages:
     resolution: {integrity: sha512-InwqeHHN2XpumIkMvpl/DCJVrAHgCsG5+cn1XlnLWGwtZBm8QJfSusItfrwx81CTp5agNZqpKU2J/ccC5nGT4A==}
     engines: {node: '>= 4'}
 
-  immediate@3.0.6:
-    resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==, tarball: https://registry.npmmirror.com/immediate/-/immediate-3.0.6.tgz}
-
   immer@9.0.21:
     resolution: {integrity: sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==}
 
@@ -3785,9 +3779,6 @@ packages:
   lezer-feel@1.4.0:
     resolution: {integrity: sha512-kNxG7O38gwpuYy+C3JCRxQNTCE2qu9uTuH5dE3EGVnRhIQMe6rPDz0S8t3urLEOsMud6HI795m6zX2ujfUaqTw==, tarball: https://registry.npmmirror.com/lezer-feel/-/lezer-feel-1.4.0.tgz}
 
-  lie@3.1.1:
-    resolution: {integrity: sha512-RiNhHysUjhrDQntfYSfY4MU24coXXdEOgw9WGcKHNeEwffDYbF//u87M1EWaMGzuFoSbqW0C9C6lEEhDOAswfw==, tarball: https://registry.npmmirror.com/lie/-/lie-3.1.1.tgz}
-
   lilconfig@3.1.2:
     resolution: {integrity: sha512-eop+wDAvpItUys0FWkHIKeC9ybYrTGbU41U5K7+bttZZeohvnY7M9dZ5kB21GNWiFT2q1OoPTvncPCgSOVO5ow==}
     engines: {node: '>=14'}
@@ -3819,9 +3810,6 @@ packages:
   local-pkg@0.5.1:
     resolution: {integrity: sha512-9rrA30MRRP3gBD3HTGnC6cDFpaE1kVDWxWgqWJUN0RvDNAo+Nz/9GxB+nHOH0ifbVFy0hSA1V6vFDvnx54lTEQ==}
     engines: {node: '>=14'}
-
-  localforage@1.10.0:
-    resolution: {integrity: sha512-14/H1aX7hzBBmmh7sGPd+AOMkkIrHM3Z1PAyGgZigA1H1p5O5ANnMyWzvpAETtG68/dC4pC0ncy3+PPGzXZHPg==, tarball: https://registry.npmmirror.com/localforage/-/localforage-1.10.0.tgz}
 
   locate-path@5.0.0:
     resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
@@ -8993,8 +8981,6 @@ snapshots:
 
   ignore@6.0.2: {}
 
-  immediate@3.0.6: {}
-
   immer@9.0.21: {}
 
   immutable@5.0.3: {}
@@ -9188,10 +9174,6 @@ snapshots:
       '@lezer/lr': 1.4.2
       min-dash: 4.2.2
 
-  lie@3.1.1:
-    dependencies:
-      immediate: 3.0.6
-
   lilconfig@3.1.2: {}
 
   lines-and-columns@1.2.4: {}
@@ -9243,10 +9225,6 @@ snapshots:
     dependencies:
       mlly: 1.7.3
       pkg-types: 1.2.1
-
-  localforage@1.10.0:
-    dependencies:
-      lie: 3.1.1
 
   locate-path@5.0.0:
     dependencies:

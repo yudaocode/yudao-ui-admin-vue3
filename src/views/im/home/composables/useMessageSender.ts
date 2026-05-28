@@ -224,8 +224,8 @@ export const useMessageSender = () => {
       return
     }
     // 本地标记已读：未读数清零 + 消息状态更新为 READ（UI 立刻响应）
-    conversationStore.markConversationAsRead(conversation.type, conversation.targetId)
-    messageStore.markConversationMessagesRead(conversation)
+    conversationStore.markConversationRead(conversation.type, conversation.targetId)
+    messageStore.markConversationMessageListRead(conversation)
     const maxMessageId = messageStore
       .getMessages(getClientConversationId(conversation.type, conversation.targetId))
       .reduce<number>(

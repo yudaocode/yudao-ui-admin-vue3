@@ -3,7 +3,8 @@ import { store } from '@/store'
 import { getSimpleChannelList, type ImManagerChannelVO } from '@/api/im/manager/channel'
 import { useConversationStore } from './conversationStore'
 import { ImConversationType } from '../../utils/constants'
-import { getCurrentUserId, imStorage, setQuietly, StorageKeys } from '../../utils/storage'
+import { getDb } from '../../utils/db'
+import type { ChannelDO } from '../types'
 
 /**
  * IM 频道 Store
@@ -26,14 +27,10 @@ export const useChannelStore = defineStore('imChannelStore', {
   actions: {
     // ==================== 本地缓存 ====================
 
-    /** 从 IDB 恢复频道列表；命中返回 true 让首屏立刻有真实名 / 头像 */
-    async loadChannels(): Promise<boolean> {
-      const userId = getCurrentUserId()
-      if (!userId) {
-        return false
-      }
+    /** 从 IndexedDB 恢复频道列表 */
+    async loadChannelList(): Promise<boolean> {
       try {
-        const cached = await imStorage.getItem<ImManagerChannelVO[]>(StorageKeys.channels(userId))
+        const cached = await getDb().getAll<ChannelDO>('channels')
         if (!cached || cached.length === 0) {
           return false
         }
@@ -47,17 +44,21 @@ export const useChannelStore = defineStore('imChannelStore', {
 
     /** 保存频道列表 */
     saveChannelList(): void {
-      const userId = getCurrentUserId()
-      if (!userId) {
-        return
-      }
-      setQuietly(StorageKeys.channels(userId), this.channels, '[IM channelStore] 本地频道缓存写入失败')
+      void getDb()
+        .transaction(['channels'], 'readwrite', async (tx) => {
+          const db = getDb()
+          await db.clearStore('channels', tx)
+          for (const channel of this.channels) {
+            await db.put('channels', channel, tx)
+          }
+        })
+        .catch((e) => console.warn('[IM channelStore] 本地频道缓存写入失败', e))
     },
 
     // ==================== 远端拉取 ====================
 
     /** 拉取启用的频道精简列表；成功后回填会话列表已有的频道 name / avatar，覆盖 IDB 旧占位 */
-    async fetchChannels(force = false) {
+    async fetchChannelList(force = false) {
       if (this.loaded && !force) {
         return
       }
@@ -67,7 +68,7 @@ export const useChannelStore = defineStore('imChannelStore', {
         this.syncChannelConversationMetadata()
         this.saveChannelList()
       } catch (e) {
-        console.warn('[IM channelStore] fetchChannels 失败', e)
+        console.warn('[IM channelStore] fetchChannelList 失败', e)
       }
     },
 

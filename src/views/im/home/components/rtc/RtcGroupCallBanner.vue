@@ -70,7 +70,7 @@ import { useRtcStore } from '../../store/rtcStore'
 import { useGroupCallMembers } from '../../composables/useGroupCallMembers'
 import { joinCall, getActiveCall } from '@/api/im/rtc'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
-import { getCurrentUserId } from '@/views/im/utils/storage'
+import { getCurrentUserId } from '@/views/im/utils/user'
 
 const props = defineProps<{
   groupId: number

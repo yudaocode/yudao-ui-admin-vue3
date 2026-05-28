@@ -28,18 +28,18 @@ export const useFaceStore = defineStore('imFace', () => {
   /** 个人表情包列表（用户长按「添加到表情」/ 上传产生） */
   const faceUserItems = ref<ImFaceUserItemVO[]>([])
 
-  /** reset() 时递增；旧账号那次还没返回的请求 resolve 后比对一致才写 store，防跨账号数据泄漏 */
+  /** clear() 时递增；旧账号请求返回后不写入新账号内存 */
   let storeEpoch = 0
 
   /**
-   * 系统表情包拉取 promise；ensureFacePacks 内 cache：
+   * 系统表情包拉取 promise；ensureFacePackList 内 cache：
    * - null = 还没拉过，下次调用真发请求
    * - resolve 后保留对象 = 后续调用 await 立即返回，不再发请求
    * - reject 后置回 null，让调用方下次重试
    */
   let facePacksPromise: Promise<void> | null = null
   /** 按需拉取系统表情包（已拉过则直接复用 cached promise） */
-  async function ensureFacePacks(): Promise<void> {
+  async function ensureFacePackList(): Promise<void> {
     if (!facePacksPromise) {
       const requestEpoch = storeEpoch
       facePacksPromise = apiGetFacePackList()
@@ -63,7 +63,7 @@ export const useFaceStore = defineStore('imFace', () => {
   /** 个人表情拉取 promise；语义同上 */
   let faceUserItemsPromise: Promise<void> | null = null
   /** 按需拉取个人表情（已拉过则直接复用 cached promise） */
-  async function ensureFaceUserItems(): Promise<void> {
+  async function ensureFaceUserItemList(): Promise<void> {
     if (!faceUserItemsPromise) {
       const requestEpoch = storeEpoch
       faceUserItemsPromise = apiGetFaceUserItemList()
@@ -95,7 +95,7 @@ export const useFaceStore = defineStore('imFace', () => {
     if (!id) {
       return false
     }
-    // reset 已切账号：旧请求拿到的 id 不能再 unshift 进新账号内存
+    // 已切账号时跳过旧请求结果
     if (requestEpoch !== storeEpoch) {
       return false
     }
@@ -117,7 +117,7 @@ export const useFaceStore = defineStore('imFace', () => {
     const requestEpoch = storeEpoch
     try {
       await apiDeleteFaceUserItem(id)
-      // reset 已切账号：不要再 filter 新账号列表
+      // 已切账号时跳过旧请求结果
       if (requestEpoch !== storeEpoch) {
         return false
       }
@@ -129,8 +129,8 @@ export const useFaceStore = defineStore('imFace', () => {
     }
   }
 
-  /** 切账号 / 退出 IM 时清空缓存，避免下个用户看到上一用户的个人表情 */
-  function reset(): void {
+  /** 清空表情缓存 */
+  function clear(): void {
     facePacks.value = []
     faceUserItems.value = []
     facePacksPromise = null
@@ -141,11 +141,11 @@ export const useFaceStore = defineStore('imFace', () => {
   return {
     facePacks,
     faceUserItems,
-    ensureFacePacks,
-    ensureFaceUserItems,
+    ensureFacePackList,
+    ensureFaceUserItemList,
     addFaceUserItem,
     removeFaceUserItem,
-    reset
+    clear
   }
 })
 

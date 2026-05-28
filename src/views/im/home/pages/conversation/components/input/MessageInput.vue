@@ -46,7 +46,7 @@
         :quote="replyTarget"
         closable
         class="mx-3 mb-1.5"
-        @close="clearReplyDraft"
+        @close="clearConversationReplyDraft"
       />
 
       <!--
@@ -261,11 +261,11 @@ function syncDraftToStore(editor: HTMLDivElement) {
   if (!conversation) {
     return
   }
-  // collectFromEditor 已 trim，plain 为空时 store 内部按 clearDraft 处理
-  // reply 透传当前快照：setDraft 是整对象替换，不读旧 reply 会让用户每敲一个键就把引用条擦掉
+  // collectFromEditor 已 trim，plain 为空时 store 内部按 clearConversationDraft 处理
+  // reply 透传当前快照：setConversationDraft 是整对象替换，不读旧 reply 会让用户每敲一个键就把引用条擦掉
   const { text } = collectFromEditor(editor)
-  const existing = conversationStore.getDraft(conversation)
-  conversationStore.setDraft(conversation, {
+  const existing = conversationStore.getConversationDraft(conversation)
+  conversationStore.setConversationDraft(conversation, {
     html: editor.innerHTML,
     plain: text,
     reply: existing?.reply
@@ -279,7 +279,7 @@ function restoreDraftToEditor() {
     return
   }
   const conversation = conversationStore.activeConversation
-  const draft = conversation ? conversationStore.getDraft(conversation) : undefined
+  const draft = conversation ? conversationStore.getConversationDraft(conversation) : undefined
   editor.innerHTML = draft?.html || ''
   applyEditorUiState(editor)
   // 把光标移到末尾，让用户接着输入；空内容直接 focus 即可
@@ -365,7 +365,7 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
  * 3. 二次防御：collectFromEditor 走 trim，可能比 syncEditorState 更严格（例如全 ZWSP），仍空就 return
  * 4. 清空 + 同步状态：先清 innerHTML 再 syncEditorState 让 placeholder / canSend 一起回归
  *    （顺序很重要：先清后 sync，否则 sync 看到旧内容会误判）
- * 5. 上送：atUserIds 非空才传，避免发空数组；quote 由 clearDraft 前抓取,确保引用条立即消失
+   * 5. 上送：atUserIds 非空才传，避免发空数组；quote 由 clearConversationDraft 前抓取，确保引用条立即消失
  */
 async function handleSend(options?: { receipt?: boolean }) {
   const editor = editorRef.value
@@ -376,12 +376,12 @@ async function handleSend(options?: { receipt?: boolean }) {
   if (!text) {
     return
   }
-  // 1. 抓 quote 后清空 editor + 当前会话草稿(包含 reply);syncEditorState 后 plain / reply 都为空,
-  //    store 内部会自动清,但显式 clearDraft 能立即同步、不依赖 debounce 时序,列表上的 [草稿] 立即消失
+  // 1. 抓 quote 后清空 editor + 当前会话草稿（包含 reply）；syncEditorState 后 plain / reply 都为空
+  //    store 内部会自动清理，但显式 clearConversationDraft 能立即同步、不依赖 debounce 时序，列表上的 [草稿] 立即消失
   const replyQuote = replyTarget.value
   editor.innerHTML = ''
   if (conversationStore.activeConversation) {
-    conversationStore.clearDraft(conversationStore.activeConversation)
+    conversationStore.clearConversationDraft(conversationStore.activeConversation)
   }
   syncEditorState()
   // 2. 发送
@@ -572,23 +572,23 @@ const replyTarget = computed<QuoteMessage | undefined>(() => {
   if (!conversation) {
     return undefined
   }
-  return conversationStore.getDraft(conversation)?.reply
+  return conversationStore.getConversationDraft(conversation)?.reply
 })
 
 /** 清掉当前 reply 但保留正文草稿：点 × 关闭 / 发送即将进行时调 */
-function clearReplyDraft() {
+function clearConversationReplyDraft() {
   const conversation = conversationStore.activeConversation
   if (!conversation) {
     return
   }
-  conversationStore.clearReplyDraft(conversation)
+  conversationStore.clearConversationReplyDraft(conversation)
 }
 
 /** 取走当前 reply 快照（抓一次清一次），媒体上传链路在动手前统一调它拿 quote */
 function consumeReply(): QuoteMessage | undefined {
   const quote = replyTarget.value
   if (quote) {
-    clearReplyDraft()
+    clearConversationReplyDraft()
   }
   return quote
 }

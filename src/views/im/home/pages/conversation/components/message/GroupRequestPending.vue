@@ -77,7 +77,7 @@ const canManage = computed(
 )
 
 /** 当前群未处理申请数；从 store 派生 */
-const pendingCount = computed(() => groupRequestStore.getUnhandledCountByGroupId(props.groupId))
+const pendingCount = computed(() => groupRequestStore.getUnhandledGroupRequestCount(props.groupId))
 </script>
 
 <style scoped>

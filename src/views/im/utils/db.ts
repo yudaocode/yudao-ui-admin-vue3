@@ -1,6 +1,6 @@
 import { toRaw } from 'vue'
 
-import { getCurrentUserId } from './storage'
+import { getCurrentUserId } from './user'
 import { ImConversationType } from './constants'
 import type { MessageDO, SettingDO } from '../home/types'
 
@@ -18,6 +18,26 @@ export type DbStoreName =
   | 'settings'
 
 export type DbTransaction = IDBTransaction
+
+/** IM 本地存储 key */
+export const StorageKeys = {
+  localStorage: {
+    /** 侧边栏宽度，三个 Tab 共用一份记忆 */
+    asideWidth: 'im:aside',
+    /** 会话列表置顶折叠展开态 */
+    conversationPinnedExpanded: 'im:conversation:pinnedExpanded'
+  },
+  settings: {
+    /** 私聊消息拉取游标 */
+    privateMessageMaxId: 'privateMessageMaxId',
+    /** 群聊消息拉取游标 */
+    groupMessageMaxId: 'groupMessageMaxId',
+    /** 频道消息拉取游标 */
+    channelMessageMaxId: 'channelMessageMaxId',
+    /** 最近转发会话 key 列表 */
+    recentForwardConversationKeys: 'recentForwardConversationKeys'
+  }
+} as const
 
 let currentDb: IDBDatabase | null = null
 let currentUserId: number | null = null
@@ -243,6 +263,15 @@ class DbClient {
     )
   }
 
+  /** 清空 store 记录 */
+  async clearStore(storeName: DbStoreName, tx?: DbTransaction): Promise<void> {
+    if (tx) {
+      await requestToPromise(tx.objectStore(storeName).clear())
+      return
+    }
+    await this.transaction([storeName], 'readwrite', (tx) => this.clearStore(storeName, tx))
+  }
+
   /** 按索引删除记录 */
   async deleteByIndex(
     storeName: DbStoreName,
@@ -422,13 +451,13 @@ export async function setMessageMaxId(
   let key: string
   switch (conversationType) {
     case ImConversationType.PRIVATE:
-      key = 'privateMessageMaxId'
+      key = StorageKeys.settings.privateMessageMaxId
       break
     case ImConversationType.GROUP:
-      key = 'groupMessageMaxId'
+      key = StorageKeys.settings.groupMessageMaxId
       break
     case ImConversationType.CHANNEL:
-      key = 'channelMessageMaxId'
+      key = StorageKeys.settings.channelMessageMaxId
       break
     default:
       throw new Error(`未知 IM 会话类型：${conversationType}`)
@@ -442,6 +471,7 @@ export async function setMessageMaxId(
 
 /** 停止当前 IM DB session */
 export async function stopRequests(): Promise<void> {
+  currentSession++
   const [
     { useMessageStoreWithOut },
     { useConversationStoreWithOut },
@@ -459,13 +489,12 @@ export async function stopRequests(): Promise<void> {
     import('../home/store/groupRequestStore'),
     import('../home/store/faceStore')
   ])
-  currentSession++
   useMessageStoreWithOut().clear()
   useConversationStoreWithOut().clear()
   useFriendStoreWithOut().clear()
   useGroupStoreWithOut().clear()
   useChannelStoreWithOut().clear()
-  useGroupRequestStoreWithOut().reset()
-  useFaceStoreWithOut().reset()
+  useGroupRequestStoreWithOut().clear()
+  useFaceStoreWithOut().clear()
   closeDbConnection()
 }

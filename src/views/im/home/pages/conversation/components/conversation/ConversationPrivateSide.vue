@@ -207,7 +207,7 @@ async function handleSaveDisplayName() {
   if (!props.friend) {
     return
   }
-  await friendStore.setDisplayName(props.friend.friendUserId, editDisplayName.value)
+  await friendStore.setFriendDisplayName(props.friend.friendUserId, editDisplayName.value)
   displayNamePopoverVisible.value = false
   message.success('保存成功')
 }
@@ -221,13 +221,13 @@ function handleMutedChange(value: boolean | string | number) {
   }
   const next = !!value
   const { type, targetId } = props.conversation
-  conversationStore.setSilent(type, targetId, next)
+  conversationStore.setConversationSilent(type, targetId, next)
   if (type !== ImConversationType.PRIVATE) {
     return
   }
-  friendStore.setSilent(targetId, next).catch((error) => {
+  friendStore.setFriendSilent(targetId, next).catch((error) => {
     console.error('[IM ConversationPrivateSide] 切换免打扰失败', { targetId }, error)
-    conversationStore.setSilent(type, targetId, !next)
+    conversationStore.setConversationSilent(type, targetId, !next)
   })
 }
 
@@ -236,7 +236,7 @@ function handleTopChange(value: boolean | string | number) {
   if (!props.conversation) {
     return
   }
-  conversationStore.setTop(props.conversation.type, props.conversation.targetId, !!value)
+  conversationStore.setConversationTop(props.conversation.type, props.conversation.targetId, !!value)
 }
 
 /** 群创建成功：跳到新群会话 + 关掉本侧抽屉，让用户专注新群 */

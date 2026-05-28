@@ -3,7 +3,7 @@
     用户名片浮层
     - 仅承担"浮层定位 + 关闭逻辑（点遮罩 / Esc）"，名片视觉走 <UserInfo>，与 contact 详情共用一份组件
     - 触发：useImUiStore.openUserInfoCard(user, position)；本组件订阅 store，全局只挂一份实例
-    - 关系态由 isSelf / isFriend 派生 relation prop 透到 UserInfo；删除 / 加好友 / 备注落库都在 UserInfo 内闭环
+    - 关系态由 isSelf / isActiveFriend 派生 relation prop 透到 UserInfo；删除 / 加好友 / 备注落库都在 UserInfo 内闭环
   -->
   <teleport to="body">
     <div v-if="card.show" class="fixed inset-0 z-9998" @click.self="handleClose">
@@ -54,11 +54,11 @@ const isSelf = computed(() => {
   const myId = Number(userStore.getUser?.id) || 0
   return !!user.value?.id && user.value.id === myId
 })
-const isFriend = computed(() => {
+const isActiveFriend = computed(() => {
   if (!user.value?.id || isSelf.value) {
     return false
   }
-  return friendStore.isFriend(user.value.id)
+  return friendStore.isActiveFriend(user.value.id)
 })
 const relation = computed<UserInfoRelation>(() => {
   if (!user.value) {
@@ -67,14 +67,14 @@ const relation = computed<UserInfoRelation>(() => {
   if (isSelf.value) {
     return 'self'
   }
-  if (isFriend.value) {
+  if (isActiveFriend.value) {
     return 'friend'
   }
   return 'stranger'
 })
 
 const remark = computed(() => {
-  if (!isFriend.value || !user.value?.id) {
+  if (!isActiveFriend.value || !user.value?.id) {
     return undefined
   }
   return friendStore.getFriend(user.value.id)?.displayName || ''

@@ -327,7 +327,7 @@ const showNotFriendBanner = computed(() => {
   if (!conversation || conversation.type !== ImConversationType.PRIVATE) {
     return false
   }
-  return !friendStore.isFriend(conversation.targetId)
+  return !friendStore.isActiveFriend(conversation.targetId)
 })
 
 /** 点击「对方还不是你的朋友」胶囊：打开 UserInfoCard，引导用户重新添加 */
@@ -436,13 +436,13 @@ async function ensureGroupData(groupId: number) {
   })
 
   // 先从 IDB 同步加载群成员，让首帧立即出成员名 / 头像
-  await groupStore.loadGroupMembers(groupId).catch((error) => {
-    console.warn('[IM MessagePanel] loadGroupMembers 失败', { groupId }, error)
+  await groupStore.loadGroupMemberList(groupId).catch((error) => {
+    console.warn('[IM MessagePanel] loadGroupMemberList 失败', { groupId }, error)
     return null
   })
   // 再从远程异步拉成员，强刷以跳过 in-memory 缓存，每次进群都能拿到最新成员状态
-  groupStore.fetchGroupMembers(groupId, true).catch((error) => {
-    console.warn('[IM MessagePanel] fetchGroupMembers 失败', { groupId }, error)
+  groupStore.fetchGroupMemberList(groupId, true).catch((error) => {
+    console.warn('[IM MessagePanel] fetchGroupMemberList 失败', { groupId }, error)
   })
 }
 
@@ -453,7 +453,7 @@ function reloadGroupData() {
     return
   }
   groupStore.fetchGroupInfo(conversation.targetId)
-  groupStore.fetchGroupMembers(conversation.targetId, true)
+  groupStore.fetchGroupMemberList(conversation.targetId, true)
 }
 
 /** 历史消息抽屉 ref：「聊天历史」icon / 抽屉「查找聊天内容」入口都调 open() 触发 */
@@ -721,7 +721,7 @@ watch(
     // 抽屉里展示的群信息 / 好友信息属于上一会话，切会话时统一关掉
     sideVisible.value = false
     scrollToBottom()
-    // 仅群聊预拉详情 / 成员（私聊对端在首屏 fetchFriends 时就拉了）
+    // 仅群聊预拉详情 / 成员（私聊对端在首屏 fetchFriendList 时就拉了）
     if (targetId && type === ImConversationType.GROUP) {
       ensureGroupData(targetId)
     }

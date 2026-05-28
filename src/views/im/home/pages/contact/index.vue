@@ -6,7 +6,7 @@
     - 本页仅做：选中分发 + 数据源转换 + 跨组件事件落 store
   -->
   <div class="flex flex-1 h-full min-w-0 bg-[var(--el-bg-color)]">
-    <ResizableAside :default-width="260" :storage-key="StorageKeys.asideWidth">
+    <ResizableAside :default-width="260" :storage-key="StorageKeys.localStorage.asideWidth">
       <!-- 顶部：仅搜索框；h-14 与消息 Tab 顶部对齐，避免切换时搜索框上下抖动 -->
       <div
         class="flex flex-shrink-0 items-center h-14 px-4 border-b border-b-solid border-[var(--el-border-color-lighter)]"
@@ -104,7 +104,7 @@ import { useGroupStore } from '../../store/groupStore'
 import { getFriendDisplayName, getGroupDisplayName } from '../../../utils/user'
 import type { FriendLite, FriendRequest, Group, GroupLite, User } from '../../types'
 import { ImConversationType } from '../../../utils/constants'
-import { StorageKeys } from '../../../utils/storage'
+import { StorageKeys } from '../../../utils/db'
 
 defineOptions({ name: 'ImContactPage' })
 
@@ -129,14 +129,14 @@ const currentRequest = computed<FriendRequest>(() => {
   if (!req) {
     return {} as FriendRequest
   }
-  return friendStore.findFriendRequest(req.id) || req
+  return friendStore.getFriendRequest(req.id) || req
 })
 
 /** 我相关的申请列表（用 friendStore 里的实时副本，便于通知到达后自动刷新） */
 const friendRequests = computed<FriendRequest[]>(() => friendStore.friendRequests)
 
 /** 好友列表的展示快照：附带后端算好的拼音，给 FriendList 做字母分桶 / 拼音搜索 */
-const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendsLite)
+const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendLiteList)
 
 const groups = computed<GroupLite[]>(() =>
   groupStore.groups.map((group: Group) => ({
@@ -217,9 +217,9 @@ const friendUser = computed<User | null>(() => {
 
 onMounted(async () => {
   await Promise.all([
-    friendStore.fetchFriends(),
-    friendStore.fetchFriendRequests(),
-    groupStore.fetchGroups()
+    friendStore.fetchFriendList(),
+    friendStore.fetchFriendRequestList(),
+    groupStore.fetchGroupList()
   ])
 })
 

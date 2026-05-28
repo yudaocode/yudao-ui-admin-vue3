@@ -314,8 +314,8 @@ watch(
       document.addEventListener('click', handleDocumentClick)
       if (isFullMode.value) {
         // 系统包通常已被 home onMounted 预拉过；ensureXxx 内部 promise 缓存避免重复请求
-        void faceStore.ensureFacePacks()
-        void faceStore.ensureFaceUserItems()
+        void faceStore.ensureFacePackList()
+        void faceStore.ensureFaceUserItemList()
       }
     } else {
       document.removeEventListener('click', handleDocumentClick)

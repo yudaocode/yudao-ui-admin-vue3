@@ -32,7 +32,7 @@ import {
 } from '../../utils/config'
 import { buildChannelConversationStub } from '../../utils/channel'
 import { generateClientMessageId, getPrivateMessagePeerId } from '../../utils/message'
-import { getCurrentUserId } from '../../utils/storage'
+import { getCurrentUserId } from '../../utils/user'
 import type { Message } from '../types'
 
 /**
@@ -42,7 +42,7 @@ import type { Message } from '../types'
  * 1. 同时拉取私聊 + 群聊，使用各自的 `minId` 游标（privateMessageMaxId / groupMessageMaxId）
  * 2. 后端一次最多返回 size 条；前端按 minId 持续翻页，直到接口返回空列表为止
  * 3. 拉取期间 conversationStore.loading=true：
- *    - conversationStore 跳过 localStorage 持久化，避免频繁写入卡顿
+ *    - conversationStore 跳过批量持久化，避免频繁写入卡顿
  *    - websocketStore 把新来的 WS 普通消息丢进缓冲区，等循环结束后统一回放
  * 4. WebSocket 重连后会再触发一次拉取，补齐断网期间错过的消息
  */
@@ -250,7 +250,7 @@ export const useMessagePuller = () => {
         }
       }
 
-      // 游标推进到本批最大 id，与后端返回顺序无关；无有效 id 直接 break 避免死翻同一批
+      // 游标推进到本批最大消息编号
       const validIds = list.map((message) => message.id).filter((id): id is number => id != null)
       if (validIds.length === 0) {
         await messageStore.applyPulledMessageList(pulledMessages, conversationType)

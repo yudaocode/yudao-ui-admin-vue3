@@ -80,7 +80,7 @@ const members = ref<GroupMemberLite[]>([])
  * 是否已加群：基于"自己确实在成员列表里"判断
  * - 缓存未命中：直接 false（陌生群）
  * - 命中且 members 已拉：精准查 self.userId 在不在
- * - 命中但 members 未拉：fetchGroups 接口语义即「我加入的群」，命中视为 member（拉成员后会自动收敛）
+ * - 命中但 members 未拉：fetchGroupList 接口语义即「我加入的群」，命中视为 member（拉成员后会自动收敛）
  */
 const isMember = computed(() => {
   if (!props.group?.id) {
@@ -117,7 +117,7 @@ watch(
     if (!id || !member) {
       return
     }
-    const list = await groupStore.fetchGroupMembers(id)
+    const list = await groupStore.fetchGroupMemberList(id)
     if (props.group?.id !== id) {
       return
     }

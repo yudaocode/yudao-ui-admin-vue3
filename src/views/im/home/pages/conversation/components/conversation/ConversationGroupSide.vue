@@ -617,10 +617,10 @@ function onMutedChange(value: boolean | string | number) {
   }
   const next = !!value
   const { type, targetId } = props.conversation
-  conversationStore.setSilent(type, targetId, next)
-  groupStore.setSilent(targetId, next).catch((error) => {
-    console.error('[IM ConversationGroupSide] setSilent 失败', { targetId }, error)
-    conversationStore.setSilent(type, targetId, !next)
+  conversationStore.setConversationSilent(type, targetId, next)
+  groupStore.setGroupSilent(targetId, next).catch((error) => {
+    console.error('[IM ConversationGroupSide] setGroupSilent 失败', { targetId }, error)
+    conversationStore.setConversationSilent(type, targetId, !next)
   })
 }
 
@@ -629,7 +629,7 @@ function onTopChange(value: boolean | string | number) {
   if (!props.conversation) {
     return
   }
-  conversationStore.setTop(props.conversation.type, props.conversation.targetId, !!value)
+  conversationStore.setConversationTop(props.conversation.type, props.conversation.targetId, !!value)
 }
 
 // ==================== 全群禁言 ====================
@@ -697,7 +697,7 @@ async function handleQuit() {
   await quitGroup(groupId)
   // 本地立即响应：先把 self.member 置 DISABLE（让 GroupInfo 等 isMember 收敛），再清会话 + 群 store
   if (myId.value) {
-    groupStore.updateMemberStatus(groupId, myId.value, CommonStatusEnum.DISABLE)
+    groupStore.updateGroupMemberStatus(groupId, myId.value, CommonStatusEnum.DISABLE)
   }
   conversationStore.removeConversation(ImConversationType.GROUP, groupId)
   groupStore.removeGroup(groupId)

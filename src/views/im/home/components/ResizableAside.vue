@@ -30,7 +30,7 @@ const props = withDefaults(
     defaultWidth?: number // 默认宽度
     minWidth?: number // 最小宽度
     maxWidth?: number // 最大宽度
-    storageKey: string // localStorage 存储 key，必填；调用方传 StorageKeys.asideWidth（三 Tab 共用一份）
+    storageKey: string // localStorage 存储 key，必填；调用方传 StorageKeys.localStorage.asideWidth
   }>(),
   {
     defaultWidth: 260,

@@ -77,7 +77,7 @@ import {
   ImConversationType
 } from '@/views/im/utils/constants'
 import { RTC_NO_ANSWER_CALL_CHECK_INTERVAL_MS } from '@/views/im/utils/config'
-import { getCurrentUserId } from '@/views/im/utils/storage'
+import { getCurrentUserId } from '@/views/im/utils/user'
 import { getSenderAvatar, getSenderDisplayName } from '@/views/im/utils/user'
 import { Track } from 'livekit-client'
 import RtcCallInviting from './RtcCallInviting.vue'

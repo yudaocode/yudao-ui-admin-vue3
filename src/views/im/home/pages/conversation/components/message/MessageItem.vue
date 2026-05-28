@@ -896,7 +896,7 @@ function handleReply() {
   if (!conversation) {
     return
   }
-  conversationStore.setReplyDraft(conversation, buildQuoteFromMessage(props.message))
+  conversationStore.setConversationReplyDraft(conversation, buildQuoteFromMessage(props.message))
 }
 
 /** 转发当前消息：打开 ForwardDialog（单条模式；mode=single 即原样转） */

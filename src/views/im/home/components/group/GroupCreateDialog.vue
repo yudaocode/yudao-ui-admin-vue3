@@ -68,7 +68,7 @@ defineExpose({
 })
 
 /** 全量好友：直接复用 friendStore Lite 视图（带拼音字段供分桶用） */
-const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendsLite)
+const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendLiteList)
 
 /** 完成按钮可点：至少有 1 个非 locked 勾选（locked 是入口锁定项，不算"用户主动选择"） */
 const canSubmit = computed(() => selectedIds.value.length > 0)
@@ -115,7 +115,7 @@ async function handleOk() {
     if (!group?.id) {
       throw new Error('创建群失败：未返回群编号')
     }
-    // 直接 upsert 进 groupStore，省一次 fetchGroups —— 服务端返回 VO 已经够建会话了
+    // 直接 upsert 进 groupStore，省一次 fetchGroupList —— 服务端返回 VO 已经够建会话了
     groupStore.upsertGroup({
       id: group.id,
       name: group.name,

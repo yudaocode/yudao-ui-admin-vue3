@@ -319,7 +319,7 @@ async function saveRemark() {
   if (next === (props.displayName || '')) {
     return
   }
-  await friendStore.setDisplayName(userId, next)
+  await friendStore.setFriendDisplayName(userId, next)
   message.success('已更新备注')
   emit('saved', next)
 }
