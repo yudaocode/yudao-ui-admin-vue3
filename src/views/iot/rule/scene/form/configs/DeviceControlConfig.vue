@@ -92,7 +92,7 @@ import {
   IoTDataSpecsDataTypeEnum
 } from '@/views/iot/utils/constants'
 import { ThingModelApi } from '@/api/iot/thingmodel'
-import { buildDeviceControlRules } from '../utils/actionRules'
+import { buildDeviceControlRules } from '@/views/iot/utils/sceneRule'
 
 /** 设备控制配置组件 */
 defineOptions({ name: 'DeviceControlConfig' })

@@ -1,6 +1,12 @@
 <!-- 告警配置组件 -->
 <template>
-  <el-form ref="innerFormRef" :model="formModel" :rules="formRules" label-width="110px" class="w-full">
+  <el-form
+    ref="innerFormRef"
+    :model="formModel"
+    :rules="formRules"
+    label-width="110px"
+    class="w-full"
+  >
     <el-form-item label="告警配置" prop="alertConfigId" required>
       <el-select
         v-model="localValue"
@@ -33,7 +39,7 @@
 import type { FormInstance } from 'element-plus'
 import { useVModel } from '@vueuse/core'
 import { AlertConfigApi } from '@/api/iot/alert/config'
-import { buildAlertConfigRules } from '../utils/actionRules'
+import { buildAlertConfigRules } from '@/views/iot/utils/sceneRule'
 
 /** 告警配置组件 */
 defineOptions({ name: 'AlertConfig' })

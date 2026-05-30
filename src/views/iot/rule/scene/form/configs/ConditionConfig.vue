@@ -166,7 +166,7 @@ import {
   getConditionTypeOptions,
   IoTDeviceStatusEnum
 } from '@/views/iot/utils/constants'
-import { buildSubConditionRules } from '../utils/triggerConditionRules'
+import { buildSubConditionRules } from '@/views/iot/utils/sceneRule'
 
 /** 单个条件配置组件 */
 defineOptions({ name: 'ConditionConfig' })

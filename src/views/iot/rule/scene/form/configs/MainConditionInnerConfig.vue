@@ -203,7 +203,7 @@ import {
   IotRuleSceneTriggerConditionParameterOperatorEnum,
   IoTDeviceStatusEnum
 } from '@/views/iot/utils/constants'
-import { buildMainConditionRules } from '../utils/triggerConditionRules'
+import { buildMainConditionRules } from '@/views/iot/utils/sceneRule'
 import { useVModel } from '@vueuse/core'
 
 /** 主条件内部配置组件 */
