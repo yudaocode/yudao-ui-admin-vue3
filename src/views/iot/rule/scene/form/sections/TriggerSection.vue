@@ -59,6 +59,7 @@
             <!-- 设备触发配置 -->
             <DeviceTriggerConfig
               v-if="isDeviceTrigger(triggerItem.type)"
+              :ref="(el) => setDeviceTriggerRef(el, index)"
               :model-value="triggerItem"
               :index="index"
               @update:model-value="(value) => updateTriggerDeviceConfig(index, value)"
@@ -93,6 +94,7 @@
 
               <!-- 附加条件组配置 -->
               <TimerConditionGroupConfig
+                :ref="(el) => setTimerConditionRef(el, index)"
                 :model-value="triggerItem.conditionGroups"
                 @update:model-value="(value) => updateTriggerConditionGroups(index, value)"
               />
@@ -127,6 +129,7 @@ import type { Trigger, TriggerCondition } from '@/api/iot/rule/scene'
 import {
   getTriggerTypeLabel,
   IotRuleSceneTriggerTypeEnum,
+  IotRuleSceneTriggerConditionParameterOperatorEnum,
   isDeviceTrigger
 } from '@/views/iot/utils/constants'
 
@@ -143,6 +146,72 @@ const emit = defineEmits<{
 
 const triggers = useVModel(props, 'triggers', emit)
 
+type DeviceTriggerConfigExpose = {
+  validate: () => Promise<boolean>
+  clearValidate: () => void
+}
+
+const deviceTriggerRefs = ref<Record<number, DeviceTriggerConfigExpose>>({})
+
+type TimerConditionGroupExpose = {
+  validate: () => Promise<boolean>
+  clearValidate: () => void
+}
+
+const timerConditionRefs = ref<Record<number, TimerConditionGroupExpose>>({})
+
+const setDeviceTriggerRef = (el: unknown, index: number) => {
+  if (el) {
+    deviceTriggerRefs.value[index] = el as DeviceTriggerConfigExpose
+  } else {
+    delete deviceTriggerRefs.value[index]
+  }
+}
+
+const setTimerConditionRef = (el: unknown, index: number) => {
+  if (el) {
+    timerConditionRefs.value[index] = el as TimerConditionGroupExpose
+  } else {
+    delete timerConditionRefs.value[index]
+  }
+}
+
+/** 校验所有触发器（主条件 + 附加子条件组） */
+const validateAllTriggers = async (): Promise<boolean> => {
+  for (let i = 0; i < triggers.value.length; i++) {
+    const triggerItem = triggers.value[i]
+
+    if (isDeviceTrigger(triggerItem.type)) {
+      const deviceConfig = deviceTriggerRefs.value[i]
+      if (deviceConfig?.validate) {
+        const valid = await deviceConfig.validate()
+        if (!valid) {
+          return false
+        }
+      }
+      continue
+    }
+
+    if (triggerItem.type === IotRuleSceneTriggerTypeEnum.TIMER) {
+      const timerConfig = timerConditionRefs.value[i]
+      if (timerConfig?.validate) {
+        const valid = await timerConfig.validate()
+        if (!valid) {
+          return false
+        }
+      }
+    }
+  }
+  return true
+}
+
+const clearAllTriggerValidate = () => {
+  Object.values(deviceTriggerRefs.value).forEach((ref) => ref.clearValidate?.())
+  Object.values(timerConditionRefs.value).forEach((ref) => ref.clearValidate?.())
+}
+
+defineExpose({ validateAllTriggers, clearAllTriggerValidate })
+
 /** 获取触发器标签类型（用于 el-tag 的 type 属性） */
 const getTriggerTagType = (type: number): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
   if (type === IotRuleSceneTriggerTypeEnum.TIMER) {
@@ -158,7 +227,7 @@ const addTrigger = () => {
     productId: undefined,
     deviceId: undefined,
     identifier: undefined,
-    operator: undefined,
+    operator: IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value,
     value: undefined,
     cronExpression: undefined,
     conditionGroups: [] // 空的条件组数组
@@ -218,7 +287,7 @@ const updateTriggerConditionGroups = (index: number, conditionGroups: TriggerCon
  * @param index 触发器索引
  * @param _ 触发器类型（未使用）
  */
-const onTriggerTypeChange = (index: number, _: number) => {
+const onTriggerTypeChange = (index: number, type: number) => {
   const triggerItem = triggers.value[index]
   triggerItem.productId = undefined
   triggerItem.deviceId = undefined
@@ -227,6 +296,10 @@ const onTriggerTypeChange = (index: number, _: number) => {
   triggerItem.value = undefined
   triggerItem.cronExpression = undefined
   triggerItem.conditionGroups = []
+  if (type === IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE) {
+    triggerItem.operator = IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
+  }
+  nextTick(() => deviceTriggerRefs.value[index]?.clearValidate?.())
 }
 
 /** 初始化：确保至少有一个触发器 */

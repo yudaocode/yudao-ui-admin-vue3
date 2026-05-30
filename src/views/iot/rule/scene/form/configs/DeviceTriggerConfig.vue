@@ -26,6 +26,7 @@
 
           <!-- 主条件内容配置 -->
           <MainConditionInnerConfig
+            ref="mainConditionRef"
             :model-value="trigger"
             @update:model-value="updateCondition"
             :trigger-type="trigger.type"
@@ -118,6 +119,7 @@
                 </div>
 
                 <SubConditionGroupConfig
+                  :ref="(el) => setSubGroupRef(el, subGroupIndex)"
                   :model-value="subGroup"
                   @update:model-value="(value) => updateSubGroup(subGroupIndex, value)"
                   :trigger-type="trigger.type"
@@ -184,6 +186,22 @@ const emit = defineEmits<{
 }>()
 
 const trigger = useVModel(props, 'modelValue', emit)
+const mainConditionRef = ref<InstanceType<typeof MainConditionInnerConfig>>()
+
+type SubConditionGroupExpose = {
+  validate: () => Promise<boolean>
+  clearValidate: () => void
+}
+
+const subGroupRefs = ref<Record<number, SubConditionGroupExpose>>({})
+
+const setSubGroupRef = (el: unknown, index: number) => {
+  if (el) {
+    subGroupRefs.value[index] = el as SubConditionGroupExpose
+  } else {
+    delete subGroupRefs.value[index]
+  }
+}
 
 const maxSubGroups = 3 // 最多 3 个子条件组
 const maxConditionsPerGroup = 3 // 每组最多 3 个条件
@@ -248,4 +266,35 @@ const updateSubGroup = (index: number, subGroup: any) => {
 const removeConditionGroup = () => {
   trigger.value.conditionGroups = undefined
 }
+
+/** 校验主条件及附加子条件组 */
+const validate = async (): Promise<boolean> => {
+  const mainValid = (await mainConditionRef.value?.validate()) ?? true
+  if (!mainValid) {
+    return false
+  }
+
+  const groups = trigger.value.conditionGroups
+  if (!groups?.length) {
+    return true
+  }
+
+  for (let i = 0; i < groups.length; i++) {
+    const subGroupRef = subGroupRefs.value[i]
+    if (subGroupRef?.validate) {
+      const valid = await subGroupRef.validate()
+      if (!valid) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
+const clearValidate = () => {
+  mainConditionRef.value?.clearValidate()
+  Object.values(subGroupRefs.value).forEach((ref) => ref.clearValidate?.())
+}
+
+defineExpose({ validate, clearValidate })
 </script>

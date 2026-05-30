@@ -67,6 +67,7 @@
           </div>
 
           <SubConditionGroupConfig
+            :ref="(el) => setSubGroupRef(el, groupIndex)"
             :model-value="group"
             @update:model-value="(value) => updateConditionGroup(groupIndex, value)"
             :trigger-type="IotRuleSceneTriggerTypeEnum.TIMER"
@@ -130,6 +131,44 @@ const conditionGroups = useVModel(props, 'modelValue', emit)
 
 const maxGroups = 3 // 最多 3 个条件组
 const maxConditionsPerGroup = 3 // 每组最多 3 个条件
+
+type SubConditionGroupExpose = {
+  validate: () => Promise<boolean>
+  clearValidate: () => void
+}
+
+const subGroupRefs = ref<Record<number, SubConditionGroupExpose>>({})
+
+const setSubGroupRef = (el: unknown, index: number) => {
+  if (el) {
+    subGroupRefs.value[index] = el as SubConditionGroupExpose
+  } else {
+    delete subGroupRefs.value[index]
+  }
+}
+
+/** 校验所有附加条件组 */
+const validate = async (): Promise<boolean> => {
+  if (!conditionGroups.value?.length) {
+    return true
+  }
+  for (let i = 0; i < conditionGroups.value.length; i++) {
+    const subGroupRef = subGroupRefs.value[i]
+    if (subGroupRef?.validate) {
+      const valid = await subGroupRef.validate()
+      if (!valid) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
+const clearValidate = () => {
+  Object.values(subGroupRefs.value).forEach((ref) => ref.clearValidate?.())
+}
+
+defineExpose({ validate, clearValidate })
 
 /** 添加条件组 */
 const addConditionGroup = async () => {
