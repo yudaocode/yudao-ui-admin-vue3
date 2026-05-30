@@ -11,12 +11,7 @@
         <el-input v-model="formData.name" placeholder="请输入配置名称" />
       </el-form-item>
       <el-form-item label="配置描述" prop="description">
-        <el-input
-          v-model="formData.description"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入配置描述"
-        />
+        <el-input v-model="formData.description" placeholder="请输入配置描述" />
       </el-form-item>
       <el-form-item label="告警级别" prop="level">
         <el-select v-model="formData.level" placeholder="请选择告警级别">
@@ -83,6 +78,63 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item
+        v-if="formData.receiveTypes?.includes(RECEIVE_TYPE_SMS)"
+        label="短信模板"
+        prop="smsTemplateCode"
+      >
+        <el-select
+          v-model="formData.smsTemplateCode"
+          placeholder="请选择短信模板"
+          class="w-full"
+          filterable
+        >
+          <el-option
+            v-for="item in smsTemplateOptions"
+            :key="item.code"
+            :label="`${item.name}（${item.code}）`"
+            :value="item.code"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item
+        v-if="formData.receiveTypes?.includes(RECEIVE_TYPE_MAIL)"
+        label="邮件模板"
+        prop="mailTemplateCode"
+      >
+        <el-select
+          v-model="formData.mailTemplateCode"
+          placeholder="请选择邮件模板"
+          class="w-full"
+          filterable
+        >
+          <el-option
+            v-for="item in mailTemplateOptions"
+            :key="item.code"
+            :label="`${item.name}（${item.code}）`"
+            :value="item.code"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item
+        v-if="formData.receiveTypes?.includes(RECEIVE_TYPE_NOTIFY)"
+        label="站内信模板"
+        prop="notifyTemplateCode"
+      >
+        <el-select
+          v-model="formData.notifyTemplateCode"
+          placeholder="请选择站内信模板"
+          class="w-full"
+          filterable
+        >
+          <el-option
+            v-for="item in notifyTemplateOptions"
+            :key="item.code"
+            :label="`${item.name}（${item.code}）`"
+            :value="item.code"
+          />
+        </el-select>
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -96,6 +148,14 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
 import * as UserApi from '@/api/system/user'
+import * as MailTemplateApi from '@/api/system/mail/template'
+import * as SmsTemplateApi from '@/api/system/sms/smsTemplate'
+import * as NotifyTemplateApi from '@/api/system/notify/template'
+
+/** 告警接收类型，与 IotAlertReceiveTypeEnum 保持一致 */
+const RECEIVE_TYPE_SMS = 1
+const RECEIVE_TYPE_MAIL = 2
+const RECEIVE_TYPE_NOTIFY = 3
 
 /** IoT 告警配置 表单 */
 defineOptions({ name: 'AlertConfigForm' })
@@ -107,7 +167,19 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
+const formData = ref<{
+  id?: number
+  name?: string
+  description?: string
+  level?: number
+  status?: number
+  sceneRuleIds: number[]
+  receiveUserIds: number[]
+  receiveTypes: number[]
+  smsTemplateCode?: string
+  mailTemplateCode?: string
+  notifyTemplateCode?: string
+}>({
   id: undefined,
   name: undefined,
   description: undefined,
@@ -115,9 +187,12 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE,
   sceneRuleIds: [],
   receiveUserIds: [],
-  receiveTypes: []
+  receiveTypes: [],
+  smsTemplateCode: undefined,
+  mailTemplateCode: undefined,
+  notifyTemplateCode: undefined
 })
-const formRules = reactive({
+const formRules = reactive<Record<string, any>>({
   name: [{ required: true, message: '配置名称不能为空', trigger: 'blur' }],
   level: [{ required: true, message: '告警级别不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '配置状态不能为空', trigger: 'blur' }],
@@ -130,6 +205,50 @@ const formRef = ref() // 表单 Ref
 // 选项数据
 const sceneRuleOptions = ref<any[]>([])
 const userOptions = ref<UserApi.UserVO[]>([])
+const smsTemplateOptions = ref<SmsTemplateApi.SmsTemplateSimpleVO[]>([])
+const mailTemplateOptions = ref<MailTemplateApi.MailTemplateSimpleVO[]>([])
+const notifyTemplateOptions = ref<NotifyTemplateApi.NotifyTemplateSimpleVO[]>([])
+
+/** 按接收类型同步模板校验规则 */
+const syncTemplateFormRules = () => {
+  const types = formData.value.receiveTypes || []
+  if (types.includes(RECEIVE_TYPE_SMS)) {
+    formRules.smsTemplateCode = [{ required: true, message: '短信模板不能为空', trigger: 'change' }]
+  } else {
+    delete formRules.smsTemplateCode
+  }
+  if (types.includes(RECEIVE_TYPE_MAIL)) {
+    formRules.mailTemplateCode = [
+      { required: true, message: '邮件模板不能为空', trigger: 'change' }
+    ]
+  } else {
+    delete formRules.mailTemplateCode
+  }
+  if (types.includes(RECEIVE_TYPE_NOTIFY)) {
+    formRules.notifyTemplateCode = [
+      { required: true, message: '站内信模板不能为空', trigger: 'change' }
+    ]
+  } else {
+    delete formRules.notifyTemplateCode
+  }
+}
+
+watch(
+  () => formData.value.receiveTypes,
+  (types) => {
+    if (!types?.includes(RECEIVE_TYPE_SMS)) {
+      formData.value.smsTemplateCode = undefined
+    }
+    if (!types?.includes(RECEIVE_TYPE_MAIL)) {
+      formData.value.mailTemplateCode = undefined
+    }
+    if (!types?.includes(RECEIVE_TYPE_NOTIFY)) {
+      formData.value.notifyTemplateCode = undefined
+    }
+    syncTemplateFormRules()
+  },
+  { deep: true }
+)
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -143,6 +262,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await AlertConfigApi.getAlertConfig(id)
+      syncTemplateFormRules()
     } finally {
       formLoading.value = false
     }
@@ -156,10 +276,18 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 /** 加载选项数据 */
 const loadOptions = async () => {
   try {
-    // 加载场景联动规则选项
-    sceneRuleOptions.value = await RuleSceneApi.getSimpleRuleSceneList()
-    // 加载用户选项
-    userOptions.value = await UserApi.getSimpleUserList()
+    const [scenes, users, smsTemplates, mailTemplates, notifyTemplates] = await Promise.all([
+      RuleSceneApi.getSimpleRuleSceneList(),
+      UserApi.getSimpleUserList(),
+      SmsTemplateApi.getSimpleSmsTemplateList(),
+      MailTemplateApi.getSimpleMailTemplateList(),
+      NotifyTemplateApi.getSimpleNotifyTemplateList()
+    ])
+    sceneRuleOptions.value = scenes
+    userOptions.value = users
+    smsTemplateOptions.value = smsTemplates
+    mailTemplateOptions.value = mailTemplates
+    notifyTemplateOptions.value = notifyTemplates
   } catch (error) {
     console.error('加载选项数据失败:', error)
   }
@@ -199,8 +327,12 @@ const resetForm = () => {
     status: CommonStatusEnum.ENABLE,
     sceneRuleIds: [],
     receiveUserIds: [],
-    receiveTypes: []
+    receiveTypes: [],
+    smsTemplateCode: undefined,
+    mailTemplateCode: undefined,
+    notifyTemplateCode: undefined
   }
+  syncTemplateFormRules()
   formRef.value?.resetFields()
 }
 </script>

@@ -21,6 +21,16 @@ export interface SendSmsReqVO {
   templateParams: Map<String, Object>
 }
 
+export interface SmsTemplateSimpleVO {
+  id: number
+  name: string
+  code: string
+}
+
+// 查询短信模板精简列表
+export const getSimpleSmsTemplateList = () => {
+  return request.get({ url: '/system/sms-template/simple-list' })
+}
 // 查询短信模板列表
 export const getSmsTemplatePage = (params: PageParam) => {
   return request.get({ url: '/system/sms-template/page', params })
