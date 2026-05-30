@@ -79,61 +79,25 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        v-if="formData.receiveTypes?.includes(RECEIVE_TYPE_SMS)"
+        v-if="formData.receiveTypes?.includes(IotAlertReceiveTypeEnum.SMS)"
         label="短信模板"
         prop="smsTemplateCode"
       >
-        <el-select
-          v-model="formData.smsTemplateCode"
-          placeholder="请选择短信模板"
-          class="w-full"
-          filterable
-        >
-          <el-option
-            v-for="item in smsTemplateOptions"
-            :key="item.code"
-            :label="`${item.name}（${item.code}）`"
-            :value="item.code"
-          />
-        </el-select>
+        <SmsTemplateSelect v-model="formData.smsTemplateCode" />
       </el-form-item>
       <el-form-item
-        v-if="formData.receiveTypes?.includes(RECEIVE_TYPE_MAIL)"
+        v-if="formData.receiveTypes?.includes(IotAlertReceiveTypeEnum.MAIL)"
         label="邮件模板"
         prop="mailTemplateCode"
       >
-        <el-select
-          v-model="formData.mailTemplateCode"
-          placeholder="请选择邮件模板"
-          class="w-full"
-          filterable
-        >
-          <el-option
-            v-for="item in mailTemplateOptions"
-            :key="item.code"
-            :label="`${item.name}（${item.code}）`"
-            :value="item.code"
-          />
-        </el-select>
+        <MailTemplateSelect v-model="formData.mailTemplateCode" />
       </el-form-item>
       <el-form-item
-        v-if="formData.receiveTypes?.includes(RECEIVE_TYPE_NOTIFY)"
+        v-if="formData.receiveTypes?.includes(IotAlertReceiveTypeEnum.NOTIFY)"
         label="站内信模板"
         prop="notifyTemplateCode"
       >
-        <el-select
-          v-model="formData.notifyTemplateCode"
-          placeholder="请选择站内信模板"
-          class="w-full"
-          filterable
-        >
-          <el-option
-            v-for="item in notifyTemplateOptions"
-            :key="item.code"
-            :label="`${item.name}（${item.code}）`"
-            :value="item.code"
-          />
-        </el-select>
+        <NotifyTemplateSelect v-model="formData.notifyTemplateCode" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -147,15 +111,11 @@ import { AlertConfigApi, AlertConfig } from '@/api/iot/alert/config'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
+import { IotAlertReceiveTypeEnum } from '@/views/iot/utils/constants'
 import * as UserApi from '@/api/system/user'
-import * as MailTemplateApi from '@/api/system/mail/template'
-import * as SmsTemplateApi from '@/api/system/sms/smsTemplate'
-import * as NotifyTemplateApi from '@/api/system/notify/template'
-
-/** 告警接收类型，与 IotAlertReceiveTypeEnum 保持一致 */
-const RECEIVE_TYPE_SMS = 1
-const RECEIVE_TYPE_MAIL = 2
-const RECEIVE_TYPE_NOTIFY = 3
+import MailTemplateSelect from '@/views/system/mail/template/components/MailTemplateSelect.vue'
+import NotifyTemplateSelect from '@/views/system/notify/template/components/NotifyTemplateSelect.vue'
+import SmsTemplateSelect from '@/views/system/sms/template/components/SmsTemplateSelect.vue'
 
 /** IoT 告警配置 表单 */
 defineOptions({ name: 'AlertConfigForm' })
@@ -205,26 +165,23 @@ const formRef = ref() // 表单 Ref
 // 选项数据
 const sceneRuleOptions = ref<any[]>([])
 const userOptions = ref<UserApi.UserVO[]>([])
-const smsTemplateOptions = ref<SmsTemplateApi.SmsTemplateSimpleVO[]>([])
-const mailTemplateOptions = ref<MailTemplateApi.MailTemplateSimpleVO[]>([])
-const notifyTemplateOptions = ref<NotifyTemplateApi.NotifyTemplateSimpleVO[]>([])
 
 /** 按接收类型同步模板校验规则 */
 const syncTemplateFormRules = () => {
   const types = formData.value.receiveTypes || []
-  if (types.includes(RECEIVE_TYPE_SMS)) {
+  if (types.includes(IotAlertReceiveTypeEnum.SMS)) {
     formRules.smsTemplateCode = [{ required: true, message: '短信模板不能为空', trigger: 'change' }]
   } else {
     delete formRules.smsTemplateCode
   }
-  if (types.includes(RECEIVE_TYPE_MAIL)) {
+  if (types.includes(IotAlertReceiveTypeEnum.MAIL)) {
     formRules.mailTemplateCode = [
       { required: true, message: '邮件模板不能为空', trigger: 'change' }
     ]
   } else {
     delete formRules.mailTemplateCode
   }
-  if (types.includes(RECEIVE_TYPE_NOTIFY)) {
+  if (types.includes(IotAlertReceiveTypeEnum.NOTIFY)) {
     formRules.notifyTemplateCode = [
       { required: true, message: '站内信模板不能为空', trigger: 'change' }
     ]
@@ -236,13 +193,13 @@ const syncTemplateFormRules = () => {
 watch(
   () => formData.value.receiveTypes,
   (types) => {
-    if (!types?.includes(RECEIVE_TYPE_SMS)) {
+    if (!types?.includes(IotAlertReceiveTypeEnum.SMS)) {
       formData.value.smsTemplateCode = undefined
     }
-    if (!types?.includes(RECEIVE_TYPE_MAIL)) {
+    if (!types?.includes(IotAlertReceiveTypeEnum.MAIL)) {
       formData.value.mailTemplateCode = undefined
     }
-    if (!types?.includes(RECEIVE_TYPE_NOTIFY)) {
+    if (!types?.includes(IotAlertReceiveTypeEnum.NOTIFY)) {
       formData.value.notifyTemplateCode = undefined
     }
     syncTemplateFormRules()
@@ -276,18 +233,12 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 /** 加载选项数据 */
 const loadOptions = async () => {
   try {
-    const [scenes, users, smsTemplates, mailTemplates, notifyTemplates] = await Promise.all([
+    const [scenes, users] = await Promise.all([
       RuleSceneApi.getSimpleRuleSceneList(),
-      UserApi.getSimpleUserList(),
-      SmsTemplateApi.getSimpleSmsTemplateList(),
-      MailTemplateApi.getSimpleMailTemplateList(),
-      NotifyTemplateApi.getSimpleNotifyTemplateList()
+      UserApi.getSimpleUserList()
     ])
     sceneRuleOptions.value = scenes
     userOptions.value = users
-    smsTemplateOptions.value = smsTemplates
-    mailTemplateOptions.value = mailTemplates
-    notifyTemplateOptions.value = notifyTemplates
   } catch (error) {
     console.error('加载选项数据失败:', error)
   }
