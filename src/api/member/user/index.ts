@@ -9,6 +9,7 @@ export interface UserVO {
   loginIp: string
   mark: string
   mobile: string
+  email: string | undefined
   name: string | undefined
   nickname: string | undefined
   registerIp: string

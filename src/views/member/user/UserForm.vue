@@ -10,6 +10,9 @@
       <el-form-item label="手机号" prop="mobile">
         <el-input v-model="formData.mobile" placeholder="请输入手机号" />
       </el-form-item>
+      <el-form-item label="邮箱" prop="email">
+        <el-input v-model="formData.email" maxlength="50" placeholder="请输入邮箱" />
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
@@ -91,6 +94,7 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   mobile: undefined,
+  email: undefined,
   password: undefined,
   status: undefined,
   nickname: undefined,
@@ -105,6 +109,7 @@ const formData = ref({
 })
 const formRules = reactive({
   mobile: [{ required: true, message: '手机号不能为空', trigger: 'blur' }],
+  email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
@@ -162,6 +167,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     mobile: undefined,
+    email: undefined,
     password: undefined,
     status: undefined,
     nickname: undefined,
