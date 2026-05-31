@@ -56,6 +56,7 @@
     "jsbarcode": "^3.12.3",
     "jsencrypt": "^3.5.4",
     "jsoneditor": "^10.4.3",
+    "livekit-client": "^2.18.9",
     "lodash-es": "^4.18.1",
     "markdown-it": "^14.1.1",
     "markmap-common": "^0.18.9",

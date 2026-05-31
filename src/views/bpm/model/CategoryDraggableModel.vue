@@ -284,7 +284,7 @@ import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { BpmModelFormType } from '@/utils/constants'
 import { checkPermi } from '@/utils/permission'
-import { useUserStoreWithOut } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { useAppStore } from '@/store/modules/app'
 import { cloneDeep, isEqual } from 'lodash-es'
 import { useDebounceFn } from '@vueuse/core'
@@ -333,7 +333,6 @@ const emit = defineEmits(['success'])
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
-const userStore = useUserStoreWithOut() // 用户信息缓存
 const isDark = computed(() => useAppStore().getIsDark) // 是否黑暗模式
 const router = useRouter() // 路由
 
@@ -501,7 +500,7 @@ const handleFormDetail = async (row: any) => {
 
 /** 判断是否可以操作 */
 const isManagerUser = (row: any) => {
-  const userId = userStore.getUser.id
+  const userId = getCurrentUserId()
   return row.managerUserIds && row.managerUserIds.includes(userId)
 }
 

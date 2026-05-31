@@ -794,6 +794,35 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: '/im',
+    name: 'Im',
+    redirect: '/im/home/conversation',
+    meta: { hidden: true, title: 'IM 即时通讯' },
+    children: [
+      {
+        path: 'home',
+        component: () => import('@/views/im/home/index.vue'),
+        name: 'ImHome',
+        redirect: '/im/home/conversation',
+        meta: { hidden: true, title: '聊天' },
+        children: [
+          {
+            path: 'conversation',
+            component: () => import('@/views/im/home/pages/conversation/index.vue'),
+            name: 'ImHomeConversation',
+            meta: { hidden: true, title: '消息' }
+          },
+          {
+            path: 'contact',
+            component: () => import('@/views/im/home/pages/contact/index.vue'),
+            name: 'ImHomeContact',
+            meta: { hidden: true, title: '通讯录' }
+          }
+        ]
+      }
+    ]
   }
 ]
 

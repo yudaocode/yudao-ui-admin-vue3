@@ -212,13 +212,13 @@ import MdItemSelect from '@/views/mes/md/item/components/MdItemSelect.vue'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import FeedbackForm from './FeedbackForm.vue'
 import { MesProFeedbackStatusEnum } from '@/views/mes/utils/constants'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 
 defineOptions({ name: 'MesProFeedback' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const currentUserId = useUserStore().getUser.id // 当前登录用户 ID
+const currentUserId = getCurrentUserId() // 当前登录用户 ID
 
 const loading = ref(true) // 列表的加载中
 const list = ref<ProFeedbackVO[]>([]) // 列表的数据

@@ -76,7 +76,7 @@ import DvMachinerySelect from '@/views/mes/dv/machinery/components/DvMachinerySe
 import DvCheckPlanSelect from '@/views/mes/dv/checkplan/components/DvCheckPlanSelect.vue'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import MaintenRecordLineList from './MaintenRecordLineList.vue'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import {
   MesDvMaintenRecordStatusEnum,
   MesDvSubjectTypeEnum,
@@ -88,7 +88,6 @@ const emit = defineEmits(['success'])
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const userStore = useUserStore()
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
@@ -135,7 +134,7 @@ const open = async (type: string, id?: number) => {
   }
   // 新增时，自动填充当前登录用户
   if (type === 'create') {
-    formData.value.userId = userStore.getUser.id
+    formData.value.userId = getCurrentUserId()
   }
   // 保存原始数据快照
   originalFormData.value = JSON.stringify(formData.value)

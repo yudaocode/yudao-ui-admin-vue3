@@ -88,7 +88,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import { useUserStoreWithOut } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
@@ -107,7 +107,6 @@ const { delView } = useTagsViewStore() // 视图操作
 const tagsView = useTagsView()
 const route = useRoute()
 const message = useMessage()
-const userStore = useUserStoreWithOut()
 
 // 组件引用
 const basicInfoRef = ref()
@@ -237,7 +236,7 @@ const initData = async () => {
   } else {
     // 情况三：新增场景
     formData.value.startUserType = 0 // 全体
-    formData.value.managerUserIds.push(userStore.getUser.id)
+    formData.value.managerUserIds.push(getCurrentUserId())
   }
 
   // 获取表单列表

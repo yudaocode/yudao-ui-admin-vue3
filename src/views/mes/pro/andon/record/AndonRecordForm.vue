@@ -118,7 +118,7 @@
 import { ProAndonRecordApi } from '@/api/mes/pro/andon/record'
 import { ProAndonConfigVO } from '@/api/mes/pro/andon/config'
 import { DICT_TYPE } from '@/utils/dict'
-import { useUserStoreWithOut } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import { formatDate } from '@/utils/formatTime'
 import { MesProAndonStatusEnum, MesProWorkOrderStatusEnum } from '@/views/mes/utils/constants'
 import MdWorkstationSelect from '@/views/mes/md/workstation/components/MdWorkstationSelect.vue'
@@ -148,7 +148,6 @@ const createRules = reactive({
   workstationId: [{ required: true, message: '工作站不能为空', trigger: 'change' }],
   configId: [{ required: true, message: '呼叫原因不能为空', trigger: 'change' }]
 })
-const userStore = useUserStoreWithOut()
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -157,7 +156,7 @@ const open = async (type: string, id?: number) => {
   resetForm()
   if (type === 'create') {
     // 新增时，自动填充当前用户
-    formData.value.userId = userStore.getUser?.id
+    formData.value.userId = getCurrentUserId()
   } else {
     // 修改 / 详情时，设置数据
     formLoading.value = true
@@ -169,7 +168,7 @@ const open = async (type: string, id?: number) => {
           formData.value.handleTime = formatDate(new Date())
         }
         if (!formData.value.handlerUserId) {
-          formData.value.handlerUserId = userStore.getUser?.id
+          formData.value.handlerUserId = getCurrentUserId()
         }
       }
     } finally {

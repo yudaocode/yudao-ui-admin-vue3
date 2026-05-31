@@ -331,5 +331,25 @@ export enum DICT_TYPE {
   MES_MD_AUTO_CODE_CYCLE_METHOD = 'mes_md_auto_code_cycle_method', // MES 编码规则循环方式
   MES_WM_BARCODE_FORMAT = 'mes_wm_barcode_format', // MES 条码格式
   MES_WM_BARCODE_BIZ_TYPE = 'mes_wm_barcode_biz_type', // MES 条码业务类型
-  MES_WM_PACKAGE_STATUS = 'mes_wm_package_status' // MES 装箱单状态
+  MES_WM_PACKAGE_STATUS = 'mes_wm_package_status', // MES 装箱单状态
+
+  // ========== IM - 即时通讯模块  ==========
+  IM_MESSAGE_TYPE = 'im_message_type', // IM 消息类型
+  IM_PRIVATE_MESSAGE_STATUS = 'im_private_message_status', // IM 私聊消息状态：0=未读 / 2=已撤回 / 3=已读
+  IM_GROUP_MESSAGE_STATUS = 'im_group_message_status', // IM 群聊消息状态：0=正常 / 2=已撤回
+  IM_GROUP_MESSAGE_RECEIPT_STATUS = 'im_group_message_receipt_status', // IM 群消息回执状态
+  IM_FRIEND_STATUS = 'im_friend_status', // IM 好友状态
+  IM_FRIEND_ADD_SOURCE = 'im_friend_add_source', // IM 好友添加来源
+  IM_FRIEND_REQUEST_HANDLE_RESULT = 'im_friend_request_handle_result', // IM 好友申请处理结果
+  IM_GROUP_STATUS = 'im_group_status', // IM 群状态
+  IM_GROUP_MEMBER_ROLE = 'im_group_member_role', // IM 群成员角色
+  IM_GROUP_ADD_SOURCE = 'im_group_add_source', // IM 加群来源
+  IM_GROUP_REQUEST_HANDLE_RESULT = 'im_group_request_handle_result', // IM 加群申请处理结果
+  IM_RTC_CALL_MEDIA_TYPE = 'im_rtc_call_media_type', // IM 通话媒体类型：1=语音 / 2=视频
+  IM_RTC_CALL_CONVERSATION_TYPE = 'im_rtc_call_conversation_type', // IM 通话会话类型：1=私聊 / 2=群聊
+  IM_RTC_CALL_STATUS = 'im_rtc_call_status', // IM 通话状态：10=创建 / 20=进行中 / 30=已结束
+  IM_RTC_CALL_END_REASON = 'im_rtc_call_end_reason', // IM 通话结束原因：1=通话结束 / 2=已拒绝 / 3=已取消 / 4=无人接听 / 5=对方正忙 / 9=通话异常
+  IM_RTC_PARTICIPANT_ROLE = 'im_rtc_participant_role', // IM 通话参与角色：1=发起人 / 2=被邀请者 / 3=主动加入者
+  IM_RTC_PARTICIPANT_STATUS = 'im_rtc_participant_status', // IM 通话参与状态：10=邀请中 / 20=已加入 / 30=已拒绝 / 40=未应答 / 50=已离开
+  IM_CHANNEL_MATERIAL_TYPE = 'im_channel_material_type' // IM 频道素材内容类型：1=富文本 / 2=外链
 }
