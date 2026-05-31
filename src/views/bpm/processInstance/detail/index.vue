@@ -44,7 +44,7 @@
           <el-tab-pane label="审批详情" name="form">
             <div class="form-scroll-area">
               <el-scrollbar>
-                <el-row>
+                <el-row :gutter="40">
                   <el-col :span="17" class="!flex !flex-col formCol">
                     <!-- 表单信息 -->
                     <div
@@ -52,14 +52,14 @@
                       class="form-box flex flex-col mb-30px flex-1"
                     >
                       <!-- 情况一：流程表单 -->
-                      <el-col v-if="processDefinition?.formType === BpmModelFormType.NORMAL">
+                      <div v-if="processDefinition?.formType === BpmModelFormType.NORMAL">
                         <form-create
                           v-model="detailForm.value"
                           v-model:api="fApi"
                           :option="detailForm.option"
                           :rule="detailForm.rule"
                         />
-                      </el-col>
+                      </div>
                       <!-- 情况二：业务表单 -->
                       <div v-if="processDefinition?.formType === BpmModelFormType.CUSTOM">
                         <BusinessFormComponent :id="processInstance.businessKey" />
