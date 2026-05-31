@@ -16,7 +16,6 @@ export interface UserVO {
   remark: string
   loginDate: Date
   createTime: Date
-  disabled?: boolean // TODO @AI：是不是可以去掉。。。
 }
 
 // 获取用户精简信息列表
@@ -45,22 +44,6 @@ export const getUserPage = (params: PageParam) => {
 // 查询用户管理列表
 export const getUserList = (ids: number[]) => {
   return request.get({ url: '/system/user/list', params: { ids: ids.join(',') } })
-}
-
-// TODO @AI：是不是可以去掉？
-// 查询所有用户列表
-export const getAllUser = () => {
-  return request.get({ url: '/system/user/simple-list' })
-}
-
-// TODO @AI：是不是可以去掉？
-/**
- * 获取部门成员
- * @param id
- * @returns
- */
-export const getDeptUser = (deptId: number): Promise<UserVO[]> => {
-  return request.get({ url: '/system/user/simple-list?deptId=' + deptId })
 }
 
 // 查询用户详情

@@ -159,6 +159,10 @@ import { dateFormatter } from '@/utils/formatTime'
 
 defineOptions({ name: 'UserSelectDialogV2' })
 
+type UserSelectRow = UserApi.UserVO & {
+  disabled?: boolean
+}
+
 const props = withDefaults(
   defineProps<{
     title?: string
@@ -178,7 +182,7 @@ const emit = defineEmits<{
 
 const dialogVisible = ref(false) // 弹窗是否展示
 const loading = ref(false) // 列表加载中
-const list = ref<UserApi.UserVO[]>([]) // 用户列表
+const list = ref<UserSelectRow[]>([]) // 用户列表
 const total = ref(0) // 总条数
 const activityId = ref()
 
@@ -193,31 +197,31 @@ const handleDeptNodeClick = (deptId: number | undefined) => {
 
 // ==================== 选中状态 ====================
 const tableRef = ref() // 表格 Ref
-const selectedRows = ref<UserApi.UserVO[]>([]) // 多选模式：选中行
+const selectedRows = ref<UserSelectRow[]>([]) // 多选模式：选中行
 const selectedRadioId = ref<number>() // 单选模式：选中 ID
-const currentRadioRow = ref<UserApi.UserVO>() // 单选模式：选中行对象
+const currentRadioRow = ref<UserSelectRow>() // 单选模式：选中行对象
 const preSelectedIds = ref<number[]>([]) // 打开弹窗时传入的已选 ID
 const preDisabledIds = ref<number[]>([]) // 打开弹窗时传入的禁选 ID
 
 /** 多选：是否可以选中 */
-const selectable = (row: UserApi.UserVO) => {
+const selectable = (row: UserSelectRow) => {
   return !preDisabledIds.value.includes(row.id)
 }
 
 /** 多选：checkbox 变化 */
-const handleSelectionChange = (rows: UserApi.UserVO[]) => {
+const handleSelectionChange = (rows: UserSelectRow[]) => {
   if (props.multiple) {
     selectedRows.value = rows
   }
 }
 
 /** 单选：radio 变化 */
-const handleRadioChange = (row: UserApi.UserVO) => {
+const handleRadioChange = (row: UserSelectRow) => {
   currentRadioRow.value = row
 }
 
 /** 单击行：单选模式下点击整行即选中（降低操作成本），多选不处理（避免和 dblclick 冲突） */
-const handleRowClick = (row: UserApi.UserVO) => {
+const handleRowClick = (row: UserSelectRow) => {
   if (row.disabled) {
     return
   }
@@ -229,7 +233,7 @@ const handleRowClick = (row: UserApi.UserVO) => {
 }
 
 /** 双击行：多选模式切换勾选，单选模式直接确认 */
-const handleRowDblClick = (row: UserApi.UserVO) => {
+const handleRowDblClick = (row: UserSelectRow) => {
   if (row.disabled) {
     return
   }
