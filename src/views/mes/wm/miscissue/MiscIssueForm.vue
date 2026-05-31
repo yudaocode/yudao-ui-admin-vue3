@@ -40,7 +40,7 @@
               :disabled="isHeaderReadonly"
             >
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_MISC_ISSUE_TYPE)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_MISC_ISSUE_TYPE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -120,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { WmMiscIssueApi, WmMiscIssueVO } from '@/api/mes/wm/miscissue'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import MiscIssueLineList from './MiscIssueLineList.vue'

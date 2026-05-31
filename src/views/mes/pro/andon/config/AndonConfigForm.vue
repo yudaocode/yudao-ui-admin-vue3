@@ -44,7 +44,7 @@
             v-model="scope.row.handlerRoleId"
             placeholder="请选择角色"
           />
-          <RoleSelect v-else :model-value="scope.row.handlerRoleId" disabled />
+          <span v-else>{{ scope.row.handlerRoleName || '-' }}</span>
         </template>
       </el-table-column>
       <el-table-column label="处置人" align="center" width="180">

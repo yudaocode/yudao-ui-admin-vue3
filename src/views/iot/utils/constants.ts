@@ -25,6 +25,13 @@ export const IoTThingModelTypeEnum = {
   EVENT: 3 // 事件
 } as const
 
+/** IoT 告警接收方式枚举，与后端 IotAlertReceiveTypeEnum 保持一致 */
+export const IotAlertReceiveTypeEnum = {
+  SMS: 1, // 短信
+  MAIL: 2, // 邮箱
+  NOTIFY: 3 // 站内信
+} as const
+
 /** IoT 设备消息的方法枚举 */
 export const IotDeviceMessageMethodEnum = {
   // ========== 设备状态 ==========

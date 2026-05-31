@@ -75,7 +75,7 @@
                 <el-select
                   :model-value="action.type"
                   @update:model-value="(value) => updateActionType(index, value)"
-                  @change="(value) => onActionTypeChange(action, value)"
+                  @change="(value) => onActionTypeChange(action, value, index)"
                   placeholder="请选择执行类型"
                   class="w-full"
                 >
@@ -92,6 +92,7 @@
             <!-- 设备控制配置 -->
             <DeviceControlConfig
               v-if="isDeviceAction(action.type)"
+              :ref="(el) => setDeviceControlRef(el, index)"
               :model-value="action"
               @update:model-value="(value) => updateAction(index, value)"
             />
@@ -99,6 +100,7 @@
             <!-- 告警配置 - 只有恢复告警时才显示 -->
             <AlertConfig
               v-if="action.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER"
+              :ref="(el) => setAlertConfigRef(el, index)"
               :model-value="action.alertConfigId"
               @update:model-value="(value) => updateActionAlertConfig(index, value)"
             />
@@ -155,6 +157,66 @@ const emit = defineEmits<{
 }>()
 
 const actions = useVModel(props, 'actions', emit)
+
+type ConfigExpose = {
+  validate: () => Promise<boolean>
+  clearValidate: () => void
+}
+
+const deviceControlRefs = ref<Record<number, ConfigExpose>>({})
+const alertConfigRefs = ref<Record<number, ConfigExpose>>({})
+
+const setDeviceControlRef = (el: unknown, index: number) => {
+  if (el) {
+    deviceControlRefs.value[index] = el as ConfigExpose
+  } else {
+    delete deviceControlRefs.value[index]
+  }
+}
+
+const setAlertConfigRef = (el: unknown, index: number) => {
+  if (el) {
+    alertConfigRefs.value[index] = el as ConfigExpose
+  } else {
+    delete alertConfigRefs.value[index]
+  }
+}
+
+/** 校验所有执行器配置 */
+const validateAllActions = async (): Promise<boolean> => {
+  for (let i = 0; i < actions.value.length; i++) {
+    const action = actions.value[i]
+
+    if (isDeviceAction(action.type)) {
+      const deviceRef = deviceControlRefs.value[i]
+      if (deviceRef?.validate) {
+        const valid = await deviceRef.validate()
+        if (!valid) {
+          return false
+        }
+      }
+      continue
+    }
+
+    if (action.type === IotRuleSceneActionTypeEnum.ALERT_RECOVER) {
+      const alertRef = alertConfigRefs.value[i]
+      if (alertRef?.validate) {
+        const valid = await alertRef.validate()
+        if (!valid) {
+          return false
+        }
+      }
+    }
+  }
+  return true
+}
+
+const clearAllActionValidate = () => {
+  Object.values(deviceControlRefs.value).forEach((ref) => ref.clearValidate?.())
+  Object.values(alertConfigRefs.value).forEach((ref) => ref.clearValidate?.())
+}
+
+defineExpose({ validateAllActions, clearAllActionValidate })
 
 /** 获取执行器标签类型（用于 el-tag 的 type 属性） */
 const getActionTypeTag = (type: number): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
@@ -222,9 +284,8 @@ const removeAction = (index: number) => {
  * @param type 执行器类型
  */
 const updateActionType = (index: number, type: number) => {
-  const action = actions.value[index]
-  onActionTypeChange(action, type) // 须在赋新值前调用 ，内部依赖 action.type 旧值
-  action.type = type
+  actions.value[index].type = type
+  onActionTypeChange(actions.value[index], type, index)
 }
 
 /**
@@ -250,7 +311,7 @@ const updateActionAlertConfig = (index: number, alertConfigId?: number) => {
  * @param action 执行器对象
  * @param type 执行器类型
  */
-const onActionTypeChange = (action: Action, type: number) => {
+const onActionTypeChange = (action: Action, type: number, index: number) => {
   // 清理不相关的配置，确保数据结构干净
   if (isDeviceAction(type)) {
     // 设备控制类型：清理告警配置，确保设备参数存在
@@ -269,5 +330,10 @@ const onActionTypeChange = (action: Action, type: number) => {
     action.params = undefined
     action.alertConfigId = undefined
   }
+
+  nextTick(() => {
+    deviceControlRefs.value[index]?.clearValidate?.()
+    alertConfigRefs.value[index]?.clearValidate?.()
+  })
 }
 </script>

@@ -1,5 +1,11 @@
 <template>
-  <div class="space-y-16px">
+  <el-form
+    ref="innerFormRef"
+    :model="condition"
+    :rules="conditionRules"
+    label-width="110px"
+    class="space-y-16px"
+  >
     <!-- 触发事件类型选择 -->
     <el-form-item label="触发事件类型" required>
       <el-select
@@ -22,7 +28,7 @@
       <!-- 产品设备选择 -->
       <el-row :gutter="16">
         <el-col :span="12">
-          <el-form-item label="产品" required>
+          <el-form-item label="产品" prop="productId" required>
             <ProductSelector
               :model-value="condition.productId"
               @update:model-value="(value) => updateConditionField('productId', value)"
@@ -31,7 +37,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="设备" required>
+          <el-form-item label="设备" prop="deviceId" required>
             <DeviceSelector
               :model-value="condition.deviceId"
               @update:model-value="(value) => updateConditionField('deviceId', value)"
@@ -46,7 +52,7 @@
       <el-row :gutter="16">
         <!-- 属性/事件/服务选择 -->
         <el-col :span="6">
-          <el-form-item label="监控项" required>
+          <el-form-item label="监控项" prop="identifier" required>
             <PropertySelector
               :model-value="condition.identifier"
               @update:model-value="(value) => updateConditionField('identifier', value)"
@@ -60,7 +66,7 @@
 
         <!-- 操作符选择 - 服务调用和事件上报不需要操作符 -->
         <el-col v-if="needsOperatorSelector" :span="6">
-          <el-form-item label="操作符" required>
+          <el-form-item label="操作符" prop="operator" required>
             <OperatorSelector
               :model-value="condition.operator"
               @update:model-value="(value) => updateConditionField('operator', value)"
@@ -71,7 +77,7 @@
 
         <!-- 值输入 -->
         <el-col :span="isWideValueColumn ? 18 : 12">
-          <el-form-item :label="valueInputLabel" required>
+          <el-form-item :label="valueInputLabel" prop="value" :required="needsValueRequired">
             <!-- 服务调用参数配置 -->
             <JsonParamsInput
               v-if="triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE"
@@ -113,7 +119,7 @@
       <!-- 设备状态触发器使用简化的配置 -->
       <el-row :gutter="16">
         <el-col :span="12">
-          <el-form-item label="产品" required>
+          <el-form-item label="产品" prop="productId" required>
             <ProductSelector
               :model-value="condition.productId"
               @update:model-value="(value) => updateConditionField('productId', value)"
@@ -122,7 +128,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="设备" required>
+          <el-form-item label="设备" prop="deviceId" required>
             <DeviceSelector
               :model-value="condition.deviceId"
               @update:model-value="(value) => updateConditionField('deviceId', value)"
@@ -134,7 +140,7 @@
       </el-row>
       <el-row :gutter="16">
         <el-col :span="6">
-          <el-form-item label="操作符" required>
+          <el-form-item label="操作符" prop="operator" required>
             <el-select
               :model-value="condition.operator"
               @update:model-value="(value) => updateConditionField('operator', value)"
@@ -149,11 +155,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="6">
-          <el-form-item label="参数" required>
+          <el-form-item label="参数" prop="value" required>
             <el-select
               :model-value="condition.value"
               @update:model-value="(value) => updateConditionField('value', value)"
-              placeholder="请选择操作符"
+              placeholder="请选择设备状态"
               class="w-full"
             >
               <el-option
@@ -177,10 +183,11 @@
         此触发类型暂不需要配置额外条件
       </p>
     </div>
-  </div>
+  </el-form>
 </template>
 
 <script setup lang="ts">
+import type { FormInstance } from 'element-plus'
 import ProductSelector from '../selectors/ProductSelector.vue'
 import DeviceSelector from '../selectors/DeviceSelector.vue'
 import PropertySelector from '../selectors/PropertySelector.vue'
@@ -196,6 +203,7 @@ import {
   IotRuleSceneTriggerConditionParameterOperatorEnum,
   IoTDeviceStatusEnum
 } from '@/views/iot/utils/constants'
+import { buildMainConditionRules } from '@/views/iot/utils/sceneRule'
 import { useVModel } from '@vueuse/core'
 
 /** 主条件内部配置组件 */
@@ -224,8 +232,11 @@ const deviceStatusChangeOptions = [
 ]
 
 const condition = useVModel(props, 'modelValue', emit)
+const innerFormRef = ref<FormInstance>()
 const propertyType = ref('') // 属性类型
 const propertyConfig = ref<any>(null) // 属性配置
+
+const conditionRules = computed(() => buildMainConditionRules(props.triggerType))
 
 // 计算属性：是否为设备属性触发器
 const isDevicePropertyTrigger = computed(() => {
@@ -248,6 +259,11 @@ const needsOperatorSelector = computed(() => {
     IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST
   ] as number[]
   return !noOperatorTriggerTypes.includes(props.triggerType)
+})
+
+// 比较值是否必填（属性上报必填，事件/服务可选）
+const needsValueRequired = computed(() => {
+  return props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_PROPERTY_POST
 })
 
 // 计算属性：是否需要宽列布局（服务调用和事件上报不需要操作符列，所以值输入列更宽）
@@ -282,13 +298,26 @@ const serviceConfig = computed(() => {
   return undefined
 })
 
+/** 设备状态触发器默认操作符为「等于」 */
+const ensureDeviceStatusDefaults = () => {
+  if (props.triggerType !== IotRuleSceneTriggerTypeEnum.DEVICE_STATE_UPDATE) {
+    return
+  }
+  if (!condition.value.operator) {
+    condition.value.operator = IotRuleSceneTriggerConditionParameterOperatorEnum.EQUALS.value
+  }
+}
+
 /**
  * 更新条件字段
  * @param field 字段名
  * @param value 字段值
  */
-const updateConditionField = (field: any, value: any) => {
+const updateConditionField = (field: keyof Trigger, value: any) => {
   condition.value[field] = value
+  nextTick(() => {
+    innerFormRef.value?.validateField(field as string).catch(() => {})
+  })
 }
 
 /**
@@ -301,15 +330,19 @@ const handleTriggerTypeChange = (type: number) => {
 
 /** 处理产品变化事件 */
 const handleProductChange = () => {
-  // 产品变化时清空设备和属性
   condition.value.deviceId = undefined
   condition.value.identifier = ''
+  nextTick(() => {
+    innerFormRef.value?.clearValidate(['deviceId', 'identifier'])
+  })
 }
 
 /** 处理设备变化事件 */
 const handleDeviceChange = () => {
-  // 设备变化时清空属性
   condition.value.identifier = ''
+  nextTick(() => {
+    innerFormRef.value?.clearValidate('identifier')
+  })
 }
 
 /**
@@ -321,7 +354,6 @@ const handlePropertyChange = (propertyInfo: any) => {
     propertyType.value = propertyInfo.type
     propertyConfig.value = propertyInfo.config
 
-    // 对于事件上报和服务调用，自动设置操作符为 '='
     if (
       props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_EVENT_POST ||
       props.triggerType === IotRuleSceneTriggerTypeEnum.DEVICE_SERVICE_INVOKE
@@ -330,4 +362,36 @@ const handlePropertyChange = (propertyInfo: any) => {
     }
   }
 }
+
+/** 校验主条件表单 */
+const validate = async (): Promise<boolean> => {
+  if (!innerFormRef.value || Object.keys(conditionRules.value).length === 0) {
+    return true
+  }
+  try {
+    await innerFormRef.value.validate()
+    return true
+  } catch {
+    return false
+  }
+}
+
+const clearValidate = () => {
+  innerFormRef.value?.clearValidate()
+}
+
+defineExpose({ validate, clearValidate })
+
+watch(
+  () => props.triggerType,
+  () => {
+    ensureDeviceStatusDefaults()
+    nextTick(() => clearValidate())
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  ensureDeviceStatusDefaults()
+})
 </script>
