@@ -284,6 +284,19 @@
 
 ![预览图](/.image/common/iot-preview.png)
 
+### IM 即时通讯
+
+演示地址（Vue3 + Element Plus）：<http://dashboard-vue3.yudao.iocoder.cn>
+
+使用文档：<https://doc.iocoder.cn/im-preview/>
+
+
+![功能图](/.image/common/im-feature.png)
+
+| 聊天界面 | 聊天管理 |
+| --- | --- |
+| ![聊天界面](/.image/common/im-preview-home.png) | ![聊天管理](/.image/common/im-preview-manager.png) |
+
 ## 🐷 演示图
 
 ### 系统功能
