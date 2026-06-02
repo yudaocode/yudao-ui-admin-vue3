@@ -5,6 +5,7 @@ export interface IotSceneRule {
   id?: number // 场景编号
   name: string // 场景名称
   description?: string // 场景描述
+  lastTriggerTime?: string // 最近触发时间
   status: number // 场景状态：0-开启，1-关闭
   triggers: Trigger[] // 触发器数组
   actions: Action[] // 执行器数组
