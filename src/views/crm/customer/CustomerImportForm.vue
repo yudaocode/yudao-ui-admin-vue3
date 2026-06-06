@@ -54,7 +54,7 @@ import * as CustomerApi from '@/api/crm/customer'
 import download from '@/utils/download'
 import type { UploadUserFile } from 'element-plus'
 import * as UserApi from '@/api/system/user'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 
 defineOptions({ name: 'CrmCustomerImportForm' })
 
@@ -74,7 +74,7 @@ const open = async () => {
   await resetForm()
   // 获得用户列表
   userOptions.value = await UserApi.getSimpleUserList()
-  ownerUserId.value = useUserStore().getUser.id
+  ownerUserId.value = getCurrentUserId()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

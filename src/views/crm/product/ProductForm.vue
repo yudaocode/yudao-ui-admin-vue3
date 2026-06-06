@@ -103,7 +103,7 @@ import * as ProductApi from '@/api/crm/product'
 import * as ProductCategoryApi from '@/api/crm/product/category'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { getSimpleUserList, UserVO } from '@/api/system/user'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 
 defineOptions({ name: 'CrmProductForm' })
 
@@ -114,7 +114,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const userId = useUserStore().getUser.id // 当前登录的编号
+const userId = getCurrentUserId() // 当前登录的编号
 const formData = ref({
   id: undefined,
   name: undefined,

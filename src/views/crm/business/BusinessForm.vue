@@ -140,7 +140,7 @@ import * as BusinessApi from '@/api/crm/business'
 import * as BusinessStatusApi from '@/api/crm/business/status'
 import * as CustomerApi from '@/api/crm/customer'
 import * as UserApi from '@/api/system/user'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import BusinessProductForm from './components/BusinessProductForm.vue'
 import { erpPriceMultiply, erpPriceInputFormatter } from '@/utils'
 
@@ -233,7 +233,7 @@ const open = async (type: string, id?: number, customerId?: number, contactId?: 
   userOptions.value = await UserApi.getSimpleUserList()
   // 默认新建时选中自己
   if (formType.value === 'create') {
-    formData.value.ownerUserId = useUserStore().getUser.id
+    formData.value.ownerUserId = getCurrentUserId()
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗

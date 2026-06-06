@@ -64,6 +64,15 @@ export const SystemUserSocialTypeEnum = {
   }
 }
 
+/**
+ * 用户性别枚举（对齐后端 system_user_sex 字典）
+ */
+export const SystemUserSexEnum = {
+  UNKNOWN: 0, // 未知
+  MALE: 1, // 男
+  FEMALE: 2 // 女
+}
+
 // ========== INFRA 模块 ==========
 /**
  * 代码生成模板类型

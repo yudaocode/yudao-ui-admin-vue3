@@ -288,15 +288,3 @@ export const isInContainer = (el: Element, container: any) => {
   )
 }
 
-// TODO @AI：拿到 /Users/yunai/Java/yudao-all-in-one/yudao-ui-admin-vue3/src/utils/index.ts；放在 domutils 有点奇怪！
-/** HTML 转义函数，防止 XSS */
-export const escapeHtml = (text: string): string => {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  }
-  return text.replace(/[&<>"']/g, (char) => map[char])
-}

@@ -37,6 +37,12 @@ export const formatToken = (token: string): string => {
 }
 // ========== 账号相关 ==========
 
+/** 获取当前登录用户编号 */
+export const getCurrentUserId = (): number => {
+  const user = wsCache.get(CACHE_KEY.USER)?.user
+  return Number(user?.id) || 0
+}
+
 export type LoginFormType = {
   tenantName: string
   username: string

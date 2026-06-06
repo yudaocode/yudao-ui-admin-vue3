@@ -163,7 +163,7 @@ import {
   MesWmStockTakingTypeEnum,
   MesWmStockTakingTaskStatusEnum
 } from '@/views/mes/utils/constants'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 
 defineOptions({ name: 'StockTakingForm' })
 
@@ -258,7 +258,7 @@ const open = async (type: string, id?: number) => {
     }
   } else {
     // 新建时，默认设置当前登录用户为盘点人
-    formData.value.userId = useUserStore().getUser.id
+    formData.value.userId = getCurrentUserId()
   }
   // 保存原始数据快照
   originalFormData.value = JSON.stringify(formData.value)

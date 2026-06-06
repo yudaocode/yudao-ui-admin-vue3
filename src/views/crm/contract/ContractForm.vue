@@ -200,7 +200,7 @@ import * as UserApi from '@/api/system/user'
 import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 import { erpPriceMultiply, erpPriceInputFormatter } from '@/utils'
-import { useUserStore } from '@/store/modules/user'
+import { getCurrentUserId } from '@/utils/auth'
 import ContractProductForm from '@/views/crm/contract/components/ContractProductForm.vue'
 
 const { t } = useI18n() // 国际化
@@ -284,7 +284,7 @@ const open = async (type: string, id?: number) => {
   userOptions.value = await UserApi.getSimpleUserList()
   // 默认新建时选中自己
   if (formType.value === 'create') {
-    formData.value.ownerUserId = useUserStore().getUser.id
+    formData.value.ownerUserId = getCurrentUserId()
   }
   // 获取联系人
   contactList.value = await ContactApi.getSimpleContactList()

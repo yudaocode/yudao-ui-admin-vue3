@@ -89,6 +89,22 @@ onMounted(() => {
   </div>
 </template>
 <style lang="scss" scoped>
+// 铃铛对齐修复：
+// DOM 链路 div.message > ElPopover > ElBadge(inline-block) > Icon
+// 默认 ElBadge 是 inline-block，在父 flex 容器里按 baseline 对齐，导致图标比其他 ElIcon 视觉偏下 1-2px
+// 解法：让 .message 本身变 flex-center 容器，且穿透设置内部 .el-badge 也为 flex-center
+// 这样从父到子整条链路都走几何中心对齐，不再受 inline-block baseline 影响
+.message {
+  display: flex;
+  align-items: center;
+  height: 100%;
+
+  :deep(.el-badge) {
+    display: flex;
+    align-items: center;
+  }
+}
+
 .message-empty {
   display: flex;
   flex-direction: column;
