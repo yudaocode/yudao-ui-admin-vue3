@@ -34,14 +34,12 @@ import { CalHolidayApi, CalHolidayVO } from '@/api/mes/cal/holiday'
 import { formatDate } from '@/utils/formatTime'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
-import PluginLunar from 'dayjs-plugin-lunar'
 import { SolarDay } from 'tyme4ts'
 import HolidayForm from './HolidayForm.vue'
 import { checkPermi } from '@/utils/permission'
 import { HolidayType } from '@/views/mes/utils/constants'
 
 dayjs.locale('zh-cn')
-dayjs.extend(PluginLunar)
 
 defineOptions({ name: 'MesCalHoliday' })
 

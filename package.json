@@ -44,7 +44,6 @@
     "cropperjs": "^2.1.1",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.20",
-    "dayjs-plugin-lunar": "^1.4.1",
     "dhtmlx-gantt": "^9.1.1",
     "diagram-js": "^15.14.0",
     "driver.js": "^1.4.0",

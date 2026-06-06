@@ -65,9 +65,6 @@ importers:
       dayjs:
         specifier: ^1.11.20
         version: 1.11.20
-      dayjs-plugin-lunar:
-        specifier: ^1.4.1
-        version: 1.4.1(dayjs@1.11.20)(tyme4ts@1.4.6)
       dhtmlx-gantt:
         specifier: ^9.1.1
         version: 9.1.4
@@ -3492,12 +3489,6 @@ packages:
   d@1.0.2:
     resolution: {integrity: sha512-MOqHvMWF9/9MX6nza0KgvFH4HpMU0EF5uUDXqX/BtxtU8NfB0QzRtJ8Oe/6SuS4kbhyzVJwjd97EA4PKrzJ8bw==}
     engines: {node: '>=0.12'}
-
-  dayjs-plugin-lunar@1.4.1:
-    resolution: {integrity: sha512-nHKJMKoVAGt/Wp6x3xH8GrjWhB25YBYd6iYTCfLkCm4GAS6q3jvfHpLwRnIX8bjHgl8sPlTPiLFcylcEaEnj8Q==}
-    peerDependencies:
-      dayjs: ^1.0.0
-      tyme4ts: ^1.0.0
 
   dayjs@1.11.20:
     resolution: {integrity: sha512-YbwwqR/uYpeoP4pu043q+LTDLFBLApUP6VxRihdfNTqu4ubqMlGDLd6ErXhEgsyvY0K6nCs7nggYumAN+9uEuQ==}
@@ -9429,11 +9420,6 @@ snapshots:
     dependencies:
       es5-ext: 0.10.64
       type: 2.7.3
-
-  dayjs-plugin-lunar@1.4.1(dayjs@1.11.20)(tyme4ts@1.4.6):
-    dependencies:
-      dayjs: 1.11.20
-      tyme4ts: 1.4.6
 
   dayjs@1.11.20: {}
 
