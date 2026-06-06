@@ -149,13 +149,18 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
       }
       if (route.children) {
         data.children = generateRoute(route.children)
-        // vue-router 5 要求路由 name 全局唯一；后端菜单可能生成父子同名，例如 /mall/trade/delivery/express。
-        // 父路由改名后，如果同名子是叶子页面，则把页面 component 折叠到父路由，保持原 URL 可访问。
+        // Vue Router 要求路由 name 全局唯一；后端菜单可能生成父子同名，例如 /mall/trade/delivery/express。
+        // 父级只有一个同名默认页时才折叠；存在兄弟节点时必须保留子菜单，例如商城装修下的装修模板。
         const sameNameChild = findDescendantRouteByName(data.children, data.name)
         if (sameNameChild) {
           data.name = `${data.name}Parent`
-          if (!sameNameChild.children?.length && sameNameChild.component) {
-            // 只移除被折叠的同名子，保留其它兄弟节点，避免后续菜单扩展时丢路由。
+          if (
+            data.children.length === 1 &&
+            data.children[0] === sameNameChild &&
+            !sameNameChild.children?.length &&
+            sameNameChild.component
+          ) {
+            // 只有单一默认页才折叠到父路由，避免父子同名且不影响多子菜单展示。
             const remainingChildren = removeDescendantRoute(data.children, sameNameChild)
             data.component = sameNameChild.component
             data.redirect = sameNameChild.redirect
