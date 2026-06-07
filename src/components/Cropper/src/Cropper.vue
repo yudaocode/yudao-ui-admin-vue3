@@ -146,3 +146,13 @@ function getRoundedCanvas(sourceCanvas: HTMLCanvasElement) {
   return canvas
 }
 </script>
+<style lang="scss" scoped>
+$prefix-cls: #{$namespace}-cropper-image;
+
+.#{$prefix-cls} {
+  // cropperjs 动态插入的自定义元素不受 scoped 样式约束，需要穿透设置高度
+  > :deep(cropper-canvas) {
+    height: 100%;
+  }
+}
+</style>
