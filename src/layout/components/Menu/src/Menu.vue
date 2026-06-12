@@ -376,7 +376,9 @@ export default defineComponent({
       if (isUrl(index)) {
         window.open(index)
       } else {
-        const routeInfo = findRouteByPath(permissionStore.getRouters, index, '/', !props.rootOnly)
+        const routeInfo = props.rootOnly
+          ? getRootMenuRoute(permissionStore.getRouters, index)
+          : findRouteByPath(permissionStore.getRouters, index)
         const link = routeInfo?.route.meta?.link
         if (typeof link === 'string') {
           window.open(link)
