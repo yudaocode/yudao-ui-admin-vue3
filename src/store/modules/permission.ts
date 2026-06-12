@@ -11,13 +11,15 @@ export interface PermissionState {
   routers: AppRouteRecordRaw[]
   addRouters: AppRouteRecordRaw[]
   menuTabRouters: AppRouteRecordRaw[]
+  menuRootPath: string
 }
 
 export const usePermissionStore = defineStore('permission', {
   state: (): PermissionState => ({
     routers: [],
     addRouters: [],
-    menuTabRouters: []
+    menuTabRouters: [],
+    menuRootPath: ''
   }),
   getters: {
     getRouters(): AppRouteRecordRaw[] {
@@ -28,6 +30,9 @@ export const usePermissionStore = defineStore('permission', {
     },
     getMenuTabRouters(): AppRouteRecordRaw[] {
       return this.menuTabRouters
+    },
+    getMenuRootPath(): string {
+      return this.menuRootPath
     }
   },
   actions: {
@@ -61,6 +66,9 @@ export const usePermissionStore = defineStore('permission', {
     },
     setMenuTabRouters(routers: AppRouteRecordRaw[]): void {
       this.menuTabRouters = routers
+    },
+    setMenuRootPath(path: string): void {
+      this.menuRootPath = path
     }
   },
   persist: false

@@ -3,7 +3,6 @@ import { ElMessage } from 'element-plus'
 import { useClipboard, useCssVar } from '@vueuse/core'
 
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
-import { useDesign } from '@/hooks/web/useDesign'
 
 import { setCssVar, trim } from '@/utils'
 import { colorIsDark, hexToRGB, lighten } from '@/utils/color'
@@ -12,16 +11,15 @@ import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import ColorRadioPicker from './components/ColorRadioPicker.vue'
 import InterfaceDisplay from './components/InterfaceDisplay.vue'
 import LayoutRadioPicker from './components/LayoutRadioPicker.vue'
+import { isHeaderNavLayout } from '@/utils/layout'
+import { useSetting } from './useSetting'
 
 defineOptions({ name: 'Setting' })
 
 const { t } = useI18n()
 const appStore = useAppStore()
-
-const { getPrefixCls } = useDesign()
-const prefixCls = getPrefixCls('setting')
 const layout = computed(() => appStore.getLayout)
-const drawer = ref(false)
+const { drawerVisible } = useSetting()
 
 // 主题色相关
 const systemTheme = ref(appStore.getTheme.elColorPrimary)
@@ -30,7 +28,7 @@ const setSystemTheme = (color: string) => {
   setCssVar('--el-color-primary', color)
   appStore.setTheme({ elColorPrimary: color })
   const leftMenuBgColor = useCssVar('--left-menu-bg-color', document.documentElement)
-  setMenuTheme(trim(unref(leftMenuBgColor)))
+  setMenuTheme(trim(unref(leftMenuBgColor) || ''))
 }
 
 // 头部主题相关
@@ -50,7 +48,7 @@ const setHeaderTheme = (color: string) => {
     topHeaderHoverColor: textHoverColor,
     topToolBorderColor
   })
-  if (unref(layout) === 'top') {
+  if (isHeaderNavLayout(unref(layout))) {
     setMenuTheme(color)
   }
 }
@@ -71,11 +69,11 @@ const setMenuTheme = (color: string) => {
     // 左侧菜单选中背景颜色
     leftMenuBgActiveColor: isDarkColor
       ? 'var(--el-color-primary)'
-      : hexToRGB(unref(primaryColor), 0.1),
+      : hexToRGB(unref(primaryColor) || '#409eff', 0.1),
     // 左侧菜单收起选中背景颜色
     leftMenuCollapseBgActiveColor: isDarkColor
       ? 'var(--el-color-primary)'
-      : hexToRGB(unref(primaryColor), 0.1),
+      : hexToRGB(unref(primaryColor) || '#409eff', 0.1),
     // 左侧菜单字体颜色
     leftMenuTextColor: isDarkColor ? '#bfcbd9' : '#333',
     // 左侧菜单选中字体颜色
@@ -88,7 +86,7 @@ const setMenuTheme = (color: string) => {
   appStore.setTheme(theme)
   appStore.setCssVarTheme()
 }
-if (layout.value === 'top' && !appStore.getIsDark) {
+if (isHeaderNavLayout(layout.value) && !appStore.getIsDark) {
   headerTheme.value = '#fff'
   setHeaderTheme('#fff')
 }
@@ -97,7 +95,7 @@ if (layout.value === 'top' && !appStore.getIsDark) {
 watch(
   () => layout.value,
   (n) => {
-    if (n === 'top' && !appStore.getIsDark) {
+    if (isHeaderNavLayout(n) && !appStore.getIsDark) {
       headerTheme.value = '#fff'
       setHeaderTheme('#fff')
     } else {
@@ -201,15 +199,7 @@ const clear = () => {
 </script>
 
 <template>
-  <div
-    :class="prefixCls"
-    class="fixed right-0 top-[45%] h-40px w-40px cursor-pointer bg-[var(--el-color-primary)] text-center leading-40px"
-    @click="drawer = true"
-  >
-    <Icon color="#fff" icon="ep:setting" />
-  </div>
-
-  <ElDrawer v-model="drawer" :z-index="4000" direction="rtl" size="350px">
+  <ElDrawer v-model="drawerVisible" :z-index="4000" direction="rtl" size="350px">
     <template #header>
       <span class="text-16px font-700">{{ t('setting.projectSetting') }}</span>
     </template>
@@ -258,7 +248,7 @@ const clear = () => {
       />
 
       <!-- 菜单主题 -->
-      <template v-if="layout !== 'top'">
+      <template v-if="!isHeaderNavLayout(layout)">
         <ElDivider>{{ t('setting.menuTheme') }}</ElDivider>
         <ColorRadioPicker
           v-model="menuTheme"
@@ -292,12 +282,3 @@ const clear = () => {
     </div>
   </ElDrawer>
 </template>
-
-<style lang="scss" scoped>
-$prefix-cls: #{$namespace}-setting;
-
-.#{$prefix-cls} {
-  z-index: 1200; /* 修正没有z-index会被表格层覆盖,值不要超过4000 */
-  border-radius: 6px 0 0 6px;
-}
-</style>

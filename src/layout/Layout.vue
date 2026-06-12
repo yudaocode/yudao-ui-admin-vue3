@@ -5,6 +5,7 @@ import { Backtop } from '@/components/Backtop'
 import { Setting } from '@/layout/components/Setting'
 import { useRenderLayout } from './components/useRenderLayout'
 import { useDesign } from '@/hooks/web/useDesign'
+import { getLayoutRenderMode } from '@/utils/layout'
 
 const { getPrefixCls } = useDesign()
 
@@ -25,7 +26,7 @@ const handleClickOutside = () => {
 }
 
 const renderLayout = () => {
-  switch (unref(layout)) {
+  switch (getLayoutRenderMode(unref(layout))) {
     case 'classic':
       const { renderClassic } = useRenderLayout()
       return renderClassic()
@@ -47,7 +48,14 @@ export default defineComponent({
   name: 'Layout',
   setup() {
     return () => (
-      <section class={[prefixCls, `${prefixCls}__${layout.value}`, 'w-[100%] h-[100%] relative']}>
+      <section
+        class={[
+          prefixCls,
+          `${prefixCls}__${layout.value}`,
+          `${prefixCls}__${getLayoutRenderMode(layout.value)}`,
+          'w-[100%] h-[100%] relative'
+        ]}
+      >
         {mobile.value && !collapse.value ? (
           <div
             class="absolute left-0 top-0 z-99 h-full w-full bg-[var(--el-color-black)] opacity-30"
