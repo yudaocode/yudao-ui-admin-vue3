@@ -804,7 +804,8 @@ function convertGroup(group: ImGroupRespVO): Group {
     pinnedMessages: group.pinnedMessages?.map(convertGroupMessageVO),
     mutedAll: group.mutedAll,
     banned: group.banned,
-    joinApproval: group.joinApproval
+    joinApproval: group.joinApproval,
+    joinStatus: group.joinStatus
   }
 }
 

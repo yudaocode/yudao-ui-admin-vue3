@@ -141,6 +141,7 @@ export interface Group {
   mutedAll?: boolean // 是否全群禁言
   banned?: boolean // 是否被管理员封禁
   joinApproval?: boolean // 进群是否需群主 / 管理员审批
+  joinStatus?: number // 当前登录用户在该群的成员状态（参见 CommonStatusEnum：0 在群 / 1 已退群）；历史退群群仍返回，供展示历史消息的群名 / 头像
 
   // ========== 前端扩展字段（user-per-group 维度） ==========
   silent?: boolean // 是否免打扰。从当前用户的 GroupMember 回填

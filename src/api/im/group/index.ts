@@ -16,6 +16,7 @@ export interface ImGroupRespVO {
   dissolvedTime?: string // 解散时间
   createTime?: string // 创建时间
   pinnedMessages?: ImGroupMessageRespVO[] // 群置顶消息列表（后端关联回填，仅当登录用户是群成员时非空）
+  joinStatus?: number // 当前登录用户在该群的成员状态（参见 CommonStatusEnum：0 在群 / 1 已退群）；历史退群群仍返回，供展示离线消息的群名 / 头像
 }
 
 // 群消息置顶 / 取消置顶 Request VO

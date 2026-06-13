@@ -241,7 +241,8 @@ import {
   getMemberDisplayName,
   getMentionCandidates,
   getSenderDisplayName,
-  getSenderRealNickname
+  getSenderRealNickname,
+  isGroupQuit
 } from '@/views/im/utils/user'
 import {
   resolveFriendNotificationSegments,
@@ -811,7 +812,8 @@ const myGroupRole = computed(() => {
 
 /** 是否可管理该消息发送人：我的角色高于目标角色（群主 > 管理员 > 普通成员）；目标角色未知时不展示 */
 const canManageSender = computed(() => {
-  if (!currentGroup.value || !myGroupRole.value) {
+  // 历史退群群：本地可能残留成员缓存，显式排除，避免右键仍出「禁言 / 移除」
+  if (!currentGroup.value || isGroupQuit(currentGroup.value) || !myGroupRole.value) {
     return false
   }
   const senderMember = currentGroup.value.members?.find((m) => m.userId === props.message.senderId)
@@ -856,6 +858,7 @@ function handleMultiSelectClick(e: MouseEvent) {
 const canPin = computed(
   () =>
     !!currentGroup.value &&
+    !isGroupQuit(currentGroup.value) &&
     isNormalMessage(props.message.type) &&
     !!props.message.id &&
     !isRecall.value &&

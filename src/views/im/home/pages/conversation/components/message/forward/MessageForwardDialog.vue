@@ -154,6 +154,7 @@ import FacePicker from '../../input/FacePicker.vue'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
+import { isGroupQuit } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
 import { useMessageMultiSelect } from '@/views/im/home/composables/useMessageMultiSelect'
 import {
@@ -228,7 +229,13 @@ const confirmButtonText = computed(() =>
 /** 候选会话：从 store 拿排序后的列表（转发回原会话也允许，与微信一致）；公众号 / 频道单向消息不接受转发，从候选里剔除 */
 const candidateConversations = computed<Conversation[]>(() =>
   conversationStore.getSortedConversationList.filter(
-    (conversation) => conversation.type !== ImConversationType.CHANNEL
+    (conversation) =>
+      conversation.type !== ImConversationType.CHANNEL &&
+      // 历史退群群不可被转发选中（选了后端也会拒）
+      !(
+        conversation.type === ImConversationType.GROUP &&
+        isGroupQuit(groupStore.getGroup(conversation.targetId))
+      )
   )
 )
 

@@ -32,8 +32,9 @@
               :group-name="group.name"
             />
 
-            <!-- 添加（任何成员都能邀请） -->
+            <!-- 添加（任何成员都能邀请；历史退群群隐藏） -->
             <div
+              v-if="!isQuitGroup"
               class="im-conversation-group-side__tile-wrap flex flex-col items-center w-[66px] cursor-pointer"
               title="邀请好友入群"
               @click="handleOpenInvite"
@@ -164,8 +165,9 @@
             <span v-else class="text-13px text-[var(--el-text-color-placeholder)] leading-[1.6]">未设置</span>
           </div>
 
-          <!-- 备注（仅自己可见；保存后会替换会话列表 / 顶部群名展示） -->
+          <!-- 备注（仅自己可见；保存后会替换会话列表 / 顶部群名展示）；历史退群群隐藏：改备注走 updateGroupMember，已退群会被后端拒 -->
           <el-popover
+            v-if="!isQuitGroup"
             v-model:visible="groupRemarkPopoverVisible"
             trigger="click"
             placement="left-start"
@@ -203,8 +205,9 @@
             </div>
           </el-popover>
 
-          <!-- 我在本群的昵称（任何成员都能改自己的） -->
+          <!-- 我在本群的昵称（任何成员都能改自己的）；历史退群群隐藏：走 updateGroupMember，已退群会被后端拒 -->
           <el-popover
+            v-if="!isQuitGroup"
             v-model:visible="remarkPopoverVisible"
             trigger="click"
             placement="left-start"
@@ -344,8 +347,11 @@
         </template>
       </div>
 
-      <!-- ==================== 底部：退出 / 解散群聊 ==================== -->
-      <div class="flex-shrink-0 px-4 pt-[14px] pb-[18px] bg-[var(--el-bg-color)] border-t border-t-solid border-[var(--el-border-color-lighter)]">
+      <!-- ==================== 底部：退出 / 解散群聊（历史退群群隐藏，已退群无需再退） ==================== -->
+      <div
+        v-if="!isQuitGroup"
+        class="flex-shrink-0 px-4 pt-[14px] pb-[18px] bg-[var(--el-bg-color)] border-t border-t-solid border-[var(--el-border-color-lighter)]"
+      >
         <!-- 群主：解散群聊 -->
         <el-button
           v-if="isOwner"
@@ -410,6 +416,7 @@ import GroupOwnerTransferDialog from '../../../../components/group/GroupOwnerTra
 import GroupRequestListDialog from '../../../../components/group/GroupRequestListDialog.vue'
 import RecommendCardDialog from '../../../../components/user/RecommendCardDialog.vue'
 import { toGroupCardTarget } from '@/views/im/utils/message'
+import { isGroupQuit } from '@/views/im/utils/user'
 import type { Conversation, GroupLite } from '../../../../types'
 import type { GroupMemberLite } from '../../../../components/group/GroupMember.vue'
 
@@ -461,12 +468,21 @@ function handleOpenInvite() {
 }
 
 const myId = computed(() => getCurrentUserId())
-const isOwner = computed(() => props.group != null && props.group.ownerId === myId.value)
+/** 历史退群群：禁所有群操作入口（邀请 / 移出 / 改资料 / 禁言 / 审批 / 退出等），只保留展示；props.group 是 GroupLite 无 joinStatus，回 store 取全量 */
+const isQuitGroup = computed(() => {
+  const id = props.group?.id
+  return id != null && isGroupQuit(groupStore.getGroup(id))
+})
+const isOwner = computed(
+  () => !isQuitGroup.value && props.group != null && props.group.ownerId === myId.value
+)
 /** 当前用户在群里的角色（来自 props.members 的 me 行）；用于判定是否可移出他人 */
 const myRole = computed(() => props.members.find((m) => m.userId === myId.value)?.role)
-/** 群主或管理员：在抽屉里有 "移出群成员" 入口 */
+/** 群主或管理员：在抽屉里有 "移出群成员" 入口；历史退群群一律视为无权限 */
 const isOwnerOrAdmin = computed(
-  () => myRole.value === ImGroupMemberRole.OWNER || myRole.value === ImGroupMemberRole.ADMIN
+  () =>
+    !isQuitGroup.value &&
+    (myRole.value === ImGroupMemberRole.OWNER || myRole.value === ImGroupMemberRole.ADMIN)
 )
 
 // 排除已退群成员 + 关键字过滤；按角色排序：群主→管理员→普通成员（同角色按 userId 稳定）

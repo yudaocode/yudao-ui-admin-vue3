@@ -4,6 +4,7 @@ import { getCurrentUserId } from '@/utils/auth'
 import { useConversationStore } from '../store/conversationStore'
 import { useGroupStore } from '../store/groupStore'
 import { ImConversationType, ImGroupMemberRole } from '../../utils/constants'
+import { isGroupQuit } from '../../utils/user'
 
 export type MuteOverlayInfo = { text: string; icon: string }
 
@@ -60,6 +61,10 @@ export function useMuteOverlay(): ComputedRef<MuteOverlayInfo | null> {
     const group = groupStore.getGroup(conversation.targetId)
     if (!group) {
       return null
+    }
+    // 历史退群群：已退群只能查看历史，禁止发送（文本 / 图片 / 文件 / 语音 / 重试共用这一层拦截）
+    if (isGroupQuit(group)) {
+      return { text: '你已退出群聊，仅可查看历史消息', icon: 'ant-design:logout-outlined' }
     }
     const myId = getCurrentUserId()
     // 群封禁：管理后台操作，所有人不可发送

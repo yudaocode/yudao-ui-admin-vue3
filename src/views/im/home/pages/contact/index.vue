@@ -101,7 +101,7 @@ import GroupDetail from './GroupDetail.vue'
 import { useConversationStore } from '../../store/conversationStore'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
-import { getFriendDisplayName, getGroupDisplayName } from '../../../utils/user'
+import { getFriendDisplayName, getGroupDisplayName, isGroupQuit } from '../../../utils/user'
 import type { FriendLite, FriendRequest, Group, GroupLite, User } from '../../types'
 import { ImConversationType } from '../../../utils/constants'
 import { StorageKeys } from '../../../utils/db'
@@ -139,14 +139,17 @@ const friendRequests = computed<FriendRequest[]>(() => friendStore.friendRequest
 const friends = computed<FriendLite[]>(() => friendStore.getActiveFriendLiteList)
 
 const groups = computed<GroupLite[]>(() =>
-  groupStore.groups.map((group: Group) => ({
-    id: group.id,
-    name: group.name,
-    showGroupName: getGroupDisplayName(group), // 优先用群备注 groupRemark，没设置时回落到原群名；避免点"进入群聊"时把已同步的备注会话名刷回原名
-    showImage: group.avatar,
-    showImageThumb: group.avatar,
-    memberCount: group.memberCount
-  }))
+  // 通讯录只展示当前仍在群的；已退群历史群只留在 store 里供消息展示群名 / 头像，不进通讯录
+  groupStore.groups
+    .filter((group: Group) => !isGroupQuit(group))
+    .map((group: Group) => ({
+      id: group.id,
+      name: group.name,
+      showGroupName: getGroupDisplayName(group), // 优先用群备注 groupRemark，没设置时回落到原群名；避免点"进入群聊"时把已同步的备注会话名刷回原名
+      showImage: group.avatar,
+      showImageThumb: group.avatar,
+      memberCount: group.memberCount
+    }))
 )
 
 /**

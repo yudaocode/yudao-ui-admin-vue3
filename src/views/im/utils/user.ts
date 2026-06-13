@@ -12,7 +12,7 @@
 import { countBy } from 'lodash-es'
 
 import { useUserStore } from '@/store/modules/user'
-import { SystemUserSexEnum } from '@/utils/constants'
+import { CommonStatusEnum, SystemUserSexEnum } from '@/utils/constants'
 import {
   ImConversationType,
   ImFriendAddSource,
@@ -30,6 +30,15 @@ import type { Conversation, Friend, Group, User } from '../home/types'
 // 候选缺失场景的稳定空数组；让 textMentions computed 在非 TEXT / 非群聊 / 无 @ 时返回同一引用，
 // MessageBubble 的 textSegments 才不会跟着无谓重算
 const EMPTY_MENTIONS: MentionCandidate[] = []
+
+/**
+ * 是否历史退群群：joinStatus 为 DISABLE（已退群 / 被移除）
+ *
+ * /im/group/list 会带回历史退群群（供展示历史消息的群名 / 头像）；这类群应禁止发送、隐藏群操作入口、不可被转发 / 推荐选中
+ */
+export function isGroupQuit(group?: Group | null): boolean {
+  return group?.joinStatus === CommonStatusEnum.DISABLE
+}
 
 /**
  * 私聊好友显示名：备注 > 真实昵称

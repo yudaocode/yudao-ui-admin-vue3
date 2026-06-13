@@ -71,7 +71,7 @@
                 </div>
               </div>
             </el-popover>
-            <el-tooltip v-else content="通话" placement="bottom">
+            <el-tooltip v-else-if="!isQuitGroup" content="通话" placement="bottom">
               <Icon
                 icon="ant-design:phone-outlined"
                 :size="20"
@@ -97,7 +97,7 @@
 
         <!-- 群通话胶囊条：仅群聊 + 该群有活跃通话时显示；点击展开看成员 + 加入按钮 -->
         <RtcGroupCallBanner
-          v-if="isGroup && conversationStore.activeConversation"
+          v-if="isGroup && !isQuitGroup && conversationStore.activeConversation"
           :group-id="conversationStore.activeConversation.targetId"
         />
 
@@ -109,7 +109,7 @@
         />
         <!-- 群顶部「待处理加群申请」横幅：仅群聊 + owner / admin + count > 0 时显示 -->
         <GroupRequestPending
-          v-if="isGroup && conversationStore.activeConversation"
+          v-if="isGroup && !isQuitGroup && conversationStore.activeConversation"
           :group-id="conversationStore.activeConversation.targetId"
         />
         <!-- 私聊：对方不再是有效好友（我删了对方 / 从未加过；单边设计下「被对方删除」本端 friendStore 不更新故不会触发）；胶囊嵌在 header 内（跟群置顶同级），点击弹 UserInfoCard -->
@@ -231,7 +231,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useFriendStore } from '../../../../store/friendStore'
 import { useImUiStore } from '../../../../store/uiStore'
-import { getMemberDisplayName } from '@/views/im/utils/user'
+import { getMemberDisplayName, isGroupQuit } from '@/views/im/utils/user'
 import { useGroupStore } from '../../../../store/groupStore'
 import MessageItem from './MessageItem.vue'
 import MessageInput from '../input/MessageInput.vue'
@@ -320,6 +320,15 @@ const isPrivate = computed(
 const isChannel = computed(
   () => conversationStore.activeConversation?.type === ImConversationType.CHANNEL
 )
+
+/** 当前激活会话是否历史退群群：禁群通话、隐藏群申请横幅等操作入口；聊天历史、群名头像照常展示 */
+const isQuitGroup = computed(() => {
+  const conversation = conversationStore.activeConversation
+  return (
+    conversation?.type === ImConversationType.GROUP &&
+    isGroupQuit(groupStore.getGroup(conversation.targetId))
+  )
+})
 
 /** 私聊会话且对端不是有效好友（本端 friend 记录缺失或 DISABLE）；单边删除语义下「被对方删除」不触发本端横幅 */
 const showNotFriendBanner = computed(() => {

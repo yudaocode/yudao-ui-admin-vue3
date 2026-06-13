@@ -79,7 +79,7 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { ImConversationType, ImGroupMemberRole } from '@/views/im/utils/constants'
 import { unpinGroupMessage as apiUnpinGroupMessage } from '@/api/im/group'
-import { getSenderDisplayName } from '@/views/im/utils/user'
+import { getSenderDisplayName, isGroupQuit } from '@/views/im/utils/user'
 import { resolveConversationLastContent } from '@/views/im/utils/conversation'
 import { getCurrentUserId } from '@/utils/auth'
 import { useGroupStore } from '../../../../store/groupStore'
@@ -123,6 +123,10 @@ const latest = computed(() => pinnedMessages.value[pinnedMessages.value.length -
 
 /** 当前用户是否群主 / 管理员（决定是否显示「移除」入口） */
 const canManage = computed(() => {
+  // 历史退群群：本地缓存残留时也不给「移除」入口
+  if (isGroupQuit(group.value)) {
+    return false
+  }
   const myId = getCurrentUserId()
   const role = group.value?.members?.find((m) => m.userId === myId)?.role
   return role === ImGroupMemberRole.OWNER || role === ImGroupMemberRole.ADMIN
