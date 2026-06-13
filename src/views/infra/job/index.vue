@@ -77,7 +77,13 @@
         <el-button type="info" plain @click="handleJobLog()" v-hasPermi="['infra:job:query']">
           <Icon icon="ep:zoom-in" class="mr-5px" /> 执行日志
         </el-button>
-        <el-button type="warning" plain @click="handleSyncJob()" :loading="syncLoading">
+        <el-button
+          type="warning"
+          plain
+          @click="handleSyncJob()"
+          :loading="syncLoading"
+          v-hasPermi="['infra:job:create']"
+        >
           <Icon icon="ep:refresh" class="mr-5px" /> 同步任务
         </el-button>
       </el-form-item>
