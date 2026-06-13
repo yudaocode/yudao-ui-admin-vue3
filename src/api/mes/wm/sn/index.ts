@@ -13,6 +13,20 @@ export interface WmSnGroupVO {
   createTime?: Date
 }
 
+export interface WmSnVO {
+  id?: number
+  uuid?: string
+  code?: string
+  itemId?: number
+  itemCode?: string
+  itemName?: string
+  specification?: string
+  unitName?: string
+  batchCode?: string
+  workOrderId?: number
+  createTime?: Date
+}
+
 export interface WmSnGenerateVO {
   itemId?: number
   batchCode?: string
@@ -28,6 +42,11 @@ export const generateSnCodes = async (data: WmSnGenerateVO) => {
 // 获得 SN 码分组分页
 export const getSnGroupPage = async (params: any) => {
   return await request.get({ url: `/mes/wm/sn/group-page`, params })
+}
+
+// 获得批次 SN 码明细列表
+export const getSnListByUuid = async (uuid: string) => {
+  return await request.get({ url: `/mes/wm/sn/list-by-uuid`, params: { uuid } })
 }
 
 // 批量删除 SN 码（按批次 UUID）

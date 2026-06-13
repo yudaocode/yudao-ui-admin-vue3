@@ -515,6 +515,7 @@ export enum BarcodeBizTypeEnum {
   PACKAGE = 105,
   STOCK = 106,
   BATCH = 107,
+  SN = 109,
   // PRO 生产模块 [300, 400)
   PROCARD = 300,
   WORKORDER = 301,
