@@ -1,4 +1,4 @@
-import {resolve} from 'path'
+import {dirname, relative, resolve} from 'path'
 import type {ConfigEnv, UserConfig} from 'vite'
 import {loadEnv, normalizePath} from 'vite'
 import {createVitePlugins} from './build/vite'
@@ -11,6 +11,12 @@ function pathResolve(dir: string) {
     return resolve(root, '.', dir)
 }
 
+function getRelativeScssUsePath(filename: string, targetPath: string) {
+    const cleanFilename = filename.split('?')[0]
+    const relativePath = normalizePath(relative(dirname(cleanFilename), targetPath))
+    return relativePath.startsWith('.') ? relativePath : `./${relativePath}`
+}
+
 // https://vitejs.dev/config/
 export default ({command, mode}: ConfigEnv): UserConfig => {
     let env = {} as any
@@ -20,7 +26,7 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
     } else {
         env = loadEnv(mode, root)
     }
-    const variablesScssPath = normalizePath(pathResolve('src/styles/variables.scss'))
+    const variablesScssPath = pathResolve('src/styles/variables.scss')
     return {
         base: env.VITE_BASE_PATH,
         root: root,
@@ -58,7 +64,7 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
                         ) {
                             return source
                         }
-                        return `@use "${variablesScssPath}" as *;\n${source}`
+                        return `@use "${getRelativeScssUsePath(filename, variablesScssPath)}" as *;\n${source}`
                     },
                     api: 'modern-compiler'
                 }
