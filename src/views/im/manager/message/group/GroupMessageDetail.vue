@@ -13,7 +13,10 @@
         <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="detail.type" />
       </el-descriptions-item>
       <el-descriptions-item v-if="MESSAGE_GROUP_READ_ENABLED" label="状态">
-        <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_STATUS" :value="detail.status" />
+        <dict-tag :type="DICT_TYPE.IM_MESSAGE_STATUS" :value="detail.status" />
+      </el-descriptions-item>
+      <el-descriptions-item v-if="MESSAGE_GROUP_READ_ENABLED" label="回执">
+        <dict-tag :type="DICT_TYPE.IM_MESSAGE_RECEIPT_STATUS" :value="detail.receiptStatus" />
       </el-descriptions-item>
       <el-descriptions-item label="@用户" :span="2">
         <template v-if="detail.atUserIds?.length">

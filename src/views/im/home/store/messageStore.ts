@@ -4,6 +4,7 @@ import { store } from '@/store'
 import {
   IM_AT_ALL_USER_ID,
   ImConversationType,
+  ImMessageReceiptStatus,
   ImMessageStatus,
   ImMessageType,
   isGroupNotification,
@@ -194,8 +195,7 @@ function syncConversationAtFlags(conversation: Conversation, message: Message): 
     message.selfSend ||
     conversation.type !== ImConversationType.GROUP ||
     !message.atUserIds ||
-    message.atUserIds.length === 0 ||
-    message.status === ImMessageStatus.READ
+    message.atUserIds.length === 0
   ) {
     return
   }
@@ -518,7 +518,6 @@ export const useMessageStore = defineStore('imMessageStore', {
           !message.selfSend &&
           !isActive &&
           isNormalMessage(message.type) &&
-          message.status !== ImMessageStatus.READ &&
           message.status !== ImMessageStatus.RECALL
         ) {
           conversation.unreadCount++
@@ -616,7 +615,6 @@ export const useMessageStore = defineStore('imMessageStore', {
         !message.selfSend &&
         !isActive &&
         isNormalMessage(message.type) &&
-        message.status !== ImMessageStatus.READ &&
         message.status !== ImMessageStatus.RECALL
       ) {
         conversation.unreadCount++
@@ -779,9 +777,9 @@ export const useMessageStore = defineStore('imMessageStore', {
             message.selfSend &&
             message.id &&
             message.id <= options.privateReadMaxId! &&
-            message.status !== ImMessageStatus.RECALL
+            message.receiptStatus === ImMessageReceiptStatus.PENDING
           ) {
-            message.status = ImMessageStatus.READ
+            message.receiptStatus = ImMessageReceiptStatus.DONE
             changed.push(message)
           }
         })
@@ -869,28 +867,6 @@ export const useMessageStore = defineStore('imMessageStore', {
         .delete('messages', getMessageKey(removed, conversationType))
         .catch((e) => console.warn('[IM messageStore] 消息删除失败', e))
       conversationStore.saveConversation(conversation)
-    },
-
-    /** 当前会话标记已读 */
-    markConversationMessageListRead(conversation: Conversation) {
-      const messages = this.getMessageList(conversation.type, conversation.targetId)
-      const changed: Message[] = []
-      messages.forEach((message) => {
-        if (!message.selfSend && message.status === ImMessageStatus.UNREAD) {
-          message.status = ImMessageStatus.READ
-          changed.push(message)
-        }
-      })
-      if (changed.length === 0) {
-        return
-      }
-      void getDb()
-        .transaction(['messages'], 'readwrite', async (tx) => {
-          for (const message of changed) {
-            await this.saveMessageRecord(message, conversation.type, tx)
-          }
-        })
-        .catch((e) => console.warn('[IM messageStore] 已读状态写入失败', e))
     },
 
     /** 删除会话全部消息 */

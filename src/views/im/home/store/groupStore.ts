@@ -391,9 +391,9 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.saveGroup(merged)
     },
 
-    /** 本地移除（由 WebSocket GROUP_DEL 事件触发） */
+    /** 本地移除群缓存和群会话；群解散（GROUP_DEL）、退群、被踢都复用 */
     removeGroup(id: number) {
-      // 群解散是硬删（区别于好友删除的软删保留记录）；级联清群聊会话避免列表里留死群
+      // 本地硬删（区别于好友删除的软删保留记录）；级联清群聊会话避免列表里留死群
       this.groups = this.groups.filter((g) => g.id !== id)
       const conversationStore = useConversationStore()
       conversationStore.removeGroupConversation(id)
@@ -735,7 +735,7 @@ export const useGroupStore = defineStore('imGroupStore', {
           senderId: message.senderId,
           type: message.type,
           content: message.content,
-          status: ImMessageStatus.UNREAD,
+          status: ImMessageStatus.NORMAL,
           sendTime: new Date(message.sendTime).getTime(),
           targetId: message.groupId || groupId,
           selfSend: message.senderId === getCurrentUserId(),

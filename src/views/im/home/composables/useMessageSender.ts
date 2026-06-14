@@ -53,7 +53,7 @@ interface SendExtOptions {
  *
  * 设计要点：
  * 1. 私聊 / 群聊接口签名对称，按 conversation.type 分支调度，差异在分支内部消化
- * 2. 发送走「乐观更新」：先 insertMessage 写入 SENDING 占位，请求成功 ackMessage 更新为 UNREAD，失败更新为 FAILED
+ * 2. 发送走「乐观更新」：先 insertMessage 写入 SENDING 占位，请求成功 ackMessage 更新为 NORMAL，失败更新为 FAILED
  * 3. 撤回不做乐观更新：服务端通过 WebSocket RECALL 事件回传，由 websocketStore 统一更新状态，避免网络失败后不可回退
  * 4. 已读上报：本端立刻清未读数；服务端回包成功后再做持久化
  */
@@ -134,7 +134,7 @@ export const useMessageSender = () => {
       messageStore.insertMessage(conversationInfo, message)
     }
 
-    // 3. 发送请求：按会话类型分发到不同接口；成功后 ackMessage 更新为 UNREAD，失败更新为 FAILED
+    // 3. 发送请求：按会话类型分发到不同接口；成功后 ackMessage 更新为 NORMAL，失败更新为 FAILED
     try {
       if (conversation.type === ImConversationType.PRIVATE) {
         const data = await apiSendPrivateMessage({
@@ -147,6 +147,7 @@ export const useMessageSender = () => {
           id: data.id,
           sendTime: new Date(data.sendTime).getTime(),
           status: data.status,
+          receiptStatus: data.receiptStatus,
           content: data.content
         })
       } else if (conversation.type === ImConversationType.GROUP) {
@@ -222,9 +223,8 @@ export const useMessageSender = () => {
     if (!conversation) {
       return
     }
-    // 本地标记已读：未读数清零 + 消息状态更新为 READ（UI 立刻响应）
+    // 本地标记已读：未读数清零（UI 立刻响应）
     conversationStore.markConversationRead(conversation.type, conversation.targetId)
-    messageStore.markConversationMessageListRead(conversation)
     const maxMessageId = messageStore
       .getMessages(getClientConversationId(conversation.type, conversation.targetId))
       .reduce<number>(
@@ -286,7 +286,7 @@ export const useMessageSender = () => {
       if (!maxReadId) {
         return
       }
-      // applyMessageReadReceipt 内部把 ≤ maxReadId 的本端消息更新为 READ
+      // applyMessageReadReceipt 内部把 ≤ maxReadId 的本端消息回执更新为 DONE
       messageStore.applyMessageReadReceipt({
         conversationType: ImConversationType.PRIVATE,
         targetId: peerId,

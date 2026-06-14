@@ -15,7 +15,10 @@
         <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="detail.type" />
       </el-descriptions-item>
       <el-descriptions-item v-if="MESSAGE_PRIVATE_READ_ENABLED" label="状态">
-        <dict-tag :type="DICT_TYPE.IM_PRIVATE_MESSAGE_STATUS" :value="detail.status" />
+        <dict-tag :type="DICT_TYPE.IM_MESSAGE_STATUS" :value="detail.status" />
+      </el-descriptions-item>
+      <el-descriptions-item v-if="MESSAGE_PRIVATE_READ_ENABLED" label="回执">
+        <dict-tag :type="DICT_TYPE.IM_MESSAGE_RECEIPT_STATUS" :value="detail.receiptStatus" />
       </el-descriptions-item>
       <el-descriptions-item label="发送时间" :span="2">
         {{ formatDate(detail.sendTime) }}

@@ -57,7 +57,7 @@ import { computed, ref } from 'vue'
 
 import { getGroupReadUsers as apiGetGroupReadUsers } from '@/api/im/message/group'
 import { CommonStatusEnum } from '@/utils/constants'
-import { ImConversationType, ImGroupReceiptStatus } from '../../../../../utils/constants'
+import { ImConversationType, ImMessageReceiptStatus } from '../../../../../utils/constants'
 import type { Message } from '../../../../types'
 import { useMessageStore } from '../../../../store/messageStore'
 import GroupMember, { type GroupMemberLite } from '../../../../components/group/GroupMember.vue'
@@ -88,7 +88,7 @@ const readUserIds = ref<number[]>([])
  * - 其他（readCount = 0 或 undefined，且未到 DONE）：显示"未读"
  */
 const label = computed(() => {
-  if (props.message.receiptStatus === ImGroupReceiptStatus.DONE) {
+  if (props.message.receiptStatus === ImMessageReceiptStatus.DONE) {
     return '全部已读'
   }
   const readCount = props.message.readCount || 0
@@ -147,15 +147,15 @@ async function loadReadUsers() {
     })
     readUserIds.value = userIds || []
     const readCount = readUserIds.value.length
-    // 全可见成员都已读 → flip 到 DONE，让外面 label 直接命中"全部已读"分支；
-    // 否则只更新 readCount，receiptStatus 维持不变（PENDING / READING）
+    // 全可见成员都已读 → 更新为 DONE，让外面 label 直接命中「全部已读」分支；
+    // 否则只更新 readCount，receiptStatus 维持不变（PENDING）
     const allRead = readCount > 0 && readCount >= visibleMembers.value.length
     messageStore.applyMessageReadReceipt({
       conversationType: ImConversationType.GROUP,
       targetId: props.groupId,
       groupMessageId: props.message.id,
       readCount,
-      receiptStatus: allRead ? ImGroupReceiptStatus.DONE : undefined
+      receiptStatus: allRead ? ImMessageReceiptStatus.DONE : undefined
     })
   } catch (error) {
     console.error('[IM] 拉取群已读列表失败:', error)

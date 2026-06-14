@@ -329,9 +329,8 @@ export enum DICT_TYPE {
 
   // ========== IM - 即时通讯模块  ==========
   IM_MESSAGE_TYPE = 'im_message_type', // IM 消息类型
-  IM_PRIVATE_MESSAGE_STATUS = 'im_private_message_status', // IM 私聊消息状态：0=未读 / 2=已撤回 / 3=已读
-  IM_GROUP_MESSAGE_STATUS = 'im_group_message_status', // IM 群聊消息状态：0=正常 / 2=已撤回
-  IM_GROUP_MESSAGE_RECEIPT_STATUS = 'im_group_message_receipt_status', // IM 群消息回执状态
+  IM_MESSAGE_STATUS = 'im_message_status', // IM 消息状态：0=正常 / 2=已撤回（私聊 / 群聊共用）
+  IM_MESSAGE_RECEIPT_STATUS = 'im_message_receipt_status', // IM 消息回执状态：0=不需要 / 1=待完成 / 2=已完成
   IM_FRIEND_STATUS = 'im_friend_status', // IM 好友状态
   IM_FRIEND_ADD_SOURCE = 'im_friend_add_source', // IM 好友添加来源
   IM_FRIEND_REQUEST_HANDLE_RESULT = 'im_friend_request_handle_result', // IM 好友申请处理结果

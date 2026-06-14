@@ -138,14 +138,13 @@ export function isMediaMessageType(type: number): boolean {
 /**
  * IM 消息状态枚举（对齐后端 ImMessageStatusEnum，前端扩展 SENDING + FAILED）
  *
- * 生命周期：FAILED(-2) → SENDING(-1) → UNREAD(0) → READ(3) / RECALL(2)
+ * 生命周期：FAILED(-2) → SENDING(-1) → NORMAL(0) → RECALL(2)
  */
 export const ImMessageStatus = {
   FAILED: -2, // 发送失败（前端独有）
   SENDING: -1, // 发送中（前端独有）
-  UNREAD: 0, // 未读
-  RECALL: 2, // 已撤回
-  READ: 3 // 已读
+  NORMAL: 0, // 正常
+  RECALL: 2 // 已撤回
 } as const
 
 /** IM 会话类型枚举 */
@@ -233,8 +232,8 @@ export const ImWebSocketMessageType = {
   CHANNEL_MESSAGE: 'im-channel-message' // 频道通道
 } as const
 
-/** IM 群回执状态枚举（对齐后端 ImGroupMessageReceiptStatusEnum） */
-export const ImGroupReceiptStatus = {
+/** IM 消息回执状态枚举（对齐后端 ImMessageReceiptStatusEnum） */
+export const ImMessageReceiptStatus = {
   NO_RECEIPT: 0, // 不需要回执
   PENDING: 1, // 待完成
   DONE: 2 // 已完成

@@ -102,7 +102,18 @@
         width="100"
       >
         <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.IM_PRIVATE_MESSAGE_STATUS" :value="row.status" />
+          <dict-tag :type="DICT_TYPE.IM_MESSAGE_STATUS" :value="row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        v-if="MESSAGE_PRIVATE_READ_ENABLED"
+        label="回执"
+        align="center"
+        prop="receiptStatus"
+        width="110"
+      >
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.IM_MESSAGE_RECEIPT_STATUS" :value="row.receiptStatus" />
         </template>
       </el-table-column>
       <el-table-column

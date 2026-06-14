@@ -120,7 +120,7 @@
         width="110"
       >
         <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_RECEIPT_STATUS" :value="row.receiptStatus" />
+          <dict-tag :type="DICT_TYPE.IM_MESSAGE_RECEIPT_STATUS" :value="row.receiptStatus" />
         </template>
       </el-table-column>
       <el-table-column
@@ -131,7 +131,7 @@
         width="100"
       >
         <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.IM_GROUP_MESSAGE_STATUS" :value="row.status" />
+          <dict-tag :type="DICT_TYPE.IM_MESSAGE_STATUS" :value="row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="100" fixed="right">

@@ -76,6 +76,7 @@ export const useMessagePuller = () => {
       type: message.type,
       content: message.content,
       status: message.status,
+      receiptStatus: message.receiptStatus,
       sendTime: new Date(message.sendTime).getTime(),
       senderId: message.senderId,
       targetId: getPrivatePeerId(message),
@@ -109,7 +110,8 @@ export const useMessagePuller = () => {
       clientMessageId: message.clientMessageId || generateClientMessageId(),
       type: message.type,
       content: message.content,
-      status: message.status ?? ImMessageStatus.UNREAD,
+      status: ImMessageStatus.NORMAL, // 频道无撤回，恒为正常
+      receiptStatus: message.receiptStatus, // 频道已读态：DONE 已读 / PENDING 未读
       sendTime: new Date(message.sendTime).getTime(),
       senderId: 0, // 系统下发，无发送人
       targetId: message.channelId, // 会话归属到频道编号

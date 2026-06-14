@@ -149,7 +149,7 @@
                 v-else-if="privateReadLabel"
                 class="text-12px whitespace-nowrap"
                 :class="
-                  message.status === ImMessageStatus.READ
+                  message.receiptStatus === ImMessageReceiptStatus.DONE
                     ? 'text-[#409eff]'
                     : 'text-[var(--el-text-color-secondary)]'
                 "
@@ -202,7 +202,7 @@ import {
   ImForwardMode,
   ImMessageType,
   ImMessageStatus,
-  ImGroupReceiptStatus,
+  ImMessageReceiptStatus,
   ImConversationType,
   ImFriendAddSource,
   ImGroupMemberRole,
@@ -527,10 +527,10 @@ const privateReadLabel = computed(() => {
   if (conversationStore.activeConversation?.type !== ImConversationType.PRIVATE) {
     return ''
   }
-  if (props.message.status === ImMessageStatus.READ) {
+  if (props.message.receiptStatus === ImMessageReceiptStatus.DONE) {
     return '已读'
   }
-  if (props.message.status === ImMessageStatus.UNREAD) {
+  if (props.message.receiptStatus === ImMessageReceiptStatus.PENDING) {
     return '未读'
   }
   return ''
@@ -551,7 +551,7 @@ const showGroupReadStatus = computed(() => {
   if (status === undefined || status === null) {
     return false
   }
-  return status !== ImGroupReceiptStatus.NO_RECEIPT
+  return status !== ImMessageReceiptStatus.NO_RECEIPT
 })
 
 /** 当前群成员（供 MessageReadStatus 计算未读名单；未加载完时兜底空数组不渲染） */

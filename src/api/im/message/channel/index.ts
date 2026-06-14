@@ -7,8 +7,7 @@ export interface ImChannelMessageRespVO {
   materialId: number
   type: number
   content: string
-  /** 当前用户已读态；pull 时按 Redis 游标计算填充，多端同步使用 */
-  status?: number
+  receiptStatus?: number
   sendTime: string
 }
 

@@ -5,6 +5,7 @@ import { getCurrentUserId, getRefreshToken } from '@/utils/auth'
 import {
   ImWebSocketMessageType,
   ImMessageStatus,
+  ImMessageReceiptStatus,
   ImMessageType,
   ImConversationType,
   ImRtcCallMediaType,
@@ -41,6 +42,7 @@ import {
 } from './rtcStore'
 import { readPrivateMessages as apiReadPrivateMessages } from '@/api/im/message/private'
 import { readGroupMessages as apiReadGroupMessages } from '@/api/im/message/group'
+import { readChannelMessages as apiReadChannelMessages } from '@/api/im/message/channel'
 import type { ImChannelMessageRespVO } from '@/api/im/message/channel'
 import { buildChannelConversationStub } from '../../utils/channel'
 import type {
@@ -106,6 +108,7 @@ const convertPrivateMessage = (
   type: websocketMessage.type,
   content: websocketMessage.content,
   status: websocketMessage.status,
+  receiptStatus: websocketMessage.receiptStatus,
   sendTime: new Date(websocketMessage.sendTime).getTime(),
   senderId: websocketMessage.senderId,
   targetId: getPrivateMessagePeerId(websocketMessage, currentUserId),
@@ -334,19 +337,6 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         typeof websocketMessage.sendTime === 'number'
           ? websocketMessage.sendTime
           : new Date(websocketMessage.sendTime).getTime()
-      messageStore.insertMessage(buildChannelConversationStub(websocketMessage.channelId), {
-        id: websocketMessage.id,
-        clientMessageId: '',
-        type: websocketMessage.type,
-        content: websocketMessage.content,
-        status: ImMessageStatus.UNREAD,
-        sendTime: sendTimeMs,
-        senderId: 0,
-        targetId: websocketMessage.channelId,
-        selfSend: false,
-        materialId: websocketMessage.materialId
-      })
-      // 非当前会话 + 未免打扰：响一下提示音
       const conversation = conversationStore.getConversation(
         ImConversationType.CHANNEL,
         websocketMessage.channelId
@@ -354,7 +344,28 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       const isActive =
         conversationStore.activeConversation?.type === ImConversationType.CHANNEL &&
         conversationStore.activeConversation?.targetId === websocketMessage.channelId
-      if (!isActive && !conversation?.silent && isNormalMessage(websocketMessage.type)) {
+      // 频道单向订阅，receiptStatus 表达「我是否已读这条」：会话打开即已读 DONE，否则 PENDING（与 pull 口径一致）
+      messageStore.insertMessage(buildChannelConversationStub(websocketMessage.channelId), {
+        id: websocketMessage.id,
+        clientMessageId: '',
+        type: websocketMessage.type,
+        content: websocketMessage.content,
+        status: ImMessageStatus.NORMAL,
+        receiptStatus: isActive ? ImMessageReceiptStatus.DONE : ImMessageReceiptStatus.PENDING,
+        sendTime: sendTimeMs,
+        senderId: 0,
+        targetId: websocketMessage.channelId,
+        selfSend: false,
+        materialId: websocketMessage.materialId
+      })
+      if (isActive) {
+        // 窗口打开 = 已读：本端清未读 + 上报服务端读位置，避免读位置滞后
+        conversationStore.markConversationRead(ImConversationType.CHANNEL, websocketMessage.channelId)
+        apiReadChannelMessages(websocketMessage.channelId, websocketMessage.id).catch((e) => {
+          console.warn('[IM WS] 频道自动已读上报失败', e)
+        })
+      } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
+        // 非当前会话且未免打扰：响一下提示音
         playAudioTip()
       }
     },
@@ -543,9 +554,6 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           // 聊天窗口打开 = 实际看到了：本端清未读；私聊已读开启时再上报后端，让对方 UI 立刻切到"已读"
           // 已读位置直接用刚到的消息 id（这条就是当前会话最大 id）
           conversationStore.markConversationRead(ImConversationType.PRIVATE, peerId)
-          if (conversation) {
-            useMessageStore().markConversationMessageListRead(conversation)
-          }
           if (MESSAGE_PRIVATE_READ_ENABLED) {
             apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
               console.warn('[IM WS] 自动已读上报失败', e)
@@ -673,9 +681,6 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
             ImConversationType.GROUP,
             websocketMessage.groupId
           )
-          if (conversation) {
-            useMessageStore().markConversationMessageListRead(conversation)
-          }
           if (MESSAGE_GROUP_READ_ENABLED) {
             apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id).catch((e) => {
               console.warn('[IM WS] 自动已读上报失败', e)

@@ -15,6 +15,7 @@ export interface ImPrivateMessageDTO {
   type: number // 消息类型
   content: string // 消息内容
   status: number // 消息状态
+  receiptStatus?: number // 回执状态（不需要 / 待完成 / 已完成）
   sendTime: string // 发送时间
 }
 
@@ -93,7 +94,7 @@ export interface Message {
   senderId: number // 发送人编号
   atUserIds?: number[] // 群 @ 目标用户列表
   receiverUserIds?: number[] // 群定向接收用户列表
-  receiptStatus?: number // 群回执状态，对齐 ImGroupReceiptStatus（仅群消息）
+  receiptStatus?: number // 回执状态，对齐 ImMessageReceiptStatus（私聊 / 群 / 频道通用）
   readCount?: number // 群回执已读人数（仅群消息）
   materialId?: number // 关联频道素材编号（仅频道消息 type=MATERIAL）
 
