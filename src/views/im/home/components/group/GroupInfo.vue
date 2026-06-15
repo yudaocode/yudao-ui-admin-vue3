@@ -24,7 +24,10 @@
       </div>
 
       <!-- 成员宫格：仅 member 渲染（陌生群拉不到成员） -->
-      <div v-if="isMember && members.length" class="flex flex-wrap gap-2 justify-center w-full pt-2">
+      <div
+        v-if="isMember && members.length"
+        class="flex flex-wrap gap-2 justify-center w-full pt-2"
+      >
         <GroupMemberGrid
           v-for="member in members"
           :key="member.userId"
@@ -95,9 +98,7 @@ const isMember = computed(() => {
   }
   if (cached.membersLoaded && cached.members) {
     const myId = getCurrentUserId()
-    return cached.members.some(
-      (m) => m.userId === myId && m.status === CommonStatusEnum.ENABLE
-    )
+    return cached.members.some((m) => m.userId === myId && m.status === CommonStatusEnum.ENABLE)
   }
   return true
 })
@@ -125,13 +126,11 @@ watch(
     if (!id || !member) {
       return
     }
-    const list = await groupStore.fetchGroupMemberList(id)
+    const list = await groupStore.fetchGroupMemberList(id, true)
     if (props.group?.id !== id) {
       return
     }
-    members.value = list.map((m) =>
-      convertGroupMemberLite(m, friendStore.getFriend(m.userId))
-    )
+    members.value = list.map((m) => convertGroupMemberLite(m, friendStore.getFriend(m.userId)))
   },
   { immediate: true }
 )

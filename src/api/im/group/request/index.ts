@@ -13,6 +13,7 @@ export interface ImGroupRequestRespVO {
   addSource?: number // 加入来源；参见 ImGroupAddSourceEnum
   handleTime?: string // 处理时间
   createTime: string // 申请创建时间
+  updateTime?: number // 最近更新时间（毫秒时间戳，增量拉取游标用）
   // 聚合字段
   userNickname?: string // 申请人 / 被邀请人昵称
   userAvatar?: string // 申请人 / 被邀请人头像
@@ -68,4 +69,9 @@ export const getMyGroupRequest = (id: number) => {
     url: '/im/group-request/get',
     params: { id }
   })
+}
+
+// 增量拉取我管理的所有群下加群申请变更（重连 / 离线补偿）
+export const pullMyGroupRequestList = (params: { lastUpdateTime?: number; lastId?: number; limit: number }) => {
+  return request.get<ImGroupRequestRespVO[]>({ url: '/im/group-request/pull', params })
 }

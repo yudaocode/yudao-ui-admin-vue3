@@ -11,6 +11,7 @@ export interface ImFriendRequestRespVO {
   addSource?: number // 添加来源；参见 ImFriendAddSourceEnum
   handleTime?: string // 处理时间
   createTime: string // 申请创建时间
+  updateTime?: number // 最近更新时间（毫秒时间戳，增量拉取游标用）
   // 聚合字段（自 AdminUser）
   fromNickname?: string // 发起方昵称
   fromAvatar?: string // 发起方头像
@@ -54,6 +55,15 @@ export const getMyFriendRequestList = (limit: number, maxId?: number) => {
     url: '/im/friend-request/list',
     params
   })
+}
+
+// 增量拉取「我相关」的好友申请变更（重连 / 离线补偿）
+export const pullMyFriendRequestList = (params: {
+  lastUpdateTime?: number
+  lastId?: number
+  limit: number
+}) => {
+  return request.get<ImFriendRequestRespVO[]>({ url: '/im/friend-request/pull', params })
 }
 
 // 按 id 单查「我相关」的申请记录（带越权过滤；WebSocket 通知到达后用）

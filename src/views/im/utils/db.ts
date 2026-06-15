@@ -35,7 +35,17 @@ export const StorageKeys = {
     /** 频道消息拉取游标 */
     channelMessageMaxId: 'channelMessageMaxId',
     /** 最近转发会话 key 列表 */
-    recentForwardConversationKeys: 'recentForwardConversationKeys'
+    recentForwardConversationKeys: 'recentForwardConversationKeys',
+    // 状态事件补偿增量拉取游标：与上面消息 maxId 游标共用同一 settings keyspace，统一登记在此避免撞 key；
+    // 走 update_time + id 复合游标（非单条 maxId），故用 PullCursor 后缀区分语义
+    /** 好友关系增量拉取游标 */
+    friendPullCursor: 'friendPullCursor',
+    /** 好友申请增量拉取游标 */
+    friendRequestPullCursor: 'friendRequestPullCursor',
+    /** 加群申请增量拉取游标 */
+    groupRequestPullCursor: 'groupRequestPullCursor',
+    /** 会话读位置增量拉取游标 */
+    conversationReadPullCursor: 'conversationReadPullCursor'
   }
 } as const
 
@@ -208,9 +218,7 @@ class DbClient {
     if (tx) {
       return requestToPromise<T[]>(tx.objectStore(storeName).getAll())
     }
-    return this.transaction<T[]>([storeName], 'readonly', (tx) =>
-      this.getAll<T>(storeName, tx)
-    )
+    return this.transaction<T[]>([storeName], 'readonly', (tx) => this.getAll<T>(storeName, tx))
   }
 
   /** 按唯一索引获取单条记录 */
@@ -258,9 +266,7 @@ class DbClient {
       await requestToPromise(tx.objectStore(storeName).delete(key))
       return
     }
-    await this.transaction([storeName], 'readwrite', (tx) =>
-      this.delete(storeName, key, tx)
-    )
+    await this.transaction([storeName], 'readwrite', (tx) => this.delete(storeName, key, tx))
   }
 
   /** 清空 store 记录 */

@@ -87,33 +87,43 @@ onMounted(async () => {
       channelStore.loadChannelList(),
       groupRequestStore.loadGroupRequestList()
     ])
-    // 1.4 我管理的群下未处理加群申请后台刷新
+    groupStore.markAllGroupMembersExpired()
+    // 1.4 我管理的群下未处理加群申请红点：首登用 unhandled-list（服务端直接过滤未处理，语义精准、启动轻）；
+    //     pullGroupRequests 只在重连 / 后续补偿时跑（见 useMessagePuller.pullStateEvents），不进首登主链路
     void groupRequestStore
       .fetchUnhandledGroupRequestList()
       .catch((e) => console.warn('[IM] 拉取未处理加群申请失败', e))
 
-    // 2.1 有缓存：异步背景刷新，失败仅记日志（IDB 数据已经够撑首屏，pullOnce 也能正常入库）
+    // 2. 好友主数据恢复走 pull；群列表用快照刷新，覆盖离线期间自己的入群 / 退群状态变化
+    // 2.1 有缓存：异步背景增量刷新，失败仅记日志（IDB 数据已经够撑首屏，pullOnce 也能正常入库）
     // 2.2 无缓存（首登 / 切账号回切）：必须 await + 失败抛出中断本轮 onMounted，
-    //     否则 pullOnce 会用 senderId 数字给会话起名落到 IDB 后续基本无法自愈；无缓存分支两个 fetch 并发 Promise.all 省一个 RTT
+    //     否则 pullOnce 会用 senderId 数字给会话起名落到 IDB 后续基本无法自愈；无缓存分支并发 Promise.all 省一个 RTT
     const requiredFetches: Promise<unknown>[] = []
     if (hasCachedFriends) {
-      void friendStore.fetchFriendList().catch((e) => console.warn('[IM] 后台刷好友失败', e))
+      void friendStore.pullFriends().catch((e) => console.warn('[IM] 后台增量拉好友失败', e))
     } else {
-      requiredFetches.push(friendStore.fetchFriendList())
+      requiredFetches.push(friendStore.pullFriends())
     }
     if (hasCachedGroups) {
-      void groupStore.fetchGroupList().catch((e) => console.warn('[IM] 后台刷群列表失败', e))
+      void groupStore.fetchGroupList(true).catch((e) => console.warn('[IM] 后台刷新群列表失败', e))
     } else {
-      requiredFetches.push(groupStore.fetchGroupList())
+      requiredFetches.push(groupStore.fetchGroupList(true))
     }
+    // 2.3 频道无增量 pull 接口，继续走 list
     if (hasCachedChannels) {
       void channelStore.fetchChannelList().catch((e) => console.warn('[IM] 后台刷频道列表失败', e))
     } else {
       requiredFetches.push(channelStore.fetchChannelList())
     }
+    // 2.4 执行加载
     if (requiredFetches.length > 0) {
       await Promise.all(requiredFetches)
     }
+
+    // 2.5 好友申请增量补偿：首登也要跑，离线期间好友申请变更不会影响好友主表
+    void friendStore
+      .pullFriendRequests()
+      .catch((e) => console.warn('[IM] 后台增量拉好友申请失败', e))
 
     // 3. 实时通信：建 WebSocket 长连接 + 拉离线消息（pullOnce finally 把 loading 归位）
     webSocketStore.connect()

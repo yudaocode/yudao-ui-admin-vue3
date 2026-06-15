@@ -131,7 +131,7 @@ export const useMessageSender = () => {
         name: conversation.name || String(realTarget),
         avatar: conversation.avatar || ''
       }
-      messageStore.insertMessage(conversationInfo, message)
+      void messageStore.insertMessage(conversationInfo, message).catch(() => undefined)
     }
 
     // 3. 发送请求：按会话类型分发到不同接口；成功后 ackMessage 更新为 NORMAL，失败更新为 FAILED
@@ -143,13 +143,15 @@ export const useMessageSender = () => {
           type,
           content
         })
-        void messageStore.ackMessage(conversation.type, realTarget, clientMessageId, {
-          id: data.id,
-          sendTime: new Date(data.sendTime).getTime(),
-          status: data.status,
-          receiptStatus: data.receiptStatus,
-          content: data.content
-        })
+        void messageStore
+          .ackMessage(conversation.type, realTarget, clientMessageId, {
+            id: data.id,
+            sendTime: new Date(data.sendTime).getTime(),
+            status: data.status,
+            receiptStatus: data.receiptStatus,
+            content: data.content
+          })
+          .catch(() => undefined)
       } else if (conversation.type === ImConversationType.GROUP) {
         const data = await apiSendGroupMessage({
           clientMessageId,
@@ -159,21 +161,25 @@ export const useMessageSender = () => {
           atUserIds: options?.atUserIds,
           receipt: options?.receipt
         })
-        void messageStore.ackMessage(conversation.type, realTarget, clientMessageId, {
-          id: data.id,
-          sendTime: new Date(data.sendTime).getTime(),
-          status: data.status,
-          receiptStatus: data.receiptStatus,
-          readCount: data.readCount,
-          content: data.content
-        })
+        void messageStore
+          .ackMessage(conversation.type, realTarget, clientMessageId, {
+            id: data.id,
+            sendTime: new Date(data.sendTime).getTime(),
+            status: data.status,
+            receiptStatus: data.receiptStatus,
+            readCount: data.readCount,
+            content: data.content
+          })
+          .catch(() => undefined)
       }
       return true
     } catch (e) {
       console.error('[IM] 消息发送失败', { type, realTarget, clientMessageId }, e)
-      void messageStore.ackMessage(conversation.type, realTarget, clientMessageId, {
-        status: ImMessageStatus.FAILED
-      })
+      void messageStore
+        .ackMessage(conversation.type, realTarget, clientMessageId, {
+          status: ImMessageStatus.FAILED
+        })
+        .catch(() => undefined)
       return false
     }
   }

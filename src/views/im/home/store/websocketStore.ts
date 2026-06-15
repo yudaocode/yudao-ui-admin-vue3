@@ -69,6 +69,11 @@ const isFriendDeleteWithClear = (frame: ImPrivateMessageDTO): boolean => {
 const RTC_LIVEKIT_PROTOCOLS = new Set(['ws:', 'wss:', 'http:', 'https:'])
 const RTC_MEDIA_TYPES = new Set<number>(Object.values(ImRtcCallMediaType))
 
+/** 忽略普通实时帧持久化失败 */
+function ignoreRealtimePersistError(promise: Promise<void>): void {
+  void promise.catch(() => undefined)
+}
+
 /** 校验 LiveKit 连接地址 */
 function isValidLiveKitUrl(url?: string): boolean {
   if (!url) {
@@ -302,27 +307,28 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         this.handleChannelRead(websocketMessage)
         return
       }
-      this.handleChannelMessage(websocketMessage)
+      ignoreRealtimePersistError(this.handleChannelMessage(websocketMessage))
     },
 
     /** 频道 READ：自己其它终端在某频道里标为已读，本端同步清零该频道未读 */
     handleChannelRead(websocketMessage: ImChannelMessageRespVO) {
-      const conversationStore = useConversationStore()
-      const conversation = conversationStore.getConversation(
-        ImConversationType.CHANNEL,
-        websocketMessage.channelId
-      )
-      if (conversation) {
-        conversation.unreadCount = 0
-        conversationStore.saveConversation(conversation)
-      }
+      void useMessageStore()
+        .applyConversationReadList([
+          {
+            id: websocketMessage.id,
+            conversationType: ImConversationType.CHANNEL,
+            targetId: websocketMessage.channelId,
+            messageId: websocketMessage.id
+          }
+        ])
+        .catch((e) => console.warn('[IM WS] 频道已读同步失败', e))
     },
 
     /**
      * 频道消息实时入会话；频道消息单向 + 无状态机，直接 insertMessage 即可
      * pull 与 WS 拿到同一条 id 时，messageStore.insertMessage 内部按 id 去重，不会重复
      */
-    handleChannelMessage(websocketMessage: ImChannelMessageRespVO) {
+    handleChannelMessage(websocketMessage: ImChannelMessageRespVO): Promise<void> {
       const conversationStore = useConversationStore()
       const messageStore = useMessageStore()
       // 离线加载期间先缓冲，等 pull 完成后再统一回放，避免重复或顺序错乱
@@ -331,7 +337,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationType: ImConversationType.CHANNEL,
           payload: websocketMessage
         })
-        return
+        return Promise.resolve()
       }
       const sendTimeMs =
         typeof websocketMessage.sendTime === 'number'
@@ -345,7 +351,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         conversationStore.activeConversation?.type === ImConversationType.CHANNEL &&
         conversationStore.activeConversation?.targetId === websocketMessage.channelId
       // 频道单向订阅，receiptStatus 表达「我是否已读这条」：会话打开即已读 DONE，否则 PENDING（与 pull 口径一致）
-      messageStore.insertMessage(buildChannelConversationStub(websocketMessage.channelId), {
+      const persistPromise = messageStore.insertMessage(buildChannelConversationStub(websocketMessage.channelId), {
         id: websocketMessage.id,
         clientMessageId: '',
         type: websocketMessage.type,
@@ -368,6 +374,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         // 非当前会话且未免打扰：响一下提示音
         playAudioTip()
       }
+      return persistPromise
     },
 
     /** content 既可能已是对象也可能是 JSON 字符串（后端用 Map 序列化下发） */
@@ -410,7 +417,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           case ImMessageType.RTC_CALL_END:
             // 入库 + 关闭通话窗 + 渲染聊天 tip（私聊场景）
             this.handleRtcCallEnd(websocketMessage)
-            this.handlePrivateMessage(websocketMessage)
+            ignoreRealtimePersistError(this.handlePrivateMessage(websocketMessage))
             break
           default:
             if (isFriendNotification(websocketMessage.type)) {
@@ -422,14 +429,14 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
                 isFriendChatTip(websocketMessage.type) &&
                 !isFriendDeleteWithClear(websocketMessage)
               ) {
-                this.handlePrivateMessage(websocketMessage)
+                ignoreRealtimePersistError(this.handlePrivateMessage(websocketMessage))
               }
             } else if (isGroupRequestNotification(websocketMessage.type)) {
               // 加群申请通知（1503 / 1505 / 1506）走私聊通道，与好友通知同段位但分开 dispatcher
               this.handleGroupRequestNotification(websocketMessage)
             } else {
               // TEXT / IMAGE / FILE / VOICE / VIDEO 等普通消息
-              this.handlePrivateMessage(websocketMessage)
+              ignoreRealtimePersistError(this.handlePrivateMessage(websocketMessage))
             }
         }
       } catch (e) {
@@ -457,16 +464,16 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
             break
           case ImMessageType.RTC_CALL_START:
             // 入库 + 渲染聊天 tip；胶囊条状态走 1602/1603，本帧不动 rtcStore，避免与首次填充竞争
-            this.handleGroupMessage(websocketMessage)
+            ignoreRealtimePersistError(this.handleGroupMessage(websocketMessage))
             break
           case ImMessageType.RTC_CALL_END:
             // 入库 + 移除胶囊条 + 关闭通话窗（如果当前在该群通话内）
             this.handleRtcCallEnd(websocketMessage)
-            this.handleGroupMessage(websocketMessage)
+            ignoreRealtimePersistError(this.handleGroupMessage(websocketMessage))
             break
           default:
             // TEXT / IMAGE / FILE / VOICE / VIDEO + GROUP_* 群广播事件
-            this.handleGroupMessage(websocketMessage)
+            ignoreRealtimePersistError(this.handleGroupMessage(websocketMessage))
         }
       } catch (e) {
         // 单条帧的处理异常不应阻断后续帧；打印完整 websocketMessage 便于排查
@@ -484,7 +491,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      * 4. 构造前端 Message，插入到对应私聊会话
      * 5. 当前会话激活时自动上报已读；否则非免打扰响提示音
      */
-    handlePrivateMessage(websocketMessage: ImPrivateMessageDTO) {
+    handlePrivateMessage(websocketMessage: ImPrivateMessageDTO): Promise<void> {
       const conversationStore = useConversationStore()
       const friendStore = useFriendStore()
       const currentUserId = getCurrentUserId()
@@ -497,7 +504,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         websocketMessage.receiverId !== currentUserId
       ) {
         console.warn('[IM WS] 丢弃不属于当前用户的私聊帧', websocketMessage)
-        return
+        return Promise.resolve()
       }
 
       // 1. 离线加载期间先缓冲，等 pull 完成后再统一回放，避免重复或顺序错乱
@@ -506,7 +513,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationType: ImConversationType.PRIVATE,
           payload: websocketMessage
         })
-        return
+        return Promise.resolve()
       }
 
       // 2. selfSend / peerId：自己发的消息属于「发给 receiverId 的会话」，别人发的属于「发送者的会话」
@@ -523,17 +530,16 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`（对齐 ImMessageTypeEnum.RECALL → RecallMessage）
       // 这里拦截下来改走 recallMessage（把原消息更新为 RECALL 态），不让它作为新消息进列表
       if (websocketMessage.type === ImMessageType.RECALL) {
-        useMessageStore().recallMessage(
+        return useMessageStore().recallMessage(
           ImConversationType.PRIVATE,
           peerId,
           websocketMessage.content
         )
-        return
       }
 
       // 4. 后端 DTO → 前端 Message：发送人名渲染时实时算，不写入消息字段
       const message = convertPrivateMessage(websocketMessage, currentUserId)
-      useMessageStore().insertMessage(
+      const persistPromise = useMessageStore().insertMessage(
         {
           type: ImConversationType.PRIVATE,
           targetId: peerId,
@@ -564,6 +570,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           playAudioTip()
         }
       }
+      return persistPromise
     },
 
     /** 私聊 READ 事件：自己的其它终端在对方会话里标为已读，本端同步清零未读；私聊已读关闭时兜底忽略 */
@@ -571,11 +578,16 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!MESSAGE_PRIVATE_READ_ENABLED) {
         return
       }
-      const conversationStore = useConversationStore()
-      conversationStore.markConversationRead(
-        ImConversationType.PRIVATE,
-        websocketMessage.receiverId
-      )
+      void useMessageStore()
+        .applyConversationReadList([
+          {
+            id: websocketMessage.id,
+            conversationType: ImConversationType.PRIVATE,
+            targetId: websocketMessage.receiverId,
+            messageId: websocketMessage.id
+          }
+        ])
+        .catch((e) => console.warn('[IM WS] 私聊已读同步失败', e))
     },
 
     /**
@@ -607,7 +619,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      * 4. 构造 Message + at 字段，插入到对应群聊会话（发送人名渲染时实时算）
      * 5. 当前会话激活时自动上报已读（带 lastMessageId）；否则非免打扰响提示音
      */
-    handleGroupMessage(websocketMessage: ImGroupMessageDTO) {
+    handleGroupMessage(websocketMessage: ImGroupMessageDTO): Promise<void> {
       const conversationStore = useConversationStore()
       const groupStore = useGroupStore()
       const currentUserId = getCurrentUserId()
@@ -624,7 +636,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         !receiverUserIds.includes(currentUserId)
       ) {
         console.warn('[IM WS] 丢弃不属于当前用户的定向群消息', websocketMessage)
-        return
+        return Promise.resolve()
       }
 
       // 1. 离线加载期缓冲（与私聊对称）
@@ -633,7 +645,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationType: ImConversationType.GROUP,
           payload: websocketMessage
         })
-        return
+        return Promise.resolve()
       }
 
       // 2. 未知群时自动拉群详情 + 成员（被拉入群但还没收到 GROUP_CREATE 时的兜底）
@@ -645,17 +657,16 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`
       // 这里拦截下来改走 recallMessage（把原消息更新为 RECALL 态）
       if (websocketMessage.type === ImMessageType.RECALL) {
-        useMessageStore().recallMessage(
+        return useMessageStore().recallMessage(
           ImConversationType.GROUP,
           websocketMessage.groupId,
           websocketMessage.content
         )
-        return
       }
 
       // 4. 后端 DTO → 前端 Message：发送人名渲染时实时算，不写入消息字段
       const message = convertGroupMessage(websocketMessage, currentUserId)
-      useMessageStore().insertMessage(
+      const persistPromise = useMessageStore().insertMessage(
         {
           type: ImConversationType.GROUP,
           targetId: websocketMessage.groupId,
@@ -691,6 +702,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           playAudioTip()
         }
       }
+      return persistPromise
     },
 
     // ==================== 群聊已读 / 回执 ====================
@@ -700,8 +712,17 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!MESSAGE_GROUP_READ_ENABLED) {
         return
       }
-      const conversationStore = useConversationStore()
-      conversationStore.markConversationRead(ImConversationType.GROUP, websocketMessage.groupId)
+      const readMessageId = websocketMessage.readId || websocketMessage.id
+      void useMessageStore()
+        .applyConversationReadList([
+          {
+            id: readMessageId,
+            conversationType: ImConversationType.GROUP,
+            targetId: websocketMessage.groupId,
+            messageId: readMessageId
+          }
+        ])
+        .catch((e) => console.warn('[IM WS] 群聊已读同步失败', e))
     },
 
     /** 群聊 RECEIPT：更新某条群消息的 readCount / receiptStatus；群已读关闭时兜底忽略 */

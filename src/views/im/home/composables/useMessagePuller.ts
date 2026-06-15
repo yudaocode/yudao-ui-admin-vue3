@@ -5,6 +5,7 @@ import { useImWebSocketStore } from '../store/websocketStore'
 import { useFriendStore } from '../store/friendStore'
 import { getFriendDisplayName } from '../../utils/user'
 import { useGroupStore } from '../store/groupStore'
+import { useGroupRequestStore } from '../store/groupRequestStore'
 import {
   pullPrivateMessages as apiPullPrivateMessages,
   getPrivateMaxReadMessageId as apiGetPrivateMaxReadMessageId,
@@ -18,6 +19,7 @@ import {
   pullChannelMessages as apiPullChannelMessages,
   type ImChannelMessageRespVO
 } from '@/api/im/message/channel'
+import { pullMyConversationReadList as apiPullMyConversationReadList } from '@/api/im/conversation/read'
 import {
   ImConversationType,
   ImMessageStatus,
@@ -32,8 +34,13 @@ import {
 } from '../../utils/config'
 import { buildChannelConversationStub } from '../../utils/channel'
 import { generateClientMessageId, getPrivateMessagePeerId } from '../../utils/message'
+import { runIncrementalPull, runMinIdPull } from '../../utils/pull'
+import { StorageKeys } from '../../utils/db'
 import { getCurrentUserId } from '@/utils/auth'
 import type { Message } from '../types'
+
+/** 三类消息 pull 接口返回的原始 VO 联合类型；runMinIdPull 只需 id 推进游标，具体分发在 applyPage 内按类型 cast */
+type PulledRawMessage = ImPrivateMessageRespVO | ImGroupMessageRespVO | ImChannelMessageRespVO
 
 /**
  * 消息增量拉取：登录后分页拉取离线期间的新消息
@@ -52,6 +59,7 @@ export const useMessagePuller = () => {
   const wsStore = useImWebSocketStore()
   const friendStore = useFriendStore()
   const groupStore = useGroupStore()
+  const groupRequestStore = useGroupRequestStore()
   const currentUserId = getCurrentUserId()
 
   /** 判断请求是否被主动取消 */
@@ -150,12 +158,12 @@ export const useMessagePuller = () => {
   }
 
   /**
-   * 循环拉取指定会话类型的消息：以本批最大 id 作为下次 minId，直到接口返回空列表或游标不再前进
+   * 分类型拉取离线消息：翻页 / minId 游标推进 / 空页停由 runMinIdPull 负责，这里只做接口分支 + 逐条业务分发
+   * （撤回 / 好友通知 / 普通消息）+ 入库。
    *
-   * 取消语义两层守卫：
-   * 1. startEpoch：cancelPull() 递增 pullEpoch；离开 IM / 切账号时旧循环检测到漂移即跳出
-   * 2. startUserId：每批 await 后比对当前登录 userId；防御 logout / 多 tab 异常下用户已切但 cancelPull 未触发
-   * 两者任一不等都丢弃本批不入库，避免旧 session 的接口响应在新 store 落地
+   * 取消语义两层守卫，经 isActive 传入 runMinIdPull，任一不等即丢弃本批不入库、停止翻页，避免旧 session 响应落到新 store：
+   * 1. startEpoch：cancelPull() 递增 pullEpoch；离开 IM / 切账号时跳出
+   * 2. startUserId：每批 await 后比对当前登录 userId；防御 logout / 多 tab 下用户已切但 cancelPull 未触发
    */
   const pullByType = async (
     conversationType: number,
@@ -164,108 +172,90 @@ export const useMessagePuller = () => {
     startUserId: number,
     signal: AbortSignal
   ) => {
-    // 私聊 / 群聊 / 频道各自一套接口；按 conversationType 在循环内分支调度
-    let minId = startMinId || 0
+    // 私聊 / 群聊 / 频道各自一套接口；按 conversationType 分支调度。翻页机制（minId 游标 / 空页判断 / 防死翻）交给 runMinIdPull
     const isPrivate = conversationType === ImConversationType.PRIVATE
     const isChannel = conversationType === ImConversationType.CHANNEL
     const size = isPrivate ? MESSAGE_PRIVATE_PULL_SIZE : MESSAGE_GROUP_PULL_SIZE
     const isStillValid = () =>
       !signal.aborted && pullEpoch === startEpoch && getCurrentUserId() === startUserId
-    while (true) {
-      if (!isStillValid()) {
-        return
-      }
-      let list: any[] | undefined
-      if (isPrivate) {
-        list = await apiPullPrivateMessages({ minId, size }, signal)
-      } else if (isChannel) {
-        list = await apiPullChannelMessages({ minId, size }, signal)
-      } else {
-        list = await apiPullGroupMessages({ minId, size }, signal)
-      }
-      // 接口返回期间发生 cancel / 切账号：丢弃本批不入库，也不再翻页
-      if (!isStillValid()) {
-        return
-      }
-      if (!list || list.length === 0) {
-        break
-      }
-
-      const pulledMessages: PulledMessage[] = []
-      // 逐条 dispatch：原消息走批量 insert；RECALL 信号走批量 recall 把同批内已 insert 的原消息更新为撤回提示。
-      // 后端按 id 升序返回，且信号 id 一定 > 原消息 id（先更新 status 再插信号），所以原消息一定先到、recallMessage 找得到
-      for (const raw of list) {
-        if (isChannel) {
-          const message = raw as ImChannelMessageRespVO
-          pulledMessages.push({
-            kind: 'insert',
-            conversationInfo: convertChannelConversation(message),
-            message: convertChannelMessage(message)
-          })
-          continue
-        }
+    await runMinIdPull<PulledRawMessage>({
+      initialMinId: startMinId,
+      pageSize: size,
+      isActive: isStillValid,
+      fetchPage: ({ minId, size }) => {
         if (isPrivate) {
-          const message = raw as ImPrivateMessageRespVO
-          // 特殊：撤回消息的处理
-          if (message.type === ImMessageType.RECALL) {
+          return apiPullPrivateMessages({ minId, size }, signal)
+        }
+        if (isChannel) {
+          return apiPullChannelMessages({ minId, size }, signal)
+        }
+        return apiPullGroupMessages({ minId, size }, signal)
+      },
+      applyPage: async (list, nextMinId) => {
+        const pulledMessages: PulledMessage[] = []
+        // 逐条 dispatch：原消息走批量 insert；RECALL 信号走批量 recall 把同批内已 insert 的原消息更新为撤回提示。
+        // 后端按 id 升序返回，且信号 id 一定 > 原消息 id（先更新 status 再插信号），所以原消息一定先到、recallMessage 找得到
+        for (const raw of list) {
+          if (isChannel) {
+            const message = raw as ImChannelMessageRespVO
             pulledMessages.push({
-              kind: 'recall',
-              conversationType: ImConversationType.PRIVATE,
-              targetId: getPrivatePeerId(message),
-              recallSignalContent: message.content
+              kind: 'insert',
+              conversationInfo: convertChannelConversation(message),
+              message: convertChannelMessage(message)
             })
             continue
           }
-          // 特殊：离线 pull 期间入库的 FRIEND_* 帧（目前仅 FRIEND_ADD persistent=true）也要走好友数据分发，
-          //      否则断线期间的好友列表更新会丢失；与 WebSocket 路径 dispatchPrivateFrame 保持对称
-          if (isFriendNotification(message.type)) {
-            wsStore.handleFriendNotification(message)
-            // 仅 FRIEND_ADD / FRIEND_DELETE 才作为会话气泡入消息列表
-            if (!isFriendChatTip(message.type)) {
+          if (isPrivate) {
+            const message = raw as ImPrivateMessageRespVO
+            // 特殊：撤回消息的处理
+            if (message.type === ImMessageType.RECALL) {
+              pulledMessages.push({
+                kind: 'recall',
+                conversationType: ImConversationType.PRIVATE,
+                targetId: getPrivatePeerId(message),
+                recallSignalContent: message.content
+              })
               continue
             }
-          }
-          // 其它消息正常入会话消息列表
-          pulledMessages.push({
-            kind: 'insert',
-            conversationInfo: convertPrivateConversation(message),
-            message: convertPrivateMessage(message)
-          })
-        } else {
-          const message = raw as ImGroupMessageRespVO
-          // 特殊：撤回消息的处理
-          if (message.type === ImMessageType.RECALL) {
+            // 特殊：离线 pull 期间入库的 FRIEND_* 帧（目前仅 FRIEND_ADD persistent=true）也要走好友数据分发，
+            //      否则断线期间的好友列表更新会丢失；与 WebSocket 路径 dispatchPrivateFrame 保持对称
+            if (isFriendNotification(message.type)) {
+              wsStore.handleFriendNotification(message)
+              // 仅 FRIEND_ADD / FRIEND_DELETE 才作为会话气泡入消息列表
+              if (!isFriendChatTip(message.type)) {
+                continue
+              }
+            }
+            // 其它消息正常入会话消息列表
             pulledMessages.push({
-              kind: 'recall',
-              conversationType: ImConversationType.GROUP,
-              targetId: message.groupId,
-              recallSignalContent: message.content
+              kind: 'insert',
+              conversationInfo: convertPrivateConversation(message),
+              message: convertPrivateMessage(message)
             })
-            continue
+          } else {
+            const message = raw as ImGroupMessageRespVO
+            // 特殊：撤回消息的处理
+            if (message.type === ImMessageType.RECALL) {
+              pulledMessages.push({
+                kind: 'recall',
+                conversationType: ImConversationType.GROUP,
+                targetId: message.groupId,
+                recallSignalContent: message.content
+              })
+              continue
+            }
+            // 其它消息正常入会话消息列表
+            pulledMessages.push({
+              kind: 'insert',
+              conversationInfo: convertGroupConversation(message),
+              message: convertGroupMessage(message)
+            })
           }
-          // 其它消息正常入会话消息列表
-          pulledMessages.push({
-            kind: 'insert',
-            conversationInfo: convertGroupConversation(message),
-            message: convertGroupMessage(message)
-          })
         }
+        // 入库 + 推进 messageMaxId；nextMinId 为空（本批无有效 id）时不推进游标，与旧逻辑一致
+        await messageStore.applyPulledMessageList(pulledMessages, conversationType, nextMinId)
       }
-
-      // 游标推进到本批最大消息编号
-      const validIds = list.map((message) => message.id).filter((id): id is number => id != null)
-      if (validIds.length === 0) {
-        await messageStore.applyPulledMessageList(pulledMessages, conversationType)
-        break
-      }
-      const nextMinId = Math.max(...validIds)
-      await messageStore.applyPulledMessageList(pulledMessages, conversationType, nextMinId)
-      // 游标没前进就停：当前后端契约是 id > minId，理论不会出现；防御后端契约变更或边界数据死翻
-      if (nextMinId <= minId) {
-        break
-      }
-      minId = nextMinId
-    }
+    })
   }
 
   /** 同一时刻只允许一次 pull：Index.vue 的手动调用与重连 watch 触发可能并发，共用同一个 promise 即可去重 */
@@ -298,6 +288,47 @@ export const useMessagePuller = () => {
     wsStore.discardBuffer()
   }
 
+  /** 增量拉取我的会话读位置并合并到本地展示态 */
+  const pullConversationReads = async (isActive: () => boolean): Promise<void> => {
+    await runIncrementalPull(
+      StorageKeys.settings.conversationReadPullCursor,
+      apiPullMyConversationReadList,
+      async (records) => {
+        if (!isActive()) {
+          return false
+        }
+        await messageStore.applyConversationReadList(records, isActive)
+        if (!isActive()) {
+          return false
+        }
+        return true
+      },
+      isActive
+    )
+  }
+
+  /**
+   * 状态事件补偿：好友 / 好友申请走增量；群列表和群申请红点走快照刷新
+   *
+   * 首登主数据由 index.vue 驱动，重连时各 store 已就位，多路 allSettled 并发互不影响，单路失败仅记日志。
+   * 群成员不做全局增量同步，重连只标记本地群成员 cache 过期，进入群会话或成员列表时再按 groupId 刷新。
+   */
+  const pullStateEvents = async (): Promise<void> => {
+    groupStore.markAllGroupMembersExpired()
+    const results = await Promise.allSettled([
+      friendStore.pullFriends(),
+      friendStore.pullFriendRequests(),
+      groupStore.fetchGroupList(true),
+      groupRequestStore.pullGroupRequests(),
+      groupRequestStore.fetchUnhandledGroupRequestList()
+    ])
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        console.warn('[IM] 状态事件增量补偿失败', result.reason)
+      }
+    }
+  }
+
   /** 执行一次全量增量拉取（重入安全：进行中再次调用复用同一个 promise） */
   const pullOnce = (): Promise<void> => {
     if (!currentUserId) {
@@ -323,8 +354,9 @@ export const useMessagePuller = () => {
           return
         }
         conversationStore.loading = true
+        let messagePullSucceeded = false
         try {
-          // 并发拉取私聊 + 群聊 + 频道，降低初始加载耗时
+          // 并发拉取私聊 + 群聊 + 频道消息，降低初始加载耗时
           await Promise.all([
             pullByType(
               ImConversationType.PRIVATE,
@@ -348,6 +380,7 @@ export const useMessagePuller = () => {
               abortController.signal
             )
           ])
+          messagePullSucceeded = true
         } catch (e) {
           if (isAbortError(e)) {
             return
@@ -364,21 +397,32 @@ export const useMessagePuller = () => {
         if (!isCurrentPull()) {
           return
         }
+        if (!messagePullSucceeded) {
+          return
+        }
 
-        // 回放 WebSocket 在 loading 期间收到的缓冲消息（此刻走正常 insertMessage 路径）
+        // 回放 WebSocket 在 loading 期间收到的缓冲消息
         const buffered = wsStore.flushBuffer()
+        const replayPersistPromises: Promise<void>[] = []
         for (const item of buffered) {
           if (item.conversationType === ImConversationType.PRIVATE) {
-            wsStore.handlePrivateMessage(item.payload)
+            replayPersistPromises.push(wsStore.handlePrivateMessage(item.payload))
           } else if (item.conversationType === ImConversationType.CHANNEL) {
-            wsStore.handleChannelMessage(item.payload)
+            replayPersistPromises.push(wsStore.handleChannelMessage(item.payload))
           } else {
-            wsStore.handleGroupMessage(item.payload)
+            replayPersistPromises.push(wsStore.handleGroupMessage(item.payload))
           }
         }
+        await Promise.all(replayPersistPromises)
 
         // pull + replay 都完成后再排序，避免回放消息打乱顺序
         conversationStore.sortConversationList()
+
+        // 消息和缓冲帧落库后再补读位置，避免读位置游标先推进导致新消息展示态漏更新
+        await pullConversationReads(isCurrentPull)
+        if (!isCurrentPull()) {
+          return
+        }
 
         // 重连 / 冷启动后补齐当前激活私聊会话的「对方已读位置」
         // 离线期间错过的 RECEIPT 推送会被这里补回；其他私聊会话等用户点开时由 Index.vue 的 watch 触发
@@ -427,14 +471,16 @@ export const useMessagePuller = () => {
   }
 
   /**
-   * 断网期间 WS 收不到推送，期间产生的消息只能靠拉取接口按 minId 游标补齐；
-   * 首次连接由 Index.vue 显式调 pullOnce 完成首拉，这里仅覆盖之后的重连
+   * 断网期间 WS 收不到推送：重连后既要按 minId 补齐消息，也要按 update_time + id 补齐好友 / 群 / 群申请状态。
+   * 首次连接由 Index.vue 显式驱动（pullOnce 拉消息 + 各 store 首拉），这里仅覆盖之后的重连。
+   * 重连时 store 已就位，pullStateEvents 与 pullOnce 并发即可，无需「先就位再拉消息」的首登顺序约束。
    */
   watch(
     () => wsStore.isConnected,
     (isConnected) => {
       if (isConnected && initialPulled) {
         void pullOnce()
+        void pullStateEvents()
       }
     }
   )

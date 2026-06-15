@@ -449,10 +449,12 @@ async function ensureGroupData(groupId: number) {
     console.warn('[IM MessagePanel] loadGroupMemberList 失败', { groupId }, error)
     return null
   })
-  // 再从远程异步拉成员，强刷以跳过 in-memory 缓存，每次进群都能拿到最新成员状态
-  groupStore.fetchGroupMemberList(groupId, true).catch((error) => {
-    console.warn('[IM MessagePanel] fetchGroupMemberList 失败', { groupId }, error)
-  })
+  const group = groupStore.getGroup(groupId)
+  if (!group?.membersLoaded || group.membersExpired) {
+    groupStore.fetchGroupMemberList(groupId, true).catch((error) => {
+      console.warn('[IM MessagePanel] fetchGroupMemberList 失败', { groupId }, error)
+    })
+  }
 }
 
 /** 群信息抽屉里点"刷新"：强拉一次最新群元数据 + 群成员 */

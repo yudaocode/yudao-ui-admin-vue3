@@ -198,7 +198,7 @@ export const useMediaUploader = () => {
       uploadProgress: 0,
       _localFile: opts.file
     }
-    messageStore.insertMessage(
+    void messageStore.insertMessage(
       {
         type: conversation.type,
         targetId: conversation.targetId,
@@ -206,7 +206,7 @@ export const useMediaUploader = () => {
         avatar: conversation.avatar || ''
       },
       placeholder
-    )
+    ).catch(() => undefined)
     return { clientMessageId, blobUrl }
   }
 

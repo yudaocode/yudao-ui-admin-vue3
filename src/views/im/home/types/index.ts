@@ -149,10 +149,11 @@ export interface Group {
   groupRemark?: string // 群备注。从当前用户的 GroupMember 回填（当前用户对该群的自定义名）
   members?: GroupMember[] // 群成员缓存（按需懒加载）
   membersLoaded?: boolean // members 是否"完整加载"——只有整群 loadGroupMemberList / fetchGroupMemberList 命中时为 true；fetchGroupMember 单成员补齐不置位，避免 fetchGroupMemberList(force=false) 命中缓存时误判整群已加载
+  membersExpired?: boolean // 群成员缓存是否已过期；重连 / 重新进入 IM 后只标记不删除，下次进入群会话再刷新
   memberCount?: number // 成员总数
 }
 
-export type GroupDO = Omit<Group, 'members' | 'membersLoaded'>
+export type GroupDO = Omit<Group, 'members' | 'membersLoaded' | 'membersExpired'>
 
 // 群成员实体（前端内部结构）
 export interface GroupMember {
