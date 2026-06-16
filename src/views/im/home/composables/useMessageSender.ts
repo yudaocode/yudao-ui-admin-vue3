@@ -222,7 +222,7 @@ export const useMessageSender = () => {
   /**
    * 触发当前会话的已读上报（切会话 / 进入页面时调用）
    * 1. 本端立刻清未读数；服务端回包成功后再做持久化
-   * 2. 已读位置取会话内最大真实消息 id（本地发送中消息跳过）
+   * 2. 已读位置取已加载消息和会话末条消息的最大服务端 id
    */
   const readActive = async () => {
     const conversation = conversationStore.activeConversation
@@ -231,13 +231,14 @@ export const useMessageSender = () => {
     }
     // 本地标记已读：未读数清零（UI 立刻响应）
     conversationStore.markConversationRead(conversation.type, conversation.targetId)
-    const maxMessageId = messageStore
+    const loadedMaxMessageId = messageStore
       .getMessages(getClientConversationId(conversation.type, conversation.targetId))
       .reduce<number>(
         (maxMessageId, message) =>
           message.id && message.id > maxMessageId ? message.id : maxMessageId,
         0
       )
+    const maxMessageId = Math.max(loadedMaxMessageId, conversation.lastMessageId || 0)
     if (!maxMessageId) {
       return
     }
