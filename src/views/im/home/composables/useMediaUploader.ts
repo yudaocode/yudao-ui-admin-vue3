@@ -7,7 +7,7 @@ import { useConversationStore } from '../store/conversationStore'
 import { useMessageStore } from '../store/messageStore'
 import { useMessageSender } from './useMessageSender'
 import { useMuteOverlay } from './useMuteOverlay'
-import { ImMessageStatus, ImMessageType } from '../../utils/constants'
+import { ImMessageStatus, ImContentType } from '../../utils/constants'
 import {
   MESSAGE_FILE_MAX_MB,
   MESSAGE_IMAGE_MAX_MB,
@@ -56,17 +56,17 @@ export interface MediaTypeHandler {
 
 /** 媒体类型注册表：image / file / voice / video 各自的 kind + 首发 / 重传共用的 build / extract */
 export const mediaTypeHandlers: Partial<Record<number, MediaTypeHandler>> = {
-  [ImMessageType.IMAGE]: {
+  [ImContentType.IMAGE]: {
     kind: '图片',
     build: (_file, url) => ({ url }) as ImageMessage,
     extractResendContext: () => ({})
   },
-  [ImMessageType.FILE]: {
+  [ImContentType.FILE]: {
     kind: '文件',
     build: (file, url) => ({ url, name: file.name, size: file.size }) as FileMessage,
     extractResendContext: () => ({})
   },
-  [ImMessageType.VOICE]: {
+  [ImContentType.VOICE]: {
     kind: '语音',
     build: (_file, url, context) => ({ url, duration: context.voiceDuration ?? 0 }) as AudioMessage,
     extractResendContext: (oldContent) => {
@@ -74,7 +74,7 @@ export const mediaTypeHandlers: Partial<Record<number, MediaTypeHandler>> = {
       return { voiceDuration: old?.duration ?? 0 }
     }
   },
-  [ImMessageType.VIDEO]: {
+  [ImContentType.VIDEO]: {
     kind: '视频',
     build: (file, url, context) =>
       ({
@@ -101,7 +101,7 @@ export const mediaTypeHandlers: Partial<Record<number, MediaTypeHandler>> = {
 /** 单次媒体上传的入参（image / file / voice 走 uploadAndSendMedia；video 走低层 helper 自行组装） */
 export interface UploadAndSendMediaOptions {
   file: File
-  /** 对齐 ImMessageType；mediaTypeHandlers 必须有对应项 */
+  /** 对齐 ImContentType；mediaTypeHandlers 必须有对应项 */
   type: number
   /** 媒体特定的元数据（如语音时长 / 视频元信息）；不传按空对象处理 */
   context?: MediaTypeContext
@@ -124,23 +124,23 @@ export interface UploadAndSendMediaOptions {
  *
  * 任意失败把消息状态置 FAILED；MessageItem 上点重试再走一次本函数（_localFile 还在内存就行）
  */
-/** 按消息类型映射体积上限（MB）；未识别类型返回 0 表示不限 */
+/** 按内容类型映射体积上限（MB）；未识别类型返回 0 表示不限 */
 function resolveMediaMaxMb(type: number): number {
   switch (type) {
-    case ImMessageType.IMAGE:
+    case ImContentType.IMAGE:
       return MESSAGE_IMAGE_MAX_MB
-    case ImMessageType.VIDEO:
+    case ImContentType.VIDEO:
       return MESSAGE_VIDEO_MAX_MB
-    case ImMessageType.VOICE:
+    case ImContentType.VOICE:
       return MESSAGE_VOICE_MAX_MB
-    case ImMessageType.FILE:
+    case ImContentType.FILE:
       return MESSAGE_FILE_MAX_MB
     default:
       return 0
   }
 }
 
-/** 校验媒体文件大小是否超过消息类型上限；超限触发 warn 并返回 false，调用方不应进入占位 / 上传链路 */
+/** 校验媒体文件大小是否超过内容类型上限；超限触发 warn 并返回 false，调用方不应进入占位 / 上传链路 */
 export function ensureMediaSizeWithinLimit(
   file: File,
   type: number,

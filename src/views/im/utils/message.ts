@@ -3,7 +3,7 @@ import { useUserStore } from '@/store/modules/user'
 import {
   ImRtcCallEndReason,
   ImConversationType,
-  ImMessageType,
+  ImContentType,
   type ImConversationTypeValue
 } from './constants'
 import { getCurrentUserId } from '@/utils/auth'
@@ -18,7 +18,7 @@ export type { QuoteMessage } from '../home/types'
 // IM 消息 content 编解码 & 展示工具
 // ====================================================================
 // 约定：消息的 content 字段统一存 JSON 字符串，字段名、结构对齐后端
-// cn.iocoder.yudao.module.im.service.websocket.dto.message.* 下的 DTO。
+// cn.iocoder.yudao.module.im.service.websocket.notification.message.* 下的 DTO。
 // 各类消息 payload interface 字段对齐后端；解析统一用 parseMessage<T>，
 // 序列化直接 JSON.stringify(payload)。
 // ====================================================================
@@ -204,7 +204,7 @@ export interface ImageMessage extends Quotable {
   size?: number
 }
 
-/** 语音消息 payload（对齐后端 AudioMessage；ImMessageType 保留 VOICE 命名） */
+/** 语音消息 payload（对齐后端 AudioMessage；ImContentType 保留 VOICE 命名） */
 export interface AudioMessage extends Quotable {
   url: string
   /** 时长（秒） */
@@ -324,7 +324,7 @@ export interface MergeMessageItem {
   senderNickname: string
   /** 发送人头像快照 */
   senderAvatar?: string
-  /** 消息类型，对齐 ImMessageType */
+  /** 内容类型，对齐 ImContentType */
   type: number
   /** 原消息 content（JSON）；嵌套合并消息时仍按本结构层层展开 */
   content: string
@@ -449,19 +449,19 @@ export interface AddableFacePayload {
 }
 
 /**
- * 从消息抽取「添加到表情」的 payload；当前消息类型不可添加返回 null
+ * 从消息抽取「添加到表情」的 payload；当前内容类型不可添加返回 null
  *
  * 调用方（MessageItem 的右键菜单）按 nullable 决定是否展示「添加到表情」入口
  */
 export function extractAddableFace(message: Message): AddableFacePayload | null {
-  if (message.type === ImMessageType.FACE) {
+  if (message.type === ImContentType.FACE) {
     const face = parseMessage<FaceMessage>(message.content)
     if (!face?.url) {
       return null
     }
     return { url: face.url, width: face.width || 200, height: face.height || 200, name: face.name }
   }
-  if (message.type === ImMessageType.IMAGE) {
+  if (message.type === ImContentType.IMAGE) {
     const image = parseMessage<ImageMessage>(message.content)
     if (!image?.url) {
       return null
@@ -718,7 +718,7 @@ export function resolveGroupNotificationSegments(
     return []
   }
   // ENTER 主语是 entrant 而非 operator，独立处理；其它 case 都以 operatorUserId 为主语
-  if (message.type === ImMessageType.GROUP_MEMBER_ENTER) {
+  if (message.type === ImContentType.GROUP_MEMBER_ENTER) {
     const entrantId = payload.entrantUserId ?? payload.operatorUserId
     return entrantId ? [tipMention(entrantId, resolveName(entrantId)), tipText(' 加入了群聊')] : []
   }
@@ -732,31 +732,31 @@ export function resolveGroupNotificationSegments(
   const memberSegments = joinMentionSegments(payload.memberUserIds || [], '、', resolveName)
 
   switch (message.type) {
-    case ImMessageType.GROUP_CREATE:
+    case ImContentType.GROUP_CREATE:
       return [operatorSegment, tipText(' 创建了群聊')]
-    case ImMessageType.GROUP_NAME_UPDATE:
+    case ImContentType.GROUP_NAME_UPDATE:
       return [operatorSegment, tipText(` 将群名修改为 "${payload.newName ?? ''}"`)]
-    case ImMessageType.GROUP_NOTICE_UPDATE:
+    case ImContentType.GROUP_NOTICE_UPDATE:
       return [operatorSegment, tipText(' 更新了群公告')]
-    case ImMessageType.GROUP_INFO_UPDATE:
+    case ImContentType.GROUP_INFO_UPDATE:
       return payload.newAvatar
         ? [operatorSegment, tipText(' 更换了群头像')]
         : [operatorSegment, tipText(' 更新了群信息')]
-    case ImMessageType.GROUP_DISSOLVE:
+    case ImContentType.GROUP_DISSOLVE:
       return [operatorSegment, tipText(' 解散了群聊')]
-    case ImMessageType.GROUP_MEMBER_INVITE:
+    case ImContentType.GROUP_MEMBER_INVITE:
       return [operatorSegment, tipText(' 邀请 '), ...memberSegments, tipText(' 加入群聊')]
-    case ImMessageType.GROUP_MEMBER_QUIT:
+    case ImContentType.GROUP_MEMBER_QUIT:
       return [operatorSegment, tipText(' 退出了群聊')]
-    case ImMessageType.GROUP_MEMBER_KICK:
+    case ImContentType.GROUP_MEMBER_KICK:
       return [operatorSegment, tipText(' 移出了 '), ...memberSegments]
-    case ImMessageType.GROUP_MEMBER_NICKNAME_UPDATE:
+    case ImContentType.GROUP_MEMBER_NICKNAME_UPDATE:
       return [operatorSegment, tipText(` 修改群昵称为 "${payload.displayUserName ?? ''}"`)]
-    case ImMessageType.GROUP_ADMIN_ADD:
+    case ImContentType.GROUP_ADMIN_ADD:
       return [operatorSegment, tipText(' 将 '), ...memberSegments, tipText(' 设为管理员')]
-    case ImMessageType.GROUP_ADMIN_REMOVE:
+    case ImContentType.GROUP_ADMIN_REMOVE:
       return [operatorSegment, tipText(' 撤销了 '), ...memberSegments, tipText(' 的管理员身份')]
-    case ImMessageType.GROUP_OWNER_TRANSFER:
+    case ImContentType.GROUP_OWNER_TRANSFER:
       return payload.newOwnerUserId
         ? [
             operatorSegment,
@@ -764,11 +764,11 @@ export function resolveGroupNotificationSegments(
             tipMention(payload.newOwnerUserId, resolveName(payload.newOwnerUserId))
           ]
         : []
-    case ImMessageType.GROUP_MESSAGE_PIN:
+    case ImContentType.GROUP_MESSAGE_PIN:
       return [operatorSegment, tipText(' 置顶了一条消息')]
-    case ImMessageType.GROUP_MESSAGE_UNPIN:
+    case ImContentType.GROUP_MESSAGE_UNPIN:
       return [operatorSegment, tipText(' 取消了一条置顶消息')]
-    case ImMessageType.GROUP_MEMBER_MUTED:
+    case ImContentType.GROUP_MEMBER_MUTED:
       return payload.mutedUserId
         ? [
             operatorSegment,
@@ -777,7 +777,7 @@ export function resolveGroupNotificationSegments(
             tipText(' 禁言')
           ]
         : []
-    case ImMessageType.GROUP_MEMBER_CANCEL_MUTED:
+    case ImContentType.GROUP_MEMBER_CANCEL_MUTED:
       return payload.mutedUserId
         ? [
             operatorSegment,
@@ -786,11 +786,11 @@ export function resolveGroupNotificationSegments(
             tipText(' 的禁言')
           ]
         : []
-    case ImMessageType.GROUP_MUTED:
+    case ImContentType.GROUP_MUTED:
       return [operatorSegment, tipText(' 开启了全群禁言')]
-    case ImMessageType.GROUP_CANCEL_MUTED:
+    case ImContentType.GROUP_CANCEL_MUTED:
       return [operatorSegment, tipText(' 关闭了全群禁言')]
-    case ImMessageType.GROUP_BANNED:
+    case ImContentType.GROUP_BANNED:
       return [operatorSegment, tipText(payload.banned ? ' 封禁了该群' : ' 解封了该群')]
     default:
       return []
@@ -813,9 +813,9 @@ export function resolveGroupNotificationText(
 /** 会话内好友事件 segments */
 export function resolveFriendNotificationSegments(message: { type?: number }): TipSegment[] {
   switch (message.type) {
-    case ImMessageType.FRIEND_ADD:
+    case ImContentType.FRIEND_ADD:
       return [tipText('你们已经是好友了，开始聊天吧')]
-    case ImMessageType.FRIEND_DELETE:
+    case ImContentType.FRIEND_DELETE:
       return [tipText('你已删除好友')]
     default:
       return []
@@ -874,7 +874,7 @@ export function resolveRtcCallTipSegments(message: {
   if (!payload) {
     return []
   }
-  if (message.type === ImMessageType.RTC_CALL_START) {
+  if (message.type === ImContentType.RTC_CALL_START) {
     return payload.inviterUserId
       ? [
           tipMention(payload.inviterUserId, resolveRtcInviterLabel(payload)),
@@ -882,7 +882,7 @@ export function resolveRtcCallTipSegments(message: {
         ]
       : []
   }
-  if (message.type === ImMessageType.RTC_CALL_END) {
+  if (message.type === ImContentType.RTC_CALL_END) {
     return [tipText('语音通话已经结束')]
   }
   return []
@@ -907,10 +907,10 @@ export function resolveRtcCallLastContent(
   if (conversationType === ImConversationType.PRIVATE) {
     return '[语音通话]'
   }
-  if (message.type === ImMessageType.RTC_CALL_END) {
+  if (message.type === ImContentType.RTC_CALL_END) {
     return '语音通话已经结束'
   }
-  if (message.type === ImMessageType.RTC_CALL_START) {
+  if (message.type === ImContentType.RTC_CALL_START) {
     const payload = parseRtcCallPayload(message.content)
     if (payload) {
       return `${resolveRtcInviterLabel(payload)} 发起了语音通话`

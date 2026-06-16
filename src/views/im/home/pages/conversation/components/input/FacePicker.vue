@@ -2,7 +2,7 @@
   <!--
     表情面板（多 tab）：emoji / 个人表情 / N 个系统表情包
     - 对齐微信 PC：底部 tab 栏切换面板内容；emoji 保持 Unicode（仍由 TEXT 通道发送）
-    - 个人表情 / 系统表情走 FACE 消息类型，通过 select-face 事件由调用方走 sendRaw 发送
+    - 个人表情 / 系统表情走 FACE 内容类型，通过 select-face 事件由调用方走 sendRaw 发送
     - mode='emoji' 时只显示 emoji tab + 隐藏底部 tab 栏，给留言 / 评论这类只发文本的场景用
     - 定位由调用方决定（通常浮在表情按钮上方）
   -->

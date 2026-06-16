@@ -157,7 +157,7 @@
     v-else
     class="px-3.5 py-2.5 text-sm italic rounded-lg text-[var(--el-text-color-secondary)] bg-[var(--el-fill-color-light)]"
   >
-    [不支持的消息类型]
+    [不支持的内容类型]
   </div>
 </template>
 
@@ -167,7 +167,7 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import { formatFileSize } from '@/utils/file'
 import { formatSeconds } from '@/utils/formatTime'
 
-import { ImMessageType } from '@/views/im/utils/constants'
+import { ImContentType } from '@/views/im/utils/constants'
 import { MESSAGE_MERGE_PREVIEW_LINES } from '@/views/im/utils/config'
 import {
   parseMessage,
@@ -193,7 +193,7 @@ import MaterialBubble from './MaterialBubble.vue'
 defineOptions({ name: 'ImMessageBubble' })
 
 const props = defineProps<{
-  /** 消息类型，对齐 ImMessageType */
+  /** 内容类型，对齐 ImContentType */
   type: number
   /** 消息 content（JSON 字符串） */
   content: string
@@ -213,15 +213,15 @@ const emit = defineEmits<{
 }>()
 
 /** 各 type 判定 */
-const isText = computed(() => props.type === ImMessageType.TEXT)
-const isImage = computed(() => props.type === ImMessageType.IMAGE)
-const isFile = computed(() => props.type === ImMessageType.FILE)
-const isVoice = computed(() => props.type === ImMessageType.VOICE)
-const isVideo = computed(() => props.type === ImMessageType.VIDEO)
-const isFace = computed(() => props.type === ImMessageType.FACE)
-const isCard = computed(() => props.type === ImMessageType.CARD)
-const isMerge = computed(() => props.type === ImMessageType.MERGE)
-const isMaterial = computed(() => props.type === ImMessageType.MATERIAL)
+const isText = computed(() => props.type === ImContentType.TEXT)
+const isImage = computed(() => props.type === ImContentType.IMAGE)
+const isFile = computed(() => props.type === ImContentType.FILE)
+const isVoice = computed(() => props.type === ImContentType.VOICE)
+const isVideo = computed(() => props.type === ImContentType.VIDEO)
+const isFace = computed(() => props.type === ImContentType.FACE)
+const isCard = computed(() => props.type === ImContentType.CARD)
+const isMerge = computed(() => props.type === ImContentType.MERGE)
+const isMaterial = computed(() => props.type === ImContentType.MATERIAL)
 
 /** 媒体上传中：uploadProgress 非 null 即视为上传中 */
 const isUploading = computed(() => props.uploadProgress != null)

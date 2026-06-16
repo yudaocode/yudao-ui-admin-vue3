@@ -6,7 +6,7 @@ import {
   ImConversationType,
   ImMessageReceiptStatus,
   ImMessageStatus,
-  ImMessageType,
+  ImContentType,
   isGroupNotification,
   isNormalMessage
 } from '../../utils/constants'
@@ -436,7 +436,7 @@ export const useMessageStore = defineStore('imMessageStore', {
         return null
       }
       // 2. 更新消息和会话摘要
-      message.type = ImMessageType.RECALL
+      message.type = ImContentType.RECALL
       message.status = ImMessageStatus.RECALL
       message.content = ''
       if (messages[messages.length - 1]?.id === messageId) {

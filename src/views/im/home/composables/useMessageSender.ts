@@ -19,7 +19,7 @@ import {
   type QuoteMessage,
   type TextMessage
 } from '../../utils/message'
-import { ImMessageType, ImMessageStatus, ImConversationType } from '../../utils/constants'
+import { ImContentType, ImMessageStatus, ImConversationType } from '../../utils/constants'
 import { MESSAGE_PRIVATE_READ_ENABLED, MESSAGE_GROUP_READ_ENABLED } from '../../utils/config'
 import { getClientConversationId } from '../../utils/db'
 import type { Conversation, Message } from '../types'
@@ -193,7 +193,7 @@ export const useMessageSender = () => {
       return false
     }
     const payload = withQuotePayload<TextMessage>({ content: text }, options?.quote)
-    return sendRaw(ImMessageType.TEXT, serializeMessage(payload), options)
+    return sendRaw(ImContentType.TEXT, serializeMessage(payload), options)
   }
 
   /**

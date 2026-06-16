@@ -23,7 +23,7 @@ import { pullMyConversationReadList as apiPullMyConversationReadList } from '@/a
 import {
   ImConversationType,
   ImMessageStatus,
-  ImMessageType,
+  ImContentType,
   isFriendChatTip,
   isFriendNotification
 } from '../../utils/constants'
@@ -208,7 +208,7 @@ export const useMessagePuller = () => {
           if (isPrivate) {
             const message = raw as ImPrivateMessageRespVO
             // 特殊：撤回消息的处理
-            if (message.type === ImMessageType.RECALL) {
+            if (message.type === ImContentType.RECALL) {
               pulledMessages.push({
                 kind: 'recall',
                 conversationType: ImConversationType.PRIVATE,
@@ -235,7 +235,7 @@ export const useMessagePuller = () => {
           } else {
             const message = raw as ImGroupMessageRespVO
             // 特殊：撤回消息的处理
-            if (message.type === ImMessageType.RECALL) {
+            if (message.type === ImContentType.RECALL) {
               pulledMessages.push({
                 kind: 'recall',
                 conversationType: ImConversationType.GROUP,

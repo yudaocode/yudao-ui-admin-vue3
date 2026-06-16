@@ -106,7 +106,7 @@ import { formatFileSize } from '@/utils/file'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useMessageStore } from '../../../../store/messageStore'
 import { getSenderDisplayName } from '@/views/im/utils/user'
-import { ImMessageType } from '@/views/im/utils/constants'
+import { ImContentType } from '@/views/im/utils/constants'
 import { getClientConversationId } from '@/views/im/utils/db'
 import CardLineLabel from '@/views/im/home/components/card/CardLineLabel.vue'
 import {
@@ -165,7 +165,7 @@ const liveMessage = computed(() => {
 })
 
 /** 命中本地缓存且 type === RECALL 才判定为已撤回;不在缓存的当快照仍有效 */
-const isRecalled = computed(() => liveMessage.value?.type === ImMessageType.RECALL)
+const isRecalled = computed(() => liveMessage.value?.type === ImContentType.RECALL)
 
 /** 渲染时实时算,与气泡上方显示名走同一套规则,避免备注变更后引用块陈旧 */
 const senderName = computed(() => {
@@ -189,12 +189,12 @@ type AnyQuotePayload = Partial<
 >
 const parsedPayload = computed(() => parseMessage<AnyQuotePayload>(props.quote.content))
 
-const isText = computed(() => props.quote.type === ImMessageType.TEXT)
-const isFile = computed(() => props.quote.type === ImMessageType.FILE)
-const isVoice = computed(() => props.quote.type === ImMessageType.VOICE)
-const isCard = computed(() => props.quote.type === ImMessageType.CARD)
-const isFace = computed(() => props.quote.type === ImMessageType.FACE)
-const isMaterial = computed(() => props.quote.type === ImMessageType.MATERIAL)
+const isText = computed(() => props.quote.type === ImContentType.TEXT)
+const isFile = computed(() => props.quote.type === ImContentType.FILE)
+const isVoice = computed(() => props.quote.type === ImContentType.VOICE)
+const isCard = computed(() => props.quote.type === ImContentType.CARD)
+const isFace = computed(() => props.quote.type === ImContentType.FACE)
+const isMaterial = computed(() => props.quote.type === ImContentType.MATERIAL)
 
 /** 文本超过 MAX_TEXT_PREVIEW_LEN 截断，长内容不撑爆引用块 */
 const textPreview = computed(() => {
@@ -211,13 +211,13 @@ const thumbnailUrl = computed<string | undefined>(() => {
     return undefined
   }
   const { type } = props.quote
-  if (type === ImMessageType.IMAGE) {
+  if (type === ImContentType.IMAGE) {
     return parsedPayload.value?.thumbnailUrl || parsedPayload.value?.url
   }
-  if (type === ImMessageType.VIDEO || type === ImMessageType.MATERIAL) {
+  if (type === ImContentType.VIDEO || type === ImContentType.MATERIAL) {
     return parsedPayload.value?.coverUrl
   }
-  if (type === ImMessageType.FACE) {
+  if (type === ImContentType.FACE) {
     return parsedPayload.value?.url
   }
   return undefined

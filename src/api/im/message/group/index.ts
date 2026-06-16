@@ -6,7 +6,7 @@ export interface ImGroupMessageRespVO {
   clientMessageId: string // 客户端消息编号
   senderId: number // 发送人编号
   groupId: number // 群编号
-  type: number // 消息类型
+  type: number // 内容类型
   content: string // 消息内容（JSON 格式）
   status: number // 消息状态
   sendTime: string // 发送时间
@@ -20,7 +20,7 @@ export interface ImGroupMessageRespVO {
 export interface ImGroupMessageSendReqVO {
   clientMessageId: string // 客户端消息编号
   groupId: number // 群编号
-  type: number // 消息类型
+  type: number // 内容类型
   content: string // 消息内容（JSON 格式）
   atUserIds?: number[] // @ 目标用户编号列表
   receipt?: boolean // 是否需要回执

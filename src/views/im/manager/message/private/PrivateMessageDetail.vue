@@ -12,7 +12,7 @@
         {{ detail.receiverNickname }} ({{ detail.receiverId }})
       </el-descriptions-item>
       <el-descriptions-item label="类型">
-        <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="detail.type" />
+        <dict-tag :type="DICT_TYPE.IM_CONTENT_TYPE" :value="detail.type" />
       </el-descriptions-item>
       <el-descriptions-item v-if="MESSAGE_PRIVATE_READ_ENABLED" label="状态">
         <dict-tag :type="DICT_TYPE.IM_MESSAGE_STATUS" :value="detail.status" />

@@ -160,7 +160,7 @@ import { useMessageMultiSelect } from '@/views/im/home/composables/useMessageMul
 import {
   ImConversationType,
   ImForwardMode,
-  ImMessageType,
+  ImContentType,
   type ImForwardModeValue
 } from '@/views/im/utils/constants'
 import { MESSAGE_MERGE_PREVIEW_LINES } from '@/views/im/utils/config'
@@ -300,7 +300,7 @@ async function forwardToTarget(target: Conversation): Promise<boolean> {
     if (!content) {
       return false
     }
-    return sendRaw(ImMessageType.MERGE, content, { conversation: target })
+    return sendRaw(ImContentType.MERGE, content, { conversation: target })
   }
   for (const payload of cleanedSinglePayloads.value) {
     const ok = await sendRaw(payload.type, payload.content, { conversation: target })

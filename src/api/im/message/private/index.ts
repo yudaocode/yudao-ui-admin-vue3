@@ -6,7 +6,7 @@ export interface ImPrivateMessageRespVO {
   clientMessageId: string // 客户端消息编号
   senderId: number // 发送人编号
   receiverId: number // 接收人编号
-  type: number // 消息类型
+  type: number // 内容类型
   content: string // 消息内容（JSON 格式）
   status: number // 消息状态（正常 / 已撤回）
   receiptStatus?: number // 回执状态（不需要 / 待完成 / 已完成），对齐 ImMessageReceiptStatus
@@ -17,7 +17,7 @@ export interface ImPrivateMessageRespVO {
 export interface ImPrivateMessageSendReqVO {
   clientMessageId: string // 客户端消息编号
   receiverId: number // 接收人编号
-  type: number // 消息类型
+  type: number // 内容类型
   content: string // 消息内容（JSON 格式）
   receipt?: boolean // 是否需要回执；不传后端默认 true（普通私聊用户消息）
 }

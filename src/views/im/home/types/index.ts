@@ -6,26 +6,39 @@ export interface WebSocketFrame {
   content: string // 帧内容（JSON 字符串）
 }
 
-// 私聊消息 DTO（对齐后端 ImPrivateMessageDTO）
-export interface ImPrivateMessageDTO {
+// IM WebSocket 通知 DTO（对齐后端 ImNotificationWebSocketDTO）
+export interface ImNotificationWebSocketDTO {
+  conversationType: number // 会话类型
+  contentType: number // 内容类型
+  payload: Record<string, any> // 负载数据
+}
+
+// 无会话在线通知（对齐后端 conversationType = NONE 的独立 payload）
+export interface ImNoConversationNotification {
+  type: number // 内容类型
+  [key: string]: any
+}
+
+// 私聊消息 DTO（对齐后端 ImPrivateMessageNotification）
+export interface ImPrivateMessageNotification {
   id: number // 消息编号
   clientMessageId: string // 客户端消息编号
   senderId: number // 发送人编号
   receiverId: number // 接收人编号
-  type: number // 消息类型
+  type: number // 内容类型
   content: string // 消息内容
   status: number // 消息状态
   receiptStatus?: number // 回执状态（不需要 / 待完成 / 已完成）
   sendTime: string // 发送时间
 }
 
-// 群聊消息 DTO（对齐后端 ImGroupMessageDTO）
-export interface ImGroupMessageDTO {
+// 群聊消息 DTO（对齐后端 ImGroupMessageNotification）
+export interface ImGroupMessageNotification {
   id: number // 消息编号
   clientMessageId: string // 客户端消息编号
   senderId: number // 发送人编号
   groupId: number // 群编号
-  type: number // 消息类型
+  type: number // 内容类型
   content: string // 消息内容
   status: number // 消息状态
   sendTime: string // 发送时间
@@ -36,13 +49,35 @@ export interface ImGroupMessageDTO {
   readId?: number // 已读位置
 }
 
+// 消息已读同步通知（对齐后端 ImMessageReadNotification）
+export interface ImMessageReadNotification {
+  id: number // 已读位置
+  type: number // 内容类型
+  senderId?: number // 发送人编号
+  receiverId?: number // 私聊接收人编号
+  groupId?: number // 群编号
+  channelId?: number // 频道编号
+  readId?: number // 已读位置
+}
+
+// 消息回执通知（对齐后端 ImMessageReceiptNotification）
+export interface ImMessageReceiptNotification {
+  id: number // 消息编号
+  type: number // 内容类型
+  senderId?: number // 已读方用户编号
+  receiverId?: number // 私聊接收人编号
+  groupId?: number // 群编号
+  readCount?: number // 群回执已读人数
+  receiptStatus?: number // 群回执状态
+}
+
 // ==================== 本地会话 / 消息结构 ====================
 
 /** 引用消息 */
 export interface QuoteMessage {
   messageId: number // 引用消息编号
   senderId: number // 引用消息发送人编号
-  type: number // 引用消息类型
+  type: number // 引用内容类型
   content: string // 引用消息内容
 }
 
@@ -61,7 +96,7 @@ export interface Conversation {
   lastContent: string // 会话列表展示的最后一条消息摘要
   lastSendTime: number // 最后一条消息时间，用于排序
   lastSenderId?: number // 发送人编号
-  lastMessageType?: number // 消息类型，对齐 ImMessageType
+  lastMessageType?: number // 内容类型，对齐 ImContentType
   lastMessageId?: number // 最后一条服务端消息编号
   lastClientMessageId?: string // 最后一条客户端消息编号
   lastMessageStatus?: number // 最后一条消息状态
@@ -84,10 +119,10 @@ export interface Conversation {
 
 // 消息数据结构
 export interface Message {
-  // ========== 后端字段（对齐 ImPrivateMessageDTO / ImGroupMessageDTO） ==========
+  // ========== 后端字段（对齐 ImPrivateMessageNotification / ImGroupMessageNotification） ==========
   id?: number // 服务端消息编号，发送中为空
   clientMessageId: string // 客户端消息编号，本地生成用于合并去重
-  type: number // 消息类型，对齐 ImMessageType
+  type: number // 内容类型，对齐 ImContentType
   content: string // 消息内容，JSON 字符串
   status: number // 消息状态，对齐 ImMessageStatus
   sendTime: number // 发送时间（前端转毫秒时间戳；后端为 LocalDateTime 字符串）

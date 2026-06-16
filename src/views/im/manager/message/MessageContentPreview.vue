@@ -85,19 +85,19 @@
 
   <!-- 控制类消息：撤回 / 已读 / 回执 -->
   <span
-    v-else-if="props.type === ImMessageType.RECALL"
+    v-else-if="props.type === ImContentType.RECALL"
     class="text-12px text-[var(--el-text-color-secondary)]"
   >
     [消息已撤回]
   </span>
   <span
-    v-else-if="props.type === ImMessageType.READ"
+    v-else-if="props.type === ImContentType.READ"
     class="text-12px text-[var(--el-text-color-secondary)]"
   >
     [已读回执]
   </span>
   <span
-    v-else-if="props.type === ImMessageType.RECEIPT"
+    v-else-if="props.type === ImContentType.RECEIPT"
     class="text-12px text-[var(--el-text-color-secondary)]"
   >
     [回执]
@@ -139,7 +139,7 @@ import { formatFileSize } from '@/utils/file'
 import { formatSeconds } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import {
-  ImMessageType,
+  ImContentType,
   ImRtcCallEndReason,
   ImRtcCallMediaType,
   isFriendChatTip,
@@ -169,7 +169,7 @@ import { openSafeUrl } from '@/utils/url'
 defineOptions({ name: 'ImMessageContentPreview' })
 
 const props = defineProps<{
-  /** 消息类型，对应 ImMessageType */
+  /** 内容类型，对应 ImContentType */
   type?: number
   /** 消息 content（JSON 字符串或裸文本） */
   content?: string
@@ -178,14 +178,14 @@ const props = defineProps<{
 }>()
 
 /** 各类型判定 */
-const isText = computed(() => props.type === ImMessageType.TEXT)
-const isImage = computed(() => props.type === ImMessageType.IMAGE)
-const isFile = computed(() => props.type === ImMessageType.FILE)
-const isVoice = computed(() => props.type === ImMessageType.VOICE)
-const isVideo = computed(() => props.type === ImMessageType.VIDEO)
-const isCard = computed(() => props.type === ImMessageType.CARD)
-const isFace = computed(() => props.type === ImMessageType.FACE)
-const isMerge = computed(() => props.type === ImMessageType.MERGE)
+const isText = computed(() => props.type === ImContentType.TEXT)
+const isImage = computed(() => props.type === ImContentType.IMAGE)
+const isFile = computed(() => props.type === ImContentType.FILE)
+const isVoice = computed(() => props.type === ImContentType.VOICE)
+const isVideo = computed(() => props.type === ImContentType.VIDEO)
+const isCard = computed(() => props.type === ImContentType.CARD)
+const isFace = computed(() => props.type === ImContentType.FACE)
+const isMerge = computed(() => props.type === ImContentType.MERGE)
 
 /** 文本内容：从 TextMessage payload 取 .content */
 const textContent = computed(
@@ -278,7 +278,7 @@ const rtcCallTipText = computed(() => {
     return ''
   }
   const mediaLabel = payload.mediaType === ImRtcCallMediaType.VIDEO ? '视频' : '语音'
-  if (props.type === ImMessageType.RTC_CALL_START) {
+  if (props.type === ImContentType.RTC_CALL_START) {
     const inviter = payload.inviterNickname?.trim() || `用户(${payload.inviterUserId ?? ''})`
     return `${inviter} 发起了${mediaLabel}通话`
   }

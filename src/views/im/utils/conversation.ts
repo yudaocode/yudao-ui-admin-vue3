@@ -6,7 +6,7 @@
 // 2. fallbackName 由调用方传入（典型来源：Conversation.lastSenderDisplayName 快照），透传到 getSenderDisplayName 内部，算不出真名时兜底
 // ====================================================================
 
-import { ImConversationType, ImMessageType, isFriendChatTip, isGroupNotification, isRtcCallTip } from './constants'
+import { ImConversationType, ImContentType, isFriendChatTip, isGroupNotification, isRtcCallTip } from './constants'
 import {
   getCardLabelInfo,
   parseMessage,
@@ -103,47 +103,47 @@ export function summarizeMessageContent(
   opts?: { withFileName?: boolean }
 ): string {
   switch (message.type) {
-    case ImMessageType.TEXT:
+    case ImContentType.TEXT:
       return parseMessage<TextMessage>(message.content)?.content ?? ''
-    case ImMessageType.IMAGE:
+    case ImContentType.IMAGE:
       return '[图片]'
-    case ImMessageType.VOICE:
+    case ImContentType.VOICE:
       return '[语音]'
-    case ImMessageType.VIDEO:
+    case ImContentType.VIDEO:
       return '[视频]'
-    case ImMessageType.FILE: {
+    case ImContentType.FILE: {
       if (opts?.withFileName) {
         const file = parseMessage<FileMessage>(message.content)
         return file?.name ? `[文件] ${file.name}` : '[文件]'
       }
       return '[文件]'
     }
-    case ImMessageType.CARD:
+    case ImContentType.CARD:
       return `[${getCardLabelInfo(parseMessage<CardMessage>(message.content)).label}]`
-    case ImMessageType.FACE:
+    case ImContentType.FACE:
       return buildFacePreviewText(parseMessage<FaceMessage>(message.content))
-    case ImMessageType.MERGE:
+    case ImContentType.MERGE:
       return '[聊天记录]'
-    case ImMessageType.MATERIAL: {
+    case ImContentType.MATERIAL: {
       const material = parseMessage<MaterialMessage>(message.content)
       return material?.title ? `[频道] ${material.title}` : '[频道]'
     }
-    case ImMessageType.RTC_CALL_START:
-    case ImMessageType.RTC_CALL_END:
+    case ImContentType.RTC_CALL_START:
+    case ImContentType.RTC_CALL_END:
       return '[语音通话]'
     default:
       return ''
   }
 }
 
-/** 会话列表最后一条摘要：RECALL 走 buildRecallTip + fallbackName；其它按消息类型派生 */
+/** 会话列表最后一条摘要：RECALL 走 buildRecallTip + fallbackName；其它按内容类型派生 */
 export function resolveConversationLastContent(
   message: Message,
   conversationType: number,
   conversationTargetId: number,
   fallbackName?: string
 ): string {
-  if (message.type === ImMessageType.RECALL) {
+  if (message.type === ImContentType.RECALL) {
     return buildRecallTip(
       message.senderId,
       message.selfSend,

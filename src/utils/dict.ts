@@ -328,7 +328,7 @@ export enum DICT_TYPE {
   MES_WM_PACKAGE_STATUS = 'mes_wm_package_status', // MES 装箱单状态
 
   // ========== IM - 即时通讯模块  ==========
-  IM_MESSAGE_TYPE = 'im_message_type', // IM 消息类型
+  IM_CONTENT_TYPE = 'im_content_type', // IM 内容类型
   IM_MESSAGE_STATUS = 'im_message_status', // IM 消息状态：0=正常 / 2=已撤回（私聊 / 群聊共用）
   IM_MESSAGE_RECEIPT_STATUS = 'im_message_receipt_status', // IM 消息回执状态：0=不需要 / 1=待完成 / 2=已完成
   IM_FRIEND_STATUS = 'im_friend_status', // IM 好友状态

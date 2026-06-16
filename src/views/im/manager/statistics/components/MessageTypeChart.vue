@@ -1,6 +1,6 @@
 <template>
   <el-card shadow="never" class="!rounded-8px mb-16px">
-    <template #header>消息类型分布</template>
+    <template #header>内容类型分布</template>
     <div ref="chartRef" v-loading="loading" style="width: 100%; height: 320px"></div>
   </el-card>
 </template>
@@ -19,7 +19,7 @@ let chart: echarts.ECharts | null = null
 /** 渲染饼图：type 在前端按字典翻译为名称给 echarts */
 const render = (data: StatisticsApi.ImStatisticsMessageTypeVO[]) => {
   const items = data.map((d) => ({
-    name: getDictLabel(DICT_TYPE.IM_MESSAGE_TYPE, d.type) || `未知(${d.type})`,
+    name: getDictLabel(DICT_TYPE.IM_CONTENT_TYPE, d.type) || `未知(${d.type})`,
     value: d.value
   }))
   chart?.setOption({

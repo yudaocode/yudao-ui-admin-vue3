@@ -22,15 +22,15 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="消息类型" prop="type">
+      <el-form-item label="内容类型" prop="type">
         <el-select
           v-model="queryParams.type"
-          placeholder="请选择消息类型"
+          placeholder="请选择内容类型"
           clearable
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IM_MESSAGE_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IM_CONTENT_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -82,7 +82,7 @@
       </el-table-column>
       <el-table-column label="类型" align="center" prop="type" width="100">
         <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.IM_MESSAGE_TYPE" :value="row.type" />
+          <dict-tag :type="DICT_TYPE.IM_CONTENT_TYPE" :value="row.type" />
         </template>
       </el-table-column>
       <el-table-column label="内容预览" align="left" min-width="240">

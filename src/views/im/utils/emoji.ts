@@ -2,7 +2,7 @@
  * IM 常用 Unicode emoji 列表
  *
  * 所见即所得（不依赖图片资源），由表情面板（FacePicker 的 emoji tab）使用；
- * Unicode emoji 选中后由调用方插入到输入框走 TEXT 通道，不走 FACE 消息类型
+ * Unicode emoji 选中后由调用方插入到输入框走 TEXT 通道，不走 FACE 内容类型
  */
 export const IM_EMOJI_LIST: string[] = [
   '😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊',

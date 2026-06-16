@@ -18,7 +18,7 @@ import {
   ImConversationType,
   ImGroupMemberRole,
   ImMessageStatus,
-  ImMessageType
+  ImContentType
 } from '../../utils/constants'
 import { CommonStatusEnum } from '@/utils/constants'
 import { getDb } from '../../utils/db'
@@ -603,37 +603,37 @@ export const useGroupStore = defineStore('imGroupStore', {
         return
       }
       switch (type) {
-        case ImMessageType.GROUP_CREATE:
+        case ImContentType.GROUP_CREATE:
           this.applyGroupCreateNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_NAME_UPDATE:
+        case ImContentType.GROUP_NAME_UPDATE:
           this.applyGroupNameUpdateNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_NOTICE_UPDATE:
+        case ImContentType.GROUP_NOTICE_UPDATE:
           this.applyGroupNoticeUpdateNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_INFO_UPDATE:
+        case ImContentType.GROUP_INFO_UPDATE:
           this.applyGroupInfoUpdateNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_DISSOLVE:
+        case ImContentType.GROUP_DISSOLVE:
           this.removeGroup(groupId)
           break
-        case ImMessageType.GROUP_MEMBER_INVITE:
+        case ImContentType.GROUP_MEMBER_INVITE:
           this.applyGroupMemberInviteNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_MEMBER_ENTER:
+        case ImContentType.GROUP_MEMBER_ENTER:
           this.applyGroupMemberEnterNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_MEMBER_QUIT:
+        case ImContentType.GROUP_MEMBER_QUIT:
           this.applyGroupMemberQuitNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_MEMBER_KICK:
+        case ImContentType.GROUP_MEMBER_KICK:
           this.applyGroupMemberKickNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_MEMBER_NICKNAME_UPDATE:
+        case ImContentType.GROUP_MEMBER_NICKNAME_UPDATE:
           this.applyGroupMemberNicknameUpdateNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_ADMIN_ADD:
+        case ImContentType.GROUP_ADMIN_ADD:
           this.updateGroupMemberRoleList(
             groupId,
             payload.memberUserIds || [],
@@ -645,7 +645,7 @@ export const useGroupStore = defineStore('imGroupStore', {
             refreshUnhandledGroupRequests()
           }
           break
-        case ImMessageType.GROUP_ADMIN_REMOVE:
+        case ImContentType.GROUP_ADMIN_REMOVE:
           this.updateGroupMemberRoleList(
             groupId,
             payload.memberUserIds || [],
@@ -656,28 +656,28 @@ export const useGroupStore = defineStore('imGroupStore', {
             refreshUnhandledGroupRequests()
           }
           break
-        case ImMessageType.GROUP_OWNER_TRANSFER:
+        case ImContentType.GROUP_OWNER_TRANSFER:
           this.applyGroupOwnerTransferNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_MESSAGE_PIN:
+        case ImContentType.GROUP_MESSAGE_PIN:
           this.applyGroupMessagePinNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_MESSAGE_UNPIN:
+        case ImContentType.GROUP_MESSAGE_UNPIN:
           this.applyGroupMessageUnpinNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_MEMBER_MUTED:
+        case ImContentType.GROUP_MEMBER_MUTED:
           this.applyGroupMemberMutedNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_MEMBER_CANCEL_MUTED:
+        case ImContentType.GROUP_MEMBER_CANCEL_MUTED:
           this.applyGroupMemberCancelMutedNotification(groupId, payload)
           break
-        case ImMessageType.GROUP_MUTED:
+        case ImContentType.GROUP_MUTED:
           this.updateGroupFields(groupId, { mutedAll: true })
           break
-        case ImMessageType.GROUP_CANCEL_MUTED:
+        case ImContentType.GROUP_CANCEL_MUTED:
           this.updateGroupFields(groupId, { mutedAll: false })
           break
-        case ImMessageType.GROUP_BANNED:
+        case ImContentType.GROUP_BANNED:
           this.updateGroupFields(groupId, { banned: !!payload.banned })
           break
       }

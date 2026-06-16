@@ -1,5 +1,5 @@
-/** IM 消息类型枚举（对齐后端 ImMessageTypeEnum） */
-export const ImMessageType = {
+/** IM 内容类型枚举（对齐后端 ImContentTypeEnum） */
+export const ImContentType = {
   // ========== 用户聊天消息（101-105 直接复用 OpenIM 段位编号） ==========
   TEXT: 101, // 文本（对应 OpenIM Text=101）
   IMAGE: 102, // 图片（对应 OpenIM Picture=102）
@@ -64,75 +64,75 @@ export const ImMessageType = {
 /** 判断是否「群广播事件」：[GROUP_CREATE, GROUP_BANNED] 段位都算，仅 GROUP_MEMBER_SETTING_UPDATE 是个人信号排除 */
 export function isGroupNotification(type: number): boolean {
   return (
-    type >= ImMessageType.GROUP_CREATE
-    && type <= ImMessageType.GROUP_BANNED
-    && type !== ImMessageType.GROUP_MEMBER_SETTING_UPDATE
+    type >= ImContentType.GROUP_CREATE &&
+    type <= ImContentType.GROUP_BANNED &&
+    type !== ImContentType.GROUP_MEMBER_SETTING_UPDATE
   )
 }
 
 /** 判断是否「好友通知事件」：1201-1210 段位 */
 export function isFriendNotification(type: number): boolean {
-  return type >= ImMessageType.FRIEND_REQUEST_APPROVED && type <= ImMessageType.FRIEND_UPDATE
+  return type >= ImContentType.FRIEND_REQUEST_APPROVED && type <= ImContentType.FRIEND_UPDATE
 }
 
-/** 判断是否「加群申请通知事件」：1503/1505/1506 走私聊通道，按段位识别 */
+/** 判断是否「加群申请通知事件」：1503/1505/1506 */
 export function isGroupRequestNotification(type: number): boolean {
   return (
-    type === ImMessageType.GROUP_REQUEST_RECEIVED
-    || type === ImMessageType.GROUP_REQUEST_APPROVED
-    || type === ImMessageType.GROUP_REQUEST_REJECTED
+    type === ImContentType.GROUP_REQUEST_RECEIVED ||
+    type === ImContentType.GROUP_REQUEST_APPROVED ||
+    type === ImContentType.GROUP_REQUEST_REJECTED
   )
 }
 
 /** 判断是否「会话内的好友事件气泡」：FRIEND_ADD / FRIEND_DELETE 直接渲染成灰色提示，与群事件同处理 */
 export function isFriendChatTip(type: number): boolean {
-  return type === ImMessageType.FRIEND_ADD || type === ImMessageType.FRIEND_DELETE
+  return type === ImContentType.FRIEND_ADD || type === ImContentType.FRIEND_DELETE
 }
 
 /** 判断是否「会话内的通话事件气泡」：RTC_CALL_START / RTC_CALL_END 渲染成灰色提示 */
 export function isRtcCallTip(type: number): boolean {
-  return type === ImMessageType.RTC_CALL_START || type === ImMessageType.RTC_CALL_END
+  return type === ImContentType.RTC_CALL_START || type === ImContentType.RTC_CALL_END
 }
 
 /**
- * IM 普通消息类型集合（normal vs event 二分；与后端 ImMessageTypeEnum.normal 字段语义一致）
+ * IM 普通内容类型集合（normal vs event 二分；与后端 ImContentTypeEnum.normal 字段语义一致）
  *
  * 这个集合在多处被复用，新增类型前先确认所有副作用都符合预期：
- * 1. 后端发送入口校验（Im{Private,Group}MessageSendReqVO.isNormalType）—— 用户发送的消息类型必须 normal=true
+ * 1. 后端发送入口校验（Im{Private,Group}MessageSendReqVO.isNormalType）—— 用户发送的内容类型必须 normal=true
  * 2. 前端接收侧未读 / 提示音（websocketStore）—— normal 消息计入会话未读数 + 触发声音
  * 3. 前端会话列表 lastType / @ 标签（ConversationItem）—— 只有 normal 才算「最后一条聊天消息」
  * 4. 前端群消息置顶菜单（MessageItem.vue 的 canPin）—— normal 才允许群主 / 管理员置顶
  *
  * 名片（CARD）/ 表情（FACE）都是「用户主动发的聊天消息」，1/2/3 都符合预期；4 同时放开 = 群主可置顶，语义合理
  */
-const ImMessageTypeNormals: number[] = [
-  ImMessageType.TEXT,
-  ImMessageType.IMAGE,
-  ImMessageType.FILE,
-  ImMessageType.VOICE,
-  ImMessageType.VIDEO,
-  ImMessageType.CARD,
-  ImMessageType.FACE,
-  ImMessageType.MERGE,
-  ImMessageType.MATERIAL // 频道素材计入未读数 + 进会话列表
+const ImContentTypeNormals: number[] = [
+  ImContentType.TEXT,
+  ImContentType.IMAGE,
+  ImContentType.FILE,
+  ImContentType.VOICE,
+  ImContentType.VIDEO,
+  ImContentType.CARD,
+  ImContentType.FACE,
+  ImContentType.MERGE,
+  ImContentType.MATERIAL // 频道素材计入未读数 + 进会话列表
 ]
 
 /** 判断是否"普通消息" */
 export function isNormalMessage(type: number): boolean {
-  return ImMessageTypeNormals.includes(type)
+  return ImContentTypeNormals.includes(type)
 }
 
-/** IM 媒体消息类型集合：发送依赖本地 File 上传，刷新后 _localFile 丢失即不可恢复 */
-const ImMessageTypeMedia: number[] = [
-  ImMessageType.IMAGE,
-  ImMessageType.FILE,
-  ImMessageType.VOICE,
-  ImMessageType.VIDEO
+/** IM 媒体内容类型集合：发送依赖本地 File 上传，刷新后 _localFile 丢失即不可恢复 */
+const ImContentTypeMedia: number[] = [
+  ImContentType.IMAGE,
+  ImContentType.FILE,
+  ImContentType.VOICE,
+  ImContentType.VIDEO
 ]
 
 /** 判断是否「媒体消息」：图片 / 文件 / 语音 / 视频 */
 export function isMediaMessageType(type: number): boolean {
-  return ImMessageTypeMedia.includes(type)
+  return ImContentTypeMedia.includes(type)
 }
 
 /**
@@ -149,6 +149,7 @@ export const ImMessageStatus = {
 
 /** IM 会话类型枚举 */
 export const ImConversationType = {
+  NONE: 0, // 无会话
   PRIVATE: 1, // 私聊
   GROUP: 2, // 群聊
   CHANNEL: 3 // 频道 / 公众号
@@ -225,11 +226,9 @@ export const ImRtcCallStage = {
 /** ImRtcCallStage 取值类型 */
 export type ImRtcCallStageValue = (typeof ImRtcCallStage)[keyof typeof ImRtcCallStage]
 
-/** IM WebSocket 外层帧类型（对齐后端 ImPrivateMessageDTO.TYPE / ImGroupMessageDTO.TYPE / ImChannelMessageDTO.TYPE） */
+/** IM WebSocket 外层帧类型 */
 export const ImWebSocketMessageType = {
-  PRIVATE_MESSAGE: 'im-private-message', // 私聊通道
-  GROUP_MESSAGE: 'im-group-message', // 群聊通道
-  CHANNEL_MESSAGE: 'im-channel-message' // 频道通道
+  NOTIFICATION: 'im-notification' // IM 通知
 } as const
 
 /** IM 消息回执状态枚举（对齐后端 ImMessageReceiptStatusEnum） */

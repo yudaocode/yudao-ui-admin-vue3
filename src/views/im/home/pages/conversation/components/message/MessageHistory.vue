@@ -194,7 +194,7 @@
               <div class="mt-1.5">
                 <!-- 撤回：单独走灰色 tip，sender 名段可点击 -->
                 <div
-                  v-if="message.type === ImMessageType.RECALL"
+                  v-if="message.type === ImContentType.RECALL"
                   class="text-sm italic text-[var(--el-text-color-secondary)]"
                 >
                   <TipSegments :segments="recallTipSegmentsOf(message)" />
@@ -274,7 +274,7 @@ import { useMessagePuller } from '@/views/im/home/composables/useMessagePuller'
 import { useVoicePlayer } from '@/views/im/home/composables/useVoicePlayer'
 import {
   ImConversationType,
-  ImMessageType,
+  ImContentType,
   isFriendChatTip,
   isGroupNotification
 } from '@/views/im/utils/constants'
@@ -506,11 +506,11 @@ function matchesActiveFilter(message: Message): boolean {
   }
   switch (activeFilter.value.kind) {
     case 'file':
-      return message.type === ImMessageType.FILE
+      return message.type === ImContentType.FILE
     case 'image':
-      return message.type === ImMessageType.IMAGE
+      return message.type === ImContentType.IMAGE
     case 'voice':
-      return message.type === ImMessageType.VOICE
+      return message.type === ImContentType.VOICE
     case 'date':
       return dayjs(message.sendTime).format('YYYY-MM-DD') === activeFilter.value.day
     case 'member':
@@ -670,27 +670,27 @@ function textSnippetOf(message: Message): string {
     return resolveFriendNotificationText(message)
   }
   switch (message.type) {
-    case ImMessageType.TEXT:
+    case ImContentType.TEXT:
       return parseMessage<TextMessage>(message.content)?.content ?? ''
-    case ImMessageType.IMAGE:
+    case ImContentType.IMAGE:
       return '[图片]'
-    case ImMessageType.FILE:
+    case ImContentType.FILE:
       return parseMessage<FileMessage>(message.content)?.name ?? '[文件]'
-    case ImMessageType.VOICE:
+    case ImContentType.VOICE:
       return '[语音]'
-    case ImMessageType.VIDEO:
+    case ImContentType.VIDEO:
       return '[视频]'
-    case ImMessageType.CARD: {
+    case ImContentType.CARD: {
       const card = parseMessage<CardMessage>(message.content)
       return `[${getCardLabelInfo(card).label}] ${card?.name ?? ''}`
     }
-    case ImMessageType.FACE:
+    case ImContentType.FACE:
       return buildFacePreviewText(parseMessage<FaceMessage>(message.content))
-    case ImMessageType.MERGE: {
+    case ImContentType.MERGE: {
       const merge = parseMessage<MergeMessage>(message.content)
       return merge?.title ?? '[聊天记录]'
     }
-    case ImMessageType.RECALL:
+    case ImContentType.RECALL:
       return recallTipOf(message)
     default:
       return ''

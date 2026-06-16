@@ -107,7 +107,7 @@ import { useFriendStore } from '../../../../store/friendStore'
 import { useGroupStore } from '../../../../store/groupStore'
 import { useGroupRequestStore } from '../../../../store/groupRequestStore'
 import { useImUiStore } from '../../../../store/uiStore'
-import { ImConversationType, ImMessageType, isNormalMessage } from '../../../../../utils/constants'
+import { ImConversationType, ImContentType, isNormalMessage } from '../../../../../utils/constants'
 import { getSenderDisplayName } from '@/views/im/utils/user'
 import { buildRecallTip } from '@/views/im/utils/conversation'
 import type { Conversation } from '../../../../types'
@@ -183,7 +183,7 @@ const lastContentDisplay = computed(() => {
     return draft.value.plain
   }
   if (
-    props.conversation.lastMessageType === ImMessageType.RECALL &&
+    props.conversation.lastMessageType === ImContentType.RECALL &&
     props.conversation.lastSenderId != null
   ) {
     return buildRecallTip(

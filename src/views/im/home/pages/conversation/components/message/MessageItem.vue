@@ -200,7 +200,7 @@ import { ElMessageBox } from 'element-plus'
 
 import {
   ImForwardMode,
-  ImMessageType,
+  ImContentType,
   ImMessageStatus,
   ImMessageReceiptStatus,
   ImConversationType,
@@ -304,7 +304,7 @@ const { confirm: confirmDialog, success: successMessage } = useMessage()
 // legacy:true 兼容 HTTP 环境，没有 navigator.clipboard 时降级到 execCommand
 const { copy: copyToClipboard } = useClipboard({ legacy: true })
 
-// ==================== 消息类型判断 ====================
+// ==================== 内容类型判断 ====================
 
 /** 是否在当前消息上方渲染时间分隔条：列表第一条 / 距上一条超过阈值；缺 sendTime 不渲染；频道素材每条都显示 */
 const shouldShowTimeTip = computed(() => {
@@ -321,15 +321,15 @@ const shouldShowTimeTip = computed(() => {
 })
 
 /** 仅 MessageItem 自身仍要用到的 type 判定（其它分支已下沉到 MessageBubble） */
-const isVoice = computed(() => props.message.type === ImMessageType.VOICE)
-const isMerge = computed(() => props.message.type === ImMessageType.MERGE)
+const isVoice = computed(() => props.message.type === ImContentType.VOICE)
+const isMerge = computed(() => props.message.type === ImContentType.MERGE)
 /**
  * 频道素材在「频道会话」内仿微信公众号样式（居中 + 无头像）；
  * 私聊 / 群聊里被转发过来的素材按 selfSend 走标准气泡布局（自己右、对方左、带头像）
  */
 const isMaterial = computed(
   () =>
-    props.message.type === ImMessageType.MATERIAL &&
+    props.message.type === ImContentType.MATERIAL &&
     conversationStore.activeConversation?.type === ImConversationType.CHANNEL
 )
 
@@ -342,7 +342,7 @@ const isChannelConversation = computed(
 // 这三类不走普通气泡，渲染成居中灰色 tip；判断 + 文案配对放一起，新增第四类事件只需在本块改完
 
 /** 是否已撤回：pull / WS 两路都会调 recallMessage 把原消息更新为 type=RECALL，渲染只需识别 type */
-const isRecall = computed(() => props.message.type === ImMessageType.RECALL)
+const isRecall = computed(() => props.message.type === ImContentType.RECALL)
 
 /** 撤回提示 segments：依赖 activeConversation 实时算 sender 名 */
 const recallTipSegments = computed(() => {
@@ -373,7 +373,7 @@ const groupNotificationSegments = computed(() =>
 
 /** 私聊 RTC_CALL_END 走「准气泡」（左右分布 + 电话图标 + 文案）；非私聊场景为 null */
 const rtcCallEndPrivatePayload = computed(() => {
-  if (props.message.type !== ImMessageType.RTC_CALL_END) {
+  if (props.message.type !== ImContentType.RTC_CALL_END) {
     return null
   }
   const payload = parseRtcCallPayload(props.message.content)
@@ -388,9 +388,13 @@ const rtcCallPrivateBubbleText = computed(() =>
   resolveRtcCallPrivateBubbleText(rtcCallEndPrivatePayload.value)
 )
 
-/** 是否会话内通话事件居中 tip：仅群聊场景（START 总是群聊；END 私聊走气泡分支，群聊走 tip） */
+/** 是否会话内群通话事件居中 tip */
 const isRtcCallTipMessage = computed(() => {
   if (!isRtcCallTip(props.message.type)) {
+    return false
+  }
+  const payload = parseRtcCallPayload(props.message.content)
+  if (payload?.conversationType !== ImConversationType.GROUP) {
     return false
   }
   return !isRtcCallPrivateBubbleMessage.value
@@ -428,7 +432,7 @@ function handleMergeOpen(content: string) {
 
 /** 文本气泡 @ mention 候选名字：仅群消息有效，按 atUserIds 反查群成员真实昵称；非 TEXT 不走 store 读，让 getMentionCandidates 直接返回稳定空数组 */
 const textMentions = computed<MentionCandidate[]>(() => {
-  if (props.message.type !== ImMessageType.TEXT) {
+  if (props.message.type !== ImContentType.TEXT) {
     return getMentionCandidates(undefined, null)
   }
   return getMentionCandidates(props.message.atUserIds, conversationStore.activeConversation)
@@ -656,7 +660,7 @@ async function handleContextMenu(e: MouseEvent) {
 
   const items: MenuItem[] = []
   // 「复制」：仅文本消息支持；放在第一项，对齐微信桌面右键习惯
-  if (props.message.type === ImMessageType.TEXT) {
+  if (props.message.type === ImContentType.TEXT) {
     items.push({
       key: MENU_KEYS.COPY,
       name: '复制',

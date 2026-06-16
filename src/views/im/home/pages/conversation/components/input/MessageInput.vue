@@ -178,7 +178,7 @@ import {
 import { useMuteOverlay } from '@/views/im/home/composables/useMuteOverlay'
 import { isOpenableUrl } from '@/utils/url'
 import { getConversationKey } from '@/views/im/utils/conversation'
-import { ImConversationType, ImGroupMemberRole, ImMessageType } from '@/views/im/utils/constants'
+import { ImConversationType, ImGroupMemberRole, ImContentType } from '@/views/im/utils/constants'
 import { DANGEROUS_FILE_EXTENSIONS, MESSAGE_GROUP_READ_ENABLED } from '@/views/im/utils/config'
 import {
   serializeMessage,
@@ -616,7 +616,7 @@ async function onSelectFace(face: { url: string; width: number; height: number; 
     { url: face.url, width: face.width, height: face.height, name: face.name },
     replyQuote
   )
-  await sendRaw(ImMessageType.FACE, serializeMessage(payload), { conversation })
+  await sendRaw(ImContentType.FACE, serializeMessage(payload), { conversation })
 }
 
 // ==================== @ 成员选择（群聊） ====================
@@ -862,7 +862,7 @@ async function uploadAndSendImage(file: File) {
   }
   await uploadAndSendMedia({
     file,
-    type: ImMessageType.IMAGE,
+    type: ImContentType.IMAGE,
     quote: context.quote,
     conversation: context.conversation
   })
@@ -882,7 +882,7 @@ async function uploadAndSendFile(file: File) {
   }
   await uploadAndSendMedia({
     file,
-    type: ImMessageType.FILE,
+    type: ImContentType.FILE,
     quote: context.quote,
     conversation: context.conversation
   })
@@ -924,7 +924,7 @@ async function onVoiceSend(payload: { blob: Blob; duration: number }) {
   const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
   await uploadAndSendMedia({
     file,
-    type: ImMessageType.VOICE,
+    type: ImContentType.VOICE,
     quote: context.quote,
     conversation: context.conversation,
     context: { voiceDuration: payload.duration }
@@ -1034,7 +1034,7 @@ async function probeVideoFile(file: File): Promise<VideoProbe> {
  * 4. 视频链路耗时长，上传期间用户切会话则放弃发送（避免落到错误会话里）；切走再切回来不算变化（key 仍相等）
  */
 async function uploadAndSendVideo(file: File) {
-  if (!ensureMediaSizeWithinLimit(file, ImMessageType.VIDEO, message.warning)) {
+  if (!ensureMediaSizeWithinLimit(file, ImContentType.VIDEO, message.warning)) {
     return
   }
   const context = prepareMediaUpload()
@@ -1049,12 +1049,12 @@ async function uploadAndSendVideo(file: File) {
   //    （<video poster> 期待图片资源，传 video blob 在部分浏览器会退化成黑底，不是稳定行为）
   //    cover 等 probe 异步出真实 URL 后由 commit 阶段一起 patch；_localFile 留 file 供失败重试
   //    payload 拼装走 mediaTypeHandlers[VIDEO].build 与 commit 阶段共享同一份逻辑
-  const videoHandler = requireMediaHandler(ImMessageType.VIDEO)
+  const videoHandler = requireMediaHandler(ImContentType.VIDEO)
   const buildPlaceholderContent = (blobUrl: string): string =>
     serializeMessage(withQuotePayload(videoHandler.build(file, blobUrl, {}), replyQuote))
   const { clientMessageId } = insertMediaPlaceholder({
     file,
-    type: ImMessageType.VIDEO,
+    type: ImContentType.VIDEO,
     conversation,
     buildContent: buildPlaceholderContent
   })
@@ -1123,7 +1123,7 @@ async function uploadAndSendVideo(file: File) {
   }
   // 3.3 上传后会话校验 + muteOverlay 复查（与 useMediaUploader.uploadAndSendMedia 同一道）
   if (
-    !verifyMediaUploadStillAllowed(conversation, startKey, ImMessageType.VIDEO, clientMessageId)
+    !verifyMediaUploadStillAllowed(conversation, startKey, ImContentType.VIDEO, clientMessageId)
   ) {
     return
   }
@@ -1139,7 +1139,7 @@ async function uploadAndSendVideo(file: File) {
     )
   )
   await commitMediaPlaceholder({
-    type: ImMessageType.VIDEO,
+    type: ImContentType.VIDEO,
     conversation,
     clientMessageId,
     realContent

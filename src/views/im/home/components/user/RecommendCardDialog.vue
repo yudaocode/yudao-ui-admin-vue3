@@ -115,7 +115,7 @@ import { useConversationStore } from '../../store/conversationStore'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
 import { useMessageSender } from '../../composables/useMessageSender'
-import { ImConversationType, ImMessageType, isGroupConversation } from '../../../utils/constants'
+import { ImConversationType, ImContentType, isGroupConversation } from '../../../utils/constants'
 import { getConversationKey } from '../../../utils/conversation'
 import { buildDefaultGroupName } from '../../../utils/group'
 import { serializeMessage, type CardTarget } from '../../../utils/message'
@@ -221,7 +221,7 @@ async function handleSend() {
   sending.value = true
   try {
     const tasks = targets.map(async (conversation) => {
-      const cardOk = await sendRaw(ImMessageType.CARD, cardContent, { conversation })
+      const cardOk = await sendRaw(ImContentType.CARD, cardContent, { conversation })
       if (!cardOk) {
         return { conversation, ok: false }
       }
@@ -289,7 +289,7 @@ async function handleCreateGroupAndSend() {
       lastContent: '',
       lastSendTime: 0
     }
-    const cardOk = await sendRaw(ImMessageType.CARD, serializeMessage({ ...card }), {
+    const cardOk = await sendRaw(ImContentType.CARD, serializeMessage({ ...card }), {
       conversation: newConversation
     })
     if (!cardOk) {

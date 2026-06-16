@@ -20,7 +20,7 @@ export interface ImStatisticsTrendVO {
 }
 
 export interface ImStatisticsMessageTypeVO {
-  type: number // 参见 ImMessageTypeEnum 枚举类，由前端按 DICT_TYPE.IM_MESSAGE_TYPE 翻译
+  type: number // 参见 ImContentTypeEnum 枚举类，由前端按 DICT_TYPE.IM_CONTENT_TYPE 翻译
   value: number
 }
 
@@ -50,7 +50,7 @@ export const getUserTrend = (days: number): Promise<ImStatisticsTrendVO> => {
   return request.get<ImStatisticsTrendVO>({ url: '/im/manager/statistics/user-trend', params: { days } })
 }
 
-// 获得消息类型分布（最近 30 天）
+// 获得内容类型分布（最近 30 天）
 export const getMessageTypeDistribution = (): Promise<ImStatisticsMessageTypeVO[]> => {
   return request.get<ImStatisticsMessageTypeVO[]>({
     url: '/im/manager/statistics/message-type-distribution'
