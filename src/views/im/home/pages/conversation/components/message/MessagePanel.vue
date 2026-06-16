@@ -437,12 +437,15 @@ const groupMembers = computed<GroupMemberLite[]>(() => {
   })
 })
 
-/** 切换到群会话时同步群信息 + 成员；各自 fire-and-forget + catch，任何一项失败不牵连其它 */
+/** 切换到群会话时同步群信息 + 成员 */
 async function ensureGroupData(groupId: number) {
-  // 远程异步拉群信息（群名 / 公告 / 群主等元数据）
-  groupStore.fetchGroupInfo(groupId).catch((error) => {
+  // 远程拉群信息（群名 / 公告 / 群主等元数据）
+  await groupStore.fetchGroupInfo(groupId).catch((error) => {
     console.warn('[IM MessagePanel] fetchGroupInfo 失败', { groupId }, error)
   })
+  if (isGroupQuit(groupStore.getGroup(groupId))) {
+    return
+  }
 
   // 先从 IDB 同步加载群成员，让首帧立即出成员名 / 头像
   await groupStore.loadGroupMemberList(groupId).catch((error) => {

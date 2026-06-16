@@ -27,7 +27,7 @@ import {
 } from '../../utils/message'
 import { resolveConversationLastContent } from '../../utils/conversation'
 import { getCurrentUserId } from '@/utils/auth'
-import { tryGetSenderDisplayName } from '../../utils/user'
+import { isGroupQuit, tryGetSenderDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import { useConversationStore } from './conversationStore'
 import type { ImConversationReadRespVO } from '@/api/im/conversation/read'
@@ -137,6 +137,9 @@ function deriveLastSenderDisplayName(
   if (conversation.type === ImConversationType.GROUP) {
     const groupStore = useGroupStore()
     const group = groupStore.getGroup(conversation.targetId)
+    if (isGroupQuit(group)) {
+      return conversation.lastSenderId === senderId ? conversation.lastSenderDisplayName : undefined
+    }
     const fetchPromise =
       group?.membersLoaded && !group.membersExpired
         ? groupStore.fetchGroupMember(conversation.targetId, senderId)
