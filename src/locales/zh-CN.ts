@@ -91,6 +91,7 @@ export default {
     sizeIcon: '尺寸图标',
     localeIcon: '多语言图标',
     messageIcon: '消息图标',
+    imIcon: '即时通讯图标',
     tagsView: '标签页',
     tagsViewImmerse: '标签页沉浸',
     logo: '标志',

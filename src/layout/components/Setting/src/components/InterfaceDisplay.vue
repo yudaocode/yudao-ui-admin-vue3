@@ -65,6 +65,13 @@ const messageChange = (show: boolean) => {
   appStore.setMessage(show)
 }
 
+// IM 即时通讯图标
+const im = ref(appStore.getIm)
+
+const imChange = (show: boolean) => {
+  appStore.setIm(show)
+}
+
 // 标签页
 const tagsView = ref(appStore.getTagsView)
 
@@ -182,6 +189,11 @@ watch(
     <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.messageIcon') }}</span>
       <ElSwitch v-model="message" @change="messageChange" />
+    </div>
+
+    <div class="flex items-center justify-between">
+      <span class="text-14px">{{ t('setting.imIcon') }}</span>
+      <ElSwitch v-model="im" @change="imChange" />
     </div>
 
     <div class="flex items-center justify-between">
