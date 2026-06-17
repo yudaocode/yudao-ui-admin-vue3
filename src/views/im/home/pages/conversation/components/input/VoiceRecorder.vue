@@ -80,7 +80,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  send: [payload: { blob: Blob; duration: number }] // 录制完成：返回录音 Blob 和时长（秒）
+  send: [payload: { blob: Blob; duration: number; extension: string; mimeType: string }] // 录制完成：返回录音 Blob 和时长（秒）
 }>()
 
 const message = useMessage()
@@ -103,8 +103,17 @@ let audioChunks: Blob[] = []
 let mediaStream: MediaStream | null = null
 let timer: ReturnType<typeof setInterval> | null = null
 let recordedBlob: Blob | null = null
+let recordedMimeType = ''
+let recordedExtension = 'webm'
 /** 取消标记：录制中触发 resetAll 时让异步 'stop' 监听器丢弃数据，不进 preview */
 let discarding = false
+
+const VOICE_MIME_TYPE_OPTIONS = [
+  { mimeType: 'audio/webm;codecs=opus', extension: 'webm' },
+  { mimeType: 'audio/webm', extension: 'webm' },
+  { mimeType: 'audio/mp4', extension: 'm4a' },
+  { mimeType: 'audio/ogg;codecs=opus', extension: 'ogg' }
+]
 
 /** 计时器展示文案：mm:ss */
 const timerText = computed(() => formatSeconds(duration.value))
@@ -147,7 +156,15 @@ async function startRecord() {
   }
   audioChunks = []
   discarding = false
-  mediaRecorder = new MediaRecorder(mediaStream)
+  const voiceMimeType = getSupportedVoiceMimeType()
+  if (!voiceMimeType) {
+    message.error('当前浏览器不支持录音格式')
+    cleanupStream()
+    return
+  }
+  recordedMimeType = voiceMimeType.mimeType
+  recordedExtension = voiceMimeType.extension
+  mediaRecorder = new MediaRecorder(mediaStream, { mimeType: recordedMimeType })
   mediaRecorder.addEventListener('dataavailable', (event: BlobEvent) => {
     if (event.data.size > 0) {
       audioChunks.push(event.data)
@@ -158,7 +175,7 @@ async function startRecord() {
     if (discarding) {
       return
     }
-    recordedBlob = new Blob(audioChunks, { type: 'audio/webm' })
+    recordedBlob = new Blob(audioChunks, { type: recordedMimeType })
     previewUrl.value = URL.createObjectURL(recordedBlob)
     status.value = 'preview'
   })
@@ -202,7 +219,12 @@ function handleSend() {
   if (!recordedBlob) {
     return
   }
-  emit('send', { blob: recordedBlob, duration: duration.value })
+  emit('send', {
+    blob: recordedBlob,
+    duration: duration.value,
+    extension: recordedExtension,
+    mimeType: recordedMimeType
+  })
   visible.value = false
 }
 
@@ -224,6 +246,8 @@ function resetAll() {
     timer = null
   }
   audioChunks = []
+  recordedMimeType = ''
+  recordedExtension = 'webm'
   duration.value = 0
   status.value = 'idle'
   clearPreview()
@@ -242,6 +266,14 @@ function clearPreview() {
 function cleanupStream() {
   mediaStream?.getTracks().forEach((t) => t.stop())
   mediaStream = null
+}
+
+/** 查询浏览器支持的录音格式 */
+function getSupportedVoiceMimeType() {
+  if (typeof MediaRecorder === 'undefined') {
+    return undefined
+  }
+  return VOICE_MIME_TYPE_OPTIONS.find((item) => MediaRecorder.isTypeSupported(item.mimeType))
 }
 
 onMounted(() => {

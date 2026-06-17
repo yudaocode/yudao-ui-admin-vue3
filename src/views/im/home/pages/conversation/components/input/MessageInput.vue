@@ -915,13 +915,20 @@ function openVoice() {
   voiceVisible.value = true
   emojiVisible.value = false
 }
-/** VoiceRecorder 录完回传 blob，包成 webm File 后走通用 uploadAndSendMedia；duration 走 context */
-async function onVoiceSend(payload: { blob: Blob; duration: number }) {
+/** VoiceRecorder 录完回传 blob，包成 File 后走通用 uploadAndSendMedia；duration 走 context */
+async function onVoiceSend(payload: {
+  blob: Blob
+  duration: number
+  extension: string
+  mimeType: string
+}) {
   const context = prepareMediaUpload()
   if (!context) {
     return
   }
-  const file = new File([payload.blob], `voice-${Date.now()}.webm`, { type: payload.blob.type })
+  const file = new File([payload.blob], `voice-${Date.now()}.${payload.extension}`, {
+    type: payload.mimeType
+  })
   await uploadAndSendMedia({
     file,
     type: ImContentType.VOICE,

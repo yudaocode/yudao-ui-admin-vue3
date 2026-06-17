@@ -12,7 +12,7 @@
       - 切 Tab 不重建组件，MessagePanel 滚动位置、输入框草稿等 UI 状态不丢
       - Vue 3 里 keep-alive 不能直接包 <router-view>（会有警告），必须走 v-slot 拿 Component
     -->
-    <router-view v-slot="{ Component }">
+    <router-view v-if="childRouteReady" v-slot="{ Component }">
       <keep-alive>
         <component :is="Component" />
       </keep-alive>
@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { useAppStore } from '@/store/modules/app'
@@ -68,6 +68,7 @@ const channelStore = useChannelStore()
 const { pullOnce, cancelPull } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
 const voicePlayer = useVoicePlayer()
+const childRouteReady = ref(false) // 子路由是否允许挂载
 
 /** 初始化：先吃本地缓存让首屏立即渲染，再远端刷新最新数据，最后建实时通信拉离线消息 */
 onMounted(async () => {
@@ -87,6 +88,7 @@ onMounted(async () => {
       channelStore.loadChannelList(),
       groupRequestStore.loadGroupRequestList()
     ])
+    childRouteReady.value = true
     groupStore.markAllGroupMembersExpired()
     // 1.4 我管理的群下未处理加群申请红点：首登用 unhandled-list（服务端直接过滤未处理，语义精准、启动轻）；
     //     pullGroupRequests 只在重连 / 后续补偿时跑（见 useMessagePuller.pullStateEvents），不进首登主链路

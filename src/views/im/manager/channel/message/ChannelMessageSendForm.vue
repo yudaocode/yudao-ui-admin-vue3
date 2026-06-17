@@ -28,21 +28,12 @@
         label="接收用户"
         prop="receiverUserIds"
       >
-        <!-- TODO @芋艿：后续换成 userselect 组件 -->
-        <el-select
+        <UserSelectV2
           v-model="formData.receiverUserIds"
-          multiple
-          filterable
-          placeholder="选择接收用户"
-          class="!w-full"
-        >
-          <el-option
-            v-for="user in userList"
-            :key="user.id"
-            :label="user.nickname"
-            :value="user.id"
-          />
-        </el-select>
+          :multiple="true"
+          placeholder="请选择接收用户"
+          @change="handleReceiverUserChange"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -54,7 +45,7 @@
 
 <script lang="ts" setup>
 import * as MessageApi from '@/api/im/manager/channel/message'
-import * as UserApi from '@/api/system/user'
+import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 import ChannelSelect from '../list/components/ChannelSelect.vue'
 import MaterialSelect from '../material/components/MaterialSelect.vue'
 
@@ -69,7 +60,6 @@ const formData = ref({
   receiverUserType: 'all' as 'all' | 'users', // 接收用户类型：全员 / 指定用户
   receiverUserIds: [] as number[]
 })
-const userList = ref<UserApi.UserVO[]>([]) // 全部启用用户（首次打开预拉）
 
 const formRules = reactive({
   channelId: [{ required: true, message: '请选择频道', trigger: 'change' }],
@@ -79,15 +69,18 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const open = async () => {
+const open = () => {
   dialogVisible.value = true
   resetForm()
-  // 加载用户列表
-  userList.value = await UserApi.getSimpleUserList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+
+/** 接收用户变化 */
+const handleReceiverUserChange = () => {
+  formRef.value?.validateField('receiverUserIds')
+}
 
 /** 提交表单 */
 const submitForm = async () => {
