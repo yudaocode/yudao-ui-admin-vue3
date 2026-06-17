@@ -7,7 +7,7 @@ const props = defineProps({
   src: propTypes.string.def('')
 })
 const loading = ref(true)
-const frameRef = ref<HTMLElement | null>(null)
+const frameRef = ref<HTMLIFrameElement | null>(null)
 const init = () => {
   nextTick(() => {
     loading.value = true
@@ -19,6 +19,11 @@ const init = () => {
 }
 onMounted(() => {
   init()
+})
+onBeforeUnmount(() => {
+  if (!frameRef.value) return
+  frameRef.value.onload = null
+  frameRef.value.src = 'about:blank'
 })
 watch(
   () => props.src,

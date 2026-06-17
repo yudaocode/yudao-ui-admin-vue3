@@ -1,8 +1,14 @@
 import type { RouteLocationNormalized, Router, RouteRecordNormalized } from 'vue-router'
-import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { defineComponent, h } from 'vue'
+import { createRouter, createWebHashHistory, RouteRecordRaw, RouterView } from 'vue-router'
 import { isUrl } from '@/utils/is'
 import { cloneDeep, omit } from 'lodash-es'
-import qs from 'qs'
+import {
+  getExternalRoutePath,
+  parseExternalRouteLocation,
+  splitDynamicRouteParams,
+  splitRoutePath
+} from '@/utils/routeParams'
 
 const modules = import.meta.glob('../views/**/*.{vue,tsx}')
 /**
@@ -21,14 +27,18 @@ export const registerComponent = (componentPath: string) => {
 /* Layout */
 export const Layout = () => import('@/layout/Layout.vue')
 
-export const getParentLayout = () => {
-  return () =>
-    new Promise((resolve) => {
-      resolve({
-        name: 'ParentLayout'
-      })
-    })
-}
+// 嵌套动态目录只需要透传子路由；不能再次渲染完整 Layout，否则内容区会重复出现顶部栏和侧边栏。
+// vue-router 5 对 component 更严格，这里必须返回带 render 的真实组件，不能只返回 { name: 'ParentLayout' }。
+const ParentLayout = defineComponent({
+  name: 'ParentLayout',
+  setup() {
+    return () => h(RouterView)
+  }
+})
+
+export const getParentLayout = () => ParentLayout
+
+export const IFrameView = () => import('@/views/IFrame/index.vue')
 
 // 按照路由中meta下的rank等级升序来排序路由
 export const ascending = (arr: any[]) => {
@@ -65,6 +75,16 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
   const res: AppRouteRecordRaw[] = []
   const modulesRoutesKeys = Object.keys(modules)
   for (const route of routes) {
+    const componentRoute = splitRoutePath(route.component)
+    const pathRoute = isUrl(route.path)
+      ? parseExternalRouteLocation(route.path)
+      : splitRoutePath(route.path)
+    if (componentRoute.path) {
+      route.component = componentRoute.path
+    }
+    if (pathRoute.path) {
+      route.path = pathRoute.path
+    }
     // 1. 生成 meta 菜单元数据
     const meta = {
       title: route.name,
@@ -76,20 +96,31 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
         route.children.length > 0 &&
         (route.alwaysShow !== undefined ? route.alwaysShow : true)
     } as any
-    // 特殊逻辑：如果后端配置的 MenuDO.component 包含 ?，则表示需要传递参数
-    // 此时，我们需要解析参数，并且将参数放到 meta.query 中
-    // 这样，后续在 Vue 文件中，可以通过 const { currentRoute } = useRouter() 中，通过 meta.query 获取到参数
-    if (route.component && route.component.indexOf('?') > -1) {
-      const query = route.component.split('?')[1]
-      route.component = route.component.split('?')[0]
-      meta.query = qs.parse(query)
+    // 后端 MenuDO.component 或 path 可通过 ?/# 携带菜单参数，对齐 vben 的 meta.query/hash/params 行为。
+    const routeQuery = {
+      ...((route.meta?.query as Record<string, any> | undefined) || {}),
+      ...(pathRoute.query || {}),
+      ...(componentRoute.query || {})
+    }
+    const routeParams = splitDynamicRouteParams(pathRoute.path || route.path, routeQuery)
+    const metaParams = {
+      ...((route.meta?.params as Record<string, any> | undefined) || {}),
+      ...(routeParams.params || {})
+    }
+    if (routeParams.query) {
+      meta.query = routeParams.query
+    }
+    if (Object.keys(metaParams).length) {
+      meta.params = metaParams
+    }
+    if (route.meta?.hash || pathRoute.hash || componentRoute.hash) {
+      meta.hash = componentRoute.hash || pathRoute.hash || route.meta.hash
     }
 
     // 2. 生成 data（AppRouteRecordRaw）
     // 路由地址转首字母大写驼峰，作为路由名称，适配keepAlive
     let data: AppRouteRecordRaw = {
-      path:
-        route.path.indexOf('?') > -1 && !isUrl(route.path) ? route.path.split('?')[0] : route.path, // 注意，需要排除 http 这种 url，避免它带 ? 参数被截取掉
+      path: route.path,
       name:
         route.componentName && route.componentName.length > 0
           ? route.componentName
@@ -98,7 +129,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
       meta: meta
     }
     //处理顶级非目录路由
-    if (!route.children && route.parentId == 0 && route.component) {
+    if (!route.children && Number(route.parentId) === 0 && route.component) {
       data.component = Layout
       data.meta = {
         hidden: meta.hidden
@@ -123,17 +154,31 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
     } else {
       // 目录
       if (route.children?.length) {
-        data.component = Layout
+        // 顶级目录承载后台整体框架；非顶级目录只作为 router-view 占位，避免多级菜单嵌套 Layout。
+        data.component = Number(route.parentId) === 0 ? Layout : getParentLayout()
         data.redirect = getRedirect(route.path, route.children)
         // 外链
       } else if (isUrl(route.path)) {
+        const externalPath = getExternalRoutePath(route.id, data.name)
+        const externalChild = {
+          ...data,
+          path: '',
+          component: IFrameView,
+          meta: {
+            ...meta,
+            iframeSrc: pathRoute.path,
+            ...(pathRoute.iframe ? {} : { link: route.path })
+          }
+        } as AppRouteRecordRaw
         data = {
-          path: '/external-link',
+          path: externalPath,
+          name: `${data.name}ExternalParent`,
           component: Layout,
           meta: {
-            name: route.name
+            ...meta,
+            ...(pathRoute.iframe ? { iframeSrc: pathRoute.path } : { link: route.path })
           },
-          children: [data]
+          children: [externalChild]
         } as AppRouteRecordRaw
         // 菜单
       } else {
@@ -145,12 +190,82 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
       }
       if (route.children) {
         data.children = generateRoute(route.children)
+        // Vue Router 要求路由 name 全局唯一；后端菜单可能生成父子同名，例如 /mall/trade/delivery/express。
+        // 父级只有一个同名默认页时才折叠；存在兄弟节点时必须保留子菜单，例如商城装修下的装修模板。
+        const sameNameChild = findDescendantRouteByName(data.children, data.name)
+        if (sameNameChild) {
+          data.name = `${data.name}Parent`
+          if (
+            data.children.length === 1 &&
+            data.children[0] === sameNameChild &&
+            !sameNameChild.children?.length &&
+            sameNameChild.component
+          ) {
+            // 只有单一默认页才折叠到父路由，避免父子同名且不影响多子菜单展示。
+            const remainingChildren = removeDescendantRoute(data.children, sameNameChild)
+            data.component = sameNameChild.component
+            data.redirect = sameNameChild.redirect
+            data.children = remainingChildren
+            data.meta = {
+              ...data.meta,
+              alwaysShow: remainingChildren.length > 0 ? data.meta.alwaysShow : false
+            }
+          }
+        }
       }
     }
     res.push(data as AppRouteRecordRaw)
   }
   return res
 }
+
+/**
+ * 在已生成的子路由树里查找第一个同名后代路由。
+ *
+ * vue-router 5 要求 name 全局唯一；后端菜单可能生成“父目录”和“默认子页面”同名的结构。
+ * 调用方会用返回的同名叶子节点做折叠处理，所以这里返回原始节点引用，供 removeDescendantRoute 精确移除。
+ */
+const findDescendantRouteByName = (
+  routes: AppRouteRecordRaw[] | undefined,
+  name: string
+): AppRouteRecordRaw | undefined => {
+  for (const route of routes || []) {
+    if (route.name === name) {
+      return route
+    }
+    const child = findDescendantRouteByName(route.children, name)
+    if (child) {
+      return child
+    }
+  }
+}
+
+/**
+ * 从路由树中移除指定节点，并保留其它兄弟节点和子树。
+ *
+ * target 来自 findDescendantRouteByName，和 routes 属于同一棵对象树，因此可以用引用相等精确定位。
+ * 不按 name 删除，是为了避免误删其它层级里可能同名但不应该折叠的节点。
+ */
+const removeDescendantRoute = (
+  routes: AppRouteRecordRaw[] | undefined,
+  target: AppRouteRecordRaw
+): AppRouteRecordRaw[] => {
+  return (routes || []).flatMap((route) => {
+    if (route === target) {
+      return []
+    }
+    if (!route.children?.length) {
+      return [route]
+    }
+    return [
+      {
+        ...route,
+        children: removeDescendantRoute(route.children, target)
+      }
+    ]
+  })
+}
+
 export const getRedirect = (parentPath: string, children: AppCustomRouteRecordRaw[]) => {
   if (!children || children.length == 0) {
     return parentPath

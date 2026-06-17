@@ -7,6 +7,7 @@ import { useWindowSize } from '@vueuse/core'
 import { useAppStore } from '@/store/modules/app'
 import { setCssVar } from '@/utils'
 import { useDesign } from '@/hooks/web/useDesign'
+import { normalizeLayout } from '@/utils/layout'
 
 const { variables } = useDesign()
 
@@ -33,7 +34,9 @@ watch(
       !appStore.getMobile ? appStore.setMobile(true) : undefined
       setCssVar('--left-menu-min-width', '0')
       appStore.setCollapse(true)
-      appStore.getLayout !== 'classic' ? appStore.setLayout('classic') : undefined
+      normalizeLayout(appStore.getLayout) !== 'sidebar-nav'
+        ? appStore.setLayout('sidebar-nav')
+        : undefined
     } else {
       appStore.getMobile ? appStore.setMobile(false) : undefined
       setCssVar('--left-menu-min-width', '64px')

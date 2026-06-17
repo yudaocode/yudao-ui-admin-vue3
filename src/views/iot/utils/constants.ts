@@ -12,11 +12,24 @@ export enum DeviceStateEnum {
   OFFLINE = 2 // 离线
 }
 
+/** IoT 产品状态枚举 */
+export enum ProductStatusEnum {
+  UNPUBLISHED = 0, // 未发布
+  PUBLISHED = 1 // 已发布
+}
+
 /** IoT 产品物模型类型枚举类 */
 export const IoTThingModelTypeEnum = {
   PROPERTY: 1, // 属性
   SERVICE: 2, // 服务
   EVENT: 3 // 事件
+} as const
+
+/** IoT 告警接收方式枚举，与后端 IotAlertReceiveTypeEnum 保持一致 */
+export const IotAlertReceiveTypeEnum = {
+  SMS: 1, // 短信
+  MAIL: 2, // 邮箱
+  NOTIFY: 3 // 站内信
 } as const
 
 /** IoT 设备消息的方法枚举 */
@@ -432,12 +445,12 @@ export const IoTDeviceStatusEnum = {
   // 在线状态
   ONLINE: {
     label: '在线',
-    value: 'online',
+    value: '1',
     tagType: 'success'
   },
   OFFLINE: {
     label: '离线',
-    value: 'offline',
+    value: '2',
     tagType: 'danger'
   },
   // 启用状态

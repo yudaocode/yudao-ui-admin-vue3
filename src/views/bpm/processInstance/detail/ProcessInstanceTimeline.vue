@@ -129,14 +129,33 @@
             </div>
             <teleport defer :to="`#activity-task-${activity.id}-${index}`">
               <div
-                v-if="
-                  task.reason &&
-                  [NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(activity.nodeType)
-                "
+                v-if="shouldShowReasonAndAttachment(task, activity.nodeType)"
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
                 <!-- TODO lesan：这里如果是办理，需要是办理意见 -->
-                审批意见：{{ task.reason }}
+                <div v-if="task.reason">审批意见：{{ task.reason }}</div>
+                <div v-if="task.attachments?.length" class="mt-2 flex flex-wrap gap-2">
+                  <template v-for="attachment in task.attachments" :key="attachment">
+                    <el-image
+                      v-if="isImageAttachment(attachment)"
+                      class="h-40px w-40px rounded"
+                      :src="attachment"
+                      :preview-src-list="[attachment]"
+                      fit="cover"
+                      preview-teleported
+                    />
+                    <el-link
+                      v-else
+                      :href="attachment"
+                      :underline="false"
+                      target="_blank"
+                      type="primary"
+                    >
+                      <Icon class="mr-1" icon="ep:document" />
+                      {{ getAttachmentName(attachment) }}
+                    </el-link>
+                  </template>
+                </div>
               </div>
               <div
                 v-if="task.signPicUrl && activity.nodeType === NodeType.USER_TASK_NODE"
@@ -314,6 +333,34 @@ const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
   if (node.startTime) {
     return `${formatDate(node.startTime)}`
   }
+}
+
+/** 是否展示审批意见和附件 */
+const shouldShowReasonAndAttachment = (
+  task: ProcessInstanceApi.ApprovalTaskInfo,
+  nodeType: NodeType
+) => {
+  return (
+    Boolean(task.reason || task.attachments?.length) &&
+    [NodeType.START_USER_NODE, NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(nodeType)
+  )
+}
+
+/** 获取附件名 */
+const getAttachmentName = (url: string) => {
+  const cleanUrl = url.split(/[?#]/)[0]
+  const fileName = cleanUrl.slice(cleanUrl.lastIndexOf('/') + 1)
+  try {
+    return decodeURIComponent(fileName)
+  } catch {
+    return fileName
+  }
+}
+
+/** 是否图片附件 */
+const isImageAttachment = (url: string) => {
+  const ext = url.split(/[?#]/)[0]?.split('.').pop()?.toLowerCase()
+  return ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'webp'].includes(ext || '')
 }
 
 // 选择自定义审批人

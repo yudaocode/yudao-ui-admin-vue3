@@ -43,7 +43,7 @@ defineOptions({ name: 'WxNews' })
 
 const props = withDefaults(
   defineProps<{
-    articles: any[] | null
+    articles?: any[] | null
   }>(),
   {
     articles: null

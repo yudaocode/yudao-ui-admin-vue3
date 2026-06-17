@@ -10,28 +10,25 @@
     reset() — 清空选中状态（供外部重置按钮调用）
 -->
 <template>
-  <div>
-    <el-input
-      v-model="filterText"
-      class="mb-15px"
-      clearable
-      :placeholder="filterPlaceholder"
-    >
+  <div class="h-full">
+    <el-input v-model="filterText" class="p-[15px]" clearable :placeholder="filterPlaceholder">
       <template #prefix>
         <Icon icon="ep:search" />
       </template>
     </el-input>
-    <el-tree
-      ref="treeRef"
-      :data="deptList"
-      :expand-on-click-node="false"
-      :filter-node-method="filterNode"
-      :props="defaultProps"
-      default-expand-all
-      highlight-current
-      node-key="id"
-      @node-click="handleNodeClick"
-    />
+    <el-scrollbar class="!h-[calc(100%-32px-30px)]">
+      <el-tree
+        ref="treeRef"
+        :data="deptList"
+        :expand-on-click-node="false"
+        :filter-node-method="filterNode"
+        :props="defaultProps"
+        default-expand-all
+        highlight-current
+        node-key="id"
+        @node-click="handleNodeClick"
+      />
+    </el-scrollbar>
   </div>
 </template>
 
@@ -98,7 +95,11 @@ const reset = () => {
   treeRef.value?.setCurrentKey(undefined)
 }
 
-defineExpose({ reset })
+const setCurrent = (deptId: number) => {
+  treeRef.value?.setCurrentKey(deptId)
+}
+
+defineExpose({ reset, setCurrent })
 
 /** 初始化 */
 onMounted(async () => {

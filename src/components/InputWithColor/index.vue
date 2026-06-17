@@ -26,6 +26,7 @@ const { modelValue, color } = useVModels(props, emit)
 <style scoped lang="scss">
 :deep(.el-input-group__append) {
   padding: 0;
+
   .el-color-picker__trigger {
     padding: 0;
     border-left: none;

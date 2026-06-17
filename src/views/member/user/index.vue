@@ -28,6 +28,15 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="邮箱" prop="email">
+        <el-input
+          v-model="queryParams.email"
+          class="!w-240px"
+          clearable
+          placeholder="请输入邮箱"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="注册时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
@@ -90,6 +99,7 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="手机号" prop="mobile" width="120px" />
+      <el-table-column align="center" label="邮箱" prop="email" width="180px" />
       <el-table-column align="center" label="昵称" prop="nickname" width="80px" />
       <el-table-column align="center" label="等级" prop="levelName" width="100px" />
       <el-table-column align="center" label="分组" prop="groupName" width="100px" />
@@ -227,6 +237,7 @@ const queryParams = reactive({
   pageSize: 10,
   nickname: null,
   mobile: null,
+  email: null,
   loginDate: [],
   createTime: [],
   tagIds: [],

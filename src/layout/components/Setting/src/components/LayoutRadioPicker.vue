@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
+import type { VbenLayoutType } from '@/types/layout'
 
 defineOptions({ name: 'LayoutRadioPicker' })
 
+const { t } = useI18n()
 const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('layout-radio-picker')
@@ -11,51 +13,68 @@ const prefixCls = getPrefixCls('layout-radio-picker')
 const appStore = useAppStore()
 
 const layout = computed(() => appStore.getLayout)
+
+const layouts: { className: string; label: string; type: VbenLayoutType }[] = [
+  {
+    className: 'sidebar-nav',
+    label: t('setting.vertical'),
+    type: 'sidebar-nav'
+  },
+  {
+    className: 'sidebar-mixed-nav',
+    label: t('setting.twoColumn'),
+    type: 'sidebar-mixed-nav'
+  },
+  {
+    className: 'header-nav',
+    label: t('setting.horizontal'),
+    type: 'header-nav'
+  },
+  {
+    className: 'header-sidebar-nav',
+    label: t('setting.headerSidebarNav'),
+    type: 'header-sidebar-nav'
+  },
+  {
+    className: 'mixed-nav',
+    label: t('setting.mixedMenu'),
+    type: 'mixed-nav'
+  },
+  {
+    className: 'header-mixed-nav',
+    label: t('setting.headerTwoColumn'),
+    type: 'header-mixed-nav'
+  }
+]
 </script>
 
 <template>
-  <div :class="prefixCls" class="flex flex-wrap space-x-14px">
+  <div :class="prefixCls" class="grid grid-cols-3 gap-14px">
     <div
-      :class="[
-        `${prefixCls}__classic`,
-        'relative w-56px h-48px cursor-pointer bg-gray-300',
-        {
-          'is-acitve': layout === 'classic'
-        }
-      ]"
-      @click="appStore.setLayout('classic')"
-    ></div>
-    <div
-      :class="[
-        `${prefixCls}__top-left`,
-        'relative w-56px h-48px cursor-pointer bg-gray-300',
-        {
-          'is-acitve': layout === 'topLeft'
-        }
-      ]"
-      @click="appStore.setLayout('topLeft')"
-    ></div>
-    <div
-      :class="[
-        `${prefixCls}__top`,
-        'relative w-56px h-48px cursor-pointer bg-gray-300',
-        {
-          'is-acitve': layout === 'top'
-        }
-      ]"
-      @click="appStore.setLayout('top')"
-    ></div>
-    <div
-      :class="[
-        `${prefixCls}__cut-menu`,
-        'relative w-56px h-48px cursor-pointer bg-gray-300',
-        {
-          'is-acitve': layout === 'cutMenu'
-        }
-      ]"
-      @click="appStore.setLayout('cutMenu')"
+      v-for="item in layouts"
+      :key="item.type"
+      class="flex cursor-pointer flex-col items-center gap-6px"
+      @click="appStore.setLayout(item.type)"
     >
-      <div class="absolute left-[10%] top-0 h-full w-[33%] bg-gray-200"></div>
+      <div
+        :aria-label="item.label"
+        :class="[
+          `${prefixCls}__${item.className}`,
+          'relative h-48px w-56px bg-gray-300',
+          {
+            'is-acitve': layout === item.type
+          }
+        ]"
+        :title="item.label"
+      >
+        <div
+          v-if="item.type === 'sidebar-mixed-nav' || item.type === 'header-mixed-nav'"
+          class="absolute left-[10%] top-0 h-full w-[33%] bg-gray-200"
+        ></div>
+      </div>
+      <span class="max-w-76px truncate text-12px text-[var(--el-text-color-regular)]">
+        {{ item.label }}
+      </span>
     </div>
   </div>
 </template>
@@ -64,7 +83,7 @@ const layout = computed(() => appStore.getLayout)
 $prefix-cls: #{$namespace}-layout-radio-picker;
 
 .#{$prefix-cls} {
-  &__classic {
+  &__sidebar-nav {
     border: 2px solid #e5e7eb;
     border-radius: 4px;
 
@@ -92,7 +111,8 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
     }
   }
 
-  &__top-left {
+  &__header-sidebar-nav,
+  &__mixed-nav {
     border: 2px solid #e5e7eb;
     border-radius: 4px;
 
@@ -120,7 +140,7 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
     }
   }
 
-  &__top {
+  &__header-nav {
     border: 2px solid #e5e7eb;
     border-radius: 4px;
 
@@ -137,7 +157,8 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
     }
   }
 
-  &__cut-menu {
+  &__header-mixed-nav,
+  &__sidebar-mixed-nav {
     border: 2px solid #e5e7eb;
     border-radius: 4px;
 
@@ -163,6 +184,25 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
       border-radius: 4px 0 0 4px;
       content: '';
     }
+  }
+
+  &__mixed-nav::after {
+    position: absolute;
+    top: 33%;
+    left: 0;
+    width: 33%;
+    height: 67%;
+    background-color: #fff;
+    border-radius: 0 0 0 4px;
+    content: '';
+  }
+
+  &__header-mixed-nav::after {
+    background-color: #273352;
+  }
+
+  &__sidebar-mixed-nav::before {
+    display: none;
   }
 
   .is-acitve {

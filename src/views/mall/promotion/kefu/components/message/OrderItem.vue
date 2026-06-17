@@ -24,8 +24,8 @@
       </div>
       <div class="pay-box flex justify-end pr-5px">
         <div class="flex items-center">
-          <div class="discounts-title pay-color"
-            >共 {{ getMessageContent?.productCount }} 件商品,总金额:
+          <div class="discounts-title pay-color">
+            共 {{ getMessageContent?.productCount }} 件商品,总金额:
           </div>
           <div class="discounts-money pay-color">
             ￥{{ fenToYuan(getMessageContent?.payPrice) }}
@@ -109,10 +109,10 @@ function formatOrderStatus(order: any) {
 
 <style lang="scss" scoped>
 .order-list-card-box {
-  border-radius: 10px;
   padding: 10px;
+  background-color: rgb(128 128 128 / 30%); // 透明色，暗黑模式下也能体现
   border: 1px var(--el-border-color) solid;
-  background-color: rgba(128, 128, 128, 0.3); // 透明色，暗黑模式下也能体现
+  border-radius: 10px;
 
   .order-card-header {
     height: 28px;
@@ -123,8 +123,8 @@ function formatOrderStatus(order: any) {
 
       span {
         &:hover {
-          text-decoration: underline;
           color: var(--left-menu-bg-active-color);
+          text-decoration: underline;
         }
       }
     }
@@ -144,9 +144,9 @@ function formatOrderStatus(order: any) {
     }
 
     .discounts-money {
+      font-family: OPPOSANS;
       font-size: 16px;
       line-height: normal;
-      font-family: OPPOSANS;
     }
 
     .pay-color {
@@ -156,26 +156,26 @@ function formatOrderStatus(order: any) {
 }
 
 .warning-color {
-  color: #faad14;
   font-size: 11px;
   font-weight: bold;
+  color: #faad14;
 }
 
 .danger-color {
-  color: #ff3000;
   font-size: 11px;
   font-weight: bold;
+  color: #ff3000;
 }
 
 .success-color {
-  color: #52c41a;
   font-size: 11px;
   font-weight: bold;
+  color: #52c41a;
 }
 
 .info-color {
-  color: #999999;
   font-size: 11px;
   font-weight: bold;
+  color: #999;
 }
 </style>

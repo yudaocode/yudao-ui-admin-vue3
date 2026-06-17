@@ -19,7 +19,9 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button @click="generateCode"> 生成 </el-button>
+                <el-button :disabled="isHeaderReadonly" @click="generateCode">
+                  生成
+                </el-button>
               </template>
             </el-input>
           </el-form-item>
@@ -61,9 +63,7 @@
               v-model="formData.taskId"
               :workOrderId="formData.workOrderId"
               :workstationId="formData.workstationId"
-              :statuses="[
-                MesProTaskStatusEnum.PREPARE
-              ]"
+              :statuses="[MesProTaskStatusEnum.PREPARE]"
               :disabled="isHeaderReadonly || !formData.workOrderId"
               placeholder="请选择任务"
               @change="handleTaskChange"

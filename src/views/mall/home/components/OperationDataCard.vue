@@ -26,6 +26,7 @@ import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as TradeStatisticsApi from '@/api/mall/statistics/trade'
 import * as PayStatisticsApi from '@/api/mall/statistics/pay'
 import { CardTitle } from '@/components/Card'
+import { fenToYuan } from '@/utils'
 
 /** 运营数据卡片 */
 defineOptions({ name: 'OperationDataCard' })
@@ -78,7 +79,7 @@ const getProductData = async () => {
 /** 查询钱包充值数据 */
 const getWalletRechargeData = async () => {
   const paySummary = await PayStatisticsApi.getWalletRechargePrice()
-  data.rechargePrice.value = paySummary.rechargePrice
+  data.rechargePrice.value = Number(fenToYuan(paySummary.rechargePrice || 0))
 }
 
 /**

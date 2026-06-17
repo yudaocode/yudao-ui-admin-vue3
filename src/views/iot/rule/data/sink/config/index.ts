@@ -2,6 +2,7 @@ import HttpConfigForm from './HttpConfigForm.vue'
 import TcpConfigForm from './TcpConfigForm.vue'
 import WebSocketConfigForm from './WebSocketConfigForm.vue'
 import MqttConfigForm from './MqttConfigForm.vue'
+import DatabaseConfigForm from './DatabaseConfigForm.vue'
 import RocketMQConfigForm from './RocketMQConfigForm.vue'
 import KafkaMQConfigForm from './KafkaMQConfigForm.vue'
 import RabbitMQConfigForm from './RabbitMQConfigForm.vue'
@@ -12,6 +13,7 @@ export {
   TcpConfigForm,
   WebSocketConfigForm,
   MqttConfigForm,
+  DatabaseConfigForm,
   RocketMQConfigForm,
   KafkaMQConfigForm,
   RabbitMQConfigForm,

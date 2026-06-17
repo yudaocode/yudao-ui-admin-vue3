@@ -47,8 +47,8 @@
           <div v-else-if="error">
             <el-text type="danger">{{ error }}</el-text>
           </div>
-          <pre v-else-if="testResult" class="result-content"
-            >{{ JSON.stringify(testResult, null, 2) }}
+          <pre v-else-if="testResult" class="result-content">
+            {{ JSON.stringify(testResult, null, 2) }}
           </pre>
           <div v-else> <el-text type="info">点击运行查看结果</el-text> </div>
         </div>
@@ -237,14 +237,14 @@ defineExpose({
 
 <style lang="css" scoped>
 .result-content {
-  background: white;
-  padding: 12px;
-  border-radius: 4px;
   max-height: 300px;
+  padding: 12px;
   overflow: auto;
   font-family: Monaco, Consolas, monospace;
   font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
+  background: white;
+  border-radius: 4px;
 }
 </style>

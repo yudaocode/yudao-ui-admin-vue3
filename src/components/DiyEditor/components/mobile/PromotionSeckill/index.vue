@@ -74,8 +74,9 @@
             v-if="property.fields.marketPrice.show && spu.marketPrice"
             class="ml-4px text-10px line-through"
             :style="{ color: property.fields.marketPrice.color }"
-            >￥{{ fenToYuan(spu.marketPrice) }}</span
           >
+            ￥{{ fenToYuan(spu.marketPrice) }}
+          </span>
         </div>
         <div class="text-12px">
           <!-- 销量 -->

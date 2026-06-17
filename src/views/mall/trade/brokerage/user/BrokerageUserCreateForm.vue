@@ -50,8 +50,8 @@
             <el-descriptions-item label="头像">
               <el-avatar :src="userInfo.bindUser?.avatar" />
             </el-descriptions-item>
-            <el-descriptions-item label="昵称"
-              >{{ userInfo.bindUser?.nickname }}
+            <el-descriptions-item label="昵称">
+              {{ userInfo.bindUser?.nickname }}
             </el-descriptions-item>
             <el-descriptions-item label="推广资格">
               <el-tag v-if="userInfo.bindUser?.brokerageEnabled">有</el-tag>

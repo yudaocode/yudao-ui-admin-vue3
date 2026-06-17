@@ -4,6 +4,7 @@ import { setCssVar } from '@/utils'
 import { useDesign } from '@/hooks/web/useDesign'
 import { useWatermark } from '@/hooks/web/useWatermark'
 import { useAppStore } from '@/store/modules/app'
+import { isHeaderNavLayout } from '@/utils/layout'
 
 defineOptions({ name: 'InterfaceDisplay' })
 
@@ -139,7 +140,7 @@ const layout = computed(() => appStore.getLayout)
 watch(
   () => layout.value,
   (n) => {
-    if (n === 'top') {
+    if (isHeaderNavLayout(n)) {
       appStore.setCollapse(false)
     }
   }
@@ -228,9 +229,9 @@ watch(
       <ElSwitch v-model="fixedMenu" @change="fixedMenuChange" />
     </div>
 
-    <div class="flex items-center justify-between">
-      <span class="text-14px">{{ t('watermark.watermark') }}</span>
-      <ElInput v-model="water" class="right-1 w-20" @change="setWater()" />
+    <div class="flex items-center justify-between gap-10px">
+      <span class="shrink-0 whitespace-nowrap text-14px">{{ t('watermark.watermark') }}</span>
+      <ElInput v-model="water" class="min-w-0 flex-1" @change="setWater()" />
     </div>
   </div>
 </template>

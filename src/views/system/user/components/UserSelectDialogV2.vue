@@ -6,31 +6,41 @@
 
   Props:
     multiple — true 多选（checkbox），false 单选（radio）；默认 true
+    deptId   — 部门 ID
   Events:
     selected(rows: UserVO[]) — 确认选择后触发，单选时数组长度为 1
   Expose:
     open(selectedIds?: number[]) — 打开弹窗，可传入已选 ID 用于预选高亮
 -->
 <template>
-  <Dialog title="人员选择" v-model="dialogVisible" width="80%">
-    <el-row :gutter="20">
+  <Dialog :title="title" v-model="dialogVisible" width="80%" align-center append-to-body>
+    <el-row class="h-[calc(100vh-196px)]" :gutter="15">
       <!-- 左侧部门树 -->
-      <el-col :span="5" :xs="24">
-        <ContentWrap class="h-full">
+      <el-col class="h-full" :span="5" :xs="24">
+        <ContentWrap class="h-full" :body-style="{ height: '100%', '--el-card-padding': '0px' }">
           <DeptTreeSelect ref="deptTreeRef" @node-click="handleDeptNodeClick" />
         </ContentWrap>
       </el-col>
       <!-- 右侧：搜索表单 + 用户表格 -->
-      <el-col :span="19" :xs="24">
+      <el-col class="h-full overflow-auto" :span="19" :xs="24">
         <ContentWrap>
-          <el-form :inline="true" :model="queryParams" label-width="85px">
+          <el-form class="-mb-[15px]" :inline="true" :model="queryParams" label-width="72px">
             <el-form-item label="用户名称">
               <el-input
                 v-model="queryParams.username"
                 placeholder="请输入用户名称"
                 clearable
                 @keyup.enter="handleQuery"
-                class="!w-220px"
+                class="!w-240px"
+              />
+            </el-form-item>
+            <el-form-item label="用户昵称">
+              <el-input
+                v-model="queryParams.nickname"
+                placeholder="请输入用户昵称"
+                clearable
+                @keyup.enter="handleQuery"
+                class="!w-240px"
               />
             </el-form-item>
             <el-form-item label="手机号码">
@@ -39,7 +49,7 @@
                 placeholder="请输入手机号码"
                 clearable
                 @keyup.enter="handleQuery"
-                class="!w-220px"
+                class="!w-240px"
               />
             </el-form-item>
             <el-form-item label="状态">
@@ -47,7 +57,7 @@
                 v-model="queryParams.status"
                 placeholder="请选择状态"
                 clearable
-                class="!w-220px"
+                class="!w-240px"
               >
                 <el-option
                   v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -68,9 +78,13 @@
           </el-form>
         </ContentWrap>
         <!-- 数据表格：单选 radio / 多选 checkbox 统一在一个 table 内 -->
-        <ContentWrap>
+        <ContentWrap
+          class="h-[calc(100%-var(--content-wrap-padding,10px)*2-var(--content-wrap-margin,15px)*2-32px*2-3px*2-2px)] !mb-0"
+          :body-style="{ height: '100%', padding: 'var(--content-wrap-padding,10px)' }"
+        >
           <el-table
             ref="tableRef"
+            class="!h-[calc(100%-32px-30px+var(--content-wrap-padding,10px))]"
             v-loading="loading"
             :data="list"
             :stripe="true"
@@ -85,6 +99,7 @@
             <el-table-column
               v-if="multiple"
               type="selection"
+              :selectable="selectable"
               :reserve-selection="true"
               width="50"
               align="center"
@@ -96,10 +111,12 @@
                   v-model="selectedRadioId"
                   :value="row.id"
                   class="radio-no-label"
+                  :disabled="row.disabled"
                   @change="handleRadioChange(row)"
                 />
               </template>
             </el-table-column>
+            <el-table-column label="用户编号" align="center" prop="id" width="150" />
             <el-table-column label="用户名称" align="center" prop="username" width="150" />
             <el-table-column label="用户昵称" align="left" prop="nickname" min-width="150" />
             <el-table-column label="部门" align="center" prop="deptName" width="150" />
@@ -109,6 +126,13 @@
                 <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
               </template>
             </el-table-column>
+            <el-table-column
+              label="创建时间"
+              align="center"
+              prop="createTime"
+              :formatter="dateFormatter"
+              width="180"
+            />
           </el-table>
           <Pagination
             :total="total"
@@ -131,27 +155,36 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as UserApi from '@/api/system/user'
 import DeptTreeSelect from '@/views/system/dept/components/DeptTreeSelect.vue'
+import { dateFormatter } from '@/utils/formatTime'
 
 defineOptions({ name: 'UserSelectDialogV2' })
 
+type UserSelectRow = UserApi.UserVO & {
+  disabled?: boolean
+}
+
 const props = withDefaults(
   defineProps<{
+    title?: string
     multiple?: boolean // true 多选（checkbox），false 单选（radio）
+    deptId?: number // 部门 ID
   }>(),
   {
+    title: '人员选择',
     multiple: true
   }
 )
 
 const message = useMessage()
 const emit = defineEmits<{
-  selected: [rows: UserApi.UserVO[]]
+  selected: [rows: UserApi.UserVO[], activityId?: any]
 }>()
 
 const dialogVisible = ref(false) // 弹窗是否展示
 const loading = ref(false) // 列表加载中
-const list = ref<UserApi.UserVO[]>([]) // 用户列表
+const list = ref<UserSelectRow[]>([]) // 用户列表
 const total = ref(0) // 总条数
+const activityId = ref()
 
 // ==================== 部门树 ====================
 const deptTreeRef = ref() // 部门树 Ref
@@ -164,25 +197,34 @@ const handleDeptNodeClick = (deptId: number | undefined) => {
 
 // ==================== 选中状态 ====================
 const tableRef = ref() // 表格 Ref
-const selectedRows = ref<UserApi.UserVO[]>([]) // 多选模式：选中行
+const selectedRows = ref<UserSelectRow[]>([]) // 多选模式：选中行
 const selectedRadioId = ref<number>() // 单选模式：选中 ID
-const currentRadioRow = ref<UserApi.UserVO>() // 单选模式：选中行对象
+const currentRadioRow = ref<UserSelectRow>() // 单选模式：选中行对象
 const preSelectedIds = ref<number[]>([]) // 打开弹窗时传入的已选 ID
+const preDisabledIds = ref<number[]>([]) // 打开弹窗时传入的禁选 ID
+
+/** 多选：是否可以选中 */
+const selectable = (row: UserSelectRow) => {
+  return !preDisabledIds.value.includes(row.id)
+}
 
 /** 多选：checkbox 变化 */
-const handleSelectionChange = (rows: UserApi.UserVO[]) => {
+const handleSelectionChange = (rows: UserSelectRow[]) => {
   if (props.multiple) {
     selectedRows.value = rows
   }
 }
 
 /** 单选：radio 变化 */
-const handleRadioChange = (row: UserApi.UserVO) => {
+const handleRadioChange = (row: UserSelectRow) => {
   currentRadioRow.value = row
 }
 
 /** 单击行：单选模式下点击整行即选中（降低操作成本），多选不处理（避免和 dblclick 冲突） */
-const handleRowClick = (row: UserApi.UserVO) => {
+const handleRowClick = (row: UserSelectRow) => {
+  if (row.disabled) {
+    return
+  }
   if (props.multiple) {
     return
   }
@@ -191,7 +233,10 @@ const handleRowClick = (row: UserApi.UserVO) => {
 }
 
 /** 双击行：多选模式切换勾选，单选模式直接确认 */
-const handleRowDblClick = (row: UserApi.UserVO) => {
+const handleRowDblClick = (row: UserSelectRow) => {
+  if (row.disabled) {
+    return
+  }
   if (props.multiple) {
     tableRef.value?.toggleRowSelection(row)
     return
@@ -206,6 +251,7 @@ const queryParams = reactive({
   pageNo: 1, // 页码
   pageSize: 10, // 每页条数
   username: undefined as string | undefined, // 用户名称
+  nickname: undefined as string | undefined, // 用户昵称
   mobile: undefined as string | undefined, // 手机号码
   status: CommonStatusEnum.ENABLE as number | undefined, // 状态：默认只查启用
   deptId: undefined as number | undefined // 部门 ID（从左侧树选择）
@@ -218,6 +264,9 @@ const getList = async () => {
     const data = await UserApi.getUserPage(queryParams)
     list.value = data.list
     total.value = data.total
+    list.value.forEach((row) => {
+      row.disabled = preDisabledIds.value.includes(row.id)
+    })
     await nextTick()
     applyPreSelection()
   } finally {
@@ -273,13 +322,13 @@ const confirmSelect = () => {
       message.warning('请至少选择一条数据')
       return
     }
-    emit('selected', selectedRows.value)
+    emit('selected', selectedRows.value, activityId.value)
   } else {
     if (!currentRadioRow.value) {
       message.warning('请选择一条数据')
       return
     }
-    emit('selected', [currentRadioRow.value])
+    emit('selected', [currentRadioRow.value], activityId.value)
   }
   dialogVisible.value = false
 }
@@ -287,24 +336,29 @@ const confirmSelect = () => {
 // ==================== 打开弹窗 ====================
 
 /** 打开弹窗，可传入已选 ID 用于预选高亮 */
-const open = async (selectedIds?: number[]) => {
+const open = async (selectedIds?: number[], disabledIds?: number[], _activityId?: any) => {
+  preDisabledIds.value = disabledIds ?? []
+  activityId.value = _activityId
   dialogVisible.value = true
   // 重置查询条件 + 页码，避免二次打开继承上次过滤上下文
   queryParams.username = undefined
   queryParams.mobile = undefined
   queryParams.status = CommonStatusEnum.ENABLE
-  queryParams.deptId = undefined
+  queryParams.deptId = props.deptId
   queryParams.pageNo = 1
   // 清空上一次的选中状态
   selectedRows.value = []
   selectedRadioId.value = undefined
   currentRadioRow.value = undefined
-  preSelectedIds.value = selectedIds ?? []
+  preSelectedIds.value = (selectedIds ?? []).filter((id) => !preDisabledIds.value.includes(id))
   // 清空部门树选中 + 多选模式清空跨页缓存的勾选
   await nextTick()
   deptTreeRef.value?.reset()
   tableRef.value?.clearSelection()
   await getList()
+  if (queryParams.deptId) {
+    deptTreeRef.value?.setCurrent(queryParams.deptId)
+  }
 }
 defineExpose({ open })
 </script>

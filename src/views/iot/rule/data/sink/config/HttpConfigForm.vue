@@ -56,21 +56,28 @@ watch([urlPrefix, urlPath], () => {
   config.value.url = fullUrl.value
 })
 
+const syncUrlFields = (url?: string) => {
+  if (url?.startsWith('https://')) {
+    urlPrefix.value = 'https://'
+    urlPath.value = url.substring(8)
+  } else if (url?.startsWith('http://')) {
+    urlPrefix.value = 'http://'
+    urlPath.value = url.substring(7)
+  } else {
+    urlPath.value = url ?? ''
+  }
+}
+
+watch(
+  () => config.value?.url,
+  (url) => syncUrlFields(url),
+  { immediate: true }
+)
+
 /** 组件初始化 */
 onMounted(() => {
   if (!isEmpty(config.value)) {
-    // 初始化 URL
-    if (config.value.url) {
-      if (config.value.url.startsWith('https://')) {
-        urlPrefix.value = 'https://'
-        urlPath.value = config.value.url.substring(8)
-      } else if (config.value.url.startsWith('http://')) {
-        urlPrefix.value = 'http://'
-        urlPath.value = config.value.url.substring(7)
-      } else {
-        urlPath.value = config.value.url
-      }
-    }
+    syncUrlFields(config.value.url)
     return
   }
 

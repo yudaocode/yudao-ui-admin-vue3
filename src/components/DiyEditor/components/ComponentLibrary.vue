@@ -94,9 +94,9 @@ const handleCloneComponent = (component: DiyComponent<any>) => {
 <style scoped lang="scss">
 .editor-left {
   z-index: 1;
-  flex-shrink: 0;
-  user-select: none;
   box-shadow: 8px 0 8px -8px rgb(0 0 0 / 12%);
+  user-select: none;
+  flex-shrink: 0;
 
   :deep(.el-collapse) {
     border-top: none;

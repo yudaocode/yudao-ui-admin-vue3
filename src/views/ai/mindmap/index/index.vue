@@ -81,7 +81,7 @@ const submit = (data: AiMindMapGenerateReqVO) => {
       console.error('生成思维导图失败', err)
       stopStream()
       // 需要抛出异常，禁止重试
-      throw error
+      throw err
     },
     ctrl: ctrl.value
   })

@@ -114,7 +114,7 @@
           <el-form-item label="分销海报图">
             <UploadImgs v-model="formData.brokeragePosterUrls" height="125px" width="75px" />
             <el-text class="w-full" size="small" type="info">
-              个人中心分销海报图片，建议尺寸 600x1000
+              分销海报图片，按上传顺序从左往右依次为<strong>个人分享海报</strong>、<strong>商品推广海报</strong>和<strong>拼团推广海报</strong>
             </el-text>
           </el-form-item>
           <el-form-item label="一级返佣比例" prop="brokerageFirstPercent">

@@ -18,9 +18,9 @@
         <el-button type="primary" plain>选择视频</el-button>
       </template>
       <template #tip>
-        <span class="el-upload__tip" style="margin-left: 10px"
-          >格式支持 MP4，文件大小不超过 10MB</span
-        >
+        <span class="el-upload__tip" style="margin-left: 10px">
+          格式支持 MP4，文件大小不超过 10MB
+        </span>
       </template>
     </el-upload>
     <el-divider />

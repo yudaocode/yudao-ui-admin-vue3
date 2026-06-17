@@ -118,13 +118,12 @@
             </template>
             <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS">
               <el-select
-                v-model="formData.valueCode"
+                v-model="qualityStatusValue"
                 placeholder="请选择质量状态"
                 class="!w-full"
-                @change="handleQualityStatusChange"
               >
                 <el-option
-                  v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)"
+                  v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)"
                   :key="dict.value"
                   :label="dict.label"
                   :value="dict.value"
@@ -148,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import {
   StockTakingPlanParamApi,
   type StockTakingPlanParamVO
@@ -218,6 +217,10 @@ const formData = ref<StockTakingPlanParamVO>({
   valueCode: '',
   valueName: '',
   remark: ''
+})
+const qualityStatusValue = computed({
+  get: () => (formData.value.valueCode ? Number(formData.value.valueCode) : undefined),
+  set: (val?: number) => handleQualityStatusChange(val)
 })
 const formRules = reactive({
   type: [{ required: true, message: '请选择条件类型', trigger: 'change' }],
@@ -331,11 +334,11 @@ const handleBatchChange = (batch?: any) => {
 }
 
 /** 质量状态选择器变化 */
-const handleQualityStatusChange = (val: string) => {
-  const dictOptions = getStrDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)
+const handleQualityStatusChange = (val?: number) => {
+  const dictOptions = getIntDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)
   const selected = dictOptions.find((d) => d.value === val)
   formData.value.valueId = undefined // 质量状态无实体 ID
-  formData.value.valueCode = val
+  formData.value.valueCode = val == null ? '' : String(val)
   formData.value.valueName = selected?.label || ''
 }
 

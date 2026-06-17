@@ -39,7 +39,7 @@
           </span>
         </div>
       </div>
-    </el-carousel-item> 
+    </el-carousel-item>
   </el-carousel>
 </template>
 
@@ -103,13 +103,16 @@ watch(
   .el-carousel__indicator {
     padding-top: 0;
     padding-bottom: 0;
+
     .el-carousel__button {
       --el-carousel-indicator-height: 6px;
       --el-carousel-indicator-width: 6px;
       --el-carousel-indicator-out-color: #ff6000;
+
       border-radius: 6px;
     }
   }
+
   .el-carousel__indicator.is-active {
     .el-carousel__button {
       --el-carousel-indicator-width: 12px;

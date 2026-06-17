@@ -199,10 +199,10 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="最近触发" prop="lastTriggeredTime" width="180">
+        <el-table-column label="最近触发" prop="lastTriggerTime" width="180">
           <template #default="{ row }">
-            <span v-if="row.lastTriggeredTime">
-              {{ formatDate(row.lastTriggeredTime) }}
+            <span v-if="row.lastTriggerTime">
+              {{ formatDate(row.lastTriggerTime) }}
             </span>
             <span v-else class="text-gray-400">未触发</span>
           </template>

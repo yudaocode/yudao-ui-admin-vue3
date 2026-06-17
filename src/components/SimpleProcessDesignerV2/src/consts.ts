@@ -629,6 +629,14 @@ export const COMPARISON_OPERATORS: DictDataVO = [
   {
     value: '<=',
     label: '小于等于'
+  },
+  {
+    value: 'contain',
+    label: '包含'
+  },
+  {
+    value: '!contain',
+    label: '不包含'
   }
 ]
 // 审批操作按钮名称

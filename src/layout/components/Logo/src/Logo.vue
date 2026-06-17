@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, unref, watch } from 'vue'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
+import { getLayoutRenderMode, isHeaderNavLayout } from '@/utils/layout'
 
 defineOptions({ name: 'Logo' })
 
@@ -26,7 +27,7 @@ onMounted(() => {
 watch(
   () => collapse.value,
   (collapse: boolean) => {
-    if (unref(layout) === 'topLeft' || unref(layout) === 'cutMenu') {
+    if (getLayoutRenderMode(unref(layout)) === 'topLeft' || getLayoutRenderMode(unref(layout)) === 'cutMenu') {
       show.value = true
       return
     }
@@ -43,7 +44,8 @@ watch(
 watch(
   () => layout.value,
   (layout) => {
-    if (layout === 'top' || layout === 'cutMenu') {
+    const renderMode = getLayoutRenderMode(layout)
+    if (renderMode === 'top' || renderMode === 'cutMenu') {
       show.value = true
     } else {
       if (unref(collapse)) {
@@ -61,7 +63,7 @@ watch(
     <router-link
       :class="[
         prefixCls,
-        layout !== 'classic' ? `${prefixCls}__Top` : '',
+        getLayoutRenderMode(layout) !== 'classic' ? `${prefixCls}__Top` : '',
         'flex !h-[var(--logo-height)] items-center cursor-pointer pl-8px relative decoration-none overflow-hidden'
       ]"
       to="/"
@@ -75,9 +77,11 @@ watch(
         :class="[
           'ml-10px text-16px font-700',
           {
-            'text-[var(--logo-title-text-color)]': layout === 'classic',
+            'text-[var(--logo-title-text-color)]': getLayoutRenderMode(layout) === 'classic',
             'text-[var(--top-header-text-color)]':
-              layout === 'topLeft' || layout === 'top' || layout === 'cutMenu'
+              getLayoutRenderMode(layout) === 'topLeft' ||
+              isHeaderNavLayout(layout) ||
+              getLayoutRenderMode(layout) === 'cutMenu'
           }
         ]"
       >

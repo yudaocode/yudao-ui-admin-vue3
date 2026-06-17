@@ -122,11 +122,16 @@ const open = async (type: string, id?: number) => {
       }
       // 情况二：服务初始化
       if (isEmpty(formData.value.service)) {
-        formData.value.service = {}
+        formData.value.service = { inputParams: [], outputParams: [] }
+      } else {
+        formData.value.service.inputParams ??= []
+        formData.value.service.outputParams ??= []
       }
       // 情况三：事件初始化
       if (isEmpty(formData.value.event)) {
-        formData.value.event = {}
+        formData.value.event = { outputParams: [] }
+      } else {
+        formData.value.event.outputParams ??= []
       }
     } finally {
       formLoading.value = false

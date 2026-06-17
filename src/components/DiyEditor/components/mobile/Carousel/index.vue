@@ -22,8 +22,9 @@
     <div
       v-if="property.indicator === 'number'"
       class="absolute bottom-10px right-10px rounded-xl bg-black p-x-8px p-y-2px text-10px text-white opacity-40"
-      >{{ currentIndex }} / {{ property.items.length }}</div
     >
+      {{ currentIndex }} / {{ property.items.length }}
+    </div>
   </div>
 </template>
 <script setup lang="ts">

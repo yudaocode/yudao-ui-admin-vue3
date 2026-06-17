@@ -35,9 +35,9 @@
               >
                 {{ conditionIndex + 1 }}
               </div>
-              <span class="text-12px font-500 text-[var(--el-text-color-primary)]"
-                >条件 {{ conditionIndex + 1 }}</span
-              >
+              <span class="text-12px font-500 text-[var(--el-text-color-primary)]">
+                条件 {{ conditionIndex + 1 }}
+              </span>
             </div>
             <el-button
               type="danger"
@@ -53,6 +53,7 @@
 
           <div class="p-12px">
             <ConditionConfig
+              :ref="(el) => setConditionRef(el, conditionIndex)"
               :model-value="condition"
               @update:model-value="(value) => updateCondition(conditionIndex, value)"
               :trigger-type="triggerType"
@@ -104,6 +105,44 @@ const emit = defineEmits<{
 const subGroup = useVModel(props, 'modelValue', emit)
 
 const maxConditions = computed(() => props.maxConditions || 3) // 最大条件数量
+
+type ConditionConfigExpose = {
+  validate: () => Promise<boolean>
+  clearValidate: () => void
+}
+
+const conditionRefs = ref<Record<number, ConditionConfigExpose>>({})
+
+const setConditionRef = (el: unknown, index: number) => {
+  if (el) {
+    conditionRefs.value[index] = el as ConditionConfigExpose
+  } else {
+    delete conditionRefs.value[index]
+  }
+}
+
+/** 校验组内所有子条件 */
+const validate = async (): Promise<boolean> => {
+  if (!subGroup.value?.length) {
+    return false
+  }
+  for (let i = 0; i < subGroup.value.length; i++) {
+    const conditionRef = conditionRefs.value[i]
+    if (conditionRef?.validate) {
+      const valid = await conditionRef.validate()
+      if (!valid) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
+const clearValidate = () => {
+  Object.values(conditionRefs.value).forEach((ref) => ref.clearValidate?.())
+}
+
+defineExpose({ validate, clearValidate })
 
 /** 添加条件 */
 const addCondition = async () => {

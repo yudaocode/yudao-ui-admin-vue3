@@ -78,6 +78,27 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item
+        v-if="formData.receiveTypes?.includes(IotAlertReceiveTypeEnum.SMS)"
+        label="短信模板"
+        prop="smsTemplateCode"
+      >
+        <SmsTemplateSelect v-model="formData.smsTemplateCode" />
+      </el-form-item>
+      <el-form-item
+        v-if="formData.receiveTypes?.includes(IotAlertReceiveTypeEnum.MAIL)"
+        label="邮件模板"
+        prop="mailTemplateCode"
+      >
+        <MailTemplateSelect v-model="formData.mailTemplateCode" />
+      </el-form-item>
+      <el-form-item
+        v-if="formData.receiveTypes?.includes(IotAlertReceiveTypeEnum.NOTIFY)"
+        label="站内信模板"
+        prop="notifyTemplateCode"
+      >
+        <NotifyTemplateSelect v-model="formData.notifyTemplateCode" />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -90,7 +111,11 @@ import { AlertConfigApi, AlertConfig } from '@/api/iot/alert/config'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { RuleSceneApi } from '@/api/iot/rule/scene'
+import { IotAlertReceiveTypeEnum } from '@/views/iot/utils/constants'
 import * as UserApi from '@/api/system/user'
+import MailTemplateSelect from '@/views/system/mail/template/components/MailTemplateSelect.vue'
+import NotifyTemplateSelect from '@/views/system/notify/template/components/NotifyTemplateSelect.vue'
+import SmsTemplateSelect from '@/views/system/sms/template/components/SmsTemplateSelect.vue'
 
 /** IoT 告警配置 表单 */
 defineOptions({ name: 'AlertConfigForm' })
@@ -102,7 +127,19 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
+const formData = ref<{
+  id?: number
+  name?: string
+  description?: string
+  level?: number
+  status?: number
+  sceneRuleIds: number[]
+  receiveUserIds: number[]
+  receiveTypes: number[]
+  smsTemplateCode?: string
+  mailTemplateCode?: string
+  notifyTemplateCode?: string
+}>({
   id: undefined,
   name: undefined,
   description: undefined,
@@ -110,9 +147,12 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE,
   sceneRuleIds: [],
   receiveUserIds: [],
-  receiveTypes: []
+  receiveTypes: [],
+  smsTemplateCode: undefined,
+  mailTemplateCode: undefined,
+  notifyTemplateCode: undefined
 })
-const formRules = reactive({
+const formRules = reactive<Record<string, any>>({
   name: [{ required: true, message: '配置名称不能为空', trigger: 'blur' }],
   level: [{ required: true, message: '告警级别不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '配置状态不能为空', trigger: 'blur' }],
@@ -126,6 +166,47 @@ const formRef = ref() // 表单 Ref
 const sceneRuleOptions = ref<any[]>([])
 const userOptions = ref<UserApi.UserVO[]>([])
 
+/** 按接收类型同步模板校验规则 */
+const syncTemplateFormRules = () => {
+  const types = formData.value.receiveTypes || []
+  if (types.includes(IotAlertReceiveTypeEnum.SMS)) {
+    formRules.smsTemplateCode = [{ required: true, message: '短信模板不能为空', trigger: 'change' }]
+  } else {
+    delete formRules.smsTemplateCode
+  }
+  if (types.includes(IotAlertReceiveTypeEnum.MAIL)) {
+    formRules.mailTemplateCode = [
+      { required: true, message: '邮件模板不能为空', trigger: 'change' }
+    ]
+  } else {
+    delete formRules.mailTemplateCode
+  }
+  if (types.includes(IotAlertReceiveTypeEnum.NOTIFY)) {
+    formRules.notifyTemplateCode = [
+      { required: true, message: '站内信模板不能为空', trigger: 'change' }
+    ]
+  } else {
+    delete formRules.notifyTemplateCode
+  }
+}
+
+watch(
+  () => formData.value.receiveTypes,
+  (types) => {
+    if (!types?.includes(IotAlertReceiveTypeEnum.SMS)) {
+      formData.value.smsTemplateCode = undefined
+    }
+    if (!types?.includes(IotAlertReceiveTypeEnum.MAIL)) {
+      formData.value.mailTemplateCode = undefined
+    }
+    if (!types?.includes(IotAlertReceiveTypeEnum.NOTIFY)) {
+      formData.value.notifyTemplateCode = undefined
+    }
+    syncTemplateFormRules()
+  },
+  { deep: true }
+)
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -138,6 +219,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await AlertConfigApi.getAlertConfig(id)
+      syncTemplateFormRules()
     } finally {
       formLoading.value = false
     }
@@ -151,10 +233,12 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 /** 加载选项数据 */
 const loadOptions = async () => {
   try {
-    // 加载场景联动规则选项
-    sceneRuleOptions.value = await RuleSceneApi.getSimpleRuleSceneList()
-    // 加载用户选项
-    userOptions.value = await UserApi.getSimpleUserList()
+    const [scenes, users] = await Promise.all([
+      RuleSceneApi.getSimpleRuleSceneList(),
+      UserApi.getSimpleUserList()
+    ])
+    sceneRuleOptions.value = scenes
+    userOptions.value = users
   } catch (error) {
     console.error('加载选项数据失败:', error)
   }
@@ -194,8 +278,12 @@ const resetForm = () => {
     status: CommonStatusEnum.ENABLE,
     sceneRuleIds: [],
     receiveUserIds: [],
-    receiveTypes: []
+    receiveTypes: [],
+    smsTemplateCode: undefined,
+    mailTemplateCode: undefined,
+    notifyTemplateCode: undefined
   }
+  syncTemplateFormRules()
   formRef.value?.resetFields()
 }
 </script>

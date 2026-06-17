@@ -29,6 +29,12 @@
           </el-descriptions-item>
           <el-descriptions-item>
             <template #label>
+              <descriptions-item-label icon="ep:message" label="邮箱" />
+            </template>
+            {{ user.email || '空' }}
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template #label>
               <descriptions-item-label icon="fa:mars-double" label="性别" />
             </template>
             <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="user.sex" />
@@ -86,6 +92,12 @@
             <descriptions-item-label icon="ep:phone" label="手机号" />
           </template>
           {{ user.mobile }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template #label>
+            <descriptions-item-label icon="ep:message" label="邮箱" />
+          </template>
+          {{ user.email || '空' }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>

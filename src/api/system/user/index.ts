@@ -41,18 +41,9 @@ export const getUserPage = (params: PageParam) => {
   return request.get({ url: '/system/user/page', params })
 }
 
-// 查询所有用户列表
-export const getAllUser = () => {
-  return request.get({ url: '/system/user/simple-list' })
-}
-
-/**
- * 获取部门成员
- * @param id
- * @returns
- */
-export const getDeptUser = (deptId: number): Promise<UserVO[]> => {
-  return request.get({ url: '/system/user/simple-list?deptId=' + deptId })
+// 查询用户管理列表
+export const getUserList = (ids: number[]) => {
+  return request.get({ url: '/system/user/list', params: { ids: ids.join(',') } })
 }
 
 // 查询用户详情

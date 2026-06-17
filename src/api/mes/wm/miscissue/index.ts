@@ -5,7 +5,7 @@ export interface WmMiscIssueVO {
   id: number
   code: string
   name: string
-  type: string
+  type: number
   sourceDocType: string
   sourceDocId: number
   sourceDocCode: string

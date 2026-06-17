@@ -74,7 +74,6 @@
   />
 </template>
 <script setup lang="ts">
-import { ProductVO } from '@/api/erp/product/product'
 import { erpPriceInputFormatter, getSumValue } from '@/utils'
 import PurchaseInPaymentEnableList from '@/views/erp/purchase/in/components/PurchaseInPaymentEnableList.vue'
 import PurchaseReturnRefundEnableList from '@/views/erp/purchase/return/components/PurchaseReturnRefundEnableList.vue'
@@ -83,19 +82,18 @@ import { ErpBizType } from '@/utils/constants'
 import { PurchaseReturnVO } from '@/api/erp/purchase/return'
 
 const props = defineProps<{
-  items: undefined
-  supplierId: undefined
-  disabled: false
+  items: any[]
+  supplierId?: number
+  disabled?: boolean
 }>()
 const message = useMessage()
 
 const formLoading = ref(false) // 表单的加载中
-const formData = ref([])
+const formData = ref<any[]>([])
 const formRules = reactive({
   paymentPrice: [{ required: true, message: '本次付款不能为空', trigger: 'blur' }]
 })
-const formRef = ref([]) // 表单 Ref
-const productList = ref<ProductVO[]>([]) // 产品列表
+const formRef = ref() // 表单 Ref
 
 /** 初始化设置入库项 */
 watch(
@@ -136,13 +134,14 @@ const handleOpenPurchaseIn = () => {
 }
 const handleAddPurchaseIn = (rows: PurchaseInVO[]) => {
   rows.forEach((row) => {
+    const paymentPrice = (row as PurchaseInVO & { paymentPrice: number }).paymentPrice
     formData.value.push({
       bizId: row.id,
       bizType: ErpBizType.PURCHASE_IN,
       bizNo: row.no,
       totalPrice: row.totalPrice,
-      paidPrice: row.paymentPrice,
-      paymentPrice: row.totalPrice - row.paymentPrice
+      paidPrice: paymentPrice,
+      paymentPrice: row.totalPrice - paymentPrice
     })
   })
 }
@@ -158,13 +157,14 @@ const handleOpenPurchaseReturn = () => {
 }
 const handleAddPurchaseReturn = (rows: PurchaseReturnVO[]) => {
   rows.forEach((row) => {
+    const refundPrice = (row as PurchaseReturnVO & { refundPrice: number }).refundPrice
     formData.value.push({
       bizId: row.id,
       bizType: ErpBizType.PURCHASE_RETURN,
       bizNo: row.no,
       totalPrice: -row.totalPrice,
-      paidPrice: -row.refundPrice,
-      paymentPrice: -row.totalPrice + row.refundPrice
+      paidPrice: -refundPrice,
+      paymentPrice: -row.totalPrice + refundPrice
     })
   })
 }

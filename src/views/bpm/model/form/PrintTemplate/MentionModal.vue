@@ -82,9 +82,9 @@ onMounted(() => {
 <style>
 #mention-modal {
   position: absolute;
-  border: 1px solid #ccc;
-  background-color: #fff;
   padding: 5px;
+  background-color: #fff;
+  border: 1px solid #ccc;
 }
 
 #mention-modal input {
@@ -98,10 +98,10 @@ onMounted(() => {
 }
 
 #mention-modal ul li {
-  list-style: none;
-  cursor: pointer;
   padding: 3px 0;
   text-align: left;
+  list-style: none;
+  cursor: pointer;
 }
 
 #mention-modal ul li:hover {

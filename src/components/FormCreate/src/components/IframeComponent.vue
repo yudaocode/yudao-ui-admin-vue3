@@ -55,7 +55,6 @@ const displayUrl = computed(() => props.url || props.modelValue || '') // 显示
 const showPreview = computed(() => {
   return displayUrl.value && isUrl(displayUrl.value)
 }) // 是否显示预览
-
 </script>
 
 <style scoped>
@@ -64,9 +63,9 @@ const showPreview = computed(() => {
 }
 
 .iframe-preview {
+  overflow: hidden;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
-  overflow: hidden;
 }
 
 .iframe-content {
@@ -76,11 +75,11 @@ const showPreview = computed(() => {
 
 .iframe-placeholder {
   display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 200px;
+  background-color: #fafafa;
   border: 1px dashed #dcdfe6;
   border-radius: 4px;
-  background-color: #fafafa;
+  align-items: center;
+  justify-content: center;
 }
 </style>

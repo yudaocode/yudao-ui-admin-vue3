@@ -216,6 +216,13 @@ export enum DICT_TYPE {
   ERP_AUDIT_STATUS = 'erp_audit_status', // ERP 审批状态
   ERP_STOCK_RECORD_BIZ_TYPE = 'erp_stock_record_biz_type', // 库存明细的业务类型
 
+  // ========== WMS - 仓库管理模块 ==========
+  WMS_MERCHANT_TYPE = 'merchant_type', // WMS 往来企业类型
+  WMS_ORDER_TYPE = 'wms_order_type', // WMS 单据类型
+  WMS_ORDER_STATUS = 'wms_order_status', // WMS 单据状态
+  WMS_RECEIPT_ORDER_TYPE = 'wms_receipt_order_type', // WMS 入库单类型
+  WMS_SHIPMENT_ORDER_TYPE = 'wms_shipment_order_type', // WMS 出库单类型
+
   // ========== AI - 人工智能模块  ==========
   AI_PLATFORM = 'ai_platform', // AI 平台
   AI_MODEL_TYPE = 'ai_model_type', // AI 模型类型
@@ -268,7 +275,6 @@ export enum DICT_TYPE {
   MES_INDICATOR_TYPE = 'mes_indicator_type', // MES 检测项类型
   MES_QC_RESULT_TYPE = 'mes_qc_result_type', // MES 质检结果值类型
   MES_DEFECT_LEVEL = 'mes_defect_level', // MES 缺陷等级
-  MES_DEFECT_TYPE = 'mes_defect_type', // MES 缺陷检测项类型
   MES_PRO_WORK_ORDER_STATUS = 'mes_pro_work_order_status', // MES 生产工单状态
   MES_PRO_WORK_ORDER_SOURCE_TYPE = 'mes_pro_work_order_source_type', // MES 工单来源类型
   MES_PRO_WORK_ORDER_TYPE = 'mes_pro_work_order_type', // MES 工单类型

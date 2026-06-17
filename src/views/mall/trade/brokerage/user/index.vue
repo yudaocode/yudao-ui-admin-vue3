@@ -219,7 +219,7 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<BrokerageUserApi.BrokerageUserVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -289,7 +289,7 @@ const openUpdateBindUserForm = (row: BrokerageUserApi.BrokerageUserVO) => {
 }
 
 /** 创建分销员 */
-const createFormRef = ref<InstanceType<typeof CreateUserForm>>()
+const createFormRef = ref<InstanceType<typeof BrokerageUserCreateForm>>()
 const openCreateUserForm = () => {
   createFormRef.value?.open()
 }

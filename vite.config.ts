@@ -1,6 +1,6 @@
-import {resolve} from 'path'
+import {dirname, relative, resolve} from 'path'
 import type {ConfigEnv, UserConfig} from 'vite'
-import {loadEnv} from 'vite'
+import {loadEnv, normalizePath} from 'vite'
 import {createVitePlugins} from './build/vite'
 import {exclude, include} from "./build/vite/optimize"
 // 当前执行node命令时文件夹的地址(工作目录)
@@ -9,6 +9,12 @@ const root = process.cwd()
 // 路径查找
 function pathResolve(dir: string) {
     return resolve(root, '.', dir)
+}
+
+function getRelativeScssUsePath(filename: string, targetPath: string) {
+    const cleanFilename = filename.split('?')[0]
+    const relativePath = normalizePath(relative(dirname(cleanFilename), targetPath))
+    return relativePath.startsWith('.') ? relativePath : `./${relativePath}`
 }
 
 // https://vitejs.dev/config/
@@ -20,6 +26,7 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
     } else {
         env = loadEnv(mode, root)
     }
+    const variablesScssPath = pathResolve('src/styles/variables.scss')
     return {
         base: env.VITE_BASE_PATH,
         root: root,
@@ -41,21 +48,31 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
         // 项目使用的vite插件。 单独提取到build/vite/plugin中管理
         plugins: createVitePlugins(),
         css: {
+            lightningcss: {
+                // Preserve legacy star-hack declarations by stripping invalid syntax during minification.
+                errorRecovery: true
+            },
             preprocessorOptions: {
                 scss: {
-                    additionalData: '@use "@/styles/variables.scss" as *;',
-                    javascriptEnabled: true,
-                    silenceDeprecations: ["legacy-js-api"], // 参考自 https://stackoverflow.com/questions/78997907/the-legacy-js-api-is-deprecated-and-will-be-removed-in-dart-sass-2-0-0
+                    additionalData: (source: string, filename: string) => {
+                        const normalizedFilename = normalizePath(filename)
+                        // Windows 下更容易触发重复注入：定义或显式转导变量的文件，不能再次注入同一个
+                        // `@use ... as *`，否则 Sass 会报 duplicate global variables。
+                        if (
+                            normalizedFilename.endsWith('/src/styles/variables.scss') ||
+                            normalizedFilename.endsWith('/src/styles/global.module.scss')
+                        ) {
+                            return source
+                        }
+                        return `@use "${getRelativeScssUsePath(filename, variablesScssPath)}" as *;\n${source}`
+                    },
+                    api: 'modern-compiler'
                 }
             }
         },
         resolve: {
             extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss', '.css'],
             alias: [
-                {
-                    find: 'vue-i18n',
-                    replacement: 'vue-i18n/dist/vue-i18n.cjs.js'
-                },
                 {
                     find: /\@\//,
                     replacement: `${pathResolve('src')}/`
@@ -75,10 +92,12 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             },
             rollupOptions: {
                 output: {
-                    manualChunks: {
-                      echarts: ['echarts'], // 将 echarts 单独打包，参考 https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues/IAB1SX 讨论
-                      'form-create': ['@form-create/element-ui'], // 参考 https://github.com/yudaocode/yudao-ui-admin-vue3/issues/148 讨论
-                      'form-designer': ['@form-create/designer'],
+                    codeSplitting: {
+                        groups: [
+                            { name: 'echarts', test: /node_modules[\\/]echarts[\\/]/ }, // 将 echarts 单独打包，参考 https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues/IAB1SX 讨论
+                            { name: 'form-create', test: /node_modules[\\/]@form-create[\\/]element-ui[\\/]/ }, // 参考 https://github.com/yudaocode/yudao-ui-admin-vue3/issues/148 讨论
+                            { name: 'form-designer', test: /node_modules[\\/]@form-create[\\/]designer[\\/]/ }
+                        ]
                     }
                 },
             },

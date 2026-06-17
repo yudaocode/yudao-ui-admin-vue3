@@ -66,3 +66,8 @@ export const runJob = (id: number) => {
 export const getJobNextTimes = (id: number) => {
   return request.get({ url: '/infra/job/get_next_times?id=' + id })
 }
+
+// 同步定时任务到 Quartz
+export const syncJob = () => {
+  return request.post({ url: '/infra/job/sync' })
+}

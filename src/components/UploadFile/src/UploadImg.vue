@@ -1,5 +1,5 @@
 <template>
-  <div class="upload-box">
+  <div class="upload-box" :style="uploadStyle">
     <el-upload
       :id="uuid"
       :accept="fileType.join(',')"
@@ -82,6 +82,13 @@ const props = defineProps({
   showBtnText: propTypes.bool.def(true), // 是否显示按钮文字
   directory: propTypes.string.def(undefined) // 上传目录 ==> 非必传（默认为 undefined）
 })
+
+const uploadStyle = computed(() => ({
+  '--upload-width': props.width,
+  '--upload-height': props.height,
+  '--upload-border-radius': props.borderradius
+}))
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 // 生成组件唯一id
@@ -167,11 +174,11 @@ const uploadError = () => {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: v-bind(width);
-      height: v-bind(height);
+      width: var(--upload-width);
+      height: var(--upload-height);
       overflow: hidden;
       border: 1px dashed var(--el-border-color-darker);
-      border-radius: v-bind(borderradius);
+      border-radius: var(--upload-border-radius);
       transition: var(--el-transition-duration-fast);
 
       &:hover {
@@ -192,7 +199,7 @@ const uploadError = () => {
         overflow: hidden;
         background-color: transparent;
         border: 1px dashed var(--el-border-color-darker);
-        border-radius: v-bind(borderradius);
+        border-radius: var(--upload-border-radius);
 
         &:hover {
           border: 1px dashed var(--el-color-primary);

@@ -48,6 +48,11 @@ declare module 'vue-router' {
     noTagsView?: boolean
     followAuth?: string
     canTo?: boolean
+    hash?: string
+    iframeSrc?: string
+    link?: string
+    params?: Recordable
+    query?: Recordable
   }
 }
 
@@ -73,6 +78,7 @@ declare global {
     meta: RouteMeta
     component: string
     componentName?: string
+    id?: number | string
     path: string
     redirect: string
     children?: AppCustomRouteRecordRaw[]

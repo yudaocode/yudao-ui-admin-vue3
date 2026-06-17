@@ -77,6 +77,15 @@
         <el-button type="info" plain @click="handleJobLog()" v-hasPermi="['infra:job:query']">
           <Icon icon="ep:zoom-in" class="mr-5px" /> 执行日志
         </el-button>
+        <el-button
+          type="warning"
+          plain
+          @click="handleSyncJob()"
+          :loading="syncLoading"
+          v-hasPermi="['infra:job:create']"
+        >
+          <Icon icon="ep:refresh" class="mr-5px" /> 同步任务
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -184,6 +193,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const syncLoading = ref(false) // 同步的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -221,6 +231,20 @@ const handleExport = async () => {
   } catch {
   } finally {
     exportLoading.value = false
+  }
+}
+
+/** 同步任务到 Quartz */
+const handleSyncJob = async () => {
+  try {
+    await message.confirm('确认要同步所有任务到调度器?', t('common.reminder'))
+    syncLoading.value = true
+    await JobApi.syncJob()
+    message.success('同步成功')
+    await getList()
+  } catch {
+  } finally {
+    syncLoading.value = false
   }
 }
 

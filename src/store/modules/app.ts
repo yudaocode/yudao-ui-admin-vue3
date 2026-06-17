@@ -4,6 +4,7 @@ import { LayoutType } from '@/types/layout'
 import { ThemeTypes } from '@/types/theme'
 import { humpToUnderline, setCssVar } from '@/utils'
 import { getCssColorVariable, hexToRGB, mix } from '@/utils/color'
+import { normalizeLayout } from '@/utils/layout'
 import { ElMessage } from 'element-plus'
 import { defineStore } from 'pinia'
 import { store } from '../index'
@@ -68,7 +69,7 @@ export const useAppStore = defineStore('app', {
       greyMode: false, // 是否开始灰色模式，用于特殊悼念日
       fixedMenu: wsCache.get('fixedMenu') || false, // 是否固定菜单
 
-      layout: wsCache.get(CACHE_KEY.LAYOUT) || 'classic', // layout布局
+      layout: normalizeLayout(wsCache.get(CACHE_KEY.LAYOUT)), // layout布局
       isDark: wsCache.get(CACHE_KEY.IS_DARK) || false, // 是否是暗黑模式
       currentSize: wsCache.get('default') || 'default', // 组件尺寸
       theme: wsCache.get(CACHE_KEY.THEME) || {
@@ -271,11 +272,12 @@ export const useAppStore = defineStore('app', {
       this.pageLoading = pageLoading
     },
     setLayout(layout: LayoutType) {
-      if (this.mobile && layout !== 'classic') {
+      const normalizedLayout = normalizeLayout(layout)
+      if (this.mobile && normalizedLayout !== 'sidebar-nav') {
         ElMessage.warning('移动端模式下不支持切换其他布局')
         return
       }
-      this.layout = layout
+      this.layout = normalizedLayout
       wsCache.set(CACHE_KEY.LAYOUT, this.layout)
     },
     setTitle(title: string) {

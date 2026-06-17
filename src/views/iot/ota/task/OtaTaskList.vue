@@ -59,7 +59,14 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="120">
         <template #default="scope">
-          <el-button link type="primary" @click="handleTaskDetail(scope.row.id)"> 详情 </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleTaskDetail(scope.row.id)"
+            v-hasPermi="['iot:ota-task:query']"
+          >
+            详情
+          </el-button>
           <el-button
             v-if="scope.row.status === IoTOtaTaskStatusEnum.IN_PROGRESS.value"
             link

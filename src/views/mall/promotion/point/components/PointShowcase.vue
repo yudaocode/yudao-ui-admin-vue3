@@ -132,11 +132,11 @@ const emitActivityChange = () => {
   display: flex;
   width: 60px;
   height: 60px;
+  cursor: pointer;
   border: 1px dashed var(--el-border-color-darker);
   border-radius: 8px;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 }
 
 .spu-pic {

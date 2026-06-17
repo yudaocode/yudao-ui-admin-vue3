@@ -21,7 +21,7 @@
       <el-form-item label="检测项类型" prop="type">
         <el-select v-model="formData.type" placeholder="请选择检测项类型" clearable class="!w-1/1">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MES_DEFECT_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_INDICATOR_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"

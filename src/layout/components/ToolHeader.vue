@@ -10,10 +10,12 @@ import { SizeDropdown } from '@/layout/components/SizeDropdown'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
 import RouterSearch from '@/components/RouterSearch/index.vue'
 import TenantVisit from '@/layout/components/TenantVisit/index.vue'
+import { useSetting } from '@/layout/components/Setting'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
 import { Icon } from '@/components/Icon'
 import { checkPermi } from '@/utils/permission'
+import { isHorizontalMenuLayout, isMixedNavLayout, isTwoColumnLayout } from '@/utils/layout'
 
 const { getPrefixCls, variables } = useDesign()
 
@@ -61,6 +63,13 @@ const goToChat = () => {
 export default defineComponent({
   name: 'ToolHeader',
   setup() {
+    const { t } = useI18n()
+    const { openSetting } = useSetting()
+    const showSidebarControl = computed(
+      () => !isHorizontalMenuLayout(layout.value) || isMixedNavLayout(layout.value)
+    )
+    const showBreadcrumb = computed(() => !isHorizontalMenuLayout(layout.value))
+
     return () => (
       <div
         id={`${variables.namespace}-tool-header`}
@@ -70,16 +79,21 @@ export default defineComponent({
           'dark:bg-[var(--el-bg-color)]'
         ]}
       >
-        {layout.value !== 'top' ? (
+        {showSidebarControl.value || showBreadcrumb.value ? (
           <div class="h-full flex items-center">
-            {hamburger.value && layout.value !== 'cutMenu' ? (
+            {showSidebarControl.value && hamburger.value && !isTwoColumnLayout(layout.value) ? (
               <Collapse class="custom-hover" color="var(--top-header-text-color)"></Collapse>
             ) : undefined}
-            {breadcrumb.value ? <Breadcrumb class="lt-md:hidden"></Breadcrumb> : undefined}
+            {showBreadcrumb.value && breadcrumb.value ? (
+              <Breadcrumb class="lt-md:hidden"></Breadcrumb>
+            ) : undefined}
           </div>
         ) : undefined}
         <div class="h-full flex items-center">
           {hasTenantVisitPermission.value ? <TenantVisit /> : undefined}
+          <div class="v-setting custom-hover" title={t('setting.projectSetting')} onClick={openSetting}>
+            <Icon color="var(--top-header-text-color)" size={18} icon="ep:setting" />
+          </div>
           {screenfull.value ? (
             <Screenfull class="custom-hover" color="var(--top-header-text-color)"></Screenfull>
           ) : undefined}

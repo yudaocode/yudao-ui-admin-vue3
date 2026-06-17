@@ -50,12 +50,12 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" v-if="isDialog"/>
+      <el-table-column type="selection" width="55" v-if="isDialog" />
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="用户标识" align="center" prop="openid" width="260" />
       <el-table-column label="用户头像" min-width="80px" prop="headImageUrl">
         <template #default="scope">
-          <el-avatar :src="scope.row.headImageUrl"/>
+          <el-avatar :src="scope.row.headImageUrl" />
         </template>
       </el-table-column>
       <el-table-column label="昵称" align="center" prop="nickname" />
@@ -106,13 +106,13 @@
   <UserForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
-import {dateFormatter} from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import * as MpUserApi from '@/api/mp/user'
 import * as MpTagApi from '@/api/mp/tag'
 import WxAccountSelect from '@/views/mp/components/wx-account-select'
-import type {FormInstance} from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import UserForm from './UserForm.vue'
-import {ref} from "vue";
+import { ref } from 'vue'
 
 defineOptions({ name: 'MpUser' })
 
@@ -159,7 +159,7 @@ const getList = async () => {
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
-  if(isDialog.value){
+  if (isDialog.value) {
     emitChange()
   }
 }
@@ -194,21 +194,24 @@ defineExpose({
     onAccountChanged(accountId)
     isDialog.value = true
   }
-});
+})
 
 /** Emits*/
 interface Emits {
-  (e: 'change', data: {
-    multipleSelection: any[]
-    total: number
-    queryParams: object
-  }): void
+  (
+    e: 'change',
+    data: {
+      multipleSelection: any[]
+      total: number
+      queryParams: object
+    }
+  ): void
   // (e: 'select', user: any): void
   // (e: 'cancel'): void
 }
 const emit = defineEmits<Emits>()
 const emitChange = () => {
-  emit('change', {multipleSelection: multipleSelection.value, total: total.value, queryParams})
+  emit('change', { multipleSelection: multipleSelection.value, total: total.value, queryParams })
 }
 
 const handleSelectionChange = (val: any[]) => {

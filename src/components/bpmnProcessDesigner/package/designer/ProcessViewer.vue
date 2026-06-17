@@ -176,6 +176,41 @@ const processReZoom = () => {
   bpmnViewer.value?.get('canvas').zoom('fit-viewport', 'auto')
 }
 
+let resizeObserver: ResizeObserver | null = null
+
+/** 停止 ResizeObserver */
+const stopResizeObserver = () => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+}
+
+/** 启动 ResizeObserver 监听容器尺寸变化 */
+const startResizeObserver = () => {
+  stopResizeObserver()
+  if (!processCanvas.value || !bpmnViewer.value) {
+    return
+  }
+
+  const { clientWidth, clientHeight } = processCanvas.value
+  if (clientWidth > 0 && clientHeight > 0) {
+    processReZoom()
+    return
+  }
+
+  resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const { width, height } = entry.contentRect
+      if (width > 0 && height > 0 && bpmnViewer.value) {
+        processReZoom()
+        stopResizeObserver()
+      }
+    }
+  })
+  resizeObserver.observe(processCanvas.value)
+}
+
 /** Zoom：放大 */
 const processZoomIn = (zoomStep = 0.1) => {
   let newZoom = Math.floor(defaultZoom.value * 100 + zoomStep * 100) / 100
@@ -198,6 +233,7 @@ const processZoomOut = (zoomStep = 0.1) => {
 
 /** 流程图预览清空 */
 const clearViewer = () => {
+  stopResizeObserver()
   if (processCanvas.value) {
     processCanvas.value.innerHTML = ''
   }
@@ -277,6 +313,12 @@ const importXML = async (xml: string) => {
       isLoading.value = false
       // 高亮流程
       setProcessStatus(props.view)
+      // 启动 ResizeObserver，等待容器可见且有尺寸时自动居中
+      // 对应 https://github.com/yudaocode/yudao-ui-admin-vue3/pull/221 场景
+      if (bpmnViewer.value) {
+        await nextTick()
+        startResizeObserver()
+      }
     }
   }
 }

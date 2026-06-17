@@ -35,7 +35,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MES_WM_MISC_ISSUE_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_MISC_ISSUE_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -195,7 +195,7 @@
 
 <script setup lang="ts">
 import { dateFormatter2 } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { WmMiscIssueApi, WmMiscIssueVO } from '@/api/mes/wm/miscissue'
 import MiscIssueForm from './MiscIssueForm.vue'

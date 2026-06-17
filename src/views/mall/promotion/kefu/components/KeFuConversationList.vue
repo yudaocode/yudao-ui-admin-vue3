@@ -208,8 +208,8 @@ onBeforeUnmount(() => {
     //transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
 
     .username {
-      min-width: 0;
       max-width: 60%;
+      min-width: 0;
     }
 
     .last-message {
@@ -218,27 +218,27 @@ onBeforeUnmount(() => {
 
     .last-message,
     .username {
+      display: -webkit-box;
       overflow: hidden;
       text-overflow: ellipsis;
-      display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 1;
     }
   }
 
   .active {
-    background-color: rgba(128, 128, 128, 0.5); // 透明色，暗黑模式下也能体现
+    background-color: rgb(128 128 128 / 50%); // 透明色，暗黑模式下也能体现
   }
 
   .right-menu-ul {
     position: absolute;
-    background-color: var(--app-content-bg-color);
+    width: 130px;
     padding: 5px;
     margin: 0;
     list-style-type: none; /* 移除默认的项目符号 */
+    background-color: var(--app-content-bg-color);
     border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影效果 */
-    width: 130px;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%); /* 阴影效果 */
 
     li {
       padding: 8px 16px;

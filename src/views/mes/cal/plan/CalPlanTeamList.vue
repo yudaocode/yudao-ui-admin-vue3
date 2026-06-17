@@ -203,9 +203,9 @@ watch(
 
 .member-card-header {
   display: flex;
-  align-items: center;
-  font-weight: 600;
   font-size: 14px;
+  font-weight: 600;
+  align-items: center;
 }
 
 .member-empty-tip {

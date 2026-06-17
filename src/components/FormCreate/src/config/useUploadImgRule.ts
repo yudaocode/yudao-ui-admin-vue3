@@ -74,8 +74,8 @@ export const useUploadImgRule = () => {
         {
           type: 'switch',
           field: 'disabled',
-          title: '是否显示删除按钮',
-          value: true
+          title: '是否禁用',
+          value: false
         },
         {
           type: 'switch',

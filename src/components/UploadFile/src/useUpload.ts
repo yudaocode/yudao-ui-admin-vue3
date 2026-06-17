@@ -24,7 +24,7 @@ export const useUpload = (directory?: string) => {
     const uploadProgressHandler = (evt: AxiosProgressEvent) => {
       const upEvt: UploadProgressEvent = Object.assign(evt.event)
       upEvt.percent = evt.progress ? evt.progress * 100 : 0
-      options.onProgress(upEvt) // 触发 el-upload 的 on-progress
+      options.onProgress?.(upEvt) // 触发 el-upload 的 on-progress
     }
 
     // 模式一：前端上传

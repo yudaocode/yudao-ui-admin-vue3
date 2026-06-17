@@ -13,7 +13,7 @@
         <el-button
           @click="openForm('update', product.id)"
           v-hasPermi="['iot:product:update']"
-          :disabled="product.status === 1"
+          :disabled="product.status === ProductStatusEnum.PUBLISHED"
         >
           编辑
         </el-button>
@@ -21,7 +21,7 @@
           type="primary"
           @click="confirmPublish(product.id)"
           v-hasPermi="['iot:product:update']"
-          v-if="product.status === 0"
+          v-if="product.status === ProductStatusEnum.UNPUBLISHED"
         >
           发布
         </el-button>
@@ -29,7 +29,7 @@
           type="danger"
           @click="confirmUnpublish(product.id)"
           v-hasPermi="['iot:product:update']"
-          v-if="product.status === 1"
+          v-if="product.status === ProductStatusEnum.PUBLISHED"
         >
           撤销发布
         </el-button>
@@ -54,6 +54,7 @@
 <script setup lang="ts">
 import ProductForm from '@/views/iot/product/product/ProductForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
+import { ProductStatusEnum } from '@/views/iot/utils/constants'
 import { useClipboard } from '@vueuse/core'
 
 const message = useMessage()
@@ -90,7 +91,7 @@ const openForm = (type: string, id?: number) => {
 /** 发布操作 */
 const confirmPublish = async (id: number) => {
   try {
-    await ProductApi.updateProductStatus(id, 1)
+    await ProductApi.updateProductStatus(id, ProductStatusEnum.PUBLISHED)
     message.success('发布成功')
     formRef.value.close() // 关闭弹框
     emit('refresh')
@@ -102,7 +103,7 @@ const confirmPublish = async (id: number) => {
 /** 撤销发布操作 */
 const confirmUnpublish = async (id: number) => {
   try {
-    await ProductApi.updateProductStatus(id, 0)
+    await ProductApi.updateProductStatus(id, ProductStatusEnum.UNPUBLISHED)
     message.success('撤销发布成功')
     formRef.value.close() // 关闭弹框
     emit('refresh')

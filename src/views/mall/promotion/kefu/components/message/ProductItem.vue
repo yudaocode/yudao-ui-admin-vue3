@@ -68,21 +68,21 @@ const openDetail = (spuId: number) => {
 
 <style lang="scss" scoped>
 .button {
-  background-color: #007bff;
-  color: white;
-  border: none;
   padding: 5px 10px;
+  color: white;
   cursor: pointer;
+  background-color: #007bff;
+  border: none;
 }
 
 .product-warp {
+  display: flex;
   width: 100%;
-  background-color: rgba(128, 128, 128, 0.3);
+  padding: 10px;
+  background-color: rgb(128 128 128 / 30%);
   border: 1px solid var(--el-border-color);
   border-radius: 8px;
-  display: flex;
   align-items: center;
-  padding: 10px;
 
   &-left {
     width: 70px;
@@ -98,14 +98,14 @@ const openDetail = (spuId: number) => {
     flex: 1;
 
     .description {
+      display: -webkit-box;
       width: 100%;
+      overflow: hidden;
       font-size: 16px;
       font-weight: bold;
-      display: -webkit-box;
-      -webkit-line-clamp: 1; /* 显示一行 */
-      -webkit-box-orient: vertical;
-      overflow: hidden;
       text-overflow: ellipsis;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1; /* 显示一行 */
     }
 
     .price {

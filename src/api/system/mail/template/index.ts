@@ -19,6 +19,16 @@ export interface MailSendReqVO {
   templateParams: Map<String, Object>
 }
 
+export interface MailTemplateSimpleVO {
+  id: number
+  name: string
+  code: string
+}
+
+// 查询邮件模版精简列表
+export const getSimpleMailTemplateList = async () => {
+  return await request.get({ url: '/system/mail-template/simple-list' })
+}
 // 查询邮件模版列表
 export const getMailTemplatePage = async (params: PageParam) => {
   return await request.get({ url: '/system/mail-template/page', params })

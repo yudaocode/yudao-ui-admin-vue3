@@ -10,6 +10,9 @@ export interface AlertConfig {
   sceneRuleIds: string // 关联的场景联动规则编号数组
   receiveUserIds: string // 接收的用户编号数组
   receiveTypes: string // 接收的类型数组
+  smsTemplateCode?: string // 短信模板编号
+  mailTemplateCode?: string // 邮件模板编号
+  notifyTemplateCode?: string // 站内信模板编号
 }
 
 // IoT 告警配置 API

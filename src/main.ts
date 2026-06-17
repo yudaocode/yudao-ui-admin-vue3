@@ -47,6 +47,12 @@ import { setupWangEditorPlugin } from '@/views/bpm/model/form/PrintTemplate'
 
 import print from 'vue3-print-nb' // 打印插件
 
+// 处理 Vite 预加载模块失败（如重新构建后 chunk 哈希变化），自动刷新页面
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault()
+  window.location.reload()
+})
+
 // 创建实例
 const setupAll = async () => {
   const app = createApp(App)

@@ -308,9 +308,9 @@
           </template>
         </template>
       </el-table-column>
-      <el-table-column label="设备状态" align="center" prop="status">
+      <el-table-column label="设备状态" align="center" prop="state">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="scope.row.state" />
         </template>
       </el-table-column>
       <el-table-column
