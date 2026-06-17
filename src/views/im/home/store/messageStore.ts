@@ -30,7 +30,6 @@ import { getCurrentUserId } from '@/utils/auth'
 import { isGroupQuit, tryGetSenderDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import { useConversationStore } from './conversationStore'
-import type { ImConversationReadRespVO } from '@/api/im/conversation/read'
 import type { Conversation, Message, MessageDO } from '../types'
 
 const MESSAGE_CACHE_RECENT_CONVERSATION_LIMIT = 5
@@ -236,24 +235,6 @@ function isSameMessage(left: Message, right: Message): boolean {
     return true
   }
   return !!left.clientMessageId && left.clientMessageId === right.clientMessageId
-}
-
-/** 获取对方普通消息最大编号 */
-function getMaxIncomingNormalMessageId(
-  messages: Array<Pick<Message, 'id' | 'selfSend' | 'type' | 'status'>>
-): number {
-  return messages.reduce((maxMessageId, message) => {
-    if (
-      message.id &&
-      !message.selfSend &&
-      isNormalMessage(message.type) &&
-      message.status !== ImMessageStatus.RECALL &&
-      message.id > maxMessageId
-    ) {
-      return message.id
-    }
-    return maxMessageId
-  }, 0)
 }
 
 export const useMessageStore = defineStore('imMessageStore', {
@@ -527,6 +508,7 @@ export const useMessageStore = defineStore('imMessageStore', {
         if (
           !message.selfSend &&
           !isActive &&
+          !conversationStore.isMessageCoveredByReadPosition(conversation, message) &&
           isNormalMessage(message.type) &&
           message.status !== ImMessageStatus.RECALL
         ) {
@@ -632,6 +614,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       if (
         !message.selfSend &&
         !isActive &&
+        !conversationStore.isMessageCoveredByReadPosition(conversation, message) &&
         isNormalMessage(message.type) &&
         message.status !== ImMessageStatus.RECALL
       ) {
@@ -842,127 +825,6 @@ export const useMessageStore = defineStore('imMessageStore', {
           }
         })
         .catch((e) => console.warn('[IM messageStore] 回执写入失败', e))
-    },
-
-    /** 应用会话读位置补偿 */
-    async applyConversationReadList(
-      records: ImConversationReadRespVO[],
-      isActive?: () => boolean
-    ): Promise<void> {
-      if (records.length === 0) {
-        return
-      }
-      const conversationStore = useConversationStore()
-      const changedConversations = new Map<string, Conversation>()
-      const changedMessages = new Map<string, MessageDO>()
-      const db = getDb()
-
-      // 1. 按读位置更新会话未读和频道已读态
-      for (const record of records) {
-        if (isActive && !isActive()) {
-          return
-        }
-        if (!record.conversationType || !record.targetId || !record.messageId) {
-          continue
-        }
-        const clientConversationId = getClientConversationId(
-          record.conversationType,
-          record.targetId
-        )
-        let storedMessages: MessageDO[] | undefined
-        const getStoredMessages = async () => {
-          if (!storedMessages) {
-            storedMessages = await db.getAllByIndex<MessageDO>(
-              'messages',
-              'clientConversationId',
-              clientConversationId
-            )
-          }
-          return storedMessages
-        }
-        const conversation = conversationStore.getConversation(
-          record.conversationType,
-          record.targetId
-        )
-        if (
-          conversation &&
-          (conversation.unreadCount > 0 || conversation.atMe || conversation.atAll)
-        ) {
-          const memoryMessages = this.messagesByConversation[clientConversationId]
-          let readCovered =
-            !!conversation.lastMessageId && conversation.lastMessageId <= record.messageId
-          const latestMessageLoaded =
-            !!conversation.lastMessageId &&
-            memoryMessages?.some((message) => message.id === conversation.lastMessageId)
-          if (!readCovered && latestMessageLoaded && memoryMessages) {
-            const maxIncomingMessageId = getMaxIncomingNormalMessageId(memoryMessages)
-            readCovered = maxIncomingMessageId > 0 && maxIncomingMessageId <= record.messageId
-          }
-          if (!readCovered && !latestMessageLoaded) {
-            const storedMessages = await getStoredMessages()
-            const latestMessageStored =
-              !!conversation.lastMessageId &&
-              storedMessages.some((message) => message.id === conversation.lastMessageId)
-            if (latestMessageStored) {
-              const storedMaxIncomingMessageId = getMaxIncomingNormalMessageId(storedMessages)
-              readCovered =
-                storedMaxIncomingMessageId > 0 && storedMaxIncomingMessageId <= record.messageId
-            }
-          }
-          if (readCovered) {
-            conversation.unreadCount = 0
-            conversation.atMe = false
-            conversation.atAll = false
-            changedConversations.set(clientConversationId, conversation)
-          }
-        }
-        if (record.conversationType !== ImConversationType.CHANNEL) {
-          continue
-        }
-        const memoryMessages = this.messagesByConversation[clientConversationId] || []
-        for (const message of memoryMessages) {
-          if (
-            message.id &&
-            message.id <= record.messageId &&
-            message.receiptStatus !== ImMessageReceiptStatus.DONE
-          ) {
-            message.receiptStatus = ImMessageReceiptStatus.DONE
-          }
-        }
-        for (const message of await getStoredMessages()) {
-          if (
-            message.id &&
-            message.id <= record.messageId &&
-            message.receiptStatus !== ImMessageReceiptStatus.DONE
-          ) {
-            message.receiptStatus = ImMessageReceiptStatus.DONE
-            changedMessages.set(message.messageKey, message)
-          }
-        }
-      }
-
-      // 2. 持久化本轮变更
-      if (changedConversations.size === 0 && changedMessages.size === 0) {
-        return
-      }
-      if (isActive && !isActive()) {
-        return
-      }
-      const stores: Array<'conversations' | 'messages'> = []
-      if (changedConversations.size > 0) {
-        stores.push('conversations')
-      }
-      if (changedMessages.size > 0) {
-        stores.push('messages')
-      }
-      await db.transaction(stores, 'readwrite', async (tx) => {
-        if (changedConversations.size > 0) {
-          await conversationStore.saveConversationRecord([...changedConversations.values()], tx)
-        }
-        for (const message of changedMessages.values()) {
-          await db.put('messages', message, tx)
-        }
-      })
     },
 
     /** 前置历史消息 */

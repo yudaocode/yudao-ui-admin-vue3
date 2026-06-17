@@ -151,6 +151,17 @@ export interface ConversationDO extends Conversation {
   clientConversationId: string // `${type}:${targetId}`
 }
 
+export interface ConversationRead {
+  conversationType: number // 会话类型，对齐 ImConversationType
+  targetId: number // 会话目标编号
+  messageId: number // 当前用户已读到的最大消息编号
+  updateTime?: number // 更新时间
+}
+
+export interface ConversationReadDO extends ConversationRead {
+  clientConversationId: string // `${conversationType}:${targetId}`
+}
+
 export interface MessageDO extends Omit<Message, 'uploadProgress' | '_localFile' | '_ackMerging'> {
   messageKey: string // `${conversationType}:${id}` 或 `client:${clientMessageId}`
   conversationType: number // 会话类型，对齐 ImConversationType

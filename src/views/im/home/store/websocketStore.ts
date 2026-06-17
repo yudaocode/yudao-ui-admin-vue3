@@ -366,7 +366,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
 
     /** 频道 READ：自己其它终端在某频道里标为已读，本端同步清零该频道未读 */
     handleChannelRead(websocketMessage: ImChannelMessageRespVO) {
-      void useMessageStore()
+      void useConversationStore()
         .applyConversationReadList([
           {
             id: websocketMessage.id,
@@ -425,7 +425,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         // 窗口打开 = 已读：本端清未读 + 上报服务端读位置，避免读位置滞后
         conversationStore.markConversationRead(
           ImConversationType.CHANNEL,
-          websocketMessage.channelId
+          websocketMessage.channelId,
+          websocketMessage.id
         )
         apiReadChannelMessages(websocketMessage.channelId, websocketMessage.id).catch((e) => {
           console.warn('[IM WS] 频道自动已读上报失败', e)
@@ -606,7 +607,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         if (isActive) {
           // 聊天窗口打开 = 实际看到了：本端清未读；私聊已读开启时再上报后端，让对方 UI 立刻切到"已读"
           // 已读位置直接用刚到的消息 id（这条就是当前会话最大 id）
-          conversationStore.markConversationRead(ImConversationType.PRIVATE, peerId)
+          conversationStore.markConversationRead(
+            ImConversationType.PRIVATE,
+            peerId,
+            websocketMessage.id
+          )
           if (MESSAGE_PRIVATE_READ_ENABLED) {
             apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
               console.warn('[IM WS] 自动已读上报失败', e)
@@ -628,7 +633,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!websocketMessage.id || !websocketMessage.receiverId) {
         return
       }
-      void useMessageStore()
+      void useConversationStore()
         .applyConversationReadList([
           {
             id: websocketMessage.id,
@@ -741,7 +746,11 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationStore.activeConversation?.targetId === websocketMessage.groupId
         if (isActive) {
           // 群已读上报需要带 messageId（群消息以"读到第几条"的游标为准，区别于私聊只标 receiverId）；群已读关闭时仅本地清零
-          conversationStore.markConversationRead(ImConversationType.GROUP, websocketMessage.groupId)
+          conversationStore.markConversationRead(
+            ImConversationType.GROUP,
+            websocketMessage.groupId,
+            websocketMessage.id
+          )
           if (MESSAGE_GROUP_READ_ENABLED) {
             apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id).catch((e) => {
               console.warn('[IM WS] 自动已读上报失败', e)
@@ -766,7 +775,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       if (!readMessageId || !websocketMessage.groupId) {
         return
       }
-      void useMessageStore()
+      void useConversationStore()
         .applyConversationReadList([
           {
             id: readMessageId,

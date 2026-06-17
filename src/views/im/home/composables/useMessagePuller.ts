@@ -19,7 +19,6 @@ import {
   pullChannelMessages as apiPullChannelMessages,
   type ImChannelMessageRespVO
 } from '@/api/im/message/channel'
-import { pullMyConversationReadList as apiPullMyConversationReadList } from '@/api/im/conversation/read'
 import {
   ImConversationType,
   ImMessageStatus,
@@ -34,8 +33,7 @@ import {
 } from '../../utils/config'
 import { buildChannelConversationStub } from '../../utils/channel'
 import { generateClientMessageId, getPrivateMessagePeerId } from '../../utils/message'
-import { runIncrementalPull, runMinIdPull } from '../../utils/pull'
-import { StorageKeys } from '../../utils/db'
+import { runMinIdPull } from '../../utils/pull'
 import { getCurrentUserId } from '@/utils/auth'
 import type { Message } from '../types'
 
@@ -285,25 +283,6 @@ export const useMessagePuller = () => {
     wsStore.discardBuffer()
   }
 
-  /** 增量拉取我的会话读位置并合并到本地展示态 */
-  const pullConversationReads = async (isActive: () => boolean): Promise<void> => {
-    await runIncrementalPull(
-      StorageKeys.settings.conversationReadPullCursor,
-      apiPullMyConversationReadList,
-      async (records) => {
-        if (!isActive()) {
-          return false
-        }
-        await messageStore.applyConversationReadList(records, isActive)
-        if (!isActive()) {
-          return false
-        }
-        return true
-      },
-      isActive
-    )
-  }
-
   /**
    * 状态事件补偿：好友 / 好友申请走增量；群列表和群申请红点走快照刷新
    *
@@ -315,6 +294,7 @@ export const useMessagePuller = () => {
     const results = await Promise.allSettled([
       friendStore.pullFriends(),
       friendStore.pullFriendRequests(),
+      conversationStore.pullConversationReads(),
       groupStore.fetchGroupList(true),
       groupRequestStore.pullGroupRequests(),
       groupRequestStore.fetchUnhandledGroupRequestList()
@@ -414,12 +394,6 @@ export const useMessagePuller = () => {
 
         // pull + replay 都完成后再排序，避免回放消息打乱顺序
         conversationStore.sortConversationList()
-
-        // 消息和缓冲帧落库后再补读位置，避免读位置游标先推进导致新消息展示态漏更新
-        await pullConversationReads(isCurrentPull)
-        if (!isCurrentPull()) {
-          return
-        }
 
         // 重连 / 冷启动后补齐当前激活私聊会话的「对方已读位置」
         // 离线期间错过的 RECEIPT 推送会被这里补回；其他私聊会话等用户点开时由 Index.vue 的 watch 触发

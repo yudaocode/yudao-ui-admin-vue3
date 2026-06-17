@@ -4,10 +4,11 @@ import { getCurrentUserId } from '@/utils/auth'
 import { ImConversationType } from './constants'
 import type { MessageDO, SettingDO } from '../home/types'
 
-export const DB_SCHEMA_VERSION = 1
+export const DB_SCHEMA_VERSION = 2
 
 export type DbStoreName =
   | 'conversations'
+  | 'conversationReads'
   | 'messages'
   | 'friends'
   | 'friendRequests'
@@ -102,6 +103,12 @@ function upgradeSchema(db: IDBDatabase) {
   if (!db.objectStoreNames.contains('conversations')) {
     const store = db.createObjectStore('conversations', { keyPath: 'clientConversationId' })
     createIndex(store, 'lastSendTime', 'lastSendTime')
+  }
+  if (!db.objectStoreNames.contains('conversationReads')) {
+    const store = db.createObjectStore('conversationReads', { keyPath: 'clientConversationId' })
+    createIndex(store, 'conversationType+targetId', ['conversationType', 'targetId'], {
+      unique: true
+    })
   }
   if (!db.objectStoreNames.contains('messages')) {
     const store = db.createObjectStore('messages', { keyPath: 'messageKey' })

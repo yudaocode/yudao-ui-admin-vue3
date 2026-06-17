@@ -125,11 +125,16 @@ onMounted(async () => {
       .pullFriendRequests()
       .catch((e) => console.warn('[IM] 后台增量拉好友申请失败', e))
 
-    // 3. 实时通信：建 WebSocket 长连接 + 拉离线消息（pullOnce finally 把 loading 归位）
+    // 3. 会话读位置先补偿，消息入库时可直接过滤已读历史消息
+    await conversationStore
+      .pullConversationReads()
+      .catch((e) => console.warn('[IM] 拉取会话读位置失败', e))
+
+    // 4. 实时通信：建 WebSocket 长连接 + 拉离线消息（pullOnce finally 把 loading 归位）
     webSocketStore.connect()
     await pullOnce()
 
-    // 4. 默认选中第一个会话；若置顶分组处于折叠态，需跳过被折叠隐藏的置顶项，避免自动展开折叠
+    // 5. 默认选中第一个会话；若置顶分组处于折叠态，需跳过被折叠隐藏的置顶项，避免自动展开折叠
     const sorted = conversationStore.getSortedConversationList
     const firstVisible = pickFirstVisibleConversation(sorted)
     if (firstVisible && !conversationStore.activeConversation) {

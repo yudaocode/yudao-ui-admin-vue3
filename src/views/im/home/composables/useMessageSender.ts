@@ -229,8 +229,6 @@ export const useMessageSender = () => {
     if (!conversation) {
       return
     }
-    // 本地标记已读：未读数清零（UI 立刻响应）
-    conversationStore.markConversationRead(conversation.type, conversation.targetId)
     const loadedMaxMessageId = messageStore
       .getMessages(getClientConversationId(conversation.type, conversation.targetId))
       .reduce<number>(
@@ -239,6 +237,8 @@ export const useMessageSender = () => {
         0
       )
     const maxMessageId = Math.max(loadedMaxMessageId, conversation.lastMessageId || 0)
+    // 本地标记已读：未读数清零（UI 立刻响应）
+    conversationStore.markConversationRead(conversation.type, conversation.targetId, maxMessageId)
     if (!maxMessageId) {
       return
     }
