@@ -226,7 +226,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (requestEpoch !== storeEpoch || getCurrentUserId() !== requestUserId) {
         return
       }
-      const fresh = (list || []).map(convertGroup)
+      const fresh = (list || []).map((group) => convertGroup(group))
       // 合并而非全量替换：silent / groupRemark / 成员缓存这些字段不在 ImGroupRespVO 里，得从旧 group 保留
       const groupMap = new Map(this.groups.map((group) => [group.id, group]))
       this.groups = fresh.map((group) => {
@@ -584,14 +584,14 @@ export const useGroupStore = defineStore('imGroupStore', {
     /**
      * 接收 GROUP_* 群广播事件，按 type 分发到对应私有 action
      *
-     * WebSocket 实时收 + useMessagePuller 离线 pull 都走 messageStore.insertMessage 旁路调用
+     * WebSocket 实时收走 messageStore.insertMessage 旁路调用
      * store 里没缓存的群静默忽略，等 fetchGroupList 兜底
      */
     applyGroupNotification(groupId: number, type: number, content?: string) {
       if (!groupId) {
         return
       }
-      let payload: GroupNotificationPayload = {}
+      let payload: GroupNotificationPayload
       try {
         payload = content ? JSON.parse(content) : {}
       } catch (error) {
@@ -683,7 +683,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
     },
 
-    /** 创建群广播：创建者多端同步 + 初始成员首次拉取；payload.memberUserIds 含自己 → 拉群详情 / 成员；本端发起者已经 upsert 过本群，跳过避免双拉 */
+    /** 创建群广播：群未就位时拉群详情 */
     async applyGroupCreateNotification(groupId: number, payload: GroupNotificationPayload) {
       if (!isSelfInPayloadMembers(payload)) {
         return
@@ -693,9 +693,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (selfIsOperator && this.getGroup(groupId)) {
         return
       }
-      // 先 await fetchGroupInfo 把群 upsert 进 state.groups；否则 fetchGroupMemberList 的「不是我加入的群」guard 会兜空
       await this.fetchGroupInfo(groupId)
-      this.fetchGroupMemberList(groupId, true).catch(() => undefined)
     },
 
     /** 群名变更：按 newName 局部更新本地群名 */
@@ -890,7 +888,7 @@ function convertGroup(group: ImGroupRespVO): Group {
     avatar: group.avatar,
     notice: group.notice,
     ownerUserId: group.ownerUserId,
-    pinnedMessages: group.pinnedMessages?.map(convertGroupMessageVO),
+    pinnedMessages: group.pinnedMessages?.map((message) => convertGroupMessageVO(message)),
     mutedAll: group.mutedAll,
     banned: group.banned,
     joinApproval: group.joinApproval,

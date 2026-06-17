@@ -79,7 +79,7 @@ onMounted(async () => {
     // 1.2 打开当前用户 IM DB
     await initDb()
     // 1.3 多个 store 并发从 IDB 读取本地缓存
-    const [, , hasCachedFriends, hasCachedGroups, hasCachedChannels] = await Promise.all([
+    const [, , hasFriendRows, hasGroupRows, hasChannelRows] = await Promise.all([
       conversationStore.loadConversationList(),
       messageStore.loadMessageCursorList(),
       friendStore.loadFriendData(),
@@ -99,18 +99,18 @@ onMounted(async () => {
     // 2.2 无缓存（首登 / 切账号回切）：必须 await + 失败抛出中断本轮 onMounted，
     //     否则 pullOnce 会用 senderId 数字给会话起名落到 IDB 后续基本无法自愈；无缓存分支并发 Promise.all 省一个 RTT
     const requiredFetches: Promise<unknown>[] = []
-    if (hasCachedFriends) {
+    if (hasFriendRows) {
       void friendStore.pullFriends().catch((e) => console.warn('[IM] 后台增量拉好友失败', e))
     } else {
       requiredFetches.push(friendStore.pullFriends())
     }
-    if (hasCachedGroups) {
+    if (hasGroupRows) {
       void groupStore.fetchGroupList(true).catch((e) => console.warn('[IM] 后台刷新群列表失败', e))
     } else {
       requiredFetches.push(groupStore.fetchGroupList(true))
     }
     // 2.3 频道无增量 pull 接口，继续走 list
-    if (hasCachedChannels) {
+    if (hasChannelRows) {
       void channelStore.fetchChannelList().catch((e) => console.warn('[IM] 后台刷频道列表失败', e))
     } else {
       requiredFetches.push(channelStore.fetchChannelList())

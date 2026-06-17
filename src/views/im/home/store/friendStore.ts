@@ -39,9 +39,16 @@ let pendingFetchFriends: PendingRequest | null = null
 let pendingFetchRequests: PendingRequest | null = null
 /** 当前正在进行的「加载更多申请」请求 */
 let pendingLoadMoreRequests: PendingRequest | null = null
+/** 当前正在进行的好友详情请求 */
+const pendingFetchFriendInfos = new Map<string, Promise<void>>()
 
 /** clear() 时递增；旧账号那次还没返回的请求 resolve 后比对一致才写 store，防跨账号数据泄漏 */
 let storeEpoch = 0
+
+/** 构建好友详情请求去重 key */
+function getPendingFriendInfoKey(userId: number, friendUserId: number): string {
+  return `${userId}:${friendUserId}`
+}
 
 /** 好友通知 payload（对齐后端 BaseFriendNotification + 子类裁减后的字段） */
 export interface FriendNotificationPayload {
@@ -303,19 +310,35 @@ export const useFriendStore = defineStore('imFriendStore', {
     async fetchFriendInfo(friendUserId: number) {
       const requestEpoch = storeEpoch
       const requestUserId = getCurrentUserId()
-      try {
-        const data = await apiGetFriend(friendUserId)
-        if (!data) {
-          return
-        }
-        // clear() 已切账号：旧请求的好友详情不能再 upsert 进新账号的 friends
-        if (requestEpoch !== storeEpoch || getCurrentUserId() !== requestUserId) {
-          return
-        }
-        this.upsertFriend(convertFriend(data))
-      } catch (e) {
-        console.warn('[IM friendStore] fetchFriendInfo 失败', e)
+      if (!requestUserId) {
+        return
       }
+      const key = getPendingFriendInfoKey(requestUserId, friendUserId)
+      const inflight = pendingFetchFriendInfos.get(key)
+      if (inflight) {
+        return inflight
+      }
+      const promise = (async () => {
+        try {
+          const data = await apiGetFriend(friendUserId)
+          if (!data) {
+            return
+          }
+          // clear() 已切账号：旧请求的好友详情不能再 upsert 进新账号的 friends
+          if (requestEpoch !== storeEpoch || getCurrentUserId() !== requestUserId) {
+            return
+          }
+          this.upsertFriend(convertFriend(data))
+        } catch (e) {
+          console.warn('[IM friendStore] fetchFriendInfo 失败', e)
+        }
+      })().finally(() => {
+        if (pendingFetchFriendInfos.get(key) === promise) {
+          pendingFetchFriendInfos.delete(key)
+        }
+      })
+      pendingFetchFriendInfos.set(key, promise)
+      return promise
     },
 
     // ==================== 申请-审批 ====================
@@ -707,6 +730,9 @@ export const useFriendStore = defineStore('imFriendStore', {
      * 本端真正的「对端」是帧上的另一个用户，不是 payload.friendUserId（payload 里固定是 toUserId）。
      */
     applyFriendAddNotification(_payload: FriendNotificationPayload, peerUserId: number) {
+      if (this.isActiveFriend(peerUserId)) {
+        return
+      }
       void this.fetchFriendInfo(peerUserId)
     },
 
@@ -773,6 +799,7 @@ export const useFriendStore = defineStore('imFriendStore', {
       pendingFetchFriends = null
       pendingFetchRequests = null
       pendingLoadMoreRequests = null
+      pendingFetchFriendInfos.clear()
       storeEpoch++
     }
   }

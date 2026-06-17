@@ -137,7 +137,7 @@ function deriveLastSenderDisplayName(
   if (conversation.type === ImConversationType.GROUP) {
     const groupStore = useGroupStore()
     const group = groupStore.getGroup(conversation.targetId)
-    if (isGroupQuit(group)) {
+    if (!group || isGroupQuit(group)) {
       return conversation.lastSenderId === senderId ? conversation.lastSenderDisplayName : undefined
     }
     const fetchPromise =
@@ -501,24 +501,12 @@ export const useMessageStore = defineStore('imMessageStore', {
         const { conversationInfo } = pulledMessage
         const hasServerClientMessageId = !!pulledMessage.message.clientMessageId
         const message = ensureClientMessageId(pulledMessage.message)
-        // 1.2 群通知先同步群资料
-        if (
-          conversationInfo.type === ImConversationType.GROUP &&
-          isGroupNotification(message.type)
-        ) {
-          useGroupStore().applyGroupNotification(
-            conversationInfo.targetId,
-            message.type,
-            message.content
-          )
-        }
-
-        // 1.3 确保会话和消息缓存存在
+        // 1.2 确保会话和消息缓存存在
         const conversation = conversationStore.ensureConversation(conversationInfo)
         const messages = this.getMessageList(conversationInfo.type, conversationInfo.targetId)
         const existingIndex = messages.findIndex((existing) => isSameMessage(existing, message))
         if (existingIndex >= 0) {
-          // 1.4 已存在消息合并服务端状态
+          // 1.3 已存在消息合并服务端状态
           applyServerMessageUpdate(messages[existingIndex], message)
           if (existingIndex === messages.length - 1) {
             recomputeConversationLast(conversation, messages)
@@ -530,7 +518,7 @@ export const useMessageStore = defineStore('imMessageStore', {
           continue
         }
 
-        // 1.5 新消息更新会话摘要和未读状态
+        // 1.4 新消息更新会话摘要和未读状态
         applyConversationSummary(conversation, message)
         syncConversationAtFlags(conversation, message)
         const isActive =
@@ -545,7 +533,7 @@ export const useMessageStore = defineStore('imMessageStore', {
           conversation.unreadCount++
         }
 
-        // 1.6 新消息按服务端 id 插入内存列表
+        // 1.5 新消息按服务端 id 插入内存列表
         let insertIndex = messages.length
         if (message.id) {
           for (let index = 0; index < messages.length; index++) {
