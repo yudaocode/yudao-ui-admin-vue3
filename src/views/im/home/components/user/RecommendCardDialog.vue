@@ -119,7 +119,7 @@ import { ImConversationType, ImContentType, isGroupConversation } from '../../..
 import { getConversationKey } from '../../../utils/conversation'
 import { buildDefaultGroupName } from '../../../utils/group'
 import { serializeMessage, type CardTarget } from '../../../utils/message'
-import { isGroupQuit } from '../../../utils/user'
+import { getGroupDisplayName, isGroupQuit } from '../../../utils/user'
 import type { Conversation, FriendLite } from '../../types'
 
 defineOptions({ name: 'ImRecommendCardDialog' })
@@ -283,7 +283,7 @@ async function handleCreateGroupAndSend() {
     const newConversation: Conversation = {
       type: ImConversationType.GROUP,
       targetId: group.id,
-      name: group.name || name,
+      name: getGroupDisplayName(group) || name,
       avatar: group.avatar || '',
       unreadCount: 0,
       lastContent: '',

@@ -227,7 +227,7 @@ export const useGroupStore = defineStore('imGroupStore', {
         return
       }
       const fresh = (list || []).map((group) => convertGroup(group))
-      // 合并而非全量替换：silent / groupRemark / 成员缓存这些字段不在 ImGroupRespVO 里，得从旧 group 保留
+      // 合并而非全量替换：成员缓存只在成员列表接口维护，群个人设置以群列表接口为准
       const groupMap = new Map(this.groups.map((group) => [group.id, group]))
       this.groups = fresh.map((group) => {
         const existing = groupMap.get(group.id)
@@ -238,8 +238,6 @@ export const useGroupStore = defineStore('imGroupStore', {
           ...group,
           members: existing.members,
           memberCount: existing.memberCount ?? group.memberCount,
-          silent: existing.silent ?? group.silent,
-          groupRemark: existing.groupRemark,
           membersLoaded: existing.membersLoaded,
           membersExpired: existing.membersExpired
         }
@@ -254,6 +252,24 @@ export const useGroupStore = defineStore('imGroupStore', {
         })
       }
       this.saveGroupList()
+      this.preloadMembersForEmptyAvatarGroups()
+    },
+
+    /** 预加载空群头像的成员列表，供 GroupAvatar 异步合成群头像 */
+    preloadMembersForEmptyAvatarGroups() {
+      for (const group of this.groups) {
+        if (
+          group.avatar ||
+          group.joinStatus === CommonStatusEnum.DISABLE ||
+          (group.membersLoaded && !group.membersExpired && group.members?.length)
+        ) {
+          continue
+        }
+        const force = !!group.membersLoaded && !group.membersExpired && !group.members?.length
+        this.fetchGroupMemberList(group.id, force).catch((error) => {
+          console.warn('[IM groupStore] 预加载群头像成员失败', { groupId: group.id }, error)
+        })
+      }
     },
 
     /** 失效全部群成员缓存 */
@@ -892,7 +908,9 @@ function convertGroup(group: ImGroupRespVO): Group {
     mutedAll: group.mutedAll,
     banned: group.banned,
     joinApproval: group.joinApproval,
-    joinStatus: group.joinStatus
+    joinStatus: group.joinStatus,
+    groupRemark: group.groupRemark,
+    silent: group.silent
   }
 }
 

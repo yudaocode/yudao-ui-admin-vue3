@@ -85,9 +85,9 @@
               />
               <div class="flex justify-end gap-2">
                 <el-button size="small" @click="displayNamePopoverVisible = false">取消</el-button>
-                <el-button size="small" type="primary" @click="handleSaveDisplayName"
-                  >保存</el-button
-                >
+                <el-button size="small" type="primary" @click="handleSaveDisplayName">
+                  保存
+                </el-button>
               </div>
             </div>
           </el-popover>
@@ -141,7 +141,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
-import { getFriendDisplayName } from '@/views/im/utils/user'
+import { getFriendDisplayName, getGroupDisplayName } from '@/views/im/utils/user'
 import { ImConversationType } from '@/views/im/utils/constants'
 import type { Conversation, Friend } from '../../../../types'
 
@@ -248,7 +248,7 @@ function handleGroupCreated(groupId: number) {
   conversationStore.openConversation(
     groupId,
     ImConversationType.GROUP,
-    group.name,
+    getGroupDisplayName(group),
     group.avatar || '',
     { silent: !!group.silent }
   )

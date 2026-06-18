@@ -154,7 +154,7 @@ import FacePicker from '../../input/FacePicker.vue'
 import { useConversationStore } from '@/views/im/home/store/conversationStore'
 import { useFriendStore } from '@/views/im/home/store/friendStore'
 import { useGroupStore } from '@/views/im/home/store/groupStore'
-import { isGroupQuit } from '@/views/im/utils/user'
+import { getGroupDisplayName, isGroupQuit } from '@/views/im/utils/user'
 import { useMessageSender } from '@/views/im/home/composables/useMessageSender'
 import { useMessageMultiSelect } from '@/views/im/home/composables/useMessageMultiSelect'
 import {
@@ -406,7 +406,7 @@ async function handleCreateGroupAndSend() {
     const newConversation: Conversation = {
       type: ImConversationType.GROUP,
       targetId: group.id,
-      name: group.name || name,
+      name: getGroupDisplayName(group) || name,
       avatar: group.avatar || '',
       unreadCount: 0,
       lastContent: '',

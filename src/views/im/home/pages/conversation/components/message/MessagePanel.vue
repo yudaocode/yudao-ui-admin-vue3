@@ -260,6 +260,7 @@ import { ImRtcCallMediaType, ImRtcCallStatus, ImConversationType } from '@/views
 import { resolveCallEndReasonText } from '@/views/im/utils/message'
 import { getClientConversationId } from '@/views/im/utils/db'
 import { getCurrentUserId } from '@/utils/auth'
+import { getGroupDisplayName } from '@/views/im/utils/user'
 import { useRtcStore } from '../../../../store/rtcStore'
 import { useMessageStore } from '../../../../store/messageStore'
 
@@ -405,10 +406,11 @@ const groupInfo = computed<
   }
   const group = groupStore.getGroup(conversation.targetId)
   const selfMember = group?.members?.find((member) => member.userId === getCurrentUserId())
+  const showGroupName = group ? getGroupDisplayName(group) : conversation.name
   return {
     id: conversation.targetId,
     name: group?.name || conversation.name,
-    showGroupName: group?.name || conversation.name,
+    showGroupName,
     showImage: group?.avatar || conversation.avatar,
     notice: group?.notice,
     remarkNickName: selfMember?.displayUserName,

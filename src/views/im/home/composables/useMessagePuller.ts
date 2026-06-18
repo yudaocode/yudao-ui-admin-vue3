@@ -3,7 +3,7 @@ import { useConversationStore } from '../store/conversationStore'
 import { useMessageStore, type PulledMessage } from '../store/messageStore'
 import { useImWebSocketStore } from '../store/websocketStore'
 import { useFriendStore } from '../store/friendStore'
-import { getFriendDisplayName } from '../../utils/user'
+import { getFriendDisplayName, getGroupDisplayName } from '../../utils/user'
 import { useGroupStore } from '../store/groupStore'
 import { useGroupRequestStore } from '../store/groupRequestStore'
 import {
@@ -149,7 +149,7 @@ export const useMessagePuller = () => {
     return {
       type: ImConversationType.GROUP,
       targetId: message.groupId,
-      name: group?.name || String(message.groupId),
+      name: group ? getGroupDisplayName(group) : String(message.groupId),
       avatar: group?.avatar || '',
       silent: group?.silent
     }

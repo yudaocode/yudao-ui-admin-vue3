@@ -104,6 +104,7 @@ import { useImUiStore } from '../../store/uiStore'
 import { ImConversationType } from '../../../utils/constants'
 import { StorageKeys } from '../../../utils/db'
 import { filterConversationsByKeyword, getConversationKey } from '../../../utils/conversation'
+import { getGroupDisplayName } from '../../../utils/user'
 import type { Conversation } from '../../types'
 import ResizableAside from '../../components/ResizableAside.vue'
 import ConversationItem from './components/conversation/ConversationItem.vue'
@@ -220,7 +221,7 @@ function handleGroupCreated(groupId: number) {
   conversationStore.openConversation(
     groupId,
     ImConversationType.GROUP,
-    group.name,
+    getGroupDisplayName(group),
     group.avatar || '',
     { silent: !!group.silent }
   )

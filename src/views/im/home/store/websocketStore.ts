@@ -30,7 +30,7 @@ import {
 import { useConversationStore } from './conversationStore'
 import { useMessageStore } from './messageStore'
 import { useFriendStore, type FriendNotificationPayload } from './friendStore'
-import { getFriendDisplayName } from '../../utils/user'
+import { getFriendDisplayName, getGroupDisplayName } from '../../utils/user'
 import { useGroupStore } from './groupStore'
 import { useGroupRequestStore } from './groupRequestStore'
 import {
@@ -732,7 +732,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         {
           type: ImConversationType.GROUP,
           targetId: websocketMessage.groupId,
-          name: group?.name || String(websocketMessage.groupId),
+          name: group ? getGroupDisplayName(group) : String(websocketMessage.groupId),
           avatar: group?.avatar || '',
           silent: group?.silent
         },
