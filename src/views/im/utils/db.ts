@@ -202,7 +202,25 @@ function guardSession(session: number) {
 
 /** 克隆可入库对象 */
 function toDbValue<T>(value: T): T {
-  return toRaw(value) as T
+  return cloneDbValue(value) as T
+}
+
+/** 转换为 IndexedDB 可克隆对象 */
+function cloneDbValue(value: unknown): unknown {
+  const raw = toRaw(value)
+  if (Array.isArray(raw)) {
+    return raw.map((item) => cloneDbValue(item))
+  }
+  if (!raw || typeof raw !== 'object') {
+    return raw
+  }
+  const prototype = Object.getPrototypeOf(raw)
+  if (prototype !== Object.prototype && prototype !== null) {
+    return raw
+  }
+  return Object.fromEntries(
+    Object.entries(raw as Record<string, unknown>).map(([key, item]) => [key, cloneDbValue(item)])
+  )
 }
 
 class DbClient {
