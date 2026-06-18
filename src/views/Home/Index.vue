@@ -73,7 +73,7 @@
           </div>
         </template>
         <el-skeleton :loading="loading" animated>
-          <el-row>
+          <el-row :gutter="8" class="gap-y-8px">
             <el-col
               v-for="(item, index) in projects"
               :key="`card-${index}`"
@@ -82,25 +82,38 @@
               :md="8"
               :sm="24"
               :xs="24"
+              class="!flex"
             >
               <el-card
                 shadow="hover"
-                class="mr-5px mt-5px cursor-pointer"
+                class="flex-1 cursor-pointer"
+                body-class="flex h-full flex-col"
                 @click="handleProjectClick(item.message)"
               >
                 <div class="flex items-center">
                   <Icon
                     :icon="item.icon"
                     :size="25"
-                    class="mr-8px"
+                    class="mr-8px flex-none"
                     :style="{ color: item.color }"
                   />
-                  <span class="text-16px">{{ item.name }}</span>
+                  <span class="min-w-0 line-clamp-2 text-16px" :title="item.name">{{
+                    item.name
+                  }}</span>
                 </div>
-                <div class="mt-12px text-12px text-gray-400">{{ t(item.message) }}</div>
-                <div class="mt-12px flex justify-between text-12px text-gray-400">
-                  <span>{{ item.personal }}</span>
-                  <span>{{ formatTime(item.time, 'yyyy-MM-dd') }}</span>
+                <div
+                  class="mt-12px break-all line-clamp-2 text-12px text-gray-400"
+                  :title="t(item.message)"
+                >
+                  {{ t(item.message) }}
+                </div>
+                <div
+                  class="mt-auto flex items-center justify-between gap-8px pt-12px text-12px text-gray-400"
+                >
+                  <span class="min-w-0 truncate" :title="item.personal">{{ item.personal }}</span>
+                  <span class="shrink-0 whitespace-nowrap">
+                    {{ formatTime(item.time, 'yyyy-MM-dd') }}
+                  </span>
                 </div>
               </el-card>
             </el-col>
