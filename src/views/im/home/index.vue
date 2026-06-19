@@ -41,6 +41,7 @@ import { useGroupStore } from './store/groupStore'
 import { useGroupRequestStore } from './store/groupRequestStore'
 import { useFaceStore } from './store/faceStore'
 import { useChannelStore } from './store/channelStore'
+import { useRtcStore } from './store/rtcStore'
 import { useMessagePuller } from './composables/useMessagePuller'
 import { useMessageSender } from './composables/useMessageSender'
 import { useVoicePlayer } from './composables/useVoicePlayer'
@@ -65,6 +66,7 @@ const groupStore = useGroupStore()
 const groupRequestStore = useGroupRequestStore()
 const faceStore = useFaceStore()
 const channelStore = useChannelStore()
+const rtcStore = useRtcStore()
 const { pullOnce, cancelPull } = useMessagePuller()
 const { readActive, syncPrivateReadStatus } = useMessageSender()
 const voicePlayer = useVoicePlayer()
@@ -173,10 +175,12 @@ function onBeforeUnload() {
 }
 window.addEventListener('beforeunload', onBeforeUnload)
 
-/** 离开 IM 主壳：取消在飞的 pull + 主动断 WebSocket + flush 草稿 + 清空表情缓存 + 解绑 unload + 停语音 */
+/** 离开 IM 主壳：取消 pull、断开 WebSocket、清理 RTC、保存草稿、停止语音、解绑 unload，并结束当前 IM session */
 onUnmounted(() => {
   cancelPull()
   webSocketStore.disconnect()
+  rtcStore.reset()
+  rtcStore.clearGroupCallCache()
   conversationStore.flushConversationDraftSave()
   faceStore.clear()
   // 模块级单例 audio 不会随视图卸载自动停，主动停掉避免切路由后语音继续响

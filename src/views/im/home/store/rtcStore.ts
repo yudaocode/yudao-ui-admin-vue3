@@ -14,6 +14,10 @@ import { getCurrentUserId } from '@/utils/auth'
 import { useFriendStore } from './friendStore'
 import { useGroupStore } from './groupStore'
 
+type GroupActiveCallCache = ImRtcGroupCallRespVO & {
+  participantsLoaded?: boolean // 是否已拉取完整参与者列表
+}
+
 // RTC_CALL 通话信令载荷；按 status 区分子类型语义
 export interface ImRtcCallNotification {
   status: ImRtcParticipantStatusValue
@@ -118,7 +122,7 @@ export const useRtcStore = defineStore('imRtc', () => {
   }
 
   /** 群活跃通话索引；groupId -> 群通话摘要；用于群聊顶部胶囊条 */
-  const groupActiveCalls = ref<Map<number, ImRtcGroupCallRespVO>>(new Map())
+  const groupActiveCalls = ref<Map<number, GroupActiveCallCache>>(new Map())
 
   /**
    * 已退出 / 已拒绝的用户编号集合；群通话场景内 pending 占位渲染时排除；
@@ -249,18 +253,49 @@ export const useRtcStore = defineStore('imRtc', () => {
    * 房内成员同步交给 LiveKit 客户端事件（ParticipantConnected / Disconnected）；
    * 胶囊条不实时刷新 joinedUserIds / inviteeIds，展开 / 加入时再走 getActiveCall 接口拉最新
    */
-  function setGroupCall(payload: ImRtcGroupCallRespVO) {
+  function setGroupCall(payload: ImRtcGroupCallRespVO, participantsLoaded?: boolean) {
     if (!payload?.groupId) {
       return
     }
     // 浅比较：room / mediaType / joinedUserIds / inviteeIds 都没变就跳过，避免下游 watcher 无意义重算
     const existing = groupActiveCalls.value.get(payload.groupId)
-    if (existing && isSameGroupCall(existing, payload)) {
+    const nextParticipantsLoaded = participantsLoaded ?? !!existing?.participantsLoaded
+    if (
+      existing &&
+      isSameGroupCall(existing, payload) &&
+      !!existing.participantsLoaded === nextParticipantsLoaded
+    ) {
       return
     }
     const newGroupActiveCalls = new Map(groupActiveCalls.value)
-    newGroupActiveCalls.set(payload.groupId, payload)
+    newGroupActiveCalls.set(payload.groupId, {
+      ...payload,
+      participantsLoaded: nextParticipantsLoaded
+    })
     groupActiveCalls.value = newGroupActiveCalls
+  }
+
+  /** 清空指定群的通话缓存 */
+  function clearGroupCallCache(groupId?: number) {
+    if (!groupId) {
+      groupActiveCalls.value = new Map()
+      return
+    }
+    const next = new Map(groupActiveCalls.value)
+    next.delete(groupId)
+    groupActiveCalls.value = next
+  }
+
+  /** 判断群通话是否已补齐 */
+  function isGroupCallParticipantsLoaded(groupId: number, room?: string): boolean {
+    const call = groupActiveCalls.value.get(groupId)
+    return (
+      !!groupId &&
+      !!room &&
+      !!call &&
+      call.room === room &&
+      !!call.participantsLoaded
+    )
   }
 
   /** 两条群通话摘要内容相等（room / mediaType / inviterId / 两个 userId 数组逐项相等） */
@@ -274,12 +309,10 @@ export const useRtcStore = defineStore('imRtc', () => {
 
   /** 群通话结束：从 groupActiveCalls 移除；胶囊条消失 */
   function removeGroupCall(groupId: number) {
-    if (!groupId || !groupActiveCalls.value.has(groupId)) {
+    if (!groupId) {
       return
     }
-    const newGroupActiveCalls = new Map(groupActiveCalls.value)
-    newGroupActiveCalls.delete(groupId)
-    groupActiveCalls.value = newGroupActiveCalls
+    clearGroupCallCache(groupId)
   }
 
   /** 获取群当前活跃通话；用于胶囊条按 groupId 查询 */
@@ -360,6 +393,10 @@ export const useRtcStore = defineStore('imRtc', () => {
     if (nextJoined.length === joined.length && nextInvitee.length === invitee.length) {
       return
     }
+    if (nextJoined.length === 0 && nextInvitee.length === 0) {
+      removeGroupCall(groupId)
+      return
+    }
     setGroupCall({
       ...existing,
       joinedUserIds: nextJoined,
@@ -385,6 +422,8 @@ export const useRtcStore = defineStore('imRtc', () => {
     setGroupCall,
     removeGroupCall,
     getGroupCall,
+    isGroupCallParticipantsLoaded,
+    clearGroupCallCache,
     applyParticipantConnected,
     applyParticipantDisconnected,
     applyParticipantRejected,

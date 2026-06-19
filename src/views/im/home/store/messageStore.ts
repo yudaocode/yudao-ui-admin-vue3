@@ -241,6 +241,7 @@ export const useMessageStore = defineStore('imMessageStore', {
   state: () => ({
     messagesByConversation: {} as Record<string, Message[]>,
     loadedConversationKeys: [] as string[],
+    privateReadMaxIds: {} as Partial<Record<number, number>>,
     privateMessageMaxId: 0,
     groupMessageMaxId: 0,
     channelMessageMaxId: 0
@@ -265,6 +266,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       })
       this.messagesByConversation = {}
       this.loadedConversationKeys = []
+      this.privateReadMaxIds = {}
       this.privateMessageMaxId = 0
       this.groupMessageMaxId = 0
       this.channelMessageMaxId = 0
@@ -302,6 +304,30 @@ export const useMessageStore = defineStore('imMessageStore', {
       ) {
         this.channelMessageMaxId = messageId
       }
+    },
+
+    /** 获取私聊对方已读位置缓存 */
+    getPrivateReadMaxId(peerId: number): number | undefined {
+      return this.privateReadMaxIds[peerId]
+    },
+
+    /** 更新私聊对方已读位置缓存 */
+    updatePrivateReadMaxId(peerId: number, maxReadId?: number | null): number {
+      if (!peerId) {
+        return 0
+      }
+      const nextMaxReadId = maxReadId || 0
+      const current = this.getPrivateReadMaxId(peerId)
+      if (current !== undefined && nextMaxReadId <= current) {
+        return current
+      }
+      this.privateReadMaxIds = { ...this.privateReadMaxIds, [peerId]: nextMaxReadId }
+      return nextMaxReadId
+    },
+
+    /** 清空私聊对方已读位置缓存 */
+    clearPrivateReadMaxIdCache(): void {
+      this.privateReadMaxIds = {}
     },
 
     /** 标记会话近期使用 */
@@ -790,6 +816,7 @@ export const useMessageStore = defineStore('imMessageStore', {
       const changed: Message[] = []
       // 1. 私聊回执批量更新自己发送的消息
       if (options.conversationType === ImConversationType.PRIVATE && options.privateReadMaxId) {
+        this.updatePrivateReadMaxId(options.targetId, options.privateReadMaxId)
         messages.forEach((message) => {
           if (
             message.selfSend &&

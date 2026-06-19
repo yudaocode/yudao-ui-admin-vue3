@@ -17,6 +17,7 @@ import {
 } from '../../utils/constants'
 import {
   getPrivateMessagePeerId,
+  parseRtcCallPayload,
   playAudioTip,
   resolveCallEndReasonText
 } from '../../utils/message'
@@ -424,14 +425,31 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       )
       if (isActive) {
         // 窗口打开 = 已读：本端清未读 + 上报服务端读位置，避免读位置滞后
-        conversationStore.markConversationRead(
+        const readCovered = conversationStore.isReadPositionCovered(
           ImConversationType.CHANNEL,
           websocketMessage.channelId,
           websocketMessage.id
         )
-        apiReadChannelMessages(websocketMessage.channelId, websocketMessage.id).catch((e) => {
-          console.warn('[IM WS] 频道自动已读上报失败', e)
-        })
+        conversationStore.markConversationRead(
+          ImConversationType.CHANNEL,
+          websocketMessage.channelId,
+          readCovered ? undefined : websocketMessage.id
+        )
+        if (!readCovered) {
+          apiReadChannelMessages(websocketMessage.channelId, websocketMessage.id)
+            .catch((e) => {
+              console.warn(
+                '[IM WS] 频道自动已读上报失败',
+                {
+                  conversationType: ImConversationType.CHANNEL,
+                  channelId: websocketMessage.channelId,
+                  messageId: websocketMessage.id,
+                  messageType: websocketMessage.type
+                },
+                e
+              )
+            })
+        }
       } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
         // 非当前会话且未免打扰：响一下提示音
         playAudioTip()
@@ -515,7 +533,8 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
             this.handleGroupMemberNicknameUpdate(websocketMessage)
             break
           case ImContentType.RTC_CALL_START:
-            // 入库 + 渲染聊天 tip；胶囊条状态走 1602/1603，本帧不动 rtcStore，避免与首次填充竞争
+            // 入库 + 渲染聊天 tip；同时用 START payload 先生成最小胶囊条，后续 getActiveCall / 参与者事件再补齐成员
+            this.handleRtcCallStart(websocketMessage)
             ignoreRealtimePersistError(this.handleGroupMessage(websocketMessage))
             break
           case ImContentType.RTC_CALL_END:
@@ -611,15 +630,31 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
         if (isActive) {
           // 聊天窗口打开 = 实际看到了：本端清未读；私聊已读开启时再上报后端，让对方 UI 立刻切到"已读"
           // 已读位置直接用刚到的消息 id（这条就是当前会话最大 id）
-          conversationStore.markConversationRead(
+          const readCovered = conversationStore.isReadPositionCovered(
             ImConversationType.PRIVATE,
             peerId,
             websocketMessage.id
           )
-          if (MESSAGE_PRIVATE_READ_ENABLED) {
-            apiReadPrivateMessages(peerId, websocketMessage.id).catch((e) => {
-              console.warn('[IM WS] 自动已读上报失败', e)
-            })
+          conversationStore.markConversationRead(
+            ImConversationType.PRIVATE,
+            peerId,
+            readCovered ? undefined : websocketMessage.id
+          )
+          if (MESSAGE_PRIVATE_READ_ENABLED && !readCovered) {
+            apiReadPrivateMessages(peerId, websocketMessage.id)
+              .catch((e) => {
+                console.warn(
+                  '[IM WS] 私聊自动已读上报失败',
+                  {
+                    conversationType: ImConversationType.PRIVATE,
+                    peerId,
+                    messageId: websocketMessage.id,
+                    messageType: websocketMessage.type,
+                    senderId: websocketMessage.senderId
+                  },
+                  e
+                )
+              })
           }
         } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
           // 非当前会话且未免打扰：响一下提示音（带节流，详见 playAudioTip）；FRIEND_* 等系统事件不响
@@ -713,7 +748,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       // 2. 未知群时自动拉群详情 + 成员（被拉入群但还没收到 GROUP_CREATE 时的兜底）
       const group = groupStore.getGroup(websocketMessage.groupId)
       if (!group) {
-        groupStore.fetchGroupInfo(websocketMessage.groupId).catch(() => undefined)
+        groupStore.fetchGroupInfo(websocketMessage.groupId, true).catch(() => undefined)
       }
 
       // 3. 后端撤回：下发一条 RECALL 消息，content 为 `{"messageId": xxx}`
@@ -750,15 +785,31 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           conversationStore.activeConversation?.targetId === websocketMessage.groupId
         if (isActive) {
           // 群已读上报需要带 messageId（群消息以"读到第几条"的游标为准，区别于私聊只标 receiverId）；群已读关闭时仅本地清零
-          conversationStore.markConversationRead(
+          const readCovered = conversationStore.isReadPositionCovered(
             ImConversationType.GROUP,
             websocketMessage.groupId,
             websocketMessage.id
           )
-          if (MESSAGE_GROUP_READ_ENABLED) {
-            apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id).catch((e) => {
-              console.warn('[IM WS] 自动已读上报失败', e)
-            })
+          conversationStore.markConversationRead(
+            ImConversationType.GROUP,
+            websocketMessage.groupId,
+            readCovered ? undefined : websocketMessage.id
+          )
+          if (MESSAGE_GROUP_READ_ENABLED && !readCovered) {
+            apiReadGroupMessages(websocketMessage.groupId, websocketMessage.id)
+              .catch((e) => {
+                console.warn(
+                  '[IM WS] 群聊自动已读上报失败',
+                  {
+                    conversationType: ImConversationType.GROUP,
+                    groupId: websocketMessage.groupId,
+                    messageId: websocketMessage.id,
+                    messageType: websocketMessage.type,
+                    senderId: websocketMessage.senderId
+                  },
+                  e
+                )
+              })
           }
         } else if (!conversation?.silent && isNormalMessage(websocketMessage.type)) {
           // GROUP_* 群广播事件等系统消息不响提示音
@@ -1061,6 +1112,27 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
           }
         }
       }
+    },
+
+    /** RTC_CALL_START 通话开始 */
+    handleRtcCallStart(websocketMessage: ImGroupMessageNotification) {
+      const payload = parseRtcCallPayload(websocketMessage.content)
+      if (!payload?.room || !payload.mediaType || !payload.inviterUserId) {
+        console.warn('[IM WS] RTC_CALL_START payload 不合法', {
+          groupId: websocketMessage.groupId,
+          messageId: websocketMessage.id,
+          contentLength: websocketMessage.content?.length ?? 0
+        })
+        return
+      }
+      useRtcStore().setGroupCall({
+        room: payload.room,
+        groupId: websocketMessage.groupId,
+        mediaType: payload.mediaType,
+        inviterId: payload.inviterUserId,
+        joinedUserIds: [payload.inviterUserId],
+        inviteeIds: []
+      })
     },
 
     /**

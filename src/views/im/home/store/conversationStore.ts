@@ -30,6 +30,20 @@ const pendingDraftConversations = new Set<Conversation>()
 
 type LegacyConversationDO = ConversationDO & { readMessageId?: number }
 
+/** 创建会话读位置记录 */
+function createConversationRead(
+  type: number,
+  targetId: number,
+  messageId: number
+): ConversationRead {
+  return {
+    conversationType: type,
+    targetId,
+    messageId,
+    updateTime: Date.now()
+  }
+}
+
 /** 会话转 IndexedDB 记录 */
 function toConversationDO(conversation: Conversation): ConversationDO {
   const draft = conversation.draft
@@ -300,6 +314,15 @@ export const useConversationStore = defineStore('imConversationStore', {
       }
       const record = this.getConversationRead(conversation.type, conversation.targetId)
       return !!record && message.id <= record.messageId
+    },
+
+    /** 判断会话读位置是否覆盖消息编号 */
+    isReadPositionCovered(type: number, targetId: number, messageId?: number): boolean {
+      if (!messageId) {
+        return false
+      }
+      const record = this.getConversationRead(type, targetId)
+      return !!record && record.messageId >= messageId
     },
 
     /** 应用读位置到会话 */
@@ -652,7 +675,7 @@ export const useConversationStore = defineStore('imConversationStore', {
     },
 
     /** 标记会话已读 */
-    markConversationRead(type: number, targetId: number, messageId?: number) {
+    markConversationRead(type: number, targetId: number, messageId?: number): void {
       const conversation = this.getConversation(type, targetId)
       if (!conversation) {
         return
@@ -672,19 +695,25 @@ export const useConversationStore = defineStore('imConversationStore', {
       conversation.atMe = false
       conversation.atAll = false
       if (readMessageIdAdvanced) {
-        const record = {
-          conversationType: type,
-          targetId,
-          messageId,
-          updateTime: Date.now()
-        }
+        const record = createConversationRead(type, targetId, messageId)
         this.conversationReads[key] = record
         void getDb()
           .transaction(['conversations', 'conversationReads'], 'readwrite', async (tx) => {
             await this.saveConversationRecord(conversation, tx)
             await this.saveConversationReadRecord(record, tx)
           })
-          .catch((e) => console.warn('[IM conversationStore] 会话已读写入失败', e))
+          .catch((e) =>
+            console.warn(
+              '[IM conversationStore] 会话已读写入失败',
+              {
+                conversationType: type,
+                targetId,
+                messageId,
+                conversationKey: key
+              },
+              e
+            )
+        )
         return
       }
       this.saveConversation(conversation)

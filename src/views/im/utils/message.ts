@@ -677,6 +677,8 @@ export type GroupNotificationPayload = {
   newNotice?: string
   oldAvatar?: string
   newAvatar?: string
+  oldJoinApproval?: boolean
+  newJoinApproval?: boolean
   displayUserName?: string
   messageId?: number
   // 禁言事件

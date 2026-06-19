@@ -51,6 +51,7 @@ const pendingSingleMemberKey = (userId: number, groupId: number, memberUserId: n
 /** 构建群 IndexedDB 记录 */
 function buildGroupDO(group: Group): GroupDO {
   const {
+    infoLoaded: _infoLoaded,
     members: _members,
     membersLoaded: _membersLoaded,
     membersExpired: _membersExpired,
@@ -232,10 +233,11 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.groups = fresh.map((group) => {
         const existing = groupMap.get(group.id)
         if (!existing) {
-          return group
+          return { ...group, infoLoaded: true }
         }
         return {
           ...group,
+          infoLoaded: true,
           members: existing.members,
           memberCount: existing.memberCount ?? group.memberCount,
           membersLoaded: existing.membersLoaded,
@@ -272,6 +274,13 @@ export const useGroupStore = defineStore('imGroupStore', {
       }
     },
 
+    /** 失效全部群详情缓存 */
+    markAllGroupInfoExpired() {
+      for (const group of this.groups) {
+        group.infoLoaded = false
+      }
+    },
+
     /** 失效全部群成员缓存 */
     markAllGroupMembersExpired() {
       this.groupMembersExpired = true
@@ -291,13 +300,17 @@ export const useGroupStore = defineStore('imGroupStore', {
     },
 
     /** 单群刷新：用 /im/group/get 拉一份最新元数据再 upsert，常用于 GROUP_UPDATE 推送后或手动 reload */
-    async fetchGroupInfo(groupId: number) {
+    async fetchGroupInfo(groupId: number, force = false) {
+      const cached = this.getGroup(groupId)
+      if (cached?.infoLoaded && !force) {
+        return
+      }
       try {
         const data = await apiGetGroup(groupId)
         if (!data) {
           return
         }
-        this.upsertGroup(convertGroup(data))
+        this.upsertGroup({ ...convertGroup(data), infoLoaded: true })
       } catch (e) {
         console.warn('[IM groupStore] fetchGroupInfo 失败', e)
       }
@@ -709,7 +722,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       if (selfIsOperator && this.getGroup(groupId)) {
         return
       }
-      await this.fetchGroupInfo(groupId)
+      await this.fetchGroupInfo(groupId, true)
     },
 
     /** 群名变更：按 newName 局部更新本地群名 */
@@ -724,11 +737,14 @@ export const useGroupStore = defineStore('imGroupStore', {
       this.updateGroupFields(groupId, { notice: payload.newNotice ?? '' })
     },
 
-    /** 群信息变更（NAME / NOTICE 之外字段，当前承载头像变更） */
+    /** 群信息变更：同步头像、进群审批 */
     applyGroupInfoUpdateNotification(groupId: number, payload: GroupNotificationPayload) {
       const fields: Partial<Group> = {}
       if (payload.newAvatar) {
         fields.avatar = payload.newAvatar
+      }
+      if (payload.newJoinApproval != null) {
+        fields.joinApproval = payload.newJoinApproval
       }
       if (Object.keys(fields).length > 0) {
         this.updateGroupFields(groupId, fields)
@@ -739,7 +755,7 @@ export const useGroupStore = defineStore('imGroupStore', {
     async applyGroupMemberInviteNotification(groupId: number, payload: GroupNotificationPayload) {
       // 自己刚被拉进来：必须 await fetchGroupInfo 让群入 state.groups，否则 fetchGroupMemberList 的 guard 会兜空
       if (isSelfInPayloadMembers(payload) && !this.getGroup(groupId)) {
-        await this.fetchGroupInfo(groupId)
+        await this.fetchGroupInfo(groupId, true)
       }
       this.markGroupMembersExpired(groupId)
       this.fetchGroupMemberList(groupId, true).catch(() => undefined)
@@ -750,7 +766,7 @@ export const useGroupStore = defineStore('imGroupStore', {
       const selfUserId = getCurrentUserId()
       // 自己自由进群：必须 await fetchGroupInfo 让群入 state.groups，否则 fetchGroupMemberList 的 guard 会兜空
       if (selfUserId && payload.entrantUserId === selfUserId && !this.getGroup(groupId)) {
-        await this.fetchGroupInfo(groupId)
+        await this.fetchGroupInfo(groupId, true)
       }
       this.markGroupMembersExpired(groupId)
       this.fetchGroupMemberList(groupId, true).catch(() => undefined)

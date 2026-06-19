@@ -55,7 +55,7 @@ interface SendExtOptions {
  * 1. 私聊 / 群聊接口签名对称，按 conversation.type 分支调度，差异在分支内部消化
  * 2. 发送走「乐观更新」：先 insertMessage 写入 SENDING 占位，请求成功 ackMessage 更新为 NORMAL，失败更新为 FAILED
  * 3. 撤回不做乐观更新：服务端通过 WebSocket RECALL 事件回传，由 websocketStore 统一更新状态，避免网络失败后不可回退
- * 4. 已读上报：本端立刻清未读数；服务端回包成功后再做持久化
+ * 4. 已读上报：本端立刻清未读数并记录本地读位置；接口失败仅记录日志
  */
 export const useMessageSender = () => {
   const conversationStore = useConversationStore()
@@ -221,7 +221,7 @@ export const useMessageSender = () => {
 
   /**
    * 触发当前会话的已读上报（切会话 / 进入页面时调用）
-   * 1. 本端立刻清未读数；服务端回包成功后再做持久化
+   * 1. 本端立刻清未读数并推进读位置
    * 2. 已读位置取已加载消息和会话末条消息的最大服务端 id
    */
   const readActive = async () => {
@@ -237,15 +237,24 @@ export const useMessageSender = () => {
         0
       )
     const maxMessageId = Math.max(loadedMaxMessageId, conversation.lastMessageId || 0)
+    const readCovered = conversationStore.isReadPositionCovered(
+      conversation.type,
+      conversation.targetId,
+      maxMessageId
+    )
+    if (readCovered) {
+      conversationStore.markConversationRead(conversation.type, conversation.targetId)
+      return
+    }
+    const isPrivate = conversation.type === ImConversationType.PRIVATE
+    const isGroup = conversation.type === ImConversationType.GROUP
+    const isChannel = conversation.type === ImConversationType.CHANNEL
     // 本地标记已读：未读数清零（UI 立刻响应）
     conversationStore.markConversationRead(conversation.type, conversation.targetId, maxMessageId)
     if (!maxMessageId) {
       return
     }
-    // 接口调用：按会话类型分发，并按对应已读开关控制；失败仅记录日志，不回退本地已读状态
-    const isPrivate = conversation.type === ImConversationType.PRIVATE
-    const isGroup = conversation.type === ImConversationType.GROUP
-    const isChannel = conversation.type === ImConversationType.CHANNEL
+    // 接口调用：按会话类型分发，并按对应已读开关控制
     if (!isPrivate && !isGroup && !isChannel) {
       return
     }
@@ -287,9 +296,21 @@ export const useMessageSender = () => {
     if (!MESSAGE_PRIVATE_READ_ENABLED) {
       return
     }
+    const cachedMaxReadId = messageStore.getPrivateReadMaxId(peerId)
+    if (cachedMaxReadId !== undefined) {
+      if (cachedMaxReadId > 0) {
+        messageStore.applyMessageReadReceipt({
+          conversationType: ImConversationType.PRIVATE,
+          targetId: peerId,
+          privateReadMaxId: cachedMaxReadId
+        })
+      }
+      return
+    }
     try {
       // 拉取对方已读到的最大消息 id
       const maxReadId = await apiGetPrivateMaxReadMessageId(peerId)
+      messageStore.updatePrivateReadMaxId(peerId, maxReadId)
       if (!maxReadId) {
         return
       }

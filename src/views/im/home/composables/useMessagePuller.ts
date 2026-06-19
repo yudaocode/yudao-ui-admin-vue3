@@ -6,6 +6,7 @@ import { useFriendStore } from '../store/friendStore'
 import { getFriendDisplayName, getGroupDisplayName } from '../../utils/user'
 import { useGroupStore } from '../store/groupStore'
 import { useGroupRequestStore } from '../store/groupRequestStore'
+import { useRtcStore } from '../store/rtcStore'
 import {
   pullPrivateMessageList as apiPullPrivateMessageList,
   getPrivateMaxReadMessageId as apiGetPrivateMaxReadMessageId,
@@ -58,6 +59,7 @@ export const useMessagePuller = () => {
   const friendStore = useFriendStore()
   const groupStore = useGroupStore()
   const groupRequestStore = useGroupRequestStore()
+  const rtcStore = useRtcStore()
   const currentUserId = getCurrentUserId()
 
   /** 判断请求是否被主动取消 */
@@ -290,7 +292,12 @@ export const useMessagePuller = () => {
    * 群成员不做全局增量同步，重连只标记本地群成员 cache 过期，进入群会话或成员列表时再按 groupId 刷新。
    */
   const pullStateEvents = async (): Promise<void> => {
+    // 1. 清理连接级缓存
+    messageStore.clearPrivateReadMaxIdCache()
+    rtcStore.clearGroupCallCache()
+    groupStore.markAllGroupInfoExpired()
     groupStore.markAllGroupMembersExpired()
+    // 2. 并发补偿远端状态
     const results = await Promise.allSettled([
       friendStore.pullFriends(),
       friendStore.pullFriendRequests(),
@@ -408,6 +415,7 @@ export const useMessagePuller = () => {
             if (!isCurrentPull()) {
               return
             }
+            messageStore.updatePrivateReadMaxId(active.targetId, maxReadId)
             if (maxReadId) {
               messageStore.applyMessageReadReceipt({
                 conversationType: ImConversationType.PRIVATE,

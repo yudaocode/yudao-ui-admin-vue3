@@ -101,15 +101,18 @@ const pillText = computed(() => {
 watch(
   () => [props.groupId, activeCall.value?.room] as const,
   async ([groupId, room], oldValues) => {
-    if (!groupId) {
+    if (!groupId || !activeCall.value) {
       return
     }
 
-    // 决策是否需要拉取：切群 / room 切换必拉；同群同 room 且已加载 >= 2 人则跳过，避免参与者通知触发后重复请求
+    // 决策是否需要拉取：仅补齐本地已有通话；没有本地通话时等待实时事件创建
     const groupChanged = !oldValues || oldValues[0] !== groupId
     const roomChanged = oldValues && oldValues[1] !== room
-    const hydrated = (activeCall.value?.joinedUserIds?.length ?? 0) > 1
-    if (!groupChanged && !roomChanged && hydrated) {
+    const participantsLoaded = (activeCall.value?.joinedUserIds?.length ?? 0) > 1
+    if (
+      rtcStore.isGroupCallParticipantsLoaded(groupId, room) ||
+      (!groupChanged && !roomChanged && participantsLoaded)
+    ) {
       return
     }
 
@@ -117,7 +120,7 @@ watch(
     try {
       const data = await getActiveCall(groupId)
       if (data) {
-        rtcStore.setGroupCall(data)
+        rtcStore.setGroupCall(data, true)
       } else {
         rtcStore.removeGroupCall(groupId)
       }

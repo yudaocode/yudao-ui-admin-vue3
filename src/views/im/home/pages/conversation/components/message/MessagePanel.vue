@@ -459,7 +459,7 @@ async function ensureGroupData(groupId: number) {
   })
   const group = groupStore.getGroup(groupId)
   if (!group?.membersLoaded || group.membersExpired) {
-    groupStore.fetchGroupMemberList(groupId, true).catch((error) => {
+    groupStore.fetchGroupMemberList(groupId).catch((error) => {
       console.warn('[IM MessagePanel] fetchGroupMemberList 失败', { groupId }, error)
     })
   }
@@ -471,7 +471,7 @@ function reloadGroupData() {
   if (!conversation || conversation.type !== ImConversationType.GROUP) {
     return
   }
-  groupStore.fetchGroupInfo(conversation.targetId)
+  groupStore.fetchGroupInfo(conversation.targetId, true)
   groupStore.fetchGroupMemberList(conversation.targetId, true)
 }
 
