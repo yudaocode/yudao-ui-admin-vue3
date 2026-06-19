@@ -295,6 +295,7 @@ export const useMessagePuller = () => {
     // 1. 清理连接级缓存
     messageStore.clearPrivateReadMaxIdCache()
     rtcStore.clearGroupCallCache()
+    groupStore.markAllGroupActiveCallsExpired()
     groupStore.markAllGroupInfoExpired()
     groupStore.markAllGroupMembersExpired()
     // 2. 并发补偿远端状态

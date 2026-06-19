@@ -91,6 +91,7 @@ onMounted(async () => {
       groupRequestStore.loadGroupRequestList()
     ])
     childRouteReady.value = true
+    groupStore.markAllGroupActiveCallsExpired()
     groupStore.markAllGroupMembersExpired()
     // 1.4 我管理的群下未处理加群申请红点：首登用 unhandled-list（服务端直接过滤未处理，语义精准、启动轻）；
     //     pullGroupRequests 只在重连 / 后续补偿时跑（见 useMessagePuller.pullStateEvents），不进首登主链路

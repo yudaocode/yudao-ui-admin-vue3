@@ -67,6 +67,7 @@ import Icon from '@/components/Icon/src/Icon.vue'
 import UserAvatar from '../user/UserAvatar.vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useRtcStore } from '../../store/rtcStore'
+import { useGroupStore } from '../../store/groupStore'
 import { useGroupCallMembers } from '../../composables/useGroupCallMembers'
 import { joinCall, getActiveCall } from '@/api/im/rtc'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
@@ -79,6 +80,7 @@ const props = defineProps<{
 defineOptions({ name: 'ImRtcGroupCallBanner' })
 
 const rtcStore = useRtcStore()
+const groupStore = useGroupStore()
 const message = useMessage()
 
 const popoverVisible = ref(false)
@@ -99,19 +101,43 @@ const pillText = computed(() => {
  * 用 [groupId, room] 双源监听 + 已填充守卫，避免切群 / 首次填充触发的双次重复拉取
  */
 watch(
-  () => [props.groupId, activeCall.value?.room] as const,
+  () =>
+    [
+      props.groupId,
+      activeCall.value?.room,
+      groupStore.isGroupActiveCallExpired(props.groupId)
+    ] as const,
   async ([groupId, room], oldValues) => {
-    if (!groupId || !activeCall.value) {
+    if (!groupId) {
       return
     }
 
-    // 决策是否需要拉取：仅补齐本地已有通话；没有本地通话时等待实时事件创建
+    if (!activeCall.value) {
+      if (!groupStore.isGroupActiveCallExpired(groupId)) {
+        return
+      }
+      try {
+        const data = await getActiveCall(groupId)
+        if (data) {
+          rtcStore.setGroupCall(data, true)
+        } else {
+          rtcStore.removeGroupCall(groupId)
+        }
+      } catch (e) {
+        console.warn('[GroupCallBanner] getActiveCall 失败', { groupId }, e)
+      }
+      return
+    }
+
+    // 决策是否需要拉取：补齐本地已有通话；没有本地通话时按群缓存过期状态懒探测一次
     const groupChanged = !oldValues || oldValues[0] !== groupId
     const roomChanged = oldValues && oldValues[1] !== room
     const participantsLoaded = (activeCall.value?.joinedUserIds?.length ?? 0) > 1
+    const activeCallExpired = groupStore.isGroupActiveCallExpired(groupId)
     if (
-      rtcStore.isGroupCallParticipantsLoaded(groupId, room) ||
-      (!groupChanged && !roomChanged && participantsLoaded)
+      !activeCallExpired &&
+      (rtcStore.isGroupCallParticipantsLoaded(groupId, room) ||
+        (!groupChanged && !roomChanged && participantsLoaded))
     ) {
       return
     }
