@@ -7,16 +7,16 @@ import { getFriendDisplayName, getGroupDisplayName } from '../../utils/user'
 import { useGroupStore } from '../store/groupStore'
 import { useGroupRequestStore } from '../store/groupRequestStore'
 import {
-  pullPrivateMessages as apiPullPrivateMessages,
+  pullPrivateMessageList as apiPullPrivateMessageList,
   getPrivateMaxReadMessageId as apiGetPrivateMaxReadMessageId,
   type ImPrivateMessageRespVO
 } from '@/api/im/message/private'
 import {
-  pullGroupMessages as apiPullGroupMessages,
+  pullGroupMessageList as apiPullGroupMessageList,
   type ImGroupMessageRespVO
 } from '@/api/im/message/group'
 import {
-  pullChannelMessages as apiPullChannelMessages,
+  pullChannelMessageList as apiPullChannelMessageList,
   type ImChannelMessageRespVO
 } from '@/api/im/message/channel'
 import {
@@ -182,12 +182,12 @@ export const useMessagePuller = () => {
       isActive: isStillValid,
       fetchPage: ({ minId, size }) => {
         if (isPrivate) {
-          return apiPullPrivateMessages({ minId, size }, signal)
+          return apiPullPrivateMessageList({ minId, size }, signal)
         }
         if (isChannel) {
-          return apiPullChannelMessages({ minId, size }, signal)
+          return apiPullChannelMessageList({ minId, size }, signal)
         }
-        return apiPullGroupMessages({ minId, size }, signal)
+        return apiPullGroupMessageList({ minId, size }, signal)
       },
       applyPage: async (list, nextMinId) => {
         const pulledMessages: PulledMessage[] = []

@@ -39,7 +39,7 @@ export const sendGroupMessage = (data: ImGroupMessageSendReqVO) => {
 }
 
 // 拉取群聊消息（增量）
-export const pullGroupMessages = (
+export const pullGroupMessageList = (
   params: { minId: number | string; size: number },
   signal?: AbortSignal
 ) => {

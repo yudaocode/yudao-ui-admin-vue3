@@ -35,7 +35,7 @@ export const sendPrivateMessage = (data: ImPrivateMessageSendReqVO) => {
 }
 
 // 拉取私聊消息（增量）
-export const pullPrivateMessages = (
+export const pullPrivateMessageList = (
   params: { minId: number | string; size: number },
   signal?: AbortSignal
 ) => {
