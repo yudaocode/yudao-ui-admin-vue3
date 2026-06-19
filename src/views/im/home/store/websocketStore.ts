@@ -1171,10 +1171,10 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
       }
       const rtcStore = useRtcStore()
       const isGroup = payload.conversationType === ImConversationType.GROUP
-      // 群通话：移除胶囊条（按外层 groupId 取，不依赖 payload）
+      // 群通话：移除对应房间的胶囊条
       const groupId = (websocketMessage as ImGroupMessageNotification).groupId
       if (isGroup && groupId) {
-        rtcStore.removeGroupCall(groupId)
+        rtcStore.removeGroupCall(groupId, payload.room)
       }
       // 通话窗 / 来电窗指向同一 room 时关闭：
       //   RUNNING / INVITING 阶段对比 call.room；INCOMING 阶段对比 incomingPayload.room

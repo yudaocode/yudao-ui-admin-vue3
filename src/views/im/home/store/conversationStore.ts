@@ -61,7 +61,7 @@ function toConversationDO(conversation: Conversation): ConversationDO {
     lastReceiptStatus: conversation.lastReceiptStatus,
     lastSelfSend: conversation.lastSelfSend,
     lastSenderDisplayName: conversation.lastSenderDisplayName,
-    readMessageId: conversation.readMessageId,
+    reportedReadMessageId: conversation.reportedReadMessageId,
     deleted: conversation.deleted,
     top: conversation.top,
     silent: conversation.silent,
@@ -307,7 +307,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         return false
       }
       const conversation = this.getConversation(type, targetId)
-      return (conversation?.readMessageId || 0) >= messageId
+      return (conversation?.reportedReadMessageId || 0) >= messageId
     },
 
     /** 应用读位置到会话 */
@@ -366,9 +366,9 @@ export const useConversationStore = defineStore('imConversationStore', {
         const conversation = this.getConversation(record.conversationType, record.targetId)
         if (
           conversation &&
-          record.messageId > (conversation.readMessageId || 0)
+          record.messageId > (conversation.reportedReadMessageId || 0)
         ) {
-          conversation.readMessageId = record.messageId
+          conversation.reportedReadMessageId = record.messageId
           changedConversations.set(clientConversationId, conversation)
         }
         if (!current || messageId > current.messageId) {
@@ -713,10 +713,10 @@ export const useConversationStore = defineStore('imConversationStore', {
         return
       }
       const conversation = this.getConversation(type, targetId)
-      if (!conversation || messageId <= (conversation.readMessageId || 0)) {
+      if (!conversation || messageId <= (conversation.reportedReadMessageId || 0)) {
         return
       }
-      conversation.readMessageId = messageId
+      conversation.reportedReadMessageId = messageId
       this.saveConversation(conversation)
     },
 
