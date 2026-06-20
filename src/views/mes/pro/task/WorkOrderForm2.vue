@@ -191,7 +191,6 @@ const formLoading = ref(false) // 表单的加载中
 const formType = ref('') // 表单的类型：detail - 详情；schedule - 排产
 const isReadonly = computed(() => formType.value === 'detail') // 是否只读
 const formData = ref<any>({})
-const formRef = ref() // 表单 Ref
 
 const routeProcessList = ref<ProRouteProcessVO[]>([]) // 工艺路线工序列表
 const activeProcessStep = ref(0) // 当前工序步骤索引

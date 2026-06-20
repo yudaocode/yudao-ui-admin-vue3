@@ -39,7 +39,6 @@ const { delView } = useTagsViewStore() // 视图操作
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const activeName = ref('colum') // Tag 激活的窗口
 const basicInfoRef = ref<ComponentRef<typeof BasicInfoForm>>()
-const columInfoRef = ref<ComponentRef<typeof ColumInfoForm>>()
 const generateInfoRef = ref<ComponentRef<typeof GenerateInfoForm>>()
 const formData = ref<CodegenApi.CodegenUpdateReqVO>({
   table: {},

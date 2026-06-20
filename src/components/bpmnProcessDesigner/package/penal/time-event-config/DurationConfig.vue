@@ -9,14 +9,14 @@
         <el-button
           v-for="val in unit.presets"
           :key="val"
-          size="mini"
+          size="small"
           @click="setUnit(unit.key, val)"
         >
           {{ val }}
         </el-button>
         <el-input
           v-model.number="custom[unit.key]"
-          size="mini"
+          size="small"
           style="width: 60px; margin-left: 8px"
           placeholder="自定义"
           @change="setUnit(unit.key, custom[unit.key])"

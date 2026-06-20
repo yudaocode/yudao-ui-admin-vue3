@@ -31,7 +31,7 @@
       <template v-else-if="isVideo">
         <div v-show="hasRemoteVideo" class="absolute inset-0">
           <video
-            ref="remoteVideoRef"
+            :ref="remoteVideoRef"
             class="object-cover w-full h-full"
             autoplay
             playsinline
@@ -53,7 +53,7 @@
           class="absolute top-4 right-4 z-[2] overflow-hidden w-30 rounded-lg aspect-[9/16] bg-[#333]"
         >
           <video
-            ref="localVideoRef"
+            :ref="localVideoRef"
             class="object-cover w-full h-full scale-x-[-1]"
             autoplay
             muted
@@ -78,7 +78,7 @@
       </template>
       <audio
         v-if="!isGroup && remoteAudioStream"
-        ref="remoteAudioRef"
+        :ref="remoteAudioRef"
         autoplay
         :muted="!speakerEnabled"
       ></audio>

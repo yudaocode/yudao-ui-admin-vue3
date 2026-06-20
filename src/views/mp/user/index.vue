@@ -116,7 +116,6 @@ import { ref } from 'vue'
 
 defineOptions({ name: 'MpUser' })
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息
 
 const isDialog = ref(false) // 是不是弹窗调用

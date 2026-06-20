@@ -465,7 +465,6 @@ function getDefaultQueryParams() {
   }
 }
 const queryParams = reactive(getDefaultQueryParams())
-const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const detailMap = reactive<Record<number, CheckOrderDetailVO[]>>({}) // 盘库单明细数据
 

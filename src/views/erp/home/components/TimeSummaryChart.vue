@@ -9,7 +9,6 @@
 </template>
 <script lang="ts" setup>
 import { EChartsOption } from 'echarts'
-import { formatDate } from '@/utils/formatTime'
 import { CardTitle } from '@/components/Card'
 import { propTypes } from '@/utils/propTypes'
 

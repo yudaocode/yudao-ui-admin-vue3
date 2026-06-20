@@ -178,7 +178,6 @@ const isEditable = computed(() => ['create', 'update'].includes(formType.value))
 const isSubmit = computed(() => formType.value === 'submit') // 是否为提交模式
 const isExecute = computed(() => formType.value === 'execute') // 是否为执行盘点模式
 const isDetail = computed(() => ['detail', 'submit', 'execute'].includes(formType.value)) // 是否只读
-const isHeaderReadonly = computed(() => ['submit', 'execute', 'detail'].includes(formType.value)) // 头部是否只读
 const resultVisible = computed(
   () => formData.value.status && formData.value.status !== MesWmStockTakingTaskStatusEnum.PREPARE
 )
@@ -220,7 +219,6 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const activeTab = ref('lines') // 当前激活的 tab
-const resultListRef = ref() // 盘点结果列表 Ref
 const originalFormData = ref<string>('') // 原始表单数据快照，用于脏检查
 
 /** 生成任务编码 */

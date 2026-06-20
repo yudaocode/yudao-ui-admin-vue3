@@ -171,7 +171,6 @@ const queryParams = reactive({
   pageSize: 10,
   remindType: 1
 })
-const queryFormRef = ref() // 搜索的表单
 
 /** 查询列表 */
 const getList = async () => {

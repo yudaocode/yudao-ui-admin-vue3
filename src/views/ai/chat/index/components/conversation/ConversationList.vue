@@ -167,7 +167,7 @@ const emits = defineEmits([
 ])
 
 /** 搜索对话 */
-const searchConversation = async (e) => {
+const searchConversation = async (_e) => {
   // 恢复数据
   if (!searchName.value.trim().length) {
     conversationMap.value = await getConversationGroupByCreateTime(conversationList.value)
@@ -365,7 +365,7 @@ const handleRoleRepository = async () => {
 
 /** 监听选中的对话 */
 const { activeId } = toRefs(props)
-watch(activeId, async (newValue, oldValue) => {
+watch(activeId, async (newValue, _oldValue) => {
   activeConversationId.value = newValue as string
 })
 

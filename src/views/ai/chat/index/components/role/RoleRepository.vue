@@ -167,7 +167,7 @@ const handlerCardEdit = async (role) => {
 }
 
 /** 添加角色成功 */
-const handlerAddRoleSuccess = async (e) => {
+const handlerAddRoleSuccess = async (_e) => {
   // 刷新数据
   await getActiveTabsRole()
 }

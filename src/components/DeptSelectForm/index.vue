@@ -87,7 +87,7 @@ const open = async (selectedList?: DeptApi.DeptVO[]) => {
 }
 
 /** 处理选中状态变化 */
-const handleCheck = (data: any, checked: any) => {
+const handleCheck = (_data: any, _checked: any) => {
   selectedDeptIds.value = treeRef.value.getCheckedKeys()
   if (!props.multiple && selectedDeptIds.value.length > 1) {
     // 单选模式下，只保留最后选择的节点

@@ -42,9 +42,6 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as FavoriteApi from '@/api/mall/product/favorite'
 import { floatToFixed2 } from '@/utils'
 
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
-
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
@@ -55,7 +52,6 @@ const queryParams = reactive({
   createTime: [],
   userId: NaN
 })
-const queryFormRef = ref() // 搜索的表单
 
 /** 查询列表 */
 const getList = async () => {
@@ -67,18 +63,6 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  handleQuery()
 }
 
 const { userId } = defineProps({

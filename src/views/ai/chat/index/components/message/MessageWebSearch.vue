@@ -158,7 +158,6 @@ const selectedResult = ref<{
   summary: string
 } | null>(null) // 选中的搜索结果
 const dialogVisible = ref(false) // 详情弹窗
-const resultRef = ref<HTMLElement>() // 详情弹窗 Ref
 
 /** 切换展开/收起状态 */
 const toggleExpanded = () => {

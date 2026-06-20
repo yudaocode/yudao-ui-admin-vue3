@@ -100,7 +100,7 @@ const emits = defineEmits(['onBtnClick', 'onMjBtnClick']) // emits
 
 /** 监听详情 */
 const { detail } = toRefs(props)
-watch(detail, async (newVal, oldVal) => {
+watch(detail, async (newVal, _oldVal) => {
   await handleLoading(newVal.status as string)
 })
 

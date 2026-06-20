@@ -282,7 +282,6 @@ const loading = ref(true) // 列表的加载中
 const list = ref<IotSceneRule[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const selectedRows = ref<IotSceneRule[]>([]) // 选中的行数据
-const queryFormRef = ref() // 搜索的表单
 
 /** 表单状态 */
 const formVisible = ref(false) // 是否可见

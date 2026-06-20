@@ -112,7 +112,6 @@
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import SupplierForm from './SupplierForm.vue'

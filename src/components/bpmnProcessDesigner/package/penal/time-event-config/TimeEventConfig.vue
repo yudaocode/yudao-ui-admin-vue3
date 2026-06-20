@@ -3,17 +3,17 @@
     <div style="margin-top: 10px">
       <span>类型：</span>
       <el-button-group>
-        <el-button size="mini" :type="type === 'time' ? 'primary' : ''" @click="setType('time')">
+        <el-button size="small" :type="type === 'time' ? 'primary' : ''" @click="setType('time')">
           时间
         </el-button>
         <el-button
-          size="mini"
+          size="small"
           :type="type === 'duration' ? 'primary' : ''"
           @click="setType('duration')"
         >
           持续
         </el-button>
-        <el-button size="mini" :type="type === 'cycle' ? 'primary' : ''" @click="setType('cycle')">
+        <el-button size="small" :type="type === 'cycle' ? 'primary' : ''" @click="setType('cycle')">
           循环
         </el-button>
       </el-button-group>
@@ -128,7 +128,6 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { CircleCheckFilled, WarningFilled, QuestionFilled } from '@element-plus/icons-vue'
 import DurationConfig from './DurationConfig.vue'
 import CycleConfig from './CycleConfig.vue'
-import { createListenerObject, updateElementExtensions } from '../../utils'
 const bpmnInstances = () => (window as any).bpmnInstances
 const props = defineProps({ businessObject: Object })
 const type = ref('time')
@@ -139,7 +138,6 @@ const showDurationDialog = ref(false)
 const showCycleDialog = ref(false)
 const showHelp = ref(false)
 const dateValue = ref(null)
-const bpmnElement = ref(null)
 
 const placeholder = computed(() => {
   if (type.value === 'time') return '请输入时间'

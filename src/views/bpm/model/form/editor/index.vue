@@ -62,7 +62,6 @@ const xmlString = inject('processData') as Ref
 const modelData = inject('modelData') as Ref
 
 const modeler = shallowRef() // BPMN Modeler
-const processDesigner = ref()
 const controlForm = ref({
   simulation: true,
   labelEditing: false,

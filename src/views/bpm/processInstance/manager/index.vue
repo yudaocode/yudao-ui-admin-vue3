@@ -169,7 +169,6 @@ import { ElMessageBox } from 'element-plus'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CategoryApi } from '@/api/bpm/category'
 import * as UserApi from '@/api/system/user'
-import { cancelProcessInstanceByAdmin } from '@/api/bpm/processInstance'
 
 // 它和【我的流程】的差异是，该菜单可以看全部的流程实例
 defineOptions({ name: 'BpmProcessInstanceManager' })

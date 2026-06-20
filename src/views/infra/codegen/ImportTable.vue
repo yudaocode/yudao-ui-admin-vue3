@@ -90,7 +90,6 @@ const queryParams = reactive({
   comment: undefined,
   dataSourceConfigId: 0
 })
-const queryFormRef = ref() // 搜索的表单
 const dataSourceConfigList = ref<DataSourceConfigApi.DataSourceConfigVO[]>([]) // 数据源列表
 
 /** 查询表数据 */

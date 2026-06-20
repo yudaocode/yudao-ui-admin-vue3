@@ -174,7 +174,6 @@
 <script setup lang="ts" name="EndContract">
 import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import * as ContractApi from '@/api/crm/contract'
-import { fenToYuanFormat } from '@/utils/formatter'
 import { DICT_TYPE } from '@/utils/dict'
 import { CONTRACT_EXPIRY_TYPE } from './common'
 import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
@@ -188,7 +187,6 @@ const queryParams = reactive({
   sceneType: '1', // 自己负责的
   expiryType: 1
 })
-const queryFormRef = ref() // 搜索的表单
 
 /** 查询列表 */
 const getList = async () => {

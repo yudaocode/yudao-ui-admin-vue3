@@ -156,7 +156,6 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { useRouter } from 'vue-router'
 import { WriteApi, AiWritePageReqVO, AiWriteRespVo } from '@/api/ai/write'
 import * as UserApi from '@/api/system/user'
 
@@ -165,7 +164,6 @@ defineOptions({ name: 'AiWriteManager' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const router = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const list = ref<AiWriteRespVo[]>([]) // 列表的数据

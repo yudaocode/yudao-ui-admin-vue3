@@ -152,8 +152,6 @@ const selectedIds = ref<number[]>([]) // 选中的设备ID
 
 const bindDialogVisible = ref(false) // 绑定弹窗可见性
 const bindFormLoading = ref(false) // 绑定弹窗加载状态
-const bindTableRef = ref()
-const bindQueryFormRef = ref()
 const bindableDevices = ref<DeviceVO[]>([]) // 可绑定设备列表
 const bindSelectedIds = ref<number[]>([]) // 绑定选中的设备ID
 const bindTotal = ref(0) // 可绑定设备总数

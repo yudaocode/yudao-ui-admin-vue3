@@ -146,7 +146,6 @@ const queryParams = ref({
   sceneType: 1,
   pool: null // 是否公海数据
 })
-const queryFormRef = ref() // 搜索的表单
 
 /** 查询列表 */
 const getList = async () => {

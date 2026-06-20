@@ -83,8 +83,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const formRef = ref() // 表单引用
-const uploadRef = ref() // 上传组件引用
 const parent = inject('parent', null) // 获取父组件实例
 const { uploadUrl, httpRequest } = useUpload() // 使用上传组件的钩子
 const message = useMessage() // 消息弹窗

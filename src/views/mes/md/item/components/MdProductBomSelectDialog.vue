@@ -75,7 +75,6 @@ const loading = ref(false) // 列表加载中
 const list = ref<MdProductBomVO[]>([]) // BOM 子物料列表
 
 // ==================== 选中状态 ====================
-const tableRef = ref() // 表格 Ref
 const selectedRadioId = ref<number>() // 选中的 bomItemId
 const currentRow = ref<MdProductBomVO>() // 选中的行对象
 

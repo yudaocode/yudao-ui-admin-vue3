@@ -238,7 +238,6 @@ import 'highlight.js/styles/github.css' // 导入代码高亮样式
 
 defineOptions({ name: 'MyProcessDesigner' })
 
-const bpmnCanvas = ref()
 const refFile = ref()
 const emit = defineEmits([
   'destroy',

@@ -536,7 +536,6 @@ const handleModelSortCancel = () => {
 }
 
 /** 创建拖拽实例 */
-const tableRef = ref()
 const initSort = useDebounceFn(() => {
   const table = document.querySelector(`.${props.categoryInfo.name} .el-table__body-wrapper tbody`)
   if (!table) return

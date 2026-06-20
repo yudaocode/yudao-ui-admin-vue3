@@ -302,7 +302,6 @@ import { PropType } from 'vue'
 
 defineOptions({ name: 'InfraCodegenGenerateInfoForm' })
 
-const message = useMessage() // 消息弹窗
 const props = defineProps({
   table: {
     type: Object as PropType<Nullable<CodegenApi.CodegenTableVO>>,

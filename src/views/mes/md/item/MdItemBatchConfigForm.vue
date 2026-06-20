@@ -48,7 +48,6 @@ const props = defineProps<{
 
 const message = useMessage() // 消息弹窗
 const loading = ref(false) // 加载中
-const formRef = ref() // 表单 Ref
 const formData = ref<MdItemBatchConfigVO>({
   itemId: props.itemId,
   produceDateFlag: false,
