@@ -76,7 +76,7 @@ const props = withDefaults(
   defineProps<{
     visible: boolean // 是否显示
     // 浮层位置：x 横坐标 + top / bottom 二选一（bottom 锚定时 picker 下沿贴 @ 上方）
-    position: { x: number; top?: number; bottom?: number }
+    position?: { x: number; top?: number; bottom?: number }
     members: GroupMemberLite[] // 当前群的成员列表
     searchText?: string // @ 后输入的过滤文本
     canAtAll?: boolean // 当前用户是否能 @ 全员（群主 / 管理员），父组件按角色算好传入

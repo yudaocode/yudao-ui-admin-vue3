@@ -31,7 +31,7 @@
           v-model="formData.data"
           type="textarea"
           :rows="4"
-          placeholder='请输入模板数据（JSON 格式），例如：{"keyword1": {"value": "测试内容"}}'
+          :placeholder="templateDataPlaceholder"
         />
       </el-form-item>
       <el-form-item label="跳转链接" prop="url">
@@ -56,6 +56,8 @@ import { MessageTemplateApi, MsgTemplateVO, MsgTemplateSendVO } from '@/api/mp/m
 import * as MpUserApi from '@/api/mp/user'
 
 const message = useMessage() // 消息弹窗
+const templateDataPlaceholder =
+  '请输入模板数据（JSON 格式），例如：{"keyword1": {"value": "测试内容"}}'
 
 const dialogVisible = ref(false) // 弹窗是否展示
 const loading = ref(false) // 提交加载中

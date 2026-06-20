@@ -13,7 +13,7 @@ module.exports = {
     'at-rule-no-unknown': [
       true,
       {
-        ignoreAtRules: ['function', 'if', 'each', 'include', 'mixin', 'extend']
+        ignoreAtRules: ['function', 'if', 'each', 'include', 'mixin', 'extend', 'use']
       }
     ],
     'media-query-no-invalid': null,
@@ -228,8 +228,30 @@ module.exports = {
           {
             ignorePseudoElements: ['v-deep', 'v-global', 'v-slotted']
           }
+        ],
+        // Vue SFC 样式里会使用 @use、@include 等 SCSS at-rule。
+        'at-rule-no-unknown': [
+          true,
+          {
+            ignoreAtRules: ['function', 'if', 'each', 'include', 'mixin', 'extend', 'use']
+          }
+        ],
+        // TagsView 使用的 WebKit 私有 mask 语法有效，但 Stylelint 不能完整识别。
+        'declaration-property-value-no-unknown': [
+          true,
+          {
+            ignoreProperties: {
+              '-webkit-mask-box-image': [/.*/]
+            }
+          }
         ]
       }
+    },
+    // 独立 SCSS 文件不会被全局 postcss-html 语法完整检查。
+    // 先只让这个 IM 选择弹窗公共 partial 使用 SCSS parser，暂不放大全量历史 SCSS 问题。
+    {
+      files: ['src/views/im/home/components/picker/picker-dialog.scss'],
+      customSyntax: 'postcss-scss'
     }
   ]
 }

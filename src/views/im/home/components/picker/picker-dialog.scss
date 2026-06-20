@@ -1,5 +1,7 @@
 // IM 选择类弹窗的公共样式 mixin
 // 每个业务壳在自己的 <style scoped lang="scss"> 内 @use + @include 即可，避免全局污染
+// Element Plus 内部类名使用 BEM 双下划线，不适合套项目自定义类名规则
+/* stylelint-disable selector-class-pattern */
 @mixin styles {
   :deep(.el-dialog__body) {
     padding: 0;
@@ -7,7 +9,8 @@
   }
 
   :deep(.el-dialog__header) {
-    margin-right: 0;
     padding-bottom: 16px;
+    margin-right: 0;
   }
 }
+/* stylelint-enable selector-class-pattern */

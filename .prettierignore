@@ -7,5 +7,6 @@
 /src/types/env.d.ts
 /src/types/auto-components.d.ts
 /src/types/auto-imports.d.ts
+/src/components/Tinyflow/ui/**
 /docs/**/*
 CHANGELOG

@@ -22,7 +22,7 @@
     "lint": "pnpm lint:eslint:check && pnpm lint:style:check && pnpm lint:format:check",
     "lint:eslint": "eslint --fix ./src --cache --cache-location node_modules/.cache/eslint/",
     "lint:eslint:check": "eslint ./src --cache --cache-location node_modules/.cache/eslint/",
-    "lint:format": "prettier --write --loglevel warn --cache --cache-location node_modules/.cache/prettier/.prettier-cache \"src/**/*.{js,ts,json,tsx,css,less,scss,vue,html,md}\"",
+    "lint:format": "prettier --write --log-level warn --cache --cache-location node_modules/.cache/prettier/.prettier-cache \"src/**/*.{js,ts,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:format:check": "prettier --check --cache --cache-location node_modules/.cache/prettier/.prettier-cache \"src/**/*.{js,ts,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:style": "stylelint --fix \"./src/**/*.{vue,less,postcss,css,scss}\" --cache --cache-location node_modules/.cache/stylelint/",
     "lint:style:check": "stylelint \"./src/**/*.{vue,less,postcss,css,scss}\" --cache --cache-location node_modules/.cache/stylelint/",

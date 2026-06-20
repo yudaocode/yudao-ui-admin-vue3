@@ -40,7 +40,7 @@
     <el-divider />
     <el-descriptions :column="1" label-class-name="desc-label" direction="vertical" border>
       <el-descriptions-item label="转账渠道通知内容">
-        <el-text style="white-space: pre-wrap; word-break: break-word">
+        <el-text style="overflow-wrap: anywhere; white-space: pre-wrap">
           {{ detailData.channelNotifyData }}
         </el-text>
       </el-descriptions-item>
