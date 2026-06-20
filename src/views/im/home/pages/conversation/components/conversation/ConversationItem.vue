@@ -6,7 +6,7 @@
     @click="handleClick"
     @contextmenu.prevent="handleContextMenu"
   >
-    <!-- 头像 + 未读提示；普通会话显示红色数字徽标，免打扰会话仅显示纯小红点（对齐微信，不暴露具体条数） -->
+    <!-- 头像 + 未读提示 -->
     <div class="relative">
       <GroupAvatar
         v-if="isGroup"
@@ -29,7 +29,7 @@
       >
         {{ conversation.unreadCount > 99 ? '99+' : conversation.unreadCount }}
       </span>
-      <!-- 小红点：免打扰且有未读时仅提示存在新消息；切回非免打扰后用上面的数字徽标暴露累计未读 -->
+      <!-- 小红点：免打扰且有未读时提示存在新消息 -->
       <span
         v-show="conversation.silent && conversation.unreadCount > 0"
         class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#f56c6c] border border-solid border-white dark:border-[var(--el-bg-color)] rounded-full box-border"
@@ -70,6 +70,13 @@
           class="conversation-item__prefix flex-shrink overflow-hidden text-12px text-[#c70b0b] truncate whitespace-nowrap"
         >
           {{ atText }}
+        </span>
+        <!-- 免打扰未读条数 -->
+        <span
+          v-if="mutedUnreadText"
+          class="flex-shrink-0 mr-1 text-12px text-[var(--el-text-color-secondary)] whitespace-nowrap"
+        >
+          {{ mutedUnreadText }}
         </span>
         <!-- 群聊最后一条发送者前缀：按 lastSenderId + 当前会话上下文实时算名字 -->
         <span
@@ -209,6 +216,15 @@ const atText = computed(() => {
     return '[@全体成员]'
   }
   return ''
+})
+
+/** 免打扰会话未读条数文案 */
+const mutedUnreadText = computed(() => {
+  if (!props.conversation.silent || props.conversation.unreadCount <= 0) {
+    return ''
+  }
+  const count = props.conversation.unreadCount > 99 ? '99+' : props.conversation.unreadCount
+  return `[${count}条]`
 })
 
 /** 群聊未处理加群申请红字前缀；store 已经按「我管理的群」过滤过，count > 0 即可显示 */
