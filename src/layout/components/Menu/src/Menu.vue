@@ -1,6 +1,7 @@
 <script lang="tsx">
 import { PropType, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import { ElMenu, ElScrollbar } from 'element-plus'
+import type { MenuInstance } from 'element-plus'
 import { useAppStore } from '@/store/modules/app'
 import { usePermissionStore } from '@/store/modules/permission'
 import { useRenderMenuItem } from './components/useRenderMenuItem'
@@ -63,7 +64,7 @@ export default defineComponent({
 
     const menuWrapRef = ref<HTMLElement>()
 
-    const menuRef = ref<InstanceType<typeof ElMenu>>()
+    const menuRef = ref<MenuInstance>()
 
     const menuMode = computed(
       (): 'vertical' | 'horizontal' =>

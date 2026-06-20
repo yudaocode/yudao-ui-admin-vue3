@@ -29,7 +29,7 @@
     </el-descriptions>
   </ContentWrap>
   <!-- 表单弹窗：添加/修改 -->
-  <ProductForm ref="formRef" @success="emit('refresh')" />
+  <ProductForm ref="formRef" @success="$emit('refresh')" />
 </template>
 <script setup lang="ts">
 import ProductForm from '@/views/crm/product/ProductForm.vue'

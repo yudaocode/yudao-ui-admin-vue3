@@ -214,9 +214,7 @@ const lineChartOptions = reactive<EChartsOption>({
         show: false
       },
       axisLabel: {
-        textStyle: {
-          color: '#7F8B9C'
-        }
+        color: '#7F8B9C'
       },
       splitLine: {
         show: true,
@@ -235,9 +233,7 @@ const lineChartOptions = reactive<EChartsOption>({
         show: false
       },
       axisLabel: {
-        textStyle: {
-          color: '#7F8B9C'
-        }
+        color: '#7F8B9C'
       },
       splitLine: {
         show: true,

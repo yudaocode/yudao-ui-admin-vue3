@@ -68,10 +68,8 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = cloneDeep(unref(formData))
+    const { payPrice: _payPrice, newPayPrice: _newPayPrice, ...data } = cloneDeep(unref(formData))
     data.adjustPrice = convertToInteger(data.adjustPrice)
-    delete data.payPrice
-    delete data.newPayPrice
     await TradeOrderApi.updateOrderPrice(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false

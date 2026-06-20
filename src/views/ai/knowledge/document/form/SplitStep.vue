@@ -72,7 +72,7 @@
         >
           <div v-for="(segment, index) in currentFile.segments" :key="index" class="mb-10px">
             <div class="text-gray-500 text-12px mb-5px">
-              分片-{{ index + 1 }} · {{ segment.contentLength || 0 }} 字符数 ·
+              分片-{{ Number(index) + 1 }} · {{ segment.contentLength || 0 }} 字符数 ·
               {{ segment.tokens || 0 }} Token
             </div>
             <div class="bg-white p-10px rounded-md">{{ segment.content }}</div>
