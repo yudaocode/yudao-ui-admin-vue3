@@ -817,7 +817,7 @@ const initNextAssigneesFormField = async () => {
           CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
         // 情况二：当前节点是审批人自选
         (isEmpty(node.candidateUsers) &&
-        CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy)
+          CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy)
       ) {
         nextAssigneesActivityNode.value.push(node)
       }
