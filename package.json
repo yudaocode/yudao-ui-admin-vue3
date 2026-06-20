@@ -135,7 +135,6 @@
     "vite-plugin-eslint2": "^5.1.0",
     "vite-plugin-progress": "^0.0.7",
     "vite-plugin-svg-icons-ng": "^1.9.0",
-    "vite-plugin-top-level-await": "^1.6.0",
     "vue-eslint-parser": "^10.4.0",
     "vue-tsc": "^3.2.8"
   },

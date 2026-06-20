@@ -46,7 +46,7 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             // },
         },
         // 项目使用的vite插件。 单独提取到build/vite/plugin中管理
-        plugins: createVitePlugins(),
+        plugins: createVitePlugins(isBuild, env),
         css: {
             lightningcss: {
                 // Preserve legacy star-hack declarations by stripping invalid syntax during minification.
@@ -80,18 +80,17 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             ]
         },
         build: {
-            minify: 'terser',
+            minify: 'oxc',
             outDir: env.VITE_OUT_DIR || 'dist',
             sourcemap: env.VITE_SOURCEMAP === 'true' ? 'inline' : false,
-            // brotliSize: false,
-            terserOptions: {
-                compress: {
-                    drop_debugger: env.VITE_DROP_DEBUGGER === 'true',
-                    drop_console: env.VITE_DROP_CONSOLE === 'true'
-                }
-            },
             rollupOptions: {
                 output: {
+                    minify: {
+                        compress: {
+                            dropDebugger: env.VITE_DROP_DEBUGGER === 'true',
+                            dropConsole: env.VITE_DROP_CONSOLE === 'true'
+                        }
+                    },
                     codeSplitting: {
                         groups: [
                             { name: 'echarts', test: /node_modules[\\/]echarts[\\/]/ }, // 将 echarts 单独打包，参考 https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues/IAB1SX 讨论

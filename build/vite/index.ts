@@ -3,30 +3,32 @@ import Vue from '@vitejs/plugin-vue'
 import VueJsx from '@vitejs/plugin-vue-jsx'
 import progress from 'vite-plugin-progress'
 import EslintPlugin from 'vite-plugin-eslint2'
-import { ViteEjsPlugin } from 'vite-plugin-ejs'
 // @ts-ignore
 import ElementPlus from 'unplugin-element-plus/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import viteCompression from 'vite-plugin-compression'
-import topLevelAwait from 'vite-plugin-top-level-await'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons-ng'
 import UnoCSS from 'unocss/vite'
 
-export function createVitePlugins() {
+export function createVitePlugins(isBuild = false, env: Record<string, string> = {}) {
   const root = process.cwd()
+  const compressTypes = (env.VITE_COMPRESS || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item === 'gzip' || item === 'brotli')
 
   // 路径查找
   function pathResolve(dir: string) {
     return resolve(root, '.', dir)
   }
 
-  return [
+  const plugins = [
     Vue(),
     VueJsx(),
     UnoCSS(),
-    progress(),
+    !isBuild && progress(),
     ElementPlus({}),
     AutoImport({
       include: [
@@ -48,7 +50,7 @@ export function createVitePlugins() {
           '@/utils/dict': ['DICT_TYPE']
         }
       ],
-      dts: 'src/types/auto-imports.d.ts',
+      dts: !isBuild && 'src/types/auto-imports.d.ts',
       resolvers: [ElementPlusResolver()],
       eslintrc: {
         enabled: false, // Default `false`
@@ -58,12 +60,12 @@ export function createVitePlugins() {
     }),
     Components({
       // 生成自定义 `auto-components.d.ts` 全局声明
-      dts: 'src/types/auto-components.d.ts',
+      dts: !isBuild && 'src/types/auto-components.d.ts',
       // 自定义组件的解析器
       resolvers: [ElementPlusResolver()],
       globs: ['src/components/**/**.{vue, md}', '!src/components/DiyEditor/components/mobile/**']
     }),
-    EslintPlugin({
+    !isBuild && EslintPlugin({
       cache: false,
       include: ['src/**/*.vue', 'src/**/*.ts', 'src/**/*.tsx'] // 检查的文件
     }),
@@ -72,7 +74,7 @@ export function createVitePlugins() {
       iconDirs: [pathResolve('src/assets/svgs')],
       symbolId: 'icon-[dir]-[name]'
     }),
-    viteCompression({
+    isBuild && compressTypes.includes('gzip') && viteCompression({
       verbose: true, // 是否在控制台输出压缩结果
       disable: false, // 是否禁用
       threshold: 10240, // 体积大于 threshold 才会被压缩,单位 b
@@ -80,13 +82,15 @@ export function createVitePlugins() {
       ext: '.gz', // 生成的压缩包后缀
       deleteOriginFile: false //压缩后是否删除源文件
     }),
-    ViteEjsPlugin(),
-    topLevelAwait({
-      // https://juejin.cn/post/7152191742513512485
-      // The export name of top-level await promise for each chunk module
-      promiseExportName: '__tla',
-      // The function to generate import names of top-level await promise in each chunk module
-      promiseImportName: (i) => `__tla_${i}`
+    isBuild && compressTypes.includes('brotli') && viteCompression({
+      verbose: true,
+      disable: false,
+      threshold: 10240,
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      deleteOriginFile: false
     })
   ]
+
+  return plugins.filter(Boolean)
 }
