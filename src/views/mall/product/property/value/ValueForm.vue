@@ -8,7 +8,7 @@
       label-width="80px"
     >
       <el-form-item label="属性编号" prop="category">
-        <el-input v-model="formData.propertyId" disabled="" />
+        <el-input v-model="formData.propertyId" disabled />
       </el-form-item>
       <el-form-item label="名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入名称" />
@@ -35,11 +35,16 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
-  id: undefined,
-  propertyId: undefined,
+const formData = ref<{
+  id?: number
+  propertyId?: number
+  name: string
+  remark?: string
+}>({
+  id: undefined as number | undefined,
+  propertyId: undefined as number | undefined,
   name: '',
-  remark: ''
+  remark: undefined as string | undefined
 })
 const formRules = reactive({
   propertyId: [{ required: true, message: '属性不能为空', trigger: 'blur' }],
@@ -98,7 +103,7 @@ const resetForm = () => {
     id: undefined,
     propertyId: undefined,
     name: '',
-    remark: ''
+    remark: undefined
   }
   formRef.value?.resetFields()
 }

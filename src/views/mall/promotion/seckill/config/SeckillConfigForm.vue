@@ -25,7 +25,7 @@
         />
       </el-form-item>
       <el-form-item label="秒杀轮播图" prop="sliderPicUrls">
-        <UploadImgs v-model="formData.sliderPicUrls" placeholder="请输入秒杀轮播图" />
+        <UploadImgs v-model="sliderPicUrls" placeholder="请输入秒杀轮播图" />
       </el-form-item>
       <el-form-item label="活动状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -61,12 +61,12 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  name: undefined,
-  startTime: undefined,
-  endTime: undefined,
-  sliderPicUrls: undefined,
-  status: undefined
+  id: undefined as number | undefined,
+  name: undefined as string | undefined,
+  startTime: undefined as string | undefined,
+  endTime: undefined as string | undefined,
+  sliderPicUrls: undefined as string[] | undefined,
+  status: undefined as number | undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '秒杀时段名称不能为空', trigger: 'blur' }],
@@ -75,6 +75,12 @@ const formRules = reactive({
   status: [{ required: true, message: '活动状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const sliderPicUrls = computed({
+  get: () => formData.value.sliderPicUrls || [],
+  set: (val: string[]) => {
+    formData.value.sliderPicUrls = val
+  }
+})
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
