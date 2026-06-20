@@ -33,6 +33,7 @@
 import songCard from './songCard/index.vue'
 import songInfo from './songInfo/index.vue'
 import audioBar from './audioBar/index.vue'
+import { currentSongKey, type MusicSong } from './types'
 
 defineOptions({ name: 'Index' })
 
@@ -40,12 +41,12 @@ const currentType = ref('mine')
 // loading 状态
 const loading = ref(false)
 // 当前音乐
-const currentSong = ref({})
+const currentSong = ref<MusicSong>({})
 
-const mySongList = ref<Recordable[]>([])
-const squareSongList = ref<Recordable[]>([])
+const mySongList = ref<MusicSong[]>([])
+const squareSongList = ref<MusicSong[]>([])
 
-provide('currentSong', currentSong)
+provide(currentSongKey, currentSong)
 
 /*
  *@Description: 调接口生成音乐列表
@@ -86,7 +87,7 @@ function generateMusic(formData: Recordable) {
  *@MethodAuthor: xiaohong
  *@Date: 2024-07-19 11:22:33
  */
-function setCurrentSong(music: Recordable) {
+function setCurrentSong(music: MusicSong) {
   currentSong.value = music
 }
 

@@ -29,7 +29,7 @@
         <el-select v-model="queryParams.status" placeholder="请选择平台" clearable class="!w-240px">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.AI_PLATFORM)"
-            :key="dict.value"
+            :key="String(dict.value)"
             :label="dict.label"
             :value="dict.value"
           />
@@ -59,7 +59,7 @@
         >
           <el-option
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
+            :key="String(dict.value)"
             :label="dict.label"
             :value="dict.value"
           />

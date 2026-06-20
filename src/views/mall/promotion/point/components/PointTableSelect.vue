@@ -246,7 +246,7 @@ const handleEmitChange = () => {
 
 /** 确认选择时的触发事件 */
 const emits = defineEmits<{
-  (e: CHANGE_EVENT, v: PointActivityVO | PointActivityVO[] | any): void
+  (e: typeof CHANGE_EVENT, v: PointActivityVO | PointActivityVO[] | any): void
 }>()
 
 /** 全选/全不选 */

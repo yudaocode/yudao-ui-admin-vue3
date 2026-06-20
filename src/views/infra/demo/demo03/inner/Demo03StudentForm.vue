@@ -125,8 +125,8 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as Demo03Student
     // 拼接子表的数据
-    data.demo03Courses = demo03CourseFormRef.value.getData()
-    data.demo03Grade = demo03GradeFormRef.value.getData()
+    data.demo03courses = demo03CourseFormRef.value.getData()
+    data.demo03grade = demo03GradeFormRef.value.getData()
     if (formType.value === 'create') {
       await Demo03StudentApi.createDemo03Student(data)
       message.success(t('common.createSuccess'))

@@ -36,7 +36,7 @@
         <el-radio-group v-model="formData.sslEnable">
           <el-radio
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
+            :key="String(dict.value)"
             :value="dict.value"
           >
             {{ dict.label }}
@@ -47,7 +47,7 @@
         <el-radio-group v-model="formData.starttlsEnable">
           <el-radio
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
+            :key="String(dict.value)"
             :value="dict.value"
           >
             {{ dict.label }}

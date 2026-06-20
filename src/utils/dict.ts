@@ -28,6 +28,10 @@ export interface StringDictDataType extends DictDataType {
   value: string
 }
 
+export interface BooleanDictDataType extends DictDataType {
+  value: boolean
+}
+
 export const getDictOptions = (dictType: string) => {
   return dictStore.getDictByType(dictType) || []
 }
@@ -62,8 +66,8 @@ export const getStrDictOptions = (dictType: string) => {
   return dictOption
 }
 
-export const getBoolDictOptions = (dictType: string) => {
-  const dictOption: DictDataType[] = []
+export const getBoolDictOptions = (dictType: string): BooleanDictDataType[] => {
+  const dictOption: BooleanDictDataType[] = []
   const dictOptions: DictDataType[] = getDictOptions(dictType)
   dictOptions.forEach((dict: DictDataType) => {
     dictOption.push({

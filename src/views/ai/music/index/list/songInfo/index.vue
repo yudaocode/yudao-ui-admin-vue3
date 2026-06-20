@@ -14,7 +14,9 @@
 </template>
 
 <script lang="ts" setup>
+import { currentSongKey, type MusicSong } from '../types'
+
 defineOptions({ name: 'Index' })
 
-const currentSong = inject('currentSong', {})
+const currentSong = inject(currentSongKey, ref<MusicSong>({}))
 </script>

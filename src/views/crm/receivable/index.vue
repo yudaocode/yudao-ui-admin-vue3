@@ -235,7 +235,10 @@ const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 
 /** tab 切换 */
 const handleTabClick = (tab: TabsPaneContext) => {
-  queryParams.sceneType = tab.paneName
+  if (tab.paneName === undefined) {
+    return
+  }
+  queryParams.sceneType = String(tab.paneName)
   handleQuery()
 }
 
