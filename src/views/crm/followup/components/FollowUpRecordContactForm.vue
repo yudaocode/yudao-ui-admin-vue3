@@ -26,10 +26,19 @@
 <script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 
+type FollowUpContact = {
+  id: number
+  name: string
+  mobile?: string
+  post?: string
+  parentName?: string
+  master?: boolean
+}
+
 const props = defineProps<{
-  contacts: undefined
+  contacts: FollowUpContact[]
 }>()
-const formData = ref([])
+const formData = ref<FollowUpContact[]>([])
 
 /** 初始化联系人列表 */
 watch(
@@ -43,5 +52,11 @@ watch(
 /** 删除按钮操作 */
 const handleDelete = (index: number) => {
   formData.value.splice(index, 1)
+}
+
+/** 打开联系人详情 */
+const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmContactDetail', params: { id } })
 }
 </script>

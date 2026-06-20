@@ -104,10 +104,10 @@ const dialogTitle = computed(() => {
 })
 const formData = ref({
   id: undefined as number | undefined,
-  planId: undefined,
-  machineryId: undefined,
+  planId: undefined as number | undefined,
+  machineryId: undefined as number | undefined,
   maintenTime: undefined,
-  userId: undefined,
+  userId: undefined as number | undefined,
   status: undefined as number | undefined,
   remark: ''
 })
@@ -194,12 +194,12 @@ const handleSubmit = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    planId: undefined,
-    machineryId: undefined,
+    id: undefined as number | undefined,
+    planId: undefined as number | undefined,
+    machineryId: undefined as number | undefined,
     maintenTime: undefined,
-    userId: undefined,
-    status: undefined,
+    userId: undefined as number | undefined,
+    status: undefined as number | undefined,
     remark: ''
   }
   formRef.value?.resetFields()

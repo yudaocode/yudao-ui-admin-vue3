@@ -121,21 +121,21 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  name: undefined,
-  contact: undefined,
-  mobile: undefined,
-  telephone: undefined,
-  email: undefined,
-  fax: undefined,
-  remark: undefined,
-  status: undefined,
-  sort: undefined,
-  taxNo: undefined,
-  taxPercent: undefined,
-  bankName: undefined,
-  bankAccount: undefined,
-  bankAddress: undefined
+  id: undefined as number | undefined,
+  name: undefined as string | undefined,
+  contact: undefined as string | undefined,
+  mobile: undefined as string | undefined,
+  telephone: undefined as string | undefined,
+  email: undefined as string | undefined,
+  fax: undefined as string | undefined,
+  remark: undefined as string | undefined,
+  status: undefined as number | undefined,
+  sort: undefined as number | undefined,
+  taxNo: undefined as string | undefined,
+  taxPercent: undefined as number | undefined,
+  bankName: undefined as string | undefined,
+  bankAccount: undefined as string | undefined,
+  bankAddress: undefined as string | undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '名称不能为空', trigger: 'blur' }],

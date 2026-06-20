@@ -148,19 +148,19 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  name: undefined,
-  barCode: undefined,
-  categoryId: undefined,
-  unitId: undefined,
-  status: undefined,
-  standard: undefined,
-  remark: undefined,
-  expiryDay: undefined,
-  weight: undefined,
-  purchasePrice: undefined,
-  salePrice: undefined,
-  minPrice: undefined
+  id: undefined as number | undefined,
+  name: undefined as string | undefined,
+  barCode: undefined as string | undefined,
+  categoryId: undefined as number | undefined,
+  unitId: undefined as number | undefined,
+  status: undefined as number | undefined,
+  standard: undefined as string | undefined,
+  remark: undefined as string | undefined,
+  expiryDay: undefined as number | undefined,
+  weight: undefined as number | undefined,
+  purchasePrice: undefined as number | undefined,
+  salePrice: undefined as number | undefined,
+  minPrice: undefined as number | undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],

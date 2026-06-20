@@ -213,19 +213,19 @@ const dialogTitle = computed(() => {
 })
 const formData = ref({
   id: undefined as number | undefined,
-  code: undefined,
-  name: undefined,
+  code: undefined as string | undefined,
+  name: undefined as string | undefined,
   status: undefined as number | undefined,
-  clientId: undefined,
-  noticeId: undefined,
-  salesOrderCode: undefined,
+  clientId: undefined as number | undefined,
+  noticeId: undefined as number | undefined,
+  salesOrderCode: undefined as string | undefined,
   salesDate: undefined,
-  contactName: undefined,
-  contactTelephone: undefined,
-  contactAddress: undefined,
-  carrier: undefined,
-  shippingNumber: undefined,
-  remark: undefined
+  contactName: undefined as string | undefined,
+  contactTelephone: undefined as string | undefined,
+  contactAddress: undefined as string | undefined,
+  carrier: undefined as string | undefined,
+  shippingNumber: undefined as string | undefined,
+  remark: undefined as string | undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '出库单编号不能为空', trigger: 'blur' }],
@@ -380,20 +380,20 @@ const handleFinish = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    code: undefined,
-    name: undefined,
-    status: undefined,
-    clientId: undefined,
-    noticeId: undefined,
-    salesOrderCode: undefined,
+    id: undefined as number | undefined,
+    code: undefined as string | undefined,
+    name: undefined as string | undefined,
+    status: undefined as number | undefined,
+    clientId: undefined as number | undefined,
+    noticeId: undefined as number | undefined,
+    salesOrderCode: undefined as string | undefined,
     salesDate: undefined,
-    contactName: undefined,
-    contactTelephone: undefined,
-    contactAddress: undefined,
-    carrier: undefined,
-    shippingNumber: undefined,
-    remark: undefined
+    contactName: undefined as string | undefined,
+    contactTelephone: undefined as string | undefined,
+    contactAddress: undefined as string | undefined,
+    carrier: undefined as string | undefined,
+    shippingNumber: undefined as string | undefined,
+    remark: undefined as string | undefined
   }
   formRef.value?.resetFields()
 }

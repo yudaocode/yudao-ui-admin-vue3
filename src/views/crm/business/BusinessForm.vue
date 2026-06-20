@@ -144,6 +144,8 @@ import { getCurrentUserId } from '@/utils/auth'
 import BusinessProductForm from './components/BusinessProductForm.vue'
 import { erpPriceMultiply, erpPriceInputFormatter } from '@/utils'
 
+type BusinessProduct = NonNullable<BusinessApi.BusinessVO['products']>[number]
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -151,19 +153,20 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const disabled = computed(() => formType.value === 'detail')
 const formData = ref({
-  id: undefined,
-  name: undefined,
-  customerId: undefined,
-  ownerUserId: undefined,
-  statusTypeId: undefined,
+  id: undefined as number | undefined,
+  name: undefined as string | undefined,
+  customerId: undefined as number | undefined,
+  ownerUserId: undefined as number | undefined,
+  statusTypeId: undefined as number | undefined,
   dealTime: undefined,
   discountPercent: 0,
-  totalProductPrice: undefined,
-  totalPrice: undefined,
-  remark: undefined,
-  products: [],
-  contactId: undefined,
+  totalProductPrice: undefined as number | undefined,
+  totalPrice: undefined as number | undefined,
+  remark: undefined as string | undefined,
+  products: [] as BusinessProduct[],
+  contactId: undefined as number | undefined,
   customerDefault: false
 })
 const formRules = reactive({
@@ -174,8 +177,8 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
-const statusTypeList = ref([]) // 商机状态类型列表
-const customerList = ref([]) // 客户列表的数据
+const statusTypeList = ref<BusinessStatusApi.BusinessStatusTypeVO[]>([]) // 商机状态类型列表
+const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表的数据
 
 /** 子表的表单 */
 const subTabsName = ref('product')

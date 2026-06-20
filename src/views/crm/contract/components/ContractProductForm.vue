@@ -98,18 +98,29 @@ import * as ProductApi from '@/api/crm/product'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
 import { DICT_TYPE } from '@/utils/dict'
 
+type ContractProduct = {
+  id?: number
+  productId?: number
+  productUnit?: number
+  productNo?: string
+  productPrice?: number
+  contractPrice?: number
+  count?: number
+  totalPrice?: number
+}
+
 const props = defineProps<{
-  products: undefined
-  disabled: false
+  products: ContractProduct[]
+  disabled: boolean
 }>()
 const formLoading = ref(false) // 表单的加载中
-const formData = ref([])
+const formData = ref<ContractProduct[]>([])
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   contractPrice: [{ required: true, message: '合同价格不能为空', trigger: 'blur' }],
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })
-const formRef = ref([]) // 表单 Ref
+const formRef = ref() // 表单 Ref
 const productList = ref<ProductApi.ProductVO[]>([]) // 产品列表
 
 /** 初始化设置产品项 */
@@ -160,7 +171,7 @@ const handleDelete = (index: number) => {
 }
 
 /** 处理产品变更 */
-const onChangeProduct = (productId, row) => {
+const onChangeProduct = (productId: number, row: ContractProduct) => {
   const product = productList.value.find((item) => item.id === productId)
   if (product) {
     row.productUnit = product.unit

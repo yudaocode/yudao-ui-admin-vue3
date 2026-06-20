@@ -21,10 +21,19 @@
 <script lang="ts" setup>
 import { erpPriceTableColumnFormatter } from '@/utils'
 
+type FollowUpBusiness = {
+  id: number
+  name: string
+  totalPrice?: number
+  customerName?: string
+  statusTypeName?: string
+  statusName?: string
+}
+
 const props = defineProps<{
-  businesses: undefined
+  businesses: FollowUpBusiness[]
 }>()
-const formData = ref([])
+const formData = ref<FollowUpBusiness[]>([])
 
 /** 初始化商机列表 */
 watch(

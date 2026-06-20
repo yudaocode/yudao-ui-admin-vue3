@@ -86,13 +86,13 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  name: undefined,
-  type: undefined,
-  status: undefined,
-  event: undefined,
-  valueType: undefined,
-  value: undefined
+  id: undefined as number | undefined,
+  name: undefined as string | undefined,
+  type: undefined as string | undefined,
+  status: undefined as number | undefined,
+  event: undefined as string | undefined,
+  valueType: undefined as string | undefined,
+  value: undefined as string | undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],

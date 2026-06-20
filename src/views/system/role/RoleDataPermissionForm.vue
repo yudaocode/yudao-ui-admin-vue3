@@ -78,10 +78,10 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = reactive({
-  id: undefined,
+  id: undefined as number | undefined,
   name: '',
   code: '',
-  dataScope: undefined,
+  dataScope: undefined as number | undefined,
   dataScopeDeptIds: []
 })
 const formRef = ref() // 表单 Ref
@@ -116,12 +116,12 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = {
-      roleId: formData.id,
-      dataScope: formData.dataScope,
+      roleId: formData.id!,
+      dataScope: formData.dataScope!,
       dataScopeDeptIds:
         formData.dataScope !== SystemDataScopeEnum.DEPT_CUSTOM
           ? []
-          : treeRef.value.getCheckedKeys(false)
+          : (treeRef.value.getCheckedKeys(false) as number[])
     }
     await PermissionApi.assignRoleDataScope(data)
     message.success(t('common.updateSuccess'))
@@ -140,13 +140,13 @@ const resetForm = () => {
   deptExpand.value = true
   checkStrictly.value = true
   // 重置表单
-  formData.value = {
+  Object.assign(formData, {
     id: undefined,
     name: '',
     code: '',
     dataScope: undefined,
     dataScopeDeptIds: []
-  }
+  })
   treeRef.value?.setCheckedNodes([])
   formRef.value?.resetFields()
 }

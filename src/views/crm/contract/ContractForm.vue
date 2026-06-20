@@ -203,6 +203,8 @@ import { erpPriceMultiply, erpPriceInputFormatter } from '@/utils'
 import { getCurrentUserId } from '@/utils/auth'
 import ContractProductForm from '@/views/crm/contract/components/ContractProductForm.vue'
 
+type ContractProduct = NonNullable<ContractApi.ContractVO['products']>[number]
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -210,22 +212,24 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const disabled = computed(() => formType.value === 'detail')
 const formData = ref({
-  id: undefined,
-  no: undefined,
-  name: undefined,
-  customerId: undefined,
-  businessId: undefined,
+  id: undefined as number | undefined,
+  no: undefined as string | undefined,
+  name: undefined as string | undefined,
+  customerId: undefined as number | undefined,
+  businessId: undefined as number | undefined,
   orderDate: undefined,
   startTime: undefined,
   endTime: undefined,
-  signUserId: undefined,
-  signContactId: undefined,
-  ownerUserId: undefined,
+  signUserId: undefined as number | undefined,
+  signContactId: undefined as number | undefined,
+  ownerUserId: undefined as number | undefined,
   discountPercent: 0,
-  totalProductPrice: undefined,
-  remark: undefined,
-  products: []
+  totalProductPrice: undefined as number | undefined,
+  totalPrice: undefined as number | undefined,
+  remark: undefined as string | undefined,
+  products: [] as ContractProduct[]
 })
 const formRules = reactive({
   name: [{ required: true, message: '合同名称不能为空', trigger: 'blur' }],
@@ -235,7 +239,7 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
-const customerList = ref([]) // 客户列表的数据
+const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表的数据
 const businessList = ref<BusinessApi.BusinessVO[]>([])
 const contactList = ref<ContactApi.ContactVO[]>([])
 
@@ -336,6 +340,7 @@ const resetForm = () => {
     ownerUserId: undefined,
     discountPercent: 0,
     totalProductPrice: undefined,
+    totalPrice: undefined,
     remark: undefined,
     products: []
   }
@@ -355,7 +360,7 @@ const handleBusinessChange = async (businessId: number) => {
   business.products.forEach((item) => {
     item.contractPrice = item.businessPrice
   })
-  formData.value.products = business.products
+  formData.value.products = business.products as unknown as ContractProduct[]
 }
 
 /** 动态获取客户联系人 */

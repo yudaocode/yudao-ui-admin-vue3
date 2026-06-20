@@ -39,16 +39,17 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formData = ref({
-  id: undefined,
-  statusId: undefined,
-  endStatus: undefined,
-  status: undefined
+  id: undefined as number | undefined,
+  statusId: undefined as number | undefined,
+  endStatus: undefined as number | undefined,
+  status: undefined as number | undefined
 })
 const formRules = reactive({
   status: [{ required: true, message: '商机阶段不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const statusList = ref([]) // 商机状态列表
+type BusinessStatus = NonNullable<BusinessStatusApi.BusinessStatusTypeVO['statuses']>
+const statusList = ref<BusinessStatus[]>([]) // 商机状态列表
 
 /** 打开弹窗 */
 const open = async (business: BusinessApi.BusinessVO) => {
@@ -81,10 +82,10 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     await BusinessApi.updateBusinessStatus({
-      id: formData.value.id,
-      statusId: formData.value.status > 0 ? formData.value.status : undefined,
-      endStatus: formData.value.status < 0 ? -formData.value.status : undefined
-    })
+      id: formData.value.id!,
+      statusId: formData.value.status! > 0 ? formData.value.status : undefined,
+      endStatus: formData.value.status! < 0 ? -formData.value.status! : undefined
+    } as BusinessApi.BusinessVO)
     message.success('更新商机状态成功')
     dialogVisible.value = false
     // 发送操作成功的事件

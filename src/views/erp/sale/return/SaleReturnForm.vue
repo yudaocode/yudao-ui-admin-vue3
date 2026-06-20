@@ -197,20 +197,21 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
-  id: undefined,
-  customerId: undefined,
-  accountId: undefined,
-  saleUserId: undefined,
+  id: undefined as number | undefined,
+  customerId: undefined as number | undefined,
+  accountId: undefined as number | undefined,
+  saleUserId: undefined as number | undefined,
+  orderId: undefined as number | undefined,
   returnTime: undefined,
-  remark: undefined,
+  remark: undefined as string | undefined,
   fileUrl: '',
   discountPercent: 0,
   discountPrice: 0,
   totalPrice: 0,
   otherPrice: 0,
-  orderNo: undefined,
+  orderNo: undefined as string | undefined,
   items: [],
-  no: undefined // 退货单号，后端返回
+  no: undefined as string | undefined // 退货单号，后端返回
 })
 const formRules = reactive({
   customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
@@ -323,18 +324,21 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    customerId: undefined,
-    accountId: undefined,
-    saleUserId: undefined,
+    id: undefined as number | undefined,
+    customerId: undefined as number | undefined,
+    accountId: undefined as number | undefined,
+    saleUserId: undefined as number | undefined,
+    orderId: undefined as number | undefined,
     returnTime: undefined,
-    remark: undefined,
-    fileUrl: undefined,
+    remark: undefined as string | undefined,
+    fileUrl: '',
     discountPercent: 0,
     discountPrice: 0,
     totalPrice: 0,
     otherPrice: 0,
-    items: []
+    orderNo: undefined,
+    items: [],
+    no: undefined
   }
   formRef.value?.resetFields()
 }

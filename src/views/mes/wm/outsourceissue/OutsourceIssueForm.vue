@@ -141,13 +141,13 @@ const dialogTitle = computed(() => {
 })
 const formData = ref({
   id: undefined as number | undefined,
-  code: undefined,
-  name: undefined,
+  code: undefined as string | undefined,
+  name: undefined as string | undefined,
   status: undefined as number | undefined,
-  vendorId: undefined,
-  workOrderId: undefined,
+  vendorId: undefined as number | undefined,
+  workOrderId: undefined as number | undefined,
   issueDate: undefined,
-  remark: undefined
+  remark: undefined as string | undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '发料单编号不能为空', trigger: 'blur' }],
@@ -276,14 +276,14 @@ const handleFinish = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    code: undefined,
-    name: undefined,
-    status: undefined,
-    vendorId: undefined,
-    workOrderId: undefined,
+    id: undefined as number | undefined,
+    code: undefined as string | undefined,
+    name: undefined as string | undefined,
+    status: undefined as number | undefined,
+    vendorId: undefined as number | undefined,
+    workOrderId: undefined as number | undefined,
     issueDate: undefined,
-    remark: undefined
+    remark: undefined as string | undefined
   }
   formRef.value?.resetFields()
 }
