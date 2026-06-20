@@ -44,7 +44,6 @@ const props = defineProps({
   spuId: propTypes.number.def(null)
 })
 
-const message = useMessage() // 消息弹窗
 const list = ref<any[]>([]) // 列表的数据
 const loading = ref(false) // 列表的加载中
 const dialogVisible = ref(false) // 弹窗的是否展示

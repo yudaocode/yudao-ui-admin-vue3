@@ -8,7 +8,7 @@
       <!-- 视频呼叫：自己摄像头预览铺底，对方头像悬浮顶部 -->
       <video
         v-if="isVideo && localStream"
-        ref="localVideoRef"
+        :ref="localVideoRef"
         class="absolute inset-0 object-cover w-full h-full scale-x-[-1]"
         autoplay
         muted

@@ -191,7 +191,7 @@
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter, formatDate } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as MailAccountApi from '@/api/system/mail/account'
 import * as MailLogApi from '@/api/system/mail/log'

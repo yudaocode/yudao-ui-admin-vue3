@@ -142,8 +142,6 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as DiscountActivity from '@/api/mall/promotion/discount/discountActivity'
 import DiscountActivityForm from './DiscountActivityForm.vue'
 import { formatDate } from '@/utils/formatTime'
-import { fenToYuanFormat } from '@/utils/formatter'
-import { fenToYuan } from '@/utils'
 
 defineOptions({ name: 'DiscountActivity' })
 
@@ -161,7 +159,6 @@ const queryParams = reactive({
   status: null
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -217,19 +214,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-const configList = ref([]) // 时段配置精简列表
-// const formatConfigNames = (configId) => {
-//   const config = configList.value.find((item) => item.id === configId)
-//   return config != null ? `${config.name}[${config.startTime} ~ ${config.endTime}]` : ''
-// }
-
-const formatSeckillPrice = (products) => {
-  // const seckillPrice = Math.min(...products.map((item) => item.seckillPrice))
-  console.log(products)
-  const seckillPrice = 200
-  return `￥${fenToYuan(seckillPrice)}`
 }
 
 /** 初始化 **/

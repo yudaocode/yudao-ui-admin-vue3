@@ -76,7 +76,6 @@ const handleDateRangeChange = (times: any[]) => {
   getSpuList()
 }
 
-const shortcutDateRangePicker = ref()
 // 查询参数
 const queryParams = reactive({
   pageNo: 1,

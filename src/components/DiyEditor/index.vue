@@ -201,7 +201,6 @@ import { propTypes } from '@/utils/propTypes'
 defineOptions({ name: 'DiyPageDetail' })
 
 // 左侧组件库
-const componentLibrary = ref()
 // 页面设置组件
 const pageConfigComponent = ref<DiyComponent<any>>(cloneDeep(PAGE_CONFIG_COMPONENT))
 // 顶部导航栏

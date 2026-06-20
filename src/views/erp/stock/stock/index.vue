@@ -102,8 +102,6 @@ import { erpCountTableColumnFormatter } from '@/utils'
 defineOptions({ name: 'ErpStock' })
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
-
 const loading = ref(true) // 列表的加载中
 const list = ref<StockVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
@@ -146,19 +144,6 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await StockApi.deleteStock(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
 }
 
 /** 导出按钮操作 */

@@ -80,10 +80,8 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import * as BusinessStatusApi from '@/api/crm/business/status'
 import BusinessStatusForm from './BusinessStatusForm.vue'
-import { deleteBusinessStatus } from '@/api/crm/business/status'
 
 defineOptions({ name: 'CrmBusinessStatus' })
 
@@ -97,8 +95,6 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10
 })
-const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -110,18 +106,6 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  handleQuery()
 }
 
 /** 添加/修改操作 */

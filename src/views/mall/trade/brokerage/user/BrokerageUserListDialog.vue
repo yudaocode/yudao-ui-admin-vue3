@@ -88,8 +88,6 @@ import * as BrokerageUserApi from '@/api/mall/trade/brokerage/user'
 /** 推广人列表 */
 defineOptions({ name: 'BrokerageUserListDialog' })
 
-const message = useMessage() // 消息弹窗
-
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据

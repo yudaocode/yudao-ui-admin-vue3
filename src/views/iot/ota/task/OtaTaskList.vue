@@ -129,7 +129,6 @@ const queryParams = reactive({
   name: '',
   firmwareId: props.firmwareId
 })
-const queryFormRef = ref() // 查询表单引用
 const taskFormRef = ref() // 任务表单引用
 const taskDetailRef = ref() // 任务详情引用
 

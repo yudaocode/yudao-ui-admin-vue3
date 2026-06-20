@@ -23,7 +23,7 @@
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="退款金额">
-        <el-tag size="mini" type="danger">
+        <el-tag size="small" type="danger">
           ￥{{ (refundDetail.refundPrice / 100.0).toFixed(2) }}
         </el-tag>
       </el-descriptions-item>

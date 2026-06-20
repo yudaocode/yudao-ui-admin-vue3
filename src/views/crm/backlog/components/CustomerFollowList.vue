@@ -133,7 +133,6 @@ const queryParams = ref({
   sceneType: 1,
   followUpStatus: false
 })
-const queryFormRef = ref() // 搜索的表单
 
 /** 查询列表 */
 const getList = async () => {

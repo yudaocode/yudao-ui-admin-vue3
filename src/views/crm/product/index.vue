@@ -185,7 +185,7 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 打开详情 */
-const { currentRoute, push } = useRouter()
+const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmProductDetail', params: { id } })
 }

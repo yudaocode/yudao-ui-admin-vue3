@@ -27,9 +27,7 @@
 <script lang="ts" setup>
 import * as CustomerApi from '@/api/crm/customer'
 import * as UserApi from '@/api/system/user'
-import { distributeCustomer } from '@/api/crm/customer'
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示

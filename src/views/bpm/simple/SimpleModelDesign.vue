@@ -26,7 +26,6 @@ defineProps<{
 }>()
 
 const emit = defineEmits(['success'])
-const designerRef = ref()
 
 // 修改成功回调
 const handleSuccess = (data?: any) => {

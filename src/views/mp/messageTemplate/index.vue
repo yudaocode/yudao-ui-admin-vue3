@@ -88,7 +88,6 @@ const list = ref<MsgTemplateVO[]>([]) // 列表的数据
 const queryParams = reactive({
   accountId: -1
 })
-const queryFormRef = ref() // 搜索的表单
 const syncLoading = ref(false) // 同步模板的加载中
 
 /** 公众号选择变化 */

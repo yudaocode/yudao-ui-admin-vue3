@@ -122,7 +122,6 @@ const queryParams = reactive({
   productId: -1
 })
 
-const queryFormRef = ref() // 搜索的表单
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
 
 /** 查询列表 */

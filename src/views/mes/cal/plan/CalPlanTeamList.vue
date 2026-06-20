@@ -89,7 +89,6 @@ const props = defineProps<{
 
 const isDetail = computed(() => props.formType === 'detail') // DONE @AI：【听我的】，参考别的模块，基于 formType 做判断；你参考下；
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表的加载中

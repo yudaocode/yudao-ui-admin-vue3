@@ -48,13 +48,13 @@
       </el-descriptions-item>
       <el-descriptions-item label="支付 IP">{{ detailData.userIp }}</el-descriptions-item>
       <el-descriptions-item label="渠道单号">
-        <el-tag size="mini" type="success" v-if="detailData.channelOrderNo">
+        <el-tag size="small" type="success" v-if="detailData.channelOrderNo">
           {{ detailData.channelOrderNo }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="渠道用户">{{ detailData.channelUserId }}</el-descriptions-item>
       <el-descriptions-item label="退款金额">
-        <el-tag size="mini" type="danger">
+        <el-tag size="small" type="danger">
           ￥{{ ((detailData.refundPrice || 0) / 100.0).toFixed(2) }}
         </el-tag>
       </el-descriptions-item>

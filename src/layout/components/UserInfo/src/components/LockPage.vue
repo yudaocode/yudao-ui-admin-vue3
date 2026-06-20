@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { resetRouter } from '@/router'
 import { deleteUserCache } from '@/hooks/web/useCache'
 import { useLockStore } from '@/store/modules/lock'
 import { useNow } from '@/hooks/web/useNow'

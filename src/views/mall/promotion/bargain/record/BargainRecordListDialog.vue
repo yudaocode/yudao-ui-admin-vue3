@@ -43,8 +43,6 @@ import { fenToYuanFormat } from '@/utils/formatter'
 /** 助力列表 */
 defineOptions({ name: 'BargainRecordListDialog' })
 
-const message = useMessage() // 消息弹窗
-
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据

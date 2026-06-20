@@ -73,7 +73,6 @@ const document = ref<{
   }[]
 } | null>(null) // 知识库文档列表
 const dialogVisible = ref(false) // 知识引用详情弹窗
-const documentRef = ref<HTMLElement>() // 知识引用详情弹窗 Ref
 
 /** 按照 document 聚合 segments */
 const documentList = computed(() => {

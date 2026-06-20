@@ -167,8 +167,6 @@ const autoRefresh = ref(false) // 自动刷新开关
 let autoRefreshTimer: any = null // 定时器
 const viewMode = ref<'card' | 'list'>('card') // 视图模式状态
 
-const queryFormRef = ref() // 搜索的表单
-
 /** 查询列表 */
 const getList = async () => {
   loading.value = true

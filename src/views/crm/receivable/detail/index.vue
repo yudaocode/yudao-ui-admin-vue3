@@ -86,7 +86,6 @@ const close = () => {
 }
 
 /** 初始化 */
-const { params } = useRoute()
 onMounted(async () => {
   const id = props.id || route.params.id
   if (!id) {

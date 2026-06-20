@@ -77,7 +77,7 @@
 <script setup lang="ts">
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { DeviceGroupApi } from '@/api/iot/device/group'
-import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
+import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { UploadImg } from '@/components/UploadFile'
 import { MapDialog } from '@/components/Map'
 import { ref } from 'vue'

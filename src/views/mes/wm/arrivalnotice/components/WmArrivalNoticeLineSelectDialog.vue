@@ -83,7 +83,6 @@ const list = ref<WmArrivalNoticeLineVO[]>([]) // 列表
 const total = ref(0) // 总条数
 
 // ==================== 选中状态 ====================
-const tableRef = ref() // 表格 Ref
 const selectedRadioId = ref<number>() // 单选模式：选中 ID
 const currentRadioRow = ref<WmArrivalNoticeLineVO>() // 单选模式：选中行对象
 const preSelectedIds = ref<number[]>([]) // 打开弹窗时传入的已选 ID

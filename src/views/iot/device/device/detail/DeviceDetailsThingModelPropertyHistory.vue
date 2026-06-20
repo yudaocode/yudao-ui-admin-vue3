@@ -94,7 +94,6 @@ const queryParams = reactive({
     formatDate(endOfDay(new Date()))
   ]
 })
-const queryFormRef = ref() // 搜索的表单
 
 // 判断是否为复杂数据类型（struct 或 array）
 const isComplexDataType = computed(() => {

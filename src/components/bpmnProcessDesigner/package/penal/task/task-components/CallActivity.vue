@@ -164,7 +164,6 @@ const outVariableList = ref()
 const variableType = ref() // 参数类型
 const editingVariableIndex = ref(-1) // 编辑参数下标
 const variableDialogVisible = ref(false)
-const varialbeFormRef = ref()
 const varialbeFormData = ref({
   source: '',
   target: ''

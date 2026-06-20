@@ -68,7 +68,7 @@
 </template>
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
-import type { UploadInstance, UploadProps, UploadRawFile, UploadUserFile } from 'element-plus'
+import type { UploadProps, UploadRawFile, UploadUserFile } from 'element-plus'
 import { isString } from '@/utils/is'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
 import { UploadFile } from 'element-plus/es/components/upload/src/upload'
@@ -91,7 +91,6 @@ const props = defineProps({
 })
 
 // ========== 上传相关 ==========
-const uploadRef = ref<UploadInstance>()
 const uploadList = ref<UploadUserFile[]>([])
 const fileList = ref<UploadUserFile[]>([])
 const uploadNumber = ref<number>(0)
