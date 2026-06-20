@@ -47,6 +47,9 @@ const locale = computed(() => appStore.getLocale)
 // 消息图标
 const message = computed(() => appStore.getMessage)
 
+// IM即时通讯图标
+const im = computed(() => appStore.getIm)
+
 // 租户切换权限
 const hasTenantVisitPermission = computed(
   () => import.meta.env.VITE_APP_TENANT_ENABLE === 'true' && checkPermi(['system:tenant:visit'])
@@ -113,9 +116,11 @@ export default defineComponent({
             <Message class="custom-hover" color="var(--top-header-text-color)"></Message>
           ) : undefined}
           {/* IM 聊天入口 */}
-          <div class="custom-hover" onClick={goToChat}>
-            <Icon color="var(--top-header-text-color)" size={18} icon="ep:chat-dot-round" />
-          </div>
+          {im.value ? (
+            <div class="custom-hover" onClick={goToChat}>
+              <Icon color="var(--top-header-text-color)" size={18} icon="ep:chat-dot-round" />
+            </div>
+          ) : undefined}
           <UserInfo></UserInfo>
         </div>
       </div>
