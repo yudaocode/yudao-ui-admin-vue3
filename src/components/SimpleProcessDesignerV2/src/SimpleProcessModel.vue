@@ -36,7 +36,11 @@
       @mouseleave="stopDrag"
       @mouseenter="setGrabCursor"
     >
-      <ProcessNodeTree v-if="processNodeTree" v-model:flow-node="processNodeTree" />
+      <ProcessNodeTree
+        v-if="processNodeTree"
+        :key="importKey"
+        v-model:flow-node="processNodeTree"
+      />
     </div>
   </div>
   <Dialog v-model="errorDialogVisible" title="保存失败" width="400" :fullscreen="false">
@@ -222,16 +226,26 @@ const exportJson = () => {
 
 /** 导入 JSON */
 const refFile = ref()
+/** 导入后自增，作为 ProcessNodeTree 的 key，强制重新挂载以保证画布刷新 */
+const importKey = ref(0)
 const importJson = () => {
   refFile.value.click()
 }
 const importLocalFile = () => {
   const file = refFile.value.files[0]
+  // 清空 input 的 value，否则再次选择同一个文件时 change 事件不会触发
+  refFile.value.value = ''
+  if (!file) {
+    return
+  }
   const reader = new FileReader()
   reader.readAsText(file)
   reader.onload = function () {
     if (isString(this.result)) {
       processNodeTree.value = JSON.parse(this.result)
+      // 改变 key，强制 ProcessNodeTree 重新挂载，
+      // 规避 watch(() => props.flowNode) 在组件复用场景下同步失效导致画布不刷新的问题
+      importKey.value++
       emits('save', processNodeTree.value)
     }
   }
