@@ -15,6 +15,7 @@ const userStore = useUserStoreWithOut()
 const activeName = ref('notice')
 const unreadCount = ref(0) // 未读消息数量
 const list = ref<any[]>([]) // 消息列表
+let unreadCountTimer: ReturnType<typeof setInterval> | undefined
 
 // 获得消息列表
 const getList = async () => {
@@ -42,7 +43,7 @@ onMounted(() => {
   // 首次加载小红点
   getUnreadCount()
   // 轮询刷新小红点
-  setInterval(
+  unreadCountTimer = setInterval(
     () => {
       if (userStore.getIsSetUser) {
         getUnreadCount()
@@ -52,6 +53,13 @@ onMounted(() => {
     },
     1000 * 60 * 2
   )
+})
+
+onBeforeUnmount(() => {
+  if (unreadCountTimer) {
+    clearInterval(unreadCountTimer)
+    unreadCountTimer = undefined
+  }
 })
 </script>
 <template>
