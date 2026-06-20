@@ -1,8 +1,6 @@
 import { resolve } from 'path'
 import Vue from '@vitejs/plugin-vue'
 import VueJsx from '@vitejs/plugin-vue-jsx'
-import progress from 'vite-plugin-progress'
-import EslintPlugin from 'vite-plugin-eslint2'
 // @ts-ignore
 import ElementPlus from 'unplugin-element-plus/vite'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -28,7 +26,6 @@ export function createVitePlugins(isBuild = false, env: Record<string, string> =
     Vue(),
     VueJsx(),
     UnoCSS(),
-    !isBuild && progress(),
     ElementPlus({}),
     AutoImport({
       include: [
@@ -65,11 +62,6 @@ export function createVitePlugins(isBuild = false, env: Record<string, string> =
       resolvers: [ElementPlusResolver()],
       globs: ['src/components/**/**.{vue, md}', '!src/components/DiyEditor/components/mobile/**']
     }),
-    !isBuild && EslintPlugin({
-      cache: false,
-      include: ['src/**/*.vue', 'src/**/*.ts', 'src/**/*.tsx'] // 检查的文件
-    }),
-
     createSvgIconsPlugin({
       iconDirs: [pathResolve('src/assets/svgs')],
       symbolId: 'icon-[dir]-[name]'

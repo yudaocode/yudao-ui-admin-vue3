@@ -80,8 +80,10 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             ]
         },
         build: {
+            chunkSizeWarningLimit: 2000,
             minify: 'oxc',
             outDir: env.VITE_OUT_DIR || 'dist',
+            reportCompressedSize: false,
             sourcemap: env.VITE_SOURCEMAP === 'true' ? 'inline' : false,
             rollupOptions: {
                 output: {

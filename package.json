@@ -19,10 +19,14 @@
     "preview": "pnpm build:local && vite preview",
     "clean": "npx rimraf node_modules",
     "clean:cache": "npx rimraf node_modules/.cache",
-    "lint:eslint": "eslint --fix ./src",
-    "lint:format": "prettier --write --loglevel warn \"src/**/*.{js,ts,json,tsx,css,less,scss,vue,html,md}\"",
+    "lint": "pnpm lint:eslint:check && pnpm lint:style:check && pnpm lint:format:check",
+    "lint:eslint": "eslint --fix ./src --cache --cache-location node_modules/.cache/eslint/",
+    "lint:eslint:check": "eslint ./src --cache --cache-location node_modules/.cache/eslint/",
+    "lint:format": "prettier --write --loglevel warn --cache --cache-location node_modules/.cache/prettier/.prettier-cache \"src/**/*.{js,ts,json,tsx,css,less,scss,vue,html,md}\"",
+    "lint:format:check": "prettier --check --cache --cache-location node_modules/.cache/prettier/.prettier-cache \"src/**/*.{js,ts,json,tsx,css,less,scss,vue,html,md}\"",
     "lint:style": "stylelint --fix \"./src/**/*.{vue,less,postcss,css,scss}\" --cache --cache-location node_modules/.cache/stylelint/",
-    "lint:lint-staged": "lint-staged -c "
+    "lint:style:check": "stylelint \"./src/**/*.{vue,less,postcss,css,scss}\" --cache --cache-location node_modules/.cache/stylelint/",
+    "lint:lint-staged": "lint-staged"
   },
   "dependencies": {
     "@element-plus/icons-vue": "2.3.2",
@@ -99,7 +103,6 @@
     "@unocss/eslint-config": "^66.6.8",
     "@unocss/eslint-plugin": "66.6.8",
     "@unocss/transformer-variant-group": "^66.6.8",
-    "@vitejs/plugin-legacy": "^8.0.1",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vitejs/plugin-vue-jsx": "^5.1.5",
     "autoprefixer": "^10.5.0",
@@ -122,7 +125,6 @@
     "stylelint-config-recommended": "^18.0.0",
     "stylelint-config-standard": "^40.0.0",
     "stylelint-order": "^8.1.1",
-    "terser": "^5.46.2",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.59.2",
     "unocss": "^66.6.8",
@@ -131,9 +133,6 @@
     "unplugin-vue-components": "^32.0.0",
     "vite": "8.0.10",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-ejs": "^1.7.0",
-    "vite-plugin-eslint2": "^5.1.0",
-    "vite-plugin-progress": "^0.0.7",
     "vite-plugin-svg-icons-ng": "^1.9.0",
     "vue-eslint-parser": "^10.4.0",
     "vue-tsc": "^3.2.8"
