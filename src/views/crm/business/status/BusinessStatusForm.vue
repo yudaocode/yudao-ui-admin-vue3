@@ -59,19 +59,14 @@
           </el-table-column>
           <el-table-column label="操作" width="110" align="center">
             <template #default="scope">
-              <el-button
-                v-if="!scope.row.endStatus"
-                link
-                type="primary"
-                @click="addStatus(scope.$index)"
-              >
+              <el-button v-if="!scope.row.endStatus" link type="primary" @click="() => addStatus()">
                 添加
               </el-button>
               <el-button
                 v-if="!scope.row.endStatus"
                 link
                 type="danger"
-                @click="deleteStatusArea(scope.$index)"
+                @click="() => deleteStatusArea(scope.$index)"
                 :disabled="formData.statuses.length <= 1"
               >
                 删除

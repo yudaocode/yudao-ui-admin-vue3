@@ -64,7 +64,7 @@
                 v-for="line in taskLineList"
                 :key="line.id"
                 :label="`${line.itemCode} - ${line.itemName} (${line.warehouseName}${line.locationName ? ' / ' + line.locationName : ''}${line.areaName ? ' / ' + line.areaName : ''})`"
-                :value="line.id"
+                :value="line.id!"
               />
             </el-select>
           </el-form-item>

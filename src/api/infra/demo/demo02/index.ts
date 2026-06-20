@@ -7,8 +7,8 @@ export interface Demo02CategoryVO {
 }
 
 // 查询示例分类列表
-export const getDemo02CategoryList = async () => {
-  return await request.get({ url: `/infra/demo02-category/list` })
+export const getDemo02CategoryList = async (params?: any) => {
+  return await request.get({ url: `/infra/demo02-category/list`, params })
 }
 
 // 查询示例分类详情

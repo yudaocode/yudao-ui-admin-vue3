@@ -26,7 +26,7 @@
       <Icon icon="majesticons:next-circle" :size="20" class="text-gray-300 cursor-pointer" />
       <div class="flex gap-[16px] items-center">
         <span>{{ audioProps.currentTime }}</span>
-        <el-slider v-model="audioProps.duration" color="#409eff" class="w-[160px!important]" />
+        <el-slider v-model="audioProgress" color="#409eff" class="w-[160px!important]" />
         <span>{{ audioProps.duration }}</span>
       </div>
       <!-- 音频 -->
@@ -62,7 +62,8 @@ defineOptions({ name: 'Index' })
 
 const currentSong = inject('currentSong', {})
 
-const audioRef = ref<Nullable<HTMLElement>>(null)
+const audioRef = ref<Nullable<HTMLAudioElement>>(null)
+const audioProgress = ref(0)
 // 音频相关属性https://www.runoob.com/tags/ref-av-dom.html
 const audioProps = reactive({
   autoplay: true,

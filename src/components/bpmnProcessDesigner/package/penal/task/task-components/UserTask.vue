@@ -65,7 +65,12 @@
         style="width: 100%"
         @change="updateElementTask"
       >
-        <el-option v-for="item in postOptions" :key="item.id" :label="item.name" :value="item.id" />
+        <el-option
+          v-for="item in postOptions"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id!"
+        />
       </el-select>
     </el-form-item>
     <el-form-item

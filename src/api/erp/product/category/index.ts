@@ -13,8 +13,8 @@ export interface ProductCategoryVO {
 // ERP 产品分类 API
 export const ProductCategoryApi = {
   // 查询产品分类列表
-  getProductCategoryList: async () => {
-    return await request.get({ url: `/erp/product-category/list` })
+  getProductCategoryList: async (params?: any) => {
+    return await request.get({ url: `/erp/product-category/list`, params })
   },
 
   // 查询产品分类精简列表
