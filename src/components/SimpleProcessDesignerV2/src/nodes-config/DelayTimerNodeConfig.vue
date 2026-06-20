@@ -152,12 +152,12 @@ const getShowText = (): string => {
   return showText
 }
 const getIsoTimeDuration = () => {
-  let strTimeDuration = 'PT'
+  let strTimeDuration = 'P'
   if (configForm.value.timeUnit === TimeUnitType.MINUTE) {
-    strTimeDuration += configForm.value.timeDuration + 'M'
+    strTimeDuration += 'T' + configForm.value.timeDuration + 'M'
   }
   if (configForm.value.timeUnit === TimeUnitType.HOUR) {
-    strTimeDuration += configForm.value.timeDuration + 'H'
+    strTimeDuration += 'T' + configForm.value.timeDuration + 'H'
   }
   if (configForm.value.timeUnit === TimeUnitType.DAY) {
     strTimeDuration += configForm.value.timeDuration + 'D'
@@ -172,7 +172,7 @@ const showDelayTimerNodeConfig = (node: SimpleFlowNode) => {
     // 固定时长
     if (configForm.value.delayType === DelayTypeEnum.FIXED_TIME_DURATION) {
       const strTimeDuration = node.delaySetting.delayTime
-      let parseTime = strTimeDuration.slice(2, strTimeDuration.length - 1)
+      let parseTime = strTimeDuration.match(/\d+/)?.[0] ?? ''
       let parseTimeUnit = strTimeDuration.slice(strTimeDuration.length - 1)
       configForm.value.timeDuration = parseInt(parseTime)
       configForm.value.timeUnit = convertTimeUnit(parseTimeUnit)
