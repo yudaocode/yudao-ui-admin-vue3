@@ -232,7 +232,8 @@ const requestText = computed(() => {
   if (!isGroup.value) {
     return ''
   }
-  const count = groupRequestStore.getUnhandledGroupRequestCountMap.get(props.conversation.targetId) ?? 0
+  const count =
+    groupRequestStore.getUnhandledGroupRequestCountMap.get(props.conversation.targetId) ?? 0
   return count > 0 ? `[${count}条进群申请]` : ''
 })
 
@@ -293,7 +294,6 @@ function handleContextMenu(e: MouseEvent) {
     }
   )
 }
-
 </script>
 
 <style scoped>
@@ -304,7 +304,7 @@ function handleContextMenu(e: MouseEvent) {
 
 /* el-icon 的全局 color:var(--color) 在暗色模式下会渲染成白色，这里用 :deep + !important 锁定 */
 .conversation-item__silent :deep(svg) {
-  fill: currentColor !important;
+  fill: currentcolor !important;
 }
 
 .conversation-item__prefix {

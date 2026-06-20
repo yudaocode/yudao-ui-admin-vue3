@@ -220,7 +220,7 @@ onActivated(() => {
   .el-form--inline .el-form-item {
     margin-right: 10px;
   }
-  
+
   .el-divider--horizontal {
     margin-top: 6px;
   }

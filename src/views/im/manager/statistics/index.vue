@@ -64,8 +64,8 @@ onMounted(async () => {
   padding: 16px;
 
   &__hero {
-    margin-bottom: 16px;
     padding: 4px 2px;
+    margin-bottom: 16px;
   }
 
   &__hero-title {

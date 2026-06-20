@@ -24,7 +24,7 @@
         <PagedScroller :items="shownMembers" :page-size="30" item-key="userId">
           <template #default="{ item }">
             <GroupMemberItem
-              :member="(item as GroupMemberLite)"
+              :member="item as GroupMemberLite"
               :height="46"
               @click="handleToggle(item as GroupMemberLite)"
             >
@@ -86,11 +86,7 @@
 
         <!-- grid 形态：宫格预览；非 locked 成员右上角叠加 × 移除（locked 不渲染） -->
         <div v-else class="flex flex-wrap p-2.5">
-          <GroupMemberGrid
-            v-for="member in selectedMembers"
-            :key="member.userId"
-            :member="member"
-          >
+          <GroupMemberGrid v-for="member in selectedMembers" :key="member.userId" :member="member">
             <Icon
               v-if="!isLocked(member)"
               icon="ant-design:close-circle-filled"
@@ -240,4 +236,3 @@ function handleToggle(member: GroupMemberLite) {
   emit('update:selectedIds', next)
 }
 </script>
-

@@ -94,7 +94,11 @@ export default defineComponent({
         ) : undefined}
         <div class="h-full flex items-center">
           {hasTenantVisitPermission.value ? <TenantVisit /> : undefined}
-          <div class="v-setting custom-hover" title={t('setting.projectSetting')} onClick={openSetting}>
+          <div
+            class="v-setting custom-hover"
+            title={t('setting.projectSetting')}
+            onClick={openSetting}
+          >
             <Icon color="var(--top-header-text-color)" size={18} icon="ep:setting" />
           </div>
           {screenfull.value ? (

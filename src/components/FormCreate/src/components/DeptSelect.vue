@@ -155,32 +155,32 @@ const hasValidPresetValue = (): boolean => {
 // 设置默认值（当前用户部门）
 const setDefaultValue = () => {
   console.log('[DeptSelect] setDefaultValue called, defaultCurrentDept:', props.defaultCurrentDept)
-  
+
   // 仅当 defaultCurrentDept 为 true 时处理
   if (!props.defaultCurrentDept) {
     console.log('[DeptSelect] defaultCurrentDept is false, skip')
     return
   }
-  
+
   // 检查是否已有预设值（预设值优先级高于默认当前部门）
   if (hasValidPresetValue()) {
     console.log('[DeptSelect] has preset value, skip:', props.modelValue)
     return
   }
-  
+
   // 获取当前用户的部门 ID
   const userStore = useUserStoreWithOut()
   const user = userStore.getUser
   const deptId = user?.deptId
-  
+
   console.log('[DeptSelect] current user:', user, 'deptId:', deptId)
-  
+
   // 处理 deptId 为空或 0 的边界情况
   if (!deptId || deptId === 0) {
     console.log('[DeptSelect] deptId is invalid, skip')
     return
   }
-  
+
   // 根据多选模式决定默认值格式
   const defaultValue = props.multiple ? [deptId] : deptId
   console.log('[DeptSelect] setting default value:', defaultValue)

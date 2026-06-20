@@ -46,7 +46,7 @@
           class="!w-240px"
           node-key="id"
           placeholder="请选择归属部门"
-          @change="(queryParams.userId = undefined), handleQuery()"
+          @change="((queryParams.userId = undefined), handleQuery())"
         />
       </el-form-item>
       <el-form-item label="员工" prop="userId">

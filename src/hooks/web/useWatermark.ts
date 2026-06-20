@@ -8,7 +8,7 @@ export function useWatermark(appendEl: HTMLElement | null = document.body) {
   const id = domSymbol.toString()
   const appStore = useAppStore()
   let watermarkStr = ''
-  
+
   const clear = () => {
     const domId = document.getElementById(id)
     if (domId) {

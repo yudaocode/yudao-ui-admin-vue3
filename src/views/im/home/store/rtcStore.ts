@@ -291,13 +291,7 @@ export const useRtcStore = defineStore('imRtc', () => {
   /** 判断群通话是否已补齐 */
   function isGroupCallParticipantsLoaded(groupId: number, room?: string): boolean {
     const call = groupActiveCalls.value.get(groupId)
-    return (
-      !!groupId &&
-      !!room &&
-      !!call &&
-      call.room === room &&
-      !!call.participantsLoaded
-    )
+    return !!groupId && !!room && !!call && call.room === room && !!call.participantsLoaded
   }
 
   /** 两条群通话摘要内容相等（room / mediaType / inviterId / 两个 userId 数组逐项相等） */
@@ -305,8 +299,10 @@ export const useRtcStore = defineStore('imRtc', () => {
     if (a.room !== b.room || a.mediaType !== b.mediaType || a.inviterId !== b.inviterId) {
       return false
     }
-    return isEqual(a.joinedUserIds ?? [], b.joinedUserIds ?? []) &&
+    return (
+      isEqual(a.joinedUserIds ?? [], b.joinedUserIds ?? []) &&
       isEqual(a.inviteeIds ?? [], b.inviteeIds ?? [])
+    )
   }
 
   /** 群通话结束：从 groupActiveCalls 移除；胶囊条消失 */

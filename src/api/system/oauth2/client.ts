@@ -48,5 +48,8 @@ export const deleteOAuth2Client = (id: number) => {
 
 // 批量删除 OAuth2 客户端
 export const deleteOAuth2ClientList = (ids: number[]) => {
-  return request.delete({ url: '/system/oauth2-client/delete-list', params: { ids: ids.join(',') } })
+  return request.delete({
+    url: '/system/oauth2-client/delete-list',
+    params: { ids: ids.join(',') }
+  })
 }

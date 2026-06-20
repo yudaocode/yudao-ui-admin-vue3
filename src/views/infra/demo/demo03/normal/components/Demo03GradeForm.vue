@@ -25,7 +25,7 @@ const formData = ref({})
 const formRules = reactive({
   studentId: [{ required: true, message: '学生编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
-  teacher: [{ required: true, message: '班主任不能为空', trigger: 'blur' }],
+  teacher: [{ required: true, message: '班主任不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 

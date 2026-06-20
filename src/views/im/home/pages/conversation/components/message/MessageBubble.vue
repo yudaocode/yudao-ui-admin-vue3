@@ -355,28 +355,31 @@ onBeforeUnmount(() => {
    颜色与气泡背景对应，留 1px 视觉吃进去，省一张图片 */
 .message-bubble--other::before,
 .message-bubble--self::before {
-  content: '';
   position: absolute;
   top: 12px;
   width: 0;
   height: 0;
   border-style: solid;
+  content: '';
 }
+
 .message-bubble--other::before {
   left: -5px;
-  border-width: 5px 6px 5px 0;
   border-color: transparent var(--el-fill-color-light) transparent transparent;
+  border-width: 5px 6px 5px 0;
 }
+
 .message-bubble--self::before {
   right: -5px;
-  border-width: 5px 0 5px 6px;
   border-color: transparent transparent transparent #95ec69;
+  border-width: 5px 0 5px 6px;
 }
 
 /* :deep 穿透 scoped 子组件 DOM；el-icon 在暗色模式下全局 color 被 .el-icon{color:var(--color)} 干扰，把 voice 图标 fill 锁死 */
 .message-bubble__voice-icon :deep(svg) {
   fill: #606266 !important;
 }
+
 .message-bubble__voice-icon.im-voice-playing :deep(svg) {
   fill: #409eff !important;
 }
@@ -391,6 +394,7 @@ onBeforeUnmount(() => {
   100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.15);
   }

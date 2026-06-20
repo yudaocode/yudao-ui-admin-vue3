@@ -82,6 +82,6 @@ const pendingCount = computed(() => groupRequestStore.getUnhandledGroupRequestCo
 <style scoped>
 /* :deep 穿透 Icon 子组件 DOM；强制 svg 走 currentColor 应对暗色模式 el-icon 全局色覆盖 */
 .im-group-request-pending__icon :deep(svg) {
-  fill: currentColor !important;
+  fill: currentcolor !important;
 }
 </style>

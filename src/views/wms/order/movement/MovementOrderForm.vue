@@ -56,18 +56,9 @@
 
       <div class="mb-12px flex items-center justify-between">
         <span class="text-14px font-bold">移库明细</span>
-        <el-tooltip
-          content="请先选择来源仓库和目标仓库"
-          :disabled="canAddDetail"
-          placement="top"
-        >
+        <el-tooltip content="请先选择来源仓库和目标仓库" :disabled="canAddDetail" placement="top">
           <span>
-            <el-button
-              :disabled="!canAddDetail"
-              plain
-              type="primary"
-              @click="handleAddDetail"
-            >
+            <el-button :disabled="!canAddDetail" plain type="primary" @click="handleAddDetail">
               <Icon class="mr-5px" icon="ep:plus" />
               添加商品
             </el-button>
@@ -375,13 +366,7 @@ const handleDetailTotalPriceChange = (detail: MovementOrderDetailVO) => {
 }
 
 /** 计算表格的合计行数据 */
-function getDetailSummaries({
-  columns,
-  data
-}: {
-  columns: any[]
-  data: MovementOrderDetailVO[]
-}) {
+function getDetailSummaries({ columns, data }: { columns: any[]; data: MovementOrderDetailVO[] }) {
   return columns.map((column, index) => {
     if (index === 0) {
       return '合计'

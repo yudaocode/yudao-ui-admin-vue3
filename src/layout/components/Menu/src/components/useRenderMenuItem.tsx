@@ -33,14 +33,12 @@ export const useRenderMenuItem = () =>
 
           if (
             !children.length ||
-            oneShowingChild &&
-            (!onlyOneChild?.children || onlyOneChild?.noShowingChildren) &&
-            !meta?.alwaysShow
+            (oneShowingChild &&
+              (!onlyOneChild?.children || onlyOneChild?.noShowingChildren) &&
+              !meta?.alwaysShow)
           ) {
             return (
-              <ElMenuItem
-                index={resolvedOnlyOneChildPath}
-              >
+              <ElMenuItem index={resolvedOnlyOneChildPath}>
                 {{
                   default: () => renderMenuTitle(onlyOneChild ? onlyOneChild?.meta : meta)
                 }}

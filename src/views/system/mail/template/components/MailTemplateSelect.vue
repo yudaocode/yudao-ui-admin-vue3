@@ -19,10 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  getSimpleMailTemplateList,
-  type MailTemplateSimpleVO
-} from '@/api/system/mail/template'
+import { getSimpleMailTemplateList, type MailTemplateSimpleVO } from '@/api/system/mail/template'
 
 /** 邮件模板下拉选择器 */
 defineOptions({ name: 'MailTemplateSelect' })

@@ -3,13 +3,9 @@
   <el-dialog v-model="visible" title="设置禁言" width="560px" :close-on-click-modal="false">
     <div class="flex flex-col gap-4">
       <!-- 成员信息卡：和 FriendAddDialog 的 user 卡保持一致的浅色背景 -->
-      <div
-        class="flex items-center gap-2 px-3 py-2.5 rounded-md bg-[var(--el-fill-color-light)]"
-      >
+      <div class="flex items-center gap-2 px-3 py-2.5 rounded-md bg-[var(--el-fill-color-light)]">
         <span class="text-13px text-[var(--el-text-color-secondary)]">禁言成员</span>
-        <span
-          class="text-sm font-medium text-[var(--el-text-color-primary)] truncate"
-        >
+        <span class="text-sm font-medium text-[var(--el-text-color-primary)] truncate">
           {{ memberName }}
         </span>
       </div>

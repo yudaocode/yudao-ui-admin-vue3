@@ -17,7 +17,12 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="高度" prop="height">
-          <el-input-number class="!w-50% mr-10px" controls-position="right" v-model="formData.height" /> px
+          <el-input-number
+            class="!w-50% mr-10px"
+            controls-position="right"
+            v-model="formData.height"
+          />
+          px
         </el-form-item>
         <el-form-item label="指示器" prop="indicator">
           <el-radio-group v-model="formData.indicator">

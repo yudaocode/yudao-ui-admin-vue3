@@ -26,7 +26,10 @@ export const deleteDataSourceConfig = (id: number) => {
 
 // 批量删除数据源配置
 export const deleteDataSourceConfigList = (ids: number[]) => {
-  return request.delete({ url: '/infra/data-source-config/delete-list', params: { ids: ids.join(',') } })
+  return request.delete({
+    url: '/infra/data-source-config/delete-list',
+    params: { ids: ids.join(',') }
+  })
 }
 
 // 查询数据源配置详情

@@ -43,9 +43,7 @@ interface CellRect {
 }
 
 /** 单格的最终绘制内容 */
-type Cell =
-  | { kind: 'image'; img: HTMLImageElement }
-  | { kind: 'color'; text: string; bg: string }
+type Cell = { kind: 'image'; img: HTMLImageElement } | { kind: 'color'; text: string; bg: string }
 
 /**
  * 把群成员头像拼成一张方形群头像 dataURL，按 1 ~ 9 张走九宫格变体布局
@@ -135,11 +133,7 @@ async function resolveCell(member: GroupAvatarMember): Promise<Cell> {
 }
 
 /** 把单个 Cell 画到 ctx 上指定格子里；image 走 cover 裁剪保比例，color 走 fillRect + 居中文字 */
-function drawCell(
-  ctx: CanvasRenderingContext2D,
-  rect: CellRect,
-  cell: Cell
-): void {
+function drawCell(ctx: CanvasRenderingContext2D, rect: CellRect, cell: Cell): void {
   const { x, y, w, h } = rect
   if (cell.kind === 'image') {
     drawImageCover(ctx, cell.img, x, y, w, h)

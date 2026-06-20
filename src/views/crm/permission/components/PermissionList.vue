@@ -77,8 +77,7 @@ const getList = async () => {
     const currentUserId = getCurrentUserId()
     const permission = list.value.find(
       (item) =>
-        item.userId === currentUserId &&
-        item.level === PermissionApi.PermissionLevelEnum.OWNER
+        item.userId === currentUserId && item.level === PermissionApi.PermissionLevelEnum.OWNER
     )
     if (permission) {
       formData.value.ownerUserId = currentUserId

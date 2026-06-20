@@ -42,12 +42,18 @@ export const getStatisticsOverview = (): Promise<ImStatisticsOverviewVO> => {
 
 // 获得消息趋势（私聊 + 群聊双线）
 export const getMessageTrend = (days: number): Promise<ImStatisticsTrendVO> => {
-  return request.get<ImStatisticsTrendVO>({ url: '/im/manager/statistics/message-trend', params: { days } })
+  return request.get<ImStatisticsTrendVO>({
+    url: '/im/manager/statistics/message-trend',
+    params: { days }
+  })
 }
 
 // 获得用户趋势（新增注册 + 日活双线）
 export const getUserTrend = (days: number): Promise<ImStatisticsTrendVO> => {
-  return request.get<ImStatisticsTrendVO>({ url: '/im/manager/statistics/user-trend', params: { days } })
+  return request.get<ImStatisticsTrendVO>({
+    url: '/im/manager/statistics/user-trend',
+    params: { days }
+  })
 }
 
 // 获得内容类型分布（最近 30 天）

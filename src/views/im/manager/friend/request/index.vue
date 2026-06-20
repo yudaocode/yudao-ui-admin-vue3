@@ -9,7 +9,11 @@
       label-width="80px"
     >
       <el-form-item label="发起方" prop="fromUserId">
-        <UserSelectV2 v-model="queryParams.fromUserId" placeholder="请选择发起方" class="!w-240px" />
+        <UserSelectV2
+          v-model="queryParams.fromUserId"
+          placeholder="请选择发起方"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="接收方" prop="toUserId">
         <UserSelectV2 v-model="queryParams.toUserId" placeholder="请选择接收方" class="!w-240px" />
@@ -78,7 +82,13 @@
           <span class="text-gray-400 ml-5px">({{ row.toUserId }})</span>
         </template>
       </el-table-column>
-      <el-table-column label="申请理由" align="center" prop="applyContent" min-width="160" show-overflow-tooltip />
+      <el-table-column
+        label="申请理由"
+        align="center"
+        prop="applyContent"
+        min-width="160"
+        show-overflow-tooltip
+      />
       <el-table-column label="备注" align="center" prop="displayName" width="120" />
       <el-table-column label="添加来源" align="center" prop="addSource" width="120">
         <template #default="{ row }">
@@ -90,7 +100,13 @@
           <dict-tag :type="DICT_TYPE.IM_FRIEND_REQUEST_HANDLE_RESULT" :value="row.handleResult" />
         </template>
       </el-table-column>
-      <el-table-column label="处理理由" align="center" prop="handleContent" min-width="140" show-overflow-tooltip />
+      <el-table-column
+        label="处理理由"
+        align="center"
+        prop="handleContent"
+        min-width="140"
+        show-overflow-tooltip
+      />
       <el-table-column
         label="处理时间"
         align="center"

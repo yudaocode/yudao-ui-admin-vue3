@@ -8,12 +8,13 @@
         {{ detail.inviterNickname || '-' }} ({{ detail.inviterUserId }})
       </el-descriptions-item>
       <el-descriptions-item label="会话类型">
-        <dict-tag :type="DICT_TYPE.IM_RTC_CALL_CONVERSATION_TYPE" :value="detail.conversationType" />
+        <dict-tag
+          :type="DICT_TYPE.IM_RTC_CALL_CONVERSATION_TYPE"
+          :value="detail.conversationType"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="群">
-        <span v-if="detail.groupId">
-          {{ detail.groupName || '-' }} ({{ detail.groupId }})
-        </span>
+        <span v-if="detail.groupId"> {{ detail.groupName || '-' }} ({{ detail.groupId }}) </span>
         <span v-else>-</span>
       </el-descriptions-item>
       <el-descriptions-item label="媒体类型">
@@ -30,7 +31,9 @@
         />
         <span v-else>-</span>
       </el-descriptions-item>
-      <el-descriptions-item label="发起时间">{{ formatDate(detail.startTime) }}</el-descriptions-item>
+      <el-descriptions-item label="发起时间">{{
+        formatDate(detail.startTime)
+      }}</el-descriptions-item>
       <el-descriptions-item label="接通时间">
         {{ detail.acceptTime ? formatDate(detail.acceptTime) : '-' }}
       </el-descriptions-item>
@@ -87,9 +90,7 @@ import { resolveCallDuration } from '@/views/im/utils/time'
 defineOptions({ name: 'ImRtcCallDetail' })
 
 const drawerVisible = ref(false)
-const detail = ref<ManagerRtcCallApi.ImManagerRtcCallVO>(
-  {} as ManagerRtcCallApi.ImManagerRtcCallVO
-)
+const detail = ref<ManagerRtcCallApi.ImManagerRtcCallVO>({} as ManagerRtcCallApi.ImManagerRtcCallVO)
 const loading = ref(false)
 const participants = ref<ManagerRtcCallApi.ImManagerRtcParticipantVO[]>([])
 

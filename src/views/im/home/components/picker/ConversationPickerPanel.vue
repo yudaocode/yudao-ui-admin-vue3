@@ -363,6 +363,7 @@ function handleToggle(conversation: Conversation) {
 .im-conversation-picker__recent::-webkit-scrollbar {
   height: 4px;
 }
+
 .im-conversation-picker__recent::-webkit-scrollbar-thumb {
   background-color: var(--el-border-color);
   border-radius: 2px;

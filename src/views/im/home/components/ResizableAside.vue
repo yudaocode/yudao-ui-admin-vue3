@@ -15,7 +15,9 @@
       title="拖拽调整宽度"
       @mousedown="startResize"
     >
-      <div class="im-resizable-aside__line w-0.5 h-full rounded-0.5 bg-transparent transition-all"></div>
+      <div
+        class="im-resizable-aside__line w-0.5 h-full rounded-0.5 bg-transparent transition-all"
+      ></div>
     </div>
   </aside>
 </template>

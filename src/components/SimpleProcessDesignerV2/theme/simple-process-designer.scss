@@ -174,7 +174,7 @@
   }
 
   .router {
-    color: #ca3a31
+    color: #ca3a31;
   }
 
   .transactor {
@@ -303,7 +303,7 @@
           }
 
           &.router-node {
-            color: #ca3a31
+            color: #ca3a31;
           }
 
           &.transactor-task {
@@ -762,14 +762,15 @@
 
 // iconfont 样式
 @font-face {
-  font-family: "iconfont"; /* Project id 4495938 */
-  src: url('iconfont.woff2?t=1737639517142') format('woff2'),
-       url('iconfont.woff?t=1737639517142') format('woff'),
-       url('iconfont.ttf?t=1737639517142') format('truetype');
+  font-family: 'iconfont'; /* Project id 4495938 */
+  src:
+    url('iconfont.woff2?t=1737639517142') format('woff2'),
+    url('iconfont.woff?t=1737639517142') format('woff'),
+    url('iconfont.ttf?t=1737639517142') format('truetype');
 }
 
 .iconfont {
-  font-family: "iconfont" !important;
+  font-family: 'iconfont' !important;
   font-size: 16px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
@@ -777,49 +778,49 @@
 }
 
 .icon-trigger:before {
-  content: "\e6d3";
+  content: '\e6d3';
 }
 
 .icon-router:before {
-  content: "\e6b2";
+  content: '\e6b2';
 }
 
 .icon-delay:before {
-  content: "\e600";
+  content: '\e600';
 }
 
 .icon-start-user:before {
-  content: "\e679";
+  content: '\e679';
 }
 
 .icon-inclusive:before {
-  content: "\e602";
+  content: '\e602';
 }
 
 .icon-copy:before {
-  content: "\e7eb";
+  content: '\e7eb';
 }
 
 .icon-transactor:before {
-  content: "\e61c";
+  content: '\e61c';
 }
 
 .icon-exclusive:before {
-  content: "\e717";
+  content: '\e717';
 }
 
 .icon-approve:before {
-  content: "\e715";
+  content: '\e715';
 }
 
 .icon-parallel:before {
-  content: "\e688";
+  content: '\e688';
 }
 
 .icon-async-child-process:before {
-  content: "\e6f2";
+  content: '\e6f2';
 }
 
 .icon-child-process:before {
-  content: "\e6c1";
+  content: '\e6c1';
 }

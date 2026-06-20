@@ -11,12 +11,20 @@
         </el-radio>
       </el-radio-group>
     </el-form-item>
-    <el-form-item v-if="modelData.formType === BpmModelFormType.NORMAL" label="流程表单" prop="formId">
+    <el-form-item
+      v-if="modelData.formType === BpmModelFormType.NORMAL"
+      label="流程表单"
+      prop="formId"
+    >
       <el-select v-model="modelData.formId" clearable style="width: 100%">
         <el-option v-for="form in formList" :key="form.id" :label="form.name" :value="form.id" />
       </el-select>
     </el-form-item>
-    <el-form-item v-if="modelData.formType === BpmModelFormType.CUSTOM" label="表单提交路由" prop="formCustomCreatePath">
+    <el-form-item
+      v-if="modelData.formType === BpmModelFormType.CUSTOM"
+      label="表单提交路由"
+      prop="formCustomCreatePath"
+    >
       <el-input
         v-model="modelData.formCustomCreatePath"
         placeholder="请输入表单提交路由"
@@ -31,7 +39,11 @@
         <Icon icon="ep:question" class="ml-5px" />
       </el-tooltip>
     </el-form-item>
-    <el-form-item v-if="modelData.formType === BpmModelFormType.CUSTOM" label="表单查看地址" prop="formCustomViewPath">
+    <el-form-item
+      v-if="modelData.formType === BpmModelFormType.CUSTOM"
+      label="表单查看地址"
+      prop="formCustomViewPath"
+    >
       <el-input
         v-model="modelData.formCustomViewPath"
         placeholder="请输入表单查看的组件地址"
@@ -48,7 +60,11 @@
     </el-form-item>
     <!-- 表单预览 -->
     <div
-      v-if="modelData.formType === BpmModelFormType.NORMAL && modelData.formId && formPreview.rule.length > 0"
+      v-if="
+        modelData.formType === BpmModelFormType.NORMAL &&
+        modelData.formId &&
+        formPreview.rule.length > 0
+      "
       class="mt-20px"
     >
       <div class="flex items-center mb-15px">

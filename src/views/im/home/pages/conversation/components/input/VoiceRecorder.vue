@@ -54,15 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  onUnmounted,
-  ref,
-  useTemplateRef,
-  watch
-} from 'vue'
+import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { useMessage } from '@/hooks/web/useMessage'
 import { formatSeconds } from '@/utils/formatTime'
 
@@ -292,14 +284,14 @@ onUnmounted(() => {
 <style scoped>
 /* 底部小三角：指向触发图标，仿微信 PC 气泡指针；left 偏移对应语音按钮（工具栏 4th icon） */
 .im-popover-arrow::after {
-  content: '';
   position: absolute;
   top: calc(100% - 1px);
   left: 110px;
-  border-style: solid;
-  border-width: 6px 6px 0 6px;
   border-color: var(--el-bg-color) transparent transparent transparent;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
+  border-style: solid;
+  border-width: 6px 6px 0;
+  content: '';
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 8%));
 }
 
 /* 录音中的脉冲呼吸动画；@keyframes 必须 CSS 定义 */
@@ -309,13 +301,15 @@ onUnmounted(() => {
 
 @keyframes im-voice-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(245, 108, 108, 0.6);
+    box-shadow: 0 0 0 0 rgb(245 108 108 / 60%);
   }
+
   70% {
-    box-shadow: 0 0 0 20px rgba(245, 108, 108, 0);
+    box-shadow: 0 0 0 20px rgb(245 108 108 / 0%);
   }
+
   100% {
-    box-shadow: 0 0 0 0 rgba(245, 108, 108, 0);
+    box-shadow: 0 0 0 0 rgb(245 108 108 / 0%);
   }
 }
 </style>

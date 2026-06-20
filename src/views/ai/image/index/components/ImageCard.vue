@@ -1,8 +1,5 @@
 <template>
-  <el-card
-    body-class=""
-    class="!w-80 !h-auto !rounded-10px !relative !flex !flex-col"
-  >
+  <el-card body-class="" class="!w-80 !h-auto !rounded-10px !relative !flex !flex-col">
     <div class="!flex !flex-row !justify-between">
       <div>
         <el-button type="primary" text bg v-if="detail?.status === AiImageStatusEnum.IN_PROGRESS">

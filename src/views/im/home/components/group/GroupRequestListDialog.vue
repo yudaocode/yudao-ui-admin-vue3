@@ -313,22 +313,23 @@ function updateLocalResult(id: number, handleResult: number) {
 <style scoped>
 /* 自绘按钮：贴近微信小药丸样式；与 :disabled、:hover:not(:disabled) 等伪类叠加 modifier 类的组合选择器写在 class 里成本高，留 SCSS */
 .im-group-request-list__btn {
-  flex-shrink: 0;
-  min-width: 56px;
   height: 28px;
+  min-width: 56px;
   padding: 0 12px;
   font-size: 13px;
-  border-radius: 4px;
   cursor: pointer;
   border: 1px solid transparent;
+  border-radius: 4px;
   transition:
     background-color 0.15s,
     border-color 0.15s,
     color 0.15s;
+  flex-shrink: 0;
 }
+
 .im-group-request-list__btn:disabled {
-  opacity: 0.6;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .im-group-request-list__btn--primary {
@@ -336,6 +337,7 @@ function updateLocalResult(id: number, handleResult: number) {
   background-color: var(--el-color-primary);
   border-color: var(--el-color-primary);
 }
+
 .im-group-request-list__btn--primary:hover:not(:disabled) {
   background-color: var(--el-color-primary-light-3);
   border-color: var(--el-color-primary-light-3);
@@ -346,6 +348,7 @@ function updateLocalResult(id: number, handleResult: number) {
   background-color: var(--el-bg-color);
   border-color: var(--el-border-color);
 }
+
 .im-group-request-list__btn--ghost:hover:not(:disabled) {
   color: var(--el-color-primary);
   border-color: var(--el-color-primary);

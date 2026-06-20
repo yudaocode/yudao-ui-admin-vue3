@@ -72,6 +72,10 @@ export const getMyGroupRequest = (id: number) => {
 }
 
 // 增量拉取我管理的所有群下加群申请变更（重连 / 离线补偿）
-export const pullMyGroupRequestList = (params: { lastUpdateTime?: number; lastId?: number; limit: number }) => {
+export const pullMyGroupRequestList = (params: {
+  lastUpdateTime?: number
+  lastId?: number
+  limit: number
+}) => {
   return request.get<ImGroupRequestRespVO[]>({ url: '/im/group-request/pull', params })
 }

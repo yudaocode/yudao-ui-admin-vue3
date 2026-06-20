@@ -32,7 +32,7 @@
             :value="channel.id"
             :label="
               channel.signature +
-                `【 ${getDictLabel(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE, channel.code)}】`
+              `【 ${getDictLabel(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE, channel.code)}】`
             "
           />
         </el-select>

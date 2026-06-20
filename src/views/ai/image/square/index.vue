@@ -10,10 +10,19 @@
       :suffix-icon="Search"
       @keyup.enter="handleQuery"
     />
-    <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-10px bg-white shadow-[0_0_10px_rgba(0,0,0,0.1)]">
+    <div
+      class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-10px bg-white shadow-[0_0_10px_rgba(0,0,0,0.1)]"
+    >
       <!-- TODO @fan：这个图片的风格，要不和 ImageCard.vue 界面一致？（只有卡片，没有操作）；因为看着更有相框的感觉~~~ -->
-      <div v-for="item in list" :key="item.id" class="relative overflow-hidden bg-gray-100 cursor-pointer transition-transform duration-300 hover:scale-105">
-        <img :src="item.picUrl" class="w-full h-auto block transition-transform duration-300 hover:scale-110" />
+      <div
+        v-for="item in list"
+        :key="item.id"
+        class="relative overflow-hidden bg-gray-100 cursor-pointer transition-transform duration-300 hover:scale-105"
+      >
+        <img
+          :src="item.picUrl"
+          class="w-full h-auto block transition-transform duration-300 hover:scale-110"
+        />
       </div>
     </div>
     <!-- TODO @fan：缺少翻页 -->
@@ -64,4 +73,3 @@ onMounted(async () => {
   await getList()
 })
 </script>
-

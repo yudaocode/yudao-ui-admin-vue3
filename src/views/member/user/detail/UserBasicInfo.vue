@@ -163,8 +163,8 @@ withDefaults(defineProps<{ user: UserApi.UserVO; mode?: string }>(), {
     justify-content: space-between;
 
     .el-descriptions__label {
-      width: 120px;
       display: block;
+      width: 120px;
       text-align: left;
     }
 

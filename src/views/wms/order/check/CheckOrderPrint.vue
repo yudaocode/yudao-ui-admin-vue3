@@ -99,8 +99,7 @@
             <td class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-right">
               {{ formatSumQuantity(printRows, (detail) => detail.quantity) }}
             </td>
-            <td class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-right">
-            </td>
+            <td class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-right"> </td>
             <td class="border border-solid border-#dcdfe6 bg-#f5f7fa p-8px text-right">
               {{ formatSumQuantity(printRows, (detail) => detail.checkQuantity) }}
             </td>

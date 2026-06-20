@@ -60,7 +60,13 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="表情名" align="center" prop="name" min-width="120" show-overflow-tooltip />
+      <el-table-column
+        label="表情名"
+        align="center"
+        prop="name"
+        min-width="120"
+        show-overflow-tooltip
+      />
       <el-table-column label="所属用户" align="center" min-width="160">
         <template #default="scope">
           <span>{{ scope.row.userNickname || '—' }}</span>

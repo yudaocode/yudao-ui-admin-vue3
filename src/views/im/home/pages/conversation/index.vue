@@ -56,11 +56,7 @@
           >
             <span class="flex items-center gap-1.5">
               <Icon icon="ant-design:menu-outlined" :size="14" />
-              {{
-                pinnedExpanded
-                  ? '折叠置顶聊天'
-                  : `${pinnedGroups.foldable.length} 个置顶聊天`
-              }}
+              {{ pinnedExpanded ? '折叠置顶聊天' : `${pinnedGroups.foldable.length} 个置顶聊天` }}
             </span>
             <Icon
               :icon="pinnedExpanded ? 'ant-design:up-outlined' : 'ant-design:down-outlined'"

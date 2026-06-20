@@ -11,10 +11,7 @@
       :index="idx"
       :key="resolveItemKey(item, idx)"
     ></slot>
-    <div
-      v-if="showFooter"
-      class="py-3 text-xs text-center text-[var(--el-text-color-secondary)]"
-    >
+    <div v-if="showFooter" class="py-3 text-xs text-center text-[var(--el-text-color-secondary)]">
       已到底部
     </div>
   </el-scrollbar>

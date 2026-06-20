@@ -51,7 +51,12 @@
             上架
           </el-button>
           <el-button link type="primary" @click="handleBarcode(scope.row)"> 条码 </el-button>
-          <PrinterLabel v-if="isStock" :bizId="scope.row.batchId" :bizCode="scope.row.batchCode" bizType="BATCH" />
+          <PrinterLabel
+            v-if="isStock"
+            :bizId="scope.row.batchId"
+            :bizCode="scope.row.batchCode"
+            bizType="BATCH"
+          />
         </template>
       </el-table-column>
     </el-table>

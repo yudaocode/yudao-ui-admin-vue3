@@ -1,4 +1,4 @@
-import {ComponentStyle, DiyComponent} from '@/components/DiyEditor/util'
+import { ComponentStyle, DiyComponent } from '@/components/DiyEditor/util'
 
 /** 积分商城属性 */
 export interface PromotionPointProperty {

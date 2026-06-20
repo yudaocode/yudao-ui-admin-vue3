@@ -6,7 +6,13 @@
 // 2. fallbackName 由调用方传入（典型来源：Conversation.lastSenderDisplayName 快照），透传到 getSenderDisplayName 内部，算不出真名时兜底
 // ====================================================================
 
-import { ImConversationType, ImContentType, isFriendChatTip, isGroupNotification, isRtcCallTip } from './constants'
+import {
+  ImConversationType,
+  ImContentType,
+  isFriendChatTip,
+  isGroupNotification,
+  isRtcCallTip
+} from './constants'
 import {
   getCardLabelInfo,
   parseMessage,
@@ -21,7 +27,11 @@ import {
   type TipSegment
 } from './message'
 import { getSenderDisplayName } from './user'
-import { resolveFriendNotificationText, resolveGroupNotificationText, resolveRtcCallLastContent } from './message'
+import {
+  resolveFriendNotificationText,
+  resolveGroupNotificationText,
+  resolveRtcCallLastContent
+} from './message'
 import type { Message } from '../home/types'
 
 /** 会话主键：`type-targetId` 拼成稳定字符串，给 v-for :key、active 比对、map key 等场景共用 */
@@ -73,10 +83,7 @@ export function buildRecallTipSegments(
   if (!senderId) {
     return [tipText(`${senderDisplayName || '对方'} 撤回了一条消息`)]
   }
-  return [
-    tipMention(senderId, senderDisplayName || '对方'),
-    tipText(' 撤回了一条消息')
-  ]
+  return [tipMention(senderId, senderDisplayName || '对方'), tipText(' 撤回了一条消息')]
 }
 
 /** 撤回提示文案：自己撤回固定文案，对方撤回带 sender 名（实时算 + fallbackName 兜底） */

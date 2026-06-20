@@ -61,7 +61,7 @@ const formRules = reactive({
   subject: [{ required: true, message: '提现标题不能为空', trigger: 'blur' }],
   price: [{ required: true, message: '提现金额不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '提现类型不能为空', trigger: 'change' }],
-  userAccount: [{ required: true, message: '收款人账号不能为空', trigger: 'blur' }],
+  userAccount: [{ required: true, message: '收款人账号不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 

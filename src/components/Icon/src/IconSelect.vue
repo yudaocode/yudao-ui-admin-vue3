@@ -125,7 +125,12 @@ watch(
 
 <template>
   <div class="selector">
-    <ElInput v-model="inputValue" @click="visible = !visible" :clearable="props.clearable" @clear="clearIcon">
+    <ElInput
+      v-model="inputValue"
+      @click="visible = !visible"
+      :clearable="props.clearable"
+      @clear="clearIcon"
+    >
       <template #append>
         <ElPopover
           :popper-options="{

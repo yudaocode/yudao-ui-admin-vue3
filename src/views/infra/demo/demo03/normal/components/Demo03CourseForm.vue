@@ -45,7 +45,7 @@ const formData = ref<any[]>([])
 const formRules = reactive({
   studentId: [{ required: true, message: '学生编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
-  score: [{ required: true, message: '分数不能为空', trigger: 'blur' }],
+  score: [{ required: true, message: '分数不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -75,7 +75,7 @@ const handleAdd = () => {
     id: undefined,
     studentId: undefined,
     name: undefined,
-    score: undefined,
+    score: undefined
   }
   row.studentId = props.studentId as any
   formData.value.push(row)

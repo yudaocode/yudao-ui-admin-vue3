@@ -168,9 +168,7 @@ const message = useMessage()
 const currentUserId = computed(() => getCurrentUserId())
 
 /** 搜索结果过滤掉自己；用 v-if 而非 v-show，避免 DOM 占位 + 头像无效请求 */
-const visibleUsers = computed(() =>
-  users.value.filter((user) => user.id !== currentUserId.value)
-)
+const visibleUsers = computed(() => users.value.filter((user) => user.id !== currentUserId.value))
 const keyword = ref('')
 const users = ref<UserVO[]>([])
 const searched = ref(false)

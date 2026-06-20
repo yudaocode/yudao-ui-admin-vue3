@@ -1162,9 +1162,7 @@ export const useImWebSocketStore = defineStore('imWebSocketStore', {
      * 私聊：关闭当前通话窗
      * 群聊：移除胶囊条；如本端在该群通话内则关闭通话窗
      */
-    handleRtcCallEnd(
-      websocketMessage: ImPrivateMessageNotification | ImGroupMessageNotification
-    ) {
+    handleRtcCallEnd(websocketMessage: ImPrivateMessageNotification | ImGroupMessageNotification) {
       const payload = this.safeParse(websocketMessage.content) as ImRtcCallEndNotification | null
       if (!payload?.room) {
         return

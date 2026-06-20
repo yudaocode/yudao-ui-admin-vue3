@@ -714,8 +714,8 @@ function locateMessage(messageId: number) {
 /* :deep 穿透 el-tag 子组件 DOM；搜索区 chip 禁掉 hover 颜色过渡 / × 图标动效，避免在搜索区里有抖动感 */
 .im-message-history__chip,
 .im-message-history__chip :deep(.el-tag__close) {
-  transition: none !important;
   animation: none !important;
+  transition: none !important;
 }
 
 /* 「定位到聊天位置」按钮：父行 hover 才显示，走 .parent:hover .child 跨元素状态联动 */
@@ -723,16 +723,18 @@ function locateMessage(messageId: number) {
   position: absolute;
   top: 100%;
   right: 0;
-  margin-top: 4px;
   display: none;
-  white-space: nowrap;
+  margin-top: 4px;
   color: #1989fa;
+  white-space: nowrap;
   cursor: pointer;
   transition: color 0.15s;
 }
+
 .im-message-history__row:hover .im-message-history__locate {
   display: block;
 }
+
 .im-message-history__locate:hover {
   color: #146fc7;
 }
@@ -744,30 +746,35 @@ function locateMessage(messageId: number) {
   color: #1989fa;
   transition: color 0.15s;
 }
+
 .im-message-history__tab:hover {
   color: #2f81d4;
 }
+
 .im-message-history__tab--active::after {
-  content: '';
   position: absolute;
-  left: 0;
   right: 0;
   bottom: 0;
+  left: 0;
   height: 2px;
   background: #1989fa;
   border-radius: 1px;
+  content: '';
 }
 
 /* :deep 穿透 el-calendar 子组件 DOM；默认偏大压一压让它能塞进 320 popover */
 .im-message-history__calendar :deep(.el-calendar) {
   --el-calendar-cell-width: 36px;
 }
+
 .im-message-history__calendar :deep(.el-calendar__header) {
   padding: 4px 8px;
 }
+
 .im-message-history__calendar :deep(.el-calendar-table) {
   font-size: 12px;
 }
+
 .im-message-history__calendar :deep(.el-calendar-day) {
   height: 36px;
   padding: 4px;

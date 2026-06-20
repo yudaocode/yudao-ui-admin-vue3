@@ -71,11 +71,7 @@ import {
   inviteCall,
   noAnswerCallCheck
 } from '@/api/im/rtc'
-import {
-  ImRtcCallMediaType,
-  ImRtcCallStage,
-  ImConversationType
-} from '@/views/im/utils/constants'
+import { ImRtcCallMediaType, ImRtcCallStage, ImConversationType } from '@/views/im/utils/constants'
 import { RTC_NO_ANSWER_CALL_CHECK_INTERVAL_MS } from '@/views/im/utils/config'
 import { getCurrentUserId } from '@/utils/auth'
 import { getSenderAvatar, getSenderDisplayName } from '@/views/im/utils/user'
@@ -104,17 +100,15 @@ const hangingUp = ref(false)
 /** 当前是否视频通话 */
 const isVideo = computed(() => {
   const t =
-    rtcStore.call?.mediaType ||
-    rtcStore.incomingPayload?.mediaType ||
-    ImRtcCallMediaType.VOICE
+    rtcStore.call?.mediaType || rtcStore.incomingPayload?.mediaType || ImRtcCallMediaType.VOICE
   return t === ImRtcCallMediaType.VIDEO
 })
 
 /** 当前是否群通话；决定浮动窗大小 */
 const isGroup = computed(
   () =>
-    (rtcStore.call?.conversationType ??
-      rtcStore.incomingPayload?.conversationType) === ImConversationType.GROUP
+    (rtcStore.call?.conversationType ?? rtcStore.incomingPayload?.conversationType) ===
+    ImConversationType.GROUP
 )
 
 /** 初始摄像头是否打开；群通话默认全部关闭，进入后用户主动开 */
@@ -261,11 +255,7 @@ function maybeEnterRunning() {
 watch(
   () => rtcStore.stage,
   async (stage) => {
-    if (
-      stage === ImRtcCallStage.INVITING &&
-      rtcStore.call?.token &&
-      rtcStore.call?.livekitUrl
-    ) {
+    if (stage === ImRtcCallStage.INVITING && rtcStore.call?.token && rtcStore.call?.livekitUrl) {
       try {
         await connectLiveKit(rtcStore.call.livekitUrl, rtcStore.call.token)
       } catch (e) {
@@ -417,7 +407,9 @@ function handlePeerDisconnected() {
 
 /** 通话存活期间（INVITING / INCOMING / RUNNING）周期性触发后端扫该 room 的超时 INVITING；保持 timer 是为了 inviteCall 追加新人后也能覆盖；阈值由后端配置决定，前端只负责 trigger */
 const { resume: resumeNoAnswerTimer, pause: pauseNoAnswerTimer } = useIntervalFn(
-  triggerNoAnswerCallCheck, RTC_NO_ANSWER_CALL_CHECK_INTERVAL_MS, { immediate: false }
+  triggerNoAnswerCallCheck,
+  RTC_NO_ANSWER_CALL_CHECK_INTERVAL_MS,
+  { immediate: false }
 )
 watch(
   () => rtcStore.isActive,

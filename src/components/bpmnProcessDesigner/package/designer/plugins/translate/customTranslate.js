@@ -23,20 +23,20 @@
 
 export default function customTranslate(translations) {
   return function (template, replacements) {
-    replacements = replacements || {};
+    replacements = replacements || {}
     // 将模板和翻译字典的键统一转换为小写进行匹配
-    const lowerTemplate = template.toLowerCase();
-    const translation = Object.keys(translations).find(key => key.toLowerCase() === lowerTemplate);
+    const lowerTemplate = template.toLowerCase()
+    const translation = Object.keys(translations).find((key) => key.toLowerCase() === lowerTemplate)
 
     // 如果找到匹配的翻译，使用翻译后的模板
     if (translation) {
-      template = translations[translation];
+      template = translations[translation]
     }
 
     // 替换模板中的占位符
     return template.replace(/{([^}]+)}/g, function (_, key) {
       // 如果替换值存在，返回替换值；否则返回原始占位符
-      return replacements[key] !== undefined ? replacements[key] : `{${key}}`;
-    });
-  };
+      return replacements[key] !== undefined ? replacements[key] : `{${key}}`
+    })
+  }
 }

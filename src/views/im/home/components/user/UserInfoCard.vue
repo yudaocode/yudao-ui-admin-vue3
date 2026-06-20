@@ -101,9 +101,7 @@ function handleSendMessage() {
   }
   // 取 friendStore 里的最新备注 / 免打扰，避免新建会话用过期数据
   const friend = friendStore.getFriend(user.value.id)
-  const conversationName = friend
-    ? getFriendDisplayName(friend)
-    : user.value.nickname || ''
+  const conversationName = friend ? getFriendDisplayName(friend) : user.value.nickname || ''
   conversationStore.openConversation(
     user.value.id,
     ImConversationType.PRIVATE,

@@ -37,7 +37,11 @@
     </div>
     <el-space wrap class="mt-15px">
       <div
-        :class="selectModel === model.key ? 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-#1293ff rounded-5px cursor-pointer' : 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-transparent cursor-pointer'"
+        :class="
+          selectModel === model.key
+            ? 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-#1293ff rounded-5px cursor-pointer'
+            : 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-transparent cursor-pointer'
+        "
         v-for="model in Dall3Models"
         :key="model.key"
       >
@@ -52,7 +56,11 @@
     </div>
     <el-space wrap class="mt-15px">
       <div
-        :class="style === imageStyle.key ? 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-#1293ff rounded-5px cursor-pointer' : 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-transparent cursor-pointer'"
+        :class="
+          style === imageStyle.key
+            ? 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-#1293ff rounded-5px cursor-pointer'
+            : 'w-110px overflow-hidden flex flex-col items-center border-3 border-solid border-transparent cursor-pointer'
+        "
         v-for="imageStyle in Dall3StyleList"
         :key="imageStyle.key"
       >
@@ -73,7 +81,11 @@
         @click="handleSizeClick(imageSize)"
       >
         <div
-          :class="selectSize === imageSize.key ? 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-#1293ff' : 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-white'"
+          :class="
+            selectSize === imageSize.key
+              ? 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-#1293ff'
+              : 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-white'
+          "
         >
           <div :style="imageSize.style"></div>
         </div>
@@ -229,4 +241,3 @@ const settingValues = async (detail: ImageVO) => {
 /** 暴露组件方法 */
 defineExpose({ settingValues })
 </script>
-

@@ -19,10 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  getSimpleSmsTemplateList,
-  type SmsTemplateSimpleVO
-} from '@/api/system/sms/smsTemplate'
+import { getSimpleSmsTemplateList, type SmsTemplateSimpleVO } from '@/api/system/sms/smsTemplate'
 
 /** 短信模板下拉选择器 */
 defineOptions({ name: 'SmsTemplateSelect' })

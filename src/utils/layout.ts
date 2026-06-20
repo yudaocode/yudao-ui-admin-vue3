@@ -40,7 +40,9 @@ export const isHeaderNavLayout = (layout?: LayoutType | string | null): boolean 
 
 export const isHorizontalMenuLayout = (layout?: LayoutType | string | null): boolean => {
   const normalized = normalizeLayout(layout)
-  return normalized === 'header-nav' || normalized === 'mixed-nav' || normalized === 'header-mixed-nav'
+  return (
+    normalized === 'header-nav' || normalized === 'mixed-nav' || normalized === 'header-mixed-nav'
+  )
 }
 
 export const isMixedNavLayout = (layout?: LayoutType | string | null): boolean => {

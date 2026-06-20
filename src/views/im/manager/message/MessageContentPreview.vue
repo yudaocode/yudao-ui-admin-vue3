@@ -41,7 +41,7 @@
         :size="22"
         color="#fff"
         class="absolute inset-0 m-auto pointer-events-none"
-        style="filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.6))"
+        style="filter: drop-shadow(0 0 2px rgb(0 0 0 / 60%))"
       />
     </span>
     <span v-else class="inline-flex gap-1.5 items-center">
@@ -61,7 +61,9 @@
 
   <!-- 合并转发：title + 前 N 条摘要 -->
   <span v-else-if="isMerge && mergePayload" class="inline-flex flex-col gap-0.5 align-middle">
-    <span class="text-13px text-[var(--el-text-color-primary)]">[聊天记录] {{ mergePayload.title }}</span>
+    <span class="text-13px text-[var(--el-text-color-primary)]"
+      >[聊天记录] {{ mergePayload.title }}</span
+    >
     <span
       v-for="(line, idx) in mergePreviewLines"
       :key="idx"
@@ -104,18 +106,12 @@
   </span>
 
   <!-- 群广播事件：拼装中文 tip 文案，operator 用 senderNickname，member / newOwner 退化为 用户(id) -->
-  <span
-    v-else-if="isGroupNotificationType"
-    class="text-12px text-[var(--el-text-color-secondary)]"
-  >
+  <span v-else-if="isGroupNotificationType" class="text-12px text-[var(--el-text-color-secondary)]">
     {{ groupNotificationText }}
   </span>
 
   <!-- 好友会话事件（FRIEND_ADD / FRIEND_DELETE）：固定中文文案 -->
-  <span
-    v-else-if="isFriendChatTipType"
-    class="text-12px text-[var(--el-text-color-secondary)]"
-  >
+  <span v-else-if="isFriendChatTipType" class="text-12px text-[var(--el-text-color-secondary)]">
     {{ friendChatTipText }}
   </span>
 
@@ -188,9 +184,7 @@ const isFace = computed(() => props.type === ImContentType.FACE)
 const isMerge = computed(() => props.type === ImContentType.MERGE)
 
 /** 文本内容：从 TextMessage payload 取 .content */
-const textContent = computed(
-  () => parseMessage<TextMessage>(props.content || '')?.content ?? ''
-)
+const textContent = computed(() => parseMessage<TextMessage>(props.content || '')?.content ?? '')
 
 const imagePayload = computed(() =>
   isImage.value ? parseMessage<ImageMessage>(props.content || '') : null

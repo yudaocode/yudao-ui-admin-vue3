@@ -31,7 +31,10 @@
         />
       </el-descriptions-item>
       <el-descriptions-item label="原始 JSON" :span="2">
-        <pre class="m-0 whitespace-pre-wrap break-all font-mono text-12px bg-[#f5f5f5] p-8px rounded-4px">{{ formatJson(detail.content) }}</pre>
+        <pre
+          class="m-0 whitespace-pre-wrap break-all font-mono text-12px bg-[#f5f5f5] p-8px rounded-4px"
+          >{{ formatJson(detail.content) }}</pre
+        >
       </el-descriptions-item>
     </el-descriptions>
   </el-dialog>

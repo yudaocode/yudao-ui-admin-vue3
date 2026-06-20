@@ -25,7 +25,11 @@ const days = ref(7)
 const loading = ref(false)
 let chart: echarts.ECharts | null = null
 
-const buildOption = (dates: string[], priv: number[], grp: number[]): echarts.EChartsCoreOption => ({
+const buildOption = (
+  dates: string[],
+  priv: number[],
+  grp: number[]
+): echarts.EChartsCoreOption => ({
   tooltip: { trigger: 'axis' },
   legend: { data: ['私聊消息', '群聊消息'], top: 0 },
   grid: { left: '3%', right: '4%', bottom: '3%', top: 40, containLabel: true },
@@ -44,7 +48,11 @@ const buildOption = (dates: string[], priv: number[], grp: number[]): echarts.EC
       itemStyle: { color: '#409EFF' },
       areaStyle: {
         color: {
-          type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+          type: 'linear',
+          x: 0,
+          y: 0,
+          x2: 0,
+          y2: 1,
           colorStops: [
             { offset: 0, color: 'rgba(64,158,255,0.35)' },
             { offset: 1, color: 'rgba(64,158,255,0.05)' }
@@ -60,7 +68,11 @@ const buildOption = (dates: string[], priv: number[], grp: number[]): echarts.EC
       itemStyle: { color: '#67C23A' },
       areaStyle: {
         color: {
-          type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+          type: 'linear',
+          x: 0,
+          y: 0,
+          x2: 0,
+          y2: 1,
           colorStops: [
             { offset: 0, color: 'rgba(103,194,58,0.35)' },
             { offset: 1, color: 'rgba(103,194,58,0.05)' }

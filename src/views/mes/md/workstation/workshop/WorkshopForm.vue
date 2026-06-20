@@ -11,7 +11,11 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="车间编码" prop="code">
-            <el-input v-model="formData.code" placeholder="请输入车间编码" :disabled="formType === 'update'">
+            <el-input
+              v-model="formData.code"
+              placeholder="请输入车间编码"
+              :disabled="formType === 'update'"
+            >
               <template v-if="formType === 'create'" #append>
                 <el-button @click="generateCode"> 生成 </el-button>
               </template>
@@ -137,7 +141,10 @@ const barcodeDetailRef = ref() // 条码详情弹窗 Ref
 /** 查看条码 */
 const handleBarcode = () => {
   barcodeDetailRef.value?.openByBusiness(
-    formData.value.id!, BarcodeBizTypeEnum.WORKSHOP, formData.value.code, formData.value.name
+    formData.value.id!,
+    BarcodeBizTypeEnum.WORKSHOP,
+    formData.value.code,
+    formData.value.name
   )
 }
 

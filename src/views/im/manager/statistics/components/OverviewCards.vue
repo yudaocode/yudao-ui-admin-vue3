@@ -9,7 +9,9 @@
             </div>
             <div class="min-w-0 flex-1">
               <div class="text-13px text-[var(--el-text-color-secondary)]">{{ card.title }}</div>
-              <div class="mt-6px text-24px font-600 leading-none text-[var(--el-text-color-primary)]">
+              <div
+                class="mt-6px text-24px font-600 leading-none text-[var(--el-text-color-primary)]"
+              >
                 <CountTo :start-val="0" :end-val="card.value" :duration="1500" />
                 <span
                   v-if="card.suffix"
@@ -18,7 +20,9 @@
                   {{ card.suffix }}
                 </span>
               </div>
-              <div class="mt-8px flex items-center text-12px text-[var(--el-text-color-placeholder)]">
+              <div
+                class="mt-8px flex items-center text-12px text-[var(--el-text-color-placeholder)]"
+              >
                 <span>{{ card.metaLabel }}</span>
                 <span class="ml-6px font-500" :class="card.metaClass">{{ card.metaValue }}</span>
               </div>
@@ -112,13 +116,13 @@ const cards = computed(() => {
   }
 
   &__icon {
-    flex-shrink: 0;
+    display: flex;
     width: 48px;
     height: 48px;
-    display: flex;
+    border-radius: 10px;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
   }
 }
 </style>

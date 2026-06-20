@@ -50,7 +50,12 @@
           <el-button v-if="isStock" link type="success" @click="handlePicking(scope.row.id)">
             拣货
           </el-button>
-          <PrinterLabel v-if="isStock" :bizId="scope.row.batchId" :bizCode="scope.row.batchCode" bizType="BATCH" />
+          <PrinterLabel
+            v-if="isStock"
+            :bizId="scope.row.batchId"
+            :bizCode="scope.row.batchCode"
+            bizType="BATCH"
+          />
         </template>
       </el-table-column>
     </el-table>

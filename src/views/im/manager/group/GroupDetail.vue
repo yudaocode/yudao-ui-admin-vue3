@@ -24,7 +24,9 @@
         <el-tag v-if="detail.mutedAll" type="danger">已禁言</el-tag>
         <el-tag v-else type="info">未禁言</el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="群公告" :span="2">{{ detail.notice || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="群公告" :span="2">{{
+        detail.notice || '-'
+      }}</el-descriptions-item>
       <el-descriptions-item label="创建时间" :span="2">
         {{ formatDate(detail.createTime) }}
       </el-descriptions-item>
@@ -58,12 +60,7 @@
       >
         <template #default="{ row }">{{ row.displayUserName || '-' }}</template>
       </el-table-column>
-      <el-table-column
-        label="群备注"
-        prop="groupRemark"
-        min-width="120"
-        show-overflow-tooltip
-      >
+      <el-table-column label="群备注" prop="groupRemark" min-width="120" show-overflow-tooltip>
         <template #default="{ row }">{{ row.groupRemark || '-' }}</template>
       </el-table-column>
       <el-table-column label="免打扰" prop="silent" width="80" align="center">
@@ -112,9 +109,7 @@ import * as ManagerGroupApi from '@/api/im/manager/group'
 defineOptions({ name: 'ImGroupDetail' })
 
 const drawerVisible = ref(false) // 抽屉的显示
-const detail = ref<ManagerGroupApi.ImManagerGroupVO>(
-  {} as ManagerGroupApi.ImManagerGroupVO
-) // 群详情数据
+const detail = ref<ManagerGroupApi.ImManagerGroupVO>({} as ManagerGroupApi.ImManagerGroupVO) // 群详情数据
 const loading = ref(false) // 成员列表的加载中
 const memberList = ref<ManagerGroupApi.ImManagerGroupMemberVO[]>([]) // 群成员列表（含已退群）
 const activeOnly = ref(true) // 仅展示当前群内的成员

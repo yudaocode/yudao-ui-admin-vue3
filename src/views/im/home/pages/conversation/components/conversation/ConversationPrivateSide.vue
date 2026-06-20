@@ -32,7 +32,9 @@
               :name="friend.nickname"
               :size="50"
             />
-            <div class="w-full mt-1.5 overflow-hidden text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center truncate">
+            <div
+              class="w-full mt-1.5 overflow-hidden text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center truncate"
+            >
               {{ displayName }}
             </div>
           </div>
@@ -43,10 +45,15 @@
             title="发起群聊"
             @click="handleOpenCreateGroup"
           >
-            <div class="im-conversation-private-side__icon-tile flex items-center justify-center w-[50px] h-[50px] text-20px text-[var(--el-text-color-regular)] bg-[var(--el-fill-color-lighter)] border border-dashed border-[var(--el-border-color)] rounded-md transition-colors duration-200">
+            <div
+              class="im-conversation-private-side__icon-tile flex items-center justify-center w-[50px] h-[50px] text-20px text-[var(--el-text-color-regular)] bg-[var(--el-fill-color-lighter)] border border-dashed border-[var(--el-border-color)] rounded-md transition-colors duration-200"
+            >
               <Icon icon="ant-design:plus-outlined" />
             </div>
-            <div class="w-full mt-1.5 overflow-hidden text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center truncate">添加</div>
+            <div
+              class="w-full mt-1.5 overflow-hidden text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center truncate"
+              >添加</div
+            >
           </div>
         </div>
 
@@ -64,14 +71,19 @@
               <div
                 class="im-conversation-private-side__row flex flex-col items-stretch gap-1.5 px-4 py-[14px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
               >
-                <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">备注</span>
+                <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+                  >备注</span
+                >
                 <span
                   v-if="friend.displayName"
                   class="text-13px leading-[1.6] text-[var(--el-text-color-regular)] break-all line-clamp-2"
                 >
                   {{ friend.displayName }}
                 </span>
-                <span v-else class="text-13px leading-[1.6] text-[var(--el-text-color-placeholder)]">
+                <span
+                  v-else
+                  class="text-13px leading-[1.6] text-[var(--el-text-color-placeholder)]"
+                >
                   好友备注仅自己可见
                 </span>
               </div>
@@ -101,7 +113,9 @@
             class="im-conversation-private-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
             @click="emit('open-history')"
           >
-            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">查找聊天内容</span>
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+              >查找聊天内容</span
+            >
             <Icon
               icon="ant-design:right-outlined"
               :size="11"
@@ -114,12 +128,20 @@
 
         <!-- 开关项 -->
         <div class="bg-[var(--el-bg-color)]">
-          <div class="im-conversation-private-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150">
-            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">消息免打扰</span>
+          <div
+            class="im-conversation-private-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150"
+          >
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+              >消息免打扰</span
+            >
             <el-switch :model-value="!!conversation?.silent" @change="handleMutedChange" />
           </div>
-          <div class="im-conversation-private-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150">
-            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">置顶聊天</span>
+          <div
+            class="im-conversation-private-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150"
+          >
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+              >置顶聊天</span
+            >
             <el-switch :model-value="!!conversation?.top" @change="handleTopChange" />
           </div>
         </div>
@@ -236,7 +258,11 @@ function handleTopChange(value: boolean | string | number) {
   if (!props.conversation) {
     return
   }
-  conversationStore.setConversationTop(props.conversation.type, props.conversation.targetId, !!value)
+  conversationStore.setConversationTop(
+    props.conversation.type,
+    props.conversation.targetId,
+    !!value
+  )
 }
 
 /** 群创建成功：跳到新群会话 + 关掉本侧抽屉，让用户专注新群 */
@@ -260,13 +286,13 @@ function handleGroupCreated(groupId: number) {
 /* 「+」 tile： hover 时联动内部 icon-tile 走主色； 跨子元素的 hover 联动无法用单元素工具类表达 */
 .im-conversation-private-side__tile-wrap-clickable:hover .im-conversation-private-side__icon-tile {
   color: var(--el-color-primary);
-  border-color: var(--el-color-primary);
   background-color: var(--el-color-primary-light-9);
+  border-color: var(--el-color-primary);
 }
 
 /* :deep 穿透 Icon 内部 svg； el-icon 全局 color 在暗色模式下被主题盖过，锁 fill 到当前色 */
 .im-conversation-private-side__icon-tile :deep(svg) {
-  fill: currentColor !important;
+  fill: currentcolor !important;
 }
 
 /* 相邻信息行加分隔线； 相邻兄弟选择器无法用工具类表达 */

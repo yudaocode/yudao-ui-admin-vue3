@@ -40,11 +40,19 @@ const buildOption = (dates: string[], reg: number[], act: number[]): echarts.ECh
   ],
   series: [
     {
-      name: '新增注册', type: 'bar', yAxisIndex: 0, data: reg,
-      itemStyle: { color: '#E6A23C' }, barMaxWidth: 24
+      name: '新增注册',
+      type: 'bar',
+      yAxisIndex: 0,
+      data: reg,
+      itemStyle: { color: '#E6A23C' },
+      barMaxWidth: 24
     },
     {
-      name: '日活', type: 'line', yAxisIndex: 1, smooth: true, data: act,
+      name: '日活',
+      type: 'line',
+      yAxisIndex: 1,
+      smooth: true,
+      data: act,
       itemStyle: { color: '#F56C6C' }
     }
   ]

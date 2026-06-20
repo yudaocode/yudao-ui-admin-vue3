@@ -9,11 +9,7 @@ import AppView from './AppView.vue'
 import ToolHeader from './ToolHeader.vue'
 import { ElScrollbar } from 'element-plus'
 import { useDesign } from '@/hooks/web/useDesign'
-import {
-  isHeaderMixedNavLayout,
-  isMixedNavLayout,
-  isTwoColumnLayout
-} from '@/utils/layout'
+import { isHeaderMixedNavLayout, isMixedNavLayout, isTwoColumnLayout } from '@/utils/layout'
 
 const { getPrefixCls } = useDesign()
 
@@ -251,7 +247,8 @@ export const useRenderLayout = () => {
   const renderCutMenu = () => {
     const showHeaderMenu = isHeaderMixedNavLayout(layout.value)
     const fixedTwoColumnMenu = fixedMenu.value || isTwoColumnLayout(layout.value)
-    const showTwoColumnExtraMenu = fixedTwoColumnMenu && permissionStore.getMenuTabRouters.length > 0
+    const showTwoColumnExtraMenu =
+      fixedTwoColumnMenu && permissionStore.getMenuTabRouters.length > 0
     return (
       <>
         <div class="relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom">

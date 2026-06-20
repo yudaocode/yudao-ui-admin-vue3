@@ -1,29 +1,29 @@
 import request from '@/config/axios'
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs'
 
 /** 学生课程信息 */
 export interface Demo03Course {
-  id: number; // 编号
-  studentId?: number; // 学生编号
-  name?: string; // 名字
-  score?: number; // 分数
+  id: number // 编号
+  studentId?: number // 学生编号
+  name?: string // 名字
+  score?: number // 分数
 }
 
 /** 学生班级信息 */
 export interface Demo03Grade {
-  id: number; // 编号
-  studentId?: number; // 学生编号
-  name?: string; // 名字
-  teacher?: string; // 班主任
+  id: number // 编号
+  studentId?: number // 学生编号
+  name?: string // 名字
+  teacher?: string // 班主任
 }
 
 /** 学生信息 */
 export interface Demo03Student {
-  id: number; // 编号
-  name?: string; // 名字
-  sex?: number; // 性别
-  birthday?: string | Dayjs; // 出生日期
-  description?: string; // 简介
+  id: number // 编号
+  name?: string // 名字
+  sex?: number // 性别
+  birthday?: string | Dayjs // 出生日期
+  description?: string // 简介
   demo03courses?: Demo03Course[]
   demo03grade?: Demo03Grade
 }
@@ -57,7 +57,9 @@ export const Demo03StudentApi = {
 
   /** 批量删除学生 */
   deleteDemo03StudentList: async (ids: number[]) => {
-    return await request.delete({ url: `/infra/demo03-student-inner/delete-list?ids=${ids.join(',')}` })
+    return await request.delete({
+      url: `/infra/demo03-student-inner/delete-list?ids=${ids.join(',')}`
+    })
   },
 
   // 导出学生 Excel
@@ -65,17 +67,21 @@ export const Demo03StudentApi = {
     return await request.download({ url: `/infra/demo03-student-inner/export-excel`, params })
   },
 
-// ==================== 子表（学生课程） ====================
+  // ==================== 子表（学生课程） ====================
 
   // 获得学生课程列表
   getDemo03CourseListByStudentId: async (studentId) => {
-    return await request.get({ url: `/infra/demo03-student-inner/demo03-course/list-by-student-id?studentId=` + studentId })
+    return await request.get({
+      url: `/infra/demo03-student-inner/demo03-course/list-by-student-id?studentId=` + studentId
+    })
   },
 
-// ==================== 子表（学生班级） ====================
+  // ==================== 子表（学生班级） ====================
 
   // 获得学生班级
   getDemo03GradeByStudentId: async (studentId) => {
-    return await request.get({ url: `/infra/demo03-student-inner/demo03-grade/get-by-student-id?studentId=` + studentId })
-  },
+    return await request.get({
+      url: `/infra/demo03-student-inner/demo03-grade/get-by-student-id?studentId=` + studentId
+    })
+  }
 }
