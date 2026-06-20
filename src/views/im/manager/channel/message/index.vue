@@ -8,7 +8,12 @@
       label-width="68px"
     >
       <el-form-item label="频道" prop="channelId">
-        <ChannelSelect v-model="queryParams.channelId" placeholder="全部" clearable class="!w-200px" />
+        <ChannelSelect
+          v-model="queryParams.channelId"
+          placeholder="全部"
+          clearable
+          class="!w-200px"
+        />
       </el-form-item>
       <el-form-item label="发送时间" prop="sendTime">
         <el-date-picker

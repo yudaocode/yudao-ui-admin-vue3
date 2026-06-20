@@ -60,9 +60,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 function handleChat(group: GroupLite) {
   const cached = groupStore.getGroup(group.id)
   // cached 命中走 getGroupDisplayName 让群备注优先（与 contact / 会话列表的展示名一致）；缺 cached 时回落 showGroupName / 原群名
-  const displayName = cached
-    ? getGroupDisplayName(cached)
-    : group.showGroupName || group.name || ''
+  const displayName = cached ? getGroupDisplayName(cached) : group.showGroupName || group.name || ''
   // 打开或新建会话
   conversationStore.openConversation(
     group.id,

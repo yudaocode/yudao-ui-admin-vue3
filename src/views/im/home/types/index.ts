@@ -210,7 +210,12 @@ export interface Group {
 /** 群 IndexedDB 存储结构 */
 export type GroupDO = Omit<
   Group,
-  'activeCallExpired' | 'activeCallLoaded' | 'infoLoaded' | 'members' | 'membersLoaded' | 'membersExpired'
+  | 'activeCallExpired'
+  | 'activeCallLoaded'
+  | 'infoLoaded'
+  | 'members'
+  | 'membersLoaded'
+  | 'membersExpired'
 >
 
 // 群成员实体（前端内部结构）

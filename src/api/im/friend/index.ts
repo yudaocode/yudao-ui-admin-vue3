@@ -34,7 +34,11 @@ export const getMyFriendList = () => {
 }
 
 // 增量拉取当前用户的好友关系（重连 / 离线补偿）
-export const pullMyFriendList = (params: { lastUpdateTime?: number; lastId?: number; limit: number }) => {
+export const pullMyFriendList = (params: {
+  lastUpdateTime?: number
+  lastId?: number
+  limit: number
+}) => {
   return request.get<ImFriendRespVO[]>({ url: '/im/friend/pull', params })
 }
 
@@ -65,4 +69,3 @@ export const blockFriend = (friendUserId: number | string) => {
 export const unblockFriend = (friendUserId: number | string) => {
   return request.put<boolean>({ url: '/im/friend/unblock', params: { friendUserId } })
 }
-

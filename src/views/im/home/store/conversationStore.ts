@@ -74,10 +74,7 @@ function toConversationDO(conversation: Conversation): ConversationDO {
 
 /** IndexedDB 记录转会话 */
 function fromConversationDO(conversation: ConversationDO): Conversation {
-  const {
-    clientConversationId: _clientConversationId,
-    ...rest
-  } = conversation
+  const { clientConversationId: _clientConversationId, ...rest } = conversation
   return rest
 }
 
@@ -364,10 +361,7 @@ export const useConversationStore = defineStore('imConversationStore', {
         const current = this.conversationReads[clientConversationId]
         const messageId = Math.max(record.messageId, current?.messageId || 0)
         const conversation = this.getConversation(record.conversationType, record.targetId)
-        if (
-          conversation &&
-          record.messageId > (conversation.reportedReadMessageId || 0)
-        ) {
+        if (conversation && record.messageId > (conversation.reportedReadMessageId || 0)) {
           conversation.reportedReadMessageId = record.messageId
           changedConversations.set(clientConversationId, conversation)
         }
@@ -701,7 +695,7 @@ export const useConversationStore = defineStore('imConversationStore', {
               },
               e
             )
-        )
+          )
         return
       }
       this.saveConversation(conversation)
@@ -794,7 +788,10 @@ export const useConversationStore = defineStore('imConversationStore', {
     // ==================== 草稿 ====================
 
     /** 获取草稿 */
-    getConversationDraft(conversation: { type: number; targetId: number }): Conversation['draft'] | undefined {
+    getConversationDraft(conversation: {
+      type: number
+      targetId: number
+    }): Conversation['draft'] | undefined {
       return this.getConversation(conversation.type, conversation.targetId)?.draft
     },
 

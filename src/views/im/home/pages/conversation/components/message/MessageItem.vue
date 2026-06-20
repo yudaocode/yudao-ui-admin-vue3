@@ -1053,6 +1053,7 @@ function handleDelete() {
 .im-loading-spin {
   animation: im-loading-spin 1s linear infinite;
 }
+
 @keyframes im-loading-spin {
   to {
     transform: rotate(360deg);

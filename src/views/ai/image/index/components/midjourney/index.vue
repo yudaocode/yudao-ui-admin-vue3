@@ -43,7 +43,11 @@
         @click="handleSizeClick(imageSize)"
       >
         <div
-          :class="selectSize === imageSize.key ? 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-#1293ff' : 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-white'"
+          :class="
+            selectSize === imageSize.key
+              ? 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-#1293ff'
+              : 'flex flex-col items-center justify-center rounded-7px p-4px w-50px h-50px bg-white border-1 border-solid border-white'
+          "
         >
           <div :style="imageSize.style"></div>
         </div>
@@ -57,7 +61,11 @@
     </div>
     <el-space wrap class="mt-15px">
       <div
-        :class="selectModel === model.key ? 'flex flex-col items-center w-150px overflow-hidden border-3 border-solid border-#1293ff rounded-5px cursor-pointer' : 'flex flex-col items-center w-150px overflow-hidden border-3 border-solid border-transparent cursor-pointer'"
+        :class="
+          selectModel === model.key
+            ? 'flex flex-col items-center w-150px overflow-hidden border-3 border-solid border-#1293ff rounded-5px cursor-pointer'
+            : 'flex flex-col items-center w-150px overflow-hidden border-3 border-solid border-transparent cursor-pointer'
+        "
         v-for="model in MidjourneyModels"
         :key="model.key"
       >
@@ -71,12 +79,7 @@
       <el-text tag="b">版本</el-text>
     </div>
     <el-space wrap class="mt-20px w-full">
-      <el-select
-        v-model="selectVersion"
-        class="!w-350px"
-        clearable
-        placeholder="请选择版本"
-      >
+      <el-select v-model="selectVersion" class="!w-350px" clearable placeholder="请选择版本">
         <el-option
           v-for="item in versionList"
           :key="item.value"
@@ -233,4 +236,3 @@ const settingValues = async (detail: ImageVO) => {
 /** 暴露组件方法 */
 defineExpose({ settingValues })
 </script>
-

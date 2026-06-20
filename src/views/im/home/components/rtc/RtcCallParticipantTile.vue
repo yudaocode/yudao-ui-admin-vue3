@@ -97,12 +97,14 @@ const audioRef = useMediaStreamElement<HTMLAudioElement>(() => props.participant
 .tile-dot {
   animation: tile-dot 1.4s infinite ease-in-out both;
 }
+
 @keyframes tile-dot {
   0%,
   80%,
   100% {
     opacity: 0.3;
   }
+
   40% {
     opacity: 1;
   }

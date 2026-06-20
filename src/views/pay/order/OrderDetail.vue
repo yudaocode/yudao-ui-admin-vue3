@@ -13,7 +13,9 @@
         <dict-tag :type="DICT_TYPE.PAY_ORDER_STATUS" :value="detailData.status" size="small" />
       </el-descriptions-item>
       <el-descriptions-item label="支付金额">
-        <el-tag type="success" size="small">￥{{ ((detailData.price || 0) / 100.0).toFixed(2) }}</el-tag>
+        <el-tag type="success" size="small"
+          >￥{{ ((detailData.price || 0) / 100.0).toFixed(2) }}</el-tag
+        >
       </el-descriptions-item>
       <el-descriptions-item label="手续费">
         <el-tag type="warning" size="small">
@@ -62,7 +64,7 @@
     <el-divider />
     <el-descriptions :column="1" label-class-name="desc-label" direction="vertical" border>
       <el-descriptions-item label="支付通道异步回调内容">
-        <el-text style="white-space: pre-wrap; word-break: break-word">
+        <el-text style="overflow-wrap: anywhere; white-space: pre-wrap">
           {{ detailData.extension.channelNotifyData }}
         </el-text>
       </el-descriptions-item>

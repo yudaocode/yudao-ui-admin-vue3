@@ -295,10 +295,20 @@
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item v-if="configForm.multiInstanceSourceType === ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY">
+              <el-form-item
+                v-if="
+                  configForm.multiInstanceSourceType ===
+                  ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY
+                "
+              >
                 <el-input-number v-model="configForm.multiInstanceSource" :min="1" />
               </el-form-item>
-              <el-form-item v-if="configForm.multiInstanceSourceType === ChildProcessMultiInstanceSourceTypeEnum.NUMBER_FORM">
+              <el-form-item
+                v-if="
+                  configForm.multiInstanceSourceType ===
+                  ChildProcessMultiInstanceSourceTypeEnum.NUMBER_FORM
+                "
+              >
                 <el-select class="w-200px!" v-model="configForm.multiInstanceSource">
                   <el-option
                     v-for="(field, fIdx) in digitalFormFieldOptions"
@@ -308,7 +318,12 @@
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item v-if="configForm.multiInstanceSourceType === ChildProcessMultiInstanceSourceTypeEnum.MULTIPLE_FORM">
+              <el-form-item
+                v-if="
+                  configForm.multiInstanceSourceType ===
+                  ChildProcessMultiInstanceSourceTypeEnum.MULTIPLE_FORM
+                "
+              >
                 <el-select class="w-200px!" v-model="configForm.multiInstanceSource">
                   <el-option
                     v-for="(field, fIdx) in multiFormFieldOptions"
@@ -519,7 +534,9 @@ const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
     configForm.value.outVariables = node.childProcessSetting.outVariables
     // 6. 发起人设置
     configForm.value.startUserType = node.childProcessSetting.startUserSetting.type
-    configForm.value.startUserEmptyType = node.childProcessSetting.startUserSetting.emptyType ?? ChildProcessStartUserEmptyTypeEnum.MAIN_PROCESS_START_USER
+    configForm.value.startUserEmptyType =
+      node.childProcessSetting.startUserSetting.emptyType ??
+      ChildProcessStartUserEmptyTypeEnum.MAIN_PROCESS_START_USER
     configForm.value.startUserFormField = node.childProcessSetting.startUserSetting.formField ?? ''
     // 7. 超时设置
     configForm.value.timeoutEnable = node.childProcessSetting.timeoutSetting.enable ?? false

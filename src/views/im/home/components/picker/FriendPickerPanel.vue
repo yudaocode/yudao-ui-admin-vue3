@@ -181,9 +181,7 @@ const disabledSet = computed(() => new Set(props.disabledIds))
 const selectedSet = computed(() => new Set(props.selectedIds))
 
 /** 候选好友：剔除 hideIds（hide 优先级最高） */
-const candidates = computed(() =>
-  props.friends.filter((friend) => !hideSet.value.has(friend.id))
-)
+const candidates = computed(() => props.friends.filter((friend) => !hideSet.value.has(friend.id)))
 
 /** 委托 useFriendBuckets：搜索规则复用，左侧列表按滚动分页渲染 */
 const { filtered } = useFriendBuckets(candidates, keyword)

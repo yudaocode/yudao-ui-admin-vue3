@@ -17,11 +17,7 @@ import { computed, ref, watch } from 'vue'
 import UserAvatar from '../user/UserAvatar.vue'
 import { useFriendStore } from '../../store/friendStore'
 import { useGroupStore } from '../../store/groupStore'
-import {
-  buildGroupAvatar,
-  getCachedGroupAvatar,
-  setCachedGroupAvatar
-} from '../../../utils/group'
+import { buildGroupAvatar, getCachedGroupAvatar, setCachedGroupAvatar } from '../../../utils/group'
 import { getMemberDisplayName } from '../../../utils/user'
 import type { GroupMember } from '../../types'
 

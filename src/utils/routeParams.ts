@@ -23,9 +23,7 @@ export const parseQueryString = (queryString = ''): Record<string, any> => {
   return qs.parse(queryString.replace(/^\?/, '')) as Record<string, any>
 }
 
-export const splitRoutePath = (
-  rawPath: string | null | undefined
-): ParsedRouteLocation => {
+export const splitRoutePath = (rawPath: string | null | undefined): ParsedRouteLocation => {
   if (!rawPath) {
     return { path: '' }
   }
@@ -113,7 +111,8 @@ export const splitDynamicRouteParams = (
   }
 }
 
-const isRepeatableParam = (matched: string): boolean => matched.endsWith('*') || matched.endsWith('+')
+const isRepeatableParam = (matched: string): boolean =>
+  matched.endsWith('*') || matched.endsWith('+')
 
 const encodeRouteParam = (matched: string, value: any): string => {
   if (Array.isArray(value)) {

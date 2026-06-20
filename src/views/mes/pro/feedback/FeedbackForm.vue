@@ -19,9 +19,7 @@
               :disabled="isHeaderReadonly"
             >
               <template #append>
-                <el-button :disabled="isHeaderReadonly" @click="generateCode">
-                  生成
-                </el-button>
+                <el-button :disabled="isHeaderReadonly" @click="generateCode"> 生成 </el-button>
               </template>
             </el-input>
           </el-form-item>

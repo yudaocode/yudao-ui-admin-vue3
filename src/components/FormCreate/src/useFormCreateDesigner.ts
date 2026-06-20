@@ -40,7 +40,14 @@ export const useFormCreateDesigner = async (designer: Ref) => {
     designer.value?.removeMenuItem('fcEditor')
     const iframeRule = useIframeRule()
     const areaSelectRule = useAreaSelectRule()
-    const components = [editorRule, uploadFileRule, uploadImgRule, uploadImgsRule, iframeRule, areaSelectRule]
+    const components = [
+      editorRule,
+      uploadFileRule,
+      uploadImgRule,
+      uploadImgsRule,
+      iframeRule,
+      areaSelectRule
+    ]
     components.forEach((component) => {
       // 插入组件规则
       designer.value?.addComponent(component)

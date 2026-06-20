@@ -129,7 +129,11 @@
       </el-table-column>
       <el-table-column label="结束原因" align="center" prop="endReason" width="120">
         <template #default="{ row }">
-          <dict-tag v-if="row.endReason" :type="DICT_TYPE.IM_RTC_CALL_END_REASON" :value="row.endReason" />
+          <dict-tag
+            v-if="row.endReason"
+            :type="DICT_TYPE.IM_RTC_CALL_END_REASON"
+            :value="row.endReason"
+          />
           <span v-else>-</span>
         </template>
       </el-table-column>

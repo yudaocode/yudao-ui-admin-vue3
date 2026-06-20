@@ -127,7 +127,11 @@ import DvMachineryTypeSelect from '@/views/mes/dv/machinery/type/components/DvMa
 import MachineryCheckRecordList from './MachineryCheckRecordList.vue'
 import MachineryMaintenRecordList from './MachineryMaintenRecordList.vue'
 import MachineryRepairList from './MachineryRepairList.vue'
-import { MesDvMachineryStatusEnum, MesAutoCodeRuleCode, BarcodeBizTypeEnum } from '@/views/mes/utils/constants'
+import {
+  MesDvMachineryStatusEnum,
+  MesAutoCodeRuleCode,
+  BarcodeBizTypeEnum
+} from '@/views/mes/utils/constants'
 import { AutoCodeRecordApi } from '@/api/mes/md/autocode/record'
 import { BarcodeDetail } from '@/views/mes/wm/barcode/components'
 
@@ -175,7 +179,10 @@ const barcodeDetailRef = ref() // 条码详情弹窗 Ref
 /** 查看条码 */
 const handleBarcode = () => {
   barcodeDetailRef.value?.openByBusiness(
-    formData.value.id!, BarcodeBizTypeEnum.MACHINERY, formData.value.code, formData.value.name
+    formData.value.id!,
+    BarcodeBizTypeEnum.MACHINERY,
+    formData.value.code,
+    formData.value.name
   )
 }
 

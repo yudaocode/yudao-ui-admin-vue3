@@ -364,7 +364,7 @@ function collectFromEditor(root: HTMLElement): { text: string; atUserIds: number
  * 3. 二次防御：collectFromEditor 走 trim，可能比 syncEditorState 更严格（例如全 ZWSP），仍空就 return
  * 4. 清空 + 同步状态：先清 innerHTML 再 syncEditorState 让 placeholder / canSend 一起回归
  *    （顺序很重要：先清后 sync，否则 sync 看到旧内容会误判）
-   * 5. 上送：atUserIds 非空才传，避免发空数组；quote 由 clearConversationDraft 前抓取，确保引用条立即消失
+ * 5. 上送：atUserIds 非空才传，避免发空数组；quote 由 clearConversationDraft 前抓取，确保引用条立即消失
  */
 async function handleSend(options?: { receipt?: boolean }) {
   const editor = editorRef.value
@@ -1171,8 +1171,9 @@ async function onVideoPicked(e: Event) {
 .message-input__tool:deep(svg) {
   font-size: 18px !important;
   color: var(--el-text-color-regular) !important;
-  fill: currentColor !important;
+  fill: currentcolor !important;
 }
+
 .message-input__tool:hover,
 .message-input__tool:hover:deep(svg) {
   color: var(--el-color-primary) !important;
@@ -1180,10 +1181,10 @@ async function onVideoPicked(e: Event) {
 
 /* 用 data-empty 而非 :empty：浏览器在删空后会留下 <br>，:empty 不命中；data-empty 由 syncEditorState 维护 */
 .message-input__editor[data-empty]::before {
-  content: attr(data-placeholder);
+  position: absolute;
   color: var(--el-text-color-placeholder);
   pointer-events: none;
-  position: absolute;
+  content: attr(data-placeholder);
 }
 
 /* @ token 走主色高亮；contenteditable=false 让 backspace 整段删而不是逐字符 */

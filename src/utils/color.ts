@@ -173,7 +173,6 @@ export const PREDEFINE_COLORS = [
   '#711f57'
 ]
 
-
 /**
  * Mixes two colors.
  *

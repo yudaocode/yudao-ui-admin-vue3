@@ -12,10 +12,7 @@ import { useDesign } from '@/hooks/web/useDesign'
 import { isUrl } from '@/utils/is'
 import { createRouteLocation } from '@/utils/routeParams'
 import { getRootPath, isHeaderMixedNavLayout, isTwoColumnLayout } from '@/utils/layout'
-import {
-  getRootMenuRoute,
-  normalizeMenuTargetPath
-} from '@/layout/components/Menu/src/menuRoute'
+import { getRootMenuRoute, normalizeMenuTargetPath } from '@/layout/components/Menu/src/menuRoute'
 
 const { getPrefixCls, variables } = useDesign()
 
@@ -58,7 +55,9 @@ export default defineComponent({
       return getRootMenuRoute(unref(routers), targetPath)
     })
 
-    const rootPath = computed(() => unref(activeRootInfo)?.fullPath || getRootPath(unref(currentMenuPath)))
+    const rootPath = computed(
+      () => unref(activeRootInfo)?.fullPath || getRootPath(unref(currentMenuPath))
+    )
 
     const activeRootRoute = computed(() => unref(activeRootInfo)?.route)
 
@@ -125,7 +124,9 @@ export default defineComponent({
     const isSameMenuRouters = (left: AppRouteRecordRaw[], right: AppRouteRecordRaw[]): boolean => {
       return (
         left.length === right.length &&
-        left.every((route, index) => route.path === right[index]?.path && route.name === right[index]?.name)
+        left.every(
+          (route, index) => route.path === right[index]?.path && route.name === right[index]?.name
+        )
       )
     }
 
@@ -219,7 +220,8 @@ export default defineComponent({
       const children = getVisibleChildren(item)
       if (children.length) {
         if (newPath === oldPath || !unref(showMenu)) {
-          showMenu.value = unref(fixedMenu) || unref(headerMixed) || unref(twoColumn) ? true : !unref(showMenu)
+          showMenu.value =
+            unref(fixedMenu) || unref(headerMixed) || unref(twoColumn) ? true : !unref(showMenu)
         }
         if (unref(showMenu)) {
           setExtraMenuRouters(buildExtraMenuRouters(children, unref(tabActive)))

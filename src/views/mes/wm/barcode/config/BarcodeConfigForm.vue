@@ -47,7 +47,12 @@
       </el-form-item>
       <!-- TODO @芋艿：后续对接 UReport 报表选择器，实现打印模板选择功能 -->
       <el-form-item label="默认打印模板" prop="defaultTemplate">
-        <el-input v-model="formData.defaultTemplate" placeholder="请选择打印模板" readonly class="!w-1/1">
+        <el-input
+          v-model="formData.defaultTemplate"
+          placeholder="请选择打印模板"
+          readonly
+          class="!w-1/1"
+        >
           <template #append>
             <el-button @click="handleSelectTemplate">设置</el-button>
           </template>

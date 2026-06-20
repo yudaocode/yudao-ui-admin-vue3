@@ -755,9 +755,10 @@ watch(
 .message-panel__header-icon,
 .message-panel__header-icon :deep(svg) {
   color: var(--el-text-color-regular) !important;
-  fill: currentColor !important;
+  fill: currentcolor !important;
   transition: color 0.15s;
 }
+
 .message-panel__header-icon:hover,
 .message-panel__header-icon:hover :deep(svg) {
   color: var(--el-color-primary) !important;
@@ -775,6 +776,7 @@ watch(
 .message-panel__message-anchor {
   transition: background-color 0.6s ease;
 }
+
 .message-panel__message-anchor--highlight {
   background-color: var(--el-color-warning-light-9);
 }

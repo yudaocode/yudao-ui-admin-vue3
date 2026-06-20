@@ -6,4 +6,12 @@ import QrCodeForm from './QrCodeForm.vue'
 import SSOLoginVue from './SSOLogin.vue'
 import ForgetPasswordForm from './ForgetPasswordForm.vue'
 
-export { LoginForm, MobileForm, LoginFormTitle, RegisterForm, QrCodeForm, SSOLoginVue, ForgetPasswordForm }
+export {
+  LoginForm,
+  MobileForm,
+  LoginFormTitle,
+  RegisterForm,
+  QrCodeForm,
+  SSOLoginVue,
+  ForgetPasswordForm
+}

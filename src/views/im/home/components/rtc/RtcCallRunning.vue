@@ -85,9 +85,7 @@
     </div>
 
     <!-- 底部操作区：麦克风 / 扬声器 / 摄像头 / (群聊：共享屏幕 / 添加成员) / 挂断 -->
-    <div
-      class="flex flex-shrink-0 gap-3 justify-around items-center pt-4 px-4 pb-5 bg-black/20"
-    >
+    <div class="flex flex-shrink-0 gap-3 justify-around items-center pt-4 px-4 pb-5 bg-black/20">
       <div
         class="flex flex-col gap-2 items-center cursor-pointer select-none min-w-[64px]"
         @click="$emit('toggle-mic')"
@@ -164,7 +162,9 @@
           class="flex flex-col gap-2 items-center cursor-pointer select-none min-w-[64px]"
           @click="$emit('add-member')"
         >
-          <span class="flex justify-center items-center w-[52px] h-[52px] text-white rounded-full bg-white/15">
+          <span
+            class="flex justify-center items-center w-[52px] h-[52px] text-white rounded-full bg-white/15"
+          >
             <Icon icon="ant-design:plus-outlined" :size="22" />
           </span>
           <span class="text-xs text-white/70 whitespace-nowrap">添加成员</span>
@@ -175,7 +175,9 @@
         :class="{ 'opacity-60 pointer-events-none': hangingUp }"
         @click="$emit('hangup')"
       >
-        <span class="flex justify-center items-center w-[52px] h-[52px] text-white rounded-full bg-[#f04a4a]">
+        <span
+          class="flex justify-center items-center w-[52px] h-[52px] text-white rounded-full bg-[#f04a4a]"
+        >
           <Icon icon="ant-design:phone-outlined" :size="22" class="rotate-[135deg]" />
         </span>
         <span class="text-xs text-white/70 whitespace-nowrap">挂断</span>
@@ -277,11 +279,13 @@ const formattedDuration = computed(() =>
 .reconnect-dot {
   animation: reconnect-pulse 1s ease-in-out infinite;
 }
+
 @keyframes reconnect-pulse {
   0%,
   100% {
     opacity: 0.3;
   }
+
   50% {
     opacity: 1;
   }

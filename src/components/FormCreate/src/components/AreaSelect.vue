@@ -34,7 +34,7 @@ interface AreaVO {
 
 interface Props {
   modelValue?: number[] | string[]
-  level?: typeof AreaLevelEnum[keyof typeof AreaLevelEnum]
+  level?: (typeof AreaLevelEnum)[keyof typeof AreaLevelEnum]
   disabled?: boolean
   placeholder?: string
   clearable?: boolean

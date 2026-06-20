@@ -242,10 +242,7 @@ function createCurrentTimeParamRule(getOperator: () => string): FormItemRule {
  * @param path 错误提示前缀
  * @returns 错误信息，通过则返回 null
  */
-export function validateTriggerCondition(
-  condition: TriggerCondition,
-  path: string
-): string | null {
+export function validateTriggerCondition(condition: TriggerCondition, path: string): string | null {
   if (!condition.type) {
     return `${path}: 条件类型不能为空`
   }

@@ -1,6 +1,9 @@
 <!-- MES 计量单位列表 -->
 <template>
-  <doc-alert title="【基础】物料产品、分类、计量单位" url="https://doc.iocoder.cn/mes/md/product/" />
+  <doc-alert
+    title="【基础】物料产品、分类、计量单位"
+    url="https://doc.iocoder.cn/mes/md/product/"
+  />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

@@ -231,7 +231,9 @@ async function handleSend() {
     const results = await Promise.all(tasks)
     const failedNames = results.filter((r) => !r.ok).map((r) => r.conversation.name || '未命名会话')
     // 把命中的目标推到最近转发列表（部分失败也推：用户的"意图"已表达）
-    conversationStore.pushRecentForwardConversationKeyList(targets.map((c) => getConversationKey(c)))
+    conversationStore.pushRecentForwardConversationKeyList(
+      targets.map((c) => getConversationKey(c))
+    )
     if (failedNames.length === 0) {
       message.success('已转发')
     } else if (failedNames.length === targets.length) {

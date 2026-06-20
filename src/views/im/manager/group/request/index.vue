@@ -15,7 +15,11 @@
         <UserSelectV2 v-model="queryParams.userId" placeholder="请选择申请人" class="!w-240px" />
       </el-form-item>
       <el-form-item label="邀请人" prop="inviterUserId">
-        <UserSelectV2 v-model="queryParams.inviterUserId" placeholder="请选择邀请人" class="!w-240px" />
+        <UserSelectV2
+          v-model="queryParams.inviterUserId"
+          placeholder="请选择邀请人"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="处理结果" prop="handleResult">
         <el-select
@@ -75,7 +79,12 @@
           <span class="text-gray-400 ml-5px">({{ row.groupId }})</span>
         </template>
       </el-table-column>
-      <el-table-column label="申请人 / 被邀请人" align="center" min-width="200" show-overflow-tooltip>
+      <el-table-column
+        label="申请人 / 被邀请人"
+        align="center"
+        min-width="200"
+        show-overflow-tooltip
+      >
         <template #default="{ row }">
           <span>{{ row.userNickname || '-' }}</span>
           <span class="text-gray-400 ml-5px">({{ row.userId }})</span>
@@ -90,7 +99,13 @@
           <span v-else class="text-gray-400">主动申请</span>
         </template>
       </el-table-column>
-      <el-table-column label="申请理由" align="center" prop="applyContent" min-width="160" show-overflow-tooltip />
+      <el-table-column
+        label="申请理由"
+        align="center"
+        prop="applyContent"
+        min-width="160"
+        show-overflow-tooltip
+      />
       <el-table-column label="加入来源" align="center" prop="addSource" width="120">
         <template #default="{ row }">
           <dict-tag :type="DICT_TYPE.IM_GROUP_ADD_SOURCE" :value="row.addSource" />
@@ -110,7 +125,13 @@
           <span v-else class="text-gray-400">-</span>
         </template>
       </el-table-column>
-      <el-table-column label="处理理由" align="center" prop="handleContent" min-width="140" show-overflow-tooltip />
+      <el-table-column
+        label="处理理由"
+        align="center"
+        prop="handleContent"
+        min-width="140"
+        show-overflow-tooltip
+      />
       <el-table-column
         label="处理时间"
         align="center"

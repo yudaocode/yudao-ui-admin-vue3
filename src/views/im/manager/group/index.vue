@@ -18,11 +18,7 @@
         />
       </el-form-item>
       <el-form-item label="群主" prop="ownerUserId">
-        <UserSelectV2
-          v-model="queryParams.ownerUserId"
-          placeholder="请选择群主"
-          class="!w-240px"
-        />
+        <UserSelectV2 v-model="queryParams.ownerUserId" placeholder="请选择群主" class="!w-240px" />
       </el-form-item>
       <el-form-item label="群状态" prop="status">
         <el-select
@@ -134,13 +130,7 @@
           >
             详情
           </el-button>
-          <el-button
-            link
-            type="primary"
-            @click="goConversation(row)"
-          >
-            查看对话
-          </el-button>
+          <el-button link type="primary" @click="goConversation(row)"> 查看对话 </el-button>
           <el-button
             v-if="!row.banned"
             link

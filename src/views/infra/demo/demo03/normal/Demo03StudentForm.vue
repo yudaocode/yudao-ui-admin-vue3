@@ -69,13 +69,13 @@ const formData = ref({
   name: undefined,
   sex: undefined,
   birthday: undefined,
-  description: undefined,
+  description: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
   sex: [{ required: true, message: '性别不能为空', trigger: 'blur' }],
   birthday: [{ required: true, message: '出生日期不能为空', trigger: 'blur' }],
-  description: [{ required: true, message: '简介不能为空', trigger: 'blur' }],
+  description: [{ required: true, message: '简介不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -149,7 +149,7 @@ const resetForm = () => {
     name: undefined,
     sex: undefined,
     birthday: undefined,
-    description: undefined,
+    description: undefined
   }
   formRef.value?.resetFields()
 }

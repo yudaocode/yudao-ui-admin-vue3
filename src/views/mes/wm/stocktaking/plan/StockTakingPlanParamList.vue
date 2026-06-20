@@ -117,11 +117,7 @@
               <WmBatchSelect v-model="formData.valueId" @change="handleBatchChange" />
             </template>
             <template v-else-if="formData.type === MesWmStockTakingParamTypeEnum.QUALITY_STATUS">
-              <el-select
-                v-model="qualityStatusValue"
-                placeholder="请选择质量状态"
-                class="!w-full"
-              >
+              <el-select v-model="qualityStatusValue" placeholder="请选择质量状态" class="!w-full">
                 <el-option
                   v-for="dict in getIntDictOptions(DICT_TYPE.MES_WM_QUALITY_STATUS)"
                   :key="dict.value"

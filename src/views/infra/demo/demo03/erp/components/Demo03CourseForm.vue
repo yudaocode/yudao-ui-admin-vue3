@@ -34,12 +34,12 @@ const formData = ref({
   id: undefined,
   studentId: undefined,
   name: undefined,
-  score: undefined,
+  score: undefined
 })
 const formRules = reactive({
   studentId: [{ required: true, message: '学生编号不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
-  score: [{ required: true, message: '分数不能为空', trigger: 'blur' }],
+  score: [{ required: true, message: '分数不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -49,7 +49,7 @@ const open = async (type: string, id?: number, studentId?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  formData.value.studentId = studentId  as any
+  formData.value.studentId = studentId as any
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -70,7 +70,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as  Demo03Course
+    const data = formData.value as unknown as Demo03Course
     if (formType.value === 'create') {
       await Demo03StudentApi.createDemo03Course(data)
       message.success(t('common.createSuccess'))
@@ -92,7 +92,7 @@ const resetForm = () => {
     id: undefined,
     studentId: undefined,
     name: undefined,
-    score: undefined,
+    score: undefined
   }
   formRef.value?.resetFields()
 }

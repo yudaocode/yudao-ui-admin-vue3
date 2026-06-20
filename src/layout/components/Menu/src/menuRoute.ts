@@ -58,9 +58,9 @@ export const getRootMenuRoute = (
   }
 }
 
-export const getRootMenuActivePath = (
-  routes: AppRouteRecordRaw[],
-  targetPath: string
-): string => {
-  return getRootMenuRoute(routes, targetPath)?.fullPath || getRootPath(normalizeMenuTargetPath(targetPath))
+export const getRootMenuActivePath = (routes: AppRouteRecordRaw[], targetPath: string): string => {
+  return (
+    getRootMenuRoute(routes, targetPath)?.fullPath ||
+    getRootPath(normalizeMenuTargetPath(targetPath))
+  )
 }

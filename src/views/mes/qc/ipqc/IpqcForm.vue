@@ -89,9 +89,7 @@
               v-model="formData.taskId"
               :workOrderId="formData.workOrderId"
               :workstationId="formData.workstationId"
-              :statuses="[
-                MesProTaskStatusEnum.PREPARE
-              ]"
+              :statuses="[MesProTaskStatusEnum.PREPARE]"
               placeholder="请选择生产任务"
               class="!w-1/1"
               :disabled="isFromPendingTask || (!isFromPendingTask && !formData.workOrderId)"

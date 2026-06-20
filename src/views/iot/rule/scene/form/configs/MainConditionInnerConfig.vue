@@ -95,8 +95,7 @@
               />
               <div class="text-12px text-[var(--el-text-color-secondary)] mt-4px leading-relaxed">
                 标量事件值填裸值（如
-                <code class="px-2px">normal</code>）；结构体／数组事件值填合法
-                JSON（如
+                <code class="px-2px">normal</code>）；结构体／数组事件值填合法 JSON（如
                 <code class="px-2px">{"level":"high"}</code>）
               </div>
             </template>

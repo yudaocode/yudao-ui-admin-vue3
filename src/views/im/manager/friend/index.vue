@@ -12,7 +12,11 @@
         <UserSelectV2 v-model="queryParams.userId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="好友" prop="friendUserId">
-        <UserSelectV2 v-model="queryParams.friendUserId" placeholder="请选择好友" class="!w-240px" />
+        <UserSelectV2
+          v-model="queryParams.friendUserId"
+          placeholder="请选择好友"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="好友状态" prop="status">
         <el-select
@@ -120,13 +124,7 @@
       />
       <el-table-column label="操作" align="center" width="100" fixed="right">
         <template #default="{ row }">
-          <el-button
-            link
-            type="primary"
-            @click="goConversation(row)"
-          >
-            查看对话
-          </el-button>
+          <el-button link type="primary" @click="goConversation(row)"> 查看对话 </el-button>
         </template>
       </el-table-column>
     </el-table>

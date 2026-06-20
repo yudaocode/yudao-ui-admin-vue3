@@ -18,7 +18,6 @@ export type RtcRedial = (mediaType: number) => void
 
 /** MessagePanel 通过 provide 暴露给子树 */
 export const IM_FORWARD_DIALOG_KEY: InjectionKey<OpenForwardDialog> = Symbol('IM_FORWARD_DIALOG')
-export const IM_MERGE_DETAIL_DIALOG_KEY: InjectionKey<OpenMergeDetailDialog> = Symbol(
-  'IM_MERGE_DETAIL_DIALOG'
-)
+export const IM_MERGE_DETAIL_DIALOG_KEY: InjectionKey<OpenMergeDetailDialog> =
+  Symbol('IM_MERGE_DETAIL_DIALOG')
 export const IM_RTC_REDIAL_KEY: InjectionKey<RtcRedial> = Symbol('IM_RTC_REDIAL')

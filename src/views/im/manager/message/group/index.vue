@@ -12,11 +12,7 @@
         <GroupSelect v-model="queryParams.groupId" class="!w-240px" />
       </el-form-item>
       <el-form-item label="发送人" prop="senderId">
-        <UserSelectV2
-          v-model="queryParams.senderId"
-          placeholder="请选择发送人"
-          class="!w-240px"
-        />
+        <UserSelectV2 v-model="queryParams.senderId" placeholder="请选择发送人" class="!w-240px" />
       </el-form-item>
       <el-form-item label="内容类型" prop="type">
         <el-select

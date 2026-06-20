@@ -17,7 +17,8 @@ export default tseslint.config(
       'test/unit/coverage/',
       'node_modules/',
       'src/main.ts',
-      'src/types/auto-components.d.ts'
+      'src/types/auto-components.d.ts',
+      'src/components/Tinyflow/ui/**'
     ]
   },
 
@@ -61,6 +62,7 @@ export default tseslint.config(
       'vue/attributes-order': 'off',
       'vue/one-component-per-file': 'off',
       'vue/html-closing-bracket-newline': 'off',
+      'vue/html-indent': 'off', // Vue 模板缩进交给 Prettier，避免格式化规则互相拉扯。
       'vue/max-attributes-per-line': 'off',
       'vue/multiline-html-element-content-newline': 'off',
       'vue/singleline-html-element-content-newline': 'off',

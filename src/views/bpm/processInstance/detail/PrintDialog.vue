@@ -252,11 +252,7 @@ const flattenAreaTree = (list: AreaNode[] = [], map: Map<string, string> = new M
   return map
 }
 
-const mapValueWithLabelMap = (
-  value: unknown,
-  labelMap: Map<string, string>,
-  separator = ', '
-) => {
+const mapValueWithLabelMap = (value: unknown, labelMap: Map<string, string>, separator = ', ') => {
   const values = toValueArray(value)
   const labels = values
     .map((item) => escapeHtml(labelMap.get(String(item)) ?? String(item)))
@@ -300,11 +296,7 @@ const loadPrintLookupMaps = async (formFieldsObj: FormFieldRule[]) => {
   } satisfies PrintLookupMaps
 }
 
-const formatPrintField = (
-  rule: FormFieldRule,
-  value: unknown,
-  lookupMaps: PrintLookupMaps
-) => {
+const formatPrintField = (rule: FormFieldRule, value: unknown, lookupMaps: PrintLookupMaps) => {
   const type = String(rule.type ?? '')
 
   switch (type) {
@@ -356,7 +348,9 @@ const formatPrintField = (
       return renderFileListHtml(value)
     case 'IframeComponent': {
       const propsObj = rule.props
-      const propsUrl = isPrintableRecord(propsObj) ? String(getRecordValue(propsObj, 'url') ?? '') : ''
+      const propsUrl = isPrintableRecord(propsObj)
+        ? String(getRecordValue(propsObj, 'url') ?? '')
+        : ''
       const iframeUrl = isEmptyValue(value) ? propsUrl : String(value ?? '')
       return iframeUrl ? createFileLinkHtml(iframeUrl) : ''
     }
@@ -395,10 +389,10 @@ const initPrintDataMap = () => {
   printDataMap.value['processNum'] = String(printData.value.processInstance.id ?? '')
   printDataMap.value['startTime'] = formatDate(printData.value.processInstance.startTime)
   printDataMap.value['endTime'] = formatDate(printData.value.processInstance.endTime)
-  printDataMap.value['processStatus'] = String(getDictLabel(
-    DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS,
-    printData.value.processInstance.status
-  ) ?? '')
+  printDataMap.value['processStatus'] = String(
+    getDictLabel(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS, printData.value.processInstance.status) ??
+      ''
+  )
   printDataMap.value['printUser'] = userName.value
   printDataMap.value['printTime'] = printTime.value
 }

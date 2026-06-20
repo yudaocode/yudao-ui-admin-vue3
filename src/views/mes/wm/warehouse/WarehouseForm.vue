@@ -140,7 +140,10 @@ const barcodeDetailRef = ref() // 条码详情弹窗 Ref
 /** 查看条码 */
 const handleBarcode = () => {
   barcodeDetailRef.value?.openByBusiness(
-    formData.value.id!, BarcodeBizTypeEnum.WAREHOUSE, formData.value.code, formData.value.name
+    formData.value.id!,
+    BarcodeBizTypeEnum.WAREHOUSE,
+    formData.value.code,
+    formData.value.name
   )
 }
 

@@ -39,10 +39,15 @@
               title="邀请好友入群"
               @click="handleOpenInvite"
             >
-              <div class="im-conversation-group-side__icon-tile flex items-center justify-center w-[50px] h-[50px] text-20px text-[var(--el-text-color-regular)] bg-[var(--el-fill-color-lighter)] border border-dashed border-[var(--el-border-color)] rounded-md transition-colors duration-200">
+              <div
+                class="im-conversation-group-side__icon-tile flex items-center justify-center w-[50px] h-[50px] text-20px text-[var(--el-text-color-regular)] bg-[var(--el-fill-color-lighter)] border border-dashed border-[var(--el-border-color)] rounded-md transition-colors duration-200"
+              >
                 <Icon icon="ant-design:plus-outlined" />
               </div>
-              <div class="mt-1.5 text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center">添加</div>
+              <div
+                class="mt-1.5 text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center"
+                >添加</div
+              >
             </div>
 
             <!-- 移出（群主或管理员；管理员只能移出普通成员，由后端校验） -->
@@ -52,10 +57,15 @@
               title="移出群成员"
               @click="handleOpenRemove"
             >
-              <div class="im-conversation-group-side__icon-tile flex items-center justify-center w-[50px] h-[50px] text-20px text-[var(--el-text-color-regular)] bg-[var(--el-fill-color-lighter)] border border-dashed border-[var(--el-border-color)] rounded-md transition-colors duration-200">
+              <div
+                class="im-conversation-group-side__icon-tile flex items-center justify-center w-[50px] h-[50px] text-20px text-[var(--el-text-color-regular)] bg-[var(--el-fill-color-lighter)] border border-dashed border-[var(--el-border-color)] rounded-md transition-colors duration-200"
+              >
                 <Icon icon="ant-design:minus-outlined" />
               </div>
-              <div class="mt-1.5 text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center">移出</div>
+              <div
+                class="mt-1.5 text-12px leading-[1.5] text-[var(--el-text-color-regular)] text-center"
+                >移出</div
+              >
             </div>
           </div>
 
@@ -87,8 +97,13 @@
               <div
                 class="im-conversation-group-side__row flex flex-col items-stretch gap-1.5 px-4 py-[14px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
               >
-                <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">群聊名称</span>
-                <span class="text-13px text-[var(--el-text-color-regular)] break-all leading-[1.6] truncate">{{ group.name }}</span>
+                <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+                  >群聊名称</span
+                >
+                <span
+                  class="text-13px text-[var(--el-text-color-regular)] break-all leading-[1.6] truncate"
+                  >{{ group.name }}</span
+                >
               </div>
             </template>
             <div class="flex flex-col gap-2">
@@ -103,8 +118,13 @@
             v-else
             class="im-conversation-group-side__row flex flex-col items-stretch gap-1.5 px-4 py-[14px] text-14px min-h-6 transition-colors duration-150"
           >
-            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">群聊名称</span>
-            <span class="text-13px text-[var(--el-text-color-regular)] break-all leading-[1.6] truncate">{{ group.name }}</span>
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+              >群聊名称</span
+            >
+            <span
+              class="text-13px text-[var(--el-text-color-regular)] break-all leading-[1.6] truncate"
+              >{{ group.name }}</span
+            >
           </div>
 
           <!-- 群公告（群主可改）：内容可能很长，加 > chevron 表示可展开编辑 -->
@@ -120,7 +140,9 @@
                 class="im-conversation-group-side__row flex flex-col items-stretch gap-1.5 px-4 py-[14px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
               >
                 <div class="flex items-center justify-between gap-2">
-                  <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">群公告</span>
+                  <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+                    >群公告</span
+                  >
                   <Icon
                     icon="ant-design:right-outlined"
                     :size="11"
@@ -133,7 +155,9 @@
                 >
                   {{ group.notice }}
                 </span>
-                <span v-else class="text-13px text-[var(--el-text-color-placeholder)] leading-[1.6]">未设置</span>
+                <span v-else class="text-13px text-[var(--el-text-color-placeholder)] leading-[1.6]"
+                  >未设置</span
+                >
               </div>
             </template>
             <div class="flex flex-col gap-2">
@@ -162,7 +186,9 @@
             >
               {{ group.notice }}
             </span>
-            <span v-else class="text-13px text-[var(--el-text-color-placeholder)] leading-[1.6]">未设置</span>
+            <span v-else class="text-13px text-[var(--el-text-color-placeholder)] leading-[1.6]"
+              >未设置</span
+            >
           </div>
 
           <!-- 备注（仅自己可见；保存后会替换会话列表 / 顶部群名展示）；历史退群群隐藏：改备注走 updateGroupMember，已退群会被后端拒 -->
@@ -177,14 +203,19 @@
               <div
                 class="im-conversation-group-side__row flex flex-col items-stretch gap-1.5 px-4 py-[14px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
               >
-                <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">备注</span>
+                <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+                  >备注</span
+                >
                 <span
                   v-if="group.groupRemark"
                   class="text-13px text-[var(--el-text-color-regular)] break-all leading-[1.6] line-clamp-2"
                 >
                   {{ group.groupRemark }}
                 </span>
-                <span v-else class="text-13px text-[var(--el-text-color-placeholder)] leading-[1.6]">
+                <span
+                  v-else
+                  class="text-13px text-[var(--el-text-color-placeholder)] leading-[1.6]"
+                >
                   群聊的备注仅自己可见
                 </span>
               </div>
@@ -217,14 +248,18 @@
               <div
                 class="im-conversation-group-side__row flex flex-col items-stretch gap-1.5 px-4 py-[14px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
               >
-                <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">我在本群的昵称</span>
+                <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+                  >我在本群的昵称</span
+                >
                 <span
                   v-if="group.remarkNickName"
                   class="text-13px text-[var(--el-text-color-regular)] break-all leading-[1.6] truncate"
                 >
                   {{ group.remarkNickName }}
                 </span>
-                <span v-else class="text-13px text-[var(--el-text-color-placeholder)] leading-[1.6]">点击设置</span>
+                <span v-else class="text-13px text-[var(--el-text-color-placeholder)] leading-[1.6]"
+                  >点击设置</span
+                >
               </div>
             </template>
             <div class="flex flex-col gap-2">
@@ -249,7 +284,9 @@
             class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
             @click="emit('open-history')"
           >
-            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">查找聊天内容</span>
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+              >查找聊天内容</span
+            >
             <Icon
               icon="ant-design:right-outlined"
               :size="11"
@@ -262,7 +299,9 @@
             class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
             @click="handleShareGroupCard"
           >
-            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">分享群名片</span>
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+              >分享群名片</span
+            >
             <Icon
               icon="ant-design:right-outlined"
               :size="11"
@@ -275,17 +314,30 @@
 
         <!-- ==================== 开关项 ==================== -->
         <div class="bg-[var(--el-bg-color)]">
-          <div class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150">
-            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">消息免打扰</span>
+          <div
+            class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150"
+          >
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+              >消息免打扰</span
+            >
             <el-switch :model-value="!!conversation?.silent" @change="onMutedChange" />
           </div>
-          <div class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150">
-            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">置顶聊天</span>
+          <div
+            class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150"
+          >
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+              >置顶聊天</span
+            >
             <el-switch :model-value="!!conversation?.top" @change="onTopChange" />
           </div>
           <!-- 全群禁言：仅群主或管理员可操作 -->
-          <div v-if="isOwnerOrAdmin" class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150">
-            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">全群禁言</span>
+          <div
+            v-if="isOwnerOrAdmin"
+            class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150"
+          >
+            <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+              >全群禁言</span
+            >
             <el-switch :model-value="!!currentMutedAll" @change="onMuteAllChange" />
           </div>
         </div>
@@ -296,8 +348,13 @@
           <div class="flex-shrink-0 h-[10px]"></div>
           <div class="bg-[var(--el-bg-color)]">
             <!-- 进群审批：仅群主可操作；开启后普通成员的「申请」「邀请」路径都需群主 / 管理员同意；群主 / 管理员邀请直进 -->
-            <div v-if="isOwner" class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150">
-              <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">进群需要群主 / 群管理确认</span>
+            <div
+              v-if="isOwner"
+              class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 transition-colors duration-150"
+            >
+              <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+                >进群需要群主 / 群管理确认</span
+              >
               <el-switch :model-value="!!group.joinApproval" @change="handleJoinApprovalChange" />
             </div>
             <!-- 进群申请子项：仅当开启审批 + 当前用户是 owner / admin 时出现；点击进列表 dialog -->
@@ -306,7 +363,9 @@
               class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
               @click="handleOpenRequestList"
             >
-              <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">- 进群申请</span>
+              <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+                >- 进群申请</span
+              >
               <Icon
                 icon="ant-design:right-outlined"
                 :size="11"
@@ -325,7 +384,9 @@
               class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
               @click="handleOpenAdminSet"
             >
-              <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">群管理员</span>
+              <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+                >群管理员</span
+              >
               <Icon
                 icon="ant-design:right-outlined"
                 :size="11"
@@ -336,7 +397,9 @@
               class="im-conversation-group-side__row flex items-center justify-between gap-3 px-4 py-[13px] text-14px min-h-6 cursor-pointer transition-colors duration-150 hover:bg-[var(--el-fill-color-lighter)]"
               @click="handleOpenTransferOwner"
             >
-              <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]">群主管理权转让</span>
+              <span class="flex-shrink-0 text-14px text-[var(--el-text-color-primary)]"
+                >群主管理权转让</span
+              >
               <Icon
                 icon="ant-design:right-outlined"
                 :size="11"
@@ -363,13 +426,7 @@
           解散群聊
         </el-button>
         <!-- 非群主：退出群聊 -->
-        <el-button
-          v-else
-          class="w-full !h-9 text-14px"
-          type="danger"
-          plain
-          @click="handleQuit"
-        >
+        <el-button v-else class="w-full !h-9 text-14px" type="danger" plain @click="handleQuit">
           退出群聊
         </el-button>
       </div>
@@ -399,11 +456,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 
 import { getCurrentUserId } from '@/utils/auth'
 import { CommonStatusEnum } from '@/utils/constants'
-import {
-  updateGroup,
-  muteAll,
-  dissolveGroup
-} from '@/api/im/group'
+import { updateGroup, muteAll, dissolveGroup } from '@/api/im/group'
 import { quitGroup, updateGroupMember } from '@/api/im/group/member'
 import { useConversationStore } from '../../../../store/conversationStore'
 import { useGroupStore } from '../../../../store/groupStore'
@@ -644,7 +697,11 @@ function onTopChange(value: boolean | string | number) {
   if (!props.conversation) {
     return
   }
-  conversationStore.setConversationTop(props.conversation.type, props.conversation.targetId, !!value)
+  conversationStore.setConversationTop(
+    props.conversation.type,
+    props.conversation.targetId,
+    !!value
+  )
 }
 
 // ==================== 全群禁言 ====================
@@ -813,13 +870,13 @@ function handleOpenTransferOwner() {
 /* 「添加 / 移出」瓦片：hover 时联动内部 icon-tile 走主色，跨子元素的 hover 联动无法用单元素工具类表达 */
 .im-conversation-group-side__tile-wrap:hover .im-conversation-group-side__icon-tile {
   color: var(--el-color-primary);
-  border-color: var(--el-color-primary);
   background-color: var(--el-color-primary-light-9);
+  border-color: var(--el-color-primary);
 }
 
 /* :deep 穿透 Icon 内部 svg； el-icon 全局 color 在暗色模式下被主题盖过，锁 fill 到当前色 */
 .im-conversation-group-side__icon-tile :deep(svg) {
-  fill: currentColor !important;
+  fill: currentcolor !important;
 }
 
 /* 相邻信息行加分隔线； 相邻兄弟选择器无法用工具类表达 */

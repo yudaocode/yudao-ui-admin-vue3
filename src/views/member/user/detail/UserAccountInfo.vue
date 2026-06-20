@@ -70,8 +70,8 @@ withDefaults(defineProps<{ user: UserApi.UserVO; wallet: WalletApi.WalletVO; col
     justify-content: space-between;
 
     .el-descriptions__label {
-      width: 120px;
       display: block;
+      width: 120px;
       text-align: left;
     }
 

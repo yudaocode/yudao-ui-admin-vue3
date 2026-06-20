@@ -205,7 +205,10 @@ const selectedToolType = ref<TmToolTypeVO>() // 当前选中的工具类型
 /** 查看条码 */
 const handleBarcode = () => {
   barcodeDetailRef.value?.openByBusiness(
-    formData.value.id!, BarcodeBizTypeEnum.TOOL, formData.value.code, formData.value.name
+    formData.value.id!,
+    BarcodeBizTypeEnum.TOOL,
+    formData.value.code,
+    formData.value.name
   )
 }
 

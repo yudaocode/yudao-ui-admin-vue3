@@ -172,43 +172,43 @@ export const once = function (el: HTMLElement, event: string, fn: EventListener)
 export const getStyle =
   ieVersion < 9
     ? function (element: Element | any, styleName: string) {
-      if (isServer) return
-      if (!element || !styleName) return null
-      styleName = camelCase(styleName)
-      if (styleName === 'float') {
-        styleName = 'styleFloat'
-      }
-      try {
-        switch (styleName) {
-          case 'opacity':
-            try {
-              return element.filters.item('alpha').opacity / 100
-            } catch (e) {
-              return 1.0
-            }
-          default:
-            return element.style[styleName] || element.currentStyle
-              ? element.currentStyle[styleName]
-              : null
+        if (isServer) return
+        if (!element || !styleName) return null
+        styleName = camelCase(styleName)
+        if (styleName === 'float') {
+          styleName = 'styleFloat'
         }
-      } catch (e) {
-        return element.style[styleName]
+        try {
+          switch (styleName) {
+            case 'opacity':
+              try {
+                return element.filters.item('alpha').opacity / 100
+              } catch (e) {
+                return 1.0
+              }
+            default:
+              return element.style[styleName] || element.currentStyle
+                ? element.currentStyle[styleName]
+                : null
+          }
+        } catch (e) {
+          return element.style[styleName]
+        }
       }
-    }
     : function (element: Element | any, styleName: string) {
-      if (isServer) return
-      if (!element || !styleName) return null
-      styleName = camelCase(styleName)
-      if (styleName === 'float') {
-        styleName = 'cssFloat'
+        if (isServer) return
+        if (!element || !styleName) return null
+        styleName = camelCase(styleName)
+        if (styleName === 'float') {
+          styleName = 'cssFloat'
+        }
+        try {
+          const computed = (document as any).defaultView.getComputedStyle(element, '')
+          return element.style[styleName] || computed ? computed[styleName] : null
+        } catch (e) {
+          return element.style[styleName]
+        }
       }
-      try {
-        const computed = (document as any).defaultView.getComputedStyle(element, '')
-        return element.style[styleName] || computed ? computed[styleName] : null
-      } catch (e) {
-        return element.style[styleName]
-      }
-    }
 
 /* istanbul ignore next */
 export function setStyle(element: Element | any, styleName: any, value: any) {
@@ -287,4 +287,3 @@ export const isInContainer = (el: Element, container: any) => {
     elRect.left < containerRect.right
   )
 }
-

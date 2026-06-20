@@ -145,7 +145,13 @@ const handleClick = (e: MouseEvent) => {
   }
   // 打开弹窗，传入当前选中 ID 用于预选高亮，传入 itemId 用于默认过滤
   const selectedIds = props.modelValue != null ? [props.modelValue] : []
-  dialogRef.value.open(selectedIds, props.itemId, props.clientId, props.vendorId, props.salesOrderCode)
+  dialogRef.value.open(
+    selectedIds,
+    props.itemId,
+    props.clientId,
+    props.vendorId,
+    props.salesOrderCode
+  )
 }
 
 /** 弹窗选中回调 */

@@ -5,8 +5,14 @@
     class="material-card cursor-pointer w-full overflow-hidden rounded-lg bg-[var(--el-bg-color)] border border-solid border-[var(--el-border-color-lighter)]"
     @click="onClick"
   >
-    <img v-if="payload.coverUrl" class="block w-full h-[200px] object-cover" :src="payload.coverUrl" />
-    <div class="px-3.5 py-3 text-15px font-600 leading-[1.4] text-[var(--el-text-color-primary)] line-clamp-2">
+    <img
+      v-if="payload.coverUrl"
+      class="block w-full h-[200px] object-cover"
+      :src="payload.coverUrl"
+    />
+    <div
+      class="px-3.5 py-3 text-15px font-600 leading-[1.4] text-[var(--el-text-color-primary)] line-clamp-2"
+    >
       {{ payload.title || '(无标题)' }}
     </div>
   </div>
@@ -19,7 +25,9 @@
   >
     <div class="flex gap-2.5 items-start">
       <div class="flex flex-1 flex-col gap-1.5 min-w-0">
-        <div class="text-15px font-600 leading-[1.4] text-[var(--el-text-color-primary)] line-clamp-2 break-all">
+        <div
+          class="text-15px font-600 leading-[1.4] text-[var(--el-text-color-primary)] line-clamp-2 break-all"
+        >
           {{ payload.title || '(无标题)' }}
         </div>
         <div
@@ -35,7 +43,9 @@
         :src="payload.coverUrl"
       />
     </div>
-    <div class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-t-solid border-[var(--el-border-color-lighter)] text-12px text-[var(--el-text-color-secondary)]">
+    <div
+      class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-t-solid border-[var(--el-border-color-lighter)] text-12px text-[var(--el-text-color-secondary)]"
+    >
       <img
         v-if="sourceChannel?.avatar"
         class="w-4 h-4 rounded-full object-cover flex-shrink-0"
@@ -47,13 +57,11 @@
   </div>
 
   <!-- 富文本详情：全屏弹窗按需挂载，destroy-on-close 关闭后释放 v-dompurify-html 解析的 DOM -->
-  <Dialog
-    v-model="detailVisible"
-    :title="payload.title || '详情'"
-    fullscreen
-    destroy-on-close
-  >
-    <div v-loading="detailLoading" class="material-detail-body max-w-[720px] mx-auto px-5 pt-6 pb-20">
+  <Dialog v-model="detailVisible" :title="payload.title || '详情'" fullscreen destroy-on-close>
+    <div
+      v-loading="detailLoading"
+      class="material-detail-body max-w-[720px] mx-auto px-5 pt-6 pb-20"
+    >
       <div class="text-[22px] font-600 leading-[1.4] text-[var(--el-text-color-primary)] mb-5">
         {{ payload.title || '' }}
       </div>
@@ -95,9 +103,7 @@ const isChannelView = computed(
 )
 
 /** 反序列化 content JSON 为 payload 对象 */
-const payload = computed<MaterialMessage>(
-  () => parseMessage<MaterialMessage>(props.content) ?? {}
-)
+const payload = computed<MaterialMessage>(() => parseMessage<MaterialMessage>(props.content) ?? {})
 
 /** 来源频道；紧凑卡底部渲染头像 + 名称 */
 const sourceChannel = computed(() =>
@@ -137,15 +143,15 @@ const onClick = async () => {
   transition: box-shadow 0.15s ease;
 
   &:hover {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 12px rgb(0 0 0 / 8%);
   }
 }
 
 /* :deep 穿透 v-dompurify-html 渲染的内嵌 DOM；统一控制富文本里的 img / p / hN 排版 */
 .article-content {
   :deep(img) {
-    max-width: 100%;
     height: auto;
+    max-width: 100%;
   }
 
   :deep(p) {

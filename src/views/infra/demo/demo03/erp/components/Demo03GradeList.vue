@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import { isEmpty } from '@/utils/is'
-import {Demo03Grade, Demo03StudentApi} from '@/api/infra/demo/demo03/erp'
+import { Demo03Grade, Demo03StudentApi } from '@/api/infra/demo/demo03/erp'
 import Demo03GradeForm from './Demo03GradeForm.vue'
 
 const { t } = useI18n() // 国际化
@@ -100,7 +100,7 @@ watch(
     queryParams.studentId = val
     handleQuery()
   },
-    { immediate: true, deep: true }
+  { immediate: true, deep: true }
 )
 
 /** 查询列表 */
@@ -150,14 +150,14 @@ const handleDeleteBatch = async () => {
     // 删除的二次确认
     await message.delConfirm()
     await Demo03StudentApi.deleteDemo03GradeList(checkedIds.value)
-    checkedIds.value = [];
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
-    await getList();
+    await getList()
   } catch {}
 }
 
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: Demo03Grade[]) => {
-  checkedIds.value = records.map((item) => item.id);
+  checkedIds.value = records.map((item) => item.id)
 }
 </script>

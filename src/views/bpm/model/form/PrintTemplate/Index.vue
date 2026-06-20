@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
       />
     </div>
     <!-- TODO @unocss 简化 style -->
-    <div style=" margin: 10px;border: 1px solid #ccc">
+    <div style="margin: 10px; border: 1px solid #ccc">
       <Toolbar
         style="border-bottom: 1px solid #ccc"
         :editor="editorRef"
@@ -106,7 +106,7 @@ onBeforeUnmount(() => {
         @insert-mention="insertMention"
       />
     </div>
-    <div style=" float: right;margin-right: 10px">
+    <div style="float: right; margin-right: 10px">
       <el-button @click="dialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="handleConfirm">确 定</el-button>
     </div>

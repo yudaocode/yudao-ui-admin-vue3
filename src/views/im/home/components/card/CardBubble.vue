@@ -42,11 +42,7 @@ import { computed } from 'vue'
 
 import UserAvatar from '../user/UserAvatar.vue'
 import { isPrivateConversation } from '@/views/im/utils/constants'
-import {
-  getCardLabelInfo,
-  type CardMessage,
-  type CardTarget
-} from '@/views/im/utils/message'
+import { getCardLabelInfo, type CardMessage, type CardTarget } from '@/views/im/utils/message'
 
 defineOptions({ name: 'ImCardBubble' })
 

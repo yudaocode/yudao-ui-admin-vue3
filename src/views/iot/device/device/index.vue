@@ -173,7 +173,10 @@
                 <div class="mr-2.5 flex items-center">
                   <el-image :src="defaultIconUrl" class="w-[18px] h-[18px]" />
                 </div>
-                <div class="text-[16px] font-600 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{{ item.deviceName }}</div>
+                <div
+                  class="text-[16px] font-600 flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
+                  >{{ item.deviceName }}</div
+                >
                 <!-- 添加设备状态标签 -->
                 <div class="inline-flex items-center">
                   <div

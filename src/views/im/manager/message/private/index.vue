@@ -9,11 +9,7 @@
       label-width="88px"
     >
       <el-form-item label="发送人" prop="senderId">
-        <UserSelectV2
-          v-model="queryParams.senderId"
-          placeholder="请选择发送人"
-          class="!w-240px"
-        />
+        <UserSelectV2 v-model="queryParams.senderId" placeholder="请选择发送人" class="!w-240px" />
       </el-form-item>
       <el-form-item label="接收人" prop="receiverId">
         <UserSelectV2

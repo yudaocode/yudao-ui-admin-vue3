@@ -10,12 +10,7 @@
     class="!w-1/1"
     @change="handleChange"
   >
-    <el-option
-      v-for="item in filteredList"
-      :key="item.id"
-      :label="item.name"
-      :value="item.id"
-    >
+    <el-option v-for="item in filteredList" :key="item.id" :label="item.name" :value="item.id">
       <div class="flex items-center gap-8px">
         <span>{{ item.name }}</span>
         <el-tag v-if="item.code" size="small" type="info" class="ml-4px">
@@ -67,8 +62,7 @@ const handleFilter = (query: string) => {
   const keyword = query.toLowerCase()
   filteredList.value = allList.value.filter(
     (item) =>
-      item.name?.toLowerCase().includes(keyword) ||
-      item.code?.toLowerCase().includes(keyword)
+      item.name?.toLowerCase().includes(keyword) || item.code?.toLowerCase().includes(keyword)
   )
 }
 

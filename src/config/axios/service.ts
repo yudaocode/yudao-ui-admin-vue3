@@ -167,8 +167,8 @@ service.interceptors.response.use(
             cb()
           })
           requestList = []
-          if ((config!.headers || {}).isEncrypt){
-            (config!.headers || {}).isEncrypted = true
+          if ((config!.headers || {}).isEncrypt) {
+            ;(config!.headers || {}).isEncrypted = true
           }
           return service(config)
         } catch (e) {

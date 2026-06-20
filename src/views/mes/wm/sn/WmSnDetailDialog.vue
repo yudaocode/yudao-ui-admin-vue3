@@ -1,9 +1,15 @@
 <template>
   <Dialog v-model="dialogVisible" title="SN 码明细" width="1000px">
     <el-descriptions :column="3" border class="mb-20px">
-      <el-descriptions-item label="物料编码">{{ detailGroup?.itemCode || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="物料名称">{{ detailGroup?.itemName || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="批次号">{{ detailGroup?.batchCode || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="物料编码">{{
+        detailGroup?.itemCode || '-'
+      }}</el-descriptions-item>
+      <el-descriptions-item label="物料名称">{{
+        detailGroup?.itemName || '-'
+      }}</el-descriptions-item>
+      <el-descriptions-item label="批次号">{{
+        detailGroup?.batchCode || '-'
+      }}</el-descriptions-item>
     </el-descriptions>
     <el-table v-loading="detailLoading" :data="detailList" stripe max-height="520">
       <el-table-column label="SN 码" align="center" prop="code" min-width="180" />
@@ -74,11 +80,6 @@ const handleBarcode = async (row: WmSnApi.WmSnVO) => {
   if (!row.id) {
     return
   }
-  await barcodeDetailRef.value.openByBusiness(
-    row.id,
-    BarcodeBizTypeEnum.SN,
-    row.code,
-    row.itemName
-  )
+  await barcodeDetailRef.value.openByBusiness(row.id, BarcodeBizTypeEnum.SN, row.code, row.itemName)
 }
 </script>

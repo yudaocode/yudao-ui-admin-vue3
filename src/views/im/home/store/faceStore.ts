@@ -2,10 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia'
 import { ref } from 'vue'
 import { store } from '@/store'
 
-import {
-  getFacePackList as apiGetFacePackList,
-  type ImFacePackUserVO
-} from '@/api/im/face/pack'
+import { getFacePackList as apiGetFacePackList, type ImFacePackUserVO } from '@/api/im/face/pack'
 import {
   getFaceUserItemList as apiGetFaceUserItemList,
   createFaceUserItem as apiCreateFaceUserItem,
@@ -22,7 +19,6 @@ import {
  * - 个人表情：切到「收藏」tab / 长按消息「添加到表情」时按需拉
  */
 export const useFaceStore = defineStore('imFace', () => {
-
   /** 系统表情包列表（含每个包的 items）；运营管理后台维护 */
   const facePacks = ref<ImFacePackUserVO[]>([])
   /** 个人表情包列表（用户长按「添加到表情」/ 上传产生） */

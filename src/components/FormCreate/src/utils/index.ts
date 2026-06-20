@@ -19,7 +19,7 @@ export const localeProps = (t, prefix, rules) => {
 
 /**
  * 解析表单组件的  field, title 等字段（递归，如果组件包含子组件）
- * 
+ *
  * @param rule  组件的生成规则 https://www.form-create.com/v3/guide/rule
  * @param fields 解析后表单组件字段
  * @param parentTitle  如果是子表单，子表单的标题，默认为空

@@ -38,7 +38,10 @@ export const deleteMailAccount = async (id: number) => {
 
 // 批量删除邮箱账号
 export const deleteMailAccountList = async (ids: number[]) => {
-  return await request.delete({ url: '/system/mail-account/delete-list', params: { ids: ids.join(',') } })
+  return await request.delete({
+    url: '/system/mail-account/delete-list',
+    params: { ids: ids.join(',') }
+  })
 }
 
 // 获得邮箱账号精简列表

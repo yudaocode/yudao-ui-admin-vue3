@@ -1,6 +1,5 @@
 import request from '@/config/axios'
 
-
 export const updateBpmSimpleModel = async (data) => {
   return await request.post({
     url: '/bpm/model/simple/update',

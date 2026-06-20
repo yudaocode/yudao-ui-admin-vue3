@@ -81,12 +81,12 @@ export function useLiveKitRoom() {
     _room.value = r
 
     r.on(RoomEvent.ParticipantConnected, (rp) => {
-        syncRemotes(r)
-        const userId = parseUserId(rp.identity)
-        if (userId != null) {
-          participantConnectedHandlers.forEach((cb) => cb(userId))
-        }
-      })
+      syncRemotes(r)
+      const userId = parseUserId(rp.identity)
+      if (userId != null) {
+        participantConnectedHandlers.forEach((cb) => cb(userId))
+      }
+    })
       .on(RoomEvent.ParticipantDisconnected, (rp) => {
         syncRemotes(r)
         // 离开的参与者缓存清掉，避免下次同 sid 重连命中失效引用

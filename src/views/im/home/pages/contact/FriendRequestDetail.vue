@@ -113,14 +113,10 @@ const currentUserId = computed(() => getCurrentUserId())
 const iSentIt = computed(() => props.request.fromUserId === currentUserId.value)
 
 /** 是否「已拒绝」态：模板里多处用到，computed 一次省得到处写枚举比对 */
-const refused = computed(
-  () => props.request.handleResult === ImFriendRequestHandleResult.REFUSED
-)
+const refused = computed(() => props.request.handleResult === ImFriendRequestHandleResult.REFUSED)
 
 /** 是否「已通过」态：转走 UserInfo 好友详情入口 */
-const agreed = computed(
-  () => props.request.handleResult === ImFriendRequestHandleResult.AGREED
-)
+const agreed = computed(() => props.request.handleResult === ImFriendRequestHandleResult.AGREED)
 
 /** 对端的用户编号 / 昵称 / 头像 */
 const peerUserId = computed(() =>

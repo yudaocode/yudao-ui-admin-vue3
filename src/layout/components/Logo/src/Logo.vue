@@ -27,7 +27,10 @@ onMounted(() => {
 watch(
   () => collapse.value,
   (collapse: boolean) => {
-    if (getLayoutRenderMode(unref(layout)) === 'topLeft' || getLayoutRenderMode(unref(layout)) === 'cutMenu') {
+    if (
+      getLayoutRenderMode(unref(layout)) === 'topLeft' ||
+      getLayoutRenderMode(unref(layout)) === 'cutMenu'
+    ) {
       show.value = true
       return
     }

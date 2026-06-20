@@ -31,13 +31,7 @@
           />
         </el-form-item>
         <el-form-item label="高度" prop="height" label-width="70px">
-          <el-slider
-            v-model="formData.height"
-            :max="200"
-            :min="20"
-            show-input
-            input-size="small"
-          />
+          <el-slider v-model="formData.height" :max="200" :min="20" show-input input-size="small" />
         </el-form-item>
       </el-card>
       <el-card header="主标题" class="property-group" shadow="never">

@@ -2,7 +2,9 @@
   <el-dialog v-model="dialogVisible" title="群聊消息详情" width="700">
     <el-descriptions :column="2" border>
       <el-descriptions-item label="编号">{{ detail.id }}</el-descriptions-item>
-      <el-descriptions-item label="客户端编号">{{ detail.clientMessageId || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="客户端编号">{{
+        detail.clientMessageId || '-'
+      }}</el-descriptions-item>
       <el-descriptions-item label="群">
         {{ detail.groupName }} ({{ detail.groupId }})
       </el-descriptions-item>
@@ -42,7 +44,10 @@
         />
       </el-descriptions-item>
       <el-descriptions-item label="原始 JSON" :span="2">
-        <pre class="m-0 whitespace-pre-wrap break-all font-mono text-12px bg-[#f5f5f5] p-8px rounded-4px">{{ formatJson(detail.content) }}</pre>
+        <pre
+          class="m-0 whitespace-pre-wrap break-all font-mono text-12px bg-[#f5f5f5] p-8px rounded-4px"
+          >{{ formatJson(detail.content) }}</pre
+        >
       </el-descriptions-item>
     </el-descriptions>
   </el-dialog>

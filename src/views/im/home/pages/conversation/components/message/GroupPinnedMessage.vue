@@ -182,15 +182,15 @@ async function handleRemove(pinnedMessage: Message) {
 <style scoped>
 /* 弹出层朝上的三角箭头；走 ::before + 4 边 border 配色画，颜色跟弹出层 background 一致 */
 .im-group-pinned-message__list::before {
-  content: '';
   position: absolute;
   top: -8px;
   left: 184px;
   width: 0;
   height: 0;
-  border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-bottom: 8px solid var(--el-bg-color);
-  filter: drop-shadow(0 -2px 1px rgba(0, 0, 0, 0.04));
+  border-left: 8px solid transparent;
+  content: '';
+  filter: drop-shadow(0 -2px 1px rgb(0 0 0 / 4%));
 }
 </style>

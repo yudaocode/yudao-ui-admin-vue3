@@ -15,7 +15,9 @@
           class="cursor-pointer text-[var(--el-text-color-secondary)] hover:text-[var(--el-text-color-primary)]"
           @click="handleBack"
         />
-        <span class="text-base font-medium truncate">{{ currentPayload?.title || '聊天记录' }}</span>
+        <span class="text-base font-medium truncate">{{
+          currentPayload?.title || '聊天记录'
+        }}</span>
       </div>
     </template>
 
@@ -113,7 +115,6 @@ function handleClose() {
   stack.value = []
   voicePlayer.stop()
 }
-
 </script>
 
 <style scoped>

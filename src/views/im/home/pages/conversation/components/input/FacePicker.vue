@@ -342,14 +342,13 @@ onUnmounted(() => {
 <style scoped>
 /* 底部小三角：指向触发图标，仿微信 PC 气泡指针；left 偏移对应表情按钮（工具栏 1st icon） */
 .im-popover-arrow::after {
-  content: '';
   position: absolute;
   top: calc(100% - 1px);
   left: 10px;
-  border-style: solid;
-  border-width: 6px 6px 0 6px;
   border-color: var(--el-bg-color) transparent transparent transparent;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.08));
+  border-style: solid;
+  border-width: 6px 6px 0;
+  content: '';
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 8%));
 }
-
 </style>
