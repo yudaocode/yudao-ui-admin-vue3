@@ -205,7 +205,7 @@ const getChatConversationList = async () => {
     conversationList.value = await ChatConversationApi.getChatConversationMyList()
     // 1.2 排序
     conversationList.value.sort((a, b) => {
-      return Number(b.createTime || 0) - Number(a.createTime || 0)
+      return Number(b.createTime) - Number(a.createTime)
     })
     // 1.3 没有任何对话情况
     if (conversationList.value.length === 0) {
@@ -252,7 +252,7 @@ const getConversationGroupByCreateTime = async (list: ChatConversationVO[]) => {
       continue
     }
     // 计算时间差（单位：毫秒）
-    const diff = now - Number(conversation.createTime || 0)
+    const diff = now - Number(conversation.createTime)
     // 根据时间间隔判断
     if (diff < oneDay) {
       groupMap['今天'].push(conversation)
