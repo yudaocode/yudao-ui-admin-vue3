@@ -236,7 +236,7 @@ const props = defineProps({
 })
 const prefix = inject('prefix')
 
-const formKey = ref(undefined)
+const formKey = ref<number | undefined>()
 const bpmnELement = ref()
 const elExtensionElements = ref()
 const formData = ref()
@@ -282,10 +282,10 @@ const updateElementExtensions = () => {
   })
 }
 
-const formList = ref([]) // 流程表单的下拉框的数据
+const formList = ref<Array<{ id: number; name: string }>>([]) // 流程表单的下拉框的数据
 onMounted(async () => {
   formList.value = await FormApi.getFormSimpleList()
-  formKey.value = parseInt(formKey.value)
+  formKey.value = formKey.value != null ? Number(formKey.value) : undefined
 })
 
 watch(

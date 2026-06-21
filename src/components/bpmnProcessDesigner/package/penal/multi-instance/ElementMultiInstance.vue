@@ -117,8 +117,8 @@ const props = defineProps({
 const prefix = inject('prefix')
 const loopCharacteristics = ref('')
 const loopInstanceForm = ref<any>({})
-const bpmnElement = ref(null)
-const multiLoopInstance = ref(null)
+const bpmnElement = ref<any | null>(null)
+const multiLoopInstance = ref<any | null>(null)
 const bpmnInstances = () => (window as any)?.bpmnInstances
 
 const changeLoopCharacteristicsType = (type) => {
@@ -261,7 +261,7 @@ const approveMethod = ref()
 const approveRatio = ref(100)
 const otherExtensions = ref()
 const getElementLoopNew = () => {
-  if (props.type === 'UserTask') {
+  if (props.type === 'UserTask' && bpmnElement.value) {
     const extensionElements =
       bpmnElement.value.businessObject?.extensionElements ??
       bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
@@ -286,6 +286,9 @@ const onApproveRatioChange = () => {
   updateLoopCharacteristics()
 }
 const updateLoopCharacteristics = () => {
+  if (!bpmnElement.value) {
+    return
+  }
   // 根据ApproveMethod生成multiInstanceLoopCharacteristics节点
   if (approveMethod.value === ApproveMethodType.RANDOM_SELECT_ONE_APPROVE) {
     bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
@@ -334,9 +337,11 @@ const updateLoopCharacteristics = () => {
         }
       )
     }
-    bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
-      loopCharacteristics: toRaw(multiLoopInstance.value)
-    })
+    if (multiLoopInstance.value) {
+      bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
+        loopCharacteristics: toRaw(multiLoopInstance.value)
+      })
+    }
   }
 
   // 添加ApproveMethod到ExtensionElements

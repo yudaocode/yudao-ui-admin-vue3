@@ -215,6 +215,18 @@ import * as UserApi from '@/api/system/user'
 import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
 import { BpmModelFormType } from '@/utils/constants'
 
+type BpmnElement = {
+  id: string
+  type: string
+  businessObject: Record<string, any>
+  source?: BpmnElement
+  target?: BpmnElement
+}
+type ReturnTask = Record<string, any> & {
+  id: string
+  name?: string
+}
+
 defineOptions({ name: 'ElementCustomConfig4UserTask' })
 const props = defineProps({
   id: String,
@@ -231,16 +243,16 @@ const rejectHandlerTypeEl = ref()
 const rejectHandlerType = ref()
 const returnNodeIdEl = ref()
 const returnNodeId = ref()
-const returnTaskList = ref([])
+const returnTaskList = ref<ReturnTask[]>([])
 
 // 审批人为空时
 const assignEmptyHandlerTypeEl = ref()
 const assignEmptyHandlerType = ref()
 const assignEmptyUserIdsEl = ref()
-const assignEmptyUserIds = ref()
+const assignEmptyUserIds = ref<Array<string | number>>([])
 
 // 操作按钮
-const buttonsSettingEl = ref()
+const buttonsSettingEl = ref<any[]>([])
 const { btnDisplayNameEdit, changeBtnDisplayName } = useButtonsSetting()
 const btnDisplayNameBlurEvent = (index: number) => {
   btnDisplayNameEdit.value[index] = false
@@ -250,7 +262,7 @@ const btnDisplayNameBlurEvent = (index: number) => {
 }
 
 // 字段权限
-const fieldsPermissionEl = ref([])
+const fieldsPermissionEl = ref<any[]>([])
 const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
   FieldPermissionType.READ
 )
@@ -451,18 +463,20 @@ watch(
   { immediate: true }
 )
 
-function findAllPredecessorsExcludingStart(elementId, modeler) {
+function findAllPredecessorsExcludingStart(elementId: string, modeler: any) {
   const elementRegistry = modeler.get('elementRegistry')
-  const allConnections = elementRegistry.filter((element) => element.type === 'bpmn:SequenceFlow')
-  const predecessors = new Set() // 使用 Set 来避免重复节点
-  const visited = new Set() // 用于记录已访问的节点
+  const allConnections = elementRegistry.filter(
+    (element: BpmnElement) => element.type === 'bpmn:SequenceFlow'
+  )
+  const predecessors = new Set<Record<string, any>>() // 使用 Set 来避免重复节点
+  const visited = new Set<BpmnElement>() // 用于记录已访问的节点
 
   // 检查是否是开始事件节点
-  function isStartEvent(element) {
+  function isStartEvent(element: BpmnElement) {
     return element.type === 'bpmn:StartEvent'
   }
 
-  function findPredecessorsRecursively(element) {
+  function findPredecessorsRecursively(element: BpmnElement) {
     // 如果该节点已经访问过，直接返回，避免循环
     if (visited.has(element)) {
       return
@@ -472,10 +486,15 @@ function findAllPredecessorsExcludingStart(elementId, modeler) {
     visited.add(element)
 
     // 获取与当前节点相连的所有连接
-    const incomingConnections = allConnections.filter((connection) => connection.target === element)
+    const incomingConnections = allConnections.filter(
+      (connection: BpmnElement) => connection.target === element
+    )
 
-    incomingConnections.forEach((connection) => {
+    incomingConnections.forEach((connection: BpmnElement) => {
       const source = connection.source // 获取前置节点
+      if (!source) {
+        return
+      }
 
       // 只添加不是开始事件的前置节点
       if (!isStartEvent(source)) {
@@ -491,7 +510,7 @@ function findAllPredecessorsExcludingStart(elementId, modeler) {
     findPredecessorsRecursively(targetElement)
   }
 
-  return Array.from(predecessors) // 返回前置节点数组
+  return Array.from(predecessors) as ReturnTask[] // 返回前置节点数组
 }
 
 function useButtonsSetting() {
