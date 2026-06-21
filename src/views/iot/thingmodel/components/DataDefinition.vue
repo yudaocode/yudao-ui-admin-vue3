@@ -8,14 +8,16 @@
           IoTDataSpecsDataTypeEnum.INT,
           IoTDataSpecsDataTypeEnum.DOUBLE,
           IoTDataSpecsDataTypeEnum.FLOAT
-        ].includes(data.property.dataType)
+        ].includes(data.property.dataType as any)
       "
     >
-      取值范围：{{ `${data.property.dataSpecs.min}~${data.property.dataSpecs.max}` }}
+      取值范围：{{
+        `${getDataSpecsValue(data.property, 'min')}~${getDataSpecsValue(data.property, 'max')}`
+      }}
     </div>
     <!-- 非列表型：文本 -->
     <div v-if="IoTDataSpecsDataTypeEnum.TEXT === data.property.dataType">
-      数据长度：{{ data.property.dataSpecs.length }}
+      数据长度：{{ getDataSpecsValue(data.property, 'length') }}
     </div>
     <!-- 列表型: 数组、结构、时间（特殊） -->
     <div
@@ -24,7 +26,7 @@
           IoTDataSpecsDataTypeEnum.ARRAY,
           IoTDataSpecsDataTypeEnum.STRUCT,
           IoTDataSpecsDataTypeEnum.DATE
-        ].includes(data.property.dataType)
+        ].includes(data.property.dataType as any)
       "
     >
       -
@@ -32,7 +34,7 @@
     <!-- 列表型: 布尔值、枚举 -->
     <div
       v-if="
-        [IoTDataSpecsDataTypeEnum.BOOL, IoTDataSpecsDataTypeEnum.ENUM].includes(
+        ([IoTDataSpecsDataTypeEnum.BOOL, IoTDataSpecsDataTypeEnum.ENUM] as string[]).includes(
           data.property.dataType
         )
       "
@@ -40,7 +42,7 @@
       <div>
         {{ IoTDataSpecsDataTypeEnum.BOOL === data.property.dataType ? '布尔值' : '枚举值' }}：
       </div>
-      <div v-for="item in data.property.dataSpecsList" :key="item.value">
+      <div v-for="item in data.property.dataSpecsList || []" :key="item.value">
         {{ `${item.name}-${item.value}` }}
       </div>
     </div>
@@ -56,7 +58,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ThingModelData } from '@/api/iot/thingmodel'
+import { ThingModelData, ThingModelProperty } from '@/api/iot/thingmodel'
 import {
   getEventTypeLabel,
   getThingModelServiceCallTypeLabel,
@@ -68,6 +70,10 @@ import {
 defineOptions({ name: 'DataDefinition' })
 
 defineProps<{ data: ThingModelData }>()
+
+const getDataSpecsValue = (property: ThingModelProperty, key: string) => {
+  return property.dataSpecs?.[key]
+}
 </script>
 
 <style lang="scss" scoped></style>

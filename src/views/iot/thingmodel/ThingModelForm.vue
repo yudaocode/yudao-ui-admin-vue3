@@ -63,7 +63,14 @@ import { ProductVO } from '@/api/iot/product/product'
 import ThingModelProperty from './ThingModelProperty.vue'
 import ThingModelService from './ThingModelService.vue'
 import ThingModelEvent from './ThingModelEvent.vue'
-import { ThingModelApi, ThingModelData, ThingModelFormRules } from '@/api/iot/thingmodel'
+import {
+  ThingModelApi,
+  ThingModelData,
+  ThingModelEvent as IotThingModelEvent,
+  ThingModelFormRules,
+  ThingModelProperty as IotThingModelProperty,
+  ThingModelService as IotThingModelService
+} from '@/api/iot/thingmodel'
 import {
   IOT_PROVIDE_KEY,
   IoTDataSpecsDataTypeEnum,
@@ -93,9 +100,9 @@ const formData = ref<ThingModelData>({
     dataSpecs: {
       dataType: IoTDataSpecsDataTypeEnum.INT
     }
-  },
-  service: {},
-  event: {}
+  } as IotThingModelProperty,
+  service: {} as IotThingModelService,
+  event: {} as IotThingModelEvent
 })
 
 const formRef = ref() // 表单 Ref
@@ -118,20 +125,23 @@ const open = async (type: string, id?: number) => {
           dataSpecs: {
             dataType: IoTDataSpecsDataTypeEnum.INT
           }
-        }
+        } as IotThingModelProperty
       }
       // 情况二：服务初始化
       if (isEmpty(formData.value.service)) {
-        formData.value.service = { inputParams: [], outputParams: [] }
+        formData.value.service = {
+          inputParams: [],
+          outputParams: []
+        } as unknown as IotThingModelService
       } else {
-        formData.value.service.inputParams ??= []
-        formData.value.service.outputParams ??= []
+        formData.value.service!.inputParams ??= []
+        formData.value.service!.outputParams ??= []
       }
       // 情况三：事件初始化
       if (isEmpty(formData.value.event)) {
-        formData.value.event = { outputParams: [] }
+        formData.value.event = { outputParams: [] } as unknown as IotThingModelEvent
       } else {
-        formData.value.event.outputParams ??= []
+        formData.value.event!.outputParams ??= []
       }
     } finally {
       formLoading.value = false
@@ -217,9 +227,9 @@ const resetForm = () => {
       dataSpecs: {
         dataType: IoTDataSpecsDataTypeEnum.INT
       }
-    },
-    service: {},
-    event: {}
+    } as IotThingModelProperty,
+    service: {} as IotThingModelService,
+    event: {} as IotThingModelEvent
   }
   formRef.value?.resetFields()
 }

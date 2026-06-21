@@ -189,7 +189,7 @@ const timeValue2 = computed(() => {
  * @param value 字段值
  */
 const updateConditionField = (field: keyof TriggerCondition, value: any) => {
-  condition.value[field] = value
+  Object.assign(condition.value, { [field]: value })
   emit('field-change', field)
 }
 
