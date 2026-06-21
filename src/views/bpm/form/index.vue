@@ -28,7 +28,12 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-button v-hasPermi="['bpm:form:create']" plain type="primary" @click="openForm">
+        <el-button
+          v-hasPermi="['bpm:form:create']"
+          plain
+          type="primary"
+          @click="openForm('create')"
+        >
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
@@ -114,7 +119,7 @@ const { currentRoute, push } = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<FormApi.FormVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,

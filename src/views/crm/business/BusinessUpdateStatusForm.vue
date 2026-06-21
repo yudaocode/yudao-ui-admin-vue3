@@ -11,9 +11,9 @@
         <el-select v-model="formData.status" placeholder="请选择商机阶段" class="w-1/1">
           <el-option
             v-for="item in statusList"
-            :key="item.id"
+            :key="item.id!"
             :label="item.name + '(赢单率：' + item.percent + '%)'"
-            :value="item.id"
+            :value="item.id!"
           />
           <el-option
             v-for="item in BusinessStatusApi.DEFAULT_STATUSES"
@@ -48,8 +48,7 @@ const formRules = reactive({
   status: [{ required: true, message: '商机阶段不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-type BusinessStatus = NonNullable<BusinessStatusApi.BusinessStatusTypeVO['statuses']>
-const statusList = ref<BusinessStatus[]>([]) // 商机状态列表
+const statusList = ref<BusinessStatusApi.BusinessStatusVO[]>([]) // 商机状态列表
 
 /** 打开弹窗 */
 const open = async (business: BusinessApi.BusinessVO) => {

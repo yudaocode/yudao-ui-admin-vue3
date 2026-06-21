@@ -77,7 +77,8 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  customerId: undefined as unknown // 允许 undefined + number
+  customerId: undefined as number | undefined,
+  businessId: undefined as number | undefined
 })
 
 /** 查询列表 */
@@ -86,6 +87,7 @@ const getList = async () => {
   try {
     // 置空参数
     queryParams.customerId = undefined
+    queryParams.businessId = undefined
     // 执行查询
     let data = { list: [], total: 0 }
     switch (props.bizType) {

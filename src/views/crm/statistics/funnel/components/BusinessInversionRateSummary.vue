@@ -180,7 +180,6 @@ const echartsOption = reactive<EChartsOption>({
       type: 'value',
       name: '赢单转化率',
       axisTick: {
-        alignWithLabel: true,
         lineStyle: { width: 0 }
       },
       axisLabel: {
@@ -199,7 +198,6 @@ const echartsOption = reactive<EChartsOption>({
       type: 'value',
       name: '商机数',
       axisTick: {
-        alignWithLabel: true,
         lineStyle: { width: 0 }
       },
       axisLabel: {

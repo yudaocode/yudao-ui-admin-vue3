@@ -33,7 +33,7 @@
               :src="url"
               :preview-src-list="scope.row.picUrls"
               class="w-10 h-10 mr-1"
-              :initial-index="index"
+              :initial-index="Number(index)"
               fit="cover"
               preview-teleported
             />

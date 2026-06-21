@@ -257,7 +257,7 @@ watch(
     const totalProductPrice = val.products.reduce((prev, curr) => prev + curr.totalPrice, 0)
     const discountPrice =
       val.discountPercent != null
-        ? erpPriceMultiply(totalProductPrice, val.discountPercent / 100.0)
+        ? (erpPriceMultiply(totalProductPrice, (val.discountPercent ?? 0) / 100.0) ?? 0)
         : 0
     const totalPrice = totalProductPrice - discountPrice
     // 赋值

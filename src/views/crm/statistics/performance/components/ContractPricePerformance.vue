@@ -120,7 +120,6 @@ const echartsOption = reactive<EChartsOption>({
       type: 'value',
       name: '',
       axisTick: {
-        alignWithLabel: true,
         lineStyle: {
           width: 0
         }
@@ -195,8 +194,12 @@ const loadData = async () => {
 }
 
 // 初始化数据
-const columnsData = reactive([])
-const tableData = reactive([
+type TableColumn = { label: string; prop: string }
+
+type TableRow = { title: string; [key: string]: string | number }
+
+const columnsData = reactive<TableColumn[]>([])
+const tableData = reactive<TableRow[]>([
   { title: '当月合同金额统计（元）' },
   { title: '上月合同金额统计（元）' },
   { title: '去年当月合同金额统计（元）' },

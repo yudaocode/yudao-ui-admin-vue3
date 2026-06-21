@@ -87,8 +87,9 @@
 
     <!-- 任务管理 -->
     <OtaTaskList
+      v-if="firmwareId && firmware?.productId"
       :firmware-id="firmwareId"
-      :product-id="firmware?.productId"
+      :product-id="firmware.productId"
       @success="getStatistics"
     />
   </div>

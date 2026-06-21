@@ -3,7 +3,7 @@
     <el-table-column label="地址编号" align="center" prop="id" width="150px" />
     <el-table-column label="收件人名称" align="center" prop="name" width="150px" />
     <el-table-column label="手机号" align="center" prop="mobile" width="150px" />
-    <el-table-column label="地区编码" align="center" prop="areaId" width="150px" />
+    <el-table-column label="所在地区" align="center" prop="areaName" width="150px" />
     <el-table-column label="收件详细地址" align="center" prop="detailAddress" />
     <el-table-column label="是否默认" align="center" prop="defaultStatus" width="150px">
       <template #default="scope">
