@@ -231,18 +231,18 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<UserApi.UserVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  nickname: null,
-  mobile: null,
-  email: null,
+  nickname: undefined as string | undefined,
+  mobile: undefined as string | undefined,
+  email: undefined as string | undefined,
   loginDate: [],
   createTime: [],
   tagIds: [],
-  levelId: null,
-  groupId: null
+  levelId: undefined as number | undefined,
+  groupId: undefined as number | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const updateLevelFormRef = ref() // 修改会员等级表单
@@ -288,7 +288,7 @@ const openForm = (type: string, id?: number) => {
 
 /** 表格选中事件 */
 const handleSelectionChange = (rows: UserApi.UserVO[]) => {
-  selectedIds.value = rows.map((row) => row.id)
+  selectedIds.value = rows.map((row) => row.id!)
 }
 
 /** 发送优惠券 */

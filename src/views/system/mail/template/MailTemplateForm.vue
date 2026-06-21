@@ -13,7 +13,7 @@
             v-for="account in accountList"
             :key="account.id"
             :label="account.mail"
-            :value="account.id"
+            :value="account.id!"
           />
         </el-select>
       </el-form-item>

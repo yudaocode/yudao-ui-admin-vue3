@@ -33,7 +33,7 @@
             v-for="item in pickUpStoreList"
             :key="item.id"
             :label="item.name"
-            :value="item.id"
+            :value="item.id!"
           />
         </el-select>
       </el-form-item>
@@ -111,7 +111,7 @@
         icon-bg-color="text-purple-500"
         prefix="￥"
         :decimals="2"
-        :value="fenToYuan(summary?.orderPayPrice || 0)"
+        :value="Number(fenToYuan(summary?.orderPayPrice || 0))"
       />
     </el-col>
     <el-col :sm="6" :xs="12" v-loading="loading">
@@ -131,7 +131,7 @@
         icon-bg-color="text-green-500"
         prefix="￥"
         :decimals="2"
-        :value="fenToYuan(summary?.afterSalePrice || 0)"
+        :value="Number(fenToYuan(summary?.afterSalePrice || 0))"
       />
     </el-col>
   </el-row>
@@ -309,7 +309,7 @@ const resetQuery = () => {
   queryFormRef.value?.resetFields()
   queryParams.value = { ...INIT_QUERY_PARAMS }
   if (pickUpStoreList.value.length > 0) {
-    queryParams.value.pickUpStoreIds = pickUpStoreList.value[0].id
+    queryParams.value.pickUpStoreIds = pickUpStoreList.value[0].id!
   }
   handleQuery()
 }
@@ -418,7 +418,7 @@ onMounted(async () => {
   }
 
   // 查询
-  queryParams.value.pickUpStoreIds = pickUpStoreList.value[0].id
+  queryParams.value.pickUpStoreIds = pickUpStoreList.value[0].id!
   isUse.value = false
   await getList()
 })

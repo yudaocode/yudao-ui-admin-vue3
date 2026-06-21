@@ -74,7 +74,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
+const formData = ref<MailAccountApi.MailAccountVO>({
   id: undefined,
   mail: '',
   username: '',
@@ -126,7 +126,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as MailAccountApi.MailAccountVO
+    const data = formData.value
     if (formType.value === 'create') {
       await MailAccountApi.createMailAccount(data)
       message.success(t('common.createSuccess'))

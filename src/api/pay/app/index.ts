@@ -62,7 +62,7 @@ export const deleteApp = (id: number) => {
 
 // 获得支付应用列表
 export const getAppList = () => {
-  return request.get({
+  return request.get<AppVO[]>({
     url: '/pay/app/list'
   })
 }

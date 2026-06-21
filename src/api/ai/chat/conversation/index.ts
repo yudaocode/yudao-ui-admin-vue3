@@ -39,7 +39,7 @@ export const ChatConversationApi = {
   },
 
   // 删除【我的】聊天对话
-  deleteChatConversationMy: async (id: string) => {
+  deleteChatConversationMy: async (id: number) => {
     return await request.delete({ url: `/ai/chat/conversation/delete-my?id=${id}` })
   },
 

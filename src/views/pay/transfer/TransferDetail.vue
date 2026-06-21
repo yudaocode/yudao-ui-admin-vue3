@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="转账单详情" width="700px">
+  <Dialog v-model="dialogVisible" title="转账单详情" width="700px" :loading="detailLoading">
     <el-descriptions :column="2" label-class-name="desc-label">
       <el-descriptions-item label="商户单号">
         <el-tag size="small">{{ detailData.merchantTransferId }}</el-tag>
@@ -9,10 +9,17 @@
       </el-descriptions-item>
       <el-descriptions-item label="应用编号">{{ detailData.appId }}</el-descriptions-item>
       <el-descriptions-item label="转账状态">
-        <dict-tag :type="DICT_TYPE.PAY_TRANSFER_STATUS" :value="detailData.status" size="small" />
+        <dict-tag
+          v-if="detailData.status !== undefined"
+          :type="DICT_TYPE.PAY_TRANSFER_STATUS"
+          :value="detailData.status"
+          size="small"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="转账金额">
-        <el-tag type="success" size="small">￥{{ (detailData.price / 100.0).toFixed(2) }}</el-tag>
+        <el-tag type="success" size="small">
+          ￥{{ (detailData.price! / 100.0).toFixed(2) }}
+        </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="转账时间">
         {{ formatDate(detailData.successTime) }}
@@ -27,7 +34,11 @@
       <el-descriptions-item label="收款人姓名">{{ detailData.userName }}</el-descriptions-item>
       <el-descriptions-item label="收款人账号">{{ detailData.userAccount }}</el-descriptions-item>
       <el-descriptions-item label="支付渠道">
-        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="detailData.channelCode" />
+        <dict-tag
+          v-if="detailData.channelCode"
+          :type="DICT_TYPE.PAY_CHANNEL_CODE"
+          :value="detailData.channelCode"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="支付 IP">{{ detailData.userIp }}</el-descriptions-item>
       <el-descriptions-item label="渠道单号">
@@ -61,13 +72,13 @@ defineOptions({ name: 'PayTransferDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
-const detailData = ref({})
+const detailData = ref<TransferApi.TransferVO>({})
 
 /** 打开弹窗 */
 const open = async (id: number) => {
-  dialogVisible.value = true
   // 设置数据
   detailLoading.value = true
+  dialogVisible.value = true
   try {
     detailData.value = await TransferApi.getTransfer(id)
   } finally {

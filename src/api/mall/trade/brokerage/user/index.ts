@@ -20,12 +20,15 @@ export const createBrokerageUser = (data: any) => {
 
 // 查询分销用户列表
 export const getBrokerageUserPage = async (params: any) => {
-  return await request.get({ url: `/trade/brokerage-user/page`, params })
+  return await request.get<PageResult<BrokerageUserVO[]>>({
+    url: `/trade/brokerage-user/page`,
+    params
+  })
 }
 
 // 查询分销用户详情
 export const getBrokerageUser = async (id: number) => {
-  return await request.get({ url: `/trade/brokerage-user/get?id=` + id })
+  return await request.get<BrokerageUserVO>({ url: `/trade/brokerage-user/get?id=` + id })
 }
 
 // 修改推广员

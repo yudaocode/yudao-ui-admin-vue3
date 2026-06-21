@@ -41,10 +41,10 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
-  id: undefined,
-  nickname: undefined,
-  levelId: undefined,
-  reason: undefined
+  id: undefined as number | undefined,
+  nickname: undefined as string | undefined,
+  levelId: undefined as number | undefined,
+  reason: undefined as string | undefined
 })
 const formRules = reactive({
   reason: [{ required: true, message: '修改原因不能为空', trigger: 'blur' }]
@@ -59,7 +59,13 @@ const open = async (id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await UserApi.getUser(id)
+      const user = await UserApi.getUser(id)
+      formData.value = {
+        id: user.id,
+        nickname: user.nickname,
+        levelId: undefined,
+        reason: undefined
+      }
     } finally {
       formLoading.value = false
     }
@@ -77,11 +83,15 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await UserApi.updateUserLevel(formData.value)
-
+    const data: UserApi.UserLevelUpdateReqVO = {
+      id: formData.value.id!,
+      levelId: formData.value.levelId!,
+      reason: formData.value.reason!
+    }
+    await UserApi.updateUserLevel(data)
+    // 发送操作成功的事件
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
-    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false

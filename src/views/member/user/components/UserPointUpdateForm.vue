@@ -47,8 +47,8 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
-  id: undefined,
-  nickname: undefined,
+  id: undefined as number | undefined,
+  nickname: undefined as string | undefined,
   point: 0,
   changePoint: 0,
   changeType: 1
@@ -66,9 +66,14 @@ const open = async (id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await UserApi.getUser(id)
-      formData.value.changeType = 1 // 默认增加积分
-      formData.value.changePoint = 0 // 变动积分默认0
+      const user = await UserApi.getUser(id)
+      formData.value = {
+        id: user.id,
+        nickname: user.nickname,
+        point: user.point!,
+        changeType: 1, // 默认增加积分
+        changePoint: 0 // 变动积分默认0
+      }
     } finally {
       formLoading.value = false
     }
@@ -96,14 +101,14 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await UserApi.updateUserPoint({
-      id: formData.value.id,
+    const data: UserApi.UserPointUpdateReqVO = {
+      id: formData.value.id!,
       point: formData.value.changePoint * formData.value.changeType
-    })
-
+    }
+    await UserApi.updateUserPoint(data)
+    // 发送操作成功的事件
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
-    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false

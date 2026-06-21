@@ -16,6 +16,12 @@ export interface WalletVO {
   freezePrice: number
 }
 
+/** 修改会员钱包余额 Request VO */
+export interface WalletBalanceUpdateReqVO {
+  userId: number
+  balance: number
+}
+
 /** 查询用户钱包详情 */
 export const getWallet = async (params: PayWalletUserReqVO) => {
   return await request.get<WalletVO>({ url: `/pay/wallet/get`, params })
@@ -27,6 +33,6 @@ export const getWalletPage = async (params: any) => {
 }
 
 /** 修改会员钱包余额 */
-export const updateWalletBalance = async (data: any) => {
+export const updateWalletBalance = async (data: WalletBalanceUpdateReqVO) => {
   return await request.put({ url: `/pay/wallet/update-balance`, data })
 }

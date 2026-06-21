@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="详情" width="700px">
+  <Dialog v-model="dialogVisible" title="详情" width="700px" :loading="detailLoading">
     <el-descriptions :column="2" label-class-name="desc-label">
       <el-descriptions-item label="商户退款单号">
         <el-tag size="small">{{ refundDetail.merchantRefundId }}</el-tag>
@@ -19,16 +19,20 @@
       <el-descriptions-item label="应用名称">{{ refundDetail.appName }}</el-descriptions-item>
       <el-descriptions-item label="支付金额">
         <el-tag type="success" size="small">
-          ￥{{ (refundDetail.payPrice / 100.0).toFixed(2) }}
+          ￥{{ (refundDetail.payPrice! / 100.0).toFixed(2) }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="退款金额">
         <el-tag size="small" type="danger">
-          ￥{{ (refundDetail.refundPrice / 100.0).toFixed(2) }}
+          ￥{{ (refundDetail.refundPrice! / 100.0).toFixed(2) }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="退款状态">
-        <dict-tag :type="DICT_TYPE.PAY_REFUND_STATUS" :value="refundDetail.status" />
+        <dict-tag
+          v-if="refundDetail.status !== undefined"
+          :type="DICT_TYPE.PAY_REFUND_STATUS"
+          :value="refundDetail.status"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="退款时间">
         {{ formatDate(refundDetail.successTime) }}
@@ -44,7 +48,11 @@
     <el-divider />
     <el-descriptions :column="2" label-class-name="desc-label">
       <el-descriptions-item label="退款渠道">
-        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="refundDetail.channelCode" />
+        <dict-tag
+          v-if="refundDetail.channelCode"
+          :type="DICT_TYPE.PAY_CHANNEL_CODE"
+          :value="refundDetail.channelCode"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="退款原因">{{ refundDetail.reason }}</el-descriptions-item>
       <el-descriptions-item label="退款 IP">{{ refundDetail.userIp }}</el-descriptions-item>
@@ -78,13 +86,13 @@ defineOptions({ name: 'PayRefundDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
-const refundDetail = ref({})
+const refundDetail = ref<RefundApi.RefundDetailVO>({})
 
 /** 打开弹窗 */
 const open = async (id: number) => {
-  dialogVisible.value = true
   // 设置数据
   detailLoading.value = true
+  dialogVisible.value = true
   try {
     refundDetail.value = await RefundApi.getRefund(id)
   } finally {

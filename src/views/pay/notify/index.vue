@@ -194,21 +194,21 @@ defineOptions({ name: 'PayNotify' })
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref() // 列表的数据
+const list = ref<PayNotifyApi.NotifyTaskVO[]>([]) // 列表的数据
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
-  appId: null,
-  type: null,
-  dataId: null,
-  status: null,
-  merchantOrderId: null,
-  merchantRefundId: null,
-  merchantTransferId: null,
-  createTime: []
+  appId: null as number | null,
+  type: null as number | null,
+  dataId: null as string | null,
+  status: null as number | null,
+  merchantOrderId: null as string | null,
+  merchantRefundId: null as string | null,
+  merchantTransferId: null as string | null,
+  createTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单
-const appList = ref([]) // 支付应用列表集合
+const appList = ref<PayAppApi.AppVO[]>([]) // 支付应用列表集合
 
 /** 搜索按钮操作 */
 const handleQuery = () => {

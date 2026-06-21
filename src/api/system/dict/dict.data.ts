@@ -1,8 +1,8 @@
 import request from '@/config/axios'
 
 export interface DictDataVO {
-  id: number
-  sort: number
+  id?: number
+  sort?: number
   label: string
   value: string
   dictType: string
@@ -10,7 +10,7 @@ export interface DictDataVO {
   colorType: string
   cssClass: string
   remark: string
-  createTime: Date
+  createTime?: Date
 }
 
 // 查询字典数据（精简)列表

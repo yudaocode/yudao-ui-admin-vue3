@@ -84,7 +84,7 @@
             v-for="item in deliveryExpressList"
             :key="item.id"
             :label="item.name"
-            :value="item.id"
+            :value="item.id!"
           />
         </el-select>
       </el-form-item>
@@ -104,7 +104,7 @@
             v-for="item in pickUpStoreList"
             :key="item.id"
             :label="item.name"
-            :value="item.id"
+            :value="item.id!"
           />
         </el-select>
       </el-form-item>
@@ -199,7 +199,7 @@ const { userId } = defineProps<{
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<OrderApi.OrderVO[]>([]) // 列表的数据
 const pickUpStoreList = ref<PickUpStoreApi.DeliveryPickUpStoreVO[]>([]) // 自提门店精简列表
 const deliveryExpressList = ref<DeliveryExpressApi.DeliveryExpressVO[]>([]) // 物流公司
 const queryFormRef = ref<FormInstance>() // 搜索的表单

@@ -41,7 +41,7 @@
             :key="conversation.id"
             @click="handleConversationClick(conversation.id)"
             @mouseover="hoverConversationId = conversation.id"
-            @mouseout="hoverConversationId = ''"
+            @mouseout="hoverConversationId = null"
           >
             <div
               class="flex flex-row justify-between flex-1 px-1.25 cursor-pointer rounded-1.25 items-center leading-7.5"
@@ -153,7 +153,7 @@ const loadingTime = ref<any>() // 加载中定时器
 // 定义组件 props
 const props = defineProps({
   activeId: {
-    type: String || null,
+    type: [Number, String],
     required: true
   }
 })
@@ -186,11 +186,9 @@ const handleConversationClick = async (id: number) => {
   const filterConversation = conversationList.value.filter((item) => {
     return item.id === id
   })
-  // 回调 onConversationClick
-  // noinspection JSVoidFunctionReturnValueUsed
-  const success = emits('onConversationClick', filterConversation[0])
-  // 切换对话
-  if (success) {
+  // 回调 onConversationClick，切换对话
+  if (filterConversation[0]) {
+    emits('onConversationClick', filterConversation[0])
     activeConversationId.value = id
   }
 }
@@ -366,7 +364,7 @@ const handleRoleRepository = async () => {
 /** 监听选中的对话 */
 const { activeId } = toRefs(props)
 watch(activeId, async (newValue, _oldValue) => {
-  activeConversationId.value = newValue as string
+  activeConversationId.value = newValue ? Number(newValue) : null
 })
 
 // 定义 public 方法
@@ -378,7 +376,7 @@ onMounted(async () => {
   await getChatConversationList()
   // 默认选中
   if (props.activeId) {
-    activeConversationId.value = props.activeId
+    activeConversationId.value = Number(props.activeId)
   } else {
     // 首次默认选中第一个
     if (conversationList.value.length) {

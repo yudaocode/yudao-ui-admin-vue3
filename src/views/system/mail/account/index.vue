@@ -190,7 +190,7 @@ const handleDelete = async (id: number) => {
 /** 批量删除按钮操作 */
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (rows: MailAccountApi.MailAccountVO[]) => {
-  checkedIds.value = rows.map((row) => row.id)
+  checkedIds.value = rows.map((row) => row.id!)
 }
 
 const handleDeleteBatch = async () => {

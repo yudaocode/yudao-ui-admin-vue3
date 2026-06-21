@@ -211,8 +211,8 @@ const handleGenerateImage = async () => {
       prompt: prompt.value, // 提示词
       modelId: matchedModel.id, // 使用匹配到的模型
       style: style.value, // 图像生成的风格
-      width: imageSize.width, // size 不能为空
-      height: imageSize.height, // size 不能为空
+      width: Number(imageSize.width), // size 不能为空
+      height: Number(imageSize.height), // size 不能为空
       options: {
         style: style.value // 图像生成的风格
       }

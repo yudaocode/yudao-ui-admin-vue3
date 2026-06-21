@@ -87,7 +87,7 @@
             v-for="item in deliveryExpressList"
             :key="item.id"
             :label="item.name"
-            :value="item.id"
+            :value="item.id!"
           />
         </el-select>
       </el-form-item>
@@ -107,7 +107,7 @@
             v-for="item in pickUpStoreList"
             :key="item.id"
             :label="item.name"
-            :value="item.id"
+            :value="item.id!"
           />
         </el-select>
       </el-form-item>

@@ -137,6 +137,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as UserApi from '@/api/system/user'
+import type { UserVO } from '@/api/system/user'
 import DeptTreeSelect from '@/views/system/dept/components/DeptTreeSelect.vue'
 
 // 是否全选
@@ -144,7 +145,7 @@ const isCheckAll = ref(false)
 // 全选框是否处于中间状态：不是全部选中 && 任意一个选中
 const isIndeterminate = ref(false)
 // 选中的活动
-const checkedUsers = ref([])
+const checkedUsers = ref<UserVO[]>([])
 // 选中状态：key为用户ID，value为是否选中
 const checkedStatus = ref<Record<string, boolean>>({})
 
@@ -152,15 +153,15 @@ const dialogTitle = '选择店员'
 const dialogVisible = ref(false)
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数
+const list = ref<UserVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  username: undefined,
-  mobile: undefined,
-  status: undefined,
+  username: undefined as string | undefined,
+  mobile: undefined as string | undefined,
+  status: undefined as number | undefined,
   deptId: undefined as number | undefined,
-  createTime: []
+  createTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -211,24 +212,24 @@ const handleCheckAll = (checked: boolean) => {
   isCheckAll.value = checked
   isIndeterminate.value = false
 
-  list.value.forEach((combinationActivity) => handleCheckOne(checked, combinationActivity, false))
+  list.value.forEach((user) => handleCheckOne(checked, user, false))
 }
 
 /**
  * 选中一行
  * @param checked 是否选中
- * @param combinationActivity 活动
+ * @param user 用户
  * @param isCalcCheckAll 是否计算全选
  */
-const handleCheckOne = (checked: boolean, combinationActivity, isCalcCheckAll: boolean) => {
+const handleCheckOne = (checked: boolean, user: UserVO, isCalcCheckAll: boolean) => {
   if (checked) {
-    checkedUsers.value.push(combinationActivity as never)
-    checkedStatus.value[combinationActivity.id] = true
+    checkedUsers.value.push(user)
+    checkedStatus.value[user.id] = true
   } else {
-    const index = findCheckedIndex(combinationActivity)
+    const index = findCheckedIndex(user)
     if (index > -1) {
       checkedUsers.value.splice(index, 1)
-      checkedStatus.value[combinationActivity.id] = false
+      checkedStatus.value[user.id] = false
       isCheckAll.value = false
     }
   }
@@ -240,7 +241,8 @@ const handleCheckOne = (checked: boolean, combinationActivity, isCalcCheckAll: b
 }
 
 // 查找活动在已选中活动列表中的索引
-const findCheckedIndex = (user) => checkedUsers.value.findIndex((item) => item.id === user.id)
+const findCheckedIndex = (user: UserVO) =>
+  checkedUsers.value.findIndex((item) => item.id === user.id)
 
 // 计算全选框状态
 const calculateIsCheckAll = () => {
@@ -259,6 +261,6 @@ const handleEmitChange = () => {
 
 /** 确认选择时的触发事件 */
 const emits = defineEmits<{
-  change: [CombinationActivityApi: any]
+  change: [users: UserVO[]]
 }>()
 </script>

@@ -72,7 +72,15 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formData = ref({
+type ConversationFormData = {
+  id?: number
+  systemMessage?: string
+  modelId?: number
+  temperature?: number
+  maxTokens?: number
+  maxContexts?: number
+}
+const formData = ref<ConversationFormData>({
   id: undefined,
   systemMessage: undefined,
   modelId: undefined,
@@ -104,7 +112,7 @@ const open = async (id: number) => {
           obj[key] = data[key]
         }
         return obj
-      }, {})
+      }, {} as ConversationFormData)
     } finally {
       formLoading.value = false
     }
