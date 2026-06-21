@@ -301,7 +301,7 @@
                   ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY
                 "
               >
-                <el-input-number v-model="configForm.multiInstanceSource" :min="1" />
+                <el-input-number v-model="multiInstanceSourceNumber" :min="1" />
               </el-form-item>
               <el-form-item
                 v-if="
@@ -452,6 +452,12 @@ const digitalFormFieldOptions = computed(() => {
 })
 const multiFormFieldOptions = computed(() => {
   return formFieldOptions.filter((item) => item.type === 'select' || item.type === 'checkbox')
+})
+const multiInstanceSourceNumber = computed({
+  get: () => Number(configForm.value.multiInstanceSource || 1),
+  set: (value?: number) => {
+    configForm.value.multiInstanceSource = String(value || '')
+  }
 })
 const childFormFieldOptions = ref()
 

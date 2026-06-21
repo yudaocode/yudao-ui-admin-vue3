@@ -70,14 +70,28 @@ defineProps<{
   provider: any
 }>()
 
+type WorkflowParam = {
+  key: string
+  value: string
+}
+
+type StartNodeParameter = {
+  name: string
+  dataType: string
+  description?: string
+  disabled?: boolean
+  required?: boolean
+  defaultValue?: string
+}
+
 const tinyflowRef = ref()
 const workflowData = inject('workflowData') as Ref
 const showTestDrawer = ref(false)
-const params4Test = ref([])
-const paramsOfStartNode = ref({})
+const params4Test = ref<WorkflowParam[]>([])
+const paramsOfStartNode = ref<Record<string, StartNodeParameter>>({})
 const testResult = ref(null)
 const loading = ref(false)
-const error = ref(null)
+const error = ref<string | null>(null)
 
 /** 展示工作流测试抽屉 */
 const testWorkflowModel = () => {
@@ -96,8 +110,8 @@ const goRun = async () => {
 
     // 获取参数定义
     const parameters = startNode.data?.parameters || []
-    const paramDefinitions = {}
-    parameters.forEach((param) => {
+    const paramDefinitions: Record<string, string> = {}
+    parameters.forEach((param: StartNodeParameter) => {
       paramDefinitions[param.name] = param.dataType
     })
 
@@ -115,7 +129,8 @@ const goRun = async () => {
       try {
         convertedParams[paramKey] = convertParamValue(value, dataType)
       } catch (e) {
-        throw new Error(`参数 ${paramKey} 转换失败: ${e.message}`)
+        const message = e instanceof Error ? e.message : String(e)
+        throw new Error(`参数 ${paramKey} 转换失败: ${message}`)
       }
     }
 
@@ -127,7 +142,11 @@ const goRun = async () => {
     const response = await WorkflowApi.testWorkflow(data)
     testResult.value = response
   } catch (err) {
-    error.value = err.response?.data?.message || '运行失败，请检查参数和网络连接'
+    const responseMessage =
+      err && typeof err === 'object' && 'response' in err
+        ? (err as any).response?.data?.message
+        : undefined
+    error.value = responseMessage || '运行失败，请检查参数和网络连接'
   } finally {
     loading.value = false
   }
@@ -142,20 +161,20 @@ watch(showTestDrawer, (value) => {
 
   // 获取参数定义
   const parameters = startNode.data?.parameters || []
-  const paramDefinitions = {}
+  const paramDefinitions: Record<string, StartNodeParameter> = {}
 
   // 加入参数选项方便用户添加非必须参数
-  parameters.forEach((param) => {
+  parameters.forEach((param: StartNodeParameter) => {
     paramDefinitions[param.name] = param
   })
 
-  function mergeIfRequiredButNotSet(target) {
-    let needPushList = []
+  function mergeIfRequiredButNotSet(target: WorkflowParam[]) {
+    let needPushList: WorkflowParam[] = []
     for (let key in paramDefinitions) {
       let param = paramDefinitions[key]
 
       if (param.required) {
-        let item = target.find((item) => item.key === key)
+        let item = target.find((item: WorkflowParam) => item.key === key)
 
         if (!item) {
           needPushList.push({ key: param.name, value: param.defaultValue || '' })
@@ -186,12 +205,12 @@ const addParam = () => {
 }
 
 /** 删除参数项 */
-const removeParam = (index) => {
+const removeParam = (index: number) => {
   params4Test.value.splice(index, 1)
 }
 
 /** 类型转换函数 */
-const convertParamValue = (value, dataType) => {
+const convertParamValue = (value: string, dataType: string) => {
   if (value === '') return null // 空值处理
 
   switch (dataType) {
@@ -210,7 +229,8 @@ const convertParamValue = (value, dataType) => {
       try {
         return JSON.parse(value)
       } catch (e) {
-        throw new Error(`JSON格式错误: ${e.message}`)
+        const message = e instanceof Error ? e.message : String(e)
+        throw new Error(`JSON格式错误: ${message}`)
       }
     default:
       throw new Error(`不支持的类型: ${dataType}`)

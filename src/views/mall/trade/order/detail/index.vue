@@ -165,7 +165,7 @@
         <el-descriptions-item v-if="formData.logisticsId" label="运单号: ">
           {{ formData.logisticsNo }}
         </el-descriptions-item>
-        <el-descriptions-item v-if="formatDate.deliveryTime" label="发货时间: ">
+        <el-descriptions-item v-if="formData.deliveryTime" label="发货时间: ">
           {{ formatDate(formData.deliveryTime) }}
         </el-descriptions-item>
         <el-descriptions-item v-for="item in 2" :key="item" label-class-name="no-colon" />

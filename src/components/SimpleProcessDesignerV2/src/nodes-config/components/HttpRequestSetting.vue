@@ -70,7 +70,7 @@
           <Icon
             icon="ep:delete"
             :size="18"
-            @click="deleteHttpResponseSetting(setting.response!, index)"
+            @click="deleteHttpResponseSetting(setting.response!, Number(index))"
           />
         </div>
       </div>

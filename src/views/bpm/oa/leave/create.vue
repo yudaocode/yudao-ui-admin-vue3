@@ -97,10 +97,17 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 // 审批相关：变量
+type StartUserSelectTask = {
+  id: string
+  name: string
+}
+type LeaveCreateData = LeaveApi.LeaveVO & {
+  startUserSelectAssignees?: Record<string, number[]>
+}
 const processDefineKey = 'oa_leave' // 流程定义 Key
-const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
-const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
-const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
+const startUserSelectTasks = ref<StartUserSelectTask[]>([]) // 发起人需要选择审批人的用户任务列表
+const startUserSelectAssignees = ref<Record<string, number[]>>({}) // 发起人选择审批人的数据
+const tempStartUserSelectAssignees = ref<Record<string, number[]>>({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
 const processDefinitionId = ref('')
 
@@ -125,7 +132,7 @@ const submitForm = async () => {
   // 2. 提交请求
   formLoading.value = true
   try {
-    const data = { ...formData.value } as unknown as LeaveApi.LeaveVO
+    const data = { ...formData.value } as unknown as LeaveCreateData
     // 审批相关：设置指定审批人
     if (startUserSelectTasks.value?.length > 0) {
       data.startUserSelectAssignees = startUserSelectAssignees.value

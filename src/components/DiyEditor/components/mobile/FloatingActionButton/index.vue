@@ -13,7 +13,7 @@
         v-for="(item, index) in property.list"
         :key="index"
         class="flex flex-col items-center"
-        @click="handleActive(index)"
+        @click="handleActive"
       >
         <el-image :src="item.imgUrl" fit="contain" class="h-27px w-27px">
           <template #error>
@@ -48,6 +48,10 @@ const expanded = ref(false)
 // 处理展开/折叠
 const handleToggleFab = () => {
   expanded.value = !expanded.value
+}
+
+const handleActive = () => {
+  expanded.value = false
 }
 </script>
 

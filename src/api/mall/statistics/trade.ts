@@ -115,5 +115,7 @@ export const getOrderCountTrendComparison = (
 
 /** 时间参数需要格式化, 确保接口能识别 */
 const formatDateParam = (params: TradeTrendReqVO) => {
-  return { times: [formatDate(params.times[0]), formatDate(params.times[1])] } as TradeTrendReqVO
+  return {
+    times: [formatDate(params.times[0]), formatDate(params.times[1])]
+  } as TradeTrendReqVO
 }

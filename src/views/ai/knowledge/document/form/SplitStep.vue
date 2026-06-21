@@ -48,7 +48,7 @@
               <el-dropdown-item
                 v-for="(file, index) in modelData.list"
                 :key="index"
-                @click="selectFile(index)"
+                @click="selectFile(Number(index))"
               >
                 {{ file.name }}
                 <span v-if="file.segments" class="ml-5px text-gray-500 text-12px">
@@ -141,7 +141,7 @@ const splitContent = async (file: any) => {
     // 调用后端分段接口，获取文档的分段内容、字符数和 Token 数
     file.segments = await KnowledgeSegmentApi.splitContent(
       file.url,
-      modelData.value.segmentMaxTokens
+      Number(modelData.value.segmentMaxTokens)
     )
   } catch (error) {
     console.error('获取分段内容失败:', file, error)

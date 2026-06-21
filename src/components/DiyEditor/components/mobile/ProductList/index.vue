@@ -54,7 +54,7 @@
               class="text-12px"
               :style="{ color: property.fields.price.color }"
             >
-              ￥{{ fenToYuan(spu.price) }}
+              ￥{{ fenToYuan(spu.price || 0) }}
             </span>
           </div>
         </div>
@@ -76,7 +76,9 @@ const spuList = ref<ProductSpuApi.Spu[]>([])
 watch(
   () => props.property.spuIds,
   async () => {
-    spuList.value = await ProductSpuApi.getSpuDetailList(props.property.spuIds)
+    spuList.value = props.property.spuIds
+      ? await ProductSpuApi.getSpuDetailList(props.property.spuIds)
+      : []
   },
   {
     immediate: true,
