@@ -70,23 +70,16 @@
       <!-- 登录按钮 / 返回按钮 -->
       <el-col :span="24" class="px-10px">
         <el-form-item>
-          <XButton
-            :loading="loginLoading"
-            :title="t('login.login')"
-            class="w-full"
-            type="primary"
-            @click="signIn()"
-          />
+          <el-button :loading="loginLoading" class="w-full" type="primary" @click="signIn()">
+            {{ t('login.login') }}
+          </el-button>
         </el-form-item>
       </el-col>
       <el-col :span="24" class="px-10px">
         <el-form-item>
-          <XButton
-            :loading="loginLoading"
-            :title="t('login.backLogin')"
-            class="w-full"
-            @click="handleBackLogin()"
-          />
+          <el-button :loading="loginLoading" class="w-full" @click="handleBackLogin()">
+            {{ t('login.backLogin') }}
+          </el-button>
         </el-form-item>
       </el-col>
     </el-row>

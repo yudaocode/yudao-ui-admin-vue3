@@ -90,8 +90,11 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<RewardActivityApi.RewardActivityVO>({
   conditionType: PromotionConditionTypeEnum.PRICE.type,
   productScope: PromotionProductScopeEnum.ALL.scope,
+  productScopeValues: [],
+  productCategoryIds: [],
+  productSpuIds: [],
   rules: []
-} as RewardActivityApi.RewardActivityVO)
+})
 const formRules = reactive({
   name: [{ required: true, message: '活动名称不能为空', trigger: 'blur' }],
   startAndEndTime: [{ required: true, message: '活动时间不能为空', trigger: 'blur' }],
@@ -113,9 +116,16 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = await RewardActivityApi.getReward(id)
+      const data: RewardActivityApi.RewardActivityVO = {
+        productScopeValues: [],
+        productCategoryIds: [],
+        productSpuIds: [],
+        ...(await RewardActivityApi.getReward(id))
+      }
       // 转区段时间
-      data.startAndEndTime = [data.startTime, data.endTime]
+      if (data.startTime && data.endTime) {
+        data.startAndEndTime = [data.startTime, data.endTime]
+      }
       // 规则分转元
       data.rules?.forEach((item: any) => {
         item.discountPrice = fenToYuan(item.discountPrice || 0)
@@ -180,8 +190,11 @@ const resetForm = () => {
   formData.value = {
     conditionType: PromotionConditionTypeEnum.PRICE.type,
     productScope: PromotionProductScopeEnum.ALL.scope,
+    productScopeValues: [],
+    productCategoryIds: [],
+    productSpuIds: [],
     rules: []
-  } as RewardActivityApi.RewardActivityVO
+  }
 }
 
 /** 获得商品范围 */
@@ -193,13 +206,8 @@ const getProductScope = async () => {
       break
     case PromotionProductScopeEnum.CATEGORY.scope:
       await nextTick()
-      let productCategoryIds = formData.value.productScopeValues as any
-      if (Array.isArray(productCategoryIds) && productCategoryIds.length === 1) {
-        // 单选时使用数组不能反显
-        productCategoryIds = productCategoryIds[0]
-      }
       // 设置品类编号
-      formData.value.productCategoryIds = productCategoryIds
+      formData.value.productCategoryIds = formData.value.productScopeValues
       break
     default:
       break
@@ -213,9 +221,7 @@ function setProductScopeValues(data: any) {
       data.productScopeValues = formData.value.productSpuIds
       break
     case PromotionProductScopeEnum.CATEGORY.scope:
-      data.productScopeValues = Array.isArray(formData.value.productCategoryIds)
-        ? formData.value.productCategoryIds
-        : [formData.value.productCategoryIds]
+      data.productScopeValues = formData.value.productCategoryIds
       break
     default:
       break

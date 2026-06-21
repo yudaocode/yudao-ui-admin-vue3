@@ -1,9 +1,8 @@
 import request from '@/config/axios'
-import type { Dayjs } from 'dayjs'
 
 /** 学生课程信息 */
 export interface Demo03Course {
-  id: number // 编号
+  id?: number // 编号
   studentId?: number // 学生编号
   name?: string // 名字
   score?: number // 分数
@@ -11,7 +10,7 @@ export interface Demo03Course {
 
 /** 学生班级信息 */
 export interface Demo03Grade {
-  id: number // 编号
+  id?: number // 编号
   studentId?: number // 学生编号
   name?: string // 名字
   teacher?: string // 班主任
@@ -19,10 +18,10 @@ export interface Demo03Grade {
 
 /** 学生信息 */
 export interface Demo03Student {
-  id: number // 编号
+  id?: number // 编号
   name?: string // 名字
   sex?: number // 性别
-  birthday?: string | Dayjs // 出生日期
+  birthday?: string | number // 出生日期
   description?: string // 简介
   demo03courses?: Demo03Course[]
   demo03grade?: Demo03Grade

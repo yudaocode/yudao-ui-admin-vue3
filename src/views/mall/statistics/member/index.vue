@@ -24,7 +24,7 @@
       <el-col v-loading="loading" :sm="6" :xs="12">
         <SummaryCard
           :decimals="2"
-          :value="fenToYuan(summary?.rechargePrice || 0)"
+          :value="fenToYuanNumber(summary?.rechargePrice || 0)"
           icon="fa-solid:money-check-alt"
           icon-bg-color="text-yellow-500"
           icon-color="bg-yellow-100"
@@ -35,7 +35,7 @@
       <el-col v-loading="loading" :sm="6" :xs="12">
         <SummaryCard
           :decimals="2"
-          :value="fenToYuan(summary?.expensePrice || 0)"
+          :value="fenToYuanNumber(summary?.expensePrice || 0)"
           icon="fa-solid:yen-sign"
           icon-bg-color="text-green-500"
           icon-color="bg-green-100"
@@ -131,7 +131,7 @@ import {
 import SummaryCard from '@/components/SummaryCard/index.vue'
 import { EChartsOption } from 'echarts'
 import china from '@/assets/map/json/china.json'
-import { areaReplace, fenToYuan } from '@/utils'
+import { areaReplace, fenToYuan, fenToYuanNumber } from '@/utils'
 import { DICT_TYPE, DictDataType, getIntDictOptions } from '@/utils/dict'
 import echarts from '@/plugins/echarts'
 import { fenToYuanFormat } from '@/utils/formatter'

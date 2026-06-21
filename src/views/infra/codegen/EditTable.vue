@@ -41,7 +41,7 @@ const activeName = ref('colum') // Tag 激活的窗口
 const basicInfoRef = ref<ComponentRef<typeof BasicInfoForm>>()
 const generateInfoRef = ref<ComponentRef<typeof GenerateInfoForm>>()
 const formData = ref<CodegenApi.CodegenUpdateReqVO>({
-  table: {},
+  table: CodegenApi.createEmptyCodegenTableSaveReqVO(),
   columns: []
 })
 

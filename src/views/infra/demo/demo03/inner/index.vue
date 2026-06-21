@@ -238,7 +238,7 @@ const handleDeleteBatch = async () => {
 
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: Demo03Student[]) => {
-  checkedIds.value = records.map((item) => item.id)
+  checkedIds.value = records.map((item) => item.id!)
 }
 
 /** 导出按钮操作 */

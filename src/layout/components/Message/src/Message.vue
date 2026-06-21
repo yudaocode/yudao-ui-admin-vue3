@@ -83,7 +83,9 @@ onMounted(() => {
       </ElTabs>
       <!-- 更多 -->
       <div style="margin-top: 10px; text-align: right">
-        <XButton preIcon="ep:view" title="查看全部" type="primary" @click="goMyList" />
+        <el-button type="primary" @click="goMyList">
+          <Icon icon="ep:view" class="mr-1px" /> 查看全部
+        </el-button>
       </div>
     </ElPopover>
   </div>

@@ -194,7 +194,7 @@ onMounted(() => {
   for (const dict of getIntDictOptions(DICT_TYPE.PROMOTION_COUPON_STATUS)) {
     statusTabs.push({
       label: dict.label,
-      value: dict.value as string
+      value: String(dict.value)
     })
   }
 })

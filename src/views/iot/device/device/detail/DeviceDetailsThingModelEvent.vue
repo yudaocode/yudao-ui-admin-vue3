@@ -33,7 +33,7 @@
           start-placeholder="开始时间"
           end-placeholder="结束时间"
           value-format="YYYY-MM-DD HH:mm:ss"
-          :default-time="[new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 1, 1, 23, 59, 59)]"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-360px"
           :shortcuts="defaultShortcuts"
         />

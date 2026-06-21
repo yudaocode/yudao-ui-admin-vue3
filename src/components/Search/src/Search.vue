@@ -114,19 +114,17 @@ const setVisible = () => {
     <template #action>
       <div v-if="layout === 'inline'">
         <!-- update by 芋艿：去除搜索的 type="primary"，颜色变淡一点 -->
-        <ElButton v-if="showSearch" @click="search">
-          <Icon class="mr-5px" icon="ep:search" />
-          {{ t('common.query') }}
-        </ElButton>
+        <el-button v-if="showSearch" @click="search">
+          <Icon class="mr-5px" icon="ep:search" /> {{ t('common.query') }}
+        </el-button>
         <!-- update by 芋艿：将 icon="ep:refresh-right" 修改成 icon="ep:refresh"，和 ruoyi-vue 搜索保持一致  -->
-        <ElButton v-if="showReset" @click="reset">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          {{ t('common.reset') }}
-        </ElButton>
-        <ElButton v-if="expand" text @click="setVisible">
+        <el-button v-if="showReset" @click="reset">
+          <Icon class="mr-5px" icon="ep:refresh" /> {{ t('common.reset') }}
+        </el-button>
+        <el-button v-if="expand" text @click="setVisible">
           {{ t(visible ? 'common.shrink' : 'common.expand') }}
           <Icon :icon="visible ? 'ep:arrow-up' : 'ep:arrow-down'" />
-        </ElButton>
+        </el-button>
         <!-- add by 芋艿：补充在搜索后的按钮 -->
         <slot name="actionMore"></slot>
       </div>
@@ -138,18 +136,16 @@ const setVisible = () => {
 
   <template v-if="layout === 'bottom'">
     <div :style="bottonButtonStyle">
-      <ElButton v-if="showSearch" type="primary" @click="search">
-        <Icon class="mr-5px" icon="ep:search" />
-        {{ t('common.query') }}
-      </ElButton>
-      <ElButton v-if="showReset" @click="reset">
-        <Icon class="mr-5px" icon="ep:refresh-right" />
-        {{ t('common.reset') }}
-      </ElButton>
-      <ElButton v-if="expand" text @click="setVisible">
+      <el-button v-if="showSearch" type="primary" @click="search">
+        <Icon class="mr-5px" icon="ep:search" /> {{ t('common.query') }}
+      </el-button>
+      <el-button v-if="showReset" @click="reset">
+        <Icon class="mr-5px" icon="ep:refresh-right" /> {{ t('common.reset') }}
+      </el-button>
+      <el-button v-if="expand" text @click="setVisible">
         {{ t(visible ? 'common.shrink' : 'common.expand') }}
         <Icon :icon="visible ? 'ep:arrow-up' : 'ep:arrow-down'" />
-      </ElButton>
+      </el-button>
       <!-- add by 芋艿：补充在搜索后的按钮 -->
       <slot name="actionMore"></slot>
     </div>

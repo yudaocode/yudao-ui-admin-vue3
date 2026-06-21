@@ -22,20 +22,12 @@
       </el-table-column>
     </el-table>
     <div class="element-drawer__button">
-      <XButton
-        type="primary"
-        preIcon="ep:plus"
-        title="添加监听器"
-        size="small"
-        @click="openListenerForm(null)"
-      />
-      <XButton
-        type="success"
-        preIcon="ep:select"
-        title="选择监听器"
-        size="small"
-        @click="openProcessListenerDialog"
-      />
+      <el-button type="primary" size="small" @click="openListenerForm(null)">
+        <Icon icon="ep:plus" class="mr-1px" /> 添加监听器
+      </el-button>
+      <el-button type="success" size="small" @click="openProcessListenerDialog">
+        <Icon icon="ep:select" class="mr-1px" /> 选择监听器
+      </el-button>
     </div>
 
     <!-- 监听器 编辑/创建 部分 -->
@@ -141,7 +133,7 @@
       <el-divider />
       <p class="listener-filed__title">
         <span><Icon icon="ep:menu" />注入字段：</span>
-        <XButton type="primary" @click="openListenerFieldForm(null)" title="添加字段" />
+        <el-button type="primary" @click="openListenerFieldForm(null)">添加字段</el-button>
       </p>
       <el-table
         :data="fieldsListOfListener"

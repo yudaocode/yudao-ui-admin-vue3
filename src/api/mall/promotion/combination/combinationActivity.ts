@@ -5,6 +5,8 @@ export interface CombinationActivityVO {
   id?: number
   name?: string
   spuId?: number
+  spuName?: string
+  picUrl?: string
   totalLimitCount?: number
   singleLimitCount?: number
   startTime?: Date

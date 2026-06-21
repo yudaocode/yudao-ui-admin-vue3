@@ -51,7 +51,7 @@ const btnClick = () => {
       <img :src="errorMap[type].url" alt="" width="350" />
       <div class="text-14px text-[var(--el-color-info)]">{{ errorMap[type].message }}</div>
       <div class="mt-20px">
-        <ElButton type="primary" @click="btnClick">{{ errorMap[type].buttonText }}</ElButton>
+        <el-button type="primary" @click="btnClick">{{ errorMap[type].buttonText }}</el-button>
       </div>
     </div>
   </div>

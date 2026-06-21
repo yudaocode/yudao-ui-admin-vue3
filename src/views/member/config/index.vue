@@ -76,9 +76,9 @@ const formData = ref<ConfigApi.ConfigVO>({
 
 // 创建一个计算属性，用于将 pointTradeDeductUnitPrice 显示为带两位小数的形式
 const computedPointTradeDeductUnitPrice = computed({
-  get: () => (formData.value.pointTradeDeductUnitPrice / 100).toFixed(2),
-  set: (newValue: number) => {
-    formData.value.pointTradeDeductUnitPrice = Math.round(newValue * 100)
+  get: () => formData.value.pointTradeDeductUnitPrice / 100,
+  set: (newValue?: number) => {
+    formData.value.pointTradeDeductUnitPrice = Math.round((newValue ?? 0) * 100)
   }
 })
 

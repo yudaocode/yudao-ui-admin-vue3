@@ -10,16 +10,16 @@
           title="销售额"
           prefix="￥"
           :decimals="2"
-          :value="fenToYuan(orderComparison?.value?.orderPayPrice || 0)"
-          :reference="fenToYuan(orderComparison?.reference?.orderPayPrice || 0)"
+          :value="fenToYuanNumber(orderComparison?.value?.orderPayPrice || 0)"
+          :reference="fenToYuanNumber(orderComparison?.reference?.orderPayPrice || 0)"
         />
       </el-col>
       <el-col :md="6" :sm="12" :xs="24" :loading="loading">
         <ComparisonCard
           tag="今日"
           title="用户访问量"
-          :value="userComparison?.value?.visitUserCount || 0"
-          :reference="userComparison?.reference?.visitUserCount || 0"
+          :value="Number(userComparison?.value?.visitUserCount || 0)"
+          :reference="Number(userComparison?.reference?.visitUserCount || 0)"
         />
       </el-col>
       <el-col :md="6" :sm="12" :xs="24" :loading="loading">
@@ -71,7 +71,7 @@ import * as MemberStatisticsApi from '@/api/mall/statistics/member'
 import { DataComparisonRespVO } from '@/api/mall/statistics/common'
 import { TradeOrderSummaryRespVO } from '@/api/mall/statistics/trade'
 import { MemberCountRespVO } from '@/api/mall/statistics/member'
-import { fenToYuan } from '@/utils'
+import { fenToYuanNumber } from '@/utils'
 import ComparisonCard from './components/ComparisonCard.vue'
 import MemberStatisticsCard from './components/MemberStatisticsCard.vue'
 import OperationDataCard from './components/OperationDataCard.vue'

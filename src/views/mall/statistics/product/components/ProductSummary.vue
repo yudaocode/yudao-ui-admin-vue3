@@ -82,7 +82,7 @@
           icon-bg-color="text-green-500"
           prefix="￥"
           :decimals="2"
-          :value="fenToYuan(trendSummary?.value?.orderPayPrice || 0)"
+          :value="fenToYuanNumber(trendSummary?.value?.orderPayPrice || 0)"
           :percent="
             calculateRelativeRate(
               trendSummary?.value?.orderPayPrice,
@@ -118,7 +118,7 @@
           icon-bg-color="text-yellow-500"
           prefix="￥"
           :decimals="2"
-          :value="fenToYuan(trendSummary?.value?.afterSaleRefundPrice || 0)"
+          :value="fenToYuanNumber(trendSummary?.value?.afterSaleRefundPrice || 0)"
           :percent="
             calculateRelativeRate(
               trendSummary?.value?.afterSaleRefundPrice,
@@ -139,7 +139,7 @@ import { ProductStatisticsApi, ProductStatisticsVO } from '@/api/mall/statistics
 import SummaryCard from '@/components/SummaryCard/index.vue'
 import { EChartsOption } from 'echarts'
 import { DataComparisonRespVO } from '@/api/mall/statistics/common'
-import { calculateRelativeRate, fenToYuan } from '@/utils'
+import { calculateRelativeRate, fenToYuanNumber } from '@/utils'
 import download from '@/utils/download'
 import { CardTitle } from '@/components/Card'
 import * as DateUtil from '@/utils/formatTime'
@@ -174,8 +174,8 @@ const lineChartOptions = reactive<EChartsOption>({
   series: [
     { name: '商品浏览量', type: 'line', smooth: true, itemStyle: { color: '#B37FEB' } },
     { name: '商品访客数', type: 'line', smooth: true, itemStyle: { color: '#FFAB2B' } },
-    { name: '支付金额', type: 'bar', smooth: true, yAxisIndex: 1, itemStyle: { color: '#1890FF' } },
-    { name: '退款金额', type: 'bar', smooth: true, yAxisIndex: 1, itemStyle: { color: '#00C050' } }
+    { name: '支付金额', type: 'bar', yAxisIndex: 1, itemStyle: { color: '#1890FF' } },
+    { name: '退款金额', type: 'bar', yAxisIndex: 1, itemStyle: { color: '#00C050' } }
   ],
   toolbox: {
     feature: {
@@ -272,8 +272,8 @@ const getProductStatisticsList = async () => {
   const list: ProductStatisticsVO[] = await ProductStatisticsApi.getProductStatisticsList({ times })
   // 处理数据
   for (let item of list) {
-    item.orderPayPrice = fenToYuan(item.orderPayPrice)
-    item.afterSaleRefundPrice = fenToYuan(item.afterSaleRefundPrice)
+    item.orderPayPrice = fenToYuanNumber(item.orderPayPrice)
+    item.afterSaleRefundPrice = fenToYuanNumber(item.afterSaleRefundPrice)
   }
   // 更新 Echarts 数据
   if (lineChartOptions.dataset && lineChartOptions.dataset['source']) {

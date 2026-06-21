@@ -20,6 +20,45 @@ export type CodegenTableVO = {
   parentMenuId: number
 }
 
+export type CodegenTableSaveReqVO = CodegenTableVO & {
+  frontType?: number | null
+  genPath?: string
+  genType?: string
+  masterTableId?: number
+  subJoinColumnId?: number
+  subJoinMany?: boolean
+  treeParentColumnId?: number
+  treeNameColumnId?: number
+}
+
+export const createEmptyCodegenTableSaveReqVO = (): CodegenTableSaveReqVO => ({
+  id: 0,
+  tableId: 0,
+  isParentMenuIdValid: false,
+  dataSourceConfigId: 0,
+  scene: 0,
+  tableName: '',
+  tableComment: '',
+  remark: '',
+  moduleName: '',
+  businessName: '',
+  className: '',
+  classComment: '',
+  author: '',
+  createTime: new Date(),
+  updateTime: new Date(),
+  templateType: 0,
+  parentMenuId: 0,
+  frontType: null,
+  genPath: '',
+  genType: '',
+  masterTableId: undefined,
+  subJoinColumnId: undefined,
+  subJoinMany: undefined,
+  treeParentColumnId: undefined,
+  treeNameColumnId: undefined
+})
+
 export type CodegenColumnVO = {
   id: number
   tableId: number
@@ -52,7 +91,7 @@ export type CodegenPreviewVO = {
 }
 
 export type CodegenUpdateReqVO = {
-  table: CodegenTableVO | any
+  table: CodegenTableSaveReqVO
   columns: CodegenColumnVO[]
 }
 
@@ -68,7 +107,7 @@ export const getCodegenTablePage = (params: PageParam) => {
 
 // 查询详情代码生成表定义
 export const getCodegenTable = (id: number) => {
-  return request.get({ url: '/infra/codegen/detail?tableId=' + id })
+  return request.get<CodegenUpdateReqVO>({ url: '/infra/codegen/detail?tableId=' + id })
 }
 
 // 修改代码生成表定义

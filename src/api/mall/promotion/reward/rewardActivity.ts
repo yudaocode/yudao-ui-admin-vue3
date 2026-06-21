@@ -10,10 +10,10 @@ export interface RewardActivityVO {
   conditionType?: number
   productScope?: number
   rules: RewardRule[]
+  productScopeValues: number[] // 商品范围：值为品类编号列表、商品编号列表
   // 如下仅用于表单，不提交
-  productScopeValues?: number[] // 商品范围：值为品类编号列表、商品编号列表
-  productCategoryIds?: number[]
-  productSpuIds?: number[]
+  productCategoryIds: number[]
+  productSpuIds: number[]
 }
 
 // 优惠规则

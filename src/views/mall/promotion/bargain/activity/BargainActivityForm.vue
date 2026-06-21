@@ -130,8 +130,8 @@ const getSpuDetails = async (
     if (typeof products !== 'undefined') {
       const product = products.find((item) => item.skuId === sku.id)
       if (product) {
-        product.bargainFirstPrice = formatToFraction(product.bargainFirstPrice)
-        product.bargainMinPrice = formatToFraction(product.bargainMinPrice)
+        product.bargainFirstPrice = Number(formatToFraction(product.bargainFirstPrice))
+        product.bargainMinPrice = Number(formatToFraction(product.bargainMinPrice))
       }
       config = product || config
     }
@@ -163,8 +163,8 @@ const open = async (type: string, id?: number) => {
         id
       )) as BargainActivityApi.BargainActivityVO
       // 用户每次砍价金额分转元, 分转元
-      data.randomMinPrice = formatToFraction(data.randomMinPrice)
-      data.randomMaxPrice = formatToFraction(data.randomMaxPrice)
+      data.randomMinPrice = Number(formatToFraction(data.randomMinPrice))
+      data.randomMaxPrice = Number(formatToFraction(data.randomMaxPrice))
       // 对齐活动商品处理结构
       await getSpuDetails(
         data.spuId!,

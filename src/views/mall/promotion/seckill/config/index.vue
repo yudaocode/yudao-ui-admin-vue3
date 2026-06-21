@@ -63,7 +63,7 @@
             :key="index"
             :src="url"
             :preview-src-list="scope?.row.sliderPicUrls"
-            :initial-index="index"
+            :initial-index="Number(index)"
             preview-teleported
           />
         </template>

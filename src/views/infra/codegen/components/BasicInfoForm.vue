@@ -48,19 +48,15 @@ defineOptions({ name: 'InfraCodegenBasicInfoForm' })
 
 const props = defineProps({
   table: {
-    type: Object as PropType<Nullable<CodegenApi.CodegenTableVO>>,
+    type: Object as PropType<Nullable<CodegenApi.CodegenTableSaveReqVO>>,
     default: () => null
   }
 })
 
 const formRef = ref()
-const formData = ref({
-  tableName: '',
-  tableComment: '',
-  className: '',
-  author: '',
-  remark: ''
-})
+const formData = ref<CodegenApi.CodegenTableSaveReqVO>(
+  CodegenApi.createEmptyCodegenTableSaveReqVO()
+)
 const rules = reactive({
   tableName: [required],
   tableComment: [required],

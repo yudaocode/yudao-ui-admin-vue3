@@ -186,14 +186,14 @@
         style="width: 100%"
         @change="updateElementTask"
       />
-      <XButton
+      <el-button
         class="!w-1/1 mt-5px"
         type="success"
-        preIcon="ep:select"
-        title="选择表达式"
         size="small"
         @click="openProcessExpressionDialog"
-      />
+      >
+        <Icon icon="ep:select" class="mr-1px" /> 选择表达式
+      </el-button>
       <!-- 选择弹窗 -->
       <ProcessExpressionDialog ref="processExpressionDialogRef" @select="selectProcessExpression" />
     </el-form-item>

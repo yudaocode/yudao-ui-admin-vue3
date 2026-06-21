@@ -5,7 +5,7 @@
       :key="pointActivity.id"
       class="select-box spu-pic"
     >
-      <el-tooltip :content="pointActivity.name">
+      <el-tooltip :content="pointActivity.spuName">
         <div class="relative h-full w-full">
           <el-image :src="pointActivity.picUrl" class="h-full w-full" />
           <Icon
