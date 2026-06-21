@@ -78,7 +78,8 @@ const formData = ref({
   moveTime: undefined,
   remark: undefined,
   fileUrl: '',
-  items: []
+  items: [],
+  no: undefined
 })
 const formRules = reactive({
   moveTime: [{ required: true, message: '调度时间不能为空', trigger: 'blur' }]
@@ -140,8 +141,9 @@ const resetForm = () => {
     customerId: undefined,
     moveTime: undefined,
     remark: undefined,
-    fileUrl: undefined,
-    items: []
+    fileUrl: '',
+    items: [],
+    no: undefined
   }
   formRef.value?.resetFields()
 }

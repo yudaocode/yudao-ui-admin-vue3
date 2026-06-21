@@ -145,7 +145,11 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { FinanceReceiptApi, FinanceReceiptVO } from '@/api/erp/finance/receipt'
+import {
+  FinanceReceiptApi,
+  FinanceReceiptItemVO,
+  FinanceReceiptVO
+} from '@/api/erp/finance/receipt'
 import FinanceReceiptItemForm from './components/FinanceReceiptItemForm.vue'
 import { erpPriceInputFormatter } from '@/utils'
 import * as UserApi from '@/api/system/user'
@@ -173,7 +177,7 @@ const formData = ref({
   totalPrice: 0,
   discountPrice: 0,
   receiptPrice: 0,
-  items: [],
+  items: [] as FinanceReceiptItemVO[],
   no: undefined as string | undefined // 订单单号，后端返回
 })
 const formRules = reactive({
@@ -270,7 +274,7 @@ const resetForm = () => {
     totalPrice: 0,
     discountPrice: 0,
     receiptPrice: 0,
-    items: [],
+    items: [] as FinanceReceiptItemVO[],
     no: undefined as string | undefined
   }
   formRef.value?.resetFields()

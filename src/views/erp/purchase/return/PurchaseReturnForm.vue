@@ -172,7 +172,7 @@ import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
 import PurchaseOrderReturnEnableList from '@/views/erp/purchase/order/components/PurchaseOrderReturnEnableList.vue'
-import { PurchaseOrderVO } from '@/api/erp/purchase/order'
+import { PurchaseOrderItemVO, PurchaseOrderVO } from '@/api/erp/purchase/order'
 import * as UserApi from '@/api/system/user'
 
 /** ERP 采购退货表单 */
@@ -198,7 +198,7 @@ const formData = ref({
   totalPrice: 0,
   otherPrice: 0,
   orderNo: undefined as string | undefined,
-  items: [],
+  items: [] as PurchaseOrderItemVO[],
   no: undefined as string | undefined // 退货单号，后端返回
 })
 const formRules = reactive({
@@ -225,7 +225,9 @@ watch(
     // 计算
     const totalPrice = val.items.reduce((prev, curr) => prev + curr.totalPrice, 0)
     const discountPrice =
-      val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
+      val.discountPercent != null
+        ? (erpPriceMultiply(totalPrice, val.discountPercent / 100.0) ?? 0)
+        : 0
     formData.value.discountPrice = discountPrice
     formData.value.totalPrice = totalPrice - discountPrice + val.otherPrice
   },
@@ -272,12 +274,12 @@ const handlePurchaseOrderChange = (order: PurchaseOrderVO) => {
   formData.value.orderNo = order.no
   formData.value.supplierId = order.supplierId
   formData.value.accountId = order.accountId
-  formData.value.discountPercent = order.discountPercent
+  formData.value.discountPercent = order.discountPercent ?? 0
   formData.value.remark = order.remark
-  formData.value.fileUrl = order.fileUrl
+  formData.value.fileUrl = order.fileUrl ?? ''
   // 将订单项设置到退货单项
   order.items.forEach((item) => {
-    item.count = item.inCount - item.returnCount
+    item.count = (item.inCount ?? 0) - (item.returnCount ?? 0)
     item.orderItemId = item.id
     item.id = undefined
   })
@@ -324,7 +326,7 @@ const resetForm = () => {
     totalPrice: 0,
     otherPrice: 0,
     orderNo: undefined,
-    items: [],
+    items: [] as PurchaseOrderItemVO[],
     no: undefined
   }
   formRef.value?.resetFields()

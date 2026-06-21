@@ -153,7 +153,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { SaleOrderApi, SaleOrderVO } from '@/api/erp/sale/order'
+import { SaleOrderApi, SaleOrderItemVO, SaleOrderVO } from '@/api/erp/sale/order'
 import SaleOrderItemForm from './components/SaleOrderItemForm.vue'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
@@ -170,7 +170,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
-const formData = ref({
+const formData = ref<SaleOrderVO>({
   id: undefined as number | undefined,
   customerId: undefined as number | undefined,
   accountId: undefined as number | undefined,
@@ -182,7 +182,7 @@ const formData = ref({
   discountPrice: 0,
   totalPrice: 0,
   depositPrice: 0,
-  items: [],
+  items: [] as SaleOrderItemVO[],
   no: undefined as string | undefined // 订单单号，后端返回
 })
 const formRules = reactive({
@@ -208,7 +208,9 @@ watch(
     }
     const totalPrice = val.items.reduce((prev, curr) => prev + curr.totalPrice, 0)
     const discountPrice =
-      val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
+      val.discountPercent != null
+        ? (erpPriceMultiply(totalPrice, val.discountPercent / 100.0) ?? 0)
+        : 0
     formData.value.discountPrice = discountPrice
     formData.value.totalPrice = totalPrice - discountPrice
   },
@@ -282,7 +284,7 @@ const resetForm = () => {
     discountPrice: 0,
     totalPrice: 0,
     depositPrice: 0,
-    items: [],
+    items: [] as SaleOrderItemVO[],
     no: undefined
   }
   formRef.value?.resetFields()

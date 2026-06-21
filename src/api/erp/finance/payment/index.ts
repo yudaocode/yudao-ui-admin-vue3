@@ -11,6 +11,11 @@ export interface FinancePaymentVO {
   remark: string // 备注
 }
 
+// ERP 付款单项 VO
+export interface FinancePaymentItemVO {
+  paymentPrice: number // 本次付款金额，单位：元
+}
+
 // ERP 付款单 API
 export const FinancePaymentApi = {
   // 查询付款单分页

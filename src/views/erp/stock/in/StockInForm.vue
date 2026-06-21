@@ -97,7 +97,8 @@ const formData = ref({
   inTime: undefined,
   remark: undefined,
   fileUrl: '',
-  items: []
+  items: [],
+  no: undefined
 })
 const formRules = reactive({
   inTime: [{ required: true, message: '入库时间不能为空', trigger: 'blur' }]
@@ -162,8 +163,9 @@ const resetForm = () => {
     supplierId: undefined,
     inTime: undefined,
     remark: undefined,
-    fileUrl: undefined,
-    items: []
+    fileUrl: '',
+    items: [],
+    no: undefined
   }
   formRef.value?.resetFields()
 }

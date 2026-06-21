@@ -144,7 +144,7 @@
         <el-button
           type="danger"
           plain
-          @click="handleDelete(selectionList.map((item) => item.id))"
+          @click="handleDelete(selectionList.map((item) => item.id!))"
           v-hasPermi="['erp:purchase-order:delete']"
           :disabled="selectionList.length === 0"
         >
@@ -356,7 +356,7 @@ const handleDelete = async (ids: number[]) => {
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
-    selectionList.value = selectionList.value.filter((item) => !ids.includes(item.id))
+    selectionList.value = selectionList.value.filter((item) => !ids.includes(item.id!))
   } catch {}
 }
 

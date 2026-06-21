@@ -11,6 +11,11 @@ export interface FinanceReceiptVO {
   remark: string // 备注
 }
 
+// ERP 收款单项 VO
+export interface FinanceReceiptItemVO {
+  receiptPrice: number // 本次收款金额，单位：元
+}
+
 // ERP 收款单 API
 export const FinanceReceiptApi = {
   // 查询收款单分页
