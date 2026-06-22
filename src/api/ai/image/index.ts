@@ -31,7 +31,7 @@ export interface ImageDrawReqVO {
 export interface ImageMidjourneyImagineReqVO {
   prompt: string // 提示词
   modelId: number // 模型
-  base64Array: string[] // size不能为空
+  base64Array: string[] // 参考图 base64 列表
   width: string // 图片宽度
   height: string // 图片高度
   version: string // 版本
