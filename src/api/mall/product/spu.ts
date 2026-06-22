@@ -65,9 +65,9 @@ export const getSpuPage = (params: PageParam) => {
   return request.get({ url: '/product/spu/page', params })
 }
 
-// 获得 Spu 列表 tabsCount
-export const getTabsCount = () => {
-  return request.get({ url: '/product/spu/get-count' })
+// 获得 Spu 列表 tabsCount（支持按 name/categoryId/createTime 筛选）
+export const getTabsCount = (params?: any) => {
+  return request.get({ url: '/product/spu/get-count', params })
 }
 
 // 创建商品 Spu
