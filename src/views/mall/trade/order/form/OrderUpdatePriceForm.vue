@@ -31,18 +31,17 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
-  id: undefined, // 订单编号
+  id: undefined as number | undefined, // 订单编号
   adjustPrice: 0, // 订单调价
   payPrice: '', // 应付金额(总)
   newPayPrice: '' // 调价后应付金额(总)
 })
 watch(
   () => formData.value.adjustPrice,
-  (adjustPrice: number | string) => {
+  (adjustPrice) => {
     const numMatch = formData.value.payPrice.match(/\d+(\.\d+)?/)
     if (numMatch) {
       const payPriceNum = parseFloat(numMatch[0])
-      adjustPrice = typeof adjustPrice === 'string' ? parseFloat(adjustPrice) : adjustPrice
       formData.value.newPayPrice = (payPriceNum + adjustPrice).toFixed(2) + '元'
     }
   }
@@ -55,7 +54,7 @@ const open = async (row: TradeOrderApi.OrderVO) => {
   resetForm()
   formData.value.id = row.id!
   // 设置数据
-  formData.value.adjustPrice = formatToFraction(row.adjustPrice!)
+  formData.value.adjustPrice = Number(formatToFraction(row.adjustPrice!))
   formData.value.payPrice = floatToFixed2(row.payPrice!) + '元'
   formData.value.newPayPrice = formData.value.payPrice
   dialogVisible.value = true
@@ -68,10 +67,8 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = cloneDeep(unref(formData))
+    const { payPrice: _payPrice, newPayPrice: _newPayPrice, ...data } = cloneDeep(unref(formData))
     data.adjustPrice = convertToInteger(data.adjustPrice)
-    delete data.payPrice
-    delete data.newPayPrice
     await TradeOrderApi.updateOrderPrice(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false

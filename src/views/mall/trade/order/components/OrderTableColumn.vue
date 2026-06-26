@@ -195,6 +195,7 @@ const headerStyle = ({ row, columnIndex }: any) => {
       display: 'none'
     }
   }
+  return {}
 }
 
 interface SpanMethodProps {

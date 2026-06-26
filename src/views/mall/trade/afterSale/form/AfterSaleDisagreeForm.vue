@@ -26,7 +26,10 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formData = ref({
+const formData = ref<{
+  id: number | null | undefined
+  auditReason: string
+}>({
   id: undefined, // 售后订单编号
   auditReason: '' // 审批备注
 })
@@ -37,7 +40,7 @@ const open = async (row: AfterSaleApi.TradeAfterSaleVO) => {
   resetForm()
   // 设置数据
   formData.value.id = row.id
-  formData.value.auditReason = row.auditReason
+  formData.value.auditReason = row.auditReason || ''
   dialogVisible.value = true
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗

@@ -93,7 +93,7 @@ onMounted(async () => {
     close()
     return
   }
-  receivableId.value = id
+  receivableId.value = Number(id)
   await getReceivable(receivableId.value)
 })
 </script>

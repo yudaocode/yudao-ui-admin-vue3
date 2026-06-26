@@ -136,7 +136,7 @@
         </el-col>
         <el-col :span="8" v-if="formType !== 'create'">
           <el-form-item label="工单状态" prop="status">
-            <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="formData.status" />
+            <dict-tag :type="DICT_TYPE.MES_PRO_WORK_ORDER_STATUS" :value="formData.status ?? ''" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -250,19 +250,19 @@ const activeTab = ref('bom') // 当前选中的 Tab
 const formData = ref({
   id: undefined as number | undefined,
   parentId: undefined as number | undefined,
-  code: undefined,
-  name: undefined,
+  code: undefined as string | undefined,
+  name: undefined as string | undefined,
   type: undefined,
   orderSourceType: undefined,
-  orderSourceCode: undefined,
-  productId: undefined,
+  orderSourceCode: undefined as string | undefined,
+  productId: undefined as number | undefined,
   quantity: undefined,
-  clientId: undefined,
-  vendorId: undefined,
-  batchCode: undefined,
+  clientId: undefined as number | undefined,
+  vendorId: undefined as number | undefined,
+  batchCode: undefined as string | undefined,
   requestDate: undefined,
   status: undefined as number | undefined,
-  remark: undefined
+  remark: undefined as string | undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '工单编码不能为空', trigger: 'blur' }],
@@ -431,21 +431,21 @@ const handleFinish = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    parentId: undefined,
-    code: undefined,
-    name: undefined,
+    id: undefined as number | undefined,
+    parentId: undefined as number | undefined,
+    code: undefined as string | undefined,
+    name: undefined as string | undefined,
     type: undefined,
     orderSourceType: undefined,
-    orderSourceCode: undefined,
-    productId: undefined,
+    orderSourceCode: undefined as string | undefined,
+    productId: undefined as number | undefined,
     quantity: undefined,
-    clientId: undefined,
-    vendorId: undefined,
-    batchCode: undefined,
+    clientId: undefined as number | undefined,
+    vendorId: undefined as number | undefined,
+    batchCode: undefined as string | undefined,
     requestDate: undefined,
-    status: undefined,
-    remark: undefined
+    status: undefined as number | undefined,
+    remark: undefined as string | undefined
   }
   formRef.value?.resetFields()
 }

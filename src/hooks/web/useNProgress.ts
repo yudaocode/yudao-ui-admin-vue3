@@ -12,7 +12,7 @@ export const useNProgress = () => {
     await nextTick()
     const bar = document.getElementById('nprogress')?.getElementsByClassName('bar')[0] as ElRef
     if (bar) {
-      bar.style.background = unref(primaryColor.value)
+      bar.style.background = unref(primaryColor.value) || ''
     }
   }
 

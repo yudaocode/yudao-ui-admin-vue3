@@ -123,17 +123,18 @@
                 </el-col>
                 <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
                   <el-form-item>
-                    <XButton
+                    <el-button
                       :loading="loginLoading"
-                      :title="t('login.login')"
                       class="w-[100%]"
                       type="primary"
                       @click="getCode()"
-                    />
+                    >
+                      {{ t('login.login') }}
+                    </el-button>
                   </el-form-item>
                 </el-col>
                 <Verify
-                  v-if="loginData.captchaEnable === 'true'"
+                  v-if="loginData.captchaEnable"
                   ref="verify"
                   :captchaType="captchaType"
                   :imgSize="{ width: '400px', height: '200px' }"

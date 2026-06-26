@@ -53,8 +53,8 @@
           @click="openForm('create')"
           v-hasPermi="['system:sms-channel:create']"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增</el-button
-        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
         <el-button
           type="danger"
           plain
@@ -62,8 +62,8 @@
           @click="handleDeleteBatch"
           v-hasPermi="['system:sms-channel:delete']"
         >
-          <Icon icon="ep:delete" class="mr-5px" /> 批量删除</el-button
-        >
+          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>

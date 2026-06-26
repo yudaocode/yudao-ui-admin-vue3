@@ -104,7 +104,7 @@ const getSpuDetails = async (
     if (typeof products !== 'undefined') {
       const product = products.find((item) => item.skuId === sku.id)
       if (product) {
-        product.combinationPrice = formatToFraction(product.combinationPrice)
+        product.combinationPrice = Number(formatToFraction(product.combinationPrice))
       }
       config = product || config
     }

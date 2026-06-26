@@ -22,7 +22,7 @@
         IoTDataSpecsDataTypeEnum.INT,
         IoTDataSpecsDataTypeEnum.DOUBLE,
         IoTDataSpecsDataTypeEnum.FLOAT
-      ].includes(property.dataType || '')
+      ].includes(property.dataType as any)
     "
     v-model="property.dataSpecs"
   />
@@ -60,7 +60,11 @@
     label="数据长度"
     prop="property.dataSpecs.length"
   >
-    <el-input v-model="property.dataSpecs.length" class="w-255px!" placeholder="请输入文本字节长度">
+    <el-input
+      v-model="property.dataSpecs!['length']"
+      class="w-255px!"
+      placeholder="请输入文本字节长度"
+    >
       <template #append>字节</template>
     </el-input>
   </el-form-item>
@@ -134,7 +138,7 @@ const handleChange = (dataType: any) => {
     IoTDataSpecsDataTypeEnum.ENUM,
     IoTDataSpecsDataTypeEnum.BOOL,
     IoTDataSpecsDataTypeEnum.STRUCT
-  ].includes(dataType) && (property.value.dataSpecs.dataType = dataType)
+  ].includes(dataType) && (property.value.dataSpecs!.dataType = dataType)
   switch (dataType) {
     case IoTDataSpecsDataTypeEnum.ENUM:
       property.value.dataSpecsList.push({

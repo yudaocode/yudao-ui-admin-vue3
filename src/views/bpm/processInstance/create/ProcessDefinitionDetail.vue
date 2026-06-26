@@ -84,7 +84,7 @@ import {
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from '../detail/ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
-import type { ApiAttrs } from '@form-create/element-ui/types/config'
+import type { Api as FormCreateApi } from '@form-create/element-ui'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
@@ -106,7 +106,7 @@ const detailForm: any = ref({
   option: {},
   value: {}
 }) // 流程表单详情
-const fApi = ref<ApiAttrs>()
+const fApi = ref<FormCreateApi>()
 // 指定审批人
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
@@ -235,12 +235,10 @@ const getApprovalDetail = async (row: any) => {
 const setFieldPermission = (field: string, permission: string) => {
   if (permission === FieldPermissionType.READ) {
     // 1. 设置字段为只读
-    //@ts-ignore
     fApi.value?.disabled(true, field)
     // 2. 只读字段， 去掉验证规则
     //  fApi.value?.updateValidate(field, []); 这个方法貌似不起作用，
     try {
-      //@ts-ignore
       const rule = fApi.value?.getRule(field)
       if (rule) {
         // 必填验证设置为false
@@ -255,11 +253,9 @@ const setFieldPermission = (field: string, permission: string) => {
     }
   }
   if (permission === FieldPermissionType.WRITE) {
-    //@ts-ignore
     fApi.value?.disabled(false, field)
   }
   if (permission === FieldPermissionType.NONE) {
-    //@ts-ignore
     fApi.value?.hidden(true, field)
   }
 }

@@ -22,7 +22,7 @@ const props = defineProps({
     default: () => []
   },
   trigger: {
-    type: String as PropType<'click' | 'hover' | 'focus' | 'contextmenu'>,
+    type: String as PropType<'click' | 'hover' | 'contextmenu'>,
     default: 'contextmenu'
   },
   tagItem: {

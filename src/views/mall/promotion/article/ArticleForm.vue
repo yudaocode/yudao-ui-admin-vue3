@@ -50,7 +50,7 @@
             <el-radio-group v-model="formData.status">
               <el-radio
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-                :key="dict.value"
+                :key="String(dict.value)"
                 :value="dict.value"
               >
                 {{ dict.label }}
@@ -63,7 +63,7 @@
             <el-radio-group v-model="formData.recommendHot">
               <el-radio
                 v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-                :key="dict.value"
+                :key="String(dict.value)"
                 :value="dict.value"
               >
                 {{ dict.label }}
@@ -76,7 +76,7 @@
             <el-radio-group v-model="formData.recommendBanner">
               <el-radio
                 v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-                :key="dict.value"
+                :key="String(dict.value)"
                 :value="dict.value"
               >
                 {{ dict.label }}

@@ -47,8 +47,8 @@
           @click="openForm('create')"
           v-hasPermi="['system:mail-account:create']"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增</el-button
-        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
         <el-button
           type="danger"
           plain
@@ -190,7 +190,7 @@ const handleDelete = async (id: number) => {
 /** 批量删除按钮操作 */
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (rows: MailAccountApi.MailAccountVO[]) => {
-  checkedIds.value = rows.map((row) => row.id)
+  checkedIds.value = rows.map((row) => row.id!)
 }
 
 const handleDeleteBatch = async () => {

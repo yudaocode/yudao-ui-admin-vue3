@@ -1,14 +1,18 @@
 import request from '@/config/axios'
 
 export interface BusinessStatusTypeVO {
-  id: number
+  id?: number
   name: string
   deptIds: number[]
-  statuses?: {
-    id: number
-    name: string
-    percent: number
-  }
+  statuses: BusinessStatusVO[]
+}
+
+export interface BusinessStatusVO {
+  id?: number
+  name: string
+  percent?: number
+  endStatus?: number
+  key?: string
 }
 
 export const DEFAULT_STATUSES = [
@@ -30,7 +34,7 @@ export const DEFAULT_STATUSES = [
     name: '无效',
     percent: 0
   }
-]
+] satisfies BusinessStatusVO[]
 
 // 查询商机状态组列表
 export const getBusinessStatusPage = async (params: any) => {

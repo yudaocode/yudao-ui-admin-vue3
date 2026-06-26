@@ -58,7 +58,7 @@ const canAdd = computed(() => {
   return Activitys.value.length < props.limit
 })
 
-// 拼团活动列表
+// 秒杀活动列表
 const Activitys = ref<SeckillActivityApi.SeckillActivityVO[]>([])
 
 watch(

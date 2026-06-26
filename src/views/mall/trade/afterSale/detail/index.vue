@@ -4,10 +4,10 @@
     <el-descriptions title="订单信息">
       <el-descriptions-item label="订单号: ">{{ formData.orderNo }}</el-descriptions-item>
       <el-descriptions-item label="配送方式: ">
-        <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="formData.order.deliveryType" />
+        <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="formData.order.deliveryType!" />
       </el-descriptions-item>
       <el-descriptions-item label="订单类型: ">
-        <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="formData.order.type" />
+        <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="formData.order.type!" />
       </el-descriptions-item>
       <el-descriptions-item label="收货人: ">
         {{ formData.order.receiverName }}
@@ -16,7 +16,7 @@
         {{ formData.order.userRemark }}
       </el-descriptions-item>
       <el-descriptions-item label="订单来源: ">
-        <dict-tag :type="DICT_TYPE.TERMINAL" :value="formData.order.terminal" />
+        <dict-tag :type="DICT_TYPE.TERMINAL" :value="formData.order.terminal!" />
       </el-descriptions-item>
       <el-descriptions-item label="联系电话: ">
         {{ formData.order.receiverMobile }}
@@ -26,7 +26,7 @@
         {{ formData.order.payOrderId }}
       </el-descriptions-item>
       <el-descriptions-item label="付款方式: ">
-        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="formData.order.payChannelCode" />
+        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="formData.order.payChannelCode!" />
       </el-descriptions-item>
       <el-descriptions-item label="买家: ">{{ formData?.user?.nickname }}</el-descriptions-item>
     </el-descriptions>
@@ -38,13 +38,13 @@
         {{ formatDate(formData.auditTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="售后类型: ">
-        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_TYPE" :value="formData.type" />
+        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_TYPE" :value="formData.type!" />
       </el-descriptions-item>
       <el-descriptions-item label="售后方式: ">
-        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_WAY" :value="formData.way" />
+        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_WAY" :value="formData.way!" />
       </el-descriptions-item>
       <el-descriptions-item label="退款金额: ">
-        {{ fenToYuan(formData.refundPrice) }}
+        {{ fenToYuan(formData.refundPrice!) }}
       </el-descriptions-item>
       <el-descriptions-item label="退款原因: ">{{ formData.applyReason }}</el-descriptions-item>
       <el-descriptions-item label="补充描述: ">
@@ -52,11 +52,12 @@
       </el-descriptions-item>
       <el-descriptions-item label="凭证图片: ">
         <el-image
-          v-for="(item, index) in formData.applyPicUrls"
+          v-for="(item, index) in formData.applyPicUrls || []"
           :key="index"
-          :src="item.url"
+          :src="item"
+          :preview-src-list="formData.applyPicUrls || []"
           class="mr-10px h-60px w-60px"
-          @click="imagePreview(formData.applyPicUrls)"
+          preview-teleported
         />
       </el-descriptions-item>
     </el-descriptions>
@@ -64,7 +65,7 @@
     <!-- 退款状态 -->
     <el-descriptions :column="1" title="退款状态">
       <el-descriptions-item label="退款状态: ">
-        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS" :value="formData.status" />
+        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS" :value="formData.status!" />
       </el-descriptions-item>
       <el-descriptions-item label-class-name="no-colon">
         <el-button v-if="formData.status === 10" type="primary" @click="agree">同意售后</el-button>
@@ -132,10 +133,10 @@
             </div>
             <template #dot>
               <span
-                :style="{ backgroundColor: getUserTypeColor(saleLog.userType) }"
+                :style="{ backgroundColor: getUserTypeColor(saleLog.userType ?? 0) }"
                 class="dot-node-style"
               >
-                {{ getDictLabel(DICT_TYPE.USER_TYPE, saleLog.userType)[0] || '系' }}
+                {{ getDictLabel(DICT_TYPE.USER_TYPE, saleLog.userType ?? 0)[0] || '系' }}
               </span>
             </template>
           </el-timeline-item>
@@ -153,8 +154,6 @@ import { fenToYuan } from '@/utils'
 import { DICT_TYPE, getDictLabel, getDictObj } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import UpdateAuditReasonForm from '@/views/mall/trade/afterSale/form/AfterSaleDisagreeForm.vue'
-import { createImageViewer } from '@/components/ImageViewer'
-import { isArray } from '@/utils/is'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 
 defineOptions({ name: 'TradeAfterSaleDetail' })
@@ -163,10 +162,10 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 查询参数
 const { push, currentRoute } = useRouter() // 路由
-const formData = ref({
+const formData = ref<AfterSaleApi.TradeAfterSaleDetailVO>({
   order: {},
   logs: []
-})
+} as AfterSaleApi.TradeAfterSaleDetailVO)
 const updateAuditReasonFormRef = ref() // 拒绝售后表单 Ref
 
 /** 获得 userType 颜色 */
@@ -187,7 +186,7 @@ const getUserTypeColor = (type: number) => {
 
 /** 获得详情 */
 const getDetail = async () => {
-  const id = params.id as unknown as number
+  const id = Number(params.id)
   if (id) {
     const res = await AfterSaleApi.getAfterSale(id)
     // 没有表单信息则关闭页面返回
@@ -252,20 +251,6 @@ const refund = async () => {
   } catch {}
 }
 
-/** 图片预览 */
-const imagePreview = (args) => {
-  const urlList = []
-  if (isArray(args)) {
-    args.forEach((item) => {
-      urlList.push(item.url)
-    })
-  } else {
-    urlList.push(args)
-  }
-  createImageViewer({
-    urlList
-  })
-}
 const { delView } = useTagsViewStore() // 视图操作
 /** 关闭 tag */
 const close = () => {

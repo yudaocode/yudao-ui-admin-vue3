@@ -1,12 +1,12 @@
 import request from '@/config/axios'
 
 export interface DictTypeVO {
-  id: number
+  id?: number
   name: string
   type: string
   status: number
   remark: string
-  createTime: Date
+  createTime?: Date
 }
 
 // 查询字典（精简)列表

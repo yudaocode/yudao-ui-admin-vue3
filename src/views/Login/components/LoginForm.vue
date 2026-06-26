@@ -69,13 +69,9 @@
       </el-col>
       <el-col :span="24" class="px-10px">
         <el-form-item>
-          <XButton
-            :loading="loginLoading"
-            :title="t('login.login')"
-            class="w-full"
-            type="primary"
-            @click="getCode()"
-          />
+          <el-button :loading="loginLoading" class="w-full" type="primary" @click="getCode()">
+            {{ t('login.login') }}
+          </el-button>
         </el-form-item>
       </el-col>
       <Verify
@@ -90,25 +86,19 @@
         <el-form-item>
           <el-row :gutter="5" justify="space-between" style="width: 100%">
             <el-col :span="8">
-              <XButton
-                :title="t('login.btnMobile')"
-                class="w-full"
-                @click="setLoginState(LoginStateEnum.MOBILE)"
-              />
+              <el-button class="w-full" @click="setLoginState(LoginStateEnum.MOBILE)">
+                {{ t('login.btnMobile') }}
+              </el-button>
             </el-col>
             <el-col :span="8">
-              <XButton
-                :title="t('login.btnQRCode')"
-                class="w-full"
-                @click="setLoginState(LoginStateEnum.QR_CODE)"
-              />
+              <el-button class="w-full" @click="setLoginState(LoginStateEnum.QR_CODE)">
+                {{ t('login.btnQRCode') }}
+              </el-button>
             </el-col>
             <el-col :span="8">
-              <XButton
-                :title="t('login.btnRegister')"
-                class="w-full"
-                @click="setLoginState(LoginStateEnum.REGISTER)"
-              />
+              <el-button class="w-full" @click="setLoginState(LoginStateEnum.REGISTER)">
+                {{ t('login.btnRegister') }}
+              </el-button>
             </el-col>
           </el-row>
         </el-form-item>

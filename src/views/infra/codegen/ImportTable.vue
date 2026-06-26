@@ -12,7 +12,7 @@
             v-for="config in dataSourceConfigList"
             :key="config.id"
             :label="config.name"
-            :value="config.id"
+            :value="config.id!"
           />
         </el-select>
       </el-form-item>

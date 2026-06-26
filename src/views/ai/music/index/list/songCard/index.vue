@@ -25,18 +25,17 @@
 </template>
 
 <script lang="ts" setup>
+import { currentSongKey, type MusicSong } from '../types'
+
 defineOptions({ name: 'Index' })
 
-defineProps({
-  songInfo: {
-    type: Object,
-    default: () => ({})
-  }
+withDefaults(defineProps<{ songInfo?: MusicSong }>(), {
+  songInfo: () => ({})
 })
 
 const emits = defineEmits(['play'])
 
-const currentSong = inject('currentSong', {})
+const currentSong = inject(currentSongKey, ref<MusicSong>({}))
 
 function playSong() {
   emits('play')

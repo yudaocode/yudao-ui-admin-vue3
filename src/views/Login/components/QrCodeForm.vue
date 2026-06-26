@@ -11,7 +11,7 @@
     <el-divider class="enter-x">{{ t('login.qrcode') }}</el-divider>
     <el-col :span="24" class="px-10px">
       <div class="mt-4 w-full">
-        <XButton :title="t('login.backLogin')" class="w-full" @click="handleBackLogin()" />
+        <el-button class="w-full" @click="handleBackLogin()">{{ t('login.backLogin') }}</el-button>
       </div>
     </el-col>
   </el-row>

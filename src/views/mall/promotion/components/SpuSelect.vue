@@ -150,7 +150,7 @@ const spuListRef = ref<InstanceType<typeof ElTable>>()
 const skuListRef = ref<InstanceType<typeof SkuList>>() // 商品属性选择 Ref
 const spuData = ref<ProductSpuApi.Spu>() // 商品详情
 const isExpand = ref(false) // 控制 SKU 列表显示
-const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
+const expandRowKeys = ref<string[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
 
 //============ 商品选择相关 ============
 const selectedSpuId = ref<number>(0) // 选中的商品 spuId
@@ -210,7 +210,7 @@ const expandChange = async (row: ProductSpuApi.Spu, expandedRows?: ProductSpuApi
   if (selectedSpuId.value !== 0) {
     if (row.id !== selectedSpuId.value) {
       message.warning('你已选择商品请先取消')
-      expandRowKeys.value = [selectedSpuId.value]
+      expandRowKeys.value = [String(selectedSpuId.value)]
       return
     }
     // 如果已展开 skuList 则选择此对应的 spu 不需要重新获取渲染 skuList
@@ -238,7 +238,7 @@ const expandChange = async (row: ProductSpuApi.Spu, expandedRows?: ProductSpuApi
   propertyList.value = getPropertyList(res)
   spuData.value = res
   isExpand.value = true
-  expandRowKeys.value = [row.id!]
+  expandRowKeys.value = [String(row.id!)]
 }
 
 // 确认选择时的触发事件

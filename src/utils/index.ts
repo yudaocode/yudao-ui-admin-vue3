@@ -377,6 +377,13 @@ export const fenToYuan = (price: string | number): string => {
 }
 
 /**
+ * 分转元，返回数字
+ */
+export const fenToYuanNumber = (price: string | number): number => {
+  return Number(fenToYuan(price))
+}
+
+/**
  * 计算环比
  *
  * @param value 当前数值

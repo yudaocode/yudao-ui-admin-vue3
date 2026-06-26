@@ -179,7 +179,7 @@ const dialogVisible = ref(false)
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
-  name: null,
+  name: undefined as string | undefined,
   status: undefined
 })
 
@@ -235,8 +235,8 @@ const resetQuery = () => {
   queryParams.value = {
     pageNo: 1,
     pageSize: 10,
-    name: '',
-    createTime: []
+    name: undefined,
+    status: undefined
   }
   getList()
 }

@@ -117,7 +117,7 @@ const queryParams = reactive({
   pageSize: 10,
   createTime: [],
   status: undefined,
-  userIds: undefined
+  userIds: undefined as number | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -183,7 +183,7 @@ onMounted(() => {
   for (const dict of getIntDictOptions(DICT_TYPE.PROMOTION_COUPON_STATUS)) {
     statusTabs.push({
       label: dict.label,
-      value: dict.value as string
+      value: String(dict.value)
     })
   }
 })

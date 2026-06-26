@@ -29,70 +29,36 @@ export interface RefundVO {
   createTime: Date
 }
 
-export interface RefundPageReqVO extends PageParam {
-  merchantId?: number
-  appId?: number
-  channelId?: number
-  channelCode?: string
-  orderId?: string
-  tradeNo?: string
+export interface RefundDetailVO {
+  merchantRefundId?: string
+  channelRefundNo?: string
   merchantOrderId?: string
-  merchantRefundNo?: string
-  notifyUrl?: string
-  notifyStatus?: number
+  channelOrderNo?: string
+  appId?: number
+  appName?: string
+  payPrice?: number
+  refundPrice?: number
   status?: number
-  type?: number
-  payAmount?: number
-  refundAmount?: number
+  successTime?: Date
+  createTime?: Date
+  updateTime?: Date
+  channelCode?: string
   reason?: string
   userIp?: string
-  channelOrderNo?: string
-  channelRefundNo?: string
-  channelErrorCode?: string
-  channelErrorMsg?: string
-  channelExtras?: string
-  expireTime?: Date[]
-  successTime?: Date[]
-  notifyTime?: Date[]
-  createTime?: Date[]
-}
-
-export interface PayRefundExportReqVO {
-  merchantId?: number
-  appId?: number
-  channelId?: number
-  channelCode?: string
-  orderId?: string
-  tradeNo?: string
-  merchantOrderId?: string
-  merchantRefundNo?: string
   notifyUrl?: string
-  notifyStatus?: number
-  status?: number
-  type?: number
-  payAmount?: number
-  refundAmount?: number
-  reason?: string
-  userIp?: string
-  channelOrderNo?: string
-  channelRefundNo?: string
   channelErrorCode?: string
   channelErrorMsg?: string
-  channelExtras?: string
-  expireTime?: Date[]
-  successTime?: Date[]
-  notifyTime?: Date[]
-  createTime?: Date[]
+  channelNotifyData?: string
 }
 
 // 查询列表退款订单
-export const getRefundPage = (params: RefundPageReqVO) => {
-  return request.get({ url: '/pay/refund/page', params })
+export const getRefundPage = (params: any) => {
+  return request.get<PageResult<RefundDetailVO[]>>({ url: '/pay/refund/page', params })
 }
 
 // 查询详情退款订单
 export const getRefund = (id: number) => {
-  return request.get({ url: '/pay/refund/get?id=' + id })
+  return request.get<RefundDetailVO>({ url: '/pay/refund/get?id=' + id })
 }
 
 // 新增退款订单
@@ -111,6 +77,6 @@ export const deleteRefund = (id: number) => {
 }
 
 // 导出退款订单
-export const exportRefund = (params: PayRefundExportReqVO) => {
+export const exportRefund = (params: any) => {
   return request.download({ url: '/pay/refund/export-excel', params })
 }

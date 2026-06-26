@@ -30,8 +30,8 @@ const { t } = useI18n() // 国际化
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
-  id: undefined,
-  replyContent: undefined
+  id: undefined as number | undefined,
+  replyContent: undefined as string | undefined
 })
 const formRules = reactive({
   replyContent: [{ required: true, message: '回复内容不能为空', trigger: 'blur' }]

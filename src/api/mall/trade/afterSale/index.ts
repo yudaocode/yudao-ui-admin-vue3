@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import type { OrderItemRespVO, OrderVO } from '@/api/mall/trade/order'
 
 export interface TradeAfterSaleVO {
   id?: number | null // 售后编号，主键自增
@@ -32,6 +33,21 @@ export interface TradeAfterSaleVO {
   receiveReason?: string // 收货备注
 }
 
+export interface TradeAfterSaleDetailVO extends TradeAfterSaleVO {
+  order: OrderVO
+  orderItem?: OrderItemRespVO
+  user?: {
+    id?: number
+    nickname?: string
+  }
+  logs: Array<{
+    id?: number
+    createTime?: Date
+    content?: string
+    userType?: number
+  }>
+}
+
 export interface ProductPropertiesVO {
   propertyId?: number | null // 属性的编号
   propertyName?: string // 属性的名称
@@ -41,12 +57,15 @@ export interface ProductPropertiesVO {
 
 // 获得交易售后分页
 export const getAfterSalePage = async (params) => {
-  return await request.get({ url: `/trade/after-sale/page`, params })
+  return await request.get<PageResult<TradeAfterSaleVO[]>>({
+    url: `/trade/after-sale/page`,
+    params
+  })
 }
 
 // 获得交易售后详情
 export const getAfterSale = async (id: any) => {
-  return await request.get({ url: `/trade/after-sale/get-detail?id=${id}` })
+  return await request.get<TradeAfterSaleDetailVO>({ url: `/trade/after-sale/get-detail?id=${id}` })
 }
 
 // 同意售后

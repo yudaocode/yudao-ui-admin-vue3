@@ -138,7 +138,7 @@ const resetForm = () => {
 /** 查询推广员和分销员 */
 const userInfo = reactive<{
   bindUser: BrokerageUserApi.BrokerageUserVO | undefined
-  user: BrokerageUserApi.BrokerageUserVO | undefined
+  user: UserApi.UserVO | undefined
 }>({
   bindUser: undefined,
   user: undefined
@@ -154,7 +154,11 @@ const handleGetUser = async (id: any, userType: string) => {
   }
   const user =
     userType === '推广员' ? await BrokerageUserApi.getBrokerageUser(id) : await UserApi.getUser(id)
-  userType === '推广员' ? (userInfo.bindUser = user) : (userInfo.user = user)
+  if (userType === '推广员') {
+    userInfo.bindUser = user as BrokerageUserApi.BrokerageUserVO
+  } else {
+    userInfo.user = user as UserApi.UserVO
+  }
   if (!user) {
     message.warning(`${userType}不存在`)
   }

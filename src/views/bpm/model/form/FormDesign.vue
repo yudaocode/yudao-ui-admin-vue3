@@ -85,13 +85,11 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { BpmModelFormType } from '@/utils/constants'
+import type { Rule } from '@form-create/element-ui'
 
-const props = defineProps({
-  formList: {
-    type: Array,
-    required: true
-  }
-})
+defineProps<{
+  formList: FormApi.FormVO[]
+}>()
 
 const formRef = ref()
 
@@ -101,7 +99,7 @@ const modelData = defineModel<any>()
 // 表单预览数据
 const formPreview = ref({
   formData: {},
-  rule: [],
+  rule: [] as Rule[],
   option: {
     submitBtn: false,
     resetBtn: false,
@@ -117,7 +115,7 @@ watch(
       const data = await FormApi.getForm(newFormId)
       setConfAndFields2(formPreview.value, data.conf, data.fields)
       // 设置只读
-      formPreview.value.rule.forEach((item: any) => {
+      formPreview.value.rule.forEach((item) => {
         item.props = { ...item.props, disabled: true }
       })
     } else {

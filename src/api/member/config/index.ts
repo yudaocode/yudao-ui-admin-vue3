@@ -1,8 +1,8 @@
 import request from '@/config/axios'
 
 export interface ConfigVO {
-  id: number
-  pointTradeDeductEnable: number
+  id?: number
+  pointTradeDeductEnable: boolean
   pointTradeDeductUnitPrice: number
   pointTradeDeductMaxPrice: number
   pointTradeGivePoint: number
@@ -10,7 +10,7 @@ export interface ConfigVO {
 
 // 查询积分设置详情
 export const getConfig = async () => {
-  return await request.get({ url: `/member/config/get` })
+  return await request.get<ConfigVO>({ url: `/member/config/get` })
 }
 
 // 新增修改积分设置

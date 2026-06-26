@@ -5,7 +5,12 @@
       <el-table-column key="id" align="center" label="商品编号" width="180" prop="id" />
       <el-table-column label="商品图" min-width="80">
         <template #default="{ row }">
-          <el-image :src="row.picUrl" class="h-30px w-30px" @click="imagePreview(row.picUrl)" />
+          <el-image
+            :src="row.picUrl"
+            :preview-src-list="row.picUrl ? [row.picUrl] : []"
+            class="h-30px w-30px"
+            preview-teleported
+          />
         </template>
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" label="商品名称" min-width="300" prop="name" />
@@ -44,7 +49,7 @@ import { floatToFixed2 } from '@/utils'
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<FavoriteApi.Favorite[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,

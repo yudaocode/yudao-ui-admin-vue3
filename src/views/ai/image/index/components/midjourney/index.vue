@@ -199,6 +199,7 @@ const handleGenerateImage = async () => {
     const req = {
       prompt: prompt.value,
       modelId: matchedModel.id,
+      base64Array: [],
       width: imageSize.width,
       height: imageSize.height,
       version: selectVersion.value,

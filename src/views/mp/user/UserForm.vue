@@ -45,11 +45,11 @@ const formData = ref({
   id: undefined,
   nickname: undefined,
   remark: undefined,
-  tagIds: []
+  tagIds: [] as number[]
 })
 const formRules = reactive({}) // 表单的校验
 const formRef = ref() // 表单 Ref
-const tagList = ref([]) // 公众号标签列表
+const tagList = ref<MpTagApi.SimpleTagVO[]>([]) // 公众号标签列表
 
 /** 打开弹窗 */
 const open = async (id: number) => {
@@ -95,7 +95,7 @@ const resetForm = () => {
     id: undefined,
     nickname: undefined,
     remark: undefined,
-    tagIds: []
+    tagIds: [] as number[]
   }
   formRef.value?.resetFields()
 }

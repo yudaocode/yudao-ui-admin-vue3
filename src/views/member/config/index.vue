@@ -66,7 +66,7 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formData = ref({
+const formData = ref<ConfigApi.ConfigVO>({
   id: undefined,
   pointTradeDeductEnable: true,
   pointTradeDeductUnitPrice: 0,
@@ -76,9 +76,9 @@ const formData = ref({
 
 // 创建一个计算属性，用于将 pointTradeDeductUnitPrice 显示为带两位小数的形式
 const computedPointTradeDeductUnitPrice = computed({
-  get: () => (formData.value.pointTradeDeductUnitPrice / 100).toFixed(2),
-  set: (newValue: number) => {
-    formData.value.pointTradeDeductUnitPrice = Math.round(newValue * 100)
+  get: () => formData.value.pointTradeDeductUnitPrice / 100,
+  set: (newValue?: number) => {
+    formData.value.pointTradeDeductUnitPrice = Math.round((newValue ?? 0) * 100)
   }
 })
 
@@ -94,7 +94,7 @@ const onSubmit = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ConfigApi.ConfigVO
+    const data = formData.value
     await ConfigApi.saveConfig(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false

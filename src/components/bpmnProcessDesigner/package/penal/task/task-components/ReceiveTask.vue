@@ -17,12 +17,9 @@
             :key="key"
           />
         </el-select>
-        <XButton
-          type="primary"
-          preIcon="ep:plus"
-          style="margin-left: 8px"
-          @click="openMessageModel"
-        />
+        <el-button type="primary" style="margin-left: 8px" @click="openMessageModel">
+          <Icon icon="ep:plus" class="mr-1px" />
+        </el-button>
       </div>
     </el-form-item>
     <el-dialog

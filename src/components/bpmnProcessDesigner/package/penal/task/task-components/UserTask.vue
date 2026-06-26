@@ -65,7 +65,12 @@
         style="width: 100%"
         @change="updateElementTask"
       >
-        <el-option v-for="item in postOptions" :key="item.id" :label="item.name" :value="item.id" />
+        <el-option
+          v-for="item in postOptions"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id!"
+        />
       </el-select>
     </el-form-item>
     <el-form-item
@@ -181,14 +186,14 @@
         style="width: 100%"
         @change="updateElementTask"
       />
-      <XButton
+      <el-button
         class="!w-1/1 mt-5px"
         type="success"
-        preIcon="ep:select"
-        title="选择表达式"
         size="small"
         @click="openProcessExpressionDialog"
-      />
+      >
+        <Icon icon="ep:select" class="mr-1px" /> 选择表达式
+      </el-button>
       <!-- 选择弹窗 -->
       <ProcessExpressionDialog ref="processExpressionDialogRef" @select="selectProcessExpression" />
     </el-form-item>
@@ -228,7 +233,13 @@ const props = defineProps({
   type: String
 })
 const prefix = inject('prefix')
-const userTaskForm = ref({
+type CandidateParam = Array<string | number> | string | number
+type UserTaskForm = {
+  candidateStrategy?: CandidateStrategy
+  candidateParam: CandidateParam
+  skipExpression: string
+}
+const userTaskForm = ref<UserTaskForm>({
   candidateStrategy: undefined, // 分配规则
   candidateParam: [], // 分配选项
   skipExpression: '' // 跳过表达式
@@ -399,13 +410,6 @@ const updateElementTask = () => {
   })
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
     extensionElements: extensions
-  })
-
-  // 改用通过extensionElements来存储数据
-  return
-  bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
-    candidateStrategy: userTaskForm.value.candidateStrategy,
-    candidateParam: userTaskForm.value.candidateParam.join(',')
   })
 }
 

@@ -313,7 +313,7 @@ const ensureDeviceStatusDefaults = () => {
  * @param value 字段值
  */
 const updateConditionField = (field: keyof Trigger, value: any) => {
-  condition.value[field] = value
+  Object.assign(condition.value, { [field]: value })
   nextTick(() => {
     innerFormRef.value?.validateField(field as string).catch(() => {})
   })

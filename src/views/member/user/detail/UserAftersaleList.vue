@@ -213,14 +213,12 @@ const getList = async () => {
   try {
     const data = cloneDeep(queryParams.value)
     // 处理掉全部的状态，不传就是全部
-    if (data.status === '0') {
-      delete data.status
-    }
+    const queryData = data.status === '0' ? (({ status: _status, ...rest }) => rest)(data) : data
     // 执行查询
     if (props.userId) {
-      data.userId = props.userId as any
+      queryData.userId = props.userId as any
     }
-    const res = await AfterSaleApi.getAfterSalePage(data)
+    const res = await AfterSaleApi.getAfterSalePage(queryData)
     list.value = res.list as AfterSaleApi.TradeAfterSaleVO[]
     total.value = res.total
   } finally {

@@ -163,7 +163,11 @@
       <el-table-column label="转账标题" align="center" prop="subject" width="120" />
       <el-table-column label="转账渠道" align="center" prop="channelCode">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="scope.row.channelCode" />
+          <dict-tag
+            v-if="scope.row.channelCode"
+            :type="DICT_TYPE.PAY_CHANNEL_CODE"
+            :value="scope.row.channelCode"
+          />
         </template>
       </el-table-column>
       <el-table-column
@@ -203,23 +207,25 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<TransferApi.TransferVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  no: null,
-  appId: null,
-  channelId: null,
-  channelCode: null,
-  merchantTransferId: null,
-  type: null,
-  status: null,
-  successTime: [],
-  price: null,
-  subject: null,
-  userName: null,
-  userAccount: null,
-  createTime: []
+  no: null as string | null,
+  appId: null as number | null,
+  channelId: null as number | null,
+  channelCode: null as string | null,
+  merchantTransferId: null as string | null,
+  type: null as string | null,
+  status: null as number | null,
+  successTime: [] as string[],
+  price: null as number | null,
+  subject: null as string | null,
+  userName: null as string | null,
+  userAccount: null as string | null,
+  accountNo: null as string | null,
+  channelTransferNo: null as string | null,
+  createTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中

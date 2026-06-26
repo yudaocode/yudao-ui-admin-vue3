@@ -106,7 +106,7 @@ const onAccountChanged = (id: number) => {
 }
 
 // 关闭弹窗
-const onBeforeDialogClose = async (onDone: () => {}) => {
+const onBeforeDialogClose = async (onDone: () => void) => {
   try {
     await message.confirm('修改内容可能还未保存，确定关闭吗?')
     onDone()

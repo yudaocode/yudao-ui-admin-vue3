@@ -8,7 +8,7 @@
     "i": "pnpm install",
     "dev": "vite --mode env.local",
     "dev-server": "vite --mode dev",
-    "ts:check": "node --max_old_space_size=8192 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit",
+    "ts:check": "node --max_old_space_size=8192 ./node_modules/vue-tsc/bin/vue-tsc.js --noEmit --incremental --tsBuildInfoFile node_modules/.cache/vue-tsc/tsconfig.tsbuildinfo",
     "build:local": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite.js build --mode env.local",
     "build:dev": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite.js build --mode dev",
     "build:test": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite.js build --mode test",

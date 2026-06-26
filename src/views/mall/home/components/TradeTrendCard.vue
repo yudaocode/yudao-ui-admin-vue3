@@ -21,7 +21,7 @@
 import dayjs, { Dayjs } from 'dayjs'
 import { EChartsOption } from 'echarts'
 import * as TradeStatisticsApi from '@/api/mall/statistics/trade'
-import { fenToYuan } from '@/utils'
+import { fenToYuanNumber } from '@/utils'
 import { formatDate } from '@/utils/formatTime'
 import { CardTitle } from '@/components/Card'
 
@@ -185,11 +185,11 @@ const getOrderCountTrendComparison = async (
   for (let item of list) {
     dates.push(item.value.date)
     if (series.length === 2) {
-      series[0].data.push(fenToYuan(item?.value?.orderPayPrice || 0)) // 当前金额
+      series[0].data.push(fenToYuanNumber(item?.value?.orderPayPrice || 0)) // 当前金额
       series[1].data.push(item?.value?.orderPayCount || 0) // 当前数量
     } else {
-      series[0].data.push(fenToYuan(item?.reference?.orderPayPrice || 0)) // 对照金额
-      series[1].data.push(fenToYuan(item?.value?.orderPayPrice || 0)) // 当前金额
+      series[0].data.push(fenToYuanNumber(item?.reference?.orderPayPrice || 0)) // 对照金额
+      series[1].data.push(fenToYuanNumber(item?.value?.orderPayPrice || 0)) // 当前金额
       series[2].data.push(item?.reference?.orderPayCount || 0) // 对照数量
       series[3].data.push(item?.value?.orderPayCount || 0) // 当前数量
     }
@@ -197,7 +197,7 @@ const getOrderCountTrendComparison = async (
   eChartOptions.xAxis!['data'] = dates
   eChartOptions.series = series
   // legend 在 4 个切换到 2 个的时候，还是显示成 4 个，需要手动配置一下
-  eChartOptions.legend['data'] = series.map((item) => item.name)
+  ;(eChartOptions.legend as Record<string, unknown>)['data'] = series.map((item) => item.name)
   loading.value = false
 }
 

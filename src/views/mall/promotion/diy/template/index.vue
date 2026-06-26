@@ -57,7 +57,7 @@
             :key="index"
             :src="url"
             :preview-src-list="scope.row.previewPicUrls"
-            :initial-index="index"
+            :initial-index="Number(index)"
             preview-teleported
           />
         </template>
@@ -147,7 +147,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: null,
-  createTime: []
+  createTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单
 

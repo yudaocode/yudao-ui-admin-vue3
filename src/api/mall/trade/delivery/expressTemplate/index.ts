@@ -1,12 +1,12 @@
 import request from '@/config/axios'
 
 export interface DeliveryExpressTemplateVO {
-  id: number
+  id?: number
   name: string
   chargeMode: number
   sort: number
-  templateCharge: ExpressTemplateChargeVO[]
-  templateFree: ExpressTemplateFreeVO[]
+  charges: ExpressTemplateChargeVO[]
+  frees: ExpressTemplateFreeVO[]
 }
 
 export declare type ExpressTemplateChargeVO = {
@@ -25,17 +25,24 @@ export declare type ExpressTemplateFreeVO = {
 
 // 查询快递运费模板列表
 export const getDeliveryExpressTemplatePage = async (params: PageParam) => {
-  return await request.get({ url: '/trade/delivery/express-template/page', params })
+  return await request.get<PageResult<DeliveryExpressTemplateVO[]>>({
+    url: '/trade/delivery/express-template/page',
+    params
+  })
 }
 
 // 查询快递运费模板详情
 export const getDeliveryExpressTemplate = async (id: number) => {
-  return await request.get({ url: '/trade/delivery/express-template/get?id=' + id })
+  return await request.get<DeliveryExpressTemplateVO>({
+    url: '/trade/delivery/express-template/get?id=' + id
+  })
 }
 
 // 查询快递运费模板详情
 export const getSimpleTemplateList = async () => {
-  return await request.get({ url: '/trade/delivery/express-template/list-all-simple' })
+  return await request.get<DeliveryExpressTemplateVO[]>({
+    url: '/trade/delivery/express-template/list-all-simple'
+  })
 }
 
 // 新增快递运费模板

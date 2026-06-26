@@ -14,7 +14,7 @@
             v-for="item in propertyOptions"
             :key="item.id"
             :label="item.name"
-            :value="item.id"
+            :value="item.id!"
           />
         </el-select>
       </el-form-item>
@@ -101,15 +101,15 @@ const { params } = useRoute() // 查询参数
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<PropertyApi.PropertyValueVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  propertyId: params.propertyId,
+  propertyId: Number(params.propertyId),
   name: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const propertyOptions = ref([]) // 属性项的列表
+const propertyOptions = ref<PropertyApi.PropertyVO[]>([]) // 属性项的列表
 
 /** 查询列表 */
 const getList = async () => {

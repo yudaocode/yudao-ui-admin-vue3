@@ -145,7 +145,11 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { FinancePaymentApi, FinancePaymentVO } from '@/api/erp/finance/payment'
+import {
+  FinancePaymentApi,
+  FinancePaymentItemVO,
+  FinancePaymentVO
+} from '@/api/erp/finance/payment'
 import FinancePaymentItemForm from './components/FinancePaymentItemForm.vue'
 import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { erpPriceInputFormatter } from '@/utils'
@@ -163,18 +167,18 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
-  id: undefined,
-  supplierId: undefined,
-  accountId: undefined,
-  financeUserId: undefined,
+  id: undefined as number | undefined,
+  supplierId: undefined as number | undefined,
+  accountId: undefined as number | undefined,
+  financeUserId: undefined as number | undefined,
   paymentTime: undefined,
-  remark: undefined,
+  remark: undefined as string | undefined,
   fileUrl: '',
   totalPrice: 0,
   discountPrice: 0,
   paymentPrice: 0,
-  items: [],
-  no: undefined // 订单单号，后端返回
+  items: [] as FinancePaymentItemVO[],
+  no: undefined as string | undefined // 订单单号，后端返回
 })
 const formRules = reactive({
   supplierId: [{ required: true, message: '供应商不能为空', trigger: 'blur' }],
@@ -260,18 +264,18 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    supplierId: undefined,
-    accountId: undefined,
-    financeUserId: undefined,
+    id: undefined as number | undefined,
+    supplierId: undefined as number | undefined,
+    accountId: undefined as number | undefined,
+    financeUserId: undefined as number | undefined,
     paymentTime: undefined,
-    remark: undefined,
-    fileUrl: undefined,
+    remark: undefined as string | undefined,
+    fileUrl: '',
     totalPrice: 0,
     discountPrice: 0,
     paymentPrice: 0,
-    items: [],
-    no: undefined
+    items: [] as FinancePaymentItemVO[],
+    no: undefined as string | undefined
   }
   formRef.value?.resetFields()
 }

@@ -10,8 +10,8 @@
       <InputPassword v-model="password.confirmPassword" strength />
     </el-form-item>
     <el-form-item>
-      <XButton :title="t('common.save')" type="primary" @click="submit(formRef)" />
-      <XButton :title="t('common.reset')" type="danger" @click="reset(formRef)" />
+      <el-button type="primary" @click="submit(formRef)">{{ t('common.save') }}</el-button>
+      <el-button type="danger" @click="reset(formRef)">{{ t('common.reset') }}</el-button>
     </el-form-item>
   </el-form>
 </template>

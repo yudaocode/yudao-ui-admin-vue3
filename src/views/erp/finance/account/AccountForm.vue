@@ -117,7 +117,8 @@ const resetForm = () => {
     no: undefined,
     remark: undefined,
     status: undefined,
-    sort: undefined
+    sort: undefined,
+    defaultStatus: undefined
   }
   formRef.value?.resetFields()
 }

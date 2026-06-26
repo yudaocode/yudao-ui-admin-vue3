@@ -22,7 +22,7 @@
           v-for="item in deliveryTemplateList"
           :key="item.id"
           :label="item.name"
-          :value="item.id"
+          :value="item.id!"
         />
       </el-select>
     </el-form-item>
@@ -89,7 +89,7 @@ const validate = async () => {
 defineExpose({ validate })
 
 /** 初始化 */
-const deliveryTemplateList = ref([]) // 运费模版
+const deliveryTemplateList = ref<ExpressTemplateApi.DeliveryExpressTemplateVO[]>([]) // 运费模版
 onMounted(async () => {
   deliveryTemplateList.value = await ExpressTemplateApi.getSimpleTemplateList()
 })

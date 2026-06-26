@@ -76,8 +76,8 @@ const getList = async () => {
 }
 
 /** 提交表单 */
-const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const select = async (row) => {
+const emit = defineEmits(['success', 'select']) // 定义 success/select 事件，用于操作成功后的回调
+const select = async (row: ProcessListenerVO) => {
   dialogVisible.value = false
   // 发送操作成功的事件
   emit('select', row)

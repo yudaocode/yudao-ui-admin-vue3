@@ -125,14 +125,10 @@
         :formatter="dateFormatter"
       />
       <el-table-column label="支付金额" align="center" prop="payPrice" width="100">
-        <template #default="scope">
-          ￥{{ parseFloat(scope.row.payPrice / 100).toFixed(2) }}
-        </template>
+        <template #default="scope"> ￥{{ (scope.row.payPrice! / 100).toFixed(2) }} </template>
       </el-table-column>
       <el-table-column label="退款金额" align="center" prop="refundPrice" width="100">
-        <template #default="scope">
-          ￥{{ parseFloat(scope.row.refundPrice / 100).toFixed(2) }}
-        </template>
+        <template #default="scope"> ￥{{ (scope.row.refundPrice! / 100).toFixed(2) }} </template>
       </el-table-column>
       <el-table-column label="退款订单号" align="left" width="300">
         <template #default="scope">
@@ -164,7 +160,11 @@
       </el-table-column>
       <el-table-column label="退款渠道" align="center" width="140">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="scope.row.channelCode" />
+          <dict-tag
+            v-if="scope.row.channelCode"
+            :type="DICT_TYPE.PAY_CHANNEL_CODE"
+            :value="scope.row.channelCode"
+          />
         </template>
       </el-table-column>
       <el-table-column
@@ -218,26 +218,26 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表遮罩层
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<RefundApi.RefundDetailVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  merchantId: undefined,
-  appId: undefined,
-  channelCode: undefined,
-  merchantOrderId: undefined,
-  merchantRefundId: undefined,
-  status: undefined,
-  payPrice: undefined,
-  refundPrice: undefined,
-  channelOrderNo: undefined,
-  channelRefundNo: undefined,
-  createTime: [],
-  successTime: []
+  merchantId: undefined as number | undefined,
+  appId: undefined as number | undefined,
+  channelCode: undefined as string | undefined,
+  merchantOrderId: undefined as string | undefined,
+  merchantRefundId: undefined as string | undefined,
+  status: undefined as number | undefined,
+  payPrice: undefined as number | undefined,
+  refundPrice: undefined as number | undefined,
+  channelOrderNo: undefined as string | undefined,
+  channelRefundNo: undefined as string | undefined,
+  createTime: [] as string[],
+  successTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出等待
-const appList = ref([]) // 支付应用列表集合
+const appList = ref<AppApi.AppVO[]>([]) // 支付应用列表集合
 
 /** 搜索按钮操作 */
 const handleQuery = () => {

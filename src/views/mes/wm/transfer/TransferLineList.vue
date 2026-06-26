@@ -212,14 +212,14 @@ const formData = ref({
   unitMeasureName: undefined,
   quantity: undefined as number | undefined,
   batchId: undefined as number | undefined,
-  batchCode: undefined,
+  batchCode: undefined as string | undefined,
   fromWarehouseId: undefined as number | undefined,
   fromWarehouseName: undefined,
   fromLocationId: undefined as number | undefined,
   fromLocationName: undefined,
   fromAreaId: undefined as number | undefined,
   fromAreaName: undefined,
-  remark: undefined
+  remark: undefined as string | undefined
 })
 const formRules = reactive({
   materialStockId: [{ required: true, message: '请选择库存', trigger: 'change' }],
@@ -304,24 +304,24 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
+    id: undefined as number | undefined,
     transferId: undefined,
     materialStockId: undefined,
-    itemId: undefined,
+    itemId: undefined as number | undefined,
     itemCode: undefined,
     itemName: undefined,
     specification: undefined,
     unitMeasureName: undefined,
     quantity: undefined,
     batchId: undefined,
-    batchCode: undefined,
+    batchCode: undefined as string | undefined,
     fromWarehouseId: undefined,
     fromWarehouseName: undefined,
     fromLocationId: undefined,
     fromLocationName: undefined,
     fromAreaId: undefined,
     fromAreaName: undefined,
-    remark: undefined
+    remark: undefined as string | undefined
   }
   quantityMax.value = undefined
   formRef.value?.resetFields()

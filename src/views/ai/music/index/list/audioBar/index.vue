@@ -9,8 +9,8 @@
         class="w-[45px]"
       />
       <div>
-        <div>{{ currentSong.name }}</div>
-        <div class="text-[12px] text-gray-400">{{ currentSong.singer }}</div>
+        <div>{{ currentSong.title || '暂无音乐' }}</div>
+        <div class="text-[12px] text-gray-400">{{ currentSong.singer || currentSong.desc }}</div>
       </div>
     </div>
 
@@ -26,19 +26,26 @@
       <Icon icon="majesticons:next-circle" :size="20" class="text-gray-300 cursor-pointer" />
       <div class="flex gap-[16px] items-center">
         <span>{{ audioProps.currentTime }}</span>
-        <el-slider v-model="audioProps.duration" color="#409eff" class="w-[160px!important]" />
+        <el-slider
+          v-model="audioProgress"
+          :max="audioDuration"
+          color="#409eff"
+          class="w-[160px!important]"
+          @change="handleProgressChange"
+        />
         <span>{{ audioProps.duration }}</span>
       </div>
       <!-- 音频 -->
       <audio
-        v-bind="audioProps"
+        :src="currentAudioUrl"
+        :autoplay="audioProps.autoplay"
+        :muted="audioProps.muted"
         ref="audioRef"
         controls
         v-show="!audioProps"
         @timeupdate="audioTimeUpdate"
-      >
-        <source :src="audioUrl" />
-      </audio>
+        @loadedmetadata="audioLoadedMetadata"
+      ></audio>
     </div>
 
     <!-- 音量控制器 -->
@@ -55,14 +62,17 @@
 </template>
 
 <script lang="ts" setup>
-import { formatPast } from '@/utils/formatTime'
 import audioUrl from '@/assets/audio/response.mp3'
+import { currentSongKey, type MusicSong } from '../types'
 
 defineOptions({ name: 'Index' })
 
-const currentSong = inject('currentSong', {})
+const currentSong = inject(currentSongKey, ref<MusicSong>({}))
+const currentAudioUrl = computed(() => currentSong.value.audioUrl || audioUrl)
 
-const audioRef = ref<Nullable<HTMLElement>>(null)
+const audioRef = ref<Nullable<HTMLAudioElement>>(null)
+const audioProgress = ref(0)
+const audioDuration = ref(0)
 // 音频相关属性https://www.runoob.com/tags/ref-av-dom.html
 const audioProps = reactive({
   autoplay: true,
@@ -72,6 +82,15 @@ const audioProps = reactive({
   muted: false,
   volume: 50
 })
+
+const formatAudioTime = (seconds: number) => {
+  if (!Number.isFinite(seconds)) {
+    return '00:00'
+  }
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = Math.floor(seconds % 60)
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+}
 
 function toggleStatus(type: string) {
   audioProps[type] = !audioProps[type]
@@ -85,7 +104,38 @@ function toggleStatus(type: string) {
 }
 
 // 更新播放位置
-function audioTimeUpdate(args) {
-  audioProps.currentTime = formatPast(new Date(args.timeStamp), 'mm:ss')
+function audioTimeUpdate() {
+  if (!audioRef.value) {
+    return
+  }
+  audioProgress.value = audioRef.value.currentTime
+  audioProps.currentTime = formatAudioTime(audioRef.value.currentTime)
 }
+
+function audioLoadedMetadata() {
+  if (!audioRef.value) {
+    return
+  }
+  audioDuration.value = audioRef.value.duration
+  audioProps.duration = formatAudioTime(audioRef.value.duration)
+}
+
+function handleProgressChange(value: number | number[]) {
+  if (!audioRef.value || Array.isArray(value)) {
+    return
+  }
+  audioRef.value.currentTime = value
+  audioProgress.value = value
+  audioProps.currentTime = formatAudioTime(value)
+}
+
+watch(currentAudioUrl, () => {
+  audioProgress.value = 0
+  audioDuration.value = 0
+  audioProps.currentTime = '00:00'
+  audioProps.duration = '00:00'
+  nextTick(() => {
+    audioRef.value?.load()
+  })
+})
 </script>

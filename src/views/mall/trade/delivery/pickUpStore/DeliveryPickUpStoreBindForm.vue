@@ -64,6 +64,7 @@
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import StoreStaffTableSelect from './components/StoreStaffTableSelect.vue'
 import { DICT_TYPE } from '@/utils/dict'
+import type { UserVO } from '@/api/system/user'
 
 const message = useMessage() // 消息弹窗
 
@@ -71,10 +72,9 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
-  id: undefined,
+  id: undefined as number | undefined,
   name: '',
-  verifyUserIds: [],
-  verifyUsers: []
+  verifyUsers: [] as UserVO[]
 })
 const formRules = reactive({})
 const formRef = ref() // 表单 Ref
@@ -87,7 +87,12 @@ const open = async (id: number) => {
   resetForm()
   formLoading.value = true
   try {
-    formData.value = await DeliveryPickUpStoreApi.getDeliveryPickUpStore(id)
+    const data = await DeliveryPickUpStoreApi.getDeliveryPickUpStore(id)
+    formData.value = {
+      id: data.id,
+      name: data.name,
+      verifyUsers: data.verifyUsers || []
+    }
   } finally {
     formLoading.value = false
   }
@@ -103,9 +108,9 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = {
-      id: formData.value.id,
-      verifyUserIds: formData.value.verifyUsers.map((item: any) => item.id)
+    const data: DeliveryPickUpStoreApi.DeliveryPickUpStoreBindReqVO = {
+      id: formData.value.id!,
+      verifyUserIds: formData.value.verifyUsers.map((item) => item.id)
     }
     await DeliveryPickUpStoreApi.bindStoreStaffId(data)
     message.success('绑定成功')
@@ -116,17 +121,13 @@ const submitForm = async () => {
 }
 
 /** 处理选择员工操作 */
-const handleSelect = (checkedUsers: []) => {
+const handleSelect = (checkedUsers: UserVO[]) => {
   formData.value.verifyUsers = checkedUsers
 }
 
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
-  const index = formData.value.verifyUsers.findIndex((item: any) => {
-    if (item.id == id) {
-      return true
-    }
-  })
+  const index = formData.value.verifyUsers.findIndex((item) => item.id === id)
   formData.value.verifyUsers.splice(index, 1)
 }
 
@@ -135,7 +136,6 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: '',
-    verifyUserIds: [],
     verifyUsers: []
   }
   formRef.value?.resetFields()

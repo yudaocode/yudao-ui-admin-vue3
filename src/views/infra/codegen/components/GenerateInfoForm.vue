@@ -304,7 +304,7 @@ defineOptions({ name: 'InfraCodegenGenerateInfoForm' })
 
 const props = defineProps({
   table: {
-    type: Object as PropType<Nullable<CodegenApi.CodegenTableVO>>,
+    type: Object as PropType<Nullable<CodegenApi.CodegenTableSaveReqVO>>,
     default: () => null
   },
   columns: {
@@ -314,23 +314,9 @@ const props = defineProps({
 })
 
 const formRef = ref()
-const formData = ref({
-  templateType: null,
-  frontType: null,
-  scene: null,
-  moduleName: '',
-  businessName: '',
-  className: '',
-  classComment: '',
-  parentMenuId: null,
-  genPath: '',
-  genType: '',
-  masterTableId: undefined,
-  subJoinColumnId: undefined,
-  subJoinMany: undefined,
-  treeParentColumnId: undefined,
-  treeNameColumnId: undefined
-})
+const formData = ref<CodegenApi.CodegenTableSaveReqVO>(
+  CodegenApi.createEmptyCodegenTableSaveReqVO()
+)
 
 const rules = reactive({
   templateType: [required],
@@ -348,7 +334,7 @@ const rules = reactive({
   treeNameColumnId: [required]
 })
 
-const tables = ref([]) // 表定义列表
+const tables = ref<CodegenApi.CodegenTableVO[]>([]) // 表定义列表
 const menus = ref<any[]>([])
 const menuTreeProps = {
   label: 'name'
@@ -358,7 +344,7 @@ watch(
   () => props.table,
   async (table) => {
     if (!table) return
-    formData.value = table as any
+    formData.value = table
     // 加载表列表
     if (table.dataSourceConfigId >= 0) {
       tables.value = await CodegenApi.getCodegenTableList(formData.value.dataSourceConfigId)

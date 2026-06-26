@@ -84,7 +84,7 @@ const handleLock = async () => {
       </el-form-item>
     </el-form>
     <template #footer>
-      <ElButton type="primary" @click="handleLock">{{ t('lock.lock') }}</ElButton>
+      <el-button type="primary" @click="handleLock">{{ t('lock.lock') }}</el-button>
     </template>
   </Dialog>
 </template>

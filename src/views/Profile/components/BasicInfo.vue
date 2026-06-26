@@ -8,8 +8,8 @@
     </template>
   </Form>
   <div style="text-align: center">
-    <XButton :title="t('common.save')" type="primary" @click="submit()" />
-    <XButton :title="t('common.reset')" type="danger" @click="init()" />
+    <el-button type="primary" @click="submit()">{{ t('common.save') }}</el-button>
+    <el-button type="danger" @click="init()">{{ t('common.reset') }}</el-button>
   </div>
 </template>
 <script lang="ts" setup>

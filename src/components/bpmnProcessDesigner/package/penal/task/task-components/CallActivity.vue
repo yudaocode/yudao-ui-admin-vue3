@@ -47,14 +47,14 @@
       <div>
         <div class="flex mb-10px">
           <el-text>输入参数</el-text>
-          <XButton
+          <el-button
             class="ml-auto"
             type="primary"
-            preIcon="ep:plus"
-            title="添加参数"
             size="small"
             @click="openVariableForm('in', null, -1)"
-          />
+          >
+            <Icon icon="ep:plus" class="mr-1px" /> 添加参数
+          </el-button>
         </div>
         <el-table :data="inVariableList" max-height="240" fit border>
           <el-table-column label="源" prop="source" min-width="100px" show-overflow-tooltip />
@@ -82,14 +82,14 @@
       <div>
         <div class="flex mb-10px">
           <el-text>输出参数</el-text>
-          <XButton
+          <el-button
             class="ml-auto"
             type="primary"
-            preIcon="ep:plus"
-            title="添加参数"
             size="small"
             @click="openVariableForm('out', null, -1)"
-          />
+          >
+            <Icon icon="ep:plus" class="mr-1px" /> 添加参数
+          </el-button>
         </div>
         <el-table :data="outVariableList" max-height="240" fit border>
           <el-table-column label="源" prop="source" min-width="100px" show-overflow-tooltip />

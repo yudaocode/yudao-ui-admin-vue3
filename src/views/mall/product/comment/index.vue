@@ -110,7 +110,7 @@
               :key="index"
               :src="picUrl"
               :preview-src-list="scope.row.picUrls"
-              :initial-index="index"
+              :initial-index="Number(index)"
               class="h-40px w-40px"
               preview-teleported
             />

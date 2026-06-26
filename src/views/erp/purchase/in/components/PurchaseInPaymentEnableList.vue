@@ -136,7 +136,7 @@ const queryParams = reactive({
   productId: undefined,
   inTime: [],
   paymentEnable: true,
-  supplierId: undefined
+  supplierId: undefined as number | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const productList = ref<ProductVO[]>([]) // 产品列表

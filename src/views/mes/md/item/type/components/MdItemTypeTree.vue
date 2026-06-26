@@ -56,7 +56,7 @@ const filterNode = (value: string, data: MdItemTypeVO) => {
   if (!value) {
     return true
   }
-  return data.name?.includes(value)
+  return data.name?.includes(value) ?? false
 }
 
 /** 监听搜索关键字变化，触发树过滤 */

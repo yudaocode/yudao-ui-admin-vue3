@@ -62,7 +62,7 @@
   <!-- 关联商机选择弹框 -->
   <BusinessListModal
     ref="businessModalRef"
-    :customer-id="props.customerId"
+    :customer-id="props.customerId!"
     @success="createContactBusinessList"
   />
 </template>

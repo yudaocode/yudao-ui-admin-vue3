@@ -213,11 +213,9 @@ const getList = async () => {
   try {
     const data = cloneDeep(queryParams)
     // 处理掉全部的状态，不传就是全部
-    if (data.status === '0') {
-      delete data.status
-    }
+    const queryData = data.status === '0' ? (({ status: _status, ...rest }) => rest)(data) : data
     // 执行查询
-    const res = await AfterSaleApi.getAfterSalePage(data)
+    const res = await AfterSaleApi.getAfterSalePage(queryData)
     list.value = res.list as AfterSaleApi.TradeAfterSaleVO[]
     total.value = res.total
   } finally {
@@ -239,7 +237,10 @@ const resetQuery = () => {
 
 /** tab 切换 */
 const tabClick = async (tab: TabsPaneContext) => {
-  queryParams.status = tab.paneName
+  if (tab.paneName === undefined) {
+    return
+  }
+  queryParams.status = String(tab.paneName)
   await getList()
 }
 

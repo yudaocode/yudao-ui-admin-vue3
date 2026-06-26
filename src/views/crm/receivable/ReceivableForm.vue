@@ -84,7 +84,7 @@
               <el-option
                 v-for="data in receivablePlanList"
                 :key="data.id"
-                :disabled="data.receivableId"
+                :disabled="!!data.receivableId"
                 :label="'第 ' + data.period + ' 期'"
                 :value="data.id!"
               />
@@ -207,7 +207,9 @@ const open = async (
     formData.value.customerId = receivablePlan.customerId
     await handleCustomerChange(receivablePlan.customerId)
     formData.value.contractId = receivablePlan.contractId
-    await handleContractChange(receivablePlan.contractId)
+    if (receivablePlan.contractId) {
+      await handleContractChange(receivablePlan.contractId)
+    }
     if (receivablePlan.id) {
       formData.value.planId = receivablePlan.id
       formData.value.price = receivablePlan.price

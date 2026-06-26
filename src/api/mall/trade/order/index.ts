@@ -122,7 +122,7 @@ export interface TradeOrderSummaryRespVO {
 
 // 查询交易订单列表
 export const getOrderPage = async (params: any) => {
-  return await request.get({ url: `/trade/order/page`, params })
+  return await request.get<PageResult<OrderVO[]>>({ url: `/trade/order/page`, params })
 }
 
 // 查询交易订单统计
@@ -132,12 +132,14 @@ export const getOrderSummary = async (params: any) => {
 
 // 查询交易订单详情
 export const getOrder = async (id: number | null) => {
-  return await request.get({ url: `/trade/order/get-detail?id=` + id })
+  return await request.get<OrderVO>({ url: `/trade/order/get-detail?id=` + id })
 }
 
 // 查询交易订单物流详情
 export const getExpressTrackList = async (id: number | null) => {
-  return await request.get({ url: `/trade/order/get-express-track-list?id=` + id })
+  return await request.get<Array<{ time?: Date | string; content?: string }>>({
+    url: `/trade/order/get-express-track-list?id=` + id
+  })
 }
 
 export interface DeliveryVO {

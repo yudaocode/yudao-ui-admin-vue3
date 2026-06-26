@@ -2,14 +2,14 @@ import request from '@/config/axios'
 
 // MES 物料产品分类 VO
 export interface MdItemTypeVO {
-  id: number // 分类编号
-  parentId: number // 父分类编号
-  code: string // 分类编码
-  name: string // 分类名称
+  id?: number // 分类编号
+  parentId?: number // 父分类编号
+  code?: string // 分类编码
+  name?: string // 分类名称
   itemOrProduct: string // 物料/产品标识
   sort: number // 显示排序
   status: number // 状态
-  remark: string // 备注
+  remark?: string // 备注
 }
 
 // MES 物料产品分类 API

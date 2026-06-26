@@ -167,7 +167,7 @@ import PurchaseInItemForm from './components/PurchaseInItemForm.vue'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
 import PurchaseOrderInEnableList from '@/views/erp/purchase/order/components/PurchaseOrderInEnableList.vue'
-import { PurchaseOrderVO } from '@/api/erp/purchase/order'
+import { PurchaseOrderItemVO, PurchaseOrderVO } from '@/api/erp/purchase/order'
 import * as UserApi from '@/api/system/user'
 import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 
@@ -182,19 +182,20 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
-  id: undefined,
-  supplierId: undefined,
-  accountId: undefined,
+  id: undefined as number | undefined,
+  supplierId: undefined as number | undefined,
+  accountId: undefined as number | undefined,
+  orderId: undefined as number | undefined,
   inTime: undefined,
-  remark: undefined,
+  remark: undefined as string | undefined,
   fileUrl: '',
   discountPercent: 0,
   discountPrice: 0,
   totalPrice: 0,
   otherPrice: 0,
-  orderNo: undefined,
-  items: [],
-  no: undefined // 入库单号，后端返回
+  orderNo: undefined as string | undefined,
+  items: [] as PurchaseOrderItemVO[],
+  no: undefined as string | undefined // 入库单号，后端返回
 })
 const formRules = reactive({
   supplierId: [{ required: true, message: '供应商不能为空', trigger: 'blur' }],
@@ -220,7 +221,9 @@ watch(
     // 计算
     const totalPrice = val.items.reduce((prev, curr) => prev + curr.totalPrice, 0)
     const discountPrice =
-      val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
+      val.discountPercent != null
+        ? (erpPriceMultiply(totalPrice, val.discountPercent / 100.0) ?? 0)
+        : 0
     formData.value.discountPrice = discountPrice
     formData.value.totalPrice = totalPrice - discountPrice + val.otherPrice
   },
@@ -267,13 +270,13 @@ const handlePurchaseOrderChange = (order: PurchaseOrderVO) => {
   formData.value.orderNo = order.no
   formData.value.supplierId = order.supplierId
   formData.value.accountId = order.accountId
-  formData.value.discountPercent = order.discountPercent
+  formData.value.discountPercent = order.discountPercent ?? 0
   formData.value.remark = order.remark
-  formData.value.fileUrl = order.fileUrl
+  formData.value.fileUrl = order.fileUrl ?? ''
   // 将订单项设置到入库单项
   order.items.forEach((item) => {
     item.totalCount = item.count
-    item.count = item.totalCount - item.inCount
+    item.count = item.totalCount - (item.inCount ?? 0)
     item.orderItemId = item.id
     item.id = undefined
   })
@@ -308,17 +311,20 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    supplierId: undefined,
-    accountId: undefined,
+    id: undefined as number | undefined,
+    supplierId: undefined as number | undefined,
+    accountId: undefined as number | undefined,
+    orderId: undefined as number | undefined,
     inTime: undefined,
-    remark: undefined,
-    fileUrl: undefined,
+    remark: undefined as string | undefined,
+    fileUrl: '',
     discountPercent: 0,
     discountPrice: 0,
     totalPrice: 0,
     otherPrice: 0,
-    items: []
+    orderNo: undefined,
+    items: [] as PurchaseOrderItemVO[],
+    no: undefined
   }
   formRef.value?.resetFields()
 }

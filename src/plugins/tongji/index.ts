@@ -12,7 +12,7 @@ const HM_ID = import.meta.env.VITE_APP_BAIDU_CODE
   const hm = document.createElement('script')
   hm.src = 'https://hm.baidu.com/hm.js?' + HM_ID
   const s = document.getElementsByTagName('script')[0]
-  s.parentNode.insertBefore(hm, s)
+  s.parentNode?.insertBefore(hm, s)
 })()
 
 router.afterEach(function (to) {

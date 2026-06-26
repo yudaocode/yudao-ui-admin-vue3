@@ -23,72 +23,81 @@
           <div :class="`${prefixCls}-toolbar`">
             <el-upload :beforeUpload="handleBeforeUpload" :fileList="[]" accept="image/*">
               <el-tooltip :content="t('cropper.selectImage')" placement="bottom">
-                <XButton preIcon="ant-design:upload-outlined" type="primary" />
+                <el-button type="primary">
+                  <Icon icon="ant-design:upload-outlined" class="mr-1px" />
+                </el-button>
               </el-tooltip>
             </el-upload>
             <el-space>
               <el-tooltip :content="t('cropper.btn_reset')" placement="bottom">
-                <XButton
+                <el-button
                   :disabled="!src"
-                  preIcon="ant-design:reload-outlined"
                   size="small"
                   type="primary"
                   @click="handlerToolbar('reset')"
-                />
+                >
+                  <Icon icon="ant-design:reload-outlined" class="mr-1px" />
+                </el-button>
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_rotate_left')" placement="bottom">
-                <XButton
+                <el-button
                   :disabled="!src"
-                  preIcon="ant-design:rotate-left-outlined"
                   size="small"
                   type="primary"
                   @click="handlerToolbar('rotate', -45)"
-                />
+                >
+                  <Icon icon="ant-design:rotate-left-outlined" class="mr-1px" />
+                </el-button>
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_rotate_right')" placement="bottom">
-                <XButton
+                <el-button
                   :disabled="!src"
-                  preIcon="ant-design:rotate-right-outlined"
                   size="small"
                   type="primary"
                   @click="handlerToolbar('rotate', 45)"
-                />
+                >
+                  <Icon icon="ant-design:rotate-right-outlined" class="mr-1px" />
+                </el-button>
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_scale_x')" placement="bottom">
-                <XButton
+                <el-button
                   :disabled="!src"
-                  preIcon="vaadin:arrows-long-h"
                   size="small"
                   type="primary"
                   @click="handlerToolbar('scaleX')"
-                />
+                >
+                  <Icon icon="vaadin:arrows-long-h" class="mr-1px" />
+                </el-button>
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_scale_y')" placement="bottom">
-                <XButton
+                <el-button
                   :disabled="!src"
-                  preIcon="vaadin:arrows-long-v"
                   size="small"
                   type="primary"
                   @click="handlerToolbar('scaleY')"
-                />
+                >
+                  <Icon icon="vaadin:arrows-long-v" class="mr-1px" />
+                </el-button>
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_zoom_in')" placement="bottom">
-                <XButton
+                <el-button
                   :disabled="!src"
-                  preIcon="ant-design:zoom-in-outlined"
                   size="small"
                   type="primary"
                   @click="handlerToolbar('zoom', 0.1)"
-                />
+                >
+                  <Icon icon="ant-design:zoom-in-outlined" class="mr-1px" />
+                </el-button>
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_zoom_out')" placement="bottom">
-                <XButton
+                <el-button
                   :disabled="!src"
-                  preIcon="ant-design:zoom-out-outlined"
                   size="small"
                   type="primary"
                   @click="handlerToolbar('zoom', -0.1)"
-                />
+                >
+                  <Icon icon="ant-design:zoom-out-outlined" class="mr-1px" />
+                </el-button>
               </el-tooltip>
             </el-space>
           </div>

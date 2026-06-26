@@ -2,14 +2,14 @@ import request from '@/config/axios'
 
 // MES 计量单位 VO
 export interface MdUnitMeasureVO {
-  id: number // 单位编号
-  code: string // 单位编码
-  name: string // 单位名称
+  id?: number // 单位编号
+  code?: string // 单位编码
+  name?: string // 单位名称
   primaryFlag: boolean // 是否主单位
-  primaryId: number // 主单位编号
-  changeRate: number // 与主单位换算比例
+  primaryId?: number // 主单位编号
+  changeRate?: number // 与主单位换算比例
   status: number // 状态
-  remark: string // 备注
+  remark?: string // 备注
 }
 
 // MES 计量单位 API

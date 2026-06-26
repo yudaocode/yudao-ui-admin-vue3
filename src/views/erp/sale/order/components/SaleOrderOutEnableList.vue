@@ -148,9 +148,9 @@ const queryFormRef = ref() // 搜索的表单
 const productList = ref<ProductVO[]>([]) // 产品列表
 
 /** 选中行 */
-const currentRowValue = ref(undefined) // 选中行的 value
-const currentRow = ref(undefined) // 选中行
-const handleCurrentChange = (row) => {
+const currentRowValue = ref<number>() // 选中行的 value
+const currentRow = ref<SaleOrderVO>() // 选中行
+const handleCurrentChange = (row: SaleOrderVO) => {
   currentRow.value = row
 }
 
@@ -171,7 +171,7 @@ const emits = defineEmits<{
 }>()
 const submitForm = () => {
   try {
-    emits('success', currentRow.value)
+    emits('success', currentRow.value!)
   } finally {
     // 关闭弹窗
     dialogVisible.value = false

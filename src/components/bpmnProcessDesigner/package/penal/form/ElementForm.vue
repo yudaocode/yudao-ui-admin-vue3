@@ -52,7 +52,7 @@
     <!--      </el-table>-->
     <!--    </div>-->
     <!--    <div class="element-drawer__button">-->
-    <!--      <XButton type="primary" proIcon="ep:plus" title="添加字段" @click="openFieldForm(null, -1)" />-->
+    <!--      <el-button type="primary" proIcon="ep:plus" @click="openFieldForm(null, -1)">添加字段</el-button>-->
     <!--    </div>-->
 
     <!--字段配置侧边栏-->
@@ -236,7 +236,7 @@ const props = defineProps({
 })
 const prefix = inject('prefix')
 
-const formKey = ref(undefined)
+const formKey = ref<number | undefined>()
 const bpmnELement = ref()
 const elExtensionElements = ref()
 const formData = ref()
@@ -282,10 +282,10 @@ const updateElementExtensions = () => {
   })
 }
 
-const formList = ref([]) // 流程表单的下拉框的数据
+const formList = ref<Array<{ id: number; name: string }>>([]) // 流程表单的下拉框的数据
 onMounted(async () => {
   formList.value = await FormApi.getFormSimpleList()
-  formKey.value = parseInt(formKey.value)
+  formKey.value = formKey.value != null ? Number(formKey.value) : undefined
 })
 
 watch(

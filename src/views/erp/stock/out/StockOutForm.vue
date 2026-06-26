@@ -97,7 +97,8 @@ const formData = ref({
   outTime: undefined,
   remark: undefined,
   fileUrl: '',
-  items: []
+  items: [],
+  no: undefined
 })
 const formRules = reactive({
   outTime: [{ required: true, message: '出库时间不能为空', trigger: 'blur' }]
@@ -162,8 +163,9 @@ const resetForm = () => {
     customerId: undefined,
     outTime: undefined,
     remark: undefined,
-    fileUrl: undefined,
-    items: []
+    fileUrl: '',
+    items: [],
+    no: undefined
   }
   formRef.value?.resetFields()
 }

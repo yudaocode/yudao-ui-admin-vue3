@@ -64,6 +64,7 @@
 </template>
 <script setup lang="ts">
 import { Plus } from '@element-plus/icons-vue'
+import type { ComponentPublicInstance } from 'vue'
 import { SimpleFlowNode, NodeType, ConditionType, RouterSetting } from '../consts'
 import { useWatchNode, useDrawer, useNodeName } from '../node'
 import Condition from './components/Condition.vue'
@@ -86,15 +87,18 @@ const currentNode = useWatchNode(props)
 // 节点名称
 const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.ROUTER_BRANCH_NODE)
 const routerGroups = ref<RouterSetting[]>([])
-const nodeOptions = ref<any>([])
-const conditionRef = ref([])
+const nodeOptions = ref<Array<{ label: string; value: string }>>([])
+type ConditionRef = ComponentPublicInstance & {
+  validate?: () => Promise<boolean>
+}
+const conditionRef = ref<Array<ConditionRef | Element | null>>([])
 
 /** 保存配置 */
 const saveConfig = async () => {
   // 校验表单
   let valid = true
   for (const item of conditionRef.value) {
-    if (item && !(await item.validate())) {
+    if (item && 'validate' in item && item.validate && !(await item.validate())) {
       valid = false
     }
   }
@@ -173,7 +177,7 @@ const deleteRouterGroup = (index: number) => {
 }
 
 // 递归获取所有节点
-const getRouterNode = (node) => {
+const getRouterNode = (node?: SimpleFlowNode) => {
   // TODO 最好还需要满足以下要求
   // 并行分支、包容分支内部节点不能跳转到外部节点
   // 条件分支节点可以向上跳转到外部节点

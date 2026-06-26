@@ -75,13 +75,9 @@
       </el-col>
       <el-col :span="24" class="px-10px">
         <el-form-item>
-          <XButton
-            :loading="loginLoading"
-            :title="t('login.register')"
-            class="w-full"
-            type="primary"
-            @click="getCode()"
-          />
+          <el-button :loading="loginLoading" class="w-full" type="primary" @click="getCode()">
+            {{ t('login.register') }}
+          </el-button>
         </el-form-item>
       </el-col>
       <Verify
@@ -93,7 +89,7 @@
         @success="handleRegister"
       />
     </el-row>
-    <XButton :title="t('login.hasUser')" class="w-full" @click="handleBackLogin()" />
+    <el-button class="w-full" @click="handleBackLogin()">{{ t('login.hasUser') }}</el-button>
   </el-form>
 </template>
 <script lang="ts" setup>

@@ -81,15 +81,15 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
-  id: undefined as unknown as number,
-  parentId: undefined as unknown as number,
-  code: undefined as unknown as string,
-  name: undefined as unknown as string,
-  itemOrProduct: MesItemOrProductEnum.ITEM.value as string,
+const formData = ref<MdItemTypeVO>({
+  id: undefined,
+  parentId: undefined,
+  code: undefined,
+  name: undefined,
+  itemOrProduct: MesItemOrProductEnum.ITEM.value,
   sort: 0,
   status: CommonStatusEnum.ENABLE,
-  remark: undefined as unknown as string
+  remark: undefined
 })
 const formRules = reactive({
   parentId: [{ required: true, message: '上级分类不能为空', trigger: 'blur' }],
@@ -133,7 +133,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as MdItemTypeVO
+    const data = formData.value
     if (formType.value === 'create') {
       await MdItemTypeApi.createItemType(data)
       message.success(t('common.createSuccess'))

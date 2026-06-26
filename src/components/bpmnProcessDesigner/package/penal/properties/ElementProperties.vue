@@ -22,12 +22,9 @@
       </el-table-column>
     </el-table>
     <div class="element-drawer__button">
-      <XButton
-        type="primary"
-        preIcon="ep:plus"
-        title="添加属性"
-        @click="openAttributesForm(null, -1)"
-      />
+      <el-button type="primary" @click="openAttributesForm(null, -1)">
+        <Icon icon="ep:plus" class="mr-1px" /> 添加属性
+      </el-button>
     </div>
 
     <el-dialog

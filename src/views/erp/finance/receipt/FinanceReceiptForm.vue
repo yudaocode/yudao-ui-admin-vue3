@@ -145,7 +145,11 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { FinanceReceiptApi, FinanceReceiptVO } from '@/api/erp/finance/receipt'
+import {
+  FinanceReceiptApi,
+  FinanceReceiptItemVO,
+  FinanceReceiptVO
+} from '@/api/erp/finance/receipt'
 import FinanceReceiptItemForm from './components/FinanceReceiptItemForm.vue'
 import { erpPriceInputFormatter } from '@/utils'
 import * as UserApi from '@/api/system/user'
@@ -163,18 +167,18 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
-  id: undefined,
-  customerId: undefined,
-  accountId: undefined,
-  financeUserId: undefined,
+  id: undefined as number | undefined,
+  customerId: undefined as number | undefined,
+  accountId: undefined as number | undefined,
+  financeUserId: undefined as number | undefined,
   receiptTime: undefined,
-  remark: undefined,
+  remark: undefined as string | undefined,
   fileUrl: '',
   totalPrice: 0,
   discountPrice: 0,
   receiptPrice: 0,
-  items: [],
-  no: undefined // 订单单号，后端返回
+  items: [] as FinanceReceiptItemVO[],
+  no: undefined as string | undefined // 订单单号，后端返回
 })
 const formRules = reactive({
   customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
@@ -260,18 +264,18 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    customerId: undefined,
-    accountId: undefined,
-    financeUserId: undefined,
+    id: undefined as number | undefined,
+    customerId: undefined as number | undefined,
+    accountId: undefined as number | undefined,
+    financeUserId: undefined as number | undefined,
     receiptTime: undefined,
-    remark: undefined,
-    fileUrl: undefined,
+    remark: undefined as string | undefined,
+    fileUrl: '',
     totalPrice: 0,
     discountPrice: 0,
     receiptPrice: 0,
-    items: [],
-    no: undefined
+    items: [] as FinanceReceiptItemVO[],
+    no: undefined as string | undefined
   }
   formRef.value?.resetFields()
 }

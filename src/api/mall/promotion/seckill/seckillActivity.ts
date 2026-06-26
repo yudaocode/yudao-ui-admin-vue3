@@ -5,6 +5,7 @@ export interface SeckillActivityVO {
   id?: number
   spuId?: number
   name?: string
+  picUrl?: string
   status?: number
   remark?: string
   startTime?: Date

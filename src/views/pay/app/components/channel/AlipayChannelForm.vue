@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Dialog v-model="dialogVisible" :title="dialogTitle" width="830px" @closed="close">
+    <Dialog v-model="dialogVisible" :title="dialogTitle" width="830px">
       <el-form
         ref="formRef"
         v-loading="formLoading"
@@ -191,6 +191,7 @@
 import { CommonStatusEnum } from '@/utils/constants'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as ChannelApi from '@/api/pay/channel'
+import type { UploadRequestHandler, UploadRequestOptions } from 'element-plus'
 
 defineOptions({ name: 'AlipayChannelForm' })
 
@@ -312,7 +313,7 @@ const resetForm = (appId, code) => {
   formRef.value?.resetFields()
 }
 
-const fileBeforeUpload = (file) => {
+const fileBeforeUpload = (file: File) => {
   let format = '.' + file.name.split('.')[1]
   if (format !== fileAccept) {
     message.error(`请上传指定格式"${fileAccept}"文件`)
@@ -325,27 +326,36 @@ const fileBeforeUpload = (file) => {
   return isRightSize
 }
 
-const appCertUpload = (event) => {
-  const readFile = new FileReader()
-  readFile.onload = (e: any) => {
-    formData.value.config.appCertContent = e.target.result
-  }
-  readFile.readAsText(event.file)
+const readCertFile = (
+  event: UploadRequestOptions,
+  setContent: (content: string) => void
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const readFile = new FileReader()
+    readFile.onload = (e) => {
+      setContent(String(e.target?.result || ''))
+      resolve()
+    }
+    readFile.onerror = () => reject(readFile.error)
+    readFile.readAsText(event.file)
+  })
 }
 
-const alipayPublicCertUpload = (event) => {
-  const readFile = new FileReader()
-  readFile.onload = (e: any) => {
-    formData.value.config.alipayPublicCertContent = e.target.result
-  }
-  readFile.readAsText(event.file)
+const appCertUpload: UploadRequestHandler = (event) => {
+  return readCertFile(event, (content) => {
+    formData.value.config.appCertContent = content
+  })
 }
 
-const rootCertUpload = (event) => {
-  const readFile = new FileReader()
-  readFile.onload = (e: any) => {
-    formData.value.config.rootCertContent = e.target.result
-  }
-  readFile.readAsText(event.file)
+const alipayPublicCertUpload: UploadRequestHandler = (event) => {
+  return readCertFile(event, (content) => {
+    formData.value.config.alipayPublicCertContent = content
+  })
+}
+
+const rootCertUpload: UploadRequestHandler = (event) => {
+  return readCertFile(event, (content) => {
+    formData.value.config.rootCertContent = content
+  })
 }
 </script>

@@ -60,16 +60,16 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  userId: undefined,
-  userNickname: undefined,
-  userAvatar: undefined,
+  id: undefined as number | undefined,
+  userId: undefined as number | undefined,
+  userNickname: undefined as string | undefined,
+  userAvatar: undefined as string | undefined,
   spuId: 0,
-  skuId: undefined,
+  skuId: undefined as number | undefined,
   descriptionScores: 5,
   benefitScores: 5,
-  content: undefined,
-  picUrls: []
+  content: undefined as string | undefined,
+  picUrls: [] as string[]
 })
 const formRules = reactive({
   spuId: [{ required: true, message: '商品不能为空', trigger: 'blur' }],
@@ -81,11 +81,7 @@ const formRules = reactive({
   benefitScores: [{ required: true, message: '服务星级不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const skuData = ref({
-  id: -1,
-  name: '',
-  picUrl: ''
-})
+const skuData = ref<ProductSpuApi.Sku>()
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {

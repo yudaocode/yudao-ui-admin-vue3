@@ -42,7 +42,7 @@ export const totalCountFormat = (row: CouponTemplateVO) => {
   if (row.totalCount === -1) {
     return '不限制'
   }
-  return row.totalCount
+  return `${row.totalCount}`
 }
 
 // 格式化【剩余数量】
@@ -50,7 +50,7 @@ export const remainedCountFormat = (row: CouponTemplateVO) => {
   if (row.totalCount === -1) {
     return '不限制'
   }
-  return row.totalCount - row.takeCount
+  return `${row.totalCount - row.takeCount}`
 }
 
 // 格式化【最低消费】

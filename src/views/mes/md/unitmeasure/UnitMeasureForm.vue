@@ -18,7 +18,7 @@
         <el-radio-group v-model="formData.primaryFlag">
           <el-radio
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
+            :key="String(dict.value)"
             :value="dict.value"
           >
             {{ dict.label }}
@@ -31,7 +31,7 @@
             v-for="item in primaryUnitList"
             :key="item.id"
             :label="item.name"
-            :value="item.id"
+            :value="item.id!"
           />
         </el-select>
       </el-form-item>
@@ -83,15 +83,15 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
-  id: undefined as unknown as number,
-  code: undefined as unknown as string,
-  name: undefined as unknown as string,
-  primaryFlag: true as boolean,
-  primaryId: undefined as unknown as number,
-  changeRate: undefined as unknown as number,
+const formData = ref<MdUnitMeasureVO>({
+  id: undefined,
+  code: undefined,
+  name: undefined,
+  primaryFlag: true,
+  primaryId: undefined,
+  changeRate: undefined,
   status: CommonStatusEnum.ENABLE,
-  remark: undefined as unknown as string
+  remark: undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '单位编码不能为空', trigger: 'blur' }],
@@ -136,13 +136,13 @@ const submitForm = async () => {
   await formRef.value.validate()
   // 如果是主单位，清空主单位和换算比例
   if (formData.value.primaryFlag) {
-    formData.value.primaryId = undefined as unknown as number
-    formData.value.changeRate = undefined as unknown as number
+    formData.value.primaryId = undefined
+    formData.value.changeRate = undefined
   }
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as MdUnitMeasureVO
+    const data = formData.value
     if (formType.value === 'create') {
       await MdUnitMeasureApi.createUnitMeasure(data)
       message.success(t('common.createSuccess'))

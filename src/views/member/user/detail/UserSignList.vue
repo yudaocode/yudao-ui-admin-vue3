@@ -8,15 +8,6 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="签到用户" prop="nickname">
-        <el-input
-          v-model="queryParams.nickname"
-          placeholder="请输入签到用户"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="签到天数" prop="day">
         <el-input
           v-model="queryParams.day"
@@ -90,7 +81,6 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   userId: NaN,
-  nickname: null,
   day: null,
   createTime: []
 })

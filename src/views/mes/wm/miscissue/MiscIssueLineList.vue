@@ -174,16 +174,16 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中
 const lineFormType = ref('') // 行表单的类型
 const formData = ref({
-  id: undefined,
+  id: undefined as number | undefined,
   issueId: undefined as number | undefined,
   materialStockId: undefined as number | undefined,
-  itemId: undefined,
+  itemId: undefined as number | undefined,
   quantity: undefined,
-  batchCode: undefined,
-  warehouseId: undefined,
-  locationId: undefined,
-  areaId: undefined,
-  remark: undefined,
+  batchCode: undefined as string | undefined,
+  warehouseId: undefined as number | undefined,
+  locationId: undefined as number | undefined,
+  areaId: undefined as number | undefined,
+  remark: undefined as string | undefined,
   quantityMax: undefined as number | undefined
 })
 const formRules = reactive({
@@ -253,16 +253,16 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
+    id: undefined as number | undefined,
     issueId: undefined,
     materialStockId: undefined,
-    itemId: undefined,
+    itemId: undefined as number | undefined,
     quantity: undefined,
-    batchCode: undefined,
-    warehouseId: undefined,
-    locationId: undefined,
-    areaId: undefined,
-    remark: undefined,
+    batchCode: undefined as string | undefined,
+    warehouseId: undefined as number | undefined,
+    locationId: undefined as number | undefined,
+    areaId: undefined as number | undefined,
+    remark: undefined as string | undefined,
     quantityMax: undefined
   }
   formRef.value?.resetFields()

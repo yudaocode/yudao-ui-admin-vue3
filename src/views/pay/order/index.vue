@@ -117,16 +117,14 @@
         :formatter="dateFormatter"
       />
       <el-table-column label="支付金额" align="center" prop="price" width="100">
-        <template #default="scope"> ￥{{ parseFloat(scope.row.price / 100).toFixed(2) }} </template>
+        <template #default="scope"> ￥{{ (scope.row.price! / 100).toFixed(2) }} </template>
       </el-table-column>
       <el-table-column label="退款金额" align="center" prop="refundPrice" width="100">
-        <template #default="scope">
-          ￥{{ parseFloat(scope.row.refundPrice / 100).toFixed(2) }}
-        </template>
+        <template #default="scope"> ￥{{ (scope.row.refundPrice! / 100).toFixed(2) }} </template>
       </el-table-column>
       <el-table-column label="手续金额" align="center" prop="channelFeePrice" width="100">
         <template #default="scope">
-          ￥{{ parseFloat(scope.row.channelFeePrice / 100).toFixed(2) }}
+          ￥{{ (scope.row.channelFeePrice! / 100).toFixed(2) }}
         </template>
       </el-table-column>
       <el-table-column label="订单号" align="left" width="300">
@@ -149,7 +147,11 @@
       </el-table-column>
       <el-table-column label="支付渠道" align="center" prop="channelCode" width="140">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="scope.row.channelCode" />
+          <dict-tag
+            v-if="scope.row.channelCode"
+            :type="DICT_TYPE.PAY_CHANNEL_CODE"
+            :value="scope.row.channelCode"
+          />
         </template>
       </el-table-column>
       <el-table-column
@@ -192,7 +194,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as OrderApi from '@/api/pay/order'
 import OrderDetail from './OrderDetail.vue'
 import download from '@/utils/download'
-import { getAppList } from '@/api/pay/app'
+import { AppVO, getAppList } from '@/api/pay/app'
 
 defineOptions({ name: 'PayOrder' })
 
@@ -200,21 +202,21 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<OrderApi.OrderDetailVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  appId: null,
-  channelCode: null,
-  merchantOrderId: null,
-  channelOrderNo: null,
-  no: null,
-  status: null,
-  createTime: []
+  appId: null as number | null,
+  channelCode: null as string | null,
+  merchantOrderId: null as string | null,
+  channelOrderNo: null as string | null,
+  no: null as string | null,
+  status: null as number | null,
+  createTime: [] as string[]
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出等待
-const appList = ref([]) // 支付应用列表集合
+const appList = ref<AppVO[]>([]) // 支付应用列表集合
 
 /** 搜索按钮操作 */
 const handleQuery = () => {

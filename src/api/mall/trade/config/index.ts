@@ -1,20 +1,28 @@
 import request from '@/config/axios'
 
 export interface ConfigVO {
+  id?: number | null
+  afterSaleRefundReasons: string[]
+  afterSaleReturnReasons: string[]
+  deliveryExpressFreeEnabled: boolean
+  deliveryExpressFreePrice: number
+  deliveryPickUpEnabled: boolean
   brokerageEnabled: boolean
-  brokerageEnabledCondition: number
-  brokerageBindMode: number
-  brokeragePosterUrls: string
+  brokerageEnabledCondition?: number
+  brokerageBindMode?: number
+  brokeragePosterUrls: string[]
   brokerageFirstPercent: number
   brokerageSecondPercent: number
   brokerageWithdrawMinPrice: number
+  brokerageWithdrawFeePercent: number
   brokerageFrozenDays: number
-  brokerageWithdrawTypes: string
+  brokerageWithdrawTypes: number[]
+  tencentLbsKey?: string
 }
 
 // 查询交易中心配置详情
 export const getTradeConfig = async () => {
-  return await request.get({ url: `/trade/config/get` })
+  return await request.get<ConfigVO>({ url: `/trade/config/get` })
 }
 
 // 保存交易中心配置

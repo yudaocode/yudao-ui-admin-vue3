@@ -32,9 +32,10 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
+const formData = ref<PropertyApi.PropertyVO>({
   id: undefined,
-  name: ''
+  name: '',
+  remark: ''
 })
 const formRules = reactive({
   name: [{ required: true, message: '名称不能为空', trigger: 'blur' }]
@@ -69,7 +70,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as PropertyApi.PropertyVO
+    const data = formData.value
     if (formType.value === 'create') {
       await PropertyApi.createProperty(data)
       message.success(t('common.createSuccess'))
@@ -89,7 +90,8 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    name: ''
+    name: '',
+    remark: ''
   }
   formRef.value?.resetFields()
 }

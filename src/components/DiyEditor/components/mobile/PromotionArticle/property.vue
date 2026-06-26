@@ -35,7 +35,7 @@ const props = defineProps<{ modelValue: PromotionArticleProperty }>()
 const emit = defineEmits(['update:modelValue'])
 const formData = useVModel(props, 'modelValue', emit)
 // 文章列表
-const articles = ref<ArticleApi.ArticleVO>([])
+const articles = ref<ArticleApi.ArticleVO[]>([])
 
 // 加载中
 const loading = ref(false)

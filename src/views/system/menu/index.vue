@@ -73,7 +73,7 @@
           v-model:expanded-row-keys="expandedRowKeys"
           :columns="columns"
           :data="list"
-          :expand-column-key="columns[0].key"
+          :expand-column-key="String(columns[0].key)"
           :height="1000"
           :width="width"
           fixed
@@ -94,7 +94,7 @@ import { MenuVO } from '@/api/system/menu'
 import MenuForm from './MenuForm.vue'
 import DictTag from '@/components/DictTag/src/DictTag.vue'
 import { Icon } from '@/components/Icon'
-import { ElButton, TableV2FixedDir, ElSwitch } from 'element-plus'
+import { ElButton, TableV2FixedDir, ElSwitch, type Column } from 'element-plus'
 import { checkPermi } from '@/utils/permission'
 import { CommonStatusEnum } from '@/utils/constants'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
@@ -102,7 +102,7 @@ import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 defineOptions({ name: 'SystemMenu' })
 
 // 虚拟列表表格
-const columns = [
+const columns: Column<MenuVO>[] = [
   {
     key: 'name',
     title: '菜单名称',

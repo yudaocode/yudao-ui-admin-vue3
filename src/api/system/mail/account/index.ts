@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
 export interface MailAccountVO {
-  id: number
+  id?: number
   mail: string
   username: string
   password: string

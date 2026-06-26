@@ -148,7 +148,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
+const formData = ref<DeliveryExpressTemplateApi.DeliveryExpressTemplateVO>({
   id: undefined,
   name: '',
   chargeMode: 1,
@@ -156,12 +156,13 @@ const formData = ref({
   charges: [],
   frees: []
 })
-const columnTitleMap = new Map()
 const columnTitle = ref({
   startCountTitle: '首件',
   extraCountTitle: '续件',
   freeCountTitle: '包邮件数'
 })
+const columnTitleMap = new Map<number, typeof columnTitle.value>()
+const getColumnTitle = (chargeMode: number) => columnTitleMap.get(chargeMode) || columnTitle.value
 const formRules = reactive({
   name: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }],
   chargeMode: [{ required: true, message: '配送计费方式不能为空', trigger: 'blur' }],
@@ -180,14 +181,14 @@ const open = async (type: string, id?: number) => {
     if (id) {
       formLoading.value = true
       formData.value = await DeliveryExpressTemplateApi.getDeliveryExpressTemplate(id)
-      columnTitle.value = columnTitleMap.get(formData.value.chargeMode)
+      columnTitle.value = getColumnTitle(formData.value.chargeMode)
       formData.value.charges.forEach((item) => {
         // 前端价格以元展示
-        item.startPrice = fenToYuan(item.startPrice)
-        item.extraPrice = fenToYuan(item.extraPrice)
+        item.startPrice = Number(fenToYuan(item.startPrice))
+        item.extraPrice = Number(fenToYuan(item.extraPrice))
       })
       formData.value.frees.forEach((item) => {
-        item.freePrice = fenToYuan(item.freePrice)
+        item.freePrice = Number(fenToYuan(item.freePrice))
       })
     }
   } finally {
@@ -206,7 +207,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = cloneDeep(formData.value) as DeliveryExpressTemplateApi.DeliveryExpressTemplateVO
+    const data = cloneDeep(formData.value)
     // 前端价格以元展示，提交到后端。用分计算
     data.charges.forEach((item) => {
       item.startPrice = yuanToFen(item.startPrice)
@@ -248,17 +249,17 @@ const resetForm = () => {
     frees: [],
     sort: 0
   }
-  columnTitle.value = columnTitleMap.get(1)
+  columnTitle.value = getColumnTitle(1)
   formRef.value?.resetFields()
 }
 
 /** 配送计费方法改变 */
 const changeChargeMode = (chargeMode: number) => {
-  columnTitle.value = columnTitleMap.get(chargeMode)
+  columnTitle.value = getColumnTitle(chargeMode)
 }
 
 /** 初始化数据 */
-const areaTree = ref([])
+const areaTree = ref<any[]>([])
 const initData = async () => {
   // 表头标题和计费方式的映射
   columnTitleMap.set(1, {
@@ -293,7 +294,7 @@ const addChargeArea = () => {
 }
 
 /** 删除计费区域 */
-const deleteChargeArea = (index) => {
+const deleteChargeArea = (index: number) => {
   const data = formData.value
   data.charges.splice(index, 1)
 }
@@ -309,7 +310,7 @@ const addFreeArea = () => {
 }
 
 /** 删除包邮区域 */
-const deleteFreeArea = (index) => {
+const deleteFreeArea = (index: number) => {
   const data = formData.value
   data.frees.splice(index, 1)
 }

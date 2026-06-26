@@ -165,7 +165,7 @@
         <el-descriptions-item v-if="formData.logisticsId" label="运单号: ">
           {{ formData.logisticsNo }}
         </el-descriptions-item>
-        <el-descriptions-item v-if="formatDate.deliveryTime" label="发货时间: ">
+        <el-descriptions-item v-if="formData.deliveryTime" label="发货时间: ">
           {{ formatDate(formData.deliveryTime) }}
         </el-descriptions-item>
         <el-descriptions-item v-for="item in 2" :key="item" label-class-name="no-colon" />
@@ -259,6 +259,7 @@ const getUserTypeColor = (type: number) => {
 
 // 订单详情
 const formData = ref<TradeOrderApi.OrderVO>({
+  items: [],
   logs: []
 })
 
@@ -299,7 +300,7 @@ const props = defineProps({
   id: propTypes.number.def(undefined), // 订单ID
   showPickUp: propTypes.bool.def(true) // 显示核销按钮
 })
-const id = (params.id || props.id) as unknown as number
+const id = Number(params.id || props.id)
 const getDetail = async () => {
   if (id) {
     const res = (await TradeOrderApi.getOrder(id)) as TradeOrderApi.OrderVO
@@ -326,9 +327,9 @@ const clipboardSuccess = () => {
 }
 
 /** 初始化 **/
-const deliveryExpressList = ref([]) // 物流公司
-const expressTrackList = ref([]) // 物流详情
-const pickUpStore = ref({}) // 自提门店
+const deliveryExpressList = ref<DeliveryExpressApi.DeliveryExpressVO[]>([]) // 物流公司
+const expressTrackList = ref<Array<{ time?: Date | string; content?: string }>>([]) // 物流详情
+const pickUpStore = ref<DeliveryPickUpStoreApi.DeliveryPickUpStoreVO>() // 自提门店
 onMounted(async () => {
   await getDetail()
   // 如果配送方式为快递，则查询物流公司

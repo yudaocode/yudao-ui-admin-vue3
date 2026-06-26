@@ -71,13 +71,13 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  parentId: undefined,
-  code: undefined,
-  name: undefined,
+  id: undefined as number | undefined,
+  parentId: undefined as number | undefined,
+  code: undefined as string | undefined,
+  name: undefined as string | undefined,
   sort: 0,
   status: CommonStatusEnum.ENABLE,
-  remark: undefined
+  remark: undefined as string | undefined
 })
 const formRules = reactive({
   code: [{ required: true, message: '设备类型编码不能为空', trigger: 'blur' }],
@@ -139,13 +139,13 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    parentId: undefined,
-    code: undefined,
-    name: undefined,
+    id: undefined as number | undefined,
+    parentId: undefined as number | undefined,
+    code: undefined as string | undefined,
+    name: undefined as string | undefined,
     sort: 0,
     status: CommonStatusEnum.ENABLE,
-    remark: undefined
+    remark: undefined as string | undefined
   }
   formRef.value?.resetFields()
 }

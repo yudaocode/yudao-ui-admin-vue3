@@ -41,7 +41,7 @@ import { fenToYuan } from '@/utils'
 defineOptions({ name: 'SkuTableSelect' })
 
 const props = defineProps({
-  spuId: propTypes.number.def(null)
+  spuId: propTypes.number.def(undefined)
 })
 
 const list = ref<any[]>([]) // 列表的数据

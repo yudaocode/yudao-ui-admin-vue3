@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="订单详情" width="700px">
+  <Dialog v-model="dialogVisible" title="订单详情" width="700px" :loading="detailLoading">
     <el-descriptions :column="2" label-class-name="desc-label">
       <el-descriptions-item label="商户单号">
         <el-tag size="small">{{ detailData.merchantOrderId }}</el-tag>
@@ -10,20 +10,25 @@
       <el-descriptions-item label="应用编号">{{ detailData.appId }}</el-descriptions-item>
       <el-descriptions-item label="应用名称">{{ detailData.appName }}</el-descriptions-item>
       <el-descriptions-item label="支付状态">
-        <dict-tag :type="DICT_TYPE.PAY_ORDER_STATUS" :value="detailData.status" size="small" />
+        <dict-tag
+          v-if="detailData.status !== undefined"
+          :type="DICT_TYPE.PAY_ORDER_STATUS"
+          :value="detailData.status"
+          size="small"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="支付金额">
-        <el-tag type="success" size="small"
-          >￥{{ ((detailData.price || 0) / 100.0).toFixed(2) }}</el-tag
-        >
+        <el-tag type="success" size="small">
+          ￥{{ (detailData.price! / 100.0).toFixed(2) }}
+        </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="手续费">
         <el-tag type="warning" size="small">
-          ￥{{ ((detailData.channelFeePrice || 0) / 100.0).toFixed(2) }}
+          ￥{{ (detailData.channelFeePrice! / 100.0).toFixed(2) }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="手续费比例">
-        {{ (detailData.channelFeeRate || 0).toFixed(2) }}%
+        {{ detailData.channelFeeRate!.toFixed(2) }}%
       </el-descriptions-item>
       <el-descriptions-item label="支付时间">
         {{ formatDate(detailData.successTime) }}
@@ -44,7 +49,11 @@
       <el-descriptions-item label="商品标题">{{ detailData.subject }}</el-descriptions-item>
       <el-descriptions-item label="商品描述">{{ detailData.body }}</el-descriptions-item>
       <el-descriptions-item label="支付渠道">
-        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="detailData.channelCode" />
+        <dict-tag
+          v-if="detailData.channelCode"
+          :type="DICT_TYPE.PAY_CHANNEL_CODE"
+          :value="detailData.channelCode"
+        />
       </el-descriptions-item>
       <el-descriptions-item label="支付 IP">{{ detailData.userIp }}</el-descriptions-item>
       <el-descriptions-item label="渠道单号">
@@ -55,7 +64,7 @@
       <el-descriptions-item label="渠道用户">{{ detailData.channelUserId }}</el-descriptions-item>
       <el-descriptions-item label="退款金额">
         <el-tag size="small" type="danger">
-          ￥{{ ((detailData.refundPrice || 0) / 100.0).toFixed(2) }}
+          ￥{{ (detailData.refundPrice! / 100.0).toFixed(2) }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="通知 URL">{{ detailData.notifyUrl }}</el-descriptions-item>
@@ -65,7 +74,7 @@
     <el-descriptions :column="1" label-class-name="desc-label" direction="vertical" border>
       <el-descriptions-item label="支付通道异步回调内容">
         <el-text style="overflow-wrap: anywhere; white-space: pre-wrap">
-          {{ detailData.extension.channelNotifyData }}
+          {{ detailData.extension?.channelNotifyData }}
         </el-text>
       </el-descriptions-item>
     </el-descriptions>
@@ -80,15 +89,15 @@ defineOptions({ name: 'PayOrderDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
-const detailData = ref({
+const detailData = ref<OrderApi.OrderDetailVO>({
   extension: {}
 })
 
 /** 打开弹窗 */
 const open = async (id: number) => {
-  dialogVisible.value = true
   // 设置数据
   detailLoading.value = true
+  dialogVisible.value = true
   try {
     detailData.value = await OrderApi.getOrderDetail(id)
     if (!detailData.value.extension) {

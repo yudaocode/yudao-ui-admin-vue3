@@ -132,10 +132,13 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
 // 文件上传成功
 const handleFileSuccess: UploadProps['onSuccess'] = (res: any): void => {
   message.success('上传成功')
+  const response = res as { data: string }
   // 删除自身
-  const index = fileList.value.findIndex((item) => item.response?.data === res.data)
+  const index = fileList.value.findIndex(
+    (item) => (item.response as { data?: string } | undefined)?.data === response.data
+  )
   fileList.value.splice(index, 1)
-  uploadList.value.push({ name: res.data, url: res.data })
+  uploadList.value.push({ name: response.data, url: response.data })
   if (uploadList.value.length == uploadNumber.value) {
     fileList.value.push(...uploadList.value)
     uploadList.value = []

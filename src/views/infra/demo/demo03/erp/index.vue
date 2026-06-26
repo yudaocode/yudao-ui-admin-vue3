@@ -142,10 +142,10 @@
   <ContentWrap>
     <el-tabs model-value="demo03Course">
       <el-tab-pane label="学生课程" name="demo03Course">
-        <Demo03CourseList :student-id="currentRow.id" />
+        <Demo03CourseList :student-id="currentRow?.id" />
       </el-tab-pane>
       <el-tab-pane label="学生班级" name="demo03Grade">
-        <Demo03GradeList :student-id="currentRow.id" />
+        <Demo03GradeList :student-id="currentRow?.id" />
       </el-tab-pane>
     </el-tabs>
   </ContentWrap>
@@ -238,7 +238,7 @@ const handleDeleteBatch = async () => {
 
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: Demo03Student[]) => {
-  checkedIds.value = records.map((item) => item.id)
+  checkedIds.value = records.map((item) => item.id!)
 }
 
 /** 导出按钮操作 */
@@ -257,8 +257,8 @@ const handleExport = async () => {
 }
 
 /** 选中行操作 */
-const currentRow = ref({}) // 选中行
-const handleCurrentChange = (row) => {
+const currentRow = ref<Demo03Student>() // 选中行
+const handleCurrentChange = (row: Demo03Student) => {
   currentRow.value = row
 }
 

@@ -51,7 +51,7 @@
         <el-select v-model="formData.mcpClientNames" placeholder="请选择 MCP" clearable multiple>
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.AI_MCP_CLIENT_NAME)"
-            :key="dict.value"
+            :key="String(dict.value)"
             :label="dict.label"
             :value="dict.value"
           />
@@ -61,7 +61,7 @@
         <el-radio-group v-model="formData.publicStatus">
           <el-radio
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
+            :key="String(dict.value)"
             :value="dict.value"
           >
             {{ dict.label }}

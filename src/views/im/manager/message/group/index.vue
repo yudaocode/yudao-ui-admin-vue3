@@ -97,7 +97,7 @@
         <template #default="{ row }">
           <template v-if="row.atUserIds?.length">
             <span v-for="(userId, idx) in row.atUserIds" :key="userId">
-              <span v-if="idx > 0">、</span>
+              <span v-if="Number(idx) > 0">、</span>
               <template v-if="userId === IM_AT_ALL_USER_ID">@{{ IM_AT_ALL_NICKNAME }}</template>
               <template v-else>
                 @{{ row.atUserNicknames?.[idx] || userId }}

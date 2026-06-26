@@ -46,11 +46,11 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  name: undefined,
-  payPrice: undefined,
-  bonusPrice: undefined,
-  status: undefined
+  id: undefined as number | undefined,
+  name: undefined as string | undefined,
+  payPrice: undefined as number | undefined,
+  bonusPrice: undefined as number | undefined,
+  status: undefined as number | undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '套餐名不能为空', trigger: 'blur' }],
@@ -71,8 +71,8 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await WalletRechargePackageApi.getWalletRechargePackage(id)
-      formData.value.payPrice = fenToYuan(formData.value.payPrice)
-      formData.value.bonusPrice = fenToYuan(formData.value.bonusPrice)
+      formData.value.payPrice = Number(fenToYuan(formData.value.payPrice!))
+      formData.value.bonusPrice = Number(fenToYuan(formData.value.bonusPrice!))
     } finally {
       formLoading.value = false
     }
@@ -90,9 +90,11 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = { ...formData.value }
-    data.payPrice = yuanToFen(data.payPrice)
-    data.bonusPrice = yuanToFen(data.bonusPrice)
+    const data = {
+      ...formData.value,
+      payPrice: yuanToFen(formData.value.payPrice!),
+      bonusPrice: yuanToFen(formData.value.bonusPrice!)
+    } as WalletRechargePackageApi.WalletRechargePackageVO
     if (formType.value === 'create') {
       await WalletRechargePackageApi.createWalletRechargePackage(data)
       message.success(t('common.createSuccess'))

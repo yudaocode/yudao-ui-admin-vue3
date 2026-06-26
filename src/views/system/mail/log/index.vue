@@ -29,7 +29,7 @@
           <el-option
             v-for="account in accountList"
             :key="account.id"
-            :value="account.id"
+            :value="account.id!"
             :label="account.mail"
           />
         </el-select>
@@ -134,19 +134,19 @@
             <div v-if="scope.row.toMails && scope.row.toMails.length > 0">
               收件：
               <span v-for="(mail, index) in scope.row.toMails" :key="mail">
-                {{ mail }}<span v-if="index < scope.row.toMails.length - 1">、</span>
+                {{ mail }}<span v-if="Number(index) < scope.row.toMails.length - 1">、</span>
               </span>
             </div>
             <div v-if="scope.row.ccMails && scope.row.ccMails.length > 0">
               抄送：
               <span v-for="(mail, index) in scope.row.ccMails" :key="mail">
-                {{ mail }}<span v-if="index < scope.row.ccMails.length - 1">、</span>
+                {{ mail }}<span v-if="Number(index) < scope.row.ccMails.length - 1">、</span>
               </span>
             </div>
             <div v-if="scope.row.bccMails && scope.row.bccMails.length > 0">
               密送：
               <span v-for="(mail, index) in scope.row.bccMails" :key="mail">
-                {{ mail }}<span v-if="index < scope.row.bccMails.length - 1">、</span>
+                {{ mail }}<span v-if="Number(index) < scope.row.bccMails.length - 1">、</span>
               </span>
             </div>
           </div>

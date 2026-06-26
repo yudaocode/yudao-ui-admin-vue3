@@ -54,7 +54,7 @@ export const defaultShortcuts = [
 
 /**
  * 时间日期转换
- * @param date 当前时间，new Date() 格式
+ * @param date 当前时间，支持 new Date()、字符串、时间戳、dayjs 等格式
  * @param format 需要转换的时间格式字符串
  * @description format 字符串随意，如 `YYYY-MM、YYYY-MM-DD`
  * @description format 季度："YYYY-MM-DD HH:mm:ss QQQQ"
@@ -63,7 +63,7 @@ export const defaultShortcuts = [
  * @description format 季度 + 星期 + 几周："YYYY-MM-DD HH:mm:ss WWW QQQQ ZZZ"
  * @returns 返回拼接后的时间字符串
  */
-export function formatDate(date: Date | string, format?: string): string {
+export function formatDate(date: dayjs.ConfigType, format?: string): string {
   // 日期不存在，则返回空
   if (!date) {
     return ''

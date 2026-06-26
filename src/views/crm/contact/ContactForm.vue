@@ -89,7 +89,7 @@
             <el-radio-group v-model="formData.master">
               <el-radio
                 v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-                :key="dict.value"
+                :key="String(dict.value)"
                 :value="dict.value"
               >
                 {{ dict.label }}
@@ -188,24 +188,24 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const areaList = ref([]) // 地区列表
 const formData = ref({
-  id: undefined,
-  name: undefined,
-  customerId: undefined,
+  id: undefined as number | undefined,
+  name: undefined as string | undefined,
+  customerId: undefined as number | undefined,
   contactNextTime: undefined,
   ownerUserId: 0,
-  mobile: undefined,
-  telephone: undefined,
-  qq: undefined,
-  wechat: undefined,
-  email: undefined,
-  areaId: undefined,
-  detailAddress: undefined,
-  sex: undefined,
+  mobile: undefined as string | undefined,
+  telephone: undefined as string | undefined,
+  qq: undefined as string | undefined,
+  wechat: undefined as string | undefined,
+  email: undefined as string | undefined,
+  areaId: undefined as number | undefined,
+  detailAddress: undefined as string | undefined,
+  sex: undefined as number | undefined,
   master: false,
-  post: undefined,
-  parentId: undefined,
-  remark: undefined,
-  businessId: undefined,
+  post: undefined as string | undefined,
+  parentId: undefined as number | undefined,
+  remark: undefined as string | undefined,
+  businessId: undefined as number | undefined,
   customerDefault: false
 })
 const formRules = reactive({

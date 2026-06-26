@@ -7,6 +7,11 @@ export interface TagVO {
   createTime: Date
 }
 
+export interface SimpleTagVO {
+  tagId: number
+  name: string
+}
+
 // 创建公众号标签
 export const createTag = (data: TagVO) => {
   return request.post({
@@ -47,7 +52,7 @@ export const getTagPage = (query: PageParam) => {
 
 // 获取公众号标签精简信息列表
 export const getSimpleTagList = () => {
-  return request.get({
+  return request.get<SimpleTagVO[]>({
     url: '/mp/tag/list-all-simple'
   })
 }

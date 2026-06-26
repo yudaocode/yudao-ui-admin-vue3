@@ -4,32 +4,34 @@
       <slot name="control-header"></slot>
       <template v-if="!$slots['control-header']">
         <ElButtonGroup key="file-control">
-          <XButton preIcon="ep:folder-opened" title="打开文件" @click="refFile.click()" />
+          <el-button @click="refFile.click()">
+            <Icon icon="ep:folder-opened" class="mr-1px" /> 打开文件
+          </el-button>
           <el-tooltip effect="light" placement="bottom">
             <template #content>
               <div style="color: #409eff">
                 <!-- <el-button link @click="downloadProcessAsXml()">下载为XML文件</el-button> -->
-                <XTextButton title="下载为XML文件" @click="downloadProcessAsXml()" />
+                <el-button link @click="downloadProcessAsXml()">下载为XML文件</el-button>
                 <br />
 
                 <!-- <el-button link @click="downloadProcessAsSvg()">下载为SVG文件</el-button> -->
-                <XTextButton title="下载为SVG文件" @click="downloadProcessAsSvg()" />
+                <el-button link @click="downloadProcessAsSvg()">下载为SVG文件</el-button>
                 <br />
 
                 <!-- <el-button link @click="downloadProcessAsBpmn()">下载为BPMN文件</el-button> -->
-                <XTextButton title="下载为BPMN文件" @click="downloadProcessAsBpmn()" />
+                <el-button link @click="downloadProcessAsBpmn()">下载为BPMN文件</el-button>
               </div>
             </template>
-            <XButton title="下载文件" preIcon="ep:download" />
+            <el-button> <Icon icon="ep:download" class="mr-1px" /> 下载文件 </el-button>
           </el-tooltip>
           <el-tooltip effect="light">
-            <XButton preIcon="ep:view" title="浏览" />
+            <el-button> <Icon icon="ep:view" class="mr-1px" /> 浏览 </el-button>
             <template #content>
               <!-- <el-button link @click="previewProcessXML">预览XML</el-button> -->
-              <XTextButton title="预览XML" @click="previewProcessXML" />
+              <el-button link @click="previewProcessXML">预览XML</el-button>
               <br />
               <!-- <el-button link @click="previewProcessJson">预览JSON</el-button> -->
-              <XTextButton title="预览JSON" @click="previewProcessJson" />
+              <el-button link @click="previewProcessJson">预览JSON</el-button>
             </template>
           </el-tooltip>
           <el-tooltip
@@ -37,7 +39,9 @@
             effect="light"
             :content="simulationStatus ? '退出模拟' : '开启模拟'"
           >
-            <XButton preIcon="ep:cpu" title="模拟" @click="processSimulation" />
+            <el-button @click="processSimulation">
+              <Icon icon="ep:cpu" class="mr-1px" /> 模拟
+            </el-button>
           </el-tooltip>
         </ElButtonGroup>
         <ElButtonGroup key="align-control">
@@ -47,11 +51,9 @@
               icon="el-icon-s-data"
               @click="elementsAlign('left')"
             /> -->
-            <XButton
-              preIcon="fa:align-left"
-              class="align align-bottom"
-              @click="elementsAlign('left')"
-            />
+            <el-button class="align align-bottom" @click="elementsAlign('left')">
+              <Icon icon="fa:align-left" class="mr-1px" />
+            </el-button>
           </el-tooltip>
           <el-tooltip effect="light" content="向右对齐">
             <!-- <el-button
@@ -59,11 +61,9 @@
               icon="el-icon-s-data"
               @click="elementsAlign('right')"
             /> -->
-            <XButton
-              preIcon="fa:align-left"
-              class="align align-top"
-              @click="elementsAlign('right')"
-            />
+            <el-button class="align align-top" @click="elementsAlign('right')">
+              <Icon icon="fa:align-left" class="mr-1px" />
+            </el-button>
           </el-tooltip>
           <el-tooltip effect="light" content="向上对齐">
             <!-- <el-button
@@ -71,11 +71,9 @@
               icon="el-icon-s-data"
               @click="elementsAlign('top')"
             /> -->
-            <XButton
-              preIcon="fa:align-left"
-              class="align align-left"
-              @click="elementsAlign('top')"
-            />
+            <el-button class="align align-left" @click="elementsAlign('top')">
+              <Icon icon="fa:align-left" class="mr-1px" />
+            </el-button>
           </el-tooltip>
           <el-tooltip effect="light" content="向下对齐">
             <!-- <el-button
@@ -83,11 +81,9 @@
               icon="el-icon-s-data"
               @click="elementsAlign('bottom')"
             /> -->
-            <XButton
-              preIcon="fa:align-left"
-              class="align align-right"
-              @click="elementsAlign('bottom')"
-            />
+            <el-button class="align align-right" @click="elementsAlign('bottom')">
+              <Icon icon="fa:align-left" class="mr-1px" />
+            </el-button>
           </el-tooltip>
           <el-tooltip effect="light" content="水平居中">
             <!-- <el-button
@@ -96,11 +92,9 @@
               @click="elementsAlign('center')"
             /> -->
             <!-- class="align align-center" -->
-            <XButton
-              preIcon="fa:align-left"
-              class="align align-center"
-              @click="elementsAlign('center')"
-            />
+            <el-button class="align align-center" @click="elementsAlign('center')">
+              <Icon icon="fa:align-left" class="mr-1px" />
+            </el-button>
           </el-tooltip>
           <el-tooltip effect="light" content="垂直居中">
             <!-- <el-button
@@ -108,11 +102,9 @@
               icon="el-icon-s-data"
               @click="elementsAlign('middle')"
             /> -->
-            <XButton
-              preIcon="fa:align-left"
-              class="align align-middle"
-              @click="elementsAlign('middle')"
-            />
+            <el-button class="align align-middle" @click="elementsAlign('middle')">
+              <Icon icon="fa:align-left" class="mr-1px" />
+            </el-button>
           </el-tooltip>
         </ElButtonGroup>
         <ElButtonGroup key="scale-control">
@@ -122,11 +114,9 @@
               icon="el-icon-zoom-out"
               @click="processZoomOut()"
             /> -->
-            <XButton
-              preIcon="ep:zoom-out"
-              @click="processZoomOut()"
-              :disabled="defaultZoom < 0.2"
-            />
+            <el-button @click="processZoomOut()" :disabled="defaultZoom < 0.2">
+              <Icon icon="ep:zoom-out" class="mr-1px" />
+            </el-button>
           </el-tooltip>
           <el-button>{{ Math.floor(defaultZoom * 10 * 10) + '%' }}</el-button>
           <el-tooltip effect="light" content="放大视图">
@@ -135,17 +125,23 @@
               icon="el-icon-zoom-in"
               @click="processZoomIn()"
             /> -->
-            <XButton preIcon="ep:zoom-in" @click="processZoomIn()" :disabled="defaultZoom > 4" />
+            <el-button @click="processZoomIn()" :disabled="defaultZoom > 4">
+              <Icon icon="ep:zoom-in" class="mr-1px" />
+            </el-button>
           </el-tooltip>
           <el-tooltip effect="light" content="重置视图并居中">
             <!-- <el-button icon="el-icon-c-scale-to-original" @click="processReZoom()" /> -->
-            <XButton preIcon="ep:scale-to-original" @click="processReZoom()" />
+            <el-button @click="processReZoom()">
+              <Icon icon="ep:scale-to-original" class="mr-1px" />
+            </el-button>
           </el-tooltip>
         </ElButtonGroup>
         <ElButtonGroup key="stack-control">
           <el-tooltip effect="light" content="撤销">
             <!-- <el-button :disabled="!revocable" icon="el-icon-refresh-left" @click="processUndo()" /> -->
-            <XButton preIcon="ep:refresh-left" @click="processUndo()" :disabled="!revocable" />
+            <el-button @click="processUndo()" :disabled="!revocable">
+              <Icon icon="ep:refresh-left" class="mr-1px" />
+            </el-button>
           </el-tooltip>
           <el-tooltip effect="light" content="恢复">
             <!-- <el-button
@@ -153,11 +149,15 @@
               icon="el-icon-refresh-right"
               @click="processRedo()"
             /> -->
-            <XButton preIcon="ep:refresh-right" @click="processRedo()" :disabled="!recoverable" />
+            <el-button @click="processRedo()" :disabled="!recoverable">
+              <Icon icon="ep:refresh-right" class="mr-1px" />
+            </el-button>
           </el-tooltip>
           <el-tooltip effect="light" content="重新绘制">
             <!-- <el-button icon="el-icon-refresh" @click="processRestart" /> -->
-            <XButton preIcon="ep:refresh" @click="processRestart()" />
+            <el-button @click="processRestart()">
+              <Icon icon="ep:refresh" class="mr-1px" />
+            </el-button>
           </el-tooltip>
         </ElButtonGroup>
       </template>
@@ -405,7 +405,10 @@ console.log(additionalModules, 'additionalModules()')
 console.log(moddleExtensions, 'moddleExtensions()')
 const initBpmnModeler = () => {
   if (bpmnModeler) return
-  let data = document.getElementById('bpmnCanvas')
+  const data = document.getElementById('bpmnCanvas')
+  if (!data) {
+    return
+  }
   console.log(data, 'data')
   console.log(props.keyboard, 'props.keyboard')
   console.log(additionalModules, 'additionalModules()')
@@ -422,9 +425,9 @@ const initBpmnModeler = () => {
     // propertiesPanel: {
     // parent: '#js-properties-panel'
     // },
-    keyboard: props.keyboard ? { bindTo: document } : null,
+    keyboard: props.keyboard ? { bind: true } : null,
     // additionalModules: additionalModules.value,
-    additionalModules: additionalModules.value,
+    additionalModules: additionalModules.value as any[],
     moddleExtensions: moddleExtensions.value
 
     // additionalModules: [

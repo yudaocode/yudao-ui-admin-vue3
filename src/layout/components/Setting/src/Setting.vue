@@ -275,12 +275,14 @@ const clear = () => {
 
     <ElDivider />
     <div>
-      <ElButton class="w-full" type="primary" @click="copyConfig">{{ t('setting.copy') }}</ElButton>
+      <el-button class="w-full" type="primary" @click="copyConfig">
+        {{ t('setting.copy') }}
+      </el-button>
     </div>
     <div class="mt-5px">
-      <ElButton class="w-full" type="danger" @click="clear">
+      <el-button class="w-full" type="danger" @click="clear">
         {{ t('setting.clearAndReset') }}
-      </ElButton>
+      </el-button>
     </div>
   </ElDrawer>
 </template>

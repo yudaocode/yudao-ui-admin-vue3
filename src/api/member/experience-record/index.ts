@@ -13,10 +13,13 @@ export interface ExperienceRecordVO {
 
 // 查询会员经验记录列表
 export const getExperienceRecordPage = async (params) => {
-  return await request.get({ url: `/member/experience-record/page`, params })
+  return await request.get<PageResult<ExperienceRecordVO[]>>({
+    url: `/member/experience-record/page`,
+    params
+  })
 }
 
 // 查询会员经验记录详情
 export const getExperienceRecord = async (id: number) => {
-  return await request.get({ url: `/member/experience-record/get?id=` + id })
+  return await request.get<ExperienceRecordVO>({ url: `/member/experience-record/get?id=` + id })
 }

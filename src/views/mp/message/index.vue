@@ -39,7 +39,7 @@
           range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="['00:00:00', '23:59:59']"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
         />
       </el-form-item>
@@ -101,7 +101,7 @@ const queryParams = reactive({
   openid: '',
   accountId: -1,
   type: MsgType.Text,
-  createTime: []
+  createTime: [] as string[]
 })
 const queryFormRef = ref<FormInstance | null>(null) // 搜索的表单
 

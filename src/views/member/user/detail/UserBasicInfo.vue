@@ -37,7 +37,7 @@
             <template #label>
               <descriptions-item-label icon="fa:mars-double" label="性别" />
             </template>
-            <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="user.sex" />
+            <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="user.sex ?? 0" />
           </el-descriptions-item>
           <el-descriptions-item>
             <template #label>
@@ -103,7 +103,7 @@
           <template #label>
             <descriptions-item-label icon="fa:mars-double" label="性别" />
           </template>
-          <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="user.sex" />
+          <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="user.sex ?? 0" />
         </el-descriptions-item>
         <el-descriptions-item>
           <template #label>
