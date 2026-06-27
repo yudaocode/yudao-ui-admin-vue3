@@ -195,6 +195,7 @@ onMounted(() => {
 /** 组件卸载前 */
 onBeforeUnmount(() => {
   clearInterval(timer.value)
+  document.body.removeEventListener('click', closeRightMenu)
 })
 </script>
 
