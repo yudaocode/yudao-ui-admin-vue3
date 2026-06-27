@@ -14,6 +14,7 @@
                 <el-row>
                   <el-col :span="17">
                     <form-create
+                      v-if="detailForm.rule.length"
                       :rule="detailForm.rule"
                       v-model:api="fApi"
                       v-model="detailForm.value"
