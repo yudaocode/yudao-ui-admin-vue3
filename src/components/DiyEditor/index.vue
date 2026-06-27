@@ -189,7 +189,12 @@ import draggable from 'vuedraggable'
 import ComponentLibrary from './components/ComponentLibrary.vue'
 import { cloneDeep, includes } from 'lodash-es'
 import { component as PAGE_CONFIG_COMPONENT } from '@/components/DiyEditor/components/mobile/PageConfig/config'
-import { component as NAVIGATION_BAR_COMPONENT } from './components/mobile/NavigationBar/config'
+import {
+  component as NAVIGATION_BAR_COMPONENT,
+  isNavigationBarAlwaysShow,
+  isNavigationBarShowType,
+  NavigationBarProperty
+} from './components/mobile/NavigationBar/config'
 import { component as TAB_BAR_COMPONENT } from './components/mobile/TabBar/config'
 import { isEmpty, isString } from '@/utils/is'
 import { DiyComponent, DiyComponentLibrary, PageConfig } from '@/components/DiyEditor/util'
@@ -232,6 +237,18 @@ const props = defineProps({
   previewUrl: propTypes.string.def('')
 })
 
+// 兼容历史装修数据：旧版只有 alwaysShow，新增 showType 后统一转成枚举并继续输出 alwaysShow。
+const normalizeNavigationBarProperty = (property: NavigationBarProperty) => {
+  const navigationBarProperty = cloneDeep(property)
+  if (!isNavigationBarShowType(navigationBarProperty.showType)) {
+    navigationBarProperty.showType = isNavigationBarAlwaysShow(navigationBarProperty)
+      ? 'always'
+      : 'scroll'
+  }
+  navigationBarProperty.alwaysShow = navigationBarProperty.showType === 'always'
+  return navigationBarProperty
+}
+
 // 监听传入的页面配置
 // 解析出 pageConfigComponent 页面整体的配置，navigationBarComponent、pageComponents、tabBarComponent 页面上、中、下的配置
 watch(
@@ -243,9 +260,10 @@ watch(
         : props.modelValue
     pageConfigComponent.value.property =
       (typeof modelValue !== 'string' && modelValue?.page) || PAGE_CONFIG_COMPONENT.property
-    navigationBarComponent.value.property =
+    navigationBarComponent.value.property = normalizeNavigationBarProperty(
       (typeof modelValue !== 'string' && modelValue?.navigationBar) ||
-      NAVIGATION_BAR_COMPONENT.property
+        NAVIGATION_BAR_COMPONENT.property
+    )
     tabBarComponent.value.property =
       (typeof modelValue !== 'string' && modelValue?.tabBar) || TAB_BAR_COMPONENT.property
     // 查找对应的页面组件

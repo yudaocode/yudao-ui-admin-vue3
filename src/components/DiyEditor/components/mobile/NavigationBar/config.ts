@@ -1,5 +1,19 @@
 import { DiyComponent } from '@/components/DiyEditor/util'
 
+export const NAVIGATION_BAR_SHOW_TYPES = ['always', 'scroll'] as const
+export type NavigationBarShowType = (typeof NAVIGATION_BAR_SHOW_TYPES)[number]
+export const isNavigationBarShowType = (showType: unknown): showType is NavigationBarShowType =>
+  NAVIGATION_BAR_SHOW_TYPES.includes(showType as NavigationBarShowType)
+const NAVIGATION_BAR_SCROLL_SHOW_VALUES: unknown[] = [false, 0, '0', 'false']
+export const isNavigationBarAlwaysShow = (
+  property: Pick<NavigationBarProperty, 'showType' | 'alwaysShow'>
+) => {
+  if (isNavigationBarShowType(property.showType)) {
+    return property.showType === 'always'
+  }
+  return !NAVIGATION_BAR_SCROLL_SHOW_VALUES.includes(property.alwaysShow)
+}
+
 /** 顶部导航栏属性 */
 export interface NavigationBarProperty {
   // 背景类型
@@ -10,8 +24,10 @@ export interface NavigationBarProperty {
   bgImg: string
   // 样式类型：默认 | 沉浸式
   styleType: 'normal' | 'inner'
-  // 常驻显示
-  alwaysShow: boolean
+  // 显示方式：常驻显示 | 滚动显示
+  showType: NavigationBarShowType
+  // 兼容旧版移动端：是否常驻显示
+  alwaysShow?: boolean | number | string
   // 小程序单元格列表
   mpCells: NavigationBarCellProperty[]
   // 其它平台单元格列表
@@ -67,6 +83,7 @@ export const component = {
     bgColor: '#fff',
     bgImg: '',
     styleType: 'normal',
+    showType: 'always',
     alwaysShow: true,
     mpCells: [
       {
