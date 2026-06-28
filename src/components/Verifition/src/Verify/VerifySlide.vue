@@ -166,6 +166,25 @@ let secretKey = ref(''), //后端返回的ase加密秘钥
 const barArea = computed(() => {
   return proxy.$el.querySelector('.verify-bar-area')
 })
+const handleMove = (e) => {
+  move(e)
+}
+const handleEnd = () => {
+  end()
+}
+const removeDragListeners = () => {
+  window.removeEventListener('touchmove', handleMove)
+  window.removeEventListener('mousemove', handleMove)
+  window.removeEventListener('touchend', handleEnd)
+  window.removeEventListener('mouseup', handleEnd)
+}
+const addDragListeners = () => {
+  removeDragListeners()
+  window.addEventListener('touchmove', handleMove)
+  window.addEventListener('mousemove', handleMove)
+  window.addEventListener('touchend', handleEnd)
+  window.addEventListener('mouseup', handleEnd)
+}
 const init = () => {
   if (explain.value === '') {
     text.value = t('captcha.slide')
@@ -182,35 +201,8 @@ const init = () => {
     proxy.$parent.$emit('ready', proxy)
   })
 
-  window.removeEventListener('touchmove', function (e) {
-    move(e)
-  })
-  window.removeEventListener('mousemove', function (e) {
-    move(e)
-  })
+  addDragListeners()
 
-  //鼠标松开
-  window.removeEventListener('touchend', function () {
-    end()
-  })
-  window.removeEventListener('mouseup', function () {
-    end()
-  })
-
-  window.addEventListener('touchmove', function (e) {
-    move(e)
-  })
-  window.addEventListener('mousemove', function (e) {
-    move(e)
-  })
-
-  //鼠标松开
-  window.addEventListener('touchend', function () {
-    end()
-  })
-  window.addEventListener('mouseup', function () {
-    end()
-  })
 }
 watch(type, () => {
   init()
@@ -221,6 +213,9 @@ onMounted(() => {
   proxy.$el.onselectstart = function () {
     return false
   }
+})
+onBeforeUnmount(() => {
+  removeDragListeners()
 })
 //鼠标按下
 const start = (e) => {

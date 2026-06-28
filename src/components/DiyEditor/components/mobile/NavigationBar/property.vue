@@ -11,11 +11,13 @@
         </el-tooltip>
       </el-radio-group>
     </el-form-item>
-    <el-form-item label="常驻显示" prop="alwaysShow" v-if="formData.styleType === 'inner'">
-      <el-radio-group v-model="formData!.alwaysShow">
-        <el-radio :value="false">关闭</el-radio>
-        <el-tooltip content="常驻显示关闭后,头部小组件将在页面滑动时淡入" placement="top">
-          <el-radio :value="true">开启</el-radio>
+    <el-form-item label="显示方式" prop="showType" v-if="formData.styleType === 'inner'">
+      <el-radio-group v-model="formData!.showType">
+        <el-tooltip content="头部导航栏固定显示" placement="top">
+          <el-radio value="always">常驻显示</el-radio>
+        </el-tooltip>
+        <el-tooltip content="头部导航栏将在页面滑动时淡入" placement="top">
+          <el-radio value="scroll">滚动显示</el-radio>
         </el-tooltip>
       </el-radio-group>
     </el-form-item>
@@ -70,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { NavigationBarProperty } from './config'
+import { isNavigationBarAlwaysShow, isNavigationBarShowType, NavigationBarProperty } from './config'
 import { useVModel } from '@vueuse/core'
 import NavigationBarCellProperty from '@/components/DiyEditor/components/mobile/NavigationBar/components/CellProperty.vue'
 // 导航栏属性面板
@@ -83,9 +85,21 @@ const rules = {
 const props = defineProps<{ modelValue: NavigationBarProperty }>()
 const emit = defineEmits(['update:modelValue'])
 const formData = useVModel(props, 'modelValue', emit)
+if (!isNavigationBarShowType(formData.value.showType)) {
+  formData.value.showType = isNavigationBarAlwaysShow(formData.value) ? 'always' : 'scroll'
+}
+formData.value.alwaysShow = formData.value.showType === 'always'
 if (!formData.value._local) {
   formData.value._local = { previewMp: true, previewOther: false }
 }
+
+watch(
+  () => formData.value.showType,
+  (showType) => {
+    formData.value.alwaysShow = showType === 'always'
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped lang="scss"></style>
