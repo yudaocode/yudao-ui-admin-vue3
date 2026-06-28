@@ -129,7 +129,7 @@
             </div>
             <teleport defer :to="`#activity-task-${activity.id}-${index}`">
               <div
-                v-if="shouldShowReasonAndAttachment(task, activity.nodeType)"
+                v-if="shouldShowReasonAndAttachment(task, activity.nodeType, index)"
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
                 <!-- TODO lesan：这里如果是办理，需要是办理意见 -->
@@ -338,11 +338,16 @@ const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
 /** 是否展示审批意见和附件 */
 const shouldShowReasonAndAttachment = (
   task: ProcessInstanceApi.ApprovalTaskInfo,
-  nodeType: NodeType
+  nodeType: NodeType,
+  nodeIndex: number
 ) => {
+  // 第一个发起人节点系统自动通过的，不展示审批意见
+  if (nodeType === NodeType.START_USER_NODE && nodeIndex === 0) {
+    return false
+  }
   return (
     Boolean(task.reason || task.attachments?.length) &&
-    [NodeType.START_USER_NODE, NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(nodeType)
+    [NodeType.START_USER_NODE, NodeType.USER_TASK_NODE].includes(nodeType)
   )
 }
 
