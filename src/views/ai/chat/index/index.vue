@@ -20,7 +20,7 @@
         </div>
         <div class="flex w-300px flex-row justify-end" v-if="activeConversation">
           <el-button type="primary" bg plain size="small" @click="openChatConversationUpdateForm">
-            <span v-html="activeConversation?.modelName"></span>
+            <span>{{ activeConversationModelName }}</span>
             <Icon icon="ep:setting" class="ml-10px" />
           </el-button>
           <el-button size="small" class="p-10px" @click="handlerMessageClear">
@@ -144,6 +144,9 @@ const message = useMessage() // 消息弹窗
 const conversationListRef = ref()
 const activeConversationId = ref<number | null>(null) // 选中的对话编号
 const activeConversation = ref<ChatConversationVO | null>(null) // 选中的 Conversation
+const activeConversationModelName = computed(
+  () => activeConversation.value?.modelName || activeConversation.value?.model || '设置模型'
+)
 const conversationInProgress = ref(false) // 对话是否正在进行中。目前只有【发送】消息时，会更新为 true，避免切换对话、删除对话等操作
 
 // 消息列表
