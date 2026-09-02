@@ -49,6 +49,9 @@ const service: AxiosInstance = axios.create({
 // request拦截器
 service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // 是否需要设置访问租户；该配置仅供前端请求拦截器使用，不作为请求头发送
+    const isVisitTenant = config.headers.get('isVisitTenant') !== false
+    config.headers.delete('isVisitTenant')
     // 是否需要设置 token；命中白名单的接口（如 /login）不带 token
     let isToken = (config!.headers || {}).isToken !== false
     if (isToken && whiteList.some((v) => config.url?.includes(v))) {
@@ -63,7 +66,7 @@ service.interceptors.request.use(
       if (tenantId) config.headers['tenant-id'] = tenantId
       // 只有登录时，才设置 visit-tenant-id 访问租户
       const visitTenantId = getVisitTenantId()
-      if (config.headers.Authorization && visitTenantId) {
+      if (config.headers.Authorization && visitTenantId && isVisitTenant) {
         config.headers['visit-tenant-id'] = visitTenantId
       }
     }
