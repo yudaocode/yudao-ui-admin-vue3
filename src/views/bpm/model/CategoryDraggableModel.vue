@@ -561,7 +561,7 @@ const initSort = useDebounceFn(() => {
   const table = document.querySelector(`.${props.categoryInfo.name} .el-table__body-wrapper tbody`)
   if (!table) return
 
-  Sortable.create(table, {
+  Sortable.create(table as HTMLElement, {
     group: 'shared',
     animation: 150,
     draggable: '.el-table__row',
@@ -569,9 +569,9 @@ const initSort = useDebounceFn(() => {
     onEnd: ({ newDraggableIndex, oldDraggableIndex }) => {
       if (oldDraggableIndex !== newDraggableIndex) {
         modelList.value.splice(
-          newDraggableIndex,
+          newDraggableIndex ?? 0,
           0,
-          modelList.value.splice(oldDraggableIndex, 1)[0]
+          modelList.value.splice(oldDraggableIndex ?? 0, 1)[0]
         )
       }
     }

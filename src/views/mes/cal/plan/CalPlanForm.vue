@@ -192,6 +192,27 @@ const formRules = reactive({
 })
 const formRef = ref()
 
+/** 轮班方式变化：单白班不倒班，清空倒班方式和倒班天数 */
+watch(
+  () => formData.value.shiftType,
+  (newVal) => {
+    if (newVal === MesCalShiftTypeEnum.SINGLE) {
+      formData.value.shiftMethod = undefined
+      formData.value.shiftCount = undefined
+    }
+  }
+)
+
+/** 倒班方式变化：仅按天倒班需要倒班天数，其他情况清空 */
+watch(
+  () => formData.value.shiftMethod,
+  (newVal) => {
+    if (newVal !== MesCalShiftMethodEnum.DAY) {
+      formData.value.shiftCount = undefined
+    }
+  }
+)
+
 /** 生成计划编码 */
 const generateCode = async () => {
   formData.value.code = await AutoCodeRecordApi.generateAutoCode(MesAutoCodeRuleCode.CAL_PLAN_CODE)

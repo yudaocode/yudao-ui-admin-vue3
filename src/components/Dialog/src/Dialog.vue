@@ -11,6 +11,7 @@ const props = defineProps({
   modelValue: propTypes.bool.def(false),
   title: propTypes.string.def('Dialog'),
   fullscreen: propTypes.bool.def(true),
+  defaultFullscreen: propTypes.bool.def(false),
   width: propTypes.oneOfType([String, Number]).def('40%'),
   scroll: propTypes.bool.def(false), // 是否开启滚动条。如果是的话，按照 maxHeight 设置最大高度
   maxHeight: propTypes.oneOfType([String, Number]).def('400px'),
@@ -18,7 +19,14 @@ const props = defineProps({
 })
 
 const getBindValue = computed(() => {
-  const delArr: string[] = ['fullscreen', 'title', 'maxHeight', 'appendToBody', 'loading']
+  const delArr: string[] = [
+    'fullscreen',
+    'defaultFullscreen',
+    'title',
+    'maxHeight',
+    'appendToBody',
+    'loading'
+  ]
   const attrs = useAttrs()
   const obj = { ...attrs, ...props }
   for (const key in obj) {
@@ -29,7 +37,16 @@ const getBindValue = computed(() => {
   return obj
 })
 
-const isFullscreen = ref(false)
+const isFullscreen = ref(props.defaultFullscreen)
+
+watch(
+  () => props.modelValue,
+  (visible) => {
+    if (visible) {
+      isFullscreen.value = props.defaultFullscreen
+    }
+  }
+)
 
 const toggleFull = () => {
   isFullscreen.value = !unref(isFullscreen)

@@ -218,6 +218,31 @@ export enum DICT_TYPE {
   CRM_PRODUCT_UNIT = 'crm_product_unit', // CRM 产品单位
   CRM_FOLLOW_UP_TYPE = 'crm_follow_up_type', // CRM 跟进方式
 
+  // ========== PMS - 项目管理模块 ==========
+  PMS_PROJECT_TYPE = 'pms_project_type', // PMS 项目类型
+  PMS_PROJECT_STATUS = 'pms_project_status', // PMS 项目状态
+  PMS_PROJECT_LEVEL = 'pms_project_level', // PMS 项目优先级
+  PMS_PROJECT_GROUP_TYPE = 'pms_project_group_type', // PMS 项目分组类型
+  PMS_PROJECT_SCENE_TYPE = 'pms_project_scene_type', // PMS 项目列表场景
+  PMS_PROJECT_SORT_TYPE = 'pms_project_sort_type', // PMS 项目排序类型
+  PMS_PROJECT_MEMBER_LEVEL = 'pms_project_member_level', // PMS 项目成员权限级别
+  PMS_ITERATION_STATUS = 'pms_iteration_status', // PMS 迭代状态
+  PMS_WORK_ITEM_TYPE = 'pms_work_item_type', // PMS 工作项类型
+  PMS_WORK_ITEM_STATUS_TYPE = 'pms_work_item_status_type', // PMS 工作项语义状态
+  PMS_WORK_ITEM_LIFECYCLE_STATUS = 'pms_work_item_lifecycle_status', // PMS 工作项生命周期状态
+  PMS_WORK_ITEM_PRIORITY = 'pms_work_item_priority', // PMS 工作项优先级
+  PMS_WORK_ITEM_DEFECT_TYPE = 'pms_work_item_defect_type', // PMS 工作项缺陷类型
+  PMS_KNOWLEDGE_OBJECT_TYPE = 'pms_knowledge_object_type', // PMS 知识对象类型
+  PMS_KNOWLEDGE_DOCUMENT_TYPE = 'pms_knowledge_document_type', // PMS 知识文档类型
+  PMS_KNOWLEDGE_DOCUMENT_STATUS = 'pms_knowledge_document_status', // PMS 知识文档状态
+  PMS_KNOWLEDGE_CONTENT_LEVEL = 'pms_knowledge_content_level', // PMS 知识内容协作等级
+  PMS_KNOWLEDGE_GROUP_TYPE = 'pms_knowledge_group_type', // PMS 知识库分组类型
+  PMS_KNOWLEDGE_LIBRARY_MEMBER_LEVEL = 'pms_knowledge_library_member_level', // PMS 知识库成员等级
+
+  // ========== OA - 办公自动化模块 ==========
+  OA_ATTENDANCE_TYPE = 'oa_attendance_type', // OA 考勤类型
+  OA_ATTENDANCE_STATUS = 'oa_attendance_status', // OA 考勤状态
+
   // ========== FMS - 财务管理模块 ==========
   FMS_ACCOUNT_USER_LEVEL = 'fms_account_user_level', // FMS 账套用户权限级别
   FMS_SUBJECT_CATEGORY = 'fms_subject_category', // FMS 科目类别

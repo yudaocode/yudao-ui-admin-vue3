@@ -177,7 +177,8 @@ const editorConfig = computed((): IEditorConfig => {
 
 const editorStyle = computed(() => {
   return {
-    height: isNumber(props.height) ? `${props.height}px` : props.height
+    height: isNumber(props.height) ? `${props.height}px` : props.height,
+    width: '100%'
   }
 })
 
@@ -205,7 +206,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="border-1 border-solid border-[var(--tags-view-border-color)] z-10">
+  <div class="w-full min-w-0 border-1 border-solid border-[var(--tags-view-border-color)] z-10">
     <!-- 工具栏 -->
     <Toolbar
       :editor="editorRef"

@@ -37,7 +37,7 @@
             </div>
           </el-tab-pane>
           <!-- 流程图 -->
-          <el-tab-pane label="流程图" name="diagram">
+          <el-tab-pane label="流程图" name="diagram" lazy>
             <div class="form-scroll-area">
               <!-- BPMN 流程图预览 -->
               <ProcessInstanceBpmnViewer

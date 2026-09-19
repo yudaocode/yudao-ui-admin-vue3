@@ -76,7 +76,7 @@ import { UploadFile } from 'element-plus/es/components/upload/src/upload'
 defineOptions({ name: 'UploadFile' })
 
 const message = useMessage() // 消息弹窗
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'update:fileSize'])
 
 const props = defineProps({
   modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
@@ -141,9 +141,10 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
 //   uploadRef.value.data.path = uploadFile.name
 // }
 // 文件上传成功
-const handleFileSuccess: UploadProps['onSuccess'] = (res: any): void => {
+const handleFileSuccess: UploadProps['onSuccess'] = (res: any, uploadFile): void => {
   message.success('上传成功')
   const response = res as { data: string }
+  const fileSize = uploadFile.raw?.size
   // 删除自身
   const index = fileList.value.findIndex(
     (item) => (item.response as { data?: string } | undefined)?.data === response.data
@@ -155,6 +156,7 @@ const handleFileSuccess: UploadProps['onSuccess'] = (res: any): void => {
     uploadList.value = []
     uploadNumber.value = 0
     emitUpdateModelValue()
+    emit('update:fileSize', fileSize)
   }
 }
 // 文件数超出提示
@@ -173,6 +175,7 @@ const handleRemove = (file: UploadFile) => {
   if (index > -1) {
     fileList.value.splice(index, 1)
     emitUpdateModelValue()
+    emit('update:fileSize', undefined)
   }
 }
 const handlePreview: UploadProps['onPreview'] = (uploadFile) => {

@@ -87,7 +87,7 @@
 
 * 通用模块（必选）：系统功能、基础设施
 * 通用模块（可选）：工作流程、支付系统、数据报表、会员中心
-* 业务系统（按需）：Mall 电子商城、OA 办公自动化、ERP 企业资源计划系统、WMS 仓库管理系统、CRM 客户关系管理、CMS 内容管理系统、MES 执行制造系统、HRM 人力资源管理、FMS 财务管理、AI 大模型平台、IoT 物联网系统、IM 即时通讯系统、Mobile 手机移动端、Report 数据大屏
+* 业务系统（按需）：Mall 电子商城、OA 办公自动化、ERP 企业资源计划系统、WMS 仓库管理系统、CRM 客户关系管理、CMS 内容管理系统、MES 执行制造系统、HRM 人力资源管理、FMS 财务管理、PMS 项目管理、AI 大模型平台、IoT 物联网系统、IM 即时通讯系统、Mobile 手机移动端、Report 数据大屏
 
 ### 系统功能
 
@@ -275,6 +275,14 @@
 ![功能图](/.image/common/fms-feature.png)
 
 ![预览图](/.image/common/fms-preview.png)
+
+### PMS 项目管理系统
+
+演示地址：<https://doc.iocoder.cn/pms-preview/>
+
+![功能图](/.image/common/pms-feature.png)
+
+![预览图](/.image/common/pms-preview.png)
 
 ### AI 大模型
 

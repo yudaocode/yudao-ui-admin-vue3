@@ -76,7 +76,7 @@
           </el-tab-pane>
 
           <!-- 流程图 -->
-          <el-tab-pane label="流程图" name="diagram">
+          <el-tab-pane label="流程图" name="diagram" lazy>
             <div class="form-scroll-area">
               <ProcessInstanceSimpleViewer
                 v-show="

@@ -210,6 +210,16 @@ const remainingRouter: AppRouteRecordRaw[] = [
     }
   },
   {
+    path: '/pms/kb/document/share/:token',
+    component: () => import('@/views/pms/kb/document/share/index.vue'),
+    name: 'PmsKnowledgeDocumentShare',
+    meta: {
+      hidden: true,
+      title: '知识文档分享',
+      noTagsView: true
+    }
+  },
+  {
     path: '/sso',
     component: () => import('@/views/Login/Login.vue'),
     name: 'SSOLogin',
@@ -527,6 +537,87 @@ const remainingRouter: AppRouteRecordRaw[] = [
           activeMenu: '/mall/promotion/diy-template/diy-page'
         },
         component: () => import('@/views/mall/promotion/diy/page/decorate.vue')
+      }
+    ]
+  },
+  {
+    path: '/pms',
+    component: Layout,
+    name: 'PmsCenter',
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'pm/iteration/detail/:id(\\d+)',
+        name: 'PmsIterationDetail',
+        meta: {
+          title: '迭代详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/pms/pm/project/list'
+        },
+        component: () => import('@/views/pms/pm/iteration/detail/index.vue')
+      },
+      {
+        path: 'pm/project/detail/:id(\\d+)',
+        name: 'PmsProjectDetail',
+        meta: {
+          title: '项目详情',
+          noCache: true,
+          hidden: true,
+          viewKey: 'PmsProjectDetail',
+          activeMenu: '/pms/pm/project/list'
+        },
+        component: () => import('@/views/pms/pm/project/detail/index.vue')
+      },
+      {
+        path: 'pm/project/config/:id(\\d+)',
+        name: 'PmsProjectConfig',
+        meta: {
+          title: '项目设置',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/pms/pm/project/list'
+        },
+        component: () => import('@/views/pms/pm/project/config/index.vue')
+      },
+      {
+        path: 'kb/library/:libraryId(\\d+)',
+        name: 'PmsKnowledgeLibraryDetail',
+        meta: {
+          title: '知识库详情',
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          viewKey: 'PmsKnowledgeDocument',
+          activeMenu: '/pms/kb/library'
+        },
+        component: () => import('@/views/pms/kb/document/index.vue')
+      },
+      {
+        path: 'kb/library/:libraryId(\\d+)/folder/:folderId(\\d+)',
+        name: 'PmsKnowledgeFolderDetail',
+        meta: {
+          title: '文件夹详情',
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          viewKey: 'PmsKnowledgeDocument',
+          activeMenu: '/pms/kb/library'
+        },
+        component: () => import('@/views/pms/kb/document/index.vue')
+      },
+      {
+        path: 'kb/library/:libraryId(\\d+)/document/:documentId(\\d+)',
+        name: 'PmsKnowledgeDocumentDetail',
+        meta: {
+          title: '文档详情',
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          viewKey: 'PmsKnowledgeDocument',
+          activeMenu: '/pms/kb/library'
+        },
+        component: () => import('@/views/pms/kb/document/index.vue')
       }
     ]
   },

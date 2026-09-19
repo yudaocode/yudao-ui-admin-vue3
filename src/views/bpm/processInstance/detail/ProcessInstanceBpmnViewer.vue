@@ -4,6 +4,7 @@
   </el-card>
 </template>
 <script lang="ts" setup>
+import { onMounted } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
 
@@ -41,22 +42,43 @@ watch(
     view.value.bpmnXml = value || ''
   }
 )
+
+/** 初始同步 props 到 view */
+const syncView = () => {
+  if (props.modelView) {
+    //@ts-ignore
+    view.value = props.modelView
+  }
+  if (props.bpmnXml) {
+    view.value.bpmnXml = props.bpmnXml
+  }
+}
+
+/** mounted：初始同步 */
+onMounted(() => {
+  syncView()
+})
 </script>
 <style lang="scss" scoped>
 .box-card {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
   margin-bottom: 0;
 
   :deep(.el-card__body) {
-    height: 100%;
+    flex: 1;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   :deep(.process-viewer) {
     width: 100%;
-    height: 100% !important;
-    min-height: 100%;
+    flex: 1;
+    min-height: 0;
     overflow: auto;
   }
 }

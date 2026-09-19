@@ -40,7 +40,7 @@ provide('reload', reload)
     <router-view v-if="routerAlive">
       <template #default="{ Component, route }">
         <keep-alive :include="getCaches">
-          <component :is="Component" :key="route.fullPath" />
+          <component :is="Component" :key="route.meta.viewKey || route.fullPath" />
         </keep-alive>
       </template>
     </router-view>
