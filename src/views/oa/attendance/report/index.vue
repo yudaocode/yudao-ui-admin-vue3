@@ -12,7 +12,7 @@
   </ContentWrap>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import OaAttendanceMonthReport from './OaAttendanceMonthReport.vue'
 import OaAttendanceWeekReport from './OaAttendanceWeekReport.vue'
 

@@ -28,7 +28,7 @@
         <div style="font-size: 8px">
           大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b>
         </div>
-        <div style="font-size: 8px">
+        <div v-if="fileType.length" style="font-size: 8px">
           格式为 <b style="color: #f56c6c">{{ fileType.join('/') }}</b> 的文件
         </div>
       </template>
@@ -80,7 +80,7 @@ const emit = defineEmits(['update:modelValue', 'update:fileSize'])
 
 const props = defineProps({
   modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
-  fileType: propTypes.array.def(['doc', 'xls', 'ppt', 'txt', 'pdf']), // 文件类型, 例如['png', 'jpg', 'jpeg']
+  fileType: propTypes.array.def(['doc', 'xls', 'ppt', 'txt', 'pdf']), // 文件类型，空数组表示不限制格式
   fileSize: propTypes.number.def(5), // 大小限制(MB)
   limit: propTypes.number.def(5), // 数量限制
   autoUpload: propTypes.bool.def(true), // 自动上传
@@ -116,12 +116,14 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
   if (file.name.lastIndexOf('.') > -1) {
     fileExtension = file.name.slice(file.name.lastIndexOf('.') + 1)
   }
-  const isImg = props.fileType.some((type: string) => {
-    if (file.type.indexOf(type) > -1) return true
-    return !!(fileExtension && fileExtension.indexOf(type) > -1)
-  })
+  const isAllowedType =
+    props.fileType.length === 0 ||
+    props.fileType.some((type: string) => {
+      if (file.type.indexOf(type) > -1) return true
+      return !!(fileExtension && fileExtension.indexOf(type) > -1)
+    })
   const isLimit = file.size < props.fileSize * 1024 * 1024
-  if (!isImg) {
+  if (!isAllowedType) {
     message.error(`文件格式不正确, 请上传${props.fileType.join('/')}格式!`)
     removeRejectedFile(file)
     return false

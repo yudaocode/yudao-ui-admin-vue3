@@ -47,7 +47,7 @@
   </Dialog>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel, getIntDictOptions } from '@/utils/dict'
 import { OA_ATTENDANCE_STATUS, OA_ATTENDANCE_TYPE } from '@/views/oa/utils/constants'
@@ -76,16 +76,19 @@ const formRef = ref() // 表单 Ref
 /** 根据考勤类型过滤可选状态 */
 const statusOptions = computed(() => {
   const allowedStatusValues: number[] =
-    formData.value.type === OA_ATTENDANCE_TYPE.CLOCK_IN
-      ? [OA_ATTENDANCE_STATUS.NORMAL, OA_ATTENDANCE_STATUS.LATE]
-      : [OA_ATTENDANCE_STATUS.NORMAL, OA_ATTENDANCE_STATUS.EARLY]
+    {
+      [OA_ATTENDANCE_TYPE.CLOCK_IN]: [OA_ATTENDANCE_STATUS.NORMAL, OA_ATTENDANCE_STATUS.LATE],
+      [OA_ATTENDANCE_TYPE.CLOCK_OUT]: [OA_ATTENDANCE_STATUS.NORMAL, OA_ATTENDANCE_STATUS.EARLY],
+      [OA_ATTENDANCE_TYPE.LEAVE]: [OA_ATTENDANCE_STATUS.LEAVE],
+      [OA_ATTENDANCE_TYPE.TRAVEL]: [OA_ATTENDANCE_STATUS.TRAVEL]
+    }[formData.value.type] ?? []
   return getIntDictOptions(DICT_TYPE.OA_ATTENDANCE_STATUS).filter((item) =>
     allowedStatusValues.includes(item.value)
   )
 })
 
 /** 打开弹窗 */
-const open = async (id: number) => {
+async function open(id: number) {
   dialogVisible.value = true
   resetForm()
   // 修改时，设置数据
@@ -98,9 +101,10 @@ const open = async (id: number) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const submitForm = async () => {
+
+/** 提交表单 */
+async function submitForm() {
   // 校验表单
   if (!formRef.value) return
   const valid = await formRef.value.validate()
@@ -119,7 +123,7 @@ const submitForm = async () => {
 }
 
 /** 重置表单 */
-const resetForm = () => {
+function resetForm() {
   formData.value = {
     id: 0,
     userId: 0,

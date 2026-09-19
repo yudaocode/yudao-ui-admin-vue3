@@ -52,8 +52,8 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" /> 重置</el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -121,7 +121,7 @@
   <OaAttendanceForm ref="formRef" @success="getList" />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as AttendanceApi from '@/api/oa/attendance'
@@ -134,8 +134,8 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const total = ref(0) // 列表的总页数
 const list = ref<AttendanceApi.OaAttendanceVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总条数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -147,7 +147,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 
 /** 查询列表 */
-const getList = async () => {
+async function getList() {
   loading.value = true
   try {
     const data = await AttendanceApi.getAttendancePage(queryParams)
@@ -159,25 +159,25 @@ const getList = async () => {
 }
 
 /** 搜索按钮操作 */
-const handleQuery = () => {
+function handleQuery() {
   queryParams.pageNo = 1
   getList()
 }
 
 /** 重置按钮操作 */
-const resetQuery = () => {
+function resetQuery() {
   queryFormRef.value?.resetFields()
   handleQuery()
 }
 
 /** 修改操作 */
 const formRef = ref()
-const openForm = (id: number) => {
+function openForm(id: number) {
   formRef.value.open(id)
 }
 
 /** 删除操作 */
-const handleDelete = async (id: number) => {
+async function handleDelete(id: number) {
   try {
     // 删除的二次确认
     await message.delConfirm()
