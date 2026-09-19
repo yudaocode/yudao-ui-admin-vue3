@@ -1,4 +1,5 @@
 <template>
+  <doc-alert title="【办公】企业邮箱" url="https://doc.iocoder.cn/oa/mail/" />
   <div
     class="h-[calc(100vh-150px)] min-h-580px overflow-x-auto rounded border border-solid border-[var(--el-border-color-light)] bg-[var(--el-bg-color)]"
   >

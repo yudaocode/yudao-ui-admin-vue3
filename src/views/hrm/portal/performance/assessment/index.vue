@@ -1,4 +1,9 @@
 <template>
+  <doc-alert
+    title="【绩效】绩效考核、绩效档案"
+    url="https://doc.iocoder.cn/hrm/performance/assessment/"
+  />
+
   <div v-if="accessible">
     <ContentWrap>
       <PerformanceTaskTabs

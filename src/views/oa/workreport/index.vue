@@ -1,4 +1,8 @@
 <template>
+  <doc-alert
+    title="【协作】日程、任务、计划与汇报"
+    url="https://doc.iocoder.cn/oa/collaboration/work/"
+  />
   <!-- 汇报类型与搜索工作栏 -->
   <ContentWrap>
     <el-tabs v-model="activeType" @tab-change="handleTypeChange">

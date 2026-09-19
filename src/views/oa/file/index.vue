@@ -1,4 +1,5 @@
 <template>
+  <doc-alert title="【办公】企业云盘" url="https://doc.iocoder.cn/oa/file/" />
   <!-- 云盘概览，独立于列表筛选 -->
   <OaFileStorage ref="storageRef" />
   <div class="flex items-start gap-20px">

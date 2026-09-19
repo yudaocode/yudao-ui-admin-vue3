@@ -1,4 +1,5 @@
 <template>
+  <doc-alert title="【办公】企业邮箱" url="https://doc.iocoder.cn/oa/mail/" />
   <!-- 搜索 -->
   <ContentWrap>
     <el-form

@@ -1,4 +1,8 @@
 <template>
+  <doc-alert
+    title="【协作】日程、任务、计划与汇报"
+    url="https://doc.iocoder.cn/oa/collaboration/work/"
+  />
   <el-row :gutter="20">
     <!-- 左侧部门树 -->
     <el-col :span="4" :xs="24">

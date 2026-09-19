@@ -1,4 +1,8 @@
 <template>
+  <doc-alert
+    title="【协作】日程、任务、计划与汇报"
+    url="https://doc.iocoder.cn/oa/collaboration/work/"
+  />
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form ref="queryFormRef" :inline="true" :model="queryParams" class="-mb-15px">

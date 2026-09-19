@@ -1,4 +1,5 @@
 <template>
+  <doc-alert title="【流程】公文管理" url="https://doc.iocoder.cn/oa/official-doc/" />
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form

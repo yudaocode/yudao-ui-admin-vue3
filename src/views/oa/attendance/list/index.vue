@@ -1,4 +1,8 @@
 <template>
+  <doc-alert
+    title="【流程】考勤、请假、加班、转正与离职"
+    url="https://doc.iocoder.cn/oa/attendance-application/"
+  />
   <!-- 搜索 -->
   <ContentWrap>
     <el-form

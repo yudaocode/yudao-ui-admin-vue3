@@ -1,4 +1,8 @@
 <template>
+  <doc-alert
+    title="【行政】会议室、车辆管理"
+    url="https://doc.iocoder.cn/oa/administration/meeting-vehicle/"
+  />
   <!-- 搜索 -->
   <ContentWrap>
     <el-form

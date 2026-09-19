@@ -1,4 +1,5 @@
 <template>
+  <doc-alert title="OA 手册（功能开启）" url="https://doc.iocoder.cn/oa/build/" />
   <div class="min-h-full">
     <!-- 各区块独立请求，首页仅负责布局 -->
     <div class="grid grid-cols-1 gap-16px md:grid-cols-2 xl:grid-cols-4">
