@@ -710,7 +710,7 @@ function resetForm() {
 <style scoped>
 .employee-form-tabs :deep(.el-tabs__content) {
   max-height: calc(100vh - 270px);
-  overflow-y: auto;
   padding-right: 8px;
+  overflow-y: auto;
 }
 </style>
