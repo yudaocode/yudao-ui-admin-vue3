@@ -165,8 +165,13 @@ const resetForm = () => {
 const getTree = async () => {
   deptTree.value = []
   const data = await DeptApi.getSimpleDeptList()
-  let dept: Tree = { id: 0, name: '顶级部门', children: [] }
-  dept.children = handleTree(data)
-  deptTree.value.push(dept)
+  // 无数据（初始化）或能访问顶层部门时才显示"顶级部门"，后端已对受限用户过滤
+  if (data.length === 0 || data.some((d) => d.parentId === 0)) {
+    const dept: Tree = { id: 0, name: '顶级部门', children: [] }
+    dept.children = handleTree(data)
+    deptTree.value.push(dept)
+  } else {
+    deptTree.value = handleTree(data)
+  }
 }
 </script>
