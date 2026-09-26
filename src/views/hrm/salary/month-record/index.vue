@@ -219,20 +219,9 @@ const summaryMap = computed<Record<number, number>>(() =>
   )
 )
 
-/** 获得叶子薪资项 */
+/** 获得工资表表头中的明细项，跳过空分类 */
 function getLeafOptions(options?: SalaryOptionVO[]) {
-  const result: SalaryOptionVO[] = []
-  function append(optionsToAppend?: SalaryOptionVO[]) {
-    for (const option of optionsToAppend || []) {
-      if (option.children?.length) {
-        append(option.children)
-      } else {
-        result.push(option)
-      }
-    }
-  }
-  append(options)
-  return result
+  return (options || []).flatMap((category) => category.children || [])
 }
 
 /** 获得员工指定薪资项金额 */

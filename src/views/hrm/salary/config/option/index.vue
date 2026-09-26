@@ -1,5 +1,8 @@
 <template>
-  <doc-alert title="【薪资】计薪设置、薪资档案、月度工资、工资条" url="https://doc.iocoder.cn/hrm/salary/config/" />
+  <doc-alert
+    title="【薪资】计薪设置、薪资档案、月度工资、工资条"
+    url="https://doc.iocoder.cn/hrm/salary/config/"
+  />
 
   <!-- 列表 -->
   <ContentWrap>
@@ -8,7 +11,12 @@
         <el-tab-pane label="企业可选项" name="enterprise" />
         <el-tab-pane label="系统默认项" name="system" />
       </el-tabs>
-      <el-button v-hasPermi="['hrm:salary:option:update']" class="ml-16px" @click="handleSync">
+      <el-button
+        v-hasPermi="['hrm:salary:option:update']"
+        class="ml-16px"
+        title="补齐并更新标准薪资项，保留已有项的启用和显示设置"
+        @click="handleSync"
+      >
         <Icon class="mr-5px" icon="ep:refresh" />同步标准薪资项
       </el-button>
     </div>
@@ -243,7 +251,7 @@ async function handleUpdateVisible(option: SalaryOptionApi.SalaryOptionVO) {
 async function handleSync() {
   // 同步标准薪资项
   await SalaryOptionApi.syncSalaryOption()
-  message.success(t('common.updateSuccess'))
+  message.success('同步完成，已保留启用和显示设置；已移除的标准项可通过「添加薪资项」恢复')
   // 刷新列表
   await getList()
 }
