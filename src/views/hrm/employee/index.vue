@@ -2,6 +2,14 @@
   <doc-alert title="【员工】员工管理" url="https://doc.iocoder.cn/hrm/employee/" />
 
   <ContentWrap>
+    <el-alert
+      v-if="queryParams.surveyType === HrmEmployeeSurveyType.ENTRY"
+      title="当前筛选：本月入职员工"
+      type="info"
+      show-icon
+      class="mb-12px"
+      @close="resetQuery"
+    />
     <!-- 搜索工作栏 -->
     <el-form
       ref="queryFormRef"
@@ -396,6 +404,7 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const router = useRouter() // 路由
 const route = useRoute() // 当前路由
+const employeePath = route.path // 缓存页面只响应自身路由
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -468,11 +477,15 @@ const statusItems = [
 /** 员工状态页签 */
 const statusTabOptions = computed(() => {
   const countMap = Object.fromEntries(statusCounts.value.map((item) => [item.status, item.count]))
-  return statusItems.map((item) => ({
+  const items = statusItems.map((item) => ({
     label: item.label,
     value: String(item.status),
     count: countMap[item.status] ?? 0
   }))
+  if (queryParams.surveyType === HrmEmployeeSurveyType.ENTRY) {
+    items.unshift({ label: '本月入职', value: 'entry', count: total.value })
+  }
+  return items
 })
 
 /** 查询列表 */
@@ -489,7 +502,11 @@ async function getList() {
 
 /** 查询员工状态数量 */
 async function getStatusCounts() {
-  statusCounts.value = await EmployeeApi.getEmployeeStatusCount(queryParams)
+  statusCounts.value = await EmployeeApi.getEmployeeStatusCount({
+    ...queryParams,
+    surveyType:
+      queryParams.surveyType === HrmEmployeeSurveyType.ENTRY ? undefined : queryParams.surveyType
+  })
 }
 
 /** 刷新列表和状态统计 */
@@ -511,12 +528,12 @@ function resetQuery() {
   queryParams.statusCategory = HrmEmployeeStatusTab.ACTIVE
   queryParams.surveyType = undefined
   queryParams.todoType = undefined
-  handleQuery()
+  syncStatusFilterToRoute()
 }
 
 /** tab 切换 */
 function handleStatusTabClick(tab: TabsPaneContext) {
-  if (tab.paneName === undefined) {
+  if (tab.paneName === undefined || tab.paneName === 'entry') {
     return
   }
   queryParams.statusCategory = Number(tab.paneName)
@@ -524,7 +541,23 @@ function handleStatusTabClick(tab: TabsPaneContext) {
   queryParams.status = undefined
   queryParams.surveyType = undefined
   queryParams.todoType = undefined
-  handleQuery()
+  syncStatusFilterToRoute()
+}
+
+/** 清除首页筛选并同步当前状态，避免刷新后旧条件恢复 */
+function syncStatusFilterToRoute() {
+  const statusCategory = String(queryParams.statusCategory)
+  if (
+    route.query.statusCategory === statusCategory &&
+    !route.query.surveyType &&
+    !route.query.todoType
+  ) {
+    handleQuery()
+    return
+  }
+  router.replace({
+    query: { ...route.query, statusCategory, surveyType: undefined, todoType: undefined }
+  })
 }
 
 /** 应用首页跳转携带的员工筛选条件 */
@@ -534,8 +567,7 @@ function applyHomeFilter() {
   queryParams.todoType = undefined
   activeStatus.value = String(HrmEmployeeStatusTab.FULL_TIME)
   const statusCategory = Number(route.query.statusCategory)
-  const statusCategoryValues: number[] = Object.values(HrmEmployeeStatusTab)
-  if (statusCategoryValues.includes(statusCategory)) {
+  if (statusItems.some((item) => item.status === statusCategory)) {
     queryParams.statusCategory = statusCategory
     activeStatus.value = String(statusCategory)
   }
@@ -552,7 +584,11 @@ function applyHomeFilter() {
       surveyStatusCategory = HrmEmployeeStatusTab.PENDING_LEAVE
     }
     queryParams.statusCategory = surveyStatusCategory
-    activeStatus.value = surveyStatusCategory ? String(surveyStatusCategory) : ''
+    if (queryParams.surveyType === HrmEmployeeSurveyType.ENTRY) {
+      activeStatus.value = 'entry'
+    } else {
+      activeStatus.value = surveyStatusCategory ? String(surveyStatusCategory) : ''
+    }
   }
   const todoType = Number(route.query.todoType)
   const todoTypeValues: number[] = Object.values(HrmEmployeeTodoType)
@@ -864,9 +900,22 @@ function isEmployeeInsuranceEligible(employee: EmployeeApi.HrmEmployeeVO) {
   )
 }
 
-/** 初始化 */
-onMounted(() => {
-  applyHomeFilter()
-  refreshList()
-})
+/** 首页跳转、缓存页面再次进入及浏览器前进后退时同步筛选 */
+watch(
+  () => [
+    route.path,
+    route.query.statusCategory,
+    route.query.surveyType,
+    route.query.todoType,
+    route.query.leaderEmployeeId
+  ],
+  () => {
+    if (route.path !== employeePath) {
+      return
+    }
+    applyHomeFilter()
+    handleQuery()
+  },
+  { immediate: true }
+)
 </script>
