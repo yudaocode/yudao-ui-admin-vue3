@@ -232,9 +232,12 @@ const handleCustomerChange = async (customerId: number) => {
   // 重置合同编号
   formData.value.contractId = undefined
   // 获得合同列表
+  contractList.value = []
   if (customerId) {
-    contractList.value = []
-    contractList.value = await ContractApi.getContractSimpleList(customerId)
+    const contracts = await ContractApi.getContractSimpleList(customerId)
+    if (formData.value.customerId === customerId) {
+      contractList.value = contracts
+    }
   }
 }
 </script>
