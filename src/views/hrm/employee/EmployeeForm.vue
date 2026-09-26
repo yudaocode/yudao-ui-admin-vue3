@@ -178,12 +178,8 @@
               </el-form-item>
             </el-col>
             <el-col v-if="isFieldVisible('postName')" :span="12">
-              <el-form-item label="职位名称" prop="postName">
-                <el-input
-                  v-model="formData.postName"
-                  maxlength="255"
-                  placeholder="请输入职位名称"
-                />
+              <el-form-item label="岗位" prop="postName">
+                <el-input v-model="formData.postName" maxlength="255" placeholder="请输入岗位" />
               </el-form-item>
             </el-col>
           </el-row>
