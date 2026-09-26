@@ -187,7 +187,7 @@ async function open(employeeIds: number[]) {
   formLoading.value = true
   try {
     const [options, adjustmentMinEffectDate] = await Promise.all([
-      SalaryOptionApi.getSalaryOptionSimpleList(),
+      SalaryOptionApi.getSalaryOptionSimpleList(true),
       SalaryEmployeeInfoApi.getSalaryAdjustmentMinEffectDate()
     ])
     formData.value.salaryOptions = options

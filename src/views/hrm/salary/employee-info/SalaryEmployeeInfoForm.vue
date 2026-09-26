@@ -228,6 +228,7 @@ async function open(employeeId?: number, recordId?: number) {
   dialogVisible.value = true
   dialogTitle.value = '定薪/调薪'
   resetForm()
+  await nextTick() // 等待弹窗内的调薪模板选择器挂载
   await loadSimpleData()
   if (recordId) {
     dialogTitle.value = '编辑定薪调薪记录'
@@ -280,7 +281,7 @@ async function submitForm() {
 /** 加载薪资项和调薪模板 */
 async function loadSimpleData() {
   const [options, templates, adjustmentMinEffectDate] = await Promise.all([
-    SalaryOptionApi.getSalaryOptionSimpleList(),
+    SalaryOptionApi.getSalaryOptionSimpleList(true),
     templateSelectRef.value?.init(),
     SalaryEmployeeInfoApi.getSalaryAdjustmentMinEffectDate()
   ])
@@ -388,10 +389,10 @@ function syncDraftMaps() {
 function getSelectedOptionDefinitions(): SalaryChangeTemplateApi.HrmSalaryChangeOptionVO[] {
   const template = salaryTemplateList.value.find((item) => item.id === selectedTemplateId.value)
   if (template?.options?.length) {
-    return template.options.map((item) => ({
-      code: item.code,
-      name: item.name
-    }))
+    const enabledOptions = new Map(salaryOptionList.value.map((item) => [item.code, item]))
+    return template.options
+      .filter((item) => enabledOptions.has(item.code))
+      .map((item) => ({ code: item.code, name: enabledOptions.get(item.code)!.name }))
   }
   return salaryOptionList.value.map((item) => ({ code: item.code, name: item.name }))
 }
