@@ -92,9 +92,8 @@ const props = defineProps({
 })
 
 // ========== 上传相关 ==========
-const uploadList = ref<UploadUserFile[]>([])
 const fileList = ref<UploadUserFile[]>([])
-const uploadNumber = ref<number>(0)
+let emittedModelValue: string | string[] | undefined // 区分自身回写与切换表单后的外部重置
 
 const { uploadUrl, httpRequest } = useUpload(props.directory)
 
@@ -135,8 +134,6 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
     return false
   }
   message.success('正在上传文件，请稍候...')
-  // 只有在验证通过后才增加计数器
-  uploadNumber.value++
   return true
 }
 // 处理上传的文件发生变化
@@ -145,25 +142,22 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
 // }
 // 文件上传成功
 const handleFileSuccess: UploadProps['onSuccess'] = (res: any, uploadFile): void => {
-  message.success('上传成功')
+  // 按上传文件定位；表单切换或文件删除后到达的旧回调不能写入新列表。
+  const index = fileList.value.findIndex((item) => item.uid === uploadFile.uid)
+  if (index < 0) {
+    return
+  }
   const response = res as { data: string }
   const fileSize = uploadFile.raw?.size
-  // 删除自身
-  const index = fileList.value.findIndex(
-    (item) => (item.response as { data?: string } | undefined)?.data === response.data
-  )
-  fileList.value.splice(index, 1)
-  uploadList.value.push({
+  fileList.value[index] = {
+    ...fileList.value[index],
     name: uploadFile.name || getFileNameFromUrl(response.data),
-    url: response.data
-  })
-  if (uploadList.value.length == uploadNumber.value) {
-    fileList.value.push(...uploadList.value)
-    uploadList.value = []
-    uploadNumber.value = 0
-    emitUpdateModelValue()
-    emit('update:fileSize', fileSize)
+    url: response.data,
+    status: 'success'
   }
+  message.success('上传成功')
+  emitUpdateModelValue()
+  emit('update:fileSize', fileSize)
 }
 // 文件数超出提示
 const handleExceed: UploadProps['onExceed'] = (): void => {
@@ -172,12 +166,10 @@ const handleExceed: UploadProps['onExceed'] = (): void => {
 // 上传错误提示
 const excelUploadError: UploadProps['onError'] = (): void => {
   message.error('导入数据失败，请您重新上传！')
-  // 上传失败时减少计数器，避免后续上传被阻塞
-  uploadNumber.value = Math.max(0, uploadNumber.value - 1)
 }
 // 删除上传文件
 const handleRemove = (file: UploadFile) => {
-  const index = fileList.value.map((f) => f.name).indexOf(file.name)
+  const index = fileList.value.findIndex((item) => item.uid === file.uid)
   if (index > -1) {
     fileList.value.splice(index, 1)
     emitUpdateModelValue()
@@ -192,6 +184,11 @@ const handlePreview: UploadProps['onPreview'] = (uploadFile) => {
 watch(
   () => props.modelValue,
   (val: string | string[]) => {
+    if (toRaw(val) === emittedModelValue) {
+      emittedModelValue = undefined
+      return // 保留同一批次尚未完成的上传文件
+    }
+    emittedModelValue = undefined
     if (!val) {
       fileList.value = [] // fix：处理掉缓存，表单重置后上传组件的内容并没有重置
       return
@@ -211,11 +208,14 @@ watch(
 // 发送文件链接列表更新
 const emitUpdateModelValue = () => {
   // 情况1：数组结果
-  let result: string | string[] = fileList.value.map((file) => file.url!)
+  let result: string | string[] = fileList.value
+    .filter((file) => !file.status || file.status === 'success')
+    .map((file) => file.url!)
   // 情况2：逗号分隔的字符串
   if (props.limit === 1 || isString(props.modelValue)) {
     result = result.join(',')
   }
+  emittedModelValue = result
   emit('update:modelValue', result)
 }
 </script>
