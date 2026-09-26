@@ -13,11 +13,7 @@
       </el-form-item>
       <template v-for="protocol in protocols" :key="protocol.key">
         <el-divider content-position="left">{{ protocol.label }}</el-divider>
-        <el-form-item
-          label="服务器域名"
-          :prop="protocol.key + '.host'"
-          :rules="[{ required: true, message: '请输入服务器域名', trigger: 'blur' }]"
-        >
+        <el-form-item label="服务器域名" :prop="protocol.key + '.host'" :rules="hostRules">
           <el-input v-model="formData[protocol.key].host" placeholder="请输入服务器域名" />
         </el-form-item>
         <el-form-item label="端口">
@@ -54,6 +50,7 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { isServerHost } from '@/utils/is'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as ProviderApi from '@/api/oa/mail/provider'
 
@@ -87,6 +84,14 @@ const formData = ref<ProviderApi.MailProviderVO>({
   status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({ name: [{ required: true, message: '请输入名称', trigger: 'blur' }] })
+const hostRules = [
+  { required: true, message: '请输入服务器域名', trigger: 'blur' },
+  {
+    validator: (_rule: unknown, value: string, callback: (error?: Error) => void) =>
+      callback(isServerHost(value) ? undefined : new Error('请输入有效的服务器域名或 IP 地址')),
+    trigger: 'blur'
+  }
+]
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
@@ -118,7 +123,7 @@ function handleSecurityChange(protocol: string, sslEnable: boolean) {
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 async function submitForm() {
   // 校验表单
-  const valid = await formRef.value.validate()
+  const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
   // 提交请求
   formLoading.value = true

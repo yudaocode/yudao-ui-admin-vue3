@@ -32,6 +32,7 @@
       </el-table-column>
     </el-table>
     <Pagination
+      class="!float-none justify-end"
       v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
       :total="total"

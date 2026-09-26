@@ -82,6 +82,7 @@
           <template #default="{ row, $index }">
             <el-form-item
               :prop="`items.${$index}.description`"
+              :label-width="0"
               :rules="[{ required: true, message: '费用说明不能为空', trigger: 'blur' }]"
               class="!mb-0"
             >
