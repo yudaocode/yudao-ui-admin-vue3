@@ -24,7 +24,8 @@ const md = new MarkdownIt({
   highlight: function (str, lang) {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        const copyHtml = `<div id="copy" data-copy='${str}' style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
+        // 代码块内容来自模型输出等不可信来源，写入属性前必须转义，避免闭合引号注入 HTML
+        const copyHtml = `<div id="copy" data-copy="${md.utils.escapeHtml(str)}" style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
         return `<pre style="position: relative;">${copyHtml}<code class="hljs">${hljs.highlight(lang, str, true).value}</code></pre>`
       } catch (__) {}
     }
