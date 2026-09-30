@@ -101,6 +101,19 @@
         :image-size="60"
       />
     </div>
+
+    <!-- 底部：全屏切换 -->
+    <div
+      class="flex items-center justify-end border-t border-t-[var(--el-border-color-lighter)] border-t-solid px-16px py-10px"
+    >
+      <Icon
+        :icon="fullscreen ? 'zmdi:fullscreen-exit' : 'zmdi:fullscreen'"
+        :size="18"
+        class="cursor-pointer text-[var(--el-text-color-secondary)] hover:text-[var(--el-color-primary)]"
+        :title="fullscreen ? '退出全屏' : '全屏'"
+        @click="emit('toggle-fullscreen')"
+      />
+    </div>
   </el-aside>
 </template>
 
@@ -118,6 +131,7 @@ defineProps<{
   sessionList: Session[] // 会话列表
   loading: boolean // 会话列表加载中
   activeId?: number // 当前选中的会话编号
+  fullscreen: boolean // 是否全屏
 }>()
 
 const emit = defineEmits<{
@@ -126,6 +140,7 @@ const emit = defineEmits<{
   select: [session: Session] // 选中会话
   rename: [session: Session, title: string] // 修改会话标题
   delete: [session: Session] // 删除会话
+  'toggle-fullscreen': [] // 切换全屏
 }>()
 
 // ==================== 标题编辑 ====================

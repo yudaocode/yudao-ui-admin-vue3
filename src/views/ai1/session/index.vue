@@ -1,7 +1,11 @@
 <template>
-  <el-container class="absolute flex-1 top-0 left-0 h-full w-full">
+  <el-container
+    class="left-0 top-0 h-full w-full flex-1 bg-[var(--el-bg-color)]"
+    :class="pageFullscreen ? 'fixed z-1000 h-100vh w-100vw' : 'absolute'"
+  >
     <!-- 左侧：会话列表 -->
     <SessionList
+      v-show="!collapsed"
       :agent-list="agentList"
       :agent-loading="agentLoading"
       :agent-id="activeAgentId"
@@ -9,22 +13,30 @@
       :session-list="sessionList"
       :loading="sessionLoading"
       :active-id="activeSessionId"
+      :fullscreen="pageFullscreen"
       @agent-change="selectAgent"
       @create="handleNewSession"
       @select="(item) => selectSession(item.id)"
       @rename="handleSessionRename"
       @delete="handleSessionDelete"
+      @toggle-fullscreen="toggleFullscreen"
     />
 
     <!-- 右侧：会话 -->
     <el-container class="bg-[var(--el-bg-color)]">
       <el-header
-        class="flex flex-row items-center justify-between bg-[var(--el-bg-color-page)] shadow-[0_0_0_0_var(--el-border-color-light)]"
+        class="flex flex-row items-center gap-10px bg-[var(--el-bg-color-page)] shadow-[0_0_0_0_var(--el-border-color-light)]"
       >
+        <Icon
+          :icon="collapsed ? 'ep:expand' : 'ep:fold'"
+          :size="18"
+          class="flex-shrink-0 cursor-pointer hover:text-[var(--el-color-primary)]"
+          :title="collapsed ? '展开会话列表' : '收起会话列表'"
+          @click="collapsed = !collapsed"
+        />
         <div class="text-18px font-bold truncate">
           {{ activeSession?.title || (activeAgent ? '新会话' : 'Agent 会话') }}
         </div>
-        <el-tag v-if="activeAgent?.modelName" type="primary">{{ activeAgent.modelName }}</el-tag>
       </el-header>
 
       <!-- 消息区 -->
@@ -97,6 +109,7 @@
 </template>
 
 <script setup lang="ts">
+import { useFullscreen } from '@vueuse/core'
 import { useCache } from '@/hooks/web/useCache'
 import { AgentApi, Agent } from '@/api/ai1/agent'
 import { SessionApi, Session } from '@/api/ai1/session'
@@ -114,6 +127,7 @@ import type { Ai1SessionMessageItem } from './types'
 defineOptions({ name: 'Ai1Session' })
 
 const route = useRoute() // 路由
+const { resolve } = useRouter() // 路由
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { wsCache } = useCache() // 本地缓存
@@ -121,6 +135,29 @@ const { wsCache } = useCache() // 本地缓存
 const AGENT_ID_CACHE_KEY = 'AI1_SESSION_AGENT_ID' // 缓存 Key：上次选择的 Agent 编号
 const MAX_RESUME_ATTEMPTS = 3 // 断线后最多自动续传的次数
 const RESUME_DELAY_MS = 500 // 续传的等待基数，单位：毫秒
+
+// ==================== 页面布局 ====================
+
+const collapsed = ref(false) // 会话列表是否收起
+const { isFullscreen, enter, exit } = useFullscreen() // 浏览器全屏
+const pageFullscreen = ref(false) // 会话页是否全屏
+
+/** 切换全屏：浏览器全屏，同时会话页铺满视口 */
+const toggleFullscreen = async () => {
+  if (pageFullscreen.value) {
+    await exit()
+    return
+  }
+  await enter()
+  pageFullscreen.value = true
+}
+
+/** 退出浏览器全屏（含 Esc）时，会话页同步退出全屏 */
+watch(isFullscreen, (value) => {
+  if (!value) {
+    pageFullscreen.value = false
+  }
+})
 
 // ==================== Agent ====================
 
@@ -510,11 +547,21 @@ let handledQueryAgentId: number | undefined // 已处理过的路由 agentId
 onMounted(async () => {
   handledQueryAgentId = Number(route.query.agentId) || undefined
   await getAgentList()
+  const sessionId = Number(route.query.id)
   const agentId = resolveInitialAgentId()
   if (agentId) {
     await selectAgent(agentId)
   }
+  // URL 带会话编号时，回到该会话
+  if (sessionId) {
+    if (sessionList.value.some((item) => item.id === sessionId)) {
+      await selectSession(sessionId)
+    } else {
+      message.warning('指定的会话不存在或已被删除')
+    }
+  }
   initialized = true
+  syncUrl()
 })
 
 /** 再次激活：带入新的 agentId 时，切换 Agent */
@@ -536,6 +583,23 @@ onActivated(() => {
         selectAgent(agentId)
       }
     })
+  }
+})
+
+/** 同步当前 Agent、会话到 URL：只改地址栏，不触发路由跳转，避免页面重新渲染 */
+const syncUrl = () => {
+  const url = resolve({
+    path: route.path,
+    query: {
+      ...(activeAgentId.value ? { agentId: String(activeAgentId.value) } : {}),
+      ...(activeSessionId.value ? { id: String(activeSessionId.value) } : {})
+    }
+  }).href
+  window.history.replaceState(window.history.state, '', url)
+}
+watch([activeAgentId, activeSessionId], () => {
+  if (initialized) {
+    syncUrl()
   }
 })
 
