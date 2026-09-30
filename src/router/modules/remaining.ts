@@ -984,6 +984,60 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
+    path: '/ai1',
+    component: Layout,
+    name: 'Ai1Center',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'provider/model/:providerId',
+        component: () => import('@/views/ai1/model/index.vue'),
+        name: 'Ai1ProviderModel',
+        meta: {
+          title: '模型管理',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai1/provider'
+        }
+      },
+      {
+        path: 'knowledge/document/:knowledgeBaseId',
+        component: () => import('@/views/ai1/knowledge/document/index.vue'),
+        name: 'Ai1KnowledgeDocument',
+        meta: {
+          title: '知识库文档',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai1/knowledge'
+        }
+      },
+      {
+        path: 'skill/file/:skillId',
+        component: () => import('@/views/ai1/skill/file/index.vue'),
+        name: 'Ai1SkillFile',
+        meta: {
+          title: 'SKILL 内容',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai1/skill'
+        }
+      },
+      {
+        path: 'agent/session/:agentId',
+        component: () => import('@/views/ai1/agent/session/index.vue'),
+        name: 'Ai1AgentSession',
+        meta: {
+          title: '会话记录',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai1/agent'
+        }
+      }
+    ]
+  },
+  {
     path: '/iot',
     component: Layout,
     name: 'IOT',

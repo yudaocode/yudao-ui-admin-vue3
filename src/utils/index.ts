@@ -1,4 +1,5 @@
 import { toNumber } from 'lodash-es'
+import { isObject } from './is'
 
 /**
  *
@@ -525,6 +526,24 @@ export function jsonParse(str: string) {
   } catch (e) {
     console.warn(`str[${str}] 不是一个 JSON 字符串`)
     return str
+  }
+}
+
+/**
+ * 解析 JSON 对象字符串
+ *
+ * @param str JSON 字符串
+ * @return JSON 对象；为空、格式错误或不是对象时，返回 undefined
+ */
+export const jsonParseObject = (str?: string): Record<string, any> | undefined => {
+  if (!str?.trim()) {
+    return undefined
+  }
+  try {
+    const value = JSON.parse(str)
+    return isObject(value) ? value : undefined
+  } catch {
+    return undefined
   }
 }
 

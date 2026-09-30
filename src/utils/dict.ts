@@ -330,6 +330,14 @@ export enum DICT_TYPE {
   AI_WRITE_LANGUAGE = 'ai_write_language', // AI 写作语言
   AI_MCP_CLIENT_NAME = 'ai_mcp_client_name', // AI MCP Client 名字
 
+  // ========== AI1 - 人工智能模块（Spring AI 版）  ==========
+  AI1_MODEL_TYPE = 'ai1_model_type', // AI1 模型类型
+  AI1_MCP_TRANSPORT = 'ai1_mcp_transport', // AI1 MCP 传输方式
+  AI1_KNOWLEDGE_DOCUMENT_STATUS = 'ai1_knowledge_document_status', // AI1 知识文档状态
+  AI1_SESSION_MESSAGE_ROLE = 'ai1_session_message_role', // AI1 会话消息角色
+  AI1_SESSION_MESSAGE_STATUS = 'ai1_session_message_status', // AI1 会话消息状态
+  AI1_SKILL_FILE_TYPE = 'ai1_skill_file_type', // AI1 SKILL 文件类型
+
   // ========== IOT - 物联网模块  ==========
   IOT_NET_TYPE = 'iot_net_type', // IOT 联网方式
   IOT_PRODUCT_STATUS = 'iot_product_status', // IOT 产品状态
