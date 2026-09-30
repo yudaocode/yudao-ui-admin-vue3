@@ -136,7 +136,7 @@
           <el-button
             link
             type="primary"
-            v-hasPermi="['bpm:process-instance:cancel']"
+            v-hasPermi="['bpm:process-instance:query']"
             @click="handleDetail(scope.row)"
           >
             详情
@@ -145,7 +145,7 @@
             link
             type="primary"
             v-if="scope.row.status === 1"
-            v-hasPermi="['bpm:process-instance:query']"
+            v-hasPermi="['bpm:process-instance:cancel-by-admin']"
             @click="handleCancel(scope.row)"
           >
             取消
