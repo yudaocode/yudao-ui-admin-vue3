@@ -7,7 +7,7 @@
       :rules="formRules"
       label-width="80px"
     >
-      <el-form-item label="属性编号" prop="category">
+      <el-form-item label="属性编号" prop="propertyId">
         <el-input v-model="formData.propertyId" disabled />
       </el-form-item>
       <el-form-item label="名称" prop="name">

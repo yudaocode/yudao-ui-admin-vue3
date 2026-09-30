@@ -157,7 +157,6 @@ const rules = {
       required: true,
       min: 4,
       max: 16,
-      validator: validatePass2,
       trigger: 'blur',
       message: '密码长度为4到16位'
     }

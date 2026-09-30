@@ -140,7 +140,7 @@
         width="120"
         :formatter="dateFormatter2"
       />
-      <el-table-column align="center" label="客户签约人" prop="contactName" width="130">
+      <el-table-column align="center" label="客户签约人" prop="signContactName" width="130">
         <template #default="scope">
           <el-link
             :underline="false"
