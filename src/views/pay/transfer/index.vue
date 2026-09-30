@@ -32,9 +32,9 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="商户单号" prop="merchantTransferId">
+      <el-form-item label="商户单号" prop="merchantOrderId">
         <el-input
-          v-model="queryParams.merchantTransferId"
+          v-model="queryParams.merchantOrderId"
           placeholder="请输入商户单号"
           clearable
           @keyup.enter="handleQuery"
@@ -75,9 +75,9 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="收款人账号" prop="accountNo">
+      <el-form-item label="收款人账号" prop="userAccount">
         <el-input
-          v-model="queryParams.accountNo"
+          v-model="queryParams.userAccount"
           placeholder="请输入收款人账号"
           clearable
           @keyup.enter="handleQuery"
@@ -215,7 +215,7 @@ const queryParams = reactive({
   appId: null as number | null,
   channelId: null as number | null,
   channelCode: null as string | null,
-  merchantTransferId: null as string | null,
+  merchantOrderId: null as string | null,
   type: null as string | null,
   status: null as number | null,
   successTime: [] as string[],
@@ -223,7 +223,6 @@ const queryParams = reactive({
   subject: null as string | null,
   userName: null as string | null,
   userAccount: null as string | null,
-  accountNo: null as string | null,
   channelTransferNo: null as string | null,
   createTime: [] as string[]
 })

@@ -105,7 +105,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['system:tenant:export']"
+          v-hasPermi="['pay:refund:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -185,7 +185,7 @@
             type="primary"
             link
             @click="openDetail(scope.row.id)"
-            v-hasPermi="['pay:order:query']"
+            v-hasPermi="['pay:refund:query']"
           >
             详情
           </el-button>
