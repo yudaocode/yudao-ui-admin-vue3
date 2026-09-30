@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【员工】员工管理" url="https://doc.iocoder.cn/hrm/employee/" />
+
   <div v-if="accessible" v-loading="loading">
     <el-row :gutter="16">
       <el-col :span="16">

@@ -11,7 +11,7 @@
       </template>
       <div class="flex items-center">
         <span class="mr-4 text-lg font-medium"> 连接状态: </span>
-        <el-tag :color="getTagColor">{{ status }}</el-tag>
+        <el-tag :type="getTagType">{{ status }}</el-tag>
       </div>
       <hr class="my-4" />
       <div class="flex">
@@ -84,7 +84,7 @@ const server = ref(
     getRefreshToken() // 使用 getRefreshToken() 方法，而不使用 getAccessToken() 方法的原因：WebSocket 无法方便的刷新访问令牌
 ) // WebSocket 服务地址
 const getIsOpen = computed(() => status.value === 'OPEN') // WebSocket 连接是否打开
-const getTagColor = computed(() => (getIsOpen.value ? 'success' : 'red')) // WebSocket 连接的展示颜色
+const getTagType = computed(() => (getIsOpen.value ? 'success' : 'danger')) // WebSocket 连接的展示类型
 
 /** 发起 WebSocket 连接 */
 const { status, data, send, close, open } = useWebSocket(server.value, {

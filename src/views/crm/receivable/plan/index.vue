@@ -142,12 +142,7 @@
         width="180px"
         :formatter="dateFormatter2"
       />
-      <el-table-column
-        align="center"
-        label="实际回款金额（元）"
-        prop="receivable.price"
-        width="160"
-      >
+      <el-table-column align="center" label="未回款金额（元）" width="160">
         <template #default="scope">
           <el-text v-if="scope.row.receivable">
             {{ erpPriceInputFormatter(scope.row.price - scope.row.receivable.price) }}

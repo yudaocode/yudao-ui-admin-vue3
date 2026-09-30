@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【社保】社保管理" url="https://doc.iocoder.cn/hrm/insurance/" />
+
   <div v-if="accessible" v-loading="loading">
     <ContentWrap>
       <div

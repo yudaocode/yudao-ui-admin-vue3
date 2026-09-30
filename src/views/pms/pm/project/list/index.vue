@@ -63,8 +63,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item
-                  v-if="project.adminStatus"
-                  v-hasPermi="['pms:pm:project:update']"
+                  v-if="project.adminStatus && checkPermi(['pms:pm:project:update'])"
                   command="config"
                 >
                   项目设置
@@ -80,8 +79,7 @@
                   </el-dropdown-item>
                 </template>
                 <el-dropdown-item
-                  v-if="project.exitStatus"
-                  v-hasPermi="['pms:pm:project-member:query']"
+                  v-if="project.exitStatus && checkPermi(['pms:pm:project-member:query'])"
                   command="exit"
                   divided
                 >
@@ -261,8 +259,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item
-                  v-if="scope.row.adminStatus"
-                  v-hasPermi="['pms:pm:project:update']"
+                  v-if="scope.row.adminStatus && checkPermi(['pms:pm:project:update'])"
                   command="config"
                 >
                   项目设置
@@ -278,8 +275,7 @@
                   </el-dropdown-item>
                 </template>
                 <el-dropdown-item
-                  v-if="scope.row.exitStatus"
-                  v-hasPermi="['pms:pm:project-member:query']"
+                  v-if="scope.row.exitStatus && checkPermi(['pms:pm:project-member:query'])"
                   command="exit"
                   divided
                 >

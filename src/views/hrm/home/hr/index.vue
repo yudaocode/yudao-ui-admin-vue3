@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【组织】工作台、组织架构" url="https://doc.iocoder.cn/hrm/organization/" />
+
   <div v-loading="loading">
     <div class="mb-16px text-24px text-[var(--el-text-color-primary)] leading-28px">
       HR 工作台

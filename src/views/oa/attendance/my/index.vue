@@ -1,13 +1,17 @@
 <template>
+  <doc-alert
+    title="【流程】考勤、请假、加班、转正与离职"
+    url="https://doc.iocoder.cn/oa/attendance-application/"
+  />
   <!-- 今日打卡 -->
   <ContentWrap>
     <div class="flex flex-wrap items-center justify-between gap-16px">
       <div>
         <div class="text-18px font-600">今日考勤</div>
         <div class="mt-8px text-14px text-[var(--el-text-color-secondary)]">
-          上班：{{ getClockText(OA_ATTENDANCE_TYPE.CLOCK_IN) }}　 下班：{{
-            getClockText(OA_ATTENDANCE_TYPE.CLOCK_OUT)
-          }}
+          <span>上班：{{ getClockText(OA_ATTENDANCE_TYPE.CLOCK_IN) }}</span
+          >　
+          <span>下班：{{ getClockText(OA_ATTENDANCE_TYPE.CLOCK_OUT) }}</span>
         </div>
       </div>
       <el-button type="primary" :loading="clockLoading" @click="handleClock">
@@ -66,8 +70,8 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" /> 重置</el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -110,7 +114,7 @@
   </ContentWrap>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel, getIntDictOptions } from '@/utils/dict'
 import { OA_ATTENDANCE_TYPE } from '@/views/oa/utils/constants'
@@ -123,8 +127,8 @@ const message = useMessage() // 消息弹窗
 const clockLoading = ref(false) // 打卡的加载中
 const todayAttendanceList = ref<AttendanceApi.OaAttendanceVO[]>([]) // 今日考勤记录
 const loading = ref(true) // 列表的加载中
-const total = ref(0) // 列表的总页数
 const list = ref<AttendanceApi.OaAttendanceVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总条数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -145,12 +149,12 @@ const clockButtonText = computed(() => {
 })
 
 /** 查询今日考勤 */
-const getTodayAttendanceList = async () => {
+async function getTodayAttendanceList() {
   todayAttendanceList.value = await AttendanceApi.getMyTodayAttendanceList()
 }
 
 /** 查询我的考勤列表 */
-const getList = async () => {
+async function getList() {
   loading.value = true
   try {
     const data = await AttendanceApi.getMyAttendancePage(queryParams)
@@ -162,19 +166,19 @@ const getList = async () => {
 }
 
 /** 搜索按钮操作 */
-const handleQuery = () => {
+function handleQuery() {
   queryParams.pageNo = 1
   getList()
 }
 
 /** 重置按钮操作 */
-const resetQuery = () => {
+function resetQuery() {
   queryFormRef.value?.resetFields()
   handleQuery()
 }
 
 /** 执行打卡 */
-const handleClock = async () => {
+async function handleClock() {
   clockLoading.value = true
   try {
     // 发起打卡
@@ -188,7 +192,7 @@ const handleClock = async () => {
 }
 
 /** 获得指定类型的今日打卡文案 */
-const getClockText = (type: number) => {
+function getClockText(type: number) {
   const attendance = todayAttendanceList.value.find((item) => item.type === type)
   if (!attendance) {
     return '未打卡'

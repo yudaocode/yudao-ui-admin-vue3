@@ -22,8 +22,8 @@
         <UserSelectV2 v-model="queryParams.userId" class="!w-220px" />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        <el-button type="primary" @click="handleQuery"><Icon icon="ep:search" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" /> 重置</el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -38,18 +38,16 @@
       <el-table-column label="正常次数" prop="normalCount" align="center" width="100" />
       <el-table-column label="迟到次数" prop="lateCount" align="center" width="100" />
       <el-table-column label="早退次数" prop="earlyCount" align="center" width="100" />
-      <el-table-column
-        label="缺少下班打卡天数"
-        prop="missingClockOutDays"
-        align="center"
-        min-width="150"
-      />
+      <el-table-column label="请假天数" prop="leaveDays" align="center" width="100" />
+      <el-table-column label="出差天数" prop="travelDays" align="center" width="100" />
+      <el-table-column label="旷工天数" prop="absentDays" align="center" min-width="150" />
     </el-table>
   </ContentWrap>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import dayjs from 'dayjs'
+import { formatDate } from '@/utils/formatTime'
 import * as AttendanceApi from '@/api/oa/attendance'
 import UserSelectV2 from '@/views/system/user/components/UserSelectV2.vue'
 
@@ -58,8 +56,7 @@ defineOptions({ name: 'OaAttendanceMonthReport' })
 const loading = ref(true) // 列表的加载中
 const list = ref<AttendanceApi.OaAttendanceMonthReportVO[]>([]) // 月报列表
 const queryParams = reactive({
-  // TODO @AI：formatDate
-  month: dayjs().format('YYYY-MM'),
+  month: formatDate(new Date(), 'YYYY-MM'),
   userId: undefined as number | undefined
 })
 const queryFormRef = ref() // 搜索的表单

@@ -112,6 +112,37 @@ export const getDictLabel = (dictType: string, value: any): string => {
 }
 
 export enum DICT_TYPE {
+  OA_REIMBURSE_STATUS = 'oa_reimburse_status',
+  OA_PAY_STATUS = 'oa_pay_status',
+  OA_TRANSPORT_TYPE = 'oa_transport_type',
+  OA_EXPENSE_TYPE = 'oa_expense_type',
+  OA_APPLY_URGENCY = 'oa_apply_urgency',
+  OA_REIMBURSEMENT_PAYMENT_METHOD = 'oa_reimbursement_payment_method',
+  OA_OVERTIME_TYPE = 'oa_overtime_type',
+  OA_LEAVE_TYPE = 'oa_leave_type',
+  OA_VEHICLE_STATUS = 'oa_vehicle_status',
+  OA_FILE_CATEGORY = 'oa_file_category',
+  OA_FILE_PERMISSION_LEVEL = 'oa_file_permission_level',
+  OA_FILE_SUBJECT_TYPE = 'oa_file_subject_type',
+  OA_VEHICLE_RETURN_STATUS = 'oa_vehicle_return_status',
+  OA_MEETING_ROOM_TYPE = 'oa_meeting_room_type',
+  OA_SUPPLY_CATEGORY = 'oa_supply_category', // 办公用品分类
+  OA_SUPPLY_MANAGE_TYPE = 'oa_supply_manage_type', // 办公用品管理类型
+  OA_SUPPLY_USE_TYPE = 'oa_supply_use_type', // 办公用品使用类型
+  OA_SUPPLY_PICKUP_METHOD = 'oa_supply_pickup_method', // 办公用品领取方式
+  OA_SUPPLY_ITEM_STATUS = 'oa_supply_item_status', // 办公用品明细状态
+  OA_MEETING_ROOM_STATUS = 'oa_meeting_room_status',
+  OA_MEETING_ROOM_EQUIPMENT = 'oa_meeting_room_equipment',
+  OA_MEETING_ROOM_BOOKING_SCOPE = 'oa_meeting_room_booking_scope',
+  OA_MEETING_ROOM_REMINDER_TYPE = 'oa_meeting_room_reminder_type',
+  OA_MEETING_ROOM_USE_STATUS = 'oa_meeting_room_use_status',
+  OA_VEHICLE_CATEGORY = 'oa_vehicle_category',
+  OA_SEAL_TYPE = 'oa_seal_type',
+  OA_SEAL_CATEGORY = 'oa_seal_category',
+  OA_SEAL_STATUS = 'oa_seal_status',
+  OA_SEAL_APPLY_TYPE = 'oa_seal_apply_type',
+  OA_SEAL_USE_MODE = 'oa_seal_use_mode',
+  OA_SEAL_USE_STATUS = 'oa_seal_use_status',
   USER_TYPE = 'user_type',
   COMMON_STATUS = 'common_status',
   TERMINAL = 'terminal', // 终端
@@ -240,6 +271,17 @@ export enum DICT_TYPE {
   PMS_KNOWLEDGE_LIBRARY_MEMBER_LEVEL = 'pms_knowledge_library_member_level', // PMS 知识库成员等级
 
   // ========== OA - 办公自动化模块 ==========
+  OA_PRIORITY = 'oa_priority', // OA 优先级
+  OA_SCHEDULE_TYPE = 'oa_schedule_type', // OA 日程类型
+  OA_PLAN_TYPE = 'oa_plan_type', // OA 计划类型
+  OA_PLAN_STATUS = 'oa_plan_status', // OA 计划状态
+  OA_WORK_REPORT_TYPE = 'oa_work_report_type', // OA 工作汇报类型
+  OA_WORK_REPORT_STATUS = 'oa_work_report_status', // OA 工作汇报状态
+  OA_NOTE_TYPE = 'oa_note_type', // OA 笔记类型
+  OA_DISCUSSION_TYPE = 'oa_discussion_type', // OA 讨论类型
+  OA_TASK_TYPE = 'oa_task_type', // OA 任务类型
+  OA_TASK_STATUS = 'oa_task_status', // OA 任务状态
+  OA_ANNOUNCEMENT_TYPE = 'oa_announcement_type', // OA 公告类型
   OA_ATTENDANCE_TYPE = 'oa_attendance_type', // OA 考勤类型
   OA_ATTENDANCE_STATUS = 'oa_attendance_status', // OA 考勤状态
 
@@ -433,6 +475,14 @@ export enum DICT_TYPE {
   MES_WM_BARCODE_FORMAT = 'mes_wm_barcode_format', // MES 条码格式
   MES_WM_BARCODE_BIZ_TYPE = 'mes_wm_barcode_biz_type', // MES 条码业务类型
   MES_WM_PACKAGE_STATUS = 'mes_wm_package_status', // MES 装箱单状态
+
+  // ========== OA - 公文管理 ==========
+  OA_OFFICIAL_DOC_SECRET_LEVEL = 'oa_official_doc_secret_level', // 公文密级
+  OA_OFFICIAL_DOC_URGENCY_LEVEL = 'oa_official_doc_urgency_level', // 紧急程度
+  OA_OFFICIAL_DOC_PUBLIC_CATEGORY = 'oa_official_doc_public_category', // 公开类别
+  OA_OFFICIAL_DOC_SEPARATOR_TYPE = 'oa_official_doc_separator_type', // 模板分隔线
+  OA_OFFICIAL_DOC_HANDLE_STATUS = 'oa_official_doc_handle_status', // 收文办理状态
+  OA_OFFICIAL_DOC_RECEIVE_TYPE = 'oa_official_doc_receive_type', // 收文类型
 
   // ========== IM - 即时通讯模块  ==========
   IM_CONTENT_TYPE = 'im_content_type', // IM 内容类型

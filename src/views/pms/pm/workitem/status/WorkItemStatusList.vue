@@ -175,10 +175,12 @@ async function getBoardConfig() {
     .filter(Boolean)
 }
 
+let nextTemporaryId = -1 // 尚未保存的状态和看板列使用独立临时编号
+
 /** 添加状态 */
 function handleAdd() {
   statusList.value.push({
-    id: -Date.now(),
+    id: nextTemporaryId--,
     projectId: projectId.value,
     workItemType: type.value,
     name: '',
@@ -191,7 +193,7 @@ function handleAdd() {
 
 /** 添加看板列 */
 function handleAddBoard() {
-  boardList.value.push({ id: -Date.now(), name: '', statusIds: [], statuses: [] })
+  boardList.value.push({ id: nextTemporaryId--, name: '', statusIds: [], statuses: [] })
 }
 
 /** 删除看板列，列内状态移回未放入看板区域 */
@@ -288,7 +290,7 @@ async function submitForm() {
       projectId.value,
       type.value,
       boardList.value.map((board) => ({
-        id: board.id,
+        id: board.id && board.id > 0 ? board.id : undefined,
         name: board.name.trim(),
         statusIds: board.statuses.map((status) => status.id)
       }))

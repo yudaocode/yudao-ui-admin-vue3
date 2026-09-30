@@ -25,8 +25,8 @@
         <el-button @click="handlePreviousWeek">上一周</el-button>
         <el-button @click="handleCurrentWeek">本周</el-button>
         <el-button @click="handleNextWeek">下一周</el-button>
-        <el-button type="primary" @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        <el-button type="primary" @click="handleQuery"><Icon icon="ep:search" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" /> 重置</el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -46,24 +46,52 @@
         <template #default="scope">
           <div class="leading-24px">
             <div>
-              上班：{{
-                getClockText(scope.row.dailyAttendances[index], OA_ATTENDANCE_TYPE.CLOCK_IN)
-              }}
+              上班：
+              <el-button
+                v-if="
+                  scope.row.dailyAttendances[index].clockInId &&
+                  checkPermi(['oa:attendance:update'])
+                "
+                link
+                type="primary"
+                @click="openForm(scope.row.dailyAttendances[index].clockInId)"
+              >
+                {{ getClockText(scope.row.dailyAttendances[index], OA_ATTENDANCE_TYPE.CLOCK_IN) }}
+              </el-button>
+              <span v-else>
+                {{ getClockText(scope.row.dailyAttendances[index], OA_ATTENDANCE_TYPE.CLOCK_IN) }}
+              </span>
             </div>
             <div>
-              下班：{{
-                getClockText(scope.row.dailyAttendances[index], OA_ATTENDANCE_TYPE.CLOCK_OUT)
-              }}
+              下班：
+              <el-button
+                v-if="
+                  scope.row.dailyAttendances[index].clockOutId &&
+                  checkPermi(['oa:attendance:update'])
+                "
+                link
+                type="primary"
+                @click="openForm(scope.row.dailyAttendances[index].clockOutId)"
+              >
+                {{ getClockText(scope.row.dailyAttendances[index], OA_ATTENDANCE_TYPE.CLOCK_OUT) }}
+              </el-button>
+              <span v-else>
+                {{ getClockText(scope.row.dailyAttendances[index], OA_ATTENDANCE_TYPE.CLOCK_OUT) }}
+              </span>
             </div>
           </div>
         </template>
       </el-table-column>
     </el-table>
   </ContentWrap>
+  <!-- 修改考勤记录 -->
+  <OaAttendanceForm ref="formRef" @success="getList" />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import dayjs from 'dayjs'
+import { checkPermi } from '@/utils/permission'
+import OaAttendanceForm from '../list/OaAttendanceForm.vue'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { OA_ATTENDANCE_TYPE } from '@/views/oa/utils/constants'
 import * as AttendanceApi from '@/api/oa/attendance'
@@ -78,6 +106,12 @@ const queryParams = reactive({
   userId: undefined as number | undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const formRef = ref() // 考勤修改表单
+
+/** 修改考勤记录 */
+function openForm(id: number) {
+  formRef.value.open(id)
+}
 
 /** 当前周的日期列 */
 const weekDays = computed(() => {

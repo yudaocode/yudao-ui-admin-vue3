@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【考勤】考勤管理" url="https://doc.iocoder.cn/hrm/attendance/" />
+
   <div v-if="accessible">
     <ContentWrap title="考勤报表">
       <div class="mb-16px flex items-center gap-12px">

@@ -94,8 +94,7 @@ const uploadStyle = computed(() => ({
 const { uploadUrl, httpRequest } = useUpload(props.directory)
 
 const fileList = ref<UploadUserFile[]>([])
-const uploadNumber = ref<number>(0)
-const uploadList = ref<UploadUserFile[]>([])
+let emittedModelValue: string[] | undefined // 区分自身回写与切换表单后的外部重置
 /**
  * @description 文件上传之前判断
  * @param rawFile 上传的文件
@@ -119,11 +118,6 @@ const beforeUpload: UploadProps['beforeUpload'] = (rawFile) => {
       type: 'warning'
     })
 
-  // 只有在验证通过后才增加计数器
-  if (isValidType && isValidSize) {
-    uploadNumber.value++
-  }
-
   return isValidType && isValidSize
 }
 
@@ -133,27 +127,32 @@ interface UploadEmits {
 }
 
 const emit = defineEmits<UploadEmits>()
-const uploadSuccess: UploadProps['onSuccess'] = (res: any): void => {
-  message.success('上传成功')
-  const response = res as { data: string }
-  // 删除自身
-  const index = fileList.value.findIndex(
-    (item) => (item.response as { data?: string } | undefined)?.data === response.data
-  )
-  fileList.value.splice(index, 1)
-  uploadList.value.push({ name: response.data, url: response.data })
-  if (uploadList.value.length == uploadNumber.value) {
-    fileList.value.push(...uploadList.value)
-    uploadList.value = []
-    uploadNumber.value = 0
-    emitUpdateModelValue()
+const uploadSuccess: UploadProps['onSuccess'] = (res: any, uploadFile): void => {
+  // 按上传文件定位；表单切换或文件删除后到达的旧回调不能写入新列表。
+  const index = fileList.value.findIndex((item) => item.uid === uploadFile.uid)
+  if (index < 0) {
+    return
   }
+  const response = res as { data: string }
+  fileList.value[index] = {
+    ...fileList.value[index],
+    name: response.data,
+    url: response.data,
+    status: 'success'
+  }
+  message.success('上传成功')
+  emitUpdateModelValue()
 }
 
 // 监听模型绑定值变动
 watch(
   () => props.modelValue,
   (val: string | string[]) => {
+    if (toRaw(val) === emittedModelValue) {
+      emittedModelValue = undefined
+      return // 保留同一批次尚未完成的上传文件
+    }
+    emittedModelValue = undefined
     if (!val) {
       fileList.value = [] // fix：处理掉缓存，表单重置后上传组件的内容并没有重置
       return
@@ -168,18 +167,17 @@ watch(
 )
 // 发送图片链接列表更新
 const emitUpdateModelValue = () => {
-  let result: string[] = fileList.value.map((file) => file.url!)
-  emit('update:modelValue', result)
+  emittedModelValue = fileList.value
+    .filter((file) => !file.status || file.status === 'success')
+    .map((file) => file.url!)
+  emit('update:modelValue', emittedModelValue)
 }
 // 删除图片
 const handleRemove = (uploadFile: UploadFile) => {
   fileList.value = fileList.value.filter(
     (item) => item.url !== uploadFile.url || item.name !== uploadFile.name
   )
-  emit(
-    'update:modelValue',
-    fileList.value.map((file) => file.url!)
-  )
+  emitUpdateModelValue()
 }
 
 // 图片上传错误提示
@@ -189,8 +187,6 @@ const uploadError = () => {
     message: '图片上传失败，请您重新上传！',
     type: 'error'
   })
-  // 上传失败时减少计数器，避免后续上传被阻塞
-  uploadNumber.value = Math.max(0, uploadNumber.value - 1)
 }
 
 // 文件数超出提示

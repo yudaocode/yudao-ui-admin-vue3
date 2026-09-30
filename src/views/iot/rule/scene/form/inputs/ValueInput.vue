@@ -28,10 +28,7 @@
     </el-select>
 
     <!-- 范围输入 (between 操作符) -->
-    <div
-      v-else-if="operator === IotRuleSceneTriggerConditionParameterOperatorEnum.BETWEEN.value"
-      class="w-full! flex items-center gap-8px"
-    >
+    <div v-else-if="isRangeOperator" class="w-full! flex items-center gap-8px">
       <el-input
         v-model="rangeStart"
         :type="getInputType()"
@@ -149,6 +146,13 @@ const localValue = useVModel(props, 'modelValue', emit, {
   defaultValue: ''
 })
 
+const isRangeOperator = computed(() =>
+  [
+    IotRuleSceneTriggerConditionParameterOperatorEnum.BETWEEN.value,
+    IotRuleSceneTriggerConditionParameterOperatorEnum.NOT_BETWEEN.value
+  ].some((operator) => operator === props.operator)
+)
+
 const rangeStart = ref('') // 范围开始值
 const rangeEnd = ref('') // 范围结束值
 const dateValue = ref('') // 日期值
@@ -252,10 +256,26 @@ const handleNumberChange = (value: number | undefined) => {
   localValue.value = value?.toString() || ''
 }
 
+/** 回填已保存的范围值，包括异步加载的规则 */
+watch(
+  () => [props.modelValue, isRangeOperator.value] as const,
+  ([value]) => {
+    if (isRangeOperator.value) {
+      const [start = '', end = ''] = (value || '').split(',')
+      rangeStart.value = start
+      rangeEnd.value = end
+    }
+  },
+  { immediate: true }
+)
+
 /** 监听操作符变化 */
 watch(
   () => props.operator,
-  () => {
+  (_operator, oldOperator) => {
+    if (oldOperator === undefined) {
+      return
+    }
     localValue.value = ''
     rangeStart.value = ''
     rangeEnd.value = ''

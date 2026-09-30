@@ -62,9 +62,9 @@
             <HrmEmployeeSelect v-model="row.leaderEmployeeId" placeholder="请选择直属上级" />
           </template>
         </el-table-column>
-        <el-table-column label="职位" min-width="170">
+        <el-table-column label="岗位" min-width="170">
           <template #default="{ row }">
-            <el-input v-model="row.postName" maxlength="255" placeholder="请输入职位" />
+            <el-input v-model="row.postName" maxlength="255" placeholder="请输入岗位" />
           </template>
         </el-table-column>
         <el-table-column label="入职时间" min-width="190">

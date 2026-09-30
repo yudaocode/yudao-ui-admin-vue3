@@ -20,11 +20,12 @@ export interface OaAttendanceWeekReportVO {
   userName?: string // 用户名称
   deptId?: number // 部门编号
   deptName?: string // 部门名称
-  // TODO DONE @AI：日考勤只属于周报明细，直接内嵌，避免创建低价值的独立 VO。
   dailyAttendances: {
     date: string // 日期
+    clockInId?: number // 上班考勤记录编号
     clockInTime?: string // 上班打卡时间
     clockInStatus?: number // 上班打卡状态
+    clockOutId?: number // 下班考勤记录编号
     clockOutTime?: string // 下班打卡时间
     clockOutStatus?: number // 下班打卡状态
   }[] // 每日考勤列表
@@ -40,7 +41,9 @@ export interface OaAttendanceMonthReportVO {
   normalCount: number // 正常次数
   lateCount: number // 迟到次数
   earlyCount: number // 早退次数
-  missingClockOutDays: number // 缺少下班打卡天数
+  leaveDays: number // 请假天数
+  travelDays: number // 出差天数
+  absentDays: number // 旷工天数
 }
 
 // 查询考勤记录分页

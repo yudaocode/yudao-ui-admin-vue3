@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【员工】员工管理" url="https://doc.iocoder.cn/hrm/employee/" />
+
   <template v-if="accessible">
     <ContentWrap>
       <div class="flex items-center justify-between">

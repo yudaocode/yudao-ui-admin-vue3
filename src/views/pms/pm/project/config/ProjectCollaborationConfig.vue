@@ -22,6 +22,7 @@
 </template>
 
 <script lang="ts" setup>
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { PmsWorkItemConfigurationOptions } from '@/views/pms/pm/utils/constants'
 import WorkItemStatusList from '@/views/pms/pm/workitem/status/WorkItemStatusList.vue'
 
@@ -33,6 +34,12 @@ const statusListRef = ref<InstanceType<typeof WorkItemStatusList>>() // 状态�
 const configurationList = computed(() =>
   PmsWorkItemConfigurationOptions.filter((option) =>
     option.projectTypes.some((projectType) => projectType === props.projectType)
-  )
+  ).map((option) => ({
+    ...option,
+    name: getDictLabel(DICT_TYPE.PMS_WORK_ITEM_TYPE, option.type),
+    projectTypeName: option.projectTypes
+      .map((projectType) => getDictLabel(DICT_TYPE.PMS_PROJECT_TYPE, projectType))
+      .join('、')
+  }))
 ) // 当前项目可配置的事项类型
 </script>

@@ -251,9 +251,9 @@ const getProject = async () => {
       color: '#409EFF'
     },
     {
-      name: 'yudao-ui-mall-uniapp',
+      name: 'yudao-mall-uniapp',
       icon: 'icon-park-outline:mall-bag',
-      message: 'github.com/yudaocode/yudao-ui-mall-uniapp',
+      message: 'github.com/yudaocode/yudao-mall-uniapp',
       personal: 'Vue3 + uniapp 商城手机端',
       time: new Date('2025-03-04'),
       color: '#ff4d4f'

@@ -1,4 +1,8 @@
 <template>
+  <doc-alert
+    title="【流程】考勤、请假、加班、转正与离职"
+    url="https://doc.iocoder.cn/oa/attendance-application/"
+  />
   <!-- 考勤报表 -->
   <ContentWrap>
     <el-tabs v-model="activeTab">
@@ -12,7 +16,7 @@
   </ContentWrap>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import OaAttendanceMonthReport from './OaAttendanceMonthReport.vue'
 import OaAttendanceWeekReport from './OaAttendanceWeekReport.vue'
 

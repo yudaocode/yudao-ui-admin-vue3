@@ -3,7 +3,7 @@
     <el-descriptions :column="4">
       <el-descriptions-item label="工号">{{ employee.jobNumber || '-' }}</el-descriptions-item>
       <el-descriptions-item label="所属部门">{{ employee.deptName || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="职位名称">{{ employee.postName || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="岗位">{{ employee.postName || '-' }}</el-descriptions-item>
       <el-descriptions-item label="岗位职级">{{ employee.postLevel || '-' }}</el-descriptions-item>
       <el-descriptions-item label="直属上级">
         {{ employee.leaderEmployeeName || '-' }}

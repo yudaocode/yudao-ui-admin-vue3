@@ -541,6 +541,60 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
+    path: '/oa',
+    component: Layout,
+    name: 'OaDetail',
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'reimbursement/detail/:id',
+        name: 'OaReimbursementDetail',
+        component: () => import('@/views/oa/reimbursement/detail/index.vue'),
+        meta: {
+          title: '费用报销',
+          hidden: true,
+          noCache: true,
+          activeMenu: '/oa/process/reimbursement'
+        }
+      },
+      {
+        path: 'overtime/detail/:id',
+        name: 'OaOvertimeApplyDetail',
+        component: () => import('@/views/oa/overtime/detail/index.vue'),
+        meta: { title: '加班申请', hidden: true, noCache: true, activeMenu: '/oa/process/overtime' }
+      },
+      {
+        path: 'leave/detail/:id',
+        name: 'OaLeaveApplyDetail',
+        component: () => import('@/views/oa/leave/detail/index.vue'),
+        meta: { title: '请假申请', hidden: true, noCache: true, activeMenu: '/oa/process/leave' }
+      },
+      {
+        path: 'regular/detail/:id',
+        name: 'OaRegularApplyDetail',
+        component: () => import('@/views/oa/regular/detail/index.vue'),
+        meta: { title: '转正申请', hidden: true, noCache: true, activeMenu: '/oa/process/regular' }
+      },
+      {
+        path: 'resign/detail/:id',
+        name: 'OaResignApplyDetail',
+        component: () => import('@/views/oa/resign/detail/index.vue'),
+        meta: { title: '离职申请', hidden: true, noCache: true, activeMenu: '/oa/process/resign' }
+      },
+      {
+        path: 'discussion/detail/:id',
+        name: 'OaDiscussionDetail',
+        component: () => import('@/views/oa/discussion/detail/index.vue'),
+        meta: {
+          title: '讨论详情',
+          hidden: true,
+          noCache: true,
+          activeMenu: '/oa/discussion/list'
+        }
+      }
+    ]
+  },
+  {
     path: '/pms',
     component: Layout,
     name: 'PmsCenter',

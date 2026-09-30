@@ -24,7 +24,7 @@
     <ContentWrap class="mt-10px">
       <el-descriptions :column="5" direction="vertical">
         <el-descriptions-item label="所属部门">{{ employee.deptName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="职位名称">{{ employee.postName || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="岗位">{{ employee.postName || '-' }}</el-descriptions-item>
         <el-descriptions-item label="工号">{{ employee.jobNumber || '-' }}</el-descriptions-item>
         <el-descriptions-item label="手机号">{{ employee.mobile || '-' }}</el-descriptions-item>
         <el-descriptions-item label="直属上级">
