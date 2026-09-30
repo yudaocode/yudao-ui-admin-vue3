@@ -604,10 +604,10 @@ export function getConditionShowText(
   return showText
 }
 
-/** 获取表单字段名称*/
+/** 获取表单字段名称。找不到时（例如业务表单手工输入的字段），直接返回字段标识*/
 const getFormFieldTitle = (fieldOptions: Array<Record<string, any>>, field: string) => {
   const item = fieldOptions.find((item) => item.field === field)
-  return item?.title
+  return item?.title ?? field
 }
 
 /** 获取操作符名称 */

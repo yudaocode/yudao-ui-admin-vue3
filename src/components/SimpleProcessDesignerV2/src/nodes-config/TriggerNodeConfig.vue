@@ -28,7 +28,7 @@
         <el-form-item label="触发器类型" prop="type">
           <el-select v-model="configForm.type" @change="changeTriggerType">
             <el-option
-              v-for="(item, index) in TRIGGER_TYPES"
+              v-for="(item, index) in triggerTypeOptions"
               :key="index"
               :value="item.value"
               :label="item.label"
@@ -242,6 +242,7 @@
   </el-drawer>
 </template>
 <script setup lang="ts">
+import { BpmModelFormType } from '@/utils/constants'
 import {
   SimpleFlowNode,
   NodeType,
@@ -251,7 +252,13 @@ import {
   FormTriggerSetting,
   DEFAULT_CONDITION_GROUP_VALUE
 } from '../consts'
-import { useWatchNode, useDrawer, useNodeName, useFormFields, getConditionShowText } from '../node'
+import {
+  useWatchNode,
+  useDrawer,
+  useNodeName,
+  useFormFieldsAndStartUser,
+  getConditionShowText
+} from '../node'
 import HttpRequestSetting from './components/HttpRequestSetting.vue'
 import ConditionDialog from './components/ConditionDialog.vue'
 import { cloneDeep } from 'lodash-es'
@@ -297,8 +304,23 @@ const configForm = ref<TriggerSetting>({
     }
   ]
 })
+
+const formType = inject<Ref<number>>('formType') // 表单类型
+/** 是否业务表单：业务表单拿不到表单字段，左值只能选择【发起人】或手工输入 */
+const isCustomForm = computed(() => formType?.value === BpmModelFormType.CUSTOM)
+
+/** 触发器类型选项：业务表单拿不到表单字段，去掉【修改表单数据】【删除表单数据】 */
+const triggerTypeOptions = computed(() => {
+  if (isCustomForm.value) {
+    return TRIGGER_TYPES.filter(
+      (item) => ![TriggerTypeEnum.FORM_UPDATE, TriggerTypeEnum.FORM_DELETE].includes(item.value)
+    )
+  }
+  return TRIGGER_TYPES
+})
+
 // 流程表单字段
-const formFields = useFormFields()
+const formFields = useFormFieldsAndStartUser()
 
 // 可选的修改的表单字段
 const optionalUpdateFormFields = computed(() => {

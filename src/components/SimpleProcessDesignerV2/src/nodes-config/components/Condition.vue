@@ -3,7 +3,7 @@
     <el-form-item label="配置方式" prop="conditionType">
       <el-radio-group v-model="condition.conditionType" @change="changeConditionType">
         <el-radio
-          v-for="(dict, indexConditionType) in conditionConfigTypes"
+          v-for="(dict, indexConditionType) in CONDITION_CONFIG_TYPES"
           :key="indexConditionType"
           :value="dict.value"
           :label="dict.value"
@@ -70,9 +70,16 @@
                   trigger: 'change'
                 }"
               >
-                <el-select style="width: 160px" v-model="rule.leftSide" clearable>
+                <el-select
+                  style="width: 160px"
+                  v-model="rule.leftSide"
+                  clearable
+                  filterable
+                  :allow-create="isCustomForm"
+                  :placeholder="isCustomForm ? '请选择或输入字段' : '请选择字段'"
+                >
                   <el-option
-                    v-for="(field, fIdx) in fieldOptions"
+                    v-for="(field, fIdx) in conditionFieldOptions"
                     :key="fIdx"
                     :label="field.title"
                     :value="field.field"
@@ -150,7 +157,8 @@ import {
   COMPARISON_OPERATORS,
   CONDITION_CONFIG_TYPES,
   ConditionType,
-  DEFAULT_CONDITION_GROUP_VALUE
+  DEFAULT_CONDITION_GROUP_VALUE,
+  ProcessVariableEnum
 } from '../../consts'
 import { BpmModelFormType } from '@/utils/constants'
 import { useFormFieldsAndStartUser } from '../../node'
@@ -171,20 +179,22 @@ const condition = computed({
     emit('update:modelValue', newValue)
   }
 })
-const formType = inject<Ref<number>>('formType') // 表单类型
-const conditionConfigTypes = computed(() => {
-  return CONDITION_CONFIG_TYPES.filter((item) => {
-    // 业务表单暂时去掉条件规则选项
-    if (formType?.value === BpmModelFormType.CUSTOM && item.value === ConditionType.RULE) {
-      return false
-    } else {
-      return true
-    }
-  })
-})
 
-/** 条件规则可选择的表单字段 */
+const formType = inject<Ref<number>>('formType') // 表单类型
+
+/** 是否业务表单：业务表单拿不到表单字段，左值只能选择【发起人】或手工输入 */
+const isCustomForm = computed(() => formType?.value === BpmModelFormType.CUSTOM)
+
+// 条件规则可选择的表单字段
 const fieldOptions = useFormFieldsAndStartUser()
+
+/** 条件规则左值下拉选项：流程表单可选全部字段；业务表单只能选【发起人】 */
+const conditionFieldOptions = computed(() => {
+  if (isCustomForm.value) {
+    return fieldOptions.filter((field) => field.field === ProcessVariableEnum.START_USER_ID)
+  }
+  return fieldOptions
+})
 
 // 表单校验规则
 const formRules = reactive({
