@@ -8,7 +8,9 @@ export const rules = reactive({
   endTime: [required],
   helpMaxCount: [required],
   bargainCount: [required],
-  singleLimitCount: [required]
+  totalLimitCount: [required],
+  randomMinPrice: [required],
+  randomMaxPrice: [required]
 })
 
 // CrudSchema https://doc.iocoder.cn/vue3/crud-schema/
