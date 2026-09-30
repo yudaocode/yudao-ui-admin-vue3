@@ -159,7 +159,9 @@ watch(
       )
       simpleModel.value = newModelView.simpleModel ? newModelView.simpleModel : {}
     }
-  }
+  },
+  // 不加 immediate 会错过唯一一次赋值，导致流程图空白
+  { immediate: true }
 )
 /** 监控模型结构数据 */
 watch(
@@ -168,7 +170,9 @@ watch(
     if (value) {
       simpleModel.value = JSON.parse(value)
     }
-  }
+  },
+  // immediate：同上，组件挂载时 simpleJson 可能已经传入
+  { immediate: true }
 )
 </script>
 
