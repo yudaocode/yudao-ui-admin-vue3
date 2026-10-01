@@ -39,6 +39,7 @@
         <el-input
           v-model="content"
           type="textarea"
+          :maxlength="16777215"
           :rows="editorRows"
           :input-style="{ fontFamily: 'monospace', fontSize: '13px', lineHeight: 1.6 }"
           spellcheck="false"

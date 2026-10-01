@@ -181,10 +181,12 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 /** 解析配置项 */
 const parseConfigForm = (data: Mcp) => {
   const config = jsonParseObject(data.config) ?? {}
+  formData.value.url = config.url || data.url
+  const headers = isEmpty(config.headers) ? data.headers : config.headers
   configForm.value = {
-    headers: isEmpty(data.headers) ? '' : JSON.stringify(data.headers, null, 2),
+    headers: isEmpty(headers) ? '' : JSON.stringify(headers, null, 2),
     command: config.command ?? '',
-    argsText: config.args?.join('\n') ?? '',
+    argsText: Array.isArray(config.args) ? config.args.join('\n') : '',
     env: isEmpty(config.env) ? '' : JSON.stringify(config.env, null, 2),
     cwd: config.cwd ?? ''
   }

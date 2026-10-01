@@ -125,9 +125,25 @@ const open = async (type: string, id?: number) => {
       const data = await ProviderApi.getProvider(id)
       formData.value = {
         ...data,
-        apiKey: data.apiKey?.includes('${') ? data.apiKey : undefined // 脱敏值不回填，${ENV} 占位符回填
+        // 仅完整的 ${ENV} 占位符回填，脱敏值和带默认值的占位符均不回填
+        apiKey:
+          data.apiKey?.match(/^\$\{[a-zA-Z_][a-zA-Z0-9_.-]*\}$/)?.[0] === data.apiKey
+            ? data.apiKey
+            : undefined
       }
-      headerList.value = data.headers ? JSON.parse(data.headers) : []
+      try {
+        const headers = data.headers ? JSON.parse(data.headers) : []
+        if (!Array.isArray(headers)) {
+          throw new Error('Header 格式错误')
+        }
+        headerList.value = headers.map((item) => ({
+          key: String(item?.key ?? ''),
+          value: String(item?.value ?? '')
+        }))
+      } catch {
+        headerList.value = []
+        message.warning('附属 Header 格式错误，已清空，请重新填写')
+      }
     } finally {
       formLoading.value = false
     }
@@ -142,7 +158,7 @@ const submitForm = async () => {
   await formRef.value.validate()
   // 校验 Header
   const headers = headerList.value
-    .map((item) => ({ key: item.key.trim(), value: item.value }))
+    .map((item) => ({ key: String(item.key ?? '').trim(), value: item.value }))
     .filter((item) => item.key || item.value)
   if (headers.some((item) => !item.key)) {
     message.warning('Header 名称不能为空')

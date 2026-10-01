@@ -245,7 +245,19 @@ const handleNewSession = () => {
 /** 选中会话 */
 const selectSession = async (sessionId: number) => {
   if (sessionId === activeSessionId.value) {
-    return
+    // 停止或断线后允许重开当前会话；接收或加载中避免重复请求
+    if (
+      streaming.value ||
+      messageLoading.value ||
+      !messageList.value.some(
+        (item) =>
+          item.role === Ai1SessionMessageRoleEnum.ASSISTANT &&
+          item.status === Ai1SessionMessageStatusEnum.GENERATING &&
+          item.interrupted
+      )
+    ) {
+      return
+    }
   }
   stopStream()
   activeSessionId.value = sessionId
@@ -280,7 +292,7 @@ const messageList = ref<Ai1SessionMessageItem[]>([]) // 消息列表
 const messageLoading = ref(false) // 消息列表加载中
 const messageListRef = ref() // 消息列表 Ref
 
-/** 加载消息列表；最后一条助手消息仍在生成中时，自动续传 */
+/** 加载消息列表，自动续传生成中的助手消息 */
 const getSessionMessageList = async () => {
   const sessionId = activeSessionId.value
   if (!sessionId) {
@@ -299,12 +311,14 @@ const getSessionMessageList = async () => {
   }
   scrollToBottom(true)
   // 续传生成中的助手消息
-  const lastMessage = messageList.value[messageList.value.length - 1]
-  if (
-    lastMessage?.role === Ai1SessionMessageRoleEnum.ASSISTANT &&
-    lastMessage.status === Ai1SessionMessageStatusEnum.GENERATING
-  ) {
-    await resumeMessage(lastMessage)
+  const generatingMessage = messageList.value.find(
+    (item) =>
+      item.role === Ai1SessionMessageRoleEnum.ASSISTANT &&
+      item.status === Ai1SessionMessageStatusEnum.GENERATING
+  )
+  if (generatingMessage) {
+    // 后台续传，不等待流结束，避免阻塞会话切换和页面初始化
+    resumeMessage(generatingMessage).catch(() => {})
   }
 }
 
@@ -320,6 +334,7 @@ const prompt = ref('') // 输入框内容
 const promptInputRef = ref() // 输入框
 const streaming = ref(false) // 是否正在接收流
 let streamController: AbortController | undefined // SSE 中止控制器
+let streamingMessage: Ai1SessionMessageItem | undefined // 当前接收的助手消息
 let streamSeq = 0 // 流序号，用于丢弃过期流的事件
 
 /** 输入框按键：Enter 发送，Shift+Enter 换行 */
@@ -415,6 +430,7 @@ const runStream = async (
 ) => {
   const seq = ++streamSeq
   streaming.value = true
+  streamingMessage = assistantMessage
   // 流状态
   const state = {
     messageId: assistantMessage.id > 0 ? assistantMessage.id : undefined,
@@ -462,6 +478,7 @@ const runStream = async (
     if (seq === streamSeq) {
       streaming.value = false
       streamController = undefined
+      streamingMessage = undefined
     }
   }
   if (state.finished && seq === streamSeq) {
@@ -526,15 +543,16 @@ const stopStream = () => {
   streamSeq++
   streamController?.abort()
   streamController = undefined
+  streamingMessage = undefined
   streaming.value = false
 }
 
 /** 停止 */
 const handleStop = () => {
+  const assistantMessage = streamingMessage
   stopStream()
-  const lastMessage = messageList.value[messageList.value.length - 1]
-  if (lastMessage?.status === Ai1SessionMessageStatusEnum.GENERATING) {
-    lastMessage.interrupted = true
+  if (assistantMessage?.status === Ai1SessionMessageStatusEnum.GENERATING) {
+    assistantMessage.interrupted = true
   }
 }
 

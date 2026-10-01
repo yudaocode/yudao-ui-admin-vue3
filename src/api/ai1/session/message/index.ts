@@ -1,5 +1,5 @@
 import request from '@/config/axios'
-import { fetchEventSource } from '@microsoft/fetch-event-source'
+import { EventStreamContentType, fetchEventSource } from '@microsoft/fetch-event-source'
 import { getAccessToken, getTenantId } from '@/utils/auth'
 import { config } from '@/config/axios/config'
 
@@ -49,6 +49,26 @@ const openSessionStream = (
     openWhenHidden: true,
     body: body ? JSON.stringify(body) : undefined,
     signal: controller.signal,
+    onopen: async (response) => {
+      if (
+        response.ok &&
+        response.headers.get('content-type')?.toLowerCase().startsWith(EventStreamContentType)
+      ) {
+        return
+      }
+      // 校验、权限等错误可能返回 JSON，交给现有 error 事件展示并终止断线重试
+      let errorMessage = response.ok
+        ? '会话响应格式异常，请稍后重试'
+        : `会话请求失败（HTTP ${response.status}），请稍后重试`
+      try {
+        const result = await response.json()
+        if (typeof result?.msg === 'string' && result.msg.trim()) {
+          errorMessage = result.msg
+        }
+      } catch {}
+      handlers.onEvent({ event: 'error', data: errorMessage })
+      throw new Error(errorMessage)
+    },
     onmessage: (message) => {
       handlers.onEvent({
         event: message.event,

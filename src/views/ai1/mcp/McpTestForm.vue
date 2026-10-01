@@ -38,6 +38,9 @@
             max-height="340"
             :show-overflow-tooltip="true"
           >
+            <template #empty>
+              <el-empty description="未发现可用工具" />
+            </template>
             <el-table-column label="序号" type="index" width="60" align="center" />
             <el-table-column label="工具名称" prop="name" min-width="140" align="center" />
             <el-table-column label="标题" prop="title" min-width="110" align="center" />

@@ -7,8 +7,8 @@
       @scroll="handleScroll"
     >
       <div
-        v-for="(item, index) in list"
-        :key="index"
+        v-for="item in list"
+        :key="item.id"
         class="group mb-16px flex gap-10px"
         :class="{ 'flex-row-reverse': item.role === Ai1SessionMessageRoleEnum.USER }"
       >

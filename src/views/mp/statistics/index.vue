@@ -269,18 +269,11 @@ const initUserSummaryChart = async () => {
     })
     // 横坐标
     userSummaryOption.xAxis.data = xAxisDate.value
-    // 处理数据
+    // 按统计日期对齐，缺失日期补零
     xAxisDate.value.forEach((date, index) => {
-      data.forEach((item) => {
-        // 匹配日期
-        const refDate = formatDate(new Date(item.refDate), 'YYYY-MM-DD')
-        if (refDate.indexOf(date) === -1) {
-          return
-        }
-        // 设置数据到对应的位置
-        userSummaryOption.series[0].data[index] = item.newUser
-        userSummaryOption.series[1].data[index] = item.cancelUser
-      })
+      const item = data.find((item) => formatDate(new Date(item.refDate), 'YYYY-MM-DD') === date)
+      userSummaryOption.series[0].data[index] = item?.newUser ?? 0
+      userSummaryOption.series[1].data[index] = item?.cancelUser ?? 0
     })
   } catch {
     //
@@ -298,9 +291,10 @@ const initUserCumulateChart = async () => {
       date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
     userCumulateOption.xAxis.data = xAxisDate.value
-    // 处理数据
-    data.forEach((item, index) => {
-      userCumulateOption.series[0].data[index] = item.cumulateUser
+    // 按统计日期对齐，缺失日期补零
+    xAxisDate.value.forEach((date, index) => {
+      const item = data.find((item) => formatDate(new Date(item.refDate), 'YYYY-MM-DD') === date)
+      userCumulateOption.series[0].data[index] = item?.cumulateUser ?? 0
     })
   } catch {
     //
@@ -319,10 +313,11 @@ const initUpstreamMessageChart = async () => {
       date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
     upstreamMessageOption.xAxis.data = xAxisDate.value
-    // 处理数据
-    data.forEach((item, index) => {
-      upstreamMessageOption.series[0].data[index] = item.messageUser
-      upstreamMessageOption.series[1].data[index] = item.messageCount
+    // 按统计日期对齐，缺失日期补零
+    xAxisDate.value.forEach((date, index) => {
+      const item = data.find((item) => formatDate(new Date(item.refDate), 'YYYY-MM-DD') === date)
+      upstreamMessageOption.series[0].data[index] = item?.messageUser ?? 0
+      upstreamMessageOption.series[1].data[index] = item?.messageCount ?? 0
     })
   } catch {
     //
@@ -343,12 +338,13 @@ const interfaceSummaryChart = async () => {
       date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
     interfaceSummaryOption.xAxis.data = xAxisDate.value
-    // 处理数据
-    data.forEach((item, index) => {
-      interfaceSummaryOption.series[0].data[index] = item.callbackCount
-      interfaceSummaryOption.series[1].data[index] = item.failCount
-      interfaceSummaryOption.series[2].data[index] = item.maxTimeCost
-      interfaceSummaryOption.series[3].data[index] = item.totalTimeCost
+    // 按统计日期对齐，缺失日期补零
+    xAxisDate.value.forEach((date, index) => {
+      const item = data.find((item) => formatDate(new Date(item.refDate), 'YYYY-MM-DD') === date)
+      interfaceSummaryOption.series[0].data[index] = item?.callbackCount ?? 0
+      interfaceSummaryOption.series[1].data[index] = item?.failCount ?? 0
+      interfaceSummaryOption.series[2].data[index] = item?.maxTimeCost ?? 0
+      interfaceSummaryOption.series[3].data[index] = item?.totalTimeCost ?? 0
     })
   } catch {
     //

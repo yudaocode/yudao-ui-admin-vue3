@@ -23,6 +23,7 @@
         <el-input
           v-model="formData.content"
           type="textarea"
+          :maxlength="16777215"
           :rows="20"
           :input-style="{ maxHeight: '52vh' }"
           placeholder="请输入文档内容（粘贴文本）；也支持在列表页上传 .txt/.md 文件"

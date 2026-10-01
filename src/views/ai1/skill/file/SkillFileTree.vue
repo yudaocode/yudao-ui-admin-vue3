@@ -30,7 +30,7 @@
         <el-tooltip content="删除" placement="top">
           <el-button
             :disabled="!selectedNode || selectedNode.locked"
-            v-hasPermi="['ai1:skill:update']"
+            v-hasPermi="['ai1:skill:delete']"
             @click="handleDelete"
           >
             <Icon icon="ep:delete" />

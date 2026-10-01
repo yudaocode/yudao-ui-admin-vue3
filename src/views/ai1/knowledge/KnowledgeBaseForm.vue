@@ -53,7 +53,7 @@
           <el-form-item label="分片大小" prop="chunkSize">
             <el-input-number
               v-model="formData.chunkSize"
-              :min="1"
+              :min="100"
               :max="2000"
               :step="100"
               class="!w-full"

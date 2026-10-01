@@ -87,14 +87,22 @@
       />
       <el-table-column label="操作" align="center" width="280px" fixed="right">
         <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openSession(scope.row)"
-            v-hasPermi="['ai1:session:my']"
+          <el-tooltip
+            content="请先开启 Agent"
+            :disabled="scope.row.status === CommonStatusEnum.ENABLE"
           >
-            前往会话
-          </el-button>
+            <span class="mr-12px inline-flex">
+              <el-button
+                link
+                type="primary"
+                :disabled="scope.row.status !== CommonStatusEnum.ENABLE"
+                @click="openSession(scope.row)"
+                v-hasPermi="['ai1:session:my']"
+              >
+                前往会话
+              </el-button>
+            </span>
+          </el-tooltip>
           <el-button
             link
             type="primary"
@@ -194,6 +202,10 @@ const openForm = (type: string, id?: number) => {
 /** 前往会话 */
 const { push } = useRouter() // 路由
 const openSession = (row: Agent) => {
+  if (row.status !== CommonStatusEnum.ENABLE) {
+    message.warning('请先开启 Agent')
+    return
+  }
   push({ path: '/ai1/session', query: { agentId: row.id } })
 }
 
