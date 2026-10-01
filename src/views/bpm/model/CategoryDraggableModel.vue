@@ -37,7 +37,13 @@
             <Icon icon="fa:sort-amount-desc" class="mr-5px" />
             排序
           </el-button>
-          <el-button v-else link type="info" class="mr-20px" @click.stop="openModelForm('create')">
+          <el-button
+            v-else-if="hasPermiCreate"
+            link
+            type="info"
+            class="mr-20px"
+            @click.stop="openModelForm('create')"
+          >
             <Icon icon="fa:plus" class="mr-5px" />
             新建
           </el-button>
@@ -183,6 +189,7 @@
               修改
             </el-button>
             <el-button
+              v-if="hasPermiCreate"
               link
               type="primary"
               @click="openModelForm('copy', scope.row.id)"
@@ -356,6 +363,9 @@ const tableCellStyle = computed(() => ({
 }))
 
 /** 权限校验：通过 computed 解决列表的卡顿问题 */
+const hasPermiCreate = computed(() => {
+  return checkPermi(['bpm:model:create'])
+})
 const hasPermiUpdate = computed(() => {
   return checkPermi(['bpm:model:update'])
 })
@@ -373,7 +383,9 @@ const hasPermiMore = computed(() => {
     'bpm:process-definition:query',
     'bpm:model:update',
     'bpm:model:delete',
-    'bpm:model:export'
+    'bpm:model:export',
+    'bpm:process-instance:manager-query',
+    'bpm:model:clean'
   ])
 })
 const hasPermiPdQuery = computed(() => {

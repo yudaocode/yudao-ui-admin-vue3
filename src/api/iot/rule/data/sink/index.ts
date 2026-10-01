@@ -120,6 +120,9 @@ export interface RedisStreamMQConfig extends Config {
   password: string
   database: number
   topic: string
+  dataStructure: number
+  hashField?: string
+  scoreField?: string
 }
 
 /** 数据流转目的类型 */

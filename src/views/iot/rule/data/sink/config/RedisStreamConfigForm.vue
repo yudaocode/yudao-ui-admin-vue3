@@ -26,9 +26,37 @@
   <el-form-item label="主题" prop="config.topic">
     <el-input v-model="config.topic" placeholder="请输入主题" />
   </el-form-item>
+  <el-form-item label="数据结构" prop="config.dataStructure">
+    <el-select v-model="config.dataStructure" placeholder="请选择数据结构" class="w-1/1">
+      <el-option
+        v-for="item in IOT_REDIS_DATA_STRUCTURE_OPTIONS"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value"
+      />
+    </el-select>
+  </el-form-item>
+  <el-form-item
+    v-if="config.dataStructure === IotRedisDataStructureEnum.HASH"
+    label="Hash 字段"
+    prop="config.hashField"
+  >
+    <el-input v-model="config.hashField" placeholder="留空时使用设备 ID" />
+  </el-form-item>
+  <el-form-item
+    v-if="config.dataStructure === IotRedisDataStructureEnum.ZSET"
+    label="Score 字段"
+    prop="config.scoreField"
+  >
+    <el-input v-model="config.scoreField" placeholder="留空时使用当前时间戳" />
+  </el-form-item>
 </template>
 <script lang="ts" setup>
 import { IotDataSinkTypeEnum, RedisStreamMQConfig } from '@/api/iot/rule/data/sink'
+import {
+  IOT_REDIS_DATA_STRUCTURE_OPTIONS,
+  IotRedisDataStructureEnum
+} from '@/views/iot/utils/constants'
 import { useVModel } from '@vueuse/core'
 import { isEmpty } from '@/utils/is'
 
@@ -43,6 +71,7 @@ const config = useVModel(props, 'modelValue', emit) as Ref<RedisStreamMQConfig>
 /** 组件初始化 */
 onMounted(() => {
   if (!isEmpty(config.value)) {
+    config.value.dataStructure ??= IotRedisDataStructureEnum.STREAM
     return
   }
   config.value = {
@@ -51,6 +80,7 @@ onMounted(() => {
     port: 6379,
     password: '',
     database: 0,
+    dataStructure: IotRedisDataStructureEnum.STREAM,
     topic: ''
   }
 })
