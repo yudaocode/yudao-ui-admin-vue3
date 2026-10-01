@@ -361,9 +361,6 @@ const handleBusinessChange = async (businessId?: number) => {
     return
   }
   const business = await BusinessApi.getBusiness(businessId)
-  if (formData.value.businessId !== businessId) {
-    return
-  }
   business.products.forEach((item) => {
     item.contractPrice = item.businessPrice
   })

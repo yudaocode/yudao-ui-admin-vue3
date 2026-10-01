@@ -129,10 +129,9 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     // 注意：需要从 formVariables 中，移除不在 row.formFields 的值。
     // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
     //        这样，就可能导致一个流程被审批不通过后，重新发起时，会直接后端报错！！！
-    const formApi = formCreate.create(decodeFields(row.formFields))
-    const allowedFields = formApi.fields()
+    const allowedFields = collectFormFields(decodeFields(row.formFields))
     for (const key in formVariables) {
-      if (!allowedFields.includes(key)) {
+      if (!allowedFields.has(key)) {
         delete formVariables[key]
       }
     }
@@ -227,6 +226,27 @@ const getApprovalDetail = async (row: any) => {
     }
   } finally {
   }
+}
+
+/** 收集布局和条件规则中的字段，不额外挂载临时表单 */
+function collectFormFields(rules: Record<string, any>[], fields = new Set<string>()): Set<string> {
+  for (const rule of rules) {
+    if (!rule || typeof rule !== 'object') {
+      continue
+    }
+    if (typeof rule.field === 'string') {
+      fields.add(rule.field)
+    }
+    if (Array.isArray(rule.children)) {
+      collectFormFields(rule.children, fields)
+    }
+    for (const control of rule.control ?? []) {
+      if (Array.isArray(control.rule)) {
+        collectFormFields(control.rule, fields)
+      }
+    }
+  }
+  return fields
 }
 
 /**

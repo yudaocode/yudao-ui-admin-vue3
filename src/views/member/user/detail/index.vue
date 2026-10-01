@@ -40,7 +40,7 @@
             <UserExperienceRecordList :user-id="id" />
           </el-tab-pane>
           <el-tab-pane label="余额" lazy>
-            <UserBalanceList :wallet-id="wallet.id" />
+            <UserBalanceList v-if="wallet.id" :wallet-id="wallet.id" />
           </el-tab-pane>
           <el-tab-pane label="收货地址" lazy>
             <UserAddressList :user-id="id" />
