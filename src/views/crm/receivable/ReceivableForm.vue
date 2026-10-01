@@ -160,7 +160,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref<ReceivableApi.ReceivableVO>({} as ReceivableApi.ReceivableVO)
+const formData = ref<Partial<ReceivableApi.ReceivableVO>>({})
 const formRules = reactive({
   customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
   contractId: [{ required: true, message: '合同不能为空', trigger: 'blur' }],
@@ -188,7 +188,7 @@ const open = async (
     try {
       const data = (await ReceivableApi.getReceivable(id)) as ReceivableVO
       formData.value = data
-      await handleCustomerChange(data.customerId!)
+      contractList.value = await ContractApi.getContractSimpleList(data.customerId!)
       formData.value.contractId = data?.contract?.id
     } finally {
       formLoading.value = false
@@ -247,17 +247,22 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  formData.value = {} as ReceivableApi.ReceivableVO
+  formData.value = {}
   formRef.value?.resetFields()
 }
 
 /** 处理切换客户 */
 const handleCustomerChange = async (customerId: number) => {
-  // 重置合同编号
+  // 清空旧客户关联的回款数据
   formData.value.contractId = undefined
+  formData.value.planId = undefined
+  formData.value.price = undefined
+  formData.value.returnTime = undefined
+  formData.value.returnType = undefined
+  contractList.value = []
+  receivablePlanList.value = []
   // 获得合同列表
   if (customerId) {
-    contractList.value = []
     contractList.value = await ContractApi.getContractSimpleList(customerId)
   }
 }

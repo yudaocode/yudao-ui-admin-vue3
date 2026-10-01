@@ -373,8 +373,7 @@ const handleDeploy = async () => {
     if (formData.value.id) {
       await ModelApi.updateModel(modelData)
     } else {
-      const result = await ModelApi.createModel(modelData)
-      formData.value.id = result.id
+      formData.value.id = await ModelApi.createModel(modelData)
     }
 
     // 发布
