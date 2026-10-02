@@ -187,7 +187,7 @@ watch(
     if (!val) {
       return
     }
-    const totalPrice = val.items.reduce((prev, curr) => prev + curr.totalPrice, 0)
+    const totalPrice = val.items.reduce((prev, curr) => prev + (curr.totalPrice || 0), 0)
     const discountPrice =
       val.discountPercent != null
         ? (erpPriceMultiply(totalPrice, val.discountPercent / 100.0) ?? 0)

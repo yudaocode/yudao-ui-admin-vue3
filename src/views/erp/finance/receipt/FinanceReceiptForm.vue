@@ -201,7 +201,7 @@ watch(
     if (!val) {
       return
     }
-    const totalPrice = val.items.reduce((prev, curr) => prev + curr.receiptPrice, 0)
+    const totalPrice = val.items.reduce((prev, curr) => prev + (curr.receiptPrice || 0), 0)
     formData.value.totalPrice = totalPrice
     formData.value.receiptPrice = totalPrice - val.discountPrice
   },
