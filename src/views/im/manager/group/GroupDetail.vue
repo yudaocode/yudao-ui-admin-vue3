@@ -51,7 +51,9 @@
           <dict-tag :type="DICT_TYPE.IM_GROUP_MEMBER_ROLE" :value="row.role" />
         </template>
       </el-table-column>
-      <el-table-column label="昵称" prop="nickname" min-width="120" show-overflow-tooltip />
+      <el-table-column label="昵称" prop="nickname" min-width="120" show-overflow-tooltip>
+        <template #default="{ row }">{{ row.nickname || '-' }}</template>
+      </el-table-column>
       <el-table-column
         label="组内显示名"
         prop="displayUserName"
