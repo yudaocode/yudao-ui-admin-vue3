@@ -257,7 +257,9 @@ const setStockCount = async (row: any) => {
   if (!row.productId) {
     return
   }
-  const count = await StockApi.getStockCount(row.productId)
+  const count = row.warehouseId == null
+    ? await StockApi.getStockCount(row.productId)
+    : (await StockApi.getStock2(row.productId, row.warehouseId))?.count
   row.stockCount = count || 0
 }
 
