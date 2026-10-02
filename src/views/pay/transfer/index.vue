@@ -41,16 +41,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择类型" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.PAY_TRANSFER_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item label="转账状态" prop="status">
         <el-select
           v-model="queryParams.status"
@@ -216,7 +206,6 @@ const queryParams = reactive({
   channelId: null as number | null,
   channelCode: null as string | null,
   merchantOrderId: null as string | null,
-  type: null as string | null,
   status: null as number | null,
   successTime: [] as string[],
   price: null as number | null,

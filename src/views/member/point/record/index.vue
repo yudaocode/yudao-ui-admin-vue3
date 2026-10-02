@@ -43,17 +43,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="获得时间" prop="createDate">
-        <el-date-picker
-          v-model="queryParams.createDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery">
           <Icon icon="ep:search" class="mr-5px" />
@@ -125,8 +114,7 @@ const queryParams = reactive({
   pageSize: 10,
   nickname: null,
   bizType: null,
-  title: null,
-  createDate: []
+  title: null
 })
 const queryFormRef = ref() // 搜索的表单
 
