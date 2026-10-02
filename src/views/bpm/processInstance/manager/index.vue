@@ -29,10 +29,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="所属流程" prop="processDefinitionId">
+      <el-form-item label="所属流程" prop="processDefinitionKey">
         <el-input
-          v-model="queryParams.processDefinitionId"
-          placeholder="请输入流程定义的编号"
+          v-model="queryParams.processDefinitionKey"
+          placeholder="请输入流程定义的标识"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -185,7 +185,7 @@ const queryParams = reactive({
   pageSize: 10,
   startUserId: undefined,
   name: '',
-  processDefinitionId: undefined,
+  processDefinitionKey: undefined,
   category: undefined,
   status: undefined,
   createTime: []
