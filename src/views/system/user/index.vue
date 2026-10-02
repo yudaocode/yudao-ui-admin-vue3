@@ -210,6 +210,7 @@
   <UserAssignRoleForm ref="assignRoleFormRef" @success="getList" />
 </template>
 <script lang="ts" setup>
+import { ElMessageBox } from 'element-plus'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { checkPermi } from '@/utils/permission'
 import { dateFormatter } from '@/utils/formatTime'
@@ -368,9 +369,15 @@ const handleDeleteBatch = async () => {
 const handleResetPwd = async (row: UserApi.UserVO) => {
   try {
     // 重置的二次确认
-    const result = await message.prompt(
+    const result = await ElMessageBox.prompt(
       '请输入"' + row.username + '"的新密码',
-      t('common.reminder')
+      t('common.reminder'),
+      {
+        confirmButtonText: t('common.ok'),
+        cancelButtonText: t('common.cancel'),
+        type: 'warning',
+        inputValidator: (value) => (value.length >= 4 && value.length <= 16) || '密码长度为 4-16 位'
+      }
     )
     const password = result.value
     // 发起重置
