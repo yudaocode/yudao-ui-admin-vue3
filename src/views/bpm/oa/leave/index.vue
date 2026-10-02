@@ -133,7 +133,7 @@
           </el-button>
           <el-button
             v-if="scope.row.result === 1"
-            v-hasPermi="['bpm:oa-leave:create']"
+            v-hasPermi="['bpm:process-instance:cancel']"
             link
             type="danger"
             @click="cancelLeave(scope.row)"

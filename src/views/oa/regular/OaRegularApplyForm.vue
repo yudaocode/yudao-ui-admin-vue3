@@ -118,7 +118,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单类型：create - 新增；update - 修改
 const formData = ref<RegularApplyApi.RegularApplyVO>({}) // 表单数据
 const formRules = reactive<FormRules>({
-  title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
+  title: [{ required: true, whitespace: true, message: '标题不能为空', trigger: 'blur' }],
   urgency: [{ required: true, message: '紧急程度不能为空', trigger: 'change' }],
   startTime: [{ required: true, message: '开始时间不能为空', trigger: 'change' }],
   endTime: [{ required: true, message: '结束时间不能为空', trigger: 'change' }],

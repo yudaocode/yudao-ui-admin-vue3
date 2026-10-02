@@ -113,7 +113,7 @@
         <template #default="scope">
           <el-switch
             v-model="scope.row.brokerageEnabled"
-            :disabled="!checkPermi(['trade:brokerage-user:update-bind-user'])"
+            :disabled="!checkPermi(['trade:brokerage-user:update-brokerage-enable'])"
             active-text="有"
             inactive-text="无"
             inline-prompt

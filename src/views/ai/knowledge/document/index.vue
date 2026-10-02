@@ -17,21 +17,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="是否启用" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择是否启用"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -112,7 +97,6 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { KnowledgeDocumentApi, KnowledgeDocumentVO } from '@/api/ai/knowledge/document'
 import { useRoute, useRouter } from 'vue-router'
@@ -135,7 +119,6 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: undefined,
-  status: undefined,
   knowledgeId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
