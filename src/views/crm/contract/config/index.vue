@@ -33,7 +33,7 @@
         </el-form-item>
         <div v-if="formData.notifyEnabled">
           <el-form-item>
-            提前 <el-input-number class="mx-2" v-model="formData.notifyDays" /> 天提醒
+            提前 <el-input-number class="mx-2" v-model="formData.notifyDays" :min="0" :precision="0" /> 天提醒
           </el-form-item>
         </div>
       </el-card>
@@ -77,6 +77,12 @@ const onSubmit = async () => {
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  const days: (number | undefined)[] = []
+  if (formData.value.notifyEnabled) days.push(formData.value.notifyDays)
+  if (days.some((day) => !Number.isInteger(day) || Number(day) < 0)) {
+    message.warning('请填写非负整数天数')
+    return
+  }
   // 提交请求
   formLoading.value = true
   try {
