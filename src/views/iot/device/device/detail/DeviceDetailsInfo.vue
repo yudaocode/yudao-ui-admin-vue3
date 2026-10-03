@@ -120,7 +120,7 @@ const mapDialogRef = ref() // 地图弹窗 Ref
 
 /** 是否有位置信息 */
 const hasLocation = computed(() => {
-  return !!(device.longitude && device.latitude)
+  return device.longitude != null && device.latitude != null
 })
 
 /** 打开地图弹窗 */
