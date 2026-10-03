@@ -766,7 +766,10 @@ async function handleBoardSort(statusGroup: BoardStatusGroup) {
 
 /** 导出工作项 */
 async function handleExport() {
-  const data = await WorkItemApi.exportWorkItemList(queryParams)
+  const data = await WorkItemApi.exportWorkItemList({
+    ...queryParams,
+    name: searchKeyword.value.trim() || undefined
+  })
   download.excel(data, `${workItemTypeName.value}.xlsx`)
 }
 

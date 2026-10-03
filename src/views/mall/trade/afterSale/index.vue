@@ -241,7 +241,7 @@ const tabClick = async (tab: TabsPaneContext) => {
     return
   }
   queryParams.status = String(tab.paneName)
-  await getList()
+  await handleQuery()
 }
 
 /** 处理退款 */

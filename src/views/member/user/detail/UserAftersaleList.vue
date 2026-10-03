@@ -241,7 +241,7 @@ const resetQuery = () => {
 /** tab 切换 */
 const tabClick = async (tab: TabsPaneContext) => {
   queryParams.value.status = tab.paneName as any
-  await getList()
+  await handleQuery()
 }
 
 /** 处理退款 */
