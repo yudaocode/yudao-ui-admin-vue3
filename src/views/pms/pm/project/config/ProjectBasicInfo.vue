@@ -41,7 +41,7 @@
             归档后项目只允许查看，不能继续维护项目中的迭代和工作项。
           </div>
         </div>
-        <el-button @click="handleArchive">归档</el-button>
+        <el-button v-hasPermi="['pms:pm:project:update']" @click="handleArchive">归档</el-button>
       </div>
       <el-divider />
       <div class="flex items-center justify-between gap-16px">
@@ -51,7 +51,7 @@
             项目进入回收站后不可访问；只有项目拥有者可以在回收站彻底删除。
           </div>
         </div>
-        <el-button type="danger" @click="handleRecycle">移入回收站</el-button>
+        <el-button v-hasPermi="['pms:pm:project:update']" type="danger" @click="handleRecycle">移入回收站</el-button>
       </div>
     </template>
 
@@ -81,26 +81,24 @@ const projectFormRef = ref<InstanceType<typeof ProjectForm>>() // 项目表单 R
 /** 归档项目 */
 async function handleArchive() {
   try {
-    // 归档的二次确认
     await message.confirm('归档后将不能继续操作项目中的数据，确认归档该项目吗？')
-    // 执行项目归档
-    await ProjectApi.archiveProject(props.project.id)
-    // 提示结果并进入归档项目列表
-    message.success('项目已归档')
-    await push({ name: 'PmsProjectArchive' })
-  } catch {}
+  } catch {
+    return
+  }
+  await ProjectApi.archiveProject(props.project.id)
+  message.success('项目已归档')
+  await push({ name: 'PmsProjectArchive' })
 }
 
 /** 将项目移入回收站 */
 async function handleRecycle() {
   try {
-    // 移入回收站的二次确认
     await message.delConfirm('确认将该项目移入回收站吗？')
-    // 将项目移入回收站
-    await ProjectApi.recycleProject(props.project.id)
-    // 提示结果并进入项目回收站
-    message.success('项目已移入回收站')
-    await push({ name: 'PmsProjectRecycle' })
-  } catch {}
+  } catch {
+    return
+  }
+  await ProjectApi.recycleProject(props.project.id)
+  message.success('项目已移入回收站')
+  await push({ name: 'PmsProjectRecycle' })
 }
 </script>
