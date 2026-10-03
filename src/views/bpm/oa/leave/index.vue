@@ -132,7 +132,7 @@
             进度
           </el-button>
           <el-button
-            v-if="scope.row.result === 1"
+            v-if="scope.row.status === BpmProcessInstanceStatus.RUNNING"
             v-hasPermi="['bpm:process-instance:cancel']"
             link
             type="danger"
@@ -162,6 +162,7 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
+import { BpmProcessInstanceStatus } from '@/utils/constants'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as LeaveApi from '@/api/bpm/leave'
@@ -236,7 +237,7 @@ const handleDetail = (row: LeaveApi.LeaveVO) => {
 }
 
 /** 取消请假操作 */
-const cancelLeave = async (row) => {
+const cancelLeave = async (row: LeaveApi.LeaveVO) => {
   // 二次确认
   const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
     confirmButtonText: t('common.ok'),
@@ -245,7 +246,7 @@ const cancelLeave = async (row) => {
     inputErrorMessage: '取消原因不能为空'
   })
   // 发起取消
-  await ProcessInstanceApi.cancelProcessInstanceByStartUser(row.id, value)
+  await ProcessInstanceApi.cancelProcessInstanceByStartUser(row.processInstanceId, value)
   message.success('取消成功')
   // 刷新列表
   await getList()
