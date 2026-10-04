@@ -262,9 +262,10 @@ const submitForm = async () => {
 
 const open = (conditionObj: any | undefined) => {
   if (conditionObj) {
-    condition.value.conditionType = conditionObj.conditionType
+    condition.value.conditionType = conditionObj.conditionType ?? ConditionType.RULE
     condition.value.conditionExpression = conditionObj.conditionExpression
-    condition.value.conditionGroups = conditionObj.conditionGroups
+    condition.value.conditionGroups =
+      conditionObj.conditionGroups ?? cloneDeep(DEFAULT_CONDITION_GROUP_VALUE)
   }
   dialogVisible.value = true
 }

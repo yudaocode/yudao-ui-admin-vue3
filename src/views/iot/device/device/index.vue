@@ -333,7 +333,7 @@
           >
             查看
           </el-button>
-          <el-button link type="primary" @click="openModel(scope.row.id)"> 日志 </el-button>
+          <el-button link type="primary" @click="openLog(scope.row.id)"> 日志 </el-button>
           <el-button
             link
             type="primary"
@@ -508,6 +508,10 @@ const openGroupForm = () => {
 /** 打开物模型数据 */
 const openModel = (id: number) => {
   push({ name: 'IoTDeviceDetail', params: { id }, query: { tab: 'model' } })
+}
+
+const openLog = (id: number) => {
+  push({ name: 'IoTDeviceDetail', params: { id }, query: { tab: 'log' } })
 }
 
 /** 设备导入 */
