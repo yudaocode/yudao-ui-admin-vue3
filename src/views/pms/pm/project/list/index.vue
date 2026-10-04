@@ -441,6 +441,10 @@ async function getFavoriteProjectList() {
 
 /** 查询个人项目分组 */
 async function getGroupList() {
+  if (!checkPermi(['pms:pm:project-group:query'])) {
+    groupList.value = []
+    return
+  }
   groupList.value = await ProjectGroupApi.getProjectGroupList()
   if (!queryParams.groupId) {
     queryParams.groupId = groupList.value.find(
