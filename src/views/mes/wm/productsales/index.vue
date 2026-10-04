@@ -42,9 +42,9 @@
       <el-form-item label="客户" prop="clientId">
         <MdClientSelect v-model="queryParams.clientId" class="!w-240px" />
       </el-form-item>
-      <el-form-item label="出库日期" prop="salesDate">
+      <el-form-item label="出库日期" prop="shipmentDate">
         <el-date-picker
-          v-model="queryParams.salesDate"
+          v-model="queryParams.shipmentDate"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
@@ -229,7 +229,7 @@ const queryParams = reactive({
   name: undefined,
   salesOrderCode: undefined,
   clientId: undefined,
-  salesDate: undefined,
+  shipmentDate: undefined,
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单

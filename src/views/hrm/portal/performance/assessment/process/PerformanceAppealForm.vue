@@ -57,7 +57,7 @@ const completedReviewStages = ref<PerformanceAssessmentStageVO[]>([]) // 已完�
 interface AppealFormData {
   assessmentId?: number
   appealReason: string
-  appealFileUrls: string[]
+  appealFileUrls: string | string[]
   reviewStageIds: number[]
 }
 const formData = ref<AppealFormData>({
@@ -106,7 +106,11 @@ async function submitForm() {
     await PerformanceAssessmentApi.submitPerformanceAssessmentAppeal({
       assessmentId: formData.value.assessmentId,
       appealReason: formData.value.appealReason,
-      appealFileUrls: formData.value.appealFileUrls,
+      appealFileUrls: Array.isArray(formData.value.appealFileUrls)
+        ? formData.value.appealFileUrls
+        : formData.value.appealFileUrls
+          ? [formData.value.appealFileUrls]
+          : [],
       reviewStageIds: formData.value.reviewStageIds
     })
     message.success('绩效申诉已提交')

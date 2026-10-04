@@ -4,6 +4,7 @@ export interface CombinationRecordVO {
   id: number // 拼团记录编号
   activityId: number // 拼团活动编号
   nickname: string // 用户昵称
+  headNickname?: string // 团长昵称
   avatar: string // 用户头像
   headId: number // 团长编号
   expireTime: string // 过期时间

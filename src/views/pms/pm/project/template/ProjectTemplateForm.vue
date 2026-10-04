@@ -269,6 +269,7 @@
 </template>
 
 <script lang="ts" setup>
+import { cloneDeep } from 'lodash-es'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { ComponentPublicInstance } from 'vue'
 import Sortable from 'sortablejs'
@@ -614,7 +615,7 @@ function warnAndSwitchTab(tab: ProjectTemplateTab, text: string) {
 
 /** 构建提交数据，并同步状态所属的看板列编码 */
 function buildSubmitData() {
-  const data = structuredClone(toRaw(formData.value))
+  const data = cloneDeep(formData.value)
   const statusBoardMap = new Map<string, string>()
   data.boards.forEach((board) => {
     board.statusCodes.forEach((statusCode) => statusBoardMap.set(statusCode, board.code))

@@ -123,11 +123,9 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="昵称" prop="nickname" min-width="100" />
-      <el-table-column align="center" label="开团团长" prop="headId" min-width="100">
+      <el-table-column align="center" label="开团团长" prop="headNickname" min-width="100">
         <template #default="{ row }: { row: CombinationRecordApi.CombinationRecordVO }">
-          {{
-            row.headId ? pageList.find((item) => item.id === row.headId)?.nickname : row.nickname
-          }}
+          {{ row.headNickname || '-' }}
         </template>
       </el-table-column>
       <el-table-column
