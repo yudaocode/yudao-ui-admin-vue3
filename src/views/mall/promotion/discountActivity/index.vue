@@ -34,9 +34,9 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="活动时间" prop="activeTime">
+      <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
-          v-model="queryParams.activeTime"
+          v-model="queryParams.createTime"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
@@ -154,7 +154,7 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  activeTime: null,
+  createTime: null,
   name: null,
   status: null
 })

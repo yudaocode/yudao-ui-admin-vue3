@@ -286,7 +286,11 @@ const inputChangeSelect = (val: string) => {
 const getList = async () => {
   loading.value = true
   try {
-    const data = await TradeOrderApi.getOrderPage(unref(queryParams))
+    const { pickUpStoreId, ...params } = unref(queryParams)
+    const data = await TradeOrderApi.getOrderPage({
+      ...params,
+      pickUpStoreIds: pickUpStoreId == null ? undefined : [pickUpStoreId]
+    })
     list.value = data.list
     total.value = data.total
   } finally {
