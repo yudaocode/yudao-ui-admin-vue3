@@ -1,6 +1,6 @@
 <template>
   <Dialog v-model="dialogVisible" :max-height="500" :scroll="true" title="详情" width="800">
-    <el-descriptions :column="1" border>
+    <el-descriptions v-loading="detailLoading" :column="1" border>
       <el-descriptions-item label="日志主键" min-width="120">
         {{ detailData.id }}
       </el-descriptions-item>
@@ -79,21 +79,21 @@ defineOptions({ name: 'SystemMailLogDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
-const detailData = ref() // 详情数据
+const detailData = ref({} as MailLogApi.MailLogVO) // 详情数据
 const accountList = ref<MailAccountApi.MailAccountVO[]>([]) // 邮箱账号列表
 
 /** 打开弹窗 */
-const open = async (data: MailLogApi.MailLogVO) => {
+const open = async (id: number) => {
   dialogVisible.value = true
   // 设置数据
   detailLoading.value = true
   try {
-    detailData.value = data
+    detailData.value = {} as MailLogApi.MailLogVO
+    detailData.value = await MailLogApi.getMailLog(id)
+    accountList.value = await MailAccountApi.getSimpleMailAccountList()
   } finally {
     detailLoading.value = false
   }
-  // 加载邮箱账号列表
-  accountList.value = await MailAccountApi.getSimpleMailAccountList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>

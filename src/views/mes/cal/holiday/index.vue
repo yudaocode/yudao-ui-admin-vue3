@@ -87,6 +87,10 @@ const onClickDay = (data: { type: string; day: string }) => {
     message.warning('没有假期设置权限')
     return
   }
+  if (!checkPermi(['mes:cal-holiday:query'])) {
+    message.warning('没有假期查询权限')
+    return
+  }
   formRef.value.open(data.day)
 }
 

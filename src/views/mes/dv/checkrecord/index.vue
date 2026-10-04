@@ -72,7 +72,12 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="设备编码" align="center" prop="machineryCode" min-width="140">
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+          <el-button
+            v-hasPermi="['mes:dv-check-record:query']"
+            link
+            type="primary"
+            @click="openForm('detail', scope.row.id)"
+          >
             {{ scope.row.machineryCode }}
           </el-button>
         </template>

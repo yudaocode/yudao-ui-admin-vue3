@@ -88,7 +88,12 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="维修单编号" align="center" prop="code" min-width="160">
         <template #default="scope">
-          <el-button link type="primary" @click="openForm('detail', scope.row.id)">
+          <el-button
+            v-hasPermi="['mes:dv-repair:query']"
+            link
+            type="primary"
+            @click="openForm('detail', scope.row.id)"
+          >
             {{ scope.row.code }}
           </el-button>
         </template>

@@ -118,7 +118,11 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="检验单编号" align="center" prop="code" width="160">
         <template #default="scope">
-          <el-link type="primary" @click="openForm('detail', scope.row.id)">
+          <el-link
+            v-hasPermi="['mes:qc-rqc:query']"
+            type="primary"
+            @click="openForm('detail', scope.row.id)"
+          >
             {{ scope.row.code }}
           </el-link>
         </template>

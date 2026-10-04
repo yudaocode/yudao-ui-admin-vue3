@@ -95,15 +95,6 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['system:mail-log:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -192,14 +183,11 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import * as MailAccountApi from '@/api/system/mail/account'
 import * as MailLogApi from '@/api/system/mail/log'
 import MailLogDetail from './MailLogDetail.vue'
 
 defineOptions({ name: 'SystemMailLog' })
-
-const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -216,7 +204,6 @@ const queryParams = reactive({
   userType: undefined,
   sendTime: []
 })
-const exportLoading = ref(false) // 导出的加载中
 const accountList = ref<MailAccountApi.MailAccountVO[]>([]) // 邮箱账号列表
 
 /** 查询列表 */
@@ -243,25 +230,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await MailLogApi.exportMailLog(queryParams)
-    download.excel(data, '邮件日志.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
-}
-
 /** 详情操作 */
 const detailRef = ref()
 const openDetail = (data: MailLogApi.MailLogVO) => {
-  detailRef.value.open(data)
+  detailRef.value.open(data.id)
 }
 
 /** 获取邮箱账号名称 */
