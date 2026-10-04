@@ -38,12 +38,10 @@
       <el-form-item label="事件" prop="event">
         <el-select v-model="formData.event" placeholder="请选择事件">
           <el-option
-            v-for="event in formData.type == 'execution'
-              ? ['开始', '结束']
-              : ['创建', '指派', '完成', '删除', '更新', '超时']"
-            :label="event"
-            :value="event"
-            :key="event"
+            v-for="event in eventOptions"
+            :label="event.label"
+            :value="event.value"
+            :key="event.value"
           />
         </el-select>
       </el-form-item>
@@ -71,6 +69,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
+import { BPM_PROCESS_LISTENER_EXECUTION_EVENT_OPTIONS, BPM_PROCESS_LISTENER_TASK_EVENT_OPTIONS } from '@/utils/constants'
 import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProcessListenerApi, ProcessListenerVO } from '@/api/bpm/processListener'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -102,6 +101,10 @@ const formRules = reactive({
   valueType: [{ required: true, message: '值类型不能为空', trigger: 'change' }],
   value: [{ required: true, message: '值不能为空', trigger: 'blur' }]
 })
+const eventOptions = computed(() =>
+  formData.value.type === 'execution' ? BPM_PROCESS_LISTENER_EXECUTION_EVENT_OPTIONS : BPM_PROCESS_LISTENER_TASK_EVENT_OPTIONS
+)
+
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
