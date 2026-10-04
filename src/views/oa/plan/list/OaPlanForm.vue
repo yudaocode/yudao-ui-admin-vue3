@@ -101,7 +101,7 @@
         />
       </el-form-item>
       <el-form-item label="附件" prop="fileUrls">
-        <UploadFile v-model="formData.fileUrls" :limit="1" />
+        <UploadFile v-model="formData.fileUrls" :limit="5" />
       </el-form-item>
     </el-form>
     <!-- 表单操作 -->
@@ -170,6 +170,7 @@ async function open(type: string, id?: number) {
     formLoading.value = true
     try {
       formData.value = await PlanApi.getPlan(id)
+      formData.value.fileUrls ??= []
     } finally {
       formLoading.value = false
     }
