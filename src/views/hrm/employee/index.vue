@@ -502,11 +502,12 @@ async function getList() {
 
 /** 查询员工状态数量 */
 async function getStatusCounts() {
-  statusCounts.value = await EmployeeApi.getEmployeeStatusCount({
+  const params = {
     ...queryParams,
     surveyType:
       queryParams.surveyType === HrmEmployeeSurveyType.ENTRY ? undefined : queryParams.surveyType
-  })
+  }
+  statusCounts.value = await EmployeeApi.getEmployeeStatusCount(params)
 }
 
 /** 刷新列表和状态统计 */
