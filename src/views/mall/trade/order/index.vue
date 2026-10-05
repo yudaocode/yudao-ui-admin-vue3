@@ -255,7 +255,7 @@ const queryParams = ref({
   type: undefined, // 订单类型
   deliveryType: undefined, // 配送方式
   logisticsId: undefined, // 快递公司
-  pickUpStoreId: undefined, // 自提门店
+  pickUpStoreId: undefined as number[] | undefined, // 自提门店
   pickUpVerifyCode: undefined // 自提核销码
 })
 const queryType = reactive({ queryParam: '' }) // 订单搜索类型 queryParam
@@ -289,7 +289,7 @@ const getList = async () => {
     const { pickUpStoreId, ...params } = unref(queryParams)
     const data = await TradeOrderApi.getOrderPage({
       ...params,
-      pickUpStoreIds: pickUpStoreId == null ? undefined : [pickUpStoreId]
+      pickUpStoreIds: pickUpStoreId?.length ? pickUpStoreId : undefined
     })
     list.value = data.list
     total.value = data.total
