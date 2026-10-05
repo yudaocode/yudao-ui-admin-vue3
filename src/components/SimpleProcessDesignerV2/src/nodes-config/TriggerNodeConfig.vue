@@ -252,7 +252,14 @@ import {
   FormTriggerSetting,
   DEFAULT_CONDITION_GROUP_VALUE
 } from '../consts'
-import { useWatchNode, useDrawer, useNodeName, useFormFields, getConditionShowText } from '../node'
+import {
+  useWatchNode,
+  useDrawer,
+  useNodeName,
+  useFormFields,
+  useFormFieldsAndStartUser,
+  getConditionShowText
+} from '../node'
 import HttpRequestSetting from './components/HttpRequestSetting.vue'
 import ConditionDialog from './components/ConditionDialog.vue'
 import { cloneDeep } from 'lodash-es'
@@ -312,6 +319,7 @@ const triggerTypeOptions = computed(() => {
 }) // 业务表单不支持修改、删除流程表单数据
 
 const formFields = useFormFields() // 可修改、删除的流程表单字段
+const includeStartUserFormFields = useFormFieldsAndStartUser() // 包含发起人的条件字段
 
 // 可选的修改的表单字段
 const optionalUpdateFormFields = computed(() => {
@@ -425,7 +433,7 @@ const showConditionText = (formSetting: FormTriggerSetting) => {
     formSetting.conditionType,
     formSetting.conditionExpression,
     formSetting.conditionGroups,
-    formFields
+    includeStartUserFormFields
   )
 }
 
