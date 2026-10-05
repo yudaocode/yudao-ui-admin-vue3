@@ -20,10 +20,8 @@ const props = defineProps({
   simpleJson: propTypes.string // Simple 模型结构数据 (json 格式)
 })
 const simpleModel = ref<any>({})
-// 用户任务
-const tasks = ref([])
-// 流程实例
-const processInstance = ref()
+const tasks = ref([]) // 用户任务
+const processInstance = ref() // 流程实例
 
 function setSimpleModelNodeTaskStatus(
   simpleModel: SimpleFlowNode | undefined,
@@ -141,14 +139,10 @@ watch(
     if (newModelView) {
       tasks.value = newModelView.tasks
       processInstance.value = newModelView.processInstance
-      // 已经拒绝的活动节点编号集合，只包括 UserTask
-      const rejectedTaskActivityIds: string[] = newModelView.rejectedTaskActivityIds
-      // 进行中的活动节点编号集合， 只包括 UserTask
-      const unfinishedTaskActivityIds: string[] = newModelView.unfinishedTaskActivityIds
-      // 已经完成的活动节点编号集合， 包括 UserTask、Gateway 等
-      const finishedActivityIds: string[] = newModelView.finishedTaskActivityIds
-      // 已经完成的连线节点编号集合，只包括 SequenceFlow
-      const finishedSequenceFlowActivityIds: string[] = newModelView.finishedSequenceFlowActivityIds
+      const rejectedTaskActivityIds: string[] = newModelView.rejectedTaskActivityIds // 已经拒绝的活动节点编号集合，只包括 UserTask
+      const unfinishedTaskActivityIds: string[] = newModelView.unfinishedTaskActivityIds // 进行中的活动节点编号集合， 只包括 UserTask
+      const finishedActivityIds: string[] = newModelView.finishedTaskActivityIds // 已经完成的活动节点编号集合， 包括 UserTask、Gateway 等
+      const finishedSequenceFlowActivityIds: string[] = newModelView.finishedSequenceFlowActivityIds // 已经完成的连线节点编号集合，只包括 SequenceFlow
       setSimpleModelNodeTaskStatus(
         newModelView.simpleModel,
         newModelView.processInstance?.status,
@@ -159,7 +153,9 @@ watch(
       )
       simpleModel.value = newModelView.simpleModel ? newModelView.simpleModel : {}
     }
-  }
+  },
+  // 不加 immediate 会错过唯一一次赋值，导致流程图空白
+  { immediate: true }
 )
 /** 监控模型结构数据 */
 watch(
@@ -168,7 +164,9 @@ watch(
     if (value) {
       simpleModel.value = JSON.parse(value)
     }
-  }
+  },
+  // immediate：同上，组件挂载时 simpleJson 可能已经传入
+  { immediate: true }
 )
 </script>
 

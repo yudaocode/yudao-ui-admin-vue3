@@ -28,7 +28,7 @@
         <el-form-item label="触发器类型" prop="type">
           <el-select v-model="configForm.type" @change="changeTriggerType">
             <el-option
-              v-for="(item, index) in TRIGGER_TYPES"
+              v-for="(item, index) in triggerTypeOptions"
               :key="index"
               :value="item.value"
               :label="item.label"
@@ -242,6 +242,7 @@
   </el-drawer>
 </template>
 <script setup lang="ts">
+import { BpmModelFormType } from '@/utils/constants'
 import {
   SimpleFlowNode,
   NodeType,
@@ -297,8 +298,20 @@ const configForm = ref<TriggerSetting>({
     }
   ]
 })
-// 流程表单字段
-const formFields = useFormFields()
+
+const formType = inject<Ref<number>>('formType') // 表单类型
+const isCustomForm = computed(() => formType?.value === BpmModelFormType.CUSTOM) // 是否业务表单
+
+const triggerTypeOptions = computed(() => {
+  if (isCustomForm.value) {
+    return TRIGGER_TYPES.filter(
+      (item) => ![TriggerTypeEnum.FORM_UPDATE, TriggerTypeEnum.FORM_DELETE].includes(item.value)
+    )
+  }
+  return TRIGGER_TYPES
+}) // 业务表单不支持修改、删除流程表单数据
+
+const formFields = useFormFields() // 可修改、删除的流程表单字段
 
 // 可选的修改的表单字段
 const optionalUpdateFormFields = computed(() => {
