@@ -1,5 +1,8 @@
 <template>
-  <doc-alert title="【设置】凭证字、常用摘要、凭证模板" url="https://doc.iocoder.cn/fms/config/voucher/" />
+  <doc-alert
+    title="【设置】凭证字、常用摘要、凭证模板"
+    url="https://doc.iocoder.cn/fms/config/voucher/"
+  />
   <!-- 操作工作栏 -->
   <ContentWrap>
     <el-form class="-mb-15px" :inline="true">

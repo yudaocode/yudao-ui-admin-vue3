@@ -69,7 +69,10 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { BPM_PROCESS_LISTENER_EXECUTION_EVENT_OPTIONS, BPM_PROCESS_LISTENER_TASK_EVENT_OPTIONS } from '@/utils/constants'
+import {
+  BPM_PROCESS_LISTENER_EXECUTION_EVENT_OPTIONS,
+  BPM_PROCESS_LISTENER_TASK_EVENT_OPTIONS
+} from '@/utils/constants'
 import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ProcessListenerApi, ProcessListenerVO } from '@/api/bpm/processListener'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -102,7 +105,9 @@ const formRules = reactive({
   value: [{ required: true, message: '值不能为空', trigger: 'blur' }]
 })
 const eventOptions = computed(() =>
-  formData.value.type === 'execution' ? BPM_PROCESS_LISTENER_EXECUTION_EVENT_OPTIONS : BPM_PROCESS_LISTENER_TASK_EVENT_OPTIONS
+  formData.value.type === 'execution'
+    ? BPM_PROCESS_LISTENER_EXECUTION_EVENT_OPTIONS
+    : BPM_PROCESS_LISTENER_TASK_EVENT_OPTIONS
 )
 
 const formRef = ref() // 表单 Ref

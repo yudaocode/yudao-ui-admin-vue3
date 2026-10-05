@@ -59,9 +59,9 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .knowledge-share-content {
-  color: var(--el-text-color-primary);
   font-size: 15px;
   line-height: 1.8;
+  color: var(--el-text-color-primary);
   overflow-wrap: anywhere;
 
   :deep(h1) {

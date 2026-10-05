@@ -229,7 +229,9 @@ const formRules = reactive({
             ? Promise.resolve()
             : Promise.reject(new Error('请选择质量状态'))
         }
-        return formData.value.valueId ? Promise.resolve() : Promise.reject(new Error('条件值不能为空'))
+        return formData.value.valueId
+          ? Promise.resolve()
+          : Promise.reject(new Error('条件值不能为空'))
       },
       trigger: 'change'
     }

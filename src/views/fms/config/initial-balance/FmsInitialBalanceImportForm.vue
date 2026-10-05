@@ -136,15 +136,15 @@ function handleExceed() {
 
 .section-title {
   margin-bottom: 12px;
-  color: var(--el-text-color-primary);
   font-size: 15px;
   font-weight: 600;
+  color: var(--el-text-color-primary);
 }
 
 .import-tip {
   margin-top: 6px;
-  color: var(--el-text-color-secondary);
   font-size: 13px;
+  color: var(--el-text-color-secondary);
 }
 
 .upload-icon {

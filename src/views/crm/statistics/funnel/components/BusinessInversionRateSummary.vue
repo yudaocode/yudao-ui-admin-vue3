@@ -233,9 +233,8 @@ const echartsOption = reactive<EChartsOption>({
 const fetchAndFill = async () => {
   syncQueryParams()
   // 1. 加载统计数据
-  const businessSummaryByDate = await StatisticFunnelApi.getBusinessInversionRateSummaryByDate(
-    queryParams0
-  )
+  const businessSummaryByDate =
+    await StatisticFunnelApi.getBusinessInversionRateSummaryByDate(queryParams0)
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis[0] && echartsOption.xAxis[0]['data']) {
     echartsOption.xAxis[0]['data'] = businessSummaryByDate.map(

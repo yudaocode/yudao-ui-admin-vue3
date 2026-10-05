@@ -33,9 +33,19 @@
         </el-form-item>
         <div v-if="formData.enabled">
           <el-form-item>
-            <el-input-number class="mr-2" v-model="formData.contactExpireDays" :min="0" :precision="0" />
+            <el-input-number
+              class="mr-2"
+              v-model="formData.contactExpireDays"
+              :min="0"
+              :precision="0"
+            />
             天不跟进或
-            <el-input-number class="mx-2" v-model="formData.dealExpireDays" :min="0" :precision="0" />
+            <el-input-number
+              class="mx-2"
+              v-model="formData.dealExpireDays"
+              :min="0"
+              :precision="0"
+            />
             天未成交
           </el-form-item>
           <el-form-item label="提前提醒设置" prop="notifyEnabled">
@@ -50,7 +60,9 @@
           </el-form-item>
           <div v-if="formData.notifyEnabled">
             <el-form-item>
-              提前 <el-input-number class="mx-2" v-model="formData.notifyDays" :min="0" :precision="0" /> 天提醒
+              提前
+              <el-input-number class="mx-2" v-model="formData.notifyDays" :min="0" :precision="0" />
+              天提醒
             </el-form-item>
           </div>
         </div>
@@ -100,7 +112,9 @@ const onSubmit = async () => {
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
-  const days = formData.value.enabled ? [formData.value.contactExpireDays, formData.value.dealExpireDays] : []
+  const days = formData.value.enabled
+    ? [formData.value.contactExpireDays, formData.value.dealExpireDays]
+    : []
   if (formData.value.notifyEnabled) days.push(formData.value.notifyDays)
   if (days.some((day) => !Number.isInteger(day) || Number(day) < 0)) {
     message.warning('请填写非负整数天数')

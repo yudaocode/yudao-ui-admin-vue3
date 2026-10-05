@@ -54,7 +54,9 @@
           >
             {{ row.customerName }}
           </el-link>
-          <span v-else-if="row.rowType === ProductSalesRowTypeEnum.DETAIL">{{ row.customerName }}</span>
+          <span v-else-if="row.rowType === ProductSalesRowTypeEnum.DETAIL">{{
+            row.customerName
+          }}</span>
         </template>
       </el-table-column>
       <el-table-column label="销售单价（元）" align="right" prop="productPrice" min-width="140">
@@ -65,7 +67,12 @@
         </template>
       </el-table-column>
       <el-table-column label="数量" align="right" prop="productCount" min-width="120" />
-      <el-table-column label="订单产品小计（元）" align="right" prop="productTotalPrice" min-width="160">
+      <el-table-column
+        label="订单产品小计（元）"
+        align="right"
+        prop="productTotalPrice"
+        min-width="160"
+      >
         <template #default="{ row }">
           {{ erpPriceInputFormatter(row.productTotalPrice) }}
         </template>
@@ -75,10 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  CrmStatisticsProductSalesRespVO,
-  StatisticsProductApi
-} from '@/api/crm/statistics/product'
+import { CrmStatisticsProductSalesRespVO, StatisticsProductApi } from '@/api/crm/statistics/product'
 import { erpPriceInputFormatter } from '@/utils'
 
 defineOptions({ name: 'CrmStatisticsProductSalesList' })
@@ -287,13 +291,13 @@ onMounted(() => {
 
 <style scoped>
 :deep(.product-summary-row > td) {
-  background-color: #fff9f2 !important;
   font-weight: 600;
+  background-color: #fff9f2 !important;
 }
 
 :deep(.category-summary-row > td) {
-  background-color: #fff3e8 !important;
   font-weight: 600;
+  background-color: #fff3e8 !important;
 }
 
 :deep(.is-link-cell) {

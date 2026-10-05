@@ -435,10 +435,10 @@ function handleRaterTypeChange(stage: PerformanceReviewStageVO) {
 }
 
 .process-section-tip {
-  color: var(--el-text-color-secondary);
   font-size: 13px;
   font-weight: 400;
   line-height: 20px;
+  color: var(--el-text-color-secondary);
   white-space: nowrap;
 }
 </style>

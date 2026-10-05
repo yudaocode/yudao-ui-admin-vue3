@@ -228,6 +228,7 @@ watch(
 <style lang="scss" scoped>
 .knowledge-comment-avatar {
   --el-avatar-bg-color: var(--el-color-primary);
+
   color: #fff;
 }
 </style>

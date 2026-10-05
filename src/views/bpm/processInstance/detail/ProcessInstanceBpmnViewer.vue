@@ -61,18 +61,18 @@ onMounted(() => {
 </script>
 <style lang="scss" scoped>
 .box-card {
+  display: flex;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
   margin-bottom: 0;
+  flex-direction: column;
 
   :deep(.el-card__body) {
-    flex: 1;
-    padding: 0;
     display: flex;
-    flex-direction: column;
     min-height: 0;
+    padding: 0;
+    flex: 1;
+    flex-direction: column;
   }
 
   :deep(.process-viewer) {

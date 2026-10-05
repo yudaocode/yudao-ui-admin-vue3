@@ -116,7 +116,9 @@ const loadData = async () => {
     list.value = data
     // 2.2 更新 Echarts 数据
     if (echartsOption.xAxis && echartsOption.xAxis['data']) {
-      echartsOption.xAxis['data'] = data.map((item: StatisticsPerformanceSummaryRespVO) => item.time)
+      echartsOption.xAxis['data'] = data.map(
+        (item: StatisticsPerformanceSummaryRespVO) => item.time
+      )
     }
     if (echartsOption.series) {
       echartsOption.series[0]['data'] = data.map(

@@ -96,7 +96,10 @@ export function formatHrmCoefficient(value?: number | null): string {
 }
 
 /** 格式化 HRM 分析项的字典分类 */
-export function formatHrmAnalysisDictType(dictType: DICT_TYPE, type: number | null | undefined): string {
+export function formatHrmAnalysisDictType(
+  dictType: DICT_TYPE,
+  type: number | null | undefined
+): string {
   return type == null ? '未填写' : getDictLabel(dictType, type) || '未知'
 }
 

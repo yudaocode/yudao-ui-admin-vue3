@@ -51,7 +51,9 @@
             项目进入回收站后不可访问；只有项目拥有者可以在回收站彻底删除。
           </div>
         </div>
-        <el-button v-hasPermi="['pms:pm:project:update']" type="danger" @click="handleRecycle">移入回收站</el-button>
+        <el-button v-hasPermi="['pms:pm:project:update']" type="danger" @click="handleRecycle"
+          >移入回收站</el-button
+        >
       </div>
     </template>
 
