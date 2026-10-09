@@ -89,7 +89,7 @@ export interface HrmHomeCalendarItemVO {
   typeName: string // 事项类型名称
   content: string // 事项内容
   typeId?: number // 关联业务编号
-  date: string // 事项日期
+  date: [number, number, number] | string // 事项日期
   eventTime?: Date // 事项时间
 }
 
