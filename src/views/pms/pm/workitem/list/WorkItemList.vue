@@ -440,6 +440,7 @@ import WorkItemLabelSelect from '@/views/pms/pm/workitem/label/WorkItemLabelSele
 defineOptions({ name: 'PmsWorkItemList' })
 
 const props = defineProps<{
+  active?: boolean
   projectId: number
   projectType: number
   type: number
@@ -774,6 +775,21 @@ async function handleExport() {
 }
 
 defineExpose({ refresh: getWorkItemList })
+
+/** 离开当前页签时收起高级筛选 */
+watch(
+  () => props.active,
+  (active) => {
+    if (active === false) {
+      showFilterPopover.value = false
+    }
+  }
+)
+
+/** 离开缓存页面时收起高级筛选 */
+onDeactivated(() => {
+  showFilterPopover.value = false
+})
 
 /** 初始化 */
 onMounted(() => {

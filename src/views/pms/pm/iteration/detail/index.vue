@@ -184,6 +184,7 @@
           <el-tabs v-model="activeWorkItemTab" type="card">
             <el-tab-pane label="全部" lazy name="all">
               <WorkItemAllList
+                :active="activeTab === 'items' && activeWorkItemTab === 'all'"
                 :editable="editable"
                 :iteration-id="iteration.id"
                 :project-id="iteration.projectId"
@@ -193,6 +194,7 @@
             </el-tab-pane>
             <el-tab-pane label="需求" lazy name="requirement">
               <WorkItemList
+                :active="activeTab === 'items' && activeWorkItemTab === 'requirement'"
                 default-view-mode="board"
                 :editable="editable"
                 :iteration-id="iteration.id"
@@ -204,6 +206,7 @@
             </el-tab-pane>
             <el-tab-pane label="任务" lazy name="task">
               <WorkItemList
+                :active="activeTab === 'items' && activeWorkItemTab === 'task'"
                 default-view-mode="board"
                 :editable="editable"
                 :iteration-id="iteration.id"
@@ -215,6 +218,7 @@
             </el-tab-pane>
             <el-tab-pane label="缺陷" lazy name="defect">
               <WorkItemList
+                :active="activeTab === 'items' && activeWorkItemTab === 'defect'"
                 default-view-mode="board"
                 :editable="editable"
                 :iteration-id="iteration.id"

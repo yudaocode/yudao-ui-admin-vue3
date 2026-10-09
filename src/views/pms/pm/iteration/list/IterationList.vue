@@ -155,6 +155,7 @@ import { checkPermi } from '@/utils/permission'
 defineOptions({ name: 'PmsIterationList' })
 
 const props = defineProps<{
+  active?: boolean
   projectId: number
   editable: boolean
 }>()
@@ -270,6 +271,21 @@ async function handleDelete(iteration: IterationApi.PmsIterationVO) {
 }
 
 defineExpose({ refresh: getIterationList })
+
+/** 离开当前页签时收起高级筛选 */
+watch(
+  () => props.active,
+  (active) => {
+    if (active === false) {
+      showFilterPopover.value = false
+    }
+  }
+)
+
+/** 离开缓存页面时收起高级筛选 */
+onDeactivated(() => {
+  showFilterPopover.value = false
+})
 
 /** 初始化 */
 onMounted(() => {

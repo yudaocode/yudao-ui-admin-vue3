@@ -47,10 +47,15 @@
         <PlanningBoard :editable="editable" :project-id="project.id" :project-type="project.type" />
       </el-tab-pane>
       <el-tab-pane v-if="agileProject" label="迭代" lazy name="iteration">
-        <IterationList :editable="editable" :project-id="project.id" />
+        <IterationList
+          :active="activeTab === 'iteration'"
+          :editable="editable"
+          :project-id="project.id"
+        />
       </el-tab-pane>
       <el-tab-pane v-if="agileProject" label="全部事项" lazy name="all">
         <WorkItemAllList
+          :active="activeTab === 'all'"
           :editable="editable"
           :project-id="project.id"
           :project-type="project.type"
@@ -58,6 +63,7 @@
       </el-tab-pane>
       <el-tab-pane v-if="agileProject" label="需求" lazy name="requirement">
         <WorkItemList
+          :active="activeTab === 'requirement'"
           :editable="editable"
           :project-id="project.id"
           :project-type="project.type"
@@ -66,6 +72,7 @@
       </el-tab-pane>
       <el-tab-pane label="任务" lazy name="task">
         <WorkItemList
+          :active="activeTab === 'task'"
           default-view-mode="board"
           :editable="editable"
           :project-id="project.id"
@@ -75,6 +82,7 @@
       </el-tab-pane>
       <el-tab-pane v-if="agileProject" label="缺陷" lazy name="defect">
         <WorkItemList
+          :active="activeTab === 'defect'"
           :editable="editable"
           :project-id="project.id"
           :project-type="project.type"
