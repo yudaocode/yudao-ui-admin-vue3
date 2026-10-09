@@ -1,5 +1,8 @@
 <template>
-  <doc-alert title="【绩效】绩效模板、绩效计划" url="https://doc.iocoder.cn/hrm/performance/template-plan/" />
+  <doc-alert
+    title="【绩效】绩效模板、绩效计划"
+    url="https://doc.iocoder.cn/hrm/performance/template-plan/"
+  />
 
   <ContentWrap>
     <el-form

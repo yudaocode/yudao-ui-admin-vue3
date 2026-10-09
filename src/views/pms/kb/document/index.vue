@@ -513,7 +513,7 @@ watch([() => route.params.folderId, () => route.params.documentId], () => {
   height: 100%;
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .knowledge-library-main :deep(.el-card__body) {
     padding-right: 16px !important;
     padding-left: 16px !important;

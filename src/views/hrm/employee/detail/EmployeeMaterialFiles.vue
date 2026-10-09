@@ -111,17 +111,17 @@ onMounted(() => {
 <style scoped>
 .file-category {
   display: flex;
-  align-items: center;
   width: 100%;
   min-height: 72px;
-  margin-bottom: 12px;
   padding: 14px 16px;
+  margin-bottom: 12px;
   color: var(--el-text-color-regular);
   text-align: left;
   cursor: pointer;
   background: var(--el-fill-color-blank);
   border: 1px solid var(--el-border-color-light);
   border-radius: 6px;
+  align-items: center;
 }
 
 .file-category:hover {

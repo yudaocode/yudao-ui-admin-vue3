@@ -1,5 +1,8 @@
 <template>
-  <doc-alert title="【设置】账套管理、财务参数、财务指标" url="https://doc.iocoder.cn/fms/config/account-set/" />
+  <doc-alert
+    title="【设置】账套管理、财务参数、财务指标"
+    url="https://doc.iocoder.cn/fms/config/account-set/"
+  />
   <!-- 操作栏 -->
   <ContentWrap>
     <el-form class="-mb-15px" :inline="true">

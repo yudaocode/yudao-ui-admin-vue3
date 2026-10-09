@@ -1,5 +1,8 @@
 <template>
-  <doc-alert title="【设置】凭证字、常用摘要、凭证模板" url="https://doc.iocoder.cn/fms/config/voucher/" />
+  <doc-alert
+    title="【设置】凭证字、常用摘要、凭证模板"
+    url="https://doc.iocoder.cn/fms/config/voucher/"
+  />
   <div class="grid grid-cols-[320px_minmax(0,1fr)] gap-16px">
     <!-- 凭证模板分类 -->
     <ContentWrap>

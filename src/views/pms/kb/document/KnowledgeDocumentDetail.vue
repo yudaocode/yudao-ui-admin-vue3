@@ -221,8 +221,8 @@ async function handleDelete() {
 .pms-knowledge-rich-text {
   display: flow-root;
   padding: 0 0 4px;
-  color: var(--el-text-color-primary);
   font-size: 14px;
+  color: var(--el-text-color-primary);
   overflow-wrap: anywhere;
 
   h1 {

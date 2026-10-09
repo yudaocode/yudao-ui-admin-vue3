@@ -1,5 +1,8 @@
 <template>
-  <doc-alert title="【设置】币别、科目、辅助核算、初始余额" url="https://doc.iocoder.cn/fms/config/accounting/" />
+  <doc-alert
+    title="【设置】币别、科目、辅助核算、初始余额"
+    url="https://doc.iocoder.cn/fms/config/accounting/"
+  />
   <div class="grid grid-cols-[260px_minmax(0,1fr)] gap-16px">
     <!-- 核算类别 -->
     <ContentWrap>

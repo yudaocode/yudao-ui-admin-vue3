@@ -202,7 +202,6 @@ const init = () => {
   })
 
   addDragListeners()
-
 }
 watch(type, () => {
   init()

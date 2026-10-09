@@ -33,7 +33,9 @@
         </el-form-item>
         <div v-if="formData.notifyEnabled">
           <el-form-item>
-            提前 <el-input-number class="mx-2" v-model="formData.notifyDays" :min="0" :precision="0" /> 天提醒
+            提前
+            <el-input-number class="mx-2" v-model="formData.notifyDays" :min="0" :precision="0" />
+            天提醒
           </el-form-item>
         </div>
       </el-card>

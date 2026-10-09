@@ -176,10 +176,10 @@ function getDailyBadges(detail?: HrmAttendanceDailyDetailVO) {
 }
 
 .calendar-cell {
-  box-sizing: border-box;
   height: 100%;
   padding: 9px 10px;
   border-top: 2px solid transparent;
+  box-sizing: border-box;
 }
 
 .calendar-cell.is-normal {

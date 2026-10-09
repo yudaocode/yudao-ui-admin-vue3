@@ -60,6 +60,30 @@ export interface PmsWorkItemImportRespVO {
   }
 }
 
+// PMS 工作项分页 Request VO
+export interface PmsWorkItemPageReqVO extends PageParam {
+  projectId: number // 项目编号
+  type?: number // 工作项类型
+  types?: number[] // 工作项类型列表
+  name?: string // 工作项标题
+  status?: number // 语义状态
+  statuses?: number[] // 语义状态列表
+  priority?: number // 优先级
+  priorities?: number[] // 优先级列表
+  lifecycleStatus?: number // 生命周期状态
+  statusId?: number // 看板状态编号
+  iterationId?: number // 迭代编号
+  iterationIds?: number[] // 迭代编号列表
+  excludedIterationIds?: number[] // 排除的迭代编号列表
+  parentId?: number // 父工作项编号
+  labelIds?: number[] // 标签编号列表
+  unplannedOnly?: boolean // 是否只查询未规划工作项
+  planningOnly?: boolean // 是否用于待规划视图
+  rootOnly?: boolean // 是否只查询一级工作项
+  assigneeUserId?: number // 负责人用户编号
+  assigneeUserIds?: number[] // 负责人用户编号列表
+}
+
 // 查询工作项分页
 export const getWorkItemPage = (params: PageParam) => {
   return request.get<PageResult<PmsWorkItemVO[]>>({ url: '/pms/pm/work-item/page', params })
@@ -141,7 +165,7 @@ export const deleteWorkItem = (id: number) => {
 }
 
 // 导出工作项 Excel
-export const exportWorkItemList = (params: PageParam) => {
+export const exportWorkItemList = (params: PmsWorkItemPageReqVO) => {
   return request.download({ url: '/pms/pm/work-item/export-excel', params })
 }
 

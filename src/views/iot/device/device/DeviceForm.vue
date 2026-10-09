@@ -143,7 +143,9 @@ const formRules = reactive({
           return Promise.reject(new Error('备注名称长度限制为 4~64 个字符，中文及日文算 2 个字符'))
         }
         if (!/^[\u4e00-\u9fa5\u3040-\u30ff_a-zA-Z0-9]+$/.test(value)) {
-          return Promise.reject(new Error('备注名称只能包含中文、英文字母、日文、数字和下划线（_）'))
+          return Promise.reject(
+            new Error('备注名称只能包含中文、英文字母、日文、数字和下划线（_）')
+          )
         }
         return Promise.resolve()
       },

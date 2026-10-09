@@ -6,7 +6,7 @@ export interface Provider {
   name: string // 名称
   baseUrl: string // 接口地址
   apiKey?: string // API 密钥
-  headers?: string // 请求附属 Header
+  headers?: Record<string, string> // 请求 Header
   status: number // 状态
   remark?: string // 备注
   createTime?: Date // 创建时间

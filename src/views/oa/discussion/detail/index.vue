@@ -144,18 +144,22 @@ watch(
 .oa-discussion-content :deep(> :first-child) {
   margin-top: 0;
 }
+
 .oa-discussion-content :deep(> :last-child) {
   margin-bottom: 0;
 }
+
 .oa-discussion-content :deep(img) {
-  max-width: 100%;
   height: auto;
+  max-width: 100%;
 }
+
 .oa-discussion-content :deep(table) {
   display: block;
   max-width: 100%;
   overflow-x: auto;
 }
+
 .oa-discussion-content :deep(pre) {
   overflow-x: auto;
 }

@@ -322,18 +322,17 @@ export function useLiveKitRoom() {
         await disconnectPhysicalRoom(r)
       }
     } finally {
-      if (_room.value) {
-        return
+      if (!_room.value) {
+        // 即使 SDK disconnect 抛错，也必须释放本地连接和设备状态
+        localParticipant.value = null
+        remoteParticipants.value = []
+        isConnected.value = false
+        reconnecting.value = false
+        micEnabled.value = true
+        cameraEnabled.value = false
+        speakerEnabled.value = true
+        screenShareEnabled.value = false
       }
-      // 即使 SDK disconnect 抛错，也必须释放本地连接和设备状态
-      localParticipant.value = null
-      remoteParticipants.value = []
-      isConnected.value = false
-      reconnecting.value = false
-      micEnabled.value = true
-      cameraEnabled.value = false
-      speakerEnabled.value = true
-      screenShareEnabled.value = false
     }
   }
 

@@ -566,10 +566,7 @@ async function doInvite(reqVO: {
   const userId = getCurrentUserId()
   try {
     const data = await createCall(reqVO)
-    if (
-      getCurrentUserId() !== userId ||
-      (rtcStore.isActive && rtcStore.call?.room !== data.room)
-    ) {
+    if (getCurrentUserId() !== userId || (rtcStore.isActive && rtcStore.call?.room !== data.room)) {
       if (getCurrentUserId() === userId) {
         await leaveCall(data.room).catch(() => undefined)
       }

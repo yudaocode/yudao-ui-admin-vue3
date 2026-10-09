@@ -331,6 +331,7 @@ onMounted(() => {
 .oa-schedule-calendar :deep(.el-calendar__header) {
   display: none;
 }
+
 .oa-schedule-calendar :deep(.el-calendar-day) {
   height: 110px;
   padding: 6px;

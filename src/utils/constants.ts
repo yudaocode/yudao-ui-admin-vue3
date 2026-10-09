@@ -486,7 +486,7 @@ export const AreaLevelEnum = {
 /** 执行监听器事件选项 */
 export const BPM_PROCESS_LISTENER_EXECUTION_EVENT_OPTIONS = [
   { label: '开始', value: 'start' },
-  { label: '结束', value: 'end' },
+  { label: '结束', value: 'end' }
 ]
 
 /** 任务监听器事件选项 */
@@ -496,5 +496,5 @@ export const BPM_PROCESS_LISTENER_TASK_EVENT_OPTIONS = [
   { label: '完成', value: 'complete' },
   { label: '删除', value: 'delete' },
   { label: '更新', value: 'update' },
-  { label: '超时', value: 'timeout' },
+  { label: '超时', value: 'timeout' }
 ]

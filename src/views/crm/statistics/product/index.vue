@@ -175,7 +175,11 @@ const resetQuery = () => {
 onMounted(async () => {
   deptList.value = handleTree(await DeptApi.getSimpleDeptList())
   userList.value = await UserApi.getSimpleUserList()
-  productCategoryList.value = handleTree(await ProductCategoryApi.getProductCategoryList({}), 'id', 'parentId')
+  productCategoryList.value = handleTree(
+    await ProductCategoryApi.getProductCategoryList({}),
+    'id',
+    'parentId'
+  )
   productList.value = await ProductApi.getProductSimpleList()
 })
 </script>

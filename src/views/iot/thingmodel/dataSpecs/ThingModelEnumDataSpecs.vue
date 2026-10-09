@@ -101,9 +101,7 @@ const validateEnumName: any = (_: any, value: string) => {
   }
   // 检查整体格式
   if (!/^[\u4e00-\u9fa5a-zA-Z0-9][a-zA-Z0-9\u4e00-\u9fa5_-]*$/.test(value)) {
-    return Promise.reject(
-      new Error('枚举描述只能包含中文、英文字母、数字、下划线和短划线')
-    )
+    return Promise.reject(new Error('枚举描述只能包含中文、英文字母、数字、下划线和短划线'))
   }
   // 检查长度（一个中文算一个字符）
   if (value.length > 20) {
