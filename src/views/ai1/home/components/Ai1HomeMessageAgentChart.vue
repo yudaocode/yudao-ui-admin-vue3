@@ -10,12 +10,13 @@
       </div>
     </div>
     <el-empty v-if="isEmpty(list)" description="暂无数据" :image-size="80" class="!h-320px" />
-    <Echart v-else :height="320" :options="chartOptions" />
+    <Ai1Echart v-else :height="320" :options="chartOptions" />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { EChartsOption } from 'echarts'
+import Ai1Echart from './Ai1Echart.vue'
 import { isEmpty } from '@/utils/is'
 import { HomeApi, HomeMessageSummaryByAgent } from '@/api/ai1/home'
 
@@ -28,6 +29,7 @@ const list = ref<HomeMessageSummaryByAgent[]>([]) // 按 Agent 消息统计
 
 /** 饼图配置 */
 const chartOptions = computed<EChartsOption>(() => ({
+  animation: false,
   tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
   legend: { type: 'scroll', bottom: 0 },
   series: [

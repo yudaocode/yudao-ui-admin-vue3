@@ -9,12 +9,13 @@
         近 {{ days }} 天每日会话消息数量
       </div>
     </div>
-    <Echart :height="320" :options="chartOptions" />
+    <Ai1Echart :height="320" :options="chartOptions" />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { EChartsOption } from 'echarts'
+import Ai1Echart from './Ai1Echart.vue'
 import { HomeApi, HomeMessageSummaryByDate } from '@/api/ai1/home'
 
 /** AI1 首页消息趋势 */
@@ -26,6 +27,7 @@ const list = ref<HomeMessageSummaryByDate[]>([]) // 每日消息统计
 
 /** 折线图配置 */
 const chartOptions = computed<EChartsOption>(() => ({
+  animation: false,
   grid: { left: 20, right: 20, top: 20, bottom: 20, containLabel: true },
   tooltip: { trigger: 'axis' },
   xAxis: { type: 'category', data: list.value.map((item) => item.date) },

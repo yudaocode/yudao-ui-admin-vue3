@@ -32,7 +32,7 @@
           maxlength="200"
         />
       </el-form-item>
-      <el-form-item label="请求附属 Header">
+      <el-form-item label="请求 Header">
         <div class="w-full">
           <div
             v-for="(header, index) in headerList"
@@ -131,19 +131,10 @@ const open = async (type: string, id?: number) => {
             ? data.apiKey
             : undefined
       }
-      try {
-        const headers = data.headers ? JSON.parse(data.headers) : []
-        if (!Array.isArray(headers)) {
-          throw new Error('Header 格式错误')
-        }
-        headerList.value = headers.map((item) => ({
-          key: String(item?.key ?? ''),
-          value: String(item?.value ?? '')
-        }))
-      } catch {
-        headerList.value = []
-        message.warning('附属 Header 格式错误，已清空，请重新填写')
-      }
+      headerList.value = Object.entries(data.headers || {}).map(([key, value]) => ({
+        key,
+        value: value as string
+      }))
     } finally {
       formLoading.value = false
     }
@@ -164,13 +155,18 @@ const submitForm = async () => {
     message.warning('Header 名称不能为空')
     return
   }
+  const names = headers.map((item) => item.key.toLowerCase())
+  if (new Set(names).size !== names.length) {
+    message.warning('Header 名称不能重复（不区分大小写）')
+    return
+  }
   // 提交请求
   formLoading.value = true
   try {
-    // 传空串，确保能清空 Header
+    // 传空对象，确保能清空 Header
     const data = {
       ...formData.value,
-      headers: headers.length > 0 ? JSON.stringify(headers) : ''
+      headers: Object.fromEntries(headers.map(({ key, value }) => [key, value]))
     } as unknown as Provider
     if (formType.value === 'create') {
       await ProviderApi.createProvider(data)
