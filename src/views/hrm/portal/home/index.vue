@@ -31,6 +31,7 @@ defineOptions({ name: 'HrmPortalHome' })
 
 const router = useRouter() // 路由
 const accessible = ref(false) // 是否可访问
+const initialized = ref(false) // 是否已完成首次访问检查
 const loading = ref(false) // 加载中
 const employee = ref<EmployeeApi.HrmPortalEmployeeVO>() // 员工信息
 const salarySlipSummary = ref<SalarySlipApi.SalarySlipUnreadSummaryVO>() // 工资条汇总数据
@@ -57,12 +58,27 @@ async function refreshAll() {
   }
 }
 
+/** 初始化个人工作台 */
+onMounted(async () => {
+  accessible.value = await checkHrmPortalAccess(router)
+  initialized.value = true
+  if (!accessible.value) {
+    return
+  }
+  await nextTick()
+  await refreshAll()
+})
+
 /** 页面激活时刷新个人工作台 */
 onActivated(async () => {
+  if (!initialized.value) {
+    return
+  }
   accessible.value = await checkHrmPortalAccess(router)
   if (!accessible.value) {
     return
   }
+  await nextTick()
   await refreshAll()
 })
 </script>
