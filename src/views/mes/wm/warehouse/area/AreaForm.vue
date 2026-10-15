@@ -43,7 +43,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="24">
           <el-form-item label="库位编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入库位编码">
               <template #append>

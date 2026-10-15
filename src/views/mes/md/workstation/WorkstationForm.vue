@@ -9,7 +9,7 @@
       :disabled="isDetail"
     >
       <el-row>
-        <el-col :span="8">
+        <el-col :span="24">
           <el-form-item label="工作站编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入工作站编码">
               <template #append>

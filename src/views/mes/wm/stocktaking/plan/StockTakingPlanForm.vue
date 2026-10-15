@@ -8,7 +8,7 @@
       v-loading="formLoading"
     >
       <el-row>
-        <el-col :span="8">
+        <el-col :span="24">
           <el-form-item label="方案编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入方案编码" :disabled="isDetail">
               <template #append>

@@ -10,7 +10,7 @@
       :disabled="isDetail"
     >
       <el-row>
-        <el-col :span="12">
+        <el-col :span="24">
           <el-form-item label="工具编码" prop="code">
             <el-input
               v-model="formData.code"

@@ -45,7 +45,7 @@
           filterable
           multiple
           placeholder="请输入授权类型"
-          style="width: 500px"
+          class="w-full"
         >
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_OAUTH2_GRANT_TYPE)"
@@ -56,78 +56,43 @@
         </el-select>
       </el-form-item>
       <el-form-item label="授权范围" prop="scopes">
-        <el-select
+        <el-input-tag
           v-model="formData.scopes"
-          filterable
-          multiple
-          allow-create
-          placeholder="请输入授权范围"
-          style="width: 500px"
-        >
-          <el-option v-for="scope in formData.scopes" :key="scope" :label="scope" :value="scope" />
-        </el-select>
+          placeholder="输入授权范围后按回车确认"
+          class="w-full"
+        />
       </el-form-item>
       <el-form-item label="自动授权范围" prop="autoApproveScopes">
         <el-select
           v-model="formData.autoApproveScopes"
           filterable
           multiple
-          placeholder="请输入授权范围"
-          style="width: 500px"
+          placeholder="请选择自动授权范围"
+          class="w-full"
         >
           <el-option v-for="scope in formData.scopes" :key="scope" :label="scope" :value="scope" />
         </el-select>
       </el-form-item>
       <el-form-item label="可重定向的 URI 地址" prop="redirectUris">
-        <el-select
+        <el-input-tag
           v-model="formData.redirectUris"
-          allow-create
-          filterable
-          multiple
-          placeholder="请输入可重定向的 URI 地址"
-          style="width: 500px"
-        >
-          <el-option
-            v-for="redirectUri in formData.redirectUris"
-            :key="redirectUri"
-            :label="redirectUri"
-            :value="redirectUri"
-          />
-        </el-select>
+          placeholder="输入可重定向的 URI 地址后按回车确认"
+          class="w-full"
+        />
       </el-form-item>
       <el-form-item label="权限" prop="authorities">
-        <el-select
+        <el-input-tag
           v-model="formData.authorities"
-          allow-create
-          filterable
-          multiple
-          placeholder="请输入权限"
-          style="width: 500px"
-        >
-          <el-option
-            v-for="authority in formData.authorities"
-            :key="authority"
-            :label="authority"
-            :value="authority"
-          />
-        </el-select>
+          placeholder="输入权限后按回车确认"
+          class="w-full"
+        />
       </el-form-item>
       <el-form-item label="资源" prop="resourceIds">
-        <el-select
+        <el-input-tag
           v-model="formData.resourceIds"
-          allow-create
-          filterable
-          multiple
-          placeholder="请输入资源"
-          style="width: 500px"
-        >
-          <el-option
-            v-for="resourceId in formData.resourceIds"
-            :key="resourceId"
-            :label="resourceId"
-            :value="resourceId"
-          />
-        </el-select>
+          placeholder="输入资源后按回车确认"
+          class="w-full"
+        />
       </el-form-item>
       <el-form-item label="附加信息" prop="additionalInformation">
         <el-input

@@ -9,7 +9,7 @@
       v-loading="formLoading"
     >
       <el-row :gutter="16">
-        <el-col :span="12">
+        <el-col :span="24">
           <el-form-item label="样品编号" prop="code">
             <el-input v-model="formData.code" placeholder="请输入样品编号">
               <template #append>

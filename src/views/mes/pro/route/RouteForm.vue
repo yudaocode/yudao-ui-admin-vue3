@@ -10,7 +10,7 @@
       :disabled="isDetail"
     >
       <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="24">
           <el-form-item label="编码" prop="code">
             <el-input v-model="formData.code" placeholder="请输入编码" :disabled="isHeaderReadonly">
               <template #append>
