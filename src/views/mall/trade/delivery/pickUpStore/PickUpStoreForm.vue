@@ -99,17 +99,17 @@
         </el-col>
       </el-row>
       <el-form-item label="获取经纬度">
-        <el-button type="primary" @click="mapDialogVisible = true">获取</el-button>
+        <el-button type="primary" @click="openMapDialog">获取</el-button>
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
-    <el-dialog v-model="mapDialogVisible" title="获取经纬度" append-to-body>
-      <IFrame class="h-609px" :src="tencentLbsUrl" />
-    </el-dialog>
   </Dialog>
+
+  <!-- 地图选择弹窗 -->
+  <MapDialog ref="mapDialogRef" @confirm="handleMapConfirm" />
 </template>
 <script setup lang="ts">
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
@@ -117,17 +117,11 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps } from '@/utils/tree'
 import { getAreaTree } from '@/api/system/area'
-import * as ConfigApi from '@/api/mall/trade/config'
-declare global {
-  interface Window {
-    selectAddress: (loc: any) => void
-  }
-}
+import { bd09ToGcj02, gcj02ToBd09, MapDialog, toMapCoordinate } from '@/components/Map'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const mapDialogVisible = ref(false) // 地图弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
@@ -162,7 +156,7 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const areaList = ref() // 区域树
-const tencentLbsUrl = ref('') // 腾讯位置服务 url
+const mapDialogRef = ref<InstanceType<typeof MapDialog>>() // 地图选择弹窗 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -227,41 +221,26 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
-/** 选择经纬度 */
-const selectAddress = function (loc: any): void {
-  if (loc.latlng && loc.latlng.lat) {
-    formData.value.latitude = loc.latlng.lat
-  }
-  if (loc.latlng && loc.latlng.lng) {
-    formData.value.longitude = loc.latlng.lng
-  }
-  mapDialogVisible.value = false
+/** 打开地图选择弹窗：门店经纬度为 GCJ02，百度地图拾取使用 BD09 */
+const openMapDialog = () => {
+  const coordinate = toMapCoordinate(formData.value.longitude, formData.value.latitude)
+  const point = coordinate ? gcj02ToBd09(coordinate.longitude, coordinate.latitude) : undefined
+  mapDialogRef.value?.open(point?.longitude, point?.latitude)
 }
 
-/** 初始化腾讯地图 */
-const initTencentLbsMap = async () => {
-  window.selectAddress = selectAddress
-  window.addEventListener(
-    'message',
-    function (event) {
-      // 接收位置信息，用户选择确认位置点后选点组件会触发该事件，回传用户的位置信息
-      let loc = event.data
-      if (loc && loc.module === 'locationPicker') {
-        // 防止其他应用也会向该页面 post 信息，需判断 module 是否为 'locationPicker'
-        window.parent.selectAddress(loc)
-      }
-    },
-    false
-  )
-  const data = await ConfigApi.getTradeConfig()
-  const key = data.tencentLbsKey
-  tencentLbsUrl.value = `https://apis.map.qq.com/tools/locpicker?type=1&key=${key}&referer=myapp`
+/** 处理地图选择确认：百度地图 BD09 转回门店 GCJ02 */
+const handleMapConfirm = (data: { longitude: string; latitude: string }) => {
+  const coordinate = toMapCoordinate(data.longitude, data.latitude)
+  if (!coordinate) {
+    return
+  }
+  const point = bd09ToGcj02(coordinate.longitude, coordinate.latitude)
+  formData.value.longitude = Number(point.longitude.toFixed(6))
+  formData.value.latitude = Number(point.latitude.toFixed(6))
 }
 
 /** 初始化 **/
 onMounted(async () => {
   areaList.value = await getAreaTree()
-  // 加载地图
-  await initTencentLbsMap()
 })
 </script>

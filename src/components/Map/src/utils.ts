@@ -68,3 +68,74 @@ export const loadBaiduMapSdk = (timeout = 10000): Promise<void> => {
 
   return loadPromise
 }
+
+/** 地图预览页面加载失败时发给父页面的消息类型 */
+export const BAIDU_MAP_PREVIEW_ERROR = 'baidu-map-preview-error'
+
+/**
+ * 生成单点地图只读预览页面，作为 iframe 的 srcdoc 使用
+ *
+ * 页面独立加载 SDK 且从不调用 destroy；iframe 移除或重新导航时，由浏览器回收其中的脚本、定时器、Worker 与 WebGL 上下文
+ * @param longitude BD09 经度
+ * @param latitude BD09 纬度
+ * @param zoom 缩放级别
+ * @param timeout SDK 加载超时时间（毫秒），默认 10000
+ * @returns 页面 HTML；Key 未配置或参数无效时返回空字符串
+ */
+export const buildBaiduMapPreviewHtml = (
+  longitude: number,
+  latitude: number,
+  zoom: number,
+  timeout = 10000
+): string => {
+  const key = import.meta.env.VITE_BAIDU_MAP_KEY
+  if (!key || ![longitude, latitude, zoom].every((value) => Number.isFinite(value))) {
+    return ''
+  }
+  const sdkUrl = `https://api.map.baidu.com/api?v=1.0&amp;type=webgl&amp;ak=${encodeURIComponent(key)}&amp;callback=initMap`
+  return [
+    '<!doctype html><html><head><meta charset="utf-8">',
+    '<style>html,body,#map{width:100%;height:100%;margin:0;overflow:hidden}</style>',
+    '</head><body><div id="map"></div><script>',
+    'var loaded = false;',
+    `function fail() { if (!loaded) parent.postMessage({ type: '${BAIDU_MAP_PREVIEW_ERROR}' }, '*'); }`,
+    'function initMap() {',
+    "  var map = new BMapGL.Map('map');",
+    '  map.disableDragging();',
+    '  map.disableDoubleClickZoom();',
+    '  map.disablePinchToZoom();',
+    `  var point = new BMapGL.Point(${longitude}, ${latitude});`,
+    '  map.addOverlay(new BMapGL.Marker(point));',
+    `  map.centerAndZoom(point, ${zoom});`,
+    '  loaded = true;',
+    '}',
+    `setTimeout(fail, ${timeout});`,
+    `</script><script src="${sdkUrl}" onerror="fail()"></script>`,
+    '</body></html>'
+  ].join('\n')
+}
+
+/** 地图 iframe 中 SDK 加载完成时发给父页面的消息类型 */
+export const BAIDU_MAP_FRAME_READY = 'baidu-map-frame-ready'
+
+/**
+ * 生成只加载 SDK 的地图页面，作为 iframe 的 srcdoc 使用
+ *
+ * 父页面通过 iframe.contentWindow.BMapGL 在页面内的 #map 容器创建地图；SDK 实例、定时器与 Worker 都属于 iframe，移除 iframe 时由浏览器回收
+ * @returns 页面 HTML；Key 未配置时返回空字符串
+ */
+export const buildBaiduMapFrameHtml = (): string => {
+  const key = import.meta.env.VITE_BAIDU_MAP_KEY
+  if (!key) {
+    return ''
+  }
+  const sdkUrl = `https://api.map.baidu.com/api?v=1.0&amp;type=webgl&amp;ak=${encodeURIComponent(key)}&amp;callback=onSdkReady`
+  return [
+    '<!doctype html><html><head><meta charset="utf-8">',
+    '<style>html,body,#map{width:100%;height:100%;margin:0;overflow:hidden}</style>',
+    '</head><body><div id="map"></div><script>',
+    `function onSdkReady() { parent.postMessage({ type: '${BAIDU_MAP_FRAME_READY}' }, '*'); }`,
+    `</script><script src="${sdkUrl}"></script>`,
+    '</body></html>'
+  ].join('\n')
+}

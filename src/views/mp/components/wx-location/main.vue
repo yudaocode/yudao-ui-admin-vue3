@@ -1,33 +1,13 @@
-<!--
-  【微信消息 - 定位】TODO @Dhb52 目前未启用
--->
+<!-- 微信消息 - 定位 -->
 <template>
   <div>
-    <el-link
-      type="primary"
-      target="_blank"
-      :href="
-        'https://map.qq.com/?type=marker&isopeninfowin=1&markertype=1&pointx=' +
-        locationY +
-        '&pointy=' +
-        locationX +
-        '&name=' +
-        label +
-        '&ref=yudao'
-      "
-    >
+    <el-link type="primary" target="_blank" rel="noopener noreferrer" :href="mapUrl">
       <el-col>
-        <el-row>
-          <img
-            :src="
-              'https://apis.map.qq.com/ws/staticmap/v2/?zoom=10&markers=color:blue|label:A|' +
-              locationX +
-              ',' +
-              locationY +
-              '&key=' +
-              qqMapKey +
-              '&size=250*180'
-            "
+        <el-row v-if="point">
+          <MapView
+            :longitude="point.longitude"
+            :latitude="point.latitude"
+            class="pointer-events-none h-180px w-250px"
           />
         </el-row>
         <el-row>
@@ -40,14 +20,18 @@
 </template>
 
 <script lang="ts" setup>
+import { gcj02ToBd09, MapView, toMapCoordinate } from '@/components/Map'
+
 defineOptions({ name: 'WxLocation' })
 
 const props = defineProps({
   locationX: {
+    // 纬度（微信 GCJ02）
     required: true,
     type: Number
   },
   locationY: {
+    // 经度（微信 GCJ02）
     required: true,
     type: Number
   },
@@ -55,19 +39,34 @@ const props = defineProps({
     // 地名
     required: true,
     type: String
-  },
-  qqMapKey: {
-    // QQ 地图的密钥 https://lbs.qq.com/service/staticV2/staticGuide/staticDoc
-    required: false,
-    type: String,
-    default: 'TVDBZ-TDILD-4ON4B-PFDZA-RNLKH-VVF6E' // 需要自定义
   }
+})
+
+/** 微信定位为 GCJ02，百度地图展示和外链使用 BD09 */
+const point = computed(() => {
+  const coordinate = toMapCoordinate(props.locationY, props.locationX)
+  return coordinate ? gcj02ToBd09(coordinate.longitude, coordinate.latitude) : undefined
+})
+
+/** 百度地图标注页外链 */
+const mapUrl = computed(() => {
+  if (!point.value) {
+    return undefined
+  }
+  const params = new URLSearchParams({
+    location: `${point.value.latitude},${point.value.longitude}`,
+    title: props.label || '位置',
+    content: props.label || '',
+    output: 'html',
+    coord_type: 'bd09ll',
+    src: 'webapp.yudao.admin'
+  })
+  return `https://api.map.baidu.com/marker?${params.toString()}`
 })
 
 defineExpose({
   locationX: props.locationX,
   locationY: props.locationY,
-  label: props.label,
-  qqMapKey: props.qqMapKey
+  label: props.label
 })
 </script>
