@@ -152,6 +152,7 @@
 
 <script lang="ts" setup>
 import { underlineToHump } from '@/utils'
+import { clearSocialCallback, getSocialCallback } from '@/utils/social'
 
 import { ElLoading } from 'element-plus'
 
@@ -171,7 +172,6 @@ import router from '@/router'
 defineOptions({ name: 'SocialLogin' })
 
 const { t } = useI18n()
-const route = useRoute()
 
 const appStore = useAppStore()
 const { getPrefixCls } = useDesign()
@@ -247,18 +247,20 @@ function getUrlValue(key: string): string {
   return url.searchParams.get(key) ?? ''
 }
 
+// 第三方登录回调的参数：读取后清理地址栏，避免 code 泄露或重复使用
+const socialType = getUrlValue('type')
+const socialRedirect = getUrlValue('redirect')
+const { code: socialCode, state: socialState } = getSocialCallback()
+clearSocialCallback(router.options.history)
+
 // 尝试登录: 当账号已经绑定，socialLogin会直接获得token
 const tryLogin = async () => {
   try {
-    const type = getUrlValue('type')
-    const redirect = getUrlValue('redirect')
-    const code = route?.query?.code as string
-    const state = route?.query?.state as string
-
-    const res = await LoginApi.socialLogin(type, code, state)
+    const res = await LoginApi.socialLogin(socialType, socialCode, socialState)
     authUtil.setToken(res)
 
-    router.push({ path: redirect || '/' })
+    // redirect 可能带 query、hash，所以使用字符串跳转
+    router.push(socialRedirect || '/')
   } catch (err) {}
 }
 
@@ -272,11 +274,7 @@ const handleLogin = async (params) => {
       return
     }
 
-    let redirect = getUrlValue('redirect')
-
-    const type = getUrlValue('type')
-    const code = route?.query?.code as string
-    const state = route?.query?.state as string
+    let redirect = socialRedirect
 
     const loginDataLoginForm = { ...loginData.loginForm }
     const res = await LoginApi.login({
@@ -285,9 +283,9 @@ const handleLogin = async (params) => {
       password: loginDataLoginForm.password,
       captchaVerification: params.captchaVerification,
       // 社交登录
-      socialCode: code,
-      socialState: state,
-      socialType: type
+      socialCode,
+      socialState,
+      socialType
     })
     if (!res) {
       return
@@ -310,7 +308,7 @@ const handleLogin = async (params) => {
     if (redirect.indexOf('sso') !== -1) {
       window.location.href = window.location.href.replace('/login?redirect=', '')
     } else {
-      push({ path: redirect || permissionStore.addRouters[0].path })
+      push(redirect || permissionStore.addRouters[0].path)
     }
   } finally {
     loginLoading.value = false
@@ -319,6 +317,11 @@ const handleLogin = async (params) => {
 }
 
 onMounted(() => {
+  // 缺少回调参数（例如说，清理地址栏后刷新、直接访问），无法社交登录，退回登录页，并保留 redirect
+  if (!socialType || !socialCode || !socialState) {
+    router.replace({ path: '/login', query: socialRedirect ? { redirect: socialRedirect } : {} })
+    return
+  }
   getCookie()
   tryLogin()
 })

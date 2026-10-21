@@ -2,6 +2,10 @@ import type { App } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 import remainingRouter from './modules/remaining'
+import { restoreSocialRoute } from '@/utils/social'
+
+// 使用 createWebHashHistory 时，需要先还原第三方登录回调的目标路由，详见 buildSocialRedirectUri() 说明
+restoreSocialRoute()
 
 // 创建路由实例
 const router = createRouter({

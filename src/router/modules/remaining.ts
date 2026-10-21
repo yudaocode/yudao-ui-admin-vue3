@@ -87,7 +87,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           noTagsView: false,
           icon: 'ep:user',
-          title: t('common.profile')
+          title: t('common.profile'),
+          viewKey: 'Profile' // 社交绑定回调后会去掉地址中的 code 等参数，使用稳定的页面实例标识，避免重建页面
         }
       },
       {

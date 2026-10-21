@@ -25,6 +25,8 @@
 import { SystemUserSocialTypeEnum } from '@/utils/constants'
 import { getBindSocialUserList } from '@/api/system/social/user'
 import { socialAuthRedirect, socialBind, socialUnbind } from '@/api/system/user/socialUser'
+import { buildSocialRedirectUri, clearSocialCallback, getSocialCallback } from '@/utils/social'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 
 defineOptions({ name: 'UserSocial' })
 defineProps<{
@@ -52,16 +54,26 @@ const initSocial = async () => {
   }
 }
 const route = useRoute()
+const { options, replace, resolve } = useRouter()
+const tagsViewStore = useTagsViewStore()
 const emit = defineEmits<{
   (e: 'update:activeName', v: string): void
 }>()
-const bindSocial = () => {
+const bindSocial = async () => {
   // 社交绑定
   const type = getUrlValue('type')
-  const code = route.query.code
-  const state = route.query.state
+  const { code, state } = getSocialCallback()
   if (!code) {
     return
+  }
+  // 清理 URL 参数，避免刷新重复触发
+  clearSocialCallback(options.history)
+  // 同步当前路由、标签页：history 路由时，它们仍带有 code 等参数，重新打开标签页会带回 code，所以替换为清理后的地址，并删除旧标签页
+  // 注意：Profile 路由的 viewKey 为 Profile，替换后不会重建页面
+  const callbackRoute = { ...route }
+  if (options.history.location !== callbackRoute.fullPath) {
+    await replace(options.history.location)
+    tagsViewStore.delVisitedView(callbackRoute)
   }
   socialBind(type, code, state).then(() => {
     message.success('绑定成功')
@@ -77,7 +89,7 @@ function getUrlValue(key: string): string {
 
 const bind = (row) => {
   // 双层 encode 解决钉钉回调 type 参数丢失的问题
-  const redirectUri = location.origin + '/user/profile?' + encodeURIComponent(`type=${row.type}`)
+  const redirectUri = buildSocialRedirectUri(resolve('/user/profile').href, { type: row.type })
   // 进行跳转
   socialAuthRedirect(row.type, encodeURIComponent(redirectUri)).then((res) => {
     window.location.href = res
