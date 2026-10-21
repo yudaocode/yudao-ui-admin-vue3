@@ -32,29 +32,37 @@ export const loadBaiduMapSdk = (timeout = 10000): Promise<void> => {
   }
 
   loadPromise = new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      loadPromise = null
-      reject(new Error('百度地图 SDK 加载超时'))
-    }, timeout)
+    // 创建 script 标签
+    const script = document.createElement('script')
 
-    // 全局回调
-    ;(window as any)[CALLBACK_NAME] = () => {
+    // 只清理本次加载的监听和回调，避免旧 script 的回调或错误干扰后续重试
+    const cleanup = () => {
       clearTimeout(timeoutId)
-      delete (window as any)[CALLBACK_NAME]
+      script.onerror = null
+      if ((window as any)[CALLBACK_NAME] === handleLoad) {
+        delete (window as any)[CALLBACK_NAME]
+      }
+    }
+    const fail = (message: string) => {
+      cleanup()
+      script.remove()
+      loadPromise = null
+      reject(new Error(message))
+    }
+    const handleLoad = () => {
+      cleanup()
       resolve()
     }
 
-    // 创建 script 标签
-    const script = document.createElement('script')
+    const timeoutId = setTimeout(() => fail('百度地图 SDK 加载超时'), timeout)
+
+    // 全局回调
+    ;(window as any)[CALLBACK_NAME] = handleLoad
+
     script.src = `https://api.map.baidu.com/api?v=1.0&type=webgl&ak=${
       import.meta.env.VITE_BAIDU_MAP_KEY
     }&callback=${CALLBACK_NAME}`
-    script.onerror = () => {
-      clearTimeout(timeoutId)
-      loadPromise = null
-      delete (window as any)[CALLBACK_NAME]
-      reject(new Error('百度地图 SDK 加载失败'))
-    }
+    script.onerror = () => fail('百度地图 SDK 加载失败')
     document.body.appendChild(script)
   })
 

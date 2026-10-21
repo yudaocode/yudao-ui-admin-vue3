@@ -109,9 +109,14 @@ const formData = ref({
 
 /** 打开地图选择弹窗 */
 const openMapDialog = () => {
+  // 0 是合法经纬度；空白和非数字输入视为未填写
+  const longitude = String(formData.value.longitude ?? '').trim()
+  const latitude = String(formData.value.latitude ?? '').trim()
+  const longitudeValue = longitude ? Number(longitude) : NaN
+  const latitudeValue = latitude ? Number(latitude) : NaN
   mapDialogRef.value?.open(
-    formData.value.longitude ? Number(formData.value.longitude) : undefined,
-    formData.value.latitude ? Number(formData.value.latitude) : undefined
+    Number.isFinite(longitudeValue) ? longitudeValue : undefined,
+    Number.isFinite(latitudeValue) ? latitudeValue : undefined
   )
 }
 
