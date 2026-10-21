@@ -41,6 +41,15 @@ const emit = defineEmits<{
 const ganttContainer = ref<HTMLElement>()
 const ganttInited = ref(false)
 
+/** 添加今天标记线 */
+const addTodayMarker = () => {
+  gantt.addMarker({
+    start_date: new Date(),
+    css: 'today',
+    text: '今天'
+  })
+}
+
 /** 初始化甘特图配置 */
 const initGantt = () => {
   if (!ganttContainer.value) {
@@ -105,11 +114,7 @@ const initGantt = () => {
 
   // 今天标记线 + tooltip 插件
   gantt.plugins({ marker: true, tooltip: true })
-  gantt.addMarker({
-    start_date: new Date(),
-    css: 'today',
-    text: '今天'
-  })
+  addTodayMarker()
 
   // 甘特条上的文本
   gantt.templates.task_text = (_start: any, _end: any, task: any) => {
@@ -189,6 +194,8 @@ const loadData = (tasks: any[]) => {
     links: []
   }
   gantt.parse(transformed)
+  // clearAll 会一并清空标记，需重新添加今天标记线（https://t.zsxq.com/kfb9f）
+  addTodayMarker()
 }
 
 /** 监听 tasks 变化 */
