@@ -91,7 +91,7 @@ export const SessionMessageApi = {
     return await request.get({ url: `/ai1/session/message/my-list?sessionId=` + sessionId })
   },
 
-  // 获得会话消息分页，按编号倒序
+  // 获得会话消息分页，按编号倒序取最新页，页内按时间正序
   getSessionMessagePage: async (params: { sessionId: number } & PageParam) => {
     return await request.get({ url: `/ai1/session/message/page`, params })
   },

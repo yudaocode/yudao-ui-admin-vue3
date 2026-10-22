@@ -71,7 +71,7 @@ defineOptions({ name: 'Ai1SessionDetail' })
 const dialogVisible = ref(false) // 弹窗的是否展示
 const loading = ref(false) // 列表的加载中
 const session = ref<Session>() // 当前会话
-const list = ref<SessionMessage[]>([]) // 消息列表，按编号倒序
+const list = ref<SessionMessage[]>([]) // 消息列表，按编号倒序取最新页，页内按时间正序
 const total = ref(0) // 消息总数
 const queryParams = reactive({
   pageNo: 1,
