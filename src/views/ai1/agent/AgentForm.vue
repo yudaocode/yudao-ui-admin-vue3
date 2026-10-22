@@ -53,6 +53,9 @@
       <el-form-item label="关联 SKILL" prop="skillIds">
         <SkillSelect v-model="formData.skillIds" multiple clearable />
       </el-form-item>
+      <el-form-item label="长期记忆" prop="memoryEnabled">
+        <el-switch v-model="formData.memoryEnabled" />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -88,7 +91,8 @@ const formData = ref({
   systemPrompt: undefined as string | undefined,
   knowledgeBaseIds: [] as number[],
   mcpIds: [] as number[],
-  skillIds: [] as number[]
+  skillIds: [] as number[],
+  memoryEnabled: false
 })
 const formRules = reactive({
   name: [{ required: true, message: 'Agent 名称不能为空', trigger: 'blur' }],
@@ -149,7 +153,8 @@ const resetForm = () => {
     systemPrompt: undefined,
     knowledgeBaseIds: [],
     mcpIds: [],
-    skillIds: []
+    skillIds: [],
+    memoryEnabled: false
   }
   formRef.value?.resetFields()
 }

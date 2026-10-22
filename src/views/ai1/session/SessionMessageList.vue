@@ -58,9 +58,12 @@
                 </span>
               </span>
               <MarkdownView v-if="item.content" :content="item.content" />
-              <!-- 生成失败 -->
+              <!-- 生成失败：正文末尾已有后端写入的终态提示时不再重复 -->
               <div
-                v-if="item.status === Ai1SessionMessageStatusEnum.FAILED"
+                v-if="
+                  item.status === Ai1SessionMessageStatusEnum.FAILED &&
+                  !hasPersistedNotice(item.content)
+                "
                 class="mt-6px flex items-center text-12px text-[var(--el-color-danger)]"
               >
                 <Icon icon="ep:warning" :size="13" class="mr-4px" />
@@ -113,8 +116,22 @@ defineProps<{
   list: Ai1SessionMessageItem[] // 消息列表
 }>()
 
+// 后端追加到失败、终止消息正文末尾的固定提示，格式为「\n\n> 提示」
+const PERSISTED_NOTICES = [
+  '本条回复已被人工终止',
+  '本条回复生成失败',
+  '生成任务已中断，请重新发送',
+  '生成任务已丢失，请重新发送'
+]
+
 const scrollRef = ref<HTMLElement>() // 滚动容器
 const nearBottom = ref(true) // 是否贴近底部
+
+/** 正文末尾是否已有后端写入的终态提示 */
+const hasPersistedNotice = (content?: string) => {
+  const text = content?.trimEnd()
+  return !!text && PERSISTED_NOTICES.some((notice) => text.endsWith('> ' + notice))
+}
 
 /** 滚动时，计算是否贴近底部 */
 const handleScroll = () => {

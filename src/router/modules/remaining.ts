@@ -1081,7 +1081,10 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: 'agent/session/:agentId',
-        component: () => import('@/views/ai1/agent/session/index.vue'),
+        redirect: (to) => ({
+          path: '/ai1/conversation/session',
+          query: { agentId: to.params.agentId }
+        }),
         name: 'Ai1AgentSession',
         meta: {
           title: '会话记录',

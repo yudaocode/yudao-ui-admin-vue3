@@ -4,6 +4,7 @@ import request from '@/config/axios'
 export interface Session {
   id: number // 编号
   agentId: number // Agent 编号
+  agentName?: string // Agent 名称
   userId: number // 用户编号
   userNickname?: string // 用户昵称
   title: string // 标题

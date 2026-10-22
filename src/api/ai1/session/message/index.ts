@@ -81,6 +81,9 @@ const openSessionStream = (
   })
 }
 
+// 进行中的停止请求，key 为会话编号；停止按会话定位生成中的消息，迟到的请求会停掉同会话的下一条回复
+const pendingStops = new Map<number, Promise<unknown>>()
+
 // AI1 会话消息 API
 export const SessionMessageApi = {
   // 获得【我的】会话消息列表
@@ -88,19 +91,40 @@ export const SessionMessageApi = {
     return await request.get({ url: `/ai1/session/message/my-list?sessionId=` + sessionId })
   },
 
-  // 获得会话消息列表
-  getSessionMessageList: async (sessionId: number): Promise<SessionMessage[]> => {
-    return await request.get({ url: `/ai1/session/message/list?sessionId=` + sessionId })
+  // 获得会话消息分页，按编号倒序
+  getSessionMessagePage: async (params: { sessionId: number } & PageParam) => {
+    return await request.get({ url: `/ai1/session/message/page`, params })
+  },
+
+  // 停止【我的】会话中正在生成的消息
+  stopSessionMessageMy: async (sessionId: number) => {
+    const promise = request.post({ url: `/ai1/session/message/stop-my?sessionId=` + sessionId })
+    // 与同会话之前的停止请求合并等待，结束后才允许发送
+    const settled = Promise.all([pendingStops.get(sessionId), promise.catch(() => {})])
+    pendingStops.set(sessionId, settled)
+    settled.then(() => {
+      if (pendingStops.get(sessionId) === settled) {
+        pendingStops.delete(sessionId)
+      }
+    })
+    return await promise
   },
 
   // 发送消息（流式）；为什么不用 axios 呢？因为它不支持 SSE 调用
-  sendSessionMessageStream: (
+  sendSessionMessageStream: async (
     sessionId: number,
     content: string,
     controller: AbortController,
     handlers: SessionStreamHandlers
   ) => {
-    return openSessionStream(
+    // 先等同会话的停止请求全部结束（含等待期间新发起的），避免它们停掉这条新回复
+    while (pendingStops.has(sessionId)) {
+      await pendingStops.get(sessionId)
+    }
+    if (controller.signal.aborted) {
+      return
+    }
+    return await openSessionStream(
       `/ai1/session/message/send-stream`,
       { sessionId, content },
       controller,

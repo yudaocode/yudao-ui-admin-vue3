@@ -91,12 +91,10 @@
             <span class="text-12px text-[var(--el-text-color-secondary)]">
               Enter 发送，Shift+Enter 换行
             </span>
-            <el-tooltip
-              v-if="streaming"
-              content="仅停止接收：服务端会继续生成，重新打开该会话即可续传查看"
-              placement="top"
-            >
-              <el-button type="danger" @click="handleStop">停止</el-button>
+            <el-tooltip v-if="streaming" content="终止本次生成，保留已生成的内容" placement="top">
+              <el-button type="danger" :loading="stopRequested" @click="handleStop">
+                {{ stopRequested ? '停止中' : '停止' }}
+              </el-button>
             </el-tooltip>
             <el-button v-else type="primary" :disabled="!activeAgentId" @click="sendMessage">
               发送
@@ -111,6 +109,7 @@
 <script setup lang="ts">
 import { useFullscreen } from '@vueuse/core'
 import { useCache } from '@/hooks/web/useCache'
+import { CommonStatusEnum } from '@/utils/constants'
 import { AgentApi, Agent } from '@/api/ai1/agent'
 import { SessionApi, Session } from '@/api/ai1/session'
 import { SessionMessageApi, SessionStreamHandlers } from '@/api/ai1/session/message'
@@ -135,6 +134,7 @@ const { wsCache } = useCache() // 本地缓存
 const AGENT_ID_CACHE_KEY = 'AI1_SESSION_AGENT_ID' // 缓存 Key：上次选择的 Agent 编号
 const MAX_RESUME_ATTEMPTS = 3 // 断线后最多自动续传的次数
 const RESUME_DELAY_MS = 500 // 续传的等待基数，单位：毫秒
+const STOP_CONFIRM_DELAY_MS = 30_000 // 停止后等待终态的时长，超时回读确认，单位：毫秒
 
 // ==================== 页面布局 ====================
 
@@ -170,7 +170,7 @@ const activeAgent = computed(() => agentList.value.find((item) => item.id === ac
 const getAgentList = async () => {
   agentLoading.value = true
   try {
-    agentList.value = await AgentApi.getAgentSimpleList()
+    agentList.value = await AgentApi.getAgentSimpleList(CommonStatusEnum.ENABLE)
   } finally {
     agentLoading.value = false
   }
@@ -245,22 +245,14 @@ const handleNewSession = () => {
 /** 选中会话 */
 const selectSession = async (sessionId: number) => {
   if (sessionId === activeSessionId.value) {
-    // 停止或断线后允许重开当前会话；接收或加载中避免重复请求
-    if (
-      streaming.value ||
-      messageLoading.value ||
-      !messageList.value.some(
-        (item) =>
-          item.role === Ai1SessionMessageRoleEnum.ASSISTANT &&
-          item.status === Ai1SessionMessageStatusEnum.GENERATING &&
-          item.interrupted
-      )
-    ) {
+    // 断线后允许重开当前会话；接收或加载中避免重复请求
+    if (streaming.value || messageLoading.value || !hasInterruptedMessage()) {
       return
     }
   }
   stopStream()
   activeSessionId.value = sessionId
+  messageList.value = []
   await getSessionMessageList()
 }
 
@@ -291,23 +283,27 @@ const handleSessionDelete = async (session: Session) => {
 const messageList = ref<Ai1SessionMessageItem[]>([]) // 消息列表
 const messageLoading = ref(false) // 消息列表加载中
 const messageListRef = ref() // 消息列表 Ref
+let pageActive = true // 页面是否处于激活状态
 
 /** 加载消息列表，自动续传生成中的助手消息 */
 const getSessionMessageList = async () => {
   const sessionId = activeSessionId.value
-  if (!sessionId) {
+  if (!sessionId || !pageActive) {
     return
   }
   messageLoading.value = true
   try {
     const list = await SessionMessageApi.getSessionMessageMyList(sessionId)
-    // 加载期间切换了会话，丢弃结果
-    if (sessionId !== activeSessionId.value) {
+    // 加载期间切换了会话、离开了页面或已在接收，丢弃结果
+    if (sessionId !== activeSessionId.value || !pageActive || streaming.value) {
       return
     }
     messageList.value = list
   } finally {
-    messageLoading.value = false
+    // 只复位本会话的加载状态，避免旧会话的响应结束新会话的加载
+    if (sessionId === activeSessionId.value) {
+      messageLoading.value = false
+    }
   }
   scrollToBottom(true)
   // 续传生成中的助手消息
@@ -322,6 +318,15 @@ const getSessionMessageList = async () => {
   }
 }
 
+/** 是否有已中断接收、仍在生成的助手消息 */
+const hasInterruptedMessage = () =>
+  messageList.value.some(
+    (item) =>
+      item.role === Ai1SessionMessageRoleEnum.ASSISTANT &&
+      item.status === Ai1SessionMessageStatusEnum.GENERATING &&
+      item.interrupted
+  )
+
 /** 滚动到底部 */
 const scrollToBottom = async (force = false) => {
   await nextTick()
@@ -333,6 +338,9 @@ const scrollToBottom = async (force = false) => {
 const prompt = ref('') // 输入框内容
 const promptInputRef = ref() // 输入框
 const streaming = ref(false) // 是否正在接收流
+const stopRequested = ref(false) // 是否已点击停止，等待服务端终态
+let stopSubmitted = false // 停止请求是否已提交
+let stopTimer: ReturnType<typeof setTimeout> | undefined // 停止等待的定时器
 let streamController: AbortController | undefined // SSE 中止控制器
 let streamingMessage: Ai1SessionMessageItem | undefined // 当前接收的助手消息
 let streamSeq = 0 // 流序号，用于丢弃过期流的事件
@@ -429,6 +437,7 @@ const runStream = async (
   open: (controller: AbortController, handlers: SessionStreamHandlers) => Promise<void>
 ) => {
   const seq = ++streamSeq
+  resetStop()
   streaming.value = true
   streamingMessage = assistantMessage
   // 流状态
@@ -440,6 +449,7 @@ const runStream = async (
   const handlers = createStreamHandlers(assistantMessage, state, seq)
   let opener = open
   let attempts = 0
+  let confirmed = false // 数据库是否已确认终态
   try {
     while (true) {
       const controller = new AbortController()
@@ -448,8 +458,12 @@ const runStream = async (
         // 异常交给下方续传判断
         await opener(controller, handlers)
       } catch {}
-      // 已结束或已停止
-      if (state.finished || seq !== streamSeq) {
+      // 已切换会话或离开页面
+      if (seq !== streamSeq) {
+        break
+      }
+      // 已收到终态，或已请求停止：不再续传
+      if (state.finished || stopRequested.value) {
         break
       }
       // 无法续传，或已达上限
@@ -473,15 +487,32 @@ const runStream = async (
           handlers
         )
     }
+    // 回读数据库终态，避免把连接关闭当作停止或完成
+    if (seq === streamSeq && (state.finished || stopRequested.value)) {
+      confirmed = await reconcileMessage(assistantMessage, seq)
+      if (
+        !confirmed &&
+        seq === streamSeq &&
+        assistantMessage.status === Ai1SessionMessageStatusEnum.GENERATING
+      ) {
+        assistantMessage.interrupted = true
+        message.warning(
+          stopRequested.value
+            ? '连接已中断，停止结果尚未确认，请稍后重新打开该会话查看'
+            : '连接已中断，服务端可能仍在生成，请稍后重新打开该会话查看'
+        )
+      }
+    }
   } finally {
     // 仍是当前流时才复位
     if (seq === streamSeq) {
+      resetStop()
       streaming.value = false
       streamController = undefined
       streamingMessage = undefined
     }
   }
-  if (state.finished && seq === streamSeq) {
+  if ((state.finished || confirmed) && seq === streamSeq) {
     await scrollToBottom()
     await getSessionList()
   }
@@ -506,6 +537,10 @@ const createStreamHandlers = (
       case Ai1SessionStreamEventEnum.STREAM:
         state.messageId = Number(event.data)
         assistantMessage.id = state.messageId
+        // 消息落库前点击了停止，此时再提交
+        if (stopRequested.value) {
+          submitStop(seq)
+        }
         break
       // 思考过程增量
       case Ai1SessionStreamEventEnum.THINKING:
@@ -520,11 +555,19 @@ const createStreamHandlers = (
       // 终态：生成结束
       case Ai1SessionStreamEventEnum.DONE:
         state.finished = true
-        assistantMessage.status = Ai1SessionMessageStatusEnum.SUCCESS
+        clearStopTimer()
+        // 已请求停止时，终态以数据库为准
+        if (
+          !stopRequested.value &&
+          assistantMessage.status === Ai1SessionMessageStatusEnum.GENERATING
+        ) {
+          assistantMessage.status = Ai1SessionMessageStatusEnum.SUCCESS
+        }
         break
       // 终态：生成失败
       case Ai1SessionStreamEventEnum.ERROR:
         state.finished = true
+        clearStopTimer()
         assistantMessage.status = Ai1SessionMessageStatusEnum.FAILED
         assistantMessage.errorMessage = event.data ? String(event.data) : undefined
         break
@@ -538,21 +581,113 @@ const createStreamHandlers = (
   onClose: () => {}
 })
 
-/** 停止接收：服务端仍会继续生成 */
+/** 回读数据库中的助手消息：已终态时以数据库为准；仍在生成时只同步状态，保留已收到的内容 */
+const reconcileMessage = async (assistantMessage: Ai1SessionMessageItem, seq: number) => {
+  const list = await SessionMessageApi.getSessionMessageMyList(assistantMessage.sessionId).catch(
+    () => undefined
+  )
+  const saved = list?.find((item) => item.id === assistantMessage.id)
+  if (seq !== streamSeq || !saved) {
+    return false
+  }
+  if (saved.status === Ai1SessionMessageStatusEnum.GENERATING) {
+    // 例如传输层 ERROR：服务端仍在生成，恢复为可续传
+    assistantMessage.status = saved.status
+    assistantMessage.errorMessage = undefined
+    return false
+  }
+  Object.assign(assistantMessage, saved, { interrupted: false, errorMessage: undefined })
+  return true
+}
+
+/** 停止接收：切换会话、离开页面时使用，服务端继续生成 */
 const stopStream = () => {
+  messageLoading.value = false
+  if (streamingMessage?.status === Ai1SessionMessageStatusEnum.GENERATING) {
+    streamingMessage.interrupted = true
+  }
   streamSeq++
+  resetStop()
   streamController?.abort()
   streamController = undefined
   streamingMessage = undefined
   streaming.value = false
 }
 
-/** 停止 */
+/** 停止生成：消息落库前点击时先记录，收到 stream 事件后再提交 */
 const handleStop = () => {
   const assistantMessage = streamingMessage
-  stopStream()
-  if (assistantMessage?.status === Ai1SessionMessageStatusEnum.GENERATING) {
-    assistantMessage.interrupted = true
+  if (
+    stopRequested.value ||
+    !assistantMessage ||
+    assistantMessage.status !== Ai1SessionMessageStatusEnum.GENERATING
+  ) {
+    return
+  }
+  stopRequested.value = true
+  const seq = streamSeq
+  if (assistantMessage.id > 0) {
+    submitStop(seq)
+    return
+  }
+  stopTimer = setTimeout(() => {
+    stopTimer = undefined
+    if (seq === streamSeq && stopRequested.value && !stopSubmitted) {
+      message.warning('消息尚未提交，停止请求等待中，请勿重复发送')
+    }
+  }, STOP_CONFIRM_DELAY_MS)
+}
+
+/** 提交停止请求，继续接收 SSE 直到服务端终态 */
+const submitStop = async (seq: number) => {
+  const assistantMessage = streamingMessage
+  if (seq !== streamSeq || !assistantMessage || stopSubmitted) {
+    return
+  }
+  stopSubmitted = true
+  clearStopTimer()
+  try {
+    await SessionMessageApi.stopSessionMessageMy(assistantMessage.sessionId)
+  } catch {
+    if (seq === streamSeq && stopRequested.value) {
+      resetStop()
+      message.error('停止失败，本次生成仍在继续，请重试')
+    }
+    return
+  }
+  if (seq !== streamSeq || !stopRequested.value) {
+    return
+  }
+  // 长时间未收到终态时，回读确认
+  stopTimer = setTimeout(() => confirmStop(assistantMessage, seq), STOP_CONFIRM_DELAY_MS)
+}
+
+/** 确认停止结果：数据库已终态时关闭连接，由 runStream 收尾 */
+const confirmStop = async (assistantMessage: Ai1SessionMessageItem, seq: number) => {
+  stopTimer = undefined
+  const confirmed = await reconcileMessage(assistantMessage, seq)
+  if (seq !== streamSeq || !stopRequested.value) {
+    return
+  }
+  if (confirmed) {
+    streamController?.abort()
+  } else {
+    message.warning('停止请求已提交，仍在等待服务端确认，可稍后重新打开该会话查看')
+  }
+}
+
+/** 复位停止状态 */
+const resetStop = () => {
+  stopRequested.value = false
+  stopSubmitted = false
+  clearStopTimer()
+}
+
+/** 清除停止等待的定时器 */
+const clearStopTimer = () => {
+  if (stopTimer) {
+    clearTimeout(stopTimer)
+    stopTimer = undefined
   }
 }
 
@@ -582,25 +717,37 @@ onMounted(async () => {
   syncUrl()
 })
 
-/** 再次激活：带入新的 agentId 时，切换 Agent */
+/** 再次激活：带入新的 agentId 时，切换 Agent；否则恢复失活时断开的接收 */
 onActivated(() => {
+  pageActive = true
+  if (!initialized) {
+    return
+  }
   const agentId = Number(route.query.agentId)
-  if (!initialized || !agentId || agentId === handledQueryAgentId) {
-    return
-  }
-  handledQueryAgentId = agentId
-  if (agentId === activeAgentId.value) {
-    return
-  }
-  if (agentList.value.some((item) => item.id === agentId)) {
-    selectAgent(agentId)
-  } else {
-    // 可能是新建的 Agent，重新加载列表
-    getAgentList().then(() => {
+  if (agentId && agentId !== handledQueryAgentId) {
+    handledQueryAgentId = agentId
+    if (agentId !== activeAgentId.value) {
       if (agentList.value.some((item) => item.id === agentId)) {
         selectAgent(agentId)
+      } else {
+        // 可能是新建的 Agent，重新加载列表
+        getAgentList().then(() => {
+          if (agentList.value.some((item) => item.id === agentId)) {
+            selectAgent(agentId)
+          }
+        })
       }
-    })
+      return
+    }
+  }
+  // 失活时丢弃了加载结果或断开了接收，重新加载并续传
+  if (
+    activeSessionId.value &&
+    !streaming.value &&
+    !messageLoading.value &&
+    (messageList.value.length === 0 || hasInterruptedMessage())
+  ) {
+    getSessionMessageList()
   }
 })
 
@@ -621,8 +768,15 @@ watch([activeAgentId, activeSessionId], () => {
   }
 })
 
+/** 切换标签页：只断开接收，不终止生成 */
+onDeactivated(() => {
+  pageActive = false
+  stopStream()
+})
+
 /** 离开页面 */
 onBeforeUnmount(() => {
+  pageActive = false
   stopStream()
 })
 </script>

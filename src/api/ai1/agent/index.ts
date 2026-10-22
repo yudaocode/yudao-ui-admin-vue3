@@ -13,6 +13,7 @@ export interface Agent {
   knowledgeBaseIds?: number[] // 知识库编号集合
   mcpIds?: number[] // MCP 编号集合
   skillIds?: number[] // SKILL 编号集合
+  memoryEnabled?: boolean // 是否开启长期记忆
   status?: number // 状态
   createTime?: Date // 创建时间
   updateTime?: Date // 更新时间
@@ -30,9 +31,9 @@ export const AgentApi = {
     return await request.get({ url: `/ai1/agent/get?id=` + id })
   },
 
-  // 查询 Agent 精简列表
-  getAgentSimpleList: async (): Promise<Agent[]> => {
-    return await request.get({ url: `/ai1/agent/simple-list` })
+  // 查询 Agent 精简列表；status 为空时返回全部
+  getAgentSimpleList: async (status?: number): Promise<Agent[]> => {
+    return await request.get({ url: `/ai1/agent/simple-list`, params: { status } })
   },
 
   // 新增 Agent

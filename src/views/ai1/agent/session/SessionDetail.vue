@@ -1,6 +1,9 @@
 <template>
   <Dialog title="会话明细" v-model="dialogVisible" width="1000px">
     <el-descriptions :column="3" :label-width="100" border>
+      <el-descriptions-item label="Agent" :span="3">
+        {{ session?.agentName || session?.agentId }}
+      </el-descriptions-item>
       <el-descriptions-item label="标题" :span="3">{{ session?.title }}</el-descriptions-item>
       <el-descriptions-item label="用户">
         {{ session?.userNickname || session?.userId }}
@@ -14,6 +17,7 @@
     </el-descriptions>
     <el-divider content-position="left">消息列表</el-divider>
     <el-table v-loading="loading" :data="list" :stripe="true" border max-height="520">
+      <el-table-column label="编号" align="center" prop="id" width="90" />
       <el-table-column label="角色" align="center" prop="role" width="80">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI1_SESSION_MESSAGE_ROLE" :value="scope.row.role" />
@@ -42,6 +46,14 @@
         width="180px"
       />
     </el-table>
+    <div class="overflow-hidden">
+      <Pagination
+        :total="total"
+        v-model:page="queryParams.pageNo"
+        v-model:limit="queryParams.pageSize"
+        @pagination="getList"
+      />
+    </div>
   </Dialog>
 </template>
 <script setup lang="ts">
@@ -59,19 +71,35 @@ defineOptions({ name: 'Ai1SessionDetail' })
 const dialogVisible = ref(false) // 弹窗的是否展示
 const loading = ref(false) // 列表的加载中
 const session = ref<Session>() // 当前会话
-const list = ref<SessionMessage[]>([]) // 消息列表
+const list = ref<SessionMessage[]>([]) // 消息列表，按编号倒序
+const total = ref(0) // 消息总数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  sessionId: 0
+})
+
+/** 查询消息分页 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await SessionMessageApi.getSessionMessagePage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
+}
 
 /** 打开弹窗 */
 const open = async (row: Session) => {
   dialogVisible.value = true
   session.value = row
   list.value = []
-  loading.value = true
-  try {
-    list.value = await SessionMessageApi.getSessionMessageList(row.id)
-  } finally {
-    loading.value = false
-  }
+  total.value = 0
+  queryParams.pageNo = 1
+  queryParams.sessionId = row.id
+  await getList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>
