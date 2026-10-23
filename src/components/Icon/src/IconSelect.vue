@@ -20,9 +20,14 @@ const props = defineProps({
 const emit = defineEmits<{ (e: 'update:modelValue', v: string) }>()
 
 const visible = ref(false)
-const inputValue = toRef(props, 'modelValue')
+// 输入框手动输入时，通过 emit 同步绑定值（props 只读，不能直接修改）
+const inputValue = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val ?? '')
+})
 const iconList = ref(IconJson)
-const icon = ref('add-location')
+// 输入框右侧预览的图标：未选择时展示默认图标
+const previewIcon = computed(() => props.modelValue || 'ep:add-location')
 const currentActiveType = ref('ep:')
 // 深拷贝图标数据，前端做搜索
 const copyIconList = cloneDeep(iconList.value)
@@ -48,25 +53,17 @@ const tabsList = [
   }
 ]
 
+// 当前分类下，按搜索条件过滤后的图标
+const filterIconList = computed<string[]>(() => {
+  const keyword = filterValue.value.trim().toLowerCase()
+  return (copyIconList[currentActiveType.value] ?? []).filter((v) => v.includes(keyword))
+})
 const pageList = computed(() => {
-  if (currentPage.value === 1) {
-    return copyIconList[currentActiveType.value]
-      ?.filter((v) => v.includes(filterValue.value))
-      .slice(currentPage.value - 1, pageSize.value)
-  } else {
-    return copyIconList[currentActiveType.value]
-      ?.filter((v) => v.includes(filterValue.value))
-      .slice(
-        pageSize.value * (currentPage.value - 1),
-        pageSize.value * (currentPage.value - 1) + pageSize.value
-      )
-  }
+  const start = pageSize.value * (currentPage.value - 1)
+  return filterIconList.value.slice(start, start + pageSize.value)
 })
-const iconCount = computed(() => {
-  return copyIconList[currentActiveType.value] == undefined
-    ? 0
-    : copyIconList[currentActiveType.value].length
-})
+// 分页总数使用过滤后的数量，避免搜索后出现空白页
+const iconCount = computed(() => filterIconList.value.length)
 
 const iconItemStyle = computed((): ParameterCSSProperties => {
   return (item) => {
@@ -79,15 +76,13 @@ const iconItemStyle = computed((): ParameterCSSProperties => {
   }
 })
 
+// 切换分类只切换展示的图标，不修改绑定值
 function handleClick({ props }) {
   currentPage.value = 1
   currentActiveType.value = props.name
-  emit('update:modelValue', currentActiveType.value + iconList.value[currentActiveType.value][0])
-  icon.value = iconList.value[currentActiveType.value][0]
 }
 
 function onChangeIcon(item) {
-  icon.value = item
   emit('update:modelValue', currentActiveType.value + item)
   visible.value = false
 }
@@ -97,21 +92,29 @@ function onCurrentChange(page) {
 }
 
 function clearIcon() {
-  icon.value = ''
   emit('update:modelValue', '')
   visible.value = false
 }
 
+// 绑定值变化（含编辑回显）时，定位到所属分类及所在页
 watch(
   () => {
     return props.modelValue
   },
   () => {
-    if (props.modelValue && props.modelValue.indexOf(':') >= 0) {
-      currentActiveType.value = props.modelValue.substring(0, props.modelValue.indexOf(':') + 1)
-      icon.value = props.modelValue.substring(props.modelValue.indexOf(':') + 1)
+    const index = props.modelValue ? props.modelValue.indexOf(':') : -1
+    if (index < 0) {
+      return
     }
-  }
+    const type = props.modelValue!.substring(0, index + 1)
+    if (!tabsList.some((tab) => tab.name === type)) {
+      return
+    }
+    currentActiveType.value = type
+    const iconIndex = filterIconList.value.indexOf(props.modelValue!.substring(index + 1))
+    currentPage.value = iconIndex >= 0 ? Math.floor(iconIndex / pageSize.value) + 1 : 1
+  },
+  { immediate: true }
 )
 watch(
   () => {
@@ -133,6 +136,7 @@ watch(
     >
       <template #append>
         <ElPopover
+          :persistent="false"
           :popper-options="{
             placement: 'auto'
           }"
@@ -146,7 +150,7 @@ watch(
               class="h-32px w-40px flex cursor-pointer items-center justify-center"
               @click="visible = !visible"
             >
-              <Icon :icon="currentActiveType + icon" />
+              <Icon :icon="previewIcon" />
             </div>
           </template>
 
@@ -160,21 +164,24 @@ watch(
               :label="pane.label"
               :name="pane.name"
             >
-              <ElDivider border-style="dashed" class="tab-divider" />
-              <ElScrollbar height="220px">
-                <ul class="ml-2 flex flex-wrap">
-                  <li
-                    v-for="(item, key) in pageList"
-                    :key="key"
-                    :style="iconItemStyle(item)"
-                    :title="item"
-                    class="icon-item mr-2 mt-1 w-1/10 flex cursor-pointer items-center justify-center border border-solid p-2"
-                    @click="onChangeIcon(item)"
-                  >
-                    <Icon :icon="currentActiveType + item" />
-                  </li>
-                </ul>
-              </ElScrollbar>
+              <!-- 各 tab 共用同一份分页数据，只渲染当前 tab，避免重复渲染图标 -->
+              <template v-if="pane.name === currentActiveType">
+                <ElDivider border-style="dashed" class="tab-divider" />
+                <ElScrollbar height="220px">
+                  <ul class="ml-2 flex flex-wrap">
+                    <li
+                      v-for="(item, key) in pageList"
+                      :key="key"
+                      :style="iconItemStyle(item)"
+                      :title="item"
+                      class="icon-item mr-2 mt-1 w-1/10 flex cursor-pointer items-center justify-center border border-solid p-2"
+                      @click="onChangeIcon(item)"
+                    >
+                      <Icon :icon="currentActiveType + item" />
+                    </li>
+                  </ul>
+                </ElScrollbar>
+              </template>
             </ElTabPane>
           </ElTabs>
           <ElDivider border-style="dashed" />
