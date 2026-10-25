@@ -2,8 +2,12 @@
 import { Editor, Toolbar } from '@wangeditor-next/editor-for-vue'
 import { IDomEditor } from '@wangeditor-next/editor'
 import MentionModal from './MentionModal.vue'
+import { setupWangEditorPlugin } from '@/views/bpm/model/form/PrintTemplate'
 
 const emit = defineEmits(['confirm'])
+
+// wangEditor 插件注册（流程记录、@mention）：需在创建编辑器之前完成
+setupWangEditorPlugin()
 
 // @mention 相关
 const isShowModal = ref(false)

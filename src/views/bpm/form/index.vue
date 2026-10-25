@@ -110,8 +110,11 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
+import { useFormCreate } from '@/plugins/formCreate'
 
 defineOptions({ name: 'BpmForm' })
+
+useFormCreate() // 按需安装 form-create，需在渲染表单之前
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

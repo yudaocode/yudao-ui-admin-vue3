@@ -576,6 +576,7 @@
 <script lang="ts" setup>
 import { getCurrentUserId } from '@/utils/auth'
 import { setConfAndFields2 } from '@/utils/formCreate'
+import { useFormCreate } from '@/plugins/formCreate'
 import * as TaskApi from '@/api/bpm/task'
 import * as CommentApi from '@/api/bpm/comment'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
@@ -595,6 +596,8 @@ import { isEmpty } from '@/utils/is'
 import { UploadFile } from '@/components/UploadFile'
 
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
+
+useFormCreate() // 按需安装 form-create，需在渲染表单之前
 
 const router = useRouter() // 路由
 const message = useMessage() // 消息弹窗

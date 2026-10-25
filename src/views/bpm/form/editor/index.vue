@@ -50,9 +50,12 @@ import FcDesigner from '@form-create/designer'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/formCreate'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useFormCreateDesigner } from '@/components/FormCreate'
+import { useFcDesigner } from '@/plugins/formCreate/designer'
 import { useRoute } from 'vue-router'
 
 defineOptions({ name: 'BpmFormEditor' })
+
+useFcDesigner() // 按需安装表单设计器，需在渲染设计器之前
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息

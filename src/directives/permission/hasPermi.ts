@@ -1,5 +1,5 @@
 import type { App } from 'vue'
-import { useUserStore } from '@/store/modules/user'
+import { useUserStoreWithOut } from '@/store/modules/user'
 
 const { t } = useI18n() // 国际化
 
@@ -21,7 +21,8 @@ export function hasPermi(app: App<Element>) {
 }
 
 /** 判断权限的方法 function */
-const userStore = useUserStore()
+// 模块求值早于 setupStore，需显式传入 store
+const userStore = useUserStoreWithOut()
 const all_permission = '*:*:*'
 export const hasPermission = (permission: string[]) => {
   return (

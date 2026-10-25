@@ -143,6 +143,7 @@ import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { BpmModelType, BpmModelFormType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
+import { useFormCreate } from '@/plugins/formCreate'
 import { registerComponent } from '@/utils/routerHelper'
 import type { Api as FormCreateApi } from '@form-create/element-ui'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
@@ -162,6 +163,7 @@ import cancelSvg from '@/assets/svgs/bpm/cancel.svg'
 import PrintDialog from './PrintDialog.vue'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
+useFormCreate() // 按需安装 form-create，需在渲染表单之前
 const props = defineProps<{
   id: string // 流程实例的编号
   taskId?: string // 任务编号

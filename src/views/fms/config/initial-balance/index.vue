@@ -266,6 +266,7 @@ import download from '@/utils/download'
 import { FMS_DEBIT_CREDIT_DIRECTION, FMS_SUBJECT_TYPE } from '@/views/fms/utils/constants'
 import { formatAmount, formatQuantity } from '@/views/fms/utils/format'
 import dayjs from 'dayjs'
+import { ElInputNumber } from 'element-plus'
 import FmsInitialAssistForm from './FmsInitialAssistForm.vue'
 import FmsInitialBalanceImportForm from './FmsInitialBalanceImportForm.vue'
 import FmsTrialBalanceDialog from './FmsTrialBalanceDialog.vue'
@@ -313,7 +314,7 @@ const AmountInput = defineComponent({
   emits: ['update:modelValue', 'change'],
   setup(props, { emit }) {
     return () =>
-      h(resolveComponent('ElInputNumber'), {
+      h(ElInputNumber, {
         modelValue: props.modelValue,
         'onUpdate:modelValue': (value: number | undefined) => emit('update:modelValue', value || 0),
         controls: false,
