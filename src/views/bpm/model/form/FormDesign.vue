@@ -84,8 +84,11 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
+import { useFormCreate } from '@/plugins/formCreate'
 import { BpmModelFormType } from '@/utils/constants'
 import type { Rule } from '@form-create/element-ui'
+
+useFormCreate() // 按需安装 form-create，需在渲染表单之前
 
 defineProps<{
   formList: FormApi.FormVO[]

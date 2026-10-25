@@ -90,8 +90,10 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
 import formCreate from '@form-create/element-ui'
+import { useFormCreate } from '@/plugins/formCreate'
 
 defineOptions({ name: 'ProcessDefinitionDetail' })
+useFormCreate() // 按需安装 form-create，需在渲染表单之前
 const props = defineProps<{
   selectProcessDefinition: any
 }>()

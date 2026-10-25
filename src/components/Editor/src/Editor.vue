@@ -8,8 +8,12 @@ import { ElMessage } from 'element-plus'
 import { useLocaleStore } from '@/store/modules/locale'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
 import merge from 'lodash-es/merge'
+import { setupWangEditorPlugin } from '@/views/bpm/model/form/PrintTemplate'
 
 defineOptions({ name: 'Editor' })
+
+// wangEditor 插件注册：需在创建编辑器之前完成
+setupWangEditorPlugin()
 
 type InsertFnType = (url: string, alt: string, href: string) => void
 

@@ -38,8 +38,11 @@ import 'highlight.js/styles/github.css' // 导入代码高亮样式
 import xml from 'highlight.js/lib/languages/java'
 import json from 'highlight.js/lib/languages/json'
 import formCreate from '@form-create/element-ui'
+import { useFcDesigner } from '@/plugins/formCreate/designer'
 
 defineOptions({ name: 'InfraBuild' })
+
+useFcDesigner() // 按需安装表单设计器，需在渲染设计器之前
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息

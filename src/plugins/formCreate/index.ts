@@ -1,4 +1,5 @@
 import type { App } from 'vue'
+import { getCurrentInstance } from 'vue'
 // 👇使用 form-create 需额外全局引入 element plus 组件
 import {
   // ElAutocomplete,
@@ -59,9 +60,10 @@ import {
   // ElFormItem,
   // ElOption
 } from 'element-plus'
-import FcDesigner from '@form-create/designer'
 import formCreate from '@form-create/element-ui'
 import install from '@form-create/element-ui/auto-import'
+// 设计器提供的签名、表格表单等组件（FcEditor、FcTitle、SignaturePad、TableForm、FcTable），渲染设计器生成的表单需要，无需加载整个设计器
+import '@form-create/designer/dist/components.es.js'
 
 //======================= 自定义组件 =======================
 import { UploadFile, UploadImg, UploadImgs } from '@/components/UploadFile'
@@ -123,12 +125,30 @@ const components = [
   ElCard
 ]
 
+formCreate.use(install)
+
+const installedApps = new WeakSet<App>() // 已安装 form-create 的应用
+
 // 参考 http://www.form-create.com/v3/element-ui/auto-import.html 文档
-export const setupFormCreate = (app: App<Element>) => {
+export const setupFormCreate = (app: App) => {
+  if (installedApps.has(app)) {
+    return
+  }
+  installedApps.add(app)
   components.forEach((component) => {
     app.component(component.name!, component)
   })
-  formCreate.use(install)
   app.use(formCreate)
-  app.use(FcDesigner)
+}
+
+/**
+ * 按需安装 form-create：在使用 <form-create /> 的组件 setup 中同步调用，保证渲染表单前已注册
+ *
+ * 注意：不在 main.ts 启动时安装，避免 form-create 进入登录、普通列表等首屏
+ */
+export const useFormCreate = () => {
+  const instance = getCurrentInstance()
+  if (instance) {
+    setupFormCreate(instance.appContext.app)
+  }
 }

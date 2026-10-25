@@ -292,6 +292,7 @@ import { formatDate } from '@/utils/formatTime'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
+import { useFormCreate } from '@/plugins/formCreate'
 import { BpmModelFormType } from '@/utils/constants'
 import { checkPermi } from '@/utils/permission'
 import { getCurrentUserId } from '@/utils/auth'
@@ -302,6 +303,8 @@ import { subString } from '@/utils/index'
 import download from '@/utils/download'
 
 defineOptions({ name: 'BpmModel' })
+
+useFormCreate() // 按需安装 form-create，需在渲染表单之前
 
 // 优化 Props 类型定义
 interface UserInfo {

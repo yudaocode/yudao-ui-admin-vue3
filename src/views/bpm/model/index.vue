@@ -107,8 +107,11 @@ import CategoryForm from '../category/CategoryForm.vue'
 import { cloneDeep } from 'lodash-es'
 import CategoryDraggableModel from './CategoryDraggableModel.vue'
 import ModelImportForm from './ModelImportForm.vue'
+import { useFormCreate } from '@/plugins/formCreate'
 
 defineOptions({ name: 'BpmModel' })
+
+useFormCreate() // 按需安装 form-create，需在渲染表单之前
 
 const { push } = useRouter()
 const message = useMessage() // 消息弹窗

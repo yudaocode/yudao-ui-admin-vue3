@@ -98,10 +98,13 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { setConfAndFields2 } from '@/utils/formCreate'
+import { useFormCreate } from '@/plugins/formCreate'
 import { DICT_TYPE } from '@/utils/dict'
 import { BpmModelFormType } from '@/utils/constants'
 
 defineOptions({ name: 'BpmProcessDefinition' })
+
+useFormCreate() // 按需安装 form-create，需在渲染表单之前
 
 const { push } = useRouter() // 路由
 const { query } = useRoute() // 查询参数
