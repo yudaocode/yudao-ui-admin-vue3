@@ -102,6 +102,8 @@
   "i18n-ally.sourceLanguage": "en",
   "i18n-ally.displayLanguage": "zh-CN",
   "i18n-ally.enabledFrameworks": ["vue", "react"],
+  // i18n Ally 用 ts-node 隔离加载语言文件，需显式 rootDir，避免 TS5011
+  "i18n-ally.parsers.typescript.compilerOptions": { "rootDir": "./" },
   "cSpell.words": [
     "xingyu",
     "yudao",
