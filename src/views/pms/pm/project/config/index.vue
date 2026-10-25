@@ -43,6 +43,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProjectApi from '@/api/pms/pm/project'
 import { PmsProjectStatus } from '@/views/pms/pm/utils/constants'
@@ -62,7 +64,7 @@ const { delView } = useTagsViewStore() // 页签视图操作
 const loading = ref(false) // 项目设置加载中
 const project = ref<ProjectApi.PmsProjectVO>({} as ProjectApi.PmsProjectVO) // 项目详情
 const activeTab = ref<ProjectConfigTab>('basic') // 当前配置页签
-const projectId = computed(() => Number(route.params.id)) // 当前项目编号
+const projectId = computed(() => parseId(route.params.id) as number) // 当前项目编号
 const editable = computed(
   () => project.value.writeStatus && project.value.status === PmsProjectStatus.ACTIVE
 ) // 当前项目是否允许编辑
@@ -104,7 +106,7 @@ function close() {
 
 /** 初始化 */
 onMounted(() => {
-  if (!projectId.value || Number.isNaN(projectId.value)) {
+  if (!projectId.value) {
     message.warning('参数错误，项目不能为空！')
     close()
     return

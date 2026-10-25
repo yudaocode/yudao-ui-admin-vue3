@@ -63,6 +63,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import { ProRouteProductBomApi, ProRouteProductBomVO } from '@/api/mes/pro/route/productbom'
 import { ProRouteProcessApi } from '@/api/mes/pro/route/process'
 import MdProductBomSelect from '@/views/mes/md/item/components/MdProductBomSelect.vue'
@@ -102,7 +104,7 @@ const getBomList = async () => {
   try {
     bomList.value = await ProRouteProductBomApi.getRouteProductBomList({
       routeId: props.routeId,
-      processId: Number(activeProcessId.value),
+      processId: activeProcessId.value as unknown as number,
       productId: props.productId
     })
   } finally {
@@ -135,7 +137,7 @@ const openForm = (type: string, row?: ProRouteProductBomVO) => {
   if (type === 'create') {
     formData.value = {
       routeId: props.routeId,
-      processId: Number(activeProcessId.value),
+      processId: parseId(activeProcessId.value),
       productId: props.productId,
       quantity: 1
     }

@@ -64,11 +64,13 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { APP_LINK_GROUP_LIST, APP_LINK_TYPE_ENUM, AppLink } from './data'
 import { ButtonInstance, ScrollbarInstance } from 'element-plus'
 import { split } from 'lodash-es'
 import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
-import { getUrlNumberValue } from '@/utils'
+import { getUrlValue } from '@/utils'
 
 // APP 链接选择弹框
 defineOptions({ name: 'AppLinkSelectDialog' })
@@ -115,7 +117,7 @@ const handleAppLinkSelected = (appLink: AppLink) => {
       detailSelectDialog.value.type = appLink.type
       // 返显
       detailSelectDialog.value.id =
-        getUrlNumberValue('id', 'http://127.0.0.1' + activeAppLink.value.path) || undefined
+        parseId(getUrlValue('id', 'http://127.0.0.1' + activeAppLink.value.path)) || undefined
       break
     default:
       break

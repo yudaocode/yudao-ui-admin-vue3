@@ -67,7 +67,7 @@ const imageList = ref<ImageVO[]>([]) // image 列表
 const imageListLoadingInstance = ref<any>() // image 列表是否正在加载中
 const imageListRef = ref<any>() // ref
 // 图片轮询相关的参数（正在生成中的）
-const inProgressImageMap = ref<{}>({}) // 监听的 image 映射，一般是生成中（需要轮询），key 为 image 编号，value 为 image
+const inProgressImageMap = ref<Record<string, ImageVO>>({}) // 监听的 image 映射，一般是生成中（需要轮询），key 为 image 编号，value 为 image
 const inProgressTimer = ref<any>() // 生成中的 image 定时器，轮询生成进展
 // 图片详情相关的参数
 const isShowImageDetail = ref<boolean>(false) // 图片详情是否展示
@@ -121,11 +121,11 @@ const getImageList = async () => {
 
 /** 轮询生成中的 image 列表 */
 const refreshWatchImages = async () => {
-  const imageIds = Object.keys(inProgressImageMap.value).map(Number)
+  const imageIds = Object.values(inProgressImageMap.value).map((image) => image.id)
   if (imageIds.length == 0) {
     return
   }
-  const list = (await ImageApi.getImageListMyByIds(imageIds)) as ImageVO[]
+  const list = await ImageApi.getImageListMyByIds(imageIds)
   const newWatchImages = {}
   list.forEach((image) => {
     if (image.status === AiImageStatusEnum.IN_PROGRESS) {

@@ -12,6 +12,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as SalarySlipSendRecordApi from '@/api/hrm/salary/slip/send-record'
 import { formatHrmYearMonth } from '@/views/hrm/utils/format'
@@ -22,7 +24,7 @@ defineOptions({ name: 'HrmSalarySlipSendRecordDetail' })
 const route = useRoute() // 路由
 const { currentRoute, push } = useRouter() // 路由操作
 const { delView } = useTagsViewStore() // 视图操作
-const recordId = Number(route.params.id) // 发放记录编号
+const recordId = (parseId(route.params.id) as number) // 发放记录编号
 const loading = ref(false) // 详情加载中
 const record = ref<SalarySlipSendRecordApi.SalarySlipSendRecordVO>({}) // 发放记录
 

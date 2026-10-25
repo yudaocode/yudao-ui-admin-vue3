@@ -89,6 +89,8 @@
   <ValueForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { dateFormatter } from '@/utils/formatTime'
 import * as PropertyApi from '@/api/mall/product/property'
 import ValueForm from './ValueForm.vue'
@@ -105,7 +107,7 @@ const list = ref<PropertyApi.PropertyValueVO[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  propertyId: Number(params.propertyId),
+  propertyId: parseId(params.propertyId) as number,
   name: undefined
 })
 const queryFormRef = ref() // 搜索的表单

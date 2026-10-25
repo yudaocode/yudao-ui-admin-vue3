@@ -92,6 +92,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import * as KnowledgeDocumentApi from '@/api/pms/kb/content/document'
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter, defaultShortcuts } from '@/utils/formatTime'
@@ -110,8 +112,8 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   keyword: String(route.query.keyword || ''),
-  libraryId: route.query.libraryId ? Number(route.query.libraryId) : undefined,
-  creatorUserId: route.query.creatorUserId ? Number(route.query.creatorUserId) : undefined,
+  libraryId: route.query.libraryId ? parseId(route.query.libraryId) : undefined,
+  creatorUserId: route.query.creatorUserId ? parseId(route.query.creatorUserId) : undefined,
   updateTime: route.query.updateTime ? String(route.query.updateTime).split(',') : ([] as string[])
 }) // 查询参数
 const queryFormRef = ref() // 查询表单 Ref
@@ -162,8 +164,8 @@ watch(
   () => route.query,
   (query) => {
     queryParams.keyword = String(query.keyword || '')
-    queryParams.libraryId = query.libraryId ? Number(query.libraryId) : undefined
-    queryParams.creatorUserId = query.creatorUserId ? Number(query.creatorUserId) : undefined
+    queryParams.libraryId = query.libraryId ? parseId(query.libraryId) : undefined
+    queryParams.creatorUserId = query.creatorUserId ? parseId(query.creatorUserId) : undefined
     queryParams.updateTime = query.updateTime ? String(query.updateTime).split(',') : []
     queryParams.pageNo = 1
     getList()

@@ -231,6 +231,8 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { TabsPaneContext } from 'element-plus'
 import { createImageViewer } from '@/components/ImageViewer'
 import { dateFormatter } from '@/utils/formatTime'
@@ -392,7 +394,7 @@ const resetQuery = () => {
 /** 新增或修改 */
 const openForm = (id?: number) => {
   // 修改
-  if (typeof id === 'number') {
+  if (id != null) {
     push({ name: 'ProductSpuEdit', params: { id } })
     return
   }
@@ -435,7 +437,7 @@ onActivated(() => {
 onMounted(async () => {
   // 解析路由的 categoryId
   if (route.query.categoryId) {
-    queryParams.value.categoryId = Number(route.query.categoryId)
+    queryParams.value.categoryId = parseId(route.query.categoryId)
   }
   // 获得商品信息
   await getTabsCount()

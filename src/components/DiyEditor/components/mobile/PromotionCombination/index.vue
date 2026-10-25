@@ -116,6 +116,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import { parseId, isIdType } from '@/utils/id'
+
 import { PromotionCombinationProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
@@ -146,7 +148,7 @@ watch(
         spuList.value = []
         spuIdList.value = combinationActivityList.value
           .map((activity) => activity.spuId)
-          .filter((spuId): spuId is number => typeof spuId === 'number')
+          .map(parseId).filter(isIdType)
         if (spuIdList.value.length > 0) {
           spuList.value = await ProductSpuApi.getSpuDetailList(spuIdList.value)
         }

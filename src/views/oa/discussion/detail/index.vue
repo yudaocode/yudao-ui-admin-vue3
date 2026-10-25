@@ -87,6 +87,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import * as DiscussionApi from '@/api/oa/discussion'
 import * as DiscussionLikeApi from '@/api/oa/discussion/like'
 import { formatDate } from '@/utils/formatTime'
@@ -104,7 +106,7 @@ const replyRef = ref<InstanceType<typeof OaDiscussionReply>>() // 回复区域
 
 /** 查询讨论详情，只有进入页面时记录访问 */
 async function getDetail(visit = false) {
-  detail.value = await DiscussionApi.getDiscussion(Number(route.params.id), visit)
+  detail.value = await DiscussionApi.getDiscussion(parseId(route.params.id) as number, visit)
 }
 
 /** 点赞或取消点赞 */

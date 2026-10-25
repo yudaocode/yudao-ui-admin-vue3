@@ -157,6 +157,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { IM_AT_ALL_NICKNAME, IM_AT_ALL_USER_ID } from '@/views/im/utils/constants'
@@ -219,7 +221,7 @@ const openDetail = (row: ManagerGroupMessageApi.ImManagerGroupMessageVO) => {
 onMounted(() => {
   const query = currentRoute.value.query
   if (query.groupId) {
-    queryParams.groupId = Number(query.groupId)
+    queryParams.groupId = parseId(query.groupId)
   }
   getList()
 })

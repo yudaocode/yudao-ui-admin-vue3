@@ -58,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+
 import * as TravelApi from '@/api/oa/travel/reimbursement'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -75,7 +76,7 @@ async function getInfo() {
   if (!props.id) return
   loading.value = true
   try {
-    detail.value = await TravelApi.getTravelReimbursement(Number(props.id))
+    detail.value = await TravelApi.getTravelReimbursement(props.id as number)
   } finally {
     loading.value = false
   }

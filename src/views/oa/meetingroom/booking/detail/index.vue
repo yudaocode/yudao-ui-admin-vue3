@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+
 import * as MeetingRoomBookingApi from '@/api/oa/meetingroom/booking'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -90,7 +91,7 @@ async function getInfo() {
   if (!id) return
   detailLoading.value = true
   try {
-    detailData.value = await MeetingRoomBookingApi.getMeetingRoomBooking(Number(id))
+    detailData.value = await MeetingRoomBookingApi.getMeetingRoomBooking(id as number)
   } finally {
     detailLoading.value = false
   }

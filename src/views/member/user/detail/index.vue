@@ -69,6 +69,8 @@
   <UserForm ref="formRef" @success="getUserData(id)" />
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import * as WalletApi from '@/api/pay/wallet/balance'
 import * as UserApi from '@/api/member/user'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -113,7 +115,7 @@ const getUserData = async (id: number) => {
 const { currentRoute } = useRouter() // 路由
 const { delView } = useTagsViewStore() // 视图操作
 const route = useRoute()
-const id = Number(route.params.id)
+const id = parseId(route.params.id) as number
 /* 用户钱包相关信息 */
 const WALLET_INIT_DATA = {
   balance: 0,

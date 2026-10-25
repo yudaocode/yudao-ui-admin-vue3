@@ -12,6 +12,8 @@
   </el-col>
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceApi } from '@/api/iot/device/device'
 import ProductDetailsHeader from './ProductDetailsHeader.vue'
@@ -28,7 +30,7 @@ const { currentRoute } = useRouter()
 
 const route = useRoute()
 const message = useMessage()
-const id = Number(route.params.id) // 编号
+const id = (parseId(route.params.id) as number) // 编号
 const loading = ref(true) // 加载中
 const product = ref<ProductVO>({} as ProductVO) // 详情
 const activeTab = ref('info') // 默认为 info 标签页

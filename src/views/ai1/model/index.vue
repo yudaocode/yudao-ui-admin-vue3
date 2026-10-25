@@ -140,6 +140,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
@@ -156,7 +158,7 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { params } = useRoute() // 路由参数
 
-const providerId = Number(params.providerId) // 模型供应商编号
+const providerId = (parseId(params.providerId) as number) // 模型供应商编号
 const provider = ref<Provider>() // 模型供应商信息
 const loading = ref(true) // 列表的加载中
 const list = ref<Model[]>([]) // 列表的数据

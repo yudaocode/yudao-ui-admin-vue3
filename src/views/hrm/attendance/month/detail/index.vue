@@ -172,6 +172,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import dayjs from 'dayjs'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -187,7 +189,7 @@ const loading = ref(false) // 详情的加载中
 const detail = ref<AttendanceStatisticsApi.HrmAttendanceMonthDetailVO>() // 月度考勤详情
 const dailyStatusFilter = ref('all') // 每日考勤状态筛选
 const leaveTypeFilter = ref<string>() // 请假类型筛选
-const employeeId = computed(() => Number(route.params.employeeId)) // 员工编号
+const employeeId = computed(() => parseId(route.params.employeeId)) // 员工编号
 const year = computed(() => Number(route.query.year) || dayjs().year()) // 年份
 const month = computed(() => Number(route.query.month) || dayjs().month() + 1) // 月份
 const yearMonth = computed(() => `${year.value}-${String(month.value).padStart(2, '0')}`) // 年月

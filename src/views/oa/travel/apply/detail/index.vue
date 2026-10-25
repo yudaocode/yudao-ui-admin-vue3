@@ -68,6 +68,7 @@
 </template>
 
 <script setup lang="ts">
+
 import * as TravelApi from '@/api/oa/travel/apply'
 import AreaSelect from '@/views/system/area/components/AreaSelect.vue'
 import { DICT_TYPE } from '@/utils/dict'
@@ -86,7 +87,7 @@ async function getInfo() {
   if (!props.id) return
   loading.value = true
   try {
-    detail.value = await TravelApi.getTravelApply(Number(props.id))
+    detail.value = await TravelApi.getTravelApply(props.id as number)
   } finally {
     loading.value = false
   }

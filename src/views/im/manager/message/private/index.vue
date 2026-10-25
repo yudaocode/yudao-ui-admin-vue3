@@ -145,6 +145,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { MESSAGE_PRIVATE_READ_ENABLED } from '@/views/im/utils/config'
@@ -205,10 +207,10 @@ const openDetail = (row: ManagerPrivateMessageApi.ImManagerPrivateMessageVO) => 
 onMounted(() => {
   const query = currentRoute.value.query
   if (query.senderId) {
-    queryParams.senderId = Number(query.senderId)
+    queryParams.senderId = parseId(query.senderId)
   }
   if (query.receiverId) {
-    queryParams.receiverId = Number(query.receiverId)
+    queryParams.receiverId = parseId(query.receiverId)
   }
   getList()
 })

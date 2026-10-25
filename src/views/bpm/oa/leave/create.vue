@@ -63,6 +63,8 @@
   </el-row>
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as LeaveApi from '@/api/bpm/leave'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -235,7 +237,7 @@ onMounted(async () => {
 
   // 如果有业务编号，说明是重新发起，需要加载原有数据
   if (query.id) {
-    await getDetail(Number(query.id))
+    await getDetail(parseId(query.id) as number)
   }
 
   // 审批相关：加载最新的审批详情，主要用于节点预测

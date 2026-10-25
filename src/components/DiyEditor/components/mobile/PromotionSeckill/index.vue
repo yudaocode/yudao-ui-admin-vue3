@@ -116,6 +116,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import { parseId, isIdType } from '@/utils/id'
+
 import { PromotionSeckillProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
@@ -146,7 +148,7 @@ watch(
         spuList.value = []
         spuIdList.value = seckillActivityList.value
           .map((activity) => activity.spuId)
-          .filter((spuId): spuId is number => typeof spuId === 'number')
+          .map(parseId).filter(isIdType)
         if (spuIdList.value.length > 0) {
           spuList.value = await ProductSpuApi.getSpuDetailList(spuIdList.value)
         }

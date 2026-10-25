@@ -40,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+
 import * as VehicleReturnApi from '@/api/oa/vehicle/return'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -60,7 +61,7 @@ async function getInfo() {
   detailData.value = { fileUrls: [] }
   try {
     // 查询申请详情，BPM 通过业务编号传入 id
-    detailData.value = await VehicleReturnApi.getVehicleReturn(Number(id))
+    detailData.value = await VehicleReturnApi.getVehicleReturn(id as number)
   } finally {
     detailLoading.value = false
   }

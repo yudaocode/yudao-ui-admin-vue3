@@ -1,3 +1,4 @@
+import { compareId, parseId } from '@/utils/id'
 import type { DbClient } from './db'
 
 /**
@@ -49,6 +50,9 @@ export async function runIncrementalPull<T extends PullRecord>(
   apply: (records: T[]) => boolean | Promise<boolean>
 ): Promise<void> {
   const storedCursor = await getPullCursor(db, cursorKey)
+  if (storedCursor.lastId != null && parseId(storedCursor.lastId) === undefined) {
+    throw new Error('无效的消息游标')
+  }
   const highWater = { ...storedCursor }
   let cursor =
     storedCursor.lastUpdateTime != null
@@ -73,9 +77,9 @@ export async function runIncrementalPull<T extends PullRecord>(
       cursor = { lastUpdateTime: last.updateTime, lastId: last.id }
       if (
         highWater.lastUpdateTime == null ||
-        cursor.lastUpdateTime > highWater.lastUpdateTime ||
-        (cursor.lastUpdateTime === highWater.lastUpdateTime &&
-          cursor.lastId > (highWater.lastId ?? 0))
+        last.updateTime > highWater.lastUpdateTime ||
+        (last.updateTime === highWater.lastUpdateTime &&
+          compareId(cursor.lastId, (highWater.lastId ?? 0)) > 0)
       ) {
         highWater.lastUpdateTime = cursor.lastUpdateTime
         highWater.lastId = cursor.lastId
@@ -113,7 +117,10 @@ export async function runMinIdPull<T extends { id?: number }>(options: {
 }): Promise<void> {
   const { initialMinId, pageSize, fetchPage, applyPage, isActive } = options
   const maxPages = options.maxPages ?? MIN_ID_PULL_MAX_PAGES
-  let minId = initialMinId || 0
+  let minId = parseId(initialMinId ?? 0)
+  if (minId === undefined) {
+    throw new Error('无效的消息游标')
+  }
   for (let page = 0; page < maxPages; page++) {
     if (isActive && !isActive()) {
       return
@@ -128,16 +135,26 @@ export async function runMinIdPull<T extends { id?: number }>(options: {
     }
     // 本批最大消息 id 作为下次游标；无有效 id 则本批 apply 后停（无法继续翻页）
     const validIds = list.map((record) => record.id).filter((id): id is number => id != null)
-    const nextMinId = validIds.length > 0 ? Math.max(...validIds) : undefined
+    const nextMinId = validIds.length > 0 ? maxImId(...validIds) : undefined
     // applyPage 返回 false：本页未落地（如入库失败），不推进游标并终止，避免漏消息
     if ((await applyPage(list, nextMinId)) === false) {
       return
     }
     // 无有效 id，或游标没前进（后端契约是 id > minId，理论不会出现）：停，防御死翻
-    if (nextMinId == null || nextMinId <= minId) {
+    if (nextMinId == null || compareId(nextMinId, minId) <= 0) {
       return
     }
     minId = nextMinId
   }
   console.warn('[IM pull] runMinIdPull 达到单轮翻页上限，提前结束本轮')
+}
+
+/** 获取最大的消息 ID */
+export function maxImId(...ids: (number | string | null | undefined)[]): number {
+  return ids.reduce<number>((max, id) => {
+    if (id == null) return max
+    const current = parseId(id)
+    if (current === undefined) throw new Error('无效的消息 ID')
+    return compareId(current, max) > 0 ? current : max
+  }, 0)
 }

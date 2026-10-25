@@ -83,6 +83,8 @@
 </template>
 
 <script lang="ts" setup>
+import { isPositiveId, parseId } from '@/utils/id'
+
 import * as KnowledgeDocumentApi from '@/api/pms/kb/content/document'
 import * as KnowledgeDocumentLabelApi from '@/api/pms/kb/content/document/label'
 import * as KnowledgeFolderApi from '@/api/pms/kb/content/folder'
@@ -112,7 +114,7 @@ defineOptions({ name: 'PmsKnowledgeLibraryDetail' })
 const route = useRoute() // 当前路由
 const router = useRouter() // 路由
 const message = useMessage() // 消息弹窗
-const libraryId = computed(() => Number(route.params.libraryId)) // 知识库编号
+const libraryId = computed(() => parseId(route.params.libraryId) as number) // 知识库编号
 const loading = ref(false) // 页面加载中
 const activeView = ref<KnowledgeContentView>('home') // 当前右侧内容
 const library = ref<KnowledgeLibraryApi.PmsKnowledgeLibraryVO>() // 知识库详情
@@ -191,16 +193,16 @@ async function getRouteContent() {
   // 切换知识库时，由页面数据查询统一加载内容
   if (library.value?.id !== libraryId.value) return
   // 打开指定文档
-  const documentId = Number(route.params.documentId)
-  if (Number.isFinite(documentId) && documentId > 0) {
+  const documentId = parseId(route.params.documentId)
+  if (isPositiveId(documentId)) {
     selectedDocument.value = await KnowledgeDocumentApi.getKnowledgeDocument(documentId, true)
     selectedFolder.value = undefined
     activeView.value = 'document'
     return
   }
   // 打开指定文件夹
-  const folderId = Number(route.params.folderId)
-  if (Number.isFinite(folderId) && folderId > 0) {
+  const folderId = parseId(route.params.folderId)
+  if (isPositiveId(folderId)) {
     selectedFolder.value = await KnowledgeFolderApi.getKnowledgeFolder(folderId, true)
     selectedDocument.value = undefined
     activeView.value = 'folder'

@@ -204,6 +204,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
@@ -249,7 +251,7 @@ const queryParams = reactive({
   iterationIds: [] as number[],
   excludedIterationIds: [] as number[],
   assigneeUserIds: route.query.assigneeUserId
-    ? [Number(route.query.assigneeUserId)]
+    ? [parseId(route.query.assigneeUserId) as number]
     : ([] as number[]),
   labelIds: [] as number[],
   unplannedOnly: false,

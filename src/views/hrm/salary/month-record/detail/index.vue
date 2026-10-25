@@ -12,6 +12,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId, isPositiveId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as SalaryMonthRecordApi from '@/api/hrm/salary/month-record'
 import { HrmSalaryMonthStatus } from '@/views/hrm/utils/constants'
@@ -24,7 +26,7 @@ const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
 const { currentRoute, push } = useRouter() // 路由操作
 const { delView } = useTagsViewStore() // 视图操作
-const recordId = Number(route.params.id) // 月度工资表编号
+const recordId = (parseId(route.params.id) as number) // 月度工资表编号
 const loading = ref(true) // 详情加载中
 const record = ref<SalaryMonthRecordApi.SalaryMonthRecordVO>({}) // 月度工资表
 
@@ -52,7 +54,7 @@ async function getRecord() {
 
 /** 初始化 */
 onMounted(async () => {
-  if (!Number.isSafeInteger(recordId) || recordId <= 0) {
+  if (!isPositiveId(recordId)) {
     message.warning('参数错误，历史工资表不能为空！')
     close()
     return

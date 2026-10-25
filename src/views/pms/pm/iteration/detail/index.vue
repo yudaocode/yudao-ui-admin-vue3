@@ -239,6 +239,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import type { EChartsOption } from 'echarts'
 import * as IterationApi from '@/api/pms/pm/iteration'
 import * as ProjectApi from '@/api/pms/pm/project'
@@ -487,7 +489,7 @@ onMounted(async () => {
   loading.value = true
   try {
     // 1. 查询迭代及所属项目
-    iteration.value = await IterationApi.getIteration(Number(route.params.id))
+    iteration.value = await IterationApi.getIteration(parseId(route.params.id) as number)
     project.value = await ProjectApi.getProject(iteration.value.projectId)
     // 2. 加载迭代统计和事项
     await loadData()

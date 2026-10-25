@@ -37,6 +37,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import * as OvertimeApplyApi from '@/api/oa/overtime'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -51,11 +53,11 @@ const detailData = ref<OvertimeApplyApi.OvertimeApplyVO>({}) // 详情数据
 
 /** 查询详情 */
 async function getInfo() {
-  const id = props.id || route.params.id || route.query.id
+  const id = parseId(props.id || route.params.id || route.query.id)
   if (!id) return
   detailLoading.value = true
   try {
-    detailData.value = await OvertimeApplyApi.getOvertimeApply(Number(id))
+    detailData.value = await OvertimeApplyApi.getOvertimeApply(id)
   } finally {
     detailLoading.value = false
   }

@@ -153,6 +153,8 @@
 </template>
 
 <script setup lang="ts">
+import { isPositiveId, parseId } from '@/utils/id'
+
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { WmWarehouseLocationApi } from '@/api/mes/wm/warehouse/location'
@@ -195,8 +197,8 @@ const queryFormRef = ref() // 查询表单 Ref
 
 /** 加载库区上下文（从 URL query 参数获取 locationId，并加载库区和仓库名称） */
 const loadLocationContext = async () => {
-  const locationId = Number(route.query.locationId)
-  if (!Number.isInteger(locationId) || locationId <= 0) {
+  const locationId = parseId(route.query.locationId)
+  if (!isPositiveId(locationId)) {
     return
   }
   currentLocation.value.id = locationId

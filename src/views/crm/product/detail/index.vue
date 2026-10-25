@@ -12,6 +12,8 @@
   </el-col>
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { OperateLogVO } from '@/api/system/operatelog'
 import * as ProductApi from '@/api/crm/product'
@@ -24,7 +26,7 @@ defineOptions({ name: 'CrmProductDetail' })
 
 const route = useRoute()
 const message = useMessage()
-const id = Number(route.params.id) // 编号
+const id = (parseId(route.params.id) as number) // 编号
 const loading = ref(true) // 加载中
 const product = ref<ProductApi.ProductVO>({} as ProductApi.ProductVO) // 详情
 

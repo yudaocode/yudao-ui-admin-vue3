@@ -495,6 +495,8 @@
 </template>
 
 <script lang="ts" setup>
+import { isIdType, parseId, isPositiveId } from '@/utils/id'
+
 import dayjs from 'dayjs'
 import { FmsAuxiliaryItemApi } from '@/api/fms/config/auxiliary/item'
 import type { FmsAuxiliaryItemOptionVO } from '@/api/fms/config/auxiliary/item'
@@ -620,10 +622,10 @@ const canSaveAndCreate = computed(() => canSave.value && checkPermi(['fms:vouche
 const voucherIds = computed(() =>
   String(route.query.ids || '')
     .split(',')
-    .map(Number)
-    .filter((id) => id > 0)
+    .map(parseId).filter(isIdType)
+    .filter(isPositiveId)
 ) // 当前列表凭证编号数组
-const currentVoucherIndex = computed(() => voucherIds.value.indexOf(Number(route.query.id || 0))) // 当前凭证索引
+const currentVoucherIndex = computed(() => voucherIds.value.indexOf(parseId(route.query.id || 0) as number)) // 当前凭证索引
 const previousVoucherId = computed(() =>
   currentVoucherIndex.value > 0 ? voucherIds.value[currentVoucherIndex.value - 1] : undefined
 ) // 上一张凭证编号
@@ -670,15 +672,16 @@ async function init() {
     voucherWords.value = wordList
     subjects.value = handleTree(subjectList)
     auxiliaryTypes.value = auxiliaryTypeList
-    Object.keys(auxiliaryOptions).forEach((key) => delete auxiliaryOptions[Number(key)])
+    Object.keys(auxiliaryOptions).forEach((key) => delete auxiliaryOptions[key])
     currentMonth.value = accountingMonth || dayjs().format('YYYY-MM')
 
     // 根据路由加载详情、复制来源或空白凭证
-    const voucherId = Number(route.query.id || 0)
+    const voucherId = parseId(route.query.id || 0)
+    const copyFromId = parseId(route.query.copyFrom || 0)
     if (voucherId) {
       await loadDetail(voucherId)
-    } else if (Number(route.query.copyFrom || 0)) {
-      await initializeCopiedVoucher(Number(route.query.copyFrom))
+    } else if (copyFromId) {
+      await initializeCopiedVoucher(copyFromId)
     } else {
       await resetForm(false)
     }
@@ -1318,7 +1321,7 @@ async function submitForm(saveAndCreate: boolean) {
     // 根据保存方式进入空白凭证或回显当前凭证
     if (saveAndCreate) {
       await resetForm()
-    } else if (Number(route.query.id) === voucherId) {
+    } else if (parseId(route.query.id) === voucherId) {
       await loadDetail(voucherId)
     } else {
       await router.replace({

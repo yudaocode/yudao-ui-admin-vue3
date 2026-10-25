@@ -94,6 +94,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import * as KnowledgeDocumentApi from '@/api/pms/kb/content/document'
 import * as KnowledgeDocumentLabelApi from '@/api/pms/kb/content/document/label'
 import { dateFormatter } from '@/utils/formatTime'
@@ -108,7 +110,7 @@ const loading = ref(false) // 文档列表加载中
 const labelList = ref<KnowledgeDocumentLabelApi.PmsKnowledgeDocumentLabelVO[]>([]) // 标签列表
 const labelKeyword = ref('') // 标签关键字
 const selectedLabelId = ref<number | undefined>(
-  route.query.labelId ? Number(route.query.labelId) : undefined
+  route.query.labelId ? parseId(route.query.labelId) : undefined
 ) // 当前标签编号
 const documentList = ref<KnowledgeDocumentApi.PmsKnowledgeDocumentVO[]>([]) // 文档列表
 const total = ref(0) // 文档总数
@@ -188,7 +190,7 @@ onMounted(() => {
 watch(
   () => route.query.labelId,
   (labelId) => {
-    selectedLabelId.value = labelId ? Number(labelId) : undefined
+    selectedLabelId.value = labelId ? parseId(labelId) : undefined
     getDocumentList()
   }
 )

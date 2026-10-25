@@ -104,6 +104,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProjectApi from '@/api/pms/pm/project'
 import * as ProjectFavoriteApi from '@/api/pms/pm/project/favorite'
@@ -159,7 +161,7 @@ async function getProject() {
   loading.value = true
   try {
     // 1. 查询项目详情
-    project.value = await ProjectApi.getProject(Number(route.params.id))
+    project.value = await ProjectApi.getProject(parseId(route.params.id) as number)
     // 2. 初始化当前业务页签
     initActiveTab()
   } finally {
@@ -240,7 +242,7 @@ function close() {
 
 /** 初始化 */
 onMounted(() => {
-  if (!route.params.id || Number.isNaN(Number(route.params.id))) {
+  if (!route.params.id || parseId(route.params.id) === undefined) {
     message.warning('参数错误，项目不能为空！')
     close()
     return

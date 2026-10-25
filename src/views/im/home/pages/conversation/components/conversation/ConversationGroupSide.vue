@@ -450,6 +450,8 @@
 </template>
 
 <script lang="ts" setup>
+import { compareId } from '@/utils/id'
+
 import { computed, ref, watch } from 'vue'
 import Icon from '@/components/Icon/src/Icon.vue'
 import { useMessage } from '@/hooks/web/useMessage'
@@ -549,7 +551,7 @@ const visibleMembers = computed(() => {
     .sort((a, b) => {
       const roleA = a.role ?? ImGroupMemberRole.NORMAL
       const roleB = b.role ?? ImGroupMemberRole.NORMAL
-      return roleA !== roleB ? roleA - roleB : a.userId - b.userId
+      return roleA !== roleB ? roleA - roleB : compareId(a.userId, b.userId)
     })
 })
 

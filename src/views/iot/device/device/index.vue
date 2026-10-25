@@ -372,6 +372,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
@@ -525,7 +527,7 @@ onMounted(async () => {
   // 处理 productId 参数
   const { productId } = route.query
   if (productId) {
-    queryParams.productId = Number(productId)
+    queryParams.productId = parseId(productId)
   }
   await getList()
 

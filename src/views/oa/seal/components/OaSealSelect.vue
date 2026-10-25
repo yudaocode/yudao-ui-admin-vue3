@@ -20,6 +20,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import * as SealApplyApi from '@/api/oa/seal/apply'
 import type { SealVO } from '@/api/oa/seal'
 
@@ -62,7 +64,7 @@ const options = computed(() => {
 /** 选中变化 */
 function handleChange(value: unknown) {
   currentSeal.value = options.value.find((seal) => seal.id === value)
-  emit('update:modelValue', typeof value === 'number' ? value : undefined)
+  emit('update:modelValue', parseId(value))
 }
 
 /** 查询可申请的印章 */

@@ -226,6 +226,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import * as FormApi from '@/api/bpm/form'
 
 defineOptions({ name: 'ElementForm' })
@@ -285,7 +287,7 @@ const updateElementExtensions = () => {
 const formList = ref<Array<{ id: number; name: string }>>([]) // 流程表单的下拉框的数据
 onMounted(async () => {
   formList.value = await FormApi.getFormSimpleList()
-  formKey.value = formKey.value != null ? Number(formKey.value) : undefined
+  formKey.value = formKey.value != null ? parseId(formKey.value) : undefined
 })
 
 watch(

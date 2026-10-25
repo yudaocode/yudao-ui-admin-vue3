@@ -101,6 +101,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DICT_TYPE } from '@/utils/dict'
 import * as PerformanceAssessmentApi from '@/api/hrm/performance/assessment'
@@ -113,7 +115,7 @@ const { t } = useI18n() // 国际化
 const route = useRoute() // 当前路由
 const { currentRoute, push } = useRouter() // 路由操作
 const { delView } = useTagsViewStore() // 页签操作
-const employeeId = Number(route.params.employeeId) // 员工编号
+const employeeId = (parseId(route.params.employeeId) as number) // 员工编号
 const loading = ref(false) // 加载中
 const total = ref(0) // 列表总数
 const list = ref<PerformanceAssessmentApi.PerformanceAssessmentVO[]>([]) // 列表数据

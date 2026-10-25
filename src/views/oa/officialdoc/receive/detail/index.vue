@@ -88,6 +88,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import * as ReceiveApi from '@/api/oa/officialdoc/receive'
 import { DICT_TYPE } from '@/utils/dict'
 import { BpmProcessInstanceStatus } from '@/utils/constants'
@@ -104,7 +106,7 @@ const detail = ref<ReceiveApi.OfficialDocReceiveVO>({}) // 公文详情
 
 /** 查询详情 */
 async function getInfo() {
-  const id = Number(props.id || route.query.id)
+  const id = parseId(props.id || route.query.id)
   if (!id) return
   loading.value = true
   try {

@@ -1,3 +1,4 @@
+import { parseId } from '@/utils/id'
 import { computed, ref, shallowRef } from 'vue'
 import {
   Room,
@@ -263,10 +264,10 @@ export function useLiveKitRoom() {
     return () => participantDisconnectedHandlers.delete(cb)
   }
 
-  /** identity 是后端签 token 时塞的 userId 字符串，转 number 返回；非数字（兼容性兜底）返回 null */
+  /** identity 是后端签 token 时使用的 userId 字符串，保留大 ID；非数字（兼容性兜底）返回 null */
   function parseUserId(identity: string): number | null {
-    const id = Number(identity)
-    return Number.isNaN(id) ? null : id
+    const id = parseId(identity)
+    return id === undefined ? null : id
   }
 
   /**

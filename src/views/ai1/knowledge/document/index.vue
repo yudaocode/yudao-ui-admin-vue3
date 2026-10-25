@@ -180,6 +180,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import type { UploadRawFile, UploadRequestOptions } from 'element-plus'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
@@ -200,7 +202,7 @@ const { params } = useRoute() // 路由参数
 const UPLOAD_EXTENSIONS = ['txt', 'md'] // 允许上传的文件扩展名
 const UPLOAD_MAX_SIZE = 10 * 1024 * 1024 // 允许上传的文件大小：10MB
 
-const knowledgeBaseId = Number(params.knowledgeBaseId) // 知识库编号
+const knowledgeBaseId = (parseId(params.knowledgeBaseId) as number) // 知识库编号
 const knowledgeBase = ref<KnowledgeBase>() // 知识库信息
 const loading = ref(true) // 列表的加载中
 const list = ref<KnowledgeDocument[]>([]) // 列表的数据
