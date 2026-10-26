@@ -27,6 +27,13 @@
       <el-tab-pane label="设备消息" name="log">
         <DeviceDetailsMessage v-if="activeTab === 'log'" :device-id="device.id" />
       </el-tab-pane>
+      <el-tab-pane label="设备影子" name="shadow" v-if="checkPermi(['iot:device:shadow-query'])">
+        <DeviceDetailsShadow
+          v-if="activeTab === 'shadow'"
+          :device-id="device.id"
+          :thing-model-list="thingModelList"
+        />
+      </el-tab-pane>
       <el-tab-pane label="模拟设备" name="simulator">
         <DeviceDetailsSimulator
           v-if="activeTab === 'simulator'"
@@ -63,6 +70,7 @@
 </template>
 <script lang="ts" setup>
 import { parseId } from '@/utils/id'
+import { checkPermi } from '@/utils/permission'
 
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
@@ -72,6 +80,7 @@ import DeviceDetailsHeader from './DeviceDetailsHeader.vue'
 import DeviceDetailsInfo from './DeviceDetailsInfo.vue'
 import DeviceDetailsThingModel from './DeviceDetailsThingModel.vue'
 import DeviceDetailsMessage from './DeviceDetailsMessage.vue'
+import DeviceDetailsShadow from './DeviceDetailsShadow.vue'
 import DeviceDetailsSimulator from './DeviceDetailsSimulator.vue'
 import DeviceDetailConfig from './DeviceDetailConfig.vue'
 import DeviceModbusConfig from './DeviceModbusConfig.vue'
