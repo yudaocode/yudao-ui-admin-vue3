@@ -128,6 +128,8 @@
 </template>
 
 <script setup lang="ts">
+import { isPositiveId, parseId } from '@/utils/id'
+
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { WmWarehouseApi } from '@/api/mes/wm/warehouse'
@@ -161,8 +163,8 @@ const queryFormRef = ref() // 查询表单 Ref
 
 /** 加载仓库上下文（从 URL query 参数获取 warehouseId，并加载仓库名称） */
 const loadWarehouseContext = async () => {
-  const warehouseId = Number(route.query.warehouseId)
-  if (!Number.isInteger(warehouseId) || warehouseId <= 0) {
+  const warehouseId = parseId(route.query.warehouseId)
+  if (!isPositiveId(warehouseId)) {
     return
   }
   currentWarehouse.value.id = warehouseId

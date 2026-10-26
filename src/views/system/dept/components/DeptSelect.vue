@@ -17,6 +17,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId, isIdType } from '@/utils/id'
+
 import * as DeptApi from '@/api/system/dept'
 import { defaultProps, handleTree } from '@/utils/tree'
 
@@ -52,11 +54,11 @@ const handleChange = (value: unknown) => {
   if (Array.isArray(value)) {
     emit(
       'update:modelValue',
-      value.filter((item): item is number => typeof item === 'number')
+      value.map(parseId).filter(isIdType)
     )
     return
   }
-  emit('update:modelValue', typeof value === 'number' ? value : undefined)
+  emit('update:modelValue', parseId(value))
 }
 
 /** 获得部门树 */

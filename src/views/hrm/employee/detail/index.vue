@@ -115,6 +115,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId, isPositiveId } from '@/utils/id'
+
 import { ElMessageBox } from 'element-plus'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { checkPermi } from '@/utils/permission'
@@ -148,7 +150,7 @@ const route = useRoute() // 路由
 const { currentRoute, push } = useRouter() // 路由操作
 const { delView } = useTagsViewStore() // 视图操作
 
-const employeeId = Number(route.params.id) // 员工编号
+const employeeId = (parseId(route.params.id) as number) // 员工编号
 const detailLoading = ref(true) // 详情的加载中
 const employee = ref<EmployeeApi.HrmEmployeeVO>({} as EmployeeApi.HrmEmployeeVO) // 员工详情
 const logList = ref<OperateLogVO[]>([]) // 操作日志列表
@@ -351,7 +353,7 @@ async function handleEmployeeQuitSuccess() {
 
 /** 初始化 */
 onMounted(async () => {
-  if (!Number.isSafeInteger(employeeId) || employeeId <= 0) {
+  if (!isPositiveId(employeeId)) {
     message.warning('参数错误，员工编号不能为空！')
     close()
     return

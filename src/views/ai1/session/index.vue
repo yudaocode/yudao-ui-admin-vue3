@@ -107,6 +107,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import { useFullscreen } from '@vueuse/core'
 import { useCache } from '@/hooks/web/useCache'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -189,14 +191,14 @@ const selectAgent = async (agentId: number) => {
 /** 获得初始 Agent：优先路由参数，其次缓存，最后第一个 */
 const resolveInitialAgentId = (): number | undefined => {
   const exists = (id?: number) => !!id && agentList.value.some((item) => item.id === id)
-  const queryAgentId = Number(route.query.agentId)
+  const queryAgentId = parseId(route.query.agentId)
   if (exists(queryAgentId)) {
     return queryAgentId
   }
   if (route.query.agentId) {
     message.warning('指定的 Agent 不存在、已关闭或已被删除')
   }
-  const cacheAgentId = Number(wsCache.get(AGENT_ID_CACHE_KEY))
+  const cacheAgentId = parseId(wsCache.get(AGENT_ID_CACHE_KEY))
   if (exists(cacheAgentId)) {
     return cacheAgentId
   }
@@ -535,7 +537,7 @@ const createStreamHandlers = (
     switch (event.event) {
       // 助手消息编号
       case Ai1SessionStreamEventEnum.STREAM:
-        state.messageId = Number(event.data)
+        state.messageId = parseId(event.data) as number
         assistantMessage.id = state.messageId
         // 消息落库前点击了停止，此时再提交
         if (stopRequested.value) {
@@ -698,9 +700,9 @@ let handledQueryAgentId: number | undefined // 已处理过的路由 agentId
 
 /** 初始化 */
 onMounted(async () => {
-  handledQueryAgentId = Number(route.query.agentId) || undefined
+  handledQueryAgentId = parseId(route.query.agentId) || undefined
   await getAgentList()
-  const sessionId = Number(route.query.id)
+  const sessionId = parseId(route.query.id)
   const agentId = resolveInitialAgentId()
   if (agentId) {
     await selectAgent(agentId)
@@ -723,7 +725,7 @@ onActivated(() => {
   if (!initialized) {
     return
   }
-  const agentId = Number(route.query.agentId)
+  const agentId = parseId(route.query.agentId)
   if (agentId && agentId !== handledQueryAgentId) {
     handledQueryAgentId = agentId
     if (agentId !== activeAgentId.value) {

@@ -74,6 +74,8 @@
 </template>
 
 <script lang="ts" setup>
+import { isPositiveId, parseId } from '@/utils/id'
+
 import dayjs from 'dayjs'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -469,8 +471,8 @@ async function initForm() {
     if (route.query.type !== 'update' && !viewMode.value) {
       return
     }
-    const id = Number(route.query.id)
-    if (!Number.isInteger(id) || id <= 0) {
+    const id = parseId(route.query.id)
+    if (!isPositiveId(id)) {
       message.error('KPI 考核编号不正确')
       close()
       return

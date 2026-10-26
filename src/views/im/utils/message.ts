@@ -1,3 +1,4 @@
+import { parseId } from '@/utils/id'
 import { generateUUID } from '@/utils'
 import { useUserStore } from '@/store/modules/user'
 import {
@@ -574,7 +575,7 @@ export const getQuoteFromMessage = (content: string): QuoteMessage | null => {
 export const parseRecallMessageId = (content: string): number => {
   try {
     const parsed = JSON.parse(content)
-    return parsed?.messageId != null ? Number(parsed.messageId) : 0
+    return parsed?.messageId != null ? (parseId(parsed.messageId) ?? 0) : 0
   } catch {
     return 0
   }

@@ -308,6 +308,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import draggable from 'vuedraggable'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as IterationApi from '@/api/pms/pm/iteration'
@@ -508,7 +510,7 @@ async function handleDeleteIteration(iteration: PlanningIteration) {
 /** 记录当前拖拽工作项，支持投放到折叠迭代标题 */
 function handlePlanningDragStart(event: { item?: HTMLElement }) {
   const workItemId = event.item?.dataset.workItemId
-  draggedWorkItemId.value = workItemId ? Number(workItemId) : undefined
+  draggedWorkItemId.value = workItemId ? parseId(workItemId) : undefined
 }
 
 /** 将工作项投放到折叠的迭代标题 */

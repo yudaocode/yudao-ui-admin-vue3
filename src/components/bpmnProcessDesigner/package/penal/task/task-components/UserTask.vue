@@ -305,7 +305,7 @@ const resetTaskForm = () => {
         .map((item) => {
           // 如果数字超出了最大安全整数范围，则将其作为字符串处理
           let num = Number(item)
-          return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
+          return num >= Number.MAX_SAFE_INTEGER || num <= -Number.MAX_SAFE_INTEGER ? item : num
         })
       deptLevel.value = +candidateParamStr.split('|')[1]
     } else if (
@@ -321,7 +321,7 @@ const resetTaskForm = () => {
       userTaskForm.value.candidateParam = candidateParamStr.split(',').map((item) => {
         // 如果数字超出了最大安全整数范围，则将其作为字符串处理
         let num = Number(item)
-        return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
+        return num >= Number.MAX_SAFE_INTEGER || num <= -Number.MAX_SAFE_INTEGER ? item : num
       })
     }
   } else {

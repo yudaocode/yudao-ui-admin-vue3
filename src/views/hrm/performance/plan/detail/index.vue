@@ -240,6 +240,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import type { TableInstance } from 'element-plus'
 import type { OperateLogVO } from '@/api/system/operatelog'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -261,7 +263,7 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { currentRoute, push } = useRouter() // 路由操作
 const { delView } = useTagsViewStore() // 页签操作
-const id = Number(route.params.id) // 绩效计划编号
+const id = (parseId(route.params.id) as number) // 绩效计划编号
 const loading = ref(false) // 详情加载中
 const employeeLoading = ref(false) // 参评员工加载中
 const plan = ref<PerformancePlanApi.PerformancePlanVO>({ name: '' }) // 绩效计划

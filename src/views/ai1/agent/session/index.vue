@@ -87,6 +87,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import { dateFormatter } from '@/utils/formatTime'
 import { SessionApi, Session } from '@/api/ai1/session'
 import AgentSelect from '@/views/ai1/agent/components/AgentSelect.vue'
@@ -104,7 +106,7 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  agentId: Number(route.query.agentId) || undefined, // 从 Agent 管理跳转时预选
+  agentId: parseId(route.query.agentId) || undefined, // 从 Agent 管理跳转时预选
   title: undefined as string | undefined,
   userId: undefined as number | undefined
 })

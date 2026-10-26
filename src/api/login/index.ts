@@ -1,5 +1,22 @@
 import request from '@/config/axios'
-import type { RegisterVO, UserLoginVO } from './types'
+import type { RegisterVO, TokenType, UserLoginVO } from './types'
+
+export enum AuthQrcodeStatusEnum {
+  WAITING = 0,
+  CONFIRMED = 1
+}
+
+export interface AuthQrcodeCreateRespVO {
+  qrcodeId: string
+  secret: string
+  qrContent: string
+  expiresIn: number
+}
+
+export interface AuthQrcodePollRespVO {
+  status: AuthQrcodeStatusEnum
+  login?: TokenType
+}
 
 export interface SmsCodeVO {
   mobile: string
@@ -19,6 +36,22 @@ export const login = (data: UserLoginVO) => {
     headers: {
       isEncrypt: false
     }
+  })
+}
+
+// 沿用登录页已选择的租户，不携带旧登录态。
+export const createQrcode = () => {
+  return request.post<AuthQrcodeCreateRespVO>({
+    url: '/system/auth/create-qrcode',
+    headers: { isToken: false }
+  })
+}
+
+export const pollQrcode = (data: { qrcodeId: string; secret: string }) => {
+  return request.post<AuthQrcodePollRespVO>({
+    url: '/system/auth/qrcode-login',
+    data,
+    headers: { isToken: false }
   })
 }
 

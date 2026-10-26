@@ -28,6 +28,8 @@
   <ReceivableForm ref="formRef" @success="getReceivable(receivable.id)" />
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ReceivableApi from '@/api/crm/receivable'
 import ReceivableDetailsHeader from './ReceivableDetailsHeader.vue'
@@ -87,13 +89,13 @@ const close = () => {
 
 /** 初始化 */
 onMounted(async () => {
-  const id = props.id || route.params.id
+  const id = parseId(props.id || route.params.id)
   if (!id) {
     message.warning('参数错误，回款不能为空！')
     close()
     return
   }
-  receivableId.value = Number(id)
+  receivableId.value = id
   await getReceivable(receivableId.value)
 })
 </script>

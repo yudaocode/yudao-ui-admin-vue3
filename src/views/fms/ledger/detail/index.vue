@@ -77,6 +77,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import type { ElTree } from 'element-plus'
 import download from '@/utils/download'
 import { formatDate } from '@/utils/formatTime'
@@ -121,7 +123,7 @@ async function init() {
   const accountingMonth = await fmsStore.loadCurrentMonth()
   queryParams.startMonth = String(route.query.startMonth || accountingMonth || currentMonth)
   queryParams.endMonth = String(route.query.endMonth || accountingMonth || currentMonth)
-  queryParams.subjectId = Number(route.query.subjectId) || 0
+  queryParams.subjectId = parseId(route.query.subjectId) || 0
   await loadSubjectTree()
   await getList()
 }

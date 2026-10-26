@@ -1,3 +1,4 @@
+import { compareId } from '@/utils/id'
 import { defineStore, acceptHMRUpdate } from 'pinia'
 
 import {
@@ -64,7 +65,7 @@ export const useGroupRequestStore = defineStore('imGroupRequestStore', {
         }
         this.unhandledList = cached
           .filter((request) => request.handleResult === ImGroupRequestHandleResult.UNHANDLED)
-          .sort((requestA, requestB) => requestB.id - requestA.id)
+          .sort((requestA, requestB) => compareId(requestB.id, requestA.id))
       } catch (e) {
         console.warn('[IM groupRequestStore] 本地加群申请缓存读取失败', e)
       }

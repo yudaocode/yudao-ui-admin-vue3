@@ -74,6 +74,8 @@
   <OaOfficialDocSendForm ref="formRef" @success="getInfo" />
 </template>
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import OaOfficialDocSendForm from '../OaOfficialDocSendForm.vue'
 import { useUserStore } from '@/store/modules/user'
 import * as SendApi from '@/api/oa/officialdoc/send'
@@ -95,7 +97,7 @@ const template = ref<TemplateApi.OfficialDocTemplateVO>() // 套红模板
 
 /** 查询详情 */
 async function getInfo() {
-  const id = Number(props.id || route.query.id)
+  const id = parseId(props.id || route.query.id)
   if (!id) return
   loading.value = true
   try {

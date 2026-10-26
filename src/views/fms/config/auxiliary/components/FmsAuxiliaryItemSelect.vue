@@ -20,6 +20,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId, isIdType } from '@/utils/id'
+
 import { FmsAuxiliaryItemApi } from '@/api/fms/config/auxiliary/item'
 import type { FmsAuxiliaryItemOptionVO } from '@/api/fms/config/auxiliary/item'
 import { useFmsStore } from '@/views/fms/store/fms'
@@ -58,7 +60,7 @@ const auxiliaryItemList = ref<FmsAuxiliaryItemOptionVO[]>([]) // 辅助核算项
 /** 选中变化 */
 function handleChange(value: unknown) {
   if (Array.isArray(value)) {
-    const itemIds = value.filter((item): item is number => typeof item === 'number')
+    const itemIds = value.map(parseId).filter(isIdType)
     emit('update:modelValue', itemIds)
     emit(
       'change',
@@ -66,7 +68,7 @@ function handleChange(value: unknown) {
     )
     return
   }
-  const itemId = typeof value === 'number' ? value : undefined
+  const itemId = parseId(value)
   emit('update:modelValue', itemId)
   emit(
     'change',

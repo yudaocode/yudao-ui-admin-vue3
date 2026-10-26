@@ -1,3 +1,5 @@
+import { compareId } from '@/utils/id'
+import { maxImId } from '@/views/im/utils/pull'
 import { useConversationStore } from '../store/conversationStore'
 import { useMessageStore } from '../store/messageStore'
 import {
@@ -271,10 +273,10 @@ export const useMessageSender = () => {
       .getMessages(getClientConversationId(conversation.type, conversation.targetId))
       .reduce<number>(
         (maxMessageId, message) =>
-          message.id && message.id > maxMessageId ? message.id : maxMessageId,
+          message.id && compareId(message.id, maxMessageId) > 0 ? message.id : maxMessageId,
         0
       )
-    const maxMessageId = Math.max(loadedMaxMessageId, conversation.lastMessageId || 0)
+    const maxMessageId = maxImId(loadedMaxMessageId, conversation.lastMessageId || 0)
     const readReported = conversationStore.isReportedReadPositionCovered(
       conversation.type,
       conversation.targetId,

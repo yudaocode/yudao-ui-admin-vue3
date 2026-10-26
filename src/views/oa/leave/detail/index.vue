@@ -41,6 +41,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import * as LeaveApplyApi from '@/api/oa/leave'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -55,11 +57,11 @@ const detailData = ref<LeaveApplyApi.LeaveApplyVO>({ fileUrls: [] }) // 详情�
 
 /** 查询详情 */
 async function getInfo() {
-  const id = props.id || route.params.id || route.query.id
+  const id = parseId(props.id || route.params.id || route.query.id)
   if (!id) return
   detailLoading.value = true
   try {
-    detailData.value = await LeaveApplyApi.getLeaveApply(Number(id))
+    detailData.value = await LeaveApplyApi.getLeaveApply(id)
   } finally {
     detailLoading.value = false
   }

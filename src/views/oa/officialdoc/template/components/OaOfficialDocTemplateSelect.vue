@@ -18,6 +18,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import * as TemplateApi from '@/api/oa/officialdoc/template'
 
 defineOptions({ name: 'OaOfficialDocTemplateSelect' })
@@ -48,8 +50,8 @@ const loading = ref(false) // 列表的加载中
 
 /** 选中变化 */
 function handleChange(value: unknown) {
-  emit('update:modelValue', typeof value === 'number' ? value : undefined)
-  emit('change', typeof value === 'number' ? value : undefined)
+  emit('update:modelValue', parseId(value))
+  emit('change', parseId(value))
 }
 
 /** 获得套红模板列表 */

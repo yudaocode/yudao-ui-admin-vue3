@@ -32,6 +32,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as AttendanceLeaveApi from '@/api/hrm/attendance/leave'
@@ -44,7 +46,7 @@ const leave = ref<AttendanceLeaveApi.HrmAttendanceLeaveVO>() // 请假详情
 
 /** 获取请假详情 */
 async function getLeave() {
-  const id = Number(props.id)
+  const id = parseId(props.id)
   if (!id) {
     return
   }

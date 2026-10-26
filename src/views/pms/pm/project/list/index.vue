@@ -367,7 +367,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: '',
-  sceneType: getProjectSceneByRoute() as number,
+  sceneType: getProjectSceneByRoute(),
   groupId: undefined as number | undefined,
   status: PmsProjectStatus.ACTIVE,
   sortType: PmsProjectSortType.ACCESS_TIME as number
@@ -559,7 +559,7 @@ async function handleProjectCommand(command: string, project: ProjectApi.PmsProj
     return
   }
   if (command.startsWith('group:')) {
-    await handleMoveGroup(project.id, Number(command.substring('group:'.length)))
+    await handleMoveGroup(project.id, command.substring('group:'.length) as unknown as number)
     return
   }
   try {

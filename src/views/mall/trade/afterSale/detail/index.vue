@@ -149,6 +149,8 @@
   <UpdateAuditReasonForm ref="updateAuditReasonFormRef" @success="getDetail" />
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import * as AfterSaleApi from '@/api/mall/trade/afterSale/index'
 import { fenToYuan } from '@/utils'
 import { DICT_TYPE, getDictLabel, getDictObj } from '@/utils/dict'
@@ -186,7 +188,7 @@ const getUserTypeColor = (type: number) => {
 
 /** 获得详情 */
 const getDetail = async () => {
-  const id = Number(params.id)
+  const id = parseId(params.id)
   if (id) {
     const res = await AfterSaleApi.getAfterSale(id)
     // 没有表单信息则关闭页面返回

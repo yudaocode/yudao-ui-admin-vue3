@@ -115,6 +115,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { Qrcode } from '@/components/Qrcode'
 import * as PayOrderApi from '@/api/pay/order'
 import { PayChannelEnum, PayDisplayModeEnum, PayOrderStatusEnum } from '@/utils/constants'
@@ -458,7 +460,7 @@ const goReturnUrl = (payResult) => {
 /** 初始化 */
 onMounted(() => {
   if (typeof route.query.id === 'string') {
-    id.value = Number(route.query.id)
+    id.value = parseId(route.query.id)
   }
   if (typeof route.query.returnUrl === 'string') {
     returnUrl.value = decodeURIComponent(route.query.returnUrl)

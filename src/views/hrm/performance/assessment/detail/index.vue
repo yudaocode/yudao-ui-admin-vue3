@@ -163,6 +163,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DICT_TYPE } from '@/utils/dict'
 import * as PerformanceAssessmentApi from '@/api/hrm/performance/assessment'
@@ -194,9 +196,9 @@ interface PerformanceScoreRow {
 const route = useRoute() // 当前路由
 const { currentRoute, push } = useRouter() // 路由操作
 const { delView } = useTagsViewStore() // 页签操作
-const assessmentId = Number(route.params.id) // 考核编号
-const employeeId = Number(route.query.employeeId) // 员工编号
-const planId = Number(route.query.planId) // 绩效计划编号
+const assessmentId = parseId(route.params.id) // 考核编号
+const employeeId = parseId(route.query.employeeId) // 员工编号
+const planId = parseId(route.query.planId) // 绩效计划编号
 const archived = route.query.archived === 'true' // 是否已归档
 const loading = ref(false) // 加载中
 const recordLoading = ref(false) // 流程记录加载中

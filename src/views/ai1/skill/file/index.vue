@@ -24,6 +24,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { SkillApi, SkillFile, Skill } from '@/api/ai1/skill'
 import SkillFileTree from './SkillFileTree.vue'
@@ -35,7 +37,7 @@ defineOptions({ name: 'Ai1SkillFile' })
 const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 路由参数
 
-const skillId = Number(params.skillId) // SKILL 编号
+const skillId = parseId(params.skillId) // SKILL 编号
 const skill = ref<Skill>() // SKILL 信息
 const selectedNode = ref<SkillFile>() // 选中的节点
 

@@ -177,6 +177,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId, isPositiveId } from '@/utils/id'
+
 import type { FormInstance } from 'element-plus'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as InsuranceMonthRecordApi from '@/api/hrm/insurance/month-record'
@@ -196,7 +198,7 @@ const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
 const { currentRoute, push } = useRouter() // 路由操作
 const { delView } = useTagsViewStore() // 视图操作
-const id = Number(route.params.id) // 月度社保表编号
+const id = (parseId(route.params.id) as number) // 月度社保表编号
 
 const recordLoading = ref(true) // 月度社保表的加载中
 const loading = ref(true) // 员工月度社保列表的加载中
@@ -315,7 +317,7 @@ async function refreshData() {
 
 /** 初始化 */
 async function init() {
-  if (!Number.isSafeInteger(id) || id <= 0) {
+  if (!isPositiveId(id)) {
     message.warning('参数错误，月度社保表不能为空！')
     close()
     return

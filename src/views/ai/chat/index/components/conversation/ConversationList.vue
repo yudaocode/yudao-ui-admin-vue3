@@ -134,6 +134,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 import RoleRepository from '../role/RoleRepository.vue'
 import { Bottom, Top } from '@element-plus/icons-vue'
@@ -364,7 +366,7 @@ const handleRoleRepository = async () => {
 /** 监听选中的对话 */
 const { activeId } = toRefs(props)
 watch(activeId, async (newValue, _oldValue) => {
-  activeConversationId.value = newValue ? Number(newValue) : null
+  activeConversationId.value = newValue ? parseId(newValue) as number : null
 })
 
 // 定义 public 方法
@@ -376,7 +378,7 @@ onMounted(async () => {
   await getChatConversationList()
   // 默认选中
   if (props.activeId) {
-    activeConversationId.value = Number(props.activeId)
+    activeConversationId.value = parseId(props.activeId) as number
   } else {
     // 首次默认选中第一个
     if (conversationList.value.length) {

@@ -18,6 +18,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import * as FmsSubjectApi from '@/api/fms/config/subject'
 import type { FmsSubjectVO } from '@/api/fms/config/subject'
 import { treeToList } from '@/utils/tree'
@@ -65,7 +67,7 @@ function formatSubjectOption(subject: FmsSubjectVO) {
 
 /** 选中变化 */
 function handleChange(value: unknown) {
-  const subjectId = typeof value === 'number' ? value : undefined
+  const subjectId = parseId(value)
   emit('update:modelValue', subjectId)
   emit('change', subjectId)
 }

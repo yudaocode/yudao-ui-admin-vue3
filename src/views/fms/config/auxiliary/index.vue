@@ -78,6 +78,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import { FmsAuxiliaryTypeApi } from '@/api/fms/config/auxiliary/type'
 import type { FmsAuxiliaryTypeVO } from '@/api/fms/config/auxiliary/type'
 import { useFmsStore } from '@/views/fms/store/fms'
@@ -110,7 +112,7 @@ async function getList() {
   loading.value = true
   try {
     list.value = await FmsAuxiliaryTypeApi.getAuxiliaryTypeList(accountSetId.value)
-    const routeAuxiliaryTypeId = Number(route.query.auxiliaryTypeId)
+    const routeAuxiliaryTypeId = parseId(route.query.auxiliaryTypeId)
     currentAuxiliaryType.value =
       list.value.find((item) => item.id === currentAuxiliaryType.value?.id) ||
       list.value.find((item) => item.id === routeAuxiliaryTypeId) ||

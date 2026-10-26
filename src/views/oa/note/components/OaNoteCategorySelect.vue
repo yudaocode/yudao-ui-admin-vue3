@@ -18,6 +18,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import * as NoteCategoryApi from '@/api/oa/note/category'
 
 defineOptions({ name: 'OaNoteCategorySelect' })
@@ -39,7 +41,7 @@ const loading = ref(false) // 分类加载中
 
 /** 选中变化 */
 function handleChange(value: unknown) {
-  emit('update:modelValue', typeof value === 'number' ? value : undefined)
+  emit('update:modelValue', parseId(value))
 }
 
 /** 查询分类列表 */

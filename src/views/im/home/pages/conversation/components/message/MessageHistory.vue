@@ -240,6 +240,8 @@
 </template>
 
 <script lang="ts" setup>
+import { compareId, isPositiveId } from '@/utils/id'
+
 import { computed, inject, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import { formatHistoryTime } from '@/views/im/utils/time'
@@ -554,9 +556,10 @@ async function loadEarlier() {
   try {
     // 本地占位没有服务端 id，不参与历史游标
     const earliestId = allMessages.value
-      .filter((message) => !!message.id && message.id > 0)
-      .reduce((min, message) => Math.min(min, message.id || min), Number.POSITIVE_INFINITY)
-    const maxId = Number.isFinite(earliestId) ? earliestId : undefined
+      .map((message) => message.id)
+      .filter(isPositiveId)
+      .sort(compareId)[0]
+    const maxId = earliestId
 
     const pageLength = await loadEarlierMessages(
       requestedType,

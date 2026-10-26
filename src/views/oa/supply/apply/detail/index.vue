@@ -58,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+
 import * as SupplyApplyApi from '@/api/oa/supply/apply'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -75,7 +76,7 @@ async function getInfo() {
   if (!id) return
   detailLoading.value = true
   try {
-    detailData.value = await SupplyApplyApi.getSupplyApply(Number(id))
+    detailData.value = await SupplyApplyApi.getSupplyApply(id as number)
   } finally {
     detailLoading.value = false
   }

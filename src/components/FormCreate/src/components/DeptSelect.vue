@@ -19,6 +19,8 @@
 </template>
 
 <script lang="ts" setup>
+import { isIdType, parseId } from '@/utils/id'
+
 import { handleTree } from '@/utils/tree'
 import { getSimpleDeptList, type DeptVO } from '@/api/system/dept'
 import { useUserStoreWithOut } from '@/store/modules/user'
@@ -75,7 +77,7 @@ const loadDeptTree = async () => {
 }
 
 // 根据 ID 获取部门名称
-const getDeptNameById = (id: number): string | undefined => {
+const getDeptNameById = (id?: number): string | undefined => {
   const dept = deptList.value.find((item) => item.id === id)
   return dept?.name
 }
@@ -98,8 +100,8 @@ const handleChange = (value: number | number[] | undefined) => {
     if (props.multiple && Array.isArray(value)) {
       const names = value.map((id) => getDeptNameById(id)).filter(Boolean) as string[]
       emit('update:modelValue', names)
-    } else if (!props.multiple && typeof value === 'number') {
-      const name = getDeptNameById(value)
+    } else if (!props.multiple && isIdType(value)) {
+      const name = getDeptNameById(parseId(value))
       emit('update:modelValue', name)
     }
   } else {

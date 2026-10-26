@@ -22,6 +22,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId, isIdType } from '@/utils/id'
+
 import { FmsCurrencyApi } from '@/api/fms/config/currency'
 import type { FmsCurrencyVO } from '@/api/fms/config/currency'
 import { useFmsStore } from '@/views/fms/store/fms'
@@ -65,11 +67,11 @@ function handleChange(value: unknown) {
   if (Array.isArray(value)) {
     emit(
       'update:modelValue',
-      value.filter((item): item is number => typeof item === 'number')
+      value.map(parseId).filter(isIdType)
     )
     return
   }
-  emit('update:modelValue', typeof value === 'number' ? value : undefined)
+  emit('update:modelValue', parseId(value))
 }
 
 /** 获得币别列表 */

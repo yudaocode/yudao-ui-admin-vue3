@@ -212,6 +212,7 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as NoteApi from '@/api/oa/note'
 import * as NoteCategoryApi from '@/api/oa/note/category'
@@ -280,7 +281,7 @@ function handleQuery() {
 /** 切换左侧分类 */
 function handleCategorySelect(index: string) {
   // 目录属于本人，选择目录时回到我的笔记；最近展示当前场景全部目录。
-  queryParams.categoryId = index === 'all' ? undefined : Number(index)
+  queryParams.categoryId = index === 'all' ? undefined : parseId(index)
   if (queryParams.categoryId !== undefined) {
     activeScene.value = OA_NOTE_SCENE_TYPE.MINE
   }

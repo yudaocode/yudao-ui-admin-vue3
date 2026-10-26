@@ -165,6 +165,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import * as KnowledgeFavoriteApi from '@/api/pms/kb/interaction/favorite'
 import * as KnowledgeLibraryApi from '@/api/pms/kb/library'
 import * as KnowledgeGroupApi from '@/api/pms/kb/library/group'
@@ -225,7 +227,7 @@ function resetQuery() {
 
 /** 切换分组查询 */
 function handleGroupQuery(groupId: string | number) {
-  queryParams.groupId = Number(groupId)
+  queryParams.groupId = parseId(groupId)
   handleQuery()
 }
 

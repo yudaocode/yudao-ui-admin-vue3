@@ -223,6 +223,8 @@
   <OrderUpdatePriceForm ref="updatePriceFormRef" @success="getDetail" />
 </template>
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { fenToYuan } from '@/utils'
 import { formatDate } from '@/utils/formatTime'
@@ -300,7 +302,7 @@ const props = defineProps({
   id: propTypes.number.def(undefined), // 订单ID
   showPickUp: propTypes.bool.def(true) // 显示核销按钮
 })
-const id = Number(params.id || props.id)
+const id = parseId(params.id || props.id)
 const getDetail = async () => {
   if (id) {
     const res = (await TradeOrderApi.getOrder(id)) as TradeOrderApi.OrderVO

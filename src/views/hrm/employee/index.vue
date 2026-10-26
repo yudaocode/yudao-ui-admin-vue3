@@ -372,6 +372,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId, isPositiveId } from '@/utils/id'
+
 import { ElMessageBox, type FormInstance, type TabsPaneContext } from 'element-plus'
 import { DICT_TYPE, getDictLabel, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
@@ -594,9 +596,9 @@ function applyHomeFilter() {
   const todoType = Number(route.query.todoType)
   const todoTypeValues: number[] = Object.values(HrmEmployeeTodoType)
   queryParams.todoType = todoTypeValues.includes(todoType) ? todoType : undefined
-  const leaderEmployeeId = Number(route.query.leaderEmployeeId)
+  const leaderEmployeeId = parseId(route.query.leaderEmployeeId)
   queryParams.leaderEmployeeId =
-    Number.isSafeInteger(leaderEmployeeId) && leaderEmployeeId > 0 ? leaderEmployeeId : undefined
+    isPositiveId(leaderEmployeeId) ? leaderEmployeeId : undefined
 }
 
 /** 打开详情 */

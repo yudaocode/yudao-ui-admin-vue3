@@ -407,6 +407,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import dayjs from 'dayjs'
 import draggable from 'vuedraggable'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
@@ -483,7 +485,7 @@ const queryParams = reactive({
   iterationIds: [] as number[],
   excludedIterationIds: [] as number[],
   assigneeUserIds: route.query.assigneeUserId
-    ? [Number(route.query.assigneeUserId)]
+    ? [parseId(route.query.assigneeUserId) as number]
     : ([] as number[]),
   labelIds: [] as number[],
   rootOnly: true,

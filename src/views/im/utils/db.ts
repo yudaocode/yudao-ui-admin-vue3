@@ -1,3 +1,4 @@
+import { isPositiveId, parseId, compareId } from '@/utils/id'
 import { toRaw } from 'vue'
 
 import { getCurrentUserId } from '@/utils/auth'
@@ -178,7 +179,7 @@ function openDb(name: string): Promise<IDBDatabase> {
 /** 初始化当前用户 IM DB */
 export async function initDb(): Promise<DbClient> {
   const userId = getCurrentUserId()
-  if (!Number.isFinite(userId) || userId <= 0) {
+  if (!isPositiveId(userId)) {
     throw new Error('当前用户不存在，无法初始化 IM DB')
   }
   if (currentClient?.userId === userId) {
@@ -469,8 +470,8 @@ export function parseClientConversationId(
 ): { type: number; targetId: number } | null {
   const [typeText, targetIdText] = clientConversationId.split(':')
   const type = Number(typeText)
-  const targetId = Number(targetIdText)
-  if (!Number.isFinite(type) || !Number.isFinite(targetId) || targetId <= 0) {
+  const targetId = parseId(targetIdText)
+  if (!Number.isFinite(type) || !isPositiveId(targetId)) {
     return null
   }
   return { type, targetId }
@@ -512,7 +513,7 @@ export async function setMessageMaxId(
   }
   const updateMaxId = async (transaction: DbTransaction) => {
     const current = (await db.getSetting<number>(key, transaction)) || 0
-    if (maxId > current) {
+    if (compareId(maxId, current) > 0) {
       await db.setSetting(key, maxId, transaction)
     }
   }

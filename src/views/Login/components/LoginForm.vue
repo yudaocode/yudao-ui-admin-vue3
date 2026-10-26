@@ -91,7 +91,7 @@
               </el-button>
             </el-col>
             <el-col :span="8">
-              <el-button class="w-full" @click="setLoginState(LoginStateEnum.QR_CODE)">
+              <el-button class="w-full" @click="handleQrcodeLogin">
                 {{ t('login.btnQRCode') }}
               </el-button>
             </el-col>
@@ -211,6 +211,11 @@ const getTenantId = async () => {
     const res = await LoginApi.getTenantIdByName(loginData.loginForm.tenantName)
     authUtil.setTenantId(res)
   }
+}
+// 扫码登录与账号登录一样，先确定租户。
+const handleQrcodeLogin = async () => {
+  await getTenantId()
+  setLoginState(LoginStateEnum.QR_CODE)
 }
 // 记住我
 const getLoginFormCache = () => {

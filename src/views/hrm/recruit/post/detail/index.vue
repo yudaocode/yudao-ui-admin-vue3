@@ -26,6 +26,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId, isPositiveId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import type { OperateLogVO } from '@/api/system/operatelog'
 import { getOperateLogPage } from '@/api/hrm/operate-log'
@@ -41,7 +43,7 @@ const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
 const { currentRoute, push } = useRouter() // 路由操作
 const { delView } = useTagsViewStore() // 视图操作
-const postId = Number(route.params.id) // 招聘职位编号
+const postId = (parseId(route.params.id) as number) // 招聘职位编号
 const loading = ref(true) // 详情的加载中
 const post = ref<RecruitPostApi.HrmRecruitPostVO>({} as RecruitPostApi.HrmRecruitPostVO) // 招聘职位详情
 
@@ -88,7 +90,7 @@ function openForm() {
 
 /** 初始化 */
 onMounted(async () => {
-  if (!Number.isSafeInteger(postId) || postId <= 0) {
+  if (!isPositiveId(postId)) {
     message.warning('参数错误，招聘职位不能为空！')
     close()
     return

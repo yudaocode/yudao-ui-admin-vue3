@@ -12,6 +12,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId } from '@/utils/id'
+
 import type { FmsVoucherWordVO } from '@/api/fms/config/voucher-word'
 
 defineOptions({ name: 'FmsVoucherWordSelect' })
@@ -39,6 +41,6 @@ const emit = defineEmits<{
 
 /** 选中变化 */
 function handleChange(value: unknown) {
-  emit('update:modelValue', typeof value === 'number' ? value : undefined)
+  emit('update:modelValue', parseId(value))
 }
 </script>

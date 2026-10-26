@@ -38,6 +38,8 @@
 </template>
 
 <script lang="ts" setup>
+import { parseId, isPositiveId } from '@/utils/id'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as EmployeeApi from '@/api/hrm/employee'
 import * as SalaryChangeRecordApi from '@/api/hrm/salary/change-record'
@@ -53,7 +55,7 @@ const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
 const { currentRoute, push } = useRouter() // 路由操作
 const { delView } = useTagsViewStore() // 视图操作
-const id = Number(route.params.id) // 员工编号
+const id = (parseId(route.params.id) as number) // 员工编号
 const loading = ref(false) // 详情加载中
 const employee = ref<EmployeeApi.HrmEmployeeVO>({} as EmployeeApi.HrmEmployeeVO) // 员工档案
 const salaryEmployee = ref<SalaryEmployeeInfoApi.SalaryEmployeeInfoVO>({}) // 薪资档案
@@ -100,7 +102,7 @@ async function handleSalaryUpdated() {
 
 /** 初始化 */
 async function init() {
-  if (!Number.isSafeInteger(id) || id <= 0) {
+  if (!isPositiveId(id)) {
     message.warning('参数错误，员工不能为空！')
     close()
     return

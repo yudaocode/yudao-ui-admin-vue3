@@ -71,6 +71,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import * as SealApplyApi from '@/api/oa/seal/apply'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -87,7 +89,7 @@ const detailData = ref<SealApplyApi.SealApplyVO>({}) // 详情数据
 /** 查询详情 */
 async function getInfo() {
   // 获取弹窗或 BPM 传入的业务编号，兼容路由查询参数
-  const id = Number(props.id || route.query.id)
+  const id = parseId(props.id || route.query.id)
   if (!id) return
   detailLoading.value = true
   try {

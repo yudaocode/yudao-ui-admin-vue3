@@ -96,6 +96,8 @@
 </template>
 
 <script setup lang="ts">
+import { parseId } from '@/utils/id'
+
 import { formatDate } from '@/utils/formatTime'
 import { IoTOtaFirmwareApi, IoTOtaFirmware } from '@/api/iot/ota/firmware'
 import { IoTOtaTaskRecordApi } from '@/api/iot/ota/task/record'
@@ -107,7 +109,7 @@ defineOptions({ name: 'IoTOtaFirmwareDetail' })
 
 const route = useRoute() // 路由
 
-const firmwareId = ref(Number(route.params.id)) // 固件编号
+const firmwareId = ref(parseId(route.params.id) as number) // 固件编号
 const firmwareLoading = ref(false) // 固件加载状态
 const firmware = ref<IoTOtaFirmware>({} as IoTOtaFirmware) // 固件信息
 
