@@ -7,9 +7,7 @@
         <span class="text-sm text-gray-600"
           >版本号：<b>{{ shadow.version ?? 0 }}</b></span
         >
-        <span class="text-sm text-gray-600">
-          最后更新：{{ shadow.shadowTime ? formatTime(shadow.shadowTime) : '-' }}
-        </span>
+        <span class="text-sm text-gray-600">最后更新：{{ formatTime(shadow.shadowTime) }}</span>
         <span class="text-sm text-gray-600 flex items-center gap-2">
           影子开关：
           <el-switch
@@ -43,7 +41,7 @@
       :data="shadow.properties"
       :show-overflow-tooltip="true"
       :stripe="true"
-      :row-class-name="rowClassName"
+      :row-class-name="({ row }) => (isDelta(row) ? 'shadow-delta-row' : '')"
       v-loading="loading"
     >
       <el-table-column align="center" label="标识符" prop="identifier" width="140" />
@@ -64,14 +62,10 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="期望更新时间" width="160">
-        <template #default="{ row }">
-          {{ row.desiredTime ? formatTime(row.desiredTime) : '-' }}
-        </template>
+        <template #default="{ row }">{{ formatTime(row.desiredTime) }}</template>
       </el-table-column>
       <el-table-column align="center" label="上报更新时间" width="160">
-        <template #default="{ row }">
-          {{ row.reportedTime ? formatTime(row.reportedTime) : '-' }}
-        </template>
+        <template #default="{ row }">{{ formatTime(row.reportedTime) }}</template>
       </el-table-column>
     </el-table>
 
@@ -167,7 +161,7 @@ import {
   IoTThingModelAccessModeEnum,
   IoTThingModelTypeEnum
 } from '@/views/iot/utils/constants'
-import { formatDate } from '@/utils/formatTime'
+import { formatNullableDate } from '@/utils/formatTime'
 import { checkPermi } from '@/utils/permission'
 import { isEqual, isPlainObject } from 'lodash-es'
 
@@ -178,10 +172,10 @@ const props = defineProps<{
 
 const message = useMessage()
 const canUpdate = checkPermi(['iot:device:shadow-update']) // 是否有影子修改权限
-const loading = ref(false)
-const updating = ref(false)
-const resetting = ref(false)
-const statusUpdating = ref(false)
+const loading = ref(false) // 加载中
+const updating = ref(false) // 下发期望中
+const resetting = ref(false) // 重置中
+const statusUpdating = ref(false) // 开关更新中
 const shadow = ref<DeviceShadowVO>({
   version: 0,
   shadowTime: 0,
@@ -190,9 +184,9 @@ const shadow = ref<DeviceShadowVO>({
   desired: {},
   reported: {},
   metadata: {}
-})
-const shadowEnabled = ref(CommonStatusEnum.ENABLE)
-const desiredForm = ref<Record<string, any>>({})
+}) // 设备影子
+const shadowEnabled = ref(CommonStatusEnum.ENABLE) // 开关的展示值
+const desiredForm = ref<Record<string, any>>({}) // 期望值表单，只保存用户填写的属性
 
 /** 可写属性列表（引导填写 desired） */
 const writableProperties = computed(() => {
@@ -206,6 +200,7 @@ const writableProperties = computed(() => {
   })
 })
 
+/** 原始影子文档 */
 const rawJson = computed(() =>
   JSON.stringify(
     {
@@ -219,6 +214,7 @@ const rawJson = computed(() =>
   )
 )
 
+/** 加载设备影子 */
 const loadShadow = async () => {
   loading.value = true
   try {
@@ -229,6 +225,7 @@ const loadShadow = async () => {
   }
 }
 
+/** 切换影子开关：失败时回滚到最近一次成功的状态 */
 const handleStatusChange = async (status: number) => {
   statusUpdating.value = true
   try {
@@ -302,6 +299,8 @@ const buildDesired = () => {
   return desired
 }
 
+// TODO DONE @AI：注释 /** */；已补充
+/** 下发期望状态：成功后清空表单并刷新；失败时保留输入 */
 const handleUpdateDesired = async () => {
   const desired = buildDesired()
   if (!desired) {
@@ -322,8 +321,11 @@ const handleUpdateDesired = async () => {
   }
 }
 
+/** 重置影子：二次确认后清空 */
 const handleReset = async () => {
-  await message.confirm('确认重置该设备的影子文档？此操作将清空 desired 和 reported。')
+  await message.confirm(
+    '确认重置该设备的影子文档？此操作将清空 desired、reported 和 metadata，版本号归 0。'
+  )
   resetting.value = true
   try {
     await DeviceShadowApi.resetShadow(props.deviceId)
@@ -340,18 +342,19 @@ const isDelta = (row: any) => {
   return !isEqual(row.desiredValue, row.reportedValue)
 }
 
-const rowClassName = ({ row }: { row: any }) => (isDelta(row) ? 'shadow-delta-row' : '')
-
+/** 格式化属性值 */
 const formatValue = (val: any) => {
   if (val === undefined || val === null) return '-'
   if (typeof val === 'object') return JSON.stringify(val)
   return String(val)
 }
 
-const formatTime = (epochSecond: number) => {
-  return formatDate(new Date(epochSecond * 1000))
+/** 格式化 epoch 秒，为空时展示 - */
+const formatTime = (epochSecond?: number) => {
+  return formatNullableDate(epochSecond ? epochSecond * 1000 : undefined)
 }
 
+/** 初始化 */
 onMounted(() => {
   loadShadow()
 })
