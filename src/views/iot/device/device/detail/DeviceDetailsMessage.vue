@@ -25,6 +25,13 @@
         </el-select>
       </el-form-item>
       <el-form-item>
+        <el-radio-group v-model="rawFilter" @change="handleQuery">
+          <el-radio-button value="all">全部</el-radio-button>
+          <el-radio-button value="withRaw">有原始帧</el-radio-button>
+          <el-radio-button value="withoutRaw">无原始帧</el-radio-button>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item>
         <el-button type="primary" @click="handleQuery">
           <Icon icon="ep:search" class="mr-5px" /> 搜索
         </el-button>
@@ -79,6 +86,19 @@
           <span v-else>{{ scope.row.params }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="原始帧（HEX）" align="center" prop="raw" width="260">
+        <template #default="scope">
+          <!-- 与设备实际收发的原始字节；没有原始帧时不展示 -->
+          <div v-if="scope.row.raw" class="flex items-center justify-center">
+            <span class="font-mono truncate" :title="formatRaw(scope.row.raw)">
+              {{ formatRaw(scope.row.raw) }}
+            </span>
+            <el-button link type="primary" class="ml-1" @click="copyRaw(scope.row.raw)">
+              <Icon icon="ep:document-copy" />
+            </el-button>
+          </div>
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 分页 -->
@@ -98,24 +118,31 @@ import { DICT_TYPE } from '@/utils/dict'
 import { DeviceApi } from '@/api/iot/device/device'
 import { formatDate } from '@/utils/formatTime'
 import { IotDeviceMessageMethodEnum } from '@/views/iot/utils/constants'
+import { base64ToHex } from '@/views/iot/utils/raw'
+import { useClipboard } from '@vueuse/core'
 
 const props = defineProps<{
   deviceId: number
 }>()
+
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 // 查询参数
 const queryParams = reactive({
   deviceId: props.deviceId,
   method: undefined,
   upstream: undefined,
+  raw: undefined as boolean | undefined,
   pageNo: 1,
   pageSize: 10
 })
+const rawFilter = ref<'all' | 'withRaw' | 'withoutRaw'>('all') // 原始帧筛选：全部、有原始帧、无原始帧
 
 // 列表数据
 const loading = ref(false)
 const total = ref(0)
-const list = ref([])
+const list = ref<any[]>([])
 const autoRefresh = ref(false) // 自动刷新开关
 let autoRefreshTimer: any = null // 自动刷新定时器
 
@@ -132,6 +159,7 @@ const getMessageList = async () => {
   if (!props.deviceId) return
   loading.value = true
   try {
+    queryParams.raw = rawFilter.value === 'all' ? undefined : rawFilter.value === 'withRaw'
     const data = await DeviceApi.getDeviceMessagePage(queryParams)
     total.value = data.total
     list.value = data.list
@@ -144,6 +172,24 @@ const getMessageList = async () => {
 const handleQuery = () => {
   queryParams.pageNo = 1
   getMessageList()
+}
+
+// ========== 透传消息 ==========
+
+/** 原始帧（Base64）转为 HEX 展示；无法解析时原样展示 */
+const formatRaw = (raw: string) => base64ToHex(raw) ?? raw
+
+/** 复制原始帧的 HEX */
+const copyRaw = async (raw: string) => {
+  const { copy, copied, isSupported } = useClipboard({ legacy: true, source: formatRaw(raw) })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+    return
+  }
+  await copy()
+  if (unref(copied)) {
+    message.success(t('common.copySuccess'))
+  }
 }
 
 /** 监听自动刷新 */

@@ -145,7 +145,7 @@ export const DeviceApi = {
   },
 
   // 查询设备消息分页
-  getDeviceMessagePage: async (params: any) => {
+  getDeviceMessagePage: async (params: PageParam) => {
     return await request.get({ url: `/iot/device/message/page`, params })
   },
 
