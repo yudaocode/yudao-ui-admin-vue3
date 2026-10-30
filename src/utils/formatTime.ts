@@ -305,7 +305,7 @@ export function isSameDay(a: dayjs.ConfigType, b: dayjs.ConfigType): boolean {
 
   const aa = dayjs(a)
   const bb = dayjs(b)
-  return aa.year() == bb.year() && aa.month() == bb.month() && aa.day() == bb.day()
+  return aa.year() == bb.year() && aa.month() == bb.month() && aa.date() == bb.date()
 }
 
 /**
