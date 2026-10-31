@@ -123,6 +123,25 @@ export const IotDeviceMessageMethodEnum = {
     method: 'thing.ota.progress',
     name: 'OTA 升级进度上报',
     upstream: true
+  },
+
+  // ========== 设备影子 ==========
+  SHADOW_UPDATE: {
+    method: 'thing.shadow.update',
+    name: '设备影子更新',
+    upstream: true
+  },
+
+  // ========== 透传 ==========
+  RAW_POST: {
+    method: 'thing.raw.post',
+    name: '透传上报',
+    upstream: true
+  },
+  RAW_PUSH: {
+    method: 'thing.raw.push',
+    name: '透传下发',
+    upstream: false
   }
 }
 

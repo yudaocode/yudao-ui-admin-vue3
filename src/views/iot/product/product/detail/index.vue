@@ -8,6 +8,9 @@
       <el-tab-pane label="物模型（功能定义）" lazy name="thingModel">
         <IoTProductThingModel ref="thingModelRef" />
       </el-tab-pane>
+      <el-tab-pane label="数据解析" lazy name="script">
+        <ProductDetailsScript :product="product" @refresh="refreshProductData" />
+      </el-tab-pane>
     </el-tabs>
   </el-col>
 </template>
@@ -18,6 +21,7 @@ import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceApi } from '@/api/iot/device/device'
 import ProductDetailsHeader from './ProductDetailsHeader.vue'
 import ProductDetailsInfo from './ProductDetailsInfo.vue'
+import ProductDetailsScript from './ProductDetailsScript.vue'
 import IoTProductThingModel from '@/views/iot/thingmodel/index.vue'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useRouter } from 'vue-router'
@@ -45,6 +49,13 @@ const getProductData = async (id: number) => {
   } finally {
     loading.value = false
   }
+}
+
+/** 刷新详情（保留已查询的设备数量），用于数据解析脚本保存、启停后 */
+const refreshProductData = async () => {
+  const deviceCount = product.value.deviceCount
+  await getProductData(id)
+  product.value.deviceCount = deviceCount
 }
 
 /** 查询设备数量 */

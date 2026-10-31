@@ -19,7 +19,39 @@ export interface ProductVO {
   protocolType: string // 协议类型
   serializeType: string // 序列化类型
   deviceCount: number // 设备数量
+  scriptContent?: string // 数据解析脚本
+  scriptEnabled?: boolean // 数据解析脚本是否启用
   createTime: Date // 创建时间
+}
+
+// IoT 产品数据解析脚本更新 Request VO（只提交需要修改的字段）
+export interface ProductScriptUpdateReqVO {
+  id: number // 产品编号
+  scriptContent?: string // 脚本内容
+  scriptEnabled?: boolean // 是否启用
+}
+
+// IoT 产品数据解析脚本调试 Request VO
+export interface ProductScriptDebugReqVO {
+  id: number // 产品编号
+  scriptContent: string // 脚本内容（当前编辑内容，不保存）
+  direction: 'decode' | 'encode' // 调试方向：上行解码、下行编码
+  inputHex?: string // 上行解码的输入（HEX，允许空格）
+  message?: { method: string; requestId?: string; params?: any } // 下行编码的输入消息
+}
+
+// IoT 产品数据解析脚本调试 Response VO
+export interface ProductScriptDebugRespVO {
+  success: boolean // 是否成功
+  durationMs: number // 执行耗时（毫秒）
+  message?: any // 上行解码得到的消息；为空表示没有业务消息
+  standard?: boolean // 下行编码是否按标准消息下发
+  outputHex?: string // 下行编码得到的字节（HEX）
+  error?: {
+    type: 'ERROR' | 'TIMEOUT' | 'REJECTED' | 'OUTPUT_INVALID' | 'ENCODE_EMPTY' // 错误类型
+    message: string // 错误信息
+    line?: number // 出错行号
+  }
 }
 
 // IOT 产品设备类型枚举类 0: 直连设备, 1: 网关子设备, 2: 网关设备
@@ -82,6 +114,16 @@ export const ProductApi = {
   // 更新产品状态
   updateProductStatus: async (id: number, status: number) => {
     return await request.put({ url: `/iot/product/update-status?id=` + id + `&status=` + status })
+  },
+
+  // 更新产品数据解析脚本（内容、启用状态）
+  updateProductScript: async (data: ProductScriptUpdateReqVO) => {
+    return await request.put({ url: `/iot/product/update-script`, data })
+  },
+
+  // 调试产品数据解析脚本
+  debugProductScript: async (data: ProductScriptDebugReqVO) => {
+    return await request.post<ProductScriptDebugRespVO>({ url: `/iot/product/debug-script`, data })
   },
 
   // 查询产品（精简）列表
