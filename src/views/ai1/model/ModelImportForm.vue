@@ -21,7 +21,15 @@
         reserve-selection
       />
       <el-table-column label="序号" type="index" align="center" width="60" />
-      <el-table-column label="模型标识" align="center" prop="model" min-width="200" />
+      <el-table-column
+        label="模型标识"
+        align="left"
+        header-align="left"
+        class-name="import-model-id"
+        label-class-name="import-model-id"
+        prop="model"
+        min-width="200"
+      />
       <el-table-column label="状态" align="center" width="110">
         <template #default="scope">
           <el-tag v-if="scope.row.imported" type="info">已导入</el-tag>
@@ -113,3 +121,9 @@ const submitImport = async () => {
   }
 }
 </script>
+<style scoped>
+/* 模型标识列左对齐时增加左侧留白，避免贴边且右侧过空 */
+:deep(.import-model-id .cell) {
+  padding-left: 40px;
+}
+</style>
