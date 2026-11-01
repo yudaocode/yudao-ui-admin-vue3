@@ -13,6 +13,7 @@ export interface ModelVO {
   temperature?: number // 温度参数
   maxTokens?: number // 单条回复的最大 Token 数量
   maxContexts?: number // 上下文的最大 Message 数量
+  inputModalities?: string[] // 输入模态数组
 }
 
 // AI 模型 API

@@ -33,6 +33,22 @@ export const AiModelTypeEnum = {
   RERANK: 6 // 重排
 }
 
+/**
+ * AI 模型输入模态的枚举
+ */
+export const AiModelInputModalityEnum = {
+  TEXT: 'text', // 文本（必选）
+  IMAGE: 'image', // 图片
+  VIDEO: 'video' // 视频
+}
+
+/** AI 模型输入模态的选项 */
+export const AiModelInputModalityOptions = [
+  { label: '文本', value: AiModelInputModalityEnum.TEXT, disabled: true },
+  { label: '图片', value: AiModelInputModalityEnum.IMAGE },
+  { label: '视频', value: AiModelInputModalityEnum.VIDEO }
+]
+
 export const OtherPlatformEnum: ImageModelVO[] = [
   {
     key: AiPlatformEnum.TONG_YI,

@@ -102,6 +102,22 @@
           class="!w-1/1"
         />
       </el-form-item>
+      <el-form-item
+        label="输入能力"
+        prop="inputModalities"
+        v-if="formData.type === AiModelTypeEnum.CHAT"
+      >
+        <el-checkbox-group v-model="formData.inputModalities">
+          <el-checkbox
+            v-for="item in AiModelInputModalityOptions"
+            :key="item.value"
+            :value="item.value"
+            :disabled="item.disabled"
+          >
+            {{ item.label }}
+          </el-checkbox>
+        </el-checkbox-group>
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -114,7 +130,11 @@ import { ModelApi, ModelVO } from '@/api/ai/model/model'
 import { ApiKeyApi, ApiKeyVO } from '@/api/ai/model/apiKey'
 import { CommonStatusEnum } from '@/utils/constants'
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
-import { AiModelTypeEnum } from '@/views/ai/utils/constants'
+import {
+  AiModelInputModalityEnum,
+  AiModelInputModalityOptions,
+  AiModelTypeEnum
+} from '@/views/ai/utils/constants'
 
 /** API 模型的表单 */
 defineOptions({ name: 'ModelForm' })
@@ -137,7 +157,8 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE,
   temperature: undefined,
   maxTokens: undefined,
-  maxContexts: undefined
+  maxContexts: undefined,
+  inputModalities: [AiModelInputModalityEnum.TEXT] as string[] // 输入模态，默认 text
 })
 const formRules = reactive({
   keyId: [{ required: true, message: 'API 秘钥不能为空', trigger: 'blur' }],
@@ -164,7 +185,13 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ModelApi.getModel(id)
+      const data = await ModelApi.getModel(id)
+      // 保留已配置的 image/video，并补上必选的 text
+      const inputModalities = data.inputModalities || []
+      data.inputModalities = inputModalities.includes(AiModelInputModalityEnum.TEXT)
+        ? inputModalities
+        : [AiModelInputModalityEnum.TEXT, ...inputModalities]
+      formData.value = data
     } finally {
       formLoading.value = false
     }
@@ -182,11 +209,13 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ModelVO
+    // 复制一份再删除字段，避免提交失败后表单丢失聊天参数
+    const data = { ...formData.value } as unknown as ModelVO
     if (data.type !== AiModelTypeEnum.CHAT) {
       delete data.temperature
       delete data.maxTokens
       delete data.maxContexts
+      delete data.inputModalities
     }
     if (formType.value === 'create') {
       await ModelApi.createModel(data)
@@ -216,7 +245,8 @@ const resetForm = () => {
     status: CommonStatusEnum.ENABLE,
     temperature: undefined,
     maxTokens: undefined,
-    maxContexts: undefined
+    maxContexts: undefined,
+    inputModalities: [AiModelInputModalityEnum.TEXT]
   }
   formRef.value?.resetFields()
 }
