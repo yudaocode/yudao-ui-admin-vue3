@@ -164,6 +164,9 @@ importers:
       vue-dompurify-html:
         specifier: ^5.3.0
         version: 5.3.0(vue@3.5.34(typescript@6.0.3))
+      vue-draggable-plus:
+        specifier: 0.6.0
+        version: 0.6.0(@types/sortablejs@1.15.9)
       vue-i18n:
         specifier: 11.4.0
         version: 11.4.0(vue@3.5.34(typescript@6.0.3))
@@ -185,6 +188,9 @@ importers:
       web-storage-cache:
         specifier: ^1.1.1
         version: 1.1.1
+      xgplayer:
+        specifier: 3.0.20
+        version: 3.0.20(core-js@3.50.0)
       xml-js:
         specifier: ^1.6.11
         version: 1.6.11
@@ -1661,6 +1667,9 @@ packages:
   '@types/qs@6.15.0':
     resolution: {integrity: sha512-JawvT8iBVWpzTrz3EGw9BTQFg3BQNmwERdKE22vlTxawwtbyUSlMppvZYKLZzB5zgACXdXxbD3m1bXaMqP/9ow==}
 
+  '@types/sortablejs@1.15.9':
+    resolution: {integrity: sha512-7HP+rZGE2p886PKV9c9OJzLBI6BBJu1O7lJGYnPyG3fS4/duUCcngkNCjsLwIMV+WMqANe3tt4irrXHSIe68OQ==, tarball: https://registry.npmmirror.com/@types/sortablejs/-/sortablejs-1.15.9.tgz}
+
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==, tarball: https://registry.npmmirror.com/@types/trusted-types/-/trusted-types-2.0.7.tgz}
 
@@ -2542,6 +2551,9 @@ packages:
   core-js-pure@3.48.0:
     resolution: {integrity: sha512-1slJgk89tWC51HQ1AEqG+s2VuwpTRr8ocu4n20QUcH1v9lAN0RXen0Q0AABa/DK1I7RrNWLucplOHMx8hfTGTw==}
 
+  core-js@3.50.0:
+    resolution: {integrity: sha512-BRWgOLKkFeCgRudR6zrs8p9XJZcE14grzKMMssoYrk6krtuEZ7MTKPIY5RzOnqsEKIR9kst7wNzphttraT+Yqw==, tarball: https://registry.npmmirror.com/core-js/-/core-js-3.50.0.tgz}
+
   cosmiconfig-typescript-loader@6.3.0:
     resolution: {integrity: sha512-Akr82WH1Wfqatyiqpj8HDkO2o2KmJRu1FhKfSNJP3K4IdXwHfEyL7MOb62i1AGQVLtIQM+iCE9CGOtrfhR+mmA==}
     engines: {node: '>=v18'}
@@ -2734,6 +2746,9 @@ packages:
     resolution: {integrity: sha512-MOqHvMWF9/9MX6nza0KgvFH4HpMU0EF5uUDXqX/BtxtU8NfB0QzRtJ8Oe/6SuS4kbhyzVJwjd97EA4PKrzJ8bw==}
     engines: {node: '>=0.12'}
 
+  danmu.js@1.2.1:
+    resolution: {integrity: sha512-evDEImUBo94c846fC92K//Dzll8jXnZ3zKmYlQHwMzmvw6IW2IyjWL3Ew2SqEAzuqauFnDkwJEgZauu3uW/p1Q==, tarball: https://registry.npmmirror.com/danmu.js/-/danmu.js-1.2.1.tgz}
+
   dayjs@1.11.20:
     resolution: {integrity: sha512-YbwwqR/uYpeoP4pu043q+LTDLFBLApUP6VxRihdfNTqu4ubqMlGDLd6ErXhEgsyvY0K6nCs7nggYumAN+9uEuQ==}
 
@@ -2765,6 +2780,9 @@ packages:
   delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
+
+  delegate@3.2.0:
+    resolution: {integrity: sha512-IofjkYBZaZivn0V8nnsMJGBr4jVLxHDheKSW88PyxS5QC4Vo9ZbZVvhzlSxY87fVq3STR6r+4cGepyHkcWOQSw==, tarball: https://registry.npmmirror.com/delegate/-/delegate-3.2.0.tgz}
 
   destr@2.0.5:
     resolution: {integrity: sha512-ugFTXCtDZunbzasqBxrK93Ik/DRYsO6S/fedkWEMKqt04xZ4csmnmwGDBAb07QWNaGMAmnTIemsYZCksjATwsA==}
@@ -2838,6 +2856,9 @@ packages:
   dotenv@17.3.1:
     resolution: {integrity: sha512-IO8C/dzEb6O3F9/twg6ZLXz164a2fhTnEWb95H23Dm4OuN+92NmEAlTrupP9VW6Jm3sO26tQlqyvyi4CsnY9GA==}
     engines: {node: '>=12'}
+
+  downloadjs@1.4.7:
+    resolution: {integrity: sha512-LN1gO7+u9xjU5oEScGFKvXhYf7Y/empUIIEAGBs1LzUq/rg5duiDrkuH5A2lQGd5jfMOb9X9usDa2oVXwJ0U/Q==, tarball: https://registry.npmmirror.com/downloadjs/-/downloadjs-1.4.7.tgz}
 
   driver.js@1.4.0:
     resolution: {integrity: sha512-Gm64jm6PmcU+si21sQhBrTAM1JvUrR0QhNmjkprNLxohOBzul9+pNHXgQaT9lW84gwg9GMLB3NZGuGolsz5uew==}
@@ -3058,6 +3079,9 @@ packages:
 
   event-emitter@0.3.5:
     resolution: {integrity: sha512-D9rRn9y7kLPnJ+hMq7S/nhvoKwwvVJahBi2BPmx3bvbsEdK3W9ii8cBSGjP+72/LnM4n6fo3+dkCX5FeTQruXA==}
+
+  eventemitter3@4.0.7:
+    resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==, tarball: https://registry.npmmirror.com/eventemitter3/-/eventemitter3-4.0.7.tgz}
 
   eventemitter3@5.0.4:
     resolution: {integrity: sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==}
@@ -4926,6 +4950,15 @@ packages:
     peerDependencies:
       vue: ^3.4.36
 
+  vue-draggable-plus@0.6.0:
+    resolution: {integrity: sha512-G5TSfHrt9tX9EjdG49InoFJbt2NYk0h3kgjgKxkFWr3ulIUays0oFObr5KZ8qzD4+QnhtALiRwIqY6qul4egqw==, tarball: https://registry.npmmirror.com/vue-draggable-plus/-/vue-draggable-plus-0.6.0.tgz}
+    peerDependencies:
+      '@types/sortablejs': ^1.15.0
+      '@vue/composition-api': '*'
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+
   vue-eslint-parser@10.4.0:
     resolution: {integrity: sha512-Vxi9pJdbN3ZnVGLODVtZ7y4Y2kzAAE2Cm0CZ3ZDRvydVYxZ6VrnBhLikBsRS+dpwj4Jv4UCv21PTEwF5rQ9WXg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -5061,6 +5094,16 @@ packages:
   write-file-atomic@7.0.1:
     resolution: {integrity: sha512-OTIk8iR8/aCRWBqvxrzxR0hgxWpnYBblY1S5hDWBQfk/VFmJwzmJgQFN3WsoUKHISv2eAwe+PpbUzyL1CKTLXg==}
     engines: {node: ^20.17.0 || >=22.9.0}
+
+  xgplayer-subtitles@3.0.20:
+    resolution: {integrity: sha512-I1bjsIY+aKOrhYQspLdneOkYg+Vf4cJVGPnDSFnNebnxXl9Mhz5SEpWGzYizMYxL9UvsQ9pgjeEY0o4hkwM+kQ==, tarball: https://registry.npmmirror.com/xgplayer-subtitles/-/xgplayer-subtitles-3.0.20.tgz}
+    peerDependencies:
+      core-js: '>=3.12.1'
+
+  xgplayer@3.0.20:
+    resolution: {integrity: sha512-UNKZJRyODOZGdka83ao8fI18xdhzOV8qG4aNEOOkuOQbXFXfXsJMr/dazRHFP+uXmTqiCXr568euee3ch7CS7g==, tarball: https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.20.tgz}
+    peerDependencies:
+      core-js: '>=3.12.1'
 
   xml-js@1.6.11:
     resolution: {integrity: sha512-7rVi2KMfwfWFl+GpPg6m80IVMWXLRjO+PxTq7V2CDhoGak0wzYzFgUY2m4XJ47OGdXd8eLE8EmwfAmdjw7lC1g==}
@@ -6410,6 +6453,8 @@ snapshots:
 
   '@types/qs@6.15.0': {}
 
+  '@types/sortablejs@1.15.9': {}
+
   '@types/trusted-types@2.0.7':
     optional: true
 
@@ -7566,6 +7611,8 @@ snapshots:
 
   core-js-pure@3.48.0: {}
 
+  core-js@3.50.0: {}
+
   cosmiconfig-typescript-loader@6.3.0(@types/node@25.6.0)(cosmiconfig@9.0.1(typescript@6.0.3))(typescript@6.0.3):
     dependencies:
       '@types/node': 25.6.0
@@ -7784,6 +7831,10 @@ snapshots:
       es5-ext: 0.10.64
       type: 2.7.3
 
+  danmu.js@1.2.1:
+    dependencies:
+      event-emitter: 0.3.5
+
   dayjs@1.11.20: {}
 
   debug@4.4.3:
@@ -7803,6 +7854,8 @@ snapshots:
       robust-predicates: 3.0.2
 
   delayed-stream@1.0.0: {}
+
+  delegate@3.2.0: {}
 
   destr@2.0.5: {}
 
@@ -7879,6 +7932,8 @@ snapshots:
       is-obj: 2.0.0
 
   dotenv@17.3.1: {}
+
+  downloadjs@1.4.7: {}
 
   driver.js@1.4.0: {}
 
@@ -8198,6 +8253,8 @@ snapshots:
     dependencies:
       d: 1.0.2
       es5-ext: 0.10.64
+
+  eventemitter3@4.0.7: {}
 
   eventemitter3@5.0.4: {}
 
@@ -10118,6 +10175,10 @@ snapshots:
       dompurify: 3.3.1
       vue: 3.5.34(typescript@6.0.3)
 
+  vue-draggable-plus@0.6.0(@types/sortablejs@1.15.9):
+    dependencies:
+      '@types/sortablejs': 1.15.9
+
   vue-eslint-parser@10.4.0(eslint@10.3.0(jiti@2.6.1)):
     dependencies:
       debug: 4.4.3
@@ -10277,6 +10338,20 @@ snapshots:
   write-file-atomic@7.0.1:
     dependencies:
       signal-exit: 4.1.0
+
+  xgplayer-subtitles@3.0.20(core-js@3.50.0):
+    dependencies:
+      core-js: 3.50.0
+      eventemitter3: 4.0.7
+
+  xgplayer@3.0.20(core-js@3.50.0):
+    dependencies:
+      core-js: 3.50.0
+      danmu.js: 1.2.1
+      delegate: 3.2.0
+      downloadjs: 1.4.7
+      eventemitter3: 4.0.7
+      xgplayer-subtitles: 3.0.20(core-js@3.50.0)
 
   xml-js@1.6.11:
     dependencies:
