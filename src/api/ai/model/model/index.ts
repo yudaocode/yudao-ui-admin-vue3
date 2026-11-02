@@ -14,6 +14,19 @@ export interface ModelVO {
   maxTokens?: number // 单条回复的最大 Token 数量
   maxContexts?: number // 上下文的最大 Message 数量
   inputModalities?: string[] // 输入模态数组
+  reasoningConfig?: ModelReasoningConfigVO // 思考配置；为空表示未配置，simple-list 不返回
+}
+
+// AI 模型的思考配置
+export interface ModelReasoningConfigVO {
+  levels: ModelReasoningLevelVO[] // 档位数组，从低到高；为空表示清空
+  defaultLevel?: string // 默认档位
+}
+
+// AI 模型的思考档位
+export interface ModelReasoningLevelVO {
+  level: string // 档位值
+  options: Record<string, unknown> // 思考参数
 }
 
 // AI 模型 API

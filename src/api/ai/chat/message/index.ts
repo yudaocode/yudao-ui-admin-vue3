@@ -3,6 +3,8 @@ import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { getAccessToken } from '@/utils/auth'
 import { config } from '@/config/axios/config'
 
+// DONE @AI：这个是否必要？感觉可以去掉？（已删除思考档位专用的 onopen 校验：后端档位错误改走 SSE 错误帧，由页面已有的 code !== 0 分支展示）
+
 // 聊天VO
 export interface ChatMessageVO {
   id: number // 编号
@@ -16,6 +18,9 @@ export interface ChatMessageVO {
   reasoningContent?: string // 推理内容
   attachmentUrls?: string[] // 附件 URL 数组
   tokens: number // 消耗 Token 数量
+  inputTokens?: number | null // 输入 Token，未知为 null
+  outputTokens?: number | null // 输出 Token，未知为 null
+  totalTokens?: number | null // 合计 Token，未知为 null
   segmentIds?: number[] // 段落编号
   segments?: {
     id: number // 段落编号
@@ -56,7 +61,8 @@ export const ChatMessageApi = {
     onMessage,
     onError,
     onClose,
-    attachmentUrls?: string[]
+    attachmentUrls?: string[],
+    reasoningLevel?: string
   ) => {
     const token = getAccessToken()
     return fetchEventSource(`${config.base_url}/ai/chat/message/send-stream`, {
@@ -71,7 +77,8 @@ export const ChatMessageApi = {
         content,
         useContext: enableContext,
         useSearch: enableWebSearch,
-        attachmentUrls: attachmentUrls || []
+        attachmentUrls: attachmentUrls || [],
+        reasoningLevel
       }),
       onmessage: onMessage,
       onerror: onError,

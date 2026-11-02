@@ -2,7 +2,7 @@
   <div ref="messageContainer" class="h-100% overflow-y-auto relative">
     <div class="flex flex-col overflow-y-hidden px-20px" v-for="(item, index) in list" :key="index">
       <!-- 靠左 message：system、assistant 类型 -->
-      <div class="flex flex-row mt-50px" v-if="item.type !== 'user'">
+      <div class="flex flex-row mt-50px" v-if="item.type !== AiChatMessageTypeEnum.USER">
         <div class="avatar">
           <el-avatar :src="roleAvatar" />
         </div>
@@ -46,7 +46,7 @@
         </div>
       </div>
       <!-- 靠右 message：user 类型 -->
-      <div class="flex flex-row-reverse justify-start mt-50px" v-if="item.type === 'user'">
+      <div class="flex flex-row-reverse justify-start mt-50px" v-if="item.type === AiChatMessageTypeEnum.USER">
         <div class="avatar">
           <el-avatar :src="userAvatar" />
         </div>
@@ -117,6 +117,7 @@ import MessageKnowledge from './MessageKnowledge.vue'
 import MessageReasoning from './MessageReasoning.vue'
 import MessageFiles from './MessageFiles.vue'
 import MessageWebSearch from './MessageWebSearch.vue'
+import { AiChatMessageTypeEnum } from '@/views/ai/utils/constants'
 import { useClipboard } from '@vueuse/core'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
 import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'

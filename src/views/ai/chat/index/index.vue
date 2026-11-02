@@ -92,6 +92,36 @@
               <span class="ml-5px mr-15px text-14px text-#8f8f8f">上下文</span>
               <el-switch v-model="enableWebSearch" />
               <span class="ml-5px text-14px text-#8f8f8f">联网搜索</span>
+              <!-- 思考等级：只有模型配置了档位才展示；只有一档时固定展示，不可点击 -->
+              <el-tag v-if="reasoningLevels.length === 1" type="info" size="small" class="ml-15px">
+                思考等级：{{ getReasoningLevelLabel(reasoningLevels[0]) }}
+              </el-tag>
+              <el-dropdown
+                v-else-if="reasoningLevels.length > 1"
+                trigger="click"
+                class="ml-15px"
+                @command="reasoningSelectedLevel = $event"
+              >
+                <el-button size="small">
+                  思考等级：{{ getReasoningLevelLabel(reasoningSelectedLevel) }}
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      v-for="level in reasoningLevels"
+                      :key="level"
+                      :command="level"
+                      :style="
+                        level === reasoningSelectedLevel
+                          ? { color: 'var(--el-color-primary)' }
+                          : undefined
+                      "
+                    >
+                      {{ getReasoningLevelLabel(level) }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
             <el-button
               type="primary"
@@ -133,6 +163,12 @@ import MessageListEmpty from './components/message/MessageListEmpty.vue'
 import MessageLoading from './components/message/MessageLoading.vue'
 import MessageNewConversation from './components/message/MessageNewConversation.vue'
 import MessageFileUpload from './components/message/MessageFileUpload.vue'
+import { AiChatMessageTypeEnum } from '@/views/ai/utils/constants'
+import {
+  getReasoningLevelLabel,
+  getReasoningLevels,
+  resolveReasoningLevel
+} from '@/views/ai/utils/utils'
 
 /** AI 聊天对话 列表 */
 defineOptions({ name: 'AiChat' })
@@ -166,6 +202,12 @@ const prompt = ref<string>() // prompt
 const enableContext = ref<boolean>(true) // 是否开启上下文
 const enableWebSearch = ref<boolean>(false) // 是否开启联网搜索
 const uploadFiles = ref<string[]>([]) // 上传的文件 URL 列表
+// 思考档位：只存在于本次发送，不持久化
+// DONE @AI：这块 modelList 有什么办法，不单独拉下么？先讨论 。（已改为随会话返回 modelReasoningConfig，去掉独立的模型列表请求）
+const reasoningSelectedLevel = ref<string>() // 选中的思考档位
+const reasoningLevels = computed(() =>
+  getReasoningLevels(activeConversation.value?.modelReasoningConfig)
+) // 当前对话模型配置的思考档位，按配置顺序；未配置时为空数组
 // 接收 Stream 消息
 const receiveMessageFullText = ref('')
 const receiveMessageDisplayedText = ref('')
@@ -254,6 +296,23 @@ const handleConversationCreateSuccess = async () => {
   uploadFiles.value = []
 }
 
+// =========== 【思考档位】相关 ===========
+
+/** 重置思考选择为模型默认档位：切换对话、切换模型时触发 */
+const resetReasoningSelection = () => {
+  reasoningSelectedLevel.value = resolveReasoningLevel(
+    activeConversation.value?.modelReasoningConfig
+  )
+}
+// 只监听对话编号和模型编号：同一对话重新拉取详情（如改标题）不重置已选档位
+watch(
+  [() => activeConversation.value?.id, () => activeConversation.value?.modelId],
+  resetReasoningSelection,
+  { immediate: true }
+)
+
+// DONE @AI：这个要不去掉，感觉有点多余了。不考虑这个情况；（已删除发送失败后自动刷新模型列表）
+
 // =========== 【消息列表】相关 ===========
 
 /** 获取消息 message 列表 */
@@ -300,7 +359,7 @@ const messageList = computed(() => {
       {
         id: 0,
         conversationId: activeConversation.value.id || 0,
-        type: 'system',
+        type: AiChatMessageTypeEnum.SYSTEM,
         userId: '',
         roleId: '',
         model: 0,
@@ -442,13 +501,18 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
   conversationInProgress.value = true
   // 设置为空
   receiveMessageFullText.value = ''
+  // 本次思考档位：发送、重新生成都使用当前选择
+  const reasoningLevel = resolveReasoningLevel(
+    activeConversation.value?.modelReasoningConfig,
+    reasoningSelectedLevel.value
+  )
 
   try {
     // 1.1 先添加两个假数据，等 stream 返回再替换
     activeMessageList.value.push({
       id: -1,
       conversationId: activeConversationId.value,
-      type: 'user',
+      type: AiChatMessageTypeEnum.USER,
       content: userMessage.content,
       attachmentUrls: userMessage.attachmentUrls || [],
       createTime: new Date()
@@ -456,7 +520,7 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
     activeMessageList.value.push({
       id: -2,
       conversationId: activeConversationId.value,
-      type: 'assistant',
+      type: AiChatMessageTypeEnum.ASSISTANT,
       content: '思考中...',
       reasoningContent: '',
       createTime: new Date()
@@ -486,32 +550,34 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
           return
         }
 
-        // 如果内容为空，就不处理。
-        if (data.receive.content === '' && !data.receive.reasoningContent) {
-          return
-        }
-
-        // 首次返回需要添加一个 message 到页面，后面的都是更新
+        // 首个成功帧：替换两个假数据，只有用量时也替换；正文、思考统一在下面追加，避免首帧重复
         if (isFirstChunk) {
           isFirstChunk = false
           // 弹出两个假数据
           activeMessageList.value.pop()
           activeMessageList.value.pop()
           // 更新返回的数据
-          activeMessageList.value.push(data.send)
           data.send.attachmentUrls = userMessage.attachmentUrls
-          activeMessageList.value.push(data.receive)
+          activeMessageList.value.push(data.send)
+          activeMessageList.value.push({ ...data.receive, content: '', reasoningContent: '' })
         }
+        const lastMessage = activeMessageList.value[activeMessageList.value.length - 1]
+
+        // 同步 Token 用量：最新快照替换，未知保持 null
+        Object.assign(lastMessage, {
+          inputTokens: data.receive.inputTokens,
+          outputTokens: data.receive.outputTokens,
+          totalTokens: data.receive.totalTokens
+        })
 
         // 处理 reasoningContent
         if (data.receive.reasoningContent) {
-          const lastMessage = activeMessageList.value[activeMessageList.value.length - 1]
           lastMessage.reasoningContent =
-            lastMessage.reasoningContent + data.receive.reasoningContent
+            (lastMessage.reasoningContent || '') + data.receive.reasoningContent
         }
 
         // 处理正常内容
-        if (data.receive.content !== '') {
+        if (data.receive.content) {
           receiveMessageFullText.value = receiveMessageFullText.value + data.receive.content
         }
         // 滚动到最下面
@@ -527,7 +593,8 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       () => {
         stopStream()
       },
-      userMessage.attachmentUrls
+      userMessage.attachmentUrls,
+      reasoningLevel
     )
   } catch {}
 }
