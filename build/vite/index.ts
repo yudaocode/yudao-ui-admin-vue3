@@ -9,6 +9,8 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import viteCompression from 'vite-plugin-compression'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons-ng'
 import UnoCSS from 'unocss/vite'
+import { visualizer } from 'rollup-plugin-visualizer'
+import type { PluginOption } from 'vite'
 
 export function createVitePlugins(isBuild = false, env: Record<string, string> = {}) {
   const root = process.cwd()
@@ -66,22 +68,33 @@ export function createVitePlugins(isBuild = false, env: Record<string, string> =
       iconDirs: [pathResolve('src/assets/svgs')],
       symbolId: 'icon-[dir]-[name]'
     }),
-    isBuild && compressTypes.includes('gzip') && viteCompression({
-      verbose: true, // 是否在控制台输出压缩结果
-      disable: false, // 是否禁用
-      threshold: 10240, // 体积大于 threshold 才会被压缩,单位 b
-      algorithm: 'gzip', // 压缩算法,可选 [ 'gzip' , 'brotliCompress' ,'deflate' , 'deflateRaw']
-      ext: '.gz', // 生成的压缩包后缀
-      deleteOriginFile: false //压缩后是否删除源文件
-    }),
-    isBuild && compressTypes.includes('brotli') && viteCompression({
-      verbose: true,
-      disable: false,
-      threshold: 10240,
-      algorithm: 'brotliCompress',
-      ext: '.br',
-      deleteOriginFile: false
-    })
+    isBuild &&
+      compressTypes.includes('gzip') &&
+      viteCompression({
+        verbose: true, // 是否在控制台输出压缩结果
+        disable: false, // 是否禁用
+        threshold: 10240, // 体积大于 threshold 才会被压缩,单位 b
+        algorithm: 'gzip', // 压缩算法,可选 [ 'gzip' , 'brotliCompress' ,'deflate' , 'deflateRaw']
+        ext: '.gz', // 生成的压缩包后缀
+        deleteOriginFile: false //压缩后是否删除源文件
+      }),
+    isBuild &&
+      compressTypes.includes('brotli') &&
+      viteCompression({
+        verbose: true,
+        disable: false,
+        threshold: 10240,
+        algorithm: 'brotliCompress',
+        ext: '.br',
+        deleteOriginFile: false
+      }),
+    // 打包体积分析：默认关闭，仅 build 且 VITE_USE_BUNDLE_ANALYZER=true 时生成离线报告；按官方建议放在最后
+    isBuild &&
+      env.VITE_USE_BUNDLE_ANALYZER === 'true' &&
+      (visualizer({
+        filename: resolve(root, 'output/bundle-analyzer/stats.html'),
+        open: false
+      }) as PluginOption)
   ]
 
   return plugins.filter(Boolean)
