@@ -4,12 +4,21 @@
       <h3 class="m-0 px-7 shrink-0 flex items-center justify-between">
         <span>思维导图预览</span>
         <!-- 展示在右上角 -->
-        <el-button v-show="isEnd" size="small" type="primary" @click="downloadImage">
-          <template #icon>
-            <Icon icon="ph:copy-bold" />
-          </template>
-          下载图片
-        </el-button>
+        <div class="flex items-center gap-8px">
+          <TokenUsage
+            v-if="showUsage"
+            :pending="isGenerating"
+            :input-tokens="inputTokens"
+            :output-tokens="outputTokens"
+            :total-tokens="totalTokens"
+          />
+          <el-button v-show="isEnd" size="small" type="primary" @click="downloadImage">
+            <template #icon>
+              <Icon icon="ph:copy-bold" />
+            </template>
+            下载图片
+          </el-button>
+        </div>
       </h3>
     </template>
 
@@ -33,16 +42,29 @@ import { Transformer } from 'markmap-lib'
 import { Toolbar } from 'markmap-toolbar'
 import markdownit from 'markdown-it'
 import download from '@/utils/download'
+import TokenUsage from '@/views/ai/components/TokenUsage.vue'
 
 const md = markdownit()
 const message = useMessage() // 消息弹窗
 
-const props = defineProps<{
-  generatedContent: string // 生成结果
-  isEnd: boolean // 是否结束
-  isGenerating: boolean // 是否正在生成
-  isStart: boolean // 开始状态，开始时需要清除 html
-}>()
+const props = withDefaults(
+  defineProps<{
+    generatedContent: string // 生成结果
+    isEnd: boolean // 是否结束
+    isGenerating: boolean // 是否正在生成
+    isStart: boolean // 开始状态，开始时需要清除 html
+    inputTokens?: number | null // 业务快照：输入 Token，未知为 null
+    outputTokens?: number | null // 业务快照：输出 Token，未知为 null
+    totalTokens?: number | null // 业务快照：合计 Token，未知为 null
+    showUsage?: boolean // 是否展示 Token 用量：真实生成的结果才展示，示例内容不展示
+  }>(),
+  {
+    inputTokens: null,
+    outputTokens: null,
+    totalTokens: null,
+    showUsage: false
+  }
+)
 const contentRef = ref<HTMLDivElement>() // 右侧出来 header 以下的区域
 const mdContainerRef = ref<HTMLDivElement>() // markdown 的容器，用来滚动到底下的
 const mindMapRef = ref<HTMLDivElement>() // 思维导图的容器

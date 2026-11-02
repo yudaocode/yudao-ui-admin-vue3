@@ -13,6 +13,7 @@
       ref="rightRef"
       class="flex-grow"
       v-model:content="writeResult"
+      :usage="writeResp"
     />
   </div>
 </template>
@@ -20,7 +21,7 @@
 <script setup lang="ts">
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
-import { WriteApi, WriteVO } from '@/api/ai/write'
+import { AiWriteGenerateRespVO, WriteApi, WriteVO } from '@/api/ai/write'
 import { WriteExample } from '@/views/ai/utils/constants'
 
 const message = useMessage()
@@ -28,6 +29,7 @@ const message = useMessage()
 const writeResult = ref('') // 写作结果
 const isWriting = ref(false) // 是否正在写作中
 const abortController = ref<AbortController>() // // 写作进行中 abort 控制器(控制 stream 写作)
+const writeResp = ref<AiWriteGenerateRespVO>() // 最近一帧的生成结果，用于展示 Token 用量；示例、重置时为空，不展示
 
 /** 停止 stream 生成 */
 const stopStream = () => {
@@ -40,6 +42,7 @@ const rightRef = ref<InstanceType<typeof Right>>()
 const submit = (data: WriteVO) => {
   abortController.value = new AbortController()
   writeResult.value = ''
+  writeResp.value = undefined
   isWriting.value = true
   WriteApi.writeStream({
     data,
@@ -50,7 +53,12 @@ const submit = (data: WriteVO) => {
         stopStream()
         return
       }
-      writeResult.value = writeResult.value + data
+      // Token 取最新快照，不累加；仅携带用量的尾帧 content 为空字符串
+      writeResp.value = data
+      if (!data.content) {
+        return
+      }
+      writeResult.value = writeResult.value + data.content
       // 滚动到底部
       await nextTick()
       rightRef.value?.scrollToBottom()
@@ -69,10 +77,12 @@ const submit = (data: WriteVO) => {
 /** 点击示例触发 */
 const handleExampleClick = (type: keyof typeof WriteExample) => {
   writeResult.value = WriteExample[type].data
+  writeResp.value = undefined // 示例内容不是模型生成，不展示用量
 }
 
 /** 点击重置的时候清空写作的结果**/
 const reset = () => {
   writeResult.value = ''
+  writeResp.value = undefined
 }
 </script>

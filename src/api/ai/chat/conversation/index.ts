@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import { ModelReasoningConfigVO } from '@/api/ai/model/model'
 
 // AI 聊天对话 VO
 export interface ChatConversationVO {
@@ -19,6 +20,7 @@ export interface ChatConversationVO {
   roleAvatar?: string // 角色头像
   modelMaxTokens?: string // 模型的单条回复的最大 Token 数量
   modelMaxContexts?: string // 模型的上下文的最大 Message 数量
+  modelReasoningConfig?: ModelReasoningConfigVO // 模型的思考配置；为空表示未配置
 }
 
 // AI 聊天对话 API

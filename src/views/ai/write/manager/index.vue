@@ -122,6 +122,15 @@
           <dict-tag :type="DICT_TYPE.AI_WRITE_LANGUAGE" :value="scope.row.language" />
         </template>
       </el-table-column>
+      <el-table-column label="输入 Token" align="center" prop="inputTokens" width="110">
+        <template #default="scope">{{ formatTokenCount(scope.row.inputTokens) }}</template>
+      </el-table-column>
+      <el-table-column label="输出 Token" align="center" prop="outputTokens" width="110">
+        <template #default="scope">{{ formatTokenCount(scope.row.outputTokens) }}</template>
+      </el-table-column>
+      <el-table-column label="合计 Token" align="center" prop="totalTokens" width="110">
+        <template #default="scope">{{ formatTokenCount(scope.row.totalTokens) }}</template>
+      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
@@ -158,6 +167,7 @@ import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { WriteApi, AiWritePageReqVO, AiWriteRespVo } from '@/api/ai/write'
 import * as UserApi from '@/api/system/user'
+import { formatTokenCount } from '@/views/ai/utils/format'
 
 /** AI 写作列表 */
 defineOptions({ name: 'AiWriteManager' })

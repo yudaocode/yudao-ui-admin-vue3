@@ -4,12 +4,21 @@
       <h3 class="m-0 px-7 shrink-0 flex items-center justify-between">
         <span>预览</span>
         <!-- 展示在右上角 -->
-        <el-button color="#846af7" v-show="showCopy" @click="copyContent" size="small">
-          <template #icon>
-            <Icon icon="ph:copy-bold" />
-          </template>
-          复制
-        </el-button>
+        <div class="flex items-center gap-8px">
+          <TokenUsage
+            v-if="usage"
+            :pending="isWriting"
+            :input-tokens="usage.inputTokens"
+            :output-tokens="usage.outputTokens"
+            :total-tokens="usage.totalTokens"
+          />
+          <el-button color="#846af7" v-show="showCopy" @click="copyContent" size="small">
+            <template #icon>
+              <Icon icon="ph:copy-bold" />
+            </template>
+            复制
+          </el-button>
+        </div>
       </h3>
     </template>
 
@@ -43,6 +52,8 @@
 
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
+import { AiWriteGenerateRespVO } from '@/api/ai/write'
+import TokenUsage from '@/views/ai/components/TokenUsage.vue'
 
 const message = useMessage() // 消息弹窗
 const { copied, copy } = useClipboard({ legacy: true }) // 粘贴板
@@ -57,6 +68,11 @@ const props = defineProps({
     // 是否正在生成文章
     type: Boolean,
     default: false
+  },
+  usage: {
+    // 最近一帧的生成结果，用于展示 Token 用量；为空时（示例、重置）不展示
+    type: Object as PropType<AiWriteGenerateRespVO>,
+    default: undefined
   }
 })
 

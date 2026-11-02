@@ -16,6 +16,9 @@ export interface ChatMessageVO {
   reasoningContent?: string // 推理内容
   attachmentUrls?: string[] // 附件 URL 数组
   tokens: number // 消耗 Token 数量
+  inputTokens?: number | null // 输入 Token，未知为 null
+  outputTokens?: number | null // 输出 Token，未知为 null
+  totalTokens?: number | null // 合计 Token，未知为 null
   segmentIds?: number[] // 段落编号
   segments?: {
     id: number // 段落编号
@@ -56,7 +59,8 @@ export const ChatMessageApi = {
     onMessage,
     onError,
     onClose,
-    attachmentUrls?: string[]
+    attachmentUrls?: string[],
+    reasoningLevel?: string
   ) => {
     const token = getAccessToken()
     return fetchEventSource(`${config.base_url}/ai/chat/message/send-stream`, {
@@ -71,7 +75,8 @@ export const ChatMessageApi = {
         content,
         useContext: enableContext,
         useSearch: enableWebSearch,
-        attachmentUrls: attachmentUrls || []
+        attachmentUrls: attachmentUrls || [],
+        reasoningLevel
       }),
       onmessage: onMessage,
       onerror: onError,

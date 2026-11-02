@@ -42,7 +42,19 @@ export interface AiWriteRespVo {
   tone: number
   language: number
   errorMessage: string
+  inputTokens?: number | null // 输入 Token，未知为 null
+  outputTokens?: number | null // 输出 Token，未知为 null
+  totalTokens?: number | null // 合计 Token，未知为 null
   createTime: string
+}
+
+// AI 写作流式生成的单帧数据：CommonResult.data
+export interface AiWriteGenerateRespVO {
+  id: number // 写作编号
+  content: string // 本次增量内容；仅携带用量的尾帧为空字符串
+  inputTokens: number | null // 输入 Token 快照，未知为 null
+  outputTokens: number | null // 输出 Token 快照，未知为 null
+  totalTokens: number | null // 合计 Token 快照，未知为 null
 }
 
 export const WriteApi = {
