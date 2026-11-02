@@ -1,44 +1,17 @@
-export type TableColumn = {
-  field: string
-  label?: string
-  width?: number | string
-  fixed?: 'left' | 'right'
-  children?: TableColumn[]
-} & Recordable
+// 兼容原有的 @/types/table 导入路径，类型统一定义在 Table 组件的 types.ts 中
+import type { TableColumn } from '@/components/Table/src/types'
+
+export type {
+  ColumnFixed,
+  Pagination,
+  TableColumn,
+  TableSetProps,
+  TableSetPropsType,
+  TableSlotDefault
+} from '@/components/Table/src/types'
 
 export type VxeTableColumn = {
   field: string
   title?: string
   children?: TableColumn[]
 } & Recordable
-
-export type TableSlotDefault = {
-  row: Recordable
-  column: TableColumn
-  $index: number
-} & Recordable
-
-export interface Pagination {
-  small?: boolean
-  background?: boolean
-  pageSize?: number
-  defaultPageSize?: number
-  total?: number
-  pageCount?: number
-  pagerCount?: number
-  currentPage?: number
-  defaultCurrentPage?: number
-  layout?: string
-  pageSizes?: number[]
-  popperClass?: string
-  prevText?: string
-  nextText?: string
-  disabled?: boolean
-  hideOnSinglePage?: boolean
-}
-
-export interface TableSetPropsType {
-  field: string
-  path: string
-  value: any
-}

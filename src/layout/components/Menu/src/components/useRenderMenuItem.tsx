@@ -45,8 +45,9 @@ export const useRenderMenuItem = () =>
               </ElMenuItem>
             )
           } else {
+            // teleported：各级子菜单弹层都挂载到 body，避免多级弹层被上级弹层的滚动区域裁切
             return (
-              <ElSubMenu index={resolvedFullPath}>
+              <ElSubMenu index={resolvedFullPath} teleported>
                 {{
                   title: () => renderMenuTitle(meta),
                   default: () => renderMenuItem(children, resolvedFullPath)

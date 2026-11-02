@@ -24,7 +24,7 @@ onMounted(() => {
 
 <template>
   <div ref="contentDetailWrap" :class="[`${prefixCls}-container`]">
-    <Sticky :offset="offset">
+    <Sticky v-if="!$slots.header" :offset="offset">
       <div
         :class="[
           `${prefixCls}-header`,
@@ -49,6 +49,9 @@ onMounted(() => {
     </Sticky>
     <div style="padding: var(--app-content-padding)">
       <ElCard :class="[`${prefixCls}-body`, 'mb-20px']" shadow="never">
+        <template v-if="$slots.header" #header>
+          <slot name="header"></slot>
+        </template>
         <div>
           <slot></slot>
         </div>

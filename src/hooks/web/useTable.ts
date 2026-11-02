@@ -1,12 +1,11 @@
 import download from '@/utils/download'
-import { Table, TableExpose } from '@/components/Table'
+import { Table } from '@/components/Table'
+import type { TableExpose } from '@/components/Table'
 import { ElMessage, ElMessageBox, ElTable } from 'element-plus'
 import { computed, nextTick, reactive, ref, unref, watch } from 'vue'
-import type { TableProps } from '@/components/Table/src/types'
+import type { TableColumn, TableProps, TableSetPropsType } from '@/components/Table/src/types'
+import { useI18n } from '@/hooks/web/useI18n'
 
-import { TableSetPropsType } from '@/types/table'
-
-const { t } = useI18n()
 interface ResponseType<T = any> {
   list: T[]
   total?: number
@@ -35,6 +34,9 @@ interface TableObject<T = any> {
 }
 
 export const useTable = <T = any>(config?: UseTableConfig<T>) => {
+  // 在函数内获取 i18n，支持先 import 本模块、再安装 i18n / pinia
+  const { t } = useI18n()
+
   const tableObject = reactive<TableObject<T>>({
     // 页数
     pageSize: 10,
@@ -74,12 +76,11 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
   watch(
     () => tableObject.pageSize,
     () => {
-      // 当前页不为1时，修改页数后会导致多次调用getList方法
       if (tableObject.currentPage === 1) {
         methods.getList()
       } else {
+        // 当前页不为1时，只重置为第1页，由 currentPage 的 watch 负责请求，避免重复调用getList方法
         tableObject.currentPage = 1
-        methods.getList()
       }
     }
   )
@@ -146,6 +147,15 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
     setColumn: async (columnProps: TableSetPropsType[]) => {
       const table = await getTable()
       table?.setColumn(columnProps)
+    },
+    // 新版 Table 暴露的列增删方法：直接修改 Table 的源 columns 数组
+    addColumn: async (column: TableColumn, index?: number) => {
+      const table = await getTable()
+      table?.addColumn(column, index)
+    },
+    delColumn: async (field: string) => {
+      const table = await getTable()
+      table?.delColumn(field)
     },
     getSelections: async () => {
       const table = await getTable()

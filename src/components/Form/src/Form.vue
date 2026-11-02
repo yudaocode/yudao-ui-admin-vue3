@@ -17,7 +17,7 @@ import { useRenderRadio } from './components/useRenderRadio'
 import { useRenderCheckbox } from './components/useRenderCheckbox'
 import { useDesign } from '@/hooks/web/useDesign'
 import { findIndex } from '@/utils'
-import { set } from 'lodash-es'
+import { cloneDeep, set } from 'lodash-es'
 import { FormProps } from './types'
 import { Icon } from '@/components/Icon'
 import { FormSchema, FormSetPropsType } from '@/types/form'
@@ -68,7 +68,7 @@ export default defineComponent({
     })
 
     // 表单数据
-    const formModel = ref<Recordable>({})
+    const formModel = ref<Recordable>(cloneDeep(props.model))
 
     onMounted(() => {
       emit('register', unref(elFormRef)?.$parent, unref(elFormRef))
@@ -182,6 +182,7 @@ export default defineComponent({
       if (
         item?.component !== 'SelectV2' &&
         item?.component !== 'Cascader' &&
+        item?.component !== 'Transfer' &&
         item?.componentProps?.options
       ) {
         slotsMap.default = () => renderOptions(item)
@@ -281,7 +282,7 @@ export default defineComponent({
       <ElForm
         ref={elFormRef}
         {...getFormBindValue()}
-        model={props.isCustom ? props.model : formModel}
+        model={unref(getProps).isCustom ? unref(getProps).model : formModel}
         class={prefixCls}
         v-loading={props.vLoading}
       >

@@ -54,7 +54,7 @@ const getBindItemValue = (item: DescriptionsSchema) => {
       delete obj[key]
     }
   }
-  return obj
+  return { labelClassName: `${prefixCls}-label`, ...obj }
 }
 
 // 折叠
@@ -94,7 +94,7 @@ const toggleClick = () => {
     </div>
 
     <ElCollapseTransition>
-      <div v-show="show" :class="[`${prefixCls}-content`, 'p-10px']">
+      <div v-show="show" :class="[`${prefixCls}-content`, 'p-20px']">
         <ElDescriptions
           :column="props.columns"
           :direction="mobile ? 'vertical' : 'horizontal'"
@@ -158,9 +158,9 @@ $prefix-cls: #{$namespace}-descriptions;
   }
 }
 
-.#{$prefix-cls}-content {
-  :deep(.#{$elNamespace}-descriptions__cell) {
-    width: 0;
+.#{$prefix-cls} {
+  :deep(.#{$prefix-cls}-label) {
+    width: 150px;
   }
 }
 </style>

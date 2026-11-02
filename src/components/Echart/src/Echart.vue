@@ -82,7 +82,8 @@ let updateId = 0
 let wordCloudReady = false
 
 const initChart = async () => {
-  if (!unref(elRef) || !props.options) {
+  // 延后初始化期间组件可能已卸载
+  if (isUnmounted || !unref(elRef) || !props.options) {
     return
   }
   if (hasWordCloud(unref(options))) {
@@ -144,7 +145,8 @@ const contentResizeHandler = async (e: TransitionEvent) => {
 }
 
 onMounted(() => {
-  initChart()
+  // Dialog 等 v-show 容器在子组件 mounted 之后才显示，延后到本轮更新完成再初始化，避免画布宽度为 0
+  nextTick(initChart)
 
   window.addEventListener('resize', resizeHandler)
 
@@ -155,9 +157,15 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   isUnmounted = true
+  // 作废等待词云扩展加载中的配置更新
+  updateId++
   window.removeEventListener('resize', resizeHandler)
+  resizeHandler.cancel()
   unref(contentEl) &&
     (unref(contentEl) as Element).removeEventListener('transitionend', contentResizeHandler)
+  // 销毁实例，避免卸载后的实例与事件监听残留
+  echartRef?.dispose()
+  echartRef = null
 })
 
 onActivated(() => {

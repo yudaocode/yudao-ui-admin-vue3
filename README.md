@@ -65,6 +65,22 @@
 | ESLint                        | 脚本代码检查              |
 | DotENV                        | env 文件高亮            |
 
+### 打包体积分析
+
+默认关闭，开发和日常构建都不会生成报告。需要分析时，给任意 `build:*` 命令加上环境变量 `VITE_USE_BUNDLE_ANALYZER=true`：
+
+```bash
+# macOS / Linux
+VITE_USE_BUNDLE_ANALYZER=true pnpm build:prod
+```
+
+```powershell
+# Windows PowerShell
+$env:VITE_USE_BUNDLE_ANALYZER='true'; pnpm build:prod; Remove-Item Env:VITE_USE_BUNDLE_ANALYZER
+```
+
+构建完成后，离线报告在 `output/bundle-analyzer/stats.html`，不会打进部署目录，也不会自动打开浏览器。每次分析构建会覆盖上一次的报告。报告只用于查看各依赖和模块的体积，本身不会减小包体积。
+
 ## 🔥 后端架构
 
 支持 Spring Boot、Spring Cloud 两种架构：

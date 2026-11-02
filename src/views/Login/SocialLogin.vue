@@ -233,12 +233,20 @@ const getCookie = () => {
     loginData.loginForm = {
       ...loginData.loginForm,
       username: loginForm.username ? loginForm.username : loginData.loginForm.username,
-      password: loginForm.password ? loginForm.password : loginData.loginForm.password,
       rememberMe: loginForm.rememberMe ? true : false,
       tenantName: loginForm.tenantName ? loginForm.tenantName : loginData.loginForm.tenantName
     }
   }
 }
+// 取消记住我时，立即清除已缓存的登录信息
+watch(
+  () => loginData.loginForm.rememberMe,
+  (rememberMe) => {
+    if (!rememberMe) {
+      authUtil.removeLoginForm()
+    }
+  }
+)
 const loading = ref() // ElLoading.service 返回的实例
 
 // tricky: 配合LoginForm.vue中redirectUri需要对参数进行encode，需要在回调后进行decode

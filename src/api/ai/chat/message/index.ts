@@ -3,6 +3,8 @@ import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { getAccessToken } from '@/utils/auth'
 import { config } from '@/config/axios/config'
 
+// DONE @AI：这个是否必要？感觉可以去掉？（已删除思考档位专用的 onopen 校验：后端档位错误改走 SSE 错误帧，由页面已有的 code !== 0 分支展示）
+
 // 聊天VO
 export interface ChatMessageVO {
   id: number // 编号

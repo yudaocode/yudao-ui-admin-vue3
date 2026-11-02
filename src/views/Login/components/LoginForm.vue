@@ -224,7 +224,6 @@ const getLoginFormCache = () => {
     loginData.loginForm = {
       ...loginData.loginForm,
       username: loginForm.username ? loginForm.username : loginData.loginForm.username,
-      password: loginForm.password ? loginForm.password : loginData.loginForm.password,
       rememberMe: loginForm.rememberMe,
       tenantName: loginForm.tenantName ? loginForm.tenantName : loginData.loginForm.tenantName
     }
@@ -318,6 +317,15 @@ const doSocialLogin = async (type: number) => {
     window.location.href = await LoginApi.socialAuthRedirect(type, encodeURIComponent(redirectUri))
   }
 }
+// 取消记住我时，立即清除已缓存的登录信息
+watch(
+  () => loginData.loginForm.rememberMe,
+  (rememberMe) => {
+    if (!rememberMe) {
+      authUtil.removeLoginForm()
+    }
+  }
+)
 watch(
   () => currentRoute.value,
   (route: RouteLocationNormalizedLoaded) => {

@@ -120,8 +120,10 @@ export const initModel = (schema: FormSchema[], formModel: Recordable) => {
       delete model[v.field]
     } else if (v.component && v.component !== 'Divider') {
       const hasField = Reflect.has(model, v.field)
+      // Transfer 的绑定值是数组，缺省时使用 []，其他组件保持 ''
+      const defaultValue = v.component === 'Transfer' ? [] : ''
       // 如果先前已经有值存在，则不进行重新赋值，而是采用现有的值
-      model[v.field] = hasField ? model[v.field] : v.value !== void 0 ? v.value : ''
+      model[v.field] = hasField ? model[v.field] : v.value !== void 0 ? v.value : defaultValue
     }
   })
   return model

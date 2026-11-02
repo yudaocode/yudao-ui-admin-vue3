@@ -98,10 +98,14 @@ export const isServer = typeof window === 'undefined'
 export const isClient = !isServer
 
 export const isUrl = (path: string): boolean => {
-  // fix:修复hash路由无法跳转的问题
-  const reg =
-    /(((^https?:(?:\/\/)?)(?:[-:&=\+\$,\w]+@)?[A-Za-z0-9.-]+(?::\d+)?|(?:www.|[-:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%#\/.\w-_]*)?\??(?:[-\+=&%@.\w_]*)#?(?:[\w]*))?)$/
-  return reg.test(path)
+  // 使用 URL 解析，兼容 query、hash 中的中文、空格、嵌套链接等
+  // 只认 http、https 外链，避免 javascript:、mailto: 等协议进入 window.open 或 iframe
+  try {
+    const { protocol } = new URL(path)
+    return protocol === 'http:' || protocol === 'https:'
+  } catch {
+    return false
+  }
 }
 
 export const isDark = (): boolean => {
