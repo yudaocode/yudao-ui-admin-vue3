@@ -1,8 +1,99 @@
 import type { Slots } from 'vue'
+import { clone, get, has, toPath } from 'lodash-es'
 import { getSlot } from '@/utils/tsxHelper'
 import { PlaceholderModel } from './types'
 import { FormSchema } from '@/types/form'
 import { ColProps } from '@/types/components'
+
+// 与 lodash set 的防护一致：路径中包含这些键时不按嵌套路径处理，避免修改对象原型
+const UNSAFE_PATH_KEYS = ['__proto__', 'constructor', 'prototype']
+
+// 与 lodash-es _isKey.js 的 reIsDeepProp 一致：含 . 或完整 [...] 才视为路径（如 x[、a[b 仍为普通键）
+const reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/
+
+/**
+ * field 是否按嵌套路径（a.b、a[0].b）处理；与 lodash 一致，存在同名字面量键时仍按普通字段处理。
+ * 含 __proto__/constructor/prototype 的路径按普通字段（字面量键）处理，与原一级键实现相同
+ */
+const isPathField = (model: Recordable, field: string): boolean => {
+  return (
+    !Reflect.has(model, field) &&
+    reIsDeepProp.test(field) &&
+    !toPath(field).some((key) => UNSAFE_PATH_KEYS.includes(key))
+  )
+}
+
+/** 按 field 判断值是否存在（已存在的 0/false/''/null/undefined 均视为存在） */
+export const hasModelValue = (model: Recordable, field: string): boolean => {
+  return isPathField(model, field) ? has(model, field) : Reflect.has(model, field)
+}
+
+/** 按 field 读取值，支持嵌套路径 */
+export const getModelValue = (model: Recordable, field: string): any => {
+  return isPathField(model, field) ? get(model, field) : model[field]
+}
+
+/**
+ * 嵌套路径写入/删除时，沿途对象逐层浅拷贝，避免修改外部传入（如 setValues）的嵌套对象
+ */
+const updatePath = (
+  model: Recordable,
+  keys: string[],
+  update: (target: Recordable, key: string) => void
+) => {
+  const build = (source: any, index: number): any => {
+    const key = keys[index]
+    let target: any
+    if (source !== null && typeof source === 'object') {
+      target = clone(source)
+    } else {
+      // 与 lodash set 一致：数字下标创建数组，其余创建对象
+      target = /^(?:0|[1-9]\d*)$/.test(key) ? [] : {}
+    }
+    if (index === keys.length - 1) {
+      update(target, key)
+    } else {
+      target[key] = build(source?.[key], index + 1)
+    }
+    return target
+  }
+  model[keys[0]] = build(model[keys[0]], 1)
+}
+
+/** 按 field 写入值，支持嵌套路径 */
+export const setModelValue = (model: Recordable, field: string, value: any) => {
+  const keys = toPath(field)
+  if (!isPathField(model, field) || keys.length === 0) {
+    model[field] = value
+    return
+  }
+  // 只解析出一个键（如 [bracket]、[0]）时直接写该键，与 get/has 的读取位置一致
+  if (keys.length === 1) {
+    model[keys[0]] = value
+    return
+  }
+  updatePath(model, keys, (target, key) => {
+    target[key] = value
+  })
+}
+
+/** 按 field 删除值，支持嵌套路径 */
+export const unsetModelValue = (model: Recordable, field: string) => {
+  const keys = toPath(field)
+  if (!isPathField(model, field) || keys.length === 0) {
+    delete model[field]
+    return
+  }
+  // 只解析出一个键（如 [bracket]、[0]）时直接删除该键，与 get/has 的读取位置一致
+  if (keys.length === 1) {
+    delete model[keys[0]]
+    return
+  }
+  if (!has(model, field)) return
+  updatePath(model, keys, (target, key) => {
+    delete target[key]
+  })
+}
 
 /**
  *
@@ -115,15 +206,16 @@ export const setItemComponentSlots = (
 export const initModel = (schema: FormSchema[], formModel: Recordable) => {
   const model: Recordable = { ...formModel }
   schema.map((v) => {
-    // 如果是hidden，就删除对应的值
+    // 如果是hidden，就删除对应的值（field 支持 a.b 嵌套路径）
     if (v.hidden) {
-      delete model[v.field]
+      unsetModelValue(model, v.field)
     } else if (v.component && v.component !== 'Divider') {
-      const hasField = Reflect.has(model, v.field)
-      // Transfer 的绑定值是数组，缺省时使用 []，其他组件保持 ''
-      const defaultValue = v.component === 'Transfer' ? [] : ''
       // 如果先前已经有值存在，则不进行重新赋值，而是采用现有的值
-      model[v.field] = hasField ? model[v.field] : v.value !== void 0 ? v.value : defaultValue
+      if (!hasModelValue(model, v.field)) {
+        // Transfer 的绑定值是数组，缺省时使用 []，其他组件保持 ''
+        const defaultValue = v.component === 'Transfer' ? [] : ''
+        setModelValue(model, v.field, v.value !== void 0 ? v.value : defaultValue)
+      }
     }
   })
   return model

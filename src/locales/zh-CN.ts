@@ -54,7 +54,10 @@ export default {
     updateTime: '更新时间',
     copy: '复制',
     copySuccess: '复制成功',
-    copyError: '复制失败'
+    copyError: '复制失败',
+    lengthRange: '长度在 {min} 到 {max} 个字符',
+    notSpace: '不能包含空格',
+    notSpecialCharacters: '不能包含特殊字符'
   },
   lock: {
     lockScreen: '锁定屏幕',

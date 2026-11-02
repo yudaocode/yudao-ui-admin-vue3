@@ -34,13 +34,8 @@ watch(
       show.value = true
       return
     }
-    if (!collapse) {
-      setTimeout(() => {
-        show.value = !collapse
-      }, 400)
-    } else {
-      show.value = !collapse
-    }
+    // 直接同步，避免旧的延时回调在快速展开→折叠后把标题重新显示
+    show.value = !collapse
   }
 )
 

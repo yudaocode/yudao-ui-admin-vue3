@@ -171,9 +171,10 @@ const filterTableSchema = (crudSchema: CrudSchema[]): TableColumn[] => {
             })
           }
         }
+        // table 内的配置优先于通用配置（如 label、width、formatter）
         return {
-          ...schema.table,
-          ...schema
+          ...schema,
+          ...schema.table
         }
       }
     }

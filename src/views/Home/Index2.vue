@@ -141,10 +141,11 @@
   </el-row>
 </template>
 <script lang="ts" setup>
-import { set } from 'lodash-es'
+import { cloneDeep, set } from 'lodash-es'
 import { EChartsOption } from 'echarts'
 
 import { useDesign } from '@/hooks/web/useDesign'
+import { useAppStore } from '@/store/modules/app'
 import type { AnalysisTotalTypes } from './types'
 import { barOptions, lineOptions, pieOptions } from './echarts-data'
 
@@ -154,7 +155,8 @@ const { t } = useI18n()
 const loading = ref(true)
 const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('panel')
-const pieOptionsData = reactive<EChartsOption>(pieOptions) as EChartsOption
+// 使用页面内深拷贝，避免数据与明暗颜色写回 echarts-data 中与其它首页共享的配置对象
+const pieOptionsData = reactive<EChartsOption>(cloneDeep(pieOptions)) as EChartsOption
 
 let totalState = reactive<AnalysisTotalTypes>({
   users: 0,
@@ -187,9 +189,14 @@ const getUserAccessSource = async () => {
     'legend.data',
     data.map((v) => t(v.name))
   )
-  set(pieOptionsData, 'series.data', data)
+  // series 为数组，需更新第一个饼图的 data；名称与图例一致使用翻译后的文本
+  set(
+    pieOptionsData,
+    'series[0].data',
+    data.map((v) => ({ name: t(v.name), value: v.value }))
+  )
 }
-const barOptionsData = reactive<EChartsOption>(barOptions) as EChartsOption
+const barOptionsData = reactive<EChartsOption>(cloneDeep(barOptions)) as EChartsOption
 
 // 周活跃量
 const getWeeklyUserActivity = async () => {
@@ -216,7 +223,7 @@ const getWeeklyUserActivity = async () => {
   ])
 }
 
-const lineOptionsData = reactive<EChartsOption>(lineOptions) as EChartsOption
+const lineOptionsData = reactive<EChartsOption>(cloneDeep(lineOptions)) as EChartsOption
 
 // 每月销售总额
 const getMonthlySales = async () => {
@@ -266,6 +273,25 @@ const getAllApi = async () => {
 }
 
 getAllApi()
+
+const appStore = useAppStore()
+const isDark = computed(() => appStore.getIsDark)
+
+// 标题、图例文字及空饼圈颜色随明暗切换：只设置 color 叶子，保留其它文字样式与图例选中状态
+const updateTextColor = (dark: boolean) => {
+  const color = dark ? '#ccc' : '#333'
+  const inactiveColor = dark ? '#abacac' : '#ccc'
+  for (const options of [pieOptionsData, barOptionsData, lineOptionsData]) {
+    set(options, 'title.textStyle.color', color)
+  }
+  for (const options of [pieOptionsData, lineOptionsData]) {
+    set(options, 'legend.textStyle.color', color)
+    set(options, 'legend.inactiveColor', inactiveColor)
+  }
+  set(pieOptionsData, 'series[0].emptyCircleStyle.color', inactiveColor)
+}
+
+watch(isDark, updateTextColor, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

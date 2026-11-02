@@ -29,7 +29,6 @@ const emit = defineEmits(['update:modelValue'])
 const dialogVisible = computed({
   get: () => props.modelValue,
   set: (val) => {
-    console.log('set: ', val)
     emit('update:modelValue', val)
   }
 })
@@ -44,17 +43,35 @@ const formRules = reactive({
 })
 
 const formRef = ref() // 表单 Ref
+const passwordRef = ref() // 密码输入框 Ref
+const locking = ref(false) // 锁定处理中，避免连续回车重复执行
 const handleLock = async () => {
-  // 校验表单
-  if (!formRef) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
+  if (!formRef.value || locking.value) return
+  locking.value = true
+  // 校验表单，校验失败时安全退出
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) {
+    locking.value = false
+    return
+  }
   // 提交请求
   dialogVisible.value = false
   lockStore.setLockInfo({
     ...formData.value,
     isLock: true
   })
+}
+
+/** 回车锁定；输入法组合输入（确认候选词）与按住重复触发时忽略 */
+const handleEnter = (e: KeyboardEvent) => {
+  if (e.isComposing || e.keyCode === 229 || e.repeat) return
+  handleLock()
+}
+
+/** 弹窗打开动画结束后聚焦密码框（首次挂载与重新打开都会触发） */
+const handleOpened = () => {
+  locking.value = false
+  passwordRef.value?.focus()
 }
 </script>
 
@@ -65,6 +82,7 @@ const handleLock = async () => {
     max-height="170px"
     :class="prefixCls"
     :title="dialogTitle"
+    @opened="handleOpened"
   >
     <div class="flex flex-col items-center">
       <img :src="avatar" alt="" class="w-70px h-70px rounded-[50%]" />
@@ -72,14 +90,17 @@ const handleLock = async () => {
         {{ userName }}
       </span>
     </div>
-    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
+    <!-- 阻止原生 submit 默认动作，避免单输入框回车整页刷新 -->
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px" @submit.prevent>
       <el-form-item :label="t('lock.lockPassword')" prop="password">
         <el-input
+          ref="passwordRef"
           type="password"
           v-model="formData.password"
           :placeholder="'请输入' + t('lock.lockPassword')"
           clearable
           show-password
+          @keydown.enter="handleEnter"
         />
       </el-form-item>
     </el-form>

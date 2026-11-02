@@ -113,7 +113,8 @@ export const useTagsViewStore = defineStore('tagsView', {
       const userStore = useUserStoreWithOut()
 
       // const affixTags = this.visitedViews.filter((tag) => tag.meta.affix)
-      this.visitedViews = userStore.getUser
+      // 使用 isSetUser 判断登录态：resetState 后 user 仍是非空对象，不能用 getUser 判断
+      this.visitedViews = userStore.getIsSetUser
         ? this.visitedViews.filter((tag) => tag?.meta?.affix)
         : []
     },

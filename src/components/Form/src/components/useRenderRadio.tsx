@@ -12,8 +12,9 @@ export const useRenderRadio = () => {
     >
     return item?.componentProps?.options?.map((option) => {
       const { ...other } = option
+      // 显式传 value（放在 other 之后，别名值优先），不再依赖 label 作为值的废弃回退
       return (
-        <Com {...other} label={option[valueAlias || 'value']}>
+        <Com {...other} value={option[valueAlias || 'value']}>
           {option[labelAlias || 'label']}
         </Com>
       )

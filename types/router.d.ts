@@ -64,8 +64,10 @@ type Component<T = any> =
   | (() => Promise<typeof import('*.vue')>)
   | (() => Promise<T>)
 
+// RouteRecordRaw 为联合类型，Omit 后 component/children 仍为 vue-router 的类型，
+// 与下方自定义的 component（含 string）、children（自定义记录数组）不兼容，需一并排除
 declare global {
-  interface AppRouteRecordRaw extends Omit<RouteRecordRaw, 'meta'> {
+  interface AppRouteRecordRaw extends Omit<RouteRecordRaw, 'meta' | 'component' | 'children'> {
     name: string
     meta: RouteMeta
     component?: Component | string
@@ -75,7 +77,10 @@ declare global {
     keepAlive?: boolean
   }
 
-  interface AppCustomRouteRecordRaw extends Omit<RouteRecordRaw, 'meta'> {
+  interface AppCustomRouteRecordRaw extends Omit<
+    RouteRecordRaw,
+    'meta' | 'component' | 'children'
+  > {
     icon: any
     name: string
     meta: RouteMeta

@@ -30,9 +30,11 @@ const { hour, month, minute, meridiem, year, day, week } = useNow(true)
 
 const { t } = useI18n()
 
+const passwordInputRef = ref() // 密码输入框 Ref
+
 // 解锁
 async function unLock() {
-  if (!password.value) {
+  if (!password.value || loading.value) {
     return
   }
   let pwd = password.value
@@ -56,8 +58,18 @@ async function goLogin() {
   replace('/login')
 }
 
+// 回车解锁；输入法组合输入（确认候选词）与按住重复触发时忽略
+function handleEnter(e: KeyboardEvent) {
+  if (e.isComposing || e.keyCode === 229 || e.repeat) return
+  unLock()
+}
+
 function handleShowForm(show = false) {
   showDate.value = show
+  if (!show) {
+    // 输入区显示后聚焦密码框
+    nextTick(() => passwordInputRef.value?.focus())
+  }
 }
 </script>
 
@@ -97,10 +109,12 @@ function handleShowForm(show = false) {
             </span>
           </div>
           <ElInput
+            ref="passwordInputRef"
             type="password"
             :placeholder="t('lock.placeholder')"
             class="enter-x"
             v-model="password"
+            @keydown.enter="handleEnter"
           />
           <span :class="`text-14px ${prefixCls}-entry__err-msg enter-x`" v-if="errMsg">
             {{ t('lock.message') }}

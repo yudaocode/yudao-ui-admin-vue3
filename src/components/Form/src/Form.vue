@@ -5,11 +5,13 @@ import { componentMap } from './componentMap'
 import { propTypes } from '@/utils/propTypes'
 import { getSlot } from '@/utils/tsxHelper'
 import {
+  getModelValue,
   initModel,
   setComponentProps,
   setFormItemSlots,
   setGridProp,
   setItemComponentSlots,
+  setModelValue,
   setTextPlaceholder
 } from './helper'
 import { useRenderSelect } from './components/useRenderSelect'
@@ -17,7 +19,7 @@ import { useRenderRadio } from './components/useRenderRadio'
 import { useRenderCheckbox } from './components/useRenderCheckbox'
 import { useDesign } from '@/hooks/web/useDesign'
 import { findIndex } from '@/utils'
-import { cloneDeep, set } from 'lodash-es'
+import { cloneDeep, cloneDeepWith, isObject, isPlainObject, set } from 'lodash-es'
 import { FormProps } from './types'
 import { Icon } from '@/components/Icon'
 import { FormSchema, FormSetPropsType } from '@/types/form'
@@ -25,6 +27,43 @@ import { FormSchema, FormSetPropsType } from '@/types/form'
 const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('form')
+
+// inline 表单中输入类组件默认宽度（参考上游 ab98ceb85），插槽、Radio/Checkbox 等不追加
+const inlineInputComponents = [
+  'Input',
+  'Autocomplete',
+  'InputNumber',
+  'InputPassword',
+  'Select',
+  'SelectV2',
+  'Cascader',
+  'TreeSelect',
+  'DatePicker',
+  'TimePicker',
+  'TimeSelect'
+]
+
+// 是否显式设置了宽度，有则保持调用方宽度，不追加默认宽度
+const hasExplicitWidth = (style: unknown): boolean => {
+  if (!style) return false
+  if (Array.isArray(style)) return style.some(hasExplicitWidth)
+  if (typeof style === 'string') return /(^|;)\s*(min-|max-)?width\s*:/i.test(style)
+  return ['width', 'minWidth', 'maxWidth', 'min-width', 'max-width'].some(
+    (key) => (style as Recordable)[key] !== undefined && (style as Recordable)[key] !== ''
+  )
+}
+
+// 是否需要默认宽度：范围日期/时间选择器自身更宽，保持原宽度
+const needInlineInputWidth = (item: FormSchema): boolean => {
+  const componentProps: Recordable = item.componentProps || {}
+  if (!inlineInputComponents.includes(item.component as string)) return false
+  if (hasExplicitWidth(componentProps.style)) return false
+  if (item.component === 'DatePicker' && /range$/i.test(componentProps.type || '')) return false
+  if (item.component === 'TimePicker' && (componentProps.isRange || componentProps['is-range'])) {
+    return false
+  }
+  return true
+}
 
 export default defineComponent({
   name: 'Form',
@@ -76,7 +115,12 @@ export default defineComponent({
 
     // 对表单赋值
     const setValues = (data: Recordable = {}) => {
-      formModel.value = Object.assign(unref(formModel), data)
+      // 隔离传入数据：深拷贝普通对象/数组，避免嵌套路径编辑或 resetFields 写回调用方对象；
+      // File、Date、函数、类实例等其他类型保持原引用。仍按 Object.assign 局部合并
+      const values = cloneDeepWith(data, (value) =>
+        isObject(value) && !isPlainObject(value) && !Array.isArray(value) ? value : undefined
+      )
+      formModel.value = Object.assign(unref(formModel), values)
     }
 
     const setProps = (props: FormProps = {}) => {
@@ -212,8 +256,15 @@ export default defineComponent({
           )
         }
       }
+      // 自定义插槽不追加默认宽度；表单项与输入组件同时受控，便于窄容器收缩
+      const inlineInputWidth = !slots[item.field] && needInlineInputWidth(item)
       return (
-        <ElFormItem {...(item.formItemProps || {})} prop={item.field} label={item.label || ''}>
+        <ElFormItem
+          {...(item.formItemProps || {})}
+          class={inlineInputWidth ? `${prefixCls}__inline-item` : undefined}
+          prop={item.field}
+          label={item.label || ''}
+        >
           {{
             ...formItemSlots,
             default: () => {
@@ -223,13 +274,20 @@ export default defineComponent({
 
               const { autoSetPlaceholder } = unref(getProps)
 
+              // field 支持 a.b 嵌套路径，按路径读写 formModel
+              const itemVal = computed({
+                get: () => getModelValue(formModel.value, item.field),
+                set: (val) => setModelValue(formModel.value, item.field, val)
+              })
+
               return slots[item.field] ? (
                 getSlot(slots, item.field, formModel.value)
               ) : (
                 <Com
-                  vModel={formModel.value[item.field]}
+                  vModel={itemVal.value}
                   {...(autoSetPlaceholder && setTextPlaceholder(item))}
                   {...setComponentProps(item)}
+                  class={inlineInputWidth ? `${prefixCls}__inline-input` : undefined}
                   style={item.componentProps?.style}
                   {...(notRenderOptions.includes(item?.component as string) &&
                   item?.componentProps?.options
@@ -285,6 +343,11 @@ export default defineComponent({
         model={unref(getProps).isCustom ? unref(getProps).model : formModel}
         class={prefixCls}
         v-loading={props.vLoading}
+        // 阻止原生 submit 默认动作，避免单输入框回车整页刷新；调用方 @submit 监听仍会触发
+        // @ts-ignore
+        onSubmit={(e: Event) => {
+          e.preventDefault()
+        }}
       >
         {{
           // 如果需要自定义，就什么都不渲染，而是提供默认插槽
@@ -303,5 +366,18 @@ export default defineComponent({
 .#{$elNamespace}-form.#{$namespace}-form .#{$elNamespace}-row {
   margin-right: 0 !important;
   margin-left: 0 !important;
+}
+
+// 仅 inline 模式生效；显式 width/minWidth/maxWidth 的组件及其表单项不带这两个 class
+// 空间充足时输入宽 229.5px；容器不足时表单项不超出容器（扣除 EP inline 的 margin-right 32px），输入随之收缩
+.#{$elNamespace}-form--inline {
+  :deep(.#{$namespace}-form__inline-item) {
+    max-width: calc(100% - 32px);
+  }
+
+  :deep(.#{$namespace}-form__inline-input) {
+    width: 229.5px;
+    max-width: 100%;
+  }
 }
 </style>

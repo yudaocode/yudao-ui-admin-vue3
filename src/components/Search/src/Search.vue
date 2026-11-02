@@ -6,6 +6,7 @@ import { useForm } from '@/hooks/web/useForm'
 import { findIndex } from '@/utils'
 import { cloneDeep } from 'lodash-es'
 import { FormSchema } from '@/types/form'
+import type { FormItemProp } from 'element-plus'
 
 defineOptions({ name: 'Search' })
 
@@ -40,7 +41,12 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['search', 'reset'])
+const emit = defineEmits(['search', 'reset', 'validate'])
+
+// Search 为多根节点，监听不会自动透传，需显式转发 Form 的 validate 事件（保持原参数）
+const onFormValidate = (prop: FormItemProp, isValid: boolean, message: string) => {
+  emit('validate', prop, isValid, message)
+}
 
 const visible = ref(true)
 
@@ -110,6 +116,7 @@ const setVisible = () => {
     class="-mb-15px"
     hide-required-asterisk
     @register="register"
+    @validate="onFormValidate"
   >
     <template #action>
       <div v-if="layout === 'inline'">

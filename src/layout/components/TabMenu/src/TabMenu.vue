@@ -89,14 +89,18 @@ export default defineComponent({
 
     watch(
       () => collapse.value,
-      (collapse: boolean) => {
-        if (!collapse) {
+      (collapse: boolean, oldCollapse?: boolean) => {
+        // 首次（immediate）直接同步，避免挂载时新增延时回调
+        if (!collapse && oldCollapse !== undefined) {
           setTimeout(() => {
             showTitle.value = !collapse
           }, 200)
         } else {
           showTitle.value = !collapse
         }
+      },
+      {
+        immediate: true
       }
     )
 
