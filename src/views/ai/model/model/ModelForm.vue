@@ -340,15 +340,12 @@ const buildReasoningData = (): Pick<ModelVO, 'reasoningConfig'> => {
   if (rows.length === 0) {
     throw new Error('请至少配置一个思考档位')
   }
-  // DONE @AI：不用这个，有点过度校验了。（已删除前端的档位数最多 8 个校验和按钮限制，由后端保存校验）
-  // DONE @AI：不用这个，有点过度校验了。（已删除前端的思考参数 4000 字节校验，由后端保存校验）
   const levels: ModelReasoningLevelVO[] = []
   for (const row of rows) {
     const level = row.level.trim()
     if (!level) {
       throw new Error('思考档位值不能为空')
     }
-    // DONE @AI：不用枚举，直接写到对应的 modelForm 就行了。（已改为表单内的正则，与后端保存校验一致）
     if (!/^[a-z0-9_-]{1,32}$/.test(level)) {
       throw new Error(`档位值「${level}」只能包含小写字母、数字、下划线和中划线，最长 32 位`)
     }

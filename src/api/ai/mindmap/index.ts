@@ -12,11 +12,23 @@ export interface MindMapVO {
   platform: string // 平台
   model: string // 模型
   errorMessage: string // 错误信息
+  inputTokens?: number | null // 输入 Token，未知为 null
+  outputTokens?: number | null // 输出 Token，未知为 null
+  totalTokens?: number | null // 合计 Token，未知为 null
 }
 
 // AI 思维导图生成 VO
 export interface AiMindMapGenerateReqVO {
   prompt: string
+}
+
+// AI 思维导图流式生成的单帧数据：CommonResult.data
+export interface AiMindMapGenerateRespVO {
+  id: number // 思维导图编号
+  content: string // 本次增量内容；仅携带用量的尾帧为空字符串
+  inputTokens: number | null // 输入 Token 快照，未知为 null
+  outputTokens: number | null // 输出 Token 快照，未知为 null
+  totalTokens: number | null // 合计 Token 快照，未知为 null
 }
 
 export const AiMindMapApi = {

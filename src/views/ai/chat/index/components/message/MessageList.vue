@@ -42,6 +42,15 @@
             >
               <img class="h-17px" src="@/assets/ai/delete.svg" />
             </el-button>
+            <!-- Token 用量：仅 assistant 消息展示业务快照，取自消息本身，未知显示未取得；生成中不展示，与写作、思维导图一致 -->
+            <TokenUsage
+              v-if="item.type === AiChatMessageTypeEnum.ASSISTANT && item.id > 0"
+              :pending="inProgress && index === list.length - 1"
+              class="ml-8px self-center"
+              :input-tokens="item.inputTokens"
+              :output-tokens="item.outputTokens"
+              :total-tokens="item.totalTokens"
+            />
           </div>
         </div>
       </div>
@@ -117,6 +126,7 @@ import MessageKnowledge from './MessageKnowledge.vue'
 import MessageReasoning from './MessageReasoning.vue'
 import MessageFiles from './MessageFiles.vue'
 import MessageWebSearch from './MessageWebSearch.vue'
+import TokenUsage from '@/views/ai/components/TokenUsage.vue'
 import { AiChatMessageTypeEnum } from '@/views/ai/utils/constants'
 import { useClipboard } from '@vueuse/core'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
@@ -146,7 +156,11 @@ const props = defineProps({
   list: {
     type: Array as PropType<ChatMessageVO[]>,
     required: true
-  }
+  },
+  inProgress: {
+    type: Boolean,
+    default: false
+  } // 对话是否正在生成，生成中的最后一条消息不展示用量
 })
 
 const { list } = toRefs(props) // 消息列表

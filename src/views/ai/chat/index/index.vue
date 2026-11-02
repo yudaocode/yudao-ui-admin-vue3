@@ -60,6 +60,7 @@
               ref="messageRef"
               :conversation="activeConversation"
               :list="messageList"
+              :in-progress="conversationInProgress"
               @on-delete-success="handleMessageDelete"
               @on-edit="handleMessageEdit"
               @on-refresh="handleMessageRefresh"
@@ -203,7 +204,6 @@ const enableContext = ref<boolean>(true) // 是否开启上下文
 const enableWebSearch = ref<boolean>(false) // 是否开启联网搜索
 const uploadFiles = ref<string[]>([]) // 上传的文件 URL 列表
 // 思考档位：只存在于本次发送，不持久化
-// DONE @AI：这块 modelList 有什么办法，不单独拉下么？先讨论 。（已改为随会话返回 modelReasoningConfig，去掉独立的模型列表请求）
 const reasoningSelectedLevel = ref<string>() // 选中的思考档位
 const reasoningLevels = computed(() =>
   getReasoningLevels(activeConversation.value?.modelReasoningConfig)
@@ -310,8 +310,6 @@ watch(
   resetReasoningSelection,
   { immediate: true }
 )
-
-// DONE @AI：这个要不去掉，感觉有点多余了。不考虑这个情况；（已删除发送失败后自动刷新模型列表）
 
 // =========== 【消息列表】相关 ===========
 

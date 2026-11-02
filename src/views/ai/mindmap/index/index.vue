@@ -14,6 +14,10 @@
       :isEnd="isEnd"
       :isGenerating="isGenerating"
       :isStart="isStart"
+      :inputTokens="generateResp?.inputTokens"
+      :outputTokens="generateResp?.outputTokens"
+      :totalTokens="generateResp?.totalTokens"
+      :showUsage="!!generateResp"
     />
   </div>
 </template>
@@ -21,7 +25,11 @@
 <script lang="ts" setup>
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
-import { AiMindMapApi, AiMindMapGenerateReqVO } from '@/api/ai/mindmap'
+import {
+  AiMindMapApi,
+  AiMindMapGenerateReqVO,
+  AiMindMapGenerateRespVO
+} from '@/api/ai/mindmap'
 import { MindMapContentExample } from '@/views/ai/utils/constants'
 
 defineOptions({
@@ -34,6 +42,7 @@ const isEnd = ref(true) // 用来判断结束的时候渲染思维导图
 const message = useMessage() // 消息提示
 
 const generatedContent = ref('') // 生成思维导图结果
+const generateResp = ref<AiMindMapGenerateRespVO>() // 最近一帧的生成结果，用于展示 Token 用量；示例、直接生成已有内容时为空，不展示
 
 const leftRef = ref<InstanceType<typeof Left>>() // 左边组件
 const rightRef = ref<InstanceType<typeof Right>>() // 右边组件
@@ -42,6 +51,7 @@ const rightRef = ref<InstanceType<typeof Right>>() // 右边组件
 const directGenerate = (existPrompt: string) => {
   isEnd.value = false // 先设置为 false 再设置为 true，让子组建的 watch 能够监听到
   generatedContent.value = existPrompt
+  generateResp.value = undefined // 已有内容不是模型生成，不展示用量
   isEnd.value = true
 }
 
@@ -59,6 +69,7 @@ const submit = (data: AiMindMapGenerateReqVO) => {
   isEnd.value = false
   ctrl.value = new AbortController() // 请求控制赋值
   generatedContent.value = '' // 清空生成数据
+  generateResp.value = undefined
   AiMindMapApi.generateMindMap({
     data,
     onMessage: async (res) => {
@@ -68,7 +79,12 @@ const submit = (data: AiMindMapGenerateReqVO) => {
         stopStream()
         return
       }
-      generatedContent.value = generatedContent.value + data
+      // Token 取最新快照，不累加；仅携带用量的尾帧 content 为空字符串
+      generateResp.value = data
+      if (!data.content) {
+        return
+      }
+      generatedContent.value = generatedContent.value + data.content
       await nextTick()
       rightRef.value?.scrollBottom()
     },

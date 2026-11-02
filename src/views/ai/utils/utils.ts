@@ -15,7 +15,6 @@ export const hasChinese = (str: string) => {
 }
 
 // ========== 【思考配置】相关 ==========
-// DONE @AI：看看剩余的，怎么分别整理到 constants 和 utils 里；（常量、预设已放到 constants.ts，控件计算方法放到 utils.ts，已删除 reasoning.ts）
 
 /** 获得思考档位的展示名 */
 export const getReasoningLevelLabel = (level?: string) => {

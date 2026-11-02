@@ -70,6 +70,28 @@
       <el-table-column label="消息类型" align="center" prop="type" width="100" />
       <el-table-column label="模型标识" align="center" prop="model" width="180" />
       <el-table-column label="消息内容" align="center" prop="content" width="300" />
+      <!-- Token 用量：仅 assistant 消息有业务快照，user、system 消息不展示 -->
+      <el-table-column label="输入 Token" align="center" prop="inputTokens" width="110">
+        <template #default="scope">
+          <span v-if="scope.row.type === AiChatMessageTypeEnum.ASSISTANT">
+            {{ formatTokenCount(scope.row.inputTokens) }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column label="输出 Token" align="center" prop="outputTokens" width="110">
+        <template #default="scope">
+          <span v-if="scope.row.type === AiChatMessageTypeEnum.ASSISTANT">
+            {{ formatTokenCount(scope.row.outputTokens) }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column label="合计 Token" align="center" prop="totalTokens" width="110">
+        <template #default="scope">
+          <span v-if="scope.row.type === AiChatMessageTypeEnum.ASSISTANT">
+            {{ formatTokenCount(scope.row.totalTokens) }}
+          </span>
+        </template>
+      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
@@ -111,6 +133,8 @@ import { dateFormatter } from '@/utils/formatTime'
 import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
 import * as UserApi from '@/api/system/user'
 import { DICT_TYPE } from '@/utils/dict'
+import { AiChatMessageTypeEnum } from '@/views/ai/utils/constants'
+import { formatTokenCount } from '@/views/ai/utils/format'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
