@@ -10,12 +10,12 @@ export const useRenderMenuTitle = () => {
     return icon ? (
       <>
         <Icon icon={meta.icon}></Icon>
-        <span class="v-menu__title overflow-hidden overflow-ellipsis whitespace-nowrap">
+        <span class="v-menu__title overflow-hidden text-ellipsis whitespace-nowrap">
           {t(title as string)}
         </span>
       </>
     ) : (
-      <span class="v-menu__title overflow-hidden overflow-ellipsis whitespace-nowrap">
+      <span class="v-menu__title overflow-hidden text-ellipsis whitespace-nowrap">
         {t(title as string)}
       </span>
     )

@@ -76,12 +76,11 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
   watch(
     () => tableObject.pageSize,
     () => {
-      // 当前页不为1时，修改页数后会导致多次调用getList方法
       if (tableObject.currentPage === 1) {
         methods.getList()
       } else {
+        // 当前页不为1时，只重置为第1页，由 currentPage 的 watch 负责请求，避免重复调用getList方法
         tableObject.currentPage = 1
-        methods.getList()
       }
     }
   )

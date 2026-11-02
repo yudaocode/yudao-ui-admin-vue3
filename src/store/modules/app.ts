@@ -69,11 +69,11 @@ export const useAppStore = defineStore('app', {
       fixedHeader: true, // 固定toolheader
       footer: true, // 显示页脚
       greyMode: false, // 是否开始灰色模式，用于特殊悼念日
-      fixedMenu: wsCache.get('fixedMenu') || false, // 是否固定菜单
+      fixedMenu: wsCache.get(CACHE_KEY.FIXED_MENU) || false, // 是否固定菜单
 
       layout: normalizeLayout(wsCache.get(CACHE_KEY.LAYOUT)), // layout布局
       isDark: wsCache.get(CACHE_KEY.IS_DARK) || false, // 是否是暗黑模式
-      currentSize: wsCache.get('default') || 'default', // 组件尺寸
+      currentSize: wsCache.get(CACHE_KEY.CURRENT_SIZE) || 'default', // 组件尺寸
       theme: wsCache.get(CACHE_KEY.THEME) || {
         // 主题色
         elColorPrimary: '#409eff',
@@ -273,7 +273,7 @@ export const useAppStore = defineStore('app', {
       this.greyMode = greyMode
     },
     setFixedMenu(fixedMenu: boolean) {
-      wsCache.set('fixedMenu', fixedMenu)
+      wsCache.set(CACHE_KEY.FIXED_MENU, fixedMenu)
       this.fixedMenu = fixedMenu
     },
     setPageLoading(pageLoading: boolean) {
@@ -305,7 +305,7 @@ export const useAppStore = defineStore('app', {
     },
     setCurrentSize(currentSize: ElementPlusSize) {
       this.currentSize = currentSize
-      wsCache.set('currentSize', this.currentSize)
+      wsCache.set(CACHE_KEY.CURRENT_SIZE, this.currentSize)
     },
     setMobile(mobile: boolean) {
       this.mobile = mobile

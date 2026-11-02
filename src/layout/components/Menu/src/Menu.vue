@@ -771,6 +771,22 @@ $prefix-cls: #{$namespace}-menu-popper;
   }
 }
 
+// 折叠菜单的子菜单弹层过长时，限制在视口内并滚动（多级子菜单已 teleported，不会被裁切）
+.#{$prefix-cls}--vertical .el-menu--popup {
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgb(144 147 153 / 30%);
+    border-radius: 4px;
+  }
+}
+
 .#{$prefix-cls}--header {
   .is-active {
     & > .el-sub-menu__title {
