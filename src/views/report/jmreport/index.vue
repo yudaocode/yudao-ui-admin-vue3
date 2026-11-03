@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="报表设计器" url="https://doc.iocoder.cn/report/" />
+  <doc-alert title="积木报表" url="https://doc.iocoder.cn/report/jimu/" />
 
   <ContentWrap :bodyStyle="{ padding: '0px' }" class="!mb-0">
     <IFrame :src="src" />
