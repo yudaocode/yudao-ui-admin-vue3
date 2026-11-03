@@ -29,7 +29,9 @@ const props = defineProps({
   data: {
     type: Object as PropType<any>,
     default: () => ({})
-  }
+  },
+  // 普通字段值为 null / undefined 时显示的占位文字（参考上游 83b09f09f）；默认空串，与原显示一致
+  emptyText: propTypes.string.def('')
 })
 
 const { getPrefixCls } = useDesign()
@@ -37,7 +39,7 @@ const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('descriptions')
 
 const getBindValue = computed(() => {
-  const delArr: string[] = ['title', 'message', 'collapse', 'schema', 'data', 'class']
+  const delArr: string[] = ['title', 'message', 'collapse', 'schema', 'data', 'class', 'emptyText']
   const obj = { ...attrs, ...props }
   for (const key in obj) {
     if (delArr.indexOf(key) !== -1) {
@@ -154,6 +156,7 @@ const toggleClick = () => {
 
             <template #default>
               <!-- 优先级：模板 #字段 插槽 > schema.slots.default(data) > 原有日期/字典/字段映射/嵌套取值 -->
+              <!-- 普通取值为 null / undefined 时显示 emptyText；0、false、'' 原样显示 -->
               <slot v-if="slots[item.field]" :name="item.field" :row="data"></slot>
               <SchemaSlotRender
                 v-else-if="item.slots?.default"
@@ -167,7 +170,7 @@ const toggleClick = () => {
                 <DictTag :type="item.dictType" :value="getFieldValue(item.field) + ''" />
               </slot>
               <slot v-else :name="item.field" :row="data">
-                {{ getFieldValue(item.mappedField || item.field) }}
+                {{ getFieldValue(item.mappedField || item.field) ?? emptyText }}
               </slot>
             </template>
           </ElDescriptionsItem>

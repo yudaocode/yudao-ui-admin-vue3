@@ -2,6 +2,22 @@ import Form from './src/Form.vue'
 import { ElForm, ElFormItem } from 'element-plus'
 import { FormSchema, FormSetPropsType } from '@/types/form'
 
+// 与上游一致的类型入口；类型定义仍在 @/types/form、@/types/components
+export type {
+  FormSchema,
+  FormSetPropsType,
+  FormSetPropsType as FormSetProps,
+  FormItemProps,
+  FormValueType
+} from '@/types/form'
+export type {
+  ComponentName,
+  ComponentOptions,
+  ComponentOptionsAlias,
+  ComponentProps,
+  ColProps
+} from '@/types/components'
+
 export interface FormExpose {
   setValues: (data: Recordable) => void
   setProps: (props: Recordable) => void

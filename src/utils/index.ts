@@ -49,6 +49,15 @@ export const setCssVar = (prop: string, val: any, dom = document.documentElement
 }
 
 /**
+ * 读取 CSS 变量的计算值，未定义时返回空字符串
+ *
+ * 与上游不同：结果会去掉首尾空白
+ */
+export const getCssVar = (prop: string, dom = document.documentElement): string => {
+  return getComputedStyle(dom).getPropertyValue(prop).trim()
+}
+
+/**
  * 查找数组对象的某个下标
  * @param {Array} ary 查找的数组
  * @param {Functon} fn 判断的方法
@@ -571,4 +580,23 @@ export const escapeHtml = (text: string): string => {
     "'": '&#039;'
   }
   return text.replace(/[&<>"']/g, (char) => map[char])
+}
+
+/**
+ * 把对象转为 FormData
+ *
+ * 与上游不同：值为 undefined、null 的字段跳过，不写入 'undefined'、'null' 字符串；
+ * 0、false、'' 照常写入；Blob / File 原样写入（File 保留文件名），其它值按字符串写入，
+ * 不展开嵌套对象或数组，需要时请先自行 JSON.stringify
+ */
+export const objToFormData = (obj: Recordable): FormData => {
+  const formData = new FormData()
+  Object.keys(obj).forEach((key) => {
+    const value = obj[key]
+    if (value === undefined || value === null) {
+      return
+    }
+    formData.append(key, value instanceof Blob ? value : String(value))
+  })
+  return formData
 }

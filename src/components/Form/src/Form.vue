@@ -1,5 +1,20 @@
 <script lang="tsx">
-import { cloneVNode, computed, defineComponent, onMounted, PropType, ref, unref, watch } from 'vue'
+import {
+  cloneVNode,
+  computed,
+  createTextVNode,
+  createVNode,
+  defineComponent,
+  Fragment,
+  isVNode,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  ref,
+  toRaw,
+  unref,
+  watch
+} from 'vue'
 import type { VNode } from 'vue'
 import { ElCol, ElForm, ElFormItem, ElRow, ElTooltip } from 'element-plus'
 import { componentMap } from './componentMap'
@@ -20,7 +35,7 @@ import { useRenderRadio } from './components/useRenderRadio'
 import { useRenderCheckbox } from './components/useRenderCheckbox'
 import { useDesign } from '@/hooks/web/useDesign'
 import { findIndex } from '@/utils'
-import { cloneDeep, cloneDeepWith, isObject, isPlainObject, set } from 'lodash-es'
+import { cloneDeep, cloneDeepWith, isObject, isPlainObject, set, toPath } from 'lodash-es'
 import { FormProps } from './types'
 import { Icon } from '@/components/Icon'
 import { FormSchema, FormSetPropsType } from '@/types/form'
@@ -28,6 +43,8 @@ import { FormSchema, FormSetPropsType } from '@/types/form'
 const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('form')
+
+type OptionApi = NonNullable<FormSchema['optionApi']>
 
 // inline 表单中输入类组件默认宽度（参考上游 ab98ceb85），插槽、Radio/Checkbox 等不追加
 const inlineInputComponents = [
@@ -143,11 +160,15 @@ export default defineComponent({
       schema.push(formSchema)
     }
 
+    // 手动修改选项时让进行中的远程请求失效；由下方 optionApi 管理器在 setup 内初始化
+    let invalidateOptionApi = (_field: string, _path: string) => {}
+
     const setSchema = (schemaProps: FormSetPropsType[]) => {
       const { schema } = unref(getProps)
       for (const v of schema) {
         for (const item of schemaProps) {
           if (v.field === item.field) {
+            invalidateOptionApi(v.field, item.path)
             set(v, item.path, item.value)
           }
         }
@@ -266,6 +287,114 @@ export default defineComponent({
       }
     )
 
+    // optionApi：按 field + 当前接口函数记录一次请求（参考上游 49451ae60、9b134161a）。
+    // 不在 render 中请求；返回空数组、非数组或异常均视为已结束，不重复请求；
+    // 接口函数变更、字段删除/隐藏、组件卸载后，旧请求的结果不再写入
+    type OptionRequest = { api: OptionApi; options?: any[]; invalidated: boolean }
+    const optionApiRequests = new Map<string, OptionRequest>()
+    // schema 也允许普通数组/computed 产出的非响应式对象，异步写入后显式触发表单渲染
+    const optionRenderVersion = ref(0)
+    let isUnmounted = false
+
+    // TreeSelect / Transfer 的选项写入 componentProps.data，其余写入 componentProps.options
+    const getOptionPath = (item: FormSchema) => {
+      return ['TreeSelect', 'Transfer'].includes(item.component as string)
+        ? 'componentProps.data'
+        : 'componentProps.options'
+    }
+
+    // 已有非空 options / data（如芋道字典静态选项、调用方手动填入）时不使用 optionApi
+    const hasOptions = (item?: FormSchema) => {
+      const { options, data } = (item?.componentProps || {}) as Recordable
+      return [options, data].some((list) => Array.isArray(list) && list.length > 0)
+    }
+
+    invalidateOptionApi = (field, path) => {
+      // 与 set 使用同样的路径分段规则：支持 options[0]，同时避免误匹配 optionsAlias / data-*
+      const [root, key] = toPath(path)
+      if (root === 'componentProps' && (key === undefined || key === 'options' || key === 'data')) {
+        const request = optionApiRequests.get(field)
+        if (request) request.invalidated = true
+      }
+    }
+
+    const applyOptions = (item: FormSchema, request: OptionRequest) => {
+      if (!request.options?.length || request.invalidated) return
+      // API 写入走内部路径，避免被识别为调用方的手动选项更新
+      set(item, getOptionPath(item), request.options)
+      optionRenderVersion.value++
+    }
+
+    const checkManualOptions = (item: FormSchema, request: OptionRequest) => {
+      if (!hasOptions(item)) return
+      const { options, data } = (item.componentProps || {}) as Recordable
+      if (
+        [options, data].some(
+          (value) => Array.isArray(value) && value.length > 0 && toRaw(value) !== request.options
+        )
+      ) {
+        request.invalidated = true
+      }
+    }
+
+    const loadOptions = (schema: FormSchema[]) => {
+      const fields = new Set<string>()
+      for (const item of schema) {
+        const api = item.optionApi
+        if (item.hidden || typeof api !== 'function') continue
+        fields.add(item.field)
+        // 同一字段、同一接口函数只请求一次（包括进行中、已结束）
+        const previous = optionApiRequests.get(item.field)
+        if (previous?.api === api) {
+          checkManualOptions(item, previous)
+          // Search/computed 可能重新创建 schema；复用当前代次已获得的结果，不重复请求
+          if (!hasOptions(item)) applyOptions(item, previous)
+          continue
+        }
+        const request: OptionRequest = { api, invalidated: hasOptions(item) }
+        optionApiRequests.set(item.field, request)
+        if (request.invalidated) continue
+        const field = item.field
+        const isCurrent = () =>
+          !isUnmounted && optionApiRequests.get(field) === request && !request.invalidated
+        Promise.resolve()
+          .then(() => api())
+          .then((options: unknown) => {
+            if (!isCurrent() || !Array.isArray(options) || options.length === 0) return
+            const current = unref(getProps).schema.find((v) => v.field === field)
+            // 请求期间调用方已填入非空选项时，不用接口结果覆盖
+            if (!current) return
+            checkManualOptions(current, request)
+            if (request.invalidated) return
+            request.options = toRaw(options)
+            applyOptions(current, request)
+          })
+          .catch((error) => {
+            if (isCurrent()) console.warn(`[Form] optionApi of field "${field}" failed`, error)
+          })
+      }
+      // 字段删除或隐藏：作废旧请求，重新出现时按新一轮请求
+      for (const field of optionApiRequests.keys()) {
+        if (!fields.has(field)) optionApiRequests.delete(field)
+      }
+    }
+
+    // 同时观察外部选项更新；内部写入的数组由当前请求持有，不会被误判为手动更新或重复请求
+    watch(
+      () =>
+        (unref(getProps).schema || []).map((v) => {
+          const { options, data } = (v.componentProps || {}) as Recordable
+          return [v.field, v.optionApi, v.hidden, options, options?.length, data, data?.length]
+        }),
+      () => loadOptions(unref(getProps).schema || []),
+      { immediate: true }
+    )
+
+    onBeforeUnmount(() => {
+      isUnmounted = true
+      optionApiRequests.clear()
+    })
+
     // 渲染包裹标签，是否使用栅格布局
     const renderWrap = () => {
       const { isCol } = unref(getProps)
@@ -279,6 +408,7 @@ export default defineComponent({
 
     // 是否要渲染el-col
     const renderFormItemWrap = () => {
+      unref(optionRenderVersion)
       // hidden属性表示隐藏，不做渲染
       const { schema = [], isCol } = unref(getProps)
       // 栅格布局切换时，表单项会整体重新挂载
@@ -319,6 +449,27 @@ export default defineComponent({
         })
     }
 
+    // 交由调用方插槽 / schema 渲染函数渲染：清除该 field 的组件实例缓存，即使内容复用了原组件实例也不再归属表单
+    const renderCustomContent = (field: string, content: any) => {
+      formComponents.delete(field)
+      // 记录单根 vnode：切回同类型同 key 组件时保留原 ref 的原生清理路径
+      const root = Array.isArray(content) && content.length === 1 ? content[0] : undefined
+      if (root) lastComponentVNodes.set(field, root)
+      else lastComponentVNodes.delete(field)
+      return content
+    }
+
+    // 渲染函数结果规范化为 vnode 数组：忽略 null / undefined / boolean，文本转文本节点，嵌套数组包为 Fragment
+    const toVNodes = (content: unknown): VNode[] => {
+      return (Array.isArray(content) ? content : [content])
+        .filter((child) => child != null && typeof child !== 'boolean')
+        .map((child) => {
+          if (isVNode(child)) return child
+          if (Array.isArray(child)) return createVNode(Fragment, null, child)
+          return createTextVNode(String(child))
+        })
+    }
+
     // 渲染formItem
     const renderFormItem = (item: FormSchema, structureStable = true) => {
       // 单独给只有options属性的组件做判断
@@ -335,13 +486,22 @@ export default defineComponent({
         slotsMap.default = () => renderOptions(item)
       }
 
+      // formItemProps.slots 为 schema 级渲染函数，不透传给 ElFormItem
+      const { slots: schemaSlots, ...formItemProps } = (item.formItemProps || {}) as Recordable
       const formItemSlots: Recordable = setFormItemSlots(slots, item.field)
-      // 如果有 labelMessage，自动使用插槽渲染
+      // schema 级 label / error：同名模板插槽 #field-label / #field-error 优先
+      for (const name of ['label', 'error']) {
+        if (!formItemSlots[name] && typeof schemaSlots?.[name] === 'function') {
+          formItemSlots[name] = (...args: any[]) => schemaSlots[name](...args)
+        }
+      }
+      // labelMessage 保留提示图标；标题内容优先使用模板插槽，其次使用 schema label，最后使用 item.label
       if (item?.labelMessage) {
-        formItemSlots.label = () => {
+        const renderLabel = formItemSlots.label
+        formItemSlots.label = (...args: any[]) => {
           return (
             <>
-              <span>{item.label}</span>
+              {renderLabel ? renderLabel(...args) : <span>{item.label}</span>}
               <ElTooltip placement="right" raw-content>
                 {{
                   content: () => <span v-dompurify-html={item.labelMessage}></span>,
@@ -359,12 +519,17 @@ export default defineComponent({
           )
         }
       }
+      // schema 级 default：同名模板插槽 #field 优先
+      const schemaDefault =
+        !slots[item.field] && typeof schemaSlots?.default === 'function'
+          ? schemaSlots.default
+          : undefined
       // 自定义插槽不追加默认宽度；表单项与输入组件同时受控，便于窄容器收缩
-      const inlineInputWidth = !slots[item.field] && needInlineInputWidth(item)
+      const inlineInputWidth = !slots[item.field] && !schemaDefault && needInlineInputWidth(item)
       const formItemVNode = (
         <ElFormItem
           key={item.field}
-          {...(item.formItemProps || {})}
+          {...formItemProps}
           class={inlineInputWidth ? `${prefixCls}__inline-item` : undefined}
           prop={item.field}
           label={item.label || ''}
@@ -385,14 +550,11 @@ export default defineComponent({
               })
 
               if (slots[item.field]) {
-                // 交由调用方插槽渲染：清除该 field 的组件实例缓存，即使插槽内容复用了原组件实例也不再归属表单
-                formComponents.delete(item.field)
-                const content = getSlot(slots, item.field, formModel.value)
-                // 记录单根插槽 vnode：切回同类型同 key 组件时保留原 ref 的原生清理路径
-                const root = Array.isArray(content) && content.length === 1 ? content[0] : undefined
-                if (root) lastComponentVNodes.set(item.field, root)
-                else lastComponentVNodes.delete(item.field)
-                return content
+                return renderCustomContent(item.field, getSlot(slots, item.field, formModel.value))
+              }
+              if (schemaDefault) {
+                // schema 级 default 与模板插槽同一路径；结果规范化为 vnode 数组，不改动其中调用方的 ref
+                return renderCustomContent(item.field, toVNodes(schemaDefault(formModel.value)))
               }
 
               // 以 field 作为 key 区分生成组件与调用方插槽内容：切换为插槽渲染时生成组件被卸载，
@@ -436,10 +598,12 @@ export default defineComponent({
           const { renderSelectOptions } = useRenderSelect(slots)
           return renderSelectOptions(item)
         case 'Radio':
+        case 'RadioGroup':
         case 'RadioButton':
           const { renderRadioOptions } = useRenderRadio()
           return renderRadioOptions(item)
         case 'Checkbox':
+        case 'CheckboxGroup':
         case 'CheckboxButton':
           const { renderCheckboxOptions } = useRenderCheckbox()
           return renderCheckboxOptions(item)

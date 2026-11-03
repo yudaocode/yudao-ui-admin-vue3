@@ -207,6 +207,10 @@ const filterFormSchema = (crudSchema: CrudSchema[], allSchemas: AllSchemas): For
       } else {
         if (component === 'InputNumber') {
           defaultValue = 0
+        } else if (component === 'CheckboxGroup') {
+          defaultValue = []
+        } else if (component === 'JsonEditor') {
+          defaultValue = {}
         }
       }
       let comonentProps: ComponentProps = {}

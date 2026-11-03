@@ -161,7 +161,8 @@ export const setGridProp = (col: ColProps = {}): ColProps => {
  * @returns 默认添加 clearable 属性
  */
 export const setComponentProps = (item: FormSchema): Recordable => {
-  const notNeedClearable = ['ColorPicker']
+  // JsonEditor 不支持 clearable，追加后会落到 DOM 属性上
+  const notNeedClearable = ['ColorPicker', 'JsonEditor']
   const componentProps: Recordable = notNeedClearable.includes(item.component as string)
     ? { ...item.componentProps }
     : {
@@ -197,6 +198,24 @@ export const setItemComponentSlots = (
 }
 
 /**
+ * 组件缺省绑定值：Transfer 的绑定值是数组，缺省时使用 []；IAgree 是勾选状态，缺省时使用 false；
+ * 新增的 CheckboxGroup 缺省 []、JsonEditor 缺省 {}；其他组件（含旧 Checkbox/Radio）保持 ''
+ */
+const getDefaultValue = (component?: string) => {
+  switch (component) {
+    case 'Transfer':
+    case 'CheckboxGroup':
+      return []
+    case 'IAgree':
+      return false
+    case 'JsonEditor':
+      return {}
+    default:
+      return ''
+  }
+}
+
+/**
  *
  * @param schema Form表单结构化数组
  * @param formModel FormModel
@@ -212,9 +231,7 @@ export const initModel = (schema: FormSchema[], formModel: Recordable) => {
     } else if (v.component && v.component !== 'Divider') {
       // 如果先前已经有值存在，则不进行重新赋值，而是采用现有的值
       if (!hasModelValue(model, v.field)) {
-        // Transfer 的绑定值是数组，缺省时使用 []；IAgree 是勾选状态，缺省时使用 false；其他组件保持 ''
-        const defaultValue = v.component === 'Transfer' ? [] : v.component === 'IAgree' ? false : ''
-        setModelValue(model, v.field, v.value !== void 0 ? v.value : defaultValue)
+        setModelValue(model, v.field, v.value !== void 0 ? v.value : getDefaultValue(v.component))
       }
     }
   })
