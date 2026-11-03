@@ -51,6 +51,9 @@ const message = computed(() => appStore.getMessage)
 // IM即时通讯图标
 const im = computed(() => appStore.getIm)
 
+// 是否隐藏全局设置入口，仅 VITE_HIDE_GLOBAL_SETTING 为 'true' 时隐藏
+const hideSetting = import.meta.env.VITE_HIDE_GLOBAL_SETTING === 'true'
+
 // 租户切换权限
 const hasTenantVisitPermission = computed(
   () => import.meta.env.VITE_APP_TENANT_ENABLE === 'true' && checkPermi(['system:tenant:visit'])
@@ -96,13 +99,15 @@ export default defineComponent({
         <div class="h-full flex items-center">
           <FmsAccountSetSwitch />
           {hasTenantVisitPermission.value ? <TenantVisit /> : undefined}
-          <div
-            class="v-setting custom-hover"
-            title={t('setting.projectSetting')}
-            onClick={openSetting}
-          >
-            <Icon color="var(--top-header-text-color)" size={18} icon="ep:setting" />
-          </div>
+          {hideSetting ? undefined : (
+            <div
+              class="v-setting custom-hover"
+              title={t('setting.projectSetting')}
+              onClick={openSetting}
+            >
+              <Icon color="var(--top-header-text-color)" size={18} icon="ep:setting" />
+            </div>
+          )}
           {screenfull.value ? (
             <Screenfull class="custom-hover" color="var(--top-header-text-color)"></Screenfull>
           ) : undefined}

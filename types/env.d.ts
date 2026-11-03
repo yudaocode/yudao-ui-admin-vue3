@@ -2,7 +2,6 @@
 
 declare module '*.vue' {
   import { DefineComponent } from 'vue'
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/ban-types
   const component: DefineComponent<{}, {}, any>
   export default component
 }
@@ -28,6 +27,8 @@ interface ImportMetaEnv {
   // 打包体积分析，仅 build 时为 'true' 才开启
   readonly VITE_USE_BUNDLE_ANALYZER?: string
   readonly VITE_GOVIEW_URL: string
+  // 是否隐藏全局设置（顶部齿轮及设置抽屉），仅为 'true' 时隐藏，缺省时显示
+  readonly VITE_HIDE_GLOBAL_SETTING?: string
   // API 加解密相关配置
   readonly VITE_APP_API_ENCRYPT_ENABLE: string
   readonly VITE_APP_API_ENCRYPT_HEADER: string

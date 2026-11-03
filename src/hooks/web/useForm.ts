@@ -1,5 +1,5 @@
 import type { Form, FormExpose } from '@/components/Form'
-import type { ElForm } from 'element-plus'
+import type { ElForm, ElFormItem } from 'element-plus'
 import type { FormProps } from '@/components/Form/src/types'
 import { FormSchema, FormSetPropsType } from '@/types/form'
 
@@ -36,6 +36,10 @@ export const useForm = (props?: FormProps) => {
     setSchema: (schemaProps: FormSetPropsType[]) => void
     addSchema: (formSchema: FormSchema, index?: number) => void
     delSchema: (field: string) => void
+    getComponentExpose: <T = any>(field: string) => Promise<T | undefined>
+    getFormItemExpose: (field: string) => Promise<ComponentRef<typeof ElFormItem> | undefined>
+    getElFormExpose: () => Promise<ComponentRef<typeof ElForm> | undefined>
+    getFormExpose: () => Promise<(typeof Form & FormExpose) | undefined>
   } = {
     setProps: async (props: FormProps = {}) => {
       const form = await getForm()
@@ -81,6 +85,40 @@ export const useForm = (props?: FormProps) => {
     getFormData: async <T = Recordable>(): Promise<T> => {
       const form = await getForm()
       return form?.formModel as T
+    },
+
+    /**
+     * @param field 表单项 field
+     * @returns 表单组件实例，插槽自定义渲染的字段返回 undefined
+     */
+    getComponentExpose: async <T = any>(field: string): Promise<T | undefined> => {
+      const form = await getForm()
+      return form?.getComponentExpose(field) as T | undefined
+    },
+
+    /**
+     * @param field 表单项 field
+     * @returns form-item 实例
+     */
+    getFormItemExpose: async (field: string) => {
+      const form = await getForm()
+      return form?.getFormItemExpose(field)
+    },
+
+    /**
+     * @returns ElForm 实例
+     */
+    getElFormExpose: async () => {
+      await getForm()
+      return unref(elFormRef) as ComponentRef<typeof ElForm> | undefined
+    },
+
+    /**
+     * @returns Form 实例
+     */
+    getFormExpose: async () => {
+      await getForm()
+      return unref(formRef) as (typeof Form & FormExpose) | undefined
     }
   }
 

@@ -28,17 +28,25 @@ const props = defineProps({
   buttomPosition: propTypes.string
     .validate((v: string) => ['left', 'center', 'right'].includes(v))
     .def('center'),
+  // 底部按钮的对齐方式（与上游属性名一致）；设置时优先于 buttomPosition
+  buttonPosition: propTypes.string.validate((v: string) => ['left', 'center', 'right'].includes(v)),
   showSearch: propTypes.bool.def(true),
   showReset: propTypes.bool.def(true),
   // 是否显示伸缩
   expand: propTypes.bool.def(false),
+  // 是否显示伸缩（与上游属性名一致）；与 expand 任一为 true 即显示
+  showExpand: propTypes.bool.def(false),
   // 伸缩的界限字段
   expandField: propTypes.string.def(''),
   inline: propTypes.bool.def(true),
   model: {
     type: Object as PropType<Recordable>,
     default: () => ({})
-  }
+  },
+  // 查询按钮 loading
+  searchLoading: propTypes.bool.def(false),
+  // 重置按钮 loading
+  resetLoading: propTypes.bool.def(false)
 })
 
 const emit = defineEmits(['search', 'reset', 'validate'])
@@ -50,9 +58,12 @@ const onFormValidate = (prop: FormItemProp, isValid: boolean, message: string) =
 
 const visible = ref(true)
 
+// 是否显示伸缩：兼容 expand 与 showExpand
+const isExpand = computed(() => props.expand || props.showExpand)
+
 const newSchema = computed(() => {
   let schema: FormSchema[] = cloneDeep(props.schema)
-  if (props.expand && props.expandField && !unref(visible)) {
+  if (unref(isExpand) && props.expandField && !unref(visible)) {
     const index = findIndex(schema, (v: FormSchema) => v.field === props.expandField)
     if (index > -1) {
       const length = schema.length
@@ -93,9 +104,12 @@ const reset = async () => {
   emit('reset', model)
 }
 
+// 底部按钮的对齐方式：设置了 buttonPosition 时优先，否则沿用 buttomPosition
+const buttonAlign = computed(() => props.buttonPosition || props.buttomPosition)
+
 const bottonButtonStyle = computed(() => {
   return {
-    textAlign: props.buttomPosition as unknown as 'left' | 'center' | 'right'
+    textAlign: unref(buttonAlign) as unknown as 'left' | 'center' | 'right'
   }
 })
 
@@ -103,6 +117,12 @@ const setVisible = () => {
   unref(elFormRef)?.resetFields()
   visible.value = !unref(visible)
 }
+
+defineExpose({
+  getFormData: methods.getFormData,
+  getElFormExpose: methods.getElFormExpose,
+  setValues: methods.setValues
+})
 </script>
 
 <template>
@@ -121,14 +141,14 @@ const setVisible = () => {
     <template #action>
       <div v-if="layout === 'inline'">
         <!-- update by 芋艿：去除搜索的 type="primary"，颜色变淡一点 -->
-        <el-button v-if="showSearch" @click="search">
+        <el-button v-if="showSearch" :loading="searchLoading" @click="search">
           <Icon class="mr-5px" icon="ep:search" /> {{ t('common.query') }}
         </el-button>
         <!-- update by 芋艿：将 icon="ep:refresh-right" 修改成 icon="ep:refresh"，和 ruoyi-vue 搜索保持一致  -->
-        <el-button v-if="showReset" @click="reset">
+        <el-button v-if="showReset" :loading="resetLoading" @click="reset">
           <Icon class="mr-5px" icon="ep:refresh" /> {{ t('common.reset') }}
         </el-button>
-        <el-button v-if="expand" text @click="setVisible">
+        <el-button v-if="isExpand" text @click="setVisible">
           {{ t(visible ? 'common.shrink' : 'common.expand') }}
           <Icon :icon="visible ? 'ep:arrow-up' : 'ep:arrow-down'" />
         </el-button>
@@ -143,13 +163,13 @@ const setVisible = () => {
 
   <template v-if="layout === 'bottom'">
     <div :style="bottonButtonStyle">
-      <el-button v-if="showSearch" type="primary" @click="search">
+      <el-button v-if="showSearch" :loading="searchLoading" type="primary" @click="search">
         <Icon class="mr-5px" icon="ep:search" /> {{ t('common.query') }}
       </el-button>
-      <el-button v-if="showReset" @click="reset">
+      <el-button v-if="showReset" :loading="resetLoading" @click="reset">
         <Icon class="mr-5px" icon="ep:refresh-right" /> {{ t('common.reset') }}
       </el-button>
-      <el-button v-if="expand" text @click="setVisible">
+      <el-button v-if="isExpand" text @click="setVisible">
         {{ t(visible ? 'common.shrink' : 'common.expand') }}
         <Icon :icon="visible ? 'ep:arrow-up' : 'ep:arrow-down'" />
       </el-button>

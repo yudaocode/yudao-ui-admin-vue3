@@ -1,5 +1,6 @@
 <script lang="tsx">
-import { computed, defineComponent, onMounted, PropType, ref, unref, watch } from 'vue'
+import { cloneVNode, computed, defineComponent, onMounted, PropType, ref, unref, watch } from 'vue'
+import type { VNode } from 'vue'
 import { ElCol, ElForm, ElFormItem, ElRow, ElTooltip } from 'element-plus'
 import { componentMap } from './componentMap'
 import { propTypes } from '@/utils/propTypes'
@@ -95,9 +96,6 @@ export default defineComponent({
     // element form 实例
     const elFormRef = ref<ComponentRef<typeof ElForm>>()
 
-    // useForm传入的props
-    const outsideProps = ref<FormProps>({})
-
     const mergeProps = ref<FormProps>({})
 
     const getProps = computed(() => {
@@ -125,7 +123,6 @@ export default defineComponent({
 
     const setProps = (props: FormProps = {}) => {
       mergeProps.value = Object.assign(unref(mergeProps), props)
-      outsideProps.value = props
     }
 
     const delSchema = (field: string) => {
@@ -161,6 +158,90 @@ export default defineComponent({
       return unref(elFormRef) as ComponentRef<typeof ElForm>
     }
 
+    // 按 field 存储表单组件、form-item 实例；使用 Map 避免任意 field 名与原型属性冲突，且不触发渲染
+    const formComponents = new Map<string, any>()
+    const formItemComponents = new Map<string, ComponentRef<typeof ElFormItem>>()
+
+    // 各 field 最近一次渲染的 vnode，用于判断下一次渲染是复用原实例还是新挂载
+    const lastComponentVNodes = new Map<string, VNode>()
+    const lastFormItemVNodes = new Map<string, VNode>()
+    // 上一次渲染是否为栅格布局；切换时表单项整体重新挂载
+    let lastIsCol: boolean | undefined
+    const lastColKeys = new Map<string, unknown>()
+
+    // 与 Vue 赋给模板 ref 的值一致：有 expose 时为 exposeProxy，否则为组件 proxy（函数式组件为元素）
+    const getPublicInstance = (vnode: VNode): any => {
+      const instance = vnode.component
+      if (!instance) return undefined
+      // 异步包装器与内层共享 vnode 钩子；始终记录 Vue ref 实际指向的内层公开实例
+      if ((vnode.type as { __asyncLoader?: unknown }).__asyncLoader) {
+        return getPublicInstance(instance.subTree)
+      }
+      if (instance.exposed) return instance.exposeProxy || undefined
+      return instance.proxy || vnode.el || undefined
+    }
+
+    // 实例仍存活、类型与 key 相同，则本次渲染会复用该实例
+    const canReuse = (last: VNode | undefined, next: VNode) => {
+      return (
+        !!last?.component &&
+        !last.component.isUnmounted &&
+        last.type === next.type &&
+        last.key === next.key
+      )
+    }
+
+    // 仅用于让 Vue 生成对外实例（exposeProxy）的空回调 ref
+    const materializeRef = () => {}
+
+    // 通过 vnode 生命周期钩子按 field 记录实例，不改动调用方经 componentProps/formItemProps 传入的 ref；
+    // 只有没有调用方 ref、且将新挂载（或复用的实例尚未生成对外实例）时，才追加空回调 ref。
+    // 复用实例时 vnode 不带内部 ref，调用方移除 ref 后由 Vue 按原逻辑清空旧 ref
+    const trackInstance = (
+      vnode: VNode,
+      map: Map<string, any>,
+      lastVNodes: Map<string, VNode>,
+      field: string,
+      structureStable = true,
+      childVNodes?: Map<string, VNode>
+    ) => {
+      const last = lastVNodes.get(field)
+      // 将被复用的实例；结构变化或不可复用时为新挂载
+      const materialized = structureStable && canReuse(last, vnode) && !!getPublicInstance(last!)
+      const record = (current: VNode) => {
+        const instance = getPublicInstance(current)
+        if (instance) map.set(field, instance)
+      }
+      const extraProps: Recordable = {
+        onVnodeMounted: record,
+        onVnodeUpdated: record,
+        onVnodeBeforeUnmount: (current: VNode) => {
+          const instance = getPublicInstance(current)
+          if (instance && map.get(field) === instance) map.delete(field)
+          if (lastVNodes.get(field) === current) lastVNodes.delete(field)
+          // form-item 卸载时，一并清理其内部组件的记录（组件实例可能已被同 key 插槽内容复用）
+          const child = childVNodes?.get(field)
+          if (child?.component?.parent === current.component) childVNodes?.delete(field)
+        }
+      }
+      if (vnode.ref == null && !materialized) {
+        extraProps.ref = materializeRef
+      }
+      const tracked = cloneVNode(vnode, extraProps)
+      lastVNodes.set(field, tracked)
+      return tracked
+    }
+
+    // 获取表单组件实例；使用插槽自定义渲染的字段没有组件实例，返回 undefined
+    const getComponentExpose = (field: string) => {
+      return formComponents.get(field)
+    }
+
+    // 获取 form-item 实例
+    const getFormItemExpose = (field: string) => {
+      return formItemComponents.get(field)
+    }
+
     expose({
       setValues,
       formModel,
@@ -168,7 +249,9 @@ export default defineComponent({
       delSchema,
       addSchema,
       setSchema,
-      getElFormRef
+      getElFormRef,
+      getComponentExpose,
+      getFormItemExpose
     })
 
     // 监听表单结构化数组，重新生成formModel
@@ -198,26 +281,46 @@ export default defineComponent({
     const renderFormItemWrap = () => {
       // hidden属性表示隐藏，不做渲染
       const { schema = [], isCol } = unref(getProps)
+      // 栅格布局切换时，表单项会整体重新挂载
+      const structureStable = lastIsCol === isCol
+      lastIsCol = isCol
+      const fields = new Set(schema.filter((item) => !item.hidden).map((item) => item.field))
+      for (const field of lastColKeys.keys()) {
+        if (!fields.has(field)) lastColKeys.delete(field)
+      }
 
+      // 各表单项根节点以 field 作为 key：隐藏、删除、调整顺序时按字段移动/卸载节点，
+      // 避免按位置复用到其他字段，导致实例（校验、重置、按 field 获取的实例）错位
       return schema
         .filter((v) => !v.hidden)
         .map((item) => {
           // 如果是 Divider 组件，需要自己占用一行
           const isDivider = item.component === 'Divider'
+          const colProps = setGridProp(item.colProps)
+          const colKey = Object.prototype.hasOwnProperty.call(colProps, 'key')
+            ? (colProps as Recordable).key
+            : item.field
+          const itemStructureStable =
+            structureStable && (!isCol || lastColKeys.get(item.field) === colKey)
+          lastColKeys.set(item.field, colKey)
           const Com = componentMap['Divider'] as ReturnType<typeof defineComponent>
           return isDivider ? (
-            <Com {...{ contentPosition: 'left', ...item.componentProps }}>{item?.label}</Com>
+            <Com key={item.field} {...{ contentPosition: 'left', ...item.componentProps }}>
+              {item?.label}
+            </Com>
           ) : isCol ? (
             // 如果需要栅格，需要包裹 ElCol
-            <ElCol {...setGridProp(item.colProps)}>{renderFormItem(item)}</ElCol>
+            <ElCol key={item.field} {...colProps}>
+              {renderFormItem(item, itemStructureStable)}
+            </ElCol>
           ) : (
-            renderFormItem(item)
+            renderFormItem(item, itemStructureStable)
           )
         })
     }
 
     // 渲染formItem
-    const renderFormItem = (item: FormSchema) => {
+    const renderFormItem = (item: FormSchema, structureStable = true) => {
       // 单独给只有options属性的组件做判断
       const notRenderOptions = ['SelectV2', 'Cascader', 'Transfer']
       const slotsMap: Recordable = {
@@ -258,8 +361,9 @@ export default defineComponent({
       }
       // 自定义插槽不追加默认宽度；表单项与输入组件同时受控，便于窄容器收缩
       const inlineInputWidth = !slots[item.field] && needInlineInputWidth(item)
-      return (
+      const formItemVNode = (
         <ElFormItem
+          key={item.field}
           {...(item.formItemProps || {})}
           class={inlineInputWidth ? `${prefixCls}__inline-item` : undefined}
           prop={item.field}
@@ -280,10 +384,22 @@ export default defineComponent({
                 set: (val) => setModelValue(formModel.value, item.field, val)
               })
 
-              return slots[item.field] ? (
-                getSlot(slots, item.field, formModel.value)
-              ) : (
+              if (slots[item.field]) {
+                // 交由调用方插槽渲染：清除该 field 的组件实例缓存，即使插槽内容复用了原组件实例也不再归属表单
+                formComponents.delete(item.field)
+                const content = getSlot(slots, item.field, formModel.value)
+                // 记录单根插槽 vnode：切回同类型同 key 组件时保留原 ref 的原生清理路径
+                const root = Array.isArray(content) && content.length === 1 ? content[0] : undefined
+                if (root) lastComponentVNodes.set(item.field, root)
+                else lastComponentVNodes.delete(item.field)
+                return content
+              }
+
+              // 以 field 作为 key 区分生成组件与调用方插槽内容：切换为插槽渲染时生成组件被卸载，
+              // 不会被插槽中的同类型组件复用，避免 getComponentExpose 残留实例
+              const comVNode = (
                 <Com
+                  key={item.field}
                   vModel={itemVal.value}
                   {...(autoSetPlaceholder && setTextPlaceholder(item))}
                   {...setComponentProps(item)}
@@ -297,9 +413,18 @@ export default defineComponent({
                   {{ ...slotsMap }}
                 </Com>
               )
+              return trackInstance(comVNode, formComponents, lastComponentVNodes, item.field)
             }
           }}
         </ElFormItem>
+      )
+      return trackInstance(
+        formItemVNode,
+        formItemComponents,
+        lastFormItemVNodes,
+        item.field,
+        structureStable,
+        lastComponentVNodes
       )
     }
 

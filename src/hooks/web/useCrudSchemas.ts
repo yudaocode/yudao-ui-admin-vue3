@@ -124,7 +124,8 @@ const filterSearchSchema = (crudSchema: CrudSchema[], allSchemas: AllSchemas): F
           // 默认为 input
           component,
           ...schemaItem.search,
-          field: schemaItem.field,
+          // 显式设置 search.field 时使用该字段，否则与列字段一致
+          field: schemaItem.search?.field || schemaItem.field,
           label: schemaItem.search?.label || schemaItem.label
         },
         { componentProps: comonentProps }
