@@ -8,27 +8,18 @@ const props = defineProps({
 })
 const loading = ref(true)
 const frameRef = ref<HTMLIFrameElement | null>(null)
-const init = () => {
-  nextTick(() => {
-    loading.value = true
-    if (!frameRef.value) return
-    frameRef.value.onload = () => {
-      loading.value = false
-    }
-  })
+/** 加载完成：通过模板的 @load 绑定，在 iframe 创建时就注册，不会错过加载事件 */
+const handleLoad = () => {
+  loading.value = false
 }
-onMounted(() => {
-  init()
-})
 onBeforeUnmount(() => {
   if (!frameRef.value) return
-  frameRef.value.onload = null
   frameRef.value.src = 'about:blank'
 })
 watch(
   () => props.src,
   () => {
-    init()
+    loading.value = true
   }
 )
 </script>
@@ -40,6 +31,7 @@ watch(
     <iframe
       ref="frameRef"
       :src="props.src"
+      @load="handleLoad"
       frameborder="0"
       scrolling="auto"
       height="100%"

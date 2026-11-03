@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="大屏设计器" url="https://doc.iocoder.cn/screen/" />
+  <doc-alert title="积木仪表盘" url="https://doc.iocoder.cn/report/jimu/" />
 
   <ContentWrap :bodyStyle="{ padding: '0px' }" class="!mb-0">
     <IFrame :src="src" />
