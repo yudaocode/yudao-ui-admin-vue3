@@ -1,3 +1,5 @@
+import type { FormValueType } from './form'
+
 export type ComponentName =
   | 'Radio'
   | 'RadioButton'
@@ -24,6 +26,12 @@ export type ComponentName =
   | 'UploadImg'
   | 'UploadImgs'
   | 'UploadFile'
+  | 'Upload'
+  | 'IAgree'
+  | 'RadioGroup'
+  | 'CheckboxGroup'
+  | 'JsonEditor'
+  | 'IconPicker'
 
 export type ColProps = {
   span?: number

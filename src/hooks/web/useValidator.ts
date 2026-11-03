@@ -50,10 +50,61 @@ export const useValidator = () => {
     }
   }
 
+  // 空值（''、null、undefined）不校验格式，是否必填交给 required
+  const isEmptyValue = (val: unknown) => val === '' || val === null || val === undefined
+
+  // 手机号（参考上游 4146716655）：空值通过
+  const phone = (message?: string): FormItemRule => {
+    return {
+      validator: ((_, val) => {
+        if (!isEmptyValue(val) && !/^1[3456789]\d{9}$/.test(String(val))) {
+          return Promise.reject(new Error(message || t('common.phone')))
+        }
+        return Promise.resolve()
+      }) as any
+    }
+  }
+
+  // 邮箱（参考上游 4146716655，沿用上游正则）：空值通过
+  const email = (message?: string): FormItemRule => {
+    return {
+      validator: ((_, val) => {
+        if (!isEmptyValue(val) && !/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(String(val))) {
+          return Promise.reject(new Error(message || t('common.email')))
+        }
+        return Promise.resolve()
+      }) as any
+    }
+  }
+
+  // 最大长度（参考上游 4146716655）
+  const maxlength = (max: number, message?: string): FormItemRule => {
+    return {
+      max,
+      message: message || t('common.maxlength', { max })
+    }
+  }
+
+  // 勾选类校验（如 IAgree 协议勾选）：只有值为 true 才通过
+  const check = (message?: string): FormItemRule => {
+    return {
+      validator: ((_, val) => {
+        if (val !== true) {
+          return Promise.reject(new Error(message || t('common.required')))
+        }
+        return Promise.resolve()
+      }) as any
+    }
+  }
+
   return {
     required,
     lengthRange,
     notSpace,
-    notSpecialCharacters
+    notSpecialCharacters,
+    phone,
+    email,
+    maxlength,
+    check
   }
 }

@@ -161,6 +161,15 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
       const table = await getTable()
       return (table?.selections || []) as T[]
     },
+    // 获取 ElTable 实例（参考上游 94800b012）；未注册时返回 undefined
+    getElTableExpose: async () => {
+      await getTable()
+      return unref(elTableRef)
+    },
+    // 按当前页码与查询参数重新获取数据（参考上游 882f162ff）
+    refresh: (): Promise<void> => {
+      return methods.getList()
+    },
     // 与Search组件结合
     setSearchParams: (data: Recordable) => {
       tableObject.params = Object.assign(tableObject.params, {

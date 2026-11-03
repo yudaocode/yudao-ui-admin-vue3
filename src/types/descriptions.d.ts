@@ -1,3 +1,5 @@
+import type { VNodeChild } from 'vue'
+
 export interface DescriptionsSchema {
   span?: number // 占多少分
   field: string // 字段名
@@ -11,4 +13,9 @@ export interface DescriptionsSchema {
   labelClassName?: string
   dateFormat?: string // add by 星语：支持时间的格式化
   dictType?: string // add by 星语：支持 dict 字典数据
+  // 渲染函数：default 参数为整条 data，label 参数为当前 schema 项；同名模板插槽优先
+  slots?: {
+    default?: (...args: any[]) => VNodeChild
+    label?: (...args: any[]) => VNodeChild
+  }
 }

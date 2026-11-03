@@ -57,7 +57,10 @@ export default {
     copyError: '复制失败',
     lengthRange: '长度在 {min} 到 {max} 个字符',
     notSpace: '不能包含空格',
-    notSpecialCharacters: '不能包含特殊字符'
+    notSpecialCharacters: '不能包含特殊字符',
+    phone: '请输入正确的手机号码',
+    email: '请输入正确的邮箱',
+    maxlength: '长度不能超过 {max} 个字符'
   },
   lock: {
     lockScreen: '锁定屏幕',

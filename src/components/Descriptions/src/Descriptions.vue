@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { PropType } from 'vue'
+import { FunctionalComponent, PropType, VNodeChild } from 'vue'
 import dayjs from 'dayjs'
 import { get } from 'lodash-es'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -29,7 +29,9 @@ const props = defineProps({
   data: {
     type: Object as PropType<any>,
     default: () => ({})
-  }
+  },
+  // 普通字段值为 null / undefined 时显示的占位文字（参考上游 83b09f09f）；默认空串，与原显示一致
+  emptyText: propTypes.string.def('')
 })
 
 const { getPrefixCls } = useDesign()
@@ -37,7 +39,7 @@ const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('descriptions')
 
 const getBindValue = computed(() => {
-  const delArr: string[] = ['title', 'message', 'collapse', 'schema', 'data', 'class']
+  const delArr: string[] = ['title', 'message', 'collapse', 'schema', 'data', 'class', 'emptyText']
   const obj = { ...attrs, ...props }
   for (const key in obj) {
     if (delArr.indexOf(key) !== -1) {
@@ -47,8 +49,16 @@ const getBindValue = computed(() => {
   return obj
 })
 
+// 渲染 schema 中的 slots 渲染函数（返回 VNode / 文本 / null）
+const SchemaSlotRender: FunctionalComponent<{
+  render: (...args: any[]) => VNodeChild
+  params?: any
+}> = (renderProps) => renderProps.render(renderProps.params)
+SchemaSlotRender.props = ['render', 'params']
+
 const getBindItemValue = (item: DescriptionsSchema) => {
-  const delArr: string[] = ['field']
+  // slots 是渲染函数，不作为属性传给 ElDescriptionsItem
+  const delArr: string[] = ['field', 'slots']
   const obj = { ...item }
   for (const key in obj) {
     if (delArr.indexOf(key) !== -1) {
@@ -134,19 +144,33 @@ const toggleClick = () => {
                   label: item.label
                 }"
               >
-                {{ item.label }}
+                <!-- 优先级：模板 #字段-label 插槽 > schema.slots.label(item) > label 文字 -->
+                <SchemaSlotRender
+                  v-if="item.slots?.label"
+                  :params="item"
+                  :render="item.slots.label"
+                />
+                <template v-else>{{ item.label }}</template>
               </slot>
             </template>
 
             <template #default>
-              <slot v-if="item.dateFormat">
+              <!-- 优先级：模板 #字段 插槽 > schema.slots.default(data) > 原有日期/字典/字段映射/嵌套取值 -->
+              <!-- 普通取值为 null / undefined 时显示 emptyText；0、false、'' 原样显示 -->
+              <slot v-if="slots[item.field]" :name="item.field" :row="data"></slot>
+              <SchemaSlotRender
+                v-else-if="item.slots?.default"
+                :params="data"
+                :render="item.slots.default"
+              />
+              <slot v-else-if="item.dateFormat">
                 {{ formatDate(item) }}
               </slot>
               <slot v-else-if="item.dictType">
                 <DictTag :type="item.dictType" :value="getFieldValue(item.field) + ''" />
               </slot>
               <slot v-else :name="item.field" :row="data">
-                {{ getFieldValue(item.mappedField || item.field) }}
+                {{ getFieldValue(item.mappedField || item.field) ?? emptyText }}
               </slot>
             </template>
           </ElDescriptionsItem>
