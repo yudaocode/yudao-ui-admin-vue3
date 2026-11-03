@@ -50,10 +50,23 @@ export const useValidator = () => {
     }
   }
 
+  // 勾选类校验（如 IAgree 协议勾选）：只有值为 true 才通过
+  const check = (message?: string): FormItemRule => {
+    return {
+      validator: ((_, val) => {
+        if (val !== true) {
+          return Promise.reject(new Error(message || t('common.required')))
+        }
+        return Promise.resolve()
+      }) as any
+    }
+  }
+
   return {
     required,
     lengthRange,
     notSpace,
-    notSpecialCharacters
+    notSpecialCharacters,
+    check
   }
 }

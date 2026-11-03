@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { PropType } from 'vue'
+import { FunctionalComponent, PropType, VNodeChild } from 'vue'
 import dayjs from 'dayjs'
 import { get } from 'lodash-es'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -47,8 +47,16 @@ const getBindValue = computed(() => {
   return obj
 })
 
+// 渲染 schema 中的 slots 渲染函数（返回 VNode / 文本 / null）
+const SchemaSlotRender: FunctionalComponent<{
+  render: (...args: any[]) => VNodeChild
+  params?: any
+}> = (renderProps) => renderProps.render(renderProps.params)
+SchemaSlotRender.props = ['render', 'params']
+
 const getBindItemValue = (item: DescriptionsSchema) => {
-  const delArr: string[] = ['field']
+  // slots 是渲染函数，不作为属性传给 ElDescriptionsItem
+  const delArr: string[] = ['field', 'slots']
   const obj = { ...item }
   for (const key in obj) {
     if (delArr.indexOf(key) !== -1) {
@@ -134,12 +142,25 @@ const toggleClick = () => {
                   label: item.label
                 }"
               >
-                {{ item.label }}
+                <!-- 优先级：模板 #字段-label 插槽 > schema.slots.label(item) > label 文字 -->
+                <SchemaSlotRender
+                  v-if="item.slots?.label"
+                  :params="item"
+                  :render="item.slots.label"
+                />
+                <template v-else>{{ item.label }}</template>
               </slot>
             </template>
 
             <template #default>
-              <slot v-if="item.dateFormat">
+              <!-- 优先级：模板 #字段 插槽 > schema.slots.default(data) > 原有日期/字典/字段映射/嵌套取值 -->
+              <slot v-if="slots[item.field]" :name="item.field" :row="data"></slot>
+              <SchemaSlotRender
+                v-else-if="item.slots?.default"
+                :params="data"
+                :render="item.slots.default"
+              />
+              <slot v-else-if="item.dateFormat">
                 {{ formatDate(item) }}
               </slot>
               <slot v-else-if="item.dictType">

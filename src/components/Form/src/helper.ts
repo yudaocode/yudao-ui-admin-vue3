@@ -212,8 +212,8 @@ export const initModel = (schema: FormSchema[], formModel: Recordable) => {
     } else if (v.component && v.component !== 'Divider') {
       // 如果先前已经有值存在，则不进行重新赋值，而是采用现有的值
       if (!hasModelValue(model, v.field)) {
-        // Transfer 的绑定值是数组，缺省时使用 []，其他组件保持 ''
-        const defaultValue = v.component === 'Transfer' ? [] : ''
+        // Transfer 的绑定值是数组，缺省时使用 []；IAgree 是勾选状态，缺省时使用 false；其他组件保持 ''
+        const defaultValue = v.component === 'Transfer' ? [] : v.component === 'IAgree' ? false : ''
         setModelValue(model, v.field, v.value !== void 0 ? v.value : defaultValue)
       }
     }

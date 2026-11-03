@@ -21,6 +21,7 @@ import {
 } from 'element-plus'
 import { InputPassword } from '@/components/InputPassword'
 import { UploadImg, UploadImgs, UploadFile } from '@/components/UploadFile'
+import { IAgree } from '@/components/IAgree'
 import { ComponentName } from '@/types/components'
 import FormTransfer from './components/FormTransfer.vue'
 
@@ -52,7 +53,8 @@ const componentMap: Recordable<Component, ComponentName> = {
   Editor: Editor,
   UploadImg: UploadImg,
   UploadImgs: UploadImgs,
-  UploadFile: UploadFile
+  UploadFile: UploadFile,
+  IAgree: IAgree
 }
 
 export { componentMap }
