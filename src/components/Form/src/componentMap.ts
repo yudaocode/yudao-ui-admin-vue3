@@ -17,7 +17,8 @@ import {
   ElTimePicker,
   ElTimeSelect,
   ElAutocomplete,
-  ElDivider
+  ElDivider,
+  ElUpload
 } from 'element-plus'
 import { InputPassword } from '@/components/InputPassword'
 import { UploadImg, UploadImgs, UploadFile } from '@/components/UploadFile'
@@ -61,6 +62,8 @@ const componentMap: Recordable<Component, ComponentName> = {
   UploadImg: UploadImg,
   UploadImgs: UploadImgs,
   UploadFile: UploadFile,
+  // 兼容上游组件名 Upload（参考 c181887f7）：原生 ElUpload，绑定 file-list；业务上传仍使用上面三个芋道组件
+  Upload: ElUpload,
   IAgree: IAgree,
   JsonEditor: JsonEditor,
   IconPicker: IconPicker

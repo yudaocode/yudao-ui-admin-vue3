@@ -26,6 +26,7 @@ export type ComponentName =
   | 'UploadImg'
   | 'UploadImgs'
   | 'UploadFile'
+  | 'Upload'
   | 'IAgree'
   | 'RadioGroup'
   | 'CheckboxGroup'

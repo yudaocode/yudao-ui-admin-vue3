@@ -557,6 +557,45 @@ export default defineComponent({
                 return renderCustomContent(item.field, toVNodes(schemaDefault(formModel.value)))
               }
 
+              // Upload（ElUpload）绑定 file-list 而不是 modelValue（参考上游 30fb2de6f）。
+              // 监听键使用 camelCase，与调用方 componentProps 中的 onUpdate:fileList 合并执行而不是互相遮蔽；
+              // 缺省值 '' 等非数组按空列表传入，避免 fileList 类型告警
+              if (item.component === 'Upload') {
+                const uploadProps = setComponentProps(item)
+                // ElUpload 没有 clearable 属性，避免通用默认值落到根节点 DOM 上
+                delete uploadProps.clearable
+                // 内部 camel 监听存在时，Vue 不再查找调用方 kebab 写法 onUpdate:file-list(Once) 的回调；
+                // 对普通、Once 两类分别做别名归一化，每类 camel 优先：已有有效 camel 时保持不变，否则改用 kebab，
+                // 并删除 kebab 别名。Once 只执行一次交由 Vue 原生机制；uploadProps 为浅拷贝，不改原 schema
+                for (const suffix of ['', 'Once']) {
+                  const camelKey = `onUpdate:fileList${suffix}`
+                  const kebabKey = `onUpdate:file-list${suffix}`
+                  const kebabListener = uploadProps[kebabKey]
+                  delete uploadProps[kebabKey]
+                  if (kebabListener && !uploadProps[camelKey]) {
+                    uploadProps[camelKey] = kebabListener
+                  }
+                }
+                const uploadVNode = (
+                  <Com
+                    key={item.field}
+                    {...{
+                      fileList: Array.isArray(itemVal.value) ? itemVal.value : [],
+                      'onUpdate:fileList': (files: unknown) => {
+                        itemVal.value = files
+                      }
+                    }}
+                    {...(autoSetPlaceholder && setTextPlaceholder(item))}
+                    {...uploadProps}
+                    class={inlineInputWidth ? `${prefixCls}__inline-input` : undefined}
+                    style={item.componentProps?.style}
+                  >
+                    {{ ...slotsMap }}
+                  </Com>
+                )
+                return trackInstance(uploadVNode, formComponents, lastComponentVNodes, item.field)
+              }
+
               // 以 field 作为 key 区分生成组件与调用方插槽内容：切换为插槽渲染时生成组件被卸载，
               // 不会被插槽中的同类型组件复用，避免 getComponentExpose 残留实例
               const comVNode = (
