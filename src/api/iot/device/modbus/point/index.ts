@@ -10,6 +10,7 @@ export interface DeviceModbusPointVO {
   functionCode?: number // Modbus 功能码
   registerAddress?: number // 寄存器起始地址
   registerCount?: number // 寄存器数量
+  bitIndex?: number // 位索引（0-15，仅 FC03/FC04 + BOOLEAN + 1 个寄存器）
   byteOrder?: string // 字节序
   rawDataType?: string // 原始数据类型
   scale: number // 缩放因子

@@ -58,6 +58,18 @@
           class="!w-full"
         />
       </el-form-item>
+      <el-form-item v-if="showBitIndex" label="位索引" prop="bitIndex">
+        <el-input-number
+          v-model="formData.bitIndex"
+          :min="0"
+          :max="15"
+          :precision="0"
+          controls-position="right"
+          placeholder="留空表示整个寄存器非 0 即 true"
+          class="!w-full"
+        />
+        <div class="text-xs text-gray-400">0 为最低位；位点位忽略缩放因子和字节序</div>
+      </el-form-item>
       <el-form-item label="原始数据类型" prop="rawDataType">
         <el-select
           v-model="formData.rawDataType"
@@ -126,7 +138,9 @@
 import { ThingModelData } from '@/api/iot/thingmodel'
 import { DeviceModbusPointApi, DeviceModbusPointVO } from '@/api/iot/device/modbus/point'
 import {
+  ModbusFunctionCodeEnum,
   ModbusFunctionCodeOptions,
+  ModbusRawDataTypeEnum,
   ModbusRawDataTypeOptions,
   getByteOrderOptions,
   IoTThingModelTypeEnum
@@ -159,6 +173,7 @@ const formData = ref<DeviceModbusPointVO>({
   functionCode: undefined,
   registerAddress: undefined,
   registerCount: undefined,
+  bitIndex: undefined,
   byteOrder: undefined,
   rawDataType: undefined,
   scale: 1,
@@ -182,6 +197,17 @@ const registerAddressHex = computed(() => {
     return ''
   }
   return '0x' + formData.value.registerAddress.toString(16).toUpperCase().padStart(4, '0')
+})
+
+/** 是否显示位索引：仅 FC03/FC04、BOOLEAN、1 个寄存器的点位，可以取寄存器中的某一位（需求来源：https://t.zsxq.com/Qg5LP） */
+const showBitIndex = computed(() => {
+  const functionCode = formData.value.functionCode
+  return (
+    (functionCode === ModbusFunctionCodeEnum.READ_HOLDING_REGISTERS ||
+      functionCode === ModbusFunctionCodeEnum.READ_INPUT_REGISTERS) &&
+    formData.value.rawDataType === ModbusRawDataTypeEnum.BOOLEAN &&
+    formData.value.registerCount === 1
+  )
 })
 
 /** 筛选属性类型的物模型 */
@@ -247,11 +273,16 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
+    // 位索引隐藏时（例如改了功能码、数据类型）不提交，后端会清空
+    const data = {
+      ...formData.value,
+      bitIndex: showBitIndex.value ? formData.value.bitIndex : undefined
+    }
     if (formType.value === 'create') {
-      await DeviceModbusPointApi.createModbusPoint(formData.value)
+      await DeviceModbusPointApi.createModbusPoint(data)
       message.success('创建成功')
     } else {
-      await DeviceModbusPointApi.updateModbusPoint(formData.value)
+      await DeviceModbusPointApi.updateModbusPoint(data)
       message.success('更新成功')
     }
     dialogVisible.value = false
@@ -272,6 +303,7 @@ const resetForm = () => {
     functionCode: undefined,
     registerAddress: undefined,
     registerCount: undefined,
+    bitIndex: undefined,
     byteOrder: undefined,
     rawDataType: undefined,
     scale: 1,
