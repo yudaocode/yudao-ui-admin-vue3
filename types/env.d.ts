@@ -26,6 +26,12 @@ interface ImportMetaEnv {
   readonly VITE_OUT_DIR: string
   // 打包体积分析，仅 build 时为 'true' 才开启
   readonly VITE_USE_BUNDLE_ANALYZER?: string
+  // CSS 分包开关，仅为 'false' 时合并为单个 CSS 文件，缺省时按 chunk 拆分
+  readonly VITE_USE_CSS_SPLIT?: string
+  // 是否使用在线图标，缺省时在线（按需请求 Iconify API）；仅为 'false' 时构建离线图标子集
+  readonly VITE_USE_ONLINE_ICON?: string
+  // 离线图标额外名称，逗号分隔的 prefix:name（如 mdi:home,tabler:ai），用于后台菜单等源码中没有字面量的图标
+  readonly VITE_OFFLINE_ICONS?: string
   readonly VITE_GOVIEW_URL: string
   // 是否隐藏全局设置（顶部齿轮及设置抽屉），仅为 'true' 时隐藏，缺省时显示
   readonly VITE_HIDE_GLOBAL_SETTING?: string
@@ -35,6 +41,15 @@ interface ImportMetaEnv {
   readonly VITE_APP_API_ENCRYPT_ALGORITHM: string
   readonly VITE_APP_API_ENCRYPT_REQUEST_KEY: string
   readonly VITE_APP_API_ENCRYPT_RESPONSE_KEY: string
+}
+
+// 离线图标子集（build/vite/offlineIcons.ts 生成）
+declare module 'virtual:offline-icons' {
+  import type { IconifyJSON } from '@iconify/vue'
+  // 是否为离线图标模式（VITE_USE_ONLINE_ICON=false）
+  export const offline: boolean
+  // 离线模式下需注册的图标子集；在线模式为空数组
+  export const collections: IconifyJSON[]
 }
 
 declare global {

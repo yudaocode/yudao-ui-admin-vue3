@@ -22,13 +22,15 @@ import { propTypes } from '@/utils/propTypes'
 import { getSlot } from '@/utils/tsxHelper'
 import {
   getModelValue,
+  hasModelValue,
   initModel,
   setComponentProps,
   setFormItemSlots,
   setGridProp,
   setItemComponentSlots,
   setModelValue,
-  setTextPlaceholder
+  setTextPlaceholder,
+  unsetModelValue
 } from './helper'
 import { useRenderSelect } from './components/useRenderSelect'
 import { useRenderRadio } from './components/useRenderRadio'
@@ -124,6 +126,35 @@ export default defineComponent({
     // 表单数据
     const formModel = ref<Recordable>(cloneDeep(props.model))
 
+    // remove 的字段：不渲染，值也不出现在表单数据中
+    const removedFields = computed(() =>
+      (unref(getProps).schema || []).filter((v) => v.remove).map((v) => v.field)
+    )
+
+    // 删除 remove 字段的值（支持嵌套路径，不存在时不改动）
+    const omitRemovedValues = (model: Recordable) => {
+      for (const field of unref(removedFields)) {
+        unsetModelValue(model, field)
+      }
+    }
+
+    // setValues、ElForm resetFields（会按已卸载表单项缓存的初始值回写）或插槽等写回 remove 字段时，同步删除，
+    // 保证对外的表单数据（formModel / getFormData）始终不含已移除的值。
+    // 先读取值再判断是否存在：lodash has 使用 hasOwnProperty.call，不经过响应式代理收集依赖
+    watch(
+      () => {
+        const model = unref(formModel)
+        return unref(removedFields).filter((field) => {
+          getModelValue(model, field)
+          return hasModelValue(model, field)
+        })
+      },
+      (fields) => {
+        if (fields.length) omitRemovedValues(unref(formModel))
+      },
+      { flush: 'sync' }
+    )
+
     onMounted(() => {
       emit('register', unref(elFormRef)?.$parent, unref(elFormRef))
     })
@@ -136,6 +167,8 @@ export default defineComponent({
         isObject(value) && !isPlainObject(value) && !Array.isArray(value) ? value : undefined
       )
       formModel.value = Object.assign(unref(formModel), values)
+      // remove 字段不接受赋值
+      omitRemovedValues(unref(formModel))
     }
 
     const setProps = (props: FormProps = {}) => {
@@ -160,15 +193,15 @@ export default defineComponent({
       schema.push(formSchema)
     }
 
-    // 手动修改选项时让进行中的远程请求失效；由下方 optionApi 管理器在 setup 内初始化
-    let invalidateOptionApi = (_field: string, _path: string) => {}
+    // 手动修改选项时让进行中的远程请求失效、设置 remove 时结束当前请求代次；由下方 optionApi 管理器在 setup 内初始化
+    let invalidateOptionApi = (_field: string, _path: string, _value: unknown) => {}
 
     const setSchema = (schemaProps: FormSetPropsType[]) => {
       const { schema } = unref(getProps)
       for (const v of schema) {
         for (const item of schemaProps) {
           if (v.field === item.field) {
-            invalidateOptionApi(v.field, item.path)
+            invalidateOptionApi(v.field, item.path, item.value)
             set(v, item.path, item.value)
           }
         }
@@ -289,7 +322,7 @@ export default defineComponent({
 
     // optionApi：按 field + 当前接口函数记录一次请求（参考上游 49451ae60、9b134161a）。
     // 不在 render 中请求；返回空数组、非数组或异常均视为已结束，不重复请求；
-    // 接口函数变更、字段删除/隐藏、组件卸载后，旧请求的结果不再写入
+    // 接口函数变更、字段删除/remove、组件卸载后，旧请求的结果不再写入。hidden 字段仍挂载，请求与结果照常保留
     type OptionRequest = { api: OptionApi; options?: any[]; invalidated: boolean }
     const optionApiRequests = new Map<string, OptionRequest>()
     // schema 也允许普通数组/computed 产出的非响应式对象，异步写入后显式触发表单渲染
@@ -309,9 +342,14 @@ export default defineComponent({
       return [options, data].some((list) => Array.isArray(list) && list.length > 0)
     }
 
-    invalidateOptionApi = (field, path) => {
+    invalidateOptionApi = (field, path, value) => {
       // 与 set 使用同样的路径分段规则：支持 options[0]，同时避免误匹配 optionsAlias / data-*
       const [root, key] = toPath(path)
+      // remove：立即结束当前代次，晚到结果不再写入；恢复后按新一轮请求
+      if (root === 'remove' && key === undefined && value) {
+        optionApiRequests.delete(field)
+        return
+      }
       if (root === 'componentProps' && (key === undefined || key === 'options' || key === 'data')) {
         const request = optionApiRequests.get(field)
         if (request) request.invalidated = true
@@ -341,7 +379,7 @@ export default defineComponent({
       const fields = new Set<string>()
       for (const item of schema) {
         const api = item.optionApi
-        if (item.hidden || typeof api !== 'function') continue
+        if (item.remove || typeof api !== 'function') continue
         fields.add(item.field)
         // 同一字段、同一接口函数只请求一次（包括进行中、已结束）
         const previous = optionApiRequests.get(item.field)
@@ -362,8 +400,8 @@ export default defineComponent({
           .then((options: unknown) => {
             if (!isCurrent() || !Array.isArray(options) || options.length === 0) return
             const current = unref(getProps).schema.find((v) => v.field === field)
-            // 请求期间调用方已填入非空选项时，不用接口结果覆盖
-            if (!current) return
+            // 请求期间调用方已填入非空选项时，不用接口结果覆盖；已 remove 的字段不回填
+            if (!current || current.remove) return
             checkManualOptions(current, request)
             if (request.invalidated) return
             request.options = toRaw(options)
@@ -373,7 +411,7 @@ export default defineComponent({
             if (isCurrent()) console.warn(`[Form] optionApi of field "${field}" failed`, error)
           })
       }
-      // 字段删除或隐藏：作废旧请求，重新出现时按新一轮请求
+      // 字段删除或 remove：作废旧请求，重新出现时按新一轮请求
       for (const field of optionApiRequests.keys()) {
         if (!fields.has(field)) optionApiRequests.delete(field)
       }
@@ -384,7 +422,7 @@ export default defineComponent({
       () =>
         (unref(getProps).schema || []).map((v) => {
           const { options, data } = (v.componentProps || {}) as Recordable
-          return [v.field, v.optionApi, v.hidden, options, options?.length, data, data?.length]
+          return [v.field, v.optionApi, v.remove, options, options?.length, data, data?.length]
         }),
       () => loadOptions(unref(getProps).schema || []),
       { immediate: true }
@@ -409,20 +447,20 @@ export default defineComponent({
     // 是否要渲染el-col
     const renderFormItemWrap = () => {
       unref(optionRenderVersion)
-      // hidden属性表示隐藏，不做渲染
+      // remove 属性表示移除，不做渲染；hidden 只隐藏（v-show），表单项保持挂载（参考上游 0f531fd1d、9a5c7bcb5 的意图）
       const { schema = [], isCol } = unref(getProps)
       // 栅格布局切换时，表单项会整体重新挂载
       const structureStable = lastIsCol === isCol
       lastIsCol = isCol
-      const fields = new Set(schema.filter((item) => !item.hidden).map((item) => item.field))
+      const fields = new Set(schema.filter((item) => !item.remove).map((item) => item.field))
       for (const field of lastColKeys.keys()) {
         if (!fields.has(field)) lastColKeys.delete(field)
       }
 
-      // 各表单项根节点以 field 作为 key：隐藏、删除、调整顺序时按字段移动/卸载节点，
+      // 各表单项根节点以 field 作为 key：移除、删除、调整顺序时按字段移动/卸载节点，
       // 避免按位置复用到其他字段，导致实例（校验、重置、按 field 获取的实例）错位
       return schema
-        .filter((v) => !v.hidden)
+        .filter((v) => !v.remove)
         .map((item) => {
           // 如果是 Divider 组件，需要自己占用一行
           const isDivider = item.component === 'Divider'
@@ -434,13 +472,18 @@ export default defineComponent({
             structureStable && (!isCol || lastColKeys.get(item.field) === colKey)
           lastColKeys.set(item.field, colKey)
           const Com = componentMap['Divider'] as ReturnType<typeof defineComponent>
+          // hidden 时 Divider、栅格 ElCol 外层一并隐藏，不留占位空白（参考上游 0f531fd1d 的意图）
           return isDivider ? (
-            <Com key={item.field} {...{ contentPosition: 'left', ...item.componentProps }}>
+            <Com
+              key={item.field}
+              v-show={!item.hidden}
+              {...{ contentPosition: 'left', ...item.componentProps }}
+            >
               {item?.label}
             </Com>
           ) : isCol ? (
             // 如果需要栅格，需要包裹 ElCol
-            <ElCol key={item.field} {...colProps}>
+            <ElCol key={item.field} v-show={!item.hidden} {...colProps}>
               {renderFormItem(item, itemStructureStable)}
             </ElCol>
           ) : (
@@ -529,6 +572,7 @@ export default defineComponent({
       const formItemVNode = (
         <ElFormItem
           key={item.field}
+          v-show={!item.hidden}
           {...formItemProps}
           class={inlineInputWidth ? `${prefixCls}__inline-item` : undefined}
           prop={item.field}

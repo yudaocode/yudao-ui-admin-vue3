@@ -55,8 +55,10 @@ export type FormSchema = {
   component?: ComponentName
   // 初始值
   value?: FormValueType
-  // 是否隐藏
+  // 样式隐藏，类似 v-show：表单项保持挂载，保留值、组件实例、选项及校验规则（参考上游 0f531fd1d、9a5c7bcb5 的意图）
   hidden?: boolean
+  // 移除，类似 v-if：不渲染表单项，并从表单数据中删除该值（setValues / resetFields 后也不会写回）
+  remove?: boolean
   // 远程加载下拉项
   api?: <T = any>() => AxiosPromise<T>
   // 远程加载选项：仅在 componentProps.options / data 为空时调用一次，返回选项数组；

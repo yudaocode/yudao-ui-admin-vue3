@@ -225,8 +225,8 @@ const getDefaultValue = (component?: string) => {
 export const initModel = (schema: FormSchema[], formModel: Recordable) => {
   const model: Recordable = { ...formModel }
   schema.map((v) => {
-    // 如果是hidden，就删除对应的值（field 支持 a.b 嵌套路径）
-    if (v.hidden) {
+    // remove 不渲染，并删除对应的值（field 支持 a.b 嵌套路径）；hidden 只隐藏，值照常初始化、保留
+    if (v.remove) {
       unsetModelValue(model, v.field)
     } else if (v.component && v.component !== 'Divider') {
       // 如果先前已经有值存在，则不进行重新赋值，而是采用现有的值

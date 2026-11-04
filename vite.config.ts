@@ -84,7 +84,10 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             minify: 'oxc',
             outDir: env.VITE_OUT_DIR || 'dist',
             reportCompressedSize: false,
-            sourcemap: env.VITE_SOURCEMAP === 'true' ? 'inline' : false,
+            // 参考上游 3a5db42c9：开启时生成独立的 .map 文件，不再内联进产物 JS
+            sourcemap: env.VITE_SOURCEMAP === 'true',
+            // CSS 分包开关（参考上游 b2cee10cc）：未配置时保持现有按 chunk 拆分 CSS，仅 VITE_USE_CSS_SPLIT=false 时合并为单个 CSS 文件
+            cssCodeSplit: env.VITE_USE_CSS_SPLIT !== 'false',
             rollupOptions: {
                 output: {
                     minify: {

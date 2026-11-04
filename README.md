@@ -9,7 +9,7 @@
 
 ## 🐶 新手必读
 
-* nodejs > 16.18.0 && pnpm > 8.6.0 (强制使用pnpm)
+* nodejs >= 20.19.0 && pnpm >= 10.28.0 (强制使用pnpm，版本由 packageManager 指定为 pnpm@10.28.0)
 * 演示地址【Vue3 + element-plus】：<http://dashboard-vue3.yudao.iocoder.cn>
 * 演示地址【Vue3 + vben5.0(ant-design-vue)】：<http://dashboard-vben.yudao.iocoder.cn>
 * 演示地址【Vue2 + element-ui】：<http://dashboard.yudao.iocoder.cn>

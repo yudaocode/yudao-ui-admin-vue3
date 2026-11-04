@@ -11,6 +11,7 @@ import { createSvgIconsPlugin } from 'vite-plugin-svg-icons-ng'
 import UnoCSS from 'unocss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import type { PluginOption } from 'vite'
+import { createOfflineIconsPlugin } from './offlineIcons'
 
 export function createVitePlugins(isBuild = false, env: Record<string, string> = {}) {
   const root = process.cwd()
@@ -68,6 +69,8 @@ export function createVitePlugins(isBuild = false, env: Record<string, string> =
       iconDirs: [pathResolve('src/assets/svgs')],
       symbolId: 'icon-[dir]-[name]'
     }),
+    // 离线图标子集：默认在线时只输出空模块，仅 VITE_USE_ONLINE_ICON=false 时生成
+    createOfflineIconsPlugin(env),
     isBuild &&
       compressTypes.includes('gzip') &&
       viteCompression({
