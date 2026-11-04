@@ -60,6 +60,20 @@ watch(
   }
 )
 
+// 外部清空兜底：内层 Editor 仅在 modelValue 与其 onChange 记录的值不同时才 setHtml，而初值经 createEditor 渲染、
+// 不触发 onChange，导致初值后的首次外部清空被内层跳过。post 回调在本组件及内层 Editor（含其 watch）更新后执行，
+// 此时编辑器仍非空才补一次清空；内层已正常清空时 isEmpty() 为 true，不会重复操作
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) return
+    const editor = editorRef.value
+    if (!editor || editor.isEmpty()) return
+    editor.setHtml('')
+  },
+  { flush: 'post' }
+)
+
 // 监听
 watch(
   () => valueHtml.value,
@@ -82,8 +96,19 @@ watch(
   }
 )
 
+// 内层 Editor 在其 onMounted 中按当时的 modelValue 同步 createEditor，本组件 onMounted 紧随其后，记录创建所用内容
+let createdHtml: string | undefined
+onMounted(() => {
+  createdHtml = valueHtml.value
+})
+
 const handleCreated = (editor: IDomEditor) => {
   editorRef.value = editor
+  // onCreated 为异步触发：期间 modelValue 若已变化，内层 watch 因实例未就绪丢弃了 setHtml，这里补同步一次；
+  // 初值未变化时不调用 setHtml，避免写入撤销栈、抢占焦点和多余的 change
+  if (createdHtml !== undefined && valueHtml.value !== createdHtml) {
+    editor.setHtml(valueHtml.value)
+  }
 }
 
 // 编辑器配置
