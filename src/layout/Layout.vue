@@ -21,6 +21,9 @@ const collapse = computed(() => appStore.getCollapse)
 
 const layout = computed(() => appStore.getLayout)
 
+// 是否隐藏全局设置，仅 VITE_HIDE_GLOBAL_SETTING 为 'true' 时隐藏
+const hideSetting = import.meta.env.VITE_HIDE_GLOBAL_SETTING === 'true'
+
 const handleClickOutside = () => {
   appStore.setCollapse(true)
 }
@@ -67,7 +70,7 @@ export default defineComponent({
 
         <Backtop></Backtop>
 
-        <Setting></Setting>
+        {hideSetting ? undefined : <Setting></Setting>}
       </section>
     )
   }

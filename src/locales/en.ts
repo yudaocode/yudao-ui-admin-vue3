@@ -54,7 +54,13 @@ export default {
     updateTime: 'Update Time',
     copy: 'Copy',
     copySuccess: 'Copy Success',
-    copyError: 'Copy Error'
+    copyError: 'Copy Error',
+    lengthRange: 'The length should be between {min} and {max}',
+    notSpace: 'Spaces are not allowed',
+    notSpecialCharacters: 'Special characters are not allowed',
+    phone: 'Please enter a valid mobile phone number',
+    email: 'Please enter a valid email address',
+    maxlength: 'The length cannot exceed {max} characters'
   },
   lock: {
     lockScreen: 'Lock screen',

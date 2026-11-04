@@ -124,7 +124,8 @@ const filterSearchSchema = (crudSchema: CrudSchema[], allSchemas: AllSchemas): F
           // 默认为 input
           component,
           ...schemaItem.search,
-          field: schemaItem.field,
+          // 显式设置 search.field 时使用该字段，否则与列字段一致
+          field: schemaItem.search?.field || schemaItem.field,
           label: schemaItem.search?.label || schemaItem.label
         },
         { componentProps: comonentProps }
@@ -171,9 +172,10 @@ const filterTableSchema = (crudSchema: CrudSchema[]): TableColumn[] => {
             })
           }
         }
+        // table 内的配置优先于通用配置（如 label、width、formatter）
         return {
-          ...schema.table,
-          ...schema
+          ...schema,
+          ...schema.table
         }
       }
     }
@@ -205,6 +207,10 @@ const filterFormSchema = (crudSchema: CrudSchema[], allSchemas: AllSchemas): For
       } else {
         if (component === 'InputNumber') {
           defaultValue = 0
+        } else if (component === 'CheckboxGroup') {
+          defaultValue = []
+        } else if (component === 'JsonEditor') {
+          defaultValue = {}
         }
       }
       let comonentProps: ComponentProps = {}

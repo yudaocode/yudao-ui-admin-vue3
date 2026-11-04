@@ -70,6 +70,15 @@ watch(
   }
 )
 
+// maxHeight 变化时同步高度；全屏时保持全屏高度，退出全屏时由上方 watch 取最新 maxHeight
+watch(
+  () => props.maxHeight,
+  (val) => {
+    if (unref(isFullscreen)) return
+    dialogHeight.value = isNumber(val) ? `${val}px` : val
+  }
+)
+
 const dialogStyle = computed(() => {
   return {
     height: unref(dialogHeight)

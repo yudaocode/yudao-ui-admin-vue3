@@ -22,10 +22,21 @@ const props = defineProps({
   hoverColor: propTypes.string
 })
 
+// 上游图标名前缀（如 vi-ep:close），解析时去掉一次，等同 ep:close
+const ICON_PREFIX = 'vi-'
+
 const isLocal = computed(() => props.icon?.startsWith('svg-icon:'))
 
+// 仅 vi- 开头且去掉后仍为 集合:图标 格式时才去前缀，其它名称原样使用
+const iconName = computed(() => {
+  const { icon } = props
+  if (typeof icon !== 'string' || !icon.startsWith(ICON_PREFIX)) return icon
+  const name = icon.slice(ICON_PREFIX.length)
+  return name.includes(':') ? name : icon
+})
+
 const symbolId = computed(() => {
-  return unref(isLocal) ? `#icon-${props.icon.split('svg-icon:')[1]}` : props.icon
+  return unref(isLocal) ? `#icon-${props.icon.split('svg-icon:')[1]}` : unref(iconName)
 })
 
 const getSvgClass = computed(() => {

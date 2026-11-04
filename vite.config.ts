@@ -97,6 +97,10 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
                         // 目标：ECharts、表单渲染/设计器等重库随使用它们的页面加载，避免阻塞不使用它们的页面；
                         // vendor-initial 只减少入口已静态依赖的第三方包的请求碎片，并不是把异步重库合进入口
                         groups: [
+                            // ECharts 及其渲染引擎 zrender 各自独立成 chunk（参考上游 28901407f）。priority 高于 vendor-initial，避免被其兜底规则吞掉；
+                            // includeDependenciesRecursively 只对这两组关闭，防止 echarts 组把依赖 zrender 一并收入，vendor-initial 仍保持默认行为
+                            { name: 'zrender', test: /node_modules[\\/]zrender[\\/]/, priority: 10, includeDependenciesRecursively: false },
+                            { name: 'echarts', test: /node_modules[\\/]echarts[\\/]/, priority: 10, includeDependenciesRecursively: false },
                             { name: 'vendor-initial', test: /node_modules[\\/]/, tags: ['$initial'] } // 仅合并入口静态依赖链上的第三方模块，避免 Element Plus 等被拆成大量小文件；路由异步依赖不受影响
                         ]
                     }

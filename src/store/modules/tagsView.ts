@@ -64,6 +64,10 @@ export const useTagsViewStore = defineStore('tagsView', {
       const cacheMap: Set<string> = new Set()
       for (const v of this.visitedViews) {
         const item = getRawRoute(v)
+        // 空路由项（null / undefined）直接跳过，避免读取 meta、name 时报错（参考上游 4169e52ba）
+        if (!item) {
+          continue
+        }
         const needCache = !item.meta?.noCache
         if (!needCache) {
           continue
@@ -113,7 +117,8 @@ export const useTagsViewStore = defineStore('tagsView', {
       const userStore = useUserStoreWithOut()
 
       // const affixTags = this.visitedViews.filter((tag) => tag.meta.affix)
-      this.visitedViews = userStore.getUser
+      // 使用 isSetUser 判断登录态：resetState 后 user 仍是非空对象，不能用 getUser 判断
+      this.visitedViews = userStore.getIsSetUser
         ? this.visitedViews.filter((tag) => tag?.meta?.affix)
         : []
     },

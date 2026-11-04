@@ -3,8 +3,9 @@ import { ElementPlusSize } from '@/types/elementPlus'
 import { LayoutType } from '@/types/layout'
 import { ThemeTypes } from '@/types/theme'
 import { humpToUnderline, setCssVar } from '@/utils'
-import { getCssColorVariable, hexToRGB, mix } from '@/utils/color'
-import { normalizeLayout } from '@/utils/layout'
+import { colorIsDark, getCssColorVariable, hexToRGB, lighten, mix } from '@/utils/color'
+import { isHeaderNavLayout, normalizeLayout } from '@/utils/layout'
+import { useCssVar } from '@vueuse/core'
 import { ElMessage } from 'element-plus'
 import { defineStore } from 'pinia'
 import { store } from '../index'
@@ -319,6 +320,56 @@ export const useAppStore = defineStore('app', {
         setCssVar(`--${humpToUnderline(key)}`, this.theme[key])
       }
       this.setPrimaryLight()
+    },
+    // 按头部背景色设置头部主题；顶部导航类布局时菜单同步使用该颜色（由 Setting 移入，参考上游 59d4ed4dd）
+    setHeaderTheme(color: string) {
+      const isDarkColor = colorIsDark(color)
+      const textColor = isDarkColor ? '#fff' : 'inherit'
+      const textHoverColor = isDarkColor ? lighten(color!, 6) : '#f6f6f6'
+      const topToolBorderColor = isDarkColor ? color : '#eee'
+      setCssVar('--top-header-bg-color', color)
+      setCssVar('--top-header-text-color', textColor)
+      setCssVar('--top-header-hover-color', textHoverColor)
+      this.setTheme({
+        topHeaderBgColor: color,
+        topHeaderTextColor: textColor,
+        topHeaderHoverColor: textHoverColor,
+        topToolBorderColor
+      })
+      if (isHeaderNavLayout(this.getLayout)) {
+        this.setMenuTheme(color)
+      }
+    },
+    // 按菜单背景色设置菜单主题（由 Setting 移入，参考上游 59d4ed4dd）
+    setMenuTheme(color: string) {
+      const primaryColor = useCssVar('--el-color-primary', document.documentElement)
+      const isDarkColor = colorIsDark(color)
+      const theme: Recordable = {
+        // 左侧菜单边框颜色
+        leftMenuBorderColor: isDarkColor ? 'inherit' : '#eee',
+        // 左侧菜单背景颜色
+        leftMenuBgColor: color,
+        // 左侧菜单浅色背景颜色
+        leftMenuBgLightColor: isDarkColor ? lighten(color!, 6) : color,
+        // 左侧菜单选中背景颜色
+        leftMenuBgActiveColor: isDarkColor
+          ? 'var(--el-color-primary)'
+          : hexToRGB(primaryColor.value || '#409eff', 0.1),
+        // 左侧菜单收起选中背景颜色
+        leftMenuCollapseBgActiveColor: isDarkColor
+          ? 'var(--el-color-primary)'
+          : hexToRGB(primaryColor.value || '#409eff', 0.1),
+        // 左侧菜单字体颜色
+        leftMenuTextColor: isDarkColor ? '#bfcbd9' : '#333',
+        // 左侧菜单选中字体颜色
+        leftMenuTextActiveColor: isDarkColor ? '#fff' : 'var(--el-color-primary)',
+        // logo字体颜色
+        logoTitleTextColor: isDarkColor ? '#fff' : 'inherit',
+        // logo边框颜色
+        logoBorderColor: isDarkColor ? color : '#eee'
+      }
+      this.setTheme(theme)
+      this.setCssVarTheme()
     },
     setFooter(footer: boolean) {
       this.footer = footer

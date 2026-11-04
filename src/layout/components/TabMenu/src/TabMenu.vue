@@ -89,14 +89,18 @@ export default defineComponent({
 
     watch(
       () => collapse.value,
-      (collapse: boolean) => {
-        if (!collapse) {
+      (collapse: boolean, oldCollapse?: boolean) => {
+        // 首次（immediate）直接同步，避免挂载时新增延时回调
+        if (!collapse && oldCollapse !== undefined) {
           setTimeout(() => {
             showTitle.value = !collapse
           }, 200)
         } else {
           showTitle.value = !collapse
         }
+      },
+      {
+        immediate: true
       }
     )
 
@@ -313,7 +317,8 @@ export default defineComponent({
               {
                 '!left-[var(--tab-menu-min-width)]': unref(collapse),
                 '!left-[var(--tab-menu-max-width)]': !unref(collapse),
-                '!w-[var(--left-menu-max-width)]': unref(showMenu) || unref(fixedMenu),
+                '!w-[var(--left-menu-max-width)] border-r-1 border-r-solid border-[var(--el-border-color)]':
+                  unref(showMenu) || unref(fixedMenu),
                 '!w-0': !unref(showMenu) && !unref(fixedMenu)
               }
             ]}

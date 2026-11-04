@@ -1,7 +1,9 @@
 import type { Form, FormExpose } from '@/components/Form'
-import type { ElForm } from 'element-plus'
+import type { ElForm, ElFormItem } from 'element-plus'
 import type { FormProps } from '@/components/Form/src/types'
 import { FormSchema, FormSetPropsType } from '@/types/form'
+import { isPlainObject } from 'lodash-es'
+import { isEmptyVal } from '@/utils/is'
 
 export const useForm = (props?: FormProps) => {
   // From实例
@@ -32,10 +34,14 @@ export const useForm = (props?: FormProps) => {
   const methods: {
     setProps: (props: Recordable) => void
     setValues: (data: Recordable) => void
-    getFormData: <T = Recordable | undefined>() => Promise<T>
+    getFormData: <T = Recordable | undefined>(filterEmptyVal?: boolean) => Promise<T>
     setSchema: (schemaProps: FormSetPropsType[]) => void
     addSchema: (formSchema: FormSchema, index?: number) => void
     delSchema: (field: string) => void
+    getComponentExpose: <T = any>(field: string) => Promise<T | undefined>
+    getFormItemExpose: (field: string) => Promise<ComponentRef<typeof ElFormItem> | undefined>
+    getElFormExpose: () => Promise<ComponentRef<typeof ElForm> | undefined>
+    getFormExpose: () => Promise<(typeof Form & FormExpose) | undefined>
   } = {
     setProps: async (props: FormProps = {}) => {
       const form = await getForm()
@@ -76,11 +82,57 @@ export const useForm = (props?: FormProps) => {
     },
 
     /**
-     * @returns form data
+     * @param filterEmptyVal 是否过滤空值（参考上游 a7f370214，上游默认 true，这里默认 false 保持原行为）：
+     * 为 true 时返回新对象，只移除顶层 ''、null、undefined 与空普通对象，保留 0、false、[]；不修改原表单数据
+     * @returns form data，未过滤时为表单数据原引用
      */
-    getFormData: async <T = Recordable>(): Promise<T> => {
+    getFormData: async <T = Recordable>(filterEmptyVal = false): Promise<T> => {
       const form = await getForm()
-      return form?.formModel as T
+      const model = form?.formModel as Recordable | undefined
+      if (!filterEmptyVal || !model) {
+        return model as T
+      }
+      // Object.fromEntries 按自有属性逐个定义，__proto__ 等键也只作为普通属性，不会改变原型
+      return Object.fromEntries(
+        Object.entries(model).filter(([, value]) => {
+          if (isEmptyVal(value)) return false
+          return !(isPlainObject(value) && Object.keys(value).length === 0)
+        })
+      ) as T
+    },
+
+    /**
+     * @param field 表单项 field
+     * @returns 表单组件实例，插槽自定义渲染的字段返回 undefined
+     */
+    getComponentExpose: async <T = any>(field: string): Promise<T | undefined> => {
+      const form = await getForm()
+      return form?.getComponentExpose(field) as T | undefined
+    },
+
+    /**
+     * @param field 表单项 field
+     * @returns form-item 实例
+     */
+    getFormItemExpose: async (field: string) => {
+      const form = await getForm()
+      return form?.getFormItemExpose(field)
+    },
+
+    /**
+     * @returns ElForm 实例
+     */
+    getElFormExpose: async () => {
+      await getForm()
+      return unref(elFormRef) as ComponentRef<typeof ElForm> | undefined
+    },
+
+    /**
+     * @returns Form 实例
+     */
+    getFormExpose: async () => {
+      await getForm()
+      return unref(formRef) as (typeof Form & FormExpose) | undefined
     }
   }
 

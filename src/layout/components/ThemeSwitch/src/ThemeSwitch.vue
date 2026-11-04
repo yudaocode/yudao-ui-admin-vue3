@@ -13,17 +13,25 @@ const Sun = useIcon({ icon: 'emojione-monotone:sun', color: '#fde047' })
 
 const CrescentMoon = useIcon({ icon: 'emojione-monotone:crescent-moon', color: '#fde047' })
 
+// 用户切换后触发，参数为切换后的是否暗黑；外部修改 store 时不触发（参考上游 b34aeba10；状态同步沿用 f015fc2ff）
+const emit = defineEmits<{
+  (e: 'change', isDark: boolean): void
+}>()
+
 const appStore = useAppStore()
 
-// 初始化获取是否是暗黑主题
-const isDark = ref(appStore.getIsDark)
+// 与 store 双向同步是否是暗黑主题，避免只取初始快照导致外部修改后状态不一致；
+// 只切换暗黑状态，不重设芋道自定义的菜单 / 头部颜色
+const isDark = computed({
+  get: () => appStore.getIsDark,
+  set: (val: boolean) => {
+    appStore.setIsDark(val)
+    emit('change', val)
+  }
+})
 
 // 设置switch的背景颜色
 const blackColor = 'var(--el-color-black)'
-
-const themeChange = (val: boolean) => {
-  appStore.setIsDark(val)
-}
 </script>
 
 <template>
@@ -36,7 +44,6 @@ const themeChange = (val: boolean) => {
     :inactive-color="blackColor"
     :inactive-icon="CrescentMoon"
     inline-prompt
-    @change="themeChange"
   />
 </template>
 <style lang="scss" scoped>

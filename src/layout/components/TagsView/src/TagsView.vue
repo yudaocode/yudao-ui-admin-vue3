@@ -572,7 +572,7 @@ $prefix-cls: #{$namespace}-tags-view;
     border: 1px solid var(--el-color-primary);
 
     .#{$prefix-cls}__item--close {
-      :deep(span) {
+      :deep(svg) {
         color: var(--el-color-white) !important;
       }
     }
@@ -606,7 +606,7 @@ $prefix-cls: #{$namespace}-tags-view;
       background-color: var(--el-color-primary);
 
       .#{$prefix-cls}__item--close {
-        :deep(span) {
+        :deep(svg) {
           color: var(--el-color-white) !important;
         }
       }
@@ -640,7 +640,7 @@ $prefix-cls: #{$namespace}-tags-view;
       border: 1px solid var(--el-color-primary);
 
       .#{$prefix-cls}__item--close {
-        :deep(span) {
+        :deep(svg) {
           color: var(--el-color-white) !important;
         }
       }

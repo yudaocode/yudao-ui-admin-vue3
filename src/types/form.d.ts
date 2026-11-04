@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'vue'
+import type { CSSProperties, VNodeChild } from 'vue'
 import { ColProps, ComponentProps, ComponentName } from '@/types/components'
 import type { AxiosPromise } from 'axios'
 
@@ -8,7 +8,16 @@ export type FormSetPropsType = {
   value: any
 }
 
-export type FormValueType = string | number | string[] | number[] | boolean | undefined | null
+// Recordable 用于 JsonEditor 等对象值组件
+export type FormValueType =
+  | string
+  | number
+  | string[]
+  | number[]
+  | boolean
+  | undefined
+  | null
+  | Recordable
 
 export type FormItemProps = {
   labelWidth?: string | number
@@ -18,6 +27,15 @@ export type FormItemProps = {
   showMessage?: boolean
   inlineMessage?: boolean
   style?: CSSProperties
+  // schema 级插槽渲染函数（不会透传到 ElFormItem）；同名模板插槽 #field / #field-label / #field-error 优先
+  slots?: {
+    // 替换表单组件，参数为表单数据
+    default?: (formModel: Recordable) => VNodeChild
+    // ElFormItem label 插槽，参数为 { label }
+    label?: (...args: any[]) => VNodeChild
+    // ElFormItem error 插槽，参数为 { error }
+    error?: (...args: any[]) => VNodeChild
+  }
 }
 
 export type FormSchema = {
@@ -41,4 +59,7 @@ export type FormSchema = {
   hidden?: boolean
   // 远程加载下拉项
   api?: <T = any>() => AxiosPromise<T>
+  // 远程加载选项：仅在 componentProps.options / data 为空时调用一次，返回选项数组；
+  // TreeSelect / Transfer 写入 componentProps.data，其余写入 componentProps.options
+  optionApi?: () => Promise<any[]> | any[]
 }
