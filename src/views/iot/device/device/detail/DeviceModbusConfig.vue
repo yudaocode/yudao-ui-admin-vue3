@@ -107,7 +107,7 @@
         </el-table-column>
         <el-table-column label="寄存器地址" align="center" prop="registerAddress" min-width="100">
           <template #default="scope">
-            {{ formatRegisterAddress(scope.row.registerAddress) }}
+            {{ formatRegisterAddress(scope.row.registerAddress, scope.row.bitIndex) }}
           </template>
         </el-table-column>
         <el-table-column label="寄存器数量" align="center" prop="registerCount" min-width="90" />
@@ -255,9 +255,10 @@ const formatFunctionCode = (code: number) => {
   return option ? option.label : `${code}`
 }
 
-/** 格式化寄存器地址为十六进制 */
-const formatRegisterAddress = (address: number) => {
-  return '0x' + address.toString(16).toUpperCase().padStart(4, '0')
+/** 格式化寄存器地址为十六进制；位点位追加位索引，例如 0x0010.8 */
+const formatRegisterAddress = (address: number, bitIndex?: number) => {
+  const hex = '0x' + address.toString(16).toUpperCase().padStart(4, '0')
+  return bitIndex != null ? `${hex}.${bitIndex}` : hex
 }
 
 /** 新增点位 */
