@@ -37,6 +37,7 @@ import { useRenderRadio } from './components/useRenderRadio'
 import { useRenderCheckbox } from './components/useRenderCheckbox'
 import { useDesign } from '@/hooks/web/useDesign'
 import { findIndex } from '@/utils'
+import { isFunction } from '@/utils/is'
 import { cloneDeep, cloneDeepWith, isObject, isPlainObject, set, toPath } from 'lodash-es'
 import { FormProps } from './types'
 import { Icon } from '@/components/Icon'
@@ -61,6 +62,17 @@ const inlineInputComponents = [
   'DatePicker',
   'TimePicker',
   'TimeSelect'
+]
+
+// 自动渲染 options 的组件：componentProps.slots.default 为函数时由它替换 options 渲染
+const optionSlotComponents = [
+  'Select',
+  'Radio',
+  'RadioGroup',
+  'RadioButton',
+  'Checkbox',
+  'CheckboxGroup',
+  'CheckboxButton'
 ]
 
 // 是否显式设置了宽度，有则保持调用方宽度，不追加默认宽度
@@ -444,6 +456,28 @@ export default defineComponent({
       return content
     }
 
+    // 渲染 Divider：与其它组件一样支持 componentProps.on 与 slots（函数为渲染函数，标记对应模板插槽 #字段-插槽名）；
+    // 默认内容为 label，只有函数 default 或确实存在的模板默认插槽才替换
+    const renderDivider = (item: FormSchema) => {
+      const Com = componentMap['Divider'] as ReturnType<typeof defineComponent>
+      const dividerSlots: Recordable = {
+        ...setItemComponentSlots(slots, item?.componentProps?.slots, item.field)
+      }
+      const defaultSlot = item?.componentProps?.slots?.default
+      if (!isFunction(defaultSlot) && !(defaultSlot && slots[`${item.field}-default`])) {
+        dividerSlots.default = () => [item?.label]
+      }
+      return (
+        <Com
+          key={item.field}
+          v-show={!item.hidden}
+          {...{ contentPosition: 'left', ...setComponentProps(item) }}
+        >
+          {{ ...dividerSlots }}
+        </Com>
+      )
+    }
+
     // 是否要渲染el-col
     const renderFormItemWrap = () => {
       unref(optionRenderVersion)
@@ -471,16 +505,9 @@ export default defineComponent({
           const itemStructureStable =
             structureStable && (!isCol || lastColKeys.get(item.field) === colKey)
           lastColKeys.set(item.field, colKey)
-          const Com = componentMap['Divider'] as ReturnType<typeof defineComponent>
           // hidden 时 Divider、栅格 ElCol 外层一并隐藏，不留占位空白（参考上游 0f531fd1d 的意图）
           return isDivider ? (
-            <Com
-              key={item.field}
-              v-show={!item.hidden}
-              {...{ contentPosition: 'left', ...item.componentProps }}
-            >
-              {item?.label}
-            </Com>
+            renderDivider(item)
           ) : isCol ? (
             // 如果需要栅格，需要包裹 ElCol
             <ElCol key={item.field} v-show={!item.hidden} {...colProps}>
@@ -527,6 +554,17 @@ export default defineComponent({
         item?.componentProps?.options
       ) {
         slotsMap.default = () => renderOptions(item)
+      }
+      // componentProps.slots.default 为函数时（参考上游 4d04734e1、6f1a94809、998d9f3ee）：
+      // SelectV2 用作虚拟列表的行渲染，参数为行数据 item 与原插槽参数；
+      // Select / Radio / Checkbox 类替换自动渲染的 options（optionsSlot 不再生效），参数为当前 options
+      const defaultSlot = item?.componentProps?.slots?.default
+      if (isFunction(defaultSlot)) {
+        if (item.component === 'SelectV2') {
+          slotsMap.default = (scope: Recordable) => defaultSlot(scope?.item, scope)
+        } else if (optionSlotComponents.includes(item.component as string)) {
+          slotsMap.default = () => defaultSlot(item.componentProps?.options)
+        }
       }
 
       // formItemProps.slots 为 schema 级渲染函数，不透传给 ElFormItem

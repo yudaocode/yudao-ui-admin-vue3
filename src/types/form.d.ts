@@ -47,7 +47,8 @@ export type FormSchema = {
   labelMessage?: string
   // col组件属性
   colProps?: ColProps
-  // 表单组件属性，slots对应的是表单组件的插槽，规则：${field}-xxx，具体可以查看element-plus文档
+  // 表单组件属性，具体可以查看element-plus文档；on 为组件事件，slots 为表单组件的插槽：
+  // 值为函数时是渲染函数（插槽名 camelCase 转 kebab-case），值为 true 等标记时对应模板插槽 #${field}-xxx，详见 Form/README.md
   componentProps?: { slots?: Recordable } & ComponentProps
   // formItem组件属性
   formItemProps?: FormItemProps

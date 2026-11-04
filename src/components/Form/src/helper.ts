@@ -1,6 +1,9 @@
 import type { Slots } from 'vue'
+import { camelize, toHandlerKey } from 'vue'
 import { clone, get, has, toPath } from 'lodash-es'
 import { getSlot } from '@/utils/tsxHelper'
+import { humpToDash } from '@/utils'
+import { isFunction } from '@/utils/is'
 import { PlaceholderModel } from './types'
 import { FormSchema } from '@/types/form'
 import { ColProps } from '@/types/components'
@@ -155,14 +158,119 @@ export const setGridProp = (col: ColProps = {}): ColProps => {
   return colProps
 }
 
+// 与 Vue isOn 一致：on 后紧跟非小写字母才是监听属性
+const isListenerKey = (key: string) => /^on[^a-z]/.test(key)
+
+// 事件名（change、visible-change、visibleChange、update:file-list）统一为 Vue 监听属性名（onChange、onVisibleChange、onUpdate:fileList）
+const toListenerKey = (event: string) => toHandlerKey(camelize(event))
+
+const toListenerList = (value: unknown): Function[] => {
+  return (Array.isArray(value) ? value : [value]).filter(isFunction)
+}
+
+// 原生 Promise 与 thenable（@/utils/is 的 isPromise 要求 [object Object]，识别不了原生 Promise，这里单独判断）
+const isThenable = (value: unknown): value is PromiseLike<unknown> => {
+  return (
+    (typeof value === 'object' || typeof value === 'function') &&
+    value !== null &&
+    typeof (value as PromiseLike<unknown>).then === 'function'
+  )
+}
+
+type ListenerOutcome = PromiseSettledResult<unknown>
+
+// 一个错误原样返回，多个错误用 AggregateError 保留全部原因
+const toListenerError = (errors: unknown[]) => {
+  return errors.length === 1
+    ? errors[0]
+    : new AggregateError(errors, `Form 组件事件的 ${errors.length} 个监听执行失败`)
+}
+
+/**
+ * 多个监听合成一个函数（不用数组：ElUpload 的 onChange 等是 Function 类型的 prop，不接受数组）。
+ * 每个监听都会执行，某个监听同步抛错不影响后续监听；
+ * 全部同步时返回最后一个监听的返回值，有错误时抛出（单个原样，多个为 AggregateError）；
+ * 有异步返回值时立即观察全部异步结果并返回一个 Promise：全部成功时为最后一个监听的结果，
+ * 有错误时（含同步错误）一次性拒绝（单个原样，多个为 AggregateError），不产生额外的未处理拒绝
+ */
+const mergeListeners = (listeners: Function[]): Function => {
+  if (listeners.length === 1) return listeners[0]
+  return (...args: any[]) => {
+    const outcomes: Array<ListenerOutcome | Promise<ListenerOutcome>> = []
+    let hasAsync = false
+    for (const listener of listeners) {
+      try {
+        const result = listener(...args)
+        if (isThenable(result)) {
+          hasAsync = true
+          // allSettled 立即订阅该结果，reject 由下面统一返回，不会成为未处理拒绝
+          outcomes.push(Promise.allSettled([result]).then(([outcome]) => outcome))
+        } else {
+          outcomes.push({ status: 'fulfilled', value: result })
+        }
+      } catch (error) {
+        outcomes.push({ status: 'rejected', reason: error })
+      }
+    }
+    const settle = (settled: ListenerOutcome[]) => {
+      const errors = settled
+        .filter((outcome): outcome is PromiseRejectedResult => outcome.status === 'rejected')
+        .map((outcome) => outcome.reason)
+      if (errors.length) throw toListenerError(errors)
+      const last = settled[settled.length - 1] as PromiseFulfilledResult<unknown>
+      return last.value
+    }
+    if (!hasAsync) return settle(outcomes as ListenerOutcome[])
+    return Promise.all(outcomes).then(settle)
+  }
+}
+
+/**
+ * componentProps.on（参考上游 4d04734e1）：键为事件名，转为 onXxx 监听。
+ * 与 componentProps 中已有的同名监听（函数或函数数组，含 kebab 写法的别名）以及 on 中规范到同一事件的多个键合并，均会触发
+ */
+const mergeOnEvents = (componentProps: Recordable) => {
+  const onEvents = componentProps.on
+  delete componentProps.on
+  if (!onEvents || typeof onEvents !== 'object' || Array.isArray(onEvents)) return
+  const eventListeners = new Map<string, Function[]>()
+  for (const event in onEvents) {
+    const listeners = toListenerList(onEvents[event])
+    if (!event || !listeners.length) continue
+    const listenerKey = toListenerKey(event)
+    eventListeners.set(listenerKey, [...(eventListeners.get(listenerKey) || []), ...listeners])
+  }
+  if (!eventListeners.size) return
+  // 收集 componentProps 中已有的同名监听：精确键在前，别名按出现顺序在后；别名合并后删除，避免重复触发
+  const existingListeners = new Map<string, Function[]>()
+  for (const key of Object.keys(componentProps)) {
+    if (!isListenerKey(key)) continue
+    const listenerKey = toListenerKey(key.slice(2))
+    if (!eventListeners.has(listenerKey)) continue
+    const listeners = toListenerList(componentProps[key])
+    const merged = existingListeners.get(listenerKey) || []
+    existingListeners.set(
+      listenerKey,
+      key === listenerKey ? [...listeners, ...merged] : [...merged, ...listeners]
+    )
+    if (key !== listenerKey) delete componentProps[key]
+  }
+  eventListeners.forEach((listeners, listenerKey) => {
+    componentProps[listenerKey] = mergeListeners([
+      ...(existingListeners.get(listenerKey) || []),
+      ...listeners
+    ])
+  })
+}
+
 /**
  *
  * @param item 传入的组件属性
- * @returns 默认添加 clearable 属性
+ * @returns 默认添加 clearable 属性，并把 componentProps.on 合并为 onXxx 监听
  */
 export const setComponentProps = (item: FormSchema): Recordable => {
-  // JsonEditor 不支持 clearable，追加后会落到 DOM 属性上
-  const notNeedClearable = ['ColorPicker', 'JsonEditor']
+  // JsonEditor、Divider 不支持 clearable，追加后会落到 DOM 属性上
+  const notNeedClearable = ['ColorPicker', 'JsonEditor', 'Divider']
   const componentProps: Recordable = notNeedClearable.includes(item.component as string)
     ? { ...item.componentProps }
     : {
@@ -171,14 +279,20 @@ export const setComponentProps = (item: FormSchema): Recordable => {
       }
   // 需要删除额外的属性
   delete componentProps?.slots
+  mergeOnEvents(componentProps)
   return componentProps
 }
+
+// Select 选项 / 分组的渲染函数，由 useRenderSelect 使用，不作为组件插槽
+const selectOptionSlotKeys = ['optionDefault', 'optionGroupDefault']
 
 /**
  *
  * @param slots 插槽
  * @param slotsProps 插槽属性
  * @param field 字段名
+ * @description 值为函数时作为组件插槽渲染函数（参考上游 4d04734e1、83513d519）：插槽名 camelCase 转 kebab-case，
+ * 参数为组件插槽原参数；其余真值为模板插槽标记，对应模板插槽 `${field}-${key}`，插槽名不变
  */
 export const setItemComponentSlots = (
   slots: Slots,
@@ -187,7 +301,12 @@ export const setItemComponentSlots = (
 ): Recordable => {
   const slotObj: Recordable = {}
   for (const key in slotsProps) {
-    if (slotsProps[key]) {
+    const slot = slotsProps[key]
+    if (isFunction(slot)) {
+      if (!selectOptionSlotKeys.includes(key)) {
+        slotObj[humpToDash(key)] = (...args: any[]) => slot(...args)
+      }
+    } else if (slot) {
       // 由于组件有可能重复，需要有一个唯一的前缀
       slotObj[key] = (data: Recordable) => {
         return getSlot(slots, `${field}-${key}`, data)

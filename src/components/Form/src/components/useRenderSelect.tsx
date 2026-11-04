@@ -2,6 +2,7 @@ import { FormSchema } from '@/types/form'
 import { ComponentOptions } from '@/types/components'
 import { ElOption, ElOptionGroup } from 'element-plus'
 import { getSlot } from '@/utils/tsxHelper'
+import { isFunction } from '@/utils/is'
 import { Slots } from 'vue'
 
 export const useRenderSelect = (slots: Slots) => {
@@ -9,8 +10,13 @@ export const useRenderSelect = (slots: Slots) => {
   const renderSelectOptions = (item: FormSchema) => {
     // 如果有别名，就取别名
     const labelAlias = item?.componentProps?.optionsAlias?.labelField
+    // 分组渲染函数（参考上游 998d9f3ee）：参数为分组项，返回值替换整个 ElOptionGroup
+    const optionGroupDefault = item?.componentProps?.slots?.optionGroupDefault
     return item?.componentProps?.options?.map((option) => {
       if (option?.options?.length) {
+        if (isFunction(optionGroupDefault)) {
+          return optionGroupDefault(option)
+        }
         return (
           <ElOptionGroup label={option[labelAlias || 'label']}>
             {() => {
@@ -31,6 +37,8 @@ export const useRenderSelect = (slots: Slots) => {
     // 如果有别名，就取别名
     const labelAlias = item?.componentProps?.optionsAlias?.labelField
     const valueAlias = item?.componentProps?.optionsAlias?.valueField
+    // 选项内容渲染函数（参考上游 998d9f3ee）：参数为选项
+    const optionDefault = item?.componentProps?.slots?.optionDefault
 
     const { label, value, ...other } = option
 
@@ -41,11 +49,13 @@ export const useRenderSelect = (slots: Slots) => {
         value={valueAlias ? option[valueAlias] : value}
       >
         {{
-          default: () =>
-            // option 插槽名规则，{field}-option
-            item?.componentProps?.optionsSlot
-              ? getSlot(slots, `${item.field}-option`, { item: option })
-              : undefined
+          // 优先级：optionsSlot 模板插槽 {field}-option > slots.optionDefault 渲染函数 > 默认显示 label
+          default: () => {
+            if (item?.componentProps?.optionsSlot) {
+              return getSlot(slots, `${item.field}-option`, { item: option })
+            }
+            return isFunction(optionDefault) ? optionDefault(option) : undefined
+          }
         }}
       </ElOption>
     )
