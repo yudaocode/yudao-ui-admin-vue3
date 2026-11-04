@@ -564,6 +564,16 @@ export const AiReasoningPresets: AiReasoningPreset[] = [
     ]
   },
   {
+    key: 'mimo',
+    name: '小米 MiMo · V2.6 系列',
+    note: '默认开启思考；思考模式下 temperature、top_p 被厂商固定为推荐值。',
+    defaultLevel: 'on',
+    levels: [
+      ['off', { thinking: { type: 'disabled' } }],
+      ['on', { thinking: { type: 'enabled' } }]
+    ]
+  },
+  {
     key: 'qwen',
     name: '通义 · 混合思考模型',
     note: '未配置时仍是 enableThinking(true)。配置后每档必须写 enable_thinking；「仅思考」模型无法关闭。',

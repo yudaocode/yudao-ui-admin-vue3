@@ -62,16 +62,15 @@ async function getList() {
 
 /** 保存字段配置 */
 async function submitForm() {
-  await Promise.all([
-    EmployeeConfigApi.saveEmployeeCreateFieldConfig(
-      HrmEmployeeEntryStatus.ACTIVE,
-      getVisibleFields('activeVisible')
-    ),
-    EmployeeConfigApi.saveEmployeeCreateFieldConfig(
-      HrmEmployeeEntryStatus.PENDING_ENTRY,
-      getVisibleFields('pendingEntryVisible')
-    )
-  ])
+  // 两组配置写同一张表，依次保存避免并发替换互相加锁；前一组失败时不再保存后一组
+  await EmployeeConfigApi.saveEmployeeCreateFieldConfig(
+    HrmEmployeeEntryStatus.ACTIVE,
+    getVisibleFields('activeVisible')
+  )
+  await EmployeeConfigApi.saveEmployeeCreateFieldConfig(
+    HrmEmployeeEntryStatus.PENDING_ENTRY,
+    getVisibleFields('pendingEntryVisible')
+  )
   message.success('保存成功')
   await getList()
 }
