@@ -21,6 +21,7 @@ import {
   COMPARISON_OPERATORS
 } from './consts'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
+import { getSubFieldPermissionField } from './utils'
 
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
   const node = ref<SimpleFlowNode>(props.flowNode)
@@ -48,65 +49,55 @@ const parseFormCreateFields = (formFields?: string[]) => {
  * @description 表单数据权限配置，用于发起人节点 、审批节点、抄送节点
  */
 export function useFormFieldsPermission(defaultPermission: FieldPermissionType) {
-  // 字段权限配置. 需要有 field, title,  permissioin 属性
+  // 字段权限配置. 需要有 field, title,  permissioin 属性；子表单还有 children 子字段权限
   const fieldsPermissionConfig = ref<Array<Record<string, any>>>([])
 
   const formType = inject<Ref<number | undefined>>('formType', ref()) // 表单类型
 
   const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
 
-  const getNodeConfigFormFields = (nodeFormFields?: Array<Record<string, string>>) => {
-    nodeFormFields = toRaw(nodeFormFields)
-    if (!nodeFormFields || nodeFormFields.length === 0) {
-      fieldsPermissionConfig.value = getDefaultFieldsPermission(unref(formFields))
-    } else {
-      fieldsPermissionConfig.value = mergeFieldsPermission(nodeFormFields, unref(formFields))
-    }
-  }
   // 合并已经设置的表单字段权限，当前流程表单字段 (可能新增，或删除了字段)
-  const mergeFieldsPermission = (
-    formFieldsPermisson: Array<Record<string, string>>,
-    formFields?: string[]
-  ) => {
-    let mergedFieldsPermission: Array<Record<string, any>> = []
-    if (formFields) {
-      mergedFieldsPermission = parseFormCreateFields(formFields).map((item) => {
-        const found = formFieldsPermisson.find(
-          (fieldPermission) => fieldPermission.field == item.field
-        )
-        return {
-          field: item.field,
-          title: item.title,
-          permission: found ? found.permission : defaultPermission
-        }
-      })
+  // 未设置的字段使用默认权限；未设置的子字段，权限为空，表示继承子表单
+  const getNodeConfigFormFields = (nodeFormFields?: Array<Record<string, string>>) => {
+    const fieldsPermission = toRaw(nodeFormFields) ?? []
+    const getPermission = (field: string) => {
+      return fieldsPermission.find((item) => item.field === field)?.permission
     }
-    return mergedFieldsPermission
+    fieldsPermissionConfig.value = parseFormCreateFields(unref(formFields)).map((item) => ({
+      field: item.field,
+      title: item.title,
+      permission: getPermission(item.field) ?? defaultPermission,
+      children: item.children?.map((child: Record<string, any>) => ({
+        field: child.field,
+        title: child.title,
+        permission: getPermission(getSubFieldPermissionField(item.field, child.field))
+      }))
+    }))
   }
 
-  // 默认的表单权限： 获取表单的所有字段，设置字段默认权限为只读
-  const getDefaultFieldsPermission = (formFields?: string[]) => {
-    let defaultFieldsPermission: Array<Record<string, any>> = []
-    if (formFields) {
-      defaultFieldsPermission = parseFormCreateFields(formFields).map((item) => {
-        return {
-          field: item.field,
-          title: item.title,
-          permission: defaultPermission
-        }
-      })
-    }
-    return defaultFieldsPermission
+  // 获得需要保存的表单字段权限：子表单的子字段，仅保存单独设置的权限，其余继承子表单
+  const getFieldsPermission = () => {
+    return fieldsPermissionConfig.value.flatMap((item) => [
+      { field: item.field, title: item.title, permission: item.permission },
+      ...(item.children ?? [])
+        .filter((child: Record<string, any>) => child.permission)
+        .map((child: Record<string, any>) => ({
+          field: getSubFieldPermissionField(item.field, child.field),
+          title: `${item.title}.${child.title}`,
+          permission: child.permission
+        }))
+    ])
   }
 
   // 获取表单的所有字段，作为下拉框选项
-  const formFieldOptions = parseFormCreateFields(unref(formFields))
+  const formFieldOptions = useFormFields()
 
   return {
     formType,
     fieldsPermissionConfig,
     formFieldOptions,
-    getNodeConfigFormFields
+    getNodeConfigFormFields,
+    getFieldsPermission
   }
 }
 
@@ -118,13 +109,12 @@ export function useFormFields() {
   return parseFormCreateFields(unref(formFields))
 }
 
-// TODO @芋艿：后续需要把各种类似 useFormFieldsPermission 的逻辑，抽成一个通用方法。
+// DONE @芋艿：后续需要把各种类似 useFormFieldsPermission 的逻辑，抽成一个通用方法。
 /**
  * @description 获取流程表单的字段和发起人字段
  */
 export function useFormFieldsAndStartUser() {
-  const injectFormFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
-  const formFields = parseFormCreateFields(unref(injectFormFields))
+  const formFields = useFormFields()
   // 添加发起人
   formFields.unshift({
     field: ProcessVariableEnum.START_USER_ID,

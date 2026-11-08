@@ -14,6 +14,12 @@ import {
   getStrDictOptions
 } from '@/utils/dict'
 import { decodeFields } from '@/utils/formCreate'
+import { collectFieldRules, isSubForm, parseSubFormFields } from '@/components/FormCreate/src/utils'
+import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
+import {
+  getSubFieldPermission,
+  getSubFieldPermissionField
+} from '@/components/SimpleProcessDesignerV2/src/utils'
 import { registerComponent } from '@/utils/routerHelper'
 
 interface FormFieldItem {
@@ -59,10 +65,12 @@ const userName = computed(() => userStore.user.nickname ?? '')
 const printTime = ref(formatDate(new Date(), 'YYYY-MM-DD HH:mm'))
 const formFields = ref<FormFieldItem[]>([])
 const printDataMap = ref<Record<string, string>>({})
+const fieldsPermission = ref<Record<string, string>>() // 表单字段权限，沿用审批详情的计算结果
 const BusinessFormComponent = shallowRef<any>()
 
-const open = async (id: string) => {
+const open = async (id: string, formFieldsPermission?: Record<string, string>) => {
   loading.value = true
+  fieldsPermission.value = formFieldsPermission
   try {
     printData.value = await ProcessInstanceApi.getProcessInstancePrintData(id)
     printTime.value = formatDate(new Date(), 'YYYY-MM-DD HH:mm')
@@ -88,16 +96,33 @@ const parseFormFields = async () => {
   const formFieldsObj = decodeFields(
     printData.value.processInstance.processDefinition?.formFields || []
   ) as FormFieldRule[]
+  // 布局组件（栅格、卡片等）中的字段，同样需要打印
+  const fieldRules = collectFieldRules(formFieldsObj) as FormFieldRule[]
   const processVariables = printData.value.processInstance.formVariables ?? {}
-  const lookupMaps = await loadPrintLookupMaps(formFieldsObj)
+  // 子表单的子字段，也需要加载用户、部门、地区等名称
+  const lookupMaps = await loadPrintLookupMaps(
+    fieldRules.flatMap((item) =>
+      isSubForm(item) ? [item, ...parseSubFormFields(item).map((field) => field.rule)] : [item]
+    )
+  )
   const res: FormFieldItem[] = []
 
-  for (const item of formFieldsObj) {
+  for (const item of fieldRules) {
     const fieldKey = String(item.field ?? '')
+    // 隐藏的字段不打印；子表单的子字段都隐藏时，与审批页一致，整个子表单不打印
+    if (
+      fieldsPermission.value?.[fieldKey] === FieldPermissionType.NONE ||
+      isSubFormFieldsHidden(item)
+    ) {
+      printDataMap.value[fieldKey] = ''
+      continue
+    }
     const id = fieldKey
     const name = String(item.title ?? fieldKey)
     const variable = processVariables[fieldKey]
-    const html = formatPrintField(item, variable, lookupMaps)
+    const html = isSubForm(item)
+      ? formatSubFormField(item, variable, lookupMaps)
+      : formatPrintField(item, variable, lookupMaps)
 
     printDataMap.value[fieldKey] = html
     res.push({ id, name, html })
@@ -378,6 +403,58 @@ const formatPrintField = (rule: FormFieldRule, value: unknown, lookupMaps: Print
     default:
       return formatPrimitiveValue(value)
   }
+}
+
+/** 获得子表单可打印的子字段：隐藏的子字段不打印 */
+const getPrintSubFormFields = (rule: FormFieldRule) => {
+  const subFormField = String(rule.field ?? '')
+  return parseSubFormFields(rule).filter(
+    (item) =>
+      getSubFieldPermission(
+        fieldsPermission.value?.[subFormField],
+        fieldsPermission.value?.[getSubFieldPermissionField(subFormField, item.field)]
+      ) !== FieldPermissionType.NONE
+  )
+}
+
+/** 子表单的子字段，是否都已隐藏 */
+const isSubFormFieldsHidden = (rule: FormFieldRule) => {
+  return (
+    isSubForm(rule) &&
+    parseSubFormFields(rule).length > 0 &&
+    getPrintSubFormFields(rule).length === 0
+  )
+}
+
+/** 子表单（表格表单、子表单）：按子字段权限打印成表格，隐藏的子字段不打印 */
+const formatSubFormField = (rule: FormFieldRule, value: unknown, lookupMaps: PrintLookupMaps) => {
+  const columns = getPrintSubFormFields(rule)
+  const rows = toValueArray(value).filter(isPrintableRecord)
+  if (columns.length === 0 || rows.length === 0) {
+    return ''
+  }
+  const tableEl = document.createElement('table')
+  tableEl.setAttribute('border', '1')
+  tableEl.setAttribute('style', 'width:100%;border-collapse:collapse;')
+  const headTr = document.createElement('tr')
+  columns.forEach((column) => {
+    const th = document.createElement('th')
+    th.setAttribute('style', 'padding:5px;')
+    th.textContent = column.title
+    headTr.appendChild(th)
+  })
+  tableEl.appendChild(headTr)
+  rows.forEach((row) => {
+    const tr = document.createElement('tr')
+    columns.forEach((column) => {
+      const td = document.createElement('td')
+      td.setAttribute('style', 'padding:5px;')
+      td.innerHTML = formatPrintField(column.rule, row[column.field], lookupMaps)
+      tr.appendChild(td)
+    })
+    tableEl.appendChild(tr)
+  })
+  return tableEl.outerHTML
 }
 
 const initPrintDataMap = () => {

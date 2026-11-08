@@ -67,59 +67,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="表单字段权限" name="fields" v-if="formType === 10">
-        <div class="field-setting-pane">
-          <div class="field-setting-desc">字段权限</div>
-          <div class="field-permit-title">
-            <div class="setting-title-label first-title"> 字段名称 </div>
-            <div class="other-titles">
-              <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')">
-                只读
-              </span>
-              <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')">
-                可编辑
-              </span>
-              <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')">
-                隐藏
-              </span>
-            </div>
-          </div>
-          <div
-            class="field-setting-item"
-            v-for="(item, index) in fieldsPermissionConfig"
-            :key="index"
-          >
-            <div class="field-setting-item-label"> {{ item.title }} </div>
-            <el-radio-group class="field-setting-item-group" v-model="item.permission">
-              <div class="item-radio-wrap">
-                <el-radio
-                  :value="FieldPermissionType.READ"
-                  size="large"
-                  :label="FieldPermissionType.READ"
-                >
-                  <span></span>
-                </el-radio>
-              </div>
-              <div class="item-radio-wrap">
-                <el-radio
-                  :value="FieldPermissionType.WRITE"
-                  size="large"
-                  :label="FieldPermissionType.WRITE"
-                >
-                  <span></span>
-                </el-radio>
-              </div>
-              <div class="item-radio-wrap">
-                <el-radio
-                  :value="FieldPermissionType.NONE"
-                  size="large"
-                  :label="FieldPermissionType.NONE"
-                >
-                  <span></span>
-                </el-radio>
-              </div>
-            </el-radio-group>
-          </div>
-        </div>
+        <FieldsPermissionSetting v-model="fieldsPermissionConfig" title="字段权限" />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -134,6 +82,7 @@
 <script setup lang="ts">
 import { SimpleFlowNode, NodeType, FieldPermissionType, START_USER_BUTTON_SETTING } from '../consts'
 import { useWatchNode, useDrawer, useNodeName, useFormFieldsPermission } from '../node'
+import FieldsPermissionSetting from './components/FieldsPermissionSetting.vue'
 import * as UserApi from '@/api/system/user'
 import * as DeptApi from '@/api/system/dept'
 defineOptions({
@@ -162,9 +111,8 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.COPY_
 // 激活的 Tab 标签页
 const activeTabName = ref('user')
 // 表单字段权限配置
-const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
-  FieldPermissionType.WRITE
-)
+const { formType, fieldsPermissionConfig, getNodeConfigFormFields, getFieldsPermission } =
+  useFormFieldsPermission(FieldPermissionType.WRITE)
 const getUserNicknames = (userIds: number[]): string => {
   if (!userIds || userIds.length === 0) {
     return ''
@@ -197,7 +145,7 @@ const saveConfig = async () => {
   currentNode.value.name = nodeName.value!
   currentNode.value.showText = '已设置'
   // 设置表单权限
-  currentNode.value.fieldsPermission = fieldsPermissionConfig.value
+  currentNode.value.fieldsPermission = getFieldsPermission()
   // 设置发起人的按钮权限
   currentNode.value.buttonsSetting = START_USER_BUTTON_SETTING
   settingVisible.value = false
@@ -210,17 +158,6 @@ const showStartUserNodeConfig = (node: SimpleFlowNode) => {
   getNodeConfigFormFields(node.fieldsPermission)
 }
 
-/** 批量更新权限 */
-const updatePermission = (type: string) => {
-  fieldsPermissionConfig.value.forEach((field) => {
-    field.permission =
-      type === 'READ'
-        ? FieldPermissionType.READ
-        : type === 'WRITE'
-          ? FieldPermissionType.WRITE
-          : FieldPermissionType.NONE
-  })
-}
 defineExpose({ openDrawer, showStartUserNodeConfig }) // 暴露方法给父组件
 </script>
 

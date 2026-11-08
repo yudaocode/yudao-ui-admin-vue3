@@ -123,57 +123,11 @@
     </div>
 
     <el-divider content-position="left">字段权限</el-divider>
-    <div class="field-setting-pane" v-if="formType === BpmModelFormType.NORMAL">
-      <div class="field-permit-title">
-        <div class="setting-title-label first-title"> 字段名称 </div>
-        <div class="other-titles">
-          <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')">
-            只读
-          </span>
-          <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')">
-            可编辑
-          </span>
-          <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')">
-            隐藏
-          </span>
-        </div>
-      </div>
-      <div class="field-setting-item" v-for="(item, index) in fieldsPermissionEl" :key="index">
-        <div class="field-setting-item-label"> {{ item.title }} </div>
-        <el-radio-group class="field-setting-item-group" v-model="item.permission">
-          <div class="item-radio-wrap">
-            <el-radio
-              :value="FieldPermissionType.READ"
-              size="large"
-              :label="FieldPermissionType.READ"
-              @change="updateElementExtensions"
-            >
-              <span></span>
-            </el-radio>
-          </div>
-          <div class="item-radio-wrap">
-            <el-radio
-              :value="FieldPermissionType.WRITE"
-              size="large"
-              :label="FieldPermissionType.WRITE"
-              @change="updateElementExtensions"
-            >
-              <span></span>
-            </el-radio>
-          </div>
-          <div class="item-radio-wrap">
-            <el-radio
-              :value="FieldPermissionType.NONE"
-              size="large"
-              :label="FieldPermissionType.NONE"
-              @change="updateElementExtensions"
-            >
-              <span></span>
-            </el-radio>
-          </div>
-        </el-radio-group>
-      </div>
-    </div>
+    <FieldsPermissionSetting
+      v-if="formType === BpmModelFormType.NORMAL"
+      v-model="fieldsPermissionConfig"
+      @change="updateFieldsPermission"
+    />
 
     <el-divider content-position="left">是否需要签名</el-divider>
     <el-form-item prop="signEnable">
@@ -213,6 +167,7 @@ import {
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
 import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
+import FieldsPermissionSetting from '@/components/SimpleProcessDesignerV2/src/nodes-config/components/FieldsPermissionSetting.vue'
 import { BpmModelFormType } from '@/utils/constants'
 
 type BpmnElement = {
@@ -232,7 +187,7 @@ const props = defineProps({
   id: String,
   type: String
 })
-const prefix = inject('prefix')
+const prefix = inject<string>('prefix')
 
 // 审批人与提交人为同一人时
 const assignStartUserHandlerTypeEl = ref()
@@ -263,9 +218,8 @@ const btnDisplayNameBlurEvent = (index: number) => {
 
 // 字段权限
 const fieldsPermissionEl = ref<any[]>([])
-const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
-  FieldPermissionType.READ
-)
+const { formType, fieldsPermissionConfig, getNodeConfigFormFields, getFieldsPermission } =
+  useFormFieldsPermission(FieldPermissionType.READ)
 
 // 审批类型
 const approveType = ref({ value: ApproveType.USER })
@@ -355,16 +309,8 @@ const resetCustomConfigList = () => {
     const fieldsPermissionList = elExtensionElements.value.values?.filter(
       (ex) => ex.$type === `${prefix}:FieldsPermission`
     )
-    fieldsPermissionEl.value = []
-    getNodeConfigFormFields()
-    fieldsPermissionConfig.value = fieldsPermissionConfig.value
-    fieldsPermissionConfig.value.forEach((element) => {
-      element.permission =
-        fieldsPermissionList?.find((obj) => obj.field === element.field)?.permission ?? '1'
-      fieldsPermissionEl.value.push(
-        bpmnInstances().moddle.create(`${prefix}:FieldsPermission`, element)
-      )
-    })
+    getNodeConfigFormFields(fieldsPermissionList)
+    setFieldsPermissionEl()
   }
 
   // 是否需要签名
@@ -427,6 +373,18 @@ const updateAssignEmptyHandlerType = () => {
 const updateAssignEmptyUserIds = () => {
   assignEmptyUserIdsEl.value.value = assignEmptyUserIds.value.toString()
 
+  updateElementExtensions()
+}
+
+// 字段权限：子表单的子字段，仅保存单独设置的权限
+const setFieldsPermissionEl = () => {
+  fieldsPermissionEl.value = getFieldsPermission().map((item) =>
+    bpmnInstances().moddle.create(`${prefix}:FieldsPermission`, item)
+  )
+}
+
+const updateFieldsPermission = () => {
+  setFieldsPermissionEl()
   updateElementExtensions()
 }
 
@@ -527,18 +485,7 @@ function useButtonsSetting() {
   }
 }
 
-/** 批量更新权限 */
-// TODO @lesan：这个页面，有一些 idea 红色报错，咱要不要 fix 下！
-const updatePermission = (type: string) => {
-  fieldsPermissionEl.value.forEach((field) => {
-    field.permission =
-      type === 'READ'
-        ? FieldPermissionType.READ
-        : type === 'WRITE'
-          ? FieldPermissionType.WRITE
-          : FieldPermissionType.NONE
-  })
-}
+// DONE @lesan：这个页面，有一些 idea 红色报错，咱要不要 fix 下！
 
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 onMounted(async () => {
@@ -626,80 +573,6 @@ onMounted(async () => {
         border-color: #40a9ff;
         outline: 0;
         box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
-      }
-    }
-  }
-}
-
-.field-setting-pane {
-  display: flex;
-  flex-direction: column;
-  font-size: 14px;
-
-  .field-setting-desc {
-    padding-right: 8px;
-    margin-bottom: 16px;
-    font-size: 16px;
-    font-weight: 700;
-  }
-
-  .field-permit-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 45px;
-    padding-left: 12px;
-    line-height: 45px;
-    background-color: #f8fafc0a;
-    border: 1px solid #1f38581a;
-
-    .first-title {
-      text-align: left !important;
-    }
-
-    .other-titles {
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .setting-title-label {
-      display: inline-block;
-      width: 100px;
-      padding: 5px 0;
-      font-size: 13px;
-      font-weight: 700;
-      color: #000;
-      text-align: center;
-    }
-  }
-
-  .field-setting-item {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    height: 38px;
-    padding-left: 12px;
-    border: 1px solid #1f38581a;
-    border-top: 0;
-
-    .field-setting-item-label {
-      display: inline-block;
-      width: 100px;
-      min-height: 16px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      cursor: text;
-    }
-
-    .field-setting-item-group {
-      display: flex;
-      justify-content: space-between;
-
-      .item-radio-wrap {
-        display: inline-block;
-        width: 100px;
-        text-align: center;
       }
     }
   }

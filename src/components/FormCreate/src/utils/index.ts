@@ -39,23 +39,76 @@ export const parseFormFields = (
     if ($required) {
       required = true
     }
-    fields.push({
+    const item: Record<string, any> = {
       field,
       title,
       type,
       required
-    })
-    // TODO 子表单 需要处理子表单字段
-    // if (type === 'group' && rule.props?.rule && Array.isArray(rule.props.rule)) {
-    //   // 解析子表单的字段
-    //   rule.props.rule.forEach((item) => {
-    //     parseFields(item, fieldsPermission, title)
-    //   })
-    // }
+    }
+    // DONE 子表单 需要处理子表单字段
+    // 子表单（表格表单、子表单）：解析其子字段，用于配置子字段权限
+    if (isSubForm(rule)) {
+      item.children = parseSubFormFields(rule)
+    }
+    fields.push(item)
   }
   if (children && Array.isArray(children)) {
     children.forEach((rule) => {
       parseFormFields(rule, fields)
     })
   }
+}
+
+/** 表格表单（tableForm）的类型 */
+export const TABLE_FORM_TYPE = 'tableForm'
+/** 子表单（group）的类型 */
+export const GROUP_FORM_TYPE = 'group'
+
+/** 是否为子表单：表格表单、子表单，值都是对象数组 */
+export const isSubForm = (rule?: Record<string, any>) => {
+  return rule?.type === TABLE_FORM_TYPE || rule?.type === GROUP_FORM_TYPE
+}
+
+/**
+ * 解析子表单的子字段：表格表单在 props.columns[].rule，子表单在 props.rule
+ *
+ * @param rule 子表单的生成规则
+ * @return 子字段；表格表单的 title 优先使用列名
+ */
+export const parseSubFormFields = (rule: Record<string, any>) => {
+  const fields: Array<{ field: string; title: string; rule: Record<string, any> }> = []
+  if (rule.type === TABLE_FORM_TYPE) {
+    rule.props?.columns?.forEach((column: Record<string, any>) => {
+      collectFieldRules(column.rule).forEach((item) => {
+        fields.push({
+          field: item.field,
+          title: column.label || item.title || item.field,
+          rule: item
+        })
+      })
+    })
+  } else if (rule.type === GROUP_FORM_TYPE) {
+    collectFieldRules(rule.props?.rule).forEach((item) => {
+      fields.push({ field: item.field, title: item.title || item.field, rule: item })
+    })
+  }
+  return fields
+}
+
+/** 收集组件规则中的字段：递归布局组件，不进入字段组件内部 */
+export const collectFieldRules = (
+  rules?: Array<Record<string, any>>,
+  fieldRules: Array<Record<string, any>> = []
+) => {
+  rules?.forEach((rule) => {
+    if (!rule || typeof rule !== 'object') {
+      return
+    }
+    if (rule.field) {
+      fieldRules.push(rule)
+    } else {
+      collectFieldRules(rule.children, fieldRules)
+    }
+  })
+  return fieldRules
 }
