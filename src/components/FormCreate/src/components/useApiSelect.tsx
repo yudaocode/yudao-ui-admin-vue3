@@ -4,6 +4,112 @@ import { ApiSelectProps } from '@/components/FormCreate/src/type'
 import { jsonParse } from '@/utils'
 import { getCurrentUserId } from '@/utils/auth'
 
+/**
+ * 获得接口选择器的选项：请求配置的接口，并解析为 { label, value } 列表
+ *
+ * 流程打印也使用它，把接口选择器的值转换为选项名称
+ *
+ * @param props 接口选择器的配置，例如 url、method、data、parseFunc、labelField、valueField 等
+ * @param query 远程搜索时输入的值
+ */
+export const getApiSelectOptions = async (
+  props: Record<string, any>,
+  query?: any
+): Promise<any[]> => {
+  // 接口选择器
+  if (isEmpty(props.url)) {
+    return []
+  }
+
+  switch (props.method) {
+    case 'GET':
+      let url: string = props.url
+      if (props.remote) {
+        if (query != undefined) {
+          if (url.includes('?')) {
+            url = `${url}&${props.remoteField}=${query}`
+          } else {
+            url = `${url}?${props.remoteField}=${query}`
+          }
+        }
+      }
+      return parseOptions(props, await request.get({ url: url }))
+    case 'POST':
+      const data: any = jsonParse(props.data)
+      if (props.remote) {
+        data[props.remoteField] = query
+      }
+      return parseOptions(props, await request.post({ url: props.url, data: data }))
+  }
+  return []
+}
+
+const parseOptions = (props: Record<string, any>, data: any) => {
+  //  情况一：如果有自定义解析函数优先使用自定义解析
+  if (!isEmpty(props.parseFunc)) {
+    return parseFunc(props)?.(data)
+  }
+  // 情况二：返回的直接是一个列表
+  if (Array.isArray(data)) {
+    return parseOptions0(props, data)
+  }
+  // 情况二：返回的是分页数据,尝试读取 list
+  data = data.list
+  if (!!data && Array.isArray(data)) {
+    return parseOptions0(props, data)
+  }
+  // 情况三：不是 yudao-vue-pro 标准返回
+  console.warn(`接口[${props.url}] 返回结果不是 yudao-vue-pro 标准返回建议采用自定义解析函数处理`)
+  return []
+}
+
+const parseOptions0 = (props: Record<string, any>, data: any[]) => {
+  return data.map((item: any) => {
+    const label = parseExpression(item, props.labelField)
+    let value = parseExpression(item, props.valueField)
+
+    // 根据 returnType 决定返回值
+    // 如果设置了 returnType 为 'name'，则返回 label 作为 value
+    if (props.returnType === 'name') {
+      value = label
+    }
+
+    return {
+      label: label,
+      value: value
+    }
+  })
+}
+
+const parseFunc = (props: Record<string, any>) => {
+  let parse: any = null
+  if (!!props.parseFunc) {
+    // 解析字符串函数
+    parse = new Function(`return ${props.parseFunc}`)()
+  }
+  return parse
+}
+
+const parseExpression = (data: any, template: string) => {
+  // 检测是否使用了表达式
+  if (template.indexOf('${') === -1) {
+    return data[template]
+  }
+  // 正则表达式匹配模板字符串中的 ${...}
+  const pattern = /\$\{([^}]*)}/g
+  // 使用replace函数配合正则表达式和回调函数来进行替换
+  return template.replace(pattern, (_, expr) => {
+    // expr 是匹配到的 ${} 内的表达式（这里是属性名），从 data 中获取对应的值
+    const result = data[expr.trim()] // 去除前后空白，以防用户输入带空格的属性名
+    if (!result) {
+      console.warn(
+        `接口选择器选项模版[${template}][${expr.trim()}] 解析值失败结果为[${result}], 请检查属性名称是否存在于接口返回值中,存在则忽略此条！！！`
+      )
+    }
+    return result
+  })
+}
+
 export const useApiSelect = (option: ApiSelectProps) => {
   return defineComponent({
     name: option.name,
@@ -109,107 +215,7 @@ export const useApiSelect = (option: ApiSelectProps) => {
 
       const getOptions = async () => {
         options.value = []
-        // 接口选择器
-        if (isEmpty(props.url)) {
-          return
-        }
-
-        switch (props.method) {
-          case 'GET':
-            let url: string = props.url
-            if (props.remote) {
-              if (queryParam.value != undefined) {
-                if (url.includes('?')) {
-                  url = `${url}&${props.remoteField}=${queryParam.value}`
-                } else {
-                  url = `${url}?${props.remoteField}=${queryParam.value}`
-                }
-              }
-            }
-            parseOptions(await request.get({ url: url }))
-            break
-          case 'POST':
-            const data: any = jsonParse(props.data)
-            if (props.remote) {
-              data[props.remoteField] = queryParam.value
-            }
-            parseOptions(await request.post({ url: props.url, data: data }))
-            break
-        }
-      }
-
-      function parseOptions(data: any) {
-        //  情况一：如果有自定义解析函数优先使用自定义解析
-        if (!isEmpty(props.parseFunc)) {
-          options.value = parseFunc()?.(data)
-          return
-        }
-        // 情况二：返回的直接是一个列表
-        if (Array.isArray(data)) {
-          parseOptions0(data)
-          return
-        }
-        // 情况二：返回的是分页数据,尝试读取 list
-        data = data.list
-        if (!!data && Array.isArray(data)) {
-          parseOptions0(data)
-          return
-        }
-        // 情况三：不是 yudao-vue-pro 标准返回
-        console.warn(
-          `接口[${props.url}] 返回结果不是 yudao-vue-pro 标准返回建议采用自定义解析函数处理`
-        )
-      }
-
-      function parseOptions0(data: any[]) {
-        if (Array.isArray(data)) {
-          options.value = data.map((item: any) => {
-            const label = parseExpression(item, props.labelField)
-            let value = parseExpression(item, props.valueField)
-
-            // 根据 returnType 决定返回值
-            // 如果设置了 returnType 为 'name'，则返回 label 作为 value
-            if (props.returnType === 'name') {
-              value = label
-            }
-
-            return {
-              label: label,
-              value: value
-            }
-          })
-          return
-        }
-        console.warn(`接口[${props.url}] 返回结果不是一个数组`)
-      }
-
-      function parseFunc() {
-        let parse: any = null
-        if (!!props.parseFunc) {
-          // 解析字符串函数
-          parse = new Function(`return ${props.parseFunc}`)()
-        }
-        return parse
-      }
-
-      function parseExpression(data: any, template: string) {
-        // 检测是否使用了表达式
-        if (template.indexOf('${') === -1) {
-          return data[template]
-        }
-        // 正则表达式匹配模板字符串中的 ${...}
-        const pattern = /\$\{([^}]*)}/g
-        // 使用replace函数配合正则表达式和回调函数来进行替换
-        return template.replace(pattern, (_, expr) => {
-          // expr 是匹配到的 ${} 内的表达式（这里是属性名），从 data 中获取对应的值
-          const result = data[expr.trim()] // 去除前后空白，以防用户输入带空格的属性名
-          if (!result) {
-            console.warn(
-              `接口选择器选项模版[${template}][${expr.trim()}] 解析值失败结果为[${result}], 请检查属性名称是否存在于接口返回值中,存在则忽略此条！！！`
-            )
-          }
-          return result
-        })
+        options.value = await getApiSelectOptions(props, queryParam.value)
       }
 
       const remoteMethod = async (query: any) => {
