@@ -15,6 +15,7 @@ import {
 } from '@/utils/dict'
 import { decodeFields } from '@/utils/formCreate'
 import { collectFieldRules, isSubForm, parseSubFormFields } from '@/components/FormCreate/src/utils'
+import { getApiSelectOptions } from '@/components/FormCreate/src/components/useApiSelect'
 import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
 import {
   getSubFieldPermission,
@@ -50,6 +51,7 @@ interface AreaNode {
 }
 
 interface PrintLookupMaps {
+  apiSelectOptionsMap: Map<string, FormFieldOption[]>
   areaMap: Map<string, string>
   deptMap: Map<string, string>
   userMap: Map<string, string>
@@ -312,7 +314,27 @@ const loadPrintLookupMaps = async (formFieldsObj: FormFieldRule[]) => {
     hasDeptSelect ? DeptApi.getSimpleDeptList() : Promise.resolve([])
   ])
 
+  // 接口选择器：按组件配置请求选项，用于打印选项名称；请求失败时，打印原值
+  const apiSelectOptionsMap = new Map<string, FormFieldOption[]>()
+  await Promise.all(
+    formFieldsObj
+      .filter((item) => item.type === 'ApiSelect' && getRuleProp(item, 'returnType') !== 'name')
+      .map(async (item) => {
+        const key = getApiSelectKey(item)
+        if (apiSelectOptionsMap.has(key)) {
+          return
+        }
+        apiSelectOptionsMap.set(key, [])
+        try {
+          apiSelectOptionsMap.set(key, (await getApiSelectOptions(getApiSelectProps(item))) ?? [])
+        } catch (e) {
+          console.warn(`[loadPrintLookupMaps][接口选择器(${item.field}) 加载选项失败]`, e)
+        }
+      })
+  )
+
   return {
+    apiSelectOptionsMap,
     areaMap: flattenAreaTree(areaList as AreaNode[]),
     deptMap: new Map((deptList ?? []).map((item) => [String(item.id), item.name] as const)),
     userMap: new Map(
@@ -321,10 +343,29 @@ const loadPrintLookupMaps = async (formFieldsObj: FormFieldRule[]) => {
   } satisfies PrintLookupMaps
 }
 
+/** 接口选择器的配置：未设置的属性，使用组件的默认值 */
+const getApiSelectProps = (rule: FormFieldRule): Record<string, any> => {
+  return {
+    method: 'GET',
+    labelField: 'label',
+    valueField: 'value',
+    remoteField: 'label',
+    ...rule.props
+  }
+}
+
+/** 接口选择器的选项缓存 key：相同配置的接口选择器，只请求一次 */
+const getApiSelectKey = (rule: FormFieldRule) => {
+  return JSON.stringify(getApiSelectProps(rule))
+}
+
 const formatPrintField = (rule: FormFieldRule, value: unknown, lookupMaps: PrintLookupMaps) => {
   const type = String(rule.type ?? '')
 
   switch (type) {
+    case 'ApiSelect':
+      // 未匹配到选项时（例如远程搜索、分页接口未返回该值），打印原值
+      return mapValuesWithOptions(value, lookupMaps.apiSelectOptionsMap.get(getApiSelectKey(rule)))
     case 'AreaSelect': {
       const separator = String(getRuleProp(rule, 'separator') || '/')
       return mapValueWithLabelMap(value, lookupMaps.areaMap, separator)

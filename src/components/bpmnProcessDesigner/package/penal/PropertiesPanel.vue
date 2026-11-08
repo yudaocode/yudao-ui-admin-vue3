@@ -68,8 +68,17 @@
           :business-object="elementBusinessObject"
         />
       </el-collapse-item>
+      <el-collapse-item v-if="eventRefVisible" name="eventRef" key="eventRef">
+        <template #title><Icon icon="ep:comment" />消息与信号</template>
+        <!-- 相关 issue：https://github.com/YunaiV/yudao-cloud/issues/271 -->
+        <EventDefinitionRef
+          :business-object="elementBusinessObject"
+          :type="elementType"
+          :key="elementId"
+        />
+      </el-collapse-item>
       <!-- 新增的时间事件配置项 -->
-      <el-collapse-item v-if="elementType === 'IntermediateCatchEvent'" name="timeEvent">
+      <el-collapse-item v-if="timeEventVisible" name="timeEvent">
         <template #title><Icon icon="ep:timer" />时间事件</template>
         <!-- 相关 issue：https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues/ICNRW2 -->
         <TimeEventConfig :businessObject="elementBusinessObject" :key="elementId" />
@@ -84,6 +93,7 @@ import ElementTask from './task/ElementTask.vue'
 import ElementMultiInstance from './multi-instance/ElementMultiInstance.vue'
 import FlowCondition from './flow-condition/FlowCondition.vue'
 import SignalAndMassage from './signal-message/SignalAndMessage.vue'
+import EventDefinitionRef from './signal-message/EventDefinitionRef.vue'
 import ElementListeners from './listeners/ElementListeners.vue'
 import ElementProperties from './properties/ElementProperties.vue'
 // import ElementForm from './form/ElementForm.vue'
@@ -126,6 +136,8 @@ const elementType = ref('')
 const elementBusinessObject = ref<any>({}) // 元素 businessObject 镜像，提供给需要做判断的组件使用
 const conditionFormVisible = ref(false) // 流转条件设置
 const formVisible = ref(false) // 表单配置
+const eventRefVisible = ref(false) // 消息、信号事件的引用配置
+const timeEventVisible = ref(false) // 时间事件配置
 const bpmnElement = ref()
 const isReady = ref(false)
 
@@ -246,6 +258,14 @@ const initFormOnChanged = (element) => {
       activatedElement.source.type.indexOf('StartEvent') === -1
     )
     formVisible.value = elementType.value === 'UserTask' || elementType.value === 'StartEvent'
+    // 中间事件：消息、信号事件配置引用的消息/信号；时间事件配置，只用于定时器事件
+    const eventDefinitionType = activatedElement.businessObject.eventDefinitions?.[0]?.$type
+    eventRefVisible.value =
+      ['IntermediateCatchEvent', 'IntermediateThrowEvent'].includes(elementType.value) &&
+      ['bpmn:MessageEventDefinition', 'bpmn:SignalEventDefinition'].includes(eventDefinitionType)
+    timeEventVisible.value =
+      elementType.value === 'IntermediateCatchEvent' &&
+      (!eventDefinitionType || eventDefinitionType === 'bpmn:TimerEventDefinition')
   } catch (error) {
     console.error('初始化表单数据失败:', error)
   }
