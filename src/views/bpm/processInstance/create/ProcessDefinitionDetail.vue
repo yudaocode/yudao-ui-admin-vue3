@@ -81,6 +81,11 @@ import {
   NodeId,
   FieldPermissionType
 } from '@/components/SimpleProcessDesignerV2/src/consts'
+import {
+  applySubFormsPermission,
+  hasSubForm,
+  isSubFieldPermissionField
+} from '@/components/SimpleProcessDesignerV2/src/utils'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from '../detail/ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
@@ -109,6 +114,7 @@ const detailForm: any = ref({
   value: {}
 }) // 流程表单详情
 const fApi = ref<FormCreateApi>()
+let subFormsPermission: string | undefined // 已写入表单规则的字段权限（子表单的子字段权限）
 // 指定审批人
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
@@ -138,6 +144,7 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
       }
     }
     setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
+    subFormsPermission = undefined
 
     await nextTick()
     fApi.value?.btn.show(false) // 隐藏提交按钮
@@ -222,12 +229,28 @@ const getApprovalDetail = async (row: any) => {
     const formFieldsPermission = data.formFieldsPermission
     // 设置表单字段权限
     if (formFieldsPermission) {
-      Object.keys(formFieldsPermission).forEach((item) => {
-        setFieldPermission(item, formFieldsPermission[item])
-      })
+      await setSubFormsPermission(formFieldsPermission)
+      Object.keys(formFieldsPermission)
+        .filter((item) => !isSubFieldPermissionField(item)) // 子表单的子字段权限，已写入规则
+        .forEach((item) => {
+          setFieldPermission(item, formFieldsPermission[item])
+        })
     }
   } finally {
   }
+}
+
+/** 设置子表单的子字段权限：需要写入规则后重新渲染表单，所以仅在权限变化时设置 */
+const setSubFormsPermission = async (formFieldsPermission: Record<string, string>) => {
+  const permission = JSON.stringify(formFieldsPermission)
+  if (permission === subFormsPermission || !hasSubForm(detailForm.value.rule)) {
+    return
+  }
+  subFormsPermission = permission
+  const rule = decodeFields(props.selectProcessDefinition.formFields)
+  applySubFormsPermission(rule, formFieldsPermission)
+  detailForm.value.rule = rule
+  await nextTick()
 }
 
 /** 收集布局和条件规则中的字段，不额外挂载临时表单 */

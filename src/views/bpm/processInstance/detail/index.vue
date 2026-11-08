@@ -155,6 +155,11 @@ import ProcessInstanceCommentList from './ProcessInstanceCommentList.vue'
 import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue'
 import ProcessInstanceTimeline from './ProcessInstanceTimeline.vue'
 import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
+import {
+  applySubFormsPermission,
+  hasSubForm,
+  isSubFieldPermissionField
+} from '@/components/SimpleProcessDesignerV2/src/utils'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import runningSvg from '@/assets/svgs/bpm/running.svg'
 import approveSvg from '@/assets/svgs/bpm/approve.svg'
@@ -192,6 +197,7 @@ const detailForm = ref({
 }) // 流程实例的表单详情
 
 const writableFields: Array<string> = [] // 表单可以编辑的字段
+const fieldsPermission = ref<Record<string, string>>() // 表单字段权限，打印时沿用
 
 /** 获得详情 */
 const getDetail = () => {
@@ -229,9 +235,11 @@ const getApprovalDetail = async () => {
     if (processDefinition.value.formType === BpmModelFormType.NORMAL) {
       // 获取表单字段权限
       const formFieldsPermission = data.formFieldsPermission
+      fieldsPermission.value = formFieldsPermission
       // 清空可编辑字段为空
       writableFields.splice(0)
-      if (detailForm.value.rule?.length > 0) {
+      // 子表单的子字段权限需要在渲染前写入规则，所以包含子表单时，重新设置表单
+      if (detailForm.value.rule?.length > 0 && !hasSubForm(detailForm.value.rule)) {
         // 避免刷新 form-create 显示不了
         detailForm.value.value = processInstance.value.formVariables
       } else {
@@ -241,6 +249,7 @@ const getApprovalDetail = async () => {
           processDefinition.value.formFields,
           processInstance.value.formVariables
         )
+        applySubFormsPermission(detailForm.value.rule, formFieldsPermission)
       }
       nextTick().then(() => {
         fApi.value?.btn.show(false)
@@ -248,9 +257,11 @@ const getApprovalDetail = async () => {
         fApi.value?.disabled(true)
         // 设置表单字段权限
         if (formFieldsPermission) {
-          Object.keys(data.formFieldsPermission).forEach((item) => {
-            setFieldPermission(item, formFieldsPermission[item])
-          })
+          Object.keys(data.formFieldsPermission)
+            .filter((item) => !isSubFieldPermissionField(item)) // 子表单的子字段权限，已写入规则
+            .forEach((item) => {
+              setFieldPermission(item, formFieldsPermission[item])
+            })
         }
       })
     } else {
@@ -308,7 +319,7 @@ const refresh = () => {
 /** 处理打印 */
 const printRef = ref()
 const handlePrint = async () => {
-  printRef.value.open(props.id)
+  printRef.value.open(props.id, fieldsPermission.value)
 }
 
 /** 当前的 Tab */

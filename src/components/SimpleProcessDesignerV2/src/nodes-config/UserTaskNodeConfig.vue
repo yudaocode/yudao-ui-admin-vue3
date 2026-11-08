@@ -455,59 +455,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="表单字段权限" name="fields" v-if="formType === 10">
-        <div class="field-setting-pane">
-          <div class="field-setting-desc">字段权限</div>
-          <div class="field-permit-title">
-            <div class="setting-title-label first-title"> 字段名称 </div>
-            <div class="other-titles">
-              <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')">
-                只读
-              </span>
-              <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')">
-                可编辑
-              </span>
-              <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')">
-                隐藏
-              </span>
-            </div>
-          </div>
-          <div
-            class="field-setting-item"
-            v-for="(item, index) in fieldsPermissionConfig"
-            :key="index"
-          >
-            <div class="field-setting-item-label"> {{ item.title }} </div>
-            <el-radio-group class="field-setting-item-group" v-model="item.permission">
-              <div class="item-radio-wrap">
-                <el-radio
-                  :value="FieldPermissionType.READ"
-                  size="large"
-                  :label="FieldPermissionType.READ"
-                >
-                  <span></span>
-                </el-radio>
-              </div>
-              <div class="item-radio-wrap">
-                <el-radio
-                  :value="FieldPermissionType.WRITE"
-                  size="large"
-                  :label="FieldPermissionType.WRITE"
-                >
-                  <span></span>
-                </el-radio>
-              </div>
-              <div class="item-radio-wrap">
-                <el-radio
-                  :value="FieldPermissionType.NONE"
-                  size="large"
-                  :label="FieldPermissionType.NONE"
-                >
-                  <span></span>
-                </el-radio>
-              </div>
-            </el-radio-group>
-          </div>
-        </div>
+        <FieldsPermissionSetting v-model="fieldsPermissionConfig" title="字段权限" />
       </el-tab-pane>
       <el-tab-pane label="监听器" name="listener">
         <UserTaskListener
@@ -566,6 +514,7 @@ import {
 import { defaultProps } from '@/utils/tree'
 import { cloneDeep } from 'lodash-es'
 import { convertTimeUnit, getApproveTypeText } from '../utils'
+import FieldsPermissionSetting from './components/FieldsPermissionSetting.vue'
 import UserTaskListener from './components/UserTaskListener.vue'
 defineOptions({
   name: 'UserTaskNodeConfig'
@@ -599,8 +548,13 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.USER_
 // 激活的 Tab 标签页
 const activeTabName = ref('user')
 // 表单字段权限设置
-const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } =
-  useFormFieldsPermission(FieldPermissionType.READ)
+const {
+  formType,
+  fieldsPermissionConfig,
+  formFieldOptions,
+  getNodeConfigFormFields,
+  getFieldsPermission
+} = useFormFieldsPermission(FieldPermissionType.READ)
 // 表单内用户字段选项, 必须是必填和用户选择器
 const userFieldOnFormOptions = computed(() => {
   // 固定添加发起人 ID 字段
@@ -751,7 +705,7 @@ const saveConfig = async () => {
   // 设置审批人与发起人相同时
   currentNode.value.assignStartUserHandlerType = configForm.value.assignStartUserHandlerType
   // 设置表单权限
-  currentNode.value.fieldsPermission = fieldsPermissionConfig.value
+  currentNode.value.fieldsPermission = getFieldsPermission()
   // 设置按钮权限
   currentNode.value.buttonsSetting = buttonsSetting.value
   // 创建任务监听器
@@ -973,17 +927,6 @@ function useTimeoutHandler() {
   }
 }
 
-/** 批量更新权限 */
-const updatePermission = (type: string) => {
-  fieldsPermissionConfig.value.forEach((field) => {
-    field.permission =
-      type === 'READ'
-        ? FieldPermissionType.READ
-        : type === 'WRITE'
-          ? FieldPermissionType.WRITE
-          : FieldPermissionType.NONE
-  })
-}
 </script>
 
 <style lang="scss" scoped>
