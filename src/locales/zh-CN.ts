@@ -1,4 +1,10 @@
 export default {
+  layout: {
+    expandNavigation: '展开导航',
+    collapseNavigation: '收起导航',
+    switchLanguage: '切换语言',
+    toggleDarkMode: '切换暗黑模式'
+  },
   common: {
     inputText: '请输入',
     selectText: '请选择',

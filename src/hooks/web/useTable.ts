@@ -2,7 +2,16 @@ import download from '@/utils/download'
 import { Table } from '@/components/Table'
 import type { TableExpose } from '@/components/Table'
 import { ElMessage, ElMessageBox, ElTable } from 'element-plus'
-import { computed, nextTick, reactive, ref, unref, watch } from 'vue'
+import {
+  computed,
+  getCurrentScope,
+  nextTick,
+  onScopeDispose,
+  reactive,
+  ref,
+  unref,
+  watch
+} from 'vue'
 import type { TableColumn, TableProps, TableSetPropsType } from '@/components/Table/src/types'
 import { useI18n } from '@/hooks/web/useI18n'
 
@@ -58,6 +67,20 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
     currentRow: null
   })
 
+  // 列表请求代次：只有最新一次 getList 可写入列表、总数及 loading，旧的慢请求不覆盖新结果（参考上游 c7f8db52d useCrud）
+  let listRequest = 0
+  // 最近一次 getList 的 Promise：删除后由页码 watch 发起的刷新，供 delData 等待
+  let listPromise: Promise<void> | undefined
+  // 所在组件作用域是否已销毁：销毁后不再发起请求、不再写入状态
+  let disposed = false
+  // 所在组件作用域销毁后作废进行中的请求，晚到的响应不再回写
+  if (getCurrentScope()) {
+    onScopeDispose(() => {
+      disposed = true
+      listRequest++
+    })
+  }
+
   const paramsObj = computed(() => {
     return {
       ...tableObject.params,
@@ -106,39 +129,61 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
   }
 
   const delData = async (ids: string | number | string[] | number[]) => {
-    let idsLength = 1
+    // 去重后的删除数量，重复 id 不重复删除、不多算
+    const uniqueIds: (string | number)[] =
+      ids instanceof Array ? [...new Set<string | number>(ids)] : [ids]
     if (ids instanceof Array) {
-      idsLength = ids.length
       await Promise.all(
-        ids.map(async (id: string | number) => {
+        uniqueIds.map(async (id: string | number) => {
           await (config?.delListApi && config?.delListApi(id))
         })
       )
     } else {
       await (config?.delListApi && config?.delListApi(ids))
     }
+    // 删除完成前组件已销毁：不再提示成功、调整页码或刷新
+    if (disposed) return
     ElMessage.success(t('common.delSuccess'))
 
-    // 计算出临界点
-    tableObject.currentPage =
-      tableObject.total % tableObject.pageSize === idsLength || tableObject.pageSize === 1
-        ? tableObject.currentPage > 1
-          ? tableObject.currentPage - 1
-          : tableObject.currentPage
-        : tableObject.currentPage
-    await methods.getList()
+    // 删除后当前页超出总页数时，收敛到删除后的最后一页（参考上游 c7f8db52d useCrud remove）
+    const lastPage = Math.max(
+      1,
+      Math.ceil(Math.max(0, tableObject.total - uniqueIds.length) / tableObject.pageSize)
+    )
+    const targetPage = Math.min(tableObject.currentPage, lastPage)
+    if (targetPage !== tableObject.currentPage) {
+      // 页码变化由 currentPage 的 watch 发起刷新，这里只等待该次请求，避免重复请求
+      tableObject.currentPage = targetPage
+      await nextTick()
+      await listPromise
+    } else {
+      await methods.getList()
+    }
   }
 
   const methods = {
-    getList: async () => {
-      tableObject.loading = true
-      const res = await config?.getListApi(unref(paramsObj)).finally(() => {
-        tableObject.loading = false
-      })
-      if (res) {
-        tableObject.tableList = (res as unknown as ResponseType).list
-        tableObject.total = (res as unknown as ResponseType).total ?? 0
+    getList: (): Promise<void> => {
+      // 作用域销毁后不再发起请求
+      if (disposed) return Promise.resolve()
+      const request = ++listRequest
+      const run = async () => {
+        tableObject.loading = true
+        try {
+          const res = await config?.getListApi(unref(paramsObj))
+          // 已有更新的请求（或作用域已销毁）时，丢弃本次结果
+          if (res && request === listRequest) {
+            tableObject.tableList = (res as unknown as ResponseType).list
+            tableObject.total = (res as unknown as ResponseType).total ?? 0
+          }
+        } finally {
+          // 旧请求结束（含失败）不清除新请求的 loading
+          if (request === listRequest) {
+            tableObject.loading = false
+          }
+        }
       }
+      listPromise = run()
+      return listPromise
     },
     setProps: async (props: TableProps = {}) => {
       const table = await getTable()

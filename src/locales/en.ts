@@ -1,4 +1,10 @@
 export default {
+  layout: {
+    expandNavigation: 'Expand navigation',
+    collapseNavigation: 'Collapse navigation',
+    switchLanguage: 'Switch language',
+    toggleDarkMode: 'Toggle dark mode'
+  },
   common: {
     inputText: 'Please input',
     selectText: 'Please select',

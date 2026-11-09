@@ -23,10 +23,14 @@ const getBindValue = computed(() => {
   return propsData
 })
 
+// 关闭时通知外部（程序式 createImageViewer 据此卸载并移除容器）
+const emit = defineEmits<{ (e: 'close'): void }>()
+
 const show = ref(props.show)
 
 const close = () => {
   show.value = false
+  emit('close')
 }
 </script>
 

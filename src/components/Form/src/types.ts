@@ -14,4 +14,6 @@ export type FormProps = {
   autoSetPlaceholder?: boolean
   isCustom?: boolean
   labelWidth?: string | number
+  // schema 移除字段后是否同时删除其值，默认 false（保留）
+  pruneRemovedFields?: boolean
 } & Recordable

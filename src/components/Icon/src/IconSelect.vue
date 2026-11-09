@@ -114,7 +114,9 @@ function handleClick({ props }) {
 }
 
 function onChangeIcon(item) {
-  emit('update:modelValue', currentActiveType.value + item)
+  const icon = currentActiveType.value + item
+  // 开启 clearable 时，再次点击已选中的图标视为清空（参考上游 c2dde2522）
+  emit('update:modelValue', props.clearable && icon === props.modelValue ? '' : icon)
   visible.value = false
 }
 

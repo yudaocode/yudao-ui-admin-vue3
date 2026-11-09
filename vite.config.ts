@@ -27,6 +27,12 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
         env = loadEnv(mode, root)
     }
     const variablesScssPath = pathResolve('src/styles/variables.scss')
+    // CSS 产物目标（参考上游 4b43c8794）：VITE_CSS_TARGET 为逗号分隔的目标（如 chrome87,safari14），设置时用于 CSS 转换与压缩，
+    // 避免 autoprefixer 加的前缀按默认现代目标被剔除；未设置保持 Vite 默认。只影响 CSS，不代表 JS 及依赖兼容这些浏览器；无效目标构建报错
+    const cssTarget = String(env.VITE_CSS_TARGET || '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
     return {
         base: env.VITE_BASE_PATH,
         root: root,
@@ -88,6 +94,7 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             sourcemap: env.VITE_SOURCEMAP === 'true',
             // CSS 分包开关（参考上游 b2cee10cc）：未配置时保持现有按 chunk 拆分 CSS，仅 VITE_USE_CSS_SPLIT=false 时合并为单个 CSS 文件
             cssCodeSplit: env.VITE_USE_CSS_SPLIT !== 'false',
+            ...(cssTarget.length ? {cssTarget} : {}),
             rollupOptions: {
                 output: {
                     minify: {

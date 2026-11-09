@@ -1,0 +1,8 @@
+# Dockerfile.dev 只需要依赖清单、workspace 配置与补丁；
+# 源码、.env*、node_modules、构建产物、.git、output 等一律不进入构建上下文
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!patches
+!patches/**

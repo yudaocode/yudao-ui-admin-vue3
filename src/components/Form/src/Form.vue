@@ -120,7 +120,10 @@ export default defineComponent({
     // 表单label宽度
     labelWidth: propTypes.oneOfType([String, Number]).def('auto'),
     // 是否 loading 数据中 add by 芋艿
-    vLoading: propTypes.bool.def(false)
+    vLoading: propTypes.bool.def(false),
+    // schema 移除字段（delSchema、替换 schema 等）后是否同时删除其值（参考上游 08665a35a），默认保留。
+    // 只删除开启后从 schema 中移除的字段；setValues / model 传入的非 schema 字段（如 id）不受影响
+    pruneRemovedFields: propTypes.bool.def(false)
   },
   emits: ['register'],
   setup(props, { slots, expose, emit, attrs }) {
@@ -329,11 +332,34 @@ export default defineComponent({
       getFormItemExpose
     })
 
+    // 上一次 schema 的 field 快照：schema 原地增删时 deep watch 的新旧值是同一数组，不能用旧值比较
+    let prevSchemaFields: string[] = []
+
+    // pruneRemovedFields：删除上一次 schema 有、本次没有的 field 的值（支持嵌套路径）。
+    // 与本次仍存在的 field 相同或互为祖先/后代路径时保守跳过，避免误删仍在使用的值
+    const pruneRemovedFieldValues = (model: Recordable, fields: string[]) => {
+      const current = new Set(fields)
+      const currentPaths = fields.map((field) => toPath(field))
+      for (const field of prevSchemaFields) {
+        if (current.has(field)) continue
+        const path = toPath(field)
+        const related = currentPaths.some((other) => {
+          const length = Math.min(path.length, other.length)
+          return path.slice(0, length).every((key, index) => key === other[index])
+        })
+        if (!related) unsetModelValue(model, field)
+      }
+    }
+
     // 监听表单结构化数组，重新生成formModel
     watch(
       () => unref(getProps).schema,
       (schema = []) => {
-        formModel.value = initModel(schema, unref(formModel))
+        const model = initModel(schema, unref(formModel))
+        const fields = schema.map((v) => v.field)
+        if (unref(getProps).pruneRemovedFields) pruneRemovedFieldValues(model, fields)
+        prevSchemaFields = fields
+        formModel.value = model
       },
       {
         immediate: true,
@@ -751,7 +777,14 @@ export default defineComponent({
     // 过滤传入Form组件的属性
     const getFormBindValue = () => {
       // 避免在标签上出现多余的属性
-      const delKeys = ['schema', 'isCol', 'autoSetPlaceholder', 'isCustom', 'model']
+      const delKeys = [
+        'schema',
+        'isCol',
+        'autoSetPlaceholder',
+        'isCustom',
+        'model',
+        'pruneRemovedFields'
+      ]
       const props = { ...unref(getProps) }
       for (const key in props) {
         if (delKeys.indexOf(key) !== -1) {
