@@ -1,7 +1,8 @@
 import router from './router'
 import type { RouteRecordRaw } from 'vue-router'
 import { isRelogin } from '@/config/axios/service'
-import { getAccessToken } from '@/utils/auth'
+import { getAccessToken, removeToken } from '@/utils/auth'
+import { deleteUserCache } from '@/hooks/web/useCache'
 import { useTitle } from '@/hooks/web/useTitle'
 import { useNProgress } from '@/hooks/web/useNProgress'
 import { usePageLoading } from '@/hooks/web/usePageLoading'
@@ -13,6 +14,9 @@ import { parseRouteLocation } from '@/utils/routeParams'
 const { start, done } = useNProgress()
 
 const { loadStart, loadDone } = usePageLoading()
+
+// 正在加载用户信息的 Promise
+let userInfoPromise: Promise<unknown> | undefined
 
 // 路由不重定向白名单
 const whiteList = [
@@ -42,17 +46,33 @@ router.beforeEach(async (to, from, next) => {
         dictStore.setDictMap().then()
       }
       if (!userStore.getIsSetUser) {
+        const redirectPath = from.query.redirect
+        // 修复跳转时不带参数的问题
+        const redirect = typeof redirectPath === 'string' ? redirectPath : to.fullPath
         isRelogin.show = true
-        await userStore.setUserInfoAction()
-        isRelogin.show = false
+        try {
+          // 并发跳转时，共用同一次加载，避免先后返回的成功、失败结果互相覆盖登录状态
+          if (!userInfoPromise) {
+            userInfoPromise = userStore.setUserInfoAction().finally(() => {
+              userInfoPromise = undefined
+            })
+          }
+          await userInfoPromise
+        } catch {
+          // 没有用户缓存，且加载用户信息失败时，清理本地登录状态并跳转登录页，避免页面一直 loading
+          // 详见 issue：https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues/IBJ6SP
+          removeToken()
+          deleteUserCache()
+          next(`/login?redirect=${encodeURIComponent(redirect)}`)
+          return
+        } finally {
+          isRelogin.show = false
+        }
         // 后端过滤菜单
         await permissionStore.generateRoutes()
         permissionStore.getAddRouters.forEach((route) => {
           router.addRoute(route as unknown as RouteRecordRaw) // 动态添加可访问路由表
         })
-        const redirectPath = from.query.redirect
-        // 修复跳转时不带参数的问题
-        const redirect = typeof redirectPath === 'string' ? redirectPath : to.fullPath
         const redirectLocation = parseRouteLocation(redirect)
         const nextData =
           to.fullPath === redirect
