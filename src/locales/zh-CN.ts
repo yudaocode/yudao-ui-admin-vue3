@@ -465,7 +465,8 @@ export default {
     btn_scale_y: '垂直翻转',
     btn_zoom_in: '放大',
     btn_zoom_out: '缩小',
-    preview: '预览'
+    preview: '预览',
+    imageTypeError: '请选择图片格式的文件'
   },
   'OAuth 2.0': 'OAuth 2.0' // 避免菜单名是 OAuth 2.0 时，一直 warn 报错
 }

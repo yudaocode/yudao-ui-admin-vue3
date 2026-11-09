@@ -470,6 +470,7 @@ export default {
     btn_scale_y: 'Flip vertical',
     btn_zoom_in: 'Zoom in',
     btn_zoom_out: 'Zoom out',
-    preview: 'Preview'
+    preview: 'Preview',
+    imageTypeError: 'Please select an image file'
   }
 }

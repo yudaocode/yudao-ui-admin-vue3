@@ -347,7 +347,9 @@ export const initModel = (schema: FormSchema[], formModel: Recordable) => {
     // remove 不渲染，并删除对应的值（field 支持 a.b 嵌套路径）；hidden 只隐藏，值照常初始化、保留
     if (v.remove) {
       unsetModelValue(model, v.field)
-    } else if (v.component && v.component !== 'Divider') {
+    } else if (v.component !== 'Divider' && (v.component || v.value !== void 0)) {
+      // 无 component 的自定义插槽项（参考上游 47016a535）仅在明确提供 value 时初始化；
+      // 未提供 value 的（如 Search 的 action 按钮项）不产生模型字段
       // 如果先前已经有值存在，则不进行重新赋值，而是采用现有的值
       if (!hasModelValue(model, v.field)) {
         setModelValue(model, v.field, v.value !== void 0 ? v.value : getDefaultValue(v.component))
