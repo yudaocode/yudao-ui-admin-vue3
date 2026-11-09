@@ -390,13 +390,19 @@ watch(
                     t(item?.meta?.title as string) +
                     (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
                   }}
-                  <Icon
+                  <!-- 原生按钮便于键盘聚焦与读屏（参考上游 8a68d60bb）；固定标签不渲染。
+                    Enter/Space 的 keydown 不冒泡到 ContextMenu 触发器（其会 preventDefault 并打开菜单），
+                    由按钮原生激活触发一次 click -->
+                  <button
+                    v-if="!item?.meta?.affix"
+                    type="button"
                     :class="`${prefixCls}__item--close`"
-                    :size="12"
-                    color="#333"
-                    icon="ep:close"
+                    :aria-label="`${t('common.closeTab')}: ${t(item?.meta?.title as string)}${item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : ''}`"
                     @click.prevent.stop="closeSelectedTag(item)"
-                  />
+                    @keydown.enter.space.stop
+                  >
+                    <Icon :size="12" color="#333" icon="ep:close" />
+                  </button>
                 </div>
               </router-link>
             </div>
@@ -541,17 +547,35 @@ $prefix-cls: #{$namespace}-tags-view;
     border-radius: 2px;
     box-sizing: border-box;
 
+    // 未悬停时透明且不响应鼠标，但仍可 Tab 聚焦；不占布局宽度
     &--close {
       position: absolute;
       top: 50%;
       right: 5px;
-      display: none;
+      display: inline-flex;
+      padding: 0;
+      color: inherit;
+      pointer-events: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      opacity: 0;
       transform: translate(0, -50%);
+      align-items: center;
+      justify-content: center;
+
+      &:focus-visible {
+        pointer-events: auto;
+        outline: 1px solid currentcolor;
+        outline-offset: 1px;
+        opacity: 1;
+      }
     }
 
     &:not(.#{$prefix-cls}__item--affix):hover {
       .#{$prefix-cls}__item--close {
-        display: block;
+        pointer-events: auto;
+        opacity: 1;
       }
     }
   }

@@ -1,4 +1,4 @@
-import type { HTMLAttributes, StyleValue, VNodeChild } from 'vue'
+import type { HTMLAttributes, StyleValue, VNodeChild, VNodeRef } from 'vue'
 import type {
   AutocompleteEmits,
   AutocompleteProps,
@@ -103,6 +103,8 @@ export interface FormComponentExtraProps<E> {
   slots?: FormComponentSlots
   style?: StyleValue
   class?: HTMLAttributes['class']
+  // 组件 ref（参考上游 097b32e1a），Form 运行时已按 Vue 原生语义透传：字符串、ref 对象或回调函数
+  ref?: VNodeRef
 }
 
 // 自动渲染选项的字段（Select / Radio / Checkbox 类）：字段别名 optionsAlias 优先，其次 props
