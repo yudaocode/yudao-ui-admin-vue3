@@ -14,9 +14,31 @@ export type {
   ComponentName,
   ComponentOptions,
   ComponentOptionsAlias,
+  ComponentOptionsProps,
   ComponentProps,
-  ColProps
+  ColProps,
+  RadioButtonComponentProps
 } from '@/types/components'
+// 组件名运行时枚举与可选的组件属性命名类型（参考上游 28d1654b2、1d0f4b4c3、2261f4997、c5b545d2c、283bc58d4）
+export { ComponentNameEnum } from './src/componentProps'
+export type {
+  InputComponentProps,
+  AutocompleteComponentProps,
+  InputNumberComponentProps,
+  SelectComponentProps,
+  SelectV2ComponentProps,
+  CascaderComponentProps,
+  SwitchComponentProps,
+  RateComponentProps,
+  ColorPickerComponentProps,
+  TransferComponentProps,
+  InputPasswordComponentProps,
+  CheckboxButtonComponentProps,
+  FormComponentEvents,
+  FormComponentSlot,
+  FormComponentSlots,
+  FormComponentExtraProps
+} from './src/componentProps'
 
 export interface FormExpose {
   setValues: (data: Recordable) => void

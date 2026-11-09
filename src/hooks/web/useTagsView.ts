@@ -30,8 +30,10 @@ export const useTagsView = () => {
   }
 
   const closeCurrent = (view?: RouteLocationNormalizedLoaded, callback?: Fn) => {
-    if (view?.meta?.affix) return
-    tagsViewStore.delView(view || unref(currentRoute))
+    // 未传 view 时关闭当前路由，同样不能关闭固定标签
+    const target = view || unref(currentRoute)
+    if (target?.meta?.affix) return
+    tagsViewStore.delView(target)
 
     callback?.()
   }

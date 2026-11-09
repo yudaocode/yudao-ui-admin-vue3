@@ -2,6 +2,8 @@
 import { CSSProperties } from 'vue'
 import { cloneDeep } from 'lodash-es'
 import { IconJson } from '@/components/Icon/src/data'
+import { useConfigGlobal } from '@/hooks/web/useConfigGlobal'
+import { useAppStoreWithOut } from '@/store/modules/app'
 
 defineOptions({ name: 'IconSelect' })
 
@@ -64,6 +66,35 @@ const pageList = computed(() => {
 })
 // 分页总数使用过滤后的数量，避免搜索后出现空白页
 const iconCount = computed(() => filterIconList.value.length)
+
+const { configGlobal } = useConfigGlobal()
+
+// 预览框与图标单元格尺寸跟随全局组件尺寸（参考上游 4490d5eee）：
+// 优先 ConfigGlobal 注入的 size，未注入时回退 app store 的 currentSize，均没有时按 default
+const iconSize = computed(() => {
+  const size = configGlobal?.size ?? useAppStoreWithOut().getCurrentSize
+  return size === 'small'
+    ? 'var(--el-component-size-small)'
+    : size === 'large'
+      ? 'var(--el-component-size-large)'
+      : 'var(--el-component-size)'
+})
+
+const iconWrapStyle = computed((): CSSProperties => {
+  return {
+    width: iconSize.value,
+    height: iconSize.value
+  }
+})
+
+// border-box：1px 边框计入宽高，small 下单元格不被撑大
+const iconCellStyle = computed((): CSSProperties => {
+  return {
+    width: iconSize.value,
+    height: iconSize.value,
+    boxSizing: 'border-box'
+  }
+})
 
 const iconItemStyle = computed((): ParameterCSSProperties => {
   return (item) => {
@@ -163,7 +194,8 @@ watch(
         >
           <template #reference>
             <div
-              class="h-32px w-40px flex cursor-pointer items-center justify-center"
+              :style="iconWrapStyle"
+              class="flex cursor-pointer items-center justify-center"
               @click="visible = !visible"
             >
               <Icon :icon="previewIcon" />
@@ -188,9 +220,9 @@ watch(
                     <li
                       v-for="(item, key) in pageList"
                       :key="key"
-                      :style="iconItemStyle(item)"
+                      :style="[iconCellStyle, iconItemStyle(item)]"
                       :title="item"
-                      class="icon-item mr-2 mt-1 w-1/10 flex cursor-pointer items-center justify-center border border-solid p-2"
+                      class="icon-item mr-2 mt-1 flex cursor-pointer items-center justify-center border border-solid"
                       @click="onChangeIcon(item)"
                     >
                       <Icon :icon="currentActiveType + item" />

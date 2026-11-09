@@ -1,6 +1,6 @@
 import type { SearchExpose, SearchProps } from '@/components/Search'
 import { FormSchema, FormSetPropsType } from '@/types/form'
-import type { ElForm } from 'element-plus'
+import type { ElForm, ElFormItem } from 'element-plus'
 
 /**
  * Search 组件的操作 hook（参考上游 a00d76e41）：
@@ -35,6 +35,8 @@ export const useSearch = () => {
     delSchema: (field: string) => Promise<void>
     getFormData: <T = Recordable | undefined>(filterEmptyVal?: boolean) => Promise<T>
     getElFormExpose: () => Promise<ComponentRef<typeof ElForm> | undefined>
+    getComponentExpose: <T = any>(field: string) => Promise<T | undefined>
+    getFormItemExpose: (field: string) => Promise<ComponentRef<typeof ElFormItem> | undefined>
   } = {
     /**
      * @param props 需要临时覆盖的 Search 属性，值为 undefined 时取消覆盖；含 model 时同时回填表单值
@@ -92,6 +94,24 @@ export const useSearch = () => {
     getElFormExpose: async () => {
       const search = await getSearch()
       return search?.getElFormExpose()
+    },
+
+    /**
+     * @param field 表单项 field
+     * @returns 表单组件实例，插槽自定义渲染的字段返回 undefined
+     */
+    getComponentExpose: async <T = any>(field: string): Promise<T | undefined> => {
+      const search = await getSearch()
+      return search?.getComponentExpose<T>(field)
+    },
+
+    /**
+     * @param field 表单项 field
+     * @returns form-item 实例
+     */
+    getFormItemExpose: async (field: string) => {
+      const search = await getSearch()
+      return search?.getFormItemExpose(field)
     }
   }
 

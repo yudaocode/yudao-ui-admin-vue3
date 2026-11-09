@@ -344,6 +344,8 @@ const setVisible = () => {
 const searchExpose: SearchExpose = {
   getFormData: methods.getFormData,
   getElFormExpose: methods.getElFormExpose,
+  getComponentExpose: methods.getComponentExpose,
+  getFormItemExpose: methods.getFormItemExpose,
   setValues: methods.setValues,
   setProps,
   setSchema,
