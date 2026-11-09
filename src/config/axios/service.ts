@@ -199,6 +199,10 @@ service.interceptors.response.use(
         return new Promise((resolve) => {
           requestList.push(() => {
             config.headers!.Authorization = 'Bearer ' + getAccessToken() // 让每个请求携带自定义token 请根据实际情况自行修改
+            // 回放时请求体已是首次发送的密文，标记已加密，避免请求拦截器二次加密
+            if ((config!.headers || {}).isEncrypt) {
+              ;(config!.headers || {}).isEncrypted = true
+            }
             resolve(service(config))
           })
         })

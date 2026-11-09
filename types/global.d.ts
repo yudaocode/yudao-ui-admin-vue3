@@ -1,3 +1,4 @@
+import type { RawAxiosRequestHeaders } from 'axios'
 export {}
 declare global {
   interface Fn<T = any> {
@@ -42,6 +43,7 @@ declare global {
     data?: any
     url?: string
     method?: AxiosMethod
+    headers?: RawAxiosRequestHeaders
     headersType?: string
     responseType?: AxiosResponseType
   }
