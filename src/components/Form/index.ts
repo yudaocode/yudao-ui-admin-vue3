@@ -37,7 +37,15 @@ export type {
   FormComponentEvents,
   FormComponentSlot,
   FormComponentSlots,
-  FormComponentExtraProps
+  FormComponentExtraProps,
+  RadioGroupComponentProps,
+  CheckboxGroupComponentProps,
+  DatePickerComponentProps,
+  TimePickerComponentProps,
+  TimeSelectComponentProps,
+  DividerComponentProps,
+  TreeSelectComponentProps,
+  UploadComponentProps
 } from './src/componentProps'
 // Form 组件属性与占位符类型入口（参考上游 26dc886f8），仅类型导出
 export type { FormProps, PlaceholderModel } from './src/types'

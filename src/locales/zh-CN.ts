@@ -3,7 +3,12 @@ export default {
     expandNavigation: '展开导航',
     collapseNavigation: '收起导航',
     switchLanguage: '切换语言',
-    toggleDarkMode: '切换暗黑模式'
+    toggleDarkMode: '切换暗黑模式',
+    enterFullscreen: '全屏',
+    exitFullscreen: '退出全屏',
+    menuSearch: '菜单搜索',
+    switchSize: '切换尺寸',
+    message: '站内信'
   },
   common: {
     inputText: '请输入',
@@ -29,6 +34,9 @@ export default {
     closeTheRightTab: '关闭右侧标签页',
     closeOther: '关闭其他标签页',
     closeAll: '关闭全部标签页',
+    scrollTagsLeft: '向左滚动标签页',
+    scrollTagsRight: '向右滚动标签页',
+    moreTabActions: '更多标签页操作',
     prevLabel: '上一步',
     nextLabel: '下一步',
     skipLabel: '跳过',

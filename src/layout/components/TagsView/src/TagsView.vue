@@ -62,9 +62,12 @@ const initTags = () => {
 
 // 新增tag
 const addTags = () => {
-  const { name } = unref(currentRoute)
+  const { name, meta } = unref(currentRoute)
   if (name) {
     setSelectTag(unref(currentRoute))
+    // 刷新用的临时 Redirect 页不加 tag，也不重算缓存：避免把刷新时刚删除的目标页缓存在同一次渲染内加回，
+    // 到达目标页后再由 addView 重建缓存
+    if (name === 'Redirect' && meta?.noTagsView) return
     tagsViewStore.addView(unref(currentRoute))
   }
 }
@@ -104,9 +107,48 @@ const closeAllTags = () => {
   })
 }
 
+type CloseRange = 'left' | 'right' | 'other' | 'all'
+
+// 对应范围内可关闭（非固定）的 tag，范围与 store 的批量删除一致（参考上游 e66532cf9）：
+// left / right 为 view 左侧 / 右侧，other 为 view 以外，all 为全部
+const getClosableViews = (view: RouteLocationNormalizedLoaded | undefined, range: CloseRange) => {
+  const views = unref(visitedViews)
+  const index = view ? views.findIndex((v) => v.fullPath === view.fullPath) : -1
+  return views.filter((v, i) => {
+    if (v?.meta?.affix) return false
+    if (range === 'all') return true
+    if (range === 'other') return v.fullPath !== view?.fullPath
+    if (index < 0) return false
+    return range === 'left' ? i < index : i > index
+  })
+}
+
+const hasClosableView = (view: RouteLocationNormalizedLoaded | undefined, range: CloseRange) => {
+  return getClosableViews(view, range).length > 0
+}
+
+// 批量关闭（其它 / 左侧 / 右侧）以操作开始时选中的 tag 为基准（参考上游 e66532cf9）：
+// 当前页的 tag 会被关闭时，先跳转到该 tag，跳转成功且最终路由不在关闭范围内才关闭；
+// 跳转被守卫拒绝、被其它导航取代或出错时不关闭，保留当前页的 tag 与缓存。
+// 当前页没有 tag 或其 tag 不在关闭范围内时直接关闭，不导航
+const closeTagsAround = async (
+  range: Exclude<CloseRange, 'all'>,
+  close: (callback?: Fn, view?: RouteLocationNormalizedLoaded) => void
+) => {
+  const anchor = unref(selectedTag)
+  const isClosing = (fullPath: string) => {
+    return getClosableViews(anchor, range).some((v) => v.fullPath === fullPath)
+  }
+  if (anchor && isClosing(unref(currentRoute).fullPath)) {
+    const failure = await push(anchor).catch(() => true)
+    if (failure || isClosing(unref(currentRoute).fullPath)) return
+  }
+  close(undefined, anchor)
+}
+
 // 关闭其它
 const closeOthersTags = () => {
-  closeOther()
+  closeTagsAround('other', closeOther)
 }
 
 // 重新加载
@@ -116,12 +158,12 @@ const refreshSelectedTag = async (view?: RouteLocationNormalizedLoaded) => {
 
 // 关闭左侧
 const closeLeftTags = () => {
-  closeLeft()
+  closeTagsAround('left', closeLeft)
 }
 
 // 关闭右侧
 const closeRightTags = () => {
-  closeRight()
+  closeTagsAround('right', closeRight)
 }
 
 // 滚动到选中的tag
@@ -279,9 +321,15 @@ watch(
     :class="prefixCls"
     class="relative w-full flex bg-[#fff] dark:bg-[var(--el-bg-color)]"
   >
-    <span
-      :class="tagsViewImmerse ? '' : `${prefixCls}__tool ${prefixCls}__tool--first`"
+    <!-- 工具栏为原生按钮，可键盘聚焦并带可访问名称（参考上游 e66532cf9） -->
+    <button
+      :aria-label="t('common.scrollTagsLeft')"
+      :class="[
+        tagsViewImmerse ? '' : `${prefixCls}__tool ${prefixCls}__tool--first`,
+        `${prefixCls}__tool-button`
+      ]"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
+      type="button"
       @click="move(-200)"
     >
       <Icon
@@ -289,7 +337,7 @@ watch(
         color="var(--el-text-color-placeholder)"
         icon="ep:d-arrow-left"
       />
-    </span>
+    </button>
     <div class="flex-1 overflow-hidden">
       <ElScrollbar ref="scrollbarRef" class="h-full" @scroll="scroll">
         <div class="h-[var(--tags-view-height)] flex">
@@ -330,9 +378,10 @@ watch(
                 icon: 'ep:d-arrow-left',
                 label: t('common.closeTheLeftTab'),
                 disabled:
-                  !!visitedViews?.length &&
-                  (item.fullPath === visitedViews[0].fullPath ||
-                    selectedTag?.fullPath !== item.fullPath),
+                  (!!visitedViews?.length &&
+                    (item.fullPath === visitedViews[0].fullPath ||
+                      selectedTag?.fullPath !== item.fullPath)) ||
+                  !hasClosableView(item, 'left'),
                 command: () => {
                   closeLeftTags()
                 }
@@ -341,9 +390,10 @@ watch(
                 icon: 'ep:d-arrow-right',
                 label: t('common.closeTheRightTab'),
                 disabled:
-                  !!visitedViews?.length &&
-                  (item.fullPath === visitedViews[visitedViews.length - 1].fullPath ||
-                    selectedTag?.fullPath !== item.fullPath),
+                  (!!visitedViews?.length &&
+                    (item.fullPath === visitedViews[visitedViews.length - 1].fullPath ||
+                      selectedTag?.fullPath !== item.fullPath)) ||
+                  !hasClosableView(item, 'right'),
                 command: () => {
                   closeRightTags()
                 }
@@ -352,7 +402,8 @@ watch(
                 divided: true,
                 icon: 'ep:discount',
                 label: t('common.closeOther'),
-                disabled: selectedTag?.fullPath !== item.fullPath,
+                disabled:
+                  selectedTag?.fullPath !== item.fullPath || !hasClosableView(item, 'other'),
                 command: () => {
                   closeOthersTags()
                 }
@@ -360,6 +411,7 @@ watch(
               {
                 icon: 'ep:minus',
                 label: t('common.closeAll'),
+                disabled: !hasClosableView(item, 'all'),
                 command: () => {
                   closeAllTags()
                 }
@@ -410,9 +462,11 @@ watch(
         </div>
       </ElScrollbar>
     </div>
-    <span
-      :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
+    <button
+      :aria-label="t('common.scrollTagsRight')"
+      :class="[tagsViewImmerse ? '' : `${prefixCls}__tool`, `${prefixCls}__tool-button`]"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
+      type="button"
       @click="move(200)"
     >
       <Icon
@@ -420,10 +474,12 @@ watch(
         color="var(--el-text-color-placeholder)"
         icon="ep:d-arrow-right"
       />
-    </span>
-    <span
-      :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
+    </button>
+    <button
+      :aria-label="t('common.reload')"
+      :class="[tagsViewImmerse ? '' : `${prefixCls}__tool`, `${prefixCls}__tool-button`]"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
+      type="button"
       @click="refreshSelectedTag(selectedTag)"
     >
       <Icon
@@ -431,7 +487,7 @@ watch(
         color="var(--el-text-color-placeholder)"
         icon="ep:refresh-right"
       />
-    </span>
+    </button>
     <ContextMenu
       :schema="[
         {
@@ -453,7 +509,9 @@ watch(
           divided: true,
           icon: 'ep:d-arrow-left',
           label: t('common.closeTheLeftTab'),
-          disabled: !!visitedViews?.length && selectedTag?.fullPath === visitedViews[0].fullPath,
+          disabled:
+            (!!visitedViews?.length && selectedTag?.fullPath === visitedViews[0].fullPath) ||
+            !hasClosableView(selectedTag, 'left'),
           command: () => {
             closeLeftTags()
           }
@@ -462,8 +520,9 @@ watch(
           icon: 'ep:d-arrow-right',
           label: t('common.closeTheRightTab'),
           disabled:
-            !!visitedViews?.length &&
-            selectedTag?.fullPath === visitedViews[visitedViews.length - 1].fullPath,
+            (!!visitedViews?.length &&
+              selectedTag?.fullPath === visitedViews[visitedViews.length - 1].fullPath) ||
+            !hasClosableView(selectedTag, 'right'),
           command: () => {
             closeRightTags()
           }
@@ -472,6 +531,7 @@ watch(
           divided: true,
           icon: 'ep:discount',
           label: t('common.closeOther'),
+          disabled: !hasClosableView(selectedTag, 'other'),
           command: () => {
             closeOthersTags()
           }
@@ -479,6 +539,7 @@ watch(
         {
           icon: 'ep:minus',
           label: t('common.closeAll'),
+          disabled: !hasClosableView(selectedTag, 'all'),
           command: () => {
             closeAllTags()
           }
@@ -486,7 +547,9 @@ watch(
       ]"
       trigger="click"
     >
+      <!-- ElDropdown 已为触发器提供 role=button / tabindex 及 Enter、Space 打开，这里补可访问名称 -->
       <span
+        :aria-label="t('common.moreTabActions')"
         :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
         class="block h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       >
@@ -506,6 +569,21 @@ $prefix-cls: #{$namespace}-tags-view;
 .#{$prefix-cls} {
   :deep(.#{$elNamespace}-scrollbar__view) {
     height: 100%;
+  }
+
+  // 工具栏原生按钮：去掉浏览器默认样式，尺寸、边线与原 span 一致；键盘聚焦时在按钮内侧显示焦点框
+  &__tool-button {
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+
+    &:focus-visible {
+      outline: 1px solid var(--el-color-primary);
+      outline-offset: -2px;
+    }
   }
 
   &__tool {

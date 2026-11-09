@@ -1,6 +1,7 @@
 import type { CSSProperties, VNodeChild } from 'vue'
 import { ColProps, ComponentProps, ComponentName } from '@/types/components'
 import type { AxiosPromise } from 'axios'
+import type { FormItemProps as ElFormItemProps } from 'element-plus'
 
 export type FormSetPropsType = {
   field: string
@@ -19,7 +20,15 @@ export type FormValueType =
   | null
   | Recordable
 
-export type FormItemProps = {
+/**
+ * ElFormItem 属性：在本地字段之外，补齐当前 Element Plus FormItem 的原生属性
+ * （size / for / validateStatus / labelPosition 等，参考上游 207c5b3fc、283bc58d4），由 Form 原样透传；
+ * prop / label 由 Form 按 field / label 设置，不在此声明；rules / style / slots 保持本地定义
+ */
+export type FormItemProps = Omit<
+  Partial<ElFormItemProps>,
+  'prop' | 'label' | 'labelWidth' | 'required' | 'rules' | 'error' | 'showMessage' | 'inlineMessage'
+> & {
   labelWidth?: string | number
   required?: boolean
   rules?: Recordable

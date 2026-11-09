@@ -1,4 +1,11 @@
-import type { HTMLAttributes, StyleValue, VNodeChild, VNodeRef } from 'vue'
+import type {
+  AllowedComponentProps,
+  HTMLAttributes,
+  StyleValue,
+  VNodeChild,
+  VNodeProps,
+  VNodeRef
+} from 'vue'
 import type {
   AutocompleteEmits,
   AutocompleteProps,
@@ -8,19 +15,27 @@ import type {
   CheckboxGroupProps,
   ColorPickerEmits,
   ColorPickerProps,
+  DatePickerProps,
+  DividerProps,
+  ElTreeSelect,
   InputEmits,
   InputNumberEmits,
   InputNumberProps,
   InputProps,
+  RadioGroupEmits,
+  RadioGroupProps,
   RateEmits,
   RateProps,
   SelectPropsPublic,
   SelectV2Props,
   SwitchEmits,
   SwitchProps,
+  TimePickerDefaultProps,
+  TimeSelectProps,
   TransferDirection,
   TransferKey,
   TransferProps,
+  UploadProps,
   selectEmits
 } from 'element-plus'
 import type {
@@ -197,10 +212,11 @@ export interface TransferComponentProps
 }
 
 // InputPassword：芋道封装组件，自身属性为 strength（是否显示密码强度）；
-// 其余属性透传给内部 ElInput，type 由组件切换、不支持 showPassword，组件不转发插槽
+// 其余属性透传给内部 ElInput，组件不转发插槽。type 默认 password，显隐使用 ElInput 内置 showPassword；
+// 显式传入的 type / showPassword 优先，未传 showPassword 时仅 type 为 password 才开启（参考上游 207c5b3fc）
 export interface InputPasswordComponentProps
   extends
-    Partial<Omit<InputProps, 'modelValue' | 'type' | 'showPassword'>>,
+    Partial<Omit<InputProps, 'modelValue'>>,
     Omit<FormComponentExtraProps<InputEmits>, 'slots'> {
   strength?: boolean
 }
@@ -211,3 +227,54 @@ export interface CheckboxButtonComponentProps
     Partial<Omit<CheckboxGroupProps, 'modelValue' | 'options' | 'props' | 'type'>>,
     FormComponentExtraProps<CheckboxGroupEmits>,
     FormOptionsProps {}
+
+// SDK 未导出事件类型的组件：事件仍按 ComponentEvents 接受
+type FormComponentNoEmits = Record<never, never>
+
+// RadioGroup（Radio 同）：Form 渲染为 ElRadioGroup，options 按 Form 的选项协议渲染为 ElRadio（参考上游 283bc58d4）
+export interface RadioGroupComponentProps
+  extends
+    Partial<Omit<RadioGroupProps, 'modelValue' | 'options' | 'props' | 'type'>>,
+    FormComponentExtraProps<RadioGroupEmits>,
+    FormOptionsProps {}
+
+// CheckboxGroup（Checkbox 同）：Form 渲染为 ElCheckboxGroup，options 按 Form 的选项协议渲染为 ElCheckbox（参考上游 283bc58d4）
+export interface CheckboxGroupComponentProps
+  extends
+    Partial<Omit<CheckboxGroupProps, 'modelValue' | 'options' | 'props' | 'type'>>,
+    FormComponentExtraProps<CheckboxGroupEmits>,
+    FormOptionsProps {}
+
+// DatePicker / TimePicker / TimeSelect / Divider（参考上游 283bc58d4、46b35e48b）
+export interface DatePickerComponentProps
+  extends
+    Partial<Omit<DatePickerProps, 'modelValue'>>,
+    FormComponentExtraProps<FormComponentNoEmits> {}
+
+export interface TimePickerComponentProps
+  extends
+    Partial<Omit<TimePickerDefaultProps, 'modelValue'>>,
+    FormComponentExtraProps<FormComponentNoEmits> {}
+
+export interface TimeSelectComponentProps
+  extends
+    Partial<Omit<TimeSelectProps, 'modelValue'>>,
+    FormComponentExtraProps<FormComponentNoEmits> {}
+
+export interface DividerComponentProps
+  extends Partial<DividerProps>, FormComponentExtraProps<FormComponentNoEmits> {}
+
+// TreeSelect：SDK 未导出属性类型，取 ElTreeSelect 组件实例属性（Select + Tree 组合，参考上游 002d03a0a），
+// 去掉 Vue 通用的 key / ref / class / style 后由本地额外字段声明；data / props（含 disabled 函数）原样交给 ElTreeSelect
+type ElTreeSelectProps = Omit<
+  InstanceType<typeof ElTreeSelect>['$props'],
+  'modelValue' | 'onUpdate:modelValue' | keyof VNodeProps | keyof AllowedComponentProps
+>
+
+export interface TreeSelectComponentProps
+  extends Partial<ElTreeSelectProps>, FormComponentExtraProps<FormComponentNoEmits> {}
+
+// Upload：原生 ElUpload，文件列表由 Form 绑定 file-list（参考上游 c181887f7）；
+// beforeUpload / onChange / httpRequest 等钩子为属性而非事件
+export interface UploadComponentProps
+  extends Partial<Omit<UploadProps, 'fileList'>>, FormComponentExtraProps<FormComponentNoEmits> {}

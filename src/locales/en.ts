@@ -3,7 +3,12 @@ export default {
     expandNavigation: 'Expand navigation',
     collapseNavigation: 'Collapse navigation',
     switchLanguage: 'Switch language',
-    toggleDarkMode: 'Toggle dark mode'
+    toggleDarkMode: 'Toggle dark mode',
+    enterFullscreen: 'Enter fullscreen',
+    exitFullscreen: 'Exit fullscreen',
+    menuSearch: 'Search menu',
+    switchSize: 'Switch size',
+    message: 'Messages'
   },
   common: {
     inputText: 'Please input',
@@ -29,6 +34,9 @@ export default {
     closeTheRightTab: 'Close right',
     closeOther: 'Close other',
     closeAll: 'Close all',
+    scrollTagsLeft: 'Scroll tabs left',
+    scrollTagsRight: 'Scroll tabs right',
+    moreTabActions: 'More tab actions',
     prevLabel: 'Prev',
     nextLabel: 'Next',
     skipLabel: 'Jump',

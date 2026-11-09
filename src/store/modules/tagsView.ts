@@ -93,9 +93,10 @@ export const useTagsViewStore = defineStore('tagsView', {
         }
       }
     },
-    // 删除缓存
-    delCachedView() {
-      const route = router.currentRoute.value
+    // 删除缓存（按路由名）：传入 view 时删除该页的缓存（参考上游 e66532cf9 refreshTag），
+    // 未传入时删除当前路由的缓存
+    delCachedView(view?: RouteLocationNormalizedLoaded) {
+      const route = view || router.currentRoute.value
       const index = findIndex<string>(this.getCachedViews, (v) => v === route.name)
       // 需要注释，解决“标签页刷新无效”。相关案例：https://github.com/yudaocode/yudao-ui-admin-vue3/issues/180
       // for (const v of this.visitedViews) {
@@ -106,6 +107,19 @@ export const useTagsViewStore = defineStore('tagsView', {
       if (index > -1) {
         this.cachedViews.delete(this.getCachedViews[index])
       }
+    },
+    // view 的路由名是否只对应一个缓存实例：AppView 的 KeepAlive 以 meta.viewKey || fullPath 为 key、
+    // 按路由名 include，同名多个实例（如同一路径不同 query）时按名删除缓存会一并清掉其它实例
+    isSingleCachedInstance(view: RouteLocationNormalizedLoaded): boolean {
+      const keys = new Set<string>([view.meta?.viewKey || view.fullPath])
+      for (const v of this.visitedViews) {
+        const item = getRawRoute(v)
+        if (!item || item.meta?.noCache || item.name !== view.name) {
+          continue
+        }
+        keys.add(v.meta?.viewKey || v.fullPath)
+      }
+      return keys.size === 1
     },
     // 删除所有缓存和tag
     delAllViews() {
