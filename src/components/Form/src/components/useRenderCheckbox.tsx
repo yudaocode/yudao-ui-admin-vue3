@@ -12,7 +12,8 @@ export const useRenderCheckbox = () => {
     const Com = (isCheckbox ? ElCheckbox : ElCheckboxButton) as ReturnType<typeof defineComponent>
     return item?.componentProps?.options?.map((option) => {
       const { ...other } = option
-      // 显式传 value（放在 other 之后，别名值优先），不再依赖 label 作为值的废弃回退
+      // 提供 value（或 valueField 别名）的选项显式传值（放在 other 之后，别名值优先）；
+      // 缺少 value 的旧配置仍保留 Element Plus 现有的 label 回退行为
       return (
         <Com {...other} value={option[valueAlias || 'value']}>
           {option[labelAlias || 'label']}

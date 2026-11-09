@@ -123,7 +123,7 @@ export default defineComponent({
     vLoading: propTypes.bool.def(false)
   },
   emits: ['register'],
-  setup(props, { slots, expose, emit }) {
+  setup(props, { slots, expose, emit, attrs }) {
     // element form 实例
     const elFormRef = ref<ComponentRef<typeof ElForm>>()
 
@@ -134,6 +134,15 @@ export default defineComponent({
       Object.assign(propsObj, unref(mergeProps))
       return propsObj
     })
+
+    // 与 ElForm 最终收到的 inline 一致：inline 未在本组件声明，调用方传入时经 $attrs 透传到根节点 ElForm，
+    // 覆盖 getFormBindValue 中 setProps 设置的值；ElForm 的 inline 为布尔属性，'' 转为 true，其余按真值生效
+    const isFormInline = () => {
+      const inline = Object.prototype.hasOwnProperty.call(attrs, 'inline')
+        ? attrs.inline
+        : (unref(getProps) as FormProps).inline
+      return inline === '' || !!inline
+    }
 
     // 表单数据
     const formModel = ref<Recordable>(cloneDeep(props.model))
@@ -625,6 +634,12 @@ export default defineComponent({
 
               const { autoSetPlaceholder } = unref(getProps)
 
+              // 未传 componentProps.style 时，非 inline 表单中的组件默认宽度 100%（参考上游 416de2b4d）；
+              // 传入的 style（含空对象、字符串、数组）原样使用、不合并默认值。inline 表单不追加，保持 229.5px 及范围日期原宽
+              const componentStyle =
+                item.componentProps?.style ||
+                (isFormInline() ? item.componentProps?.style : { width: '100%' })
+
               // field 支持 a.b 嵌套路径，按路径读写 formModel
               const itemVal = computed({
                 get: () => getModelValue(formModel.value, item.field),
@@ -670,7 +685,7 @@ export default defineComponent({
                     {...(autoSetPlaceholder && setTextPlaceholder(item))}
                     {...uploadProps}
                     class={inlineInputWidth ? `${prefixCls}__inline-input` : undefined}
-                    style={item.componentProps?.style}
+                    style={componentStyle}
                   >
                     {{ ...slotsMap }}
                   </Com>
@@ -687,7 +702,7 @@ export default defineComponent({
                   {...(autoSetPlaceholder && setTextPlaceholder(item))}
                   {...setComponentProps(item)}
                   class={inlineInputWidth ? `${prefixCls}__inline-input` : undefined}
-                  style={item.componentProps?.style}
+                  style={componentStyle}
                   {...(notRenderOptions.includes(item?.component as string) &&
                   item?.componentProps?.options
                     ? { options: item?.componentProps?.options || [] }

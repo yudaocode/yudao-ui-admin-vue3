@@ -1,3 +1,5 @@
+import type { StyleValue, VNodeChild } from 'vue'
+import type { ComponentSize } from 'element-plus'
 import type { FormValueType } from './form'
 
 export type ComponentName =
@@ -57,9 +59,15 @@ export type ComponentOptionsAlias = {
   valueField?: string
 }
 
+// 组件事件监听：返回值不限（可为 Promise / thenable，由 Form 合并后统一返回）
+export type ComponentEventListener = (...args: any[]) => any
+
 // 组件事件：键为事件名（change、visible-change / visibleChange、update:fileList 等），按 Vue 规则转为 onXxx 监听；
-// 与 componentProps 中已有的同名 onXxx（含别名）合并，均会触发
-export type ComponentEvents = Record<string, ((...args: any[]) => any) | undefined>
+// 值为函数或函数数组（与运行时一致，数组中的监听依次执行），与 componentProps 中已有的同名 onXxx（含别名）合并，均会触发
+export type ComponentEvents = Record<
+  string,
+  ComponentEventListener | ComponentEventListener[] | undefined
+>
 
 // 组件插槽：值为函数时是渲染函数，插槽名 camelCase 转 kebab-case，参数为组件插槽原参数；
 // default 在 Select / Radio / Checkbox 类中参数为 options 并替换自动渲染的选项，在 SelectV2 中参数为 (item, 原插槽参数)；
@@ -75,3 +83,47 @@ export type ComponentProps = {
   on?: ComponentEvents
   slots?: ComponentSlots
 } & Recordable
+
+// RadioButton 选项：value 支持 string / number / boolean；其余字段（如 name、border）透传给 ElRadioButton
+export type RadioButtonOption = {
+  label?: string
+  value?: string | number | boolean
+  disabled?: boolean
+} & Recordable
+
+// RadioButton change 事件监听，参数为选中值
+export type RadioButtonChangeListener = (value: string | number | boolean | undefined) => any
+
+/**
+ * RadioButton 组件属性（参考上游 deeee73bc 的 RadioButtonComponentProps）：
+ * Form 渲染为 ElRadioGroup，options 渲染为 ElRadioButton（value 取选项 value，内容取 label）。
+ * 字段别名使用 optionsAlias（labelField / valueField），不支持上游的 props 别名；
+ * 未列出的属性同样透传给 ElRadioGroup，与 ComponentProps 一样保持宽松。
+ * 不并入 FormSchema.componentProps 联合（会收窄其它组件 slots 的上下文推断），需要提示时显式标注，
+ * 如 componentProps: { ... } satisfies RadioButtonComponentProps，或先赋给 RadioButtonComponentProps 类型的变量
+ */
+export interface RadioButtonComponentProps extends ComponentProps {
+  // ElRadioGroup 属性
+  size?: ComponentSize
+  disabled?: boolean
+  // 按钮激活时的文字颜色、背景与边框颜色
+  textColor?: string
+  fill?: string
+  // 值变化时是否触发表单校验
+  validateEvent?: boolean
+  // 无障碍标签
+  label?: string
+  name?: string
+  id?: string
+  options?: RadioButtonOption[]
+  optionsAlias?: ComponentOptionsAlias
+  on?: {
+    change?: RadioButtonChangeListener | RadioButtonChangeListener[]
+  } & ComponentEvents
+  slots?: {
+    // 替换自动渲染的选项，参数为当前 options；为 true 时对应模板插槽 #字段-default（需不传 options）
+    default?: ((options: RadioButtonOption[]) => VNodeChild) | true
+  } & ComponentSlots
+  // 与 Vue style 绑定一致：对象、字符串或数组
+  style?: StyleValue
+}

@@ -171,9 +171,20 @@ export const useTagsViewStore = defineStore('tagsView', {
     setSelectedTag(tag: RouteLocationNormalizedLoaded) {
       this.selectedTag = tag
     },
+    // 设置 tag 标题：显式传入 path（含空字符串）时修改该 path 的第一个 tag；
+    // 未传入（undefined / null）时修改当前选中的 tag，没有选中的 tag 则不修改
     setTitle(title: string, path?: string) {
+      const selectedTag = this.selectedTag
+      if (path == null && !selectedTag) return
+      const isTarget = (v: RouteLocationNormalizedLoaded) => {
+        if (path != null) return v.path === path
+        // 芋道同一路径、不同 query 的页面各自成 tag，当前 tag 按 fullPath 定位；没有 fullPath 的自建 tag 回退按 path
+        return selectedTag?.fullPath
+          ? v.fullPath === selectedTag.fullPath
+          : v.path === selectedTag?.path
+      }
       for (const v of this.visitedViews) {
-        if (v.path === (path ?? this.selectedTag?.path)) {
+        if (isTarget(v)) {
           v.meta.title = title
           break
         }

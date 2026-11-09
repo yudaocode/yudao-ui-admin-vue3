@@ -96,32 +96,48 @@ function clearIcon() {
   visible.value = false
 }
 
+// 解析绑定值的分类及图标名，前缀不属于已知分类时返回 undefined
+function parseModelValue() {
+  const index = props.modelValue ? props.modelValue.indexOf(':') : -1
+  if (index < 0) {
+    return
+  }
+  const type = props.modelValue!.substring(0, index + 1)
+  if (!tabsList.some((tab) => tab.name === type)) {
+    return
+  }
+  return { type, name: props.modelValue!.substring(index + 1) }
+}
+
+// 计算图标在当前过滤后列表中的页码，不存在时为第 1 页
+function getIconPage(name: string) {
+  const iconIndex = filterIconList.value.indexOf(name)
+  return iconIndex >= 0 ? Math.floor(iconIndex / pageSize.value) + 1 : 1
+}
+
 // 绑定值变化（含编辑回显）时，定位到所属分类及所在页
 watch(
   () => {
     return props.modelValue
   },
   () => {
-    const index = props.modelValue ? props.modelValue.indexOf(':') : -1
-    if (index < 0) {
+    const selected = parseModelValue()
+    if (!selected) {
       return
     }
-    const type = props.modelValue!.substring(0, index + 1)
-    if (!tabsList.some((tab) => tab.name === type)) {
-      return
-    }
-    currentActiveType.value = type
-    const iconIndex = filterIconList.value.indexOf(props.modelValue!.substring(index + 1))
-    currentPage.value = iconIndex >= 0 ? Math.floor(iconIndex / pageSize.value) + 1 : 1
+    currentActiveType.value = selected.type
+    currentPage.value = getIconPage(selected.name)
   },
   { immediate: true }
 )
+// 搜索时回到第 1 页；清空搜索时，若选中图标属于当前分类，则回到其所在页
 watch(
   () => {
     return filterValue.value
   },
-  () => {
-    currentPage.value = 1
+  (value) => {
+    const selected = value.trim() ? undefined : parseModelValue()
+    currentPage.value = selected?.type === currentActiveType.value ? getIconPage(selected.name) : 1
   }
 )
 </script>

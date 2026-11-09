@@ -70,3 +70,10 @@
 ## 优先级
 
 模板插槽 `#字段` 整体替换表单组件，优先于 `formItemProps.slots.default` 与 `componentProps` 中的一切写法；`#字段-label`、`#字段-error` 优先于 `formItemProps.slots.label` / `error`。
+
+## 组件默认宽度
+
+- 非 inline 表单（含 `isCol` 栅格）：未传 `componentProps.style` 时，组件（含 Upload）默认 `style: { width: '100%' }`，占满表单项。
+- 传入真值 `componentProps.style`（对象、字符串、数组，包括空对象 `{}`）时原样使用，不合并默认宽度；需要原宽度时传 `style: {}` 或显式宽度。
+- inline 表单不追加 100%：输入类组件保持默认 229.5px，范围日期/时间保持原宽。是否 inline 以 ElForm 最终收到的 `inline` 为准（组件传入的 `inline` 优先于 `setProps` 设置的值）。
+- 模板插槽 `#字段` 与 `formItemProps.slots.default` 渲染的内容不追加默认宽度。

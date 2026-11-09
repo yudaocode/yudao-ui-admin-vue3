@@ -632,7 +632,6 @@ $prefix-cls: #{$namespace}-menu;
 
   // 折叠动画的时候，就需要把文字给隐藏掉
   :deep(.horizontal-collapse-transition) {
-    // transition: 0s width ease-in-out, 0s padding-left ease-in-out, 0s padding-right ease-in-out !important;
     .#{$prefix-cls}__title {
       display: none;
     }
