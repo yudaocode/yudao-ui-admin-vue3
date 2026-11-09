@@ -11,7 +11,7 @@ declare global {
 
   type Recordable<T = any, K = string> = Record<K extends null | undefined ? string : K, T>
 
-  type ComponentRef<T> = InstanceType<T>
+  type ComponentRef<T extends abstract new (...args: any) => any> = InstanceType<T>
 
   type LocaleType = 'zh-CN' | 'en'
 
