@@ -12,6 +12,7 @@ import { createRouteLocation, resolveDynamicPath } from '@/utils/routeParams'
 import { isHeaderNavLayout, isHorizontalMenuLayout, isTwoColumnLayout } from '@/utils/layout'
 import { cloneDeep } from 'lodash-es'
 import { pathResolve } from '@/utils/routerHelper'
+import { getRouteTitle } from '@/utils/routeTitle'
 import {
   findRouteByPath,
   getRootMenuActivePath,
@@ -58,8 +59,6 @@ export default defineComponent({
 
     const { push, currentRoute, resolve } = useRouter()
 
-    const { t } = useI18n()
-
     const permissionStore = usePermissionStore()
 
     const menuWrapRef = ref<HTMLElement>()
@@ -89,7 +88,9 @@ export default defineComponent({
           : {
               ...route.meta,
               icon: firstVisibleChild.meta?.icon,
-              title: firstVisibleChild.meta?.title
+              title: firstVisibleChild.meta?.title,
+              // 标题来源随标题一起复制，后端菜单原文不被当作语言 key 翻译
+              titleSource: firstVisibleChild.meta?.titleSource
             }
       return {
         ...route,
@@ -530,7 +531,7 @@ export default defineComponent({
                 role="menuitem"
                 onClick={() => menuSelect(getOverflowMenuIndex(route))}
               >
-                {route.meta?.title ? t(route.meta.title as string) : ''}
+                {getRouteTitle(route.meta)}
               </li>
             ))}
           </ul>

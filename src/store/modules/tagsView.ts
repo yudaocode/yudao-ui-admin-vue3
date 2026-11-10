@@ -200,6 +200,8 @@ export const useTagsViewStore = defineStore('tagsView', {
       for (const v of this.visitedViews) {
         if (isTarget(v)) {
           v.meta.title = title
+          // 沿用历史契约：setTitle 的标题与静态路由一样经 t 展示，不再沿用后端菜单原文标记
+          v.meta.titleSource = undefined
           break
         }
       }

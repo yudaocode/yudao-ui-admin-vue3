@@ -10,6 +10,7 @@ import type { RouteLocationNormalizedLoaded, RouteMeta } from 'vue-router'
 import { Icon } from '@/components/Icon'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
+import { getRouteTitle } from '@/utils/routeTitle'
 
 const { getPrefixCls } = useDesign()
 
@@ -24,8 +25,6 @@ export default defineComponent({
   name: 'Breadcrumb',
   setup() {
     const { currentRoute } = useRouter()
-
-    const { t } = useI18n()
 
     const levelList = ref<AppRouteRecordRaw[]>([])
 
@@ -48,9 +47,9 @@ export default defineComponent({
       const breadcrumbList = treeToList<AppRouteRecordRaw[]>(unref(levelList))
       return breadcrumbList.map((v) => {
         const disabled = !v.redirect || v.redirect === 'noredirect'
-        // 路由未配置 meta 或 title 时回退为空，避免 t(undefined)
+        // 路由未配置 meta 或 title 时回退为空
         const meta = (v.meta ?? {}) as RouteMeta
-        const title = t(meta.title || '')
+        const title = getRouteTitle(meta)
         return (
           <ElBreadcrumbItem to={{ path: disabled ? '' : v.path }} key={v.name}>
             {meta.icon && breadcrumbIcon.value ? (

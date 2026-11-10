@@ -153,7 +153,7 @@
   "web-types": "./web-types.json",
   "packageManager": "pnpm@10.28.0",
   "engines": {
-    "node": ">= 20.19.0",
+    "node": "^20.19.0 || ^22.13.0 || >=24.0.0",
     "pnpm": ">=10.28.0"
   }
 }

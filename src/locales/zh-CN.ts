@@ -2,6 +2,7 @@ export default {
   layout: {
     expandNavigation: '展开导航',
     collapseNavigation: '收起导航',
+    closeNavigation: '关闭导航菜单',
     switchLanguage: '切换语言',
     toggleDarkMode: '切换暗黑模式',
     enterFullscreen: '全屏',

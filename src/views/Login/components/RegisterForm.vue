@@ -167,9 +167,15 @@ const registerData = reactive({
 })
 
 const loading = ref() // ElLoading.service 返回的实例
+// 注册进行中的同步锁：点击与验证码 success 重复回调只触发一次注册（与 LoginForm 一致）
+let registerPending = false
 // 提交注册
 const handleRegister = async (params: any) => {
-  loading.value = true
+  if (registerPending) {
+    return
+  }
+  registerPending = true
+  loginLoading.value = true
   try {
     if (registerData.tenantEnable) {
       await getTenantId()
@@ -205,16 +211,22 @@ const handleRegister = async (params: any) => {
     if (redirect.value.indexOf('sso') !== -1) {
       window.location.href = window.location.href.replace('/login?redirect=', '')
     } else {
-      push({ path: redirect.value || permissionStore.addRouters[0].path })
+      await push({ path: redirect.value || permissionStore.addRouters[0].path })
     }
   } finally {
+    registerPending = false
     loginLoading.value = false
-    loading.value.close()
+    // 校验失败、接口无返回或异常时，尚未创建 loading 实例
+    loading.value?.close()
+    loading.value = undefined
   }
 }
 
 // 获取验证码
 const getCode = async () => {
+  if (registerPending) {
+    return
+  }
   // 情况一，未开启：则直接注册
   if (registerData.captchaEnable === 'false') {
     await handleRegister({})

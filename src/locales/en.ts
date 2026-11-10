@@ -2,6 +2,7 @@ export default {
   layout: {
     expandNavigation: 'Expand navigation',
     collapseNavigation: 'Collapse navigation',
+    closeNavigation: 'Close navigation menu',
     switchLanguage: 'Switch language',
     toggleDarkMode: 'Toggle dark mode',
     enterFullscreen: 'Enter fullscreen',

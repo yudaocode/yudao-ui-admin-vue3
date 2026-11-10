@@ -11,6 +11,7 @@ import { filterMenusPath, initTabMap, tabPathMap } from './helper'
 import { useDesign } from '@/hooks/web/useDesign'
 import { isUrl } from '@/utils/is'
 import { createRouteLocation } from '@/utils/routeParams'
+import { getRouteTitle } from '@/utils/routeTitle'
 import { getRootPath, isHeaderMixedNavLayout, isTwoColumnLayout } from '@/utils/layout'
 import { getRootMenuRoute, normalizeMenuTargetPath } from '@/layout/components/Menu/src/menuRoute'
 
@@ -22,8 +23,6 @@ export default defineComponent({
   name: 'TabMenu',
   setup() {
     const { push, currentRoute, resolve } = useRouter()
-
-    const { t } = useI18n()
 
     const appStore = useAppStore()
 
@@ -290,7 +289,7 @@ export default defineComponent({
                       <Icon icon={item?.meta?.icon}></Icon>
                     </div>
                     {!unref(showTitle) ? undefined : (
-                      <p class="mt-5px break-words px-2px">{t(item.meta?.title)}</p>
+                      <p class="mt-5px break-words px-2px">{getRouteTitle(item.meta)}</p>
                     )}
                   </div>
                 )

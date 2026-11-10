@@ -1,9 +1,11 @@
-import type { RouteLocationNormalized, Router, RouteRecordNormalized } from 'vue-router'
+import type { RouteLocationNormalized, RouteMeta, Router, RouteRecordNormalized } from 'vue-router'
 import { defineComponent, h } from 'vue'
 import { createRouter, createWebHashHistory, RouteRecordRaw, RouterView } from 'vue-router'
 import { isUrl } from '@/utils/is'
+import { BACKEND_TITLE_SOURCE } from '@/utils/routeTitle'
 import { cloneDeep, omit } from 'lodash-es'
 import {
+  getDynamicPathParamNames,
   getExternalRoutePath,
   parseExternalRouteLocation,
   splitDynamicRouteParams,
@@ -88,6 +90,8 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
     // 1. 生成 meta 菜单元数据
     const meta = {
       title: route.name,
+      // 标记 title 为后端菜单原文，展示时不按语言 key 翻译（见 getRouteTitle）
+      titleSource: BACKEND_TITLE_SOURCE,
       icon: route.icon,
       hidden: !route.visible,
       noCache: !route.keepAlive,
@@ -212,6 +216,16 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
             }
           }
         }
+        // getRedirect 遇到 children 缺省 / null 的叶子（后端叶子的常见形态）时不生成 redirect；
+        // 此时对绝对路径、可见且无 query / params / hash 的目录，按已生成的子路由补充默认跳转
+        if (
+          data.redirect === undefined &&
+          data.children?.length &&
+          data.path.startsWith('/') &&
+          isPlainRouteMeta(data.meta)
+        ) {
+          data.redirect = getDefaultRedirect(data.path, data.children)
+        }
       }
     }
     res.push(data as AppRouteRecordRaw)
@@ -273,6 +287,49 @@ export const getRedirect = (parentPath: string, children: AppCustomRouteRecordRa
   const path = generateRoutePath(parentPath, children[0].path)
   // 递归子节点
   if (children[0].children) return getRedirect(path, children[0].children)
+}
+
+/**
+ * 目录的默认跳转（getRedirect 未生成时使用），基于 generateRoute 已生成的子路由沿首个子路由向下查找。
+ *
+ * 只有叶子是生成后实际存在的静态页面才返回其完整路径，否则返回 undefined，保持菜单等使用方原有的 fallback：
+ * 每层须可见、为站内相对路径（外链已生成为绝对路径的独立父路由），meta 中无 query / params / hash
+ * （包含 path / component 携带的 ?、#）；叶子须有页面组件、无显式 redirect，完整路径无动态参数。
+ * 同名折叠后的节点（children 为 []，meta 沿用父目录、不含原子节点的 hidden / query / hash）不作为默认跳转，
+ * 后端 children 缺省 / null 的普通叶子生成后没有 children
+ */
+const getDefaultRedirect = (
+  parentPath: string,
+  children: AppRouteRecordRaw[] | undefined
+): string | undefined => {
+  const child = children?.[0]
+  if (
+    !child ||
+    !child.path ||
+    child.path.startsWith('/') ||
+    isUrl(child.path) ||
+    !isPlainRouteMeta(child.meta)
+  ) {
+    return undefined
+  }
+  const path = generateRoutePath(parentPath, child.path)
+  if (child.children?.length) {
+    return getDefaultRedirect(path, child.children)
+  }
+  if (
+    child.children ||
+    !child.component ||
+    child.redirect ||
+    getDynamicPathParamNames(path).length
+  ) {
+    return undefined
+  }
+  return path
+}
+
+// 可见，且无 query / params / hash（包含 path / component 携带的 ?、#）
+const isPlainRouteMeta = (meta?: RouteMeta) => {
+  return !meta?.hidden && !meta?.query && !meta?.params && !meta?.hash
 }
 const generateRoutePath = (parentPath: string, path: string) => {
   if (parentPath.endsWith('/')) {

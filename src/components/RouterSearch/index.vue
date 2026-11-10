@@ -50,6 +50,7 @@
 
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
+import { getRouteTitle } from '@/utils/routeTitle'
 defineProps({
   isModal: {
     type: Boolean,
@@ -70,14 +71,20 @@ const options = computed(() => {
   if (!value.value) {
     return []
   }
-  const list = routers.filter((item: any) => {
-    if (item.meta.title?.indexOf(value.value) > -1 || item.path.indexOf(value.value) > -1) {
-      return true
-    }
-  })
-  return list.map((item) => {
+  // 按原始标题（静态路由的语言 key，兼容原有搜索）、展示标题（静态路由翻译后、后端菜单原文）及路径搜索，
+  // 按展示标题显示
+  const list = routers
+    .map((item) => ({ item, title: getRouteTitle(item.meta) }))
+    .filter(({ item, title }) => {
+      return (
+        (item.meta.title ?? '').indexOf(value.value) > -1 ||
+        title.indexOf(value.value) > -1 ||
+        item.path.indexOf(value.value) > -1
+      )
+    })
+  return list.map(({ item, title }) => {
     return {
-      label: `${item.meta.title}${item.path}`,
+      label: `${title}${item.path}`,
       value: item.path
     }
   })

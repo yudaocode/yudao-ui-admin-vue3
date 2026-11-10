@@ -9,6 +9,7 @@ import { TableColumn } from '@/types/table'
 import { DescriptionsSchema } from '@/types/descriptions'
 import { ComponentOptions, ComponentProps } from '@/types/components'
 import { DictTag } from '@/components/DictTag'
+import { getOptionFields } from '@/components/Form/src/components/useRenderSelect'
 import { cloneDeep, merge } from 'lodash-es'
 
 export type CrudSchema = Omit<TableColumn, 'children'> & {
@@ -66,8 +67,6 @@ export type UseCrudSchemasOptions = {
   // 默认 false：保持 isSearch / search.show 的原行为，search.hidden 原样透传给查询表单
   excludeHiddenSearchFields?: boolean
 }
-
-const { t } = useI18n()
 
 // 过滤所有结构
 export const useCrudSchemas = (
@@ -153,9 +152,11 @@ const filterSearchSchema = (
               return v.field === searchSchemaItem.field
             })
             if (index !== -1) {
-              allSchemas.searchSchema[index]!.componentProps!.options = filterOptions(
+              const schema = allSchemas.searchSchema[index]!
+              schema.componentProps!.options = filterOptions(
                 res,
-                searchSchemaItem.componentProps.optionsAlias?.labelField
+                schema.component,
+                schema.componentProps
               )
             }
           }
@@ -271,9 +272,11 @@ const filterFormSchema = (crudSchema: CrudSchema[], allSchemas: AllSchemas): For
               return v.field === formSchemaItem.field
             })
             if (index !== -1) {
-              allSchemas.formSchema[index]!.componentProps!.options = filterOptions(
+              const schema = allSchemas.formSchema[index]!
+              schema.componentProps!.options = filterOptions(
                 res,
-                formSchemaItem.componentProps.optionsAlias?.labelField
+                schema.component,
+                schema.componentProps
               )
             }
           }
@@ -325,15 +328,46 @@ const filterDescriptionsSchema = (crudSchema: CrudSchema[]): DescriptionsSchema[
   return descriptionsSchema
 }
 
-// 给options添加国际化
-const filterOptions = (options: Recordable, labelField?: string) => {
+// 给options添加国际化：标签字段与 Form 渲染一致（Transfer 见 FormTransfer，props.label 优先；
+// SelectV2 / Cascader 原样透传给 Element Plus，只认 props.label / props.value，默认 label / value；
+// 其余见 getOptionFields，optionsAlias.labelField 优先，其次 props.label，默认 label）。
+// 标签字段同时是取值字段时保留原值，避免改变 v-model 取值与回显；仅翻译字符串，返回浅拷贝不修改接口返回的选项。
+// 翻译函数在调用时获取，避免模块加载时 i18n 尚未初始化
+const filterOptions = (
+  options: Recordable,
+  component?: string,
+  componentProps?: ComponentProps
+) => {
+  const { t } = useI18n()
+  const { optionsAlias, props } = (componentProps || {}) as Recordable
+  const optionFields = getOptionFields({ componentProps } as FormSchema)
+  const isTransfer = component === 'Transfer'
+  const isNative = component === 'SelectV2' || component === 'Cascader'
+  const labelField: string = isTransfer
+    ? (props?.label ?? optionsAlias?.labelField ?? 'label')
+    : isNative
+      ? props?.label || 'label'
+      : optionFields.labelField
+  // Transfer 未配置 key 字段时逐项取值：有 value 字段用 value，否则用 key；
+  // SelectV2 / Cascader 为 props.value（默认 value），其余为 getOptionFields 的取值字段
+  const transferKeyField = props?.key ?? optionsAlias?.valueField
+  const valueFields = isTransfer
+    ? [transferKeyField]
+    : [isNative ? props?.value || 'value' : optionFields.valueField]
+  if (valueFields.includes(labelField)) {
+    return options
+  }
   return options?.map((v: Recordable) => {
-    if (labelField) {
-      v['labelField'] = t(v.labelField)
-    } else {
-      v['label'] = t(v.label)
+    if (!v || typeof v[labelField] !== 'string') {
+      return v
     }
-    return v
+    if (isTransfer && transferKeyField === undefined) {
+      const itemKeyField = Object.prototype.hasOwnProperty.call(v, 'value') ? 'value' : 'key'
+      if (itemKeyField === labelField) {
+        return v
+      }
+    }
+    return { ...v, [labelField]: t(v[labelField]) }
   })
 }
 

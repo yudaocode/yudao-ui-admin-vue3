@@ -50,6 +50,8 @@ const renderLayout = () => {
 export default defineComponent({
   name: 'Layout',
   setup() {
+    const { t } = useI18n()
+
     return () => (
       <section
         class={[
@@ -59,11 +61,17 @@ export default defineComponent({
           'w-[100%] h-[100%] relative'
         ]}
       >
+        {/* 移动端遮罩用原生 button，可键盘聚焦并带可访问名称（参考上游 6b10db306） */}
         {mobile.value && !collapse.value ? (
-          <div
-            class="absolute left-0 top-0 z-99 h-full w-full bg-[var(--el-color-black)] opacity-30"
+          <button
+            aria-label={t('layout.closeNavigation')}
+            class={[
+              `${prefixCls}__mask`,
+              'absolute left-0 top-0 z-99 h-full w-full bg-[var(--el-color-black)] opacity-30'
+            ]}
+            type="button"
             onClick={handleClickOutside}
-          ></div>
+          ></button>
         ) : undefined}
 
         {renderLayout()}
@@ -82,5 +90,21 @@ $prefix-cls: #{$namespace}-layout;
 
 .#{$prefix-cls} {
   background-color: var(--app-content-bg-color);
+
+  // 只重置原生 button 默认盒模型，遮罩颜色、透明度、层级仍由上面的 class 决定
+  &__mask {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    appearance: none;
+
+    // 遮罩铺满且 html/body overflow: hidden，原生焦点框改为内缩才不被裁掉；
+    // opacity 会连带淡化焦点框，聚焦时把 30% 黑移到背景色上，视觉不变
+    &:focus-visible {
+      background-color: rgb(0 0 0 / 30%);
+      outline-offset: -4px;
+      opacity: 1;
+    }
+  }
 }
 </style>

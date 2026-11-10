@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, unref, watch } from 'vue'
-import type { RouteLocationNormalizedLoaded, RouterLinkProps } from 'vue-router'
+import type { RouteLocationNormalizedLoaded, RouteLocationRaw, RouterLinkProps } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { usePermissionStore } from '@/store/modules/permission'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -13,6 +13,7 @@ import { useTemplateRefsList } from '@vueuse/core'
 import { ElScrollbar } from 'element-plus'
 import { useScrollTo } from '@/hooks/event/useScrollTo'
 import { useTagsView } from '@/hooks/web/useTagsView'
+import { getRouteTitle } from '@/utils/routeTitle'
 import { cloneDeep } from 'lodash-es'
 
 defineOptions({ name: 'TagsView' })
@@ -23,7 +24,7 @@ const prefixCls = getPrefixCls('tags-view')
 
 const { t } = useI18n()
 
-const { currentRoute, push } = useRouter()
+const { currentRoute, push, hasRoute } = useRouter()
 
 const { closeAll, closeLeft, closeRight, closeOther, closeCurrent, refreshPage } = useTagsView()
 
@@ -72,39 +73,85 @@ const addTags = () => {
   }
 }
 
-// 关闭选中的tag
-const closeSelectedTag = (view: RouteLocationNormalizedLoaded) => {
-  closeCurrent(view, () => {
-    if (isActive(view)) {
-      toLastView()
-    }
-  })
+// 关闭选中的tag：非当前页的 tag 直接关闭；当前页的 tag 先离开当前页（见 leaveClosingView），成功后才关闭，
+// 跳转被守卫拒绝、被其它导航取代或出错时保留 tag 与缓存。固定 tag 不关闭也不跳转
+const closeSelectedTag = async (view: RouteLocationNormalizedLoaded) => {
+  if (view?.meta?.affix) return
+  if (isActive(view) && !(await leaveClosingView([view]))) return
+  // 无需跳转而仍停留在该页时保留其 tag（原逻辑为删除后由 toLastView 重新添加）
+  if (!isActive(view)) {
+    closeCurrent(view)
+  }
+}
+
+// tag 对应的路由仍注册在 router 中：tag 带路由名，路由已被移除时按 tag 跳转会在 push 内同步抛出 MATCHER_NOT_FOUND，
+// 因此只把仍注册的 tag 作为关闭后的跳转目标，已移除的 tag 保留在原处
+const isRegisteredView = (view: RouteLocationNormalizedLoaded) => {
+  return !view.name || hasRoute(view.name)
+}
+
+// 跳转结果与 push 一致；push 同步抛出的错误也转为失败（返回 true），由调用方保留 tag 与缓存
+const tryPush = async (to: RouteLocationRaw) => {
+  try {
+    return await push(to)
+  } catch {
+    return true
+  }
 }
 
 // 去最后一个
 const toLastView = () => {
   const visitedViews = tagsViewStore.getVisitedViews
-  const latestView = visitedViews.slice(-1)[0]
+  const latestView = visitedViews.filter(isRegisteredView).slice(-1)[0]
   if (latestView) {
-    push(latestView)
+    tryPush(latestView)
   } else {
+    const firstRoute = permissionStore.getAddRouters[0]
+    // 动态路由尚未生成、没有首个路由时无处可去，不跳转
+    if (!firstRoute) return
     if (
-      unref(currentRoute).path === permissionStore.getAddRouters[0].path ||
-      unref(currentRoute).path === permissionStore.getAddRouters[0].redirect
+      unref(currentRoute).path === firstRoute.path ||
+      unref(currentRoute).path === firstRoute.redirect
     ) {
       addTags()
       return
     }
     // You can set another route
-    push(permissionStore.getAddRouters[0].path)
+    tryPush(firstRoute.path)
   }
 }
 
-// 关闭全部
-const closeAllTags = () => {
-  closeAll(() => {
-    toLastView()
-  })
+// 当前页的 tag 将被关闭时，先跳转到关闭后应显示的页面，目标与 toLastView 一致：
+// 剩余且路由仍注册的 tag 的最后一个，没有时为首个路由；没有剩余且已在首个路由时不跳转，返回 true 并由调用方保留当前页的 tag。
+// 跳转成功且已离开当前页返回 true；被守卫拒绝、被其它导航取代或出错返回 false，调用方不关闭任何 tag
+const leaveClosingView = async (closing: RouteLocationNormalizedLoaded[]) => {
+  const { path, fullPath } = unref(currentRoute)
+  const latestView = unref(visitedViews)
+    .filter((v) => !closing.some((item) => item.fullPath === v.fullPath) && isRegisteredView(v))
+    .slice(-1)[0]
+  const firstRoute = permissionStore.getAddRouters[0]
+  // 没有可跳转的 tag，也没有首个路由（动态路由尚未生成）时无处可去，按跳转失败处理
+  if (!latestView && !firstRoute) return false
+  if (!latestView && (path === firstRoute.path || path === firstRoute.redirect)) {
+    return true
+  }
+  const failure = await tryPush(latestView || firstRoute.path)
+  return !failure && unref(currentRoute).fullPath !== fullPath
+}
+
+// 关闭全部：当前页的 tag 不在关闭范围内时沿用原逻辑（先关闭再 toLastView）；
+// 否则先离开当前页，成功后只关闭操作开始时可关闭的 tag（不含跳转后所在页），避免删除跳转期间新增的 tag；
+// 跳转被拒绝、取代或出错时保留全部 tag 与缓存
+const closeAllTags = async () => {
+  const closing = getClosableViews(undefined, 'all')
+  if (!closing.some((v) => isActive(v))) {
+    closeAll(() => {
+      toLastView()
+    })
+    return
+  }
+  if (!(await leaveClosingView(closing))) return
+  closing.filter((v) => !isActive(v)).forEach((v) => closeCurrent(v))
 }
 
 type CloseRange = 'left' | 'right' | 'other' | 'all'
@@ -140,7 +187,7 @@ const closeTagsAround = async (
     return getClosableViews(anchor, range).some((v) => v.fullPath === fullPath)
   }
   if (anchor && isClosing(unref(currentRoute).fullPath)) {
-    const failure = await push(anchor).catch(() => true)
+    const failure = await tryPush(anchor)
     if (failure || isClosing(unref(currentRoute).fullPath)) return
   }
   close(undefined, anchor)
@@ -421,10 +468,17 @@ watch(
             @visible-change="visibleChange"
           >
             <div>
-              <router-link :ref="tagLinksRefs.set" v-slot="{ navigate }" :to="{ ...item }" custom>
+              <!-- 路由已被移除的 tag 按名称解析会抛错：link 改用 fullPath（解析不抛错，开发环境 devtools 会在创建时解析），
+                点击时不跳转，停留在当前路由 -->
+              <router-link
+                :ref="tagLinksRefs.set"
+                v-slot="{ navigate }"
+                :to="isRegisteredView(item) ? { ...item } : item.fullPath"
+                custom
+              >
                 <div
                   :class="`h-full flex items-center justify-center whitespace-nowrap pl-15px ${prefixCls}__item--label`"
-                  @click="navigate"
+                  @click="isRegisteredView(item) && navigate($event)"
                 >
                   <Icon
                     v-if="
@@ -439,7 +493,7 @@ watch(
                     class="mr-5px"
                   />
                   {{
-                    t(item?.meta?.title as string) +
+                    getRouteTitle(item?.meta) +
                     (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
                   }}
                   <!-- 原生按钮便于键盘聚焦与读屏（参考上游 8a68d60bb）；固定标签不渲染。
@@ -449,7 +503,7 @@ watch(
                     v-if="!item?.meta?.affix"
                     type="button"
                     :class="`${prefixCls}__item--close`"
-                    :aria-label="`${t('common.closeTab')}: ${t(item?.meta?.title as string)}${item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : ''}`"
+                    :aria-label="`${t('common.closeTab')}: ${getRouteTitle(item?.meta)}${item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : ''}`"
                     @click.prevent.stop="closeSelectedTag(item)"
                     @keydown.enter.space.stop
                   >
