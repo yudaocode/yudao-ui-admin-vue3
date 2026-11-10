@@ -48,6 +48,17 @@
       <el-form-item label="模型标识" prop="model">
         <el-input v-model="formData.model" placeholder="请输入模型标识" />
       </el-form-item>
+      <el-form-item label="模型简介" prop="description">
+        <el-input
+          v-model="formData.description"
+          placeholder="选填，展示在模型选择框中，例如：通用推荐"
+          maxlength="255"
+          show-word-limit
+        />
+      </el-form-item>
+      <el-form-item label="模型图标" prop="iconUrl">
+        <UploadImg v-model="formData.iconUrl" height="60px" width="60px" />
+      </el-form-item>
       <el-form-item label="模型排序" prop="sort">
         <el-input-number v-model="formData.sort" placeholder="请输入模型排序" class="!w-1/1" />
       </el-form-item>
@@ -227,6 +238,8 @@ const formData = ref({
   id: undefined,
   keyId: undefined,
   name: undefined,
+  description: undefined,
+  iconUrl: undefined,
   model: undefined,
   platform: undefined,
   type: undefined,
@@ -445,6 +458,8 @@ const resetForm = () => {
     id: undefined,
     keyId: undefined,
     name: undefined,
+    description: undefined,
+    iconUrl: undefined,
     model: undefined,
     platform: undefined,
     type: undefined,

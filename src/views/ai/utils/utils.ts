@@ -44,3 +44,19 @@ export const resolveReasoningLevel = (config?: ModelReasoningConfigVO, selected?
   const defaultLevel = config?.defaultLevel
   return defaultLevel && levels.includes(defaultLevel) ? defaultLevel : levels[0]
 }
+
+// ========== 【音乐】相关 ==========
+
+/** 格式化音乐时长（秒）为 mm:ss；为空时返回 - */
+export const formatMusicDuration = (seconds?: number | null): string => {
+  if (seconds === undefined || seconds === null || Number.isNaN(seconds)) {
+    return '-'
+  }
+  const total = Math.max(0, Math.floor(seconds))
+  const minute = Math.floor(total / 60)
+  const second = total % 60
+  return `${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`
+}
+
+/** 音乐名称为空时的展示文案 */
+export const getMusicTitle = (title?: string | null): string => title || '未命名歌曲'

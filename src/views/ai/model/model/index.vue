@@ -65,6 +65,13 @@
           <dict-tag :type="DICT_TYPE.AI_MODEL_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
+      <el-table-column label="图标" align="center" prop="iconUrl" width="70">
+        <template #default="scope">
+          <el-avatar :size="28" shape="square" :src="scope.row.iconUrl || undefined">
+            <Icon icon="ep:cpu" />
+          </el-avatar>
+        </template>
+      </el-table-column>
       <el-table-column label="模型名字" align="center" prop="name" min-width="180" />
       <el-table-column label="模型标识" align="center" prop="model" min-width="180" />
       <el-table-column label="API 秘钥" align="center" prop="keyId" min-width="140">

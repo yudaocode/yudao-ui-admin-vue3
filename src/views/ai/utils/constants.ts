@@ -30,7 +30,8 @@ export const AiModelTypeEnum = {
   VOICE: 3, // 音频
   VIDEO: 4, // 视频
   EMBEDDING: 5, // 向量
-  RERANK: 6 // 重排
+  RERANK: 6, // 重排
+  MUSIC: 7 // 音乐
 }
 
 /**
@@ -90,9 +91,28 @@ export const AiImageStatusEnum = {
  * AI 音乐生成状态的枚举
  */
 export const AiMusicStatusEnum = {
-  IN_PROGRESS: 10, // 进行中
-  SUCCESS: 20, // 已完成
-  FAIL: 30 // 已失败
+  PENDING: 10, // 待处理
+  IN_PROGRESS: 20, // 生成中
+  SAVING: 30, // 转存中
+  SUCCESS: 40, // 已完成
+  FAIL: 50 // 已失败
+}
+
+/** AI 音乐是否未结束：待处理、生成中、转存中 */
+export const isAiMusicRunning = (status?: number) =>
+  status === AiMusicStatusEnum.PENDING ||
+  status === AiMusicStatusEnum.IN_PROGRESS ||
+  status === AiMusicStatusEnum.SAVING
+
+/**
+ * AI 音乐生成模式的枚举
+ */
+export const AiMusicGenerateModeEnum = {
+  INSPIRATION: 1, // 灵感
+  CUSTOM: 2, // 自定义
+  EXTEND: 3, // 续写
+  CONCAT: 4, // 拼接
+  UPLOAD: 5 // 上传
 }
 
 /**
