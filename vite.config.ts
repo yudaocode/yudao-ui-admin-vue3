@@ -19,13 +19,9 @@ function getRelativeScssUsePath(filename: string, targetPath: string) {
 
 // https://vitejs.dev/config/
 export default ({command, mode}: ConfigEnv): UserConfig => {
-    let env = {} as any
     const isBuild = command === 'build'
-    if (!isBuild) {
-        env = loadEnv((process.argv[3] === '--mode' ? process.argv[4] : process.argv[3]), root)
-    } else {
-        env = loadEnv(mode, root)
-    }
+    // 统一使用 Vite 解析后的 mode（参考上游 61d7ef642 的环境模式选择），兼容 --mode=x、--host 在前等任意参数顺序
+    const env = loadEnv(mode, root) as any
     const variablesScssPath = pathResolve('src/styles/variables.scss')
     // CSS 产物目标（参考上游 4b43c8794）：VITE_CSS_TARGET 为逗号分隔的目标（如 chrome87,safari14），设置时用于 CSS 转换与压缩，
     // 避免 autoprefixer 加的前缀按默认现代目标被剔除；未设置保持 Vite 默认。只影响 CSS，不代表 JS 及依赖兼容这些浏览器；无效目标构建报错
