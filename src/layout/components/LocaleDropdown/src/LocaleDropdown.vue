@@ -20,16 +20,11 @@ const localeStore = useLocaleStore()
 
 const langMap = computed(() => localeStore.getLocaleMap)
 
-const currentLang = computed(() => localeStore.getCurrentLocale)
+const { changeLocale } = useLocale()
 
+// 不刷新页面切换语言（参考上游 d4cb48036、2e5656055），保留当前路由、标签页缓存与未保存的输入；
+// changeLocale 同步切换 vue-i18n、Element Plus 语言、html lang 并持久化，是否已是当前语言由其判断
 const setLang = (lang: LocaleType) => {
-  if (lang === unref(currentLang).lang) return
-  // 需要重新加载页面让整个语言多初始化
-  window.location.reload()
-  localeStore.setCurrentLocale({
-    lang
-  })
-  const { changeLocale } = useLocale()
   changeLocale(lang)
 }
 </script>

@@ -469,6 +469,7 @@ export default {
       oldPwdMsg: 'Please Enter Old Password',
       newPwdMsg: 'Please Enter New Password',
       cfPwdMsg: 'Please Enter Confirm Password',
+      pwdRules: 'Length must be between 4 and 16 characters',
       diffPwd: 'The Passwords Entered Twice No Match'
     }
   },

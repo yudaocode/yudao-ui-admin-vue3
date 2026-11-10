@@ -14,7 +14,10 @@ const appStore = useAppStore()
 
 const layout = computed(() => appStore.getLayout)
 
-const layouts: { className: string; label: string; type: VbenLayoutType }[] = [
+type LayoutOption = { className: string; label: string; type: VbenLayoutType }
+
+// 文案随当前语言响应式更新（设置抽屉常驻，不刷新切换语言后仍需同步）
+const layouts = computed<LayoutOption[]>(() => [
   {
     className: 'sidebar-nav',
     label: t('setting.vertical'),
@@ -45,7 +48,7 @@ const layouts: { className: string; label: string; type: VbenLayoutType }[] = [
     label: t('setting.headerTwoColumn'),
     type: 'header-mixed-nav'
   }
-]
+])
 </script>
 
 <template>

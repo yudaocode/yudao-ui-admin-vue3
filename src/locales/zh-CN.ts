@@ -463,7 +463,7 @@ export default {
       oldPwdMsg: '请输入旧密码',
       newPwdMsg: '请输入新密码',
       cfPwdMsg: '请输入确认密码',
-      pwdRules: '长度在 6 到 20 个字符',
+      pwdRules: '长度为 4 到 16 个字符',
       diffPwd: '两次输入密码不一致'
     }
   },

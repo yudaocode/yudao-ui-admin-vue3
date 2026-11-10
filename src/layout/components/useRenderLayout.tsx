@@ -78,7 +78,7 @@ export const useRenderLayout = () => {
               'fixed !w-full !left-0': mobile.value
             }
           ]}
-          style="transition: all var(--transition-time-02);"
+          style="transition: width var(--transition-time-02), left var(--transition-time-02);"
         >
           <ElScrollbar
             v-loading={pageLoading.value}
