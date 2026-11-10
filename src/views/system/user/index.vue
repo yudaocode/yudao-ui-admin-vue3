@@ -268,6 +268,8 @@ const resetQuery = () => {
 /** 处理部门被点击 */
 const handleDeptNodeClick = async (deptId: number | undefined) => {
   queryParams.deptId = deptId
+  // 切换或清空部门后回到第一页，避免沿用旧页码查不到数据
+  queryParams.pageNo = 1
   await getList()
 }
 
