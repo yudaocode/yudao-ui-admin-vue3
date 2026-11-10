@@ -5,6 +5,8 @@ export interface ModelVO {
   id: number // 编号
   keyId: number // API 秘钥编号
   name: string // 模型名字
+  description?: string // 模型简介
+  iconUrl?: string // 模型图标地址
   model: string // 模型标识
   platform: string // 模型平台
   type: number // 模型类型
@@ -37,11 +39,12 @@ export const ModelApi = {
   },
 
   // 获得模型列表
-  getModelSimpleList: async (type?: number) => {
+  getModelSimpleList: async (type?: number, platform?: string) => {
     return await request.get({
       url: `/ai/model/simple-list`,
       params: {
-        type
+        type,
+        platform
       }
     })
   },
