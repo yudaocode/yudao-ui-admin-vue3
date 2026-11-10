@@ -115,6 +115,15 @@ const toggleClick = () => {
     show.value = !unref(show)
   }
 }
+
+// 可折叠时标题支持键盘 Enter / 空格切换（空格阻止页面滚动）
+const onHeaderKeydown = (event: KeyboardEvent) => {
+  if (!props.collapse || event.target !== event.currentTarget) return
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    toggleClick()
+  }
+}
 </script>
 
 <template>
@@ -130,7 +139,11 @@ const toggleClick = () => {
         `${prefixCls}-header`,
         'h-50px flex justify-between items-center b-b-1 border-solid border-[var(--el-border-color)] px-10px cursor-pointer dark:border-[var(--el-border-color)]'
       ]"
+      :aria-expanded="collapse ? show : undefined"
+      :role="collapse ? 'button' : undefined"
+      :tabindex="collapse ? 0 : undefined"
       @click="toggleClick"
+      @keydown="onHeaderKeydown"
     >
       <div :class="[`${prefixCls}-header__title`, 'relative font-18px font-bold ml-10px']">
         <div class="flex items-center">

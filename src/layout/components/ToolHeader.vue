@@ -99,14 +99,17 @@ export default defineComponent({
         <div class="h-full flex items-center">
           <FmsAccountSetSwitch />
           {hasTenantVisitPermission.value ? <TenantVisit /> : undefined}
+          {/* 项目配置、IM 入口为原生 button，可键盘聚焦并带可访问名称（参考上游 LayoutSwitcher 触发器） */}
           {hideSetting ? undefined : (
-            <div
-              class="v-setting custom-hover"
+            <button
+              type="button"
+              class={['v-setting custom-hover', `${prefixCls}__action`]}
               title={t('setting.projectSetting')}
+              aria-label={t('setting.projectSetting')}
               onClick={openSetting}
             >
               <Icon color="var(--top-header-text-color)" size={18} icon="ep:setting" />
-            </div>
+            </button>
           )}
           {screenfull.value ? (
             <Screenfull class="custom-hover" color="var(--top-header-text-color)"></Screenfull>
@@ -128,9 +131,15 @@ export default defineComponent({
           ) : undefined}
           {/* IM 聊天入口 */}
           {im.value ? (
-            <div class="custom-hover" onClick={goToChat}>
+            <button
+              type="button"
+              class={['custom-hover', `${prefixCls}__action`]}
+              title={t('layout.openChat')}
+              aria-label={t('layout.openChat')}
+              onClick={goToChat}
+            >
               <Icon color="var(--top-header-text-color)" size={18} icon="ep:chat-dot-round" />
-            </div>
+            </button>
           ) : undefined}
           <UserInfo></UserInfo>
         </div>
@@ -145,5 +154,14 @@ $prefix-cls: #{$namespace}-tool-header;
 
 .#{$prefix-cls} {
   transition: left var(--transition-time-02);
+}
+
+// :where 不增加优先级，只重置原生 button 默认样式；高度、内边距、hover 仍由 custom-hover 决定，保留 focus outline
+:where(.#{$prefix-cls}__action) {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
 }
 </style>

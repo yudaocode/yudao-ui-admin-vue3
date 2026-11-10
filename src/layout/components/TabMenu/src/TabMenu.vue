@@ -24,6 +24,8 @@ export default defineComponent({
   setup() {
     const { push, currentRoute, resolve } = useRouter()
 
+    const { t } = useI18n()
+
     const appStore = useAppStore()
 
     const collapse = computed(() => appStore.getCollapse)
@@ -86,12 +88,24 @@ export default defineComponent({
 
     const showTitle = ref(true)
 
+    // 展开后延时显示标题的定时器；每次切换先清除，避免快速展开又收起时旧定时器在收起态重新显示标题
+    let showTitleTimer: ReturnType<typeof setTimeout> | undefined
+
+    const clearShowTitleTimer = () => {
+      if (showTitleTimer !== undefined) {
+        clearTimeout(showTitleTimer)
+        showTitleTimer = undefined
+      }
+    }
+
     watch(
       () => collapse.value,
       (collapse: boolean, oldCollapse?: boolean) => {
+        clearShowTitleTimer()
         // 首次（immediate）直接同步，避免挂载时新增延时回调
         if (!collapse && oldCollapse !== undefined) {
-          setTimeout(() => {
+          showTitleTimer = setTimeout(() => {
+            showTitleTimer = undefined
             showTitle.value = !collapse
           }, 200)
         } else {
@@ -102,6 +116,8 @@ export default defineComponent({
         immediate: true
       }
     )
+
+    onBeforeUnmount(clearShowTitleTimer)
 
     // 是否显示菜单
     const showMenu = ref(unref(fixedMenu) || unref(headerMixed) || unref(twoColumn))
@@ -272,40 +288,53 @@ export default defineComponent({
               return unref(tabRouters).map((v) => {
                 const fullTabPath = getFullTabPath(v)
                 const item = getTabItem(v)
+                const active = isActive(fullTabPath)
+                // 原生 button（参考上游 PrimaryNav 一级导航），可键盘聚焦、Enter/Space 触发；
+                // 收起时只显示图标，以 aria-label 提供可访问名称；以完整路径作 key，重排时焦点不错位到其它路由
                 return (
-                  <div
+                  <button
+                    key={fullTabPath}
+                    type="button"
+                    aria-label={getRouteTitle(item.meta)}
+                    aria-current={active ? 'true' : undefined}
                     class={[
                       `${prefixCls}__item`,
-                      'text-center text-12px relative py-12px cursor-pointer',
+                      'block w-full text-center text-12px relative py-12px cursor-pointer',
                       {
-                        'is-active': isActive(fullTabPath)
+                        'is-active': active
                       }
                     ]}
                     onClick={() => {
                       tabClick(item)
                     }}
                   >
-                    <div>
+                    {/* button 内只放 phrasing content：block span 代替原 div / p（全局 var.css 已将 p 外边距置 0） */}
+                    <span class="block">
                       <Icon icon={item?.meta?.icon}></Icon>
-                    </div>
+                    </span>
                     {!unref(showTitle) ? undefined : (
-                      <p class="mt-5px break-words px-2px">{getRouteTitle(item.meta)}</p>
+                      <span class={`${prefixCls}__title block mt-5px break-words px-2px`}>
+                        {getRouteTitle(item.meta)}
+                      </span>
                     )}
-                  </div>
+                  </button>
                 )
               })
             }}
           </div>
         </ElScrollbar>
-        <div
+        <button
+          type="button"
+          aria-expanded={!unref(collapse)}
+          aria-label={t(unref(collapse) ? 'layout.expandNavigation' : 'layout.collapseNavigation')}
           class={[
             `${prefixCls}--collapse`,
-            'text-center h-[var(--tab-menu-collapse-height)] leading-[var(--tab-menu-collapse-height)] cursor-pointer'
+            'block w-full text-center h-[var(--tab-menu-collapse-height)] leading-[var(--tab-menu-collapse-height)] cursor-pointer'
           ]}
           onClick={setCollapse}
         >
           <Icon icon={unref(collapse) ? 'ep:d-arrow-right' : 'ep:d-arrow-left'}></Icon>
-        </div>
+        </button>
         {unref(hasExtraMenu) ? (
           <Menu
             split={false}
@@ -336,8 +365,24 @@ $prefix-cls: #{$namespace}-tab-menu;
 .#{$prefix-cls} {
   transition: all var(--transition-time-02);
 
+  // 原生 button 默认样式重置：只重置原子类未设置的属性（不动 font-size、上下内边距、行高原子类）
+  &__item,
+  &--collapse {
+    padding-inline: 0;
+    margin: 0;
+    font-family: inherit;
+    border: 0;
+
+    &:focus-visible {
+      outline: 2px solid var(--el-color-primary);
+      outline-offset: -2px;
+    }
+  }
+
   &__item {
+    line-height: inherit;
     color: var(--left-menu-text-color);
+    background-color: transparent;
     transition: all var(--transition-time-02);
 
     &:hover {
@@ -347,6 +392,8 @@ $prefix-cls: #{$namespace}-tab-menu;
   }
 
   &--collapse {
+    padding-block: 0;
+    font-size: inherit;
     color: var(--left-menu-text-color);
     background-color: var(--left-menu-bg-light-color);
   }

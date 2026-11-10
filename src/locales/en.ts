@@ -9,7 +9,8 @@ export default {
     exitFullscreen: 'Exit fullscreen',
     menuSearch: 'Search menu',
     switchSize: 'Switch size',
-    message: 'Messages'
+    message: 'Messages',
+    openChat: 'Open chat'
   },
   common: {
     inputText: 'Please input',

@@ -60,18 +60,23 @@ export const useRenderSelect = (slots: Slots) => {
   // 渲染 select options
   const renderSelectOptions = (item: FormSchema) => {
     // 如果有别名，就取别名
-    const { labelField, valueField, keyField } = getOptionFields(item)
+    const { labelField, valueField, disabledField, keyField } = getOptionFields(item)
     // 分组渲染函数（参考上游 998d9f3ee）：参数为分组项，返回值替换整个 ElOptionGroup
     const optionGroupDefault = item?.componentProps?.slots?.optionGroupDefault
     return item?.componentProps?.options?.map((option) => {
-      if (option?.options?.length) {
+      // options 为数组即为分组（含空数组）：空分组按分组渲染，由 ElOptionGroup 自行隐藏，
+      // 不再落入选项分支渲染成 value 为空的可选项
+      if (Array.isArray(option?.options)) {
         if (isFunction(optionGroupDefault)) {
           return optionGroupDefault(option)
         }
+        // 分组禁用：与选项一致，props.disabled 映射优先，缺失时取分组自身 disabled
+        const { disabled = option.disabled } = getOptionDisabled(option, disabledField)
         return (
           <ElOptionGroup
             key={getOptionKey(option, keyField, option[valueField])}
             label={option[labelField]}
+            disabled={!!disabled}
           >
             {() => {
               return option?.options?.map((v) => {

@@ -9,7 +9,8 @@ export default {
     exitFullscreen: '退出全屏',
     menuSearch: '菜单搜索',
     switchSize: '切换尺寸',
-    message: '站内信'
+    message: '站内信',
+    openChat: '打开即时通讯'
   },
   common: {
     inputText: '请输入',

@@ -4,6 +4,7 @@ import { isNumber } from '@/utils/is'
 
 defineOptions({ name: 'Dialog' })
 
+const { t } = useI18n()
 const slots = useSlots()
 const emits = defineEmits(['update:modelValue'])
 
@@ -119,21 +120,37 @@ function closedHandler() {
         <div
           class="absolute right-15px top-[50%] h-54px flex translate-y-[-50%] items-center justify-between"
         >
-          <Icon
+          <!-- 原生 button，可键盘聚焦并带可访问名称（与布局工具栏一致） -->
+          <button
             v-if="fullscreen"
-            class="is-hover mr-10px cursor-pointer"
-            :icon="isFullscreen ? 'radix-icons:exit-full-screen' : 'radix-icons:enter-full-screen'"
-            color="var(--el-color-info)"
-            hover-color="var(--el-color-primary)"
+            :aria-label="t(isFullscreen ? 'layout.exitFullscreen' : 'layout.enterFullscreen')"
+            :aria-pressed="isFullscreen"
+            class="com-dialog__action mr-10px"
+            type="button"
             @click="toggleFull"
-          />
-          <Icon
-            class="is-hover cursor-pointer"
-            icon="ep:close"
-            hover-color="var(--el-color-primary)"
-            color="var(--el-color-info)"
+          >
+            <Icon
+              class="is-hover cursor-pointer"
+              :icon="
+                isFullscreen ? 'radix-icons:exit-full-screen' : 'radix-icons:enter-full-screen'
+              "
+              color="var(--el-color-info)"
+              hover-color="var(--el-color-primary)"
+            />
+          </button>
+          <button
+            :aria-label="t('common.close')"
+            class="com-dialog__action"
+            type="button"
             @click.stop="close"
-          />
+          >
+            <Icon
+              class="is-hover cursor-pointer"
+              icon="ep:close"
+              hover-color="var(--el-color-primary)"
+              color="var(--el-color-info)"
+            />
+          </button>
         </div>
       </div>
     </template>
@@ -155,6 +172,18 @@ function closedHandler() {
 </template>
 
 <style lang="scss">
+// :where 不增加优先级，只重置原生 button 默认样式，保留 focus outline
+:where(.com-dialog__action) {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+
 .com-dialog {
   .#{$elNamespace}-overlay-dialog {
     display: flex;

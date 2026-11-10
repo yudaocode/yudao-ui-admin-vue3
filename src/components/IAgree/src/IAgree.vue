@@ -91,8 +91,12 @@ const keyClick = (key: string) => {
         <span
           v-if="item.key"
           class="cursor-pointer"
+          role="button"
           style="color: var(--el-color-primary)"
+          tabindex="0"
           @click="keyClick(item.key)"
+          @keydown.enter.prevent="keyClick(item.key)"
+          @keydown.space.prevent="keyClick(item.key)"
           >{{ item.text }}</span
         >
         <template v-else>{{ item.text }}</template>
