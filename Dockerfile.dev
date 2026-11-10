@@ -1,0 +1,21 @@
+# 可选开发容器（参考上游 7a0d401b5d，按当前 engines / packageManager 适配）
+# 用法：docker compose -f docker-compose.dev.yaml up --build，然后访问 http://127.0.0.1:5173（宿主端口可用 DEV_PORT 修改）
+# 镜像只安装依赖：源码、.env* 等不进入镜像层（见 .dockerignore），运行时由 compose 挂载项目目录
+ARG NODE_IMAGE=node:22-bookworm-slim
+FROM ${NODE_IMAGE}
+
+WORKDIR /app
+
+# 按 package.json 的 packageManager 启用 pnpm 10.28.0
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
+
+# 依赖清单、workspace 配置（allowBuilds / patchedDependencies）及补丁，按锁文件安装
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches ./patches
+RUN pnpm install --frozen-lockfile
+
+EXPOSE 80
+
+# 容器内固定监听 0.0.0.0:80，端口被占用时直接报错而不是换端口（compose 端口映射依赖固定端口）
+CMD ["pnpm", "dev", "--host", "0.0.0.0", "--port", "80", "--strictPort"]

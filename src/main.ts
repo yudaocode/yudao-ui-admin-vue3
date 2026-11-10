@@ -1,3 +1,6 @@
+// Element Plus 全量样式：仅 VITE_USE_ALL_ELEMENT_PLUS_STYLE=true 时引入，否则为空模块；需早于项目样式
+import 'virtual:element-plus-style'
+
 // 引入unocss css
 import '@/plugins/unocss'
 

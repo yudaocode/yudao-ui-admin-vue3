@@ -1,4 +1,4 @@
-import { onBeforeUnmount } from 'vue'
+import { getCurrentScope, onScopeDispose } from 'vue'
 import { useEmitt } from '@/hooks/web/useEmitt'
 
 interface Option {
@@ -16,10 +16,12 @@ export const useEventBus = (option?: Option) => {
   if (option) {
     emitter.on(option.name, option.callback)
 
-    // 卸载时只移除本次注册的回调，不影响其他组件对同名事件的监听
-    onBeforeUnmount(() => {
-      emitter.off(option.name, option.callback)
-    })
+    // 组件卸载或 effectScope 停止时只移除本次注册的回调，不影响其他组件对同名事件的监听
+    if (getCurrentScope()) {
+      onScopeDispose(() => {
+        emitter.off(option.name, option.callback)
+      })
+    }
   }
 
   return {

@@ -22,6 +22,7 @@ import {
   UserProfileUpdateReqVO
 } from '@/api/system/user/profile'
 import { useUserStore } from '@/store/modules/user'
+import { useLocaleStore } from '@/store/modules/locale'
 
 defineOptions({ name: 'BasicInfo' })
 
@@ -34,22 +35,22 @@ const emit = defineEmits<{
   (e: 'success'): void
 }>()
 
-// 表单校验
+// 表单校验（提示文案在校验时按当前语言取值，不刷新切换语言后同样生效）
 const rules = reactive<FormRules>({
-  nickname: [{ required: true, message: t('profile.rules.nickname'), trigger: 'blur' }],
+  nickname: [{ required: true, message: () => t('profile.rules.nickname'), trigger: 'blur' }],
   email: [
-    { required: true, message: t('profile.rules.mail'), trigger: 'blur' },
+    { required: true, message: () => t('profile.rules.mail'), trigger: 'blur' },
     {
       type: 'email',
-      message: t('profile.rules.truemail'),
+      message: () => t('profile.rules.truemail'),
       trigger: ['blur', 'change']
     }
   ],
   mobile: [
-    { required: true, message: t('profile.rules.phone'), trigger: 'blur' },
+    { required: true, message: () => t('profile.rules.phone'), trigger: 'blur' },
     {
       pattern: /^1[3-9]\d{9}$/,
-      message: t('profile.rules.truephone'),
+      message: () => t('profile.rules.truephone'),
       trigger: 'blur'
     }
   ]
@@ -77,6 +78,16 @@ const schema = reactive<FormSchema[]>([
     value: 0
   }
 ])
+// 不刷新切换语言后原地更新表单项标题（语言 key 为 profile.user.<field>），不重建表单、保留已填写的数据
+const localeStore = useLocaleStore()
+watch(
+  () => localeStore.getCurrentLocale.lang,
+  () => {
+    for (const item of schema) {
+      item.label = t(`profile.user.${item.field}`)
+    }
+  }
+)
 const formRef = ref<FormExpose>() // 表单 Ref
 
 // 监听 userStore 中头像的变化，同步更新表单数据

@@ -28,7 +28,15 @@ const setCurrentSize = (size: ElementPlusSize) => {
 
 <template>
   <ElDropdown :class="prefixCls" trigger="click" @command="setCurrentSize">
-    <Icon :color="color" :size="18" class="cursor-pointer" icon="mdi:format-size" />
+    <!-- 原生 button 作为触发器，可键盘聚焦并带可访问名称（与 LocaleDropdown 一致）；外部 class 继续落在触发器上 -->
+    <button
+      :aria-label="t('layout.switchSize')"
+      :class="$attrs.class"
+      class="size-dropdown-trigger cursor-pointer !p-0"
+      type="button"
+    >
+      <Icon :color="color" :size="18" class="cursor-pointer" icon="mdi:format-size" />
+    </button>
     <template #dropdown>
       <ElDropdownMenu>
         <ElDropdownItem v-for="item in sizeMap" :key="item" :command="item">
@@ -38,3 +46,13 @@ const setCurrentSize = (size: ElementPlusSize) => {
     </template>
   </ElDropdown>
 </template>
+
+<style lang="scss" scoped>
+:where(.size-dropdown-trigger) {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+}
+</style>

@@ -1,0 +1,20 @@
+# 可选开发容器（参考上游 7a0d401b5d）：docker compose -f docker-compose.dev.yaml up --build
+# 宿主只在 127.0.0.1 上暴露端口，默认 http://127.0.0.1:5173，可用 DEV_PORT 修改；NODE_IMAGE 可替换基础镜像来源
+services:
+  yudao-ui-admin-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:22-bookworm-slim}
+    ports:
+      - '127.0.0.1:${DEV_PORT:-5173}:80'
+    environment:
+      # 容器内无法打开浏览器，覆盖 .env 中的 VITE_OPEN
+      VITE_OPEN: 'false'
+    volumes:
+      # 源码运行时挂载，修改后由 Vite 热更新
+      - .:/app
+      # 容器内使用镜像安装的 node_modules，不读写宿主的 node_modules；
+      # 依赖变更后需 up --build --renew-anon-volumes，否则沿用旧的匿名卷
+      - /app/node_modules

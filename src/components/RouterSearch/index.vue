@@ -18,7 +18,15 @@
     </el-select>
   </ElDialog>
   <div v-else class="custom-hover" @click.stop="showTopSearch = !showTopSearch">
-    <Icon icon="ep:search" :color="color" />
+    <!-- 原生 button 便于键盘聚焦与读屏；不单独绑定点击，激活后冒泡到外层统一切换，只切换一次 -->
+    <button
+      :aria-expanded="showTopSearch"
+      :aria-label="t('layout.menuSearch')"
+      class="router-search-trigger"
+      type="button"
+    >
+      <Icon icon="ep:search" :color="color" />
+    </button>
     <el-select
       @click.stop
       filterable
@@ -50,6 +58,7 @@ defineProps({
   color: propTypes.string.def('')
 })
 
+const { t } = useI18n()
 const router = useRouter() // 路由对象
 const showSearch = ref(false) // 是否显示弹框
 const showTopSearch = ref(false) // 是否显示顶部搜索框
@@ -119,3 +128,17 @@ defineExpose({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+// :where 不增加优先级，只重置原生 button 默认样式，图标仍在外层 custom-hover 中居中，保留 focus outline
+:where(.router-search-trigger) {
+  display: inline-flex;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  align-items: center;
+}
+</style>

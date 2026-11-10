@@ -2,6 +2,7 @@
 import { propTypes } from '@/utils/propTypes'
 import { Icon as IconifyIcon } from '@iconify/vue'
 import { useDesign } from '@/hooks/web/useDesign'
+import { isIconAvailable, isOfflineIcon, warnUnavailableIcon } from '@/plugins/svgIcon'
 
 defineOptions({ name: 'Icon' })
 
@@ -39,6 +40,15 @@ const symbolId = computed(() => {
   return unref(isLocal) ? `#icon-${props.icon.split('svg-icon:')[1]}` : unref(iconName)
 })
 
+// 离线图标模式下未注册的图标（参考上游 49a1f54c9 在线 / 离线开关）：渲染同尺寸占位，不请求 Iconify API
+const isUnavailable = computed(
+  () => isOfflineIcon && !unref(isLocal) && !isIconAvailable(unref(symbolId))
+)
+
+watchEffect(() => {
+  if (unref(isUnavailable)) warnUnavailableIcon(unref(symbolId))
+})
+
 const getSvgClass = computed(() => {
   const { svgClass } = props
   return `iconify ${svgClass}`
@@ -58,6 +68,13 @@ const getHoverStyle = computed(() => {
     <svg v-if="isLocal" :class="getSvgClass">
       <use :xlink:href="symbolId" />
     </svg>
+
+    <span
+      v-else-if="isUnavailable"
+      :class="getSvgClass"
+      :style="{ display: 'inline-block', width: '1em', height: '1em', fontSize: `${size}px` }"
+      aria-hidden="true"
+    ></span>
 
     <IconifyIcon
       v-else

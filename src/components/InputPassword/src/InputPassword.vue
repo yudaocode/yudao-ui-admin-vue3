@@ -29,11 +29,19 @@ const { configGlobal } = useConfigGlobal()
 
 const emit = defineEmits(['update:modelValue'])
 
-// 设置input的type属性
-const textType = ref<'password' | 'text'>('password')
+const attrs = useAttrs()
 
-const changeTextType = () => {
-  textType.value = unref(textType) === 'text' ? 'password' : 'text'
+// 传给 ElInput 的 type：显式传入的 type，默认 password。
+// 按 ElInput 的优先级，showPassword 开启时原生 input 的 type 由显隐状态决定（password / text），
+// 此值仅在 showPassword 关闭时决定原生 type（同时传 type="email" 与 showPassword 时为 password，切换显示后为 text）
+const getInputType = () => (attrs.type as string | undefined) ?? 'password'
+
+// 密码显隐：采用 ElInput 内置 showPassword（禁用、空值时不显示，原生状态与指针，不占用 suffix 插槽）；
+// 显式传入的 showPassword / show-password 决定是否开启（空字符串视为 true），未传入时仅 type 为 password 才开启
+const getShowPassword = () => {
+  const value = attrs.showPassword ?? attrs['show-password']
+  if (value === undefined) return getInputType() === 'password'
+  return value !== false
 }
 
 // 输入框的值
@@ -53,17 +61,16 @@ const getPasswordStrength = computed(() => {
   const zxcvbnRef = zxcvbn(unref(valueRef)) as ZxcvbnResult
   return value ? zxcvbnRef.score : -1
 })
-
-const getIconName = computed(() => (unref(textType) === 'password' ? 'ep:hide' : 'ep:view'))
 </script>
 
 <template>
   <div :class="[prefixCls, `${prefixCls}--${configGlobal?.size}`]">
-    <ElInput v-model="valueRef" :type="textType" v-bind="$attrs">
-      <template #suffix>
-        <Icon :icon="getIconName" class="el-input__icon cursor-pointer" @click="changeTextType" />
-      </template>
-    </ElInput>
+    <ElInput
+      v-model="valueRef"
+      v-bind="$attrs"
+      :show-password="getShowPassword()"
+      :type="getInputType()"
+    />
     <div
       v-if="strength"
       :class="`${prefixCls}__bar`"

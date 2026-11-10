@@ -44,7 +44,8 @@ export const hexToRGB = (hex: string, opacity?: number) => {
     for (let i = 1; i < 7; i += 2) {
       sColorChange.push(parseInt('0x' + sHex.slice(i, i + 2)))
     }
-    return opacity
+    // 显式传入的透明度（含 0）均输出 RGBA
+    return opacity !== undefined
       ? 'RGBA(' + sColorChange.join(',') + ',' + opacity + ')'
       : 'RGB(' + sColorChange.join(',') + ')'
   }
@@ -134,8 +135,12 @@ const contrast = (rgb1: string[], rgb2: number[]) => {
  * @param hexColor - Last selected color by the user
  */
 export const calculateBestTextColor = (hexColor: string) => {
-  const rgbColor = hexToRGB(hexColor.substring(1))
-  const contrastWithBlack = contrast(rgbColor.split(','), [0, 0, 0])
+  // 按 HEX（#fff / #ffffff，兼容不带 #）解析出 R、G、B 数值再计算对比度
+  const hex = hexColor.startsWith('#') ? hexColor : `#${hexColor}`
+  const rgbColor = hexToRGB(hex)
+    .replace(/(?:\(|\)|rgb|RGB)*/g, '')
+    .split(',')
+  const contrastWithBlack = contrast(rgbColor, [0, 0, 0])
 
   return contrastWithBlack >= 12 ? '#000000' : '#FFFFFF'
 }
@@ -210,7 +215,7 @@ export const getCssColorVariable = (
     .getPropertyValue(colorVariable)
     .trim()
   if (colorValue) {
-    return opacity ? hexToRGB(colorValue, opacity) : colorValue
+    return opacity !== undefined ? hexToRGB(colorValue, opacity) : colorValue
   }
   return ''
 }

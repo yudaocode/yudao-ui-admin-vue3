@@ -1,5 +1,5 @@
 import { defineConfig, toEscapedSelector as e, presetUno } from 'unocss'
-// import transformerVariantGroup from '@unocss/transformer-variant-group'
+import transformerVariantGroup from '@unocss/transformer-variant-group'
 
 export default defineConfig({
   // ...UnoCSS options
@@ -101,7 +101,8 @@ ${selector}:after {
     ]
   ],
   presets: [presetUno({ dark: 'class', attributify: false })],
-  // transformers: [transformerVariantGroup()],
+  // 变体分组（参考上游 719317694）：展开 hover:(a b)、lt-xl:(a b) 等写法，如 Login.vue、MessageFiles.vue 中的分组类
+  transformers: [transformerVariantGroup()],
   shortcuts: {
     'wh-full': 'w-full h-full'
   }

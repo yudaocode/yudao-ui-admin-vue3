@@ -18,6 +18,8 @@ const emit = defineEmits<{
   (e: 'change', isDark: boolean): void
 }>()
 
+const { t } = useI18n()
+
 const appStore = useAppStore()
 
 // 与 store 双向同步是否是暗黑主题，避免只取初始快照导致外部修改后状态不一致；
@@ -39,6 +41,7 @@ const blackColor = 'var(--el-color-black)'
     v-model="isDark"
     :active-color="blackColor"
     :active-icon="Sun"
+    :aria-label="t('layout.toggleDarkMode')"
     :border-color="blackColor"
     :class="prefixCls"
     :inactive-color="blackColor"

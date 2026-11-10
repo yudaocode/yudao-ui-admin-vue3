@@ -3,7 +3,7 @@
 </template>
 <script setup lang="ts">
 import { useVModel } from '@vueuse/core'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import JSONEditor, { JSONEditorMode, JSONEditorOptions } from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.min.css'
 import { JsonEditorEmits, JsonEditorExpose, JsonEditorProps } from '../types'
@@ -25,8 +25,8 @@ const jsonObj = useVModel(props, 'modelValue', emits) as Ref<any>
 const jsonEditorContainer = ref<HTMLElement | null>(null)
 let jsonEditor: JSONEditor | null = null
 
-// 设置默认值
-const height = props.height
+// 高度跟随 props 变化
+const height = computed(() => props.height)
 
 // 初始化JSONEditor
 const initJsonEditor = () => {
@@ -54,8 +54,8 @@ const initJsonEditor = () => {
   // 创建JSONEditor实例
   jsonEditor = new JSONEditor(jsonEditorContainer.value, options)
 
-  // 设置初始值
-  if (jsonObj.value) {
+  // 设置初始值：false / 0 / null 也是合法 JSON；undefined、'' 保持 SDK 空初值
+  if (jsonObj.value !== undefined && jsonObj.value !== '') {
     jsonEditor.set(jsonObj.value)
   }
 

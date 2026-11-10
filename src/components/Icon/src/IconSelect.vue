@@ -2,6 +2,8 @@
 import { CSSProperties } from 'vue'
 import { cloneDeep } from 'lodash-es'
 import { IconJson } from '@/components/Icon/src/data'
+import { useConfigGlobal } from '@/hooks/web/useConfigGlobal'
+import { useAppStoreWithOut } from '@/store/modules/app'
 
 defineOptions({ name: 'IconSelect' })
 
@@ -65,6 +67,35 @@ const pageList = computed(() => {
 // 分页总数使用过滤后的数量，避免搜索后出现空白页
 const iconCount = computed(() => filterIconList.value.length)
 
+const { configGlobal } = useConfigGlobal()
+
+// 预览框与图标单元格尺寸跟随全局组件尺寸（参考上游 4490d5eee）：
+// 优先 ConfigGlobal 注入的 size，未注入时回退 app store 的 currentSize，均没有时按 default
+const iconSize = computed(() => {
+  const size = configGlobal?.size ?? useAppStoreWithOut().getCurrentSize
+  return size === 'small'
+    ? 'var(--el-component-size-small)'
+    : size === 'large'
+      ? 'var(--el-component-size-large)'
+      : 'var(--el-component-size)'
+})
+
+const iconWrapStyle = computed((): CSSProperties => {
+  return {
+    width: iconSize.value,
+    height: iconSize.value
+  }
+})
+
+// border-box：1px 边框计入宽高，small 下单元格不被撑大
+const iconCellStyle = computed((): CSSProperties => {
+  return {
+    width: iconSize.value,
+    height: iconSize.value,
+    boxSizing: 'border-box'
+  }
+})
+
 const iconItemStyle = computed((): ParameterCSSProperties => {
   return (item) => {
     if (inputValue.value === currentActiveType.value + item) {
@@ -83,7 +114,9 @@ function handleClick({ props }) {
 }
 
 function onChangeIcon(item) {
-  emit('update:modelValue', currentActiveType.value + item)
+  const icon = currentActiveType.value + item
+  // 开启 clearable 时，再次点击已选中的图标视为清空（参考上游 c2dde2522）
+  emit('update:modelValue', props.clearable && icon === props.modelValue ? '' : icon)
   visible.value = false
 }
 
@@ -96,32 +129,48 @@ function clearIcon() {
   visible.value = false
 }
 
+// 解析绑定值的分类及图标名，前缀不属于已知分类时返回 undefined
+function parseModelValue() {
+  const index = props.modelValue ? props.modelValue.indexOf(':') : -1
+  if (index < 0) {
+    return
+  }
+  const type = props.modelValue!.substring(0, index + 1)
+  if (!tabsList.some((tab) => tab.name === type)) {
+    return
+  }
+  return { type, name: props.modelValue!.substring(index + 1) }
+}
+
+// 计算图标在当前过滤后列表中的页码，不存在时为第 1 页
+function getIconPage(name: string) {
+  const iconIndex = filterIconList.value.indexOf(name)
+  return iconIndex >= 0 ? Math.floor(iconIndex / pageSize.value) + 1 : 1
+}
+
 // 绑定值变化（含编辑回显）时，定位到所属分类及所在页
 watch(
   () => {
     return props.modelValue
   },
   () => {
-    const index = props.modelValue ? props.modelValue.indexOf(':') : -1
-    if (index < 0) {
+    const selected = parseModelValue()
+    if (!selected) {
       return
     }
-    const type = props.modelValue!.substring(0, index + 1)
-    if (!tabsList.some((tab) => tab.name === type)) {
-      return
-    }
-    currentActiveType.value = type
-    const iconIndex = filterIconList.value.indexOf(props.modelValue!.substring(index + 1))
-    currentPage.value = iconIndex >= 0 ? Math.floor(iconIndex / pageSize.value) + 1 : 1
+    currentActiveType.value = selected.type
+    currentPage.value = getIconPage(selected.name)
   },
   { immediate: true }
 )
+// 搜索时回到第 1 页；清空搜索时，若选中图标属于当前分类，则回到其所在页
 watch(
   () => {
     return filterValue.value
   },
-  () => {
-    currentPage.value = 1
+  (value) => {
+    const selected = value.trim() ? undefined : parseModelValue()
+    currentPage.value = selected?.type === currentActiveType.value ? getIconPage(selected.name) : 1
   }
 )
 </script>
@@ -147,7 +196,8 @@ watch(
         >
           <template #reference>
             <div
-              class="h-32px w-40px flex cursor-pointer items-center justify-center"
+              :style="iconWrapStyle"
+              class="flex cursor-pointer items-center justify-center"
               @click="visible = !visible"
             >
               <Icon :icon="previewIcon" />
@@ -172,9 +222,9 @@ watch(
                     <li
                       v-for="(item, key) in pageList"
                       :key="key"
-                      :style="iconItemStyle(item)"
+                      :style="[iconCellStyle, iconItemStyle(item)]"
                       :title="item"
-                      class="icon-item mr-2 mt-1 w-1/10 flex cursor-pointer items-center justify-center border border-solid p-2"
+                      class="icon-item mr-2 mt-1 flex cursor-pointer items-center justify-center border border-solid"
                       @click="onChangeIcon(item)"
                     >
                       <Icon :icon="currentActiveType + item" />

@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  monaco-editor@0.52.2:
+    hash: 65fead60181f6086c178630ed17082327a747076b436188347657699058924f9
+    path: patches/monaco-editor@0.52.2.patch
+
 importers:
 
   .:
@@ -125,6 +130,9 @@ importers:
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
+      monaco-editor:
+        specifier: 0.52.2
+        version: 0.52.2(patch_hash=65fead60181f6086c178630ed17082327a747076b436188347657699058924f9)
       nprogress:
         specifier: ^0.2.0
         version: 0.2.0
@@ -3951,6 +3959,9 @@ packages:
 
   moddle@8.1.0:
     resolution: {integrity: sha512-dBddc1CNuZHgro8nQWwfPZ2BkyLWdnxoNpPu9d+XKPN96DAiiBOeBw527ft++ebDuFez5PMdaR3pgUgoOaUGrA==}
+
+  monaco-editor@0.52.2:
+    resolution: {integrity: sha512-GEQWEZmfkOGLdd3XK8ryrfWz3AIP8YymVXiPHEdewrUq7mh0qrKrfHLNCXcbB6sTnMLnOZ3ztSiKcciFUkIJwQ==, tarball: https://registry.npmmirror.com/monaco-editor/-/monaco-editor-0.52.2.tgz}
 
   mpd-parser@1.3.1:
     resolution: {integrity: sha512-1FuyEWI5k2HcmhS1HkKnUAQV7yFPfXPht2DnRRGtoiiAAW+ESTbtEXIDpRkwdU+XyrQuwrIym7UkoPKsZ0SyFw==}
@@ -9153,6 +9164,8 @@ snapshots:
   moddle@8.1.0:
     dependencies:
       min-dash: 5.0.0
+
+  monaco-editor@0.52.2(patch_hash=65fead60181f6086c178630ed17082327a747076b436188347657699058924f9): {}
 
   mpd-parser@1.3.1:
     dependencies:
