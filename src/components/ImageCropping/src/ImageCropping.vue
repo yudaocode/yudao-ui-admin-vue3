@@ -409,6 +409,20 @@ const updatePreview = async () => {
   }
 }
 
+// 获取当前裁剪结果（参考上游 c7f8db52d）：在 cropBoxWidth × cropBoxHeight 内按当前选区比例输出（取整，不拉伸）；
+// 图片未就绪时为 undefined，导出失败时 reject
+const getCroppedCanvas = async (): Promise<HTMLCanvasElement | undefined> => {
+  const selection = getSelection()
+  if (!selection || !imageReady) return undefined
+  return selection.$toCanvas({ width: props.cropBoxWidth, height: props.cropBoxHeight })
+}
+
+// 当前裁剪结果的 base64；没有图片或选区为空时为空串
+const getBase64 = async () => {
+  const canvas = await getCroppedCanvas()
+  return canvas && canvas.width > 0 && canvas.height > 0 ? canvas.toDataURL() : ''
+}
+
 const schedulePreview = () => {
   if (disposed) return
   clearTimeout(previewTimer)
@@ -666,7 +680,9 @@ onBeforeUnmount(() => {
 })
 
 defineExpose({
-  cropperExpose: cropperRef
+  cropperExpose: cropperRef,
+  getCroppedCanvas,
+  getBase64
 })
 </script>
 <style lang="scss" scoped>

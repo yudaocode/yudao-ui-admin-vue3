@@ -1,5 +1,5 @@
 export interface IconTypes {
-  size?: number
+  size?: number | string
   color?: string
   icon: string
   hoverColor?: string

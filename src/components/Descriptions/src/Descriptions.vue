@@ -21,7 +21,8 @@ const props = defineProps({
   title: propTypes.string.def(''),
   message: propTypes.string.def(''),
   collapse: propTypes.bool.def(true),
-  columns: propTypes.number.def(1),
+  // 默认两列（与上游 49e415d27 的 column 默认值一致）；传 1 可恢复单列
+  columns: propTypes.number.def(2),
   schema: {
     type: Array as PropType<DescriptionsSchema[]>,
     default: () => []
@@ -30,8 +31,8 @@ const props = defineProps({
     type: Object as PropType<any>,
     default: () => ({})
   },
-  // 普通字段值为 null / undefined 时显示的占位文字（参考上游 83b09f09f）；默认空串，与原显示一致
-  emptyText: propTypes.string.def(''),
+  // 普通字段值为 null / undefined 时显示的占位文字，默认 '-'（与上游 83b09f09f 一致）；传 '' 可恢复空白显示
+  emptyText: propTypes.string.def('-'),
   // 内容区内边距：上游 82245ee6d 直接删除了默认内边距，芋道保留默认 20px，改为按需传入实现同样的紧凑显示
   // 本属性为芋道适配（非上游新增）：0 表示无内边距，数字按 px，字符串原样；未传保持默认 p-20px
   contentPadding: {
@@ -53,7 +54,9 @@ const getBindValue = computed(() => {
     'data',
     'class',
     'emptyText',
-    'contentPadding'
+    'contentPadding',
+    // 已通过 :column 传入，不再作为未声明属性落到 DOM 上；调用方显式传 column 仍可覆盖
+    'columns'
   ]
   const obj = { ...attrs, ...props }
   for (const key in obj) {

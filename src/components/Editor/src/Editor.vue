@@ -19,9 +19,12 @@ type InsertFnType = (url: string, alt: string, href: string) => void
 
 const localeStore = useLocaleStore()
 
-const currentLocale = computed(() => localeStore.getCurrentLocale)
-
-i18nChangeLanguage(unref(currentLocale).lang)
+// wangEditor 界面语言跟随无刷新语言切换（参考上游 c7f8db52d）：immediate 保持初始化时设置一次
+watch(
+  () => localeStore.getCurrentLocale.lang,
+  (lang) => i18nChangeLanguage(lang),
+  { immediate: true }
+)
 
 const props = defineProps({
   editorId: propTypes.string.def('wangEditor-1'),

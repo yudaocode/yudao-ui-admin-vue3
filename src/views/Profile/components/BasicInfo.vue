@@ -1,5 +1,5 @@
 <template>
-  <Form ref="formRef" :labelWidth="200" :rules="rules" :schema="schema">
+  <Form ref="formRef" :is-col="false" :labelWidth="200" :rules="rules" :schema="schema">
     <template #sex="form">
       <el-radio-group v-model="form['sex']">
         <el-radio :value="1">{{ t('profile.user.man') }}</el-radio>

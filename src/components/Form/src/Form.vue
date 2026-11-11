@@ -105,9 +105,8 @@ export default defineComponent({
       type: Array as PropType<FormSchema[]>,
       default: () => []
     },
-    // 是否需要栅格布局
-    // update by 芋艿：将 true 改成 false，因为项目更常用这种方式
-    isCol: propTypes.bool.def(false),
+    // 是否需要栅格布局（默认 true，与上游一致；需要单列时显式传 :is-col="false"）
+    isCol: propTypes.bool.def(true),
     // 表单数据对象
     model: {
       type: Object as PropType<Recordable>,

@@ -16,7 +16,7 @@ defineOptions({ name: 'ResizeDialog', inheritAttrs: false })
 
 const props = defineProps({
   modelValue: propTypes.bool.def(false),
-  // 初始宽度、内容区初始高度，与 Dialog 默认值一致
+  // 初始宽度 40%、内容区初始高度 400px：保留本组件原有兼容默认值（不随 Dialog 回落 50%）
   width: propTypes.oneOfType([String, Number]).def('40%'),
   maxHeight: propTypes.oneOfType([String, Number]).def('400px'),
   // 与上游属性名一致：设置时优先于 width / maxHeight（单位 px）

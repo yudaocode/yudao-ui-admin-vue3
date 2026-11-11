@@ -407,14 +407,19 @@ export default defineComponent({
     })
 
     const pagination = computed(() => {
-      // update by 芋艿：保持和 Pagination 组件的逻辑一致
+      // 默认分页外观与上游一致（无背景、含 40 条/页，桌面总数在右侧）；
+      // 窗口小于 992 时仍收窄页码数并保留总数在前的布局，避免当前页被挤出右浮动容器左侧
+      // 调用方传入的 pagination 优先
+      const isSmallScreen = document.body.clientWidth < 992
       return Object.assign(
         {
           small: false,
-          background: true,
-          pagerCount: document.body.clientWidth < 992 ? 5 : 7,
-          layout: 'total, sizes, prev, pager, next, jumper',
-          pageSizes: [10, 20, 30, 50, 100],
+          background: false,
+          pagerCount: isSmallScreen ? 5 : 7,
+          layout: isSmallScreen
+            ? 'total, sizes, prev, pager, next, jumper'
+            : 'sizes, prev, pager, next, jumper, ->, total',
+          pageSizes: [10, 20, 30, 40, 50, 100],
           disabled: false,
           hideOnSinglePage: false,
           total: 10

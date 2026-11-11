@@ -39,10 +39,12 @@ const TIME_AGO_MESSAGE_MAP: {
 export const useTimeAgo = (time: Date | number | string) => {
   const localeStore = useLocaleStoreWithOut()
 
-  const currentLocale = computed(() => localeStore.getCurrentLocale)
-
+  // 词表随无刷新语言切换（参考上游 c7f8db52d）：VueUse 的 messages 不接受 ref，这里用 getter，
+  // 由其内部 computed 每次格式化时读取当前语言并建立依赖，共用同一时钟
   const timeAgo = useTimeAgoCore(time, {
-    messages: TIME_AGO_MESSAGE_MAP[unref(currentLocale).lang]
+    get messages() {
+      return TIME_AGO_MESSAGE_MAP[localeStore.getCurrentLocale.lang]
+    }
   })
 
   return timeAgo

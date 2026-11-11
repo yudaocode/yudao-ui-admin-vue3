@@ -3,6 +3,7 @@ import { propTypes } from '@/utils/propTypes'
 import { Icon as IconifyIcon } from '@iconify/vue'
 import { useDesign } from '@/hooks/web/useDesign'
 import { isIconAvailable, isOfflineIcon, warnUnavailableIcon } from '@/plugins/svgIcon'
+import { isNumber, isString } from '@/utils/is'
 
 defineOptions({ name: 'Icon' })
 
@@ -15,8 +16,8 @@ const props = defineProps({
   icon: propTypes.string,
   // icon color
   color: propTypes.string,
-  // icon size
-  size: propTypes.number.def(16),
+  // icon size：数字按 px，也可传 '1.5em'、'2rem'、'var(--x)' 等 CSS 尺寸
+  size: propTypes.oneOfType([Number, String]).def(16),
   // icon svg class
   svgClass: propTypes.string.def(''),
   // icon hover color：仅传值时生效，不影响未传值的图标
@@ -49,6 +50,13 @@ watchEffect(() => {
   if (unref(isUnavailable)) warnUnavailableIcon(unref(symbolId))
 })
 
+// 子图标字号：数字（含数字字符串）沿用 px；其它单位已由外层 ElIcon 设置，子图标用 1em 继承，避免 em 叠乘
+const getInnerSize = computed(() => {
+  const { size } = props
+  const numeric = isNumber(size) || (isString(size) && size.trim() !== '' && !isNaN(Number(size)))
+  return numeric ? `${size}px` : '1em'
+})
+
 const getSvgClass = computed(() => {
   const { svgClass } = props
   return `iconify ${svgClass}`
@@ -72,7 +80,7 @@ const getHoverStyle = computed(() => {
     <span
       v-else-if="isUnavailable"
       :class="getSvgClass"
-      :style="{ display: 'inline-block', width: '1em', height: '1em', fontSize: `${size}px` }"
+      :style="{ display: 'inline-block', width: '1em', height: '1em', fontSize: getInnerSize }"
       aria-hidden="true"
     ></span>
 
@@ -80,7 +88,7 @@ const getHoverStyle = computed(() => {
       v-else
       :icon="symbolId"
       :class="getSvgClass"
-      :style="{ fontSize: `${size}px`, color }"
+      :style="{ fontSize: getInnerSize, color }"
     />
   </ElIcon>
 </template>

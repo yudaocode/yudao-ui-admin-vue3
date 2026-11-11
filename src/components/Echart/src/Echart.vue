@@ -25,8 +25,10 @@ const props = defineProps({
     type: Object as PropType<EChartsOption>,
     required: true
   },
-  width: propTypes.oneOfType([Number, String]).def(''),
-  height: propTypes.oneOfType([Number, String]).def('500px'),
+  // 默认铺满容器（参考上游 f977fdb05d），flex 等父容器中不会因无内容而宽度为 0
+  width: propTypes.oneOfType([Number, String]).def('100%'),
+  // 默认高度 300（参考上游 e66532cf9），数字按 px 处理
+  height: propTypes.oneOfType([Number, String]).def(300),
   notMerge: propTypes.bool.def(false)
 })
 
@@ -39,11 +41,16 @@ const theme = computed(() => {
 })
 
 // 浅拷贝后再设置 darkMode，不原地修改父组件传入的 options
+// 背景默认透明（参考上游 e66532cf9），调用方设置了背景时以调用方为准
 const options = computed(() => {
-  return {
+  const option = {
     ...props.options,
     darkMode: unref(theme)
   } as EChartsOption
+  if (option.backgroundColor === undefined) {
+    option.backgroundColor = 'transparent'
+  }
+  return option
 })
 
 const elRef = ref<ElRef>()

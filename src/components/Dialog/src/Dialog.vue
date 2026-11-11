@@ -2,7 +2,8 @@
 import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 
-defineOptions({ name: 'Dialog' })
+// 关闭自动透传：attrs 只经模板中的 getBindValue() 转发一次，避免透传在显式 align-center 之后再次合并原始值
+defineOptions({ name: 'Dialog', inheritAttrs: false })
 
 const { t } = useI18n()
 const slots = useSlots()
@@ -13,22 +14,32 @@ const props = defineProps({
   title: propTypes.string.def('Dialog'),
   fullscreen: propTypes.bool.def(true),
   defaultFullscreen: propTypes.bool.def(false),
-  width: propTypes.oneOfType([String, Number]).def('40%'),
+  // 未传时不设默认值，由 ElDialog 使用 Element Plus 默认宽度 50%（与上游一致：上游 Dialog 不强制宽度）
+  width: propTypes.oneOfType([String, Number]),
   scroll: propTypes.bool.def(false), // 是否开启滚动条。如果是的话，按照 maxHeight 设置最大高度
   maxHeight: propTypes.oneOfType([String, Number]).def('400px'),
-  loading: propTypes.bool.def(false)
+  loading: propTypes.bool.def(false),
+  // 点击遮罩是否关闭：默认 false（与上游一致）。声明为 prop 后，未传与显式 undefined 都取默认值，
+  // close-on-click-modal / closeOnClickModal 由 Vue 统一归一化，空布尔属性按 true 处理
+  closeOnClickModal: propTypes.bool.def(false)
 })
 
-const getBindValue = computed(() => {
+const attrs = useAttrs()
+
+// 转发给 ElDialog 的 attrs + props（class/style/事件/aria/append-to-body 等原样转发）。
+// 在渲染时调用而非 computed：attrs 起初为空时整体展开不会建立依赖，渲染时读取总能拿到最新 attrs。
+// align-center 由下方 alignCenter 单独传入，这里剔除原始值
+const getBindValue = () => {
   const delArr: string[] = [
     'fullscreen',
     'defaultFullscreen',
     'title',
     'maxHeight',
-    'appendToBody',
-    'loading'
+    'loading',
+    'closeOnClickModal',
+    'alignCenter',
+    'align-center'
   ]
-  const attrs = useAttrs()
   const obj = { ...attrs, ...props }
   for (const key in obj) {
     if (delArr.indexOf(key) !== -1) {
@@ -36,6 +47,15 @@ const getBindValue = computed(() => {
     }
   }
   return obj
+}
+
+// 默认垂直居中（参考上游 3701a04231）：用 ElDialog 自带 align-center，不改全局遮罩样式，原生 el-dialog 不受影响。
+// 调用方传了 align-center（含 false）时原样透传；传了 top 时交回 ElDialog 默认；值为 undefined 视为未传。
+// 按键读取 attrs 会被追踪，动态增删这些属性时同样更新
+const alignCenter = computed(() => {
+  const explicit = attrs.alignCenter !== undefined ? attrs.alignCenter : attrs['align-center']
+  if (explicit !== undefined) return explicit as boolean
+  return attrs.top !== undefined ? undefined : true
 })
 
 const isFullscreen = ref(props.defaultFullscreen)
@@ -99,16 +119,18 @@ function closedHandler() {
 </script>
 
 <template>
+  <!-- 顺序即合并优先级：v-bind 之前是可被调用方 attrs 覆盖的默认值（与原自动透传后合并的效果一致），之后是组件自身决定的值 -->
   <ElDialog
-    v-bind="getBindValue"
-    :close-on-click-modal="true"
-    :fullscreen="isFullscreen"
-    :width="width"
     destroy-on-close
     lock-scroll
     draggable
-    class="com-dialog"
     :show-close="false"
+    v-bind="getBindValue()"
+    :align-center="alignCenter"
+    :close-on-click-modal="closeOnClickModal"
+    :fullscreen="isFullscreen"
+    :width="width"
+    class="com-dialog"
     @close="closeHandler"
     @closed="closedHandler"
   >
