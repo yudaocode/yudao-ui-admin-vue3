@@ -44,14 +44,20 @@ export default defineComponent({
     }
 
     const renderBreadcrumb = () => {
-      const breadcrumbList = treeToList<AppRouteRecordRaw[]>(unref(levelList))
-      return breadcrumbList.map((v) => {
-        const disabled = !v.redirect || v.redirect === 'noredirect'
+      // meta.breadcrumb 为 false 的路由不在面包屑中显示（参考上游 e66532cf9）
+      const breadcrumbList = treeToList<AppRouteRecordRaw[]>(unref(levelList)).filter(
+        (v) => v.meta?.breadcrumb !== false
+      )
+      return breadcrumbList.map((v, index) => {
+        // 仅非最后一项且配置了 redirect 的路由可点击；其余不设置 to，
+        // 避免显示为链接、点击时跳到丢失 query 的当前路径（参考上游 e66532cf9）
+        const canNavigate =
+          index < breadcrumbList.length - 1 && !!v.redirect && v.redirect !== 'noredirect'
         // 路由未配置 meta 或 title 时回退为空
         const meta = (v.meta ?? {}) as RouteMeta
         const title = getRouteTitle(meta)
         return (
-          <ElBreadcrumbItem to={{ path: disabled ? '' : v.path }} key={v.name}>
+          <ElBreadcrumbItem to={canNavigate ? { path: v.path } : undefined} key={v.name}>
             {meta.icon && breadcrumbIcon.value ? (
               <div class="flex items-center">
                 <Icon icon={meta.icon} class="mr-[2px]" svgClass="inline-block"></Icon>

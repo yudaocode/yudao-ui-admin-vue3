@@ -20,6 +20,9 @@ const localeStore = useLocaleStore()
 
 const langMap = computed(() => localeStore.getLocaleMap)
 
+// 当前语言，对应菜单项禁用（参考上游 c7f8db52d）
+const currentLang = computed(() => localeStore.getCurrentLocale.lang)
+
 const { changeLocale } = useLocale()
 
 // 不刷新页面切换语言（参考上游 d4cb48036、2e5656055），保留当前路由、标签页缓存与未保存的输入；
@@ -42,7 +45,12 @@ const setLang = (lang: LocaleType) => {
     </button>
     <template #dropdown>
       <ElDropdownMenu>
-        <ElDropdownItem v-for="item in langMap" :key="item.lang" :command="item.lang">
+        <ElDropdownItem
+          v-for="item in langMap"
+          :key="item.lang"
+          :command="item.lang"
+          :disabled="item.lang === currentLang"
+        >
           {{ item.name }}
         </ElDropdownItem>
       </ElDropdownMenu>

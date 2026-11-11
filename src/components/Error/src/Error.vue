@@ -14,9 +14,8 @@ interface ErrorMap {
 
 const { t } = useI18n()
 
-const errorMap: {
-  [key: string]: ErrorMap
-} = {
+// 文案随语言切换更新：不刷新页面切换语言后，错误页提示与按钮也使用新语言（参考上游 c7f8db52d）
+const errorMap = computed<Record<string, ErrorMap>>(() => ({
   '404': {
     url: pageError,
     message: t('error.pageError'),
@@ -32,7 +31,7 @@ const errorMap: {
     message: t('error.noPermission'),
     buttonText: t('error.returnToHome')
   }
-}
+}))
 
 const props = defineProps({
   type: propTypes.string.validate((v: string) => ['404', '500', '403'].includes(v)).def('404')

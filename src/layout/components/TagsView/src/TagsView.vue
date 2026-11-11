@@ -77,7 +77,7 @@ const addTags = () => {
 // 跳转被守卫拒绝、被其它导航取代或出错时保留 tag 与缓存。固定 tag 不关闭也不跳转
 const closeSelectedTag = async (view: RouteLocationNormalizedLoaded) => {
   if (view?.meta?.affix) return
-  if (isActive(view) && !(await leaveClosingView([view]))) return
+  if (isActive(view) && !(await leaveClosingView([view], view))) return
   // 无需跳转而仍停留在该页时保留其 tag（原逻辑为删除后由 toLastView 重新添加）
   if (!isActive(view)) {
     closeCurrent(view)
@@ -121,14 +121,24 @@ const toLastView = () => {
   }
 }
 
-// 当前页的 tag 将被关闭时，先跳转到关闭后应显示的页面，目标与 toLastView 一致：
-// 剩余且路由仍注册的 tag 的最后一个，没有时为首个路由；没有剩余且已在首个路由时不跳转，返回 true 并由调用方保留当前页的 tag。
+// 当前页的 tag 将被关闭时，先跳转到关闭后应显示的页面：
+// 关闭单个 tag（传入 adjacentTo）时为其右侧最近的、剩余且路由仍注册的 tag，没有时为左侧最近的（参考上游 e66532cf9）；
+// 批量关闭时与 toLastView 一致，为剩余且路由仍注册的 tag 的最后一个。
+// 都没有时为首个路由；没有剩余且已在首个路由时不跳转，返回 true 并由调用方保留当前页的 tag。
 // 跳转成功且已离开当前页返回 true；被守卫拒绝、被其它导航取代或出错返回 false，调用方不关闭任何 tag
-const leaveClosingView = async (closing: RouteLocationNormalizedLoaded[]) => {
+const leaveClosingView = async (
+  closing: RouteLocationNormalizedLoaded[],
+  adjacentTo?: RouteLocationNormalizedLoaded
+) => {
   const { path, fullPath } = unref(currentRoute)
-  const latestView = unref(visitedViews)
-    .filter((v) => !closing.some((item) => item.fullPath === v.fullPath) && isRegisteredView(v))
-    .slice(-1)[0]
+  const views = unref(visitedViews)
+  const isTarget = (v: RouteLocationNormalizedLoaded) =>
+    !closing.some((item) => item.fullPath === v.fullPath) && isRegisteredView(v)
+  const index = adjacentTo ? views.findIndex((v) => v.fullPath === adjacentTo.fullPath) : -1
+  const latestView =
+    index > -1
+      ? views.slice(index + 1).find(isTarget) || views.slice(0, index).reverse().find(isTarget)
+      : views.filter(isTarget).slice(-1)[0]
   const firstRoute = permissionStore.getAddRouters[0]
   // 没有可跳转的 tag，也没有首个路由（动态路由尚未生成）时无处可去，按跳转失败处理
   if (!latestView && !firstRoute) return false
@@ -299,6 +309,37 @@ const moveToTarget = (currentTag: RouteLocationNormalizedLoaded) => {
 // 是否是当前tag
 const isActive = (route: RouteLocationNormalizedLoaded): boolean => {
   return route.fullPath === unref(currentRoute).fullPath
+}
+
+// 未扁平的路由树中，各路由名所在分支由自身向上最近的非空图标（没有时为 ''）；同名出现多次、分支不唯一的记为 null。
+// 动态路由注册时三级及以上会被扁平，route.matched 缺少中间目录，因此按原树计算；路由树变化时才重新遍历
+const branchIconMap = computed(() => {
+  const map = new Map<string, string | null>()
+  const walk = (routes: AppRouteRecordRaw[], parentIcon: string) => {
+    for (const route of routes) {
+      const icon = route.meta?.icon || parentIcon
+      const name = route.name
+      if (typeof name === 'string' && name) {
+        map.set(name, map.has(name) ? null : icon)
+      }
+      if (route.children?.length) walk(route.children, icon)
+    }
+  }
+  walk(unref(routers), '')
+  return map
+})
+
+// tag 图标：取自身到祖先最近的非空图标（参考上游 8a68d60bb）。已注册的路由按原树中唯一分支查找；
+// 查不到唯一分支时按实际 matched 由近到远查找，最后回退 meta.icon。没有 matched 的固定 tag 沿用自身图标
+const getTagIcon = (route: RouteLocationNormalizedLoaded): string | undefined => {
+  if (!route?.matched) return route?.meta?.icon
+  const name = typeof route.name === 'string' && hasRoute(route.name) ? route.name : undefined
+  const branchIcon = name ? unref(branchIconMap).get(name) : undefined
+  if (typeof branchIcon === 'string') return branchIcon || undefined
+  return (
+    [...route.matched].reverse().find((record) => record.meta?.icon)?.meta?.icon ||
+    route.meta?.icon
+  )
 }
 
 // 所有右键菜单组件的元素
@@ -472,30 +513,35 @@ watch(
                 点击时不跳转，停留在当前路由 -->
               <router-link
                 :ref="tagLinksRefs.set"
-                v-slot="{ navigate }"
+                v-slot="{ href, navigate }"
                 :to="isRegisteredView(item) ? { ...item } : item.fullPath"
                 custom
               >
+                <!-- 点击时重新检查路由是否仍注册：已移除时阻止默认行为，不走可能残留的旧 href -->
                 <div
                   :class="`h-full flex items-center justify-center whitespace-nowrap pl-15px ${prefixCls}__item--label`"
-                  @click="isRegisteredView(item) && navigate($event)"
+                  @click="isRegisteredView(item) ? navigate($event) : $event.preventDefault()"
                 >
-                  <Icon
-                    v-if="
-                      tagsViewIcon &&
-                      (item?.meta?.icon ||
-                        (item?.matched &&
-                          item.matched[0] &&
-                          item.matched[item.matched.length - 1].meta?.icon))
-                    "
-                    :icon="item?.meta?.icon || item.matched[item.matched.length - 1].meta.icon"
-                    :size="12"
-                    class="mr-5px"
-                  />
-                  {{
-                    getRouteTitle(item?.meta) +
-                    (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
-                  }}
+                  <!-- 正文为真实链接，与关闭按钮并列（参考上游 e66532cf9）：只有路由仍注册才带 href；
+                    点击冒泡到外层由 navigate 导航（带修饰键时交给浏览器）。Enter 的 keydown 不冒泡到 ContextMenu 触发器，
+                    由链接原生激活触发 click -->
+                  <a
+                    :aria-current="isActive(item) ? 'page' : undefined"
+                    :class="`${prefixCls}__item--link`"
+                    :href="isRegisteredView(item) ? href : undefined"
+                    @keydown.enter.stop
+                  >
+                    <Icon
+                      v-if="tagsViewIcon && getTagIcon(item)"
+                      :icon="getTagIcon(item)"
+                      :size="12"
+                      class="mr-5px"
+                    />
+                    {{
+                      getRouteTitle(item?.meta) +
+                      (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
+                    }}
+                  </a>
                   <!-- 原生按钮便于键盘聚焦与读屏（参考上游 8a68d60bb）；固定标签不渲染。
                     Enter/Space 的 keydown 不冒泡到 ContextMenu 触发器（其会 preventDefault 并打开菜单），
                     由按钮原生激活触发一次 click -->
@@ -708,6 +754,20 @@ $prefix-cls: #{$namespace}-tags-view;
       .#{$prefix-cls}__item--close {
         pointer-events: auto;
         opacity: 1;
+      }
+    }
+
+    // 正文链接：外观与原标签文字一致，键盘聚焦时在内侧显示焦点框
+    &--link {
+      display: inline-flex;
+      height: 100%;
+      color: inherit;
+      text-decoration: none;
+      align-items: center;
+
+      &:focus-visible {
+        outline: 1px solid currentcolor;
+        outline-offset: -1px;
       }
     }
   }

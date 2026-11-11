@@ -69,7 +69,8 @@ export default defineComponent({
             onClick={refresh}
             onKeydown={onKeyActivate(refresh)}
           >
-            <Icon icon="ant-design:sync-outlined" />
+            {/* 悬停时图标变为主题色（参考上游 0eefce32a、747c26fbc） */}
+            <Icon icon="ant-design:sync-outlined" hoverColor="var(--el-color-primary)" />
           </div>
 
           <ElDropdown trigger="click" onCommand={changSize}>
@@ -81,7 +82,10 @@ export default defineComponent({
                     aria-label="尺寸"
                     class="w-30px h-20px flex items-center justify-end cursor-pointer"
                   >
-                    <Icon icon="ant-design:column-height-outlined" />
+                    <Icon
+                      icon="ant-design:column-height-outlined"
+                      hoverColor="var(--el-color-primary)"
+                    />
                   </div>
                 )
               },
@@ -114,7 +118,7 @@ export default defineComponent({
             onClick={showColumnSetting}
             onKeydown={onKeyActivate(showColumnSetting)}
           >
-            <Icon icon="ant-design:setting-outlined" />
+            <Icon icon="ant-design:setting-outlined" hoverColor="var(--el-color-primary)" />
           </div>
         </div>
         <ColumnSetting
