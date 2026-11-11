@@ -31,9 +31,12 @@ watch(
   () => width.value,
   (width: number) => {
     if (width < 768) {
-      !appStore.getMobile ? appStore.setMobile(true) : undefined
+      // 只在从桌面进入移动端时收起菜单；已处于移动端时宽度再变化，保留用户展开的菜单（参考上游 6b10db306）
+      if (!appStore.getMobile) {
+        appStore.setMobile(true)
+        appStore.setCollapse(true)
+      }
       setCssVar('--left-menu-min-width', '0')
-      appStore.setCollapse(true)
       normalizeLayout(appStore.getLayout) !== 'sidebar-nav'
         ? appStore.setLayout('sidebar-nav')
         : undefined

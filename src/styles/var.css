@@ -55,6 +55,13 @@
   --transition-time-02: 0.2s;
 }
 
+/* 系统开启“减少动态效果”时，布局侧栏、菜单面板、固定头部的过渡立即完成（参考上游 6b10db306） */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-time-02: 0s;
+  }
+}
+
 .dark {
   --app-content-bg-color: var(--el-bg-color);
 }

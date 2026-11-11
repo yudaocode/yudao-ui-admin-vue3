@@ -540,7 +540,7 @@ export default defineComponent({
     }
 
     return () => (
-      <div
+      <nav
         id={prefixCls}
         ref={menuWrapRef}
         class={[
@@ -564,7 +564,7 @@ export default defineComponent({
       >
         {renderMenuWrap()}
         {renderHorizontalOverflowFallback()}
-      </div>
+      </nav>
     )
   }
 })

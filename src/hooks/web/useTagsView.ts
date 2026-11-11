@@ -48,11 +48,13 @@ export const useTagsView = () => {
     if (!removeTargetCache) {
       tagsViewStore.delCachedView()
     }
-    const { path, query } = target
+    // 带上 hash，刷新后回到同一锚点（参考上游 e66532cf9），由 Redirect 页继续转发
+    const { path, query, hash } = target
     await nextTick()
     const location = {
       path: '/redirect' + path,
-      query: query
+      query: query,
+      hash: hash
     }
     let removeAfterEach: (() => void) | undefined
     if (removeTargetCache) {

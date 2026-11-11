@@ -5,7 +5,8 @@
 defineOptions({ name: 'Redirect' })
 
 const { currentRoute, replace } = useRouter()
-const { params, query } = unref(currentRoute)
+// hash 随 query 一起转发，刷新页签后保留原锚点
+const { params, query, hash } = unref(currentRoute)
 const { path, _redirect_type = 'path' } = params
 
 Reflect.deleteProperty(params, '_redirect_type')
@@ -20,12 +21,14 @@ const navigate = async () => {
     return replace({
       name: _path,
       query,
-      params
+      params,
+      hash
     })
   }
   return replace({
     path: _path.startsWith('/') ? _path : '/' + _path,
-    query
+    query,
+    hash
   })
 }
 
