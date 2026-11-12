@@ -183,6 +183,7 @@ import type { FormRules, UploadRequestOptions } from 'element-plus'
 import { MusicApi, MusicVO } from '@/api/ai/music'
 import { ModelVO } from '@/api/ai/model/model'
 import ModelSelect from '@/views/ai/model/model/components/ModelSelect.vue'
+import { useUpload } from '@/components/UploadFile/src/useUpload'
 import {
   AiModelTypeEnum,
   AiMusicGenerateModeEnum,
@@ -393,7 +394,8 @@ const cancelExtend = () => {
 
 defineExpose({ setExtendSource })
 
-/** 上传音频：由后端存到文件服务，再提交上传任务 */
+/** 上传音频：先上传到文件服务，再提交上传任务 */
+const { httpRequest: uploadFile } = useUpload('ai/music')
 const uploading = ref(false)
 const MAX_UPLOAD_MB = 50
 const beforeUpload = (file: File) => {
@@ -413,11 +415,12 @@ const beforeUpload = (file: File) => {
   uploading.value = true
   return true
 }
-const httpRequest = (options: UploadRequestOptions) => {
+const httpRequest = async (options: UploadRequestOptions) => {
+  const res: any = await uploadFile(options)
   const name = options.file.name.replace(/\.[^.]+$/, '')
   return MusicApi.uploadMusic({
     modelId: formData.modelId!,
-    file: options.file,
+    fileUrl: res.data,
     title: name ? name.slice(0, 100) : undefined
   })
 }

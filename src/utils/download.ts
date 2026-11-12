@@ -37,6 +37,18 @@ const download = {
   json: (data: Blob, fileName: string) => {
     download0(data, fileName, 'application/json')
   },
+  // 下载 PPTX 方法
+  pptx: (data: Blob, fileName: string) => {
+    download0(
+      data,
+      fileName,
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    )
+  },
+  // 下载 PDF 方法
+  pdf: (data: Blob, fileName: string) => {
+    download0(data, fileName, 'application/pdf')
+  },
   // 下载图片（允许跨域）
   image: ({
     url,

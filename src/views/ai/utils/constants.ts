@@ -116,6 +116,61 @@ export const AiMusicGenerateModeEnum = {
 }
 
 /**
+ * AI PPT 状态的枚举：任务、每页共用；每页的状态为空表示待生成
+ */
+export const AiPptStatusEnum = {
+  IN_PROGRESS: 10, // 生成中
+  SUCCESS: 20, // 已完成
+  FAIL: 30 // 已失败
+}
+
+/**
+ * AI PPT 格式的枚举
+ */
+export const AiPptModeEnum = {
+  DETAILED: 1, // 详细演示文稿
+  SLIDES: 2 // 演示用幻灯片
+}
+
+/**
+ * AI PPT 素材来源的枚举
+ */
+export const AiPptSourceEnum = {
+  PASTE: 1, // 粘贴大纲
+  UPLOAD: 2 // 上传材料
+}
+
+/**
+ * AI PPT 语言的枚举
+ */
+export const AiPptLanguageEnum = {
+  ZH_CN: 'zh-CN', // 中文
+  EN: 'en' // English
+}
+
+/**
+ * AI PPT 导出格式的枚举
+ */
+export enum AiPptExportFormatEnum {
+  PPTX = 'pptx',
+  PDF = 'pdf'
+}
+
+/**
+ * AI PPT 支持的绘图平台，与后端一致
+ */
+export const AiPptImagePlatforms = [
+  AiPlatformEnum.OPENAI,
+  AiPlatformEnum.SiliconFlow,
+  AiPlatformEnum.TONG_YI
+]
+
+/**
+ * AI PPT 材料支持的格式，与后端一致
+ */
+export const AiPptFileTypes = ['pdf', 'doc', 'docx', 'txt', 'md', 'markdown']
+
+/**
  * AI 写作类型的枚举
  */
 export enum AiWriteTypeEnum {

@@ -56,7 +56,7 @@ export interface MusicExtendReqVO {
 // AI 音乐上传 Request VO
 export interface MusicUploadReqVO {
   modelId: number // 模型编号
-  file: File // 音频文件，只支持 mp3、wav
+  fileUrl: string // 音频文件地址，只支持 mp3、wav
   title?: string // 歌曲名称
 }
 
@@ -87,17 +87,7 @@ export const MusicApi = {
 
   // 上传音乐
   uploadMusic: async (data: MusicUploadReqVO): Promise<number> => {
-    const formData = new FormData()
-    formData.append('modelId', String(data.modelId))
-    formData.append('file', data.file)
-    if (data.title) {
-      formData.append('title', data.title)
-    }
-    return await request.post({
-      url: '/ai/music/upload',
-      data: formData,
-      headersType: 'multipart/form-data'
-    })
+    return await request.post({ url: '/ai/music/upload', data })
   },
 
   // 生成歌词
