@@ -26,7 +26,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="平台" prop="platform">
-        <el-select v-model="queryParams.status" placeholder="请选择平台" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.platform"
+          placeholder="请选择平台"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.AI_PLATFORM)"
             :key="String(dict.value)"
@@ -34,6 +39,30 @@
             :value="dict.value"
           />
         </el-select>
+      </el-form-item>
+      <el-form-item label="生成方式" prop="mode">
+        <el-select
+          v-model="queryParams.mode"
+          placeholder="请选择生成方式"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.AI_IMAGE_MODE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="提示词" prop="prompt">
+        <el-input
+          v-model="queryParams.prompt"
+          placeholder="请输入提示词"
+          clearable
+          class="!w-240px"
+          @keyup.enter="handleQuery"
+        />
       </el-form-item>
       <el-form-item label="绘画状态" prop="status">
         <el-select
@@ -105,6 +134,11 @@
           <span>{{ userList.find((item) => item.id === scope.row.userId)?.nickname }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="生成方式" align="center" prop="mode" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.AI_IMAGE_MODE" :value="scope.row.mode" />
+        </template>
+      </el-table-column>
       <el-table-column label="平台" align="center" prop="platform" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI_PLATFORM" :value="scope.row.platform" />
@@ -114,6 +148,22 @@
       <el-table-column label="绘画状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI_IMAGE_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="进度" align="center" prop="progress" width="80">
+        <template #default="scope">{{ scope.row.progress ?? 0 }}%</template>
+      </el-table-column>
+      <el-table-column label="来源" align="center" prop="parentId" width="100">
+        <template #default="scope">
+          <el-button
+            v-if="scope.row.parentId"
+            link
+            type="primary"
+            @click="openDetail(scope.row.parentId)"
+          >
+            #{{ scope.row.parentId }}
+          </el-button>
+          <span v-else>-</span>
         </template>
       </el-table-column>
       <el-table-column label="是否发布" align="center" prop="publicStatus">
@@ -135,12 +185,11 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="宽度" align="center" prop="width" />
-      <el-table-column label="高度" align="center" prop="height" />
       <el-table-column label="错误信息" align="center" prop="errorMessage" />
       <el-table-column label="任务编号" align="center" prop="taskId" />
-      <el-table-column label="操作" align="center" width="100" fixed="right">
+      <el-table-column label="操作" align="center" width="120" fixed="right">
         <template #default="scope">
+          <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
           <el-button
             link
             type="danger"
@@ -160,6 +209,9 @@
       @pagination="getList"
     />
   </ContentWrap>
+
+  <!-- 详情：管理员视角 -->
+  <ImageDetail ref="detailRef" />
 </template>
 
 <script setup lang="ts">
@@ -168,6 +220,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { ImageApi, ImageVO } from '@/api/ai/image'
 import * as UserApi from '@/api/system/user'
 import { AiImageStatusEnum } from '@/views/ai/utils/constants'
+import ImageDetail from '../index/components/ImageDetail.vue'
 
 /** AI 绘画 列表 */
 defineOptions({ name: 'AiImageManager' })
@@ -183,6 +236,8 @@ const queryParams = reactive({
   pageSize: 10,
   userId: undefined,
   platform: undefined,
+  mode: undefined,
+  prompt: undefined,
   status: undefined,
   publicStatus: undefined,
   createTime: []
@@ -225,6 +280,12 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 详情 */
+const detailRef = ref<InstanceType<typeof ImageDetail>>()
+const openDetail = (id: number) => {
+  detailRef.value?.open(id, 'admin')
 }
 
 /** 修改是否发布 */
