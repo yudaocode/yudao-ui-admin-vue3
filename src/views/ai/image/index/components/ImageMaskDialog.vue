@@ -83,6 +83,7 @@ const brushSize = ref(60) // 屏幕像素
 const strokes = ref<Stroke[]>([])
 const canvasRef = ref<HTMLCanvasElement>()
 let drawing: Stroke | undefined // 正在绘制的笔画
+// TODO DONE @AI：openCount 是不是去掉噢？有点过度了。。。（已去掉，改为提交完成时按 source.id 判断是否关闭弹窗）
 
 /** 打开弹窗 */
 const open = (source: ImageVO) => {
@@ -198,11 +199,10 @@ const handleClear = () => {
 }
 
 /** 生成蒙版图片：黑底，白色为重绘区域 */
-const buildMaskFile = async (): Promise<File> => {
-  const source = canvasRef.value!
+const buildMaskFile = async (source: ImageVO): Promise<File> => {
   const canvas = document.createElement('canvas')
-  canvas.width = source.width
-  canvas.height = source.height
+  canvas.width = canvasRef.value!.width
+  canvas.height = canvasRef.value!.height
   const ctx = canvas.getContext('2d')!
   ctx.fillStyle = '#000000'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -211,11 +211,11 @@ const buildMaskFile = async (): Promise<File> => {
   if (!blob) {
     throw new Error('蒙版生成失败')
   }
-  return new File([blob], `mask-${image.value!.id}-${Date.now()}.png`, { type: 'image/png' })
+  return new File([blob], `mask-${source.id}-${Date.now()}.png`, { type: 'image/png' })
 }
 
 /** 提交：蒙版上传到文件服务，再提交局部重绘 */
-const { httpRequest } = useUpload('ai/image')
+const { httpRequest } = useUpload()
 const submitting = ref(false)
 const handleSubmit = async () => {
   if (!strokes.value.some((stroke) => stroke.tool === 'brush')) {
@@ -226,17 +226,23 @@ const handleSubmit = async () => {
     message.warning('请输入重绘提示词')
     return
   }
+  // 本次提交的作品、提示词：上传期间可能已取消并打开其它作品
+  const source = image.value!
+  const sourcePrompt = prompt.value
   submitting.value = true
   try {
-    const file = await buildMaskFile()
+    const file = await buildMaskFile(source)
     const result: any = await httpRequest({ file, filename: file.name } as any)
     await ImageApi.midjourneyModal({
-      id: image.value!.id,
-      prompt: prompt.value,
+      id: source.id,
+      prompt: sourcePrompt,
       maskUrl: result.data
     })
     message.success('已提交局部重绘')
-    dialogVisible.value = false
+    // 上传期间可能已取消并打开其它作品：只在仍是本次作品时关闭弹窗
+    if (image.value?.id === source.id) {
+      dialogVisible.value = false
+    }
     emit('success')
   } finally {
     submitting.value = false

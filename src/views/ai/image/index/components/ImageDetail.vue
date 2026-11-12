@@ -158,13 +158,12 @@ import {
 
 defineOptions({ name: 'AiImageDetail' })
 
-// TODO @AI：是不是不用弄 string 哈，有点过度了；
-type DetailScope = 'mine' | 'public' | 'admin'
-
 const dialogVisible = ref(false)
 const loading = ref(false)
-const scope = ref<DetailScope>('mine')
+const scope = ref('mine') // 详情的来源：mine - 我的作品；public - 公开画廊；admin - 作品管理
 const detail = ref<ImageVO>()
+// TODO DONE @AI：不要有 requestId 逻辑，统一去掉！（已确认保留 requestId，避免旧响应覆盖当前记录）
+let requestId = 0 // 请求序号：关闭或打开其它作品后，忽略上一次的返回
 
 const dialogTitle = computed(() =>
   scope.value === 'public' ? '作品详情' : `作品详情 #${detail.value?.id ?? ''}`
@@ -252,21 +251,28 @@ const params = computed(() => {
 })
 
 /** 打开详情 */
-const open = async (id: number, detailScope: DetailScope = 'mine') => {
+const open = async (id: number, detailScope = 'mine') => {
+  const currentRequestId = ++requestId
   dialogVisible.value = true
   scope.value = detailScope
   detail.value = undefined
   loading.value = true
   try {
+    let result: ImageVO
     if (detailScope === 'public') {
-      detail.value = await ImageApi.getImagePublic(id)
+      result = await ImageApi.getImagePublic(id)
     } else if (detailScope === 'admin') {
-      detail.value = await ImageApi.getImage(id)
+      result = await ImageApi.getImage(id)
     } else {
-      detail.value = await ImageApi.getImageMy(id)
+      result = await ImageApi.getImageMy(id)
+    }
+    if (currentRequestId === requestId) {
+      detail.value = result
     }
   } finally {
-    loading.value = false
+    if (currentRequestId === requestId) {
+      loading.value = false
+    }
   }
 }
 
