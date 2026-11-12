@@ -5,23 +5,24 @@
 
   --left-menu-min-width: 64px;
 
-  --left-menu-bg-color: #001529;
+  /* 菜单 / Logo 静态初值与 app store 无 THEME 缓存时的默认主题一致（上游浅色导航 + 主色 #5b5bd6，按 setMenuTheme('#fff') 推导） */
+  --left-menu-bg-color: #fff;
 
-  --left-menu-bg-light-color: #0f2438;
+  --left-menu-bg-light-color: #fff;
 
-  --left-menu-bg-active-color: var(--el-color-primary);
+  --left-menu-bg-active-color: rgb(91 91 214 / 10%);
 
-  --left-menu-text-color: #bfcbd9;
+  --left-menu-text-color: #333;
 
-  --left-menu-text-active-color: #fff;
+  --left-menu-text-active-color: var(--el-color-primary);
 
-  --left-menu-collapse-bg-active-color: var(--el-color-primary);
+  --left-menu-collapse-bg-active-color: rgb(91 91 214 / 10%);
   /* left menu end */
 
   /* logo start */
   --logo-height: 50px;
 
-  --logo-title-text-color: #fff;
+  --logo-title-text-color: #172033;
   /* logo end */
 
   /* header start */
@@ -53,6 +54,11 @@
   --app-footer-height: 50px;
 
   --transition-time-02: 0.2s;
+
+  /* 壳层分隔线与浮层阴影（取值对齐上游 packages/styles/src/var.css 9047610a7） */
+  --layout-border-color: #e7eaf0;
+
+  --layout-shadow: 0 1px 2px rgb(15 23 42 / 4%), 0 8px 24px rgb(15 23 42 / 4%);
 }
 
 /* 系统开启“减少动态效果”时，布局侧栏、菜单面板、固定头部的过渡立即完成（参考上游 6b10db306） */
@@ -64,6 +70,10 @@
 
 .dark {
   --app-content-bg-color: #0b1120;
+
+  --layout-border-color: #273244;
+
+  --layout-shadow: 0 1px 2px rgb(0 0 0 / 18%), 0 10px 30px rgb(0 0 0 / 18%);
 }
 
 /*

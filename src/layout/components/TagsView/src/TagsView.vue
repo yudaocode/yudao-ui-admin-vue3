@@ -337,8 +337,7 @@ const getTagIcon = (route: RouteLocationNormalizedLoaded): string | undefined =>
   const branchIcon = name ? unref(branchIconMap).get(name) : undefined
   if (typeof branchIcon === 'string') return branchIcon || undefined
   return (
-    [...route.matched].reverse().find((record) => record.meta?.icon)?.meta?.icon ||
-    route.meta?.icon
+    [...route.matched].reverse().find((record) => record.meta?.icon)?.meta?.icon || route.meta?.icon
   )
 }
 
@@ -868,5 +867,52 @@ $prefix-cls: #{$namespace}-tags-view;
       }
     }
   }
+}
+
+// 普通（非沉浸）标签的卡片外观（参考上游 e66532cf9 / 8a68d60bb TagsView 样式段）：
+// 圆角卡片、壳层分隔色边框，选中为主色浅底 + 主色字，选中的可关闭标签常显关闭按钮；
+// 尺寸、结构、事件与沉浸式标签均不变；放在 .dark 规则之后，明暗两套共用
+.#{$prefix-cls} {
+  &__tool::before,
+  &__tool--first::before {
+    border-color: var(--layout-border-color);
+  }
+
+  &__item:not(.#{$prefix-cls}__item--immerse) {
+    color: var(--el-text-color-regular);
+    border: 1px solid var(--layout-border-color);
+    border-radius: 8px;
+    transition:
+      color var(--transition-time-02),
+      background-color var(--transition-time-02),
+      border-color var(--transition-time-02);
+
+    &:hover {
+      color: var(--el-color-primary);
+    }
+
+    &.is-active {
+      color: var(--el-color-primary);
+      background-color: var(--el-color-primary-light-9);
+      border: 1px solid var(--el-color-primary-light-7);
+
+      .#{$prefix-cls}__item--close {
+        :deep(svg) {
+          color: currentcolor !important;
+        }
+      }
+    }
+
+    &.is-active:not(.#{$prefix-cls}__item--affix) .#{$prefix-cls}__item--close {
+      pointer-events: auto;
+      opacity: 1;
+    }
+  }
+}
+
+// 暗色下普通选中标签前景改用正文主色：主色浅底（light-9）在暗色为深色色阶，主色字对比不足；
+// 背景与边框仍沿用上游新版，沉浸式标签不受影响
+.dark .#{$prefix-cls}__item:not(.#{$prefix-cls}__item--immerse).is-active {
+  color: var(--el-text-color-primary);
 }
 </style>

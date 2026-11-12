@@ -55,7 +55,7 @@ export const useAppStore = defineStore('app', {
       breadcrumb: true, // 面包屑
       breadcrumbIcon: true, // 面包屑图标
       collapse: false, // 折叠菜单
-      uniqueOpened: true, // 是否只保持一个子菜单的展开
+      uniqueOpened: false, // 是否只保持一个子菜单的展开（默认值对齐最新上游 config/app.ts）
       hamburger: true, // 折叠图标
       screenfull: true, // 全屏图标
       search: true, // 搜索图标
@@ -75,27 +75,29 @@ export const useAppStore = defineStore('app', {
       layout: normalizeLayout(wsCache.get(CACHE_KEY.LAYOUT)), // layout布局
       isDark: wsCache.get(CACHE_KEY.IS_DARK) || false, // 是否是暗黑模式
       currentSize: wsCache.get(CACHE_KEY.CURRENT_SIZE) || 'default', // 组件尺寸
+      // 已保存的主题缓存原样使用；仅无缓存时采用默认主题：上游主色 #5b5bd6 + 浅色菜单，
+      // 菜单各项按 setMenuTheme('#fff') 的推导规则取值（选中背景为主色 10%，Logo 标题 #172033）
       theme: wsCache.get(CACHE_KEY.THEME) || {
         // 主题色
-        elColorPrimary: '#409eff',
+        elColorPrimary: '#5b5bd6',
         // 左侧菜单边框颜色
-        leftMenuBorderColor: 'inherit',
+        leftMenuBorderColor: '#eee',
         // 左侧菜单背景颜色
-        leftMenuBgColor: '#001529',
+        leftMenuBgColor: '#fff',
         // 左侧菜单浅色背景颜色
-        leftMenuBgLightColor: '#0f2438',
+        leftMenuBgLightColor: '#fff',
         // 左侧菜单选中背景颜色
-        leftMenuBgActiveColor: 'var(--el-color-primary)',
+        leftMenuBgActiveColor: 'RGBA(91,91,214,0.1)',
         // 左侧菜单收起选中背景颜色
-        leftMenuCollapseBgActiveColor: 'var(--el-color-primary)',
+        leftMenuCollapseBgActiveColor: 'RGBA(91,91,214,0.1)',
         // 左侧菜单字体颜色
-        leftMenuTextColor: '#bfcbd9',
+        leftMenuTextColor: '#333',
         // 左侧菜单选中字体颜色
-        leftMenuTextActiveColor: '#fff',
+        leftMenuTextActiveColor: 'var(--el-color-primary)',
         // logo字体颜色
-        logoTitleTextColor: '#fff',
+        logoTitleTextColor: '#172033',
         // logo边框颜色
-        logoBorderColor: 'inherit',
+        logoBorderColor: '#eee',
         // 头部背景颜色
         topHeaderBgColor: '#fff',
         // 头部字体颜色
@@ -364,7 +366,8 @@ export const useAppStore = defineStore('app', {
         // 左侧菜单选中字体颜色
         leftMenuTextActiveColor: isDarkColor ? '#fff' : 'var(--el-color-primary)',
         // logo字体颜色
-        logoTitleTextColor: isDarkColor ? '#fff' : 'inherit',
+        // 浅色菜单取上游浅色 Logo 标题色，避免继承暗色模式正文浅色字后在白底上不可读
+        logoTitleTextColor: isDarkColor ? '#fff' : '#172033',
         // logo边框颜色
         logoBorderColor: isDarkColor ? color : '#eee'
       }

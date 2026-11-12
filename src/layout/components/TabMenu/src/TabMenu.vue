@@ -297,20 +297,22 @@ export default defineComponent({
     }
 
     return () => (
-      <div
+      <aside
         id={`${variables.namespace}-menu`}
         class={[
           prefixCls,
           'relative bg-[var(--left-menu-bg-color)] layout-border__right',
           {
             'w-[var(--tab-menu-max-width)]': !unref(collapse),
-            'w-[var(--tab-menu-min-width)]': unref(collapse)
+            'w-[var(--tab-menu-min-width)]': unref(collapse),
+            'is-collapsed': unref(collapse)
           }
         ]}
         onMouseleave={mouseleave}
       >
         <ElScrollbar class="!h-[calc(100%-var(--tab-menu-collapse-height))]">
-          <div>
+          {/* 一级导航语义地标（参考上游 PrimaryNav）；顶部混合导航下此列为二级入口，不重复“主导航”名称 */}
+          <nav aria-label={unref(headerMixed) ? undefined : t('layout.mainNavigation')}>
             {() => {
               return unref(tabRouters).map((v) => {
                 const fullTabPath = getFullTabPath(v)
@@ -348,7 +350,7 @@ export default defineComponent({
                 )
               })
             }}
-          </div>
+          </nav>
         </ElScrollbar>
         <button
           type="button"
@@ -380,7 +382,7 @@ export default defineComponent({
             style="transition: width var(--transition-time-02), left var(--transition-time-02);"
           ></Menu>
         ) : undefined}
-      </div>
+      </aside>
     )
   }
 })
@@ -428,6 +430,50 @@ $prefix-cls: #{$namespace}-tab-menu;
   .is-active {
     color: var(--left-menu-text-active-color);
     background-color: var(--left-menu-bg-active-color);
+  }
+
+  // 一级入口 pill + 选中主色指示条（参考上游 PrimaryNav rail，6b10db306）：
+  // 用伪元素绘制，按钮尺寸与点击区域不变；颜色全部取自菜单主题变量，已保存的自定义主题继续生效
+  &__item {
+    isolation: isolate;
+
+    &::before {
+      position: absolute;
+      z-index: -1;
+      border-radius: 10px;
+      content: '';
+      transition: background-color var(--transition-time-02);
+      inset: 4px 6px;
+    }
+
+    &:hover::before {
+      background-color: color-mix(in srgb, var(--left-menu-text-active-color) 10%, transparent);
+    }
+
+    &.is-active {
+      font-weight: 600;
+      background-color: transparent;
+
+      &::before {
+        background-color: var(--left-menu-bg-active-color);
+      }
+
+      &::after {
+        position: absolute;
+        top: 12px;
+        bottom: 12px;
+        left: 0;
+        width: 3px;
+        background-color: var(--el-color-primary);
+        border-radius: 0 3px 3px 0;
+        content: '';
+      }
+    }
+  }
+
+  // 收起（30px）时 pill 内缩减小，避免挤占图标
+  &.is-collapsed .#{$prefix-cls}__item::before {
+    inset: 4px 3px;
   }
 }
 </style>

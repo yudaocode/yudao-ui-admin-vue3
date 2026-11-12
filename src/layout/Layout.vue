@@ -91,20 +91,38 @@ $prefix-cls: #{$namespace}-layout;
 .#{$prefix-cls} {
   background-color: var(--app-content-bg-color);
 
-  // 只重置原生 button 默认盒模型，遮罩颜色、透明度、层级仍由上面的 class 决定
+  // 只重置原生 button 默认盒模型，层级仍由上面的 class 决定；
+  // 遮罩外观对齐上游 6b10db306：半透明深色 + 轻度背景模糊（用背景色透明度代替 opacity，焦点框不被淡化）
   &__mask {
     padding: 0;
     margin: 0;
+    background-color: rgb(15 23 42 / 45%);
     border: 0;
+    opacity: 1;
     appearance: none;
+    backdrop-filter: blur(2px);
 
-    // 遮罩铺满且 html/body overflow: hidden，原生焦点框改为内缩才不被裁掉；
-    // opacity 会连带淡化焦点框，聚焦时把 30% 黑移到背景色上，视觉不变
+    // 遮罩铺满且 html/body overflow: hidden，原生焦点框改为内缩才不被裁掉
     &:focus-visible {
-      background-color: rgb(0 0 0 / 30%);
       outline-offset: -4px;
-      opacity: 1;
     }
+  }
+
+  // 顶栏（header-nav / header-sidebar-nav / mixed-nav / sidebar-mixed-nav / header-mixed-nav）：
+  // 浮于下方菜单与内容之上，以壳层阴影区分（参考上游 6b10db306 __topbar）；尺寸、背景色仍由原 class 与主题变量决定
+  &__topbar {
+    z-index: 20;
+    box-shadow: var(--layout-shadow);
+  }
+
+  // sidebar-nav 的顶部工具栏 + 标签栏容器（固定头部时浮于内容之上）
+  &__toolbar {
+    box-shadow: var(--layout-shadow);
+  }
+
+  // 移动端展开的侧栏抽屉阴影（参考上游 is-mobile），宽度不变
+  &__sidebar--mobile-open {
+    box-shadow: 20px 0 50px rgb(15 23 42 / 25%);
   }
 }
 </style>

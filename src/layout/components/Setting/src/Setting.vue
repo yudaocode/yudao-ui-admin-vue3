@@ -181,6 +181,7 @@ const clear = () => {
       <ColorRadioPicker
         v-model="systemTheme"
         :schema="[
+          '#5b5bd6',
           '#409eff',
           '#009688',
           '#536dfe',

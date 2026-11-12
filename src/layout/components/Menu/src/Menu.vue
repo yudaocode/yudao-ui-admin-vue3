@@ -53,6 +53,8 @@ export default defineComponent({
     }
   },
   setup(props) {
+    const { t } = useI18n()
+
     const appStore = useAppStore()
 
     const layout = computed(() => appStore.getLayout)
@@ -543,6 +545,7 @@ export default defineComponent({
       <nav
         id={prefixCls}
         ref={menuWrapRef}
+        aria-label={props.rootOnly ? t('layout.mainNavigation') : undefined}
         class={[
           `${prefixCls} ${prefixCls}__${unref(menuMode)}`,
           `${prefixCls}--${props.theme}`,
@@ -737,6 +740,107 @@ $prefix-cls: #{$namespace}-menu;
 .#{$prefix-cls}-overflow-fallback.is-open {
   display: block;
 }
+
+// 菜单 pill 外观（参考上游 e66532cf9 Menu.vue 样式段）：
+// 用伪元素在菜单项内侧绘制圆角底色，菜单项的高度、宽度、内边距与点击区域均不变；
+// 颜色全部取自菜单 / 头部主题变量，已保存的自定义主题继续生效
+.#{$prefix-cls}.#{$prefix-cls}__vertical {
+  :deep(.#{$elNamespace}-menu) {
+    .#{$elNamespace}-sub-menu__title,
+    .#{$elNamespace}-menu-item {
+      position: relative;
+      isolation: isolate;
+
+      &,
+      &:hover,
+      &.is-active,
+      &.is-active:hover {
+        background-color: transparent !important;
+      }
+
+      &::before {
+        position: absolute;
+        z-index: -1;
+        border-radius: 10px;
+        content: '';
+        transition: background-color var(--transition-time-02);
+        inset: 4px 8px;
+      }
+
+      &:hover::before {
+        background-color: color-mix(in srgb, var(--left-menu-text-active-color) 10%, transparent);
+      }
+    }
+
+    .#{$elNamespace}-menu-item.is-active {
+      font-weight: 600;
+
+      &::before {
+        background-color: var(--left-menu-bg-active-color);
+      }
+    }
+
+    // 内联子菜单区域保留浅色底
+    .#{$elNamespace}-menu--inline {
+      background-color: var(--left-menu-bg-light-color) !important;
+    }
+  }
+
+  // 折叠态：一级项居中显示 48px pill，选中沿用收起选中色
+  :deep(.#{$elNamespace}-menu--collapse) {
+    & > .is-active {
+      background-color: transparent !important;
+    }
+
+    & > .#{$elNamespace}-menu-item.is-active::before,
+    & > .#{$elNamespace}-sub-menu.is-active > .#{$elNamespace}-sub-menu__title::before {
+      background-color: var(--left-menu-collapse-bg-active-color);
+    }
+  }
+}
+
+// 水平菜单：pill 上下内缩，底部高亮线隐藏（边框宽度保留，不改变菜单项宽度与 More 溢出计算）
+.#{$prefix-cls}.#{$prefix-cls}__horizontal {
+  :deep(.#{$elNamespace}-menu--horizontal) {
+    & > .#{$elNamespace}-menu-item,
+    & > .#{$elNamespace}-sub-menu > .#{$elNamespace}-sub-menu__title {
+      position: relative;
+      isolation: isolate;
+
+      &,
+      &:hover {
+        background-color: transparent !important;
+        border-bottom-color: transparent !important;
+      }
+
+      &::before {
+        position: absolute;
+        z-index: -1;
+        border-radius: 10px;
+        content: '';
+        transition: background-color var(--transition-time-02);
+        inset: 6px 2px;
+      }
+
+      &:hover::before {
+        background-color: var(--top-header-hover-color);
+      }
+    }
+
+    & > .#{$elNamespace}-menu-item.is-active,
+    & > .#{$elNamespace}-sub-menu.is-active > .#{$elNamespace}-sub-menu__title {
+      &,
+      &:hover {
+        background-color: transparent !important;
+        border-bottom-color: transparent !important;
+      }
+
+      &::before {
+        background-color: color-mix(in srgb, var(--el-color-primary) 12%, transparent);
+      }
+    }
+  }
+}
 </style>
 
 <style lang="scss">
@@ -807,6 +911,39 @@ $prefix-cls: #{$namespace}-menu-popper;
 
     &:hover {
       background-color: var(--top-header-hover-color) !important;
+    }
+  }
+}
+
+// 弹层圆角、边框与阴影，菜单项圆角（参考上游 e66532cf9 popper 样式）；背景与文字颜色仍取主题变量
+.#{$prefix-cls}--vertical,
+.#{$prefix-cls}--horizontal {
+  overflow: hidden;
+  border: 1px solid var(--layout-border-color) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--layout-shadow) !important;
+
+  .el-menu--popup {
+    padding: 6px;
+  }
+
+  .el-sub-menu__title,
+  .el-menu-item {
+    margin: 2px 0;
+    border-radius: 8px;
+  }
+}
+
+// 侧栏折叠弹层的悬停底色（头部主题弹层沿用上方 --header 规则）
+.#{$prefix-cls}--vertical:not(.#{$prefix-cls}--header) {
+  .el-sub-menu__title,
+  .el-menu-item:not(.is-active) {
+    &:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--left-menu-text-active-color) 10%,
+        transparent
+      ) !important;
     }
   }
 }
