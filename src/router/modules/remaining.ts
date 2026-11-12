@@ -944,16 +944,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'image/square',
-        component: () => import('@/views/ai/image/square/index.vue'),
-        name: 'AiImageSquare',
-        meta: {
-          title: '绘图作品',
-          icon: 'ep:home-filled',
-          noCache: false
-        }
-      },
-      {
         path: 'knowledge/document',
         component: () => import('@/views/ai/knowledge/document/index.vue'),
         name: 'AiKnowledgeDocument',
